@@ -46,10 +46,6 @@
         </dependency>
         <dependency>
             <groupId>io.terminus.doctor</groupId>
-            <artifactId>doctor-web-mock</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.terminus.doctor</groupId>
             <artifactId>doctor-user-api</artifactId>
         </dependency>
         <dependency>
