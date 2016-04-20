@@ -3,7 +3,7 @@ server:
   port: 8082
 
 pampas:
-  rootPath: ${user.home}/assets/spinda
+  rootPath: ${user.home}/assets/pidgeotto
   apps:
     - key: PC
   devMode: false

@@ -5,8 +5,8 @@ server:
 pampas:
   rootPath: ${user.home}/assets
   apps:
-    - key: PC
-      assetsHome: feebas
+    - key: MOBILE
+      assetsHome: pidgey
   devMode: false
   locale: zh_CN
   mvc:
@@ -24,7 +24,7 @@ pampas:
 
 session:
   cookie-context-path: /
-  cookie-domain: bbc.com
+  cookie-domain: doctor.com
   cookie-max-age: 1800
   cookie-name: msid
   source: redis

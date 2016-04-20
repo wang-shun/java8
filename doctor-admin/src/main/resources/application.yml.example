@@ -3,14 +3,14 @@ server:
   port: 8082
 
 pampas:
-  rootPath: ${user.home}/assets/spinda
+  rootPath: ${user.home}/assets/pidgeotto
   devMode: true
   redis:
     host: 127.0.0.1
     port: 6379
 
 session:
-  cookie-domain: bbc.com
+  cookie-domain: doctor.com
   redis-host: 127.0.0.1
   redis-port: 6379
 
