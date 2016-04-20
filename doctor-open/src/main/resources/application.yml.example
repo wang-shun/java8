@@ -1,0 +1,29 @@
+server:
+  context-path: /
+  port: 8081
+
+session:
+  cookie-context-path: /
+  cookie-domain: bbc.dev
+  redis-host: 127.0.0.1
+  redis-port: 8888
+
+dubbo:
+  registry: zookeeper://127.0.0.1:2181
+
+logging:
+  file: ~/Logs/doctor/web.log
+  level.*: INFO
+  level.io.terminus: DEBUG
+
+
+zookeeper:
+  host: 127.0.0.1
+  port: 2181
+
+
+oss:
+  endpoint: todo
+  appKey: todo
+  appSecret: todo
+  bucketName: terminus

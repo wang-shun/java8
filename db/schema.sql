@@ -1,0 +1,249 @@
+
+-- 用户表: parana_users
+
+CREATE TABLE `parana_users` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `name` VARCHAR(40) NULL COMMENT '用户名',
+  `email` VARCHAR(32) NULL COMMENT '邮件',
+  `mobile` VARCHAR(16) NULL COMMENT '手机号码',
+  `password` VARCHAR(32) NULL COMMENT '登录密码',
+  `type` SMALLINT NOT NULL COMMENT '用户类型',
+  `status` tinyint(1) NOT NULL COMMENT '状态 0:未激活, 1:正常, -1:锁定, -2:冻结, -3: 删除',
+  `roles_json` VARCHAR(512) NULL COMMENT '角色列表, 以json表示',
+  `extra_json` VARCHAR(1024) NULL COMMENT '商品额外信息,建议json字符串',
+  `tags_json` VARCHAR(1024) NULL COMMENT '商品标签的json表示形式,只能运营操作, 对商家不可见',
+  `item_info_md5` CHAR(32) NULL COMMENT '商品信息的m5值, 商品快照需要和这个摘要进行对比',
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY idx_users_name(name),
+  UNIQUE KEY idx_users_email(email),
+  UNIQUE KEY idx_users_mobile(mobile)
+) COMMENT='用户表';
+
+-- 用户文件表: parana_user_files
+CREATE TABLE IF NOT EXISTS `parana_user_files` (
+  `id`          bigint(20)    unsigned  NOT NULL  AUTO_INCREMENT,
+  `create_by`   bigint(20)    NOT NULL      COMMENT '用户id',
+  `file_type`   smallint(6)   NOT NULL      COMMENT '文件类型',
+  `group`       varchar(128)  DEFAULT   NULL      COMMENT '用户族',
+  `folder_id`   bigint(20)    NOT NULL      COMMENT '文件夹id',
+  `name`        varchar(128)  NULL      DEFAULT '' COMMENT '文件名称',
+  `path`        varchar(128)  NOT NULL DEFAULT '' COMMENT '文件相对路径',
+  `size`        int(11)       NOT NULL      COMMENT '文件大小',
+  `extra`       varchar(512)  NULL      DEFAULT '' COMMENT '文件信息介绍',
+  `created_at`  datetime      DEFAULT   NULL,
+  `updated_at`  datetime      DEFAULT   NULL,
+  PRIMARY KEY (`id`)
+) COMMENT='用户文件表';
+CREATE INDEX idx_user_files_create_by ON parana_user_files (`create_by`);
+CREATE INDEX idx_user_files_folder_id ON parana_user_files (folder_id);
+CREATE INDEX idx_user_files_name ON parana_user_files (name);
+
+
+-- 用户文件夹管理表:parana_user_folders
+CREATE TABLE IF NOT EXISTS `parana_user_folders` (
+  `id`          bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `create_by`   bigint(20)          NOT NULL COMMENT '用户id',
+  `group`       varchar(128)        DEFAULT   NULL      COMMENT '用户族',
+  `pid`         bigint(20)          DEFAULT NULL COMMENT '父级id',
+  `level`       tinyint(1)          DEFAULT NULL COMMENT '级别',
+  `has_children`bit(1)              DEFAULT NULL COMMENT '是否有孩子',
+  `folder`      varchar(128)        NOT NULL DEFAULT '' COMMENT '文件夹名称',
+  `created_at`  datetime            DEFAULT NULL,
+  `updated_at`  datetime            DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) COMMENT='用户文件夹管理表';
+CREATE INDEX idx_user_folders_create_by ON parana_user_folders (`create_by`);
+CREATE INDEX idx_user_folders_pid ON parana_user_folders (pid);
+CREATE INDEX idx_user_folders_folder ON parana_user_folders (folder);
+
+
+-- 消息中心相关的表
+
+CREATE TABLE parana_subscriptions(
+  `id` BIGINT NOT NULL AUTO_INCREMENT  COMMENT '自增主键',
+  `user_id`  BIGINT  NOT NULL  COMMENT '用户id',
+  `user_name` VARCHAR(128) NULL comment '用户名称',
+  `channel`  INT  NOT NULL  COMMENT '消息渠道：-1-》非法，0-》站内信，1-》短信，2-》邮箱，3-》app消息推送',
+  `account`  VARCHAR(128)  NULL  COMMENT '用户的账户, 可以为用户id(站内信), 邮箱(邮件), 手机号(短信), app设备号(app消息推送)',
+  `created_at`  DATETIME  NULL  COMMENT '创建时间',
+  `updated_at`  DATETIME  NULL  COMMENT '修改时间',
+  PRIMARY KEY (`id`)
+)COMMENT='消息订阅情况';
+CREATE UNIQUE INDEX idx_subscriptions_account ON parana_subscriptions(account);
+CREATE INDEX idx_subscriptions_user_id ON parana_subscriptions(user_id);
+CREATE INDEX idx_subscriptions_user_name ON parana_subscriptions(user_name);
+
+CREATE TABLE parana_receiver_groups(
+  `id` BIGINT NOT NULL AUTO_INCREMENT  COMMENT '自增主键',
+  `user_id`  BIGINT  NULL  COMMENT '用户id, 唯一自然键, 发站内信时使用',
+  `user_name` VARCHAR(128) null comment '用户名称',
+  `email`  VARCHAR(128)  NULL  COMMENT '发邮件时使用',
+  `mobile`  VARCHAR(64)  NULL  COMMENT '发短信进使用',
+  `android`  VARCHAR(128)  NULL  COMMENT '用于app消息推送时的安卓设备号',
+  `ios`  VARCHAR(128)  NULL  COMMENT '用于app消息推送时的iphone设备号',
+  `wp`  VARCHAR(128)  NULL  COMMENT '用于app消息推送时的winPhone设备号',
+  `group1`  VARCHAR(128)  NULL  COMMENT '消息群组, 具体含义由解决方案中定义, 如用户类型, 用户所属公司等信息',
+  `group2`  VARCHAR(128)  NULL  COMMENT '消息群组, 具体含义由解决方案中定义, 如用户类型, 用户所属公司等信息',
+  `group3`  VARCHAR(128)  NULL  COMMENT '消息群组, 具体含义由解决方案中定义, 如用户类型, 用户所属公司等信息',
+  `group4`  VARCHAR(128)  NULL  COMMENT '消息群组, 具体含义由解决方案中定义, 如用户类型, 用户所属公司等信息',
+  `created_at`  DATETIME  NULL  COMMENT '创建时间',
+  `updated_at`  DATETIME  NULL  COMMENT '修改时间',
+  PRIMARY KEY (`id`)
+)COMMENT='接收者群组';
+CREATE UNIQUE INDEX idx_receiver_groups_user_id ON parana_receiver_groups(user_id);
+CREATE UNIQUE INDEX idx_receiver_groups_user_name ON parana_receiver_groups(user_name);
+CREATE INDEX idx_receiver_groups_group1 ON parana_receiver_groups(group1);
+CREATE INDEX idx_receiver_groups_group2 ON parana_receiver_groups(group2);
+CREATE INDEX idx_receiver_groups_group3 ON parana_receiver_groups(group3);
+CREATE INDEX idx_receiver_groups_group4 ON parana_receiver_groups(group4);
+
+CREATE TABLE parana_message_templates(
+  `id` BIGINT NOT NULL AUTO_INCREMENT  COMMENT '自增主键',
+  `creator_id`  BIGINT  NULL  COMMENT '创建者的用户id',
+  `creator_name`  VARCHAR(128)  NULL  COMMENT '创建者的名称, 冗余',
+  `name`  VARCHAR(128) NOT NULL  COMMENT '模板的名称, 具有唯一性',
+  `title`  VARCHAR(1024)  NULL  COMMENT '消息的默认标题',
+  `content`  VARCHAR(4096) NOT  NULL  COMMENT '消息的内容模板, handlebars格式',
+  `context`  VARCHAR(4096)  NULL  COMMENT '消息的内容模板相关连的上下文示例, 用于指导消息调用者有哪些变量可用',
+  `channel`  INT  NULL  COMMENT '消息渠道：-1-》非法，0-》站内信，1-》短信，2-》邮箱，3-》app消息推送',
+  `disabled`  BIT(1)  NULL  COMMENT '当配置为true时, 这个模板的调用者不应该发送这个消息.',
+  `description`  VARCHAR(256)  NULL  COMMENT '消息模板的备注',
+  `created_at`  DATETIME  NULL  COMMENT '创建时间',
+  `updated_at`  DATETIME  NULL  COMMENT '修改时间',
+  PRIMARY KEY (`id`)
+)COMMENT='消息模板表';
+CREATE UNIQUE INDEX idx_message_templates_name ON parana_message_templates(name);
+
+
+CREATE TABLE parana_messages(
+  `id` BIGINT NOT NULL AUTO_INCREMENT  COMMENT '自增主键',
+  `category`  VARCHAR(128)  NULL  COMMENT '消息的类别, 主要用于归类, 如分页查询的条件, 具体值由解决方案中决定',
+  `title`  VARCHAR(1024)  NULL  COMMENT '标题',
+  `content`  VARCHAR(4096)  NULL  COMMENT '内容',
+  `template`  VARCHAR(128)  NULL  COMMENT '消息模板名称',
+  `data`  VARCHAR(4096)  NULL  COMMENT '消息模板的上下文数据，json（map）',
+  `attaches`  VARCHAR(1024)  NULL  COMMENT '消息的附件, 以逗号分割的URL文件名',
+  `remark`  VARCHAR(256)  NULL  COMMENT '消息备注',
+  `sender_id`  BIGINT  NULL  COMMENT '发送者id',
+  `sender`  VARCHAR(128)  NULL  COMMENT '发送者信息:userid, email, mobile, device_token',
+  `send_at`  DATETIME  NULL  COMMENT '消息最终的发送时间',
+  `start_at`  DATETIME  NULL  COMMENT '消息的发送时机, 用于决定什么时间才能尝试消息发送',
+  `end_at`  DATETIME  NULL  COMMENT '消息的关闭时间',
+  `receivers`  VARCHAR(4096)  NULL  COMMENT '消息的接收者列表json: userIds(站内信), emails, mobiles, device_tokens。当为群组消息时,可支持四个维度的分组, 格式如下: {"group1":"buyer", "group2":"terminus corp", "group3":"浙江省", "group4":"xxx"}',
+  `group_message_type`  INT  NULL  COMMENT '标志是否为群组消息',
+  `check_subscribe`  BIT(1)  NULL  COMMENT '是否检测订阅情况. 当为false时,不检测用户类型',
+  `status`  INT  NULL  COMMENT '消息的状态：-2-》初始化消息失败，-1-》发送失败，0-》消息排队中，1-》发送成功， 2-》关闭',
+  `fail_reason`  VARCHAR(256)  NULL  COMMENT '消息失败的原因',
+  `channel`  INT  NULL  COMMENT '消息渠道：-1-》非法，0-》站内信，1-》短信，2-》邮箱，3-》app消息推送',
+  `channel_output`  VARCHAR(256)  NULL  COMMENT '发送渠道的结果返回: 站内信的ids(以逗号分割)',
+  `created_at`  DATETIME  NULL  COMMENT '创建时间',
+  `updated_at`  DATETIME  NULL  COMMENT '修改时间',
+  PRIMARY KEY (`id`)
+)COMMENT='消息表';
+CREATE INDEX idx_message_category ON parana_messages(`category`);
+CREATE INDEX idx_message_send_id ON parana_messages(sender_id);
+
+CREATE TABLE parana_notifications(
+  `id` BIGINT NOT NULL AUTO_INCREMENT  COMMENT '自增主键',
+  `audience_id`  BIGINT  NULL  COMMENT '听众的用户id',
+  `audience_group1`  VARCHAR(128)  NULL  COMMENT '听众的群组, 具体含义由解决方案中定义, 如用户类型, 用户所属公司等信息',
+  `audience_group2`  VARCHAR(128)  NULL  COMMENT '',
+  `audience_group3`  VARCHAR(128)  NULL  COMMENT '',
+  `audience_group4`  VARCHAR(128)  NULL  COMMENT '',
+  `subject`  VARCHAR(1024)  NULL  COMMENT '消息标题',
+  `content`  VARCHAR(4096)  NULL  COMMENT '消息内容',
+  `checked`  BIT(1)  NULL  COMMENT '用户是否查看过此通知',
+  `created_at`  DATETIME  NULL  COMMENT '创建时间',
+  `updated_at`  DATETIME  NULL  COMMENT '修改时间',
+  PRIMARY KEY (`id`)
+)COMMENT='站内信表';
+CREATE INDEX idx_notification_audience_id ON parana_notifications(audience_id);
+CREATE INDEX idx_notification_audience_group1 ON parana_notifications(audience_group1);
+CREATE INDEX idx_notification_audience_group2 ON parana_notifications(audience_group2);
+CREATE INDEX idx_notification_audience_group3 ON parana_notifications(audience_group3);
+CREATE INDEX idx_notification_audience_group4 ON parana_notifications(audience_group4);
+
+
+CREATE TABLE parana_message_boxes(
+    `id` BIGINT NOT NULL AUTO_INCREMENT  COMMENT '自增主键',
+    `user_id`  BIGINT  NULL  COMMENT '用户id',
+    `box_index`  INT  NULL  COMMENT '消息箱号',
+    `notification_id`  BIGINT  NULL  COMMENT '站内信id',
+    `created_at`  DATETIME  NULL  COMMENT '创建时间',
+    `updated_at`  DATETIME  NULL  COMMENT '修改时间',
+    PRIMARY KEY (`id`)
+);
+CREATE INDEX idx_message_box_user_box_notification ON parana_message_boxes(user_id,box_index,notification_id);
+CREATE INDEX idx_message_box_notification_id ON parana_message_boxes(notification_id);
+
+
+
+-- 用户设备信息表 galaxy_user_devices
+create table `parana_user_devices` (
+  `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
+  `user_id` bigint null COMMENT '用户ID',
+  `user_name` VARCHAR(64) COMMENT '用户名',
+  `device_token` VARCHAR(128) COMMENT '',
+  `device_type` VARCHAR(128) COMMENT '',
+  `created_at` datetime NULL ,
+  `updated_at` datetime NULL ,
+   PRIMARY KEY (`id`)
+) COMMENT = '用户设备信息表';
+CREATE INDEX idx_user_devices_user_id ON `parana_user_devices` (`user_id`);
+CREATE INDEX idx_user_devices_token ON `parana_user_devices` (`device_token`);
+
+-- sub domain 表
+CREATE TABLE `parana_sub_domains` (
+  `id`        BIGINT           NOT NULL AUTO_INCREMENT,
+  `desc`      VARCHAR(32)      NULL COMMENT '描述',
+  `value`     VARCHAR(64)      NOT NULL COMMENT 'sub domain',
+  `type`      TINYINT UNSIGNED NOT NULL COMMENT '类型: 1. 用户, 2. 店铺, 3. 企业',
+  `target_id` BIGINT           NOT NULL COMMENT '目标 id (user id, shop id)',
+  created_at  DATETIME         NULL COMMENT '创建时间',
+  updated_at  DATETIME         NULL COMMENT '更新时间',
+  PRIMARY KEY (`id`)
+);
+CREATE UNIQUE INDEX `idx_sub_domains_value_UNIQUE` ON `parana_sub_domains` (`value`);
+CREATE UNIQUE INDEX `idx_sub_domains_t_target_id_UNIQUE` ON `parana_sub_domains` (`type`, `target_id`);
+
+
+-- 配置表: parana_configs
+DROP TABLE IF EXISTS `parana_configs`;
+
+CREATE TABLE `parana_configs` (
+  `id`          BIGINT          NOT NULL AUTO_INCREMENT,
+  `biz_type`    SMALLINT        NOT NULL DEFAULT 0 COMMENT '业务类型',
+  `key`         VARCHAR(128)    NOT NULL COMMENT '键',
+  `value`       VARCHAR(1024)   NOT NULL COMMENT '值',
+  `data_type`   VARCHAR(16)     NOT NULL DEFAULT 0 COMMENT '数据类型',
+  `group`       VARCHAR(16)     NOT NULL DEFAULT 0 COMMENT '分组',
+  `description` VARCHAR(256)    NULL COMMENT '描述',
+  `created_at`  DATETIME        NOT NULL,
+  `updated_at`  DATETIME        NOT NULL,
+  PRIMARY KEY (`id`)
+) COMMENT='配置中心';
+
+CREATE UNIQUE INDEX `idx_configs_bt_key_UNIQUE` ON parana_configs(`biz_type`, `key`);
+
+
+
+
+CREATE TABLE `parana_user_vat_invoices` (
+  `id`                    BIGINT          NOT NULL  AUTO_INCREMENT COMMENT '自增主键' ,
+  `user_id`               BIGINT          NOT NULL  COMMENT '用户标识',
+  `company_name`          VARCHAR(128)    NOT NULL  COMMENT '公司名称',
+  `tax_register_no`       VARCHAR(32)     NOT NULL  COMMENT '税务登记号',
+  `register_address`      VARCHAR(128)    NOT NULL  COMMENT '注册地址',
+  `register_phone`        VARCHAR(16)     NOT NULL  COMMENT '注册电话',
+  `register_bank`         VARCHAR(128)    NOT NULL  COMMENT '注册银行',
+  `bank_account`          VARCHAR(32)     NOT NULL  COMMENT '银行帐号',
+  `tax_certificate`       VARCHAR(256)    NULL      COMMENT '税务登记证',
+  `taxpayer_certificate`  VARCHAR(256)    NULL      COMMENT '一般纳税人证书',
+  `created_at`            DATETIME        NULL      COMMENT '创建时间',
+  `updated_at`            DATETIME        NULL      COMMENT '更新时间',
+  PRIMARY KEY (`id`)
+)COMMENT='用户增值税发票表';
+CREATE UNIQUE INDEX idx_parana_uvi_user_id_uniq on `parana_user_vat_invoices`(`user_id`);
+

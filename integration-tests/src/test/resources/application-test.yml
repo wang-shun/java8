@@ -1,0 +1,45 @@
+spring:
+  datasource:
+    driver-class-name: org.h2.Driver
+    url: jdbc:h2:mem:test;MODE=MySQL
+
+
+
+mybatis:
+  mapperLocations:  classpath*:mapper/*Mapper.xml
+  typeAliasesPackage: >
+    io.terminus.parana.item.model,
+    io.terminus.parana.category.model,
+    io.terminus.parana.brand.model,
+    io.terminus.parana.spu.model,
+    io.terminus.parana.shop.model,
+    io.terminus.parana.user.model,
+    io.terminus.parana.cart.model,
+    io.terminus.parana.order.model,
+    io.terminus.parana.user.address.model,
+    io.terminus.parana.file.model,
+    io.terminus.doctor.user.model,
+    io.terminus.doctor.order.model,
+    io.terminus.parana.article.model
+
+image:
+  base:
+    url: http://terminus.oss-cn-hangzhou.aliyuncs.com
+
+
+oss:
+  endpoint: oss-cn-hangzhou.aliyuncs.com
+  appKey: Pm1oHDnzVajPfmXg
+  appSecret: ryWBUlfHjwJC6aUlctqyVJuKnh00ij
+  bucketName: terminus
+
+search:
+  host: localhost
+  port: 9200
+
+item.search:
+  index-name: items
+  index-type: item
+  mapping-path: item_mapping.json
+  full-dump-range: 3
+  batch-size: 100

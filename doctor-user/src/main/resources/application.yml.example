@@ -1,0 +1,21 @@
+datasource:
+  url: jdbc:mysql://127.0.0.1:3306/b2b2c?useUnicode=true&characterEncoding=UTF8
+  username: root
+  password: anywhere
+
+# dubbo
+dubbo:
+  registry: zookeeper://127.0.0.1:2181
+
+redis:
+  host: 127.0.0.1
+  port: 8888
+
+logging:
+  file: ${user.home}/logs/doctor/user.log
+  level.*: DEBUG
+
+# zookeeper
+zookeeper:
+  host: 127.0.0.1
+  port: 2181

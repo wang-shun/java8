@@ -1,0 +1,74 @@
+server:
+  context-path: /
+  port: 8081
+
+pampas:
+  rootPath: ${user.home}/assets
+  apps:
+    - key: PC
+      assetsHome: feebas
+  devMode: false
+  locale: zh_CN
+  mvc:
+    ignoreInterceptors:
+      - Login
+      - Auth
+    customInterceptors:
+      - doctorLoginInterceptor
+      - doctorAuthInterceptor
+  redis:
+    host: 127.0.0.1
+    port: 6379
+  design:
+    enable: true
+
+session:
+  cookie-context-path: /
+  cookie-domain: bbc.com
+  cookie-max-age: 1800
+  cookie-name: msid
+  source: redis
+  serialize-type: json
+  redis-host: 127.0.0.1
+  redis-port: 6379
+  redis-index: 1
+  redis-cluster: false
+  redis-test-on-borrow: true
+  redis-max-total: 10
+  redis-max-idle: 0
+  redis-prefix: afsession
+
+dubbo:
+  name: doctor-web
+  registry: zookeeper://127.0.0.1:2181
+  port: -1
+  timeout: 10000
+  threads: 100
+  heartBeats: 10000
+  mode: consumer
+
+# zookeeper
+zookeeper:
+  host: 127.0.0.1
+  port: 2181
+
+logging:
+  file: /var/log/doctor/web.log
+  level.*: INFO
+
+image:
+  base:
+    url: http://terminus.oss-cn-hangzhou.aliyuncs.com
+
+oss:
+  endpoint: oss-cn-hangzhou.aliyuncs.com
+  appKey: Pm1oHDnzVajPfmXg
+  appSecret: ryWBUlfHjwJC6aUlctqyVJuKnh00ij
+  bucketName: terminus
+
+parana:
+  config:
+    mode: server
+
+pay:
+  debug: false

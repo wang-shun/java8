@@ -1,0 +1,44 @@
+server:
+  port: 8081
+
+pampas:
+  rootPath: ${user.home}/assets
+  devMode: true
+  redis:
+    host: 127.0.0.1
+    port: 6379
+
+session:
+  cookie-domain: bbc.com
+  redis-host: 127.0.0.1
+  redis-port: 6379
+
+dubbo:
+  name: doctor-web
+  registry: zookeeper://127.0.0.1:2181
+
+# zookeeper
+zookeeper:
+  host: 127.0.0.1
+  port: 2181
+
+logging:
+  file: /var/log/doctor/web.log
+  level.*: INFO
+
+image:
+  base:
+    url: http://terminus.oss-cn-hangzhou.aliyuncs.com
+
+oss:
+  endpoint: oss-cn-hangzhou.aliyuncs.com
+  appKey: Pm1oHDnzVajPfmXg
+  appSecret: ryWBUlfHjwJC6aUlctqyVJuKnh00ij
+  bucketName: terminus
+
+parana:
+  config:
+    mode: server
+
+pay:
+  debug: false

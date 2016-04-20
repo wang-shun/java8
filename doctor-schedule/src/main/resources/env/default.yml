@@ -1,0 +1,26 @@
+server:
+  context-path: /schedule
+  port: 8087
+
+dubbo:
+  name: doctor-schedule
+  registry: zookeeper://127.0.0.1:2181
+  port: -1
+  timeout: 10000
+  threads: 100
+  heartBeats: 10000
+  mode: consumer
+
+# zookeeper
+zookeeper:
+  host: 127.0.0.1
+  port: 2181
+
+logging:
+  file: /var/log/doctor/web-schedule.log
+  level.*: INFO
+
+parana:
+  config:
+    mode: server
+

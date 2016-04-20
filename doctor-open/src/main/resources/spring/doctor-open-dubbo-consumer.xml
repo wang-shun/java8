@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (c) 2015 杭州端点网络科技有限公司
+  -->
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:dubbo="http://code.alibabatech.com/schema/dubbo"
+       xsi:schemaLocation="
+        http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://code.alibabatech.com/schema/dubbo
+        http://code.alibabatech.com/schema/dubbo/dubbo.xsd">
+
+    <!-- user services -->
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.parana.user.service.UserReadService" id="userReadService" check="false"/>
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.parana.user.service.UserWriteService" id="userWriteService" check="false"/>
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.parana.user.service.DeviceWriteService" id="deviceWriteService" check="false"/>
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.parana.user.service.DeviceReadService" id="deviceReadService" check="false"/>
+
+    <!-- category services -->
+    <dubbo:reference version="1.0.0" interface="io.terminus.parana.category.service.BackCategoryReadService" id="backCategoryReadService" retries="0" check="false"/>
+    <dubbo:reference version="1.0.0" interface="io.terminus.parana.category.service.BackCategoryWriteService" id="backCategoryWriteService" retries="0" check="false"/>
+    <dubbo:reference version="1.0.0" interface="io.terminus.parana.category.service.FrontCategoryReadService" id="frontCategoryReadService" retries="0" check="false"/>
+    <dubbo:reference version="1.0.0" interface="io.terminus.parana.category.service.FrontCategoryWriteService" id="frontCategoryWriteService" retries="0" check="false"/>
+    <dubbo:reference version="1.0.0" interface="io.terminus.parana.category.service.CategoryAttributeReadService" id="categoryAttributeReadService" retries="0" check="false"/>
+    <dubbo:reference version="1.0.0" interface="io.terminus.parana.category.service.CategoryAttributeWriteService" id="categoryAttributeWriteService" retries="0" check="false"/>
+    <dubbo:reference version="1.0.0" interface="io.terminus.parana.category.service.CategoryBindingReadService" id="categoryBindingReadService" retries="0" check="false"/>
+    <dubbo:reference version="1.0.0" interface="io.terminus.parana.category.service.CategoryBindingWriteService" id="categoryBindingWriteService" retries="0" check="false"/>
+    <dubbo:reference version="1.0.0" interface="io.terminus.parana.category.service.ShopCategoryReadService" id="shopCategoryReadService"  retries="0" check="false"/>
+
+    <!-- item services -->
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.parana.item.service.ItemReadService" id="itemReadService" check="false"/>
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.parana.item.service.ItemWriteService" id="itemWriteService" check="false"/>
+    <dubbo:reference version="1.0.0" interface="io.terminus.parana.item.service.SkuReadService" id="skuReadService" check="false" retries="0"/>
+    <dubbo:reference version="1.0.0" interface="io.terminus.parana.item.service.SkuWriteService" id="skuWriteService" check="false" retries="0"/>
+    <dubbo:reference version="1.0.0" interface="io.terminus.parana.brand.service.BrandWriteService" id="brandWriteService" check="false" retries="0"/>
+    <dubbo:reference version="1.0.0" interface="io.terminus.parana.brand.service.BrandReadService" id="brandReadService" check="false" retries="0"/>
+    <dubbo:reference version="1.0.0" interface="io.terminus.parana.item.service.ItemSnapshotReadService" id="itemSnapshotReadService" check="false" retries="0"/>
+    <dubbo:reference version="1.0.0" interface="io.terminus.parana.item.service.ItemSnapshotWriteService" id="itemSnapshotWriteService" check="false" retries="0"/>
+    <dubbo:reference version="1.0.0" interface="io.terminus.parana.search.item.ItemSearchReadService" id="itemSearchReadService" check="false" retries="0"/>
+    <dubbo:reference version="1.0.0" interface="io.terminus.parana.spu.service.SpuReadService" id="spuReadService" check="false" retries="0"/>
+    <dubbo:reference version="1.0.0" interface="io.terminus.parana.spu.service.SpuWriteService" id="spuWriteService" check="false" retries="0"/>
+    <!--<dubbo:reference version="1.0.0" interface="io.terminus.parana.storage.service.StorageService" id="storageService" check="false" retries="0"/>-->
+
+    <!-- file services -->
+    <dubbo:reference version="1.0.0" interface="io.terminus.parana.file.service.UserFileService" id="userFileService" check="false" retries="0"/>
+    <dubbo:reference version="1.0.0" interface="io.terminus.parana.file.service.UserFolderService" id="userFolderService" check="false" retries="0"/>
+
+    <!-- shop services -->
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.parana.shop.service.ShopReadService" id="shopReadService" check="false"/>
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.parana.shop.service.ShopWriteService" id="shopWriteService" check="false"/>
+
+    <!-- config service -->
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.parana.config.service.ConfigReadService" id="configReadService" check="false"/>
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.parana.config.service.ConfigWriteService" id="configWriteService" check="false"/>
+
+
+</beans>

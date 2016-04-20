@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (c) 2016. 杭州端点网络科技有限公司.  All rights reserved.
+  -->
+
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>doctor</artifactId>
+        <groupId>io.terminus.doctor</groupId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>doctor-web</artifactId>
+
+    <dependencies>
+        <dependency>
+            <groupId>io.terminus.search</groupId>
+            <artifactId>search-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.terminus.doctor</groupId>
+            <artifactId>doctor-web-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.terminus.doctor</groupId>
+            <artifactId>doctor-common</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.terminus.pampas</groupId>
+            <artifactId>pampas-spring-boot-starter</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.terminus.pampas</groupId>
+            <artifactId>pampas-design</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.terminus.boot</groupId>
+            <artifactId>spring-boot-starter-dubbo</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>dubbo</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.terminus.doctor</groupId>
+            <artifactId>doctor-web-mock</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.terminus.doctor</groupId>
+            <artifactId>doctor-user-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.terminus.parana</groupId>
+            <artifactId>parana-article-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-starter-tomcat</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-jetty</artifactId>
+        </dependency>
+        <!-- zookeeper -->
+        <dependency>
+            <groupId>com.github.sgroschupf</groupId>
+            <artifactId>zkclient</artifactId>
+        </dependency>
+        <!-- session -->
+        <dependency>
+            <groupId>io.terminus.session</groupId>
+            <artifactId>terminus-session</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.terminus.boot</groupId>
+            <artifactId>spring-boot-starter-session</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.jodd</groupId>
+            <artifactId>jodd-lagarto</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.terminus.parana</groupId>
+            <artifactId>parana-boot-starter-config</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.terminus.boot</groupId>
+            <artifactId>spring-boot-starter-zookeeper</artifactId>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <version> 1.3.2.RELEASE</version>
+                <configuration>
+                    <executable>true</executable>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>repackage</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-deploy-plugin</artifactId>
+                <version>2.7</version>
+                <configuration>
+                    <skip>true</skip>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>

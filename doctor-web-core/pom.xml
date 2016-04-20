@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (c) 2016. 杭州端点网络科技有限公司.  All rights reserved.
+  -->
+
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>doctor</artifactId>
+        <groupId>io.terminus.doctor</groupId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>doctor-web-core</artifactId>
+
+    <dependencies>
+
+        <dependency>
+            <groupId>io.terminus.doctor</groupId>
+            <artifactId>doctor-common</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.terminus.doctor</groupId>
+            <artifactId>doctor-user-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.terminus.parana</groupId>
+            <artifactId>parana-user-auth</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.jsoup</groupId>
+            <artifactId>jsoup</artifactId>
+            <version>1.8.3</version>
+        </dependency>
+        <dependency>
+            <groupId>io.terminus.lib</groupId>
+            <artifactId>terminus-file</artifactId>
+        </dependency>
+        <!-- parana extra -->
+        <dependency>
+            <groupId>io.terminus.parana</groupId>
+            <artifactId>parana-file-api</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>io.terminus.pampas</groupId>
+            <artifactId>pampas-design</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.aliyun.oss</groupId>
+            <artifactId>aliyun-sdk-oss</artifactId>
+            <version>2.2.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.yaml</groupId>
+            <artifactId>snakeyaml</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-starter-tomcat</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-jetty</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.github.cage</groupId>
+            <artifactId>cage</artifactId>
+            <version>1.0</version>
+        </dependency>
+        <dependency>
+            <groupId>io.terminus.session</groupId>
+            <artifactId>terminus-session</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.google.code.findbugs</groupId>
+            <artifactId>jsr305</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.terminus.lib</groupId>
+            <artifactId>terminus-sms</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.terminus.lib</groupId>
+            <artifactId>terminus-email</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.terminus.lib</groupId>
+            <artifactId>terminus-apppush</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.terminus.parana</groupId>
+            <artifactId>parana-msg-controller</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>net.glxn</groupId>
+            <artifactId>qrgen</artifactId>
+        </dependency>
+        <!--<dependency>-->
+            <!--<groupId>io.terminus.lib</groupId>-->
+            <!--<artifactId>terminus-sms</artifactId>-->
+            <!--<version>1.0.RELEASE</version>-->
+        <!--</dependency>-->
+        <dependency>
+            <groupId>io.terminus.parana</groupId>
+            <artifactId>parana-config-client</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.google.http-client</groupId>
+            <artifactId>google-http-client</artifactId>
+            <version>1.20.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.apis</groupId>
+            <artifactId>google-api-services-drive</artifactId>
+            <version>v2-rev99-1.17.0-rc</version>
+        </dependency>
+
+    </dependencies>
+
+
+</project>

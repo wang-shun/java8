@@ -1,0 +1,66 @@
+server:
+  context-path: /
+  port: 8082
+
+pampas:
+  rootPath: ${user.home}/assets/spinda
+  apps:
+    - key: PC
+  devMode: false
+  mvc:
+    ignoreInterceptors:
+      - Login
+      - Auth
+    customInterceptors:
+      - doctorLoginInterceptor
+      - doctorAuthInterceptor
+  redis:
+    host: 127.0.0.1
+    port: 6379
+  design:
+    enable: false
+  locale: zh_CN
+
+session:
+  cookie-context-path: /
+  cookie-domain: doctor.com
+  cookie-max-age: 1800
+  cookie-name: msid
+  source: redis
+  serialize-type: json
+  redis-host: 127.0.0.1
+  redis-port: 6379
+  redis-index: 1
+  redis-cluster: false
+  redis-test-on-borrow: true
+  redis-max-total: 10
+  redis-max-idle: 0
+  redis-prefix: afsession
+
+dubbo:
+  name: doctor-admin
+  registry: zookeeper://127.0.0.1:2181
+  port: -1
+  timeout: 10000
+  threads: 100
+  heartBeats: 10000
+  mode: consumer
+
+# zookeeper
+zookeeper:
+  host: 127.0.0.1
+  port: 2181
+
+logging:
+  file: ${user.home}/logs/doctor/admin.log
+  level.*: DEBUG
+
+image:
+  base:
+    url: http://terminus.oss-cn-hangzhou.aliyuncs.com
+
+oss:
+  endpoint: oss-cn-hangzhou.aliyuncs.com
+  appKey: Pm1oHDnzVajPfmXg
+  appSecret: ryWBUlfHjwJC6aUlctqyVJuKnh00ij
+  bucketName: terminus
