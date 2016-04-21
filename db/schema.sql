@@ -1,6 +1,5 @@
 
 -- 用户表: parana_users
-
 CREATE TABLE `parana_users` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `name` VARCHAR(40) NULL COMMENT '用户名',
@@ -178,8 +177,6 @@ CREATE TABLE parana_message_boxes(
 CREATE INDEX idx_message_box_user_box_notification ON parana_message_boxes(user_id,box_index,notification_id);
 CREATE INDEX idx_message_box_notification_id ON parana_message_boxes(notification_id);
 
-
-
 -- 用户设备信息表 galaxy_user_devices
 create table `parana_user_devices` (
   `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -227,9 +224,6 @@ CREATE TABLE `parana_configs` (
 
 CREATE UNIQUE INDEX `idx_configs_bt_key_UNIQUE` ON parana_configs(`biz_type`, `key`);
 
-
-
-
 CREATE TABLE `parana_user_vat_invoices` (
   `id`                    BIGINT          NOT NULL  AUTO_INCREMENT COMMENT '自增主键' ,
   `user_id`               BIGINT          NOT NULL  COMMENT '用户标识',
@@ -246,4 +240,222 @@ CREATE TABLE `parana_user_vat_invoices` (
   PRIMARY KEY (`id`)
 )COMMENT='用户增值税发票表';
 CREATE UNIQUE INDEX idx_parana_uvi_user_id_uniq on `parana_user_vat_invoices`(`user_id`);
+
+-- 2016-04-21 猪场软件表
+-- 基础表
+-- 公司表
+CREATE TABLE `doctor_orgs` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '自增主键',
+  `name` varchar(64) DEFAULT NULL COMMENT '公司名称',
+  `out_id`  varchar(128) DEFAULT NULL COMMENT  '外部id',
+  `extra` text COMMENT '附加字段',
+  `created_at` datetime DEFAULT NULL COMMENT '创建时间',
+  `updated_at` datetime DEFAULT NULL COMMENT '修改时间',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='公司表';
+
+-- 猪场表
+CREATE TABLE `doctor_farms` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '自增主键',
+  `name` varchar(64) DEFAULT NULL COMMENT '公司名称',
+  `org_id` bigint(20) DEFAULT NULL COMMENT '公司id',
+  `org_name` varchar(64) DEFAULT NULL COMMENT '公司名称',
+  `out_id`  varchar(128) DEFAULT NULL COMMENT  '外部id',
+  `extra` text COMMENT '附加字段',
+  `created_at` datetime DEFAULT NULL COMMENT '创建时间',
+  `updated_at` datetime DEFAULT NULL COMMENT '修改时间',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='猪场表';
+CREATE INDEX idx_doctor_farms_org_id ON doctor_farms(org_id);
+
+-- 猪舍表
+CREATE TABLE `doctor_barns` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '自增主键',
+  `name` varchar(64) DEFAULT NULL COMMENT '猪舍名称',
+  `org_id` bigint(20) DEFAULT NULL COMMENT '公司id',
+  `org_name` varchar(64) DEFAULT NULL COMMENT '公司名称',
+  `farm_id` bigint(20) DEFAULT NULL COMMENT '猪场id',
+  `farm_name` varchar(64) DEFAULT NULL COMMENT '猪场名称',
+  `pig_type` smallint(6) DEFAULT NULL COMMENT '猪类名称  代码枚举',
+  `can_open_group` smallint(6) DEFAULT NULL COMMENT '能否建群',
+  `status` smallint(6) DEFAULT NULL COMMENT '使用状态',
+  `staff` varchar(64) DEFAULT NULL COMMENT '工作人员',
+  `out_id`  varchar(128) DEFAULT NULL COMMENT  '外部id',
+  `extra` text COMMENT '附加字段',
+  `created_at` datetime DEFAULT NULL COMMENT '创建时间',
+  `updated_at` datetime DEFAULT NULL COMMENT '修改时间',
+  PRIMARY KEY (`id`)
+) ENGINE=Myisam DEFAULT CHARSET=utf8 COMMENT='猪舍表';
+CREATE INDEX idx_doctor_barns_farm_id ON doctor_barns(farm_id);
+
+-- 猪场职员表
+CREATE TABLE `doctor_staffs` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '自增主键',
+  `name` varchar(64) DEFAULT NULL COMMENT '猪舍名称',
+  `org_id` bigint(20) DEFAULT NULL COMMENT '公司id',
+  `org_name` varchar(64) DEFAULT NULL COMMENT '公司名称',
+  `farm_id` bigint(20) DEFAULT NULL COMMENT '猪场id',
+  `farm_name` varchar(64) DEFAULT NULL COMMENT '猪场名称',
+  `role_type` smallint(6) DEFAULT NULL COMMENT '角色类型',
+  `status` smallint(6) DEFAULT NULL COMMENT '状态 在职，不在职',
+  `sex` smallint(6) DEFAULT NULL COMMENT '性别',
+  `mobile` varchar(16) DEFAULT NULL COMMENT '手机号',
+  `out_id`  varchar(128) DEFAULT NULL COMMENT  '外部id',
+  `extra` text COMMENT '附加字段',
+  `created_at` datetime DEFAULT NULL COMMENT '创建时间',
+  `updated_at` datetime DEFAULT NULL COMMENT '修改时间',
+  PRIMARY KEY (`id`)
+) ENGINE=Myisam DEFAULT CHARSET=utf8 COMMENT='猪场职员表';
+CREATE INDEX idx_doctor_staffs_farm_id ON doctor_staffs(farm_id);
+
+-- 变动类型表
+CREATE TABLE `doctor_change_types` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '自增主键',
+  `name` varchar(32) DEFAULT NULL COMMENT '变动类型名称',
+  `is_count_out` smallint(6) DEFAULT NULL COMMENT '是否计入出栏猪',
+  `farm_id` bigint(20) DEFAULT NULL COMMENT '猪场id',
+  `farm_name` varchar(64) DEFAULT NULL COMMENT '猪场名称',
+  `out_id`  varchar(128) DEFAULT NULL COMMENT  '外部id',
+  `extra` text COMMENT '附加字段',
+  `created_at` datetime DEFAULT NULL COMMENT '创建时间',
+  `updated_at` datetime DEFAULT NULL COMMENT '修改时间',
+  PRIMARY KEY (`id`)
+) ENGINE=Myisam DEFAULT CHARSET=utf8 COMMENT='变动类型表';
+CREATE INDEX idx_doctor_change_types_farm_id ON doctor_change_types(farm_id);
+
+-- 疾病表
+CREATE TABLE `doctor_diseases` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '自增主键',
+  `name` varchar(32) DEFAULT NULL COMMENT '变动类型名称',
+  `farm_id` bigint(20) DEFAULT NULL COMMENT '猪场id',
+  `farm_name` varchar(64) DEFAULT NULL COMMENT '猪场名称',
+  `out_id`  varchar(128) DEFAULT NULL COMMENT  '外部id',
+  `extra` text COMMENT '附加字段',
+  `created_at` datetime DEFAULT NULL COMMENT '创建时间',
+  `updated_at` datetime DEFAULT NULL COMMENT '修改时间',
+  PRIMARY KEY (`id`)
+) ENGINE=Myisam DEFAULT CHARSET=utf8 COMMENT='变动类型表';
+CREATE INDEX idx_doctor_diseases_farm_id ON doctor_diseases(farm_id);
+
+
+-- 品种表
+CREATE TABLE `doctor_breeds` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '自增主键',
+  `name` varchar(64) DEFAULT NULL COMMENT '品种名称',
+  `out_id`  varchar(128) DEFAULT NULL COMMENT  '外部id',
+  `extra` text COMMENT '附加字段',
+  `created_at` datetime DEFAULT NULL COMMENT '创建时间',
+  `updated_at` datetime DEFAULT NULL COMMENT '修改时间',
+  PRIMARY KEY (`id`)
+) ENGINE=Myisam DEFAULT CHARSET=utf8 COMMENT='品种表';
+
+-- 品系表
+CREATE TABLE `doctor_genetics` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '自增主键',
+  `name` varchar(64) DEFAULT NULL COMMENT '品系名称',
+  `out_id`  varchar(128) DEFAULT NULL COMMENT  '外部id',
+  `extra` text COMMENT '附加字段',
+  `created_at` datetime DEFAULT NULL COMMENT '创建时间',
+  `updated_at` datetime DEFAULT NULL COMMENT '修改时间',
+  PRIMARY KEY (`id`)
+) ENGINE=Myisam DEFAULT CHARSET=utf8 COMMENT='品系表';
+
+-- 计量单位表
+CREATE TABLE `doctor_units` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '自增主键',
+  `name` varchar(64) DEFAULT NULL COMMENT '品系名称',
+  `extra` text COMMENT '附加字段',
+  `created_at` datetime DEFAULT NULL COMMENT '创建时间',
+  `updated_at` datetime DEFAULT NULL COMMENT '修改时间',
+  PRIMARY KEY (`id`)
+) ENGINE=Myisam DEFAULT CHARSET=utf8 COMMENT='计量单位表';
+
+
+-- 猪群表
+-- 猪群卡片表
+CREATE TABLE `doctor_group_cards` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '自增主键',
+  `org_id` bigint(20) DEFAULT NULL COMMENT '公司id',
+  `org_name` varchar(64) DEFAULT NULL COMMENT '公司名称',
+  `farm_id` bigint(20) DEFAULT NULL COMMENT '猪场id',
+  `farm_name` varchar(64) DEFAULT NULL COMMENT '猪场名称',
+  `group_code` varchar(64) DEFAULT NULL COMMENT '猪群号',
+  `open_at` datetime DEFAULT NULL COMMENT '建群时间',
+  `close_at` datetime DEFAULT NULL COMMENT '关闭时间',
+  `status` smallint(6) DEFAULT NULL COMMENT '枚举: 已建群, 已关闭',
+  `init_barn_id` bigint(20) DEFAULT NULL COMMENT '初始猪舍id',
+  `init_barn_name` varchar(64) DEFAULT NULL COMMENT '初始猪舍name',
+  `current_barn_id` bigint(20) DEFAULT NULL COMMENT '当前猪舍id',
+  `current_barn_name` varchar(64) DEFAULT NULL COMMENT '当前猪舍名称',
+  `pig_type` smallint(6) DEFAULT NULL COMMENT '猪类名称id',
+  `sex` smallint(6) DEFAULT NULL COMMENT '性别',
+  `breed_id` bigint(20) DEFAULT NULL COMMENT '品种id',
+  `breed_name` varchar(32) DEFAULT NULL COMMENT '品种name',
+  `genetic_id` bigint(32) DEFAULT NULL COMMENT '品系id',
+  `genetic_name` varchar(32) DEFAULT NULL COMMENT '品系name',
+  `staff` varchar(64) DEFAULT NULL COMMENT '饲养员',
+  `remark` text COMMENT '描述',
+  `out_id`  varchar(128) DEFAULT NULL COMMENT  '外部id',
+  `extra` text COMMENT '附加字段',
+  `created_at` datetime DEFAULT NULL COMMENT '创建时间',
+  `updated_at` datetime DEFAULT NULL COMMENT '修改时间',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='猪群卡片表';
+CREATE INDEX idx_doctor_group_cards_org_id ON doctor_group_cards(org_id);
+CREATE INDEX idx_doctor_group_cards_farm_id ON doctor_group_cards(farm_id);
+CREATE INDEX idx_doctor_group_cards_init_barn_id ON doctor_group_cards(init_barn_id);
+CREATE INDEX idx_doctor_group_cards_current_barn_id ON doctor_group_cards(current_barn_id);
+CREATE INDEX idx_doctor_group_cards_open_at ON doctor_group_cards(open_at);
+CREATE INDEX idx_doctor_group_cards_close_at ON doctor_group_cards(close_at);
+
+-- 猪群卡片跟踪表
+CREATE TABLE `doctor_group_card_tracks` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '自增主键',
+  `group_card_id` bigint(20) DEFAULT NULL COMMENT '猪群卡片id',
+  `rel_event_id` bigint(20) DEFAULT NULL COMMENT '关联的最新一次的事件id',
+  `quantity` int(11) DEFAULT NULL COMMENT '猪只数',
+  `avg_day_age` double DEFAULT NULL COMMENT '平均日龄',
+  `weight` double DEFAULT NULL COMMENT '总活体重(公斤)',
+  `avg_weight` double DEFAULT NULL COMMENT '平均体重(公斤)',
+  `price` bigint(20) DEFAULT NULL COMMENT '单价(元)',
+  `amount` bigint(20) DEFAULT NULL COMMENT '总金额(元)',
+  `customer` varchar(32) DEFAULT NULL COMMENT '客户',
+  `sale_qty` int(11) DEFAULT NULL COMMENT '销售数量',
+  `extra` text COMMENT '附加字段',
+  `created_at` datetime DEFAULT NULL COMMENT '创建时间',
+  `updated_at` datetime DEFAULT NULL COMMENT '修改时间',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='猪群卡片明细表';
+CREATE UNIQUE INDEX idx_doctor_group_card_tracks_group_card_id ON doctor_group_card_tracks(group_card_id);
+CREATE INDEX idx_doctor_group_card_tracks_rel_event_id ON doctor_group_card_tracks(rel_event_id);
+
+-- 猪群事件表
+CREATE TABLE `doctor_group_events` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '自增主键',
+  `org_id` varchar(64) DEFAULT NULL COMMENT '公司id',
+  `org_name` varchar(64) DEFAULT NULL COMMENT '公司名称',
+  `farm_id` varchar(64) DEFAULT NULL COMMENT '猪场id',
+  `farm_name` varchar(64) DEFAULT NULL COMMENT '猪场名称',
+  `group_card_id` varchar(64) DEFAULT NULL COMMENT '猪群卡片id',
+  `group_code` varchar(64) DEFAULT NULL COMMENT '猪群号',
+  `type` smallint(6) DEFAULT NULL COMMENT '事件类型 枚举 总共10种',
+  `name` varchar(32) DEFAULT NULL COMMENT '事件名称 冗余',
+  `desc` varchar(512) DEFAULT NULL COMMENT '事件描述',
+  `barn_id` bigint(20) DEFAULT NULL COMMENT '事件发生猪舍id',
+  `barn_name` varchar(63) DEFAULT NULL COMMENT '事件发生猪舍id',
+  `pig_type` smallint(6) DEFAULT NULL COMMENT '猪类枚举',
+  `operator` smallint(6) DEFAULT NULL COMMENT '操作符 + -',
+  `quantity` int(11) DEFAULT 0 COMMENT '事件猪只数',
+  `boar_qty` int(11) DEFAULT 0 COMMENT '事件公猪数',
+  `sow_qty` int(11) DEFAULT 0 COMMENT '事件母猪数',
+  `out_id`  varchar(128) DEFAULT NULL COMMENT  '外部id',
+  `extra` text COMMENT '具体时间的内容通过json存储',
+  `created_at` datetime DEFAULT NULL COMMENT '创建时间',
+  `created_by` varchar(64) DEFAULT NULL COMMENT '创建人',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='猪群事件表';
+CREATE INDEX idx_doctor_doctor_group_events_farm_id ON doctor_group_events(farm_id);
+CREATE INDEX idx_doctor_doctor_group_events_group_card_id ON doctor_group_events(group_card_id);
+CREATE INDEX idx_doctor_doctor_group_events_barn_id ON doctor_group_events(barn_id);
+CREATE INDEX idx_doctor_doctor_group_events_created_at ON doctor_group_events(created_at);
 
