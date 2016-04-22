@@ -470,8 +470,8 @@ create table doctor_pig_cards(
 	pig_father_id bigint(20) UNSIGNED default null comment '猪父亲Id',
 	pig_mother_id bigint(20) UNSIGNED default null comment '母猪Id',
 	source varchar(64) default null comment '母猪来源',
-	birthdate DATETIME default null comment '母猪生日',
-	birthweight DOUBLE default null comment '出生重量',
+	birth_date DATETIME default null comment '母猪生日',
+	birth_weight DOUBLE default null comment '出生重量',
 	in_farm_date datetime default null comment '进厂日期',
 	in_farm_day_age int default null comment '进厂日龄',
 	init_barn_id bigint(20) UNSIGNED default null comment '进厂位置',
@@ -488,13 +488,15 @@ create table doctor_pig_cards(
 	updated_by varchar(64) default null,
 	primary key (id)
 )ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='猪基础信息表';
-create index doctor_pig_card_farm_id on doctor_pig_card(farm_id);
+CREATE index doctor_pig_cards_id on doctor_pig_cards(id);
+create index doctor_pig_cards_farm_id on doctor_pig_cards(farm_id);
+CREATE index doctor_pig_cards_pig_code on doctor_pig_cards(pig_code);
 
 -- 猪 track 信息关联表
 drop table if exists doctor_pig_tracks;
 create table doctor_pig_tracks(
 	id bigint(20) UNSIGNED not NULL comment '猪Id',
-	status varchar(64) default null comment '猪状态信息',
+	status SMALLINT default null comment '猪状态信息',
 	current_barn_id bigint(20) UNSIGNED default null comment '当前猪舍Id',
 	current_barn_name bigint(20) UNSIGNED DEFAULT null comment '当前猪舍名称',
 	weight double default null comment '猪重量',
@@ -506,8 +508,9 @@ create table doctor_pig_tracks(
 	remark varchar(64) default null comment '备注',
 	primary key(id)
 )ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='猪Track 信息表';
-create index doctor_pig_track_id on doctor_pig_track(id);
-
+create index doctor_pig_tracks_id on doctor_pig_tracks(id);
+CREATE index doctor_pig_tracks_current_barn_id on doctor_pig_tracks(current_barn_id);
+CREATE index doctor_pig_tracks_status on doctor_pig_tracks(status);
 
 -- 公猪，母猪， 仔猪事件信息表
 drop table if exists doctor_pig_events;
@@ -535,8 +538,8 @@ create table doctor_pig_events(
 	updated_by varchar(64) comment '修改人',
 	primary key(id)
 )ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='用户设备信息表';;
-create index doctor_pig_event_pig_id on doctor_pig_event(pig_id);
-CREATE index doctor_pig_event_rel_event_id on doctor_pig_event(rel_event_id);
+create index doctor_pig_events_pig_id on doctor_pig_events(pig_id);
+CREATE index doctor_pig_events_rel_event_id on doctor_pig_events(rel_event_id);
 
 -- 仓库表
 drop table if exists doctor_ware_houses;
@@ -553,6 +556,7 @@ create table doctor_ware_houses(
 	is_default SMALLINT not null comment '默认仓库信息',
 	primary key (id)
 )ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='仓库信息数据表';
+CREATE doctor_ware_houses_id on doctor_ware_houses(id);
 
 
 -- 物料信息数据表内容（当前包含 疫苗， 药品，原料，饲料，消耗品）等
@@ -576,6 +580,8 @@ create table doctor_material_infos(
 	updated_by varchar(64) default null,
 	primary key (id)
 )ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='物料信息表内容';
+CREATE index doctor_material_infos_farm_id on doctor_material_infos(farm_id);
+CREATE index doctor_material_infos_material_type_id on doctor_material_infos(material_type_id);
 
 -- 原料， 仓库 关联数据信息内容, 原料可以存储不同的仓库信息
 drop table if exists doctor_material_in_ware_houses;
@@ -599,6 +605,9 @@ create table doctor_material_in_ware_houses(
 	updated_by varchar(64) default null,
 	primary key (id)
 )ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='仓库原料信息表';
+CREATE index doctor_material_in_ware_houses_farm_id on doctor_material_in_ware_houses(farm_id);
+CREATE index doctor_material_in_ware_houses_ware_house_id on doctor_material_in_ware_houses(ware_house_id);
+CREATE index doctor_material_in_ware_houses_material_id on doctor_material_in_ware_houses(material_id);
 
 -- 原料信息表领用， 调用信息记录
 drop table if exists doctor_material_consume_providers;
@@ -625,6 +634,6 @@ create table doctor_material_consume_providers(
 	updated_by varchar(64) default null,
 	primary KEY(id)
 )ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='领用记录信息表';
-create index doctor_material_consume_provider_farm_id on doctor_material_consume_provider(farm_id);
-create index doctor_material_consume_provider_ware_house_id on doctor_material_consume_provider(ware_house_id);
-create index doctor_material_consume_provider_material_id on doctor_material_consume_provider(material_id);
+create index doctor_material_consume_providers_farm_id on doctor_material_consume_providers(farm_id);
+create index doctor_material_consume_providers_ware_house_id on doctor_material_consume_providers(ware_house_id);
+create index doctor_material_consume_providers_material_id on doctor_material_consume_providers(material_id);
