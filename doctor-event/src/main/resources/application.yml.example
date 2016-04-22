@@ -1,5 +1,5 @@
 datasource:
-  url: jdbc:mysql://127.0.0.1:3306/b2b2c?useUnicode=true&characterEncoding=UTF8
+  url: jdbc:mysql://127.0.0.1:3306/pig_doctor?useUnicode=true&characterEncoding=UTF8
   username: root
   password: anywhere
 
@@ -12,7 +12,7 @@ redis:
   port: 8888
 
 logging:
-  file: ${user.home}/logs/doctor/user.log
+  file: ${user.home}/logs/doctor/event.log
   level.*: DEBUG
 
 # zookeeper
