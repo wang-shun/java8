@@ -460,8 +460,8 @@ CREATE INDEX idx_doctor_doctor_group_events_barn_id ON doctor_group_events(barn_
 CREATE INDEX idx_doctor_doctor_group_events_created_at ON doctor_group_events(created_at);
 
 -- pig card 猪信息表
-drop table if exists doctor_pig_card;
-create table doctor_pig_card(
+drop table if exists doctor_pig_cards;
+create table doctor_pig_cards(
 	id	bigint(20) UNSIGNED not null AUTO_INCREMENT comment 'ID',
 	org_id bigint(20) UNSIGNED not null comment '公司Id',
 	org_name varchar(128) default null comment '公司名称',
@@ -494,8 +494,8 @@ create table doctor_pig_card(
 create index doctor_pig_card_farm_id on doctor_pig_card(farm_id);
 
 -- 猪 track 信息关联表
-drop table if exists doctor_pig_track;
-create table doctor_pig_track(
+drop table if exists doctor_pig_tracks;
+create table doctor_pig_tracks(
 	id bigint(20) UNSIGNED not NULL comment '猪Id',
 	status varchar(64) default null comment '猪状态信息',
 	current_barn_id bigint(20) UNSIGNED default null comment '当前猪舍Id',
@@ -513,8 +513,8 @@ create index doctor_pig_track_id on doctor_pig_track(id);
 
 
 -- 公猪，母猪， 仔猪事件信息表
-drop table if exists doctor_pig_event;
-create table doctor_pig_event(
+drop table if exists doctor_pig_events;
+create table doctor_pig_events(
 	id BIGINT(20) UNSIGNED not null AUTO_INCREMENT comment 'id',
 	org_id bigint(20) UNSIGNED not null comment '公司Id',
 	org_name varchar(64) default null comment '公司名称',
@@ -541,8 +541,8 @@ create table doctor_pig_event(
 create index doctor_pig_event_pig_id on doctor_pig_event(pig_id);
 
 -- 仓库表
-drop table if exists doctor_ware_house;
-create table doctor_ware_house(
+drop table if exists doctor_ware_houses;
+create table doctor_ware_houses(
 	id bigint(20) UNSIGNED not null AUTO_INCREMENT comment 'id',
 	ware_house_name varchar(128) default null comment '仓库名称',
 	farm_id bigint(20) unsigned not null comment '猪场仓库信息',
@@ -558,8 +558,8 @@ create table doctor_ware_house(
 
 
 -- 物料信息数据表内容（当前包含 疫苗， 药品，原料，饲料，消耗品）等
-drop table if exists doctor_material_info;
-create table doctor_material_info(
+drop table if exists doctor_material_infos;
+create table doctor_material_infos(
 	id bigint(20) unsigned not null AUTO_INCREMENT comment 'id',
 	farm_id bigint(20) unsigned not null comment '猪场信息',
 	farm_name varchar(64) default null comment '猪场名称',
@@ -580,8 +580,8 @@ create table doctor_material_info(
 )ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='物料信息表内容';
 
 -- 原料， 仓库 关联数据信息内容, 原料可以存储不同的仓库信息
-drop table if exists doctor_material_in_ware_house;
-create table doctor_material_in_ware_house(
+drop table if exists doctor_material_in_ware_houses;
+create table doctor_material_in_ware_houses(
 	id bigint(20) UNSIGNED	not null AUTO_INCREMENT comment 'id',
 	farm_id bigint(20) unsigned not null comment '冗余仓库信息',
 	farm_name varchar(64) default null comment '猪场姓名',
@@ -603,8 +603,8 @@ create table doctor_material_in_ware_house(
 )ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='仓库原料信息表';
 
 -- 原料信息表领用， 调用信息记录
-drop table if exists doctor_material_consume_provider;
-create table doctor_material_consume_provider(
+drop table if exists doctor_material_consume_providers;
+create table doctor_material_consume_providers(
 	id bigint(20) unsigned not null AUTO_INCREMENT comment 'id',
 	material_in_house_id bigint(20) unsigned not null comment '对应的仓库原料信息',
 	farm_id bigint(20) unsigned not null comment '冗余仓库信息',
