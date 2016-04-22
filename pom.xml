@@ -10,6 +10,10 @@
         <module>doctor-web-core</module>
         <module>doctor-web</module>
         <module>doctor-admin</module>
+        <module>doctor-event</module>
+        <module>doctor-event-api</module>
+        <module>doctor-basic</module>
+        <module>doctor-basic-api</module>
         <module>doctor-warehouse</module>
         <module>doctor-warehouse-api</module>
         <module>doctor-user-api</module>
@@ -294,6 +298,30 @@
             <dependency>
                 <groupId>io.terminus.doctor</groupId>
                 <artifactId>doctor-web-admin</artifactId>
+                <version>${project.parent.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>io.terminus.doctor</groupId>
+                <artifactId>doctor-event</artifactId>
+                <version>${project.parent.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>io.terminus.doctor</groupId>
+                <artifactId>doctor-event-api</artifactId>
+                <version>${project.parent.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>io.terminus.doctor</groupId>
+                <artifactId>doctor-basic</artifactId>
+                <version>${project.parent.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>io.terminus.doctor</groupId>
+                <artifactId>doctor-basic-api</artifactId>
                 <version>${project.parent.version}</version>
             </dependency>
 
