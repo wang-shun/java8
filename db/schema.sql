@@ -519,13 +519,13 @@ create table doctor_pig_events(
 	farm_name varchar(64) default null comment '猪场名称',
 	pig_id bigint(20) unsigned not null comment '猪Id',
 	pig_code varchar(64) default null comment '猪Code',
-	event_time datetime not null comment '事件时间',
-	event_type int not null comment '事件类型',
-	event_kind int not null comment '事件猪类型， 公猪， 母猪， 仔猪',
-	event_name varchar(128) not null comment '事件名称',
-	event_desc varchar(128) default null comment '事件描述',
-	event_barn_id bigint(20) unsigned comment '事件地点',
-	event_barn_name varchar(64) comment '地点名称',
+	time datetime not null comment '事件时间',
+	type int not null comment '事件类型',
+	kind int not null comment '事件猪类型， 公猪， 母猪， 仔猪',
+	name varchar(128) not null comment '事件名称',
+	desc varchar(128) default null comment '事件描述',
+	barn_id bigint(20) unsigned comment '事件地点',
+	barn_name varchar(64) comment '地点名称',
 	rel_event_id bigint(20) unsigned comment '关联事件Id',
 	extra TEXT default null comment '参考设计文档',
 	mark varchar(128) comment '备注信息',
@@ -536,6 +536,7 @@ create table doctor_pig_events(
 	primary key(id)
 )ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='用户设备信息表';;
 create index doctor_pig_event_pig_id on doctor_pig_event(pig_id);
+CREATE index doctor_pig_event_rel_event_id on doctor_pig_event(rel_event_id);
 
 -- 仓库表
 drop table if exists doctor_ware_houses;
