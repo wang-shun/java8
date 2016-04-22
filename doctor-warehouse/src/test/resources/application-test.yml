@@ -1,0 +1,7 @@
+datasource:
+  driver-class-name: org.h2.Driver
+  url: jdbc:h2:mem:test;MODE=MySQL
+
+mybatis:
+  mapperLocations:  classpath*:mapper/*Mapper.xml
+  typeAliasesPackage: io.terminus.parana.(user|file|article|user.address).model,io.terminus.doctor.user.model
