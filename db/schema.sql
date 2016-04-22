@@ -405,8 +405,6 @@ CREATE INDEX idx_doctor_group_cards_org_id ON doctor_group_cards(org_id);
 CREATE INDEX idx_doctor_group_cards_farm_id ON doctor_group_cards(farm_id);
 CREATE INDEX idx_doctor_group_cards_init_barn_id ON doctor_group_cards(init_barn_id);
 CREATE INDEX idx_doctor_group_cards_current_barn_id ON doctor_group_cards(current_barn_id);
-CREATE INDEX idx_doctor_group_cards_open_at ON doctor_group_cards(open_at);
-CREATE INDEX idx_doctor_group_cards_close_at ON doctor_group_cards(close_at);
 
 -- 猪群卡片跟踪表
 CREATE TABLE `doctor_group_card_tracks` (
@@ -457,7 +455,6 @@ CREATE TABLE `doctor_group_events` (
 CREATE INDEX idx_doctor_doctor_group_events_farm_id ON doctor_group_events(farm_id);
 CREATE INDEX idx_doctor_doctor_group_events_group_card_id ON doctor_group_events(group_card_id);
 CREATE INDEX idx_doctor_doctor_group_events_barn_id ON doctor_group_events(barn_id);
-CREATE INDEX idx_doctor_doctor_group_events_created_at ON doctor_group_events(created_at);
 
 -- pig card 猪信息表
 drop table if exists doctor_pig_card;
