@@ -10,6 +10,8 @@
         <module>doctor-web-core</module>
         <module>doctor-web</module>
         <module>doctor-admin</module>
+        <module>doctor-warehouse</module>
+        <module>doctor-warehouse-api</module>
         <module>doctor-user-api</module>
         <module>doctor-user</module>
         <module>doctor-msg-api</module>
@@ -294,6 +296,19 @@
                 <artifactId>doctor-web-admin</artifactId>
                 <version>${project.parent.version}</version>
             </dependency>
+
+            <dependency>
+                <groupId>io.terminus.doctor</groupId>
+                <artifactId>doctor-warehouse-api</artifactId>
+                <version>${project.parent.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>io.terminus.doctor</groupId>
+                <artifactId>doctor-warehouse</artifactId>
+                <version>${project.parent.version}</version>
+            </dependency>
+
             <dependency>
                 <groupId>io.terminus.doctor</groupId>
                 <artifactId>doctor-user-api</artifactId>

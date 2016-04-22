@@ -7,4 +7,7 @@ package io.terminus.doctor.warehouse;
  * Descirbe:
  */
 public class NoUseClass {
+    public static void main(String[] args) {
+        System.out.println("no use class condition");
+    }
 }
