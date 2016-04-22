@@ -466,7 +466,7 @@ create table doctor_pig_cards(
 	farm_name varchar(128) default null comment '猪场名称',
 	pig_out_id varchar(128) not null comment '关联猪外部Id',
 	pig_code varchar(64) default null comment '猪编号',
-	pit_type SMALLINT not null comment '猪类型(公猪，母猪， 仔猪)',
+	pig_type SMALLINT not null comment '猪类型(公猪，母猪， 仔猪)',
 	pig_father_id bigint(20) UNSIGNED default null comment '猪父亲Id',
 	pig_mother_id bigint(20) UNSIGNED default null comment '母猪Id',
 	source varchar(64) default null comment '母猪来源',
