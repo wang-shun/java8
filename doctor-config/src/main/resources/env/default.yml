@@ -18,3 +18,12 @@ dubbo:
   timeout: 10000
   threads: 100
   heartBeats: 10000
+
+logging:
+  file: /var/logs/doctor/config.log
+  level.*: INFO
+
+# zookeeper
+zookeeper:
+  host: 127.0.0.1
+  port: 2181
