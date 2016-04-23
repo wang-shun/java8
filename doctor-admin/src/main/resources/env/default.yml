@@ -23,7 +23,7 @@ pampas:
 
 session:
   cookie-context-path: /
-  cookie-domain: doctor.com
+  cookie-domain: xrnm.com
   cookie-max-age: 1800
   cookie-name: msid
   source: redis
