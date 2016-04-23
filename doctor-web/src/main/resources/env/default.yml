@@ -40,7 +40,7 @@ session:
 
 dubbo:
   name: doctor-web
-  registry: zookeeper://127.0.0.1:2181
+  registry: zookeeper://101.201.44.35:2181
   port: -1
   timeout: 10000
   threads: 100
@@ -49,7 +49,7 @@ dubbo:
 
 # zookeeper
 zookeeper:
-  host: 127.0.0.1
+  host: 101.201.44.35
   port: 2181
 
 logging:
@@ -61,10 +61,10 @@ image:
     url: http://terminus.oss-cn-hangzhou.aliyuncs.com
 
 oss:
-  endpoint: oss-cn-hangzhou.aliyuncs.com
-  appKey: Pm1oHDnzVajPfmXg
-  appSecret: ryWBUlfHjwJC6aUlctqyVJuKnh00ij
-  bucketName: terminus
+  endpoint: oss-cn-beijing.aliyuncs.com
+  appKey: n67jFjUcEjZxPOZf
+  appSecret: ZOPL1A33iQB52g60Dgvs3xT2FJqeaf
+  bucketName: pigmall
 
 parana:
   config:

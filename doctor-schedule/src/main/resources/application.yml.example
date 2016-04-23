@@ -4,7 +4,7 @@ server:
 
 dubbo:
   name: doctor-schedule
-  registry: zookeeper://101.201.44.35:2181
+  registry: zookeeper://127.0.0.1:2181
   port: -1
   timeout: 10000
   threads: 100
@@ -13,11 +13,11 @@ dubbo:
 
 # zookeeper
 zookeeper:
-  host: 101.201.44.35
+  host: 127.0.0.1
   port: 2181
 
 logging:
-  file: /var/log/doctor/schedule.log
+  file: ${user.home}/logs/doctor/schedule.log
   level.*: INFO
 
 parana:

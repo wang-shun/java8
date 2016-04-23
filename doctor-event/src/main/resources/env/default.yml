@@ -6,22 +6,31 @@ mybatis:
 # Datasource
 datasource:
   driver-class-name: com.mysql.jdbc.Driver
-  url: jdbc:mysql://127.0.0.1:3306/pig_doctor?useUnicode=true&characterEncoding=UTF8&autoReconnect=true
+  url: jdbc:mysql://101.201.44.35:3306/pig_doctor?useUnicode=true&characterEncoding=UTF8&autoReconnect=true
   username: root
   password: anywhere
 
 # Dubbo
 dubbo:
   name: doctor-event
-  registry: zookeeper://127.0.0.1:2181
+  registry: zookeeper://101.201.44.35:2181
   port: -1
   timeout: 10000
   threads: 100
   heartBeats: 10000
 
+logging:
+  file: /var/log/doctor/event.log
+  level.*: INFO
+
+# zookeeper
+zookeeper:
+  host: 101.201.44.35
+  port: 2181
+
 # Redis
 redis:
-  host: 127.0.0.1
+  host: 101.201.44.35
   port: 6379
   max-total: 10
   max-idle: 2
