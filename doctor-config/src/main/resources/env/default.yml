@@ -20,7 +20,7 @@ dubbo:
   heartBeats: 10000
 
 logging:
-  file: /var/logs/doctor/config.log
+  file: /var/log/doctor/config.log
   level.*: INFO
 
 # zookeeper
