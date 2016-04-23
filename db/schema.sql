@@ -526,7 +526,7 @@ create table doctor_pig_events(
 	type int not null comment '事件类型',
 	kind int not null comment '事件猪类型， 公猪， 母猪， 仔猪',
 	name varchar(128) not null comment '事件名称',
-	desc varchar(128) default null comment '事件描述',
+	desc_ varchar(128) default null comment '事件描述',
 	barn_id bigint(20) unsigned comment '事件地点',
 	barn_name varchar(64) comment '地点名称',
 	rel_event_id bigint(20) unsigned comment '关联事件Id',
@@ -556,7 +556,7 @@ create table doctor_ware_houses(
 	is_default SMALLINT not null comment '默认仓库信息',
 	primary key (id)
 )ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='仓库信息数据表';
-CREATE doctor_ware_houses_id on doctor_ware_houses(id);
+CREATE index doctor_ware_houses_id on doctor_ware_houses(farm_id);
 
 
 -- 物料信息数据表内容（当前包含 疫苗， 药品，原料，饲料，消耗品）等

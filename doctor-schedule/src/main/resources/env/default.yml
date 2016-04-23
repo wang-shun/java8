@@ -17,7 +17,7 @@ zookeeper:
   port: 2181
 
 logging:
-  file: /var/log/doctor/web-schedule.log
+  file: /var/log/doctor/schedule.log
   level.*: INFO
 
 parana:

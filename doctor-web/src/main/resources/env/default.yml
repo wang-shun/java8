@@ -3,7 +3,7 @@ server:
   port: 8081
 
 pampas:
-  rootPath: ${user.home}/assets
+  rootPath: /home/admin/assets
   apps:
     - key: MOBILE
       assetsHome: pidgey
