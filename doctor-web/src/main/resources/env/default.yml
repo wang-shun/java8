@@ -17,7 +17,7 @@ pampas:
       - doctorLoginInterceptor
       - doctorAuthInterceptor
   redis:
-    host: 127.0.0.1
+    host: 101.201.44.35
     port: 6379
   design:
     enable: true
@@ -29,7 +29,7 @@ session:
   cookie-name: msid
   source: redis
   serialize-type: json
-  redis-host: 127.0.0.1
+  redis-host: 101.201.44.35
   redis-port: 6379
   redis-index: 1
   redis-cluster: false

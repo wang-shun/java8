@@ -5,23 +5,12 @@ server:
 pampas:
   rootPath: ${user.home}/assets/pidgeotto
   devMode: true
-  redis:
-    host: 127.0.0.1
-    port: 6379
 
 session:
   cookie-domain: doctor.com
-  redis-host: 127.0.0.1
-  redis-port: 6379
 
 dubbo:
   name: doctor-admin
-  registry: zookeeper://127.0.0.1:2181
-
-# zookeeper
-zookeeper:
-  host: 127.0.0.1
-  port: 2181
 
 logging:
   file: ${user.home}/logs/doctor/admin.log
@@ -29,10 +18,10 @@ logging:
 
 image:
   base:
-    url: http://terminus.oss-cn-hangzhou.aliyuncs.com
+    url: http://img.xrnm.com
 
 oss:
-  endpoint: oss-cn-hangzhou.aliyuncs.com
-  appKey: Pm1oHDnzVajPfmXg
-  appSecret: ryWBUlfHjwJC6aUlctqyVJuKnh00ij
-  bucketName: terminus
+  endpoint: oss-cn-beijing.aliyuncs.com
+  appKey: n67jFjUcEjZxPOZf
+  appSecret: ZOPL1A33iQB52g60Dgvs3xT2FJqeaf
+  bucketName: pigmall
