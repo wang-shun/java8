@@ -845,3 +845,27 @@ CREATE TABLE `doctor_res_ctrl_roles` (
 ) ENGINE=Myisam DEFAULT CHARSET=utf8 COMMENT='猪场角色权限表';
 CREATE INDEX idx_doctor_res_ctrl_roles_farm_id ON doctor_res_ctrl_roles(farm_id);
 CREATE INDEX idx_doctor_res_ctrl_roles_owner_id ON doctor_res_ctrl_roles(owner_id);
+
+-- 菜单界面
+CREATE TABLE `doctor_menus` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `pid` int(11) DEFAULT NULL COMMENT '父级id',
+  `name` varchar(30) DEFAULT NULL COMMENT '名称',
+  `level` tinyint(1) DEFAULT NULL COMMENT '级别',
+  `url` varchar(255) DEFAULT NULL COMMENT '访问路径',
+  `has_icon` tinyint(1) DEFAULT NULL COMMENT '是否含有logo',
+  `icon` varchar(255) DEFAULT NULL COMMENT 'logo路径',
+  `icon_class` varchar(255) DEFAULT NULL COMMENT 'logoClass 的名称',
+  `type` tinyint(1) DEFAULT NULL COMMENT '类型 1:普通路径页面 2:自定义图表 3:虚拟节点 4:全局res白名单节点',
+  `order_no` int(32) DEFAULT NULL COMMENT '排序号',
+  `need_hiden` tinyint(1) DEFAULT '0' COMMENT '是否需要隐藏',
+  `need_mobile_page` tinyint(1) DEFAULT '0' COMMENT '是否需要手机端页面',
+  `res_virtual` tinyint(1) DEFAULT NULL COMMENT '是否是虚拟节点',
+  `res_key` varchar(30) DEFAULT NULL COMMENT '权限key名称',
+  `res_name` varchar(30) DEFAULT NULL COMMENT '权限名称',
+  `res_path_url` varchar(255) DEFAULT NULL COMMENT '访问路径',
+  `res_method` tinyint(1) DEFAULT NULL COMMENT '访问方法，1:GET 2:POST',
+  `created_at` datetime DEFAULT NULL COMMENT '创建时间',
+  `updated_at` datetime DEFAULT NULL COMMENT '更新时间',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=523 DEFAULT CHARSET=utf8 COMMENT='菜单界面';
