@@ -430,7 +430,7 @@ CREATE INDEX idx_doctor_groups_init_barn_id ON doctor_groups(init_barn_id);
 CREATE INDEX idx_doctor_groups_current_barn_id ON doctor_groups(current_barn_id);
 
 -- 猪群卡片跟踪
-DROP TABLE IF EXISTS `doctor_group_tracks`表;
+DROP TABLE IF EXISTS `doctor_group_tracks`;
 CREATE TABLE `doctor_group_tracks` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '自增主键',
   `group_id` bigint(20) DEFAULT NULL COMMENT '猪群卡片id',
@@ -597,8 +597,8 @@ close_at   Date 关闭日期
 */
 
 -- 猪
+DROP TABLE IF EXISTS `doctor_pigs`;
 CREATE TABLE `doctor_pigs` (
-	DROP TABLE IF EXISTS `doctor_pigs`;
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT 'ID',
   `org_id` bigint(20) unsigned DEFAULT NULL COMMENT '公司Id',
   `org_name` varchar(64) DEFAULT NULL COMMENT '公司名称',
