@@ -430,7 +430,7 @@ CREATE INDEX idx_doctor_groups_init_barn_id ON doctor_groups(init_barn_id);
 CREATE INDEX idx_doctor_groups_current_barn_id ON doctor_groups(current_barn_id);
 
 -- 猪群卡片跟踪
-DROP TABLE IF EXISTS `doctor_group_tracks`表;
+DROP TABLE IF EXISTS `doctor_group_tracks`;
 CREATE TABLE `doctor_group_tracks` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '自增主键',
   `group_id` bigint(20) DEFAULT NULL COMMENT '猪群卡片id',
@@ -473,7 +473,7 @@ CREATE TABLE `doctor_group_events` (
   `barn_id` bigint(20) DEFAULT NULL COMMENT '事件发生猪舍id',
   `barn_name` varchar(64) DEFAULT NULL COMMENT '事件发生猪舍name',
   `pig_type` smallint(6) DEFAULT NULL COMMENT '猪类枚举 9种',
-  `quantity` int(11) DEFAULT 0 COMMENT '事件猪只数',:
+  `quantity` int(11) DEFAULT 0 COMMENT '事件猪只数',
   `weight` double DEFAULT NULL COMMENT '总活体重(公斤)',
   `avg_weight` double DEFAULT NULL COMMENT '平均体重(公斤)',
   `avg_day_age` double DEFAULT NULL COMMENT '平均日龄',
