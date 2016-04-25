@@ -298,7 +298,7 @@ DROP TABLE IF EXISTS `doctor_change_types`;
 CREATE TABLE `doctor_change_types` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '自增主键',
   `name` varchar(32) DEFAULT NULL COMMENT '变动类型名称',
-  `is_count_out` smallint(6) DEFAULT NULL COMMENT '是否计入出栏猪',
+  `is_count_out` smallint(6) DEFAULT NULL COMMENT '是否计入出栏猪 1:计入, -1:不计入',
   `farm_id` bigint(20) DEFAULT NULL COMMENT '猪场id',
   `farm_name` varchar(64) DEFAULT NULL COMMENT '猪场名称',
   `out_id`  varchar(128) DEFAULT NULL COMMENT  '外部id',
