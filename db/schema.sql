@@ -298,7 +298,7 @@ DROP TABLE IF EXISTS `doctor_change_types`;
 CREATE TABLE `doctor_change_types` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '自增主键',
   `name` varchar(32) DEFAULT NULL COMMENT '变动类型名称',
-  `is_count_out` smallint(6) DEFAULT NULL COMMENT '是否计入出栏猪',
+  `is_count_out` smallint(6) DEFAULT NULL COMMENT '是否计入出栏猪 1:计入, -1:不计入',
   `farm_id` bigint(20) DEFAULT NULL COMMENT '猪场id',
   `farm_name` varchar(64) DEFAULT NULL COMMENT '猪场名称',
   `out_id`  varchar(128) DEFAULT NULL COMMENT  '外部id',
@@ -351,7 +351,7 @@ CREATE TABLE `doctor_customers` (
   `updated_at` datetime DEFAULT NULL COMMENT '修改时间',
   PRIMARY KEY (`id`)
 ) ENGINE=Myisam DEFAULT CHARSET=utf8 COMMENT='变动类型表';
-CREATE INDEX idx_doctor_diseases_farm_id ON doctor_diseases(farm_id);
+CREATE INDEX idx_doctor_customers_farm_id ON doctor_customers(farm_id);
 
 -- 品种表
 DROP TABLE IF EXISTS `doctor_breeds`;
@@ -430,7 +430,7 @@ CREATE INDEX idx_doctor_groups_init_barn_id ON doctor_groups(init_barn_id);
 CREATE INDEX idx_doctor_groups_current_barn_id ON doctor_groups(current_barn_id);
 
 -- 猪群卡片跟踪
-DROP TABLE IF EXISTS `doctor_group_tracks`表;
+DROP TABLE IF EXISTS `doctor_group_tracks`;
 CREATE TABLE `doctor_group_tracks` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '自增主键',
   `group_id` bigint(20) DEFAULT NULL COMMENT '猪群卡片id',
@@ -473,7 +473,7 @@ CREATE TABLE `doctor_group_events` (
   `barn_id` bigint(20) DEFAULT NULL COMMENT '事件发生猪舍id',
   `barn_name` varchar(64) DEFAULT NULL COMMENT '事件发生猪舍name',
   `pig_type` smallint(6) DEFAULT NULL COMMENT '猪类枚举 9种',
-  `quantity` int(11) DEFAULT 0 COMMENT '事件猪只数',:
+  `quantity` int(11) DEFAULT 0 COMMENT '事件猪只数',
   `weight` double DEFAULT NULL COMMENT '总活体重(公斤)',
   `avg_weight` double DEFAULT NULL COMMENT '平均体重(公斤)',
   `avg_day_age` double DEFAULT NULL COMMENT '平均日龄',
@@ -597,8 +597,8 @@ close_at   Date 关闭日期
 */
 
 -- 猪
+DROP TABLE IF EXISTS `doctor_pigs`;
 CREATE TABLE `doctor_pigs` (
-	DROP TABLE IF EXISTS `doctor_pigs`;
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT 'ID',
   `org_id` bigint(20) unsigned DEFAULT NULL COMMENT '公司Id',
   `org_name` varchar(64) DEFAULT NULL COMMENT '公司名称',
@@ -797,3 +797,75 @@ CREATE TABLE `doctor_material_consume_providers` (
 CREATE index doctor_material_consume_providers_farm_id on doctor_material_consume_providers(farm_id);
 create index doctor_material_consume_providers_ware_house_id on doctor_material_consume_providers(ware_house_id);
 create index doctor_material_consume_providers_material_id on doctor_material_consume_providers(material_id);
+
+-- 2016-04-25 角色权限相关
+-- 人员表
+DROP TABLE IF EXISTS `doctor_staffs`;
+CREATE TABLE `doctor_staffs` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '自增主键',
+  `org_id` bigint(20) DEFAULT NULL COMMENT '公司id',
+  `org_name` varchar(64) DEFAULT NULL COMMENT '公司名称',
+  `farm_id` bigint(20) DEFAULT NULL COMMENT '猪场id',
+  `farm_name` varchar(64) DEFAULT NULL COMMENT '猪场名称',
+  `user_id` bigint(20) DEFAULT NULL COMMENT '用户id',
+  `role_id` bigint(20) DEFAULT NULL COMMENT '角色id',
+  `role_name` varchar(64) DEFAULT NULL COMMENT '角色名称(冗余)',
+  `status` smallint(6) DEFAULT NULL COMMENT '状态 1:在职，-1:不在职',
+  `sex` smallint(6) DEFAULT NULL COMMENT '性别',
+  `out_id`  varchar(128) DEFAULT NULL COMMENT  '外部id',
+  `extra` text COMMENT '附加字段',
+  `creator_id` bigint(20) DEFAULT NULL COMMENT  '创建人id',
+  `creator_name` varchar(64) DEFAULT NULL COMMENT '创建人name',
+  `updator_id` bigint(20) DEFAULT NULL COMMENT  '更新人id',
+  `updator_name` varchar(64) DEFAULT NULL COMMENT '更新人name',
+  `created_at` datetime DEFAULT NULL COMMENT '创建时间',
+  `updated_at` datetime DEFAULT NULL COMMENT '修改时间',
+  PRIMARY KEY (`id`)
+) ENGINE=Myisam DEFAULT CHARSET=utf8 COMMENT='猪场职员表';
+CREATE UNIQUE INDEX idx_doctor_staffs_user_id ON doctor_staffs(user_id);
+CREATE INDEX idx_doctor_staffs_farm_id ON doctor_staffs(farm_id);
+CREATE INDEX idx_doctor_staffs_role_id ON doctor_staffs(role_id);
+
+-- 猪场角色权限表
+DROP TABLE IF EXISTS `doctor_res_ctrl_roles`;
+CREATE TABLE `doctor_res_ctrl_roles` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '自增主键',
+  `name` varchar(64) DEFAULT NULL COMMENT '角色名称',
+  `owner_id` bigint(20) DEFAULT NULL COMMENT  '角色拥有者id',
+  `farm_id` bigint(20) DEFAULT NULL COMMENT '猪场id',
+  `farm_name` varchar(64) DEFAULT NULL COMMENT '猪场名称',
+  `remark` varchar(128) DEFAULT NULL COMMENT '描述',
+  `allow` text DEFAULT NULL COMMENT '此角色权限',
+  `scope` varchar(20) DEFAULT NULL COMMENT '权限作用域',
+  `active` smallint(6) DEFAULT NULL COMMENT '此角色生效',
+  `extra` text COMMENT '附加字段',
+  `created_at` datetime DEFAULT NULL COMMENT '创建时间',
+  `updated_at` datetime DEFAULT NULL COMMENT '修改时间',
+  PRIMARY KEY (`id`)
+) ENGINE=Myisam DEFAULT CHARSET=utf8 COMMENT='猪场角色权限表';
+CREATE INDEX idx_doctor_res_ctrl_roles_farm_id ON doctor_res_ctrl_roles(farm_id);
+CREATE INDEX idx_doctor_res_ctrl_roles_owner_id ON doctor_res_ctrl_roles(owner_id);
+
+-- 菜单界面
+CREATE TABLE `doctor_menus` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `pid` int(11) DEFAULT NULL COMMENT '父级id',
+  `name` varchar(30) DEFAULT NULL COMMENT '名称',
+  `level` tinyint(1) DEFAULT NULL COMMENT '级别',
+  `url` varchar(255) DEFAULT NULL COMMENT '访问路径',
+  `has_icon` tinyint(1) DEFAULT NULL COMMENT '是否含有logo',
+  `icon` varchar(255) DEFAULT NULL COMMENT 'logo路径',
+  `icon_class` varchar(255) DEFAULT NULL COMMENT 'logoClass 的名称',
+  `type` tinyint(1) DEFAULT NULL COMMENT '类型 1:普通路径页面 2:自定义图表 3:虚拟节点 4:全局res白名单节点',
+  `order_no` int(32) DEFAULT NULL COMMENT '排序号',
+  `need_hiden` tinyint(1) DEFAULT '0' COMMENT '是否需要隐藏',
+  `need_mobile_page` tinyint(1) DEFAULT '0' COMMENT '是否需要手机端页面',
+  `res_virtual` tinyint(1) DEFAULT NULL COMMENT '是否是虚拟节点',
+  `res_key` varchar(30) DEFAULT NULL COMMENT '权限key名称',
+  `res_name` varchar(30) DEFAULT NULL COMMENT '权限名称',
+  `res_path_url` varchar(255) DEFAULT NULL COMMENT '访问路径',
+  `res_method` tinyint(1) DEFAULT NULL COMMENT '访问方法，1:GET 2:POST',
+  `created_at` datetime DEFAULT NULL COMMENT '创建时间',
+  `updated_at` datetime DEFAULT NULL COMMENT '更新时间',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=523 DEFAULT CHARSET=utf8 COMMENT='菜单界面';

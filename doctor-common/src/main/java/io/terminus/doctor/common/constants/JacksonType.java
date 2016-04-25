@@ -20,4 +20,6 @@ public final class JacksonType {
     public static final TypeReference<Map<String, String>> MAP_OF_STRING = new TypeReference<Map<String,String>>(){};
 
     public static final TypeReference<Map<String, Integer>> MAP_OF_INTEGER = new TypeReference<Map<String, Integer>>(){};
+
+    public static final TypeReference<Map<String, Object>> MAP_OF_OBJECT = new TypeReference<Map<String, Object>>() {};
 }
