@@ -597,8 +597,8 @@ close_at   Date 关闭日期
 */
 
 -- 猪
+DROP TABLE IF EXISTS `doctor_pigs`;
 CREATE TABLE `doctor_pigs` (
-	DROP TABLE IF EXISTS `doctor_pigs`;
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT 'ID',
   `org_id` bigint(20) unsigned DEFAULT NULL COMMENT '公司Id',
   `org_name` varchar(64) DEFAULT NULL COMMENT '公司名称',
