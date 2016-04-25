@@ -7,6 +7,8 @@
     <artifactId>doctor</artifactId>
     <version>1.0-SNAPSHOT</version>
     <modules>
+        <module>doctor-workflow</module>
+        <module>doctor-workflow-api</module>
         <module>doctor-web-core</module>
         <module>doctor-web</module>
         <module>doctor-admin</module>
@@ -334,6 +336,18 @@
             <dependency>
                 <groupId>io.terminus.doctor</groupId>
                 <artifactId>doctor-warehouse</artifactId>
+                <version>${project.parent.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>io.terminus.doctor</groupId>
+                <artifactId>doctor-workflow-api</artifactId>
+                <version>${project.parent.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>io.terminus.doctor</groupId>
+                <artifactId>doctor-workflow</artifactId>
                 <version>${project.parent.version}</version>
             </dependency>
 
