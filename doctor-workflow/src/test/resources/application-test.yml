@@ -1,0 +1,9 @@
+datasource:
+  driver-class-name: com.mysql.jdbc.Driver
+  url: jdbc:mysql://127.0.0.1:3306/pig_doctor?useUnicode=true&characterEncoding=UTF8&autoReconnect=true
+  username: root
+  password: anywhere
+
+mybatis:
+  mapperLocations:  classpath*:mapper/*Mapper.xml
+  typeAliasesPackage: io.terminus.doctor.workflow.model
