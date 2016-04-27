@@ -1,6 +1,8 @@
 package io.terminus.doctor.workflow.model;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.experimental.Builder;
 
 import java.io.Serializable;
@@ -13,6 +15,8 @@ import java.util.Date;
  * Date: 16/4/23
  */
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 @Builder
 public class FlowDefinitionNodeEvent implements Serializable{
     private static final long serialVersionUID = -5849629810016607854L;
@@ -56,4 +60,8 @@ public class FlowDefinitionNodeEvent implements Serializable{
      * 创建时间
      */
     private Date createdAt;
+    /**
+     * 更新时间
+     */
+    private Date updatedAt;
 }

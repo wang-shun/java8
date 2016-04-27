@@ -15,7 +15,7 @@ import org.springframework.context.annotation.Configuration;
  */
 @Configuration
 @EnableAutoConfiguration(exclude = DubboAutoConfiguration.class)
-@ComponentScan({"io.terminus.doctor.workflow.service"})
+@ComponentScan({"io.terminus.doctor.workflow.*"})
 @AutoConfigureAfter(MybatisAutoConfiguration.class)
 public class ServiceConfiguration {
 

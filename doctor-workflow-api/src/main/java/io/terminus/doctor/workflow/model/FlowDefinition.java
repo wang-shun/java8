@@ -1,6 +1,8 @@
 package io.terminus.doctor.workflow.model;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.experimental.Builder;
 
 import java.io.Serializable;
@@ -13,6 +15,8 @@ import java.util.Date;
  * Date: 16/4/23
  */
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 @Builder
 public class FlowDefinition implements Serializable {
     private static final long serialVersionUID = 1719062480277024027L;
@@ -87,6 +91,10 @@ public class FlowDefinition implements Serializable {
         }
         public final int value(){
             return value;
+        }
+        @Override
+        public String toString() {
+            return describe;
         }
     }
 }

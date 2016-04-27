@@ -16,7 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringApplicationConfiguration(ServiceConfiguration.class)
 @Transactional
-@Rollback
+@Rollback(false)
 @ActiveProfiles("test")
 public class BaseServiceTest {
 

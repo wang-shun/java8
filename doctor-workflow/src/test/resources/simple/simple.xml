@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" ?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- 流程开始 -->
 <workflow key="simpleFlow" name="简单流程测试">
     <!-- 开始节点 -->
@@ -7,7 +7,7 @@
     </start>
 
     <!-- 任务节点 -->
-    <task name="任务节点1" assignee="" pointx="250" pointy="100">
+    <task name="任务节点1" assignee="terminus" pointx="250" pointy="100">
         <transition name="任务连线" target="结束节点" />
     </task>
 
