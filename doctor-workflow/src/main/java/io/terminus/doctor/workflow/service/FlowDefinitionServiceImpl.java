@@ -36,6 +36,8 @@ public class FlowDefinitionServiceImpl implements FlowDefinitionService {
 
     private DateTimeFormatter DTF = DateTimeFormat.forPattern("yyyy-MM-dd");
 
+    /*********************** 流程 deploy 相关 *****************************************/
+
     @Override
     public void deploy(String sourceName) {
         deploy(sourceName, null, null);
@@ -97,6 +99,22 @@ public class FlowDefinitionServiceImpl implements FlowDefinitionService {
             }
         }
     }
+
+
+    /*********************** 流程 delete 相关 *****************************************/
+
+    @Override
+    public void delete(Long flowDefinitionId) {
+        delete(flowDefinitionId, false);
+    }
+
+    @Override
+    public void delete(Long flowDefinitionId, boolean cascade) {
+        // TODO
+    }
+
+
+    /*********************** 流程 find 相关 *****************************************/
 
     @Override
     public FlowDefinition findLatestDefinitionByKey(String key) {

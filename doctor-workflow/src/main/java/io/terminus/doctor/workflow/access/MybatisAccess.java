@@ -3,11 +3,15 @@ package io.terminus.doctor.workflow.access;
 import io.terminus.doctor.workflow.dao.FlowDefinitionDao;
 import io.terminus.doctor.workflow.dao.FlowDefinitionNodeDao;
 import io.terminus.doctor.workflow.dao.FlowDefinitionNodeEventDao;
+import io.terminus.doctor.workflow.dao.FlowInstanceDao;
 import io.terminus.doctor.workflow.model.FlowDefinition;
 import io.terminus.doctor.workflow.model.FlowDefinitionNode;
 import io.terminus.doctor.workflow.model.FlowDefinitionNodeEvent;
+import io.terminus.doctor.workflow.model.FlowInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
+
+import java.util.List;
 
 /**
  * Desc: 工作流数据库层统一访问入口, MyBatis实现
@@ -27,7 +31,10 @@ public class MybatisAccess implements JdbcAccess {
     @Autowired
     private FlowDefinitionNodeEventDao flowDefinitionNodeEventDao;
 
-    /************************************** 流程定义相关 *****************************************************/
+    @Autowired
+    private FlowInstanceDao flowInstanceDao;
+
+    /******************* 流程定义相关 ********************************************/
     @Override
     public void createFlowDefinition(FlowDefinition flowDefinition) {
         flowDefinitionDao.create(flowDefinition);
@@ -43,16 +50,22 @@ public class MybatisAccess implements JdbcAccess {
         return flowDefinitionDao.findLatestDefinitionByKey(key);
     }
 
-    /************************************** 流程定义 节点 相关 *****************************************************/
+    /******************** 流程定义 节点 相关 *************************************/
     @Override
     public void createFlowDefinitionNode(FlowDefinitionNode flowDefinitionNode) {
         flowDefinitionNodeDao.create(flowDefinitionNode);
     }
 
 
-    /************************************** 流程定义节点 连接事件 相关 *****************************************************/
+    /******************** 流程定义节点 连接事件 相关 *******************************/
     @Override
     public void createFlowDefinitionNodeEvent(FlowDefinitionNodeEvent flowDefinitionNodeEvent) {
         flowDefinitionNodeEventDao.create(flowDefinitionNodeEvent);
+    }
+
+    /******************** 流程实例 相关 *******************************/
+    @Override
+    public List<FlowInstance> findExistFlowInstance(String flowDefinitionKey, Long businessId) {
+        return flowInstanceDao.findExistFlowInstance(flowDefinitionKey, businessId);
     }
 }

@@ -82,7 +82,9 @@
             <if test="name != null"> AND `name` = #{name} </if>
             <if test="status != null"> AND `status` = #{status}</if>
             <if test="operatorId != null"> AND `operator_id` = #{operatorId}</if>
-            <if test="operatorName != null"> AND `operator_name` LIKE CONCAT('%',#{operator_name},'%' </if>
+            <if test="operatorName != null"> AND `operator_name` LIKE CONCAT('%',#{operator_name},'%') </if>
+            <if test="startAt != null">AND  `created_at` >= #{startAt}</if>
+            <if test="endAt != null">AND  `created_at` &lt;= #{endAt}</if>
         </where>
     </sql>
 

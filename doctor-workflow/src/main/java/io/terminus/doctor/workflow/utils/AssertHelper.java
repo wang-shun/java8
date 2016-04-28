@@ -38,6 +38,23 @@ public class AssertHelper {
     }
 
     /**
+     * 校验一个对象是否为null,如果不为空则抛出异常信息
+     * @param t         校验对象
+     * @param message   异常信息
+     * @param args      模板填充数据
+     */
+    public static <T> T notNull(T t, String message, Object ... args) {
+        if(t != null) {
+            throwException(getExceptionMessage(message,
+                    "[Assert Error] => the argument must be null"), args);
+        }
+        return t;
+    }
+    public static <T> T notNull(T t) {
+        return isNull(t, null);
+    }
+
+    /**
      * 校验一个对象是否为 blank 或 null,如果是则抛出异常信息
      * @param object    校验对象
      * @param message   异常信息

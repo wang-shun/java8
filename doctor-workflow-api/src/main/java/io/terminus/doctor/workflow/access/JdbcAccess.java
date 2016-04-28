@@ -3,6 +3,9 @@ package io.terminus.doctor.workflow.access;
 import io.terminus.doctor.workflow.model.FlowDefinition;
 import io.terminus.doctor.workflow.model.FlowDefinitionNode;
 import io.terminus.doctor.workflow.model.FlowDefinitionNodeEvent;
+import io.terminus.doctor.workflow.model.FlowInstance;
+
+import java.util.List;
 
 /**
  * Desc: 工作流数据库层统一访问接口
@@ -15,7 +18,6 @@ public interface JdbcAccess {
     /////////////////////////////////////////////////////////////////////////////////////
     //////// 流程定义相关的方法 ///////////////////////////////////////////////////////////
     /////////////////////////////////////////////////////////////////////////////////////
-
     /**
      * 创建一个流程定义对象
      * @param flowDefinition
@@ -37,7 +39,6 @@ public interface JdbcAccess {
     public FlowDefinition findLatestDefinitionByKey(String key);
 
 
-
     /////////////////////////////////////////////////////////////////////////////////////
     //////// 流程定义 节点 的方法 //////////////////////////////////////////////////////////
     /////////////////////////////////////////////////////////////////////////////////////
@@ -47,6 +48,7 @@ public interface JdbcAccess {
      * @param flowDefinitionNode
      */
     public void createFlowDefinitionNode(FlowDefinitionNode flowDefinitionNode);
+
 
     /////////////////////////////////////////////////////////////////////////////////////
     //////// 流程定义节点 连接事件 的方法 ///////////////////////////////////////////////////
@@ -58,4 +60,15 @@ public interface JdbcAccess {
      */
     public void createFlowDefinitionNodeEvent(FlowDefinitionNodeEvent flowDefinitionNodeEvent);
 
+
+    /////////////////////////////////////////////////////////////////////////////////////
+    //////// 流程实例 的方法 //////////////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////////////////////////////////////
+    /**
+     * 根据流程定义key和业务id查询流程实例
+     * @param flowDefinitionKey 流程定义key
+     * @param businessId        业务id
+     * @return
+     */
+    public List<FlowInstance> findExistFlowInstance(String flowDefinitionKey, Long businessId);
 }

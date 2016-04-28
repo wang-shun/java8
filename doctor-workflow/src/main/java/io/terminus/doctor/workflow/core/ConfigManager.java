@@ -67,6 +67,7 @@ public class ConfigManager implements Configuration {
         initFlowDefinition();
         // 初始化开始节点
         initStartNode();
+        // 初始化简单任务节点
         initTaskNodes();
         // 初始化结束节点
         initEndNode();

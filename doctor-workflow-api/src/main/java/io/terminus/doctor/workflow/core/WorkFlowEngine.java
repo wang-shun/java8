@@ -1,8 +1,12 @@
 package io.terminus.doctor.workflow.core;
 
 import io.terminus.doctor.workflow.access.JdbcAccess;
+import io.terminus.doctor.workflow.event.Interceptor;
+import io.terminus.doctor.workflow.service.FlowDefinitionService;
+import io.terminus.doctor.workflow.service.FlowProcessService;
 
 import java.io.InputStream;
+import java.util.List;
 
 /**
  * Desc: 流程引擎接口
@@ -26,4 +30,27 @@ public interface WorkFlowEngine {
      */
     public Configuration buildConfiguration(InputStream inputStream) throws Exception;
 
+    /**
+     * 获取全局上下文对象
+     * @return
+     */
+    public Context buildContext();
+
+    /**
+     * 获取所有拦截器对象
+     * @return
+     */
+    public List<Interceptor> buildInterceptors();
+
+    /**
+     * 构造流程定义服务类
+     * @return
+     */
+    public FlowDefinitionService buildFlowDefinitionService();
+
+    /**
+     * 构造流程节点流转服务类
+     * @return
+     */
+    public FlowProcessService buildFlowProcessService();
 }
