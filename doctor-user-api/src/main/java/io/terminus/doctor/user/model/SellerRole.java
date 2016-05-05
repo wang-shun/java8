@@ -6,7 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Strings;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.parana.common.constants.JacksonType;
-import io.terminus.parana.auth.CompiledTree;
+import io.terminus.parana.user.auth.CompiledTree;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.EqualsAndHashCode;

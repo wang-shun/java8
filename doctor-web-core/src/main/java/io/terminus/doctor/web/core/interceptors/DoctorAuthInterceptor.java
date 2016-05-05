@@ -8,7 +8,7 @@ import io.terminus.common.model.BaseUser;
 import io.terminus.doctor.web.core.auth.DoctorAuthChecker;
 import io.terminus.pampas.common.UserUtil;
 import io.terminus.pampas.engine.ThreadVars;
-import io.terminus.parana.auth.Req;
+import io.terminus.parana.user.auth.Req;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
