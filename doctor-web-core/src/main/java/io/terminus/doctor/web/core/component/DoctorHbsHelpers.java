@@ -10,7 +10,6 @@ import com.github.jknack.handlebars.Options;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import io.terminus.common.model.BaseUser;
-import io.terminus.doctor.web.core.auth.DoctorAuthChecker;
 import io.terminus.pampas.common.UserUtil;
 import io.terminus.pampas.engine.ThreadVars;
 import io.terminus.pampas.engine.handlebars.HandlebarsEngine;
@@ -36,7 +35,7 @@ public class DoctorHbsHelpers {
     private final HandlebarsEngine handlebarsEngine;
 
     @Autowired
-    public DoctorHbsHelpers(final HandlebarsEngine handlebarsEngine, final DoctorAuthChecker doctorAuthChecker) {
+    public DoctorHbsHelpers(final HandlebarsEngine handlebarsEngine) {
         this.handlebarsEngine = handlebarsEngine;
 
         this.handlebarsEngine.registerHelper("cross", new Helper<Collection>() {
@@ -108,28 +107,6 @@ public class DoctorHbsHelpers {
                 } else {
                     return options.inverse();
                 }
-            }
-        });
-
-        this.handlebarsEngine.registerHelper("withPerm", new Helper<String>() {
-            @Override
-            public CharSequence apply(String key, Options options) throws IOException {
-                BaseUser user = UserUtil.getCurrentUser();
-                if (user == null) {
-                    return doctorAuthChecker.forNotLogin_key(key) ? options.fn() : options.inverse();
-                }
-                return doctorAuthChecker.forLogin_key(key, user) ? options.fn() : options.inverse();
-            }
-        });
-
-        this.handlebarsEngine.registerHelper("auth", new Helper<String>() {
-            @Override
-            public CharSequence apply(String key, Options options) throws IOException {
-                BaseUser user = UserUtil.getCurrentUser();
-                if (user == null) {
-                    return doctorAuthChecker.forNotLogin_key(key) ? options.fn() : options.inverse();
-                }
-                return doctorAuthChecker.forLogin_key(key, user) ? options.fn() : options.inverse();
             }
         });
 

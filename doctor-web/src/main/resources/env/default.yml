@@ -14,8 +14,8 @@ pampas:
       - Login
       - Auth
     customInterceptors:
-      - doctorLoginInterceptor
-      - doctorAuthInterceptor
+      - loginInterceptor
+      - authInterceptor
   redis:
     host: 101.201.44.35
     port: 6379
