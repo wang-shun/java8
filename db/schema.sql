@@ -249,6 +249,7 @@ CREATE TABLE `doctor_orgs` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '自增主键',
   `name` varchar(64) DEFAULT NULL COMMENT '公司名称',
   `status` smallint(6) DEFAULT NULL COMMENT '状态: 0 待审核, 1 审核成功/正常, -1 审核失败, -2 已冻结',
+  `can_open_farm` smallint(6) DEFAULT NULL COMMENT '是否可以开通猪场, 1 可以, -1 不可以(需要充值?)',
   `license` varchar(512) DEFAULT NULL COMMENT '营业执照复印件图片地址',
   `out_id`  varchar(128) DEFAULT NULL COMMENT  '外部id',
   `extra` text COMMENT '附加字段',
