@@ -871,3 +871,20 @@ CREATE TABLE `doctor_menus` (
   `updated_at` datetime DEFAULT NULL COMMENT '更新时间',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=523 DEFAULT CHARSET=utf8 COMMENT='菜单界面';
+
+-- 单点登录其他系统
+CREATE TABLE `doctor_other_system` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `system_code` varchar(32) NOT NULL DEFAULT '' COMMENT '系统编号',
+  `password` varchar(128) NOT NULL DEFAULT '' COMMENT '调用该系统的接口时加密数据的密码',
+  `corp_id` bigint(20) NOT NULL DEFAULT '1' COMMENT '本系统在该目标系统的id',
+  `domain` varchar(512) NOT NULL DEFAULT '' COMMENT '该系统的完整域名,部署测试或生产时务必记得正确填写此字段',
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `idx_other_system_UNIQUE` (`system_code`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='用户可以通过本系统登录其他系统，此表用于维护可从本系统登录的其他系统';
+INSERT INTO `doctor_other_system` (`system_code`, `password`, `corp_id`, `domain`, `created_at`, `updated_at`)
+VALUES
+	('pigmall','pigmall',1,'http://www.pigmall.com',now(),now()),
+	('neverest','neverest',1,'http://www.neverest.com',now(),now());

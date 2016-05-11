@@ -126,6 +126,12 @@
             <version>v2-rev99-1.17.0-rc</version>
         </dependency>
 
+        <dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcprov-jdk15on</artifactId>
+            <version>1.51</version>
+            <type>jar</type>
+        </dependency>
     </dependencies>
 
 
