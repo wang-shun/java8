@@ -110,7 +110,7 @@ public class ConfigManager implements Configuration {
         // 3. 解析start节点下的事件连线transition
         Node transitionNode = XmlHelper.getChildrenSingleNode(startNode, NODE_TRANSITION);
         AssertHelper.isNull(transitionNode, "开始节点下缺少事件连线");
-        AssertHelper.isBlank(XmlHelper.getAttrValue(transitionNode, ATTR_TARGET),"开始节点缺少事件连线");
+        AssertHelper.isBlank(XmlHelper.getAttrValue(transitionNode, ATTR_TARGET),"开始节点事件连线缺少目标节点");
         List<Node> transitionNodes = Lists.newArrayList(transitionNode);
         transitionMap.put(nodeAttrName, transitionNodes);
     }
@@ -155,8 +155,8 @@ public class ConfigManager implements Configuration {
 
             // 3. transition 节点
             Node transitionNode = XmlHelper.getChildrenSingleNode(taskNode, NODE_TRANSITION);
-            AssertHelper.isNull(transitionNode, "开始节点下缺少事件连线");
-            AssertHelper.isBlank(XmlHelper.getAttrValue(transitionNode, ATTR_TARGET),"开始节点缺少事件连线");
+            AssertHelper.isNull(transitionNode, "任务节点下缺少事件连线");
+            AssertHelper.isBlank(XmlHelper.getAttrValue(transitionNode, ATTR_TARGET),"任务节点事件连线缺少目标节点");
             List<Node> transitionNodes = Lists.newArrayList(transitionNode);
             transitionMap.put(nodeAttrName, transitionNodes);
         }

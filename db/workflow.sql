@@ -73,6 +73,7 @@ CREATE TABLE IF NOT EXISTS `workflow_process_instances`(
 	`business_id` BIGINT(20) DEFAULT NULL COMMENT '与流程实例相关联的业务id',
 	`business_data` text COMMENT '流程实例全局业务数据',
 	`status` SMALLINT(6) DEFAULT NULL COMMENT '流程实例的状态', 		-- TODO: 描述
+	`type` SMALLINT(6) DEFAULT NULL COMMENT '流程实例类型, 1-> 主流程, 2-> 子流程',
 	`operator_id` BIGINT(20) DEFAULT NULL COMMENT '操作者id',
 	`operator_name` VARCHAR(32) DEFAULT NULL COMMENT '操作者姓名',
 	`parent_instance_id` BIGINT(20) DEFAULT NULL COMMENT '父流程实例id',

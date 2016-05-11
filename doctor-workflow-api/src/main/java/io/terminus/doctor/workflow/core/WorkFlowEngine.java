@@ -4,6 +4,7 @@ import io.terminus.doctor.workflow.access.JdbcAccess;
 import io.terminus.doctor.workflow.event.Interceptor;
 import io.terminus.doctor.workflow.service.FlowDefinitionService;
 import io.terminus.doctor.workflow.service.FlowProcessService;
+import io.terminus.doctor.workflow.service.FlowQueryService;
 
 import java.io.InputStream;
 import java.util.List;
@@ -43,6 +44,12 @@ public interface WorkFlowEngine {
     public List<Interceptor> buildInterceptors();
 
     /**
+     * 构造公共服务类
+     * @return
+     */
+    public WorkFlowService buildWorkFlowService();
+
+    /**
      * 构造流程定义服务类
      * @return
      */
@@ -53,4 +60,10 @@ public interface WorkFlowEngine {
      * @return
      */
     public FlowProcessService buildFlowProcessService();
+
+    /**
+     * 构造流程查询服务类
+     * @return
+     */
+    public FlowQueryService buildFlowQueryService();
 }

@@ -75,4 +75,45 @@
         WHERE id = #{id}
     </delete>
 
+    <sql id="criteria">
+        <where>
+            <if test="id != null">AND `id` = #{id}</if>
+            <if test="name != null">AND `name` = #{name}</if>
+            <if test="flowDefinitionId != null">AND `flow_definition_id` = #{flowDefinitionId}</if>
+            <if test="sourceNodeId != null">AND `source_node_id` = #{sourceNodeId}</if>
+            <if test="targetNodeId != null">AND `target_node_id` = #{targetNodeId}</if>
+            <if test="startAt != null">AND `created_at` >= #{startAt}</if>
+            <if test="endAt != null">AND `created_at` &lt;= #{endAt}</if>
+        </where>
+    </sql>
+
+    <select id="list" resultMap="FlowDefinitionNodeEventMap">
+        SELECT
+        <include refid="cols_all"/>
+        FROM
+        <include refid="tb"/>
+        <include refid="criteria"/>
+        <if test="orderBy != null"> ORDER BY ${orderBy}</if>
+        <if test="desc != null"> DESC </if>
+    </select>
+
+    <!-- 计数 -->
+    <select id="count" parameterType="map" resultType="long">
+        SELECT COUNT(1)
+        FROM <include refid="tb"/>
+        <include refid="criteria"/>
+    </select>
+
+    <!-- 分页查询 -->
+    <select id="paging" parameterType="map" resultMap="FlowDefinitionNodeEventMap">
+        SELECT
+        <include refid="cols_all"/>
+        FROM
+        <include refid="tb"/>
+        <include refid="criteria"/>
+        <if test="orderBy != null"> ORDER BY ${orderBy}</if>
+        <if test="desc != null"> DESC </if>
+        LIMIT #{offset}, #{limit}
+    </select>
+
 </mapper>

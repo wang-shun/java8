@@ -50,6 +50,10 @@ public class FlowInstance implements Serializable{
      */
     private Integer status;
     /**
+     * 流程实例类型
+     */
+    private Integer type;
+    /**
      * 操作人id
      */
     private Long operatorId;
@@ -93,6 +97,31 @@ public class FlowInstance implements Serializable{
         private final int value;
         private final String describe;
         Status(int value,String describe){
+            this.value = value;
+            this.describe = describe;
+        }
+        public final int value(){
+            return value;
+        }
+        @Override
+        public String toString() {
+            return describe;
+        }
+    }
+
+    public enum Type {
+        /**
+         * 主流程
+         */
+        PARENT(1,"主流程"),
+        /**
+         * 子流程
+         */
+        CHILD(2,"子流程");
+
+        private final int value;
+        private final String describe;
+        Type(int value,String describe){
             this.value = value;
             this.describe = describe;
         }

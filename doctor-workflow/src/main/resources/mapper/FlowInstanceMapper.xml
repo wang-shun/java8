@@ -15,6 +15,7 @@
         <result column="business_id" property="businessId"/>
         <result column="business_data" property="businessData"/>
         <result column="status" property="status"/>
+        <result column="type" property="type"/>
         <result column="operator_id" property="operatorId"/>
         <result column="operator_name" property="operatorName"/>
         <result column="parent_instance_id" property="parentInstanceId"/>
@@ -32,10 +33,10 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        `name`,`flow_definition_id`,`flow_definition_key`,`business_id`,`business_data`,`status`,`operator_id`,`operator_name`,`parent_instance_id`,`created_at`,`updated_at`    </sql>
+        `name`,`flow_definition_id`,`flow_definition_key`,`business_id`,`business_data`,`status`,`type`,`operator_id`,`operator_name`,`parent_instance_id`,`created_at`,`updated_at`    </sql>
 
     <sql id="vals">
-        #{name},#{flowDefinitionId},#{flowDefinitionKey},#{businessId},#{businessData},#{status},#{operatorId},#{operatorName},#{parentInstanceId},now(),now()    </sql>
+        #{name},#{flowDefinitionId},#{flowDefinitionKey},#{businessId},#{businessData},#{status},#{type},#{operatorId},#{operatorName},#{parentInstanceId},now(),now()    </sql>
 
     <insert id="create" parameterType="FlowInstance" keyProperty="id" useGeneratedKeys="true">
         INSERT INTO
@@ -65,6 +66,7 @@
             <if test="businessId != null">,`business_id` = #{businessId}</if>
             <if test="businessData != null">,`business_data` = #{businessData}</if>
             <if test="status != null">,`status` = #{status}</if>
+            <if test="type != null">,`type` = #{type}</if>
             <if test="operatorId != null">,`operator_id` = #{operatorId}</if>
             <if test="operatorName != null">,`operator_name` = #{operatorName}</if>
             <if test="parentInstanceId != null">,`parent_instance_id` = #{parentInstanceId}</if>
@@ -82,14 +84,16 @@
 
     <sql id="criteria">
         <where>
-            <if test="name != null">AND `name` = #{name}</if>
+            <if test="id != null">AND `id` = #{id}</if>
+            <if test="name != null">AND `name` LIKE CONCAT('%',#{name},'%')</if>
             <if test="flowDefinitionId != null">AND `flow_definition_id` = #{flowDefinitionId}</if>
             <if test="flowDefinitionKey != null">AND `flow_definition_key` = #{flowDefinitionKey}</if>
             <if test="businessId != null">AND `business_id` = #{businessId}</if>
             <if test="businessData != null">AND `business_data` = #{businessData}</if>
             <if test="status != null">AND `status` = #{status}</if>
+            <if test="type != null">AND `type` = #{type}</if>
             <if test="operatorId != null">AND `operator_id` = #{operatorId}</if>
-            <if test="operatorName != null">AND `operator_name` = #{operatorName}</if>
+            <if test="operatorName != null">AND `operator_name` LIKE CONCAT('%',#{operatorName},'%')</if>
             <if test="parentInstanceId != null">AND `parent_instance_id` = #{parentInstanceId}</if>
             <if test="startAt != null">AND `created_at` >= #{startAt}</if>
             <if test="endAt != null">AND `created_at` &lt;= #{endAt}</if>
@@ -101,6 +105,27 @@
         FROM
         <include refid="tb"/>
         <include refid="criteria"/>
+        <if test="orderBy != null">ORDER BY ${orderBy}</if>
+        <if test="desc != null">DESC</if>
     </select>
 
+    <!-- 计数 -->
+    <select id="count" parameterType="map" resultType="long">
+        SELECT COUNT(1)
+        FROM
+        <include refid="tb"/>
+        <include refid="criteria"/>
+    </select>
+
+    <!-- 分页查询 -->
+    <select id="paging" parameterType="map" resultMap="FlowInstanceMap">
+        SELECT
+        <include refid="cols_all"/>
+        FROM
+        <include refid="tb"/>
+        <include refid="criteria"/>
+        <if test="orderBy != null">ORDER BY ${orderBy}</if>
+        <if test="desc != null">DESC</if>
+        LIMIT #{offset}, #{limit}
+    </select>
 </mapper>

@@ -32,7 +32,7 @@ public class FlowProcess implements Serializable{
     /**
      * 流程实例id
      */
-    private Long flowDefinitionId;
+    private Long flowInstanceId;
     /**
      * 流转数据
      */
@@ -56,6 +56,35 @@ public class FlowProcess implements Serializable{
 
     // TODO
     public enum Status {
+        /**
+         * 正常
+         */
+        NORMAL(1,"正常"),
+        /**
+         * 挂起
+         */
+        END(2,"正常结束"),
+        /**
+         * 删除
+         */
+        DELETE(-1,"删除"),
+        /**
+         * 挂起
+         */
+        STOPED(-2,"挂起");
 
+        private final int value;
+        private final String describe;
+        Status(int value,String describe){
+            this.value = value;
+            this.describe = describe;
+        }
+        public final int value(){
+            return value;
+        }
+        @Override
+        public String toString() {
+            return describe;
+        }
     }
 }

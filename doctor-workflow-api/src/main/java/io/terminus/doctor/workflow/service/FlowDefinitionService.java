@@ -1,7 +1,5 @@
 package io.terminus.doctor.workflow.service;
 
-import io.terminus.doctor.workflow.model.FlowDefinition;
-
 import java.io.InputStream;
 
 /**
@@ -65,16 +63,5 @@ public interface FlowDefinitionService {
      * @param cascade           是否强制级联删除, 默认false
      */
     public void delete(Long flowDefinitionId, boolean cascade);
-
-
-    ///////////////////////////////////////////////////////////////
-    ///// 流程定义 query 相关方法 ///////////////////////////////////
-    ///////////////////////////////////////////////////////////////
-    /**
-     * 根据流程定义的key值获取当前最新版本的流程定义
-     * @param key
-     * @return
-     */
-    public FlowDefinition findLatestDefinitionByKey(String key);
 
 }

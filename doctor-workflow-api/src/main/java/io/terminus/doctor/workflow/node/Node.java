@@ -1,7 +1,9 @@
 package io.terminus.doctor.workflow.node;
 
+import io.terminus.doctor.workflow.core.Execution;
+
 /**
- * Desc: 流程节点的顶层接口
+ * Desc: 流程节点的顶层接口, 一般继承BaseNode类
  * Mail: chk@terminus.io
  * Created by icemimosa
  * Date: 16/4/26
@@ -31,4 +33,9 @@ public interface Node {
     String ATTR_EXPRESSION = "expression";
     String ATTR_DESCRIBE = "describe";
 
+    /**
+     * 节点执行方法入口
+     * @param execution
+     */
+    public void execute(Execution execution);
 }

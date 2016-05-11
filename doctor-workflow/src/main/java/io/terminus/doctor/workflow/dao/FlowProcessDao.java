@@ -1,19 +1,19 @@
 package io.terminus.doctor.workflow.dao;
 
 import io.terminus.common.mysql.dao.MyBatisDao;
-import io.terminus.doctor.workflow.model.FlowDefinitionNode;
+import io.terminus.doctor.workflow.model.FlowProcess;
 import org.springframework.stereotype.Repository;
 
 import java.util.Map;
 
 /**
- * Desc: 流程定义 节点 DAO层
+ * Desc: 当前活动流程节点 DAO 层
  * Mail: chk@terminus.io
  * Created by icemimosa
- * Date: 16/4/27
+ * Date: 16/4/29
  */
 @Repository
-public class FlowDefinitionNodeDao extends MyBatisDao<FlowDefinitionNode> {
+public class FlowProcessDao extends MyBatisDao<FlowProcess> {
 
     public Long count(Map criteria) {
         return this.sqlSession.selectOne(this.sqlId("count"), criteria);

@@ -72,7 +72,8 @@ public class FlowDefinitionServiceImpl implements FlowDefinitionService {
             flowDefinition.setOperatorName(operatorName);
             flowDefinition.setStatus(FlowDefinition.Status.NORMAL.value());
             // 获取最新版本的流程定义
-            FlowDefinition latestVersionDefinition = findLatestDefinitionByKey(flowDefinition.getKey());
+            FlowDefinition latestVersionDefinition = workFlowEngine.buildFlowQueryService().
+                    getFlowDefinitionQuery().findLatestDefinitionByKey(flowDefinition.getKey());
             if (latestVersionDefinition == null) {
                 flowDefinition.setVersion(0L);
             } else {
@@ -89,7 +90,7 @@ public class FlowDefinitionServiceImpl implements FlowDefinitionService {
             flowDefinitionNodeEvents.forEach(event-> access().createFlowDefinitionNodeEvent(event));
 
         } catch (Exception e) {
-            log.error("部署流程定义失败, cause by: {}", Throwables.getStackTraceAsString(e));
+            log.error("[Work Flow Definition] -> 部署流程定义失败, cause by: {}", Throwables.getStackTraceAsString(e));
             throw new WorkFlowException(e);
         } finally {
             try {
@@ -111,14 +112,6 @@ public class FlowDefinitionServiceImpl implements FlowDefinitionService {
     @Override
     public void delete(Long flowDefinitionId, boolean cascade) {
         // TODO
-    }
-
-
-    /*********************** 流程 find 相关 *****************************************/
-
-    @Override
-    public FlowDefinition findLatestDefinitionByKey(String key) {
-        return access().findLatestDefinitionByKey(key);
     }
 
     private JdbcAccess access() {

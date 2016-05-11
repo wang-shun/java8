@@ -29,7 +29,7 @@ public class FlowProcessTrack implements Serializable{
     /**
      * 流程实例id
      */
-    private Long flowDefinitionId;
+    private Long flowInstanceId;
     /**
      * 流转数据
      */

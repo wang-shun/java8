@@ -1,7 +1,7 @@
 package io.terminus.doctor.workflow.simple;
 
 import io.terminus.doctor.workflow.base.BaseServiceTest;
-import io.terminus.doctor.workflow.service.FlowDefinitionService;
+import io.terminus.doctor.workflow.core.WorkFlowEngine;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -14,10 +14,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 public class Simple extends BaseServiceTest{
 
     @Autowired
-    private FlowDefinitionService flowDefinitionService;
+    private WorkFlowEngine workFlowEngine;
+
 
     @Test
     public void test01(){
-        //flowDefinitionService.deploy("simple/simple.xml");
+        workFlowEngine.buildFlowDefinitionService().deploy("simple/simple.xml");
     }
+
+    @Test
+    public void testStartFlowInstance(){
+        workFlowEngine.buildFlowProcessService().startFlowInstance("simpleFlow",1314L,"businessData","FlowData",2333L,"IceMimosa");
+    }
+
 }

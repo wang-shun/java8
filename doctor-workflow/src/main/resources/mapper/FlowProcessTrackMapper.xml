@@ -10,7 +10,7 @@
     <resultMap id="FlowProcessTrackMap" type="FlowProcessTrack">
         <id column="id" property="id"/>
         <result column="flow_definition_node_id" property="flowDefinitionNodeId"/>
-        <result column="flow_definition_id" property="flowDefinitionId"/>
+        <result column="flow_instance_id" property="flowInstanceId"/>
         <result column="flow_data" property="flowData"/>
         <result column="status" property="status"/>
         <result column="assignee" property="assignee"/>
@@ -30,10 +30,10 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        `flow_definition_node_id`,`flow_definition_id`,`flow_data`,`status`,`assignee`,`operator_id`,`operator_name`,`created_at`,`updated_at`    </sql>
+        `flow_definition_node_id`,`flow_instance_id`,`flow_data`,`status`,`assignee`,`operator_id`,`operator_name`,`created_at`,`updated_at`    </sql>
 
     <sql id="vals">
-        #{flowDefinitionNodeId},#{flowDefinitionId},#{flowData},#{status},#{assignee},#{operatorId},#{operatorName},now(),now()    </sql>
+        #{flowDefinitionNodeId},#{flowInstanceId},#{flowData},#{status},#{assignee},#{operatorId},#{operatorName},now(),now()    </sql>
 
     <insert id="create" parameterType="FlowProcessTrack" keyProperty="id" useGeneratedKeys="true">
         INSERT INTO
@@ -58,7 +58,7 @@
         <set>
             update_at = now()
             <if test="flowDefinitionNodeId != null">,`flow_definition_node_id` = #{flowDefinitionNodeId}</if>
-            <if test="flowDefinitionId != null">,`flow_definition_id` = #{flowDefinitionId}</if>
+            <if test="flowInstanceId != null">,`flow_instance_id` = #{flowInstanceId}</if>
             <if test="flowData != null">,`flow_data` = #{flowData}</if>
             <if test="status != null">,`status` = #{status}</if>
             <if test="assignee != null">,`assignee` = #{assignee}</if>

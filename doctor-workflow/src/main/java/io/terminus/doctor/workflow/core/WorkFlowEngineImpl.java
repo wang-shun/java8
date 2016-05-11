@@ -4,6 +4,7 @@ import io.terminus.doctor.workflow.access.JdbcAccess;
 import io.terminus.doctor.workflow.event.Interceptor;
 import io.terminus.doctor.workflow.service.FlowDefinitionService;
 import io.terminus.doctor.workflow.service.FlowProcessService;
+import io.terminus.doctor.workflow.service.FlowQueryService;
 import io.terminus.doctor.workflow.utils.AssertHelper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,10 +30,16 @@ public class WorkFlowEngineImpl implements WorkFlowEngine {
     private JdbcAccess jdbcAccess;
 
     @Autowired
+    private WorkFlowService workFlowService;
+
+    @Autowired
     private FlowDefinitionService flowDefinitionService;
 
     @Autowired
     private FlowProcessService flowProcessService;
+
+    @Autowired
+    private FlowQueryService flowQueryService;
 
     @Override
     public JdbcAccess buildJdbcAccess() {
@@ -63,6 +70,15 @@ public class WorkFlowEngineImpl implements WorkFlowEngine {
     }
 
     @Override
+    public WorkFlowService buildWorkFlowService() {
+        if (workFlowService == null) {
+            log.error("[engine build] -> WorkFlowService build error");
+            AssertHelper.throwException("WorkFlowService 获取失败");
+        }
+        return workFlowService;
+    }
+
+    @Override
     public FlowDefinitionService buildFlowDefinitionService() {
         if (flowDefinitionService == null) {
             log.error("[engine build] -> FlowDefinitionService build error");
@@ -78,6 +94,15 @@ public class WorkFlowEngineImpl implements WorkFlowEngine {
             AssertHelper.throwException("FlowProcessService 获取失败");
         }
         return flowProcessService;
+    }
+
+    @Override
+    public FlowQueryService buildFlowQueryService() {
+        if (flowQueryService == null) {
+            log.error("[engine build] -> FlowQueryService build error");
+            AssertHelper.throwException("FlowQueryService 获取失败");
+        }
+        return flowQueryService;
     }
 
 }

@@ -78,6 +78,7 @@
 
     <sql id="criteria">
         <where>
+            <if test="id != null"> AND `id` = #{id} </if>
             <if test="key != null"> AND `key` = #{key} </if>
             <if test="name != null"> AND `name` = #{name} </if>
             <if test="status != null"> AND `status` = #{status}</if>
@@ -94,8 +95,27 @@
         FROM
         <include refid="tb"/>
         <include refid="criteria"/>
-        <if test="order != null"> ORDER BY ${order}</if>
+        <if test="orderBy != null"> ORDER BY ${orderBy}</if>
         <if test="desc != null"> DESC </if>
+    </select>
+
+    <!-- 计数 -->
+    <select id="count" parameterType="map" resultType="long">
+        SELECT COUNT(1)
+        FROM <include refid="tb"/>
+        <include refid="criteria"/>
+    </select>
+
+    <!-- 分页查询 -->
+    <select id="paging" parameterType="map" resultMap="FlowDefinitionMap">
+        SELECT
+        <include refid="cols_all"/>
+        FROM
+        <include refid="tb"/>
+        <include refid="criteria"/>
+        <if test="orderBy != null"> ORDER BY ${orderBy}</if>
+        <if test="desc != null"> DESC </if>
+        LIMIT #{offset}, #{limit}
     </select>
 
 </mapper>

@@ -1,7 +1,5 @@
 package io.terminus.doctor.workflow.service;
 
-import io.terminus.doctor.workflow.model.FlowInstance;
-
 /**
  * Desc: 流程流转相关的接口
  *      1. 启动流程实例
@@ -58,15 +56,4 @@ public interface FlowProcessService {
      */
     public void startFlowInstance(String flowDefinitionKey, Long businessId, String businessData, String flowData, Long operatorId, String operatorName);
 
-
-    ///////////////////////////////////////////////////////////////
-    ///// 流程实例 查询 相关方法 /////////////////////////////////////
-    ///////////////////////////////////////////////////////////////
-    /**
-     * 查询是否已经存在的流程实例, 一个业务id只能启动一种key类型的流程定义
-     * @param flowDefinitionKey 流程实例的key
-     * @param businessId        业务id
-     * @return
-     */
-    public FlowInstance findExistFlowInstance(String flowDefinitionKey, Long businessId);
 }
