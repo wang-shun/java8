@@ -7,8 +7,8 @@ package io.terminus.doctor.web.front.controller;
 import com.google.common.base.Objects;
 import com.google.common.base.Optional;
 import io.terminus.common.exception.JsonResponseException;
-import io.terminus.common.model.BaseUser;
 import io.terminus.common.model.Response;
+import io.terminus.doctor.common.model.ParanaUser;
 import io.terminus.doctor.common.utils.EncryptUtil;
 import io.terminus.doctor.web.core.util.SimpleAESUtils;
 import io.terminus.pampas.common.UserUtil;
@@ -76,9 +76,11 @@ public class LoginOtherSystem {
     public Response<String> getLoginUrl(
             @RequestParam(value = "padding", required = false, defaultValue = "pkcs5") String padding,
             @RequestParam("targetSystem") Integer targetSystem,
+            @RequestParam("mobile") String mobile,
+            @RequestParam("email") String email,
             @RequestParam(value = "redirectPage", required = false, defaultValue = "") String redirectPage){
 
-        BaseUser user = UserUtil.getCurrentUser();
+        ParanaUser user = UserUtil.getCurrentUser();
         if (isNull(user)) {
             return Response.fail("user.not.login");
         }
@@ -97,13 +99,16 @@ public class LoginOtherSystem {
             String corpId = this.getCorpIdInTargetSystem(targetSystemEnum);
             String domain = this.getTargetSystemDomain(targetSystemEnum);
 
-            String encryptedUserId = EncryptUtil.encrypt(user.getId().toString()); //用加密密码的算法给userId加密
-            String data = "third_user_id=" + encryptedUserId + "\ntimestamp=" + (System.currentTimeMillis() / 1000);
+            String encryptedUserId = EncryptUtil.MD5Short(user.getId().toString()); //给userId加密
+            String data = "third_user_id=" + encryptedUserId
+                    + "\ntimestamp=" + (System.currentTimeMillis() / 1000)
+                    + "\nmobile=" + mobile
+                    + "\nemail=" + email;
             String encryptedData = SimpleAESUtils.encrypt(data, password, (String) alg.get());
             return Response.ok(domain + "/api/all/third/access/" + corpId
                     + "?d=" + encryptedData
                     + "&padding=" + padding
-                    + "&redirectPage=" + redirectPage);
+                    + (redirectPage == null ? "" : "&redirectPage=" + redirectPage));
         } catch (Exception e) {
             throw new JsonResponseException(e);
         }
@@ -138,5 +143,16 @@ public class LoginOtherSystem {
             throw new JsonResponseException(e);
         }
         return null;
+    }
+
+    //以下代码仅供测试时生成链接使用
+    public static void main(String[] args) throws Exception{
+        ParanaUser user = new ParanaUser();
+        user.setId(33333L);
+        UserUtil.putCurrentUser(user);
+
+        String redirectPage = null;
+        String loginURL = new LoginOtherSystem().getLoginUrl("pkcs5", 1,"18888888888", "888@888.com", redirectPage).getResult();
+        System.out.println(loginURL);
     }
 }

@@ -12,6 +12,8 @@ import com.google.common.collect.Iterables;
 import com.google.common.hash.HashFunction;
 import com.google.common.hash.Hashing;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.UUID;
 
 /**
@@ -55,5 +57,42 @@ public class EncryptUtil {
         String salt = Iterables.get(parts, 0);
         String realPassword = Iterables.get(parts, 1);
         return Objects.equal(SHA512.hashString(password + salt, Charsets.UTF_8).toString().substring(0, 20), realPassword);
+    }
+
+    /**
+     * md5加密
+     * @param sourceStr 待加密字符串
+     * @return 加密后的32位字符串
+     */
+    public static String MD5(String sourceStr){
+        byte[] b = new byte[0];
+        try {
+            MessageDigest md = MessageDigest.getInstance("MD5");
+            md.update(sourceStr.getBytes());
+            b = md.digest();
+        } catch (NoSuchAlgorithmException e) {
+            //不会出现异常的
+        }
+        StringBuilder buf = new StringBuilder("");
+        for (byte aB : b) {
+            int i = aB;
+            if (i < 0) {
+                i += 256;
+            }
+            if (i < 16) {
+                buf.append("0");
+            }
+            buf.append(Integer.toHexString(i));
+        }
+        return buf.toString(); //32bits
+    }
+
+    /**
+     * md5加密
+     * @param sourceStr 待加密字符串
+     * @return 加密后的16位字符串
+     */
+    public static String MD5Short(String sourceStr) {
+        return MD5(sourceStr).substring(8, 24);
     }
 }
