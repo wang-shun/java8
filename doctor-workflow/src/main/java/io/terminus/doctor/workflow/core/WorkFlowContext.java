@@ -1,6 +1,7 @@
 package io.terminus.doctor.workflow.core;
 
 import com.google.common.collect.Lists;
+import io.terminus.doctor.workflow.event.IHandler;
 import io.terminus.doctor.workflow.event.Interceptor;
 import io.terminus.doctor.workflow.utils.AssertHelper;
 import lombok.extern.slf4j.Slf4j;
@@ -41,7 +42,10 @@ public class WorkFlowContext implements Context{
         // 1. 初始化拦截器
         initInterceptors(applicationContext.getBeansOfType(Interceptor.class));
 
-        // TODO 事件初始化
+        // 2. 初始化事件
+        initEventHandlers(applicationContext.getBeansOfType(IHandler.class));
+
+        System.out.println(context);
     }
 
     @Override
@@ -61,6 +65,7 @@ public class WorkFlowContext implements Context{
             return null;
         }
         if(list.size() > 1) {
+            log.error("[workflow context] -> get single class failed");
             AssertHelper.throwException("work flow context get single class error, the class is: {}", clazz);
         }
         return list.get(0);
@@ -84,7 +89,23 @@ public class WorkFlowContext implements Context{
      */
     private void initInterceptors(Map<String, Interceptor> interceptorsMap) {
         if(interceptorsMap != null && interceptorsMap.size() > 0) {
-            interceptorsMap.forEach((beanName, i) -> context.put(beanName, i));
+            interceptorsMap.forEach((beanName, i) -> {
+                context.put(beanName, i);
+                context.put(i.getClass().getName(), i);
+            });
+        }
+    }
+
+    /**
+     * 初始化所有的事件处理
+     * @param IHandlersMap
+     */
+    private void initEventHandlers(Map<String, IHandler> IHandlersMap) {
+        if(IHandlersMap != null && IHandlersMap.size() > 0) {
+            IHandlersMap.forEach((beanName, i) -> {
+                context.put(beanName, i);
+                context.put(i.getClass().getName(), i);
+            });
         }
     }
 }

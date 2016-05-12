@@ -12,6 +12,6 @@ public class StartNode extends BaseNode {
 
     @Override
     protected void exec(Execution execution) {
-        // TODO
+        execution.getHandler().forEach(handler -> forward(handler, execution));
     }
 }

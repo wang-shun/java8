@@ -1,5 +1,7 @@
 package io.terminus.doctor.workflow.event;
 
+import io.terminus.doctor.workflow.core.Execution;
+
 /**
  * Desc: 流程执行的前后拦截器接口
  * Mail: chk@terminus.io
@@ -8,7 +10,15 @@ package io.terminus.doctor.workflow.event;
  */
 public interface Interceptor {
 
-    public void before();
+    /**
+     * 拦截前置方法
+     * @param execution
+     */
+    public void before(Execution execution);
 
-    public void after();
+    /**
+     * 拦截后置方法
+     * @param execution
+     */
+    public void after(Execution execution);
 }

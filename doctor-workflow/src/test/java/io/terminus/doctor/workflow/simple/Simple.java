@@ -19,7 +19,7 @@ public class Simple extends BaseServiceTest{
 
     @Test
     public void test01(){
-        workFlowEngine.buildFlowDefinitionService().deploy("simple/simple.xml");
+        //workFlowEngine.buildFlowDefinitionService().deploy("simple/simple.xml");
     }
 
     @Test

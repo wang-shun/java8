@@ -44,8 +44,8 @@ public interface FlowDefinitionQuery {
     ///////////////////////////////////////////////////////////////
     /**
      * 根据流程定义的key值获取当前最新版本的流程定义
-     * @param key
+     * @param key   流程定义的key值
      * @return
      */
-    public FlowDefinition findLatestDefinitionByKey(String key);
+    public FlowDefinition getLatestDefinitionByKey(String key);
 }

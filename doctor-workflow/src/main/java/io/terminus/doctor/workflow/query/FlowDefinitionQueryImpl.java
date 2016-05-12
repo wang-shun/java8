@@ -148,7 +148,7 @@ public class FlowDefinitionQueryImpl implements FlowDefinitionQuery {
     }
 
     @Override
-    public FlowDefinition findLatestDefinitionByKey(String key) {
+    public FlowDefinition getLatestDefinitionByKey(String key) {
         List<FlowDefinition> list = this
                 .key(key)
                 .status(FlowDefinition.Status.NORMAL.value())

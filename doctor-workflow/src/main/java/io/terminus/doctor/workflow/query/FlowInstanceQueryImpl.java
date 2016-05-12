@@ -172,7 +172,7 @@ public class FlowInstanceQueryImpl implements FlowInstanceQuery {
     }
 
     @Override
-    public FlowInstance findExistFlowInstance(String flowDefinitionKey, Long businessId) {
+    public FlowInstance getExistFlowInstance(String flowDefinitionKey, Long businessId) {
         return this
                 .flowDefinitionKey(flowDefinitionKey)
                 .businessId(businessId)

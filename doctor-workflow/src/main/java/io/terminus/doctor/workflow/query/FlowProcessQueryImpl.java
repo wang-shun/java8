@@ -3,7 +3,6 @@ package io.terminus.doctor.workflow.query;
 import io.terminus.common.model.Paging;
 import io.terminus.doctor.workflow.access.JdbcAccess;
 import io.terminus.doctor.workflow.core.WorkFlowEngine;
-import io.terminus.doctor.workflow.model.FlowInstance;
 import io.terminus.doctor.workflow.model.FlowProcess;
 import io.terminus.doctor.workflow.utils.BeanHelper;
 
@@ -143,13 +142,17 @@ public class FlowProcessQueryImpl implements FlowProcessQuery {
     }
 
     @Override
-    public List<FlowProcess> findCurrentProcesses(String flowDefinitionKey, Long businessId) {
-        // 1. 获取当前的流程实例
-        FlowInstance flowInstance = workFlowEngine.buildFlowQueryService().getFlowInstanceQuery()
-                .findExistFlowInstance(flowDefinitionKey, businessId);
-        // 2. 获取当前活动节点
+    public List<FlowProcess> getCurrentProcesses(Long flowInstanceId) {
         return this
-                .flowInstanceId(flowInstance.getId())
+                .flowInstanceId(flowInstanceId)
                 .list();
+    }
+
+    @Override
+    public FlowProcess getCurrentProcess(Long flowInstanceId, String assignee) {
+        return this
+                .flowInstanceId(flowInstanceId)
+                .assignee(assignee)
+                .single();
     }
 }

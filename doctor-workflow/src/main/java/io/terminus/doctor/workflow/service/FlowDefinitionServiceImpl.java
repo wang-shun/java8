@@ -73,7 +73,7 @@ public class FlowDefinitionServiceImpl implements FlowDefinitionService {
             flowDefinition.setStatus(FlowDefinition.Status.NORMAL.value());
             // 获取最新版本的流程定义
             FlowDefinition latestVersionDefinition = workFlowEngine.buildFlowQueryService().
-                    getFlowDefinitionQuery().findLatestDefinitionByKey(flowDefinition.getKey());
+                    getFlowDefinitionQuery().getLatestDefinitionByKey(flowDefinition.getKey());
             if (latestVersionDefinition == null) {
                 flowDefinition.setVersion(0L);
             } else {

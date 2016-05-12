@@ -14,7 +14,7 @@ public abstract class HandlerAware implements IHandler {
 
     }
     @Override
-    public void AfterHandle(Execution execution) {
+    public void afterHandle(Execution execution) {
 
     }
 }

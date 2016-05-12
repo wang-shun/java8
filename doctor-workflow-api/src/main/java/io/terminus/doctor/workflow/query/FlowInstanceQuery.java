@@ -52,5 +52,5 @@ public interface FlowInstanceQuery {
      * @param businessId        业务id
      * @return
      */
-    public FlowInstance findExistFlowInstance(String flowDefinitionKey, Long businessId);
+    public FlowInstance getExistFlowInstance(String flowDefinitionKey, Long businessId);
 }

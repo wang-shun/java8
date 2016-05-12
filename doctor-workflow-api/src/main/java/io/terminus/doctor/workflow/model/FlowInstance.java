@@ -74,7 +74,6 @@ public class FlowInstance implements Serializable{
      */
     private Date updatedAt;
 
-    // TODO
     public enum Status {
         /**
          * 正常

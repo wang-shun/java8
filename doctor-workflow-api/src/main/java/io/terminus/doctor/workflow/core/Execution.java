@@ -1,6 +1,8 @@
 package io.terminus.doctor.workflow.core;
 
+import io.terminus.doctor.workflow.event.IHandler;
 import io.terminus.doctor.workflow.event.Interceptor;
+import io.terminus.doctor.workflow.model.FlowProcess;
 
 import java.util.List;
 
@@ -23,4 +25,22 @@ public interface Execution {
      * @return
      */
     public WorkFlowService getWorkFlowService();
+
+    /**
+     * 获取当前活动的节点
+     * @return
+     */
+    public FlowProcess getFlowProcess();
+
+    /**
+     * 获取当前活动节点的下个执行节点
+     * @return
+     */
+    public List<FlowProcess> getNextFlowProcesses();
+
+    /**
+     * 获取当前活动节点的处理事件
+     * @return
+     */
+    public List<IHandler> getHandler();
 }

@@ -26,5 +26,5 @@ public interface IHandler {
      * 事件后置拦截
      * @param execution 执行器
      */
-    public void AfterHandle(Execution execution);
+    public void afterHandle(Execution execution);
 }

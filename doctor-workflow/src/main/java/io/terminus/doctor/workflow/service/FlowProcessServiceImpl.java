@@ -47,13 +47,13 @@ public class FlowProcessServiceImpl implements FlowProcessService {
         try {
             // 1. 校验当前 businessId 是否存在流程实例
             FlowInstance existFlowInstance = workFlowEngine.buildFlowQueryService().getFlowInstanceQuery()
-                    .findExistFlowInstance(flowDefinitionKey, businessId);
+                    .getExistFlowInstance(flowDefinitionKey, businessId);
             AssertHelper.notNull(existFlowInstance,
                     "当前流程定义已经存在流程实例, 流程定义key为: {}, 业务id为: {}", flowDefinitionKey, businessId);
 
             // 2. 获取最新的流程实例, 并创建流程实例
             FlowDefinition flowDefinition = workFlowEngine.buildFlowQueryService().
-                    getFlowDefinitionQuery().findLatestDefinitionByKey(flowDefinitionKey);
+                    getFlowDefinitionQuery().getLatestDefinitionByKey(flowDefinitionKey);
             AssertHelper.isNull(flowDefinition,
                     "启动流程实例错误, 当前不存在key为: {} 的流程定义", flowDefinitionKey);
             AssertHelper.isNull(businessId,
