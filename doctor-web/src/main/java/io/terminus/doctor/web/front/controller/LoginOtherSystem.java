@@ -8,11 +8,16 @@ import com.google.common.base.Objects;
 import com.google.common.base.Optional;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.Response;
+import io.terminus.common.utils.Arguments;
 import io.terminus.doctor.common.model.ParanaUser;
 import io.terminus.doctor.common.utils.EncryptUtil;
+import io.terminus.doctor.web.core.component.MobilePattern;
 import io.terminus.doctor.web.core.util.SimpleAESUtils;
 import io.terminus.pampas.common.UserUtil;
+import io.terminus.parana.user.model.User;
+import io.terminus.parana.user.service.UserReadService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import static io.terminus.common.utils.Arguments.isNull;
@@ -25,6 +30,16 @@ import static io.terminus.common.utils.Arguments.isNull;
 @RestController
 @RequestMapping("/api/user/third")
 public class LoginOtherSystem {
+
+    private final UserReadService<User> userReadService;
+    private final MobilePattern mobilePattern;
+
+    @Autowired
+    public LoginOtherSystem(UserReadService<User> userReadService,
+                            MobilePattern mobilePattern){
+        this.userReadService = userReadService;
+        this.mobilePattern = mobilePattern;
+    }
 
     //TODO 这些配置应当写在配置文件里,或者在数据库里配置
     private static final String PASSWORD_LOGIN_PIGMALL = "pigmall"; //通过本系统登录PigMall的密码
@@ -76,13 +91,23 @@ public class LoginOtherSystem {
     public Response<String> getLoginUrl(
             @RequestParam(value = "padding", required = false, defaultValue = "pkcs5") String padding,
             @RequestParam("targetSystem") Integer targetSystem,
-            @RequestParam("mobile") String mobile,
-            @RequestParam("email") String email,
             @RequestParam(value = "redirectPage", required = false, defaultValue = "") String redirectPage){
 
-        ParanaUser user = UserUtil.getCurrentUser();
-        if (isNull(user)) {
+        ParanaUser paranaUser = UserUtil.getCurrentUser();
+        if (isNull(paranaUser)) {
             return Response.fail("user.not.login");
+        }
+
+        Response<User> result = userReadService.findById(paranaUser.getId());
+        if (!result.isSuccess()) {
+            return Response.fail(result.getError());
+        }
+        User user = result.getResult();
+        if (user == null) {
+            return Response.fail("user.not.found");
+        }
+        if (user.getMobile() == null || !mobilePattern.getPattern().matcher(user.getMobile()).matches()) {
+            return Response.fail("mobile.format.error");
         }
 
         Optional alg = SimpleAESUtils.algSelect(padding);
@@ -99,11 +124,10 @@ public class LoginOtherSystem {
             String corpId = this.getCorpIdInTargetSystem(targetSystemEnum);
             String domain = this.getTargetSystemDomain(targetSystemEnum);
 
-            String encryptedUserId = EncryptUtil.MD5Short(user.getId().toString()); //给userId加密
+            String encryptedUserId = EncryptUtil.MD5Short(paranaUser.getId().toString()); //给userId加密
             String data = "third_user_id=" + encryptedUserId
                     + "\ntimestamp=" + (System.currentTimeMillis() / 1000)
-                    + "\nmobile=" + mobile
-                    + "\nemail=" + email;
+                    + "\nmobile=" + user.getMobile();
             String encryptedData = SimpleAESUtils.encrypt(data, password, (String) alg.get());
             return Response.ok(domain + "/api/all/third/access/" + corpId
                     + "?d=" + encryptedData
@@ -147,12 +171,20 @@ public class LoginOtherSystem {
 
     //以下代码仅供测试时生成链接使用
     public static void main(String[] args) throws Exception{
-        ParanaUser user = new ParanaUser();
-        user.setId(33333L);
-        UserUtil.putCurrentUser(user);
-
+        Long third_user_id = 33333L;
         String redirectPage = null;
-        String loginURL = new LoginOtherSystem().getLoginUrl("pkcs5", 1,"18888888888", "888@888.com", redirectPage).getResult();
+        String padding = "pkcs5";
+
+        String data = "third_user_id=" + EncryptUtil.MD5Short(third_user_id.toString())
+                + "\ntimestamp=" + (System.currentTimeMillis() / 1000)
+                + "\nmobile=" + "18888888888";
+
+        Optional alg = SimpleAESUtils.algSelect(padding);
+        String encryptedData = SimpleAESUtils.encrypt(data, "pigmall", (String)alg.get());
+        String loginURL = "http://www.pigmall.com" + "/api/all/third/access/" + 1
+                + "?d=" + encryptedData
+                + "&padding=pkcs5"
+                + (redirectPage == null ? "" : "&redirectPage=" + redirectPage);
         System.out.println(loginURL);
     }
 }
