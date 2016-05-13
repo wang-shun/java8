@@ -91,7 +91,6 @@ public class WorkFlowContext implements Context{
         if(interceptorsMap != null && interceptorsMap.size() > 0) {
             interceptorsMap.forEach((beanName, i) -> {
                 context.put(beanName, i);
-                context.put(i.getClass().getName(), i);
             });
         }
     }
@@ -104,7 +103,6 @@ public class WorkFlowContext implements Context{
         if(IHandlersMap != null && IHandlersMap.size() > 0) {
             IHandlersMap.forEach((beanName, i) -> {
                 context.put(beanName, i);
-                context.put(i.getClass().getName(), i);
             });
         }
     }

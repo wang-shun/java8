@@ -106,15 +106,22 @@ public class ExecutionImpl implements Execution {
         IHandler handler = null;
         // 如果配置了handler
         if (StringUtils.isNotBlank(handlerName)) {
+            // 从上下文中获取
             handler = workFlowEngine.buildContext().get(handlerName);
             if (handler == null) {
-                try {
-                    handler = (IHandler) Class.forName(handlerName).newInstance();
-                } catch (Exception e) {
-                    log.error("[Flow Execution] -> handler not found, handler is {}, cause by {}",
-                            handlerName, Throwables.getStackTraceAsString(e));
-                    AssertHelper.throwException("[Flow Execution] -> handler not found, handler is {}, cause by {}",
-                            handlerName, Throwables.getStackTraceAsString(e));
+                // 获取类的简单名称, 从上下文中获取
+                handler = workFlowEngine.buildContext().get(
+                        StringUtils.uncapitalize(handlerName.substring(handlerName.lastIndexOf(".") + 1)));
+                if(handler == null) {
+                    try {
+                        // 实例化
+                        handler = (IHandler) Class.forName(handlerName).newInstance();
+                    } catch (Exception e) {
+                        log.error("[Flow Execution] -> handler not found, handler is {}, cause by {}",
+                                handlerName, Throwables.getStackTraceAsString(e));
+                        AssertHelper.throwException("[Flow Execution] -> handler not found, handler is {}, cause by {}",
+                                handlerName, Throwables.getStackTraceAsString(e));
+                    }
                 }
             }
         }
@@ -156,5 +163,4 @@ public class ExecutionImpl implements Execution {
     public String getOperatorName() {
         return this.operatorName;
     }
-
 }
