@@ -34,7 +34,7 @@ import java.util.concurrent.TimeUnit;
  * Date: 2016-01-28
  */
 @Slf4j
-@Component
+@Component("loginInterceptor")
 public class DoctorLoginInterceptor extends HandlerInterceptorAdapter {
 
     private final LoadingCache<Long, Response<User>> userCache;

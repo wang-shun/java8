@@ -5,6 +5,7 @@
 package io.terminus.doctor.web.admin;
 
 import io.terminus.doctor.web.core.DoctorCoreWebConfiguration;
+import io.terminus.parana.auth.web.AuthWebConfiguration;
 import io.terminus.parana.config.ConfigCenter;
 import io.terminus.doctor.web.core.advices.JsonExceptionResolver;
 import io.terminus.parana.web.msg.config.MsgAdminWebConfig;
@@ -40,6 +41,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
 @EnableWebMvc
 @EnableScheduling
 @Import({DoctorCoreWebConfiguration.class,
+        AuthWebConfiguration.class,
         DbMsgGatewayBuilder.class,
         MsgAdminWebConfig.class, DbNotifyConfig.class})
 public class DoctorAdminConfiguration extends WebMvcConfigurerAdapter {
