@@ -703,8 +703,9 @@ CREATE TABLE `doctor_ware_houses` (
   `manager_id` bigint(20) unsigned DEFAULT NULL COMMENT '管理员Id',
   `manager_name` varchar(64) DEFAULT NULL COMMENT '管理人员姓名',
   `address` varchar(64) DEFAULT NULL COMMENT '地址信息',
-  `type_id` bigint(20) unsigned DEFAULT NULL COMMENT '仓库类型',
-  `type_name` varchar(64) DEFAULT NULL COMMENT '仓库类型名称',
+  `ware_house_type` SMALLINT(6) unsigned DEFAULT NULL COMMENT '对应仓库类型',
+  `material_type_id` bigint(20) unsigned DEFAULT NULL COMMENT '仓库原料类型',
+  `material_type_name` varchar(64) DEFAULT NULL COMMENT '仓库原料名称',
   `is_default` smallint(6) DEFAULT NULL COMMENT '默认仓库信息',
   `creator_id` bigint(20) DEFAULT NULL COMMENT '创建人id',
   `creator_name` varchar(64) DEFAULT NULL COMMENT '创建人姓名',
@@ -716,14 +717,12 @@ CREATE TABLE `doctor_ware_houses` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='仓库信息数据表';
 create index doctor_ware_houses_farm_id on doctor_ware_houses(farm_id);
 
--- 物料信息数据表内容（当前包含 疫苗， 药品，原料，饲料，消耗品）等
+-- 物料信息数据表, 不同的公司，不同的物料信息
 DROP TABLE IF EXISTS `doctor_material_infos`;
 CREATE TABLE `doctor_material_infos` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT 'id',
   `farm_id` bigint(20) unsigned DEFAULT NULL COMMENT '猪场信息',
   `farm_name` varchar(64) DEFAULT NULL COMMENT '猪场名称',
-  `material_type_id` bigint(20) unsigned DEFAULT NULL COMMENT '原料类别',
-  `material_type_text` varchar(64) DEFAULT NULL COMMENT '原料类别名称',
   `remark` text COMMENT '标注',
   `unit_group_id` bigint(20) unsigned DEFAULT NULL COMMENT '单位组Id',
   `unit_group_name` varchar(64) DEFAULT NULL COMMENT '单位组名称',
@@ -751,8 +750,6 @@ CREATE TABLE `doctor_material_in_ware_houses` (
   `ware_house_name` varchar(64) DEFAULT NULL COMMENT '仓库名称',
   `material_id` bigint(20) DEFAULT NULL COMMENT '原料Id',
   `material_name` varchar(64) DEFAULT NULL COMMENT '原料名称',
-  `material_type_id` bigint(20) DEFAULT NULL COMMENT '原料类型',
-  `material_type_name` varchar(64) DEFAULT NULL COMMENT '原料名称',
   `lot_number` bigint(20) DEFAULT NULL COMMENT '数量信息',
   `unit_group_name` varchar(64) DEFAULT NULL COMMENT '单位组信息',
   `unit_name` varchar(64) DEFAULT NULL COMMENT '单位信息',
@@ -780,8 +777,6 @@ CREATE TABLE `doctor_material_consume_providers` (
   `ware_house_name` varchar(64) DEFAULT NULL COMMENT '仓库名称',
   `material_id` bigint(20) DEFAULT NULL COMMENT '原料Id',
   `material_name` varchar(64) DEFAULT NULL COMMENT '原料名称',
-  `material_type_id` bigint(20) DEFAULT NULL COMMENT '原料类型',
-  `material_type_name` varchar(64) DEFAULT NULL COMMENT '原料名称',
   `event_time` datetime DEFAULT NULL COMMENT '事件日期',
   `event_type` smallint(6) DEFAULT NULL COMMENT '事件类型, provider 提供， consumer 消费',
   `event_count` bigint(20) DEFAULT NULL COMMENT '事件数量',

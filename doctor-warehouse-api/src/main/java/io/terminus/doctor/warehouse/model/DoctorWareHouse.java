@@ -24,9 +24,11 @@ public class DoctorWareHouse implements Serializable{
 
     private String address;
 
-    private Long typeId;
+    private Integer wareHouseType;
 
-    private String typeName;
+    private Long materialTypeId;
+
+    private String materialTypeName;
 
     private Integer isDefault;
 

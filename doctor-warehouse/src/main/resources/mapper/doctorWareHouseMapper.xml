@@ -16,8 +16,9 @@
         <result column="manager_id" property="managerId"/>
         <result column="manager_name" property="managerName"/>
         <result column="address" property="address"/>
-        <result column="type_id" property="typeId"/>
-        <result column="type_name" property="typeName"/>
+        <result column="ware_house_type" property="wareHouseType"/>
+        <result column="material_type_id" property="materialTypeId"/>
+        <result column="material_type_name" property="materialTypeName"/>
         <result column="is_default" property="isDefault"/>
         <result column="creator_id" property="creatorId"/>
         <result column="creator_name" property="creatorName"/>
@@ -35,11 +36,11 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        `ware_house_name`,`farm_id`,`farm_name`,`manager_id`,`manager_name`,`address`,`type_id`,`type_name`,`is_default`,`creator_id`,`creator_name`,`updator_id`,`updator_name`,`created_at`,`updated_at`
+        `ware_house_name`,`farm_id`,`farm_name`,`manager_id`,`manager_name`,`address`,`ware_house_type`,`material_type_id`,`material_type_name`,`is_default`,`creator_id`,`creator_name`,`updator_id`,`updator_name`,`created_at`,`updated_at`
     </sql>
 
     <sql id="vals">
-        #{wareHouseName},#{farmId},#{farmName},#{managerId},#{managerName},#{address},#{typeId},#{typeName},#{isDefault},#{creatorId},#{creatorName},#{updatorId},#{updatorName},now(),now()
+        #{wareHouseName},#{farmId},#{farmName},#{managerId},#{managerName},#{address},#{wareHouseType},#{materialTypeId},#{materialTypeName},#{isDefault},#{creatorId},#{creatorName},#{updatorId},#{updatorName},now(),now()
     </sql>
 
     <insert id="create" parameterType="DoctorWareHouse" keyProperty="id" useGeneratedKeys="true">
@@ -53,8 +54,7 @@
         ( <include refid="cols_exclude_id"/> )
         VALUES
         <foreach collection="list" item="i" separator=",">
-        ( #{i.wareHouseName},#{i.farmId},#{i.farmName},#{i.managerId},#{i.managerName},#{i.address},#{i.typeId},#{i.typeName},#{i.isDefault},#{i.creatorId},#{i.creatorName},#{i.updatorId},#{i.updatorName},now(),now()
- )
+        (#{i.wareHouseName},#{i.farmId},#{i.farmName},#{i.managerId},#{i.managerName},#{i.address},#{i.wareHouseType},#{i.materialTypeId},#{i.materialTypeName},#{i.isDefault},#{i.creatorId},#{i.creatorName},#{i.updatorId},#{i.updatorName},now(),now())
         </foreach>
     </insert>
 
@@ -74,21 +74,21 @@
         UPDATE <include refid="tb"/>
         <set>
         updated_at = now()
-            <if test="wareHouseName != null" > ,`ware_house_name` = #{wareHouseName}</if>
-            <if test="farmId != null" > ,`farm_id` = #{farmId}</if>
-            <if test="farmName != null" > ,`farm_name` = #{farmName}</if>
-            <if test="managerId != null" > ,`manager_id` = #{managerId}</if>
-            <if test="managerName != null" > ,`manager_name` = #{managerName}</if>
-            <if test="address != null" > ,`address` = #{address}</if>
-            <if test="typeId != null" > ,`type_id` = #{typeId}</if>
-            <if test="typeName != null" > ,`type_name` = #{typeName}</if>
-            <if test="isDefault != null" > ,`is_default` = #{isDefault}</if>
-            <if test="creatorId != null" > ,`creator_id` = #{creatorId}</if>
-            <if test="creatorName != null" > ,`creator_name` = #{creatorName}</if>
-            <if test="updatorId != null" > ,`updator_id` = #{updatorId}</if>
-            <if test="updatorName != null" > ,`updator_name` = #{updatorName}</if>
-            <if test="createdAt != null" > ,`created_at` = #{createdAt}</if>
-                    
+        <if test="wareHouseName != null" > ,`ware_house_name` = #{wareHouseName}</if>
+        <if test="farmId != null" > ,`farm_id` = #{farmId}</if>
+        <if test="farmName != null" > ,`farm_name` = #{farmName}</if>
+        <if test="managerId != null" > ,`manager_id` = #{managerId}</if>
+        <if test="managerName != null" > ,`manager_name` = #{managerName}</if>
+        <if test="address != null" > ,`address` = #{address}</if>
+        <if test="wareHouseType != null" > ,`ware_house_type` = #{wareHouseType}</if>
+        <if test="materialTypeId != null" > ,`material_type_id` = #{materialTypeId}</if>
+        <if test="materialTypeName != null" > ,`material_type_name` = #{materialTypeName}</if>
+        <if test="isDefault != null" > ,`is_default` = #{isDefault}</if>
+        <if test="creatorId != null" > ,`creator_id` = #{creatorId}</if>
+        <if test="creatorName != null" > ,`creator_name` = #{creatorName}</if>
+        <if test="updatorId != null" > ,`updator_id` = #{updatorId}</if>
+        <if test="updatorName != null" > ,`updator_name` = #{updatorName}</if>
+        <if test="createdAt != null" > ,`created_at` = #{createdAt}</if>
         </set>
         WHERE id=#{id}
     </update>

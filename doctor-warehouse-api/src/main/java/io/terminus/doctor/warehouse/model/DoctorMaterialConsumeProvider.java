@@ -41,10 +41,6 @@ public class DoctorMaterialConsumeProvider implements Serializable{
 
     private String materialName;
 
-    private Long materialTypeId;
-
-    private String materialTypeName;
-
     private Date eventTime;
 
     private Integer eventType;

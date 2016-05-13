@@ -39,10 +39,6 @@ public class DoctorMaterialInWareHouse implements Serializable{
 
     private String materialName;
 
-    private Long materialTypeId;
-
-    private String materialTypeName;
-
     private Long lotNumber;
 
     private String unitGroupName;
