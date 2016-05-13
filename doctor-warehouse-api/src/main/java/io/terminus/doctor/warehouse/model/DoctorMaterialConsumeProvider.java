@@ -8,6 +8,7 @@ import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.constants.JacksonType;
 import lombok.AccessLevel;
 import lombok.Data;
+import lombok.Getter;
 import lombok.Setter;
 import lombok.SneakyThrows;
 
@@ -15,6 +16,7 @@ import java.io.Serializable;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Map;
+import java.util.Objects;
 
 import static java.util.Objects.isNull;
 
@@ -87,6 +89,31 @@ public class DoctorMaterialConsumeProvider implements Serializable{
             this.extra = null;
         }else {
             this.extra = OBJECT_MAPPER.writeValueAsString(extraMap);
+        }
+    }
+
+    public static enum  EVENT_TYPE{
+        CONSUMER(1, "消耗事件"),
+        PROVIDER(2, "提供事件");
+
+        @Getter
+        private Integer value;
+
+        @Getter
+        private String desc;
+
+        private EVENT_TYPE(Integer value, String desc){
+            this.value = value;
+            this.desc = desc;
+        }
+
+        public static EVENT_TYPE from(Integer value){
+            for (EVENT_TYPE event_type : EVENT_TYPE.values()){
+                if(Objects.equals(event_type.getValue(), value)){
+                    return event_type;
+                }
+            }
+            return null;
         }
     }
 }

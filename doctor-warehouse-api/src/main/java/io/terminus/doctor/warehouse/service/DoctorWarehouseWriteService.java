@@ -1,5 +1,8 @@
 package io.terminus.doctor.warehouse.service;
 
+import io.terminus.common.model.Response;
+import io.terminus.doctor.warehouse.model.DoctorWareHouse;
+
 /**
  * Created by yaoqijun.
  * Date:2016-05-13
@@ -7,4 +10,18 @@ package io.terminus.doctor.warehouse.service;
  * Descirbe:
  */
 public interface DoctorWarehouseWriteService {
+
+    /**
+     * 创建WareHouse
+     * @param doctorWareHouse
+     * @return
+     */
+    Response<Boolean> createWareHouse(DoctorWareHouse doctorWareHouse);
+
+    /**
+     * 修改warehouse 信息
+     * @param wareHouse
+     * @return
+     */
+    Response<Boolean> updateWareHouse(DoctorWareHouse wareHouse);
 }
