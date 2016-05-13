@@ -6,5 +6,5 @@ package io.terminus.doctor.warehouse.service;
  * Email:yaoqj@terminus.io
  * Descirbe:
  */
-public interface WarehouseReadService {
+public interface DoctorWarehouseWriteService {
 }
