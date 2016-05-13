@@ -112,7 +112,7 @@ public class XmlHelper {
                 return null;
             }
             String value = attr.getNodeValue();
-            if(StringUtils.isNoneBlank(value)) {
+            if(StringUtils.isNotBlank(value)) {
                 return Double.parseDouble(value.trim());
             }
         }
@@ -147,7 +147,7 @@ public class XmlHelper {
         NodeList chilNodes = node.getChildNodes();
         for (int i = 0; chilNodes != null && i < chilNodes.getLength(); i++) {
             Node chilNode = chilNodes.item(i);
-            if(StringUtils.isNoneBlank(nodeName) && nodeName.equals(chilNode.getNodeName())) {
+            if(StringUtils.isNotBlank(nodeName) && nodeName.equals(chilNode.getNodeName())) {
                 list.add(chilNode);
             }
         }

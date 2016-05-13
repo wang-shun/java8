@@ -117,6 +117,12 @@ public interface JdbcAccess {
      */
     public void createFlowInstance(FlowInstance flowInstance);
 
+    /**
+     * 删除一个流程实例
+     * @param flowInstanceId
+     */
+    public void deleteFlowInstance(Long flowInstanceId);
+
     /** 以下是流程实例的公共查询方法, 与上述流程定义类似 */
     public List<FlowInstance> findFlowInstances(FlowInstance flowInstance);
     public List<FlowInstance> findFlowInstances(Map criteria);
@@ -133,6 +139,12 @@ public interface JdbcAccess {
      * @param flowProcess
      */
     public void createFlowProcess(FlowProcess flowProcess);
+
+    /**
+     * 删除当前活动节点
+     * @param flowProcessId
+     */
+    public void deleteFlowProcess(Long flowProcessId);
 
     /** 以下是流程活动节点的公共查询方法, 与上述流程定义类似 */
     public List<FlowProcess> findFlowProcesses(FlowProcess flowProcess);

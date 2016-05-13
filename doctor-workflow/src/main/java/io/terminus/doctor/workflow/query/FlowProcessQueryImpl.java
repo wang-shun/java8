@@ -145,6 +145,7 @@ public class FlowProcessQueryImpl implements FlowProcessQuery {
     public List<FlowProcess> getCurrentProcesses(Long flowInstanceId) {
         return this
                 .flowInstanceId(flowInstanceId)
+                .status(FlowProcess.Status.NORMAL.value())
                 .list();
     }
 
@@ -153,6 +154,7 @@ public class FlowProcessQueryImpl implements FlowProcessQuery {
         return this
                 .flowInstanceId(flowInstanceId)
                 .assignee(assignee)
+                .status(FlowProcess.Status.NORMAL.value())
                 .single();
     }
 }

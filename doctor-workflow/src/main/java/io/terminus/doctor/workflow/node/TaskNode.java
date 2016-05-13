@@ -3,12 +3,12 @@ package io.terminus.doctor.workflow.node;
 import io.terminus.doctor.workflow.core.Execution;
 
 /**
- * Desc: 开始节点
+ * Desc: 任务节点
  * Mail: chk@terminus.io
  * Created by icemimosa
- * Date: 16/4/29
+ * Date: 16/5/13
  */
-public class StartNode extends BaseNode {
+public class TaskNode extends BaseNode {
 
     @Override
     protected void exec(Execution execution) {

@@ -2,6 +2,7 @@ package io.terminus.doctor.workflow.core;
 
 import io.terminus.doctor.workflow.access.JdbcAccess;
 import io.terminus.doctor.workflow.event.Interceptor;
+import io.terminus.doctor.workflow.model.FlowProcess;
 import io.terminus.doctor.workflow.service.FlowDefinitionService;
 import io.terminus.doctor.workflow.service.FlowProcessService;
 import io.terminus.doctor.workflow.service.FlowQueryService;
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Component;
 
 import java.io.InputStream;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Desc: 流程引擎实现类
@@ -67,6 +69,16 @@ public class WorkFlowEngineImpl implements WorkFlowEngine {
     @Override
     public List<Interceptor> buildInterceptors() {
         return buildContext().getList(Interceptor.class);
+    }
+
+    @Override
+    public Executor buildExecutor(String flowDefinitionKey, Long businessId, String assignee) {
+        return new ExecutorImpl(this, flowDefinitionKey, businessId, assignee);
+    }
+
+    @Override
+    public Execution buildExecution(FlowProcess flowProcess, Map expression, String flowData, Long operatorId, String operatorName) {
+        return new ExecutionImpl(this, flowProcess, expression, flowData, operatorId, operatorName);
     }
 
     @Override

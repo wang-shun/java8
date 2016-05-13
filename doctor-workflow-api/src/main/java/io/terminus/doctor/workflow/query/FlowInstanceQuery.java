@@ -48,7 +48,7 @@ public interface FlowInstanceQuery {
     ///////////////////////////////////////////////////////////////
     /**
      * 查询是否已经存在的主流程实例, 一个业务id只能启动一种key类型的流程定义, 只能存在一个主流程实例
-     * @param flowDefinitionKey 流程实例的key
+     * @param flowDefinitionKey 流程定义的key
      * @param businessId        业务id
      * @return
      */

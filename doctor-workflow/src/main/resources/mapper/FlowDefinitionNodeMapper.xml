@@ -78,6 +78,7 @@
 
     <sql id="criteria">
         <where>
+            <if test="id != null">AND id = #{id}</if>
             <if test="flowDefinitionId != null">AND `flow_definition_id` = #{flowDefinitionId}</if>
             <if test="name != null">AND `name` LIKE CONCAT('%',#{name},'%')</if>
             <if test="nodeName != null">AND `node_name` = #{nodeName}</if>

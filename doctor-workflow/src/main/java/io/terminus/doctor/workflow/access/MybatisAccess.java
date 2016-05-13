@@ -201,6 +201,11 @@ public class MybatisAccess implements JdbcAccess {
     }
 
     @Override
+    public void deleteFlowInstance(Long flowInstanceId) {
+        flowInstanceDao.delete(flowInstanceId);
+    }
+
+    @Override
     public List<FlowInstance> findFlowInstances(FlowInstance flowInstance) {
         return flowInstanceDao.list(flowInstance);
     }
@@ -248,6 +253,11 @@ public class MybatisAccess implements JdbcAccess {
     @Override
     public void createFlowProcess(FlowProcess flowProcess) {
         flowProcessDao.create(flowProcess);
+    }
+
+    @Override
+    public void deleteFlowProcess(Long flowProcessId) {
+        flowProcessDao.delete(flowProcessId);
     }
 
     @Override

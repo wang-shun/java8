@@ -1,7 +1,10 @@
 package io.terminus.doctor.workflow.utils;
 
+import io.terminus.doctor.workflow.model.FlowDefinitionNode;
+import io.terminus.doctor.workflow.node.EndNode;
 import io.terminus.doctor.workflow.node.Node;
 import io.terminus.doctor.workflow.node.StartNode;
+import io.terminus.doctor.workflow.node.TaskNode;
 
 /**
  * Desc: 流转节点帮助类
@@ -11,35 +14,33 @@ import io.terminus.doctor.workflow.node.StartNode;
  */
 public class NodeHelper {
 
-    public static Node buildNode(Integer nodeType) {
-        if (nodeType == null) {
-            return null;
-        }
+    public static Node buildNode(FlowDefinitionNode.Type nodeType) {
         Node node = null;
         switch (nodeType) {
-            case 1:
+            case START:
                 node = buildStartNode();
                 break;
-            case -1:
+            case END:
                 node = buildEndNode();
                 break;
-            case 2:
+            case TASK:
                 node = buildTaskNode();
+                break;
+            default:
                 break;
         }
         return node;
     }
 
-    // TODO
     public static Node buildStartNode() {
         return new StartNode();
     }
 
     public static Node buildEndNode() {
-        return null;
+        return new EndNode();
     }
 
     public static Node buildTaskNode() {
-        return null;
+        return new TaskNode();
     }
 }

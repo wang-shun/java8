@@ -8,7 +8,12 @@
 
     <!-- 任务节点 -->
     <task name="任务节点1" assignee="terminus" pointx="250" pointy="100">
-        <transition name="任务连线" target="结束节点" />
+        <transition name="任务连线1" target="任务节点2" />
+    </task>
+
+    <!-- 任务节点 -->
+    <task name="任务节点2" assignee="terminus2" pointx="250" pointy="100">
+        <transition name="任务连线2" target="结束节点" />
     </task>
 
     <!-- 结束节点 -->
