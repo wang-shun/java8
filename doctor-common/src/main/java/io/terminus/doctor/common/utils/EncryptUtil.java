@@ -86,13 +86,4 @@ public class EncryptUtil {
         }
         return buf.toString(); //32bits
     }
-
-    /**
-     * md5加密
-     * @param sourceStr 待加密字符串
-     * @return 加密后的16位字符串
-     */
-    public static String MD5Short(String sourceStr) {
-        return MD5(sourceStr).substring(8, 24);
-    }
 }

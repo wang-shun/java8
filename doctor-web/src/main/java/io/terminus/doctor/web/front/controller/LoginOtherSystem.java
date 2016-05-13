@@ -8,7 +8,6 @@ import com.google.common.base.Objects;
 import com.google.common.base.Optional;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.Response;
-import io.terminus.common.utils.Arguments;
 import io.terminus.doctor.common.model.ParanaUser;
 import io.terminus.doctor.common.utils.EncryptUtil;
 import io.terminus.doctor.web.core.component.MobilePattern;
@@ -124,7 +123,7 @@ public class LoginOtherSystem {
             String corpId = this.getCorpIdInTargetSystem(targetSystemEnum);
             String domain = this.getTargetSystemDomain(targetSystemEnum);
 
-            String encryptedUserId = EncryptUtil.MD5Short(paranaUser.getId().toString()); //给userId加密
+            String encryptedUserId = EncryptUtil.MD5(paranaUser.getId().toString()); //给userId加密
             String data = "third_user_id=" + encryptedUserId
                     + "\ntimestamp=" + (System.currentTimeMillis() / 1000)
                     + "\nmobile=" + user.getMobile();
@@ -149,7 +148,7 @@ public class LoginOtherSystem {
     }
 
     /**
-     * 给指定的用户开通指定系统的服务,所谓开通服务其实就是在目标系统注册账号并绑定
+     * 给指定的用户开通指定系统的服务
      * @param userId
      * @param targetSystem 必要参数,用于区分要开通哪个系统的服务,关联枚举  @see LoginOtherSystem.TargetSystem
      * @return
@@ -174,14 +173,16 @@ public class LoginOtherSystem {
         Long third_user_id = 33333L;
         String redirectPage = null;
         String padding = "pkcs5";
+        String password = "neverest";
+        String domain = "http://www.neverest.com";
 
-        String data = "third_user_id=" + EncryptUtil.MD5Short(third_user_id.toString())
+        String data = "third_user_id=" + EncryptUtil.MD5(third_user_id.toString())
                 + "\ntimestamp=" + (System.currentTimeMillis() / 1000)
                 + "\nmobile=" + "18888888888";
 
         Optional alg = SimpleAESUtils.algSelect(padding);
-        String encryptedData = SimpleAESUtils.encrypt(data, "pigmall", (String)alg.get());
-        String loginURL = "http://www.pigmall.com" + "/api/all/third/access/" + 1
+        String encryptedData = SimpleAESUtils.encrypt(data, password, (String)alg.get());
+        String loginURL = domain + "/api/all/third/access/" + 1
                 + "?d=" + encryptedData
                 + "&padding=pkcs5"
                 + (redirectPage == null ? "" : "&redirectPage=" + redirectPage);
