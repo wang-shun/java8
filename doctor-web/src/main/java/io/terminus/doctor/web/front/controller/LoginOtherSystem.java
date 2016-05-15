@@ -13,6 +13,7 @@ import io.terminus.doctor.common.utils.EncryptUtil;
 import io.terminus.doctor.web.core.component.MobilePattern;
 import io.terminus.doctor.web.core.util.SimpleAESUtils;
 import io.terminus.pampas.common.UserUtil;
+import io.terminus.parana.config.ConfigCenter;
 import io.terminus.parana.user.model.User;
 import io.terminus.parana.user.service.UserReadService;
 import lombok.extern.slf4j.Slf4j;
@@ -20,6 +21,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import static io.terminus.common.utils.Arguments.isNull;
+import static io.terminus.common.utils.Arguments.isEmpty;
 
 /**
  * Author:  陈增辉
@@ -32,6 +34,8 @@ public class LoginOtherSystem {
 
     private final UserReadService<User> userReadService;
     private final MobilePattern mobilePattern;
+    @Autowired
+    private ConfigCenter configCenter;
 
     @Autowired
     public LoginOtherSystem(UserReadService<User> userReadService,
@@ -40,17 +44,8 @@ public class LoginOtherSystem {
         this.mobilePattern = mobilePattern;
     }
 
-    //TODO 这些配置应当写在配置文件里,或者在数据库里配置
-    private static final String PASSWORD_LOGIN_PIGMALL = "pigmall"; //通过本系统登录PigMall的密码
-    private static final long CORP_ID_IN_PIGMALL = 1L; //本系统在PigMall系统的 corp_id
-    private static final String DOMAIN_PIGMALL = "http://www.pigmall.com";
-
-    private static final String PASSWORD_LOGIN_NEVEREST = "neverest"; //通过本系统登录NEVEREST的密码
-    private static final long CORP_ID_IN_NEVEREST = 1L; //本系统在NEVEREST系统的 corp_id
-    private static final String DOMAIN_NEVEREST = "http://www.neverest.com";
-
     public enum TargetSystem {
-        //名称必须与上面的常量的后缀相同
+        //名称必须与 config center 中的key的后缀相同
         PIGMALL    (1, "pigmall电商系统"),
         NEVEREST   (2, "neverest大数据系统");
 
@@ -131,20 +126,39 @@ public class LoginOtherSystem {
             return Response.ok(domain + "/api/all/third/access/" + corpId
                     + "?d=" + encryptedData
                     + "&padding=" + padding
-                    + (redirectPage == null ? "" : "&redirectPage=" + redirectPage));
+                    + (isEmpty(redirectPage) ? "" : "&redirectPage=" + redirectPage));
         } catch (Exception e) {
             throw new JsonResponseException(e);
         }
     }
 
-    private String getTargetSystemPassword(TargetSystem targetSystemEnum) throws NoSuchFieldException, IllegalAccessException {
-        return this.getClass().getDeclaredField("PASSWORD_LOGIN_" + targetSystemEnum.name()).get(this).toString();
+    private String getTargetSystemPassword(TargetSystem targetSystemEnum){
+        //TODO 不知道该把常量定义在哪儿, 暂时先在这里写死吧....
+        String key = "user.password.login." + targetSystemEnum.name().toLowerCase();
+        Optional<String> optional = configCenter.get(key);
+        if (!optional.isPresent()) {
+            log.error("required config is missing, key = {}", key);
+            throw new JsonResponseException("required.config.missing");
+        }
+        return optional.get();
     }
-    private String getCorpIdInTargetSystem(TargetSystem targetSystemEnum) throws NoSuchFieldException, IllegalAccessException {
-        return this.getClass().getDeclaredField("CORP_ID_IN_" + targetSystemEnum.name()).get(this).toString();
+    private String getCorpIdInTargetSystem(TargetSystem targetSystemEnum){
+        String key = "user.corp.id.in." + targetSystemEnum.name().toLowerCase();
+        Optional<String> optional = configCenter.get(key);
+        if (!optional.isPresent()) {
+            log.error("required config is missing, key = {}", key);
+            throw new JsonResponseException("required.config.missing");
+        }
+        return optional.get();
     }
-    private String getTargetSystemDomain(TargetSystem targetSystemEnum) throws NoSuchFieldException, IllegalAccessException {
-        return this.getClass().getDeclaredField("DOMAIN_" + targetSystemEnum.name()).get(this).toString();
+    private String getTargetSystemDomain(TargetSystem targetSystemEnum){
+        String key = "user.domain." + targetSystemEnum.name().toLowerCase();
+        Optional<String> optional = configCenter.get(key);
+        if (!optional.isPresent()) {
+            log.error("required config is missing, key = {}", key);
+            throw new JsonResponseException("required.config.missing");
+        }
+        return optional.get();
     }
 
     /**

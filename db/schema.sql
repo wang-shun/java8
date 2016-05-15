@@ -872,19 +872,12 @@ CREATE TABLE `doctor_menus` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=523 DEFAULT CHARSET=utf8 COMMENT='菜单界面';
 
--- 单点登录其他系统
-CREATE TABLE `doctor_other_system` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `system_code` varchar(32) NOT NULL DEFAULT '' COMMENT '系统编号',
-  `password` varchar(128) NOT NULL DEFAULT '' COMMENT '调用该系统的接口时加密数据的密码',
-  `corp_id` bigint(20) NOT NULL DEFAULT '1' COMMENT '本系统在该目标系统的id',
-  `domain` varchar(512) NOT NULL DEFAULT '' COMMENT '该系统的完整域名,部署测试或生产时务必记得正确填写此字段',
-  `created_at` datetime DEFAULT NULL,
-  `updated_at` datetime DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `idx_other_system_UNIQUE` (`system_code`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='用户可以通过本系统登录其他系统，此表用于维护可从本系统登录的其他系统';
-INSERT INTO `doctor_other_system` (`system_code`, `password`, `corp_id`, `domain`, `created_at`, `updated_at`)
-VALUES
-	('pigmall','pigmall',1,'http://www.pigmall.com',now(),now()),
-	('neverest','neverest',1,'http://www.neverest.com',now(),now());
+insert into `parana_configs`
+(`biz_type`, `key`, `value`, `data_type`, `group`, `description`, created_at, updated_at)
+values
+(0, 'user.password.login.pigmall', 'pigmall', 'string', 0, '第三方用户登录pigmall系统的接口密码', NOW(), now()),
+(0, 'user.corp.id.in.pigmall', '1', 'string', 0, '本系统在pigmall系统的corp_id', NOW(), now()),
+(0, 'user.domain.pigmall', 'http://www.pigmall.com', 'string', 0, 'pigmall系统的完整域名', NOW(), now()),
+(0, 'user.password.login.neverest', 'neverest', 'string', 0, '第三方用户登录neverest系统的接口密码', NOW(), now()),
+(0, 'user.corp.id.in.neverest', '1', 'string', 0, '本系统在neverest系统的corp_id', NOW(), now()),
+(0, 'user.domain.neverest', 'http://www.neverest.com', 'string', 0, 'neverest系统的完整域名', NOW(), now());
