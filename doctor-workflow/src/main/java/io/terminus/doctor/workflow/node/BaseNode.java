@@ -4,6 +4,7 @@ import io.terminus.doctor.workflow.core.Execution;
 import io.terminus.doctor.workflow.event.IHandler;
 import io.terminus.doctor.workflow.event.Interceptor;
 import io.terminus.doctor.workflow.model.FlowDefinitionNode;
+import io.terminus.doctor.workflow.model.FlowProcess;
 import io.terminus.doctor.workflow.utils.NodeHelper;
 import lombok.extern.slf4j.Slf4j;
 
@@ -57,31 +58,35 @@ public abstract class BaseNode implements Node {
         }
     }
 
-    protected void forward(IHandler handler, Execution execution) {
+    protected void forward(IHandler handler, Execution execution, FlowProcess nextProcess) {
         // 1. 执行节点
-        if(handler != null) {
+        if (handler != null) {
             handler.preHandle(execution);
             handler.handle(execution);
             handler.afterHandle(execution);
         }
 
-        // 2. 删除当前节点, 并存储下一个节点
-        execution.getNextFlowProcesses().forEach(nextProcess -> {
+        if (nextProcess != null) {
+            // 2. 删除当前节点, 并存储下一个节点
             execution.createNextFlowProcess(nextProcess);
-            // 3. 判断节点类型
+
+            // 3. 判断节点类型, 执行下个节点
             FlowDefinitionNode nextNode = execution.getWorkFlowService().getFlowQueryService().getFlowDefinitionNodeQuery()
                     .id(nextProcess.getFlowDefinitionNodeId())
                     .single();
             // 结束节点, 继续执行
-            if(FlowDefinitionNode.Type.END.value() == nextNode.getType()) {
+            if (FlowDefinitionNode.Type.END.value() == nextNode.getType()) {
                 NodeHelper.buildEndNode().execute(execution);
+            }
+            if (FlowDefinitionNode.Type.DECISION.value() == nextNode.getType()) {
+                execution.setFlowProcess(nextProcess);
+                NodeHelper.buildDecisionNode().execute(execution);
             }
             // 任务节点, 停止, 等待下一次执行
             else if (FlowDefinitionNode.Type.TASK.value() == nextNode.getType()) {
 
             }
             // TODO 其他
-
-        });
+        }
     }
 }

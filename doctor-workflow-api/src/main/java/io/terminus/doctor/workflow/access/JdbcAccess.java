@@ -141,6 +141,12 @@ public interface JdbcAccess {
     public void createFlowProcess(FlowProcess flowProcess);
 
     /**
+     * 更新活动节点
+     * @param flowProcess
+     */
+    public void updateFlowProcess(FlowProcess flowProcess);
+
+    /**
      * 删除当前活动节点
      * @param flowProcessId
      */

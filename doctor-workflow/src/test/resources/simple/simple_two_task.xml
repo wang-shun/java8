@@ -12,10 +12,10 @@
     </task>
 
     <!-- 任务节点 -->
-    <task name="任务节点2" assignee="terminus2" pointx="250" pointy="100">
+    <task name="任务节点2" assignee="terminus2" pointx="450" pointy="100">
         <transition name="任务连线2" target="结束节点" />
     </task>
 
     <!-- 结束节点 -->
-    <end name="结束节点" pointx="450" pointy="100" />
+    <end name="结束节点" pointx="650" pointy="100" />
 </workflow>

@@ -15,6 +15,7 @@ public interface Node {
     String NODE_ROOT = "workflow";
     String NODE_START = "start";
     String NODE_TASK = "task";
+    String NODE_DECISION = "decision";
     String NODE_END = "end";
 
     String NODE_TRANSITION = "transition";

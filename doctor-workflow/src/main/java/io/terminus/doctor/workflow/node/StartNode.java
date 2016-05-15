@@ -12,6 +12,7 @@ public class StartNode extends BaseNode {
 
     @Override
     protected void exec(Execution execution) {
-        execution.getTransitions().forEach(transition -> forward(execution.getHandler(transition.getHandler()), execution));
+        execution.getTransitions().forEach(transition ->
+                forward(execution.getHandler(transition.getHandler()), execution, execution.getNextFlowProcess(transition)));
     }
 }

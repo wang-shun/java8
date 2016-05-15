@@ -45,7 +45,6 @@ public class WorkFlowContext implements Context{
         // 2. 初始化事件
         initEventHandlers(applicationContext.getBeansOfType(IHandler.class));
 
-        System.out.println(context);
     }
 
     @Override

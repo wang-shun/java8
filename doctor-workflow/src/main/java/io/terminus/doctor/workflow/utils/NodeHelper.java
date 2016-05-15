@@ -1,6 +1,7 @@
 package io.terminus.doctor.workflow.utils;
 
 import io.terminus.doctor.workflow.model.FlowDefinitionNode;
+import io.terminus.doctor.workflow.node.DecisionNode;
 import io.terminus.doctor.workflow.node.EndNode;
 import io.terminus.doctor.workflow.node.Node;
 import io.terminus.doctor.workflow.node.StartNode;
@@ -14,6 +15,12 @@ import io.terminus.doctor.workflow.node.TaskNode;
  */
 public class NodeHelper {
 
+    /**
+     * 根据节点类型, 返回节点实现类
+     * @param nodeType  节点类型枚举
+     *                  @see io.terminus.doctor.workflow.model.FlowDefinitionNode.Type
+     * @return
+     */
     public static Node buildNode(FlowDefinitionNode.Type nodeType) {
         Node node = null;
         switch (nodeType) {
@@ -25,6 +32,9 @@ public class NodeHelper {
                 break;
             case TASK:
                 node = buildTaskNode();
+                break;
+            case DECISION:
+                node = buildDecisionNode();
                 break;
             default:
                 break;
@@ -42,5 +52,9 @@ public class NodeHelper {
 
     public static Node buildTaskNode() {
         return new TaskNode();
+    }
+
+    public static Node buildDecisionNode() {
+        return new DecisionNode();
     }
 }

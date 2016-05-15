@@ -1,7 +1,6 @@
 package io.terminus.doctor.workflow.utils;
 
 import io.terminus.doctor.workflow.core.WorkFlowException;
-import org.apache.commons.lang3.StringUtils;
 
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -11,7 +10,7 @@ import java.util.regex.Pattern;
  * Desc: 断言校验类
  *      1. null 异常
  *      2. 空白blank 异常
- *      3. not equals 异常
+ *      3. not/is equals 异常
  *      4. Map包含key 异常
  *      5. 统一异常抛出方法
  * Mail: chk@terminus.io
@@ -61,7 +60,7 @@ public class AssertHelper {
      * @param args      模板填充数据
      */
     public static String isBlank(String object, String message, Object ... args) {
-        if(StringUtils.isBlank(object)) {
+        if(StringHelper.isBlank(object)) {
             throwException(getExceptionMessage(message,
                     "[Assert Error] => the argument can not be blank or null"), args);
         }
@@ -81,6 +80,23 @@ public class AssertHelper {
      */
     public static <T> void notEquals(T src, T tar, String message, Object ... args) {
         if(!src.equals(tar)) {
+            throwException(getExceptionMessage(message,
+                    "[Assert Error] => the source should be equals to target, source is {}, target is {}"),
+                    src, tar,
+                    args
+            );
+        }
+    }
+
+    /**
+     * 校验两个对象是否相等, 如果相等则抛出异常
+     * @param src       源对象
+     * @param tar       目标对象
+     * @param message   异常信息
+     * @param args      模板填充数据
+     */
+    public static <T> void isEquals(T src, T tar, String message, Object ... args) {
+        if(src.equals(tar)) {
             throwException(getExceptionMessage(message,
                     "[Assert Error] => the source should be equals to target, source is {}, target is {}"),
                     src, tar,
@@ -112,7 +128,7 @@ public class AssertHelper {
         Pattern p = Pattern.compile("\\{\\}");
         Matcher matcher = p.matcher(message);
         for (int i = 0; args != null && i < args.length && matcher.find(); i++) {
-            message = matcher.replaceFirst(args[i].toString());
+            message = matcher.replaceFirst(StringHelper.escape(args[i] == null ? "null" : args[i].toString()));
             matcher = matcher.reset(message);
         }
         throw new WorkFlowException(message);
@@ -124,7 +140,7 @@ public class AssertHelper {
      * @param willMessage   代替的异常信息
      */
     private static String getExceptionMessage(String ifMessage, String willMessage) {
-        if(StringUtils.isBlank(ifMessage)) {
+        if(StringHelper.isBlank(ifMessage)) {
             ifMessage = willMessage;
         }
         return ifMessage;

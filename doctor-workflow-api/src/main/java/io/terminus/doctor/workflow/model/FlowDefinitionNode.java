@@ -72,6 +72,7 @@ public class FlowDefinitionNode implements Serializable{
 
         START(1, "开始节点", Node.NODE_START),
         TASK(2, "简单任务节点", Node.NODE_TASK),
+        DECISION(3, "选择节点", Node.NODE_DECISION),
         END(-1, "结束节点", Node.NODE_END);
 
         private final int value;

@@ -27,6 +27,10 @@ public class FlowProcessTrack implements Serializable{
      */
     private Long flowDefinitionNodeId;
     /**
+     * 上一个流程节点的id, 可能存在多个, 用逗号隔开
+     */
+    private String preFlowDefinitionNodeId;
+    /**
      * 流程实例id
      */
     private Long flowInstanceId;

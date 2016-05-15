@@ -2,6 +2,8 @@ package io.terminus.doctor.workflow.service;
 
 import io.terminus.doctor.workflow.core.Executor;
 
+import java.util.Map;
+
 /**
  * Desc: 流程流转相关的接口
  *      1. 启动流程实例
@@ -53,10 +55,23 @@ public interface FlowProcessService {
      * @param businessId        业务id
      * @param businessData      业务全局数据(推荐json), 每个流程节点都能访问到
      * @param flowData          节点之间的流转数据, 当前节点之外的无法获取
+     * @param expression        流转判断表达式(decision节点情形)
+     */
+    public void startFlowInstance(String flowDefinitionKey, Long businessId, String businessData, String flowData, Map expression);
+
+    /**
+     * 根据key值, 启动一个流程实例, 根据version最新的流程定义启动.
+     * 注意: 每个业务id只能启动一个类型的流程定义, 多次启动会抛出异常
+     *
+     * @param flowDefinitionKey 流程定义的key
+     * @param businessId        业务id
+     * @param businessData      业务全局数据(推荐json), 每个流程节点都能访问到
+     * @param flowData          节点之间的流转数据, 当前节点之外的无法获取
+     * @param expression        流转判断表达式(decision节点情形)
      * @param operatorId        操作人id
      * @param operatorName      操作人姓名
      */
-    public void startFlowInstance(String flowDefinitionKey, Long businessId, String businessData, String flowData, Long operatorId, String operatorName);
+    public void startFlowInstance(String flowDefinitionKey, Long businessId, String businessData, String flowData, Map expression, Long operatorId, String operatorName);
 
     /**
      * 获取任务执行器

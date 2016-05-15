@@ -1,7 +1,6 @@
 package io.terminus.doctor.workflow.utils;
 
 import com.google.common.collect.Lists;
-import org.apache.commons.lang3.StringUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -14,7 +13,6 @@ import javax.xml.transform.stream.StreamResult;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathFactory;
-import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.StringWriter;
 import java.util.List;
@@ -112,7 +110,7 @@ public class XmlHelper {
                 return null;
             }
             String value = attr.getNodeValue();
-            if(StringUtils.isNotBlank(value)) {
+            if(StringHelper.isNotBlank(value)) {
                 return Double.parseDouble(value.trim());
             }
         }
@@ -144,44 +142,13 @@ public class XmlHelper {
      */
     public static List<Node> getChildrenNodes(Node node, String nodeName) {
         List<Node> list = Lists.newArrayList();
-        NodeList chilNodes = node.getChildNodes();
-        for (int i = 0; chilNodes != null && i < chilNodes.getLength(); i++) {
-            Node chilNode = chilNodes.item(i);
-            if(StringUtils.isNotBlank(nodeName) && nodeName.equals(chilNode.getNodeName())) {
-                list.add(chilNode);
+        NodeList childNodes = node.getChildNodes();
+        for (int i = 0; childNodes != null && i < childNodes.getLength(); i++) {
+            Node childNode = childNodes.item(i);
+            if(StringHelper.isNotBlank(nodeName) && nodeName.equals(childNode.getNodeName())) {
+                list.add(childNode);
             }
         }
         return list;
-    }
-
-
-
-    public static void main(String[] args) throws Exception {
-
-        String aa = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n" +
-                "<!-- 流程开始 -->\n" +
-                "<workflow key=\"simpleFlow\" name=\"简单流程测试\">\n" +
-                "    <!-- 开始节点 -->\n" +
-                "    <start name=\"开始节点\" pointx=\"50\" pointy=\"100\">\n" +
-                "        <transition name=\"开始连线\" target=\"任务节点1\" />\n" +
-                "    </start>\n" +
-                "    <!-- 任务节点 -->\n" +
-                "    <task name=\"任务节点1\" assignee=\"\" pointx=\"250\" pointy=\"100\">\n" +
-                "        <transition name=\"任务连线\" target=\"结束节点\" />\n" +
-                "    </task>\n" +
-                "\n" +
-                "    <!-- 结束节点 -->\n" +
-                "    <end name=\"结束节点\" pointx=\"450\" pointy=\"100\" />\n" +
-                "</workflow>";
-
-        InputStream inputStream = new ByteArrayInputStream(aa.getBytes());
-        Document document = toDocument(inputStream);
-        Node root = getNode("/workflow",document);
-        System.out.println(root.getAttributes().getNamedItem("key").getNodeValue());
-        Node start = getNode("workflow/start", document);
-        // start 下的节点
-        Node tran1 = getNode("/workflow/start/transition", document);
-        System.out.println(tran1.getAttributes().getNamedItem("name").getNodeValue());
-
     }
 }

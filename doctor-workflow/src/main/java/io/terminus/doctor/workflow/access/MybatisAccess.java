@@ -256,6 +256,11 @@ public class MybatisAccess implements JdbcAccess {
     }
 
     @Override
+    public void updateFlowProcess(FlowProcess flowProcess) {
+        flowProcessDao.update(flowProcess);
+    }
+
+    @Override
     public void deleteFlowProcess(Long flowProcessId) {
         flowProcessDao.delete(flowProcessId);
     }

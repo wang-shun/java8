@@ -35,16 +35,22 @@ public interface Execution {
     public FlowProcess getFlowProcess();
 
     /**
+     * 设置当前活动的节点
+     * @return
+     */
+    public FlowProcess setFlowProcess(FlowProcess flowProcess);
+
+    /**
      * 获取当前活动节点的所有事件连线
      * @return
      */
     public List<FlowDefinitionNodeEvent> getTransitions();
 
     /**
-     * 获取当前活动节点的下个执行节点
+     * 根据事件连线, 获取当前活动节点的下个执行节点
      * @return
      */
-    public List<FlowProcess> getNextFlowProcesses();
+    public FlowProcess getNextFlowProcess(FlowDefinitionNodeEvent transition);
 
     /**
      * 创建下一个流程活动节点

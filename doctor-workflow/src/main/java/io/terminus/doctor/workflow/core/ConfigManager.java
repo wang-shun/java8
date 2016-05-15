@@ -7,6 +7,7 @@ import io.terminus.doctor.workflow.model.FlowDefinition;
 import io.terminus.doctor.workflow.model.FlowDefinitionNode;
 import io.terminus.doctor.workflow.model.FlowDefinitionNodeEvent;
 import io.terminus.doctor.workflow.utils.AssertHelper;
+import io.terminus.doctor.workflow.utils.StringHelper;
 import io.terminus.doctor.workflow.utils.XmlHelper;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
@@ -25,6 +26,7 @@ import static io.terminus.doctor.workflow.node.Node.ATTR_NAME;
 import static io.terminus.doctor.workflow.node.Node.ATTR_POINT_X;
 import static io.terminus.doctor.workflow.node.Node.ATTR_POINT_Y;
 import static io.terminus.doctor.workflow.node.Node.ATTR_TARGET;
+import static io.terminus.doctor.workflow.node.Node.NODE_DECISION;
 import static io.terminus.doctor.workflow.node.Node.NODE_END;
 import static io.terminus.doctor.workflow.node.Node.NODE_ROOT;
 import static io.terminus.doctor.workflow.node.Node.NODE_START;
@@ -71,6 +73,8 @@ public class ConfigManager implements Configuration {
         initTaskNodes();
         // 初始化结束节点
         initEndNode();
+        // 初始化选择节点(唯一网关)
+        initDecisionNode();
     }
 
     /**
@@ -155,9 +159,51 @@ public class ConfigManager implements Configuration {
 
             // 3. transition 节点
             Node transitionNode = XmlHelper.getChildrenSingleNode(taskNode, NODE_TRANSITION);
-            AssertHelper.isNull(transitionNode, "任务节点下缺少事件连线");
-            AssertHelper.isBlank(XmlHelper.getAttrValue(transitionNode, ATTR_TARGET),"任务节点事件连线缺少目标节点");
+            AssertHelper.isNull(transitionNode,
+                    "任务节点下缺少事件连线, 当前节点名称为: {}, name属性值为: {}", taskNode.getNodeName(), nodeAttrName);
+            AssertHelper.isBlank(XmlHelper.getAttrValue(transitionNode, ATTR_TARGET),
+                    "任务节点事件连线缺少目标节点, 当前节点名称为: {}, name属性值为: {}", taskNode.getNodeName(), nodeAttrName);
             List<Node> transitionNodes = Lists.newArrayList(transitionNode);
+            transitionMap.put(nodeAttrName, transitionNodes);
+        }
+    }
+
+    /**
+     * 初始化选择节点(唯一网关)
+     */
+    private void initDecisionNode() throws Exception {
+        // 1. 获取所有的decision节点
+        String expression = "/" + NODE_ROOT + "/" + NODE_DECISION;
+        NodeList nodeList = XmlHelper.getNodeList(expression, document);
+        if(nodeList == null || nodeList.getLength() == 0) {
+            return;
+        }
+        for (int i = 0; i < nodeList.getLength(); i++) {
+            // 2. 解析decision节点
+            Node decisionNode = nodeList.item(i);
+            String nodeAttrName = XmlHelper.getAttrValue(decisionNode, ATTR_NAME);
+            AssertHelper.mapContainsKey(nodeMap, nodeAttrName,
+                    "选择节点的name属性必须唯一, 当前节点名称为: {}, name属性值为: {}", decisionNode.getNodeName(), nodeAttrName);
+            nodeMap.put(nodeAttrName, decisionNode);
+
+            // 3. transition 节点
+            List<Node> transitionNodes = XmlHelper.getChildrenNodes(decisionNode, NODE_TRANSITION);
+            AssertHelper.isEquals(transitionNodes.size(), 0,
+                    "选择节点下缺少事件连线, 当前节点名称为: {}, name属性值为: {}", decisionNode.getNodeName(), nodeAttrName);
+            AssertHelper.isEquals(transitionNodes.size(), 1,
+                    "选择节点下的事件连线数量必须大于1, 当前节点名称为: {}, name属性值为: {}", decisionNode.getNodeName(), nodeAttrName);
+            // 校验每个事件连线
+            int blankExpressionNum = 0;
+            for(Node transitionNode : transitionNodes) {
+                AssertHelper.isBlank(XmlHelper.getAttrValue(transitionNode, ATTR_TARGET),
+                        "选择节点事件连线缺少目标节点, 当前节点名称为: {}, name属性值为: {}", decisionNode.getNodeName(), nodeAttrName);
+                if(StringHelper.isBlank(XmlHelper.getAttrValue(transitionNode, ATTR_EXPRESSION))) {
+                    blankExpressionNum ++;
+                    if(blankExpressionNum > 1) {
+                        AssertHelper.throwException("选择节点事件连线只能存在一个默认的表达式, 当前节点名称为: {}, name属性值为: {}", decisionNode.getNodeName(), nodeAttrName);
+                    }
+                }
+            }
             transitionMap.put(nodeAttrName, transitionNodes);
         }
     }

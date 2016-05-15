@@ -10,6 +10,7 @@
     <resultMap id="FlowProcessMap" type="FlowProcess">
         <id column="id" property="id"/>
         <result column="flow_definition_node_id" property="flowDefinitionNodeId"/>
+        <result column="pre_flow_definition_node_id" property="preFlowDefinitionNodeId"/>
         <result column="flow_instance_id" property="flowInstanceId"/>
         <result column="flow_data" property="flowData"/>
         <result column="status" property="status"/>
@@ -28,10 +29,10 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        `flow_definition_node_id`,`flow_instance_id`,`flow_data`,`status`,`assignee`,`created_at`,`updated_at`    </sql>
+        `flow_definition_node_id`,`pre_flow_definition_node_id`,`flow_instance_id`,`flow_data`,`status`,`assignee`,`created_at`,`updated_at`    </sql>
 
     <sql id="vals">
-        #{flowDefinitionNodeId},#{flowInstanceId},#{flowData},#{status},#{assignee},now(),now()    </sql>
+        #{flowDefinitionNodeId},#{preFlowDefinitionNodeId},#{flowInstanceId},#{flowData},#{status},#{assignee},now(),now()    </sql>
 
     <insert id="create" parameterType="FlowProcess" keyProperty="id" useGeneratedKeys="true">
         INSERT INTO
@@ -56,6 +57,7 @@
         <set>
             update_at = now()
             <if test="flowDefinitionNodeId != null">,`flow_definition_node_id` = #{flowDefinitionNodeId}</if>
+            <if test="preFlowDefinitionNodeId != null">,`pre_flow_definition_node_id` = #{preFlowDefinitionNodeId}</if>
             <if test="flowInstanceId != null">,`flow_instance_id` = #{flowInstanceId}</if>
             <if test="flowData != null">,`flow_data` = #{flowData}</if>
             <if test="status != null">,`status` = #{status}</if>

@@ -16,7 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
- * Desc:
+ * Desc: 工作流统一查询接口
  * Mail: chk@terminus.io
  * Created by icemimosa
  * Date: 16/5/10

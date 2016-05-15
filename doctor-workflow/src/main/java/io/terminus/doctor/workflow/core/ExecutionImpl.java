@@ -9,8 +9,8 @@ import io.terminus.doctor.workflow.model.FlowDefinitionNodeEvent;
 import io.terminus.doctor.workflow.model.FlowInstance;
 import io.terminus.doctor.workflow.model.FlowProcess;
 import io.terminus.doctor.workflow.utils.AssertHelper;
+import io.terminus.doctor.workflow.utils.StringHelper;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
 import java.util.Map;
@@ -63,6 +63,11 @@ public class ExecutionImpl implements Execution {
     }
 
     @Override
+    public FlowProcess setFlowProcess(FlowProcess flowProcess) {
+        return this.flowProcess = flowProcess;
+    }
+
+    @Override
     public List<FlowDefinitionNodeEvent> getTransitions() {
         List<FlowDefinitionNodeEvent> transitions = workFlowEngine.buildFlowQueryService().getFlowDefinitionNodeEventQuery()
                 .sourceNodeId(this.flowProcess.getFlowDefinitionNodeId())
@@ -71,51 +76,52 @@ public class ExecutionImpl implements Execution {
     }
 
     @Override
-    public List<FlowProcess> getNextFlowProcesses() {
-        List<FlowDefinitionNodeEvent> events = getTransitions();
-        // TODO 如果存在decision, decision根据判断表达式
-        List<FlowProcess> nextProcesses = Lists.newArrayList();
-        if (events != null && events.size() > 0) {
-            events.forEach(event -> {
+    public FlowProcess getNextFlowProcess(FlowDefinitionNodeEvent transition) {
+        if (transition != null) {
                 FlowDefinitionNode nextNode = workFlowEngine.buildFlowQueryService().getFlowDefinitionNodeQuery()
-                        .id(event.getTargetNodeId())
+                        .id(transition.getTargetNodeId())
                         .single();
                 FlowProcess nextProcess = FlowProcess.builder()
                         .flowDefinitionNodeId(nextNode.getId())
+                        .preFlowDefinitionNodeId(this.flowProcess.getFlowDefinitionNodeId() + "")
                         .flowInstanceId(this.flowProcess.getFlowInstanceId())
                         .flowData(this.flowData)
                         .assignee(nextNode.getAssignee())
                         .status(FlowProcess.Status.NORMAL.value())
                         .build();
-                nextProcesses.add(nextProcess);
-            });
+                return nextProcess;
         }
-        return nextProcesses;
+        return null;
     }
 
     @Override
     public void createNextFlowProcess(FlowProcess flowProcess) {
         // 1. 删除当前已经完成的节点, TODO 记录历史和Track
         workFlowEngine.buildJdbcAccess().deleteFlowProcess(this.flowProcess.getId());
-        // 2. 创建下一个节点
-        workFlowEngine.buildJdbcAccess().createFlowProcess(flowProcess);
+        // 2. 创建下一个节点, 如果存在就更新
+        if(flowProcess.getId() != null) {
+            workFlowEngine.buildJdbcAccess().updateFlowProcess(flowProcess);
+        }else{
+            workFlowEngine.buildJdbcAccess().createFlowProcess(flowProcess);
+        }
     }
 
     @Override
     public IHandler getHandler(String handlerName) {
         IHandler handler = null;
         // 如果配置了handler
-        if (StringUtils.isNotBlank(handlerName)) {
+        if (StringHelper.isNotBlank(handlerName)) {
             // 从上下文中获取
             handler = workFlowEngine.buildContext().get(handlerName);
             if (handler == null) {
                 // 获取类的简单名称, 从上下文中获取
                 handler = workFlowEngine.buildContext().get(
-                        StringUtils.uncapitalize(handlerName.substring(handlerName.lastIndexOf(".") + 1)));
+                        StringHelper.uncapitalize(handlerName.substring(handlerName.lastIndexOf(".") + 1)));
                 if(handler == null) {
                     try {
-                        // 实例化
+                        // 实例化, 并存到上下文
                         handler = (IHandler) Class.forName(handlerName).newInstance();
+                        workFlowEngine.buildContext().put(handlerName, handler);
                     } catch (Exception e) {
                         log.error("[Flow Execution] -> handler not found, handler is {}, cause by {}",
                                 handlerName, Throwables.getStackTraceAsString(e));

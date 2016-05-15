@@ -4,7 +4,6 @@ import com.google.common.base.Throwables;
 import io.terminus.doctor.workflow.access.JdbcAccess;
 import io.terminus.doctor.workflow.core.Executor;
 import io.terminus.doctor.workflow.core.WorkFlowEngine;
-import io.terminus.doctor.workflow.core.WorkFlowException;
 import io.terminus.doctor.workflow.model.FlowDefinition;
 import io.terminus.doctor.workflow.model.FlowDefinitionNode;
 import io.terminus.doctor.workflow.model.FlowInstance;
@@ -16,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Desc: 流程流程相关的实现类
@@ -43,11 +43,16 @@ public class FlowProcessServiceImpl implements FlowProcessService {
 
     @Override
     public void startFlowInstance(String flowDefinitionKey, Long businessId, String businessData, String flowData) {
-        startFlowInstance(flowDefinitionKey, businessId, businessData, flowData, null, null);
+        startFlowInstance(flowDefinitionKey, businessId, businessData, flowData, null);
     }
 
     @Override
-    public void startFlowInstance(String flowDefinitionKey, Long businessId, String businessData, String flowData, Long operatorId, String operatorName) {
+    public void startFlowInstance(String flowDefinitionKey, Long businessId, String businessData, String flowData, Map expression) {
+        startFlowInstance(flowDefinitionKey, businessId, businessData, flowData, expression, null, null);
+    }
+
+    @Override
+    public void startFlowInstance(String flowDefinitionKey, Long businessId, String businessData, String flowData, Map expression, Long operatorId, String operatorName) {
         try {
             // 1. 校验当前 businessId 是否存在流程实例
             FlowInstance existFlowInstance = workFlowEngine.buildFlowQueryService().getFlowInstanceQuery()
@@ -84,6 +89,7 @@ public class FlowProcessServiceImpl implements FlowProcessService {
                     "当前流程的定义不存在开始节点, 流程定义id为: {}", flowDefinition.getId());
             FlowProcess startProcess = FlowProcess.builder()
                     .flowInstanceId(flowInstance.getId())
+                    .preFlowDefinitionNodeId("-1") // 开始没有上一个节点
                     .flowDefinitionNodeId(startDefinitionNode.getId())
                     .flowData(flowData)
                     .assignee(startDefinitionNode.getAssignee())
@@ -92,11 +98,11 @@ public class FlowProcessServiceImpl implements FlowProcessService {
             access().createFlowProcess(startProcess);
 
             // 4. 执行开始节点
-            NodeHelper.buildStartNode().execute(workFlowEngine.buildExecution(startProcess, null, flowData, operatorId, operatorName));
+            NodeHelper.buildStartNode().execute(workFlowEngine.buildExecution(startProcess, expression, flowData, operatorId, operatorName));
 
         }catch (Exception e) {
             log.error("[Work Flow Instance] -> 启动流程实例失败, cause by: {}", Throwables.getStackTraceAsString(e));
-            throw new WorkFlowException(e);
+            AssertHelper.throwException("启动流程实例失败, cause by: {}", Throwables.getStackTraceAsString(e));
         }
     }
 

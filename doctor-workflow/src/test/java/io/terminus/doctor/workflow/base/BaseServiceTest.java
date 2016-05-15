@@ -8,7 +8,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * Desc:
+ * Desc: 工作流基础测试类
  * Mail: chk@terminus.io
  * Created by icemimosa
  * Date: 16/4/25

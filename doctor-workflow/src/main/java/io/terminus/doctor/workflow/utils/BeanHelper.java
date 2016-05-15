@@ -9,6 +9,7 @@ import java.util.Map;
 /**
  * Desc: Bean处理的一些方法
  * 1. bean转Map
+ * 2. 拷贝bean的属性
  * Mail: chk@terminus.io
  * Created by icemimosa
  * Date: 16/5/10
@@ -47,6 +48,15 @@ public class BeanHelper {
             map = mapTemp;
         }
         return map;
+    }
+
+    /**
+     * 拷贝bean的属性
+     * @param dest      拷贝的目标对象
+     * @param origin    拷贝的源对象
+     */
+    public static void copy(Object dest, Object origin) {
+        dozer.map(origin, dest);
     }
 
 }

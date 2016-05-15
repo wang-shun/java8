@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Desc:
+ * Desc: 流程定义公共查询接口
  * Mail: chk@terminus.io
  * Created by icemimosa
  * Date: 16/5/10

@@ -93,6 +93,7 @@ DROP TABLE IF EXISTS `workflow_processes`;
 CREATE TABLE IF NOT EXISTS `workflow_processes`(
 	`id` BIGINT(20) NOT NULL AUTO_INCREMENT COMMENT '自增主键',
 	`flow_definition_node_id` BIGINT(20) DEFAULT NULL COMMENT '流程节点的id',
+	`pre_flow_definition_node_id` VARCHAR(128) DEFAULT NULL COMMENT '上一个流程节点的id, 可能存在多个, 用逗号隔开',
 	`flow_instance_id` BIGINT(20) DEFAULT NULL COMMENT '流程实例的id',
 	`flow_data` text COMMENT '流程节点之间的暂时性流转数据',
 	`status` SMALLINT(6) DEFAULT NULL COMMENT '流程节点的状态',		-- TODO: 描述
@@ -112,6 +113,7 @@ DROP TABLE IF EXISTS `workflow_process_tracks`;
 CREATE TABLE IF NOT EXISTS `workflow_process_tracks`(
 	`id` BIGINT(20) NOT NULL AUTO_INCREMENT COMMENT '自增主键',
 	`flow_definition_node_id` BIGINT(20) DEFAULT NULL COMMENT '流程节点的id',
+	`pre_flow_definition_node_id` VARCHAR(128) DEFAULT NULL COMMENT '上一个流程节点的id, 可能存在多个, 用逗号隔开',
 	`flow_instance_id` BIGINT(20) DEFAULT NULL COMMENT '流程实例的id',
 	`flow_data` text COMMENT '流程节点之间的暂时性流转数据',
 	`status` SMALLINT(6) DEFAULT NULL COMMENT '流程节点的状态,冗余workflow_process表',
@@ -158,6 +160,7 @@ DROP TABLE IF EXISTS `workflow_history_processes`;
 CREATE TABLE IF NOT EXISTS `workflow_history_processes`(
 	`id` BIGINT(20) NOT NULL AUTO_INCREMENT COMMENT '自增主键',
 	`flow_definition_node_id` BIGINT(20) DEFAULT NULL COMMENT '流程节点的id',
+	`pre_flow_definition_node_id` VARCHAR(128) DEFAULT NULL COMMENT '上一个流程节点的id, 可能存在多个, 用逗号隔开',
 	`flow_instance_id` BIGINT(20) DEFAULT NULL COMMENT '流程实例的id',
 	`flow_data` text COMMENT '流程节点之间的暂时性流转数据',
 	`describe` text COMMENT '历史节点流转描述',
