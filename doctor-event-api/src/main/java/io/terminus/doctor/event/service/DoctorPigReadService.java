@@ -1,6 +1,9 @@
 package io.terminus.doctor.event.service;
 
+import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
+import io.terminus.doctor.event.dto.DoctorPigInfoDto;
+import io.terminus.doctor.event.dto.DoctorSowPigInfoDetailDto;
 
 import javax.validation.constraints.NotNull;
 import java.util.Map;
@@ -43,7 +46,22 @@ public interface DoctorPigReadService {
      * @param farmId
      * @return
      */
-    Response<Map<Long, Integer>> queryPigCountByStatus(@NotNull(message = "input.farmId,empty") Long farmId);
+    Response<Map<Long, Integer>> queryPigCountByStatus(@NotNull(message = "input.farmId.empty") Long farmId);
 
+    /**
+     * 分页猪场，猪舍，母猪的状态信息，猪Code 搜索猪信息
+     * @param farmId
+     * @param barnId
+     * @param status
+     * @param pigCode
+     * @return
+     */
+    Response<Paging<DoctorPigInfoDto>> pagingDoctorInfoDto(Long farmId, Long barnId, Long status, Long pigCode);
 
+    /**
+     * 获取母猪的详细信息
+     * @param pigId
+     * @return
+     */
+    Response<DoctorSowPigInfoDetailDto> querySowPigInfoDetail(@NotNull(message = "input.pigId.empty") Long pigId);
 }
