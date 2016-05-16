@@ -17,26 +17,26 @@ public interface FlowDefinitionNodeEventQuery {
     ///////////////////////////////////////////////////////////////
     ///// 流程事件连线 query 公共查询方法 ////////////////////////////
     ///////////////////////////////////////////////////////////////
-    public FlowDefinitionNodeEventQuery id(Long id);
-    public FlowDefinitionNodeEventQuery name(String name);
-    public FlowDefinitionNodeEventQuery flowDefinitionId(Long flowDefinitionId);
-    public FlowDefinitionNodeEventQuery sourceNodeId(Long sourceNodeId);
-    public FlowDefinitionNodeEventQuery targetNodeId(Long targetNodeId);
-    public FlowDefinitionNodeEventQuery bean(FlowDefinitionNodeEvent flowDefinitionNodeEvent);
-    public FlowDefinitionNodeEventQuery orderBy(String orderBy);
-    public FlowDefinitionNodeEventQuery desc();
-    public FlowDefinitionNodeEventQuery asc();
-    public Paging<FlowDefinitionNodeEvent> paging(Integer offset, Integer limit);   // 分页方法
-    public FlowDefinitionNodeEvent single();                                        // 唯一值
-    public List<FlowDefinitionNodeEvent> list();                                    // 值列表
-    public long size();                                                             // 数量
+    FlowDefinitionNodeEventQuery id(Long id);
+    FlowDefinitionNodeEventQuery name(String name);
+    FlowDefinitionNodeEventQuery flowDefinitionId(Long flowDefinitionId);
+    FlowDefinitionNodeEventQuery sourceNodeId(Long sourceNodeId);
+    FlowDefinitionNodeEventQuery targetNodeId(Long targetNodeId);
+    FlowDefinitionNodeEventQuery bean(FlowDefinitionNodeEvent flowDefinitionNodeEvent);
+    FlowDefinitionNodeEventQuery orderBy(String orderBy);
+    FlowDefinitionNodeEventQuery desc();
+    FlowDefinitionNodeEventQuery asc();
+    Paging<FlowDefinitionNodeEvent> paging(Integer offset, Integer limit);   // 分页方法
+    FlowDefinitionNodeEvent single();                                        // 唯一值
+    List<FlowDefinitionNodeEvent> list();                                    // 值列表
+    long size();                                                             // 数量
 
-    public List<FlowDefinitionNodeEvent> findFlowDefinitionNodeEvents(FlowDefinitionNodeEvent flowDefinitionNodeEvent);
-    public List<FlowDefinitionNodeEvent> findFlowDefinitionNodeEvents(Map criteria);
-    public FlowDefinitionNodeEvent findFlowDefinitionNodeEventSingle(FlowDefinitionNodeEvent flowDefinitionNodeEvent);
-    public FlowDefinitionNodeEvent findFlowDefinitionNodeEventSingle(Map criteria);
-    public Paging<FlowDefinitionNodeEvent> findFlowDefinitionNodeEventsPaging(Map criteria, Integer offset, Integer limit);
-    public long findFlowDefinitionNodeEventsSize(Map criteria);
+    List<FlowDefinitionNodeEvent> findFlowDefinitionNodeEvents(FlowDefinitionNodeEvent flowDefinitionNodeEvent);
+    List<FlowDefinitionNodeEvent> findFlowDefinitionNodeEvents(Map criteria);
+    FlowDefinitionNodeEvent findFlowDefinitionNodeEventSingle(FlowDefinitionNodeEvent flowDefinitionNodeEvent);
+    FlowDefinitionNodeEvent findFlowDefinitionNodeEventSingle(Map criteria);
+    Paging<FlowDefinitionNodeEvent> findFlowDefinitionNodeEventsPaging(Map criteria, Integer offset, Integer limit);
+    long findFlowDefinitionNodeEventsSize(Map criteria);
 
     ///////////////////////////////////////////////////////////////
     ///// 流程事件连线 query 其他查询方法 /////////////////////////////

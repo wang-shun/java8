@@ -20,89 +20,89 @@ public interface Execution {
      * 获取执行前后的拦截器
      * @return
      */
-    public List<Interceptor> getInterceptors();
+    List<Interceptor> getInterceptors();
 
     /**
      * 获取流程公共服务类
      * @return
      */
-    public WorkFlowService getWorkFlowService();
+    WorkFlowService getWorkFlowService();
 
     /**
      * 获取当前活动的节点
      * @return
      */
-    public FlowProcess getFlowProcess();
+    FlowProcess getFlowProcess();
 
     /**
      * 设置当前活动的节点
      * @return
      */
-    public FlowProcess setFlowProcess(FlowProcess flowProcess);
+    FlowProcess setFlowProcess(FlowProcess flowProcess);
 
     /**
      * 获取当前活动节点的所有事件连线
      * @return
      */
-    public List<FlowDefinitionNodeEvent> getTransitions();
+    List<FlowDefinitionNodeEvent> getTransitions();
 
     /**
      * 根据事件连线, 获取当前活动节点的下个执行节点
      * @return
      */
-    public FlowProcess getNextFlowProcess(FlowDefinitionNodeEvent transition);
+    FlowProcess getNextFlowProcess(FlowDefinitionNodeEvent transition);
 
     /**
      * 创建下一个流程活动节点
      */
-    public void createNextFlowProcess(FlowProcess flowProcess);
+    void createNextFlowProcess(FlowProcess flowProcess);
 
     /**
      * 获取当前活动节点的处理事件
      * @param handlerName   事件处理类名称
      * @return
      */
-    public IHandler getHandler(String handlerName);
+    IHandler getHandler(String handlerName);
 
     /**
      * 获取执行表达式
      * @return
      */
-    public Map getExpression();
+    Map getExpression();
 
     /**
      * 获取节点间流转数据
      * @return
      */
-    public String getFlowData();
+    String getFlowData();
 
     /**
      * 设置节点间流转数据
      * @param flowData
      */
-    public void setFlowData(String flowData);
+    void setFlowData(String flowData);
 
     /**
      * 获取全局业务数据
      * @return
      */
-    public String getBusinessData();
+    String getBusinessData();
 
     /**
      * 设置全局业务数据
      * @return
      */
-    public void setBusinessData(String businessData);
+    void setBusinessData(String businessData);
 
     /**
      * 获取操作者id
      * @return
      */
-    public Long getOperatorId();
+    Long getOperatorId();
 
     /**
      * 获取操作者姓名
      * @return
      */
-    public String getOperatorName();
+    String getOperatorName();
 }

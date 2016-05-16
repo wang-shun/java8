@@ -17,27 +17,27 @@ public interface FlowDefinitionQuery {
     ///////////////////////////////////////////////////////////////
     ///// 流程定义 query 公共查询方法 ///////////////////////////////////
     ///////////////////////////////////////////////////////////////
-    public FlowDefinitionQuery id(Long id);
-    public FlowDefinitionQuery key(String key);
-    public FlowDefinitionQuery version(Long version);
-    public FlowDefinitionQuery status(Integer status);
-    public FlowDefinitionQuery operatorId(Long operatorId);
-    public FlowDefinitionQuery operatorName(String operatorName);
-    public FlowDefinitionQuery bean(FlowDefinition flowDefinition);
-    public FlowDefinitionQuery orderBy(String orderBy);
-    public FlowDefinitionQuery desc();
-    public FlowDefinitionQuery asc();
-    public Paging<FlowDefinition> paging(Integer offset, Integer limit); // 分页方法
-    public FlowDefinition single();                                      // 唯一值
-    public List<FlowDefinition> list();                                  // 值列表
-    public long size();                                                  // 数量
+    FlowDefinitionQuery id(Long id);
+    FlowDefinitionQuery key(String key);
+    FlowDefinitionQuery version(Long version);
+    FlowDefinitionQuery status(Integer status);
+    FlowDefinitionQuery operatorId(Long operatorId);
+    FlowDefinitionQuery operatorName(String operatorName);
+    FlowDefinitionQuery bean(FlowDefinition flowDefinition);
+    FlowDefinitionQuery orderBy(String orderBy);
+    FlowDefinitionQuery desc();
+    FlowDefinitionQuery asc();
+    Paging<FlowDefinition> paging(Integer offset, Integer limit); // 分页方法
+    FlowDefinition single();                                      // 唯一值
+    List<FlowDefinition> list();                                  // 值列表
+    long size();                                                  // 数量
 
-    public List<FlowDefinition> findFlowDefinitions(FlowDefinition flowDefinition);
-    public List<FlowDefinition> findFlowDefinitions(Map criteria);
-    public FlowDefinition findFlowDefinitionSingle(FlowDefinition flowDefinition);
-    public FlowDefinition findFlowDefinitionSingle(Map criteria);
-    public Paging<FlowDefinition> findFlowDefinitionsPaging(Map criteria, Integer offset, Integer limit);
-    public long findFlowDefinitionsSize(Map criteria);
+    List<FlowDefinition> findFlowDefinitions(FlowDefinition flowDefinition);
+    List<FlowDefinition> findFlowDefinitions(Map criteria);
+    FlowDefinition findFlowDefinitionSingle(FlowDefinition flowDefinition);
+    FlowDefinition findFlowDefinitionSingle(Map criteria);
+    Paging<FlowDefinition> findFlowDefinitionsPaging(Map criteria, Integer offset, Integer limit);
+    long findFlowDefinitionsSize(Map criteria);
 
     ///////////////////////////////////////////////////////////////
     ///// 流程定义 query 其他方法 ///////////////////////////////////
@@ -47,5 +47,5 @@ public interface FlowDefinitionQuery {
      * @param key   流程定义的key值
      * @return
      */
-    public FlowDefinition getLatestDefinitionByKey(String key);
+    FlowDefinition getLatestDefinitionByKey(String key);
 }

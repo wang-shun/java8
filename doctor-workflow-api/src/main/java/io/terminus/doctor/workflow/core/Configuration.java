@@ -18,17 +18,17 @@ public interface Configuration {
      * 获取流程定义的对象
      * @return
      */
-    public FlowDefinition getFlowDefinition();
+    FlowDefinition getFlowDefinition();
 
     /**
      * 获取流程定义的所有任务节点对象
      * @return
      */
-    public List<FlowDefinitionNode> getFlowDefinitionNodes();
+    List<FlowDefinitionNode> getFlowDefinitionNodes();
 
     /**
      * 获取流程定义中任务节点对象的所有连接事件
      * @return
      */
-    public List<FlowDefinitionNodeEvent> getFlowDefinitionNodeEvents();
+    List<FlowDefinitionNodeEvent> getFlowDefinitionNodeEvents();
 }

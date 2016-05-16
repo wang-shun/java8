@@ -14,17 +14,17 @@ public interface IHandler {
      * 事件执行前置拦截
      * @param execution 执行容器
      */
-    public void preHandle(Execution execution);
+    void preHandle(Execution execution);
 
     /**
      * 事件执行
      * @param execution 执行容器
      */
-    public void handle(Execution execution);
+    void handle(Execution execution);
 
     /**
      * 事件后置拦截
      * @param execution 执行容器
      */
-    public void afterHandle(Execution execution);
+    void afterHandle(Execution execution);
 }

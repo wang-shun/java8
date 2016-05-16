@@ -15,18 +15,18 @@ public interface WorkFlowService {
      * 获取流程定义相关的服务类
      * @return
      */
-    public FlowDefinitionService getFlowDefinitionService();
+    FlowDefinitionService getFlowDefinitionService();
 
     /**
      * 获取流程流转相关的服务类
      * @return
      */
-    public FlowProcessService getFlowProcessService();
+    FlowProcessService getFlowProcessService();
 
     /**
      * 获取流程查询相关的服务类
      * @return
      */
-    public FlowQueryService getFlowQueryService();
+    FlowQueryService getFlowQueryService();
 
 }

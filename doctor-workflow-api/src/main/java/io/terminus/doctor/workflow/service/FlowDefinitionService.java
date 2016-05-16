@@ -19,13 +19,13 @@ public interface FlowDefinitionService {
      * 根据文件名称部署流程定义
      * @param sourceName    文件名称
      */
-    public void deploy(String sourceName);
+    void deploy(String sourceName);
 
     /**
      * 根据文件流部署流程定义
      * @param inputStream   文件输入流
      */
-    public void deploy(InputStream inputStream);
+    void deploy(InputStream inputStream);
 
     /**
      * 根据文件名称部署流程定义, 传入部署人
@@ -33,7 +33,7 @@ public interface FlowDefinitionService {
      * @param operatorId    部署人id
      * @param operatorName  部署人姓名
      */
-    public void deploy(String sourceName, Long operatorId, String operatorName);
+    void deploy(String sourceName, Long operatorId, String operatorName);
 
     /**
      * 根据文件流部署流程定义
@@ -41,7 +41,7 @@ public interface FlowDefinitionService {
      * @param operatorId    部署人id
      * @param operatorName  部署人姓名
      */
-    public void deploy(InputStream inputStream, Long operatorId, String operatorName);
+    void deploy(InputStream inputStream, Long operatorId, String operatorName);
 
 
     ///////////////////////////////////////////////////////////////
@@ -52,7 +52,7 @@ public interface FlowDefinitionService {
      *
      * @param flowDefinitionId  流程定义id
      */
-    public void delete(Long flowDefinitionId);
+    void delete(Long flowDefinitionId);
 
     /**
      * 根据流程定义id删除流程定义
@@ -62,7 +62,7 @@ public interface FlowDefinitionService {
      * @param flowDefinitionId  流程定义id
      * @param cascade           是否强制级联删除, 默认false
      */
-    public void delete(Long flowDefinitionId, boolean cascade);
+    void delete(Long flowDefinitionId, boolean cascade);
 
     /**
      * 根据流程定义id删除流程定义
@@ -74,6 +74,6 @@ public interface FlowDefinitionService {
      * @param operatorId        操作人id
      * @param operatorName      操作人姓名
      */
-    public void delete(Long flowDefinitionId, boolean cascade, Long operatorId, String operatorName);
+    void delete(Long flowDefinitionId, boolean cascade, Long operatorId, String operatorName);
 
 }

@@ -14,11 +14,11 @@ public interface Interceptor {
      * 拦截前置方法
      * @param execution
      */
-    public void before(Execution execution);
+    void before(Execution execution);
 
     /**
      * 拦截后置方法
      * @param execution
      */
-    public void after(Execution execution);
+    void after(Execution execution);
 }

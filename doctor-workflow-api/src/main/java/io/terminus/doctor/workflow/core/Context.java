@@ -15,26 +15,26 @@ public interface Context {
      * @param name  key值
      * @param t     value值
      */
-    public <T> void put(String name, T t);
+    <T> void put(String name, T t);
 
     /**
      * 根据name属性获取key值
      * @param name  key值
      * @return
      */
-    public <T> T get(String name);
+    <T> T get(String name);
 
     /**
      * 根据值的类型获取对象, 如果存在多个则抛出异常
      * @param clazz     值的字节类型
      * @return
      */
-    public <T> T get(Class<T> clazz);
+    <T> T get(Class<T> clazz);
 
     /**
      * 根据值的类型获取对象列表
      * @param clazz     值的字节码类型
      * @return
      */
-    public <T> List<T> getList(Class<T> clazz);
+    <T> List<T> getList(Class<T> clazz);
 }

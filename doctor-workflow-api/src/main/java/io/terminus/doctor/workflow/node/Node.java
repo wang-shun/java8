@@ -42,5 +42,5 @@ public interface Node {
      * 节点执行方法入口
      * @param execution
      */
-    public void execute(Execution execution);
+    void execute(Execution execution);
 }

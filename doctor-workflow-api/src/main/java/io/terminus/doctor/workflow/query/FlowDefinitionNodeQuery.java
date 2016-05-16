@@ -17,27 +17,27 @@ public interface FlowDefinitionNodeQuery {
     ///////////////////////////////////////////////////////////////
     ///// 流程节点 query 公共查询方法 ////////////////////////////////
     ///////////////////////////////////////////////////////////////
-    public FlowDefinitionNodeQuery id(Long id);
-    public FlowDefinitionNodeQuery name(String name);
-    public FlowDefinitionNodeQuery flowDefinitionId(Long flowDefinitionId);
-    public FlowDefinitionNodeQuery nodeName(String nodeName);
-    public FlowDefinitionNodeQuery type(Integer type);
-    public FlowDefinitionNodeQuery assignee(String  assignee);
-    public FlowDefinitionNodeQuery bean(FlowDefinitionNode flowDefinitionNode);
-    public FlowDefinitionNodeQuery orderBy(String orderBy);
-    public FlowDefinitionNodeQuery desc();
-    public FlowDefinitionNodeQuery asc();
-    public Paging<FlowDefinitionNode> paging(Integer offset, Integer limit);   // 分页方法
-    public FlowDefinitionNode single();                                        // 唯一值
-    public List<FlowDefinitionNode> list();                                    // 值列表
-    public long size();                                                        // 数量
+    FlowDefinitionNodeQuery id(Long id);
+    FlowDefinitionNodeQuery name(String name);
+    FlowDefinitionNodeQuery flowDefinitionId(Long flowDefinitionId);
+    FlowDefinitionNodeQuery nodeName(String nodeName);
+    FlowDefinitionNodeQuery type(Integer type);
+    FlowDefinitionNodeQuery assignee(String assignee);
+    FlowDefinitionNodeQuery bean(FlowDefinitionNode flowDefinitionNode);
+    FlowDefinitionNodeQuery orderBy(String orderBy);
+    FlowDefinitionNodeQuery desc();
+    FlowDefinitionNodeQuery asc();
+    Paging<FlowDefinitionNode> paging(Integer offset, Integer limit);   // 分页方法
+    FlowDefinitionNode single();                                        // 唯一值
+    List<FlowDefinitionNode> list();                                    // 值列表
+    long size();                                                        // 数量
 
-    public List<FlowDefinitionNode> findFlowDefinitionNodes(FlowDefinitionNode flowDefinitionNode);
-    public List<FlowDefinitionNode> findFlowDefinitionNodes(Map criteria);
-    public FlowDefinitionNode findFlowDefinitionNodeSingle(FlowDefinitionNode flowDefinitionNode);
-    public FlowDefinitionNode findFlowDefinitionNodeSingle(Map criteria);
-    public Paging<FlowDefinitionNode> findFlowDefinitionNodesPaging(Map criteria, Integer offset, Integer limit);
-    public long findFlowDefinitionNodesSize(Map criteria);
+    List<FlowDefinitionNode> findFlowDefinitionNodes(FlowDefinitionNode flowDefinitionNode);
+    List<FlowDefinitionNode> findFlowDefinitionNodes(Map criteria);
+    FlowDefinitionNode findFlowDefinitionNodeSingle(FlowDefinitionNode flowDefinitionNode);
+    FlowDefinitionNode findFlowDefinitionNodeSingle(Map criteria);
+    Paging<FlowDefinitionNode> findFlowDefinitionNodesPaging(Map criteria, Integer offset, Integer limit);
+    long findFlowDefinitionNodesSize(Map criteria);
 
     ///////////////////////////////////////////////////////////////
     ///// 流程节点 query 其他查询方法 ////////////////////////////////
@@ -50,5 +50,5 @@ public interface FlowDefinitionNodeQuery {
      *      @see io.terminus.doctor.workflow.model.FlowDefinitionNode.Type
      * @return
      */
-    public FlowDefinitionNode findDefinitionNodeByType(Long flowDefinitionId, Integer nodeType);
+    FlowDefinitionNode findDefinitionNodeByType(Long flowDefinitionId, Integer nodeType);
 }

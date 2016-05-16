@@ -13,33 +13,33 @@ public interface Executor {
     /**
      * 执行当前流程实例的任务
      */
-    public void execute();
+    void execute();
 
     /**
      * 执行当前流程实例的任务
      * @param expression    执行表达式, 一般指decision节点
      */
-    public void execute(Map expression);
+    void execute(Map expression);
 
     /**
      * 执行当前流程实例的任务
      * @param flowData      流转数据
      */
-    public void execute(String flowData);
+    void execute(String flowData);
 
     /**
      * 执行当前流程实例的任务
      * @param expression    执行表达式, 一般指decision节点
      * @param flowData      流转数据
      */
-    public void execute(Map expression, String flowData);
+    void execute(Map expression, String flowData);
 
     /**
      * 执行当前流程实例的任务
      * @param operatorId    操作人id
      * @param operatorName  操作人姓名
      */
-    public void execute(Long operatorId, String operatorName);
+    void execute(Long operatorId, String operatorName);
 
     /**
      * 执行当前流程实例的任务
@@ -47,7 +47,7 @@ public interface Executor {
      * @param operatorId    操作人id
      * @param operatorName  操作人姓名
      */
-    public void execute(Map expression, Long operatorId, String operatorName);
+    void execute(Map expression, Long operatorId, String operatorName);
 
     /**
      * 执行当前流程实例的任务
@@ -56,6 +56,6 @@ public interface Executor {
      * @param operatorId    操作人id
      * @param operatorName  操作人姓名
      */
-    public void execute(Map expression, String flowData, Long operatorId, String operatorName);
+    void execute(Map expression, String flowData, Long operatorId, String operatorName);
 
 }

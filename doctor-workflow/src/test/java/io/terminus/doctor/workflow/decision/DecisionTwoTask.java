@@ -12,7 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.Map;
 
 /**
- * Desc:
+ * Desc: 选择节点简单测试
  * Mail: chk@terminus.io
  * Created by icemimosa
  * Date: 16/5/14

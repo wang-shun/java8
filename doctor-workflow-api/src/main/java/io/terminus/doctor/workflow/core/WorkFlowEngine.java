@@ -23,7 +23,7 @@ public interface WorkFlowEngine {
      * 获取去DAO层统一接口
      * @return
      */
-    public JdbcAccess buildJdbcAccess();
+    JdbcAccess buildJdbcAccess();
 
     /**
      * 创建配置解析类
@@ -31,19 +31,19 @@ public interface WorkFlowEngine {
      * @return
      * @throws Exception
      */
-    public Configuration buildConfiguration(InputStream inputStream) throws Exception;
+    Configuration buildConfiguration(InputStream inputStream) throws Exception;
 
     /**
      * 获取全局上下文对象
      * @return
      */
-    public Context buildContext();
+    Context buildContext();
 
     /**
      * 获取所有拦截器对象
      * @return
      */
-    public List<Interceptor> buildInterceptors();
+    List<Interceptor> buildInterceptors();
 
     /**
      * 创建节点执行器
@@ -52,7 +52,7 @@ public interface WorkFlowEngine {
      * @param assignee          任务
      * @return
      */
-    public Executor buildExecutor(String flowDefinitionKey, Long businessId, String assignee);
+    Executor buildExecutor(String flowDefinitionKey, Long businessId, String assignee);
 
     /**
      * 创建节点执行容器
@@ -63,29 +63,29 @@ public interface WorkFlowEngine {
      * @param operatorName  操作人name
      * @return
      */
-    public Execution buildExecution(FlowProcess flowProcess, Map expression, String flowData, Long operatorId, String operatorName);
+    Execution buildExecution(FlowProcess flowProcess, Map expression, String flowData, Long operatorId, String operatorName);
 
     /**
      * 构造公共服务类
      * @return
      */
-    public WorkFlowService buildWorkFlowService();
+    WorkFlowService buildWorkFlowService();
 
     /**
      * 构造流程定义服务类
      * @return
      */
-    public FlowDefinitionService buildFlowDefinitionService();
+    FlowDefinitionService buildFlowDefinitionService();
 
     /**
      * 构造流程节点流转服务类
      * @return
      */
-    public FlowProcessService buildFlowProcessService();
+    FlowProcessService buildFlowProcessService();
 
     /**
      * 构造流程查询服务类
      * @return
      */
-    public FlowQueryService buildFlowQueryService();
+    FlowQueryService buildFlowQueryService();
 }

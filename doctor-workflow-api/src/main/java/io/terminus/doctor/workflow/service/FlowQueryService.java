@@ -20,47 +20,47 @@ public interface FlowQueryService {
      * 获取流程定义查询接口
      * @return
      */
-    public FlowDefinitionQuery getFlowDefinitionQuery();
+    FlowDefinitionQuery getFlowDefinitionQuery();
 
     /**
      * 获取流程定义 节点 查询接口
      * @return
      */
-    public FlowDefinitionNodeQuery getFlowDefinitionNodeQuery();
+    FlowDefinitionNodeQuery getFlowDefinitionNodeQuery();
 
     /**
      * 获取流程定义 事件连线 查询接口
      * @return
      */
-    public FlowDefinitionNodeEventQuery getFlowDefinitionNodeEventQuery();
+    FlowDefinitionNodeEventQuery getFlowDefinitionNodeEventQuery();
 
     /**
      * 获取流程实例查询接口
      * @return
      */
-    public FlowInstanceQuery getFlowInstanceQuery();
+    FlowInstanceQuery getFlowInstanceQuery();
 
     /**
      * 获取流程活动节点查询接口
      * @return
      */
-    public FlowProcessQuery getFlowProcessQuery();
+    FlowProcessQuery getFlowProcessQuery();
 
     /**
      * 获取流程活动节点跟踪查询接口
      * @return
      */
-    public FlowProcessTrackQuery getFlowProcessTrackQuery();
+    FlowProcessTrackQuery getFlowProcessTrackQuery();
 
     /**
      * 获取流程实例历史查询接口
      * @return
      */
-    public FlowHistoryInstanceQuery getFlowHistoryInstanceQuery();
+    FlowHistoryInstanceQuery getFlowHistoryInstanceQuery();
 
     /**
      * 获取流程活动节点历史查询接口
      * @return
      */
-    public FlowHistoryProcessQuery getFlowHistoryProcessQuery();
+    FlowHistoryProcessQuery getFlowHistoryProcessQuery();
 }
