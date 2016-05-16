@@ -660,6 +660,24 @@ CREATE TABLE `doctor_pig_tracks` (
 CREATE unique index doctor_pig_tracks_pig_card_id on doctor_pig_tracks(pig_id);
 CREATE index doctor_pig_tracks_current_barn_id on doctor_pig_tracks(current_barn_id);
 
+-- 添加猪快照信息表数据内容
+drop table if exists doctor_pig_snapshots;
+create table doctor_pig_snapshots(
+	`id` bigint(20) unsigned not null AUTO_INCREMENT comment 'id',
+	`org_id` bigint(20) unsigned default null comment 'org_id',
+	`farm_id` bigint(20) unsigned default null comment 'farm_id',
+	`pig_id` bigint(20) unsigned default null comment 'pig_id',
+	`event_id` bigint(20) unsigned default null comment 'event_id',
+	`pig_info` text default null comment '公猪快照信息',
+	`created_at` datetime DEFAULT NULL,
+  	`updated_at` datetime DEFAULT NULL,
+  	 primary key(id)
+)ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='猪群事件记录数据表';
+CREATE index doctor_pig_snapshots_farm_id on doctor_pig_snapshots(farm_id);
+CREATE index doctor_pig_snapshots_pig_id on doctor_pig_snapshots(pig_id);
+create index doctor_pig_snapshots_event_id on doctor_pig_snapshots(event_id);
+
+
 -- 公猪，母猪， 仔猪事件信息表
 DROP TABLE IF EXISTS `doctor_pig_events`;
 CREATE TABLE `doctor_pig_events` (
