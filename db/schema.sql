@@ -875,9 +875,9 @@ CREATE TABLE `doctor_menus` (
 insert into `parana_configs`
 (`biz_type`, `key`, `value`, `data_type`, `group`, `description`, created_at, updated_at)
 values
-(0, 'user.password.login.pigmall', 'pigmall', 'string', 0, '第三方用户登录pigmall系统的接口密码', NOW(), now()),
-(0, 'user.corp.id.in.pigmall', '1', 'string', 0, '本系统在pigmall系统的corp_id', NOW(), now()),
-(0, 'user.domain.pigmall', 'http://www.pigmall.com', 'string', 0, 'pigmall系统的完整域名', NOW(), now()),
-(0, 'user.password.login.neverest', 'neverest', 'string', 0, '第三方用户登录neverest系统的接口密码', NOW(), now()),
-(0, 'user.corp.id.in.neverest', '1', 'string', 0, '本系统在neverest系统的corp_id', NOW(), now()),
-(0, 'user.domain.neverest', 'http://www.neverest.com', 'string', 0, 'neverest系统的完整域名', NOW(), now());
+(0, 'system.pigmall.password', 'pigmall', 'string', 0, '第三方用户登录pigmall系统的接口密码', NOW(), now()),
+(0, 'system.pigmall.corp.id', '1', 'string', 0, '本系统在pigmall系统的corp_id', NOW(), now()),
+(0, 'system.pigmall.domain', 'http://www.pigmall.com', 'string', 0, 'pigmall系统的完整域名', NOW(), now()),
+(0, 'system.neverest.password', 'neverest', 'string', 0, '第三方用户登录neverest系统的接口密码', NOW(), now()),
+(0, 'system.neverest.corp.id', '1', 'string', 0, '本系统在neverest系统的corp_id', NOW(), now()),
+(0, 'system.neverest.domain', 'http://www.neverest.com', 'string', 0, 'neverest系统的完整域名', NOW(), now());
