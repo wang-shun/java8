@@ -4,6 +4,7 @@ import io.terminus.doctor.workflow.model.FlowInstance;
 import io.terminus.doctor.workflow.model.FlowProcess;
 import io.terminus.doctor.workflow.utils.AssertHelper;
 import io.terminus.doctor.workflow.utils.NodeHelper;
+import io.terminus.doctor.workflow.utils.StringHelper;
 
 import java.util.List;
 import java.util.Map;
@@ -100,6 +101,9 @@ public class ExecutorImpl implements Executor {
         }
         // 一般情况任务执行
         if (currentProcesses != null) {
+            if(StringHelper.isBlank(flowData)) {
+                flowData = currentProcesses.get(0).getFlowData();
+            }
             NodeHelper.buildTaskNode().execute(workFlowEngine.buildExecution(currentProcesses.get(0), expression, flowData, operatorId, operatorName));
         }
     }

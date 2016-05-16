@@ -174,7 +174,9 @@ public class FlowProcessServiceImpl implements FlowProcessService {
             flowHistoryProcess.setStatus(FlowProcess.Status.END.value());
             access().createFlowHistoryProcess(flowHistoryProcess);
             // 记录历史流程实例
-            FlowHistoryInstance flowHistoryInstance = FlowHistoryInstance.builder().build();
+            FlowHistoryInstance flowHistoryInstance = FlowHistoryInstance.builder()
+                    .describe(describe)
+                    .build();
             BeanHelper.copy(flowHistoryInstance, existFlowInstance);
             flowHistoryInstance.setStatus(FlowInstance.Status.END.value());
             access().createFlowHistoryInstance(flowHistoryInstance);
@@ -216,7 +218,9 @@ public class FlowProcessServiceImpl implements FlowProcessService {
                     }
                     access().deleteFlowInstance(flowInstance.getId());
                     // 记录历史流程实例
-                    FlowHistoryInstance flowHistoryInstance = FlowHistoryInstance.builder().build();
+                    FlowHistoryInstance flowHistoryInstance = FlowHistoryInstance.builder()
+                            .describe(describe)
+                            .build();
                     BeanHelper.copy(flowHistoryInstance, flowInstance);
                     flowHistoryInstance.setStatus(FlowInstance.Status.DELETE.value());
                     access().createFlowHistoryInstance(flowHistoryInstance);

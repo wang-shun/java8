@@ -18,7 +18,7 @@ public class EndNode extends BaseNode {
                 .single();
         if(flowInstance != null) {
             execution.getWorkFlowService().getFlowProcessService()
-                    .endFlowInstance(flowInstance.getFlowDefinitionKey(), flowInstance.getBusinessId());
+                    .endFlowInstance(flowInstance.getFlowDefinitionKey(), flowInstance.getBusinessId(), false, "流程实例正常结束");
         }
     }
 }

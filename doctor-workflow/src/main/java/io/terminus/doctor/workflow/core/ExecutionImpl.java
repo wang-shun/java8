@@ -154,7 +154,8 @@ public class ExecutionImpl implements Execution {
                     try {
                         // 实例化, 并存到上下文
                         handler = (IHandler) Class.forName(handlerName).newInstance();
-                        workFlowEngine.buildContext().put(handlerName, handler);
+                        workFlowEngine.buildContext().put(
+                                StringHelper.uncapitalize(handlerName.substring(handlerName.lastIndexOf(".") + 1)), handler);
                     } catch (Exception e) {
                         log.error("[Flow Execution] -> handler not found, handler is {}, cause by {}",
                                 handlerName, Throwables.getStackTraceAsString(e));
@@ -191,6 +192,17 @@ public class ExecutionImpl implements Execution {
             return flowInstance.getBusinessData();
         }
         return null;
+    }
+
+    @Override
+    public void setBusinessData(String businessData) {
+        FlowInstance flowInstance = workFlowEngine.buildFlowQueryService().getFlowInstanceQuery()
+                .id(this.flowProcess.getFlowInstanceId())
+                .single();
+        if (flowInstance != null) {
+            flowInstance.setBusinessData(businessData);
+            workFlowEngine.buildJdbcAccess().updateFlowInstance(flowInstance);
+        }
     }
 
     @Override

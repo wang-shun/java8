@@ -49,7 +49,7 @@ public class DecisionNode extends BaseNode {
                 "decision节点没有找到可执行的连接事件, 事件表达式为: {}, 执行参数为: {}", goTransition.getExpression(), execution.getExpression());
 
         // 执行handler
-        forward(execution.getHandler(goTransition.getHandler()), execution, execution.getNextFlowProcess(goTransition));
+        forward(execution.getHandler(goTransition.getHandler()), execution, goTransition);
     }
 
 }

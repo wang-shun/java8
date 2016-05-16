@@ -56,7 +56,7 @@
         UPDATE
         <include refid="tb"/>
         <set>
-            update_at = now()
+            updated_at = now()
             <if test="key != null">,`key` = #{key}</if>
             <if test="name != null">,`name` = #{name}</if>
             <if test="version != null">,`version` = #{version}</if>

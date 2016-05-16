@@ -105,4 +105,9 @@ public class WorkFlowContext implements Context{
             });
         }
     }
+
+    @Override
+    public String toString() {
+        return context.toString();
+    }
 }

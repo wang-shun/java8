@@ -16,6 +16,7 @@
         <result column="business_data" property="businessData"/>
         <result column="status" property="status"/>
         <result column="type" property="type"/>
+        <result column="describe" property="describe"/>
         <result column="operator_id" property="operatorId"/>
         <result column="operator_name" property="operatorName"/>
         <result column="parent_instance_id" property="parentInstanceId"/>
@@ -33,10 +34,10 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        `name`,`flow_definition_id`,`flow_definition_key`,`business_id`,`business_data`,`status`,`type`,`operator_id`,`operator_name`,`parent_instance_id`,`created_at`,`updated_at`    </sql>
+        `name`,`flow_definition_id`,`flow_definition_key`,`business_id`,`business_data`,`status`,`type`,`describe`,`operator_id`,`operator_name`,`parent_instance_id`,`created_at`,`updated_at`    </sql>
 
     <sql id="vals">
-        #{name},#{flowDefinitionId},#{flowDefinitionKey},#{businessId},#{businessData},#{status},#{type},#{operatorId},#{operatorName},#{parentInstanceId},now(),now()    </sql>
+        #{name},#{flowDefinitionId},#{flowDefinitionKey},#{businessId},#{businessData},#{status},#{type},#{describe},#{operatorId},#{operatorName},#{parentInstanceId},now(),now()    </sql>
 
     <insert id="create" parameterType="FlowHistoryInstance" keyProperty="id" useGeneratedKeys="true">
         INSERT INTO
@@ -58,7 +59,7 @@
         UPDATE
         <include refid="tb"/>
         <set>
-            update_at = now()
+            updated_at = now()
             <if test="name != null">,`name` = #{name}</if>
             <if test="flowDefinitionId != null">,`flow_definition_id` = #{flowDefinitionId}</if>
             <if test="flowDefinitionKey != null">,`flow_definition_key` = #{flowDefinitionKey}</if>
@@ -66,6 +67,7 @@
             <if test="businessData != null">,`business_data` = #{businessData}</if>
             <if test="status != null">,`status` = #{status}</if>
             <if test="type != null">,`type` = #{type}</if>
+            <if test="describe != null">,`describe` = #{describe}</if>
             <if test="operatorId != null">,`operator_id` = #{operatorId}</if>
             <if test="operatorName != null">,`operator_name` = #{operatorName}</if>
             <if test="parentInstanceId != null">,`parent_instance_id` = #{parentInstanceId}</if>

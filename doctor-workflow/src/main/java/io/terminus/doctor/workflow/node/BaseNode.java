@@ -4,6 +4,7 @@ import io.terminus.doctor.workflow.core.Execution;
 import io.terminus.doctor.workflow.event.IHandler;
 import io.terminus.doctor.workflow.event.Interceptor;
 import io.terminus.doctor.workflow.model.FlowDefinitionNode;
+import io.terminus.doctor.workflow.model.FlowDefinitionNodeEvent;
 import io.terminus.doctor.workflow.model.FlowProcess;
 import io.terminus.doctor.workflow.utils.NodeHelper;
 import lombok.extern.slf4j.Slf4j;
@@ -58,7 +59,7 @@ public abstract class BaseNode implements Node {
         }
     }
 
-    protected void forward(IHandler handler, Execution execution, FlowProcess nextProcess) {
+    protected void forward(IHandler handler, Execution execution, FlowDefinitionNodeEvent transition) {
         // 1. 执行节点
         if (handler != null) {
             handler.preHandle(execution);
@@ -66,6 +67,7 @@ public abstract class BaseNode implements Node {
             handler.afterHandle(execution);
         }
 
+        FlowProcess nextProcess = execution.getNextFlowProcess(transition);
         if (nextProcess != null) {
             // 2. 删除当前节点, 并存储下一个节点
             execution.createNextFlowProcess(nextProcess);

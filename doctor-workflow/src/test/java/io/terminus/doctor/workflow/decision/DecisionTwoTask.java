@@ -3,9 +3,9 @@ package io.terminus.doctor.workflow.decision;
 import com.google.common.collect.Maps;
 import io.terminus.doctor.workflow.base.BaseServiceTest;
 import io.terminus.doctor.workflow.core.WorkFlowService;
-import io.terminus.doctor.workflow.model.FlowDefinitionNode;
 import io.terminus.doctor.workflow.model.FlowInstance;
 import io.terminus.doctor.workflow.model.FlowProcess;
+import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -26,37 +26,38 @@ public class DecisionTwoTask extends BaseServiceTest {
     private Long businessId = 1314L;
 
     @Test
-    public void testDeploySimpleWorkFlow() {
-        workFlowService.getFlowDefinitionService().deploy("decision/decision_two_task.xml");
-    }
-
-    @Test
-    public void testStartFlowInstance() {
-        workFlowService.getFlowProcessService().startFlowInstance(flowDefinitionKey, businessId);
-    }
-
-    @Test
-    public void testGetCurrentTask() {
-        // 1. 获取流程实例
-        FlowInstance flowInstance = workFlowService.getFlowQueryService().getFlowInstanceQuery()
-                .getExistFlowInstance(flowDefinitionKey, businessId);
-        // 2. 获取当前执行的任务
-        FlowProcess process = workFlowService.getFlowQueryService().getFlowProcessQuery()
-                // .getCurrentProcess(flowInstance.getId(), "terminus");
-                .getCurrentProcess(flowInstance.getId(), "terminus2");
-        FlowDefinitionNode node = workFlowService.getFlowQueryService().getFlowDefinitionNodeQuery()
-                .id(process.getFlowDefinitionNodeId())
-                .single();
-        System.out.println(node);
-    }
-
-    @Test
-    public void testExecuteTask() {
+    public void test_NORMAL_DecisionWorkFlow() {
+        // 1. 部署流程
+        defService().deploy("decision/decision_two_task.xml");
+        // 2. 启动流程实例
+        processService().startFlowInstance(flowDefinitionKey, businessId);
+        // 3. 执行第一个任务
         Map expression = Maps.newHashMap();
         expression.put("money",700);
         workFlowService.getFlowProcessService()
                 .getExecutor(flowDefinitionKey, businessId)
-                .execute();
-                //.execute(expression);
+                .execute(expression);
+        // 4. 查询, 当前任务应该为 "任务节点2"
+        FlowInstance flowInstance = instanceQuery().getExistFlowInstance(flowDefinitionKey, businessId);
+        Assert.assertNotNull(flowInstance);
+        FlowProcess process = processQuery().getCurrentProcess(flowInstance.getId(), "terminus2");
+        Assert.assertNotNull(process);
+    }
+
+    @Test
+    public void test_NORMAL1_DecisionWorkFlow() {
+        // 1. 部署流程
+        defService().deploy("decision/decision_two_task.xml");
+        // 2. 启动流程实例
+        processService().startFlowInstance(flowDefinitionKey, businessId);
+        // 3. 执行第一个任务
+        Map expression = Maps.newHashMap();
+        expression.put("money",1001);
+        workFlowService.getFlowProcessService()
+                .getExecutor(flowDefinitionKey, businessId)
+                .execute(expression);
+        // 4. 查询, 流程实例应该结束
+        FlowInstance flowInstance = instanceQuery().getExistFlowInstance(flowDefinitionKey, businessId);
+        Assert.assertNull(flowInstance);
     }
 }

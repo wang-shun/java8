@@ -122,14 +122,14 @@ public class FlowDefinitionServiceImpl implements FlowDefinitionService {
         List<FlowInstance> flowInstances = workFlowEngine.buildFlowQueryService().getFlowInstanceQuery()
                 .flowDefinitionId(flowDefinitionId)
                 .list();
-        if(flowInstances != null) {
+        if(flowInstances != null && flowInstances.size() > 0) {
             flowInstances.forEach(flowInstance ->
                     workFlowEngine.buildFlowProcessService()
                             .endFlowInstance(
                                     flowInstance.getFlowDefinitionKey(),
                                     flowInstance.getBusinessId(),
                                     cascade,
-                                    "删除流程定义",
+                                    "流程定义执行删除操作",
                                     operatorId,
                                     operatorName
                             )
@@ -152,6 +152,9 @@ public class FlowDefinitionServiceImpl implements FlowDefinitionService {
                 .map(FlowDefinitionNodeEvent::getId)
                 .collect(Collectors.toList());
         access().deleteFlowDefinitionNodeEvent(flowDefinitionNodeEventIds);
+
+        // 4. 删除流程定义(逻辑删除)
+        access().deleteFlowDefinition(flowDefinitionId);
     }
 
     private JdbcAccess access() {

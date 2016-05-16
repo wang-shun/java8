@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 流程开始 -->
+<workflow key="simpleFlowHandler" name="简单流程测试">
+    <!-- 开始节点 -->
+    <start name="开始节点" pointx="50" pointy="100">
+        <transition name="开始连线" target="任务节点1" />
+    </start>
+
+    <!-- 任务节点 -->
+    <task name="任务节点1" assignee="terminus" pointx="250" pointy="100">
+        <transition name="任务连线1" target="任务节点2" handler="handlerOne" />
+    </task>
+
+    <!-- 任务节点 -->
+    <task name="任务节点2" assignee="terminus2" pointx="450" pointy="100">
+        <transition name="任务连线2" target="结束节点" handler="io.terminus.doctor.workflow.base.handler.HandlerTwo" />
+    </task>
+
+    <!-- 结束节点 -->
+    <end name="结束节点" pointx="650" pointy="100" />
+</workflow>

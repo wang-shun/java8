@@ -141,6 +141,7 @@ CREATE TABLE IF NOT EXISTS `workflow_history_process_instances`(
 	`business_data` text COMMENT '流程实例全局业务数据',
 	`status` SMALLINT(6) DEFAULT NULL COMMENT '流程实例的状态,冗余流程实例表',
 	`type` SMALLINT(6) DEFAULT NULL COMMENT '流程实例类型, 1-> 主流程, 2-> 子流程',
+	`describe` text COMMENT '历史流程描述',
 	`operator_id` BIGINT(20) DEFAULT NULL COMMENT '操作者id',
 	`operator_name` VARCHAR(32) DEFAULT NULL COMMENT '操作者姓名',
 	`parent_instance_id` BIGINT(20) DEFAULT NULL COMMENT '父流程实例id',

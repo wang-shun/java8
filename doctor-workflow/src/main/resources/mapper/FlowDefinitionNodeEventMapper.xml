@@ -55,7 +55,7 @@
         UPDATE
         <include refid="tb"/>
         <set>
-            update_at = now()
+            updated_at = now()
             <if test="name != null">,`name` = #{name}</if>
             <if test="flowDefinitionId != null">,`flow_definition_id` = #{flowDefinitionId}</if>
             <if test="sourceNodeId != null">,`source_node_id` = #{sourceNodeId}</if>

@@ -57,7 +57,7 @@
         UPDATE
         <include refid="tb"/>
         <set>
-            update_at = now()
+            updated_at = now()
             <if test="flowDefinitionNodeId != null">,`flow_definition_node_id` = #{flowDefinitionNodeId}</if>
             <if test="preFlowDefinitionNodeId != null">,`pre_flow_definition_node_id` = #{preFlowDefinitionNodeId}</if>
             <if test="flowInstanceId != null">,`flow_instance_id` = #{flowInstanceId}</if>

@@ -57,6 +57,10 @@ public class FlowHistoryInstance implements Serializable {
      */
     private Integer type;
     /**
+     * 历史实例描述
+     */
+    private String describe;
+    /**
      * 操作人id
      */
     private Long operatorId;
