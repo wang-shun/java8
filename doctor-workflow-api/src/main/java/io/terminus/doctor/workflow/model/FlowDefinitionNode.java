@@ -66,13 +66,16 @@ public class FlowDefinitionNode implements Serializable{
 
     /**
      * 节点类型
-     * TODO
      */
     public static enum Type{
 
         START(1, "开始节点", Node.NODE_START),
-        TASK(2, "简单任务节点", Node.NODE_TASK),
+        TASK(2, "任务节点", Node.NODE_TASK),
         DECISION(3, "选择节点", Node.NODE_DECISION),
+        FORK(4, "并行节点", Node.NODE_FORK),
+        JOIN(5, "并行汇聚节点", Node.NODE_JOIN),
+        SUBSTART(10, "子流程开始节点", Node.NODE_SUB_START),
+        SUBEND(-10, "子流程结束节点", Node.NODE_SUB_END),
         END(-1, "结束节点", Node.NODE_END);
 
         private final int value;
@@ -118,6 +121,20 @@ public class FlowDefinitionNode implements Serializable{
             for(Type type : Type.values()) {
                 if(Objects.equals(nodeName, type.nodeName())) {
                     return type.value();
+                }
+            }
+            throw new IllegalArgumentException("flow.node.type.undefined");
+        }
+
+        /**
+         * 根据枚举值获取当前节点的描述
+         * @param value
+         * @return
+         */
+        public static String describe(int value) {
+            for (Type type : Type.values()) {
+                if(type.value() == value) {
+                    return type.toString();
                 }
             }
             throw new IllegalArgumentException("flow.node.type.undefined");

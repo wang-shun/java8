@@ -6,9 +6,13 @@ import io.terminus.doctor.workflow.core.Executor;
 import io.terminus.doctor.workflow.core.WorkFlowEngine;
 import io.terminus.doctor.workflow.model.FlowDefinition;
 import io.terminus.doctor.workflow.model.FlowDefinitionNode;
+import io.terminus.doctor.workflow.model.FlowHistoryInstance;
+import io.terminus.doctor.workflow.model.FlowHistoryProcess;
 import io.terminus.doctor.workflow.model.FlowInstance;
 import io.terminus.doctor.workflow.model.FlowProcess;
+import io.terminus.doctor.workflow.model.FlowProcessTrack;
 import io.terminus.doctor.workflow.utils.AssertHelper;
+import io.terminus.doctor.workflow.utils.BeanHelper;
 import io.terminus.doctor.workflow.utils.NodeHelper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +20,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Desc: 流程流程相关的实现类
@@ -123,9 +128,19 @@ public class FlowProcessServiceImpl implements FlowProcessService {
 
     @Override
     public void endFlowInstance(String flowDefinitionKey, Long businessId, boolean isForce, String describe) {
-        // 如果不强制删除
+        endFlowInstance(flowDefinitionKey, businessId, isForce, describe, null, null);
+    }
+
+    @Override
+    public void endFlowInstance(String flowDefinitionKey, Long businessId, boolean isForce, String describe, Long operatorId, String operatorName) {
+        // 如果不强制删除(正常结束)
         if(!isForce) {
-            // 1. 校验流程实例是否存在
+            // 1. 校验流程实例, 和子流程实例是否存在
+            List<FlowInstance> childFlowInstances = workFlowEngine.buildFlowQueryService().getFlowInstanceQuery()
+                    .getExistChildFlowInstance(flowDefinitionKey, businessId);
+            if(childFlowInstances != null && childFlowInstances.size() > 0) {
+                AssertHelper.throwException("当前存在子流程实例, 不能结束结束流程, 流程定义key为: {}, 业务id为: {}", flowDefinitionKey, businessId);
+            }
             FlowInstance existFlowInstance = workFlowEngine.buildFlowQueryService().getFlowInstanceQuery()
                     .getExistFlowInstance(flowDefinitionKey, businessId);
             AssertHelper.isNull(existFlowInstance,
@@ -149,7 +164,29 @@ public class FlowProcessServiceImpl implements FlowProcessService {
             access().deleteFlowProcess(currentProcess.getId());
             access().deleteFlowInstance(existFlowInstance.getId());
 
-            // 3. TODO 记录删除历史
+            // 记录历史活动节点
+            FlowHistoryProcess flowHistoryProcess = FlowHistoryProcess.builder()
+                    .describe(describe)
+                    .operatorId(operatorId)
+                    .operatorName(operatorName)
+                    .build();
+            BeanHelper.copy(flowHistoryProcess, currentProcess);
+            flowHistoryProcess.setStatus(FlowProcess.Status.END.value());
+            access().createFlowHistoryProcess(flowHistoryProcess);
+            // 记录历史流程实例
+            FlowHistoryInstance flowHistoryInstance = FlowHistoryInstance.builder().build();
+            BeanHelper.copy(flowHistoryInstance, existFlowInstance);
+            flowHistoryInstance.setStatus(FlowInstance.Status.END.value());
+            access().createFlowHistoryInstance(flowHistoryInstance);
+            // 删除所有的流程跟踪
+            access().deleteFlowProcessTrack(
+                    workFlowEngine.buildFlowQueryService().getFlowProcessTrackQuery()
+                            .flowInstanceId(existFlowInstance.getId())
+                            .list()
+                            .stream()
+                            .map(FlowProcessTrack::getId)
+                            .collect(Collectors.toList())
+            );
         }
         // 如果强制删除
         else {
@@ -164,14 +201,37 @@ public class FlowProcessServiceImpl implements FlowProcessService {
                             .flowInstanceId(flowInstance.getId())
                             .list();
                     if(flowProcesses != null && flowProcesses.size() > 0) {
-                        flowProcesses.forEach(flowProcess -> access().deleteFlowProcess(flowProcess.getId()));
+                        flowProcesses.forEach(flowProcess -> {
+                            access().deleteFlowProcess(flowProcess.getId());
+                            // 记录历史活动节点
+                            FlowHistoryProcess flowHistoryProcess = FlowHistoryProcess.builder()
+                                    .describe(describe)
+                                    .operatorId(operatorId)
+                                    .operatorName(operatorName)
+                                    .build();
+                            BeanHelper.copy(flowHistoryProcess, flowProcess);
+                            flowHistoryProcess.setStatus(FlowProcess.Status.DELETE.value());
+                            access().createFlowHistoryProcess(flowHistoryProcess);
+                        });
                     }
                     access().deleteFlowInstance(flowInstance.getId());
+                    // 记录历史流程实例
+                    FlowHistoryInstance flowHistoryInstance = FlowHistoryInstance.builder().build();
+                    BeanHelper.copy(flowHistoryInstance, flowInstance);
+                    flowHistoryInstance.setStatus(FlowInstance.Status.DELETE.value());
+                    access().createFlowHistoryInstance(flowHistoryInstance);
+                    // 删除所有的流程跟踪
+                    access().deleteFlowProcessTrack(
+                            workFlowEngine.buildFlowQueryService().getFlowProcessTrackQuery()
+                                    .flowInstanceId(flowInstance.getId())
+                                    .list()
+                                    .stream()
+                                    .map(FlowProcessTrack::getId)
+                                    .collect(Collectors.toList())
+                    );
                 });
             }
-            // 2. TODO 记录删除历史
         }
-
     }
 
     private JdbcAccess access() {

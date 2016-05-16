@@ -16,6 +16,10 @@ public interface Node {
     String NODE_START = "start";
     String NODE_TASK = "task";
     String NODE_DECISION = "decision";
+    String NODE_FORK = "fork";
+    String NODE_JOIN = "join";
+    String NODE_SUB_START = "substart";
+    String NODE_SUB_END = "subend";
     String NODE_END = "end";
 
     String NODE_TRANSITION = "transition";

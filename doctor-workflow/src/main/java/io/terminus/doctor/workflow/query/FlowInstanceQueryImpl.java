@@ -179,4 +179,13 @@ public class FlowInstanceQueryImpl implements FlowInstanceQuery {
                 .type(FlowInstance.Type.PARENT.value())
                 .single();
     }
+
+    @Override
+    public List<FlowInstance> getExistChildFlowInstance(String flowDefinitionKey, Long businessId) {
+        return this
+                .flowDefinitionKey(flowDefinitionKey)
+                .businessId(businessId)
+                .type(FlowInstance.Type.CHILD.value())
+                .list();
+    }
 }

@@ -5,22 +5,25 @@
 
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 
-<mapper namespace="FlowProcess">
+<mapper namespace="FlowHistoryProcess">
 
-    <resultMap id="FlowProcessMap" type="FlowProcess">
+    <resultMap id="FlowHistoryProcessMap" type="FlowHistoryProcess">
         <id column="id" property="id"/>
         <result column="flow_definition_node_id" property="flowDefinitionNodeId"/>
         <result column="pre_flow_definition_node_id" property="preFlowDefinitionNodeId"/>
         <result column="flow_instance_id" property="flowInstanceId"/>
         <result column="flow_data" property="flowData"/>
+        <result column="describe" property="describe"/>
         <result column="status" property="status"/>
         <result column="assignee" property="assignee"/>
+        <result column="operator_id" property="operatorId"/>
+        <result column="operator_name" property="operatorName"/>
         <result column="created_at" property="createdAt"/>
         <result column="updated_at" property="updatedAt"/>
     </resultMap>
 
     <sql id="tb">
-        workflow_processes
+        workflow_history_processes
     </sql>
 
     <sql id="cols_all">
@@ -29,12 +32,12 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        `flow_definition_node_id`,`pre_flow_definition_node_id`,`flow_instance_id`,`flow_data`,`status`,`assignee`,`created_at`,`updated_at`    </sql>
+        `flow_definition_node_id`,`pre_flow_definition_node_id`,`flow_instance_id`,`flow_data`,`describe`,`status`,`assignee`,`operator_id`,`operator_name`,`created_at`,`updated_at`    </sql>
 
     <sql id="vals">
-        #{flowDefinitionNodeId},#{preFlowDefinitionNodeId},#{flowInstanceId},#{flowData},#{status},#{assignee},now(),now()    </sql>
+        #{flowDefinitionNodeId},#{preFlowDefinitionNodeId},#{flowInstanceId},#{flowData},#{describe},#{status},#{assignee},#{operatorId},#{operatorName},now(),now()    </sql>
 
-    <insert id="create" parameterType="FlowProcess" keyProperty="id" useGeneratedKeys="true">
+    <insert id="create" parameterType="FlowHistoryProcess" keyProperty="id" useGeneratedKeys="true">
         INSERT INTO
         <include refid="tb"/>
         (<include refid="cols_exclude_id"/>)
@@ -42,7 +45,7 @@
         (<include refid="vals"/>)
     </insert>
 
-    <select id="findById" parameterType="int" resultMap="FlowProcessMap">
+    <select id="findById" parameterType="long" resultMap="FlowHistoryProcessMap">
         SELECT
         <include refid="cols_all"/>
         FROM
@@ -51,17 +54,20 @@
     </select>
 
 
-    <update id="update" parameterType="FlowProcess">
+    <update id="update" parameterType="FlowHistoryProcess">
         UPDATE
         <include refid="tb"/>
         <set>
-            update_at = now()
+            updated_at = now()
             <if test="flowDefinitionNodeId != null">,`flow_definition_node_id` = #{flowDefinitionNodeId}</if>
             <if test="preFlowDefinitionNodeId != null">,`pre_flow_definition_node_id` = #{preFlowDefinitionNodeId}</if>
             <if test="flowInstanceId != null">,`flow_instance_id` = #{flowInstanceId}</if>
             <if test="flowData != null">,`flow_data` = #{flowData}</if>
+            <if test="describe != null">,`describe` = #{describe}</if>
             <if test="status != null">,`status` = #{status}</if>
             <if test="assignee != null">,`assignee` = #{assignee}</if>
+            <if test="operatorId != null">,`operator_id` = #{operatorId}</if>
+            <if test="operatorName != null">,`operator_name` = #{operatorName}</if>
             <if test="createdAt != null">,`created_at` = #{createdAt}</if>
         </set>
         WHERE id=#{id}
@@ -89,12 +95,14 @@
             <if test="flowInstanceId != null">AND `flow_instance_id` = #{flowInstanceId}</if>
             <if test="status != null">AND `status` = #{status}</if>
             <if test="assignee != null">AND `assignee` = #{assignee}</if>
+            <if test="operatorId != null">AND `operator_id` = #{operatorId}</if>
+            <if test="operatorName != null">AND `operator_name` = #{operatorName}</if>
             <if test="startAt != null">AND `created_at` >= #{startAt}</if>
             <if test="endAt != null">AND `created_at` &lt;= #{endAt}</if>
         </where>
     </sql>
 
-    <select id="list" resultMap="FlowProcessMap">
+    <select id="list" resultMap="FlowHistoryProcessMap">
         SELECT
         <include refid="cols_all"/>
         FROM
@@ -112,7 +120,7 @@
     </select>
 
     <!-- 分页查询 -->
-    <select id="paging" parameterType="map" resultMap="FlowProcessMap">
+    <select id="paging" parameterType="map" resultMap="FlowHistoryProcessMap">
         SELECT
         <include refid="cols_all"/>
         FROM

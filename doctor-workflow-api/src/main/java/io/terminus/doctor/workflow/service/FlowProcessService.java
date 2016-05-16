@@ -106,4 +106,16 @@ public interface FlowProcessService {
      * @param describe          删除的理由(描述信息)
      */
     public void endFlowInstance(String flowDefinitionKey, Long businessId, boolean isForce, String describe);
+
+    /**
+     * 结束流程实例
+     * @param flowDefinitionKey 流程定义的key
+     * @param businessId        业务id
+     * @param isForce           是否强制结束, 强制结束会移除所有的正在运行的流程.
+     *                          isForce 默认为false, 如果存在正在执行的流程, 抛出异常
+     * @param operatorId        操作人id
+     * @param operatorName      操作人姓名
+     * @param describe          删除的理由(描述信息)
+     */
+    public void endFlowInstance(String flowDefinitionKey, Long businessId, boolean isForce, String describe, Long operatorId, String operatorName);
 }

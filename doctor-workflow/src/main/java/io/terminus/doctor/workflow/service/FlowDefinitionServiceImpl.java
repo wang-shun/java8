@@ -8,6 +8,7 @@ import io.terminus.doctor.workflow.core.WorkFlowException;
 import io.terminus.doctor.workflow.model.FlowDefinition;
 import io.terminus.doctor.workflow.model.FlowDefinitionNode;
 import io.terminus.doctor.workflow.model.FlowDefinitionNodeEvent;
+import io.terminus.doctor.workflow.model.FlowInstance;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Desc: 流程服务类,包括功能如下
@@ -111,7 +113,45 @@ public class FlowDefinitionServiceImpl implements FlowDefinitionService {
 
     @Override
     public void delete(Long flowDefinitionId, boolean cascade) {
-        // TODO
+        delete(flowDefinitionId, cascade, null, null);
+    }
+
+    @Override
+    public void delete(Long flowDefinitionId, boolean cascade, Long operatorId, String operatorName) {
+        // 1. 停止所有的流程实例
+        List<FlowInstance> flowInstances = workFlowEngine.buildFlowQueryService().getFlowInstanceQuery()
+                .flowDefinitionId(flowDefinitionId)
+                .list();
+        if(flowInstances != null) {
+            flowInstances.forEach(flowInstance ->
+                    workFlowEngine.buildFlowProcessService()
+                            .endFlowInstance(
+                                    flowInstance.getFlowDefinitionKey(),
+                                    flowInstance.getBusinessId(),
+                                    cascade,
+                                    "删除流程定义",
+                                    operatorId,
+                                    operatorName
+                            )
+            );
+        }
+        // 2. 删除对应的节点
+        List<Long> flowDefinitionNodeIds = workFlowEngine.buildFlowQueryService().getFlowDefinitionNodeQuery()
+                .flowDefinitionId(flowDefinitionId)
+                .list()
+                .stream()
+                .map(FlowDefinitionNode::getId)
+                .collect(Collectors.toList());
+        access().deleteFlowDefinitionNode(flowDefinitionNodeIds);
+
+        // 3. 删除对应的连接事件
+        List<Long> flowDefinitionNodeEventIds = workFlowEngine.buildFlowQueryService().getFlowDefinitionNodeEventQuery()
+                .flowDefinitionId(flowDefinitionId)
+                .list()
+                .stream()
+                .map(FlowDefinitionNodeEvent::getId)
+                .collect(Collectors.toList());
+        access().deleteFlowDefinitionNodeEvent(flowDefinitionNodeEventIds);
     }
 
     private JdbcAccess access() {

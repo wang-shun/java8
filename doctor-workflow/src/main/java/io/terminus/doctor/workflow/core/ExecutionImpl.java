@@ -6,9 +6,12 @@ import io.terminus.doctor.workflow.event.IHandler;
 import io.terminus.doctor.workflow.event.Interceptor;
 import io.terminus.doctor.workflow.model.FlowDefinitionNode;
 import io.terminus.doctor.workflow.model.FlowDefinitionNodeEvent;
+import io.terminus.doctor.workflow.model.FlowHistoryProcess;
 import io.terminus.doctor.workflow.model.FlowInstance;
 import io.terminus.doctor.workflow.model.FlowProcess;
+import io.terminus.doctor.workflow.model.FlowProcessTrack;
 import io.terminus.doctor.workflow.utils.AssertHelper;
+import io.terminus.doctor.workflow.utils.BeanHelper;
 import io.terminus.doctor.workflow.utils.StringHelper;
 import lombok.extern.slf4j.Slf4j;
 
@@ -26,10 +29,25 @@ public class ExecutionImpl implements Execution {
 
     private WorkFlowEngine workFlowEngine;
 
+    /**
+     * 当前执行的流程
+     */
     private FlowProcess flowProcess;
+    /**
+     * 流程判断表达式参数
+     */
     private Map expression;
+    /**
+     * 流转数据
+     */
     private String flowData;
+    /**
+     * 操作人id
+     */
     private Long operatorId;
+    /**
+     * 操作人姓名
+     */
     private String operatorName;
 
     public ExecutionImpl(WorkFlowEngine workFlowEngine, FlowProcess flowProcess,
@@ -96,8 +114,23 @@ public class ExecutionImpl implements Execution {
 
     @Override
     public void createNextFlowProcess(FlowProcess flowProcess) {
-        // 1. 删除当前已经完成的节点, TODO 记录历史和Track
+        // 1. 删除当前已经完成的节点, 记录历史和Track
         workFlowEngine.buildJdbcAccess().deleteFlowProcess(this.flowProcess.getId());
+        FlowDefinitionNode currNode = workFlowEngine.buildFlowQueryService().getFlowDefinitionNodeQuery()
+                .id(this.flowProcess.getFlowDefinitionNodeId())
+                .single();
+        FlowProcessTrack flowProcessTrack = FlowProcessTrack.builder().build();
+        FlowHistoryProcess flowHistoryProcess = FlowHistoryProcess.builder()
+                .describe(FlowDefinitionNode.Type.describe(currNode.getType()) + "[name:" + currNode.getName() + "], 正常结束")
+                .operatorId(operatorId)
+                .operatorName(operatorName)
+                .build();
+        BeanHelper.copy(flowHistoryProcess, this.flowProcess);
+        flowHistoryProcess.setStatus(FlowProcess.Status.END.value());
+        BeanHelper.copy(flowProcessTrack, flowHistoryProcess);
+        workFlowEngine.buildJdbcAccess().createFlowHistoryProcess(flowHistoryProcess);
+        workFlowEngine.buildJdbcAccess().createFlowProcessTrack(flowProcessTrack);
+
         // 2. 创建下一个节点, 如果存在就更新
         if(flowProcess.getId() != null) {
             workFlowEngine.buildJdbcAccess().updateFlowProcess(flowProcess);

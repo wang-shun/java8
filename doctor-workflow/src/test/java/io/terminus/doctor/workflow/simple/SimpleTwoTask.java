@@ -4,6 +4,7 @@ import io.terminus.doctor.workflow.base.BaseServiceTest;
 import io.terminus.doctor.workflow.core.WorkFlowService;
 import io.terminus.doctor.workflow.model.FlowInstance;
 import io.terminus.doctor.workflow.model.FlowProcess;
+import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -22,28 +23,22 @@ public class SimpleTwoTask extends BaseServiceTest {
     private Long businessId = 1314L;
 
     @Test
-    public void testDeploySimpleWorkFlow() {
+    public void testNormalSimpleWorkFlow() {
+        // 1. 部署流程
         workFlowService.getFlowDefinitionService().deploy("simple/simple_two_task.xml");
-    }
-
-    @Test
-    public void testStartFlowInstance() {
+        // 2. 启动一个流程实例
         workFlowService.getFlowProcessService().startFlowInstance(flowDefinitionKey, businessId);
-    }
-
-    @Test
-    public void testGetCurrentTask() {
-        // 1. 获取流程实例
+        // 3. 查询
         FlowInstance flowInstance = workFlowService.getFlowQueryService().getFlowInstanceQuery()
                 .getExistFlowInstance(flowDefinitionKey, businessId);
-        // 2. 获取当前执行的任务
         FlowProcess process = workFlowService.getFlowQueryService().getFlowProcessQuery()
                 .getCurrentProcess(flowInstance.getId(), "terminus");
         System.out.println(process);
-    }
-
-    @Test
-    public void testExecuteTask() {
+        // 5. 执行第一个任务
+        workFlowService.getFlowProcessService()
+                .getExecutor(flowDefinitionKey, businessId)
+                .execute();
+        // 6. 执行第二个任务
         workFlowService.getFlowProcessService()
                 .getExecutor(flowDefinitionKey, businessId)
                 .execute();

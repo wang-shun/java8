@@ -28,7 +28,7 @@ CREATE TABLE IF NOT EXISTS `workflow_definition_nodes`(
 	`flow_definition_id` BIGINT(20) DEFAULT NULL COMMENT '流程定义id',
 	`name` VARCHAR(32) DEFAULT NULL COMMENT '节点name属性名称',
 	`node_name` VARCHAR(32) DEFAULT NULL COMMENT '节点标签名称',
-	`type` SMALLINT(6) DEFAULT NULL COMMENT '节点类型',  				-- TODO:描述
+	`type` SMALLINT(6) DEFAULT NULL COMMENT '节点类型, 1->开始节点, 2->任务节点, 3->选择节点, 4->并行节点, 5->并行汇聚节点, 10->子流程开始节点, -10->子流程结束节点, -1->结束节点',
 	`assignee` VARCHAR(32) DEFAULT NULL COMMENT '处理人(暂时保留)',
 	`point_x` DOUBLE DEFAULT NULL COMMENT '节点x轴偏移量',
 	`point_y` DOUBLE DEFAULT NULL COMMENT '节点y轴偏移量',
@@ -72,7 +72,7 @@ CREATE TABLE IF NOT EXISTS `workflow_process_instances`(
 	`flow_definition_key` VARCHAR(128) DEFAULT NULL COMMENT '流程定义唯一标识,冗余',
 	`business_id` BIGINT(20) DEFAULT NULL COMMENT '与流程实例相关联的业务id',
 	`business_data` text COMMENT '流程实例全局业务数据',
-	`status` SMALLINT(6) DEFAULT NULL COMMENT '流程实例的状态', 		-- TODO: 描述
+	`status` SMALLINT(6) DEFAULT NULL COMMENT '流程实例的状态, 1->正常, 2->正常结束, -1->删除, -2->挂起',
 	`type` SMALLINT(6) DEFAULT NULL COMMENT '流程实例类型, 1-> 主流程, 2-> 子流程',
 	`operator_id` BIGINT(20) DEFAULT NULL COMMENT '操作者id',
 	`operator_name` VARCHAR(32) DEFAULT NULL COMMENT '操作者姓名',
@@ -96,7 +96,7 @@ CREATE TABLE IF NOT EXISTS `workflow_processes`(
 	`pre_flow_definition_node_id` VARCHAR(128) DEFAULT NULL COMMENT '上一个流程节点的id, 可能存在多个, 用逗号隔开',
 	`flow_instance_id` BIGINT(20) DEFAULT NULL COMMENT '流程实例的id',
 	`flow_data` text COMMENT '流程节点之间的暂时性流转数据',
-	`status` SMALLINT(6) DEFAULT NULL COMMENT '流程节点的状态',		-- TODO: 描述
+	`status` SMALLINT(6) DEFAULT NULL COMMENT '流程节点的状态, 1->正常, 2->正常结束, -1->删除, -2->挂起',
 	`assignee` VARCHAR(32) DEFAULT NULL COMMENT '处理人(暂时保留),该值优先于流程定义节点的值',
 	`created_at` DATETIME DEFAULT NULL COMMENT '创建时间',
 	`updated_at`  DATETIME DEFAULT NULL COMMENT '更新时间',
@@ -140,6 +140,7 @@ CREATE TABLE IF NOT EXISTS `workflow_history_process_instances`(
 	`business_id` BIGINT(20) DEFAULT NULL COMMENT '与流程实例相关联的业务id',
 	`business_data` text COMMENT '流程实例全局业务数据',
 	`status` SMALLINT(6) DEFAULT NULL COMMENT '流程实例的状态,冗余流程实例表',
+	`type` SMALLINT(6) DEFAULT NULL COMMENT '流程实例类型, 1-> 主流程, 2-> 子流程',
 	`operator_id` BIGINT(20) DEFAULT NULL COMMENT '操作者id',
 	`operator_name` VARCHAR(32) DEFAULT NULL COMMENT '操作者姓名',
 	`parent_instance_id` BIGINT(20) DEFAULT NULL COMMENT '父流程实例id',
@@ -164,7 +165,7 @@ CREATE TABLE IF NOT EXISTS `workflow_history_processes`(
 	`flow_instance_id` BIGINT(20) DEFAULT NULL COMMENT '流程实例的id',
 	`flow_data` text COMMENT '流程节点之间的暂时性流转数据',
 	`describe` text COMMENT '历史节点流转描述',
-	`status` SMALLINT(6) DEFAULT NULL COMMENT '流程节点的状态,冗余节点状态',
+	`status` SMALLINT(6) DEFAULT NULL COMMENT '流程节点的状态,冗余workflow_process表',
 	`operator_id` BIGINT(20) DEFAULT NULL COMMENT '操作者id',
 	`operator_name` VARCHAR(32) DEFAULT NULL COMMENT '操作者姓名',
 	`assignee` VARCHAR(32) DEFAULT NULL COMMENT '处理人(暂时保留)',

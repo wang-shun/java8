@@ -4,8 +4,11 @@ import io.terminus.common.model.Paging;
 import io.terminus.doctor.workflow.model.FlowDefinition;
 import io.terminus.doctor.workflow.model.FlowDefinitionNode;
 import io.terminus.doctor.workflow.model.FlowDefinitionNodeEvent;
+import io.terminus.doctor.workflow.model.FlowHistoryInstance;
+import io.terminus.doctor.workflow.model.FlowHistoryProcess;
 import io.terminus.doctor.workflow.model.FlowInstance;
 import io.terminus.doctor.workflow.model.FlowProcess;
+import io.terminus.doctor.workflow.model.FlowProcessTrack;
 
 import java.util.List;
 import java.util.Map;
@@ -26,6 +29,13 @@ public interface JdbcAccess {
      * @param flowDefinition    流程定义对象
      */
     public void createFlowDefinition(FlowDefinition flowDefinition);
+
+    /**
+     * 删除一个流程定义对象(逻辑删除)
+     * @param flowDefinitionId
+     */
+    public void deleteFlowDefinition(Long flowDefinitionId);
+    public void deleteFlowDefinition(List<Long> flowDefinitionIds);
 
     /**
      * 根据流程定义的bean查询流程定义
@@ -82,6 +92,13 @@ public interface JdbcAccess {
      */
     public void createFlowDefinitionNode(FlowDefinitionNode flowDefinitionNode);
 
+    /**
+     * 删除一个流程定义的 节点 对象
+     * @param flowDefinitionNodeId
+     */
+    public void deleteFlowDefinitionNode(Long flowDefinitionNodeId);
+    public void deleteFlowDefinitionNode(List<Long> flowDefinitionNodeIds);
+
     /** 以下是流程节点的公共查询方法, 与上述流程定义类似 */
     public List<FlowDefinitionNode> findFlowDefinitionNodes(FlowDefinitionNode flowDefinitionNode);
     public List<FlowDefinitionNode> findFlowDefinitionNodes(Map criteria);
@@ -99,6 +116,13 @@ public interface JdbcAccess {
      * @param flowDefinitionNodeEvent
      */
     public void createFlowDefinitionNodeEvent(FlowDefinitionNodeEvent flowDefinitionNodeEvent);
+
+    /**
+     * 删除流程定义节点的 连接事件 对象
+     * @param flowDefinitionNodeEventId
+     */
+    public void deleteFlowDefinitionNodeEvent(Long flowDefinitionNodeEventId);
+    public void deleteFlowDefinitionNodeEvent(List<Long> flowDefinitionNodeEventIds);
 
     /** 以下是流程节点事件连接的公共查询方法, 与上述流程定义类似 */
     public List<FlowDefinitionNodeEvent> findFlowDefinitionNodeEvents(FlowDefinitionNodeEvent flowDefinitionNodeEvent);
@@ -118,10 +142,17 @@ public interface JdbcAccess {
     public void createFlowInstance(FlowInstance flowInstance);
 
     /**
+     * 更新一个流程实例
+     * @param flowInstance
+     */
+    public void updateFlowInstance(FlowInstance flowInstance);
+
+    /**
      * 删除一个流程实例
      * @param flowInstanceId
      */
     public void deleteFlowInstance(Long flowInstanceId);
+    public void deleteFlowInstance(List<Long> flowInstanceIds);
 
     /** 以下是流程实例的公共查询方法, 与上述流程定义类似 */
     public List<FlowInstance> findFlowInstances(FlowInstance flowInstance);
@@ -151,6 +182,7 @@ public interface JdbcAccess {
      * @param flowProcessId
      */
     public void deleteFlowProcess(Long flowProcessId);
+    public void deleteFlowProcess(List<Long> flowProcessIds);
 
     /** 以下是流程活动节点的公共查询方法, 与上述流程定义类似 */
     public List<FlowProcess> findFlowProcesses(FlowProcess flowProcess);
@@ -159,4 +191,60 @@ public interface JdbcAccess {
     public FlowProcess findFlowProcessSingle(Map criteria);
     public Paging<FlowProcess> findFlowProcessesPaging(Map criteria, Integer offset, Integer limit);
     public long findFlowProcessesSize(Map criteria);
+
+    /////////////////////////////////////////////////////////////////////////////////////
+    //////// 流程节点跟踪 的方法 ///////////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////////////////////////////////////
+    /**
+     * 创建当前活动节点跟踪
+     * @param flowProcessTrack
+     */
+    public void createFlowProcessTrack(FlowProcessTrack flowProcessTrack);
+    /**
+     * 删除当前活动节点跟踪
+     * @param flowProcessTrackId
+     */
+    public void deleteFlowProcessTrack(Long flowProcessTrackId);
+    public void deleteFlowProcessTrack(List<Long> flowProcessTrackIds);
+
+    /** 活动节点跟踪公共查新接口 */
+    public List<FlowProcessTrack> findFlowProcessTracks(FlowProcessTrack flowProcessTrack);
+    public List<FlowProcessTrack> findFlowProcessTracks(Map criteria);
+    public FlowProcessTrack findFlowProcessTrackSingle(FlowProcessTrack flowProcessTrack);
+    public FlowProcessTrack findFlowProcessTrackSingle(Map criteria);
+    public Paging<FlowProcessTrack> findFlowProcessTracksPaging(Map criteria, Integer offset, Integer limit);
+    public long findFlowProcessTracksSize(Map criteria);
+
+
+    /////////////////////////////////////////////////////////////////////////////////////
+    //////// 流程实例历史 的方法 ///////////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////////////////////////////////////
+    /**
+     * 创建一个历史实例
+     * @param flowHistoryInstance
+     */
+    public void createFlowHistoryInstance(FlowHistoryInstance flowHistoryInstance);
+    /** 历史实例公共查新接口 */
+    public List<FlowHistoryInstance> findFlowHistoryInstances(FlowHistoryInstance flowHistoryInstance);
+    public List<FlowHistoryInstance> findFlowHistoryInstances(Map criteria);
+    public FlowHistoryInstance findFlowHistoryInstanceSingle(FlowHistoryInstance flowHistoryInstance);
+    public FlowHistoryInstance findFlowHistoryInstanceSingle(Map criteria);
+    public Paging<FlowHistoryInstance> findFlowHistoryInstancesPaging(Map criteria, Integer offset, Integer limit);
+    public long findFlowHistoryInstancesSize(Map criteria);
+
+    /////////////////////////////////////////////////////////////////////////////////////
+    //////// 历史活动节点 的方法 ///////////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////////////////////////////////////
+    /**
+     * 创建一个历史活动节点
+     * @param flowHistoryProcess
+     */
+    public void createFlowHistoryProcess(FlowHistoryProcess flowHistoryProcess);
+    /** 历史活动节点公共查询接口 */
+    public List<FlowHistoryProcess> findFlowHistoryProcesses(FlowHistoryProcess flowHistoryProcess);
+    public List<FlowHistoryProcess> findFlowHistoryProcesses(Map criteria);
+    public FlowHistoryProcess findFlowHistoryProcessSingle(FlowHistoryProcess flowHistoryProcess);
+    public FlowHistoryProcess findFlowHistoryProcessSingle(Map criteria);
+    public Paging<FlowHistoryProcess> findFlowHistoryProcessesPaging(Map criteria, Integer offset, Integer limit);
+    public long findFlowHistoryProcessesSize(Map criteria);
 }

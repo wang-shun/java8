@@ -3,8 +3,11 @@ package io.terminus.doctor.workflow.service;
 import io.terminus.doctor.workflow.query.FlowDefinitionNodeEventQuery;
 import io.terminus.doctor.workflow.query.FlowDefinitionNodeQuery;
 import io.terminus.doctor.workflow.query.FlowDefinitionQuery;
+import io.terminus.doctor.workflow.query.FlowHistoryInstanceQuery;
+import io.terminus.doctor.workflow.query.FlowHistoryProcessQuery;
 import io.terminus.doctor.workflow.query.FlowInstanceQuery;
 import io.terminus.doctor.workflow.query.FlowProcessQuery;
+import io.terminus.doctor.workflow.query.FlowProcessTrackQuery;
 
 /**
  * Desc: 工作流统一查询接口
@@ -42,4 +45,22 @@ public interface FlowQueryService {
      * @return
      */
     public FlowProcessQuery getFlowProcessQuery();
+
+    /**
+     * 获取流程活动节点跟踪查询接口
+     * @return
+     */
+    public FlowProcessTrackQuery getFlowProcessTrackQuery();
+
+    /**
+     * 获取流程实例历史查询接口
+     * @return
+     */
+    public FlowHistoryInstanceQuery getFlowHistoryInstanceQuery();
+
+    /**
+     * 获取流程活动节点历史查询接口
+     * @return
+     */
+    public FlowHistoryProcessQuery getFlowHistoryProcessQuery();
 }

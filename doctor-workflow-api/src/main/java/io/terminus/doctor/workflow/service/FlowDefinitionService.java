@@ -64,4 +64,16 @@ public interface FlowDefinitionService {
      */
     public void delete(Long flowDefinitionId, boolean cascade);
 
+    /**
+     * 根据流程定义id删除流程定义
+     *      1. 默认是不强制级联删除, 如果当前定义存在流程实例, 则抛出异常.
+     *      2. 如果强制级联删除, 则删除流程实例, 以及所有执行的任务和任务追踪/历史
+     *
+     * @param flowDefinitionId  流程定义id
+     * @param cascade           是否强制级联删除, 默认false
+     * @param operatorId        操作人id
+     * @param operatorName      操作人姓名
+     */
+    public void delete(Long flowDefinitionId, boolean cascade, Long operatorId, String operatorName);
+
 }

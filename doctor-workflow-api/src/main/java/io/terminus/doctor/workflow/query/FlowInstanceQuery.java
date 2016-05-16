@@ -53,4 +53,12 @@ public interface FlowInstanceQuery {
      * @return
      */
     public FlowInstance getExistFlowInstance(String flowDefinitionKey, Long businessId);
+
+    /**
+     * 查询是否已经存在的子流程实例
+     * @param flowDefinitionKey 流程定义的key
+     * @param businessId        业务id
+     * @return
+     */
+    public List<FlowInstance> getExistChildFlowInstance(String flowDefinitionKey, Long businessId);
 }

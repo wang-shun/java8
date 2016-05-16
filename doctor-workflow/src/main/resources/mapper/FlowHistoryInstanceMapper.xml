@@ -5,9 +5,9 @@
 
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 
-<mapper namespace="FlowInstance">
+<mapper namespace="FlowHistoryInstance">
 
-    <resultMap id="FlowInstanceMap" type="FlowInstance">
+    <resultMap id="FlowHistoryInstanceMap" type="FlowHistoryInstance">
         <id column="id" property="id"/>
         <result column="name" property="name"/>
         <result column="flow_definition_id" property="flowDefinitionId"/>
@@ -24,7 +24,7 @@
     </resultMap>
 
     <sql id="tb">
-        workflow_process_instances
+        workflow_history_process_instances
     </sql>
 
     <sql id="cols_all">
@@ -38,7 +38,7 @@
     <sql id="vals">
         #{name},#{flowDefinitionId},#{flowDefinitionKey},#{businessId},#{businessData},#{status},#{type},#{operatorId},#{operatorName},#{parentInstanceId},now(),now()    </sql>
 
-    <insert id="create" parameterType="FlowInstance" keyProperty="id" useGeneratedKeys="true">
+    <insert id="create" parameterType="FlowHistoryInstance" keyProperty="id" useGeneratedKeys="true">
         INSERT INTO
         <include refid="tb"/>
         (<include refid="cols_exclude_id"/>)
@@ -46,7 +46,7 @@
         (<include refid="vals"/>)
     </insert>
 
-    <select id="findById" parameterType="int" resultMap="FlowInstanceMap">
+    <select id="findById" parameterType="int" resultMap="FlowHistoryInstanceMap">
         SELECT
         <include refid="cols_all"/>
         FROM
@@ -54,8 +54,7 @@
         WHERE id = #{id}
     </select>
 
-
-    <update id="update" parameterType="FlowInstance">
+    <update id="update" parameterType="FlowHistoryInstance">
         UPDATE
         <include refid="tb"/>
         <set>
@@ -82,7 +81,8 @@
     </delete>
 
     <delete id="deletes" parameterType="list">
-        DELETE FROM <include refid="tb"/>
+        DELETE FROM
+        <include refid="tb"/>
         WHERE id IN
         <foreach collection="list" open="(" separator="," close=")" item="item">
             #{item}
@@ -96,7 +96,6 @@
             <if test="flowDefinitionId != null">AND `flow_definition_id` = #{flowDefinitionId}</if>
             <if test="flowDefinitionKey != null">AND `flow_definition_key` = #{flowDefinitionKey}</if>
             <if test="businessId != null">AND `business_id` = #{businessId}</if>
-            <if test="businessData != null">AND `business_data` = #{businessData}</if>
             <if test="status != null">AND `status` = #{status}</if>
             <if test="type != null">AND `type` = #{type}</if>
             <if test="operatorId != null">AND `operator_id` = #{operatorId}</if>
@@ -106,7 +105,7 @@
             <if test="endAt != null">AND `created_at` &lt;= #{endAt}</if>
         </where>
     </sql>
-    <select id="list" resultMap="FlowInstanceMap">
+    <select id="list" resultMap="FlowHistoryInstanceMap">
         SELECT
         <include refid="cols_all"/>
         FROM
@@ -125,7 +124,7 @@
     </select>
 
     <!-- 分页查询 -->
-    <select id="paging" parameterType="map" resultMap="FlowInstanceMap">
+    <select id="paging" parameterType="map" resultMap="FlowHistoryInstanceMap">
         SELECT
         <include refid="cols_all"/>
         FROM

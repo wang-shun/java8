@@ -76,6 +76,15 @@
         WHERE id = #{id}
     </delete>
 
+    <delete id="deletes" parameterType="list">
+        DELETE FROM
+        <include refid="tb"/>
+        WHERE id IN
+        <foreach collection="list" open="(" separator="," close=")" item="item">
+            #{item}
+        </foreach>
+    </delete>
+
     <sql id="criteria">
         <where>
             <if test="id != null">AND id = #{id}</if>
