@@ -1,10 +1,5 @@
 package io.terminus.doctor.warehouse.service;
 
-import io.terminus.common.model.Response;
-import io.terminus.doctor.warehouse.model.DoctorMaterialInfo;
-
-import java.util.List;
-
 /**
  * Created by yaoqijun.
  * Date:2016-05-13
@@ -18,6 +13,6 @@ public interface DoctorMaterialInfoReadService {
      * @param farmId
      * @return
      */
-    Response<List<DoctorMaterialInfo>> queryMaterialInfos(String farmId);
+//    Response<List<DoctorMaterialInfo>> queryMaterialInfos(String farmId);
 
 }

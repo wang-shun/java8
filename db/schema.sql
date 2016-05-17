@@ -729,29 +729,40 @@ create index doctor_pig_events_farm_id on doctor_pig_events(farm_id);
 create index doctor_pig_events_pig_id on doctor_pig_events(pig_id);
 CREATE index doctor_pig_events_rel_event_id on doctor_pig_events(rel_event_id);
 
--- 仓库表
-DROP TABLE IF EXISTS `doctor_ware_houses`;
-CREATE TABLE `doctor_ware_houses` (
+-- 猪只免疫信息统计方式
+drop Table if exists doctor_vaccination_pig_warns(
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT 'id',
-  `ware_house_name` varchar(64) DEFAULT NULL COMMENT '仓库名称',
   `farm_id` bigint(20) unsigned DEFAULT NULL COMMENT '猪场仓库信息',
   `farm_name` varchar(64) DEFAULT NULL COMMENT '猪场名称',
-  `manager_id` bigint(20) unsigned DEFAULT NULL COMMENT '管理员Id',
-  `manager_name` varchar(64) DEFAULT NULL COMMENT '管理人员姓名',
-  `address` varchar(64) DEFAULT NULL COMMENT '地址信息',
-  `ware_house_type` SMALLINT(6) unsigned DEFAULT NULL COMMENT '对应仓库类型',
-  `material_type_id` bigint(20) unsigned DEFAULT NULL COMMENT '仓库原料类型',
-  `material_type_name` varchar(64) DEFAULT NULL COMMENT '仓库原料名称',
-  `is_default` smallint(6) DEFAULT NULL COMMENT '默认仓库信息',
+  `has_warn` smallint(6) default null comment '是否提示过了, 0-未提示，1-提示',
+  `warn_days` int default 7 comment '默认7 天提示用户信息',
+  `event_date` datetime DEFAULT null comment '事件日期信息',
+  `event_desc` varchar(64) default null comment '事件信息描述',
+  `extra` text DEFAULT NULL comment '扩展信息',
+  `creator_name` varchar(64) DEFAULT NULL COMMENT '创建人姓名',
+  `created_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+)ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='猪只免疫预警信息';
+create index doctor_vaccination_pig_warns_farm_id on doctor_vaccination_pig_warns(farm_id);
+
+-- 猪场级别的， 仓库数据类型
+drop table if exists doctor_farm_ware_house_types;
+create table doctor_farm_ware_house_types(
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT 'id',
+  `farm_id` bigint(20) unsigned DEFAULT NULL COMMENT '猪场仓库信息',
+  `farm_name` varchar(64) DEFAULT NULL COMMENT '猪场名称',
+  `type` SMALLINT(6) unsigned DEFAULT NULL COMMENT '猪场仓库类型',
+  `log_number` bigint(20) DEFAULT NULL COMMENT '类型原料的数量',
+  `extra` text default null comment '扩展字段',
   `creator_id` bigint(20) DEFAULT NULL COMMENT '创建人id',
   `creator_name` varchar(64) DEFAULT NULL COMMENT '创建人姓名',
   `updator_id` bigint(20) DEFAULT NULL COMMENT '创建人Id',
   `updator_name` varchar(64) DEFAULT NULL COMMENT '创建人姓名',
   `created_at` datetime DEFAULT NULL,
   `updated_at` datetime DEFAULT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='仓库信息数据表';
-create index doctor_ware_houses_farm_id on doctor_ware_houses(farm_id);
+   primary key(id)
+)ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='猪场仓库类型数量';
+create index doctor_farm_ware_house_types_farm_id on doctor_farm_ware_house_types(farm_id);
 
 -- 物料信息数据表, 不同的公司，不同的物料信息
 DROP TABLE IF EXISTS `doctor_material_infos`;
@@ -759,11 +770,13 @@ CREATE TABLE `doctor_material_infos` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT 'id',
   `farm_id` bigint(20) unsigned DEFAULT NULL COMMENT '猪场信息',
   `farm_name` varchar(64) DEFAULT NULL COMMENT '猪场名称',
+  `type` smallint(6) DEFAULT NULL comment '物料所属原料的名称',
   `remark` text COMMENT '标注',
   `unit_group_id` bigint(20) unsigned DEFAULT NULL COMMENT '单位组Id',
   `unit_group_name` varchar(64) DEFAULT NULL COMMENT '单位组名称',
   `unit_id` bigint(20) unsigned DEFAULT NULL COMMENT '单位Id',
   `unit_name` varchar(64) DEFAULT NULL COMMENT '单位名称',
+  `default_consume_count` bigint(20) DEFAULT NULL COMMENT '原料默认消耗数量',
   `price` bigint(20) DEFAULT NULL COMMENT '价格',
   `extra` text COMMENT '扩展信息: 药品-默认计量的大小',
   `creator_id` bigint(20) DEFAULT NULL COMMENT '创建人id',
@@ -776,7 +789,48 @@ CREATE TABLE `doctor_material_infos` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='物料信息表内容';
 CREATE index doctor_material_infos_farm_id on doctor_material_infos(farm_id);
 
--- 原料， 仓库 关联数据信息内容, 原料可以存储不同的仓库信息
+-- 仓库表
+DROP TABLE IF EXISTS `doctor_ware_houses`;
+CREATE TABLE `doctor_ware_houses` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT 'id',
+  `ware_house_name` varchar(64) DEFAULT NULL COMMENT '仓库名称',
+  `farm_id` bigint(20) unsigned DEFAULT NULL COMMENT '猪场仓库信息',
+  `farm_name` varchar(64) DEFAULT NULL COMMENT '猪场名称',
+  `manager_id` bigint(20) unsigned DEFAULT NULL COMMENT '管理员Id',
+  `manager_name` varchar(64) DEFAULT NULL COMMENT '管理人员姓名',
+  `address` varchar(64) DEFAULT NULL COMMENT '地址信息',
+  `type` smallint(6) DEFAULT NULL comment '仓库类型，一个仓库只能属于一个',
+  `extra` text DEFAULT NULL comment '扩展信息',
+  `creator_id` bigint(20) DEFAULT NULL COMMENT '创建人id',
+  `creator_name` varchar(64) DEFAULT NULL COMMENT '创建人姓名',
+  `updator_id` bigint(20) DEFAULT NULL COMMENT '创建人Id',
+  `updator_name` varchar(64) DEFAULT NULL COMMENT '创建人姓名',
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='仓库信息数据表';
+create index doctor_ware_houses_farm_id on doctor_ware_houses(farm_id);
+
+-- 仓库Track 数据表信息
+DROP TABLE IF EXISTS `doctor_ware_house_tracks`;
+CREATE TABLE `doctor_ware_house_tracks` (
+  `ware_house_id` bigint(20) unsigned NOT NULL COMMENT 'ware_house_id',
+  `farm_id` bigint(20) unsigned DEFAULT NULL COMMENT '猪场仓库信息',
+  `farm_name` varchar(64) DEFAULT NULL COMMENT '猪场名称',
+  `manager_id` bigint(20) unsigned DEFAULT NULL COMMENT '管理员Id',
+  `manager_name` varchar(64) DEFAULT NULL COMMENT '管理人员姓名',
+  `material_lot_number` text DEFAULT NULL comment '各种原料的数量信息',
+  `lot_number` bigint(20) DEFAULT NULL comment '仓库物品的总数量信息',
+  `is_default` smallint(6) DEFAULT NULL COMMENT '默认仓库信息',
+  `extra` text DEFAULT NULL comment '扩展信息',
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`ware_house_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='仓库信息Track数据表';
+create index doctor_ware_house_tracks_farm_id on doctor_ware_house_tracks(farm_id);
+
+
+-- 原料数据库中的存储数量信息
 DROP TABLE IF EXISTS `doctor_material_in_ware_houses`;
 CREATE TABLE `doctor_material_in_ware_houses` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT 'id',
@@ -830,6 +884,25 @@ CREATE TABLE `doctor_material_consume_providers` (
 CREATE index doctor_material_consume_providers_farm_id on doctor_material_consume_providers(farm_id);
 create index doctor_material_consume_providers_ware_house_id on doctor_material_consume_providers(ware_house_id);
 create index doctor_material_consume_providers_material_id on doctor_material_consume_providers(material_id);
+
+-- 物料消耗的平均数量统计
+drop table if exists doctor_material_consume_avgs;
+CREATE TABLE `doctor_material_consume_avgs` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT 'id',
+  `farm_id` bigint(20) unsigned DEFAULT NULL COMMENT '冗余仓库信息',
+  `ware_house_id` bigint(20) unsigned DEFAULT NULL COMMENT '仓库信息',
+  `material_id` bigint(20) DEFAULT NULL COMMENT '原料Id',
+  `consume_avg_count` bigint(20) DEFAULT NULL COMMENT '平均消耗数量',
+  `consume_count` bigint(20) DEFAULT NULL COMMENT '消耗数量',
+  `consime_date` datetime DEFAULT NULL comment '消耗日期',
+  `extra` text DEFAULT NULL comment 'extra',
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='物料消耗信息统计方式';
+CREATE index doctor_material_consume_avgs_farm_id on doctor_material_consume_avgs(farm_id);
+create index doctor_material_consume_avgs_wware_house_id on doctor_material_consume_avgs(ware_house_id);
+create index doctor_material_consume_avgs_material_id on doctor_material_consume_avgs(material_id);
 
 -- 2016-04-25 角色权限相关
 -- 人员表
