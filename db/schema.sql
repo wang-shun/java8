@@ -928,7 +928,7 @@ CREATE TABLE `doctor_service_reviews` (
   `created_at` datetime DEFAULT NULL COMMENT '创建时间',
   `updated_at` datetime DEFAULT NULL COMMENT '修改时间',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='公司表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='用户服务审批表';
 CREATE INDEX idx_doctor_service_reviews_user_id ON doctor_service_reviews(user_id);
 
 -- 数据回滚相关
