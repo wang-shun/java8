@@ -1,8 +1,5 @@
 package io.terminus.doctor.warehouse.service;
 
-import io.terminus.common.model.Response;
-import io.terminus.doctor.warehouse.dto.DoctorMaterialConsumeDto;
-
 /**
  * Created by yaoqijun.
  * Date:2016-05-13
@@ -16,6 +13,6 @@ public interface DoctorMaterialConsumeProviderWriteService {
      * @param doctorMaterialConsumeDto
      * @return
      */
-    Response<Boolean> createMaterialConsumerEvent(DoctorMaterialConsumeDto doctorMaterialConsumeDto);
+//    Response<Boolean> createMaterialConsumerEvent(DoctorMaterialConsumeDto doctorMaterialConsumeDto);
 
 }
