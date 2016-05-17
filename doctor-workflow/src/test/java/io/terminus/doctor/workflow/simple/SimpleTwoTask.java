@@ -7,7 +7,6 @@ import io.terminus.doctor.workflow.model.FlowInstance;
 import io.terminus.doctor.workflow.model.FlowProcess;
 import org.junit.Assert;
 import org.junit.Test;
-import org.springframework.test.annotation.Rollback;
 
 /**
  * Desc: 简单任务流程(两个任务节点)
@@ -21,7 +20,6 @@ public class SimpleTwoTask extends BaseServiceTest {
     private Long businessId = 1314L;
 
     @Test
-    @Rollback(false)
     public void test_NORMAL_SimpleWorkFlow() {
         // 1. 部署流程
         defService().deploy("simple/simple_two_task.xml");

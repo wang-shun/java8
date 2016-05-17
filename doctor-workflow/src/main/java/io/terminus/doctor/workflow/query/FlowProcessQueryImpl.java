@@ -61,6 +61,12 @@ public class FlowProcessQueryImpl implements FlowProcessQuery {
     }
 
     @Override
+    public FlowProcessQuery forkNodeId(Long forkNodeId) {
+        flowProcess.setForkNodeId(forkNodeId);
+        return this;
+    }
+
+    @Override
     public FlowProcessQuery bean(FlowProcess flowProcess) {
         this.flowProcess = flowProcess;
         return this;

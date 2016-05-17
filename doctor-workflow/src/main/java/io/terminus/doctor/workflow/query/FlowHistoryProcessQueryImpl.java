@@ -61,6 +61,12 @@ public class FlowHistoryProcessQueryImpl implements FlowHistoryProcessQuery {
     }
 
     @Override
+    public FlowHistoryProcessQuery forkNodeId(Long forkNodeId) {
+        flowHistoryProcess.setForkNodeId(forkNodeId);
+        return this;
+    }
+
+    @Override
     public FlowHistoryProcessQuery operatorId(Long operatorId) {
         flowHistoryProcess.setOperatorId(operatorId);
         return this;

@@ -22,6 +22,7 @@ public interface FlowHistoryProcessQuery {
     FlowHistoryProcessQuery flowInstanceId(Long flowInstanceId);
     FlowHistoryProcessQuery status(Integer status);
     FlowHistoryProcessQuery assignee(String assignee);
+    FlowHistoryProcessQuery forkNodeId(Long forkNodeId);
     FlowHistoryProcessQuery operatorId(Long operatorId);
     FlowHistoryProcessQuery operatorName(String operatorName);
     FlowHistoryProcessQuery bean(FlowHistoryProcess flowHistoryProcess);

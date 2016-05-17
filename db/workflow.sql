@@ -98,6 +98,7 @@ CREATE TABLE IF NOT EXISTS `workflow_processes`(
 	`flow_data` text COMMENT '流程节点之间的暂时性流转数据',
 	`status` SMALLINT(6) DEFAULT NULL COMMENT '流程节点的状态, 1->正常, 2->正常结束, -1->删除, -2->挂起',
 	`assignee` VARCHAR(32) DEFAULT NULL COMMENT '处理人(暂时保留),该值优先于流程定义节点的值',
+	`fork_node_id` BIGINT(20) DEFAULT NULL COMMENT 'fork节点id, 便于join',
 	`created_at` DATETIME DEFAULT NULL COMMENT '创建时间',
 	`updated_at`  DATETIME DEFAULT NULL COMMENT '更新时间',
 	PRIMARY KEY(`id`)
@@ -120,6 +121,7 @@ CREATE TABLE IF NOT EXISTS `workflow_process_tracks`(
 	`operator_id` BIGINT(20) DEFAULT NULL COMMENT '操作者id',
 	`operator_name` VARCHAR(32) DEFAULT NULL COMMENT '操作者姓名',
 	`assignee` VARCHAR(32) DEFAULT NULL COMMENT '处理人(暂时保留)',
+	`fork_node_id` BIGINT(20) DEFAULT NULL COMMENT 'fork节点id, 便于join',
 	`created_at` DATETIME DEFAULT NULL COMMENT '创建时间',
 	`updated_at` DATETIME DEFAULT NULL COMMENT '更新时间',
 	PRIMARY KEY(`id`)
@@ -170,6 +172,7 @@ CREATE TABLE IF NOT EXISTS `workflow_history_processes`(
 	`operator_id` BIGINT(20) DEFAULT NULL COMMENT '操作者id',
 	`operator_name` VARCHAR(32) DEFAULT NULL COMMENT '操作者姓名',
 	`assignee` VARCHAR(32) DEFAULT NULL COMMENT '处理人(暂时保留)',
+	`fork_node_id` BIGINT(20) DEFAULT NULL COMMENT 'fork节点id, 便于join',
 	`created_at` DATETIME DEFAULT NULL COMMENT '创建时间',
 	`updated_at` DATETIME DEFAULT NULL COMMENT '更新时间',
 	PRIMARY KEY(`id`)

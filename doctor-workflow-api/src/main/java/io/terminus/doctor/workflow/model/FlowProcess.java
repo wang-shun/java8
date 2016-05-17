@@ -50,6 +50,10 @@ public class FlowProcess implements Serializable{
      */
     private String assignee;
     /**
+     * fork节点id, 便于join
+     */
+    private Long forkNodeId;
+    /**
      * 创建时间
      */
     private Date createdAt;

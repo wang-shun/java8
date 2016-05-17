@@ -22,6 +22,7 @@ public interface FlowProcessTrackQuery {
     FlowProcessTrackQuery flowInstanceId(Long flowInstanceId);
     FlowProcessTrackQuery status(Integer status);
     FlowProcessTrackQuery assignee(String assignee);
+    FlowProcessTrackQuery forkNodeId(Long forkNodeId);
     FlowProcessTrackQuery operatorId(Long operatorId);
     FlowProcessTrackQuery operatorName(String operatorName);
     FlowProcessTrackQuery bean(FlowProcessTrack flowProcessTrack);

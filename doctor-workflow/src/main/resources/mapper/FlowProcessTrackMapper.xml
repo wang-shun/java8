@@ -15,6 +15,7 @@
         <result column="flow_data" property="flowData"/>
         <result column="status" property="status"/>
         <result column="assignee" property="assignee"/>
+        <result column="fork_node_id" property="forkNodeId"/>
         <result column="operator_id" property="operatorId"/>
         <result column="operator_name" property="operatorName"/>
         <result column="created_at" property="createdAt"/>
@@ -31,10 +32,10 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        `flow_definition_node_id`,`pre_flow_definition_node_id`,`flow_instance_id`,`flow_data`,`status`,`assignee`,`operator_id`,`operator_name`,`created_at`,`updated_at`    </sql>
+        `flow_definition_node_id`,`pre_flow_definition_node_id`,`flow_instance_id`,`flow_data`,`status`,`assignee`,`fork_node_id`,`operator_id`,`operator_name`,`created_at`,`updated_at`    </sql>
 
     <sql id="vals">
-        #{flowDefinitionNodeId},#{preFlowDefinitionNodeId},#{flowInstanceId},#{flowData},#{status},#{assignee},#{operatorId},#{operatorName},now(),now()    </sql>
+        #{flowDefinitionNodeId},#{preFlowDefinitionNodeId},#{flowInstanceId},#{flowData},#{status},#{assignee},#{forkNodeId},#{operatorId},#{operatorName},now(),now()    </sql>
 
     <insert id="create" parameterType="FlowProcessTrack" keyProperty="id" useGeneratedKeys="true">
         INSERT INTO
@@ -64,6 +65,7 @@
             <if test="flowData != null">,`flow_data` = #{flowData}</if>
             <if test="status != null">,`status` = #{status}</if>
             <if test="assignee != null">,`assignee` = #{assignee}</if>
+            <if test="forkNodeId != null">,`fork_node_id` = #{forkNodeId}</if>
             <if test="operatorId != null">,`operator_id` = #{operatorId}</if>
             <if test="operatorName != null">,`operator_name` = #{operatorName}</if>
             <if test="createdAt != null">,`created_at` = #{createdAt}</if>
@@ -93,6 +95,7 @@
             <if test="flowInstanceId != null">AND `flow_instance_id` = #{flowInstanceId}</if>
             <if test="status != null">AND `status` = #{status}</if>
             <if test="assignee != null">AND `assignee` = #{assignee}</if>
+            <if test="forkNodeId != null">AND `fork_node_id` = #{forkNodeId}</if>
             <if test="operatorId != null">AND `operator_id` = #{operatorId}</if>
             <if test="operatorName != null">AND `operator_name` = #{operatorName}</if>
             <if test="startAt != null">AND `created_at` >= #{startAt}</if>

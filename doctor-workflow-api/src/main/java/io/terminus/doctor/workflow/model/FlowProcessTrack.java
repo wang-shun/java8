@@ -48,6 +48,10 @@ public class FlowProcessTrack implements Serializable{
      */
     private String assignee;
     /**
+     * fork节点id, 便于join
+     */
+    private Long forkNodeId;
+    /**
      * 处理人id
      */
     private Long operatorId;

@@ -8,7 +8,6 @@ import io.terminus.doctor.workflow.model.FlowProcess;
 import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.annotation.Rollback;
 
 import java.util.Map;
 
@@ -27,7 +26,6 @@ public class DecisionTwoTask extends BaseServiceTest {
     private Long businessId = 1314L;
 
     @Test
-    @Rollback(false)
     public void test_NORMAL_DecisionWorkFlow() {
         // 1. 部署流程
         defService().deploy("decision/decision_two_task.xml");

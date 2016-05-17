@@ -22,6 +22,7 @@ public interface FlowProcessQuery {
     FlowProcessQuery flowInstanceId(Long flowInstanceId);
     FlowProcessQuery status(Integer status);
     FlowProcessQuery assignee(String assignee);
+    FlowProcessQuery forkNodeId(Long forkNodeId);
     FlowProcessQuery bean(FlowProcess flowProcess);
     FlowProcessQuery orderBy(String orderBy);
     FlowProcessQuery desc();

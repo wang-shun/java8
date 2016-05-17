@@ -80,7 +80,8 @@ public abstract class BaseNode implements Node {
             if (FlowDefinitionNode.Type.END.value() == nextNode.getType()) {
                 NodeHelper.buildEndNode().execute(execution);
             }
-            if (FlowDefinitionNode.Type.DECISION.value() == nextNode.getType()) {
+            // 选择节点
+            else if (FlowDefinitionNode.Type.DECISION.value() == nextNode.getType()) {
                 execution.setFlowProcess(nextProcess);
                 NodeHelper.buildDecisionNode().execute(execution);
             }

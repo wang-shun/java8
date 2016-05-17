@@ -15,6 +15,7 @@
         <result column="flow_data" property="flowData"/>
         <result column="status" property="status"/>
         <result column="assignee" property="assignee"/>
+        <result column="fork_node_id" property="forkNodeId"/>
         <result column="created_at" property="createdAt"/>
         <result column="updated_at" property="updatedAt"/>
     </resultMap>
@@ -29,10 +30,10 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        `flow_definition_node_id`,`pre_flow_definition_node_id`,`flow_instance_id`,`flow_data`,`status`,`assignee`,`created_at`,`updated_at`    </sql>
+        `flow_definition_node_id`,`pre_flow_definition_node_id`,`flow_instance_id`,`flow_data`,`status`,`assignee`,`fork_node_id`,`created_at`,`updated_at`    </sql>
 
     <sql id="vals">
-        #{flowDefinitionNodeId},#{preFlowDefinitionNodeId},#{flowInstanceId},#{flowData},#{status},#{assignee},now(),now()    </sql>
+        #{flowDefinitionNodeId},#{preFlowDefinitionNodeId},#{flowInstanceId},#{flowData},#{status},#{assignee},#{forkNodeId},now(),now()    </sql>
 
     <insert id="create" parameterType="FlowProcess" keyProperty="id" useGeneratedKeys="true">
         INSERT INTO
@@ -62,6 +63,7 @@
             <if test="flowData != null">,`flow_data` = #{flowData}</if>
             <if test="status != null">,`status` = #{status}</if>
             <if test="assignee != null">,`assignee` = #{assignee}</if>
+            <if test="forkNodeId != null">,`fork_node_id` = #{forkNodeId}</if>
             <if test="createdAt != null">,`created_at` = #{createdAt}</if>
         </set>
         WHERE id=#{id}
@@ -89,6 +91,7 @@
             <if test="flowInstanceId != null">AND `flow_instance_id` = #{flowInstanceId}</if>
             <if test="status != null">AND `status` = #{status}</if>
             <if test="assignee != null">AND `assignee` = #{assignee}</if>
+            <if test="forkNodeId != null">AND `fork_node_id` = #{forkNodeId}</if>
             <if test="startAt != null">AND `created_at` >= #{startAt}</if>
             <if test="endAt != null">AND `created_at` &lt;= #{endAt}</if>
         </where>

@@ -61,6 +61,12 @@ public class FlowProcessTrackQueryImpl implements FlowProcessTrackQuery {
     }
 
     @Override
+    public FlowProcessTrackQuery forkNodeId(Long forkNodeId) {
+        flowProcessTrack.setForkNodeId(forkNodeId);
+        return this;
+    }
+
+    @Override
     public FlowProcessTrackQuery operatorId(Long operatorId) {
         flowProcessTrack.setOperatorId(operatorId);
         return this;
