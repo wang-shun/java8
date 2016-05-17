@@ -16,10 +16,6 @@ public class DoctorMaterialInfo implements Serializable{
 
     private String farmName;
 
-    private Long materialTypeId;
-
-    private String materialTypeText;
-
     private String remark;
 
     private Long unitGroupId;

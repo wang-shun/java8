@@ -1,9 +1,11 @@
 package io.terminus.doctor.event.model;
 
 import lombok.Data;
+import lombok.Getter;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.Objects;
 
 @Data
 public class DoctorPig implements Serializable{
@@ -68,4 +70,32 @@ public class DoctorPig implements Serializable{
 
     private Date updatedAt;
 
+    /**
+     * 猪类型信息表数据
+     */
+    public static enum PIG_TYPE{
+        SOW(1, "母猪"),
+        BOAR(2, "公猪"),
+        LITTER(3, "仔猪");
+
+        @Getter
+        private Integer key;
+
+        @Getter
+        private String desc;
+
+        private PIG_TYPE(Integer key, String desc){
+            this.key = key;
+            this.desc = desc;
+        }
+
+        public static PIG_TYPE from(Integer key){
+            for(PIG_TYPE pig_type : PIG_TYPE.values()){
+                if(Objects.equals(pig_type.getKey(), key)){
+                    return pig_type;
+                }
+            }
+            return null;
+        }
+    }
 }

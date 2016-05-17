@@ -661,6 +661,24 @@ CREATE TABLE `doctor_pig_tracks` (
 CREATE unique index doctor_pig_tracks_pig_card_id on doctor_pig_tracks(pig_id);
 CREATE index doctor_pig_tracks_current_barn_id on doctor_pig_tracks(current_barn_id);
 
+-- 添加猪快照信息表数据内容
+drop table if exists doctor_pig_snapshots;
+create table doctor_pig_snapshots(
+	`id` bigint(20) unsigned not null AUTO_INCREMENT comment 'id',
+	`org_id` bigint(20) unsigned default null comment 'org_id',
+	`farm_id` bigint(20) unsigned default null comment 'farm_id',
+	`pig_id` bigint(20) unsigned default null comment 'pig_id',
+	`event_id` bigint(20) unsigned default null comment 'event_id',
+	`pig_info` text default null comment '公猪快照信息',
+	`created_at` datetime DEFAULT NULL,
+  	`updated_at` datetime DEFAULT NULL,
+  	 primary key(id)
+)ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='猪群事件记录数据表';
+CREATE index doctor_pig_snapshots_farm_id on doctor_pig_snapshots(farm_id);
+CREATE index doctor_pig_snapshots_pig_id on doctor_pig_snapshots(pig_id);
+create index doctor_pig_snapshots_event_id on doctor_pig_snapshots(event_id);
+
+
 -- 公猪，母猪， 仔猪事件信息表
 DROP TABLE IF EXISTS `doctor_pig_events`;
 CREATE TABLE `doctor_pig_events` (
@@ -704,8 +722,9 @@ CREATE TABLE `doctor_ware_houses` (
   `manager_id` bigint(20) unsigned DEFAULT NULL COMMENT '管理员Id',
   `manager_name` varchar(64) DEFAULT NULL COMMENT '管理人员姓名',
   `address` varchar(64) DEFAULT NULL COMMENT '地址信息',
-  `type_id` bigint(20) unsigned DEFAULT NULL COMMENT '仓库类型',
-  `type_name` varchar(64) DEFAULT NULL COMMENT '仓库类型名称',
+  `ware_house_type` SMALLINT(6) unsigned DEFAULT NULL COMMENT '对应仓库类型',
+  `material_type_id` bigint(20) unsigned DEFAULT NULL COMMENT '仓库原料类型',
+  `material_type_name` varchar(64) DEFAULT NULL COMMENT '仓库原料名称',
   `is_default` smallint(6) DEFAULT NULL COMMENT '默认仓库信息',
   `creator_id` bigint(20) DEFAULT NULL COMMENT '创建人id',
   `creator_name` varchar(64) DEFAULT NULL COMMENT '创建人姓名',
@@ -717,14 +736,12 @@ CREATE TABLE `doctor_ware_houses` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='仓库信息数据表';
 create index doctor_ware_houses_farm_id on doctor_ware_houses(farm_id);
 
--- 物料信息数据表内容（当前包含 疫苗， 药品，原料，饲料，消耗品）等
+-- 物料信息数据表, 不同的公司，不同的物料信息
 DROP TABLE IF EXISTS `doctor_material_infos`;
 CREATE TABLE `doctor_material_infos` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT 'id',
   `farm_id` bigint(20) unsigned DEFAULT NULL COMMENT '猪场信息',
   `farm_name` varchar(64) DEFAULT NULL COMMENT '猪场名称',
-  `material_type_id` bigint(20) unsigned DEFAULT NULL COMMENT '原料类别',
-  `material_type_text` varchar(64) DEFAULT NULL COMMENT '原料类别名称',
   `remark` text COMMENT '标注',
   `unit_group_id` bigint(20) unsigned DEFAULT NULL COMMENT '单位组Id',
   `unit_group_name` varchar(64) DEFAULT NULL COMMENT '单位组名称',
@@ -752,8 +769,6 @@ CREATE TABLE `doctor_material_in_ware_houses` (
   `ware_house_name` varchar(64) DEFAULT NULL COMMENT '仓库名称',
   `material_id` bigint(20) DEFAULT NULL COMMENT '原料Id',
   `material_name` varchar(64) DEFAULT NULL COMMENT '原料名称',
-  `material_type_id` bigint(20) DEFAULT NULL COMMENT '原料类型',
-  `material_type_name` varchar(64) DEFAULT NULL COMMENT '原料名称',
   `lot_number` bigint(20) DEFAULT NULL COMMENT '数量信息',
   `unit_group_name` varchar(64) DEFAULT NULL COMMENT '单位组信息',
   `unit_name` varchar(64) DEFAULT NULL COMMENT '单位信息',
@@ -781,8 +796,6 @@ CREATE TABLE `doctor_material_consume_providers` (
   `ware_house_name` varchar(64) DEFAULT NULL COMMENT '仓库名称',
   `material_id` bigint(20) DEFAULT NULL COMMENT '原料Id',
   `material_name` varchar(64) DEFAULT NULL COMMENT '原料名称',
-  `material_type_id` bigint(20) DEFAULT NULL COMMENT '原料类型',
-  `material_type_name` varchar(64) DEFAULT NULL COMMENT '原料名称',
   `event_time` datetime DEFAULT NULL COMMENT '事件日期',
   `event_type` smallint(6) DEFAULT NULL COMMENT '事件类型, provider 提供， consumer 消费',
   `event_count` bigint(20) DEFAULT NULL COMMENT '事件数量',
