@@ -29,7 +29,7 @@ public class DoctorMaterialConsumeProvider implements Serializable{
 
     private Long id;
 
-    private Long materialInHouseId;
+    private Integer type;
 
     private Long farmId;
 

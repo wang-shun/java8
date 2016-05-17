@@ -1,6 +1,8 @@
 package io.terminus.doctor.warehouse.service;
 
+import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
+import io.terminus.doctor.warehouse.dto.DoctorWareHouseDto;
 import io.terminus.doctor.warehouse.model.DoctorFarmWareHouseType;
 
 import javax.validation.constraints.NotNull;
@@ -19,12 +21,16 @@ public interface DoctorWarehouseReadService {
      * @param farmId
      * @return
      */
-    Response<List<DoctorFarmWareHouseType>> queryDoctorFarmWareHouseType(@NotNull(message = "input.farmId.empty") String farmId);
+    Response<List<DoctorFarmWareHouseType>> queryDoctorFarmWareHouseType(@NotNull(message = "input.farmId.empty") Long farmId);
 
-//    /**
-//     *
-//     * @param farmId
-//     * @return
-//     */
-//    Response<List<DoctorWareHouseDto>> queryWarehouseByFarmId(@NotNull(message = "input.farmId.empty") String farmId);
+    /**
+     * 分页查询仓库信息
+     * @param farmId
+     * @param pageNo
+     * @param pageSize
+     * @return
+     */
+    Response<Paging<DoctorWareHouseDto>> queryDoctorWarehouseDto(@NotNull(message = "input.farmId.empty") Long farmId,
+                                                                 Integer pageNo,Integer pageSize);
+
 }

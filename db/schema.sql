@@ -840,6 +840,7 @@ CREATE TABLE `doctor_material_in_ware_houses` (
   `ware_house_name` varchar(64) DEFAULT NULL COMMENT '仓库名称',
   `material_id` bigint(20) DEFAULT NULL COMMENT '原料Id',
   `material_name` varchar(64) DEFAULT NULL COMMENT '原料名称',
+  `type` smallint(6) DEFAULT NULL comment '仓库类型, 冗余',
   `lot_number` bigint(20) DEFAULT NULL COMMENT '数量信息',
   `unit_group_name` varchar(64) DEFAULT NULL COMMENT '单位组信息',
   `unit_name` varchar(64) DEFAULT NULL COMMENT '单位信息',
@@ -860,7 +861,7 @@ CREATE index doctor_material_in_ware_houses_material_id on doctor_material_in_wa
 DROP TABLE IF EXISTS `doctor_material_consume_providers`;
 CREATE TABLE `doctor_material_consume_providers` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT 'id',
-  `material_in_house_id` bigint(20) unsigned DEFAULT NULL COMMENT '对应的仓库原料信息',
+  `type` bigint(20) unsigned DEFAULT NULL COMMENT '领取货物属于的类型',
   `farm_id` bigint(20) unsigned DEFAULT NULL COMMENT '冗余仓库信息',
   `farm_name` varchar(64) DEFAULT NULL COMMENT '猪场姓名',
   `ware_house_id` bigint(20) unsigned DEFAULT NULL COMMENT '仓库信息',

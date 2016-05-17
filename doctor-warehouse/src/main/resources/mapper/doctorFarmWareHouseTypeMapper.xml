@@ -64,6 +64,11 @@
         WHERE id = #{id}
     </select>
 
+    <select id="findByFarmId" parameterType="long" resultMap="DoctorFarmWareHouseTypeMap">
+        SELECT <include refid="cols_all"/>
+        FROM <include refid="tb"/>
+        WHERE farm_id=#{farmId}
+    </select>
 
     <update id="update" parameterType="DoctorFarmWareHouseType">
         UPDATE <include refid="tb"/>
