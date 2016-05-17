@@ -18,28 +18,29 @@ import java.util.Map;
 
 import static java.util.Objects.isNull;
 
+/**
+ * 物料信息平均消耗数量
+ */
 @Data
-public class DoctorWareHouse implements Serializable{
+public class DoctorMaterialConsumeAvg implements Serializable{
 
-    private static final long serialVersionUID = -2131754410925405501L;
+    private static final long serialVersionUID = 1582237200306571835L;
 
     public static final ObjectMapper OBJECT_MAPPER = JsonMapper.JSON_NON_DEFAULT_MAPPER.getMapper();
 
     private Long id;
 
-    private String wareHouseName;
-
     private Long farmId;
 
-    private String farmName;
+    private Long wareHouseId;
 
-    private Long managerId;
+    private Long materialId;
 
-    private String managerName;
+    private Long consumeAvgCount;
 
-    private String address;
+    private Long consumeCount;
 
-    private Integer type;
+    private Date consimeDate;
 
     @Setter(AccessLevel.NONE)
     private Map<String,Object> extraMap;
@@ -47,14 +48,6 @@ public class DoctorWareHouse implements Serializable{
     @Setter(AccessLevel.NONE)
     @JsonIgnore
     private String extra;
-
-    private Long creatorId;
-
-    private String creatorName;
-
-    private Long updatorId;
-
-    private String updatorName;
 
     private Date createdAt;
 

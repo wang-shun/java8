@@ -1,7 +1,7 @@
 package io.terminus.doctor.warehouse.dao;
 
 import io.terminus.common.mysql.dao.MyBatisDao;
-import io.terminus.doctor.warehouse.model.DoctorWareHouse;
+import io.terminus.doctor.warehouse.model.DoctorMaterialConsumeAvg;
 import org.springframework.stereotype.Repository;
 
 /**
@@ -11,5 +11,5 @@ import org.springframework.stereotype.Repository;
  * Descirbe:
  */
 @Repository
-public class DoctorWareHouseDao extends MyBatisDao<DoctorWareHouse>{
+public class DoctorMaterialConsumeAvgDao extends MyBatisDao<DoctorMaterialConsumeAvg>{
 }

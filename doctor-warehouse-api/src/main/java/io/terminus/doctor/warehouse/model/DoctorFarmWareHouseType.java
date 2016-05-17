@@ -19,27 +19,21 @@ import java.util.Map;
 import static java.util.Objects.isNull;
 
 @Data
-public class DoctorWareHouse implements Serializable{
+public class DoctorFarmWareHouseType implements Serializable{
 
-    private static final long serialVersionUID = -2131754410925405501L;
+    private static final long serialVersionUID = -1423280056553558752L;
 
     public static final ObjectMapper OBJECT_MAPPER = JsonMapper.JSON_NON_DEFAULT_MAPPER.getMapper();
 
     private Long id;
 
-    private String wareHouseName;
-
     private Long farmId;
 
     private String farmName;
 
-    private Long managerId;
-
-    private String managerName;
-
-    private String address;
-
     private Integer type;
+
+    private Long logNumber;
 
     @Setter(AccessLevel.NONE)
     private Map<String,Object> extraMap;
@@ -79,4 +73,5 @@ public class DoctorWareHouse implements Serializable{
             this.extra = OBJECT_MAPPER.writeValueAsString(extraMap);
         }
     }
+
 }
