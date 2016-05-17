@@ -22,14 +22,9 @@ public interface DoctorCarouselFigureReadService {
     Response<List<DoctorCarouselFigure>> findFiguresByStatus(Integer status);
 
     /**
-     * 查询所有轮播图
-     * @return 轮播图list
+     * 根据id查询轮播图
+     * @param id id
+     * @return 轮播图
      */
-    Response<List<DoctorCarouselFigure>> findAllFigures();
-
-    /**
-     * 查询启用的轮播图
-     * @return 轮播图list
-     */
-    Response<List<DoctorCarouselFigure>> findActingFigures();
+    Response<DoctorCarouselFigure> findFigureById(Long id);
 }
