@@ -1,6 +1,7 @@
-package io.terminus.doctor.user.service;
+package io.terminus.doctor.web.design.service;
 
 import io.terminus.common.model.Response;
+import io.terminus.doctor.user.enums.TargetSystem;
 import io.terminus.parana.user.model.User;
 
 /**
@@ -13,7 +14,7 @@ public interface AccountService {
      * 查询用户在其他系统绑定的账号
      * @param userId
      * @param targetSystem 目标系统,  关联枚举: @see io.terminus.doctor.user.enums.TargetSystem
-     * @return 目标系统的User对象, 有效字段:id, name, mobile, email, type, status
+     * @return 目标系统的User对象, 有效字段:id, name, mobile, email, type, status . result 为 null 时表示没有绑定账号
      */
     Response<User> findBindAccount(Long userId, Integer targetSystem);
 
@@ -35,4 +36,5 @@ public interface AccountService {
      */
     Response<User> unbindAccount(Long userId, Integer targetSystem);
 
+    TargetSystem.Bean getTargetSystemBean(Integer targetSystem) throws Exception;
 }

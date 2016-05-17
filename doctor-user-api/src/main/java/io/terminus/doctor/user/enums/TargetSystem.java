@@ -1,6 +1,8 @@
 package io.terminus.doctor.user.enums;
 
 import com.google.common.base.Objects;
+import lombok.Getter;
+import lombok.Setter;
 
 public enum TargetSystem {
     //注意: desc的写法, 由3个分号分隔的字符串组成, 依次对应表 parana_configs 中的字段 key, 用于获取在数据库中配置的值
@@ -32,5 +34,19 @@ public enum TargetSystem {
     @Override
     public String toString() {
         return desc;
+    }
+
+    public Bean getTargetSystemBean(){
+        return new Bean();
+    }
+
+    public class Bean{
+        @Getter
+        @Setter
+        private String domain;
+        @Getter @Setter
+        private String password;
+        @Getter @Setter
+        private Long corpId;
     }
 }

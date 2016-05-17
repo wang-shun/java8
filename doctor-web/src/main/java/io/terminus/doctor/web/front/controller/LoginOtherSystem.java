@@ -12,18 +12,16 @@ import io.terminus.doctor.common.utils.EncryptUtil;
 import io.terminus.doctor.user.enums.TargetSystem;
 import io.terminus.doctor.web.core.component.MobilePattern;
 import io.terminus.doctor.web.core.util.SimpleAESUtils;
+import io.terminus.doctor.web.design.service.AccountService;
 import io.terminus.pampas.common.UserUtil;
-import io.terminus.parana.config.ConfigCenter;
 import io.terminus.parana.user.model.User;
 import io.terminus.parana.user.service.UserReadService;
-import lombok.Getter;
-import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import static io.terminus.common.utils.Arguments.isNull;
 import static io.terminus.common.utils.Arguments.isEmpty;
+import static io.terminus.common.utils.Arguments.isNull;
 
 /**
  * Author:  陈增辉
@@ -36,14 +34,14 @@ public class LoginOtherSystem {
 
     private final UserReadService<User> userReadService;
     private final MobilePattern mobilePattern;
-    @Autowired
-    private ConfigCenter configCenter;
+    private final AccountService accountService;
 
     @Autowired
-    public LoginOtherSystem(UserReadService<User> userReadService,
+    public LoginOtherSystem(UserReadService<User> userReadService, AccountService accountService,
                             MobilePattern mobilePattern){
         this.userReadService = userReadService;
         this.mobilePattern = mobilePattern;
+        this.accountService = accountService;
     }
 
 
@@ -83,13 +81,8 @@ public class LoginOtherSystem {
             return Response.fail("unknown.padding.for.encrypt");
         }
 
-        TargetSystem targetSystemEnum = TargetSystem.from(targetSystem);
-        if(isNull(targetSystemEnum)){
-            return Response.fail("unknown.target.system");
-        }
         try {
-            TargetSystemBean targetSystemBean = this.getTargetSystemBean(targetSystemEnum);
-
+            TargetSystem.Bean targetSystemBean = accountService.getTargetSystemBean(targetSystem);
             String encryptedUserId = EncryptUtil.MD5(paranaUser.getId().toString()); //给userId加密
             String data = "third_user_id=" + encryptedUserId
                     + "\ntimestamp=" + (System.currentTimeMillis() / 1000)
@@ -102,32 +95,6 @@ public class LoginOtherSystem {
         } catch (Exception e) {
             throw new JsonResponseException(e);
         }
-    }
-
-    private class TargetSystemBean{
-        @Getter @Setter
-        private String domain;
-        @Getter @Setter
-        private String password;
-        @Getter @Setter
-        private Long corpId;
-    }
-
-    private TargetSystemBean getTargetSystemBean(TargetSystem targetSystemEnum){
-        TargetSystemBean bean = new TargetSystemBean();
-        String[] keys = targetSystemEnum.toString().split(";");
-        bean.setDomain(this.getConfigValue(keys[0]));
-        bean.setPassword(this.getConfigValue(keys[1]));
-        bean.setCorpId(Long.parseLong(this.getConfigValue(keys[2])));
-        return bean;
-    }
-    private String getConfigValue(String key){
-        Optional<String> optional = configCenter.get(key);
-        if (!optional.isPresent()) {
-            log.error("required config is missing, key = {}", key);
-            throw new JsonResponseException("required.config.missing");
-        }
-        return optional.get();
     }
 
 }
