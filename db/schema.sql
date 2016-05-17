@@ -248,7 +248,6 @@ DROP TABLE IF EXISTS `doctor_orgs`;
 CREATE TABLE `doctor_orgs` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '自增主键',
   `name` varchar(64) DEFAULT NULL COMMENT '公司名称',
-  `status` smallint(6) DEFAULT NULL COMMENT '状态: 0 待审核, 1 审核成功/正常, -1 审核失败, -2 已冻结',
   `license` varchar(512) DEFAULT NULL COMMENT '营业执照复印件图片地址',
   `out_id`  varchar(128) DEFAULT NULL COMMENT  '外部id',
   `extra` text COMMENT '附加字段',
@@ -314,6 +313,24 @@ CREATE TABLE `doctor_change_types` (
   PRIMARY KEY (`id`)
 ) ENGINE=Myisam DEFAULT CHARSET=utf8 COMMENT='变动类型表';
 CREATE INDEX idx_doctor_change_types_farm_id ON doctor_change_types(farm_id);
+
+-- 变动原因
+DROP TABLE IF EXISTS `doctor_change_reasons`;
+CREATE TABLE `doctor_change_reasons` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '自增主键',
+  `change_type_id` bigint(20) DEFAULT NULL COMMENT '变动类型id',
+  `reason` varchar(128) DEFAULT NULL COMMENT '变动原因',
+  `out_id`  varchar(128) DEFAULT NULL COMMENT  '外部id',
+  `extra` text COMMENT '附加字段',
+  `creator_id` bigint(20) DEFAULT NULL COMMENT  '创建人id',
+  `creator_name` varchar(64) DEFAULT NULL COMMENT '创建人name',
+  `updator_id` bigint(20) DEFAULT NULL COMMENT  '更新人id',
+  `updator_name` varchar(64) DEFAULT NULL COMMENT '更新人name',
+  `created_at` datetime DEFAULT NULL COMMENT '创建时间',
+  `updated_at` datetime DEFAULT NULL COMMENT '修改时间',
+  PRIMARY KEY (`id`)
+) ENGINE=Myisam DEFAULT CHARSET=utf8 COMMENT='变动类型表';
+CREATE INDEX idx_doctor_change_reasons_change_type_id ON doctor_change_reasons(change_type_id);
 
 -- 疾病表
 DROP TABLE IF EXISTS `doctor_diseases`;
@@ -400,6 +417,7 @@ CREATE TABLE `doctor_groups` (
   `farm_id` bigint(20) DEFAULT NULL COMMENT '猪场id',
   `farm_name` varchar(64) DEFAULT NULL COMMENT '猪场名称',
   `group_code` varchar(64) DEFAULT NULL COMMENT '猪群号',
+  `batch_no` varchar(64) DEFAULT NULL COMMENT '猪群批次号(雏鹰模式)',
   `open_at` datetime DEFAULT NULL COMMENT '建群时间',
   `close_at` datetime DEFAULT NULL COMMENT '关闭时间',
   `status` smallint(6) DEFAULT NULL COMMENT '枚举: 1:已建群, -1:已关闭',
@@ -838,7 +856,6 @@ CREATE TABLE `doctor_staffs` (
 CREATE UNIQUE INDEX idx_doctor_staffs_user_id ON doctor_staffs(user_id);
 CREATE INDEX idx_doctor_staffs_role_id ON doctor_staffs(role_id);
 
-
 -- 猪场角色权限表
 DROP TABLE IF EXISTS `doctor_res_ctrl_roles`;
 CREATE TABLE `doctor_res_ctrl_roles` (
@@ -898,7 +915,7 @@ CREATE TABLE `doctor_user_data_permissions` (
   `updated_at` datetime DEFAULT NULL COMMENT '修改时间',
   PRIMARY KEY (`id`)
 ) ENGINE=Myisam DEFAULT CHARSET=utf8 COMMENT='用户数据权限表';
-CREATE INDEX idx_doctor_user_data_permissions_user_id ON doctor_user_data_permissions(user_id);
+CREATE UNIQUE INDEX idx_doctor_user_data_permissions_user_id ON doctor_user_data_permissions(user_id);
 
 -- 用户服务审批表设计:
 DROP TABLE IF EXISTS `doctor_service_reviews`;
