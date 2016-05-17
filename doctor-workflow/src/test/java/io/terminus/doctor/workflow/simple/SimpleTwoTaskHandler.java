@@ -26,7 +26,7 @@ public class SimpleTwoTaskHandler extends BaseServiceTest{
         // 3. 查询
         FlowInstance flowInstance = instanceQuery().getExistFlowInstance(flowDefinitionKey, businessId);
         Assert.assertNotNull(flowInstance);
-        FlowProcess process = processQuery().getCurrentProcess(flowInstance.getId(), "terminus");
+        FlowProcess process = processQuery().getCurrentProcess(flowInstance.getId(), "terminus1");
         Assert.assertNotNull(process);
         // 5. 执行第一个任务
         processService().getExecutor(flowDefinitionKey, businessId).execute();

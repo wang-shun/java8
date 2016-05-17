@@ -19,7 +19,7 @@
     </decision>
 
     <!-- 任务节点 -->
-    <task name="任务节点1" assignee="terminus" pointx="250" pointy="100">
+    <task name="任务节点1" assignee="terminus1" pointx="250" pointy="100">
         <transition name="任务连线1" target="结束节点" />
     </task>
 

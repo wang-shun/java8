@@ -8,6 +8,7 @@ import io.terminus.doctor.workflow.model.FlowProcess;
 import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.annotation.Rollback;
 
 import java.util.Map;
 
@@ -26,6 +27,7 @@ public class DecisionTwoTask extends BaseServiceTest {
     private Long businessId = 1314L;
 
     @Test
+    @Rollback(false)
     public void test_NORMAL_DecisionWorkFlow() {
         // 1. 部署流程
         defService().deploy("decision/decision_two_task.xml");
@@ -34,14 +36,14 @@ public class DecisionTwoTask extends BaseServiceTest {
         // 3. 执行第一个任务
         Map expression = Maps.newHashMap();
         expression.put("money",700);
-        workFlowService.getFlowProcessService()
-                .getExecutor(flowDefinitionKey, businessId)
-                .execute(expression);
+        processService().getExecutor(flowDefinitionKey, businessId).execute(expression);
         // 4. 查询, 当前任务应该为 "任务节点2"
         FlowInstance flowInstance = instanceQuery().getExistFlowInstance(flowDefinitionKey, businessId);
         Assert.assertNotNull(flowInstance);
         FlowProcess process = processQuery().getCurrentProcess(flowInstance.getId(), "terminus2");
         Assert.assertNotNull(process);
+        // 5. 执行 任务节点2
+        processService().getExecutor(flowDefinitionKey, businessId).execute();
     }
 
     @Test

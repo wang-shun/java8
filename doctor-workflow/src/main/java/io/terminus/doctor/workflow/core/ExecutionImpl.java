@@ -195,17 +195,6 @@ public class ExecutionImpl implements Execution {
     }
 
     @Override
-    public void setBusinessData(String businessData) {
-        FlowInstance flowInstance = workFlowEngine.buildFlowQueryService().getFlowInstanceQuery()
-                .id(this.flowProcess.getFlowInstanceId())
-                .single();
-        if (flowInstance != null) {
-            flowInstance.setBusinessData(businessData);
-            workFlowEngine.buildJdbcAccess().updateFlowInstance(flowInstance);
-        }
-    }
-
-    @Override
     public Long getOperatorId() {
         return this.operatorId;
     }

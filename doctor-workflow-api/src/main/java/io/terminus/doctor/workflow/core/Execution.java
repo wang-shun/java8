@@ -89,12 +89,6 @@ public interface Execution {
     String getBusinessData();
 
     /**
-     * 设置全局业务数据
-     * @return
-     */
-    void setBusinessData(String businessData);
-
-    /**
      * 获取操作者id
      * @return
      */
