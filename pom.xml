@@ -58,9 +58,21 @@
         <openplatform.version>0.3.BUILD-SNAPSHOT</openplatform.version>
         <jackson-guava.version>2.7.0</jackson-guava.version>
         <parana.core.version>4.1-SNAPSHOT</parana.core.version>
+        <validation-api.version>1.1.0.Final</validation-api.version>
+        <hibernate-validator.version>5.0.1.Final</hibernate-validator.version>
     </properties>
 
     <dependencies>
+        <!-- validate -->
+        <dependency>
+            <groupId>javax.validation</groupId>
+            <artifactId>validation-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-validator</artifactId>
+        </dependency>
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter</artifactId>
@@ -83,6 +95,19 @@
 
     <dependencyManagement>
         <dependencies>
+
+            <!-- validate -->
+            <dependency>
+                <groupId>javax.validation</groupId>
+                <artifactId>validation-api</artifactId>
+                <version>${validation-api.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.hibernate</groupId>
+                <artifactId>hibernate-validator</artifactId>
+                <version>${hibernate-validator.version}</version>
+            </dependency>
+
             <dependency>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-dependencies</artifactId>
