@@ -24,8 +24,12 @@ import java.util.Map;
 @Slf4j
 public class AccountServiceImpl implements AccountService{
 
+    private final ConfigCenter configCenter;
+
     @Autowired
-    private ConfigCenter configCenter;
+    public AccountServiceImpl (ConfigCenter configCenter) {
+        this.configCenter = configCenter;
+    }
 
     @Override
     public Response<User> findBindAccount(Long userId, TargetSystem targetSystem) {
