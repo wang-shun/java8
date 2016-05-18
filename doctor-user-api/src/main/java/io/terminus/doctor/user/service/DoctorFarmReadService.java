@@ -27,7 +27,7 @@ public interface DoctorFarmReadService {
      * @param userId 用户id
      * @return 公司信息
      */
-    Response<DoctorOrg> findByUserId(Long userId);
+    Response<DoctorOrg> findOrgByUserId(Long userId);
 
     /**
      * 根据猪场id查询猪场信息

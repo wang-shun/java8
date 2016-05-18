@@ -27,7 +27,7 @@ public class MockDoctorFarmReadServiceImpl implements DoctorFarmReadService {
     }
 
     @Override
-    public Response<DoctorOrg> findByUserId(Long userId) {
+    public Response<DoctorOrg> findOrgByUserId(Long userId) {
         return Response.ok(mockOrg(userId));
     }
 

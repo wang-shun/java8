@@ -22,8 +22,11 @@ import static io.terminus.common.utils.Arguments.isEmpty;
  * Author: xiao
  */
 @OpenParamHandler(patterns = "*", exclusions = {
-        "user.login", "server.time",
-        "get.session.id", "get.user.captcher"
+        "user.login",
+        "server.time",
+        "get.session.id",
+        "get.user.captcher",
+        "get.carousel.figure"   //轮播图接口
 })
 public class SessionHandle implements ParamPreHandle {
 
