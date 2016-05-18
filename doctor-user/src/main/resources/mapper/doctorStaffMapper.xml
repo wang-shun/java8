@@ -13,6 +13,7 @@
         <result column="role_name" property="roleName"/>
         <result column="status" property="status"/>
         <result column="sex" property="sex"/>
+        <result column="avatar" property="avatar"/>
         <result column="out_id" property="outId"/>
         <result column="extra" property="extra"/>
         <result column="creator_id" property="creatorId"/>
@@ -33,11 +34,11 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        org_id, org_name, user_id, role_id, role_name, status, sex, out_id, extra, creator_id, creator_name, updator_id, updator_name, created_at, updated_at
+        org_id, org_name, user_id, role_id, role_name, status, sex, avatar, out_id, extra, creator_id, creator_name, updator_id, updator_name, created_at, updated_at
     </sql>
 
     <sql id="vals">
-        #{orgId}, #{orgName}, #{userId}, #{roleId}, #{roleName}, #{status}, #{sex}, #{outId}, #{extra}, #{creatorId}, #{creatorName}, #{updatorId}, #{updatorName}, now(), now()
+        #{orgId}, #{orgName}, #{userId}, #{roleId}, #{roleName}, #{status}, #{sex}, #{avatar}, #{outId}, #{extra}, #{creatorId}, #{creatorName}, #{updatorId}, #{updatorName}, now(), now()
     </sql>
 
     <insert id="create" parameterType="DoctorStaff" keyProperty="id" useGeneratedKeys="true">
@@ -65,6 +66,7 @@
             <if test="roleName != null">role_name = #{roleName},</if>
             <if test="status != null">status = #{status},</if>
             <if test="sex != null">sex = #{sex},</if>
+            <if test="avatar != null">avatar = #{avatar},</if>
             <if test="outId != null">out_id = #{outId},</if>
             <if test="extra != null">extra = #{extra},</if>
             <if test="creatorId != null">creator_id = #{creatorId},</if>

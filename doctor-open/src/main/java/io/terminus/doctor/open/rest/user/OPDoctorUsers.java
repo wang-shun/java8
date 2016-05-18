@@ -3,6 +3,7 @@ package io.terminus.doctor.open.rest.user;
 import io.terminus.doctor.open.util.OPRespHelper;
 import io.terminus.doctor.user.dto.DoctorServiceApplyDto;
 import io.terminus.doctor.user.dto.DoctorServiceReviewDto;
+import io.terminus.doctor.user.dto.DoctorUserInfoDto;
 import io.terminus.doctor.user.service.DoctorServiceReviewReadService;
 import io.terminus.doctor.user.service.DoctorServiceReviewWriteService;
 import io.terminus.doctor.user.service.DoctorUserReadService;
@@ -65,5 +66,14 @@ public class OPDoctorUsers {
     @OpenMethod(key = "get.user.role.type")
     public Integer getUserRoleType() {
         return OPRespHelper.orOPEx(doctorUserReadService.findUserRoleTypeByUserId(UserUtil.getUserId()));
+    }
+
+    /**
+     * 获取用户基本信息
+     * @return 用户基本信息
+     */
+    @OpenMethod(key = "get.user.basic.info")
+    public DoctorUserInfoDto getUserBasicInfo() {
+        return OPRespHelper.orOPEx(doctorUserReadService.findUserInfoByUserId(UserUtil.getUserId()));
     }
 }

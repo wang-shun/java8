@@ -248,6 +248,7 @@ DROP TABLE IF EXISTS `doctor_orgs`;
 CREATE TABLE `doctor_orgs` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '自增主键',
   `name` varchar(64) DEFAULT NULL COMMENT '公司名称',
+  `mobile` VARCHAR(16) DEFAULT NULL COMMENT '手机号码',
   `license` varchar(512) DEFAULT NULL COMMENT '营业执照复印件图片地址',
   `out_id`  varchar(128) DEFAULT NULL COMMENT  '外部id',
   `extra` text COMMENT '附加字段',
@@ -920,6 +921,7 @@ CREATE TABLE `doctor_staffs` (
   `role_name` varchar(64) DEFAULT NULL COMMENT '角色名称(冗余)',
   `status` smallint(6) DEFAULT NULL COMMENT '状态 1:在职，-1:不在职',
   `sex` smallint(6) DEFAULT NULL COMMENT '性别',
+  `avatar` varchar(128) DEFAULT NULL COMMENT '用户头像',
   `out_id`  varchar(128) DEFAULT NULL COMMENT  '外部id',
   `extra` text COMMENT '附加字段',
   `creator_id` bigint(20) DEFAULT NULL COMMENT  '创建人id',

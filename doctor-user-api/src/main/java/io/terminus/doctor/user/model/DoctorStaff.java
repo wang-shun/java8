@@ -9,11 +9,11 @@ import java.util.Date;
  * Desc: 猪场职员表Model类
  * Mail: yangzl@terminus.io
  * author: DreamYoung
- * Date: 2016-05-18
+ * Date: 2016-05-19
  */
 @Data
 public class DoctorStaff implements Serializable {
-    private static final long serialVersionUID = 5302529605415428422L;
+    private static final long serialVersionUID = -403686963673350907L;
 
     private Long id;
     
@@ -48,9 +48,14 @@ public class DoctorStaff implements Serializable {
     private Integer status;
     
     /**
-     * 性别
+     * 性别 1 男, 2 女
      */
     private Integer sex;
+    
+    /**
+     * 用户头像
+     */
+    private String avatar;
     
     /**
      * 外部id

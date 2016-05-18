@@ -8,6 +8,7 @@ import com.google.common.collect.Maps;
 import com.google.common.hash.Hashing;
 import io.terminus.boot.session.properties.SessionProperties;
 import io.terminus.common.model.Response;
+import io.terminus.doctor.common.utils.RandomUtil;
 import io.terminus.doctor.open.common.CaptchaGenerator;
 import io.terminus.doctor.open.common.Sessions;
 import io.terminus.pampas.common.UserUtil;
@@ -26,7 +27,10 @@ import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.Base64Utils;
+import org.springframework.web.bind.annotation.RequestMethod;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.Serializable;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -90,6 +94,23 @@ public class OPUsers {
     @OpenMethod(key="server.time", paramNames = {})
     public Map<String, String> serverTime() {
         return ImmutableMap.of("time", DateTime.now().toString(DateTimeFormat.forPattern("yyyyMMddHHmmss")));
+    }
+
+    /**
+     * 用户注册
+     *
+     * @param password   密码
+     * @param userName   用户名
+     * @param mobile     手机号
+     * @param code       手机验证码
+     * @param request    请求
+     * @param response   响应
+     * @return 注册成功之后的用户ID
+     */
+    @OpenMethod(key = "user.register", httpMethods = RequestMethod.POST, paramNames = {"password", "userName", "mobile", "code"})
+    public Long register(String password, String userName, String mobile, String code,
+                         HttpServletRequest request, HttpServletResponse response) {
+        return Long.valueOf(RandomUtil.random(1, 10));
     }
 
     @OpenMethod(key="user.login", paramNames = {"name", "password", "type", "code", "sid"})
@@ -224,6 +245,17 @@ public class OPUsers {
         if (!res.isSuccess()) {
             throw new OPClientException("user.device.unbind.fail");
         }
+    }
+
+    /**
+     * 用户修改密码
+     * @param oldPassword 旧密码
+     * @param newPassword 新密码
+     * @return 是否成功
+     */
+    @OpenMethod(key = "user.change.password", httpMethods = RequestMethod.POST, paramNames = {"oldPassword", "newPassword"})
+    public Boolean changePassword(String oldPassword, String newPassword) {
+        return Boolean.TRUE;
     }
 
     @Data

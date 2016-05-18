@@ -1,7 +1,7 @@
 package io.terminus.doctor.user.service;
 
 import io.terminus.common.model.Response;
-import io.terminus.parana.user.model.User;
+import io.terminus.doctor.user.dto.DoctorUserInfoDto;
 
 /**
  * Desc: 用户读服务
@@ -25,5 +25,5 @@ public interface DoctorUserReadService {
      * @param userId 用户id
      * @return 用户信息
      */
-    Response<User> findUserInfoByUserId(Long userId);
+    Response<DoctorUserInfoDto> findUserInfoByUserId(Long userId);
 }
