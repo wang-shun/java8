@@ -40,7 +40,7 @@
         (<include refid="vals" />)
     </insert>
 
-    <select id="load" parameterType="long" resultMap="DoctorFarmMap" >
+    <select id="findById" parameterType="long" resultMap="DoctorFarmMap" >
         SELECT <include refid="cols_all" />
         FROM <include refid="tb" />
         WHERE id = #{id}
