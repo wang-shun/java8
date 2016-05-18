@@ -27,6 +27,7 @@ public interface AccountService {
      * @return 目标系统的User对象
      */
     Response<User> bindAccount(Long userId, TargetSystem targetSystem, String account, String password);
+    Response<User> bindAccount(Long userId, TargetSystem targetSystem, String account);
 
     /**
      * 解除用户在目标系统的账号绑定

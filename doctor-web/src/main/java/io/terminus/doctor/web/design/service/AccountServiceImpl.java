@@ -6,6 +6,7 @@ import com.google.common.base.Throwables;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.Response;
 import io.terminus.common.utils.JsonMapper;
+import io.terminus.common.utils.MapBuilder;
 import io.terminus.doctor.common.utils.EncryptUtil;
 import io.terminus.doctor.user.enums.TargetSystem;
 import io.terminus.parana.config.ConfigCenter;
@@ -31,43 +32,32 @@ public class AccountServiceImpl implements AccountService{
         this.configCenter = configCenter;
     }
 
-    @Override
-    public Response<User> findBindAccount(Long userId, TargetSystem targetSystem) {
-        Response<User> response = new Response<>();
-        try {
-            TargetSystem.Bean targetSystemBean = this.getTargetSystemBean(targetSystem);
-            String encryptedUserId = EncryptUtil.MD5(userId.toString());
-            String url = targetSystemBean.getDomain() + "/api/all/third/findBindAccount?thirdPartUserId=" + encryptedUserId
-                    + "&corpId=" + targetSystemBean.getCorpId();
-            HttpRequest request = HttpRequest.get(url);
-            String body = request.body();
-            if (request.code() != 200) {
-                throw new ServiceException(body);
-            } else {
-                User user = JsonMapper.nonEmptyMapper().fromJson(body, User.class);
-                response.setResult(user);
-            }
-        } catch (ServiceException e) {
-            response.setError(e.getMessage());
-        } catch (Exception e) {
-            log.error("findBindAccount failed, cause:{}", Throwables.getStackTraceAsString(e));
-            response.setError("find.bind.account.failed");
-        }
-        return response;
-    }
+    private static final String URL_FINDBINDACCOUNT = "/api/all/third/findBindAccount";
+    private static final String URL_BINDACCOUNT = "/api/all/third/bindAccount";
+    private static final String URL_BINDACCOUNT_NOPASSWORD = "/api/all/third/bindAccount/noPassword";
+    private static final String URL_UNBINDACCOUNT = "/api/all/third/unbindAccount";
 
     @Override
     public Response<User> bindAccount(Long userId, TargetSystem targetSystem, String account, String password) {
+        return this._bindAccount(userId, targetSystem, account, password, true);
+    }
+    @Override
+    public Response<User> bindAccount(Long userId, TargetSystem targetSystem, String account){
+        return this._bindAccount(userId, targetSystem, account, null, false);
+    }
+
+    private Response<User> _bindAccount(Long userId, TargetSystem targetSystem, String account, String password, boolean checkPassword){
         Response<User> response = new Response<>();
         try {
             TargetSystem.Bean targetSystemBean = this.getTargetSystemBean(targetSystem);
             String encryptedUserId = EncryptUtil.MD5(userId.toString());
-            String url = targetSystemBean.getDomain() + "/api/all/third/bindAccount";
-            Map<String, String> params = new HashMap<>();
-            params.put("thirdPartUserId", encryptedUserId);
-            params.put("corpId", targetSystemBean.getCorpId().toString());
-            params.put("account", account);
-            params.put("password", password);
+            String url = targetSystemBean.getDomain() + (checkPassword ? URL_BINDACCOUNT : URL_BINDACCOUNT_NOPASSWORD);
+            Map<String, String> params = MapBuilder.<String, String>of()
+                    .put("thirdPartUserId", encryptedUserId)
+                    .put("corpId", targetSystemBean.getCorpId().toString())
+                    .put("account", account)
+                    .put("password", password)
+                    .map();
             HttpRequest request = HttpRequest.post(url).form(params);
             String body = request.body();
             if (request.code() != 200) {
@@ -87,12 +77,18 @@ public class AccountServiceImpl implements AccountService{
 
     @Override
     public Response<User> unbindAccount(Long userId, TargetSystem targetSystem) {
+        return this.httpRequestGet(userId, targetSystem, URL_UNBINDACCOUNT);
+    }
+    @Override
+    public Response<User> findBindAccount(Long userId, TargetSystem targetSystem) {
+        return this.httpRequestGet(userId, targetSystem, URL_FINDBINDACCOUNT);
+    }
+    private Response<User> httpRequestGet(Long userId, TargetSystem targetSystem, String shortUrl){
         Response<User> response = new Response<>();
         try {
             TargetSystem.Bean targetSystemBean = this.getTargetSystemBean(targetSystem);
             String encryptedUserId = EncryptUtil.MD5(userId.toString());
-            String url = targetSystemBean.getDomain() + "/api/all/third/unbindAccount?thirdPartUserId=" + encryptedUserId
-                    + "&corpId=" + targetSystemBean.getCorpId();
+            String url = targetSystemBean.getDomain() + shortUrl +"/" + encryptedUserId + "/" + targetSystemBean.getCorpId();
             HttpRequest request = HttpRequest.get(url);
             String body = request.body();
             if (request.code() != 200) {
