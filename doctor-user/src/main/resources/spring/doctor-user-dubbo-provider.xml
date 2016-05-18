@@ -44,4 +44,15 @@
     <dubbo:service version="1.0.0" retries="0" interface="io.terminus.parana.article.service.ArticleReadService" ref="articleReadServiceImpl"/>
     <dubbo:service version="1.0.0" retries="0" interface="io.terminus.parana.article.service.ArticleWriteService" ref="articleWriteServiceImpl"/>
 
+    <!-- farm org services -->
+    <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.DoctorFarmReadService" ref="doctorFarmReadServiceImpl"/>
+    <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.DoctorFarmWriteService" ref="doctorFarmWriteServiceImpl"/>
+
+    <!-- data services -->
+    <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.DoctorServiceReviewReadService" ref="doctorServiceReviewReadServiceImpl"/>
+    <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.DoctorServiceReviewWriteService" ref="doctorServiceReviewWriteServiceImpl"/>
+    <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.DoctorUserDataPermissionReadService" ref="doctorUserDataPermissionReadServiceImpl"/>
+    <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.DoctorUserDataPermissionWriteService" ref="doctorUserDataPermissionWriteServiceImpl"/>
+    <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.DoctorUserReadService" ref="doctorUserReadServiceImpl"/>
+
 </beans>
