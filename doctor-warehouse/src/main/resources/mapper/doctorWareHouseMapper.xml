@@ -41,6 +41,21 @@
         #{wareHouseName},#{farmId},#{farmName},#{managerId},#{managerName},#{address},#{type},#{extra},#{creatorId},#{creatorName},#{updatorId},#{updatorName},now(),now()
     </sql>
 
+    <sql id="criteria">
+        <if test="wareHouseName != null" > AND `ware_house_name` = #{wareHouseName}</if>
+        <if test="farmId != null" > AND `farm_id` = #{farmId}</if>
+        <if test="farmName != null" > AND `farm_name` = #{farmName}</if>
+        <if test="managerId != null" > AND `manager_id` = #{managerId}</if>
+        <if test="managerName != null" > AND `manager_name` = #{managerName}</if>
+        <if test="address != null" > AND `address` = #{address}</if>
+        <if test="type != null" > AND `type` = #{type}</if>
+        <if test="extra != null" > AND `extra` = #{extra}</if>
+        <if test="creatorId != null" > AND `creator_id` = #{creatorId}</if>
+        <if test="creatorName != null" > AND `creator_name` = #{creatorName}</if>
+        <if test="updatorId != null" > AND `updator_id` = #{updatorId}</if>
+        <if test="updatorName != null" > AND `updator_name` = #{updatorName}</if>
+    </sql>
+
     <insert id="create" parameterType="DoctorWareHouse" keyProperty="id" useGeneratedKeys="true">
         INSERT INTO <include refid="tb" />
         (<include refid="cols_exclude_id" />)
@@ -88,4 +103,19 @@
         </set>
         WHERE id=#{id}
     </update>
+
+    <select id="count" parameterType="map" resultType="long">
+        select count(1) from <include refid="tb"/>
+        <where>
+            <include refid="criteria"/>
+        </where>
+    </select>
+
+    <select id="paging" parameterMap="map" resultMap="DoctorWareHouseMap">
+        SELECT <include refid="cols_all"/> from <include refid="tb"/>
+        <where>
+            <include refid="criteria"/>
+        </where>
+        LIMIT #{offset}, #{limit}
+    </select>
 </mapper>

@@ -15,7 +15,7 @@
         <result column="material_id" property="materialId"/>
         <result column="consume_avg_count" property="consumeAvgCount"/>
         <result column="consume_count" property="consumeCount"/>
-        <result column="consime_date" property="consimeDate"/>
+        <result column="consume_date" property="consumeDate"/>
         <result column="extra" property="extra"/>
         <result column="created_at" property="createdAt"/>
         <result column="updated_at" property="updatedAt"/>
@@ -29,11 +29,11 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        `farm_id`,`ware_house_id`,`material_id`,`consume_avg_count`,`consume_count`,`consime_date`,`extra`,`created_at`,`updated_at`
+        `farm_id`,`ware_house_id`,`material_id`,`consume_avg_count`,`consume_count`,`consume_date`,`extra`,`created_at`,`updated_at`
     </sql>
 
     <sql id="vals">
-        #{farmId},#{wareHouseId},#{materialId},#{consumeAvgCount},#{consumeCount},#{consimeDate},#{extra},now(),now()
+        #{farmId},#{wareHouseId},#{materialId},#{consumeAvgCount},#{consumeCount},#{consumeDate},#{extra},now(),now()
     </sql>
 
     <insert id="create" parameterType="DoctorMaterialConsumeAvg" keyProperty="id" useGeneratedKeys="true">
@@ -47,7 +47,7 @@
         ( <include refid="cols_exclude_id"/> )
         VALUES
         <foreach collection="list" item="i" separator=",">
-        (#{i.farmId},#{i.wareHouseId},#{i.materialId},#{i.consumeAvgCount},#{i.consumeCount},#{i.consimeDate},#{i.extra},now(),now())
+        (#{i.farmId},#{i.wareHouseId},#{i.materialId},#{i.consumeAvgCount},#{i.consumeCount},#{i.consumeDate},#{i.extra},now(),now())
         </foreach>
     </insert>
 
@@ -62,6 +62,10 @@
         WHERE id = #{id}
     </select>
 
+    <select id="queryByIds" parameterType="map" resultMap="DoctorMaterialConsumeAvgMap">
+        SELECT <include refid="cols_all"/> FROM <include refid="tb"/>
+        WHERE farm_id=#{farmId} and ware_house_id=#{wareHouseId} and material_id=#{materialId}
+    </select>
 
     <update id="update" parameterType="DoctorMaterialConsumeAvg">
         UPDATE <include refid="tb"/>
@@ -72,7 +76,7 @@
         <if test="materialId != null" > ,`material_id` = #{materialId}</if>
         <if test="consumeAvgCount != null" > ,`consume_avg_count` = #{consumeAvgCount}</if>
         <if test="consumeCount != null" > ,`consume_count` = #{consumeCount}</if>
-        <if test="consimeDate != null" > ,`consime_date` = #{consimeDate}</if>
+        <if test="consumeDate != null" > ,`consume_date` = #{consumeDate}</if>
         <if test="extra != null" > ,`extra` = #{extra}</if>
         <if test="createdAt != null" > ,`created_at` = #{createdAt}</if>
         </set>
