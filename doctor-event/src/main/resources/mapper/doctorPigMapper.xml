@@ -110,7 +110,7 @@
         </where>
     </select>
 
-    <select id="paging" parameterType="map" resultType="DoctorPigMap">
+    <select id="paging" parameterType="map" resultMap="DoctorPigMap">
         SELECT <include refid="cols_all"/> FROM <include refid="tb"/>
         <where>
             <include refid="criteria"/>
