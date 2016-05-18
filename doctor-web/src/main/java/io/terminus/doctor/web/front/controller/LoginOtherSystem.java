@@ -9,10 +9,10 @@ import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.common.model.ParanaUser;
 import io.terminus.doctor.common.utils.EncryptUtil;
-import io.terminus.doctor.user.enums.TargetSystem;
 import io.terminus.doctor.web.core.component.MobilePattern;
+import io.terminus.doctor.web.core.enums.TargetSystem;
+import io.terminus.doctor.web.core.service.OtherSystemService;
 import io.terminus.doctor.web.core.util.SimpleAESUtils;
-import io.terminus.doctor.web.design.service.AccountService;
 import io.terminus.pampas.common.UserUtil;
 import io.terminus.parana.user.model.User;
 import io.terminus.parana.user.service.UserReadService;
@@ -34,14 +34,14 @@ public class LoginOtherSystem {
 
     private final UserReadService<User> userReadService;
     private final MobilePattern mobilePattern;
-    private final AccountService accountService;
+    private final OtherSystemService otherSystemService;
 
     @Autowired
-    public LoginOtherSystem(UserReadService<User> userReadService, AccountService accountService,
+    public LoginOtherSystem(UserReadService<User> userReadService, OtherSystemService otherSystemService,
                             MobilePattern mobilePattern){
         this.userReadService = userReadService;
         this.mobilePattern = mobilePattern;
-        this.accountService = accountService;
+        this.otherSystemService = otherSystemService;
     }
 
 
@@ -86,13 +86,13 @@ public class LoginOtherSystem {
             throw new JsonResponseException(500, "unknown.target.system");
         }
         try {
-            TargetSystem.Bean targetSystemBean = accountService.getTargetSystemBean(targetSystemEnum);
+            otherSystemService.setTargetSystemValue(targetSystemEnum);
             String encryptedUserId = EncryptUtil.MD5(paranaUser.getId().toString()); //给userId加密
             String data = "third_user_id=" + encryptedUserId
                     + "\ntimestamp=" + (System.currentTimeMillis() / 1000)
                     + "\nmobile=" + user.getMobile();
-            String encryptedData = SimpleAESUtils.encrypt(data, targetSystemBean.getPassword(), algStr);
-            return targetSystemBean.getDomain() + "/api/all/third/access/" + targetSystemBean.getCorpId()
+            String encryptedData = SimpleAESUtils.encrypt(data, targetSystemEnum.getValueOfPasword(), algStr);
+            return targetSystemEnum.getValueOfDomain() + "/api/all/third/access/" + targetSystemEnum.getValueOfCorpId()
                     + "?d=" + encryptedData
                     + "&padding=" + padding
                     + (isEmpty(redirectPage) ? "" : "&redirectPage=" + redirectPage);

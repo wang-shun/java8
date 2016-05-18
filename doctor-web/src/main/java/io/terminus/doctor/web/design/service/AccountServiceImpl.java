@@ -1,21 +1,19 @@
 package io.terminus.doctor.web.design.service;
 
 import com.github.kevinsawicki.http.HttpRequest;
-import com.google.common.base.Optional;
 import com.google.common.base.Throwables;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.Response;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.common.utils.MapBuilder;
 import io.terminus.doctor.common.utils.EncryptUtil;
-import io.terminus.doctor.user.enums.TargetSystem;
-import io.terminus.parana.config.ConfigCenter;
+import io.terminus.doctor.web.core.enums.TargetSystem;
+import io.terminus.doctor.web.core.service.OtherSystemService;
 import io.terminus.parana.user.model.User;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -25,11 +23,11 @@ import java.util.Map;
 @Slf4j
 public class AccountServiceImpl implements AccountService{
 
-    private final ConfigCenter configCenter;
+    private final OtherSystemService otherSystemService;
 
     @Autowired
-    public AccountServiceImpl (ConfigCenter configCenter) {
-        this.configCenter = configCenter;
+    public AccountServiceImpl (OtherSystemService otherSystemService) {
+        this.otherSystemService = otherSystemService;
     }
 
     private static final String URL_FINDBINDACCOUNT = "/api/all/third/findBindAccount";
@@ -49,12 +47,12 @@ public class AccountServiceImpl implements AccountService{
     private Response<User> _bindAccount(Long userId, TargetSystem targetSystem, String account, String password, boolean checkPassword){
         Response<User> response = new Response<>();
         try {
-            TargetSystem.Bean targetSystemBean = this.getTargetSystemBean(targetSystem);
+            otherSystemService.setTargetSystemValue(targetSystem);
             String encryptedUserId = EncryptUtil.MD5(userId.toString());
-            String url = targetSystemBean.getDomain() + (checkPassword ? URL_BINDACCOUNT : URL_BINDACCOUNT_NOPASSWORD);
-            Map<String, String> params = MapBuilder.<String, String>of()
+            String url = targetSystem.getValueOfDomain() + (checkPassword ? URL_BINDACCOUNT : URL_BINDACCOUNT_NOPASSWORD);
+            Map<String, Object> params = MapBuilder.<String, Object>of()
                     .put("thirdPartUserId", encryptedUserId)
-                    .put("corpId", targetSystemBean.getCorpId().toString())
+                    .put("corpId", targetSystem.getValueOfCorpId())
                     .put("account", account)
                     .put("password", password)
                     .map();
@@ -86,9 +84,9 @@ public class AccountServiceImpl implements AccountService{
     private Response<User> httpRequestGet(Long userId, TargetSystem targetSystem, String shortUrl){
         Response<User> response = new Response<>();
         try {
-            TargetSystem.Bean targetSystemBean = this.getTargetSystemBean(targetSystem);
+            otherSystemService.setTargetSystemValue(targetSystem);
             String encryptedUserId = EncryptUtil.MD5(userId.toString());
-            String url = targetSystemBean.getDomain() + shortUrl +"/" + encryptedUserId + "/" + targetSystemBean.getCorpId();
+            String url = targetSystem.getValueOfDomain() + shortUrl + "/" + encryptedUserId + "/" + targetSystem.getValueOfCorpId();
             HttpRequest request = HttpRequest.get(url);
             String body = request.body();
             if (request.code() != 200) {
@@ -105,21 +103,4 @@ public class AccountServiceImpl implements AccountService{
         }
         return response;
     }
-
-    @Override
-    public TargetSystem.Bean getTargetSystemBean(TargetSystem targetSystem){
-        TargetSystem.Bean bean = targetSystem.getTargetSystemBean();
-        String[] keys = targetSystem.toString().split(";");
-        bean.setDomain(this.getConfigValue(keys[0]));
-        bean.setPassword(this.getConfigValue(keys[1]));
-        bean.setCorpId(Long.valueOf(this.getConfigValue(keys[2])));
-        return bean;
-    }
-    private String getConfigValue(String key){
-        Optional<String> optional = configCenter.get(key);
-        return optional.or(() -> {
-            throw new ServiceException("required.config.is.missing");
-        });
-    }
-
 }

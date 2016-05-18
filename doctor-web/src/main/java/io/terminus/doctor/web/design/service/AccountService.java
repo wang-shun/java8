@@ -1,7 +1,7 @@
 package io.terminus.doctor.web.design.service;
 
 import io.terminus.common.model.Response;
-import io.terminus.doctor.user.enums.TargetSystem;
+import io.terminus.doctor.web.core.enums.TargetSystem;
 import io.terminus.parana.user.model.User;
 
 /**
@@ -37,5 +37,4 @@ public interface AccountService {
      */
     Response<User> unbindAccount(Long userId, TargetSystem targetSystem);
 
-    TargetSystem.Bean getTargetSystemBean(TargetSystem targetSystem) throws Exception;
 }
