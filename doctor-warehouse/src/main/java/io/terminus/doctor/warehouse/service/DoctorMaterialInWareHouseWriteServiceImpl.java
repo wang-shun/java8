@@ -2,9 +2,10 @@ package io.terminus.doctor.warehouse.service;
 
 import com.google.common.base.Throwables;
 import io.terminus.common.model.Response;
-import io.terminus.doctor.warehouse.dto.DoctorMaterialConsumeDto;
+import io.terminus.doctor.warehouse.dto.DoctorMaterialConsumeProviderDto;
 import io.terminus.doctor.warehouse.manager.MaterialInWareHouseManager;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
@@ -19,17 +20,18 @@ public class DoctorMaterialInWareHouseWriteServiceImpl implements DoctorMaterial
 
     private final MaterialInWareHouseManager materialInWareHouseManager;
 
+    @Autowired
     public DoctorMaterialInWareHouseWriteServiceImpl(MaterialInWareHouseManager materialInWareHouseManager){
         this.materialInWareHouseManager = materialInWareHouseManager;
     }
 
     @Override
-    public Response<Boolean> consumeMaterialInfo(DoctorMaterialConsumeDto doctorMaterialConsumeDto) {
+    public Response<Boolean> consumeMaterialInfo(DoctorMaterialConsumeProviderDto doctorMaterialConsumeProviderDto) {
         try{
 
             // TODO validate field parameter info
 
-            return Response.ok(materialInWareHouseManager.consumeMaterialInWareHouse(doctorMaterialConsumeDto));
+            return Response.ok(materialInWareHouseManager.consumeMaterialInWareHouse(doctorMaterialConsumeProviderDto));
         }catch (Exception e){
             log.error("consumer material info error, cause:{}", Throwables.getStackTraceAsString(e));
             return Response.fail("consume.material.error");

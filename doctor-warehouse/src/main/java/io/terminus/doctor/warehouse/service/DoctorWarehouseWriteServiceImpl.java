@@ -5,6 +5,7 @@ import io.terminus.common.model.Response;
 import io.terminus.doctor.warehouse.dao.DoctorWareHouseDao;
 import io.terminus.doctor.warehouse.model.DoctorWareHouse;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import static java.util.Objects.isNull;
@@ -21,6 +22,7 @@ public class DoctorWarehouseWriteServiceImpl implements DoctorWarehouseWriteServ
 
     private final DoctorWareHouseDao doctorWareHouseDao;
 
+    @Autowired
     public DoctorWarehouseWriteServiceImpl(DoctorWareHouseDao doctorWareHouseDao){
         this.doctorWareHouseDao = doctorWareHouseDao;
     }

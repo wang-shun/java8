@@ -70,6 +70,11 @@
         WHERE farm_id=#{farmId}
     </select>
 
+    <select id="findByFarmIdAndType" parameterType="map" resultMap="DoctorFarmWareHouseTypeMap">
+        SELECT <include refid="cols_all"/> FROM <include refid="tb"/>
+        WHERE farm_id=#{farmId} and `type`=#{type}
+    </select>
+
     <update id="update" parameterType="DoctorFarmWareHouseType">
         UPDATE <include refid="tb"/>
         <set>

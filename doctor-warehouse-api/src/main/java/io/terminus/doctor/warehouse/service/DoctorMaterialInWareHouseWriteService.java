@@ -1,7 +1,7 @@
 package io.terminus.doctor.warehouse.service;
 
 import io.terminus.common.model.Response;
-import io.terminus.doctor.warehouse.dto.DoctorMaterialConsumeDto;
+import io.terminus.doctor.warehouse.dto.DoctorMaterialConsumeProviderDto;
 
 /**
  * Created by yaoqijun.
@@ -13,9 +13,9 @@ public interface DoctorMaterialInWareHouseWriteService {
 
     /**
      * 录入用户消耗信息
-     * @param doctorMaterialConsumeDto
+     * @param doctorMaterialConsumeProviderDto
      * @return
      */
-    Response<Boolean> consumeMaterialInfo(DoctorMaterialConsumeDto doctorMaterialConsumeDto);
+    Response<Boolean> consumeMaterialInfo(DoctorMaterialConsumeProviderDto doctorMaterialConsumeProviderDto);
 
 }
