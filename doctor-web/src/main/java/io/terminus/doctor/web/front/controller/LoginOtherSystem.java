@@ -54,46 +54,50 @@ public class LoginOtherSystem {
      */
     @RequestMapping(value = "/getLoginUrl", method = RequestMethod.GET)
     @ResponseBody
-    public Response<String> getLoginUrl(
+    public String getLoginUrl(
             @RequestParam(value = "padding", required = false, defaultValue = "pkcs5") String padding,
             @RequestParam("targetSystem") Integer targetSystem,
             @RequestParam(value = "redirectPage", required = false, defaultValue = "") String redirectPage){
 
         ParanaUser paranaUser = UserUtil.getCurrentUser();
         if (isNull(paranaUser)) {
-            return Response.fail("user.not.login");
+            throw new JsonResponseException(500, "user.not.login");
         }
 
         Response<User> result = userReadService.findById(paranaUser.getId());
         if (!result.isSuccess()) {
-            return Response.fail(result.getError());
+            throw new JsonResponseException(500, result.getError());
         }
         User user = result.getResult();
         if (user == null) {
-            return Response.fail("user.not.found");
+            throw new JsonResponseException(500, "user.not.found");
         }
         if (user.getMobile() == null || !mobilePattern.getPattern().matcher(user.getMobile()).matches()) {
-            return Response.fail("mobile.format.error");
+            throw new JsonResponseException(500, "mobile.format.error");
         }
 
-        Optional alg = SimpleAESUtils.algSelect(padding);
-        if (!alg.isPresent()) {
-            return Response.fail("unknown.padding.for.encrypt");
+        Optional<String> alg = SimpleAESUtils.algSelect(padding);
+        String algStr = alg.or(() -> {
+            throw new JsonResponseException(500, "unknown.padding.for.encrypt");
+        });
+        
+        TargetSystem targetSystemEnum = TargetSystem.from(targetSystem);
+        if(targetSystemEnum == null){
+            throw new JsonResponseException(500, "unknown.target.system");
         }
-
         try {
-            TargetSystem.Bean targetSystemBean = accountService.getTargetSystemBean(targetSystem);
+            TargetSystem.Bean targetSystemBean = accountService.getTargetSystemBean(targetSystemEnum);
             String encryptedUserId = EncryptUtil.MD5(paranaUser.getId().toString()); //给userId加密
             String data = "third_user_id=" + encryptedUserId
                     + "\ntimestamp=" + (System.currentTimeMillis() / 1000)
                     + "\nmobile=" + user.getMobile();
-            String encryptedData = SimpleAESUtils.encrypt(data, targetSystemBean.getPassword(), (String) alg.get());
-            return Response.ok(targetSystemBean.getDomain() + "/api/all/third/access/" + targetSystemBean.getCorpId()
+            String encryptedData = SimpleAESUtils.encrypt(data, targetSystemBean.getPassword(), algStr);
+            return targetSystemBean.getDomain() + "/api/all/third/access/" + targetSystemBean.getCorpId()
                     + "?d=" + encryptedData
                     + "&padding=" + padding
-                    + (isEmpty(redirectPage) ? "" : "&redirectPage=" + redirectPage));
+                    + (isEmpty(redirectPage) ? "" : "&redirectPage=" + redirectPage);
         } catch (Exception e) {
-            throw new JsonResponseException(e);
+            throw new JsonResponseException(500, e);
         }
     }
 

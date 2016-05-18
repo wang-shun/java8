@@ -16,7 +16,7 @@ public interface AccountService {
      * @param targetSystem 目标系统,  关联枚举: @see io.terminus.doctor.user.enums.TargetSystem
      * @return 目标系统的User对象, 有效字段:id, name, mobile, email, type, status . result 为 null 时表示没有绑定账号
      */
-    Response<User> findBindAccount(Long userId, Integer targetSystem);
+    Response<User> findBindAccount(Long userId, TargetSystem targetSystem);
 
     /**
      * 绑定用户指定的目标系统的账号
@@ -26,7 +26,7 @@ public interface AccountService {
      * @param password 用户填写的目标系统的明文密码,不加密
      * @return 目标系统的User对象
      */
-    Response<User> bindAccount(Long userId, Integer targetSystem, String account, String password);
+    Response<User> bindAccount(Long userId, TargetSystem targetSystem, String account, String password);
 
     /**
      * 解除用户在目标系统的账号绑定
@@ -34,7 +34,7 @@ public interface AccountService {
      * @param targetSystem 目标系统,  关联枚举: @see io.terminus.doctor.user.enums.TargetSystem
      * @return 解除绑定之前的目标系统的User对象
      */
-    Response<User> unbindAccount(Long userId, Integer targetSystem);
+    Response<User> unbindAccount(Long userId, TargetSystem targetSystem);
 
-    TargetSystem.Bean getTargetSystemBean(Integer targetSystem) throws Exception;
+    TargetSystem.Bean getTargetSystemBean(TargetSystem targetSystem) throws Exception;
 }
