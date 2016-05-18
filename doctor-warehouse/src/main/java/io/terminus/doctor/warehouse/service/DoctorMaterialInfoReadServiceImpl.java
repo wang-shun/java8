@@ -9,6 +9,7 @@ import io.terminus.doctor.warehouse.dao.DoctorMaterialInfoDao;
 import io.terminus.doctor.warehouse.dto.DoctorMaterialProductRatioDto;
 import io.terminus.doctor.warehouse.model.DoctorMaterialInfo;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -28,6 +29,7 @@ public class DoctorMaterialInfoReadServiceImpl implements DoctorMaterialInfoRead
 
     private final DoctorMaterialInfoDao doctorMaterialInfoDao;
 
+    @Autowired
     public DoctorMaterialInfoReadServiceImpl(DoctorMaterialInfoDao doctorMaterialInfoDao){
         this.doctorMaterialInfoDao = doctorMaterialInfoDao;
     }
