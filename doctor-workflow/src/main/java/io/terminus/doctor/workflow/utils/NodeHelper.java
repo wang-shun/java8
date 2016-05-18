@@ -3,6 +3,8 @@ package io.terminus.doctor.workflow.utils;
 import io.terminus.doctor.workflow.model.FlowDefinitionNode;
 import io.terminus.doctor.workflow.node.DecisionNode;
 import io.terminus.doctor.workflow.node.EndNode;
+import io.terminus.doctor.workflow.node.ForkNode;
+import io.terminus.doctor.workflow.node.JoinNode;
 import io.terminus.doctor.workflow.node.Node;
 import io.terminus.doctor.workflow.node.StartNode;
 import io.terminus.doctor.workflow.node.TaskNode;
@@ -36,6 +38,12 @@ public class NodeHelper {
             case DECISION:
                 node = buildDecisionNode();
                 break;
+            case FORK:
+                node = buildForkNode();
+                break;
+            case JOIN:
+                node = buildJoinNode();
+                break;
             default:
                 break;
         }
@@ -56,5 +64,13 @@ public class NodeHelper {
 
     public static Node buildDecisionNode() {
         return new DecisionNode();
+    }
+
+    public static Node buildForkNode() {
+        return new ForkNode();
+    }
+
+    public static Node buildJoinNode() {
+        return new JoinNode();
     }
 }

@@ -28,6 +28,8 @@ import static io.terminus.doctor.workflow.node.Node.ATTR_POINT_Y;
 import static io.terminus.doctor.workflow.node.Node.ATTR_TARGET;
 import static io.terminus.doctor.workflow.node.Node.NODE_DECISION;
 import static io.terminus.doctor.workflow.node.Node.NODE_END;
+import static io.terminus.doctor.workflow.node.Node.NODE_FORK;
+import static io.terminus.doctor.workflow.node.Node.NODE_JOIN;
 import static io.terminus.doctor.workflow.node.Node.NODE_ROOT;
 import static io.terminus.doctor.workflow.node.Node.NODE_START;
 import static io.terminus.doctor.workflow.node.Node.NODE_TASK;
@@ -75,6 +77,9 @@ public class ConfigManager implements Configuration {
         initEndNode();
         // 初始化选择节点(唯一网关)
         initDecisionNode();
+        // 初始化fork节点(并行网关)和join节点
+        int forkNodeCount = initForkNode();
+        initJoinNode(forkNodeCount);
     }
 
     /**
@@ -163,6 +168,9 @@ public class ConfigManager implements Configuration {
                     "任务节点下缺少事件连线, 当前节点名称为: {}, name属性值为: {}", taskNode.getNodeName(), nodeAttrName);
             AssertHelper.isBlank(XmlHelper.getAttrValue(transitionNode, ATTR_TARGET),
                     "任务节点事件连线缺少目标节点, 当前节点名称为: {}, name属性值为: {}", taskNode.getNodeName(), nodeAttrName);
+            // 校验事件连线
+            AssertHelper.isBlank(XmlHelper.getAttrValue(transitionNode, ATTR_TARGET),
+                    "fork节点事件连线缺少目标节点, 当前节点名称为: {}, name属性值为: {}", taskNode.getNodeName(), nodeAttrName);
             List<Node> transitionNodes = Lists.newArrayList(transitionNode);
             transitionMap.put(nodeAttrName, transitionNodes);
         }
@@ -204,6 +212,75 @@ public class ConfigManager implements Configuration {
                     }
                 }
             }
+            transitionMap.put(nodeAttrName, transitionNodes);
+        }
+    }
+
+    /**
+     * 初始化Fork节点
+     * @throws Exception
+     */
+    private int initForkNode() throws Exception {
+        // 1. 获取所有的fork节点
+        String expression = "/" + NODE_ROOT + "/" + NODE_FORK;
+        NodeList nodeList = XmlHelper.getNodeList(expression, document);
+        if(nodeList == null || nodeList.getLength() == 0) {
+            return 0;
+        }
+        for (int i = 0; i < nodeList.getLength(); i++) {
+            // 2. 解析fork节点
+            Node forkNode = nodeList.item(i);
+            String nodeAttrName = XmlHelper.getAttrValue(forkNode, ATTR_NAME);
+            AssertHelper.mapContainsKey(nodeMap, nodeAttrName,
+                    "fork节点的name属性必须唯一, 当前节点名称为: {}, name属性值为: {}", forkNode.getNodeName(), nodeAttrName);
+            nodeMap.put(nodeAttrName, forkNode);
+
+            // 3. transition 节点
+            List<Node> transitionNodes = XmlHelper.getChildrenNodes(forkNode, NODE_TRANSITION);
+            AssertHelper.isEquals(transitionNodes.size(), 0,
+                    "fork节点下缺少事件连线, 当前节点名称为: {}, name属性值为: {}", forkNode.getNodeName(), nodeAttrName);
+            AssertHelper.isEquals(transitionNodes.size(), 1,
+                    "fork节点下的事件连线数量必须大于1, 当前节点名称为: {}, name属性值为: {}", forkNode.getNodeName(), nodeAttrName);
+
+            // 校验每个事件连线
+            for(Node transitionNode : transitionNodes) {
+                AssertHelper.isBlank(XmlHelper.getAttrValue(transitionNode, ATTR_TARGET),
+                        "fork节点事件连线缺少目标节点, 当前节点名称为: {}, name属性值为: {}", forkNode.getNodeName(), nodeAttrName);
+            }
+            transitionMap.put(nodeAttrName, transitionNodes);
+        }
+        return nodeList.getLength();
+    }
+
+    /**
+     * 初始化Join节点
+     * @throws Exception
+     */
+    private void initJoinNode(int forkNodeCount) throws Exception {
+        // 1. 获取所有的Join节点
+        String expression = "/" + NODE_ROOT + "/" + NODE_JOIN;
+        NodeList nodeList = XmlHelper.getNodeList(expression, document);
+        if(nodeList == null || nodeList.getLength() == 0) {
+            AssertHelper.notEquals(0, forkNodeCount, "fork节点数量与join节点数量不匹配");
+            return;
+        }
+        AssertHelper.notEquals(nodeList.getLength(), forkNodeCount, "fork节点数量与join节点数量不匹配");
+
+        for (int i = 0; i < nodeList.getLength(); i++) {
+            // 2. 解析join节点
+            Node JoinNode = nodeList.item(i);
+            String nodeAttrName = XmlHelper.getAttrValue(JoinNode, ATTR_NAME);
+            AssertHelper.mapContainsKey(nodeMap, nodeAttrName,
+                    "join节点的name属性必须唯一, 当前节点名称为: {}, name属性值为: {}", JoinNode.getNodeName(), nodeAttrName);
+            nodeMap.put(nodeAttrName, JoinNode);
+
+            // 3. transition 节点
+            Node transitionNode = XmlHelper.getChildrenSingleNode(JoinNode, NODE_TRANSITION);
+            AssertHelper.isNull(transitionNode,
+                    "join节点下缺少事件连线, 当前节点名称为: {}, name属性值为: {}", JoinNode.getNodeName(), nodeAttrName);
+            AssertHelper.isBlank(XmlHelper.getAttrValue(transitionNode, ATTR_TARGET),
+                    "join节点事件连线缺少目标节点, 当前节点名称为: {}, name属性值为: {}", JoinNode.getNodeName(), nodeAttrName);
+            List<Node> transitionNodes = Lists.newArrayList(transitionNode);
             transitionMap.put(nodeAttrName, transitionNodes);
         }
     }

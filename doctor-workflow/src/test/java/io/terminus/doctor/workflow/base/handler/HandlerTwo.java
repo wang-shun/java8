@@ -19,6 +19,8 @@ public class HandlerTwo extends HandlerAware {
         log.info("[handler two] -> 执行");
         log.info("全局业务数据为: " + execution.getBusinessData());
         log.info("流转数据为: " + execution.getFlowData());
+        log.info("[handler two] -> 修改了流转数据");
+        execution.setFlowData("{flowData:300}");
         log.info("[handler two] -> 执行结束");
     }
 }

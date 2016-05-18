@@ -55,7 +55,7 @@ public interface Execution {
     /**
      * 创建下一个流程活动节点
      */
-    void createNextFlowProcess(FlowProcess flowProcess);
+    void createNextFlowProcess(FlowProcess flowProcess, boolean ifCreate);
 
     /**
      * 获取当前活动节点的处理事件

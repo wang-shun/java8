@@ -70,26 +70,89 @@ public abstract class BaseNode implements Node {
         FlowProcess nextProcess = execution.getNextFlowProcess(transition);
         if (nextProcess != null) {
             // 2. 删除当前节点, 并存储下一个节点
-            execution.createNextFlowProcess(nextProcess);
+            // execution.createNextFlowProcess(nextProcess);
 
-            // 3. 判断节点类型, 执行下个节点
+            // 2. 判断节点类型, 执行下个节点
             FlowDefinitionNode nextNode = execution.getWorkFlowService().getFlowQueryService().getFlowDefinitionNodeQuery()
                     .id(nextProcess.getFlowDefinitionNodeId())
                     .single();
             // 结束节点, 继续执行
             if (FlowDefinitionNode.Type.END.value() == nextNode.getType()) {
-                NodeHelper.buildEndNode().execute(execution);
+                goEnd(nextProcess, execution);
             }
             // 选择节点
             else if (FlowDefinitionNode.Type.DECISION.value() == nextNode.getType()) {
-                execution.setFlowProcess(nextProcess);
-                NodeHelper.buildDecisionNode().execute(execution);
+                goDecision(nextProcess, execution);
             }
-            // 任务节点, 停止, 等待下一次执行
+            // fork 节点
+            else if (FlowDefinitionNode.Type.FORK.value() == nextNode.getType()) {
+                goFork(nextProcess, execution);
+            }
+            // join 节点
+            else if (FlowDefinitionNode.Type.JOIN.value() == nextNode.getType()) {
+                goJoin(nextProcess, execution);
+            }
+            // 任务节点
             else if (FlowDefinitionNode.Type.TASK.value() == nextNode.getType()) {
-
+                goTask(nextProcess, execution);
             }
             // TODO 其他
+        }
+    }
+
+    /**
+     * end 节点执行
+     */
+    private void goEnd(FlowProcess nextProcess, Execution execution) {
+        execution.createNextFlowProcess(nextProcess, true);
+        NodeHelper.buildEndNode().execute(execution);
+    }
+
+    /**
+     * task 节点执行
+     */
+    private void goTask(FlowProcess nextProcess, Execution execution) {
+        execution.createNextFlowProcess(nextProcess, true);
+        // 暂停 task 节点, 不执行
+    }
+
+    /**
+     * decision 节点执行
+     */
+    private void goDecision(FlowProcess nextProcess, Execution execution) {
+        execution.createNextFlowProcess(nextProcess, true);
+        execution.setFlowProcess(nextProcess);
+        NodeHelper.buildDecisionNode().execute(execution);
+    }
+
+    /**
+     * fork 节点执行
+     */
+    private void goFork(FlowProcess nextProcess, Execution execution) {
+        execution.createNextFlowProcess(nextProcess, true);
+        nextProcess.setForkNodeId(nextProcess.getFlowDefinitionNodeId());
+        execution.setFlowProcess(nextProcess);
+        NodeHelper.buildForkNode().execute(execution);
+    }
+
+    /**
+     * join 节点执行
+     */
+    private void goJoin(FlowProcess nextProcess, Execution execution) {
+        // 1. 查询正在执行的fork节点相关的任务节点个数
+        List<FlowProcess> forkNodes = execution.getWorkFlowService().getFlowQueryService().getFlowProcessQuery()
+                .forkNodeId(nextProcess.getForkNodeId())
+                .list();
+        // 如果大于1, 表示存在多个执行节点
+        if(forkNodes.size() > 1) {
+            execution.createNextFlowProcess(nextProcess, false);
+        }
+        // 否则汇聚merge
+        else {
+            execution.createNextFlowProcess(nextProcess, true);
+            nextProcess.setForkNodeId(null);
+            execution.setFlowProcess(nextProcess);
+            NodeHelper.buildDecisionNode().execute(execution);
         }
     }
 }

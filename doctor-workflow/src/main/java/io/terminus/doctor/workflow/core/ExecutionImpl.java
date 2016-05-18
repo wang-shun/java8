@@ -105,6 +105,7 @@ public class ExecutionImpl implements Execution {
                         .flowInstanceId(this.flowProcess.getFlowInstanceId())
                         .flowData(this.flowData)
                         .assignee(nextNode.getAssignee())
+                        .forkNodeId(this.flowProcess.getForkNodeId())
                         .status(FlowProcess.Status.NORMAL.value())
                         .build();
                 return nextProcess;
@@ -113,29 +114,39 @@ public class ExecutionImpl implements Execution {
     }
 
     @Override
-    public void createNextFlowProcess(FlowProcess flowProcess) {
+    public void createNextFlowProcess(FlowProcess flowProcess, boolean ifCreate) {
         // 1. 删除当前已经完成的节点, 记录历史和Track
-        workFlowEngine.buildJdbcAccess().deleteFlowProcess(this.flowProcess.getId());
-        FlowDefinitionNode currNode = workFlowEngine.buildFlowQueryService().getFlowDefinitionNodeQuery()
-                .id(this.flowProcess.getFlowDefinitionNodeId())
+        FlowProcess deleteFlowProcess = workFlowEngine.buildFlowQueryService().getFlowProcessQuery()
+                .id(this.flowProcess.getId())
                 .single();
-        FlowProcessTrack flowProcessTrack = FlowProcessTrack.builder().build();
-        FlowHistoryProcess flowHistoryProcess = FlowHistoryProcess.builder()
-                .describe(FlowDefinitionNode.Type.describe(currNode.getType()) + "[name:" + currNode.getName() + "], 正常结束")
-                .operatorId(operatorId)
-                .operatorName(operatorName)
-                .build();
-        BeanHelper.copy(flowHistoryProcess, this.flowProcess);
-        flowHistoryProcess.setStatus(FlowProcess.Status.END.value());
-        BeanHelper.copy(flowProcessTrack, flowHistoryProcess);
-        workFlowEngine.buildJdbcAccess().createFlowHistoryProcess(flowHistoryProcess);
-        workFlowEngine.buildJdbcAccess().createFlowProcessTrack(flowProcessTrack);
+        if(deleteFlowProcess != null) {
+            workFlowEngine.buildJdbcAccess().deleteFlowProcess(this.flowProcess.getId());
+            FlowDefinitionNode currNode = workFlowEngine.buildFlowQueryService().getFlowDefinitionNodeQuery()
+                    .id(this.flowProcess.getFlowDefinitionNodeId())
+                    .single();
+            // track 记录
+            FlowProcessTrack flowProcessTrack = FlowProcessTrack.builder().build();
+            BeanHelper.copy(flowProcessTrack, this.flowProcess);
+            flowProcessTrack.setFlowData(this.flowData);
+            flowProcessTrack.setOperatorId(this.operatorId);
+            flowProcessTrack.setOperatorName(this.operatorName);
+            workFlowEngine.buildJdbcAccess().createFlowProcessTrack(flowProcessTrack);
+            // history 记录
+            FlowHistoryProcess flowHistoryProcess = FlowHistoryProcess.builder()
+                    .describe(FlowDefinitionNode.Type.describe(currNode.getType()) + "[name:" + currNode.getName() + "], 正常结束")
+                    .build();
+            BeanHelper.copy(flowHistoryProcess, flowProcessTrack);
+            flowHistoryProcess.setStatus(FlowProcess.Status.END.value());
+            workFlowEngine.buildJdbcAccess().createFlowHistoryProcess(flowHistoryProcess);
+        }
 
         // 2. 创建下一个节点, 如果存在就更新
-        if(flowProcess.getId() != null) {
-            workFlowEngine.buildJdbcAccess().updateFlowProcess(flowProcess);
-        }else{
-            workFlowEngine.buildJdbcAccess().createFlowProcess(flowProcess);
+        if(ifCreate) {
+            if(flowProcess.getId() != null) {
+                workFlowEngine.buildJdbcAccess().updateFlowProcess(flowProcess);
+            }else{
+                workFlowEngine.buildJdbcAccess().createFlowProcess(flowProcess);
+            }
         }
     }
 

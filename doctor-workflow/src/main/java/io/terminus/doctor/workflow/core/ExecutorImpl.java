@@ -100,7 +100,7 @@ public class ExecutorImpl implements Executor {
             NodeHelper.buildTaskNode().execute(workFlowEngine.buildExecution(assigneeProcess, expression, flowData, operatorId, operatorName));
         }
         // 一般情况任务执行
-        if (currentProcesses != null) {
+        if (currentProcesses != null && currentProcesses.size() == 1) {
             if(StringHelper.isBlank(flowData)) {
                 flowData = currentProcesses.get(0).getFlowData();
             }
