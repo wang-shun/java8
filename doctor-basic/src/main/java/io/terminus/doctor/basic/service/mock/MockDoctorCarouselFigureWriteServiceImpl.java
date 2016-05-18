@@ -19,8 +19,8 @@ import org.springframework.stereotype.Service;
 public class MockDoctorCarouselFigureWriteServiceImpl implements DoctorCarouselFigureWriteService {
 
     @Override
-    public Response<Boolean> createFigure(DoctorCarouselFigure carouselFigure) {
-        return Response.ok(Boolean.TRUE);
+    public Response<Long> createFigure(DoctorCarouselFigure carouselFigure) {
+        return Response.ok(1L);
     }
 
     @Override

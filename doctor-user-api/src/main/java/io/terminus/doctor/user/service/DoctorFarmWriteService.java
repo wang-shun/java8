@@ -13,13 +13,13 @@ import io.terminus.doctor.user.model.DoctorOrg;
 
 public interface DoctorFarmWriteService {
 
-    Response<Boolean> createOrg(DoctorOrg org);
+    Response<Long> createOrg(DoctorOrg org);
 
     Response<Boolean> updateOrg(DoctorOrg org);
 
     Response<Boolean> deleteOrg(Long orgId);
 
-    Response<Boolean> createFarm(DoctorFarm farm);
+    Response<Long> createFarm(DoctorFarm farm);
 
     Response<Boolean> updateFarm(DoctorFarm farm);
 
