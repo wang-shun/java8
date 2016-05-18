@@ -657,6 +657,7 @@ CREATE index doctor_pigs_pig_code on doctor_pigs(pig_code);
 DROP TABLE IF EXISTS `doctor_pig_tracks`;
 CREATE TABLE `doctor_pig_tracks` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT 'ID',
+  `farm_id` bigint(20) unsigned NOT NULL comment '猪场Id',
   `pig_id` bigint(20) DEFAULT NULL COMMENT '猪id',
   `status` smallint(6) DEFAULT NULL COMMENT '猪状态信息',
   `current_barn_id` bigint(20) unsigned DEFAULT NULL COMMENT '当前猪舍Id',
@@ -675,8 +676,10 @@ CREATE TABLE `doctor_pig_tracks` (
   `updated_at` datetime DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='猪Track 信息表';
+create index doctor_pig_tracks_farm_id on doctor_pig_tracks(farm_id);
 CREATE unique index doctor_pig_tracks_pig_card_id on doctor_pig_tracks(pig_id);
 CREATE index doctor_pig_tracks_current_barn_id on doctor_pig_tracks(current_barn_id);
+create index doctor_pig_tracks_status on doctor_pig_tracks(status);
 
 -- 添加猪快照信息表数据内容
 drop table if exists doctor_pig_snapshots;

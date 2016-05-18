@@ -44,7 +44,7 @@
         #{farmId},#{farmName},#{type},#{remark},#{unitGroupId},#{unitGroupName},#{unitId},#{unitName},#{defaultConsumeCount},#{price},#{extra},#{creatorId},#{creatorName},#{updatorId},#{updatorName},now(),now()
     </sql>
 
-    <sql id="cateria">
+    <sql id="criteria">
         <if test="farmId != null" > AND `farm_id` = #{farmId}</if>
         <if test="type != null" > AND `type` = #{type}</if>
         <if test="remark != null" > AND `remark` = #{remark}</if>
@@ -92,14 +92,14 @@
     <select id="count" parameterType="map" resultType="long">
         SELECT count(1) from <include refid="tb"/>
         <where>
-            <include refid="cateria"/>
+            <include refid="criteria"/>
         </where>
     </select>
 
     <select id="paging" parameterMap="map" resultMap="DoctorMaterialInfoMap">
         SELECT <include refid="cols_all"/> from <include refid="tb"/>
         <where>
-            <include refid="cateria"/>
+            <include refid="criteria"/>
         </where>
         LIMIT #{offset}, #{limit}
     </select>

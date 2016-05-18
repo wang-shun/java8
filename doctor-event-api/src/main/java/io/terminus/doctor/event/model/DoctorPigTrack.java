@@ -27,6 +27,8 @@ public class DoctorPigTrack implements Serializable{
 
     private Long id;
 
+    private Long farmId;
+
     private Long pigId;
 
     private Integer status;

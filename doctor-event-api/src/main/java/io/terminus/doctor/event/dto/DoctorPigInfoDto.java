@@ -1,11 +1,19 @@
 package io.terminus.doctor.event.dto;
 
+import io.terminus.doctor.event.model.DoctorPig;
+import io.terminus.doctor.event.model.DoctorPigTrack;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.experimental.Builder;
+import org.joda.time.DateTime;
+import org.joda.time.Days;
 
 import java.io.Serializable;
 import java.util.Date;
+
+import static com.google.common.base.Preconditions.checkState;
+import static java.util.Objects.isNull;
 
 /**
  * Created by yaoqijun.
@@ -13,6 +21,7 @@ import java.util.Date;
  * Email:yaoqj@terminus.io
  * Descirbe: 猪 分页列表数据信息
  */
+@Builder
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -22,11 +31,13 @@ public class DoctorPigInfoDto implements Serializable{
 
     private Long id;
 
+    private Long farmId;
+
     private Integer pigType;
 
     private String pigCode;
 
-    private Long status;
+    private Integer status;
 
     private String statusName;
 
@@ -41,4 +52,19 @@ public class DoctorPigInfoDto implements Serializable{
     private Long barnId;
 
     private String barnName;
+
+    public static DoctorPigInfoDto buildDoctorPigInfoDto(DoctorPig doctorPig, DoctorPigTrack doctorPigTrack){
+        checkState(!isNull(doctorPig), "build.doctorPig.empty");
+        DoctorPigInfoDtoBuilder builder = DoctorPigInfoDto.builder()
+                .id(doctorPig.getId()).farmId(doctorPig.getFarmId()).pigType(doctorPig.getPigType())
+                .pigCode(doctorPig.getPigCode()).birthDay(doctorPig.getBirthDate()).inFarmDate(doctorPig.getInFarmDate())
+                .dateAge(Days.daysBetween(new DateTime(doctorPig.getBirthDate()), DateTime.now()).getDays());
+
+        if(!isNull(doctorPigTrack)){
+            builder.status(doctorPigTrack.getStatus()).parity(doctorPigTrack.getCurrentParity())
+                    .barnId(doctorPigTrack.getCurrentBarnId())
+                    .barnName(doctorPigTrack.getCurrentBarnName());
+        }
+        return builder.build();
+    }
 }
