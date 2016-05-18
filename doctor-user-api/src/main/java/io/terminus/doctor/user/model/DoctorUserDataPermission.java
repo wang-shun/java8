@@ -6,26 +6,16 @@ import java.io.Serializable;
 import java.util.Date;
 
 /**
- * Desc: 猪场职员表Model类
+ * Desc: 用户数据权限表Model类
  * Mail: yangzl@terminus.io
  * author: DreamYoung
  * Date: 2016-05-18
  */
 @Data
-public class DoctorStaff implements Serializable {
-    private static final long serialVersionUID = 5302529605415428422L;
+public class DoctorUserDataPermission implements Serializable {
+    private static final long serialVersionUID = 8058093995754134945L;
 
     private Long id;
-    
-    /**
-     * 公司id
-     */
-    private Long orgId;
-    
-    /**
-     * 公司名称
-     */
-    private String orgName;
     
     /**
      * 用户id
@@ -33,29 +23,19 @@ public class DoctorStaff implements Serializable {
     private Long userId;
     
     /**
-     * 角色id
+     * 猪场ids, 逗号分隔
      */
-    private Long roleId;
+    private String farmIds;
     
     /**
-     * 角色名称(冗余)
+     * 猪舍ids, 逗号分隔
      */
-    private String roleName;
+    private String barnIds;
     
     /**
-     * 状态 1:在职，-1:不在职
+     * 仓库类型, 逗号分隔
      */
-    private Integer status;
-    
-    /**
-     * 性别
-     */
-    private Integer sex;
-    
-    /**
-     * 外部id
-     */
-    private String outId;
+    private String wareHouseTypes;
     
     /**
      * 附加字段
