@@ -44,6 +44,15 @@
         #{farmId},#{farmName},#{type},#{remark},#{unitGroupId},#{unitGroupName},#{unitId},#{unitName},#{defaultConsumeCount},#{price},#{extra},#{creatorId},#{creatorName},#{updatorId},#{updatorName},now(),now()
     </sql>
 
+    <sql id="cateria">
+        <if test="farmId != null" > AND `farm_id` = #{farmId}</if>
+        <if test="type != null" > AND `type` = #{type}</if>
+        <if test="remark != null" > AND `remark` = #{remark}</if>
+        <if test="unitGroupId != null" > AND `unit_group_id` = #{unitGroupId}</if>
+        <if test="unitId != null" > AND `unit_id` = #{unitId}</if>
+        <if test="defaultConsumeCount != null" > AND `default_consume_count` = #{defaultConsumeCount}</if>
+    </sql>
+
     <insert id="create" parameterType="DoctorMaterialInfo" keyProperty="id" useGeneratedKeys="true">
         INSERT INTO <include refid="tb" />
         (<include refid="cols_exclude_id" />)
@@ -70,6 +79,30 @@
         WHERE id = #{id}
     </select>
 
+    <select id="findByFarmId" parameterType="long" resultMap="DoctorMaterialInfoMap">
+        SELECT <include refid="cols_all"/> from <include refid="tb"/>
+        WHERE farm_id = #{farmId}
+    </select>
+
+    <select id="findByFarmIdType" parameterType="map" resultMap="DoctorMaterialInfoMap">
+        SELECT <include refid="cols_all"/> FROM <include refid="tb"/>
+        WHERE farm_id=#{farmId} and `type`=#{type}
+    </select>
+
+    <select id="count" parameterType="map" resultType="long">
+        SELECT count(1) from <include refid="tb"/>
+        <where>
+            <include refid="cateria"/>
+        </where>
+    </select>
+
+    <select id="paging" parameterMap="map" resultMap="DoctorMaterialInfoMap">
+        SELECT <include refid="cols_all"/> from <include refid="tb"/>
+        <where>
+            <include refid="cateria"/>
+        </where>
+        LIMIT #{offset}, #{limit}
+    </select>
 
     <update id="update" parameterType="DoctorMaterialInfo">
         UPDATE <include refid="tb"/>
