@@ -3,6 +3,7 @@ package io.terminus.doctor.workflow.core;
 import io.terminus.doctor.workflow.event.IHandler;
 import io.terminus.doctor.workflow.event.Interceptor;
 import io.terminus.doctor.workflow.model.FlowDefinitionNodeEvent;
+import io.terminus.doctor.workflow.model.FlowInstance;
 import io.terminus.doctor.workflow.model.FlowProcess;
 
 import java.util.List;
@@ -63,6 +64,24 @@ public interface Execution {
      * @return
      */
     IHandler getHandler(String handlerName);
+
+    /**
+     * 获取流程实例
+     * @return
+     */
+    FlowInstance getFlowInstance();
+
+    /**
+     * 获取流程定义的key
+     * @return
+     */
+    String getFlowDefinitionKey();
+
+    /**
+     * 获取当前实例的业务id
+     * @return
+     */
+    Long getBusinessId();
 
     /**
      * 获取执行表达式

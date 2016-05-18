@@ -180,6 +180,31 @@ public class ExecutionImpl implements Execution {
     }
 
     @Override
+    public FlowInstance getFlowInstance() {
+        return workFlowEngine.buildFlowQueryService().getFlowInstanceQuery()
+                .id(this.flowProcess.getFlowInstanceId())
+                .single();
+    }
+
+    @Override
+    public String getFlowDefinitionKey() {
+        FlowInstance flowInstance = getFlowInstance();
+        if (flowInstance != null) {
+            return flowInstance.getFlowDefinitionKey();
+        }
+        return null;
+    }
+
+    @Override
+    public Long getBusinessId() {
+        FlowInstance flowInstance = getFlowInstance();
+        if (flowInstance != null) {
+            return flowInstance.getBusinessId();
+        }
+        return null;
+    }
+
+    @Override
     public Map getExpression() {
         return this.expression;
     }
@@ -196,9 +221,7 @@ public class ExecutionImpl implements Execution {
 
     @Override
     public String getBusinessData() {
-        FlowInstance flowInstance = workFlowEngine.buildFlowQueryService().getFlowInstanceQuery()
-                .id(this.flowProcess.getFlowInstanceId())
-                .single();
+        FlowInstance flowInstance = getFlowInstance();
         if (flowInstance != null) {
             return flowInstance.getBusinessData();
         }
