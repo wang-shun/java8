@@ -14,7 +14,7 @@ public interface AccountService {
      * 查询用户在其他系统绑定的账号
      * @param userId
      * @param targetSystem 目标系统,  关联枚举: @see io.terminus.doctor.user.enums.TargetSystem
-     * @return 目标系统的User对象, 有效字段:id, name, mobile, email, type, status . result 为 null 时表示没有绑定账号
+     * @return 目标系统的User对象, 有效字段:id, name, mobile, email, type, status . 没有绑定账号时会有异常提示
      */
     Response<User> findBindAccount(Long userId, TargetSystem targetSystem);
 
