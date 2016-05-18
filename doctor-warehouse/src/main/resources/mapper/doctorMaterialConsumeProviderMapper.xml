@@ -10,15 +10,13 @@
     <resultMap id="DoctorMaterialConsumeProviderMap" type="DoctorMaterialConsumeProvider">
 
         <result column="id" property="id"/>
-        <result column="material_in_house_id" property="materialInHouseId"/>
+        <result column="type" property="type"/>
         <result column="farm_id" property="farmId"/>
         <result column="farm_name" property="farmName"/>
         <result column="ware_house_id" property="wareHouseId"/>
         <result column="ware_house_name" property="wareHouseName"/>
         <result column="material_id" property="materialId"/>
         <result column="material_name" property="materialName"/>
-        <result column="material_type_id" property="materialTypeId"/>
-        <result column="material_type_name" property="materialTypeName"/>
         <result column="event_time" property="eventTime"/>
         <result column="event_type" property="eventType"/>
         <result column="event_count" property="eventCount"/>
@@ -41,11 +39,11 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        `material_in_house_id`,`farm_id`,`farm_name`,`ware_house_id`,`ware_house_name`,`material_id`,`material_name`,`material_type_id`,`material_type_name`,`event_time`,`event_type`,`event_count`,`staff_id`,`staff_name`,`extra`,`creator_id`,`creator_name`,`updator_id`,`updator_name`,`created_at`,`updated_at`
+        `type`,`farm_id`,`farm_name`,`ware_house_id`,`ware_house_name`,`material_id`,`material_name`,`event_time`,`event_type`,`event_count`,`staff_id`,`staff_name`,`extra`,`creator_id`,`creator_name`,`updator_id`,`updator_name`,`created_at`,`updated_at`
     </sql>
 
     <sql id="vals">
-        #{materialInHouseId},#{farmId},#{farmName},#{wareHouseId},#{wareHouseName},#{materialId},#{materialName},#{materialTypeId},#{materialTypeName},#{eventTime},#{eventType},#{eventCount},#{staffId},#{staffName},#{extra},#{creatorId},#{creatorName},#{updatorId},#{updatorName},now(),now()
+        #{type},#{farmId},#{farmName},#{wareHouseId},#{wareHouseName},#{materialId},#{materialName},#{eventTime},#{eventType},#{eventCount},#{staffId},#{staffName},#{extra},#{creatorId},#{creatorName},#{updatorId},#{updatorName},now(),now()
     </sql>
 
     <insert id="create" parameterType="DoctorMaterialConsumeProvider" keyProperty="id" useGeneratedKeys="true">
@@ -59,8 +57,7 @@
         ( <include refid="cols_exclude_id"/> )
         VALUES
         <foreach collection="list" item="i" separator=",">
-        ( #{i.materialInHouseId},#{i.farmId},#{i.farmName},#{i.wareHouseId},#{i.wareHouseName},#{i.materialId},#{i.materialName},#{i.materialTypeId},#{i.materialTypeName},#{i.eventTime},#{i.eventType},#{i.eventCount},#{i.staffId},#{i.staffName},#{i.extra},#{i.creatorId},#{i.creatorName},#{i.updatorId},#{i.updatorName},now(),now()
- )
+        (#{i.type},#{i.farmId},#{i.farmName},#{i.wareHouseId},#{i.wareHouseName},#{i.materialId},#{i.materialName},#{i.eventTime},#{i.eventType},#{i.eventCount},#{i.staffId},#{i.staffName},#{i.extra},#{i.creatorId},#{i.creatorName},#{i.updatorId},#{i.updatorName},now(),now())
         </foreach>
     </insert>
 
@@ -80,27 +77,24 @@
         UPDATE <include refid="tb"/>
         <set>
         updated_at = now()
-            <if test="materialInHouseId != null" > ,`material_in_house_id` = #{materialInHouseId}</if>
-            <if test="farmId != null" > ,`farm_id` = #{farmId}</if>
-            <if test="farmName != null" > ,`farm_name` = #{farmName}</if>
-            <if test="wareHouseId != null" > ,`ware_house_id` = #{wareHouseId}</if>
-            <if test="wareHouseName != null" > ,`ware_house_name` = #{wareHouseName}</if>
-            <if test="materialId != null" > ,`material_id` = #{materialId}</if>
-            <if test="materialName != null" > ,`material_name` = #{materialName}</if>
-            <if test="materialTypeId != null" > ,`material_type_id` = #{materialTypeId}</if>
-            <if test="materialTypeName != null" > ,`material_type_name` = #{materialTypeName}</if>
-            <if test="eventTime != null" > ,`event_time` = #{eventTime}</if>
-            <if test="eventType != null" > ,`event_type` = #{eventType}</if>
-            <if test="eventCount != null" > ,`event_count` = #{eventCount}</if>
-            <if test="staffId != null" > ,`staff_id` = #{staffId}</if>
-            <if test="staffName != null" > ,`staff_name` = #{staffName}</if>
-            <if test="extra != null" > ,`extra` = #{extra}</if>
-            <if test="creatorId != null" > ,`creator_id` = #{creatorId}</if>
-            <if test="creatorName != null" > ,`creator_name` = #{creatorName}</if>
-            <if test="updatorId != null" > ,`updator_id` = #{updatorId}</if>
-            <if test="updatorName != null" > ,`updator_name` = #{updatorName}</if>
-            <if test="createdAt != null" > ,`created_at` = #{createdAt}</if>
-                    
+        <if test="type != null" > ,`type` = #{type}</if>
+        <if test="farmId != null" > ,`farm_id` = #{farmId}</if>
+        <if test="farmName != null" > ,`farm_name` = #{farmName}</if>
+        <if test="wareHouseId != null" > ,`ware_house_id` = #{wareHouseId}</if>
+        <if test="wareHouseName != null" > ,`ware_house_name` = #{wareHouseName}</if>
+        <if test="materialId != null" > ,`material_id` = #{materialId}</if>
+        <if test="materialName != null" > ,`material_name` = #{materialName}</if>
+        <if test="eventTime != null" > ,`event_time` = #{eventTime}</if>
+        <if test="eventType != null" > ,`event_type` = #{eventType}</if>
+        <if test="eventCount != null" > ,`event_count` = #{eventCount}</if>
+        <if test="staffId != null" > ,`staff_id` = #{staffId}</if>
+        <if test="staffName != null" > ,`staff_name` = #{staffName}</if>
+        <if test="extra != null" > ,`extra` = #{extra}</if>
+        <if test="creatorId != null" > ,`creator_id` = #{creatorId}</if>
+        <if test="creatorName != null" > ,`creator_name` = #{creatorName}</if>
+        <if test="updatorId != null" > ,`updator_id` = #{updatorId}</if>
+        <if test="updatorName != null" > ,`updator_name` = #{updatorName}</if>
+        <if test="createdAt != null" > ,`created_at` = #{createdAt}</if>
         </set>
         WHERE id=#{id}
     </update>
