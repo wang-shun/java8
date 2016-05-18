@@ -17,7 +17,7 @@ public interface DoctorCarouselFigureWriteService {
      * @param carouselFigure 轮播图
      * @return 是否成功
      */
-    Response<Boolean> createFigure(DoctorCarouselFigure carouselFigure);
+    Response<Long> createFigure(DoctorCarouselFigure carouselFigure);
 
     /**
      * 更需吧轮播图
