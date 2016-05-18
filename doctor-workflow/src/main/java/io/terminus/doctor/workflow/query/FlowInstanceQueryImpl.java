@@ -21,7 +21,7 @@ public class FlowInstanceQueryImpl implements FlowInstanceQuery {
 
     private WorkFlowEngine workFlowEngine;
     private JdbcAccess jdbcAccess;
-    private String orderBy;
+    private String orderBy = "id"; // 默认id排序
     private String desc;
 
     public FlowInstanceQueryImpl(WorkFlowEngine workFlowEngine) {

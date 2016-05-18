@@ -127,7 +127,6 @@ public class ExecutionImpl implements Execution {
             // track 记录
             FlowProcessTrack flowProcessTrack = FlowProcessTrack.builder().build();
             BeanHelper.copy(flowProcessTrack, this.flowProcess);
-            flowProcessTrack.setFlowData(this.flowData);
             flowProcessTrack.setOperatorId(this.operatorId);
             flowProcessTrack.setOperatorName(this.operatorName);
             workFlowEngine.buildJdbcAccess().createFlowProcessTrack(flowProcessTrack);
@@ -136,6 +135,7 @@ public class ExecutionImpl implements Execution {
                     .describe(FlowDefinitionNode.Type.describe(currNode.getType()) + "[name:" + currNode.getName() + "], 正常结束")
                     .build();
             BeanHelper.copy(flowHistoryProcess, flowProcessTrack);
+            flowHistoryProcess.setFlowData(this.flowData);
             flowHistoryProcess.setStatus(FlowProcess.Status.END.value());
             workFlowEngine.buildJdbcAccess().createFlowHistoryProcess(flowHistoryProcess);
         }

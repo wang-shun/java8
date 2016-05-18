@@ -5,6 +5,7 @@ import io.terminus.doctor.workflow.model.FlowInstance;
 import io.terminus.doctor.workflow.model.FlowProcess;
 import org.junit.Assert;
 import org.junit.Test;
+import org.springframework.test.annotation.Rollback;
 
 /**
  * Desc: 简单流程(含有事件)
@@ -39,4 +40,25 @@ public class SimpleTwoTaskHandler extends BaseServiceTest{
         Assert.assertNull(flowInstance);
     }
 
+    @Test
+    @Rollback(false)
+    public void test_ROLLBACK_SimpleWorkFlowHandler() {
+        // 1. 部署流程
+        defService().deploy("simple/simple_two_task_handler.xml");
+        // 2. 启动一个流程实例
+        processService().startFlowInstance(flowDefinitionKey, businessId, "{businessData:100}", "{flowData:200}");
+        // 3. 查询
+        FlowInstance flowInstance = instanceQuery().getExistFlowInstance(flowDefinitionKey, businessId);
+        Assert.assertNotNull(flowInstance);
+        FlowProcess process = processQuery().getCurrentProcess(flowInstance.getId(), "terminus1");
+        Assert.assertNotNull(process);
+        // 5. 执行第一个任务
+        processService().getExecutor(flowDefinitionKey, businessId).execute();
+        process = processQuery().getCurrentProcess(flowInstance.getId(), "terminus2");
+        Assert.assertNotNull(process);
+
+        // 回滚
+        processService().rollBack(flowDefinitionKey, businessId);
+
+    }
 }

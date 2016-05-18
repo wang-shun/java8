@@ -20,7 +20,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * Desc: 流程流程相关的实现类
@@ -105,12 +104,13 @@ public class FlowProcessServiceImpl implements FlowProcessService {
             // 4. 执行开始节点
             NodeHelper.buildStartNode().execute(workFlowEngine.buildExecution(startProcess, expression, flowData, operatorId, operatorName));
 
-        }catch (Exception e) {
+        } catch (Exception e) {
             log.error("[Work Flow Instance] -> 启动流程实例失败, cause by: {}", Throwables.getStackTraceAsString(e));
             AssertHelper.throwException("启动流程实例失败, cause by: {}", Throwables.getStackTraceAsString(e));
         }
     }
 
+    /******************* 执行流程 相关 ********************************************/
     @Override
     public Executor getExecutor(String flowDefinitionKey, Long businessId) {
         return getExecutor(flowDefinitionKey, businessId, null);
@@ -131,48 +131,54 @@ public class FlowProcessServiceImpl implements FlowProcessService {
         endFlowInstance(flowDefinitionKey, businessId, isForce, describe, null, null);
     }
 
+    /******************* 结束流程 相关 ********************************************/
     @Override
     public void endFlowInstance(String flowDefinitionKey, Long businessId, boolean isForce, String describe, Long operatorId, String operatorName) {
         // 如果不强制删除(正常结束)
-        if(!isForce) {
+        if (!isForce) {
             // 1. 校验流程实例, 和子流程实例是否存在
             List<FlowInstance> childFlowInstances = workFlowEngine.buildFlowQueryService().getFlowInstanceQuery()
                     .getExistChildFlowInstance(flowDefinitionKey, businessId);
-            if(childFlowInstances != null && childFlowInstances.size() > 0) {
+            if (childFlowInstances != null && childFlowInstances.size() > 0) {
                 AssertHelper.throwException("当前存在子流程实例, 不能结束结束流程, 流程定义key为: {}, 业务id为: {}", flowDefinitionKey, businessId);
             }
             FlowInstance existFlowInstance = workFlowEngine.buildFlowQueryService().getFlowInstanceQuery()
                     .getExistFlowInstance(flowDefinitionKey, businessId);
             AssertHelper.isNull(existFlowInstance,
-                    "流程实例不存在, 流程定义key为: {}, 业务id为: {}", flowDefinitionKey, businessId);
+                    "主流程实例不存在, 流程定义key为: {}, 业务id为: {}", flowDefinitionKey, businessId);
             // 2. 删除结束节点, 和流程实例
             List<FlowProcess> currentProcesses = workFlowEngine.buildFlowQueryService().getFlowProcessQuery()
                     .getCurrentProcesses(existFlowInstance.getId());
-            if(currentProcesses == null || currentProcesses.size() == 0) {
+            if (currentProcesses == null || currentProcesses.size() == 0) {
                 AssertHelper.throwException("当前不存在流转的任务节点, 流程定义key为: {}, 业务id为: {}", flowDefinitionKey, businessId);
             }
-            if(currentProcesses.size() > 1) {
+            if (currentProcesses.size() > 1) {
                 AssertHelper.throwException("当前存在多个任务节点, 不能结束结束流程, 流程定义key为: {}, 业务id为: {}", flowDefinitionKey, businessId);
             }
             FlowProcess currentProcess = currentProcesses.get(0);
             FlowDefinitionNode processNode = workFlowEngine.buildFlowQueryService().getFlowDefinitionNodeQuery()
                     .id(currentProcess.getFlowDefinitionNodeId())
                     .single();
-            if(FlowDefinitionNode.Type.END.value() != processNode.getType()) {
+            if (FlowDefinitionNode.Type.END.value() != processNode.getType()) {
                 AssertHelper.throwException("当前存在正在执行的任务节点, 不能结束结束流程, 流程定义key为: {}, 业务id为: {}", flowDefinitionKey, businessId);
             }
             access().deleteFlowProcess(currentProcess.getId());
             access().deleteFlowInstance(existFlowInstance.getId());
 
             // 记录历史活动节点
-            FlowHistoryProcess flowHistoryProcess = FlowHistoryProcess.builder()
-                    .describe(describe)
-                    .operatorId(operatorId)
-                    .operatorName(operatorName)
-                    .build();
+            FlowHistoryProcess flowHistoryProcess = FlowHistoryProcess.builder().build();
             BeanHelper.copy(flowHistoryProcess, currentProcess);
+            flowHistoryProcess.setDescribe(describe);
+            flowHistoryProcess.setOperatorId(operatorId);
+            flowHistoryProcess.setOperatorName(operatorName);
             flowHistoryProcess.setStatus(FlowProcess.Status.END.value());
             access().createFlowHistoryProcess(flowHistoryProcess);
+            // 记录track
+            FlowProcessTrack flowProcessTrack = FlowProcessTrack.builder().build();
+            BeanHelper.copy(flowProcessTrack, currentProcess);
+            flowProcessTrack.setOperatorId(operatorId);
+            flowProcessTrack.setOperatorName(operatorName);
+            access().createFlowProcessTrack(flowProcessTrack);
             // 记录历史流程实例
             FlowHistoryInstance flowHistoryInstance = FlowHistoryInstance.builder()
                     .describe(describe)
@@ -180,15 +186,15 @@ public class FlowProcessServiceImpl implements FlowProcessService {
             BeanHelper.copy(flowHistoryInstance, existFlowInstance);
             flowHistoryInstance.setStatus(FlowInstance.Status.END.value());
             access().createFlowHistoryInstance(flowHistoryInstance);
-            // 删除所有的流程跟踪
-            access().deleteFlowProcessTrack(
+            // 删除所有的流程跟踪 (暂不考虑删除)
+            /*access().deleteFlowProcessTrack(
                     workFlowEngine.buildFlowQueryService().getFlowProcessTrackQuery()
                             .flowInstanceId(existFlowInstance.getId())
                             .list()
                             .stream()
                             .map(FlowProcessTrack::getId)
                             .collect(Collectors.toList())
-            );
+            );*/
         }
         // 如果强制删除
         else {
@@ -197,45 +203,129 @@ public class FlowProcessServiceImpl implements FlowProcessService {
                     .flowDefinitionKey(flowDefinitionKey)
                     .businessId(businessId)
                     .list();
-            if(flowInstances != null && flowInstances.size() > 0) {
+            if (flowInstances != null && flowInstances.size() > 0) {
                 flowInstances.forEach(flowInstance -> {
                     List<FlowProcess> flowProcesses = workFlowEngine.buildFlowQueryService().getFlowProcessQuery()
                             .flowInstanceId(flowInstance.getId())
                             .list();
-                    if(flowProcesses != null && flowProcesses.size() > 0) {
+                    if (flowProcesses != null && flowProcesses.size() > 0) {
                         flowProcesses.forEach(flowProcess -> {
                             access().deleteFlowProcess(flowProcess.getId());
                             // 记录历史活动节点
-                            FlowHistoryProcess flowHistoryProcess = FlowHistoryProcess.builder()
-                                    .describe(describe)
-                                    .operatorId(operatorId)
-                                    .operatorName(operatorName)
-                                    .build();
+                            FlowHistoryProcess flowHistoryProcess = FlowHistoryProcess.builder().build();
                             BeanHelper.copy(flowHistoryProcess, flowProcess);
+                            flowHistoryProcess.setDescribe(describe);
+                            flowHistoryProcess.setOperatorId(operatorId);
+                            flowHistoryProcess.setOperatorName(operatorName);
                             flowHistoryProcess.setStatus(FlowProcess.Status.DELETE.value());
                             access().createFlowHistoryProcess(flowHistoryProcess);
+                            // 记录track
+                            FlowProcessTrack flowProcessTrack = FlowProcessTrack.builder().build();
+                            BeanHelper.copy(flowProcessTrack, flowProcess);
+                            flowProcessTrack.setOperatorId(operatorId);
+                            flowProcessTrack.setOperatorName(operatorName);
+                            access().createFlowProcessTrack(flowProcessTrack);
                         });
                     }
                     access().deleteFlowInstance(flowInstance.getId());
                     // 记录历史流程实例
-                    FlowHistoryInstance flowHistoryInstance = FlowHistoryInstance.builder()
-                            .describe(describe)
-                            .build();
+                    FlowHistoryInstance flowHistoryInstance = FlowHistoryInstance.builder().build();
                     BeanHelper.copy(flowHistoryInstance, flowInstance);
+                    flowHistoryInstance.setDescribe(describe);
+                    flowHistoryInstance.setOperatorId(operatorId);
+                    flowHistoryInstance.setOperatorName(operatorName);
                     flowHistoryInstance.setStatus(FlowInstance.Status.DELETE.value());
                     access().createFlowHistoryInstance(flowHistoryInstance);
-                    // 删除所有的流程跟踪
-                    access().deleteFlowProcessTrack(
+
+                    // 删除所有的流程跟踪 (暂不考虑删除)
+                    /*access().deleteFlowProcessTrack(
                             workFlowEngine.buildFlowQueryService().getFlowProcessTrackQuery()
                                     .flowInstanceId(flowInstance.getId())
                                     .list()
                                     .stream()
                                     .map(FlowProcessTrack::getId)
                                     .collect(Collectors.toList())
-                    );
+                    );*/
                 });
             }
         }
+    }
+
+    /******************* 回滚流程 相关 ********************************************/
+    @Override
+    public void rollBack(String flowDefinitionKey, Long businessId) {
+        rollBack(flowDefinitionKey, businessId, 1, null, null);
+    }
+
+    @Override
+    public void rollBack(String flowDefinitionKey, Long businessId, Long operatorId, String operatorName) {
+        rollBack(flowDefinitionKey, businessId, 1, operatorId, operatorName);
+    }
+
+    @Override
+    public void rollBack(String flowDefinitionKey, Long businessId, int depth) {
+        rollBack(flowDefinitionKey, businessId, depth, null, null);
+    }
+
+    @Override
+    public void rollBack(String flowDefinitionKey, Long businessId, int depth, Long operatorId, String operatorName) {
+        if (depth < 1) {
+            AssertHelper.throwException(
+                    "当前流程回滚操作深度不能小于1, 流程定义key为: {}, 业务id为: {}", flowDefinitionKey, businessId);
+        }
+        // TODO 子流程回滚情况...
+
+        // 获取主流程实例
+        FlowInstance mainFlowInstance = workFlowEngine.buildFlowQueryService().getFlowInstanceQuery()
+                .getExistFlowInstance(flowDefinitionKey, businessId);
+        AssertHelper.isNull(mainFlowInstance,
+                "主流程实例不存在, 无法回滚, 流程定义key为: {}, 业务id为: {}", flowDefinitionKey, businessId);
+        List<FlowProcess> currentProcesses = workFlowEngine.buildFlowQueryService().getFlowProcessQuery()
+                .getCurrentProcesses(mainFlowInstance.getId());
+        // 1. 如果当前只存在一个执行任务
+        if(currentProcesses != null && currentProcesses.size() == 1) {
+            FlowDefinitionNode currNode = workFlowEngine.buildFlowQueryService().getFlowDefinitionNodeQuery()
+                    .id(currentProcesses.get(0).getFlowDefinitionNodeId())
+                    .single();
+            List<FlowProcessTrack> flowTracks = workFlowEngine.buildFlowQueryService().getFlowProcessTrackQuery()
+                    .flowInstanceId(mainFlowInstance.getId())
+                    .desc()
+                    .list();
+            int count = 0;
+            FlowProcessTrack currTrack = null;
+            for (FlowProcessTrack flowTrack : flowTracks) {
+                FlowDefinitionNode trackNode = workFlowEngine.buildFlowQueryService().getFlowDefinitionNodeQuery()
+                        .id(flowTrack.getFlowDefinitionNodeId())
+                        .type(FlowDefinitionNode.Type.TASK.value())
+                        .single();
+                if (trackNode == null)
+                    continue;
+                count ++;
+                if(count == depth) {
+                    currTrack = flowTrack;
+                    break;
+                }
+            }
+            AssertHelper.notEquals(count, depth,
+                    "回滚的深度过大, 不能执行回滚操作, 流程定义key为: {}, 业务id为: {}", flowDefinitionKey, businessId);
+            // 回滚
+            access().deleteFlowProcess(currentProcesses.get(0).getId());
+            access().deleteFlowProcessTrack(currTrack.getId());
+            FlowProcess rollBackProcess = FlowProcess.builder().build();
+            BeanHelper.copy(rollBackProcess, currTrack);
+            access().createFlowProcess(rollBackProcess);
+            // 记录历史
+            FlowHistoryProcess hisProcess = FlowHistoryProcess.builder().build();
+            BeanHelper.copy(hisProcess, rollBackProcess);
+            hisProcess.setOperatorId(operatorId);
+            hisProcess.setOperatorName(operatorName);
+            hisProcess.setStatus(FlowProcess.Status.END.value());
+            hisProcess.setDescribe("任务节点[" + currNode.getName() + "], 回滚成功");
+            access().createFlowHistoryProcess(hisProcess);
+        }
+        // 2. 如果存在多个任务 TODO
+
+
     }
 
     private JdbcAccess access() {

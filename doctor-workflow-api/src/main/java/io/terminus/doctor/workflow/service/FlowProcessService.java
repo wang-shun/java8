@@ -14,9 +14,6 @@ import java.util.Map;
  */
 public interface FlowProcessService {
 
-    ///////////////////////////////////////////////////////////////
-    ///// 流程实例 启动 相关方法 /////////////////////////////////////
-    ///////////////////////////////////////////////////////////////
     /**
      * 根据key值, 启动一个流程实例, 根据version最新的流程定义启动.
      * 注意: 每个业务id只能启动一个类型的流程定义, 多次启动会抛出异常
@@ -118,4 +115,38 @@ public interface FlowProcessService {
      * @param describe          删除的理由(描述信息)
      */
     void endFlowInstance(String flowDefinitionKey, Long businessId, boolean isForce, String describe, Long operatorId, String operatorName);
+
+    /**
+     * 回滚操作, 默认回滚1次
+     * @param flowDefinitionKey 流程定义的key
+     * @param businessId        业务id
+     */
+    void rollBack(String flowDefinitionKey, Long businessId);
+
+    /**
+     * 指定operator的id和name, 回滚操作, 默认回滚1次
+     * @param flowDefinitionKey 流程定义的key
+     * @param businessId        业务id
+     * @param operatorId        操作人id
+     * @param operatorName      操作人姓名
+     */
+    void rollBack(String flowDefinitionKey, Long businessId, Long operatorId, String operatorName);
+
+    /**
+     * 根据回滚的深度进行回滚操作
+     * @param flowDefinitionKey 流程定义的key
+     * @param businessId        业务id
+     * @param depth             回滚深度
+     */
+    void rollBack(String flowDefinitionKey, Long businessId, int depth);
+
+    /**
+     * 根据回滚的深度进行回滚操作
+     * @param flowDefinitionKey 流程定义的key
+     * @param businessId        业务id
+     * @param depth             回滚深度
+     * @param operatorId        操作人id
+     * @param operatorName      操作人姓名
+     */
+    void rollBack(String flowDefinitionKey, Long businessId, int depth, Long operatorId, String operatorName);
 }
