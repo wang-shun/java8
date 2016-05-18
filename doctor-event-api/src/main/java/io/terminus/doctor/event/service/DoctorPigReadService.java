@@ -4,6 +4,8 @@ import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.event.dto.DoctorPigInfoDto;
 import io.terminus.doctor.event.dto.DoctorSowPigInfoDetailDto;
+import io.terminus.doctor.event.model.DoctorPig;
+import io.terminus.doctor.event.model.DoctorPigTrack;
 
 import javax.validation.constraints.NotNull;
 import java.util.Map;
@@ -19,44 +21,45 @@ public interface DoctorPigReadService {
     /**
      * 获取母猪数量
      * @param range
+     * @see io.terminus.doctor.event.enums.DataRange
      * @param id
      * @return
      */
-    Response<Integer> querySowPigCount(@NotNull(message = "input.range.empty")Integer range,
-                                       @NotNull(message = "input.id.empty") Long id);
-
-    /**
-     * 获取公猪数量
-     * @param range
-     * @param id
-     * @return
-     */
-    Response<Integer> queryBoarPigCount(@NotNull(message = "input.range.empty") Integer range,
-                                        @NotNull(message = "input.id.empty") Long id);
+    Response<Long> queryPigCount(@NotNull(message = "input.range.empty")Integer range,
+                                 @NotNull(message = "input.id.empty") Long id,
+                                 @NotNull(message = "input.pigType.empty") Integer pigType);
 
     /**
      * 获取猪场Breed 状态存栏信息
      * @param farmId
      * @return
      */
-    Response<Map<Long,Integer>> queryPigCountByBreed(@NotNull(message = "input.farmId.empty") Long farmId);
+    Response<Map<Long,Long>> queryPigCountByBreed(@NotNull(message = "input.farmId.empty") Long farmId);
 
     /**
      * 猪状态存栏结构
      * @param farmId
      * @return
      */
-    Response<Map<Long, Integer>> queryPigCountByStatus(@NotNull(message = "input.farmId.empty") Long farmId);
+    Response<Map<Long, Long>> queryPigCountByStatus(@NotNull(message = "input.farmId.empty") Long farmId);
 
     /**
-     * 分页猪场，猪舍，母猪的状态信息，猪Code 搜索猪信息
-     * @param farmId
-     * @param barnId
-     * @param status
-     * @param pigCode
+     * 通过doctorPig 信息分页查询
+     * @param doctorPig
+     * @param pageNo
+     * @param pageSize
      * @return
      */
-    Response<Paging<DoctorPigInfoDto>> pagingDoctorInfoDto(Long farmId, Long barnId, Long status, Long pigCode);
+    Response<Paging<DoctorPigInfoDto>> pagingDoctorInfoDtoByPig(DoctorPig doctorPig, Integer pageNo, Integer pageSize);
+
+    /**
+     * 公猪的Track 信息分页查询
+     * @param doctorPigTrack
+     * @param pageNo
+     * @param pageSize
+     * @return
+     */
+    Response<Paging<DoctorPigInfoDto>> pagingDoctorInfoDtoByPigTrack(DoctorPigTrack doctorPigTrack, Integer pageNo, Integer pageSize);
 
     /**
      * 获取母猪的详细信息
