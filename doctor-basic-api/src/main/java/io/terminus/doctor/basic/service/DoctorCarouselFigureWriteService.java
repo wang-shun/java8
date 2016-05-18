@@ -28,8 +28,8 @@ public interface DoctorCarouselFigureWriteService {
 
     /**
      * 删除轮播图
-     * @param id 轮播图id
+     * @param figureId 轮播图id
      * @return 是否成功
      */
-    Response<Boolean> deleteFigure(Long id);
+    Response<Boolean> deleteFigure(Long figureId);
 }

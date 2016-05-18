@@ -23,8 +23,8 @@ public interface DoctorCarouselFigureReadService {
 
     /**
      * 根据id查询轮播图
-     * @param id id
+     * @param figureId id
      * @return 轮播图
      */
-    Response<DoctorCarouselFigure> findFigureById(Long id);
+    Response<DoctorCarouselFigure> findFigureById(Long figureId);
 }
