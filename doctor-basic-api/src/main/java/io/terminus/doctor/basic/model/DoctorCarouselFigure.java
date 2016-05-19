@@ -31,6 +31,11 @@ public class DoctorCarouselFigure implements Serializable {
      * 轮播图链接地址
      */
     private String url;
+
+    /**
+     * 跳转地址
+     */
+    private String forward;
     
     /**
      * 创建时间

@@ -52,14 +52,10 @@ public class RandomUtil {
     }
 
     public static void main(String[] args) {
-        System.out.println(generateSign("pigDoctorSecret",
+        System.out.println(generateSign("pigDoctorAndroidSecret",
                 MapBuilder.<String, Object>of()
-                        .put("appKey", "pigDoctorMobile")
-                        .put("pampasCall", "user.change.password")
-                        .put("mobile", "13333333333")
-                        .put("code", "code")
-                        .put("newPassword", "1234567")
-                        .put("sid", "testSessionId")
+                        .put("appKey", "pigDoctorAndroid")
+                        .put("pampasCall", "get.carousel.figure")
                         .map()));
     }
 }
