@@ -49,6 +49,6 @@ public class RandomUtil {
 
     public static void main(String[] args) {
         System.out.println(generateSign("pigDoctorSecret",
-                ImmutableMap.of("appKey", "pigDoctorMobile", "name", "dadu", "pampasCall", "say.hi")));
+                ImmutableMap.of("appKey", "pigDoctorMobile", "pampasCall", "get.carousel.figure")));
     }
 }

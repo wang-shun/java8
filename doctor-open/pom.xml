@@ -17,11 +17,11 @@
         </dependency>
         <dependency>
             <groupId>io.terminus.doctor</groupId>
-            <artifactId>doctor-user</artifactId>
+            <artifactId>doctor-user-api</artifactId>
         </dependency>
         <dependency>
             <groupId>io.terminus.doctor</groupId>
-            <artifactId>doctor-basic</artifactId>
+            <artifactId>doctor-basic-api</artifactId>
         </dependency>
         <dependency>
             <groupId>io.terminus.parana</groupId>

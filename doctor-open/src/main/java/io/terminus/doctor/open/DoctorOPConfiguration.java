@@ -4,9 +4,7 @@
 
 package io.terminus.doctor.open;
 
-import io.terminus.doctor.basic.DoctorBasicConfiguration;
 import io.terminus.doctor.open.common.MessageSources;
-import io.terminus.doctor.user.DoctorUserConfiguration;
 import io.terminus.doctor.web.core.image.FileHelper;
 import io.terminus.lib.file.FileServer;
 import io.terminus.lib.file.ImageServer;
@@ -18,7 +16,6 @@ import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
 /**
@@ -30,7 +27,6 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 @EnableOpenPlatform
 @ComponentScan({"io.terminus.doctor.open.common"})
 @EnableAutoConfiguration
-@Import({DoctorUserConfiguration.class, DoctorBasicConfiguration.class})
 public class DoctorOPConfiguration {
     @Bean
     public MessageSources messageSources() {
