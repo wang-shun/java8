@@ -18,6 +18,7 @@
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.OperatorReadService" id="operatorReadService" check="false"/>
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.SellerReadService" id="sellerReadService" check="false"/>
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.SellerWriteService" id="sellerWriteService" check="false"/>
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.DoctorUserService" id="doctorUserService" check="false"/>
 
     <!-- user device service -->
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.parana.user.service.DeviceReadService" id="deviceReadService" check="false"/>

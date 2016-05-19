@@ -1,4 +1,4 @@
-package io.terminus.doctor.web.design.service;
+package io.terminus.doctor.web.admin.service;
 
 import com.fasterxml.jackson.databind.JavaType;
 import com.github.kevinsawicki.http.HttpRequest;
@@ -55,6 +55,11 @@ public class AccountServiceImpl implements AccountService{
     private Response<User> _bindAccount(Long userId, TargetSystem targetSystem, String account, String password, boolean checkPassword){
         Response<User> response = new Response<>();
         try {
+            Response<UserBind> bindResponse = doctorUserService.findUserBindUnique(userId, targetSystem);
+            UserBind userBind = RespHelper.orServEx(bindResponse);
+            if (userBind != null) {
+                return Response.fail("user.bind.already");
+            }
             otherSystemService.setTargetSystemValue(targetSystem);
             String simpleUUID = UUID.randomUUID().toString().replace("-", "");
             String url = targetSystem.getValueOfDomain() + (checkPassword ? URL_BINDACCOUNT : URL_BINDACCOUNT_NOPASSWORD);
@@ -73,7 +78,7 @@ public class AccountServiceImpl implements AccountService{
                 User user = this.makeUserFromJson(body);
 
                 //在自己系统记录绑定关系
-                UserBind userBind = new UserBind();
+                userBind = new UserBind();
                 userBind.setTargetSystem(targetSystem.value());
                 userBind.setUserId(userId);
                 userBind.setUuid(simpleUUID);
@@ -96,7 +101,7 @@ public class AccountServiceImpl implements AccountService{
         User user = new User();
         user.setName(map.get("nickname"));
         user.setMobile(map.get("mobile"));
-        user.setEmail("email");
+        user.setEmail(map.get("email"));
         return user;
     }
     @Override

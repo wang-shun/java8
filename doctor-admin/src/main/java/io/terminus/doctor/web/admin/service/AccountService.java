@@ -1,4 +1,4 @@
-package io.terminus.doctor.web.design.service;
+package io.terminus.doctor.web.admin.service;
 
 import io.terminus.common.model.Response;
 import io.terminus.doctor.user.enums.TargetSystem;
