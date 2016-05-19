@@ -26,7 +26,8 @@ import static io.terminus.common.utils.Arguments.isEmpty;
         "server.time",
         "get.session.id",
         "get.user.captcher",
-        "get.carousel.figure"   //轮播图接口
+        "get.carousel.figure",  //轮播图接口
+        "user.forget.password"  //忘记密码
 })
 public class SessionHandle implements ParamPreHandle {
 

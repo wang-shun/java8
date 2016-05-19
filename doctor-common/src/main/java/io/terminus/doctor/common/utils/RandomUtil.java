@@ -42,20 +42,24 @@ public class RandomUtil {
 
     private static String generateSign(String secret, Map<String, Object> params) {
         String toVerify = Joiner.on('&').withKeyValueSeparator("=").join(params);
-        return Hashing.md5().newHasher()
+        System.out.println(toVerify);
+        String sign = Hashing.md5().newHasher()
                 .putString(toVerify, Charsets.UTF_8)
                 .putString(secret, Charsets.UTF_8).hash().toString();
+
+        System.out.println(toVerify + "&sign=" + sign);
+        return "";
     }
 
     public static void main(String[] args) {
         System.out.println(generateSign("pigDoctorSecret",
                 MapBuilder.<String, Object>of()
                         .put("appKey", "pigDoctorMobile")
-                        .put("pampasCall", "user.login")
-                        .put("pampasCall", "user.login")
-                        .put("pampasCall", "user.login")
-                        .put("pampasCall", "user.login")
-                        .put("pampasCall", "user.login")
+                        .put("pampasCall", "user.change.password")
+                        .put("mobile", "13333333333")
+                        .put("code", "code")
+                        .put("newPassword", "1234567")
+                        .put("sid", "testSessionId")
                         .map()));
     }
 }

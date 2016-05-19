@@ -118,9 +118,9 @@ public class OPUsers {
     }
 
     @OpenMethod(key="user.login", paramNames = {"name", "password", "type", "code", "sid"})
-    public Token login(String name, String password, String type, String code, String sessionId) {
-        if (isEmpty(name)) {
-            throw new OPClientException("user.name.miss");
+    public Token login(String mobile, String password, String code, String sessionId) {
+        if (isEmpty(mobile)) {
+            throw new OPClientException("user.mobile.miss");
         }
         if (isEmpty(password)) {
             throw new OPClientException("user.password.miss");
@@ -141,8 +141,8 @@ public class OPUsers {
             throw new OPClientException("user.code.mismatch");
         }
 
-        // 用户名密码登录
-        User user = doLogin(name, password, type, sessionId);
+        // 手机 密码登录
+        User user = doLogin(mobile, password, sessionId);
         // 登录成功记录 session
         sessionManager.save(Sessions.TOKEN_PREFIX, sessionId, ImmutableMap.of(Sessions.USER_ID, (Object) user.getId()), Sessions.LONG_INACTIVE_INTERVAL);
         // 清除 limit & code
@@ -151,13 +151,18 @@ public class OPUsers {
 
         // 返回登录的凭证
         Token token = new Token();
-        token.setName(name);
+        token.setName(mobile);
         token.setDomain(sessionProperties.getCookieDomain());
         token.setExpiredAt(DateTime.now().plusSeconds(Sessions.LONG_INACTIVE_INTERVAL)
                 .toString(DateTimeFormat.forPattern("yyyyMMddHHmmss")));
         token.setSessionId(sessionId);
         token.setCookieName(sessionProperties.getCookieName());
         return token;
+    }
+
+    //手机登录
+    private User doLogin(String mobile, String password, String sessionId) {
+        return doLogin(mobile, password, "3", sessionId);
     }
 
     private User doLogin(String name, String password, String type, String sessionId) {
@@ -259,6 +264,20 @@ public class OPUsers {
      */
     @OpenMethod(key = "user.change.password", httpMethods = RequestMethod.POST, paramNames = {"oldPassword", "newPassword"})
     public Boolean changePassword(@NotEmpty(message = "oldPassword.not.empty") String oldPassword,
+                                  @NotEmpty(message = "newPassword.not.empty") String newPassword) {
+        return Boolean.TRUE;
+    }
+
+    /**
+     * 忘记密码
+     * @param mobile  手机号
+     * @param code    验证码
+     * @param newPassword  新密码
+     * @return 是否成功
+     */
+    @OpenMethod(key = "user.forget.password", httpMethods = RequestMethod.POST, paramNames = {"mobile", "code", "newPassword"})
+    public Boolean forgetPassword(@NotEmpty(message = "mobile.not.empty") String mobile,
+                                  @NotEmpty(message = "code.not.empty") String code,
                                   @NotEmpty(message = "newPassword.not.empty") String newPassword) {
         return Boolean.TRUE;
     }
