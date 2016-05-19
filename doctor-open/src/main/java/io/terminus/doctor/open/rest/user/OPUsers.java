@@ -151,7 +151,7 @@ public class OPUsers {
 
         // 返回登录的凭证
         Token token = new Token();
-        token.setName(mobile);
+        token.setName(user.getName());
         token.setDomain(sessionProperties.getCookieDomain());
         token.setExpiredAt(DateTime.now().plusSeconds(Sessions.LONG_INACTIVE_INTERVAL)
                 .toString(DateTimeFormat.forPattern("yyyyMMddHHmmss")));
