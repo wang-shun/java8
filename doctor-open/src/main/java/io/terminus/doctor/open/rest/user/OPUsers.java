@@ -110,7 +110,8 @@ public class OPUsers {
      */
     @OpenMethod(key = "user.register", httpMethods = RequestMethod.POST, paramNames = {"password", "userName", "mobile", "code"})
     public Long register(@NotEmpty(message = "password.not.empty") String password,
-                         String userName, String mobile,
+                         @NotEmpty(message = "username.not.empty") String userName,
+                         @NotEmpty(message = "mobile.not.empty") String mobile,
                          @NotEmpty(message = "code.not.empty") String code,
                          HttpServletRequest request, HttpServletResponse response) {
         return Long.valueOf(RandomUtil.random(1, 10));

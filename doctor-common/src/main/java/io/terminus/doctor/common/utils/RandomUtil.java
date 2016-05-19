@@ -2,8 +2,8 @@ package io.terminus.doctor.common.utils;
 
 import com.google.common.base.Charsets;
 import com.google.common.base.Joiner;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.hash.Hashing;
+import io.terminus.common.utils.MapBuilder;
 
 import java.util.Map;
 import java.util.Random;
@@ -49,6 +49,13 @@ public class RandomUtil {
 
     public static void main(String[] args) {
         System.out.println(generateSign("pigDoctorSecret",
-                ImmutableMap.of("appKey", "pigDoctorMobile", "pampasCall", "get.carousel.figure")));
+                MapBuilder.<String, Object>of()
+                        .put("appKey", "pigDoctorMobile")
+                        .put("pampasCall", "user.login")
+                        .put("pampasCall", "user.login")
+                        .put("pampasCall", "user.login")
+                        .put("pampasCall", "user.login")
+                        .put("pampasCall", "user.login")
+                        .map()));
     }
 }
