@@ -1,12 +1,12 @@
 package io.terminus.doctor.event.dto.event.sow;
 
-import io.terminus.doctor.event.model.DoctorPig;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Builder;
 
 import java.io.Serializable;
+import java.util.Date;
 
 /**
  * Created by yaoqijun.
@@ -22,9 +22,33 @@ public class DoctorSowFarmEntryDto implements Serializable{
 
     private static final long serialVersionUID = 5276009871407574407L;
 
-    private DoctorPig doctorPig;    // pig 基础数据信息
+    private String pigCode;
 
-    private Long status;    //猪状态信息
+    private Date inFarmDate;
 
-    private Integer parity; //母猪胎次信息
+    private Date birthday;
+
+    private Long barnId;
+
+    private String barnName;
+
+    private Integer source;
+
+    private String earCode;
+
+    private Integer parity;
+
+    private Integer left;   //左乳头的数量
+
+    private Integer right;  //右乳头数量
+
+    private Long breed; //品种
+
+    private Long breedType;     //品系
+
+    private Long fatherId;
+
+    private Long motherId;
+
+    private String mark;
 }

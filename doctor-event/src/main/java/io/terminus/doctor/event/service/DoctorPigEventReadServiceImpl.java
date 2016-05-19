@@ -8,6 +8,7 @@ import io.terminus.common.model.Response;
 import io.terminus.doctor.event.dao.DoctorPigEventDao;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
@@ -28,6 +29,7 @@ public class DoctorPigEventReadServiceImpl implements DoctorPigEventReadService{
 
     private final DoctorPigEventDao doctorPigEventDao;
 
+    @Autowired
     public DoctorPigEventReadServiceImpl(DoctorPigEventDao doctorPigEventDao){
         this.doctorPigEventDao = doctorPigEventDao;
     }
