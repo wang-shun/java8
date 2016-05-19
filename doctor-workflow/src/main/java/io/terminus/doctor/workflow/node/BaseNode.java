@@ -96,7 +96,10 @@ public abstract class BaseNode implements Node {
             else if (FlowDefinitionNode.Type.TASK.value() == nextNode.getType()) {
                 goTask(nextProcess, execution);
             }
-            // TODO 其他
+            // 子流程结束节点
+            else if (FlowDefinitionNode.Type.SUBEND.value() == nextNode.getType()) {
+                goSubEnd(nextProcess, execution);
+            }
         }
     }
 
@@ -151,5 +154,13 @@ public abstract class BaseNode implements Node {
             nextProcess.setForkNodeId(null);
             NodeHelper.buildDecisionNode().execute(execution.getExecution(nextProcess));
         }
+    }
+
+    /**
+     * 子流程 end 节点执行
+     */
+    private void goSubEnd(FlowProcess nextProcess, Execution execution) {
+        execution.createNextFlowProcess(nextProcess, true);
+        NodeHelper.buildSubEndNode().execute(execution.getExecution(nextProcess));
     }
 }

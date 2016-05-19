@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 流程开始 -->
+<workflow key="simpleSubFlow" name="简单子流程流程测试">
+    <!-- 开始节点 -->
+    <start name="开始节点" pointx="50" pointy="100">
+        <transition name="开始连线" target="任务节点1" />
+    </start>
+
+    <!-- 任务节点 -->
+    <task name="任务节点1" assignee="terminus1" pointx="250" pointy="100">
+        <transition name="任务连线1" target="任务节点2" />
+        <subflow name="子流程连线1" target="子流程开始节点" />
+    </task>
+
+    <!-- 任务节点 -->
+    <task name="任务节点2" assignee="terminus2" pointx="450" pointy="100">
+        <transition name="任务连线2" target="结束节点" />
+    </task>
+
+    <!-- 子流程 start -->
+    <substart name="子流程开始节点" pointx="" pointy="">
+        <transition name="子流程开始连线" target="子流程任务节点1" />
+    </substart>
+
+    <task name="子流程任务节点1" assignee="terminus101" pointx="" pointy="">
+        <transition name="子流程任务连线1" target="子流程任务节点2"/>
+    </task>
+
+    <task name="子流程任务节点2" assignee="terminus102" pointx="" pointy="">
+        <transition name="子流程任务连线2" target="子流程结束节点"/>
+    </task>
+
+    <subend name="子流程结束节点" pointx="" pointy="" />
+    <!-- 子流程 end -->
+
+    <!-- 结束节点 -->
+    <end name="结束节点" pointx="650" pointy="100" />
+</workflow>

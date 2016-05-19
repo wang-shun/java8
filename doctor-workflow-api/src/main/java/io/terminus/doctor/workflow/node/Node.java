@@ -23,6 +23,7 @@ public interface Node {
     String NODE_END = "end";
 
     String NODE_TRANSITION = "transition";
+    String NODE_SUBFLOW = "subflow";
 
     ///////////////////////////////////////////////////////////////
     ///// 流程定义 属性 相关 ////////////////////////////////////////
