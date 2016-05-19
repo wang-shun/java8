@@ -1,5 +1,11 @@
 package io.terminus.doctor.common.utils;
 
+import com.google.common.base.Charsets;
+import com.google.common.base.Joiner;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.hash.Hashing;
+
+import java.util.Map;
 import java.util.Random;
 
 /**
@@ -31,5 +37,18 @@ public class RandomUtil {
 
     private static int getMax(int a, int b) {
         return Math.max(a, b);
+    }
+
+
+    private static String generateSign(String secret, Map<String, Object> params) {
+        String toVerify = Joiner.on('&').withKeyValueSeparator("=").join(params);
+        return Hashing.md5().newHasher()
+                .putString(toVerify, Charsets.UTF_8)
+                .putString(secret, Charsets.UTF_8).hash().toString();
+    }
+
+    public static void main(String[] args) {
+        System.out.println(generateSign("pigDoctorSecret",
+                ImmutableMap.of("appKey", "pigDoctorMobile", "name", "dadu", "pampasCall", "say.hi")));
     }
 }

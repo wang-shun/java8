@@ -12,7 +12,7 @@
         http://code.alibabatech.com/schema/dubbo/dubbo.xsd">
 
     <!-- carousel figure service -->
-    <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.basic.service.DoctorCarouselFigureReadService" ref="doctorCarouselFigureReadServiceImpl"/>
-    <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.basic.service.DoctorCarouselFigureWriteService" ref="doctorCarouselFigureWriteServiceImpl"/>
+    <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.basic.service.DoctorCarouselFigureReadService" ref="mockDoctorCarouselFigureReadServiceImpl"/>
+    <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.basic.service.DoctorCarouselFigureWriteService" ref="mockDoctorCarouselFigureWriteServiceImpl"/>
 
 </beans>
