@@ -1,4 +1,4 @@
-package io.terminus.doctor.web.core.enums;
+package io.terminus.doctor.user.enums;
 
 import com.google.common.base.Objects;
 import lombok.Getter;

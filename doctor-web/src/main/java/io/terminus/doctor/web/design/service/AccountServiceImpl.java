@@ -7,7 +7,7 @@ import io.terminus.common.model.Response;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.common.utils.MapBuilder;
 import io.terminus.doctor.common.utils.EncryptUtil;
-import io.terminus.doctor.web.core.enums.TargetSystem;
+import io.terminus.doctor.user.enums.TargetSystem;
 import io.terminus.doctor.web.core.service.OtherSystemService;
 import io.terminus.parana.user.model.User;
 import lombok.extern.slf4j.Slf4j;
