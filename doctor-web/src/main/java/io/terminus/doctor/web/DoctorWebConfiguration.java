@@ -7,7 +7,6 @@ package io.terminus.doctor.web;
 import com.google.common.eventbus.EventBus;
 import io.terminus.doctor.web.core.DoctorCoreWebConfiguration;
 import io.terminus.doctor.web.core.advices.JsonExceptionResolver;
-import io.terminus.doctor.web.core.configs.OtherSystemDbConfig;
 import io.terminus.parana.auth.web.AuthWebConfiguration;
 import io.terminus.parana.web.msg.config.db.DbAppPushConfig;
 import io.terminus.parana.web.msg.config.db.DbEmailConfig;
@@ -47,7 +46,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
 @EnableWebMvc
 @Import({DoctorCoreWebConfiguration.class,
         AuthWebConfiguration.class,
-        DbMsgGatewayBuilderConfig.class, OtherSystemDbConfig.class,
+        DbMsgGatewayBuilderConfig.class,
         DbSmsConfig.class, TestSmsWebServiceConfig.class,
         DbNotifyConfig.class,TestNotifyWebServiceConfig.class,
         DbEmailConfig.class, TestEmailWebServiceConfig.class,

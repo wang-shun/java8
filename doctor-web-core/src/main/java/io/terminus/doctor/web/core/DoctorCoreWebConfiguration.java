@@ -12,10 +12,14 @@ import io.terminus.doctor.web.core.auth.DefaultRoleAuthorizor;
 import io.terminus.doctor.web.core.auth.DefaultTypeAuthorizor;
 import io.terminus.doctor.web.core.auth.RoleAuthorizor;
 import io.terminus.doctor.web.core.auth.TypeAuthorizor;
+import io.terminus.doctor.web.core.service.OtherSystemService;
+import io.terminus.doctor.web.core.service.impl.OtherSystemDbServiceImpl;
+import io.terminus.doctor.web.core.service.impl.OtherSystemYmlServiceImpl;
 import io.terminus.lib.file.FileServer;
 import io.terminus.lib.file.ImageServer;
 import io.terminus.lib.file.aliyun.AliyunFileServer;
 import io.terminus.lib.file.aliyun.AliyunImageServer;
+import io.terminus.parana.config.ConfigCenter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -102,4 +106,17 @@ public class DoctorCoreWebConfiguration extends WebMvcConfigurerAdapter {
             return new DefaultRoleAuthorizor();
         }
     }
+
+    //******begin 这两个bean 有且只有一个可以启用 ******begin
+    @Bean
+    @ConditionalOnMissingBean(OtherSystemService.class)
+    public OtherSystemService otherSystemService(ConfigCenter configCenter){
+        return new OtherSystemDbServiceImpl(configCenter);
+    }
+//    @Bean
+//    @ConditionalOnMissingBean(OtherSystemService.class)
+//    public OtherSystemService otherSystemService(){
+//        return new OtherSystemYmlServiceImpl();
+//    }
+    //******end 这两个bean 有且只有一个可以启用 *******end
 }
