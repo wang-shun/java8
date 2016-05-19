@@ -52,10 +52,10 @@ public class DoctorUserServiceImpl implements  DoctorUserService{
     }
 
     @Override
-    public Response<Long> deleteUserBindByUnique(Long userId, TargetSystem targetSystem) {
+    public Response<Long> deleteUserBindByUserIdAndTargetSystem(Long userId, TargetSystem targetSystem) {
         Response<Long> response = new Response<>();
         try {
-            UserBind userBind = userBindDao.findUnique(userId, targetSystem);
+            UserBind userBind = userBindDao.findByUserIdAndTargetSystem(userId, targetSystem);
             if (userBind != null) {
                 userBindDao.delete(userBind.getId());
                 response.setResult(userBind.getId());
@@ -94,10 +94,10 @@ public class DoctorUserServiceImpl implements  DoctorUserService{
     }
 
     @Override
-    public Response<UserBind> findUserBindUnique(Long userId, TargetSystem targetSystem) {
+    public Response<UserBind> findUserBindByUserIdAndTargetSystem(Long userId, TargetSystem targetSystem) {
         Response<UserBind> response = new Response<>();
         try {
-            response.setResult(userBindDao.findUnique(userId, targetSystem));
+            response.setResult(userBindDao.findByUserIdAndTargetSystem(userId, targetSystem));
         } catch (Exception e) {
             log.error("findUserBindById failed, cause: {}", Throwables.getStackTraceAsString(e));
             response.setError("find.user.bind.failed");

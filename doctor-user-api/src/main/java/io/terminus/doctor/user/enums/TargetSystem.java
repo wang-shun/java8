@@ -11,24 +11,15 @@ public enum TargetSystem {
     NEVEREST   (2, "system.neverest.domain", "system.neverest.password", "system.neverest.corp.id");
 
     private final int value;
-    @Getter
-    private final String keyOfDomain;
-    @Getter
-    private final String keyOfPasword;
-    @Getter
-    private final String keyOfCorpId;
-    @Getter @Setter
-    private String valueOfDomain;
-    @Getter @Setter
-    private String valueOfPasword;
-    @Getter @Setter
-    private Long valueOfCorpId;
+    private final String domain;
+    private final String password;
+    private final String corpId;
 
-    TargetSystem(int value, String keyOfDomain, String keyOfPasword, String keyOfCorpId) {
+    TargetSystem(int value, String domain, String password, String corpId) {
         this.value = value;
-        this.keyOfDomain = keyOfDomain;
-        this.keyOfPasword = keyOfPasword;
-        this.keyOfCorpId = keyOfCorpId;
+        this.domain = domain;
+        this.password = password;
+        this.corpId = corpId;
     }
 
     public static TargetSystem from(int value) {
@@ -43,17 +34,23 @@ public enum TargetSystem {
     public int value() {
         return value;
     }
+    public String domain(){
+        return domain;
+    }
+    public String password(){
+        return password;
+    }
+    public String corpId(){
+        return corpId;
+    }
 
     @Override
     public String toString() {
         return "TargetSystem{" +
                 "value=" + value +
-                ", keyOfDomain='" + keyOfDomain + '\'' +
-                ", keyOfPasword='" + keyOfPasword + '\'' +
-                ", keyOfCorpId='" + keyOfCorpId + '\'' +
-                ", valueOfDomain='" + valueOfDomain + '\'' +
-                ", valueOfPasword='" + valueOfPasword + '\'' +
-                ", valueOfCorpId='" + valueOfCorpId + '\'' +
+                ", keyOfDomain='" + domain + '\'' +
+                ", keyOfPasword='" + password + '\'' +
+                ", keyOfCorpId='" + corpId + '\'' +
                 '}';
     }
 }

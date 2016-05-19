@@ -9,6 +9,7 @@ import io.terminus.common.utils.JsonMapper;
 import io.terminus.common.utils.MapBuilder;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.user.enums.TargetSystem;
+import io.terminus.doctor.user.model.TargetSystemModel;
 import io.terminus.doctor.user.model.UserBind;
 import io.terminus.doctor.user.service.DoctorUserService;
 import io.terminus.doctor.web.core.service.OtherSystemService;
@@ -45,27 +46,19 @@ public class AccountServiceImpl implements AccountService{
 
     @Override
     public Response<User> bindAccount(Long userId, TargetSystem targetSystem, String account, String password) {
-        return this._bindAccount(userId, targetSystem, account, password, true);
-    }
-    @Override
-    public Response<User> bindAccount(Long userId, TargetSystem targetSystem, String account){
-        return this._bindAccount(userId, targetSystem, account, null, false);
-    }
-
-    private Response<User> _bindAccount(Long userId, TargetSystem targetSystem, String account, String password, boolean checkPassword){
         Response<User> response = new Response<>();
         try {
-            Response<UserBind> bindResponse = doctorUserService.findUserBindUnique(userId, targetSystem);
+            Response<UserBind> bindResponse = doctorUserService.findUserBindByUserIdAndTargetSystem(userId, targetSystem);
             UserBind userBind = RespHelper.orServEx(bindResponse);
             if (userBind != null) {
                 return Response.fail("user.bind.already");
             }
-            otherSystemService.setTargetSystemValue(targetSystem);
+            TargetSystemModel model = otherSystemService.getTargetSystemModel(targetSystem);
             String simpleUUID = UUID.randomUUID().toString().replace("-", "");
-            String url = targetSystem.getValueOfDomain() + (checkPassword ? URL_BINDACCOUNT : URL_BINDACCOUNT_NOPASSWORD);
+            String url = model.getDomain() + (password != null ? URL_BINDACCOUNT : URL_BINDACCOUNT_NOPASSWORD);
             Map<String, Object> params = MapBuilder.<String, Object>of()
                     .put("thirdPartUserId", simpleUUID)
-                    .put("corpId", targetSystem.getValueOfCorpId())
+                    .put("corpId", model.getCorpId())
                     .put("account", account)
                     .put("password", password)
                     .map();
@@ -96,6 +89,11 @@ public class AccountServiceImpl implements AccountService{
         }
         return response;
     }
+    @Override
+    public Response<User> bindAccount(Long userId, TargetSystem targetSystem, String account){
+        return this.bindAccount(userId, targetSystem, account, null);
+    }
+
     private User makeUserFromJson(String json){
         Map<String, String> map = JsonMapper.nonEmptyMapper().fromJson(json, javaType);
         User user = new User();
@@ -108,13 +106,13 @@ public class AccountServiceImpl implements AccountService{
     public Response<User> unbindAccount(Long userId, TargetSystem targetSystem) {
         Response<User> response = new Response<>();
         try {
-            Response<UserBind> bindResponse = doctorUserService.findUserBindUnique(userId, targetSystem);
+            Response<UserBind> bindResponse = doctorUserService.findUserBindByUserIdAndTargetSystem(userId, targetSystem);
             UserBind userBind = RespHelper.orServEx(bindResponse);
             if (userBind == null) {
                 return Response.fail("no.user.bind.found");
             }
-            otherSystemService.setTargetSystemValue(targetSystem);
-            String url = targetSystem.getValueOfDomain() + URL_UNBINDACCOUNT + "/" + userBind.getUuid() + "/" + targetSystem.getValueOfCorpId();
+            TargetSystemModel model = otherSystemService.getTargetSystemModel(targetSystem);
+            String url = model.getDomain() + URL_UNBINDACCOUNT + "/" + userBind.getUuid() + "/" + model.getCorpId();
             HttpRequest request = HttpRequest.get(url);
             String body = request.body();
             if (request.code() != 200) {

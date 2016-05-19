@@ -10,6 +10,7 @@ import io.terminus.common.model.Response;
 import io.terminus.doctor.common.model.ParanaUser;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.user.enums.TargetSystem;
+import io.terminus.doctor.user.model.TargetSystemModel;
 import io.terminus.doctor.user.model.UserBind;
 import io.terminus.doctor.user.service.DoctorUserService;
 import io.terminus.doctor.web.core.component.MobilePattern;
@@ -21,8 +22,6 @@ import io.terminus.parana.user.service.UserReadService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.UUID;
 
 import static io.terminus.common.utils.Arguments.isEmpty;
 import static io.terminus.common.utils.Arguments.isNull;
@@ -70,11 +69,7 @@ public class LoginOtherSystem {
             throw new JsonResponseException(500, "user.not.login");
         }
 
-        Response<User> result = userReadService.findById(paranaUser.getId());
-        if (!result.isSuccess()) {
-            throw new JsonResponseException(500, result.getError());
-        }
-        User user = result.getResult();
+        User user = RespHelper.or500(userReadService.findById(paranaUser.getId()));
         if (user == null) {
             throw new JsonResponseException(500, "user.not.found");
         }
@@ -91,18 +86,18 @@ public class LoginOtherSystem {
         if(targetSystemEnum == null){
             throw new JsonResponseException(500, "unknown.target.system");
         }
-        Response<UserBind> bindResponse = doctorUserService.findUserBindUnique(paranaUser.getId(), targetSystemEnum);
+        Response<UserBind> bindResponse = doctorUserService.findUserBindByUserIdAndTargetSystem(paranaUser.getId(), targetSystemEnum);
         UserBind userBind = RespHelper.orServEx(bindResponse);
         if (userBind == null) {
             throw new JsonResponseException(500, "no.user.bind.found");
         }
         try {
-            otherSystemService.setTargetSystemValue(targetSystemEnum);
+            TargetSystemModel model = otherSystemService.getTargetSystemModel(targetSystemEnum);
             String data = "third_user_id=" + userBind.getUuid()
                     + "\ntimestamp=" + (System.currentTimeMillis() / 1000)
                     + "\nmobile=" + user.getMobile();
-            String encryptedData = SimpleAESUtils.encrypt(data, targetSystemEnum.getValueOfPasword(), algStr);
-            return targetSystemEnum.getValueOfDomain() + "/api/all/third/access/" + targetSystemEnum.getValueOfCorpId()
+            String encryptedData = SimpleAESUtils.encrypt(data, model.getPassword(), algStr);
+            return model.getDomain() + "/api/all/third/access/" + model.getPassword()
                     + "?d=" + encryptedData
                     + "&padding=" + padding
                     + (isEmpty(redirectPage) ? "" : "&redirectPage=" + redirectPage);

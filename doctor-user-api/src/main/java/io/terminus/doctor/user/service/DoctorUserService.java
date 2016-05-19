@@ -11,11 +11,27 @@ import java.util.List;
  */
 public interface DoctorUserService {
 
+    /**
+     * 创建本系统用户与其他系统账户的绑定关系
+     * @param userBind
+     * @return
+     */
     Response<Long> createUserBind(UserBind userBind);
-    Response<Long> deleteUserBindById(Long id);
-    Response<Long> deleteUserBindByUnique(Long userId, TargetSystem targetSystem);
 
+    /**
+     * 删除用户绑定关系
+     * @param id 表user_bind中的主键
+     * @return
+     */
+    Response<Long> deleteUserBindById(Long id);
+    Response<Long> deleteUserBindByUserIdAndTargetSystem(Long userId, TargetSystem targetSystem);
+
+    /**
+     * 查询用户绑定关系
+     * @param id
+     * @return
+     */
     Response<UserBind> findUserBindById(Long id);
     Response<List<UserBind>> findUserBindByUserId(Long userId);
-    Response<UserBind> findUserBindUnique(Long userId, TargetSystem targetSystem);
+    Response<UserBind> findUserBindByUserIdAndTargetSystem(Long userId, TargetSystem targetSystem);
 }
