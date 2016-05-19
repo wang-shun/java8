@@ -19,6 +19,7 @@ public class SimpleTwoTaskHandler extends BaseServiceTest{
     private Long businessId = 1314L;
 
     @Test
+    @Rollback(false)
     public void test_NORMAL_SimpleWorkFlowHandler() {
         // 1. 部署流程
         defService().deploy("simple/simple_two_task_handler.xml");

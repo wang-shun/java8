@@ -140,4 +140,28 @@ public class FlowDefinitionNodeEventQueryImpl implements FlowDefinitionNodeEvent
     public long findFlowDefinitionNodeEventsSize(Map criteria) {
         return jdbcAccess.findFlowDefinitionNodeEventsSize(criteria);
     }
+
+    @Override
+    public List<FlowDefinitionNodeEvent> getNodeEvents(Long flowDefinitionId) {
+        return this
+                .flowDefinitionId(flowDefinitionId)
+                .list();
+    }
+
+    @Override
+    public List<FlowDefinitionNodeEvent> getNodeEventsBySourceId(Long flowDefinitionId, Long sourceId) {
+        return this
+                .flowDefinitionId(flowDefinitionId)
+                .sourceNodeId(sourceId)
+                .list();
+    }
+
+    @Override
+    public FlowDefinitionNodeEvent getNodeEventByST(Long flowDefinitionId, Long sourceId, Long targetId) {
+        return this
+                .flowDefinitionId(flowDefinitionId)
+                .sourceNodeId(sourceId)
+                .targetNodeId(targetId)
+                .single();
+    }
 }

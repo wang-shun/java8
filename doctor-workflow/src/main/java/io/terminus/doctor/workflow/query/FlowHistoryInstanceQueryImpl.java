@@ -170,4 +170,12 @@ public class FlowHistoryInstanceQueryImpl implements FlowHistoryInstanceQuery {
     public long findFlowHistoryInstancesSize(Map criteria) {
         return jdbcAccess.findFlowHistoryInstancesSize(criteria);
     }
+
+    @Override
+    public List<FlowHistoryInstance> getFlowHistoryInstances(String flowDefinitionKey, Long businessId) {
+        return this
+                .flowDefinitionKey(flowDefinitionKey)
+                .businessId(businessId)
+                .list();
+    }
 }

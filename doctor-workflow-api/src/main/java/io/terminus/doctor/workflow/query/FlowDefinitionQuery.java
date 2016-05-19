@@ -44,8 +44,27 @@ public interface FlowDefinitionQuery {
     ///////////////////////////////////////////////////////////////
     /**
      * 根据流程定义的key值获取当前最新版本的流程定义
-     * @param key   流程定义的key值
+     * @param flowDefinitionKey   流程定义的key值
      * @return
      */
-    FlowDefinition getLatestDefinitionByKey(String key);
+    FlowDefinition getLatestDefinitionByKey(String flowDefinitionKey);
+
+    /**
+     * 根据id查询流程定义
+     * @param id
+     * @return
+     */
+    FlowDefinition getDefinitionById(Long id);
+
+    /**
+     * 获取流程定义列表(状态为normal的)
+     * @return
+     */
+    List<FlowDefinition> getDefinitions();
+
+    /**
+     * 根据流程定义key获取列表(状态为normal的)
+     * @return
+     */
+    List<FlowDefinition> getDefinitionsByKey(String flowDefinitionKey);
 }

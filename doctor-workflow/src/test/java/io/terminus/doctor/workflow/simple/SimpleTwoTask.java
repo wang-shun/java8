@@ -7,6 +7,7 @@ import io.terminus.doctor.workflow.model.FlowInstance;
 import io.terminus.doctor.workflow.model.FlowProcess;
 import org.junit.Assert;
 import org.junit.Test;
+import org.springframework.test.annotation.Rollback;
 
 /**
  * Desc: 简单任务流程(两个任务节点)

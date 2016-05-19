@@ -1,7 +1,6 @@
 package io.terminus.doctor.workflow.node;
 
 import io.terminus.doctor.workflow.core.Execution;
-import io.terminus.doctor.workflow.model.FlowInstance;
 
 /**
  * Desc: 结束节点的执行
@@ -13,12 +12,12 @@ public class EndNode extends BaseNode {
 
     @Override
     protected void exec(Execution execution) {
-        FlowInstance flowInstance = execution.getWorkFlowService().getFlowQueryService().getFlowInstanceQuery()
-                .id(execution.getFlowProcess().getFlowInstanceId())
-                .single();
-        if(flowInstance != null) {
             execution.getWorkFlowService().getFlowProcessService()
-                    .endFlowInstance(flowInstance.getFlowDefinitionKey(), flowInstance.getBusinessId(), false, "流程实例正常结束");
-        }
+                    .endFlowInstance(
+                            execution.getFlowDefinitionKey(),
+                            execution.getBusinessId(),
+                            false,
+                            "流程实例正常结束"
+                    );
     }
 }

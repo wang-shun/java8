@@ -105,7 +105,7 @@ public abstract class BaseNode implements Node {
      */
     private void goEnd(FlowProcess nextProcess, Execution execution) {
         execution.createNextFlowProcess(nextProcess, true);
-        NodeHelper.buildEndNode().execute(execution);
+        NodeHelper.buildEndNode().execute(execution.getExecution(nextProcess));
     }
 
     /**
@@ -121,8 +121,7 @@ public abstract class BaseNode implements Node {
      */
     private void goDecision(FlowProcess nextProcess, Execution execution) {
         execution.createNextFlowProcess(nextProcess, true);
-        execution.setFlowProcess(nextProcess);
-        NodeHelper.buildDecisionNode().execute(execution);
+        NodeHelper.buildDecisionNode().execute(execution.getExecution(nextProcess));
     }
 
     /**
@@ -131,8 +130,7 @@ public abstract class BaseNode implements Node {
     private void goFork(FlowProcess nextProcess, Execution execution) {
         execution.createNextFlowProcess(nextProcess, true);
         nextProcess.setForkNodeId(nextProcess.getFlowDefinitionNodeId());
-        execution.setFlowProcess(nextProcess);
-        NodeHelper.buildForkNode().execute(execution);
+        NodeHelper.buildForkNode().execute(execution.getExecution(nextProcess));
     }
 
     /**
@@ -151,8 +149,7 @@ public abstract class BaseNode implements Node {
         else {
             execution.createNextFlowProcess(nextProcess, true);
             nextProcess.setForkNodeId(null);
-            execution.setFlowProcess(nextProcess);
-            NodeHelper.buildDecisionNode().execute(execution);
+            NodeHelper.buildDecisionNode().execute(execution.getExecution(nextProcess));
         }
     }
 }

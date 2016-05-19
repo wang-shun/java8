@@ -148,10 +148,33 @@ public class FlowDefinitionNodeQueryImpl implements FlowDefinitionNodeQuery {
     }
 
     @Override
-    public FlowDefinitionNode findDefinitionNodeByType(Long flowDefinitionId, Integer nodeType) {
+    public List<FlowDefinitionNode> getDefinitionNodes(Long flowDefinitionId) {
+        return this
+                .flowDefinitionId(flowDefinitionId)
+                .list();
+    }
+
+    @Override
+    public List<FlowDefinitionNode> getDefinitionNodesByType(Long flowDefinitionId, Integer nodeType) {
         return this
                 .flowDefinitionId(flowDefinitionId)
                 .type(nodeType)
+                .list();
+    }
+
+    @Override
+    public FlowDefinitionNode getDefinitionNodeByType(Long flowDefinitionId, Integer nodeType) {
+        return this
+                .flowDefinitionId(flowDefinitionId)
+                .type(nodeType)
+                .single();
+    }
+
+    @Override
+    public FlowDefinitionNode getDefinitionNodeByName(Long flowDefinitionId, String name) {
+        return this
+                .flowDefinitionId(flowDefinitionId)
+                .name(name)
                 .single();
     }
 }
