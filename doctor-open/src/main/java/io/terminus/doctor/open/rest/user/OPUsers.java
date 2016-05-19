@@ -117,7 +117,7 @@ public class OPUsers {
         return Long.valueOf(RandomUtil.random(1, 10));
     }
 
-    @OpenMethod(key="user.login", paramNames = {"name", "password", "type", "code", "sid"})
+    @OpenMethod(key="user.login", paramNames = {"mobile", "password", "code", "sid"})
     public Token login(String mobile, String password, String code, String sessionId) {
         if (isEmpty(mobile)) {
             throw new OPClientException("user.mobile.miss");
