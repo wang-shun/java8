@@ -71,6 +71,11 @@ public class ExecutionImpl implements Execution {
     }
 
     @Override
+    public Execution getExecution(FlowProcess flowProcess) {
+        return workFlowEngine.buildExecution(flowProcess, this.expression, this.flowData, this.operatorId, this.operatorName);
+    }
+
+    @Override
     public WorkFlowService getWorkFlowService() {
         return workFlowEngine.buildWorkFlowService();
     }

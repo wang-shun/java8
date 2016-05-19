@@ -23,6 +23,8 @@ public interface Execution {
      */
     List<Interceptor> getInterceptors();
 
+    Execution getExecution(FlowProcess flowProcess);
+
     /**
      * 获取流程公共服务类
      * @return
