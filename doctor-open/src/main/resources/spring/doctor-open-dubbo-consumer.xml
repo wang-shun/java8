@@ -17,6 +17,7 @@
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.parana.user.service.UserWriteService" id="userWriteService" check="false"/>
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.parana.user.service.DeviceWriteService" id="deviceWriteService" check="false"/>
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.parana.user.service.DeviceReadService" id="deviceReadService" check="false"/>
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.DoctorFarmReadService" id="doctorFarmReadService" check="false"/>
 
     <!-- file services -->
     <dubbo:reference version="1.0.0" interface="io.terminus.parana.file.service.UserFileService" id="userFileService" check="false" retries="0"/>

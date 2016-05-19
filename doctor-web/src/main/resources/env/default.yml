@@ -24,7 +24,7 @@ pampas:
 
 session:
   cookie-context-path: /
-  cookie-domain: xrnm.com
+  cookie-domain: doctor.com
   cookie-max-age: 1800
   cookie-name: msid
   source: redis
@@ -58,7 +58,7 @@ logging:
 
 image:
   base:
-    url: http://terminus.oss-cn-hangzhou.aliyuncs.com
+    url: http://pigmall.oss-cn-beijing.aliyuncs.com
 
 oss:
   endpoint: oss-cn-beijing.aliyuncs.com
