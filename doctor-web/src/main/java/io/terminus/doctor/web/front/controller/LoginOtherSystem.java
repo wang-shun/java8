@@ -8,8 +8,10 @@ import com.google.common.base.Optional;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.common.model.ParanaUser;
-import io.terminus.doctor.common.utils.EncryptUtil;
+import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.user.enums.TargetSystem;
+import io.terminus.doctor.user.model.UserBind;
+import io.terminus.doctor.user.service.DoctorUserService;
 import io.terminus.doctor.web.core.component.MobilePattern;
 import io.terminus.doctor.web.core.service.OtherSystemService;
 import io.terminus.doctor.web.core.util.SimpleAESUtils;
@@ -19,6 +21,8 @@ import io.terminus.parana.user.service.UserReadService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.UUID;
 
 import static io.terminus.common.utils.Arguments.isEmpty;
 import static io.terminus.common.utils.Arguments.isNull;
@@ -35,13 +39,15 @@ public class LoginOtherSystem {
     private final UserReadService<User> userReadService;
     private final MobilePattern mobilePattern;
     private final OtherSystemService otherSystemService;
+    private final DoctorUserService doctorUserService;
 
     @Autowired
     public LoginOtherSystem(UserReadService<User> userReadService, OtherSystemService otherSystemService,
-                            MobilePattern mobilePattern){
+                            MobilePattern mobilePattern, DoctorUserService doctorUserService){
         this.userReadService = userReadService;
         this.mobilePattern = mobilePattern;
         this.otherSystemService = otherSystemService;
+        this.doctorUserService = doctorUserService;
     }
 
 
@@ -85,10 +91,14 @@ public class LoginOtherSystem {
         if(targetSystemEnum == null){
             throw new JsonResponseException(500, "unknown.target.system");
         }
+        Response<UserBind> bindResponse = doctorUserService.findUserBindUnique(paranaUser.getId(), targetSystemEnum);
+        UserBind userBind = RespHelper.orServEx(bindResponse);
+        if (userBind == null) {
+            throw new JsonResponseException(500, "no.user.bind.found");
+        }
         try {
             otherSystemService.setTargetSystemValue(targetSystemEnum);
-            String encryptedUserId = EncryptUtil.MD5(paranaUser.getId().toString()); //给userId加密
-            String data = "third_user_id=" + encryptedUserId
+            String data = "third_user_id=" + userBind.getUuid()
                     + "\ntimestamp=" + (System.currentTimeMillis() / 1000)
                     + "\nmobile=" + user.getMobile();
             String encryptedData = SimpleAESUtils.encrypt(data, targetSystemEnum.getValueOfPasword(), algStr);

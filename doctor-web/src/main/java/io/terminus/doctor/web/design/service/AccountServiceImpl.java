@@ -1,13 +1,16 @@
 package io.terminus.doctor.web.design.service;
 
+import com.fasterxml.jackson.databind.JavaType;
 import com.github.kevinsawicki.http.HttpRequest;
 import com.google.common.base.Throwables;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.Response;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.common.utils.MapBuilder;
-import io.terminus.doctor.common.utils.EncryptUtil;
+import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.user.enums.TargetSystem;
+import io.terminus.doctor.user.model.UserBind;
+import io.terminus.doctor.user.service.DoctorUserService;
 import io.terminus.doctor.web.core.service.OtherSystemService;
 import io.terminus.parana.user.model.User;
 import lombok.extern.slf4j.Slf4j;
@@ -15,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
+import java.util.UUID;
 
 /**
  * 陈增辉 16/5/16.
@@ -24,16 +28,20 @@ import java.util.Map;
 public class AccountServiceImpl implements AccountService{
 
     private final OtherSystemService otherSystemService;
+    private final DoctorUserService doctorUserService;
 
     @Autowired
-    public AccountServiceImpl (OtherSystemService otherSystemService) {
+    public AccountServiceImpl (OtherSystemService otherSystemService, DoctorUserService doctorUserService) {
         this.otherSystemService = otherSystemService;
+        this.doctorUserService = doctorUserService;
     }
 
     private static final String URL_FINDBINDACCOUNT = "/api/all/third/findBindAccount";
     private static final String URL_BINDACCOUNT = "/api/all/third/bindAccount";
     private static final String URL_BINDACCOUNT_NOPASSWORD = "/api/all/third/bindAccount/noPassword";
     private static final String URL_UNBINDACCOUNT = "/api/all/third/unbindAccount";
+    private static JavaType javaType = JsonMapper.nonEmptyMapper().createCollectionType(Map.class, String.class, String.class);
+
 
     @Override
     public Response<User> bindAccount(Long userId, TargetSystem targetSystem, String account, String password) {
@@ -48,10 +56,10 @@ public class AccountServiceImpl implements AccountService{
         Response<User> response = new Response<>();
         try {
             otherSystemService.setTargetSystemValue(targetSystem);
-            String encryptedUserId = EncryptUtil.MD5(userId.toString());
+            String simpleUUID = UUID.randomUUID().toString().replace("-", "");
             String url = targetSystem.getValueOfDomain() + (checkPassword ? URL_BINDACCOUNT : URL_BINDACCOUNT_NOPASSWORD);
             Map<String, Object> params = MapBuilder.<String, Object>of()
-                    .put("thirdPartUserId", encryptedUserId)
+                    .put("thirdPartUserId", simpleUUID)
                     .put("corpId", targetSystem.getValueOfCorpId())
                     .put("account", account)
                     .put("password", password)
@@ -61,7 +69,18 @@ public class AccountServiceImpl implements AccountService{
             if (request.code() != 200) {
                 throw new ServiceException(body);
             } else {
-                User user = JsonMapper.nonEmptyMapper().fromJson(body, User.class);
+                //这是对方系统的user
+                User user = this.makeUserFromJson(body);
+
+                //在自己系统记录绑定关系
+                UserBind userBind = new UserBind();
+                userBind.setTargetSystem(targetSystem.value());
+                userBind.setUserId(userId);
+                userBind.setUuid(simpleUUID);
+                userBind.setTargetUserName(user.getName());
+                userBind.setTargetUserMobile(user.getMobile());
+                userBind.setTargetUserEmail(user.getEmail());
+                doctorUserService.createUserBind(userBind);
                 response.setResult(user);
             }
         } catch (ServiceException e) {
@@ -72,27 +91,35 @@ public class AccountServiceImpl implements AccountService{
         }
         return response;
     }
-
+    private User makeUserFromJson(String json){
+        Map<String, String> map = JsonMapper.nonEmptyMapper().fromJson(json, javaType);
+        User user = new User();
+        user.setName(map.get("nickname"));
+        user.setMobile(map.get("mobile"));
+        user.setEmail("email");
+        return user;
+    }
     @Override
     public Response<User> unbindAccount(Long userId, TargetSystem targetSystem) {
-        return this.httpRequestGet(userId, targetSystem, URL_UNBINDACCOUNT);
-    }
-    @Override
-    public Response<User> findBindAccount(Long userId, TargetSystem targetSystem) {
-        return this.httpRequestGet(userId, targetSystem, URL_FINDBINDACCOUNT);
-    }
-    private Response<User> httpRequestGet(Long userId, TargetSystem targetSystem, String shortUrl){
         Response<User> response = new Response<>();
         try {
+            Response<UserBind> bindResponse = doctorUserService.findUserBindUnique(userId, targetSystem);
+            UserBind userBind = RespHelper.orServEx(bindResponse);
+            if (userBind == null) {
+                return Response.fail("no.user.bind.found");
+            }
             otherSystemService.setTargetSystemValue(targetSystem);
-            String encryptedUserId = EncryptUtil.MD5(userId.toString());
-            String url = targetSystem.getValueOfDomain() + shortUrl + "/" + encryptedUserId + "/" + targetSystem.getValueOfCorpId();
+            String url = targetSystem.getValueOfDomain() + URL_UNBINDACCOUNT + "/" + userBind.getUuid() + "/" + targetSystem.getValueOfCorpId();
             HttpRequest request = HttpRequest.get(url);
             String body = request.body();
             if (request.code() != 200) {
                 throw new ServiceException(body);
             } else {
-                User user = JsonMapper.nonEmptyMapper().fromJson(body, User.class);
+                //这是对方系统的user
+                User user = this.makeUserFromJson(body);
+
+                //删除在本系统记录的账户绑定关系
+                doctorUserService.deleteUserBindById(userBind.getId());
                 response.setResult(user);
             }
         } catch (ServiceException e) {
@@ -103,4 +130,5 @@ public class AccountServiceImpl implements AccountService{
         }
         return response;
     }
+
 }

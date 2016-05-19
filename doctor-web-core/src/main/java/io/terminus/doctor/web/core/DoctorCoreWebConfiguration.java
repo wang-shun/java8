@@ -107,7 +107,7 @@ public class DoctorCoreWebConfiguration extends WebMvcConfigurerAdapter {
         }
     }
 
-    //******begin 这两个bean 有且只有一个可以启用 ******begin
+    //******begin 这两个bean 有且只有一个可以启用 begin ******
     @Bean
     @ConditionalOnMissingBean(OtherSystemService.class)
     public OtherSystemService otherSystemService(ConfigCenter configCenter){
@@ -118,5 +118,5 @@ public class DoctorCoreWebConfiguration extends WebMvcConfigurerAdapter {
 //    public OtherSystemService otherSystemService(){
 //        return new OtherSystemYmlServiceImpl();
 //    }
-    //******end 这两个bean 有且只有一个可以启用 *******end
+    //******end 这两个bean 有且只有一个可以启用 end *******
 }
