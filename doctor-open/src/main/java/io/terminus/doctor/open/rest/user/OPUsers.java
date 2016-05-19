@@ -23,6 +23,7 @@ import io.terminus.parana.user.service.UserReadService;
 import io.terminus.session.AFSessionManager;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.validator.constraints.NotEmpty;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -108,7 +109,9 @@ public class OPUsers {
      * @return 注册成功之后的用户ID
      */
     @OpenMethod(key = "user.register", httpMethods = RequestMethod.POST, paramNames = {"password", "userName", "mobile", "code"})
-    public Long register(String password, String userName, String mobile, String code,
+    public Long register(@NotEmpty(message = "password.not.empty") String password,
+                         String userName, String mobile,
+                         @NotEmpty(message = "code.not.empty") String code,
                          HttpServletRequest request, HttpServletResponse response) {
         return Long.valueOf(RandomUtil.random(1, 10));
     }
@@ -254,7 +257,8 @@ public class OPUsers {
      * @return 是否成功
      */
     @OpenMethod(key = "user.change.password", httpMethods = RequestMethod.POST, paramNames = {"oldPassword", "newPassword"})
-    public Boolean changePassword(String oldPassword, String newPassword) {
+    public Boolean changePassword(@NotEmpty(message = "oldPassword.not.empty") String oldPassword,
+                                  @NotEmpty(message = "newPassword.not.empty") String newPassword) {
         return Boolean.TRUE;
     }
 
