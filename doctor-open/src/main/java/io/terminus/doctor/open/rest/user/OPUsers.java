@@ -8,6 +8,7 @@ import com.google.common.collect.Maps;
 import com.google.common.hash.Hashing;
 import io.terminus.boot.session.properties.SessionProperties;
 import io.terminus.common.model.Response;
+import io.terminus.doctor.common.utils.RandomUtil;
 import io.terminus.doctor.open.common.CaptchaGenerator;
 import io.terminus.doctor.open.common.Sessions;
 import io.terminus.pampas.common.UserUtil;
@@ -22,11 +23,15 @@ import io.terminus.parana.user.service.UserReadService;
 import io.terminus.session.AFSessionManager;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.validator.constraints.NotEmpty;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.Base64Utils;
+import org.springframework.web.bind.annotation.RequestMethod;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.Serializable;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -92,10 +97,30 @@ public class OPUsers {
         return ImmutableMap.of("time", DateTime.now().toString(DateTimeFormat.forPattern("yyyyMMddHHmmss")));
     }
 
-    @OpenMethod(key="user.login", paramNames = {"name", "password", "type", "code", "sid"})
-    public Token login(String name, String password, String type, String code, String sessionId) {
-        if (isEmpty(name)) {
-            throw new OPClientException("user.name.miss");
+    /**
+     * 用户注册
+     *
+     * @param password   密码
+     * @param userName   用户名
+     * @param mobile     手机号
+     * @param code       手机验证码
+     * @param request    请求
+     * @param response   响应
+     * @return 注册成功之后的用户ID
+     */
+    @OpenMethod(key = "user.register", httpMethods = RequestMethod.POST, paramNames = {"password", "userName", "mobile", "code"})
+    public Long register(@NotEmpty(message = "password.not.empty") String password,
+                         @NotEmpty(message = "username.not.empty") String userName,
+                         @NotEmpty(message = "mobile.not.empty") String mobile,
+                         @NotEmpty(message = "code.not.empty") String code,
+                         HttpServletRequest request, HttpServletResponse response) {
+        return Long.valueOf(RandomUtil.random(1, 10));
+    }
+
+    @OpenMethod(key="user.login", paramNames = {"mobile", "password", "code", "sid"})
+    public Token login(String mobile, String password, String code, String sessionId) {
+        if (isEmpty(mobile)) {
+            throw new OPClientException("user.mobile.miss");
         }
         if (isEmpty(password)) {
             throw new OPClientException("user.password.miss");
@@ -116,8 +141,8 @@ public class OPUsers {
             throw new OPClientException("user.code.mismatch");
         }
 
-        // 用户名密码登录
-        User user = doLogin(name, password, type, sessionId);
+        // 手机 密码登录
+        User user = doLogin(mobile, password, sessionId);
         // 登录成功记录 session
         sessionManager.save(Sessions.TOKEN_PREFIX, sessionId, ImmutableMap.of(Sessions.USER_ID, (Object) user.getId()), Sessions.LONG_INACTIVE_INTERVAL);
         // 清除 limit & code
@@ -126,13 +151,18 @@ public class OPUsers {
 
         // 返回登录的凭证
         Token token = new Token();
-        token.setName(name);
+        token.setName(user.getName());
         token.setDomain(sessionProperties.getCookieDomain());
         token.setExpiredAt(DateTime.now().plusSeconds(Sessions.LONG_INACTIVE_INTERVAL)
                 .toString(DateTimeFormat.forPattern("yyyyMMddHHmmss")));
         token.setSessionId(sessionId);
         token.setCookieName(sessionProperties.getCookieName());
         return token;
+    }
+
+    //手机登录
+    private User doLogin(String mobile, String password, String sessionId) {
+        return doLogin(mobile, password, "3", sessionId);
     }
 
     private User doLogin(String name, String password, String type, String sessionId) {
@@ -224,6 +254,32 @@ public class OPUsers {
         if (!res.isSuccess()) {
             throw new OPClientException("user.device.unbind.fail");
         }
+    }
+
+    /**
+     * 用户修改密码
+     * @param oldPassword 旧密码
+     * @param newPassword 新密码
+     * @return 是否成功
+     */
+    @OpenMethod(key = "user.change.password", httpMethods = RequestMethod.POST, paramNames = {"oldPassword", "newPassword"})
+    public Boolean changePassword(@NotEmpty(message = "oldPassword.not.empty") String oldPassword,
+                                  @NotEmpty(message = "newPassword.not.empty") String newPassword) {
+        return Boolean.TRUE;
+    }
+
+    /**
+     * 忘记密码
+     * @param mobile  手机号
+     * @param code    验证码
+     * @param newPassword  新密码
+     * @return 是否成功
+     */
+    @OpenMethod(key = "user.forget.password", httpMethods = RequestMethod.POST, paramNames = {"mobile", "code", "newPassword"})
+    public Boolean forgetPassword(@NotEmpty(message = "mobile.not.empty") String mobile,
+                                  @NotEmpty(message = "code.not.empty") String code,
+                                  @NotEmpty(message = "newPassword.not.empty") String newPassword) {
+        return Boolean.TRUE;
     }
 
     @Data

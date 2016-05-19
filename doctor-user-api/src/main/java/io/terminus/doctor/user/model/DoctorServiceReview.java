@@ -1,6 +1,9 @@
 package io.terminus.doctor.user.model;
 
+import com.google.common.base.Objects;
+import com.google.common.collect.Lists;
 import lombok.Data;
+import lombok.Getter;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -24,11 +27,13 @@ public class DoctorServiceReview implements Serializable {
     
     /**
      * 服务类型 1 猪场软件, 2 新融电商, 3 大数据, 4 生猪交易
+     * @see io.terminus.doctor.user.model.DoctorServiceReview.Type
      */
     private Integer type;
     
     /**
      * 审核状态 0 未审核, 2 待审核(提交申请) 1 通过，-1 不通过, -2 冻结
+     * @see io.terminus.doctor.user.model.DoctorServiceReview.Status
      */
     private Integer status;
     
@@ -46,4 +51,61 @@ public class DoctorServiceReview implements Serializable {
      * 修改时间
      */
     private Date updatedAt;
+
+    /**
+     * 服务类型枚举
+     */
+    public enum Type {
+        PIG_DOCTOR(1, "猪场软件"),
+        PIGMALL(2, "新融电商"),
+        NEVEREST(3, "大数据"),
+        PIG_TRADE(4, "生猪交易");
+
+        @Getter
+        private final int value;
+        @Getter
+        private final String desc;
+
+        Type(int value, String desc) {
+            this.value = value;
+            this.desc = desc;
+        }
+
+        public static Type from(int number) {
+            for (Type type : Type.values()) {
+                if (Objects.equal(type.value, number)) {
+                    return type;
+                }
+            }
+            return null;
+        }
+    }
+
+    /**
+     * 审批状态枚举
+     */
+    public enum Status {
+        INIT(0, "未审核"),
+        REVIEW(1, "待审核"),
+        OK(2, "通过"),
+        NOT_OK(-1, "不通过"),
+        FROZEN(-2, "冻结");
+
+        @Getter
+        private int value;
+        @Getter
+        private String desc;
+
+        Status(int value, String desc) {
+            this.value = value;
+            this.desc = desc;
+        }
+
+        public static Status from(int number) {
+            return Lists.newArrayList(Status.values()).stream()
+                    .filter(s -> Objects.equal(s.value, number))
+                    .findFirst()
+                    .orElse(null);
+        }
+    }
 }

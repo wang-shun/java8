@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 流程开始 -->
+<workflow key="decisionFlow" name="选择流程测试">
+    <!-- 开始节点 -->
+    <start name="开始节点" pointx="50" pointy="100">
+        <transition name="开始连线" target="任务节点0" />
+    </start>
+
+    <!-- 任务节点 -->
+    <task name="任务节点0" assignee="terminus0" pointx="250" pointy="100">
+        <transition name="任务连线0" target="选择节点1" />
+    </task>
+
+    <!-- 选择节点 -->
+    <decision name="选择节点1" pointx="150" pointy="100">
+        <transition name="选择连线1" expression="${money} &lt;= 500" target="任务节点1" />
+        <transition name="选择连线2" expression="500 &lt; ${money} &amp;&amp; ${money} &lt;= 1000" target="任务节点2" />
+        <transition name="选择连线3" expression="" target="结束节点" />
+    </decision>
+
+    <!-- 任务节点 -->
+    <task name="任务节点1" assignee="terminus1" pointx="250" pointy="100">
+        <transition name="任务连线1" target="结束节点" />
+    </task>
+
+    <!-- 任务节点 -->
+    <task name="任务节点2" assignee="terminus2" pointx="450" pointy="100">
+        <transition name="任务连线2" target="结束节点" />
+    </task>
+
+    <!-- 结束节点 -->
+    <end name="结束节点" pointx="650" pointy="100" />
+</workflow>

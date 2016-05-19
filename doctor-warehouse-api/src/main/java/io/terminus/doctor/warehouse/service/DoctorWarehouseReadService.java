@@ -1,8 +1,9 @@
 package io.terminus.doctor.warehouse.service;
 
+import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
-import io.terminus.doctor.warehouse.dto.DoctorFarmWareHouseTypeDto;
 import io.terminus.doctor.warehouse.dto.DoctorWareHouseDto;
+import io.terminus.doctor.warehouse.model.DoctorFarmWareHouseType;
 
 import javax.validation.constraints.NotNull;
 import java.util.List;
@@ -16,16 +17,20 @@ import java.util.List;
 public interface DoctorWarehouseReadService {
 
     /**
-     * 猪场Id 仓库种类
+     * 获取猪场不同原料类型的仓库统计信息
      * @param farmId
      * @return
      */
-    Response<List<DoctorFarmWareHouseTypeDto>> queryFarmWareHouseTypeDto(@NotNull(message = "input.farmId.empty") String farmId);
+    Response<List<DoctorFarmWareHouseType>> queryDoctorFarmWareHouseType(@NotNull(message = "input.farmId.empty") Long farmId);
 
     /**
-     *
+     * 分页查询仓库信息
      * @param farmId
+     * @param pageNo
+     * @param pageSize
      * @return
      */
-    Response<List<DoctorWareHouseDto>> queryWarehouseByFarmId(@NotNull(message = "input.farmId.empty") String farmId);
+    Response<Paging<DoctorWareHouseDto>> queryDoctorWarehouseDto(@NotNull(message = "input.farmId.empty") Long farmId,
+                                                                 Integer pageNo,Integer pageSize);
+
 }

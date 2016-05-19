@@ -26,9 +26,10 @@ public class DoctorCarouselFigureWriteServiceImpl implements DoctorCarouselFigur
     }
 
     @Override
-    public Response<Boolean> createFigure(DoctorCarouselFigure carouselFigure) {
+    public Response<Long> createFigure(DoctorCarouselFigure carouselFigure) {
         try {
-            return Response.ok(doctorCarouselFigureDao.create(carouselFigure));
+            doctorCarouselFigureDao.create(carouselFigure);
+            return Response.ok(carouselFigure.getId());
         } catch (Exception e) {
             log.error("figure create failed, carouselFigure:{}, cause:{}", carouselFigure, Throwables.getStackTraceAsString(e));
             return Response.fail("figure.create.fail");
@@ -46,11 +47,11 @@ public class DoctorCarouselFigureWriteServiceImpl implements DoctorCarouselFigur
     }
 
     @Override
-    public Response<Boolean> deleteFigure(Long id) {
+    public Response<Boolean> deleteFigure(Long figureId) {
         try {
-            return Response.ok(doctorCarouselFigureDao.delete(id));
+            return Response.ok(doctorCarouselFigureDao.delete(figureId));
         } catch (Exception e) {
-            log.error("figure delete failed, id:{}, cause:{}", id, Throwables.getStackTraceAsString(e));
+            log.error("figure delete failed, figureId:{}, cause:{}", figureId, Throwables.getStackTraceAsString(e));
             return Response.fail("figure.delete.fail");
         }
     }

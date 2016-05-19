@@ -7,10 +7,13 @@ import com.google.common.collect.Iterables;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.constants.JacksonType;
 import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.SneakyThrows;
+import lombok.experimental.Builder;
 
 import java.io.Serializable;
 import java.util.Collections;
@@ -20,7 +23,10 @@ import java.util.Objects;
 
 import static java.util.Objects.isNull;
 
+@Builder
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class DoctorMaterialConsumeProvider implements Serializable{
 
     private static final long serialVersionUID = 6834365500624638371L;
@@ -29,7 +35,7 @@ public class DoctorMaterialConsumeProvider implements Serializable{
 
     private Long id;
 
-    private Long materialInHouseId;
+    private Integer type;
 
     private Long farmId;
 

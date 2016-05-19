@@ -21,7 +21,12 @@ public class DoctorOrg implements Serializable {
      * 公司名称
      */
     private String name;
-    
+
+    /**
+     * 手机号码
+     */
+    private String mobile;
+
     /**
      * 营业执照复印件图片地址
      */

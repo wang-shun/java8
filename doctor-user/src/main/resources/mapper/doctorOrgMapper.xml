@@ -7,6 +7,7 @@
 <mapper namespace="DoctorOrg">
     <resultMap id="DoctorOrgMap" type="DoctorOrg">
         <result column="name" property="name"/>
+        <result column="mobile" property="mobile"/>
         <result column="license" property="license"/>
         <result column="out_id" property="outId"/>
         <result column="extra" property="extra"/>
@@ -24,11 +25,11 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        name, license, out_id, extra, created_at, updated_at
+        name, mobile, license, out_id, extra, created_at, updated_at
     </sql>
 
     <sql id="vals">
-        #{name}, #{license}, #{outId}, #{extra}, now(), now()
+        #{name}, #{mobile}, #{license}, #{outId}, #{extra}, now(), now()
     </sql>
 
     <insert id="create" parameterType="DoctorOrg" keyProperty="id" useGeneratedKeys="true">
@@ -50,6 +51,7 @@
         <include refid="tb"/>
         <set>
             <if test="name != null">name = #{name},</if>
+            <if test="mobile != null">mobile = #{mobile},</if>
             <if test="license != null">license = #{license},</if>
             <if test="outId != null">out_id = #{outId},</if>
             <if test="extra != null">extra = #{extra},</if>

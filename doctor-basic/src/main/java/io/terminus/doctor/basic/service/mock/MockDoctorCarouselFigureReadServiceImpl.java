@@ -28,18 +28,21 @@ public class MockDoctorCarouselFigureReadServiceImpl implements DoctorCarouselFi
         f1.setIndex(1);
         f1.setStatus(1);
         f1.setUrl("http://img.xrnm.com/20150816-1b959d0ae008e92d72da4ba46ab0f04b.jpg");
+        f1.setForward("https://www.baidu.com/");
 
         DoctorCarouselFigure f2 = new DoctorCarouselFigure();
         f2.setId(2L);
         f2.setIndex(2);
         f2.setStatus(1);
         f2.setUrl("http://img.xrnm.com/20150816-2995c70688bef24516f9137eb9e31ae4.jpg");
+        f2.setForward("https://www.baidu.com/");
 
         DoctorCarouselFigure f3 = new DoctorCarouselFigure();
         f3.setId(3L);
         f3.setIndex(3);
         f3.setStatus(1);
         f3.setUrl("http://img.xrnm.com/20150816-92bbf23989e2e66e7db8fc856aadbe6d.jpg");
+        f3.setForward("https://www.baidu.com/");
         return Response.ok(Lists.newArrayList(f1, f2, f3));
     }
 
@@ -50,6 +53,7 @@ public class MockDoctorCarouselFigureReadServiceImpl implements DoctorCarouselFi
         f1.setIndex(1);
         f1.setStatus(1);
         f1.setUrl("http://img.xrnm.com/20150816-1b959d0ae008e92d72da4ba46ab0f04b.jpg");
+        f1.setForward("https://www.baidu.com/");
         return Response.ok(f1);
     }
 }

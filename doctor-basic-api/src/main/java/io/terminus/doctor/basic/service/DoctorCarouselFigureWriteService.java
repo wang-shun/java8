@@ -17,7 +17,7 @@ public interface DoctorCarouselFigureWriteService {
      * @param carouselFigure 轮播图
      * @return 是否成功
      */
-    Response<Boolean> createFigure(DoctorCarouselFigure carouselFigure);
+    Response<Long> createFigure(DoctorCarouselFigure carouselFigure);
 
     /**
      * 更需吧轮播图
@@ -28,8 +28,8 @@ public interface DoctorCarouselFigureWriteService {
 
     /**
      * 删除轮播图
-     * @param id 轮播图id
+     * @param figureId 轮播图id
      * @return 是否成功
      */
-    Response<Boolean> deleteFigure(Long id);
+    Response<Boolean> deleteFigure(Long figureId);
 }

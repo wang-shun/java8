@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 流程开始 -->
+<workflow key="forkJoinFlow" name="并行流程测试">
+    <!-- 开始节点 -->
+    <start name="开始节点" pointx="50" pointy="100">
+        <transition name="开始连线" target="任务节点0" />
+    </start>
+
+    <!-- 任务节点 -->
+    <task name="任务节点0" assignee="terminus0" pointx="250" pointy="100">
+        <transition name="任务连线0" target="fork节点1" />
+    </task>
+
+    <!-- fork节点 -->
+    <fork name="fork节点1" pointx="150" pointy="100">
+        <transition name="fork连线1"  target="任务节点1" />
+        <transition name="fork连线2"  target="任务节点2" />
+    </fork>
+
+    <!-- 任务节点 -->
+    <task name="任务节点1" assignee="terminus1" pointx="250" pointy="100">
+        <transition name="任务连线1" target="任务节点11" />
+    </task>
+
+    <!-- 任务节点 -->
+    <task name="任务节点11" assignee="terminus11" pointx="250" pointy="100">
+        <transition name="任务连线11" target="join节点1" />
+    </task>
+
+    <!-- 任务节点 -->
+    <task name="任务节点2" assignee="terminus2" pointx="450" pointy="100">
+        <transition name="任务连线2" target="join节点1" />
+    </task>
+
+    <!-- join -->
+    <join name="join节点1" pointx="150" pointy="100">
+        <transition name="join连线1" target="结束节点" />
+    </join>
+
+    <!-- 结束节点 -->
+    <end name="结束节点" pointx="650" pointy="100" />
+</workflow>

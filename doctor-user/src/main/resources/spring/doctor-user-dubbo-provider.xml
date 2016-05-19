@@ -45,4 +45,15 @@
     <dubbo:service version="1.0.0" retries="0" interface="io.terminus.parana.article.service.ArticleReadService" ref="articleReadServiceImpl"/>
     <dubbo:service version="1.0.0" retries="0" interface="io.terminus.parana.article.service.ArticleWriteService" ref="articleWriteServiceImpl"/>
 
+    <!-- farm org services -->
+    <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.DoctorFarmReadService" ref="mockDoctorFarmReadServiceImpl"/>
+    <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.DoctorFarmWriteService" ref="mockDoctorFarmWriteServiceImpl"/>
+
+    <!-- data services -->
+    <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.DoctorServiceReviewReadService" ref="mockDoctorServiceReviewReadServiceImpl"/>
+    <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.DoctorServiceReviewWriteService" ref="mockDoctorServiceReviewWriteServiceImpl"/>
+    <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.DoctorUserDataPermissionReadService" ref="mockDoctorUserDataPermissionReadServiceImpl"/>
+    <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.DoctorUserDataPermissionWriteService" ref="mockDoctorUserDataPermissionWriteServiceImpl"/>
+    <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.DoctorUserReadService" ref="mockDoctorUserReadServiceImpl"/>
+
 </beans>

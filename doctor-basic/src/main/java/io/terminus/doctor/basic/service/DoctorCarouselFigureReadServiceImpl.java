@@ -38,11 +38,11 @@ public class DoctorCarouselFigureReadServiceImpl implements DoctorCarouselFigure
     }
 
     @Override
-    public Response<DoctorCarouselFigure> findFigureById(Long id) {
+    public Response<DoctorCarouselFigure> findFigureById(Long figureId) {
         try {
-            return Response.ok(doctorCarouselFigureDao.findById(id));
+            return Response.ok(doctorCarouselFigureDao.findById(figureId));
         } catch (Exception e) {
-            log.error("find figure by id failed, id:{}, cause:{}", id, Throwables.getStackTraceAsString(e));
+            log.error("find figure by id failed, figureId:{}, cause:{}", figureId, Throwables.getStackTraceAsString(e));
             return Response.fail("figure.find.fail");
         }
     }

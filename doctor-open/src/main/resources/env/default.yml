@@ -4,25 +4,24 @@ server:
 
 session:
   cookie-context-path: /
-  cookie-domain: bbc.dev
+  cookie-domain: doctor.com
   cookie-max-age: 1800
   cookie-name: msid
   source: redis
   serialize-type: json
-  redis-host: 127.0.0.1
-  redis-port: 8888
+  redis-host: 101.201.44.35
+  redis-port: 6379
   redis-index: 1
   redis-cluster: false
   redis-test-on-borrow: true
   redis-max-total: 10
   redis-max-idle: 0
   redis-prefix: afsession
-  mode: manager
 
 
 dubbo:
   name: doctor-web
-  registry: zookeeper://127.0.0.1:2181
+  registry: zookeeper://101.201.44.35:2181
   port: -1
   timeout: 10000
   threads: 100
@@ -30,7 +29,7 @@ dubbo:
   mode: consumer
 
 logging:
-  file: /path/to/web.log
+  file: /var/log/doctor/open.log
   level.*: INFO
   level.io.terminus: DEBUG
 
@@ -42,7 +41,7 @@ parana:
     mode: server
 
 zookeeper:
-  host: 127.0.0.1
+  host: 101.201.44.35
   port: 2181
 
 spring:
@@ -53,12 +52,12 @@ spring:
     fallback-to-system-locale: true
 
 oss:
-  endpoint: todo
-  appKey: todo
-  appSecret: todo
-  bucketName: terminus
+  endpoint: oss-cn-beijing.aliyuncs.com
+  appKey: n67jFjUcEjZxPOZf
+  appSecret: ZOPL1A33iQB52g60Dgvs3xT2FJqeaf
+  bucketName: pigmall
 
 
 image:
   base:
-    url: http://terminus.oss-cn-hangzhou.aliyuncs.com
+    url: http://pigmall.oss-cn-beijing.aliyuncs.com

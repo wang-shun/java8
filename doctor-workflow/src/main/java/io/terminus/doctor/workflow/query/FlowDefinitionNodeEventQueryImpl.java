@@ -1,0 +1,143 @@
+package io.terminus.doctor.workflow.query;
+
+import io.terminus.common.model.Paging;
+import io.terminus.doctor.workflow.access.JdbcAccess;
+import io.terminus.doctor.workflow.core.WorkFlowEngine;
+import io.terminus.doctor.workflow.model.FlowDefinitionNodeEvent;
+import io.terminus.doctor.workflow.utils.BeanHelper;
+
+import java.util.List;
+import java.util.Map;
+
+/**
+ * Desc: 流程定义事件连线公共查询接口
+ * Mail: chk@terminus.io
+ * Created by icemimosa
+ * Date: 16/5/11
+ */
+public class FlowDefinitionNodeEventQueryImpl implements FlowDefinitionNodeEventQuery {
+
+    private FlowDefinitionNodeEvent flowDefinitionNodeEvent;
+
+    private WorkFlowEngine workFlowEngine;
+    private JdbcAccess jdbcAccess;
+    private String orderBy = "id"; // 默认id排序
+    private String desc;
+
+    public FlowDefinitionNodeEventQueryImpl(WorkFlowEngine workFlowEngine) {
+        this.workFlowEngine = workFlowEngine;
+        this.jdbcAccess = workFlowEngine.buildJdbcAccess();
+        this.flowDefinitionNodeEvent = new FlowDefinitionNodeEvent();
+    }
+
+    @Override
+    public FlowDefinitionNodeEventQuery id(Long id) {
+        flowDefinitionNodeEvent.setId(id);
+        return this;
+    }
+
+    @Override
+    public FlowDefinitionNodeEventQuery name(String name) {
+        flowDefinitionNodeEvent.setName(name);
+        return this;
+    }
+
+    @Override
+    public FlowDefinitionNodeEventQuery flowDefinitionId(Long flowDefinitionId) {
+        flowDefinitionNodeEvent.setFlowDefinitionId(flowDefinitionId);
+        return this;
+    }
+
+    @Override
+    public FlowDefinitionNodeEventQuery sourceNodeId(Long sourceNodeId) {
+        flowDefinitionNodeEvent.setSourceNodeId(sourceNodeId);
+        return this;
+    }
+
+    @Override
+    public FlowDefinitionNodeEventQuery targetNodeId(Long targetNodeId) {
+        flowDefinitionNodeEvent.setTargetNodeId(targetNodeId);
+        return this;
+    }
+
+    @Override
+    public FlowDefinitionNodeEventQuery bean(FlowDefinitionNodeEvent flowDefinitionNodeEvent) {
+        this.flowDefinitionNodeEvent = flowDefinitionNodeEvent;
+        return this;
+    }
+
+    @Override
+    public FlowDefinitionNodeEventQuery orderBy(String orderBy) {
+        this.orderBy = orderBy;
+        return this;
+    }
+
+    @Override
+    public FlowDefinitionNodeEventQuery desc() {
+        this.desc = "true";
+        return this;
+    }
+
+    @Override
+    public FlowDefinitionNodeEventQuery asc() {
+        this.desc = null;
+        return this;
+    }
+
+    private Map getConditionMap(){
+        Map criteria = BeanHelper.bean2Map(this.flowDefinitionNodeEvent, true);
+        criteria.put("orderBy", orderBy);
+        criteria.put("desc", desc);
+        return criteria;
+    }
+
+    @Override
+    public Paging<FlowDefinitionNodeEvent> paging(Integer offset, Integer limit) {
+        return jdbcAccess.findFlowDefinitionNodeEventsPaging(getConditionMap(), offset, limit);
+    }
+
+    @Override
+    public FlowDefinitionNodeEvent single() {
+        return jdbcAccess.findFlowDefinitionNodeEventSingle(getConditionMap());
+    }
+
+    @Override
+    public List<FlowDefinitionNodeEvent> list() {
+        return jdbcAccess.findFlowDefinitionNodeEvents(getConditionMap());
+    }
+
+    @Override
+    public long size() {
+        return jdbcAccess.findFlowDefinitionNodeEventsSize(getConditionMap());
+    }
+
+    @Override
+    public List<FlowDefinitionNodeEvent> findFlowDefinitionNodeEvents(FlowDefinitionNodeEvent flowDefinitionNodeEvent) {
+        return jdbcAccess.findFlowDefinitionNodeEvents(flowDefinitionNodeEvent);
+    }
+
+    @Override
+    public List<FlowDefinitionNodeEvent> findFlowDefinitionNodeEvents(Map criteria) {
+        return jdbcAccess.findFlowDefinitionNodeEvents(criteria);
+    }
+
+    @Override
+    public FlowDefinitionNodeEvent findFlowDefinitionNodeEventSingle(FlowDefinitionNodeEvent flowDefinitionNodeEvent) {
+        return jdbcAccess.findFlowDefinitionNodeEventSingle(flowDefinitionNodeEvent);
+    }
+
+    @Override
+    public FlowDefinitionNodeEvent findFlowDefinitionNodeEventSingle(Map criteria) {
+        return jdbcAccess.findFlowDefinitionNodeEventSingle(criteria);
+    }
+
+    @Override
+    public Paging<FlowDefinitionNodeEvent> findFlowDefinitionNodeEventsPaging(Map criteria, Integer offset, Integer limit) {
+        return jdbcAccess.findFlowDefinitionNodeEventsPaging(criteria, offset, limit);
+    }
+
+    @Override
+    public long findFlowDefinitionNodeEventsSize(Map criteria) {
+        return jdbcAccess.findFlowDefinitionNodeEventsSize(criteria);
+    }
+}
