@@ -1049,7 +1049,7 @@ CREATE TABLE `doctor_carousel_figures` (
   `created_at` datetime DEFAULT NULL COMMENT '创建时间',
   `updated_at` datetime DEFAULT NULL COMMENT '修改时间',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='轮播图表';) ENGINE=InnoDB AUTO_INCREMENT=523 DEFAULT CHARSET=utf8 COMMENT='菜单界面';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='轮播图表';
 
 insert into `parana_configs`
 (`biz_type`, `key`, `value`, `data_type`, `group`, `description`, created_at, updated_at)
@@ -1076,4 +1076,4 @@ CREATE TABLE `doctor_user_binds` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `idx_user_bind_UNIQUE1` (`user_id`,`target_system`),
   UNIQUE KEY `idx_user_bind_UNIQUE2` (`uuid`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8 COMMENT='用户账户与其他系统账户的绑定关系';
