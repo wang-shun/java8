@@ -44,4 +44,11 @@ public interface FlowHistoryProcessQuery {
     ///////////////////////////////////////////////////////////////
     ///// 流程历史节点 query 其他方法 ////////////////////////////////
     ///////////////////////////////////////////////////////////////
+
+    /**
+     * 根据流程实例id获取流程任务历史
+     * @param flowInstanceId    流程实例id
+     * @return
+     */
+    List<FlowHistoryProcess> getHistoryProcess(Long flowInstanceId);
 }

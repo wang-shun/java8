@@ -43,6 +43,21 @@ public interface FlowDefinitionNodeQuery {
     ///// 流程节点 query 其他查询方法 ////////////////////////////////
     ///////////////////////////////////////////////////////////////
     /**
+     * 根据流程定义id获取所有节点
+     * @param flowDefinitionId  流程定义id
+     * @return
+     */
+    List<FlowDefinitionNode> getDefinitionNodes(Long flowDefinitionId);
+
+    /**
+     * 根据流程定义id和节点类型获取节点列表
+     * @param flowDefinitionId  流程定义id
+     * @param nodeType          流程节点类型
+     * @return
+     */
+    List<FlowDefinitionNode> getDefinitionNodesByType(Long flowDefinitionId, Integer nodeType);
+
+    /**
      * 根据流程定义id和节点类型, 查询当前流程定义的流程节点
      *
      * @param flowDefinitionId  流程定义id
@@ -50,5 +65,13 @@ public interface FlowDefinitionNodeQuery {
      *      @see io.terminus.doctor.workflow.model.FlowDefinitionNode.Type
      * @return
      */
-    FlowDefinitionNode findDefinitionNodeByType(Long flowDefinitionId, Integer nodeType);
+    FlowDefinitionNode getDefinitionNodeByType(Long flowDefinitionId, Integer nodeType);
+
+    /**
+     * 根据流程定义id和节点name, 获取唯一节点
+     * @param flowDefinitionId
+     * @param name
+     * @return
+     */
+    FlowDefinitionNode getDefinitionNodeByName(Long flowDefinitionId, String name);
 }

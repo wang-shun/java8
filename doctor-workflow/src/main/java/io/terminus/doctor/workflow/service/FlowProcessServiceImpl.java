@@ -88,7 +88,7 @@ public class FlowProcessServiceImpl implements FlowProcessService {
 
             // 3. 获取开始节点, 并执行任务
             FlowDefinitionNode startDefinitionNode = workFlowEngine.buildFlowQueryService().getFlowDefinitionNodeQuery()
-                    .findDefinitionNodeByType(flowDefinition.getId(), FlowDefinitionNode.Type.START.value());
+                    .getDefinitionNodeByType(flowDefinition.getId(), FlowDefinitionNode.Type.START.value());
             AssertHelper.isNull(startDefinitionNode,
                     "当前流程的定义不存在开始节点, 流程定义id为: {}", flowDefinition.getId());
             FlowProcess startProcess = FlowProcess.builder()

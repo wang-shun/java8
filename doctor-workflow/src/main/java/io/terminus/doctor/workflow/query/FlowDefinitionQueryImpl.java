@@ -148,9 +148,9 @@ public class FlowDefinitionQueryImpl implements FlowDefinitionQuery {
     }
 
     @Override
-    public FlowDefinition getLatestDefinitionByKey(String key) {
+    public FlowDefinition getLatestDefinitionByKey(String flowDefinitionKey) {
         List<FlowDefinition> list = this
-                .key(key)
+                .key(flowDefinitionKey)
                 .status(FlowDefinition.Status.NORMAL.value())
                 .orderBy("version")
                 .desc()
@@ -159,5 +159,27 @@ public class FlowDefinitionQueryImpl implements FlowDefinitionQuery {
             return list.get(0);
         }
         return null;
+    }
+
+    @Override
+    public FlowDefinition getDefinitionById(Long id) {
+        return this
+                .id(id)
+                .single();
+    }
+
+    @Override
+    public List<FlowDefinition> getDefinitions() {
+        return this
+                .status(FlowDefinition.Status.NORMAL.value())
+                .list();
+    }
+
+    @Override
+    public List<FlowDefinition> getDefinitionsByKey(String flowDefinitionKey) {
+        return this
+                .key(flowDefinitionKey)
+                .status(FlowDefinition.Status.NORMAL.value())
+                .list();
     }
 }

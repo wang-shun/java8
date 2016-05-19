@@ -42,4 +42,27 @@ public interface FlowDefinitionNodeEventQuery {
     ///// 流程事件连线 query 其他查询方法 /////////////////////////////
     ///////////////////////////////////////////////////////////////
 
+    /**
+     * 根据流程定义id, 获取事件连线列表
+     * @param flowDefinitionId  流程定义id
+     * @return
+     */
+    List<FlowDefinitionNodeEvent> getNodeEvents(Long flowDefinitionId);
+
+    /**
+     * 根据流程定义id和源nodeId, 获取事件连线列表
+     * @param flowDefinitionId  流程定义id
+     * @param sourceId          源nodeId
+     * @return
+     */
+    List<FlowDefinitionNodeEvent> getNodeEventsBySourceId(Long flowDefinitionId, Long sourceId);
+
+    /**
+     * 根据流程定义id, 源nodeId和目标nodeId, 获取事件连线列表
+     * @param flowDefinitionId  流程定义id
+     * @param sourceId          源nodeId
+     * @param targetId          目标nodeId
+     * @return
+     */
+    FlowDefinitionNodeEvent getNodeEventByST(Long flowDefinitionId, Long sourceId, Long targetId);
 }
