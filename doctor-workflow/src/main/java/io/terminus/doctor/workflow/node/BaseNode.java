@@ -105,6 +105,7 @@ public abstract class BaseNode implements Node {
      */
     private void goEnd(FlowProcess nextProcess, Execution execution) {
         execution.createNextFlowProcess(nextProcess, true);
+        execution.setFlowProcess(nextProcess);
         NodeHelper.buildEndNode().execute(execution);
     }
 

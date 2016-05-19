@@ -47,4 +47,11 @@ public interface FlowHistoryInstanceQuery {
     ///// 流程实例历史 query 其他查询方法 ////////////////////////////
     ///////////////////////////////////////////////////////////////
 
+    /**
+     * 根据流程定义key和业务id获取流程实例历史
+     * @param flowDefinitionKey     流程定义key
+     * @param businessId            业务id
+     * @return
+     */
+    List<FlowHistoryInstance> getFlowHistoryInstances(String flowDefinitionKey, Long businessId);
 }
