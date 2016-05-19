@@ -30,8 +30,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.Base64Utils;
 import org.springframework.web.bind.annotation.RequestMethod;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.Serializable;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -112,8 +110,7 @@ public class OPUsers {
     public Long register(@NotEmpty(message = "password.not.empty") String password,
                          @NotEmpty(message = "username.not.empty") String userName,
                          @NotEmpty(message = "mobile.not.empty") String mobile,
-                         @NotEmpty(message = "code.not.empty") String code,
-                         HttpServletRequest request, HttpServletResponse response) {
+                         @NotEmpty(message = "code.not.empty") String code, String a) {
         return Long.valueOf(RandomUtil.random(1, 10));
     }
 

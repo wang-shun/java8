@@ -1,6 +1,8 @@
 package io.terminus.doctor.open.rest.user;
 
+import com.google.common.collect.Lists;
 import io.terminus.doctor.open.util.OPRespHelper;
+import io.terminus.doctor.user.dto.DoctorMenuDto;
 import io.terminus.doctor.user.dto.DoctorServiceApplyDto;
 import io.terminus.doctor.user.dto.DoctorServiceReviewDto;
 import io.terminus.doctor.user.dto.DoctorUserInfoDto;
@@ -13,6 +15,7 @@ import io.terminus.pampas.openplatform.annotations.OpenMethod;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.validation.Valid;
+import java.util.List;
 
 /**
  * Desc: 用户相关
@@ -75,5 +78,10 @@ public class OPDoctorUsers {
     @OpenMethod(key = "get.user.basic.info")
     public DoctorUserInfoDto getUserBasicInfo() {
         return OPRespHelper.orOPEx(doctorUserReadService.findUserInfoByUserId(UserUtil.getUserId()));
+    }
+
+    @OpenMethod(key = "get.user.level.one.menu")
+    public List<DoctorMenuDto> getUserLevelOneMenu() {
+        return Lists.newArrayList();
     }
 }
