@@ -16,15 +16,15 @@ public interface DoctorUserService {
      * @param userBind
      * @return
      */
-    Response<Long> createUserBind(UserBind userBind);
+    Response<Boolean> createUserBind(UserBind userBind);
 
     /**
      * 删除用户绑定关系
      * @param id 表user_bind中的主键
      * @return
      */
-    Response<Long> deleteUserBindById(Long id);
-    Response<Long> deleteUserBindByUserIdAndTargetSystem(Long userId, TargetSystem targetSystem);
+    Response<Boolean> deleteUserBindById(Long id);
+    Response<Boolean> deleteUserBindByUserIdAndTargetSystem(Long userId, TargetSystem targetSystem);
 
     /**
      * 查询用户绑定关系

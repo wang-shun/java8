@@ -16,7 +16,7 @@ import java.util.List;
  */
 @Slf4j
 @Service
-public class DoctorUserServiceImpl implements  DoctorUserService{
+public class DoctorUserServiceImpl implements DoctorUserService{
 
     private final UserBindDao userBindDao;
 
@@ -26,11 +26,10 @@ public class DoctorUserServiceImpl implements  DoctorUserService{
     }
 
     @Override
-    public Response<Long> createUserBind(UserBind userBind) {
-        Response<Long> response = new Response<>();
+    public Response<Boolean> createUserBind(UserBind userBind) {
+        Response<Boolean> response = new Response<>();
         try {
-            userBindDao.create(userBind);
-            response.setResult(userBind.getId());
+            response.setResult(userBindDao.create(userBind));
         } catch (Exception e) {
             log.error("createUserBind failed, cause: {}", Throwables.getStackTraceAsString(e));
             response.setError("create.user.bind.failed");
@@ -39,11 +38,10 @@ public class DoctorUserServiceImpl implements  DoctorUserService{
     }
 
     @Override
-    public Response<Long> deleteUserBindById(Long id) {
-        Response<Long> response = new Response<>();
+    public Response<Boolean> deleteUserBindById(Long id) {
+        Response<Boolean> response = new Response<>();
         try {
-            userBindDao.delete(id);
-            response.setResult(id);
+            response.setResult(userBindDao.delete(id));
         } catch (Exception e) {
             log.error("deleteUserBind failed, cause: {}", Throwables.getStackTraceAsString(e));
             response.setError("delete.user.bind.failed");
@@ -52,15 +50,14 @@ public class DoctorUserServiceImpl implements  DoctorUserService{
     }
 
     @Override
-    public Response<Long> deleteUserBindByUserIdAndTargetSystem(Long userId, TargetSystem targetSystem) {
-        Response<Long> response = new Response<>();
+    public Response<Boolean> deleteUserBindByUserIdAndTargetSystem(Long userId, TargetSystem targetSystem) {
+        Response<Boolean> response = new Response<>();
         try {
             UserBind userBind = userBindDao.findByUserIdAndTargetSystem(userId, targetSystem);
             if (userBind != null) {
-                userBindDao.delete(userBind.getId());
-                response.setResult(userBind.getId());
+                response.setResult(userBindDao.delete(userBind.getId()));
             } else {
-                response.setResult(0L);
+                return Response.fail("no.user.bind.found");
             }
         } catch (Exception e) {
             log.error("deleteUserBind failed, cause: {}", Throwables.getStackTraceAsString(e));
