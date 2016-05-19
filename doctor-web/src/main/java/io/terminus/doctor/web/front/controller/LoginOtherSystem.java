@@ -97,7 +97,7 @@ public class LoginOtherSystem {
                     + "\ntimestamp=" + (System.currentTimeMillis() / 1000)
                     + "\nmobile=" + user.getMobile();
             String encryptedData = SimpleAESUtils.encrypt(data, model.getPassword(), algStr);
-            return model.getDomain() + "/api/all/third/access/" + model.getPassword()
+            return model.getDomain() + "/api/all/third/access/" + model.getCorpId()
                     + "?d=" + encryptedData
                     + "&padding=" + padding
                     + (isEmpty(redirectPage) ? "" : "&redirectPage=" + redirectPage);
