@@ -2,6 +2,7 @@ package io.terminus.doctor.web.admin.service;
 
 import com.fasterxml.jackson.databind.JavaType;
 import com.github.kevinsawicki.http.HttpRequest;
+import com.google.common.base.Joiner;
 import com.google.common.base.Throwables;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.Response;
@@ -117,7 +118,7 @@ public class AccountServiceImpl implements AccountService{
                 return Response.fail("no.user.bind.found");
             }
             TargetSystemModel model = otherSystemService.getTargetSystemModel(targetSystem);
-            String url = model.getDomain() + URL_UNBINDACCOUNT + "/" + userBind.getUuid() + "/" + model.getCorpId();
+            String url = Joiner.on("").join(model.getDomain(), URL_UNBINDACCOUNT, "/", userBind.getUuid(), "/", model.getCorpId());
             HttpRequest request = HttpRequest.get(url);
             String body = request.body();
             if (request.code() != 200) {
