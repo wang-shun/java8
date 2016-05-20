@@ -12,35 +12,20 @@ import java.util.Date;
  * Date: 2016-05-20
  */
 @Data
-public class DoctorCustomer implements Serializable {
-    private static final long serialVersionUID = -6214143194109087138L;
+public class DoctorChangeReason implements Serializable {
+    private static final long serialVersionUID = 6395413596819548653L;
 
     private Long id;
     
     /**
-     * 客户名称
+     * 变动类型id
      */
-    private String name;
+    private Long changeTypeId;
     
     /**
-     * 猪场id
+     * 变动原因
      */
-    private Long farmId;
-    
-    /**
-     * 猪场名称
-     */
-    private String farmName;
-    
-    /**
-     * 手机号
-     */
-    private String mobile;
-    
-    /**
-     * 邮箱
-     */
-    private String email;
+    private String reason;
     
     /**
      * 外部id
