@@ -140,7 +140,7 @@ public class FlowProcessServiceImpl implements FlowProcessService {
             List<FlowInstance> childFlowInstances = workFlowEngine.buildFlowQueryService().getFlowInstanceQuery()
                     .getExistChildFlowInstance(flowDefinitionKey, businessId);
             if (childFlowInstances != null && childFlowInstances.size() > 0) {
-                AssertHelper.throwException("当前存在子流程实例, 不能结束结束流程, 流程定义key为: {}, 业务id为: {}", flowDefinitionKey, businessId);
+                AssertHelper.throwException("当前存在子流程实例, 不能结束流程, 流程定义key为: {}, 业务id为: {}", flowDefinitionKey, businessId);
             }
             FlowInstance existFlowInstance = workFlowEngine.buildFlowQueryService().getFlowInstanceQuery()
                     .getExistFlowInstance(flowDefinitionKey, businessId);
@@ -153,14 +153,14 @@ public class FlowProcessServiceImpl implements FlowProcessService {
                 AssertHelper.throwException("当前不存在流转的任务节点, 流程定义key为: {}, 业务id为: {}", flowDefinitionKey, businessId);
             }
             if (currentProcesses.size() > 1) {
-                AssertHelper.throwException("当前存在多个任务节点, 不能结束结束流程, 流程定义key为: {}, 业务id为: {}", flowDefinitionKey, businessId);
+                AssertHelper.throwException("当前存在多个任务节点, 不能结束流程, 流程定义key为: {}, 业务id为: {}", flowDefinitionKey, businessId);
             }
             FlowProcess currentProcess = currentProcesses.get(0);
             FlowDefinitionNode processNode = workFlowEngine.buildFlowQueryService().getFlowDefinitionNodeQuery()
                     .id(currentProcess.getFlowDefinitionNodeId())
                     .single();
             if (FlowDefinitionNode.Type.END.value() != processNode.getType()) {
-                AssertHelper.throwException("当前存在正在执行的任务节点, 不能结束结束流程, 流程定义key为: {}, 业务id为: {}", flowDefinitionKey, businessId);
+                AssertHelper.throwException("当前存在正在执行的任务节点, 不能结束流程, 流程定义key为: {}, 业务id为: {}", flowDefinitionKey, businessId);
             }
             access().deleteFlowProcess(currentProcess.getId());
             access().deleteFlowInstance(existFlowInstance.getId());
