@@ -22,15 +22,13 @@ public class DoctorChgLocationDto implements Serializable{
 
     private static final long serialVersionUID = 8270765125209815779L;
 
-    private Long pigId;
-
     private Date changeLocationDate;
 
-    private Long fromBarnId;
+    private Long chgLocationFromBarnId;
 
-    private String fromBarnName;
+    private String chgLocationFromBarnName;
 
-    private Long toBarnId;
+    private Long chgLocationToBarnId;
 
-    private String toBarnName;
+    private String chgLocationToBarnName;
 }

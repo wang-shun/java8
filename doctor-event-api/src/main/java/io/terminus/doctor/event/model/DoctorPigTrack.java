@@ -4,12 +4,16 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Strings;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Maps;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.constants.JacksonType;
 import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.SneakyThrows;
+import lombok.experimental.Builder;
 
 import java.io.Serializable;
 import java.util.Collections;
@@ -18,7 +22,10 @@ import java.util.Map;
 
 import static java.util.Objects.isNull;
 
+@Builder
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class DoctorPigTrack implements Serializable{
 
     private static final long serialVersionUID = 6287905644724949716L;
@@ -84,5 +91,17 @@ public class DoctorPigTrack implements Serializable{
         }else {
             this.extra = OBJECT_MAPPER.writeValueAsString(extraMap);
         }
+    }
+
+    @SneakyThrows
+    public void addAllExtraMap(Map<String, Object> extraMap){
+        if(isNull(extraMap) || Iterables.isEmpty(extraMap.entrySet())){
+            return;
+        }
+        if(isNull(this.extraMap)){
+            this.extraMap = Maps.newHashMap();
+        }
+        this.extraMap.putAll(extraMap);
+        this.extra = OBJECT_MAPPER.writeValueAsString(this.extraMap);
     }
 }
