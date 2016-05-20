@@ -25,6 +25,7 @@ import io.terminus.doctor.event.model.DoctorPigTrack;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
 import org.joda.time.Years;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -54,6 +55,7 @@ public class DoctorPigEventManager {
 
     private final DoctorPigSnapshotDao doctorPigSnapshotDao;
 
+    @Autowired
     public DoctorPigEventManager(DoctorPigDao doctorPigDao,
                                  DoctorPigEventDao doctorPigEventDao,
                                  DoctorPigTrackDao doctorPigTrackDao,

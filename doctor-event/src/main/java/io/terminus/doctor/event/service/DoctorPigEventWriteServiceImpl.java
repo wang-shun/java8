@@ -21,6 +21,7 @@ import io.terminus.doctor.event.dto.event.usual.DoctorRemovalDto;
 import io.terminus.doctor.event.dto.event.usual.DoctorVaccinationDto;
 import io.terminus.doctor.event.manager.DoctorPigEventManager;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
@@ -35,6 +36,7 @@ public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteServic
 
     private final DoctorPigEventManager doctorPigEventManager;
 
+    @Autowired
     public DoctorPigEventWriteServiceImpl(DoctorPigEventManager doctorPigEventManager){
         this.doctorPigEventManager = doctorPigEventManager;
     }

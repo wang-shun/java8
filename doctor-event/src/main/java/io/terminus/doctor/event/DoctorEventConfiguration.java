@@ -11,7 +11,8 @@ import org.springframework.context.annotation.Configuration;
  */
 @Configuration
 @ComponentScan(basePackages = {
-        "io.terminus.doctor.event"
+        "io.terminus.doctor.event",
+        "io.terminus.doctor.workflow"
 })
 public class DoctorEventConfiguration {
 }
