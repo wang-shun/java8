@@ -32,6 +32,9 @@ import static io.terminus.doctor.workflow.node.Node.NODE_FORK;
 import static io.terminus.doctor.workflow.node.Node.NODE_JOIN;
 import static io.terminus.doctor.workflow.node.Node.NODE_ROOT;
 import static io.terminus.doctor.workflow.node.Node.NODE_START;
+import static io.terminus.doctor.workflow.node.Node.NODE_SUBFLOW;
+import static io.terminus.doctor.workflow.node.Node.NODE_SUB_END;
+import static io.terminus.doctor.workflow.node.Node.NODE_SUB_START;
 import static io.terminus.doctor.workflow.node.Node.NODE_TASK;
 import static io.terminus.doctor.workflow.node.Node.NODE_TRANSITION;
 
@@ -80,6 +83,9 @@ public class ConfigManager implements Configuration {
         // 初始化fork节点(并行网关)和join节点
         int forkNodeCount = initForkNode();
         initJoinNode(forkNodeCount);
+        // 初始化子流程开始节点和子流程结束节点
+        initSubStartNode();
+        initSubEndNode();
     }
 
     /**
@@ -125,6 +131,29 @@ public class ConfigManager implements Configuration {
     }
 
     /**
+     * 初始化 子流程开始 节点
+     */
+    private void initSubStartNode() throws Exception {
+        String expression = "/" + NODE_ROOT + "/" + NODE_SUB_START;
+        NodeList nodeList = XmlHelper.getNodeList(expression, document);
+        for (int i = 0; nodeList != null && i < nodeList.getLength(); i++) {
+            // 1. 解析出 subStart 节点
+            Node subStartNode = nodeList.item(i);
+            String nodeAttrName = XmlHelper.getAttrValue(subStartNode, ATTR_NAME);
+            AssertHelper.mapContainsKey(nodeMap, nodeAttrName,
+                    "子流程开始节点的name属性必须唯一, 当前节点名称为: {}, name属性值为: {}", subStartNode.getNodeName(), nodeAttrName);
+            nodeMap.put(nodeAttrName, subStartNode);
+
+            // 2. 解析subStart节点下的事件连线transition
+            Node transitionNode = XmlHelper.getChildrenSingleNode(subStartNode, NODE_TRANSITION);
+            AssertHelper.isNull(transitionNode, "子流程开始节点下缺少事件连线");
+            AssertHelper.isBlank(XmlHelper.getAttrValue(transitionNode, ATTR_TARGET),"子流程开始节点事件连线缺少目标节点");
+            List<Node> transitionNodes = Lists.newArrayList(transitionNode);
+            transitionMap.put(nodeAttrName, transitionNodes);
+        }
+    }
+
+    /**
      * 初始化结束节点
      */
     private void initEndNode() throws Exception {
@@ -135,13 +164,33 @@ public class ConfigManager implements Configuration {
         AssertHelper.notEquals(nodeList.getLength(), 1, "流程定义的结束节点数量只能为: 1, 当前数量为: {}", nodeList.getLength());
 
         // 2. 解析出 end 节点
-        Node startNode = nodeList.item(0);
-        String nodeAttrName = XmlHelper.getAttrValue(startNode, ATTR_NAME);
+        Node endNode = nodeList.item(0);
+        String nodeAttrName = XmlHelper.getAttrValue(endNode, ATTR_NAME);
         AssertHelper.mapContainsKey(nodeMap, nodeAttrName,
-                "任务节点的name属性必须唯一, 当前节点名称为: {}, name属性值为: {}", startNode.getNodeName(), nodeAttrName);
-        nodeMap.put(nodeAttrName, startNode);
+                "任务节点的name属性必须唯一, 当前节点名称为: {}, name属性值为: {}", endNode.getNodeName(), nodeAttrName);
+        nodeMap.put(nodeAttrName, endNode);
 
         // 3. 不存在transition节点, 以下忽视
+    }
+
+    /**
+     * 初始化 子流程结束 节点
+     * @throws Exception
+     */
+    private void initSubEndNode() throws Exception {
+        // 1. 校验是否存在end节点
+        String expression = "/" + NODE_ROOT + "/" + NODE_SUB_END;
+        NodeList nodeList = XmlHelper.getNodeList(expression, document);
+        for (int i = 0; nodeList != null && i < nodeList.getLength(); i++) {
+            // 2. 解析出 end 节点
+            Node subEndNode = nodeList.item(i);
+            String nodeAttrName = XmlHelper.getAttrValue(subEndNode, ATTR_NAME);
+            AssertHelper.mapContainsKey(nodeMap, nodeAttrName,
+                    "子流程结束节点的name属性必须唯一, 当前节点名称为: {}, name属性值为: {}", subEndNode.getNodeName(), nodeAttrName);
+            nodeMap.put(nodeAttrName, subEndNode);
+
+            // 3. 不存在transition节点, 以下忽视
+        }
     }
 
     /**
@@ -168,10 +217,21 @@ public class ConfigManager implements Configuration {
                     "任务节点下缺少事件连线, 当前节点名称为: {}, name属性值为: {}", taskNode.getNodeName(), nodeAttrName);
             AssertHelper.isBlank(XmlHelper.getAttrValue(transitionNode, ATTR_TARGET),
                     "任务节点事件连线缺少目标节点, 当前节点名称为: {}, name属性值为: {}", taskNode.getNodeName(), nodeAttrName);
-            // 校验事件连线
-            AssertHelper.isBlank(XmlHelper.getAttrValue(transitionNode, ATTR_TARGET),
-                    "fork节点事件连线缺少目标节点, 当前节点名称为: {}, name属性值为: {}", taskNode.getNodeName(), nodeAttrName);
             List<Node> transitionNodes = Lists.newArrayList(transitionNode);
+
+            // 4. subflow 节点
+            List<Node> subTransNodes = XmlHelper.getChildrenNodes(taskNode, NODE_SUBFLOW);
+            if (subTransNodes != null && subTransNodes.size() > 0) {
+                if (subTransNodes.size() > 1) {
+                    AssertHelper.throwException(
+                            "任务节点子流程连线数量不能大于1, 当前节点名称为: {}, name属性值为: {}", taskNode.getNodeName(), nodeAttrName);
+                }
+                Node subTransNode = subTransNodes.get(0);
+                AssertHelper.isBlank(XmlHelper.getAttrValue(subTransNode, ATTR_TARGET),
+                        "任务节点子流程连线缺少目标节点, 当前节点名称为: {}, name属性值为: {}", taskNode.getNodeName(), nodeAttrName);
+                transitionNodes.add(subTransNode);
+            }
+
             transitionMap.put(nodeAttrName, transitionNodes);
         }
     }

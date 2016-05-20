@@ -9,6 +9,7 @@
     <!-- 任务节点 -->
     <task name="任务节点0" assignee="terminus0" pointx="250" pointy="100">
         <transition name="任务连线0" target="选择节点1" />
+        <subflow></subflow>
     </task>
 
     <!-- 选择节点 -->

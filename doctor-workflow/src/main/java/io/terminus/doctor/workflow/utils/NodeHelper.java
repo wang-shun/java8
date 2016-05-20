@@ -7,6 +7,8 @@ import io.terminus.doctor.workflow.node.ForkNode;
 import io.terminus.doctor.workflow.node.JoinNode;
 import io.terminus.doctor.workflow.node.Node;
 import io.terminus.doctor.workflow.node.StartNode;
+import io.terminus.doctor.workflow.node.SubEndNode;
+import io.terminus.doctor.workflow.node.SubStartNode;
 import io.terminus.doctor.workflow.node.TaskNode;
 
 /**
@@ -44,6 +46,12 @@ public class NodeHelper {
             case JOIN:
                 node = buildJoinNode();
                 break;
+            case SUBSTART:
+                node = buildSubStartNode();
+                break;
+            case SUBEND:
+                node = buildSubEndNode();
+                break;
             default:
                 break;
         }
@@ -73,4 +81,13 @@ public class NodeHelper {
     public static Node buildJoinNode() {
         return new JoinNode();
     }
+
+    public static Node buildSubStartNode() {
+        return new SubStartNode();
+    }
+
+    public static Node buildSubEndNode() {
+        return new SubEndNode();
+    }
+
 }
