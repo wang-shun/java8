@@ -1,13 +1,19 @@
 package io.terminus.doctor.event.model;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.experimental.Builder;
 
 import java.io.Serializable;
 import java.util.Date;
 import java.util.Objects;
 
+@Builder
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class DoctorPig implements Serializable{
 
     private static final long serialVersionUID = -5981942073814626473L;

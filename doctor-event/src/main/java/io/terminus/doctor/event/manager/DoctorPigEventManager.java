@@ -1,7 +1,12 @@
 package io.terminus.doctor.event.manager;
 
+import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
+import io.terminus.doctor.event.dto.event.boar.DoctorBoarFarmEntryDto;
+import io.terminus.doctor.event.dto.event.sow.DoctorSowFarmEntryDto;
+import io.terminus.doctor.event.model.DoctorPig;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Created by yaoqijun.
@@ -14,10 +19,21 @@ import org.springframework.stereotype.Component;
 public class DoctorPigEventManager {
 
     /**
-     * 进厂事件
+     * 进厂事件(不进行数据校验信息)
      * @return
      */
-    public Boolean entrySowFarmEvent(){
+    @Transactional
+    public Boolean entrySowFarmEvent(DoctorSowFarmEntryDto doctorSowFarmEntryDto, DoctorBasicInputInfoDto doctorBasicInputInfoDto){
+
+        //母猪表
+//        DoctorPig doctorPig =
+
+        //pig track
+
+        //snapshot
+
+        //event
+
         return null;
     }
 
@@ -25,63 +41,27 @@ public class DoctorPigEventManager {
      * 公猪进厂事件
      * @return
      */
-    public Boolean entryBoarFarmEvent(){
+    public Boolean entryBoarFarmEvent(DoctorBoarFarmEntryDto doctorBoarFarmEntryDto, DoctorBasicInputInfoDto doctorBasicInputInfoDto){
         return null;
     }
 
     /**
-     * 公猪采精事件
+     * 构建DoctorPig
+     * @param dto
+     * @param basic
      * @return
      */
-    public Boolean boarSnmenEvent(){
+    public DoctorPig buildDoctorPig(DoctorSowFarmEntryDto dto, DoctorBasicInputInfoDto basic){
+
+//        if(isNull(doctorBasicInputInfoDto.getFarmId())||isNull(doctorSowFarmEntryDto.getPigCode())){
+//            return null;
+//        }
+//
+//        return DoctorPig.builder()
+//                .farmId(basic.getFarmId()).farmName(basic.getFarmName()).orgId(basic.getOrgId()).orgName(basic.getOrgName())
+//                .build();
         return null;
+
     }
 
-    public Boolean diseaseEvent(){
-        return null;
-    }
-
-    public Boolean vaccinationEvent(){
-        return null;
-    }
-
-    /**
-     * 体况信息检查
-     * @return
-     */
-    public Boolean conditionEvent(){
-        return null;
-    }
-
-    /**
-     * 转舍事件信息
-     * @return
-     */
-    public Boolean chgLocationEvent(){
-        return null;
-    }
-
-    /**
-     * 转舍事件信息
-     * @return
-     */
-    public Boolean chgFarmEvent(){
-        return null;
-    }
-
-    /**
-     * 离场事件信息
-     * @return
-     */
-    public Boolean removalEvent(){
-        return null;
-    }
-
-    /**
-     * 配种事件
-     * @return
-     */
-    public Boolean  matingEvent(){
-        return null;
-    }
 }

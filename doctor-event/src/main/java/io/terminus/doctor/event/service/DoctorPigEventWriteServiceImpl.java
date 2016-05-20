@@ -1,5 +1,6 @@
 package io.terminus.doctor.event.service;
 
+import com.google.common.base.Throwables;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
 import io.terminus.doctor.event.dto.event.boar.DoctorBoarFarmEntryDto;
@@ -19,6 +20,7 @@ import io.terminus.doctor.event.dto.event.usual.DoctorConditionDto;
 import io.terminus.doctor.event.dto.event.usual.DoctorDiseaseDto;
 import io.terminus.doctor.event.dto.event.usual.DoctorRemovalDto;
 import io.terminus.doctor.event.dto.event.usual.DoctorVaccinationDto;
+import io.terminus.doctor.event.manager.DoctorPigEventManager;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -32,14 +34,30 @@ import org.springframework.stereotype.Service;
 @Slf4j
 public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteService{
 
+    private final DoctorPigEventManager doctorPigEventManager;
+
+    public DoctorPigEventWriteServiceImpl(DoctorPigEventManager doctorPigEventManager){
+        this.doctorPigEventManager = doctorPigEventManager;
+    }
+
     @Override
     public Response<Boolean> sowEntryEvent(DoctorBasicInputInfoDto doctorBasicInputInfoDto, DoctorSowFarmEntryDto doctorSowFarmEntryDto) {
-        return null;
+        try{
+            return Response.ok(doctorPigEventManager.entrySowFarmEvent(doctorSowFarmEntryDto,doctorBasicInputInfoDto));
+        }catch (Exception e){
+            log.error("sow entry event create error, cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("create.sowEntryEvent.fail");
+        }
     }
 
     @Override
     public Response<Boolean> boarEntryEvent(DoctorBasicInputInfoDto doctorBasicInputInfoDto, DoctorBoarFarmEntryDto doctorBoarFarmEntryDto) {
-        return null;
+        try{
+            return Response.ok(doctorPigEventManager.entryBoarFarmEvent(doctorBoarFarmEntryDto, doctorBasicInputInfoDto));
+        }catch (Exception e){
+            log.error("boar entry event error, cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("create.boarEntryEvent.fail");
+        }
     }
 
     @Override
