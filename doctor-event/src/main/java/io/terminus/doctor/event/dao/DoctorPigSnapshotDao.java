@@ -12,4 +12,17 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public class DoctorPigSnapshotDao extends MyBatisDao<DoctorPigSnapshot>{
+
+    public Boolean deleteByEventId(Long eventId){
+        return this.getSqlSession().delete(sqlId("deleteByEventId"),eventId) == 1;
+    }
+
+    /**
+     * 通过EventId 获取对应的事件信息
+     * @param eventId
+     * @return
+     */
+    public DoctorPigSnapshot queryByEventId(Long eventId){
+        return this.getSqlSession().selectOne(sqlId("queryByEventId"), eventId);
+    }
 }

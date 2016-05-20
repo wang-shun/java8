@@ -54,12 +54,21 @@
         id=#{id}
     </delete>
 
+    <delete id="deleteByEventId" parameterMap="long">
+        DELETE FROM <include refid="tb"/> WHERE
+        eventId = #{eventId};
+    </delete>
+
     <select id="findById" parameterType="long" resultMap="DoctorPigSnapshotMap" >
         SELECT <include refid="cols_all" />
         FROM <include refid="tb" />
         WHERE id = #{id}
     </select>
 
+    <select id="queryByEventId" parameterType="long" resultMap="DoctorPigSnapshotMap">
+        SELECT <include refid="cols_all"/> FROM <include refid="tb"/>
+        WHERE eventId = #{eventId}
+    </select>
 
     <update id="update" parameterType="DoctorPigSnapshot">
         UPDATE <include refid="tb"/>

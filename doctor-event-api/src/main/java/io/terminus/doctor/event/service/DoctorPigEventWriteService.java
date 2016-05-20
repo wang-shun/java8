@@ -30,6 +30,13 @@ import javax.validation.constraints.NotNull;
 public interface DoctorPigEventWriteService {
 
     /**
+     * 回滚 pig event 事件信息
+     * @param pigEventId
+     * @return
+     */
+    Response<Boolean> rollBackPigEvent(@NotNull(message = "input.pigEventId.empty") Long pigEventId);
+
+    /**
      * 公猪， 母猪 进仓事件信息
      * @param doctorBasicInputInfoDto
      * @param doctorFarmEntryDto
@@ -56,7 +63,9 @@ public interface DoctorPigEventWriteService {
      * @param doctorBasicInputInfoDto
      * @return
      */
-    Response<Boolean> vaccinationEvent(DoctorVaccinationDto doctorVaccinationDto, DoctorBasicInputInfoDto doctorBasicInputInfoDto);
+    Response<Boolean> vaccinationEvent(@NotNull(message = "input.dto.empty") DoctorVaccinationDto doctorVaccinationDto,
+                                       @NotNull(message = "input.basic.empty") DoctorBasicInputInfoDto doctorBasicInputInfoDto,
+                                       @NotNull(message = "input.pigType.empty") Integer pigType);
 
     /**
      * 体况事件信息
@@ -64,7 +73,9 @@ public interface DoctorPigEventWriteService {
      * @param doctorBasicInputInfoDto
      * @return
      */
-    Response<Boolean> conditionEvent(DoctorConditionDto doctorConditionDto, DoctorBasicInputInfoDto doctorBasicInputInfoDto);
+    Response<Boolean> conditionEvent(@NotNull(message = "input.dto.empty") DoctorConditionDto doctorConditionDto,
+                                     @NotNull(message = "input.basic.empty") DoctorBasicInputInfoDto doctorBasicInputInfoDto,
+                                     @NotNull(message = "input.pigType.empty") Integer pigType);
 
     /**
      * 转舍事件信息
@@ -72,7 +83,9 @@ public interface DoctorPigEventWriteService {
      * @param doctorBasicInputInfoDto
      * @return
      */
-    Response<Boolean> chgLocationEvent(DoctorChgLocationDto doctorChgLocationDto, DoctorBasicInputInfoDto doctorBasicInputInfoDto);
+    Response<Boolean> chgLocationEvent(@NotNull(message = "input.dto.empty") DoctorChgLocationDto doctorChgLocationDto,
+                                       @NotNull(message = "input.basic.empty") DoctorBasicInputInfoDto doctorBasicInputInfoDto,
+                                       @NotNull(message = "input.pigType.empty") Integer pigType);
 
     /**
      * 转场事件信息
@@ -80,7 +93,7 @@ public interface DoctorPigEventWriteService {
      * @param doctorBasicInputInfoDto
      * @return
      */
-    Response<Boolean> chgFarmEvent(DoctorChgFarmDto doctorChgFarmDto, DoctorBasicInputInfoDto doctorBasicInputInfoDto);
+    Response<Boolean> chgFarmEvent(DoctorChgFarmDto doctorChgFarmDto, DoctorBasicInputInfoDto doctorBasicInputInfoDto, Integer pigType);
 
     /**
      * 离场事件
@@ -88,7 +101,7 @@ public interface DoctorPigEventWriteService {
      * @param doctorBasicInputInfoDto
      * @return
      */
-    Response<Boolean> removalEvent(DoctorRemovalDto doctorRemovalDto, DoctorBasicInputInfoDto doctorBasicInputInfoDto);
+    Response<Boolean> removalEvent(DoctorRemovalDto doctorRemovalDto, DoctorBasicInputInfoDto doctorBasicInputInfoDto, Integer pigType);
 
     /**
      * 公猪采精事件录入
@@ -96,7 +109,7 @@ public interface DoctorPigEventWriteService {
      * @param doctorBasicInputInfoDto
      * @return
      */
-    Response<Boolean> boarSemenEvent(DoctorSemenDto doctorSemenDto, DoctorBasicInputInfoDto doctorBasicInputInfoDto);
+    Response<Boolean> boarSemenEvent(DoctorSemenDto doctorSemenDto, DoctorBasicInputInfoDto doctorBasicInputInfoDto, Integer pigType);
 
     /**
      * 母猪配种事件信息录入
@@ -104,7 +117,7 @@ public interface DoctorPigEventWriteService {
      * @param doctorBasicInputInfoDto
      * @return
      */
-    Response<Boolean> sowMatingEvent(DoctorMatingDto doctorMatingDto, DoctorBasicInputInfoDto doctorBasicInputInfoDto);
+    Response<Boolean> sowMatingEvent(DoctorMatingDto doctorMatingDto, DoctorBasicInputInfoDto doctorBasicInputInfoDto, Integer pigType);
 
     /**
      * 母猪妊娠事件
@@ -112,7 +125,7 @@ public interface DoctorPigEventWriteService {
      * @param doctorBasicInputInfoDto
      * @return
      */
-    Response<Boolean> sowPregCheckEvent(DoctorPregChkResultDto doctorPregChkResultDto, DoctorBasicInputInfoDto doctorBasicInputInfoDto);
+    Response<Boolean> sowPregCheckEvent(DoctorPregChkResultDto doctorPregChkResultDto, DoctorBasicInputInfoDto doctorBasicInputInfoDto, Integer pigType);
 
     /**
      * 母猪分娩事件
@@ -120,7 +133,7 @@ public interface DoctorPigEventWriteService {
      * @param doctorBasicInputInfoDto
      * @return
      */
-    Response<Boolean> sowFarrowingEvent(DoctorFarrowingDto doctorFarrowingDto, DoctorBasicInputInfoDto doctorBasicInputInfoDto);
+    Response<Boolean> sowFarrowingEvent(DoctorFarrowingDto doctorFarrowingDto, DoctorBasicInputInfoDto doctorBasicInputInfoDto, Integer pigType);
 
     /**
      * 仔猪变动事件信息
@@ -128,7 +141,7 @@ public interface DoctorPigEventWriteService {
      * @param doctorBasicInputInfoDto
      * @return
      */
-    Response<Boolean> sowPigletsChgEvent(DoctorPigletsChgDto doctorPigletsChgDto, DoctorBasicInputInfoDto doctorBasicInputInfoDto);
+    Response<Boolean> sowPigletsChgEvent(DoctorPigletsChgDto doctorPigletsChgDto, DoctorBasicInputInfoDto doctorBasicInputInfoDto, Integer pigType);
 
     /**
      * 拼窝事件信息
@@ -136,7 +149,7 @@ public interface DoctorPigEventWriteService {
      * @param doctorBasicInputInfoDto
      * @return
      */
-    Response<Boolean> sowFostersEvent(DoctorFostersDto doctorFostersDto, DoctorBasicInputInfoDto doctorBasicInputInfoDto);
+    Response<Boolean> sowFostersEvent(DoctorFostersDto doctorFostersDto, DoctorBasicInputInfoDto doctorBasicInputInfoDto, Integer pigType);
 
     /**
      * 仔猪窝重事件
@@ -144,7 +157,7 @@ public interface DoctorPigEventWriteService {
      * @param doctorBasicInputInfoDto
      * @return
      */
-    Response<Boolean> sowLitterWeightEvent(DoctorLitterWeightDto doctorLitterWeightDto, DoctorBasicInputInfoDto doctorBasicInputInfoDto);
+    Response<Boolean> sowLitterWeightEvent(DoctorLitterWeightDto doctorLitterWeightDto, DoctorBasicInputInfoDto doctorBasicInputInfoDto, Integer pigType);
 
     /**
      * 部分断奶母猪
@@ -152,7 +165,7 @@ public interface DoctorPigEventWriteService {
      * @param doctorBasicInputInfoDto
      * @return
      */
-    Response<Boolean> sowPartWeanEvent(DoctorPartWeanDto doctorPartWeanDto, DoctorBasicInputInfoDto doctorBasicInputInfoDto);
+    Response<Boolean> sowPartWeanEvent(DoctorPartWeanDto doctorPartWeanDto, DoctorBasicInputInfoDto doctorBasicInputInfoDto, Integer pigType);
 
     /**
      * 母猪断奶事件
@@ -160,5 +173,5 @@ public interface DoctorPigEventWriteService {
      * @param doctorBasicInputInfoDto
      * @return
      */
-    Response<Boolean> sowWeanEvent(DoctorWeanDto doctorWeanDto, DoctorBasicInputInfoDto doctorBasicInputInfoDto);
+    Response<Boolean> sowWeanEvent(DoctorWeanDto doctorWeanDto, DoctorBasicInputInfoDto doctorBasicInputInfoDto, Integer pigType);
 }

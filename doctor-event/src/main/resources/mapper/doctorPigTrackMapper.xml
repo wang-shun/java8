@@ -89,6 +89,11 @@
         </foreach>
     </select>
 
+    <select id="findByEventId" parameterType="long" resultMap="DoctorPigTrackMap">
+        SELECT <include refid="cols_all"/> FROM <include refid="tb"/>
+        WHERE relEventId = #{relEventId};
+    </select>
+
     <select id="count" parameterType="map" resultType="long">
         SELECT count(1) FROM <include refid="tb"/>
         <where>
