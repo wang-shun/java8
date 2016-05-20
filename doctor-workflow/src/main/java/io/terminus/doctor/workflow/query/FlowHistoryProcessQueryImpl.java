@@ -158,4 +158,11 @@ public class FlowHistoryProcessQueryImpl implements FlowHistoryProcessQuery {
     public long findFlowHistoryProcessesSize(Map criteria) {
         return jdbcAccess.findFlowHistoryProcessesSize(criteria);
     }
+
+    @Override
+    public List<FlowHistoryProcess> getHistoryProcess(Long flowInstanceId) {
+        return this
+                .flowInstanceId(flowInstanceId)
+                .list();
+    }
 }

@@ -46,6 +46,15 @@ public interface FlowInstanceQuery {
     ///////////////////////////////////////////////////////////////
     ///// 流程实例 query 其他查询方法 ////////////////////////////////
     ///////////////////////////////////////////////////////////////
+
+    /**
+     * 根据流程定义key和业务id获取所有的流程实例(包括子流程)
+     * @param flowDefinitionKey 流程定义的key
+     * @param businessId        业务id
+     * @return
+     */
+    List<FlowInstance> getFlowInstances(String flowDefinitionKey, Long businessId);
+
     /**
      * 查询是否已经存在的主流程实例, 一个业务id只能启动一种key类型的流程定义, 只能存在一个主流程实例
      * @param flowDefinitionKey 流程定义的key
