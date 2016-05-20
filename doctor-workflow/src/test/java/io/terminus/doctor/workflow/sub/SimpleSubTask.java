@@ -4,7 +4,6 @@ import io.terminus.doctor.workflow.base.BaseServiceTest;
 import io.terminus.doctor.workflow.core.WorkFlowService;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.annotation.Rollback;
 
 /**
  * Desc: 选择节点简单测试
@@ -21,7 +20,6 @@ public class SimpleSubTask extends BaseServiceTest {
     private Long businessId = 1314L;
 
     @Test
-    @Rollback(false)
     public void test_NORMAL_ForkJoinWorkFlow() {
         // 1. 部署流程
         defService().deploy("subflow/simple_sub_flow.xml");
