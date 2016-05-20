@@ -39,10 +39,10 @@ public class AccountServiceImpl implements AccountService{
         this.userBindService = userBindService;
     }
 
-    private static final String URL_FINDBINDACCOUNT = "/api/all/third/findBindAccount";
-    private static final String URL_BINDACCOUNT = "/api/all/third/bindAccount";
-    private static final String URL_BINDACCOUNT_NOPASSWORD = "/api/all/third/bindAccount/noPassword";
-    private static final String URL_UNBINDACCOUNT = "/api/all/third/unbindAccount";
+    private static final String URL_FINDBINDACCOUNT = "api/all/third/findBindAccount";
+    private static final String URL_BINDACCOUNT = "api/all/third/bindAccount";
+    private static final String URL_BINDACCOUNT_NOPASSWORD = "api/all/third/bindAccount/noPassword";
+    private static final String URL_UNBINDACCOUNT = "api/all/third/unbindAccount";
     private static JavaType javaType = JsonMapper.nonEmptyMapper().createCollectionType(Map.class, String.class, String.class);
 
 
@@ -92,7 +92,7 @@ public class AccountServiceImpl implements AccountService{
     }
     private HttpRequest sendHttpRequestPost(TargetSystem targetSystem, String simpleUUID, String account, String password){
         TargetSystemModel model = otherSystemService.getTargetSystemModel(targetSystem);
-        String url = model.getDomain() + (password != null ? URL_BINDACCOUNT : URL_BINDACCOUNT_NOPASSWORD);
+        String url = Joiner.on("/").join(model.getDomain(), password != null ? URL_BINDACCOUNT : URL_BINDACCOUNT_NOPASSWORD);
         Map<String, Object> params = MapBuilder.<String, Object>of()
                 .put("thirdPartUserId", simpleUUID)
                 .put("corpId", model.getCorpId())
@@ -118,7 +118,7 @@ public class AccountServiceImpl implements AccountService{
                 return Response.fail("no.user.bind.found");
             }
             TargetSystemModel model = otherSystemService.getTargetSystemModel(targetSystem);
-            String url = Joiner.on("").join(model.getDomain(), URL_UNBINDACCOUNT, "/", userBind.getUuid(), "/", model.getCorpId());
+            String url = Joiner.on("/").join(model.getDomain(), URL_UNBINDACCOUNT, userBind.getUuid(), model.getCorpId());
             HttpRequest request = HttpRequest.get(url);
             String body = request.body();
             if (request.code() != 200) {
