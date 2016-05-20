@@ -12,7 +12,7 @@ import io.terminus.doctor.common.utils.SimpleAESUtils;
 import io.terminus.doctor.user.enums.TargetSystem;
 import io.terminus.doctor.user.model.TargetSystemModel;
 import io.terminus.doctor.user.model.UserBind;
-import io.terminus.doctor.user.service.DoctorUserService;
+import io.terminus.doctor.user.service.UserBindService;
 import io.terminus.doctor.web.core.component.MobilePattern;
 import io.terminus.doctor.web.core.service.OtherSystemService;
 import io.terminus.pampas.common.UserUtil;
@@ -37,15 +37,15 @@ public class LoginOtherSystem {
     private final UserReadService<User> userReadService;
     private final MobilePattern mobilePattern;
     private final OtherSystemService otherSystemService;
-    private final DoctorUserService doctorUserService;
+    private final UserBindService userBindService;
 
     @Autowired
     public LoginOtherSystem(UserReadService<User> userReadService, OtherSystemService otherSystemService,
-                            MobilePattern mobilePattern, DoctorUserService doctorUserService){
+                            MobilePattern mobilePattern, UserBindService userBindService){
         this.userReadService = userReadService;
         this.mobilePattern = mobilePattern;
         this.otherSystemService = otherSystemService;
-        this.doctorUserService = doctorUserService;
+        this.userBindService = userBindService;
     }
 
     private static final String URL_THIRD_USERS_ACCESS = "/api/all/third/access";
@@ -82,7 +82,7 @@ public class LoginOtherSystem {
         if(targetSystemEnum == null){
             throw new JsonResponseException(500, "unknown.target.system");
         }
-        UserBind userBind = RespHelper.orServEx(doctorUserService.findUserBindByUserIdAndTargetSystem(paranaUser.getId(), targetSystemEnum));
+        UserBind userBind = RespHelper.orServEx(userBindService.findUserBindByUserIdAndTargetSystem(paranaUser.getId(), targetSystemEnum));
         if (userBind == null) {
             throw new JsonResponseException(500, "no.user.bind.found");
         }

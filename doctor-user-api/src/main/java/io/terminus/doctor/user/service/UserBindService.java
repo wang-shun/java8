@@ -10,7 +10,7 @@ import java.util.List;
  * 陈增辉 16/5/19.
  * 与用户相关的业务service
  */
-public interface DoctorUserService {
+public interface UserBindService {
 
     /**
      * 创建本系统用户与其他系统账户的绑定关系

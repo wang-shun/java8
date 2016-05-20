@@ -16,12 +16,12 @@ import java.util.List;
  */
 @Slf4j
 @Service
-public class DoctorUserServiceImpl implements DoctorUserService{
+public class UserBindServiceImpl implements UserBindService{
 
     private final UserBindDao userBindDao;
 
     @Autowired
-    public DoctorUserServiceImpl(UserBindDao userBindDao){
+    public UserBindServiceImpl(UserBindDao userBindDao){
         this.userBindDao = userBindDao;
     }
 
@@ -41,11 +41,10 @@ public class DoctorUserServiceImpl implements DoctorUserService{
     public Response<Boolean> deleteUserBindById(Long id) {
         Response<Boolean> response = new Response<>();
         try {
-            if (userBindDao.delete(id)) {
-                response.setResult(true);
-            } else {
+            if (!userBindDao.delete(id)) {
                 log.warn("no UserBind deleted, id = {}", id);
             }
+            response.setResult(true);
         } catch (Exception e) {
             log.error("deleteUserBind failed, cause: {}", Throwables.getStackTraceAsString(e));
             response.setError("delete.user.bind.failed");

@@ -11,7 +11,7 @@ import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.user.enums.TargetSystem;
 import io.terminus.doctor.user.model.TargetSystemModel;
 import io.terminus.doctor.user.model.UserBind;
-import io.terminus.doctor.user.service.DoctorUserService;
+import io.terminus.doctor.user.service.UserBindService;
 import io.terminus.doctor.web.core.service.OtherSystemService;
 import io.terminus.parana.user.model.User;
 import lombok.extern.slf4j.Slf4j;
@@ -30,12 +30,12 @@ import java.util.UUID;
 public class AccountServiceImpl implements AccountService{
 
     private final OtherSystemService otherSystemService;
-    private final DoctorUserService doctorUserService;
+    private final UserBindService userBindService;
 
     @Autowired
-    public AccountServiceImpl (OtherSystemService otherSystemService, DoctorUserService doctorUserService) {
+    public AccountServiceImpl (OtherSystemService otherSystemService, UserBindService userBindService) {
         this.otherSystemService = otherSystemService;
-        this.doctorUserService = doctorUserService;
+        this.userBindService = userBindService;
     }
 
     private static final String URL_FINDBINDACCOUNT = "/api/all/third/findBindAccount";
@@ -50,7 +50,7 @@ public class AccountServiceImpl implements AccountService{
         Response<User> response = new Response<>();
         try {
             //检查用户是否已经绑定过了
-            UserBind userBind = RespHelper.orServEx(doctorUserService.findUserBindByUserIdAndTargetSystem(userId, targetSystem));
+            UserBind userBind = RespHelper.orServEx(userBindService.findUserBindByUserIdAndTargetSystem(userId, targetSystem));
             if (userBind != null) {
                 throw new ServiceException("user.bind.already");
             }
@@ -87,7 +87,7 @@ public class AccountServiceImpl implements AccountService{
         userBind.setTargetUserName(user.getName());
         userBind.setTargetUserMobile(user.getMobile());
         userBind.setTargetUserEmail(user.getEmail());
-        return doctorUserService.createUserBind(userBind);
+        return userBindService.createUserBind(userBind);
     }
     private HttpRequest sendHttpRequestPost(TargetSystem targetSystem, String simpleUUID, String account, String password){
         TargetSystemModel model = otherSystemService.getTargetSystemModel(targetSystem);
@@ -112,7 +112,7 @@ public class AccountServiceImpl implements AccountService{
     public Response<User> unbindAccount(Long userId, TargetSystem targetSystem) {
         Response<User> response = new Response<>();
         try {
-            UserBind userBind = RespHelper.orServEx(doctorUserService.findUserBindByUserIdAndTargetSystem(userId, targetSystem));
+            UserBind userBind = RespHelper.orServEx(userBindService.findUserBindByUserIdAndTargetSystem(userId, targetSystem));
             if (userBind == null) {
                 return Response.fail("no.user.bind.found");
             }
@@ -127,7 +127,7 @@ public class AccountServiceImpl implements AccountService{
                 User user = this.makeUserFromJson(body);
 
                 //删除在本系统记录的账户绑定关系
-                doctorUserService.deleteUserBindById(userBind.getId());
+                userBindService.deleteUserBindById(userBind.getId());
                 response.setResult(user);
             }
         } catch (ServiceException e) {
