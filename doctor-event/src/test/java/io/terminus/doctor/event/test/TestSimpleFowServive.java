@@ -27,7 +27,6 @@ public class TestSimpleFowServive extends BaseServiceTest {
     private Long pigId = 1314L;
 
     @Test
-    @Rollback(false)
     public void testDeploy() {
         // 1. 部署流程, 并查询
         simpleFlowService.depoly(TestSimpleFowServive.class.getClassLoader().getResourceAsStream("flow/simple.xml"));

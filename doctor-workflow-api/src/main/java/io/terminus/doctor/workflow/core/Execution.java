@@ -23,6 +23,11 @@ public interface Execution {
      */
     List<Interceptor> getInterceptors();
 
+    /**
+     * 获取流程节点执行容器
+     * @param flowProcess
+     * @return
+     */
     Execution getExecution(FlowProcess flowProcess);
 
     /**
