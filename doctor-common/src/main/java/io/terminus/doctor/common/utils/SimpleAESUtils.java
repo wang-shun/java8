@@ -2,7 +2,7 @@
  * Copyright (c) 2015 杭州端点网络科技有限公司
  */
 
-package io.terminus.doctor.web.core.util;
+package io.terminus.doctor.common.utils;
 
 import com.google.common.base.Optional;
 import org.apache.commons.codec.binary.Hex;

@@ -19,6 +19,13 @@ public interface AccountService {
      * @return 目标系统的User对象, 有效字段: name, mobile, email,
      */
     Response<User> bindAccount(Long userId, TargetSystem targetSystem, String account, String password);
+    /**
+     * 绑定用户指定的目标系统的账号, 不检验密码
+     * @param userId
+     * @param targetSystem 目标系统,  关联枚举: @see io.terminus.doctor.user.enums.TargetSystem
+     * @param account 用户填写的目标系统的账号
+     * @return 目标系统的User对象, 有效字段: name, mobile, email,
+     */
     Response<User> bindAccount(Long userId, TargetSystem targetSystem, String account);
 
     /**

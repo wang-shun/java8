@@ -4,18 +4,17 @@
 
 package io.terminus.doctor.web.front.controller;
 
-import com.google.common.base.Optional;
+import com.google.common.base.Joiner;
 import io.terminus.common.exception.JsonResponseException;
-import io.terminus.common.model.Response;
 import io.terminus.doctor.common.model.ParanaUser;
 import io.terminus.doctor.common.utils.RespHelper;
+import io.terminus.doctor.common.utils.SimpleAESUtils;
 import io.terminus.doctor.user.enums.TargetSystem;
 import io.terminus.doctor.user.model.TargetSystemModel;
 import io.terminus.doctor.user.model.UserBind;
 import io.terminus.doctor.user.service.DoctorUserService;
 import io.terminus.doctor.web.core.component.MobilePattern;
 import io.terminus.doctor.web.core.service.OtherSystemService;
-import io.terminus.doctor.web.core.util.SimpleAESUtils;
 import io.terminus.pampas.common.UserUtil;
 import io.terminus.parana.user.model.User;
 import io.terminus.parana.user.service.UserReadService;
@@ -49,6 +48,7 @@ public class LoginOtherSystem {
         this.doctorUserService = doctorUserService;
     }
 
+    private static final String URL_THIRD_USERS_ACCESS = "/api/all/third/access";
 
     /**
      * 用户通过本系统登录pigmall 或neverest, 调用接口前将要传输的数据加密,然后返回完整的接口地址并附带参数,前台直接访问此URL即可登录目标系统
@@ -70,15 +70,11 @@ public class LoginOtherSystem {
         }
 
         User user = RespHelper.or500(userReadService.findById(paranaUser.getId()));
-        if (user == null) {
-            throw new JsonResponseException(500, "user.not.found");
-        }
         if (user.getMobile() == null || !mobilePattern.getPattern().matcher(user.getMobile()).matches()) {
             throw new JsonResponseException(500, "mobile.format.error");
         }
 
-        Optional<String> alg = SimpleAESUtils.algSelect(padding);
-        String algStr = alg.or(() -> {
+        String algStr = SimpleAESUtils.algSelect(padding).or(() -> {
             throw new JsonResponseException(500, "unknown.padding.for.encrypt");
         });
         
@@ -86,21 +82,18 @@ public class LoginOtherSystem {
         if(targetSystemEnum == null){
             throw new JsonResponseException(500, "unknown.target.system");
         }
-        Response<UserBind> bindResponse = doctorUserService.findUserBindByUserIdAndTargetSystem(paranaUser.getId(), targetSystemEnum);
-        UserBind userBind = RespHelper.orServEx(bindResponse);
+        UserBind userBind = RespHelper.orServEx(doctorUserService.findUserBindByUserIdAndTargetSystem(paranaUser.getId(), targetSystemEnum));
         if (userBind == null) {
             throw new JsonResponseException(500, "no.user.bind.found");
         }
         try {
             TargetSystemModel model = otherSystemService.getTargetSystemModel(targetSystemEnum);
-            String data = "third_user_id=" + userBind.getUuid()
-                    + "\ntimestamp=" + (System.currentTimeMillis() / 1000)
-                    + "\nmobile=" + user.getMobile();
+            String data = Joiner.on("").join("third_user_id=", userBind.getUuid(),
+                    "\ntimestamp=", System.currentTimeMillis() / 1000,
+                    "\nmobile=", user.getMobile());
             String encryptedData = SimpleAESUtils.encrypt(data, model.getPassword(), algStr);
-            return model.getDomain() + "/api/all/third/access/" + model.getCorpId()
-                    + "?d=" + encryptedData
-                    + "&padding=" + padding
-                    + (isEmpty(redirectPage) ? "" : "&redirectPage=" + redirectPage);
+            return Joiner.on("").join(model.getDomain(), URL_THIRD_USERS_ACCESS, "/", model.getCorpId(),
+                    "?d=", encryptedData, "&padding=", padding, isEmpty(redirectPage) ? "" : "&redirectPage=" + redirectPage);
         } catch (Exception e) {
             throw new JsonResponseException(500, e);
         }

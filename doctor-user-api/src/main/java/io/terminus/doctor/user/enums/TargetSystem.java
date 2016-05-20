@@ -3,7 +3,9 @@ package io.terminus.doctor.user.enums;
 import com.google.common.base.Objects;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
+@ToString
 public enum TargetSystem {
     //注意: desc的写法, 由3个分号分隔的字符串组成, 依次对应表 parana_configs 中的字段 key, 用于获取在数据库中配置的值
     //在此增加枚举值时, 不要忘了往表 parana_configs 中添加相应数据
@@ -44,13 +46,4 @@ public enum TargetSystem {
         return corpId;
     }
 
-    @Override
-    public String toString() {
-        return "TargetSystem{" +
-                "value=" + value +
-                ", keyOfDomain='" + domain + '\'' +
-                ", keyOfPasword='" + password + '\'' +
-                ", keyOfCorpId='" + corpId + '\'' +
-                '}';
-    }
 }

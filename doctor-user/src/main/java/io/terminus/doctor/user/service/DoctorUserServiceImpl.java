@@ -41,7 +41,11 @@ public class DoctorUserServiceImpl implements DoctorUserService{
     public Response<Boolean> deleteUserBindById(Long id) {
         Response<Boolean> response = new Response<>();
         try {
-            response.setResult(userBindDao.delete(id));
+            if (userBindDao.delete(id)) {
+                response.setResult(true);
+            } else {
+                log.warn("no UserBind deleted, id = {}", id);
+            }
         } catch (Exception e) {
             log.error("deleteUserBind failed, cause: {}", Throwables.getStackTraceAsString(e));
             response.setError("delete.user.bind.failed");

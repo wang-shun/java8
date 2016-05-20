@@ -49,37 +49,22 @@ public class AccountServiceImpl implements AccountService{
     public Response<User> bindAccount(Long userId, TargetSystem targetSystem, String account, String password) {
         Response<User> response = new Response<>();
         try {
-            Response<UserBind> bindResponse = doctorUserService.findUserBindByUserIdAndTargetSystem(userId, targetSystem);
-            UserBind userBind = RespHelper.orServEx(bindResponse);
+            //检查用户是否已经绑定过了
+            UserBind userBind = RespHelper.orServEx(doctorUserService.findUserBindByUserIdAndTargetSystem(userId, targetSystem));
             if (userBind != null) {
-                return Response.fail("user.bind.already");
+                throw new ServiceException("user.bind.already");
             }
-            TargetSystemModel model = otherSystemService.getTargetSystemModel(targetSystem);
+
             String simpleUUID = UUID.randomUUID().toString().replace("-", "");
-            String url = model.getDomain() + (password != null ? URL_BINDACCOUNT : URL_BINDACCOUNT_NOPASSWORD);
-            Map<String, Object> params = MapBuilder.<String, Object>of()
-                    .put("thirdPartUserId", simpleUUID)
-                    .put("corpId", model.getCorpId())
-                    .put("account", account)
-                    .put("password", password)
-                    .map();
-            HttpRequest request = HttpRequest.post(url).form(params);
+            HttpRequest request = this.sendHttpRequestPost(targetSystem, simpleUUID, account, password);
             String body = request.body();
             if (request.code() != 200) {
                 throw new ServiceException(body);
             } else {
-                //这是对方系统的user
+                //得到对方系统的user
                 User user = this.makeUserFromJson(body);
-
                 //在自己系统记录绑定关系
-                userBind = new UserBind();
-                userBind.setTargetSystem(targetSystem.value());
-                userBind.setUserId(userId);
-                userBind.setUuid(simpleUUID);
-                userBind.setTargetUserName(user.getName());
-                userBind.setTargetUserMobile(user.getMobile());
-                userBind.setTargetUserEmail(user.getEmail());
-                doctorUserService.createUserBind(userBind);
+                this.createUserBind(user, simpleUUID, targetSystem, userId);
                 response.setResult(user);
             }
         } catch (ServiceException e) {
@@ -94,7 +79,27 @@ public class AccountServiceImpl implements AccountService{
     public Response<User> bindAccount(Long userId, TargetSystem targetSystem, String account){
         return this.bindAccount(userId, targetSystem, account, null);
     }
-
+    private Response<Boolean> createUserBind(User user, String simpleUUID, TargetSystem targetSystem, Long userId){
+        UserBind userBind = new UserBind();
+        userBind.setTargetSystem(targetSystem.value());
+        userBind.setUserId(userId);
+        userBind.setUuid(simpleUUID);
+        userBind.setTargetUserName(user.getName());
+        userBind.setTargetUserMobile(user.getMobile());
+        userBind.setTargetUserEmail(user.getEmail());
+        return doctorUserService.createUserBind(userBind);
+    }
+    private HttpRequest sendHttpRequestPost(TargetSystem targetSystem, String simpleUUID, String account, String password){
+        TargetSystemModel model = otherSystemService.getTargetSystemModel(targetSystem);
+        String url = model.getDomain() + (password != null ? URL_BINDACCOUNT : URL_BINDACCOUNT_NOPASSWORD);
+        Map<String, Object> params = MapBuilder.<String, Object>of()
+                .put("thirdPartUserId", simpleUUID)
+                .put("corpId", model.getCorpId())
+                .put("account", account)
+                .put("password", password)
+                .map();
+        return HttpRequest.post(url).form(params);
+    }
     private User makeUserFromJson(String json){
         Map<String, String> map = JsonMapper.nonEmptyMapper().fromJson(json, javaType);
         User user = new User();
@@ -107,8 +112,7 @@ public class AccountServiceImpl implements AccountService{
     public Response<User> unbindAccount(Long userId, TargetSystem targetSystem) {
         Response<User> response = new Response<>();
         try {
-            Response<UserBind> bindResponse = doctorUserService.findUserBindByUserIdAndTargetSystem(userId, targetSystem);
-            UserBind userBind = RespHelper.orServEx(bindResponse);
+            UserBind userBind = RespHelper.orServEx(doctorUserService.findUserBindByUserIdAndTargetSystem(userId, targetSystem));
             if (userBind == null) {
                 return Response.fail("no.user.bind.found");
             }

@@ -8,6 +8,7 @@ import java.util.List;
 
 /**
  * 陈增辉 16/5/19.
+ * 与用户相关的业务service
  */
 public interface DoctorUserService {
 
@@ -24,6 +25,13 @@ public interface DoctorUserService {
      * @return
      */
     Response<Boolean> deleteUserBindById(Long id);
+
+    /**
+     *  删除用户绑定关系
+     * @param userId
+     * @param targetSystem
+     * @return
+     */
     Response<Boolean> deleteUserBindByUserIdAndTargetSystem(Long userId, TargetSystem targetSystem);
 
     /**
@@ -32,6 +40,19 @@ public interface DoctorUserService {
      * @return
      */
     Response<UserBind> findUserBindById(Long id);
+
+    /**
+     * 查询用户绑定关系
+     * @param userId
+     * @return
+     */
     Response<List<UserBind>> findUserBindByUserId(Long userId);
+
+    /**
+     * 查询用户绑定关系
+     * @param userId
+     * @param targetSystem
+     * @return
+     */
     Response<UserBind> findUserBindByUserIdAndTargetSystem(Long userId, TargetSystem targetSystem);
 }

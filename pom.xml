@@ -57,6 +57,8 @@
         <jodd.version>3.5.1</jodd.version>
         <openplatform.version>0.3.BUILD-SNAPSHOT</openplatform.version>
         <jackson-guava.version>2.7.0</jackson-guava.version>
+        <commons-codec.version>1.5</commons-codec.version>
+        <bcprov-jdk15on.version>1.51</bcprov-jdk15on.version>
         <parana.core.version>4.1-SNAPSHOT</parana.core.version>
         <validation-api.version>1.1.0.Final</validation-api.version>
         <hibernate-validator.version>5.0.1.Final</hibernate-validator.version>
