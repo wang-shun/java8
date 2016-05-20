@@ -1,7 +1,7 @@
 # MyBatis
 mybatis:
   mapper-locations: classpath*:mapper/*Mapper.xml
-  type-aliases-package: io.terminus.doctor.event.model,io.terminus.doctor.workflow.model
+  type-aliases-package: io.terminus.doctor.event.model
 
 # Datasource
 datasource:
