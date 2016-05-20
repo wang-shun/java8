@@ -21,6 +21,16 @@ public class DoctorBasicInputInfoDto implements Serializable{
 
     private static final long serialVersionUID = 3753583575280390916L;
 
+    // basic exist pig info（进厂事件信息，不用录入）
+    private Long pigId;
+
+    private String pigCode;
+
+    private Long barnId;
+
+    private String barnName;
+
+    // usual farm info
     private Long farmId;
 
     private String farmName;
@@ -32,4 +42,14 @@ public class DoctorBasicInputInfoDto implements Serializable{
     private Long staffId;
 
     private String staffName;
+
+    // event create rel
+    private Integer eventType;
+
+    private String eventName;
+
+    private String eventDesc;
+
+    private Long relEventId;
+
 }

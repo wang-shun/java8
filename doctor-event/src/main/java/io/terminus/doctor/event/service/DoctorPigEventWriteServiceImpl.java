@@ -3,7 +3,6 @@ package io.terminus.doctor.event.service;
 import com.google.common.base.Throwables;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
-import io.terminus.doctor.event.dto.event.boar.DoctorBoarFarmEntryDto;
 import io.terminus.doctor.event.dto.event.boar.DoctorSemenDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorFarrowingDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorFostersDto;
@@ -12,12 +11,12 @@ import io.terminus.doctor.event.dto.event.sow.DoctorMatingDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorPartWeanDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorPigletsChgDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorPregChkResultDto;
-import io.terminus.doctor.event.dto.event.sow.DoctorSowFarmEntryDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorWeanDto;
 import io.terminus.doctor.event.dto.event.usual.DoctorChgFarmDto;
 import io.terminus.doctor.event.dto.event.usual.DoctorChgLocationDto;
 import io.terminus.doctor.event.dto.event.usual.DoctorConditionDto;
 import io.terminus.doctor.event.dto.event.usual.DoctorDiseaseDto;
+import io.terminus.doctor.event.dto.event.usual.DoctorFarmEntryDto;
 import io.terminus.doctor.event.dto.event.usual.DoctorRemovalDto;
 import io.terminus.doctor.event.dto.event.usual.DoctorVaccinationDto;
 import io.terminus.doctor.event.manager.DoctorPigEventManager;
@@ -41,28 +40,23 @@ public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteServic
     }
 
     @Override
-    public Response<Boolean> sowEntryEvent(DoctorBasicInputInfoDto doctorBasicInputInfoDto, DoctorSowFarmEntryDto doctorSowFarmEntryDto) {
+    public Response<Boolean> pigEntryEvent(DoctorBasicInputInfoDto doctorBasicInputInfoDto, DoctorFarmEntryDto doctorFarmEntryDto, Integer pigType) {
         try{
-            return Response.ok(doctorPigEventManager.entrySowFarmEvent(doctorSowFarmEntryDto,doctorBasicInputInfoDto));
+            return Response.ok(doctorPigEventManager.pigEntryEvent(doctorBasicInputInfoDto, doctorFarmEntryDto,pigType));
         }catch (Exception e){
-            log.error("sow entry event create error, cause:{}", Throwables.getStackTraceAsString(e));
-            return Response.fail("create.sowEntryEvent.fail");
+            log.error("pig entry event create fail, cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("create.entryEvent.fail");
         }
     }
 
     @Override
-    public Response<Boolean> boarEntryEvent(DoctorBasicInputInfoDto doctorBasicInputInfoDto, DoctorBoarFarmEntryDto doctorBoarFarmEntryDto) {
+    public Response<Boolean> diseaseEvent(DoctorDiseaseDto doctorDiseaseDto, DoctorBasicInputInfoDto doctorBasicInputInfoDto,Integer pigType) {
         try{
-            return Response.ok(doctorPigEventManager.entryBoarFarmEvent(doctorBoarFarmEntryDto, doctorBasicInputInfoDto));
+            return Response.ok(doctorPigEventManager.createDiseaseEvent(doctorDiseaseDto,doctorBasicInputInfoDto,pigType));
         }catch (Exception e){
-            log.error("boar entry event error, cause:{}", Throwables.getStackTraceAsString(e));
-            return Response.fail("create.boarEntryEvent.fail");
+            log.error("disease event create fail, cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("create.diseaseEvent.fail");
         }
-    }
-
-    @Override
-    public Response<Boolean> diseaseEvent(DoctorDiseaseDto doctorDiseaseDto, DoctorBasicInputInfoDto doctorBasicInputInfoDto) {
-        return null;
     }
 
     @Override

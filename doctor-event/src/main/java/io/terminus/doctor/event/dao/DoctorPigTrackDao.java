@@ -1,5 +1,6 @@
 package io.terminus.doctor.event.dao;
 
+import com.google.common.collect.Lists;
 import io.terminus.common.mysql.dao.MyBatisDao;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 import org.springframework.stereotype.Repository;
@@ -22,6 +23,10 @@ public class DoctorPigTrackDao extends MyBatisDao<DoctorPigTrack>{
      */
     public List<DoctorPigTrack> findByPigIds(List<Long> pigIds){
         return this.getSqlSession().selectList(sqlId("findByPigIds"),pigIds);
+    }
+
+    public DoctorPigTrack findByPigId(Long pigId){
+        return findByPigIds(Lists.newArrayList(pigId)).get(0);
     }
 
 }

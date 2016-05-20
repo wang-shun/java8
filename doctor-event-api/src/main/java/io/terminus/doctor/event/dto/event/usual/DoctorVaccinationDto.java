@@ -22,8 +22,6 @@ public class DoctorVaccinationDto implements Serializable{
 
     private static final long serialVersionUID = 183960403500452272L;
 
-    private Long pigId;
-
     private Date vaccinationDate;
 
     private Long vaccinationId;
@@ -32,9 +30,9 @@ public class DoctorVaccinationDto implements Serializable{
 
     private Integer vaccinationResult;
 
-    private Long staffId;
+    private Long vaccinationStaffId;
 
-    private String staffName;
+    private String vaccinationStaffName;
 
-    private String remark;
+    private String vaccinationRemark;
 }

@@ -2,7 +2,6 @@ package io.terminus.doctor.event.service;
 
 import io.terminus.common.model.Response;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
-import io.terminus.doctor.event.dto.event.boar.DoctorBoarFarmEntryDto;
 import io.terminus.doctor.event.dto.event.boar.DoctorSemenDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorFarrowingDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorFostersDto;
@@ -11,14 +10,16 @@ import io.terminus.doctor.event.dto.event.sow.DoctorMatingDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorPartWeanDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorPigletsChgDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorPregChkResultDto;
-import io.terminus.doctor.event.dto.event.sow.DoctorSowFarmEntryDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorWeanDto;
 import io.terminus.doctor.event.dto.event.usual.DoctorChgFarmDto;
 import io.terminus.doctor.event.dto.event.usual.DoctorChgLocationDto;
 import io.terminus.doctor.event.dto.event.usual.DoctorConditionDto;
 import io.terminus.doctor.event.dto.event.usual.DoctorDiseaseDto;
+import io.terminus.doctor.event.dto.event.usual.DoctorFarmEntryDto;
 import io.terminus.doctor.event.dto.event.usual.DoctorRemovalDto;
 import io.terminus.doctor.event.dto.event.usual.DoctorVaccinationDto;
+
+import javax.validation.constraints.NotNull;
 
 /**
  * Created by yaoqijun.
@@ -29,20 +30,15 @@ import io.terminus.doctor.event.dto.event.usual.DoctorVaccinationDto;
 public interface DoctorPigEventWriteService {
 
     /**
-     * 母猪进厂事件信息
+     * 公猪， 母猪 进仓事件信息
      * @param doctorBasicInputInfoDto
-     * @param doctorSowFarmEntryDto
+     * @param doctorFarmEntryDto
+     * @param pigType 猪类型
      * @return
      */
-    Response<Boolean> sowEntryEvent(DoctorBasicInputInfoDto doctorBasicInputInfoDto, DoctorSowFarmEntryDto doctorSowFarmEntryDto);
-
-    /**
-     * 公猪进厂事件信息
-     * @param doctorBasicInputInfoDto
-     * @param doctorBoarFarmEntryDto
-     * @return
-     */
-    Response<Boolean> boarEntryEvent(DoctorBasicInputInfoDto doctorBasicInputInfoDto, DoctorBoarFarmEntryDto doctorBoarFarmEntryDto);
+    Response<Boolean> pigEntryEvent(@NotNull(message = "input.basic.empty") DoctorBasicInputInfoDto doctorBasicInputInfoDto,
+                                    @NotNull(message = "input.dto.empty") DoctorFarmEntryDto doctorFarmEntryDto,
+                                    @NotNull(message = "input.pigType.empty") Integer pigType);
 
     /**
      * 猪只疾病事件录入
@@ -50,7 +46,9 @@ public interface DoctorPigEventWriteService {
      * @param doctorBasicInputInfoDto
      * @return
      */
-    Response<Boolean> diseaseEvent(DoctorDiseaseDto doctorDiseaseDto, DoctorBasicInputInfoDto doctorBasicInputInfoDto);
+    Response<Boolean> diseaseEvent(@NotNull(message = "input.dto.empty") DoctorDiseaseDto doctorDiseaseDto,
+                                   @NotNull(message = "input.basic.empty") DoctorBasicInputInfoDto doctorBasicInputInfoDto,
+                                   @NotNull(message = "input.pigType.empty") Integer pigType);
 
     /**
      * 防疫事件信息
