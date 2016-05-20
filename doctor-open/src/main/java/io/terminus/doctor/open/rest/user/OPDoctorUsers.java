@@ -82,6 +82,19 @@ public class OPDoctorUsers {
 
     @OpenMethod(key = "get.user.level.one.menu")
     public List<DoctorMenuDto> getUserLevelOneMenu() {
-        return Lists.newArrayList();
+        return Lists.newArrayList(mockMenuDto(1L), mockMenuDto(2L), mockMenuDto(3L));
+    }
+
+    private DoctorMenuDto mockMenuDto(Long id) {
+        DoctorMenuDto menuDto = new DoctorMenuDto();
+        menuDto.setId(id);
+        menuDto.setName("menu" + id);
+        menuDto.setLevel(1);
+        menuDto.setUrl("/user/info");
+        menuDto.setHasIcon(0);
+        menuDto.setType(3);
+        menuDto.setOrderNo(id.intValue());
+        menuDto.setNeedHiden(0);
+        return menuDto;
     }
 }
