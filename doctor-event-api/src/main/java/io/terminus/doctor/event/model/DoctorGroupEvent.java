@@ -54,6 +54,7 @@ public class DoctorGroupEvent implements Serializable {
     
     /**
      * 事件类型 枚举 总共10种
+     * @see io.terminus.doctor.event.enums.GroupEventType
      */
     private Integer type;
     
@@ -79,6 +80,7 @@ public class DoctorGroupEvent implements Serializable {
     
     /**
      * 猪类枚举 9种
+     * @see io.terminus.doctor.common.enums.PigType
      */
     private Integer pigType;
     

@@ -1,6 +1,8 @@
 package io.terminus.doctor.basic.model;
 
+import com.google.common.base.Objects;
 import lombok.Data;
+import lombok.Getter;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -44,16 +46,19 @@ public class DoctorBarn implements Serializable {
     
     /**
      * 猪类名称 枚举9种
+     * @see io.terminus.doctor.common.enums.PigType
      */
     private Integer pigType;
     
     /**
      * 能否建群 -1:不能, 1:能
+     * @see io.terminus.doctor.basic.model.DoctorBarn.CanOpenGroup
      */
     private Integer canOpenGroup;
     
     /**
      * 使用状态 0:未用 1:在用 -1:已删除
+     * @see io.terminus.doctor.basic.model.DoctorBarn.Status
      */
     private Integer status;
     
@@ -91,4 +96,53 @@ public class DoctorBarn implements Serializable {
      * 修改时间
      */
     private Date updatedAt;
+
+    public enum CanOpenGroup {
+        NO(-1, "不能"),
+        YES(1, "能");
+
+        @Getter
+        private final int value;
+        @Getter
+        private final String desc;
+
+        CanOpenGroup(int value, String desc) {
+            this.value = value;
+            this.desc = desc;
+        }
+
+        public static CanOpenGroup from(int number) {
+            for (CanOpenGroup canOpenGroup : CanOpenGroup.values()) {
+                if (Objects.equal(canOpenGroup.value, number)) {
+                    return canOpenGroup;
+                }
+            }
+            return null;
+        }
+    }
+
+    public enum Status {
+        NOUSE(0, "未用"),
+        USING(1, "在用"),
+        CLOSE(-1, "已删除");
+
+        @Getter
+        private final int value;
+        @Getter
+        private final String desc;
+
+        Status(int value, String desc) {
+            this.value = value;
+            this.desc = desc;
+        }
+
+        public static Status from(int number) {
+            for (Status status : Status.values()) {
+                if (Objects.equal(status.value, number)) {
+                    return status;
+                }
+            }
+            return null;
+        }
+    }
 }

@@ -1,6 +1,8 @@
 package io.terminus.doctor.event.model;
 
+import com.google.common.base.Objects;
 import lombok.Data;
+import lombok.Getter;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -84,11 +86,13 @@ public class DoctorGroup implements Serializable {
     
     /**
      * 猪类 枚举9种
+     * @see io.terminus.doctor.common.enums.PigType
      */
     private Integer pigType;
     
     /**
      * 性别 1:混合 2:母 3:公
+     * @see io.terminus.doctor.event.model.DoctorGroup.Sex
      */
     private Integer sex;
     
@@ -166,4 +170,53 @@ public class DoctorGroup implements Serializable {
      * 修改时间
      */
     private Date updatedAt;
+
+    public enum Status {
+        CREATED(1, "已建群"),
+        CLOSED(-1, "已关闭");
+
+        @Getter
+        private final int value;
+        @Getter
+        private final String desc;
+
+        Status(int value, String desc) {
+            this.value = value;
+            this.desc = desc;
+        }
+
+        public static Status from(int number) {
+            for (Status status : Status.values()) {
+                if (Objects.equal(status.value, number)) {
+                    return status;
+                }
+            }
+            return null;
+        }
+    }
+
+    public enum Sex {
+        MIX(1, "混合"),
+        FEMALE(2, "母"),
+        MALE(3, "公");
+
+        @Getter
+        private final int value;
+        @Getter
+        private final String desc;
+
+        Sex(int value, String desc) {
+            this.value = value;
+            this.desc = desc;
+        }
+
+        public static Sex from(int number) {
+            for (Sex sex : Sex.values()) {
+                if (Objects.equal(sex.value, number)) {
+                    return sex;
+                }
+            }
+            return null;
+        }
+    }
 }

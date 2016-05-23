@@ -1,6 +1,8 @@
 package io.terminus.doctor.basic.model;
 
+import com.google.common.base.Objects;
 import lombok.Data;
+import lombok.Getter;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -24,6 +26,7 @@ public class DoctorChangeType implements Serializable {
     
     /**
      * 是否计入出栏猪 1:计入, -1:不计入
+     * @see io.terminus.doctor.basic.model.DoctorChangeType.IsCountOut
      */
     private Integer isCountOut;
     
@@ -76,4 +79,28 @@ public class DoctorChangeType implements Serializable {
      * 修改时间
      */
     private Date updatedAt;
+
+    public enum IsCountOut {
+        YES(1, "计入出栏猪"),
+        NO(-1, "不计入出栏猪");
+
+        @Getter
+        private final int value;
+        @Getter
+        private final String desc;
+
+        IsCountOut(int value, String desc) {
+            this.value = value;
+            this.desc = desc;
+        }
+
+        public static IsCountOut from(int number) {
+            for (IsCountOut is : IsCountOut.values()) {
+                if (Objects.equal(is.value, number)) {
+                    return is;
+                }
+            }
+            return null;
+        }
+    }
 }

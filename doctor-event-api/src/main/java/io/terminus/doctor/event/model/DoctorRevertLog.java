@@ -1,6 +1,8 @@
 package io.terminus.doctor.event.model;
 
+import com.google.common.base.Objects;
 import lombok.Data;
+import lombok.Getter;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -19,6 +21,7 @@ public class DoctorRevertLog implements Serializable {
     
     /**
      * 回滚类型 1 母猪，2 公猪，3 猪群
+     * @see io.terminus.doctor.event.model.DoctorRevertLog.Type
      */
     private Integer type;
     
@@ -46,4 +49,29 @@ public class DoctorRevertLog implements Serializable {
      * 回滚时间
      */
     private Date createdAt;
+
+    public enum Type {
+        SOW(1, "母猪"),
+        BOAR(2, "公猪"),
+        GROUP(3, "猪群");
+
+        @Getter
+        private final int value;
+        @Getter
+        private final String desc;
+
+        Type(int value, String desc) {
+            this.value = value;
+            this.desc = desc;
+        }
+
+        public static Type from(int number) {
+            for (Type type : Type.values()) {
+                if (Objects.equal(type.value, number)) {
+                    return type;
+                }
+            }
+            return null;
+        }
+    }
 }
