@@ -734,7 +734,8 @@ create index doctor_pig_events_pig_id on doctor_pig_events(pig_id);
 CREATE index doctor_pig_events_rel_event_id on doctor_pig_events(rel_event_id);
 
 -- 猪只免疫信息统计方式
-drop Table if exists doctor_vaccination_pig_warns(
+drop Table if exists doctor_vaccination_pig_warns;
+create table doctor_vaccination_pig_warns (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT 'id',
   `farm_id` bigint(20) unsigned DEFAULT NULL COMMENT '猪场仓库信息',
   `farm_name` varchar(64) DEFAULT NULL COMMENT '猪场名称',
@@ -1037,7 +1038,7 @@ CREATE TABLE `doctor_revert_logs` (
   `reverter_name` varchar(64) DEFAULT NULL COMMENT '回滚人姓名',
   `created_at` datetime DEFAULT NULL COMMENT '回滚时间',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='回滚记录表'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='回滚记录表';
 
 -- 平台轮播图
 DROP TABLE IF EXISTS `doctor_carousel_figures`;
