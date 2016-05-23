@@ -8,6 +8,7 @@ import io.terminus.doctor.warehouse.constants.DoctorMaterialInfoConstants;
 import io.terminus.doctor.warehouse.dao.DoctorMaterialInfoDao;
 import io.terminus.doctor.warehouse.dao.DoctorWareHouseDao;
 import io.terminus.doctor.warehouse.dto.DoctorMaterialProductRatioDto;
+import io.terminus.doctor.warehouse.dto.DoctorWareHouseBasicDto;
 import io.terminus.doctor.warehouse.manager.MaterialInWareHouseManager;
 import io.terminus.doctor.warehouse.model.DoctorMaterialInfo;
 import io.terminus.doctor.warehouse.model.DoctorWareHouse;
@@ -93,14 +94,14 @@ public class DoctorMaterialInfoWriteServiceImpl implements DoctorMaterialInfoWri
     }
 
     @Override
-    public Response<Boolean> realProduceMaterial(Long farmId, Long wareHouseId, Long materialId, DoctorMaterialInfo.MaterialProduce materialProduce) {
+    public Response<Boolean> realProduceMaterial(DoctorWareHouseBasicDto doctorWareHouseBasicDto, DoctorMaterialInfo.MaterialProduce materialProduce) {
         try{
             // validate
             // 校验Material
-            DoctorMaterialInfo doctorMaterialInfo = doctorMaterialInfoDao.findById(materialId);
+            DoctorMaterialInfo doctorMaterialInfo = doctorMaterialInfoDao.findById(doctorWareHouseBasicDto.getMaterialId());
             checkState(!isNull(doctorMaterialInfo), "input.materialId.error");
 
-            DoctorWareHouse doctorWareHouse = this.doctorWareHouseDao.findById(wareHouseId);
+            DoctorWareHouse doctorWareHouse = this.doctorWareHouseDao.findById(doctorWareHouseBasicDto.getWareHouseId());
             checkState(!isNull(doctorMaterialInfo), "input.warehouseId.error");
 
             // 校验用户修改数量信息
@@ -110,7 +111,7 @@ public class DoctorMaterialInfoWriteServiceImpl implements DoctorMaterialInfoWri
             checkState(Objects.equals(doctorWareHouse.getType(), doctorMaterialInfo.getType()), "produce.targetWarehouseType.fail");
 
             // produce 生产对应的数据
-            checkState(materialInWareHouseManager.produceMaterialInfo(farmId, doctorWareHouse, doctorMaterialInfo, materialProduce),
+            checkState(materialInWareHouseManager.produceMaterialInfo(doctorWareHouseBasicDto.getFarmId(), doctorWareHouse, doctorMaterialInfo, materialProduce),
                     "produce.materialInfo.error");
             return Response.ok(Boolean.TRUE);
         }catch(IllegalStateException e){

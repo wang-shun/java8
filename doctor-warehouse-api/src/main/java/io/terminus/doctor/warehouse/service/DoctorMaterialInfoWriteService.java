@@ -2,6 +2,7 @@ package io.terminus.doctor.warehouse.service;
 
 import io.terminus.common.model.Response;
 import io.terminus.doctor.warehouse.dto.DoctorMaterialProductRatioDto;
+import io.terminus.doctor.warehouse.dto.DoctorWareHouseBasicDto;
 import io.terminus.doctor.warehouse.model.DoctorMaterialInfo;
 
 import javax.validation.constraints.NotNull;
@@ -37,8 +38,6 @@ public interface DoctorMaterialInfoWriteService {
      * @param materialProduce
      * @return
      */
-    Response<Boolean> realProduceMaterial(@NotNull(message = "input.farmId.empty") Long farmId,
-                                          @NotNull(message = "input.warehouseId.empty")Long wareHouseId,
-                                          @NotNull(message = "input.materialId.empty") Long materialId,
+    Response<Boolean> realProduceMaterial(@NotNull(message = "input.wareHouseDto.empty") DoctorWareHouseBasicDto doctorWareHouseBasicDto,
                                           @NotNull(message = "input.materialProduce.empty") DoctorMaterialInfo.MaterialProduce materialProduce);
 }
