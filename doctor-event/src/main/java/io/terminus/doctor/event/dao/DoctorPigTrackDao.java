@@ -29,4 +29,7 @@ public class DoctorPigTrackDao extends MyBatisDao<DoctorPigTrack>{
         return findByPigIds(Lists.newArrayList(pigId)).get(0);
     }
 
+    public DoctorPigTrack findByEventId(Long relEventId){
+        return this.getSqlSession().selectOne(sqlId("findByEventId"), relEventId);
+    }
 }

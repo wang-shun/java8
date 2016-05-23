@@ -1,5 +1,6 @@
 package io.terminus.doctor.event.manager;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import io.terminus.common.utils.BeanMapper;
@@ -67,6 +68,26 @@ public class DoctorPigEventManager {
     }
 
     private static final String REMARK = "remark";
+
+
+    @Transactional
+    public Boolean rollBackPigEvent(Long pigEventId){
+
+        // delete event
+        checkState(doctorPigEventDao.delete(pigEventId), "delete.pigEventById.fail");
+
+        // roll back track info
+        DoctorPigSnapshot doctorPigSnapshot = doctorPigSnapshotDao.queryByEventId(pigEventId);
+        DoctorPigTrack doctorPigTrack =
+        JsonMapper.JSON_NON_DEFAULT_MAPPER.fromJson(
+                String.valueOf(doctorPigSnapshot.getPigInfoMap().get(DoctorPigSnapshotConstants.PIG_TRACK)),
+                DoctorPigTrack.class);
+        checkState(doctorPigTrackDao.update(doctorPigTrack), "update.snapshot.fail");
+
+        //delete snapshot
+        checkState(doctorPigSnapshotDao.deleteByEventId(pigEventId), "delete.snapshot.error");
+        return Boolean.FALSE;
+    }
 
     /**
      * 创建（公猪， 母猪 疾病）事件信息内容
