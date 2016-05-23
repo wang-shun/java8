@@ -49,9 +49,6 @@
         <set>
             <if test="name != null">name = #{name},</if>
             <if test="extra != null">extra = #{extra},</if>
-            
-            
-            
             updated_at=now()
         </set>
         WHERE id = #{id}
@@ -61,5 +58,9 @@
         DELETE FROM <include refid="tb"/>
         WHERE id = #{id}
     </delete>
-    
+
+    <select id="listAll" resultMap="DoctorUnitMap" >
+        SELECT <include refid="cols_all" />
+        FROM <include refid="tb" />
+    </select>
 </mapper>

@@ -9,6 +9,8 @@ import io.terminus.doctor.basic.model.DoctorDisease;
 import io.terminus.doctor.basic.model.DoctorGenetic;
 import io.terminus.doctor.basic.model.DoctorUnit;
 
+import javax.validation.constraints.NotNull;
+
 /**
  * Desc: 基础数据写服务
  * Mail: yangzl@terminus.io
@@ -17,6 +19,14 @@ import io.terminus.doctor.basic.model.DoctorUnit;
  */
 
 public interface DoctorBasicWriteService {
+
+    /**
+     * 创建猪场时, 初始化一些基础数据
+     * @param farmId 猪场id
+     * @return
+     */
+    Response<Boolean> initFarmBasic(@NotNull(message = "farmId.not.null") Long farmId);
+
     /**
      * 创建DoctorBreed
      * @return 主键id

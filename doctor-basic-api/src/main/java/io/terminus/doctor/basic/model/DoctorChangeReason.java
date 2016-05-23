@@ -6,7 +6,7 @@ import java.io.Serializable;
 import java.util.Date;
 
 /**
- * Desc: 变动类型表Model类
+ * Desc: 变动原因表Model类
  * Mail: yangzl@terminus.io
  * author: DreamYoung
  * Date: 2016-05-20
