@@ -1050,3 +1050,30 @@ CREATE TABLE `doctor_carousel_figures` (
   `updated_at` datetime DEFAULT NULL COMMENT '修改时间',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='轮播图表';
+
+insert into `parana_configs`
+(`biz_type`, `key`, `value`, `data_type`, `group`, `description`, created_at, updated_at)
+values
+(0, 'system.pigmall.password', 'pigmall', 'string', 0, '第三方用户登录pigmall系统的接口密码', NOW(), now()),
+(0, 'system.pigmall.corp.id', '1', 'string', 0, '本系统在pigmall系统的corp_id', NOW(), now()),
+(0, 'system.pigmall.domain', 'http://www.pigmall.com', 'string', 0, 'pigmall系统的完整域名', NOW(), now()),
+(0, 'system.neverest.password', 'neverest', 'string', 0, '第三方用户登录neverest系统的接口密码', NOW(), now()),
+(0, 'system.neverest.corp.id', '1', 'string', 0, '本系统在neverest系统的corp_id', NOW(), now()),
+(0, 'system.neverest.domain', 'http://www.neverest.com', 'string', 0, 'neverest系统的完整域名', NOW(), now());
+
+-- 用户账户与其他系统账户的绑定关系
+CREATE TABLE `doctor_user_binds` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `user_id` bigint(20) NOT NULL,
+  `target_system` int(11) NOT NULL COMMENT '目标系统，参见项目中的枚举 TargetSystem',
+  `uuid` varchar(64) NOT NULL DEFAULT '' COMMENT '系统为该用户生成的在目标系统的key（其实就是一个去掉横杠的UUID）',
+  `target_user_name` varchar(128) DEFAULT NULL COMMENT '该用户在目标系统绑定的账号的名称',
+  `target_user_mobile` varchar(16) DEFAULT NULL COMMENT '该用户在目标系统绑定的账号的手机号',
+  `target_user_email` varchar(100) DEFAULT NULL COMMENT '该用户在目标系统绑定的账号的邮箱',
+  `extra` varchar(1000) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `idx_user_bind_UNIQUE1` (`user_id`,`target_system`),
+  UNIQUE KEY `idx_user_bind_UNIQUE2` (`uuid`)
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8 COMMENT='用户账户与其他系统账户的绑定关系';
