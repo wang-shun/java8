@@ -13,6 +13,7 @@
         <result column="farm_id" property="farmId"/>
         <result column="farm_name" property="farmName"/>
         <result column="type" property="type"/>
+        <result column="material_name" property="materialName"/>
         <result column="remark" property="remark"/>
         <result column="unit_group_id" property="unitGroupId"/>
         <result column="unit_group_name" property="unitGroupName"/>
@@ -37,11 +38,11 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        `farm_id`,`farm_name`,`type`,`remark`,`unit_group_id`,`unit_group_name`,`unit_id`,`unit_name`,`default_consume_count`,`price`,`extra`,`creator_id`,`creator_name`,`updator_id`,`updator_name`,`created_at`,`updated_at`
+        `farm_id`,`farm_name`,`type`,`material_name`,`remark`,`unit_group_id`,`unit_group_name`,`unit_id`,`unit_name`,`default_consume_count`,`price`,`extra`,`creator_id`,`creator_name`,`updator_id`,`updator_name`,`created_at`,`updated_at`
     </sql>
 
     <sql id="vals">
-        #{farmId},#{farmName},#{type},#{remark},#{unitGroupId},#{unitGroupName},#{unitId},#{unitName},#{defaultConsumeCount},#{price},#{extra},#{creatorId},#{creatorName},#{updatorId},#{updatorName},now(),now()
+        #{farmId},#{farmName},#{type},#{materialName},#{remark},#{unitGroupId},#{unitGroupName},#{unitId},#{unitName},#{defaultConsumeCount},#{price},#{extra},#{creatorId},#{creatorName},#{updatorId},#{updatorName},now(),now()
     </sql>
 
     <sql id="criteria">
@@ -111,6 +112,7 @@
         <if test="farmId != null" > ,`farm_id` = #{farmId}</if>
         <if test="farmName != null" > ,`farm_name` = #{farmName}</if>
         <if test="type != null" > ,`type` = #{type}</if>
+        <if test="materialName != null">, material_name=#{materialName} </if>
         <if test="remark != null" > ,`remark` = #{remark}</if>
         <if test="unitGroupId != null" > ,`unit_group_id` = #{unitGroupId}</if>
         <if test="unitGroupName != null" > ,`unit_group_name` = #{unitGroupName}</if>

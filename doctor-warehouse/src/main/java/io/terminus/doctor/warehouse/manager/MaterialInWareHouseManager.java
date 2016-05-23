@@ -15,6 +15,7 @@ import io.terminus.doctor.warehouse.model.DoctorMaterialConsumeAvg;
 import io.terminus.doctor.warehouse.model.DoctorMaterialConsumeProvider;
 import io.terminus.doctor.warehouse.model.DoctorMaterialInWareHouse;
 import io.terminus.doctor.warehouse.model.DoctorMaterialInfo;
+import io.terminus.doctor.warehouse.model.DoctorWareHouse;
 import io.terminus.doctor.warehouse.model.DoctorWareHouseTrack;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
@@ -64,6 +65,16 @@ public class MaterialInWareHouseManager {
         this.doctorWareHouseTrackDao = doctorWareHouseTrackDao;
         this.doctorFarmWareHouseTypeDao = doctorFarmWareHouseTypeDao;
         this.doctorMaterialInfoDao = doctorMaterialInfoDao;
+    }
+
+    // 生产对应的物料内容
+    public Boolean produceMaterialInfo(Long farmId, DoctorWareHouse targetHouse, DoctorMaterialInfo targetMaterial, DoctorMaterialInfo.MaterialProduce materialProduce){
+
+        // consume each source
+
+        // provider source
+
+        return Boolean.FALSE;
     }
 
     /**

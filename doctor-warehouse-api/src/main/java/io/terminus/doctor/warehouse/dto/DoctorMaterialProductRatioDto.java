@@ -1,12 +1,12 @@
 package io.terminus.doctor.warehouse.dto;
 
+import io.terminus.doctor.warehouse.model.DoctorMaterialInfo;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Builder;
 
 import java.io.Serializable;
-import java.util.Map;
 
 /**
  * Created by yaoqijun.
@@ -24,6 +24,6 @@ public class DoctorMaterialProductRatioDto implements Serializable{
 
     private Long materialId; // 原料Id
 
-    private Map<String, Object> ratio; // 原料配比信息
+    private DoctorMaterialInfo.MaterialProduce produce; // 原料配比信息
 
 }
