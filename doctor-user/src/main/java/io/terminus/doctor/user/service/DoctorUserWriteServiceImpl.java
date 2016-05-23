@@ -19,7 +19,7 @@ import org.springframework.util.StringUtils;
 @Slf4j
 @Service
 @Primary
-public class DoctorUserWriteServiceImpl implements UserWriteService<User> {
+public class DoctorUserWriteServiceImpl implements UserWriteService<User>, DoctorUserWriteInterface {
 
     private final DoctorUserManager doctorUserManager;
 
@@ -53,5 +53,10 @@ public class DoctorUserWriteServiceImpl implements UserWriteService<User> {
             log.error("failed to update {}, cause:{}", user, Throwables.getStackTraceAsString(e));
             return Response.fail("user.update.fail");
         }
+    }
+
+    @Override
+    public Response<String> write(Integer test) {
+        return Response.ok("write" + test);
     }
 }

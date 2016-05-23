@@ -19,6 +19,7 @@
         <module>doctor-warehouse</module>
         <module>doctor-warehouse-api</module>
         <module>doctor-user-api</module>
+        <module>doctor-user-interface</module>
         <module>doctor-user</module>
         <module>doctor-msg-api</module>
         <module>doctor-msg</module>
@@ -381,6 +382,11 @@
             <dependency>
                 <groupId>io.terminus.doctor</groupId>
                 <artifactId>doctor-user-api</artifactId>
+                <version>${project.parent.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.terminus.doctor</groupId>
+                <artifactId>doctor-user-interface</artifactId>
                 <version>${project.parent.version}</version>
             </dependency>
             <dependency>
