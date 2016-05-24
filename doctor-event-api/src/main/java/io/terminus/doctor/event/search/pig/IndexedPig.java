@@ -9,6 +9,8 @@ import java.util.Date;
 
 /**
  * Desc: 猪(索引对象)
+ *      @see io.terminus.doctor.event.model.DoctorPig
+ *      @see io.terminus.doctor.event.model.DoctorPigTrack
  * Mail: chk@terminus.io
  * Created by icemimosa
  * Date: 16/5/23

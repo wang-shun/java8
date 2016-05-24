@@ -9,6 +9,7 @@ import java.util.Date;
 
 /**
  * Desc: 猪查询信息
+ *      @see IndexedPig
  * Mail: chk@terminus.io
  * Created by icemimosa
  * Date: 16/5/24

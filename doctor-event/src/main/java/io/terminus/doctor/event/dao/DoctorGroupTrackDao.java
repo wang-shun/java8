@@ -13,4 +13,12 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class DoctorGroupTrackDao extends MyBatisDao<DoctorGroupTrack> {
 
+    /**
+     * 根据猪群id查询猪群Track信息
+     * @param groupId   猪群id
+     * @return
+     */
+    public DoctorGroupTrack findByGroupId(Long groupId) {
+        return getSqlSession().selectOne("findByGroupId", groupId);
+    }
 }

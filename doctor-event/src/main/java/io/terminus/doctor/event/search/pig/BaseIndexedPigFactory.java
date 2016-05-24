@@ -10,7 +10,7 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 
 /**
- * Desc:
+ * Desc: 猪(索引对象)创建工厂
  * Mail: chk@terminus.io
  * Created by icemimosa
  * Date: 16/5/23

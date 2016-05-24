@@ -1,4 +1,4 @@
-package io.terminus.doctor.event.search.pig;
+package io.terminus.doctor.event.search.group;
 
 import io.terminus.common.model.PageInfo;
 import io.terminus.search.api.query.Aggs;
@@ -21,7 +21,7 @@ import java.util.Map;
  * Created by icemimosa
  * Date: 16/5/24
  */
-public abstract class BasePigQueryBuilder {
+public abstract class BaseGroupQueryBuilder {
 
     @SuppressWarnings("all")
     public Criterias buildCriterias(Integer pageNo, Integer pageSize, Map<String, String> params) {

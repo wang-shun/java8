@@ -27,6 +27,7 @@ logging:
 zookeeper:
   host: 101.201.44.35
   port: 2181
+  cacheTopic: pig.event.topic
 
 # Redis
 redis:
@@ -35,3 +36,22 @@ redis:
   max-total: 10
   max-idle: 2
   test-on-borrow: true
+
+# search
+search:
+  host: 101.201.44.35
+  port: 9200
+
+search.pig:
+  index-name: pigs
+  index-type: pig
+  mapping-path: search/pig_mapping.json
+  full-dump-range: 3
+  batch-size: 100
+
+search.group:
+  index-name: groups
+  index-type: group
+  mapping-path: search/group_mapping.json
+  full-dump-range: 3
+  batch-size: 100
