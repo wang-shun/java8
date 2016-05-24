@@ -11,7 +11,7 @@ mybatis:
   mapperLocations:  classpath*:mapper/*Mapper.xml
   typeAliasesPackage: io.terminus.parana.event.model,io.terminus.doctor.(event|workflow).model
 
-# search
+#### search start
 search:
   host: localhost
   port: 9200
@@ -22,3 +22,13 @@ search.pig:
   mapping-path: search/pig_mapping.json
   full-dump-range: 3
   batch-size: 100
+
+search.group:
+  index-name: groups
+  index-type: group
+  mapping-path: search/group_mapping.json
+  full-dump-range: 3
+  batch-size: 100
+
+#### > search end
+

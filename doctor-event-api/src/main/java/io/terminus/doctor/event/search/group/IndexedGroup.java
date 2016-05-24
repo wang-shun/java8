@@ -9,6 +9,8 @@ import java.util.Date;
 
 /**
  * Desc: 猪群(索引对象)
+ *      @see io.terminus.doctor.event.model.DoctorGroup
+ *      @see io.terminus.doctor.event.model.DoctorGroupTrack
  * Mail: chk@terminus.io
  * Created by icemimosa
  * Date: 16/5/23
@@ -17,10 +19,18 @@ import java.util.Date;
 @AllArgsConstructor
 @NoArgsConstructor
 public class IndexedGroup implements Serializable {
-    private static final long serialVersionUID = 1121581546502813499L;
+    private static final long serialVersionUID = 8463331809080229435L;
 
     private Long id;
-    private String pigCode;
+
+    private String groupCode;
+    private String batchNo;
+
+    private Integer pigType;
+    private String pigTypeName;
+
+    private Integer sex;
+    private Integer status;
 
     private Long orgId;
     private String orgName;
@@ -28,25 +38,14 @@ public class IndexedGroup implements Serializable {
     private Long farmId;
     private String farmName;
 
-    private Integer pigType;
-    private String pigTypeName;
-
-    private Long pigFatherId;
-    private String pigFatherCode;
-
-    private Long pigMotherId;
-    private String pigMotherCode;
-
-    private Integer source;
-
-    private Date birthDate;
-    private Double birthWeight;
-
-    private Date inFarmDate;
-    private Integer inFarmDayAge;
+    private Date openAt;
+    private Date closeAt;
 
     private Long initBarnId;
     private String initBarnName;
+
+    private Long currentBarnId;
+    private String currentBarnName;
 
     private Long breedId;
     private String breedName;
@@ -54,17 +53,16 @@ public class IndexedGroup implements Serializable {
     private Long geneticId;
     private String geneticName;
 
-    private Integer status;
-    private String statusName;
-
-    private Long currentBarnId;
-    private String currentBarnName;
+    private Integer quantity;
+    private Double avgDayAge;
 
     private Double weight;
+    private Double avgWeight;
 
-    private Date outFarmDate;
+    private Long price;
+    private Long amount;
 
-    private Integer currentParity;
+    private Integer saleQty;
 
     private Date updatedAt;
 }

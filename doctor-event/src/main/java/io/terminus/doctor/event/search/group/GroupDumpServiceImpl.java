@@ -1,13 +1,13 @@
-package io.terminus.doctor.event.search.pig;
+package io.terminus.doctor.event.search.group;
 
 import com.google.common.base.Stopwatch;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Iterables;
 import io.terminus.common.model.Response;
-import io.terminus.doctor.event.dao.DoctorPigDao;
-import io.terminus.doctor.event.dao.DoctorPigTrackDao;
-import io.terminus.doctor.event.model.DoctorPig;
-import io.terminus.doctor.event.model.DoctorPigTrack;
+import io.terminus.doctor.event.dao.DoctorGroupDao;
+import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
+import io.terminus.doctor.event.model.DoctorGroup;
+import io.terminus.doctor.event.model.DoctorGroupTrack;
 import io.terminus.search.api.IndexExecutor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -28,27 +28,27 @@ import java.util.concurrent.TimeUnit;
  */
 @Component
 @Slf4j
-public class PigDumpServiceImpl implements PigDumpService {
+public class GroupDumpServiceImpl implements GroupDumpService {
 
     private DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss");
 
     @Autowired
-    private PigSearchProperties pigSearchProperties;
+    private GroupSearchProperties groupSearchProperties;
 
     @Autowired
-    private IndexedPigFactory indexedPigFactory;
+    private IndexedGroupFactory indexedGroupFactory;
 
     @Autowired
     private IndexExecutor indexExecutor;
 
     @Autowired
-    private IndexedPigTaskAction indexedPigTaskAction;
+    private IndexedGroupTaskAction indexedGroupTaskAction;
 
     @Autowired
-    private DoctorPigDao doctorPigDao;
+    private DoctorGroupDao doctorGroupDao;
 
     @Autowired
-    private DoctorPigTrackDao doctorPigTrackDao;
+    private DoctorGroupTrackDao doctorGroupTrackDao;
 
     /**
      * 全量dump
@@ -57,9 +57,9 @@ public class PigDumpServiceImpl implements PigDumpService {
     @Override
     public Response<Boolean> fullDump(String before) {
         try {
-            log.info("pig full dump start");
+            log.info("group full dump start");
             Stopwatch stopwatch = Stopwatch.createStarted();
-            Integer fullDumpRange = pigSearchProperties.getFullDumpRange();
+            Integer fullDumpRange = groupSearchProperties.getFullDumpRange();
             if (fullDumpRange <= 0) {
                 fullDumpRange = 3;
             }
@@ -71,12 +71,12 @@ public class PigDumpServiceImpl implements PigDumpService {
             int dumpCount = doIndex(since);
 
             stopwatch.stop();
-            log.info("pig full dump end. cost: {} ms, dumped {} pigs",
+            log.info("group full dump end. cost: {} ms, dumped {} groups",
                     stopwatch.elapsed(TimeUnit.MILLISECONDS), dumpCount);
             return Response.ok(Boolean.TRUE);
         } catch (Exception e) {
-            log.error("pig full dump failed, cause by {}", Throwables.getStackTraceAsString(e));
-            return Response.fail("pig.full.dump.fail");
+            log.error("group full dump failed, cause by {}", Throwables.getStackTraceAsString(e));
+            return Response.fail("group.full.dump.fail");
         }
     }
 
@@ -88,49 +88,49 @@ public class PigDumpServiceImpl implements PigDumpService {
     @Override
     public Response<Boolean> DeltaDump(Integer interval) {
         try {
-            log.info("pig delta dump start");
+            log.info("group delta dump start");
             Stopwatch stopwatch = Stopwatch.createStarted();
             String since = DATE_TIME_FORMATTER.print(DateTime.now().minusMinutes(interval));
             int dumpCount = doIndex(since);
 
             stopwatch.stop();
-            log.info("pig delta dump end. cost: {} ms, dumped {} pigs",
+            log.info("group delta dump end. cost: {} ms, dumped {} groups",
                     stopwatch.elapsed(TimeUnit.MILLISECONDS), dumpCount);
             return Response.ok(Boolean.TRUE);
         } catch (Exception e) {
-            log.error("pig delta dump failed, cause by {}", Throwables.getStackTraceAsString(e));
-            return Response.fail("pig.delta.dump.fail");
+            log.error("group delta dump failed, cause by {}", Throwables.getStackTraceAsString(e));
+            return Response.fail("group.delta.dump.fail");
         }
     }
 
     private int doIndex(String since) {
         // 猪最大id
-        Long lastId = doctorPigDao.maxId() + 1;
+        Long lastId = doctorGroupDao.maxId() + 1;
 
         // 记录数量
         int dumpCount = 0;
         while (true) {
-            List<DoctorPig> pigs = doctorPigDao.listSince(lastId, since, pigSearchProperties.getBatchSize());
-            if (pigs == null || pigs.size() == 0) {
+            List<DoctorGroup> groups = doctorGroupDao.listSince(lastId, since, groupSearchProperties.getBatchSize());
+            if (groups == null || groups.size() == 0) {
                 break;
             }
             // 建立索引
-            pigs.forEach(pig -> {
+            groups.forEach(group -> {
                 try{
-                    DoctorPigTrack pigTrack = doctorPigTrackDao.findByPigId(pig.getId());
-                    IndexedPig indexedPig = indexedPigFactory.create(pig, pigTrack);
-                    indexExecutor.submit(indexedPigTaskAction.indexTask(indexedPig));
+                    DoctorGroupTrack groupTrack = doctorGroupTrackDao.findByGroupId(group.getId());
+                    IndexedGroup indexedGroup = indexedGroupFactory.create(group, groupTrack);
+                    indexExecutor.submit(indexedGroupTaskAction.indexTask(indexedGroup));
                 }catch (Exception e){
-                    log.error("failed to index pig(id={}),cause:{}", pig.getId(), Throwables.getStackTraceAsString(e));
+                    log.error("failed to index group(id={}),cause:{}", group.getId(), Throwables.getStackTraceAsString(e));
                 }
             });
 
-            dumpCount += pigs.size();
-            log.info("has indexed {} pigs, and last handled id is {}", dumpCount, lastId);
-            lastId = Iterables.getLast(pigs).getId();
+            dumpCount += groups.size();
+            log.info("has indexed {} groups, and last handled id is {}", dumpCount, lastId);
+            lastId = Iterables.getLast(groups).getId();
 
             // 如果是最后一个, 结束
-            if (pigs.size() < pigSearchProperties.getBatchSize()) {
+            if (groups.size() < groupSearchProperties.getBatchSize()) {
                 break;
             }
         }

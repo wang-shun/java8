@@ -2,7 +2,6 @@ package io.terminus.doctor.event.search.group;
 
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
-import io.terminus.doctor.event.search.pig.IndexedPig;
 
 /**
  * Desc: 猪群(索引对象)创建接口
@@ -10,7 +9,7 @@ import io.terminus.doctor.event.search.pig.IndexedPig;
  * Created by icemimosa
  * Date: 16/5/23
  */
-public interface IndexedGroupFactory<T extends IndexedPig> {
+public interface IndexedGroupFactory<T extends IndexedGroup> {
 
     /**
      * 创建猪(索引对象)的方法

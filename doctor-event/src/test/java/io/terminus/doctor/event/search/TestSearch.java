@@ -30,4 +30,9 @@ public class TestSearch extends BaseServiceTest {
         System.out.println(paging.getTotal());
         System.out.println(paging.getData());
     }
+
+    @Test
+    public void testGroupSearch() throws InterruptedException {
+
+    }
 }

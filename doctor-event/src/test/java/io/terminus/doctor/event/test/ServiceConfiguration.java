@@ -4,6 +4,10 @@ import io.terminus.boot.dubbo.autoconfigure.DubboAutoConfiguration;
 import io.terminus.boot.mybatis.autoconfigure.MybatisAutoConfiguration;
 import io.terminus.boot.search.autoconfigure.ESSearchAutoConfiguration;
 import io.terminus.doctor.event.dao.DoctorPigDao;
+import io.terminus.doctor.event.search.group.DefaultIndexedGroupFactory;
+import io.terminus.doctor.event.search.group.GroupSearchProperties;
+import io.terminus.doctor.event.search.group.IndexedGroup;
+import io.terminus.doctor.event.search.group.IndexedGroupFactory;
 import io.terminus.doctor.event.search.pig.BasePigQueryBuilder;
 import io.terminus.doctor.event.search.pig.DefaultIndexedPigFactory;
 import io.terminus.doctor.event.search.pig.DefaultPigQueryBuilder;
@@ -61,5 +65,14 @@ public class ServiceConfiguration {
 
         }
 
+        @Configuration
+        @EnableConfigurationProperties(GroupSearchProperties.class)
+        protected static class GroupSearchConfiguration {
+            @Bean
+            @ConditionalOnMissingBean(IndexedGroupFactory.class)
+            public IndexedGroupFactory<? extends IndexedGroup> indexedGroupFactory() {
+                return new DefaultIndexedGroupFactory();
+            }
+        }
     }
 }
