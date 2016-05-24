@@ -55,4 +55,20 @@ public class DoctorBarnWriteServiceImpl implements DoctorBarnWriteService {
             return Response.fail("barn.delete.fail");
         }
     }
+
+    @Override
+    public Response<Boolean> updateBarnStatus(Long barnId, Integer status) {
+        try {
+            // TODO: 16/5/24 校验下是否可以更新成这个状态
+
+            DoctorBarn barn = new DoctorBarn();
+            barn.setId(barnId);
+            barn.setStatus(status);
+            return Response.ok(doctorBarnDao.update(barn));
+        } catch (Exception e) {
+            log.error("update barn status failed, barnId:{}, status:{}, cause:{}",
+                    barnId, status, Throwables.getStackTraceAsString(e));
+            return Response.fail("barn.update.fail");
+        }
+    }
 }
