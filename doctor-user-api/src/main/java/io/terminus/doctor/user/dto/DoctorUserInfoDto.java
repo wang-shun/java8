@@ -22,5 +22,14 @@ public class DoctorUserInfoDto implements Serializable {
 
     private User user;
 
-    private DoctorStaff staff;  //职员信息
+    /**
+     * 角色类型
+     * @see io.terminus.doctor.user.enums.RoleType
+     */
+    private Integer frontRoleType;
+
+    /**
+     * 职员信息
+     */
+    private DoctorStaff staff;
 }
