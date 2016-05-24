@@ -6,16 +6,13 @@ import io.terminus.common.model.PageInfo;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.warehouse.dao.DoctorMaterialInfoDao;
-import io.terminus.doctor.warehouse.dto.DoctorMaterialProductRatioDto;
 import io.terminus.doctor.warehouse.model.DoctorMaterialInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import javax.validation.constraints.NotNull;
 import java.util.List;
-
-import static com.google.common.base.Preconditions.checkState;
-import static java.util.Objects.isNull;
 
 /**
  * Created by yaoqijun.
@@ -56,16 +53,12 @@ public class DoctorMaterialInfoReadServiceImpl implements DoctorMaterialInfoRead
     }
 
     @Override
-    public Response<Boolean> createMaterialProductRatioInfo(DoctorMaterialProductRatioDto doctorMaterialProductRatioDto) {
+    public Response<DoctorMaterialInfo> queryById(@NotNull(message = "input.id.empty") Long id) {
         try{
-            DoctorMaterialInfo doctorMaterialInfo = doctorMaterialInfoDao.findById(doctorMaterialProductRatioDto.getMaterialId());
-            checkState(!isNull(doctorMaterialInfo),"doctor.materialRatio.error");
-            doctorMaterialInfo.setExtraMap(ImmutableMap.of("produceRatio",doctorMaterialProductRatioDto.getRatio()));
-            doctorMaterialInfoDao.update(doctorMaterialInfo);
-            return Response.ok(Boolean.TRUE);
+            return Response.ok(doctorMaterialInfoDao.findById(id));
         }catch (Exception e){
-            log.error("create material product ratio fail,cause:{}", Throwables.getStackTraceAsString(e));
-            return Response.fail("create.materialProduct.fail");
+            log.error("material query by id error, cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("query.materialInfo.fail");
         }
     }
 }

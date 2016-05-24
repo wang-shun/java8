@@ -83,7 +83,7 @@
 
     <select id="findByPigIds" parameterType="list" resultMap="DoctorPigTrackMap">
         select <include refid="cols_all"/> from <include refid="tb"/>
-        WHERE pigId in
+        WHERE pig_id in
         <foreach collection="list" close=")" open="(" separator="," item="i">
             #{i}
         </foreach>

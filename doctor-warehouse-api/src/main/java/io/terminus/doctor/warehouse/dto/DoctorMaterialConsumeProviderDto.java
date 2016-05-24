@@ -1,6 +1,9 @@
 package io.terminus.doctor.warehouse.dto;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.Builder;
 
 import java.io.Serializable;
 
@@ -10,7 +13,10 @@ import java.io.Serializable;
  * Email:yaoqj@terminus.io
  * Descirbe: 原料信息领用信息
  */
+@Builder
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class DoctorMaterialConsumeProviderDto implements Serializable{
 
     private static final long serialVersionUID = -6771008689155023995L;
@@ -29,7 +35,7 @@ public class DoctorMaterialConsumeProviderDto implements Serializable{
 
     private String wareHouseName;
 
-    private Integer barnId; // barn Id
+    private Long barnId; // barn Id
 
     private String barnName;    //宿舍名称
 
@@ -41,9 +47,9 @@ public class DoctorMaterialConsumeProviderDto implements Serializable{
 
     private Long consumeCount;
 
-    private Integer unitId;
+    private Long unitId;
 
-    private String UnitName;    // 单位信息
+    private String unitName;    // 单位信息
 
     private Integer consumeDays; // 耗用天数
 }

@@ -94,7 +94,7 @@ public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteServic
     @Override
     public Response<Boolean> chgLocationEvent(DoctorChgLocationDto doctorChgLocationDto, DoctorBasicInputInfoDto doctorBasicInputInfoDto, Integer pigType) {
         try{
-            return Response.ok();
+            return Response.ok(doctorPigEventManager.createChgLocationEvent(doctorChgLocationDto, doctorBasicInputInfoDto, pigType));
         }catch (Exception e){
             log.error("vaccination event create fail, cause:{}", Throwables.getStackTraceAsString(e));
             return Response.fail("create.vaccination.fail");
@@ -104,8 +104,7 @@ public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteServic
     @Override
     public Response<Boolean> chgFarmEvent(DoctorChgFarmDto doctorChgFarmDto, DoctorBasicInputInfoDto doctorBasicInputInfoDto, Integer pigType) {
         try{
-
-            return Response.ok();
+            return Response.ok(doctorPigEventManager.createChgFarmLocationEvent(doctorChgFarmDto, doctorBasicInputInfoDto, pigType));
         }catch (Exception e){
             log.error("vaccination event create fail, cause:{}", Throwables.getStackTraceAsString(e));
             return Response.fail("create.vaccination.fail");
@@ -115,8 +114,7 @@ public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteServic
     @Override
     public Response<Boolean> removalEvent(DoctorRemovalDto doctorRemovalDto, DoctorBasicInputInfoDto doctorBasicInputInfoDto, Integer pigType) {
         try{
-
-            return Response.ok();
+            return Response.ok(doctorPigEventManager.createRemovalEvent(doctorRemovalDto, doctorBasicInputInfoDto, pigType));
         }catch (Exception e){
             log.error("vaccination event create fail, cause:{}", Throwables.getStackTraceAsString(e));
             return Response.fail("create.vaccination.fail");
@@ -126,8 +124,7 @@ public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteServic
     @Override
     public Response<Boolean> boarSemenEvent(DoctorSemenDto doctorSemenDto, DoctorBasicInputInfoDto doctorBasicInputInfoDto, Integer pigType) {
         try{
-
-            return Response.ok();
+            return Response.ok(doctorPigEventManager.createBoarSemenEvent(doctorSemenDto, doctorBasicInputInfoDto, pigType));
         }catch (Exception e){
             log.error("vaccination event create fail, cause:{}", Throwables.getStackTraceAsString(e));
             return Response.fail("create.vaccination.fail");
@@ -138,7 +135,7 @@ public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteServic
     public Response<Boolean> sowMatingEvent(DoctorMatingDto doctorMatingDto, DoctorBasicInputInfoDto doctorBasicInputInfoDto, Integer pigType) {
         try{
 
-            return Response.ok();
+            return Response.ok(doctorPigEventManager.createPigEventOnlyExtra(doctorMatingDto, doctorBasicInputInfoDto, pigType));
         }catch (Exception e){
             log.error("vaccination event create fail, cause:{}", Throwables.getStackTraceAsString(e));
             return Response.fail("create.vaccination.fail");
@@ -149,7 +146,7 @@ public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteServic
     public Response<Boolean> sowPregCheckEvent(DoctorPregChkResultDto doctorPregChkResultDto, DoctorBasicInputInfoDto doctorBasicInputInfoDto, Integer pigType) {
         try{
 
-            return Response.ok();
+            return Response.ok(doctorPigEventManager.createPigEventOnlyExtra(doctorPregChkResultDto, doctorBasicInputInfoDto, pigType));
         }catch (Exception e){
             log.error("vaccination event create fail, cause:{}", Throwables.getStackTraceAsString(e));
             return Response.fail("create.vaccination.fail");
@@ -159,8 +156,7 @@ public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteServic
     @Override
     public Response<Boolean> sowFarrowingEvent(DoctorFarrowingDto doctorFarrowingDto, DoctorBasicInputInfoDto doctorBasicInputInfoDto, Integer pigType) {
         try{
-
-            return Response.ok();
+            return Response.ok(doctorPigEventManager.createPigEventOnlyExtra(doctorFarrowingDto, doctorBasicInputInfoDto, pigType));
         }catch (Exception e){
             log.error("vaccination event create fail, cause:{}", Throwables.getStackTraceAsString(e));
             return Response.fail("create.vaccination.fail");
@@ -170,8 +166,7 @@ public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteServic
     @Override
     public Response<Boolean> sowPigletsChgEvent(DoctorPigletsChgDto doctorPigletsChgDto, DoctorBasicInputInfoDto doctorBasicInputInfoDto, Integer pigType) {
         try{
-
-            return Response.ok();
+            return Response.ok(doctorPigEventManager.createPigEventOnlyExtra(doctorPigletsChgDto, doctorBasicInputInfoDto, pigType));
         }catch (Exception e){
             log.error("vaccination event create fail, cause:{}", Throwables.getStackTraceAsString(e));
             return Response.fail("create.vaccination.fail");
@@ -181,8 +176,7 @@ public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteServic
     @Override
     public Response<Boolean> sowFostersEvent(DoctorFostersDto doctorFostersDto, DoctorBasicInputInfoDto doctorBasicInputInfoDto, Integer pigType) {
         try{
-
-            return Response.ok();
+            return Response.ok(doctorPigEventManager.createPigEventOnlyExtra(doctorFostersDto, doctorBasicInputInfoDto, pigType));
         }catch (Exception e){
             log.error("vaccination event create fail, cause:{}", Throwables.getStackTraceAsString(e));
             return Response.fail("create.vaccination.fail");
@@ -193,7 +187,7 @@ public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteServic
     public Response<Boolean> sowLitterWeightEvent(DoctorLitterWeightDto doctorLitterWeightDto, DoctorBasicInputInfoDto doctorBasicInputInfoDto, Integer pigType) {
         try{
 
-            return Response.ok();
+            return Response.ok(doctorPigEventManager.createPigEventOnlyExtra(doctorLitterWeightDto, doctorBasicInputInfoDto, pigType));
         }catch (Exception e){
             log.error("vaccination event create fail, cause:{}", Throwables.getStackTraceAsString(e));
             return Response.fail("create.vaccination.fail");
@@ -203,8 +197,7 @@ public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteServic
     @Override
     public Response<Boolean> sowPartWeanEvent(DoctorPartWeanDto doctorPartWeanDto, DoctorBasicInputInfoDto doctorBasicInputInfoDto, Integer pigType) {
         try{
-
-            return Response.ok();
+            return Response.ok(doctorPigEventManager.createPigEventOnlyExtra(doctorPartWeanDto, doctorBasicInputInfoDto, pigType));
         }catch (Exception e){
             log.error("vaccination event create fail, cause:{}", Throwables.getStackTraceAsString(e));
             return Response.fail("create.vaccination.fail");
@@ -215,7 +208,7 @@ public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteServic
     public Response<Boolean> sowWeanEvent(DoctorWeanDto doctorWeanDto, DoctorBasicInputInfoDto doctorBasicInputInfoDto, Integer pigType) {
         try{
 
-            return Response.ok();
+            return Response.ok(doctorPigEventManager.createPigEventOnlyExtra(doctorWeanDto, doctorBasicInputInfoDto, pigType));
         }catch (Exception e){
             log.error("vaccination event create fail, cause:{}", Throwables.getStackTraceAsString(e));
             return Response.fail("create.vaccination.fail");

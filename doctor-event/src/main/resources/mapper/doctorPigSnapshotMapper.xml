@@ -54,7 +54,7 @@
         id=#{id}
     </delete>
 
-    <delete id="deleteByEventId" parameterMap="long">
+    <delete id="deleteByEventId" parameterType="long">
         DELETE FROM <include refid="tb"/> WHERE
         eventId = #{eventId};
     </delete>
