@@ -4,7 +4,9 @@ import io.terminus.boot.dubbo.autoconfigure.DubboAutoConfiguration;
 import io.terminus.boot.mybatis.autoconfigure.MybatisAutoConfiguration;
 import io.terminus.boot.search.autoconfigure.ESSearchAutoConfiguration;
 import io.terminus.doctor.event.dao.DoctorPigDao;
+import io.terminus.doctor.event.search.pig.BasePigQueryBuilder;
 import io.terminus.doctor.event.search.pig.DefaultIndexedPigFactory;
+import io.terminus.doctor.event.search.pig.DefaultPigQueryBuilder;
 import io.terminus.doctor.event.search.pig.IndexedPig;
 import io.terminus.doctor.event.search.pig.IndexedPigFactory;
 import io.terminus.doctor.event.search.pig.PigSearchProperties;
@@ -50,6 +52,13 @@ public class ServiceConfiguration {
             public IndexedPigFactory<? extends IndexedPig> indexedPigFactory(DoctorPigDao doctorPigDao) {
                 return new DefaultIndexedPigFactory(doctorPigDao);
             }
+
+            @Bean
+            @ConditionalOnMissingBean(BasePigQueryBuilder.class)
+            public BasePigQueryBuilder pigQueryBuilder() {
+                return new DefaultPigQueryBuilder();
+            }
+
         }
 
     }
