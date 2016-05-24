@@ -37,4 +37,16 @@ public class DoctorMaterialInWareHouseWriteServiceImpl implements DoctorMaterial
             return Response.fail("consume.material.error");
         }
     }
+
+    public Response<Boolean> providerMaterialInfo(DoctorMaterialConsumeProviderDto doctorMaterialConsumeProviderDto){
+        try{
+
+            // TODO validate field param info
+
+            return Response.ok(materialInWareHouseManager.providerMaterialInWareHouse(doctorMaterialConsumeProviderDto));
+        }catch (Exception e){
+            log.error("provider material info fail, cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("provider.materialInfo.fail");
+        }
+    }
 }
