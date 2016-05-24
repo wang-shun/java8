@@ -1,4 +1,4 @@
-package io.terminus.doctor.event.search.pig;
+package io.terminus.doctor.event.search.group;
 
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
@@ -13,41 +13,41 @@ import org.springframework.stereotype.Service;
 import java.util.Map;
 
 /**
- * Desc: 猪(索引对象)查询服务
+ * Desc: 猪群搜索服务类
  * Mail: chk@terminus.io
  * Created by icemimosa
  * Date: 16/5/24
  */
 @Service
 @Slf4j
-public class PigSearchReadServiceImpl implements PigSearchReadService {
+public class GroupSearchReadServiceImpl implements GroupSearchReadService {
 
     @Autowired
     private Searcher searcher;
 
     @Autowired
-    private BasePigQueryBuilder basePigQueryBuilder;
+    private BaseGroupQueryBuilder baseGroupQueryBuilder;
 
     @Autowired
-    private PigSearchProperties pigSearchProperties;
+    private GroupSearchProperties groupSearchProperties;
 
     @Override
-    public Response<Paging<SearchedPig>> searchWithAggs(Integer pageNo, Integer pageSize, String template, Map<String, String> params) {
+    public Response<Paging<SearchedGroup>> searchWithAggs(Integer pageNo, Integer pageSize, String template, Map<String, String> params) {
         // 获取关键词, 设置高亮
         String q = params.get("q");
         if (StringUtils.isNotBlank(q)) {
-            params.put("highlight", "pigCode");
+            params.put("highlight", "pigCode_batchNo");
         }
         // 构建查询条件, 并查询
-        Criterias criterias = basePigQueryBuilder.buildCriterias(pageNo, pageSize, params);
-        WithAggregations<SearchedPig> searchedPigs = searcher.searchWithAggs(
-                pigSearchProperties.getIndexName(),
-                pigSearchProperties.getIndexType(),
+        Criterias criterias = baseGroupQueryBuilder.buildCriterias(pageNo, pageSize, params);
+        WithAggregations<SearchedGroup> searchedGroups = searcher.searchWithAggs(
+                groupSearchProperties.getIndexName(),
+                groupSearchProperties.getIndexType(),
                 template,
                 criterias,
-                SearchedPig.class
+                SearchedGroup.class
         );
-        Paging<SearchedPig> paging = new Paging<>(searchedPigs.getTotal(), searchedPigs.getData());
+        Paging<SearchedGroup> paging = new Paging<>(searchedGroups.getTotal(), searchedGroups.getData());
         return Response.ok(paging);
     }
 }

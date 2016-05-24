@@ -3,6 +3,8 @@ package io.terminus.doctor.event.search;
 import com.google.common.collect.Maps;
 import io.terminus.common.model.Paging;
 import io.terminus.doctor.common.utils.RespHelper;
+import io.terminus.doctor.event.search.group.GroupSearchReadService;
+import io.terminus.doctor.event.search.group.SearchedGroup;
 import io.terminus.doctor.event.search.pig.PigSearchReadService;
 import io.terminus.doctor.event.search.pig.SearchedPig;
 import io.terminus.doctor.event.test.BaseServiceTest;
@@ -21,7 +23,10 @@ public class TestSearch extends BaseServiceTest {
 
     @Autowired
     private PigSearchReadService pigSearchReadService;
-    
+
+    @Autowired
+    private GroupSearchReadService groupSearchReadService;
+
     @Test
     public void testPigSearch() throws InterruptedException {
         String template = "search/search.mustache";
@@ -33,6 +38,10 @@ public class TestSearch extends BaseServiceTest {
 
     @Test
     public void testGroupSearch() throws InterruptedException {
-
+        String template = "search/search.mustache";
+        Map<String, String> params = Maps.newHashMap();
+        Paging<SearchedGroup> paging = RespHelper.orServEx(groupSearchReadService.searchWithAggs(1, 2, template, params));
+        System.out.println(paging.getTotal());
+        System.out.println(paging.getData());
     }
 }
