@@ -27,6 +27,7 @@ logging:
 zookeeper:
   host: 101.201.44.35
   port: 2181
+  cacheTopic: pig.event.topic
 
 # Redis
 redis:

@@ -1,5 +1,7 @@
 package io.terminus.doctor.event;
 
+import com.google.common.eventbus.AsyncEventBus;
+import com.google.common.eventbus.EventBus;
 import io.terminus.boot.mybatis.autoconfigure.MybatisAutoConfiguration;
 import io.terminus.boot.search.autoconfigure.ESSearchAutoConfiguration;
 import io.terminus.doctor.event.dao.DoctorPigDao;
@@ -16,15 +18,22 @@ import io.terminus.doctor.event.search.pig.IndexedPig;
 import io.terminus.doctor.event.search.pig.IndexedPigFactory;
 import io.terminus.doctor.event.search.pig.PigSearchProperties;
 import io.terminus.search.core.ESClient;
+import io.terminus.zookeeper.ZKClientFactory;
+import io.terminus.zookeeper.pubsub.Publisher;
+import io.terminus.zookeeper.pubsub.Subscriber;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
+
+import java.util.concurrent.Executors;
 
 /**
  * Created by yaoqijun.
@@ -39,6 +48,30 @@ import org.springframework.context.annotation.Configuration;
 })
 @AutoConfigureAfter(MybatisAutoConfiguration.class)
 public class DoctorEventConfiguration {
+
+    @Bean
+    public EventBus eventBus(){
+        return new AsyncEventBus(
+                Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors()));
+    }
+
+    @Configuration
+    @ConditionalOnBean(ZKClientFactory.class)
+    @Profile("zookeeper")
+    public static class ZookeeperConfiguration{
+
+        @Bean
+        public Subscriber cacheListenerBean(ZKClientFactory zkClientFactory,
+                                            @Value("${zookeeper.cacheTopic}") String cacheTopic) throws Exception{
+            return new Subscriber(zkClientFactory,cacheTopic);
+        }
+
+        @Bean
+        public Publisher cachePublisherBean(ZKClientFactory zkClientFactory,
+                                            @Value("${zookeeper.cacheTopic}}") String cacheTopic) throws Exception{
+            return new Publisher(zkClientFactory, cacheTopic);
+        }
+    }
 
     @Configuration
     @ConditionalOnClass(ESClient.class)
