@@ -1,7 +1,14 @@
 package io.terminus.doctor.event;
 
 import io.terminus.boot.mybatis.autoconfigure.MybatisAutoConfiguration;
+import io.terminus.boot.search.autoconfigure.ESSearchAutoConfiguration;
 import io.terminus.doctor.event.dao.DoctorPigDao;
+import io.terminus.doctor.event.search.group.BaseGroupQueryBuilder;
+import io.terminus.doctor.event.search.group.DefaultGroupQueryBuilder;
+import io.terminus.doctor.event.search.group.DefaultIndexedGroupFactory;
+import io.terminus.doctor.event.search.group.GroupSearchProperties;
+import io.terminus.doctor.event.search.group.IndexedGroup;
+import io.terminus.doctor.event.search.group.IndexedGroupFactory;
 import io.terminus.doctor.event.search.pig.BasePigQueryBuilder;
 import io.terminus.doctor.event.search.pig.DefaultIndexedPigFactory;
 import io.terminus.doctor.event.search.pig.DefaultPigQueryBuilder;
@@ -11,6 +18,7 @@ import io.terminus.doctor.event.search.pig.PigSearchProperties;
 import io.terminus.search.core.ESClient;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -57,8 +65,22 @@ public class DoctorEventConfiguration {
             public BasePigQueryBuilder pigQueryBuilder() {
                 return new DefaultPigQueryBuilder();
             }
-
         }
 
+        @Configuration
+        @EnableConfigurationProperties(GroupSearchProperties.class)
+        protected static class GroupSearchConfiguration {
+            @Bean
+            @ConditionalOnMissingBean(IndexedGroupFactory.class)
+            public IndexedGroupFactory<? extends IndexedGroup> indexedGroupFactory() {
+                return new DefaultIndexedGroupFactory();
+            }
+
+            @Bean
+            @ConditionalOnMissingBean(BaseGroupQueryBuilder.class)
+            public BaseGroupQueryBuilder groupQueryBuilder() {
+                return new DefaultGroupQueryBuilder();
+            }
+        }
     }
 }
