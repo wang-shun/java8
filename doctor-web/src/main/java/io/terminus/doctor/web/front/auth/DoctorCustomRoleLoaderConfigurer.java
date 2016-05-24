@@ -18,6 +18,6 @@ public class DoctorCustomRoleLoaderConfigurer implements CustomRoleLoaderConfigu
 
     @Override
     public void configureCustomRoleLoader(CustomRoleLoaderRegistry registry) {
-        registry.register("PC", "SUB", new CustomRoleReadServiceWrapper(subRoleReadService));
+        registry.register("MOBILE", "SUB", new CustomRoleReadServiceWrapper(subRoleReadService));
     }
 }
