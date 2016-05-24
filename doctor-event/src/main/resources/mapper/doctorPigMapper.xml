@@ -153,4 +153,23 @@
         </set>
         WHERE id=#{id}
     </update>
+
+    <!-- search api start -->
+    <select id="maxId" resultType="long">
+        SELECT MAX(id) FROM
+        <include refid="tb"/>
+    </select>
+
+    <select id="listSince" resultMap="DoctorPigMap">
+        SELECT
+        <include refid="cols_all"/>
+        FROM
+        <include refid="tb"/>
+        WHERE  <![CDATA[
+          id < #{lastId} AND updated_at > #{since}
+        ]]>
+        ORDER BY id DESC LIMIT #{limit}
+    </select>
+    <!-- search api end -->
+
 </mapper>
