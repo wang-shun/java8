@@ -37,9 +37,12 @@
             <artifactId>spring-boot-starter-datasource</artifactId>
         </dependency>
         <dependency>
+            <groupId>io.terminus.boot</groupId>
+            <artifactId>spring-boot-starter-zookeeper</artifactId>
+        </dependency>
+        <dependency>
             <groupId>io.terminus.search</groupId>
             <artifactId>spring-boot-starter-search</artifactId>
-            <version>3.0-SNAPSHOT</version>
         </dependency>
 
         <dependency>

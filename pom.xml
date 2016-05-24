@@ -198,6 +198,11 @@
                 <artifactId>search-api</artifactId>
                 <version>${terminus.search.version}</version>
             </dependency>
+            <dependency>
+                <groupId>io.terminus.search</groupId>
+                <artifactId>spring-boot-starter-search</artifactId>
+                <version>${terminus.search.version}</version>
+            </dependency>
             <!-- Pampas -->
             <dependency>
                 <groupId>io.terminus.pampas</groupId>
