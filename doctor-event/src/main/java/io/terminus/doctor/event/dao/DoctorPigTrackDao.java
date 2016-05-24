@@ -26,7 +26,11 @@ public class DoctorPigTrackDao extends MyBatisDao<DoctorPigTrack>{
     }
 
     public DoctorPigTrack findByPigId(Long pigId){
-        return findByPigIds(Lists.newArrayList(pigId)).get(0);
+        List<DoctorPigTrack> pigs = findByPigIds(Lists.newArrayList(pigId));
+        if (pigs != null && pigs.size() > 0) {
+            return pigs.get(0);
+        }
+        return null;
     }
 
     public DoctorPigTrack findByEventId(Long relEventId){

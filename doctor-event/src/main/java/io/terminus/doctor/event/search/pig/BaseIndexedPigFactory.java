@@ -1,0 +1,70 @@
+package io.terminus.doctor.event.search.pig;
+
+import io.terminus.common.utils.BeanMapper;
+import io.terminus.doctor.event.dao.DoctorPigDao;
+import io.terminus.doctor.event.model.DoctorPig;
+import io.terminus.doctor.event.model.DoctorPigTrack;
+import lombok.extern.slf4j.Slf4j;
+
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+
+/**
+ * Desc:
+ * Mail: chk@terminus.io
+ * Created by icemimosa
+ * Date: 16/5/23
+ */
+@Slf4j
+public abstract class BaseIndexedPigFactory<T extends IndexedPig> implements IndexedPigFactory<T> {
+
+    protected DoctorPigDao doctorPigDao;
+
+    protected final Class<T> clazz;
+
+    @SuppressWarnings("all")
+    public BaseIndexedPigFactory(DoctorPigDao doctorPigDao) {
+        this.doctorPigDao = doctorPigDao;
+        final Type genericSuperclass = getClass().getGenericSuperclass();
+        if (genericSuperclass instanceof ParameterizedType) {
+            clazz = ((Class<T>) ((ParameterizedType) genericSuperclass).getActualTypeArguments()[0]);
+        } else {
+            clazz = ((Class<T>) ((ParameterizedType) getClass().getSuperclass().getGenericSuperclass())
+                    .getActualTypeArguments()[0]);
+        }
+    }
+
+    @Override
+    public T create(DoctorPig pig, DoctorPigTrack pigTrack, Object... others) {
+        if (pig == null) {
+            return null;
+        }
+        // 1. 处理猪信息
+        T indexedPig = BeanMapper.map(pig, clazz);
+        DoctorPig.PIG_TYPE pigType = DoctorPig.PIG_TYPE.from(indexedPig.getPigType());
+        indexedPig.setPigTypeName(pigType == null ? "" : pigType.getDesc());
+        // 父亲猪
+        DoctorPig fatherPig = doctorPigDao.findById(indexedPig.getPigFatherId());
+        if (fatherPig != null) {
+            indexedPig.setPigFatherCode(fatherPig.getPigCode());
+        }
+        // 母亲猪
+        DoctorPig motherPig = doctorPigDao.findById(indexedPig.getPigMotherId());
+        if (motherPig != null) {
+            indexedPig.setPigMotherCode(motherPig.getPigCode());
+        }
+
+        // 2. 处理猪Track信息
+        if (pigTrack != null) {
+            indexedPig.setStatus(pigTrack.getStatus());
+            // TODO status name
+            indexedPig.setCurrentBarnId(pigTrack.getCurrentBarnId());
+            indexedPig.setCurrentBarnName(pigTrack.getCurrentBarnName());
+            indexedPig.setWeight(pigTrack.getWeight());
+            indexedPig.setOutFarmDate(pigTrack.getOutFarmDate());
+            indexedPig.setCurrentParity(pigTrack.getCurrentParity());
+        }
+
+        return indexedPig;
+    }
+}
