@@ -15,4 +15,5 @@ import org.springframework.context.annotation.Configuration;
         "io.terminus.doctor.workflow"
 })
 public class DoctorEventConfiguration {
+
 }
