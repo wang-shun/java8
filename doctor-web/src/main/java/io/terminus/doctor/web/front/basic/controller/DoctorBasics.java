@@ -1,4 +1,4 @@
-package io.terminus.doctor.web.basic.controller;
+package io.terminus.doctor.web.front.basic.controller;
 
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.basic.model.DoctorChangeReason;

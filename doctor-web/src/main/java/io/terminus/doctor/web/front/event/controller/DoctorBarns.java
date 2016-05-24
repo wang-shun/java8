@@ -1,4 +1,4 @@
-package io.terminus.doctor.web.barn.controller;
+package io.terminus.doctor.web.front.event.controller;
 
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.model.DoctorBarn;
