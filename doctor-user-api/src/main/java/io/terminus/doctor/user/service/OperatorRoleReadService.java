@@ -3,6 +3,7 @@ package io.terminus.doctor.user.service;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.user.model.OperatorRole;
+import io.terminus.parana.user.auth.CustomRoleReadService;
 
 import java.util.List;
 
@@ -11,7 +12,7 @@ import java.util.List;
  *
  * @author Effet
  */
-public interface OperatorRoleReadService {
+public interface OperatorRoleReadService extends CustomRoleReadService<OperatorRole> {
 
     /**
      * 通过 ID 查询
@@ -32,18 +33,20 @@ public interface OperatorRoleReadService {
     /**
      * 通过角色状态查询
      *
+     * @param appKey 角色使用场景
      * @param status 角色状态
      * @return 运营角色列表
      */
-    Response<List<OperatorRole>> findByStatus(Integer status);
+    Response<List<OperatorRole>> findByStatus(String appKey, Integer status);
 
     /**
      * 分页查询
      *
+     * @param appKey 角色使用场景
      * @param status 角色状态
      * @param pageNo 页码
      * @param size   查询个数
      * @return 运营角色分页
      */
-    Response<Paging<OperatorRole>> pagination(Integer status, Integer pageNo, Integer size);
+    Response<Paging<OperatorRole>> pagination(String appKey, Integer status, Integer pageNo, Integer size);
 }

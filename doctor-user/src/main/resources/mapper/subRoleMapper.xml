@@ -5,12 +5,13 @@
 
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 
-<mapper namespace="OperatorRole">
+<mapper namespace="SubRole">
 
-    <resultMap id="OperatorRoleMap" type="OperatorRole">
+    <resultMap id="SubRoleMap" type="SubRole">
         <id column="id" property="id"/>
         <result column="name" property="name"/>
         <result column="desc" property="desc"/>
+        <result column="user_id" property="userId"/>
         <result column="app_key" property="appKey"/>
         <result column="status" property="status"/>
         <result column="allow_json" property="allowJson"/>
@@ -20,7 +21,7 @@
     </resultMap>
 
     <sql id="tb">
-        doctor_operator_roles
+        galaxy_seller_roles
     </sql>
 
     <sql id="cols_all">
@@ -29,14 +30,14 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        `name`,`desc`, app_key, status, allow_json, extra_json, created_at, updated_at
+        `name`,`desc`, user_id, app_key, status, allow_json, extra_json, created_at, updated_at
     </sql>
 
     <sql id="vals">
-        #{name}, #{desc}, #{appKey}, #{status}, #{allowJson}, #{extraJson}, now(), now()
+        #{name}, #{desc}, #{userId}, #{appKey}, #{status}, #{allowJson}, #{extraJson}, now(), now()
     </sql>
 
-    <insert id="create" parameterType="OperatorRole" keyProperty="id" useGeneratedKeys="true">
+    <insert id="create" parameterType="SubRole" keyProperty="id" useGeneratedKeys="true">
         INSERT INTO
         <include refid="tb"/>
         (<include refid="cols_exclude_id"/>)
@@ -44,7 +45,7 @@
         (<include refid="vals"/>)
     </insert>
 
-    <select id="findById" parameterType="long" resultMap="OperatorRoleMap">
+    <select id="findById" parameterType="long" resultMap="SubRoleMap">
         SELECT
         <include refid="cols_all"/>
         FROM
@@ -52,7 +53,7 @@
         WHERE id = #{id}
     </select>
 
-    <select id="findByIds" parameterType="list" resultMap="OperatorRoleMap">
+    <select id="findByIds" parameterType="list" resultMap="SubRoleMap">
         SELECT
         <include refid="cols_all"/>
         FROM
@@ -63,19 +64,20 @@
         </foreach>
     </select>
 
-    <update id="update" parameterType="OperatorRole">
+    <update id="update" parameterType="SubRole">
         update
         <include refid="tb"/>
         <set>
             <if test="name!=null">`name` = #{name},</if>
             <if test="desc!=null">`desc` = #{desc},</if>
-            <if test="appKey != null">`app_key` = #{appKey},</if>
-            <if test="status!=null">`status` = #{status},</if>
-            <if test="allowJson!=null">`allow_json` = #{allowJson},</if>
-            <if test="extraJson!=null">`extra_json` = #{extraJson},</if>
-            `updated_at` = now()
+            <if test="userId!=null">user_id = #{userId},</if>
+            <if test="appKey != null">app_key = #{appKey},</if>
+            <if test="status!=null">status = #{status},</if>
+            <if test="allowJson!=null">allow_json = #{allowJson},</if>
+            <if test="extraJson!=null">extra_json = #{extraJson},</if>
+            updated_at = now()
         </set>
-        where `id` = #{id}
+        where id = #{id}
     </update>
 
     <delete id="delete" parameterType="long">
@@ -84,20 +86,22 @@
         where id = #{id}
     </delete>
 
-    <select id="findByStatus" parameterType="map" resultMap="OperatorRoleMap">
+    <select id="findByUserIdAndStatus" parameterType="map" resultMap="SubRoleMap">
         SELECT
         <include refid="cols_all"/>
         FROM
         <include refid="tb"/>
-        WHERE app_key = #{appKey} AND `status` = #{status}
+        WHERE app_key = #{appKey} AND user_id = #{userId} AND `status` = #{status}
     </select>
 
     <sql id="criteria">
         app_key = #{appKey}
         <if test="status != null">AND status = #{status}</if>
+        <if test="userId != null">AND user_id = #{userId}</if>
     </sql>
 
-    <select id="paging" parameterType="map" resultMap="OperatorRoleMap">
+
+    <select id="paging" parameterType="map" resultMap="SubRoleMap">
         select id,
         <include refid="cols_exclude_id"/>
         from

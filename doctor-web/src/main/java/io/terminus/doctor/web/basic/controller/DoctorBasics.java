@@ -172,7 +172,7 @@ public class DoctorBasics {
      * @param changeTypeId 变动类型id
      * @return 变动原因表
      */
-    @RequestMapping(value = "/changeReason/id", method = RequestMethod.GET)
+    @RequestMapping(value = "/changeReason/typeId", method = RequestMethod.GET)
     public List<DoctorChangeReason> findChangeReasonByChangeTypeId(@RequestParam("changeTypeId") Long changeTypeId) {
         return RespHelper.or500(doctorBasicReadService.findChangeReasonByChangeTypeId(changeTypeId));
     }

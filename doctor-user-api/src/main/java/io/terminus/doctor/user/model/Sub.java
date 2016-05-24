@@ -16,12 +16,12 @@ import java.util.Date;
 import java.util.Map;
 
 /**
- * 运营
+ * 猪场子账号
  *
- * @author Effet
+ * @author houly
  */
 @Data
-public class Operator implements Serializable {
+public class Sub implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -33,14 +33,24 @@ public class Operator implements Serializable {
     private Long id;
 
     /**
-     * 运营用户 ID
+     * 子账号用户 ID
      */
     private Long userId;
 
     /**
-     * 用户名 (冗余)
+     * 子账号用户名
      */
     private String userName;
+
+    /**
+     * 主账号 ID
+     */
+    private Long parentUserId;
+
+    /**
+     * 主账号名称
+     */
+    private String parentUserName;
 
     /**
      * 角色 ID
@@ -53,7 +63,7 @@ public class Operator implements Serializable {
     private String roleName;
 
     /**
-     * 0: 未生效(冻结), 1: 生效, -1: 删除
+     * 0: 未生效(待审核), 1: 生效(审核通过), -1: 审核不通过, -2: 冻结, -3: 删除
      */
     private Integer status;
 

@@ -16,12 +16,11 @@ import java.util.Date;
 import java.util.Map;
 
 /**
- * 运营
- *
- * @author Effet
+ * 猪场登陆主账号
+ * Created by houluyao on 16/5/24.
  */
 @Data
-public class Operator implements Serializable {
+public class PrimaryUser implements Serializable{
 
     private static final long serialVersionUID = 1L;
 
@@ -33,27 +32,17 @@ public class Operator implements Serializable {
     private Long id;
 
     /**
-     * 运营用户 ID
+     * 主账号用户 ID
      */
     private Long userId;
 
     /**
-     * 用户名 (冗余)
+     * 主账号用户名
      */
     private String userName;
 
     /**
-     * 角色 ID
-     */
-    private Long roleId;
-
-    /**
-     * 角色名 (冗余)
-     */
-    private String roleName;
-
-    /**
-     * 0: 未生效(冻结), 1: 生效, -1: 删除
+     * 0: 未生效(待审核), 1: 生效(审核通过), -1: 审核不通过, -2: 冻结, -3: 删除
      */
     private Integer status;
 

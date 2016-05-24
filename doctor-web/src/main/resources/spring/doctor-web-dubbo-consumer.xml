@@ -20,6 +20,11 @@
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.parana.user.service.UserWriteService" id="userWriteService" check="false"/>
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.parana.user.service.UserProfileReadService" id="userProfileReadService" check="false"/>
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.parana.user.service.UserProfileWriteService" id="userProfileWriteService" check="false"/>
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.PrimaryUserWriteService" id="primaryUserWriteService" check="false"/>
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.PrimaryUserReadService" id="primaryUserReadService" check="false"/>
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.SubRoleWriteService" id="subRoleWriteService" check="false"/>
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.SubRoleReadService" id="subRoleReadService" check="false"/>
+
 
     <!-- address services -->
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.parana.user.address.service.AddressReadService" id="addressReadService" check="false"/>
@@ -59,4 +64,13 @@
     <!-- article service -->
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.parana.article.service.ArticleReadService" id="articleReadService" check="false"/>
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.parana.article.service.ArticleWriteService" id="articleWriteService" check="false"/>
+
+    <!-- event service -->
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.event.service.DoctorBarnReadService" id="doctorBarnReadService" check="false"/>
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.event.service.DoctorBarnWriteService" id="doctorBarnWriteService" check="false"/>
+
+    <!-- basic service -->
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.basic.service.DoctorBasicReadService" id="doctorBasicReadService" check="false"/>
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.basic.service.DoctorBasicWriteService" id="doctorBasicWriteService" check="false"/>
+
 </beans>

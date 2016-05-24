@@ -23,14 +23,14 @@ import java.util.Map;
 import java.util.Objects;
 
 /**
- * 卖家细分权限
+ * 子账号细分权限
  *
- * @author Effet
+ * @author houly
  */
 @Data
 @EqualsAndHashCode(of = {"id"})
-@ToString(of = {"id", "name", "desc", "shopId", "status"})
-public class SellerRole implements Serializable, CustomRole {
+@ToString(of = {"id", "name", "desc", "userId", "roleId", "status"})
+public class SubRole implements Serializable, CustomRole {
 
     private static final long serialVersionUID = 1L;
 
@@ -52,9 +52,14 @@ public class SellerRole implements Serializable, CustomRole {
     private String desc;
 
     /**
-     * 店铺 ID
+     * 主账号 ID
      */
-    private Long shopId;
+    private Long userId;
+
+    /**
+     * 角色 ID
+     */
+    private Long roleId;
 
     /**
      * 角色所属 (PC / MOBILE)
@@ -155,8 +160,8 @@ public class SellerRole implements Serializable, CustomRole {
     @Override
     public Map<String, String> getContext() {
         Map<String, String> context = new HashMap<>();
-        if (shopId != null) {
-            context.put("shopId", String.valueOf(shopId));
+        if (userId != null) {
+            context.put("userId", String.valueOf(userId));
         }
         return context;
     }

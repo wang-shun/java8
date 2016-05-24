@@ -5,9 +5,15 @@
 package io.terminus.doctor.web;
 
 import com.google.common.eventbus.EventBus;
+import io.terminus.doctor.user.service.SubRoleReadService;
 import io.terminus.doctor.web.core.DoctorCoreWebConfiguration;
 import io.terminus.doctor.web.core.advices.JsonExceptionResolver;
-import io.terminus.parana.auth.web.AuthWebConfiguration;
+import io.terminus.doctor.web.core.service.OtherSystemService;
+import io.terminus.doctor.web.core.service.impl.OtherSystemServiceImpl;
+import io.terminus.doctor.web.front.auth.DoctorCustomRoleLoaderConfigurer;
+import io.terminus.parana.auth.role.CustomRoleLoaderConfigurer;
+import io.terminus.parana.auth.web.WebAuthenticationConfiguration;
+import io.terminus.parana.config.ConfigCenter;
 import io.terminus.parana.web.msg.config.db.DbAppPushConfig;
 import io.terminus.parana.web.msg.config.db.DbEmailConfig;
 import io.terminus.parana.web.msg.config.db.DbNotifyConfig;
@@ -45,7 +51,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
 })
 @EnableWebMvc
 @Import({DoctorCoreWebConfiguration.class,
-        AuthWebConfiguration.class,
+        WebAuthenticationConfiguration.class,
         DbMsgGatewayBuilderConfig.class,
         DbSmsConfig.class, TestSmsWebServiceConfig.class,
         DbNotifyConfig.class,TestNotifyWebServiceConfig.class,
@@ -54,4 +60,13 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
 })
 public class DoctorWebConfiguration extends WebMvcConfigurerAdapter {
 
+    @Bean
+    public CustomRoleLoaderConfigurer customRoleLoaderConfigurer(SubRoleReadService subRoleReadService) {
+          return new DoctorCustomRoleLoaderConfigurer(subRoleReadService);
+    }
+
+    @Bean
+    public OtherSystemService otherSystemServiceConfigurer(ConfigCenter configCenter) {
+        return new OtherSystemServiceImpl(configCenter);
+    }
 }

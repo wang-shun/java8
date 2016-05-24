@@ -937,46 +937,92 @@ CREATE TABLE `doctor_staffs` (
 CREATE UNIQUE INDEX idx_doctor_staffs_user_id ON doctor_staffs(user_id);
 CREATE INDEX idx_doctor_staffs_role_id ON doctor_staffs(role_id);
 
--- 猪场角色权限表
-DROP TABLE IF EXISTS `doctor_res_ctrl_roles`;
-CREATE TABLE `doctor_res_ctrl_roles` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '自增主键',
-  `name` varchar(64) DEFAULT NULL COMMENT '角色名称',
-  `owner_id` bigint(20) DEFAULT NULL COMMENT  '角色拥有者id',
-  `remark` varchar(128) DEFAULT NULL COMMENT '描述',
-  `allow` text DEFAULT NULL COMMENT '此角色权限',
-  `scope` varchar(20) DEFAULT NULL COMMENT '权限作用域',
-  `active` smallint(6) DEFAULT NULL COMMENT '此角色生效',
-  `extra` text COMMENT '附加字段',
-  `created_at` datetime DEFAULT NULL COMMENT '创建时间',
-  `updated_at` datetime DEFAULT NULL COMMENT '修改时间',
-  PRIMARY KEY (`id`)
-) ENGINE=Myisam DEFAULT CHARSET=utf8 COMMENT='猪场角色权限表';
-CREATE INDEX idx_doctor_res_ctrl_roles_owner_id ON doctor_res_ctrl_roles(owner_id);
+-- ==============猪场角色权限表 相关========================
 
--- 菜单界面
-CREATE TABLE `doctor_menus` (
-  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
-  `pid` int(11) DEFAULT NULL COMMENT '父级id',
-  `name` varchar(30) DEFAULT NULL COMMENT '名称',
-  `level` tinyint(1) DEFAULT NULL COMMENT '级别',
-  `url` varchar(255) DEFAULT NULL COMMENT '访问路径',
-  `has_icon` tinyint(1) DEFAULT NULL COMMENT '是否含有logo',
-  `icon` varchar(255) DEFAULT NULL COMMENT 'logo路径',
-  `icon_class` varchar(255) DEFAULT NULL COMMENT 'logoClass 的名称',
-  `type` tinyint(1) DEFAULT NULL COMMENT '类型 1:普通路径页面 2:自定义图表 3:虚拟节点 4:全局res白名单节点',
-  `order_no` int(32) DEFAULT NULL COMMENT '排序号',
-  `need_hiden` tinyint(1) DEFAULT '0' COMMENT '是否需要隐藏',
-  `need_mobile_page` tinyint(1) DEFAULT '0' COMMENT '是否需要手机端页面',
-  `res_virtual` tinyint(1) DEFAULT NULL COMMENT '是否是虚拟节点',
-  `res_key` varchar(30) DEFAULT NULL COMMENT '权限key名称',
-  `res_name` varchar(30) DEFAULT NULL COMMENT '权限名称',
-  `res_path_url` varchar(255) DEFAULT NULL COMMENT '访问路径',
-  `res_method` tinyint(1) DEFAULT NULL COMMENT '访问方法，1:GET 2:POST',
-  `created_at` datetime DEFAULT NULL COMMENT '创建时间',
-  `updated_at` datetime DEFAULT NULL COMMENT '更新时间',
+-- 猪场 用户运维表
+DROP TABLE IF EXISTS `doctor_user_operators`;
+CREATE TABLE `doctor_user_operators` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `user_id` bigint(20) DEFAULT NULL COMMENT '用户 ID',
+  `role_id` bigint(20) DEFAULT NULL COMMENT '运营角色 ID',
+  `status` tinyint(4) DEFAULT NULL COMMENT '运营状态',
+  `extra_json` varchar(1024) DEFAULT NULL COMMENT '运营额外信息, 建议json字符串',
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `idx_user_operator_user_id` (`user_id`),
+  KEY `idx_user_operator_role_id` (`role_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='用户运营表';
+
+-- 猪场 运维角色表
+DROP TABLE IF EXISTS `doctor_operator_roles`;
+CREATE TABLE `doctor_operator_roles` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(40) DEFAULT NULL COMMENT '用户名',
+  `desc` varchar(32) DEFAULT NULL COMMENT '角色描述',
+  `app_key` varchar(16) DEFAULT NULL COMMENT '角色所属',
+  `status` smallint(6) DEFAULT NULL COMMENT '0. 未生效(冻结), 1. 生效, -1. 删除',
+  `extra_json` varchar(1024) DEFAULT NULL COMMENT '用户额外信息,建议json字符串',
+  `allow_json` varchar(1024) DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=523 DEFAULT CHARSET=utf8 COMMENT='菜单界面';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='运营角色表';
+
+-- 猪场 子账号
+DROP TABLE IF EXISTS `doctor_user_subs`;
+CREATE TABLE `doctor_user_subs` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `user_id` bigint(20) DEFAULT NULL COMMENT '用户 ID',
+  `user_name` varchar(64) DEFAULT NULL COMMENT '用户名 (冗余)',
+  `parent_user_id` bigint(20) DEFAULT NULL COMMENT '主账号ID',
+  `parent_user_name` varchar(64) DEFAULT NULL COMMENT '主账号用户名(冗余)',
+  `role_id` bigint(20) DEFAULT NULL COMMENT '子账号角色 ID',
+  `status` tinyint(4) DEFAULT NULL COMMENT '状态',
+  `extra_json` varchar(1024) DEFAULT NULL COMMENT '用户额外信息, 建议json字符串',
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `idx_user_sub_user_id` (`user_id`),
+  KEY `idx_user_parent_sub_id` (`parent_user_id`),
+  KEY `idx_user_sub_roles_id` (`role_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8 COMMENT='猪场子账户表';
+
+-- 猪场 子账号角色表
+DROP TABLE IF EXISTS `doctor_sub_roles`;
+CREATE TABLE `doctor_sub_roles` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(40) DEFAULT NULL COMMENT '用户名',
+  `desc` varchar(32) DEFAULT NULL COMMENT '角色描述',
+  `user_id` bigint(20) DEFAULT NULL COMMENT '所属主账号ID',
+  `app_key` varchar(16) DEFAULT NULL COMMENT '角色所属',
+  `status` smallint(6) DEFAULT NULL COMMENT '0. 未生效(冻结), 1. 生效, -1. 删除',
+  `extra_json` varchar(1024) DEFAULT NULL COMMENT '用户额外信息,建议json字符串',
+  `allow_json` varchar(1024) DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `idx_sub_roles_user_id` (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='子账号角色表';
+
+
+-- 猪场 主账号
+DROP TABLE IF EXISTS `doctor_user_primarys`;
+CREATE TABLE `doctor_user_primarys` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `user_id` bigint(20) DEFAULT NULL COMMENT '用户 ID',
+  `user_name` varchar(64) DEFAULT NULL COMMENT '用户名 (冗余)',
+  `status` tinyint(4) DEFAULT NULL COMMENT '状态',
+  `extra_json` varchar(1024) DEFAULT NULL COMMENT '用户额外信息, 建议json字符串',
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `idx_user_primary_user_id` (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='猪场主账户表';
+
+
+
+-- ==============猪场角色权限表 相关 ========================
 
 -- 2016-05-16
 -- 用户数据权限表

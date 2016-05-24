@@ -17,6 +17,7 @@ import io.terminus.doctor.event.search.pig.DefaultPigQueryBuilder;
 import io.terminus.doctor.event.search.pig.IndexedPig;
 import io.terminus.doctor.event.search.pig.IndexedPigFactory;
 import io.terminus.doctor.event.search.pig.PigSearchProperties;
+import io.terminus.doctor.workflow.DoctorWorkflowConfiguration;
 import io.terminus.search.core.ESClient;
 import io.terminus.zookeeper.ZKClientFactory;
 import io.terminus.zookeeper.pubsub.Publisher;
@@ -31,6 +32,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Profile;
 
 import java.util.concurrent.Executors;
@@ -44,8 +46,8 @@ import java.util.concurrent.Executors;
 @Configuration
 @ComponentScan(basePackages = {
         "io.terminus.doctor.event",
-        "io.terminus.doctor.workflow",
 })
+@Import(DoctorWorkflowConfiguration.class)
 @AutoConfigureAfter(MybatisAutoConfiguration.class)
 public class DoctorEventConfiguration {
 
