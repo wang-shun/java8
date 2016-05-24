@@ -330,7 +330,7 @@ CREATE TABLE `doctor_change_reasons` (
   `created_at` datetime DEFAULT NULL COMMENT '创建时间',
   `updated_at` datetime DEFAULT NULL COMMENT '修改时间',
   PRIMARY KEY (`id`)
-) ENGINE=Myisam DEFAULT CHARSET=utf8 COMMENT='变动类型表';
+) ENGINE=Myisam DEFAULT CHARSET=utf8 COMMENT='变动原因表';
 CREATE INDEX idx_doctor_change_reasons_change_type_id ON doctor_change_reasons(change_type_id);
 
 -- 疾病表
@@ -349,7 +349,7 @@ CREATE TABLE `doctor_diseases` (
   `created_at` datetime DEFAULT NULL COMMENT '创建时间',
   `updated_at` datetime DEFAULT NULL COMMENT '修改时间',
   PRIMARY KEY (`id`)
-) ENGINE=Myisam DEFAULT CHARSET=utf8 COMMENT='变动类型表';
+) ENGINE=Myisam DEFAULT CHARSET=utf8 COMMENT='疾病表';
 CREATE INDEX idx_doctor_diseases_farm_id ON doctor_diseases(farm_id);
 
 -- 客户表
@@ -370,7 +370,7 @@ CREATE TABLE `doctor_customers` (
   `created_at` datetime DEFAULT NULL COMMENT '创建时间',
   `updated_at` datetime DEFAULT NULL COMMENT '修改时间',
   PRIMARY KEY (`id`)
-) ENGINE=Myisam DEFAULT CHARSET=utf8 COMMENT='变动类型表';
+) ENGINE=Myisam DEFAULT CHARSET=utf8 COMMENT='客户表';
 CREATE INDEX idx_doctor_customers_farm_id ON doctor_customers(farm_id);
 
 -- 品种表
@@ -776,6 +776,7 @@ CREATE TABLE `doctor_material_infos` (
   `farm_id` bigint(20) unsigned DEFAULT NULL COMMENT '猪场信息',
   `farm_name` varchar(64) DEFAULT NULL COMMENT '猪场名称',
   `type` smallint(6) DEFAULT NULL comment '物料所属原料的名称',
+  `material_name` VARCHAR (128) DEFAULT NULL comment '物料名称',
   `remark` text COMMENT '标注',
   `unit_group_id` bigint(20) unsigned DEFAULT NULL COMMENT '单位组Id',
   `unit_group_name` varchar(64) DEFAULT NULL COMMENT '单位组名称',

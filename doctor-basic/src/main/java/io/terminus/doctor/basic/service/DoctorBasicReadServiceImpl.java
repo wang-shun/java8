@@ -68,11 +68,31 @@ public class DoctorBasicReadServiceImpl implements DoctorBasicReadService {
     }
 
     @Override
+    public Response<List<DoctorBreed>> findAllBreeds() {
+        try {
+            return Response.ok(doctorBreedDao.listAll());
+        } catch (Exception e) {
+            log.error("find all breeds failed, cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("breed.find.fail");
+        }
+    }
+
+    @Override
     public Response<DoctorChangeReason> findChangeReasonById(Long changeReasonId) {
         try {
             return Response.ok(doctorChangeReasonDao.findById(changeReasonId));
         } catch (Exception e) {
             log.error("find changeReason by id failed, changeReasonId:{}, cause:{}", changeReasonId, Throwables.getStackTraceAsString(e));
+            return Response.fail("changeReason.find.fail");
+        }
+    }
+
+    @Override
+    public Response<List<DoctorChangeReason>> findChangeReasonByChangeTypeId(Long changeTypeId) {
+        try {
+            return Response.ok(doctorChangeReasonDao.findByChangeTypeId(changeTypeId));
+        } catch (Exception e) {
+            log.error("find changeReason by id failed, changeTypeId:{}, cause:{}", changeTypeId, Throwables.getStackTraceAsString(e));
             return Response.fail("changeReason.find.fail");
         }
     }
@@ -148,11 +168,31 @@ public class DoctorBasicReadServiceImpl implements DoctorBasicReadService {
     }
 
     @Override
+    public Response<List<DoctorGenetic>> findAllGenetics() {
+        try {
+            return Response.ok(doctorGeneticDao.listAll());
+        } catch (Exception e) {
+            log.error("find all genetics failed, cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("genetic.find.fail");
+        }
+    }
+
+    @Override
     public Response<DoctorUnit> findUnitById(Long unitId) {
         try {
             return Response.ok(doctorUnitDao.findById(unitId));
         } catch (Exception e) {
             log.error("find unit by id failed, unitId:{}, cause:{}", unitId, Throwables.getStackTraceAsString(e));
+            return Response.fail("unit.find.fail");
+        }
+    }
+
+    @Override
+    public Response<List<DoctorUnit>> findAllUnits() {
+        try {
+            return Response.ok(doctorUnitDao.listAll());
+        } catch (Exception e) {
+            log.error("find all units failed, cause:{}", Throwables.getStackTraceAsString(e));
             return Response.fail("unit.find.fail");
         }
     }

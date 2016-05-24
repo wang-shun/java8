@@ -1,7 +1,7 @@
-package io.terminus.doctor.basic.dao;
+package io.terminus.doctor.event.dao;
 
 import io.terminus.common.mysql.dao.MyBatisDao;
-import io.terminus.doctor.basic.model.DoctorBarn;
+import io.terminus.doctor.event.model.DoctorBarn;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;

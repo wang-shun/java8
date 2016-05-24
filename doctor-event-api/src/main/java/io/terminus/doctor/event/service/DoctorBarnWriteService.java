@@ -1,7 +1,7 @@
-package io.terminus.doctor.basic.service;
+package io.terminus.doctor.event.service;
 
 import io.terminus.common.model.Response;
-import io.terminus.doctor.basic.model.DoctorBarn;
+import io.terminus.doctor.event.model.DoctorBarn;
 
 /**
  * Desc: 猪舍表写服务

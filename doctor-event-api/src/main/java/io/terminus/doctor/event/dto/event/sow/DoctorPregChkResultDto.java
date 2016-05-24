@@ -22,8 +22,6 @@ public class DoctorPregChkResultDto implements Serializable{
 
     private static final long serialVersionUID = 2879901632920960216L;
 
-    private Long pigId;
-
     private Date checkDate;
 
     private Integer checkResult;
