@@ -24,6 +24,7 @@ import static io.terminus.common.utils.Arguments.isEmpty;
  */
 @OpenParamHandler(patterns = "*", exclusions = {
         "user.login",
+        "user.auto.login",
         "server.time",
         "get.session.id",
         "get.user.captcher",
