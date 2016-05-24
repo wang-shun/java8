@@ -1,9 +1,9 @@
-package io.terminus.doctor.basic.service;
+package io.terminus.doctor.event.service;
 
 import com.google.common.base.Throwables;
 import io.terminus.common.model.Response;
-import io.terminus.doctor.basic.dao.DoctorBarnDao;
-import io.terminus.doctor.basic.model.DoctorBarn;
+import io.terminus.doctor.event.dao.DoctorBarnDao;
+import io.terminus.doctor.event.model.DoctorBarn;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

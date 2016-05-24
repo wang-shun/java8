@@ -1,4 +1,4 @@
-package io.terminus.doctor.basic.model;
+package io.terminus.doctor.event.model;
 
 import com.google.common.base.Objects;
 import lombok.Data;
@@ -52,13 +52,13 @@ public class DoctorBarn implements Serializable {
     
     /**
      * 能否建群 -1:不能, 1:能
-     * @see io.terminus.doctor.basic.model.DoctorBarn.CanOpenGroup
+     * @see DoctorBarn.CanOpenGroup
      */
     private Integer canOpenGroup;
     
     /**
      * 使用状态 0:未用 1:在用 -1:已删除
-     * @see io.terminus.doctor.basic.model.DoctorBarn.Status
+     * @see DoctorBarn.Status
      */
     private Integer status;
     
