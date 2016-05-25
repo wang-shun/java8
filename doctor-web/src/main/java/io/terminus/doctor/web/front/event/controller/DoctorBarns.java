@@ -4,6 +4,9 @@ import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.service.DoctorBarnReadService;
 import io.terminus.doctor.event.service.DoctorBarnWriteService;
+import io.terminus.doctor.user.model.DoctorFarm;
+import io.terminus.doctor.user.service.DoctorFarmReadService;
+import io.terminus.doctor.user.service.DoctorUserReadService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -29,12 +32,18 @@ public class DoctorBarns {
 
     private final DoctorBarnReadService doctorBarnReadService;
     private final DoctorBarnWriteService doctorBarnWriteService;
+    private final DoctorFarmReadService doctorFarmReadService;
+    private final DoctorUserReadService doctorUserReadService;
 
     @Autowired
     public DoctorBarns(DoctorBarnReadService doctorBarnReadService,
-                       DoctorBarnWriteService doctorBarnWriteService) {
+                       DoctorBarnWriteService doctorBarnWriteService,
+                       DoctorFarmReadService doctorFarmReadService,
+                       DoctorUserReadService doctorUserReadService) {
         this.doctorBarnReadService = doctorBarnReadService;
         this.doctorBarnWriteService = doctorBarnWriteService;
+        this.doctorFarmReadService = doctorFarmReadService;
+        this.doctorUserReadService = doctorUserReadService;
     }
 
     /**
@@ -68,6 +77,8 @@ public class DoctorBarns {
         // TODO: 权限中心校验权限
 
         if (barn.getId() == null) {
+            Long farmId = barn.getFarmId();
+            DoctorFarm farm = RespHelper.or500(doctorFarmReadService.findFarmById(farmId));
 
             RespHelper.or500(doctorBarnWriteService.createBarn(barn));
         } else {

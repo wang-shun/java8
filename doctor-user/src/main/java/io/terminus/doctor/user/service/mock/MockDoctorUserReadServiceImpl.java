@@ -31,6 +31,11 @@ public class MockDoctorUserReadServiceImpl implements DoctorUserReadService {
         return Response.ok(new DoctorUserInfoDto(mockUser(userId), findUserRoleTypeByUserId(userId).getResult(), mockStaff(userId)));
     }
 
+    @Override
+    public Response<DoctorStaff> findStaffByUserId(Long userId) {
+        return null;
+    }
+
     private User mockUser(Long userId) {
         User user = new User();
         user.setId(userId);

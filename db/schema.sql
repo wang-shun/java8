@@ -536,7 +536,8 @@ sow_qty          Integer 其中:母猪数
 -- 3.猪群变动 -
 change_type_id   Long 猪群变动类型id
 change_type_name String 猪群变动类型name
-change_reason    String 变动原因
+change_reason_id String 变动原因id
+change_reason_name String 变动原因
 breed_id         Integer 品种id
 breed_name       String 品种name
 price            Long  单价(分)
