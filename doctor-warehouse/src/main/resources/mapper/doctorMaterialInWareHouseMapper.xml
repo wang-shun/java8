@@ -80,6 +80,11 @@
           farm_id=#{farmId} and `type`=#{type};
     </select>
 
+    <select id="queryByFarmHouseMaterial" parameterType="map" resultMap="DoctorMaterialInWareHouseMap">
+        SELECT <include refid="cols_all"/> from <include refid="tb"/> WHERE
+          farm_id=#{farmId} AND ware_house_id=#{wareHouseId} AND material_id=#{materialId}
+    </select>
+
     <update id="update" parameterType="DoctorMaterialInWareHouse">
         UPDATE <include refid="tb"/>
         <set>

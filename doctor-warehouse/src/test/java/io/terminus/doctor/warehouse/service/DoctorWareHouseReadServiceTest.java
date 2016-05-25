@@ -6,10 +6,7 @@ import io.terminus.doctor.warehouse.dao.DoctorWareHouseDao;
 import io.terminus.doctor.warehouse.dao.DoctorWareHouseTrackDao;
 import io.terminus.doctor.warehouse.dto.DoctorWareHouseDto;
 import io.terminus.doctor.warehouse.model.DoctorFarmWareHouseType;
-import io.terminus.doctor.warehouse.model.DoctorWareHouse;
-import io.terminus.doctor.warehouse.model.DoctorWareHouseTrack;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -34,19 +31,6 @@ public class DoctorWareHouseReadServiceTest extends BasicServiceTest{
     @Autowired
     private DoctorWareHouseTrackDao doctorWareHouseTrackDao;
 
-    @Before
-    public void initWareHouseTrackInfo(){
-        List<DoctorWareHouse> wareHouses = doctorWareHouseDao.findByFarmId(12345l);
-        wareHouses.forEach(houses->{
-            doctorWareHouseTrackDao.create(DoctorWareHouseTrack.builder()
-                    .wareHouseId(houses.getId()).farmId(houses.getFarmId()).farmName(houses.getFarmName())
-                    .managerId(houses.getManagerId()).managerName(houses.getManagerName())
-                    .materialLotNumber(null).lotNumber(1000l).isDefault(1).extraMap(null)
-                    .build());
-        });
-    }
-
-
     @Test
     public void testFarmWareHouseTypeQuery(){
         Response<List<DoctorFarmWareHouseType>> response = doctorWareHouseReadService.queryDoctorFarmWareHouseType(12345l);
@@ -58,7 +42,7 @@ public class DoctorWareHouseReadServiceTest extends BasicServiceTest{
         // validate each item
         types.stream().forEach(t->{
             Assert.assertEquals(t.getFarmId(), new Long(12345l));
-            Assert.assertEquals(t.getLogNumber(), new Long(200));
+            Assert.assertEquals(t.getLogNumber(), new Long(1000));
         });
         Assert.assertThat(123, is(123));
     }

@@ -1,5 +1,6 @@
 package io.terminus.doctor.warehouse.service;
 
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.test.annotation.Rollback;
@@ -19,4 +20,10 @@ import org.springframework.transaction.annotation.Transactional;
 @Rollback
 @ActiveProfiles("test")
 public class BasicServiceTest {
+
+    @Test
+    public void runNull(){
+
+    }
+
 }

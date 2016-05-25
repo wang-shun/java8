@@ -136,7 +136,7 @@ CREATE TABLE `doctor_material_consume_avgs` (
   `material_id` bigint(20) DEFAULT NULL COMMENT '原料Id',
   `consume_avg_count` bigint(20) DEFAULT NULL COMMENT '平均消耗数量',
   `consume_count` bigint(20) DEFAULT NULL COMMENT '消耗数量',
-  `consime_date` datetime DEFAULT NULL comment '消耗日期',
+  `consume_date` datetime DEFAULT NULL comment '消耗日期',
   `extra` text DEFAULT NULL comment 'extra',
   `created_at` datetime DEFAULT NULL,
   `updated_at` datetime DEFAULT NULL,

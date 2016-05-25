@@ -25,16 +25,27 @@ public class DoctorMaterialInWareHouseWriteServiceImpl implements DoctorMaterial
         this.materialInWareHouseManager = materialInWareHouseManager;
     }
 
+    /**
+     * 消耗对应的 Consumer 信息内容
+     * @param doctorMaterialConsumeProviderDto (参数)farmId, warehouseId, materialId
+     * @return
+     */
     @Override
-    public Response<Boolean> consumeMaterialInfo(DoctorMaterialConsumeProviderDto doctorMaterialConsumeProviderDto) {
+    public Response<Long> consumeMaterialInfo(DoctorMaterialConsumeProviderDto doctorMaterialConsumeProviderDto) {
         try{
-            return Response.ok(materialInWareHouseManager.consumeMaterialInWareHouse(doctorMaterialConsumeProviderDto));
+            return Response.ok(materialInWareHouseManager.consumeMaterial(doctorMaterialConsumeProviderDto));
         }catch (Exception e){
             log.error("consumer material info error, cause:{}", Throwables.getStackTraceAsString(e));
             return Response.fail("consume.material.error");
         }
     }
 
+    /**
+     *
+     * @param doctorMaterialConsumeProviderDto
+     * @return
+     */
+    @Override
     public Response<Boolean> providerMaterialInfo(DoctorMaterialConsumeProviderDto doctorMaterialConsumeProviderDto){
         try{
             return Response.ok(materialInWareHouseManager.providerMaterialInWareHouse(doctorMaterialConsumeProviderDto));

@@ -21,13 +21,13 @@ public class DoctorMaterialInfoReadServiceTest extends BasicServiceTest {
 
     @Test
     public void testPagingMaterialInfo(){
-        Response<Paging<DoctorMaterialInfo>> pagingResponse = doctorMaterialInfoReadService.pagingMaterialInfos(1l, null, 1, 2);
+        Response<Paging<DoctorMaterialInfo>> pagingResponse = doctorMaterialInfoReadService.pagingMaterialInfos(12345l, null, 1, 2);
         Assert.assertTrue(pagingResponse.isSuccess());
         Assert.assertEquals(pagingResponse.getResult().getTotal(), new Long(5));
         Assert.assertEquals(pagingResponse.getResult().getData().size(), 2);
 
         // validate
-        Response<Paging<DoctorMaterialInfo>> pagingResponse2 = doctorMaterialInfoReadService.pagingMaterialInfos(1l, 1 , null, null);
+        Response<Paging<DoctorMaterialInfo>> pagingResponse2 = doctorMaterialInfoReadService.pagingMaterialInfos(12345l, 1 , null, null);
         Assert.assertTrue(pagingResponse2.isSuccess());
         Assert.assertEquals(pagingResponse2.getResult().getTotal(), new Long(1));
         Assert.assertEquals(pagingResponse2.getResult().getData().size(), 1);
