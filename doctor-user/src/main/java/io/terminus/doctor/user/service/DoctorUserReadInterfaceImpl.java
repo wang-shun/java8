@@ -239,7 +239,7 @@ public class DoctorUserReadInterfaceImpl implements DoctorUserReadInterface {
 
     private User setUserType(User user){
         user.getRolesJson();
-        user.setType(null);//TODO 陈增辉
+        //user.setType(null);//TODO 陈增辉
         return user;
     }
     private Paging<User> getPaging(io.terminus.common.model.Paging<io.terminus.parana.user.model.User> page){
