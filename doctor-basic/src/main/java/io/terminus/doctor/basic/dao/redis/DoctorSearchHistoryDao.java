@@ -17,7 +17,7 @@ import java.util.Set;
 @Repository
 public class DoctorSearchHistoryDao {
 
-    private static final String KEY = "search:history:";
+    private static final String KEY = "search:history";
 
     private static final long size = 10L;
 
@@ -25,7 +25,6 @@ public class DoctorSearchHistoryDao {
 
     @Autowired
     public DoctorSearchHistoryDao(JedisTemplate jedisTemplate) {
-        SearchType.BARN.name();
         this.jedisTemplate = jedisTemplate;
     }
 
@@ -61,7 +60,7 @@ public class DoctorSearchHistoryDao {
      */
     public Set<String> getWords(Long userId, SearchType type, Long size) {
         return jedisTemplate.execute(jedis -> {
-            return jedis.zrangeByScore(getKey(userId, type), 0, size);
+            return jedis.zrevrange(getKey(userId, type), 0, size <= 0 ? -1 : (size - 1) );
         });
     }
 
@@ -72,7 +71,10 @@ public class DoctorSearchHistoryDao {
      */
     public void deleteAllWords(Long userId, SearchType type) {
         jedisTemplate.execute(jedis -> {
-            getWords(userId, type, -1L).forEach(w -> jedis.zrem(getKey(userId, type), w));
+            String[] words = getWords(userId, type, -1L).toArray(new String[0]);
+            if (words != null && words.length > 0) {
+                jedis.zrem(getKey(userId, type), words);
+            }
         });
     }
 
@@ -89,7 +91,7 @@ public class DoctorSearchHistoryDao {
     }
 
     private static String getKey(Long userId, SearchType type) {
-        return KEY + ":" + type.name() + ":" + userId;
+        return KEY + ":" + userId + ":" + type.name();
     }
 
     private static double getScore() {

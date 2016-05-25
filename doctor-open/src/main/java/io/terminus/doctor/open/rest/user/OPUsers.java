@@ -100,18 +100,14 @@ public class OPUsers {
      * 用户注册
      *
      * @param password   密码
-     * @param userName   用户名
      * @param mobile     手机号
      * @param code       手机验证码
-     * @param request    请求
-     * @param response   响应
      * @return 注册成功之后的用户ID
      */
-    @OpenMethod(key = "user.register", httpMethods = RequestMethod.POST, paramNames = {"password", "userName", "mobile", "code"})
+    @OpenMethod(key = "user.register", httpMethods = RequestMethod.POST, paramNames = {"password", "mobile", "code"})
     public Long register(@NotEmpty(message = "password.not.empty") String password,
-                         @NotEmpty(message = "username.not.empty") String userName,
                          @NotEmpty(message = "mobile.not.empty") String mobile,
-                         @NotEmpty(message = "code.not.empty") String code, String a) {
+                         @NotEmpty(message = "code.not.empty") String code) {
         return Long.valueOf(RandomUtil.random(1, 10));
     }
 
