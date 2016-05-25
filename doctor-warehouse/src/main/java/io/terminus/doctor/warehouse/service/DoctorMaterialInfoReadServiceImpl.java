@@ -1,7 +1,7 @@
 package io.terminus.doctor.warehouse.service;
 
 import com.google.common.base.Throwables;
-import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Maps;
 import io.terminus.common.model.PageInfo;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 
 import javax.validation.constraints.NotNull;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by yaoqijun.
@@ -45,7 +46,10 @@ public class DoctorMaterialInfoReadServiceImpl implements DoctorMaterialInfoRead
     public Response<Paging<DoctorMaterialInfo>> pagingMaterialInfos(Long farmId, Integer type, Integer pageNo, Integer pageSize) {
         try{
             PageInfo pageInfo = new PageInfo(pageNo, pageSize);
-            return Response.ok(doctorMaterialInfoDao.paging(pageInfo.getOffset(),pageInfo.getLimit(), ImmutableMap.of("farmId",farmId, "type",type)));
+            Map<String,Object> params = Maps.newHashMap();
+            params.put("farmId",farmId);
+            params.put("type", type);
+            return Response.ok(doctorMaterialInfoDao.paging(pageInfo.getOffset(),pageInfo.getLimit(), params));
         }catch (Exception e){
             log.error("paging material infos fail ,cause:{}", Throwables.getStackTraceAsString(e));
             return Response.fail("paging.materialInfo.fail");
