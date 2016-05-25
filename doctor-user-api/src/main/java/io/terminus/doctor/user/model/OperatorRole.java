@@ -141,7 +141,6 @@ public class OperatorRole implements Serializable, CustomRole {
         }
     }
 
-    @Override
     public String getBaseRole() {
         return "ADMIN";
     }
