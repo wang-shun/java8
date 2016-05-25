@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 import java.util.Set;
 
 /**
- * Desc:
+ * Desc: 搜索历史接口
  * Mail: yangzl@terminus.io
  * author: DreamYoung
  * Date: 16/5/24
@@ -28,49 +28,60 @@ public class DoctorSearchHistoryServiceImpl implements DoctorSearchHistoryServic
     }
 
     @Override
-    public Response<Boolean> createBarnSearchHistory(Long userId, String barnName) {
+    public Response<Boolean> createSearchHistory(Long userId, int searchType, String word) {
         try {
-            doctorSearchHistoryDao.setWord(userId, SearchType.BARN, barnName);
+            doctorSearchHistoryDao.setWord(userId, SearchType.from(searchType), word);
             return Response.ok(Boolean.TRUE);
         } catch (Exception e) {
-            log.error("create barn search history failed, userId:{}, barnName:{}, cause:{}",
-                    userId, barnName, Throwables.getStackTraceAsString(e));
-            return Response.fail("barn.search.history.create.fail");
+            log.error("create search history failed, userId:{}, type:{} word:{}, cause:{}",
+                    userId, searchType, word, Throwables.getStackTraceAsString(e));
+            return Response.fail("search.history.create.fail");
         }
     }
 
     @Override
-    public Response<Set<String>> findBarnSearchHistory(Long userId) {
+    public Response<Set<String>> findSearchHistory(Long userId, int searchType) {
         try {
-            return Response.ok(doctorSearchHistoryDao.getWords(userId, SearchType.BARN));
+            return Response.ok(doctorSearchHistoryDao.getWords(userId, SearchType.from(searchType)));
         } catch (Exception e) {
-            log.error("find barn search history failed, userId:{}, cause:{}",
+            log.error("find search history failed, userId:{}, type:{} cause:{}",
+                    userId, searchType, Throwables.getStackTraceAsString(e));
+            return Response.fail("search.history.find.fail");
+        }
+    }
+
+    @Override
+    public Response<Set<String>> findSearchHistory(Long userId, int searchType, Long size) {
+        try {
+            return Response.ok(doctorSearchHistoryDao.getWords(userId, SearchType.from(searchType), size));
+        } catch (Exception e) {
+            log.error("find search history failed, userId:{}, type:{} cause:{}",
+                    userId, searchType, Throwables.getStackTraceAsString(e));
+            return Response.fail("search.history.find.fail");
+        }
+    }
+
+    @Override
+    public Response<Boolean> deleteSearchHistory(Long userId, int searchType, String word) {
+        try {
+            doctorSearchHistoryDao.deleteWord(userId, SearchType.from(searchType), word);
+            return Response.ok(Boolean.TRUE);
+        } catch (Exception e) {
+            log.error("delete search history failed, userId:{}, type:{}, word:{}, cause:{}",
+                    userId, searchType, word, Throwables.getStackTraceAsString(e));
+            return Response.fail("search.history.delete.fail");
+        }
+    }
+
+    @Override
+    public Response<Boolean> deleteAllSearchHistories(Long userId, int searchType) {
+        try {
+            doctorSearchHistoryDao.deleteAllWords(userId, SearchType.from(searchType));
+            return Response.ok(Boolean.TRUE);
+        } catch (Exception e) {
+            log.error("delete search history failed, userId:{}, cause:{}",
                     userId, Throwables.getStackTraceAsString(e));
-            return Response.fail("barn.search.history.find.fail");
-        }
-    }
-
-    @Override
-    public Response<Boolean> deleteBarnSearchHistory(Long userId, String barnName) {
-        try {
-            doctorSearchHistoryDao.deleteWord(userId, SearchType.BARN, barnName);
-            return Response.ok(Boolean.TRUE);
-        } catch (Exception e) {
-            log.error("delete barn search history failed, userId:{}, barnName:{}, cause:{}",
-                    userId, barnName, Throwables.getStackTraceAsString(e));
-            return Response.fail("barn.search.history.delete.fail");
-        }
-    }
-
-    @Override
-    public Response<Boolean> deleteAllBarnSearchHistories(Long userId) {
-        try {
-            doctorSearchHistoryDao.deleteAllWords(userId, SearchType.BARN);
-            return Response.ok(Boolean.TRUE);
-        } catch (Exception e) {
-            log.error("delete barn search history failed, userId:{}, cause:{}",
-                    userId, Throwables.getStackTraceAsString(e));
-            return Response.fail("barn.search.history.delete.fail");
+            return Response.fail("search.history.delete.fail");
         }
     }
 }
