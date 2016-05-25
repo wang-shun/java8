@@ -1,10 +1,9 @@
 package io.terminus.doctor.open.rest.farm;
 
 import com.google.common.collect.Lists;
-import io.terminus.doctor.open.dto.DoctorStatisticDto;
 import io.terminus.doctor.open.dto.DoctorBasicDto;
 import io.terminus.doctor.open.dto.DoctorFarmBasicDto;
-import io.terminus.doctor.open.dto.DoctorOrgBasicDto;
+import io.terminus.doctor.open.dto.DoctorStatisticDto;
 import io.terminus.doctor.open.util.OPRespHelper;
 import io.terminus.doctor.user.model.DoctorOrg;
 import io.terminus.doctor.user.service.DoctorFarmReadService;
@@ -50,10 +49,8 @@ public class OPFarms {
     @OpenMethod(key = "get.farm.info")
     public DoctorBasicDto getFarmInfo() {
         return new DoctorBasicDto(
-                new DoctorOrgBasicDto(
                         OPRespHelper.orOPEx(doctorFarmReadService.findOrgByUserId(UserUtil.getUserId())),
-                        mockOrgStats()
-                ),
+                        mockOrgStats(),
                 Lists.newArrayList(
                         new DoctorFarmBasicDto(
                                 OPRespHelper.orOPEx(doctorFarmReadService.findFarmById(1L)),

@@ -1,5 +1,6 @@
 package io.terminus.doctor.open.dto;
 
+import io.terminus.doctor.user.model.DoctorOrg;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -20,9 +21,14 @@ public class DoctorBasicDto implements Serializable {
     private static final long serialVersionUID = 7618953726708026762L;
 
     /**
-     * 公司概况
+     * 公司信息
      */
-    private DoctorOrgBasicDto orgBasic;
+    private DoctorOrg org;
+
+    /**
+     * 公司统计信息
+     */
+    private List<DoctorStatisticDto> orgStatistics;
 
     /**
      * 猪场概况
