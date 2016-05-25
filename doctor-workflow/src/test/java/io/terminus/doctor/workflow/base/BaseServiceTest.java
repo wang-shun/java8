@@ -30,7 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 @Rollback
 @ActiveProfiles("test")
-public class BaseServiceTest {
+public abstract class BaseServiceTest {
 
     @Autowired
     protected WorkFlowService workFlowService;
