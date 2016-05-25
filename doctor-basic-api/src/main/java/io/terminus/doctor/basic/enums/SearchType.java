@@ -1,4 +1,4 @@
-package io.terminus.doctor.web.history.enums;
+package io.terminus.doctor.basic.enums;
 
 /**
  * Desc: 用户搜索类型

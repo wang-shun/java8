@@ -1,9 +1,9 @@
-package io.terminus.doctor.web.history.service;
+package io.terminus.doctor.basic.service;
 
 import com.google.common.base.Throwables;
 import io.terminus.common.model.Response;
-import io.terminus.doctor.web.history.dao.DoctorSearchHistoryDao;
-import io.terminus.doctor.web.history.enums.SearchType;
+import io.terminus.doctor.basic.dao.redis.DoctorSearchHistoryDao;
+import io.terminus.doctor.basic.enums.SearchType;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

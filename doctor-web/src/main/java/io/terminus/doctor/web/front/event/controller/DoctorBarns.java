@@ -1,4 +1,4 @@
-package io.terminus.doctor.web.barn.controller;
+package io.terminus.doctor.web.front.event.controller;
 
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.model.DoctorBarn;
@@ -78,15 +78,16 @@ public class DoctorBarns {
     }
 
     /**
-     * 根据主键id删除DoctorBarn
+     * 更新猪舍状态
      * @return 是否成功
      */
-    @RequestMapping(value = "/barn", method = RequestMethod.DELETE)
-    public Boolean deleteBarn(@RequestParam("barnId") Long barnId) {
+    @RequestMapping(value = "/barn/status", method = RequestMethod.GET)
+    public Boolean updateBarnStatus(@RequestParam("barnId") Long barnId,
+                                    @RequestParam("status") Integer status) {
         DoctorBarn barn = RespHelper.or500(doctorBarnReadService.findBarnById(barnId));
 
         // TODO: 权限中心校验权限
 
-        return RespHelper.or500(doctorBarnWriteService.deleteBarnById(barnId));
+        return RespHelper.or500(doctorBarnWriteService.updateBarnStatus(barnId, status));
     }
 }

@@ -12,13 +12,13 @@
         <result column="name" property="name"/>
         <result column="desc" property="desc"/>
         <result column="shop_id" property="shopId"/>
+        <result column="app_key" property="appKey"/>
         <result column="status" property="status"/>
         <result column="allow_json" property="allowJson"/>
         <result column="extra_json" property="extraJson"/>
         <result column="created_at" property="createdAt"/>
         <result column="updated_at" property="updatedAt"/>
     </resultMap>
-
 
     <sql id="tb">
         doctor_seller_roles
@@ -30,18 +30,12 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        `name`,`desc`, shop_id, status, allow_json, extra_json, created_at, updated_at
+        `name`,`desc`, shop_id, app_key, status, allow_json, extra_json, created_at, updated_at
     </sql>
 
     <sql id="vals">
-        #{name}, #{desc}, #{shopId}, #{status}, #{allowJson}, #{extraJson}, now(), now()
+        #{name}, #{desc}, #{shopId}, #{appKey}, #{status}, #{allowJson}, #{extraJson}, now(), now()
     </sql>
-
-    <sql id="criteria">
-        <if test="status != null">AND status = #{status}</if>
-        <if test="shopId != null">AND shop_id = #{shopId}</if>
-    </sql>
-
 
     <insert id="create" parameterType="SellerRole" keyProperty="id" useGeneratedKeys="true">
         INSERT INTO
@@ -77,6 +71,7 @@
             <if test="name!=null">`name` = #{name},</if>
             <if test="desc!=null">`desc` = #{desc},</if>
             <if test="shopId!=null">shop_id = #{shopId},</if>
+            <if test="appKey != null">app_key = #{appKey},</if>
             <if test="status!=null">status = #{status},</if>
             <if test="allowJson!=null">allow_json = #{allowJson},</if>
             <if test="extraJson!=null">extra_json = #{extraJson},</if>
@@ -91,13 +86,20 @@
         where id = #{id}
     </delete>
 
-    <select id="findByShopId" parameterType="long" resultMap="SellerRoleMap">
+    <select id="findByShopIdAndStatus" parameterType="map" resultMap="SellerRoleMap">
         SELECT
         <include refid="cols_all"/>
         FROM
         <include refid="tb"/>
-        WHERE shop_id = #{shopId}
+        WHERE app_key = #{appKey} AND shop_id = #{shopId} AND `status` = #{status}
     </select>
+
+    <sql id="criteria">
+        app_key = #{appKey}
+        <if test="status != null">AND status = #{status}</if>
+        <if test="shopId != null">AND shop_id = #{shopId}</if>
+    </sql>
+
 
     <select id="paging" parameterType="map" resultMap="SellerRoleMap">
         select id,
@@ -118,7 +120,4 @@
             <include refid="criteria"/>
         </where>
     </select>
-
-
-
 </mapper>

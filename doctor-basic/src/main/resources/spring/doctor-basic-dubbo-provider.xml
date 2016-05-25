@@ -15,4 +15,7 @@
     <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.basic.service.DoctorCarouselFigureReadService" ref="mockDoctorCarouselFigureReadServiceImpl"/>
     <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.basic.service.DoctorCarouselFigureWriteService" ref="mockDoctorCarouselFigureWriteServiceImpl"/>
 
+    <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.basic.service.DoctorBasicReadService" ref="doctorBasicReadServiceImpl" />
+    <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.basic.service.DoctorBasicWriteService" ref="doctorBasicWriteServiceImpl" />
+
 </beans>

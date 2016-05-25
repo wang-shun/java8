@@ -1,4 +1,4 @@
-package io.terminus.doctor.web.history.service;
+package io.terminus.doctor.basic.service;
 
 import io.terminus.common.model.Response;
 import org.hibernate.validator.constraints.NotEmpty;

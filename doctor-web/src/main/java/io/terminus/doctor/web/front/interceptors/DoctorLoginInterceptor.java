@@ -14,6 +14,7 @@ import io.terminus.doctor.user.util.DoctorUserMaker;
 import io.terminus.pampas.common.UserUtil;
 import io.terminus.doctor.common.model.ParanaUser;
 import io.terminus.doctor.common.utils.Iters;
+import io.terminus.pampas.engine.common.WebUtil;
 import io.terminus.parana.user.model.User;
 import io.terminus.parana.user.service.UserReadService;
 import io.terminus.doctor.web.core.Constants;
@@ -52,6 +53,8 @@ public class DoctorLoginInterceptor extends HandlerInterceptorAdapter {
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+        WebUtil.putRequestAndResponse(request, response);
+
         HttpSession session = request.getSession(false);
         if (session != null) {
             Object userIdInSession = session.getAttribute(Constants.SESSION_USER_ID);
@@ -70,7 +73,7 @@ public class DoctorLoginInterceptor extends HandlerInterceptorAdapter {
                     ParanaUser paranaUser = DoctorUserMaker.from(user);
                     // TODO: 默认现在只有一个店铺
                     Long shopId = null;
-                    for (String role : Iters.nullToEmpty(user.getRoles())) {
+                    for (String role : io.terminus.parana.common.utils.Iters.nullToEmpty(user.getRoles())) {
                         List<String> richRole = UserRoleUtil.roleConsFrom(role);
                         if (richRole.size() > 1 && Objects.equals(richRole.get(0), UserRole.SELLER.name())) {
                             for (String inner : richRole.subList(1, richRole.size())) {
@@ -95,6 +98,7 @@ public class DoctorLoginInterceptor extends HandlerInterceptorAdapter {
 
     @Override
     public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
+        WebUtil.clear();
         UserUtil.clearCurrentUser();
     }
 }

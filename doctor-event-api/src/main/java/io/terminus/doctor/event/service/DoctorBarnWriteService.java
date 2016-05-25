@@ -3,6 +3,8 @@ package io.terminus.doctor.event.service;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.event.model.DoctorBarn;
 
+import javax.validation.constraints.NotNull;
+
 /**
  * Desc: 猪舍表写服务
  * Mail: yangzl@terminus.io
@@ -32,4 +34,13 @@ public interface DoctorBarnWriteService {
      * @return 是否成功
      */
     Response<Boolean> deleteBarnById(Long barnId);
+
+    /**
+     * 修改猪舍状态
+     * @param barnId 猪舍id
+     * @param status 猪舍状态
+     * @return 是否成功
+     */
+    Response<Boolean> updateBarnStatus(@NotNull(message = "barnId.not.null") Long barnId,
+                                    @NotNull(message = "status.not.null") Integer status);
 }

@@ -1,8 +1,9 @@
-package io.terminus.doctor.web.history.dao;
+package io.terminus.doctor.basic.dao.redis;
 
 import io.terminus.common.redis.utils.JedisTemplate;
-import io.terminus.doctor.web.history.enums.SearchType;
+import io.terminus.doctor.basic.enums.SearchType;
 import org.joda.time.DateTime;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import java.util.Set;
@@ -22,6 +23,7 @@ public class DoctorSearchHistoryDao {
 
     private final JedisTemplate jedisTemplate;
 
+    @Autowired
     public DoctorSearchHistoryDao(JedisTemplate jedisTemplate) {
         SearchType.BARN.name();
         this.jedisTemplate = jedisTemplate;
@@ -31,7 +33,7 @@ public class DoctorSearchHistoryDao {
      * 保存搜索记录
      * @param userId 用户id
      * @param type 搜索类型
-     * @see io.terminus.doctor.web.history.enums.SearchType
+     * @see io.terminus.doctor.basic.enums.SearchType
      * @param word 要保存的值
      */
     public void setWord(Long userId, SearchType type, String word) {

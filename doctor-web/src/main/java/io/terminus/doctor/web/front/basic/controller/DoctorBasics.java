@@ -1,4 +1,4 @@
-package io.terminus.doctor.web.basic.controller;
+package io.terminus.doctor.web.front.basic.controller;
 
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.basic.model.DoctorChangeReason;
@@ -172,7 +172,7 @@ public class DoctorBasics {
      * @param changeTypeId 变动类型id
      * @return 变动原因表
      */
-    @RequestMapping(value = "/changeReason/id", method = RequestMethod.GET)
+    @RequestMapping(value = "/changeReason/typeId", method = RequestMethod.GET)
     public List<DoctorChangeReason> findChangeReasonByChangeTypeId(@RequestParam("changeTypeId") Long changeTypeId) {
         return RespHelper.or500(doctorBasicReadService.findChangeReasonByChangeTypeId(changeTypeId));
     }

@@ -40,6 +40,10 @@
     <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.OperatorRoleWriteService" ref="operatorRoleWriteServiceImpl"/>
     <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.OperatorReadService" ref="operatorReadServiceImpl"/>
     <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.UserBindService" ref="userBindServiceImpl"/>
+    <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.PrimaryUserWriteService" ref="primaryUserWriteServiceImpl"/>
+    <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.PrimaryUserReadService" ref="primaryUserReadServiceImpl"/>
+    <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.SubRoleWriteService" ref="subRoleWriteServiceImpl"/>
+    <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.SubRoleReadService" ref="subRoleReadServiceImpl"/>
 
     <!-- article service -->
     <dubbo:service version="1.0.0" retries="0" interface="io.terminus.parana.article.service.ArticleReadService" ref="articleReadServiceImpl"/>

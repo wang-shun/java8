@@ -6,7 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Strings;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.parana.common.constants.JacksonType;
-import io.terminus.parana.auth.CompiledTree;
+import io.terminus.parana.user.auth.CustomRole;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -19,6 +19,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * 运营细分权限
@@ -28,9 +29,9 @@ import java.util.Map;
 @Data
 @EqualsAndHashCode(of = {"id"})
 @ToString(of = {"id", "name", "desc", "status"})
-public class OperatorRole implements Serializable {
+public class OperatorRole implements Serializable, CustomRole {
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 0;
 
     private static final ObjectMapper OBJECT_MAPPER = JsonMapper.nonEmptyMapper().getMapper();
 
@@ -50,6 +51,11 @@ public class OperatorRole implements Serializable {
     private String desc;
 
     /**
+     * 角色所属 (PC / MOBILE)
+     */
+    private String appKey;
+
+    /**
      * 角色状态:
      *
      * 0. 未生效(冻结), 1. 生效, -1. 删除
@@ -60,7 +66,7 @@ public class OperatorRole implements Serializable {
      * 角色对应资源列表, 不存数据库
      */
     @Setter(AccessLevel.NONE)
-    private List<CompiledTree> allow;
+    private List<String> allow;
 
     /**
      * 角色对应资源列表 JSON, 存数据库
@@ -93,7 +99,7 @@ public class OperatorRole implements Serializable {
     private Date updatedAt;
 
     @SneakyThrows
-    public void setAllow(List<CompiledTree> allow) {
+    public void setAllow(List<String> allow) {
         this.allow = allow;
         if (allow == null) {
             this.allowJson = null;
@@ -110,7 +116,7 @@ public class OperatorRole implements Serializable {
         } else if (allowJson.length() == 0) {
             this.allow = Collections.emptyList();
         } else {
-            this.allow = OBJECT_MAPPER.readValue(allowJson, new TypeReference<List<CompiledTree>>() {
+            this.allow = OBJECT_MAPPER.readValue(allowJson, new TypeReference<List<String>>() {
             });
         }
     }
@@ -133,5 +139,15 @@ public class OperatorRole implements Serializable {
         } else {
             this.extra = OBJECT_MAPPER.readValue(extraJson, JacksonType.MAP_OF_STRING);
         }
+    }
+
+    @Override
+    public boolean isActive() {
+        return Objects.equals(status, 1);
+    }
+
+    @Override
+    public Map<String, String> getContext() {
+        return Collections.emptyMap();
     }
 }

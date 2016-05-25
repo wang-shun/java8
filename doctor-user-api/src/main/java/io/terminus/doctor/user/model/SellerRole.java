@@ -6,7 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Strings;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.parana.common.constants.JacksonType;
-import io.terminus.parana.auth.CompiledTree;
+import io.terminus.parana.user.auth.CustomRole;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -17,8 +17,10 @@ import lombok.ToString;
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * 卖家细分权限
@@ -28,7 +30,7 @@ import java.util.Map;
 @Data
 @EqualsAndHashCode(of = {"id"})
 @ToString(of = {"id", "name", "desc", "shopId", "status"})
-public class SellerRole implements Serializable {
+public class SellerRole implements Serializable, CustomRole {
 
     private static final long serialVersionUID = 1L;
 
@@ -55,6 +57,11 @@ public class SellerRole implements Serializable {
     private Long shopId;
 
     /**
+     * 角色所属 (PC / MOBILE)
+     */
+    private String appKey;
+
+    /**
      * 角色状态:
      *
      * 0. 未生效(冻结), 1. 生效, -1. 删除
@@ -65,7 +72,7 @@ public class SellerRole implements Serializable {
      * 角色对应资源列表, 不存数据库
      */
     @Setter(AccessLevel.NONE)
-    private List<CompiledTree> allow;
+    private List<String> allow;
 
     /**
      * 角色对应资源列表 JSON, 存数据库
@@ -98,7 +105,7 @@ public class SellerRole implements Serializable {
     private Date updatedAt;
 
     @SneakyThrows
-    public void setAllow(List<CompiledTree> allow) {
+    public void setAllow(List<String> allow) {
         this.allow = allow;
         if (allow == null) {
             this.allowJson = null;
@@ -115,7 +122,7 @@ public class SellerRole implements Serializable {
         } else if (allowJson.length() == 0) {
             this.allow = Collections.emptyList();
         } else {
-            this.allow = OBJECT_MAPPER.readValue(allowJson, new TypeReference<List<CompiledTree>>() {
+            this.allow = OBJECT_MAPPER.readValue(allowJson, new TypeReference<List<String>>() {
             });
         }
     }
@@ -138,5 +145,19 @@ public class SellerRole implements Serializable {
         } else {
             this.extra = OBJECT_MAPPER.readValue(extraJson, JacksonType.MAP_OF_STRING);
         }
+    }
+
+    @Override
+    public boolean isActive() {
+        return Objects.equals(status, 1);
+    }
+
+    @Override
+    public Map<String, String> getContext() {
+        Map<String, String> context = new HashMap<>();
+        if (shopId != null) {
+            context.put("shopId", String.valueOf(shopId));
+        }
+        return context;
     }
 }

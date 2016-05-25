@@ -27,7 +27,18 @@ public enum UserType {
     /**
      * 站点拥有者
      */
-    SITE_OWNER(4);
+    SITE_OWNER(4),
+
+    /**
+     * 猪场管理员
+     */
+    FARM_ADMIN_PRIMARY(5),
+
+    /**
+     * 猪场子账号
+     */
+    FARM_SUB(6)
+    ;
 
     private final int value;
 

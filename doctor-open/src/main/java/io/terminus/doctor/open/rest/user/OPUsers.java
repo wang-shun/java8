@@ -34,6 +34,7 @@ import java.io.Serializable;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 
 import static io.terminus.common.utils.Arguments.isEmpty;
@@ -114,8 +115,17 @@ public class OPUsers {
         return Long.valueOf(RandomUtil.random(1, 10));
     }
 
-    @OpenMethod(key="user.login", paramNames = {"mobile", "password", "code", "sid"})
-    public Token login(String mobile, String password, String code, String sessionId) {
+    /**
+     * 用户登录,
+     * @param mobile
+     * @param password
+     * @param code
+     * @param sessionId
+     * @param deviceId
+     * @return
+     */
+    @OpenMethod(key="user.login", paramNames = {"mobile", "password", "code", "sid", "deviceId"})
+    public Token login(String mobile, String password, String code, String sessionId, String deviceId) {
         if (isEmpty(mobile)) {
             throw new OPClientException("user.mobile.miss");
         }
@@ -124,6 +134,9 @@ public class OPUsers {
         }
         if (isEmpty(sessionId)) {
             throw new OPClientException("session.id.miss");
+        }
+        if (isEmpty(deviceId)) {
+            throw new OPClientException("device.id.miss");
         }
 
         // 当用户次数超过指定次数之后,需要校验code
@@ -140,8 +153,11 @@ public class OPUsers {
 
         // 手机 密码登录
         User user = doLogin(mobile, password, sessionId);
-        // 登录成功记录 session
-        sessionManager.save(Sessions.TOKEN_PREFIX, sessionId, ImmutableMap.of(Sessions.USER_ID, (Object) user.getId()), Sessions.LONG_INACTIVE_INTERVAL);
+
+        // 登录成功记录 sessionId 和 deviceId, 防止其他设备获得sessionId, 伪造登录
+        sessionManager.save(Sessions.TOKEN_PREFIX, sessionId,
+                ImmutableMap.of(Sessions.USER_ID, (Object) user.getId(), Sessions.DEVICE_ID, (Object) deviceId),
+                Sessions.LONG_INACTIVE_INTERVAL);
         // 清除 limit & code
         sessionManager.deletePhysically(Sessions.LIMIT_PREFIX, sessionId);
         sessionManager.deletePhysically(Sessions.CODE_PREFIX, sessionId);
@@ -153,8 +169,63 @@ public class OPUsers {
         token.setExpiredAt(DateTime.now().plusSeconds(Sessions.LONG_INACTIVE_INTERVAL)
                 .toString(DateTimeFormat.forPattern("yyyyMMddHHmmss")));
         token.setSessionId(sessionId);
+        token.setDeviceId(deviceId);
         token.setCookieName(sessionProperties.getCookieName());
         return token;
+    }
+
+    /**
+     * 用户自动登录, 需要传入 sessionId 和 deviceId 防止sessionId泄露
+     * @param sessionId
+     * @param deviceId
+     * @return
+     */
+    @OpenMethod(key="user.auto.login", paramNames = {"sid", "deviceId"})
+    public Token autologin(String sessionId, String deviceId) {
+        if (isEmpty(sessionId)) {
+            throw new OPClientException("session.id.miss");
+        }
+        if (isEmpty(deviceId)) {
+            throw new OPClientException("device.id.miss");
+        }
+
+        Map<String, Object> snapshot = sessionManager.findSessionById(Sessions.TOKEN_PREFIX, sessionId);
+        if (snapshot == null || snapshot.size() == 0 || snapshot.get(Sessions.USER_ID) == null) {
+            throw new OPClientException(400, "session.id.expired");
+        }
+
+        //校验下设备号是否匹配
+        checkDeviceId(snapshot, deviceId);
+
+        // refresh
+        sessionManager.refreshExpireTime(Sessions.TOKEN_PREFIX, sessionId, Sessions.LONG_INACTIVE_INTERVAL);
+        Long uid = Long.parseLong(snapshot.get(Sessions.USER_ID).toString());
+        Response<User> res = userReadService.findById(uid);
+        if (!res.isSuccess()) {
+            throw new OPClientException(400, res.getError());
+        }
+
+        // 返回登录的凭证
+        Token token = new Token();
+        token.setName(res.getResult().getName());
+        token.setDomain(sessionProperties.getCookieDomain());
+        token.setExpiredAt(DateTime.now().plusSeconds(Sessions.LONG_INACTIVE_INTERVAL)
+                .toString(DateTimeFormat.forPattern("yyyyMMddHHmmss")));
+        token.setSessionId(sessionId);
+        token.setDeviceId(deviceId);
+        token.setCookieName(sessionProperties.getCookieName());
+        return token;
+    }
+
+    //校验设备号是否匹配
+    private void checkDeviceId(Map<String, Object> snapshot, String deviceId) {
+        if (snapshot == null || snapshot.size() == 0 || snapshot.get(Sessions.DEVICE_ID) == null) {
+            throw new OPClientException(400, "device.id.expired");
+        }
+
+        if (!Objects.equals(deviceId, String.valueOf(snapshot.get(Sessions.DEVICE_ID)))) {
+            throw new OPClientException(400, "device.id.not.match");
+        }
     }
 
     //手机登录
@@ -284,6 +355,7 @@ public class OPUsers {
         String name;
         String expiredAt;
         String sessionId;
+        String deviceId;
         String cookieName;
         String domain;
     }
