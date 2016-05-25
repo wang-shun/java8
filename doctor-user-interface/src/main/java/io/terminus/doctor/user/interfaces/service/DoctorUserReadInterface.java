@@ -28,8 +28,8 @@ public interface DoctorUserReadInterface {
      *                 <br>1. name[String], 模糊匹配字段 name
      *                 <br>2. mobile[String], 精确匹配字段 mobile
      *                 <br>3. email[String], 精确匹配字段 email
-     *                 <br>4. type[Integer], 通过枚举  转换成名称后精确匹配字段 type TODO
-     *                 <br>5. types[Array], 同上, 但仅在 type=null 时才有效
+     *                 <br>4. type[String], 参数为 rolesJson 字段的子字符串
+     *                 <br>5. types[Array[String]], 同上, 但仅在 type=null 时才有效
      *                 <br>6. status[Integer], 精确匹配字段 status
      *                 <br>7. login 或 displayNameExact [String], 精确匹配字段 name
      *                 <br>8. displayName[String], 匹配字段 name 以此值开头的

@@ -14,9 +14,13 @@ public interface DoctorUserWriteInterface {
     Response<Integer> updateStatus(Long userId, Integer status);
     Response<Integer> batchUpdateStatus(List<Long> userIds, Integer status);
 
-    Response<Integer> updateType(Long userId, int type);
-    Response<Integer> batchUpdateType(List<Long> userIds, int type);
+    Response<Integer> updateType(Long userId, String typeName);
 
+    /**
+     * 仅支持更新 name, email, mobile, password
+     * @param user
+     * @return
+     */
     Response<Boolean> update(User user);
 
     Response<Boolean> createUser(User user);

@@ -19,10 +19,6 @@ import java.util.*;
 public class UserDaoExt extends UserDao {
     private static final String NAMESPACE = "UserExtend.";
 
-    public void updateRoles(List<Long> userIds, List<String> roles){
-        sqlSession.update(NAMESPACE + "batchUpdateRoles", ImmutableMap.of("userIds", userIds, "rolesJson", JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(roles)));
-    }
-
     /**
      * 查询所有对象列表
      * @return 所有对象列表
@@ -61,7 +57,7 @@ public class UserDaoExt extends UserDao {
     }
 
     public Paging<User> paging(Integer offset, Integer limit){
-        return this.paging(offset, limit, ImmutableMap.of());
+        return this.paging(offset, limit, new HashMap<>());
     }
     @SuppressWarnings("unchecked")
     public Paging<User> paging(Integer offset, Integer limit, User criteria){

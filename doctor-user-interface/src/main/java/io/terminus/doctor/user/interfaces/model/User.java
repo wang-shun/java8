@@ -13,7 +13,6 @@ public class User implements Serializable{
     private String email;
     private String mobile;
     private String password;
-    private Integer type; //用户类型 1:超级管理员, 2:普通用户, 3:后台运营, 4:站点拥有者
     private Integer status; //用户状态 0:未激活, 1:正常, -1:锁定, -2:冻结, -3: 删除
     private String rolesJson;
     private Date createdAt;
@@ -57,14 +56,6 @@ public class User implements Serializable{
 
     public void setPassword(String password) {
         this.password = password;
-    }
-
-    public Integer getType() {
-        return type;
-    }
-
-    public void setType(Integer type) {
-        this.type = type;
     }
 
     public Integer getStatus() {

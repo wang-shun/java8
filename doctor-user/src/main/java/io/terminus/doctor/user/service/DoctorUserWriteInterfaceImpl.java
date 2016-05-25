@@ -1,16 +1,20 @@
 package io.terminus.doctor.user.service;
 
 import com.google.common.base.Throwables;
+import com.google.common.collect.Lists;
 import io.terminus.common.utils.BeanMapper;
-import io.terminus.doctor.user.interfaces.service.DoctorUserWriteInterface;
+import io.terminus.doctor.common.enums.UserType;
 import io.terminus.doctor.user.dao.UserDaoExt;
 import io.terminus.doctor.user.interfaces.model.Response;
 import io.terminus.doctor.user.interfaces.model.User;
+import io.terminus.doctor.user.interfaces.service.DoctorUserWriteInterface;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -48,24 +52,24 @@ public class DoctorUserWriteInterfaceImpl implements DoctorUserWriteInterface {
     }
 
     @Override
-    public Response<Integer> updateType(Long userId, int type) {
+    public Response<Integer> updateType(Long userId, String typeName) {
         Response<Integer> response = new Response<>();
         try {
-            userDaoExt.updateRoles(userId, this.getRolesFromType(type));
+            io.terminus.parana.user.model.User user = userDaoExt.findById(userId);
+            if (user == null) {
+                return Response.fail("user.not.found");
+            }
+            List<String> roles = user.getRoles();
+            if (roles == null) {
+                roles = new ArrayList<>();
+            }else{
+                roles = Lists.newArrayList(roles);
+            }
+            if(!roles.contains(typeName)){
+                roles.add(typeName);
+                userDaoExt.updateRoles(userId, roles);
+            }
             response.setResult(1);
-        } catch (Exception e) {
-            log.error("update user failed, cause:{}", Throwables.getStackTraceAsString(e));
-            response.setError("update.user.failed");
-        }
-        return response;
-    }
-
-    @Override
-    public Response<Integer> batchUpdateType(List<Long> userIds, int type) {
-        Response<Integer> response = new Response<>();
-        try {
-            userDaoExt.updateRoles(userIds, this.getRolesFromType(type));
-            response.setResult(userIds.size());
         } catch (Exception e) {
             log.error("update user failed, cause:{}", Throwables.getStackTraceAsString(e));
             response.setError("update.user.failed");
@@ -89,7 +93,16 @@ public class DoctorUserWriteInterfaceImpl implements DoctorUserWriteInterface {
     public Response<Boolean> createUser(User user) {
         Response<Boolean> response = new Response<>();
         try {
-            response.setResult(userDaoExt.create(BeanMapper.map(user, io.terminus.parana.user.model.User.class)));
+            if(userDaoExt.findByName(user.getName()) != null){
+                return Response.fail("duplicated.name");
+            }
+            if(userDaoExt.findByMobile(user.getMobile()) != null){
+                return Response.fail("duplicated.mobile");
+            }
+            if(userDaoExt.findByEmail(user.getEmail()) != null){
+                return Response.fail("duplicated.email");
+            }
+            response.setResult(userDaoExt.create(this.makeParanaUserFromInterface(user)));
         } catch (Exception e) {
             log.error("update user failed, cause:{}", Throwables.getStackTraceAsString(e));
             response.setError("create.user.failed");
@@ -101,7 +114,7 @@ public class DoctorUserWriteInterfaceImpl implements DoctorUserWriteInterface {
     public Response<Integer> createUsers(List<User> users) {
         Response<Integer> response = new Response<>();
         try {
-            response.setResult(userDaoExt.creates(BeanMapper.mapList(users, io.terminus.parana.user.model.User.class)));
+            response.setResult(userDaoExt.creates(this.makeParanaUserFromInterface(users)));
         } catch (Exception e) {
             log.error("update user failed, cause:{}", Throwables.getStackTraceAsString(e));
             response.setError("create.user.failed");
@@ -145,7 +158,15 @@ public class DoctorUserWriteInterfaceImpl implements DoctorUserWriteInterface {
         return response;
     }
 
-    private List<String> getRolesFromType(int type){
-        return null; //TODO
+    private io.terminus.parana.user.model.User makeParanaUserFromInterface(User user){
+        io.terminus.parana.user.model.User paranaUser = BeanMapper.map(user, io.terminus.parana.user.model.User.class);
+        if(paranaUser.getType() == null){
+            paranaUser.setType(UserType.NORMAL.value());
+        }
+        return paranaUser;
+    }
+    private List<io.terminus.parana.user.model.User> makeParanaUserFromInterface(List<User> users){
+        List<io.terminus.parana.user.model.User> list = users.stream().map(this::makeParanaUserFromInterface).collect(Collectors.toList());
+        return list;
     }
 }

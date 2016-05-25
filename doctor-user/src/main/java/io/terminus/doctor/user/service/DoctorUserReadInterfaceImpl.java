@@ -1,13 +1,15 @@
 package io.terminus.doctor.user.service;
 
 import com.google.common.base.Throwables;
+import com.google.common.collect.Lists;
+import io.terminus.common.exception.ServiceException;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.common.utils.Params;
-import io.terminus.doctor.user.interfaces.service.DoctorUserReadInterface;
 import io.terminus.doctor.user.dao.UserDaoExt;
 import io.terminus.doctor.user.interfaces.model.Paging;
 import io.terminus.doctor.user.interfaces.model.Response;
 import io.terminus.doctor.user.interfaces.model.User;
+import io.terminus.doctor.user.interfaces.service.DoctorUserReadInterface;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -36,8 +38,10 @@ public class DoctorUserReadInterfaceImpl implements DoctorUserReadInterface {
         Response<User> response = new Response<>();
         User user = new User();
         try {
-            BeanMapper.copy(userDaoExt.findByName(nickname), user);
-            response.setResult(this.setUserType(user));
+            BeanMapper.copy(this.checkNotNull(userDaoExt.findByName(nickname)), user);
+            response.setResult(user);
+        } catch(ServiceException e) {
+            response.setError(e.getMessage());
         } catch (Exception e) {
             log.error("find user failed, cause:{}", Throwables.getStackTraceAsString(e));
             response.setError("find.user.failed");
@@ -50,8 +54,10 @@ public class DoctorUserReadInterfaceImpl implements DoctorUserReadInterface {
         Response<User> response = new Response<>();
         User user = new User();
         try {
-            BeanMapper.copy(userDaoExt.findByEmail(email), user);
-            response.setResult(this.setUserType(user));
+            BeanMapper.copy(this.checkNotNull(userDaoExt.findByEmail(email)), user);
+            response.setResult(user);
+        } catch(ServiceException e) {
+            response.setError(e.getMessage());
         } catch (Exception e) {
             log.error("find user failed, cause:{}", Throwables.getStackTraceAsString(e));
             response.setError("find.user.failed");
@@ -64,8 +70,10 @@ public class DoctorUserReadInterfaceImpl implements DoctorUserReadInterface {
         Response<User> response = new Response<>();
         User user = new User();
         try {
-            BeanMapper.copy(userDaoExt.findByMobile(mobile), user);
-            response.setResult(this.setUserType(user));
+            BeanMapper.copy(this.checkNotNull(userDaoExt.findByMobile(mobile)), user);
+            response.setResult(user);
+        } catch(ServiceException e) {
+            response.setError(e.getMessage());
         } catch (Exception e) {
             log.error("find user failed, cause:{}", Throwables.getStackTraceAsString(e));
             response.setError("find.user.failed");
@@ -78,8 +86,10 @@ public class DoctorUserReadInterfaceImpl implements DoctorUserReadInterface {
         Response<User> response = new Response<>();
         User user = new User();
         try {
-            BeanMapper.copy(userDaoExt.findById(id), user);
-            response.setResult(this.setUserType(user));
+            BeanMapper.copy(this.checkNotNull(userDaoExt.findById(id)), user);
+            response.setResult(user);
+        } catch(ServiceException e) {
+            response.setError(e.getMessage());
         } catch (Exception e) {
             log.error("find user failed, cause:{}", Throwables.getStackTraceAsString(e));
             response.setError("find.user.failed");
@@ -92,8 +102,10 @@ public class DoctorUserReadInterfaceImpl implements DoctorUserReadInterface {
         Response<User> response = new Response<>();
         User user = new User();
         try {
-            BeanMapper.copy(userDaoExt.findById(id), user);
-            response.setResult(this.setUserType(user));
+            BeanMapper.copy(this.checkNotNull(userDaoExt.findById(id)), user);
+            response.setResult(user);
+        } catch(ServiceException e) {
+            response.setError(e.getMessage());
         } catch (Exception e) {
             log.error("find user failed, cause:{}", Throwables.getStackTraceAsString(e));
             response.setError("find.user.failed");
@@ -131,7 +143,16 @@ public class DoctorUserReadInterfaceImpl implements DoctorUserReadInterface {
     public Response<List<User>> loadsBy(Map<String, Object> criteria) {
         Response<List<User>> response = new Response<>();
         try {
-            List<User> list = BeanMapper.mapList(userDaoExt.list(Params.filterNullOrEmpty(criteria)), User.class);
+            criteria = Params.filterNullOrEmpty(criteria);
+            if(criteria.containsKey("type")){
+                String type = criteria.get("type").toString();
+                criteria.remove("type");
+                criteria.put("roles", Lists.newArrayList(type));
+            }else if(criteria.containsKey("types")){
+                criteria.put("roles", criteria.get("types"));
+                criteria.remove("types");
+            }
+            List<User> list = BeanMapper.mapList(userDaoExt.list(criteria), User.class);
             response.setResult(list);
         } catch (Exception e) {
             log.error("find user failed, cause:{}", Throwables.getStackTraceAsString(e));
@@ -235,13 +256,13 @@ public class DoctorUserReadInterfaceImpl implements DoctorUserReadInterface {
         }
         return response;
     }
-
-
-    private User setUserType(User user){
-        user.getRolesJson();
-        //user.setType(null);//TODO 陈增辉
+    private io.terminus.parana.user.model.User checkNotNull(io.terminus.parana.user.model.User user){
+        if(user == null){
+            throw new ServiceException("user.not.found");
+        }
         return user;
     }
+    
     private Paging<User> getPaging(io.terminus.common.model.Paging<io.terminus.parana.user.model.User> page){
         Paging<User> paging = new Paging<>();
         paging.setTotal(page.getTotal());

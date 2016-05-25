@@ -51,6 +51,12 @@
         <if test="displayNameExact != null"> AND name = #{displayNameExact}</if><!-- 昵称完全匹配 -->
         <if test="haveMobile != null"> AND mobile is not null AND  mobile !=""</if> <!-- 手机号不为空 -->
         <if test="searchValue!= null"> AND (`name` = #{searchValue} or email = #{searchValue} or mobile = #{searchValue})</if> <!-- 手机号、邮箱、登录名匹配-->
+        <if test="roles != null">
+            and
+            <foreach collection="roles" item="role" open="(" separator="or" close=")">
+                <![CDATA[ instr(roles_json, #{role}) > 0 ]]>
+            </foreach>
+        </if>
     </sql>
 
     <select id="list" resultMap="UserMap" parameterType="map">
