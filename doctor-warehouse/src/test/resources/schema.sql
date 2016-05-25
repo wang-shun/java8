@@ -99,3 +99,49 @@ CREATE TABLE `doctor_material_in_ware_houses` (
 CREATE index doctor_material_in_ware_houses_farm_id on doctor_material_in_ware_houses(farm_id);
 CREATE index doctor_material_in_ware_houses_ware_house_id on doctor_material_in_ware_houses(ware_house_id);
 CREATE index doctor_material_in_ware_houses_material_id on doctor_material_in_ware_houses(material_id);
+
+-- create consume provider event table
+CREATE TABLE `doctor_material_consume_providers` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT 'id',
+  `type` bigint(20) unsigned DEFAULT NULL COMMENT '领取货物属于的类型',
+  `farm_id` bigint(20) unsigned DEFAULT NULL COMMENT '冗余仓库信息',
+  `farm_name` varchar(64) DEFAULT NULL COMMENT '猪场姓名',
+  `ware_house_id` bigint(20) unsigned DEFAULT NULL COMMENT '仓库信息',
+  `ware_house_name` varchar(64) DEFAULT NULL COMMENT '仓库名称',
+  `material_id` bigint(20) DEFAULT NULL COMMENT '原料Id',
+  `material_name` varchar(64) DEFAULT NULL COMMENT '原料名称',
+  `event_time` datetime DEFAULT NULL COMMENT '事件日期',
+  `event_type` smallint(6) DEFAULT NULL COMMENT '事件类型, provider 提供， consumer 消费',
+  `event_count` bigint(20) DEFAULT NULL COMMENT '事件数量',
+  `staff_id` bigint(20) unsigned DEFAULT NULL COMMENT '工作人员Id',
+  `staff_name` varchar(64) DEFAULT NULL COMMENT '关联事件人',
+  `extra` text COMMENT '领用: 领用猪群的信息, 消耗天数。 提供： 供应商的名称， 相关信息',
+  `creator_id` bigint(20) DEFAULT NULL COMMENT '创建人id',
+  `creator_name` varchar(64) DEFAULT NULL COMMENT '创建人姓名',
+  `updator_id` bigint(20) DEFAULT NULL COMMENT '创建人Id',
+  `updator_name` varchar(64) DEFAULT NULL COMMENT '创建人姓名',
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) COMMENT='领用记录信息表';
+CREATE index doctor_material_consume_providers_farm_id on doctor_material_consume_providers(farm_id);
+create index doctor_material_consume_providers_ware_house_id on doctor_material_consume_providers(ware_house_id);
+create index doctor_material_consume_providers_material_id on doctor_material_consume_providers(material_id);
+
+-- create consume avg
+CREATE TABLE `doctor_material_consume_avgs` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT 'id',
+  `farm_id` bigint(20) unsigned DEFAULT NULL COMMENT '冗余仓库信息',
+  `ware_house_id` bigint(20) unsigned DEFAULT NULL COMMENT '仓库信息',
+  `material_id` bigint(20) DEFAULT NULL COMMENT '原料Id',
+  `consume_avg_count` bigint(20) DEFAULT NULL COMMENT '平均消耗数量',
+  `consume_count` bigint(20) DEFAULT NULL COMMENT '消耗数量',
+  `consime_date` datetime DEFAULT NULL comment '消耗日期',
+  `extra` text DEFAULT NULL comment 'extra',
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) COMMENT='物料消耗信息统计方式';
+CREATE index doctor_material_consume_avgs_farm_id on doctor_material_consume_avgs(farm_id);
+create index doctor_material_consume_avgs_wware_house_id on doctor_material_consume_avgs(ware_house_id);
+create index doctor_material_consume_avgs_material_id on doctor_material_consume_avgs(material_id);

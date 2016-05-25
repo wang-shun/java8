@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import static com.google.common.base.Preconditions.checkState;
 import static java.util.Objects.isNull;
 
 /**
@@ -28,7 +29,7 @@ public class DoctorWareHouseWriteServiceImpl implements DoctorWareHouseWriteServ
     }
 
     @Override
-    public Response<Boolean> createWareHouse(DoctorWareHouse doctorWareHouse) {
+    public Response<Long> createWareHouse(DoctorWareHouse doctorWareHouse) {
         try{
             // validate farmInfo
             if(isNull(doctorWareHouse.getFarmId())){
@@ -43,10 +44,12 @@ public class DoctorWareHouseWriteServiceImpl implements DoctorWareHouseWriteServ
                 return Response.fail("input.wareHouseType.empty");
             }
 
-            return Response.ok(doctorWareHouseDao.create(doctorWareHouse));
+            checkState(doctorWareHouseDao.create(doctorWareHouse), "warehouse.create.fail");
+            return Response.ok(doctorWareHouse.getId());
         }catch (Exception e){
             log.error("create ware house error, cause:{}", Throwables.getStackTraceAsString(e));
             return Response.fail("create.wareHouse.error");
         }
     }
 }
+

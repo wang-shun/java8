@@ -18,7 +18,7 @@ public interface DoctorWareHouseWriteService {
      * @param doctorWareHouse
      * @return
      */
-    Response<Boolean> createWareHouse(@NotNull(message = "input.wareHouse.empty") DoctorWareHouse doctorWareHouse);
+    Response<Long> createWareHouse(@NotNull(message = "input.wareHouse.empty") DoctorWareHouse doctorWareHouse);
 
     /**
      * 修改warehouse 信息
