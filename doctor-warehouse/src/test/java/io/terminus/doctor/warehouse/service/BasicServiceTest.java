@@ -1,4 +1,4 @@
-package io.terminus.doctor.user.service;
+package io.terminus.doctor.warehouse.service;
 
 import org.junit.runner.RunWith;
 import org.springframework.boot.test.SpringApplicationConfiguration;
@@ -14,7 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
  * Descirbe: Service 测试基础类
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@SpringApplicationConfiguration(ServiceTestConfiguration.class)
+@SpringApplicationConfiguration(classes = ServiceTestConfiguration.class)
 @Transactional
 @Rollback
 @ActiveProfiles("test")

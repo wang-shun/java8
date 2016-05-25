@@ -1,5 +1,6 @@
-package io.terminus.doctor.user.service;
+package io.terminus.doctor.warehouse.service;
 
+import io.terminus.boot.dubbo.autoconfigure.DubboAutoConfiguration;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -11,7 +12,8 @@ import org.springframework.context.annotation.Configuration;
  * Descirbe: Service 信息配置工具类
  */
 @Configuration
-@EnableAutoConfiguration
-@ComponentScan("io.terminus.doctor.warehouse")
+@EnableAutoConfiguration(exclude = {DubboAutoConfiguration.class})
+@ComponentScan("io.terminus.doctor.warehouse.*")
 public class ServiceTestConfiguration {
+
 }
