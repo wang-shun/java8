@@ -31,7 +31,7 @@ public interface SubRoleReadService extends CustomRoleReadService<SubRole> {
     Response<List<SubRole>> findByIds(List<Long> ids);
 
     /**
-     * 通过店铺 ID 查询
+     * 通过主账号 ID 查询
      *
      * @param appKey 角色使用场景
      * @param userId 主账号 ID

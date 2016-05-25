@@ -141,6 +141,10 @@ public class OperatorRole implements Serializable, CustomRole {
         }
     }
 
+    public String getBaseRole() {
+        return "ADMIN";
+    }
+
     @Override
     public boolean isActive() {
         return Objects.equals(status, 1);

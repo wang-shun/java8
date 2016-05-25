@@ -30,7 +30,7 @@ public interface DoctorMaterialInfoReadService {
      * @param pageSize
      * @return
      */
-    Response<Paging<DoctorMaterialInfo>> pagingMaterialInfos(@NotNull(message = "input.farmId.empty") String farmId,
+    Response<Paging<DoctorMaterialInfo>> pagingMaterialInfos(@NotNull(message = "input.farmId.empty") Long farmId,
                                                              Integer type, Integer pageNo, Integer pageSize);
 
     /**

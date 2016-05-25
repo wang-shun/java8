@@ -1,5 +1,7 @@
 package io.terminus.doctor.event.test;
 
+import com.google.common.eventbus.AsyncEventBus;
+import com.google.common.eventbus.EventBus;
 import io.terminus.boot.dubbo.autoconfigure.DubboAutoConfiguration;
 import io.terminus.boot.mybatis.autoconfigure.MybatisAutoConfiguration;
 import io.terminus.boot.search.autoconfigure.ESSearchAutoConfiguration;
@@ -27,6 +29,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
+import java.util.concurrent.Executors;
+
 /**
  * Desc: 工作基础测试类配置类
  * Mail: chk@terminus.io
@@ -38,6 +42,12 @@ import org.springframework.context.annotation.Configuration;
 @ComponentScan({"io.terminus.doctor.event.*","io.terminus.doctor.workflow.*"})
 @AutoConfigureAfter(MybatisAutoConfiguration.class)
 public class ServiceConfiguration {
+
+    @Bean
+    public EventBus eventBus(){
+        return new AsyncEventBus(
+                Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors()));
+    }
 
     @Configuration
     @ConditionalOnClass(ESClient.class)

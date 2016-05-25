@@ -14,7 +14,7 @@ import java.util.List;
  * Email:yaoqj@terminus.io
  * Descirbe:
  */
-public interface DoctorWarehouseReadService {
+public interface DoctorWareHouseReadService {
 
     /**
      * 获取猪场不同原料类型的仓库统计信息

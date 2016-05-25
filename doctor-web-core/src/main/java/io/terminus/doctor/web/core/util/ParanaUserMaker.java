@@ -5,7 +5,7 @@
 package io.terminus.doctor.web.core.util;
 
 import io.terminus.common.utils.BeanMapper;
-import io.terminus.doctor.common.model.ParanaUser;
+import io.terminus.parana.common.model.ParanaUser;
 import io.terminus.parana.user.model.User;
 
 /**
