@@ -6,7 +6,7 @@ package io.terminus.doctor.web.front.controller;
 
 import com.google.common.base.Joiner;
 import io.terminus.common.exception.JsonResponseException;
-import io.terminus.doctor.common.model.ParanaUser;
+import io.terminus.parana.common.model.ParanaUser;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.common.utils.SimpleAESUtils;
 import io.terminus.doctor.user.enums.TargetSystem;

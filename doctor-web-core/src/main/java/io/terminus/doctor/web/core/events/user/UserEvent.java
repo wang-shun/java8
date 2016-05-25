@@ -4,7 +4,7 @@
 
 package io.terminus.doctor.web.core.events.user;
 
-import io.terminus.doctor.common.model.ParanaUser;
+import io.terminus.parana.common.model.ParanaUser;
 import lombok.Getter;
 
 import javax.servlet.http.HttpServletRequest;

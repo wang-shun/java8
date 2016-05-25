@@ -25,7 +25,7 @@ import io.terminus.doctor.web.core.component.MobilePattern;
 import io.terminus.doctor.web.core.util.TextValidator;
 import io.terminus.lib.sms.SmsException;
 import io.terminus.pampas.common.UserUtil;
-import io.terminus.doctor.common.model.ParanaUser;
+import io.terminus.parana.common.model.ParanaUser;
 import io.terminus.parana.user.model.LoginType;
 import io.terminus.parana.user.model.User;
 import io.terminus.parana.user.service.UserReadService;

@@ -94,6 +94,10 @@
             <artifactId>search-api</artifactId>
             <version>10.6</version>
         </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.dataformat</groupId>
+            <artifactId>jackson-dataformat-yaml</artifactId>
+        </dependency>
     </dependencies>
 
     <build>

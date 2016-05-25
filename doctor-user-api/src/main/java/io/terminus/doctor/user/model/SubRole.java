@@ -152,6 +152,10 @@ public class SubRole implements Serializable, CustomRole {
         }
     }
 
+    public String getBaseRole() {
+        return "SUB";
+    }
+
     @Override
     public boolean isActive() {
         return Objects.equals(status, 1);
