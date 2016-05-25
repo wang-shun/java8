@@ -12,6 +12,14 @@
         http://code.alibabatech.com/schema/dubbo/dubbo.xsd">
 
     <!-- dubbo warehouse read service -->
-    <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.warehouse.service.DoctorWareHouseReadService" ref="doctorWareHouseReadServiceImpl"/>
 
+    <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.warehouse.service.DoctorWareHouseReadService" ref="doctorWareHouseReadServiceImpl"/>
+    <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.warehouse.service.DoctorWareHouseWriteService" ref="doctorWareHouseWriteServiceImpl"/>
+
+    <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.warehouse.service.DoctorMaterialInWareHouseReadService" ref="doctorMaterialInWareHouseReadServiceImpl"/>
+    <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.warehouse.service.DoctorMaterialInWareHouseWriteService" ref="doctorMaterialInWareHouseWriteServiceImpl"/>
+
+    <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.warehouse.service.DoctorMaterialInfoReadService" ref="doctorMaterialInfoReadServiceImpl"/>
+    <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.warehouse.service.DoctorMaterialInfoWriteService" ref="doctorMaterialInfoWriteServiceImpl"/>
+    
 </beans>

@@ -1,12 +1,12 @@
 package io.terminus.doctor.open.dto;
 
-import io.terminus.doctor.event.dto.DoctorStatisticDto;
 import io.terminus.doctor.user.model.DoctorFarm;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * Desc: 猪场基本概况
@@ -28,5 +28,5 @@ public class DoctorFarmBasicDto implements Serializable {
     /**
      * 猪场统计信息
      */
-    private DoctorStatisticDto farmStatistic;
+    private List<DoctorStatisticDto> farmStatistics;
 }

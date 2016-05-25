@@ -1,12 +1,12 @@
 package io.terminus.doctor.open.dto;
 
-import io.terminus.doctor.event.dto.DoctorStatisticDto;
 import io.terminus.doctor.user.model.DoctorOrg;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * Desc: 公司概况(包含统计信息)
@@ -28,5 +28,5 @@ public class DoctorOrgBasicDto implements Serializable {
     /**
      * 公司统计信息
      */
-    private DoctorStatisticDto orgStatistic;
+    private List<DoctorStatisticDto> orgStatistics;
 }

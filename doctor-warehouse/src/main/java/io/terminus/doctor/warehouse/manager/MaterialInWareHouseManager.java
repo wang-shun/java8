@@ -3,6 +3,7 @@ package io.terminus.doctor.warehouse.manager;
 import com.google.common.collect.ImmutableMap;
 import io.terminus.doctor.common.utils.Params;
 import io.terminus.doctor.warehouse.constants.DoctorFarmWareHouseTypeConstants;
+import io.terminus.doctor.warehouse.constants.DoctorWareHouseTrackConstants;
 import io.terminus.doctor.warehouse.dao.DoctorFarmWareHouseTypeDao;
 import io.terminus.doctor.warehouse.dao.DoctorMaterialConsumeAvgDao;
 import io.terminus.doctor.warehouse.dao.DoctorMaterialConsumeProviderDao;
@@ -275,11 +276,12 @@ public class MaterialInWareHouseManager {
         checkState(!isNull(doctorWareHouseTrack), "not.find.doctorWareHouse");
         doctorWareHouseTrack.setLotNumber(doctorWareHouseTrack.getLotNumber() - doctorMaterialConsumeProviderDto.getConsumeCount());
 
+        // track中 存放 不同material 数量信息
         Map<String, Object> consumeMap = doctorWareHouseTrack.getExtraMap();
         Long count = Params.getWithOutNull(consumeMap, doctorMaterialConsumeProviderDto.getMaterialTypeId().toString());
         consumeMap.put(doctorMaterialConsumeProviderDto.getMaterialTypeId().toString(), count - doctorMaterialConsumeProviderDto.getConsumeCount());
+        consumeMap.put(DoctorWareHouseTrackConstants.RECENT_CONSUME_DATE, DateTime.now().toDate());
         doctorWareHouseTrack.setExtraMap(consumeMap);
-
         doctorWareHouseTrackDao.update(doctorWareHouseTrack);
 
         // update ware house type count
