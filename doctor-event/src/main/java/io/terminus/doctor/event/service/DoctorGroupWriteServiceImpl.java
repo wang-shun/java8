@@ -6,7 +6,10 @@ import io.terminus.doctor.event.dao.DoctorGroupDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorGroupSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
+import io.terminus.doctor.event.manager.DoctorGroupManager;
 import io.terminus.doctor.event.model.DoctorGroup;
+import io.terminus.doctor.event.model.DoctorGroupEvent;
+import io.terminus.doctor.event.model.DoctorGroupTrack;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -25,23 +28,25 @@ public class DoctorGroupWriteServiceImpl implements DoctorGroupWriteService {
     private final DoctorGroupEventDao doctorGroupEventDao;
     private final DoctorGroupSnapshotDao doctorGroupSnapshotDao;
     private final DoctorGroupTrackDao doctorGroupTrackDao;
+    private final DoctorGroupManager doctorGroupManager;
 
     @Autowired
     public DoctorGroupWriteServiceImpl(DoctorGroupDao doctorGroupDao,
                                        DoctorGroupEventDao doctorGroupEventDao,
                                        DoctorGroupSnapshotDao doctorGroupSnapshotDao,
-                                       DoctorGroupTrackDao doctorGroupTrackDao) {
+                                       DoctorGroupTrackDao doctorGroupTrackDao,
+                                       DoctorGroupManager doctorGroupManager) {
         this.doctorGroupDao = doctorGroupDao;
         this.doctorGroupEventDao = doctorGroupEventDao;
         this.doctorGroupSnapshotDao = doctorGroupSnapshotDao;
         this.doctorGroupTrackDao = doctorGroupTrackDao;
+        this.doctorGroupManager = doctorGroupManager;
     }
 
     @Override
-    public Response<Long> createNewGroup(DoctorGroup group) {
+    public Response<Long> createNewGroup(DoctorGroup group, DoctorGroupEvent groupEvent, DoctorGroupTrack groupTrack) {
         try {
-            doctorGroupDao.create(group);
-            return Response.ok(group.getId());
+            return Response.ok(doctorGroupManager.createNewGroup(group, groupEvent, groupTrack));
         } catch (Exception e) {
             log.error("create group failed, group:{}, cause:{}", group, Throwables.getStackTraceAsString(e));
             return Response.fail("group.create.fail");

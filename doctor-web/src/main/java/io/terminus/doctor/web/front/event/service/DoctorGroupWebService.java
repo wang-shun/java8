@@ -18,9 +18,9 @@ public interface DoctorGroupWebService {
     /**
      * 新建猪群
      * @param newGroupDto 新建猪群所需字段
-     * @return 是否成功
+     * @return 猪群id
      */
-    Response<Boolean> createNewGroup(@Valid DoctorNewGroupDto newGroupDto);
+    Response<Long> createNewGroup(@Valid DoctorNewGroupDto newGroupDto);
 
     /**
      * 录入猪群事件

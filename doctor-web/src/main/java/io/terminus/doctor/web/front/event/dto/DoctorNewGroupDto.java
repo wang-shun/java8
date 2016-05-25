@@ -5,6 +5,7 @@ import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
+import java.util.Date;
 
 /**
  * Desc: 新建猪群所需字段
@@ -29,10 +30,21 @@ public class DoctorNewGroupDto implements Serializable {
     private String groupCode;
 
     /**
+     * 建群时间
+     */
+    private Date openAt;
+
+    /**
      * 猪舍id
      */
     @NotNull(message = "barnId.not.null")
     private Long barnId;
+
+    /**
+     * 猪舍名称
+     */
+    @NotEmpty(message = "barnName.not.empty")
+    private String barnName;
 
     /**
      * 猪类 枚举9种
@@ -51,20 +63,22 @@ public class DoctorNewGroupDto implements Serializable {
     /**
      * 品种id
      */
-    @NotNull(message = "breedId.not.null")
     private Long breedId;
+
+    /**
+     * 品种name
+     */
+    private String breedName;
 
     /**
      * 品系id
      */
-    @NotNull(message = "geneticId.not.null")
     private Long geneticId;
 
     /**
-     * 工作人员id
+     * 品系name
      */
-    @NotNull(message = "staffId.not.null")
-    private Long staffId;
+    private String geneticName;
 
     /**
      * 来源 1 本场, 2 外购
@@ -72,24 +86,6 @@ public class DoctorNewGroupDto implements Serializable {
      */
     @NotNull(message = "source.not.null")
     private Integer source;
-
-    /**
-     * 事件猪只数
-     */
-    @NotNull(message = "quantity.not.null")
-    private Integer quantity;
-
-    /**
-     * 总活体重(公斤)
-     */
-    @NotNull(message = "weight.not.null")
-    private Double weight;
-
-    /**
-     * 平均日龄
-     */
-    @NotNull(message = "avgDayAge.not.null")
-    private Double avgDayAge;
 
     /**
      * 备注

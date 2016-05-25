@@ -485,7 +485,7 @@ CREATE TABLE `doctor_group_events` (
   `org_name` varchar(64) DEFAULT NULL COMMENT '公司名称',
   `farm_id` varchar(64) DEFAULT NULL COMMENT '猪场id',
   `farm_name` varchar(64) DEFAULT NULL COMMENT '猪场名称',
-  `group_id` varchar(64) DEFAULT NULL COMMENT '猪群卡片id',
+  `group_id` bigint(20) DEFAULT NULL COMMENT '猪群卡片id',
   `group_code` varchar(64) DEFAULT NULL COMMENT '猪群号',
   `event_at` datetime DEFAULT NULL COMMENT '事件发生日期',
   `type` smallint(6) DEFAULT NULL COMMENT '事件类型 枚举 总共10种',
@@ -1064,6 +1064,7 @@ CREATE INDEX idx_doctor_service_reviews_user_id ON doctor_service_reviews(user_i
 DROP TABLE IF EXISTS `doctor_group_snapshots`;
 CREATE TABLE `doctor_group_snapshots` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '自增主键',
+  `event_type` smallint(6) DEFAULT NULL COMMENT '猪群事件类型',
   `from_group_id` bigint(20) DEFAULT NULL COMMENT '操作前的猪群id',
   `to_group_id` bigint(20) DEFAULT NULL COMMENT '操作后的猪群id',
   `from_event_id` bigint(20) DEFAULT NULL COMMENT '操作前的事件id',

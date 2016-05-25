@@ -1,6 +1,9 @@
 package io.terminus.doctor.event.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.AccessLevel;
 import lombok.Data;
+import lombok.Setter;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -40,7 +43,7 @@ public class DoctorGroupEvent implements Serializable {
     /**
      * 猪群卡片id
      */
-    private String groupId;
+    private Long groupId;
     
     /**
      * 猪群号
@@ -117,8 +120,10 @@ public class DoctorGroupEvent implements Serializable {
     /**
      * 具体事件的内容通过json存储
      */
+    @Setter(AccessLevel.NONE)
+    @JsonIgnore
     private String extra;
-    
+
     /**
      * 创建时间
      */

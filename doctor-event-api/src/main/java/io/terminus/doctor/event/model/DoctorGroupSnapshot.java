@@ -9,13 +9,18 @@ import java.util.Date;
  * Desc: 猪群快照表Model类
  * Mail: yangzl@terminus.io
  * author: DreamYoung
- * Date: 2016-05-20
+ * Date: 2016-05-25
  */
 @Data
 public class DoctorGroupSnapshot implements Serializable {
-    private static final long serialVersionUID = -8594460676067820159L;
+    private static final long serialVersionUID = -6267365953172609599L;
 
     private Long id;
+    
+    /**
+     * 猪群事件类型
+     */
+    private Integer eventType;
     
     /**
      * 操作前的猪群id

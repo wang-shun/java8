@@ -2,6 +2,8 @@ package io.terminus.doctor.event.service;
 
 import io.terminus.common.model.Response;
 import io.terminus.doctor.event.model.DoctorGroup;
+import io.terminus.doctor.event.model.DoctorGroupEvent;
+import io.terminus.doctor.event.model.DoctorGroupTrack;
 
 /**
  * Desc: 猪群卡片表写服务
@@ -16,6 +18,6 @@ public interface DoctorGroupWriteService {
      * 新建猪群
      * @return 主键id
      */
-    Response<Long> createNewGroup(DoctorGroup group);
+    Response<Long> createNewGroup(DoctorGroup group, DoctorGroupEvent groupEvent, DoctorGroupTrack groupTrack);
 
 }

@@ -1,9 +1,16 @@
 package io.terminus.doctor.event.manager;
 
+import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.event.dao.DoctorGroupDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorGroupSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
+import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
+import io.terminus.doctor.event.enums.GroupEventType;
+import io.terminus.doctor.event.model.DoctorGroup;
+import io.terminus.doctor.event.model.DoctorGroupEvent;
+import io.terminus.doctor.event.model.DoctorGroupSnapshot;
+import io.terminus.doctor.event.model.DoctorGroupTrack;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -18,6 +25,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 @Component
 public class DoctorGroupManager {
+
+    private static final JsonMapper JSON_MAPPER = JsonMapper.nonEmptyMapper();
 
     private final DoctorGroupDao doctorGroupDao;
     private final DoctorGroupEventDao doctorGroupEventDao;
@@ -37,10 +46,42 @@ public class DoctorGroupManager {
 
     /**
      * 新建猪群
-     * @return
+     * @param group 猪群
+     * @param groupEvent 猪群事件
+     * @param groupTrack 猪群跟踪
+     * @return 猪群id
      */
     @Transactional
-    public Long createNewGroup() {
+    public Long createNewGroup(DoctorGroup group, DoctorGroupEvent groupEvent, DoctorGroupTrack groupTrack) {
+        //1. 创建猪群
+        doctorGroupDao.create(group);
+        Long groupId = group.getId();
 
+        //2. 创建新建猪群事件
+        groupEvent.setGroupId(groupId);
+        doctorGroupEventDao.create(groupEvent);
+
+        //3. 创建猪群跟踪
+        groupTrack.setGroupId(groupId);
+        groupTrack.setRelEventId(groupEvent.getId());
+        doctorGroupTrackDao.create(groupTrack);
+
+        //4. 创建猪群镜像
+        doctorGroupSnapshotDao.create(getCreateNewGroupSnapShot(group, groupEvent, groupTrack));
+        return groupId;
+    }
+
+    //创建新建猪群镜像信息
+    private DoctorGroupSnapshot getCreateNewGroupSnapShot(DoctorGroup group, DoctorGroupEvent groupEvent, DoctorGroupTrack groupTrack) {
+        DoctorGroupSnapshot groupSnapshot = new DoctorGroupSnapshot();
+        groupSnapshot.setEventType(GroupEventType.NEW.getValue());  //新建猪群事件
+        groupSnapshot.setToGroupId(group.getId());
+        groupSnapshot.setToEventId(groupEvent.getId());
+        groupSnapshot.setToInfo(JSON_MAPPER.toJson(DoctorGroupSnapShotInfo.builder()
+                .group(group)
+                .groupEvent(groupEvent)
+                .groupTrack(groupTrack)
+                .build()));
+        return groupSnapshot;
     }
 }
