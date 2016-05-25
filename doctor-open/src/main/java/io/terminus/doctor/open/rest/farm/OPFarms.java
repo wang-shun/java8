@@ -1,7 +1,11 @@
 package io.terminus.doctor.open.rest.farm;
 
+import com.google.common.collect.Lists;
+import io.terminus.doctor.event.dto.DoctorStatisticDto;
+import io.terminus.doctor.open.dto.DoctorBasicDto;
+import io.terminus.doctor.open.dto.DoctorFarmBasicDto;
+import io.terminus.doctor.open.dto.DoctorOrgBasicDto;
 import io.terminus.doctor.open.util.OPRespHelper;
-import io.terminus.doctor.user.model.DoctorFarm;
 import io.terminus.doctor.user.model.DoctorOrg;
 import io.terminus.doctor.user.service.DoctorFarmReadService;
 import io.terminus.pampas.common.UserUtil;
@@ -9,8 +13,6 @@ import io.terminus.pampas.openplatform.annotations.OpenBean;
 import io.terminus.pampas.openplatform.annotations.OpenMethod;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-
-import java.util.List;
 
 /**
  * Desc:
@@ -44,7 +46,32 @@ public class OPFarms {
      * @return 猪场信息list
      */
     @OpenMethod(key = "get.farm.info")
-    public List<DoctorFarm> getFarmInfo() {
-        return OPRespHelper.orOPEx(doctorFarmReadService.findFarmsByUserId(UserUtil.getUserId()));
+    public DoctorBasicDto getFarmInfo() {
+        return new DoctorBasicDto(
+                new DoctorOrgBasicDto(
+                        OPRespHelper.orOPEx(doctorFarmReadService.findOrgByUserId(UserUtil.getUserId())),
+                        mockStat()
+                ),
+                Lists.newArrayList(
+                        new DoctorFarmBasicDto(
+                                OPRespHelper.orOPEx(doctorFarmReadService.findFarmById(1L)),
+                                mockStat()
+                        ),
+                        new DoctorFarmBasicDto(
+                                OPRespHelper.orOPEx(doctorFarmReadService.findFarmById(2L)),
+                                mockStat()
+                        )
+                )
+        );
+    }
+
+    private DoctorStatisticDto mockStat() {
+        DoctorStatisticDto stat = new DoctorStatisticDto();
+        stat.setSow(100);
+        stat.setFarrowPiglet(200);
+        stat.setNurseryPiglet(300);
+        stat.setFattenPig(400);
+        stat.setBreedingPig(50);
+        return stat;
     }
 }
