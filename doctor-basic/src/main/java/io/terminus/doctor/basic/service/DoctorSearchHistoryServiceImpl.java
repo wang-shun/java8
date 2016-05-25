@@ -53,6 +53,9 @@ public class DoctorSearchHistoryServiceImpl implements DoctorSearchHistoryServic
     @Override
     public Response<Set<String>> findSearchHistory(Long userId, int searchType, Long size) {
         try {
+            if (size == null) {
+                size = 10L; // 默认查10条
+            }
             return Response.ok(doctorSearchHistoryDao.getWords(userId, SearchType.from(searchType), size));
         } catch (Exception e) {
             log.error("find search history failed, userId:{}, type:{} cause:{}",
