@@ -1,7 +1,7 @@
 package io.terminus.doctor.open.rest.farm;
 
 import com.google.common.collect.Lists;
-import io.terminus.doctor.event.dto.DoctorStatisticDto;
+import io.terminus.doctor.open.dto.DoctorStatisticDto;
 import io.terminus.doctor.open.dto.DoctorBasicDto;
 import io.terminus.doctor.open.dto.DoctorFarmBasicDto;
 import io.terminus.doctor.open.dto.DoctorOrgBasicDto;
@@ -52,28 +52,38 @@ public class OPFarms {
         return new DoctorBasicDto(
                 new DoctorOrgBasicDto(
                         OPRespHelper.orOPEx(doctorFarmReadService.findOrgByUserId(UserUtil.getUserId())),
-                        mockStats()
+                        mockOrgStats()
                 ),
                 Lists.newArrayList(
                         new DoctorFarmBasicDto(
                                 OPRespHelper.orOPEx(doctorFarmReadService.findFarmById(1L)),
-                                mockStats()
+                                mockFarmStats()
                         ),
                         new DoctorFarmBasicDto(
                                 OPRespHelper.orOPEx(doctorFarmReadService.findFarmById(2L)),
-                                mockStats()
+                                mockFarmStats()
                         )
                 )
         );
     }
 
-    private List<DoctorStatisticDto> mockStats() {
+    private List<DoctorStatisticDto> mockOrgStats() {
         return Lists.newArrayList(
                 new DoctorStatisticDto(DoctorStatisticDto.PigType.SOW.getDesc(), 100),
                 new DoctorStatisticDto(DoctorStatisticDto.PigType.FARROW_PIGLET.getDesc(), 200),
                 new DoctorStatisticDto(DoctorStatisticDto.PigType.NURSERY_PIGLET.getDesc(), 300),
                 new DoctorStatisticDto(DoctorStatisticDto.PigType.FATTEN_PIG.getDesc(), 400),
                 new DoctorStatisticDto(DoctorStatisticDto.PigType.BREEDING_PIG.getDesc(), 50)
+        );
+    }
+
+    private List<DoctorStatisticDto> mockFarmStats() {
+        return Lists.newArrayList(
+                new DoctorStatisticDto(DoctorStatisticDto.PigType.SOW.getCutDesc(), 100),
+                new DoctorStatisticDto(DoctorStatisticDto.PigType.FARROW_PIGLET.getCutDesc(), 200),
+                new DoctorStatisticDto(DoctorStatisticDto.PigType.NURSERY_PIGLET.getCutDesc(), 300),
+                new DoctorStatisticDto(DoctorStatisticDto.PigType.FATTEN_PIG.getCutDesc(), 400),
+                new DoctorStatisticDto(DoctorStatisticDto.PigType.BREEDING_PIG.getCutDesc(), 50)
         );
     }
 }

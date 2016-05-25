@@ -1,4 +1,4 @@
-package io.terminus.doctor.event.dto;
+package io.terminus.doctor.open.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -33,17 +33,20 @@ public class DoctorStatisticDto implements Serializable {
 
     public enum PigType {
 
-        SOW("母猪存栏量（头）"),
-        FARROW_PIGLET("产房仔猪存栏量（头）"),
-        NURSERY_PIGLET("保育猪存栏量（头）"),
-        FATTEN_PIG("育肥猪存栏量（头）"),
-        BREEDING_PIG("育种猪存栏量（头）");
+        SOW("母猪存栏量（头）", "母"),
+        FARROW_PIGLET("产房仔猪存栏量（头）", "产房"),
+        NURSERY_PIGLET("保育猪存栏量（头）", "保育"),
+        FATTEN_PIG("育肥猪存栏量（头）", "育肥"),
+        BREEDING_PIG("育种猪存栏量（头）", "育种");
 
         @Getter
         private final String desc;
+        @Getter
+        private final String cutDesc;
 
-        PigType(String desc) {
+        PigType(String desc, String cutDesc) {
             this.desc = desc;
+            this.cutDesc = cutDesc;
         }
     }
 }

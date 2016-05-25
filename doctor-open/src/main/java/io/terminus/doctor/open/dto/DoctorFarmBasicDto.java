@@ -1,6 +1,5 @@
 package io.terminus.doctor.open.dto;
 
-import io.terminus.doctor.event.dto.DoctorStatisticDto;
 import io.terminus.doctor.user.model.DoctorFarm;
 import lombok.AllArgsConstructor;
 import lombok.Data;
