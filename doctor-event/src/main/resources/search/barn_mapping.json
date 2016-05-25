@@ -1,0 +1,12 @@
+{
+  "barn": {
+    "_all": {
+      "enabled": false
+    },
+    "properties": {
+      "id": {
+        "type": "long"
+      }
+    }
+  }
+}
