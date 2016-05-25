@@ -55,6 +55,23 @@
         #{orgId}, #{orgName}, #{farmId}, #{farmName}, #{groupCode}, #{batchNo}, #{openAt}, #{closeAt}, #{status}, #{initBarnId}, #{initBarnName}, #{currentBarnId}, #{currentBarnName}, #{pigType}, #{sex}, #{breedId}, #{breedName}, #{geneticId}, #{geneticName}, #{staffId}, #{staffName}, #{remark}, #{outId}, #{extra}, #{creatorId}, #{creatorName}, #{updatorId}, #{updatorName}, now(), now()
     </sql>
 
+    <sql id="criteria">
+        <if test="orgId != null">AND org_id = #{orgId},</if>
+        <if test="farmId != null">AND farm_id = #{farmId},</if>
+        <if test="groupCode != null">AND group_code = #{groupCode},</if>
+        <if test="status != null">AND status = #{status},</if>
+        <if test="initBarnId != null">AND init_barn_id = #{initBarnId},</if>
+        <if test="currentBarnId != null">AND current_barn_id = #{currentBarnId},</if>
+        <if test="pigType != null">AND pig_type = #{pigType},</if>
+        <if test="sex != null">AND sex = #{sex},</if>
+        <if test="breedId != null">AND breed_id = #{breedId},</if>
+        <if test="geneticId != null">AND genetic_id = #{geneticId},</if>
+        <if test="startOpenAt != null">AND open_at &gt;= #{startOpenAt},</if>
+        <if test="endOpenAt != null">AND open_at &lt;= #{endOpenAt},</if>
+        <if test="startCloseAt != null">AND close_at &gt;= #{startCloseAt},</if>
+        <if test="endCloseAt != null">AND close_at &lt;= #{endCloseAt},</if>
+    </sql>
+
     <insert id="create" parameterType="DoctorGroup" keyProperty="id" useGeneratedKeys="true">
         INSERT INTO
         <include refid="tb" />
@@ -137,5 +154,20 @@
         ORDER BY id DESC LIMIT #{limit}
     </select>
     <!-- search api end -->
+
+    <select id="count" parameterType="map" resultType="long">
+        SELECT count(1) from <include refid="tb"/>
+        <where>
+            <include refid="criteria"/>
+        </where>
+    </select>
+
+    <select id="paging" parameterMap="map" resultMap="DoctorGroupMap">
+        SELECT <include refid="cols_all"/> from <include refid="tb"/>
+        <where>
+            <include refid="criteria"/>
+        </where>
+        LIMIT #{offset}, #{limit}
+    </select>
 
 </mapper>

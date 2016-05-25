@@ -1,11 +1,15 @@
 package io.terminus.doctor.event.service;
 
+import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
+import io.terminus.doctor.event.dto.DoctorGroupDetailDto;
+import io.terminus.doctor.event.dto.DoctorGroupSearchDto;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorGroupSnapshot;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
 
+import javax.validation.constraints.NotNull;
 import java.util.List;
 
 /**
@@ -30,6 +34,22 @@ public interface DoctorGroupReadService {
      * @return 猪群卡片表
      */
     Response<List<DoctorGroup>> findGroupsByFarmId(Long farmId);
+
+    /**
+     * 查询猪群详情
+     * @param groupId 猪群id
+     * @return 猪群详情
+     */
+    Response<DoctorGroupDetailDto> findGroupDetailByGroupId(@NotNull(message = "groupId.not.null") Long groupId);
+
+    /**
+     * 根据查询条件分页查询猪群
+     * @param groupSearchDto 查询条件dto
+     * @param pageNo 当前页码
+     * @param size   分页大小
+     * @return 分页后的猪群列表
+     */
+    Response<Paging<DoctorGroup>> pagingGroup(DoctorGroupSearchDto groupSearchDto, Integer pageNo, Integer size);
 
     /**
      * 根据id查询猪群事件表

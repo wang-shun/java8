@@ -1,11 +1,15 @@
 package io.terminus.doctor.event.service;
 
 import com.google.common.base.Throwables;
+import io.terminus.common.model.PageInfo;
+import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.event.dao.DoctorGroupDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorGroupSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
+import io.terminus.doctor.event.dto.DoctorGroupDetailDto;
+import io.terminus.doctor.event.dto.DoctorGroupSearchDto;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorGroupSnapshot;
@@ -58,6 +62,27 @@ public class DoctorGroupReadServiceImpl implements DoctorGroupReadService {
             return Response.ok(doctorGroupDao.findByFarmId(farmId));
         } catch (Exception e) {
             log.error("find group by farm id fail, farmId:{}, cause:{}", farmId, Throwables.getStackTraceAsString(e));
+            return Response.fail("group.find.fail");
+        }
+    }
+
+    @Override
+    public Response<DoctorGroupDetailDto> findGroupDetailByGroupId(Long groupId) {
+        try {
+            return Response.ok(new DoctorGroupDetailDto(doctorGroupDao.findById(groupId), doctorGroupTrackDao.findByGroupId(groupId)));
+        } catch (Exception e) {
+            log.error("find group detail by groupId failed, groupId:{}, cause:{}", groupId, Throwables.getStackTraceAsString(e));
+            return Response.fail("group.find.fail");
+        }
+    }
+
+    @Override
+    public Response<Paging<DoctorGroup>> pagingGroup(DoctorGroupSearchDto groupSearchDto, Integer pageNo, Integer size) {
+        try {
+            PageInfo pageInfo = PageInfo.of(pageNo, size);
+            return Response.ok(doctorGroupDao.paging(pageInfo.getOffset(), pageInfo.getLimit(), groupSearchDto));
+        } catch (Exception e) {
+            log.error("paging group by groupSearchDto failed, groupSearchDto:{}, cause:{}", groupSearchDto, Throwables.getStackTraceAsString(e));
             return Response.fail("group.find.fail");
         }
     }
