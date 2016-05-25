@@ -165,6 +165,30 @@ public class DoctorUserReadInterfaceImpl implements DoctorUserReadInterface {
     }
 
     @Override
+    public Response<List<User>> listTo(Long lastId, int limit) {
+        Response<List<User>> response = new Response<>();
+        try {
+            response.setResult(BeanMapper.mapList(userDaoExt.listTo(lastId, limit), User.class));
+        } catch (Exception e) {
+            log.error("find user failed, cause:{}", Throwables.getStackTraceAsString(e));
+            response.setError("find.user.failed");
+        }
+        return response;
+    }
+
+    @Override
+    public Response<List<User>> listSince(Long lastId, String since, int limit) {
+        Response<List<User>> response = new Response<>();
+        try {
+            response.setResult(BeanMapper.mapList(userDaoExt.listSince(lastId, since, limit), User.class));
+        } catch (Exception e) {
+            log.error("find user failed, cause:{}", Throwables.getStackTraceAsString(e));
+            response.setError("find.user.failed");
+        }
+        return response;
+    }
+
+    @Override
     public Response<Paging<User>> paging(Integer offset, Integer limit) {
         Response<Paging<User>> response = new Response<>();
         try {
@@ -215,7 +239,7 @@ public class DoctorUserReadInterfaceImpl implements DoctorUserReadInterface {
 
     private User setUserType(User user){
         user.getRolesJson();
-        user.setType(null);//TODO
+        user.setType(null);//TODO 陈增辉
         return user;
     }
     private Paging<User> getPaging(io.terminus.common.model.Paging<io.terminus.parana.user.model.User> page){

@@ -51,6 +51,22 @@ public interface DoctorUserReadInterface {
      */
     Response<Date> minDate();
 
+    /**
+     * 查询id小于lastId内的limit个用戶
+     * @param lastId 最大的用戶id
+     * @param limit 用戶个数
+     * @return id小于lastId内的pageSize个用戶
+     */
+    Response<List<User>> listTo(Long lastId, int limit);
+    /**
+     * 查询id小于lastId内且更新时间大于since的limit个用戶
+     * @param lastId lastId 最大的用戶id
+     * @param since 起始更新时间
+     * @param limit 用戶个数
+     * @return id小于lastId内且更新时间大于since的limit个用戶
+     */
+    Response<List<User>> listSince(Long lastId, String since, int limit);
+
     Response<Paging<User>> paging(Integer offset, Integer limit);
 
     /**

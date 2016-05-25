@@ -110,4 +110,11 @@ public class UserDaoExt extends UserDao {
         List<User> datas = sqlSession.selectList(NAMESPACE + "paging", criteria);
         return new Paging<>(total, datas);
     }
+
+    public List<User> listTo(Long lastId, int limit){
+        return sqlSession.selectList(NAMESPACE + "listTo", ImmutableMap.of("lastId", lastId, "limit", limit));
+    }
+    public List<User> listSince(Long lastId, String since, int limit){
+        return sqlSession.selectList(NAMESPACE + "listSince", ImmutableMap.of("lastId", lastId, "since", since, "limit", limit));
+    }
 }
