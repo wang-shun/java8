@@ -14,9 +14,12 @@
     <dependencies>
         <dependency>
             <groupId>io.terminus.doctor</groupId>
+            <artifactId>doctor-user-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.terminus.doctor</groupId>
             <artifactId>doctor-user-interface</artifactId>
         </dependency>
-
         <dependency>
             <groupId>io.terminus.doctor</groupId>
             <artifactId>doctor-common</artifactId>

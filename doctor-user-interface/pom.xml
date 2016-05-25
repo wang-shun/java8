@@ -11,10 +11,4 @@
 
     <artifactId>doctor-user-interface</artifactId>
 
-    <dependencies>
-        <dependency>
-            <groupId>io.terminus.doctor</groupId>
-            <artifactId>doctor-user-api</artifactId>
-        </dependency>
-    </dependencies>
 </project>
