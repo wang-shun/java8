@@ -28,9 +28,6 @@ public class DoctorMaterialInWareHouseWriteServiceImpl implements DoctorMaterial
     @Override
     public Response<Boolean> consumeMaterialInfo(DoctorMaterialConsumeProviderDto doctorMaterialConsumeProviderDto) {
         try{
-
-            // TODO validate field parameter info
-
             return Response.ok(materialInWareHouseManager.consumeMaterialInWareHouse(doctorMaterialConsumeProviderDto));
         }catch (Exception e){
             log.error("consumer material info error, cause:{}", Throwables.getStackTraceAsString(e));
@@ -40,9 +37,6 @@ public class DoctorMaterialInWareHouseWriteServiceImpl implements DoctorMaterial
 
     public Response<Boolean> providerMaterialInfo(DoctorMaterialConsumeProviderDto doctorMaterialConsumeProviderDto){
         try{
-
-            // TODO validate field param info
-
             return Response.ok(materialInWareHouseManager.providerMaterialInWareHouse(doctorMaterialConsumeProviderDto));
         }catch (Exception e){
             log.error("provider material info fail, cause:{}", Throwables.getStackTraceAsString(e));

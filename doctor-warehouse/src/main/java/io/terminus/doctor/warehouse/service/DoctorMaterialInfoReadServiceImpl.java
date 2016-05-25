@@ -42,7 +42,7 @@ public class DoctorMaterialInfoReadServiceImpl implements DoctorMaterialInfoRead
     }
 
     @Override
-    public Response<Paging<DoctorMaterialInfo>> pagingMaterialInfos(String farmId, Integer type, Integer pageNo, Integer pageSize) {
+    public Response<Paging<DoctorMaterialInfo>> pagingMaterialInfos(Long farmId, Integer type, Integer pageNo, Integer pageSize) {
         try{
             PageInfo pageInfo = new PageInfo(pageNo, pageSize);
             return Response.ok(doctorMaterialInfoDao.paging(pageInfo.getOffset(),pageInfo.getLimit(), ImmutableMap.of("farmId",farmId, "type",type)));
