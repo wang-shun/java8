@@ -1,5 +1,4 @@
 -- 猪场类别测试方式
-drop table if exists doctor_farm_ware_house_types;
 create table doctor_farm_ware_house_types(
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT 'id',
   `farm_id` bigint(20) unsigned DEFAULT NULL COMMENT '猪场仓库信息',
@@ -14,4 +13,5 @@ create table doctor_farm_ware_house_types(
   `created_at` datetime DEFAULT NULL,
   `updated_at` datetime DEFAULT NULL,
    primary key(id)
-)ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='猪场仓库类型数量';
+) COMMENT='猪场仓库类型数量';
+

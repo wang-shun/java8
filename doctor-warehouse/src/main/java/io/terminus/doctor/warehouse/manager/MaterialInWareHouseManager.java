@@ -2,6 +2,7 @@ package io.terminus.doctor.warehouse.manager;
 
 import com.google.common.collect.ImmutableMap;
 import io.terminus.doctor.common.utils.Params;
+import io.terminus.doctor.warehouse.constants.DoctorFarmWareHouseTypeConstants;
 import io.terminus.doctor.warehouse.dao.DoctorFarmWareHouseTypeDao;
 import io.terminus.doctor.warehouse.dao.DoctorMaterialConsumeAvgDao;
 import io.terminus.doctor.warehouse.dao.DoctorMaterialConsumeProviderDao;
@@ -70,6 +71,7 @@ public class MaterialInWareHouseManager {
     }
 
     // 生产对应的物料内容
+    @Transactional
     public Boolean produceMaterialInfo(DoctorWareHouseBasicDto basicDto, DoctorWareHouse targetHouse, DoctorMaterialInfo targetMaterial, DoctorMaterialInfo.MaterialProduce materialProduce){
 
         // consume each source
@@ -182,7 +184,8 @@ public class MaterialInWareHouseManager {
         }
 
         // 修改猪场仓库类型的数量信息
-        DoctorFarmWareHouseType doctorFarmWareHouseType = doctorFarmWareHouseTypeDao.findByFarmIdAndType(doctorMaterialConsumeProviderDto.getFarmId(), doctorMaterialConsumeProviderDto.getType());
+        DoctorFarmWareHouseType doctorFarmWareHouseType = doctorFarmWareHouseTypeDao.findByFarmIdAndType(
+                doctorMaterialConsumeProviderDto.getFarmId(), doctorMaterialConsumeProviderDto.getType());
         if(isNull(doctorFarmWareHouseType)){
             doctorFarmWareHouseTypeDao.create(doctorFarmWareHouseType);
         }else {
@@ -283,7 +286,17 @@ public class MaterialInWareHouseManager {
         DoctorFarmWareHouseType doctorFarmWareHouseType = doctorFarmWareHouseTypeDao.findByFarmIdAndType(doctorMaterialConsumeProviderDto.getFarmId(), doctorMaterialConsumeProviderDto.getType());
         checkState(!isNull(doctorFarmWareHouseType), "doctorFarm.wareHouseType.emoty");
         doctorFarmWareHouseType.setLogNumber(doctorFarmWareHouseType.getLogNumber()- doctorMaterialConsumeProviderDto.getConsumeCount());
+        Map<String,Object> extraMap = doctorFarmWareHouseType.getExtraMap();
+        if(extraMap.containsKey(DoctorFarmWareHouseTypeConstants.CONSUME_DATE) &&
+                DateTime.now().withTimeAtStartOfDay().isEqual((long)extraMap.get(DoctorFarmWareHouseTypeConstants.CONSUME_DATE))){
 
+            extraMap.put(DoctorFarmWareHouseTypeConstants.CONSUME_COUNT,
+                    (long)extraMap.get(DoctorFarmWareHouseTypeConstants.CONSUME_COUNT) + doctorMaterialConsumeProviderDto.getConsumeCount());
+        }else {
+            extraMap.put(DoctorFarmWareHouseTypeConstants.CONSUME_DATE, DateTime.now().withTimeAtStartOfDay().getMillis());
+            extraMap.put(DoctorFarmWareHouseTypeConstants.CONSUME_COUNT, doctorMaterialConsumeProviderDto.getConsumeCount());
+        }
+        doctorFarmWareHouseType.setExtraMap(extraMap);
         doctorFarmWareHouseTypeDao.update(doctorFarmWareHouseType);
     }
 
