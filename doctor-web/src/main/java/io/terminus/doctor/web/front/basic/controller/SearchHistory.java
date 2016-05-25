@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Collections;
-import java.util.Set;
+import java.util.List;
 
 /**
  * Desc: 搜索词历史搜索
@@ -38,12 +38,12 @@ public class SearchHistory {
      * @return
      */
     @RequestMapping(value = "/history", method = RequestMethod.GET)
-    public Set<String> findHistoryWords(@RequestParam Integer type,
-                                        @RequestParam(required = false) Long size) {
+    public List<String> findHistoryWords(@RequestParam Integer type,
+                                         @RequestParam(required = false) Long size) {
         if (type != null) {
             return RespHelper.or500(doctorSearchHistoryService.findSearchHistory(UserUtil.getUserId(), type, size));
         }
-        return Collections.emptySet();
+        return Collections.emptyList();
     }
 
     /**

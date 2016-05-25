@@ -8,7 +8,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.Set;
+import java.util.List;
 
 /**
  * Desc: 历史搜索记录测试
@@ -24,7 +24,7 @@ public class DoctorSearchHistoryServiceTest extends BaseServiceTest {
     /**
      * 用户id
      */
-    private Long userId = 110L;
+    private Long userId = 1L;
 
     /**
      * 搜索类型
@@ -52,27 +52,27 @@ public class DoctorSearchHistoryServiceTest extends BaseServiceTest {
     @Test
     public void test_CREATE_HistoryWord() {
         doctorSearchHistoryService.createSearchHistory(userId, searchType, "搜索词13");
-        Set<String> words = RespHelper.orServEx(doctorSearchHistoryService.findSearchHistory(userId, searchType, -1L));
+        List<String> words = RespHelper.orServEx(doctorSearchHistoryService.findSearchHistory(userId, searchType, -1L));
         Assert.assertEquals(13, words.size());
     }
 
     @Test
     public void test_DELETE_HistoryWord() {
         doctorSearchHistoryService.deleteSearchHistory(userId, searchType, "搜索词1");
-        Set<String> words = RespHelper.orServEx(doctorSearchHistoryService.findSearchHistory(userId, searchType, -1L));
+        List<String> words = RespHelper.orServEx(doctorSearchHistoryService.findSearchHistory(userId, searchType, -1L));
         Assert.assertEquals(11, words.size());
     }
 
     @Test
     public void test_SEARCH_HistoryWord() {
-        Set<String> words = RespHelper.orServEx(doctorSearchHistoryService.findSearchHistory(userId, searchType));
+        List<String> words = RespHelper.orServEx(doctorSearchHistoryService.findSearchHistory(userId, searchType));
         Assert.assertEquals(10, words.size());
     }
 
     @Test
     public void test_DELETE_AllHistoryWord() {
         doctorSearchHistoryService.deleteAllSearchHistories(userId, searchType);
-        Set<String> words = RespHelper.orServEx(doctorSearchHistoryService.findSearchHistory(userId, searchType, -1L));
+        List<String> words = RespHelper.orServEx(doctorSearchHistoryService.findSearchHistory(userId, searchType, -1L));
         Assert.assertEquals(0, words.size());
     }
 }

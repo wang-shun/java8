@@ -2,7 +2,7 @@ package io.terminus.doctor.basic.service;
 
 import io.terminus.common.model.Response;
 
-import java.util.Set;
+import java.util.List;
 
 /**
  * Desc: 搜索历史接口
@@ -29,7 +29,7 @@ public interface DoctorSearchHistoryService {
      * @param searchType    搜索类型
      * @return    历史搜索词
      */
-    Response<Set<String>> findSearchHistory(Long userId, int searchType);
+    Response<List<String>> findSearchHistory(Long userId, int searchType);
 
     /**
      * 查询猪舍搜索记录
@@ -38,7 +38,7 @@ public interface DoctorSearchHistoryService {
      * @param size          搜索词数量
      * @return    历史搜索词
      */
-    Response<Set<String>> findSearchHistory(Long userId, int searchType, Long size);
+    Response<List<String>> findSearchHistory(Long userId, int searchType, Long size);
 
     /**
      * 删除单个猪舍搜索记录
