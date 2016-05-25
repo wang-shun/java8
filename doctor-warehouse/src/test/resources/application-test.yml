@@ -1,13 +1,13 @@
-spring:
-  datasource:
-    driver-class-name: org.h2.Driver
-    url: jdbc:h2:mem:test;MODE=MySQL
+#spring:
+#  datasource:
+#    driver-class-name: org.h2.Driver
+#    url: jdbc:h2:mem:test;MODE=MySQL
 
-#datasource:
-#  driver-class-name: com.mysql.jdbc.Driver
-#  url: jdbc:mysql://127.0.0.1:3306/pig_doctor?useUnicode=true&characterEncoding=UTF8&autoReconnect=true
-#  username: root
-#  password: anywhere
+datasource:
+  driver-class-name: com.mysql.jdbc.Driver
+  url: jdbc:mysql://127.0.0.1:3306/pig_doctor?useUnicode=true&characterEncoding=UTF8&autoReconnect=true
+  username: root
+  password: anywhere
 
 mybatis:
   mapperLocations:  classpath*:mapper/*Mapper.xml

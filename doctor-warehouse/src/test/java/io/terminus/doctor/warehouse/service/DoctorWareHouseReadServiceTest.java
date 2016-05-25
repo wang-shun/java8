@@ -25,10 +25,8 @@ public class DoctorWareHouseReadServiceTest extends BasicServiceTest{
     public void testFarmWareHouseTypeQuery(){
         Response<List<DoctorFarmWareHouseType>> response = doctorWareHouseReadService.queryDoctorFarmWareHouseType(12345l);
         Assert.assertTrue(response.isSuccess());
-
         List<DoctorFarmWareHouseType> types = response.getResult();
-        System.out.println(types.size());
-
+        Assert.assertThat(types.size(), is(5));
         Assert.assertThat(123, is(123));
     }
 
