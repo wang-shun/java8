@@ -148,6 +148,11 @@ public class SellerRole implements Serializable, CustomRole {
     }
 
     @Override
+    public String getBaseRole() {
+        return "SELLER";
+    }
+
+    @Override
     public boolean isActive() {
         return Objects.equals(status, 1);
     }

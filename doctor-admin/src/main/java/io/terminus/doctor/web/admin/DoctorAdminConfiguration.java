@@ -4,8 +4,13 @@
 
 package io.terminus.doctor.web.admin;
 
+import io.terminus.doctor.user.service.OperatorRoleReadService;
+import io.terminus.doctor.web.admin.auth.DoctorCustomRoleLoaderConfigurer;
 import io.terminus.doctor.web.core.DoctorCoreWebConfiguration;
-import io.terminus.parana.auth.web.AuthWebConfiguration;
+import io.terminus.doctor.web.core.service.OtherSystemService;
+import io.terminus.doctor.web.core.service.impl.OtherSystemServiceImpl;
+import io.terminus.parana.auth.role.CustomRoleLoaderConfigurer;
+import io.terminus.parana.auth.web.WebAuthenticationConfiguration;
 import io.terminus.parana.config.ConfigCenter;
 import io.terminus.doctor.web.core.advices.JsonExceptionResolver;
 import io.terminus.parana.web.msg.config.MsgAdminWebConfig;
@@ -41,7 +46,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
 @EnableWebMvc
 @EnableScheduling
 @Import({DoctorCoreWebConfiguration.class,
-        AuthWebConfiguration.class,
+        WebAuthenticationConfiguration.class,
         DbMsgGatewayBuilder.class,
         MsgAdminWebConfig.class, DbNotifyConfig.class})
 public class DoctorAdminConfiguration extends WebMvcConfigurerAdapter {
@@ -49,5 +54,15 @@ public class DoctorAdminConfiguration extends WebMvcConfigurerAdapter {
     @Bean(autowire = Autowire.BY_NAME)
     public ConfigCenter configCenter() {
         return new ConfigCenter();
+    }
+
+    @Bean
+    public CustomRoleLoaderConfigurer customRoleLoaderConfigurer(OperatorRoleReadService operatorRoleReadService) {
+        return new DoctorCustomRoleLoaderConfigurer(operatorRoleReadService);
+    }
+
+    @Bean
+    public OtherSystemService otherSystemServiceConfigurer(ConfigCenter configCenter) {
+        return new OtherSystemServiceImpl(configCenter);
     }
 }

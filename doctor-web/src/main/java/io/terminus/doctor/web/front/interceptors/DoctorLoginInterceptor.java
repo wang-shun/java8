@@ -12,7 +12,7 @@ import io.terminus.doctor.common.enums.UserRole;
 import io.terminus.doctor.common.util.UserRoleUtil;
 import io.terminus.doctor.user.util.DoctorUserMaker;
 import io.terminus.pampas.common.UserUtil;
-import io.terminus.doctor.common.model.ParanaUser;
+import io.terminus.parana.common.model.ParanaUser;
 import io.terminus.doctor.common.utils.Iters;
 import io.terminus.pampas.engine.common.WebUtil;
 import io.terminus.parana.user.model.User;
