@@ -73,4 +73,6 @@
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.basic.service.DoctorBasicReadService" id="doctorBasicReadService" check="false"/>
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.basic.service.DoctorBasicWriteService" id="doctorBasicWriteService" check="false"/>
 
+    <!-- doctor ware house  -->
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.warehouse.service.DoctorWareHouseReadService" id="doctorWareHouseReadService" check="false"/>
 </beans>
