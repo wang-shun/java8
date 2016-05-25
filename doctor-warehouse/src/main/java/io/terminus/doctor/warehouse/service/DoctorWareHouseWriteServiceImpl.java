@@ -18,12 +18,12 @@ import static java.util.Objects.isNull;
  */
 @Service
 @Slf4j
-public class DoctorWarehouseWriteServiceImpl implements DoctorWarehouseWriteService{
+public class DoctorWareHouseWriteServiceImpl implements DoctorWareHouseWriteService{
 
     private final DoctorWareHouseDao doctorWareHouseDao;
 
     @Autowired
-    public DoctorWarehouseWriteServiceImpl(DoctorWareHouseDao doctorWareHouseDao){
+    public DoctorWareHouseWriteServiceImpl(DoctorWareHouseDao doctorWareHouseDao){
         this.doctorWareHouseDao = doctorWareHouseDao;
     }
 

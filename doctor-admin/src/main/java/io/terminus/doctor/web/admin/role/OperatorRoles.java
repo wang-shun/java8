@@ -1,10 +1,12 @@
 package io.terminus.doctor.web.admin.role;
 
 import io.terminus.common.exception.JsonResponseException;
-import io.terminus.parana.common.utils.RespHelper;
+
 import io.terminus.doctor.user.model.OperatorRole;
 import io.terminus.doctor.user.service.OperatorRoleReadService;
 import io.terminus.doctor.user.service.OperatorRoleWriteService;
+import io.terminus.pampas.engine.ThreadVars;
+import io.terminus.parana.common.utils.RespHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -41,6 +43,7 @@ public class OperatorRoles {
      */
     @RequestMapping(value = "", method = RequestMethod.POST)
     public Long createRole(@RequestBody OperatorRole role) {
+        role.setAppKey(ThreadVars.getAppKey());
         role.setStatus(1);
         return or500(operatorRoleWriteService.createRole(role));
     }
@@ -48,19 +51,20 @@ public class OperatorRoles {
     /**
      * 更新运营角色
      *
-     * @param id         角色 ID
-     * @param OperatorRole 角色授权内容
+     * @param id   角色 ID
+     * @param role 角色授权内容
      * @return 是否更新成功
      */
     @RequestMapping(value = "/{id}", method = RequestMethod.PUT)
-    public Boolean updateRole(@PathVariable Long id, @RequestBody OperatorRole OperatorRole) {
+    public Boolean updateRole(@PathVariable Long id, @RequestBody OperatorRole role) {
         OperatorRole existRole = RespHelper.orServEx(operatorRoleReadService.findById(id));
         if (existRole == null) {
             throw new JsonResponseException(500, "operator.role.not.exist");
         }
-        OperatorRole.setId(id);
-        OperatorRole.setStatus(null); // prevent update
-        return or500(operatorRoleWriteService.updateRole(OperatorRole));
+        role.setId(id);
+        role.setAppKey(null); // prevent update
+        role.setStatus(null); // prevent update
+        return or500(operatorRoleWriteService.updateRole(role));
     }
 
     /**
@@ -70,6 +74,6 @@ public class OperatorRoles {
      */
     @RequestMapping(value = "/all", method = RequestMethod.GET)
     public List<OperatorRole> findAllRoles() {
-        return RespHelper.or500(operatorRoleReadService.findByStatus(1));
+        return RespHelper.or500(operatorRoleReadService.findByStatus(ThreadVars.getAppKey(), 1));
     }
 }

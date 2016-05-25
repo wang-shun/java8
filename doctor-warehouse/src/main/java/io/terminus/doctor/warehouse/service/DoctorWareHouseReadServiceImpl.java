@@ -28,7 +28,7 @@ import java.util.stream.Collectors;
  */
 @Service
 @Slf4j
-public class DoctorWarehouseReadServiceImpl implements DoctorWarehouseReadService{
+public class DoctorWareHouseReadServiceImpl implements DoctorWareHouseReadService{
 
     private final DoctorFarmWareHouseTypeDao doctorFarmWareHouseTypeDao;
 
@@ -37,7 +37,7 @@ public class DoctorWarehouseReadServiceImpl implements DoctorWarehouseReadServic
     private final DoctorWareHouseTrackDao doctorWareHouseTrackDao;
 
     @Autowired
-    public DoctorWarehouseReadServiceImpl(DoctorFarmWareHouseTypeDao doctorFarmWareHouseTypeDao,
+    public DoctorWareHouseReadServiceImpl(DoctorFarmWareHouseTypeDao doctorFarmWareHouseTypeDao,
                                           DoctorWareHouseDao doctorWareHouseDao,
                                           DoctorWareHouseTrackDao doctorWareHouseTrackDao){
         this.doctorFarmWareHouseTypeDao = doctorFarmWareHouseTypeDao;

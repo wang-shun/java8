@@ -13,6 +13,7 @@ import io.terminus.doctor.warehouse.manager.MaterialInWareHouseManager;
 import io.terminus.doctor.warehouse.model.DoctorMaterialInfo;
 import io.terminus.doctor.warehouse.model.DoctorWareHouse;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Objects;
@@ -36,6 +37,7 @@ public class DoctorMaterialInfoWriteServiceImpl implements DoctorMaterialInfoWri
 
     private final MaterialInWareHouseManager materialInWareHouseManager;
 
+    @Autowired
     private DoctorMaterialInfoWriteServiceImpl(DoctorMaterialInfoDao doctorMaterialInfoDao,
                                                DoctorWareHouseDao doctorWareHouseDao,
                                                MaterialInWareHouseManager materialInWareHouseManager){
@@ -111,7 +113,7 @@ public class DoctorMaterialInfoWriteServiceImpl implements DoctorMaterialInfoWri
             checkState(Objects.equals(doctorWareHouse.getType(), doctorMaterialInfo.getType()), "produce.targetWarehouseType.fail");
 
             // produce 生产对应的数据
-            checkState(materialInWareHouseManager.produceMaterialInfo(doctorWareHouseBasicDto.getFarmId(), doctorWareHouse, doctorMaterialInfo, materialProduce),
+            checkState(materialInWareHouseManager.produceMaterialInfo(doctorWareHouseBasicDto, doctorWareHouse, doctorMaterialInfo, materialProduce),
                     "produce.materialInfo.error");
             return Response.ok(Boolean.TRUE);
         }catch(IllegalStateException e){

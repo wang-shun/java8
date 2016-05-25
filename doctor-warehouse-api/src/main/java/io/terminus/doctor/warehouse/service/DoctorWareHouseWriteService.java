@@ -11,7 +11,7 @@ import javax.validation.constraints.NotNull;
  * Email:yaoqj@terminus.io
  * Descirbe:
  */
-public interface DoctorWarehouseWriteService {
+public interface DoctorWareHouseWriteService {
 
     /**
      * 创建WareHouse

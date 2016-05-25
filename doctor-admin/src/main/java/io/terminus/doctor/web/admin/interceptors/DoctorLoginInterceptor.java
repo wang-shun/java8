@@ -11,7 +11,7 @@ import io.terminus.common.model.Response;
 import io.terminus.doctor.common.enums.UserType;
 import io.terminus.doctor.user.util.DoctorUserMaker;
 import io.terminus.pampas.common.UserUtil;
-import io.terminus.doctor.common.model.ParanaUser;
+import io.terminus.parana.common.model.ParanaUser;
 import io.terminus.parana.user.model.User;
 import io.terminus.parana.user.service.UserReadService;
 import io.terminus.doctor.web.core.Constants;

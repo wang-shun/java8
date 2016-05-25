@@ -111,7 +111,7 @@
         </where>
     </select>
 
-    <select id="paging" parameterMap="map" resultMap="DoctorWareHouseMap">
+    <select id="paging" parameterType="map" resultMap="DoctorWareHouseMap">
         SELECT <include refid="cols_all"/> from <include refid="tb"/>
         <where>
             <include refid="criteria"/>
