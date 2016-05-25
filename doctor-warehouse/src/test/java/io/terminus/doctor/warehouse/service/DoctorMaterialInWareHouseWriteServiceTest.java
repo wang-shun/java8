@@ -1,6 +1,7 @@
 package io.terminus.doctor.warehouse.service;
 
 import io.terminus.common.model.Response;
+import io.terminus.doctor.common.utils.Params;
 import io.terminus.doctor.warehouse.dao.DoctorFarmWareHouseTypeDao;
 import io.terminus.doctor.warehouse.dao.DoctorMaterialConsumeAvgDao;
 import io.terminus.doctor.warehouse.dao.DoctorMaterialConsumeProviderDao;
@@ -13,6 +14,7 @@ import io.terminus.doctor.warehouse.model.DoctorMaterialConsumeAvg;
 import io.terminus.doctor.warehouse.model.DoctorMaterialConsumeProvider;
 import io.terminus.doctor.warehouse.model.DoctorMaterialInWareHouse;
 import io.terminus.doctor.warehouse.model.DoctorWareHouseTrack;
+import org.joda.time.DateTime;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -52,21 +54,34 @@ public class DoctorMaterialInWareHouseWriteServiceTest extends BasicServiceTest{
 
     @Test
     public void testConsumeMaterial(){
+        Long total = 1000l;
+        Long eachConsume = 50l;
+        consumeMaterial(eachConsume, total-eachConsume);
+        consumeMaterial(eachConsume * 2, total - eachConsume * 2);
+    }
+
+    /**
+     * consume material  消耗对应的 原料信息
+     * @param consumeCount  消耗的物料的数量信息
+     * @param consumeLeft   剩余的物料数量信息
+     */
+    private void consumeMaterial(Long consumeCount, Long consumeLeft){
         // first consumer
         Response<Long> response = doctorMaterialInWareHouseWriteService.consumeMaterialInfo(buildConsumerProvider());
         Assert.assertTrue(response.isSuccess());
 
         // validate type
         DoctorFarmWareHouseType type = doctorFarmWareHouseTypeDao.findByFarmIdAndType(12345l, WareHouseType.FEED.getKey());
-        Assert.assertEquals(type.getLogNumber(),new Long(950));
+        Assert.assertEquals(type.getLogNumber(),consumeLeft);
 
         // validate track warehouse
         DoctorWareHouseTrack doctorWareHouseTrack = doctorWareHouseTrackDao.findById(1l);
-        Assert.assertEquals(doctorWareHouseTrack.getLotNumber(), new Long(950));
+        Assert.assertEquals(doctorWareHouseTrack.getLotNumber(), consumeLeft);
+        Assert.assertEquals(Params.getWithConvert(doctorWareHouseTrack.getExtraMap(), "1", a->Long.valueOf(a.toString())), consumeLeft);
 
-        // validate in ware hosue count
+        // validate in ware house count
         DoctorMaterialInWareHouse doctorMaterialInWareHouse = doctorMaterialInWareHouseDao.queryByFarmHouseMaterial(12345l, 1l, 1l);
-        Assert.assertEquals(doctorMaterialInWareHouse.getLotNumber(), new Long(950));
+        Assert.assertEquals(doctorMaterialInWareHouse.getLotNumber(), consumeLeft);
 
         DoctorMaterialConsumeProvider doctorMaterialConsumeProvider =  doctorMaterialConsumeProviderDao.findById(response.getResult());
         Assert.assertEquals(doctorMaterialConsumeProvider.getFarmId(), new Long(12345l));
@@ -75,9 +90,9 @@ public class DoctorMaterialInWareHouseWriteServiceTest extends BasicServiceTest{
         Assert.assertEquals(doctorMaterialConsumeProvider.getEventCount(), new Long(50l));
 
         DoctorMaterialConsumeAvg doctorMaterialConsumeAvg = doctorMaterialConsumeAvgDao.queryByIds(12345l, 1l, 1l);
-        Assert.assertEquals(doctorMaterialConsumeAvg.getConsumeCount(),new Long(50l));
+        Assert.assertEquals(doctorMaterialConsumeAvg.getConsumeCount(), new Long(50l)); // breed Consume 每次相同的
         Assert.assertEquals(doctorMaterialConsumeAvg.getConsumeAvgCount(), new Long(0));
-
+        Assert.assertEquals(doctorMaterialConsumeAvg.getConsumeDate().getTime(), DateTime.now().withTimeAtStartOfDay().toDate().getTime());
     }
 
     private DoctorMaterialConsumeProviderDto buildConsumerProvider(){

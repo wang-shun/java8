@@ -318,7 +318,7 @@ public class MaterialInWareHouseManager {
             // create consume avg
             DoctorMaterialConsumeAvg avg = DoctorMaterialConsumeAvg.builder()
                     .farmId(dto.getFarmId()).wareHouseId(dto.getWareHouseId()).materialId(dto.getMaterialTypeId())
-                    .consumeDate(DateTime.now().toDate()).consumeCount(dto.getConsumeCount())
+                    .consumeDate(DateTime.now().withTimeAtStartOfDay().toDate()).consumeCount(dto.getConsumeCount())
                     .build();
 
             if(Objects.equals(dto.getType(), WareHouseType.FEED.getKey())){
@@ -326,7 +326,6 @@ public class MaterialInWareHouseManager {
             }
             doctorMaterialConsumeAvgDao.create(avg);
         }else{
-            doctorMaterialConsumeAvg.setConsumeDate(DateTime.now().toDate());
             if(Objects.equals(dto.getType(), WareHouseType.FEED.getKey())){
                 // calculate current avg rate
                 doctorMaterialConsumeAvg.setConsumeCount(dto.getConsumeCount());
@@ -343,6 +342,7 @@ public class MaterialInWareHouseManager {
                             doctorMaterialConsumeAvg.getConsumeCount() /dayRange);
                 }
             }
+            doctorMaterialConsumeAvg.setConsumeDate(DateTime.now().withTimeAtStartOfDay().toDate());
             doctorMaterialConsumeAvgDao.update(doctorMaterialConsumeAvg);
         }
     }
