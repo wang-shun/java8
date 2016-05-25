@@ -152,7 +152,6 @@ public class SubRole implements Serializable, CustomRole {
         }
     }
 
-    @Override
     public String getBaseRole() {
         return "SUB";
     }

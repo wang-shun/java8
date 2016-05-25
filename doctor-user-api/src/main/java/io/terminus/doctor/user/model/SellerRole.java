@@ -147,7 +147,6 @@ public class SellerRole implements Serializable, CustomRole {
         }
     }
 
-    @Override
     public String getBaseRole() {
         return "SELLER";
     }
