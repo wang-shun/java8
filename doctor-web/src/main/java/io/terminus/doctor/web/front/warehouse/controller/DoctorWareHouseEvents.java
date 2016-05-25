@@ -6,6 +6,7 @@ import io.terminus.doctor.warehouse.model.DoctorMaterialInWareHouse;
 import io.terminus.doctor.warehouse.service.DoctorMaterialInWareHouseReadService;
 import io.terminus.doctor.warehouse.service.DoctorMaterialInWareHouseWriteService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -30,6 +31,7 @@ public class DoctorWareHouseEvents {
 
     private final DoctorMaterialInWareHouseReadService doctorMaterialInWareHouseReadService;
 
+    @Autowired
     public DoctorWareHouseEvents(DoctorMaterialInWareHouseWriteService doctorMaterialInWareHouseWriteService,
                                  DoctorMaterialInWareHouseReadService doctorMaterialInWareHouseReadService){
         this.doctorMaterialInWareHouseWriteService = doctorMaterialInWareHouseWriteService;
