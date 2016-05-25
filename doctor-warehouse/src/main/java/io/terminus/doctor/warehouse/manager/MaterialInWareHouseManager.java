@@ -275,6 +275,7 @@ public class MaterialInWareHouseManager {
         checkState(!isNull(doctorWareHouseTrack), "not.find.doctorWareHouse");
         doctorWareHouseTrack.setLotNumber(doctorWareHouseTrack.getLotNumber() - doctorMaterialConsumeProviderDto.getConsumeCount());
 
+        // track中 存放 不同material 数量信息
         Map<String, Object> consumeMap = doctorWareHouseTrack.getExtraMap();
         Long count = Params.getWithOutNull(consumeMap, doctorMaterialConsumeProviderDto.getMaterialTypeId().toString());
         consumeMap.put(doctorMaterialConsumeProviderDto.getMaterialTypeId().toString(), count - doctorMaterialConsumeProviderDto.getConsumeCount());
