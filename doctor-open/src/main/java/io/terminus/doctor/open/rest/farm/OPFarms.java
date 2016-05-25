@@ -14,6 +14,8 @@ import io.terminus.pampas.openplatform.annotations.OpenMethod;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.List;
+
 /**
  * Desc:
  * Mail: yangzl@terminus.io
@@ -50,28 +52,28 @@ public class OPFarms {
         return new DoctorBasicDto(
                 new DoctorOrgBasicDto(
                         OPRespHelper.orOPEx(doctorFarmReadService.findOrgByUserId(UserUtil.getUserId())),
-                        mockStat()
+                        mockStats()
                 ),
                 Lists.newArrayList(
                         new DoctorFarmBasicDto(
                                 OPRespHelper.orOPEx(doctorFarmReadService.findFarmById(1L)),
-                                mockStat()
+                                mockStats()
                         ),
                         new DoctorFarmBasicDto(
                                 OPRespHelper.orOPEx(doctorFarmReadService.findFarmById(2L)),
-                                mockStat()
+                                mockStats()
                         )
                 )
         );
     }
 
-    private DoctorStatisticDto mockStat() {
-        DoctorStatisticDto stat = new DoctorStatisticDto();
-        stat.setSow(100);
-        stat.setFarrowPiglet(200);
-        stat.setNurseryPiglet(300);
-        stat.setFattenPig(400);
-        stat.setBreedingPig(50);
-        return stat;
+    private List<DoctorStatisticDto> mockStats() {
+        return Lists.newArrayList(
+                new DoctorStatisticDto(DoctorStatisticDto.PigType.SOW.getDesc(), 100),
+                new DoctorStatisticDto(DoctorStatisticDto.PigType.FARROW_PIGLET.getDesc(), 200),
+                new DoctorStatisticDto(DoctorStatisticDto.PigType.NURSERY_PIGLET.getDesc(), 300),
+                new DoctorStatisticDto(DoctorStatisticDto.PigType.FATTEN_PIG.getDesc(), 400),
+                new DoctorStatisticDto(DoctorStatisticDto.PigType.BREEDING_PIG.getDesc(), 50)
+        );
     }
 }
