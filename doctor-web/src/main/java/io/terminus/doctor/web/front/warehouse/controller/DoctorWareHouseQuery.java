@@ -2,7 +2,7 @@ package io.terminus.doctor.web.front.warehouse.controller;
 
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.warehouse.model.DoctorFarmWareHouseType;
-import io.terminus.doctor.warehouse.service.DoctorWarehouseReadService;
+import io.terminus.doctor.warehouse.service.DoctorWareHouseReadService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -25,16 +25,16 @@ import java.util.List;
 @RequestMapping("/api/doctor/warehouse/query")
 public class DoctorWareHouseQuery {
 
-    private final DoctorWarehouseReadService doctorWarehouseReadService;
+    private final DoctorWareHouseReadService doctorWareHouseReadService;
 
     @Autowired
-    public DoctorWareHouseQuery(DoctorWarehouseReadService doctorWarehouseReadService){
-        this.doctorWarehouseReadService = doctorWarehouseReadService;
+    public DoctorWareHouseQuery(DoctorWareHouseReadService doctorWareHouseReadService){
+        this.doctorWareHouseReadService = doctorWareHouseReadService;
     }
 
     @RequestMapping(value = "/listWareHouseType", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public List<DoctorFarmWareHouseType> pagingDoctorWareHouseType(@RequestParam("farmId") Long farmId){
-        return RespHelper.or500(doctorWarehouseReadService.queryDoctorFarmWareHouseType(farmId));
+        return RespHelper.or500(doctorWareHouseReadService.queryDoctorFarmWareHouseType(farmId));
     }
 }
