@@ -13,4 +13,6 @@ import java.io.Serializable;
 @Data
 public class IndexedBarn implements Serializable {
     private static final long serialVersionUID = 7546040680187245833L;
+
+    private Long id;
 }
