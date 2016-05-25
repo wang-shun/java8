@@ -112,6 +112,10 @@ public class Users {
         this.smsWebService =smsWebService;
     }
 
+    /**
+     * 用户
+     * @return
+     */
     @RequestMapping("")
     public BaseUser getLoginUser() {
         return UserUtil.getCurrentUser();
@@ -139,7 +143,7 @@ public class Users {
                                    HttpServletResponse response){
         try {
             // 手机邮箱不可同时为空
-            checkArgument(notEmpty(mobile) || notEmpty(email), "user.mobile.email.both.empty");
+            checkArgument(notEmpty(mobile), "user.mobile.empty");
             // 如果是手机注册, 验证码不能为空
             if (notEmpty(mobile)) {
                 checkArgument(notEmpty(code), "user.register.mobile.code.empty");
@@ -416,10 +420,11 @@ public class Users {
 
         // 用户状态 0: 未激活, 1: 正常, -1: 锁定, -2: 冻结, -3: 删除
         user.setStatus(UserStatus.NORMAL.value());
-        // 用户类型 1: 超级管理员, 2: 普通用户, 3: 后台运营, 4: 站点拥有者
-        user.setType(UserType.NORMAL.value());
-        // 注册用户默认成为个人买家
-        user.setRoles(Lists.newArrayList(UserRole.BUYER.name(), "BUYER(OWNER)"));
+
+        user.setType(UserType.FARM_ADMIN_PRIMARY.value());
+
+        // 注册用户默认成为猪场管理员
+        user.setRoles(Lists.newArrayList(UserRole.PRIMARY.name()));
 
         Response<Long> resp = userWriteService.create(user);
         checkState(resp.isSuccess(), resp.getError());

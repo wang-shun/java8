@@ -61,10 +61,11 @@ public interface PrimaryUserReadService {
      * 分页子账户信息
      *
      * @param parentUserId 主账号用户 ID
+     * @param roleId 角色ID ID
      * @param status 子账户绑定状态
      * @param pageNo 页号
      * @param size   查询数量
      * @return 子账户分页
      */
-    Response<Paging<Sub>> subPagination(Long parentUserId, Integer status, Integer pageNo, Integer size);
+    Response<Paging<Sub>> subPagination(Long parentUserId, Long roleId, Integer status, Integer pageNo, Integer size);
 }

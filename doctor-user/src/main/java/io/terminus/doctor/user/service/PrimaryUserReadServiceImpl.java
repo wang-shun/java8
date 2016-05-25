@@ -101,13 +101,14 @@ public class PrimaryUserReadServiceImpl implements PrimaryUserReadService {
     }
 
     @Override
-    public Response<Paging<Sub>> subPagination(Long parentUserId, Integer status, Integer pageNo, Integer size) {
+    public Response<Paging<Sub>> subPagination(Long parentUserId, Long roleId, Integer status, Integer pageNo, Integer size) {
         try {
             PageInfo page = new PageInfo(pageNo, size);
             Sub criteria = new Sub();
             criteria.setParentUserId(parentUserId);
             criteria.setStatus(status);
-            return Response.ok(subDao.paging(page.getOffset(), page.getLimit()));
+            criteria.setRoleId(roleId);
+            return Response.ok(subDao.paging(page.getOffset(), page.getLimit(), criteria));
         } catch (Exception e) {
             log.error("paging sub seller failed, parentUserId={}, status={}, pageNo={}, size={}, cause:{}",
                     parentUserId, status, pageNo, size, Throwables.getStackTraceAsString(e));
