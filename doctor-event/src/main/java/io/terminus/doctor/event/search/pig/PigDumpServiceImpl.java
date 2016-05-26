@@ -86,7 +86,7 @@ public class PigDumpServiceImpl implements PigDumpService {
      * @return
      */
     @Override
-    public Response<Boolean> DeltaDump(Integer interval) {
+    public Response<Boolean> deltaDump(Integer interval) {
         try {
             log.info("pig delta dump start");
             Stopwatch stopwatch = Stopwatch.createStarted();

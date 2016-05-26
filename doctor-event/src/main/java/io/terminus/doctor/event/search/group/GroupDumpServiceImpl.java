@@ -86,7 +86,7 @@ public class GroupDumpServiceImpl implements GroupDumpService {
      * @return
      */
     @Override
-    public Response<Boolean> DeltaDump(Integer interval) {
+    public Response<Boolean> deltaDump(Integer interval) {
         try {
             log.info("group delta dump start");
             Stopwatch stopwatch = Stopwatch.createStarted();
