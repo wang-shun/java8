@@ -1,5 +1,7 @@
 package io.terminus.doctor.event.search.barn;
 
+import io.terminus.doctor.event.service.DoctorBarnReadService;
+
 /**
  * Desc:
  * Mail: yangzl@terminus.io
@@ -8,7 +10,7 @@ package io.terminus.doctor.event.search.barn;
  */
 
 public class DefaultIndexedBarnFactory extends BaseIndexedBarnFactory<IndexedBarn> {
-    public DefaultIndexedBarnFactory() {
-        super();
+    public DefaultIndexedBarnFactory(DoctorBarnReadService doctorBarnReadService) {
+        super(doctorBarnReadService);
     }
 }
