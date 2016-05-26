@@ -6,6 +6,15 @@ import io.terminus.doctor.event.dao.DoctorGroupDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorGroupSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
+import io.terminus.doctor.event.dto.event.group.input.DoctorAntiepidemicGroupInput;
+import io.terminus.doctor.event.dto.event.group.input.DoctorChangeGroupInput;
+import io.terminus.doctor.event.dto.event.group.input.DoctorCloseGroupInput;
+import io.terminus.doctor.event.dto.event.group.input.DoctorDiseaseGroupInput;
+import io.terminus.doctor.event.dto.event.group.input.DoctorLiveStockGroupInput;
+import io.terminus.doctor.event.dto.event.group.input.DoctorMoveInGroupInput;
+import io.terminus.doctor.event.dto.event.group.input.DoctorTransFarmGroupInput;
+import io.terminus.doctor.event.dto.event.group.input.DoctorTransGroupInput;
+import io.terminus.doctor.event.dto.event.group.input.DoctorTurnSeedGroupInput;
 import io.terminus.doctor.event.manager.DoctorGroupManager;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
@@ -13,6 +22,8 @@ import io.terminus.doctor.event.model.DoctorGroupTrack;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import javax.validation.Valid;
 
 /**
  * Desc: 猪群卡片表写服务实现类
@@ -51,6 +62,51 @@ public class DoctorGroupWriteServiceImpl implements DoctorGroupWriteService {
             log.error("create group failed, group:{}, cause:{}", group, Throwables.getStackTraceAsString(e));
             return Response.fail("group.create.fail");
         }
+    }
+
+    @Override
+    public Response<Boolean> groupEventAntiepidemic(DoctorGroup group, @Valid DoctorAntiepidemicGroupInput antiepidemic) {
+        return null;
+    }
+
+    @Override
+    public Response<Boolean> groupEventChange(DoctorGroup group, @Valid DoctorChangeGroupInput change) {
+        return null;
+    }
+
+    @Override
+    public Response<Boolean> groupEventClose(DoctorGroup group, @Valid DoctorCloseGroupInput close) {
+        return null;
+    }
+
+    @Override
+    public Response<Boolean> groupEventDisease(DoctorGroup group, @Valid DoctorDiseaseGroupInput disease) {
+        return null;
+    }
+
+    @Override
+    public Response<Boolean> groupEventLiveStock(DoctorGroup group, @Valid DoctorLiveStockGroupInput liveStock) {
+        return null;
+    }
+
+    @Override
+    public Response<Boolean> groupEventMoveIn(DoctorGroup group, @Valid DoctorMoveInGroupInput moveIn) {
+        return null;
+    }
+
+    @Override
+    public Response<Boolean> groupEventTransFarm(DoctorGroup group, @Valid DoctorTransFarmGroupInput transFarm) {
+        return null;
+    }
+
+    @Override
+    public Response<Boolean> groupEventTransGroup(DoctorGroup group, @Valid DoctorTransGroupInput transGroup) {
+        return null;
+    }
+
+    @Override
+    public Response<Boolean> groupEventTurnSeed(DoctorGroup group, @Valid DoctorTurnSeedGroupInput turnSeed) {
+        return null;
     }
 
 }

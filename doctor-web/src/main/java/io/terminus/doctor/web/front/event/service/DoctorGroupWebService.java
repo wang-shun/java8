@@ -17,7 +17,7 @@ import java.util.Map;
 public interface DoctorGroupWebService {
 
     /**
-     * 新建猪群
+     * 新建猪群(此事件单独拿出来)
      * @param newGroupDto 新建猪群所需字段
      * @return 猪群id
      */

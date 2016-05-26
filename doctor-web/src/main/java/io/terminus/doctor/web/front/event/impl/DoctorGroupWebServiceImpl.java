@@ -7,16 +7,26 @@ import io.terminus.common.utils.BeanMapper;
 import io.terminus.doctor.basic.service.DoctorBasicReadService;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dto.event.group.DoctorNewGroupEvent;
+import io.terminus.doctor.event.dto.event.group.input.DoctorAntiepidemicGroupInput;
+import io.terminus.doctor.event.dto.event.group.input.DoctorChangeGroupInput;
+import io.terminus.doctor.event.dto.event.group.input.DoctorCloseGroupInput;
+import io.terminus.doctor.event.dto.event.group.input.DoctorDiseaseGroupInput;
+import io.terminus.doctor.event.dto.event.group.input.DoctorLiveStockGroupInput;
+import io.terminus.doctor.event.dto.event.group.input.DoctorMoveInGroupInput;
+import io.terminus.doctor.event.dto.event.group.input.DoctorNewGroupInput;
+import io.terminus.doctor.event.dto.event.group.input.DoctorTransFarmGroupInput;
+import io.terminus.doctor.event.dto.event.group.input.DoctorTransGroupInput;
+import io.terminus.doctor.event.dto.event.group.input.DoctorTurnSeedGroupInput;
 import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
 import io.terminus.doctor.event.service.DoctorBarnReadService;
+import io.terminus.doctor.event.service.DoctorGroupReadService;
 import io.terminus.doctor.event.service.DoctorGroupWriteService;
 import io.terminus.doctor.user.model.DoctorFarm;
 import io.terminus.doctor.user.model.DoctorOrg;
 import io.terminus.doctor.user.service.DoctorFarmReadService;
-import io.terminus.doctor.event.dto.event.group.input.DoctorNewGroupInput;
 import io.terminus.doctor.web.front.event.service.DoctorGroupWebService;
 import io.terminus.pampas.common.UserUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -42,16 +52,19 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
     private final DoctorFarmReadService doctorFarmReadService;
     private final DoctorBasicReadService doctorBasicReadService;
     private final DoctorBarnReadService doctorBarnReadService;
+    private final DoctorGroupReadService doctorGroupReadService;
 
     @Autowired
     public DoctorGroupWebServiceImpl(DoctorGroupWriteService doctorGroupWriteService,
                                      DoctorFarmReadService doctorFarmReadService,
                                      DoctorBasicReadService doctorBasicReadService,
-                                     DoctorBarnReadService doctorBarnReadService) {
+                                     DoctorBarnReadService doctorBarnReadService,
+                                     DoctorGroupReadService doctorGroupReadService) {
         this.doctorGroupWriteService = doctorGroupWriteService;
         this.doctorFarmReadService = doctorFarmReadService;
         this.doctorBasicReadService = doctorBasicReadService;
         this.doctorBarnReadService = doctorBarnReadService;
+        this.doctorGroupReadService = doctorGroupReadService;
     }
 
     @Override
@@ -135,35 +148,54 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
     public Response<Boolean> createGroupEvent(Long groupId, Integer eventType, Map<String, Object> params) {
         try {
             //1.校验猪群是否存在
-            //2.校验能否操作此事件
+            DoctorGroup group = checkGroupExist(groupId);
 
+            //2.校验能否操作此事件
+            // TODO: 16/5/26
+
+            //根据不同的事件类型调用不同的录入接口
             GroupEventType groupEventType = checkNotNull(GroupEventType.from(eventType));
             switch (groupEventType) {
                 case MOVE_IN:
+                    RespHelper.or500(doctorGroupWriteService.groupEventMoveIn(group, BeanMapper.map(params, DoctorMoveInGroupInput.class)));
                     break;
                 case CHANGE:
+                    RespHelper.or500(doctorGroupWriteService.groupEventChange(group, BeanMapper.map(params, DoctorChangeGroupInput.class)));
                     break;
                 case TRANS_GROUP:
+                    RespHelper.or500(doctorGroupWriteService.groupEventTransGroup(group, BeanMapper.map(params, DoctorTransGroupInput.class)));
                     break;
                 case TURN_SEED:
+                    RespHelper.or500(doctorGroupWriteService.groupEventTurnSeed(group, BeanMapper.map(params, DoctorTurnSeedGroupInput.class)));
                     break;
                 case LIVE_STOCK:
+                    RespHelper.or500(doctorGroupWriteService.groupEventLiveStock(group, BeanMapper.map(params, DoctorLiveStockGroupInput.class)));
                     break;
                 case DISEASE:
+                    RespHelper.or500(doctorGroupWriteService.groupEventDisease(group, BeanMapper.map(params, DoctorDiseaseGroupInput.class)));
                     break;
                 case ANTIEPIDEMIC:
+                    RespHelper.or500(doctorGroupWriteService.groupEventAntiepidemic(group, BeanMapper.map(params, DoctorAntiepidemicGroupInput.class)));
                     break;
                 case TRANS_FARM:
+                    RespHelper.or500(doctorGroupWriteService.groupEventTransFarm(group, BeanMapper.map(params, DoctorTransFarmGroupInput.class)));
                     break;
                 case CLOSE:
+                    RespHelper.or500(doctorGroupWriteService.groupEventClose(group, BeanMapper.map(params, DoctorCloseGroupInput.class)));
                     break;
                 default:
-                    return Response.fail("fail");
+                    return Response.fail("event.type.error");
             }
-            return Response.ok();
+            return Response.ok(Boolean.TRUE);
         } catch (Exception e) {
-            log.error("failed, cause:{}", Throwables.getStackTraceAsString(e));
-            return Response.fail("");
+            log.error("create group event failed, groupId:{}, eventType:{}, params:{}, cause:{}",
+                    groupId, eventType, params, Throwables.getStackTraceAsString(e));
+            return Response.fail("create.group.event.fail");
         }
+    }
+
+    //校验猪群是否存在
+    private DoctorGroup checkGroupExist(Long groupId) {
+        return checkNotNull(RespHelper.or500(doctorGroupReadService.findGroupById(groupId)), "group.not.exist");
     }
 }
