@@ -6,6 +6,12 @@ import io.terminus.boot.dubbo.autoconfigure.DubboAutoConfiguration;
 import io.terminus.boot.mybatis.autoconfigure.MybatisAutoConfiguration;
 import io.terminus.boot.search.autoconfigure.ESSearchAutoConfiguration;
 import io.terminus.doctor.event.dao.DoctorPigDao;
+import io.terminus.doctor.event.search.barn.BarnSearchProperties;
+import io.terminus.doctor.event.search.barn.BaseBarnQueryBuilder;
+import io.terminus.doctor.event.search.barn.DefaultBarnQueryBuilder;
+import io.terminus.doctor.event.search.barn.DefaultIndexedBarnFactory;
+import io.terminus.doctor.event.search.barn.IndexedBarn;
+import io.terminus.doctor.event.search.barn.IndexedBarnFactory;
 import io.terminus.doctor.event.search.group.BaseGroupQueryBuilder;
 import io.terminus.doctor.event.search.group.DefaultGroupQueryBuilder;
 import io.terminus.doctor.event.search.group.DefaultIndexedGroupFactory;
@@ -90,6 +96,22 @@ public class ServiceConfiguration {
             @ConditionalOnMissingBean(BaseGroupQueryBuilder.class)
             public BaseGroupQueryBuilder groupQueryBuilder() {
                 return new DefaultGroupQueryBuilder();
+            }
+        }
+
+        @Configuration
+        @EnableConfigurationProperties(BarnSearchProperties.class)
+        protected static class BarnSearchConfiguration {
+            @Bean
+            @ConditionalOnMissingBean(IndexedBarnFactory.class)
+            public IndexedBarnFactory<? extends IndexedBarn> indexedBarnFactory() {
+                return new DefaultIndexedBarnFactory();
+            }
+
+            @Bean
+            @ConditionalOnMissingBean(BaseBarnQueryBuilder.class)
+            public BaseBarnQueryBuilder BarnQueryBuilder() {
+                return new DefaultBarnQueryBuilder();
             }
         }
     }
