@@ -9,7 +9,7 @@ import lombok.Getter;
  * Date: 16/5/26
  */
 
-public enum  IsCreateGroup {
+public enum IsCreateGroup {
     NO(0, "否"),
     YES(1, "是");
 

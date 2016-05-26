@@ -15,4 +15,11 @@ import java.io.Serializable;
 @Data
 public class DoctorMoveInGroupInput extends BaseGroupInput implements Serializable {
     private static final long serialVersionUID = -2457482464847828070L;
+
+    /**
+     * 转入日期
+     */
+    private String moveInAt;
+
+
 }

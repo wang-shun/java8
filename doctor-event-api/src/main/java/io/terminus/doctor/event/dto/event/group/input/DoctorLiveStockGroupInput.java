@@ -4,6 +4,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.hibernate.validator.constraints.NotEmpty;
 
+import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 
 /**
@@ -22,4 +23,10 @@ public class DoctorLiveStockGroupInput extends BaseGroupInput implements Seriali
      */
     @NotEmpty(message = "date.not.null")
     private String measureAt;
+
+    /**
+     * 平均体重(单位: 千克)
+     */
+    @NotNull(message = "avgWeight.not.null")
+    private Double avgWeight;
 }

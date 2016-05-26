@@ -2,8 +2,10 @@ package io.terminus.doctor.event.dto.event.group;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 /**
  * Desc: 转入猪群事件
@@ -18,7 +20,7 @@ public class DoctorMoveInGroupEvent extends BaseGroupEvent implements Serializab
 
     /**
      * 猪群转移类型
-     * @see
+     * @see io.terminus.doctor.event.dto.event.group.DoctorMoveInGroupEvent.InType
      */
     private Integer inType;
 
@@ -68,4 +70,30 @@ public class DoctorMoveInGroupEvent extends BaseGroupEvent implements Serializab
     private Integer boarQty;
 
     private Integer sowQty;
+
+    public enum InType {
+        PIGLET(1, "仔猪转入"),
+        SEED(2, "种猪转商品猪"),
+        GROUP(3, "群间转移"),
+        BUY(4, "购买");
+
+        @Getter
+        private Integer value;
+        @Getter
+        private String desc;
+
+        InType(Integer value, String desc){
+            this.value = value;
+            this.desc = desc;
+        }
+
+        public static InType from(Integer value){
+            for (InType type : InType.values()){
+                if(Objects.equals(value, type.getValue())){
+                    return type;
+                }
+            }
+            return null;
+        }
+    }
 }

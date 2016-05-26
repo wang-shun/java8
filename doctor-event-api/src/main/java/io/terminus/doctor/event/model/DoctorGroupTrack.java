@@ -31,7 +31,22 @@ public class DoctorGroupTrack implements Serializable {
      * 猪只数
      */
     private Integer quantity;
-    
+
+    /**
+     * 公猪数
+     */
+    private Integer boarQty;
+
+    /**
+     * 母猪数
+     */
+    private Integer sowQty;
+
+    /**
+     * 出生日期(此日期仅用于计算日龄)
+     */
+    private Date birthDate;
+
     /**
      * 平均日龄
      */

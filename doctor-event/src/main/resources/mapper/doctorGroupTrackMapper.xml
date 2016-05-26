@@ -9,6 +9,9 @@
         <result column="group_id" property="groupId"/>
         <result column="rel_event_id" property="relEventId"/>
         <result column="quantity" property="quantity"/>
+        <result column="boar_qty" property="boarQty"/>
+        <result column="sow_qty" property="sowQty"/>
+        <result column="birth_date" property="birthate"/>
         <result column="avg_day_age" property="avgDayAge"/>
         <result column="weight" property="weight"/>
         <result column="avg_weight" property="avgWeight"/>
@@ -36,11 +39,11 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        group_id, rel_event_id, quantity, avg_day_age, weight, avg_weight, price, amount, customer_id, customer_name, sale_qty, extra, creator_id, creator_name, updator_id, updator_name, created_at, updated_at
+        group_id, rel_event_id, quantity, boar_qty, sow_qty, birth_date, avg_day_age, weight, avg_weight, price, amount, customer_id, customer_name, sale_qty, extra, creator_id, creator_name, updator_id, updator_name, created_at, updated_at
     </sql>
 
     <sql id="vals">
-        #{groupId}, #{relEventId}, #{quantity}, #{avgDayAge}, #{weight}, #{avgWeight}, #{price}, #{amount}, #{customerId}, #{customerName}, #{saleQty}, #{extra}, #{creatorId}, #{creatorName}, #{updatorId}, #{updatorName}, now(), now()
+        #{groupId}, #{relEventId}, #{quantity}, #{boarQty}, #{sowQty}, #{birthDate}, #{avgDayAge}, #{weight}, #{avgWeight}, #{price}, #{amount}, #{customerId}, #{customerName}, #{saleQty}, #{extra}, #{creatorId}, #{creatorName}, #{updatorId}, #{updatorName}, now(), now()
     </sql>
 
     <insert id="create" parameterType="DoctorGroupTrack" keyProperty="id" useGeneratedKeys="true">
@@ -64,6 +67,9 @@
             <if test="groupId != null">group_id = #{groupId},</if>
             <if test="relEventId != null">rel_event_id = #{relEventId},</if>
             <if test="quantity != null">quantity = #{quantity},</if>
+            <if test="boarQty != null">boar_qty = #{boarQty},</if>
+            <if test="sowQty != null">sow_qty = #{sowQty},</if>
+            <if test="birthDate != null">birth_date = #{birthDate},</if>
             <if test="avgDayAge != null">avg_day_age = #{avgDayAge},</if>
             <if test="weight != null">weight = #{weight},</if>
             <if test="avgWeight != null">avg_weight = #{avgWeight},</if>
