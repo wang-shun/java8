@@ -5,7 +5,6 @@ import com.google.common.collect.ImmutableMap;
 import io.terminus.common.mysql.dao.MyBatisDao;
 import io.terminus.common.utils.MapBuilder;
 import io.terminus.doctor.event.model.DoctorBarn;
-import io.terminus.doctor.event.model.DoctorGroup;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -42,7 +41,7 @@ public class DoctorBarnDao extends MyBatisDao<DoctorBarn> {
     /**
      * 查询id小于lastId内且更新时间大于since的limit条数据
      *
-     * @param lastId lastId 最大的猪群id
+     * @param lastId lastId 最大的猪舍id
      * @param since  起始更新时间 yyyy-MM-dd HH:mm:ss
      * @param limit  个数
      */

@@ -1,6 +1,7 @@
 package io.terminus.doctor.event.search.barn;
 
 import io.terminus.common.utils.BeanMapper;
+import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.event.model.DoctorBarn;
 import lombok.extern.slf4j.Slf4j;
 
@@ -36,6 +37,8 @@ public abstract class BaseIndexedBarnFactory<T extends IndexedBarn> implements I
         }
 
         T indexedBarn = BeanMapper.map(barn, clazz);
+        PigType pigType = PigType.from(indexedBarn.getPigType());
+        indexedBarn.setPigTypeName(pigType == null ? "" : ( pigType.getDesc() + "[" + pigType.getType() + "]"));
         return indexedBarn;
     }
 }

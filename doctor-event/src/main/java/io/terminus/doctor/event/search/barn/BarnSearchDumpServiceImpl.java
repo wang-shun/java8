@@ -90,7 +90,7 @@ public class BarnSearchDumpServiceImpl implements BarnSearchDumpService {
     }
 
     private int doIndex(String since) {
-        // 猪最大id
+        // 猪舍最大id
         Long lastId = doctorBarnDao.maxId() + 1;
 
         // 记录数量

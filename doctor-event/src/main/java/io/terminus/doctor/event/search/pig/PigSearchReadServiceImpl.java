@@ -1,5 +1,6 @@
 package io.terminus.doctor.event.search.pig;
 
+import com.google.common.base.Throwables;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
 import io.terminus.search.api.Searcher;
@@ -33,21 +34,26 @@ public class PigSearchReadServiceImpl implements PigSearchReadService {
 
     @Override
     public Response<Paging<SearchedPig>> searchWithAggs(Integer pageNo, Integer pageSize, String template, Map<String, String> params) {
-        // 获取关键词, 设置高亮
-        String q = params.get("q");
-        if (StringUtils.isNotBlank(q)) {
-            params.put("highlight", "pigCode");
+        try{
+            // 获取关键词, 设置高亮
+            String q = params.get("q");
+            if (StringUtils.isNotBlank(q)) {
+                params.put("highlight", "pigCode");
+            }
+            // 构建查询条件, 并查询
+            Criterias criterias = basePigQueryBuilder.buildCriterias(pageNo, pageSize, params);
+            WithAggregations<SearchedPig> searchedPigs = searcher.searchWithAggs(
+                    pigSearchProperties.getIndexName(),
+                    pigSearchProperties.getIndexType(),
+                    template,
+                    criterias,
+                    SearchedPig.class
+            );
+            Paging<SearchedPig> paging = new Paging<>(searchedPigs.getTotal(), searchedPigs.getData());
+            return Response.ok(paging);
+        } catch (Exception e) {
+            log.error("pig search failed, cause by {}", Throwables.getStackTraceAsString(e));
+            return Response.fail("search.pig.fail");
         }
-        // 构建查询条件, 并查询
-        Criterias criterias = basePigQueryBuilder.buildCriterias(pageNo, pageSize, params);
-        WithAggregations<SearchedPig> searchedPigs = searcher.searchWithAggs(
-                pigSearchProperties.getIndexName(),
-                pigSearchProperties.getIndexType(),
-                template,
-                criterias,
-                SearchedPig.class
-        );
-        Paging<SearchedPig> paging = new Paging<>(searchedPigs.getTotal(), searchedPigs.getData());
-        return Response.ok(paging);
     }
 }

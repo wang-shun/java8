@@ -6,6 +6,54 @@
     "properties": {
       "id": {
         "type": "long"
+      },
+      "name": {
+        "type": "string",
+        "analyzer": "jieba",
+        "search_analyzer": "jieba"
+      },
+      "orgId": {
+        "type": "long"
+      },
+      "orgName": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "farmId": {
+        "type": "long"
+      },
+      "farmName": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "pigType": {
+        "type": "integer"
+      },
+      "pigTypeName": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "canOpenGroup": {
+        "type": "integer"
+      },
+      "status": {
+        "type": "integer"
+      },
+      "capacity": {
+        "type": "integer"
+      },
+      "staffId": {
+        "type": "long"
+      },
+      "staffName": {
+        "type": "string",
+        "index": "not_analyzed"
+      },
+      "createdAt": {
+        "type": "date"
+      },
+      "updatedAt": {
+        "type": "date"
       }
     }
   }
