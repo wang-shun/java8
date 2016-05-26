@@ -4,7 +4,6 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 import java.io.Serializable;
-import java.util.Date;
 
 /**
  * Desc: 猪只存栏事件
@@ -20,5 +19,5 @@ public class DoctorLiveStockGroupEvent extends BaseGroupEvent implements Seriali
     /**
      * 测量日期
      */
-    private Date measureAt;
+    private String measureAt;
 }

@@ -4,7 +4,6 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 import java.io.Serializable;
-import java.util.Date;
 
 /**
  * Desc: 猪群转群事件
@@ -20,7 +19,7 @@ public class DoctorTransGroupEvent extends BaseGroupEvent implements Serializabl
     /**
      * 转群日期
      */
-    private Date transGroupAt;
+    private String transGroupAt;
 
     private Long fromBarnId;
 

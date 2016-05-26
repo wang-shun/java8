@@ -5,7 +5,7 @@ import lombok.Data;
 import java.io.Serializable;
 
 /**
- * Desc: 猪群时间录入信息基类
+ * Desc: 猪群时间录入信息基类(公用字段)
  * Mail: yangzl@terminus.io
  * author: DreamYoung
  * Date: 16/5/26
@@ -14,8 +14,5 @@ import java.io.Serializable;
 public class BaseGroupInput implements Serializable {
     private static final long serialVersionUID = 3142495945186975856L;
 
-    protected Long farmId;
-
-    protected Long groupId;
-
+    protected String remark;
 }

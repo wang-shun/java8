@@ -1,6 +1,7 @@
 package io.terminus.doctor.event.dto.event.group.input;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.io.Serializable;
 
@@ -10,7 +11,8 @@ import java.io.Serializable;
  * author: DreamYoung
  * Date: 16/5/26
  */
+@EqualsAndHashCode(callSuper = true)
 @Data
-public class DoctorTransGroupInput implements Serializable {
+public class DoctorTransGroupInput extends BaseGroupInput implements Serializable {
     private static final long serialVersionUID = -8219074426917150673L;
 }

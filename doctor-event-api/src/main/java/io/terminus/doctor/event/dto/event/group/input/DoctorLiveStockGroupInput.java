@@ -1,6 +1,8 @@
 package io.terminus.doctor.event.dto.event.group.input;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import org.hibernate.validator.constraints.NotEmpty;
 
 import java.io.Serializable;
 
@@ -10,7 +12,14 @@ import java.io.Serializable;
  * author: DreamYoung
  * Date: 16/5/26
  */
+@EqualsAndHashCode(callSuper = true)
 @Data
-public class DoctorLiveStockGroupInput implements Serializable {
+public class DoctorLiveStockGroupInput extends BaseGroupInput implements Serializable {
     private static final long serialVersionUID = 510561556213800405L;
+
+    /**
+     * 测量日期
+     */
+    @NotEmpty(message = "date.not.null")
+    private String measureAt;
 }

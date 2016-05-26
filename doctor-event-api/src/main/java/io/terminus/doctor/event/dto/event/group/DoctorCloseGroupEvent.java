@@ -4,7 +4,6 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 import java.io.Serializable;
-import java.util.Date;
 
 /**
  * Desc: 关闭猪群事件
@@ -20,5 +19,5 @@ public class DoctorCloseGroupEvent extends BaseGroupEvent implements Serializabl
     /**
      * 关闭日期
      */
-    private Date closeAt;
+    private String closeAt;
 }

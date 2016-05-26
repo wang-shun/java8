@@ -5,7 +5,6 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 
 import java.io.Serializable;
-import java.util.Date;
 
 /**
  * Desc: 商品猪转为种猪事件
@@ -36,12 +35,12 @@ public class DoctorTurnSeedGroupEvent extends BaseGroupEvent implements Serializ
     /**
      * 转入日期
      */
-    private Date transInAt;
+    private String transInAt;
 
     /**
      * 出生日期
      */
-    private Date birthDate;
+    private String birthDate;
 
     /**
      * 性别 0:种母猪 1:种公猪(ESex)
