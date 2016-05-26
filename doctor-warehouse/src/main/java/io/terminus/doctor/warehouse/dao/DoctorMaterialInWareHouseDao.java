@@ -27,8 +27,8 @@ public class DoctorMaterialInWareHouseDao extends MyBatisDao<DoctorMaterialInWar
      * @param materialId
      * @return
      */
-    public DoctorMaterialInWareHouse queryByIds(Long farmId, Long wareHouseId, Long materialId){
-        return this.getSqlSession().selectOne("queryByIds",ImmutableMap.of("farmId",farmId,"wareHouseId",wareHouseId,"materialId",materialId));
+    public DoctorMaterialInWareHouse queryByFarmHouseMaterial(Long farmId, Long wareHouseId, Long materialId){
+        return this.getSqlSession().selectOne("queryByFarmHouseMaterial",ImmutableMap.of("farmId",farmId,"wareHouseId",wareHouseId,"materialId",materialId));
     }
 
     /**

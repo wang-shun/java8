@@ -11,6 +11,8 @@ import com.google.common.collect.Maps;
 
 import javax.annotation.Nullable;
 import java.util.Map;
+import java.util.function.Function;
+
 import static com.google.common.base.Preconditions.*;
 /**
  * Author: haolin
@@ -55,4 +57,8 @@ public final class Params {
         return (T)source.get(key);
     }
 
+    public static <T, F> T getWithConvert(Map<String, F> source, String key, Function<F, T> convert){
+        checkNotNull(source.get(key));
+        return convert.apply(source.get(key));
+    }
 }
