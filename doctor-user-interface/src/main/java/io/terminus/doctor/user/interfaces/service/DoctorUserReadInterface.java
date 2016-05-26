@@ -15,28 +15,54 @@ import java.util.Map;
 public interface DoctorUserReadInterface {
 
     /**
-     * 按用户名查询, 如果查询不到不会抛出异常
-     * @param nickname
-     * @return
+     * 按用户名查询
+     * @param nickname 按用户名
+     * @return 如果查询不到不会返回异常, 而是在Response中放null
      */
     Response<User> findByNick(String nickname);
 
     /**
-     * 按邮箱查询, 如果查询不到不会抛出异常
-     * @param email
-     * @return
+     * 按邮箱查询
+     * @param email 邮箱
+     * @return 如果查询不到不会返回异常, 而是在Response中放null
      */
     Response<User> findByEmail(String email);
 
     /**
-     * 按手机号查询, 如果查询不到不会抛出异常
-     * @param mobile
-     * @return
+     * 按手机号查询
+     * @param mobile 手机号
+     * @return 如果查询不到不会返回异常, 而是在Response中放null
      */
     Response<User> findByMobile(String mobile);
+
+    /**
+     * 按id查询用户
+     * @param id 用户id
+     * @return 如果查询不到将会返回异常 user.not.found
+     */
     Response<User> load(Integer id);
+
+    /**
+     * 按id查询用户
+     * @param id 用户id
+     * @return 如果查询不到将会返回异常 user.not.found
+     */
     Response<User> load(Long id);
+
+    /**
+     * 批量查询用户
+     * @param ids  用户id
+     * @return 如果查询不到不会返回异常
+     */
     Response<List<User>> loads(List<Long> ids);
+
+    /**
+     * 批量查询用户
+     * @param id0  用户id
+     * @param id1  用户id
+     * @param idn  用户id
+     * @return 如果查询不到不会返回异常
+     */
     Response<List<User>> loads(Long id0, Long id1, Long... idn);
 
     /**
@@ -52,7 +78,7 @@ public interface DoctorUserReadInterface {
      *                 <br>8. displayName[String], 匹配字段 name 以此值开头的
      *                 <br>9. haveMobile[Object], 只要此值不为空则匹配字段 mobile 不为空
      *                 <br>10.searchValue[String], email\mobile\name 任一字段与此值相等
-     * @return
+     * @return 如果查询不到不会返回异常
      */
     Response<List<User>> loadsBy(Map<String, Object> criteria);
 
@@ -84,12 +110,18 @@ public interface DoctorUserReadInterface {
      */
     Response<List<User>> listSince(Long lastId, String since, int limit);
 
+    /**
+     * 分页查询
+     * @param offset 起始值
+     * @param limit 数量
+     * @return
+     */
     Response<Paging<User>> paging(Integer offset, Integer limit);
 
     /**
      * 分页查询用户基本信息
-     * @param offset
-     * @param limit
+     * @param offset 起始值
+     * @param limit 数量
      * @param criteria 关于字段的匹配规则,参见loadsBy方法
      * @return
      */
@@ -97,8 +129,8 @@ public interface DoctorUserReadInterface {
 
     /**
      * 分页查询用户基本信息
-     * @param offset
-     * @param limit
+     * @param offset 起始值
+     * @param limit 数量
      * @param criteria 关于字段的匹配规则,参见loadsBy方法
      * @return
      */
