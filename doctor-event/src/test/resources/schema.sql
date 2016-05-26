@@ -314,6 +314,33 @@ CREATE TABLE `doctor_pigs` (
 CREATE index doctor_pigs_farm_id on doctor_pigs(farm_id);
 CREATE index doctor_pigs_pig_code on doctor_pigs(pig_code);
 
+DROP TABLE IF EXISTS `doctor_pig_tracks`;
+CREATE TABLE `doctor_pig_tracks` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT 'ID',
+  `farm_id` bigint(20) unsigned NOT NULL comment '猪场Id',
+  `pig_id` bigint(20) DEFAULT NULL COMMENT '猪id',
+  `status` smallint(6) DEFAULT NULL COMMENT '猪状态信息',
+  `current_barn_id` bigint(20) unsigned DEFAULT NULL COMMENT '当前猪舍Id',
+  `current_barn_name` varchar(64) DEFAULT NULL COMMENT '当前猪舍名称',
+  `weight` double DEFAULT NULL COMMENT '猪重量',
+  `out_farm_date` datetime DEFAULT NULL COMMENT '猪离场时间',
+  `rel_event_id` bigint(20) DEFAULT NULL COMMENT '关联事件最近事件',
+  `extra` text COMMENT '事件修改猪对应信息',
+  `current_parity` int(11) DEFAULT NULL COMMENT '当前胎次信息',
+  `remark` text COMMENT '备注',
+  `creator_id` bigint(20) DEFAULT NULL COMMENT '创建人id',
+  `creator_name` varchar(64) DEFAULT NULL COMMENT '创建人姓名',
+  `updator_id` bigint(20) DEFAULT NULL COMMENT '创建人Id',
+  `updator_name` varchar(64) DEFAULT NULL COMMENT '创建人姓名',
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) COMMENT='猪Track 信息表';
+create index doctor_pig_tracks_farm_id on doctor_pig_tracks(farm_id);
+CREATE unique index doctor_pig_tracks_pig_card_id on doctor_pig_tracks(pig_id);
+CREATE index doctor_pig_tracks_current_barn_id on doctor_pig_tracks(current_barn_id);
+create index doctor_pig_tracks_status on doctor_pig_tracks(status);
+
 -- init pig event info
 CREATE TABLE `doctor_pig_events` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT 'id',
@@ -345,3 +372,18 @@ CREATE TABLE `doctor_pig_events` (
 create index doctor_pig_events_farm_id on doctor_pig_events(farm_id);
 create index doctor_pig_events_pig_id on doctor_pig_events(pig_id);
 CREATE index doctor_pig_events_rel_event_id on doctor_pig_events(rel_event_id);
+
+create table doctor_pig_snapshots(
+	`id` bigint(20) unsigned not null AUTO_INCREMENT comment 'id',
+	`org_id` bigint(20) unsigned default null comment 'org_id',
+	`farm_id` bigint(20) unsigned default null comment 'farm_id',
+	`pig_id` bigint(20) unsigned default null comment 'pig_id',
+	`event_id` bigint(20) unsigned default null comment 'event_id',
+	`pig_info` text default null comment '公猪快照信息',
+	`created_at` datetime DEFAULT NULL,
+  	`updated_at` datetime DEFAULT NULL,
+  	 primary key(id)
+)COMMENT='猪群事件记录数据表';
+CREATE index doctor_pig_snapshots_farm_id on doctor_pig_snapshots(farm_id);
+CREATE index doctor_pig_snapshots_pig_id on doctor_pig_snapshots(pig_id);
+create index doctor_pig_snapshots_event_id on doctor_pig_snapshots(event_id);

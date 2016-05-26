@@ -53,9 +53,9 @@ public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteServic
     }
 
     @Override
-    public Response<Boolean> rollBackPigEvent(Long pigEventId) {
+    public Response<Long> rollBackPigEvent(Long pigEventId,Integer revertPigType,Long staffId, String staffName) {
         try{
-            return Response.ok(doctorPigEventManager.rollBackPigEvent(pigEventId));
+            return Response.ok(doctorPigEventManager.rollBackPigEvent(pigEventId,revertPigType,staffId,staffName));
         }catch (Exception e){
             log.error("pig roll back fail, eventId:{}, cause:{}",pigEventId, Throwables.getStackTraceAsString(e));
             return Response.fail("pig.rollBack.fail");

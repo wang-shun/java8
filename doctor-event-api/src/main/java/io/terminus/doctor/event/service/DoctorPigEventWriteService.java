@@ -34,7 +34,9 @@ public interface DoctorPigEventWriteService {
      * @param pigEventId
      * @return
      */
-    Response<Boolean> rollBackPigEvent(@NotNull(message = "input.pigEventId.empty") Long pigEventId);
+    Response<Long> rollBackPigEvent(@NotNull(message = "input.pigEventId.empty") Long pigEventId,
+                                    @NotNull(message = "input.reverterPigType") Integer revertPigType,
+                                    Long staffId, String staffName);
 
     /**
      * 公猪， 母猪 进仓事件信息

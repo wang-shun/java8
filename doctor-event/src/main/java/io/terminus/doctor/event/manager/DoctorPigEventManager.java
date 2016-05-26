@@ -1,6 +1,5 @@
 package io.terminus.doctor.event.manager;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import io.terminus.common.utils.BeanMapper;
@@ -11,10 +10,9 @@ import io.terminus.doctor.event.dao.DoctorPigDao;
 import io.terminus.doctor.event.dao.DoctorPigEventDao;
 import io.terminus.doctor.event.dao.DoctorPigSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorPigTrackDao;
+import io.terminus.doctor.event.dao.DoctorRevertLogDao;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
 import io.terminus.doctor.event.dto.event.boar.DoctorSemenDto;
-import io.terminus.doctor.event.dto.event.sow.DoctorMatingDto;
-import io.terminus.doctor.event.dto.event.sow.DoctorPregChkResultDto;
 import io.terminus.doctor.event.dto.event.usual.DoctorChgFarmDto;
 import io.terminus.doctor.event.dto.event.usual.DoctorChgLocationDto;
 import io.terminus.doctor.event.dto.event.usual.DoctorConditionDto;
@@ -22,16 +20,20 @@ import io.terminus.doctor.event.dto.event.usual.DoctorDiseaseDto;
 import io.terminus.doctor.event.dto.event.usual.DoctorFarmEntryDto;
 import io.terminus.doctor.event.dto.event.usual.DoctorRemovalDto;
 import io.terminus.doctor.event.dto.event.usual.DoctorVaccinationDto;
+import io.terminus.doctor.event.enums.BoarStatus;
+import io.terminus.doctor.event.enums.SowStatus;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigSnapshot;
 import io.terminus.doctor.event.model.DoctorPigTrack;
+import io.terminus.doctor.event.model.DoctorRevertLog;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
 import org.joda.time.Years;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import sun.rmi.runtime.Log;
 
 import java.util.Map;
 import java.util.Objects;
@@ -59,22 +61,26 @@ public class DoctorPigEventManager {
 
     private final DoctorPigSnapshotDao doctorPigSnapshotDao;
 
+    private final DoctorRevertLogDao doctorRevertLogDao;
+
     @Autowired
     public DoctorPigEventManager(DoctorPigDao doctorPigDao,
                                  DoctorPigEventDao doctorPigEventDao,
                                  DoctorPigTrackDao doctorPigTrackDao,
-                                 DoctorPigSnapshotDao doctorPigSnapshotDao){
+                                 DoctorPigSnapshotDao doctorPigSnapshotDao,
+                                 DoctorRevertLogDao doctorRevertLogDao){
         this.doctorPigEventDao = doctorPigEventDao;
         this.doctorPigDao = doctorPigDao;
         this.doctorPigTrackDao = doctorPigTrackDao;
         this.doctorPigSnapshotDao = doctorPigSnapshotDao;
+        this.doctorRevertLogDao = doctorRevertLogDao;
     }
 
     private static final String REMARK = "remark";
 
 
     @Transactional
-    public Boolean rollBackPigEvent(Long pigEventId){
+    public Long rollBackPigEvent(Long pigEventId, Integer revertPigType, Long staffId, String staffName){
 
         // delete event
         checkState(doctorPigEventDao.delete(pigEventId), "delete.pigEventById.fail");
@@ -89,7 +95,14 @@ public class DoctorPigEventManager {
 
         //delete snapshot
         checkState(doctorPigSnapshotDao.deleteByEventId(pigEventId), "delete.snapshot.error");
-        return Boolean.FALSE;
+
+        // create roll back log
+        DoctorRevertLog doctorRevertLog = DoctorRevertLog.builder()
+                .type(revertPigType).fromInfo(pigEventId.toString()).toInfo(doctorPigTrack.getRelEventId().toString())
+                .reverterId(staffId).reverterName(staffName)
+                .build();
+        doctorRevertLogDao.create(doctorRevertLog);
+        return doctorRevertLog.getId();
     }
 
     /**
@@ -200,7 +213,7 @@ public class DoctorPigEventManager {
         return createEntryEvent(
                 buildDoctorPig(dto, basic, pigType),
                 buildDoctorPigEntryEvent(basic, dto, pigType),
-                buildEntryFarmPigDoctorTrack(dto, basic));
+                buildEntryFarmPigDoctorTrack(dto, basic, pigType));
     }
 
     /**
@@ -295,13 +308,21 @@ public class DoctorPigEventManager {
      * @param basic
      * @return
      */
-    private DoctorPigTrack buildEntryFarmPigDoctorTrack(DoctorFarmEntryDto dto, DoctorBasicInputInfoDto basic){
-        return DoctorPigTrack.builder().farmId(basic.getFarmId())
-                .status(-1)  // TODO status to wait base service
+    private DoctorPigTrack buildEntryFarmPigDoctorTrack(DoctorFarmEntryDto dto, DoctorBasicInputInfoDto basic, Integer pigType){
+
+        DoctorPigTrack doctorPigTrack = DoctorPigTrack.builder().farmId(basic.getFarmId())
                 .currentBarnId(dto.getBarnId()).currentBarnName(dto.getBarnName())
                 .currentParity(dto.getParity())
                 .creatorId(basic.getStaffId()).creatorName(basic.getStaffName())
                 .build();
+        if(Objects.equals(pigType, DoctorPig.PIG_TYPE.SOW.getKey())){
+            doctorPigTrack.setStatus(SowStatus.Entry.getKey());
+        }else if(Objects.equals(pigType, DoctorPig.PIG_TYPE.BOAR.getKey())) {
+            doctorPigTrack.setStatus(BoarStatus.ENTRY.getKey());
+        }else {
+            throw new IllegalStateException("input.pigType.error");
+        }
+        return doctorPigTrack;
     }
 
     /**
