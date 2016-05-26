@@ -26,6 +26,8 @@ import static io.terminus.doctor.workflow.node.Node.ATTR_NAME;
 import static io.terminus.doctor.workflow.node.Node.ATTR_POINT_X;
 import static io.terminus.doctor.workflow.node.Node.ATTR_POINT_Y;
 import static io.terminus.doctor.workflow.node.Node.ATTR_TARGET;
+import static io.terminus.doctor.workflow.node.Node.ATTR_TIMER;
+import static io.terminus.doctor.workflow.node.Node.ATTR_VALUE;
 import static io.terminus.doctor.workflow.node.Node.NODE_DECISION;
 import static io.terminus.doctor.workflow.node.Node.NODE_END;
 import static io.terminus.doctor.workflow.node.Node.NODE_FORK;
@@ -209,6 +211,14 @@ public class ConfigManager implements Configuration {
             String nodeAttrName = XmlHelper.getAttrValue(taskNode, ATTR_NAME);
             AssertHelper.mapContainsKey(nodeMap, nodeAttrName,
                     "任务节点的name属性必须唯一, 当前节点名称为: {}, name属性值为: {}", taskNode.getNodeName(), nodeAttrName);
+            // 解析timer
+            String timer = XmlHelper.getAttrValue(taskNode, ATTR_TIMER);
+            if (StringHelper.isNotBlank(timer)) {
+                if (!timer.trim().matches("[\\s\\d]+")) {
+                    AssertHelper.throwException(
+                            "任务节点的timer属性必须只能包含空格和数字, 当前节点名称为: {}, name属性值为: {}", taskNode.getNodeName(), nodeAttrName);
+                }
+            }
             nodeMap.put(nodeAttrName, taskNode);
 
             // 3. transition 节点
@@ -358,9 +368,11 @@ public class ConfigManager implements Configuration {
             FlowDefinitionNode definitionNode = FlowDefinitionNode.builder()
                     .flowDefinitionId(flowDefinition.getId())
                     .name(XmlHelper.getAttrValue(node, ATTR_NAME))
+                    .value(XmlHelper.getAttrValue(node, ATTR_VALUE))
                     .nodeName(node.getNodeName())
                     .type(FlowDefinitionNode.Type.vlaue(node.getNodeName()))
                     .assignee(XmlHelper.getAttrValue(node, ATTR_ASSIGNEE))
+                    .timer(XmlHelper.getAttrValue(node, ATTR_TIMER))
                     .pointX(XmlHelper.getAttrDoubleValue(node, ATTR_POINT_X))
                     .pointY(XmlHelper.getAttrDoubleValue(node, ATTR_POINT_Y))
                     .build();

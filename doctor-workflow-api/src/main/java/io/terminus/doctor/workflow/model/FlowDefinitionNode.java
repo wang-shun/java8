@@ -36,6 +36,10 @@ public class FlowDefinitionNode implements Serializable{
      */
     private String name;
     /**
+     * 节点值
+     */
+    private String value;
+    /**
      * 节点标签名称
      */
     private String nodeName;
@@ -47,6 +51,10 @@ public class FlowDefinitionNode implements Serializable{
      * 当前处理人
      */
     private String assignee;
+    /**
+     * 定时表达式
+     */
+    private String timer;
     /**
      * 节点x轴偏移量
      */
