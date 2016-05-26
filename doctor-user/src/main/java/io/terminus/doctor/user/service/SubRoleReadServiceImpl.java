@@ -1,0 +1,76 @@
+package io.terminus.doctor.user.service;
+
+import com.google.common.base.Throwables;
+import io.terminus.common.model.PageInfo;
+import io.terminus.common.model.Paging;
+import io.terminus.common.model.Response;
+import io.terminus.doctor.user.dao.SubRoleDao;
+import io.terminus.doctor.user.model.SubRole;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+
+/**
+ * Created by houluyao on 16/5/24.
+ */
+@Slf4j
+@Service
+public class SubRoleReadServiceImpl implements SubRoleReadService {
+    private final SubRoleDao subRoleDao;
+
+    @Autowired
+    public SubRoleReadServiceImpl(SubRoleDao subRoleDao) {
+        this.subRoleDao = subRoleDao;
+    }
+
+    @Override
+    public Response<SubRole> findById(Long id) {
+        try {
+            return Response.ok(subRoleDao.findById(id));
+        } catch (Exception e) {
+            log.error("find sub role by id={} failed, cause:{}",
+                    id, Throwables.getStackTraceAsString(e));
+            return Response.fail("sub.role.find.fail");
+        }
+    }
+
+    @Override
+    public Response<List<SubRole>> findByIds(List<Long> ids) {
+        try {
+            return Response.ok(subRoleDao.findByIds(ids));
+        } catch (Exception e) {
+            log.error("find sub role by ids={} failed, cause:{}",
+                    ids, Throwables.getStackTraceAsString(e));
+            return Response.fail("sub.role.find.fail");
+        }
+    }
+
+    @Override
+    public Response<List<SubRole>> findByUserIdAndStatus(String appKey, Long userId, Integer status) {
+        try {
+            return Response.ok(subRoleDao.findByUserIdAndStatus(appKey, userId, status));
+        } catch (Exception e) {
+            log.error("find seller roles by userId={} failed, cause:{}",
+                    userId, Throwables.getStackTraceAsString(e));
+            return Response.fail("sub.role.find.fail");
+        }
+    }
+
+    @Override
+    public Response<Paging<SubRole>> pagination(String appKey, Long userId, Integer status, Integer pageNo, Integer size) {
+        try {
+            PageInfo page = new PageInfo(pageNo, size);
+            SubRole criteria = new SubRole();
+            criteria.setAppKey(appKey);
+            criteria.setUserId(userId);
+            criteria.setStatus(status);
+            return Response.ok(subRoleDao.paging(page.getOffset(), page.getLimit(), criteria));
+        } catch (Exception e) {
+            log.error("paging seller roles failed, userId={}, status={}, pageNo={}, size={}, cause:{}",
+                    userId, status, pageNo, size, Throwables.getStackTraceAsString(e));
+            return Response.fail("sub.role.paging.fail");
+        }
+    }
+}

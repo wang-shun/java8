@@ -12,13 +12,14 @@
         <result column="id" property="id"/>
         <result column="farm_id" property="farmId"/>
         <result column="farm_name" property="farmName"/>
-        <result column="material_type_id" property="materialTypeId"/>
-        <result column="material_type_text" property="materialTypeText"/>
+        <result column="type" property="type"/>
+        <result column="material_name" property="materialName"/>
         <result column="remark" property="remark"/>
         <result column="unit_group_id" property="unitGroupId"/>
         <result column="unit_group_name" property="unitGroupName"/>
         <result column="unit_id" property="unitId"/>
         <result column="unit_name" property="unitName"/>
+        <result column="default_consume_count" property="defaultConsumeCount"/>
         <result column="price" property="price"/>
         <result column="extra" property="extra"/>
         <result column="creator_id" property="creatorId"/>
@@ -37,11 +38,20 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        `farm_id`,`farm_name`,`material_type_id`,`material_type_text`,`remark`,`unit_group_id`,`unit_group_name`,`unit_id`,`unit_name`,`price`,`extra`,`creator_id`,`creator_name`,`updator_id`,`updator_name`,`created_at`,`updated_at`
+        `farm_id`,`farm_name`,`type`,`material_name`,`remark`,`unit_group_id`,`unit_group_name`,`unit_id`,`unit_name`,`default_consume_count`,`price`,`extra`,`creator_id`,`creator_name`,`updator_id`,`updator_name`,`created_at`,`updated_at`
     </sql>
 
     <sql id="vals">
-        #{farmId},#{farmName},#{materialTypeId},#{materialTypeText},#{remark},#{unitGroupId},#{unitGroupName},#{unitId},#{unitName},#{price},#{extra},#{creatorId},#{creatorName},#{updatorId},#{updatorName},now(),now()
+        #{farmId},#{farmName},#{type},#{materialName},#{remark},#{unitGroupId},#{unitGroupName},#{unitId},#{unitName},#{defaultConsumeCount},#{price},#{extra},#{creatorId},#{creatorName},#{updatorId},#{updatorName},now(),now()
+    </sql>
+
+    <sql id="criteria">
+        <if test="farmId != null" > AND `farm_id` = #{farmId}</if>
+        <if test="type != null" > AND `type` = #{type}</if>
+        <if test="remark != null" > AND `remark` = #{remark}</if>
+        <if test="unitGroupId != null" > AND `unit_group_id` = #{unitGroupId}</if>
+        <if test="unitId != null" > AND `unit_id` = #{unitId}</if>
+        <if test="defaultConsumeCount != null" > AND `default_consume_count` = #{defaultConsumeCount}</if>
     </sql>
 
     <insert id="create" parameterType="DoctorMaterialInfo" keyProperty="id" useGeneratedKeys="true">
@@ -55,8 +65,7 @@
         ( <include refid="cols_exclude_id"/> )
         VALUES
         <foreach collection="list" item="i" separator=",">
-        ( #{i.farmId},#{i.farmName},#{i.materialTypeId},#{i.materialTypeText},#{i.remark},#{i.unitGroupId},#{i.unitGroupName},#{i.unitId},#{i.unitName},#{i.price},#{i.extra},#{i.creatorId},#{i.creatorName},#{i.updatorId},#{i.updatorName},now(),now()
- )
+        (#{i.farmId},#{i.farmName},#{i.type},#{i.remark},#{i.unitGroupId},#{i.unitGroupName},#{i.unitId},#{i.unitName},#{i.defaultConsumeCount},#{i.price},#{i.extra},#{i.creatorId},#{i.creatorName},#{i.updatorId},#{i.updatorName},now(),now())
         </foreach>
     </insert>
 
@@ -71,28 +80,52 @@
         WHERE id = #{id}
     </select>
 
+    <select id="findByFarmId" parameterType="long" resultMap="DoctorMaterialInfoMap">
+        SELECT <include refid="cols_all"/> from <include refid="tb"/>
+        WHERE farm_id = #{farmId}
+    </select>
+
+    <select id="findByFarmIdType" parameterType="map" resultMap="DoctorMaterialInfoMap">
+        SELECT <include refid="cols_all"/> FROM <include refid="tb"/>
+        WHERE farm_id=#{farmId} and `type`=#{type}
+    </select>
+
+    <select id="count" parameterType="map" resultType="long">
+        SELECT count(1) from <include refid="tb"/>
+        <where>
+            <include refid="criteria"/>
+        </where>
+    </select>
+
+    <select id="paging" parameterType="map" resultMap="DoctorMaterialInfoMap">
+        SELECT <include refid="cols_all"/> from <include refid="tb"/>
+        <where>
+            <include refid="criteria"/>
+        </where>
+        LIMIT #{offset}, #{limit}
+    </select>
 
     <update id="update" parameterType="DoctorMaterialInfo">
         UPDATE <include refid="tb"/>
         <set>
         updated_at = now()
-            <if test="farmId != null" > ,`farm_id` = #{farmId}</if>
-            <if test="farmName != null" > ,`farm_name` = #{farmName}</if>
-            <if test="materialTypeId != null" > ,`material_type_id` = #{materialTypeId}</if>
-            <if test="materialTypeText != null" > ,`material_type_text` = #{materialTypeText}</if>
-            <if test="remark != null" > ,`remark` = #{remark}</if>
-            <if test="unitGroupId != null" > ,`unit_group_id` = #{unitGroupId}</if>
-            <if test="unitGroupName != null" > ,`unit_group_name` = #{unitGroupName}</if>
-            <if test="unitId != null" > ,`unit_id` = #{unitId}</if>
-            <if test="unitName != null" > ,`unit_name` = #{unitName}</if>
-            <if test="price != null" > ,`price` = #{price}</if>
-            <if test="extra != null" > ,`extra` = #{extra}</if>
-            <if test="creatorId != null" > ,`creator_id` = #{creatorId}</if>
-            <if test="creatorName != null" > ,`creator_name` = #{creatorName}</if>
-            <if test="updatorId != null" > ,`updator_id` = #{updatorId}</if>
-            <if test="updatorName != null" > ,`updator_name` = #{updatorName}</if>
-            <if test="createdAt != null" > ,`created_at` = #{createdAt}</if>
-                    
+        <if test="farmId != null" > ,`farm_id` = #{farmId}</if>
+        <if test="farmName != null" > ,`farm_name` = #{farmName}</if>
+        <if test="type != null" > ,`type` = #{type}</if>
+        <if test="materialName != null">, material_name=#{materialName} </if>
+        <if test="remark != null" > ,`remark` = #{remark}</if>
+        <if test="unitGroupId != null" > ,`unit_group_id` = #{unitGroupId}</if>
+        <if test="unitGroupName != null" > ,`unit_group_name` = #{unitGroupName}</if>
+        <if test="unitId != null" > ,`unit_id` = #{unitId}</if>
+        <if test="unitName != null" > ,`unit_name` = #{unitName}</if>
+        <if test="defaultConsumeCount != null" > ,`default_consume_count` = #{defaultConsumeCount}</if>
+        <if test="price != null" > ,`price` = #{price}</if>
+        <if test="extra != null" > ,`extra` = #{extra}</if>
+        <if test="creatorId != null" > ,`creator_id` = #{creatorId}</if>
+        <if test="creatorName != null" > ,`creator_name` = #{creatorName}</if>
+        <if test="updatorId != null" > ,`updator_id` = #{updatorId}</if>
+        <if test="updatorName != null" > ,`updator_name` = #{updatorName}</if>
+        <if test="createdAt != null" > ,`created_at` = #{createdAt}</if>
         </set>
         WHERE id=#{id}
     </update>

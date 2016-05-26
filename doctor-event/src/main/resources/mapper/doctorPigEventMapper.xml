@@ -50,6 +50,20 @@
         #{orgId},#{orgName},#{farmId},#{farmName},#{pigId},#{pigCode},#{eventAt},#{type},#{kind},#{name},#{desc},#{barnId},#{barnName},#{relEventId},#{outId},#{extra},#{remark},#{creatorId},#{creatorName},#{updatorId},#{updatorName},now(),now()
     </sql>
 
+    <sql id="criteria">
+        <if test="orgId != null" > AND `org_id` = #{orgId}</if>
+        <if test="farmId != null" > AND `farm_id` = #{farmId}</if>
+        <if test="pigId != null" > AND `pig_id` = #{pigId}</if>
+        <if test="pigCode != null" > AND `pig_code` = #{pigCode}</if>
+        <if test="beginDate != null"> AND <![CDATA[ event_at >= #{beginDate} ]]> </if>
+        <if test="endDate != null"> AND <![CDATA[ event_at <= #{endDate} ]]> </if>
+        <if test="type != null" > AND `type` = #{type}</if>
+        <if test="kind != null" > AND `kind` = #{kind}</if>
+        <if test="barnId != null" > AND `barn_id` = #{barnId}</if>
+        <if test="relEventId != null" > AND `rel_event_id` = #{relEventId}</if>
+        <if test="outId != null" > AND `out_id` = #{outId}</if>
+    </sql>
+
     <insert id="create" parameterType="DoctorPigEvent" keyProperty="id" useGeneratedKeys="true">
         INSERT INTO <include refid="tb" />
         (<include refid="cols_exclude_id" />)
@@ -77,6 +91,26 @@
         WHERE id = #{id}
     </select>
 
+    <select id="count" parameterType="map" resultType="long">
+        SELECT count(1) from <include refid="tb"/>
+        <where>
+            <include refid="criteria"/>
+        </where>
+    </select>
+
+    <select id="paging" parameterType="map" resultMap="DoctorPigEventMap">
+        SELECT <include refid="cols_all"/> from <include refid="tb"/>
+        <where>
+            <include refid="criteria"/>
+        </where>
+        LIMIT #{offset}, #{limit}
+        <if test="ordered!=null">
+            ORDER BY event_at
+            <if test="ordered == 0">
+                DESC
+            </if>
+        </if>
+    </select>
 
     <update id="update" parameterType="DoctorPigEvent">
         UPDATE <include refid="tb"/>

@@ -8,6 +8,7 @@ import com.google.common.collect.Maps;
 import com.google.common.hash.Hashing;
 import io.terminus.boot.session.properties.SessionProperties;
 import io.terminus.common.model.Response;
+import io.terminus.doctor.common.utils.RandomUtil;
 import io.terminus.doctor.open.common.CaptchaGenerator;
 import io.terminus.doctor.open.common.Sessions;
 import io.terminus.pampas.common.UserUtil;
@@ -22,15 +23,18 @@ import io.terminus.parana.user.service.UserReadService;
 import io.terminus.session.AFSessionManager;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.validator.constraints.NotEmpty;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.Base64Utils;
+import org.springframework.web.bind.annotation.RequestMethod;
 
 import java.io.Serializable;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 
 import static io.terminus.common.utils.Arguments.isEmpty;
@@ -92,16 +96,53 @@ public class OPUsers {
         return ImmutableMap.of("time", DateTime.now().toString(DateTimeFormat.forPattern("yyyyMMddHHmmss")));
     }
 
-    @OpenMethod(key="user.login", paramNames = {"name", "password", "type", "code", "sid"})
-    public Token login(String name, String password, String type, String code, String sessionId) {
-        if (isEmpty(name)) {
-            throw new OPClientException("user.name.miss");
+    /**
+     * 获取手机验证码(不需要sessionId)
+     * @param mobile
+     * @return
+     */
+    @OpenMethod(key = "get.mobile.code", paramNames = "mobile")
+    public Boolean sendSms(@NotEmpty(message = "user.mobile.miss") String mobile) {
+        return Boolean.TRUE;
+    }
+
+    /**
+     * 用户注册
+     *
+     * @param password   密码
+     * @param mobile     手机号
+     * @param code       手机验证码
+     * @return 注册成功之后的用户ID
+     */
+    @OpenMethod(key = "user.register", httpMethods = RequestMethod.POST, paramNames = {"password", "mobile", "code"})
+    public Long register(@NotEmpty(message = "user.password.miss") String password,
+                         @NotEmpty(message = "user.mobile.miss") String mobile,
+                         @NotEmpty(message = "user.code.miss") String code) {
+        return Long.valueOf(RandomUtil.random(1, 10));
+    }
+
+    /**
+     * 用户登录,
+     * @param mobile
+     * @param password
+     * @param code
+     * @param sessionId
+     * @param deviceId
+     * @return
+     */
+    @OpenMethod(key="user.login", paramNames = {"mobile", "password", "code", "sid", "deviceId"})
+    public Token login(String mobile, String password, String code, String sessionId, String deviceId) {
+        if (isEmpty(mobile)) {
+            throw new OPClientException("user.mobile.miss");
         }
         if (isEmpty(password)) {
             throw new OPClientException("user.password.miss");
         }
         if (isEmpty(sessionId)) {
             throw new OPClientException("session.id.miss");
+        }
+        if (isEmpty(deviceId)) {
+            throw new OPClientException("device.id.miss");
         }
 
         // 当用户次数超过指定次数之后,需要校验code
@@ -116,23 +157,86 @@ public class OPUsers {
             throw new OPClientException("user.code.mismatch");
         }
 
-        // 用户名密码登录
-        User user = doLogin(name, password, type, sessionId);
-        // 登录成功记录 session
-        sessionManager.save(Sessions.TOKEN_PREFIX, sessionId, ImmutableMap.of(Sessions.USER_ID, (Object) user.getId()), Sessions.LONG_INACTIVE_INTERVAL);
+        // 手机 密码登录
+        User user = doLogin(mobile, password, sessionId);
+
+        // 登录成功记录 sessionId 和 deviceId, 防止其他设备获得sessionId, 伪造登录
+        sessionManager.save(Sessions.TOKEN_PREFIX, sessionId,
+                ImmutableMap.of(Sessions.USER_ID, (Object) user.getId(), Sessions.DEVICE_ID, (Object) deviceId),
+                Sessions.LONG_INACTIVE_INTERVAL);
         // 清除 limit & code
         sessionManager.deletePhysically(Sessions.LIMIT_PREFIX, sessionId);
         sessionManager.deletePhysically(Sessions.CODE_PREFIX, sessionId);
 
         // 返回登录的凭证
         Token token = new Token();
-        token.setName(name);
+        token.setName(user.getName());
         token.setDomain(sessionProperties.getCookieDomain());
         token.setExpiredAt(DateTime.now().plusSeconds(Sessions.LONG_INACTIVE_INTERVAL)
                 .toString(DateTimeFormat.forPattern("yyyyMMddHHmmss")));
         token.setSessionId(sessionId);
+        token.setDeviceId(deviceId);
         token.setCookieName(sessionProperties.getCookieName());
         return token;
+    }
+
+    /**
+     * 用户自动登录, 需要传入 sessionId 和 deviceId 防止sessionId泄露
+     * @param sessionId
+     * @param deviceId
+     * @return
+     */
+    @OpenMethod(key="user.auto.login", paramNames = {"sid", "deviceId"})
+    public Token autologin(String sessionId, String deviceId) {
+        if (isEmpty(sessionId)) {
+            throw new OPClientException("session.id.miss");
+        }
+        if (isEmpty(deviceId)) {
+            throw new OPClientException("device.id.miss");
+        }
+
+        Map<String, Object> snapshot = sessionManager.findSessionById(Sessions.TOKEN_PREFIX, sessionId);
+        if (snapshot == null || snapshot.size() == 0 || snapshot.get(Sessions.USER_ID) == null) {
+            throw new OPClientException(400, "session.id.expired");
+        }
+
+        //校验下设备号是否匹配
+        checkDeviceId(snapshot, deviceId);
+
+        // refresh
+        sessionManager.refreshExpireTime(Sessions.TOKEN_PREFIX, sessionId, Sessions.LONG_INACTIVE_INTERVAL);
+        Long uid = Long.parseLong(snapshot.get(Sessions.USER_ID).toString());
+        Response<User> res = userReadService.findById(uid);
+        if (!res.isSuccess()) {
+            throw new OPClientException(400, res.getError());
+        }
+
+        // 返回登录的凭证
+        Token token = new Token();
+        token.setName(res.getResult().getName());
+        token.setDomain(sessionProperties.getCookieDomain());
+        token.setExpiredAt(DateTime.now().plusSeconds(Sessions.LONG_INACTIVE_INTERVAL)
+                .toString(DateTimeFormat.forPattern("yyyyMMddHHmmss")));
+        token.setSessionId(sessionId);
+        token.setDeviceId(deviceId);
+        token.setCookieName(sessionProperties.getCookieName());
+        return token;
+    }
+
+    //校验设备号是否匹配
+    private void checkDeviceId(Map<String, Object> snapshot, String deviceId) {
+        if (snapshot == null || snapshot.size() == 0 || snapshot.get(Sessions.DEVICE_ID) == null) {
+            throw new OPClientException(400, "device.id.expired");
+        }
+
+        if (!Objects.equals(deviceId, String.valueOf(snapshot.get(Sessions.DEVICE_ID)))) {
+            throw new OPClientException(400, "device.id.not.match");
+        }
+    }
+
+    //手机登录
+    private User doLogin(String mobile, String password, String sessionId) {
+        return doLogin(mobile, password, "3", sessionId);
     }
 
     private User doLogin(String name, String password, String type, String sessionId) {
@@ -226,11 +330,38 @@ public class OPUsers {
         }
     }
 
+    /**
+     * 用户修改密码
+     * @param oldPassword 旧密码
+     * @param newPassword 新密码
+     * @return 是否成功
+     */
+    @OpenMethod(key = "user.change.password", httpMethods = RequestMethod.POST, paramNames = {"oldPassword", "newPassword"})
+    public Boolean changePassword(@NotEmpty(message = "oldPassword.not.empty") String oldPassword,
+                                  @NotEmpty(message = "newPassword.not.empty") String newPassword) {
+        return Boolean.TRUE;
+    }
+
+    /**
+     * 忘记密码
+     * @param mobile  手机号
+     * @param code    验证码
+     * @param newPassword  新密码
+     * @return 是否成功
+     */
+    @OpenMethod(key = "user.forget.password", httpMethods = RequestMethod.POST, paramNames = {"mobile", "code", "newPassword"})
+    public Boolean forgetPassword(@NotEmpty(message = "mobile.not.empty") String mobile,
+                                  @NotEmpty(message = "code.not.empty") String code,
+                                  @NotEmpty(message = "newPassword.not.empty") String newPassword) {
+        return Boolean.TRUE;
+    }
+
     @Data
     class Token implements Serializable {
         String name;
         String expiredAt;
         String sessionId;
+        String deviceId;
         String cookieName;
         String domain;
     }

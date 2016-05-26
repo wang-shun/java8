@@ -13,5 +13,15 @@ public enum UserRole {
     /**
      * 卖家
      */
-    SELLER
+    SELLER,
+
+    /**
+     * 主账号
+     */
+    PRIMARY,
+
+    /**
+     * 子账号
+     */
+    SUB
 }

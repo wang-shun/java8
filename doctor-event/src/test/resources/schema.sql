@@ -113,7 +113,7 @@ CREATE TABLE IF NOT EXISTS `workflow_definitions` (
 	`created_at` DATETIME DEFAULT NULL COMMENT '创建时间',
 	`updated_at`  DATETIME DEFAULT NULL COMMENT '更新时间',
 	PRIMARY KEY(`id`)
-)ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='流程定义表';
+) COMMENT='流程定义表';
 CREATE INDEX idx_flow_definition_key ON workflow_definitions(`key`);
 
 
@@ -133,7 +133,7 @@ CREATE TABLE IF NOT EXISTS `workflow_definition_nodes`(
 	`created_at` DATETIME DEFAULT NULL COMMENT '创建时间',
 	`updated_at`  DATETIME DEFAULT NULL COMMENT '更新时间',
 	PRIMARY KEY(`id`)
-)ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='流程定义节点表';
+) COMMENT='流程定义节点表';
 CREATE INDEX idx_flow_definition_nodes_def_id ON workflow_definition_nodes(flow_definition_id);
 
 
@@ -153,7 +153,7 @@ CREATE TABLE IF NOT EXISTS `workflow_definition_node_events`(
 	`created_at` DATETIME DEFAULT NULL COMMENT '创建时间',
 	`updated_at`  DATETIME DEFAULT NULL COMMENT '更新时间',
 	PRIMARY KEY(`id`)
-)ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='流程定义节点连线事件表';
+) COMMENT='流程定义节点连线事件表';
 CREATE INDEX idx_flow_node_event_def_id ON workflow_definition_node_events(flow_definition_id);
 CREATE INDEX idx_flow_node_event_src_id ON workflow_definition_node_events(source_node_id);
 CREATE INDEX idx_flow_node_event_handler ON workflow_definition_node_events(handler);
@@ -178,7 +178,7 @@ CREATE TABLE IF NOT EXISTS `workflow_process_instances`(
 	`created_at` DATETIME DEFAULT NULL COMMENT '创建时间',
 	`updated_at` DATETIME DEFAULT NULL COMMENT '更新时间',
 	PRIMARY KEY(`id`)
-)ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='流程实例表';
+) COMMENT='流程实例表';
 CREATE INDEX idx_flow_instance_def_id ON workflow_process_instances(flow_definition_id);
 CREATE INDEX idx_flow_instance_def_key ON workflow_process_instances(flow_definition_key);
 CREATE INDEX idx_flow_instance_busi_id ON workflow_process_instances(business_id);
@@ -200,7 +200,7 @@ CREATE TABLE IF NOT EXISTS `workflow_processes`(
 	`created_at` DATETIME DEFAULT NULL COMMENT '创建时间',
 	`updated_at`  DATETIME DEFAULT NULL COMMENT '更新时间',
 	PRIMARY KEY(`id`)
-)ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='流程实例的当前活动节点表';
+) COMMENT='流程实例的当前活动节点表';
 CREATE INDEX idx_flow_process_ins_id ON workflow_processes(flow_instance_id);
 
 
@@ -223,7 +223,7 @@ CREATE TABLE IF NOT EXISTS `workflow_process_tracks`(
 	`created_at` DATETIME DEFAULT NULL COMMENT '创建时间',
 	`updated_at` DATETIME DEFAULT NULL COMMENT '更新时间',
 	PRIMARY KEY(`id`)
-)ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='流程处理节点跟踪表';
+) COMMENT='流程处理节点跟踪表';
 CREATE INDEX idx_flow_process_track_ins_id ON workflow_process_tracks(flow_instance_id);
 
 
@@ -248,7 +248,7 @@ CREATE TABLE IF NOT EXISTS `workflow_history_process_instances`(
 	`created_at` DATETIME DEFAULT NULL COMMENT '创建时间',
 	`updated_at` DATETIME DEFAULT NULL COMMENT '更新时间',
 	PRIMARY KEY(`id`)
-)ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='流程实例历史表';
+) COMMENT='流程实例历史表';
 CREATE INDEX idx_flow_instance_his_def_id ON workflow_history_process_instances(flow_definition_id);
 CREATE INDEX idx_flow_instance_his_def_key ON workflow_history_process_instances(flow_definition_key);
 CREATE INDEX idx_flow_instance_his_busi_id ON workflow_history_process_instances(business_id);
@@ -274,5 +274,5 @@ CREATE TABLE IF NOT EXISTS `workflow_history_processes`(
 	`created_at` DATETIME DEFAULT NULL COMMENT '创建时间',
 	`updated_at` DATETIME DEFAULT NULL COMMENT '更新时间',
 	PRIMARY KEY(`id`)
-)ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='流程实例的活动节点历史表';
+) COMMENT='流程实例的活动节点历史表';
 CREATE INDEX idx_flow_process_his_ins_id ON workflow_history_processes(flow_instance_id);

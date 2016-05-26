@@ -11,5 +11,13 @@
         http://code.alibabatech.com/schema/dubbo
         http://code.alibabatech.com/schema/dubbo/dubbo.xsd">
 
+    <!-- carousel figure service -->
+    <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.basic.service.DoctorCarouselFigureReadService" ref="mockDoctorCarouselFigureReadServiceImpl"/>
+    <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.basic.service.DoctorCarouselFigureWriteService" ref="mockDoctorCarouselFigureWriteServiceImpl"/>
 
+    <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.basic.service.DoctorBasicReadService" ref="doctorBasicReadServiceImpl" />
+    <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.basic.service.DoctorBasicWriteService" ref="doctorBasicWriteServiceImpl" />
+
+    <!-- search history word service -->
+    <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.basic.service.DoctorSearchHistoryService" ref="doctorSearchHistoryServiceImpl"/>
 </beans>

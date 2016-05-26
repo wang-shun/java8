@@ -20,6 +20,14 @@
             <artifactId>doctor-user-api</artifactId>
         </dependency>
         <dependency>
+            <groupId>io.terminus.doctor</groupId>
+            <artifactId>doctor-event-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.terminus.doctor</groupId>
+            <artifactId>doctor-basic-api</artifactId>
+        </dependency>
+        <dependency>
             <groupId>io.terminus.parana</groupId>
             <artifactId>parana-config-client</artifactId>
         </dependency>

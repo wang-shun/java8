@@ -4,7 +4,7 @@ server:
 
 session:
   cookie-context-path: /
-  cookie-domain: bbc.dev
+  cookie-domain: doctor.com
   redis-host: 127.0.0.1
   redis-port: 8888
 
@@ -12,7 +12,7 @@ dubbo:
   registry: zookeeper://127.0.0.1:2181
 
 logging:
-  file: ~/Logs/doctor/web.log
+  file: ${user.home}/logs/doctor/open.log
   level.*: INFO
   level.io.terminus: DEBUG
 
@@ -23,7 +23,7 @@ zookeeper:
 
 
 oss:
-  endpoint: todo
-  appKey: todo
-  appSecret: todo
-  bucketName: terminus
+  endpoint: oss-cn-beijing.aliyuncs.com
+  appKey: n67jFjUcEjZxPOZf
+  appSecret: ZOPL1A33iQB52g60Dgvs3xT2FJqeaf
+  bucketName: pigmall

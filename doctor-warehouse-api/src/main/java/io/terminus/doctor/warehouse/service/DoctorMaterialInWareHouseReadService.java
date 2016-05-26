@@ -1,0 +1,26 @@
+package io.terminus.doctor.warehouse.service;
+
+import io.terminus.common.model.Response;
+import io.terminus.doctor.warehouse.model.DoctorMaterialInWareHouse;
+
+import javax.validation.constraints.NotNull;
+import java.util.List;
+
+/**
+ * Created by yaoqijun.
+ * Date:2016-05-13
+ * Email:yaoqj@terminus.io
+ * Descirbe:
+ */
+public interface DoctorMaterialInWareHouseReadService {
+
+    /**
+     * 获取仓库的物料数据信息
+     * @param farmId
+     * @param wareHouseId
+     * @return
+     */
+    Response<List<DoctorMaterialInWareHouse>> queryDoctorMaterialInWareHouse(@NotNull(message = "input.farmId.empty") Long farmId,
+                                                                             @NotNull(message = "input.wareHouseId.empty") Long wareHouseId);
+
+}

@@ -1,14 +1,37 @@
 package io.terminus.doctor.event.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.Strings;
+import com.google.common.collect.Iterables;
+import io.terminus.common.utils.JsonMapper;
+import io.terminus.doctor.common.constants.JacksonType;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.SneakyThrows;
+import lombok.experimental.Builder;
 
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.Date;
+import java.util.Map;
+import java.util.Objects;
 
+import static java.util.Objects.isNull;
+
+@Builder
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class DoctorPig implements Serializable{
 
     private static final long serialVersionUID = -5981942073814626473L;
+
+    private static final ObjectMapper OBJECT_MAPPER = JsonMapper.JSON_NON_DEFAULT_MAPPER.getMapper();
 
     private Long id;
 
@@ -34,7 +57,7 @@ public class DoctorPig implements Serializable{
 
     private Date birthDate;
 
-    private Double birthWeight;
+    private Double birthWeight; // not include
 
     private Date inFarmDate;
 
@@ -52,6 +75,11 @@ public class DoctorPig implements Serializable{
 
     private String geneticName;
 
+    @Setter(AccessLevel.NONE)
+    private Map<String, Object> extraMap;
+
+    @Setter(AccessLevel.NONE)
+    @JsonIgnore
     private String extra;
 
     private String remark;
@@ -68,4 +96,52 @@ public class DoctorPig implements Serializable{
 
     private Date updatedAt;
 
+    @SneakyThrows
+    public void setExtraMap(Map<String,Object> extraMap){
+        this.extraMap = extraMap;
+        if(isNull(extraMap) || Iterables.isEmpty(extraMap.entrySet())){
+            this.extra = null;
+        }else {
+            this.extra = OBJECT_MAPPER.writeValueAsString(extraMap);
+        }
+    }
+
+    @SneakyThrows
+    public void setExtra(String extra){
+        this.extra = extra;
+        if(Strings.isNullOrEmpty(extra)){
+            this.extraMap = Collections.emptyMap();
+        }else {
+            this.extraMap = OBJECT_MAPPER.readValue(extra, JacksonType.MAP_OF_OBJECT);
+        }
+    }
+
+    /**
+     * 猪类型信息表数据
+     */
+    public static enum PIG_TYPE{
+        SOW(1, "母猪"),
+        BOAR(2, "公猪"),
+        LITTER(3, "仔猪");
+
+        @Getter
+        private Integer key;
+
+        @Getter
+        private String desc;
+
+        private PIG_TYPE(Integer key, String desc){
+            this.key = key;
+            this.desc = desc;
+        }
+
+        public static PIG_TYPE from(Integer key){
+            for(PIG_TYPE pig_type : PIG_TYPE.values()){
+                if(Objects.equals(pig_type.getKey(), key)){
+                    return pig_type;
+                }
+            }
+            return null;
+        }
+    }
 }

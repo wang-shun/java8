@@ -10,6 +10,7 @@
     <resultMap id="DoctorPigTrackMap" type="DoctorPigTrack">
 
         <result column="id" property="id"/>
+        <result column="farm_id" property="farmId"/>
         <result column="pig_id" property="pigId"/>
         <result column="status" property="status"/>
         <result column="current_barn_id" property="currentBarnId"/>
@@ -36,11 +37,21 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        `pig_id`,`status`,`current_barn_id`,`current_barn_name`,`weight`,`out_farm_date`,`rel_event_id`,`extra`,`current_parity`,`remark`,`creator_id`,`creator_name`,`updator_id`,`updator_name`,`created_at`,`updated_at`
+        `farm_id`,`pig_id`,`status`,`current_barn_id`,`current_barn_name`,`weight`,`out_farm_date`,`rel_event_id`,`extra`,`current_parity`,`remark`,`creator_id`,`creator_name`,`updator_id`,`updator_name`,`created_at`,`updated_at`
     </sql>
 
     <sql id="vals">
-        #{pigId},#{status},#{currentBarnId},#{currentBarnName},#{weight},#{outFarmDate},#{relEventId},#{extra},#{currentParity},#{remark},#{creatorId},#{creatorName},#{updatorId},#{updatorName},now(),now()
+        #{farmId},#{pigId},#{status},#{currentBarnId},#{currentBarnName},#{weight},#{outFarmDate},#{relEventId},#{extra},#{currentParity},#{remark},#{creatorId},#{creatorName},#{updatorId},#{updatorName},now(),now()
+    </sql>
+
+    <sql id="criteria">
+        <if test="farmId!=null"> AND `farm_id`=#{farmId}</if>
+        <if test="pigId != null" > AND `pig_id` = #{pigId}</if>
+        <if test="status != null" > AND `status` = #{status}</if>
+        <if test="currentBarnId != null" > AND `current_barn_id` = #{currentBarnId}</if>
+        <if test="weight != null" > AND `weight` = #{weight}</if>
+        <if test="relEventId != null" > AND `rel_event_id` = #{relEventId}</if>
+        <if test="currentParity != null" > AND `current_parity` = #{currentParity}</if>
     </sql>
 
     <insert id="create" parameterType="DoctorPigTrack" keyProperty="id" useGeneratedKeys="true">
@@ -54,7 +65,7 @@
         ( <include refid="cols_exclude_id"/> )
         VALUES
         <foreach collection="list" item="i" separator=",">
-        ( #{i.pigId},#{i.status},#{i.currentBarnId},#{i.currentBarnName},#{i.weight},#{i.outFarmDate},#{i.relEventId},#{i.extra},#{i.currentParity},#{i.remark},#{i.creatorId},#{i.creatorName},#{i.updatorId},#{i.updatorName},now(),now()
+        (#{i.farmId}, #{i.pigId},#{i.status},#{i.currentBarnId},#{i.currentBarnName},#{i.weight},#{i.outFarmDate},#{i.relEventId},#{i.extra},#{i.currentParity},#{i.remark},#{i.creatorId},#{i.creatorName},#{i.updatorId},#{i.updatorName},now(),now()
  )
         </foreach>
     </insert>
@@ -70,11 +81,39 @@
         WHERE id = #{id}
     </select>
 
+    <select id="findByPigIds" parameterType="list" resultMap="DoctorPigTrackMap">
+        select <include refid="cols_all"/> from <include refid="tb"/>
+        WHERE pig_id in
+        <foreach collection="list" close=")" open="(" separator="," item="i">
+            #{i}
+        </foreach>
+    </select>
+
+    <select id="findByEventId" parameterType="long" resultMap="DoctorPigTrackMap">
+        SELECT <include refid="cols_all"/> FROM <include refid="tb"/>
+        WHERE relEventId = #{relEventId};
+    </select>
+
+    <select id="count" parameterType="map" resultType="long">
+        SELECT count(1) FROM <include refid="tb"/>
+        <where>
+            <include refid="criteria"/>
+        </where>
+    </select>
+
+    <select id="paging" parameterType="map" resultMap="DoctorPigTrackMap">
+        SELECT <include refid="cols_all"/> FROM <include refid="tb"/>
+        <where>
+            <include refid="criteria"/>
+        </where>
+        LIMIT #{offset}, #{limit}
+    </select>
 
     <update id="update" parameterType="DoctorPigTrack">
         UPDATE <include refid="tb"/>
         <set>
         updated_at = now()
+            <if test="farmId!=null">, `farm_id`=#{farmId}</if>
             <if test="pigId != null" > ,`pig_id` = #{pigId}</if>
             <if test="status != null" > ,`status` = #{status}</if>
             <if test="currentBarnId != null" > ,`current_barn_id` = #{currentBarnId}</if>

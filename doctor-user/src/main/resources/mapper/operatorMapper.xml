@@ -27,7 +27,7 @@
     </sql>
 
     <sql id="cols_exclude_id">
-      `user_id`, `role_id`, `status`, `extra_json`, `created_at`, `updated_at`
+        `user_id`, `role_id`, `status`, `extra_json`, `created_at`, `updated_at`
     </sql>
 
     <sql id="vals">

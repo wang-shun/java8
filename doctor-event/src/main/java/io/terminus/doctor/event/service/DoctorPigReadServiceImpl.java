@@ -1,0 +1,132 @@
+package io.terminus.doctor.event.service;
+
+import com.google.common.base.Throwables;
+import com.google.common.collect.Maps;
+import io.terminus.common.model.PageInfo;
+import io.terminus.common.model.Paging;
+import io.terminus.common.model.Response;
+import io.terminus.doctor.event.dao.DoctorPigDao;
+import io.terminus.doctor.event.dao.DoctorPigTrackDao;
+import io.terminus.doctor.event.dto.DoctorPigInfoDto;
+import io.terminus.doctor.event.dto.DoctorSowPigInfoDetailDto;
+import io.terminus.doctor.event.enums.DataRange;
+import io.terminus.doctor.event.model.DoctorPig;
+import io.terminus.doctor.event.model.DoctorPigTrack;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
+
+import static java.util.Objects.isNull;
+
+/**
+ * Created by yaoqijun.
+ * Date:2016-05-18
+ * Email:yaoqj@terminus.io
+ * Descirbe:
+ */
+@Slf4j
+@Service
+public class DoctorPigReadServiceImpl implements DoctorPigReadService{
+
+    private final DoctorPigDao doctorPigDao;
+
+    private final DoctorPigTrackDao doctorPigTrackDao;
+
+    @Autowired
+    public DoctorPigReadServiceImpl(DoctorPigDao doctorPigDao, DoctorPigTrackDao doctorPigTrackDao){
+        this.doctorPigDao = doctorPigDao;
+        this.doctorPigTrackDao = doctorPigTrackDao;
+    }
+
+    @Override
+    public Response<Long> queryPigCount(Integer range, Long id, Integer pigType) {
+        try{
+            Map<String,Object> criteria = Maps.newHashMap();
+            if(Objects.equals(range, DataRange.FARM.getKey())){
+                criteria.put("farmId",id);
+            }else if(Objects.equals(DataRange.ORG.getKey(), range)){
+                criteria.put("orgId",id);
+            }else {
+                return Response.fail("range.input.error");
+            }
+            criteria.put("pigType",pigType);
+            return Response.ok(doctorPigDao.count(criteria));
+        }catch (Exception e){
+            log.error(" query pig sow count fail, cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("query.pigSowCount.fail");
+        }
+    }
+
+    @Override
+    public Response<Map<Long, Long>> queryPigCountByBreed(Long farmId) {
+        //TODO not sure
+        return null;
+    }
+
+    @Override
+    public Response<Map<Long, Long>> queryPigCountByStatus(Long farmId) {
+        // TODO not sure
+        return null;
+    }
+
+    @Override
+    public Response<Paging<DoctorPigInfoDto>> pagingDoctorInfoDtoByPig(DoctorPig doctorPig, Integer pageNo, Integer pageSize) {
+        try{
+            if(isNull(doctorPig.getFarmId())){
+                return Response.fail("input.farmId.empty");
+            }
+
+            PageInfo pageInfo = new PageInfo(pageNo, pageSize);
+            Paging<DoctorPig> paging = doctorPigDao.paging(pageInfo.getOffset(),pageInfo.getLimit(),doctorPig);
+            if(paging.isEmpty()){
+                return Response.ok(Paging.empty());
+            }
+            List<DoctorPig> doctorPigs = paging.getData();
+            List<DoctorPigTrack> doctorPigTracks = doctorPigTrackDao.findByPigIds(doctorPigs.stream().map(s->s.getId()).collect(Collectors.toList()));
+
+            Map<Long, DoctorPigTrack> doctorPigTrackMap = doctorPigTracks.stream().collect(Collectors.toMap(k->k.getPigId(), v->v));
+
+            return Response.ok(new Paging<>(paging.getTotal(),
+                        doctorPigs.stream().map(s->DoctorPigInfoDto.buildDoctorPigInfoDto(s, doctorPigTrackMap.get(s.getId()))).collect(Collectors.toList())
+                    ));
+        }catch (Exception e){
+            log.error("paging doctor info dto by pig, cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("paging.doctorDto.fail");
+        }
+    }
+
+    @Override
+    public Response<Paging<DoctorPigInfoDto>> pagingDoctorInfoDtoByPigTrack(DoctorPigTrack doctorPigTrack, Integer pageNo, Integer pageSize) {
+        try{
+            if(isNull(doctorPigTrack.getFarmId())){
+                return Response.fail("paging.doctorInfoDto.fail");
+            }
+
+            PageInfo pageInfo = new PageInfo(pageNo,pageSize);
+            Paging<DoctorPigTrack> paging = doctorPigTrackDao.paging(pageInfo.getOffset(),pageInfo.getLimit(),doctorPigTrack);
+            if(paging.isEmpty()){
+                return Response.ok(Paging.empty());
+            }
+            List<DoctorPigTrack> doctorPigTracks = paging.getData();
+            List<DoctorPig> doctorPigs = doctorPigDao.findByIds(doctorPigTracks.stream().map(s->s.getPigId()).collect(Collectors.toList()));
+            Map<Long, DoctorPigTrack> doctorPigTrackMap = doctorPigTracks.stream().collect(Collectors.toMap(k->k.getPigId(),v->v));
+
+            return Response.ok(new Paging<>(paging.getTotal(),
+                    doctorPigs.stream().map(s->DoctorPigInfoDto.buildDoctorPigInfoDto(s, doctorPigTrackMap.get(s.getId()))).collect(Collectors.toList())
+                    ));
+        }catch (Exception e){
+            log.error("paging doctor info dto by track pig fail, cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("paging.doctorInfoTrack.fail");
+        }
+    }
+
+    @Override
+    public Response<DoctorSowPigInfoDetailDto> querySowPigInfoDetail(Long pigId) {
+        return null;
+    }
+}

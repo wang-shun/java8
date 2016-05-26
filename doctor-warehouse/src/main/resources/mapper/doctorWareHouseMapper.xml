@@ -16,9 +16,8 @@
         <result column="manager_id" property="managerId"/>
         <result column="manager_name" property="managerName"/>
         <result column="address" property="address"/>
-        <result column="type_id" property="typeId"/>
-        <result column="type_name" property="typeName"/>
-        <result column="is_default" property="isDefault"/>
+        <result column="type" property="type"/>
+        <result column="extra" property="extra"/>
         <result column="creator_id" property="creatorId"/>
         <result column="creator_name" property="creatorName"/>
         <result column="updator_id" property="updatorId"/>
@@ -35,11 +34,26 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        `ware_house_name`,`farm_id`,`farm_name`,`manager_id`,`manager_name`,`address`,`type_id`,`type_name`,`is_default`,`creator_id`,`creator_name`,`updator_id`,`updator_name`,`created_at`,`updated_at`
+        `ware_house_name`,`farm_id`,`farm_name`,`manager_id`,`manager_name`,`address`,`type`,`extra`,`creator_id`,`creator_name`,`updator_id`,`updator_name`,`created_at`,`updated_at`
     </sql>
 
     <sql id="vals">
-        #{wareHouseName},#{farmId},#{farmName},#{managerId},#{managerName},#{address},#{typeId},#{typeName},#{isDefault},#{creatorId},#{creatorName},#{updatorId},#{updatorName},now(),now()
+        #{wareHouseName},#{farmId},#{farmName},#{managerId},#{managerName},#{address},#{type},#{extra},#{creatorId},#{creatorName},#{updatorId},#{updatorName},now(),now()
+    </sql>
+
+    <sql id="criteria">
+        <if test="wareHouseName != null" > AND `ware_house_name` = #{wareHouseName}</if>
+        <if test="farmId != null" > AND `farm_id` = #{farmId}</if>
+        <if test="farmName != null" > AND `farm_name` = #{farmName}</if>
+        <if test="managerId != null" > AND `manager_id` = #{managerId}</if>
+        <if test="managerName != null" > AND `manager_name` = #{managerName}</if>
+        <if test="address != null" > AND `address` = #{address}</if>
+        <if test="type != null" > AND `type` = #{type}</if>
+        <if test="extra != null" > AND `extra` = #{extra}</if>
+        <if test="creatorId != null" > AND `creator_id` = #{creatorId}</if>
+        <if test="creatorName != null" > AND `creator_name` = #{creatorName}</if>
+        <if test="updatorId != null" > AND `updator_id` = #{updatorId}</if>
+        <if test="updatorName != null" > AND `updator_name` = #{updatorName}</if>
     </sql>
 
     <insert id="create" parameterType="DoctorWareHouse" keyProperty="id" useGeneratedKeys="true">
@@ -53,8 +67,7 @@
         ( <include refid="cols_exclude_id"/> )
         VALUES
         <foreach collection="list" item="i" separator=",">
-        ( #{i.wareHouseName},#{i.farmId},#{i.farmName},#{i.managerId},#{i.managerName},#{i.address},#{i.typeId},#{i.typeName},#{i.isDefault},#{i.creatorId},#{i.creatorName},#{i.updatorId},#{i.updatorName},now(),now()
- )
+        (#{i.wareHouseName},#{i.farmId},#{i.farmName},#{i.managerId},#{i.managerName},#{i.address},#{i.type},#{i.extra},#{i.creatorId},#{i.creatorName},#{i.updatorId},#{i.updatorName},now(),now())
         </foreach>
     </insert>
 
@@ -69,27 +82,44 @@
         WHERE id = #{id}
     </select>
 
+    <select id="findByFarmId" parameterType="long" resultMap="DoctorWareHouseMap">
+        SELECT <include refid="cols_all"/> from <include refid="tb"/>
+        WHERE farm_id = #{farmId}
+    </select>
 
     <update id="update" parameterType="DoctorWareHouse">
         UPDATE <include refid="tb"/>
         <set>
         updated_at = now()
-            <if test="wareHouseName != null" > ,`ware_house_name` = #{wareHouseName}</if>
-            <if test="farmId != null" > ,`farm_id` = #{farmId}</if>
-            <if test="farmName != null" > ,`farm_name` = #{farmName}</if>
-            <if test="managerId != null" > ,`manager_id` = #{managerId}</if>
-            <if test="managerName != null" > ,`manager_name` = #{managerName}</if>
-            <if test="address != null" > ,`address` = #{address}</if>
-            <if test="typeId != null" > ,`type_id` = #{typeId}</if>
-            <if test="typeName != null" > ,`type_name` = #{typeName}</if>
-            <if test="isDefault != null" > ,`is_default` = #{isDefault}</if>
-            <if test="creatorId != null" > ,`creator_id` = #{creatorId}</if>
-            <if test="creatorName != null" > ,`creator_name` = #{creatorName}</if>
-            <if test="updatorId != null" > ,`updator_id` = #{updatorId}</if>
-            <if test="updatorName != null" > ,`updator_name` = #{updatorName}</if>
-            <if test="createdAt != null" > ,`created_at` = #{createdAt}</if>
-                    
+        <if test="wareHouseName != null" > ,`ware_house_name` = #{wareHouseName}</if>
+        <if test="farmId != null" > ,`farm_id` = #{farmId}</if>
+        <if test="farmName != null" > ,`farm_name` = #{farmName}</if>
+        <if test="managerId != null" > ,`manager_id` = #{managerId}</if>
+        <if test="managerName != null" > ,`manager_name` = #{managerName}</if>
+        <if test="address != null" > ,`address` = #{address}</if>
+        <if test="type != null" > ,`type` = #{type}</if>
+        <if test="extra != null" > ,`extra` = #{extra}</if>
+        <if test="creatorId != null" > ,`creator_id` = #{creatorId}</if>
+        <if test="creatorName != null" > ,`creator_name` = #{creatorName}</if>
+        <if test="updatorId != null" > ,`updator_id` = #{updatorId}</if>
+        <if test="updatorName != null" > ,`updator_name` = #{updatorName}</if>
+        <if test="createdAt != null" > ,`created_at` = #{createdAt}</if>
         </set>
         WHERE id=#{id}
     </update>
+
+    <select id="count" parameterType="map" resultType="long">
+        select count(1) from <include refid="tb"/>
+        <where>
+            <include refid="criteria"/>
+        </where>
+    </select>
+
+    <select id="paging" parameterType="map" resultMap="DoctorWareHouseMap">
+        SELECT <include refid="cols_all"/> from <include refid="tb"/>
+        <where>
+            <include refid="criteria"/>
+        </where>
+        LIMIT #{offset}, #{limit}
+    </select>
 </mapper>

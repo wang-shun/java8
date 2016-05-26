@@ -49,9 +49,9 @@ public class OperatorRoleReadServiceImpl implements OperatorRoleReadService {
     }
 
     @Override
-    public Response<List<OperatorRole>> findByStatus(Integer status) {
+    public Response<List<OperatorRole>> findByStatus(String appKey, Integer status) {
         try {
-            return Response.ok(operatorRoleDao.findByStatus(status));
+            return Response.ok(operatorRoleDao.findByStatus(appKey, status));
         } catch (Exception e) {
             log.error("find operator roles by status={} failed, cause:{}",
                     status, Throwables.getStackTraceAsString(e));
@@ -60,10 +60,11 @@ public class OperatorRoleReadServiceImpl implements OperatorRoleReadService {
     }
 
     @Override
-    public Response<Paging<OperatorRole>> pagination(Integer status, Integer pageNo, Integer size) {
+    public Response<Paging<OperatorRole>> pagination(String appKey, Integer status, Integer pageNo, Integer size) {
         try {
             PageInfo page = new PageInfo(pageNo, size);
             OperatorRole criteria = new OperatorRole();
+            criteria.setAppKey(appKey);
             criteria.setStatus(status);
             return Response.ok(operatorRoleDao.paging(page.getOffset(), page.getLimit(), criteria));
         } catch (Exception e) {

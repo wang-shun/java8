@@ -16,26 +16,45 @@
     <artifactId>doctor-web</artifactId>
 
     <dependencies>
+        <!-- doctor -->
         <dependency>
-            <groupId>io.terminus.search</groupId>
-            <artifactId>search-api</artifactId>
+            <groupId>io.terminus.doctor</groupId>
+            <artifactId>doctor-event-api</artifactId>
         </dependency>
         <dependency>
             <groupId>io.terminus.doctor</groupId>
-            <artifactId>doctor-web-core</artifactId>
+            <artifactId>doctor-basic-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.terminus.doctor</groupId>
+            <artifactId>doctor-warehouse-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.terminus.doctor</groupId>
+            <artifactId>doctor-user-api</artifactId>
         </dependency>
         <dependency>
             <groupId>io.terminus.doctor</groupId>
             <artifactId>doctor-common</artifactId>
         </dependency>
         <dependency>
-            <groupId>io.terminus.pampas</groupId>
-            <artifactId>pampas-spring-boot-starter</artifactId>
+            <groupId>io.terminus.doctor</groupId>
+            <artifactId>doctor-web-core</artifactId>
         </dependency>
+
+        <!-- parana -->
         <dependency>
-            <groupId>io.terminus.pampas</groupId>
-            <artifactId>pampas-design</artifactId>
+            <groupId>io.terminus.parana</groupId>
+            <artifactId>parana-article-api</artifactId>
         </dependency>
+
+        <!-- search -->
+        <dependency>
+            <groupId>io.terminus.search</groupId>
+            <artifactId>search-api</artifactId>
+        </dependency>
+
+        <!-- dubbo -->
         <dependency>
             <groupId>io.terminus.boot</groupId>
             <artifactId>spring-boot-starter-dubbo</artifactId>
@@ -44,19 +63,22 @@
             <groupId>com.alibaba</groupId>
             <artifactId>dubbo</artifactId>
         </dependency>
+
+        <!-- pamas -->
         <dependency>
-            <groupId>io.terminus.doctor</groupId>
-            <artifactId>doctor-user-api</artifactId>
+            <groupId>io.terminus.pampas</groupId>
+            <artifactId>pampas-spring-boot-starter</artifactId>
         </dependency>
         <dependency>
-            <groupId>io.terminus.parana</groupId>
-            <artifactId>parana-article-api</artifactId>
+            <groupId>io.terminus.pampas</groupId>
+            <artifactId>pampas-design</artifactId>
         </dependency>
+
+        <!-- spring -->
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-context</artifactId>
         </dependency>
-
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
@@ -71,11 +93,13 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-jetty</artifactId>
         </dependency>
+
         <!-- zookeeper -->
         <dependency>
             <groupId>com.github.sgroschupf</groupId>
             <artifactId>zkclient</artifactId>
         </dependency>
+
         <!-- session -->
         <dependency>
             <groupId>io.terminus.session</groupId>
@@ -96,6 +120,10 @@
         <dependency>
             <groupId>io.terminus.boot</groupId>
             <artifactId>spring-boot-starter-zookeeper</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.dataformat</groupId>
+            <artifactId>jackson-dataformat-yaml</artifactId>
         </dependency>
     </dependencies>
 
