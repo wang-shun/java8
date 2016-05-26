@@ -38,7 +38,7 @@ public class OPFarms {
      * 猪场id
      * @return 猪场信息
      */
-    @OpenMethod(key = "get.farm.info")
+    @OpenMethod(key = "get.farm.info", paramNames = "farmId")
     public DoctorFarmBasicDto getFarmInfo(@NotNull(message = "farmId.not.null") Long farmId) {
         return new DoctorFarmBasicDto(
                 OPRespHelper.orOPEx(doctorFarmReadService.findFarmById(1L)),
