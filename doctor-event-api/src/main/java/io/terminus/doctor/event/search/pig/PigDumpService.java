@@ -21,5 +21,5 @@ public interface PigDumpService {
      * @param interval  间隔时间(分钟)
      * @return
      */
-    Response<Boolean> DeltaDump(Integer interval);
+    Response<Boolean> deltaDump(Integer interval);
 }
