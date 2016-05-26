@@ -46,6 +46,18 @@ public class DoctorMaterialInfoWriteServiceImpl implements DoctorMaterialInfoWri
         this.materialInWareHouseManager = materialInWareHouseManager;
     }
 
+
+    @Override
+    public Response<Long> createMaterialInfo(DoctorMaterialInfo doctorMaterialInfo) {
+        try{
+            checkState(doctorMaterialInfoDao.create(doctorMaterialInfo), "create.materialInfo.fail");
+            return Response.ok(doctorMaterialInfo.getId());
+        }catch (Exception e){
+            log.error("create material info fail, cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("create.materialInfo.fail");
+        }
+    }
+
     @Override
     public Response<Boolean> createMaterialProductRatioInfo(DoctorMaterialProductRatioDto doctorMaterialProductRatioDto) {
         try{
