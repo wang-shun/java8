@@ -81,7 +81,12 @@ public class DoctorUserWriteInterfaceImpl implements DoctorUserWriteInterface {
     public Response<Boolean> update(User user) {
         Response<Boolean> response = new Response<>();
         try {
-            response.setResult(userDaoExt.update(BeanMapper.map(user, io.terminus.parana.user.model.User.class)));
+            io.terminus.parana.user.model.User paranaUser = BeanMapper.map(user, io.terminus.parana.user.model.User.class);
+            userDaoExt.update(paranaUser);
+            if(paranaUser.getRolesJson() != null){
+                userDaoExt.updateRoles(paranaUser.getId(), paranaUser.getRoles());
+            }
+            response.setResult(true);
         } catch (Exception e) {
             log.error("update user failed, cause:{}", Throwables.getStackTraceAsString(e));
             response.setError("update.user.failed");
@@ -90,8 +95,8 @@ public class DoctorUserWriteInterfaceImpl implements DoctorUserWriteInterface {
     }
 
     @Override
-    public Response<Boolean> createUser(User user) {
-        Response<Boolean> response = new Response<>();
+    public Response<User> createUser(User user) {
+        Response<User> response = new Response<>();
         try {
             if(userDaoExt.findByName(user.getName()) != null){
                 return Response.fail("duplicated.name");
@@ -104,8 +109,8 @@ public class DoctorUserWriteInterfaceImpl implements DoctorUserWriteInterface {
             }
             io.terminus.parana.user.model.User paranaUser = this.makeParanaUserFromInterface(user);
             userDaoExt.create(paranaUser);
-            user.setId(paranaUser.getId());
-            response.setResult(true);
+            BeanMapper.copy(paranaUser, user);
+            response.setResult(user);
         } catch (Exception e) {
             log.error("update user failed, cause:{}", Throwables.getStackTraceAsString(e));
             response.setError("create.user.failed");

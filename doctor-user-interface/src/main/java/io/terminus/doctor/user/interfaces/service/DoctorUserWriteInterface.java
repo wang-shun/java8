@@ -17,13 +17,13 @@ public interface DoctorUserWriteInterface {
     Response<Integer> updateType(Long userId, String typeName);
 
     /**
-     * 仅支持更新 name, email, mobile, password
+     * 仅支持更新 name, email, mobile, password, type
      * @param user
      * @return
      */
     Response<Boolean> update(User user);
 
-    Response<Boolean> createUser(User user);
+    Response<User> createUser(User user);
 
     Response<Boolean> delete(Long id);
     Response<Integer> deletes(List<Long> ids);
