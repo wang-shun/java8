@@ -67,7 +67,13 @@ public class SearchedPig implements Serializable {
     /**
      * 当前体重
      */
+    private Date birthDate;
     private Double weight;
+
+    /**
+     * 当前日龄
+     */
+    private Integer dayAge;
 
     /**
      * 当前胎次
