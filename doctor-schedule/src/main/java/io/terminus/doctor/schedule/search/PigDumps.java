@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * Desc:
+ * Desc: 猪索引dump
  * Mail: chk@terminus.io
  * Created by icemimosa
  * Date: 16/5/26
