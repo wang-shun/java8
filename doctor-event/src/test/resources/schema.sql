@@ -276,3 +276,72 @@ CREATE TABLE IF NOT EXISTS `workflow_history_processes`(
 	PRIMARY KEY(`id`)
 ) COMMENT='流程实例的活动节点历史表';
 CREATE INDEX idx_flow_process_his_ins_id ON workflow_history_processes(flow_instance_id);
+
+-- doctor pig
+DROP TABLE IF EXISTS `doctor_pigs`;
+CREATE TABLE `doctor_pigs` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT 'ID',
+  `org_id` bigint(20) unsigned DEFAULT NULL COMMENT '公司Id',
+  `org_name` varchar(64) DEFAULT NULL COMMENT '公司名称',
+  `farm_id` bigint(20) unsigned DEFAULT NULL COMMENT '猪场Id',
+  `farm_name` varchar(64) DEFAULT NULL COMMENT '猪场名称',
+  `out_id` varchar(128) DEFAULT NULL COMMENT '关联猪外部Id',
+  `pig_code` varchar(64) DEFAULT NULL COMMENT '猪编号',
+  `pig_type` smallint(6) DEFAULT NULL COMMENT '猪类型(公猪，母猪， 仔猪)',
+  `pig_father_id` bigint(20) unsigned DEFAULT NULL COMMENT '猪父亲Id',
+  `pig_mother_id` bigint(20) unsigned DEFAULT NULL COMMENT '母猪Id',
+  `source` smallint(6) DEFAULT NULL COMMENT '母猪来源',
+  `birth_date` datetime DEFAULT NULL COMMENT '母猪生日',
+  `birth_weight` double DEFAULT NULL COMMENT '出生重量',
+  `in_farm_date` datetime DEFAULT NULL COMMENT '进厂日期',
+  `in_farm_day_age` int(11) DEFAULT NULL COMMENT '进厂日龄',
+  `init_barn_id` bigint(20) unsigned DEFAULT NULL COMMENT '进厂位置',
+  `init_barn_name` varchar(64) DEFAULT NULL COMMENT '进厂位置名称',
+  `breed_id` bigint(20) unsigned DEFAULT NULL COMMENT '品种id',
+  `breed_name` varchar(64) DEFAULT NULL COMMENT '品种名称',
+  `genetic_id` bigint(20) unsigned DEFAULT NULL COMMENT '品系Id',
+  `genetic_name` varchar(64) DEFAULT NULL COMMENT '品系名称',
+  `extra` text COMMENT '公猪（公猪类型，boar_type）母猪（初始胎次:init_parity, 性别：sex, 左右乳头数量： left_nipple_count, right_nipple_count ）',
+  `remark` text COMMENT '标注信息',
+  `creator_id` bigint(20) DEFAULT NULL COMMENT '创建人id',
+  `creator_name` varchar(64) DEFAULT NULL COMMENT '创建人姓名',
+  `updator_id` bigint(20) DEFAULT NULL COMMENT '创建人Id',
+  `updator_name` varchar(64) DEFAULT NULL COMMENT '创建人姓名',
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) COMMENT='猪基础信息表';
+CREATE index doctor_pigs_farm_id on doctor_pigs(farm_id);
+CREATE index doctor_pigs_pig_code on doctor_pigs(pig_code);
+
+-- init pig event info
+CREATE TABLE `doctor_pig_events` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT 'id',
+  `org_id` bigint(20) unsigned DEFAULT NULL COMMENT '公司Id',
+  `org_name` varchar(64) DEFAULT NULL COMMENT '公司名称',
+  `farm_id` bigint(20) unsigned DEFAULT NULL COMMENT '猪场Id',
+  `farm_name` varchar(64) DEFAULT NULL COMMENT '猪场名称',
+  `pig_id` bigint(20) unsigned DEFAULT NULL COMMENT '猪Id',
+  `pig_code` varchar(64) DEFAULT NULL COMMENT '猪Code',
+  `event_at` datetime DEFAULT NULL COMMENT '事件时间',
+  `type` int(11) DEFAULT NULL COMMENT '事件类型',
+  `kind` int(11) DEFAULT NULL COMMENT '事件猪类型， 公猪， 母猪， 仔猪',
+  `name` varchar(64) DEFAULT NULL COMMENT '事件名称',
+  `desc` varchar(512) DEFAULT NULL COMMENT '事件描述',
+  `barn_id` bigint(20) unsigned DEFAULT NULL COMMENT '事件地点',
+  `barn_name` varchar(64) DEFAULT NULL COMMENT '地点名称',
+  `rel_event_id` bigint(20) DEFAULT NULL COMMENT '关联事件Id',
+  `out_id` varchar(128) DEFAULT NULL COMMENT '外部Id',
+  `extra` text COMMENT '参考设计文档',
+  `remark` text COMMENT '备注信息',
+  `creator_id` bigint(20) DEFAULT NULL COMMENT '创建人id',
+  `creator_name` varchar(64) DEFAULT NULL COMMENT '创建人姓名',
+  `updator_id` bigint(20) DEFAULT NULL COMMENT '创建人Id',
+  `updator_name` varchar(64) DEFAULT NULL COMMENT '创建人姓名',
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) COMMENT='用户设备信息表';
+create index doctor_pig_events_farm_id on doctor_pig_events(farm_id);
+create index doctor_pig_events_pig_id on doctor_pig_events(pig_id);
+CREATE index doctor_pig_events_rel_event_id on doctor_pig_events(rel_event_id);

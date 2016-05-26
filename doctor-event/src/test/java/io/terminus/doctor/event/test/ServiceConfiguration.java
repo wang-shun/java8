@@ -6,6 +6,12 @@ import io.terminus.boot.dubbo.autoconfigure.DubboAutoConfiguration;
 import io.terminus.boot.mybatis.autoconfigure.MybatisAutoConfiguration;
 import io.terminus.boot.search.autoconfigure.ESSearchAutoConfiguration;
 import io.terminus.doctor.event.dao.DoctorPigDao;
+import io.terminus.doctor.event.search.barn.BarnSearchProperties;
+import io.terminus.doctor.event.search.barn.BaseBarnQueryBuilder;
+import io.terminus.doctor.event.search.barn.DefaultBarnQueryBuilder;
+import io.terminus.doctor.event.search.barn.DefaultIndexedBarnFactory;
+import io.terminus.doctor.event.search.barn.IndexedBarn;
+import io.terminus.doctor.event.search.barn.IndexedBarnFactory;
 import io.terminus.doctor.event.search.group.BaseGroupQueryBuilder;
 import io.terminus.doctor.event.search.group.DefaultGroupQueryBuilder;
 import io.terminus.doctor.event.search.group.DefaultIndexedGroupFactory;
@@ -19,15 +25,20 @@ import io.terminus.doctor.event.search.pig.IndexedPig;
 import io.terminus.doctor.event.search.pig.IndexedPigFactory;
 import io.terminus.doctor.event.search.pig.PigSearchProperties;
 import io.terminus.search.core.ESClient;
+import io.terminus.zookeeper.ZKClientFactory;
+import io.terminus.zookeeper.pubsub.Publisher;
+import io.terminus.zookeeper.pubsub.Subscriber;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 
 import java.util.concurrent.Executors;
 
@@ -47,6 +58,24 @@ public class ServiceConfiguration {
     public EventBus eventBus(){
         return new AsyncEventBus(
                 Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors()));
+    }
+
+    @Configuration
+    @ConditionalOnBean(ZKClientFactory.class)
+    @Profile("zookeeper")
+    public static class ZookeeperConfiguration{
+
+        @Bean
+        public Subscriber cacheListenerBean(ZKClientFactory zkClientFactory,
+                                            @Value("${zookeeper.cacheTopic}") String cacheTopic) throws Exception{
+            return new Subscriber(zkClientFactory,cacheTopic);
+        }
+
+        @Bean
+        public Publisher cachePublisherBean(ZKClientFactory zkClientFactory,
+                                            @Value("${zookeeper.cacheTopic}}") String cacheTopic) throws Exception{
+            return new Publisher(zkClientFactory, cacheTopic);
+        }
     }
 
     @Configuration
@@ -74,7 +103,6 @@ public class ServiceConfiguration {
             public BasePigQueryBuilder pigQueryBuilder() {
                 return new DefaultPigQueryBuilder();
             }
-
         }
 
         @Configuration
@@ -90,6 +118,22 @@ public class ServiceConfiguration {
             @ConditionalOnMissingBean(BaseGroupQueryBuilder.class)
             public BaseGroupQueryBuilder groupQueryBuilder() {
                 return new DefaultGroupQueryBuilder();
+            }
+        }
+
+        @Configuration
+        @EnableConfigurationProperties(BarnSearchProperties.class)
+        protected static class BarnSearchConfiguration {
+            @Bean
+            @ConditionalOnMissingBean(IndexedBarnFactory.class)
+            public IndexedBarnFactory<? extends IndexedBarn> indexedBarnFactory() {
+                return new DefaultIndexedBarnFactory();
+            }
+
+            @Bean
+            @ConditionalOnMissingBean(BaseBarnQueryBuilder.class)
+            public BaseBarnQueryBuilder BarnQueryBuilder() {
+                return new DefaultBarnQueryBuilder();
             }
         }
     }
