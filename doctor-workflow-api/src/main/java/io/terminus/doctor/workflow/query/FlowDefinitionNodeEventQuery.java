@@ -19,6 +19,7 @@ public interface FlowDefinitionNodeEventQuery {
     ///////////////////////////////////////////////////////////////
     FlowDefinitionNodeEventQuery id(Long id);
     FlowDefinitionNodeEventQuery name(String name);
+    FlowDefinitionNodeEventQuery value(String value);
     FlowDefinitionNodeEventQuery flowDefinitionId(Long flowDefinitionId);
     FlowDefinitionNodeEventQuery sourceNodeId(Long sourceNodeId);
     FlowDefinitionNodeEventQuery targetNodeId(Long targetNodeId);

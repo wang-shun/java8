@@ -59,10 +59,13 @@ public class Scheduler {
             if (isBefore(flowProcess)) {
                 FlowInstance instance = workFlowEngine.buildFlowQueryService().getFlowInstanceQuery()
                         .id(flowProcess.getFlowInstanceId())
+                        .status(FlowInstance.Status.NORMAL.value())
                         .single();
-                workFlowEngine.buildFlowProcessService()
-                        .getExecutor(instance.getFlowDefinitionKey(), instance.getBusinessId(), flowProcess.getAssignee())
-                        .execute();
+                if(instance != null) {
+                    workFlowEngine.buildFlowProcessService()
+                            .getExecutor(instance.getFlowDefinitionKey(), instance.getBusinessId(), flowProcess.getAssignee())
+                            .execute();
+                }
             }
         }
     }

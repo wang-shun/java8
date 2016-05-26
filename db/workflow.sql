@@ -48,6 +48,7 @@ DROP TABLE IF EXISTS `workflow_definition_node_events`;
 CREATE TABLE IF NOT EXISTS `workflow_definition_node_events`(
 	`id` BIGINT(20) NOT NULL AUTO_INCREMENT COMMENT '自增主键',
 	`name` VARCHAR(128) DEFAULT NULL COMMENT '连线name属性名称',
+	`value` VARCHAR(32) DEFAULT NULL COMMENT '连线value属性值',
 	`flow_definition_id` BIGINT(20) DEFAULT NULL COMMENT '流程定义id,冗余',
 	`source_node_id` BIGINT(20) DEFAULT NULL COMMENT '流程源节点的id',
 	`handler` VARCHAR(128) DEFAULT NULL COMMENT '事件驱动处理类(一般为类标识)',

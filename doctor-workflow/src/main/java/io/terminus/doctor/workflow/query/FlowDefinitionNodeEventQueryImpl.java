@@ -43,6 +43,12 @@ public class FlowDefinitionNodeEventQueryImpl implements FlowDefinitionNodeEvent
     }
 
     @Override
+    public FlowDefinitionNodeEventQuery value(String value) {
+        flowDefinitionNodeEvent.setValue(value);
+        return this;
+    }
+
+    @Override
     public FlowDefinitionNodeEventQuery flowDefinitionId(Long flowDefinitionId) {
         flowDefinitionNodeEvent.setFlowDefinitionId(flowDefinitionId);
         return this;

@@ -394,6 +394,7 @@ public class ConfigManager implements Configuration {
                     // 获取 FlowDefinitionNode 对象
                     FlowDefinitionNodeEvent event = FlowDefinitionNodeEvent.builder()
                             .name(XmlHelper.getAttrValue(node, ATTR_NAME))
+                            .value(XmlHelper.getAttrValue(node, ATTR_VALUE))
                             .flowDefinitionId(flowDefinition.getId())
                             .sourceNodeId(definitionNodeMap.get(taskNodeAttrName).getId())
                             .targetNodeId(target.getId())

@@ -10,6 +10,7 @@
     <resultMap id="FlowDefinitionNodeEventMap" type="FlowDefinitionNodeEvent">
         <id column="id" property="id"/>
         <result column="name" property="name"/>
+        <result column="value" property="value"/>
         <result column="flow_definition_id" property="flowDefinitionId"/>
         <result column="source_node_id" property="sourceNodeId"/>
         <result column="handler" property="handler"/>
@@ -30,10 +31,10 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        `name`,`flow_definition_id`,`source_node_id`,`handler`,`expression`,`target_node_id`,`describe`,`created_at`,`updated_at`    </sql>
+        `name`,`value`,`flow_definition_id`,`source_node_id`,`handler`,`expression`,`target_node_id`,`describe`,`created_at`,`updated_at`    </sql>
 
     <sql id="vals">
-        #{name},#{flowDefinitionId},#{sourceNodeId},#{handler},#{expression},#{targetNodeId},#{describe},now(),now()   </sql>
+        #{name},#{value},#{flowDefinitionId},#{sourceNodeId},#{handler},#{expression},#{targetNodeId},#{describe},now(),now()   </sql>
 
     <insert id="create" parameterType="FlowDefinitionNodeEvent" keyProperty="id" useGeneratedKeys="true">
         INSERT INTO
@@ -57,6 +58,7 @@
         <set>
             updated_at = now()
             <if test="name != null">,`name` = #{name}</if>
+            <if test="value != null">,`value` = #{value}</if>
             <if test="flowDefinitionId != null">,`flow_definition_id` = #{flowDefinitionId}</if>
             <if test="sourceNodeId != null">,`source_node_id` = #{sourceNodeId}</if>
             <if test="handler != null">,`handler` = #{handler}</if>
@@ -87,6 +89,7 @@
         <where>
             <if test="id != null">AND `id` = #{id}</if>
             <if test="name != null">AND `name` = #{name}</if>
+            <if test="value != null">AND `value` = #{value}</if>
             <if test="flowDefinitionId != null">AND `flow_definition_id` = #{flowDefinitionId}</if>
             <if test="sourceNodeId != null">AND `source_node_id` = #{sourceNodeId}</if>
             <if test="targetNodeId != null">AND `target_node_id` = #{targetNodeId}</if>

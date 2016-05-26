@@ -176,6 +176,7 @@ public class FlowInstanceQueryImpl implements FlowInstanceQuery {
         return this
                 .flowDefinitionKey(flowDefinitionKey)
                 .businessId(businessId)
+                .status(FlowInstance.Status.NORMAL.value())
                 .list();
     }
 
@@ -185,6 +186,7 @@ public class FlowInstanceQueryImpl implements FlowInstanceQuery {
                 .flowDefinitionKey(flowDefinitionKey)
                 .businessId(businessId)
                 .type(FlowInstance.Type.PARENT.value())
+                .status(FlowInstance.Status.NORMAL.value())
                 .single();
     }
 
@@ -194,6 +196,7 @@ public class FlowInstanceQueryImpl implements FlowInstanceQuery {
                 .flowDefinitionKey(flowDefinitionKey)
                 .businessId(businessId)
                 .type(FlowInstance.Type.CHILD.value())
+                .status(FlowInstance.Status.NORMAL.value())
                 .list();
     }
 }
