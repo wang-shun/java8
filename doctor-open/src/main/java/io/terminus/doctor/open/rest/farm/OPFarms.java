@@ -5,7 +5,6 @@ import io.terminus.doctor.open.dto.DoctorBasicDto;
 import io.terminus.doctor.open.dto.DoctorFarmBasicDto;
 import io.terminus.doctor.open.dto.DoctorStatisticDto;
 import io.terminus.doctor.open.util.OPRespHelper;
-import io.terminus.doctor.user.model.DoctorOrg;
 import io.terminus.doctor.user.service.DoctorFarmReadService;
 import io.terminus.pampas.common.UserUtil;
 import io.terminus.pampas.openplatform.annotations.OpenBean;
@@ -13,6 +12,7 @@ import io.terminus.pampas.openplatform.annotations.OpenMethod;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import javax.validation.constraints.NotNull;
 import java.util.List;
 
 /**
@@ -34,20 +34,24 @@ public class OPFarms {
     }
 
     /**
-     * 查询公司概况
-     * @return 公司信息
+     * 查询单个猪场信息
+     * 猪场id
+     * @return 猪场信息
      */
-    @OpenMethod(key = "get.company.info")
-    public DoctorOrg getOrgInfo() {
-        return OPRespHelper.orOPEx(doctorFarmReadService.findOrgByUserId(UserUtil.getUserId()));
+    @OpenMethod(key = "get.farm.info")
+    public DoctorFarmBasicDto getFarmInfo(@NotNull(message = "farmId.not.null") Long farmId) {
+        return new DoctorFarmBasicDto(
+                OPRespHelper.orOPEx(doctorFarmReadService.findFarmById(1L)),
+                mockFarmStats()
+        );
     }
 
     /**
      * 根据用户id查询所拥有权限的猪场信息
      * @return 猪场信息list
      */
-    @OpenMethod(key = "get.farm.info")
-    public DoctorBasicDto getFarmInfo() {
+    @OpenMethod(key = "get.company.info")
+    public DoctorBasicDto getCompanyInfo() {
         return new DoctorBasicDto(
                         OPRespHelper.orOPEx(doctorFarmReadService.findOrgByUserId(UserUtil.getUserId())),
                         mockOrgStats(),
