@@ -3,8 +3,13 @@ package io.terminus.doctor.event;
 import com.google.common.eventbus.AsyncEventBus;
 import com.google.common.eventbus.EventBus;
 import io.terminus.boot.mybatis.autoconfigure.MybatisAutoConfiguration;
-import io.terminus.boot.search.autoconfigure.ESSearchAutoConfiguration;
 import io.terminus.doctor.event.dao.DoctorPigDao;
+import io.terminus.doctor.event.search.barn.BarnSearchProperties;
+import io.terminus.doctor.event.search.barn.BaseBarnQueryBuilder;
+import io.terminus.doctor.event.search.barn.DefaultBarnQueryBuilder;
+import io.terminus.doctor.event.search.barn.DefaultIndexedBarnFactory;
+import io.terminus.doctor.event.search.barn.IndexedBarn;
+import io.terminus.doctor.event.search.barn.IndexedBarnFactory;
 import io.terminus.doctor.event.search.group.BaseGroupQueryBuilder;
 import io.terminus.doctor.event.search.group.DefaultGroupQueryBuilder;
 import io.terminus.doctor.event.search.group.DefaultIndexedGroupFactory;
@@ -24,7 +29,6 @@ import io.terminus.zookeeper.pubsub.Publisher;
 import io.terminus.zookeeper.pubsub.Subscriber;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -49,7 +53,7 @@ import java.util.concurrent.Executors;
 })
 @Import(DoctorWorkflowConfiguration.class)
 @AutoConfigureAfter(MybatisAutoConfiguration.class)
-public class DoctorEventConfiguration {
+public class  DoctorEventConfiguration {
 
     @Bean
     public EventBus eventBus(){
@@ -115,6 +119,22 @@ public class DoctorEventConfiguration {
             @ConditionalOnMissingBean(BaseGroupQueryBuilder.class)
             public BaseGroupQueryBuilder groupQueryBuilder() {
                 return new DefaultGroupQueryBuilder();
+            }
+        }
+
+        @Configuration
+        @EnableConfigurationProperties(BarnSearchProperties.class)
+        protected static class BarnSearchConfiguration {
+            @Bean
+            @ConditionalOnMissingBean(IndexedBarnFactory.class)
+            public IndexedBarnFactory<? extends IndexedBarn> indexedBarnFactory() {
+                return new DefaultIndexedBarnFactory();
+            }
+
+            @Bean
+            @ConditionalOnMissingBean(BaseBarnQueryBuilder.class)
+            public BaseBarnQueryBuilder BarnQueryBuilder() {
+                return new DefaultBarnQueryBuilder();
             }
         }
     }

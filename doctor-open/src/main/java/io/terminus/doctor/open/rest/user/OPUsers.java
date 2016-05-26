@@ -97,6 +97,16 @@ public class OPUsers {
     }
 
     /**
+     * 获取手机验证码(不需要sessionId)
+     * @param mobile
+     * @return
+     */
+    @OpenMethod(key = "get.mobile.code", paramNames = "mobile")
+    public Boolean sendSms(@NotEmpty(message = "user.mobile.miss") String mobile) {
+        return Boolean.TRUE;
+    }
+
+    /**
      * 用户注册
      *
      * @param password   密码
@@ -105,9 +115,9 @@ public class OPUsers {
      * @return 注册成功之后的用户ID
      */
     @OpenMethod(key = "user.register", httpMethods = RequestMethod.POST, paramNames = {"password", "mobile", "code"})
-    public Long register(@NotEmpty(message = "password.not.empty") String password,
-                         @NotEmpty(message = "mobile.not.empty") String mobile,
-                         @NotEmpty(message = "code.not.empty") String code) {
+    public Long register(@NotEmpty(message = "user.password.miss") String password,
+                         @NotEmpty(message = "user.mobile.miss") String mobile,
+                         @NotEmpty(message = "user.code.miss") String code) {
         return Long.valueOf(RandomUtil.random(1, 10));
     }
 
