@@ -40,8 +40,7 @@ public interface DoctorMaterialInfoWriteService {
 
     /**
      * 对应的物料生产信息比例
-     * @param wareHouseId 生产后的物料仓库
-     * @param materialId
+     * @param doctorWareHouseBasicDto
      * @param materialProduce
      * @return
      */

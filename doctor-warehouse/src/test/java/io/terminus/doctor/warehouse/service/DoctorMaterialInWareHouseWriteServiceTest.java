@@ -53,11 +53,87 @@ public class DoctorMaterialInWareHouseWriteServiceTest extends BasicServiceTest{
     }
 
     @Test
+    public void testProviderMaterial(){
+        Long total = 1000l;
+        Long eachProvider = 50l;
+
+        providerMaterial(eachProvider, total + eachProvider);
+        providerMaterial(eachProvider * 2, total + eachProvider * 2);
+    }
+
+    @Test
     public void testConsumeMaterial(){
         Long total = 1000l;
         Long eachConsume = 50l;
         consumeMaterial(eachConsume, total-eachConsume);
         consumeMaterial(eachConsume * 2, total - eachConsume * 2);
+
+        consumeMaterialNotFeed(eachConsume, total - eachConsume);
+        consumeMaterialNotFeed(eachConsume * 2, total - eachConsume * 2);
+    }
+
+    private void providerMaterial(Long providerCount, Long providerLeft){
+        DoctorMaterialConsumeProviderDto dto = buildProviderDtoInfo();
+        Response<Long> response = doctorMaterialInWareHouseWriteService.providerMaterialInfo(dto);
+        Assert.assertTrue(response.isSuccess());
+
+        // validate type
+        DoctorFarmWareHouseType type = doctorFarmWareHouseTypeDao.findByFarmIdAndType(12345l, WareHouseType.VACCINATION.getKey());
+        Assert.assertEquals(type.getLogNumber(), providerLeft);
+
+        // validate track info
+        DoctorWareHouseTrack doctorWareHouseTrack = doctorWareHouseTrackDao.findById(3l);
+        Assert.assertEquals(doctorWareHouseTrack.getLotNumber(), providerLeft);
+        Assert.assertEquals(Params.getWithConvert(doctorWareHouseTrack.getExtraMap(),"3", a->Long.valueOf(a.toString())), providerLeft);
+
+        // validate in ware house
+        DoctorMaterialInWareHouse doctorMaterialInWareHouse = doctorMaterialInWareHouseDao.queryByFarmHouseMaterial(12345l, 3l, 3l);
+        Assert.assertEquals(doctorMaterialInWareHouse.getLotNumber(), providerLeft);
+
+        DoctorMaterialConsumeProvider doctorMaterialConsumeProvider =  doctorMaterialConsumeProviderDao.findById(response.getResult());
+        Assert.assertEquals(doctorMaterialConsumeProvider.getFarmId(), new Long(12345l));
+        Assert.assertEquals(doctorMaterialConsumeProvider.getMaterialId(), new Long(3l));
+        Assert.assertEquals(doctorMaterialConsumeProvider.getWareHouseId(), new Long(3l));
+        Assert.assertEquals(doctorMaterialConsumeProvider.getEventCount(), new Long(50l));
+    }
+
+    /**
+     * 测试非饲料 物料的消耗的方式
+     * @param consumeCount
+     * @param consumeLeft
+     */
+    private void consumeMaterialNotFeed(Long consumeCount, Long consumeLeft){
+        // consume material
+        DoctorMaterialConsumeProviderDto dto = buildConsumerProvider();
+        dto.setType(WareHouseType.MEDICINE.getKey());
+        dto.setMaterialTypeId(2l);  // 消耗对应原料类型2 原料信息
+        dto.setWareHouseId(2l);
+        Response<Long> response = doctorMaterialInWareHouseWriteService.consumeMaterialInfo(dto);
+        Assert.assertTrue(response.isSuccess());
+
+        // validate type
+        DoctorFarmWareHouseType type = doctorFarmWareHouseTypeDao.findByFarmIdAndType(12345l, WareHouseType.MEDICINE.getKey());
+        Assert.assertEquals(type.getLogNumber(),consumeLeft);
+
+        // validate track warehouse
+        DoctorWareHouseTrack doctorWareHouseTrack = doctorWareHouseTrackDao.findById(2l);
+        Assert.assertEquals(doctorWareHouseTrack.getLotNumber(), consumeLeft);
+        Assert.assertEquals(Params.getWithConvert(doctorWareHouseTrack.getExtraMap(), "2", a->Long.valueOf(a.toString())), consumeLeft);
+
+        // validate in ware house count
+        DoctorMaterialInWareHouse doctorMaterialInWareHouse = doctorMaterialInWareHouseDao.queryByFarmHouseMaterial(12345l, 2l, 2l);
+        Assert.assertEquals(doctorMaterialInWareHouse.getLotNumber(), consumeLeft);
+
+        DoctorMaterialConsumeProvider doctorMaterialConsumeProvider =  doctorMaterialConsumeProviderDao.findById(response.getResult());
+        Assert.assertEquals(doctorMaterialConsumeProvider.getFarmId(), new Long(12345l));
+        Assert.assertEquals(doctorMaterialConsumeProvider.getMaterialId(), new Long(2l));
+        Assert.assertEquals(doctorMaterialConsumeProvider.getWareHouseId(), new Long(2l));
+        Assert.assertEquals(doctorMaterialConsumeProvider.getEventCount(), new Long(50l));
+
+        DoctorMaterialConsumeAvg doctorMaterialConsumeAvg = doctorMaterialConsumeAvgDao.queryByIds(12345l, 2l, 2l);
+        Assert.assertEquals(doctorMaterialConsumeAvg.getConsumeCount(), consumeCount); // breed Consume 每次相同的
+        Assert.assertEquals(doctorMaterialConsumeAvg.getConsumeAvgCount(), new Long(0));
+        Assert.assertEquals(doctorMaterialConsumeAvg.getConsumeDate().getTime(), DateTime.now().withTimeAtStartOfDay().toDate().getTime());
     }
 
     /**
@@ -93,6 +169,25 @@ public class DoctorMaterialInWareHouseWriteServiceTest extends BasicServiceTest{
         Assert.assertEquals(doctorMaterialConsumeAvg.getConsumeCount(), new Long(50l)); // breed Consume 每次相同的
         Assert.assertEquals(doctorMaterialConsumeAvg.getConsumeAvgCount(), new Long(0));
         Assert.assertEquals(doctorMaterialConsumeAvg.getConsumeDate().getTime(), DateTime.now().withTimeAtStartOfDay().toDate().getTime());
+    }
+
+    /**
+     * 构建对应的Provider 数据信息
+     * @return
+     */
+    private DoctorMaterialConsumeProviderDto buildProviderDtoInfo(){
+
+        DoctorMaterialConsumeProviderDto dto = new DoctorMaterialConsumeProviderDto();
+        dto.setType(WareHouseType.VACCINATION.getKey());
+        dto.setFarmId(12345l);
+        dto.setFarmName("farmName");
+        dto.setWareHouseId(3l);
+        dto.setWareHouseName("wareHouseName");
+        dto.setMaterialTypeId(3l);
+        dto.setMaterialName("materialName");
+        dto.setProviderCount(50l);
+        return dto;
+
     }
 
     private DoctorMaterialConsumeProviderDto buildConsumerProvider(){

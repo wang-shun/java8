@@ -42,4 +42,11 @@ public interface DoctorBarnReadService {
      */
     Response<List<DoctorBarn>> findBarnsByEnums(@NotNull(message = "farmId.not.null") Long farmId,
                                                 Integer pigType, Integer canOpenGroup, Integer status);
+
+    /**
+     * 查询当前猪舍的存栏量
+     * @param barnId 猪舍id
+     * @return 存栏量
+     */
+    Response<Integer> countPigByBarnId(@NotNull(message = "barnId.not.null") Long barnId);
 }

@@ -69,6 +69,12 @@
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.event.service.DoctorBarnReadService" id="doctorBarnReadService" check="false"/>
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.event.service.DoctorBarnWriteService" id="doctorBarnWriteService" check="false"/>
 
+    <!-- pig event service -->
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.event.service.DoctorPigEventReadService" id="doctorPigEventReadService" check="false"/>
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.event.service.DoctorPigEventWriteService" id="doctorPigEventWriteService" check="false"/>
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.event.service.DoctorPigReadService" id="doctorPigReadService" check="false"/>
+    <!--<dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.event.service.DoctorPigWriteService" id="doctorPigWriteService" check="false"/>-->
+
     <!-- basic service -->
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.basic.service.DoctorBasicReadService" id="doctorBasicReadService" check="false"/>
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.basic.service.DoctorBasicWriteService" id="doctorBasicWriteService" check="false"/>

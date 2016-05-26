@@ -25,5 +25,5 @@ public interface DoctorMaterialInWareHouseWriteService {
      * @param doctorMaterialConsumeProviderDto
      * @return
      */
-    Response<Boolean> providerMaterialInfo(@NotNull(message = "input.dto.empty") DoctorMaterialConsumeProviderDto doctorMaterialConsumeProviderDto);
+    Response<Long> providerMaterialInfo(@NotNull(message = "input.dto.empty") DoctorMaterialConsumeProviderDto doctorMaterialConsumeProviderDto);
 }

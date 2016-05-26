@@ -1,5 +1,6 @@
 package io.terminus.doctor.warehouse.manager;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import io.terminus.doctor.common.utils.Params;
@@ -10,6 +11,7 @@ import io.terminus.doctor.warehouse.dao.DoctorMaterialConsumeAvgDao;
 import io.terminus.doctor.warehouse.dao.DoctorMaterialConsumeProviderDao;
 import io.terminus.doctor.warehouse.dao.DoctorMaterialInWareHouseDao;
 import io.terminus.doctor.warehouse.dao.DoctorMaterialInfoDao;
+import io.terminus.doctor.warehouse.dao.DoctorWareHouseDao;
 import io.terminus.doctor.warehouse.dao.DoctorWareHouseTrackDao;
 import io.terminus.doctor.warehouse.dto.DoctorMaterialConsumeProviderDto;
 import io.terminus.doctor.warehouse.dto.DoctorWareHouseBasicDto;
@@ -51,6 +53,8 @@ public class MaterialInWareHouseManager {
 
     private final DoctorMaterialConsumeAvgDao doctorMaterialConsumeAvgDao;
 
+    private final DoctorWareHouseDao doctorWareHouseDao;
+
     private final DoctorWareHouseTrackDao doctorWareHouseTrackDao;
 
     private final DoctorFarmWareHouseTypeDao doctorFarmWareHouseTypeDao;
@@ -63,10 +67,12 @@ public class MaterialInWareHouseManager {
                                       DoctorMaterialConsumeAvgDao doctorMaterialConsumeAvgDao,
                                       DoctorWareHouseTrackDao doctorWareHouseTrackDao,
                                       DoctorFarmWareHouseTypeDao doctorFarmWareHouseTypeDao,
-                                      DoctorMaterialInfoDao doctorMaterialInfoDao){
+                                      DoctorMaterialInfoDao doctorMaterialInfoDao,
+                                      DoctorWareHouseDao doctorWareHouseDao){
         this.doctorMaterialConsumeProviderDao = doctorMaterialConsumeProviderDao;
         this.doctorMaterialInWareHouseDao = doctorMaterialInWareHouseDao;
         this.doctorMaterialConsumeAvgDao = doctorMaterialConsumeAvgDao;
+        this.doctorWareHouseDao = doctorWareHouseDao;
         this.doctorWareHouseTrackDao = doctorWareHouseTrackDao;
         this.doctorFarmWareHouseTypeDao = doctorFarmWareHouseTypeDao;
         this.doctorMaterialInfoDao = doctorMaterialInfoDao;
@@ -89,7 +95,7 @@ public class MaterialInWareHouseManager {
                 .materialTypeId(targetMaterial.getId()).materialName(targetMaterial.getMaterialName())
                 .wareHouseId(targetHouse.getId()).wareHouseName(targetHouse.getWareHouseName())
                 .barnId(basicDto.getBarnId()).barnName(basicDto.getBarnName()).staffId(basicDto.getStaffId()).staffName(basicDto.getStaffName())
-                .consumeCount(materialProduce.getTotal()).unitId(targetMaterial.getUnitId()).unitName(targetMaterial.getUnitName())
+                .providerCount(materialProduce.getTotal()).unitId(targetMaterial.getUnitId()).unitName(targetMaterial.getUnitName())
                 .build());
 
         return Boolean.TRUE;
@@ -105,18 +111,21 @@ public class MaterialInWareHouseManager {
         long totalCount = doctorMaterialInWareHouses.stream().map(DoctorMaterialInWareHouse::getLotNumber).reduce(Math::addExact).orElse(0l);
         checkState(totalCount >= materialProduceEntry.getMaterialCount(), "not.enough.source");
 
+
         // consume
+        long totalConsumeCount= materialProduceEntry.getMaterialCount();
         int index = 0;
 
-        while (totalCount!=0){
+        while (totalConsumeCount!=0){
             DoctorMaterialInWareHouse doctorMaterialInWareHouse = doctorMaterialInWareHouses.get(index);
+            index+=1;
             long toConsume = doctorMaterialInWareHouse.getLotNumber();
 
-            if(toConsume>=totalCount){
-                toConsume = totalCount;
-                totalCount = 0;
+            if(toConsume>=totalConsumeCount){
+                toConsume = totalConsumeCount;
+                totalConsumeCount = 0;
             }else {
-                totalCount = totalCount - toConsume;
+                totalConsumeCount = totalConsumeCount - toConsume;
             }
 
             consumeMaterialInner(DoctorMaterialConsumeProviderDto.builder()
@@ -148,14 +157,21 @@ public class MaterialInWareHouseManager {
      * @return
      */
     @Transactional
-    public Boolean providerMaterialInWareHouse(DoctorMaterialConsumeProviderDto doctorMaterialConsumeProviderDto){
-        providerMaterialInWareHouseInner(doctorMaterialConsumeProviderDto);
-        return Boolean.TRUE;
+    public Long providerMaterialInWareHouse(DoctorMaterialConsumeProviderDto doctorMaterialConsumeProviderDto){
+        // validate ware house type
+        // 仓库 仅仅存储一种Type的 物料信息
+        DoctorWareHouse doctorWareHouse = doctorWareHouseDao.findById(doctorMaterialConsumeProviderDto.getWareHouseId());
+        // validate type
+        Preconditions.checkState(Objects.equals(doctorWareHouse.getType(), doctorMaterialConsumeProviderDto.getType()),
+                "wareHouse.provider.illegalType");
+
+        return providerMaterialInWareHouseInner(doctorMaterialConsumeProviderDto);
     }
 
-    private void providerMaterialInWareHouseInner(DoctorMaterialConsumeProviderDto doctorMaterialConsumeProviderDto){
+    private Long providerMaterialInWareHouseInner(DoctorMaterialConsumeProviderDto doctorMaterialConsumeProviderDto){
         // 录入事件信息
-        doctorMaterialConsumeProviderDao.create(builderMaterialEvent(doctorMaterialConsumeProviderDto,DoctorMaterialConsumeProvider.EVENT_TYPE.PROVIDER.getValue()));
+        DoctorMaterialConsumeProvider providerEvent = builderMaterialEvent(doctorMaterialConsumeProviderDto, DoctorMaterialConsumeProvider.EVENT_TYPE.PROVIDER.getValue());
+        doctorMaterialConsumeProviderDao.create(providerEvent);
 
         // 修改数量信息
         DoctorMaterialInWareHouse doctorMaterialInWareHouse = doctorMaterialInWareHouseDao.queryByFarmHouseMaterial(doctorMaterialConsumeProviderDto.getFarmId(),
@@ -178,7 +194,13 @@ public class MaterialInWareHouseManager {
         }else {
             doctorWareHouseTrack.setLotNumber(doctorWareHouseTrack.getLotNumber() + doctorMaterialConsumeProviderDto.getProviderCount());
             String key = doctorMaterialConsumeProviderDto.getMaterialTypeId().toString();
-            doctorWareHouseTrack.setExtraMap(ImmutableMap.of(key, Params.getNullDefualt(doctorWareHouseTrack.getExtraMap(), key, 0l) + doctorMaterialConsumeProviderDto.getProviderCount()));
+            Map<String,Object> trackExtraMap = doctorWareHouseTrack.getExtraMap();
+            if(trackExtraMap.containsKey(key)){
+                trackExtraMap.put(key, doctorMaterialConsumeProviderDto.getProviderCount() + Params.getWithConvert(trackExtraMap, key, a->Long.valueOf(a.toString())));
+            }else {
+                trackExtraMap.put(key, doctorMaterialConsumeProviderDto.getProviderCount());
+            }
+            doctorWareHouseTrack.setExtraMap(trackExtraMap);
             doctorWareHouseTrackDao.update(doctorWareHouseTrack);
         }
 
@@ -193,6 +215,8 @@ public class MaterialInWareHouseManager {
             doctorFarmWareHouseType.setUpdatorName(doctorMaterialConsumeProviderDto.getStaffName());
             doctorFarmWareHouseTypeDao.update(doctorFarmWareHouseType);
         }
+
+        return providerEvent.getId();
     }
 
     private Long consumeMaterialInner(DoctorMaterialConsumeProviderDto doctorMaterialConsumeProviderDto){
@@ -247,7 +271,7 @@ public class MaterialInWareHouseManager {
     private DoctorWareHouseTrack buildDoctorWreHouseTrack(DoctorMaterialConsumeProviderDto doctorMaterialConsumeProviderDto){
         DoctorWareHouseTrack track = DoctorWareHouseTrack.builder()
                 .farmId(doctorMaterialConsumeProviderDto.getFarmId()).farmName(doctorMaterialConsumeProviderDto.getFarmName()).wareHouseId(doctorMaterialConsumeProviderDto.getWareHouseId())
-                .managerId(null).managerName("")    // TODO 每种物料是否设定对应的管理员信息
+                .managerId(doctorMaterialConsumeProviderDto.getStaffId()).managerName(doctorMaterialConsumeProviderDto.getStaffName())
                 .lotNumber(doctorMaterialConsumeProviderDto.getProviderCount())
                 .build();
 
@@ -319,6 +343,7 @@ public class MaterialInWareHouseManager {
             DoctorMaterialConsumeAvg avg = DoctorMaterialConsumeAvg.builder()
                     .farmId(dto.getFarmId()).wareHouseId(dto.getWareHouseId()).materialId(dto.getMaterialTypeId())
                     .consumeDate(DateTime.now().withTimeAtStartOfDay().toDate()).consumeCount(dto.getConsumeCount())
+                    .consumeAvgCount(0l)
                     .build();
 
             if(Objects.equals(dto.getType(), WareHouseType.FEED.getKey())){
@@ -328,18 +353,18 @@ public class MaterialInWareHouseManager {
         }else{
             if(Objects.equals(dto.getType(), WareHouseType.FEED.getKey())){
                 // calculate current avg rate
-                doctorMaterialConsumeAvg.setConsumeCount(dto.getConsumeCount());
                 doctorMaterialConsumeAvg.setConsumeAvgCount(dto.getConsumeCount() / dto.getConsumeDays());
+                doctorMaterialConsumeAvg.setConsumeCount(dto.getConsumeCount());
             }else {
                 Integer dayRange = Days.daysBetween(new DateTime(doctorMaterialConsumeAvg.getConsumeDate()),DateTime.now()).getDays();
                 if(dayRange == 0){
                     // 同一天领用 0
-                    doctorMaterialConsumeAvg.setConsumeCount(doctorMaterialConsumeAvg.getConsumeAvgCount() + dto.getConsumeCount());
+                    doctorMaterialConsumeAvg.setConsumeCount(doctorMaterialConsumeAvg.getConsumeCount() + dto.getConsumeCount());
                 }else {
-                    doctorMaterialConsumeAvg.setConsumeCount(dto.getConsumeCount());
                     // calculate avg date content
                     doctorMaterialConsumeAvg.setConsumeAvgCount(
                             doctorMaterialConsumeAvg.getConsumeCount() /dayRange);
+                    doctorMaterialConsumeAvg.setConsumeCount(dto.getConsumeCount());
                 }
             }
             doctorMaterialConsumeAvg.setConsumeDate(DateTime.now().withTimeAtStartOfDay().toDate());
@@ -358,10 +383,17 @@ public class MaterialInWareHouseManager {
                 .farmId(doctorMaterialConsumeProviderDto.getFarmId()).farmName(doctorMaterialConsumeProviderDto.getFarmName())
                 .wareHouseId(doctorMaterialConsumeProviderDto.getWareHouseId()).wareHouseName(doctorMaterialConsumeProviderDto.getWareHouseName())
                 .materialId(doctorMaterialConsumeProviderDto.getMaterialTypeId()).materialName(doctorMaterialConsumeProviderDto.getMaterialName())
-                .eventType(eventType).eventTime(DateTime.now().toDate()).eventCount(doctorMaterialConsumeProviderDto.getConsumeCount())
+                .eventType(eventType).eventTime(DateTime.now().toDate())
                 .staffId(doctorMaterialConsumeProviderDto.getStaffId()).staffName(doctorMaterialConsumeProviderDto.getStaffName())
                 .creatorId(doctorMaterialConsumeProviderDto.getStaffId()).creatorName(doctorMaterialConsumeProviderDto.getStaffName())
                 .build();
+
+        // consume provider
+        if(Objects.equals(eventType, DoctorMaterialConsumeProvider.EVENT_TYPE.CONSUMER.getValue())){
+            result.setEventCount(doctorMaterialConsumeProviderDto.getConsumeCount());
+        }else {
+            result.setEventCount(doctorMaterialConsumeProviderDto.getProviderCount());
+        }
 
         // 消耗事件计算方式 统计消耗天数
         if(Objects.equals(eventType, DoctorMaterialConsumeProvider.EVENT_TYPE.CONSUMER.getValue()) &&
