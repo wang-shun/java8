@@ -70,6 +70,11 @@
         WHERE id = #{id}
     </select>
 
+    <select id="queryByFarmMaterial" parameterType="map" resultMap="DoctorMaterialInWareHouseMap">
+        SELECT <include refid="cols_all"/> from <include refid="tb"/> WHERE
+        farm_id=#{farmId} AND material_id=#{materialId}
+    </select>
+
     <select id="queryByFarmAndWareHouseId" parameterType="map" resultMap="DoctorMaterialInWareHouseMap">
         SELECT <include refid="cols_all"/> from <include refid="tb"/>
         WHERE farm_id = #{farmId} and ware_house_id = #{wareHouseId}

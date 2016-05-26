@@ -46,6 +46,16 @@
         #{type},#{farmId},#{farmName},#{wareHouseId},#{wareHouseName},#{materialId},#{materialName},#{eventTime},#{eventType},#{eventCount},#{staffId},#{staffName},#{extra},#{creatorId},#{creatorName},#{updatorId},#{updatorName},now(),now()
     </sql>
 
+    <sql id="criteria">
+        <if test="type != null" > AND `type` = #{type}</if>
+        <if test="farmId != null" > AND `farm_id` = #{farmId}</if>
+        <if test="wareHouseId != null" > AND `ware_house_id` = #{wareHouseId}</if>
+        <if test="materialId != null" > AND `material_id` = #{materialId}</if>
+        <if test="eventType != null" > AND `event_type` = #{eventType}</if>
+        <if test="eventCount != null" > AND `event_count` = #{eventCount}</if>
+        <if test="staffId != null" > AND `staff_id` = #{staffId}</if>
+    </sql>
+
     <insert id="create" parameterType="DoctorMaterialConsumeProvider" keyProperty="id" useGeneratedKeys="true">
         INSERT INTO <include refid="tb" />
         (<include refid="cols_exclude_id" />)
@@ -72,6 +82,13 @@
         WHERE id = #{id}
     </select>
 
+    <select id="list" resultMap="DoctorMaterialConsumeProviderMap">
+        SELECT <include refid="cols_all" />
+        FROM <include refid="tb" />
+        <where>
+            <include refid="criteria"/>
+        </where>
+    </select>
 
     <update id="update" parameterType="DoctorMaterialConsumeProvider">
         UPDATE <include refid="tb"/>
