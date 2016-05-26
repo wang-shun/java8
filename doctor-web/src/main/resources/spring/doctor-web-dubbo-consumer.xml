@@ -57,7 +57,6 @@
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.parana.msg.service.MessageWriteService" id="messageWriteService" check="false"/>
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.parana.msg.service.NotifyReadService" id="notifyReadService" check="false"/>
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.parana.msg.service.NotifyWriteService" id="notifyWriteService" check="false"/>
-
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.parana.user.service.DeviceReadService" id="deviceReadService" check="false"/>
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.parana.user.service.DeviceWriteService" id="deviceWriteService" check="false"/>
 
