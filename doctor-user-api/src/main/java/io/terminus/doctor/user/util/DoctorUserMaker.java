@@ -5,7 +5,8 @@
 package io.terminus.doctor.user.util;
 
 import io.terminus.common.utils.BeanMapper;
-import io.terminus.doctor.common.model.ParanaUser;
+import io.terminus.doctor.user.model.DoctorUser;
+import io.terminus.parana.common.model.ParanaUser;
 import io.terminus.parana.user.model.User;
 
 /**
@@ -14,8 +15,8 @@ import io.terminus.parana.user.model.User;
  */
 public abstract class DoctorUserMaker {
     public static ParanaUser from(User user){
-        ParanaUser paranaUser = new ParanaUser();
-        BeanMapper.copy(user, paranaUser);
-        return paranaUser;
+        DoctorUser doctorUser = new DoctorUser();
+        BeanMapper.copy(user, doctorUser);
+        return doctorUser;
     }
 }

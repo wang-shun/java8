@@ -49,9 +49,9 @@ public class SellerRoleReadServiceImpl implements SellerRoleReadService {
     }
 
     @Override
-    public Response<List<SellerRole>> findByShopId(Long shopId) {
+    public Response<List<SellerRole>> findByShopIdAndStatus(String appKey, Long shopId, Integer status) {
         try {
-            return Response.ok(sellerRoleDao.findByShopId(shopId));
+            return Response.ok(sellerRoleDao.findByShopIdAndStatus(appKey, shopId, status));
         } catch (Exception e) {
             log.error("find seller roles by shopId={} failed, cause:{}",
                     shopId, Throwables.getStackTraceAsString(e));
@@ -60,10 +60,11 @@ public class SellerRoleReadServiceImpl implements SellerRoleReadService {
     }
 
     @Override
-    public Response<Paging<SellerRole>> pagination(Long shopId, Integer status, Integer pageNo, Integer size) {
+    public Response<Paging<SellerRole>> pagination(String appKey, Long shopId, Integer status, Integer pageNo, Integer size) {
         try {
             PageInfo page = new PageInfo(pageNo, size);
             SellerRole criteria = new SellerRole();
+            criteria.setAppKey(appKey);
             criteria.setShopId(shopId);
             criteria.setStatus(status);
             return Response.ok(sellerRoleDao.paging(page.getOffset(), page.getLimit(), criteria));

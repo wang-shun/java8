@@ -72,3 +72,12 @@ parana:
 
 pay:
   debug: false
+
+msg:
+  current:
+      smsService: luoSiMaoSmsService
+  luosimao:
+    sendUrl: http://sms-api.luosimao.com/v1/http_get/send/json
+    statusUrl: http://sms-api.luosimao.com/v1/http_get/status/json
+    apiKey: 35dec4a658e7a3fe96af38a62540cacc
+    companyName: 【新融农牧】

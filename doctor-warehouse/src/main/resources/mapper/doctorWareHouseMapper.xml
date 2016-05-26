@@ -82,6 +82,10 @@
         WHERE id = #{id}
     </select>
 
+    <select id="findByFarmId" parameterType="long" resultMap="DoctorWareHouseMap">
+        SELECT <include refid="cols_all"/> from <include refid="tb"/>
+        WHERE farm_id = #{farmId}
+    </select>
 
     <update id="update" parameterType="DoctorWareHouse">
         UPDATE <include refid="tb"/>
@@ -111,7 +115,7 @@
         </where>
     </select>
 
-    <select id="paging" parameterMap="map" resultMap="DoctorWareHouseMap">
+    <select id="paging" parameterType="map" resultMap="DoctorWareHouseMap">
         SELECT <include refid="cols_all"/> from <include refid="tb"/>
         <where>
             <include refid="criteria"/>

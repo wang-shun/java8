@@ -19,3 +19,7 @@ logging:
 zookeeper:
   host: 127.0.0.1
   port: 2181
+
+# search
+search:
+  host: localhost

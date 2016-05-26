@@ -22,5 +22,19 @@ public class DoctorUserInfoDto implements Serializable {
 
     private User user;
 
-    private DoctorStaff staff;  //职员信息
+    /**
+     * 角色类型
+     * @see io.terminus.doctor.user.enums.RoleType
+     */
+    private Integer frontRoleType;
+
+    /**
+     * frontRoleType = 3 时, 可以取这个farmId, 再调用 get.farm.info 接口获取猪场概况
+     */
+    private Long farmId;
+
+    /**
+     * 职员信息
+     */
+    private DoctorStaff staff;
 }

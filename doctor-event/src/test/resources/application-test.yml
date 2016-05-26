@@ -1,12 +1,39 @@
-#datasource:
-#  driver-class-name: org.h2.Driver
-#  url: jdbc:h2:mem:test;MODE=MySQL
 datasource:
-  driver-class-name: com.mysql.jdbc.Driver
-  url: jdbc:mysql://127.0.0.1:3306/pig_doctor?useUnicode=true&characterEncoding=UTF8&autoReconnect=true
-  username: root
-  password: anywhere
+  driver-class-name: org.h2.Driver
+  url: jdbc:h2:mem:test;MODE=MySQL
+#datasource:
+#  driver-class-name: com.mysql.jdbc.Driver
+#  url: jdbc:mysql://127.0.0.1:3306/pig_doctor?useUnicode=true&characterEncoding=UTF8&autoReconnect=true
+#  username: root
+#  password: anywhere
 
 mybatis:
   mapperLocations:  classpath*:mapper/*Mapper.xml
   typeAliasesPackage: io.terminus.parana.event.model,io.terminus.doctor.(event|workflow).model
+
+#### search start
+search:
+  host: localhost
+  port: 9200
+
+search.pig:
+  index-name: pigs
+  index-type: pig
+  mapping-path: search/pig_mapping.json
+  full-dump-range: 3
+  batch-size: 100
+
+search.group:
+  index-name: groups
+  index-type: group
+  mapping-path: search/group_mapping.json
+  full-dump-range: 3
+  batch-size: 100
+
+search.barn:
+  index-name: barns
+  index-type: barn
+  mapping-path: search/barn_mapping.json
+  full-dump-range: 3
+  batch-size: 100
+

@@ -20,6 +20,11 @@
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.parana.user.service.UserWriteService" id="userWriteService" check="false"/>
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.parana.user.service.UserProfileReadService" id="userProfileReadService" check="false"/>
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.parana.user.service.UserProfileWriteService" id="userProfileWriteService" check="false"/>
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.PrimaryUserWriteService" id="primaryUserWriteService" check="false"/>
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.PrimaryUserReadService" id="primaryUserReadService" check="false"/>
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.SubRoleWriteService" id="subRoleWriteService" check="false"/>
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.SubRoleReadService" id="subRoleReadService" check="false"/>
+
 
     <!-- address services -->
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.parana.user.address.service.AddressReadService" id="addressReadService" check="false"/>
@@ -52,11 +57,44 @@
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.parana.msg.service.MessageWriteService" id="messageWriteService" check="false"/>
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.parana.msg.service.NotifyReadService" id="notifyReadService" check="false"/>
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.parana.msg.service.NotifyWriteService" id="notifyWriteService" check="false"/>
-
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.parana.user.service.DeviceReadService" id="deviceReadService" check="false"/>
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.parana.user.service.DeviceWriteService" id="deviceWriteService" check="false"/>
 
     <!-- article service -->
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.parana.article.service.ArticleReadService" id="articleReadService" check="false"/>
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.parana.article.service.ArticleWriteService" id="articleWriteService" check="false"/>
+
+    <!-- event service -->
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.event.service.DoctorBarnReadService" id="doctorBarnReadService" check="false"/>
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.event.service.DoctorBarnWriteService" id="doctorBarnWriteService" check="false"/>
+
+    <!-- pig event service -->
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.event.service.DoctorPigEventReadService" id="doctorPigEventReadService" check="false"/>
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.event.service.DoctorPigEventWriteService" id="doctorPigEventWriteService" check="false"/>
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.event.service.DoctorPigReadService" id="doctorPigReadService" check="false"/>
+    <!--<dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.event.service.DoctorPigWriteService" id="doctorPigWriteService" check="false"/>-->
+
+    <!-- basic service -->
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.basic.service.DoctorBasicReadService" id="doctorBasicReadService" check="false"/>
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.basic.service.DoctorBasicWriteService" id="doctorBasicWriteService" check="false"/>
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.basic.service.DoctorSearchHistoryService" id="doctorSearchHistoryService" check="false" />
+
+    <!-- search api -->
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.event.search.pig.PigSearchReadService" id="pigSearchReadService" check="false" />
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.event.search.pig.PigSearchWriteService" id="pigSearchWriteService" check="false" />
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.event.search.group.GroupSearchReadService" id="groupSearchReadService" check="false" />
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.event.search.group.GroupSearchWriteService" id="groupSearchWriteService" check="false" />
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.event.search.barn.BarnSearchReadService" id="barnSearchReadService" check="false" />
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.event.search.barn.BarnSearchWriteService" id="barnSearchWriteService" check="false" />
+
+
+    <!-- doctor ware house  -->
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.warehouse.service.DoctorWareHouseReadService" id="doctorWareHouseReadService" check="false"/>
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.warehouse.service.DoctorWareHouseWriteService" id="doctorWareHouseWriteService" check="false"/>
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.warehouse.service.DoctorMaterialInWareHouseWriteService" id="doctorMaterialInWareHouseWriteService" check="false"/>
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.warehouse.service.DoctorMaterialInfoWriteService" id="doctorMaterialInfoWriteService" check="false"/>
+
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.warehouse.service.DoctorMaterialInfoReadService" id="doctorMaterialInfoReadService" check="false"/>
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.warehouse.service.DoctorMaterialInWareHouseReadService" id="doctorMaterialInWareHouseReadService" check="false"/>
+
 </beans>

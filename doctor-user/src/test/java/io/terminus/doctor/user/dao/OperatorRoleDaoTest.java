@@ -85,7 +85,7 @@ public class OperatorRoleDaoTest extends BaseDaoTest  {
     @Test
     public void testFindByStatus() {
         List<Long> createdIds = createOperatorRole();
-        List<OperatorRole> result = operatorRoleDao.findByStatus(1);
+        List<OperatorRole> result = operatorRoleDao.findByStatus("PC", 1);
         Assert.assertNotNull(result);
     }
 

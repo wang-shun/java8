@@ -113,7 +113,7 @@ CREATE TABLE IF NOT EXISTS `workflow_definitions` (
 	`created_at` DATETIME DEFAULT NULL COMMENT '创建时间',
 	`updated_at`  DATETIME DEFAULT NULL COMMENT '更新时间',
 	PRIMARY KEY(`id`)
-)ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='流程定义表';
+) COMMENT='流程定义表';
 CREATE INDEX idx_flow_definition_key ON workflow_definitions(`key`);
 
 
@@ -133,7 +133,7 @@ CREATE TABLE IF NOT EXISTS `workflow_definition_nodes`(
 	`created_at` DATETIME DEFAULT NULL COMMENT '创建时间',
 	`updated_at`  DATETIME DEFAULT NULL COMMENT '更新时间',
 	PRIMARY KEY(`id`)
-)ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='流程定义节点表';
+) COMMENT='流程定义节点表';
 CREATE INDEX idx_flow_definition_nodes_def_id ON workflow_definition_nodes(flow_definition_id);
 
 
@@ -153,7 +153,7 @@ CREATE TABLE IF NOT EXISTS `workflow_definition_node_events`(
 	`created_at` DATETIME DEFAULT NULL COMMENT '创建时间',
 	`updated_at`  DATETIME DEFAULT NULL COMMENT '更新时间',
 	PRIMARY KEY(`id`)
-)ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='流程定义节点连线事件表';
+) COMMENT='流程定义节点连线事件表';
 CREATE INDEX idx_flow_node_event_def_id ON workflow_definition_node_events(flow_definition_id);
 CREATE INDEX idx_flow_node_event_src_id ON workflow_definition_node_events(source_node_id);
 CREATE INDEX idx_flow_node_event_handler ON workflow_definition_node_events(handler);
@@ -178,7 +178,7 @@ CREATE TABLE IF NOT EXISTS `workflow_process_instances`(
 	`created_at` DATETIME DEFAULT NULL COMMENT '创建时间',
 	`updated_at` DATETIME DEFAULT NULL COMMENT '更新时间',
 	PRIMARY KEY(`id`)
-)ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='流程实例表';
+) COMMENT='流程实例表';
 CREATE INDEX idx_flow_instance_def_id ON workflow_process_instances(flow_definition_id);
 CREATE INDEX idx_flow_instance_def_key ON workflow_process_instances(flow_definition_key);
 CREATE INDEX idx_flow_instance_busi_id ON workflow_process_instances(business_id);
@@ -200,7 +200,7 @@ CREATE TABLE IF NOT EXISTS `workflow_processes`(
 	`created_at` DATETIME DEFAULT NULL COMMENT '创建时间',
 	`updated_at`  DATETIME DEFAULT NULL COMMENT '更新时间',
 	PRIMARY KEY(`id`)
-)ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='流程实例的当前活动节点表';
+) COMMENT='流程实例的当前活动节点表';
 CREATE INDEX idx_flow_process_ins_id ON workflow_processes(flow_instance_id);
 
 
@@ -223,7 +223,7 @@ CREATE TABLE IF NOT EXISTS `workflow_process_tracks`(
 	`created_at` DATETIME DEFAULT NULL COMMENT '创建时间',
 	`updated_at` DATETIME DEFAULT NULL COMMENT '更新时间',
 	PRIMARY KEY(`id`)
-)ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='流程处理节点跟踪表';
+) COMMENT='流程处理节点跟踪表';
 CREATE INDEX idx_flow_process_track_ins_id ON workflow_process_tracks(flow_instance_id);
 
 
@@ -248,7 +248,7 @@ CREATE TABLE IF NOT EXISTS `workflow_history_process_instances`(
 	`created_at` DATETIME DEFAULT NULL COMMENT '创建时间',
 	`updated_at` DATETIME DEFAULT NULL COMMENT '更新时间',
 	PRIMARY KEY(`id`)
-)ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='流程实例历史表';
+) COMMENT='流程实例历史表';
 CREATE INDEX idx_flow_instance_his_def_id ON workflow_history_process_instances(flow_definition_id);
 CREATE INDEX idx_flow_instance_his_def_key ON workflow_history_process_instances(flow_definition_key);
 CREATE INDEX idx_flow_instance_his_busi_id ON workflow_history_process_instances(business_id);
@@ -274,5 +274,116 @@ CREATE TABLE IF NOT EXISTS `workflow_history_processes`(
 	`created_at` DATETIME DEFAULT NULL COMMENT '创建时间',
 	`updated_at` DATETIME DEFAULT NULL COMMENT '更新时间',
 	PRIMARY KEY(`id`)
-)ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='流程实例的活动节点历史表';
+) COMMENT='流程实例的活动节点历史表';
 CREATE INDEX idx_flow_process_his_ins_id ON workflow_history_processes(flow_instance_id);
+
+-- doctor pig
+DROP TABLE IF EXISTS `doctor_pigs`;
+CREATE TABLE `doctor_pigs` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT 'ID',
+  `org_id` bigint(20) unsigned DEFAULT NULL COMMENT '公司Id',
+  `org_name` varchar(64) DEFAULT NULL COMMENT '公司名称',
+  `farm_id` bigint(20) unsigned DEFAULT NULL COMMENT '猪场Id',
+  `farm_name` varchar(64) DEFAULT NULL COMMENT '猪场名称',
+  `out_id` varchar(128) DEFAULT NULL COMMENT '关联猪外部Id',
+  `pig_code` varchar(64) DEFAULT NULL COMMENT '猪编号',
+  `pig_type` smallint(6) DEFAULT NULL COMMENT '猪类型(公猪，母猪， 仔猪)',
+  `pig_father_id` bigint(20) unsigned DEFAULT NULL COMMENT '猪父亲Id',
+  `pig_mother_id` bigint(20) unsigned DEFAULT NULL COMMENT '母猪Id',
+  `source` smallint(6) DEFAULT NULL COMMENT '母猪来源',
+  `birth_date` datetime DEFAULT NULL COMMENT '母猪生日',
+  `birth_weight` double DEFAULT NULL COMMENT '出生重量',
+  `in_farm_date` datetime DEFAULT NULL COMMENT '进厂日期',
+  `in_farm_day_age` int(11) DEFAULT NULL COMMENT '进厂日龄',
+  `init_barn_id` bigint(20) unsigned DEFAULT NULL COMMENT '进厂位置',
+  `init_barn_name` varchar(64) DEFAULT NULL COMMENT '进厂位置名称',
+  `breed_id` bigint(20) unsigned DEFAULT NULL COMMENT '品种id',
+  `breed_name` varchar(64) DEFAULT NULL COMMENT '品种名称',
+  `genetic_id` bigint(20) unsigned DEFAULT NULL COMMENT '品系Id',
+  `genetic_name` varchar(64) DEFAULT NULL COMMENT '品系名称',
+  `extra` text COMMENT '公猪（公猪类型，boar_type）母猪（初始胎次:init_parity, 性别：sex, 左右乳头数量： left_nipple_count, right_nipple_count ）',
+  `remark` text COMMENT '标注信息',
+  `creator_id` bigint(20) DEFAULT NULL COMMENT '创建人id',
+  `creator_name` varchar(64) DEFAULT NULL COMMENT '创建人姓名',
+  `updator_id` bigint(20) DEFAULT NULL COMMENT '创建人Id',
+  `updator_name` varchar(64) DEFAULT NULL COMMENT '创建人姓名',
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) COMMENT='猪基础信息表';
+CREATE index doctor_pigs_farm_id on doctor_pigs(farm_id);
+CREATE index doctor_pigs_pig_code on doctor_pigs(pig_code);
+
+DROP TABLE IF EXISTS `doctor_pig_tracks`;
+CREATE TABLE `doctor_pig_tracks` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT 'ID',
+  `farm_id` bigint(20) unsigned NOT NULL comment '猪场Id',
+  `pig_id` bigint(20) DEFAULT NULL COMMENT '猪id',
+  `status` smallint(6) DEFAULT NULL COMMENT '猪状态信息',
+  `current_barn_id` bigint(20) unsigned DEFAULT NULL COMMENT '当前猪舍Id',
+  `current_barn_name` varchar(64) DEFAULT NULL COMMENT '当前猪舍名称',
+  `weight` double DEFAULT NULL COMMENT '猪重量',
+  `out_farm_date` datetime DEFAULT NULL COMMENT '猪离场时间',
+  `rel_event_id` bigint(20) DEFAULT NULL COMMENT '关联事件最近事件',
+  `extra` text COMMENT '事件修改猪对应信息',
+  `current_parity` int(11) DEFAULT NULL COMMENT '当前胎次信息',
+  `remark` text COMMENT '备注',
+  `creator_id` bigint(20) DEFAULT NULL COMMENT '创建人id',
+  `creator_name` varchar(64) DEFAULT NULL COMMENT '创建人姓名',
+  `updator_id` bigint(20) DEFAULT NULL COMMENT '创建人Id',
+  `updator_name` varchar(64) DEFAULT NULL COMMENT '创建人姓名',
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) COMMENT='猪Track 信息表';
+create index doctor_pig_tracks_farm_id on doctor_pig_tracks(farm_id);
+CREATE unique index doctor_pig_tracks_pig_card_id on doctor_pig_tracks(pig_id);
+CREATE index doctor_pig_tracks_current_barn_id on doctor_pig_tracks(current_barn_id);
+create index doctor_pig_tracks_status on doctor_pig_tracks(status);
+
+-- init pig event info
+CREATE TABLE `doctor_pig_events` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT 'id',
+  `org_id` bigint(20) unsigned DEFAULT NULL COMMENT '公司Id',
+  `org_name` varchar(64) DEFAULT NULL COMMENT '公司名称',
+  `farm_id` bigint(20) unsigned DEFAULT NULL COMMENT '猪场Id',
+  `farm_name` varchar(64) DEFAULT NULL COMMENT '猪场名称',
+  `pig_id` bigint(20) unsigned DEFAULT NULL COMMENT '猪Id',
+  `pig_code` varchar(64) DEFAULT NULL COMMENT '猪Code',
+  `event_at` datetime DEFAULT NULL COMMENT '事件时间',
+  `type` int(11) DEFAULT NULL COMMENT '事件类型',
+  `kind` int(11) DEFAULT NULL COMMENT '事件猪类型， 公猪， 母猪， 仔猪',
+  `name` varchar(64) DEFAULT NULL COMMENT '事件名称',
+  `desc` varchar(512) DEFAULT NULL COMMENT '事件描述',
+  `barn_id` bigint(20) unsigned DEFAULT NULL COMMENT '事件地点',
+  `barn_name` varchar(64) DEFAULT NULL COMMENT '地点名称',
+  `rel_event_id` bigint(20) DEFAULT NULL COMMENT '关联事件Id',
+  `out_id` varchar(128) DEFAULT NULL COMMENT '外部Id',
+  `extra` text COMMENT '参考设计文档',
+  `remark` text COMMENT '备注信息',
+  `creator_id` bigint(20) DEFAULT NULL COMMENT '创建人id',
+  `creator_name` varchar(64) DEFAULT NULL COMMENT '创建人姓名',
+  `updator_id` bigint(20) DEFAULT NULL COMMENT '创建人Id',
+  `updator_name` varchar(64) DEFAULT NULL COMMENT '创建人姓名',
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) COMMENT='用户设备信息表';
+create index doctor_pig_events_farm_id on doctor_pig_events(farm_id);
+create index doctor_pig_events_pig_id on doctor_pig_events(pig_id);
+CREATE index doctor_pig_events_rel_event_id on doctor_pig_events(rel_event_id);
+
+create table doctor_pig_snapshots(
+	`id` bigint(20) unsigned not null AUTO_INCREMENT comment 'id',
+	`org_id` bigint(20) unsigned default null comment 'org_id',
+	`farm_id` bigint(20) unsigned default null comment 'farm_id',
+	`pig_id` bigint(20) unsigned default null comment 'pig_id',
+	`event_id` bigint(20) unsigned default null comment 'event_id',
+	`pig_info` text default null comment '公猪快照信息',
+	`created_at` datetime DEFAULT NULL,
+  	`updated_at` datetime DEFAULT NULL,
+  	 primary key(id)
+)COMMENT='猪群事件记录数据表';
+CREATE index doctor_pig_snapshots_farm_id on doctor_pig_snapshots(farm_id);
+CREATE index doctor_pig_snapshots_pig_id on doctor_pig_snapshots(pig_id);
+create index doctor_pig_snapshots_event_id on doctor_pig_snapshots(event_id);

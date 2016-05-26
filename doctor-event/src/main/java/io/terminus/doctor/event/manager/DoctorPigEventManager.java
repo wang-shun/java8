@@ -1,6 +1,5 @@
 package io.terminus.doctor.event.manager;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import io.terminus.common.utils.BeanMapper;
@@ -11,7 +10,9 @@ import io.terminus.doctor.event.dao.DoctorPigDao;
 import io.terminus.doctor.event.dao.DoctorPigEventDao;
 import io.terminus.doctor.event.dao.DoctorPigSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorPigTrackDao;
+import io.terminus.doctor.event.dao.DoctorRevertLogDao;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
+import io.terminus.doctor.event.dto.event.boar.DoctorSemenDto;
 import io.terminus.doctor.event.dto.event.usual.DoctorChgFarmDto;
 import io.terminus.doctor.event.dto.event.usual.DoctorChgLocationDto;
 import io.terminus.doctor.event.dto.event.usual.DoctorConditionDto;
@@ -19,16 +20,20 @@ import io.terminus.doctor.event.dto.event.usual.DoctorDiseaseDto;
 import io.terminus.doctor.event.dto.event.usual.DoctorFarmEntryDto;
 import io.terminus.doctor.event.dto.event.usual.DoctorRemovalDto;
 import io.terminus.doctor.event.dto.event.usual.DoctorVaccinationDto;
+import io.terminus.doctor.event.enums.BoarStatus;
+import io.terminus.doctor.event.enums.SowStatus;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigSnapshot;
 import io.terminus.doctor.event.model.DoctorPigTrack;
+import io.terminus.doctor.event.model.DoctorRevertLog;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
 import org.joda.time.Years;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import sun.rmi.runtime.Log;
 
 import java.util.Map;
 import java.util.Objects;
@@ -56,22 +61,26 @@ public class DoctorPigEventManager {
 
     private final DoctorPigSnapshotDao doctorPigSnapshotDao;
 
+    private final DoctorRevertLogDao doctorRevertLogDao;
+
     @Autowired
     public DoctorPigEventManager(DoctorPigDao doctorPigDao,
                                  DoctorPigEventDao doctorPigEventDao,
                                  DoctorPigTrackDao doctorPigTrackDao,
-                                 DoctorPigSnapshotDao doctorPigSnapshotDao){
+                                 DoctorPigSnapshotDao doctorPigSnapshotDao,
+                                 DoctorRevertLogDao doctorRevertLogDao){
         this.doctorPigEventDao = doctorPigEventDao;
         this.doctorPigDao = doctorPigDao;
         this.doctorPigTrackDao = doctorPigTrackDao;
         this.doctorPigSnapshotDao = doctorPigSnapshotDao;
+        this.doctorRevertLogDao = doctorRevertLogDao;
     }
 
     private static final String REMARK = "remark";
 
 
     @Transactional
-    public Boolean rollBackPigEvent(Long pigEventId){
+    public Long rollBackPigEvent(Long pigEventId, Integer revertPigType, Long staffId, String staffName){
 
         // delete event
         checkState(doctorPigEventDao.delete(pigEventId), "delete.pigEventById.fail");
@@ -86,7 +95,14 @@ public class DoctorPigEventManager {
 
         //delete snapshot
         checkState(doctorPigSnapshotDao.deleteByEventId(pigEventId), "delete.snapshot.error");
-        return Boolean.FALSE;
+
+        // create roll back log
+        DoctorRevertLog doctorRevertLog = DoctorRevertLog.builder()
+                .type(revertPigType).fromInfo(pigEventId.toString()).toInfo(doctorPigTrack.getRelEventId().toString())
+                .reverterId(staffId).reverterName(staffName)
+                .build();
+        doctorRevertLogDao.create(doctorRevertLog);
+        return doctorRevertLog.getId();
     }
 
     /**
@@ -97,75 +113,90 @@ public class DoctorPigEventManager {
      * @return
      */
     @Transactional
-    public Boolean createDiseaseEvent(DoctorDiseaseDto dto, DoctorBasicInputInfoDto basic, Integer pigType){
+    public Long createDiseaseEvent(DoctorDiseaseDto dto, DoctorBasicInputInfoDto basic, Integer pigType){
         Map<String,Object> extra = Maps.newHashMap();
         BeanMapper.copy(dto, extra);
-        createAllEvent(buildAllPigDoctorEvent(pigType, basic, extra),track->{
+        return createAllEvent(buildAllPigDoctorEvent(pigType, basic, extra),track->{
             track.setRemark(dto.getDiseaseRemark());
             track.addAllExtraMap(extra);
             return track;
         });
-        return true;
     }
 
     @Transactional
-    public Boolean createVaccinationEvent(DoctorVaccinationDto doctorVaccinationDto, DoctorBasicInputInfoDto basic, Integer pigType){
+    public Long createVaccinationEvent(DoctorVaccinationDto doctorVaccinationDto, DoctorBasicInputInfoDto basic, Integer pigType){
         Map<String,Object> extra = Maps.newHashMap();
         BeanMapper.copy(doctorVaccinationDto, extra);
-        createAllEvent(buildAllPigDoctorEvent(pigType, basic,extra), track->{
+        return createAllEvent(buildAllPigDoctorEvent(pigType, basic,extra), track->{
             track.setRemark(doctorVaccinationDto.getVaccinationRemark());
             track.addAllExtraMap(extra);
             return track;
         });
-        return true;
     }
 
     @Transactional
-    public Boolean createConditionEvent(DoctorConditionDto doctorConditionDto, DoctorBasicInputInfoDto doctorBasicInputInfoDto, Integer pigType){
+    public Long createConditionEvent(DoctorConditionDto doctorConditionDto, DoctorBasicInputInfoDto doctorBasicInputInfoDto, Integer pigType){
         Map<String,Object> extra = Maps.newHashMap();
         BeanMapper.copy(doctorConditionDto, extra);
-        createAllEvent(buildAllPigDoctorEvent(pigType, doctorBasicInputInfoDto, extra), doctorPigTrack -> {
+        return createAllEvent(buildAllPigDoctorEvent(pigType, doctorBasicInputInfoDto, extra), doctorPigTrack -> {
             doctorPigTrack.setRemark(doctorConditionDto.getConditionRemark());
             doctorPigTrack.setWeight(doctorConditionDto.getConditionWeight());
             doctorPigTrack.addAllExtraMap(extra);
             return doctorPigTrack;
         });
-        return Boolean.TRUE;
     }
 
     @Transactional
-    public Boolean createChgLocationEvent(DoctorChgLocationDto dto, DoctorBasicInputInfoDto basic, Integer pigType){
+    public Long createChgLocationEvent(DoctorChgLocationDto dto, DoctorBasicInputInfoDto basic, Integer pigType){
         Map<String,Object> extra = Maps.newHashMap();
         BeanMapper.copy(dto, extra);
-        createAllEvent(buildAllPigDoctorEvent(pigType, basic, extra), track->{
+        return createAllEvent(buildAllPigDoctorEvent(pigType, basic, extra), track->{
             track.setCurrentBarnId(dto.getChgLocationToBarnId());
             track.setCurrentBarnName(dto.getChgLocationToBarnName());
             track.addAllExtraMap(extra);
             return track;
         });
-        return Boolean.TRUE;
     }
 
     @Transactional
-    public Boolean createChgFarmLocationEvent(DoctorChgFarmDto dto, DoctorBasicInputInfoDto basic, Integer pigType){
+    public Long createChgFarmLocationEvent(DoctorChgFarmDto dto, DoctorBasicInputInfoDto basic, Integer pigType){
         Map<String,Object> extra = Maps.newHashMap();
         BeanMapper.copy(dto, extra);
-        createAllEvent(buildAllPigDoctorEvent(pigType, basic, extra), track->{
+        return createAllEvent(buildAllPigDoctorEvent(pigType, basic, extra), track->{
             track.addAllExtraMap(extra);
             return track;
         });
-        return Boolean.TRUE;
     }
 
     @Transactional
-    public Boolean createRemovalEvent(DoctorRemovalDto dto, DoctorBasicInputInfoDto basic, Integer pigType){
+    public Long createRemovalEvent(DoctorRemovalDto dto, DoctorBasicInputInfoDto basic, Integer pigType){
         Map<String,Object> extra = Maps.newHashMap();
         BeanMapper.copy(dto, extra);
-        createAllEvent(buildAllPigDoctorEvent(pigType, basic, extra), track->{
+        return createAllEvent(buildAllPigDoctorEvent(pigType, basic, extra), track->{
             track.addAllExtraMap(extra);
             return track;
         });
-        return Boolean.TRUE;
+    }
+
+    @Transactional
+    public Long createBoarSemenEvent(DoctorSemenDto doctorSemenDto, DoctorBasicInputInfoDto basic, Integer pigType){
+        Map<String,Object> extra = Maps.newHashMap();
+        BeanMapper.copy(doctorSemenDto, extra);
+        return createAllEvent(buildAllPigDoctorEvent(pigType, basic, extra), track->{
+            track.setWeight(doctorSemenDto.getWeight());
+            track.addAllExtraMap(extra);
+            return track;
+        });
+    }
+
+    @Transactional
+    public <T> Long createPigEventOnlyExtra(T dto, DoctorBasicInputInfoDto basicInputInfoDto, Integer pigType){
+        Map<String, Object> extra = Maps.newHashMap();
+        BeanMapper.copy(dto, extra);
+        return createAllEvent(buildAllPigDoctorEvent(pigType, basicInputInfoDto, extra), track->{
+            track.addAllExtraMap(extra);
+            return track;
+        });
     }
 
     /**
@@ -177,13 +208,12 @@ public class DoctorPigEventManager {
      * @return
      */
     @Transactional
-    public Boolean pigEntryEvent(DoctorBasicInputInfoDto basic, DoctorFarmEntryDto dto, Integer pigType){
+    public Long pigEntryEvent(DoctorBasicInputInfoDto basic, DoctorFarmEntryDto dto, Integer pigType){
 
-        createEntryEvent(
+        return createEntryEvent(
                 buildDoctorPig(dto, basic, pigType),
-                buildDoctorPigEntryEvent(basic,dto, pigType),
-                buildEntryFarmPigDoctorTrack(dto,basic));
-        return Boolean.TRUE;
+                buildDoctorPigEntryEvent(basic, dto, pigType),
+                buildEntryFarmPigDoctorTrack(dto, basic, pigType));
     }
 
     /**
@@ -194,7 +224,7 @@ public class DoctorPigEventManager {
      * @param doctorPigSnapshot
      * @return 对应的录入结果
      */
-    private Boolean createEntryEvent(DoctorPig doctorPig, DoctorPigEvent doctorPigEvent, DoctorPigTrack doctorPigTrack){
+    private Long createEntryEvent(DoctorPig doctorPig, DoctorPigEvent doctorPigEvent, DoctorPigTrack doctorPigTrack){
         // pig create
         doctorPigDao.create(doctorPig);
 
@@ -213,11 +243,16 @@ public class DoctorPigEventManager {
                 .build();
         doctorPigSnapshot.setPigInfoMap(ImmutableMap.of(DoctorPigSnapshotConstants.PIG_TRACK,JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(doctorPigTrack)));
         doctorPigSnapshotDao.create(doctorPigSnapshot);
-        return Boolean.TRUE;
+        return doctorPigEvent.getId();
     }
 
-
-    private Boolean createAllEvent(DoctorPigEvent doctorPigEvent, Function<DoctorPigTrack,DoctorPigTrack> callPigTrackBack){
+    /**
+     * 返回对应的创建事件Id
+     * @param doctorPigEvent
+     * @param callPigTrackBack
+     * @return
+     */
+    private Long createAllEvent(DoctorPigEvent doctorPigEvent, Function<DoctorPigTrack,DoctorPigTrack> callPigTrackBack){
         // create event
         doctorPigEventDao.create(doctorPigEvent);
 
@@ -233,31 +268,8 @@ public class DoctorPigEventManager {
                 .build();
         doctorPigSnapshot.setPigInfoMap(ImmutableMap.of(DoctorPigSnapshotConstants.PIG_TRACK,JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(doctorPigTrack)));
         doctorPigSnapshotDao.create(doctorPigSnapshot);
-        return Boolean.TRUE;
+        return doctorPigEvent.getId();
     }
-
-//    private Boolean createUsualEvent(Map<String,Object> extra, DoctorBasicInputInfoDto basic, Integer pigType){
-//        // create event
-//        DoctorPigEvent doctorPigEvent =  buildBasicDoctorPigEvent(pigType, basic);
-//        doctorPigEvent.setExtraMap(extra);
-//        doctorPigEventDao.create(doctorPigEvent);
-//
-//        //get staff
-//        DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(basic.getPigId());
-//        doctorPigTrack.setRelEventId(doctorPigEvent.getRelEventId());
-//        Map<String,Object> staffExtraMap = doctorPigTrack.getExtraMap();
-//        staffExtraMap.putAll(extra);
-//        doctorPigTrack.setExtraMap(staffExtraMap);
-//        doctorPigTrackDao.update(doctorPigTrack);
-//
-//        // create snapshot
-//        DoctorPigSnapshot doctorPigSnapshot = DoctorPigSnapshot.builder()
-//                .orgId(basic.getOrgId()).farmId(basic.getFarmId()).pigId(basic.getPigId()).eventId(doctorPigEvent.getId())
-//                .build();
-//        doctorPigSnapshot.setPigInfoMap(ImmutableMap.of(DoctorPigSnapshotConstants.PIG_TRACK,doctorPigTrack));
-//        doctorPigSnapshotDao.create(doctorPigSnapshot);
-//        return true;
-//    }
 
     public DoctorPigEvent buildAllPigDoctorEvent(Integer pigType, DoctorBasicInputInfoDto basic, Map<String,Object> extra){
         DoctorPigEvent doctorPigEvent = DoctorPigEvent.builder()
@@ -296,13 +308,21 @@ public class DoctorPigEventManager {
      * @param basic
      * @return
      */
-    private DoctorPigTrack buildEntryFarmPigDoctorTrack(DoctorFarmEntryDto dto, DoctorBasicInputInfoDto basic){
-        return DoctorPigTrack.builder().farmId(basic.getFarmId())
-                .status(-1)  // TODO status to wait base service
+    private DoctorPigTrack buildEntryFarmPigDoctorTrack(DoctorFarmEntryDto dto, DoctorBasicInputInfoDto basic, Integer pigType){
+
+        DoctorPigTrack doctorPigTrack = DoctorPigTrack.builder().farmId(basic.getFarmId())
                 .currentBarnId(dto.getBarnId()).currentBarnName(dto.getBarnName())
                 .currentParity(dto.getParity())
                 .creatorId(basic.getStaffId()).creatorName(basic.getStaffName())
                 .build();
+        if(Objects.equals(pigType, DoctorPig.PIG_TYPE.SOW.getKey())){
+            doctorPigTrack.setStatus(SowStatus.Entry.getKey());
+        }else if(Objects.equals(pigType, DoctorPig.PIG_TYPE.BOAR.getKey())) {
+            doctorPigTrack.setStatus(BoarStatus.ENTRY.getKey());
+        }else {
+            throw new IllegalStateException("input.pigType.error");
+        }
+        return doctorPigTrack;
     }
 
     /**

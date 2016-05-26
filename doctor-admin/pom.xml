@@ -12,17 +12,11 @@
     <artifactId>doctor-admin</artifactId>
 
     <dependencies>
-        <dependency>
-            <groupId>org.sakaiproject.search</groupId>
-            <artifactId>search-api</artifactId>
-            <version>10.6</version>
-        </dependency>
         <!-- doctor -->
         <dependency>
             <groupId>io.terminus.doctor</groupId>
-            <artifactId>doctor-web-core</artifactId>
+            <artifactId>doctor-basic-api</artifactId>
         </dependency>
-        <!-- parana base -->
         <dependency>
             <groupId>io.terminus.doctor</groupId>
             <artifactId>doctor-user-api</artifactId>
@@ -31,11 +25,17 @@
             <groupId>io.terminus.doctor</groupId>
             <artifactId>doctor-common</artifactId>
         </dependency>
+        <dependency>
+            <groupId>io.terminus.doctor</groupId>
+            <artifactId>doctor-web-core</artifactId>
+        </dependency>
+
         <!-- parana extra -->
         <dependency>
             <groupId>io.terminus.parana</groupId>
             <artifactId>parana-article-api</artifactId>
         </dependency>
+
         <!-- pampas base -->
         <dependency>
             <groupId>io.terminus.pampas</groupId>
@@ -49,6 +49,7 @@
             <groupId>io.terminus.pampas</groupId>
             <artifactId>pampas-engine</artifactId>
         </dependency>
+
         <!-- springboot -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -85,6 +86,17 @@
         <dependency>
             <groupId>io.terminus.boot</groupId>
             <artifactId>spring-boot-starter-session</artifactId>
+        </dependency>
+
+        <!-- search -->
+        <dependency>
+            <groupId>org.sakaiproject.search</groupId>
+            <artifactId>search-api</artifactId>
+            <version>10.6</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.dataformat</groupId>
+            <artifactId>jackson-dataformat-yaml</artifactId>
         </dependency>
     </dependencies>
 

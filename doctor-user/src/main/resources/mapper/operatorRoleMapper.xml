@@ -11,6 +11,7 @@
         <id column="id" property="id"/>
         <result column="name" property="name"/>
         <result column="desc" property="desc"/>
+        <result column="app_key" property="appKey"/>
         <result column="status" property="status"/>
         <result column="allow_json" property="allowJson"/>
         <result column="extra_json" property="extraJson"/>
@@ -28,17 +29,12 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        `name`,`desc`, status, allow_json, extra_json, created_at, updated_at
+        `name`,`desc`, app_key, status, allow_json, extra_json, created_at, updated_at
     </sql>
 
     <sql id="vals">
-        #{name}, #{desc}, #{status}, #{allowJson}, #{extraJson}, now(), now()
+        #{name}, #{desc}, #{appKey}, #{status}, #{allowJson}, #{extraJson}, now(), now()
     </sql>
-
-    <sql id="criteria">
-        <if test="status != null">AND status = #{status}</if>
-    </sql>
-
 
     <insert id="create" parameterType="OperatorRole" keyProperty="id" useGeneratedKeys="true">
         INSERT INTO
@@ -73,6 +69,7 @@
         <set>
             <if test="name!=null">`name` = #{name},</if>
             <if test="desc!=null">`desc` = #{desc},</if>
+            <if test="appKey != null">`app_key` = #{appKey},</if>
             <if test="status!=null">`status` = #{status},</if>
             <if test="allowJson!=null">`allow_json` = #{allowJson},</if>
             <if test="extraJson!=null">`extra_json` = #{extraJson},</if>
@@ -87,13 +84,18 @@
         where id = #{id}
     </delete>
 
-    <select id="findByStatus" parameterType="int" resultMap="OperatorRoleMap">
+    <select id="findByStatus" parameterType="map" resultMap="OperatorRoleMap">
         SELECT
         <include refid="cols_all"/>
         FROM
         <include refid="tb"/>
-        WHERE `status` = #{status}
+        WHERE app_key = #{appKey} AND `status` = #{status}
     </select>
+
+    <sql id="criteria">
+        app_key = #{appKey}
+        <if test="status != null">AND status = #{status}</if>
+    </sql>
 
     <select id="paging" parameterType="map" resultMap="OperatorRoleMap">
         select id,

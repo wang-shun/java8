@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 @Service
 @Primary
 public class MockDoctorUserReadServiceImpl implements DoctorUserReadService {
+
     @Override
     public Response<Integer> findUserRoleTypeByUserId(Long userId) {
         return Response.ok(RandomUtil.random(1, 3));
@@ -27,7 +28,7 @@ public class MockDoctorUserReadServiceImpl implements DoctorUserReadService {
 
     @Override
     public Response<DoctorUserInfoDto> findUserInfoByUserId(Long userId) {
-        return Response.ok(new DoctorUserInfoDto(mockUser(userId), mockStaff(userId)));
+        return Response.ok(new DoctorUserInfoDto(mockUser(userId), findUserRoleTypeByUserId(userId).getResult(), 1L, mockStaff(userId)));
     }
 
     private User mockUser(Long userId) {

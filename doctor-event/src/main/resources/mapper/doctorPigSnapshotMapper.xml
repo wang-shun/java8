@@ -54,9 +54,9 @@
         id=#{id}
     </delete>
 
-    <delete id="deleteByEventId" parameterMap="long">
+    <delete id="deleteByEventId" parameterType="long">
         DELETE FROM <include refid="tb"/> WHERE
-        eventId = #{eventId};
+        event_id = #{eventId};
     </delete>
 
     <select id="findById" parameterType="long" resultMap="DoctorPigSnapshotMap" >
@@ -67,7 +67,7 @@
 
     <select id="queryByEventId" parameterType="long" resultMap="DoctorPigSnapshotMap">
         SELECT <include refid="cols_all"/> FROM <include refid="tb"/>
-        WHERE eventId = #{eventId}
+        WHERE event_id = #{eventId}
     </select>
 
     <update id="update" parameterType="DoctorPigSnapshot">

@@ -3,8 +3,13 @@ package io.terminus.doctor.user.manager;
 import io.terminus.doctor.common.enums.UserRole;
 import io.terminus.doctor.common.enums.UserType;
 import io.terminus.doctor.common.util.UserRoleUtil;
+import io.terminus.doctor.common.utils.Params;
 import io.terminus.doctor.user.dao.OperatorDao;
+import io.terminus.doctor.user.dao.PrimaryUserDao;
+import io.terminus.doctor.user.dao.SubDao;
 import io.terminus.doctor.user.model.Operator;
+import io.terminus.doctor.user.model.PrimaryUser;
+import io.terminus.doctor.user.model.Sub;
 import io.terminus.parana.common.utils.Iters;
 import io.terminus.parana.user.impl.dao.UserDao;
 import io.terminus.parana.user.model.User;
@@ -24,15 +29,20 @@ import static com.google.common.base.Preconditions.checkState;
 @Slf4j
 @Component
 public class DoctorUserManager {
-
     private final UserDao userDao;
 
     private final OperatorDao operatorDao;
 
+    private final PrimaryUserDao primaryUserDao;
+
+    private final SubDao subDao;
+
     @Autowired
-    public DoctorUserManager(UserDao userDao, OperatorDao operatorDao) {
+    public DoctorUserManager(UserDao userDao, OperatorDao operatorDao, PrimaryUserDao primaryUserDao, SubDao subDao) {
         this.userDao = userDao;
         this.operatorDao = operatorDao;
+        this.primaryUserDao = primaryUserDao;
+        this.subDao = subDao;
     }
 
     @Transactional
@@ -61,6 +71,29 @@ public class DoctorUserManager {
             if (user.getRoles().contains(UserRole.SELLER.name())) {
                 // 卖家
             }
+        } else if (Objects.equals(user.getType(), UserType.FARM_ADMIN_PRIMARY.value())){
+            //猪场管理员
+            PrimaryUser primaryUser = new PrimaryUser();
+            primaryUser.setUserId(userId);
+            //暂时暂定手机号
+            primaryUser.setUserName(user.getMobile());
+            primaryUserDao.create(primaryUser);
+        } else if (Objects.equals(user.getType(), UserType.FARM_SUB.value())){
+            //猪场子账号
+            Long roleId = null;// TODO: read roleId from user.getRoles()
+            for (String role : Iters.nullToEmpty(user.getRoles())) {
+                List<String> richRole = UserRoleUtil.roleConsFrom(role);
+                if (richRole.get(0).equalsIgnoreCase("SUB") && richRole.size() > 1) {
+                    roleId = Long.parseLong(UserRoleUtil.roleConsFrom(richRole.get(1)).get(1));
+                }
+            }
+
+            Sub sub = new Sub();
+            sub.setUserId(userId);
+            sub.setRoleId(roleId);
+            sub.setParentUserId(Params.get(user.getExtra(), "pid"));
+            subDao.create(sub);
+
         }
         return userId;
     }

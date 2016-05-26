@@ -11,5 +11,23 @@
         http://code.alibabatech.com/schema/dubbo
         http://code.alibabatech.com/schema/dubbo/dubbo.xsd">
 
+    <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.event.service.DoctorBarnReadService" ref="doctorBarnReadServiceImpl"/>
+    <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.event.service.DoctorBarnWriteService" ref="doctorBarnWriteServiceImpl" />
 
+    <!-- search api -->
+    <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.event.search.pig.PigSearchReadService" ref="pigSearchReadServiceImpl" />
+    <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.event.search.pig.PigSearchWriteService" ref="pigSearchWriteServiceImpl" />
+    <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.event.search.pig.PigDumpService" ref="pigDumpServiceImpl" />
+    <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.event.search.group.GroupSearchReadService" ref="groupSearchReadServiceImpl" />
+    <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.event.search.group.GroupSearchWriteService" ref="groupSearchWriteServiceImpl" />
+    <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.event.search.group.GroupDumpService" ref="groupDumpServiceImpl" />
+    <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.event.search.barn.BarnSearchReadService" ref="barnSearchReadServiceImpl" />
+    <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.event.search.barn.BarnSearchWriteService" ref="barnSearchWriteServiceImpl" />
+    <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.event.search.barn.BarnSearchDumpService" ref="barnSearchDumpServiceImpl" />
+
+    <!-- pig api -->
+    <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.event.service.DoctorPigEventReadService" ref="doctorPigEventReadServiceImpl"/>
+    <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.event.service.DoctorPigEventWriteService" ref="doctorPigEventWriteServiceImpl"/>
+    <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.event.service.DoctorPigReadService" ref="doctorPigReadServiceImpl"/>
+    <!--<dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.event.service.DoctorPigWriteService" ref="doctorPigWriteServiceImpl"/>-->
 </beans>

@@ -6,8 +6,8 @@ import io.terminus.common.model.BaseUser;
 import io.terminus.doctor.common.enums.UserRole;
 import io.terminus.doctor.common.enums.UserType;
 
+
 import java.util.List;
-import java.util.Objects;
 
 /**
  * 用户角色工具类
@@ -23,27 +23,43 @@ public class UserRoleUtil {
      * @return 是否为 ADMIN
      */
     public static boolean isAdmin(BaseUser user) {
-        return Objects.equals(user.getType(), UserType.ADMIN.value());
+        return user != null && isAdmin(user.getType());
+    }
+
+    public static boolean isAdmin(Integer type) {
+        return type != null && type == UserType.ADMIN.value();
     }
 
     public static boolean isOperator(BaseUser user) {
-        return isAdmin(user) || Objects.equals(user.getType(), UserType.OPERATOR.value());
+        return isOperator(user.getType());
     }
 
-    public static boolean isSeller(List<String> roles) {
-        return roles.contains(UserRole.SELLER.name());
+    public static boolean isOperator(Integer type) {
+        return type != null && type == UserType.OPERATOR.value();
+    }
+
+    public static boolean isNormal(BaseUser user) {
+        return isNormal(user.getType());
+    }
+
+    public static boolean isNormal(Integer type) {
+        return type != null && type == UserType.NORMAL.value();
     }
 
     public static boolean isSeller(BaseUser user) {
-        return isSeller(user.getRoles());
+        return isSeller(user.getType(), user.getRoles());
     }
 
-    public static boolean isBuyer(List<String> roles) {
-        return roles.contains(UserRole.BUYER.name());
+    public static boolean isSeller(Integer type, List<String> roles) {
+        return isNormal(type) && roles != null && roles.contains(UserRole.SELLER.name());
     }
 
     public static boolean isBuyer(BaseUser user) {
-        return isBuyer(user.getRoles());
+        return isBuyer(user.getType(), user.getRoles());
+    }
+
+    public static boolean isBuyer(Integer type, List<String> roles) {
+        return isNormal(type) && roles != null && roles.contains(UserRole.BUYER.name());
     }
 
     // TODO: 只考虑最规范的语法

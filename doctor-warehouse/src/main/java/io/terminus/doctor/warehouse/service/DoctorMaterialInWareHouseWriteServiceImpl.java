@@ -25,16 +25,35 @@ public class DoctorMaterialInWareHouseWriteServiceImpl implements DoctorMaterial
         this.materialInWareHouseManager = materialInWareHouseManager;
     }
 
+    /**
+     * 消耗对应的 Consumer 信息内容
+     * @param doctorMaterialConsumeProviderDto (参数)farmId, warehouseId, materialId
+     * @return
+     */
     @Override
-    public Response<Boolean> consumeMaterialInfo(DoctorMaterialConsumeProviderDto doctorMaterialConsumeProviderDto) {
+    public Response<Long> consumeMaterialInfo(DoctorMaterialConsumeProviderDto doctorMaterialConsumeProviderDto) {
         try{
-
-            // TODO validate field parameter info
-
-            return Response.ok(materialInWareHouseManager.consumeMaterialInWareHouse(doctorMaterialConsumeProviderDto));
+            return Response.ok(materialInWareHouseManager.consumeMaterial(doctorMaterialConsumeProviderDto));
+        }catch (IllegalStateException se){
+            log.warn("illegal state fail, cause:{}", Throwables.getStackTraceAsString(se));
+            return Response.fail(se.getMessage());
         }catch (Exception e){
-            log.error("consumer material info error, cause:{}", Throwables.getStackTraceAsString(e));
-            return Response.fail("consume.material.error");
+            log.error("consume material fail, cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("consume.material.fail");
+        }
+    }
+
+
+    @Override
+    public Response<Long> providerMaterialInfo(DoctorMaterialConsumeProviderDto doctorMaterialConsumeProviderDto){
+        try{
+            return Response.ok(materialInWareHouseManager.providerMaterialInWareHouse(doctorMaterialConsumeProviderDto));
+        }catch (IllegalStateException se){
+            log.warn("provider illegal state fail, cause:{}", Throwables.getStackTraceAsString(se));
+            return Response.fail(se.getMessage());
+        }catch (Exception e){
+            log.error("provider material info fail, cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("provider.materialInfo.fail");
         }
     }
 }

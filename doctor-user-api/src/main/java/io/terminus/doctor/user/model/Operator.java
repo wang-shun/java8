@@ -57,6 +57,10 @@ public class Operator implements Serializable {
      */
     private Integer status;
 
+    public boolean isActive() {
+        return status != null && status == 1;
+    }
+
     /**
      * 扩展信息, 不存数据库
      */

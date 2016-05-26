@@ -23,7 +23,7 @@ public interface DoctorBasicWriteService {
     /**
      * 创建猪场时, 初始化一些基础数据
      * @param farmId 猪场id
-     * @return
+     * @return 是否成功
      */
     Response<Boolean> initFarmBasic(@NotNull(message = "farmId.not.null") Long farmId);
 

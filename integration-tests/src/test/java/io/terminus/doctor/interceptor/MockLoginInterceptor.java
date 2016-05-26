@@ -1,7 +1,7 @@
 package io.terminus.doctor.interceptor;
 
 import io.terminus.pampas.common.UserUtil;
-import io.terminus.doctor.common.model.ParanaUser;
+import io.terminus.parana.common.model.ParanaUser;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
 import javax.servlet.http.HttpServletRequest;
