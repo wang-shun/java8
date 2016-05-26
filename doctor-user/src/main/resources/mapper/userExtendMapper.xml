@@ -14,6 +14,8 @@
         <result column="type" property="type"/>
         <result column="status" property="status"/>
         <result column="roles_json" property="rolesJson"/>
+        <result column="extra_json" property="extraJson"/>
+        <result column="tags_json" property="tagsJson"/>
         <result column="created_at" property="createdAt"/>
         <result column="updated_at" property="updatedAt"/>
     </resultMap>
