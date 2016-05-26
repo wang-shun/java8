@@ -29,5 +29,5 @@
     <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.event.service.DoctorPigEventReadService" ref="doctorPigEventReadServiceImpl"/>
     <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.event.service.DoctorPigEventWriteService" ref="doctorPigEventWriteServiceImpl"/>
     <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.event.service.DoctorPigReadService" ref="doctorPigReadServiceImpl"/>
-    <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.event.service.DoctorPigWriteService" ref="doctorPigWriteServiceImpl"/>
+    <!--<dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.event.service.DoctorPigWriteService" ref="doctorPigWriteServiceImpl"/>-->
 </beans>
