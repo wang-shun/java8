@@ -481,9 +481,9 @@ CREATE INDEX idx_doctor_group_tracks_rel_event_id ON doctor_group_tracks(rel_eve
 DROP TABLE IF EXISTS `doctor_group_events`;
 CREATE TABLE `doctor_group_events` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '自增主键',
-  `org_id` varchar(64) DEFAULT NULL COMMENT '公司id',
+  `org_id` bigint(20) DEFAULT NULL COMMENT '公司id',
   `org_name` varchar(64) DEFAULT NULL COMMENT '公司名称',
-  `farm_id` varchar(64) DEFAULT NULL COMMENT '猪场id',
+  `farm_id` bigint(20) DEFAULT NULL COMMENT '猪场id',
   `farm_name` varchar(64) DEFAULT NULL COMMENT '猪场名称',
   `group_id` bigint(20) DEFAULT NULL COMMENT '猪群卡片id',
   `group_code` varchar(64) DEFAULT NULL COMMENT '猪群号',

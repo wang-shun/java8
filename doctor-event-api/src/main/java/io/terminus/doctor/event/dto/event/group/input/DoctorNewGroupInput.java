@@ -1,4 +1,4 @@
-package io.terminus.doctor.web.front.event.dto;
+package io.terminus.doctor.event.dto.event.group.input;
 
 import lombok.Data;
 import org.hibernate.validator.constraints.NotEmpty;
@@ -14,7 +14,7 @@ import java.util.Date;
  * Date: 16/5/25
  */
 @Data
-public class DoctorNewGroupDto implements Serializable {
+public class DoctorNewGroupInput implements Serializable {
     private static final long serialVersionUID = 5586688187641324955L;
 
     /**
