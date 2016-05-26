@@ -39,6 +39,12 @@ public class DoctorMaterialInfos {
         this.doctorMaterialInfoReadService = doctorMaterialInfoReadService;
     }
 
+    @RequestMapping(value = "/create", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public Long createMaterialInfo(@RequestBody DoctorMaterialInfo doctorMaterialInfo){
+        return RespHelper.or500(doctorMaterialInfoWriteService.createMaterialInfo(doctorMaterialInfo));
+    }
+
     /**
      * 通过Id 筛选Material Info
      * @param id

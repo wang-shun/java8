@@ -16,6 +16,13 @@ import javax.validation.constraints.NotNull;
 public interface DoctorMaterialInfoWriteService {
 
     /**
+     * 创建对应的Material Info
+     * @param doctorMaterialInfo
+     * @return
+     */
+    Response<Long> createMaterialInfo(DoctorMaterialInfo doctorMaterialInfo);
+
+    /**
      * 录入生产物料的配比信息
      * @param doctorMaterialProductRatioDto
      * @return
@@ -33,8 +40,7 @@ public interface DoctorMaterialInfoWriteService {
 
     /**
      * 对应的物料生产信息比例
-     * @param wareHouseId 生产后的物料仓库
-     * @param materialId
+     * @param doctorWareHouseBasicDto
      * @param materialProduce
      * @return
      */

@@ -1,7 +1,7 @@
 package io.terminus.doctor.warehouse.service;
 
 import com.google.common.base.Throwables;
-import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Maps;
 import io.terminus.common.model.PageInfo;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
@@ -59,7 +59,9 @@ public class DoctorWareHouseReadServiceImpl implements DoctorWareHouseReadServic
     public Response<Paging<DoctorWareHouseDto>> queryDoctorWarehouseDto(Long farmId, Integer pageNo, Integer pageSize) {
         try{
             PageInfo pageInfo = new PageInfo(pageNo, pageSize);
-            Paging<DoctorWareHouse> doctorWareHousePaging = doctorWareHouseDao.paging(pageInfo.getOffset(),pageInfo.getLimit(), ImmutableMap.of("farmId", farmId));
+            Map<String,Object> params = Maps.newHashMap();
+            params.put("farmId", farmId);
+            Paging<DoctorWareHouse> doctorWareHousePaging = doctorWareHouseDao.paging(pageInfo.getOffset(), pageInfo.getLimit(), params);
 
             // validate null
             if(doctorWareHousePaging.isEmpty()){

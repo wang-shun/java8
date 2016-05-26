@@ -18,12 +18,12 @@ public interface DoctorMaterialInWareHouseWriteService {
      * @param doctorMaterialConsumeProviderDto
      * @return
      */
-    Response<Boolean> consumeMaterialInfo(@NotNull(message = "input.dto.empty") DoctorMaterialConsumeProviderDto doctorMaterialConsumeProviderDto);
+    Response<Long> consumeMaterialInfo(@NotNull(message = "input.dto.empty") DoctorMaterialConsumeProviderDto doctorMaterialConsumeProviderDto);
 
     /**
      * 用户录入生产数量信息
      * @param doctorMaterialConsumeProviderDto
      * @return
      */
-    Response<Boolean> providerMaterialInfo(@NotNull(message = "input.dto.empty") DoctorMaterialConsumeProviderDto doctorMaterialConsumeProviderDto);
+    Response<Long> providerMaterialInfo(@NotNull(message = "input.dto.empty") DoctorMaterialConsumeProviderDto doctorMaterialConsumeProviderDto);
 }

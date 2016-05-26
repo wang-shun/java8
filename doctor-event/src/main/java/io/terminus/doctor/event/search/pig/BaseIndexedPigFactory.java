@@ -2,6 +2,7 @@ package io.terminus.doctor.event.search.pig;
 
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.doctor.event.dao.DoctorPigDao;
+import io.terminus.doctor.event.enums.SowStatus;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 import lombok.extern.slf4j.Slf4j;
@@ -57,7 +58,8 @@ public abstract class BaseIndexedPigFactory<T extends IndexedPig> implements Ind
         // 2. 处理猪Track信息
         if (pigTrack != null) {
             indexedPig.setStatus(pigTrack.getStatus());
-            // TODO status name
+            SowStatus status = SowStatus.from(pigTrack.getStatus());
+            indexedPig.setStatusName(status == null ? "" : status.getDesc());
             indexedPig.setCurrentBarnId(pigTrack.getCurrentBarnId());
             indexedPig.setCurrentBarnName(pigTrack.getCurrentBarnName());
             indexedPig.setWeight(pigTrack.getWeight());

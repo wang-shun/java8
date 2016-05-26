@@ -55,7 +55,7 @@ public class DoctorWareHouseEvents {
      */
     @RequestMapping(value = "/consume", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public Boolean createConsumeEvent(@RequestBody DoctorMaterialConsumeProviderDto dto){
+    public Long createConsumeEvent(@RequestBody DoctorMaterialConsumeProviderDto dto){
         return RespHelper.or500(doctorMaterialInWareHouseWriteService.consumeMaterialInfo(dto));
     }
 
@@ -66,7 +66,7 @@ public class DoctorWareHouseEvents {
      */
     @RequestMapping(value = "/provider", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public Boolean createProviderEvent(@RequestBody DoctorMaterialConsumeProviderDto dto){
+    public Long createProviderEvent(@RequestBody DoctorMaterialConsumeProviderDto dto){
         return RespHelper.or500(doctorMaterialInWareHouseWriteService.providerMaterialInfo(dto));
     }
 }

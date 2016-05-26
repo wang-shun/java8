@@ -55,7 +55,7 @@ public class DoctorWareHouseQuery {
 
     @RequestMapping(value = "/createWareHouse", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public Boolean createWareHouseInfo(@RequestBody DoctorWareHouse doctorWareHouse){
+    public Long createWareHouseInfo(@RequestBody DoctorWareHouse doctorWareHouse){
         return RespHelper.or500(doctorWareHouseWriteService.createWareHouse(doctorWareHouse));
     }
 }
