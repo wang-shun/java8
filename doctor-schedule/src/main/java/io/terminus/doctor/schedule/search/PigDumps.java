@@ -2,6 +2,7 @@ package io.terminus.doctor.schedule.search;
 
 import com.google.common.base.Throwables;
 import io.terminus.doctor.event.search.pig.PigDumpService;
+import io.terminus.zookeeper.leader.HostLeader;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
@@ -27,9 +28,16 @@ public class PigDumps {
     @Autowired
     private PigDumpService pigDumpService;
 
+    @Autowired
+    private HostLeader hostLeader;
+
     @Scheduled(cron = "0 0 1 * * ?")
     public void fullDump() {
         try{
+            if(!hostLeader.isLeader()) {
+                log.info("current leader is:{}, skip", hostLeader.currentLeaderId());
+                return;
+            }
             log.info("full dump fired");
             pigDumpService.fullDump(null);
             log.info("full dump end");
@@ -53,6 +61,10 @@ public class PigDumps {
     @RequestMapping(value = "/pig/delta")
     public void deltaDump() {
         try{
+            if(!hostLeader.isLeader()) {
+                log.info("current leader is:{}, skip", hostLeader.currentLeaderId());
+                return;
+            }
             log.info("delta dump fired");
             pigDumpService.deltaDump(15);
             log.info("delta dump end");

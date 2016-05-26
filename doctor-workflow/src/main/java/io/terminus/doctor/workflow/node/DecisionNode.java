@@ -26,7 +26,7 @@ public class DecisionNode extends BaseNode {
                 continue;
             }
             try {
-                if (StringHelper.parseExpression(expression, execution.getExpression())) {
+                if (StringHelper.isNotBlank(expression) && StringHelper.parseExpression(expression, execution.getExpression())) {
                     onlyOk++;
                     goTransition = transition;
                 }
