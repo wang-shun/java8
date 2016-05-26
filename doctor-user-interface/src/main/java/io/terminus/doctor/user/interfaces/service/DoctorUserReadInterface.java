@@ -14,8 +14,25 @@ import java.util.Map;
  */
 public interface DoctorUserReadInterface {
 
+    /**
+     * 按用户名查询, 如果查询不到不会抛出异常
+     * @param nickname
+     * @return
+     */
     Response<User> findByNick(String nickname);
+
+    /**
+     * 按邮箱查询, 如果查询不到不会抛出异常
+     * @param email
+     * @return
+     */
     Response<User> findByEmail(String email);
+
+    /**
+     * 按手机号查询, 如果查询不到不会抛出异常
+     * @param mobile
+     * @return
+     */
     Response<User> findByMobile(String mobile);
     Response<User> load(Integer id);
     Response<User> load(Long id);

@@ -24,7 +24,6 @@ public interface DoctorUserWriteInterface {
     Response<Boolean> update(User user);
 
     Response<Boolean> createUser(User user);
-    Response<Integer> createUsers(List<User> users);
 
     Response<Boolean> delete(Long id);
     Response<Integer> deletes(List<Long> ids);

@@ -36,10 +36,13 @@ public class DoctorUserReadInterfaceImpl implements DoctorUserReadInterface {
     @Override
     public Response<User> findByNick(String nickname) {
         Response<User> response = new Response<>();
-        User user = new User();
         try {
-            BeanMapper.copy(this.checkNotNull(userDaoExt.findByName(nickname)), user);
-            response.setResult(user);
+            io.terminus.parana.user.model.User paranaUser = userDaoExt.findByName(nickname);
+            if (paranaUser == null) {
+                return Response.ok(null);
+            } else {
+                response.setResult(BeanMapper.map(paranaUser, User.class));
+            }
         } catch(ServiceException e) {
             response.setError(e.getMessage());
         } catch (Exception e) {
@@ -52,10 +55,13 @@ public class DoctorUserReadInterfaceImpl implements DoctorUserReadInterface {
     @Override
     public Response<User> findByEmail(String email) {
         Response<User> response = new Response<>();
-        User user = new User();
         try {
-            BeanMapper.copy(this.checkNotNull(userDaoExt.findByEmail(email)), user);
-            response.setResult(user);
+            io.terminus.parana.user.model.User paranaUser = userDaoExt.findByEmail(email);
+            if (paranaUser == null) {
+                return Response.ok(null);
+            } else {
+                response.setResult(BeanMapper.map(paranaUser, User.class));
+            }
         } catch(ServiceException e) {
             response.setError(e.getMessage());
         } catch (Exception e) {
@@ -68,10 +74,13 @@ public class DoctorUserReadInterfaceImpl implements DoctorUserReadInterface {
     @Override
     public Response<User> findByMobile(String mobile) {
         Response<User> response = new Response<>();
-        User user = new User();
         try {
-            BeanMapper.copy(this.checkNotNull(userDaoExt.findByMobile(mobile)), user);
-            response.setResult(user);
+            io.terminus.parana.user.model.User paranaUser = userDaoExt.findByMobile(mobile);
+            if (paranaUser == null) {
+                return Response.ok(null);
+            } else {
+                response.setResult(BeanMapper.map(paranaUser, User.class));
+            }
         } catch(ServiceException e) {
             response.setError(e.getMessage());
         } catch (Exception e) {

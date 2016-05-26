@@ -102,19 +102,10 @@ public class DoctorUserWriteInterfaceImpl implements DoctorUserWriteInterface {
             if(userDaoExt.findByEmail(user.getEmail()) != null){
                 return Response.fail("duplicated.email");
             }
-            response.setResult(userDaoExt.create(this.makeParanaUserFromInterface(user)));
-        } catch (Exception e) {
-            log.error("update user failed, cause:{}", Throwables.getStackTraceAsString(e));
-            response.setError("create.user.failed");
-        }
-        return response;
-    }
-
-    @Override
-    public Response<Integer> createUsers(List<User> users) {
-        Response<Integer> response = new Response<>();
-        try {
-            response.setResult(userDaoExt.creates(this.makeParanaUserFromInterface(users)));
+            io.terminus.parana.user.model.User paranaUser = this.makeParanaUserFromInterface(user);
+            userDaoExt.create(paranaUser);
+            user.setId(paranaUser.getId());
+            response.setResult(true);
         } catch (Exception e) {
             log.error("update user failed, cause:{}", Throwables.getStackTraceAsString(e));
             response.setError("create.user.failed");

@@ -55,10 +55,12 @@ public class UserDaoExt extends UserDao {
     public Date minDate() {
         return sqlSession.selectOne(NAMESPACE + "minDate");
     }
-
+    @Override
     public Paging<User> paging(Integer offset, Integer limit){
         return this.paging(offset, limit, new HashMap<>());
     }
+
+    @Override
     @SuppressWarnings("unchecked")
     public Paging<User> paging(Integer offset, Integer limit, User criteria){
         Map<String, Object> params = Maps.newHashMap();
@@ -75,7 +77,7 @@ public class UserDaoExt extends UserDao {
         List<User> datas = sqlSession.selectList(NAMESPACE + "paging", params);
         return new Paging<>(total, datas);
     }
-
+    @Override
     public Paging<User> paging(Integer offset, Integer limit, Map<String, Object> criteria) {
         if (criteria == null) {    //如果查询条件为空
             criteria = Maps.newHashMap();
@@ -95,6 +97,7 @@ public class UserDaoExt extends UserDao {
      * @param criteria 所有查询参数
      * @return 查询到的分页对象
      */
+    @Override
     public Paging<User> paging(Map<String, Object> criteria) {
         if (criteria == null) {    //如果查询条件为空
             criteria = Maps.newHashMap();
