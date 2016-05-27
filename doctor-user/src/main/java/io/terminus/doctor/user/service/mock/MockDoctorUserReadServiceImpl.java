@@ -4,9 +4,13 @@ import io.terminus.common.model.Response;
 import io.terminus.doctor.common.utils.RandomUtil;
 import io.terminus.doctor.user.dto.DoctorUserInfoDto;
 import io.terminus.doctor.user.model.DoctorStaff;
+import io.terminus.doctor.user.model.DoctorUser;
 import io.terminus.doctor.user.service.DoctorUserReadService;
+import io.terminus.pampas.common.UserUtil;
 import io.terminus.parana.user.model.User;
+import io.terminus.parana.user.service.UserReadService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 
@@ -21,6 +25,9 @@ import org.springframework.stereotype.Service;
 @Primary
 public class MockDoctorUserReadServiceImpl implements DoctorUserReadService {
 
+    @Autowired
+    private UserReadService userReadService;
+
     @Override
     public Response<Integer> findUserRoleTypeByUserId(Long userId) {
         return Response.ok(RandomUtil.random(1, 3));
@@ -28,17 +35,16 @@ public class MockDoctorUserReadServiceImpl implements DoctorUserReadService {
 
     @Override
     public Response<DoctorUserInfoDto> findUserInfoByUserId(Long userId) {
-        return Response.ok(new DoctorUserInfoDto(mockUser(userId), findUserRoleTypeByUserId(userId).getResult(), 1L, mockStaff(userId)));
+        return Response.ok(new DoctorUserInfoDto(mockUser(userId), getUser().getType(), 1L, mockStaff(userId)));
     }
 
     private User mockUser(Long userId) {
         User user = new User();
-        user.setId(userId);
-        user.setName("测试用户" + userId);
-        user.setMobile("13333333333");
+        user.setId(getUser().getId());
+        user.setName(getUser().getName());
+        user.setMobile(getUser().getMobile());
         user.setStatus(1);
         user.setType(2);
-        user.setPassword("passwd");
         return user;
     }
 
@@ -54,5 +60,9 @@ public class MockDoctorUserReadServiceImpl implements DoctorUserReadService {
         staff.setSex(1);
         staff.setAvatar("http://img.xrnm.com/20150821-ee59df0636a3291405b61f997d314a19.jpg");
         return staff;
+    }
+
+    private DoctorUser getUser() {
+        return UserUtil.getCurrentUser();
     }
 }
