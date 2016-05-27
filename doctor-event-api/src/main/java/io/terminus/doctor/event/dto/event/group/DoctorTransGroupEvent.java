@@ -43,12 +43,6 @@ public class DoctorTransGroupEvent extends BaseGroupEvent implements Serializabl
      */
     private Integer isCreateGroup;
 
-    /**
-     * 来源 1 本场, 2 外购
-     * @see io.terminus.doctor.event.enums.PigSource
-     */
-    private Integer source;
-
     private Long breedId;
 
     private String breedName;

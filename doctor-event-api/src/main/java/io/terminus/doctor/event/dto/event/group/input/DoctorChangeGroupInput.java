@@ -3,6 +3,7 @@ package io.terminus.doctor.event.dto.event.group.input;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
+import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 
 /**
@@ -15,4 +16,71 @@ import java.io.Serializable;
 @Data
 public class DoctorChangeGroupInput extends BaseGroupInput implements Serializable {
     private static final long serialVersionUID = -7231563115604588914L;
+
+    /**
+     * 转入日期
+     */
+    @NotNull(message = "date.not.null")
+    private String changeAt;
+
+    /**
+     * 猪群变动类型id
+     */
+    @NotNull(message = "changeType.not.null")
+    private Long changeTypeId;
+
+    /**
+     * 猪群变动类型name
+     */
+    @NotNull(message = "changeType.not.null")
+    private String changeTypeName;
+
+    /**
+     * 变动原因id
+     */
+    private String changeReasonId;
+
+    /**
+     * 变动原因
+     */
+    private String changeReasonName;
+
+    /**
+     * 猪只数 公 + 母的和
+     */
+    @NotNull(message = "quantity.not.null")
+    private Integer quantity;
+
+    @NotNull(message = "boarQty.not.null")
+    private Integer boarQty;
+
+    @NotNull(message = "boarQty.not.null")
+    private Integer sowQty;
+
+    /**
+     * 总活体重(单位:kg)
+     */
+    @NotNull(message = "weight.not.null")
+    private Double weight;
+
+    private Integer breedId;
+
+    private String breedName;
+
+    /**
+     * 单价(分)
+     */
+    private Long price;
+
+    /**
+     * 金额(分)
+     */
+    private Long amount;
+
+    /**
+     * 客户id
+     */
+    private Long customerId;
+
+    private String customerName;
 }
