@@ -8,9 +8,7 @@ import io.terminus.doctor.user.model.DoctorUser;
 import io.terminus.doctor.user.service.DoctorUserReadService;
 import io.terminus.pampas.common.UserUtil;
 import io.terminus.parana.user.model.User;
-import io.terminus.parana.user.service.UserReadService;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 
@@ -24,9 +22,6 @@ import org.springframework.stereotype.Service;
 @Service
 @Primary
 public class MockDoctorUserReadServiceImpl implements DoctorUserReadService {
-
-    @Autowired
-    private UserReadService userReadService;
 
     @Override
     public Response<Integer> findUserRoleTypeByUserId(Long userId) {
