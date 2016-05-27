@@ -26,6 +26,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.validation.Valid;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import static io.terminus.common.utils.Arguments.notEmpty;
 
 /**
  * Desc: 猪群卡片表写服务实现类
@@ -198,7 +202,16 @@ public class DoctorGroupWriteServiceImpl implements DoctorGroupWriteService {
 
     @Override
     public Response<Boolean> incrDayAge() {
-        return null;
+        try {
+            List<DoctorGroup> groups = doctorGroupDao.fingByStatus(DoctorGroup.Status.CREATED.getValue());
+            if (notEmpty(groups)) {
+                doctorGroupTrackDao.incrDayAge(groups.stream().map(DoctorGroup::getId).collect(Collectors.toList()));
+            }
+            return Response.ok(Boolean.TRUE);
+        } catch (Exception e) {
+            log.error("incr day age failed, cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("incr.group.dayAge.fail");
+        }
     }
 
     //校验数量

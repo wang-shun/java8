@@ -110,7 +110,7 @@ public class DoctorGroupEvent<T extends BaseGroupEvent> implements Serializable 
     /**
      * 平均日龄
      */
-    private Double avgDayAge;
+    private Integer avgDayAge;
 
     /**
      * 是否是自动生成的事件(用于区分是触发事件还是手工录入事件) 0 否, 1 是

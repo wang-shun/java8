@@ -100,4 +100,13 @@
         WHERE group_id = #{groupId}
     </select>
 
+    <!-- 计算平均日龄, 求当天和出生日期的时间差 + 1 -->
+    <update id="incrDayAge" parameterType="list">
+        UPDATE <include refid="tb"/>
+        SET avg_day_age = TIMESTAMPDIFF(DAY, birth_date, now()) + 1
+        WHERE group_id IN
+        <foreach collection="list" item="gid" open="(" separator="," close=")">
+            #{gid}
+        </foreach>
+    </update>
 </mapper>

@@ -4,6 +4,8 @@ import io.terminus.common.mysql.dao.MyBatisDao;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 /**
  * Desc: 猪群卡片明细表Dao类
  * Mail: yangzl@terminus.io
@@ -20,5 +22,13 @@ public class DoctorGroupTrackDao extends MyBatisDao<DoctorGroupTrack> {
      */
     public DoctorGroupTrack findByGroupId(Long groupId) {
         return getSqlSession().selectOne("findByGroupId", groupId);
+    }
+
+    /**
+     * 重新计算下日龄
+     * @param groupIds 猪群ids
+     */
+    public void incrDayAge(List<Long> groupIds) {
+        getSqlSession().update(sqlId("incrDayAge"), groupIds);
     }
 }

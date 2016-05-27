@@ -83,7 +83,7 @@ public class DoctorMoveInGroupInput extends BaseGroupInput implements Serializab
      * 平均日龄
      */
     @NotNull(message = "avgDayAge.not.null")
-    private Double avgDayAge;
+    private Integer avgDayAge;
 
     /**
      * 平均体重(单位:kg)

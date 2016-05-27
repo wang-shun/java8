@@ -50,7 +50,7 @@ public class DoctorGroupTrack implements Serializable {
     /**
      * 平均日龄
      */
-    private Double avgDayAge;
+    private Integer avgDayAge;
     
     /**
      * 总活体重(公斤)

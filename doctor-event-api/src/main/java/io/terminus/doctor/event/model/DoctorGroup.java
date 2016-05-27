@@ -61,6 +61,7 @@ public class DoctorGroup implements Serializable {
     
     /**
      * 枚举: 1:已建群, -1:已关闭
+     * @see Status
      */
     private Integer status;
     
