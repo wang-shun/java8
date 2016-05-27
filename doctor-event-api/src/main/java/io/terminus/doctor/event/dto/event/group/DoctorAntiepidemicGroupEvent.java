@@ -43,6 +43,11 @@ public class DoctorAntiepidemicGroupEvent extends BaseGroupEvent implements Seri
      */
     private String vaccinStaffName;
 
+    /**
+     * 防疫猪只数
+     */
+    private Integer quantity;
+
     public enum VaccinResult {
         POSITIVE(1, "阳性"),
         NEGATIVE(-1, "阴性");

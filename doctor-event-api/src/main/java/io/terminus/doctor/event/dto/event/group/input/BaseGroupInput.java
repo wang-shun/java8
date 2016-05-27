@@ -21,4 +21,8 @@ public class BaseGroupInput implements Serializable {
     protected Integer isAuto;
 
     protected String remark;
+
+    protected Long creatorId;
+
+    protected String creatorName;
 }

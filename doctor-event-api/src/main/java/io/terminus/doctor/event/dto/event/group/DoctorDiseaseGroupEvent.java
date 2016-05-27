@@ -35,4 +35,10 @@ public class DoctorDiseaseGroupEvent extends BaseGroupEvent implements Serializa
      * 诊断人员name
      */
     private String doctorName;
+
+
+    /**
+     * 疾病猪只数
+     */
+    private Integer quantity;
 }

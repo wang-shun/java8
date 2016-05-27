@@ -69,7 +69,7 @@ public class DoctorGroupWriteServiceImpl implements DoctorGroupWriteService {
     @Override
     public Response<Boolean> groupEventAntiepidemic(DoctorGroupDetail groupDetail, @Valid DoctorAntiepidemicGroupInput antiepidemic) {
         try {
-            //校验防疫数量
+            //校验数量
             checkQuantity(groupDetail.getGroupTrack().getQuantity(), antiepidemic.getQuantity());
             doctorGroupManager.groupEventAntiepidemic(groupDetail.getGroup(), groupDetail.getGroupTrack(), antiepidemic);
             return Response.ok(Boolean.TRUE);
@@ -99,8 +99,8 @@ public class DoctorGroupWriteServiceImpl implements DoctorGroupWriteService {
     @Override
     public Response<Boolean> groupEventClose(DoctorGroupDetail groupDetail, @Valid DoctorCloseGroupInput close) {
         try {
-
-            return Response.ok();
+            doctorGroupManager.groupEventClose(groupDetail.getGroup(), groupDetail.getGroupTrack(), close);
+            return Response.ok(Boolean.TRUE);
         } catch (ServiceException e) {
             log.error("failed, groupDetail:{}, close:{}, cause:{}", groupDetail, close, Throwables.getStackTraceAsString(e));
             return Response.fail(e.getMessage());
@@ -113,8 +113,10 @@ public class DoctorGroupWriteServiceImpl implements DoctorGroupWriteService {
     @Override
     public Response<Boolean> groupEventDisease(DoctorGroupDetail groupDetail, @Valid DoctorDiseaseGroupInput disease) {
         try {
-
-            return Response.ok();
+            //校验数量
+            checkQuantity(groupDetail.getGroupTrack().getQuantity(), disease.getQuantity());
+            doctorGroupManager.groupEventDisease(groupDetail.getGroup(), groupDetail.getGroupTrack(), disease);
+            return Response.ok(Boolean.TRUE);
         } catch (ServiceException e) {
             log.error("failed, groupDetail:{}, disease:{}, cause:{}", groupDetail, disease, Throwables.getStackTraceAsString(e));
             return Response.fail(e.getMessage());
@@ -127,8 +129,8 @@ public class DoctorGroupWriteServiceImpl implements DoctorGroupWriteService {
     @Override
     public Response<Boolean> groupEventLiveStock(DoctorGroupDetail groupDetail, @Valid DoctorLiveStockGroupInput liveStock) {
         try {
-
-            return Response.ok();
+            doctorGroupManager.groupEventLiveStock(groupDetail.getGroup(), groupDetail.getGroupTrack(), liveStock);
+            return Response.ok(Boolean.TRUE);
         } catch (ServiceException e) {
             log.error("failed, groupDetail:{}, liveStock:{}, cause:{}", groupDetail, liveStock, Throwables.getStackTraceAsString(e));
             return Response.fail(e.getMessage());

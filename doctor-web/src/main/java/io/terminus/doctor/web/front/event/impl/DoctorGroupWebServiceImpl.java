@@ -155,8 +155,11 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
             //2.校验能否操作此事件
             // TODO: 16/5/26
 
-            //根据不同的事件类型调用不同的录入接口
             params.put("isAuto", IsOrNot.NO.getValue());
+            params.put("creatorId", UserUtil.getUserId());
+            params.put("creatorName", UserUtil.getCurrentUser().getName());
+
+            //根据不同的事件类型调用不同的录入接口
             GroupEventType groupEventType = checkNotNull(GroupEventType.from(eventType));
             switch (groupEventType) {
                 case MOVE_IN:

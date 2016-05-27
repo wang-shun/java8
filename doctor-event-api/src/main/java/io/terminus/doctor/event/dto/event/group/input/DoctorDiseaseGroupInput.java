@@ -26,7 +26,7 @@ public class DoctorDiseaseGroupInput extends BaseGroupInput implements Serializa
     private String diseaseAt;
 
     /**
-     * 防疫猪只数
+     * 疾病猪只数
      */
     @NotNull(message = "quantity.not.empty")
     @Min(value = 1L, message = "quantity.not.lt.1")
