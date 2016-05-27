@@ -12,7 +12,7 @@ import java.util.Objects;
  */
 public enum PigEvent {
 
-    CHG_LOCATION(1, "转场事件"),
+    CHG_LOCATION(1, "转舍事件"),
     CHG_FARM(2,"转场事件"),
     CONDITION(3, "体况事件"),
     DISEASE(4, " 疾病事件"),
