@@ -1,11 +1,15 @@
 package io.terminus.doctor.event.manager;
 
+import io.terminus.common.utils.BeanMapper;
 import io.terminus.common.utils.JsonMapper;
+import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.dao.DoctorGroupDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorGroupSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
 import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
+import io.terminus.doctor.event.dto.event.group.DoctorAntiepidemicGroupEvent;
+import io.terminus.doctor.event.dto.event.group.input.DoctorAntiepidemicGroupInput;
 import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
@@ -70,6 +74,26 @@ public class DoctorGroupManager {
         doctorGroupSnapshotDao.create(getCreateNewGroupSnapShot(group, groupEvent, groupTrack));
         return groupId;
     }
+
+    /**
+     * 防疫事件
+     */
+    @Transactional
+    public void groupEventAntiepidemic(DoctorGroup group, DoctorGroupTrack groupTrack, DoctorAntiepidemicGroupInput antiepidemic) {
+        //1.转换下防疫信息
+        DoctorAntiepidemicGroupEvent antiEvent = BeanMapper.map(antiepidemic, DoctorAntiepidemicGroupEvent.class);
+
+        //2.创建防疫事件
+        DoctorGroupEvent<DoctorAntiepidemicGroupEvent> event = new DoctorGroupEvent<>();
+        // TODO: 16/5/27 dozer 下事件
+        event.setEventAt(DateUtil.toDate(antiepidemic.getVaccinAt()));
+        event.setExtraMap(antiEvent);
+
+        //3.更新猪群跟踪
+        groupTrack.setRelEventId(event.getId());
+        doctorGroupTrackDao.update(groupTrack);
+    }
+
 
     //创建新建猪群镜像信息
     private DoctorGroupSnapshot getCreateNewGroupSnapShot(DoctorGroup group, DoctorGroupEvent groupEvent, DoctorGroupTrack groupTrack) {

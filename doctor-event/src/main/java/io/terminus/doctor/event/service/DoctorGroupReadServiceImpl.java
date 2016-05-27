@@ -8,7 +8,7 @@ import io.terminus.doctor.event.dao.DoctorGroupDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorGroupSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
-import io.terminus.doctor.event.dto.DoctorGroupDetailDto;
+import io.terminus.doctor.event.dto.DoctorGroupDetail;
 import io.terminus.doctor.event.dto.DoctorGroupSearchDto;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
@@ -67,9 +67,9 @@ public class DoctorGroupReadServiceImpl implements DoctorGroupReadService {
     }
 
     @Override
-    public Response<DoctorGroupDetailDto> findGroupDetailByGroupId(Long groupId) {
+    public Response<DoctorGroupDetail> findGroupDetailByGroupId(Long groupId) {
         try {
-            return Response.ok(new DoctorGroupDetailDto(doctorGroupDao.findById(groupId), doctorGroupTrackDao.findByGroupId(groupId)));
+            return Response.ok(new DoctorGroupDetail(doctorGroupDao.findById(groupId), doctorGroupTrackDao.findByGroupId(groupId)));
         } catch (Exception e) {
             log.error("find group detail by groupId failed, groupId:{}, cause:{}", groupId, Throwables.getStackTraceAsString(e));
             return Response.fail("group.find.fail");

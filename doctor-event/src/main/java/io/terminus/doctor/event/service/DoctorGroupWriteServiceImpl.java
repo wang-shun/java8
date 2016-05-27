@@ -1,11 +1,13 @@
 package io.terminus.doctor.event.service;
 
 import com.google.common.base.Throwables;
+import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.event.dao.DoctorGroupDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorGroupSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
+import io.terminus.doctor.event.dto.DoctorGroupDetail;
 import io.terminus.doctor.event.dto.event.group.input.DoctorAntiepidemicGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorChangeGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorCloseGroupInput;
@@ -59,54 +61,148 @@ public class DoctorGroupWriteServiceImpl implements DoctorGroupWriteService {
         try {
             return Response.ok(doctorGroupManager.createNewGroup(group, groupEvent, groupTrack));
         } catch (Exception e) {
-            log.error("create group failed, group:{}, cause:{}", group, Throwables.getStackTraceAsString(e));
+            log.error("create group failed, groupDetail:{}, groupEvent:{}, groupTrack:{}, cause:{}", group, groupEvent, groupTrack, Throwables.getStackTraceAsString(e));
             return Response.fail("group.create.fail");
         }
     }
 
     @Override
-    public Response<Boolean> groupEventAntiepidemic(DoctorGroup group, @Valid DoctorAntiepidemicGroupInput antiepidemic) {
-        return null;
+    public Response<Boolean> groupEventAntiepidemic(DoctorGroupDetail groupDetail, @Valid DoctorAntiepidemicGroupInput antiepidemic) {
+        try {
+            //校验防疫数量
+            checkQuantity(groupDetail.getGroupTrack().getQuantity(), antiepidemic.getQuantity());
+            doctorGroupManager.groupEventAntiepidemic(groupDetail.getGroup(), groupDetail.getGroupTrack(), antiepidemic);
+            return Response.ok(Boolean.TRUE);
+        } catch (ServiceException e) {
+            log.error("failed, groupDetail:{}, antiepidemic:{}, cause:{}", groupDetail, antiepidemic, Throwables.getStackTraceAsString(e));
+            return Response.fail(e.getMessage());
+        } catch (Exception e) {
+            log.error("failed, groupDetail:{}, antiepidemic:{}, cause:{}", groupDetail, antiepidemic, Throwables.getStackTraceAsString(e));
+            return Response.fail("group.event.antiepidemic.fail");
+        }
     }
 
     @Override
-    public Response<Boolean> groupEventChange(DoctorGroup group, @Valid DoctorChangeGroupInput change) {
-        return null;
+    public Response<Boolean> groupEventChange(DoctorGroupDetail groupDetail, @Valid DoctorChangeGroupInput change) {
+        try {
+
+            return Response.ok();
+        } catch (ServiceException e) {
+            log.error("failed, groupDetail:{}, change:{}, cause:{}", groupDetail, change, Throwables.getStackTraceAsString(e));
+            return Response.fail(e.getMessage());
+        } catch (Exception e) {
+            log.error("failed, groupDetail:{}, change:{}, cause:{}", groupDetail, change, Throwables.getStackTraceAsString(e));
+            return Response.fail("group.event.change.fail");
+        }
     }
 
     @Override
-    public Response<Boolean> groupEventClose(DoctorGroup group, @Valid DoctorCloseGroupInput close) {
-        return null;
+    public Response<Boolean> groupEventClose(DoctorGroupDetail groupDetail, @Valid DoctorCloseGroupInput close) {
+        try {
+
+            return Response.ok();
+        } catch (ServiceException e) {
+            log.error("failed, groupDetail:{}, close:{}, cause:{}", groupDetail, close, Throwables.getStackTraceAsString(e));
+            return Response.fail(e.getMessage());
+        } catch (Exception e) {
+            log.error("failed, groupDetail:{}, close:{}, cause:{}", groupDetail, close, Throwables.getStackTraceAsString(e));
+            return Response.fail("group.event.close.fail");
+        }
     }
 
     @Override
-    public Response<Boolean> groupEventDisease(DoctorGroup group, @Valid DoctorDiseaseGroupInput disease) {
-        return null;
+    public Response<Boolean> groupEventDisease(DoctorGroupDetail groupDetail, @Valid DoctorDiseaseGroupInput disease) {
+        try {
+
+            return Response.ok();
+        } catch (ServiceException e) {
+            log.error("failed, groupDetail:{}, disease:{}, cause:{}", groupDetail, disease, Throwables.getStackTraceAsString(e));
+            return Response.fail(e.getMessage());
+        } catch (Exception e) {
+            log.error("failed, groupDetail:{}, disease:{}, cause:{}", groupDetail, disease, Throwables.getStackTraceAsString(e));
+            return Response.fail("group.event.disease.fail");
+        }
     }
 
     @Override
-    public Response<Boolean> groupEventLiveStock(DoctorGroup group, @Valid DoctorLiveStockGroupInput liveStock) {
-        return null;
+    public Response<Boolean> groupEventLiveStock(DoctorGroupDetail groupDetail, @Valid DoctorLiveStockGroupInput liveStock) {
+        try {
+
+            return Response.ok();
+        } catch (ServiceException e) {
+            log.error("failed, groupDetail:{}, liveStock:{}, cause:{}", groupDetail, liveStock, Throwables.getStackTraceAsString(e));
+            return Response.fail(e.getMessage());
+        } catch (Exception e) {
+            log.error("failed, groupDetail:{}, liveStock:{}, cause:{}", groupDetail, liveStock, Throwables.getStackTraceAsString(e));
+            return Response.fail("group.event.liveStock.fail");
+        }
     }
 
     @Override
-    public Response<Boolean> groupEventMoveIn(DoctorGroup group, @Valid DoctorMoveInGroupInput moveIn) {
-        return null;
+    public Response<Boolean> groupEventMoveIn(DoctorGroupDetail groupDetail, @Valid DoctorMoveInGroupInput moveIn) {
+        try {
+
+            return Response.ok();
+        } catch (ServiceException e) {
+            log.error("failed, groupDetail:{}, moveIn:{}, cause:{}", groupDetail, moveIn, Throwables.getStackTraceAsString(e));
+            return Response.fail(e.getMessage());
+        } catch (Exception e) {
+            log.error("failed, groupDetail:{}, moveIn:{}, cause:{}", groupDetail, moveIn, Throwables.getStackTraceAsString(e));
+            return Response.fail("group.event.moveIn.fail");
+        }
     }
 
     @Override
-    public Response<Boolean> groupEventTransFarm(DoctorGroup group, @Valid DoctorTransFarmGroupInput transFarm) {
-        return null;
+    public Response<Boolean> groupEventTransFarm(DoctorGroupDetail groupDetail, @Valid DoctorTransFarmGroupInput transFarm) {
+        try {
+
+            return Response.ok();
+        } catch (ServiceException e) {
+            log.error("failed, groupDetail:{}, transFarm:{}, cause:{}", groupDetail, transFarm, Throwables.getStackTraceAsString(e));
+            return Response.fail(e.getMessage());
+        } catch (Exception e) {
+            log.error("failed, groupDetail:{}, transFarm:{}, cause:{}", groupDetail, transFarm, Throwables.getStackTraceAsString(e));
+            return Response.fail("group.event.transFarm.fail");
+        }
     }
 
     @Override
-    public Response<Boolean> groupEventTransGroup(DoctorGroup group, @Valid DoctorTransGroupInput transGroup) {
-        return null;
+    public Response<Boolean> groupEventTransGroup(DoctorGroupDetail groupDetail, @Valid DoctorTransGroupInput transGroup) {
+        try {
+
+            return Response.ok();
+        } catch (ServiceException e) {
+            log.error("failed, groupDetail:{}, transGroup:{}, cause:{}", groupDetail, transGroup, Throwables.getStackTraceAsString(e));
+            return Response.fail(e.getMessage());
+        } catch (Exception e) {
+            log.error("failed, groupDetail:{}, transGroup:{}, cause:{}", groupDetail, transGroup, Throwables.getStackTraceAsString(e));
+            return Response.fail("group.event.transGroup.fail");
+        }
     }
 
     @Override
-    public Response<Boolean> groupEventTurnSeed(DoctorGroup group, @Valid DoctorTurnSeedGroupInput turnSeed) {
+    public Response<Boolean> groupEventTurnSeed(DoctorGroupDetail groupDetail, @Valid DoctorTurnSeedGroupInput turnSeed) {
+        try {
+
+            return Response.ok();
+        } catch (ServiceException e) {
+            log.error("failed, groupDetail:{}, turnSeed:{}, cause:{}", groupDetail, turnSeed, Throwables.getStackTraceAsString(e));
+            return Response.fail(e.getMessage());
+        } catch (Exception e) {
+            log.error("failed, groupDetail:{}, turnSeed:{}, cause:{}", groupDetail, turnSeed, Throwables.getStackTraceAsString(e));
+            return Response.fail("group.event.turnSeed.fail");
+        }
+    }
+
+    @Override
+    public Response<Boolean> incrDayAge() {
         return null;
     }
 
+    //校验数量
+    private static void checkQuantity(Integer max, Integer actual) {
+        if (actual > max) {
+            throw new ServiceException("quantity.over.max");
+        }
+    }
 }

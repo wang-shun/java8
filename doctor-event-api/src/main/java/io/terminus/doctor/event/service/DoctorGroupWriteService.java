@@ -1,6 +1,7 @@
 package io.terminus.doctor.event.service;
 
 import io.terminus.common.model.Response;
+import io.terminus.doctor.event.dto.DoctorGroupDetail;
 import io.terminus.doctor.event.dto.event.group.input.DoctorAntiepidemicGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorChangeGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorCloseGroupInput;
@@ -34,74 +35,79 @@ public interface DoctorGroupWriteService {
 
     /**
      * 录入防疫事件
-     * @param group  操作猪群
+     * @param groupDetail 操作猪群信息
      * @param antiepidemic 防疫信息
      * @return 是否成功
      */
-    Response<Boolean> groupEventAntiepidemic(DoctorGroup group, @Valid DoctorAntiepidemicGroupInput antiepidemic);
+    Response<Boolean> groupEventAntiepidemic(DoctorGroupDetail groupDetail, @Valid DoctorAntiepidemicGroupInput antiepidemic);
 
     /**
      * 录入猪群变动事件
-     * @param group  操作猪群
+     * @param groupDetail 操作猪群信息
      * @param change 猪群变动信息
      * @return 是否成功
      */
-    Response<Boolean> groupEventChange(DoctorGroup group, @Valid DoctorChangeGroupInput change);
+    Response<Boolean> groupEventChange(DoctorGroupDetail groupDetail, @Valid DoctorChangeGroupInput change);
 
     /**
      * 录入猪群关闭事件
-     * @param group  操作猪群
+     * @param groupDetail 操作猪群信息
      * @param close  猪群关闭信息
      * @return 是否成功
      */
-    Response<Boolean> groupEventClose(DoctorGroup group, @Valid DoctorCloseGroupInput close);
+    Response<Boolean> groupEventClose(DoctorGroupDetail groupDetail, @Valid DoctorCloseGroupInput close);
 
     /**
      * 录入疾病事件
-     * @param group  操作猪群
+     * @param groupDetail 操作猪群信息
      * @param disease 疾病信息
      * @return 是否成功
      */
-    Response<Boolean> groupEventDisease(DoctorGroup group, @Valid DoctorDiseaseGroupInput disease);
+    Response<Boolean> groupEventDisease(DoctorGroupDetail groupDetail, @Valid DoctorDiseaseGroupInput disease);
 
     /**
      * 录入猪只存栏事件
-     * @param group  操作猪群
+     * @param groupDetail 操作猪群信息
      * @param liveStock 猪只存栏信息
      * @return 是否成功
      */
-    Response<Boolean> groupEventLiveStock(DoctorGroup group, @Valid DoctorLiveStockGroupInput liveStock);
+    Response<Boolean> groupEventLiveStock(DoctorGroupDetail groupDetail, @Valid DoctorLiveStockGroupInput liveStock);
 
     /**
      * 录入转入猪群事件
-     * @param group  操作猪群
+     * @param groupDetail 操作猪群信息
      * @param moveIn 转入猪群信息
      * @return 是否成功
      */
-    Response<Boolean> groupEventMoveIn(DoctorGroup group, @Valid DoctorMoveInGroupInput moveIn);
+    Response<Boolean> groupEventMoveIn(DoctorGroupDetail groupDetail, @Valid DoctorMoveInGroupInput moveIn);
 
     /**
      * 录入转场事件
-     * @param group  操作猪群
+     * @param groupDetail 操作猪群信息
      * @param transFarm 转场信息
      * @return 是否成功
      */
-    Response<Boolean> groupEventTransFarm(DoctorGroup group, @Valid DoctorTransFarmGroupInput transFarm);
+    Response<Boolean> groupEventTransFarm(DoctorGroupDetail groupDetail, @Valid DoctorTransFarmGroupInput transFarm);
 
     /**
      * 录入猪群转群事件
-     * @param group  操作猪群
+     * @param groupDetail 操作猪群信息
      * @param transGroup 猪群转群信息
      * @return 是否成功
      */
-    Response<Boolean> groupEventTransGroup(DoctorGroup group, @Valid DoctorTransGroupInput transGroup);
+    Response<Boolean> groupEventTransGroup(DoctorGroupDetail groupDetail, @Valid DoctorTransGroupInput transGroup);
 
     /**
      * 录入商品猪转为种猪事件
-     * @param group  操作猪群
+     * @param groupDetail 操作猪群信息
      * @param turnSeed 商品猪转为种猪信息
      * @return 是否成功
      */
-    Response<Boolean> groupEventTurnSeed(DoctorGroup group, @Valid DoctorTurnSeedGroupInput turnSeed);
+    Response<Boolean> groupEventTurnSeed(DoctorGroupDetail groupDetail, @Valid DoctorTurnSeedGroupInput turnSeed);
 
+    /**
+     * job调用, 用于每日更新日龄
+     * @return 是否成功
+     */
+    Response<Boolean> incrDayAge();
 }

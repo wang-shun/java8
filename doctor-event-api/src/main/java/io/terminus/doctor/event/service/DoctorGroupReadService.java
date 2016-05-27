@@ -2,7 +2,7 @@ package io.terminus.doctor.event.service;
 
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
-import io.terminus.doctor.event.dto.DoctorGroupDetailDto;
+import io.terminus.doctor.event.dto.DoctorGroupDetail;
 import io.terminus.doctor.event.dto.DoctorGroupSearchDto;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
@@ -40,7 +40,7 @@ public interface DoctorGroupReadService {
      * @param groupId 猪群id
      * @return 猪群详情
      */
-    Response<DoctorGroupDetailDto> findGroupDetailByGroupId(@NotNull(message = "groupId.not.null") Long groupId);
+    Response<DoctorGroupDetail> findGroupDetailByGroupId(@NotNull(message = "groupId.not.null") Long groupId);
 
     /**
      * 根据查询条件分页查询猪群

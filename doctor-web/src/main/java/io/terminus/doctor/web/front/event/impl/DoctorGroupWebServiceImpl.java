@@ -6,6 +6,7 @@ import io.terminus.common.model.Response;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.doctor.basic.service.DoctorBasicReadService;
 import io.terminus.doctor.common.utils.RespHelper;
+import io.terminus.doctor.event.dto.DoctorGroupDetail;
 import io.terminus.doctor.event.dto.event.group.DoctorNewGroupEvent;
 import io.terminus.doctor.event.dto.event.group.input.DoctorAntiepidemicGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorChangeGroupInput;
@@ -18,6 +19,7 @@ import io.terminus.doctor.event.dto.event.group.input.DoctorTransFarmGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorTransGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorTurnSeedGroupInput;
 import io.terminus.doctor.event.enums.GroupEventType;
+import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
@@ -148,40 +150,41 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
     public Response<Boolean> createGroupEvent(Long groupId, Integer eventType, Map<String, Object> params) {
         try {
             //1.校验猪群是否存在
-            DoctorGroup group = checkGroupExist(groupId);
+            DoctorGroupDetail groupDetail = checkGroupExist(groupId);
 
             //2.校验能否操作此事件
             // TODO: 16/5/26
 
             //根据不同的事件类型调用不同的录入接口
+            params.put("isAuto", IsOrNot.NO.getValue());
             GroupEventType groupEventType = checkNotNull(GroupEventType.from(eventType));
             switch (groupEventType) {
                 case MOVE_IN:
-                    RespHelper.or500(doctorGroupWriteService.groupEventMoveIn(group, BeanMapper.map(params, DoctorMoveInGroupInput.class)));
+                    RespHelper.or500(doctorGroupWriteService.groupEventMoveIn(groupDetail, BeanMapper.map(params, DoctorMoveInGroupInput.class)));
                     break;
                 case CHANGE:
-                    RespHelper.or500(doctorGroupWriteService.groupEventChange(group, BeanMapper.map(params, DoctorChangeGroupInput.class)));
+                    RespHelper.or500(doctorGroupWriteService.groupEventChange(groupDetail, BeanMapper.map(params, DoctorChangeGroupInput.class)));
                     break;
                 case TRANS_GROUP:
-                    RespHelper.or500(doctorGroupWriteService.groupEventTransGroup(group, BeanMapper.map(params, DoctorTransGroupInput.class)));
+                    RespHelper.or500(doctorGroupWriteService.groupEventTransGroup(groupDetail, BeanMapper.map(params, DoctorTransGroupInput.class)));
                     break;
                 case TURN_SEED:
-                    RespHelper.or500(doctorGroupWriteService.groupEventTurnSeed(group, BeanMapper.map(params, DoctorTurnSeedGroupInput.class)));
+                    RespHelper.or500(doctorGroupWriteService.groupEventTurnSeed(groupDetail, BeanMapper.map(params, DoctorTurnSeedGroupInput.class)));
                     break;
                 case LIVE_STOCK:
-                    RespHelper.or500(doctorGroupWriteService.groupEventLiveStock(group, BeanMapper.map(params, DoctorLiveStockGroupInput.class)));
+                    RespHelper.or500(doctorGroupWriteService.groupEventLiveStock(groupDetail, BeanMapper.map(params, DoctorLiveStockGroupInput.class)));
                     break;
                 case DISEASE:
-                    RespHelper.or500(doctorGroupWriteService.groupEventDisease(group, BeanMapper.map(params, DoctorDiseaseGroupInput.class)));
+                    RespHelper.or500(doctorGroupWriteService.groupEventDisease(groupDetail, BeanMapper.map(params, DoctorDiseaseGroupInput.class)));
                     break;
                 case ANTIEPIDEMIC:
-                    RespHelper.or500(doctorGroupWriteService.groupEventAntiepidemic(group, BeanMapper.map(params, DoctorAntiepidemicGroupInput.class)));
+                    RespHelper.or500(doctorGroupWriteService.groupEventAntiepidemic(groupDetail, BeanMapper.map(params, DoctorAntiepidemicGroupInput.class)));
                     break;
                 case TRANS_FARM:
-                    RespHelper.or500(doctorGroupWriteService.groupEventTransFarm(group, BeanMapper.map(params, DoctorTransFarmGroupInput.class)));
+                    RespHelper.or500(doctorGroupWriteService.groupEventTransFarm(groupDetail, BeanMapper.map(params, DoctorTransFarmGroupInput.class)));
                     break;
                 case CLOSE:
-                    RespHelper.or500(doctorGroupWriteService.groupEventClose(group, BeanMapper.map(params, DoctorCloseGroupInput.class)));
+                    RespHelper.or500(doctorGroupWriteService.groupEventClose(groupDetail, BeanMapper.map(params, DoctorCloseGroupInput.class)));
                     break;
                 default:
                     return Response.fail("event.type.error");
@@ -195,7 +198,7 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
     }
 
     //校验猪群是否存在
-    private DoctorGroup checkGroupExist(Long groupId) {
-        return checkNotNull(RespHelper.or500(doctorGroupReadService.findGroupById(groupId)), "group.not.exist");
+    private DoctorGroupDetail checkGroupExist(Long groupId) {
+        return checkNotNull(RespHelper.or500(doctorGroupReadService.findGroupDetailByGroupId(groupId)), "group.not.exist");
     }
 }
