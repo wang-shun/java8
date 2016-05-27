@@ -113,6 +113,12 @@ public class DoctorGroupEvent<T extends BaseGroupEvent> implements Serializable 
     private Double avgDayAge;
 
     /**
+     * 是否是自动生成的事件(用于区分是触发事件还是手工录入事件) 0 否, 1 是
+     * @see io.terminus.doctor.event.enums.IsOrNot
+     */
+    private Integer isAuto;
+
+    /**
      * 外部id
      */
     private String outId;

@@ -1,5 +1,6 @@
 package io.terminus.doctor.event.dto.event.group;
 
+import io.terminus.doctor.event.enums.IsOrNot;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -42,7 +43,7 @@ public class DoctorTransFarmGroupEvent extends BaseGroupEvent implements Seriali
 
     /**
      * 是否新建猪群 0:否 1:是
-     * @see io.terminus.doctor.event.enums.IsCreateGroup
+     * @see IsOrNot
      */
     private Integer isCreateGroup;
 

@@ -1,5 +1,6 @@
 package io.terminus.doctor.event.dto.event.group.input;
 
+import io.terminus.doctor.event.enums.IsOrNot;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -45,7 +46,7 @@ public class DoctorTransGroupInput extends BaseGroupInput implements Serializabl
 
     /**
      * 是否新建猪群 0:否 1:是
-     * @see io.terminus.doctor.event.enums.IsCreateGroup
+     * @see IsOrNot
      */
     @NotNull(message = "is.create.group.not.null")
     private Integer isCreateGroup;

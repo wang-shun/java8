@@ -501,6 +501,7 @@ CREATE TABLE `doctor_group_events` (
   `weight` double DEFAULT NULL COMMENT '总活体重(公斤)',
   `avg_weight` double DEFAULT NULL COMMENT '平均体重(公斤)',
   `avg_day_age` double DEFAULT NULL COMMENT '平均日龄',
+  `is_auto` smallint(6) DEFAULT NULL COMMENT '是否是自动生成事件, 0 不是, 1 是',
   `out_id`  varchar(128) DEFAULT NULL COMMENT  '外部id',
   `remark` text COMMENT  '备注',
   `extra` text COMMENT '具体事件的内容通过json存储',

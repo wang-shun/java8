@@ -14,5 +14,11 @@ import java.io.Serializable;
 public class BaseGroupInput implements Serializable {
     private static final long serialVersionUID = 3142495945186975856L;
 
+    /**
+     * 是否是自动生成的事件(用于区分是触发事件还是手工录入事件) 0 不是, 1 是
+     * @see io.terminus.doctor.event.enums.IsOrNot
+     */
+    protected Integer isAuto;
+
     protected String remark;
 }
