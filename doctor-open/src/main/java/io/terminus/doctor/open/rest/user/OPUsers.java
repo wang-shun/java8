@@ -199,7 +199,7 @@ public class OPUsers {
      * @param code       手机验证码
      * @return 注册成功之后的用户ID
      */
-    @OpenMethod(key = "user.register", httpMethods = RequestMethod.GET, paramNames = {"password", "mobile", "code", "sid"})
+    @OpenMethod(key = "user.register", httpMethods = RequestMethod.POST, paramNames = {"password", "mobile", "code", "sid"})
     public Long register(@NotEmpty(message = "user.password.miss") String password,
                          @NotEmpty(message = "user.mobile.miss") String mobile,
                          @NotEmpty(message = "user.code.miss") String code,
