@@ -6,12 +6,15 @@ import io.terminus.doctor.user.dto.DoctorMenuDto;
 import io.terminus.doctor.user.dto.DoctorServiceApplyDto;
 import io.terminus.doctor.user.dto.DoctorServiceReviewDto;
 import io.terminus.doctor.user.dto.DoctorUserInfoDto;
+import io.terminus.doctor.user.model.DoctorStaff;
+import io.terminus.doctor.user.model.DoctorUser;
 import io.terminus.doctor.user.service.DoctorServiceReviewReadService;
 import io.terminus.doctor.user.service.DoctorServiceReviewWriteService;
 import io.terminus.doctor.user.service.DoctorUserReadService;
 import io.terminus.pampas.common.UserUtil;
 import io.terminus.pampas.openplatform.annotations.OpenBean;
 import io.terminus.pampas.openplatform.annotations.OpenMethod;
+import io.terminus.parana.user.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.validation.Valid;
@@ -77,7 +80,35 @@ public class OPDoctorUsers {
      */
     @OpenMethod(key = "get.user.basic.info")
     public DoctorUserInfoDto getUserBasicInfo() {
-        return OPRespHelper.orOPEx(doctorUserReadService.findUserInfoByUserId(UserUtil.getUserId()));
+        return new DoctorUserInfoDto(mockUser(), getUser().getType(), 1L, mockStaff(getUser().getId()));
+    }
+
+    private DoctorUser getUser() {
+        return UserUtil.getCurrentUser();
+    }
+
+    private User mockUser() {
+        User user = new User();
+        user.setId(getUser().getId());
+        user.setName(getUser().getName());
+        user.setMobile(getUser().getMobile());
+        user.setStatus(1);
+        user.setType(2);
+        return user;
+    }
+
+    private DoctorStaff mockStaff(Long userId) {
+        DoctorStaff staff = new DoctorStaff();
+        staff.setId(userId);
+        staff.setOrgId(userId);
+        staff.setOrgName("测试公司"+userId);
+        staff.setUserId(userId);
+        staff.setRoleId(1L);
+        staff.setRoleName("仓库管理员");
+        staff.setStatus(1);
+        staff.setSex(1);
+        staff.setAvatar("http://img.xrnm.com/20150821-ee59df0636a3291405b61f997d314a19.jpg");
+        return staff;
     }
 
     @OpenMethod(key = "get.user.level.one.menu")

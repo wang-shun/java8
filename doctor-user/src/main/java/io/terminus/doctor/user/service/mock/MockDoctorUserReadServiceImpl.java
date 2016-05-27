@@ -3,11 +3,7 @@ package io.terminus.doctor.user.service.mock;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.common.utils.RandomUtil;
 import io.terminus.doctor.user.dto.DoctorUserInfoDto;
-import io.terminus.doctor.user.model.DoctorStaff;
-import io.terminus.doctor.user.model.DoctorUser;
 import io.terminus.doctor.user.service.DoctorUserReadService;
-import io.terminus.pampas.common.UserUtil;
-import io.terminus.parana.user.model.User;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
@@ -30,34 +26,6 @@ public class MockDoctorUserReadServiceImpl implements DoctorUserReadService {
 
     @Override
     public Response<DoctorUserInfoDto> findUserInfoByUserId(Long userId) {
-        return Response.ok(new DoctorUserInfoDto(mockUser(userId), getUser().getType(), 1L, mockStaff(userId)));
-    }
-
-    private User mockUser(Long userId) {
-        User user = new User();
-        user.setId(getUser().getId());
-        user.setName(getUser().getName());
-        user.setMobile(getUser().getMobile());
-        user.setStatus(1);
-        user.setType(2);
-        return user;
-    }
-
-    private DoctorStaff mockStaff(Long userId) {
-        DoctorStaff staff = new DoctorStaff();
-        staff.setId(userId);
-        staff.setOrgId(userId);
-        staff.setOrgName("测试公司"+userId);
-        staff.setUserId(userId);
-        staff.setRoleId(1L);
-        staff.setRoleName("仓库管理员");
-        staff.setStatus(1);
-        staff.setSex(1);
-        staff.setAvatar("http://img.xrnm.com/20150821-ee59df0636a3291405b61f997d314a19.jpg");
-        return staff;
-    }
-
-    private DoctorUser getUser() {
-        return UserUtil.getCurrentUser();
+        return Response.ok();
     }
 }
