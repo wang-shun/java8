@@ -142,7 +142,7 @@ public class Users {
                                    HttpServletRequest request,
                                    HttpServletResponse response){
         try {
-            // 手机邮箱不可同时为空
+            // 手机不可为空
             checkArgument(notEmpty(mobile), "user.mobile.empty");
             // 如果是手机注册, 验证码不能为空
             if (notEmpty(mobile)) {

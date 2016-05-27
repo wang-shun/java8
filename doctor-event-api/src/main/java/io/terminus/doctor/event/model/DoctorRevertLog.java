@@ -1,8 +1,11 @@
 package io.terminus.doctor.event.model;
 
 import com.google.common.base.Objects;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.experimental.Builder;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -13,7 +16,10 @@ import java.util.Date;
  * author: DreamYoung
  * Date: 2016-05-20
  */
+@Builder
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class DoctorRevertLog implements Serializable {
     private static final long serialVersionUID = 1861449639048681648L;
 
