@@ -147,5 +147,14 @@ public class FlowDefinitionNode implements Serializable{
             }
             throw new IllegalArgumentException("flow.node.type.undefined");
         }
+
+        public static Type from(int number) {
+            for (Type type : Type.values()) {
+                if (Objects.equals(type.value, number)) {
+                    return type;
+                }
+            }
+            throw new IllegalArgumentException("flow.node.type.undefined");
+        }
     }
 }

@@ -1,9 +1,14 @@
 package io.terminus.doctor.workflow.query;
 
+import com.google.common.collect.Lists;
 import io.terminus.common.model.Paging;
 import io.terminus.doctor.workflow.access.JdbcAccess;
 import io.terminus.doctor.workflow.core.WorkFlowEngine;
+import io.terminus.doctor.workflow.model.FlowDefinitionNode;
 import io.terminus.doctor.workflow.model.FlowDefinitionNodeEvent;
+import io.terminus.doctor.workflow.model.FlowInstance;
+import io.terminus.doctor.workflow.model.FlowProcess;
+import io.terminus.doctor.workflow.utils.AssertHelper;
 import io.terminus.doctor.workflow.utils.BeanHelper;
 
 import java.util.List;
@@ -90,7 +95,7 @@ public class FlowDefinitionNodeEventQueryImpl implements FlowDefinitionNodeEvent
         return this;
     }
 
-    private Map getConditionMap(){
+    private Map getConditionMap() {
         Map criteria = BeanHelper.bean2Map(this.flowDefinitionNodeEvent, true);
         criteria.put("orderBy", orderBy);
         criteria.put("desc", desc);
@@ -170,4 +175,57 @@ public class FlowDefinitionNodeEventQueryImpl implements FlowDefinitionNodeEvent
                 .targetNodeId(targetId)
                 .single();
     }
+
+    @Override
+    public List<FlowDefinitionNodeEvent> getNextTaskNodeEvents(String flowDefinitionKey, Long businessId) {
+        List<FlowDefinitionNodeEvent> events = Lists.newArrayList();
+        // 1. 获取正常的流程实例
+        List<FlowInstance> flowInstances = workFlowEngine.buildFlowQueryService().getFlowInstanceQuery()
+                .getFlowInstances(flowDefinitionKey, businessId);
+        if (flowInstances == null || flowInstances.size() == 0) {
+            AssertHelper.throwException(
+                    "当前不存在可运行的流程实例, 流程key为{}, 业务id为{}", flowDefinitionKey, businessId);
+        }
+        flowInstances.forEach(instance -> {
+            // 2. 获取正在执行的流程
+            List<FlowProcess> processes = workFlowEngine.buildFlowQueryService().getFlowProcessQuery()
+                    .getCurrentProcesses(instance.getId());
+
+            processes.forEach(process -> {
+                List<FlowDefinitionNodeEvent> nodeEvents = getNodeEventsBySourceId(instance.getFlowDefinitionId(), process.getFlowDefinitionNodeId());
+                nodeEvents.forEach(nodeEvent -> getTaskEvents(events, instance, nodeEvent));
+            });
+        });
+        return events;
+    }
+
+    private void getTaskEvents(List<FlowDefinitionNodeEvent> events, FlowInstance instance, FlowDefinitionNodeEvent nodeEvent) {
+
+        FlowDefinitionNode nextNode = workFlowEngine.buildFlowQueryService().getFlowDefinitionNodeQuery()
+                .id(nodeEvent.getTargetNodeId())
+                .single();
+        switch (FlowDefinitionNode.Type.from(nextNode.getType())) {
+            case TASK:
+                events.add(nodeEvent);
+                break;
+            case DECISION:
+                List<FlowDefinitionNodeEvent> eventsDecision = getNodeEventsBySourceId(instance.getFlowDefinitionId(), nextNode.getId());
+                eventsDecision.forEach(nextEvent -> getTaskEvents(events, instance, nextEvent));
+                break;
+            case FORK:
+                List<FlowDefinitionNodeEvent> eventsFork = getNodeEventsBySourceId(instance.getFlowDefinitionId(), nextNode.getId());
+                eventsFork.forEach(nextEvent -> getTaskEvents(events, instance, nextEvent));
+                break;
+            case JOIN:
+                events.add(nodeEvent);
+                break;
+            case END:
+                events.add(nodeEvent);
+                break;
+            // TODO : 子流程
+            default:
+                break;
+        }
+    }
+
 }

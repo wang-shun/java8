@@ -148,7 +148,7 @@ public class Scheduler {
                         this.month = value;
                         break;
                     case 5:
-                        this.year = year;
+                        this.year = value;
                         break;
                     default:
                         break;
