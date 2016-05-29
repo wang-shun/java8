@@ -46,7 +46,7 @@ public class DoctorMoveInGroupInput extends BaseGroupInput implements Serializab
 
     /**
      * 性别 1:混合 2:母 3:公
-     * @see io.terminus.doctor.event.model.DoctorGroup.Sex
+     * @see io.terminus.doctor.event.model.DoctorGroupTrack.Sex
      */
     @NotNull(message = "sex.not.null")
     private Integer sex;
@@ -58,10 +58,6 @@ public class DoctorMoveInGroupInput extends BaseGroupInput implements Serializab
     private Long fromBarnId;
 
     private String fromBarnName;
-
-    private Long toBarnId;
-
-    private String toBarnName;
 
     private Long fromGroupId;
 

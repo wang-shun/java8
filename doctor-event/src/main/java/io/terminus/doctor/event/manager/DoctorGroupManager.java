@@ -12,15 +12,18 @@ import io.terminus.doctor.event.dto.event.group.DoctorAntiepidemicGroupEvent;
 import io.terminus.doctor.event.dto.event.group.DoctorCloseGroupEvent;
 import io.terminus.doctor.event.dto.event.group.DoctorDiseaseGroupEvent;
 import io.terminus.doctor.event.dto.event.group.DoctorLiveStockGroupEvent;
+import io.terminus.doctor.event.dto.event.group.DoctorMoveInGroupEvent;
 import io.terminus.doctor.event.dto.event.group.input.DoctorAntiepidemicGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorCloseGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorDiseaseGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorLiveStockGroupInput;
+import io.terminus.doctor.event.dto.event.group.input.DoctorMoveInGroupInput;
 import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorGroupSnapshot;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
+import io.terminus.doctor.event.util.EventUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -91,7 +94,6 @@ public class DoctorGroupManager {
 
         //2.创建防疫事件
         DoctorGroupEvent<DoctorAntiepidemicGroupEvent> event = dozerGroupEvent(group, GroupEventType.ANTIEPIDEMIC);
-        event.setGroupId(group.getId());    //猪群id
         event.setEventAt(DateUtil.toDate(antiepidemic.getVaccinAt()));
         event.setExtraMap(antiEvent);
         event.setCreatorId(antiepidemic.getCreatorId());
@@ -116,7 +118,6 @@ public class DoctorGroupManager {
 
         //2.创建疾病事件
         DoctorGroupEvent<DoctorDiseaseGroupEvent> event = dozerGroupEvent(group, GroupEventType.DISEASE);
-        event.setGroupId(group.getId());    //猪群id
         event.setEventAt(DateUtil.toDate(disease.getDiseaseAt()));
         event.setExtraMap(diseaseEvent);
         event.setCreatorId(disease.getCreatorId());
@@ -141,9 +142,9 @@ public class DoctorGroupManager {
 
         //2.创建关闭猪群事件
         DoctorGroupEvent<DoctorCloseGroupEvent> event = dozerGroupEvent(group, GroupEventType.CLOSE);
-        event.setGroupId(group.getId());    //猪群id
         event.setEventAt(DateUtil.toDate(close.getCloseAt()));
         event.setExtraMap(closeEvent);
+
         event.setCreatorId(close.getCreatorId());
         event.setCreatorName(close.getCreatorName());
         doctorGroupEventDao.create(event);
@@ -170,11 +171,11 @@ public class DoctorGroupManager {
 
         //2.创建猪只存栏事件
         DoctorGroupEvent<DoctorLiveStockGroupEvent> event = dozerGroupEvent(group, GroupEventType.LIVE_STOCK);
-        event.setGroupId(group.getId());    //猪群id
         event.setEventAt(DateUtil.toDate(liveStock.getMeasureAt()));
         event.setQuantity(groupTrack.getQuantity());  //猪群存栏数量 = 猪群数量
         event.setWeight(event.getQuantity() * event.getAvgWeight()); // 总活体重 = 数量 * 均重
         event.setExtraMap(liveStockEvent);
+
         event.setCreatorId(liveStock.getCreatorId());
         event.setCreatorName(liveStock.getCreatorName());
         doctorGroupEventDao.create(event);
@@ -185,6 +186,55 @@ public class DoctorGroupManager {
 
         //4.创建镜像
         createGroupSnapShot(group, event, groupTrack, GroupEventType.LIVE_STOCK);
+    }
+
+    /**
+     * 转入猪群事件
+     */
+    @Transactional
+    public void groupEventMoveIn(DoctorGroup group, DoctorGroupTrack groupTrack, DoctorMoveInGroupInput moveIn) {
+        //1.转换转入猪群事件
+        DoctorMoveInGroupEvent moveInEvent = BeanMapper.map(moveIn, DoctorMoveInGroupEvent.class);
+
+        //2.创建转入猪群事件
+        DoctorGroupEvent<DoctorMoveInGroupEvent> event = dozerGroupEvent(group, GroupEventType.MOVE_IN);
+
+        event.setEventAt(DateUtil.toDate(moveIn.getMoveInAt()));
+        event.setQuantity(moveIn.getQuantity());
+        event.setAvgDayAge(moveIn.getAvgDayAge());
+        event.setAvgWeight(moveIn.getAvgWeight());
+        event.setWeight(EventUtil.getWeight(event.getAvgWeight(), event.getQuantity()));
+        event.setExtraMap(moveInEvent);
+
+        event.setCreatorId(moveIn.getCreatorId());
+        event.setCreatorName(moveIn.getCreatorName());
+        doctorGroupEventDao.create(event);
+
+        //3.更新猪群跟踪
+        groupTrack.setRelEventId(event.getId());
+        groupTrack.setQuantity(EventUtil.plusQuantity(groupTrack.getQuantity(), moveIn.getQuantity()));
+        groupTrack.setBoarQty(EventUtil.plusQuantity(groupTrack.getBoarQty(), moveIn.getBoarQty()));
+        groupTrack.setSowQty(EventUtil.plusQuantity(groupTrack.getSowQty(), moveIn.getSowQty()));
+        groupTrack.setSex(EventUtil.getSex(groupTrack.getBoarQty(), groupTrack.getSowQty()));
+
+        //重新计算日龄
+        int deltaDayAge = EventUtil.deltaDayAge(groupTrack.getAvgDayAge(), groupTrack.getQuantity(), moveIn.getAvgDayAge(), moveIn.getQuantity());
+        groupTrack.setAvgDayAge(groupTrack.getAvgDayAge() + deltaDayAge);
+        groupTrack.setBirthDate(EventUtil.getBirthDate(groupTrack.getBirthDate(), deltaDayAge));
+
+        //重新计算重量
+        groupTrack.setAvgWeight(EventUtil.getAvgWeight(groupTrack.getWeight(), EventUtil.getWeight(moveIn.getAvgWeight(), moveIn.getQuantity()), groupTrack.getQuantity()));
+        groupTrack.setWeight(EventUtil.getWeight(groupTrack.getAvgWeight(), groupTrack.getQuantity()));
+
+        //重新计算金额
+        groupTrack.setAmount(groupTrack.getAmount() + moveIn.getAmount());
+        groupTrack.setPrice(EventUtil.getPrice(groupTrack.getAmount(), groupTrack.getQuantity()));
+        doctorGroupTrackDao.update(groupTrack);
+
+        // TODO: 16/5/29 其他转入类型 需要set的值
+
+        //4.创建镜像
+        createGroupSnapShot(group, event, groupTrack, GroupEventType.MOVE_IN);
     }
 
     //转换下猪群基本数据
@@ -198,7 +248,7 @@ public class DoctorGroupManager {
         event.setGroupCode(group.getGroupCode());
         event.setType(eventType.getValue());    //事件类型
         event.setName(eventType.getDesc());
-        event.setBarnId(group.getCurrentBarnId());
+        event.setBarnId(group.getCurrentBarnId());  //事件发生猪舍
         event.setBarnName(group.getCurrentBarnName());
         event.setPigType(group.getPigType());  // todo 猪类是否需要转换?
         return event;

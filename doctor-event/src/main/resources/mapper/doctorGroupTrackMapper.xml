@@ -8,6 +8,7 @@
     <resultMap id="DoctorGroupTrackMap" type="DoctorGroupTrack">
         <result column="group_id" property="groupId"/>
         <result column="rel_event_id" property="relEventId"/>
+        <result column="sex" property="sex"/>
         <result column="quantity" property="quantity"/>
         <result column="boar_qty" property="boarQty"/>
         <result column="sow_qty" property="sowQty"/>
@@ -39,11 +40,11 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        group_id, rel_event_id, quantity, boar_qty, sow_qty, birth_date, avg_day_age, weight, avg_weight, price, amount, customer_id, customer_name, sale_qty, extra, creator_id, creator_name, updator_id, updator_name, created_at, updated_at
+        group_id, rel_event_id, sex, quantity, boar_qty, sow_qty, birth_date, avg_day_age, weight, avg_weight, price, amount, customer_id, customer_name, sale_qty, extra, creator_id, creator_name, updator_id, updator_name, created_at, updated_at
     </sql>
 
     <sql id="vals">
-        #{groupId}, #{relEventId}, #{quantity}, #{boarQty}, #{sowQty}, #{birthDate}, #{avgDayAge}, #{weight}, #{avgWeight}, #{price}, #{amount}, #{customerId}, #{customerName}, #{saleQty}, #{extra}, #{creatorId}, #{creatorName}, #{updatorId}, #{updatorName}, now(), now()
+        #{groupId}, #{relEventId}, #{sex}, #{quantity}, #{boarQty}, #{sowQty}, #{birthDate}, #{avgDayAge}, #{weight}, #{avgWeight}, #{price}, #{amount}, #{customerId}, #{customerName}, #{saleQty}, #{extra}, #{creatorId}, #{creatorName}, #{updatorId}, #{updatorName}, now(), now()
     </sql>
 
     <insert id="create" parameterType="DoctorGroupTrack" keyProperty="id" useGeneratedKeys="true">
@@ -66,6 +67,7 @@
         <set>
             <if test="groupId != null">group_id = #{groupId},</if>
             <if test="relEventId != null">rel_event_id = #{relEventId},</if>
+            <if test="sex != null">sex = #{sex},</if>
             <if test="quantity != null">quantity = #{quantity},</if>
             <if test="boarQty != null">boar_qty = #{boarQty},</if>
             <if test="sowQty != null">sow_qty = #{sowQty},</if>

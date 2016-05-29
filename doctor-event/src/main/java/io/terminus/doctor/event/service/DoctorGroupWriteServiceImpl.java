@@ -147,8 +147,9 @@ public class DoctorGroupWriteServiceImpl implements DoctorGroupWriteService {
     @Override
     public Response<Boolean> groupEventMoveIn(DoctorGroupDetail groupDetail, @Valid DoctorMoveInGroupInput moveIn) {
         try {
-
-            return Response.ok();
+            checkQuantityEqual(moveIn.getQuantity(), moveIn.getBoarQty(), moveIn.getSowQty());
+            doctorGroupManager.groupEventMoveIn(groupDetail.getGroup(), groupDetail.getGroupTrack(), moveIn);
+            return Response.ok(Boolean.TRUE);
         } catch (ServiceException e) {
             log.error("failed, groupDetail:{}, moveIn:{}, cause:{}", groupDetail, moveIn, Throwables.getStackTraceAsString(e));
             return Response.fail(e.getMessage());
@@ -218,6 +219,13 @@ public class DoctorGroupWriteServiceImpl implements DoctorGroupWriteService {
     private static void checkQuantity(Integer max, Integer actual) {
         if (actual > max) {
             throw new ServiceException("quantity.over.max");
+        }
+    }
+
+    //校验 公 + 母 = 总和
+    private static void checkQuantityEqual(Integer all, Integer boar, Integer sow) {
+        if (all != (boar + sow)) {
+            throw new ServiceException("quantity.not.equal");
         }
     }
 }

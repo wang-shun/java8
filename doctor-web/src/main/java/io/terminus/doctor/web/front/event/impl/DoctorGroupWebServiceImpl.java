@@ -80,6 +80,7 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
 
             //3. 构造猪群跟踪信息
             DoctorGroupTrack groupTrack = BeanMapper.map(groupEvent, DoctorGroupTrack.class);
+            groupTrack.setSex(newGroupInput.getSex());
 
             return doctorGroupWriteService.createNewGroup(group, groupEvent, groupTrack);
         } catch (Exception e) {
