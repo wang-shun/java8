@@ -19,12 +19,6 @@ public class DoctorTransFarmGroupInput extends BaseGroupInput implements Seriali
     private static final long serialVersionUID = -2076403155703080256L;
 
     /**
-     * 转场日期
-     */
-    @NotNull(message = "date.not.null")
-    private String transGroupAt;
-
-    /**
      * 转入猪场id
      */
     @NotNull(message = "to.farm.not.null")

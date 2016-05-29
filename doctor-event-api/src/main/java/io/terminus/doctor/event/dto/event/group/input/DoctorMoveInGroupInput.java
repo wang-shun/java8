@@ -19,12 +19,6 @@ public class DoctorMoveInGroupInput extends BaseGroupInput implements Serializab
     private static final long serialVersionUID = -2457482464847828070L;
 
     /**
-     * 转入日期
-     */
-    @NotNull(message = "date.not.null")
-    private String moveInAt;
-
-    /**
      * 猪群转移类型
      * @see io.terminus.doctor.event.dto.event.group.DoctorMoveInGroupEvent.InType
      */

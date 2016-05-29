@@ -20,12 +20,6 @@ public class DoctorDiseaseGroupInput extends BaseGroupInput implements Serializa
     private static final long serialVersionUID = -7993155207725161551L;
 
     /**
-     * 疾病时间 yyyy-MM-dd
-     */
-    @NotEmpty(message = "date.not.null")
-    private String diseaseAt;
-
-    /**
      * 疾病猪只数
      */
     @NotNull(message = "quantity.not.empty")

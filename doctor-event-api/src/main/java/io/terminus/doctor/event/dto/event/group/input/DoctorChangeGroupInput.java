@@ -18,12 +18,6 @@ public class DoctorChangeGroupInput extends BaseGroupInput implements Serializab
     private static final long serialVersionUID = -7231563115604588914L;
 
     /**
-     * 转入日期
-     */
-    @NotNull(message = "date.not.null")
-    private String changeAt;
-
-    /**
      * 猪群变动类型id
      */
     @NotNull(message = "changeType.not.null")

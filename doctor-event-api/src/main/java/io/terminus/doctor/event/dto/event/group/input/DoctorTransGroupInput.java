@@ -19,12 +19,6 @@ public class DoctorTransGroupInput extends BaseGroupInput implements Serializabl
     private static final long serialVersionUID = -8219074426917150673L;
 
     /**
-     * 转群日期
-     */
-    @NotNull(message = "date.not.null")
-    private String transGroupAt;
-
-    /**
      * 转入猪舍id
      */
     @NotNull(message = "to.barn.not.null")

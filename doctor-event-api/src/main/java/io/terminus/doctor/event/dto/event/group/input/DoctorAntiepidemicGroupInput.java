@@ -20,12 +20,6 @@ public class DoctorAntiepidemicGroupInput extends BaseGroupInput implements Seri
     private static final long serialVersionUID = -1677728961844574978L;
 
     /**
-     * 防疫时间 yyyy-MM-dd
-     */
-    @NotEmpty(message = "date.not.null")
-    private String vaccinAt;
-
-    /**
      * 防疫猪只数
      */
     @NotNull(message = "quantity.not.empty")
