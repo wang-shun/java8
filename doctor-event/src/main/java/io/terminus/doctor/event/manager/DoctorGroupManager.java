@@ -231,8 +231,6 @@ public class DoctorGroupManager {
         groupTrack.setPrice(EventUtil.getPrice(groupTrack.getAmount(), groupTrack.getQuantity()));
         doctorGroupTrackDao.update(groupTrack);
 
-        // TODO: 16/5/29 其他转入类型 需要set的值
-
         //4.创建镜像
         createGroupSnapShot(group, event, groupTrack, GroupEventType.MOVE_IN);
     }
