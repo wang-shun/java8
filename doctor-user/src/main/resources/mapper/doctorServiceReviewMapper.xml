@@ -6,13 +6,14 @@
 
 <mapper namespace="DoctorServiceReview">
     <resultMap id="DoctorServiceReviewMap" type="DoctorServiceReview">
+        <id column="id" property="id"/>
         <result column="user_id" property="userId"/>
         <result column="type" property="type"/>
         <result column="status" property="status"/>
         <result column="reviewer_id" property="reviewerId"/>
         <result column="created_at" property="createdAt"/>
         <result column="updated_at" property="updatedAt"/>
-        
+
     </resultMap>
 
     <sql id="tb">
@@ -39,10 +40,32 @@
         (<include refid="vals" />)
     </insert>
 
+    <insert id="initData" parameterType="map">
+        INSERT INTO
+        <include refid="tb" />
+        (<include refid="cols_exclude_id" />)
+        VALUES
+        <foreach collection="types" close="" item="type" open="" separator=",">
+            (#{userId}, #{type}, 0, null, now(), now())
+        </foreach>
+    </insert>
+
     <select id="findById" parameterType="long" resultMap="DoctorServiceReviewMap" >
         SELECT <include refid="cols_all" />
         FROM <include refid="tb" />
         WHERE id = #{id}
+    </select>
+
+    <select id="findByUserId" parameterType="long" resultMap="DoctorServiceReviewMap" >
+        SELECT <include refid="cols_all" />
+        FROM <include refid="tb" />
+        WHERE user_id = #{userId}
+    </select>
+
+    <select id="findByUserIdAndType" parameterType="map" resultMap="DoctorServiceReviewMap" >
+        SELECT <include refid="cols_all" />
+        FROM <include refid="tb" />
+        WHERE user_id = #{userId} and type = #{type}
     </select>
 
     <update id="update" parameterType="DoctorServiceReview">
@@ -53,17 +76,19 @@
             <if test="type != null">type = #{type},</if>
             <if test="status != null">status = #{status},</if>
             <if test="reviewerId != null">reviewer_id = #{reviewerId},</if>
-            
-            
-            
             updated_at=now()
         </set>
         WHERE id = #{id}
+    </update>
+
+    <update id="updateStatus" parameterType="map">
+        update <include refid="tb"/>
+        set status = #{status}, reviewer_id = #{reviewerId}
+        where user_id = #{userId} and type = #{type}
     </update>
 
     <delete id="delete" parameterType="long">
         DELETE FROM <include refid="tb"/>
         WHERE id = #{id}
     </delete>
-
 </mapper>

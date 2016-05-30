@@ -6,6 +6,7 @@
 
 <mapper namespace="DoctorOrg">
     <resultMap id="DoctorOrgMap" type="DoctorOrg">
+        <id column="id" property="id"/>
         <result column="name" property="name"/>
         <result column="mobile" property="mobile"/>
         <result column="license" property="license"/>
@@ -55,9 +56,6 @@
             <if test="license != null">license = #{license},</if>
             <if test="outId != null">out_id = #{outId},</if>
             <if test="extra != null">extra = #{extra},</if>
-            
-            
-            
             updated_at=now()
         </set>
         WHERE id = #{id}

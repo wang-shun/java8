@@ -6,6 +6,7 @@
 
 <mapper namespace="DoctorStaff">
     <resultMap id="DoctorStaffMap" type="DoctorStaff">
+        <id column="id" property="id"/>
         <result column="org_id" property="orgId"/>
         <result column="org_name" property="orgName"/>
         <result column="user_id" property="userId"/>
@@ -73,9 +74,6 @@
             <if test="creatorName != null">creator_name = #{creatorName},</if>
             <if test="updatorId != null">updator_id = #{updatorId},</if>
             <if test="updatorName != null">updator_name = #{updatorName},</if>
-            
-            
-            
             updated_at=now()
         </set>
         WHERE id = #{id}

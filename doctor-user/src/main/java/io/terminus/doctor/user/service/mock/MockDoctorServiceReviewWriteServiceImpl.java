@@ -17,7 +17,6 @@ import org.springframework.stereotype.Service;
  */
 @Slf4j
 @Service
-@Primary
 public class MockDoctorServiceReviewWriteServiceImpl implements DoctorServiceReviewWriteService {
     @Override
     public Response<Long> createReview(DoctorServiceReview review) {

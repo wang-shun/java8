@@ -85,10 +85,10 @@ public class DoctorServiceReview implements Serializable {
      * 审批状态枚举
      */
     public enum Status {
-        INIT(0, "未审核"),
-        REVIEW(1, "待审核"),
-        OK(2, "通过"),
-        NOT_OK(-1, "不通过"),
+        INIT(0, "用户未提交申请"),
+        OK(1, "审核通过"),
+        REVIEW(2, "用户已提交申请,正在审核中"),
+        NOT_OK(-1, "审核不通过"),
         FROZEN(-2, "冻结");
 
         @Getter

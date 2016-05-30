@@ -19,7 +19,6 @@ import java.util.List;
  */
 @Slf4j
 @Service
-@Primary
 public class MockDoctorServiceReviewReadServiceImpl implements DoctorServiceReviewReadService {
     @Override
     public Response<DoctorServiceReview> findServiceReviewById(Long reviewId) {
