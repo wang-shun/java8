@@ -42,6 +42,8 @@ public class DoctorMaterialConsumeAvg implements Serializable{
 
     private Long materialId;
 
+    private Integer type;
+
     private Long consumeAvgCount;
 
     private Long consumeCount;

@@ -1,16 +1,21 @@
 package io.terminus.doctor.warehouse.handler.consume;
 
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 import io.terminus.doctor.warehouse.constants.DoctorFarmWareHouseTypeConstants;
 import io.terminus.doctor.warehouse.dao.DoctorFarmWareHouseTypeDao;
+import io.terminus.doctor.warehouse.dao.DoctorMaterialConsumeAvgDao;
+import io.terminus.doctor.warehouse.dao.DoctorMaterialInfoDao;
 import io.terminus.doctor.warehouse.dto.DoctorMaterialConsumeProviderDto;
 import io.terminus.doctor.warehouse.handler.IHandler;
 import io.terminus.doctor.warehouse.model.DoctorFarmWareHouseType;
+import io.terminus.doctor.warehouse.model.DoctorMaterialConsumeAvg;
 import io.terminus.doctor.warehouse.model.DoctorMaterialConsumeProvider;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkState;
@@ -27,9 +32,17 @@ public class DoctorWareHouseTypeConsumerHandler implements IHandler{
 
     private final DoctorFarmWareHouseTypeDao doctorFarmWareHouseTypeDao;
 
+    private final DoctorMaterialConsumeAvgDao doctorMaterialConsumeAvgDao;
+
+    private final DoctorMaterialInfoDao doctorMaterialInfoDao;
+
     @Autowired
-    public DoctorWareHouseTypeConsumerHandler(DoctorFarmWareHouseTypeDao doctorFarmWareHouseTypeDao){
+    public DoctorWareHouseTypeConsumerHandler(DoctorFarmWareHouseTypeDao doctorFarmWareHouseTypeDao,
+                                              DoctorMaterialConsumeAvgDao doctorMaterialConsumeAvgDao,
+                                              DoctorMaterialInfoDao doctorMaterialInfoDao){
         this.doctorFarmWareHouseTypeDao = doctorFarmWareHouseTypeDao;
+        this.doctorMaterialConsumeAvgDao = doctorMaterialConsumeAvgDao;
+        this.doctorMaterialInfoDao = doctorMaterialInfoDao;
     }
 
     @Override
@@ -43,7 +56,11 @@ public class DoctorWareHouseTypeConsumerHandler implements IHandler{
         DoctorFarmWareHouseType doctorFarmWareHouseType = doctorFarmWareHouseTypeDao.findByFarmIdAndType(
                 dto.getFarmId(), dto.getType());
         checkState(!isNull(doctorFarmWareHouseType), "doctorFarm.wareHouseType.empty");
+
+        // 修改当前消耗的数量
         doctorFarmWareHouseType.setLogNumber(doctorFarmWareHouseType.getLogNumber() - dto.getCount());
+
+        // 修改数量当日领用信息
         Map<String,Object> extraMap = isNull(doctorFarmWareHouseType.getExtraMap())? Maps.newHashMap() :doctorFarmWareHouseType.getExtraMap();
         if(extraMap.containsKey(DoctorFarmWareHouseTypeConstants.CONSUME_DATE) &&
                 DateTime.now().withTimeAtStartOfDay().isEqual(Long.valueOf(extraMap.get(DoctorFarmWareHouseTypeConstants.CONSUME_DATE).toString()))){
@@ -52,6 +69,15 @@ public class DoctorWareHouseTypeConsumerHandler implements IHandler{
         }else {
             extraMap.put(DoctorFarmWareHouseTypeConstants.CONSUME_DATE, DateTime.now().withTimeAtStartOfDay().getMillis());
             extraMap.put(DoctorFarmWareHouseTypeConstants.CONSUME_COUNT, dto.getCount());
+        }
+
+        // 修改预计领用时间
+        List<DoctorMaterialConsumeAvg> avgs = doctorMaterialConsumeAvgDao.queryByFarmIdAndType(dto.getFarmId(), dto.getType());
+        if(!isNull(avgs) && !Iterables.isEmpty(avgs)){
+            Long avg = avgs.stream().filter(a->!isNull(a.getConsumeAvgCount()))
+                    .map(b -> b.getConsumeAvgCount()).reduce((c,d)->c+d).orElse(0l);
+            if(avg != 0l)
+                extraMap.put(DoctorFarmWareHouseTypeConstants.TO_CONSUME_DATE, doctorFarmWareHouseType.getLogNumber()/avg);
         }
         doctorFarmWareHouseType.setExtraMap(extraMap);
         doctorFarmWareHouseTypeDao.update(doctorFarmWareHouseType);

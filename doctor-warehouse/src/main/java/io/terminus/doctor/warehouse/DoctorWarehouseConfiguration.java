@@ -47,8 +47,8 @@ public class DoctorWarehouseConfiguration {
         iHandlers.add(doctorWareHouseTypeConsumerHandler);
 
         // provider
-        iHandlers.add(doctorInWareHouseProviderHandler);
         iHandlers.add(doctorProviderEventHandler);
+        iHandlers.add(doctorInWareHouseProviderHandler);
         iHandlers.add(doctorTrackProviderHandler);
         iHandlers.add(doctorTypeProviderHandler);
 

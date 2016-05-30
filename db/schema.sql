@@ -867,7 +867,7 @@ CREATE index doctor_material_in_ware_houses_material_id on doctor_material_in_wa
 DROP TABLE IF EXISTS `doctor_material_consume_providers`;
 CREATE TABLE `doctor_material_consume_providers` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT 'id',
-  `type` bigint(20) unsigned DEFAULT NULL COMMENT '领取货物属于的类型',
+  `type` smallint(6) unsigned DEFAULT NULL COMMENT '领取货物属于的类型',
   `farm_id` bigint(20) unsigned DEFAULT NULL COMMENT '冗余仓库信息',
   `farm_name` varchar(64) DEFAULT NULL COMMENT '猪场姓名',
   `ware_house_id` bigint(20) unsigned DEFAULT NULL COMMENT '仓库信息',
@@ -899,6 +899,7 @@ CREATE TABLE `doctor_material_consume_avgs` (
   `farm_id` bigint(20) unsigned DEFAULT NULL COMMENT '冗余仓库信息',
   `ware_house_id` bigint(20) unsigned DEFAULT NULL COMMENT '仓库信息',
   `material_id` bigint(20) DEFAULT NULL COMMENT '原料Id',
+  `type` smallint(6) unsigned DEFAULT NULL COMMENT '领取货物属于的类型',
   `consume_avg_count` bigint(20) DEFAULT NULL COMMENT '平均消耗数量',
   `consume_count` bigint(20) DEFAULT NULL COMMENT '消耗数量',
   `consime_date` datetime DEFAULT NULL comment '消耗日期',
