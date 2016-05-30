@@ -77,7 +77,7 @@ public class DoctorWareHouseTypeConsumerHandler implements IHandler{
             Long avg = avgs.stream().filter(a->!isNull(a.getConsumeAvgCount()))
                     .map(b -> b.getConsumeAvgCount()).reduce((c,d)->c+d).orElse(0l);
             if(avg != 0l)
-                extraMap.put(DoctorFarmWareHouseTypeConstants.TO_CONSUME_DATE, doctorFarmWareHouseType.getLogNumber()/avg);
+                extraMap.put(DoctorFarmWareHouseTypeConstants.TO_CONSUME_DATE, doctorFarmWareHouseType.getLogNumber() * avgs.size()/avg);
         }
         doctorFarmWareHouseType.setExtraMap(extraMap);
         doctorFarmWareHouseTypeDao.update(doctorFarmWareHouseType);

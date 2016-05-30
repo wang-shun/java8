@@ -49,8 +49,11 @@ public class DoctorWareHouseQuery {
 
     @RequestMapping(value = "/pagingDoctorWareHouseDto", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public Paging<DoctorWareHouseDto> pagingDoctorWareHouseDto(@RequestParam("farmId") Long farmId, Integer pageNo, Integer pageSize){
-        return RespHelper.or500(doctorWareHouseReadService.queryDoctorWarehouseDto(farmId, pageNo, pageSize));
+    public Paging<DoctorWareHouseDto> pagingDoctorWareHouseDto(@RequestParam("farmId") Long farmId,
+                                                               @RequestParam(value = "type", required = false) Integer type,
+                                                               @RequestParam(value = "pageNo", required = false) Integer pageNo,
+                                                               @RequestParam(value = "pageSize", required = false) Integer pageSize){
+        return RespHelper.or500(doctorWareHouseReadService.queryDoctorWarehouseDto(farmId, type, pageNo, pageSize));
     }
 
     @RequestMapping(value = "/createWareHouse", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)

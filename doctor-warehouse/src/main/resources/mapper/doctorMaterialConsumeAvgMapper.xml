@@ -37,6 +37,13 @@
         #{farmId},#{wareHouseId},#{materialId},#{type},#{consumeAvgCount},#{consumeCount},#{consumeDate},#{extra},now(),now()
     </sql>
 
+    <sql id="criteria">
+        <if test="farmId != null" > AND `farm_id` = #{farmId}</if>
+        <if test="wareHouseId != null" > AND `ware_house_id` = #{wareHouseId}</if>
+        <if test="materialId != null" > AND `material_id` = #{materialId}</if>
+        <if test="type != null"> AND `type` = #{type} </if>
+    </sql>
+
     <insert id="create" parameterType="DoctorMaterialConsumeAvg" keyProperty="id" useGeneratedKeys="true">
         INSERT INTO <include refid="tb" />
         (<include refid="cols_exclude_id" />)
@@ -75,7 +82,9 @@
 
     <select id="queryByIds" parameterType="map" resultMap="DoctorMaterialConsumeAvgMap">
         SELECT <include refid="cols_all"/> FROM <include refid="tb"/>
-        WHERE farm_id=#{farmId} and ware_house_id=#{wareHouseId} and material_id=#{materialId}
+        <where>
+            <include refid="criteria"/>
+        </where>
     </select>
 
     <select id="queryByFarmIdAndType" parameterType="map" resultMap="DoctorMaterialConsumeAvgMap">

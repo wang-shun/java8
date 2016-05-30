@@ -56,11 +56,12 @@ public class DoctorWareHouseReadServiceImpl implements DoctorWareHouseReadServic
     }
 
     @Override
-    public Response<Paging<DoctorWareHouseDto>> queryDoctorWarehouseDto(Long farmId, Integer pageNo, Integer pageSize) {
+    public Response<Paging<DoctorWareHouseDto>> queryDoctorWarehouseDto(Long farmId, Integer type, Integer pageNo, Integer pageSize) {
         try{
             PageInfo pageInfo = new PageInfo(pageNo, pageSize);
             Map<String,Object> params = Maps.newHashMap();
             params.put("farmId", farmId);
+            params.put("type", type);
             Paging<DoctorWareHouse> doctorWareHousePaging = doctorWareHouseDao.paging(pageInfo.getOffset(), pageInfo.getLimit(), params);
 
             // validate null
