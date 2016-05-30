@@ -387,6 +387,12 @@
 
             <dependency>
                 <groupId>io.terminus.doctor</groupId>
+                <artifactId>doctor-workflow-job</artifactId>
+                <version>${project.parent.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>io.terminus.doctor</groupId>
                 <artifactId>doctor-user-api</artifactId>
                 <version>${project.parent.version}</version>
             </dependency>

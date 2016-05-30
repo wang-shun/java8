@@ -4,7 +4,7 @@ server:
 
 session:
   cookie-context-path: /
-  cookie-domain: doctor.com
+
   cookie-max-age: 1800
   cookie-name: msid
   source: redis
@@ -65,8 +65,22 @@ image:
 msg:
   current:
       smsService: luoSiMaoSmsService
+      emailService: commonEmailService
   luosimao:
     sendUrl: http://sms-api.luosimao.com/v1/http_get/send/json
     statusUrl: http://sms-api.luosimao.com/v1/http_get/status/json
     apiKey: 35dec4a658e7a3fe96af38a62540cacc
     companyName: 【新融农牧】
+  email:
+    host: smtp.mxhichina.com
+    port: 25
+    account: no-reply@xrnm.com
+    password: 123456Pigmall
+    protocol: 2
+  umeng: #友盟APP消息推送网关配置
+      android: #Android应用配置
+        appKey: xxxx
+        appSecret: xxxx
+      ios: #IOS应用配置
+        appKey: xxxx
+        appSecret: xxxx

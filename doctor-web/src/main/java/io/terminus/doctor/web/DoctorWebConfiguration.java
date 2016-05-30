@@ -7,6 +7,7 @@ package io.terminus.doctor.web;
 import io.terminus.doctor.user.service.SubRoleReadService;
 import io.terminus.doctor.web.core.DoctorCoreWebConfiguration;
 import io.terminus.doctor.web.core.advices.JsonExceptionResolver;
+import io.terminus.doctor.web.core.msg.email.CommonEmailServiceConfig;
 import io.terminus.doctor.web.core.msg.sms.LuoSiMaoSmsServiceConfig;
 import io.terminus.doctor.web.core.service.OtherSystemService;
 import io.terminus.doctor.web.core.service.impl.OtherSystemServiceImpl;
@@ -53,6 +54,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
         WebAuthenticationConfiguration.class,
         SimpleMsgGatewayBuilderConfig.class,
         LuoSiMaoSmsServiceConfig.class,
+        CommonEmailServiceConfig.class,
         DbSmsConfig.class, TestSmsWebServiceConfig.class,
         DbNotifyConfig.class,TestNotifyWebServiceConfig.class,
         DbEmailConfig.class, TestEmailWebServiceConfig.class,

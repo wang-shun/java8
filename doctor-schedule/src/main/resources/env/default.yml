@@ -23,4 +23,35 @@ logging:
 parana:
   config:
     mode: server
+image:
+  base:
+    url: http://pigmall.oss-cn-beijing.aliyuncs.com
+
+oss:
+  endpoint: oss-cn-beijing.aliyuncs.com
+  appKey: n67jFjUcEjZxPOZf
+  appSecret: ZOPL1A33iQB52g60Dgvs3xT2FJqeaf
+  bucketName: pigmall
+
+msg:
+  current:
+      smsService: luoSiMaoSmsService
+  luosimao:
+    sendUrl: http://sms-api.luosimao.com/v1/http_get/send/json
+    statusUrl: http://sms-api.luosimao.com/v1/http_get/status/json
+    apiKey: 35dec4a658e7a3fe96af38a62540cacc
+    companyName: 【新融农牧】
+  email:
+    host: smtp.mxhichina.com
+    port: 25
+    account: no-reply@xrnm.com
+    password: 123456Pigmall
+    protocol: 2
+  umeng: #友盟APP消息推送网关配置
+      android: #Android应用配置
+        appKey: xxxx
+        appSecret: xxxx
+      ios: #IOS应用配置
+        appKey: xxxx
+        appSecret: xxxx
 
