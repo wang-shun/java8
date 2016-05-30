@@ -39,9 +39,8 @@ public class DoctorPigCreateEvents {
     @RequestMapping(value = "/createChgLocation", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Long createChangeLocationEvent(@RequestParam("doctorChgLocationDto") DoctorChgLocationDto doctorChgLocationDto,
-                                          @RequestParam("doctorBasicInputInfoDto") DoctorBasicInputInfoDto doctorBasicInputInfoDto,
-                                          @RequestParam("pigType") Integer pigType){
-        return RespHelper.or500(doctorPigEventWriteService.chgLocationEvent(doctorChgLocationDto, doctorBasicInputInfoDto, pigType));
+                                          @RequestParam("doctorBasicInputInfoDto") DoctorBasicInputInfoDto doctorBasicInputInfoDto){
+        return RespHelper.or500(doctorPigEventWriteService.chgLocationEvent(doctorChgLocationDto, doctorBasicInputInfoDto));
     }
 
     @RequestMapping(value = "/createChgFarm", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -49,7 +48,7 @@ public class DoctorPigCreateEvents {
     public Long createChangeFarmEvent(@RequestParam("doctorChgFarmDto") DoctorChgFarmDto doctorChgFarmDto,
                                       @RequestParam("doctorBasicInputInfoDto") DoctorBasicInputInfoDto basicInputInfoDto,
                                       @RequestParam("pigType") Integer pigType){
-        return RespHelper.or500(doctorPigEventWriteService.chgFarmEvent(doctorChgFarmDto, basicInputInfoDto, pigType));
+        return RespHelper.or500(doctorPigEventWriteService.chgFarmEvent(doctorChgFarmDto, basicInputInfoDto));
     }
 
     @RequestMapping(value = "/createRemovalEvent", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -57,7 +56,7 @@ public class DoctorPigCreateEvents {
     public Long createRemovalEvent(@RequestParam("doctorRemovalDto") DoctorRemovalDto doctorRemovalDto,
                                    @RequestParam("doctorBasicInputInfoDto") DoctorBasicInputInfoDto doctorBasicInputInfoDto,
                                    @RequestParam("pigType") Integer pigType){
-        return RespHelper.or500(doctorPigEventWriteService.removalEvent(doctorRemovalDto, doctorBasicInputInfoDto, pigType));
+        return RespHelper.or500(doctorPigEventWriteService.removalEvent(doctorRemovalDto, doctorBasicInputInfoDto));
     }
 
     @RequestMapping(value = "/createDiseaseEvent", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -65,7 +64,7 @@ public class DoctorPigCreateEvents {
     public Long createRemovalEvent(@RequestParam("doctorDiseaseDto") DoctorDiseaseDto doctorDiseaseDto,
                                    @RequestParam("doctorBasicInputInfoDto") DoctorBasicInputInfoDto doctorBasicInputInfoDto,
                                    @RequestParam("pigType") Integer pigType){
-        return RespHelper.or500(doctorPigEventWriteService.diseaseEvent(doctorDiseaseDto, doctorBasicInputInfoDto, pigType));
+        return RespHelper.or500(doctorPigEventWriteService.diseaseEvent(doctorDiseaseDto, doctorBasicInputInfoDto));
     }
 
     @RequestMapping(value = "/createVaccinationEvent", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -73,7 +72,7 @@ public class DoctorPigCreateEvents {
     public Long createVaccinationEvent(@RequestParam("doctorVaccinationDto") DoctorVaccinationDto doctorVaccinationDto,
                                    @RequestParam("doctorBasicInputInfoDto") DoctorBasicInputInfoDto doctorBasicInputInfoDto,
                                    @RequestParam("pigType") Integer pigType){
-        return RespHelper.or500(doctorPigEventWriteService.vaccinationEvent(doctorVaccinationDto, doctorBasicInputInfoDto, pigType));
+        return RespHelper.or500(doctorPigEventWriteService.vaccinationEvent(doctorVaccinationDto, doctorBasicInputInfoDto));
     }
 
     @RequestMapping(value = "/createConditionEvent", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -81,6 +80,6 @@ public class DoctorPigCreateEvents {
     public Long createConditionEvent(@RequestParam("doctorConditionDto") DoctorConditionDto doctorConditionDto,
                                        @RequestParam("doctorBasicInputInfoDto") DoctorBasicInputInfoDto doctorBasicInputInfoDto,
                                        @RequestParam("pigType") Integer pigType){
-        return RespHelper.or500(doctorPigEventWriteService.conditionEvent(doctorConditionDto, doctorBasicInputInfoDto, pigType));
+        return RespHelper.or500(doctorPigEventWriteService.conditionEvent(doctorConditionDto, doctorBasicInputInfoDto));
     }
 }
