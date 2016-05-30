@@ -36,27 +36,27 @@ public class FlowProcessServiceImpl implements FlowProcessService {
 
     /******************* 启动流程 相关 ********************************************/
     @Override
-    public void startFlowInstance(String flowDefinitionKey, Long businessId) {
-        startFlowInstance(flowDefinitionKey, businessId, null);
+    public FlowInstance startFlowInstance(String flowDefinitionKey, Long businessId) {
+        return startFlowInstance(flowDefinitionKey, businessId, null);
     }
 
     @Override
-    public void startFlowInstance(String flowDefinitionKey, Long businessId, String businessData) {
-        startFlowInstance(flowDefinitionKey, businessId, businessData, null);
+    public FlowInstance startFlowInstance(String flowDefinitionKey, Long businessId, String businessData) {
+        return startFlowInstance(flowDefinitionKey, businessId, businessData, null);
     }
 
     @Override
-    public void startFlowInstance(String flowDefinitionKey, Long businessId, String businessData, String flowData) {
-        startFlowInstance(flowDefinitionKey, businessId, businessData, flowData, null);
+    public FlowInstance startFlowInstance(String flowDefinitionKey, Long businessId, String businessData, String flowData) {
+        return startFlowInstance(flowDefinitionKey, businessId, businessData, flowData, null);
     }
 
     @Override
-    public void startFlowInstance(String flowDefinitionKey, Long businessId, String businessData, String flowData, Map expression) {
-        startFlowInstance(flowDefinitionKey, businessId, businessData, flowData, expression, null, null);
+    public FlowInstance startFlowInstance(String flowDefinitionKey, Long businessId, String businessData, String flowData, Map expression) {
+        return startFlowInstance(flowDefinitionKey, businessId, businessData, flowData, expression, null, null);
     }
 
     @Override
-    public void startFlowInstance(String flowDefinitionKey, Long businessId, String businessData, String flowData, Map expression, Long operatorId, String operatorName) {
+    public FlowInstance startFlowInstance(String flowDefinitionKey, Long businessId, String businessData, String flowData, Map expression, Long operatorId, String operatorName) {
         try {
             // 1. 校验当前 businessId 是否存在流程实例
             FlowInstance existFlowInstance = workFlowEngine.buildFlowQueryService().getFlowInstanceQuery()
@@ -104,10 +104,12 @@ public class FlowProcessServiceImpl implements FlowProcessService {
             // 4. 执行开始节点
             NodeHelper.buildStartNode().execute(workFlowEngine.buildExecution(startProcess, expression, flowData, operatorId, operatorName));
 
+            return flowInstance;
         } catch (Exception e) {
             log.error("[Work Flow Instance] -> 启动流程实例失败, cause by: {}", Throwables.getStackTraceAsString(e));
             AssertHelper.throwException("启动流程实例失败, cause by: {}", Throwables.getStackTraceAsString(e));
         }
+        return null;
     }
 
     /******************* 执行流程 相关 ********************************************/

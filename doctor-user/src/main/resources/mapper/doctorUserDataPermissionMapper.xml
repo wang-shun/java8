@@ -6,6 +6,7 @@
 
 <mapper namespace="DoctorUserDataPermission">
     <resultMap id="DoctorUserDataPermissionMap" type="DoctorUserDataPermission">
+        <id column="id" property="id"/>
         <result column="user_id" property="userId"/>
         <result column="farm_ids" property="farmIds"/>
         <result column="barn_ids" property="barnIds"/>

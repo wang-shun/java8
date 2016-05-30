@@ -6,6 +6,7 @@
 
 <mapper namespace="DoctorChangeType">
     <resultMap id="DoctorChangeTypeMap" type="DoctorChangeType">
+        <id column="id" property="id"/>
         <result column="name" property="name"/>
         <result column="is_count_out" property="isCountOut"/>
         <result column="farm_id" property="farmId"/>

@@ -88,4 +88,10 @@ public interface WorkFlowEngine {
      * @return
      */
     FlowQueryService buildFlowQueryService();
+
+    /**
+     * 构造一个Schedule对象
+     * @return
+     */
+    Scheduler buildScheduler();
 }

@@ -26,9 +26,11 @@ public class DecisionNode extends BaseNode {
                 continue;
             }
             try {
-                if (StringHelper.parseExpression(expression, execution.getExpression())) {
-                    onlyOk++;
-                    goTransition = transition;
+                if (execution.getExpression() != null && execution.getExpression().size() > 0) {
+                    if (StringHelper.parseExpression(expression, execution.getExpression())) {
+                        onlyOk++;
+                        goTransition = transition;
+                    }
                 }
             } catch (Exception e) {
                 AssertHelper.throwException("表达式解析失败, 请查看判断表达式是否正确, 事件表达式为: {}, 执行参数为: {}, cause by: {}",

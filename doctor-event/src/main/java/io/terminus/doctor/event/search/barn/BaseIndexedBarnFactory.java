@@ -2,7 +2,9 @@ package io.terminus.doctor.event.search.barn;
 
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.doctor.common.enums.PigType;
+import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.model.DoctorBarn;
+import io.terminus.doctor.event.service.DoctorBarnReadService;
 import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.ParameterizedType;
@@ -19,8 +21,11 @@ public abstract class BaseIndexedBarnFactory<T extends IndexedBarn> implements I
 
     protected final Class<T> clazz;
 
+    protected DoctorBarnReadService doctorBarnReadService;
+
     @SuppressWarnings("all")
-    public BaseIndexedBarnFactory() {
+    public BaseIndexedBarnFactory(DoctorBarnReadService doctorBarnReadService) {
+        this.doctorBarnReadService = doctorBarnReadService;
         final Type genericSuperclass = getClass().getGenericSuperclass();
         if (genericSuperclass instanceof ParameterizedType) {
             clazz = ((Class<T>) ((ParameterizedType) genericSuperclass).getActualTypeArguments()[0]);
@@ -39,6 +44,7 @@ public abstract class BaseIndexedBarnFactory<T extends IndexedBarn> implements I
         T indexedBarn = BeanMapper.map(barn, clazz);
         PigType pigType = PigType.from(indexedBarn.getPigType());
         indexedBarn.setPigTypeName(pigType == null ? "" : ( pigType.getDesc() + "[" + pigType.getType() + "]"));
+        indexedBarn.setStorage(RespHelper.orServEx(doctorBarnReadService.countPigByBarnId(indexedBarn.getId())));
         return indexedBarn;
     }
 }

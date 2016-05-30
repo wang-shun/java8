@@ -6,6 +6,7 @@
 
 <mapper namespace="DoctorGenetic">
     <resultMap id="DoctorGeneticMap" type="DoctorGenetic">
+        <id column="id" property="id"/>
         <result column="name" property="name"/>
         <result column="out_id" property="outId"/>
         <result column="extra" property="extra"/>

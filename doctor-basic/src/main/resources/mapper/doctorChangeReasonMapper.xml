@@ -6,6 +6,7 @@
 
 <mapper namespace="DoctorChangeReason">
     <resultMap id="DoctorChangeReasonMap" type="DoctorChangeReason">
+        <id column="id" property="id"/>
         <result column="change_type_id" property="changeTypeId"/>
         <result column="reason" property="reason"/>
         <result column="out_id" property="outId"/>

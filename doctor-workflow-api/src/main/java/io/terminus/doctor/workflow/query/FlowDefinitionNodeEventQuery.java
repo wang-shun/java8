@@ -19,6 +19,7 @@ public interface FlowDefinitionNodeEventQuery {
     ///////////////////////////////////////////////////////////////
     FlowDefinitionNodeEventQuery id(Long id);
     FlowDefinitionNodeEventQuery name(String name);
+    FlowDefinitionNodeEventQuery value(String value);
     FlowDefinitionNodeEventQuery flowDefinitionId(Long flowDefinitionId);
     FlowDefinitionNodeEventQuery sourceNodeId(Long sourceNodeId);
     FlowDefinitionNodeEventQuery targetNodeId(Long targetNodeId);
@@ -65,4 +66,12 @@ public interface FlowDefinitionNodeEventQuery {
      * @return
      */
     FlowDefinitionNodeEvent getNodeEventByST(Long flowDefinitionId, Long sourceId, Long targetId);
+
+    /**
+     * 获取当前流程的下个任务事件
+     * @param flowDefinitionKey 流程定义key
+     * @param businessId        业务id
+     * @return
+     */
+    List<FlowDefinitionNodeEvent> getNextTaskNodeEvents(String flowDefinitionKey, Long businessId);
 }

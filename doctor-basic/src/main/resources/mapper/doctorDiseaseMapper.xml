@@ -6,6 +6,7 @@
 
 <mapper namespace="DoctorDisease">
     <resultMap id="DoctorDiseaseMap" type="DoctorDisease">
+        <id column="id" property="id"/>
         <result column="name" property="name"/>
         <result column="farm_id" property="farmId"/>
         <result column="farm_name" property="farmName"/>
