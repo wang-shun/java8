@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.Builder;
 
 import java.io.Serializable;
+import java.util.Map;
 
 /**
  * Created by yaoqijun.
@@ -19,6 +20,6 @@ import java.io.Serializable;
 @NoArgsConstructor
 public class PigEventCreateEvent implements Serializable{
 
-    private Long eventId;
+    private Map<String, Object> context;
 
 }
