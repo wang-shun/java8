@@ -58,4 +58,11 @@ public class DoctorBasicInputInfoDto implements Serializable{
 
     private Long relEventId;
 
+    public DoctorBasicInputInfoDto buildSameBarnPigInfo(Long pigId, Integer pigType, String pigCode){
+        return DoctorBasicInputInfoDto.builder()
+                .pigId(pigId).pigType(pigType).pigCode(pigCode).barnId(this.barnId).barnName(this.barnName)
+                .farmId(this.farmId).farmName(this.farmName).orgId(this.orgId).orgName(this.orgName).staffId(this.staffId).staffName(this.staffName)
+                .eventType(this.eventType).eventName(this.eventName).eventDesc(this.eventDesc).relEventId(this.relEventId)
+                .build();
+    }
 }
