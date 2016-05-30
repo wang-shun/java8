@@ -6,6 +6,7 @@
 
 <mapper namespace="DoctorServiceReview">
     <resultMap id="DoctorServiceReviewMap" type="DoctorServiceReview">
+        <id column="id" property="id"/>
         <result column="user_id" property="userId"/>
         <result column="type" property="type"/>
         <result column="status" property="status"/>
