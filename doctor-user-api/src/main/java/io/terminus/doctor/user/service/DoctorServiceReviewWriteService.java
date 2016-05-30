@@ -20,4 +20,6 @@ public interface DoctorServiceReviewWriteService {
 
     Response<Boolean> deleteReview(Long reviewId);
 
+    Response<Boolean> updateStatus(BaseUser user, Long userId, DoctorServiceReview.Type type, DoctorServiceReview.Status newStatus);
+
 }

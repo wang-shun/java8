@@ -19,13 +19,16 @@ public class DoctorServiceReviewDao extends MyBatisDao<DoctorServiceReview> {
     /**
      * 修改服务状态
      * @param userId 申请服务的用户的id
-     * @param reviewerId 审核人id, 如果是用户申请开通服务,此参数可以为空
+     * @param reviewerId 审核人id
      * @param type 服务类型, 参见枚举 ServiceReview.Type
      * @param status 相应服务的新状态
      * @return
      */
     public boolean updateStatus(Long userId, Long reviewerId, DoctorServiceReview.Type type, DoctorServiceReview.Status status){
         return sqlSession.update(sqlId("updateStatus"), ImmutableMap.of("userId", userId, "reviewerId", reviewerId, "type", type.getValue(), "status", status.getValue())) == 1;
+    }
+    public boolean updateStatus(Long userId, DoctorServiceReview.Type type, DoctorServiceReview.Status status){
+        return sqlSession.update(sqlId("updateStatus"), ImmutableMap.of("userId", userId, "type", type.getValue(), "status", status.getValue())) == 1;
     }
 
     /**

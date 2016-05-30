@@ -1,6 +1,7 @@
 package io.terminus.doctor.user.service;
 
 import com.google.common.base.Throwables;
+import io.terminus.common.model.BaseUser;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.user.dao.DoctorServiceReviewDao;
 import io.terminus.doctor.user.model.DoctorServiceReview;
@@ -8,6 +9,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
+
+import java.util.Objects;
 
 /**
  * Desc:
@@ -63,4 +66,19 @@ public class DoctorServiceReviewWriteServiceImpl implements DoctorServiceReviewW
         return response;
     }
 
+    @Override
+    public Response<Boolean> updateStatus(BaseUser user, Long userId, DoctorServiceReview.Type type, DoctorServiceReview.Status newStatus){
+        Response<Boolean> response = new Response<>();
+        try {
+            if (Objects.equals(newStatus.getValue(), DoctorServiceReview.Status.REVIEW.getValue())) {
+                response.setResult(doctorServiceReviewDao.updateStatus(userId, type, newStatus));
+            } else {
+                response.setResult(doctorServiceReviewDao.updateStatus(userId, user.getId(), type, newStatus));
+            }
+        } catch (Exception e) {
+            log.error("update doctor service review failed, cause : {}", Throwables.getStackTraceAsString(e));
+            response.setError("update.doctor.service.review.failed");
+        }
+        return response;
+    }
 }

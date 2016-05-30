@@ -49,7 +49,7 @@ public class DoctorServiceReviewServiceImpl implements DoctorServiceReviewServic
                     "doctor.service.review.status.error");
 
             //处理数据
-            doctorServiceReviewManager.applyOpenService(user, serviceApplyDto.getOrg(), type);
+            doctorServiceReviewManager.applyOpenService(user, serviceApplyDto.getOrg(), type, serviceApplyDto.getRealName());
             response.setResult(true);
         } catch (ServiceException | IllegalStateException | IllegalArgumentException e) {
             response.setError(e.getMessage());
