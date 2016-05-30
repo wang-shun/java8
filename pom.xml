@@ -9,6 +9,7 @@
     <modules>
         <module>doctor-workflow</module>
         <module>doctor-workflow-api</module>
+        <module>doctor-workflow-job</module>
         <module>doctor-web-core</module>
         <module>doctor-web</module>
         <module>doctor-admin</module>

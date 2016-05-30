@@ -32,4 +32,9 @@ public class WorkFlowServiceImpl implements WorkFlowService {
     public FlowQueryService getFlowQueryService() {
         return workFlowEngine.buildFlowQueryService();
     }
+
+    @Override
+    public void doTimerSchedule() {
+        workFlowEngine.buildScheduler().doSchedule();
+    }
 }

@@ -14,6 +14,9 @@
 
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.parana.config.service.ConfigReadService" id="configReadService" check="false"/>
 
+    <!-- workflow api -->
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.workflow.core.WorkFlowService" id="workFlowService" check="false"/>
+
     <!-- search api -->
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.event.search.pig.PigDumpService" id="pigDumpService" check="false"/>
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.event.search.group.GroupDumpService" id="groupDumpService" check="false"/>

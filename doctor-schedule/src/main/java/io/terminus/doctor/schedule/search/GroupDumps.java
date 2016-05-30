@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -21,8 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 @Configuration
 @EnableScheduling
-@RestController
-@RequestMapping("/api/doctor/search")
+@Component
 public class GroupDumps {
 
     @Autowired
@@ -46,19 +46,7 @@ public class GroupDumps {
         }
     }
 
-    @RequestMapping(value = "/group/full")
-    public void fullDump(@RequestParam(required = false) String before) {
-        try{
-            log.info("full dump fired");
-            groupDumpService.fullDump(before);
-            log.info("full dump end");
-        } catch (Exception e) {
-            log.error("group full dump failed", Throwables.getStackTraceAsString(e));
-        }
-    }
-
     @Scheduled(cron = "0 */15 * * * ?")
-    @RequestMapping(value = "/group/delta")
     public void deltaDump() {
         try{
             if(!hostLeader.isLeader()) {

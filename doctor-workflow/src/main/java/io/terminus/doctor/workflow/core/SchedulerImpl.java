@@ -6,12 +6,10 @@ import com.google.common.collect.Maps;
 import io.terminus.doctor.workflow.model.FlowDefinitionNode;
 import io.terminus.doctor.workflow.model.FlowInstance;
 import io.terminus.doctor.workflow.model.FlowProcess;
-import io.terminus.doctor.workflow.utils.StringHelper;
 import lombok.Data;
+import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.EnableScheduling;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.io.Serializable;
@@ -25,11 +23,10 @@ import java.util.Map;
  * Date: 16/5/26
  */
 @Component
-@EnableScheduling
-public class Scheduler {
+public class SchedulerImpl implements Scheduler {
 
     @Autowired
-    private WorkFlowEngine workFlowEngine;
+    private WorkFlowService workFlowService;
 
     private static final String TIMER_PREFIX = "scheduler_timer";
 
@@ -42,27 +39,25 @@ public class Scheduler {
     private Map<String, Timer> timerMap;
 
     /**
-     * 每 10s 轮询一次任务节点
+     * 执行定时Task任务
      */
-    @Scheduled(cron = "0 0/10 * * * ?")
-    public void taskInvocation() {
-
+    public void doSchedule() {
         // 1. 获取所有的node ids
         List<Long> nodeIds = getTimerNodeIds();
 
         // 2. 获取所有的process, 并执行
-        List<FlowProcess> processes = workFlowEngine.buildFlowQueryService().getFlowProcessQuery()
+        List<FlowProcess> processes = workFlowService.getFlowQueryService().getFlowProcessQuery()
                 .findFlowProcesses(ImmutableMap.of("flowDefinitionNodeIds", nodeIds));
         for (int i = 0; processes != null && i < processes.size(); i++) {
             FlowProcess flowProcess = processes.get(i);
             // 如果到达执行时间, 则执行任务
             if (isBefore(flowProcess)) {
-                FlowInstance instance = workFlowEngine.buildFlowQueryService().getFlowInstanceQuery()
+                FlowInstance instance = workFlowService.getFlowQueryService().getFlowInstanceQuery()
                         .id(flowProcess.getFlowInstanceId())
                         .status(FlowInstance.Status.NORMAL.value())
                         .single();
                 if(instance != null) {
-                    workFlowEngine.buildFlowProcessService()
+                    workFlowService.getFlowProcessService()
                             .getExecutor(instance.getFlowDefinitionKey(), instance.getBusinessId(), flowProcess.getAssignee())
                             .execute();
                 }
@@ -98,12 +93,12 @@ public class Scheduler {
     private List<Long> getTimerNodeIds() {
         timerMap = Maps.newHashMap();
         List<Long> nodeIds = Lists.newArrayList();
-        List<FlowDefinitionNode> flowDefinitionNodes = workFlowEngine.buildFlowQueryService().getFlowDefinitionNodeQuery()
+        List<FlowDefinitionNode> flowDefinitionNodes = workFlowService.getFlowQueryService().getFlowDefinitionNodeQuery()
                 .type(FlowDefinitionNode.Type.TASK.value())
                 .list();
         if (flowDefinitionNodes != null && flowDefinitionNodes.size() > 0) {
             flowDefinitionNodes.forEach(node -> {
-                if (StringHelper.isNotBlank(node.getTimer())) {
+                if (StringUtils.isNotBlank(node.getTimer())) {
                     nodeIds.add(node.getId());
                     timerMap.put(TIMER_PREFIX + node.getId(), new Timer(node.getTimer()));
                 }
