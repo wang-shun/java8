@@ -44,6 +44,13 @@
         #{farmId},#{farmName},#{wareHouseId},#{wareHouseName},#{materialId},#{materialName},#{type},#{lotNumber},#{unitGroupName},#{unitName},#{extra},#{creatorId},#{creatorName},#{updatorId},#{updatorName},now(),now()
     </sql>
 
+    <sql id="criteria">
+        <if test="farmId != null" > AND `farm_id` = #{farmId}</if>
+        <if test="wareHouseId != null" > AND `ware_house_id` = #{wareHouseId}</if>
+        <if test="materialId != null" > AND `material_id` = #{materialId}</if>
+        <if test="type!=null">AND  `type`=#{type}</if>
+    </sql>
+
     <insert id="create" parameterType="DoctorMaterialInWareHouse" keyProperty="id" useGeneratedKeys="true">
         INSERT INTO <include refid="tb" />
         (<include refid="cols_exclude_id" />)
@@ -88,6 +95,21 @@
     <select id="queryByFarmHouseMaterial" parameterType="map" resultMap="DoctorMaterialInWareHouseMap">
         SELECT <include refid="cols_all"/> from <include refid="tb"/> WHERE
           farm_id=#{farmId} AND ware_house_id=#{wareHouseId} AND material_id=#{materialId}
+    </select>
+
+    <select id="count" resultType="long">
+      SELECT count(1) FROM <include refid="tb"/>
+        <where>
+            <include refid="criteria"/>
+        </where>
+    </select>
+
+    <select id="paging" resultMap="DoctorMaterialInWareHouseMap">
+        SELECT <include refid="cols_all"/> FROM <include refid="tb"/>
+        <where>
+            <include refid="criteria"/>
+        </where>
+        LIMIT #{offset}, #{limit}
     </select>
 
     <update id="update" parameterType="DoctorMaterialInWareHouse">

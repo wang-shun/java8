@@ -1,6 +1,8 @@
 package io.terminus.doctor.warehouse.service;
 
+import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
+import io.terminus.doctor.warehouse.dto.DoctorMaterialInWareHouseDto;
 import io.terminus.doctor.warehouse.model.DoctorMaterialInWareHouse;
 
 import javax.validation.constraints.NotNull;
@@ -22,5 +24,17 @@ public interface DoctorMaterialInWareHouseReadService {
      */
     Response<List<DoctorMaterialInWareHouse>> queryDoctorMaterialInWareHouse(@NotNull(message = "input.farmId.empty") Long farmId,
                                                                              @NotNull(message = "input.wareHouseId.empty") Long wareHouseId);
+
+    /**
+     * 分页查询仓库原料信息
+     * @param farmId
+     * @param wareHouseId
+     * @param pageNo
+     * @param pageSize
+     * @return
+     */
+    Response<Paging<DoctorMaterialInWareHouseDto>> pagingDoctorMaterialInWareHouse(@NotNull(message = "input.farmId.empty") Long farmId,
+                                                                                @NotNull(message = "input.wareHouseId.empty") Long wareHouseId,
+                                                                                Integer pageNo, Integer pageSize);
 
 }

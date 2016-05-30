@@ -1,7 +1,9 @@
 package io.terminus.doctor.web.front.warehouse.controller;
 
+import io.terminus.common.model.Paging;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.warehouse.dto.DoctorMaterialConsumeProviderDto;
+import io.terminus.doctor.warehouse.dto.DoctorMaterialInWareHouseDto;
 import io.terminus.doctor.warehouse.model.DoctorMaterialInWareHouse;
 import io.terminus.doctor.warehouse.service.DoctorMaterialInWareHouseReadService;
 import io.terminus.doctor.warehouse.service.DoctorMaterialInWareHouseWriteService;
@@ -12,6 +14,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.util.List;
@@ -44,8 +47,28 @@ public class DoctorWareHouseEvents {
      * @param wareHouseId
      * @return
      */
-    public List<DoctorMaterialInWareHouse> listDoctorMaterialInWareHouse(Long farmId, Long wareHouseId){
+    @RequestMapping(value = "/list", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public List<DoctorMaterialInWareHouse> listDoctorMaterialInWareHouse(@RequestParam("farmId") Long farmId,
+                                                                         @RequestParam("wareHouseId") Long wareHouseId){
         return RespHelper.or500(doctorMaterialInWareHouseReadService.queryDoctorMaterialInWareHouse(farmId, wareHouseId));
+    }
+
+    /**
+     * 对应的仓库信息的分页查询方式
+     * @param farmId
+     * @param wareHouseId
+     * @param pageNo
+     * @param pageSize
+     * @return
+     */
+    @RequestMapping(value = "/paging", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public Paging<DoctorMaterialInWareHouseDto> pagingDoctorMaterialInWareHouse(@RequestParam("farmId") Long farmId,
+                                                                                @RequestParam("wareHouseId") Long wareHouseId,
+                                                                                @RequestParam("pageNo") Integer pageNo,
+                                                                                @RequestParam("pageSize") Integer pageSize){
+        return RespHelper.or500(doctorMaterialInWareHouseReadService.pagingDoctorMaterialInWareHouse(farmId, wareHouseId, pageNo, pageSize));
     }
 
     /**

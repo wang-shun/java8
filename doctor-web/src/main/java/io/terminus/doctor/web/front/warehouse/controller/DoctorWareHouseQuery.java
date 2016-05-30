@@ -1,5 +1,6 @@
 package io.terminus.doctor.web.front.warehouse.controller;
 
+import com.google.common.base.Throwables;
 import io.terminus.common.model.Paging;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.warehouse.dto.DoctorWareHouseDto;
@@ -58,7 +59,14 @@ public class DoctorWareHouseQuery {
 
     @RequestMapping(value = "/createWareHouse", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public Long createWareHouseInfo(@RequestBody DoctorWareHouse doctorWareHouse){
+    public Long createWareHouseInfo(@RequestBody DoctorWareHouseDto doctorWareHouseDto){
+        DoctorWareHouse doctorWareHouse = null;
+        try{
+            // TODO convert farm info 信息
+            doctorWareHouse = new DoctorWareHouse();
+        }catch (Exception e){
+            log.error("create ware house info fail, cause:{}", Throwables.getStackTraceAsString(e));
+        }
         return RespHelper.or500(doctorWareHouseWriteService.createWareHouse(doctorWareHouse));
     }
 }
