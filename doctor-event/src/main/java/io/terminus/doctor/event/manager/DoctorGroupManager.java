@@ -30,6 +30,7 @@ import io.terminus.doctor.event.dto.event.group.input.DoctorNewGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorTransGroupInput;
 import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.enums.IsOrNot;
+import io.terminus.doctor.event.enums.PigSource;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorGroupSnapshot;
@@ -41,7 +42,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Date;
 import java.util.Objects;
 
 /**
@@ -114,7 +114,7 @@ public class DoctorGroupManager {
         group.setCurrentBarnName(newGroupInput.getBarnName());
 
         //建群时间与状态
-        group.setOpenAt(MoreObjects.firstNonNull(group.getOpenAt(), new Date()));
+        group.setOpenAt(DateUtil.toDate(newGroupInput.getEventAt()));
         group.setStatus(DoctorGroup.Status.CREATED.getValue());
         return group;
     }
@@ -351,7 +351,7 @@ public class DoctorGroupManager {
 
         updateGroupTrack(groupTrack, event);
 
-        //4.创建镜像 todo
+        //4.创建镜像 todo 其他字段
         createGroupSnapShot(group, event, groupTrack, GroupEventType.TRANS_GROUP);
 
         //5.判断转群数量, 如果 = 猪群数量, 触发关闭猪群事件
@@ -361,9 +361,14 @@ public class DoctorGroupManager {
 
         //6.判断是否新建群,触发目标群的转入仔猪事件
         if (Objects.equals(transGroup.getIsCreateGroup(), IsOrNot.YES.getValue())) {
-//            autoGroupEventNew();
+            //新建猪群
+            Long toGroupId = autoTransGroupEventNew(group, groupTrack, transGroup);
+            transGroup.setToGroupId(toGroupId);
+
+            //转入猪群
+            autoTransGroupEventMoveIn(group, groupTrack, transGroup);
         } else {
-//            autoGroupEventMoveIn();
+            autoTransGroupEventMoveIn(group, groupTrack, transGroup);
         }
     }
 
@@ -380,14 +385,34 @@ public class DoctorGroupManager {
     /**
      * 系统触发的自动新建猪群事件
      */
-    private void autoGroupEventNew(DoctorGroup group, DoctorGroupTrack groupTrack, DoctorNewGroupInput newGroupInput) {
+    private Long autoTransGroupEventNew(DoctorGroup fromGroup, DoctorGroupTrack fromGroupTrack, DoctorTransGroupInput transGroup) {
+        DoctorNewGroupInput newGroupInput = new DoctorNewGroupInput();
+        newGroupInput.setFarmId(fromGroup.getFarmId());
+        newGroupInput.setGroupCode(transGroup.getToGroupCode());    //录入猪群号
+        newGroupInput.setEventAt(transGroup.getEventAt());          //事件发生日期
+        newGroupInput.setBarnId(transGroup.getToBarnId());          //转到的猪舍id
+        newGroupInput.setBarnName(transGroup.getToBarnName());
+        newGroupInput.setPigType(fromGroup.getPigType());           //猪类去原先的猪类 // TODO: 16/5/30 还是取猪舍的猪类?
+        newGroupInput.setSex(fromGroupTrack.getSex());
+        newGroupInput.setBreedId(fromGroup.getBreedId());
+        newGroupInput.setBreedName(fromGroup.getBreedName());
+        newGroupInput.setGeneticId(fromGroup.getGeneticId());
+        newGroupInput.setGeneticName(fromGroup.getGeneticName());
+        newGroupInput.setSource(PigSource.LOCAL.getKey());          //来源是本场
 
+        DoctorGroup toGroup = BeanMapper.map(newGroupInput, DoctorGroup.class);
+        toGroup.setFarmName(fromGroup.getFarmName());
+        toGroup.setOrgId(fromGroup.getId());
+        toGroup.setOrgName(fromGroup.getOrgName());
+        toGroup.setCreatorId(0L);       //创建者0, 标识系统自动生成
+        return RespHelper.orServEx(doctorGroupWriteService.createNewGroup(toGroup, newGroupInput));
     }
 
     /**
      * 系统触发的自动转入转入猪群事件(群间转移)
      */
-    private void autoGroupEventMoveIn(DoctorGroup group, DoctorGroupTrack groupTrack, DoctorMoveInGroupInput moveIn) {
+    private void autoTransGroupEventMoveIn(DoctorGroup fromGroup, DoctorGroupTrack fromGroupTrack, DoctorTransGroupInput transGroup) {
+        
 
     }
 

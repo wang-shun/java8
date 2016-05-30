@@ -5,7 +5,6 @@ import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
-import java.util.Date;
 
 /**
  * Desc: 新建猪群所需字段
@@ -32,7 +31,8 @@ public class DoctorNewGroupInput implements Serializable {
     /**
      * 建群时间
      */
-    private Date openAt;
+    @NotEmpty(message = "date.not.null")
+    private String eventAt;
 
     /**
      * 猪舍id

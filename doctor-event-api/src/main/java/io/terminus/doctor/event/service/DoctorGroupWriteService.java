@@ -31,7 +31,6 @@ public interface DoctorGroupWriteService {
      */
     Response<Long> createNewGroup(DoctorGroup group, @Valid DoctorNewGroupInput newGroupInput);
 
-
     /**
      * 录入防疫事件
      * @param groupDetail 操作猪群信息
