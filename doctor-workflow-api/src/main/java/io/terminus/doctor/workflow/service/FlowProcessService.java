@@ -1,6 +1,7 @@
 package io.terminus.doctor.workflow.service;
 
 import io.terminus.doctor.workflow.core.Executor;
+import io.terminus.doctor.workflow.model.FlowInstance;
 
 import java.util.Map;
 
@@ -21,7 +22,7 @@ public interface FlowProcessService {
      * @param flowDefinitionKey 流程定义的key
      * @param businessId        业务id
      */
-    void startFlowInstance(String flowDefinitionKey, Long businessId);
+    FlowInstance startFlowInstance(String flowDefinitionKey, Long businessId);
 
     /**
      * 根据key值, 启动一个流程实例, 根据version最新的流程定义启动.
@@ -31,7 +32,7 @@ public interface FlowProcessService {
      * @param businessId        业务id
      * @param businessData      业务全局数据(推荐json), 每个流程节点都能访问到
      */
-    void startFlowInstance(String flowDefinitionKey, Long businessId, String businessData);
+    FlowInstance startFlowInstance(String flowDefinitionKey, Long businessId, String businessData);
 
     /**
      * 根据key值, 启动一个流程实例, 根据version最新的流程定义启动.
@@ -42,7 +43,7 @@ public interface FlowProcessService {
      * @param businessData      业务全局数据(推荐json), 每个流程节点都能访问到
      * @param flowData          节点之间的流转数据, 当前节点之外的无法获取
      */
-    void startFlowInstance(String flowDefinitionKey, Long businessId, String businessData, String flowData);
+    FlowInstance startFlowInstance(String flowDefinitionKey, Long businessId, String businessData, String flowData);
 
     /**
      * 根据key值, 启动一个流程实例, 根据version最新的流程定义启动.
@@ -54,7 +55,7 @@ public interface FlowProcessService {
      * @param flowData          节点之间的流转数据, 当前节点之外的无法获取
      * @param expression        流转判断表达式(decision节点情形)
      */
-    void startFlowInstance(String flowDefinitionKey, Long businessId, String businessData, String flowData, Map expression);
+    FlowInstance startFlowInstance(String flowDefinitionKey, Long businessId, String businessData, String flowData, Map expression);
 
     /**
      * 根据key值, 启动一个流程实例, 根据version最新的流程定义启动.
@@ -68,7 +69,7 @@ public interface FlowProcessService {
      * @param operatorId        操作人id
      * @param operatorName      操作人姓名
      */
-    void startFlowInstance(String flowDefinitionKey, Long businessId, String businessData, String flowData, Map expression, Long operatorId, String operatorName);
+    FlowInstance startFlowInstance(String flowDefinitionKey, Long businessId, String businessData, String flowData, Map expression, Long operatorId, String operatorName);
 
     /**
      * 获取任务执行器

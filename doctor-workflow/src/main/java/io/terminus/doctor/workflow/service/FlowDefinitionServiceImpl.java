@@ -9,6 +9,7 @@ import io.terminus.doctor.workflow.model.FlowDefinition;
 import io.terminus.doctor.workflow.model.FlowDefinitionNode;
 import io.terminus.doctor.workflow.model.FlowDefinitionNodeEvent;
 import io.terminus.doctor.workflow.model.FlowInstance;
+import io.terminus.doctor.workflow.utils.AssertHelper;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
@@ -93,7 +94,7 @@ public class FlowDefinitionServiceImpl implements FlowDefinitionService {
 
         } catch (Exception e) {
             log.error("[Work Flow Definition] -> 部署流程定义失败, cause by: {}", Throwables.getStackTraceAsString(e));
-            throw new WorkFlowException(e);
+            AssertHelper.throwException("[Work Flow Definition] -> 部署流程定义失败, cause by: {}", Throwables.getStackTraceAsString(e));
         } finally {
             try {
                 inputStream.close();
@@ -118,43 +119,49 @@ public class FlowDefinitionServiceImpl implements FlowDefinitionService {
 
     @Override
     public void delete(Long flowDefinitionId, boolean cascade, Long operatorId, String operatorName) {
-        // 1. 停止所有的流程实例
-        List<FlowInstance> flowInstances = workFlowEngine.buildFlowQueryService().getFlowInstanceQuery()
-                .flowDefinitionId(flowDefinitionId)
-                .list();
-        if(flowInstances != null && flowInstances.size() > 0) {
-            flowInstances.forEach(flowInstance ->
-                    workFlowEngine.buildFlowProcessService()
-                            .endFlowInstance(
-                                    flowInstance.getFlowDefinitionKey(),
-                                    flowInstance.getBusinessId(),
-                                    cascade,
-                                    "流程定义执行删除操作",
-                                    operatorId,
-                                    operatorName
-                            )
-            );
+        try{
+            // 1. 停止所有的流程实例
+            List<FlowInstance> flowInstances = workFlowEngine.buildFlowQueryService().getFlowInstanceQuery()
+                    .flowDefinitionId(flowDefinitionId)
+                    .list();
+            if(flowInstances != null && flowInstances.size() > 0) {
+                flowInstances.forEach(flowInstance ->
+                        workFlowEngine.buildFlowProcessService()
+                                .endFlowInstance(
+                                        flowInstance.getFlowDefinitionKey(),
+                                        flowInstance.getBusinessId(),
+                                        cascade,
+                                        "流程定义执行删除操作",
+                                        operatorId,
+                                        operatorName
+                                )
+                );
+            }
+            // 2. 删除对应的节点
+            List<Long> flowDefinitionNodeIds = workFlowEngine.buildFlowQueryService().getFlowDefinitionNodeQuery()
+                    .flowDefinitionId(flowDefinitionId)
+                    .list()
+                    .stream()
+                    .map(FlowDefinitionNode::getId)
+                    .collect(Collectors.toList());
+            access().deleteFlowDefinitionNode(flowDefinitionNodeIds);
+
+            // 3. 删除对应的连接事件
+            List<Long> flowDefinitionNodeEventIds = workFlowEngine.buildFlowQueryService().getFlowDefinitionNodeEventQuery()
+                    .flowDefinitionId(flowDefinitionId)
+                    .list()
+                    .stream()
+                    .map(FlowDefinitionNodeEvent::getId)
+                    .collect(Collectors.toList());
+            access().deleteFlowDefinitionNodeEvent(flowDefinitionNodeEventIds);
+
+            // 4. 删除流程定义(逻辑删除)
+            access().deleteFlowDefinition(flowDefinitionId);
+
+        } catch (Exception e) {
+            log.error("[work Flow delete] -> 删除流程定义失败, cause by {}", Throwables.getStackTraceAsString(e));
+            AssertHelper.throwException("[work Flow delete] -> 删除流程定义失败, cause by {}", Throwables.getStackTraceAsString(e));
         }
-        // 2. 删除对应的节点
-        List<Long> flowDefinitionNodeIds = workFlowEngine.buildFlowQueryService().getFlowDefinitionNodeQuery()
-                .flowDefinitionId(flowDefinitionId)
-                .list()
-                .stream()
-                .map(FlowDefinitionNode::getId)
-                .collect(Collectors.toList());
-        access().deleteFlowDefinitionNode(flowDefinitionNodeIds);
-
-        // 3. 删除对应的连接事件
-        List<Long> flowDefinitionNodeEventIds = workFlowEngine.buildFlowQueryService().getFlowDefinitionNodeEventQuery()
-                .flowDefinitionId(flowDefinitionId)
-                .list()
-                .stream()
-                .map(FlowDefinitionNodeEvent::getId)
-                .collect(Collectors.toList());
-        access().deleteFlowDefinitionNodeEvent(flowDefinitionNodeEventIds);
-
-        // 4. 删除流程定义(逻辑删除)
-        access().deleteFlowDefinition(flowDefinitionId);
     }
 
     private JdbcAccess access() {
