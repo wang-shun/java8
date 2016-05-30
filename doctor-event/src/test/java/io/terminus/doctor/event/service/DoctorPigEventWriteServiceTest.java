@@ -1,18 +1,13 @@
 package io.terminus.doctor.event.service;
 
-import io.terminus.common.model.Response;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.event.dao.DoctorPigDao;
 import io.terminus.doctor.event.dao.DoctorPigEventDao;
 import io.terminus.doctor.event.dao.DoctorPigSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorPigTrackDao;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
-import io.terminus.doctor.event.dto.event.usual.DoctorDiseaseDto;
 import io.terminus.doctor.event.dto.event.usual.DoctorFarmEntryDto;
-import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.test.BaseServiceTest;
-import org.joda.time.DateTime;
-import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -52,37 +47,23 @@ public class DoctorPigEventWriteServiceTest extends BaseServiceTest{
     @Test
     public void testEventWriteService(){
 
-        Response<Long> response = doctorPigEventWriteService.diseaseEvent(
-                DoctorDiseaseDto.builder().diseaseDate(DateTime.now().toDate())
-                        .diseaseName("diseaseName").diseaseRemark("diseaseRemark").diseaseStaff("diseaseStaff").build(), buildBasicInputInfo(), DoctorPig.PIG_TYPE.SOW.getKey());
-        Assert.assertTrue(response.isSuccess());
-
-        // validate table
-        printInfo(doctorPigEventDao.findById(response.getResult()));
-
-        // pig track
-        printInfo(doctorPigTrackDao.findByPigId(1l));
-
-        // snap shot
-        printInfo(doctorPigSnapshotDao.queryByEventId(response.getResult()));
-
     }
 
     @Test
     public void testPigEntryEvent(){
 
-        Response<Long> response = doctorPigEventWriteService.pigEntryEvent(buildEntryInputInfo(),buildFarmEntryDto(),DoctorPig.PIG_TYPE.SOW.getKey());
-
-//        printInfo(doctorPigDao.findById(6l));
-
-        // validate table
-        printInfo(doctorPigEventDao.findById(response.getResult()));
-
-        // pig track
-        printInfo(doctorPigTrackDao.findByPigId(1l));
-
-        // snap shot
-        printInfo(doctorPigSnapshotDao.queryByEventId(response.getResult()));
+//        Response<Long> response = doctorPigEventWriteService.pigEntryEvent(buildEntryInputInfo(),buildFarmEntryDto(),DoctorPig.PIG_TYPE.SOW.getKey());
+//
+////        printInfo(doctorPigDao.findById(6l));
+//
+//        // validate table
+//        printInfo(doctorPigEventDao.findById(response.getResult()));
+//
+//        // pig track
+//        printInfo(doctorPigTrackDao.findByPigId(1l));
+//
+//        // snap shot
+//        printInfo(doctorPigSnapshotDao.queryByEventId(response.getResult()));
 
     }
 

@@ -24,6 +24,12 @@ public class DoctorBasicInputInfoDto implements Serializable{
     // basic exist pig info（进厂事件信息，不用录入）
     private Long pigId;
 
+    /**
+     * 对应的母猪类型（公猪，母猪）
+     * @see io.terminus.doctor.event.model.DoctorPig.PIG_TYPE
+     */
+    private Integer pigType;
+
     private String pigCode;
 
     private Long barnId;

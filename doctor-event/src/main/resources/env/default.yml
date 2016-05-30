@@ -62,3 +62,9 @@ search.barn:
   mapping-path: search/barn_mapping.json
   full-dump-range: 3
   batch-size: 100
+
+flow:
+  definition:
+    key:
+      sow:sow
+      boar:boar
