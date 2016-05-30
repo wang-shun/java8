@@ -6,6 +6,8 @@
 
 <mapper namespace="DoctorGroupSnapshot">
     <resultMap id="DoctorGroupSnapshotMap" type="DoctorGroupSnapshot">
+        <id column="id" property="id"/>
+        <result column="event_type" property="eventType"/>
         <result column="from_group_id" property="fromGroupId"/>
         <result column="to_group_id" property="toGroupId"/>
         <result column="from_event_id" property="fromEventId"/>
