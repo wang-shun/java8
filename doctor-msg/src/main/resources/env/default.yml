@@ -1,7 +1,7 @@
 # MyBatis
 mybatis:
   mapperLocations: classpath*:mapper/*Mapper.xml
-  typeAliasesPackage: io.terminus.parana.msg.model
+  typeAliasesPackage: io.terminus.parana.msg.model,io.terminus.doctor.msg.model
 
 # Datasource
 datasource:
