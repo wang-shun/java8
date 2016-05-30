@@ -20,6 +20,28 @@ CREATE TABLE `parana_users` (
   UNIQUE KEY idx_users_mobile(mobile)
 ) COMMENT='用户表';
 
+-- 用户详情表: parana_user_profiles
+CREATE TABLE `parana_user_profiles` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `user_id` bigint(20) NULL COMMENT '用户id',
+  `realname` VARCHAR(32) NULL COMMENT '真实姓名',
+  `gender` SMALLINT NULL COMMENT '性别1男2女',
+  `province_id` bigint(20) NOT NULL COMMENT '省id',
+  `province` VARCHAR(100) NOT NULL COMMENT '省',
+  `city_id` bigint(20) NULL COMMENT '城id',
+  `city` VARCHAR(100) NULL COMMENT '城',
+  `region_id` bigint(20) NULL COMMENT '区id',
+  `region` VARCHAR(100) NULL COMMENT '区',
+  `street` VARCHAR(130) NULL COMMENT '地址',
+  `extra_json` VARCHAR(2048) NULL COMMENT '其他信息, 以json形式存储',
+  `avatar` VARCHAR(512) NOT NULL COMMENT '头像',
+  `birth` VARCHAR(40) NULL COMMENT '出生日期',
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY idx_user_id(user_id)
+) COMMENT='用户详情表';
+
 -- 用户文件表: parana_user_files
 CREATE TABLE IF NOT EXISTS `parana_user_files` (
   `id`          bigint(20)    unsigned  NOT NULL  AUTO_INCREMENT,

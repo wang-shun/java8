@@ -14,6 +14,9 @@
     <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.event.service.DoctorBarnReadService" ref="doctorBarnReadServiceImpl"/>
     <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.event.service.DoctorBarnWriteService" ref="doctorBarnWriteServiceImpl" />
 
+    <!-- workflow api -->
+    <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.workflow.core.WorkFlowService" ref="workFlowServiceImpl" />
+
     <!-- search api -->
     <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.event.search.pig.PigSearchReadService" ref="pigSearchReadServiceImpl" />
     <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.event.search.pig.PigSearchWriteService" ref="pigSearchWriteServiceImpl" />

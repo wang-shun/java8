@@ -29,6 +29,10 @@ public class FlowDefinitionNodeEvent implements Serializable{
      */
     private String name;
     /**
+     * 事件值
+     */
+    private String value;
+    /**
      * 流程定义id
      * @see FlowDefinition
      */

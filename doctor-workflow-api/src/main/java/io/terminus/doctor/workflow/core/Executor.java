@@ -1,5 +1,6 @@
 package io.terminus.doctor.workflow.core;
 
+import io.terminus.doctor.workflow.model.FlowInstance;
 import io.terminus.doctor.workflow.model.FlowProcess;
 
 import java.util.Map;
@@ -63,26 +64,26 @@ public interface Executor {
     /**
      * 启动子流程实例
      */
-    void startSubFlowInstance();
+    FlowInstance startSubFlowInstance();
 
     /**
      * 启动子流程实例
      * @param flowData  流转数据
      */
-    void startSubFlowInstance(String flowData);
+    FlowInstance startSubFlowInstance(String flowData);
 
     /**
      * 启动子流程实例
      * @param expression    执行判断表达式
      */
-    void startSubFlowInstance(Map expression);
+    FlowInstance startSubFlowInstance(Map expression);
 
     /**
      * 启动子流程实例
      * @param flowData      流转数据
      * @param expression    执行判断表达式
      */
-    void startSubFlowInstance(String flowData, Map expression);
+    FlowInstance startSubFlowInstance(String flowData, Map expression);
 
     /**
      * 启动子流程实例
@@ -91,7 +92,7 @@ public interface Executor {
      * @param operatorId    操作人id
      * @param operatorName  操作人姓名
      */
-    void startSubFlowInstance(String flowData, Map expression, Long operatorId, String operatorName);
+    FlowInstance startSubFlowInstance(String flowData, Map expression, Long operatorId, String operatorName);
 
     /**
      * 结束子流程实例

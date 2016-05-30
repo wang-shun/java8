@@ -1,6 +1,8 @@
 package io.terminus.doctor.event.service;
 
 import com.google.common.base.Throwables;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 import io.terminus.common.model.PageInfo;
 import io.terminus.common.model.Paging;
@@ -16,6 +18,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.validation.constraints.NotNull;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -128,5 +132,29 @@ public class DoctorPigReadServiceImpl implements DoctorPigReadService{
     @Override
     public Response<DoctorSowPigInfoDetailDto> querySowPigInfoDetail(Long pigId) {
         return null;
+    }
+
+    @Override
+    public Response<List<DoctorPigInfoDto>> queryDoctorPigInfoByBarnId(@NotNull(message = "input.barnId.empty") Long barnId) {
+        try{
+            List<DoctorPig> doctorPigs = doctorPigDao.list(ImmutableMap.of("barnId", barnId));
+            if(isNull(doctorPigs) || Iterables.isEmpty(doctorPigs)){
+                return Response.ok(Collections.emptyList());
+            }
+
+            List<DoctorPigTrack> tracks = doctorPigTrackDao.findByPigIds(doctorPigs.stream().map(d -> d.getId()).collect(Collectors.toList()));
+            Map<Long, DoctorPigTrack> trackMap = tracks.stream().collect(Collectors.toMap(k->k.getPigId(), v->v));
+
+            List<DoctorPigInfoDto> dtos =  doctorPigs.stream()
+                    .map(doc->DoctorPigInfoDto.buildDoctorPigInfoDto(doc, trackMap.get(doc.getId())))
+                    .collect(Collectors.toList());
+        	return Response.ok(dtos);
+        }catch (IllegalStateException se){
+            log.warn("illegal state fail, cause:{}", Throwables.getStackTraceAsString(se));
+            return Response.fail(se.getMessage());
+        }catch (Exception e){
+            log.error("query pig info by barn id fail, cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("query.doctorPigInfo.fail");
+        }
     }
 }

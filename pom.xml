@@ -9,6 +9,7 @@
     <modules>
         <module>doctor-workflow</module>
         <module>doctor-workflow-api</module>
+        <module>doctor-workflow-job</module>
         <module>doctor-web-core</module>
         <module>doctor-web</module>
         <module>doctor-admin</module>
@@ -19,6 +20,7 @@
         <module>doctor-warehouse</module>
         <module>doctor-warehouse-api</module>
         <module>doctor-user-api</module>
+        <module>doctor-user-interface</module>
         <module>doctor-user</module>
         <module>doctor-msg-api</module>
         <module>doctor-msg</module>
@@ -61,6 +63,7 @@
         <bcprov-jdk15on.version>1.51</bcprov-jdk15on.version>
         <validation-api.version>1.1.0.Final</validation-api.version>
         <hibernate-validator.version>5.0.1.Final</hibernate-validator.version>
+        <simple.mail.version>2.1</simple.mail.version>
     </properties>
 
     <dependencies>
@@ -389,6 +392,11 @@
             </dependency>
             <dependency>
                 <groupId>io.terminus.doctor</groupId>
+                <artifactId>doctor-user-interface</artifactId>
+                <version>${project.parent.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.terminus.doctor</groupId>
                 <artifactId>doctor-user</artifactId>
                 <version>${project.parent.version}</version>
             </dependency>
@@ -492,6 +500,13 @@
                 <groupId>io.terminus.pampas.openplatform</groupId>
                 <artifactId>core</artifactId>
                 <version>${openplatform.version}</version>
+            </dependency>
+
+            <!-- mail -->
+            <dependency>
+                <groupId>org.codemonkey.simplejavamail</groupId>
+                <artifactId>simple-java-mail</artifactId>
+                <version>${simple.mail.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

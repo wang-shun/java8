@@ -11,9 +11,11 @@
         <id column="id" property="id"/>
         <result column="flow_definition_id" property="flowDefinitionId"/>
         <result column="name" property="name"/>
+        <result column="value" property="value"/>
         <result column="node_name" property="nodeName"/>
         <result column="type" property="type"/>
         <result column="assignee" property="assignee"/>
+        <result column="timer" property="timer"/>
         <result column="point_x" property="pointX"/>
         <result column="point_y" property="pointY"/>
         <result column="created_at" property="createdAt"/>
@@ -30,10 +32,10 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        `flow_definition_id`,`name`,`node_name`,`type`,`assignee`,`point_x`,`point_y`,`created_at`,`updated_at`    </sql>
+        `flow_definition_id`,`name`,`value`,`node_name`,`type`,`assignee`,`timer`,`point_x`,`point_y`,`created_at`,`updated_at`    </sql>
 
     <sql id="vals">
-        #{flowDefinitionId},#{name},#{nodeName},#{type},#{assignee},#{pointX},#{pointY},now(),now()    </sql>
+        #{flowDefinitionId},#{name},#{value},#{nodeName},#{type},#{assignee},#{timer},#{pointX},#{pointY},now(),now()    </sql>
 
     <insert id="create" parameterType="FlowDefinitionNode" keyProperty="id" useGeneratedKeys="true">
         INSERT INTO
@@ -59,9 +61,11 @@
             updated_at = now()
             <if test="flowDefinitionId != null">,`flow_definition_id` = #{flowDefinitionId}</if>
             <if test="name != null">,`name` = #{name}</if>
+            <if test="value != null">,`value` = #{value}</if>
             <if test="nodeName != null">,`node_name` = #{nodeName}</if>
             <if test="type != null">,`type` = #{type}</if>
             <if test="assignee != null">,`assignee` = #{assignee}</if>
+            <if test="timer != null">,`timer` = #{timer}</if>
             <if test="pointX != null">,`point_x` = #{pointX}</if>
             <if test="pointY != null">,`point_y` = #{pointY}</if>
             <if test="createdAt != null">,`created_at` = #{createdAt}</if>
@@ -90,6 +94,7 @@
             <if test="id != null">AND id = #{id}</if>
             <if test="flowDefinitionId != null">AND `flow_definition_id` = #{flowDefinitionId}</if>
             <if test="name != null">AND `name` LIKE CONCAT('%',#{name},'%')</if>
+            <if test="value != null">AND `value` = #{value}</if>
             <if test="nodeName != null">AND `node_name` = #{nodeName}</if>
             <if test="type != null">AND `type` = #{type}</if>
             <if test="assignee != null">AND `assignee` = #{assignee}</if>

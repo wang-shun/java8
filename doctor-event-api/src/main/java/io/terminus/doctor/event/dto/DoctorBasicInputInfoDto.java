@@ -24,6 +24,12 @@ public class DoctorBasicInputInfoDto implements Serializable{
     // basic exist pig info（进厂事件信息，不用录入）
     private Long pigId;
 
+    /**
+     * 对应的母猪类型（公猪，母猪）
+     * @see io.terminus.doctor.event.model.DoctorPig.PIG_TYPE
+     */
+    private Integer pigType;
+
     private String pigCode;
 
     private Long barnId;
@@ -52,4 +58,11 @@ public class DoctorBasicInputInfoDto implements Serializable{
 
     private Long relEventId;
 
+    public DoctorBasicInputInfoDto buildSameBarnPigInfo(Long pigId, Integer pigType, String pigCode){
+        return DoctorBasicInputInfoDto.builder()
+                .pigId(pigId).pigType(pigType).pigCode(pigCode).barnId(this.barnId).barnName(this.barnName)
+                .farmId(this.farmId).farmName(this.farmName).orgId(this.orgId).orgName(this.orgName).staffId(this.staffId).staffName(this.staffName)
+                .eventType(this.eventType).eventName(this.eventName).eventDesc(this.eventDesc).relEventId(this.relEventId)
+                .build();
+    }
 }

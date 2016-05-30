@@ -1,5 +1,5 @@
 
-CREATE TABLE `workflow_definitions` (
+CREATE TABLE IF NOT EXISTS `workflow_definitions` (
   `id` BIGINT(20) NOT NULL AUTO_INCREMENT COMMENT '自增主键',
   `key` VARCHAR(128) DEFAULT NULL COMMENT '流程定义唯一标识, 按照版本号区分',
   `name` VARCHAR(128) DEFAULT NULL COMMENT '流程定义name属性名称',
@@ -15,13 +15,15 @@ CREATE TABLE `workflow_definitions` (
 )COMMENT='流程定义表';
 
 
-CREATE TABLE `workflow_definition_nodes`(
+CREATE TABLE IF NOT EXISTS `workflow_definition_nodes`(
   `id` BIGINT(20) NOT NULL AUTO_INCREMENT COMMENT '自增主键',
   `flow_definition_id` BIGINT(20) DEFAULT NULL COMMENT '流程定义id',
   `name` VARCHAR(32) DEFAULT NULL COMMENT '节点name属性名称',
+  `value` VARCHAR(32) DEFAULT NULL COMMENT '节点value属性值',
   `node_name` VARCHAR(32) DEFAULT NULL COMMENT '节点标签名称',
   `type` SMALLINT(6) DEFAULT NULL COMMENT '节点类型, 1->开始节点, 2->任务节点, 3->选择节点, 4->并行节点, 5->并行汇聚节点, 10->子流程开始节点, -10->子流程结束节点, -1->结束节点',
   `assignee` VARCHAR(32) DEFAULT NULL COMMENT '处理人(暂时保留)',
+  `timer` VARCHAR(32) DEFAULT NULL COMMENT '定时表达式',
   `point_x` DOUBLE DEFAULT NULL COMMENT '节点x轴偏移量',
   `point_y` DOUBLE DEFAULT NULL COMMENT '节点y轴偏移量',
   `created_at` DATETIME DEFAULT NULL COMMENT '创建时间',
@@ -30,9 +32,10 @@ CREATE TABLE `workflow_definition_nodes`(
 )COMMENT='流程定义节点表';
 
 
-CREATE TABLE `workflow_definition_node_events`(
+CREATE TABLE IF NOT EXISTS `workflow_definition_node_events`(
   `id` BIGINT(20) NOT NULL AUTO_INCREMENT COMMENT '自增主键',
   `name` VARCHAR(128) DEFAULT NULL COMMENT '连线name属性名称',
+  `value` VARCHAR(32) DEFAULT NULL COMMENT '连线value属性值',
   `flow_definition_id` BIGINT(20) DEFAULT NULL COMMENT '流程定义id,冗余',
   `source_node_id` BIGINT(20) DEFAULT NULL COMMENT '流程源节点的id',
   `handler` VARCHAR(128) DEFAULT NULL COMMENT '事件驱动处理类(一般为类标识)',
@@ -45,7 +48,7 @@ CREATE TABLE `workflow_definition_node_events`(
 )COMMENT='流程定义节点连线事件表';
 
 
-CREATE TABLE `workflow_process_instances`(
+CREATE TABLE IF NOT EXISTS `workflow_process_instances`(
   `id` BIGINT(20) NOT NULL AUTO_INCREMENT COMMENT '自增主键',
   `name` VARCHAR(128) DEFAULT NULL COMMENT '流程实例的名称',
   `flow_definition_id` BIGINT(20) DEFAULT NULL COMMENT '流程定义id',
@@ -63,7 +66,7 @@ CREATE TABLE `workflow_process_instances`(
 )COMMENT='流程实例表';
 
 
-CREATE TABLE `workflow_processes`(
+CREATE TABLE IF NOT EXISTS `workflow_processes`(
   `id` BIGINT(20) NOT NULL AUTO_INCREMENT COMMENT '自增主键',
   `flow_definition_node_id` BIGINT(20) DEFAULT NULL COMMENT '流程节点的id',
   `pre_flow_definition_node_id` VARCHAR(128) DEFAULT NULL COMMENT '上一个流程节点的id, 可能存在多个, 用逗号隔开',
@@ -79,7 +82,7 @@ CREATE TABLE `workflow_processes`(
 
 
 
-CREATE TABLE `workflow_process_tracks`(
+CREATE TABLE IF NOT EXISTS `workflow_process_tracks`(
   `id` BIGINT(20) NOT NULL AUTO_INCREMENT COMMENT '自增主键',
   `flow_definition_node_id` BIGINT(20) DEFAULT NULL COMMENT '流程节点的id',
   `pre_flow_definition_node_id` VARCHAR(128) DEFAULT NULL COMMENT '上一个流程节点的id, 可能存在多个, 用逗号隔开',
@@ -97,7 +100,7 @@ CREATE TABLE `workflow_process_tracks`(
 
 
 
-CREATE TABLE `workflow_history_process_instances`(
+CREATE TABLE IF NOT EXISTS `workflow_history_process_instances`(
   `id` BIGINT(20) NOT NULL AUTO_INCREMENT COMMENT '自增主键',
   `name` VARCHAR(128) DEFAULT NULL COMMENT '流程实例的名称',
   `flow_definition_id` BIGINT(20) DEFAULT NULL COMMENT '流程定义id',
@@ -117,7 +120,7 @@ CREATE TABLE `workflow_history_process_instances`(
 
 
 
-CREATE TABLE `workflow_history_processes`(
+CREATE TABLE IF NOT EXISTS `workflow_history_processes`(
   `id` BIGINT(20) NOT NULL AUTO_INCREMENT COMMENT '自增主键',
   `flow_definition_node_id` BIGINT(20) DEFAULT NULL COMMENT '流程节点的id',
   `pre_flow_definition_node_id` VARCHAR(128) DEFAULT NULL COMMENT '上一个流程节点的id, 可能存在多个, 用逗号隔开',

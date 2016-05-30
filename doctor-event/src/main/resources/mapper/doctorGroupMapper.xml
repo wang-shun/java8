@@ -6,6 +6,7 @@
 
 <mapper namespace="DoctorGroup">
     <resultMap id="DoctorGroupMap" type="DoctorGroup">
+        <id column="id" property="id"/>
         <result column="org_id" property="orgId"/>
         <result column="org_name" property="orgName"/>
         <result column="farm_id" property="farmId"/>

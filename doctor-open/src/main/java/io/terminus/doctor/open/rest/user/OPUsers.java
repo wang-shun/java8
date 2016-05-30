@@ -3,23 +3,35 @@ package io.terminus.doctor.open.rest.user;
 import com.github.cage.Cage;
 import com.github.cage.token.RandomTokenGenerator;
 import com.google.common.base.Charsets;
+import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.hash.Hashing;
 import io.terminus.boot.session.properties.SessionProperties;
+import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.Response;
-import io.terminus.doctor.common.utils.RandomUtil;
+import io.terminus.common.utils.Splitters;
+import io.terminus.doctor.common.enums.UserRole;
+import io.terminus.doctor.common.enums.UserStatus;
+import io.terminus.doctor.common.enums.UserType;
+import io.terminus.doctor.common.utils.Params;
 import io.terminus.doctor.open.common.CaptchaGenerator;
+import io.terminus.doctor.open.common.MobilePattern;
 import io.terminus.doctor.open.common.Sessions;
+import io.terminus.lib.sms.SmsException;
 import io.terminus.pampas.common.UserUtil;
 import io.terminus.pampas.openplatform.annotations.OpenBean;
 import io.terminus.pampas.openplatform.annotations.OpenMethod;
 import io.terminus.pampas.openplatform.exceptions.OPClientException;
+import io.terminus.parana.common.utils.EncryptUtil;
 import io.terminus.parana.user.model.LoginType;
 import io.terminus.parana.user.model.User;
 import io.terminus.parana.user.model.UserDevice;
 import io.terminus.parana.user.service.DeviceWriteService;
 import io.terminus.parana.user.service.UserReadService;
+import io.terminus.parana.user.service.UserWriteService;
+import io.terminus.parana.web.msg.MsgWebService;
 import io.terminus.session.AFSessionManager;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -33,12 +45,17 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import java.io.Serializable;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 import static io.terminus.common.utils.Arguments.isEmpty;
 import static io.terminus.common.utils.Arguments.isNull;
+import static io.terminus.common.utils.Arguments.notEmpty;
+import static io.terminus.common.utils.Arguments.notNull;
 
 /**
  * Mail: xiao@terminus.io <br>
@@ -62,7 +79,13 @@ public class OPUsers {
     @Autowired
     private UserReadService<User> userReadService;
     @Autowired
+    private UserWriteService<User> userWriteService;
+    @Autowired
     private DeviceWriteService deviceWriteService;
+    @Autowired
+    private MsgWebService smsWebService;
+    @Autowired
+    private MobilePattern mobilePattern;
 
     public OPUsers() {
         String hostIp;
@@ -74,6 +97,11 @@ public class OPUsers {
         hostIpMd5 = Hashing.md5().hashString(hostIp, Charsets.UTF_8).toString().substring(0,8);
     }
 
+    /**
+     * 获取sessionID
+     * @param key
+     * @return
+     */
     @OpenMethod(key = "get.session.id", paramNames = {"key"})
     public Map<String, String> getSessionId(String key) {
         if (isEmpty(key)) {
@@ -82,6 +110,11 @@ public class OPUsers {
         return ImmutableMap.of("sessionId", generateId(key));
     }
 
+    /**
+     * sessionId 产生规则
+     * @param key
+     * @return
+     */
     private String generateId(String key) {
         StringBuilder builder = new StringBuilder(30);
         String clientKey =  Hashing.md5().hashString(key, Charsets.UTF_8).toString().substring(0, 8);
@@ -91,6 +124,10 @@ public class OPUsers {
         return builder.toString();
     }
 
+    /**
+     * 获取服务器时间
+     * @return
+     */
     @OpenMethod(key="server.time", paramNames = {})
     public Map<String, String> serverTime() {
         return ImmutableMap.of("time", DateTime.now().toString(DateTimeFormat.forPattern("yyyyMMddHHmmss")));
@@ -101,9 +138,57 @@ public class OPUsers {
      * @param mobile
      * @return
      */
-    @OpenMethod(key = "get.mobile.code", paramNames = "mobile")
-    public Boolean sendSms(@NotEmpty(message = "user.mobile.miss") String mobile) {
-        return Boolean.TRUE;
+    @OpenMethod(key = "get.mobile.code", paramNames = {"mobile", "sid"})
+    public Boolean sendSms(@NotEmpty(message = "user.mobile.miss") String mobile, @NotEmpty(message = "session.id.miss")String sessionId) {
+        if (mobilePattern.getPattern().matcher(mobile).matches()) {
+            Map<String, Object> snapshot = sessionManager.findSessionById(Sessions.CODE_PREFIX, sessionId);
+            String activateCode = null;
+            if(notNull(snapshot)){
+                activateCode = Params.get(snapshot, "code");
+            }
+            Response<Boolean> result = null;
+
+            if (!Strings.isNullOrEmpty(activateCode)) { //判断是否需要重新发送激活码
+                List<String> parts = Splitters.AT.splitToList(activateCode);
+                long sendTime = Long.parseLong(parts.get(1));
+                if (System.currentTimeMillis() - sendTime < TimeUnit.MINUTES.toMillis(1)) { //
+                    log.error("could not send sms, sms only can be sent once in one minute");
+                    throw new OPClientException("1分钟内只能获取一次验证码");
+                } else {
+                    String code = generateMsgCode();
+
+                    // 将code存放到session当中
+                    sessionManager.save(Sessions.MSG_PREFIX, sessionId,
+                            ImmutableMap.of("code", code + "@" + System.currentTimeMillis()+"@"+mobile),
+                            Sessions.SHORT_INACTIVE_INTERVAL);
+                    // 发送验证码
+                    result = doSendSms(code, mobile);
+                }
+            } else { //新发送激活码
+                String code = generateMsgCode();
+                // 将code存放到session当中
+                sessionManager.save(Sessions.MSG_PREFIX, sessionId,
+                        ImmutableMap.of("code", code + "@" + System.currentTimeMillis()+"@"+mobile),
+                        Sessions.SHORT_INACTIVE_INTERVAL);
+                // 发送验证码
+                result = doSendSms(code, mobile);
+            }
+            if(!result.isSuccess()) {
+                log.warn("send sms single fail, cause:{}", result.getError());
+                throw new OPClientException(result.getError());
+            }
+            return result.getResult();
+        } else {
+            throw new OPClientException("mobile.format.error");
+        }
+    }
+
+    /**
+     * 产生手机验证码
+     * @return
+     */
+    private String generateMsgCode(){
+        return String.valueOf((int) ((Math.random() * 9 + 1) * 100000));
     }
 
     /**
@@ -114,15 +199,93 @@ public class OPUsers {
      * @param code       手机验证码
      * @return 注册成功之后的用户ID
      */
-    @OpenMethod(key = "user.register", httpMethods = RequestMethod.POST, paramNames = {"password", "mobile", "code"})
+    @OpenMethod(key = "user.register", httpMethods = RequestMethod.POST, paramNames = {"password", "mobile", "code", "sid"})
     public Long register(@NotEmpty(message = "user.password.miss") String password,
                          @NotEmpty(message = "user.mobile.miss") String mobile,
-                         @NotEmpty(message = "user.code.miss") String code) {
-        return Long.valueOf(RandomUtil.random(1, 10));
+                         @NotEmpty(message = "user.code.miss") String code,
+                         @NotEmpty(message = "session.id.miss")String sessionId) {
+        checkPasswordFormat(password);
+        User user = null;
+        // 校验手机验证码
+        validateSmsCode(code, mobile, sessionId);
+        user = registerByMobile(mobile, password, null);
+        return user.getId();
     }
 
     /**
-     * 用户登录,
+     * 校验密码格式
+     * @param password
+     */
+    private void checkPasswordFormat(String password){
+        if (!password.matches("[\\s\\S]{6,16}")){
+            throw new OPClientException("user.password.6to16");
+        }
+    }
+
+    /**
+     * 校验手机验证码
+     *
+     * @param code    输入的验证码
+     * @param mobile  手机号
+     * @param sessionId
+     */
+    private void validateSmsCode(String code, String mobile, String sessionId) {
+        Map<String, Object> msgSession = sessionManager.findSessionById(Sessions.MSG_PREFIX, sessionId);
+        // session verify, value = code@time@mobile
+        String codeInSession = Params.get(msgSession, "code");
+        if(isEmpty(codeInSession)){
+            throw new OPClientException("sms.token.error");
+        }
+        String expectedCode = Splitters.AT.splitToList(codeInSession).get(0);
+        if(!Objects.equals(code, expectedCode)){
+            throw new OPClientException("sms.token.error");
+        }
+        String expectedMobile = Splitters.AT.splitToList(codeInSession).get(2);
+        if(!Objects.equals(mobile, expectedMobile)){
+            throw new OPClientException("sms.token.error");
+        }
+        // 如果验证成功则删除之前的code
+        sessionManager.deletePhysically(Sessions.MSG_PREFIX, sessionId);
+    }
+
+    /**
+     * 手机注册
+     *
+     * @param mobile 手机号
+     * @param password 密码
+     * @param userName 用户名
+     * @return 注册成功之后的用户
+     */
+    private User registerByMobile(String mobile, String password, String userName) {
+        Response<User> result = userReadService.findBy(mobile, LoginType.MOBILE);
+        // 检测手机号是否已存在
+        if(result.isSuccess() && result.getResult() != null){
+            throw new OPClientException("user.register.mobile.has.been.used");
+        }
+        // 设置用户信息
+        User user = new User();
+        user.setMobile(mobile);
+        user.setPassword(password);
+        user.setName(userName);
+
+        // 用户状态 0: 未激活, 1: 正常, -1: 锁定, -2: 冻结, -3: 删除
+        user.setStatus(UserStatus.NORMAL.value());
+
+        user.setType(UserType.FARM_ADMIN_PRIMARY.value());
+
+        // 注册用户默认成为猪场管理员
+        user.setRoles(Lists.newArrayList(UserRole.PRIMARY.name()));
+
+        Response<Long> resp = userWriteService.create(user);
+        if(!resp.isSuccess()){
+            throw new OPClientException(resp.getError());
+        }
+        user.setId(resp.getResult());
+        return user;
+    }
+
+    /**
+     * 用户登录
      * @param mobile
      * @param password
      * @param code
@@ -336,10 +499,43 @@ public class OPUsers {
      * @param newPassword 新密码
      * @return 是否成功
      */
-    @OpenMethod(key = "user.change.password", httpMethods = RequestMethod.POST, paramNames = {"oldPassword", "newPassword"})
+    @OpenMethod(key = "user.change.password", httpMethods = RequestMethod.POST, paramNames = {"oldPassword", "newPassword", "sid"})
     public Boolean changePassword(@NotEmpty(message = "oldPassword.not.empty") String oldPassword,
-                                  @NotEmpty(message = "newPassword.not.empty") String newPassword) {
+                                  @NotEmpty(message = "newPassword.not.empty") String newPassword,
+                                  @NotEmpty(message = "session.id.miss")String sessionId) {
+
+        //1.从session中获取用户信息
+        Map<String, Object> snapshot = sessionManager.findSessionById(Sessions.TOKEN_PREFIX, sessionId);
+        if (snapshot == null || snapshot.size() == 0 || snapshot.get(Sessions.USER_ID) == null) {
+            throw new OPClientException(400, "session.id.expired");
+        }
+        //2.获取用户
+        Response<User> userResp = userReadService.findById(Long.valueOf(snapshot.get(Sessions.USER_ID).toString()));
+        if(!userResp.isSuccess()){
+            throw new OPClientException(userResp.getError());
+        }
+        User user = userResp.getResult();
+        //3.加密密码
+        checkPassword(oldPassword, user.getPassword());
+
+        //4.更新密码
+        user.setPassword(newPassword);
+        Response<Boolean> res = userWriteService.update(user);
+        if (!res.isSuccess()) {
+            throw new OPClientException(res.getError());
+        }
         return Boolean.TRUE;
+    }
+
+    /**
+     * 检查密码
+     * @param inputPassword
+     * @param dbpassword
+     */
+    private void checkPassword(String inputPassword, String dbpassword){
+        if(!Objects.equals(EncryptUtil.encrypt(inputPassword), dbpassword)){
+            throw new OPClientException("user.password.error");
+        }
     }
 
     /**
@@ -349,11 +545,53 @@ public class OPUsers {
      * @param newPassword  新密码
      * @return 是否成功
      */
-    @OpenMethod(key = "user.forget.password", httpMethods = RequestMethod.POST, paramNames = {"mobile", "code", "newPassword"})
+    @OpenMethod(key = "user.forget.password", httpMethods = RequestMethod.POST, paramNames = {"mobile", "code", "newPassword", "sid"})
     public Boolean forgetPassword(@NotEmpty(message = "mobile.not.empty") String mobile,
                                   @NotEmpty(message = "code.not.empty") String code,
-                                  @NotEmpty(message = "newPassword.not.empty") String newPassword) {
+                                  @NotEmpty(message = "newPassword.not.empty") String newPassword,
+                                  @NotEmpty(message = "session.id.miss")String sessionId) {
+        //检查密码格式
+        checkPasswordFormat(newPassword);
+        User user = null;
+        // 校验手机验证码
+        validateSmsCode(code, mobile, sessionId);
+        Response<User> userResp = userReadService.findBy(mobile, LoginType.MOBILE);
+        if(!userResp.isSuccess()){
+            throw new OPClientException(userResp.getError());
+        }
+        user = userResp.getResult();
+        user.setPassword(newPassword);
+        Response<Boolean> res = userWriteService.update(user);
+        if (!res.isSuccess()) {
+            throw new OPClientException(res.getError());
+        }
         return Boolean.TRUE;
+    }
+
+
+    /**
+     * 发送短信验证码
+     *
+     * @param code   验证码
+     * @param mobile 手机号
+     * @return 发送结果
+     */
+    private Response<Boolean> doSendSms(String code, String mobile){
+        Response<Boolean> r = new Response<Boolean>();
+        try {
+            Map<String, Serializable> context=new HashMap<>();
+            context.put("code",code);
+            String result=smsWebService.send(mobile, "user.register.code",context, null);
+            log.info("send sms result : {}", result);
+            r.setResult(Boolean.TRUE);
+            return r;
+        }catch (SmsException e) {
+            log.info("send sms failed, error : {} ", e.getMessage());
+            throw new JsonResponseException(500, "sms.send.fail");
+        }catch (Exception e) {
+            log.error("send sms failed , error : {}", e.getMessage());
+            throw new JsonResponseException(500, "sms.send.fail");
+        }
     }
 
     @Data

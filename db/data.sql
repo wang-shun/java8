@@ -9,7 +9,7 @@ VALUES
 
 INSERT INTO `parana_message_templates` (`id`, `creator_id`, `creator_name`, `name`, `title`, `content`, `context`, `channel`, `disabled`, `description`, `created_at`, `updated_at`)
 VALUES
-	(1, 1, 'admin', 'user.register.code', '用户中心手机注册码', '{\"smsName\":\"大鱼测试\",\"smsTemplate\":\"SMS_5495133\",\"smsParam\":{\"code\":\"{{code}}\",\"product\":\"{{product}}\"}}', '{\"code\":\"123456\"}', 1, b'0', '用户中心手机注册码', now(), now());
+	(1, 1, 'admin', 'user.register.code', '用户中心手机注册码', '您的注册手机验证码是：{{code}}', '{\"code\":\"123456\"}', 1, 0, '用户中心手机注册码', '2016-05-17 17:08:43', '2016-05-17 17:08:43');
 
 
 INSERT INTO `parana_configs` (`biz_type`, `key`, `value`, `data_type`, `group`, `description`, `created_at`, `updated_at`)

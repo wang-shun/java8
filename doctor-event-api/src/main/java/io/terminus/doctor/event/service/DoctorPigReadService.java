@@ -8,6 +8,7 @@ import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 
 import javax.validation.constraints.NotNull;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -67,4 +68,11 @@ public interface DoctorPigReadService {
      * @return
      */
     Response<DoctorSowPigInfoDetailDto> querySowPigInfoDetail(@NotNull(message = "input.pigId.empty") Long pigId);
+
+    /**
+     * 获取猪舍pig 信息内容
+     * @param barnId
+     * @return
+     */
+    Response<List<DoctorPigInfoDto>> queryDoctorPigInfoByBarnId(@NotNull(message = "input.barnId.empty") Long barnId);
 }

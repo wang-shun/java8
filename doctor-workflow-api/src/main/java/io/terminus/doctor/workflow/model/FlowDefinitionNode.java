@@ -36,6 +36,10 @@ public class FlowDefinitionNode implements Serializable{
      */
     private String name;
     /**
+     * 节点值
+     */
+    private String value;
+    /**
      * 节点标签名称
      */
     private String nodeName;
@@ -47,6 +51,10 @@ public class FlowDefinitionNode implements Serializable{
      * 当前处理人
      */
     private String assignee;
+    /**
+     * 定时表达式
+     */
+    private String timer;
     /**
      * 节点x轴偏移量
      */
@@ -135,6 +143,15 @@ public class FlowDefinitionNode implements Serializable{
             for (Type type : Type.values()) {
                 if(type.value() == value) {
                     return type.toString();
+                }
+            }
+            throw new IllegalArgumentException("flow.node.type.undefined");
+        }
+
+        public static Type from(int number) {
+            for (Type type : Type.values()) {
+                if (Objects.equals(type.value, number)) {
+                    return type;
                 }
             }
             throw new IllegalArgumentException("flow.node.type.undefined");

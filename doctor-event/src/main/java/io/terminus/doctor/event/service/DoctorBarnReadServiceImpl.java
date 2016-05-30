@@ -2,6 +2,7 @@ package io.terminus.doctor.event.service;
 
 import com.google.common.base.Throwables;
 import io.terminus.common.model.Response;
+import io.terminus.doctor.common.utils.RandomUtil;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.model.DoctorBarn;
 import lombok.extern.slf4j.Slf4j;
@@ -56,5 +57,10 @@ public class DoctorBarnReadServiceImpl implements DoctorBarnReadService {
                     farmId, pigType, canOpenGroup, status, Throwables.getStackTraceAsString(e));
             return Response.fail("barn.find.fail");
         }
+    }
+
+    @Override
+    public Response<Integer> countPigByBarnId(Long barnId) {
+        return Response.ok(RandomUtil.random(1, 50));
     }
 }

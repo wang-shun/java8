@@ -30,5 +30,10 @@ search.group:
   full-dump-range: 3
   batch-size: 100
 
-#### > search end
+search.barn:
+  index-name: barns
+  index-type: barn
+  mapping-path: search/barn_mapping.json
+  full-dump-range: 3
+  batch-size: 100
 

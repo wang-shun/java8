@@ -41,7 +41,9 @@
     
     </resultMap>
 
-    <sql id="tb"> doctor_pigs </sql>
+    <sql id="tb">
+      doctor_pigs
+    </sql>
 
     <sql id="cols_all">
       id, <include refid="cols_exclude_id" />
@@ -96,7 +98,7 @@
     </select>
 
     <select id="findByIds" parameterType="list" resultMap="DoctorPigMap">
-        SELECT <include refid="cols_all"/> form <include refid="tb"/>
+        SELECT <include refid="cols_all"/> FROM <include refid="tb"/>
         WHERE id in
         <foreach collection="list" open="(" close=")" item="i" separator=",">
             #{i}
@@ -116,6 +118,13 @@
             <include refid="criteria"/>
         </where>
         LIMIT #{offset}, #{limit}
+    </select>
+
+    <select id="list" resultMap="DoctorPigMap">
+        SELECT <include refid="cols_all"/> FROM <include refid="tb"/>
+        <where>
+            <include refid="criteria"/>
+        </where>
     </select>
 
     <update id="update" parameterType="DoctorPig">

@@ -30,8 +30,10 @@ public interface Node {
     ///////////////////////////////////////////////////////////////
     String ATTR_KEY = "key";
     String ATTR_NAME = "name";
+    String ATTR_VALUE = "value";
 
     String ATTR_ASSIGNEE = "assignee";
+    String ATTR_TIMER = "timer";
     String ATTR_POINT_X = "pointx";
     String ATTR_POINT_Y = "pointy";
     String ATTR_TARGET = "target";

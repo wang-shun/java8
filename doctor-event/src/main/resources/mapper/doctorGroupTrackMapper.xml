@@ -6,6 +6,7 @@
 
 <mapper namespace="DoctorGroupTrack">
     <resultMap id="DoctorGroupTrackMap" type="DoctorGroupTrack">
+        <id column="id" property="id"/>
         <result column="group_id" property="groupId"/>
         <result column="rel_event_id" property="relEventId"/>
         <result column="sex" property="sex"/>

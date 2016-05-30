@@ -7,6 +7,7 @@ package io.terminus.doctor.web.admin;
 import io.terminus.doctor.user.service.OperatorRoleReadService;
 import io.terminus.doctor.web.admin.auth.DoctorCustomRoleLoaderConfigurer;
 import io.terminus.doctor.web.core.DoctorCoreWebConfiguration;
+import io.terminus.doctor.web.core.msg.sms.LuoSiMaoSmsServiceConfig;
 import io.terminus.doctor.web.core.service.OtherSystemService;
 import io.terminus.doctor.web.core.service.impl.OtherSystemServiceImpl;
 import io.terminus.parana.auth.role.CustomRoleLoaderConfigurer;
@@ -15,7 +16,7 @@ import io.terminus.parana.config.ConfigCenter;
 import io.terminus.doctor.web.core.advices.JsonExceptionResolver;
 import io.terminus.parana.web.msg.config.MsgAdminWebConfig;
 import io.terminus.parana.web.msg.config.db.DbNotifyConfig;
-import io.terminus.parana.web.msg.impl.common.db.DbMsgGatewayBuilder;
+import io.terminus.parana.web.msg.config.gatewaybuilder.SimpleMsgGatewayBuilderConfig;
 import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -47,7 +48,8 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
 @EnableScheduling
 @Import({DoctorCoreWebConfiguration.class,
         WebAuthenticationConfiguration.class,
-        DbMsgGatewayBuilder.class,
+        SimpleMsgGatewayBuilderConfig.class,
+        LuoSiMaoSmsServiceConfig.class,
         MsgAdminWebConfig.class, DbNotifyConfig.class})
 public class DoctorAdminConfiguration extends WebMvcConfigurerAdapter {
 
