@@ -1,4 +1,4 @@
-package io.terminus.doctor.web.core.msg;
+package io.terminus.doctor.web.core.msg.sms;
 
 import lombok.Data;
 import lombok.experimental.Builder;

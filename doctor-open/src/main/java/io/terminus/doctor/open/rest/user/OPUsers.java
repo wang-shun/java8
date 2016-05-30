@@ -260,7 +260,7 @@ public class OPUsers {
         Response<User> result = userReadService.findBy(mobile, LoginType.MOBILE);
         // 检测手机号是否已存在
         if(result.isSuccess() && result.getResult() != null){
-            throw new JsonResponseException("user.register.mobile.has.been.used");
+            throw new OPClientException("user.register.mobile.has.been.used");
         }
         // 设置用户信息
         User user = new User();
@@ -545,7 +545,7 @@ public class OPUsers {
      * @param newPassword  新密码
      * @return 是否成功
      */
-    @OpenMethod(key = "user.forget.password", httpMethods = RequestMethod.POST, paramNames = {"mobile", "code", "newPassword"})
+    @OpenMethod(key = "user.forget.password", httpMethods = RequestMethod.POST, paramNames = {"mobile", "code", "newPassword", "sid"})
     public Boolean forgetPassword(@NotEmpty(message = "mobile.not.empty") String mobile,
                                   @NotEmpty(message = "code.not.empty") String code,
                                   @NotEmpty(message = "newPassword.not.empty") String newPassword,
