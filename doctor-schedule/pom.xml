@@ -20,6 +20,11 @@
 
         <dependency>
             <groupId>io.terminus.doctor</groupId>
+            <artifactId>doctor-web-core</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>io.terminus.doctor</groupId>
             <artifactId>doctor-event-api</artifactId>
         </dependency>
 

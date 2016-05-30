@@ -6,6 +6,7 @@ package io.terminus.doctor.open;
 
 import io.terminus.doctor.open.common.MessageSources;
 import io.terminus.doctor.web.core.image.FileHelper;
+import io.terminus.doctor.web.core.msg.email.CommonEmailServiceConfig;
 import io.terminus.doctor.web.core.msg.sms.LuoSiMaoSmsServiceConfig;
 import io.terminus.lib.file.FileServer;
 import io.terminus.lib.file.ImageServer;
@@ -41,6 +42,7 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 @Import({
         SimpleMsgGatewayBuilderConfig.class,
         LuoSiMaoSmsServiceConfig.class,
+        CommonEmailServiceConfig.class,
         DbSmsConfig.class, TestSmsWebServiceConfig.class,
         DbNotifyConfig.class,TestNotifyWebServiceConfig.class,
         DbEmailConfig.class, TestEmailWebServiceConfig.class,

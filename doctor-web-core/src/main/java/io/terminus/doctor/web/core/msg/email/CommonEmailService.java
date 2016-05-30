@@ -1,7 +1,11 @@
 package io.terminus.doctor.web.core.msg.email;
 
+import com.google.common.base.Splitter;
 import com.google.common.base.Throwables;
 import io.terminus.common.model.Response;
+import io.terminus.common.utils.JsonMapper;
+import io.terminus.common.utils.Splitters;
+import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.lib.email.EmailException;
 import io.terminus.lib.email.EmailService;
 import lombok.extern.slf4j.Slf4j;
@@ -16,7 +20,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 /**
- * Desc:
+ * Desc: 普通短信网关实现
  * Mail: houly@terminus.io
  * Data: 下午2:07 16/5/30
  * Author: houly
@@ -48,7 +52,12 @@ public class CommonEmailService implements EmailService {
     }
     @Override
     public String send(String subject, String content, String toes, String attachments) throws EmailException {
-        return null;
+        toes=singleString2JsonFormat(toes);
+
+        List<String> toList= JsonMapper.JSON_NON_EMPTY_MAPPER.fromJson(toes, List.class);
+
+        RespHelper.orServEx(send(subject, content, toList, false));
+        return "SUCCESS";
     }
 
 
@@ -105,5 +114,11 @@ public class CommonEmailService implements EmailService {
             log.error("failed to send email({}), cause: {}", email, Throwables.getStackTraceAsString(e));
             return Response.fail(e.getMessage());
         }
+    }
+    private String singleString2JsonFormat(String from){
+        if(!from.contains("[")){
+            from="[\""+from+"\"]";
+        }
+        return from;
     }
 }
