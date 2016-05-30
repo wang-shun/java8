@@ -1,4 +1,4 @@
-package io.terminus.doctor.web.core.msg;
+package io.terminus.doctor.web.core.msg.sms;
 
 import io.terminus.lib.sms.SmsService;
 import org.springframework.beans.factory.annotation.Value;

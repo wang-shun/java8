@@ -57,12 +57,30 @@ public interface DoctorPigEventWriteService {
                                    @NotNull(message = "input.basic.empty") DoctorBasicInputInfoDto doctorBasicInputInfoDto);
 
     /**
+     * 批量创建疾病数据信息
+     * @param doctorDiseaseDto 相同的疾病信息数据
+     * @param basicInputInfoDto 基础信息， barnId 下每头猪创建疾病信息内容
+     * @return 创建事件列表信息
+     */
+    Response<Boolean> diseaseEvents(@NotNull(message = "input.dto.empty") DoctorDiseaseDto doctorDiseaseDto,
+                                    @NotNull(message = "input.basic.empty") DoctorBasicInputInfoDto basicInputInfoDto);
+
+    /**
      * 防疫事件信息
      * @param doctorVaccinationDto
      * @param doctorBasicInputInfoDto
      * @return
      */
     Response<Long> vaccinationEvent(@NotNull(message = "input.dto.empty") DoctorVaccinationDto doctorVaccinationDto,
+                                        @NotNull(message = "input.basic.empty") DoctorBasicInputInfoDto doctorBasicInputInfoDto);
+
+    /**
+     * 批量创建免疫事件信息
+     * @param doctorVaccinationDto
+     * @param doctorBasicInputInfoDto
+     * @return
+     */
+    Response<Boolean> vaccinationEvents(@NotNull(message = "input.dto.empty") DoctorVaccinationDto doctorVaccinationDto,
                                         @NotNull(message = "input.basic.empty") DoctorBasicInputInfoDto doctorBasicInputInfoDto);
 
     /**

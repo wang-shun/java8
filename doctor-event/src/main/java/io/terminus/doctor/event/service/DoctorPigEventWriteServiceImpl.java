@@ -8,7 +8,9 @@ import io.terminus.common.utils.BeanMapper;
 import io.terminus.doctor.common.enums.DataEventType;
 import io.terminus.doctor.common.event.DataEvent;
 import io.terminus.doctor.common.utils.Params;
+import io.terminus.doctor.event.dao.DoctorPigTrackDao;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
+import io.terminus.doctor.event.dto.DoctorPigInfoDto;
 import io.terminus.doctor.event.dto.event.boar.DoctorSemenDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorFarrowingDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorFostersDto;
@@ -33,8 +35,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
+
+import static com.google.common.base.Preconditions.checkState;
 
 /**
  * Created by yaoqijun.
@@ -48,15 +54,23 @@ public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteServic
 
     private final DoctorPigEventManager doctorPigEventManager;
 
+    private final DoctorPigTrackDao doctorPigTrackDao;
+
+    private final DoctorPigReadService doctorPigReadService;
+
     private final EventBus eventBus;
 
     @Autowired(required = false)
     private Publisher publisher;
 
     @Autowired
-    public DoctorPigEventWriteServiceImpl(DoctorPigEventManager doctorPigEventManager, EventBus eventBus){
+    public DoctorPigEventWriteServiceImpl(
+            DoctorPigEventManager doctorPigEventManager, EventBus eventBus,
+            DoctorPigTrackDao doctorPigTrackDao, DoctorPigReadService doctorPigReadService){
+        this.doctorPigTrackDao = doctorPigTrackDao;
         this.doctorPigEventManager = doctorPigEventManager;
         this.eventBus = eventBus;
+        this.doctorPigReadService = doctorPigReadService;
     }
 
     @Override
@@ -104,6 +118,29 @@ public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteServic
     }
 
     @Override
+    public Response<Boolean> diseaseEvents(DoctorDiseaseDto doctorDiseaseDto, DoctorBasicInputInfoDto basicInputInfoDto) {
+        try{
+            Response<List<DoctorPigInfoDto>> listResponse = this.doctorPigReadService.queryDoctorPigInfoByBarnId(basicInputInfoDto.getBarnId());
+            checkState(listResponse.isSuccess(), "query.pigByBarnId.fail");
+
+            List<DoctorBasicInputInfoDto> basicInputInfoDtos = listResponse.getResult().stream()
+                    .map(dto->basicInputInfoDto.buildSameBarnPigInfo(dto.getId(),dto.getPigType(),dto.getPigCode())).collect(Collectors.toList());
+
+            Map<String,Object> beans = Maps.newHashMap();
+            BeanMapper.copy(doctorDiseaseDto, beans);
+
+            doctorPigEventManager.createCasualPigEvents(basicInputInfoDtos, beans);
+        	return Response.ok(Boolean.TRUE);
+        }catch (IllegalStateException se){
+            log.warn("illegal state, create events disease fail, cause:{}", Throwables.getStackTraceAsString(se));
+            return Response.fail(se.getMessage());
+        }catch (Exception e){
+            log.error("create diseases events fail, cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("create.diseaseEvents.fail");
+        }
+    }
+
+    @Override
     public Response<Long> vaccinationEvent(DoctorVaccinationDto doctorVaccinationDto, DoctorBasicInputInfoDto doctorBasicInputInfoDto) {
         try{
             Map<String,Object> dto = Maps.newHashMap();
@@ -115,6 +152,29 @@ public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteServic
         }catch (Exception e){
             log.error("vaccination event create fail, cause:{}", Throwables.getStackTraceAsString(e));
             return Response.fail("create.vaccination.fail");
+        }
+    }
+
+    @Override
+    public Response<Boolean> vaccinationEvents(DoctorVaccinationDto doctorVaccinationDto, DoctorBasicInputInfoDto doctorBasicInputInfoDto) {
+        try{
+            Response<List<DoctorPigInfoDto>> listResponse = this.doctorPigReadService.queryDoctorPigInfoByBarnId(doctorBasicInputInfoDto.getBarnId());
+            checkState(listResponse.isSuccess(), "query.vaccinations.error");
+
+            List<DoctorBasicInputInfoDto> basicInputInfoDtos = listResponse.getResult().stream()
+                    .map(dto->doctorBasicInputInfoDto.buildSameBarnPigInfo(dto.getId(),dto.getPigType(),dto.getPigCode())).collect(Collectors.toList());
+
+            Map<String,Object> beans = Maps.newHashMap();
+            BeanMapper.copy(doctorVaccinationDto, beans);
+
+            doctorPigEventManager.createCasualPigEvents(basicInputInfoDtos, beans);
+        	return Response.ok(Boolean.TRUE);
+        }catch (IllegalStateException se){
+            log.warn("illegal state fail, cause:{}", Throwables.getStackTraceAsString(se));
+            return Response.fail(se.getMessage());
+        }catch (Exception e){
+            log.error("vaccination events create fail, cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("vaccination.createEvents.fail");
         }
     }
 

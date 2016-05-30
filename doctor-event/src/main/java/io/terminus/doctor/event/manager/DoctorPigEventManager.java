@@ -21,6 +21,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkState;
@@ -102,6 +103,22 @@ public class DoctorPigEventManager {
         Map<String,Object> context = Maps.newHashMap();
         doctorEventHandlerChainInvocation.invoke(doctorBasicInputInfoDto, extra, context);
         return context;
+    }
+
+    /**
+     * 批量创建普通事件信息内容
+     * @param basicList
+     * @param extra
+     * @return 通过PigId 获取对应的返回结果信息
+     */
+    public Map<String, Object> createCasualPigEvents(List<DoctorBasicInputInfoDto> basicList, Map<String,Object> extra){
+        Map<String,Object> result = Maps.newHashMap();
+        basicList.forEach(basic->{
+            Map<String,Object> currentContext = Maps.newHashMap();
+            doctorEventHandlerChainInvocation.invoke(basic, extra, currentContext);
+            result.put(basic.getPigId().toString(), JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(currentContext));
+        });
+        return result;
     }
 
     /**

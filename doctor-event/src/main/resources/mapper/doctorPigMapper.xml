@@ -120,6 +120,13 @@
         LIMIT #{offset}, #{limit}
     </select>
 
+    <select id="list" resultMap="DoctorPigMap">
+        SELECT <include refid="cols_all"/> FROM <include refid="tb"/>
+        <where>
+            <include refid="criteria"/>
+        </where>
+    </select>
+
     <update id="update" parameterType="DoctorPig">
         UPDATE <include refid="tb"/>
         <set>
