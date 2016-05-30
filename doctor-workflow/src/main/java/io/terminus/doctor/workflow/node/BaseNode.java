@@ -1,11 +1,13 @@
 package io.terminus.doctor.workflow.node;
 
+import com.google.common.base.Throwables;
 import io.terminus.doctor.workflow.core.Execution;
 import io.terminus.doctor.workflow.event.IHandler;
 import io.terminus.doctor.workflow.event.Interceptor;
 import io.terminus.doctor.workflow.model.FlowDefinitionNode;
 import io.terminus.doctor.workflow.model.FlowDefinitionNodeEvent;
 import io.terminus.doctor.workflow.model.FlowProcess;
+import io.terminus.doctor.workflow.utils.AssertHelper;
 import io.terminus.doctor.workflow.utils.NodeHelper;
 import lombok.extern.slf4j.Slf4j;
 
@@ -61,11 +63,18 @@ public abstract class BaseNode implements Node {
 
     protected void forward(IHandler handler, Execution execution, FlowDefinitionNodeEvent transition) {
         // 1. 执行节点
-        if (handler != null) {
-            handler.preHandle(execution);
-            handler.handle(execution);
-            handler.afterHandle(execution);
+        try{
+            if (handler != null) {
+                handler.preHandle(execution);
+                handler.handle(execution);
+                handler.afterHandle(execution);
+            }
+        } catch (Exception e) {
+            log.error("[handler execute] -> handler execute failed cause by {}", Throwables.getStackTraceAsString(e));
+            AssertHelper.throwException("[handler execute] -> handler [{}] execute failed cause by {}",
+                    handler.getClass().getSimpleName(), Throwables.getStackTraceAsString(e));
         }
+
 
         FlowProcess nextProcess = execution.getNextFlowProcess(transition);
         if (nextProcess != null) {
