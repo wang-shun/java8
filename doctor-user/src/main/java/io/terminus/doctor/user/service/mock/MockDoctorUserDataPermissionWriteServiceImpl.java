@@ -15,7 +15,6 @@ import org.springframework.stereotype.Service;
  */
 @Slf4j
 @Service
-@Primary
 public class MockDoctorUserDataPermissionWriteServiceImpl implements DoctorUserDataPermissionWriteService {
     @Override
     public Response<Long> createDataPermission(DoctorUserDataPermission dataPermission) {

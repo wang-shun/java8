@@ -2,7 +2,6 @@ package io.terminus.doctor.user.service;
 
 import io.terminus.common.model.Response;
 import io.terminus.doctor.user.model.DoctorFarm;
-import io.terminus.doctor.user.model.DoctorOrg;
 
 /**
  * Desc: 猪场信息写接口
@@ -12,12 +11,6 @@ import io.terminus.doctor.user.model.DoctorOrg;
  */
 
 public interface DoctorFarmWriteService {
-
-    Response<Long> createOrg(DoctorOrg org);
-
-    Response<Boolean> updateOrg(DoctorOrg org);
-
-    Response<Boolean> deleteOrg(Long orgId);
 
     Response<Long> createFarm(DoctorFarm farm);
 

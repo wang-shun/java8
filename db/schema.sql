@@ -1132,6 +1132,7 @@ values
 (0, 'system.neverest.domain', 'http://www.neverest.com', 'string', 0, 'neverest系统的完整域名', NOW(), now());
 
 -- 用户账户与其他系统账户的绑定关系
+DROP TABLE IF EXISTS `doctor_user_binds`;
 CREATE TABLE `doctor_user_binds` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `user_id` bigint(20) NOT NULL,

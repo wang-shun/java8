@@ -16,22 +16,7 @@ import org.springframework.stereotype.Service;
  */
 @Slf4j
 @Service
-@Primary
 public class MockDoctorFarmWriteServiceImpl implements DoctorFarmWriteService {
-    @Override
-    public Response<Long> createOrg(DoctorOrg org) {
-        return Response.ok(1L);
-    }
-
-    @Override
-    public Response<Boolean> updateOrg(DoctorOrg org) {
-        return Response.ok(Boolean.TRUE);
-    }
-
-    @Override
-    public Response<Boolean> deleteOrg(Long orgId) {
-        return Response.ok(Boolean.TRUE);
-    }
 
     @Override
     public Response<Long> createFarm(DoctorFarm farm) {
