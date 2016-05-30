@@ -14,13 +14,12 @@ import io.terminus.doctor.event.dto.event.group.input.DoctorCloseGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorDiseaseGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorLiveStockGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorMoveInGroupInput;
+import io.terminus.doctor.event.dto.event.group.input.DoctorNewGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorTransFarmGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorTransGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorTurnSeedGroupInput;
 import io.terminus.doctor.event.manager.DoctorGroupManager;
 import io.terminus.doctor.event.model.DoctorGroup;
-import io.terminus.doctor.event.model.DoctorGroupEvent;
-import io.terminus.doctor.event.model.DoctorGroupTrack;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -61,11 +60,11 @@ public class DoctorGroupWriteServiceImpl implements DoctorGroupWriteService {
     }
 
     @Override
-    public Response<Long> createNewGroup(DoctorGroup group, DoctorGroupEvent groupEvent, DoctorGroupTrack groupTrack) {
+    public Response<Long> createNewGroup(DoctorGroup group, @Valid DoctorNewGroupInput newGroupInput) {
         try {
-            return Response.ok(doctorGroupManager.createNewGroup(group, groupEvent, groupTrack));
+            return Response.ok(doctorGroupManager.createNewGroup(group, newGroupInput));
         } catch (Exception e) {
-            log.error("create group failed, groupDetail:{}, groupEvent:{}, groupTrack:{}, cause:{}", group, groupEvent, groupTrack, Throwables.getStackTraceAsString(e));
+            log.error("create group failed, group:{}, newGroupInput:{}, cause:{}", group, newGroupInput, Throwables.getStackTraceAsString(e));
             return Response.fail("group.create.fail");
         }
     }
@@ -89,8 +88,10 @@ public class DoctorGroupWriteServiceImpl implements DoctorGroupWriteService {
     @Override
     public Response<Boolean> groupEventChange(DoctorGroupDetail groupDetail, @Valid DoctorChangeGroupInput change) {
         try {
-
-            return Response.ok();
+            checkQuantity(groupDetail.getGroupTrack().getQuantity(), change.getQuantity());
+            checkQuantityEqual(change.getQuantity(), change.getBoarQty(), change.getSowQty());
+            doctorGroupManager.groupEventChange(groupDetail.getGroup(), groupDetail.getGroupTrack(), change);
+            return Response.ok(Boolean.TRUE);
         } catch (ServiceException e) {
             log.error("failed, groupDetail:{}, change:{}, cause:{}", groupDetail, change, Throwables.getStackTraceAsString(e));
             return Response.fail(e.getMessage());

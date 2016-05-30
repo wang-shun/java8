@@ -31,11 +31,15 @@ public class EventUtil {
      * @return 均重
      */
     public static double getAvgWeight(double oldWeight, double newWeight, int allQty) {
-        return (oldWeight + newWeight) / allQty;
+        return getAvgWeight(oldWeight + newWeight, allQty);
     }
 
     public static int plusQuantity(int aq, int bq) {
         return aq + bq;
+    }
+
+    public static int minusQuantity(int aq, int bq) {
+        return aq - bq;
     }
 
     /**

@@ -28,6 +28,7 @@ public interface DoctorGroupWebService {
      * @param groupId 猪群id
      * @param eventType 事件类型
      * @param params 入参
+     * @see io.terminus.doctor.event.dto.event.group.input.BaseGroupInput
      * @return 是否成功
      */
     Response<Boolean> createGroupEvent(@NotNull(message = "groupId.not.null") Long groupId,

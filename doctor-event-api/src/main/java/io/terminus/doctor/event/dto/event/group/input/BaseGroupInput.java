@@ -22,6 +22,8 @@ public class BaseGroupInput implements Serializable {
     @NotEmpty(message = "date.not.null")
     protected String eventAt;
 
+    protected String remark;
+
     /**
      * 是否是自动生成的事件(用于区分是触发事件还是手工录入事件) 0 不是, 1 是
      * @see io.terminus.doctor.event.enums.IsOrNot
@@ -33,6 +35,4 @@ public class BaseGroupInput implements Serializable {
     protected Long creatorId;
 
     protected String creatorName;
-
-    protected String remark;
 }
