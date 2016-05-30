@@ -1,4 +1,4 @@
-package io.terminus.doctor.web.core.msg;
+package io.terminus.doctor.web.core.msg.sms;
 
 import com.github.kevinsawicki.http.HttpRequest;
 import com.google.common.collect.ImmutableMap;

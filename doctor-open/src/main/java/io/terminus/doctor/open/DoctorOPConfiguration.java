@@ -5,22 +5,18 @@
 package io.terminus.doctor.open;
 
 import io.terminus.doctor.open.common.MessageSources;
-import io.terminus.doctor.web.core.DoctorCoreWebConfiguration;
 import io.terminus.doctor.web.core.image.FileHelper;
-import io.terminus.doctor.web.core.msg.LuoSiMaoSmsServiceConfig;
+import io.terminus.doctor.web.core.msg.sms.LuoSiMaoSmsServiceConfig;
 import io.terminus.lib.file.FileServer;
 import io.terminus.lib.file.ImageServer;
 import io.terminus.lib.file.aliyun.AliyunFileServer;
 import io.terminus.lib.file.aliyun.AliyunImageServer;
 import io.terminus.pampas.openplatform.annotations.EnableOpenPlatform;
-import io.terminus.parana.auth.web.WebAuthenticationConfiguration;
 import io.terminus.parana.web.msg.config.db.DbAppPushConfig;
 import io.terminus.parana.web.msg.config.db.DbEmailConfig;
 import io.terminus.parana.web.msg.config.db.DbNotifyConfig;
 import io.terminus.parana.web.msg.config.db.DbSmsConfig;
-import io.terminus.parana.web.msg.config.gatewaybuilder.DbMsgGatewayBuilderConfig;
 import io.terminus.parana.web.msg.config.gatewaybuilder.SimpleMsgGatewayBuilderConfig;
-import io.terminus.parana.web.msg.config.simple.SimpleSmsConfig;
 import io.terminus.parana.web.msg.config.test.TestAppPushWebServiceConfig;
 import io.terminus.parana.web.msg.config.test.TestEmailWebServiceConfig;
 import io.terminus.parana.web.msg.config.test.TestNotifyWebServiceConfig;

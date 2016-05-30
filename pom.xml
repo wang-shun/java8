@@ -62,6 +62,7 @@
         <bcprov-jdk15on.version>1.51</bcprov-jdk15on.version>
         <validation-api.version>1.1.0.Final</validation-api.version>
         <hibernate-validator.version>5.0.1.Final</hibernate-validator.version>
+        <simple.mail.version>2.1</simple.mail.version>
     </properties>
 
     <dependencies>
@@ -498,6 +499,13 @@
                 <groupId>io.terminus.pampas.openplatform</groupId>
                 <artifactId>core</artifactId>
                 <version>${openplatform.version}</version>
+            </dependency>
+
+            <!-- mail -->
+            <dependency>
+                <groupId>org.codemonkey.simplejavamail</groupId>
+                <artifactId>simple-java-mail</artifactId>
+                <version>${simple.mail.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
