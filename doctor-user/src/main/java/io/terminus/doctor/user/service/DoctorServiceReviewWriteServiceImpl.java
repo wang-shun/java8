@@ -1,13 +1,8 @@
 package io.terminus.doctor.user.service;
 
-import com.google.common.base.Objects;
 import com.google.common.base.Throwables;
-import io.terminus.common.exception.ServiceException;
-import io.terminus.common.model.BaseUser;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.user.dao.DoctorServiceReviewDao;
-import io.terminus.doctor.user.dto.DoctorServiceApplyDto;
-import io.terminus.doctor.user.manager.DoctorUserManager;
 import io.terminus.doctor.user.model.DoctorServiceReview;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,12 +20,10 @@ import org.springframework.stereotype.Service;
 @Primary
 public class DoctorServiceReviewWriteServiceImpl implements DoctorServiceReviewWriteService{
     private final DoctorServiceReviewDao doctorServiceReviewDao;
-    private final DoctorUserManager doctorUserManager;
 
     @Autowired
-    public DoctorServiceReviewWriteServiceImpl(DoctorServiceReviewDao doctorServiceReviewDao, DoctorUserManager doctorUserManager){
+    public DoctorServiceReviewWriteServiceImpl(DoctorServiceReviewDao doctorServiceReviewDao){
         this.doctorServiceReviewDao = doctorServiceReviewDao;
-        this.doctorUserManager = doctorUserManager;
     }
 
     @Override
@@ -70,18 +63,4 @@ public class DoctorServiceReviewWriteServiceImpl implements DoctorServiceReviewW
         return response;
     }
 
-    @Override
-    public Response<Boolean> applyOpenService(BaseUser baseUser, DoctorServiceApplyDto serviceApplyDto) {
-        Response<Boolean> response = new Response<>();
-        try {
-            doctorUserManager.applyOpenService(baseUser, serviceApplyDto);
-            response.setResult(true);
-        } catch (ServiceException e) {
-            response.setError(e.getMessage());
-        } catch (Exception e) {
-            log.error("applyOpenService failed, cause : {}", Throwables.getStackTraceAsString(e));
-            response.setError("apply.open.service.failed");
-        }
-        return response;
-    }
 }

@@ -6,6 +6,7 @@
 
 <mapper namespace="DoctorFarm">
     <resultMap id="DoctorFarmMap" type="DoctorFarm">
+        <id column="id" property="id"/>
         <result column="name" property="name"/>
         <result column="org_id" property="orgId"/>
         <result column="org_name" property="orgName"/>
@@ -55,9 +56,6 @@
             <if test="orgName != null">org_name = #{orgName},</if>
             <if test="outId != null">out_id = #{outId},</if>
             <if test="extra != null">extra = #{extra},</if>
-            
-            
-            
             updated_at=now()
         </set>
         WHERE id = #{id}
