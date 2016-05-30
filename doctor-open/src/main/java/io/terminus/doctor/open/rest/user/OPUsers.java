@@ -555,12 +555,11 @@ public class OPUsers {
         User user = null;
         // 校验手机验证码
         validateSmsCode(code, mobile, sessionId);
-
         Response<User> userResp = userReadService.findBy(mobile, LoginType.MOBILE);
         if(!userResp.isSuccess()){
             throw new OPClientException(userResp.getError());
         }
-
+        user = userResp.getResult();
         user.setPassword(newPassword);
         Response<Boolean> res = userWriteService.update(user);
         if (!res.isSuccess()) {
