@@ -106,7 +106,7 @@ public class DoctorServiceReview implements Serializable {
             return Lists.newArrayList(Status.values()).stream()
                     .filter(s -> Objects.equal(s.value, number))
                     .findFirst()
-                    .orElseThrow(() -> {
+                    .<ServiceException>orElseThrow(() -> {
                         throw new ServiceException("doctor.service.review.status.error");
                     });
         }

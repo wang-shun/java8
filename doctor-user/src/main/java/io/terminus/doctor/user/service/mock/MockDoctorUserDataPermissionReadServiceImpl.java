@@ -15,7 +15,6 @@ import org.springframework.stereotype.Service;
  */
 @Slf4j
 @Service
-@Primary
 public class MockDoctorUserDataPermissionReadServiceImpl implements DoctorUserDataPermissionReadService {
     @Override
     public Response<DoctorUserDataPermission> findDataPermissionByUserId(Long userId) {

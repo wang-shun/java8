@@ -19,17 +19,7 @@ import java.util.List;
  */
 @Slf4j
 @Service
-@Primary
 public class MockDoctorFarmReadServiceImpl implements DoctorFarmReadService {
-    @Override
-    public Response<DoctorOrg> findOrgById(Long orgId) {
-        return Response.ok(mockOrg(orgId));
-    }
-
-    @Override
-    public Response<DoctorOrg> findOrgByUserId(Long userId) {
-        return Response.ok(mockOrg(userId));
-    }
 
     @Override
     public Response<DoctorFarm> findFarmById(Long farmId) {

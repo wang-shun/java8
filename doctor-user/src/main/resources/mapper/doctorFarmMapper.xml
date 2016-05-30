@@ -47,6 +47,12 @@
         WHERE id = #{id}
     </select>
 
+    <select id="findByOrgId" parameterType="long" resultMap="DoctorFarmMap" >
+        SELECT <include refid="cols_all" />
+        FROM <include refid="tb" />
+        WHERE org_id = #{orgId}
+    </select>
+
     <update id="update" parameterType="DoctorFarm">
         UPDATE
         <include refid="tb"/>

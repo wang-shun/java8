@@ -11,6 +11,7 @@ import io.terminus.doctor.user.model.DoctorUser;
 import io.terminus.doctor.user.service.DoctorServiceReviewReadService;
 import io.terminus.doctor.user.service.DoctorServiceReviewWriteService;
 import io.terminus.doctor.user.service.DoctorUserReadService;
+import io.terminus.doctor.user.service.business.DoctorServiceReviewService;
 import io.terminus.pampas.common.UserUtil;
 import io.terminus.pampas.openplatform.annotations.OpenBean;
 import io.terminus.pampas.openplatform.annotations.OpenMethod;
@@ -33,16 +34,19 @@ public class OPDoctorUsers {
     private final DoctorServiceReviewReadService doctorServiceReviewReadService;
 
     private final DoctorServiceReviewWriteService doctorServiceReviewWriteService;
+    private final DoctorServiceReviewService doctorServiceReviewService;
 
     private final DoctorUserReadService doctorUserReadService;
 
     @Autowired
     public OPDoctorUsers(DoctorServiceReviewReadService doctorServiceReviewReadService,
                          DoctorServiceReviewWriteService doctorServiceReviewWriteService,
-                         DoctorUserReadService doctorUserReadService) {
+                         DoctorUserReadService doctorUserReadService,
+                         DoctorServiceReviewService doctorServiceReviewService) {
         this.doctorServiceReviewReadService = doctorServiceReviewReadService;
         this.doctorServiceReviewWriteService = doctorServiceReviewWriteService;
         this.doctorUserReadService = doctorUserReadService;
+        this.doctorServiceReviewService = doctorServiceReviewService;
     }
 
     /**
@@ -61,7 +65,7 @@ public class OPDoctorUsers {
      */
     @OpenMethod(key = "apply.open.service", paramNames = "serviceApplyDto")
     public Boolean applyOpenService(@Valid DoctorServiceApplyDto serviceApplyDto) {
-        return OPRespHelper.orOPEx(doctorServiceReviewWriteService.applyOpenService(UserUtil.getCurrentUser(), serviceApplyDto));
+        return OPRespHelper.orOPEx(doctorServiceReviewService.applyOpenService(UserUtil.getCurrentUser(), serviceApplyDto));
     }
 
     /**
