@@ -4,7 +4,7 @@ server:
 
 session:
   cookie-context-path: /
-
+  cookie-domain: doctor.com
   cookie-max-age: 1800
   cookie-name: msid
   source: redis
@@ -79,8 +79,8 @@ msg:
     protocol: 2
   umeng: #友盟APP消息推送网关配置
     android: #Android应用配置
-      appKey: xxxx
-      appSecret: xxxx
+      appKey: 574cecdce0f55a85f00028fe
+      appSecret: jmaegca1mvlzpxewuufcn6kbxhebpzeo
     ios: #IOS应用配置
-      appKey: xxxx
-      appSecret: xxxx
+      appKey: 574ced4267e58eef570035c7
+      appSecret: ws685rsevimn8fgx6mmxzzgx7bs1y9pn

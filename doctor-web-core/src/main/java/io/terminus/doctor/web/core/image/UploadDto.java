@@ -1,6 +1,5 @@
 package io.terminus.doctor.web.core.image;
 
-import io.terminus.parana.file.enums.FileType;
 import io.terminus.parana.file.model.UserFile;
 import io.terminus.parana.file.model.UserFolder;
 import lombok.Data;

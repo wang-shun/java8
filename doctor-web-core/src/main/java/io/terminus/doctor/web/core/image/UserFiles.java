@@ -5,21 +5,15 @@
 package io.terminus.doctor.web.core.image;
 
 import com.google.common.base.Optional;
-import com.google.common.base.Strings;
-import com.google.common.base.Throwables;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
-import com.google.common.io.Files;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.BaseUser;
 import io.terminus.common.model.Response;
-import io.terminus.common.utils.JsonMapper;
 import io.terminus.lib.file.FileServer;
 import io.terminus.lib.file.ImageServer;
-import io.terminus.lib.file.util.FUtil;
 import io.terminus.pampas.common.UserUtil;
-import io.terminus.pampas.engine.MessageSources;
+import io.terminus.pampas.engine.ThreadVars;
+import org.springframework.context.MessageSource;
 import io.terminus.parana.file.dto.FileRealPath;
 import io.terminus.parana.file.enums.FileType;
 import io.terminus.parana.file.model.UserFile;
@@ -31,18 +25,19 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static io.terminus.common.utils.Arguments.notNull;
@@ -62,7 +57,7 @@ public class UserFiles {
     @Autowired(required = false)
     private UserFolderService userFolderService;
     @Autowired(required = false)
-    private MessageSources messageSources;
+    private MessageSource messageSources;
     @Autowired
     private FileHelper fileHelper;
     @Autowired
@@ -85,7 +80,7 @@ public class UserFiles {
     public List<UploadDto> upload(MultipartHttpServletRequest request) {
         BaseUser user = UserUtil.getCurrentUser();
         if (user == null) {
-            throw new JsonResponseException(401, messageSources.get("user.not.login"));
+            throw new JsonResponseException(401, get("user.not.login"));
         }
 
         Long folderId = request.getParameter("folderId") == null ? 0 : Long.parseLong(request.getParameter("folderId"));
@@ -128,7 +123,7 @@ public class UserFiles {
     public Boolean updateFile(@RequestBody UserFile userFile) {
         BaseUser user = UserUtil.getCurrentUser();
         if (user == null) {
-            throw new JsonResponseException(401, messageSources.get("user.not.login"));
+            throw new JsonResponseException(401, get("user.not.login"));
         }
 
         try {
@@ -160,7 +155,7 @@ public class UserFiles {
     public Boolean moveFile(@PathVariable Long id, @RequestParam Long folderId) {
         BaseUser user = UserUtil.getCurrentUser();
         if (user == null) {
-            throw new JsonResponseException(401, messageSources.get("user.not.login"));
+            throw new JsonResponseException(401, get("user.not.login"));
         }
 
         checkAuthorize(user.getId(), id);
@@ -194,7 +189,7 @@ public class UserFiles {
     public void delete(@PathVariable Long id) {
         BaseUser user = UserUtil.getCurrentUser();
         if (user == null) {
-            throw new JsonResponseException(401, messageSources.get("user.not.login"));
+            throw new JsonResponseException(401, get("user.not.login"));
         }
 
         Response<UserFile> fileR = userFileService.deleteFile(id);
@@ -227,5 +222,12 @@ public class UserFiles {
             log.error("Can't delete folder={}, by userId={}", folderId, userId);
             throw new JsonResponseException("authorize.fail");
         }
+    }
+    private String get(String code) {
+        return this.get(code, new Object[0]);
+    }
+
+    private String get(String code, Object... args) {
+        return this.messageSources == null?code:this.messageSources.getMessage(code, args, code, ThreadVars.getLocale());
     }
 }

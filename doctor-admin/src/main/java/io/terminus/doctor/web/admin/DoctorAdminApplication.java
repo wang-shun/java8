@@ -16,7 +16,6 @@ import org.springframework.scheduling.annotation.EnableScheduling;
  * Date    : 6:17 PM 2/29/16
  * Mail    : panxin@terminus.io
  */
-@EnableScheduling
 @SpringBootApplication
 public class DoctorAdminApplication {
 

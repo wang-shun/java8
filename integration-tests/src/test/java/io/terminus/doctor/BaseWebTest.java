@@ -23,7 +23,6 @@ import java.util.Map;
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @WebIntegrationTest(randomPort=true)
-@ActiveProfiles("test")
 public abstract class BaseWebTest {
     protected RestTemplate restTemplate = new TestRestTemplate();
 

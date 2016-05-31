@@ -9,7 +9,8 @@ import io.terminus.common.model.BaseUser;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
 import io.terminus.pampas.common.UserUtil;
-import io.terminus.pampas.engine.MessageSources;
+import io.terminus.pampas.engine.ThreadVars;
+import org.springframework.context.MessageSource;
 import io.terminus.parana.file.dto.FilePagingDto;
 import io.terminus.parana.file.dto.UserFileDto;
 import io.terminus.parana.file.model.UserFolder;
@@ -38,7 +39,7 @@ import static io.terminus.common.utils.Arguments.notNull;
 @Slf4j
 public class Folders {
     @Autowired(required = false)
-    private MessageSources messageSources;
+    private MessageSource messageSources;
 
     @Autowired(required = false)
     private UserFolderService userFolderService;
@@ -62,13 +63,13 @@ public class Folders {
                                       @RequestParam(value = "size", defaultValue = "10")Integer pageSize){
         BaseUser user = UserUtil.getCurrentUser();
         if (user == null) {
-            throw new JsonResponseException(401, messageSources.get("user.not.login"));
+            throw new JsonResponseException(401, get("user.not.login"));
         }
 
         Response<FilePagingDto> resp = userFolderService.pagingFiles(user.getId(), fileType, group, fileName, folderId, pageNo, pageSize);
         if (!resp.isSuccess()){
             log.error("Query files failed, userId={} folderId={} fileType={} fileName={}", user.getId(), folderId, fileType, fileName);
-            throw new JsonResponseException(messageSources.get(resp.getError()));
+            throw new JsonResponseException(get(resp.getError()));
         }
         Paging<UserFileDto> tempUserImages = resp.getResult().getFileDtoPaging();
         Paging<UploadDto> userFiles = new Paging<UploadDto>(tempUserImages.getTotal(), Lists.transform(tempUserImages.getData(), new Function<UserFileDto, UploadDto>() {
@@ -103,7 +104,7 @@ public class Folders {
     public UploadDto createFolder(@RequestBody UserFolder userFolder) {
         BaseUser user = UserUtil.getCurrentUser();
         if (user == null) {
-            throw new JsonResponseException(401, messageSources.get("user.not.login"));
+            throw new JsonResponseException(401, get("user.not.login"));
         }
 
         userFolder.setCreateBy(user.getId());
@@ -132,7 +133,7 @@ public class Folders {
     public Boolean updateFolder(@RequestBody UserFolder userFolder) {
         BaseUser user = UserUtil.getCurrentUser();
         if (user == null) {
-            throw new JsonResponseException(401, messageSources.get("user.not.login"));
+            throw new JsonResponseException(401, get("user.not.login"));
         }
 
         try {
@@ -164,7 +165,7 @@ public class Folders {
     public Boolean moveFolder(@PathVariable Long id, @RequestParam Long pid) {
         BaseUser user = UserUtil.getCurrentUser();
         if (user == null) {
-            throw new JsonResponseException(401, messageSources.get("user.not.login"));
+            throw new JsonResponseException(401, get("user.not.login"));
         }
 
         checkAuthorize(user.getId(), id);
@@ -189,7 +190,7 @@ public class Folders {
     public void deleteFolder(@PathVariable Long id) {
         BaseUser user = UserUtil.getCurrentUser();
         if (user == null) {
-            throw new JsonResponseException(401, messageSources.get("user.not.login"));
+            throw new JsonResponseException(401, get("user.not.login"));
         }
         checkAuthorize(user.getId(), id);
 
@@ -216,5 +217,14 @@ public class Folders {
             log.error("Can't delete folder={}, by userId={}", folderId, userId);
             throw new JsonResponseException("authorize.fail");
         }
+    }
+
+
+    private String get(String code) {
+        return this.get(code, new Object[0]);
+    }
+
+    private String get(String code, Object... args) {
+        return this.messageSources == null?code:this.messageSources.getMessage(code, args, code, ThreadVars.getLocale());
     }
 }
