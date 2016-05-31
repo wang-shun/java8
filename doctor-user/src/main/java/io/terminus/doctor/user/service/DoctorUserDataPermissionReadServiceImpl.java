@@ -5,6 +5,7 @@ import io.terminus.common.model.Response;
 import io.terminus.doctor.user.dao.DoctorUserDataPermissionDao;
 import io.terminus.doctor.user.model.DoctorUserDataPermission;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 
@@ -21,7 +22,7 @@ public class DoctorUserDataPermissionReadServiceImpl implements DoctorUserDataPe
 
     private final DoctorUserDataPermissionDao doctorUserDataPermissionDao;
 
-
+    @Autowired
     public DoctorUserDataPermissionReadServiceImpl(DoctorUserDataPermissionDao doctorUserDataPermissionDao){
         this.doctorUserDataPermissionDao = doctorUserDataPermissionDao;
     }

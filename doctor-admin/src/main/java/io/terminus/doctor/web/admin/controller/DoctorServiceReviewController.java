@@ -1,6 +1,5 @@
 package io.terminus.doctor.web.admin.controller;
 
-import com.google.common.base.Preconditions;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.BaseUser;
 import io.terminus.doctor.user.model.DoctorServiceReview;
@@ -13,8 +12,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.Objects;
 
 /**
  * 陈增辉 16/5/30.与用户开通\关闭服务相关的controller
