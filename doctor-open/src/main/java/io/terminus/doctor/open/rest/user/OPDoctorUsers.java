@@ -80,7 +80,7 @@ public class OPDoctorUsers {
      */
     @OpenMethod(key = "get.user.basic.info")
     public DoctorUserInfoDto getUserBasicInfo() {
-        return new DoctorUserInfoDto(mockUser(), getUser().getType(), 1L, mockStaff(getUser().getId()));
+        return new DoctorUserInfoDto(mockUser(), getUser().getType() % 4, 1L, mockStaff(getUser().getId()));
     }
 
     private DoctorUser getUser() {
