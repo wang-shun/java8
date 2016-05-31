@@ -163,8 +163,10 @@ public class DoctorGroupWriteServiceImpl implements DoctorGroupWriteService {
     @Override
     public Response<Boolean> groupEventTransFarm(DoctorGroupDetail groupDetail, @Valid DoctorTransFarmGroupInput transFarm) {
         try {
-
-            return Response.ok();
+            checkQuantity(groupDetail.getGroupTrack().getQuantity(), transFarm.getQuantity());
+            checkQuantityEqual(transFarm.getQuantity(), transFarm.getBoarQty(), transFarm.getSowQty());
+            doctorGroupManager.groupEventTransFarm(groupDetail.getGroup(), groupDetail.getGroupTrack(), transFarm);
+            return Response.ok(Boolean.TRUE);
         } catch (ServiceException e) {
             log.error("failed, groupDetail:{}, transFarm:{}, cause:{}", groupDetail, transFarm, Throwables.getStackTraceAsString(e));
             return Response.fail(e.getMessage());
@@ -177,8 +179,10 @@ public class DoctorGroupWriteServiceImpl implements DoctorGroupWriteService {
     @Override
     public Response<Boolean> groupEventTransGroup(DoctorGroupDetail groupDetail, @Valid DoctorTransGroupInput transGroup) {
         try {
-
-            return Response.ok();
+            checkQuantity(groupDetail.getGroupTrack().getQuantity(), transGroup.getQuantity());
+            checkQuantityEqual(transGroup.getQuantity(), transGroup.getBoarQty(), transGroup.getSowQty());
+            doctorGroupManager.groupEventTransGroup(groupDetail.getGroup(), groupDetail.getGroupTrack(), transGroup);
+            return Response.ok(Boolean.TRUE);
         } catch (ServiceException e) {
             log.error("failed, groupDetail:{}, transGroup:{}, cause:{}", groupDetail, transGroup, Throwables.getStackTraceAsString(e));
             return Response.fail(e.getMessage());
@@ -191,8 +195,8 @@ public class DoctorGroupWriteServiceImpl implements DoctorGroupWriteService {
     @Override
     public Response<Boolean> groupEventTurnSeed(DoctorGroupDetail groupDetail, @Valid DoctorTurnSeedGroupInput turnSeed) {
         try {
-
-            return Response.ok();
+            // TODO: 16/5/31 商品猪转种猪不能手工录入???
+            return Response.ok(Boolean.TRUE);
         } catch (ServiceException e) {
             log.error("failed, groupDetail:{}, turnSeed:{}, cause:{}", groupDetail, turnSeed, Throwables.getStackTraceAsString(e));
             return Response.fail(e.getMessage());
@@ -225,6 +229,7 @@ public class DoctorGroupWriteServiceImpl implements DoctorGroupWriteService {
 
     //校验 公 + 母 = 总和
     private static void checkQuantityEqual(Integer all, Integer boar, Integer sow) {
+
         if (all != (boar + sow)) {
             throw new ServiceException("quantity.not.equal");
         }

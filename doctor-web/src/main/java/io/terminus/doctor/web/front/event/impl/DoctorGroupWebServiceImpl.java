@@ -1,6 +1,7 @@
 package io.terminus.doctor.web.front.event.impl;
 
 import com.google.common.base.Throwables;
+import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.Response;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.doctor.basic.service.DoctorBasicReadService;
@@ -69,6 +70,8 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
         try {
             //1. 构造猪群信息
             return doctorGroupWriteService.createNewGroup(getNewGroup(newGroupInput), newGroupInput);
+        } catch (ServiceException e) {
+            return Response.fail(e.getMessage());
         } catch (Exception e) {
             log.error("create new group failed, newGroupInput:{}, cause:{}", newGroupInput, Throwables.getStackTraceAsString(e));
             return Response.fail("group.event.create.fail");
@@ -140,6 +143,8 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
                     return Response.fail("event.type.error");
             }
             return Response.ok(Boolean.TRUE);
+        } catch (ServiceException e) {
+            return Response.fail(e.getMessage());
         } catch (Exception e) {
             log.error("create group event failed, groupId:{}, eventType:{}, params:{}, cause:{}",
                     groupId, eventType, params, Throwables.getStackTraceAsString(e));

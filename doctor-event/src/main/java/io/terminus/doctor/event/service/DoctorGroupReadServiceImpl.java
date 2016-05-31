@@ -1,6 +1,7 @@
 package io.terminus.doctor.event.service;
 
 import com.google.common.base.Throwables;
+import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.PageInfo;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
@@ -69,7 +70,9 @@ public class DoctorGroupReadServiceImpl implements DoctorGroupReadService {
     @Override
     public Response<DoctorGroupDetail> findGroupDetailByGroupId(Long groupId) {
         try {
-            return Response.ok(new DoctorGroupDetail(doctorGroupDao.findById(groupId), doctorGroupTrackDao.findByGroupId(groupId)));
+            return Response.ok(new DoctorGroupDetail(checkGroupExist(groupId), checkGroupTrackExist(groupId)));
+        } catch (ServiceException e) {
+            return Response.fail(e.getMessage());
         } catch (Exception e) {
             log.error("find group detail by groupId failed, groupId:{}, cause:{}", groupId, Throwables.getStackTraceAsString(e));
             return Response.fail("group.find.fail");
@@ -125,5 +128,21 @@ public class DoctorGroupReadServiceImpl implements DoctorGroupReadService {
             log.error("find groupTrack by id failed, groupTrackId:{}, cause:{}", groupTrackId, Throwables.getStackTraceAsString(e));
             return Response.fail("groupTrack.find.fail");
         }
+    }
+
+    private DoctorGroup checkGroupExist(Long groupId) {
+        DoctorGroup group = doctorGroupDao.findById(groupId);
+        if (group == null) {
+            throw new ServiceException("group.not.found");
+        }
+        return group;
+    }
+
+    private DoctorGroupTrack checkGroupTrackExist(Long groupId) {
+        DoctorGroupTrack groupTrack = doctorGroupTrackDao.findByGroupId(groupId);
+        if (groupTrack == null) {
+            throw new ServiceException("group.track.not.found");
+        }
+        return groupTrack;
     }
 }

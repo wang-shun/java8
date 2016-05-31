@@ -66,4 +66,10 @@ public class DoctorTransGroupInput extends BaseGroupInput implements Serializabl
      */
     @NotNull(message = "weight.not.null")
     private Double weight;
+
+    /**
+     * 来源 1 本场, 2 外购
+     * @see io.terminus.doctor.event.enums.PigSource
+     */
+    private Integer source;
 }
