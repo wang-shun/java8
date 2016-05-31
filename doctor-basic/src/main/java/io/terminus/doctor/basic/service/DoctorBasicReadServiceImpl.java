@@ -70,7 +70,7 @@ public class DoctorBasicReadServiceImpl implements DoctorBasicReadService {
     @Override
     public Response<List<DoctorBreed>> findAllBreeds() {
         try {
-            return Response.ok(doctorBreedDao.listAll());
+            return Response.ok(doctorBreedDao.findAll());
         } catch (Exception e) {
             log.error("find all breeds failed, cause:{}", Throwables.getStackTraceAsString(e));
             return Response.fail("breed.find.fail");
@@ -170,7 +170,7 @@ public class DoctorBasicReadServiceImpl implements DoctorBasicReadService {
     @Override
     public Response<List<DoctorGenetic>> findAllGenetics() {
         try {
-            return Response.ok(doctorGeneticDao.listAll());
+            return Response.ok(doctorGeneticDao.findAll());
         } catch (Exception e) {
             log.error("find all genetics failed, cause:{}", Throwables.getStackTraceAsString(e));
             return Response.fail("genetic.find.fail");
@@ -190,7 +190,7 @@ public class DoctorBasicReadServiceImpl implements DoctorBasicReadService {
     @Override
     public Response<List<DoctorUnit>> findAllUnits() {
         try {
-            return Response.ok(doctorUnitDao.listAll());
+            return Response.ok(doctorUnitDao.findAll());
         } catch (Exception e) {
             log.error("find all units failed, cause:{}", Throwables.getStackTraceAsString(e));
             return Response.fail("unit.find.fail");

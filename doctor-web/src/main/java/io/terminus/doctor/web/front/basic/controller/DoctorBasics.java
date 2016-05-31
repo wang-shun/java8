@@ -1,10 +1,12 @@
 package io.terminus.doctor.web.front.basic.controller;
 
 import io.terminus.common.utils.JsonMapper;
+import io.terminus.doctor.basic.model.DoctorBreed;
 import io.terminus.doctor.basic.model.DoctorChangeReason;
 import io.terminus.doctor.basic.model.DoctorChangeType;
 import io.terminus.doctor.basic.model.DoctorCustomer;
 import io.terminus.doctor.basic.model.DoctorDisease;
+import io.terminus.doctor.basic.model.DoctorGenetic;
 import io.terminus.doctor.basic.service.DoctorBasicReadService;
 import io.terminus.doctor.basic.service.DoctorBasicWriteService;
 import io.terminus.doctor.common.utils.RespHelper;
@@ -43,6 +45,25 @@ public class DoctorBasics {
                         DoctorBasicWriteService doctorBasicWriteService) {
         this.doctorBasicReadService = doctorBasicReadService;
         this.doctorBasicWriteService = doctorBasicWriteService;
+    }
+
+    /************************** 品种品系相关 *************************/
+    /**
+     * 查询所有品种
+     * @return 品种列表
+     */
+    @RequestMapping(value = "/breed/all", method = RequestMethod.GET)
+    public List<DoctorBreed> finaAllBreed() {
+        return RespHelper.or500(doctorBasicReadService.findAllBreeds());
+    }
+
+    /**
+     * 查询所有品种
+     * @return 品种列表
+     */
+    @RequestMapping(value = "/genetic/all", method = RequestMethod.GET)
+    public List<DoctorGenetic> finaAllGenetic() {
+        return RespHelper.or500(doctorBasicReadService.findAllGenetics());
     }
 
     /************************** 疾病防疫相关 **************************/

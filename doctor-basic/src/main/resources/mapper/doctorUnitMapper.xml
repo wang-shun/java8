@@ -60,7 +60,7 @@
         WHERE id = #{id}
     </delete>
 
-    <select id="listAll" resultMap="DoctorUnitMap" >
+    <select id="findAll" resultMap="DoctorUnitMap" >
         SELECT <include refid="cols_all" />
         FROM <include refid="tb" />
     </select>

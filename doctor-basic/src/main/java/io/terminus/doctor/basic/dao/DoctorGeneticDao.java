@@ -4,6 +4,8 @@ import io.terminus.common.mysql.dao.MyBatisDao;
 import io.terminus.doctor.basic.model.DoctorGenetic;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 /**
  * Desc: 品系表Dao类
  * Mail: yangzl@terminus.io
@@ -13,4 +15,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class DoctorGeneticDao extends MyBatisDao<DoctorGenetic> {
 
+    public List<DoctorGenetic> findAll() {
+        return getSqlSession().selectList(sqlId("findAll"));
+    }
 }
