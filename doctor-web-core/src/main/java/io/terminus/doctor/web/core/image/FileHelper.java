@@ -11,7 +11,8 @@ import io.terminus.common.utils.JsonMapper;
 import io.terminus.lib.file.FileServer;
 import io.terminus.lib.file.ImageServer;
 import io.terminus.lib.file.util.FUtil;
-import io.terminus.pampas.engine.MessageSources;
+import io.terminus.pampas.engine.ThreadVars;
+import org.springframework.context.MessageSource;
 import io.terminus.parana.file.enums.FileType;
 import io.terminus.parana.file.model.UserFile;
 import io.terminus.parana.file.service.UserFileService;
@@ -43,7 +44,7 @@ public class FileHelper {
     @Autowired(required = false)
     private UserFileService userFileService;
     @Autowired(required = false)
-    private MessageSources messageSources;
+    private MessageSource messageSources;
     @Autowired
     private ImageServer imageServer;
     @Autowired
@@ -54,6 +55,7 @@ public class FileHelper {
     private String imageBaseUrl;
 
 
+    
     /**
      * 上传文件
      * @param userId    用户id
@@ -98,7 +100,7 @@ public class FileHelper {
                 //if size of the image is more than imgSizeMax,it will raise an 500 error
                 if (imageData.length > imageMaxSize) {
                     log.debug("image size {} ,maxsize {} ,the upload image is to large", imageData.length, imageMaxSize);
-                    return new UploadDto(image, messageSources.get("image.size.exceed", imageMaxSize / (1024 * 1024), "mb"));
+                    return new UploadDto(image, get("image.size.exceed", imageMaxSize / (1024 * 1024), "mb"));
                 }
 
                 image.setSize((int)file.getSize());
@@ -112,7 +114,7 @@ public class FileHelper {
                 boolean isSucceed = !Strings.isNullOrEmpty(filePath);
                 if (!isSucceed) {
                     log.error("write file(name={}) of user(id={}) to image server failed", fileRealName, userId);
-                    return new UploadDto(image, messageSources.get("user.image.upload.fail"));
+                    return new UploadDto(image, get("user.image.upload.fail"));
                 }
 
                 Response<Long> createRes = userFileService.createFile(image);
@@ -126,10 +128,10 @@ public class FileHelper {
                 return new UploadDto(image);
             } catch (Exception e) {
                 log.error("failed to process upload image {},cause:{}", fileRealName, Throwables.getStackTraceAsString(e));
-                return new UploadDto(image, messageSources.get("user.image.upload.fail"));
+                return new UploadDto(image, get("user.image.upload.fail"));
             }
         } else {
-            return new UploadDto(image, messageSources.get("user.image.illegal.ext"));
+            return new UploadDto(image, get("user.image.illegal.ext"));
         }
     }
 
@@ -155,7 +157,7 @@ public class FileHelper {
             byte[] fileData = file.getBytes();
             if (fileData.length > imageMaxSize) {
                 log.debug("image size {} ,maxsize {} ,the upload file is to large", fileData.length, imageMaxSize);
-                return new UploadDto(upFile, messageSources.get("file.size.exceed", imageMaxSize / (1024 * 1024), "mb"));
+                return new UploadDto(upFile, get("file.size.exceed", imageMaxSize / (1024 * 1024), "mb"));
             }
 
             upFile.setSize((int)file.getSize());
@@ -168,7 +170,7 @@ public class FileHelper {
             boolean isSucceed = !Strings.isNullOrEmpty(filePath);
             if (!isSucceed) {
                 log.error("write file(name={}) of user(id={}) to file server failed", fileRealName, userId);
-                return new UploadDto(upFile, messageSources.get("user.file.upload.fail"));
+                return new UploadDto(upFile, get("user.file.upload.fail"));
             }
 
             Response<Long> createRes = userFileService.createFile(upFile);
@@ -182,7 +184,7 @@ public class FileHelper {
             return new UploadDto(upFile);
         } catch (Exception e) {
             log.error("failed to process upload file {},cause:{}", fileRealName, Throwables.getStackTraceAsString(e));
-            return new UploadDto(upFile, messageSources.get("user.file.upload.fail"));
+            return new UploadDto(upFile, get("user.file.upload.fail"));
         }
     }
 
@@ -203,6 +205,16 @@ public class FileHelper {
             log.error("Read image size failed, Error code={}", Throwables.getStackTraceAsString(e));
             return "";
         }
+    }
+    
+    
+
+    private String get(String code) {
+        return this.get(code, new Object[0]);
+    }
+
+    private String get(String code, Object... args) {
+        return this.messageSources == null?code:this.messageSources.getMessage(code, args, code, ThreadVars.getLocale());
     }
 
 

@@ -1,21 +1,15 @@
-/*
- * Copyright (c) 2016. 杭州端点网络科技有限公司.  All rights reserved.
- */
+package configuration.admin;
 
-package io.terminus.doctor.web;
-
-import io.terminus.doctor.user.service.SubRoleReadService;
+import io.terminus.doctor.event.DoctorEventConfiguration;
+import io.terminus.doctor.interceptor.MockLoginInterceptor;
+import io.terminus.doctor.msg.DoctorMsgConfig;
+import io.terminus.doctor.user.DoctorUserConfiguration;
 import io.terminus.doctor.web.core.DoctorCoreWebConfiguration;
-import io.terminus.doctor.web.core.advices.JsonExceptionResolver;
+import io.terminus.doctor.web.core.component.DoctorHbsHelpers;
+import io.terminus.doctor.web.core.component.ParanaHbsHelpers;
 import io.terminus.doctor.web.core.msg.email.CommonEmailServiceConfig;
 import io.terminus.doctor.web.core.msg.sms.LuoSiMaoSmsServiceConfig;
-import io.terminus.doctor.web.core.service.OtherSystemService;
 import io.terminus.doctor.web.core.service.OtherSystemServiceConfig;
-import io.terminus.doctor.web.core.service.impl.OtherSystemServiceImpl;
-import io.terminus.doctor.web.front.auth.DoctorCustomRoleLoaderConfigurer;
-import io.terminus.parana.auth.role.CustomRoleLoaderConfigurer;
-import io.terminus.parana.auth.web.WebAuthenticationConfiguration;
-import io.terminus.parana.config.ConfigCenter;
 import io.terminus.parana.web.msg.config.db.DbAppPushConfig;
 import io.terminus.parana.web.msg.config.db.DbEmailConfig;
 import io.terminus.parana.web.msg.config.db.DbNotifyConfig;
@@ -26,34 +20,27 @@ import io.terminus.parana.web.msg.config.test.TestEmailWebServiceConfig;
 import io.terminus.parana.web.msg.config.test.TestNotifyWebServiceConfig;
 import io.terminus.parana.web.msg.config.test.TestSmsWebServiceConfig;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.FilterType;
 import org.springframework.context.annotation.Import;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
+import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
 /**
- * Author:  <a href="mailto:i@terminus.io">jlchen</a>
- * Date: 2016-02-01
+ * Desc: 管理端配置
+ * Mail: houly@terminus.io
+ * Data: 下午4:23 16/5/31
+ * Author: houly
  */
 @Configuration
-@ComponentScan(basePackages = {
-        "io.terminus.doctor.web.core.component",
-        "io.terminus.doctor.web.core.events",
-        "io.terminus.doctor.web.front.component",
-        "io.terminus.doctor.web.front.design"
-}, excludeFilters = {
-        @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = {
-                JsonExceptionResolver.class
-        })
-})
-@EnableWebMvc
-@EnableAutoConfiguration
-@Import({DoctorCoreWebConfiguration.class,
+@Import({
+        DoctorEventConfiguration.class,
+        DoctorMsgConfig.class,
+        DoctorUserConfiguration.class,
+        DoctorCoreWebConfiguration.class,
         OtherSystemServiceConfig.class,
-        WebAuthenticationConfiguration.class,
         SimpleMsgGatewayBuilderConfig.class,
         LuoSiMaoSmsServiceConfig.class,
         CommonEmailServiceConfig.class,
@@ -62,11 +49,24 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
         DbEmailConfig.class, TestEmailWebServiceConfig.class,
         DbAppPushConfig.class, TestAppPushWebServiceConfig.class
 })
-public class DoctorWebConfiguration extends WebMvcConfigurerAdapter {
-
-    @Bean
-    public CustomRoleLoaderConfigurer customRoleLoaderConfigurer(SubRoleReadService subRoleReadService) {
-          return new DoctorCustomRoleLoaderConfigurer(subRoleReadService);
+@ComponentScan(value = {
+        "io.terminus.doctor.web.core.component",
+        "io.terminus.doctor.web.admin.jobs",
+        "io.terminus.doctor.web.admin.article",
+        "io.terminus.doctor.web.admin.role",
+        "io.terminus.doctor.web.admin.user"
+}, excludeFilters = {
+        @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = {
+                DoctorHbsHelpers.class,
+                ParanaHbsHelpers.class,
+        })
+})
+@EnableWebMvc
+@EnableAutoConfiguration
+public class AdminWebConfiguration extends WebMvcConfigurerAdapter {
+    @Override
+    public void addInterceptors(InterceptorRegistry registry) {
+        registry.addInterceptor(new MockLoginInterceptor());
     }
 
 }
