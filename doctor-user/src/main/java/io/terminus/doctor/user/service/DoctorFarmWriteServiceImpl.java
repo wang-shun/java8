@@ -9,6 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 /**
  * Desc:
  * Mail: yangzl@terminus.io
@@ -34,6 +36,17 @@ public class DoctorFarmWriteServiceImpl implements DoctorFarmWriteService{
         try {
             doctorFarmDao.create(farm);
             response.setResult(farm.getId());
+        } catch (Exception e) {
+            log.error("create farm failed, cause : {}", Throwables.getStackTraceAsString(e));
+            response.setError("create.farm.failed");
+        }
+        return response;
+    }
+    @Override
+    public Response<Integer> createFarms(List<DoctorFarm> farms){
+        Response<Integer> response = new Response<>();
+        try {
+            response.setResult(doctorFarmDao.creates(farms));
         } catch (Exception e) {
             log.error("create farm failed, cause : {}", Throwables.getStackTraceAsString(e));
             response.setError("create.farm.failed");
