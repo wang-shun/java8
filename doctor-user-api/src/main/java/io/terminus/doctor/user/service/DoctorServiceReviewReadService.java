@@ -1,5 +1,6 @@
 package io.terminus.doctor.user.service;
 
+import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.user.dto.DoctorServiceReviewDto;
 import io.terminus.doctor.user.model.DoctorServiceReview;
@@ -43,4 +44,13 @@ public interface DoctorServiceReviewReadService {
      * @return 用户审批服务dto
      */
     Response<DoctorServiceReviewDto> findServiceReviewDtoByUserId(Long userId);
+
+    /**
+     * 分页查询, 所有参数都可以为空
+     * @param userId 申请用户的id
+     * @param type 参见枚举 DoctorServiceReview.Type
+     * @param status 枚举 DoctorServiceReview.Status
+     * @return
+     */
+    Response<Paging<DoctorServiceReview>> page(Integer pageNo, Integer pageSize, Long userId, DoctorServiceReview.Type type, DoctorServiceReview.Status status);
 }

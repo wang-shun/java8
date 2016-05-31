@@ -2,8 +2,10 @@ package io.terminus.doctor.web.admin.controller;
 
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.BaseUser;
+import io.terminus.common.model.Paging;
 import io.terminus.doctor.user.model.DoctorOrg;
 import io.terminus.doctor.user.model.DoctorServiceReview;
+import io.terminus.doctor.user.service.DoctorServiceReviewReadService;
 import io.terminus.doctor.user.service.DoctorServiceReviewWriteService;
 import io.terminus.doctor.user.service.business.DoctorServiceReviewService;
 import io.terminus.pampas.common.UserUtil;
@@ -24,12 +26,15 @@ public class DoctorServiceReviewController {
 
     private final DoctorServiceReviewWriteService doctorServiceReviewWriteService;
     private final DoctorServiceReviewService doctorServiceReviewService;
+    private final DoctorServiceReviewReadService doctorServiceReviewReadService;
 
     @Autowired
     public DoctorServiceReviewController(DoctorServiceReviewWriteService doctorServiceReviewWriteService,
-                                         DoctorServiceReviewService doctorServiceReviewService){
+                                         DoctorServiceReviewService doctorServiceReviewService,
+                                         DoctorServiceReviewReadService doctorServiceReviewReadService){
         this.doctorServiceReviewWriteService = doctorServiceReviewWriteService;
         this.doctorServiceReviewService = doctorServiceReviewService;
+        this.doctorServiceReviewReadService = doctorServiceReviewReadService;
     }
 
     /**
@@ -115,5 +120,30 @@ public class DoctorServiceReviewController {
             throw new JsonResponseException(500, e.getMessage());
         }
         return true;
+    }
+
+    /**
+     * 分页查询用户提交的申请
+     * @param userId 申请服务的用户的id, 用于筛选, 不是当前登录者的id
+     * @param type 服务类型, 枚举DoctorServiceReview.Type
+     * @param status 审核状态 枚举DoctorServiceReview.Status
+     * @param pageNo 第几页
+     * @param pageSize 每页数量
+     * @return
+     */
+    @RequestMapping(value = "/page", method = RequestMethod.GET)
+    public Paging<DoctorServiceReview> pageServiceApplies(@RequestParam(value = "userId", required = false) Long userId,
+                                     @RequestParam(value = "type", required = false) Integer type,
+                                     @RequestParam(value = "status", required = false)Integer status,
+                                     @RequestParam Integer pageNo, @RequestParam Integer pageSize){
+        DoctorServiceReview.Type servicetype = null;
+        if (type != null) {
+            servicetype = DoctorServiceReview.Type.from(type);
+        }
+        DoctorServiceReview.Status servicecStatus = null;
+        if(status != null){
+            servicecStatus = DoctorServiceReview.Status.from(status);
+        }
+        return RespHelper.or500(doctorServiceReviewReadService.page(pageNo, pageSize, userId, servicetype, servicecStatus));
     }
 }

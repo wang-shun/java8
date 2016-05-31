@@ -1,5 +1,7 @@
 package io.terminus.doctor.user.service.mock;
 
+import com.google.common.collect.Lists;
+import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.common.utils.RandomUtil;
 import io.terminus.doctor.user.dto.DoctorServiceReviewDto;
@@ -57,5 +59,10 @@ public class MockDoctorServiceReviewReadServiceImpl implements DoctorServiceRevi
         review.setType(type);
         review.setStatus(RandomUtil.random(-2, 2));
         return review;
+    }
+
+    @Override
+    public Response<Paging<DoctorServiceReview>> page(Integer pageNo, Integer pageSize, Long userId, DoctorServiceReview.Type type, DoctorServiceReview.Status status){
+        return Response.ok(new Paging<>(1L, Lists.newArrayList(new DoctorServiceReview())));
     }
 }
