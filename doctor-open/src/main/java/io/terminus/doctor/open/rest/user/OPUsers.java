@@ -11,6 +11,7 @@ import com.google.common.hash.Hashing;
 import io.terminus.boot.session.properties.SessionProperties;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.Response;
+import io.terminus.common.utils.MapBuilder;
 import io.terminus.common.utils.Splitters;
 import io.terminus.doctor.common.enums.UserRole;
 import io.terminus.doctor.common.enums.UserStatus;
@@ -42,6 +43,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.Base64Utils;
 import org.springframework.web.bind.annotation.RequestMethod;
 
+import javax.annotation.PostConstruct;
 import java.io.Serializable;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -84,6 +86,8 @@ public class OPUsers {
     private DeviceWriteService deviceWriteService;
     @Autowired
     private MsgWebService smsWebService;
+    @Autowired
+    private MsgWebService emailWebService;
     @Autowired
     private MobilePattern mobilePattern;
 
@@ -260,7 +264,7 @@ public class OPUsers {
         Response<User> result = userReadService.findBy(mobile, LoginType.MOBILE);
         // 检测手机号是否已存在
         if(result.isSuccess() && result.getResult() != null){
-            throw new JsonResponseException("user.register.mobile.has.been.used");
+            throw new OPClientException("user.register.mobile.has.been.used");
         }
         // 设置用户信息
         User user = new User();
@@ -545,7 +549,7 @@ public class OPUsers {
      * @param newPassword  新密码
      * @return 是否成功
      */
-    @OpenMethod(key = "user.forget.password", httpMethods = RequestMethod.POST, paramNames = {"mobile", "code", "newPassword"})
+    @OpenMethod(key = "user.forget.password", httpMethods = RequestMethod.POST, paramNames = {"mobile", "code", "newPassword", "sid"})
     public Boolean forgetPassword(@NotEmpty(message = "mobile.not.empty") String mobile,
                                   @NotEmpty(message = "code.not.empty") String code,
                                   @NotEmpty(message = "newPassword.not.empty") String newPassword,
@@ -555,12 +559,11 @@ public class OPUsers {
         User user = null;
         // 校验手机验证码
         validateSmsCode(code, mobile, sessionId);
-
         Response<User> userResp = userReadService.findBy(mobile, LoginType.MOBILE);
         if(!userResp.isSuccess()){
             throw new OPClientException(userResp.getError());
         }
-
+        user = userResp.getResult();
         user.setPassword(newPassword);
         Response<Boolean> res = userWriteService.update(user);
         if (!res.isSuccess()) {

@@ -4,11 +4,11 @@
 
 package io.terminus.doctor.web;
 
-import com.google.common.eventbus.EventBus;
 import io.terminus.doctor.user.service.SubRoleReadService;
 import io.terminus.doctor.web.core.DoctorCoreWebConfiguration;
 import io.terminus.doctor.web.core.advices.JsonExceptionResolver;
-import io.terminus.doctor.web.core.msg.LuoSiMaoSmsServiceConfig;
+import io.terminus.doctor.web.core.msg.email.CommonEmailServiceConfig;
+import io.terminus.doctor.web.core.msg.sms.LuoSiMaoSmsServiceConfig;
 import io.terminus.doctor.web.core.service.OtherSystemService;
 import io.terminus.doctor.web.core.service.impl.OtherSystemServiceImpl;
 import io.terminus.doctor.web.front.auth.DoctorCustomRoleLoaderConfigurer;
@@ -19,13 +19,11 @@ import io.terminus.parana.web.msg.config.db.DbAppPushConfig;
 import io.terminus.parana.web.msg.config.db.DbEmailConfig;
 import io.terminus.parana.web.msg.config.db.DbNotifyConfig;
 import io.terminus.parana.web.msg.config.db.DbSmsConfig;
-import io.terminus.parana.web.msg.config.gatewaybuilder.DbMsgGatewayBuilderConfig;
 import io.terminus.parana.web.msg.config.gatewaybuilder.SimpleMsgGatewayBuilderConfig;
 import io.terminus.parana.web.msg.config.test.TestAppPushWebServiceConfig;
 import io.terminus.parana.web.msg.config.test.TestEmailWebServiceConfig;
 import io.terminus.parana.web.msg.config.test.TestNotifyWebServiceConfig;
 import io.terminus.parana.web.msg.config.test.TestSmsWebServiceConfig;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -56,6 +54,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
         WebAuthenticationConfiguration.class,
         SimpleMsgGatewayBuilderConfig.class,
         LuoSiMaoSmsServiceConfig.class,
+        CommonEmailServiceConfig.class,
         DbSmsConfig.class, TestSmsWebServiceConfig.class,
         DbNotifyConfig.class,TestNotifyWebServiceConfig.class,
         DbEmailConfig.class, TestEmailWebServiceConfig.class,

@@ -6,6 +6,7 @@
 
 <mapper namespace="DoctorBarn">
     <resultMap id="DoctorBarnMap" type="DoctorBarn">
+        <id column="id" property="id"/>
         <result column="name" property="name"/>
         <result column="org_id" property="orgId"/>
         <result column="org_name" property="orgName"/>

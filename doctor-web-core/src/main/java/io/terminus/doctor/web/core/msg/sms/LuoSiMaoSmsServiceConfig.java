@@ -1,4 +1,4 @@
-package io.terminus.doctor.web.core.msg;
+package io.terminus.doctor.web.core.msg.sms;
 
 import io.terminus.lib.sms.SmsService;
 import org.springframework.beans.factory.annotation.Value;
@@ -6,7 +6,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
- * Desc:
+ * Desc: 螺丝帽短信服务配置
  * Mail: houly@terminus.io
  * Data: 下午5:53 16/5/26
  * Author: houly

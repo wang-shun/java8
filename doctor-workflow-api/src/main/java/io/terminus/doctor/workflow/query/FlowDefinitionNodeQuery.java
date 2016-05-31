@@ -19,6 +19,7 @@ public interface FlowDefinitionNodeQuery {
     ///////////////////////////////////////////////////////////////
     FlowDefinitionNodeQuery id(Long id);
     FlowDefinitionNodeQuery name(String name);
+    FlowDefinitionNodeQuery value(String value);
     FlowDefinitionNodeQuery flowDefinitionId(Long flowDefinitionId);
     FlowDefinitionNodeQuery nodeName(String nodeName);
     FlowDefinitionNodeQuery type(Integer type);

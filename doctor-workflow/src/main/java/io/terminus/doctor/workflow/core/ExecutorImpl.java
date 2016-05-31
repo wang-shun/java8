@@ -1,5 +1,6 @@
 package io.terminus.doctor.workflow.core;
 
+import com.google.common.base.Throwables;
 import io.terminus.doctor.workflow.model.FlowDefinitionNode;
 import io.terminus.doctor.workflow.model.FlowDefinitionNodeEvent;
 import io.terminus.doctor.workflow.model.FlowHistoryInstance;
@@ -11,6 +12,7 @@ import io.terminus.doctor.workflow.utils.AssertHelper;
 import io.terminus.doctor.workflow.utils.BeanHelper;
 import io.terminus.doctor.workflow.utils.NodeHelper;
 import io.terminus.doctor.workflow.utils.StringHelper;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
 import java.util.Map;
@@ -21,6 +23,7 @@ import java.util.Map;
  * Created by icemimosa
  * Date: 16/5/13
  */
+@Slf4j
 public class ExecutorImpl implements Executor {
 
     private WorkFlowEngine workFlowEngine;
@@ -80,92 +83,105 @@ public class ExecutorImpl implements Executor {
 
     @Override
     public void execute(Map expression, String flowData, Long operatorId, String operatorName) {
-
-        // 获取正在执行的流程实例
-        FlowInstance flowInstance = workFlowEngine.buildFlowQueryService().getFlowInstanceQuery()
-                .flowDefinitionKey(flowDefinitionKey)
-                .businessId(businessId)
-                .status(FlowInstance.Status.NORMAL.value())
-                .single();
-        AssertHelper.isNull(flowInstance,
-                "执行节点的流程实例不存在, 流程定义key为: {}, 业务id为: {}", flowDefinitionKey, businessId);
-
-        // 获取当前正在执行的节点
-        FlowProcess currentProcess = getCurrentProcess(flowInstance.getId());
-        if(StringHelper.isBlank(flowData)) {
-            flowData = currentProcess.getFlowData();
-        }
-        NodeHelper.buildTaskNode().execute(workFlowEngine.buildExecution(currentProcess, expression, flowData, operatorId, operatorName));
-    }
-
-    @Override
-    public void startSubFlowInstance() {
-        startSubFlowInstance(null, null, null, null);
-    }
-
-    @Override
-    public void startSubFlowInstance(String flowData) {
-        startSubFlowInstance(flowData, null, null, null);
-    }
-
-    @Override
-    public void startSubFlowInstance(Map expression) {
-        startSubFlowInstance(null, expression, null, null);
-    }
-
-    @Override
-    public void startSubFlowInstance(String flowData, Map expression) {
-        startSubFlowInstance(flowData, expression, null, null);
-    }
-
-    @Override
-    public void startSubFlowInstance(String flowData, Map expression, Long operatorId, String operatorName) {
-        // 1. 查看当前处于正常状态的流程实例, 找出子流程的开始节点
-        FlowInstance normalInstance = workFlowEngine.buildFlowQueryService().getFlowInstanceQuery()
-                .flowDefinitionKey(flowDefinitionKey)
-                .businessId(businessId)
-                .status(FlowInstance.Status.NORMAL.value())
-                .single();
-        FlowProcess currentProcess = getCurrentProcess(normalInstance.getId());
-        List<FlowDefinitionNodeEvent> transitions = workFlowEngine.buildFlowQueryService().getFlowDefinitionNodeEventQuery()
-                .getNodeEventsBySourceId(
-                        normalInstance.getFlowDefinitionId(), currentProcess.getFlowDefinitionNodeId());
-        FlowDefinitionNode subStartNode = null;
-        for (int i = 0; transitions != null && i < transitions.size(); i++) {
-            FlowDefinitionNode targetNode = workFlowEngine.buildFlowQueryService().getFlowDefinitionNodeQuery()
-                    .id(transitions.get(i).getTargetNodeId())
+        try{
+            // 获取正在执行的流程实例
+            FlowInstance flowInstance = workFlowEngine.buildFlowQueryService().getFlowInstanceQuery()
+                    .flowDefinitionKey(flowDefinitionKey)
+                    .businessId(businessId)
+                    .status(FlowInstance.Status.NORMAL.value())
                     .single();
-            if (FlowDefinitionNode.Type.SUBSTART.value() == targetNode.getType()) {
-                subStartNode = targetNode;
-                break;
+            AssertHelper.isNull(flowInstance,
+                    "执行节点的流程实例不存在, 流程定义key为: {}, 业务id为: {}", flowDefinitionKey, businessId);
+
+            // 获取当前正在执行的节点
+            FlowProcess currentProcess = getCurrentProcess(flowInstance.getId());
+            if(StringHelper.isBlank(flowData)) {
+                flowData = currentProcess.getFlowData();
             }
-        }
-        if (subStartNode == null) {
-            AssertHelper.throwException(
-                    "当前节点不存在子流程开始节点, , 流程定义key为: {}, 业务id为: {}", flowDefinitionKey, businessId);
-        }
+            NodeHelper.buildTaskNode().execute(workFlowEngine.buildExecution(currentProcess, expression, flowData, operatorId, operatorName));
 
-        // 2. 将当前流程实例挂起, 并创建子流程实例
-        normalInstance.setStatus(FlowInstance.Status.STOPED.value());
-        workFlowEngine.buildJdbcAccess().updateFlowInstance(normalInstance);
-        FlowInstance subInstance = FlowInstance.builder().build();
-        BeanHelper.copy(subInstance, normalInstance);
-        subInstance.setParentInstanceId(normalInstance.getId());
-        subInstance.setStatus(FlowInstance.Status.NORMAL.value());
-        subInstance.setType(FlowInstance.Type.CHILD.value());
-        workFlowEngine.buildJdbcAccess().createFlowInstance(subInstance);
+        } catch (Exception e) {
+            log.error("[Flow Process Execute] -> 流程任务执行异常, cause by {}", Throwables.getStackTraceAsString(e));
+            AssertHelper.throwException("[Flow Process Execute] -> 流程任务执行异常, cause by {}", Throwables.getStackTraceAsString(e));
+        }
+    }
 
-        // 3. 创建并执行子流程开始节点
-        FlowProcess subStartProcess = FlowProcess.builder()
-                .flowDefinitionNodeId(subStartNode.getId())
-                .preFlowDefinitionNodeId(currentProcess.getFlowDefinitionNodeId() + "")
-                .flowInstanceId(subInstance.getId())
-                .flowData(flowData)
-                .status(FlowProcess.Status.NORMAL.value())
-                .assignee(subStartNode.getAssignee())
-                .build();
-        workFlowEngine.buildJdbcAccess().createFlowProcess(subStartProcess);
-        NodeHelper.buildSubStartNode().execute(workFlowEngine.buildExecution(subStartProcess, expression, flowData, operatorId, operatorName));
+    @Override
+    public FlowInstance startSubFlowInstance() {
+        return startSubFlowInstance(null, null, null, null);
+    }
+
+    @Override
+    public FlowInstance startSubFlowInstance(String flowData) {
+        return startSubFlowInstance(flowData, null, null, null);
+    }
+
+    @Override
+    public FlowInstance startSubFlowInstance(Map expression) {
+        return startSubFlowInstance(null, expression, null, null);
+    }
+
+    @Override
+    public FlowInstance startSubFlowInstance(String flowData, Map expression) {
+        return startSubFlowInstance(flowData, expression, null, null);
+    }
+
+    @Override
+    public FlowInstance startSubFlowInstance(String flowData, Map expression, Long operatorId, String operatorName) {
+        try{
+            // 1. 查看当前处于正常状态的流程实例, 找出子流程的开始节点
+            FlowInstance normalInstance = workFlowEngine.buildFlowQueryService().getFlowInstanceQuery()
+                    .flowDefinitionKey(flowDefinitionKey)
+                    .businessId(businessId)
+                    .status(FlowInstance.Status.NORMAL.value())
+                    .single();
+            FlowProcess currentProcess = getCurrentProcess(normalInstance.getId());
+            List<FlowDefinitionNodeEvent> transitions = workFlowEngine.buildFlowQueryService().getFlowDefinitionNodeEventQuery()
+                    .getNodeEventsBySourceId(
+                            normalInstance.getFlowDefinitionId(), currentProcess.getFlowDefinitionNodeId());
+            FlowDefinitionNode subStartNode = null;
+            for (int i = 0; transitions != null && i < transitions.size(); i++) {
+                FlowDefinitionNode targetNode = workFlowEngine.buildFlowQueryService().getFlowDefinitionNodeQuery()
+                        .id(transitions.get(i).getTargetNodeId())
+                        .single();
+                if (FlowDefinitionNode.Type.SUBSTART.value() == targetNode.getType()) {
+                    subStartNode = targetNode;
+                    break;
+                }
+            }
+            if (subStartNode == null) {
+                AssertHelper.throwException(
+                        "当前节点不存在子流程开始节点, , 流程定义key为: {}, 业务id为: {}", flowDefinitionKey, businessId);
+            }
+
+            // 2. 将当前流程实例挂起, 并创建子流程实例
+            normalInstance.setStatus(FlowInstance.Status.STOPED.value());
+            workFlowEngine.buildJdbcAccess().updateFlowInstance(normalInstance);
+            FlowInstance subInstance = FlowInstance.builder().build();
+            BeanHelper.copy(subInstance, normalInstance);
+            subInstance.setParentInstanceId(normalInstance.getId());
+            subInstance.setStatus(FlowInstance.Status.NORMAL.value());
+            subInstance.setType(FlowInstance.Type.CHILD.value());
+            workFlowEngine.buildJdbcAccess().createFlowInstance(subInstance);
+
+            // 3. 创建并执行子流程开始节点
+            FlowProcess subStartProcess = FlowProcess.builder()
+                    .flowDefinitionNodeId(subStartNode.getId())
+                    .preFlowDefinitionNodeId(currentProcess.getFlowDefinitionNodeId() + "")
+                    .flowInstanceId(subInstance.getId())
+                    .flowData(flowData)
+                    .status(FlowProcess.Status.NORMAL.value())
+                    .assignee(subStartNode.getAssignee())
+                    .build();
+            workFlowEngine.buildJdbcAccess().createFlowProcess(subStartProcess);
+            NodeHelper.buildSubStartNode().execute(workFlowEngine.buildExecution(subStartProcess, expression, flowData, operatorId, operatorName));
+
+            return subInstance;
+        } catch (Exception e) {
+            log.error("[Sub Flow Instance] -> 子流程启动异常, cause by {}", Throwables.getStackTraceAsString(e));
+            AssertHelper.throwException("[Sub Flow Instance] -> 子流程启动异常, cause by {}", Throwables.getStackTraceAsString(e));
+        }
+        return null;
     }
 
     /**

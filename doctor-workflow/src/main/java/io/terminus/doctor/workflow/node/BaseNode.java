@@ -69,8 +69,6 @@ public abstract class BaseNode implements Node {
 
         FlowProcess nextProcess = execution.getNextFlowProcess(transition);
         if (nextProcess != null) {
-            // 2. 删除当前节点, 并存储下一个节点
-            // execution.createNextFlowProcess(nextProcess);
 
             // 2. 判断节点类型, 执行下个节点
             FlowDefinitionNode nextNode = execution.getWorkFlowService().getFlowQueryService().getFlowDefinitionNodeQuery()

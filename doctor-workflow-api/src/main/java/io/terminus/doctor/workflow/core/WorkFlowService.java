@@ -29,4 +29,8 @@ public interface WorkFlowService {
      */
     FlowQueryService getFlowQueryService();
 
+    /**
+     * 执行定时Task任务, 此方法供job模块运行
+     */
+    void doTimerSchedule();
 }

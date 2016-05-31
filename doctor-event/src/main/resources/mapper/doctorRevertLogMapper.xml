@@ -6,6 +6,7 @@
 
 <mapper namespace="DoctorRevertLog">
     <resultMap id="DoctorRevertLogMap" type="DoctorRevertLog">
+        <id column="id" property="id"/>
         <result column="type" property="type"/>
         <result column="from_info" property="fromInfo"/>
         <result column="to_info" property="toInfo"/>

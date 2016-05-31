@@ -33,6 +33,7 @@ import io.terminus.doctor.event.search.pig.DefaultPigQueryBuilder;
 import io.terminus.doctor.event.search.pig.IndexedPig;
 import io.terminus.doctor.event.search.pig.IndexedPigFactory;
 import io.terminus.doctor.event.search.pig.PigSearchProperties;
+import io.terminus.doctor.event.service.DoctorBarnReadService;
 import io.terminus.doctor.workflow.DoctorWorkflowConfiguration;
 import io.terminus.search.core.ESClient;
 import io.terminus.zookeeper.ZKClientFactory;
@@ -159,8 +160,8 @@ public class  DoctorEventConfiguration {
         protected static class BarnSearchConfiguration {
             @Bean
             @ConditionalOnMissingBean(IndexedBarnFactory.class)
-            public IndexedBarnFactory<? extends IndexedBarn> indexedBarnFactory() {
-                return new DefaultIndexedBarnFactory();
+            public IndexedBarnFactory<? extends IndexedBarn> indexedBarnFactory(DoctorBarnReadService doctorBarnReadService) {
+                return new DefaultIndexedBarnFactory(doctorBarnReadService);
             }
 
             @Bean

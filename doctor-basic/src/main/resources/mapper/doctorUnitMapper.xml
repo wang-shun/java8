@@ -6,6 +6,7 @@
 
 <mapper namespace="DoctorUnit">
     <resultMap id="DoctorUnitMap" type="DoctorUnit">
+        <id column="id" property="id"/>
         <result column="name" property="name"/>
         <result column="extra" property="extra"/>
         <result column="created_at" property="createdAt"/>

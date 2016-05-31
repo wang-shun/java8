@@ -15,7 +15,6 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 @Configurable
-@EnableScheduling
 public class ExampleJob {
     @Scheduled(cron = "0 0/1 * * * ?")
     public void demo(){

@@ -8,6 +8,7 @@ import io.terminus.search.api.model.WithAggregations;
 import io.terminus.search.api.query.Criterias;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -49,6 +50,13 @@ public class PigSearchReadServiceImpl implements PigSearchReadService {
                     criterias,
                     SearchedPig.class
             );
+            // 处理日龄
+            searchedPigs.getData().forEach(searchedPig -> {
+                if (searchedPig.getBirthDate() != null) {
+                    searchedPig.setDayAge((int)(DateTime.now()
+                            .minus(searchedPig.getBirthDate().getTime()).getMillis() / (1000 * 60 * 60 * 24) + 1));
+                }
+            });
             Paging<SearchedPig> paging = new Paging<>(searchedPigs.getTotal(), searchedPigs.getData());
             return Response.ok(paging);
         } catch (Exception e) {

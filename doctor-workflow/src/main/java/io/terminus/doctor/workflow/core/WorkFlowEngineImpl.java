@@ -43,6 +43,9 @@ public class WorkFlowEngineImpl implements WorkFlowEngine {
     @Autowired
     private FlowQueryService flowQueryService;
 
+    @Autowired
+    private Scheduler scheduler;
+
     @Override
     public JdbcAccess buildJdbcAccess() {
         if (jdbcAccess == null) {
@@ -115,6 +118,11 @@ public class WorkFlowEngineImpl implements WorkFlowEngine {
             AssertHelper.throwException("FlowQueryService 获取失败");
         }
         return flowQueryService;
+    }
+
+    @Override
+    public Scheduler buildScheduler() {
+        return scheduler;
     }
 
 }
