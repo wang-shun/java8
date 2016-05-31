@@ -110,7 +110,7 @@ public class DoctorEntryFlowHandler extends HandlerAware {
             execution.setFlowData(JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(flowDataMap));
         }catch (Exception e){
             log.error("doctor abstract entry flow handle fail, cause:{}", Throwables.getStackTraceAsString(e));
-            // TODO illegal state
+            throw new RuntimeException("sow.entryFarm.error");
         }
     }
 
