@@ -89,7 +89,7 @@ public class IndexedGroup implements Serializable {
     /**
      * 均龄
      */
-    private Double avgDayAge;
+    private Integer avgDayAge;
 
     /**
      * 重量和均重

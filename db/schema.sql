@@ -449,7 +449,6 @@ CREATE TABLE `doctor_groups` (
   `current_barn_id` bigint(20) DEFAULT NULL COMMENT '当前猪舍id',
   `current_barn_name` varchar(64) DEFAULT NULL COMMENT '当前猪舍名称',
   `pig_type` smallint(6) DEFAULT NULL COMMENT '猪类 枚举9种',
-  `sex` smallint(6) DEFAULT NULL COMMENT '性别 1:混合 2:母 3:公',
   `breed_id` bigint(20) DEFAULT NULL COMMENT '品种id',
   `breed_name` varchar(64) DEFAULT NULL COMMENT '品种name',
   `genetic_id` bigint(20) DEFAULT NULL COMMENT '品系id',
@@ -478,8 +477,12 @@ CREATE TABLE `doctor_group_tracks` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '自增主键',
   `group_id` bigint(20) DEFAULT NULL COMMENT '猪群卡片id',
   `rel_event_id` bigint(20) DEFAULT NULL COMMENT '关联的最新一次的事件id',
+  `sex` smallint(6) DEFAULT NULL COMMENT '性别 0母 1公 2混合',
   `quantity` int(11) DEFAULT NULL COMMENT '猪只数',
-  `avg_day_age` double DEFAULT NULL COMMENT '平均日龄',
+  `boar_qty` int(11) DEFAULT NULL COMMENT '公猪数',
+  `sow_qty` int(11) DEFAULT NULL COMMENT '母猪数',
+  `birth_date` datetime DEFAULT NULL COMMENT '出生日期(此日期仅用于计算日龄)',
+  `avg_day_age` int(11) DEFAULT NULL COMMENT '平均日龄',
   `weight` double DEFAULT NULL COMMENT '总活体重(公斤)',
   `avg_weight` double DEFAULT NULL COMMENT '平均体重(公斤)',
   `price` bigint(20) DEFAULT NULL COMMENT '单价(分)',
@@ -503,11 +506,11 @@ CREATE INDEX idx_doctor_group_tracks_rel_event_id ON doctor_group_tracks(rel_eve
 DROP TABLE IF EXISTS `doctor_group_events`;
 CREATE TABLE `doctor_group_events` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '自增主键',
-  `org_id` varchar(64) DEFAULT NULL COMMENT '公司id',
+  `org_id` bigint(20) DEFAULT NULL COMMENT '公司id',
   `org_name` varchar(64) DEFAULT NULL COMMENT '公司名称',
-  `farm_id` varchar(64) DEFAULT NULL COMMENT '猪场id',
+  `farm_id` bigint(20) DEFAULT NULL COMMENT '猪场id',
   `farm_name` varchar(64) DEFAULT NULL COMMENT '猪场名称',
-  `group_id` varchar(64) DEFAULT NULL COMMENT '猪群卡片id',
+  `group_id` bigint(20) DEFAULT NULL COMMENT '猪群卡片id',
   `group_code` varchar(64) DEFAULT NULL COMMENT '猪群号',
   `event_at` datetime DEFAULT NULL COMMENT '事件发生日期',
   `type` smallint(6) DEFAULT NULL COMMENT '事件类型 枚举 总共10种',
@@ -519,7 +522,8 @@ CREATE TABLE `doctor_group_events` (
   `quantity` int(11) DEFAULT 0 COMMENT '事件猪只数',
   `weight` double DEFAULT NULL COMMENT '总活体重(公斤)',
   `avg_weight` double DEFAULT NULL COMMENT '平均体重(公斤)',
-  `avg_day_age` double DEFAULT NULL COMMENT '平均日龄',
+  `avg_day_age` int(11) DEFAULT NULL COMMENT '平均日龄',
+  `is_auto` smallint(6) DEFAULT NULL COMMENT '是否是自动生成事件, 0 不是, 1 是',
   `out_id`  varchar(128) DEFAULT NULL COMMENT  '外部id',
   `remark` text COMMENT  '备注',
   `extra` text COMMENT '具体事件的内容通过json存储',
@@ -558,7 +562,8 @@ sow_qty          Integer 其中:母猪数
 -- 3.猪群变动 -
 change_type_id   Long 猪群变动类型id
 change_type_name String 猪群变动类型name
-change_reason    String 变动原因
+change_reason_id String 变动原因id
+change_reason_name String 变动原因
 breed_id         Integer 品种id
 breed_name       String 品种name
 price            Long  单价(分)
@@ -1086,6 +1091,7 @@ CREATE INDEX idx_doctor_service_reviews_user_id ON doctor_service_reviews(user_i
 DROP TABLE IF EXISTS `doctor_group_snapshots`;
 CREATE TABLE `doctor_group_snapshots` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '自增主键',
+  `event_type` smallint(6) DEFAULT NULL COMMENT '猪群事件类型',
   `from_group_id` bigint(20) DEFAULT NULL COMMENT '操作前的猪群id',
   `to_group_id` bigint(20) DEFAULT NULL COMMENT '操作后的猪群id',
   `from_event_id` bigint(20) DEFAULT NULL COMMENT '操作前的事件id',

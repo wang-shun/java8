@@ -1,6 +1,8 @@
 package io.terminus.doctor.event.model;
 
+import com.google.common.base.Objects;
 import lombok.Data;
+import lombok.Getter;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -26,16 +28,37 @@ public class DoctorGroupTrack implements Serializable {
      * 关联的最新一次的事件id
      */
     private Long relEventId;
-    
+
+    /**
+     * 性别 0母 1公 2混合
+     * @see io.terminus.doctor.event.model.DoctorGroupTrack.Sex
+     */
+    private Integer sex;
+
     /**
      * 猪只数
      */
     private Integer quantity;
-    
+
+    /**
+     * 公猪数
+     */
+    private Integer boarQty;
+
+    /**
+     * 母猪数
+     */
+    private Integer sowQty;
+
+    /**
+     * 出生日期(此日期仅用于计算日龄)
+     */
+    private Date birthDate;
+
     /**
      * 平均日龄
      */
-    private Double avgDayAge;
+    private Integer avgDayAge;
     
     /**
      * 总活体重(公斤)
@@ -106,4 +129,29 @@ public class DoctorGroupTrack implements Serializable {
      * 修改时间
      */
     private Date updatedAt;
+
+    public enum Sex {
+        FEMALE(0, "母"),
+        MALE(1, "公"),
+        MIX(2, "混合");
+
+        @Getter
+        private final int value;
+        @Getter
+        private final String desc;
+
+        Sex(int value, String desc) {
+            this.value = value;
+            this.desc = desc;
+        }
+
+        public static Sex from(int number) {
+            for (Sex sex : Sex.values()) {
+                if (Objects.equal(sex.value, number)) {
+                    return sex;
+                }
+            }
+            return null;
+        }
+    }
 }

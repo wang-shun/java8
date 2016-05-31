@@ -21,6 +21,10 @@ public class DoctorGroupDao extends MyBatisDao<DoctorGroup> {
         return getSqlSession().selectList(sqlId("findByFarmId"), farmId);
     }
 
+    public List<DoctorGroup> fingByStatus(Integer status) {
+        return getSqlSession().selectList(sqlId("fingByStatus"), status);
+    }
+
     /**
      * 猪群的当前最大的id, 这个是dump搜素引擎用的
      *

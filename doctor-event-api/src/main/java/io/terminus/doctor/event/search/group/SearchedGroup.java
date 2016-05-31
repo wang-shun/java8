@@ -68,7 +68,7 @@ public class SearchedGroup implements Serializable {
     /**
      * 品均日龄
      */
-    private Double avgDayAge;
+    private Integer avgDayAge;
 
     /**
      * 总重量和品均重量

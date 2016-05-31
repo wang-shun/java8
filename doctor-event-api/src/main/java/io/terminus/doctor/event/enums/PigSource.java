@@ -24,7 +24,7 @@ public enum PigSource {
     @Getter
     private String desc;
 
-    private PigSource(Integer key, String inputCode, String desc){
+    PigSource(Integer key, String inputCode, String desc){
         this.key = key;
         this.inputCode = inputCode;
         this.desc = desc;

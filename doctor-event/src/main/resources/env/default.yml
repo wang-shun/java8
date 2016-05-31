@@ -42,7 +42,7 @@ search:
   host: 101.201.44.35
   port: 9200
 
-search:
+esearch:
   pig:
     index-name: pigs
     index-type: pig

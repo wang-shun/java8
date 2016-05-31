@@ -13,7 +13,7 @@ import lombok.Getter;
 public enum GroupEventType {
 
     NEW(1, "新建猪群"),
-    TRANS_IN(2, "转入猪群"),
+    MOVE_IN(2, "转入猪群"),
     CHANGE(3, "猪群变动"),
     TRANS_GROUP(4, "猪群转群"),
     TURN_SEED(5, "商品猪转为种猪"),
