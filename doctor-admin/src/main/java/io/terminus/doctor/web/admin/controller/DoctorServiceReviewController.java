@@ -2,10 +2,12 @@ package io.terminus.doctor.web.admin.controller;
 
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.BaseUser;
+import io.terminus.doctor.user.enums.TargetSystem;
 import io.terminus.doctor.user.model.DoctorOrg;
 import io.terminus.doctor.user.model.DoctorServiceReview;
 import io.terminus.doctor.user.service.DoctorServiceReviewWriteService;
 import io.terminus.doctor.user.service.business.DoctorServiceReviewService;
+import io.terminus.doctor.web.admin.service.AccountService;
 import io.terminus.pampas.common.UserUtil;
 import io.terminus.parana.common.utils.RespHelper;
 import lombok.extern.slf4j.Slf4j;
@@ -25,12 +27,15 @@ public class DoctorServiceReviewController {
 
     private final DoctorServiceReviewWriteService doctorServiceReviewWriteService;
     private final DoctorServiceReviewService doctorServiceReviewService;
+    private final AccountService accountService;
 
     @Autowired
     public DoctorServiceReviewController(DoctorServiceReviewWriteService doctorServiceReviewWriteService,
-                                         DoctorServiceReviewService doctorServiceReviewService){
+                                         DoctorServiceReviewService doctorServiceReviewService,
+                                         AccountService accountService){
         this.doctorServiceReviewWriteService = doctorServiceReviewWriteService;
         this.doctorServiceReviewService = doctorServiceReviewService;
+        this.accountService = accountService;
     }
 
     /**
@@ -42,32 +47,29 @@ public class DoctorServiceReviewController {
      */
     @RequestMapping(value = "/pigdoctor/open", method = RequestMethod.POST)
     public Boolean openDoctorService(@RequestParam("userId") Long userId, @RequestParam DoctorOrg org, @RequestParam List<String> farms){
-        try {
-            BaseUser baseUser = UserUtil.getCurrentUser();
-            // TODO: 权限中心校验权限
+        BaseUser baseUser = UserUtil.getCurrentUser();
+        // TODO: 权限中心校验权限
 
-
-        } catch (Exception e) {
-            throw new JsonResponseException(500, e.getMessage());
+        if (org.getId() == null) {
+            throw new JsonResponseException(500, "org.id.can.not.be.null");
         }
-        return true;
+        return RespHelper.or500(doctorServiceReviewService.openDoctorService(baseUser, userId, farms, org));
     }
 
     /**
-     * 开通电商读物
+     * 开通电商服务
      * @param userId 被操作的用户的id, 注意不是当前登录者的id
      * @return
      */
     @RequestMapping(value = "/pigmall/open", method = RequestMethod.GET)
-    public Boolean openPigmallService(@RequestParam("userId") Long userId){
-        try {
-            BaseUser baseUser = UserUtil.getCurrentUser();
-            // TODO: 权限中心校验权限
+    public Boolean openPigmallService(@RequestParam("userId") Long userId, @RequestParam("account") String account){
+        BaseUser baseUser = UserUtil.getCurrentUser();
+        // TODO: 权限中心校验权限
 
-
-        } catch (Exception e) {
-            throw new JsonResponseException(500, e.getMessage());
-        }
+        //更新服务状态为开通
+        RespHelper.or500(doctorServiceReviewWriteService.updateStatus(baseUser, userId, DoctorServiceReview.Type.PIGMALL, DoctorServiceReview.Status.OK));
+        //与电商系统绑定账户
+        RespHelper.or500(accountService.bindAccount(userId, TargetSystem.PIGMALL, account));
         return true;
     }
 
@@ -77,15 +79,14 @@ public class DoctorServiceReviewController {
      * @return
      */
     @RequestMapping(value = "/neverest/open", method = RequestMethod.GET)
-    public Boolean openNeverestService(@RequestParam("userId") Long userId){
-        try {
-            BaseUser baseUser = UserUtil.getCurrentUser();
-            // TODO: 权限中心校验权限
+    public Boolean openNeverestService(@RequestParam("userId") Long userId, @RequestParam("account") String account){
+        BaseUser baseUser = UserUtil.getCurrentUser();
+        // TODO: 权限中心校验权限
 
-
-        } catch (Exception e) {
-            throw new JsonResponseException(500, e.getMessage());
-        }
+        //更新服务状态为开通
+        RespHelper.or500(doctorServiceReviewWriteService.updateStatus(baseUser, userId, DoctorServiceReview.Type.NEVEREST, DoctorServiceReview.Status.OK));
+        //与大数据系统绑定账户
+        RespHelper.or500(accountService.bindAccount(userId, TargetSystem.NEVEREST, account));
         return true;
     }
     /**

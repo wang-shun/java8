@@ -65,12 +65,14 @@ public class DoctorServiceReviewServiceImpl implements DoctorServiceReviewServic
     public Response<Boolean> openDoctorService(BaseUser user, Long userId, List<String> farms, DoctorOrg org){
         Response<Boolean> response = new Response<>();
         try{
-
+            DoctorServiceReview review = doctorServiceReviewDao.findByUserIdAndType(userId, DoctorServiceReview.Type.PIG_DOCTOR);
+            Preconditions.checkState(Objects.equals(DoctorServiceReview.Status.REVIEW.getValue(), review.getStatus()), "doctor.service.review.status.error");
+            doctorServiceReviewManager.openDoctorService(user, userId, farms, org);
             response.setResult(true);
-        }catch (ServiceException e){
+        }catch (ServiceException | IllegalStateException e){
             response.setError(e.getMessage());
         } catch(Exception e){
-            log.error("audit service failed, cause:{}", Throwables.getStackTraceAsString(e));
+            log.error("open service failed, cause:{}", Throwables.getStackTraceAsString(e));
             response.setError("audit.service.failed");
         }
         return response;

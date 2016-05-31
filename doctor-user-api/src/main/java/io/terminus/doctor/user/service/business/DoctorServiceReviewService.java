@@ -23,5 +23,13 @@ public interface DoctorServiceReviewService {
      */
     Response<Boolean> applyOpenService(BaseUser baseUser, DoctorServiceApplyDto serviceApplyDto);
 
+    /**
+     * 给用户开通猪场软件服务
+     * @param user 登录者
+     * @param userId 被操作的用户
+     * @param farms 猪场名称
+     * @param org 公司名称
+     * @return
+     */
     Response<Boolean> openDoctorService(BaseUser user, Long userId, List<String> farms, DoctorOrg org);
 }

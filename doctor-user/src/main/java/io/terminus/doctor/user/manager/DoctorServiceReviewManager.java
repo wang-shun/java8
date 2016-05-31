@@ -14,9 +14,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -100,7 +100,9 @@ public class DoctorServiceReviewManager {
                 return farm;
             }).collect(Collectors.toList());
             doctorFarmDao.creates(list);
-//            Joiner.on(",").join()
+            if (list.size() > 0) {
+                farmIds = Joiner.on(",").join(Arrays.asList(list.stream().mapToLong(DoctorFarm::getId).toArray()));
+            }
         }
         DoctorUserDataPermission permission = new DoctorUserDataPermission();
         permission.setUserId(userId);
