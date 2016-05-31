@@ -4,8 +4,6 @@ import com.google.common.base.Throwables;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.event.dao.DoctorGroupDao;
-import io.terminus.doctor.event.dao.DoctorGroupEventDao;
-import io.terminus.doctor.event.dao.DoctorGroupSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
 import io.terminus.doctor.event.dto.DoctorGroupDetail;
 import io.terminus.doctor.event.dto.event.group.input.DoctorAntiepidemicGroupInput;
@@ -41,20 +39,14 @@ import static io.terminus.common.utils.Arguments.notEmpty;
 public class DoctorGroupWriteServiceImpl implements DoctorGroupWriteService {
 
     private final DoctorGroupDao doctorGroupDao;
-    private final DoctorGroupEventDao doctorGroupEventDao;
-    private final DoctorGroupSnapshotDao doctorGroupSnapshotDao;
     private final DoctorGroupTrackDao doctorGroupTrackDao;
     private final DoctorGroupManager doctorGroupManager;
 
     @Autowired
     public DoctorGroupWriteServiceImpl(DoctorGroupDao doctorGroupDao,
-                                       DoctorGroupEventDao doctorGroupEventDao,
-                                       DoctorGroupSnapshotDao doctorGroupSnapshotDao,
                                        DoctorGroupTrackDao doctorGroupTrackDao,
                                        DoctorGroupManager doctorGroupManager) {
         this.doctorGroupDao = doctorGroupDao;
-        this.doctorGroupEventDao = doctorGroupEventDao;
-        this.doctorGroupSnapshotDao = doctorGroupSnapshotDao;
         this.doctorGroupTrackDao = doctorGroupTrackDao;
         this.doctorGroupManager = doctorGroupManager;
     }
@@ -72,8 +64,6 @@ public class DoctorGroupWriteServiceImpl implements DoctorGroupWriteService {
     @Override
     public Response<Boolean> groupEventAntiepidemic(DoctorGroupDetail groupDetail, @Valid DoctorAntiepidemicGroupInput antiepidemic) {
         try {
-            //校验数量
-            checkQuantity(groupDetail.getGroupTrack().getQuantity(), antiepidemic.getQuantity());
             doctorGroupManager.groupEventAntiepidemic(groupDetail.getGroup(), groupDetail.getGroupTrack(), antiepidemic);
             return Response.ok(Boolean.TRUE);
         } catch (ServiceException e) {
@@ -88,8 +78,6 @@ public class DoctorGroupWriteServiceImpl implements DoctorGroupWriteService {
     @Override
     public Response<Boolean> groupEventChange(DoctorGroupDetail groupDetail, @Valid DoctorChangeGroupInput change) {
         try {
-            checkQuantity(groupDetail.getGroupTrack().getQuantity(), change.getQuantity());
-            checkQuantityEqual(change.getQuantity(), change.getBoarQty(), change.getSowQty());
             doctorGroupManager.groupEventChange(groupDetail.getGroup(), groupDetail.getGroupTrack(), change);
             return Response.ok(Boolean.TRUE);
         } catch (ServiceException e) {
@@ -118,8 +106,6 @@ public class DoctorGroupWriteServiceImpl implements DoctorGroupWriteService {
     @Override
     public Response<Boolean> groupEventDisease(DoctorGroupDetail groupDetail, @Valid DoctorDiseaseGroupInput disease) {
         try {
-            //校验数量
-            checkQuantity(groupDetail.getGroupTrack().getQuantity(), disease.getQuantity());
             doctorGroupManager.groupEventDisease(groupDetail.getGroup(), groupDetail.getGroupTrack(), disease);
             return Response.ok(Boolean.TRUE);
         } catch (ServiceException e) {
@@ -148,7 +134,6 @@ public class DoctorGroupWriteServiceImpl implements DoctorGroupWriteService {
     @Override
     public Response<Boolean> groupEventMoveIn(DoctorGroupDetail groupDetail, @Valid DoctorMoveInGroupInput moveIn) {
         try {
-            checkQuantityEqual(moveIn.getQuantity(), moveIn.getBoarQty(), moveIn.getSowQty());
             doctorGroupManager.groupEventMoveIn(groupDetail.getGroup(), groupDetail.getGroupTrack(), moveIn);
             return Response.ok(Boolean.TRUE);
         } catch (ServiceException e) {
@@ -163,8 +148,6 @@ public class DoctorGroupWriteServiceImpl implements DoctorGroupWriteService {
     @Override
     public Response<Boolean> groupEventTransFarm(DoctorGroupDetail groupDetail, @Valid DoctorTransFarmGroupInput transFarm) {
         try {
-            checkQuantity(groupDetail.getGroupTrack().getQuantity(), transFarm.getQuantity());
-            checkQuantityEqual(transFarm.getQuantity(), transFarm.getBoarQty(), transFarm.getSowQty());
             doctorGroupManager.groupEventTransFarm(groupDetail.getGroup(), groupDetail.getGroupTrack(), transFarm);
             return Response.ok(Boolean.TRUE);
         } catch (ServiceException e) {
@@ -179,8 +162,6 @@ public class DoctorGroupWriteServiceImpl implements DoctorGroupWriteService {
     @Override
     public Response<Boolean> groupEventTransGroup(DoctorGroupDetail groupDetail, @Valid DoctorTransGroupInput transGroup) {
         try {
-            checkQuantity(groupDetail.getGroupTrack().getQuantity(), transGroup.getQuantity());
-            checkQuantityEqual(transGroup.getQuantity(), transGroup.getBoarQty(), transGroup.getSowQty());
             doctorGroupManager.groupEventTransGroup(groupDetail.getGroup(), groupDetail.getGroupTrack(), transGroup);
             return Response.ok(Boolean.TRUE);
         } catch (ServiceException e) {
@@ -217,21 +198,6 @@ public class DoctorGroupWriteServiceImpl implements DoctorGroupWriteService {
         } catch (Exception e) {
             log.error("incr day age failed, cause:{}", Throwables.getStackTraceAsString(e));
             return Response.fail("incr.group.dayAge.fail");
-        }
-    }
-
-    //校验数量
-    private static void checkQuantity(Integer max, Integer actual) {
-        if (actual > max) {
-            throw new ServiceException("quantity.over.max");
-        }
-    }
-
-    //校验 公 + 母 = 总和
-    private static void checkQuantityEqual(Integer all, Integer boar, Integer sow) {
-
-        if (all != (boar + sow)) {
-            throw new ServiceException("quantity.not.equal");
         }
     }
 }
