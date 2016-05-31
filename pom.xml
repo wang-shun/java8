@@ -12,6 +12,8 @@
         <module>doctor-workflow-job</module>
         <module>doctor-web-core</module>
         <module>doctor-web</module>
+        <module>doctor-standalone-web</module>
+        <module>doctor-standalone-admin</module>
         <module>doctor-admin</module>
         <module>doctor-event</module>
         <module>doctor-event-api</module>
@@ -328,12 +330,19 @@
             </dependency>
             <dependency>
                 <groupId>io.terminus.doctor</groupId>
-                <artifactId>doctor-web-front</artifactId>
+                <artifactId>doctor-web-admin</artifactId>
                 <version>${project.parent.version}</version>
             </dependency>
+
             <dependency>
                 <groupId>io.terminus.doctor</groupId>
-                <artifactId>doctor-web-admin</artifactId>
+                <artifactId>doctor-web</artifactId>
+                <version>${project.parent.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>io.terminus.doctor</groupId>
+                <artifactId>doctor-admin</artifactId>
                 <version>${project.parent.version}</version>
             </dependency>
 
@@ -387,6 +396,12 @@
 
             <dependency>
                 <groupId>io.terminus.doctor</groupId>
+                <artifactId>doctor-workflow-job</artifactId>
+                <version>${project.parent.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>io.terminus.doctor</groupId>
                 <artifactId>doctor-user-api</artifactId>
                 <version>${project.parent.version}</version>
             </dependency>
@@ -398,12 +413,6 @@
             <dependency>
                 <groupId>io.terminus.doctor</groupId>
                 <artifactId>doctor-user</artifactId>
-                <version>${project.parent.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>io.terminus.doctor</groupId>
-                <artifactId>doctor-web-mock</artifactId>
                 <version>${project.parent.version}</version>
             </dependency>
 

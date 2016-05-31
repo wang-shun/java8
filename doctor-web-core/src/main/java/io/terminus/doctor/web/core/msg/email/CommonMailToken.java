@@ -18,3 +18,4 @@ public class CommonMailToken {
     private String password;
     private Integer protocol;        //1: SSL; 2: TLS
 }
+
