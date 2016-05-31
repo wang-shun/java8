@@ -23,7 +23,10 @@ import java.util.Map;
 
 import static java.util.Objects.isNull;
 
+@Builder
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class DoctorMaterialInfo implements Serializable{
 
     private static final long serialVersionUID = -6818633941387063734L;
@@ -106,7 +109,7 @@ public class DoctorMaterialInfo implements Serializable{
     @NoArgsConstructor
     public static class MaterialProduce{
 
-        private Long total;
+        private Long total; //生产物料总量信息
 
         private List<MaterialProduceEntry> materialProduceEntries ; // 原料占比信息
 
@@ -156,12 +159,12 @@ public class DoctorMaterialInfo implements Serializable{
     @NoArgsConstructor
     public static class MaterialProduceEntry{
 
-        private Long materialId;
+        private Long materialId;    //原料Id
 
-        private String materialName;
+        private String materialName;    //  原料名称
 
-        private Long materialCount;
+        private Long materialCount; // 原料数量信息
 
-        private Double percent;
+        private Double percent; //原料配比信息
     }
 }

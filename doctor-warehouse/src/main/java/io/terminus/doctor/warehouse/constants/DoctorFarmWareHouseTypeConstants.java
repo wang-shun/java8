@@ -12,4 +12,6 @@ public class DoctorFarmWareHouseTypeConstants {
 
     public static final String CONSUME_COUNT = "consumeCount";  // 对应的Consume Date 消耗物品的数量
 
+    public static final String TO_CONSUME_DATE = "toConsumeDate"; // 预计消耗时间
+
 }

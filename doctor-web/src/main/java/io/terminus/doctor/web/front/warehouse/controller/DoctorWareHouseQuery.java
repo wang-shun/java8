@@ -1,12 +1,21 @@
 package io.terminus.doctor.web.front.warehouse.controller;
 
+import com.google.common.base.Throwables;
+import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.Paging;
+import io.terminus.common.model.Response;
 import io.terminus.doctor.common.utils.RespHelper;
+import io.terminus.doctor.user.model.DoctorFarm;
+import io.terminus.doctor.user.service.DoctorFarmReadService;
 import io.terminus.doctor.warehouse.dto.DoctorWareHouseDto;
 import io.terminus.doctor.warehouse.model.DoctorFarmWareHouseType;
 import io.terminus.doctor.warehouse.model.DoctorWareHouse;
 import io.terminus.doctor.warehouse.service.DoctorWareHouseReadService;
 import io.terminus.doctor.warehouse.service.DoctorWareHouseWriteService;
+import io.terminus.doctor.web.front.warehouse.dto.DoctorWareHouseCreateDto;
+import io.terminus.pampas.common.UserUtil;
+import io.terminus.parana.user.model.User;
+import io.terminus.parana.user.service.UserReadService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -18,6 +27,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.util.List;
+
+import static com.google.common.base.Preconditions.checkState;
 
 /**
  * Created by yaoqijun.
@@ -34,11 +45,18 @@ public class DoctorWareHouseQuery {
 
     private final DoctorWareHouseWriteService doctorWareHouseWriteService;
 
+    private final DoctorFarmReadService doctorFarmReadService;
+
+    private final UserReadService userReadService;
+
     @Autowired
     public DoctorWareHouseQuery(DoctorWareHouseReadService doctorWareHouseReadService,
-                                DoctorWareHouseWriteService doctorWareHouseWriteService){
+                                DoctorWareHouseWriteService doctorWareHouseWriteService,
+                                DoctorFarmReadService doctorFarmReadService, UserReadService userReadService){
         this.doctorWareHouseReadService = doctorWareHouseReadService;
         this.doctorWareHouseWriteService = doctorWareHouseWriteService;
+        this.doctorFarmReadService = doctorFarmReadService;
+        this.userReadService = userReadService;
     }
 
     @RequestMapping(value = "/listWareHouseType", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -49,13 +67,42 @@ public class DoctorWareHouseQuery {
 
     @RequestMapping(value = "/pagingDoctorWareHouseDto", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public Paging<DoctorWareHouseDto> pagingDoctorWareHouseDto(@RequestParam("farmId") Long farmId, Integer pageNo, Integer pageSize){
-        return RespHelper.or500(doctorWareHouseReadService.queryDoctorWarehouseDto(farmId, pageNo, pageSize));
+    public Paging<DoctorWareHouseDto> pagingDoctorWareHouseDto(@RequestParam("farmId") Long farmId,
+                                                               @RequestParam(value = "type", required = false) Integer type,
+                                                               @RequestParam(value = "pageNo", required = false) Integer pageNo,
+                                                               @RequestParam(value = "pageSize", required = false) Integer pageSize){
+        return RespHelper.or500(doctorWareHouseReadService.queryDoctorWarehouseDto(farmId, type, pageNo, pageSize));
     }
 
     @RequestMapping(value = "/createWareHouse", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public Long createWareHouseInfo(@RequestBody DoctorWareHouse doctorWareHouse){
+    public Long createWareHouseInfo(@RequestBody DoctorWareHouseCreateDto doctorWareHouseCreateDto){
+        DoctorWareHouse doctorWareHouse = null;
+        try{
+            // get farm info
+            Response<DoctorFarm> farmResponse = doctorFarmReadService.findFarmById(doctorWareHouseCreateDto.getFarmId());
+            checkState(farmResponse.isSuccess(), "read.farmInfo.fail");
+            DoctorFarm doctorFarm = farmResponse.getResult();
+
+            // get user reader info
+            Response<User> userResponse = userReadService.findById(doctorWareHouseCreateDto.getManagerId());
+            checkState(userResponse.isSuccess(), "read.userInfo.fail");
+            User user = userResponse.getResult();
+
+            Response<User> currentUserResponse = userReadService.findById(UserUtil.getUserId());
+            User currentUser = currentUserResponse.getResult();
+
+            doctorWareHouse = DoctorWareHouse.builder()
+                    .wareHouseName(doctorWareHouseCreateDto.getWareHouseName())
+                    .farmId(doctorWareHouseCreateDto.getFarmId()).farmName(doctorFarm.getName())
+                    .managerId(doctorWareHouseCreateDto.getManagerId()).managerName(user.getName())
+                    .address(doctorWareHouseCreateDto.getAddress()).type(doctorWareHouseCreateDto.getType())
+                    .creatorId(currentUser.getId()).creatorName(currentUser.getName())
+                    .build();
+        }catch (Exception e){
+            log.error("create ware house info fail, cause:{}", Throwables.getStackTraceAsString(e));
+            throw new JsonResponseException(e.getMessage());
+        }
         return RespHelper.or500(doctorWareHouseWriteService.createWareHouse(doctorWareHouse));
     }
 }

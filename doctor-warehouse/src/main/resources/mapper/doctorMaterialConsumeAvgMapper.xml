@@ -13,6 +13,7 @@
         <result column="farm_id" property="farmId"/>
         <result column="ware_house_id" property="wareHouseId"/>
         <result column="material_id" property="materialId"/>
+        <result column="type" property="type"/>
         <result column="consume_avg_count" property="consumeAvgCount"/>
         <result column="consume_count" property="consumeCount"/>
         <result column="consume_date" property="consumeDate"/>
@@ -29,11 +30,18 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        `farm_id`,`ware_house_id`,`material_id`,`consume_avg_count`,`consume_count`,`consume_date`,`extra`,`created_at`,`updated_at`
+        `farm_id`,`ware_house_id`,`material_id`,`type`,`consume_avg_count`,`consume_count`,`consume_date`,`extra`,`created_at`,`updated_at`
     </sql>
 
     <sql id="vals">
-        #{farmId},#{wareHouseId},#{materialId},#{consumeAvgCount},#{consumeCount},#{consumeDate},#{extra},now(),now()
+        #{farmId},#{wareHouseId},#{materialId},#{type},#{consumeAvgCount},#{consumeCount},#{consumeDate},#{extra},now(),now()
+    </sql>
+
+    <sql id="criteria">
+        <if test="farmId != null" > AND `farm_id` = #{farmId}</if>
+        <if test="wareHouseId != null" > AND `ware_house_id` = #{wareHouseId}</if>
+        <if test="materialId != null" > AND `material_id` = #{materialId}</if>
+        <if test="type != null"> AND `type` = #{type} </if>
     </sql>
 
     <insert id="create" parameterType="DoctorMaterialConsumeAvg" keyProperty="id" useGeneratedKeys="true">
@@ -47,7 +55,7 @@
         ( <include refid="cols_exclude_id"/> )
         VALUES
         <foreach collection="list" item="i" separator=",">
-        (#{i.farmId},#{i.wareHouseId},#{i.materialId},#{i.consumeAvgCount},#{i.consumeCount},#{i.consumeDate},#{i.extra},now(),now())
+        (#{i.farmId},#{i.wareHouseId},#{i.materialId},#{type},#{i.consumeAvgCount},#{i.consumeCount},#{i.consumeDate},#{i.extra},now(),now())
         </foreach>
     </insert>
 
@@ -74,7 +82,14 @@
 
     <select id="queryByIds" parameterType="map" resultMap="DoctorMaterialConsumeAvgMap">
         SELECT <include refid="cols_all"/> FROM <include refid="tb"/>
-        WHERE farm_id=#{farmId} and ware_house_id=#{wareHouseId} and material_id=#{materialId}
+        <where>
+            <include refid="criteria"/>
+        </where>
+    </select>
+
+    <select id="queryByFarmIdAndType" parameterType="map" resultMap="DoctorMaterialConsumeAvgMap">
+        SELECT <include refid="cols_all"/> FROM <include refid="tb"/>
+        WHERE farm_id = #{farm_id} and `type` = #{type}
     </select>
 
     <update id="update" parameterType="DoctorMaterialConsumeAvg">
@@ -84,6 +99,7 @@
         <if test="farmId != null" > ,`farm_id` = #{farmId}</if>
         <if test="wareHouseId != null" > ,`ware_house_id` = #{wareHouseId}</if>
         <if test="materialId != null" > ,`material_id` = #{materialId}</if>
+        <if test="type != null"> ,`type` = #{type} </if>
         <if test="consumeAvgCount != null" > ,`consume_avg_count` = #{consumeAvgCount}</if>
         <if test="consumeCount != null" > ,`consume_count` = #{consumeCount}</if>
         <if test="consumeDate != null" > ,`consume_date` = #{consumeDate}</if>

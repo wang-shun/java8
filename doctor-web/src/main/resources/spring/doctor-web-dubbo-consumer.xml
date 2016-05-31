@@ -40,6 +40,8 @@
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.OperatorRoleReadService" id="operatorRoleReadService" check="false"/>
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.UserBindService" id="userBindService" check="false"/>
 
+    <!-- farm read service  -->
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.DoctorFarmReadService" id="doctorFarmReadService" check="false"/>
 
     <!-- file services -->
     <dubbo:reference version="1.0.0" interface="io.terminus.parana.file.service.UserFileService" id="userFileService" check="false" retries="0"/>
@@ -64,7 +66,7 @@
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.parana.article.service.ArticleReadService" id="articleReadService" check="false"/>
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.parana.article.service.ArticleWriteService" id="articleWriteService" check="false"/>
 
-    <!-- event service -->
+    <!-- barn service -->
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.event.service.DoctorBarnReadService" id="doctorBarnReadService" check="false"/>
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.event.service.DoctorBarnWriteService" id="doctorBarnWriteService" check="false"/>
 
@@ -97,4 +99,11 @@
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.warehouse.service.DoctorMaterialInfoReadService" id="doctorMaterialInfoReadService" check="false"/>
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.warehouse.service.DoctorMaterialInWareHouseReadService" id="doctorMaterialInWareHouseReadService" check="false"/>
 
+    <!-- group service -->
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.event.service.DoctorGroupReadService" id="doctorGroupReadService" check="false"/>
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.event.service.DoctorGroupWriteService" id="doctorGroupWriteService" check="false"/>
+
+    <!--farm service-->
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.DoctorFarmReadService" id="doctorFarmReadService" check="false"/>
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.DoctorFarmWriteService" id="doctorFarmWriteService" check="false"/>
 </beans>

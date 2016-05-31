@@ -24,6 +24,7 @@
         <result column="weight" property="weight"/>
         <result column="avg_weight" property="avgWeight"/>
         <result column="avg_day_age" property="avgDayAge"/>
+        <result column="is_auto" property="isAuto"/>
         <result column="out_id" property="outId"/>
         <result column="remark" property="remark"/>
         <result column="extra" property="extra"/>
@@ -42,11 +43,11 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        org_id, org_name, farm_id, farm_name, group_id, group_code, event_at, type, name, desc, barn_id, barn_name, pig_type, quantity, weight, avg_weight, avg_day_age, out_id, remark, extra, created_at, creator_id, creator_name
+        org_id, org_name, farm_id, farm_name, group_id, group_code, event_at, type, name, desc, barn_id, barn_name, pig_type, quantity, weight, avg_weight, avg_day_age, is_auto, out_id, remark, extra, created_at, creator_id, creator_name
     </sql>
 
     <sql id="vals">
-        #{orgId}, #{orgName}, #{farmId}, #{farmName}, #{groupId}, #{groupCode}, #{eventAt}, #{type}, #{name}, #{desc}, #{barnId}, #{barnName}, #{pigType}, #{quantity}, #{weight}, #{avgWeight}, #{avgDayAge}, #{outId}, #{remark}, #{extra}, now(), #{creatorId}, #{creatorName}
+        #{orgId}, #{orgName}, #{farmId}, #{farmName}, #{groupId}, #{groupCode}, #{eventAt}, #{type}, #{name}, #{desc}, #{barnId}, #{barnName}, #{pigType}, #{quantity}, #{weight}, #{avgWeight}, #{avgDayAge}, #{isAuto}, #{outId}, #{remark}, #{extra}, now(), #{creatorId}, #{creatorName}
     </sql>
 
     <insert id="create" parameterType="DoctorGroupEvent" keyProperty="id" useGeneratedKeys="true">
@@ -84,10 +85,10 @@
             <if test="weight != null">weight = #{weight},</if>
             <if test="avgWeight != null">avg_weight = #{avgWeight},</if>
             <if test="avgDayAge != null">avg_day_age = #{avgDayAge},</if>
+            <if test="isAuto != null">is_auto = #{isAuto},</if>
             <if test="outId != null">out_id = #{outId},</if>
             <if test="remark != null">remark = #{remark},</if>
             <if test="extra != null">extra = #{extra},</if>
-            
             <if test="creatorId != null">creator_id = #{creatorId},</if>
             <if test="creatorName != null">creator_name = #{creatorName},</if>
             

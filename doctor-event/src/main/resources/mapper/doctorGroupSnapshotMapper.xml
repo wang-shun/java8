@@ -27,11 +27,11 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        from_group_id, to_group_id, from_event_id, to_event_id, from_info, to_info, created_at
+        event_type, from_group_id, to_group_id, from_event_id, to_event_id, from_info, to_info, created_at
     </sql>
 
     <sql id="vals">
-        #{fromGroupId}, #{toGroupId}, #{fromEventId}, #{toEventId}, #{fromInfo}, #{toInfo}, now()
+        #{eventType}, #{fromGroupId}, #{toGroupId}, #{fromEventId}, #{toEventId}, #{fromInfo}, #{toInfo}, now()
     </sql>
 
     <insert id="create" parameterType="DoctorGroupSnapshot" keyProperty="id" useGeneratedKeys="true">
@@ -52,6 +52,7 @@
         UPDATE
         <include refid="tb"/>
         <set>
+            <if test="eventType != null">event_type = #{eventType},</if>
             <if test="fromGroupId != null">from_group_id = #{fromGroupId},</if>
             <if test="toGroupId != null">to_group_id = #{toGroupId},</if>
             <if test="fromEventId != null">from_event_id = #{fromEventId},</if>

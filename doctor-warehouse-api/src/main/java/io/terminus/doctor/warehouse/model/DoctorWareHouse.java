@@ -7,9 +7,12 @@ import com.google.common.collect.Iterables;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.constants.JacksonType;
 import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.SneakyThrows;
+import lombok.experimental.Builder;
 
 import java.io.Serializable;
 import java.util.Collections;
@@ -18,7 +21,10 @@ import java.util.Map;
 
 import static java.util.Objects.isNull;
 
+@Builder
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class DoctorWareHouse implements Serializable{
 
     private static final long serialVersionUID = -2131754410925405501L;

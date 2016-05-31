@@ -29,7 +29,7 @@ session:
   cookie-name: msid
   source: redis
   serialize-type: json
-  redis-host: 101.201.44.35
+  redis-host: 127.0.0.1
   redis-port: 6379
   redis-index: 1
   redis-cluster: false
@@ -75,7 +75,8 @@ pay:
 
 msg:
   current:
-      smsService: luoSiMaoSmsService
+    smsService: luoSiMaoSmsService
+    emailService: commonEmailService
   luosimao:
     sendUrl: http://sms-api.luosimao.com/v1/http_get/send/json
     statusUrl: http://sms-api.luosimao.com/v1/http_get/status/json
@@ -88,9 +89,9 @@ msg:
     password: 123456Pigmall
     protocol: 2
   umeng: #友盟APP消息推送网关配置
-      android: #Android应用配置
-        appKey: xxxx
-        appSecret: xxxx
-      ios: #IOS应用配置
-        appKey: xxxx
-        appSecret: xxxx
+    android: #Android应用配置
+      appKey: xxxx
+      appSecret: xxxx
+    ios: #IOS应用配置
+      appKey: xxxx
+      appSecret: xxxx

@@ -61,6 +61,7 @@ public class DoctorGroup implements Serializable {
     
     /**
      * 枚举: 1:已建群, -1:已关闭
+     * @see Status
      */
     private Integer status;
     
@@ -89,13 +90,7 @@ public class DoctorGroup implements Serializable {
      * @see io.terminus.doctor.common.enums.PigType
      */
     private Integer pigType;
-    
-    /**
-     * 性别 1:混合 2:母 3:公
-     * @see io.terminus.doctor.event.model.DoctorGroup.Sex
-     */
-    private Integer sex;
-    
+
     /**
      * 品种id
      */
@@ -189,31 +184,6 @@ public class DoctorGroup implements Serializable {
             for (Status status : Status.values()) {
                 if (Objects.equal(status.value, number)) {
                     return status;
-                }
-            }
-            return null;
-        }
-    }
-
-    public enum Sex {
-        MIX(1, "混合"),
-        FEMALE(2, "母"),
-        MALE(3, "公");
-
-        @Getter
-        private final int value;
-        @Getter
-        private final String desc;
-
-        Sex(int value, String desc) {
-            this.value = value;
-            this.desc = desc;
-        }
-
-        public static Sex from(int number) {
-            for (Sex sex : Sex.values()) {
-                if (Objects.equal(sex.value, number)) {
-                    return sex;
                 }
             }
             return null;
