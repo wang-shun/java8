@@ -9,7 +9,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  * author: DreamYoung
  * Date: 16/5/25
  */
-@ConfigurationProperties(prefix = "search.barn")
+@ConfigurationProperties(prefix = "esearch.barn")
 @Data
 public class BarnSearchProperties {
 
