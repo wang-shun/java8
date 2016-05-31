@@ -72,13 +72,16 @@ public class DoctorBarns {
 
         // TODO: 权限中心校验权限
 
+        //todo 舍名校验重复
+
         if (barn.getId() == null) {
             Long farmId = barn.getFarmId();
             DoctorFarm farm = RespHelper.or500(doctorFarmReadService.findFarmById(farmId));
-
+            barn.setOrgId(farm.getOrgId());
+            barn.setOrgName(farm.getOrgName());
+            barn.setFarmName(farm.getName());
             RespHelper.or500(doctorBarnWriteService.createBarn(barn));
         } else {
-
             RespHelper.or500(doctorBarnWriteService.updateBarn(barn));
         }
         return Boolean.TRUE;

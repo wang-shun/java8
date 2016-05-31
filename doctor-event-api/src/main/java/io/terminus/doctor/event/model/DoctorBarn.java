@@ -3,7 +3,9 @@ package io.terminus.doctor.event.model;
 import com.google.common.base.Objects;
 import lombok.Data;
 import lombok.Getter;
+import org.hibernate.validator.constraints.NotEmpty;
 
+import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.util.Date;
 
@@ -22,6 +24,7 @@ public class DoctorBarn implements Serializable {
     /**
      * 猪舍名称
      */
+    @NotEmpty(message = "barn.name.not.null")
     private String name;
     
     /**
@@ -37,6 +40,7 @@ public class DoctorBarn implements Serializable {
     /**
      * 猪场id
      */
+    @NotNull(message = "farmId.not.null")
     private Long farmId;
     
     /**
@@ -48,6 +52,7 @@ public class DoctorBarn implements Serializable {
      * 猪类名称 枚举9种
      * @see io.terminus.doctor.common.enums.PigType
      */
+    @NotNull(message = "pigType.not.null")
     private Integer pigType;
     
     /**
