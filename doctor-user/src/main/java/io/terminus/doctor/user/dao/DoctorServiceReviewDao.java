@@ -5,8 +5,8 @@ import io.terminus.common.mysql.dao.MyBatisDao;
 import io.terminus.doctor.user.model.DoctorServiceReview;
 import org.springframework.stereotype.Repository;
 
-import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Stream;
 
 /**
  * Desc: 用户服务审批表Dao类
@@ -37,7 +37,7 @@ public class DoctorServiceReviewDao extends MyBatisDao<DoctorServiceReview> {
      * @return 插入的数据的行数, 理论上应该等于枚举 ServiceReview.Type 的数量
      */
     public boolean initData(Long userId){
-        int[] types = Arrays.asList(DoctorServiceReview.Type.values()).stream().mapToInt(DoctorServiceReview.Type::getValue).toArray();
+        int[] types = Stream.of(DoctorServiceReview.Type.values()).mapToInt(DoctorServiceReview.Type::getValue).toArray();
         return sqlSession.insert(sqlId("initData"), ImmutableMap.of("userId", userId, "types", types)) == types.length;
     }
 
