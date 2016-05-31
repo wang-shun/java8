@@ -79,4 +79,15 @@ public class DoctorMaterialInWareHouseReadServiceImpl implements DoctorMaterialI
         }
     }
 
+    @Override
+    public Response<DoctorMaterialInWareHouse> queryByMaterialWareHouseIds(Long farmId, Long materialId, Long wareHouseId) {
+        try{
+            DoctorMaterialInWareHouse doctorMaterialInWareHouse = doctorMaterialInWareHouseDao.queryByFarmHouseMaterial(farmId, wareHouseId,materialId);
+            return Response.ok(doctorMaterialInWareHouse);
+        }catch (Exception e){
+            log.error("query by farm material ware house ids fail, cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("query.byIds.fail");
+        }
+    }
+
 }

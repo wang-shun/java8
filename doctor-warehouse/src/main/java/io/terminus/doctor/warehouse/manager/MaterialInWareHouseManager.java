@@ -1,11 +1,14 @@
 package io.terminus.doctor.warehouse.manager;
 
 import com.google.common.collect.Maps;
+import io.terminus.doctor.warehouse.dao.DoctorMaterialConsumeAvgDao;
 import io.terminus.doctor.warehouse.dao.DoctorMaterialInWareHouseDao;
 import io.terminus.doctor.warehouse.dao.DoctorMaterialInfoDao;
 import io.terminus.doctor.warehouse.dto.DoctorMaterialConsumeProviderDto;
 import io.terminus.doctor.warehouse.dto.DoctorWareHouseBasicDto;
 import io.terminus.doctor.warehouse.handler.DoctorWareHouseHandlerInvocation;
+import io.terminus.doctor.warehouse.model.DoctorMaterialConsumeAvg;
+import io.terminus.doctor.warehouse.model.DoctorMaterialConsumeProvider;
 import io.terminus.doctor.warehouse.model.DoctorMaterialInWareHouse;
 import io.terminus.doctor.warehouse.model.DoctorMaterialInfo;
 import io.terminus.doctor.warehouse.model.DoctorWareHouse;
@@ -36,13 +39,17 @@ public class MaterialInWareHouseManager {
 
     private final DoctorMaterialInfoDao doctorMaterialInfoDao;
 
+    private final DoctorMaterialConsumeAvgDao doctorMaterialConsumeAvgDao;
+
     @Autowired
     public MaterialInWareHouseManager(DoctorMaterialInWareHouseDao doctorMaterialInWareHouseDao,
                                       DoctorMaterialInfoDao doctorMaterialInfoDao,
-                                      DoctorWareHouseHandlerInvocation doctorWareHouseHandlerInvocation){
+                                      DoctorWareHouseHandlerInvocation doctorWareHouseHandlerInvocation,
+                                      DoctorMaterialConsumeAvgDao doctorMaterialConsumeAvgDao){
         this.doctorMaterialInWareHouseDao = doctorMaterialInWareHouseDao;
         this.doctorMaterialInfoDao = doctorMaterialInfoDao;
         this.doctorWareHouseHandlerInvocation = doctorWareHouseHandlerInvocation;
+        this.doctorMaterialConsumeAvgDao = doctorMaterialConsumeAvgDao;
     }
 
     // 生产对应的物料内容
@@ -129,13 +136,50 @@ public class MaterialInWareHouseManager {
         return providerMaterialInWareHouseInner(doctorMaterialConsumeProviderDto);
     }
 
+    /**
+     * 删除对应的物料信息
+     * @param materialInWareHouseId
+     * @return
+     */
+    @Transactional
+    public Boolean deleteMaterialInWareHouse(Long materialInWareHouseId, Long userId, String userName){
+        DoctorMaterialInWareHouse doctorMaterialInWareHouse = doctorMaterialInWareHouseDao.findById(materialInWareHouseId);
+        checkState(!isNull(doctorMaterialInWareHouse), "input.materialInWareHouseId.empty");
+
+        DoctorMaterialInfo doctorMaterialInfo = doctorMaterialInfoDao.findById(doctorMaterialInWareHouse.getMaterialId());
+        checkState(!isNull(doctorMaterialInfo), "query.materialInfo.fail");
+        Integer consumeDays = (int)(doctorMaterialInWareHouse.getLotNumber() / doctorMaterialInfo.getDefaultConsumeCount());
+
+        // 消耗对应的物资信息
+        consumeMaterialInner(DoctorMaterialConsumeProviderDto.builder()
+                .type(doctorMaterialInWareHouse.getType())
+                .farmId(doctorMaterialInWareHouse.getFarmId()).farmName(doctorMaterialInWareHouse.getFarmName())
+                .materialTypeId(doctorMaterialInWareHouse.getMaterialId()).materialName(doctorMaterialInWareHouse.getMaterialName())
+                .wareHouseId(doctorMaterialInWareHouse.getWareHouseId()).wareHouseName(doctorMaterialInWareHouse.getWareHouseName())
+                .staffId(userId).staffName(userName).count(doctorMaterialInWareHouse.getLotNumber())
+                .unitId(doctorMaterialInfo.getUnitId()).unitName(userName).consumeDays(consumeDays)
+                .build());
+
+        // delete in warehouse
+        doctorMaterialInWareHouseDao.delete(materialInWareHouseId);
+
+        // delete consum avg
+        DoctorMaterialConsumeAvg doctorMaterialConsumeAvg = doctorMaterialConsumeAvgDao.queryByIds(
+                doctorMaterialInWareHouse.getFarmId(), doctorMaterialInWareHouse.getWareHouseId(), doctorMaterialInWareHouse.getMaterialId());
+        checkState(!isNull(doctorMaterialConsumeAvg), "query.materialInWareHouse.empty");
+        doctorMaterialConsumeAvgDao.delete(doctorMaterialConsumeAvg.getId());
+        return Boolean.TRUE;
+    }
+
     private Long providerMaterialInWareHouseInner(DoctorMaterialConsumeProviderDto dto){
+        dto.setActionType(DoctorMaterialConsumeProvider.EVENT_TYPE.PROVIDER.getValue());
         Map<String,Object> context = Maps.newHashMap();
         doctorWareHouseHandlerInvocation.invoke(dto, context);
         return Long.valueOf(context.get("eventId").toString());
     }
 
     private Long consumeMaterialInner(DoctorMaterialConsumeProviderDto doctorMaterialConsumeProviderDto){
+        doctorMaterialConsumeProviderDto.setActionType(DoctorMaterialConsumeProvider.EVENT_TYPE.CONSUMER.getValue());
         Map<String,Object> context = Maps.newHashMap();
         this.doctorWareHouseHandlerInvocation.invoke(doctorMaterialConsumeProviderDto, context);
         return Long.valueOf(context.get("eventId").toString());

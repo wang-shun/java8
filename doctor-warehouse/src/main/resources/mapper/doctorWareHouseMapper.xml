@@ -93,8 +93,6 @@
         <foreach collection="list" open="(" close=")" separator="," item="i">
           #{i}
         </foreach>
-    </foreach>
-
     </select>
 
     <update id="update" parameterType="DoctorWareHouse">

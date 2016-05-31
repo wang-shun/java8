@@ -1,5 +1,10 @@
 package io.terminus.doctor.web.front.warehouse.dto;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.Builder;
+
 import java.io.Serializable;
 
 /**
@@ -8,6 +13,10 @@ import java.io.Serializable;
  * Email:yaoqj@terminus.io
  * Descirbe: WareHouse 仓库创建的方式
  */
+@Builder
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class DoctorWareHouseCreateDto implements Serializable{
 
     private static final long serialVersionUID = -2254236798030507493L;

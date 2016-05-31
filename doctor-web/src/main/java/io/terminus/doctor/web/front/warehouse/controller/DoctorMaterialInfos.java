@@ -1,12 +1,24 @@
 package io.terminus.doctor.web.front.warehouse.controller;
 
+import com.google.common.base.Throwables;
+import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.Paging;
+import io.terminus.common.model.Response;
+import io.terminus.doctor.basic.service.DoctorBasicReadService;
 import io.terminus.doctor.common.utils.RespHelper;
+import io.terminus.doctor.user.model.DoctorFarm;
+import io.terminus.doctor.user.service.DoctorFarmReadService;
 import io.terminus.doctor.warehouse.dto.DoctorMaterialProductRatioDto;
 import io.terminus.doctor.warehouse.dto.DoctorWareHouseBasicDto;
+import io.terminus.doctor.warehouse.model.DoctorMaterialInWareHouse;
 import io.terminus.doctor.warehouse.model.DoctorMaterialInfo;
+import io.terminus.doctor.warehouse.service.DoctorMaterialInWareHouseReadService;
 import io.terminus.doctor.warehouse.service.DoctorMaterialInfoReadService;
 import io.terminus.doctor.warehouse.service.DoctorMaterialInfoWriteService;
+import io.terminus.doctor.web.front.warehouse.dto.DoctorMaterialInfoCreateDto;
+import io.terminus.pampas.common.UserUtil;
+import io.terminus.parana.user.model.User;
+import io.terminus.parana.user.service.UserReadService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -16,6 +28,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+
+import static com.google.common.base.Preconditions.checkState;
+import static java.util.Objects.isNull;
 
 /**
  * Created by yaoqijun.
@@ -32,16 +47,57 @@ public class DoctorMaterialInfos {
 
     private final DoctorMaterialInfoReadService doctorMaterialInfoReadService;
 
+    private final DoctorMaterialInWareHouseReadService doctorMaterialInWareHouseReadService;
+
+    private final DoctorFarmReadService doctorFarmReadService;
+
+    private final UserReadService userReadService;
+
+    private final DoctorBasicReadService doctorBasicReadService;
+
     @Autowired
     public DoctorMaterialInfos(DoctorMaterialInfoWriteService doctorMaterialInfoWriteService,
-                               DoctorMaterialInfoReadService doctorMaterialInfoReadService){
+                               DoctorMaterialInfoReadService doctorMaterialInfoReadService,
+                               DoctorFarmReadService doctorFarmReadService,
+                               UserReadService userReadService,
+                               DoctorBasicReadService doctorBasicReadService,
+                               DoctorMaterialInWareHouseReadService doctorMaterialInWareHouseReadService){
         this.doctorMaterialInfoWriteService = doctorMaterialInfoWriteService;
         this.doctorMaterialInfoReadService = doctorMaterialInfoReadService;
+        this.doctorFarmReadService = doctorFarmReadService;
+        this.userReadService = userReadService;
+        this.doctorBasicReadService = doctorBasicReadService;
+        this.doctorMaterialInWareHouseReadService = doctorMaterialInWareHouseReadService;
     }
 
     @RequestMapping(value = "/create", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public Long createMaterialInfo(@RequestBody DoctorMaterialInfo doctorMaterialInfo){
+    public Long createMaterialInfo(@RequestBody DoctorMaterialInfoCreateDto doctorMaterialInfoCreateDto){
+        DoctorMaterialInfo doctorMaterialInfo = null;
+        try{
+            DoctorFarm doctorFarm = RespHelper.orServEx(doctorFarmReadService.findFarmById(doctorMaterialInfo.getFarmId()));
+            checkState(!isNull(doctorFarm), "find.doctorFarm.fail");
+
+            Long userId = UserUtil.getUserId();
+            Response<User> userResponse = userReadService.findById(userId);
+            String username = RespHelper.orServEx(userResponse).getName();
+
+            String unitName = RespHelper.orServEx(doctorBasicReadService.findUnitById(doctorMaterialInfoCreateDto.getUnitId())).getName();
+            String unitGroupName = RespHelper.orServEx(doctorBasicReadService.findUnitById(doctorMaterialInfoCreateDto.getUnitGroupId())).getName();
+
+            doctorMaterialInfo = DoctorMaterialInfo.builder()
+                    .farmId(doctorMaterialInfoCreateDto.getFarmId()).farmName(doctorFarm.getName())
+                    .type(doctorMaterialInfoCreateDto.getType()).materialName(doctorMaterialInfoCreateDto.getMaterialName())
+                    .remark(doctorMaterialInfoCreateDto.getMark())
+                    .unitId(doctorMaterialInfoCreateDto.getUnitId()).unitName(unitName)
+                    .unitGroupId(doctorMaterialInfoCreateDto.getUnitGroupId()).unitGroupName(unitGroupName)
+                    .defaultConsumeCount(doctorMaterialInfoCreateDto.getDefaultConsumeCount()).price(doctorMaterialInfoCreateDto.getPrice())
+                    .creatorId(userId).creatorName(username)
+                    .build();
+        }catch (Exception e){
+            log.error("create material info fail, cause:{}", Throwables.getStackTraceAsString(e));
+            throw new JsonResponseException(e.getMessage());
+        }
         return RespHelper.or500(doctorMaterialInfoWriteService.createMaterialInfo(doctorMaterialInfo));
     }
 
@@ -102,10 +158,37 @@ public class DoctorMaterialInfos {
      * @param materialProduce 生产信息
      * @return
      */
+    /**
+     * 生产对应的物料信息
+     * @param farmId 对应的猪场Id
+     * @param wareHouseId 对应的仓库Id
+     * @param materialId 对应的原料MaterialId
+     * @param materialProduce 对应的用户定义生产规则
+     * @return
+     */
     @RequestMapping(value = "/realProduceMaterial", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public Boolean realProduceMaterial(@RequestParam("doctorWareHouseBasicDto") DoctorWareHouseBasicDto doctorWareHouseBasicDto,
+    public Boolean realProduceMaterial(@RequestParam("farmId")Long farmId,
+                                       @RequestParam("wareHouseId") Long wareHouseId,
+                                       @RequestParam("materialId") Long materialId,
                                        @RequestParam("materialProduce") DoctorMaterialInfo.MaterialProduce materialProduce){
+        DoctorWareHouseBasicDto doctorWareHouseBasicDto = null;
+        try{
+            DoctorMaterialInWareHouse dto= RespHelper.orServEx(doctorMaterialInWareHouseReadService.queryByMaterialWareHouseIds(farmId,materialId, wareHouseId));
+            Long userId = UserUtil.getUserId();
+            Response<User> response =  userReadService.findById(userId);
+            String userName = RespHelper.orServEx(response).getName();
+
+            doctorWareHouseBasicDto = DoctorWareHouseBasicDto.builder()
+                    .farmId(farmId).farmName(dto.getFarmName())
+                    .wareHouseId(wareHouseId).wareHouseName(dto.getWareHouseName())
+                    .materialId(materialId).materialName(dto.getMaterialName())
+                    .staffId(userId).staffName(userName)
+                    .build();
+        }catch (Exception e){
+            log.error("build ware house basic dto fail, cause:{}", Throwables.getStackTraceAsString(e));
+            throw new JsonResponseException(e.getMessage());
+        }
         return RespHelper.orFalse(doctorMaterialInfoWriteService.realProduceMaterial(doctorWareHouseBasicDto, materialProduce));
     }
 }

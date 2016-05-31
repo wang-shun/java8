@@ -1,12 +1,23 @@
 package io.terminus.doctor.web.front.warehouse.controller;
 
+import com.google.common.base.Throwables;
+import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.Paging;
+import io.terminus.common.model.Response;
 import io.terminus.doctor.common.utils.RespHelper;
+import io.terminus.doctor.event.service.DoctorBarnReadService;
 import io.terminus.doctor.warehouse.dto.DoctorMaterialConsumeProviderDto;
 import io.terminus.doctor.warehouse.dto.DoctorMaterialInWareHouseDto;
+import io.terminus.doctor.warehouse.model.DoctorMaterialConsumeProvider;
 import io.terminus.doctor.warehouse.model.DoctorMaterialInWareHouse;
+import io.terminus.doctor.warehouse.model.DoctorMaterialInfo;
 import io.terminus.doctor.warehouse.service.DoctorMaterialInWareHouseReadService;
 import io.terminus.doctor.warehouse.service.DoctorMaterialInWareHouseWriteService;
+import io.terminus.doctor.warehouse.service.DoctorMaterialInfoReadService;
+import io.terminus.doctor.web.front.warehouse.dto.DoctorConsumeProviderInputDto;
+import io.terminus.pampas.common.UserUtil;
+import io.terminus.parana.user.model.User;
+import io.terminus.parana.user.service.UserReadService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -18,6 +29,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.util.List;
+
+import static com.google.common.base.Preconditions.checkState;
+import static java.util.Objects.isNull;
 
 /**
  * Created by yaoqijun.
@@ -34,11 +48,22 @@ public class DoctorWareHouseEvents {
 
     private final DoctorMaterialInWareHouseReadService doctorMaterialInWareHouseReadService;
 
+    private final UserReadService userReadService;
+
+    private final DoctorBarnReadService doctorBarnReadService;
+
+    private final DoctorMaterialInfoReadService doctorMaterialInfoReadService;
+
     @Autowired
     public DoctorWareHouseEvents(DoctorMaterialInWareHouseWriteService doctorMaterialInWareHouseWriteService,
-                                 DoctorMaterialInWareHouseReadService doctorMaterialInWareHouseReadService){
+                                 DoctorMaterialInWareHouseReadService doctorMaterialInWareHouseReadService,
+                                 UserReadService userReadService, DoctorBarnReadService doctorBarnReadService,
+                                 DoctorMaterialInfoReadService doctorMaterialInfoReadService){
         this.doctorMaterialInWareHouseWriteService = doctorMaterialInWareHouseWriteService;
         this.doctorMaterialInWareHouseReadService = doctorMaterialInWareHouseReadService;
+        this.userReadService = userReadService;
+        this.doctorBarnReadService = doctorBarnReadService;
+        this.doctorMaterialInfoReadService = doctorMaterialInfoReadService;
     }
 
     /**
@@ -71,6 +96,25 @@ public class DoctorWareHouseEvents {
         return RespHelper.or500(doctorMaterialInWareHouseReadService.pagingDoctorMaterialInWareHouse(farmId, wareHouseId, pageNo, pageSize));
     }
 
+    @RequestMapping(value = "/materialInWareHouse/delete", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public Boolean deleteMaterialInWareHouse(@RequestParam("materialInWareHouseId") Long materialInWareHouseId){
+        Long userId;
+        String userName;
+        try{
+            userId = UserUtil.getUserId();
+            Response<User> userResponse = userReadService.findById(userId);
+            checkState(userResponse.isSuccess(), "query.userInfo.error");
+            userName = userResponse.getResult().getName();
+        }catch (Exception e){
+            log.error("get user info fail, cause:{}", Throwables.getStackTraceAsString(e));
+            throw new JsonResponseException(e.getMessage());
+        }
+        return RespHelper.or500(
+                doctorMaterialInWareHouseWriteService.deleteMaterialInWareHouseInfo(
+                        materialInWareHouseId, userId, userName));
+    }
+
     /**
      * 消耗物品的领用
      * @param dto
@@ -78,8 +122,35 @@ public class DoctorWareHouseEvents {
      */
     @RequestMapping(value = "/consume", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public Long createConsumeEvent(@RequestBody DoctorMaterialConsumeProviderDto dto){
-        return RespHelper.or500(doctorMaterialInWareHouseWriteService.consumeMaterialInfo(dto));
+    public Long createConsumeEvent(@RequestBody DoctorConsumeProviderInputDto dto){
+        DoctorMaterialConsumeProviderDto doctorMaterialConsumeProviderDto = null;
+        try{
+
+            DoctorMaterialInWareHouse doctorMaterialInWareHouse = RespHelper.orServEx(doctorMaterialInWareHouseReadService.queryByMaterialWareHouseIds(
+                    dto.getFarmId(),dto.getMaterialId(),dto.getWareHouseId()));
+            checkState(!isNull(doctorMaterialInWareHouse), "input.materialInfo.error");
+
+            String barnName = RespHelper.orServEx(doctorBarnReadService.findBarnById(dto.getBarnId())).getName();
+
+            Response<User> userResponse = userReadService.findById(dto.getFeederId());
+            String userName = RespHelper.orServEx(userResponse).getName();
+
+            DoctorMaterialInfo doctorMaterialInfo = RespHelper.orServEx(doctorMaterialInfoReadService.queryById(dto.getMaterialId()));
+
+            doctorMaterialConsumeProviderDto = DoctorMaterialConsumeProviderDto.builder()
+                    .actionType(DoctorMaterialConsumeProvider.EVENT_TYPE.CONSUMER.getValue())
+                    .farmId(doctorMaterialInWareHouse.getFarmId()).farmName(doctorMaterialConsumeProviderDto.getFarmName())
+                    .wareHouseId(doctorMaterialInWareHouse.getWareHouseId()).wareHouseName(doctorMaterialInWareHouse.getWareHouseName())
+                    .materialTypeId(doctorMaterialInWareHouse.getMaterialId()).materialName(doctorMaterialInWareHouse.getMaterialName())
+                    .barnId(dto.getBarnId()).barnName(barnName).staffId(dto.getFeederId()).staffName(userName)
+                    .count(dto.getCount()).consumeDays(dto.getConsumeDays())
+                    .unitId(doctorMaterialInfo.getUnitId()).unitName(doctorMaterialInfo.getUnitName())
+                    .build();
+        }catch (Exception e){
+            log.error(" fail, cause:{}", Throwables.getStackTraceAsString(e));
+            throw new JsonResponseException(e.getMessage());
+        }
+        return RespHelper.or500(doctorMaterialInWareHouseWriteService.consumeMaterialInfo(doctorMaterialConsumeProviderDto));
     }
 
     /**
@@ -89,7 +160,33 @@ public class DoctorWareHouseEvents {
      */
     @RequestMapping(value = "/provider", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public Long createProviderEvent(@RequestBody DoctorMaterialConsumeProviderDto dto){
-        return RespHelper.or500(doctorMaterialInWareHouseWriteService.providerMaterialInfo(dto));
+    public Long createProviderEvent(@RequestBody DoctorConsumeProviderInputDto dto){
+        DoctorMaterialConsumeProviderDto doctorMaterialConsumeProviderDto = null;
+        try{
+
+            DoctorMaterialInWareHouse doctorMaterialInWareHouse = RespHelper.orServEx(doctorMaterialInWareHouseReadService.queryByMaterialWareHouseIds(
+                    dto.getFarmId(),dto.getMaterialId(),dto.getWareHouseId()));
+            checkState(!isNull(doctorMaterialInWareHouse), "input.materialInfo.error");
+
+            String barnName = RespHelper.orServEx(doctorBarnReadService.findBarnById(dto.getBarnId())).getName();
+
+            Response<User> userResponse = userReadService.findById(dto.getFeederId());
+            String userName = RespHelper.orServEx(userResponse).getName();
+
+            DoctorMaterialInfo doctorMaterialInfo = RespHelper.orServEx(doctorMaterialInfoReadService.queryById(dto.getMaterialId()));
+
+            doctorMaterialConsumeProviderDto = DoctorMaterialConsumeProviderDto.builder()
+                    .actionType(DoctorMaterialConsumeProvider.EVENT_TYPE.PROVIDER.getValue())
+                    .farmId(doctorMaterialInWareHouse.getFarmId()).farmName(doctorMaterialConsumeProviderDto.getFarmName())
+                    .wareHouseId(doctorMaterialInWareHouse.getWareHouseId()).wareHouseName(doctorMaterialInWareHouse.getWareHouseName())
+                    .materialTypeId(doctorMaterialInWareHouse.getMaterialId()).materialName(doctorMaterialInWareHouse.getMaterialName())
+                    .barnId(dto.getBarnId()).barnName(barnName).staffId(dto.getFeederId()).staffName(userName)
+                    .count(dto.getCount()).unitId(doctorMaterialInfo.getUnitId()).unitName(doctorMaterialInfo.getUnitName())
+                    .build();
+        }catch (Exception e){
+            log.error(" fail, cause:{}", Throwables.getStackTraceAsString(e));
+            throw new JsonResponseException(e.getMessage());
+        }
+        return RespHelper.or500(doctorMaterialInWareHouseWriteService.providerMaterialInfo(doctorMaterialConsumeProviderDto));
     }
 }
