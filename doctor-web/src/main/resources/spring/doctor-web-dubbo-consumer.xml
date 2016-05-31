@@ -24,6 +24,7 @@
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.PrimaryUserReadService" id="primaryUserReadService" check="false"/>
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.SubRoleWriteService" id="subRoleWriteService" check="false"/>
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.SubRoleReadService" id="subRoleReadService" check="false"/>
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.DoctorOrgReadService" id="doctorOrgReadService" check="false"/>
 
 
     <!-- address services -->
@@ -38,10 +39,8 @@
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.SellerRoleReadService" id="sellerRoleReadService" check="false"/>
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.SellerRoleWriteService" id="sellerRoleWriteService" check="false"/>
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.OperatorRoleReadService" id="operatorRoleReadService" check="false"/>
-    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.UserBindService" id="userBindService" check="false"/>
-
-    <!-- farm read service  -->
-    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.DoctorFarmReadService" id="doctorFarmReadService" check="false"/>
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.UserBindWriteService" id="userBindWriteService" check="false"/>
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.UserBindReadService" id="userBindReadService" check="false"/>
 
     <!-- file services -->
     <dubbo:reference version="1.0.0" interface="io.terminus.parana.file.service.UserFileService" id="userFileService" check="false" retries="0"/>
