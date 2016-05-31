@@ -2,12 +2,10 @@ package io.terminus.doctor.web.admin.controller;
 
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.BaseUser;
-import io.terminus.doctor.user.enums.TargetSystem;
 import io.terminus.doctor.user.model.DoctorOrg;
 import io.terminus.doctor.user.model.DoctorServiceReview;
 import io.terminus.doctor.user.service.DoctorServiceReviewWriteService;
 import io.terminus.doctor.user.service.business.DoctorServiceReviewService;
-import io.terminus.doctor.web.admin.service.AccountService;
 import io.terminus.pampas.common.UserUtil;
 import io.terminus.parana.common.utils.RespHelper;
 import lombok.extern.slf4j.Slf4j;
@@ -15,7 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Objects;
 
 /**
  * 陈增辉 16/5/30.与用户开通\关闭服务相关的controller
@@ -27,15 +24,12 @@ public class DoctorServiceReviewController {
 
     private final DoctorServiceReviewWriteService doctorServiceReviewWriteService;
     private final DoctorServiceReviewService doctorServiceReviewService;
-    private final AccountService accountService;
 
     @Autowired
     public DoctorServiceReviewController(DoctorServiceReviewWriteService doctorServiceReviewWriteService,
-                                         DoctorServiceReviewService doctorServiceReviewService,
-                                         AccountService accountService){
+                                         DoctorServiceReviewService doctorServiceReviewService){
         this.doctorServiceReviewWriteService = doctorServiceReviewWriteService;
         this.doctorServiceReviewService = doctorServiceReviewService;
-        this.accountService = accountService;
     }
 
     /**
@@ -67,10 +61,7 @@ public class DoctorServiceReviewController {
         // TODO: 权限中心校验权限
 
         //更新服务状态为开通
-        RespHelper.or500(doctorServiceReviewWriteService.updateStatus(baseUser, userId, DoctorServiceReview.Type.PIGMALL, DoctorServiceReview.Status.OK));
-        //与电商系统绑定账户
-        RespHelper.or500(accountService.bindAccount(userId, TargetSystem.PIGMALL, account));
-        return true;
+        return RespHelper.or500(doctorServiceReviewWriteService.updateStatus(baseUser, userId, DoctorServiceReview.Type.PIGMALL, DoctorServiceReview.Status.OK));
     }
 
     /**
@@ -84,10 +75,7 @@ public class DoctorServiceReviewController {
         // TODO: 权限中心校验权限
 
         //更新服务状态为开通
-        RespHelper.or500(doctorServiceReviewWriteService.updateStatus(baseUser, userId, DoctorServiceReview.Type.NEVEREST, DoctorServiceReview.Status.OK));
-        //与大数据系统绑定账户
-        RespHelper.or500(accountService.bindAccount(userId, TargetSystem.NEVEREST, account));
-        return true;
+        return RespHelper.or500(doctorServiceReviewWriteService.updateStatus(baseUser, userId, DoctorServiceReview.Type.NEVEREST, DoctorServiceReview.Status.OK));
     }
     /**
      * 管理员审批不允许给用户开通服务
