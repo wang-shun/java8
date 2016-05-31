@@ -37,7 +37,7 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 @Configuration
 @EnableWebMvc
 @EnableOpenPlatform
-@ComponentScan({"io.terminus.doctor.open.common"})
+@ComponentScan({"io.terminus.doctor.open"})
 @EnableAutoConfiguration
 @Import({
         SimpleMsgGatewayBuilderConfig.class,

@@ -1,347 +1,4 @@
 
--- 后台类目表: parana_back_categories
-drop table if exists `parana_back_categories`;
-CREATE TABLE `parana_back_categories` (
-  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `pid` bigint(20) NOT NULL COMMENT '父级id',
-  `name` varchar(50) NOT NULL COMMENT '名称',
-  `level` tinyint(1) NOT NULL COMMENT '级别',
-  `status` tinyint(1) NOT NULL COMMENT '状态,1启用,-1禁用',
-  `has_children` tinyint(1) NOT NULL COMMENT '是否有孩子',
-  `has_spu` tinyint(1) NOT NULL COMMENT '是否有spu关联',
-  `outer_id` VARCHAR(256) NULL COMMENT '外部 id',
-  `created_at` datetime NOT NULL,
-  `updated_at` datetime NOT NULL,
-  PRIMARY KEY (`id`)
-) COMMENT='后台类目表';
-CREATE INDEX idx_back_categories_pid ON parana_back_categories (pid);
-
-
--- 品牌表: parana_brands
-drop table if exists `parana_brands`;
-
-CREATE TABLE `parana_brands` (
-  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `name` varchar(100) NOT NULL COMMENT '名称',
-  `en_name` VARCHAR(100) NULL COMMENT '英文名称',
-  `en_cap` CHAR(1) NULL COMMENT '首字母',
-  `logo` VARCHAR(128) NULL COMMENT '品牌logo',
-  `description` varchar(200)  NULL COMMENT '描述',
-  `status` tinyint(1)  NULL COMMENT '状态,1启用,-1禁用',
-  `created_at` datetime NOT NULL,
-  `updated_at` datetime NOT NULL,
-  PRIMARY KEY (`id`)
-) COMMENT='品牌表';
-CREATE INDEX idx_brands_name ON parana_brands (name);
-CREATE INDEX idx_brands_en_name ON `parana_brands` (`en_name`);
-
--- 类目属性表: parana_category_attributes
-drop table if exists `parana_category_attributes`;
-
-CREATE TABLE `parana_category_attributes` (
-  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `category_id` int(11) NOT NULL COMMENT '类目id',
-  `attr_key` VARCHAR(20) NOT NULL COMMENT '属性名',
-  `group` VARCHAR(20) NULL COMMENT '所属组名',
-  `index` SMALLINT(3) NULL COMMENT '顺序编号',
-  `status` tinyint(1) NOT NULL COMMENT '状态,1启用,-1删除',
-  `attr_metas_json` varchar(255) NULL COMMENT 'json 格式存储的属性元信息',
-  `attr_vals_json` VARCHAR(4096) NULL  COMMENT 'json 格式存储的属性值信息',
-  `created_at` datetime NOT NULL,
-  `updated_at` datetime NOT NULL,
-  PRIMARY KEY (`id`)
-) COMMENT='品牌表';
-CREATE INDEX idx_pca_category_id ON parana_category_attributes (category_id);
-
--- 前台类目表:
-drop table if exists `parana_front_categories`;
-
-CREATE TABLE `parana_front_categories` (
-  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `pid` bigint(20) NOT NULL COMMENT '父级id',
-  `name` varchar(50) NOT NULL COMMENT '名称',
-  `level` tinyint(1)  NULL COMMENT '级别',
-  `has_children` tinyint(1)  NULL COMMENT '是否有孩子',
-  `logo` VARCHAR(256) NULL COMMENT 'logo',
-  `created_at` datetime NOT NULL,
-  `updated_at` datetime NOT NULL,
-  PRIMARY KEY (`id`)
-) COMMENT='前台类目表';
-CREATE INDEX idx_front_categories_pid ON parana_front_categories (pid);
-
--- 前后台叶子类目映射表: parana_category_bindings
-drop table if exists `parana_category_bindings`;
-
-CREATE TABLE `parana_category_bindings` (
-  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `front_category_id` bigint(20) NOT NULL COMMENT '前台叶子类目id',
-  `back_category_id` bigint(20) NOT NULL COMMENT '后台叶子类目id',
-  `created_at` datetime NOT NULL,
-  `updated_at` datetime NOT NULL,
-  PRIMARY KEY (`id`)
-) COMMENT='前后台叶子类目映射表';
-
--- 店铺内类目表: parana_shop_categories
-drop table if exists `parana_shop_categories`;
-
-CREATE TABLE `parana_shop_categories` (
-  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `shop_id` bigint(20) NOT NULL COMMENT '店铺id',
-  `name` VARCHAR(20) NOT NULL COMMENT '类目名称',
-  `pid` bigint(20) NOT NULL COMMENT '父级id',
-  `level` tinyint(1) NOT NULL COMMENT '级别',
-  `has_children` tinyint(1)  NULL COMMENT '是否有孩子',
-  `has_item` tinyint(1)  NULL COMMENT '是否有商品关联',
-  `created_at` datetime NOT NULL,
-  `updated_at` datetime NOT NULL,
-  PRIMARY KEY (`id`)
-)COMMENT = '店铺内类目表';
-CREATE INDEX idx_shopcats_shop_id ON `parana_shop_categories` (shop_id);
-
--- 店铺内类目和商品关联表: parana_shop_category_items
-drop table if exists `parana_shop_category_items`;
-
-CREATE TABLE `parana_shop_category_items` (
-  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `shop_id` bigint(20) NOT NULL COMMENT '店铺id',
-  `item_id` bigint(20) NOT NULL COMMENT '商品id',
-  `item_name` varchar(100) NOT NULL COMMENT '商品名称',
-  `shop_category_id` bigint(20) NOT NULL COMMENT '店铺内类目id',
-  `shop_category_name` VARCHAR(20) NOT NULL COMMENT '店铺内类目名称',
-  `created_at` datetime NOT NULL,
-  `updated_at` datetime NOT NULL,
-  PRIMARY KEY (`id`)
-)COMMENT = '店铺内类目表';
-CREATE INDEX idx_shopcis_shop_id ON `parana_shop_category_items` (shop_id);
-
-
--- spu表: parana_spus
-drop table if exists `parana_spus`;
-
-CREATE TABLE `parana_spus` (
-  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `spu_code` VARCHAR(40) NULL COMMENT 'spu编码',
-  `category_id` int(11) UNSIGNED NOT NULL COMMENT '后台类目 ID',
-  `brand_id` bigint(20)  NULL COMMENT '品牌id',
-  `brand_name` varchar(100) NULL COMMENT '品牌名称',
-  `name` varchar(200) NOT NULL COMMENT 'spu名称',
-  `main_image` varchar(128)  NULL COMMENT '主图',
-  `low_price` int(11) NULL COMMENT '实际售卖价格(所有sku的最低实际售卖价格)',
-  `high_price` int(11) NULL COMMENT '实际售卖价格(所有sku的最高实际售卖价格)',
-  `stock_type` TINYINT NULL COMMENT '库存类型, 0: 不分仓存储, 1: 分仓存储',
-  `stock_quantity` int(11)  NULL COMMENT '库存',
-  `status` tinyint(1) NOT NULL COMMENT '状态',
-  `advertise` varchar(255) COMMENT '广告语',
-  `specification` varchar(128) COMMENT '规格型号',
-  `type` SMALLINT  NULL COMMENT 'spu类型 1为普通spu, 2为组合spu',
-  `reduce_stock_type` SMALLINT DEFAULT 1 COMMENT '减库存方式, 1为拍下减库存, 2为付款减库存',
-  `extra_json` VARCHAR(1024) COMMENT 'spu额外信息,建议json字符串',
-  `spu_info_md5` CHAR(32) NULL COMMENT 'spu信息的m5值, 交易快照可能需要和这个摘要进行对比',
-  `created_at` datetime NOT NULL,
-  `updated_at` datetime NOT NULL,
-  PRIMARY KEY (`id`)
-) COMMENT='SPU表';
-CREATE UNIQUE INDEX idx_spus_spu_code ON `parana_spus` (`spu_code`);
-CREATE INDEX idx_spus_cid ON `parana_spus` (`category_id`);
-
--- SPU详情: parana_spu_details
-drop table if exists `parana_spu_details`;
-
-CREATE TABLE `parana_spu_details` (
-  `spu_id` bigint(20)  NOT NULL COMMENT 'spu id',
-  `images_json` varchar(1024) DEFAULT NULL COMMENT '图片列表, json表示',
-  `detail` text  NULL COMMENT '富文本详情',
-  `packing_json` varchar(1024) COMMENT '包装清单,kv对, json表示',
-  `service` text NULL COMMENT '售后服务',
-  `created_at` datetime NOT NULL,
-  `updated_at` datetime NOT NULL,
-  PRIMARY KEY (`spu_id`)
-) COMMENT='SPU详情';
-
--- spu属性: parana_spu_attributes
-drop table if exists `parana_spu_attributes`;
-
-CREATE TABLE `parana_spu_attributes` (
-  `spu_id` bigint(20) NOT NULL COMMENT 'spu id',
-  `sku_attributes` varchar(4096)  NULL COMMENT 'spu的sku属性, json存储',
-  `other_attributes` varchar(8192)  NULL COMMENT 'spu的其他属性, json存储',
-  `created_at` datetime NOT NULL,
-  `updated_at` datetime NOT NULL,
-  PRIMARY KEY (`spu_id`)
-) COMMENT='spu属性';
-
-
-
--- SKU模板表: parana_skus
-drop table if EXISTS `parana_sku_templates`;
-
-CREATE TABLE `parana_sku_templates` (
-  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `sku_code` VARCHAR(40) NULL COMMENT 'SKU 编码 (标准库存单位编码)',
-  `spu_id` bigint(20) NOT NULL COMMENT '商品id',
-  `specification` VARCHAR(50) NULL COMMENT '型号/款式',
-  `status` TINYINT(1) NOT NULL COMMENT 'sku template 状态, 1: 上架, -1:下架,  -3:删除',
-  `image` varchar(128)  NULL COMMENT '图片url',
-  `thumbnail` VARCHAR(128) NULL COMMENT '样本图 (SKU 缩略图) URL',
-  `name` VARCHAR(100) NULL COMMENT '名称',
-  `extra_price_json` VARCHAR(255)  NULL COMMENT '其他各种价格的json表示形式',
-  `price` int(11) NULL COMMENT '实际售卖价格',
-  `attrs_json` varchar(1024)  NULL COMMENT 'json存储的sku属性键值对',
-  `stock_type` TINYINT NOT NULL COMMENT '库存类型, 0: 不分仓存储, 1: 分仓存储, (冗余自SPU表)',
-  `stock_quantity` int(11) DEFAULT NULL COMMENT '库存',
-  `extra`     TEXT         DEFAULT NULL COMMENT 'sku额外信息',
-  `created_at` datetime NOT NULL,
-  `updated_at` datetime NOT NULL,
-  PRIMARY KEY (`id`)
-) COMMENT='SKU模板表';
-CREATE INDEX idx_skutmpls_spu_id ON `parana_sku_templates` (`spu_id`);
-CREATE INDEX idx_skutmpls_sku_code ON `parana_sku_templates` (`sku_code`);
-
-
--- 商品表: parana_items
-drop table if exists `parana_items`;
-
-CREATE TABLE `parana_items` (
-  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `item_code` VARCHAR(40) NULL COMMENT '外部商品编码',
-  `category_id` int(11) UNSIGNED NOT NULL COMMENT '后台类目 ID',
-  `spu_id` int(11) NULL COMMENT 'SPU编号',
-  `shop_id` int(11) NOT NULL COMMENT '店铺id',
-  `shop_name` varchar(100) NOT NULL DEFAULT '' COMMENT '店铺名称',
-  `brand_id` bigint(20) NULL COMMENT '品牌id',
-  `brand_name` varchar(100) NULL COMMENT '品牌名称',
-  `name` varchar(200) NOT NULL  COMMENT '商品名称',
-  `main_image` varchar(128) DEFAULT NULL COMMENT '主图',
-  `low_price` int(11) NULL COMMENT '实际售卖价格(所有sku的最低实际售卖价格)',
-  `high_price` int(11) NULL COMMENT '实际售卖价格(所有sku的最高实际售卖价格)',
-  `stock_type` TINYINT NULL COMMENT '库存类型, 0: 不分仓存储, 1: 分仓存储',
-  `stock_quantity` int(11)  NULL COMMENT '库存',
-  `sale_quantity` int(11)  NULL COMMENT '销量',
-  `status` tinyint(1) NOT NULL COMMENT '状态 1: 上架, -1:下架, -2:冻结, -3:删除',
-  `on_shelf_at` datetime  NULL COMMENT '上架时间',
-  `advertise` varchar(255) COMMENT '广告语',
-  `specification` varchar(128) COMMENT '规格型号',
-  `type` SMALLINT  NULL COMMENT '商品类型 1为普通商品, 2为组合商品',
-  `reduce_stock_type` SMALLINT DEFAULT 1 COMMENT '减库存方式, 1为拍下减库存, 2为付款减库存',
-  `extra_json` VARCHAR(1024) NULL COMMENT '商品额外信息,建议json字符串',
-  `tags_json` VARCHAR(1024) NULL COMMENT '商品标签的json表示形式,只能运营操作, 对商家不可见',
-  `item_info_md5` CHAR(32) NULL COMMENT '商品信息的m5值, 商品快照需要和这个摘要进行对比',
-  `created_at` datetime NOT NULL,
-  `updated_at` datetime NOT NULL,
-  PRIMARY KEY (`id`)
-) COMMENT='商品表';
-CREATE INDEX idx_items_item_code ON `parana_items` (`item_code`);
-CREATE INDEX idx_items_shop_id ON parana_items (shop_id);
-CREATE INDEX idx_items_updated_at ON parana_items (updated_at);
-
-
-
--- 商品SKU表: parana_skus
-drop table if EXISTS `parana_skus`;
-
-CREATE TABLE `parana_skus` (
-  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `sku_code` VARCHAR(40) NULL COMMENT 'SKU 编码 (标准库存单位编码)',
-  `item_id` bigint(20) NOT NULL COMMENT '商品id',
-  `shop_id` BIGINT UNSIGNED NOT NULL COMMENT '店铺 ID (冗余自商品表)',
-  `status` TINYINT(1) NOT NULL COMMENT 'sku状态, 1: 上架, -1:下架, -2:冻结, -3:删除',
-  `specification` VARCHAR(50) NULL COMMENT '型号/款式',
-  `outer_sku_id` VARCHAR(32) NULL COMMENT '外部sku编号',
-  `outer_shop_id` VARCHAR(32) NULL COMMENT '外部店铺id',
-  `image` varchar(128)  NULL COMMENT '图片url',
-  `thumbnail` VARCHAR(128) NULL COMMENT '样本图 (SKU 缩略图) URL',
-  `name` VARCHAR(100) NULL COMMENT '名称',
-  `extra_price_json` VARCHAR(255)  NULL COMMENT 'sku其他各种价格的json表示形式',
-  `price` int(11) NULL COMMENT '实际售卖价格',
-  `attrs_json` varchar(1024)  NULL COMMENT 'json存储的sku属性键值对',
-  `stock_type` TINYINT NOT NULL COMMENT '库存类型, 0: 不分仓存储, 1: 分仓存储, (冗余自商品表)',
-  `stock_quantity` int(11) DEFAULT NULL COMMENT '库存',
-  `extra`     TEXT         DEFAULT NULL COMMENT 'sku额外信息',
-  `created_at` datetime NOT NULL,
-  `updated_at` datetime NOT NULL,
-  PRIMARY KEY (`id`)
-) COMMENT='商品SKU表';
-CREATE INDEX idx_skus_item_id ON `parana_skus` (`item_id`);
-CREATE INDEX idx_skus_shop_id ON `parana_skus` (`shop_id`);
-CREATE INDEX idx_skus_sku_code ON `parana_skus` (`sku_code`);
-
--- 商品详情: parana_item_details
-drop table if exists `parana_item_details`;
-
-CREATE TABLE `parana_item_details` (
-  `item_id` bigint(20)  NULL COMMENT '商品id',
-  `images_json` varchar(1024)  NULL COMMENT '图片列表, json表示',
-  `detail` VARCHAR(2048)  NULL COMMENT '富文本详情',
-  `packing_json` varchar(1024) COMMENT '包装清单,kv对, json表示',
-  `service` VARCHAR(1024) NULL COMMENT '售后服务',
-  `created_at` datetime NOT NULL,
-  `updated_at` datetime NOT NULL,
-  PRIMARY KEY (`item_id`)
-) COMMENT='商品详情';
-
--- 商品属性: parana_item_attributes
-drop table if exists `parana_item_attributes`;
-
-CREATE TABLE `parana_item_attributes` (
-  `item_id` bigint(20) NOT NULL COMMENT '商品id',
-  `sku_attributes` varchar(4096)  NULL COMMENT '商品的sku属性, json存储',
-  `other_attributes` varchar(8192)  NULL COMMENT '商品的其他属性, json存储',
-  `created_at` datetime NOT NULL,
-  `updated_at` datetime NOT NULL,
-  PRIMARY KEY (`item_id`)
-) COMMENT='商品属性';
-
--- 商品快照表: parana_item_snapshots
-drop table if exists `parana_item_snapshots`;
-
-
--- 店铺表: parana_shops
-drop table if exists `parana_shops`;
-
-CREATE TABLE `parana_shops` (
-  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `outer_id` VARCHAR(32)  NULL COMMENT '外部店铺编码',
-  `user_id` BIGINT(20) NOT NULL COMMENT '商家id',
-  `user_name` VARCHAR(32) NOT NULL COMMENT '商家名称',
-  `name` VARCHAR(64) NOT NULL COMMENT '店铺名称',
-  `status`  TINYINT(1) NOT NULL COMMENT '状态 1:正常, -1:关闭, -2:冻结',
-  `type` TINYINT(1) NOT NULL  COMMENT '店铺状态',
-  `phone` varchar(32) NULL COMMENT '联系电话',
-  `business_id` int(4)  NULL COMMENT '行业id',
-  `image_url` varchar(128) NULL COMMENT '店铺图片url',
-  `address` varchar(128) NULL COMMENT '店铺地址',
-  `extra_json` VARCHAR(1024) NULL COMMENT '商品额外信息,建议json字符串',
-  `tags_json` VARCHAR(1024) NULL COMMENT '商品标签的json表示形式,只能运营操作, 对商家不可见',
-  `created_at` datetime NOT NULL,
-  `updated_at` datetime NOT NULL,
-  PRIMARY KEY (`id`)
-) COMMENT='店铺表';
-
--- 店铺附加表: parana_shop_extra
-drop table if exists `parana_shop_extras`;
-
-CREATE TABLE `parana_shop_extras` (
-  `shop_id` bigint(20) NOT NULL COMMENT '店铺id',
-  `deposit_cost` int(11) NULL COMMENT '保证金金额',
-  `rate` int(4) NULL COMMENT '商家费率',
-  `account` VARCHAR(64) NULL COMMENT '店铺名称',
-  `account_type`  SMALLINT(1) NULL COMMENT '1:支付宝 2:银行卡',
-  `account_name` VARCHAR(64) NULL  COMMENT '开户人姓名',
-  `bank_name` varchar(32) NULL COMMENT '银行名称',
-  `pre_im_id` VARCHAR(32)  NULL COMMENT '售前客服联系方式id',
-  `post_im_id` varchar(32) NULL COMMENT '售后客服联系方式id',
-  `commission_type` SMALLINT(4) NULL COMMENT '抽佣类型 1 费率 2 差价',
-  `billing_period` SMALLINT(4) NULL COMMENT '帐期,  1、5、10、15、30五类',
-  `created_at` datetime NOT NULL,
-  `updated_at` datetime NOT NULL,
-  PRIMARY KEY (`shop_id`)
-) COMMENT='店铺附加表';
-
-
-
--- 用户表: parana_users
-drop table if exists `parana_users`;
-
 CREATE TABLE `parana_users` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `name` VARCHAR(40) NULL COMMENT '用户名',
@@ -351,8 +8,9 @@ CREATE TABLE `parana_users` (
   `type` SMALLINT NOT NULL COMMENT '用户类型',
   `status` tinyint(1) NOT NULL COMMENT '状态 0:未激活, 1:正常, -1:锁定, -2:冻结, -3: 删除',
   `roles_json` VARCHAR(512) NULL COMMENT '角色列表, 以json表示',
-  `extra_json` VARCHAR(1024) NULL COMMENT '用户额外信息,建议json字符串',
-  `tags_json` VARCHAR(1024) NULL COMMENT '用户标签的json表示形式,只能运营操作, 对用户不可见',
+  `extra_json` VARCHAR(1024) NULL COMMENT '商品额外信息,建议json字符串',
+  `tags_json` VARCHAR(1024) NULL COMMENT '商品标签的json表示形式,只能运营操作, 对商家不可见',
+  `item_info_md5` CHAR(32) NULL COMMENT '商品信息的m5值, 商品快照需要和这个摘要进行对比',
   `created_at` datetime NOT NULL,
   `updated_at` datetime NOT NULL,
   PRIMARY KEY (`id`),
@@ -361,187 +19,912 @@ CREATE TABLE `parana_users` (
   UNIQUE KEY idx_users_mobile(mobile)
 ) COMMENT='用户表';
 
--- 购物车商品
-CREATE TABLE IF NOT EXISTS `parana_cart_items` (
-  `id`             BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
-  `buyer_id`       BIGINT(20) UNSIGNED DEFAULT NULL COMMENT '买家ID',
-  `shop_id`        BIGINT(20) UNSIGNED NOT NULL COMMENT '店铺ID',
-  `sku_id`         BIGINT(20) UNSIGNED NOT NULL COMMENT 'SKU ID',
-  `quantity`       INT(10) UNSIGNED    NOT NULL COMMENT '商品数量',
-  `snapshot_price` INT                 NULL     COMMENT '快照价格',
-  `extra_json` VARCHAR(1024) NULL COMMENT 'json储存的其他属性键值对',
-  `created_at`     DATETIME DEFAULT NULL  COMMENT '创建时间',
-  `updated_at`     DATETIME DEFAULT NULL  COMMENT '更新时间',
+CREATE TABLE `parana_user_profiles` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `user_id` bigint(20) NULL COMMENT '用户id',
+  `realname` VARCHAR(32) NULL COMMENT '真实姓名',
+  `gender` SMALLINT NULL COMMENT '性别1男2女',
+  `province_id` bigint(20) NOT NULL COMMENT '省id',
+  `province` VARCHAR(100) NOT NULL COMMENT '省',
+  `city_id` bigint(20) NULL COMMENT '城id',
+  `city` VARCHAR(100) NULL COMMENT '城',
+  `region_id` bigint(20) NULL COMMENT '区id',
+  `region` VARCHAR(100) NULL COMMENT '区',
+  `street` VARCHAR(130) NULL COMMENT '地址',
+  `extra_json` VARCHAR(2048) NULL COMMENT '其他信息, 以json形式存储',
+  `avatar` VARCHAR(512) NOT NULL COMMENT '头像',
+  `birth` VARCHAR(40) NULL COMMENT '出生日期',
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY idx_user_id(user_id)
+) COMMENT='用户详情表';
+
+CREATE TABLE IF NOT EXISTS `parana_user_files` (
+  `id`          bigint(20)    unsigned  NOT NULL  AUTO_INCREMENT,
+  `create_by`   bigint(20)    NOT NULL      COMMENT '用户id',
+  `file_type`   smallint(6)   NOT NULL      COMMENT '文件类型',
+  `group`       varchar(128)  DEFAULT   NULL      COMMENT '用户族',
+  `folder_id`   bigint(20)    NOT NULL      COMMENT '文件夹id',
+  `name`        varchar(128)  NULL      DEFAULT '' COMMENT '文件名称',
+  `path`        varchar(128)  NOT NULL DEFAULT '' COMMENT '文件相对路径',
+  `size`        int(11)       NOT NULL      COMMENT '文件大小',
+  `extra`       varchar(512)  NULL      DEFAULT '' COMMENT '文件信息介绍',
+  `created_at`  datetime      DEFAULT   NULL,
+  `updated_at`  datetime      DEFAULT   NULL,
+  PRIMARY KEY (`id`)
+) COMMENT='用户文件表';
+
+
+
+
+
+CREATE TABLE IF NOT EXISTS `parana_user_folders` (
+  `id`          bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `create_by`   bigint(20)          NOT NULL COMMENT '用户id',
+  `group`       varchar(128)        DEFAULT   NULL      COMMENT '用户族',
+  `pid`         bigint(20)          DEFAULT NULL COMMENT '父级id',
+  `level`       tinyint(1)          DEFAULT NULL COMMENT '级别',
+  `has_children`bit(1)              DEFAULT NULL COMMENT '是否有孩子',
+  `folder`      varchar(128)        NOT NULL DEFAULT '' COMMENT '文件夹名称',
+  `created_at`  datetime            DEFAULT NULL,
+  `updated_at`  datetime            DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) COMMENT='用户文件夹管理表';
+
+
+
+
+
+
+CREATE TABLE parana_subscriptions(
+  `id` BIGINT NOT NULL AUTO_INCREMENT  COMMENT '自增主键',
+  `user_id`  BIGINT  NOT NULL  COMMENT '用户id',
+  `user_name` VARCHAR(128) NULL comment '用户名称',
+  `channel`  INT  NOT NULL  COMMENT '消息渠道：-1-》非法，0-》站内信，1-》短信，2-》邮箱，3-》app消息推送',
+  `account`  VARCHAR(128)  NULL  COMMENT '用户的账户, 可以为用户id(站内信), 邮箱(邮件), 手机号(短信), app设备号(app消息推送)',
+  `created_at`  DATETIME  NULL  COMMENT '创建时间',
+  `updated_at`  DATETIME  NULL  COMMENT '修改时间',
+  PRIMARY KEY (`id`)
+)COMMENT='消息订阅情况';
+
+
+
+
+CREATE TABLE parana_receiver_groups(
+  `id` BIGINT NOT NULL AUTO_INCREMENT  COMMENT '自增主键',
+  `user_id`  BIGINT  NULL  COMMENT '用户id, 唯一自然键, 发站内信时使用',
+  `user_name` VARCHAR(128) null comment '用户名称',
+  `email`  VARCHAR(128)  NULL  COMMENT '发邮件时使用',
+  `mobile`  VARCHAR(64)  NULL  COMMENT '发短信进使用',
+  `android`  VARCHAR(128)  NULL  COMMENT '用于app消息推送时的安卓设备号',
+  `ios`  VARCHAR(128)  NULL  COMMENT '用于app消息推送时的iphone设备号',
+  `wp`  VARCHAR(128)  NULL  COMMENT '用于app消息推送时的winPhone设备号',
+  `group1`  VARCHAR(128)  NULL  COMMENT '消息群组, 具体含义由解决方案中定义, 如用户类型, 用户所属公司等信息',
+  `group2`  VARCHAR(128)  NULL  COMMENT '消息群组, 具体含义由解决方案中定义, 如用户类型, 用户所属公司等信息',
+  `group3`  VARCHAR(128)  NULL  COMMENT '消息群组, 具体含义由解决方案中定义, 如用户类型, 用户所属公司等信息',
+  `group4`  VARCHAR(128)  NULL  COMMENT '消息群组, 具体含义由解决方案中定义, 如用户类型, 用户所属公司等信息',
+  `created_at`  DATETIME  NULL  COMMENT '创建时间',
+  `updated_at`  DATETIME  NULL  COMMENT '修改时间',
+  PRIMARY KEY (`id`)
+)COMMENT='接收者群组';
+
+
+
+
+
+
+
+CREATE TABLE parana_message_templates(
+  `id` BIGINT NOT NULL AUTO_INCREMENT  COMMENT '自增主键',
+  `creator_id`  BIGINT  NULL  COMMENT '创建者的用户id',
+  `creator_name`  VARCHAR(128)  NULL  COMMENT '创建者的名称, 冗余',
+  `name`  VARCHAR(128) NOT NULL  COMMENT '模板的名称, 具有唯一性',
+  `title`  VARCHAR(1024)  NULL  COMMENT '消息的默认标题',
+  `content`  VARCHAR(4096) NOT  NULL  COMMENT '消息的内容模板, handlebars格式',
+  `context`  VARCHAR(4096)  NULL  COMMENT '消息的内容模板相关连的上下文示例, 用于指导消息调用者有哪些变量可用',
+  `channel`  INT  NULL  COMMENT '消息渠道：-1-》非法，0-》站内信，1-》短信，2-》邮箱，3-》app消息推送',
+  `disabled`  BIT(1)  NULL  COMMENT '当配置为true时, 这个模板的调用者不应该发送这个消息.',
+  `description`  VARCHAR(256)  NULL  COMMENT '消息模板的备注',
+  `created_at`  DATETIME  NULL  COMMENT '创建时间',
+  `updated_at`  DATETIME  NULL  COMMENT '修改时间',
+  PRIMARY KEY (`id`)
+)COMMENT='消息模板表';
+
+
+
+CREATE TABLE parana_messages(
+  `id` BIGINT NOT NULL AUTO_INCREMENT  COMMENT '自增主键',
+  `category`  VARCHAR(128)  NULL  COMMENT '消息的类别, 主要用于归类, 如分页查询的条件, 具体值由解决方案中决定',
+  `title`  VARCHAR(1024)  NULL  COMMENT '标题',
+  `content`  VARCHAR(4096)  NULL  COMMENT '内容',
+  `template`  VARCHAR(128)  NULL  COMMENT '消息模板名称',
+  `data`  VARCHAR(4096)  NULL  COMMENT '消息模板的上下文数据，json（map）',
+  `attaches`  VARCHAR(1024)  NULL  COMMENT '消息的附件, 以逗号分割的URL文件名',
+  `remark`  VARCHAR(256)  NULL  COMMENT '消息备注',
+  `sender_id`  BIGINT  NULL  COMMENT '发送者id',
+  `sender`  VARCHAR(128)  NULL  COMMENT '发送者信息:userid, email, mobile, device_token',
+  `send_at`  DATETIME  NULL  COMMENT '消息最终的发送时间',
+  `start_at`  DATETIME  NULL  COMMENT '消息的发送时机, 用于决定什么时间才能尝试消息发送',
+  `end_at`  DATETIME  NULL  COMMENT '消息的关闭时间',
+  `receivers`  VARCHAR(4096)  NULL  COMMENT '消息的接收者列表json: userIds(站内信), emails, mobiles, device_tokens。当为群组消息时,可支持四个维度的分组, 格式如下: {"group1":"buyer", "group2":"terminus corp", "group3":"浙江省", "group4":"xxx"}',
+  `group_message_type`  INT  NULL  COMMENT '标志是否为群组消息',
+  `check_subscribe`  BIT(1)  NULL  COMMENT '是否检测订阅情况. 当为false时,不检测用户类型',
+  `status`  INT  NULL  COMMENT '消息的状态：-2-》初始化消息失败，-1-》发送失败，0-》消息排队中，1-》发送成功， 2-》关闭',
+  `fail_reason`  VARCHAR(256)  NULL  COMMENT '消息失败的原因',
+  `channel`  INT  NULL  COMMENT '消息渠道：-1-》非法，0-》站内信，1-》短信，2-》邮箱，3-》app消息推送',
+  `channel_output`  VARCHAR(256)  NULL  COMMENT '发送渠道的结果返回: 站内信的ids(以逗号分割)',
+  `created_at`  DATETIME  NULL  COMMENT '创建时间',
+  `updated_at`  DATETIME  NULL  COMMENT '修改时间',
+  PRIMARY KEY (`id`)
+)COMMENT='消息表';
+
+
+
+CREATE TABLE parana_notifications(
+  `id` BIGINT NOT NULL AUTO_INCREMENT  COMMENT '自增主键',
+  `audience_id`  BIGINT  NULL  COMMENT '听众的用户id',
+  `audience_group1`  VARCHAR(128)  NULL  COMMENT '听众的群组, 具体含义由解决方案中定义, 如用户类型, 用户所属公司等信息',
+  `audience_group2`  VARCHAR(128)  NULL  COMMENT '',
+  `audience_group3`  VARCHAR(128)  NULL  COMMENT '',
+  `audience_group4`  VARCHAR(128)  NULL  COMMENT '',
+  `subject`  VARCHAR(1024)  NULL  COMMENT '消息标题',
+  `content`  VARCHAR(4096)  NULL  COMMENT '消息内容',
+  `checked`  BIT(1)  NULL  COMMENT '用户是否查看过此通知',
+  `created_at`  DATETIME  NULL  COMMENT '创建时间',
+  `updated_at`  DATETIME  NULL  COMMENT '修改时间',
+  PRIMARY KEY (`id`)
+)COMMENT='站内信表';
+
+
+
+
+
+
+
+CREATE TABLE parana_message_boxes(
+    `id` BIGINT NOT NULL AUTO_INCREMENT  COMMENT '自增主键',
+    `user_id`  BIGINT  NULL  COMMENT '用户id',
+    `box_index`  INT  NULL  COMMENT '消息箱号',
+    `notification_id`  BIGINT  NULL  COMMENT '站内信id',
+    `created_at`  DATETIME  NULL  COMMENT '创建时间',
+    `updated_at`  DATETIME  NULL  COMMENT '修改时间',
+    PRIMARY KEY (`id`)
+);
+
+
+
+create table `parana_user_devices` (
+  `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
+  `user_id` bigint null COMMENT '用户ID',
+  `user_name` VARCHAR(64) COMMENT '用户名',
+  `device_token` VARCHAR(128) COMMENT '',
+  `device_type` VARCHAR(128) COMMENT '',
+  `created_at` datetime NULL ,
+  `updated_at` datetime NULL ,
+   PRIMARY KEY (`id`)
+) COMMENT = '用户设备信息表';
+
+
+
+CREATE TABLE `parana_sub_domains` (
+  `id`        BIGINT           NOT NULL AUTO_INCREMENT,
+  `desc`      VARCHAR(32)      NULL COMMENT '描述',
+  `value`     VARCHAR(64)      NOT NULL COMMENT 'sub domain',
+  `type`      TINYINT UNSIGNED NOT NULL COMMENT '类型: 1. 用户, 2. 店铺, 3. 企业',
+  `target_id` BIGINT           NOT NULL COMMENT '目标 id (user id, shop id)',
+  created_at  DATETIME         NULL COMMENT '创建时间',
+  updated_at  DATETIME         NULL COMMENT '更新时间',
   PRIMARY KEY (`id`)
 );
 
--- 订单节点实例表: parana_order_node_instances
 
-DROP TABLE IF EXISTS `parana_order_node_instances`;
 
-CREATE TABLE `parana_order_node_instances` (
-  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `fid` bigint(20) NOT NULL COMMENT '订单流程ID',
-  `first_node` tinyint NOT NULL COMMENT '首节点',
-  `names` varchar(128) DEFAULT NULL COMMENT '节点名称(状态名称),对于同一个节点,角色不同对应的显示文案也不同',
-  `desc` varchar(256) DEFAULT NULL COMMENT '描述',
-  `created_at` datetime NOT NULL,
-  `updated_at` datetime NOT NULL,
+
+
+CREATE TABLE `parana_configs` (
+  `id`          BIGINT          NOT NULL AUTO_INCREMENT,
+  `biz_type`    SMALLINT        NOT NULL DEFAULT 0 COMMENT '业务类型',
+  `key`         VARCHAR(128)    NOT NULL COMMENT '键',
+  `value`       VARCHAR(1024)   NOT NULL COMMENT '值',
+  `data_type`   VARCHAR(16)     NOT NULL DEFAULT 0 COMMENT '数据类型',
+  `group`       VARCHAR(16)     NOT NULL DEFAULT 0 COMMENT '分组',
+  `description` VARCHAR(256)    NULL COMMENT '描述',
+  `created_at`  DATETIME        NOT NULL,
+  `updated_at`  DATETIME        NOT NULL,
   PRIMARY KEY (`id`)
-) COMMENT='订单流程节点实例表';
+) COMMENT='配置中心';
 
--- 订单动作实例表: parana_order_action_instances
 
-DROP TABLE IF EXISTS `parana_order_action_instances`;
 
-CREATE TABLE `parana_order_action_instances` (
-  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `node_instance_id` bigint(20) NOT NULL COMMENT '节点实例ID',
-  `action` varchar(128) DEFAULT NULL COMMENT 'action bean id',
-  `display` tinyint NOT NULL COMMENT '该动作是否显示',
-  `type`    SMALLINT  NOT NULL COMMENT '动作类型 1->普通, 2->定时任务, 3->通知',
-  `belong_user_types` VARCHAR(128) NOT NULL COMMENT '动作执行对象的用户类型 0:管理员, 1: 买家, 2: 卖家.一个用户类型的jsonList',
-  `name` varchar(128) DEFAULT NULL COMMENT '动作名称',
-  `desc`  VARCHAR(256)  DEFAULT NULL,
-  `created_at` datetime NOT NULL,
-  `updated_at` datetime NOT NULL,
-  PRIMARY KEY (`id`)
-) COMMENT='动作实例表';
-
-CREATE INDEX idx_order_action_instance_node_instance_id ON `parana_order_action_instances` (`node_instance_id`);
-
--- 订单流转规则表: parana_order_transfer_rules
-
-DROP TABLE IF EXISTS `parana_order_transfer_rules`;
-
-CREATE TABLE `parana_order_transfer_rules`(
-  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `start_node_instance_id` BIGINT NOT NULL COMMENT '流转起始节点id',
-  `end_node_instance_id` BIGINT NOT NULL COMMENT '流转终止节点id',
-  `created_at` datetime NOT NULL,
-  `updated_at` datetime NOT NULL,
-  PRIMARY KEY (`id`)
-)COMMENT='流转规则表';
-
--- shopOrder 表: parana_shop_orders
-
-DROP TABLE IF EXISTS `parana_shop_orders`;
-
-CREATE TABLE `parana_shop_orders` (
-  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `parent_id` BIGINT NOT NULL COMMENT '父订单id, 没有则填-1',
-  `parent_type` INT NOT NULL COMMENT '父订单类型, 没有则填-1',
-  `flow_id` BIGINT NOT NULL COMMENT '流程id',
-  `node_instance_id`  BIGINT NOT NULL COMMENT '订单当前所属节点id',
-  `next_action_instance_ids`  VARCHAR(1024) NULL COMMENT '接下来可执行的actionId列表,用一个json对象描述每个角色可以进行的操作',
-  `type` INT NOT NULL COMMENT '订单类型,同parent_type',
-  `out_id` VARCHAR(64) NULL COMMENT '外部订单id',
-  `out_from` VARCHAR(64) NULL COMMENT '外部订单来源',
-  `extra_json` VARCHAR(2048)  NULL COMMENT '订单额外信息',
-  `tags_json` VARCHAR(2048) NULL COMMENT '订单tag信息',
-  `origin_fee`  INT NULL COMMENT '原价',
-  `fee` INT NULL COMMENT '实付金额',
-  `discount`  INT NULL COMMENT '优惠金额',
-  `ship_fee`  INT NULL COMMENT '运费',
-  `ship_fee_discount` INT NULL COMMENT '运费优惠金额',
-  `integral`  INT NULL COMMENT '积分减免金额',
-  `balance` INT NULL COMMENT '余额减免金额',
-  `sale_tax`  INT NULL COMMENT '消费税',
-  `ship_fee_sale_tax` INT NULL COMMENT '运费中包含的消费税',
-  `buyer_id`  BIGINT  NULL COMMENT '买家id',
-  `buyer_name` VARCHAR(64)  NULL COMMENT '买家名称',
-  `out_buyer_id`  VARCHAR(64) NULL COMMENT '外部买家id',
-  `shop_id` BIGINT  NULL COMMENT '店铺id',
-  `shop_name` VARCHAR(64) NULL COMMENT '店铺名称',
-  `out_shop_id` VARCHAR(64) NULL COMMENT '外部店铺id',
-  `company_id`  BIGINT  NULL COMMENT '公司id',
-  `deliver_type`  SMALLINT NULL COMMENT '配送方式',
-  `pay_type`  SMALLINT NOT NULL COMMENT '支付类型, 1-在线支付 2-货到付款',
-  `channel` SMALLINT NOT NULL COMMENT '订单渠道 1-手机 2-pc',
-  `has_refund` tinyint NULL COMMENT '是否申请过逆向流程',
-  `created_at`  DATETIME NOT NULL COMMENT '订单创建时间',
-  `updated_at`  DATETIME  NOT NULL COMMENT '订单更新时间',
-  PRIMARY KEY (`id`)
-) COMMENT='店铺维度订单';
-
--- itemOrder 表: parana_sku_orders
-
-DROP TABLE IF EXISTS `parana_sku_orders`;
-
-CREATE TABLE `parana_sku_orders` (
-  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `parent_id` BIGINT NOT NULL COMMENT '父订单id, 没有则填-1',
-  `parent_type` INT NOT NULL COMMENT '父订单类型, 没有则填-1',
-  `flow_id` BIGINT NOT NULL COMMENT '流程id',
-  `node_instance_id`  BIGINT NOT NULL COMMENT '订单当前所属节点id',
-  `next_action_instance_ids`  VARCHAR(1024) NULL COMMENT '接下来可执行的actionId列表,用一个json对象描述每个角色可以进行的操作',
-  `type` INT NOT NULL COMMENT '订单类型,同parent_type',
-  `out_id` VARCHAR(64) NULL COMMENT '外部订单id',
-  `out_from` VARCHAR(64) NULL COMMENT '外部订单来源',
-  `extra_json` VARCHAR(2048)  NULL COMMENT '订单额外信息',
-  `tags_json` VARCHAR(2048) NULL COMMENT '订单tag信息',
-  `origin_fee`  INT NULL COMMENT '原价',
-  `fee` INT NULL COMMENT '实付金额',
-  `discount`  INT NULL COMMENT '优惠金额',
-  `ship_fee`  INT NULL COMMENT '运费',
-  `ship_fee_discount` INT NULL COMMENT '运费优惠金额',
-  `integral`  INT NULL COMMENT '积分减免金额',
-  `balance` INT NULL COMMENT '余额减免金额',
-  `sale_tax`  INT NULL COMMENT '消费税',
-  `ship_fee_sale_tax` INT NULL COMMENT '运费中包含的消费税',
-  `buyer_id`  BIGINT  NULL COMMENT '买家id',
-  `buyer_name` VARCHAR(64)  NULL COMMENT '买家名称',
-  `out_buyer_id`  VARCHAR(64) NULL COMMENT '外部买家id',
-  `shop_id` BIGINT  NULL COMMENT '店铺id',
-  `shop_name` VARCHAR(64) NULL COMMENT '店铺名称',
-  `out_shop_id` VARCHAR(64) NULL COMMENT '外部店铺id',
-  `company_id`  BIGINT  NULL COMMENT '公司id',
-  `sku_id`  BIGINT NOT NULL COMMENT '销售属性Id',
-  `out_sku_id`  VARCHAR(64) NULL COMMENT '外部销售属性id',
-  `sku_attributes`  VARCHAR(512) NULL COMMENT 'sku属性 json',
-  `item_id` BIGINT  NULL COMMENT '商品id',
-  `item_snapshot_id`  BIGINT  NULL COMMENT '商品快照id',
-  `item_name` VARCHAR(64) NULL COMMENT '商品名称',
-  `item_image`  VARCHAR(128)  NULL COMMENT '商品主图',
-  `out_item_id` VARCHAR(64) NULL COMMENT '外部商品id',
-  `quantity`  INT NULL COMMENT '购买数量',
-  `deliver_type`  SMALLINT NULL COMMENT '配送方式',
-  `pay_type`  SMALLINT NOT NULL COMMENT '支付类型, 1-在线支付 2-货到付款',
-  `channel` SMALLINT NOT NULL COMMENT '订单渠道 1-手机 2-pc',
-  `has_refund` tinyint NULL COMMENT '是否申请过逆向流程',
-  `created_at`  DATETIME NOT NULL COMMENT '订单创建时间',
-  `updated_at`  DATETIME  NOT NULL COMMENT '订单更新时间',
-  PRIMARY KEY (`id`)
-) COMMENT='sku维度订单';
-
--- 订单关联信息表
-
-DROP TABLE IF EXISTS `parana_order_extra`;
-
-CREATE TABLE `parana_order_extra` (
+CREATE TABLE `parana_user_vat_invoices` (
   `id`                    BIGINT          NOT NULL  AUTO_INCREMENT COMMENT '自增主键' ,
-  `order_id`  BIGINT NOT NULL COMMENT '关联订单id',
-  `order_type` SMALLINT NOT NULL COMMENT '订单类型',
-  `channel` VARCHAR(64) NULL COMMENT '支付方式,alipay之类的',
-  `trade_no`  VARCHAR(128)  NULL COMMENT '交易流水号',
-  `batch_no`  VARCHAR(128)  NULL COMMENT '退款流水号',
-  `payment_code`  VARCHAR(128)  NULL COMMENT '第三方交易流水号',
-  `system_no`  VARCHAR(128)  NULL COMMENT '系统内部流水号',
-  `trade_info`  VARCHAR(1024)  NULL COMMENT '收货地址',
-  `buyer_notes` VARCHAR(256)  NULL COMMENT '买家留言',
-  `seller_notes`  VARCHAR(256)  NULL COMMENT '卖家留言',
-  `invoice` VARCHAR(1024) NULL COMMENT '发票信息',
-  `paid_at` DATETIME  NULL COMMENT '支付时间',
-  `buyer_cancel_at` DATETIME NULL COMMENT '买家取消订单时间',
-  `seller_cancel_at`  DATETIME  NULL COMMENT '卖家取消订单时间',
-  `deliver_at`  DATETIME  NULL COMMENT '发货时间',
-  `done_at` DATETIME  NULL COMMENT '完成时间',
-  `apply_at`  DATETIME  NULL COMMENT '申请时间',
-  `check_at`  DATETIME  NULL COMMENT '审核时间',
-  `buyer_deliver_at`  DATETIME  NULL COMMENT '买家发货时间',
-  `seller_deliver_at` DATETIME  NULL COMMENT '卖家发货时间',
-  `refund_at` DATETIME  NULL COMMENT '退款时间',
-  `created_at`  DATETIME  NULL COMMENT '创建时间',
-  `updated_at` DATETIME  NULL COMMENT '更新时间',
+  `user_id`               BIGINT          NOT NULL  COMMENT '用户标识',
+  `company_name`          VARCHAR(128)    NOT NULL  COMMENT '公司名称',
+  `tax_register_no`       VARCHAR(32)     NOT NULL  COMMENT '税务登记号',
+  `register_address`      VARCHAR(128)    NOT NULL  COMMENT '注册地址',
+  `register_phone`        VARCHAR(16)     NOT NULL  COMMENT '注册电话',
+  `register_bank`         VARCHAR(128)    NOT NULL  COMMENT '注册银行',
+  `bank_account`          VARCHAR(32)     NOT NULL  COMMENT '银行帐号',
+  `tax_certificate`       VARCHAR(256)    NULL      COMMENT '税务登记证',
+  `taxpayer_certificate`  VARCHAR(256)    NULL      COMMENT '一般纳税人证书',
+  `created_at`            DATETIME        NULL      COMMENT '创建时间',
+  `updated_at`            DATETIME        NULL      COMMENT '更新时间',
   PRIMARY KEY (`id`)
-) COMMENT='订单关联信息';
+)COMMENT='用户增值税发票表';
+
+
+CREATE TABLE `doctor_orgs` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '自增主键',
+  `name` varchar(64) DEFAULT NULL COMMENT '公司名称',
+  `mobile` VARCHAR(16) DEFAULT NULL COMMENT '手机号码',
+  `license` varchar(512) DEFAULT NULL COMMENT '营业执照复印件图片地址',
+  `out_id`  varchar(128) DEFAULT NULL COMMENT  '外部id',
+  `extra` text COMMENT '附加字段',
+  `created_at` datetime DEFAULT NULL COMMENT '创建时间',
+  `updated_at` datetime DEFAULT NULL COMMENT '修改时间',
+  PRIMARY KEY (`id`)
+)  COMMENT='公司表';
+
+CREATE TABLE `doctor_farms` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '自增主键',
+  `name` varchar(64) DEFAULT NULL COMMENT '公司名称',
+  `org_id` bigint(20) DEFAULT NULL COMMENT '公司id',
+  `org_name` varchar(64) DEFAULT NULL COMMENT '公司名称',
+  `out_id`  varchar(128) DEFAULT NULL COMMENT  '外部id',
+  `extra` text COMMENT '附加字段',
+  `created_at` datetime DEFAULT NULL COMMENT '创建时间',
+  `updated_at` datetime DEFAULT NULL COMMENT '修改时间',
+  PRIMARY KEY (`id`)
+)  COMMENT='猪场表';
+
+
+CREATE TABLE `doctor_barns` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '自增主键',
+  `name` varchar(64) DEFAULT NULL COMMENT '猪舍名称',
+  `org_id` bigint(20) DEFAULT NULL COMMENT '公司id',
+  `org_name` varchar(64) DEFAULT NULL COMMENT '公司名称',
+  `farm_id` bigint(20) DEFAULT NULL COMMENT '猪场id',
+  `farm_name` varchar(64) DEFAULT NULL COMMENT '猪场名称',
+  `pig_type` smallint(6) DEFAULT NULL COMMENT '猪类名称 枚举9种',
+  `can_open_group` smallint(6) DEFAULT NULL COMMENT '能否建群 -1:不能, 1:能',
+  `status` smallint(6) DEFAULT NULL COMMENT '使用状态 0:未用 1:在用 -1:已删除',
+  `capacity` int(11) DEFAULT NULL COMMENT '猪舍容量',
+  `staff_id` bigint(20) DEFAULT NULL COMMENT '工作人员id',
+  `staff_name` varchar(64) DEFAULT NULL COMMENT '工作人员name',
+  `out_id`  varchar(128) DEFAULT NULL COMMENT  '外部id',
+  `extra` text COMMENT '附加字段',
+  `created_at` datetime DEFAULT NULL COMMENT '创建时间',
+  `updated_at` datetime DEFAULT NULL COMMENT '修改时间',
+  PRIMARY KEY (`id`)
+)  COMMENT='猪舍表';
+
+
+CREATE TABLE `doctor_change_types` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '自增主键',
+  `name` varchar(32) DEFAULT NULL COMMENT '变动类型名称',
+  `is_count_out` smallint(6) DEFAULT NULL COMMENT '是否计入出栏猪 1:计入, -1:不计入',
+  `farm_id` bigint(20) DEFAULT NULL COMMENT '猪场id',
+  `farm_name` varchar(64) DEFAULT NULL COMMENT '猪场名称',
+  `out_id`  varchar(128) DEFAULT NULL COMMENT  '外部id',
+  `extra` text COMMENT '附加字段',
+  `creator_id` bigint(20) DEFAULT NULL COMMENT  '创建人id',
+  `creator_name` varchar(64) DEFAULT NULL COMMENT '创建人name',
+  `updator_id` bigint(20) DEFAULT NULL COMMENT  '更新人id',
+  `updator_name` varchar(64) DEFAULT NULL COMMENT '更新人name',
+  `created_at` datetime DEFAULT NULL COMMENT '创建时间',
+  `updated_at` datetime DEFAULT NULL COMMENT '修改时间',
+  PRIMARY KEY (`id`)
+)  COMMENT='变动类型表';
+
+
+CREATE TABLE `doctor_change_reasons` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '自增主键',
+  `change_type_id` bigint(20) DEFAULT NULL COMMENT '变动类型id',
+  `reason` varchar(128) DEFAULT NULL COMMENT '变动原因',
+  `out_id`  varchar(128) DEFAULT NULL COMMENT  '外部id',
+  `extra` text COMMENT '附加字段',
+  `creator_id` bigint(20) DEFAULT NULL COMMENT  '创建人id',
+  `creator_name` varchar(64) DEFAULT NULL COMMENT '创建人name',
+  `updator_id` bigint(20) DEFAULT NULL COMMENT  '更新人id',
+  `updator_name` varchar(64) DEFAULT NULL COMMENT '更新人name',
+  `created_at` datetime DEFAULT NULL COMMENT '创建时间',
+  `updated_at` datetime DEFAULT NULL COMMENT '修改时间',
+  PRIMARY KEY (`id`)
+)  COMMENT='变动原因表';
+
+
+CREATE TABLE `doctor_diseases` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '自增主键',
+  `name` varchar(64) DEFAULT NULL COMMENT '疾病名称',
+  `farm_id` bigint(20) DEFAULT NULL COMMENT '猪场id',
+  `farm_name` varchar(64) DEFAULT NULL COMMENT '猪场名称',
+  `out_id`  varchar(128) DEFAULT NULL COMMENT  '外部id',
+  `extra` text COMMENT '附加字段',
+  `creator_id` bigint(20) DEFAULT NULL COMMENT  '创建人id',
+  `creator_name` varchar(64) DEFAULT NULL COMMENT '创建人name',
+  `updator_id` bigint(20) DEFAULT NULL COMMENT  '更新人id',
+  `updator_name` varchar(64) DEFAULT NULL COMMENT '更新人name',
+  `created_at` datetime DEFAULT NULL COMMENT '创建时间',
+  `updated_at` datetime DEFAULT NULL COMMENT '修改时间',
+  PRIMARY KEY (`id`)
+)  COMMENT='疾病表';
+
+
+CREATE TABLE `doctor_customers` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '自增主键',
+  `name` varchar(64) DEFAULT NULL COMMENT '客户名称',
+  `farm_id` bigint(20) DEFAULT NULL COMMENT '猪场id',
+  `farm_name` varchar(64) DEFAULT NULL COMMENT '猪场名称',
+  `mobile` varchar(20) DEFAULT NULL COMMENT '手机号',
+  `email` varchar(64) DEFAULT NULL COMMENT '邮箱',
+  `out_id`  varchar(128) DEFAULT NULL COMMENT  '外部id',
+  `extra` text COMMENT '附加字段',
+  `creator_id` bigint(20) DEFAULT NULL COMMENT  '创建人id',
+  `creator_name` varchar(64) DEFAULT NULL COMMENT '创建人name',
+  `updator_id` bigint(20) DEFAULT NULL COMMENT  '更新人id',
+  `updator_name` varchar(64) DEFAULT NULL COMMENT '更新人name',
+  `created_at` datetime DEFAULT NULL COMMENT '创建时间',
+  `updated_at` datetime DEFAULT NULL COMMENT '修改时间',
+  PRIMARY KEY (`id`)
+)  COMMENT='客户表';
+
+
+CREATE TABLE `doctor_breeds` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '自增主键',
+  `name` varchar(64) DEFAULT NULL COMMENT '品种名称',
+  `out_id`  varchar(128) DEFAULT NULL COMMENT  '外部id',
+  `extra` text COMMENT '附加字段',
+  `created_at` datetime DEFAULT NULL COMMENT '创建时间',
+  `updated_at` datetime DEFAULT NULL COMMENT '修改时间',
+  PRIMARY KEY (`id`)
+)  COMMENT='品种表';
+
+CREATE TABLE `doctor_genetics` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '自增主键',
+  `name` varchar(64) DEFAULT NULL COMMENT '品系名称',
+  `out_id`  varchar(128) DEFAULT NULL COMMENT  '外部id',
+  `extra` text COMMENT '附加字段',
+  `created_at` datetime DEFAULT NULL COMMENT '创建时间',
+  `updated_at` datetime DEFAULT NULL COMMENT '修改时间',
+  PRIMARY KEY (`id`)
+)  COMMENT='品系表';
+
+CREATE TABLE `doctor_units` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '自增主键',
+  `name` varchar(64) DEFAULT NULL COMMENT '品系名称',
+  `extra` text COMMENT '附加字段',
+  `created_at` datetime DEFAULT NULL COMMENT '创建时间',
+  `updated_at` datetime DEFAULT NULL COMMENT '修改时间',
+  PRIMARY KEY (`id`)
+)  COMMENT='计量单位表';
+
+CREATE TABLE `doctor_groups` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '自增主键',
+  `org_id` bigint(20) DEFAULT NULL COMMENT '公司id',
+  `org_name` varchar(64) DEFAULT NULL COMMENT '公司名称',
+  `farm_id` bigint(20) DEFAULT NULL COMMENT '猪场id',
+  `farm_name` varchar(64) DEFAULT NULL COMMENT '猪场名称',
+  `group_code` varchar(64) DEFAULT NULL COMMENT '猪群号',
+  `batch_no` varchar(64) DEFAULT NULL COMMENT '猪群批次号(雏鹰模式)',
+  `open_at` datetime DEFAULT NULL COMMENT '建群时间',
+  `close_at` datetime DEFAULT NULL COMMENT '关闭时间',
+  `status` smallint(6) DEFAULT NULL COMMENT '枚举: 1:已建群, -1:已关闭',
+  `init_barn_id` bigint(20) DEFAULT NULL COMMENT '初始猪舍id',
+  `init_barn_name` varchar(64) DEFAULT NULL COMMENT '初始猪舍name',
+  `current_barn_id` bigint(20) DEFAULT NULL COMMENT '当前猪舍id',
+  `current_barn_name` varchar(64) DEFAULT NULL COMMENT '当前猪舍名称',
+  `pig_type` smallint(6) DEFAULT NULL COMMENT '猪类 枚举9种',
+  `sex` smallint(6) DEFAULT NULL COMMENT '性别 1:混合 2:母 3:公',
+  `breed_id` bigint(20) DEFAULT NULL COMMENT '品种id',
+  `breed_name` varchar(64) DEFAULT NULL COMMENT '品种name',
+  `genetic_id` bigint(20) DEFAULT NULL COMMENT '品系id',
+  `genetic_name` varchar(64) DEFAULT NULL COMMENT '品系name',
+  `staff_id` bigint(20) DEFAULT NULL COMMENT '工作人员id',
+  `staff_name` varchar(64) DEFAULT NULL COMMENT '工作人员name',
+  `remark` text COMMENT '备注',
+  `out_id`  varchar(128) DEFAULT NULL COMMENT  '外部id',
+  `extra` text COMMENT '附加字段',
+  `creator_id` bigint(20) DEFAULT NULL COMMENT  '创建人id',
+  `creator_name` varchar(64) DEFAULT NULL COMMENT '创建人name',
+  `updator_id` bigint(20) DEFAULT NULL COMMENT  '更新人id',
+  `updator_name` varchar(64) DEFAULT NULL COMMENT '更新人name',
+  `created_at` datetime DEFAULT NULL COMMENT '创建时间',
+  `updated_at` datetime DEFAULT NULL COMMENT '修改时间',
+  PRIMARY KEY (`id`)
+)  COMMENT='猪群卡片表';
+
+
+
+
+
+CREATE TABLE `doctor_group_tracks` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '自增主键',
+  `group_id` bigint(20) DEFAULT NULL COMMENT '猪群卡片id',
+  `rel_event_id` bigint(20) DEFAULT NULL COMMENT '关联的最新一次的事件id',
+  `quantity` int(11) DEFAULT NULL COMMENT '猪只数',
+  `avg_day_age` double DEFAULT NULL COMMENT '平均日龄',
+  `weight` double DEFAULT NULL COMMENT '总活体重(公斤)',
+  `avg_weight` double DEFAULT NULL COMMENT '平均体重(公斤)',
+  `price` bigint(20) DEFAULT NULL COMMENT '单价(分)',
+  `amount` bigint(20) DEFAULT NULL COMMENT '总金额(分)',
+  `customer_id` bigint(20) DEFAULT NULL COMMENT '客户id',
+  `customer_name` varchar(64) DEFAULT NULL COMMENT '客户名称',
+  `sale_qty` int(11) DEFAULT NULL COMMENT '销售数量',
+  `extra` text COMMENT '附加字段',
+  `creator_id` bigint(20) DEFAULT NULL COMMENT  '创建人id',
+  `creator_name` varchar(64) DEFAULT NULL COMMENT '创建人name',
+  `updator_id` bigint(20) DEFAULT NULL COMMENT  '更新人id',
+  `updator_name` varchar(64) DEFAULT NULL COMMENT '更新人name',
+  `created_at` datetime DEFAULT NULL COMMENT '创建时间',
+  `updated_at` datetime DEFAULT NULL COMMENT '修改时间',
+  PRIMARY KEY (`id`)
+)  COMMENT='猪群卡片明细表';
+
+
+
+CREATE TABLE `doctor_group_events` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '自增主键',
+  `org_id` varchar(64) DEFAULT NULL COMMENT '公司id',
+  `org_name` varchar(64) DEFAULT NULL COMMENT '公司名称',
+  `farm_id` varchar(64) DEFAULT NULL COMMENT '猪场id',
+  `farm_name` varchar(64) DEFAULT NULL COMMENT '猪场名称',
+  `group_id` varchar(64) DEFAULT NULL COMMENT '猪群卡片id',
+  `group_code` varchar(64) DEFAULT NULL COMMENT '猪群号',
+  `event_at` datetime DEFAULT NULL COMMENT '事件发生日期',
+  `type` smallint(6) DEFAULT NULL COMMENT '事件类型 枚举 总共10种',
+  `name` varchar(32) DEFAULT NULL COMMENT '事件名称 冗余枚举的name',
+  `desc` varchar(512) DEFAULT NULL COMMENT '事件描述',
+  `barn_id` bigint(20) DEFAULT NULL COMMENT '事件发生猪舍id',
+  `barn_name` varchar(64) DEFAULT NULL COMMENT '事件发生猪舍name',
+  `pig_type` smallint(6) DEFAULT NULL COMMENT '猪类枚举 9种',
+  `quantity` int(11) DEFAULT 0 COMMENT '事件猪只数',
+  `weight` double DEFAULT NULL COMMENT '总活体重(公斤)',
+  `avg_weight` double DEFAULT NULL COMMENT '平均体重(公斤)',
+  `avg_day_age` double DEFAULT NULL COMMENT '平均日龄',
+  `out_id`  varchar(128) DEFAULT NULL COMMENT  '外部id',
+  `remark` text COMMENT  '备注',
+  `extra` text COMMENT '具体事件的内容通过json存储',
+  `created_at` datetime DEFAULT NULL COMMENT '创建时间',
+  `creator_id` bigint(20) DEFAULT NULL COMMENT '创建人id',
+  `creator_name` varchar(64) DEFAULT NULL COMMENT '创建人name',
+  PRIMARY KEY (`id`)
+)  COMMENT='猪群事件表';
+
+CREATE TABLE `doctor_pigs` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT 'ID',
+  `org_id` bigint(20) unsigned DEFAULT NULL COMMENT '公司Id',
+  `org_name` varchar(64) DEFAULT NULL COMMENT '公司名称',
+  `farm_id` bigint(20) unsigned DEFAULT NULL COMMENT '猪场Id',
+  `farm_name` varchar(64) DEFAULT NULL COMMENT '猪场名称',
+  `out_id` varchar(128) DEFAULT NULL COMMENT '关联猪外部Id',
+  `pig_code` varchar(64) DEFAULT NULL COMMENT '猪编号',
+  `pig_type` smallint(6) DEFAULT NULL COMMENT '猪类型(公猪，母猪， 仔猪)',
+  `pig_father_id` bigint(20) unsigned DEFAULT NULL COMMENT '猪父亲Id',
+  `pig_mother_id` bigint(20) unsigned DEFAULT NULL COMMENT '母猪Id',
+  `source` smallint(6) DEFAULT NULL COMMENT '母猪来源',
+  `birth_date` datetime DEFAULT NULL COMMENT '母猪生日',
+  `birth_weight` double DEFAULT NULL COMMENT '出生重量',
+  `in_farm_date` datetime DEFAULT NULL COMMENT '进厂日期',
+  `in_farm_day_age` int(11) DEFAULT NULL COMMENT '进厂日龄',
+  `init_barn_id` bigint(20) unsigned DEFAULT NULL COMMENT '进厂位置',
+  `init_barn_name` varchar(64) DEFAULT NULL COMMENT '进厂位置名称',
+  `breed_id` bigint(20) unsigned DEFAULT NULL COMMENT '品种id',
+  `breed_name` varchar(64) DEFAULT NULL COMMENT '品种名称',
+  `genetic_id` bigint(20) unsigned DEFAULT NULL COMMENT '品系Id',
+  `genetic_name` varchar(64) DEFAULT NULL COMMENT '品系名称',
+  `extra` text COMMENT '公猪（公猪类型，boar_type）母猪（初始胎次:init_parity, 性别：sex, 左右乳头数量： left_nipple_count, right_nipple_count ）',
+  `remark` text COMMENT '标注信息',
+  `creator_id` bigint(20) DEFAULT NULL COMMENT '创建人id',
+  `creator_name` varchar(64) DEFAULT NULL COMMENT '创建人姓名',
+  `updator_id` bigint(20) DEFAULT NULL COMMENT '创建人Id',
+  `updator_name` varchar(64) DEFAULT NULL COMMENT '创建人姓名',
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+)  COMMENT='猪基础信息表';
+
+CREATE TABLE `doctor_pig_tracks` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT 'ID',
+  `farm_id` bigint(20) unsigned NOT NULL comment '猪场Id',
+  `pig_id` bigint(20) DEFAULT NULL COMMENT '猪id',
+  `status` smallint(6) DEFAULT NULL COMMENT '猪状态信息',
+  `current_barn_id` bigint(20) unsigned DEFAULT NULL COMMENT '当前猪舍Id',
+  `current_barn_name` varchar(64) DEFAULT NULL COMMENT '当前猪舍名称',
+  `weight` double DEFAULT NULL COMMENT '猪重量',
+  `out_farm_date` datetime DEFAULT NULL COMMENT '猪离场时间',
+  `rel_event_id` bigint(20) DEFAULT NULL COMMENT '关联事件最近事件',
+  `extra` text COMMENT '事件修改猪对应信息',
+  `current_parity` int(11) DEFAULT NULL COMMENT '当前胎次信息',
+  `remark` text COMMENT '备注',
+  `creator_id` bigint(20) DEFAULT NULL COMMENT '创建人id',
+  `creator_name` varchar(64) DEFAULT NULL COMMENT '创建人姓名',
+  `updator_id` bigint(20) DEFAULT NULL COMMENT '创建人Id',
+  `updator_name` varchar(64) DEFAULT NULL COMMENT '创建人姓名',
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+)  COMMENT='猪Track 信息表';
+
+
+
+drop table if exists doctor_pig_snapshots;
+create table doctor_pig_snapshots(
+  `id` bigint(20) unsigned not null AUTO_INCREMENT comment 'id',
+  `org_id` bigint(20) unsigned default null comment 'org_id',
+  `farm_id` bigint(20) unsigned default null comment 'farm_id',
+  `pig_id` bigint(20) unsigned default null comment 'pig_id',
+  `event_id` bigint(20) unsigned default null comment 'event_id',
+  `pig_info` text default null comment '公猪快照信息',
+  `created_at` datetime DEFAULT NULL,
+    `updated_at` datetime DEFAULT NULL,
+     primary key(id)
+) COMMENT='猪群事件记录数据表';
+
+
+
+CREATE TABLE `doctor_pig_events` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT 'id',
+  `org_id` bigint(20) unsigned DEFAULT NULL COMMENT '公司Id',
+  `org_name` varchar(64) DEFAULT NULL COMMENT '公司名称',
+  `farm_id` bigint(20) unsigned DEFAULT NULL COMMENT '猪场Id',
+  `farm_name` varchar(64) DEFAULT NULL COMMENT '猪场名称',
+  `pig_id` bigint(20) unsigned DEFAULT NULL COMMENT '猪Id',
+  `pig_code` varchar(64) DEFAULT NULL COMMENT '猪Code',
+  `event_at` datetime DEFAULT NULL COMMENT '事件时间',
+  `type` int(11) DEFAULT NULL COMMENT '事件类型',
+  `kind` int(11) DEFAULT NULL COMMENT '事件猪类型， 公猪， 母猪， 仔猪',
+  `name` varchar(64) DEFAULT NULL COMMENT '事件名称',
+  `desc` varchar(512) DEFAULT NULL COMMENT '事件描述',
+  `barn_id` bigint(20) unsigned DEFAULT NULL COMMENT '事件地点',
+  `barn_name` varchar(64) DEFAULT NULL COMMENT '地点名称',
+  `rel_event_id` bigint(20) DEFAULT NULL COMMENT '关联事件Id',
+  `out_id` varchar(128) DEFAULT NULL COMMENT '外部Id',
+  `extra` text COMMENT '参考设计文档',
+  `remark` text COMMENT '备注信息',
+  `creator_id` bigint(20) DEFAULT NULL COMMENT '创建人id',
+  `creator_name` varchar(64) DEFAULT NULL COMMENT '创建人姓名',
+  `updator_id` bigint(20) DEFAULT NULL COMMENT '创建人Id',
+  `updator_name` varchar(64) DEFAULT NULL COMMENT '创建人姓名',
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+)  COMMENT='用户设备信息表';
+
+
+
+drop Table if exists doctor_vaccination_pig_warns;
+create table doctor_vaccination_pig_warns (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT 'id',
+  `farm_id` bigint(20) unsigned DEFAULT NULL COMMENT '猪场仓库信息',
+  `farm_name` varchar(64) DEFAULT NULL COMMENT '猪场名称',
+  `has_warn` smallint(6) default null comment '是否提示过了, 0-未提示，1-提示',
+  `warn_days` int default 7 comment '默认7 天提示用户信息',
+  `event_date` datetime DEFAULT null comment '事件日期信息',
+  `event_desc` varchar(64) default null comment '事件信息描述',
+  `extra` text DEFAULT NULL comment '扩展信息',
+  `creator_name` varchar(64) DEFAULT NULL COMMENT '创建人姓名',
+  `created_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) COMMENT='猪只免疫预警信息';
+
+
+drop table if exists doctor_farm_ware_house_types;
+create table doctor_farm_ware_house_types(
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT 'id',
+  `farm_id` bigint(20) unsigned DEFAULT NULL COMMENT '猪场仓库信息',
+  `farm_name` varchar(64) DEFAULT NULL COMMENT '猪场名称',
+  `type` SMALLINT(6) unsigned DEFAULT NULL COMMENT '猪场仓库类型',
+  `log_number` bigint(20) DEFAULT NULL COMMENT '类型原料的数量',
+  `extra` text default null comment '扩展字段',
+  `creator_id` bigint(20) DEFAULT NULL COMMENT '创建人id',
+  `creator_name` varchar(64) DEFAULT NULL COMMENT '创建人姓名',
+  `updator_id` bigint(20) DEFAULT NULL COMMENT '创建人Id',
+  `updator_name` varchar(64) DEFAULT NULL COMMENT '创建人姓名',
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+   primary key(id)
+) COMMENT='猪场仓库类型数量';
+
+
+CREATE TABLE `doctor_material_infos` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT 'id',
+  `farm_id` bigint(20) unsigned DEFAULT NULL COMMENT '猪场信息',
+  `farm_name` varchar(64) DEFAULT NULL COMMENT '猪场名称',
+  `type` smallint(6) DEFAULT NULL comment '物料所属原料的名称',
+  `material_name` VARCHAR (128) DEFAULT NULL comment '物料名称',
+  `remark` text COMMENT '标注',
+  `unit_group_id` bigint(20) unsigned DEFAULT NULL COMMENT '单位组Id',
+  `unit_group_name` varchar(64) DEFAULT NULL COMMENT '单位组名称',
+  `unit_id` bigint(20) unsigned DEFAULT NULL COMMENT '单位Id',
+  `unit_name` varchar(64) DEFAULT NULL COMMENT '单位名称',
+  `default_consume_count` bigint(20) DEFAULT NULL COMMENT '原料默认消耗数量',
+  `price` bigint(20) DEFAULT NULL COMMENT '价格',
+  `extra` text COMMENT '扩展信息: 药品-默认计量的大小',
+  `creator_id` bigint(20) DEFAULT NULL COMMENT '创建人id',
+  `creator_name` varchar(64) DEFAULT NULL COMMENT '创建人姓名',
+  `updator_id` bigint(20) DEFAULT NULL COMMENT '创建人Id',
+  `updator_name` varchar(64) DEFAULT NULL COMMENT '创建人姓名',
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+)  COMMENT='物料信息表内容';
+
+CREATE TABLE `doctor_ware_houses` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT 'id',
+  `ware_house_name` varchar(64) DEFAULT NULL COMMENT '仓库名称',
+  `farm_id` bigint(20) unsigned DEFAULT NULL COMMENT '猪场仓库信息',
+  `farm_name` varchar(64) DEFAULT NULL COMMENT '猪场名称',
+  `manager_id` bigint(20) unsigned DEFAULT NULL COMMENT '管理员Id',
+  `manager_name` varchar(64) DEFAULT NULL COMMENT '管理人员姓名',
+  `address` varchar(64) DEFAULT NULL COMMENT '地址信息',
+  `type` smallint(6) DEFAULT NULL comment '仓库类型，一个仓库只能属于一个',
+  `extra` text DEFAULT NULL comment '扩展信息',
+  `creator_id` bigint(20) DEFAULT NULL COMMENT '创建人id',
+  `creator_name` varchar(64) DEFAULT NULL COMMENT '创建人姓名',
+  `updator_id` bigint(20) DEFAULT NULL COMMENT '创建人Id',
+  `updator_name` varchar(64) DEFAULT NULL COMMENT '创建人姓名',
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+)  COMMENT='仓库信息数据表';
+
+
+CREATE TABLE `doctor_ware_house_tracks` (
+  `ware_house_id` bigint(20) unsigned NOT NULL COMMENT 'ware_house_id',
+  `farm_id` bigint(20) unsigned DEFAULT NULL COMMENT '猪场仓库信息',
+  `farm_name` varchar(64) DEFAULT NULL COMMENT '猪场名称',
+  `manager_id` bigint(20) unsigned DEFAULT NULL COMMENT '管理员Id',
+  `manager_name` varchar(64) DEFAULT NULL COMMENT '管理人员姓名',
+  `material_lot_number` text DEFAULT NULL comment '各种原料的数量信息',
+  `lot_number` bigint(20) DEFAULT NULL comment '仓库物品的总数量信息',
+  `is_default` smallint(6) DEFAULT NULL COMMENT '默认仓库信息',
+  `extra` text DEFAULT NULL comment '扩展信息',
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`ware_house_id`)
+)  COMMENT='仓库信息Track数据表';
+
+
+
+CREATE TABLE `doctor_material_in_ware_houses` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT 'id',
+  `farm_id` bigint(20) unsigned DEFAULT NULL COMMENT '冗余仓库信息',
+  `farm_name` varchar(64) DEFAULT NULL COMMENT '猪场姓名',
+  `ware_house_id` bigint(20) unsigned DEFAULT NULL COMMENT '仓库信息',
+  `ware_house_name` varchar(64) DEFAULT NULL COMMENT '仓库名称',
+  `material_id` bigint(20) DEFAULT NULL COMMENT '原料Id',
+  `material_name` varchar(64) DEFAULT NULL COMMENT '原料名称',
+  `type` smallint(6) DEFAULT NULL comment '仓库类型, 冗余',
+  `lot_number` bigint(20) DEFAULT NULL COMMENT '数量信息',
+  `unit_group_name` varchar(64) DEFAULT NULL COMMENT '单位组信息',
+  `unit_name` varchar(64) DEFAULT NULL COMMENT '单位信息',
+  `extra` text COMMENT '扩展',
+  `creator_id` bigint(20) DEFAULT NULL COMMENT '创建人id',
+  `creator_name` varchar(64) DEFAULT NULL COMMENT '创建人姓名',
+  `updator_id` bigint(20) DEFAULT NULL COMMENT '创建人Id',
+  `updator_name` varchar(64) DEFAULT NULL COMMENT '创建人姓名',
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+)  COMMENT='仓库原料信息表';
+
+CREATE TABLE `doctor_material_consume_providers` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT 'id',
+  `type` bigint(20) unsigned DEFAULT NULL COMMENT '领取货物属于的类型',
+  `farm_id` bigint(20) unsigned DEFAULT NULL COMMENT '冗余仓库信息',
+  `farm_name` varchar(64) DEFAULT NULL COMMENT '猪场姓名',
+  `ware_house_id` bigint(20) unsigned DEFAULT NULL COMMENT '仓库信息',
+  `ware_house_name` varchar(64) DEFAULT NULL COMMENT '仓库名称',
+  `material_id` bigint(20) DEFAULT NULL COMMENT '原料Id',
+  `material_name` varchar(64) DEFAULT NULL COMMENT '原料名称',
+  `event_time` datetime DEFAULT NULL COMMENT '事件日期',
+  `event_type` smallint(6) DEFAULT NULL COMMENT '事件类型, provider 提供， consumer 消费',
+  `event_count` bigint(20) DEFAULT NULL COMMENT '事件数量',
+  `staff_id` bigint(20) unsigned DEFAULT NULL COMMENT '工作人员Id',
+  `staff_name` varchar(64) DEFAULT NULL COMMENT '关联事件人',
+  `extra` text COMMENT '领用: 领用猪群的信息, 消耗天数。 提供： 供应商的名称， 相关信息',
+  `creator_id` bigint(20) DEFAULT NULL COMMENT '创建人id',
+  `creator_name` varchar(64) DEFAULT NULL COMMENT '创建人姓名',
+  `updator_id` bigint(20) DEFAULT NULL COMMENT '创建人Id',
+  `updator_name` varchar(64) DEFAULT NULL COMMENT '创建人姓名',
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+)  COMMENT='领用记录信息表';
+
+
+
+drop table if exists doctor_material_consume_avgs;
+CREATE TABLE `doctor_material_consume_avgs` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT 'id',
+  `farm_id` bigint(20) unsigned DEFAULT NULL COMMENT '冗余仓库信息',
+  `ware_house_id` bigint(20) unsigned DEFAULT NULL COMMENT '仓库信息',
+  `material_id` bigint(20) DEFAULT NULL COMMENT '原料Id',
+  `consume_avg_count` bigint(20) DEFAULT NULL COMMENT '平均消耗数量',
+  `consume_count` bigint(20) DEFAULT NULL COMMENT '消耗数量',
+  `consime_date` datetime DEFAULT NULL comment '消耗日期',
+  `extra` text DEFAULT NULL comment 'extra',
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+)  COMMENT='物料消耗信息统计方式';
+
+
+
+CREATE TABLE `doctor_staffs` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '自增主键',
+  `org_id` bigint(20) DEFAULT NULL COMMENT '公司id',
+  `org_name` varchar(64) DEFAULT NULL COMMENT '公司名称',
+  `user_id` bigint(20) DEFAULT NULL COMMENT '用户id',
+  `role_id` bigint(20) DEFAULT NULL COMMENT '角色id',
+  `role_name` varchar(64) DEFAULT NULL COMMENT '角色名称(冗余)',
+  `status` smallint(6) DEFAULT NULL COMMENT '状态 1:在职，-1:不在职',
+  `sex` smallint(6) DEFAULT NULL COMMENT '性别',
+  `avatar` varchar(128) DEFAULT NULL COMMENT '用户头像',
+  `out_id`  varchar(128) DEFAULT NULL COMMENT  '外部id',
+  `extra` text COMMENT '附加字段',
+  `creator_id` bigint(20) DEFAULT NULL COMMENT  '创建人id',
+  `creator_name` varchar(64) DEFAULT NULL COMMENT '创建人name',
+  `updator_id` bigint(20) DEFAULT NULL COMMENT  '更新人id',
+  `updator_name` varchar(64) DEFAULT NULL COMMENT '更新人name',
+  `created_at` datetime DEFAULT NULL COMMENT '创建时间',
+  `updated_at` datetime DEFAULT NULL COMMENT '修改时间',
+  PRIMARY KEY (`id`)
+) COMMENT='猪场职员表';
+
+
+
+
+CREATE TABLE `doctor_user_operators` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `user_id` bigint(20) DEFAULT NULL COMMENT '用户 ID',
+  `role_id` bigint(20) DEFAULT NULL COMMENT '运营角色 ID',
+  `status` tinyint(4) DEFAULT NULL COMMENT '运营状态',
+  `extra_json` varchar(1024) DEFAULT NULL COMMENT '运营额外信息, 建议json字符串',
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `idx_user_operator_user_id` (`user_id`),
+  KEY `idx_user_operator_role_id` (`role_id`)
+)  COMMENT='用户运营表';
+
+CREATE TABLE `doctor_operator_roles` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(40) DEFAULT NULL COMMENT '用户名',
+  `desc` varchar(32) DEFAULT NULL COMMENT '角色描述',
+  `app_key` varchar(16) DEFAULT NULL COMMENT '角色所属',
+  `status` smallint(6) DEFAULT NULL COMMENT '0. 未生效(冻结), 1. 生效, -1. 删除',
+  `extra_json` varchar(1024) DEFAULT NULL COMMENT '用户额外信息,建议json字符串',
+  `allow_json` varchar(1024) DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  PRIMARY KEY (`id`)
+)  COMMENT='运营角色表';
+
+CREATE TABLE `doctor_user_subs` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `user_id` bigint(20) DEFAULT NULL COMMENT '用户 ID',
+  `user_name` varchar(64) DEFAULT NULL COMMENT '用户名 (冗余)',
+  `parent_user_id` bigint(20) DEFAULT NULL COMMENT '主账号ID',
+  `parent_user_name` varchar(64) DEFAULT NULL COMMENT '主账号用户名(冗余)',
+  `role_id` bigint(20) DEFAULT NULL COMMENT '子账号角色 ID',
+  `status` tinyint(4) DEFAULT NULL COMMENT '状态',
+  `extra_json` varchar(1024) DEFAULT NULL COMMENT '用户额外信息, 建议json字符串',
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `idx_user_sub_user_id` (`user_id`),
+  KEY `idx_user_parent_sub_id` (`parent_user_id`),
+  KEY `idx_user_sub_roles_id` (`role_id`)
+) COMMENT='猪场子账户表';
+
+CREATE TABLE `doctor_sub_roles` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `name` varchar(40) DEFAULT NULL COMMENT '用户名',
+  `desc` varchar(32) DEFAULT NULL COMMENT '角色描述',
+  `user_id` bigint(20) DEFAULT NULL COMMENT '所属主账号ID',
+  `app_key` varchar(16) DEFAULT NULL COMMENT '角色所属',
+  `status` smallint(6) DEFAULT NULL COMMENT '0. 未生效(冻结), 1. 生效, -1. 删除',
+  `extra_json` varchar(1024) DEFAULT NULL COMMENT '用户额外信息,建议json字符串',
+  `allow_json` varchar(1024) DEFAULT NULL,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `idx_sub_roles_user_id` (`user_id`)
+)  COMMENT='子账号角色表';
+
+
+CREATE TABLE `doctor_user_primarys` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `user_id` bigint(20) DEFAULT NULL COMMENT '用户 ID',
+  `user_name` varchar(64) DEFAULT NULL COMMENT '用户名 (冗余)',
+  `status` tinyint(4) DEFAULT NULL COMMENT '状态',
+  `extra_json` varchar(1024) DEFAULT NULL COMMENT '用户额外信息, 建议json字符串',
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `idx_user_primary_user_id` (`user_id`)
+)  COMMENT='猪场主账户表';
+
+
+
+
+CREATE TABLE `doctor_user_data_permissions` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '自增主键',
+  `user_id` bigint(20) DEFAULT NULL COMMENT '用户id',
+  `farm_ids` varchar(512) DEFAULT NULL COMMENT '猪场ids, 逗号分隔',
+  `barn_ids` varchar(512) DEFAULT NULL COMMENT '猪舍ids, 逗号分隔',
+  `ware_house_types` varchar(512) DEFAULT NULL COMMENT '仓库类型, 逗号分隔',
+  `extra` text COMMENT '附加字段',
+  `creator_id` bigint(20) DEFAULT NULL COMMENT  '创建人id',
+  `creator_name` varchar(64) DEFAULT NULL COMMENT '创建人name',
+  `updator_id` bigint(20) DEFAULT NULL COMMENT  '更新人id',
+  `updator_name` varchar(64) DEFAULT NULL COMMENT '更新人name',
+  `created_at` datetime DEFAULT NULL COMMENT '创建时间',
+  `updated_at` datetime DEFAULT NULL COMMENT '修改时间',
+  PRIMARY KEY (`id`)
+)  COMMENT='用户数据权限表';
+
+
+CREATE TABLE `doctor_service_reviews` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '自增主键',
+  `user_id` bigint(20) DEFAULT NULL COMMENT '用户id',
+  `type` smallint(6) DEFAULT NULL COMMENT  '服务类型 1 猪场软件, 2 新融电商, 3 大数据, 4 生猪交易',
+  `status` smallint(6) DEFAULT NULL COMMENT '审核状态 0 未审核, 2 待审核(提交申请) 1 通过，-1 不通过, -2 冻结',
+  `reviewer_id` bigint(20) DEFAULT NULL COMMENT '审批人id',
+  `created_at` datetime DEFAULT NULL COMMENT '创建时间',
+  `updated_at` datetime DEFAULT NULL COMMENT '修改时间',
+  PRIMARY KEY (`id`)
+)  COMMENT='用户服务审批表';
+
+
+CREATE TABLE `doctor_group_snapshots` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '自增主键',
+  `from_group_id` bigint(20) DEFAULT NULL COMMENT '操作前的猪群id',
+  `to_group_id` bigint(20) DEFAULT NULL COMMENT '操作后的猪群id',
+  `from_event_id` bigint(20) DEFAULT NULL COMMENT '操作前的事件id',
+  `to_event_id` bigint(20) DEFAULT NULL COMMENT '操作后的事件id',
+  `from_info` text COMMENT  '操作前的信息',
+  `to_info` text COMMENT  '操作后的信息',
+  `created_at` datetime DEFAULT NULL COMMENT '创建时间',
+  PRIMARY KEY (`id`)
+)  COMMENT='猪群快照表';
+
+
+CREATE TABLE `doctor_revert_logs` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '自增主键',
+  `type` smallint(6) DEFAULT NULL COMMENT '回滚类型 1 母猪，2 公猪，3 猪群',
+  `from_info` text COMMENT  '回滚前的信息',
+  `to_info` text COMMENT  '回滚后的信息',
+  `reverter_id` bigint(20) DEFAULT NULL COMMENT '回滚人id',
+  `reverter_name` varchar(64) DEFAULT NULL COMMENT '回滚人姓名',
+  `created_at` datetime DEFAULT NULL COMMENT '回滚时间',
+  PRIMARY KEY (`id`)
+)  COMMENT='回滚记录表';
+
+CREATE TABLE `doctor_carousel_figures` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '自增主键',
+  `index` int(11) DEFAULT NULL COMMENT '轮播图顺序, asc排序',
+  `status` smallint(6) DEFAULT NULL COMMENT '状态: 1 启用, -1 不启用',
+  `url` varchar(512) DEFAULT NULL COMMENT '轮播图链接地址',
+  `created_at` datetime DEFAULT NULL COMMENT '创建时间',
+  `updated_at` datetime DEFAULT NULL COMMENT '修改时间',
+  PRIMARY KEY (`id`)
+)  COMMENT='轮播图表';
+
+CREATE TABLE `doctor_user_binds` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `user_id` bigint(20) NOT NULL,
+  `target_system` int(11) NOT NULL COMMENT '目标系统，参见项目中的枚举 TargetSystem',
+  `uuid` varchar(64) NOT NULL DEFAULT '' COMMENT '系统为该用户生成的在目标系统的key（其实就是一个去掉横杠的UUID）',
+  `target_user_name` varchar(128) DEFAULT NULL COMMENT '该用户在目标系统绑定的账号的名称',
+  `target_user_mobile` varchar(16) DEFAULT NULL COMMENT '该用户在目标系统绑定的账号的手机号',
+  `target_user_email` varchar(100) DEFAULT NULL COMMENT '该用户在目标系统绑定的账号的邮箱',
+  `extra` varchar(1000) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `idx_user_bind_UNIQUE1` (`user_id`,`target_system`),
+  UNIQUE KEY `idx_user_bind_UNIQUE2` (`uuid`)
+) COMMENT='用户账户与其他系统账户的绑定关系';

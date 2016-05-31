@@ -1,0 +1,1 @@
+spring.autoconfigure.exclude: io.terminus.pampas.openplatform.core.OpenPlatformAutoConfiguration,io.terminus.boot.session.autoconfigure.SessionAutoConfiguration
