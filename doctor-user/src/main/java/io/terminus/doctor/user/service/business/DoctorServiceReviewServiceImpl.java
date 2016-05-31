@@ -8,11 +8,13 @@ import io.terminus.common.model.Response;
 import io.terminus.doctor.user.dao.DoctorServiceReviewDao;
 import io.terminus.doctor.user.dto.DoctorServiceApplyDto;
 import io.terminus.doctor.user.manager.DoctorServiceReviewManager;
+import io.terminus.doctor.user.model.DoctorOrg;
 import io.terminus.doctor.user.model.DoctorServiceReview;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -56,6 +58,20 @@ public class DoctorServiceReviewServiceImpl implements DoctorServiceReviewServic
         } catch (Exception e) {
             log.error("applyOpenService failed, cause : {}", Throwables.getStackTraceAsString(e));
             response.setError("apply.open.service.failed");
+        }
+        return response;
+    }
+    @Override
+    public Response<Boolean> openDoctorService(BaseUser user, Long userId, List<String> farms, DoctorOrg org){
+        Response<Boolean> response = new Response<>();
+        try{
+
+            response.setResult(true);
+        }catch (ServiceException e){
+            response.setError(e.getMessage());
+        } catch(Exception e){
+            log.error("audit service failed, cause:{}", Throwables.getStackTraceAsString(e));
+            response.setError("audit.service.failed");
         }
         return response;
     }

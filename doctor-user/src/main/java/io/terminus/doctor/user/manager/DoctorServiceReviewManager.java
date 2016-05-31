@@ -1,15 +1,12 @@
 package io.terminus.doctor.user.manager;
 
+import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.BaseUser;
 import io.terminus.common.utils.Arguments;
-import io.terminus.doctor.user.dao.DoctorOrgDao;
-import io.terminus.doctor.user.dao.DoctorServiceReviewDao;
-import io.terminus.doctor.user.dao.DoctorStaffDao;
-import io.terminus.doctor.user.model.DoctorOrg;
-import io.terminus.doctor.user.model.DoctorServiceReview;
-import io.terminus.doctor.user.model.DoctorStaff;
+import io.terminus.doctor.user.dao.*;
+import io.terminus.doctor.user.model.*;
 import io.terminus.parana.user.impl.dao.UserProfileDao;
 import io.terminus.parana.user.model.UserProfile;
 import lombok.extern.slf4j.Slf4j;
@@ -17,7 +14,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Objects;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * 陈增辉 16/5/30.
@@ -31,15 +31,20 @@ public class DoctorServiceReviewManager {
     private final DoctorStaffDao doctorStaffDao;
     private final DoctorServiceReviewDao doctorServiceReviewDao;
     private final UserProfileDao userProfileDao;
+    private final DoctorFarmDao doctorFarmDao;
+    private final DoctorUserDataPermissionDao doctorUserDataPermissionDao;
 
     @Autowired
     public DoctorServiceReviewManager(DoctorOrgDao doctorOrgDao, DoctorStaffDao doctorStaffDao,
                                       DoctorServiceReviewDao doctorServiceReviewDao,
-                                      UserProfileDao userProfileDao) {
+                                      UserProfileDao userProfileDao, DoctorFarmDao doctorFarmDao,
+                                      DoctorUserDataPermissionDao doctorUserDataPermissionDao) {
         this.doctorOrgDao = doctorOrgDao;
         this.doctorStaffDao = doctorStaffDao;
         this.doctorServiceReviewDao = doctorServiceReviewDao;
         this.userProfileDao = userProfileDao;
+        this.doctorFarmDao = doctorFarmDao;
+        this.doctorUserDataPermissionDao = doctorUserDataPermissionDao;
     }
 
     @Transactional
@@ -80,5 +85,31 @@ public class DoctorServiceReviewManager {
         staff.setUpdatorId(user.getId());
         staff.setUpdatorName(user.getName());
         doctorStaffDao.create(staff);
+    }
+
+    @Transactional
+    public void openDoctorService(BaseUser user, Long userId, List<String> farms, DoctorOrg org){
+        doctorOrgDao.update(org);
+        String farmIds = null;
+        if (farms != null) {
+            List<DoctorFarm> list = farms.stream().map(farmName -> {
+                DoctorFarm farm = new DoctorFarm();
+                farm.setOrgId(org.getId());
+                farm.setOrgName(org.getName());
+                farm.setName(farmName);
+                return farm;
+            }).collect(Collectors.toList());
+            doctorFarmDao.creates(list);
+//            Joiner.on(",").join()
+        }
+        DoctorUserDataPermission permission = new DoctorUserDataPermission();
+        permission.setUserId(userId);
+        permission.setFarmIds(farmIds);
+        permission.setCreatorName(user.getName());
+        permission.setCreatorId(user.getId());
+        permission.setUpdatorId(user.getId());
+        permission.setUpdatorName(user.getName());
+        doctorUserDataPermissionDao.create(permission);
+        doctorServiceReviewDao.updateStatus(userId, user.getId(), DoctorServiceReview.Type.PIG_DOCTOR, DoctorServiceReview.Status.OK);
     }
 }

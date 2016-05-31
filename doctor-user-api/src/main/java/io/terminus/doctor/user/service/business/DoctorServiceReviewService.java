@@ -3,6 +3,10 @@ package io.terminus.doctor.user.service.business;
 import io.terminus.common.model.BaseUser;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.user.dto.DoctorServiceApplyDto;
+import io.terminus.doctor.user.model.DoctorOrg;
+import io.terminus.doctor.user.model.DoctorServiceReview;
+
+import java.util.List;
 
 /**
  * 陈增辉16/5/30.
@@ -18,4 +22,6 @@ public interface DoctorServiceReviewService {
      * @return 是否成功
      */
     Response<Boolean> applyOpenService(BaseUser baseUser, DoctorServiceApplyDto serviceApplyDto);
+
+    Response<Boolean> openDoctorService(BaseUser user, Long userId, List<String> farms, DoctorOrg org);
 }
