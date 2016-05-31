@@ -24,13 +24,15 @@ public interface DoctorWareHouseReadService {
     Response<List<DoctorFarmWareHouseType>> queryDoctorFarmWareHouseType(@NotNull(message = "input.farmId.empty") Long farmId);
 
     /**
-     * 分页查询仓库信息
+     * 仓库分页
      * @param farmId
+     * @param type
      * @param pageNo
      * @param pageSize
      * @return
      */
     Response<Paging<DoctorWareHouseDto>> queryDoctorWarehouseDto(@NotNull(message = "input.farmId.empty") Long farmId,
+                                                                 Integer type,
                                                                  Integer pageNo,Integer pageSize);
 
 }

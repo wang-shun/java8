@@ -42,8 +42,8 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
         "io.terminus.doctor.web.core.component",
         "io.terminus.doctor.web.core.events",
         "io.terminus.doctor.web.core.exceptions",
-        "io.terminus.doctor.web.front.component",
-        "io.terminus.doctor.web.front.design",
+        "io.terminus.doctor.web.component",
+        "io.terminus.doctor.web.design",
 }, excludeFilters = {
         @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = {
                 JsonExceptionResolver.class
