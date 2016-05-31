@@ -12,7 +12,7 @@ import java.util.Objects;
  */
 public enum SowStatus {
 
-    Entry (1,"已进场"),
+    Entry (1,"待配种"),
     Removal(2,"已离场"),
     Mate(3,"已配种"),
     Pregnancy(4,"妊娠检查阳性"),
