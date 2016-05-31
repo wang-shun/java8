@@ -7,6 +7,7 @@ import io.terminus.doctor.basic.model.DoctorChangeType;
 import io.terminus.doctor.basic.model.DoctorCustomer;
 import io.terminus.doctor.basic.model.DoctorDisease;
 import io.terminus.doctor.basic.model.DoctorGenetic;
+import io.terminus.doctor.basic.model.DoctorUnit;
 import io.terminus.doctor.basic.service.DoctorBasicReadService;
 import io.terminus.doctor.basic.service.DoctorBasicWriteService;
 import io.terminus.doctor.common.utils.RespHelper;
@@ -292,5 +293,15 @@ public class DoctorBasics {
         // TODO: 权限中心校验权限
 
         return RespHelper.or500(doctorBasicWriteService.deleteCustomerById(customerId));
+    }
+
+    /************************* 计量单位 **************************/
+    /**
+     * 查询所有计量单位
+     * @return 计量单位列表
+     */
+    @RequestMapping(value = "/unit/all", method = RequestMethod.GET)
+    public List<DoctorUnit> finaAllUnits() {
+        return RespHelper.or500(doctorBasicReadService.findAllUnits());
     }
 }
