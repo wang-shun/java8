@@ -15,6 +15,7 @@ import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.event.service.DoctorBarnReadService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
@@ -35,6 +36,7 @@ public class DoctorSowChgLocationHandler extends DoctorAbstractEventFlowHandler 
 
     private final DoctorBarnReadService doctorBarnReadService;
 
+    @Autowired
     public DoctorSowChgLocationHandler(DoctorPigDao doctorPigDao, DoctorPigEventDao doctorPigEventDao,
                                        DoctorPigTrackDao doctorPigTrackDao, DoctorPigSnapshotDao doctorPigSnapshotDao,
                                        DoctorRevertLogDao doctorRevertLogDao, DoctorBarnReadService doctorBarnReadService) {
