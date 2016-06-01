@@ -144,7 +144,7 @@
         <include refid="tb"/>
     </select>
 
-    <select id="listSince" resultMap="DoctorGroupMap">
+    <select id="listSince" parameterType="map" resultMap="DoctorGroupMap">
         SELECT
         <include refid="cols_all"/>
         FROM
@@ -163,7 +163,7 @@
         </where>
     </select>
 
-    <select id="paging" parameterMap="map" resultMap="DoctorGroupMap">
+    <select id="paging" parameterType="map" resultMap="DoctorGroupMap">
         SELECT <include refid="cols_all"/> from <include refid="tb"/>
         <where>
             <include refid="criteria"/>

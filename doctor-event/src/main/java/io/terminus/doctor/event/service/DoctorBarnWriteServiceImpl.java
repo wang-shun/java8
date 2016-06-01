@@ -1,6 +1,7 @@
 package io.terminus.doctor.event.service;
 
 import com.google.common.base.Throwables;
+import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.model.DoctorBarn;
@@ -28,8 +29,12 @@ public class DoctorBarnWriteServiceImpl implements DoctorBarnWriteService {
     @Override
     public Response<Long> createBarn(DoctorBarn barn) {
         try {
+            //校验猪舍名称是否重复
+            checkBarnNameRepeat(barn.getFarmId(), barn.getName());
             doctorBarnDao.create(barn);
             return Response.ok(barn.getId());
+        } catch (ServiceException e) {
+            return Response.fail(e.getMessage());
         } catch (Exception e) {
             log.error("create barn failed, barn:{}, cause:{}", barn, Throwables.getStackTraceAsString(e));
             return Response.fail("barn.create.fail");
@@ -69,6 +74,12 @@ public class DoctorBarnWriteServiceImpl implements DoctorBarnWriteService {
             log.error("update barn status failed, barnId:{}, status:{}, cause:{}",
                     barnId, status, Throwables.getStackTraceAsString(e));
             return Response.fail("barn.update.fail");
+        }
+    }
+
+    private void checkBarnNameRepeat(Long farmId, String barnName) {
+        if (doctorBarnDao.findByFarmId(farmId).stream().anyMatch(barn -> barnName.equals(barn.getName()))) {
+            throw new ServiceException("barn.name.repeat");
         }
     }
 }

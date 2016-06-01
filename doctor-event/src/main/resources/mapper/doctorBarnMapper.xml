@@ -91,7 +91,7 @@
         WHERE farm_id = #{farmId}
     </select>
 
-    <select id="findByEnums" parameterType="long" resultMap="DoctorBarnMap">
+    <select id="findByEnums" parameterType="map" resultMap="DoctorBarnMap">
         SELECT <include refid="cols_all"/>
         FROM <include refid="tb"/>
         <where>
@@ -108,7 +108,7 @@
         <include refid="tb"/>
     </select>
 
-    <select id="listSince" resultMap="DoctorBarnMap">
+    <select id="listSince" parameterType="map" resultMap="DoctorBarnMap">
         SELECT
         <include refid="cols_all"/>
         FROM

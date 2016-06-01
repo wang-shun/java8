@@ -1,6 +1,5 @@
 package io.terminus.doctor.web.front.event.controller;
 
-import io.terminus.common.exception.JsonResponseException;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.service.DoctorBarnReadService;
@@ -73,14 +72,14 @@ public class DoctorBarns {
 
         // TODO: 权限中心校验权限
 
-        //校验猪舍名称是否重复
-        checkBarnNameRepeat(barn);
+        DoctorFarm farm = RespHelper.or500(doctorFarmReadService.findFarmById(barn.getFarmId()));
+        barn.setOrgId(farm.getOrgId());
+        barn.setOrgName(farm.getOrgName());
+        barn.setFarmName(farm.getName());
 
         if (barn.getId() == null) {
-            DoctorFarm farm = RespHelper.or500(doctorFarmReadService.findFarmById(barn.getFarmId()));
-            barn.setOrgId(farm.getOrgId());
-            barn.setOrgName(farm.getOrgName());
-            barn.setFarmName(farm.getName());
+            barn.setStatus(DoctorBarn.Status.NOUSE.getValue());     //初始猪舍状态: 未用
+            barn.setCanOpenGroup(DoctorBarn.CanOpenGroup.YES.getValue());  //初始是否可建群: 可建群
             RespHelper.or500(doctorBarnWriteService.createBarn(barn));
         } else {
             RespHelper.or500(doctorBarnWriteService.updateBarn(barn));
@@ -100,12 +99,5 @@ public class DoctorBarns {
         // TODO: 权限中心校验权限
 
         return RespHelper.or500(doctorBarnWriteService.updateBarnStatus(barnId, status));
-    }
-
-    //校验猪舍名称是否重复
-    private void checkBarnNameRepeat(DoctorBarn barn) {
-        if (RespHelper.or500(doctorBarnReadService.checkBarnNameRepeat(barn.getFarmId(), barn.getName()))) {
-            throw new JsonResponseException(500, "barn.name.repeat");
-        }
     }
 }
