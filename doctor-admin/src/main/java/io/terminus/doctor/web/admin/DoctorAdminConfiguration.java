@@ -12,6 +12,7 @@ import io.terminus.doctor.web.core.service.OtherSystemServiceConfig;
 import io.terminus.parana.auth.web.WebAuthenticationConfiguration;
 import io.terminus.parana.config.ConfigCenter;
 import io.terminus.parana.web.msg.config.MsgAdminWebConfig;
+import io.terminus.parana.web.msg.config.MsgWebConfig;
 import io.terminus.parana.web.msg.config.db.DbNotifyConfig;
 import io.terminus.parana.web.msg.config.gatewaybuilder.SimpleMsgGatewayBuilderConfig;
 import org.springframework.beans.factory.annotation.Autowire;
@@ -46,10 +47,10 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
 @Import({DoctorCoreWebConfiguration.class,
         OtherSystemServiceConfig.class,
         WebAuthenticationConfiguration.class,
-        SimpleMsgGatewayBuilderConfig.class,
+        MsgWebConfig.class,
         LuoSiMaoSmsServiceConfig.class,
-        CommonEmailServiceConfig.class,
-        MsgAdminWebConfig.class, DbNotifyConfig.class})
+        CommonEmailServiceConfig.class
+})
 public class DoctorAdminConfiguration extends WebMvcConfigurerAdapter {
 
     @Bean(autowire = Autowire.BY_NAME)

@@ -13,6 +13,7 @@ import io.terminus.doctor.web.core.msg.email.CommonEmailServiceConfig;
 import io.terminus.doctor.web.core.msg.sms.LuoSiMaoSmsServiceConfig;
 import io.terminus.doctor.web.core.service.OtherSystemServiceConfig;
 import io.terminus.pampas.openplatform.core.Gateway;
+import io.terminus.parana.web.msg.config.MsgWebConfig;
 import io.terminus.parana.web.msg.config.db.DbAppPushConfig;
 import io.terminus.parana.web.msg.config.db.DbEmailConfig;
 import io.terminus.parana.web.msg.config.db.DbNotifyConfig;
@@ -45,13 +46,9 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
         DoctorWarehouseConfiguration.class,
         DoctorCoreWebConfiguration.class,
         OtherSystemServiceConfig.class,
-        SimpleMsgGatewayBuilderConfig.class,
+        MsgWebConfig.class,
         LuoSiMaoSmsServiceConfig.class,
-        CommonEmailServiceConfig.class,
-        DbSmsConfig.class, TestSmsWebServiceConfig.class,
-        DbNotifyConfig.class,TestNotifyWebServiceConfig.class,
-        DbEmailConfig.class, TestEmailWebServiceConfig.class,
-        DbAppPushConfig.class, TestAppPushWebServiceConfig.class
+        CommonEmailServiceConfig.class
 })
 @ComponentScan(value = {
         "io.terminus.doctor.web.core.component",

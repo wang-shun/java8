@@ -34,9 +34,27 @@ oss:
   bucketName: pigmall
 
 msg:
+  test.enabled: true
+  gateway:
+    version: simple
+    sms: #包含的短信网关实现bean
+      luoSiMaoSmsService:
+    email: #包含的邮件网关实现bean
+      commonEmailService:
+    apppush: #包含的app消息推送实现bean
+      umengAppPushServiceIos:
+      umengAppPushServiceAndroid:
   current:
     smsService: luoSiMaoSmsService
     emailService: commonEmailService
+    appPushService: umengAppPushService #当前的app消息推送网关服务
+  webservice:
+    version: db
+    channel: #WEB层开启的消息服务, 在Controller中可以用@Qualifier("smsWebService")方式指明注入的MsgWebService
+      sms:  #开启WEB层短信服务 SmsWebService, 使用时@Qualifier("smsWebService")
+      email:  #开启WEB层邮件服务 EmailWebService, 使用时@Qualifier("emailWebService")
+      notify:  #开启WEB层站内信服务 NotifyWebService, 使用时@Qualifier("notifyWebService")
+      apppush:  #开启WEB层APP消息推送服务 AppPushWebService, 使用时@Qualifier("appPushWebService")
   luosimao:
     sendUrl: http://sms-api.luosimao.com/v1/http_get/send/json
     statusUrl: http://sms-api.luosimao.com/v1/http_get/status/json
@@ -50,8 +68,8 @@ msg:
     protocol: 2
   umeng: #友盟APP消息推送网关配置
     android: #Android应用配置
-      appKey: xxxx
-      appSecret: xxxx
+      appKey: 574ced4267e58eef570035c7
+      appSecret: jmaegca1mvlzpxewuufcn6kbxhebpzeo
     ios: #IOS应用配置
-      appKey: xxxx
-      appSecret: xxxx
+      appKey: 574cecdce0f55a85f00028fe
+      appSecret: ws685rsevimn8fgx6mmxzzgx7bs1y9pn
