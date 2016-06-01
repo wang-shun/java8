@@ -10,8 +10,13 @@ import java.util.Objects;
  * Email:yaoqj@terminus.io
  * Descirbe:
  */
-public enum SowStatus {
+public enum PigStatus {
 
+    // 公猪状态信息
+    BOAR_ENTRY(11, "公猪已进场"),
+    BOAR_LEAVE(12, "公猪已离场"),
+
+    // 母猪状态
     Entry (1,"待配种"),
     Removal(2,"已离场"),
     Mate(3,"已配种"),
@@ -29,15 +34,15 @@ public enum SowStatus {
     @Getter
     private String desc;
 
-    private SowStatus(Integer key, String desc){
+    private PigStatus(Integer key, String desc){
         this.key = key;
         this.desc = desc;
     }
 
-    public static SowStatus from(Integer key){
-        for(SowStatus sowStatus : SowStatus.values()){
-            if(Objects.equals(sowStatus.getKey(), key)){
-                return sowStatus;
+    public static PigStatus from(Integer key){
+        for(PigStatus pigStatus : PigStatus.values()){
+            if(Objects.equals(pigStatus.getKey(), key)){
+                return pigStatus;
             }
         }
         return null;
