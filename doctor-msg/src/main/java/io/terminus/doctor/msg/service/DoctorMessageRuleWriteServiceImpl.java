@@ -70,11 +70,15 @@ public class DoctorMessageRuleWriteServiceImpl implements DoctorMessageRuleWrite
             log.error("init template rule for farm failed, farm id can not be null");
             return Response.fail("message.template.rule.fail");
         }
-        // 1. 获取所有的模板
-        List<DoctorMessageRuleTemplate> ruleTemplates = doctorMessageRuleTemplateDao.listAll();
+        List<DoctorMessageRuleTemplate> ruleTemplates = doctorMessageRuleTemplateDao.findAllWarnMessageTpl();
         for (int i = 0; ruleTemplates != null && i < ruleTemplates.size(); i++) {
             DoctorMessageRuleTemplate ruleTemplate = ruleTemplates.get(i);
-            // 2. 与farm建立关系
+            // 1. 判断模板与farm的关系是否存在
+            DoctorMessageRule messageRules = doctorMessageRuleDao.findByTplAndFarm(ruleTemplate.getId(), farmId);
+            if (messageRules != null) {
+                continue;
+            }
+            // 2. 将模板与farm建立关系
             DoctorMessageRule rule = DoctorMessageRule.builder()
                     .farmId(farmId)
                     .templateId(ruleTemplate.getId())

@@ -99,4 +99,11 @@
         WHERE category = #{category}
     </select>
 
+    <!-- 获取所有的预警和警报消息 -->
+    <select id="findAllWarnMessageTpl" resultMap="DoctorMessageRuleTemplateMap">
+        SELECT <include refid="cols_all"/>
+        FROM <include refid="tb"/>
+        WHERE (`type` = 1 OR `type` = 2) AND `status` != -1
+    </select>
+
 </mapper>

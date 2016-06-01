@@ -1,5 +1,6 @@
 package io.terminus.doctor.msg.dao;
 
+import com.google.common.collect.ImmutableMap;
 import io.terminus.common.mysql.dao.MyBatisDao;
 import io.terminus.doctor.msg.model.DoctorMessageRule;
 import org.springframework.stereotype.Repository;
@@ -13,4 +14,13 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class DoctorMessageRuleDao extends MyBatisDao<DoctorMessageRule> {
 
+    /**
+     * 获取猪场和规则关系
+     * @param templateId    模板id
+     * @param farmId        猪场id
+     * @return
+     */
+    public DoctorMessageRule findByTplAndFarm(Long templateId, Long farmId) {
+        return getSqlSession().selectOne(sqlId("findByTplAndFarm"), ImmutableMap.of("farmId", farmId, "templateId", templateId));
+    }
 }
