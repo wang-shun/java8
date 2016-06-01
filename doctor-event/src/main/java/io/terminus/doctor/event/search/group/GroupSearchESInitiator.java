@@ -32,6 +32,11 @@ public class GroupSearchESInitiator {
             log.error("[group search initiator] -> elasticsearch is not available ");
             return;
         }
+        if (groupSearchProperties.getIndexName() == null || groupSearchProperties.getIndexType() == null) {
+            log.error("[group search initiator] -> groupSearchProperties indexName or indexType is null");
+            return;
+        }
+
         // 1. 建立索引
         esClient.createIndexIfNotExists(groupSearchProperties.getIndexName());
 
