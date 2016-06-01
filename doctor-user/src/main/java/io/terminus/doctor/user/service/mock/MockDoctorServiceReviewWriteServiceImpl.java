@@ -33,9 +33,4 @@ public class MockDoctorServiceReviewWriteServiceImpl implements DoctorServiceRev
         return Response.ok(Boolean.TRUE);
     }
 
-    @Override
-    public Response<Boolean> updateStatus(BaseUser user, Long userId, DoctorServiceReview.Type type, DoctorServiceReview.Status newStatus) {
-        return Response.ok(Boolean.TRUE);
-    }
-
 }
