@@ -170,4 +170,11 @@
         FROM <include refid="tb"/>
         WHERE status = #{status}
     </select>
+
+    <select id="findBySearchDto" parameterType="map" resultMap="DoctorGroupMap">
+        SELECT <include refid="cols_all"/> from <include refid="tb"/>
+        <where>
+            <include refid="criteria"/>
+        </where>
+    </select>
 </mapper>

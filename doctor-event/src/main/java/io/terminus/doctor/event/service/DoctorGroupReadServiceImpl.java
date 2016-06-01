@@ -90,7 +90,20 @@ public class DoctorGroupReadServiceImpl implements DoctorGroupReadService {
                     .collect(Collectors.toList());
             return Response.ok(new Paging<>(groupPaging.getTotal(), groupDetails));
         } catch (Exception e) {
-            log.error("paging group by groupSearchDto failed, groupSearchDto:{}, cause:{}", groupSearchDto, Throwables.getStackTraceAsString(e));
+            log.error("paging group by groupSearchDto failed, groupSearchDto:{}, pageNo:{}, size:{}, cause:{}",
+                    groupSearchDto, pageNo, size, Throwables.getStackTraceAsString(e));
+            return Response.fail("group.find.fail");
+        }
+    }
+
+    @Override
+    public Response<List<DoctorGroupDetail>> findGroupDetail(DoctorGroupSearchDto groupSearchDto) {
+        try {
+            return Response.ok(doctorGroupDao.findBySearchDto(groupSearchDto).stream()
+                    .map(group -> new DoctorGroupDetail(group, doctorGroupTrackDao.findByGroupId(group.getId())))
+                    .collect(Collectors.toList()));
+        } catch (Exception e) {
+            log.error("find group detial by groupSearchDto failed, groupSearchDto:{}, cause:{}", groupSearchDto, Throwables.getStackTraceAsString(e));
             return Response.fail("group.find.fail");
         }
     }
