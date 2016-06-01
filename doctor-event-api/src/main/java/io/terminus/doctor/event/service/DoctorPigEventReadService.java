@@ -37,4 +37,10 @@ public interface DoctorPigEventReadService {
                                                           Integer pageNo, Integer pageSize,
                                                           Date beginDate, Date endDate);
 
+    /**
+     * 通过pigIds 获取操作事件内容
+     * @param pigIds
+     * @return
+     */
+    Response<List<Integer>> queryPigEvents(@NotNull(message = "input.pigIds.empty") List<Long> pigIds);
 }
