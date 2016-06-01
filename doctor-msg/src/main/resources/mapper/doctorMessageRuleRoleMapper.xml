@@ -6,15 +6,13 @@
 
 <mapper namespace="DoctorMessageRuleRole">
     <resultMap id="DoctorMessageRuleRoleMap" type="DoctorMessageRuleRole">
-        <id column="id" property="id"/>
-        <result column="role_id" property="roleId"/>
         <result column="rule_id" property="ruleId"/>
-        <result column="type" property="type"/>
-        <result column="rule_type" property="ruleType"/>
+        <result column="template_id" property="templateId"/>
+        <result column="farm_id" property="farmId"/>
+        <result column="role_id" property="roleId"/>
         <result column="rule_value" property="ruleValue"/>
-        <result column="rule_start_value" property="ruleStartValue"/>
-        <result column="rule_end_value" property="ruleEndValue"/>
-        <result column="channel" property="channel"/>
+        <result column="use_default" property="useDefault"/>
+        <result column="channels" property="channels"/>
         <result column="created_at" property="createdAt"/>
         <result column="updated_at" property="updatedAt"/>
         
@@ -29,11 +27,11 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        role_id, rule_id, type, rule_type, rule_value, rule_start_value, rule_end_value, channel, created_at, updated_at
+        rule_id, template_id, farm_id, role_id, rule_value, use_default, channels, created_at, updated_at
     </sql>
 
     <sql id="vals">
-        #{roleId}, #{ruleId}, #{type}, #{ruleType}, #{ruleValue}, #{ruleStartValue}, #{ruleEndValue}, #{channel}, now(), now()
+        #{ruleId}, #{templateId}, #{farmId}, #{roleId}, #{ruleValue}, #{useDefault}, #{channels}, now(), now()
     </sql>
 
     <insert id="create" parameterType="DoctorMessageRuleRole" keyProperty="id" useGeneratedKeys="true">
@@ -54,17 +52,13 @@
         UPDATE
         <include refid="tb"/>
         <set>
-            <if test="roleId != null">role_id = #{roleId},</if>
             <if test="ruleId != null">rule_id = #{ruleId},</if>
-            <if test="type != null">type = #{type},</if>
-            <if test="ruleType != null">rule_type = #{ruleType},</if>
+            <if test="templateId != null">template_id = #{templateId},</if>
+            <if test="farmId != null">farm_id = #{farmId},</if>
+            <if test="roleId != null">role_id = #{roleId},</if>
             <if test="ruleValue != null">rule_value = #{ruleValue},</if>
-            <if test="ruleStartValue != null">rule_start_value = #{ruleStartValue},</if>
-            <if test="ruleEndValue != null">rule_end_value = #{ruleEndValue},</if>
-            <if test="channel != null">channel = #{channel},</if>
-            
-            
-            
+            <if test="useDefault != null">use_default = #{useDefault},</if>
+            <if test="channels != null">channels = #{channels},</if>
             updated_at=now()
         </set>
         WHERE id = #{id}
@@ -74,4 +68,13 @@
         DELETE FROM <include refid="tb"/>
         WHERE id = #{id}
     </delete>
+
+    <select id="findByTplId" parameterType="long" resultMap="DoctorMessageRuleRoleMap">
+        SELECT <include refid="cols_all"/>
+        FROM <include refid="tb"/>
+        WHERE template_id = #{templateId}
+    </select>
+
+
+
 </mapper>

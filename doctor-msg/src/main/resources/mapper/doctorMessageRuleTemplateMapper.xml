@@ -4,25 +4,25 @@
   -->
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 
-<mapper namespace="DoctorMessageRule">
-    <resultMap id="DoctorMessageRuleMap" type="DoctorMessageRule">
-        <result column="farm_id" property="farmId"/>
-        <result column="template_id" property="templateId"/>
-        <result column="template_name" property="templateName"/>
+<mapper namespace="DoctorMessageRuleTemplate">
+    <resultMap id="DoctorMessageRuleTemplateMap" type="DoctorMessageRuleTemplate">
+        <result column="name" property="name"/>
         <result column="type" property="type"/>
         <result column="category" property="category"/>
         <result column="rule_value" property="ruleValue"/>
-        <result column="use_default" property="useDefault"/>
         <result column="status" property="status"/>
+        <result column="message_template" property="messageTemplate"/>
+        <result column="content" property="content"/>
+        <result column="producer" property="producer"/>
         <result column="describe" property="describe"/>
-        <result column="channels" property="channels"/>
         <result column="created_at" property="createdAt"/>
         <result column="updated_at" property="updatedAt"/>
+        <result column="updated_by" property="updatedBy"/>
         
     </resultMap>
 
     <sql id="tb">
-        doctor_message_rules
+        doctor_message_rule_templates
     </sql>
 
     <sql id="cols_all">
@@ -30,14 +30,14 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        farm_id, template_id, template_name, type, category, rule_value, use_default, status, describe, channels, created_at, updated_at
+        name, type, category, rule_value, status, message_template, content, producer, describe, created_at, updated_at, updated_by
     </sql>
 
     <sql id="vals">
-        #{farmId}, #{templateId}, #{templateName}, #{type}, #{category}, #{ruleValue}, #{useDefault}, #{status}, #{describe}, #{channels}, now(), now()
+        #{name}, #{type}, #{category}, #{ruleValue}, #{status}, #{messageTemplate}, #{content}, #{producer}, #{describe}, now(), now(), #{updatedBy}
     </sql>
 
-    <insert id="create" parameterType="DoctorMessageRule" keyProperty="id" useGeneratedKeys="true">
+    <insert id="create" parameterType="DoctorMessageRuleTemplate" keyProperty="id" useGeneratedKeys="true">
         INSERT INTO
         <include refid="tb" />
         (<include refid="cols_exclude_id" />)
@@ -45,26 +45,26 @@
         (<include refid="vals" />)
     </insert>
 
-    <select id="findById" parameterType="long" resultMap="DoctorMessageRuleMap" >
+    <select id="findById" parameterType="long" resultMap="DoctorMessageRuleTemplateMap" >
         SELECT <include refid="cols_all" />
         FROM <include refid="tb" />
         WHERE id = #{id}
     </select>
 
-    <update id="update" parameterType="DoctorMessageRule">
+    <update id="update" parameterType="DoctorMessageRuleTemplate">
         UPDATE
         <include refid="tb"/>
         <set>
-            <if test="farmId != null">farm_id = #{farmId},</if>
-            <if test="templateId != null">template_id = #{templateId},</if>
-            <if test="templateName != null">template_name = #{templateName},</if>
+            <if test="name != null">name = #{name},</if>
             <if test="type != null">type = #{type},</if>
             <if test="category != null">category = #{category},</if>
             <if test="ruleValue != null">rule_value = #{ruleValue},</if>
-            <if test="useDefault != null">use_default = #{useDefault},</if>
             <if test="status != null">status = #{status},</if>
+            <if test="messageTemplate != null">message_template = #{messageTemplate},</if>
+            <if test="content != null">content = #{content},</if>
+            <if test="producer != null">producer = #{producer},</if>
             <if test="describe != null">describe = #{describe},</if>
-            <if test="channels != null">channels = #{channels},</if>
+            <if test="updatedBy != null">updated_by = #{updatedBy},</if>
             updated_at=now()
         </set>
         WHERE id = #{id}
@@ -74,5 +74,11 @@
         DELETE FROM <include refid="tb"/>
         WHERE id = #{id}
     </delete>
+
+    <select id="findByCategory" parameterType="int" resultMap="DoctorMessageRuleTemplateMap">
+        SELECT <include refid="cols_all"/>
+        FROM <include refid="tb"/>
+        WHERE category = #{category}
+    </select>
 
 </mapper>

@@ -6,16 +6,22 @@
 
 <mapper namespace="DoctorMessage">
     <resultMap id="DoctorMessageMap" type="DoctorMessage">
-        <id column="id" property="id"/>
+        <result column="farm_id" property="farmId"/>
+        <result column="rule_id" property="ruleId"/>
+        <result column="role_id" property="roleId"/>
         <result column="user_id" property="userId"/>
+        <result column="template_id" property="templateId"/>
         <result column="type" property="type"/>
-        <result column="content" property="content"/>
+        <result column="category" property="category"/>
+        <result column="data" property="data"/>
         <result column="channel" property="channel"/>
         <result column="status" property="status"/>
-        <result column="operator_id" property="operatorId"/>
-        <result column="operator_name" property="operatorName"/>
+        <result column="sended_at" property="sendedAt"/>
+        <result column="failed_by" property="failedBy"/>
+        <result column="created_by" property="createdBy"/>
         <result column="created_at" property="createdAt"/>
         <result column="updated_at" property="updatedAt"/>
+        
     </resultMap>
 
     <sql id="tb">
@@ -27,11 +33,11 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        user_id, type, content, channel, status, operator_id, operator_name, created_at, updated_at
+        farm_id, rule_id, role_id, user_id, template_id, type, category, data, channel, status, sended_at, failed_by, created_by, created_at, updated_at
     </sql>
 
     <sql id="vals">
-        #{userId}, #{type}, #{content}, #{channel}, #{status}, #{operatorId}, #{operatorName}, now(), now()
+        #{farmId}, #{ruleId}, #{roleId}, #{userId}, #{templateId}, #{type}, #{category}, #{data}, #{channel}, #{status}, now(), #{failedBy}, #{createdBy}, now(), now()
     </sql>
 
     <insert id="create" parameterType="DoctorMessage" keyProperty="id" useGeneratedKeys="true">
@@ -40,6 +46,16 @@
         (<include refid="cols_exclude_id" />)
         VALUES
         (<include refid="vals" />)
+    </insert>
+
+    <insert id="creates" parameterType="list">
+        INSERT INTO
+        <include refid="tb" />
+        (<include refid="cols_exclude_id" />)
+        VALUES
+        <foreach collection="list" item="i" separator=",">
+            (#{i.farmId}, #{i.ruleId}, #{i.roleId}, #{i.userId}, #{i.templateId}, #{i.type}, #{i.category}, #{i.data}, #{i.channel}, #{i.status}, now(), #{i.failedBy}, #{createdBy}, now(), now())
+        </foreach>
     </insert>
 
     <select id="findById" parameterType="long" resultMap="DoctorMessageMap" >
@@ -52,13 +68,19 @@
         UPDATE
         <include refid="tb"/>
         <set>
+            <if test="farmId != null">farm_id = #{farmId},</if>
+            <if test="ruleId != null">rule_id = #{ruleId},</if>
+            <if test="roleId != null">role_id = #{roleId},</if>
             <if test="userId != null">user_id = #{userId},</if>
+            <if test="templateId != null">template_id = #{templateId},</if>
             <if test="type != null">type = #{type},</if>
-            <if test="content != null">content = #{content},</if>
+            <if test="category != null">category = #{category},</if>
+            <if test="data != null">data = #{data},</if>
             <if test="channel != null">channel = #{channel},</if>
             <if test="status != null">status = #{status},</if>
-            <if test="operatorId != null">operator_id = #{operatorId},</if>
-            <if test="operatorName != null">operator_name = #{operatorName},</if>
+            <if test="failedBy != null">failed_by = #{failedBy},</if>
+            <if test="createdBy != null">created_by = #{createdBy},</if>
+            sended_at=now(),
             updated_at=now()
         </set>
         WHERE id = #{id}
@@ -68,4 +90,25 @@
         DELETE FROM <include refid="tb"/>
         WHERE id = #{id}
     </delete>
+
+    <sql id="criteria">
+        <where>
+            <if test="farmId != null">AND farm_id = #{farmId}</if>
+            <if test="ruleId != null">AND rule_id = #{ruleId}</if>
+            <if test="roleId != null">AND role_id = #{roleId}</if>
+            <if test="userId != null">AND user_id = #{userId}</if>
+            <if test="templateId != null">AND template_id = #{templateId}</if>
+            <if test="type != null">AND type = #{type}</if>
+            <if test="category != null">AND category = #{category}</if>
+            <if test="channel != null">AND channel = #{channel}</if>
+            <if test="status != null">AND status = #{status}</if>
+        </where>
+    </sql>
+
+    <select id="list" resultMap="DoctorMessageMap">
+        SELECT <include refid="cols_all"/>
+        FROM <include refid="tb"/>
+        <include refid="criteria"/>
+    </select>
+
 </mapper>
