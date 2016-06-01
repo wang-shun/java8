@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import com.google.common.eventbus.AsyncEventBus;
 import com.google.common.eventbus.EventBus;
 import io.terminus.boot.mybatis.autoconfigure.MybatisAutoConfiguration;
+import io.terminus.doctor.common.DoctorCommonConfiguration;
 import io.terminus.doctor.event.dao.DoctorPigDao;
 import io.terminus.doctor.event.handler.DoctorEntryHandler;
 import io.terminus.doctor.event.handler.DoctorEventCreateHandler;
@@ -64,7 +65,7 @@ import java.util.concurrent.Executors;
 @ComponentScan(basePackages = {
         "io.terminus.doctor.event",
 })
-@Import(DoctorWorkflowConfiguration.class)
+@Import({DoctorWorkflowConfiguration.class, DoctorCommonConfiguration.class})
 @AutoConfigureAfter(MybatisAutoConfiguration.class)
 public class  DoctorEventConfiguration {
 

@@ -4,7 +4,7 @@
 
     <!-- 开始节点 -->
     <start name="开始节点" pointx="50" pointy="100">
-        <transition name="开始节点连线" target="已进场" handler="doctorEntryFlowHandler" describe="进厂事件"/>
+        <transition name="开始节点连线" target="待配种" handler="doctorEntryFlowHandler" describe="进厂事件"/>
     </start>
 
     <task name="待配种" assignee="" pointx="250" pointy="100">
@@ -74,7 +74,7 @@
 
     <decision name="断奶事件判断">
         <transition name="部分断奶" expression="#{healthCount - weanCount} > 0" target="哺乳"/>
-        <transition name="部分断奶" expression="#{healthCount - weanCount} = 0" target="断奶"/>
+        <transition name="全部断奶" expression="#{healthCount - weanCount} = 0" target="断奶"/>
     </decision>
 
     <task name="断奶">
