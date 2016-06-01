@@ -32,4 +32,29 @@ public interface DoctorServiceReviewService {
      * @return
      */
     Response<Boolean> openDoctorService(BaseUser user, Long userId, List<String> farms, DoctorOrg org);
+
+    /**
+     * 开通服务, 更新服务状态并保存状态变更历史记录
+     * @param user 登录者
+     * @param userId 被操作的用户
+     * @param type 服务类型
+     * @return
+     */
+    Response<Boolean> openService(BaseUser user, Long userId, DoctorServiceReview.Type type);
+    /**
+     * 不开通服务, 更新服务状态并保存状态变更历史记录
+     * @param user 登录者
+     * @param userId 被操作的用户
+     * @param type 服务类型
+     * @return
+     */
+    Response<Boolean> notOpenService(BaseUser user, Long userId, DoctorServiceReview.Type type, String reason);
+    /**
+     * 冻结服务, 更新服务状态并保存状态变更历史记录
+     * @param user 登录者
+     * @param userId 被操作的用户
+     * @param type 服务类型
+     * @return
+     */
+    Response<Boolean> frozeService(BaseUser user, Long userId, DoctorServiceReview.Type type, String reason);
 }

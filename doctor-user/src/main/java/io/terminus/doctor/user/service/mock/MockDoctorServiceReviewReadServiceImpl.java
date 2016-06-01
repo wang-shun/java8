@@ -33,8 +33,8 @@ public class MockDoctorServiceReviewReadServiceImpl implements DoctorServiceRevi
     }
 
     @Override
-    public Response<DoctorServiceReview> findServiceReviewByUserIdAndType(Long userId, Integer type) {
-        return Response.ok(mockDoctorServiceReview(userId, type));
+    public Response<DoctorServiceReview> findServiceReviewByUserIdAndType(Long userId, DoctorServiceReview.Type type) {
+        return Response.ok(mockDoctorServiceReview(userId, type.getValue()));
     }
 
     @Override

@@ -36,7 +36,7 @@ public interface DoctorServiceReviewReadService {
      * @param type 服务类型
      * @return 用户审批服务
      */
-    Response<DoctorServiceReview> findServiceReviewByUserIdAndType(Long userId, Integer type);
+    Response<DoctorServiceReview> findServiceReviewByUserIdAndType(Long userId, DoctorServiceReview.Type type);
 
     /**
      * 根据用户id和服务类型查询审批服务dto(列转行)

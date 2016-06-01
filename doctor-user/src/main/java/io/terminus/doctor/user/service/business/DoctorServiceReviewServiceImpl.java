@@ -46,12 +46,19 @@ public class DoctorServiceReviewServiceImpl implements DoctorServiceReviewServic
 
             //查询, 校验数据库
             DoctorServiceReview  review = doctorServiceReviewDao.findByUserIdAndType(user.getId(), type);
+            //服务已被冻结
+            Preconditions.checkState(!Objects.equals(DoctorServiceReview.Status.FROZEN.getValue(), review.getStatus()), "user.service.frozen");
+            //服务已经开通了
+            Preconditions.checkState(!Objects.equals(DoctorServiceReview.Status.OK.getValue(), review.getStatus()), "user.service.opened");
+            //已经申请,正在审核中
+            Preconditions.checkState(!Objects.equals(DoctorServiceReview.Status.REVIEW.getValue(), review.getStatus()), "user.service.applied");
+            //状态不是初始化或驳回
             Preconditions.checkState(Objects.equals(DoctorServiceReview.Status.INIT.getValue(), review.getStatus())
                             || Objects.equals(DoctorServiceReview.Status.NOT_OK.getValue(), review.getStatus()),
                     "doctor.service.review.status.error");
 
             //处理数据
-            doctorServiceReviewManager.applyOpenService(user, serviceApplyDto.getOrg(), type, serviceApplyDto.getRealName());
+            doctorServiceReviewManager.applyOpenService(user, serviceApplyDto.getOrg(), type, review);
             response.setResult(true);
         } catch (ServiceException | IllegalStateException | IllegalArgumentException e) {
             response.setError(e.getMessage());
@@ -66,7 +73,7 @@ public class DoctorServiceReviewServiceImpl implements DoctorServiceReviewServic
         Response<Boolean> response = new Response<>();
         try{
             DoctorServiceReview review = doctorServiceReviewDao.findByUserIdAndType(userId, DoctorServiceReview.Type.PIG_DOCTOR);
-            Preconditions.checkState(Objects.equals(DoctorServiceReview.Status.REVIEW.getValue(), review.getStatus()), "doctor.service.review.status.error");
+            Preconditions.checkState(Objects.equals(DoctorServiceReview.Status.REVIEW.getValue(), review.getStatus()), "user.service.not.applied");
             doctorServiceReviewManager.openDoctorService(user, userId, farms, org);
             response.setResult(true);
         }catch (ServiceException | IllegalStateException e){
@@ -74,6 +81,55 @@ public class DoctorServiceReviewServiceImpl implements DoctorServiceReviewServic
         } catch(Exception e){
             log.error("open service failed, cause:{}", Throwables.getStackTraceAsString(e));
             response.setError("audit.service.failed");
+        }
+        return response;
+    }
+
+    @Override
+    public Response<Boolean> openService(BaseUser user, Long userId, DoctorServiceReview.Type type){
+        Response<Boolean> response = new Response<>();
+        try {
+            DoctorServiceReview review = doctorServiceReviewDao.findByUserIdAndType(userId, type);
+            if (!Objects.equals(review.getStatus(), DoctorServiceReview.Status.REVIEW.getValue())) {
+                return Response.fail("user.service.not.applied");
+            }
+            doctorServiceReviewManager.updateServiceStatus(user, userId, type, DoctorServiceReview.Status.REVIEW, DoctorServiceReview.Status.OK, null);
+            response.setResult(true);
+        } catch (Exception e) {
+            log.error("update doctor service review failed, cause : {}", Throwables.getStackTraceAsString(e));
+            response.setError("update.doctor.service.review.failed");
+        }
+        return response;
+    }
+
+    @Override
+    public Response<Boolean> notOpenService(BaseUser user, Long userId, DoctorServiceReview.Type type, String reason) {
+        Response<Boolean> response = new Response<>();
+        try {
+            DoctorServiceReview review = doctorServiceReviewDao.findByUserIdAndType(userId, type);
+            if (!Objects.equals(review.getStatus(), DoctorServiceReview.Status.REVIEW.getValue())) {
+                return Response.fail("user.service.not.applied");
+            }
+            doctorServiceReviewManager.updateServiceStatus(user, userId, type, DoctorServiceReview.Status.REVIEW, DoctorServiceReview.Status.NOT_OK, reason);
+            response.setResult(true);
+        } catch (Exception e) {
+            log.error("update doctor service review failed, cause : {}", Throwables.getStackTraceAsString(e));
+            response.setError("update.doctor.service.review.failed");
+        }
+        return response;
+    }
+
+    @Override
+    public Response<Boolean> frozeService(BaseUser user, Long userId, DoctorServiceReview.Type type, String reason) {
+        Response<Boolean> response = new Response<>();
+        try {
+            DoctorServiceReview review = doctorServiceReviewDao.findByUserIdAndType(userId, type);
+            doctorServiceReviewManager.updateServiceStatus(user, userId, type, DoctorServiceReview.Status.from(review.getStatus()),
+                    DoctorServiceReview.Status.FROZEN, reason);
+            response.setResult(true);
+        } catch (Exception e) {
+            log.error("update doctor service review failed, cause : {}", Throwables.getStackTraceAsString(e));
+            response.setError("update.doctor.service.review.failed");
         }
         return response;
     }

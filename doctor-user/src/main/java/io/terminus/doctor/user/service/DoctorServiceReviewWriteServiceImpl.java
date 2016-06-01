@@ -66,19 +66,4 @@ public class DoctorServiceReviewWriteServiceImpl implements DoctorServiceReviewW
         return response;
     }
 
-    @Override
-    public Response<Boolean> updateStatus(BaseUser user, Long userId, DoctorServiceReview.Type type, DoctorServiceReview.Status newStatus){
-        Response<Boolean> response = new Response<>();
-        try {
-            if (Objects.equals(newStatus.getValue(), DoctorServiceReview.Status.REVIEW.getValue())) {
-                response.setResult(doctorServiceReviewDao.updateStatus(userId, type, newStatus));
-            } else {
-                response.setResult(doctorServiceReviewDao.updateStatus(userId, user.getId(), type, newStatus));
-            }
-        } catch (Exception e) {
-            log.error("update doctor service review failed, cause : {}", Throwables.getStackTraceAsString(e));
-            response.setError("update.doctor.service.review.failed");
-        }
-        return response;
-    }
 }

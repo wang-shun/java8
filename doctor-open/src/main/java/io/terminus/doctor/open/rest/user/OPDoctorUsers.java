@@ -6,8 +6,10 @@ import io.terminus.doctor.user.dto.DoctorMenuDto;
 import io.terminus.doctor.user.dto.DoctorServiceApplyDto;
 import io.terminus.doctor.user.dto.DoctorServiceReviewDto;
 import io.terminus.doctor.user.dto.DoctorUserInfoDto;
+import io.terminus.doctor.user.model.DoctorOrg;
 import io.terminus.doctor.user.model.DoctorStaff;
 import io.terminus.doctor.user.model.DoctorUser;
+import io.terminus.doctor.user.service.DoctorOrgReadService;
 import io.terminus.doctor.user.service.DoctorServiceReviewReadService;
 import io.terminus.doctor.user.service.DoctorServiceReviewWriteService;
 import io.terminus.doctor.user.service.DoctorUserReadService;
@@ -35,18 +37,20 @@ public class OPDoctorUsers {
 
     private final DoctorServiceReviewWriteService doctorServiceReviewWriteService;
     private final DoctorServiceReviewService doctorServiceReviewService;
-
+    private final DoctorOrgReadService doctorOrgReadService;
     private final DoctorUserReadService doctorUserReadService;
 
     @Autowired
     public OPDoctorUsers(DoctorServiceReviewReadService doctorServiceReviewReadService,
                          DoctorServiceReviewWriteService doctorServiceReviewWriteService,
                          DoctorUserReadService doctorUserReadService,
-                         DoctorServiceReviewService doctorServiceReviewService) {
+                         DoctorServiceReviewService doctorServiceReviewService,
+                         DoctorOrgReadService doctorOrgReadService) {
         this.doctorServiceReviewReadService = doctorServiceReviewReadService;
         this.doctorServiceReviewWriteService = doctorServiceReviewWriteService;
         this.doctorUserReadService = doctorUserReadService;
         this.doctorServiceReviewService = doctorServiceReviewService;
+        this.doctorOrgReadService = doctorOrgReadService;
     }
 
     /**
@@ -59,7 +63,7 @@ public class OPDoctorUsers {
     }
 
     /**
-     * 申请开通服务
+     * 申请开通服务, 首次申请和驳回后再次申请都可以用这个
      * @param serviceApplyDto 申请信息
      * @return 申请是否成功
      */
@@ -85,6 +89,15 @@ public class OPDoctorUsers {
     @OpenMethod(key = "get.user.basic.info")
     public DoctorUserInfoDto getUserBasicInfo() {
         return new DoctorUserInfoDto(mockUser(), getUser().getType() % 4, 1L, mockStaff(getUser().getId()));
+    }
+
+    /**
+     * 查询用户所在的公司的信息
+     * @return 公司id, 公司名称, 营业执照url, 公司手机号
+     */
+    @OpenMethod(key = "get.org.info")
+    public DoctorOrg getOrgInfo() {
+        return OPRespHelper.orOPEx(doctorOrgReadService.findOrgByUserId(UserUtil.getUserId()));
     }
 
     private DoctorUser getUser() {

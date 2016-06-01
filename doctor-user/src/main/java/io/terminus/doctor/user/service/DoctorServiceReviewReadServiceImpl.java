@@ -58,10 +58,10 @@ public class DoctorServiceReviewReadServiceImpl implements DoctorServiceReviewRe
     }
 
     @Override
-    public Response<DoctorServiceReview> findServiceReviewByUserIdAndType(Long userId, Integer type) {
+    public Response<DoctorServiceReview> findServiceReviewByUserIdAndType(Long userId, DoctorServiceReview.Type type) {
         Response<DoctorServiceReview> response = new Response<>();
         try {
-            response.setResult(doctorServiceReviewDao.findByUserIdAndType(userId, DoctorServiceReview.Type.from(type)));
+            response.setResult(doctorServiceReviewDao.findByUserIdAndType(userId, type));
         } catch (Exception e) {
             log.error("find doctor service review failed, cause : {}", Throwables.getStackTraceAsString(e));
             response.setError("find.doctor.service.review.failed");
