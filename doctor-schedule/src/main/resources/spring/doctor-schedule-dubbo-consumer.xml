@@ -31,4 +31,18 @@
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.event.search.group.GroupDumpService" id="groupDumpService" check="false"/>
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.event.search.barn.BarnSearchDumpService" id="barnSearchDumpService" check="false"/>
 
+    <!-- message service -->
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.parana.msg.service.ReceiverGroupReadService" id="receiverGroupReadService" check="false"/>
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.parana.msg.service.ReceiverGroupWriteService" id="receiverGroupWriteService" check="false"/>
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.parana.msg.service.SubscriptionReadService" id="subscriptionReadService" check="false"/>
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.parana.msg.service.SubscriptionWriteService" id="subscriptionWriteService" check="false"/>
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.parana.msg.service.MessageTemplateReadService" id="messageTemplateReadService" check="false"/>
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.parana.msg.service.MessageTemplateWriteService" id="messageTemplateWriteService" check="false"/>
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.parana.msg.service.MessageReadService" id="messageReadService" check="false"/>
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.parana.msg.service.MessageWriteService" id="messageWriteService" check="false"/>
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.parana.msg.service.NotifyReadService" id="notifyReadService" check="false"/>
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.parana.msg.service.NotifyWriteService" id="notifyWriteService" check="false"/>
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.parana.user.service.DeviceReadService" id="deviceReadService" check="false"/>
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.parana.user.service.DeviceWriteService" id="deviceWriteService" check="false"/>
+
 </beans>
