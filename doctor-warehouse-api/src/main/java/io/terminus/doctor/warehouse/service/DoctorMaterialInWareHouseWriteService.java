@@ -26,4 +26,15 @@ public interface DoctorMaterialInWareHouseWriteService {
      * @return
      */
     Response<Long> providerMaterialInfo(@NotNull(message = "input.dto.empty") DoctorMaterialConsumeProviderDto doctorMaterialConsumeProviderDto);
+
+    /**
+     * 删除对应的仓库中某种物料信息
+     * @param materialInWareHouseId
+     * @param userId
+     * @param userName
+     * @return
+     */
+    Response<Boolean> deleteMaterialInWareHouseInfo(@NotNull(message = "input.materialInWareHouseId.empty") Long materialInWareHouseId,
+                                                    @NotNull(message = "input.userId.empty") Long userId,
+                                                    @NotNull(message = "input.userName.empty") String userName);
 }

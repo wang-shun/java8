@@ -13,7 +13,7 @@ public class MockLoginInterceptor extends HandlerInterceptorAdapter {
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         ParanaUser paranaUser = new ParanaUser();
         paranaUser.setShopId(1L);
-        paranaUser.setType(2);
+        paranaUser.setType(1);
         paranaUser.setId(1L);
         UserUtil.putCurrentUser(paranaUser);
         return true;

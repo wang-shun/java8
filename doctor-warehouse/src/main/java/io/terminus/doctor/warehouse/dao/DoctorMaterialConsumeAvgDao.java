@@ -5,6 +5,9 @@ import io.terminus.common.mysql.dao.MyBatisDao;
 import io.terminus.doctor.warehouse.model.DoctorMaterialConsumeAvg;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+import java.util.Map;
+
 /**
  * Created by yaoqijun.
  * Date:2016-05-17
@@ -22,7 +25,19 @@ public class DoctorMaterialConsumeAvgDao extends MyBatisDao<DoctorMaterialConsum
      * @return
      */
     public DoctorMaterialConsumeAvg queryByIds(Long farmId, Long wareHouseId, Long materialId){
-        return this.getSqlSession().selectOne("queryByIds", ImmutableMap.of("farmId",farmId, "wareHouseId", wareHouseId, "materialId", materialId));
+        return this.getSqlSession().selectOne(sqlId("queryByIds"), ImmutableMap.of("farmId",farmId, "wareHouseId", wareHouseId, "materialId", materialId));
     }
 
+    /**
+     * 通过 farmIds, warehouseId, materialId 获取结果
+     * @param params
+     * @return
+     */
+    public List<DoctorMaterialConsumeAvg> queryByIds(Map<String,Object> params){
+        return this.getSqlSession().selectList(sqlId("queryByIds"), params);
+    }
+
+    public List<DoctorMaterialConsumeAvg> queryByFarmIdAndType(Long farmId, Integer type){
+        return this.getSqlSession().selectList(sqlId("queryByFarmIdAndType"), ImmutableMap.of("farmId",farmId, "type", type));
+    }
 }

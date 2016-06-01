@@ -11,7 +11,7 @@ import java.io.Serializable;
  * Created by yaoqijun.
  * Date:2016-05-13
  * Email:yaoqj@terminus.io
- * Descirbe: 原料信息领用信息
+ * Descirbe: 物料的领用消耗基本数据信息
  */
 @Builder
 @Data
@@ -20,6 +20,12 @@ import java.io.Serializable;
 public class DoctorMaterialConsumeProviderDto implements Serializable{
 
     private static final long serialVersionUID = -6771008689155023995L;
+
+    /**
+     * 操作类型
+     * @see io.terminus.doctor.warehouse.model.DoctorMaterialConsumeProvider.EVENT_TYPE
+     */
+    private Integer actionType;
 
     private Integer type;   //领取物料类型
 
@@ -43,9 +49,7 @@ public class DoctorMaterialConsumeProviderDto implements Serializable{
 
     private String staffName;  //饲养员信息
 
-    private Long providerCount;
-
-    private Long consumeCount;
+    private Long count;
 
     private Long unitId;
 

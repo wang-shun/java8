@@ -348,6 +348,12 @@
 
             <dependency>
                 <groupId>io.terminus.doctor</groupId>
+                <artifactId>doctor-open</artifactId>
+                <version>${project.parent.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>io.terminus.doctor</groupId>
                 <artifactId>doctor-event</artifactId>
                 <version>${project.parent.version}</version>
             </dependency>

@@ -130,7 +130,7 @@ public class DoctorSearches {
         // 获取搜索词
         String q = params.get("q");
         if (StringUtils.isNotBlank(q)) {
-            doctorSearchHistoryService.createSearchHistory(UserUtil.getUserId(), searchType, "");
+            doctorSearchHistoryService.createSearchHistory(UserUtil.getUserId(), searchType, q);
         }
     }
 }

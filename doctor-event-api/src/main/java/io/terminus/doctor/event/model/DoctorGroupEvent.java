@@ -1,6 +1,12 @@
 package io.terminus.doctor.event.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import io.terminus.common.utils.JsonMapper;
+import io.terminus.doctor.event.dto.event.group.BaseGroupEvent;
+import lombok.AccessLevel;
 import lombok.Data;
+import lombok.Setter;
+import lombok.SneakyThrows;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -12,15 +18,17 @@ import java.util.Date;
  * Date: 2016-05-20
  */
 @Data
-public class DoctorGroupEvent implements Serializable {
+public class DoctorGroupEvent<T extends BaseGroupEvent> implements Serializable {
     private static final long serialVersionUID = 2651236908562482893L;
+
+    private static final JsonMapper JSON_MAPPER = JsonMapper.nonEmptyMapper();
 
     private Long id;
     
     /**
      * 公司id
      */
-    private String orgId;
+    private Long orgId;
     
     /**
      * 公司名称
@@ -30,7 +38,7 @@ public class DoctorGroupEvent implements Serializable {
     /**
      * 猪场id
      */
-    private String farmId;
+    private Long farmId;
     
     /**
      * 猪场名称
@@ -40,7 +48,7 @@ public class DoctorGroupEvent implements Serializable {
     /**
      * 猪群卡片id
      */
-    private String groupId;
+    private Long groupId;
     
     /**
      * 猪群号
@@ -98,27 +106,41 @@ public class DoctorGroupEvent implements Serializable {
      * 平均体重(公斤)
      */
     private Double avgWeight;
-    
+
     /**
      * 平均日龄
      */
-    private Double avgDayAge;
-    
+    private Integer avgDayAge;
+
+    /**
+     * 是否是自动生成的事件(用于区分是触发事件还是手工录入事件) 0 否, 1 是
+     * @see io.terminus.doctor.event.enums.IsOrNot
+     */
+    private Integer isAuto;
+
     /**
      * 外部id
      */
     private String outId;
-    
+
     /**
      * 备注
      */
     private String remark;
-    
+
     /**
      * 具体事件的内容通过json存储
      */
+    @JsonIgnore
     private String extra;
-    
+
+    /**
+     * 具体事件转换成的实体类
+     * @see io.terminus.doctor.event.dto.event.group.BaseGroupEvent
+     */
+    @Setter(AccessLevel.NONE)
+    private T extraMap;
+
     /**
      * 创建时间
      */
@@ -133,4 +155,14 @@ public class DoctorGroupEvent implements Serializable {
      * 创建人name
      */
     private String creatorName;
+
+    @SneakyThrows
+    public void setExtraMap(T extraMap){
+        this.extraMap = extraMap;
+        if(extraMap == null){
+            this.extra = null;
+        }else {
+            this.extra = JSON_MAPPER.toJson(extraMap);
+        }
+    }
 }

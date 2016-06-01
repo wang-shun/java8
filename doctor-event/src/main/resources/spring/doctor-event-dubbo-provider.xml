@@ -33,4 +33,17 @@
     <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.event.service.DoctorPigEventWriteService" ref="doctorPigEventWriteServiceImpl"/>
     <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.event.service.DoctorPigReadService" ref="doctorPigReadServiceImpl"/>
     <!--<dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.event.service.DoctorPigWriteService" ref="doctorPigWriteServiceImpl"/>-->
+
+    <!-- group api -->
+    <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.event.service.DoctorGroupReadService" ref="doctorGroupReadServiceImpl"/>
+    <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.event.service.DoctorGroupWriteService" ref="doctorGroupWriteServiceImpl"/>
+
+    <!-- barn api -->
+    <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.event.service.DoctorBarnReadService" ref="doctorBarnReadServiceImpl"/>
+    <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.event.service.DoctorBarnWriteService" ref="doctorBarnWriteServiceImpl"/>
+
+    <!--revert api-->
+    <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.event.service.DoctorRevertLogReadService" ref="doctorRevertLogReadServiceImpl"/>
+    <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.event.service.DoctorRevertLogWriteService" ref="doctorRevertLogWriteServiceImpl"/>
+
 </beans>

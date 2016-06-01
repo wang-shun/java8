@@ -8,6 +8,8 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.eventbus.AsyncEventBus;
 import com.google.common.eventbus.EventBus;
+import io.terminus.doctor.web.core.component.DoctorHbsHelpers;
+import io.terminus.doctor.web.core.component.ParanaHbsHelpers;
 import io.terminus.lib.file.FileServer;
 import io.terminus.lib.file.ImageServer;
 import io.terminus.lib.file.aliyun.AliyunFileServer;
@@ -18,6 +20,7 @@ import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.FilterType;
 import org.springframework.context.support.ReloadableResourceBundleMessageSource;
 import org.springframework.web.filter.HiddenHttpMethodFilter;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
@@ -32,8 +35,13 @@ import java.util.concurrent.Executors;
  */
 @Configuration
 @EnableWebMvc
-@EnableAutoConfiguration
-@ComponentScan
+@ComponentScan(basePackages = {
+        "io.terminus.doctor.web.core.advices",
+        "io.terminus.doctor.web.core.exceptions",
+        "io.terminus.doctor.web.core.util",
+        "io.terminus.doctor.web.core.image"
+
+})
 public class DoctorCoreWebConfiguration extends WebMvcConfigurerAdapter {
 
     @Bean

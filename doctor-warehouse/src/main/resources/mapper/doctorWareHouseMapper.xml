@@ -87,6 +87,14 @@
         WHERE farm_id = #{farmId}
     </select>
 
+    <select id="findByIds" parameterType="list" resultMap="DoctorWareHouseMap">
+        SELECT <include refid="cols_all"/> FROM <include refid="tb"/>
+        WHERE id in
+        <foreach collection="list" open="(" close=")" separator="," item="i">
+          #{i}
+        </foreach>
+    </select>
+
     <update id="update" parameterType="DoctorWareHouse">
         UPDATE <include refid="tb"/>
         <set>

@@ -1,7 +1,22 @@
 package io.terminus.doctor.warehouse;
 
+import com.google.common.collect.Lists;
+import io.terminus.doctor.warehouse.handler.DoctorWareHouseHandlerChain;
+import io.terminus.doctor.warehouse.handler.IHandler;
+import io.terminus.doctor.warehouse.handler.consume.DoctorConsumerEventHandler;
+import io.terminus.doctor.warehouse.handler.consume.DoctorInWareHouseConsumeHandler;
+import io.terminus.doctor.warehouse.handler.consume.DoctorMaterialAvgConsumerHandler;
+import io.terminus.doctor.warehouse.handler.consume.DoctorWareHouseTrackConsumeHandler;
+import io.terminus.doctor.warehouse.handler.consume.DoctorWareHouseTypeConsumerHandler;
+import io.terminus.doctor.warehouse.handler.provider.DoctorInWareHouseProviderHandler;
+import io.terminus.doctor.warehouse.handler.provider.DoctorProviderEventHandler;
+import io.terminus.doctor.warehouse.handler.provider.DoctorTrackProviderHandler;
+import io.terminus.doctor.warehouse.handler.provider.DoctorTypeProviderHandler;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+
+import java.util.List;
 
 /**
  * Created by yaoqijun.
@@ -14,4 +29,30 @@ import org.springframework.context.annotation.Configuration;
         "io.terminus.doctor.warehouse"
 })
 public class DoctorWarehouseConfiguration {
+
+    @Bean
+    public DoctorWareHouseHandlerChain doctorWareHouseHandlerChain(
+            DoctorConsumerEventHandler doctorConsumerEventHandler,DoctorInWareHouseConsumeHandler doctorInWareHouseConsumeHandler,
+            DoctorMaterialAvgConsumerHandler doctorMaterialAvgConsumerHandler, DoctorWareHouseTrackConsumeHandler doctorWareHouseTrackConsumeHandler,
+            DoctorWareHouseTypeConsumerHandler doctorWareHouseTypeConsumerHandler,
+            DoctorInWareHouseProviderHandler doctorInWareHouseProviderHandler, DoctorProviderEventHandler doctorProviderEventHandler,
+            DoctorTrackProviderHandler doctorTrackProviderHandler, DoctorTypeProviderHandler doctorTypeProviderHandler){
+        List<IHandler> iHandlers = Lists.newArrayList();
+
+        // consumer
+        iHandlers.add(doctorConsumerEventHandler);
+        iHandlers.add(doctorInWareHouseConsumeHandler);
+        iHandlers.add(doctorMaterialAvgConsumerHandler);
+        iHandlers.add(doctorWareHouseTrackConsumeHandler);
+        iHandlers.add(doctorWareHouseTypeConsumerHandler);
+
+        // provider
+        iHandlers.add(doctorProviderEventHandler);
+        iHandlers.add(doctorInWareHouseProviderHandler);
+        iHandlers.add(doctorTrackProviderHandler);
+        iHandlers.add(doctorTypeProviderHandler);
+
+        return new DoctorWareHouseHandlerChain(iHandlers);
+    }
+
 }

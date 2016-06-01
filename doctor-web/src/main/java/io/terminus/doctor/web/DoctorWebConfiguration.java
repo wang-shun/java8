@@ -10,6 +10,7 @@ import io.terminus.doctor.web.core.advices.JsonExceptionResolver;
 import io.terminus.doctor.web.core.msg.email.CommonEmailServiceConfig;
 import io.terminus.doctor.web.core.msg.sms.LuoSiMaoSmsServiceConfig;
 import io.terminus.doctor.web.core.service.OtherSystemService;
+import io.terminus.doctor.web.core.service.OtherSystemServiceConfig;
 import io.terminus.doctor.web.core.service.impl.OtherSystemServiceImpl;
 import io.terminus.doctor.web.front.auth.DoctorCustomRoleLoaderConfigurer;
 import io.terminus.parana.auth.role.CustomRoleLoaderConfigurer;
@@ -24,6 +25,7 @@ import io.terminus.parana.web.msg.config.test.TestAppPushWebServiceConfig;
 import io.terminus.parana.web.msg.config.test.TestEmailWebServiceConfig;
 import io.terminus.parana.web.msg.config.test.TestNotifyWebServiceConfig;
 import io.terminus.parana.web.msg.config.test.TestSmsWebServiceConfig;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -38,19 +40,19 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
  */
 @Configuration
 @ComponentScan(basePackages = {
-        "io.terminus.doctor.web.core.advices",
         "io.terminus.doctor.web.core.component",
         "io.terminus.doctor.web.core.events",
-        "io.terminus.doctor.web.core.exceptions",
         "io.terminus.doctor.web.front.component",
-        "io.terminus.doctor.web.front.design",
+        "io.terminus.doctor.web.front.design"
 }, excludeFilters = {
         @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = {
                 JsonExceptionResolver.class
         })
 })
 @EnableWebMvc
+@EnableAutoConfiguration
 @Import({DoctorCoreWebConfiguration.class,
+        OtherSystemServiceConfig.class,
         WebAuthenticationConfiguration.class,
         SimpleMsgGatewayBuilderConfig.class,
         LuoSiMaoSmsServiceConfig.class,
@@ -67,8 +69,4 @@ public class DoctorWebConfiguration extends WebMvcConfigurerAdapter {
           return new DoctorCustomRoleLoaderConfigurer(subRoleReadService);
     }
 
-    @Bean
-    public OtherSystemService otherSystemServiceConfigurer(ConfigCenter configCenter) {
-        return new OtherSystemServiceImpl(configCenter);
-    }
 }

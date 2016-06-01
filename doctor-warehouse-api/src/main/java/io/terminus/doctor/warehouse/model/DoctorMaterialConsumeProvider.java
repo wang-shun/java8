@@ -6,6 +6,7 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Iterables;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.constants.JacksonType;
+import io.terminus.doctor.warehouse.dto.DoctorMaterialConsumeProviderDto;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -14,6 +15,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.SneakyThrows;
 import lombok.experimental.Builder;
+import org.joda.time.DateTime;
 
 import java.io.Serializable;
 import java.util.Collections;
@@ -121,5 +123,19 @@ public class DoctorMaterialConsumeProvider implements Serializable{
             }
             return null;
         }
+    }
+
+    public static DoctorMaterialConsumeProvider buildFromDto(DoctorMaterialConsumeProviderDto dto){
+        DoctorMaterialConsumeProvider result = DoctorMaterialConsumeProvider.builder()
+                .type(dto.getType())
+                .farmId(dto.getFarmId()).farmName(dto.getFarmName())
+                .wareHouseId(dto.getWareHouseId()).wareHouseName(dto.getWareHouseName())
+                .materialId(dto.getMaterialTypeId()).materialName(dto.getMaterialName())
+                .eventType(dto.getActionType()).eventTime(DateTime.now().toDate()).eventCount(dto.getCount())
+                .staffId(dto.getStaffId()).staffName(dto.getStaffName())
+                .creatorId(dto.getStaffId()).creatorName(dto.getStaffName())
+                .build();
+
+        return result;
     }
 }

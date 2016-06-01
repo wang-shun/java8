@@ -3,6 +3,7 @@ package io.terminus.doctor.event.service;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.event.model.DoctorBarn;
 
+import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
 /**
@@ -19,21 +20,21 @@ public interface DoctorBarnWriteService {
      * @param barn
      * @return 主键id
      */
-    Response<Long> createBarn(DoctorBarn barn);
+    Response<Long> createBarn(@Valid DoctorBarn barn);
 
     /**
      * 更新DoctorBarn
      * @param barn
      * @return 是否成功
      */
-    Response<Boolean> updateBarn(DoctorBarn barn);
+    Response<Boolean> updateBarn(@Valid DoctorBarn barn);
 
     /**
      * 根据主键id删除DoctorBarn
      * @param barnId
      * @return 是否成功
      */
-    Response<Boolean> deleteBarnById(Long barnId);
+    Response<Boolean> deleteBarnById(@NotNull(message = "barnId.not.null") Long barnId);
 
     /**
      * 修改猪舍状态

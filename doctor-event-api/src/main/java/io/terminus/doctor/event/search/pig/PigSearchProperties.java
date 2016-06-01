@@ -9,7 +9,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  * Created by icemimosa
  * Date: 16/5/23
  */
-@ConfigurationProperties(prefix = "search.pig")
+@ConfigurationProperties(prefix = "esearch.pig")
 @Data
 public class PigSearchProperties {
 
