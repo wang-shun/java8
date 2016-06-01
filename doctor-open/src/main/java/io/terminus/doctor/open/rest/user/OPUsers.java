@@ -11,6 +11,7 @@ import com.google.common.hash.Hashing;
 import io.terminus.boot.session.properties.SessionProperties;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.Response;
+import io.terminus.common.utils.MapBuilder;
 import io.terminus.common.utils.Splitters;
 import io.terminus.doctor.common.enums.UserRole;
 import io.terminus.doctor.common.enums.UserStatus;
@@ -42,6 +43,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.Base64Utils;
 import org.springframework.web.bind.annotation.RequestMethod;
 
+import javax.annotation.PostConstruct;
 import java.io.Serializable;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -85,6 +87,8 @@ public class OPUsers {
     private MsgWebService smsWebService;
     @Autowired
     private MsgWebService emailWebService;
+    @Autowired
+    private MsgWebService appPushWebService;
     @Autowired
     private MobilePattern mobilePattern;
 
@@ -594,6 +598,21 @@ public class OPUsers {
             throw new JsonResponseException(500, "sms.send.fail");
         }
     }
+
+
+    /**
+     * 测试APP push的测试
+     * @param ids
+     * @return
+     */
+    @OpenMethod(key = "user.test.push", httpMethods = RequestMethod.GET, paramNames = {"ids"})
+    public String testpush(String ids) {
+        String result = appPushWebService.send("[1]", "user.register.code", MapBuilder.<String, Serializable>of().put("code", "推送123456").map(), null);
+        log.debug(result);
+        return result;
+    }
+
+
 
     @Data
     class Token implements Serializable {

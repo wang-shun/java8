@@ -24,6 +24,8 @@ dev.properties
 dependency-reduced-pom.xml
 *.rdb
 log/
+rebel.xml
+.rebel.xml.bak
 application.yml
 application-*.yml
 application.properties
