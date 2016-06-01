@@ -1,5 +1,6 @@
 package io.terminus.doctor.web.front.event.controller;
 
+import io.terminus.common.exception.JsonResponseException;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.service.DoctorBarnReadService;
@@ -72,11 +73,11 @@ public class DoctorBarns {
 
         // TODO: 权限中心校验权限
 
-        //todo 舍名校验重复
+        //校验猪舍名称是否重复
+        checkBarnNameRepeat(barn);
 
         if (barn.getId() == null) {
-            Long farmId = barn.getFarmId();
-            DoctorFarm farm = RespHelper.or500(doctorFarmReadService.findFarmById(farmId));
+            DoctorFarm farm = RespHelper.or500(doctorFarmReadService.findFarmById(barn.getFarmId()));
             barn.setOrgId(farm.getOrgId());
             barn.setOrgName(farm.getOrgName());
             barn.setFarmName(farm.getName());
@@ -99,5 +100,12 @@ public class DoctorBarns {
         // TODO: 权限中心校验权限
 
         return RespHelper.or500(doctorBarnWriteService.updateBarnStatus(barnId, status));
+    }
+
+    //校验猪舍名称是否重复
+    private void checkBarnNameRepeat(DoctorBarn barn) {
+        if (RespHelper.or500(doctorBarnReadService.checkBarnNameRepeat(barn.getFarmId(), barn.getName()))) {
+            throw new JsonResponseException(500, "barn.name.repeat");
+        }
     }
 }

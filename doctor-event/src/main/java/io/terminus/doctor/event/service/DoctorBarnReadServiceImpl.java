@@ -63,4 +63,14 @@ public class DoctorBarnReadServiceImpl implements DoctorBarnReadService {
     public Response<Integer> countPigByBarnId(Long barnId) {
         return Response.ok(RandomUtil.random(1, 50));
     }
+
+    @Override
+    public Response<Boolean> checkBarnNameRepeat(Long farmId, String barnName) {
+        try {
+            return Response.ok(doctorBarnDao.findByFarmId(farmId).stream().anyMatch(barn -> barnName.equals(barn.getName())));
+        } catch (Exception e) {
+            log.error("check barn name repeat failed, farmId:{}, barnName:{}, cause:{}", farmId, barnName, Throwables.getStackTraceAsString(e));
+            return Response.fail("check.repeat.fail");
+        }
+    }
 }

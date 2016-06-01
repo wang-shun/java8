@@ -2,6 +2,7 @@ package io.terminus.doctor.event.service;
 
 import io.terminus.common.model.Response;
 import io.terminus.doctor.event.model.DoctorBarn;
+import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.validation.constraints.NotNull;
 import java.util.List;
@@ -49,4 +50,13 @@ public interface DoctorBarnReadService {
      * @return 存栏量
      */
     Response<Integer> countPigByBarnId(@NotNull(message = "barnId.not.null") Long barnId);
+
+    /**
+     * 校验猪舍名称是否重复
+     * @param farmId   猪场id
+     * @param barnName 猪舍名称
+     * @return true 重复, false 没重复
+     */
+    Response<Boolean> checkBarnNameRepeat(@NotNull(message = "farmId.not.null") Long farmId,
+                                          @NotEmpty(message = "barn.name.not.empty") String barnName);
 }
