@@ -6,12 +6,16 @@ import io.terminus.doctor.event.dao.DoctorPigSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorPigTrackDao;
 import io.terminus.doctor.event.dao.DoctorRevertLogDao;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
+import io.terminus.doctor.event.enums.SowStatus;
 import io.terminus.doctor.event.handler.DoctorAbstractEventFlowHandler;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
+import java.util.Objects;
+
+import static com.google.common.base.Preconditions.checkState;
 
 /**
  * Created by yaoqijun.
@@ -29,7 +33,21 @@ public class DoctorSowFostersHandler extends DoctorAbstractEventFlowHandler{
 
     @Override
     public DoctorPigTrack updateDoctorPigTrackInfo(DoctorPigTrack doctorPigTrack, DoctorBasicInputInfoDto basic, Map<String, Object> extra) {
+        // 校验当前的母猪状态 status 的存在方式
+        Integer currentStatus = doctorPigTrack.getStatus();
+        checkState(
+                Objects.equals(currentStatus, SowStatus.FEED.getKey()) &&
+                        Objects.equals(currentStatus, SowStatus.Wean.getKey()), "foster.currentSowStatus.error");
+
+        //添加当前母猪的健崽猪的数量信息
+        Map<String,Object> extraMap = doctorPigTrack.getExtraMap();
+        Integer healthCount = (Integer) extraMap.get("healthCount");
+        Integer fosterCount= (Integer) extra.get("fostersCount");
+        extra.put("healthCount", healthCount + fosterCount);
         doctorPigTrack.addAllExtraMap(extra);
+
+        // 修改当前的母猪状态信息
+        doctorPigTrack.setStatus(SowStatus.FEED.getKey());
         return doctorPigTrack;
     }
 }

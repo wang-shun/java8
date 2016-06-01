@@ -30,7 +30,9 @@ public enum PigEvent {
     TO_FARROWING(14, "去分娩信息"),
     FARROWING(15, "分娩"),
     WEAN(16, "断奶事件"),
-    FOSTERS(11, "拼窝事件");
+    FOSTERS(17, "拼窝事件"),
+    PIGLETS_CHG(18, "母猪仔猪变动事件信息");
+
 
     @Getter
     private Integer key;

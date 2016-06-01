@@ -4,6 +4,7 @@ import com.google.common.base.Objects;
 import lombok.Data;
 import lombok.Getter;
 
+import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.util.Date;
 
@@ -32,6 +33,7 @@ public class DoctorGroup implements Serializable {
     /**
      * 猪场id
      */
+    @NotNull(message = "farmId.not.null")
     private Long farmId;
     
     /**

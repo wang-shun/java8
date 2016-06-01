@@ -299,6 +299,7 @@ public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteServic
     }
 
     @Override
+    @Deprecated
     public Response<Long> sowPigletsChgEvent(DoctorPigletsChgDto doctorPigletsChgDto, DoctorBasicInputInfoDto doctorBasicInputInfoDto) {
         try{
             Map<String,Object> dto = Maps.newHashMap();
@@ -359,6 +360,7 @@ public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteServic
     }
 
     @Override
+    @Deprecated //每次对部分断奶事件的判断， 进行操作的方式
     public Response<Long> sowWeanEvent(DoctorWeanDto doctorWeanDto, DoctorBasicInputInfoDto doctorBasicInputInfoDto) {
         try{
             Map<String,Object> dto = Maps.newHashMap();
