@@ -24,11 +24,11 @@ public class DoctorPartWeanDto implements Serializable{
 
     private Long pigId;
 
-    private Date weanDate; //断奶日期
+    private Date partWeanDate; //断奶日期
 
-    private Integer pigletsCount;
+    private Integer partWeanPigletsCount;
 
-    private Double avgWeight;
+    private Double partWeanAvgWeight;
 
-    private String remark;
+    private String partWeanRemark;
 }

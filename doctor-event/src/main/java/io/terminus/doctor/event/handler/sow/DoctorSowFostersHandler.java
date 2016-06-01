@@ -29,7 +29,13 @@ public class DoctorSowFostersHandler extends DoctorAbstractEventFlowHandler{
 
     @Override
     public DoctorPigTrack updateDoctorPigTrackInfo(DoctorPigTrack doctorPigTrack, DoctorBasicInputInfoDto basic, Map<String, Object> extra) {
-        doctorPigTrack.addAllExtraMap(extra);
+
+        // 判定拼窝事件信息
+
+//        doctorPigTrack.addAllExtraMap(extra);
+
+
+
         return doctorPigTrack;
     }
 }

@@ -49,7 +49,9 @@ public class DoctorBasicInputInfoDto implements Serializable{
 
     private String staffName;
 
-    // event create rel
+    /**
+     * @see io.terminus.doctor.event.enums.PigEvent
+     */
     private Integer eventType;
 
     private String eventName;
