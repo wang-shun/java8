@@ -88,9 +88,7 @@ public class WorkFlowContext implements Context{
      */
     private void initInterceptors(Map<String, Interceptor> interceptorsMap) {
         if(interceptorsMap != null && interceptorsMap.size() > 0) {
-            interceptorsMap.forEach((beanName, i) -> {
-                context.put(beanName, i);
-            });
+            interceptorsMap.forEach((beanName, i) -> context.put(beanName, i));
         }
     }
 
@@ -100,9 +98,7 @@ public class WorkFlowContext implements Context{
      */
     private void initEventHandlers(Map<String, IHandler> IHandlersMap) {
         if(IHandlersMap != null && IHandlersMap.size() > 0) {
-            IHandlersMap.forEach((beanName, i) -> {
-                context.put(beanName, i);
-            });
+            IHandlersMap.forEach((beanName, i) -> context.put(beanName, i));
         }
     }
 
