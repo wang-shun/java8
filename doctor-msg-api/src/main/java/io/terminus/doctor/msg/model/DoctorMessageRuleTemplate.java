@@ -4,9 +4,12 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.msg.dto.Rule;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
+import lombok.experimental.Builder;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.Serializable;
@@ -19,6 +22,9 @@ import java.util.Date;
  * Author: chk@terminus.io
  */
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
 public class DoctorMessageRuleTemplate implements Serializable {
 
     private static final long serialVersionUID = -4637626879952114253L;

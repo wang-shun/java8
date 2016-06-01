@@ -1,6 +1,9 @@
 package io.terminus.doctor.msg.model;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.Builder;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -12,6 +15,9 @@ import java.util.Date;
  * Author: chk@terminus.io
  */
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
 public class DoctorMessage implements Serializable {
 
     private static final long serialVersionUID = 1684778508002616587L;
