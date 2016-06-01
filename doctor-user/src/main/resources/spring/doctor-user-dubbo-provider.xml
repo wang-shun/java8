@@ -53,6 +53,8 @@
     <!-- farm org services -->
     <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.DoctorFarmReadService" ref="doctorFarmReadServiceImpl"/>
     <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.DoctorFarmWriteService" ref="doctorFarmWriteServiceImpl"/>
+    <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.DoctorOrgReadService" ref="doctorOrgReadServiceImpl"/>
+    <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.DoctorOrgWriteService" ref="doctorOrgWriteServiceImpl"/>
 
     <!-- data services -->
     <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.DoctorServiceReviewReadService" ref="doctorServiceReviewReadServiceImpl"/>

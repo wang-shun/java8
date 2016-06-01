@@ -49,6 +49,7 @@ public class DoctorServiceReviewController {
      * @return
      */
     @RequestMapping(value = "/pigdoctor/open", method = RequestMethod.POST)
+    @ResponseBody
     public Boolean openDoctorService(@RequestBody UserApplyServiceDetailDto dto){
         BaseUser baseUser = UserUtil.getCurrentUser();
         // TODO: 权限中心校验权限
@@ -65,6 +66,7 @@ public class DoctorServiceReviewController {
      * @return
      */
     @RequestMapping(value = "/pigmall/open", method = RequestMethod.GET)
+    @ResponseBody
     public Boolean openPigmallService(@RequestParam("userId") Long userId){
         BaseUser baseUser = UserUtil.getCurrentUser();
         // TODO: 权限中心校验权限
@@ -79,6 +81,7 @@ public class DoctorServiceReviewController {
      * @return
      */
     @RequestMapping(value = "/neverest/open", method = RequestMethod.GET)
+    @ResponseBody
     public Boolean openNeverestService(@RequestParam("userId") Long userId){
         BaseUser baseUser = UserUtil.getCurrentUser();
         // TODO: 权限中心校验权限
@@ -93,6 +96,7 @@ public class DoctorServiceReviewController {
      * @return
      */
     @RequestMapping(value = "/notopen", method = RequestMethod.GET)
+    @ResponseBody
     public Boolean notOpenService(@RequestParam("userId") Long userId, @RequestParam("type") Integer type, @RequestParam("reason") String reason){
         try {
             BaseUser baseUser = UserUtil.getCurrentUser();
@@ -114,6 +118,7 @@ public class DoctorServiceReviewController {
      * @return
      */
     @RequestMapping(value = "/froze", method = RequestMethod.GET)
+    @ResponseBody
     public Boolean frozeService(@RequestParam("userId") Long userId, @RequestParam("type") Integer type, @RequestParam("reason") String reason){
         try {
             BaseUser baseUser = UserUtil.getCurrentUser();
@@ -137,6 +142,7 @@ public class DoctorServiceReviewController {
      * @return
      */
     @RequestMapping(value = "/page", method = RequestMethod.GET)
+    @ResponseBody
     public Paging<DoctorServiceReview> pageServiceApplies(@RequestParam(value = "userId", required = false) Long userId,
                                      @RequestParam(value = "type", required = false) Integer type,
                                      @RequestParam(value = "status", required = false)Integer status,
@@ -158,6 +164,7 @@ public class DoctorServiceReviewController {
     }
 
     @RequestMapping(value = "/pigdoctor/detail", method = RequestMethod.GET)
+    @ResponseBody
     public UserApplyServiceDetailDto findUserApplyDetail(@RequestParam("userId") Long userId){
         BaseUser baseUser = UserUtil.getCurrentUser();
         // TODO: 权限中心校验权限
