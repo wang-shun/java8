@@ -146,7 +146,10 @@ public class DoctorServiceReviewController {
     public Paging<DoctorServiceReview> pageServiceApplies(@RequestParam(value = "userId", required = false) Long userId,
                                      @RequestParam(value = "type", required = false) Integer type,
                                      @RequestParam(value = "status", required = false)Integer status,
-                                     @RequestParam Integer pageNo, @RequestParam Integer pageSize){
+                                     @RequestParam(required = false) Integer pageNo, @RequestParam(required = false) Integer pageSize){
+        BaseUser baseUser = UserUtil.getCurrentUser();
+        // TODO: 权限中心校验权限
+
         try {
             DoctorServiceReview.Type servicetype = null;
             if (type != null) {

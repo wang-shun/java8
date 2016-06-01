@@ -102,7 +102,7 @@
         FROM <include refid="tb" />
         <include refid="criteria" />
         order by updated_at desc
-        limit #{offset} #{limit}
+        limit #{offset}, #{limit}
     </select>
 
     <sql id="criteria">

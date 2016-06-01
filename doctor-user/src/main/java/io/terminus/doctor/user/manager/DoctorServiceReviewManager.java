@@ -77,7 +77,7 @@ public class DoctorServiceReviewManager {
         //更新状态为已提交,待审核
         doctorServiceReviewDao.updateStatus(user.getId(), type, DoctorServiceReview.Status.REVIEW);
         //添加状态变更记录
-        this.createServiceReviewTrack(user, user.getId(), review.getStatus(), DoctorServiceReview.Status.REVIEW.getValue(), type, "用户申请开通服务");
+        this.createServiceReviewTrack(null, user.getId(), review.getStatus(), DoctorServiceReview.Status.REVIEW.getValue(), type, "用户申请开通服务");
 
     }
     private void createDoctorStaff(BaseUser user, Long orgId, String orgName){
@@ -99,8 +99,10 @@ public class DoctorServiceReviewManager {
         track.setType(type.getValue());
         track.setOldStatus(oldStatus);
         track.setNewStatus(newStatus);
-        track.setReviewerId(user.getId());
-        track.setReviewerName(user.getName());
+        if(user != null){
+            track.setReviewerId(user.getId());
+            track.setReviewerName(user.getName());
+        }
         track.setReason(reason);
         serviceReviewTrackDao.create(track);
     }
@@ -140,9 +142,10 @@ public class DoctorServiceReviewManager {
                                     DoctorServiceReview.Status newStatus, String reason){
         if (Objects.equals(newStatus.getValue(), DoctorServiceReview.Status.REVIEW.getValue())) {
             doctorServiceReviewDao.updateStatus(userId, type, newStatus);
+            this.createServiceReviewTrack(null, userId, oldStatus.getValue(), newStatus.getValue(), type, reason);
         } else {
             doctorServiceReviewDao.updateStatus(userId, user.getId(), type, newStatus);
+            this.createServiceReviewTrack(user, userId, oldStatus.getValue(), newStatus.getValue(), type, reason);
         }
-        this.createServiceReviewTrack(user, userId, oldStatus.getValue(), newStatus.getValue(), type, reason);
     }
 }
