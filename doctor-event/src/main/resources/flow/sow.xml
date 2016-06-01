@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 母猪状态简单流程开始 -->
+<workflow key="sow" name="母猪状态流图流转方式">
+
+    <!-- 开始节点 -->
+    <start name="开始节点" pointx="50" pointy="100">
+        <transition name="开始节点连线" target="已进场" handler="doctorEntryFlowHandler" describe="进厂事件"/>
+    </start>
+
+    <!-- 怀孕节点 -->
+    <task name="待配种" value="1" assignee="" pointx="250" pointy="100">
+        <transition name="待配种" target="已配种" handler="doctorSowMatingHandle" describe="配种事件" />
+    </task>
+
+    <task name="已配种" value="3" assignee="" pointx="250" pointy="100">
+        <transition name="配种事件连线" target="妊娠检查结果" handler="doctorSowPregCheckHandler" describe="妊娠检查事件"/>
+    </task>
+
+    <task name="妊娠检查不确定" assignee="" pointx="" pointy="" value="7">
+        <transition name="妊娠检查事件连线" target="妊娠检查结果" handler="doctorSowPregCheckHandler" describe="妊娠检查事件"/>
+    </task>
+
+    <!-- 选择节点 -->
+    <decision name="妊娠检查结果" pointx="" pointy="">
+        <transition name="妊娠检查不确定" expression="#{checkResult} equals 0" target="妊娠检查不确定" />
+        <transition name="妊娠检查阳性" expression="#{checkResult} equals 1" target="妊娠检查阳性" />
+        <transition name="妊娠检查阴性/返情/流产" />
+    </decision>
+
+
+    <!-- 哺乳节点 -->
+    <task name="哺乳" assignee="" pointx="450" pointy="100">
+        <transition name="任务连线2" target="已断奶" handler="weaningHandler" describe="断奶事件" />
+    </task>
+
+    <!-- 已断奶节点 -->
+    <task name="已断奶" assignee="" pointx="650" pointy="100">
+        <transition name="任务连线3" target="结束节点" handler="leaveHandler" describe="离场事件"/>
+    </task>
+
+    <!-- 结束节点 -->
+    <end name="结束节点" pointx="850" pointy="100" />
+
+</workflow>
