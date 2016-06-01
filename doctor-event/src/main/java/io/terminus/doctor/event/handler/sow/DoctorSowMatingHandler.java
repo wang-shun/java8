@@ -6,6 +6,7 @@ import io.terminus.doctor.event.dao.DoctorPigSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorPigTrackDao;
 import io.terminus.doctor.event.dao.DoctorRevertLogDao;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
+import io.terminus.doctor.event.enums.SowStatus;
 import io.terminus.doctor.event.handler.DoctorAbstractEventFlowHandler;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +31,7 @@ public class DoctorSowMatingHandler extends DoctorAbstractEventFlowHandler{
     @Override
     public DoctorPigTrack updateDoctorPigTrackInfo(DoctorPigTrack doctorPigTrack, DoctorBasicInputInfoDto basic, Map<String, Object> extra) {
         doctorPigTrack.addAllExtraMap(extra);
+        doctorPigTrack.setStatus(SowStatus.Mate.getKey());
         return doctorPigTrack;
     }
 }

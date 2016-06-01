@@ -16,13 +16,12 @@ public enum SowStatus {
     Removal(2,"已离场"),
     Mate(3,"已配种"),
     Pregnancy(4,"妊娠检查阳性"),
-    NotSurePregnancy(5,"妊娠检查无法确定"),
-    KongHuai(6,"空怀"),
-    Abortion(7,"流产"),
-    Farrow(8,"等待分娩"),
-    FEED(9, "哺乳状态"),
-    Wean(10,"断奶"),
-    FanQing(11,"返情");
+    KongHuai(5,"空怀"),
+    Abortion(6,"流产"),
+    Farrow(7,"等待分娩"),
+    FEED(8, "哺乳状态"),
+    Wean(9,"断奶"),
+    FanQing(10,"返情");
 
     @Getter
     private Integer key;

@@ -44,7 +44,7 @@ public class DoctorFarrowingDto implements Serializable{
 
     private Integer liveBoarCount;
 
-    private Integer healthCount;
+    private Integer healthCount;    //健仔数量(断奶事件校验对应的母猪状态信息)
 
     private Integer weakCount;
 
