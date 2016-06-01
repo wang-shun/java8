@@ -520,7 +520,7 @@ public class OPUsers {
         checkPassword(oldPassword, user.getPassword());
 
         //4.更新密码
-        user.setPassword(newPassword);
+        user.setPassword(EncryptUtil.encrypt(newPassword));
         Response<Boolean> res = userWriteService.update(user);
         if (!res.isSuccess()) {
             throw new OPClientException(res.getError());
@@ -561,7 +561,7 @@ public class OPUsers {
             throw new OPClientException(userResp.getError());
         }
         user = userResp.getResult();
-        user.setPassword(newPassword);
+        user.setPassword(EncryptUtil.encrypt(newPassword));
         Response<Boolean> res = userWriteService.update(user);
         if (!res.isSuccess()) {
             throw new OPClientException(res.getError());
