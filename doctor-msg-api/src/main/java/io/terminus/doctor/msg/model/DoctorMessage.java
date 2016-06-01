@@ -67,6 +67,11 @@ public class DoctorMessage implements Serializable {
     private Integer channel;
 
     /**
+     * app回调url
+     */
+    private String url;
+
+    /**
      * 状态 1:未发送, 2:已发送, 3:已读,  -1:删除, -2:发送失败
      */
     private Integer status;

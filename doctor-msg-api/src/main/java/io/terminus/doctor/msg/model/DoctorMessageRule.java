@@ -75,11 +75,6 @@ public class DoctorMessageRule implements Serializable {
     private String describe;
 
     /**
-     * 消息发送渠道, 多个以逗号分隔. 0->站内信, 1->短信, 2->邮箱
-     */
-    private String channels;
-
-    /**
      * 创建时间
      */
     private Date createdAt;

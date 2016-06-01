@@ -6,6 +6,7 @@
 
 <mapper namespace="DoctorMessage">
     <resultMap id="DoctorMessageMap" type="DoctorMessage">
+        <id column="id" property="id"/>
         <result column="farm_id" property="farmId"/>
         <result column="rule_id" property="ruleId"/>
         <result column="role_id" property="roleId"/>
@@ -15,13 +16,13 @@
         <result column="category" property="category"/>
         <result column="data" property="data"/>
         <result column="channel" property="channel"/>
+        <result column="url" property="url"/>
         <result column="status" property="status"/>
         <result column="sended_at" property="sendedAt"/>
         <result column="failed_by" property="failedBy"/>
         <result column="created_by" property="createdBy"/>
         <result column="created_at" property="createdAt"/>
         <result column="updated_at" property="updatedAt"/>
-        
     </resultMap>
 
     <sql id="tb">
@@ -33,11 +34,11 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        farm_id, rule_id, role_id, user_id, template_id, type, category, data, channel, status, sended_at, failed_by, created_by, created_at, updated_at
+        farm_id, rule_id, role_id, user_id, template_id, type, category, data, channel, url, status, sended_at, failed_by, created_by, created_at, updated_at
     </sql>
 
     <sql id="vals">
-        #{farmId}, #{ruleId}, #{roleId}, #{userId}, #{templateId}, #{type}, #{category}, #{data}, #{channel}, #{status}, now(), #{failedBy}, #{createdBy}, now(), now()
+        #{farmId}, #{ruleId}, #{roleId}, #{userId}, #{templateId}, #{type}, #{category}, #{data}, #{channel}, #{url}, #{status}, now(), #{failedBy}, #{createdBy}, now(), now()
     </sql>
 
     <insert id="create" parameterType="DoctorMessage" keyProperty="id" useGeneratedKeys="true">
@@ -77,6 +78,7 @@
             <if test="category != null">category = #{category},</if>
             <if test="data != null">data = #{data},</if>
             <if test="channel != null">channel = #{channel},</if>
+            <if test="url != null">url = #{url},</if>
             <if test="status != null">status = #{status},</if>
             <if test="failedBy != null">failed_by = #{failedBy},</if>
             <if test="createdBy != null">created_by = #{createdBy},</if>

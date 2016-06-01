@@ -57,13 +57,13 @@ public class RuleValue implements Serializable {
         DATE_RANGE(4, "到达日期范围, leftDate和rightDate起作用");
 
         @Getter
-        private Integer key;
+        private Integer value;
 
         @Getter
         private String describe;
 
-        RuleType(Integer key, String describe) {
-            this.key = key;
+        RuleType(Integer value, String describe) {
+            this.value = value;
             this.describe = describe;
         }
 

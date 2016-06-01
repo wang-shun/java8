@@ -1,6 +1,7 @@
 package io.terminus.doctor.msg.dto;
 
 import lombok.Data;
+import lombok.Getter;
 
 import java.io.Serializable;
 import java.util.List;
@@ -26,4 +27,33 @@ public class Rule implements Serializable {
      * 若小于0, 表示消息只通知一次
      */
     private Integer frequence;
+
+    /**
+     * 发送渠道, 多个以 逗号 分隔
+     * 消息发送渠道, 多个以逗号分隔. 0->站内信, 1->短信, 2->邮箱, 3->app推送
+     */
+    private String channels;
+
+
+    /**
+     * 发送渠道枚举值
+     */
+    public enum Channel {
+
+        SYSTEM(0, "站内信"),
+        MESSAGE(1, "短信"),
+        EMAIL(2, "邮箱"),
+        APPPUSH(3, "app推送");
+
+        @Getter
+        private Integer value;
+
+        @Getter
+        private String describe;
+
+        Channel(Integer value, String describe) {
+            this.value = value;
+            this.describe = describe;
+        }
+    }
 }

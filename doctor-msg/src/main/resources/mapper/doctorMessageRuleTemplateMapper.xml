@@ -6,6 +6,7 @@
 
 <mapper namespace="DoctorMessageRuleTemplate">
     <resultMap id="DoctorMessageRuleTemplateMap" type="DoctorMessageRuleTemplate">
+        <id column="id" property="id"/>
         <result column="name" property="name"/>
         <result column="type" property="type"/>
         <result column="category" property="category"/>
@@ -74,6 +75,23 @@
         DELETE FROM <include refid="tb"/>
         WHERE id = #{id}
     </delete>
+
+    <sql id="criteria">
+        <where>
+            <if test="name != null">AND = #{name}</if>
+            <if test="type != null">AND type = #{type}</if>
+            <if test="category != null">AND category = #{category}</if>
+            <if test="status != null">AND status = #{status}</if>
+            <if test="messageTemplate != null">AND message_template = #{messageTemplate}</if>
+            <if test="producer != null">AND producer = #{producer}</if>
+        </where>
+    </sql>
+
+    <select id="list" resultMap="DoctorMessageRuleTemplateMap">
+        SELECT <include refid="cols_all"/>
+        FROM <include refid="tb"/>
+        <include refid="criteria"/>
+    </select>
 
     <select id="findByCategory" parameterType="int" resultMap="DoctorMessageRuleTemplateMap">
         SELECT <include refid="cols_all"/>

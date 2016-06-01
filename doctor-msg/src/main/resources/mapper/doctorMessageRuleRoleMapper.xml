@@ -6,13 +6,13 @@
 
 <mapper namespace="DoctorMessageRuleRole">
     <resultMap id="DoctorMessageRuleRoleMap" type="DoctorMessageRuleRole">
+        <id column="id" property="id"/>
         <result column="rule_id" property="ruleId"/>
         <result column="template_id" property="templateId"/>
         <result column="farm_id" property="farmId"/>
         <result column="role_id" property="roleId"/>
         <result column="rule_value" property="ruleValue"/>
         <result column="use_default" property="useDefault"/>
-        <result column="channels" property="channels"/>
         <result column="created_at" property="createdAt"/>
         <result column="updated_at" property="updatedAt"/>
         
@@ -27,11 +27,11 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        rule_id, template_id, farm_id, role_id, rule_value, use_default, channels, created_at, updated_at
+        rule_id, template_id, farm_id, role_id, rule_value, use_default, created_at, updated_at
     </sql>
 
     <sql id="vals">
-        #{ruleId}, #{templateId}, #{farmId}, #{roleId}, #{ruleValue}, #{useDefault}, #{channels}, now(), now()
+        #{ruleId}, #{templateId}, #{farmId}, #{roleId}, #{ruleValue}, #{useDefault}, now(), now()
     </sql>
 
     <insert id="create" parameterType="DoctorMessageRuleRole" keyProperty="id" useGeneratedKeys="true">
@@ -58,7 +58,6 @@
             <if test="roleId != null">role_id = #{roleId},</if>
             <if test="ruleValue != null">rule_value = #{ruleValue},</if>
             <if test="useDefault != null">use_default = #{useDefault},</if>
-            <if test="channels != null">channels = #{channels},</if>
             updated_at=now()
         </set>
         WHERE id = #{id}

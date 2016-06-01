@@ -6,6 +6,7 @@
 
 <mapper namespace="DoctorMessageRule">
     <resultMap id="DoctorMessageRuleMap" type="DoctorMessageRule">
+        <id column="id" property="id"/>
         <result column="farm_id" property="farmId"/>
         <result column="template_id" property="templateId"/>
         <result column="template_name" property="templateName"/>
@@ -15,7 +16,6 @@
         <result column="use_default" property="useDefault"/>
         <result column="status" property="status"/>
         <result column="describe" property="describe"/>
-        <result column="channels" property="channels"/>
         <result column="created_at" property="createdAt"/>
         <result column="updated_at" property="updatedAt"/>
         
@@ -30,11 +30,11 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        farm_id, template_id, template_name, type, category, rule_value, use_default, status, `describe`, channels, created_at, updated_at
+        farm_id, template_id, template_name, type, category, rule_value, use_default, status, `describe`, created_at, updated_at
     </sql>
 
     <sql id="vals">
-        #{farmId}, #{templateId}, #{templateName}, #{type}, #{category}, #{ruleValue}, #{useDefault}, #{status}, #{describe}, #{channels}, now(), now()
+        #{farmId}, #{templateId}, #{templateName}, #{type}, #{category}, #{ruleValue}, #{useDefault}, #{status}, #{describe}, now(), now()
     </sql>
 
     <insert id="create" parameterType="DoctorMessageRule" keyProperty="id" useGeneratedKeys="true">
@@ -64,7 +64,6 @@
             <if test="useDefault != null">use_default = #{useDefault},</if>
             <if test="status != null">status = #{status},</if>
             <if test="describe != null">`describe` = #{describe},</if>
-            <if test="channels != null">channels = #{channels},</if>
             updated_at=now()
         </set>
         WHERE id = #{id}

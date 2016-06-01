@@ -32,4 +32,11 @@ public interface DoctorMessageRuleWriteService {
      * @return 是否成功
      */
     Response<Boolean> deleteMessageRuleById(Long messageRuleId);
+
+    /**
+     * 当猪场校验成功后, 与消息规则进行绑定
+     * @param farmId
+     */
+    void initTemplate(Long farmId);
+
 }
