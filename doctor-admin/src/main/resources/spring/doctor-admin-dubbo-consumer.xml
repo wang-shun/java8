@@ -23,6 +23,9 @@
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.business.DoctorServiceReviewService" id="doctorServiceReviewService" check="false"/>
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.DoctorServiceReviewWriteService" id="doctorServiceReviewWriteService" check="false"/>
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.DoctorServiceReviewReadService" id="doctorServiceReviewReadService" check="false"/>
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.DoctorFarmReadService" id="doctorFarmReadService" check="false"/>
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.DoctorOrgWriteService" id="doctorOrgWriteService" check="false"/>
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.DoctorOrgReadService" id="doctorOrgReadService" check="false"/>
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.DoctorFarmWriteService" id="doctorFarmWriteService" check="false"/>
 
     <!-- user device service -->

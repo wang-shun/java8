@@ -28,29 +28,20 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/doctor/admin/service")
 public class DoctorServiceReviewController {
 
-    private final DoctorServiceReviewWriteService doctorServiceReviewWriteService;
     private final DoctorServiceReviewService doctorServiceReviewService;
     private final DoctorServiceReviewReadService doctorServiceReviewReadService;
     private final DoctorOrgReadService doctorOrgReadService;
-    private final DoctorOrgWriteService doctorOrgWriteService;
     private final DoctorFarmReadService doctorFarmReadService;
-    private final DoctorFarmWriteService doctorFarmWriteService;
 
     @Autowired
-    public DoctorServiceReviewController(DoctorServiceReviewWriteService doctorServiceReviewWriteService,
-                                         DoctorServiceReviewService doctorServiceReviewService,
+    public DoctorServiceReviewController(DoctorServiceReviewService doctorServiceReviewService,
                                          DoctorServiceReviewReadService doctorServiceReviewReadService,
                                          DoctorOrgReadService doctorOrgReadService,
-                                         DoctorFarmReadService doctorFarmReadService,
-                                         DoctorOrgWriteService doctorOrgWriteService,
-                                         DoctorFarmWriteService doctorFarmWriteService){
-        this.doctorServiceReviewWriteService = doctorServiceReviewWriteService;
+                                         DoctorFarmReadService doctorFarmReadService){
         this.doctorServiceReviewService = doctorServiceReviewService;
         this.doctorServiceReviewReadService = doctorServiceReviewReadService;
         this.doctorOrgReadService = doctorOrgReadService;
         this.doctorFarmReadService = doctorFarmReadService;
-        this.doctorOrgWriteService = doctorOrgWriteService;
-        this.doctorFarmWriteService = doctorFarmWriteService;
     }
 
     /**
