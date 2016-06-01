@@ -53,6 +53,13 @@ public interface DoctorGroupReadService {
     Response<Paging<DoctorGroupDetail>> pagingGroup(@Valid DoctorGroupSearchDto groupSearchDto, Integer pageNo, Integer size);
 
     /**
+     * 根据查询条件分页猪群
+     * @param groupSearchDto 查询条件dto
+     * @return 分页后的猪群列表
+     */
+    Response<List<DoctorGroupDetail>> findGroupDetail(@Valid DoctorGroupSearchDto groupSearchDto);
+
+    /**
      * 根据id查询猪群事件表
      * @param groupEventId 主键id
      * @return 猪群事件表

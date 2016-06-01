@@ -2,14 +2,21 @@ package io.terminus.doctor.event.service;
 
 import com.google.common.base.Throwables;
 import io.terminus.common.model.Response;
-import io.terminus.doctor.common.utils.RandomUtil;
+import io.terminus.doctor.common.enums.PigType;
+import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
+import io.terminus.doctor.event.dto.DoctorGroupDetail;
+import io.terminus.doctor.event.dto.DoctorGroupSearchDto;
+import io.terminus.doctor.event.dto.DoctorPigInfoDto;
+import io.terminus.doctor.event.enums.BoarStatus;
 import io.terminus.doctor.event.model.DoctorBarn;
+import io.terminus.doctor.event.model.DoctorGroup;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Desc: 猪舍表读服务实现类
@@ -22,10 +29,16 @@ import java.util.List;
 public class DoctorBarnReadServiceImpl implements DoctorBarnReadService {
 
     private final DoctorBarnDao doctorBarnDao;
+    private final DoctorGroupReadService doctorGroupReadService;
+    private final DoctorPigReadService doctorPigReadService;
 
     @Autowired
-    public DoctorBarnReadServiceImpl(DoctorBarnDao doctorBarnDao) {
+    public DoctorBarnReadServiceImpl(DoctorBarnDao doctorBarnDao,
+                                     DoctorGroupReadService doctorGroupReadService,
+                                     DoctorPigReadService doctorPigReadService) {
         this.doctorBarnDao = doctorBarnDao;
+        this.doctorGroupReadService = doctorGroupReadService;
+        this.doctorPigReadService = doctorPigReadService;
     }
 
     @Override
@@ -61,6 +74,25 @@ public class DoctorBarnReadServiceImpl implements DoctorBarnReadService {
 
     @Override
     public Response<Integer> countPigByBarnId(Long barnId) {
-        return Response.ok(RandomUtil.random(1, 50));
+        try {
+            DoctorBarn barn = doctorBarnDao.findById(barnId);
+            if (PigType.isGroup(barn.getPigType())) {
+                DoctorGroupSearchDto searchDto = new DoctorGroupSearchDto();
+                searchDto.setFarmId(barn.getFarmId());
+                searchDto.setCurrentBarnId(barnId);
+                searchDto.setStatus(DoctorGroup.Status.CREATED.getValue());
+                List<DoctorGroupDetail> groupDetails = RespHelper.orServEx(doctorGroupReadService.findGroupDetail(searchDto));
+                return Response.ok((int)groupDetails.stream().collect(Collectors.summarizingInt(g -> g.getGroupTrack().getQuantity())).getSum());
+            }
+
+            //过滤已离场的猪
+            List<DoctorPigInfoDto> pigInfoDtos = RespHelper.orServEx(doctorPigReadService.queryDoctorPigInfoByBarnId(barnId)).stream()
+                    .filter(pig -> !pig.getStatus().equals(BoarStatus.LEAVE.getKey()))
+                    .collect(Collectors.toList());
+            return Response.ok(pigInfoDtos.size());
+        } catch (Exception e) {
+            log.error("coutn pigt by barn id failed, barnId:{}, cause:{}", barnId, Throwables.getStackTraceAsString(e));
+            return Response.fail("count.pig.fail");
+        }
     }
 }

@@ -3,6 +3,7 @@ package io.terminus.doctor.event.dao;
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableMap;
 import io.terminus.common.mysql.dao.MyBatisDao;
+import io.terminus.doctor.event.dto.DoctorGroupSearchDto;
 import io.terminus.doctor.event.model.DoctorGroup;
 import org.springframework.stereotype.Repository;
 
@@ -23,6 +24,10 @@ public class DoctorGroupDao extends MyBatisDao<DoctorGroup> {
 
     public List<DoctorGroup> fingByStatus(Integer status) {
         return getSqlSession().selectList(sqlId("fingByStatus"), status);
+    }
+
+    public List<DoctorGroup> findBySearchDto(DoctorGroupSearchDto searchDto) {
+        return getSqlSession().selectList(sqlId("findBySearchDto"), searchDto);
     }
 
     /**
