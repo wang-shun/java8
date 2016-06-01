@@ -149,6 +149,7 @@ public class DoctorBarns {
             barnDetail.setType(DoctorBarnDetail.Type.GROUP.getValue());
 
             DoctorGroupSearchDto searchDto = new DoctorGroupSearchDto();
+            searchDto.setFarmId(barn.getFarmId());
             searchDto.setCurrentBarnId(barnId);
             barnDetail.setGroupPaging(RespHelper.or500(doctorGroupReadService.pagingGroup(searchDto, pageNo, size)));
             return barnDetail;
