@@ -30,7 +30,7 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        farm_id, template_id, template_name, type, category, rule_value, use_default, status, describe, channels, created_at, updated_at
+        farm_id, template_id, template_name, type, category, rule_value, use_default, status, `describe`, channels, created_at, updated_at
     </sql>
 
     <sql id="vals">
@@ -63,7 +63,7 @@
             <if test="ruleValue != null">rule_value = #{ruleValue},</if>
             <if test="useDefault != null">use_default = #{useDefault},</if>
             <if test="status != null">status = #{status},</if>
-            <if test="describe != null">describe = #{describe},</if>
+            <if test="describe != null">`describe` = #{describe},</if>
             <if test="channels != null">channels = #{channels},</if>
             updated_at=now()
         </set>

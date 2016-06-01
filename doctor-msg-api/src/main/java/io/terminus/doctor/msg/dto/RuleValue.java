@@ -1,6 +1,7 @@
 package io.terminus.doctor.msg.dto;
 
 import lombok.Data;
+import lombok.Getter;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -17,11 +18,11 @@ public class RuleValue implements Serializable {
 
     /**
      * 类型
-     *      1. 到达某个值, value起作用
-     *      2. 到达值范围, leftValue和rightValue起作用
-     *
-     *      3. 到达某个日期, date起作用
-     *      4. 到达日期范围, leftDate和rightDate起作用
+     * 1. 到达某个值, value起作用
+     * 2. 到达值范围, leftValue和rightValue起作用
+     * <p>
+     * 3. 到达某个日期, date起作用
+     * 4. 到达日期范围, leftDate和rightDate起作用
      */
     private Integer ruleType;
 
@@ -44,4 +45,27 @@ public class RuleValue implements Serializable {
     private Date leftDate;
     private Date rightDate;
 
+    /**
+     * @see RuleValue#ruleType
+     */
+    public enum RuleType {
+
+        VALUE(1, "到达某个值, value起作用"),
+        VALUE_RANGE(2, "leftValue和rightValue起作用"),
+
+        DATE(3, "到达某个日期, date起作用"),
+        DATE_RANGE(4, "到达日期范围, leftDate和rightDate起作用");
+
+        @Getter
+        private Integer key;
+
+        @Getter
+        private String describe;
+
+        RuleType(Integer key, String describe) {
+            this.key = key;
+            this.describe = describe;
+        }
+
+    }
 }

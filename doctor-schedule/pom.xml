@@ -34,6 +34,11 @@
         </dependency>
 
         <dependency>
+            <groupId>io.terminus.doctor</groupId>
+            <artifactId>doctor-msg-api</artifactId>
+        </dependency>
+
+        <dependency>
             <groupId>io.terminus.boot</groupId>
             <artifactId>spring-boot-starter-dubbo</artifactId>
         </dependency>

@@ -30,7 +30,7 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        name, type, category, rule_value, status, message_template, content, producer, describe, created_at, updated_at, updated_by
+        name, type, category, rule_value, status, message_template, content, producer, `describe`, created_at, updated_at, updated_by
     </sql>
 
     <sql id="vals">
@@ -63,7 +63,7 @@
             <if test="messageTemplate != null">message_template = #{messageTemplate},</if>
             <if test="content != null">content = #{content},</if>
             <if test="producer != null">producer = #{producer},</if>
-            <if test="describe != null">describe = #{describe},</if>
+            <if test="describe != null">`describe` = #{describe},</if>
             <if test="updatedBy != null">updated_by = #{updatedBy},</if>
             updated_at=now()
         </set>

@@ -22,4 +22,7 @@
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.event.search.group.GroupDumpService" id="groupDumpService" check="false"/>
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.event.search.barn.BarnSearchDumpService" id="barnSearchDumpService" check="false"/>
 
+    <!-- Doctor Message api -->
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.msg.service.DoctorMessageJob" id="doctorMessageJob" check="false"/>
+
 </beans>

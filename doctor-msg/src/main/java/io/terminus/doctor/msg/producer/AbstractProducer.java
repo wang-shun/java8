@@ -24,11 +24,11 @@ import java.util.Objects;
  */
 public abstract class AbstractProducer implements IProducer {
 
-    private DoctorMessageRuleTemplateDao doctorMessageRuleTemplateDao;
-    private DoctorMessageRuleDao doctorMessageRuleDao;
-    private DoctorMessageRuleRoleDao doctorMessageRuleRoleDao;
-    private DoctorMessageDao doctorMessageDao;
-    private Category category;
+    protected DoctorMessageRuleTemplateDao doctorMessageRuleTemplateDao;
+    protected DoctorMessageRuleDao doctorMessageRuleDao;
+    protected DoctorMessageRuleRoleDao doctorMessageRuleRoleDao;
+    protected DoctorMessageDao doctorMessageDao;
+    protected Category category;
 
     public AbstractProducer(DoctorMessageRuleTemplateDao doctorMessageRuleTemplateDao,
                             DoctorMessageRuleDao doctorMessageRuleDao,
@@ -44,9 +44,10 @@ public abstract class AbstractProducer implements IProducer {
 
     @Override
     public void produce() {
+
         DoctorMessageRuleTemplate ruleTemplate = doctorMessageRuleTemplateDao.findByCategory(category.getKey());
         // 如果不正常, 则不继续执行
-        if(!Objects.equals(ruleTemplate.getStatus(), DoctorMessageRuleTemplate.Status.NORMAL.getValue())) {
+        if(ruleTemplate == null || !Objects.equals(ruleTemplate.getStatus(), DoctorMessageRuleTemplate.Status.NORMAL.getValue())) {
             return;
         }
         List<DoctorMessageRuleRole> ruleRoles = doctorMessageRuleRoleDao.findByTplId(ruleTemplate.getId());
@@ -54,7 +55,7 @@ public abstract class AbstractProducer implements IProducer {
             DoctorMessageRuleRole ruleRole = ruleRoles.get(i);
             // 查询对应的message_rule
             DoctorMessageRule messageRule = doctorMessageRuleDao.findById(ruleRole.getRuleId());
-            if(!Objects.equals(messageRule.getStatus(), DoctorMessageRule.Status.NORMAL.getValue())) {
+            if(messageRule == null || !Objects.equals(messageRule.getStatus(), DoctorMessageRule.Status.NORMAL.getValue())) {
                 continue;
             }
 

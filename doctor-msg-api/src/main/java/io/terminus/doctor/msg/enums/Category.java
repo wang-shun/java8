@@ -12,7 +12,7 @@ import java.util.Objects;
  */
 public enum Category {
 
-    ONE(1,"占位"); // TODO
+    SOW_BREEDING(1,"待配种母猪提示");
 
     @Getter
     private Integer key;
