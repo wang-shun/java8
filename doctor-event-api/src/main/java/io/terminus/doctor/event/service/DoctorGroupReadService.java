@@ -49,7 +49,7 @@ public interface DoctorGroupReadService {
      * @param size   分页大小
      * @return 分页后的猪群列表
      */
-    Response<Paging<DoctorGroup>> pagingGroup(DoctorGroupSearchDto groupSearchDto, Integer pageNo, Integer size);
+    Response<Paging<DoctorGroupDetail>> pagingGroup(DoctorGroupSearchDto groupSearchDto, Integer pageNo, Integer size);
 
     /**
      * 根据id查询猪群事件表
