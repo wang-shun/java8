@@ -107,7 +107,7 @@
         </where>
     </sql>
 
-    <select id="list" resultMap="DoctorMessageMap">
+    <select id="list" parameterType="map" resultMap="DoctorMessageMap">
         SELECT <include refid="cols_all"/>
         FROM <include refid="tb"/>
         <include refid="criteria"/>

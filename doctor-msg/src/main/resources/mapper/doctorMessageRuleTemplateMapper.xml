@@ -87,7 +87,7 @@
         </where>
     </sql>
 
-    <select id="list" resultMap="DoctorMessageRuleTemplateMap">
+    <select id="list" parameterType="map" resultMap="DoctorMessageRuleTemplateMap">
         SELECT <include refid="cols_all"/>
         FROM <include refid="tb"/>
         <include refid="criteria"/>
