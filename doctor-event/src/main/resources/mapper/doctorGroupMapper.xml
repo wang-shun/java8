@@ -21,7 +21,6 @@
         <result column="current_barn_id" property="currentBarnId"/>
         <result column="current_barn_name" property="currentBarnName"/>
         <result column="pig_type" property="pigType"/>
-        <result column="sex" property="sex"/>
         <result column="breed_id" property="breedId"/>
         <result column="breed_name" property="breedName"/>
         <result column="genetic_id" property="geneticId"/>
@@ -49,28 +48,27 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        org_id, org_name, farm_id, farm_name, group_code, batch_no, open_at, close_at, status, init_barn_id, init_barn_name, current_barn_id, current_barn_name, pig_type, sex, breed_id, breed_name, genetic_id, genetic_name, staff_id, staff_name, remark, out_id, extra, creator_id, creator_name, updator_id, updator_name, created_at, updated_at
+        org_id, org_name, farm_id, farm_name, group_code, batch_no, open_at, close_at, status, init_barn_id, init_barn_name, current_barn_id, current_barn_name, pig_type, breed_id, breed_name, genetic_id, genetic_name, staff_id, staff_name, remark, out_id, extra, creator_id, creator_name, updator_id, updator_name, created_at, updated_at
     </sql>
 
     <sql id="vals">
-        #{orgId}, #{orgName}, #{farmId}, #{farmName}, #{groupCode}, #{batchNo}, #{openAt}, #{closeAt}, #{status}, #{initBarnId}, #{initBarnName}, #{currentBarnId}, #{currentBarnName}, #{pigType}, #{sex}, #{breedId}, #{breedName}, #{geneticId}, #{geneticName}, #{staffId}, #{staffName}, #{remark}, #{outId}, #{extra}, #{creatorId}, #{creatorName}, #{updatorId}, #{updatorName}, now(), now()
+        #{orgId}, #{orgName}, #{farmId}, #{farmName}, #{groupCode}, #{batchNo}, #{openAt}, #{closeAt}, #{status}, #{initBarnId}, #{initBarnName}, #{currentBarnId}, #{currentBarnName}, #{pigType}, #{breedId}, #{breedName}, #{geneticId}, #{geneticName}, #{staffId}, #{staffName}, #{remark}, #{outId}, #{extra}, #{creatorId}, #{creatorName}, #{updatorId}, #{updatorName}, now(), now()
     </sql>
 
     <sql id="criteria">
-        <if test="orgId != null">AND org_id = #{orgId},</if>
-        <if test="farmId != null">AND farm_id = #{farmId},</if>
-        <if test="groupCode != null">AND group_code = #{groupCode},</if>
-        <if test="status != null">AND status = #{status},</if>
-        <if test="initBarnId != null">AND init_barn_id = #{initBarnId},</if>
-        <if test="currentBarnId != null">AND current_barn_id = #{currentBarnId},</if>
-        <if test="pigType != null">AND pig_type = #{pigType},</if>
-        <if test="sex != null">AND sex = #{sex},</if>
-        <if test="breedId != null">AND breed_id = #{breedId},</if>
-        <if test="geneticId != null">AND genetic_id = #{geneticId},</if>
-        <if test="startOpenAt != null">AND open_at &gt;= #{startOpenAt},</if>
-        <if test="endOpenAt != null">AND open_at &lt;= #{endOpenAt},</if>
-        <if test="startCloseAt != null">AND close_at &gt;= #{startCloseAt},</if>
-        <if test="endCloseAt != null">AND close_at &lt;= #{endCloseAt},</if>
+        <if test="orgId != null">AND org_id = #{orgId}</if>
+        <if test="farmId != null">AND farm_id = #{farmId}</if>
+        <if test="groupCode != null">AND group_code = #{groupCode}</if>
+        <if test="status != null">AND status = #{status}</if>
+        <if test="initBarnId != null">AND init_barn_id = #{initBarnId}</if>
+        <if test="currentBarnId != null">AND current_barn_id = #{currentBarnId}</if>
+        <if test="pigType != null">AND pig_type = #{pigType}</if>
+        <if test="breedId != null">AND breed_id = #{breedId}</if>
+        <if test="geneticId != null">AND genetic_id = #{geneticId}</if>
+        <if test="startOpenAt != null">AND open_at &gt;= #{startOpenAt}</if>
+        <if test="endOpenAt != null">AND open_at &lt;= #{endOpenAt}</if>
+        <if test="startCloseAt != null">AND close_at &gt;= #{startCloseAt}</if>
+        <if test="endCloseAt != null">AND close_at &lt;= #{endCloseAt}</if>
     </sql>
 
     <insert id="create" parameterType="DoctorGroup" keyProperty="id" useGeneratedKeys="true">
@@ -105,7 +103,6 @@
             <if test="currentBarnId != null">current_barn_id = #{currentBarnId},</if>
             <if test="currentBarnName != null">current_barn_name = #{currentBarnName},</if>
             <if test="pigType != null">pig_type = #{pigType},</if>
-            <if test="sex != null">sex = #{sex},</if>
             <if test="breedId != null">breed_id = #{breedId},</if>
             <if test="breedName != null">breed_name = #{breedName},</if>
             <if test="geneticId != null">genetic_id = #{geneticId},</if>
@@ -119,9 +116,6 @@
             <if test="creatorName != null">creator_name = #{creatorName},</if>
             <if test="updatorId != null">updator_id = #{updatorId},</if>
             <if test="updatorName != null">updator_name = #{updatorName},</if>
-            
-            
-            
             updated_at=now()
         </set>
         WHERE id = #{id}

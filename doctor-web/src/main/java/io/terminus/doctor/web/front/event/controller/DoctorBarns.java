@@ -114,7 +114,7 @@ public class DoctorBarns {
     }
 
     /**
-     * 根据id查询猪舍表
+     * 查询猪舍详情
      * @param barnId 主键id
      * @return 猪舍表
      */
@@ -122,6 +122,9 @@ public class DoctorBarns {
     public DoctorBarnDetail findBarnDetailByBarnId(@RequestParam("barnId") Long barnId,
                                                    @RequestParam(value = "pageNo", required = false) Integer pageNo,
                                                    @RequestParam(value = "size", required = false) Integer size) {
+
+        //// TODO: 16/6/1 其他搜索条件, 排序条件
+
         DoctorBarnDetail barnDetail = new DoctorBarnDetail();
         DoctorBarn barn = RespHelper.or500(doctorBarnReadService.findBarnById(barnId));
 
@@ -129,7 +132,7 @@ public class DoctorBarns {
         if (PigType.isBoar(barn.getPigType())) {
             barnDetail.setType(DoctorBarnDetail.Type.BOAR.getValue());
             barnDetail.setPigPaging(RespHelper.or500(doctorPigReadService.pagingDoctorInfoDtoByPig(
-                    DoctorPig.builder().initBarnId(barnId).pigType(DoctorPig.PIG_TYPE.BOAR.getKey()).build(), pageNo, size)));
+                    DoctorPig.builder().initBarnId(barnId).pigType(DoctorPig.PIG_TYPE.BOAR.getKey()).farmId(barn.getFarmId()).build(), pageNo, size)));
             return barnDetail;
         }
 
@@ -137,7 +140,7 @@ public class DoctorBarns {
         if (PigType.isSow(barn.getPigType())) {
             barnDetail.setType(DoctorBarnDetail.Type.SOW.getValue());
             barnDetail.setPigPaging(RespHelper.or500(doctorPigReadService.pagingDoctorInfoDtoByPig(
-                    DoctorPig.builder().initBarnId(barnId).pigType(DoctorPig.PIG_TYPE.SOW.getKey()).build(), pageNo, size)));
+                    DoctorPig.builder().initBarnId(barnId).pigType(DoctorPig.PIG_TYPE.SOW.getKey()).farmId(barn.getFarmId()).build(), pageNo, size)));
             return barnDetail;
         }
 
@@ -146,7 +149,6 @@ public class DoctorBarns {
             barnDetail.setType(DoctorBarnDetail.Type.GROUP.getValue());
 
             DoctorGroupSearchDto searchDto = new DoctorGroupSearchDto();
-            //// TODO: 16/6/1 其他搜索条件
             searchDto.setCurrentBarnId(barnId);
             barnDetail.setGroupPaging(RespHelper.or500(doctorGroupReadService.pagingGroup(searchDto, pageNo, size)));
             return barnDetail;
