@@ -12,7 +12,7 @@ import java.util.Date;
  * Created by yaoqijun.
  * Date:2016-05-16
  * Email:yaoqj@terminus.io
- * Descirbe: 仔猪变动事件
+ * Descirbe: 仔猪变动事件 (拼窝事件发生后，产生对应的仔猪变动的事件)
  */
 @Builder
 @Data
@@ -24,7 +24,7 @@ public class DoctorPigletsChgDto implements Serializable{
 
     private Long pigId;
 
-    private Date changeDate;
+    private Date pigletsChangeDate;
 
     private Integer pigletsCount;   // 仔猪数量
 
@@ -32,9 +32,7 @@ public class DoctorPigletsChgDto implements Serializable{
 
     private Integer boarPigletsCount;
 
-    private Long changeType;
-
-    private Long changeReason;
+    private Long pigletsChangeReason;
 
     private Double weight;
 

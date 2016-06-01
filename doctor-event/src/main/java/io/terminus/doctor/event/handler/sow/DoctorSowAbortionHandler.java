@@ -9,29 +9,27 @@ import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
 import io.terminus.doctor.event.enums.SowStatus;
 import io.terminus.doctor.event.handler.DoctorAbstractEventFlowHandler;
 import io.terminus.doctor.event.model.DoctorPigTrack;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import java.util.Map;
 
 /**
  * Created by yaoqijun.
- * Date:2016-05-27
+ * Date:2016-06-01
  * Email:yaoqj@terminus.io
- * Descirbe:
+ * Descirbe: 母猪流产事件处理
  */
-@Component
-public class DoctorSowFarrowingHandler extends DoctorAbstractEventFlowHandler {
+public class DoctorSowAbortionHandler extends DoctorAbstractEventFlowHandler {
 
-    @Autowired
-    public DoctorSowFarrowingHandler(DoctorPigDao doctorPigDao, DoctorPigEventDao doctorPigEventDao, DoctorPigTrackDao doctorPigTrackDao, DoctorPigSnapshotDao doctorPigSnapshotDao, DoctorRevertLogDao doctorRevertLogDao) {
+    public DoctorSowAbortionHandler(DoctorPigDao doctorPigDao, DoctorPigEventDao doctorPigEventDao,
+                                    DoctorPigTrackDao doctorPigTrackDao, DoctorPigSnapshotDao doctorPigSnapshotDao,
+                                    DoctorRevertLogDao doctorRevertLogDao) {
         super(doctorPigDao, doctorPigEventDao, doctorPigTrackDao, doctorPigSnapshotDao, doctorRevertLogDao);
     }
 
     @Override
     public DoctorPigTrack updateDoctorPigTrackInfo(DoctorPigTrack doctorPigTrack, DoctorBasicInputInfoDto basic, Map<String, Object> extra) {
+        doctorPigTrack.setStatus(SowStatus.Abortion.getKey());
         doctorPigTrack.addAllExtraMap(extra);
-        doctorPigTrack.setStatus(SowStatus.FEED.getKey());  //母猪进入哺乳的状态
         return doctorPigTrack;
     }
 }

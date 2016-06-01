@@ -36,5 +36,5 @@ public class DoctorFostersDto implements Serializable{
 
     private Long fosterSowId;
 
-    private String remark;
+    private String fosterRemark;
 }
