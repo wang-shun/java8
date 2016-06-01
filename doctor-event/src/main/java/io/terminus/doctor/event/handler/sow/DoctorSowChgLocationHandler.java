@@ -8,11 +8,11 @@ import io.terminus.doctor.event.dao.DoctorPigSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorPigTrackDao;
 import io.terminus.doctor.event.dao.DoctorRevertLogDao;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
-import io.terminus.doctor.event.enums.SowStatus;
 import io.terminus.doctor.event.handler.DoctorAbstractEventFlowHandler;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.event.service.DoctorBarnReadService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
@@ -30,6 +30,7 @@ public class DoctorSowChgLocationHandler extends DoctorAbstractEventFlowHandler 
 
     private final DoctorBarnReadService doctorBarnReadService;
 
+    @Autowired
     public DoctorSowChgLocationHandler(DoctorPigDao doctorPigDao, DoctorPigEventDao doctorPigEventDao,
                                        DoctorPigTrackDao doctorPigTrackDao, DoctorPigSnapshotDao doctorPigSnapshotDao,
                                        DoctorRevertLogDao doctorRevertLogDao, DoctorBarnReadService doctorBarnReadService) {
@@ -54,7 +55,7 @@ public class DoctorSowChgLocationHandler extends DoctorAbstractEventFlowHandler 
         Integer fromBarnType = RespHelper.orServEx(doctorBarnReadService.findBarnById(fromBarnId)).getPigType();
         Integer toBarnType = RespHelper.orServEx(doctorBarnReadService.findBarnById(toBarnId)).getPigType();
         if(Objects.equals(fromBarnType, PigType.MATE_SOW.getValue()) || Objects.equals(toBarnType, PigType.PREG_SOW.getValue())){
-            return SowStatus.Hy.getKey();
+//            return SowStatus.Hy.getKey();
         }
         return 0;
     }
