@@ -13,7 +13,7 @@
         <result column="quantity" property="quantity"/>
         <result column="boar_qty" property="boarQty"/>
         <result column="sow_qty" property="sowQty"/>
-        <result column="birth_date" property="birthate"/>
+        <result column="birth_date" property="birthDate"/>
         <result column="avg_day_age" property="avgDayAge"/>
         <result column="weight" property="weight"/>
         <result column="avg_weight" property="avgWeight"/>

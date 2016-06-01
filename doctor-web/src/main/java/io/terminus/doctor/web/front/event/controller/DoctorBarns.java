@@ -1,11 +1,17 @@
 package io.terminus.doctor.web.front.event.controller;
 
+import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.utils.RespHelper;
+import io.terminus.doctor.event.dto.DoctorGroupSearchDto;
 import io.terminus.doctor.event.model.DoctorBarn;
+import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.service.DoctorBarnReadService;
 import io.terminus.doctor.event.service.DoctorBarnWriteService;
+import io.terminus.doctor.event.service.DoctorGroupReadService;
+import io.terminus.doctor.event.service.DoctorPigReadService;
 import io.terminus.doctor.user.model.DoctorFarm;
 import io.terminus.doctor.user.service.DoctorFarmReadService;
+import io.terminus.doctor.web.front.event.dto.DoctorBarnDetail;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -32,14 +38,20 @@ public class DoctorBarns {
     private final DoctorBarnReadService doctorBarnReadService;
     private final DoctorBarnWriteService doctorBarnWriteService;
     private final DoctorFarmReadService doctorFarmReadService;
+    private final DoctorPigReadService doctorPigReadService;
+    private final DoctorGroupReadService doctorGroupReadService;
 
     @Autowired
     public DoctorBarns(DoctorBarnReadService doctorBarnReadService,
                        DoctorBarnWriteService doctorBarnWriteService,
-                       DoctorFarmReadService doctorFarmReadService) {
+                       DoctorFarmReadService doctorFarmReadService,
+                       DoctorPigReadService doctorPigReadService,
+                       DoctorGroupReadService doctorGroupReadService) {
         this.doctorBarnReadService = doctorBarnReadService;
         this.doctorBarnWriteService = doctorBarnWriteService;
         this.doctorFarmReadService = doctorFarmReadService;
+        this.doctorPigReadService = doctorPigReadService;
+        this.doctorGroupReadService = doctorGroupReadService;
     }
 
     /**
@@ -72,13 +84,16 @@ public class DoctorBarns {
 
         // TODO: 权限中心校验权限
 
-        if (barn.getId() == null) {
-            Long farmId = barn.getFarmId();
-            DoctorFarm farm = RespHelper.or500(doctorFarmReadService.findFarmById(farmId));
+        DoctorFarm farm = RespHelper.or500(doctorFarmReadService.findFarmById(barn.getFarmId()));
+        barn.setOrgId(farm.getOrgId());
+        barn.setOrgName(farm.getOrgName());
+        barn.setFarmName(farm.getName());
 
+        if (barn.getId() == null) {
+            barn.setStatus(DoctorBarn.Status.NOUSE.getValue());     //初始猪舍状态: 未用
+            barn.setCanOpenGroup(DoctorBarn.CanOpenGroup.YES.getValue());  //初始是否可建群: 可建群
             RespHelper.or500(doctorBarnWriteService.createBarn(barn));
         } else {
-
             RespHelper.or500(doctorBarnWriteService.updateBarn(barn));
         }
         return Boolean.TRUE;
@@ -96,5 +111,48 @@ public class DoctorBarns {
         // TODO: 权限中心校验权限
 
         return RespHelper.or500(doctorBarnWriteService.updateBarnStatus(barnId, status));
+    }
+
+    /**
+     * 查询猪舍详情
+     * @param barnId 主键id
+     * @return 猪舍表
+     */
+    @RequestMapping(value = "/barn/detail", method = RequestMethod.GET)
+    public DoctorBarnDetail findBarnDetailByBarnId(@RequestParam("barnId") Long barnId,
+                                                   @RequestParam(value = "pageNo", required = false) Integer pageNo,
+                                                   @RequestParam(value = "size", required = false) Integer size) {
+
+        //// TODO: 16/6/1 其他搜索条件, 排序条件
+
+        DoctorBarnDetail barnDetail = new DoctorBarnDetail();
+        DoctorBarn barn = RespHelper.or500(doctorBarnReadService.findBarnById(barnId));
+
+        //公猪舍
+        if (PigType.isBoar(barn.getPigType())) {
+            barnDetail.setType(DoctorBarnDetail.Type.BOAR.getValue());
+            barnDetail.setPigPaging(RespHelper.or500(doctorPigReadService.pagingDoctorInfoDtoByPig(
+                    DoctorPig.builder().initBarnId(barnId).pigType(DoctorPig.PIG_TYPE.BOAR.getKey()).farmId(barn.getFarmId()).build(), pageNo, size)));
+            return barnDetail;
+        }
+
+        //母猪舍
+        if (PigType.isSow(barn.getPigType())) {
+            barnDetail.setType(DoctorBarnDetail.Type.SOW.getValue());
+            barnDetail.setPigPaging(RespHelper.or500(doctorPigReadService.pagingDoctorInfoDtoByPig(
+                    DoctorPig.builder().initBarnId(barnId).pigType(DoctorPig.PIG_TYPE.SOW.getKey()).farmId(barn.getFarmId()).build(), pageNo, size)));
+            return barnDetail;
+        }
+
+        //猪群舍
+        if (PigType.isGroup(barn.getPigType())) {
+            barnDetail.setType(DoctorBarnDetail.Type.GROUP.getValue());
+
+            DoctorGroupSearchDto searchDto = new DoctorGroupSearchDto();
+            searchDto.setCurrentBarnId(barnId);
+            barnDetail.setGroupPaging(RespHelper.or500(doctorGroupReadService.pagingGroup(searchDto, pageNo, size)));
+            return barnDetail;
+        }
+        return barnDetail;
     }
 }

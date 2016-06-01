@@ -39,7 +39,7 @@ import static java.util.Objects.isNull;
  * Created by yaoqijun.
  * Date:2016-05-27
  * Email:yaoqj@terminus.io
- * Descirbe:
+ * Descirbe: 流程图处理进厂事件
  */
 @Component
 @Slf4j
@@ -110,7 +110,7 @@ public class DoctorEntryFlowHandler extends HandlerAware {
             execution.setFlowData(JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(flowDataMap));
         }catch (Exception e){
             log.error("doctor abstract entry flow handle fail, cause:{}", Throwables.getStackTraceAsString(e));
-            // TODO illegal state
+            throw new RuntimeException("sow.entryFarm.error");
         }
     }
 
@@ -124,7 +124,7 @@ public class DoctorEntryFlowHandler extends HandlerAware {
 
         DoctorPigTrack doctorPigTrack = DoctorPigTrack.builder().farmId(basic.getFarmId())
                 .currentBarnId(dto.getBarnId()).currentBarnName(dto.getBarnName())
-                .currentParity(dto.getParity())
+                .currentParity(dto.getParity()).status(SowStatus.Entry.getKey())
                 .creatorId(basic.getStaffId()).creatorName(basic.getStaffName())
                 .build();
         if(Objects.equals(basic.getPigType(), DoctorPig.PIG_TYPE.SOW.getKey())){

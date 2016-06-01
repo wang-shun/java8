@@ -10,15 +10,7 @@ import io.terminus.doctor.web.core.component.ParanaHbsHelpers;
 import io.terminus.doctor.web.core.msg.email.CommonEmailServiceConfig;
 import io.terminus.doctor.web.core.msg.sms.LuoSiMaoSmsServiceConfig;
 import io.terminus.doctor.web.core.service.OtherSystemServiceConfig;
-import io.terminus.parana.web.msg.config.db.DbAppPushConfig;
-import io.terminus.parana.web.msg.config.db.DbEmailConfig;
-import io.terminus.parana.web.msg.config.db.DbNotifyConfig;
-import io.terminus.parana.web.msg.config.db.DbSmsConfig;
-import io.terminus.parana.web.msg.config.gatewaybuilder.SimpleMsgGatewayBuilderConfig;
-import io.terminus.parana.web.msg.config.test.TestAppPushWebServiceConfig;
-import io.terminus.parana.web.msg.config.test.TestEmailWebServiceConfig;
-import io.terminus.parana.web.msg.config.test.TestNotifyWebServiceConfig;
-import io.terminus.parana.web.msg.config.test.TestSmsWebServiceConfig;
+import io.terminus.parana.web.msg.config.MsgWebConfig;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -41,13 +33,9 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
         DoctorUserConfiguration.class,
         DoctorCoreWebConfiguration.class,
         OtherSystemServiceConfig.class,
-        SimpleMsgGatewayBuilderConfig.class,
+        MsgWebConfig.class,
         LuoSiMaoSmsServiceConfig.class,
         CommonEmailServiceConfig.class,
-        DbSmsConfig.class, TestSmsWebServiceConfig.class,
-        DbNotifyConfig.class,TestNotifyWebServiceConfig.class,
-        DbEmailConfig.class, TestEmailWebServiceConfig.class,
-        DbAppPushConfig.class, TestAppPushWebServiceConfig.class
 })
 @ComponentScan(value = {
         "io.terminus.doctor.web.core.component",

@@ -20,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Desc: 猪群卡片表读服务实现类
@@ -80,10 +81,14 @@ public class DoctorGroupReadServiceImpl implements DoctorGroupReadService {
     }
 
     @Override
-    public Response<Paging<DoctorGroup>> pagingGroup(DoctorGroupSearchDto groupSearchDto, Integer pageNo, Integer size) {
+    public Response<Paging<DoctorGroupDetail>> pagingGroup(DoctorGroupSearchDto groupSearchDto, Integer pageNo, Integer size) {
         try {
             PageInfo pageInfo = PageInfo.of(pageNo, size);
-            return Response.ok(doctorGroupDao.paging(pageInfo.getOffset(), pageInfo.getLimit(), groupSearchDto));
+            Paging<DoctorGroup> groupPaging = doctorGroupDao.paging(pageInfo.getOffset(), pageInfo.getLimit(), groupSearchDto);
+            List<DoctorGroupDetail> groupDetails = groupPaging.getData().stream()
+                    .map(group -> new DoctorGroupDetail(group, doctorGroupTrackDao.findByGroupId(group.getId())))
+                    .collect(Collectors.toList());
+            return Response.ok(new Paging<>(groupPaging.getTotal(), groupDetails));
         } catch (Exception e) {
             log.error("paging group by groupSearchDto failed, groupSearchDto:{}, cause:{}", groupSearchDto, Throwables.getStackTraceAsString(e));
             return Response.fail("group.find.fail");
