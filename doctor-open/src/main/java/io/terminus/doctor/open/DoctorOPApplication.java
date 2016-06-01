@@ -1,5 +1,6 @@
 package io.terminus.doctor.open;
 
+import io.terminus.doctor.common.banner.DoctorBanner;
 import io.terminus.parana.common.banner.ParanaBanner;
 import org.springframework.beans.factory.config.YamlPropertiesFactoryBean;
 import org.springframework.boot.SpringApplication;
@@ -15,7 +16,7 @@ public class DoctorOPApplication {
         YamlPropertiesFactoryBean yml = new YamlPropertiesFactoryBean();
         yml.setResources(new ClassPathResource("env/default.yml"));
         application.setDefaultProperties(yml.getObject());
-        application.setBanner(new ParanaBanner());
+        application.setBanner(new DoctorBanner());
         application.run(args);
     }
 }
