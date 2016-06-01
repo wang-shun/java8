@@ -6,6 +6,7 @@ import io.terminus.common.model.PageInfo;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.user.dao.DoctorServiceReviewDao;
+import io.terminus.doctor.user.dao.ServiceReviewTrackDao;
 import io.terminus.doctor.user.dto.DoctorServiceReviewDto;
 import io.terminus.doctor.user.model.DoctorServiceReview;
 import lombok.extern.slf4j.Slf4j;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Desc:
@@ -27,10 +29,13 @@ import java.util.Map;
 @Primary
 public class DoctorServiceReviewReadServiceImpl implements DoctorServiceReviewReadService{
     private final DoctorServiceReviewDao doctorServiceReviewDao;
+    private final ServiceReviewTrackDao serviceReviewTrackDao;
 
     @Autowired
-    public DoctorServiceReviewReadServiceImpl(DoctorServiceReviewDao doctorServiceReviewDao){
+    public DoctorServiceReviewReadServiceImpl(DoctorServiceReviewDao doctorServiceReviewDao,
+                                              ServiceReviewTrackDao serviceReviewTrackDao){
         this.doctorServiceReviewDao = doctorServiceReviewDao;
+        this.serviceReviewTrackDao = serviceReviewTrackDao;
     }
 
     @Override
@@ -78,12 +83,28 @@ public class DoctorServiceReviewReadServiceImpl implements DoctorServiceReviewRe
             for (DoctorServiceReview review : doctorServiceReviewDao.findByUserId(userId)){
                 if (DoctorServiceReview.Type.PIG_DOCTOR.getValue() == review.getType()) {
                     dto.setPigDoctor(review);
+                    if (Objects.equals(review.getStatus(), DoctorServiceReview.Status.FROZEN.getValue())
+                            || Objects.equals(review.getStatus(), DoctorServiceReview.Status.NOT_OK.getValue())) {
+                        dto.setPigDoctorReason(serviceReviewTrackDao.findLastByUserIdAndType(userId, DoctorServiceReview.Type.PIG_DOCTOR).getReason());
+                    }
                 } else if (DoctorServiceReview.Type.PIGMALL.getValue() == review.getType()) {
                     dto.setPigmall(review);
+                    if (Objects.equals(review.getStatus(), DoctorServiceReview.Status.FROZEN.getValue())
+                            || Objects.equals(review.getStatus(), DoctorServiceReview.Status.NOT_OK.getValue())) {
+                        dto.setPigmallReason(serviceReviewTrackDao.findLastByUserIdAndType(userId, DoctorServiceReview.Type.PIGMALL).getReason());
+                    }
                 } else if (DoctorServiceReview.Type.NEVEREST.getValue() == review.getType()) {
                     dto.setNeverest(review);
+                    if (Objects.equals(review.getStatus(), DoctorServiceReview.Status.FROZEN.getValue())
+                            || Objects.equals(review.getStatus(), DoctorServiceReview.Status.NOT_OK.getValue())) {
+                        dto.setNeverestReason(serviceReviewTrackDao.findLastByUserIdAndType(userId, DoctorServiceReview.Type.NEVEREST).getReason());
+                    }
                 } else if (DoctorServiceReview.Type.PIG_TRADE.getValue() == review.getType()) {
                     dto.setPigTrade(review);
+                    if (Objects.equals(review.getStatus(), DoctorServiceReview.Status.FROZEN.getValue())
+                            || Objects.equals(review.getStatus(), DoctorServiceReview.Status.NOT_OK.getValue())) {
+                        dto.setPigTradeReason(serviceReviewTrackDao.findLastByUserIdAndType(userId, DoctorServiceReview.Type.PIG_TRADE).getReason());
+                    }
                 } else {
                     log.error("doctor service review type error, type = {}", review.getType());
                     return Response.fail("doctor.service.review.type.error");

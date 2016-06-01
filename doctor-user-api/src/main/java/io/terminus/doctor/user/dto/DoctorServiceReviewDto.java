@@ -24,4 +24,10 @@ public class DoctorServiceReviewDto implements Serializable {
     private DoctorServiceReview neverest;   //大数据
 
     private DoctorServiceReview pigTrade;   //生猪交易
+
+    //下面4个是服务被冻结或审核不通过的原因
+    private String pigDoctorReason;
+    private String pigmallReason;
+    private String neverestReason;
+    private String pigTradeReason;
 }
