@@ -13,6 +13,7 @@ import io.terminus.lib.file.ImageServer;
 import io.terminus.lib.file.aliyun.AliyunFileServer;
 import io.terminus.lib.file.aliyun.AliyunImageServer;
 import io.terminus.pampas.openplatform.annotations.EnableOpenPlatform;
+import io.terminus.parana.web.msg.config.MsgWebConfig;
 import io.terminus.parana.web.msg.config.db.DbAppPushConfig;
 import io.terminus.parana.web.msg.config.db.DbEmailConfig;
 import io.terminus.parana.web.msg.config.db.DbNotifyConfig;
@@ -40,13 +41,9 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 @ComponentScan({"io.terminus.doctor.open"})
 @EnableAutoConfiguration
 @Import({
-        SimpleMsgGatewayBuilderConfig.class,
+        MsgWebConfig.class,
         LuoSiMaoSmsServiceConfig.class,
         CommonEmailServiceConfig.class,
-        DbSmsConfig.class, TestSmsWebServiceConfig.class,
-        DbNotifyConfig.class,TestNotifyWebServiceConfig.class,
-        DbEmailConfig.class, TestEmailWebServiceConfig.class,
-        DbAppPushConfig.class, TestAppPushWebServiceConfig.class
 })
 public class DoctorOPConfiguration {
     @Bean

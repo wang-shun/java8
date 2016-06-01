@@ -6,12 +6,15 @@ import io.terminus.doctor.event.dao.DoctorPigSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorPigTrackDao;
 import io.terminus.doctor.event.dao.DoctorRevertLogDao;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
+import io.terminus.doctor.event.enums.PregCheckResult;
+import io.terminus.doctor.event.enums.SowStatus;
 import io.terminus.doctor.event.handler.DoctorAbstractEventFlowHandler;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Created by yaoqijun.
@@ -30,6 +33,16 @@ public class DoctorSowPregCheckHandler extends DoctorAbstractEventFlowHandler{
     @Override
     public DoctorPigTrack updateDoctorPigTrackInfo(DoctorPigTrack doctorPigTrack, DoctorBasicInputInfoDto basic, Map<String, Object> extra) {
         doctorPigTrack.addAllExtraMap(extra);
+        Integer pregCheckResult = (Integer) extra.get("checkResult");
+        if(Objects.equals(pregCheckResult, PregCheckResult.UNSURE.getKey())){
+            // 不修改状态
+        }else if(Objects.equals(pregCheckResult, PregCheckResult.YANG.getKey())){
+            // 阳性
+            doctorPigTrack.setStatus(SowStatus.Pregnancy.getKey());
+        }else {
+            // 其余默认 没有怀孕
+            doctorPigTrack.setStatus(SowStatus.KongHuai.getKey());
+        }
         return doctorPigTrack;
     }
 }

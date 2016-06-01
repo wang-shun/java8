@@ -31,7 +31,8 @@ import static io.terminus.common.utils.Arguments.isEmpty;
         "get.carousel.figure",  //轮播图接口
         "user.forget.password", //忘记密码
         "user.register",  //用户注册
-        "get.mobile.code"
+        "get.mobile.code",
+        "user.test.push"
 })
 public class SessionHandle implements ParamPreHandle {
 

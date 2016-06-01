@@ -11,9 +11,11 @@ import java.util.Objects;
  * Descirbe:
  */
 public enum PregCheckResult {
+    UNSURE(0, "rsjcbqd","妊娠检查不确定"),
     YANG(1, "rsjcyx", "妊娠检查阳性"),
-    LIUCHAN(2, "lc", "流产"),
-    FANQING(3, "fq", "返情");
+    YING(2, "rsjcyx", "妊娠检查阴性"),
+    LIUCHAN(3, "lc", "流产"),
+    FANQING(4, "fq", "返情");
 
     @Getter
     private Integer key;

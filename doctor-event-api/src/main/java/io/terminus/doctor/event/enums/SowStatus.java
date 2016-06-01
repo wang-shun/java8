@@ -12,18 +12,16 @@ import java.util.Objects;
  */
 public enum SowStatus {
 
-    Entry (1,"已进场"),
+    Entry (1,"待配种"),
     Removal(2,"已离场"),
     Mate(3,"已配种"),
     Pregnancy(4,"妊娠检查阳性"),
-    Hy(5,"怀孕"),
-    NoPregnancy(6,"妊娠检查阴性"),
-    NotSurePregnancy(7,"妊娠检查无法确定"),
-    Farrow(8,"哺乳"),
+    KongHuai(5,"空怀"),
+    Abortion(6,"流产"),
+    Farrow(7,"等待分娩"),
+    FEED(8, "哺乳状态"),
     Wean(9,"断奶"),
-    KongHuai(10,"空怀"),
-    FanQing(11,"返情"),
-    Abortion(12,"流产");
+    FanQing(10,"返情");
 
     @Getter
     private Integer key;

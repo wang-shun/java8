@@ -43,4 +43,21 @@ public enum PigType {
         }
         return null;
     }
+
+    public static boolean isBoar(int value) {
+        return RESERVE_BOAR.getValue() == value || BOAR.getValue() == value;
+    }
+
+    public static boolean isSow(int value) {
+        return RESERVE_SOW.getValue() == value ||
+                MATE_SOW.getValue() == value ||
+                PREG_SOW.getValue() == value ||
+                DELIVER_SOW.getValue() == value;
+    }
+
+    public static boolean isGroup(int value) {
+        return FARROW_PIGLET.getValue() == value ||
+                NURSERY_PIGLET.getValue() == value ||
+                FATTEN_PIG.getValue() == value;
+    }
 }

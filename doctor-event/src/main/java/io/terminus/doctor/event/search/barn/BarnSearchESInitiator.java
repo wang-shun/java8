@@ -32,6 +32,12 @@ public class BarnSearchESInitiator {
             log.error("[barn search initiator] -> elasticsearch is not available ");
             return;
         }
+
+        if (barnSearchProperties.getIndexName() == null || barnSearchProperties.getIndexType() == null) {
+            log.error("[barn search initiator] -> barnSearchProperties indexName or indexType is null");
+            return;
+        }
+
         // 1. 建立索引
         esClient.createIndexIfNotExists(barnSearchProperties.getIndexName());
 

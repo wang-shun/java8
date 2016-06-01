@@ -32,6 +32,10 @@ public class PigSearchESInitiator {
             log.error("[pig search initiator] -> elasticsearch is not available ");
             return;
         }
+        if (pigSearchProperties.getIndexName() == null || pigSearchProperties.getIndexType() == null) {
+            log.error("[pig search initiator] -> pigSearchProperties indexName or indexType is null");
+            return;
+        }
         // 1. 建立索引
         esClient.createIndexIfNotExists(pigSearchProperties.getIndexName());
 
