@@ -1,6 +1,8 @@
 package io.terminus.doctor.schedule.msg;
 
 import com.google.common.base.Throwables;
+import com.google.common.collect.Lists;
+import io.terminus.doctor.msg.dto.SubUser;
 import io.terminus.doctor.msg.service.DoctorMessageJob;
 import io.terminus.zookeeper.leader.HostLeader;
 import lombok.extern.slf4j.Slf4j;
@@ -9,6 +11,8 @@ import org.springframework.beans.factory.annotation.Configurable;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 /**
  * Desc:
@@ -39,11 +43,23 @@ public class MessageJob {
                 return;
             }
             log.info("message produce fired");
-            doctorMessageJob.produce();
+            // TODO 测试
+            doctorMessageJob.produce(create());
             log.info("message produce end");
         } catch (Exception e) {
             log.error("message produce failed", Throwables.getStackTraceAsString(e));
         }
     }
 
+    public List<SubUser> create() {
+        List<SubUser> users = Lists.newArrayList();
+        for (long i = 1314; i < 1320; i++) {
+            users.add(SubUser.builder()
+                    .userId(i)
+                    .roleId(i%2 + 1)
+                    .parentUserId(1L)
+                    .build());
+        }
+        return users;
+    }
 }

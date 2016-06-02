@@ -23,8 +23,8 @@ public class DoctorMessageRuleTemplateDao extends MyBatisDao<DoctorMessageRuleTe
      *          @see io.terminus.doctor.msg.enums.Category
      * @return
      */
-    public DoctorMessageRuleTemplate findByCategory(Integer category) {
-        return getSqlSession().selectOne(sqlId("findByCategory"), category);
+    public List<DoctorMessageRuleTemplate> findByCategory(Integer category) {
+        return getSqlSession().selectList(sqlId("findByCategory"), category);
     }
 
     /**

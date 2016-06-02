@@ -17,6 +17,11 @@ public class RuleValue implements Serializable {
     private static final long serialVersionUID = -8931008060015900072L;
 
     /**
+     * 规则的id值
+     */
+    private Integer id;
+
+    /**
      * 类型
      * 1. 到达某个值, value起作用
      * 2. 到达值范围, leftValue和rightValue起作用
@@ -32,7 +37,7 @@ public class RuleValue implements Serializable {
     private String describe;
 
     /**
-     * 值判断
+     * 值判断,  **** 值若为时间则以小时为单位
      */
     private Double value;
     private Double leftValue;

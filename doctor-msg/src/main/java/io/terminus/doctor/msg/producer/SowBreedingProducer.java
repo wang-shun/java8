@@ -4,6 +4,7 @@ import io.terminus.doctor.msg.dao.DoctorMessageDao;
 import io.terminus.doctor.msg.dao.DoctorMessageRuleDao;
 import io.terminus.doctor.msg.dao.DoctorMessageRuleRoleDao;
 import io.terminus.doctor.msg.dao.DoctorMessageRuleTemplateDao;
+import io.terminus.doctor.msg.dto.SubUser;
 import io.terminus.doctor.msg.enums.Category;
 import io.terminus.doctor.msg.model.DoctorMessage;
 import io.terminus.doctor.msg.model.DoctorMessageRuleRole;
@@ -34,7 +35,7 @@ public class SowBreedingProducer extends AbstractProducer {
     }
 
     @Override
-    protected List<DoctorMessage> message(DoctorMessageRuleRole ruleRole) {
+    protected List<DoctorMessage> message(DoctorMessageRuleRole ruleRole, List<SubUser> subUsers) {
 
         // TODO 处理母猪待配种消息
 

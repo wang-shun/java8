@@ -2,6 +2,7 @@ package io.terminus.doctor.msg.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Builder;
 
@@ -68,7 +69,7 @@ public class DoctorMessage implements Serializable {
     private String data;
 
     /**
-     * 消息发送渠道. 0->站内信, 1->短信, 2->邮箱
+     * 消息发送渠道. 0->站内信, 1->短信, 2->邮箱, 3->app推送
      */
     private Integer channel;
 
@@ -106,4 +107,26 @@ public class DoctorMessage implements Serializable {
      * 更新时间
      */
     private Date updatedAt;
+
+    /**
+     * 状态枚举值
+     */
+    public enum Status {
+        NORMAL(1, "未发送"),
+        SENDED(2, "已发送"),
+        READED(3, "已读"),
+        DELETE(-1, "删除"),
+        FAILED(-2, "发送失败");
+
+        @Getter
+        private Integer value;
+
+        @Getter
+        private String describe;
+
+        Status(Integer value, String describe) {
+            this.value = value;
+            this.describe = describe;
+        }
+    }
 }

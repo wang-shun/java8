@@ -1,6 +1,8 @@
 package io.terminus.doctor.msg.service;
 
 import com.google.common.base.Throwables;
+import com.google.common.collect.Maps;
+import io.terminus.doctor.msg.dto.SubUser;
 import io.terminus.doctor.msg.producer.IProducer;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,6 +11,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.PostConstruct;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -24,22 +27,23 @@ public class DoctorMessageJobImpl implements DoctorMessageJob {
     @Autowired
     private ApplicationContext applicationContext;
 
+    private Map<String, IProducer> producerMap;
+
     @PostConstruct
     public void init() {
-        Map<String, IProducer> producerMap = applicationContext.getBeansOfType(IProducer.class);
-        System.out.println(producerMap);
+        producerMap = applicationContext.getBeansOfType(IProducer.class);
+        if (producerMap == null) {
+            producerMap = Maps.newHashMap();
+        }
     }
 
     @Override
     @Transactional
-    public void produce() {
+    public void produce(List<SubUser> subUsers) {
         try{
-            Map<String, IProducer> producerMap = applicationContext.getBeansOfType(IProducer.class);
-            if (producerMap != null) {
-                producerMap.forEach((beanName, producer) -> producer.produce());
-            }
+            producerMap.forEach((beanName, producer) -> producer.produce(subUsers));
         } catch (Exception e) {
-            log.error("[produce message] -> message produce error", Throwables.getStackTraceAsString(e));
+            log.error("[produce message] -> message produce error, cause by {}", Throwables.getStackTraceAsString(e));
         }
     }
 }

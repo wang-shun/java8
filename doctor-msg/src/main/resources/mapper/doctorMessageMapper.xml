@@ -38,7 +38,7 @@
     </sql>
 
     <sql id="vals">
-        #{farmId}, #{ruleId}, #{roleId}, #{userId}, #{templateId}, #{type}, #{category}, #{data}, #{channel}, #{url}, #{status}, now(), #{failedBy}, #{createdBy}, now(), now()
+        #{farmId}, #{ruleId}, #{roleId}, #{userId}, #{templateId}, #{type}, #{category}, #{data}, #{channel}, #{url}, #{status}, #{sendedAt}, #{failedBy}, #{createdBy}, now(), now()
     </sql>
 
     <insert id="create" parameterType="DoctorMessage" keyProperty="id" useGeneratedKeys="true">
@@ -55,7 +55,7 @@
         (<include refid="cols_exclude_id" />)
         VALUES
         <foreach collection="list" item="i" separator=",">
-            (#{i.farmId}, #{i.ruleId}, #{i.roleId}, #{i.userId}, #{i.templateId}, #{i.type}, #{i.category}, #{i.data}, #{i.channel}, #{i.status}, now(), #{i.failedBy}, #{createdBy}, now(), now())
+            (#{i.farmId}, #{i.ruleId}, #{i.roleId}, #{i.userId}, #{i.templateId}, #{i.type}, #{i.category}, #{i.data}, #{i.channel}, #{i.url} ,#{i.status}, #{i.sendedAt}, #{i.failedBy}, #{i.createdBy}, now(), now())
         </foreach>
     </insert>
 
@@ -80,9 +80,9 @@
             <if test="channel != null">channel = #{channel},</if>
             <if test="url != null">url = #{url},</if>
             <if test="status != null">status = #{status},</if>
+            <if test="sendedAt != null">sended_at = #{sendedAt},</if>
             <if test="failedBy != null">failed_by = #{failedBy},</if>
             <if test="createdBy != null">created_by = #{createdBy},</if>
-            sended_at=now(),
             updated_at=now()
         </set>
         WHERE id = #{id}

@@ -125,4 +125,24 @@ public class DoctorMessageRuleTemplate implements Serializable {
             this.describe = describe;
         }
     }
+
+    /**
+     * 类型枚举值
+     */
+    public enum Type {
+        SYSTEM(0, "系统消息"),
+        WARNING(1, "预警消息"),
+        ERROR(2, "警报消息");
+
+        @Getter
+        private Integer value;
+
+        @Getter
+        private String describe;
+
+        Type(Integer value, String describe) {
+            this.value = value;
+            this.describe = describe;
+        }
+    }
 }

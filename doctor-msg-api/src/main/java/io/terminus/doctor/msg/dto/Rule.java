@@ -34,6 +34,11 @@ public class Rule implements Serializable {
      */
     private String channels;
 
+    /**
+     * app回调url地址
+     */
+    private String url;
+
 
     /**
      * 发送渠道枚举值

@@ -12,6 +12,8 @@ import java.util.Objects;
  */
 public enum Category {
 
+    SYSTEM(0, "一般系统消息"),
+
     SOW_BREEDING(1,"待配种母猪提示");
 
     @Getter
