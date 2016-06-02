@@ -22,6 +22,9 @@ public class BaseGroupInput implements Serializable {
     @NotEmpty(message = "date.not.null")
     private String eventAt;
 
+    /**
+     * 备注
+     */
     private String remark;
 
     /**
