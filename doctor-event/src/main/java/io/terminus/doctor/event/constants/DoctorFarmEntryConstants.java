@@ -6,8 +6,14 @@ package io.terminus.doctor.event.constants;
  * Email:yaoqj@terminus.io
  * Descirbe:
  */
-public class DoctorFarmEntrySowConstants {
+public class DoctorFarmEntryConstants {
 
+    // boar
+    public static final String BOAR_TYPE_ID = "boarTypeId";
+
+    public static final String BOAR_TYPE_NAME = "boarTypeName";
+
+    // sow
     public static final String EAR_CODE = "earCode";
 
     public static final String FIRST_PARITY = "firstParity";

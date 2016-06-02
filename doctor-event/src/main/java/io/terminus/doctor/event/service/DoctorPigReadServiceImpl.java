@@ -78,7 +78,7 @@ public class DoctorPigReadServiceImpl implements DoctorPigReadService{
         try{
             DoctorPig doctorPig = doctorPigDao.findById(pigId);
             checkState(!isNull(doctorPig), "query.doctorPigId.fail");
-
+            
             DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(pigId);
 
             List<DoctorPigEvent> doctorPigEvents = RespHelper.orServEx(
@@ -139,6 +139,21 @@ public class DoctorPigReadServiceImpl implements DoctorPigReadService{
         }catch (Exception e){
             log.error("paging doctor info dto by track pig fail, cause:{}", Throwables.getStackTraceAsString(e));
             return Response.fail("paging.doctorInfoTrack.fail");
+        }
+    }
+
+    @Override
+    public Response<DoctorPigInfoDto> queryDoctorInfoDtoById(@NotNull(message = "input.pigId.empty") Long pigId) {
+        try{
+            DoctorPig doctorPig = doctorPigDao.findById(pigId);
+            checkState(!isNull(doctorPig), "doctorPig.findById.empty");
+
+            DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(pigId);
+
+            return Response.ok(DoctorPigInfoDto.buildDoctorPigInfoDto(doctorPig, doctorPigTrack));
+        }catch (Exception e){
+            log.error(" fail, cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("query.doctorInfoDto.fail");
         }
     }
 

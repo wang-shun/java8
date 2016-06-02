@@ -21,25 +21,23 @@ public class DoctorRemovalDto implements Serializable{
 
     private static final long serialVersionUID = -5166658905616894350L;
 
-    private Long pigId;
+    private Long chgTypeId; // 变动类型Id basic 数据信息
 
-    private Long chgTypeId;
+    private Long chgTypeName;   // 变动名称
 
-    private Long chgTypeName;
+    private Long chgReasonId;   // 变动原因 Id
 
-    private Long chgReasonId;
-
-    private Long chgReasonName;
+    private Long chgReasonName; // 变动原因
 
     private Long toBarnId;  // 转入事件信息
 
-    private Double weight;
+    private Double weight;  // 重量
 
-    private Double price;
+    private Double price;  // 价格
 
-    private Double sum;
+    private Double sum; // 总量
 
-    private Long customerId;
+    private Long customerId;    // 客户Id
 
-    private String remark;
+    private String remark;  //注解
 }

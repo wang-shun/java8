@@ -22,25 +22,23 @@ public class DoctorPigletsChgDto implements Serializable{
 
     private static final long serialVersionUID = 2032098840987088160L;
 
-    private Long pigId;
-
-    private Date pigletsChangeDate;
+    private Date pigletsChangeDate; // 仔猪变动日期
 
     private Integer pigletsCount;   // 仔猪数量
 
-    private Integer sowPigletsCount;
+    private Integer sowPigletsCount;    // 仔母猪数量
 
-    private Integer boarPigletsCount;
+    private Integer boarPigletsCount;   // 崽公猪数量
 
-    private Long pigletsChangeReason;
+    private Long pigletsChangeReason;   // 仔猪变动原因
 
-    private Double weight;
+    private Double pigletsWeight;  // 变动重量 (非必填)
 
-    private Double price;
+    private Double pigletsPrice;   // 变动价格 （非必填）
 
-    private Double sum;
+    private Double pigletsSum; //  总价（非必填）
 
-    private Long customerId;    //客户Id
+    private Long pigletsCustomerId;    //客户Id （非必填）
 
-    private String mark;
+    private String pigletsMark;  //标识(非必填)
 }

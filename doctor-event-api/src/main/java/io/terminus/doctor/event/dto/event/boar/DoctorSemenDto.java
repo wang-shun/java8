@@ -22,25 +22,23 @@ public class DoctorSemenDto implements Serializable{
 
     private static final long serialVersionUID = 3227572350710428642L;
 
-    private Long pigId;
+    private Date semenDate;     //采精日期
 
-    private Date semenDate;
+    private Double semenWeight; //采精重量
 
-    private Double weight;
+    private Double dilutionRatio;   // 稀释倍数
 
-    private Double dilutionRatio;
+    private Double dilutionWeight;  //稀释后重量
 
-    private Double dilutionWeight;
+    private Double semenDensity;    //精液密度
 
-    private Double density;
+    private Double semenActive; //精液活力
 
-    private Double active;
+    private Double semenPh; //精液PH
 
-    private Double ph;
+    private Double semenTotal;  //精液总量
 
-    private Double total;
+    private Double semenJxRatio;    //精液畸形率
 
-    private Double jxRatio;
-
-    private String remark;
+    private String semenRemark; //精液备注（非必填）
 }

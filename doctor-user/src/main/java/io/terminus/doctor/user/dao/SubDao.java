@@ -5,6 +5,8 @@ import io.terminus.common.mysql.dao.MyBatisDao;
 import io.terminus.doctor.user.model.Sub;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 /**
  * @author houly
  */
@@ -19,4 +21,11 @@ public class SubDao extends MyBatisDao<Sub> {
         return getSqlSession().selectOne(sqlId("findByParentUserIdAndUserId"), ImmutableMap.of("parentUserId", parentUserId, "userId", userId));
     }
 
+    /**
+     * 获取所有审核通过的子账号
+     * @return
+     */
+    public List<Sub> findAllActiveSubs() {
+        return getSqlSession().selectList(sqlId("findAllActiveSubs"));
+    }
 }
