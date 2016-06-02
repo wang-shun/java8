@@ -22,19 +22,17 @@ public class DoctorFostersDto implements Serializable{
 
     private static final long serialVersionUID = 2998287596879859648L;
 
-    private Long pigId;
+    private Date fostersDate;   // 拼窝日期
 
-    private Date fostersDate;
+    private Integer fostersCount;   //  拼窝数量
 
-    private Integer fostersCount;
+    private Integer sowFostersCount;    // 拼窝母猪数量
 
-    private Integer sowFostersCount;
-
-    private Integer boarFostersCount;
+    private Integer boarFostersCount;   // 拼窝公猪数量
 
     private Long fosterReason;  //寄养原因
 
-    private Long fosterSowId;
+    private Long fosterSowId;   // 拼窝母猪Id
 
-    private String fosterRemark;
+    private String fosterRemark;    // 拼窝标识
 }

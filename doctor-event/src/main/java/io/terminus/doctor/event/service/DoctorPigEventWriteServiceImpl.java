@@ -12,9 +12,9 @@ import io.terminus.doctor.event.dao.DoctorPigTrackDao;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
 import io.terminus.doctor.event.dto.DoctorPigInfoDto;
 import io.terminus.doctor.event.dto.event.boar.DoctorSemenDto;
+import io.terminus.doctor.event.dto.event.sow.DoctorAbortionDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorFarrowingDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorFostersDto;
-import io.terminus.doctor.event.dto.event.sow.DoctorLitterWeightDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorMatingDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorPartWeanDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorPigletsChgDto;
@@ -209,6 +209,19 @@ public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteServic
     }
 
     @Override
+    public Response<Long> abortionEvent(DoctorAbortionDto doctorAbortionDto, DoctorBasicInputInfoDto doctorBasicInputInfoDto) {
+        try{
+            Map<String,Object> dto = Maps.newHashMap();
+            BeanMapper.copy(doctorAbortionDto, dto);
+            Map<String,Object> result = doctorPigEventManager.createSowPigEvent(doctorBasicInputInfoDto, dto);
+            return Response.ok(Params.getWithConvert(result, "eventId", a->Long.valueOf(a.toString())));
+        }catch (Exception e){
+            log.error("abortion create event fail, cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("create.abortionEvent.fail");
+        }
+    }
+
+    @Override
     public Response<Long> chgFarmEvent(DoctorChgFarmDto doctorChgFarmDto, DoctorBasicInputInfoDto doctorBasicInputInfoDto) {
         try{
             Map<String,Object> dto = Maps.newHashMap();
@@ -319,21 +332,6 @@ public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteServic
         try{
             Map<String,Object> dto = Maps.newHashMap();
             BeanMapper.copy(doctorFostersDto, dto);
-
-            Map<String,Object> result = doctorPigEventManager.createSowPigEvent(doctorBasicInputInfoDto, dto);
-            publishEvent(result);
-            return Response.ok(Params.getWithConvert(result,"eventId",a->Long.valueOf(a.toString())));
-        }catch (Exception e){
-            log.error("vaccination event create fail, cause:{}", Throwables.getStackTraceAsString(e));
-            return Response.fail("create.vaccination.fail");
-        }
-    }
-
-    @Override
-    public Response<Long> sowLitterWeightEvent(DoctorLitterWeightDto doctorLitterWeightDto, DoctorBasicInputInfoDto doctorBasicInputInfoDto) {
-        try{
-            Map<String,Object> dto = Maps.newHashMap();
-            BeanMapper.copy(doctorLitterWeightDto, dto);
 
             Map<String,Object> result = doctorPigEventManager.createSowPigEvent(doctorBasicInputInfoDto, dto);
             publishEvent(result);

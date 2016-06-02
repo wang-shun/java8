@@ -49,9 +49,9 @@ public class DoctorPig implements Serializable{
 
     private Integer pigType;
 
-    private Long pigFatherId;
+    private String pigFatherCode;
 
-    private Long pigMotherId;
+    private String pigMotherCode;
 
     private Integer source;
 

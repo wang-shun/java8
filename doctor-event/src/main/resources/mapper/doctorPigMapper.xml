@@ -17,8 +17,8 @@
         <result column="out_id" property="outId"/>
         <result column="pig_code" property="pigCode"/>
         <result column="pig_type" property="pigType"/>
-        <result column="pig_father_id" property="pigFatherId"/>
-        <result column="pig_mother_id" property="pigMotherId"/>
+        <result column="pig_father_code" property="pigFatherCode"/>
+        <result column="pig_mother_code" property="pigMotherCode"/>
         <result column="source" property="source"/>
         <result column="birth_date" property="birthDate"/>
         <result column="birth_weight" property="birthWeight"/>
@@ -50,11 +50,11 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        `org_id`,`org_name`,`farm_id`,`farm_name`,`out_id`,`pig_code`,`pig_type`,`pig_father_id`,`pig_mother_id`,`source`,`birth_date`,`birth_weight`,`in_farm_date`,`in_farm_day_age`,`init_barn_id`,`init_barn_name`,`breed_id`,`breed_name`,`genetic_id`,`genetic_name`,`extra`,`remark`,`creator_id`,`creator_name`,`updator_id`,`updator_name`,`created_at`,`updated_at`
+        `org_id`,`org_name`,`farm_id`,`farm_name`,`out_id`,`pig_code`,`pig_type`,`pig_father_code`,`pig_mother_code`,`source`,`birth_date`,`birth_weight`,`in_farm_date`,`in_farm_day_age`,`init_barn_id`,`init_barn_name`,`breed_id`,`breed_name`,`genetic_id`,`genetic_name`,`extra`,`remark`,`creator_id`,`creator_name`,`updator_id`,`updator_name`,`created_at`,`updated_at`
     </sql>
 
     <sql id="vals">
-        #{orgId},#{orgName},#{farmId},#{farmName},#{outId},#{pigCode},#{pigType},#{pigFatherId},#{pigMotherId},#{source},#{birthDate},#{birthWeight},#{inFarmDate},#{inFarmDayAge},#{initBarnId},#{initBarnName},#{breedId},#{breedName},#{geneticId},#{geneticName},#{extra},#{remark},#{creatorId},#{creatorName},#{updatorId},#{updatorName},now(),now()
+        #{orgId},#{orgName},#{farmId},#{farmName},#{outId},#{pigCode},#{pigType},#{pigFatherCode},#{pigMotherCode},#{source},#{birthDate},#{birthWeight},#{inFarmDate},#{inFarmDayAge},#{initBarnId},#{initBarnName},#{breedId},#{breedName},#{geneticId},#{geneticName},#{extra},#{remark},#{creatorId},#{creatorName},#{updatorId},#{updatorName},now(),now()
     </sql>
 
     <sql id="criteria">
@@ -63,8 +63,8 @@
         <if test="outId != null" > AND `out_id` = #{outId}</if>
         <if test="pigCode != null" > AND `pig_code` = #{pigCode}</if>
         <if test="pigType != null" > AND `pig_type` = #{pigType}</if>
-        <if test="pigFatherId != null" > AND `pig_father_id` = #{pigFatherId}</if>
-        <if test="pigMotherId != null" > AND `pig_mother_id` = #{pigMotherId}</if>
+        <if test="pigFatherCode != null" > AND `pig_father_code` = #{pigFatherCode}</if>
+        <if test="pigMotherCode != null" > AND `pig_mother_code` = #{pigMotherCode}</if>
         <if test="initBarnId != null" > AND `init_barn_id` = #{initBarnId}</if>
         <if test="breedId != null" > AND `breed_id` = #{breedId}</if>
         <if test="geneticId != null" > AND `genetic_id` = #{geneticId}</if>
@@ -81,7 +81,7 @@
         ( <include refid="cols_exclude_id"/> )
         VALUES
         <foreach collection="list" item="i" separator=",">
-        ( #{i.orgId},#{i.orgName},#{i.farmId},#{i.farmName},#{i.outId},#{i.pigCode},#{i.pigType},#{i.pigFatherId},#{i.pigMotherId},#{i.source},#{i.birthDate},#{i.birthWeight},#{i.inFarmDate},#{i.inFarmDayAge},#{i.initBarnId},#{i.initBarnName},#{i.breedId},#{i.breedName},#{i.geneticId},#{i.geneticName},#{i.extra},#{i.remark},#{i.creatorId},#{i.creatorName},#{i.updatorId},#{i.updatorName},now(),now()
+        ( #{i.orgId},#{i.orgName},#{i.farmId},#{i.farmName},#{i.outId},#{i.pigCode},#{i.pigType},#{i.pigFatherCode},#{i.pigMotherCode},#{i.source},#{i.birthDate},#{i.birthWeight},#{i.inFarmDate},#{i.inFarmDayAge},#{i.initBarnId},#{i.initBarnName},#{i.breedId},#{i.breedName},#{i.geneticId},#{i.geneticName},#{i.extra},#{i.remark},#{i.creatorId},#{i.creatorName},#{i.updatorId},#{i.updatorName},now(),now()
  )
         </foreach>
     </insert>
@@ -138,8 +138,8 @@
             <if test="outId != null" > ,`out_id` = #{outId}</if>
             <if test="pigCode != null" > ,`pig_code` = #{pigCode}</if>
             <if test="pigType != null" > ,`pig_type` = #{pigType}</if>
-            <if test="pigFatherId != null" > ,`pig_father_id` = #{pigFatherId}</if>
-            <if test="pigMotherId != null" > ,`pig_mother_id` = #{pigMotherId}</if>
+            <if test="pigFatherCode != null" > ,`pig_father_code` = #{pigFatherCode}</if>
+            <if test="pigMotherCode != null" > ,`pig_mother_code` = #{pigMotherCode}</if>
             <if test="source != null" > ,`source` = #{source}</if>
             <if test="birthDate != null" > ,`birth_date` = #{birthDate}</if>
             <if test="birthWeight != null" > ,`birth_weight` = #{birthWeight}</if>

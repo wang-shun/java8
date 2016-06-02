@@ -136,7 +136,11 @@ public class DoctorPigEventManager {
 
         // execute
         Executor executor = flowProcessService.getExecutor(sowFlowDefinitionKey, basic.getPigId());
-        executor.execute(flowData);
+        Map<String,Object> express = Maps.newHashMap();
+
+        // 添加对应的操作方式
+
+        executor.execute(express, flowData);
 
         // TODO wait workflow context
         // TODO from executor  取出对应的结果信息返回操作方式
