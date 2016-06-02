@@ -75,7 +75,7 @@ public class DoctorMaterialInfos {
     public Long createMaterialInfo(@RequestBody DoctorMaterialInfoCreateDto doctorMaterialInfoCreateDto){
         DoctorMaterialInfo doctorMaterialInfo = null;
         try{
-            DoctorFarm doctorFarm = RespHelper.orServEx(doctorFarmReadService.findFarmById(doctorMaterialInfo.getFarmId()));
+            DoctorFarm doctorFarm = RespHelper.orServEx(doctorFarmReadService.findFarmById(doctorMaterialInfoCreateDto.getFarmId()));
             checkState(!isNull(doctorFarm), "find.doctorFarm.fail");
 
             Long userId = UserUtil.getUserId();
