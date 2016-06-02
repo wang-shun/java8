@@ -25,10 +25,9 @@ public class SearchedGroup implements Serializable {
     private Long id;
 
     /**
-     * 猪群好
+     * 猪群号
      */
     private String groupCode;
-    private String batchNo;
 
     /**
      * 猪群类型

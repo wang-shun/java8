@@ -115,7 +115,7 @@ public class DoctorGroupReadServiceImpl implements DoctorGroupReadService {
                     GroupEventType.MOVE_IN.getValue(),
                     GroupEventType.CHANGE.getValue(),
                     GroupEventType.TRANS_GROUP.getValue(),
-//                    GroupEventType.TURN_SEED.getValue(),  // TODO: 16/6/2  商品猪转为种猪的规则待定 
+//                    GroupEventType.TURN_SEED.getValue(),  // TODO: 16/6/2  商品猪转为种猪的规则待定
                     GroupEventType.LIVE_STOCK.getValue(),
                     GroupEventType.DISEASE.getValue(),
                     GroupEventType.ANTIEPIDEMIC.getValue(),
