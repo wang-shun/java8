@@ -28,7 +28,7 @@ public class DoctorTransGroupInput extends BaseGroupInput implements Serializabl
     private String toBarnName;
 
     /**
-     * 转入猪群
+     * 转入猪群id
      */
     private Long toGroupId;
 
@@ -45,6 +45,9 @@ public class DoctorTransGroupInput extends BaseGroupInput implements Serializabl
     @NotNull(message = "is.create.group.not.null")
     private Integer isCreateGroup;
 
+    /**
+     * 品种id
+     */
     private Long breedId;
 
     private String breedName;

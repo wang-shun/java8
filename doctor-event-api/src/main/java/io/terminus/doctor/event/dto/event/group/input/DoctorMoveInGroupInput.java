@@ -45,14 +45,23 @@ public class DoctorMoveInGroupInput extends BaseGroupInput implements Serializab
     @NotNull(message = "sex.not.null")
     private Integer sex;
 
+    /**
+     * 品种id
+     */
     private Long breedId;
 
     private String breedName;
 
+    /**
+     * 来源猪舍id
+     */
     private Long fromBarnId;
 
     private String fromBarnName;
 
+    /**
+     * 来源猪群id
+     */
     private Long fromGroupId;
 
     private String fromGroupCode;

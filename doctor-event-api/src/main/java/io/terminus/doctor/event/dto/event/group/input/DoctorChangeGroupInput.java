@@ -57,6 +57,9 @@ public class DoctorChangeGroupInput extends BaseGroupInput implements Serializab
     @NotNull(message = "weight.not.null")
     private Double weight;
 
+    /**
+     * 品种id
+     */
     private Integer breedId;
 
     private String breedName;
