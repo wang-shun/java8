@@ -5,6 +5,7 @@ import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.Response;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.doctor.basic.service.DoctorBasicReadService;
+import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dto.DoctorGroupDetail;
 import io.terminus.doctor.event.dto.event.group.input.DoctorAntiepidemicGroupInput;
@@ -32,9 +33,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.terminus.common.utils.Arguments.isEmpty;
 
 /**
  * Desc:
@@ -150,6 +153,14 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
                     groupId, eventType, params, Throwables.getStackTraceAsString(e));
             return Response.fail("create.group.event.fail");
         }
+    }
+
+    @Override
+    public Response<String> generateGroupCode(String barnName) {
+        if (isEmpty(barnName)) {
+            return Response.ok();
+        }
+        return Response.ok(barnName + DateUtil.toDateString(new Date()));
     }
 
     //校验猪群是否存在

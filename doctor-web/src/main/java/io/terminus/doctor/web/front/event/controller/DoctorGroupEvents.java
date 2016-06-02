@@ -68,4 +68,14 @@ public class DoctorGroupEvents {
     public List<Integer> findEventTypesByGroupIds(@RequestParam("groupIds[]") Long[] groupIds) {
         return RespHelper.or500(doctorGroupReadService.findEventTypesByGroupIds(Lists.newArrayList(groupIds)));
     }
+
+    /**
+     * 生成猪群号 猪舍名(yyyy-MM-dd)
+     * @param barnName 猪舍名称
+     * @return  猪群号
+     */
+    @RequestMapping(value = "/code", method = RequestMethod.GET)
+    public String generateGroupCode(@RequestParam(value = "barnName", required = false) String barnName) {
+        return doctorGroupWebService.generateGroupCode(barnName).getResult();
+    }
 }

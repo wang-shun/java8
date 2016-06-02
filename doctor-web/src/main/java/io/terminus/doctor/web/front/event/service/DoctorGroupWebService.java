@@ -34,4 +34,11 @@ public interface DoctorGroupWebService {
     Response<Boolean> createGroupEvent(@NotNull(message = "groupId.not.null") Long groupId,
                                        @NotNull(message = "eventType.not.null") Integer eventType,
                                        Map<String, Object> params);
+
+    /**
+     * 生成猪群号 猪舍名(yyyy-MM-dd)
+     * @param barnName 猪舍名称
+     * @return  猪群号
+     */
+    Response<String> generateGroupCode(String barnName);
 }
