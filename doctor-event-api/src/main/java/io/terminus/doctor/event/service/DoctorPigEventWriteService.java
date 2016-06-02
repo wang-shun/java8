@@ -3,9 +3,9 @@ package io.terminus.doctor.event.service;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
 import io.terminus.doctor.event.dto.event.boar.DoctorSemenDto;
+import io.terminus.doctor.event.dto.event.sow.DoctorAbortionDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorFarrowingDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorFostersDto;
-import io.terminus.doctor.event.dto.event.sow.DoctorLitterWeightDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorMatingDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorPartWeanDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorPigletsChgDto;
@@ -102,6 +102,15 @@ public interface DoctorPigEventWriteService {
                                        @NotNull(message = "input.basic.empty") DoctorBasicInputInfoDto doctorBasicInputInfoDto);
 
     /**
+     * 流产事件录入
+     * @param doctorAbortionDto
+     * @param doctorBasicInputInfoDto
+     * @return
+     */
+    Response<Long> abortionEvent(@NotNull(message = "input.dto.empty") DoctorAbortionDto doctorAbortionDto,
+                                 @NotNull(message = "input.basic.empty") DoctorBasicInputInfoDto doctorBasicInputInfoDto);
+
+    /**
      * 转场事件信息
      * @param doctorChgFarmDto
      * @param doctorBasicInputInfoDto
@@ -164,14 +173,6 @@ public interface DoctorPigEventWriteService {
      * @return
      */
     Response<Long> sowFostersEvent(DoctorFostersDto doctorFostersDto, DoctorBasicInputInfoDto doctorBasicInputInfoDto);
-
-    /**
-     * 仔猪窝重事件
-     * @param doctorLitterWeightDto
-     * @param doctorBasicInputInfoDto
-     * @return
-     */
-    Response<Long> sowLitterWeightEvent(DoctorLitterWeightDto doctorLitterWeightDto, DoctorBasicInputInfoDto doctorBasicInputInfoDto);
 
     /**
      * 部分断奶母猪

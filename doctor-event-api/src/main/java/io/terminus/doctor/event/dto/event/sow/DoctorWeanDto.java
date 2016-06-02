@@ -22,17 +22,11 @@ public class DoctorWeanDto implements Serializable {
 
     private static final long serialVersionUID = -8375069125388951376L;
 
-    private Long pigId;
+    private Date weanDate;  // 断奶日期
 
-    private Date weanDate;
+    private Integer pigletsCount;   // 断奶数量
 
-    private Integer pigletsCount;
+    private Double avgWeight;   //平均断奶重量
 
-    private Double avgWeight;
-
-    private Long barnId;
-
-    private String barnName;
-
-    private String remark;
+    private String weanRemark;  //断奶标识
 }

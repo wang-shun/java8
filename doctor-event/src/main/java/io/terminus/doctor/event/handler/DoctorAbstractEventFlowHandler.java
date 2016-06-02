@@ -72,7 +72,7 @@ public abstract class DoctorAbstractEventFlowHandler extends HandlerAware {
 
             // update track info
             DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(doctorPigEvent.getPigId());
-            DoctorPigTrack refreshPigTrack = updateDoctorPigTrackInfo(doctorPigTrack, doctorBasicInputInfoDto, extraInfo);
+            DoctorPigTrack refreshPigTrack = updateDoctorPigTrackInfo(execution, doctorPigTrack, doctorBasicInputInfoDto, extraInfo);
             doctorPigTrackDao.update(refreshPigTrack);
 
             // create snapshot info
@@ -102,7 +102,7 @@ public abstract class DoctorAbstractEventFlowHandler extends HandlerAware {
      * @param extra 事件关联的信息内容
      * @return
      */
-    public abstract DoctorPigTrack updateDoctorPigTrackInfo(DoctorPigTrack doctorPigTrack, DoctorBasicInputInfoDto basic, Map<String,Object> extra);
+    public abstract DoctorPigTrack updateDoctorPigTrackInfo(Execution execution, DoctorPigTrack doctorPigTrack, DoctorBasicInputInfoDto basic, Map<String,Object> extra);
 
     public DoctorPigEvent buildAllPigDoctorEvent(DoctorBasicInputInfoDto basic, Map<String,Object> extra){
         DoctorPigEvent doctorPigEvent = DoctorPigEvent.builder()

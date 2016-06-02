@@ -20,19 +20,22 @@ public class BaseGroupInput implements Serializable {
      * 事件发生时间 yyyy-MM-dd
      */
     @NotEmpty(message = "date.not.null")
-    protected String eventAt;
+    private String eventAt;
 
-    protected String remark;
+    /**
+     * 备注
+     */
+    private String remark;
 
     /**
      * 是否是自动生成的事件(用于区分是触发事件还是手工录入事件) 0 不是, 1 是
      * @see io.terminus.doctor.event.enums.IsOrNot
      */
     @NotNull(message = "isAuto.not.null")
-    protected Integer isAuto;
+    private Integer isAuto;
 
     @NotNull(message = "creatorId.not.null")
-    protected Long creatorId;
+    private Long creatorId;
 
-    protected String creatorName;
+    private String creatorName;
 }

@@ -22,49 +22,53 @@ public class DoctorFarrowingDto implements Serializable{
 
     private static final long serialVersionUID = 7823378636552520021L;
 
-    private Long pigId;
-
-    private Date farrowingDate;
+    private Date farrowingDate; // 分娩日期
 
     private String nestCode; // 窝号
 
-    private Long barnId;
+    private Long barnId;   // 分娩猪舍
 
-    private Long barnName;
+    private Long barnName;  //分娩猪舍名称
 
-    private String bedCode;
+    private String bedCode; // 床号
 
-    private Integer farrowingType;
+    /**
+     * @see io.terminus.doctor.event.enums.FarrowingType
+     */
+    private Integer farrowingType;  // 分娩类型
 
-    private Integer isHelp;
+    /**
+     * @see io.terminus.doctor.event.enums.IsOrNot
+     */
+    private Integer isHelp;     //  是否帮助
 
-    private double birthNestAvg;
+    private double birthNestAvg;    //出生窝重
 
-    private Integer liveSowCount;
+    private Integer liveSowCount;   //  活母猪数量
 
-    private Integer liveBoarCount;
+    private Integer liveBoarCount;  // 活公猪数量
 
     private Integer healthCount;    //健仔数量(断奶事件校验对应的母猪状态信息)
 
-    private Integer weakCount;
+    private Integer weakCount;  //  弱崽数量
 
-    private Integer mnyCount;
+    private Integer mnyCount;   // 木乃伊数量
 
-    private Integer jxCount;
+    private Integer jxCount;    // 畸形数量
 
-    private Integer deadCount;
+    private Integer deadCount;  // 死亡数量
 
-    private Integer blackCount;
+    private Integer blackCount; //  黑太数量
 
-    private Long toBarnId;
+    private Long toBarnId;  // 猪群相关 待定！！
 
-    private String toBarnName;
+    private String toBarnName;  //猪群相关 待定！！
 
-    private Integer isSingleManager;
+    private Integer farrowIsSingleManager;    //是否个体管理
 
-    private String staff1;
+    private String farrowStaff1;  //接生员1
 
-    private String staff2;
+    private String farrowStaff2;  //接生员2
 
-    private String remark;
+    private String farrowRemark;    //标志
 }

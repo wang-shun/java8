@@ -4,7 +4,11 @@ import com.google.common.base.Throwables;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.Response;
 import io.terminus.common.utils.BeanMapper;
+import io.terminus.doctor.basic.model.DoctorBreed;
+import io.terminus.doctor.basic.model.DoctorGenetic;
 import io.terminus.doctor.basic.service.DoctorBasicReadService;
+import io.terminus.doctor.common.utils.DateUtil;
+import io.terminus.doctor.common.utils.Params;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dto.DoctorGroupDetail;
 import io.terminus.doctor.event.dto.event.group.input.DoctorAntiepidemicGroupInput;
@@ -19,6 +23,7 @@ import io.terminus.doctor.event.dto.event.group.input.DoctorTransGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorTurnSeedGroupInput;
 import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.enums.IsOrNot;
+import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.service.DoctorBarnReadService;
 import io.terminus.doctor.event.service.DoctorGroupReadService;
@@ -32,9 +37,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.terminus.common.utils.Arguments.isEmpty;
 
 /**
  * Desc:
@@ -80,6 +87,10 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
 
     //构造新建猪群信息
     private DoctorGroup getNewGroup(DoctorNewGroupInput newGroupInput) {
+        newGroupInput.setBarnName(getBarnName(newGroupInput.getBarnId()));
+        newGroupInput.setBreedName(getBreedName(newGroupInput.getBreedId()));
+        newGroupInput.setGeneticName(getGeneticName(newGroupInput.getGeneticId()));
+
         DoctorGroup group = BeanMapper.map(newGroupInput, DoctorGroup.class);
 
         //设置猪场公司信息
@@ -105,11 +116,10 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
             //2.校验能否操作此事件
             // TODO: 16/5/26
 
-            params.put("isAuto", IsOrNot.NO.getValue());
-            params.put("creatorId", UserUtil.getUserId());
-            params.put("creatorName", UserUtil.getCurrentUser().getName());
+            //3.put一些字段
+            putFields(params);
 
-            //根据不同的事件类型调用不同的录入接口
+            //4.根据不同的事件类型调用不同的录入接口
             GroupEventType groupEventType = checkNotNull(GroupEventType.from(eventType));
             switch (groupEventType) {
                 case MOVE_IN:
@@ -152,8 +162,45 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
         }
     }
 
+    @Override
+    public Response<String> generateGroupCode(String barnName) {
+        if (isEmpty(barnName)) {
+            return Response.ok();
+        }
+        return Response.ok(barnName + "(" +DateUtil.toDateString(new Date()) + ")");
+    }
+
     //校验猪群是否存在
     private DoctorGroupDetail checkGroupExist(Long groupId) {
         return checkNotNull(RespHelper.or500(doctorGroupReadService.findGroupDetailByGroupId(groupId)), "group.not.exist");
+    }
+
+    //获取猪舍名称
+    private String getBarnName(Long barnId) {
+        return barnId == null ? null : RespHelper.or(doctorBarnReadService.findBarnById(barnId), new DoctorBarn()).getName();
+    }
+
+    //获取品种名称
+    private String getBreedName(Long breedId) {
+        return breedId == null ? null : RespHelper.or(doctorBasicReadService.findBreedById(breedId), new DoctorBreed()).getName();
+    }
+
+    //获取品系名称
+    private String getGeneticName(Long geneticId) {
+        return geneticId == null ? null : RespHelper.or(doctorBasicReadService.findGeneticById(geneticId), new DoctorGenetic()).getName();
+    }
+
+    //put一些关联字段
+    private void putFields(Map<String, Object> params) {
+        //手工录入, 记录下创建人
+        params.put("isAuto", IsOrNot.NO.getValue());
+        params.put("creatorId", UserUtil.getUserId());
+        params.put("creatorName", UserUtil.getCurrentUser().getName());
+
+        //id关联字段
+        params.put("barnName", getBarnName(Params.get(params, "barnId")));
+        params.put("breedName", getBreedName(Params.get(params, "breedName")));
+        params.put("geneticName", getGeneticName(Params.get(params, "geneticId")));
+        Params.filterNullOrEmpty(params);
     }
 }

@@ -6,6 +6,8 @@ import io.terminus.common.model.Response;
 import io.terminus.doctor.user.model.PrimaryUser;
 import io.terminus.doctor.user.model.Sub;
 
+import java.util.List;
+
 /**
  * 主账号读服务
  *
@@ -68,4 +70,10 @@ public interface PrimaryUserReadService {
      * @return 子账户分页
      */
     Response<Paging<Sub>> subPagination(Long parentUserId, Long roleId, Integer status, Integer pageNo, Integer size);
+
+    /**
+     * 获取所有审核通过的子账号
+     * @return  子账户
+     */
+    Response<List<Sub>> findAllActiveSubs();
 }

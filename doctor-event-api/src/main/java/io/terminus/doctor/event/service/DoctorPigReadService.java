@@ -55,6 +55,13 @@ public interface DoctorPigReadService {
     Response<Paging<DoctorPigInfoDto>> pagingDoctorInfoDtoByPigTrack(DoctorPigTrack doctorPigTrack, Integer pageNo, Integer pageSize);
 
     /**
+     * 通过pigId 获取对应的 pigDto 信息内容
+     * @param pigId
+     * @return
+     */
+    Response<DoctorPigInfoDto> queryDoctorInfoDtoById(@NotNull(message = "input.pigId.empty") Long pigId);
+
+    /**
      * 获取猪舍pig 信息内容
      * @param barnId
      * @return

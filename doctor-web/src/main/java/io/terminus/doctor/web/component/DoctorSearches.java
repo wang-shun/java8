@@ -20,7 +20,10 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Collections;
 import java.util.Map;
+
+import static io.terminus.common.utils.Arguments.isEmpty;
 
 /**
  * Desc: 猪场软件主搜
@@ -65,6 +68,9 @@ public class DoctorSearches {
     public Paging<SearchedPig> searchSowPigs(@RequestParam(required = false) Integer pageNo,
                                              @RequestParam(required = false) Integer pageSize,
                                              @RequestParam Map<String, String> params) {
+        if (farmIdNotExist(params)) {
+            return new Paging<>(0L, Collections.emptyList());
+        }
         createSearchWord(SearchType.SOW.getValue(), params);
         params.put("pigType", DoctorPig.PIG_TYPE.SOW.getKey().toString());
         return RespHelper.or500(pigSearchReadService.searchWithAggs(pageNo, pageSize, "search/search.mustache", params));
@@ -82,6 +88,9 @@ public class DoctorSearches {
     public Paging<SearchedPig> searchBoarPigs(@RequestParam(required = false) Integer pageNo,
                                               @RequestParam(required = false) Integer pageSize,
                                               @RequestParam Map<String, String> params) {
+        if (farmIdNotExist(params)) {
+            return new Paging<>(0L, Collections.emptyList());
+        }
         createSearchWord(SearchType.BOAR.getValue(), params);
         params.put("pigType", DoctorPig.PIG_TYPE.BOAR.toString());
         return RespHelper.or500(pigSearchReadService.searchWithAggs(pageNo, pageSize, "search/search.mustache", params));
@@ -99,6 +108,9 @@ public class DoctorSearches {
     public Paging<SearchedGroup> searchGroups(@RequestParam(required = false) Integer pageNo,
                                               @RequestParam(required = false) Integer pageSize,
                                               @RequestParam Map<String, String> params) {
+        if (farmIdNotExist(params)) {
+            return new Paging<>(0L, Collections.emptyList());
+        }
         createSearchWord(SearchType.GROUP.getValue(), params);
         return RespHelper.or500(groupSearchReadService.searchWithAggs(pageNo, pageSize, "search/search.mustache", params));
     }
@@ -115,6 +127,9 @@ public class DoctorSearches {
     public Paging<SearchedBarn> searchBarns(@RequestParam(required = false) Integer pageNo,
                                             @RequestParam(required = false) Integer pageSize,
                                             @RequestParam Map<String, String> params) {
+        if (farmIdNotExist(params)) {
+            return new Paging<>(0L, Collections.emptyList());
+        }
         createSearchWord(SearchType.BARN.getValue(), params);
         return RespHelper.or500(barnSearchReadService.searchWithAggs(pageNo, pageSize, "search/search.mustache", params));
     }
@@ -132,5 +147,9 @@ public class DoctorSearches {
         if (StringUtils.isNotBlank(q)) {
             doctorSearchHistoryService.createSearchHistory(UserUtil.getUserId(), searchType, q);
         }
+    }
+
+    private boolean farmIdNotExist(Map<String, String> params) {
+        return isEmpty(params.get("farmId"));
     }
 }

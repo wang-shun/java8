@@ -30,7 +30,7 @@ public class DefaultGroupQueryBuilder extends BaseGroupQueryBuilder {
         // 搜索关键词 处理
         String q = params.get("q");
         if (StringUtils.isNotBlank(q)) {
-            return new Keyword(ImmutableList.of("groupCode", "batchNo"), q);
+            return new Keyword(ImmutableList.of("groupCode"), q);
         }
         return null;
     }

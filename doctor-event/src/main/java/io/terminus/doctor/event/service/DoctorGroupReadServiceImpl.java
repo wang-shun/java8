@@ -1,6 +1,7 @@
 package io.terminus.doctor.event.service;
 
 import com.google.common.base.Throwables;
+import com.google.common.collect.Lists;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.PageInfo;
 import io.terminus.common.model.Paging;
@@ -11,9 +12,8 @@ import io.terminus.doctor.event.dao.DoctorGroupSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
 import io.terminus.doctor.event.dto.DoctorGroupDetail;
 import io.terminus.doctor.event.dto.DoctorGroupSearchDto;
+import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.model.DoctorGroup;
-import io.terminus.doctor.event.model.DoctorGroupEvent;
-import io.terminus.doctor.event.model.DoctorGroupSnapshot;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -109,42 +109,21 @@ public class DoctorGroupReadServiceImpl implements DoctorGroupReadService {
     }
 
     @Override
-    public Response<DoctorGroupEvent> findGroupEventById(Long groupEventId) {
+    public Response<List<Integer>> findEventTypesByGroupIds(List<Long> groupIds) {
         try {
-            return Response.ok(doctorGroupEventDao.findById(groupEventId));
+            return Response.ok(Lists.newArrayList(
+                    GroupEventType.MOVE_IN.getValue(),
+                    GroupEventType.CHANGE.getValue(),
+                    GroupEventType.TRANS_GROUP.getValue(),
+//                    GroupEventType.TURN_SEED.getValue(),  // TODO: 16/6/2  商品猪转为种猪的规则待定
+                    GroupEventType.LIVE_STOCK.getValue(),
+                    GroupEventType.DISEASE.getValue(),
+                    GroupEventType.ANTIEPIDEMIC.getValue(),
+                    GroupEventType.TRANS_FARM.getValue(),
+                    GroupEventType.CLOSE.getValue()));
         } catch (Exception e) {
-            log.error("find groupEvent by id failed, groupEventId:{}, cause:{}", groupEventId, Throwables.getStackTraceAsString(e));
-            return Response.fail("groupEvent.find.fail");
-        }
-    }
-
-    @Override
-    public Response<List<DoctorGroupEvent>> findGroupEventsByFarmId(Long farmId) {
-        try {
-            return Response.ok(doctorGroupEventDao.findByFarmId(farmId));
-        } catch (Exception e) {
-            log.error("find groupEvent by farm id fail, farmId:{}, cause:{}", farmId, Throwables.getStackTraceAsString(e));
-            return Response.fail("groupEvent.find.fail");
-        }
-    }
-
-    @Override
-    public Response<DoctorGroupSnapshot> findGroupSnapshotById(Long groupSnapshotId) {
-        try {
-            return Response.ok(doctorGroupSnapshotDao.findById(groupSnapshotId));
-        } catch (Exception e) {
-            log.error("find groupSnapshot by id failed, groupSnapshotId:{}, cause:{}", groupSnapshotId, Throwables.getStackTraceAsString(e));
-            return Response.fail("groupSnapshot.find.fail");
-        }
-    }
-
-    @Override
-    public Response<DoctorGroupTrack> findGroupTrackById(Long groupTrackId) {
-        try {
-            return Response.ok(doctorGroupTrackDao.findById(groupTrackId));
-        } catch (Exception e) {
-            log.error("find groupTrack by id failed, groupTrackId:{}, cause:{}", groupTrackId, Throwables.getStackTraceAsString(e));
-            return Response.fail("groupTrack.find.fail");
+            log.error("find eventType by groupIds failed, groupIds:{}, cause:{}", groupIds, Throwables.getStackTraceAsString(e));
+            return Response.fail("eventType.find.fail");
         }
     }
 

@@ -22,27 +22,25 @@ public class DoctorChgFarmDto implements Serializable{
 
     private static final long serialVersionUID = -6702066337454157425L;
 
-    private Long pigId;
+    private Date chgFarmDate;  // 转场日期
 
-    private Date chgFarmDate;
+    private Long fromFarmId;   // 原场Id
 
-    private Long fromFarmId;
+    private String fromFarmName;    // 原场名称
 
-    private String fromFarmName;
+    private Long fromBarnId;    // 原设Id
 
-    private Long fromBarnId;
+    private String fromBarnName; // 原舍名称
 
-    private String fromBarnName;
+    private Long toFarmId;  // 转场Id
 
-    private Long toFarmId;
+    private String toFarmName;  // 转场名称
 
-    private String toFarmName;
+    private Long toBarnId;  //  转舍Id
 
-    private Long toBarnId;
+    private String toBarnName;  // 转舍名称
 
-    private String toBarnName;
+    private Integer pigletsCount; // 仔猪数量
 
-    private Integer pigletsCount;
-
-    private String remark;
+    private String remark;  // 注解
 }

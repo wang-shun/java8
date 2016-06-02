@@ -119,4 +119,10 @@
         <include refid="tb"/>
         WHERE `user_id` = #{userId} and `parent_user_id` = #{parentUserId}
     </select>
+
+    <select id="findAllActiveSubs" resultMap="SubMap">
+        SELECT <include refid="cols_all"/>
+        FROM <include refid="tb"/>
+        WHERE `status` = 1
+    </select>
 </mapper>

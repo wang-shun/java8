@@ -9,6 +9,7 @@ import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
 import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.handler.DoctorAbstractEventFlowHandler;
 import io.terminus.doctor.event.model.DoctorPigTrack;
+import io.terminus.doctor.workflow.core.Execution;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -32,7 +33,7 @@ public class DoctorSowWeanHandler extends DoctorAbstractEventFlowHandler{
     }
 
     @Override
-    public DoctorPigTrack updateDoctorPigTrackInfo(DoctorPigTrack doctorPigTrack, DoctorBasicInputInfoDto basic, Map<String, Object> extra) {
+    public DoctorPigTrack updateDoctorPigTrackInfo(Execution execution, DoctorPigTrack doctorPigTrack, DoctorBasicInputInfoDto basic, Map<String, Object> extra) {
         // 校验断奶的数量信息
         Map<String,Object> extraMap = doctorPigTrack.getExtraMap();
         Integer healthCount = (Integer) extraMap.get("healthCount");
@@ -56,6 +57,8 @@ public class DoctorSowWeanHandler extends DoctorAbstractEventFlowHandler{
         if(Objects.equals(toWeanCount, healthCount)){
             doctorPigTrack.setStatus(PigStatus.Wean.getKey());
         }
+
+        execution.getExpression().put("leftCount", (healthCount - toWeanCount));
         return doctorPigTrack;
     }
 }
