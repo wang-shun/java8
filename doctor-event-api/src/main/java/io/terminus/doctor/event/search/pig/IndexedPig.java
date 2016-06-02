@@ -1,5 +1,6 @@
 package io.terminus.doctor.event.search.pig;
 
+import io.terminus.doctor.event.enums.PigStatus;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -88,7 +89,7 @@ public class IndexedPig implements Serializable {
 
     /**
      * 状态
-     * @see io.terminus.doctor.event.enums.SowStatus
+     * @see PigStatus
      */
     private Integer status;
     private String statusName;

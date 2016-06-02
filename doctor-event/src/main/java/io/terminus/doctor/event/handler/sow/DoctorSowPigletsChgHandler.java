@@ -6,7 +6,7 @@ import io.terminus.doctor.event.dao.DoctorPigSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorPigTrackDao;
 import io.terminus.doctor.event.dao.DoctorRevertLogDao;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
-import io.terminus.doctor.event.enums.SowStatus;
+import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.handler.DoctorAbstractEventFlowHandler;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 
@@ -32,7 +32,7 @@ public class DoctorSowPigletsChgHandler extends DoctorAbstractEventFlowHandler{
     @Override
     public DoctorPigTrack updateDoctorPigTrackInfo(DoctorPigTrack doctorPigTrack, DoctorBasicInputInfoDto basic, Map<String, Object> extra) {
         // 校验母猪的状态信息
-        checkState(Objects.equals(doctorPigTrack.getStatus(), SowStatus.FEED.getKey()), "piglets.chgLocation.error");
+        checkState(Objects.equals(doctorPigTrack.getStatus(), PigStatus.FEED.getKey()), "piglets.chgLocation.error");
 
         // 校验转出的数量信息
         Map<String,Object> extraMap = doctorPigTrack.getExtraMap();

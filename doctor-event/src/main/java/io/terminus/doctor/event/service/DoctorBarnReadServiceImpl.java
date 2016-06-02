@@ -8,7 +8,7 @@ import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dto.DoctorGroupDetail;
 import io.terminus.doctor.event.dto.DoctorGroupSearchDto;
 import io.terminus.doctor.event.dto.DoctorPigInfoDto;
-import io.terminus.doctor.event.enums.BoarStatus;
+import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorGroup;
 import lombok.extern.slf4j.Slf4j;
@@ -87,7 +87,7 @@ public class DoctorBarnReadServiceImpl implements DoctorBarnReadService {
 
             //过滤已离场的猪
             List<DoctorPigInfoDto> pigInfoDtos = RespHelper.orServEx(doctorPigReadService.queryDoctorPigInfoByBarnId(barnId)).stream()
-                    .filter(pig -> !pig.getStatus().equals(BoarStatus.LEAVE.getKey()))
+                    .filter(pig -> !pig.getStatus().equals(PigStatus.BOAR_LEAVE.getKey()))
                     .collect(Collectors.toList());
             return Response.ok(pigInfoDtos.size());
         } catch (Exception e) {

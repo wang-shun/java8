@@ -6,7 +6,7 @@ import io.terminus.doctor.event.dao.DoctorPigSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorPigTrackDao;
 import io.terminus.doctor.event.dao.DoctorRevertLogDao;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
-import io.terminus.doctor.event.enums.SowStatus;
+import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.handler.DoctorAbstractEventFlowHandler;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,7 +54,7 @@ public class DoctorSowWeanHandler extends DoctorAbstractEventFlowHandler{
         doctorPigTrack.addAllExtraMap(extra);
 
         if(Objects.equals(toWeanCount, healthCount)){
-            doctorPigTrack.setStatus(SowStatus.Wean.getKey());
+            doctorPigTrack.setStatus(PigStatus.Wean.getKey());
         }
         return doctorPigTrack;
     }
