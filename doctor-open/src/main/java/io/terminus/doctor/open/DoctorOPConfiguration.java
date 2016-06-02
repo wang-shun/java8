@@ -13,16 +13,8 @@ import io.terminus.lib.file.ImageServer;
 import io.terminus.lib.file.aliyun.AliyunFileServer;
 import io.terminus.lib.file.aliyun.AliyunImageServer;
 import io.terminus.pampas.openplatform.annotations.EnableOpenPlatform;
+import io.terminus.parana.auth.core.AuthenticationConfiguration;
 import io.terminus.parana.web.msg.config.MsgWebConfig;
-import io.terminus.parana.web.msg.config.db.DbAppPushConfig;
-import io.terminus.parana.web.msg.config.db.DbEmailConfig;
-import io.terminus.parana.web.msg.config.db.DbNotifyConfig;
-import io.terminus.parana.web.msg.config.db.DbSmsConfig;
-import io.terminus.parana.web.msg.config.gatewaybuilder.SimpleMsgGatewayBuilderConfig;
-import io.terminus.parana.web.msg.config.test.TestAppPushWebServiceConfig;
-import io.terminus.parana.web.msg.config.test.TestEmailWebServiceConfig;
-import io.terminus.parana.web.msg.config.test.TestNotifyWebServiceConfig;
-import io.terminus.parana.web.msg.config.test.TestSmsWebServiceConfig;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.annotation.Bean;
@@ -38,12 +30,13 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 @Configuration
 @EnableWebMvc
 @EnableOpenPlatform
-@ComponentScan({"io.terminus.doctor.open"})
+@ComponentScan(value = {"io.terminus.doctor.open"})
 @EnableAutoConfiguration
 @Import({
         MsgWebConfig.class,
         LuoSiMaoSmsServiceConfig.class,
         CommonEmailServiceConfig.class,
+        AuthenticationConfiguration.class
 })
 public class DoctorOPConfiguration {
     @Bean

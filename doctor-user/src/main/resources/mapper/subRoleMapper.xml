@@ -21,7 +21,7 @@
     </resultMap>
 
     <sql id="tb">
-        galaxy_seller_roles
+        doctor_sub_roles
     </sql>
 
     <sql id="cols_all">

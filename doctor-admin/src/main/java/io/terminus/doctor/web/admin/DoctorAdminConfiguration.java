@@ -4,11 +4,15 @@
 
 package io.terminus.doctor.web.admin;
 
+import io.terminus.doctor.user.service.OperatorRoleReadService;
+import io.terminus.doctor.web.admin.auth.DoctorCustomRoleLoaderConfigurer;
 import io.terminus.doctor.web.core.DoctorCoreWebConfiguration;
 import io.terminus.doctor.web.core.advices.JsonExceptionResolver;
 import io.terminus.doctor.web.core.msg.email.CommonEmailServiceConfig;
 import io.terminus.doctor.web.core.msg.sms.LuoSiMaoSmsServiceConfig;
 import io.terminus.doctor.web.core.service.OtherSystemServiceConfig;
+import io.terminus.parana.auth.role.CustomRoleLoaderConfigurer;
+import io.terminus.parana.auth.role.CustomRoleLoaderRegistry;
 import io.terminus.parana.auth.web.WebAuthenticationConfiguration;
 import io.terminus.parana.config.ConfigCenter;
 import io.terminus.parana.web.msg.config.MsgAdminWebConfig;
@@ -58,4 +62,11 @@ public class DoctorAdminConfiguration extends WebMvcConfigurerAdapter {
         return new ConfigCenter();
     }
 
+    @Bean
+    public CustomRoleLoaderConfigurer customRoleLoaderConfigurer(CustomRoleLoaderRegistry customRoleLoaderRegistry,
+                                                                 OperatorRoleReadService operatorRoleReadService) {
+        CustomRoleLoaderConfigurer configurer = new DoctorCustomRoleLoaderConfigurer(operatorRoleReadService);
+        configurer.configureCustomRoleLoader(customRoleLoaderRegistry);
+        return configurer;
+    }
 }
