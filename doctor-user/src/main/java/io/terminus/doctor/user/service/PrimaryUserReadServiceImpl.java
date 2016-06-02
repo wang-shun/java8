@@ -13,6 +13,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 /**
  * Created by houluyao on 16/5/24.
  */
@@ -113,6 +115,16 @@ public class PrimaryUserReadServiceImpl implements PrimaryUserReadService {
             log.error("paging sub seller failed, parentUserId={}, status={}, pageNo={}, size={}, cause:{}",
                     parentUserId, status, pageNo, size, Throwables.getStackTraceAsString(e));
             return Response.fail("sub.paging.fail");
+        }
+    }
+
+    @Override
+    public Response<List<Sub>> findAllActiveSubs() {
+        try{
+            return Response.ok(subDao.findAllActiveSubs());
+        } catch (Exception e) {
+            log.error("find all active subs failed, cause by {}", Throwables.getStackTraceAsString(e));
+            return Response.fail("active.sub.find.fail");
         }
     }
 }
