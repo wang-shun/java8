@@ -54,8 +54,11 @@ public class DoctorServiceReviewController {
         BaseUser baseUser = UserUtil.getCurrentUser();
         // TODO: 权限中心校验权限
 
-        if (dto.getOrg().getId() == null) {
+        if (dto.getOrg() == null || dto.getOrg().getId() == null) {
             throw new JsonResponseException(500, "org.id.can.not.be.null");
+        }
+        if (dto.getUserId() == null) {
+            throw new JsonResponseException(500, "user.id.null");
         }
         return RespHelper.or500(doctorServiceReviewService.openDoctorService(baseUser, dto.getUserId(), dto.getFarms(), dto.getOrg()));
     }

@@ -121,7 +121,7 @@ public class DoctorServiceReviewManager {
             }).collect(Collectors.toList());
             doctorFarmDao.creates(list);
             if (list.size() > 0) {
-                farmIds = Joiner.on(",").join(Arrays.asList(list.stream().mapToLong(DoctorFarm::getId).toArray()));
+                farmIds = Joiner.on(",").join(list.stream().map(DoctorFarm::getId).toArray());
             }
         }
         DoctorUserDataPermission permission = new DoctorUserDataPermission();

@@ -83,7 +83,7 @@
 
     <update id="updateStatus" parameterType="map">
         update <include refid="tb"/>
-        set status = #{status}, reviewer_id = #{reviewerId}
+        set status = #{status}, reviewer_id = #{reviewerId}, updated_at = now()
         where user_id = #{userId} and type = #{type}
     </update>
 
