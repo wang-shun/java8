@@ -1,6 +1,8 @@
 package io.terminus.doctor.open.rest.user;
 
 import com.google.common.collect.Lists;
+import io.terminus.common.model.BaseUser;
+import io.terminus.doctor.common.enums.UserType;
 import io.terminus.doctor.open.util.OPRespHelper;
 import io.terminus.doctor.user.dto.DoctorMenuDto;
 import io.terminus.doctor.user.dto.DoctorServiceApplyDto;
@@ -16,10 +18,12 @@ import io.terminus.doctor.user.service.business.DoctorServiceReviewService;
 import io.terminus.pampas.common.UserUtil;
 import io.terminus.pampas.openplatform.annotations.OpenBean;
 import io.terminus.pampas.openplatform.annotations.OpenMethod;
+import io.terminus.pampas.openplatform.exceptions.OPClientException;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.validation.Valid;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Desc: 用户相关
@@ -67,7 +71,12 @@ public class OPDoctorUsers {
      */
     @OpenMethod(key = "apply.open.service", paramNames = "serviceApplyDto")
     public Boolean applyOpenService(@Valid DoctorServiceApplyDto serviceApplyDto) {
-        return OPRespHelper.orOPEx(doctorServiceReviewService.applyOpenService(UserUtil.getCurrentUser(), serviceApplyDto));
+        BaseUser baseUser = UserUtil.getCurrentUser();
+        if(!Objects.equals(UserType.FARM_ADMIN_PRIMARY.value(), baseUser.getType())){
+            //只有主账号(猪场管理员)才能申请开通服务
+            throw new OPClientException("authorize.fail");
+        }
+        return OPRespHelper.orOPEx(doctorServiceReviewService.applyOpenService(baseUser, serviceApplyDto));
     }
 
     /**
@@ -96,10 +105,6 @@ public class OPDoctorUsers {
     @OpenMethod(key = "get.org.info")
     public DoctorOrg getOrgInfo() {
         return OPRespHelper.orOPEx(doctorOrgReadService.findOrgByUserId(UserUtil.getUserId()));
-    }
-
-    private DoctorUser getUser() {
-        return UserUtil.getCurrentUser();
     }
 
     @OpenMethod(key = "get.user.level.one.menu")

@@ -1,6 +1,9 @@
 package io.terminus.doctor.web.front.user.controller;
 
 import com.google.common.collect.Lists;
+import io.terminus.common.exception.JsonResponseException;
+import io.terminus.common.model.BaseUser;
+import io.terminus.doctor.common.enums.UserType;
 import io.terminus.doctor.user.dto.DoctorMenuDto;
 import io.terminus.doctor.user.dto.DoctorServiceApplyDto;
 import io.terminus.doctor.user.dto.DoctorServiceReviewDto;
@@ -19,6 +22,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.List;
+import java.util.Objects;
 
 @Slf4j
 @RestController
@@ -62,7 +66,12 @@ public class ServiceReviews {
     @RequestMapping(value = "/applyOpenService", method = RequestMethod.POST)
     @ResponseBody
     public Boolean applyOpenService(@Valid @RequestBody DoctorServiceApplyDto serviceApplyDto) {
-        return RespHelper.or500(doctorServiceReviewService.applyOpenService(UserUtil.getCurrentUser(), serviceApplyDto));
+        BaseUser baseUser = UserUtil.getCurrentUser();
+        if(!Objects.equals(UserType.FARM_ADMIN_PRIMARY.value(), baseUser.getType())){
+            //只有主账号(猪场管理员)才能申请开通服务
+            throw new JsonResponseException("authorize.fail");
+        }
+        return RespHelper.or500(doctorServiceReviewService.applyOpenService(baseUser, serviceApplyDto));
     }
 
     /**

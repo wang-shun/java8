@@ -5,6 +5,7 @@ import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.BaseUser;
 import io.terminus.common.model.Paging;
+import io.terminus.doctor.common.enums.UserType;
 import io.terminus.doctor.user.model.DoctorFarm;
 import io.terminus.doctor.user.model.DoctorOrg;
 import io.terminus.doctor.user.model.DoctorServiceReview;
@@ -18,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -51,14 +53,12 @@ public class DoctorServiceReviewController {
     @RequestMapping(value = "/pigdoctor/open", method = RequestMethod.POST)
     @ResponseBody
     public Boolean openDoctorService(@RequestBody UserApplyServiceDetailDto dto){
-        BaseUser baseUser = UserUtil.getCurrentUser();
-        // TODO: 权限中心校验权限
-
+        BaseUser baseUser = this.checkUserTypeOperator();
         if (dto.getOrg() == null || dto.getOrg().getId() == null) {
             throw new JsonResponseException(500, "org.id.can.not.be.null");
         }
         if (dto.getUserId() == null) {
-            throw new JsonResponseException(500, "user.id.null");
+            throw new JsonResponseException(500, "user.id.invalid");
         }
         return RespHelper.or500(doctorServiceReviewService.openDoctorService(baseUser, dto.getUserId(), dto.getFarms(), dto.getOrg()));
     }
@@ -71,9 +71,7 @@ public class DoctorServiceReviewController {
     @RequestMapping(value = "/pigmall/open", method = RequestMethod.GET)
     @ResponseBody
     public Boolean openPigmallService(@RequestParam("userId") Long userId){
-        BaseUser baseUser = UserUtil.getCurrentUser();
-        // TODO: 权限中心校验权限
-
+        BaseUser baseUser = this.checkUserTypeOperator();
         //更新服务状态为开通
         return RespHelper.or500(doctorServiceReviewService.openService(baseUser, userId, DoctorServiceReview.Type.PIGMALL));
     }
@@ -86,9 +84,7 @@ public class DoctorServiceReviewController {
     @RequestMapping(value = "/neverest/open", method = RequestMethod.GET)
     @ResponseBody
     public Boolean openNeverestService(@RequestParam("userId") Long userId){
-        BaseUser baseUser = UserUtil.getCurrentUser();
-        // TODO: 权限中心校验权限
-
+        BaseUser baseUser = this.checkUserTypeOperator();
         //更新服务状态为开通
         return RespHelper.or500(doctorServiceReviewService.openService(baseUser, userId, DoctorServiceReview.Type.NEVEREST));
     }
@@ -101,10 +97,8 @@ public class DoctorServiceReviewController {
     @RequestMapping(value = "/notopen", method = RequestMethod.GET)
     @ResponseBody
     public Boolean notOpenService(@RequestParam("userId") Long userId, @RequestParam("type") Integer type, @RequestParam("reason") String reason){
+        BaseUser baseUser = this.checkUserTypeOperator();
         try {
-            BaseUser baseUser = UserUtil.getCurrentUser();
-            // TODO: 权限中心校验权限
-
             DoctorServiceReview.Type serviceType = DoctorServiceReview.Type.from(type);
             RespHelper.or500(doctorServiceReviewService.notOpenService(baseUser, userId, serviceType, reason));
         } catch (Exception e) {
@@ -123,10 +117,8 @@ public class DoctorServiceReviewController {
     @RequestMapping(value = "/froze", method = RequestMethod.GET)
     @ResponseBody
     public Boolean frozeService(@RequestParam("userId") Long userId, @RequestParam("type") Integer type, @RequestParam("reason") String reason){
+        BaseUser baseUser = this.checkUserTypeOperator();
         try {
-            BaseUser baseUser = UserUtil.getCurrentUser();
-            // TODO: 权限中心校验权限
-
             DoctorServiceReview.Type serviceType = DoctorServiceReview.Type.from(type);
             RespHelper.or500(doctorServiceReviewService.frozeService(baseUser, userId, serviceType, reason));
         } catch (Exception e) {
@@ -150,9 +142,6 @@ public class DoctorServiceReviewController {
                                      @RequestParam(value = "type", required = false) Integer type,
                                      @RequestParam(value = "status", required = false)Integer status,
                                      @RequestParam(required = false) Integer pageNo, @RequestParam(required = false) Integer pageSize){
-        BaseUser baseUser = UserUtil.getCurrentUser();
-        // TODO: 权限中心校验权限
-
         try {
             DoctorServiceReview.Type servicetype = null;
             if (type != null) {
@@ -177,9 +166,6 @@ public class DoctorServiceReviewController {
     @RequestMapping(value = "/pigdoctor/detail", method = RequestMethod.GET)
     @ResponseBody
     public UserApplyServiceDetailDto findUserApplyDetail(@RequestParam("userId") Long userId){
-        BaseUser baseUser = UserUtil.getCurrentUser();
-        // TODO: 权限中心校验权限
-
         UserApplyServiceDetailDto dto = new UserApplyServiceDetailDto();
         List<String> farms = RespHelper.or500(doctorFarmReadService.findFarmsByUserId(userId)).stream().map(DoctorFarm::getName).collect(Collectors.toList());
         DoctorOrg org = RespHelper.or500(doctorOrgReadService.findOrgByUserId(userId));
@@ -189,4 +175,15 @@ public class DoctorServiceReviewController {
         return dto;
     }
 
+    /**
+     * 检查当前用户是否为运营人员, 若不是将抛出无权限异常
+     * @return
+     */
+    private BaseUser checkUserTypeOperator(){
+        BaseUser baseUser = UserUtil.getCurrentUser();
+        if(!Objects.equals(UserType.OPERATOR.value(), baseUser.getType())){
+            throw new JsonResponseException("authorize.fail");
+        }
+        return baseUser;
+    }
 }
