@@ -160,7 +160,7 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
         if (isEmpty(barnName)) {
             return Response.ok();
         }
-        return Response.ok(barnName + DateUtil.toDateString(new Date()));
+        return Response.ok(barnName + "(" +DateUtil.toDateString(new Date()) + ")");
     }
 
     //校验猪群是否存在
