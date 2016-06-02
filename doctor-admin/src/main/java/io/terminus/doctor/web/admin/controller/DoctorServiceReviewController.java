@@ -169,6 +169,11 @@ public class DoctorServiceReviewController {
         }
     }
 
+    /**
+     * 用户申请猪场软件后, admin审批的页面, 查询用户的公司和猪场信息
+     * @param userId
+     * @return
+     */
     @RequestMapping(value = "/pigdoctor/detail", method = RequestMethod.GET)
     @ResponseBody
     public UserApplyServiceDetailDto findUserApplyDetail(@RequestParam("userId") Long userId){

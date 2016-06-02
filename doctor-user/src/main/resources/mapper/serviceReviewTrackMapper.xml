@@ -59,14 +59,14 @@
     <select id="findByUserIdAndType" parameterType="map" resultMap="ServiceReviewTrackMap" >
         SELECT <include refid="cols_all" />
         FROM <include refid="tb" />
-        WHERE user_id = #{userId} and type #{type}
+        WHERE user_id = #{userId} and type = #{type}
         order by created_at
     </select>
 
     <select id="findLastByUserIdAndType" parameterType="map" resultMap="ServiceReviewTrackMap" >
         SELECT <include refid="cols_all" />
         FROM <include refid="tb" />
-        WHERE user_id = #{userId} and type #{type}
+        WHERE user_id = #{userId} and type = #{type}
         order by created_at desc limit 1
     </select>
 
