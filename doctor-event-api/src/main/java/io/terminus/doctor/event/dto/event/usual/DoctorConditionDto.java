@@ -22,13 +22,13 @@ public class DoctorConditionDto implements Serializable{
 
     private static final long serialVersionUID = 2731040792952612479L;
 
-    private Date conditionDate;
+    private Date conditionDate; //体况日期
 
-    private Integer conditionJudgeScore;
+    private Integer conditionJudgeScore;    //体况评分
 
-    private Double conditionWeight;
+    private Double conditionWeight; // 体况重量
 
     private Double conditionBackWeight; // 背膘
 
-    private String conditionRemark;
+    private String conditionRemark; //体况注解
 }

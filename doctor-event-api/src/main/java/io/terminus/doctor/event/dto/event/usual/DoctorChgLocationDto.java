@@ -22,13 +22,13 @@ public class DoctorChgLocationDto implements Serializable{
 
     private static final long serialVersionUID = 8270765125209815779L;
 
-    private Date changeLocationDate;
+    private Date changeLocationDate; //转舍日期
 
-    private Long chgLocationFromBarnId;
+    private Long chgLocationFromBarnId; //源舍
 
-    private String chgLocationFromBarnName;
+    private String chgLocationFromBarnName; // 原舍名称
 
-    private Long chgLocationToBarnId;
+    private Long chgLocationToBarnId;   // 转舍Id
 
-    private String chgLocationToBarnName;
+    private String chgLocationToBarnName;   // 转舍名称
 }

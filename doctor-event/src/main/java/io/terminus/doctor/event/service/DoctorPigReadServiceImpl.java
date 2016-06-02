@@ -7,12 +7,14 @@ import com.google.common.collect.Maps;
 import io.terminus.common.model.PageInfo;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
+import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dao.DoctorPigDao;
 import io.terminus.doctor.event.dao.DoctorPigTrackDao;
+import io.terminus.doctor.event.dto.DoctorPigInfoDetailDto;
 import io.terminus.doctor.event.dto.DoctorPigInfoDto;
-import io.terminus.doctor.event.dto.DoctorSowPigInfoDetailDto;
 import io.terminus.doctor.event.enums.DataRange;
 import io.terminus.doctor.event.model.DoctorPig;
+import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +27,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import static com.google.common.base.Preconditions.checkState;
 import static java.util.Objects.isNull;
 
 /**
@@ -41,10 +44,14 @@ public class DoctorPigReadServiceImpl implements DoctorPigReadService{
 
     private final DoctorPigTrackDao doctorPigTrackDao;
 
+    private final DoctorPigEventReadService doctorPigEventReadService;
+
     @Autowired
-    public DoctorPigReadServiceImpl(DoctorPigDao doctorPigDao, DoctorPigTrackDao doctorPigTrackDao){
+    public DoctorPigReadServiceImpl(DoctorPigDao doctorPigDao, DoctorPigTrackDao doctorPigTrackDao,
+                                    DoctorPigEventReadService doctorPigEventReadService){
         this.doctorPigDao = doctorPigDao;
         this.doctorPigTrackDao = doctorPigTrackDao;
+        this.doctorPigEventReadService = doctorPigEventReadService;
     }
 
     @Override
@@ -67,15 +74,21 @@ public class DoctorPigReadServiceImpl implements DoctorPigReadService{
     }
 
     @Override
-    public Response<Map<Long, Long>> queryPigCountByBreed(Long farmId) {
-        //TODO not sure
-        return null;
-    }
+    public Response<DoctorPigInfoDetailDto> queryPigDetailInfoByPigId(Long pigId) {
+        try{
+            DoctorPig doctorPig = doctorPigDao.findById(pigId);
+            checkState(!isNull(doctorPig), "query.doctorPigId.fail");
+            
+            DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(pigId);
 
-    @Override
-    public Response<Map<Long, Long>> queryPigCountByStatus(Long farmId) {
-        // TODO not sure
-        return null;
+            List<DoctorPigEvent> doctorPigEvents = RespHelper.orServEx(
+                    doctorPigEventReadService.queryPigDoctorEvents(doctorPig.getFarmId(), doctorPig.getId(), null, null, null, null)).getData();
+
+            return Response.ok(DoctorPigInfoDetailDto.builder().doctorPig(doctorPig).doctorPigTrack(doctorPigTrack).doctorPigEvents(doctorPigEvents).build());
+        }catch (Exception e){
+            log.error("query pig detail info fail, cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("query.pigDetailInfo.fail");
+        }
     }
 
     @Override
@@ -130,8 +143,18 @@ public class DoctorPigReadServiceImpl implements DoctorPigReadService{
     }
 
     @Override
-    public Response<DoctorSowPigInfoDetailDto> querySowPigInfoDetail(Long pigId) {
-        return null;
+    public Response<DoctorPigInfoDto> queryDoctorInfoDtoById(@NotNull(message = "input.pigId.empty") Long pigId) {
+        try{
+            DoctorPig doctorPig = doctorPigDao.findById(pigId);
+            checkState(!isNull(doctorPig), "doctorPig.findById.empty");
+
+            DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(pigId);
+
+            return Response.ok(DoctorPigInfoDto.buildDoctorPigInfoDto(doctorPig, doctorPigTrack));
+        }catch (Exception e){
+            log.error(" fail, cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("query.doctorInfoDto.fail");
+        }
     }
 
     @Override

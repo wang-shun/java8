@@ -22,17 +22,17 @@ public class DoctorVaccinationDto implements Serializable{
 
     private static final long serialVersionUID = 183960403500452272L;
 
-    private Date vaccinationDate;
+    private Date vaccinationDate; // 免疫日期
 
-    private Long vaccinationId;
+    private Long vaccinationId; // 疫苗名称Id
 
-    private String vaccinationName;
+    private String vaccinationName; // 疫苗名称
 
-    private Integer vaccinationResult;
+    private Integer vaccinationResult;  // 防疫结果
 
-    private Long vaccinationStaffId;
+    private Long vaccinationStaffId;    // 防疫人员Id
 
-    private String vaccinationStaffName;
+    private String vaccinationStaffName;    //防疫人员名称
 
-    private String vaccinationRemark;
+    private String vaccinationRemark;   // 防疫注解
 }

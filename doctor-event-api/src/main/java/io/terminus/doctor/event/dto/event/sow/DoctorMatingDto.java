@@ -22,17 +22,16 @@ public class DoctorMatingDto implements Serializable {
 
     private static final long serialVersionUID = 2732269011148894160L;
 
-    private Long pigId;
-
-    private Date matingDate;
-
-    private String pigCode;
+    private Date matingDate; // 品种日期
 
     private Date judgePregDate; //预产日期
 
-    private Integer matingType;
+    /**
+     * @see io.terminus.doctor.event.enums.MatingType
+     */
+    private Integer matingType; // 配种类型
 
-    private String staff;
+    private String matingStaff; // 配种人员
 
-    private String mark;
+    private String mattingMark; // 配种mark
 }

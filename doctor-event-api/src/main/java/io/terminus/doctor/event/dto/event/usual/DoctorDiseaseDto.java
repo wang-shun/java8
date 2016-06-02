@@ -22,11 +22,11 @@ public class DoctorDiseaseDto implements Serializable{
 
     private static final long serialVersionUID = 7557956788545103933L;
 
-    private Date diseaseDate;
+    private Date diseaseDate;   // 疾病日期
 
-    private String diseaseName;
+    private String diseaseName; // 疾病名称
 
-    private String diseaseStaff;
+    private String diseaseStaff;    // 疾病操作人员
 
-    private String diseaseRemark;
+    private String diseaseRemark;   // 疾病注解
 }

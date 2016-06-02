@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * Created by yaoqijun.
@@ -63,8 +64,8 @@ public class DoctorPigEvents {
                                                        @RequestParam("pigId") Long pigId,
                                                        @RequestParam(value = "pageNo", required = false) Integer pageNo,
                                                        @RequestParam(value = "pageSize", required = false)Integer pageSize,
-                                                       @RequestParam("startDate") String startDate,
-                                                       @RequestParam("endDate") String endDate){
+                                                       @RequestParam(value = "startDate",required = false) String startDate,
+                                                       @RequestParam(value = "endDate", required = false) String endDate){
         try{
             Date beginDateTime = Strings.isNullOrEmpty(startDate) ? null : DTF.parseDateTime(startDate).toDate();
             Date endDateTime = Strings.isNullOrEmpty(endDate) ? null : (DTF).parseDateTime(endDate).toDate();
@@ -74,5 +75,11 @@ public class DoctorPigEvents {
             log.error("pig event paging error, cause:{}", Throwables.getStackTraceAsString(e));
             throw new JsonResponseException(500, "paging.pigEvent.error");
         }
+    }
+
+    @RequestMapping(value = "/queryPigEvents", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public List<Integer> queryPigExecuteEvent(@RequestParam("pigIds") List<Long> pigIds){
+        return RespHelper.or500(doctorPigEventReadService.queryPigEvents(pigIds));
     }
 }

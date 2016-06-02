@@ -22,9 +22,12 @@ public class DoctorPregChkResultDto implements Serializable{
 
     private static final long serialVersionUID = 2879901632920960216L;
 
-    private Date checkDate;
+    private Date checkDate; //妊娠检查日期
 
-    private Integer checkResult;
+    /**
+     * @see io.terminus.doctor.event.enums.PregCheckResult
+     */
+    private Integer checkResult;    // 妊娠检查结果
 
-    private String mark;
+    private String checkMark;   // 校验标识
 }

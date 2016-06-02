@@ -6,7 +6,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.constants.JacksonType;
-import io.terminus.doctor.event.constants.DoctorFarmEntrySowConstants;
+import io.terminus.doctor.event.constants.DoctorFarmEntryConstants;
 import io.terminus.doctor.event.constants.DoctorPigSnapshotConstants;
 import io.terminus.doctor.event.dao.DoctorPigDao;
 import io.terminus.doctor.event.dao.DoctorPigEventDao;
@@ -15,8 +15,7 @@ import io.terminus.doctor.event.dao.DoctorPigTrackDao;
 import io.terminus.doctor.event.dao.DoctorRevertLogDao;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
 import io.terminus.doctor.event.dto.event.usual.DoctorFarmEntryDto;
-import io.terminus.doctor.event.enums.BoarStatus;
-import io.terminus.doctor.event.enums.SowStatus;
+import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigSnapshot;
@@ -124,13 +123,13 @@ public class DoctorEntryFlowHandler extends HandlerAware {
 
         DoctorPigTrack doctorPigTrack = DoctorPigTrack.builder().farmId(basic.getFarmId())
                 .currentBarnId(dto.getBarnId()).currentBarnName(dto.getBarnName())
-                .currentParity(dto.getParity()).status(SowStatus.Entry.getKey())
+                .currentParity(dto.getParity()).status(PigStatus.Entry.getKey())
                 .creatorId(basic.getStaffId()).creatorName(basic.getStaffName())
                 .build();
         if(Objects.equals(basic.getPigType(), DoctorPig.PIG_TYPE.SOW.getKey())){
-            doctorPigTrack.setStatus(SowStatus.Entry.getKey());
+            doctorPigTrack.setStatus(PigStatus.Entry.getKey());
         }else if(Objects.equals(basic.getPigType(), DoctorPig.PIG_TYPE.BOAR.getKey())) {
-            doctorPigTrack.setStatus(BoarStatus.ENTRY.getKey());
+            doctorPigTrack.setStatus(PigStatus.BOAR_ENTRY.getKey());
         }else {
             throw new IllegalStateException("input.pigType.error");
         }
@@ -150,7 +149,7 @@ public class DoctorEntryFlowHandler extends HandlerAware {
                 .pigCode(dto.getPigCode()).eventAt(DateTime.now().toDate())
                 .type(basic.getEventType()).kind(basic.getPigType()).name(basic.getEventName()).desc(basic.getEventDesc())
                 .barnId(dto.getBarnId()).barnName(dto.getBarnName()).relEventId(basic.getRelEventId())
-                .outId(UUID.randomUUID().toString()).remark(dto.getMark())
+                .outId(UUID.randomUUID().toString()).remark(dto.getEntryMark())
                 .creatorId(basic.getStaffId()).creatorName(basic.getStaffName())
                 .build();
         return doctorPigEvent;
@@ -170,19 +169,24 @@ public class DoctorEntryFlowHandler extends HandlerAware {
 
         DoctorPig doctorPig = DoctorPig.builder()
                 .farmId(basic.getFarmId()).farmName(basic.getFarmName()).orgId(basic.getOrgId()).orgName(basic.getOrgName())
-                .outId(UUID.randomUUID().toString()).pigCode(dto.getPigCode()).pigType(basic.getPigType()).pigFatherId(dto.getFatherId()).pigMotherId(dto.getMotherId())
+                .outId(UUID.randomUUID().toString()).pigCode(dto.getPigCode()).pigType(basic.getPigType()).pigFatherCode(dto.getFatherCode()).pigMotherCode(dto.getMotherCode())
                 .source(dto.getSource()).birthDate(dto.getBirthday()).inFarmDate(dto.getInFarmDate()).inFarmDayAge(Years.yearsBetween(new DateTime(dto.getBirthday()), DateTime.now()).getYears())
                 .initBarnId(dto.getBarnId()).initBarnName(dto.getBarnName()).breedId(dto.getBreed()).breedName(dto.getBreedName()).geneticId(dto.getBreedType()).geneticName(dto.getBreedTypeName())
-                .remark(dto.getMark()).creatorId(basic.getStaffId()).creatorName(basic.getStaffName())
+                .remark(dto.getEntryMark()).creatorId(basic.getStaffId()).creatorName(basic.getStaffName())
                 .build();
         if(Objects.equals(basic.getPigType(), DoctorPig.PIG_TYPE.SOW.getKey())){
             // add sow pig info
             Map<String,Object> extraMapInfo = Maps.newHashMap();
-            extraMapInfo.put(DoctorFarmEntrySowConstants.EAR_CODE, dto.getEarCode());
-            extraMapInfo.put(DoctorFarmEntrySowConstants.FIRST_PARITY, dto.getParity());
-            extraMapInfo.put(DoctorFarmEntrySowConstants.LEFT_COUNT, dto.getLeft());
-            extraMapInfo.put(DoctorFarmEntrySowConstants.RIGHT_COUNT, dto.getRight());
+            extraMapInfo.put(DoctorFarmEntryConstants.EAR_CODE, dto.getEarCode());
+            extraMapInfo.put(DoctorFarmEntryConstants.FIRST_PARITY, dto.getParity());
+            extraMapInfo.put(DoctorFarmEntryConstants.LEFT_COUNT, dto.getLeft());
+            extraMapInfo.put(DoctorFarmEntryConstants.RIGHT_COUNT, dto.getRight());
             doctorPig.setExtraMap(extraMapInfo);
+        }else if(Objects.equals(basic.getPigType(), DoctorPig.PIG_TYPE.BOAR.getKey())) {
+            Map<String,Object> extraMap = Maps.newHashMap();
+            extraMap.put(DoctorFarmEntryConstants.BOAR_TYPE_ID, dto.getBoarTypeId());
+            extraMap.put(DoctorFarmEntryConstants.BOAR_TYPE_NAME, dto.getBoarTypeName());
+            doctorPig.setExtraMap(extraMap);
         }
         return doctorPig;
     }

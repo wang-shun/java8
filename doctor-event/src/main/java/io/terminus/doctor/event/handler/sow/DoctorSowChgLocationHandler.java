@@ -9,11 +9,12 @@ import io.terminus.doctor.event.dao.DoctorPigTrackDao;
 import io.terminus.doctor.event.dao.DoctorRevertLogDao;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
 import io.terminus.doctor.event.enums.PigEvent;
-import io.terminus.doctor.event.enums.SowStatus;
+import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.handler.DoctorAbstractEventFlowHandler;
 import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.event.service.DoctorBarnReadService;
+import io.terminus.doctor.workflow.core.Execution;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -45,7 +46,7 @@ public class DoctorSowChgLocationHandler extends DoctorAbstractEventFlowHandler 
     }
 
     @Override
-    public DoctorPigTrack updateDoctorPigTrackInfo(DoctorPigTrack doctorPigTrack, DoctorBasicInputInfoDto basic, Map<String, Object> extra) {
+    public DoctorPigTrack updateDoctorPigTrackInfo(Execution execution,DoctorPigTrack doctorPigTrack, DoctorBasicInputInfoDto basic, Map<String, Object> extra) {
         doctorPigTrack.addAllExtraMap(extra);
 
         Long toBarnId = (Long) extra.get("chgLocationToBarnId");
@@ -59,20 +60,20 @@ public class DoctorSowChgLocationHandler extends DoctorAbstractEventFlowHandler 
 
         // 修改对应的状态信息
         if(Objects.equals(basic.getEventType(), PigEvent.TO_MATING.getKey())){
-            doctorPigTrack.setStatus(SowStatus.Entry.getKey());
+            doctorPigTrack.setStatus(PigStatus.Entry.getKey());
 
             //清空对应的Map 信息内容 （有一次生产过程）
             doctorPigTrack.setExtraMap(Maps.newHashMap());
 
             // 断奶后添加对应的胎次信息
-            if(Objects.equals(doctorPigTrack.getStatus(), SowStatus.Wean.getKey())){
+            if(Objects.equals(doctorPigTrack.getStatus(), PigStatus.Wean.getKey())){
                 // 断奶进入配种
                 doctorPigTrack.setCurrentParity(doctorPigTrack.getCurrentParity() + 1);
             }
         }else if(Objects.equals(basic.getEventType(), PigEvent.TO_PREG.getKey())){
             // 状态妊娠检查相关， 而不是转舍相关
         }else if(Objects.equals(basic.getEventType(), PigEvent.TO_FARROWING.getKey())){
-            doctorPigTrack.setStatus(SowStatus.Farrow.getKey());
+            doctorPigTrack.setStatus(PigStatus.Farrow.getKey());
         }
         return doctorPigTrack;
     }

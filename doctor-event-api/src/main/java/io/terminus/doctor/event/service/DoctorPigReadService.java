@@ -2,14 +2,13 @@ package io.terminus.doctor.event.service;
 
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
+import io.terminus.doctor.event.dto.DoctorPigInfoDetailDto;
 import io.terminus.doctor.event.dto.DoctorPigInfoDto;
-import io.terminus.doctor.event.dto.DoctorSowPigInfoDetailDto;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 
 import javax.validation.constraints.NotNull;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Created by yaoqijun.
@@ -31,18 +30,11 @@ public interface DoctorPigReadService {
                                  @NotNull(message = "input.pigType.empty") Integer pigType);
 
     /**
-     * 获取猪场Breed 状态存栏信息
-     * @param farmId
+     * 通过pigId 获取对应的详细信息
+     * @param pigId
      * @return
      */
-    Response<Map<Long,Long>> queryPigCountByBreed(@NotNull(message = "input.farmId.empty") Long farmId);
-
-    /**
-     * 猪状态存栏结构
-     * @param farmId
-     * @return
-     */
-    Response<Map<Long, Long>> queryPigCountByStatus(@NotNull(message = "input.farmId.empty") Long farmId);
+    Response<DoctorPigInfoDetailDto> queryPigDetailInfoByPigId(@NotNull(message = "input.pigId.empty") Long pigId);
 
     /**
      * 通过doctorPig 信息分页查询
@@ -63,11 +55,11 @@ public interface DoctorPigReadService {
     Response<Paging<DoctorPigInfoDto>> pagingDoctorInfoDtoByPigTrack(DoctorPigTrack doctorPigTrack, Integer pageNo, Integer pageSize);
 
     /**
-     * 获取母猪的详细信息
+     * 通过pigId 获取对应的 pigDto 信息内容
      * @param pigId
      * @return
      */
-    Response<DoctorSowPigInfoDetailDto> querySowPigInfoDetail(@NotNull(message = "input.pigId.empty") Long pigId);
+    Response<DoctorPigInfoDto> queryDoctorInfoDtoById(@NotNull(message = "input.pigId.empty") Long pigId);
 
     /**
      * 获取猪舍pig 信息内容

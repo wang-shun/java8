@@ -1,7 +1,9 @@
 package io.terminus.doctor.web.front.event.controller;
 
+import com.google.common.collect.Lists;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dto.event.group.input.DoctorNewGroupInput;
+import io.terminus.doctor.event.service.DoctorGroupReadService;
 import io.terminus.doctor.web.front.event.service.DoctorGroupWebService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -26,10 +29,13 @@ import java.util.Map;
 public class DoctorGroupEvents {
 
     private final DoctorGroupWebService doctorGroupWebService;
+    private final DoctorGroupReadService doctorGroupReadService;
 
     @Autowired
-    public DoctorGroupEvents(DoctorGroupWebService doctorGroupWebService) {
+    public DoctorGroupEvents(DoctorGroupWebService doctorGroupWebService,
+                             DoctorGroupReadService doctorGroupReadService) {
         this.doctorGroupWebService = doctorGroupWebService;
+        this.doctorGroupReadService = doctorGroupReadService;
     }
 
     /**
@@ -48,7 +54,18 @@ public class DoctorGroupEvents {
     @RequestMapping(value = "/other", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public Boolean createGroupEvent(@RequestParam("groupId") Long groupId,
                                     @RequestParam("eventType") Integer eventType,
-                                    @RequestParam("params") Map<String, Object> params) {
+                                    @RequestParam Map<String, Object> params) {
         return RespHelper.or500(doctorGroupWebService.createGroupEvent(groupId, eventType, params));
+    }
+
+    /**
+     * 根据猪群id查询可以操作的事件类型
+     * @param groupIds 猪群ids
+     * @return 事件类型s
+     * @see io.terminus.doctor.event.enums.GroupEventType
+     */
+    @RequestMapping(value = "/types", method = RequestMethod.POST)
+    public List<Integer> findEventTypesByGroupIds(@RequestParam("groupIds[]") Long[] groupIds) {
+        return RespHelper.or500(doctorGroupReadService.findEventTypesByGroupIds(Lists.newArrayList(groupIds)));
     }
 }

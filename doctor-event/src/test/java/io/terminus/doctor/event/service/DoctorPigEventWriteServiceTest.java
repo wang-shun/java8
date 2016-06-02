@@ -6,12 +6,9 @@ import io.terminus.doctor.event.dao.DoctorPigEventDao;
 import io.terminus.doctor.event.dao.DoctorPigSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorPigTrackDao;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
-import io.terminus.doctor.event.dto.event.usual.DoctorFarmEntryDto;
 import io.terminus.doctor.event.test.BaseServiceTest;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-
-import java.util.Date;
 
 /**
  * Created by yaoqijun.
@@ -69,14 +66,14 @@ public class DoctorPigEventWriteServiceTest extends BaseServiceTest{
 
 
 
-    private DoctorFarmEntryDto buildFarmEntryDto(){
-        DoctorFarmEntryDto doctorFarmEntryDto = DoctorFarmEntryDto.builder()
-                .pigCode("pigcode").birthday(new Date()).inFarmDate(new Date()).barnId(1l).barnName("barnName")
-                .source(1).breed(1l).breedName("breedNAme").breedType(1l).breedTypeName("typeName")
-                .fatherId(1l).motherId(1l).mark("mark").earCode("earCoe").parity(100).left(1).right(2)
-                .build();
-        return doctorFarmEntryDto;
-    }
+//    private DoctorFarmEntryDto buildFarmEntryDto(){
+//        DoctorFarmEntryDto doctorFarmEntryDto = DoctorFarmEntryDto.builder()
+//                .pigCode("pigcode").birthday(new Date()).inFarmDate(new Date()).barnId(1l).barnName("barnName")
+//                .source(1).breed(1l).breedName("breedNAme").breedType(1l).breedTypeName("typeName")
+//                .fatherId(1l).motherId(1l).mark("mark").earCode("earCoe").parity(100).left(1).right(2)
+//                .build();
+//        return doctorFarmEntryDto;
+//    }
 
     public DoctorBasicInputInfoDto buildEntryInputInfo(){
         return DoctorBasicInputInfoDto.builder()

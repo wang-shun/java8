@@ -10,6 +10,7 @@ import io.terminus.doctor.workflow.model.FlowInstance;
 import io.terminus.doctor.workflow.model.FlowProcess;
 import io.terminus.doctor.workflow.utils.AssertHelper;
 import io.terminus.doctor.workflow.utils.BeanHelper;
+import io.terminus.doctor.workflow.utils.StringHelper;
 
 import java.util.List;
 import java.util.Map;
@@ -193,7 +194,14 @@ public class FlowDefinitionNodeEventQueryImpl implements FlowDefinitionNodeEvent
 
             processes.forEach(process -> {
                 List<FlowDefinitionNodeEvent> nodeEvents = getNodeEventsBySourceId(instance.getFlowDefinitionId(), process.getFlowDefinitionNodeId());
-                nodeEvents.forEach(nodeEvent -> getTaskEvents(events, instance, nodeEvent));
+                nodeEvents.forEach(nodeEvent -> {
+                    // 如果存在事件, 直接返回
+                    if (StringHelper.isNotBlank(nodeEvent.getHandler())) {
+                        events.add(nodeEvent);
+                    }else{
+                        getTaskEvents(events, instance, nodeEvent);
+                    }
+                });
             });
         });
         return events;
