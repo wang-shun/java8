@@ -33,6 +33,9 @@
 
     <!-- Doctor Message api -->
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.msg.service.DoctorMessageJob" id="doctorMessageJob" check="false"/>
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.msg.service.DoctorMessageReadService" id="doctorMessageReadService" check="false"/>
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.msg.service.DoctorMessageWriteService" id="doctorMessageWriteService" check="false"/>
+
 
     <!-- message service -->
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.parana.msg.service.ReceiverGroupReadService" id="receiverGroupReadService" check="false"/>

@@ -1,9 +1,6 @@
 package io.terminus.doctor.schedule.msg;
 
 import com.google.common.base.Throwables;
-import com.google.common.collect.Lists;
-import io.terminus.doctor.msg.dto.SubUser;
-import io.terminus.doctor.msg.service.DoctorMessageJob;
 import io.terminus.zookeeper.leader.HostLeader;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,8 +8,6 @@ import org.springframework.beans.factory.annotation.Configurable;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-
-import java.util.List;
 
 /**
  * Desc:
@@ -30,12 +25,12 @@ public class MessageJob {
     private HostLeader hostLeader;
 
     @Autowired
-    private DoctorMessageJob doctorMessageJob;
+    private MsgManager msgManager;
 
     /**
      * 产生消息
      */
-    @Scheduled(cron = "0/5 * * * * ?")
+    @Scheduled(cron = "0 0/10 * * * ?")
     public void messageProduce() {
         try {
             if (!hostLeader.isLeader()) {
@@ -43,23 +38,46 @@ public class MessageJob {
                 return;
             }
             log.info("message produce fired");
-            // TODO 测试
-            doctorMessageJob.produce(create());
+            msgManager.produce();
             log.info("message produce end");
         } catch (Exception e) {
-            log.error("message produce failed", Throwables.getStackTraceAsString(e));
+            log.error("message produce failed, cause by {}", Throwables.getStackTraceAsString(e));
         }
     }
 
-    public List<SubUser> create() {
-        List<SubUser> users = Lists.newArrayList();
-        for (long i = 1314; i < 1320; i++) {
-            users.add(SubUser.builder()
-                    .userId(i)
-                    .roleId(i%2 + 1)
-                    .parentUserId(1L)
-                    .build());
+    /**
+     * 消费短信消息
+     */
+    @Scheduled(cron = "0 0/10 * * * ?")
+    public void messageConsume() {
+        try {
+            if (!hostLeader.isLeader()) {
+                log.info("current leader is:{}, skip", hostLeader.currentLeaderId());
+                return;
+            }
+            log.info("msg message consume fired");
+            msgManager.consumeMsg();
+            log.info("msg message consume end");
+        } catch (Exception e) {
+            log.error("msg message consume failed, cause by {}", Throwables.getStackTraceAsString(e));
         }
-        return users;
+    }
+
+    /**
+     * 消费邮件消息
+     */
+    @Scheduled(cron = "0 0/10 * * * ?")
+    public void emailConsume() {
+        try {
+            if (!hostLeader.isLeader()) {
+                log.info("current leader is:{}, skip", hostLeader.currentLeaderId());
+                return;
+            }
+            log.info("msg message consume fired");
+            msgManager.consumeEmail();
+            log.info("msg message consume end");
+        } catch (Exception e) {
+            log.error("msg message consume failed, cause by {}", Throwables.getStackTraceAsString(e));
+        }
     }
 }

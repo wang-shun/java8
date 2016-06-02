@@ -6,7 +6,6 @@ import io.terminus.doctor.web.core.msg.sms.LuoSiMaoSmsServiceConfig;
 import io.terminus.doctor.workflow.WorkFlowJobConfiguration;
 import io.terminus.parana.config.ConfigCenter;
 import io.terminus.parana.web.msg.config.MsgWebConfig;
-import io.terminus.parana.web.msg.config.gatewaybuilder.SimpleMsgGatewayBuilderConfig;
 import org.springframework.beans.factory.annotation.Autowire;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -23,7 +22,9 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
 @EnableScheduling
 @Import({WorkFlowJobConfiguration.class,
         DoctorCoreWebConfiguration.class,
-        MsgWebConfig.class
+        MsgWebConfig.class,
+        LuoSiMaoSmsServiceConfig.class,
+        CommonEmailServiceConfig.class
 })
 public class DoctorScheduleConfiguration extends WebMvcConfigurerAdapter {
 

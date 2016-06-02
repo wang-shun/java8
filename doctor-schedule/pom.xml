@@ -39,6 +39,16 @@
         </dependency>
 
         <dependency>
+            <groupId>io.terminus.doctor</groupId>
+            <artifactId>doctor-user-api</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>io.terminus.doctor</groupId>
+            <artifactId>doctor-web-core</artifactId>
+        </dependency>
+
+        <dependency>
             <groupId>io.terminus.boot</groupId>
             <artifactId>spring-boot-starter-dubbo</artifactId>
         </dependency>
