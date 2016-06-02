@@ -2,8 +2,10 @@ package io.terminus.doctor.workflow.service;
 
 import com.google.common.base.Throwables;
 import io.terminus.doctor.workflow.access.JdbcAccess;
+import io.terminus.doctor.workflow.core.Execution;
 import io.terminus.doctor.workflow.core.Executor;
 import io.terminus.doctor.workflow.core.WorkFlowEngine;
+import io.terminus.doctor.workflow.event.IHandler;
 import io.terminus.doctor.workflow.model.FlowDefinition;
 import io.terminus.doctor.workflow.model.FlowDefinitionNode;
 import io.terminus.doctor.workflow.model.FlowHistoryInstance;
@@ -14,6 +16,7 @@ import io.terminus.doctor.workflow.model.FlowProcessTrack;
 import io.terminus.doctor.workflow.utils.AssertHelper;
 import io.terminus.doctor.workflow.utils.BeanHelper;
 import io.terminus.doctor.workflow.utils.NodeHelper;
+import io.terminus.doctor.workflow.utils.StringHelper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -130,12 +133,17 @@ public class FlowProcessServiceImpl implements FlowProcessService {
 
     @Override
     public void endFlowInstance(String flowDefinitionKey, Long businessId, boolean isForce, String describe) {
-        endFlowInstance(flowDefinitionKey, businessId, isForce, describe, null, null);
+        endFlowInstance(flowDefinitionKey, businessId, isForce, describe, null);
+    }
+
+    @Override
+    public void endFlowInstance(String flowDefinitionKey, Long businessId, boolean isForce, String describe, Class<? extends IHandler> handler) {
+        endFlowInstance(flowDefinitionKey, businessId, isForce, describe, null, null, handler);
     }
 
     /******************* 结束流程 相关 ********************************************/
     @Override
-    public void endFlowInstance(String flowDefinitionKey, Long businessId, boolean isForce, String describe, Long operatorId, String operatorName) {
+    public void endFlowInstance(String flowDefinitionKey, Long businessId, boolean isForce, String describe, Long operatorId, String operatorName, Class<? extends IHandler> handler) {
         // 如果不强制删除(正常结束)
         if (!isForce) {
             // 1. 校验流程实例, 和子流程实例是否存在
@@ -205,50 +213,66 @@ public class FlowProcessServiceImpl implements FlowProcessService {
                     .flowDefinitionKey(flowDefinitionKey)
                     .businessId(businessId)
                     .list();
-            if (flowInstances != null && flowInstances.size() > 0) {
-                flowInstances.forEach(flowInstance -> {
-                    List<FlowProcess> flowProcesses = workFlowEngine.buildFlowQueryService().getFlowProcessQuery()
-                            .flowInstanceId(flowInstance.getId())
-                            .list();
-                    if (flowProcesses != null && flowProcesses.size() > 0) {
-                        flowProcesses.forEach(flowProcess -> {
-                            access().deleteFlowProcess(flowProcess.getId());
-                            // 记录历史活动节点
-                            FlowHistoryProcess flowHistoryProcess = FlowHistoryProcess.builder().build();
-                            BeanHelper.copy(flowHistoryProcess, flowProcess);
-                            flowHistoryProcess.setDescribe(describe);
-                            flowHistoryProcess.setOperatorId(operatorId);
-                            flowHistoryProcess.setOperatorName(operatorName);
-                            flowHistoryProcess.setStatus(FlowProcess.Status.DELETE.value());
-                            access().createFlowHistoryProcess(flowHistoryProcess);
-                            // 记录track
-                            FlowProcessTrack flowProcessTrack = FlowProcessTrack.builder().build();
-                            BeanHelper.copy(flowProcessTrack, flowProcess);
-                            flowProcessTrack.setOperatorId(operatorId);
-                            flowProcessTrack.setOperatorName(operatorName);
-                            access().createFlowProcessTrack(flowProcessTrack);
-                        });
+            boolean flag = false; // 是否已经执行过了结束的handler
+            for (int i = 0; flowInstances != null && i < flowInstances.size(); i++) {
+                FlowInstance flowInstance = flowInstances.get(i);
+                List<FlowProcess> flowProcesses = workFlowEngine.buildFlowQueryService().getFlowProcessQuery()
+                        .flowInstanceId(flowInstance.getId())
+                        .list();
+                for (int j = 0; flowProcesses != null && j < flowProcesses.size(); j++) {
+                    FlowProcess flowProcess = flowProcesses.get(j);
+                    // 执行handler
+                    if (!flag && handler != null) {
+                        IHandler iHandler = workFlowEngine.buildContext().get(StringHelper.uncapitalize(handler.getSimpleName()));
+                        if (iHandler != null) {
+                            Execution execution = workFlowEngine.buildExecution(
+                                    flowProcess,
+                                    null,
+                                    null,
+                                    operatorId,
+                                    operatorName
+                            );
+                            iHandler.preHandle(execution);
+                            iHandler.handle(execution);
+                            iHandler.afterHandle(execution);
+                            flag = true;
+                        }
                     }
-                    access().deleteFlowInstance(flowInstance.getId());
-                    // 记录历史流程实例
-                    FlowHistoryInstance flowHistoryInstance = FlowHistoryInstance.builder().build();
-                    BeanHelper.copy(flowHistoryInstance, flowInstance);
-                    flowHistoryInstance.setDescribe(describe);
-                    flowHistoryInstance.setOperatorId(operatorId);
-                    flowHistoryInstance.setOperatorName(operatorName);
-                    flowHistoryInstance.setStatus(FlowInstance.Status.DELETE.value());
-                    access().createFlowHistoryInstance(flowHistoryInstance);
+                    access().deleteFlowProcess(flowProcess.getId());
+                    // 记录历史活动节点
+                    FlowHistoryProcess flowHistoryProcess = FlowHistoryProcess.builder().build();
+                    BeanHelper.copy(flowHistoryProcess, flowProcess);
+                    flowHistoryProcess.setDescribe(describe);
+                    flowHistoryProcess.setOperatorId(operatorId);
+                    flowHistoryProcess.setOperatorName(operatorName);
+                    flowHistoryProcess.setStatus(FlowProcess.Status.DELETE.value());
+                    access().createFlowHistoryProcess(flowHistoryProcess);
+                    // 记录track
+                    FlowProcessTrack flowProcessTrack = FlowProcessTrack.builder().build();
+                    BeanHelper.copy(flowProcessTrack, flowProcess);
+                    flowProcessTrack.setOperatorId(operatorId);
+                    flowProcessTrack.setOperatorName(operatorName);
+                    access().createFlowProcessTrack(flowProcessTrack);
+                }
+                access().deleteFlowInstance(flowInstance.getId());
+                // 记录历史流程实例
+                FlowHistoryInstance flowHistoryInstance = FlowHistoryInstance.builder().build();
+                BeanHelper.copy(flowHistoryInstance, flowInstance);
+                flowHistoryInstance.setDescribe(describe);
+                flowHistoryInstance.setOperatorId(operatorId);
+                flowHistoryInstance.setOperatorName(operatorName);
+                flowHistoryInstance.setStatus(FlowInstance.Status.DELETE.value());
+                access().createFlowHistoryInstance(flowHistoryInstance);
 
-                    // 删除所有的流程跟踪 (暂不考虑删除)
-                    /*access().deleteFlowProcessTrack(
-                            workFlowEngine.buildFlowQueryService().getFlowProcessTrackQuery()
-                                    .flowInstanceId(flowInstance.getId())
-                                    .list()
-                                    .stream()
-                                    .map(FlowProcessTrack::getId)
-                                    .collect(Collectors.toList())
-                    );*/
-                });
+                // 删除所有的流程跟踪 (暂不考虑删除)
+                /*access().deleteFlowProcessTrack(
+                        workFlowEngine.buildFlowQueryService().getFlowProcessTrackQuery()
+                                .flowInstanceId(flowInstance.getId())
+                                .list()
+                                .stream()
+                                .map(FlowProcessTrack::getId)
+                                .collect(Collectors.toList())
+                );*/
             }
         }
     }

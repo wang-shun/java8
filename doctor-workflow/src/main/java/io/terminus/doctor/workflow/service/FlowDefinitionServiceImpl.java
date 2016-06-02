@@ -133,7 +133,8 @@ public class FlowDefinitionServiceImpl implements FlowDefinitionService {
                                         cascade,
                                         "流程定义执行删除操作",
                                         operatorId,
-                                        operatorName
+                                        operatorName,
+                                        null
                                 )
                 );
             }

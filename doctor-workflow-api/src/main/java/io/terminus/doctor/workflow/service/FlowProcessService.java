@@ -1,6 +1,7 @@
 package io.terminus.doctor.workflow.service;
 
 import io.terminus.doctor.workflow.core.Executor;
+import io.terminus.doctor.workflow.event.IHandler;
 import io.terminus.doctor.workflow.model.FlowInstance;
 
 import java.util.Map;
@@ -106,6 +107,18 @@ public interface FlowProcessService {
     void endFlowInstance(String flowDefinitionKey, Long businessId, boolean isForce, String describe);
 
     /**
+     * 结束流程
+     * @param flowDefinitionKey 流程定义的key
+     * @param businessId        业务id
+     * @param isForce           是否强制结束, 强制结束会移除所有的正在运行的流程.
+     *                          isForce 默认为false, 如果存在正在执行的流程, 抛出异常
+     * @param describe          删除的理由(描述信息)
+     * @param handler           强制结束流程之后需要执行的handler
+     */
+    void endFlowInstance(String flowDefinitionKey, Long businessId, boolean isForce, String describe, Class<? extends IHandler> handler);
+
+
+    /**
      * 结束流程实例
      * @param flowDefinitionKey 流程定义的key
      * @param businessId        业务id
@@ -114,8 +127,9 @@ public interface FlowProcessService {
      * @param operatorId        操作人id
      * @param operatorName      操作人姓名
      * @param describe          删除的理由(描述信息)
+     * @param handler           强制结束流程之后需要执行的handler
      */
-    void endFlowInstance(String flowDefinitionKey, Long businessId, boolean isForce, String describe, Long operatorId, String operatorName);
+    void endFlowInstance(String flowDefinitionKey, Long businessId, boolean isForce, String describe, Long operatorId, String operatorName, Class<? extends IHandler> handler);
 
     /**
      * 回滚操作, 默认回滚1次

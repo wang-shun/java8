@@ -6,7 +6,7 @@ import io.terminus.doctor.event.dao.DoctorPigSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorPigTrackDao;
 import io.terminus.doctor.event.dao.DoctorRevertLogDao;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
-import io.terminus.doctor.event.enums.SowStatus;
+import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.handler.DoctorAbstractEventFlowHandler;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +31,7 @@ public class DoctorSowFarrowingHandler extends DoctorAbstractEventFlowHandler {
     @Override
     public DoctorPigTrack updateDoctorPigTrackInfo(DoctorPigTrack doctorPigTrack, DoctorBasicInputInfoDto basic, Map<String, Object> extra) {
         doctorPigTrack.addAllExtraMap(extra);
-        doctorPigTrack.setStatus(SowStatus.FEED.getKey());  //母猪进入哺乳的状态
+        doctorPigTrack.setStatus(PigStatus.FEED.getKey());  //母猪进入哺乳的状态
         return doctorPigTrack;
     }
 }

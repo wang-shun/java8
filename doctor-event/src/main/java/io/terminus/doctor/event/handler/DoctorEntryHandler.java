@@ -6,7 +6,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.common.utils.JsonMapper;
-import io.terminus.doctor.common.constants.JacksonType;
 import io.terminus.doctor.event.constants.DoctorFarmEntrySowConstants;
 import io.terminus.doctor.event.constants.DoctorPigSnapshotConstants;
 import io.terminus.doctor.event.dao.DoctorPigDao;
@@ -16,15 +15,12 @@ import io.terminus.doctor.event.dao.DoctorPigTrackDao;
 import io.terminus.doctor.event.dao.DoctorRevertLogDao;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
 import io.terminus.doctor.event.dto.event.usual.DoctorFarmEntryDto;
-import io.terminus.doctor.event.enums.BoarStatus;
 import io.terminus.doctor.event.enums.PigEvent;
-import io.terminus.doctor.event.enums.SowStatus;
+import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigSnapshot;
 import io.terminus.doctor.event.model.DoctorPigTrack;
-import io.terminus.doctor.workflow.core.Execution;
-import io.terminus.doctor.workflow.event.HandlerAware;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
 import org.joda.time.Years;
@@ -138,9 +134,9 @@ public class DoctorEntryHandler implements DoctorEventCreateHandler {
                 .creatorId(basic.getStaffId()).creatorName(basic.getStaffName())
                 .build();
         if(Objects.equals(basic.getPigType(), DoctorPig.PIG_TYPE.SOW.getKey())){
-            doctorPigTrack.setStatus(SowStatus.Entry.getKey());
+            doctorPigTrack.setStatus(PigStatus.Entry.getKey());
         }else if(Objects.equals(basic.getPigType(), DoctorPig.PIG_TYPE.BOAR.getKey())) {
-            doctorPigTrack.setStatus(BoarStatus.ENTRY.getKey());
+            doctorPigTrack.setStatus(PigStatus.BOAR_ENTRY.getKey());
         }else {
             throw new IllegalStateException("input.pigType.error");
         }

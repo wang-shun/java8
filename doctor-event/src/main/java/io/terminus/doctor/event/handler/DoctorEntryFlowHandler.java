@@ -15,8 +15,7 @@ import io.terminus.doctor.event.dao.DoctorPigTrackDao;
 import io.terminus.doctor.event.dao.DoctorRevertLogDao;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
 import io.terminus.doctor.event.dto.event.usual.DoctorFarmEntryDto;
-import io.terminus.doctor.event.enums.BoarStatus;
-import io.terminus.doctor.event.enums.SowStatus;
+import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigSnapshot;
@@ -124,13 +123,13 @@ public class DoctorEntryFlowHandler extends HandlerAware {
 
         DoctorPigTrack doctorPigTrack = DoctorPigTrack.builder().farmId(basic.getFarmId())
                 .currentBarnId(dto.getBarnId()).currentBarnName(dto.getBarnName())
-                .currentParity(dto.getParity()).status(SowStatus.Entry.getKey())
+                .currentParity(dto.getParity()).status(PigStatus.Entry.getKey())
                 .creatorId(basic.getStaffId()).creatorName(basic.getStaffName())
                 .build();
         if(Objects.equals(basic.getPigType(), DoctorPig.PIG_TYPE.SOW.getKey())){
-            doctorPigTrack.setStatus(SowStatus.Entry.getKey());
+            doctorPigTrack.setStatus(PigStatus.Entry.getKey());
         }else if(Objects.equals(basic.getPigType(), DoctorPig.PIG_TYPE.BOAR.getKey())) {
-            doctorPigTrack.setStatus(BoarStatus.ENTRY.getKey());
+            doctorPigTrack.setStatus(PigStatus.BOAR_ENTRY.getKey());
         }else {
             throw new IllegalStateException("input.pigType.error");
         }
