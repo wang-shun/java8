@@ -5,9 +5,7 @@ import io.terminus.common.model.Response;
 import io.terminus.doctor.event.dto.DoctorGroupDetail;
 import io.terminus.doctor.event.dto.DoctorGroupSearchDto;
 import io.terminus.doctor.event.model.DoctorGroup;
-import io.terminus.doctor.event.model.DoctorGroupEvent;
-import io.terminus.doctor.event.model.DoctorGroupSnapshot;
-import io.terminus.doctor.event.model.DoctorGroupTrack;
+import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
@@ -60,30 +58,9 @@ public interface DoctorGroupReadService {
     Response<List<DoctorGroupDetail>> findGroupDetail(@Valid DoctorGroupSearchDto groupSearchDto);
 
     /**
-     * 根据id查询猪群事件表
-     * @param groupEventId 主键id
-     * @return 猪群事件表
+     * 根据猪群id查询可以操作的事件类型
+     * @param groupIds 猪群ids
+     * @return 事件类型s
      */
-    Response<DoctorGroupEvent> findGroupEventById(Long groupEventId);
-
-    /**
-     * 根据farmId查询猪群事件表
-     * @param farmId 猪场id
-     * @return 猪群事件表
-     */
-    Response<List<DoctorGroupEvent>> findGroupEventsByFarmId(Long farmId);
-
-    /**
-     * 根据id查询猪群快照表
-     * @param groupSnapshotId 主键id
-     * @return 猪群快照表
-     */
-    Response<DoctorGroupSnapshot> findGroupSnapshotById(Long groupSnapshotId);
-
-    /**
-     * 根据id查询猪群卡片明细表
-     * @param groupTrackId 主键id
-     * @return 猪群卡片明细表
-     */
-    Response<DoctorGroupTrack> findGroupTrackById(Long groupTrackId);
+    Response<List<Integer>> findEventTypesByGroupIds(@NotEmpty(message = "groupIds.not.empty") List<Long> groupIds);
 }
