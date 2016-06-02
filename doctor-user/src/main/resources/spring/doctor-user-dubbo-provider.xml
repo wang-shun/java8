@@ -62,7 +62,7 @@
     <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.DoctorServiceReviewWriteService" ref="doctorServiceReviewWriteServiceImpl"/>
     <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.DoctorUserDataPermissionReadService" ref="doctorUserDataPermissionReadServiceImpl"/>
     <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.DoctorUserDataPermissionWriteService" ref="doctorUserDataPermissionWriteServiceImpl"/>
-    <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.DoctorUserReadService" ref="mockDoctorUserReadServiceImpl"/>
+    <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.DoctorUserReadService" ref="doctorUserReadServiceImpl"/>
 
     <!-- dubbo interface -->
     <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.user.interfaces.service.DoctorUserReadInterface" ref="doctorUserReadInterfaceImpl"/>

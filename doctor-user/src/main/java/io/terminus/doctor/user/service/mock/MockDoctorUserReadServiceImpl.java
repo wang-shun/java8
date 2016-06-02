@@ -18,7 +18,6 @@ import org.springframework.stereotype.Service;
  */
 @Slf4j
 @Service
-@Primary
 public class MockDoctorUserReadServiceImpl implements DoctorUserReadService {
 
     @Override

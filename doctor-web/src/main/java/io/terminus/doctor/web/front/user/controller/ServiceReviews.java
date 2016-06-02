@@ -1,5 +1,7 @@
 package io.terminus.doctor.web.front.user.controller;
 
+import com.google.common.collect.Lists;
+import io.terminus.doctor.user.dto.DoctorMenuDto;
 import io.terminus.doctor.user.dto.DoctorServiceApplyDto;
 import io.terminus.doctor.user.dto.DoctorServiceReviewDto;
 import io.terminus.doctor.user.dto.DoctorUserInfoDto;
@@ -16,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.List;
 
 @Slf4j
 @RestController
@@ -41,12 +44,21 @@ public class ServiceReviews {
         this.doctorOrgReadService = doctorOrgReadService;
     }
 
+    /**
+     * 根据用户id查询 用户服务开通情况
+     * @return 服务开通情况
+     */
     @RequestMapping(value = "/getUserServiceStatus", method = RequestMethod.GET)
     @ResponseBody
     public DoctorServiceReviewDto getUserServiceStatus() {
         return RespHelper.or500(doctorServiceReviewReadService.findServiceReviewDtoByUserId(UserUtil.getUserId()));
     }
 
+    /**
+     * 申请开通服务, 首次申请和驳回后再次申请都可以用这个
+     * @param serviceApplyDto 申请信息
+     * @return 申请是否成功
+     */
     @RequestMapping(value = "/applyOpenService", method = RequestMethod.POST)
     @ResponseBody
     public Boolean applyOpenService(@Valid @RequestBody DoctorServiceApplyDto serviceApplyDto) {
@@ -59,6 +71,7 @@ public class ServiceReviews {
      * @see io.terminus.doctor.user.enums.RoleType
      */
     @RequestMapping(value = "/getUserRoleType", method = RequestMethod.GET)
+    @ResponseBody
     public Integer getUserRoleType() {
         return RespHelper.or500(doctorUserReadService.findUserRoleTypeByUserId(UserUtil.getUserId()));
     }
@@ -68,8 +81,9 @@ public class ServiceReviews {
      * @return 用户基本信息
      */
     @RequestMapping(value = "/getUserBasicInfo", method = RequestMethod.GET)
+    @ResponseBody
     public DoctorUserInfoDto getUserBasicInfo() {
-        return null;
+        return RespHelper.or500(doctorUserReadService.findUserInfoByUserId(UserUtil.getUserId()));
     }
 
     /**
@@ -77,7 +91,14 @@ public class ServiceReviews {
      * @return 公司id, 公司名称, 营业执照url, 公司手机号
      */
     @RequestMapping(value = "/getOrgInfo", method = RequestMethod.GET)
+    @ResponseBody
     public DoctorOrg getOrgInfo() {
         return RespHelper.or500(doctorOrgReadService.findOrgByUserId(UserUtil.getUserId()));
+    }
+
+    @RequestMapping(value = "/getUserLevelOneMenu", method = RequestMethod.GET)
+    @ResponseBody
+    public List<DoctorMenuDto> getUserLevelOneMenu() {
+        return Lists.newArrayList();
     }
 }
