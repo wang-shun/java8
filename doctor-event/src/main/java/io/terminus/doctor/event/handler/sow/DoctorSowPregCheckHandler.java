@@ -10,6 +10,7 @@ import io.terminus.doctor.event.enums.PregCheckResult;
 import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.handler.DoctorAbstractEventFlowHandler;
 import io.terminus.doctor.event.model.DoctorPigTrack;
+import io.terminus.doctor.workflow.core.Execution;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -31,7 +32,7 @@ public class DoctorSowPregCheckHandler extends DoctorAbstractEventFlowHandler{
     }
 
     @Override
-    public DoctorPigTrack updateDoctorPigTrackInfo(DoctorPigTrack doctorPigTrack, DoctorBasicInputInfoDto basic, Map<String, Object> extra) {
+    public DoctorPigTrack updateDoctorPigTrackInfo(Execution execution, DoctorPigTrack doctorPigTrack, DoctorBasicInputInfoDto basic, Map<String, Object> extra) {
         doctorPigTrack.addAllExtraMap(extra);
         Integer pregCheckResult = (Integer) extra.get("checkResult");
         if(Objects.equals(pregCheckResult, PregCheckResult.UNSURE.getKey())){
@@ -43,6 +44,8 @@ public class DoctorSowPregCheckHandler extends DoctorAbstractEventFlowHandler{
             // 其余默认 没有怀孕
             doctorPigTrack.setStatus(PigStatus.KongHuai.getKey());
         }
+        Map<String,Object> express = execution.getExpression();
+        express.put("pregCheckResult", pregCheckResult);
         return doctorPigTrack;
     }
 }
