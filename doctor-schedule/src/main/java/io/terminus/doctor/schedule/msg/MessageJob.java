@@ -10,7 +10,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 /**
- * Desc:
+ * Desc: 消息 job
  * Mail: chk@terminus.io
  * Created by icemimosa
  * Date: 16/6/1

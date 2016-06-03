@@ -14,7 +14,9 @@ public enum Category {
 
     SYSTEM(0, "一般系统消息"),
 
-    SOW_BREEDING(1,"待配种母猪提示");
+    SOW_BREEDING(1,"待配种母猪提示"),
+
+    SOW_PREGCHECK(2,"母猪需妊娠检查提示");
 
     @Getter
     private Integer key;

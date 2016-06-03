@@ -37,7 +37,7 @@ public class RuleValue implements Serializable {
     private String describe;
 
     /**
-     * 值判断,  **** 值若为时间则以小时为单位
+     * 值判断
      */
     private Double value;
     private Double leftValue;

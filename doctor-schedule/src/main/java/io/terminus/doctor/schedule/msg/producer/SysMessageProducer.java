@@ -1,11 +1,8 @@
-package io.terminus.doctor.msg.producer;
+package io.terminus.doctor.schedule.msg.producer;
 
 import com.google.common.collect.Lists;
 import io.terminus.common.utils.Splitters;
-import io.terminus.doctor.msg.dao.DoctorMessageDao;
-import io.terminus.doctor.msg.dao.DoctorMessageRuleDao;
-import io.terminus.doctor.msg.dao.DoctorMessageRuleRoleDao;
-import io.terminus.doctor.msg.dao.DoctorMessageRuleTemplateDao;
+import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.msg.dto.Rule;
 import io.terminus.doctor.msg.dto.RuleValue;
 import io.terminus.doctor.msg.dto.SubUser;
@@ -13,6 +10,13 @@ import io.terminus.doctor.msg.enums.Category;
 import io.terminus.doctor.msg.model.DoctorMessage;
 import io.terminus.doctor.msg.model.DoctorMessageRuleRole;
 import io.terminus.doctor.msg.model.DoctorMessageRuleTemplate;
+import io.terminus.doctor.msg.producer.AbstractProducer;
+import io.terminus.doctor.msg.service.DoctorMessageReadService;
+import io.terminus.doctor.msg.service.DoctorMessageRuleReadService;
+import io.terminus.doctor.msg.service.DoctorMessageRuleRoleReadService;
+import io.terminus.doctor.msg.service.DoctorMessageRuleTemplateReadService;
+import io.terminus.doctor.msg.service.DoctorMessageWriteService;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,28 +32,31 @@ import java.util.List;
  * Date: 16/6/2
  */
 @Component
+@Slf4j
 public class SysMessageProducer extends AbstractProducer {
 
 
     @Autowired
-    public SysMessageProducer(DoctorMessageRuleTemplateDao doctorMessageRuleTemplateDao,
-                               DoctorMessageRuleDao doctorMessageRuleDao,
-                               DoctorMessageRuleRoleDao doctorMessageRuleRoleDao,
-                               DoctorMessageDao doctorMessageDao) {
-        super(doctorMessageRuleTemplateDao,
-                doctorMessageRuleDao,
-                doctorMessageRuleRoleDao,
-                doctorMessageDao,
+    public SysMessageProducer(DoctorMessageRuleTemplateReadService doctorMessageRuleTemplateReadService,
+                              DoctorMessageRuleReadService doctorMessageRuleReadService,
+                              DoctorMessageRuleRoleReadService doctorMessageRuleRoleReadService,
+                              DoctorMessageReadService doctorMessageReadService,
+                              DoctorMessageWriteService doctorMessageWriteService) {
+        super(doctorMessageRuleTemplateReadService,
+                doctorMessageRuleReadService,
+                doctorMessageRuleRoleReadService,
+                doctorMessageReadService,
+                doctorMessageWriteService,
                 Category.SYSTEM);
     }
 
     @Override
     protected List<DoctorMessage> message(DoctorMessageRuleRole ruleRole, List<SubUser> subUsers) {
-
+        log.info("系统消息产生 --- SysMessageProducer 开始执行");
         List<DoctorMessage> messages = Lists.newArrayList();
 
         // 1. 获取消息模板和规则
-        DoctorMessageRuleTemplate template = doctorMessageRuleTemplateDao.findById(ruleRole.getTemplateId());
+        DoctorMessageRuleTemplate template = RespHelper.orServEx(doctorMessageRuleTemplateReadService.findMessageRuleTemplateById(ruleRole.getTemplateId()));
         Rule rule = template.getRule();
 
         if (StringUtils.isNotBlank(rule.getChannels())) {
@@ -76,6 +83,7 @@ public class SysMessageProducer extends AbstractProducer {
             Splitters.COMMA.splitToList(rule.getChannels()).forEach(channel ->
                     messages.addAll(createMessage(subUsers, ruleRole, Integer.parseInt(channel), template.getContent())));
         }
+        log.info("系统消息产生 --- SysMessageProducer 结束执行执行, 产生 {} 条消息", messages.size());
         return messages;
     }
 }

@@ -5,6 +5,7 @@ import lombok.Getter;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Desc: 规则对象
@@ -45,10 +46,10 @@ public class Rule implements Serializable {
      */
     public enum Channel {
 
-        SYSTEM(0, "站内信"),
-        MESSAGE(1, "短信"),
-        EMAIL(2, "邮箱"),
-        APPPUSH(3, "app推送");
+        SYSTEM(0, "站内信", "sys"),
+        MESSAGE(1, "短信", "sms"),
+        EMAIL(2, "邮箱", "email"),
+        APPPUSH(3, "app推送", "app");
 
         @Getter
         private Integer value;
@@ -56,9 +57,21 @@ public class Rule implements Serializable {
         @Getter
         private String describe;
 
-        Channel(Integer value, String describe) {
+        @Getter
+        private String suffix;
+
+        Channel(Integer value, String describe, String suffix) {
             this.value = value;
             this.describe = describe;
+            this.suffix = suffix;
+        }
+        public static Channel from(Integer value){
+            for(Channel channel : Channel.values()){
+                if(Objects.equals(channel.getValue(), value)){
+                    return channel;
+                }
+            }
+            return null;
         }
     }
 }

@@ -1,11 +1,11 @@
 package io.terminus.doctor.msg.producer;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
-import io.terminus.doctor.msg.dao.DoctorMessageDao;
-import io.terminus.doctor.msg.dao.DoctorMessageRuleDao;
-import io.terminus.doctor.msg.dao.DoctorMessageRuleRoleDao;
-import io.terminus.doctor.msg.dao.DoctorMessageRuleTemplateDao;
+import io.terminus.common.utils.JsonMapper;
+import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.msg.dto.Rule;
 import io.terminus.doctor.msg.dto.RuleValue;
 import io.terminus.doctor.msg.dto.SubUser;
@@ -14,6 +14,11 @@ import io.terminus.doctor.msg.model.DoctorMessage;
 import io.terminus.doctor.msg.model.DoctorMessageRule;
 import io.terminus.doctor.msg.model.DoctorMessageRuleRole;
 import io.terminus.doctor.msg.model.DoctorMessageRuleTemplate;
+import io.terminus.doctor.msg.service.DoctorMessageReadService;
+import io.terminus.doctor.msg.service.DoctorMessageRuleReadService;
+import io.terminus.doctor.msg.service.DoctorMessageRuleRoleReadService;
+import io.terminus.doctor.msg.service.DoctorMessageRuleTemplateReadService;
+import io.terminus.doctor.msg.service.DoctorMessageWriteService;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
 
@@ -31,28 +36,38 @@ import java.util.stream.Collectors;
 @Slf4j
 public abstract class AbstractProducer implements IProducer {
 
-    protected DoctorMessageRuleTemplateDao doctorMessageRuleTemplateDao;
-    protected DoctorMessageRuleDao doctorMessageRuleDao;
-    protected DoctorMessageRuleRoleDao doctorMessageRuleRoleDao;
-    protected DoctorMessageDao doctorMessageDao;
+    protected ObjectMapper MAPPER = JsonMapper.JSON_NON_DEFAULT_MAPPER.getMapper();
+
+    protected DoctorMessageRuleTemplateReadService doctorMessageRuleTemplateReadService;
+
+    protected DoctorMessageRuleReadService doctorMessageRuleReadService;
+
+    protected DoctorMessageRuleRoleReadService doctorMessageRuleRoleReadService;
+
+    protected DoctorMessageReadService doctorMessageReadService;
+
+    protected DoctorMessageWriteService doctorMessageWriteService;
+
     protected Category category;
 
-    public AbstractProducer(DoctorMessageRuleTemplateDao doctorMessageRuleTemplateDao,
-                            DoctorMessageRuleDao doctorMessageRuleDao,
-                            DoctorMessageRuleRoleDao doctorMessageRuleRoleDao,
-                            DoctorMessageDao doctorMessageDao,
+    public AbstractProducer(DoctorMessageRuleTemplateReadService doctorMessageRuleTemplateReadService,
+                            DoctorMessageRuleReadService doctorMessageRuleReadService,
+                            DoctorMessageRuleRoleReadService doctorMessageRuleRoleReadService,
+                            DoctorMessageReadService doctorMessageReadService,
+                            DoctorMessageWriteService doctorMessageWriteService,
                             Category category) {
-        this.doctorMessageRuleTemplateDao = doctorMessageRuleTemplateDao;
-        this.doctorMessageRuleDao = doctorMessageRuleDao;
-        this.doctorMessageRuleRoleDao = doctorMessageRuleRoleDao;
-        this.doctorMessageDao = doctorMessageDao;
+        this.doctorMessageRuleTemplateReadService = doctorMessageRuleTemplateReadService;
+        this.doctorMessageRuleReadService = doctorMessageRuleReadService;
+        this.doctorMessageRuleRoleReadService = doctorMessageRuleRoleReadService;
+        this.doctorMessageReadService = doctorMessageReadService;
+        this.doctorMessageWriteService = doctorMessageWriteService;
         this.category = category;
     }
 
     @Override
     public void produce(List<SubUser> subUsers) {
 
-        List<DoctorMessageRuleTemplate> ruleTemplates = doctorMessageRuleTemplateDao.findByCategory(category.getKey());
+        List<DoctorMessageRuleTemplate> ruleTemplates = RespHelper.orServEx(doctorMessageRuleTemplateReadService.findByCategory(category.getKey()));
         for (int k = 0; ruleTemplates != null && k < ruleTemplates.size(); k++) {
             DoctorMessageRuleTemplate ruleTemplate = ruleTemplates.get(k);
             // 如果不正常, 则不继续执行
@@ -60,7 +75,6 @@ public abstract class AbstractProducer implements IProducer {
                 return;
             }
             // 1. 如果是系统消息
-            log.info("消息类型是 : {}, subUsers size is {}", ruleTemplate.getType(), subUsers.size());
             if (Objects.equals(DoctorMessageRuleTemplate.Type.SYSTEM.getValue(), ruleTemplate.getType())) {
                 // 获取最新发送的系统消息(系统消息是对应到模板的)
                 DoctorMessage latestMessage = getLatestSysMessage(ruleTemplate.getId());
@@ -75,18 +89,17 @@ public abstract class AbstractProducer implements IProducer {
                 // 获取信息 (针对所有的角色/user)
                 List<DoctorMessage> message = message(ruleRole, subUsers);
                 if(message != null && message.size() > 0) {
-                    log.info("生成消息对象: {}", message);
-                    doctorMessageDao.creates(message);
+                    doctorMessageWriteService.createMessages(message);
                 }
             }
 
             // 2. 如果是预警或警报消息
             else{
-                List<DoctorMessageRuleRole> ruleRoles = doctorMessageRuleRoleDao.findByTplId(ruleTemplate.getId());
+                List<DoctorMessageRuleRole> ruleRoles = RespHelper.orServEx(doctorMessageRuleRoleReadService.findByTplId(ruleTemplate.getId()));
                 for (int i = 0; ruleRoles != null && i < ruleRoles.size(); i++) {
                     DoctorMessageRuleRole ruleRole = ruleRoles.get(i);
                     // 查询对应的message_rule
-                    DoctorMessageRule messageRule = doctorMessageRuleDao.findById(ruleRole.getRuleId());
+                    DoctorMessageRule messageRule = RespHelper.orServEx(doctorMessageRuleReadService.findMessageRuleById(ruleRole.getRuleId()));
                     if(messageRule == null || !Objects.equals(messageRule.getStatus(), DoctorMessageRule.Status.NORMAL.getValue())) {
                         continue;
                     }
@@ -99,7 +112,7 @@ public abstract class AbstractProducer implements IProducer {
                     // 获取信息
                     List<DoctorMessage> message = message(ruleRole, subUsers);
                     if(message != null && message.size() > 0) {
-                        doctorMessageDao.creates(message);
+                        doctorMessageWriteService.createMessages(message);
                     }
                 }
             }
@@ -171,7 +184,7 @@ public abstract class AbstractProducer implements IProducer {
      */
     protected List<DoctorMessage> createMessage(List<SubUser> subUsers, DoctorMessageRuleRole ruleRole, Integer channel, String jsonData) {
         List<DoctorMessage> messages = Lists.newArrayList();
-        DoctorMessageRuleTemplate template = doctorMessageRuleTemplateDao.findById(ruleRole.getTemplateId());
+        DoctorMessageRuleTemplate template = RespHelper.orServEx(doctorMessageRuleTemplateReadService.findMessageRuleTemplateById(ruleRole.getTemplateId()));
         if (subUsers != null && subUsers.size() > 0) {
             // 主账户
             subUsers.stream().map(SubUser::getParentUserId).collect(Collectors.toSet())
@@ -182,12 +195,12 @@ public abstract class AbstractProducer implements IProducer {
                                     .roleId(ruleRole.getRoleId())
                                     .userId(parentId)
                                     .templateId(ruleRole.getTemplateId())
-                                    .messageTemplate(template.getMessageTemplate())
+                                    .messageTemplate(getTemplateName(template.getMessageTemplate(), channel))
                                     .type(template.getType())
                                     .category(template.getCategory())
                                     .data(jsonData)
                                     .channel(channel)
-                                    .url(ruleRole.getRule().getUrl())
+                                    .url(getUrl(ruleRole.getRule().getUrl(), channel))
                                     .status(DoctorMessage.Status.NORMAL.getValue())
                                     .createdBy(template.getUpdatedBy())
                                     .build()
@@ -203,12 +216,12 @@ public abstract class AbstractProducer implements IProducer {
                                 .roleId(ruleRole.getRoleId())
                                 .userId(subUser.getUserId())
                                 .templateId(ruleRole.getTemplateId())
-                                .messageTemplate(template.getMessageTemplate())
+                                .messageTemplate(getTemplateName(template.getMessageTemplate(), channel))
                                 .type(template.getType())
                                 .category(template.getCategory())
                                 .data(jsonData)
                                 .channel(channel)
-                                .url(ruleRole.getRule().getUrl())
+                                .url(getUrl(ruleRole.getRule().getUrl(), channel))
                                 .status(DoctorMessage.Status.NORMAL.getValue())
                                 .createdBy(template.getUpdatedBy())
                                 .build()
@@ -225,12 +238,12 @@ public abstract class AbstractProducer implements IProducer {
                                         .roleId(ruleRole.getRoleId())
                                         .userId(subUser.getUserId())
                                         .templateId(ruleRole.getTemplateId())
-                                        .messageTemplate(template.getMessageTemplate())
+                                        .messageTemplate(getTemplateName(template.getMessageTemplate(), channel))
                                         .type(template.getType())
                                         .category(template.getCategory())
                                         .data(jsonData)
                                         .channel(channel)
-                                        .url(ruleRole.getRule().getUrl())
+                                        .url(getUrl(ruleRole.getRule().getUrl(), channel))
                                         .status(DoctorMessage.Status.NORMAL.getValue())
                                         .createdBy(template.getUpdatedBy())
                                         .build()
@@ -248,7 +261,8 @@ public abstract class AbstractProducer implements IProducer {
      * @return
      */
     private DoctorMessage getLatestWarnMessage(Long templateId, Long farmId, Long roleId) {
-        List<DoctorMessage> messages = doctorMessageDao.list(ImmutableMap.of("farmId", farmId, "templateId", templateId, "roleId", roleId));
+        List<DoctorMessage> messages = RespHelper.orServEx(doctorMessageReadService.findMessageByCriteria(
+                ImmutableMap.of("farmId", farmId, "templateId", templateId, "roleId", roleId)));
         if (messages != null && messages.size() > 0) {
             return messages.get(0);
         }
@@ -261,7 +275,8 @@ public abstract class AbstractProducer implements IProducer {
      * @return
      */
     private DoctorMessage getLatestSysMessage(Long templateId) {
-        List<DoctorMessage> messages = doctorMessageDao.list(ImmutableMap.of("templateId", templateId));
+        List<DoctorMessage> messages = RespHelper.orServEx(doctorMessageReadService.findMessageByCriteria(
+                ImmutableMap.of("templateId", templateId)));
         if (messages != null && messages.size() > 0) {
             return messages.get(0);
         }
@@ -290,5 +305,58 @@ public abstract class AbstractProducer implements IProducer {
             }
         }
         return true;
+    }
+
+    /**
+     * 获取具体的模板名称
+     * @param tplName   模板基名
+     * @param channel   渠道
+     * @return
+     */
+    private String getTemplateName(String tplName, Integer channel) {
+        Rule.Channel type = Rule.Channel.from(channel);
+        if (type != null) {
+            return tplName + "." + type.getSuffix();
+        }
+        return tplName;
+    }
+
+    /**
+     * 获取不同的url
+     * @param url       url
+     * @param channel   发送渠道, app推送需要带 http:// 的全url
+     */
+    private String getUrl(String url, Integer channel) {
+        // 如果是 app 推送
+        if (Objects.equals(channel, Rule.Channel.APPPUSH.getValue())) {
+            return url;
+        }
+        // 否则去除前缀
+        if (url.contains("http://")) {
+            String url1 = url.substring(7);
+            url1 = url1.substring(url1.indexOf("/"));
+            return url1;
+        }else {
+            return url.substring(url.indexOf("/"));
+        }
+    }
+
+    /**
+     * 获取总页数
+     * @param total     总数量
+     * @param size      批量获取的数量
+     * @return
+     */
+    protected Long getPageSize(Long total, Long size) {
+        size = MoreObjects.firstNonNull(size, 100L);
+        Long page = 0L;
+        if (total != null) {
+            if (total % size == 0) {
+                page = total / size;
+            }else {
+                page = total / size + 1;
+            }
+        }
+        return page;
     }
 }

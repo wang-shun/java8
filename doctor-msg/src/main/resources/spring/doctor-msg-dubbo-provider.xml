@@ -28,7 +28,6 @@
     <dubbo:service version="1.0.0" retries="0" interface="io.terminus.parana.msg.service.NotifyWriteService" ref="notifyWriteServiceImpl"/>
 
     <!-- Doctor Message Services -->
-    <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.msg.service.DoctorMessageJob" ref="doctorMessageJobImpl"/>
     <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.msg.service.DoctorMessageRuleTemplateReadService" ref="doctorMessageRuleTemplateReadServiceImpl"/>
     <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.msg.service.DoctorMessageRuleTemplateWriteService" ref="doctorMessageRuleTemplateWriteServiceImpl"/>
     <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.msg.service.DoctorMessageRuleReadService" ref="doctorMessageRuleReadServiceImpl"/>

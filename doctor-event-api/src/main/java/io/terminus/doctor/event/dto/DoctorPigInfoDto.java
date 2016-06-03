@@ -53,6 +53,8 @@ public class DoctorPigInfoDto implements Serializable{
 
     private String barnName;
 
+    private Date updatedAt;
+
     public static DoctorPigInfoDto buildDoctorPigInfoDto(DoctorPig doctorPig, DoctorPigTrack doctorPigTrack){
         checkState(!isNull(doctorPig), "build.doctorPig.empty");
         DoctorPigInfoDtoBuilder builder = DoctorPigInfoDto.builder()
@@ -63,7 +65,8 @@ public class DoctorPigInfoDto implements Serializable{
         if(!isNull(doctorPigTrack)){
             builder.status(doctorPigTrack.getStatus()).parity(doctorPigTrack.getCurrentParity())
                     .barnId(doctorPigTrack.getCurrentBarnId())
-                    .barnName(doctorPigTrack.getCurrentBarnName());
+                    .barnName(doctorPigTrack.getCurrentBarnName())
+                    .updatedAt(doctorPigTrack.getUpdatedAt());
         }
         return builder.build();
     }
