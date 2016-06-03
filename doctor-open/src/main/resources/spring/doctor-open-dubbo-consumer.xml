@@ -58,6 +58,10 @@
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.SellerRoleReadService" id="sellerRoleReadService" check="false"/>
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.SellerRoleWriteService" id="sellerRoleWriteService" check="false"/>
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.OperatorRoleReadService" id="operatorRoleReadService" check="false"/>
-    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.UserBindService" id="userBindService" check="false"/>
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.UserBindReadService" id="userBindReadService" check="false"/>
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.UserBindWriteService" id="userBindWriteService" check="false"/>
+
+    <!--event service-->
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.event.service.DoctorPigTypeStatisticReadService" id="doctorPigTypeStatisticReadService" check="false"/>
 
 </beans>

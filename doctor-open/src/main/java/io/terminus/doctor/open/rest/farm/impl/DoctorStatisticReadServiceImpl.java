@@ -14,6 +14,7 @@ import io.terminus.doctor.open.rest.farm.service.DoctorStatisticReadService;
 import io.terminus.doctor.user.model.DoctorFarm;
 import io.terminus.doctor.user.model.DoctorOrg;
 import io.terminus.doctor.user.service.DoctorFarmReadService;
+import io.terminus.doctor.user.service.DoctorOrgReadService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -32,12 +33,15 @@ import java.util.stream.Collectors;
 public class DoctorStatisticReadServiceImpl implements DoctorStatisticReadService {
 
     private final DoctorFarmReadService doctorFarmReadService;
+    private final DoctorOrgReadService doctorOrgReadService;
     private final DoctorPigTypeStatisticReadService doctorPigTypeStatisticReadService;
 
     @Autowired
     private DoctorStatisticReadServiceImpl(DoctorFarmReadService doctorFarmReadService,
+                                           DoctorOrgReadService doctorOrgReadService,
                                            DoctorPigTypeStatisticReadService doctorPigTypeStatisticReadService) {
         this.doctorFarmReadService = doctorFarmReadService;
+        this.doctorOrgReadService = doctorOrgReadService;
         this.doctorPigTypeStatisticReadService = doctorPigTypeStatisticReadService;
     }
 
@@ -63,7 +67,7 @@ public class DoctorStatisticReadServiceImpl implements DoctorStatisticReadServic
             List<Long> farmIds = Lists.newArrayList();
 
             //获取公司信息
-            DoctorOrg org = RespHelper.orServEx(doctorFarmReadService.findOrgById(orgId));
+            DoctorOrg org = RespHelper.orServEx(doctorOrgReadService.findOrgById(orgId));
 
             //获取猪场统计
             List<DoctorFarmBasicDto> farmBasicDtos = farmIds.stream()
