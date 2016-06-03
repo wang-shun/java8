@@ -27,6 +27,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static io.terminus.common.utils.Arguments.notEmpty;
+
 /**
  * Desc: 猪群卡片表读服务实现类
  * Mail: yangzl@terminus.io
@@ -145,13 +147,15 @@ public class DoctorGroupReadServiceImpl implements DoctorGroupReadService {
                     .collect(Collectors.groupingBy(gd -> gd.getGroup().getPigType()));
 
             //根据猪类统计
-            DoctorGroupCount count = DoctorGroupCount.builder()
-                    .orgId(orgId)
-                    .farmId(farmId)
-                    .farrowCount(CountUtil.sumInt(groupMap.get(PigType.FARROW_PIGLET.getValue()), g -> g.getGroupTrack().getQuantity()))
-                    .nurseryCount(CountUtil.sumInt(groupMap.get(PigType.NURSERY_PIGLET.getValue()), g -> g.getGroupTrack().getQuantity()))
-                    .fattenCount(CountUtil.sumInt(groupMap.get(PigType.FATTEN_PIG.getValue()), g -> g.getGroupTrack().getQuantity()))
-                    .build();
+            DoctorGroupCount count = new DoctorGroupCount();
+            count.setOrgId(orgId);
+            count.setFarmId(farmId);
+            count.setFarrowCount(notEmpty(groupMap.get(PigType.FARROW_PIGLET.getValue())) ?
+                    CountUtil.sumInt(groupMap.get(PigType.FARROW_PIGLET.getValue()), g -> g.getGroupTrack().getQuantity()) : 0L);
+            count.setNurseryCount(notEmpty(groupMap.get(PigType.NURSERY_PIGLET.getValue())) ?
+                    CountUtil.sumInt(groupMap.get(PigType.NURSERY_PIGLET.getValue()), g -> g.getGroupTrack().getQuantity()) : 0L);
+            count.setFattenCount(notEmpty(groupMap.get(PigType.FATTEN_PIG.getValue())) ?
+                    CountUtil.sumInt(groupMap.get(PigType.FATTEN_PIG.getValue()), g -> g.getGroupTrack().getQuantity()) : 0L);
             return Response.ok(count);
         } catch (Exception e) {
             log.error("count farm group failed, farmId:{}, cause:{}", farmId, Throwables.getStackTraceAsString(e));

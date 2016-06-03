@@ -9,7 +9,6 @@ import com.google.common.eventbus.EventBus;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
-import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import java.util.Map;
@@ -23,7 +22,6 @@ import java.util.concurrent.Executors;
  * Author: xiao
  */
 @Slf4j
-@Component
 public class CoreEventDispatcher {
 
     protected final EventBus eventBus;

@@ -63,6 +63,11 @@
         <if test="initBarnId != null">AND init_barn_id = #{initBarnId}</if>
         <if test="currentBarnId != null">AND current_barn_id = #{currentBarnId}</if>
         <if test="pigType != null">AND pig_type = #{pigType}</if>
+        <if test="pigTypes != null  &amp;&amp; pigTypes.size() > 0">AND pig_type IN
+            <foreach collection="pigTypes" item="type" open="(" separator="," close=")">
+                #{type}
+            </foreach>
+        </if>
         <if test="breedId != null">AND breed_id = #{breedId}</if>
         <if test="geneticId != null">AND genetic_id = #{geneticId}</if>
         <if test="startOpenAt != null">AND open_at &gt;= #{startOpenAt}</if>

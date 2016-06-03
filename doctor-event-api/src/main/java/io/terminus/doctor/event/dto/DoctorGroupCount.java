@@ -1,9 +1,6 @@
 package io.terminus.doctor.event.dto;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.experimental.Builder;
 
 import java.io.Serializable;
 
@@ -14,9 +11,6 @@ import java.io.Serializable;
  * Date: 16/6/3
  */
 @Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
 public class DoctorGroupCount implements Serializable {
     private static final long serialVersionUID = -7198222555477065587L;
 
