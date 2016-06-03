@@ -19,15 +19,15 @@ import java.util.stream.Collectors;
 public class CountUtil {
 
     public static <T> long sumInt(List<T> datas, ToIntFunction<T> function) {
-        return (int) datas.stream().collect(Collectors.summarizingInt(function)).getSum();
+        return datas.stream().collect(Collectors.summarizingInt(function)).getSum();
     }
 
     public static <T> long sumLong(List<T> datas, ToLongFunction<T> function) {
-        return  datas.stream().collect(Collectors.summarizingLong(function)).getSum();
+        return datas.stream().collect(Collectors.summarizingLong(function)).getSum();
     }
 
     public static <T> double sumDouble(List<T> datas, ToDoubleFunction<T> function) {
-        return  datas.stream().collect(Collectors.summarizingDouble(function)).getSum();
+        return datas.stream().collect(Collectors.summarizingDouble(function)).getSum();
     }
 
     public static <T> IntSummaryStatistics intStatistics(List<T> datas, ToIntFunction<T> function) {
