@@ -14,6 +14,8 @@ import io.terminus.parana.user.impl.dao.UserDao;
 import io.terminus.parana.user.impl.service.UserReadServiceImpl;
 import io.terminus.parana.user.model.LoginType;
 import io.terminus.parana.user.model.User;
+import io.terminus.parana.user.model.UserProfile;
+import io.terminus.parana.user.service.UserProfileReadService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
@@ -36,14 +38,17 @@ public class DoctorUserReadServiceImpl extends UserReadServiceImpl implements Do
     private final UserDao userDao;
     private final DoctorStaffReadService doctorStaffReadService;
     private final DoctorUserDataPermissionReadService doctorUserDataPermissionReadService;
+    private final UserProfileReadService userProfileReadService;
 
     @Autowired
     public DoctorUserReadServiceImpl(UserDao userDao, DoctorStaffReadService doctorStaffReadService,
-                                     DoctorUserDataPermissionReadService doctorUserDataPermissionReadService) {
+                                     DoctorUserDataPermissionReadService doctorUserDataPermissionReadService,
+                                     UserProfileReadService userProfileReadService) {
         super(userDao);
         this.userDao = userDao;
         this.doctorStaffReadService = doctorStaffReadService;
         this.doctorUserDataPermissionReadService = doctorUserDataPermissionReadService;
+        this.userProfileReadService = userProfileReadService;
     }
 
     /**
@@ -117,17 +122,17 @@ public class DoctorUserReadServiceImpl extends UserReadServiceImpl implements Do
             //子账号
             if(Objects.equals(UserType.FARM_SUB.value(), user.getType())){
                 DoctorUserDataPermission permission = RespHelper.orServEx(doctorUserDataPermissionReadService.findDataPermissionByUserId(userId));
-                if(permission.getFarmIdSet() != null){
-                    if(permission.getFarmIdSet().size() == 1){
+                if(!permission.getFarmIdsList().isEmpty()){
+                    if(permission.getFarmIdsList().size() == 1){
                         return Response.ok(RoleType.SUB_SINGLE.getValue());
                     }
-                    if(permission.getFarmIdSet().size() > 1){
+                    else{
                         return Response.ok(RoleType.SUB_MULTI.getValue());
                     }
                 }
             }
             //其他
-            response.setResult(null);
+            return Response.fail("user.role.not.vaild");
         }catch(ServiceException e){
             response.setError(e.getMessage());
         }catch(Exception e){
@@ -140,37 +145,36 @@ public class DoctorUserReadServiceImpl extends UserReadServiceImpl implements Do
     @Override
     public Response<DoctorUserInfoDto> findUserInfoByUserId(Long userId) {
         Response<DoctorUserInfoDto> response = new Response<>();
-        DoctorUserInfoDto dto = new DoctorUserInfoDto();
         try {
+
+            //用户信息
             User user = userDao.findById(userId);
             user.setPassword(null);
-            dto.setUser(user);
-            dto.setStaff(RespHelper.orServEx(this.findStaffByUserId(userId)));
 
-            //管理员
-            if(Objects.equals(UserType.ADMIN.value(), user.getType())){
-                dto.setFrontRoleType(RoleType.ADMIN.getValue());
-            }
+            //用户个人信息
+            UserProfile userProfile = RespHelper.orServEx(userProfileReadService.findProfileByUserId(userId));
 
-            //主账号
-            if(Objects.equals(UserType.FARM_ADMIN_PRIMARY.value(), user.getType())){
-                dto.setFrontRoleType(RoleType.MAIN.getValue());
-            }
+            //员工信息
+            DoctorStaff doctorStaff = RespHelper.orServEx(this.findStaffByUserId(userId));
 
-            //子账号
-            if(Objects.equals(UserType.FARM_SUB.value(), user.getType())){
+            //角色类型
+            Integer roleType = RespHelper.orServEx(findUserRoleTypeByUserId(userId));
+
+            Long farmId = null;
+            if(Objects.equals(roleType, RoleType.SUB_SINGLE.getValue())){
                 DoctorUserDataPermission permission = RespHelper.orServEx(doctorUserDataPermissionReadService.findDataPermissionByUserId(userId));
-                if(permission.getFarmIdSet() != null){
-                    if(permission.getFarmIdSet().size() == 1){
-                        dto.setFrontRoleType(RoleType.SUB_SINGLE.getValue());
-                        dto.setFarmId(permission.getFarmIdSet().iterator().next());
-                    }
-                    if(permission.getFarmIdSet().size() > 1){
-                        dto.setFrontRoleType(RoleType.SUB_MULTI.getValue());
-                    }
-                }
+                farmId = permission.getFarmIdsList().get(0);
             }
-            response.setResult(dto);
+
+            return RespHelper.ok(
+                    DoctorUserInfoDto.builder()
+                            .user(user)
+                            .userProfile(userProfile)
+                            .staff(doctorStaff)
+                            .frontRoleType(roleType)
+                            .farmId(farmId)
+                            .build()
+            );
         }catch(ServiceException e){
             response.setError(e.getMessage());
         }catch(Exception e){

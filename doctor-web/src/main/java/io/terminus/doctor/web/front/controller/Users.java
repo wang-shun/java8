@@ -15,16 +15,23 @@ import com.google.common.eventbus.EventBus;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.BaseUser;
 import io.terminus.common.model.Response;
+import io.terminus.common.utils.JsonMapper;
 import io.terminus.common.utils.Splitters;
 import io.terminus.doctor.common.enums.UserRole;
 import io.terminus.doctor.common.enums.UserStatus;
 import io.terminus.doctor.common.enums.UserType;
+import io.terminus.doctor.user.model.DoctorUser;
 import io.terminus.doctor.user.util.DoctorUserMaker;
 import io.terminus.doctor.web.core.component.CaptchaGenerator;
 import io.terminus.doctor.web.core.component.MobilePattern;
 import io.terminus.doctor.web.core.util.TextValidator;
 import io.terminus.lib.sms.SmsException;
 import io.terminus.pampas.common.UserUtil;
+import io.terminus.parana.auth.core.AclLoader;
+import io.terminus.parana.auth.core.PermissionHelper;
+import io.terminus.parana.auth.model.Acl;
+import io.terminus.parana.auth.model.ParanaThreadVars;
+import io.terminus.parana.auth.model.PermissionData;
 import io.terminus.parana.common.model.ParanaUser;
 import io.terminus.parana.user.model.LoginType;
 import io.terminus.parana.user.model.User;
@@ -90,6 +97,10 @@ public class Users {
 
     private final MsgWebService smsWebService;
 
+    private final AclLoader aclLoader;
+
+    private final PermissionHelper permissionHelper;
+
     private final Splitter AT_SPLITTER = Splitter.on('@').trimResults();
 
     /**
@@ -103,13 +114,17 @@ public class Users {
                  EventBus eventBus,
                  CaptchaGenerator captchaGenerator,
                  MobilePattern mobilePattern,
-                 @Qualifier("smsWebService") MsgWebService smsWebService) {
+                 @Qualifier("smsWebService") MsgWebService smsWebService,
+                 AclLoader aclLoader,
+                 PermissionHelper permissionHelper) {
         this.userWriteService = userWriteService;
         this.userReadService = userReadService;
         this.eventBus = eventBus;
         this.captchaGenerator = captchaGenerator;
         this.mobilePattern = mobilePattern;
         this.smsWebService =smsWebService;
+        this.aclLoader = aclLoader;
+        this.permissionHelper = permissionHelper;
     }
 
     /**
@@ -118,7 +133,19 @@ public class Users {
      */
     @RequestMapping("")
     public BaseUser getLoginUser() {
-        return UserUtil.getCurrentUser();
+        DoctorUser doctorUser = (DoctorUser) UserUtil.getCurrentUser();
+        try {
+            Acl acl = aclLoader.getAcl(ParanaThreadVars.getApp());
+            BaseUser user = UserUtil.getCurrentUser();
+            PermissionData perm = permissionHelper.getPermissions(acl, user, true);
+            perm.setAllRequests(null); // empty it
+            doctorUser.setAuth(JsonMapper.nonEmptyMapper().toJson(perm));
+        } catch (Exception e) {
+            Throwables.propagateIfInstanceOf(e, JsonResponseException.class);
+            log.error("get permissions of user failed, cause:{}", Throwables.getStackTraceAsString(e));
+            throw new JsonResponseException("auth.permission.find.fail");
+        }
+        return doctorUser;
     }
 
     /**
