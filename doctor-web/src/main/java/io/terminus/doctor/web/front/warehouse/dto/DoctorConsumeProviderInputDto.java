@@ -1,6 +1,9 @@
 package io.terminus.doctor.web.front.warehouse.dto;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.Builder;
 
 import java.io.Serializable;
 
@@ -10,7 +13,10 @@ import java.io.Serializable;
  * Email:yaoqj@terminus.io
  * Descirbe: 对应的物料领用消耗录入信息
  */
+@Builder
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class DoctorConsumeProviderInputDto implements Serializable{
 
     private static final long serialVersionUID = 3717428182117868904L;

@@ -33,6 +33,8 @@ public class DoctorMaterialInfo implements Serializable{
 
     public static final Long DEFAULT_COUNT = 1000000l;
 
+    public static final Integer SCALE = 10; // 默认精度大小
+
     private static final Integer PERCENT_SCALE = 4; // percent 数据大小比例
 
     public static final ObjectMapper OBJECT_MAPPER = JsonMapper.JSON_NON_DEFAULT_MAPPER.getMapper();
@@ -107,7 +109,9 @@ public class DoctorMaterialInfo implements Serializable{
     @Data
     @AllArgsConstructor
     @NoArgsConstructor
-    public static class MaterialProduce{
+    public static class MaterialProduce implements Serializable{
+
+        private static final long serialVersionUID = 633401329050233302L;
 
         private Long total; //生产物料总量信息
 
@@ -134,13 +138,18 @@ public class DoctorMaterialInfo implements Serializable{
         public Boolean calculatePercentByTotal(Long baseCount){
             if(!isNull(materialProduceEntries)){
                 materialProduceEntries.forEach(m->{
-                    m.setMaterialCount(BigDecimal.valueOf(m.getMaterialCount() * baseCount).divide(BigDecimal.valueOf(total), 0, BigDecimal.ROUND_UP).longValue());
+                    m.setMaterialCount(
+                            BigDecimal.valueOf(baseCount)
+                                    .divide(BigDecimal.valueOf(total), SCALE, BigDecimal.ROUND_UP)
+                                    .multiply(BigDecimal.valueOf(m.getMaterialCount())).longValue());
                 });
             }
 
             if(!isNull(medicalProduceEntries)){
-                materialProduceEntries.forEach(m->{
-                    m.setMaterialCount(BigDecimal.valueOf(m.getMaterialCount() * baseCount).divide(BigDecimal.valueOf(total), 0, BigDecimal.ROUND_UP).longValue());
+                medicalProduceEntries.forEach(m -> {
+                    m.setMaterialCount(BigDecimal.valueOf(baseCount)
+                            .divide(BigDecimal.valueOf(total), SCALE, BigDecimal.ROUND_UP)
+                            .multiply(BigDecimal.valueOf(m.getMaterialCount())).longValue());
                 });
             }
 
@@ -157,7 +166,9 @@ public class DoctorMaterialInfo implements Serializable{
     @Data
     @AllArgsConstructor
     @NoArgsConstructor
-    public static class MaterialProduceEntry{
+    public static class MaterialProduceEntry implements Serializable{
+
+        private static final long serialVersionUID = -5681942806422877951L;
 
         private Long materialId;    //原料Id
 
