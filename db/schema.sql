@@ -1144,3 +1144,21 @@ CREATE TABLE `doctor_user_binds` (
   UNIQUE KEY `idx_user_bind_UNIQUE1` (`user_id`,`target_system`),
   UNIQUE KEY `idx_user_bind_UNIQUE2` (`uuid`)
 ) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8 COMMENT='用户账户与其他系统账户的绑定关系';
+
+-- 2016-06-03 猪只数统计表
+DROP TABLE IF EXISTS `doctor_pig_type_statistics`;
+CREATE TABLE `doctor_pig_type_statistics` (
+  `id` BIGINT(20) NOT NULL AUTO_INCREMENT COMMENT '自增主键',
+  `org_id` BIGINT(20) DEFAULT NULL COMMENT '公司id',
+  `farm_id` BIGINT(20) DEFAULT NULL COMMENT '猪场id',
+  `boar` INT(11) DEFAULT NULL COMMENT '公猪数',
+  `sow` INT(11) DEFAULT NULL COMMENT '母猪数',
+  `farrow` INT(11) DEFAULT NULL COMMENT '产房仔猪数',
+  `nursery` INT(11) DEFAULT NULL COMMENT '保育猪数',
+  `fatten` INT(11) DEFAULT NULL COMMENT '育肥猪数',
+  `created_at` DATETIME DEFAULT NULL COMMENT '创建时间',
+  `updated_at` DATETIME DEFAULT NULL COMMENT '修改时间',
+  PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8 COMMENT='猪只数统计表';
+CREATE UNIQUE INDEX idx_doctor_pig_type_statistics_farm_id ON doctor_pig_type_statistics(farm_id);
+CREATE INDEX idx_doctor_pig_type_statistics_org_id ON doctor_pig_type_statistics(org_id);
