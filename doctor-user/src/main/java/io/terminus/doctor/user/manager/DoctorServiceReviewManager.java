@@ -57,20 +57,20 @@ public class DoctorServiceReviewManager {
             DoctorStaff staff = doctorStaffDao.findByUserId(user.getId());
             if (staff == null || staff.getOrgId() == null) {
                 doctorOrgDao.create(org);
+                //插入staff
+                this.createDoctorStaff(user, org.getId(), org.getName());
             } else {
                 org.setId(staff.getOrgId());
                 doctorOrgDao.update(org);
-            }
 
-            //删除已有的staff
-            if(staff != null){
-                doctorStaffDao.delete(staff.getId());
+                staff.setUpdatorName(user.getName());
+                staff.setUpdatorId(user.getId());
+                staff.setOrgName(org.getName());
+                doctorStaffDao.update(staff);
             }
-            //插入staff
-            this.createDoctorStaff(user, org.getId(), org.getName());
         } else if (Objects.equals(DoctorServiceReview.Type.PIGMALL.getValue(), type.getValue())
                 || Objects.equals(DoctorServiceReview.Type.NEVEREST.getValue(), type.getValue())) {
-            //no extra thing to do
+            //TODO extra things. 陈增辉: 目前没什么额外的数据需要处理,以后如有需要可在此添加
         } else {
             throw new ServiceException("doctor.service.review.type.error");
         }
