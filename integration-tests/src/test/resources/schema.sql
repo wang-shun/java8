@@ -735,21 +735,23 @@ CREATE TABLE `doctor_material_consume_providers` (
 
 
 
+-- 物料消耗的平均数量统计
+-- 物料消耗的平均数量统计
 drop table if exists doctor_material_consume_avgs;
 CREATE TABLE `doctor_material_consume_avgs` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT 'id',
   `farm_id` bigint(20) unsigned DEFAULT NULL COMMENT '冗余仓库信息',
   `ware_house_id` bigint(20) unsigned DEFAULT NULL COMMENT '仓库信息',
   `material_id` bigint(20) DEFAULT NULL COMMENT '原料Id',
+  `type` smallint(6) unsigned DEFAULT NULL COMMENT '领取货物属于的类型',
   `consume_avg_count` bigint(20) DEFAULT NULL COMMENT '平均消耗数量',
   `consume_count` bigint(20) DEFAULT NULL COMMENT '消耗数量',
-  `consime_date` datetime DEFAULT NULL comment '消耗日期',
+  `consume_date` datetime DEFAULT NULL comment '消耗日期',
   `extra` text DEFAULT NULL comment 'extra',
   `created_at` datetime DEFAULT NULL,
   `updated_at` datetime DEFAULT NULL,
   PRIMARY KEY (`id`)
-)  COMMENT='物料消耗信息统计方式';
-
+) COMMENT='物料消耗信息统计方式';
 
 
 CREATE TABLE `doctor_staffs` (

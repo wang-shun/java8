@@ -4,6 +4,7 @@ import com.google.common.base.Throwables;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
+import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.basic.service.DoctorBasicReadService;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.user.model.DoctorFarm;
@@ -146,10 +147,10 @@ public class DoctorMaterialInfos {
      * @param produceCount 生产的数量
      * @return
      */
-    @RequestMapping(value = "/preProduceMaterial", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(value = "/preProduceMaterial", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public DoctorMaterialInfo.MaterialProduce preProduceMaterial(@RequestParam("produceId") Long produceId, @RequestParam("produceCount") Long produceCount){
-        return RespHelper.or500(doctorMaterialInfoWriteService.produceMaterial(produceId, produceCount));
+    public DoctorMaterialInfo.MaterialProduce preProduceMaterial(@RequestParam("materialId") Long materialId, @RequestParam("produceCount") Long produceCount){
+        return RespHelper.or500(doctorMaterialInfoWriteService.produceMaterial(materialId, produceCount));
     }
 
     /**
@@ -166,15 +167,17 @@ public class DoctorMaterialInfos {
      * @param materialProduce 对应的用户定义生产规则
      * @return
      */
-    @RequestMapping(value = "/realProduceMaterial", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(value = "/realProduceMaterial", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public Boolean realProduceMaterial(@RequestParam("farmId")Long farmId,
+    public Boolean realProduceMaterial(@RequestParam("farmId") Long farmId,
                                        @RequestParam("wareHouseId") Long wareHouseId,
                                        @RequestParam("materialId") Long materialId,
-                                       @RequestParam("materialProduce") DoctorMaterialInfo.MaterialProduce materialProduce){
+                                       @RequestParam("materialProduce") String materialProduceJson){
         DoctorWareHouseBasicDto doctorWareHouseBasicDto = null;
+        DoctorMaterialInfo.MaterialProduce materialProduce = null;
         try{
-            DoctorMaterialInWareHouse dto= RespHelper.orServEx(doctorMaterialInWareHouseReadService.queryByMaterialWareHouseIds(farmId,materialId, wareHouseId));
+            materialProduce = JsonMapper.JSON_NON_DEFAULT_MAPPER.fromJson(materialProduceJson, DoctorMaterialInfo.MaterialProduce.class);
+            DoctorMaterialInWareHouse dto= RespHelper.orServEx(doctorMaterialInWareHouseReadService.queryByMaterialWareHouseIds(farmId, materialId, wareHouseId));
             Long userId = UserUtil.getUserId();
             Response<User> response =  userReadService.findById(userId);
             String userName = RespHelper.orServEx(response).getName();
