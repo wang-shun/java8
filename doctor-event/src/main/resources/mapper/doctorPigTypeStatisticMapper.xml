@@ -59,12 +59,23 @@
             <if test="farrow != null">farrow = #{farrow},</if>
             <if test="nursery != null">nursery = #{nursery},</if>
             <if test="fatten != null">fatten = #{fatten},</if>
-            
-            
-            
             updated_at=now()
         </set>
         WHERE id = #{id}
+    </update>
+
+    <update id="updateByFarmId" parameterType="DoctorPigTypeStatistic">
+        UPDATE
+        <include refid="tb"/>
+        <set>
+            <if test="boar != null">boar = #{boar},</if>
+            <if test="sow != null">sow = #{sow},</if>
+            <if test="farrow != null">farrow = #{farrow},</if>
+            <if test="nursery != null">nursery = #{nursery},</if>
+            <if test="fatten != null">fatten = #{fatten},</if>
+            updated_at=now()
+        </set>
+        WHERE farm_id = #{farmId}
     </update>
 
     <delete id="delete" parameterType="long">
@@ -76,5 +87,11 @@
         SELECT <include refid="cols_all"/>
         FROM <include refid="tb"/>
         WHERE farm_id = #{farmId}
+    </select>
+
+    <select id="findByOrgId" parameterType="long" resultMap="DoctorPigTypeStatisticMap">
+        SELECT <include refid="cols_all"/>
+        FROM <include refid="tb"/>
+        WHERE org_id = #{orgId}
     </select>
 </mapper>
