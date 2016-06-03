@@ -7,6 +7,7 @@ import io.terminus.doctor.open.dto.DoctorStatisticDto;
 import io.terminus.doctor.open.rest.farm.service.DoctorStatisticReadService;
 import io.terminus.doctor.open.util.OPRespHelper;
 import io.terminus.doctor.user.service.DoctorFarmReadService;
+import io.terminus.doctor.user.service.DoctorOrgReadService;
 import io.terminus.pampas.common.UserUtil;
 import io.terminus.pampas.openplatform.annotations.OpenBean;
 import io.terminus.pampas.openplatform.annotations.OpenMethod;
@@ -28,10 +29,13 @@ import java.util.List;
 public class OPFarms {
 
     private final DoctorFarmReadService doctorFarmReadService;
+    private final DoctorOrgReadService doctorOrgReadService;
+
 
     @Autowired
-    private OPFarms(DoctorFarmReadService doctorFarmReadService) {
+    private OPFarms(DoctorFarmReadService doctorFarmReadService, DoctorOrgReadService doctorOrgReadService) {
         this.doctorFarmReadService = doctorFarmReadService;
+        this.doctorOrgReadService = doctorOrgReadService;
     }
 
     /**
@@ -56,7 +60,7 @@ public class OPFarms {
     @OpenMethod(key = "get.company.info")
     public DoctorBasicDto getCompanyInfo() {
         return new DoctorBasicDto(
-                        OPRespHelper.orOPEx(doctorFarmReadService.findOrgByUserId(UserUtil.getUserId())),
+                        OPRespHelper.orOPEx(doctorOrgReadService.findOrgByUserId(UserUtil.getUserId())),
                         mockOrgStats(),
                 Lists.newArrayList(
                         new DoctorFarmBasicDto(

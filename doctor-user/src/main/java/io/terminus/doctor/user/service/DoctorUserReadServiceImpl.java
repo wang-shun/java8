@@ -4,6 +4,12 @@ import com.google.common.base.Throwables;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.Response;
 import io.terminus.common.utils.Splitters;
+import io.terminus.doctor.common.enums.UserType;
+import io.terminus.doctor.common.utils.RespHelper;
+import io.terminus.doctor.user.dto.DoctorUserInfoDto;
+import io.terminus.doctor.user.enums.RoleType;
+import io.terminus.doctor.user.model.DoctorStaff;
+import io.terminus.doctor.user.model.DoctorUserDataPermission;
 import io.terminus.parana.user.impl.dao.UserDao;
 import io.terminus.parana.user.impl.service.UserReadServiceImpl;
 import io.terminus.parana.user.model.LoginType;
@@ -13,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 
+import javax.validation.constraints.NotNull;
 import java.util.List;
 import java.util.Objects;
 
@@ -24,15 +31,19 @@ import java.util.Objects;
  */
 @Slf4j
 @Service
-@Primary
-public class DoctorUserReadServiceImpl extends UserReadServiceImpl{
+public class DoctorUserReadServiceImpl extends UserReadServiceImpl implements DoctorUserReadService{
 
     private final UserDao userDao;
+    private final DoctorStaffReadService doctorStaffReadService;
+    private final DoctorUserDataPermissionReadService doctorUserDataPermissionReadService;
 
     @Autowired
-    public DoctorUserReadServiceImpl(UserDao userDao) {
+    public DoctorUserReadServiceImpl(UserDao userDao, DoctorStaffReadService doctorStaffReadService,
+                                     DoctorUserDataPermissionReadService doctorUserDataPermissionReadService) {
         super(userDao);
         this.userDao = userDao;
+        this.doctorStaffReadService = doctorStaffReadService;
+        this.doctorUserDataPermissionReadService = doctorUserDataPermissionReadService;
     }
 
     /**
@@ -86,5 +97,91 @@ public class DoctorUserReadServiceImpl extends UserReadServiceImpl{
         //检查子账号
         User user = userDao.findByName(loginId);
         return user;
+    }
+
+    @Override
+    public Response<Integer> findUserRoleTypeByUserId(Long userId) {
+        Response<Integer> response = new Response<>();
+        try{
+            User user = userDao.findById(userId);
+            //管理员
+            if(Objects.equals(UserType.ADMIN.value(), user.getType())){
+                return Response.ok(RoleType.ADMIN.getValue());
+            }
+
+            //主账号
+            if(Objects.equals(UserType.FARM_ADMIN_PRIMARY.value(), user.getType())){
+                return Response.ok(RoleType.MAIN.getValue());
+            }
+
+            //子账号
+            if(Objects.equals(UserType.FARM_SUB.value(), user.getType())){
+                DoctorUserDataPermission permission = RespHelper.orServEx(doctorUserDataPermissionReadService.findDataPermissionByUserId(userId));
+                if(permission.getFarmIdSet() != null){
+                    if(permission.getFarmIdSet().size() == 1){
+                        return Response.ok(RoleType.SUB_SINGLE.getValue());
+                    }
+                    if(permission.getFarmIdSet().size() > 1){
+                        return Response.ok(RoleType.SUB_MULTI.getValue());
+                    }
+                }
+            }
+            //其他
+            response.setResult(null);
+        }catch(ServiceException e){
+            response.setError(e.getMessage());
+        }catch(Exception e){
+            log.error("findUserRoleTypeByUserId failed, cause : {}", Throwables.getStackTraceAsString(e));
+            response.setError("find.user.role.type.by.user.id.failed");
+        }
+        return response;
+    }
+
+    @Override
+    public Response<DoctorUserInfoDto> findUserInfoByUserId(Long userId) {
+        Response<DoctorUserInfoDto> response = new Response<>();
+        DoctorUserInfoDto dto = new DoctorUserInfoDto();
+        try {
+            User user = userDao.findById(userId);
+            user.setPassword(null);
+            dto.setUser(user);
+            dto.setStaff(RespHelper.orServEx(this.findStaffByUserId(userId)));
+
+            //管理员
+            if(Objects.equals(UserType.ADMIN.value(), user.getType())){
+                dto.setFrontRoleType(RoleType.ADMIN.getValue());
+            }
+
+            //主账号
+            if(Objects.equals(UserType.FARM_ADMIN_PRIMARY.value(), user.getType())){
+                dto.setFrontRoleType(RoleType.MAIN.getValue());
+            }
+
+            //子账号
+            if(Objects.equals(UserType.FARM_SUB.value(), user.getType())){
+                DoctorUserDataPermission permission = RespHelper.orServEx(doctorUserDataPermissionReadService.findDataPermissionByUserId(userId));
+                if(permission.getFarmIdSet() != null){
+                    if(permission.getFarmIdSet().size() == 1){
+                        dto.setFrontRoleType(RoleType.SUB_SINGLE.getValue());
+                        dto.setFarmId(permission.getFarmIdSet().iterator().next());
+                    }
+                    if(permission.getFarmIdSet().size() > 1){
+                        dto.setFrontRoleType(RoleType.SUB_MULTI.getValue());
+                    }
+                }
+            }
+            response.setResult(dto);
+        }catch(ServiceException e){
+            response.setError(e.getMessage());
+        }catch(Exception e){
+            log.error("findUserInfoByUserId failed, cause : {}", Throwables.getStackTraceAsString(e));
+            response.setError("find.user.info.by.user.id.failed");
+        }
+        return response;
+    }
+
+    @Override
+    public Response<DoctorStaff> findStaffByUserId(@NotNull(message = "userId.not.null") Long userId) {
+        return doctorStaffReadService.findStaffByUserId(userId);
     }
 }

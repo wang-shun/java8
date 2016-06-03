@@ -6,9 +6,13 @@ import io.terminus.common.model.Response;
 import io.terminus.common.utils.Joiners;
 import io.terminus.doctor.user.dao.OperatorDao;
 import io.terminus.doctor.user.dao.SellerDao;
+import io.terminus.doctor.user.dao.SubDao;
+import io.terminus.doctor.user.dao.SubRoleDao;
 import io.terminus.doctor.user.dao.SubSellerDao;
 import io.terminus.doctor.user.model.Operator;
 import io.terminus.doctor.user.model.Seller;
+import io.terminus.doctor.user.model.Sub;
+import io.terminus.doctor.user.model.SubRole;
 import io.terminus.doctor.user.model.SubSeller;
 import io.terminus.parana.common.utils.Iters;
 import io.terminus.parana.user.auth.UserRoleLoader;
@@ -27,6 +31,8 @@ import java.util.Set;
 import static io.terminus.doctor.common.util.UserRoleUtil.isAdmin;
 import static io.terminus.doctor.common.util.UserRoleUtil.isNormal;
 import static io.terminus.doctor.common.util.UserRoleUtil.isOperator;
+import static io.terminus.doctor.common.util.UserRoleUtil.isPrimary;
+import static io.terminus.doctor.common.util.UserRoleUtil.isSub;
 
 /**
  * @author Effet
@@ -43,12 +49,16 @@ public class DoctorUserRoleLoaderImpl implements UserRoleLoader {
 
     private final OperatorDao operatorDao;
 
+    private final SubDao subDao;
+
+
     @Autowired
-    public DoctorUserRoleLoaderImpl(UserDao userDao, SellerDao sellerDao, SubSellerDao subSellerDao, OperatorDao operatorDao) {
+    public DoctorUserRoleLoaderImpl(UserDao userDao, SellerDao sellerDao, SubSellerDao subSellerDao, OperatorDao operatorDao, SubDao subDao) {
         this.userDao = userDao;
         this.sellerDao = sellerDao;
         this.subSellerDao = subSellerDao;
         this.operatorDao = operatorDao;
+        this.subDao = subDao;
     }
 
     @Override
@@ -68,6 +78,8 @@ public class DoctorUserRoleLoaderImpl implements UserRoleLoader {
             forAdmin(user, roleBuilder);
             forOperator(user, roleBuilder);
             forNormal(user, roleBuilder);
+            forPrimary(user, roleBuilder);
+            forSub(user, roleBuilder);
 
             Set<String> originRoles = new HashSet<>();
             if (user.getRoles() != null) {
@@ -104,6 +116,27 @@ public class DoctorUserRoleLoaderImpl implements UserRoleLoader {
         if (operator != null) {
             if (operator.isActive() && operator.getRoleId() != null) {
                 mutableRoles.add(String.format("ADMIN(SUB(%s))", operator.getRoleId()));
+            }
+        }
+    }
+
+    protected void forPrimary(User user, Collection<String> mutableRoles) {
+        if (user == null || !isPrimary(user.getType())) {
+            return;
+        }
+        mutableRoles.add("PRIMARY");
+        mutableRoles.add("PRIMARY(OWNER)");
+    }
+
+    protected void forSub(User user, Collection<String> mutableRoles) {
+        if (user == null || !isSub(user.getType())) {
+            return;
+        }
+        mutableRoles.add("SUB");
+        Sub sub = subDao.findByUserId(user.getId());
+        if (sub != null) {
+            if (sub.isActive() && sub.getRoleId() != null) {
+                mutableRoles.add(String.format("SUB(SUB(%s))", sub.getRoleId()));
             }
         }
     }

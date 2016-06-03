@@ -62,6 +62,22 @@ public class UserRoleUtil {
         return isNormal(type) && roles != null && roles.contains(UserRole.BUYER.name());
     }
 
+    public static boolean isSub(BaseUser user) {
+        return isSub(user.getType());
+    }
+
+    public static boolean isSub(Integer type) {
+        return type != null && type == UserType.FARM_SUB.value();
+    }
+
+    public static boolean isPrimary(BaseUser user) {
+        return isPrimary(user.getType());
+    }
+
+    public static boolean isPrimary(Integer type) {
+        return type != null && type == UserType.FARM_ADMIN_PRIMARY.value();
+    }
+
     // TODO: 只考虑最规范的语法
     public static List<String> roleConsFrom(String str) {
         if (Strings.isNullOrEmpty(str)) {

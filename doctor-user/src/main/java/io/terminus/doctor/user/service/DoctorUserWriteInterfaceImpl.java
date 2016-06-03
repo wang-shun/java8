@@ -66,7 +66,7 @@ public class DoctorUserWriteInterfaceImpl implements DoctorUserWriteInterface {
                 roles = Lists.newArrayList(roles);
             }
             if(!roles.contains(typeName)){
-                roles.add(typeName);
+                roles.add(0, typeName);
                 userDaoExt.updateRoles(userId, roles);
             }
             response.setResult(1);
@@ -83,8 +83,9 @@ public class DoctorUserWriteInterfaceImpl implements DoctorUserWriteInterface {
         try {
             io.terminus.parana.user.model.User paranaUser = BeanMapper.map(user, io.terminus.parana.user.model.User.class);
             userDaoExt.update(paranaUser);
-            if(paranaUser.getRolesJson() != null){
-                userDaoExt.updateRoles(paranaUser.getId(), paranaUser.getRoles());
+            if(paranaUser.getRoles().size() > 0){
+                String typeName = paranaUser.getRoles().get(0);
+                this.updateType(paranaUser.getId(), typeName);
             }
             response.setResult(true);
         } catch (Exception e) {

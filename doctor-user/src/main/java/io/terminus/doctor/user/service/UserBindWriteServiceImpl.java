@@ -16,12 +16,12 @@ import java.util.List;
  */
 @Slf4j
 @Service
-public class UserBindServiceImpl implements UserBindService{
+public class UserBindWriteServiceImpl implements UserBindWriteService{
 
     private final UserBindDao userBindDao;
 
     @Autowired
-    public UserBindServiceImpl(UserBindDao userBindDao){
+    public UserBindWriteServiceImpl(UserBindDao userBindDao){
         this.userBindDao = userBindDao;
     }
 
@@ -69,39 +69,4 @@ public class UserBindServiceImpl implements UserBindService{
         return response;
     }
 
-    @Override
-    public Response<UserBind> findUserBindById(Long id) {
-        Response<UserBind> response = new Response<>();
-        try {
-            response.setResult(userBindDao.findById(id));
-        } catch (Exception e) {
-            log.error("findUserBindById failed, cause: {}", Throwables.getStackTraceAsString(e));
-            response.setError("find.user.bind.failed");
-        }
-        return response;
-    }
-
-    @Override
-    public Response<List<UserBind>> findUserBindByUserId(Long userId) {
-        Response<List<UserBind>> response = new Response<>();
-        try {
-            response.setResult(userBindDao.findByUserId(userId));
-        } catch (Exception e) {
-            log.error("findUserBindById failed, cause: {}", Throwables.getStackTraceAsString(e));
-            response.setError("find.user.bind.failed");
-        }
-        return response;
-    }
-
-    @Override
-    public Response<UserBind> findUserBindByUserIdAndTargetSystem(Long userId, TargetSystem targetSystem) {
-        Response<UserBind> response = new Response<>();
-        try {
-            response.setResult(userBindDao.findByUserIdAndTargetSystem(userId, targetSystem));
-        } catch (Exception e) {
-            log.error("findUserBindById failed, cause: {}", Throwables.getStackTraceAsString(e));
-            response.setError("find.user.bind.failed");
-        }
-        return response;
-    }
 }

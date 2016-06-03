@@ -16,20 +16,6 @@ import java.util.List;
 public interface DoctorFarmReadService {
 
     /**
-     * 根据公司id查询公司信息
-     * @param orgId 公司id
-     * @return 公司信息
-     */
-    Response<DoctorOrg> findOrgById(Long orgId);
-
-    /**
-     * 根据用户id查询公司信息
-     * @param userId 用户id
-     * @return 公司信息
-     */
-    Response<DoctorOrg> findOrgByUserId(Long userId);
-
-    /**
      * 根据猪场id查询猪场信息
      * @param farmId 猪场id
      * @return 猪场信息

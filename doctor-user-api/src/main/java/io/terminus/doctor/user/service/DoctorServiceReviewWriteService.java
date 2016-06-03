@@ -20,11 +20,4 @@ public interface DoctorServiceReviewWriteService {
 
     Response<Boolean> deleteReview(Long reviewId);
 
-    /**
-     * 申请开通服务
-     * @param baseUser  当前登录用户
-     * @param serviceApplyDto   申请信息
-     * @return 是否成功
-     */
-    Response<Boolean> applyOpenService(BaseUser baseUser, DoctorServiceApplyDto serviceApplyDto);
 }
