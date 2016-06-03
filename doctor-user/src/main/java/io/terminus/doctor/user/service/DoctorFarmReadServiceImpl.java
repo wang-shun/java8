@@ -25,7 +25,6 @@ import java.util.stream.Stream;
  */
 @Slf4j
 @Service
-@Primary
 public class DoctorFarmReadServiceImpl implements DoctorFarmReadService{
 
     private final DoctorFarmDao doctorFarmDao;

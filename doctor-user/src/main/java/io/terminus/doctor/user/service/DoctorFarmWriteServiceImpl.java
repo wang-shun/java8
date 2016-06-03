@@ -19,7 +19,6 @@ import java.util.List;
  */
 @Slf4j
 @Service
-@Primary
 public class DoctorFarmWriteServiceImpl implements DoctorFarmWriteService{
     private final DoctorFarmDao doctorFarmDao;
 

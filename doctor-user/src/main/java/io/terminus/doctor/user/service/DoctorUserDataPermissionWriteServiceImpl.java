@@ -17,7 +17,6 @@ import org.springframework.stereotype.Service;
  */
 @Slf4j
 @Service
-@Primary
 public class DoctorUserDataPermissionWriteServiceImpl implements DoctorUserDataPermissionWriteService{
     private final DoctorUserDataPermissionDao doctorUserDataPermissionDao;
 

@@ -20,7 +20,6 @@ import java.util.Objects;
  */
 @Slf4j
 @Service
-@Primary
 public class DoctorServiceReviewWriteServiceImpl implements DoctorServiceReviewWriteService{
     private final DoctorServiceReviewDao doctorServiceReviewDao;
 

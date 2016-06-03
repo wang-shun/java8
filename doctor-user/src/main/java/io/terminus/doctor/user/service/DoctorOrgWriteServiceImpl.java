@@ -11,7 +11,6 @@ import org.springframework.stereotype.Service;
 
 @Slf4j
 @Service
-@Primary
 public class DoctorOrgWriteServiceImpl implements DoctorOrgWriteService{
     private final DoctorOrgDao doctorOrgDao;
 

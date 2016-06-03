@@ -26,7 +26,6 @@ import java.util.Objects;
  */
 @Slf4j
 @Service
-@Primary
 public class DoctorServiceReviewReadServiceImpl implements DoctorServiceReviewReadService{
     private final DoctorServiceReviewDao doctorServiceReviewDao;
     private final ServiceReviewTrackDao serviceReviewTrackDao;
