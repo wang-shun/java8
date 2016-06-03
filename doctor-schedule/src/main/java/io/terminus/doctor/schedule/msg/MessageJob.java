@@ -80,4 +80,22 @@ public class MessageJob {
             log.error("msg message consume failed, cause by {}", Throwables.getStackTraceAsString(e));
         }
     }
+
+    /**
+     * 消费 app push 消息
+     */
+    @Scheduled(cron = "0 0/10 * * * ?")
+    public void appPushConsume() {
+        try {
+            if (!hostLeader.isLeader()) {
+                log.info("current leader is:{}, skip", hostLeader.currentLeaderId());
+                return;
+            }
+            log.info("app push message consume fired");
+            msgManager.consumeAppPush();
+            log.info("app push message consume end");
+        } catch (Exception e) {
+            log.error("app push message consume failed, cause by {}", Throwables.getStackTraceAsString(e));
+        }
+    }
 }
