@@ -24,14 +24,7 @@ public interface DoctorPigTypeStatisticWriteService {
      * @param pigTypeStatistic 猪只数统计表实例
      * @return 是否成功
      */
-    Response<Boolean> updatePigTypeStatisticById(DoctorPigTypeStatistic pigTypeStatistic);
-
-    /**
-     * 更新DoctorPigTypeStatistic
-     * @param pigTypeStatistic 猪只数统计表实例
-     * @return 是否成功
-     */
-    Response<Boolean> updatePigTypeStatisticByFarmId(DoctorPigTypeStatistic pigTypeStatistic);
+    Response<Boolean> updatePigTypeStatistic(DoctorPigTypeStatistic pigTypeStatistic);
 
     /**
      * 根据主键id删除DoctorPigTypeStatistic

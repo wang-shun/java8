@@ -133,7 +133,7 @@ public class DoctorGroupReadServiceImpl implements DoctorGroupReadService {
     }
 
     @Override
-    public Response<DoctorGroupCount> coutFarmGroups(Long farmId) {
+    public Response<DoctorGroupCount> coutFarmGroups(Long orgId, Long farmId) {
         try {
             DoctorGroupSearchDto searchDto = new DoctorGroupSearchDto();
             searchDto.setFarmId(farmId);
@@ -146,6 +146,7 @@ public class DoctorGroupReadServiceImpl implements DoctorGroupReadService {
 
             //根据猪类统计
             DoctorGroupCount count = DoctorGroupCount.builder()
+                    .orgId(orgId)
                     .farmId(farmId)
                     .farrowCount(CountUtil.sumInt(groupMap.get(PigType.FARROW_PIGLET.getValue()), g -> g.getGroupTrack().getQuantity()))
                     .nurseryCount(CountUtil.sumInt(groupMap.get(PigType.NURSERY_PIGLET.getValue()), g -> g.getGroupTrack().getQuantity()))

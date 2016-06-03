@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import io.terminus.doctor.open.dto.DoctorBasicDto;
 import io.terminus.doctor.open.dto.DoctorFarmBasicDto;
 import io.terminus.doctor.open.dto.DoctorStatisticDto;
+import io.terminus.doctor.open.rest.farm.service.DoctorStatisticReadService;
 import io.terminus.doctor.open.util.OPRespHelper;
 import io.terminus.doctor.user.service.DoctorFarmReadService;
 import io.terminus.pampas.common.UserUtil;
@@ -37,6 +38,7 @@ public class OPFarms {
      * 查询单个猪场信息
      * 猪场id
      * @return 猪场信息
+     * @see DoctorStatisticReadService#getFarmStatistic(java.lang.Long) 正式接口
      */
     @OpenMethod(key = "get.farm.info", paramNames = "farmId")
     public DoctorFarmBasicDto getFarmInfo(@NotNull(message = "farmId.not.null") Long farmId) {
@@ -49,6 +51,7 @@ public class OPFarms {
     /**
      * 根据用户id查询所拥有权限的猪场信息
      * @return 猪场信息list
+     * @see DoctorStatisticReadService#getOrgStatistic(java.lang.Long) 正式接口
      */
     @OpenMethod(key = "get.company.info")
     public DoctorBasicDto getCompanyInfo() {

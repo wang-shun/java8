@@ -37,19 +37,9 @@ public class DoctorPigTypeStatisticWriteServiceImpl implements DoctorPigTypeStat
     }
 
     @Override
-    public Response<Boolean> updatePigTypeStatisticById(DoctorPigTypeStatistic pigTypeStatistic) {
+    public Response<Boolean> updatePigTypeStatistic(DoctorPigTypeStatistic pigTypeStatistic) {
         try {
             return Response.ok(doctorPigTypeStatisticDao.update(pigTypeStatistic));
-        } catch (Exception e) {
-            log.error("update pigTypeStatistic failed, pigTypeStatistic:{}, cause:{}", pigTypeStatistic, Throwables.getStackTraceAsString(e));
-            return Response.fail("pigTypeStatistic.update.fail");
-        }
-    }
-
-    @Override
-    public Response<Boolean> updatePigTypeStatisticByFarmId(DoctorPigTypeStatistic pigTypeStatistic) {
-        try {
-            return Response.ok(doctorPigTypeStatisticDao.updateByFarmId(pigTypeStatistic));
         } catch (Exception e) {
             log.error("update pigTypeStatistic failed, pigTypeStatistic:{}, cause:{}", pigTypeStatistic, Throwables.getStackTraceAsString(e));
             return Response.fail("pigTypeStatistic.update.fail");

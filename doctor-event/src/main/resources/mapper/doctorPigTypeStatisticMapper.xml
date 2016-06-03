@@ -52,8 +52,6 @@
         UPDATE
         <include refid="tb"/>
         <set>
-            <if test="orgId != null">org_id = #{orgId},</if>
-            <if test="farmId != null">farm_id = #{farmId},</if>
             <if test="boar != null">boar = #{boar},</if>
             <if test="sow != null">sow = #{sow},</if>
             <if test="farrow != null">farrow = #{farrow},</if>
@@ -62,20 +60,6 @@
             updated_at=now()
         </set>
         WHERE id = #{id}
-    </update>
-
-    <update id="updateByFarmId" parameterType="DoctorPigTypeStatistic">
-        UPDATE
-        <include refid="tb"/>
-        <set>
-            <if test="boar != null">boar = #{boar},</if>
-            <if test="sow != null">sow = #{sow},</if>
-            <if test="farrow != null">farrow = #{farrow},</if>
-            <if test="nursery != null">nursery = #{nursery},</if>
-            <if test="fatten != null">fatten = #{fatten},</if>
-            updated_at=now()
-        </set>
-        WHERE farm_id = #{farmId}
     </update>
 
     <delete id="delete" parameterType="long">

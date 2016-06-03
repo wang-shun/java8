@@ -20,6 +20,14 @@ import java.io.Serializable;
 public class DoctorGroupCount implements Serializable {
     private static final long serialVersionUID = -7198222555477065587L;
 
+    /**
+     * 公司id
+     */
+    private Long orgId;
+
+    /**
+     * 猪场id
+     */
     private Long farmId;
 
     /**
