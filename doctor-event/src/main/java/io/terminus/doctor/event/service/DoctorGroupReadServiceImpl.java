@@ -6,10 +6,14 @@ import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.PageInfo;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
+import io.terminus.doctor.common.enums.PigType;
+import io.terminus.doctor.common.utils.CountUtil;
+import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dao.DoctorGroupDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorGroupSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
+import io.terminus.doctor.event.dto.DoctorGroupCount;
 import io.terminus.doctor.event.dto.DoctorGroupDetail;
 import io.terminus.doctor.event.dto.DoctorGroupSearchDto;
 import io.terminus.doctor.event.enums.GroupEventType;
@@ -20,6 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -124,6 +129,32 @@ public class DoctorGroupReadServiceImpl implements DoctorGroupReadService {
         } catch (Exception e) {
             log.error("find eventType by groupIds failed, groupIds:{}, cause:{}", groupIds, Throwables.getStackTraceAsString(e));
             return Response.fail("eventType.find.fail");
+        }
+    }
+
+    @Override
+    public Response<DoctorGroupCount> coutFarmGroups(Long farmId) {
+        try {
+            DoctorGroupSearchDto searchDto = new DoctorGroupSearchDto();
+            searchDto.setFarmId(farmId);
+            searchDto.setStatus(DoctorGroup.Status.CREATED.getValue());
+            searchDto.setPigTypes(Lists.newArrayList(PigType.FARROW_PIGLET.getValue(), PigType.NURSERY_PIGLET.getValue(), PigType.FATTEN_PIG.getValue()));
+
+            //过滤猪群类型, 然后按照类型分组
+            Map<Integer, List<DoctorGroupDetail>> groupMap = RespHelper.orServEx(findGroupDetail(searchDto)).stream()
+                    .collect(Collectors.groupingBy(gd -> gd.getGroup().getPigType()));
+
+            //根据猪类统计
+            DoctorGroupCount count = DoctorGroupCount.builder()
+                    .farmId(farmId)
+                    .farrowCount(CountUtil.sumInt(groupMap.get(PigType.FARROW_PIGLET.getValue()), g -> g.getGroupTrack().getQuantity()))
+                    .nurseryCount(CountUtil.sumInt(groupMap.get(PigType.NURSERY_PIGLET.getValue()), g -> g.getGroupTrack().getQuantity()))
+                    .fattenCount(CountUtil.sumInt(groupMap.get(PigType.FATTEN_PIG.getValue()), g -> g.getGroupTrack().getQuantity()))
+                    .build();
+            return Response.ok(count);
+        } catch (Exception e) {
+            log.error("count farm group failed, farmId:{}, cause:{}", farmId, Throwables.getStackTraceAsString(e));
+            return Response.fail("count.farm.group.fail");
         }
     }
 
