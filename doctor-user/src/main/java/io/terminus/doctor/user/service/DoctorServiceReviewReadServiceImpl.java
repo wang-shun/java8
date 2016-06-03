@@ -81,33 +81,38 @@ public class DoctorServiceReviewReadServiceImpl implements DoctorServiceReviewRe
         dto.setUserId(userId);
         try {
             for (DoctorServiceReview review : doctorServiceReviewDao.findByUserId(userId)){
-                if (DoctorServiceReview.Type.PIG_DOCTOR.getValue() == review.getType()) {
-                    dto.setPigDoctor(review);
-                    if (Objects.equals(review.getStatus(), DoctorServiceReview.Status.FROZEN.getValue())
-                            || Objects.equals(review.getStatus(), DoctorServiceReview.Status.NOT_OK.getValue())) {
-                        dto.setPigDoctorReason(serviceReviewTrackDao.findLastByUserIdAndType(userId, DoctorServiceReview.Type.PIG_DOCTOR).getReason());
-                    }
-                } else if (DoctorServiceReview.Type.PIGMALL.getValue() == review.getType()) {
-                    dto.setPigmall(review);
-                    if (Objects.equals(review.getStatus(), DoctorServiceReview.Status.FROZEN.getValue())
-                            || Objects.equals(review.getStatus(), DoctorServiceReview.Status.NOT_OK.getValue())) {
-                        dto.setPigmallReason(serviceReviewTrackDao.findLastByUserIdAndType(userId, DoctorServiceReview.Type.PIGMALL).getReason());
-                    }
-                } else if (DoctorServiceReview.Type.NEVEREST.getValue() == review.getType()) {
-                    dto.setNeverest(review);
-                    if (Objects.equals(review.getStatus(), DoctorServiceReview.Status.FROZEN.getValue())
-                            || Objects.equals(review.getStatus(), DoctorServiceReview.Status.NOT_OK.getValue())) {
-                        dto.setNeverestReason(serviceReviewTrackDao.findLastByUserIdAndType(userId, DoctorServiceReview.Type.NEVEREST).getReason());
-                    }
-                } else if (DoctorServiceReview.Type.PIG_TRADE.getValue() == review.getType()) {
-                    dto.setPigTrade(review);
-                    if (Objects.equals(review.getStatus(), DoctorServiceReview.Status.FROZEN.getValue())
-                            || Objects.equals(review.getStatus(), DoctorServiceReview.Status.NOT_OK.getValue())) {
-                        dto.setPigTradeReason(serviceReviewTrackDao.findLastByUserIdAndType(userId, DoctorServiceReview.Type.PIG_TRADE).getReason());
-                    }
-                } else {
-                    log.error("doctor service review type error, type = {}", review.getType());
-                    return Response.fail("doctor.service.review.type.error");
+                switch (DoctorServiceReview.Type.from(review.getType())) {
+                    case PIG_DOCTOR :
+                        dto.setPigDoctor(review);
+                        if (Objects.equals(review.getStatus(), DoctorServiceReview.Status.FROZEN.getValue())
+                                || Objects.equals(review.getStatus(), DoctorServiceReview.Status.NOT_OK.getValue())) {
+                            dto.setPigDoctorReason(serviceReviewTrackDao.findLastByUserIdAndType(userId, DoctorServiceReview.Type.PIG_DOCTOR).getReason());
+                        }
+                        break;
+                    case PIGMALL :
+                        dto.setPigmall(review);
+                        if (Objects.equals(review.getStatus(), DoctorServiceReview.Status.FROZEN.getValue())
+                                || Objects.equals(review.getStatus(), DoctorServiceReview.Status.NOT_OK.getValue())) {
+                            dto.setPigmallReason(serviceReviewTrackDao.findLastByUserIdAndType(userId, DoctorServiceReview.Type.PIGMALL).getReason());
+                        }
+                        break;
+                    case NEVEREST :
+                        dto.setNeverest(review);
+                        if (Objects.equals(review.getStatus(), DoctorServiceReview.Status.FROZEN.getValue())
+                                || Objects.equals(review.getStatus(), DoctorServiceReview.Status.NOT_OK.getValue())) {
+                            dto.setNeverestReason(serviceReviewTrackDao.findLastByUserIdAndType(userId, DoctorServiceReview.Type.NEVEREST).getReason());
+                        }
+                        break;
+                    case PIG_TRADE :
+                        dto.setPigTrade(review);
+                        if (Objects.equals(review.getStatus(), DoctorServiceReview.Status.FROZEN.getValue())
+                                || Objects.equals(review.getStatus(), DoctorServiceReview.Status.NOT_OK.getValue())) {
+                            dto.setPigTradeReason(serviceReviewTrackDao.findLastByUserIdAndType(userId, DoctorServiceReview.Type.PIG_TRADE).getReason());
+                        }
+                        break;
+                    default:
+                        log.error("doctor service review type error, type = {}", review.getType());
+                        return Response.fail("doctor.service.review.type.error");
                 }
             }
             response.setResult(dto);

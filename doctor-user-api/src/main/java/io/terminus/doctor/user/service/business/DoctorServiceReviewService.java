@@ -50,7 +50,7 @@ public interface DoctorServiceReviewService {
      */
     Response<Boolean> notOpenService(BaseUser user, Long userId, DoctorServiceReview.Type type, String reason);
     /**
-     * 冻结服务, 更新服务状态并保存状态变更历史记录
+     * 冻结申请服务的资格, 冻结后就不能申请了
      * @param user 登录者
      * @param userId 被操作的用户
      * @param type 服务类型

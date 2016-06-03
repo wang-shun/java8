@@ -105,32 +105,30 @@ public class DoctorUserReadServiceImpl extends UserReadServiceImpl implements Do
         Response<Integer> response = new Response<>();
         try{
             User user = userDao.findById(userId);
+            //管理员
             if(Objects.equals(UserType.ADMIN.value(), user.getType())){
-                //管理员
-                response.setResult(RoleType.ADMIN.getValue());
-            }else if(Objects.equals(UserType.FARM_ADMIN_PRIMARY.value(), user.getType())){
-                //主账号
-                response.setResult(RoleType.MAIN.getValue());
-            }else if(Objects.equals(UserType.FARM_SUB.value(), user.getType())){
-                //子账号
+                return Response.ok(RoleType.ADMIN.getValue());
+            }
+
+            //主账号
+            if(Objects.equals(UserType.FARM_ADMIN_PRIMARY.value(), user.getType())){
+                return Response.ok(RoleType.MAIN.getValue());
+            }
+
+            //子账号
+            if(Objects.equals(UserType.FARM_SUB.value(), user.getType())){
                 DoctorUserDataPermission permission = RespHelper.orServEx(doctorUserDataPermissionReadService.findDataPermissionByUserId(userId));
                 if(permission.getFarmIdSet() != null){
                     if(permission.getFarmIdSet().size() == 1){
-                        response.setResult(RoleType.SUB_SINGLE.getValue());
-                    }else if(permission.getFarmIdSet().size() > 1){
-                        response.setResult(RoleType.SUB_MULTI.getValue());
-                    }else{
-                        //其他
-                        response.setResult(null);
+                        return Response.ok(RoleType.SUB_SINGLE.getValue());
                     }
-                }else{
-                    //其他
-                    response.setResult(null);
+                    if(permission.getFarmIdSet().size() > 1){
+                        return Response.ok(RoleType.SUB_MULTI.getValue());
+                    }
                 }
-            }else{
-                //其他
-                response.setResult(null);
             }
+            //其他
+            response.setResult(null);
         }catch(ServiceException e){
             response.setError(e.getMessage());
         }catch(Exception e){
@@ -146,34 +144,32 @@ public class DoctorUserReadServiceImpl extends UserReadServiceImpl implements Do
         DoctorUserInfoDto dto = new DoctorUserInfoDto();
         try {
             User user = userDao.findById(userId);
+            user.setPassword(null);
             dto.setUser(user);
             dto.setStaff(RespHelper.orServEx(this.findStaffByUserId(userId)));
+
+            //管理员
             if(Objects.equals(UserType.ADMIN.value(), user.getType())){
-                //管理员
                 dto.setFrontRoleType(RoleType.ADMIN.getValue());
-            }else if(Objects.equals(UserType.FARM_ADMIN_PRIMARY.value(), user.getType())){
-                //主账号
+            }
+
+            //主账号
+            if(Objects.equals(UserType.FARM_ADMIN_PRIMARY.value(), user.getType())){
                 dto.setFrontRoleType(RoleType.MAIN.getValue());
-            }else if(Objects.equals(UserType.FARM_SUB.value(), user.getType())){
-                //子账号
+            }
+
+            //子账号
+            if(Objects.equals(UserType.FARM_SUB.value(), user.getType())){
                 DoctorUserDataPermission permission = RespHelper.orServEx(doctorUserDataPermissionReadService.findDataPermissionByUserId(userId));
                 if(permission.getFarmIdSet() != null){
                     if(permission.getFarmIdSet().size() == 1){
                         dto.setFrontRoleType(RoleType.SUB_SINGLE.getValue());
                         dto.setFarmId(permission.getFarmIdSet().iterator().next());
-                    }else if(permission.getFarmIdSet().size() > 1){
-                        dto.setFrontRoleType(RoleType.SUB_MULTI.getValue());
-                    }else{
-                        //其他
-                        dto.setFrontRoleType(null);
                     }
-                }else{
-                    //其他
-                    dto.setFrontRoleType(null);
+                    if(permission.getFarmIdSet().size() > 1){
+                        dto.setFrontRoleType(RoleType.SUB_MULTI.getValue());
+                    }
                 }
-            }else{
-                //其他
-                dto.setFrontRoleType(null);
             }
             response.setResult(dto);
         }catch(ServiceException e){
