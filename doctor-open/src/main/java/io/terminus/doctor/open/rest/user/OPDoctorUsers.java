@@ -1,24 +1,29 @@
 package io.terminus.doctor.open.rest.user;
 
 import com.google.common.collect.Lists;
+import io.terminus.common.model.BaseUser;
+import io.terminus.doctor.common.enums.UserType;
 import io.terminus.doctor.open.util.OPRespHelper;
 import io.terminus.doctor.user.dto.DoctorMenuDto;
 import io.terminus.doctor.user.dto.DoctorServiceApplyDto;
 import io.terminus.doctor.user.dto.DoctorServiceReviewDto;
 import io.terminus.doctor.user.dto.DoctorUserInfoDto;
-import io.terminus.doctor.user.model.DoctorStaff;
+import io.terminus.doctor.user.model.DoctorOrg;
 import io.terminus.doctor.user.model.DoctorUser;
+import io.terminus.doctor.user.service.DoctorOrgReadService;
 import io.terminus.doctor.user.service.DoctorServiceReviewReadService;
 import io.terminus.doctor.user.service.DoctorServiceReviewWriteService;
 import io.terminus.doctor.user.service.DoctorUserReadService;
+import io.terminus.doctor.user.service.business.DoctorServiceReviewService;
 import io.terminus.pampas.common.UserUtil;
 import io.terminus.pampas.openplatform.annotations.OpenBean;
 import io.terminus.pampas.openplatform.annotations.OpenMethod;
-import io.terminus.parana.user.model.User;
+import io.terminus.pampas.openplatform.exceptions.OPClientException;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.validation.Valid;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Desc: 用户相关
@@ -33,16 +38,21 @@ public class OPDoctorUsers {
     private final DoctorServiceReviewReadService doctorServiceReviewReadService;
 
     private final DoctorServiceReviewWriteService doctorServiceReviewWriteService;
-
+    private final DoctorServiceReviewService doctorServiceReviewService;
+    private final DoctorOrgReadService doctorOrgReadService;
     private final DoctorUserReadService doctorUserReadService;
 
     @Autowired
     public OPDoctorUsers(DoctorServiceReviewReadService doctorServiceReviewReadService,
                          DoctorServiceReviewWriteService doctorServiceReviewWriteService,
-                         DoctorUserReadService doctorUserReadService) {
+                         DoctorUserReadService doctorUserReadService,
+                         DoctorServiceReviewService doctorServiceReviewService,
+                         DoctorOrgReadService doctorOrgReadService) {
         this.doctorServiceReviewReadService = doctorServiceReviewReadService;
         this.doctorServiceReviewWriteService = doctorServiceReviewWriteService;
         this.doctorUserReadService = doctorUserReadService;
+        this.doctorServiceReviewService = doctorServiceReviewService;
+        this.doctorOrgReadService = doctorOrgReadService;
     }
 
     /**
@@ -55,13 +65,18 @@ public class OPDoctorUsers {
     }
 
     /**
-     * 申请开通服务
+     * 申请开通服务, 首次申请和驳回后再次申请都可以用这个
      * @param serviceApplyDto 申请信息
      * @return 申请是否成功
      */
     @OpenMethod(key = "apply.open.service", paramNames = "serviceApplyDto")
     public Boolean applyOpenService(@Valid DoctorServiceApplyDto serviceApplyDto) {
-        return OPRespHelper.orOPEx(doctorServiceReviewWriteService.applyOpenService(UserUtil.getCurrentUser(), serviceApplyDto));
+        BaseUser baseUser = UserUtil.getCurrentUser();
+        if(!Objects.equals(UserType.FARM_ADMIN_PRIMARY.value(), baseUser.getType())){
+            //只有主账号(猪场管理员)才能申请开通服务
+            throw new OPClientException("authorize.fail");
+        }
+        return OPRespHelper.orOPEx(doctorServiceReviewService.applyOpenService(baseUser, serviceApplyDto));
     }
 
     /**
@@ -80,35 +95,16 @@ public class OPDoctorUsers {
      */
     @OpenMethod(key = "get.user.basic.info")
     public DoctorUserInfoDto getUserBasicInfo() {
-        return new DoctorUserInfoDto(mockUser(), getUser().getType() % 4, 1L, mockStaff(getUser().getId()));
+        return OPRespHelper.orOPEx(doctorUserReadService.findUserInfoByUserId(UserUtil.getUserId()));
     }
 
-    private DoctorUser getUser() {
-        return UserUtil.getCurrentUser();
-    }
-
-    private User mockUser() {
-        User user = new User();
-        user.setId(getUser().getId());
-        user.setName(getUser().getName());
-        user.setMobile(getUser().getMobile());
-        user.setStatus(1);
-        user.setType(2);
-        return user;
-    }
-
-    private DoctorStaff mockStaff(Long userId) {
-        DoctorStaff staff = new DoctorStaff();
-        staff.setId(userId);
-        staff.setOrgId(userId);
-        staff.setOrgName("测试公司"+userId);
-        staff.setUserId(userId);
-        staff.setRoleId(1L);
-        staff.setRoleName("仓库管理员");
-        staff.setStatus(1);
-        staff.setSex(1);
-        staff.setAvatar("http://img.xrnm.com/20150821-ee59df0636a3291405b61f997d314a19.jpg");
-        return staff;
+    /**
+     * 查询用户所在的公司的信息
+     * @return 公司id, 公司名称, 营业执照url, 公司手机号
+     */
+    @OpenMethod(key = "get.org.info")
+    public DoctorOrg getOrgInfo() {
+        return OPRespHelper.orOPEx(doctorOrgReadService.findOrgByUserId(UserUtil.getUserId()));
     }
 
     @OpenMethod(key = "get.user.level.one.menu")

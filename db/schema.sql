@@ -1082,9 +1082,27 @@ CREATE TABLE `doctor_service_reviews` (
   `reviewer_id` bigint(20) DEFAULT NULL COMMENT '审批人id',
   `created_at` datetime DEFAULT NULL COMMENT '创建时间',
   `updated_at` datetime DEFAULT NULL COMMENT '修改时间',
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `idx_service_review_UNIQUE` (`user_id`,`type`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='用户服务审批表';
 CREATE INDEX idx_doctor_service_reviews_user_id ON doctor_service_reviews(user_id);
+
+-- 用户服务状态变更历史记录表
+DROP TABLE IF EXISTS `doctor_service_review_tracks`;
+CREATE TABLE `doctor_service_review_tracks` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `user_id` bigint(20) NOT NULL,
+  `type` smallint(6) NOT NULL COMMENT '服务类型',
+  `old_status` smallint(6) NOT NULL COMMENT '原状态',
+  `new_status` smallint(6) NOT NULL COMMENT '新状态',
+  `reason` varchar(256) DEFAULT NULL COMMENT '状态变更的原因',
+  `reviewer_id` bigint(20) DEFAULT NULL COMMENT '操作人id',
+  `reviewer_name` varchar(64) DEFAULT NULL COMMENT '操作人姓名',
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='用户服务状态变更历史记录表';
+CREATE INDEX idx_doctor_service_reviews_track_user_id ON doctor_service_review_tracks(user_id);
 
 -- 数据回滚相关
 -- 猪群快照表
@@ -1129,6 +1147,7 @@ CREATE TABLE `doctor_carousel_figures` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='轮播图表';
 
 -- 用户账户与其他系统账户的绑定关系
+DROP TABLE IF EXISTS `doctor_user_binds`;
 CREATE TABLE `doctor_user_binds` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `user_id` bigint(20) NOT NULL,

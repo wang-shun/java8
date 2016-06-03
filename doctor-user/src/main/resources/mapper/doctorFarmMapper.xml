@@ -41,10 +41,35 @@
         (<include refid="vals" />)
     </insert>
 
+    <insert id="creates" parameterType="list" keyProperty="id" useGeneratedKeys="true">
+        INSERT INTO
+        <include refid="tb" />
+        (<include refid="cols_exclude_id" />)
+        VALUES
+        <foreach collection="list" separator="," item="i">
+            (#{i.name}, #{i.orgId}, #{i.orgName}, #{i.outId}, #{i.extra}, now(), now())
+        </foreach>
+    </insert>
+
     <select id="findById" parameterType="long" resultMap="DoctorFarmMap" >
         SELECT <include refid="cols_all" />
         FROM <include refid="tb" />
         WHERE id = #{id}
+    </select>
+
+    <select id="findByIds" parameterType="list" resultMap="DoctorFarmMap" >
+        SELECT <include refid="cols_all" />
+        FROM <include refid="tb" />
+        WHERE id in
+        <foreach collection="list" open="(" separator="," close=")" item="id">
+            #{id}
+        </foreach>
+    </select>
+
+    <select id="findByOrgId" parameterType="long" resultMap="DoctorFarmMap" >
+        SELECT <include refid="cols_all" />
+        FROM <include refid="tb" />
+        WHERE org_id = #{orgId}
     </select>
 
     <update id="update" parameterType="DoctorFarm">
@@ -56,9 +81,6 @@
             <if test="orgName != null">org_name = #{orgName},</if>
             <if test="outId != null">out_id = #{outId},</if>
             <if test="extra != null">extra = #{extra},</if>
-            
-            
-            
             updated_at=now()
         </set>
         WHERE id = #{id}

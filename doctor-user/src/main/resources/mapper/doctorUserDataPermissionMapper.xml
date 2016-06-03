@@ -51,6 +51,12 @@
         WHERE id = #{id}
     </select>
 
+    <select id="findByUserId" parameterType="long" resultMap="DoctorUserDataPermissionMap" >
+        SELECT <include refid="cols_all" />
+        FROM <include refid="tb" />
+        WHERE user_id = #{userId}
+    </select>
+
     <update id="update" parameterType="DoctorUserDataPermission">
         UPDATE
         <include refid="tb"/>
@@ -64,9 +70,6 @@
             <if test="creatorName != null">creator_name = #{creatorName},</if>
             <if test="updatorId != null">updator_id = #{updatorId},</if>
             <if test="updatorName != null">updator_name = #{updatorName},</if>
-            
-            
-            
             updated_at=now()
         </set>
         WHERE id = #{id}

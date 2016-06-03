@@ -183,7 +183,7 @@ public class Users {
             }else {
                 throw new JsonResponseException(500,"user.password.6to16") ;
             }
-        }catch (IllegalArgumentException e) {
+        }catch (IllegalArgumentException | JsonResponseException e) {
             log.warn("failed to sign up userName={}, email={}, mobile={}, error:{}",
                     userName, email, mobile, e.getMessage());
             throw new JsonResponseException(500, e.getMessage());
