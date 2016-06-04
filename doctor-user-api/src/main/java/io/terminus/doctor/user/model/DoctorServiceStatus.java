@@ -15,50 +15,70 @@ public class DoctorServiceStatus implements Serializable {
     private static final long serialVersionUID = -5197463213695970480L;
 
     private Long id;
-    
+
     private Long userId;
-    
+
     /**
      * 猪场软件服务状态，1-开通，0-关闭
      */
     private Integer pigdoctorStatus;
-    
+
     /**
-     * 猪场软件审批不通过或被冻结申请资格的原因
+     * 冗余，猪场软件审批不通过或被冻结申请资格的原因
      */
     private String pigdoctorReason;
-    
+
+    /**
+     * 冗余，猪场软件服务的审批状态
+     */
+    private Integer pigdoctorReviewStatus;
+
     /**
      * 电商服务状态，1-开通，0-关闭
      */
     private Integer pigmallStatus;
-    
+
     /**
-     * 电商软件审批不通过或被冻结申请资格的原因
+     * 冗余，电商服务审批不通过或被冻结申请资格的原因
      */
     private String pigmallReason;
-    
+
+    /**
+     * 冗余，电商服务的审批状态
+     */
+    private Integer pigmallReviewStatus;
+
     /**
      * 大数据服务状态，1-开通，0-关闭
      */
     private Integer neverestStatus;
-    
+
     /**
-     * 大数据软件审批不通过或被冻结申请资格的原因
+     * 冗余，大数据服务审批不通过或被冻结申请资格的原因
      */
     private String neverestReason;
-    
+
+    /**
+     * 冗余，大数据服务的审批状态
+     */
+    private Integer neverestReviewStatus;
+
     /**
      * 生猪交易服务状态，1-开通，0-关闭
      */
     private Integer pigtradeStatus;
-    
+
     /**
-     * 生猪交易审批不通过或被冻结申请资格的原因
+     * 冗余，生猪交易审批不通过或被冻结申请资格的原因
      */
     private String pigtradeReason;
-    
+
+    /**
+     * 冗余，生猪交易服务的审批状态
+     */
+    private Integer pigtradeReviewStatus;
+
     private Date createdAt;
-    
+
     private Date updatedAt;
 }

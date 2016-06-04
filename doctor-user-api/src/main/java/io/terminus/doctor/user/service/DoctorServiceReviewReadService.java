@@ -2,7 +2,6 @@ package io.terminus.doctor.user.service;
 
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
-import io.terminus.doctor.user.dto.DoctorServiceReviewDto;
 import io.terminus.doctor.user.model.DoctorServiceReview;
 
 import java.util.List;
@@ -37,13 +36,6 @@ public interface DoctorServiceReviewReadService {
      * @return 用户审批服务
      */
     Response<DoctorServiceReview> findServiceReviewByUserIdAndType(Long userId, DoctorServiceReview.Type type);
-
-    /**
-     * 根据用户id和服务类型查询审批服务dto(列转行)
-     * @param userId 用户id
-     * @return 用户审批服务dto
-     */
-    Response<DoctorServiceReviewDto> findServiceReviewDtoByUserId(Long userId);
 
     /**
      * 分页查询, 所有参数都可以为空

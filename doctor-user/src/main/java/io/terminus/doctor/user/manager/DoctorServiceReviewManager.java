@@ -4,17 +4,13 @@ import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.BaseUser;
-import io.terminus.common.utils.Arguments;
 import io.terminus.doctor.user.dao.*;
 import io.terminus.doctor.user.model.*;
-import io.terminus.parana.user.impl.dao.UserProfileDao;
-import io.terminus.parana.user.model.UserProfile;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -33,11 +29,12 @@ public class DoctorServiceReviewManager {
     private final DoctorFarmDao doctorFarmDao;
     private final DoctorUserDataPermissionDao doctorUserDataPermissionDao;
     private final ServiceReviewTrackDao serviceReviewTrackDao;
+    private final DoctorServiceStatusDao doctorServiceStatusDao;
 
     @Autowired
     public DoctorServiceReviewManager(DoctorOrgDao doctorOrgDao, DoctorStaffDao doctorStaffDao,
                                       DoctorServiceReviewDao doctorServiceReviewDao,
-                                      DoctorFarmDao doctorFarmDao,
+                                      DoctorFarmDao doctorFarmDao, DoctorServiceStatusDao doctorServiceStatusDao,
                                       DoctorUserDataPermissionDao doctorUserDataPermissionDao,
                                       ServiceReviewTrackDao serviceReviewTrackDao) {
         this.doctorOrgDao = doctorOrgDao;
@@ -46,6 +43,7 @@ public class DoctorServiceReviewManager {
         this.doctorFarmDao = doctorFarmDao;
         this.doctorUserDataPermissionDao = doctorUserDataPermissionDao;
         this.serviceReviewTrackDao = serviceReviewTrackDao;
+        this.doctorServiceStatusDao = doctorServiceStatusDao;
     }
 
     @Transactional
@@ -105,6 +103,55 @@ public class DoctorServiceReviewManager {
         }
         track.setReason(reason);
         serviceReviewTrackDao.create(track);
+
+        DoctorServiceStatus status = doctorServiceStatusDao.findByUserId(userId);
+        switch (type) {
+            case PIG_DOCTOR:
+                this.setPigDoctorField(status, newStatus, reason);
+                break;
+            case PIGMALL:
+                this.setPigmallField(status, newStatus, reason);
+                break;
+            case NEVEREST:
+                this.setNeverestField(status, newStatus, reason);
+                break;
+            case PIG_TRADE:
+                this.setPigTradeField(status, newStatus, reason);
+                break;
+        }
+        doctorServiceStatusDao.update(status);
+    }
+    private void setPigDoctorField(DoctorServiceStatus status, Integer newStatus, String reason){
+        status.setPigdoctorReviewStatus(newStatus);
+        if(Objects.equals(newStatus, DoctorServiceReview.Status.NOT_OK.getValue()) || Objects.equals(newStatus, DoctorServiceReview.Status.FROZEN.getValue())){
+            status.setPigdoctorReason(reason);
+        }else if(Objects.equals(newStatus, DoctorServiceReview.Status.OK.getValue())){
+            status.setPigdoctorStatus(1);
+        }
+    }
+    private void setPigmallField(DoctorServiceStatus status, Integer newStatus, String reason){
+        status.setPigmallReviewStatus(newStatus);
+        if(Objects.equals(newStatus, DoctorServiceReview.Status.NOT_OK.getValue()) || Objects.equals(newStatus, DoctorServiceReview.Status.FROZEN.getValue())){
+            status.setPigmallReason(reason);
+        }else if(Objects.equals(newStatus, DoctorServiceReview.Status.OK.getValue())){
+            status.setPigmallStatus(1);
+        }
+    }
+    private void setNeverestField(DoctorServiceStatus status, Integer newStatus, String reason){
+        status.setNeverestReviewStatus(newStatus);
+        if(Objects.equals(newStatus, DoctorServiceReview.Status.NOT_OK.getValue()) || Objects.equals(newStatus, DoctorServiceReview.Status.FROZEN.getValue())){
+            status.setNeverestReason(reason);
+        }else if(Objects.equals(newStatus, DoctorServiceReview.Status.OK.getValue())){
+            status.setNeverestStatus(1);
+        }
+    }
+    private void setPigTradeField(DoctorServiceStatus status, Integer newStatus, String reason){
+        status.setPigtradeReviewStatus(newStatus);
+        if(Objects.equals(newStatus, DoctorServiceReview.Status.NOT_OK.getValue()) || Objects.equals(newStatus, DoctorServiceReview.Status.FROZEN.getValue())){
+            status.setPigtradeReason(reason);
+        }else if(Objects.equals(newStatus, DoctorServiceReview.Status.OK.getValue())){
+            status.setPigtradeStatus(1);
+        }
     }
 
     @Transactional
@@ -133,13 +180,13 @@ public class DoctorServiceReviewManager {
         permission.setUpdatorName(user.getName());
         doctorUserDataPermissionDao.create(permission);
 
-        this.updateServiceStatus(user, userId, DoctorServiceReview.Type.PIG_DOCTOR, DoctorServiceReview.Status.REVIEW,
+        this.updateServiceReviewStatus(user, userId, DoctorServiceReview.Type.PIG_DOCTOR, DoctorServiceReview.Status.REVIEW,
                 DoctorServiceReview.Status.OK, "审核通过");
     }
 
     @Transactional
-    public void updateServiceStatus(BaseUser user, Long userId, DoctorServiceReview.Type type, DoctorServiceReview.Status oldStatus,
-                                    DoctorServiceReview.Status newStatus, String reason){
+    public void updateServiceReviewStatus(BaseUser user, Long userId, DoctorServiceReview.Type type, DoctorServiceReview.Status oldStatus,
+                                          DoctorServiceReview.Status newStatus, String reason){
         if (Objects.equals(newStatus.getValue(), DoctorServiceReview.Status.REVIEW.getValue())) {
             doctorServiceReviewDao.updateStatus(userId, type, newStatus);
             this.createServiceReviewTrack(null, userId, oldStatus.getValue(), newStatus.getValue(), type, reason);

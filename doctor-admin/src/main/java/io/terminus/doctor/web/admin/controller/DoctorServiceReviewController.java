@@ -68,9 +68,9 @@ public class DoctorServiceReviewController {
      * @param userId 被操作的用户的id, 注意不是当前登录者的id
      * @return
      */
-    @RequestMapping(value = "/pigmall/open", method = RequestMethod.GET)
+    @RequestMapping(value = "/pigmall/open/{userId}", method = RequestMethod.GET)
     @ResponseBody
-    public Boolean openPigmallService(@RequestParam("userId") Long userId){
+    public Boolean openPigmallService(@PathVariable Long userId){
         BaseUser baseUser = this.checkUserTypeOperator();
         //更新服务状态为开通
         return RespHelper.or500(doctorServiceReviewService.openService(baseUser, userId, DoctorServiceReview.Type.PIGMALL));
@@ -81,9 +81,9 @@ public class DoctorServiceReviewController {
      * @param userId 被操作的用户的id, 注意不是当前登录者的id
      * @return
      */
-    @RequestMapping(value = "/neverest/open", method = RequestMethod.GET)
+    @RequestMapping(value = "/neverest/open/{userId}", method = RequestMethod.GET)
     @ResponseBody
-    public Boolean openNeverestService(@RequestParam("userId") Long userId){
+    public Boolean openNeverestService(@PathVariable Long userId){
         BaseUser baseUser = this.checkUserTypeOperator();
         //更新服务状态为开通
         return RespHelper.or500(doctorServiceReviewService.openService(baseUser, userId, DoctorServiceReview.Type.NEVEREST));
@@ -94,7 +94,7 @@ public class DoctorServiceReviewController {
      * @param type 哪一个服务, 参见枚举 DoctorServiceReview.Type
      * @return
      */
-    @RequestMapping(value = "/notopen", method = RequestMethod.GET)
+    @RequestMapping(value = "/notopen", method = RequestMethod.POST)
     @ResponseBody
     public Boolean notOpenService(@RequestParam("userId") Long userId, @RequestParam("type") Integer type, @RequestParam("reason") String reason){
         BaseUser baseUser = this.checkUserTypeOperator();
@@ -108,19 +108,19 @@ public class DoctorServiceReviewController {
     }
 
     /**
-     * 管理员冻结用户的服务
+     * 管理员冻结用户申请服务的资格
      * @param userId 被操作的用户的id, 注意不是当前登录者的id
      * @param type 哪一个服务, 参见枚举 DoctorServiceReview.Type
      * @param reason 冻结服务的原因
      * @return
      */
-    @RequestMapping(value = "/froze", method = RequestMethod.GET)
+    @RequestMapping(value = "/froze", method = RequestMethod.POST)
     @ResponseBody
     public Boolean frozeService(@RequestParam("userId") Long userId, @RequestParam("type") Integer type, @RequestParam("reason") String reason){
         BaseUser baseUser = this.checkUserTypeOperator();
         try {
             DoctorServiceReview.Type serviceType = DoctorServiceReview.Type.from(type);
-            RespHelper.or500(doctorServiceReviewService.frozeService(baseUser, userId, serviceType, reason));
+            RespHelper.or500(doctorServiceReviewService.frozeApply(baseUser, userId, serviceType, reason));
         } catch (Exception e) {
             throw new JsonResponseException(500, e.getMessage());
         }
@@ -136,7 +136,7 @@ public class DoctorServiceReviewController {
      * @param pageSize 每页数量
      * @return
      */
-    @RequestMapping(value = "/page", method = RequestMethod.GET)
+    @RequestMapping(value = "/apply/page", method = RequestMethod.GET)
     @ResponseBody
     public Paging<DoctorServiceReview> pageServiceApplies(@RequestParam(value = "userId", required = false) Long userId,
                                      @RequestParam(value = "type", required = false) Integer type,
@@ -163,9 +163,9 @@ public class DoctorServiceReviewController {
      * @param userId
      * @return
      */
-    @RequestMapping(value = "/pigdoctor/detail", method = RequestMethod.GET)
+    @RequestMapping(value = "/pigdoctor/detail/{userId}", method = RequestMethod.GET)
     @ResponseBody
-    public UserApplyServiceDetailDto findUserApplyDetail(@RequestParam("userId") Long userId){
+    public UserApplyServiceDetailDto findUserApplyDetail(@PathVariable Long userId){
         UserApplyServiceDetailDto dto = new UserApplyServiceDetailDto();
         List<String> farms = RespHelper.or500(doctorFarmReadService.findFarmsByUserId(userId)).stream().map(DoctorFarm::getName).collect(Collectors.toList());
         DoctorOrg org = RespHelper.or500(doctorOrgReadService.findOrgByUserId(userId));

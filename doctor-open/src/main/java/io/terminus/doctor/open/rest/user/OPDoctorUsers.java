@@ -6,14 +6,11 @@ import io.terminus.doctor.common.enums.UserType;
 import io.terminus.doctor.open.util.OPRespHelper;
 import io.terminus.doctor.user.dto.DoctorMenuDto;
 import io.terminus.doctor.user.dto.DoctorServiceApplyDto;
-import io.terminus.doctor.user.dto.DoctorServiceReviewDto;
+import io.terminus.doctor.user.dto.DoctorServiceStatusDto;
 import io.terminus.doctor.user.dto.DoctorUserInfoDto;
 import io.terminus.doctor.user.model.DoctorOrg;
 import io.terminus.doctor.user.model.DoctorUser;
-import io.terminus.doctor.user.service.DoctorOrgReadService;
-import io.terminus.doctor.user.service.DoctorServiceReviewReadService;
-import io.terminus.doctor.user.service.DoctorServiceReviewWriteService;
-import io.terminus.doctor.user.service.DoctorUserReadService;
+import io.terminus.doctor.user.service.*;
 import io.terminus.doctor.user.service.business.DoctorServiceReviewService;
 import io.terminus.pampas.common.UserUtil;
 import io.terminus.pampas.openplatform.annotations.OpenBean;
@@ -41,18 +38,21 @@ public class OPDoctorUsers {
     private final DoctorServiceReviewService doctorServiceReviewService;
     private final DoctorOrgReadService doctorOrgReadService;
     private final DoctorUserReadService doctorUserReadService;
+    private final DoctorServiceStatusReadService doctorServiceStatusReadService;
 
     @Autowired
     public OPDoctorUsers(DoctorServiceReviewReadService doctorServiceReviewReadService,
                          DoctorServiceReviewWriteService doctorServiceReviewWriteService,
                          DoctorUserReadService doctorUserReadService,
                          DoctorServiceReviewService doctorServiceReviewService,
-                         DoctorOrgReadService doctorOrgReadService) {
+                         DoctorOrgReadService doctorOrgReadService,
+                         DoctorServiceStatusReadService doctorServiceStatusReadService) {
         this.doctorServiceReviewReadService = doctorServiceReviewReadService;
         this.doctorServiceReviewWriteService = doctorServiceReviewWriteService;
         this.doctorUserReadService = doctorUserReadService;
         this.doctorServiceReviewService = doctorServiceReviewService;
         this.doctorOrgReadService = doctorOrgReadService;
+        this.doctorServiceStatusReadService = doctorServiceStatusReadService;
     }
 
     /**
@@ -60,8 +60,8 @@ public class OPDoctorUsers {
      * @return 服务开通情况
      */
     @OpenMethod(key = "get.user.service.status")
-    public DoctorServiceReviewDto getUserServiceStatus() {
-        return OPRespHelper.orOPEx(doctorServiceReviewReadService.findServiceReviewDtoByUserId(UserUtil.getUserId()));
+    public DoctorServiceStatusDto getUserServiceStatus() {
+        return OPRespHelper.orOPEx(doctorServiceStatusReadService.findDoctorServiceStatusDto(UserUtil.getUserId()));
     }
 
     /**

@@ -47,6 +47,8 @@ public class DoctorServiceReviewServiceImpl implements DoctorServiceReviewServic
             //查询, 校验数据库
             DoctorServiceReview  review = doctorServiceReviewDao.findByUserIdAndType(user.getId(), type);
 
+            //已被冻结申请资格
+            Preconditions.checkState(Objects.equals(DoctorServiceReview.Status.FROZEN.getValue(), review.getStatus()), "user.service.frozen");
             //状态不是初始化或驳回
             Preconditions.checkState(Objects.equals(DoctorServiceReview.Status.INIT.getValue(), review.getStatus())
                             || Objects.equals(DoctorServiceReview.Status.NOT_OK.getValue(), review.getStatus()),
@@ -88,7 +90,7 @@ public class DoctorServiceReviewServiceImpl implements DoctorServiceReviewServic
             if (!Objects.equals(review.getStatus(), DoctorServiceReview.Status.REVIEW.getValue())) {
                 return Response.fail("user.service.not.applied");
             }
-            doctorServiceReviewManager.updateServiceStatus(user, userId, type, DoctorServiceReview.Status.REVIEW, DoctorServiceReview.Status.OK, null);
+            doctorServiceReviewManager.updateServiceReviewStatus(user, userId, type, DoctorServiceReview.Status.REVIEW, DoctorServiceReview.Status.OK, null);
             response.setResult(true);
         } catch (Exception e) {
             log.error("update doctor service review failed, cause : {}", Throwables.getStackTraceAsString(e));
@@ -105,7 +107,7 @@ public class DoctorServiceReviewServiceImpl implements DoctorServiceReviewServic
             if (!Objects.equals(review.getStatus(), DoctorServiceReview.Status.REVIEW.getValue())) {
                 return Response.fail("user.service.not.applied");
             }
-            doctorServiceReviewManager.updateServiceStatus(user, userId, type, DoctorServiceReview.Status.REVIEW, DoctorServiceReview.Status.NOT_OK, reason);
+            doctorServiceReviewManager.updateServiceReviewStatus(user, userId, type, DoctorServiceReview.Status.REVIEW, DoctorServiceReview.Status.NOT_OK, reason);
             response.setResult(true);
         } catch (Exception e) {
             log.error("update doctor service review failed, cause : {}", Throwables.getStackTraceAsString(e));
@@ -115,14 +117,14 @@ public class DoctorServiceReviewServiceImpl implements DoctorServiceReviewServic
     }
 
     @Override
-    public Response<Boolean> frozeService(BaseUser user, Long userId, DoctorServiceReview.Type type, String reason) {
+    public Response<Boolean> frozeApply(BaseUser user, Long userId, DoctorServiceReview.Type type, String reason) {
         Response<Boolean> response = new Response<>();
         try {
             DoctorServiceReview review = doctorServiceReviewDao.findByUserIdAndType(userId, type);
             if (!Objects.equals(review.getStatus(), DoctorServiceReview.Status.REVIEW.getValue())) {
                 return Response.fail("user.service.not.applied");
             }
-            doctorServiceReviewManager.updateServiceStatus(user, userId, type, DoctorServiceReview.Status.from(review.getStatus()),
+            doctorServiceReviewManager.updateServiceReviewStatus(user, userId, type, DoctorServiceReview.Status.from(review.getStatus()),
                     DoctorServiceReview.Status.FROZEN, reason);
             response.setResult(true);
         } catch (Exception e) {

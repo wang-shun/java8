@@ -6,13 +6,11 @@ import io.terminus.common.model.BaseUser;
 import io.terminus.doctor.common.enums.UserType;
 import io.terminus.doctor.user.dto.DoctorMenuDto;
 import io.terminus.doctor.user.dto.DoctorServiceApplyDto;
-import io.terminus.doctor.user.dto.DoctorServiceReviewDto;
+import io.terminus.doctor.user.dto.DoctorServiceStatusDto;
 import io.terminus.doctor.user.dto.DoctorUserInfoDto;
 import io.terminus.doctor.user.model.DoctorOrg;
-import io.terminus.doctor.user.service.DoctorOrgReadService;
-import io.terminus.doctor.user.service.DoctorServiceReviewReadService;
-import io.terminus.doctor.user.service.DoctorServiceReviewWriteService;
-import io.terminus.doctor.user.service.DoctorUserReadService;
+import io.terminus.doctor.user.model.DoctorServiceStatus;
+import io.terminus.doctor.user.service.*;
 import io.terminus.doctor.user.service.business.DoctorServiceReviewService;
 import io.terminus.pampas.common.UserUtil;
 import io.terminus.parana.common.utils.RespHelper;
@@ -34,18 +32,21 @@ public class ServiceReviews {
     private final DoctorServiceReviewService doctorServiceReviewService;
     private final DoctorOrgReadService doctorOrgReadService;
     private final DoctorUserReadService doctorUserReadService;
+    private final DoctorServiceStatusReadService doctorServiceStatusReadService;
 
     @Autowired
     public ServiceReviews(DoctorServiceReviewReadService doctorServiceReviewReadService,
                          DoctorServiceReviewWriteService doctorServiceReviewWriteService,
                          DoctorUserReadService doctorUserReadService,
                          DoctorServiceReviewService doctorServiceReviewService,
-                         DoctorOrgReadService doctorOrgReadService) {
+                         DoctorOrgReadService doctorOrgReadService,
+                          DoctorServiceStatusReadService doctorServiceStatusReadService) {
         this.doctorServiceReviewReadService = doctorServiceReviewReadService;
         this.doctorServiceReviewWriteService = doctorServiceReviewWriteService;
         this.doctorUserReadService = doctorUserReadService;
         this.doctorServiceReviewService = doctorServiceReviewService;
         this.doctorOrgReadService = doctorOrgReadService;
+        this.doctorServiceStatusReadService = doctorServiceStatusReadService;
     }
 
     /**
@@ -54,8 +55,8 @@ public class ServiceReviews {
      */
     @RequestMapping(value = "/getUserServiceStatus", method = RequestMethod.GET)
     @ResponseBody
-    public DoctorServiceReviewDto getUserServiceStatus() {
-        return RespHelper.or500(doctorServiceReviewReadService.findServiceReviewDtoByUserId(UserUtil.getUserId()));
+    public DoctorServiceStatusDto getUserServiceStatus() {
+        return RespHelper.or500(doctorServiceStatusReadService.findDoctorServiceStatusDto(UserUtil.getUserId()));
     }
 
     /**

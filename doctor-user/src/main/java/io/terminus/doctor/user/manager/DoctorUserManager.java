@@ -4,10 +4,7 @@ import io.terminus.doctor.common.enums.UserRole;
 import io.terminus.doctor.common.enums.UserType;
 import io.terminus.doctor.common.util.UserRoleUtil;
 import io.terminus.doctor.common.utils.Params;
-import io.terminus.doctor.user.dao.DoctorServiceReviewDao;
-import io.terminus.doctor.user.dao.OperatorDao;
-import io.terminus.doctor.user.dao.PrimaryUserDao;
-import io.terminus.doctor.user.dao.SubDao;
+import io.terminus.doctor.user.dao.*;
 import io.terminus.doctor.user.model.Operator;
 import io.terminus.doctor.user.model.PrimaryUser;
 import io.terminus.doctor.user.model.Sub;
@@ -37,16 +34,20 @@ public class DoctorUserManager {
     private final PrimaryUserDao primaryUserDao;
 
     private final SubDao subDao;
+
     private final DoctorServiceReviewDao doctorServiceReviewDao;
+
+    private final DoctorServiceStatusDao doctorServiceStatusDao;
 
     @Autowired
     public DoctorUserManager(UserDao userDao, OperatorDao operatorDao, PrimaryUserDao primaryUserDao, SubDao subDao,
-                             DoctorServiceReviewDao doctorServiceReviewDao) {
+                             DoctorServiceReviewDao doctorServiceReviewDao, DoctorServiceStatusDao doctorServiceStatusDao) {
         this.userDao = userDao;
         this.operatorDao = operatorDao;
         this.primaryUserDao = primaryUserDao;
         this.subDao = subDao;
         this.doctorServiceReviewDao = doctorServiceReviewDao;
+        this.doctorServiceStatusDao = doctorServiceStatusDao;
     }
 
     @Transactional
@@ -83,8 +84,11 @@ public class DoctorUserManager {
             primaryUser.setUserName(user.getMobile());
             primaryUserDao.create(primaryUser);
 
-            //初始化4个服务, 均为未开通状态
+            //初始化4个服务的申请审批数据, 均为未申请状态
             doctorServiceReviewDao.initData(userId);
+
+            //初始化4个服务是否开通的状态, 均为未开通状态
+            doctorServiceStatusDao.initdata(userId);
         } else if (Objects.equals(user.getType(), UserType.FARM_SUB.value())){
             //猪场子账号
             Long roleId = null;// TODO: read roleId from user.getRoles()

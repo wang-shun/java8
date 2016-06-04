@@ -41,6 +41,7 @@ public interface DoctorServiceReviewService {
      * @return
      */
     Response<Boolean> openService(BaseUser user, Long userId, DoctorServiceReview.Type type);
+
     /**
      * 不开通服务, 更新服务状态并保存状态变更历史记录
      * @param user 登录者
@@ -49,6 +50,7 @@ public interface DoctorServiceReviewService {
      * @return
      */
     Response<Boolean> notOpenService(BaseUser user, Long userId, DoctorServiceReview.Type type, String reason);
+
     /**
      * 冻结申请服务的资格, 冻结后就不能申请了
      * @param user 登录者
@@ -56,5 +58,5 @@ public interface DoctorServiceReviewService {
      * @param type 服务类型
      * @return
      */
-    Response<Boolean> frozeService(BaseUser user, Long userId, DoctorServiceReview.Type type, String reason);
+    Response<Boolean> frozeApply(BaseUser user, Long userId, DoctorServiceReview.Type type, String reason);
 }

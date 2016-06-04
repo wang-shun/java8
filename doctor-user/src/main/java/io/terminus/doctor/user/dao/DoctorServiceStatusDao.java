@@ -12,4 +12,11 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class DoctorServiceStatusDao extends MyBatisDao<DoctorServiceStatus> {
 
+    public DoctorServiceStatus findByUserId(Long userId){
+        return sqlSession.selectOne(sqlId("findByUserId"), userId);
+    }
+
+    public boolean initdata(Long userId){
+        return sqlSession.insert(sqlId("initdata"), userId) == 1;
+    }
 }

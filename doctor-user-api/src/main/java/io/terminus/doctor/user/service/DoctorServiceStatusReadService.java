@@ -1,6 +1,7 @@
 package io.terminus.doctor.user.service;
 
 import io.terminus.common.model.Response;
+import io.terminus.doctor.user.dto.DoctorServiceStatusDto;
 import io.terminus.doctor.user.model.DoctorServiceStatus;
 
 import java.util.List;
@@ -19,4 +20,18 @@ public interface DoctorServiceStatusReadService {
      * @return 用户服务状态表
      */
     Response<DoctorServiceStatus> findServiceStatusById(Long serviceStatusId);
+
+    /**
+     * 根据userId查询用户的服务开t通情况
+     * @param userId
+     * @return
+     */
+    Response<DoctorServiceStatus> findByUserId(Long userId);
+
+    /**
+     * 查询用户服务开通情况dto
+     * @param userId
+     * @return
+     */
+    Response<DoctorServiceStatusDto> findDoctorServiceStatusDto(Long userId);
 }
