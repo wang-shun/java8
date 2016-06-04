@@ -1,6 +1,7 @@
 package io.terminus.doctor.schedule.msg.producer;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.google.api.client.util.Maps;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
 import io.terminus.common.utils.Splitters;
@@ -32,6 +33,7 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * Desc: 待配种母猪提示
@@ -70,12 +72,18 @@ public class SowBreedingProducer extends AbstractProducer {
         log.info("待配种母猪提示消息产生 --- SowBreedingProducer 开始执行");
         List<DoctorMessage> messages = Lists.newArrayList();
 
-        // 批量获取猪信息
-        Long total = RespHelper.orServEx(doctorPigReadService.queryPigCount(
-                DataRange.FARM.getKey(), ruleRole.getFarmId(), DoctorPig.PIG_TYPE.SOW.getKey()));
         Rule rule = ruleRole.getRule();
+        // ruleValue map
+        Map<Integer, RuleValue> ruleValueMap = Maps.newHashMap();
+        for (int i = 0; rule.getValues() != null && i < rule.getValues().size(); i++) {
+            RuleValue ruleValue = rule.getValues().get(i);
+            ruleValueMap.put(ruleValue.getId(), ruleValue);
+        }
 
         if (StringUtils.isNotBlank(rule.getChannels())) {
+            // 批量获取猪信息
+            Long total = RespHelper.orServEx(doctorPigReadService.queryPigCount(
+                    DataRange.FARM.getKey(), ruleRole.getFarmId(), DoctorPig.PIG_TYPE.SOW.getKey()));
             // 计算size, 分批处理
             Long page = getPageSize(total, 100L);
             DoctorPig pig =DoctorPig.builder()
@@ -84,24 +92,21 @@ public class SowBreedingProducer extends AbstractProducer {
                     .build();
             for (int i = 1; i <= page; i++) {
                 List<DoctorPigInfoDto> pigs = RespHelper.orServEx(doctorPigReadService.pagingDoctorInfoDtoByPig(pig, i, 100)).getData();
+                pigs = pigs.stream().filter(pigDto ->
+                        Objects.equals(PigStatus.Wean.getKey(), pigDto.getStatus()) || Objects.equals(PigStatus.Entry.getKey(), pigDto.getStatus()))
+                        .collect(Collectors.toList());
+                // 处理每个猪
                 for (int j = 0; pigs != null && j < pigs.size(); j++) {
                     DoctorPigInfoDto pigDto = pigs.get(j);
                     // 母猪的updatedAt与当前时间差 (天)
                     Double timeDiff = (double) (DateTime.now().minus(new DateTime(pigDto.getUpdatedAt()).getMillis()).getMillis() / 86400000);
-                    for (int k = 0; rule.getValues() != null && k < rule.getValues().size(); k++) {
-                        RuleValue ruleValue = rule.getValues().get(k);
-                        // 1. 断奶日期判断 -> id:1
-                        if (1 == ruleValue.getId() && Objects.equals(PigStatus.Wean.getKey(), pigDto.getStatus())) {
-                            if (checkRuleValue(ruleValue, timeDiff)) {
-                                messages.addAll(getMessage(pigDto, rule.getChannels(), ruleRole, subUsers, timeDiff, rule.getUrl()));
-                            }
-                        }
-                        // 2. 初配日期 -> id:2
-                        if (2 == ruleValue.getId() && Objects.equals(PigStatus.Entry.getKey(), pigDto.getStatus())) {
-                            if (checkRuleValue(ruleValue, timeDiff)) {
-                                messages.addAll(getMessage(pigDto, rule.getChannels(), ruleRole, subUsers, timeDiff, rule.getUrl()));
-                            }
-                        }
+                    // 1. 断奶日期判断 -> id:1
+                    if (checkRuleValue(ruleValueMap.get(1), timeDiff)) {
+                        messages.addAll(getMessage(pigDto, rule.getChannels(), ruleRole, subUsers, timeDiff, rule.getUrl()));
+                    }
+                    // 2. 初配日期 -> id:2
+                    if (checkRuleValue(ruleValueMap.get(2), timeDiff)) {
+                        messages.addAll(getMessage(pigDto, rule.getChannels(), ruleRole, subUsers, timeDiff, rule.getUrl()));
                     }
                 }
             }
