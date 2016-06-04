@@ -1104,6 +1104,29 @@ CREATE TABLE `doctor_service_review_tracks` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='用户服务状态变更历史记录表';
 CREATE INDEX idx_doctor_service_reviews_track_user_id ON doctor_service_review_tracks(user_id);
 
+-- 用户服务状态表
+DROP TABLE IF EXISTS `doctor_service_status`;
+CREATE TABLE `doctor_service_status` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `user_id` bigint(20) NOT NULL,
+  `pigdoctor_status` smallint(6) NOT NULL DEFAULT '0' COMMENT '猪场软件服务状态，1-开通，0-关闭',
+  `pigdoctor_reason` varchar(256) DEFAULT NULL COMMENT '冗余，猪场软件审批不通过或被冻结申请资格的原因',
+  `pigdoctor_review_status` smallint(6) DEFAULT NULL COMMENT '冗余，猪场软件服务的审批状态',
+  `pigmall_status` smallint(6) NOT NULL DEFAULT '0' COMMENT '电商服务状态，1-开通，0-关闭',
+  `pigmall_reason` varchar(256) DEFAULT NULL COMMENT '冗余，电商服务审批不通过或被冻结申请资格的原因',
+  `pigmall_review_status` smallint(6) DEFAULT NULL COMMENT '冗余，电商服务的审批状态',
+  `neverest_status` smallint(6) NOT NULL DEFAULT '0' COMMENT '大数据服务状态，1-开通，0-关闭',
+  `neverest_reason` varchar(256) DEFAULT NULL COMMENT '冗余，大数据服务审批不通过或被冻结申请资格的原因',
+  `neverest_review_status` smallint(6) DEFAULT NULL COMMENT '冗余，大数据服务的审批状态',
+  `pigtrade_status` smallint(6) NOT NULL DEFAULT '0' COMMENT '生猪交易服务状态，1-开通，0-关闭',
+  `pigtrade_reason` varchar(256) DEFAULT NULL COMMENT '冗余，生猪交易审批不通过或被冻结申请资格的原因',
+  `pigtrade_review_status` smallint(6) DEFAULT NULL COMMENT '冗余，生猪交易服务的审批状态',
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `idx_doctor_service_status_UNIQUE` (`user_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8 COMMENT='用户服务状态表';
+
 -- 数据回滚相关
 -- 猪群快照表
 DROP TABLE IF EXISTS `doctor_group_snapshots`;

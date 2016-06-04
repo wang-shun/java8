@@ -48,7 +48,7 @@ public class DoctorServiceReviewServiceImpl implements DoctorServiceReviewServic
             DoctorServiceReview  review = doctorServiceReviewDao.findByUserIdAndType(user.getId(), type);
 
             //已被冻结申请资格
-            Preconditions.checkState(Objects.equals(DoctorServiceReview.Status.FROZEN.getValue(), review.getStatus()), "user.service.frozen");
+            Preconditions.checkState(!Objects.equals(DoctorServiceReview.Status.FROZEN.getValue(), review.getStatus()), "user.service.frozen");
             //状态不是初始化或驳回
             Preconditions.checkState(Objects.equals(DoctorServiceReview.Status.INIT.getValue(), review.getStatus())
                             || Objects.equals(DoctorServiceReview.Status.NOT_OK.getValue(), review.getStatus()),

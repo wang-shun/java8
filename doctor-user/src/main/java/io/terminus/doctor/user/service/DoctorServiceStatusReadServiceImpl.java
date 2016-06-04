@@ -51,7 +51,9 @@ public class DoctorServiceStatusReadServiceImpl implements DoctorServiceStatusRe
     public Response<DoctorServiceStatusDto> findDoctorServiceStatusDto(Long userId){
         try {
             DoctorServiceStatus status = doctorServiceStatusDao.findByUserId(userId);
-            return Response.ok(this.makeDoctorServiceStatusDto(status));
+            DoctorServiceStatusDto dto = this.makeDoctorServiceStatusDto(status);
+            dto.setUserId(userId);
+            return Response.ok(dto);
         } catch (Exception e) {
             log.error("find serviceStatus by userId failed, userId:{}, cause:{}", userId, Throwables.getStackTraceAsString(e));
             return Response.fail("serviceStatus.find.fail");
@@ -68,9 +70,9 @@ public class DoctorServiceStatusReadServiceImpl implements DoctorServiceStatusRe
 
         //如果服务已开通,则设状态为1, 否则使用申请和审批的状态
         dto.setPigDoctor(status.getPigdoctorStatus() == 1 ? 1 : status.getPigdoctorReviewStatus());
-        dto.setPigDoctor(status.getPigmallStatus() == 1 ? 1 : status.getPigmallReviewStatus());
-        dto.setPigDoctor(status.getNeverestStatus() == 1 ? 1 : status.getNeverestReviewStatus());
-        dto.setPigDoctor(status.getPigtradeStatus() == 1 ? 1 : status.getPigtradeReviewStatus());
+        dto.setPigmall(status.getPigmallStatus() == 1 ? 1 : status.getPigmallReviewStatus());
+        dto.setNeverest(status.getNeverestStatus() == 1 ? 1 : status.getNeverestReviewStatus());
+        dto.setPigTrade(status.getPigtradeStatus() == 1 ? 1 : status.getPigtradeReviewStatus());
         return dto;
     }
 }

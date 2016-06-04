@@ -119,7 +119,7 @@ public class DoctorServiceReviewManager {
                 this.setPigTradeField(status, newStatus, reason);
                 break;
         }
-        doctorServiceStatusDao.update(status);
+        doctorServiceStatusDao.updateWithNull(status);
     }
     private void setPigDoctorField(DoctorServiceStatus status, Integer newStatus, String reason){
         status.setPigdoctorReviewStatus(newStatus);
@@ -127,6 +127,8 @@ public class DoctorServiceReviewManager {
             status.setPigdoctorReason(reason);
         }else if(Objects.equals(newStatus, DoctorServiceReview.Status.OK.getValue())){
             status.setPigdoctorStatus(1);
+        }else{
+            status.setPigdoctorReason(null);
         }
     }
     private void setPigmallField(DoctorServiceStatus status, Integer newStatus, String reason){
@@ -135,6 +137,8 @@ public class DoctorServiceReviewManager {
             status.setPigmallReason(reason);
         }else if(Objects.equals(newStatus, DoctorServiceReview.Status.OK.getValue())){
             status.setPigmallStatus(1);
+        }else{
+            status.setPigmallReason(null);
         }
     }
     private void setNeverestField(DoctorServiceStatus status, Integer newStatus, String reason){
@@ -143,6 +147,8 @@ public class DoctorServiceReviewManager {
             status.setNeverestReason(reason);
         }else if(Objects.equals(newStatus, DoctorServiceReview.Status.OK.getValue())){
             status.setNeverestStatus(1);
+        }else{
+            status.setNeverestReason(null);
         }
     }
     private void setPigTradeField(DoctorServiceStatus status, Integer newStatus, String reason){
@@ -151,6 +157,8 @@ public class DoctorServiceReviewManager {
             status.setPigtradeReason(reason);
         }else if(Objects.equals(newStatus, DoctorServiceReview.Status.OK.getValue())){
             status.setPigtradeStatus(1);
+        }else{
+            status.setPigtradeReason(null);
         }
     }
 

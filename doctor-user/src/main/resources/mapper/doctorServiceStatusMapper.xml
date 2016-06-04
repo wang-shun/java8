@@ -54,7 +54,7 @@
         WHERE id = #{id}
     </select>
 
-    <select id="findById" parameterType="long" resultMap="DoctorServiceStatusMap" >
+    <select id="findByUserId" parameterType="long" resultMap="DoctorServiceStatusMap" >
         SELECT <include refid="cols_all" />
         FROM <include refid="tb" />
         WHERE user_id = #{userId}
@@ -77,6 +77,28 @@
             <if test="pigtradeStatus != null">pigtrade_status = #{pigtradeStatus},</if>
             <if test="pigtradeReason != null">pigtrade_reason = #{pigtradeReason},</if>
             <if test="pigtradeReviewStatus != null">pigtrade_review_status = #{pigtradeReviewStatus},</if>
+            updated_at=now()
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <update id="updateWithNull" parameterType="DoctorServiceStatus">
+        UPDATE
+        <include refid="tb"/>
+        <set>
+            user_id = #{userId},
+            pigdoctor_status = #{pigdoctorStatus},
+            pigdoctor_reason = #{pigdoctorReason},
+            pigdoctor_review_status = #{pigdoctorReviewStatus},
+            pigmall_status = #{pigmallStatus},
+            pigmall_reason = #{pigmallReason},
+            pigmall_review_status = #{pigmallReviewStatus},
+            neverest_status = #{neverestStatus},
+            neverest_reason = #{neverestReason},
+            neverest_review_status = #{neverestReviewStatus},
+            pigtrade_status = #{pigtradeStatus},
+            pigtrade_reason = #{pigtradeReason},
+            pigtrade_review_status = #{pigtradeReviewStatus},
             updated_at=now()
         </set>
         WHERE id = #{id}

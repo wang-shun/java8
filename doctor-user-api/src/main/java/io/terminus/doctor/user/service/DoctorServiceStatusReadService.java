@@ -22,7 +22,7 @@ public interface DoctorServiceStatusReadService {
     Response<DoctorServiceStatus> findServiceStatusById(Long serviceStatusId);
 
     /**
-     * 根据userId查询用户的服务开t通情况
+     * 根据userId查询用户的服务开通情况
      * @param userId
      * @return
      */
