@@ -20,6 +20,7 @@ import org.springframework.stereotype.Component;
  */
 @Slf4j
 @Component
+@SuppressWarnings("unused")
 public class DoctorGroupCountListener implements EventListener {
 
     private final DoctorGroupReadService doctorGroupReadService;
@@ -41,7 +42,7 @@ public class DoctorGroupCountListener implements EventListener {
      */
     @Subscribe
     public void countGroupByType(DoctorGroupCountEvent event) {
-        DoctorGroupCount groupCount = RespHelper.or500(doctorGroupReadService.coutFarmGroups(event.getOrgId(), event.getFarmId()));
+        DoctorGroupCount groupCount = RespHelper.or500(doctorGroupReadService.countFarmGroups(event.getOrgId(), event.getFarmId()));
         DoctorPigTypeStatistic statistic = RespHelper.or500(doctorPigTypeStatisticReadService.findPigTypeStatisticByFarmId(event.getFarmId()));
 
         //如果不存在, 就新建统计数据

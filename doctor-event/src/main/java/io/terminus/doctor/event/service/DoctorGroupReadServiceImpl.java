@@ -137,7 +137,7 @@ public class DoctorGroupReadServiceImpl implements DoctorGroupReadService {
     }
 
     @Override
-    public Response<DoctorGroupCount> coutFarmGroups(Long orgId, Long farmId) {
+    public Response<DoctorGroupCount> countFarmGroups(Long orgId, Long farmId) {
         try {
             DoctorGroupSearchDto searchDto = new DoctorGroupSearchDto();
             searchDto.setFarmId(farmId);

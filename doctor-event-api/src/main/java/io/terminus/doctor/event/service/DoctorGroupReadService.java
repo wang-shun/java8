@@ -71,7 +71,7 @@ public interface DoctorGroupReadService {
      * @param farmId 猪场id
      * @return 统计结果
      */
-    Response<DoctorGroupCount> coutFarmGroups(@NotNull(message = "orgId.not.null") Long orgId,
+    Response<DoctorGroupCount> countFarmGroups(@NotNull(message = "orgId.not.null") Long orgId,
                                               @NotNull(message = "farmId.not.nulll") Long farmId);
 
     /**
