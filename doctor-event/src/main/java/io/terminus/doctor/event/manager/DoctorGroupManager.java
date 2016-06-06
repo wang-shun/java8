@@ -571,7 +571,8 @@ public class DoctorGroupManager {
         event.setIsAuto(baseInput.getIsAuto());
         event.setCreatorId(baseInput.getCreatorId());   //创建人
         event.setCreatorName(baseInput.getCreatorName());
-        event.setDesc(baseInput.getRemark());
+        event.setDesc("todo 事件描述");
+        event.setRemark(baseInput.getRemark());
         return event;
     }
 
