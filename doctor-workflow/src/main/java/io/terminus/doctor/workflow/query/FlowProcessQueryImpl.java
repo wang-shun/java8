@@ -1,8 +1,10 @@
 package io.terminus.doctor.workflow.query;
 
+import com.google.common.collect.Lists;
 import io.terminus.common.model.Paging;
 import io.terminus.doctor.workflow.access.JdbcAccess;
 import io.terminus.doctor.workflow.core.WorkFlowEngine;
+import io.terminus.doctor.workflow.model.FlowInstance;
 import io.terminus.doctor.workflow.model.FlowProcess;
 import io.terminus.doctor.workflow.utils.BeanHelper;
 
@@ -145,6 +147,16 @@ public class FlowProcessQueryImpl implements FlowProcessQuery {
     @Override
     public long findFlowProcessesSize(Map criteria) {
         return jdbcAccess.findFlowProcessesSize(criteria);
+    }
+
+    @Override
+    public List<FlowProcess> getCurrentProcesses(String flowDefinitionKey, Long businessId) {
+        FlowInstance instance = workFlowEngine.buildFlowQueryService().getFlowInstanceQuery()
+                .getExistFlowInstance(flowDefinitionKey, businessId);
+        if (instance != null) {
+            return getCurrentProcesses(instance.getId());
+        }
+        return Lists.newArrayList();
     }
 
     @Override
