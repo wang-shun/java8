@@ -145,7 +145,7 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
             //1.校验猪群是否存在
             DoctorGroupDetail groupDetail = checkGroupExist(groupId);
 
-            //2.校验能否操作此事件
+            //2.校验能否操作此事件 // TODO: 16/6/6 当前没有猪只,不能防疫,疾病,存栏,转群,等等等
             checkEventTypeIllegal(groupId, eventType);
 
             //3.根据不同的事件类型调用不同的录入接口
@@ -311,6 +311,7 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
     }
 
     private Long getLong(Map<String, Object> params, String key) {
-        return Long.valueOf(Params.get(params, key));
+        Object o = params.get(key);
+        return o == null ? null : Long.valueOf(String.valueOf(o));
     }
 }

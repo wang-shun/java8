@@ -157,7 +157,6 @@ public class DoctorGroupManager {
         groupEvent.setRemark(group.getRemark());
 
         DoctorNewGroupEvent newGroupEvent = new DoctorNewGroupEvent();
-        newGroupEvent.setType(GroupEventType.NEW.getValue());
         newGroupEvent.setSource(newGroupInput.getSource());
         groupEvent.setExtraMap(newGroupEvent);
         return groupEvent;
@@ -174,6 +173,7 @@ public class DoctorGroupManager {
 
         //2.创建防疫事件
         DoctorGroupEvent<DoctorAntiepidemicGroupEvent> event = dozerGroupEvent(group, GroupEventType.ANTIEPIDEMIC, antiepidemic);
+        event.setQuantity(antiepidemic.getQuantity());
         event.setExtraMap(antiEvent);
         doctorGroupEventDao.create(event);
 
@@ -196,6 +196,7 @@ public class DoctorGroupManager {
 
         //2.创建疾病事件
         DoctorGroupEvent<DoctorDiseaseGroupEvent> event = dozerGroupEvent(group, GroupEventType.DISEASE, disease);
+        event.setQuantity(disease.getQuantity());
         event.setExtraMap(diseaseEvent);
         doctorGroupEventDao.create(event);
 
@@ -542,6 +543,7 @@ public class DoctorGroupManager {
         newGroupInput.setGeneticName(fromGroup.getGeneticName());
         newGroupInput.setSource(PigSource.OUTER.getKey());          //来源:外购
         newGroupInput.setIsAuto(IsOrNot.YES.getValue());
+        newGroupInput.setRemark(transFarm.getRemark());
 
         DoctorGroup toGroup = BeanMapper.map(newGroupInput, DoctorGroup.class);
         toGroup.setFarmName(transFarm.getToFarmName());
@@ -566,8 +568,10 @@ public class DoctorGroupManager {
         event.setBarnId(group.getCurrentBarnId());      //事件发生猪舍
         event.setBarnName(group.getCurrentBarnName());
         event.setPigType(group.getPigType());           //猪类
+        event.setIsAuto(baseInput.getIsAuto());
         event.setCreatorId(baseInput.getCreatorId());   //创建人
         event.setCreatorName(baseInput.getCreatorName());
+        event.setDesc(baseInput.getRemark());
         return event;
     }
 

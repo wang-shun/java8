@@ -13,10 +13,4 @@ import java.io.Serializable;
 @Data
 public class BaseGroupEvent implements Serializable {
     private static final long serialVersionUID = 8577777699827163897L;
-
-    /**
-     * 事件类型
-     * @see io.terminus.doctor.event.enums.GroupEventType
-     */
-    protected Integer type;
 }
