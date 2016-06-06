@@ -1,5 +1,6 @@
 package io.terminus.doctor.common.validate;
 
+import io.terminus.common.exception.ServiceException;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.validation.ConstraintViolation;
@@ -41,7 +42,7 @@ public class DoctorInvokeValidator {
         Set<ConstraintViolation<Object>> violations = validator.validateParameters(target, method, args);
         if (violations.size() > 0){
             log.error("failed to validate service({})'s method({})'s params: {}", target, method, violations);
-            throw new IllegalArgumentException(violations.iterator().next().getMessage());
+            throw new ServiceException(violations.iterator().next().getMessage());
         }
     }
 }

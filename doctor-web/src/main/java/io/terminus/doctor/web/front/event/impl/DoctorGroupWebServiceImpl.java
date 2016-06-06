@@ -39,7 +39,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.terminus.common.utils.Arguments.isEmpty;
@@ -79,7 +81,10 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
     @Override
     public Response<Long> createNewGroup(DoctorNewGroupInput newGroupInput) {
         try {
-            //1. 构造猪群信息
+            //1.校验猪群号是否重复
+            checkGroupCodeExist(newGroupInput.getFarmId(), newGroupInput.getGroupCode());
+
+            //2.构造猪群信息
             return doctorGroupWriteService.createNewGroup(getNewGroup(newGroupInput), newGroupInput);
         } catch (ServiceException e) {
             return Response.fail(e.getMessage());
@@ -91,9 +96,15 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
 
     //构造新建猪群信息
     private DoctorGroup getNewGroup(DoctorNewGroupInput newGroupInput) {
+        newGroupInput.setIsAuto(IsOrNot.NO.getValue());
+
         newGroupInput.setBarnName(getBarnName(newGroupInput.getBarnId()));
         newGroupInput.setBreedName(getBreedName(newGroupInput.getBreedId()));
         newGroupInput.setGeneticName(getGeneticName(newGroupInput.getGeneticId()));
+
+        //事件录入人信息
+        newGroupInput.setCreatorId(UserUtil.getUserId());
+        newGroupInput.setCreatorName(UserUtil.getCurrentUser().getName());
 
         DoctorGroup group = BeanMapper.map(newGroupInput, DoctorGroup.class);
 
@@ -104,10 +115,6 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
         DoctorOrg org = RespHelper.orServEx(doctorOrgReadService.findOrgById(farm.getOrgId()));
         group.setOrgId(org.getId());
         group.setOrgName(org.getName());
-
-        //事件录入人信息
-        group.setCreatorId(UserUtil.getUserId());
-        group.setCreatorName(UserUtil.getCurrentUser().getName());
         return group;
     }
 
@@ -177,6 +184,14 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
     //校验猪群是否存在
     private DoctorGroupDetail checkGroupExist(Long groupId) {
         return checkNotNull(RespHelper.or500(doctorGroupReadService.findGroupDetailByGroupId(groupId)), "group.not.exist");
+    }
+
+    //校验猪群号是否重复
+    private void checkGroupCodeExist(Long farmId, String groupCode) {
+        List<DoctorGroup> groups = RespHelper.or500(doctorGroupReadService.findGroupsByFarmId(farmId));
+        if (groups.stream().map(DoctorGroup::getGroupCode).collect(Collectors.toList()).contains(groupCode)) {
+            throw new ServiceException("group.code.exist");
+        }
     }
 
     //获取猪舍名称
