@@ -39,6 +39,10 @@ openplatform:
 parana:
   config:
     mode: server
+  auth:
+    level: easy
+    path: /home/admin/assets/pidgey/
+    key: MOBILE
 
 zookeeper:
   host: 101.201.44.35

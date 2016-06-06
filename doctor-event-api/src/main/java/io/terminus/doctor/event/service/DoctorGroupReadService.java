@@ -2,9 +2,11 @@ package io.terminus.doctor.event.service;
 
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
+import io.terminus.doctor.event.dto.DoctorGroupCount;
 import io.terminus.doctor.event.dto.DoctorGroupDetail;
 import io.terminus.doctor.event.dto.DoctorGroupSearchDto;
 import io.terminus.doctor.event.model.DoctorGroup;
+import io.terminus.doctor.event.model.DoctorGroupEvent;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.validation.Valid;
@@ -63,4 +65,24 @@ public interface DoctorGroupReadService {
      * @return 事件类型s
      */
     Response<List<Integer>> findEventTypesByGroupIds(@NotEmpty(message = "groupIds.not.empty") List<Long> groupIds);
+
+    /**
+     * 统计猪群不同种类的猪群数量
+     * @param farmId 猪场id
+     * @return 统计结果
+     */
+    Response<DoctorGroupCount> countFarmGroups(@NotNull(message = "orgId.not.null") Long orgId,
+                                              @NotNull(message = "farmId.not.nulll") Long farmId);
+
+    /**
+     * 分页查询猪群历史事件
+     * @param farmId    猪场id
+     * @param groupId   猪群id
+     * @param type      事件类型
+     * @param pageNo    分页大小
+     * @param size      当前页码
+     * @return  分页结果
+     */
+    Response<Paging<DoctorGroupEvent>> pagingGroupEvent(@NotNull(message = "farmId.not.null") Long farmId,
+                                                        Long groupId, Integer type, Integer pageNo, Integer size);
 }

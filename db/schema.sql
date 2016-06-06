@@ -692,7 +692,7 @@ CREATE TABLE `doctor_pig_tracks` (
   `current_barn_name` varchar(64) DEFAULT NULL COMMENT '当前猪舍名称',
   `weight` double DEFAULT NULL COMMENT '猪重量',
   `out_farm_date` datetime DEFAULT NULL COMMENT '猪离场时间',
-  `rel_event_id` bigint(20) DEFAULT NULL COMMENT '关联事件最近事件',
+  `rel_event_ids` text DEFAULT NULL COMMENT '关联事件最近事件',
   `extra` text COMMENT '事件修改猪对应信息',
   `current_parity` int(11) DEFAULT NULL COMMENT '当前胎次信息',
   `remark` text COMMENT '备注',
@@ -929,7 +929,7 @@ CREATE TABLE `doctor_material_consume_avgs` (
   `type` smallint(6) unsigned DEFAULT NULL COMMENT '领取货物属于的类型',
   `consume_avg_count` bigint(20) DEFAULT NULL COMMENT '平均消耗数量',
   `consume_count` bigint(20) DEFAULT NULL COMMENT '消耗数量',
-  `consime_date` datetime DEFAULT NULL comment '消耗日期',
+  `consume_date` datetime DEFAULT NULL comment '消耗日期',
   `extra` text DEFAULT NULL comment 'extra',
   `created_at` datetime DEFAULT NULL,
   `updated_at` datetime DEFAULT NULL,
@@ -1082,9 +1082,27 @@ CREATE TABLE `doctor_service_reviews` (
   `reviewer_id` bigint(20) DEFAULT NULL COMMENT '审批人id',
   `created_at` datetime DEFAULT NULL COMMENT '创建时间',
   `updated_at` datetime DEFAULT NULL COMMENT '修改时间',
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `idx_service_review_UNIQUE` (`user_id`,`type`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='用户服务审批表';
 CREATE INDEX idx_doctor_service_reviews_user_id ON doctor_service_reviews(user_id);
+
+-- 用户服务状态变更历史记录表
+DROP TABLE IF EXISTS `doctor_service_review_tracks`;
+CREATE TABLE `doctor_service_review_tracks` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `user_id` bigint(20) NOT NULL,
+  `type` smallint(6) NOT NULL COMMENT '服务类型',
+  `old_status` smallint(6) NOT NULL COMMENT '原状态',
+  `new_status` smallint(6) NOT NULL COMMENT '新状态',
+  `reason` varchar(256) DEFAULT NULL COMMENT '状态变更的原因',
+  `reviewer_id` bigint(20) DEFAULT NULL COMMENT '操作人id',
+  `reviewer_name` varchar(64) DEFAULT NULL COMMENT '操作人姓名',
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='用户服务状态变更历史记录表';
+CREATE INDEX idx_doctor_service_reviews_track_user_id ON doctor_service_review_tracks(user_id);
 
 -- 数据回滚相关
 -- 猪群快照表
@@ -1129,6 +1147,7 @@ CREATE TABLE `doctor_carousel_figures` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='轮播图表';
 
 -- 用户账户与其他系统账户的绑定关系
+DROP TABLE IF EXISTS `doctor_user_binds`;
 CREATE TABLE `doctor_user_binds` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `user_id` bigint(20) NOT NULL,
@@ -1144,3 +1163,21 @@ CREATE TABLE `doctor_user_binds` (
   UNIQUE KEY `idx_user_bind_UNIQUE1` (`user_id`,`target_system`),
   UNIQUE KEY `idx_user_bind_UNIQUE2` (`uuid`)
 ) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8 COMMENT='用户账户与其他系统账户的绑定关系';
+
+-- 2016-06-03 猪只数统计表
+DROP TABLE IF EXISTS `doctor_pig_type_statistics`;
+CREATE TABLE `doctor_pig_type_statistics` (
+  `id` BIGINT(20) NOT NULL AUTO_INCREMENT COMMENT '自增主键',
+  `org_id` BIGINT(20) DEFAULT NULL COMMENT '公司id',
+  `farm_id` BIGINT(20) DEFAULT NULL COMMENT '猪场id',
+  `boar` INT(11) DEFAULT NULL COMMENT '公猪数',
+  `sow` INT(11) DEFAULT NULL COMMENT '母猪数',
+  `farrow` INT(11) DEFAULT NULL COMMENT '产房仔猪数',
+  `nursery` INT(11) DEFAULT NULL COMMENT '保育猪数',
+  `fatten` INT(11) DEFAULT NULL COMMENT '育肥猪数',
+  `created_at` DATETIME DEFAULT NULL COMMENT '创建时间',
+  `updated_at` DATETIME DEFAULT NULL COMMENT '修改时间',
+  PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8 COMMENT='猪只数统计表';
+CREATE UNIQUE INDEX idx_doctor_pig_type_statistics_farm_id ON doctor_pig_type_statistics(farm_id);
+CREATE INDEX idx_doctor_pig_type_statistics_org_id ON doctor_pig_type_statistics(org_id);

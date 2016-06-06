@@ -6,6 +6,7 @@ import lombok.EqualsAndHashCode;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 
 /**
  * Desc: 猪群查询条件
@@ -25,4 +26,6 @@ public class DoctorGroupSearchDto extends DoctorGroup implements Serializable {
     private Date startCloseAt;  //关群开始时间
 
     private Date endCloseAt;    //关群结束时间
+
+    private List<Integer> pigTypes; //猪类list
 }

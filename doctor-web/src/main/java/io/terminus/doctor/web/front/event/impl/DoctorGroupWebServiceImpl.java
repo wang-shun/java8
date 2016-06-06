@@ -31,6 +31,7 @@ import io.terminus.doctor.event.service.DoctorGroupWriteService;
 import io.terminus.doctor.user.model.DoctorFarm;
 import io.terminus.doctor.user.model.DoctorOrg;
 import io.terminus.doctor.user.service.DoctorFarmReadService;
+import io.terminus.doctor.user.service.DoctorOrgReadService;
 import io.terminus.doctor.web.front.event.service.DoctorGroupWebService;
 import io.terminus.pampas.common.UserUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -58,18 +59,21 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
     private final DoctorBasicReadService doctorBasicReadService;
     private final DoctorBarnReadService doctorBarnReadService;
     private final DoctorGroupReadService doctorGroupReadService;
+    private final DoctorOrgReadService doctorOrgReadService;
 
     @Autowired
     public DoctorGroupWebServiceImpl(DoctorGroupWriteService doctorGroupWriteService,
                                      DoctorFarmReadService doctorFarmReadService,
                                      DoctorBasicReadService doctorBasicReadService,
                                      DoctorBarnReadService doctorBarnReadService,
-                                     DoctorGroupReadService doctorGroupReadService) {
+                                     DoctorGroupReadService doctorGroupReadService,
+                                     DoctorOrgReadService doctorOrgReadService) {
         this.doctorGroupWriteService = doctorGroupWriteService;
         this.doctorFarmReadService = doctorFarmReadService;
         this.doctorBasicReadService = doctorBasicReadService;
         this.doctorBarnReadService = doctorBarnReadService;
         this.doctorGroupReadService = doctorGroupReadService;
+        this.doctorOrgReadService = doctorOrgReadService;
     }
 
     @Override
@@ -97,7 +101,7 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
         DoctorFarm farm = RespHelper.orServEx(doctorFarmReadService.findFarmById(group.getFarmId()));
         group.setFarmName(farm.getName());
 
-        DoctorOrg org = RespHelper.orServEx(doctorFarmReadService.findOrgById(farm.getOrgId()));
+        DoctorOrg org = RespHelper.orServEx(doctorOrgReadService.findOrgById(farm.getOrgId()));
         group.setOrgId(org.getId());
         group.setOrgName(org.getName());
 

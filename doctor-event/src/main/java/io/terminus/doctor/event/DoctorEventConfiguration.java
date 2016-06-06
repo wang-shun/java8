@@ -1,10 +1,9 @@
 package io.terminus.doctor.event;
 
 import com.google.common.collect.Lists;
-import com.google.common.eventbus.AsyncEventBus;
-import com.google.common.eventbus.EventBus;
 import io.terminus.boot.mybatis.autoconfigure.MybatisAutoConfiguration;
 import io.terminus.doctor.common.DoctorCommonConfiguration;
+import io.terminus.doctor.common.event.CoreEventDispatcher;
 import io.terminus.doctor.event.dao.DoctorPigDao;
 import io.terminus.doctor.event.handler.DoctorEntryHandler;
 import io.terminus.doctor.event.handler.DoctorEventCreateHandler;
@@ -53,7 +52,6 @@ import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Profile;
 
 import java.util.List;
-import java.util.concurrent.Executors;
 
 /**
  * Created by yaoqijun.
@@ -70,9 +68,8 @@ import java.util.concurrent.Executors;
 public class  DoctorEventConfiguration {
 
     @Bean
-    public EventBus eventBus(){
-        return new AsyncEventBus(
-                Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors()));
+    public CoreEventDispatcher coreEventDispatcher(){
+        return new CoreEventDispatcher();
     }
 
     /**

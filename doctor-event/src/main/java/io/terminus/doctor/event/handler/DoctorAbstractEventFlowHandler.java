@@ -3,6 +3,7 @@ package io.terminus.doctor.event.handler;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Maps;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.constants.JacksonType;
 import io.terminus.doctor.event.constants.DoctorPigSnapshotConstants;
@@ -65,14 +66,16 @@ public abstract class DoctorAbstractEventFlowHandler extends HandlerAware {
             Map<String,String> flowDataMap = OBJECT_MAPPER.readValue(execution.getFlowData(), JacksonType.MAP_OF_STRING);
             DoctorBasicInputInfoDto doctorBasicInputInfoDto = OBJECT_MAPPER.readValue(flowDataMap.get("basic"), DoctorBasicInputInfoDto.class);
             Map<String,Object> extraInfo = OBJECT_MAPPER.readValue(flowDataMap.get("extra"), JacksonType.MAP_OF_OBJECT);
+            Map<String,Object> context = Maps.newHashMap();
 
             // create event info
             DoctorPigEvent doctorPigEvent = buildAllPigDoctorEvent(doctorBasicInputInfoDto, extraInfo);
             doctorPigEventDao.create(doctorPigEvent);
+            context.put("doctorPigEventId", doctorPigEvent.getId());
 
             // update track info
             DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(doctorPigEvent.getPigId());
-            DoctorPigTrack refreshPigTrack = updateDoctorPigTrackInfo(execution, doctorPigTrack, doctorBasicInputInfoDto, extraInfo);
+            DoctorPigTrack refreshPigTrack = updateDoctorPigTrackInfo(execution, doctorPigTrack, doctorBasicInputInfoDto, extraInfo, context);
             doctorPigTrackDao.update(refreshPigTrack);
 
             // create snapshot info
@@ -100,9 +103,11 @@ public abstract class DoctorAbstractEventFlowHandler extends HandlerAware {
      * @param doctorPigTrack 基础的母猪事件信息
      * @param basic 录入基础信息内容
      * @param extra 事件关联的信息内容
+     * @param context 执行上下文环境
      * @return
      */
-    public abstract DoctorPigTrack updateDoctorPigTrackInfo(Execution execution, DoctorPigTrack doctorPigTrack, DoctorBasicInputInfoDto basic, Map<String,Object> extra);
+    public abstract DoctorPigTrack updateDoctorPigTrackInfo(Execution execution, DoctorPigTrack doctorPigTrack,
+                                                            DoctorBasicInputInfoDto basic, Map<String,Object> extra, Map<String,Object> context);
 
     public DoctorPigEvent buildAllPigDoctorEvent(DoctorBasicInputInfoDto basic, Map<String,Object> extra){
         DoctorPigEvent doctorPigEvent = DoctorPigEvent.builder()

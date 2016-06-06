@@ -2,6 +2,7 @@ package io.terminus.doctor.user.model;
 
 import com.google.common.base.Objects;
 import com.google.common.collect.Lists;
+import io.terminus.common.exception.ServiceException;
 import lombok.Data;
 import lombok.Getter;
 
@@ -77,7 +78,7 @@ public class DoctorServiceReview implements Serializable {
                     return type;
                 }
             }
-            return null;
+            throw new ServiceException("doctor.service.review.type.error");
         }
     }
 
@@ -85,10 +86,10 @@ public class DoctorServiceReview implements Serializable {
      * 审批状态枚举
      */
     public enum Status {
-        INIT(0, "未审核"),
-        REVIEW(1, "待审核"),
-        OK(2, "通过"),
-        NOT_OK(-1, "不通过"),
+        INIT(0, "用户未提交申请"),
+        OK(1, "审核通过"),
+        REVIEW(2, "用户已提交申请,正在审核中"),
+        NOT_OK(-1, "审核不通过"),
         FROZEN(-2, "冻结");
 
         @Getter
@@ -105,7 +106,9 @@ public class DoctorServiceReview implements Serializable {
             return Lists.newArrayList(Status.values()).stream()
                     .filter(s -> Objects.equal(s.value, number))
                     .findFirst()
-                    .orElse(null);
+                    .<ServiceException>orElseThrow(() -> {
+                        throw new ServiceException("doctor.service.review.status.error");
+                    });
         }
     }
 }

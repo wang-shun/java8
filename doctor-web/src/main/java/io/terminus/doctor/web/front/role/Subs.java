@@ -67,7 +67,7 @@ public class Subs {
         // TODO: 自定义角色冗余进 user 表
         List<String> roles = Lists.newArrayList("SUB");
         if (sub.getRoleId() != null) {
-            roles.add("SUB(" + sub.getRoleId() + ")");
+            roles.add("SUB(SUB(" + sub.getRoleId() + "))");
         }
         user.setRoles(roles);
         user.setExtra(MapBuilder.<String, String>of().put("pid", primaryId.toString()).map());

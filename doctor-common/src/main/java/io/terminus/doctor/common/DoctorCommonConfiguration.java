@@ -1,5 +1,6 @@
 package io.terminus.doctor.common;
 
+import io.terminus.doctor.common.event.CoreEventDispatcher;
 import io.terminus.doctor.common.validate.DoctorServiceInvokeValidator;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -16,5 +17,10 @@ public class DoctorCommonConfiguration {
     @Bean
     public DoctorServiceInvokeValidator doctorServiceInvokeValidator() {
         return new DoctorServiceInvokeValidator();
+    }
+
+    @Bean
+    public CoreEventDispatcher coreEventDispatcher() {
+        return new CoreEventDispatcher();
     }
 }

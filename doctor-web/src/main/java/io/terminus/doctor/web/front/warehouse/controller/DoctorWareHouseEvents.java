@@ -147,7 +147,7 @@ public class DoctorWareHouseEvents {
                     .unitId(doctorMaterialInfo.getUnitId()).unitName(doctorMaterialInfo.getUnitName())
                     .build();
         }catch (Exception e){
-            log.error(" fail, cause:{}", Throwables.getStackTraceAsString(e));
+            log.error("consume material fail, cause:{}", Throwables.getStackTraceAsString(e));
             throw new JsonResponseException(e.getMessage());
         }
         return RespHelper.or500(doctorMaterialInWareHouseWriteService.consumeMaterialInfo(doctorMaterialConsumeProviderDto));
@@ -184,7 +184,7 @@ public class DoctorWareHouseEvents {
                     .count(dto.getCount()).unitId(doctorMaterialInfo.getUnitId()).unitName(doctorMaterialInfo.getUnitName())
                     .build();
         }catch (Exception e){
-            log.error(" fail, cause:{}", Throwables.getStackTraceAsString(e));
+            log.error("provider material fail, cause:{}", Throwables.getStackTraceAsString(e));
             throw new JsonResponseException(e.getMessage());
         }
         return RespHelper.or500(doctorMaterialInWareHouseWriteService.providerMaterialInfo(doctorMaterialConsumeProviderDto));

@@ -4,6 +4,7 @@ import io.terminus.doctor.common.enums.UserRole;
 import io.terminus.doctor.common.enums.UserType;
 import io.terminus.doctor.common.util.UserRoleUtil;
 import io.terminus.doctor.common.utils.Params;
+import io.terminus.doctor.user.dao.DoctorServiceReviewDao;
 import io.terminus.doctor.user.dao.OperatorDao;
 import io.terminus.doctor.user.dao.PrimaryUserDao;
 import io.terminus.doctor.user.dao.SubDao;
@@ -36,13 +37,16 @@ public class DoctorUserManager {
     private final PrimaryUserDao primaryUserDao;
 
     private final SubDao subDao;
+    private final DoctorServiceReviewDao doctorServiceReviewDao;
 
     @Autowired
-    public DoctorUserManager(UserDao userDao, OperatorDao operatorDao, PrimaryUserDao primaryUserDao, SubDao subDao) {
+    public DoctorUserManager(UserDao userDao, OperatorDao operatorDao, PrimaryUserDao primaryUserDao, SubDao subDao,
+                             DoctorServiceReviewDao doctorServiceReviewDao) {
         this.userDao = userDao;
         this.operatorDao = operatorDao;
         this.primaryUserDao = primaryUserDao;
         this.subDao = subDao;
+        this.doctorServiceReviewDao = doctorServiceReviewDao;
     }
 
     @Transactional
@@ -78,6 +82,9 @@ public class DoctorUserManager {
             //暂时暂定手机号
             primaryUser.setUserName(user.getMobile());
             primaryUserDao.create(primaryUser);
+
+            //初始化4个服务, 均为未开通状态
+            doctorServiceReviewDao.initData(userId);
         } else if (Objects.equals(user.getType(), UserType.FARM_SUB.value())){
             //猪场子账号
             Long roleId = null;// TODO: read roleId from user.getRoles()
@@ -102,4 +109,5 @@ public class DoctorUserManager {
     public Boolean update(User user) {
         return userDao.update(user);
     }
+
 }

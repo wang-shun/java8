@@ -5,13 +5,21 @@
 package io.terminus.doctor.web.admin.user;
 
 import com.google.common.base.Objects;
+import com.google.common.base.Throwables;
 import com.google.common.eventbus.EventBus;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.BaseUser;
 import io.terminus.common.model.Response;
+import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.enums.UserStatus;
+import io.terminus.doctor.user.model.DoctorUser;
 import io.terminus.doctor.user.util.DoctorUserMaker;
 import io.terminus.pampas.common.UserUtil;
+import io.terminus.parana.auth.core.AclLoader;
+import io.terminus.parana.auth.core.PermissionHelper;
+import io.terminus.parana.auth.model.Acl;
+import io.terminus.parana.auth.model.ParanaThreadVars;
+import io.terminus.parana.auth.model.PermissionData;
 import io.terminus.parana.common.model.ParanaUser;
 import io.terminus.parana.user.model.LoginType;
 import io.terminus.parana.user.model.User;
@@ -46,16 +54,36 @@ public class Users {
 
     private final EventBus eventBus;
 
+    private final AclLoader aclLoader;
+
+    private final PermissionHelper permissionHelper;
+
     @Autowired
     public Users(UserReadService<User> userReadService,
-                 EventBus eventBus) {
+                 EventBus eventBus,
+                 AclLoader aclLoader,
+                 PermissionHelper permissionHelper) {
         this.userReadService = userReadService;
         this.eventBus = eventBus;
+        this.aclLoader = aclLoader;
+        this.permissionHelper = permissionHelper;
     }
 
     @RequestMapping("")
     public BaseUser getLoginUser() {
-        return UserUtil.getCurrentUser();
+        DoctorUser doctorUser = (DoctorUser) UserUtil.getCurrentUser();
+        try {
+            Acl acl = aclLoader.getAcl(ParanaThreadVars.getApp());
+            BaseUser user = UserUtil.getCurrentUser();
+            PermissionData perm = permissionHelper.getPermissions(acl, user, true);
+            perm.setAllRequests(null); // empty it
+            doctorUser.setAuth(JsonMapper.nonEmptyMapper().toJson(perm));
+        } catch (Exception e) {
+            Throwables.propagateIfInstanceOf(e, JsonResponseException.class);
+            log.error("get permissions of user failed, cause:{}", Throwables.getStackTraceAsString(e));
+            throw new JsonResponseException("auth.permission.find.fail");
+        }
+        return doctorUser;
     }
 
     /**

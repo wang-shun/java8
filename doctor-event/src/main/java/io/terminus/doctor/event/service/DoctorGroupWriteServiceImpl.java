@@ -3,6 +3,7 @@ package io.terminus.doctor.event.service;
 import com.google.common.base.Throwables;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.Response;
+import io.terminus.doctor.common.event.CoreEventDispatcher;
 import io.terminus.doctor.event.dao.DoctorGroupDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
 import io.terminus.doctor.event.dto.DoctorGroupDetail;
@@ -16,6 +17,7 @@ import io.terminus.doctor.event.dto.event.group.input.DoctorNewGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorTransFarmGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorTransGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorTurnSeedGroupInput;
+import io.terminus.doctor.event.event.DoctorGroupCountEvent;
 import io.terminus.doctor.event.manager.DoctorGroupManager;
 import io.terminus.doctor.event.model.DoctorGroup;
 import lombok.extern.slf4j.Slf4j;
@@ -41,20 +43,27 @@ public class DoctorGroupWriteServiceImpl implements DoctorGroupWriteService {
     private final DoctorGroupDao doctorGroupDao;
     private final DoctorGroupTrackDao doctorGroupTrackDao;
     private final DoctorGroupManager doctorGroupManager;
+    private final CoreEventDispatcher coreEventDispatcher;
 
     @Autowired
     public DoctorGroupWriteServiceImpl(DoctorGroupDao doctorGroupDao,
                                        DoctorGroupTrackDao doctorGroupTrackDao,
-                                       DoctorGroupManager doctorGroupManager) {
+                                       DoctorGroupManager doctorGroupManager,
+                                       CoreEventDispatcher coreEventDispatcher) {
         this.doctorGroupDao = doctorGroupDao;
         this.doctorGroupTrackDao = doctorGroupTrackDao;
         this.doctorGroupManager = doctorGroupManager;
+        this.coreEventDispatcher = coreEventDispatcher;
     }
 
     @Override
     public Response<Long> createNewGroup(DoctorGroup group, @Valid DoctorNewGroupInput newGroupInput) {
         try {
-            return Response.ok(doctorGroupManager.createNewGroup(group, newGroupInput));
+            Long groupId = doctorGroupManager.createNewGroup(group, newGroupInput);
+
+            //发布统计事件
+            publishCountGroupEvent(group.getOrgId(), group.getFarmId());
+            return Response.ok(groupId);
         } catch (Exception e) {
             log.error("create group failed, group:{}, newGroupInput:{}, cause:{}", group, newGroupInput, Throwables.getStackTraceAsString(e));
             return Response.fail("group.create.fail");
@@ -79,6 +88,9 @@ public class DoctorGroupWriteServiceImpl implements DoctorGroupWriteService {
     public Response<Boolean> groupEventChange(DoctorGroupDetail groupDetail, @Valid DoctorChangeGroupInput change) {
         try {
             doctorGroupManager.groupEventChange(groupDetail.getGroup(), groupDetail.getGroupTrack(), change);
+
+            //发布统计事件
+            publishCountGroupEvent(groupDetail.getGroup().getOrgId(), groupDetail.getGroup().getFarmId());
             return Response.ok(Boolean.TRUE);
         } catch (ServiceException e) {
             log.error("failed, groupDetail:{}, change:{}, cause:{}", groupDetail, change, Throwables.getStackTraceAsString(e));
@@ -93,6 +105,9 @@ public class DoctorGroupWriteServiceImpl implements DoctorGroupWriteService {
     public Response<Boolean> groupEventClose(DoctorGroupDetail groupDetail, @Valid DoctorCloseGroupInput close) {
         try {
             doctorGroupManager.groupEventClose(groupDetail.getGroup(), groupDetail.getGroupTrack(), close);
+
+            //发布统计事件
+            publishCountGroupEvent(groupDetail.getGroup().getOrgId(), groupDetail.getGroup().getFarmId());
             return Response.ok(Boolean.TRUE);
         } catch (ServiceException e) {
             log.error("failed, groupDetail:{}, close:{}, cause:{}", groupDetail, close, Throwables.getStackTraceAsString(e));
@@ -135,6 +150,9 @@ public class DoctorGroupWriteServiceImpl implements DoctorGroupWriteService {
     public Response<Boolean> groupEventMoveIn(DoctorGroupDetail groupDetail, @Valid DoctorMoveInGroupInput moveIn) {
         try {
             doctorGroupManager.groupEventMoveIn(groupDetail.getGroup(), groupDetail.getGroupTrack(), moveIn);
+
+            //发布统计事件
+            publishCountGroupEvent(groupDetail.getGroup().getOrgId(), groupDetail.getGroup().getFarmId());
             return Response.ok(Boolean.TRUE);
         } catch (ServiceException e) {
             log.error("failed, groupDetail:{}, moveIn:{}, cause:{}", groupDetail, moveIn, Throwables.getStackTraceAsString(e));
@@ -149,6 +167,9 @@ public class DoctorGroupWriteServiceImpl implements DoctorGroupWriteService {
     public Response<Boolean> groupEventTransFarm(DoctorGroupDetail groupDetail, @Valid DoctorTransFarmGroupInput transFarm) {
         try {
             doctorGroupManager.groupEventTransFarm(groupDetail.getGroup(), groupDetail.getGroupTrack(), transFarm);
+
+            //发布统计事件
+            publishCountGroupEvent(groupDetail.getGroup().getOrgId(), groupDetail.getGroup().getFarmId());
             return Response.ok(Boolean.TRUE);
         } catch (ServiceException e) {
             log.error("failed, groupDetail:{}, transFarm:{}, cause:{}", groupDetail, transFarm, Throwables.getStackTraceAsString(e));
@@ -163,6 +184,9 @@ public class DoctorGroupWriteServiceImpl implements DoctorGroupWriteService {
     public Response<Boolean> groupEventTransGroup(DoctorGroupDetail groupDetail, @Valid DoctorTransGroupInput transGroup) {
         try {
             doctorGroupManager.groupEventTransGroup(groupDetail.getGroup(), groupDetail.getGroupTrack(), transGroup);
+
+            //发布统计事件
+            publishCountGroupEvent(groupDetail.getGroup().getOrgId(), groupDetail.getGroup().getFarmId());
             return Response.ok(Boolean.TRUE);
         } catch (ServiceException e) {
             log.error("failed, groupDetail:{}, transGroup:{}, cause:{}", groupDetail, transGroup, Throwables.getStackTraceAsString(e));
@@ -177,6 +201,9 @@ public class DoctorGroupWriteServiceImpl implements DoctorGroupWriteService {
     public Response<Boolean> groupEventTurnSeed(DoctorGroupDetail groupDetail, @Valid DoctorTurnSeedGroupInput turnSeed) {
         try {
             // TODO: 16/5/31 商品猪转种猪不能手工录入???
+
+            //发布统计事件
+            publishCountGroupEvent(groupDetail.getGroup().getOrgId(), groupDetail.getGroup().getFarmId());
             return Response.ok(Boolean.TRUE);
         } catch (ServiceException e) {
             log.error("failed, groupDetail:{}, turnSeed:{}, cause:{}", groupDetail, turnSeed, Throwables.getStackTraceAsString(e));
@@ -199,5 +226,10 @@ public class DoctorGroupWriteServiceImpl implements DoctorGroupWriteService {
             log.error("incr day age failed, cause:{}", Throwables.getStackTraceAsString(e));
             return Response.fail("incr.group.dayAge.fail");
         }
+    }
+
+    //发布统计猪群事件
+    private void publishCountGroupEvent(Long orgId, Long farmId) {
+        coreEventDispatcher.publish(new DoctorGroupCountEvent(orgId, farmId));
     }
 }

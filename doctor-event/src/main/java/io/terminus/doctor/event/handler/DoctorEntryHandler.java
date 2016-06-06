@@ -94,7 +94,7 @@ public class DoctorEntryHandler implements DoctorEventCreateHandler {
 
             // track create
             doctorPigTrack.setPigId(doctorPig.getId());
-            doctorPigTrack.setRelEventId(doctorPigEvent.getId());
+            doctorPigTrack.addPigEvent(doctorPig.getPigType(), doctorPigEvent.getId());
             doctorPigTrackDao.create(doctorPigTrack);
 
             // snapshot create
@@ -171,7 +171,7 @@ public class DoctorEntryHandler implements DoctorEventCreateHandler {
     private DoctorPig buildDoctorPig(DoctorFarmEntryDto dto, DoctorBasicInputInfoDto basic){
 
         if(isNull(basic.getFarmId())||isNull(dto.getPigCode())){
-            return null;
+            throw new IllegalArgumentException("input.farmIdPigCode.empty");
         }
 
         DoctorPig doctorPig = DoctorPig.builder()

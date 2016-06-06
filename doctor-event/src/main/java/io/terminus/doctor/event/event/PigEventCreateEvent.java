@@ -20,6 +20,8 @@ import java.util.Map;
 @NoArgsConstructor
 public class PigEventCreateEvent implements Serializable{
 
+    private static final long serialVersionUID = -7364318853701532344L;
+
     private Map<String, Object> context;
 
 }

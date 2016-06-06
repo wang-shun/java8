@@ -15,6 +15,7 @@
     <!-- user services -->
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.parana.user.service.UserReadService" id="userReadService" check="false"/>
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.parana.user.service.UserWriteService" id="userWriteService" check="false"/>
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.DoctorMobileMenuReadService" id="doctorMobileMenuReadService" check="false"/>
 
     <!-- file services -->
     <dubbo:reference version="1.0.0" interface="io.terminus.parana.file.service.UserFileService" id="userFileService" check="false" retries="0"/>
@@ -26,9 +27,13 @@
 
     <!--farm service-->
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.DoctorFarmReadService" id="doctorFarmReadService" check="false"/>
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.DoctorFarmWriteService" id="doctorFarmWriteService" check="false"/>
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.DoctorServiceReviewReadService" id="doctorServiceReviewReadService" check="false"/>
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.DoctorServiceReviewWriteService" id="doctorServiceReviewWriteService" check="false"/>
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.DoctorUserReadService" id="doctorUserReadService" check="false"/>
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.DoctorOrgReadService" id="doctorOrgReadService" check="false"/>
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.DoctorOrgWriteService" id="doctorOrgWriteService" check="false"/>
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.business.DoctorServiceReviewService" id="doctorServiceReviewService" check="false"/>
 
     <!--image service-->
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.basic.service.DoctorCarouselFigureReadService" id="doctorCarouselFigureReadService" check="false"/>
@@ -46,5 +51,18 @@
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.parana.msg.service.NotifyWriteService" id="notifyWriteService" check="false"/>
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.parana.user.service.DeviceReadService" id="deviceReadService" check="false"/>
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.parana.user.service.DeviceWriteService" id="deviceWriteService" check="false"/>
+
+    <!-- auth services -->
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.parana.user.auth.UserRoleLoader" id="userRoleLoader" check="false"/>
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.SellerReadService" id="sellerReadService" check="false"/>
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.SellerWriteService" id="sellerWriteService" check="false"/>
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.SellerRoleReadService" id="sellerRoleReadService" check="false"/>
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.SellerRoleWriteService" id="sellerRoleWriteService" check="false"/>
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.OperatorRoleReadService" id="operatorRoleReadService" check="false"/>
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.UserBindReadService" id="userBindReadService" check="false"/>
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.UserBindWriteService" id="userBindWriteService" check="false"/>
+
+    <!--event service-->
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.event.service.DoctorPigTypeStatisticReadService" id="doctorPigTypeStatisticReadService" check="false"/>
 
 </beans>

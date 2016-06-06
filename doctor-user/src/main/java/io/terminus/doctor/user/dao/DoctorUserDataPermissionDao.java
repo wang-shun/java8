@@ -13,4 +13,8 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class DoctorUserDataPermissionDao extends MyBatisDao<DoctorUserDataPermission> {
 
+    public DoctorUserDataPermission findByUserId(Long userId){
+        return sqlSession.selectOne(sqlId("findByUserId"), userId);
+    }
+
 }

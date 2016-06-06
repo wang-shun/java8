@@ -6,21 +6,30 @@ import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.PageInfo;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
+import io.terminus.common.utils.MapBuilder;
+import io.terminus.doctor.common.enums.PigType;
+import io.terminus.doctor.common.utils.CountUtil;
+import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dao.DoctorGroupDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorGroupSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
+import io.terminus.doctor.event.dto.DoctorGroupCount;
 import io.terminus.doctor.event.dto.DoctorGroupDetail;
 import io.terminus.doctor.event.dto.DoctorGroupSearchDto;
 import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.model.DoctorGroup;
+import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
+
+import static io.terminus.common.utils.Arguments.notEmpty;
 
 /**
  * Desc: 猪群卡片表读服务实现类
@@ -124,6 +133,48 @@ public class DoctorGroupReadServiceImpl implements DoctorGroupReadService {
         } catch (Exception e) {
             log.error("find eventType by groupIds failed, groupIds:{}, cause:{}", groupIds, Throwables.getStackTraceAsString(e));
             return Response.fail("eventType.find.fail");
+        }
+    }
+
+    @Override
+    public Response<DoctorGroupCount> countFarmGroups(Long orgId, Long farmId) {
+        try {
+            DoctorGroupSearchDto searchDto = new DoctorGroupSearchDto();
+            searchDto.setFarmId(farmId);
+            searchDto.setStatus(DoctorGroup.Status.CREATED.getValue());
+            searchDto.setPigTypes(Lists.newArrayList(PigType.FARROW_PIGLET.getValue(), PigType.NURSERY_PIGLET.getValue(), PigType.FATTEN_PIG.getValue()));
+
+            //过滤猪群类型, 然后按照类型分组
+            Map<Integer, List<DoctorGroupDetail>> groupMap = RespHelper.orServEx(findGroupDetail(searchDto)).stream()
+                    .collect(Collectors.groupingBy(gd -> gd.getGroup().getPigType()));
+
+            //根据猪类统计
+            DoctorGroupCount count = new DoctorGroupCount();
+            count.setOrgId(orgId);
+            count.setFarmId(farmId);
+            count.setFarrowCount(notEmpty(groupMap.get(PigType.FARROW_PIGLET.getValue())) ?
+                    CountUtil.sumInt(groupMap.get(PigType.FARROW_PIGLET.getValue()), g -> g.getGroupTrack().getQuantity()) : 0L);
+            count.setNurseryCount(notEmpty(groupMap.get(PigType.NURSERY_PIGLET.getValue())) ?
+                    CountUtil.sumInt(groupMap.get(PigType.NURSERY_PIGLET.getValue()), g -> g.getGroupTrack().getQuantity()) : 0L);
+            count.setFattenCount(notEmpty(groupMap.get(PigType.FATTEN_PIG.getValue())) ?
+                    CountUtil.sumInt(groupMap.get(PigType.FATTEN_PIG.getValue()), g -> g.getGroupTrack().getQuantity()) : 0L);
+            return Response.ok(count);
+        } catch (Exception e) {
+            log.error("count farm group failed, farmId:{}, cause:{}", farmId, Throwables.getStackTraceAsString(e));
+            return Response.fail("count.farm.group.fail");
+        }
+    }
+
+    @Override
+    public Response<Paging<DoctorGroupEvent>> pagingGroupEvent(Long farmId, Long groupId, Integer type, Integer pageNo, Integer size) {
+        try {
+            PageInfo pageInfo = PageInfo.of(pageNo, size);
+            return Response.ok(doctorGroupEventDao.paging(pageInfo.getOffset(), pageInfo.getLimit(),
+                    MapBuilder.<String, Object>of().put("farmId", farmId).put("groupId", groupId).put("type", type).map()));
+        } catch (Exception e) {
+            log.error("paging group event failed, farmId:{}, groupId:{}, type:{}, pageNo:{}, size:{}, cause:{}",
+                    farmId, groupId, type, pageNo, size, Throwables.getStackTraceAsString(e));
+            return Response.fail("group.event.paging.fail");
         }
     }
 

@@ -12,6 +12,7 @@ import io.terminus.doctor.web.core.msg.sms.LuoSiMaoSmsServiceConfig;
 import io.terminus.doctor.web.core.service.OtherSystemServiceConfig;
 import io.terminus.doctor.web.front.auth.DoctorCustomRoleLoaderConfigurer;
 import io.terminus.parana.auth.role.CustomRoleLoaderConfigurer;
+import io.terminus.parana.auth.role.CustomRoleLoaderRegistry;
 import io.terminus.parana.auth.web.WebAuthenticationConfiguration;
 import io.terminus.parana.web.msg.config.MsgWebConfig;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -50,8 +51,10 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
 public class DoctorWebConfiguration extends WebMvcConfigurerAdapter {
 
     @Bean
-    public CustomRoleLoaderConfigurer customRoleLoaderConfigurer(SubRoleReadService subRoleReadService) {
-          return new DoctorCustomRoleLoaderConfigurer(subRoleReadService);
+    public CustomRoleLoaderConfigurer customRoleLoaderConfigurer(CustomRoleLoaderRegistry customRoleLoaderRegistry, SubRoleReadService subRoleReadService) {
+        CustomRoleLoaderConfigurer configurer = new DoctorCustomRoleLoaderConfigurer(subRoleReadService);
+        configurer.configureCustomRoleLoader(customRoleLoaderRegistry);
+        return configurer;
     }
 
 }
