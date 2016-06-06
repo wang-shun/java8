@@ -28,6 +28,8 @@ public class PigDtoFactory {
         jsonData.put("updatedAt",pigDto.getUpdatedAt());
         jsonData.put("barnName",pigDto.getBarnName());
         jsonData.put("barnId",pigDto.getBarnId());
+        jsonData.put("farmId",pigDto.getFarmId());
+        jsonData.put("farmName",pigDto.getFarmName());
         jsonData.put("status",pigDto.getStatus());
         jsonData.put("statusName",pigDto.getStatusName());
         jsonData.put("timeDiff", timeDiff);

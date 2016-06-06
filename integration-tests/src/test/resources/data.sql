@@ -123,3 +123,41 @@ VALUES
 
 -- basic
 INSERT INTO doctor_units VALUES (1, 'unitName', null, now(), now());
+
+
+-- start 消息相关
+INSERT INTO `doctor_message_rule_templates` (`id`, `name`, `type`, `category`, `rule_value`, `status`, `message_template`, `content`, `producer`, `describe`, `created_at`, `updated_at`, `updated_by`)
+VALUES
+(1,'系统消息测试',0,0,
+'{\n
+    \"frequence\":-1,\n
+    \"channels\":\"0\",\n
+    \"url\":\"http://m.doctor.com/message/message-detail\"\n
+}',1,NULL,'系统消息测试','sysMessageProducer','系统消息测试','2016-06-03 11:39:26','2016-06-03 11:39:26',NULL),
+(2,'待配种母猪提示',1,1,
+'{\n
+    \"values\":[\n
+          {\"id\":1, \"ruleType\":2,\"leftValue\":7, \"describe\":\"断奶日期间隔(天)\"},\n
+          {\"id\":2, \"ruleType\":2,\"leftValue\":7, \"describe\":\"初配日期间隔(天)\"}\n
+    ],\n
+    \"frequence\":72,\n
+    \"channels\":\"0,1,2,3\",\n
+    \"url\":\"http://m.doctor.com/message/message-detail\"\n
+}',1,'template.sow',NULL,'sowBreedingProducer','待配种母猪提示','2016-06-03 11:39:26','2016-06-03 11:39:26',NULL);
+
+INSERT INTO `doctor_messages` (`id`, `farm_id`, `rule_id`, `role_id`, `user_id`, `template_id`, `message_template`, `type`, `category`, `data`, `channel`, `url`, `status`, `sended_at`, `failed_by`, `created_by`, `created_at`, `updated_at`)
+VALUES
+	(1,NULL,NULL,NULL,1,1,NULL,         0,0,'系统消息测试',                                     0,'http://m.doctor.com/message/message-detail',1,NULL,NULL,NULL,'2016-06-06 00:00:00','2016-06-06 00:00:00'),
+	(2,NULL,NULL,NULL,2,1,NULL,         0,0,'系统消息测试',                                      0,'http://m.doctor.com/message/message-detail',1,NULL,NULL,NULL,'2016-06-06 00:00:00','2016-06-06 00:00:00'),
+	(3,1,NULL,NULL,1,2,'template.sow',1,1,'{"pigCode":"2333", "barnName":"猪场1号"}',0,'http://m.doctor.com/message/message-detail',1,NULL,NULL,NULL,'2016-06-06 00:00:00','2016-06-06 00:00:00'),
+	(4,1,NULL,NULL,1,2,'template.sow',1,1,'{"pigCode":"2333", "barnName":"猪场1号"}',1,'http://m.doctor.com/message/message-detail',1,NULL,NULL,NULL,'2016-06-06 00:00:00','2016-06-06 00:00:00'),
+	(5,2,NULL,NULL,1,2,'template.sow',1,2,'{"pigCode":"2333", "barnName":"猪场2号"}',0,'http://m.doctor.com/message/message-detail',1,NULL,NULL,NULL,'2016-06-06 00:00:00','2016-06-06 00:00:00'),
+	(6,2,NULL,NULL,1,2,'template.sow',1,2,'{"pigCode":"2333", "barnName":"猪场2号"}',1,'http://m.doctor.com/message/message-detail',1,NULL,NULL,NULL,'2016-06-06 00:00:00','2016-06-06 00:00:00'),
+	(7,2,NULL,NULL,1,2,'template.sow',1,2,'{"pigCode":"2333", "barnName":"猪场2号"}',2,'http://m.doctor.com/message/message-detail',1,NULL,NULL,NULL,'2016-06-06 00:00:00','2016-06-06 00:00:00'),
+	(8,2,NULL,NULL,1,2,'template.sow',1,2,'{"pigCode":"2333", "barnName":"猪场2号"}',3,'http://m.doctor.com/message/message-detail',1,NULL,NULL,NULL,'2016-06-06 00:00:00','2016-06-06 00:00:00'),
+	(9,3,NULL,NULL,1,2,'template.sow',1,3,'{"pigCode":"2333", "barnName":"猪场3号"}',0,'http://m.doctor.com/message/message-detail',1,NULL,NULL,NULL,'2016-06-06 00:00:00','2016-06-06 00:00:00'),
+	(10,3,NULL,NULL,1,2,'template.sow',1,3,'{"pigCode":"2333","barnName":"猪场3号"}',1,'http://m.doctor.com/message/message-detail',1,NULL,NULL,NULL,'2016-06-06 00:00:00','2016-06-06 00:00:00'),
+	(11,3,NULL,NULL,1,2,'template.sow',1,3,'{"pigCode":"2333","barnName":"猪场3号"}',2,'http://m.doctor.com/message/message-detail',1,NULL,NULL,NULL,'2016-06-06 00:00:00','2016-06-06 00:00:00'),
+	(12,4,NULL,NULL,1,2,'template.sow',1,4,'{"pigCode":"2333","barnName":"猪场4号"}',0,'http://m.doctor.com/message/message-detail',1,NULL,NULL,NULL,'2016-06-06 00:00:00','2016-06-06 00:00:00');
+
+-- 消息相关 end

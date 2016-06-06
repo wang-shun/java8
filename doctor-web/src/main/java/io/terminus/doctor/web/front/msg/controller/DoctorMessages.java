@@ -51,6 +51,7 @@ public class DoctorMessages {
     public Paging<DoctorMessage> pagingWarnDoctorMessages(@RequestParam("pageNo") Integer pageNo,
                                                       @RequestParam("pageSize") Integer pageSize,
                                                       @RequestParam Map<String, Object> criteria) {
+        criteria.put("userId", UserUtil.getUserId());
         return RespHelper.or500(doctorMessageReadService.pagingWarnMessages(criteria, pageNo, pageSize));
     }
 
@@ -65,6 +66,7 @@ public class DoctorMessages {
     public Paging<DoctorMessage> pagingSysDoctorMessages(@RequestParam("pageNo") Integer pageNo,
                                                           @RequestParam("pageSize") Integer pageSize,
                                                           @RequestParam Map<String, Object> criteria) {
+        criteria.put("userId", UserUtil.getUserId());
         return RespHelper.or500(doctorMessageReadService.pagingSysMessages(criteria, pageNo, pageSize));
     }
 
@@ -82,7 +84,7 @@ public class DoctorMessages {
      * @param id    消息id
      * @return
      */
-    @RequestMapping(value = "/message/detail")
+    @RequestMapping(value = "/message/detail", method = RequestMethod.GET)
     public DoctorMessage findMessageDetail(@RequestParam("id") Long id) {
         // 将消息设置为已读
         DoctorMessage message = RespHelper.or500(doctorMessageReadService.findMessageById(id));

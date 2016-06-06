@@ -51,7 +51,7 @@ public class DoctorMessageReadServiceImpl implements DoctorMessageReadService {
             criteria.put("types", ImmutableList.of(1, 2));
             criteria.put("channel", Rule.Channel.SYSTEM.getValue());
             if (criteria.get("status") == null) {
-                criteria.put("status", DoctorMessage.Status.NORMAL);
+                criteria.put("status", DoctorMessage.Status.NORMAL.getValue());
             }
             return Response.ok(doctorMessageDao.paging(pageInfo.getOffset(), pageInfo.getLimit(), criteria));
         } catch (Exception e) {
@@ -68,7 +68,7 @@ public class DoctorMessageReadServiceImpl implements DoctorMessageReadService {
             criteria.put("type", 0);
             criteria.put("channel", Rule.Channel.SYSTEM.getValue());
             if (criteria.get("status") == null) {
-                criteria.put("status", DoctorMessage.Status.NORMAL);
+                criteria.put("status", DoctorMessage.Status.NORMAL.getValue());
             }
             return Response.ok(doctorMessageDao.paging(pageInfo.getOffset(), pageInfo.getLimit(), criteria));
         } catch (Exception e) {
@@ -101,7 +101,7 @@ public class DoctorMessageReadServiceImpl implements DoctorMessageReadService {
     public Response<List<DoctorMessage>> findMsgMessage() {
         try{
             return Response.ok(doctorMessageDao.list(
-                    ImmutableMap.of("channel", Rule.Channel.MESSAGE, "status", DoctorMessage.Status.NORMAL)));
+                    ImmutableMap.of("channel", Rule.Channel.MESSAGE.getValue(), "status", DoctorMessage.Status.NORMAL.getValue())));
         } catch (Exception e) {
             log.error("", Throwables.getStackTraceAsString(e));
             return Response.fail("msg.message.find.fail");
@@ -112,7 +112,7 @@ public class DoctorMessageReadServiceImpl implements DoctorMessageReadService {
     public Response<List<DoctorMessage>> findEmailMessage() {
         try{
             return Response.ok(doctorMessageDao.list(
-                    ImmutableMap.of("channel", Rule.Channel.EMAIL, "status", DoctorMessage.Status.NORMAL)));
+                    ImmutableMap.of("channel", Rule.Channel.EMAIL.getValue(), "status", DoctorMessage.Status.NORMAL.getValue())));
         } catch (Exception e) {
             log.error("", Throwables.getStackTraceAsString(e));
             return Response.fail("email.message.find.fail");
@@ -123,7 +123,7 @@ public class DoctorMessageReadServiceImpl implements DoctorMessageReadService {
     public Response<List<DoctorMessage>> findAppPushMessage() {
         try{
             return Response.ok(doctorMessageDao.list(
-                    ImmutableMap.of("channel", Rule.Channel.APPPUSH, "status", DoctorMessage.Status.NORMAL)));
+                    ImmutableMap.of("channel", Rule.Channel.APPPUSH.getValue(), "status", DoctorMessage.Status.NORMAL.getValue())));
         } catch (Exception e) {
             log.error("", Throwables.getStackTraceAsString(e));
             return Response.fail("app.message.find.fail");

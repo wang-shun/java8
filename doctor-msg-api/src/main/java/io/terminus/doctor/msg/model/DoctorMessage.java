@@ -60,6 +60,7 @@ public class DoctorMessage implements Serializable {
 
     /**
      * 消息类型: 0->系统消息, 1->预警消息, 2->警报消息
+     * @see DoctorMessageRuleTemplate.Type
      */
     private Integer type;
 

@@ -32,6 +32,7 @@ public class DoctorPigInfoDto implements Serializable{
     private Long id;
 
     private Long farmId;
+    private String farmName;
 
     private Integer pigType;
 
@@ -58,7 +59,7 @@ public class DoctorPigInfoDto implements Serializable{
     public static DoctorPigInfoDto buildDoctorPigInfoDto(DoctorPig doctorPig, DoctorPigTrack doctorPigTrack){
         checkState(!isNull(doctorPig), "build.doctorPig.empty");
         DoctorPigInfoDtoBuilder builder = DoctorPigInfoDto.builder()
-                .id(doctorPig.getId()).farmId(doctorPig.getFarmId()).pigType(doctorPig.getPigType())
+                .id(doctorPig.getId()).farmId(doctorPig.getFarmId()).farmName(doctorPig.getFarmName()).pigType(doctorPig.getPigType())
                 .pigCode(doctorPig.getPigCode()).birthDay(doctorPig.getBirthDate()).inFarmDate(doctorPig.getInFarmDate())
                 .dateAge(Days.daysBetween(new DateTime(doctorPig.getBirthDate()), DateTime.now()).getDays());
 
