@@ -74,6 +74,7 @@ public abstract class AbstractProducer implements IProducer {
             if(ruleTemplate == null || !Objects.equals(ruleTemplate.getStatus(), DoctorMessageRuleTemplate.Status.NORMAL.getValue())) {
                 return;
             }
+
             // 1. 如果是系统消息
             if (Objects.equals(DoctorMessageRuleTemplate.Type.SYSTEM.getValue(), ruleTemplate.getType())) {
                 // 获取最新发送的系统消息(系统消息是对应到模板的)
@@ -110,7 +111,8 @@ public abstract class AbstractProducer implements IProducer {
                         return;
                     }
                     // 获取信息
-                    List<DoctorMessage> message = message(ruleRole, subUsers);
+                    List<DoctorMessage> message = message(ruleRole,
+                            subUsers.stream().filter(sub -> Objects.equals(sub.getRoleId(), ruleRole.getRoleId())).collect(Collectors.toList()));
                     if(message != null && message.size() > 0) {
                         doctorMessageWriteService.createMessages(message);
                     }
@@ -179,7 +181,7 @@ public abstract class AbstractProducer implements IProducer {
 
     /**
      * 创建DoctorMessage对象
-     * @param subUsers  所有子账号
+     * @param subUsers  子账号(已经通过roleId过滤)
      * @param ruleRole  规则角色
      * @param channel   发送渠道
      * @param jsonData  填充数据
@@ -208,50 +210,24 @@ public abstract class AbstractProducer implements IProducer {
                                     .createdBy(template.getUpdatedBy())
                                     .build()
                     ));
-
-            // 1. 如果是系统消息
-            if (ruleRole.getRoleId() == null) {
-                // 子账户
-                subUsers.stream().forEach(subUser -> messages.add(
-                        DoctorMessage.builder()
-                                .farmId(ruleRole.getFarmId())
-                                .ruleId(ruleRole.getRuleId())
-                                .roleId(ruleRole.getRoleId())
-                                .userId(subUser.getUserId())
-                                .templateId(ruleRole.getTemplateId())
-                                .messageTemplate(getTemplateName(template.getMessageTemplate(), channel))
-                                .type(template.getType())
-                                .category(template.getCategory())
-                                .data(jsonData)
-                                .channel(channel)
-                                .url(getUrl(ruleRole.getRule().getUrl(), channel))
-                                .status(DoctorMessage.Status.NORMAL.getValue())
-                                .createdBy(template.getUpdatedBy())
-                                .build()
-                        ));
-            }
-            // 2. 否则预警或警报消息
-            else {
-                // 子账户
-                subUsers.stream().filter(sub -> Objects.equals(sub.getRoleId(), ruleRole.getRoleId()))
-                        .forEach(subUser -> messages.add(
-                                DoctorMessage.builder()
-                                        .farmId(ruleRole.getFarmId())
-                                        .ruleId(ruleRole.getRuleId())
-                                        .roleId(ruleRole.getRoleId())
-                                        .userId(subUser.getUserId())
-                                        .templateId(ruleRole.getTemplateId())
-                                        .messageTemplate(getTemplateName(template.getMessageTemplate(), channel))
-                                        .type(template.getType())
-                                        .category(template.getCategory())
-                                        .data(jsonData)
-                                        .channel(channel)
-                                        .url(getUrl(ruleRole.getRule().getUrl(), channel))
-                                        .status(DoctorMessage.Status.NORMAL.getValue())
-                                        .createdBy(template.getUpdatedBy())
-                                        .build()
-                ));
-            }
+            // 子账户
+            subUsers.stream().forEach(subUser -> messages.add(
+                    DoctorMessage.builder()
+                            .farmId(ruleRole.getFarmId())
+                            .ruleId(ruleRole.getRuleId())
+                            .roleId(ruleRole.getRoleId())
+                            .userId(subUser.getUserId())
+                            .templateId(ruleRole.getTemplateId())
+                            .messageTemplate(getTemplateName(template.getMessageTemplate(), channel))
+                            .type(template.getType())
+                            .category(template.getCategory())
+                            .data(jsonData)
+                            .channel(channel)
+                            .url(getUrl(ruleRole.getRule().getUrl(), channel))
+                            .status(DoctorMessage.Status.NORMAL.getValue())
+                            .createdBy(template.getUpdatedBy())
+                            .build()
+                    ));
         }
         return messages;
     }

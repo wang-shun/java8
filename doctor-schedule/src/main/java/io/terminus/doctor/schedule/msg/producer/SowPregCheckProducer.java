@@ -37,7 +37,9 @@ import java.util.stream.Collectors;
 
 /**
  * Desc: 母猪需妊娠检查提示
+ *
  *      1. 已配种日期
+ *
  * Mail: chk@terminus.io
  * Created by icemimosa
  * Date: 16/6/3
@@ -91,6 +93,7 @@ public class SowPregCheckProducer extends AbstractProducer {
                     .build();
             for (int i = 1; i <= page; i++) {
                 List<DoctorPigInfoDto> pigs = RespHelper.orServEx(doctorPigReadService.pagingDoctorInfoDtoByPig(pig, i, 100)).getData();
+                // 过滤出已经配种的母猪
                 pigs = pigs.stream().filter(pigDto -> Objects.equals(PigStatus.Mate.getKey(), pigDto.getStatus())).collect(Collectors.toList());
                 // 处理每个猪
                 for (int j = 0; pigs != null && j < pigs.size(); j++) {

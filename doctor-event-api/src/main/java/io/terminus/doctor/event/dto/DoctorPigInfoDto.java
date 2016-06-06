@@ -31,6 +31,8 @@ public class DoctorPigInfoDto implements Serializable{
 
     private Long id;
 
+    private Long pigId;
+
     private Long farmId;
     private String farmName;
 
@@ -54,19 +56,22 @@ public class DoctorPigInfoDto implements Serializable{
 
     private String barnName;
 
+    private String extraTrack;
+
     private Date updatedAt;
 
     public static DoctorPigInfoDto buildDoctorPigInfoDto(DoctorPig doctorPig, DoctorPigTrack doctorPigTrack){
         checkState(!isNull(doctorPig), "build.doctorPig.empty");
         DoctorPigInfoDtoBuilder builder = DoctorPigInfoDto.builder()
-                .id(doctorPig.getId()).farmId(doctorPig.getFarmId()).farmName(doctorPig.getFarmName()).pigType(doctorPig.getPigType())
-                .pigCode(doctorPig.getPigCode()).birthDay(doctorPig.getBirthDate()).inFarmDate(doctorPig.getInFarmDate())
-                .dateAge(Days.daysBetween(new DateTime(doctorPig.getBirthDate()), DateTime.now()).getDays());
+                .id(doctorPig.getId()).pigId(doctorPig.getId()).farmId(doctorPig.getFarmId()).farmName(doctorPig.getFarmName())
+                .pigType(doctorPig.getPigType()).pigCode(doctorPig.getPigCode()).birthDay(doctorPig.getBirthDate())
+                .inFarmDate(doctorPig.getInFarmDate()).dateAge(Days.daysBetween(new DateTime(doctorPig.getBirthDate()), DateTime.now()).getDays());
 
         if(!isNull(doctorPigTrack)){
             builder.status(doctorPigTrack.getStatus()).parity(doctorPigTrack.getCurrentParity())
                     .barnId(doctorPigTrack.getCurrentBarnId())
                     .barnName(doctorPigTrack.getCurrentBarnName())
+                    .extraTrack(doctorPigTrack.getExtra())
                     .updatedAt(doctorPigTrack.getUpdatedAt());
         }
         return builder.build();

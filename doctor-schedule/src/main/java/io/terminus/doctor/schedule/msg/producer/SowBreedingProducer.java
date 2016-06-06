@@ -38,8 +38,7 @@ import java.util.stream.Collectors;
 /**
  * Desc: 待配种母猪提示
  *
- *      1. 断奶日期
- *      2. 初配日期
+ *      1. 断奶/流程/返情日期
  *
  * Mail: chk@terminus.io
  * Created by icemimosa
@@ -92,20 +91,19 @@ public class SowBreedingProducer extends AbstractProducer {
                     .build();
             for (int i = 1; i <= page; i++) {
                 List<DoctorPigInfoDto> pigs = RespHelper.orServEx(doctorPigReadService.pagingDoctorInfoDtoByPig(pig, i, 100)).getData();
+                // 过滤出 断奶/流产/空怀 的母猪
                 pigs = pigs.stream().filter(pigDto ->
-                        Objects.equals(PigStatus.Wean.getKey(), pigDto.getStatus()) || Objects.equals(PigStatus.Entry.getKey(), pigDto.getStatus()))
-                        .collect(Collectors.toList());
+                        Objects.equals(PigStatus.Wean.getKey(), pigDto.getStatus())
+                                || Objects.equals(PigStatus.Abortion.getKey(), pigDto.getStatus())
+                                || Objects.equals(PigStatus.KongHuai.getKey(), pigDto.getStatus())
+                ).collect(Collectors.toList());
                 // 处理每个猪
                 for (int j = 0; pigs != null && j < pigs.size(); j++) {
                     DoctorPigInfoDto pigDto = pigs.get(j);
                     // 母猪的updatedAt与当前时间差 (天)
                     Double timeDiff = (double) (DateTime.now().minus(pigDto.getUpdatedAt().getTime()).getMillis() / 86400000);
-                    // 1. 断奶日期判断 -> id:1
-                    if (Objects.equals(PigStatus.Wean.getKey(), pigDto.getStatus()) && checkRuleValue(ruleValueMap.get(1), timeDiff)) {
-                        messages.addAll(getMessage(pigDto, rule.getChannels(), ruleRole, subUsers, timeDiff, rule.getUrl()));
-                    }
-                    // 2. 初配日期 -> id:2
-                    if (Objects.equals(PigStatus.Entry.getKey(), pigDto.getStatus()) && checkRuleValue(ruleValueMap.get(2), timeDiff)) {
+                    // 获取配置的天数, 并判断
+                    if (ruleValueMap.get(1) != null && ruleValueMap.get(1).getValue() <= timeDiff) {
                         messages.addAll(getMessage(pigDto, rule.getChannels(), ruleRole, subUsers, timeDiff, rule.getUrl()));
                     }
                 }
