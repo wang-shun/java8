@@ -28,9 +28,10 @@ public class DoctorSowAbortionHandler extends DoctorAbstractEventFlowHandler {
     }
 
     @Override
-    public DoctorPigTrack updateDoctorPigTrackInfo(Execution execution, DoctorPigTrack doctorPigTrack, DoctorBasicInputInfoDto basic, Map<String, Object> extra) {
+    public DoctorPigTrack updateDoctorPigTrackInfo(Execution execution, DoctorPigTrack doctorPigTrack, DoctorBasicInputInfoDto basic, Map<String, Object> extra, Map<String,Object> context) {
         doctorPigTrack.setStatus(PigStatus.Abortion.getKey());
         doctorPigTrack.addAllExtraMap(extra);
+        doctorPigTrack.addPigEvent(basic.getPigType(), (Long) context.get("doctorPigEventId"));
         return doctorPigTrack;
     }
 }

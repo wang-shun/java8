@@ -32,7 +32,7 @@ public class DoctorSowPregCheckHandler extends DoctorAbstractEventFlowHandler{
     }
 
     @Override
-    public DoctorPigTrack updateDoctorPigTrackInfo(Execution execution, DoctorPigTrack doctorPigTrack, DoctorBasicInputInfoDto basic, Map<String, Object> extra) {
+    public DoctorPigTrack updateDoctorPigTrackInfo(Execution execution, DoctorPigTrack doctorPigTrack, DoctorBasicInputInfoDto basic, Map<String, Object> extra, Map<String, Object> context) {
         doctorPigTrack.addAllExtraMap(extra);
         Integer pregCheckResult = (Integer) extra.get("checkResult");
         if(Objects.equals(pregCheckResult, PregCheckResult.UNSURE.getKey())){
@@ -46,6 +46,7 @@ public class DoctorSowPregCheckHandler extends DoctorAbstractEventFlowHandler{
         }
         Map<String,Object> express = execution.getExpression();
         express.put("pregCheckResult", pregCheckResult);
+        doctorPigTrack.addPigEvent(basic.getPigType(), (Long) context.get("doctorPigEventId"));
         return doctorPigTrack;
     }
 }

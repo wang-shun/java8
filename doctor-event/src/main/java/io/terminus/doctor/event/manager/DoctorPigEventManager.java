@@ -84,7 +84,7 @@ public class DoctorPigEventManager {
 
         // create roll back log
         DoctorRevertLog doctorRevertLog = DoctorRevertLog.builder()
-                .type(revertPigType).fromInfo(pigEventId.toString()).toInfo(doctorPigTrack.getRelEventId().toString())
+                .type(revertPigType).fromInfo(pigEventId.toString()).toInfo(pigEventId.toString())
                 .reverterId(staffId).reverterName(staffName)
                 .build();
         doctorRevertLogDao.create(doctorRevertLog);
