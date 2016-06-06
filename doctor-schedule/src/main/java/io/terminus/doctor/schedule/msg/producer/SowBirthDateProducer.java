@@ -98,9 +98,13 @@ public class SowBirthDateProducer extends AbstractProducer {
                     DoctorPigInfoDto pigDto = pigs.get(j);
                     // 母猪的updatedAt与当前时间差 (天)
                     Double timeDiff = (double) (DateTime.now().minus(pigDto.getUpdatedAt().getTime()).getMillis() / 86400000);
-                    // 获取预产期 - 7 天
-                    getBirthDate(pigDto);
-
+                    // 获取预产期, 并校验日期
+                    DateTime birthDate = getBirthDate(pigDto);
+                    if (birthDate != null && ruleValueMap.get(1) != null) {
+                        if (DateTime.now().isAfter(birthDate.minusHours(ruleValueMap.get(1).getValue().intValue()))) {
+                            messages.addAll(getMessage(pigDto, rule.getChannels(), ruleRole, subUsers, timeDiff, rule.getUrl()));
+                        }
+                    }
                 }
             }
         }
@@ -131,12 +135,13 @@ public class SowBirthDateProducer extends AbstractProducer {
      * 获取预产期
      * @param pigDto
      */
-    private Date getBirthDate(DoctorPigInfoDto pigDto) {
-        // 获取预产期 - 7天
+    private DateTime getBirthDate(DoctorPigInfoDto pigDto) {
+        // 获取预产期
         try{
+            // @see DoctorMatingDto
             Date date = (Date) MAPPER.readValue(pigDto.getExtraTrack(), Map.class).get("judgePregDate");
             if (date != null) {
-                return new DateTime(date).minusDays(7).toDate();
+                return new DateTime(date);
             }
         } catch (Exception e) {
             log.error("", Throwables.getStackTraceAsString(e));
