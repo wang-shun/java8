@@ -30,9 +30,10 @@ public class DoctorSowMatingHandler extends DoctorAbstractEventFlowHandler{
     }
 
     @Override
-    public DoctorPigTrack updateDoctorPigTrackInfo(Execution execution, DoctorPigTrack doctorPigTrack, DoctorBasicInputInfoDto basic, Map<String, Object> extra) {
+    public DoctorPigTrack updateDoctorPigTrackInfo(Execution execution, DoctorPigTrack doctorPigTrack, DoctorBasicInputInfoDto basic, Map<String, Object> extra, Map<String,Object> context) {
         doctorPigTrack.addAllExtraMap(extra);
         doctorPigTrack.setStatus(PigStatus.Mate.getKey());
+        doctorPigTrack.addPigEvent(basic.getPigType(), (Long) context.get("doctorPigEventId"));
         return doctorPigTrack;
     }
 }

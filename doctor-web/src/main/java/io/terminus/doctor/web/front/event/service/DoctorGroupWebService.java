@@ -3,7 +3,6 @@ package io.terminus.doctor.web.front.event.service;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.event.dto.event.group.input.DoctorNewGroupInput;
 
-import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import java.util.Map;
 
@@ -21,7 +20,7 @@ public interface DoctorGroupWebService {
      * @param newGroupDto 新建猪群所需字段
      * @return 猪群id
      */
-    Response<Long> createNewGroup(@Valid DoctorNewGroupInput newGroupDto);
+    Response<Long> createNewGroup(DoctorNewGroupInput newGroupDto);
 
     /**
      * 录入猪群事件

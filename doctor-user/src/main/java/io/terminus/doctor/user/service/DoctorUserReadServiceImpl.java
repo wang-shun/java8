@@ -33,6 +33,7 @@ import java.util.Objects;
  */
 @Slf4j
 @Service
+@Primary
 public class DoctorUserReadServiceImpl extends UserReadServiceImpl implements DoctorUserReadService{
 
     private final UserDao userDao;

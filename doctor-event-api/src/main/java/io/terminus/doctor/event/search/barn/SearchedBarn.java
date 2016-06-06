@@ -26,6 +26,7 @@ public class SearchedBarn implements Serializable {
      * 猪场
      */
     private Long farmId;
+
     private String farmName;
 
     /**
@@ -33,6 +34,7 @@ public class SearchedBarn implements Serializable {
      * @see io.terminus.doctor.common.enums.PigType
      */
     private Integer pigType;
+
     private String pigTypeName;
 
     /**
@@ -59,6 +61,7 @@ public class SearchedBarn implements Serializable {
      * 工作人员
      */
     private Long staffId;
+
     private String staffName;
 
     /**

@@ -30,15 +30,22 @@ public class SearchedGroup implements Serializable {
     private String groupCode;
 
     /**
-     * 猪群类型
+     * 猪类 枚举9种
+     * @see io.terminus.doctor.common.enums.PigType
      */
     private Integer pigType;
     private String pigTypeName;
 
     /**
-     * 性别和状态
+     * 性别 0母 1公 2混合
+     * @see io.terminus.doctor.event.model.DoctorGroupTrack.Sex
      */
     private Integer sex;
+
+    /**
+     * 状态枚举: 1:已建群, -1:已关闭
+     * @see io.terminus.doctor.event.model.DoctorGroup.Status
+     */
     private Integer status;
 
     /**
@@ -48,7 +55,7 @@ public class SearchedGroup implements Serializable {
     private String farmName;
 
     /**
-     * 建群和闭群事件
+     * 建群和闭群时间
      */
     private Date openAt;
     private Date closeAt;

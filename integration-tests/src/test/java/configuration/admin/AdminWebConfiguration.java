@@ -10,7 +10,9 @@ import io.terminus.doctor.web.core.component.ParanaHbsHelpers;
 import io.terminus.doctor.web.core.msg.email.CommonEmailServiceConfig;
 import io.terminus.doctor.web.core.msg.sms.LuoSiMaoSmsServiceConfig;
 import io.terminus.doctor.web.core.service.OtherSystemServiceConfig;
+import io.terminus.parana.auth.core.AuthenticationConfiguration;
 import io.terminus.parana.web.msg.config.MsgWebConfig;
+import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -28,6 +30,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
  */
 @Configuration
 @Import({
+        AuthenticationConfiguration.class,
         DoctorEventConfiguration.class,
         DoctorMsgConfig.class,
         DoctorUserConfiguration.class,
@@ -51,6 +54,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
 })
 @EnableWebMvc
 @EnableAutoConfiguration
+@AutoConfigureAfter(AuthenticationConfiguration.class)
 public class AdminWebConfiguration extends WebMvcConfigurerAdapter {
     @Override
     public void addInterceptors(InterceptorRegistry registry) {

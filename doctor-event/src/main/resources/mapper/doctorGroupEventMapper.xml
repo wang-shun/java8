@@ -43,7 +43,7 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        org_id, org_name, farm_id, farm_name, group_id, group_code, event_at, type, name, desc, barn_id, barn_name, pig_type, quantity, weight, avg_weight, avg_day_age, is_auto, out_id, remark, extra, created_at, creator_id, creator_name
+        org_id, org_name, farm_id, farm_name, group_id, group_code, event_at, type, name, `desc`, barn_id, barn_name, pig_type, quantity, weight, avg_weight, avg_day_age, is_auto, out_id, remark, extra, created_at, creator_id, creator_name
     </sql>
 
     <sql id="vals">
@@ -77,7 +77,7 @@
             <if test="eventAt != null">event_at = #{eventAt},</if>
             <if test="type != null">type = #{type},</if>
             <if test="name != null">name = #{name},</if>
-            <if test="desc != null">desc = #{desc},</if>
+            <if test="desc != null">`desc` = #{desc},</if>
             <if test="barnId != null">barn_id = #{barnId},</if>
             <if test="barnName != null">barn_name = #{barnName},</if>
             <if test="pigType != null">pig_type = #{pigType},</if>
@@ -106,5 +106,25 @@
         SELECT <include refid="cols_all"/>
         FROM <include refid="tb"/>
         WHERE farm_id = #{farmId}
+    </select>
+
+    <select id="count" parameterType="map" resultType="long">
+        SELECT count(1) from <include refid="tb"/>
+        <where>
+            <if test="farmId != null">AND farm_id = #{farmId}</if>
+            <if test="groupId != null">AND group_id = #{groupId}</if>
+            <if test="type != null">AND type = #{type}</if>
+        </where>
+    </select>
+
+    <select id="paging" parameterType="map" resultMap="DoctorGroupEventMap">
+        SELECT <include refid="cols_all"/> from <include refid="tb"/>
+        <where>
+            <if test="farmId != null">AND farm_id = #{farmId}</if>
+            <if test="groupId != null">AND group_id = #{groupId}</if>
+            <if test="type != null">AND type = #{type}</if>
+        </where>
+        ORDER BY event_at DESC
+        LIMIT #{offset}, #{limit}
     </select>
 </mapper>

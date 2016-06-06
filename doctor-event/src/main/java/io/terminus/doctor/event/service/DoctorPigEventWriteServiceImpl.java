@@ -2,10 +2,10 @@ package io.terminus.doctor.event.service;
 
 import com.google.common.base.Throwables;
 import com.google.common.collect.Maps;
-import com.google.common.eventbus.EventBus;
 import io.terminus.common.model.Response;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.doctor.common.enums.DataEventType;
+import io.terminus.doctor.common.event.CoreEventDispatcher;
 import io.terminus.doctor.common.event.DataEvent;
 import io.terminus.doctor.common.utils.Params;
 import io.terminus.doctor.event.dao.DoctorPigTrackDao;
@@ -27,6 +27,7 @@ import io.terminus.doctor.event.dto.event.usual.DoctorDiseaseDto;
 import io.terminus.doctor.event.dto.event.usual.DoctorFarmEntryDto;
 import io.terminus.doctor.event.dto.event.usual.DoctorRemovalDto;
 import io.terminus.doctor.event.dto.event.usual.DoctorVaccinationDto;
+import io.terminus.doctor.event.event.DoctorPigCountEvent;
 import io.terminus.doctor.event.event.PigEventCreateEvent;
 import io.terminus.doctor.event.manager.DoctorPigEventManager;
 import io.terminus.doctor.event.model.DoctorPig;
@@ -58,18 +59,18 @@ public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteServic
 
     private final DoctorPigReadService doctorPigReadService;
 
-    private final EventBus eventBus;
+    private final CoreEventDispatcher coreEventDispatcher;
 
     @Autowired(required = false)
     private Publisher publisher;
 
     @Autowired
     public DoctorPigEventWriteServiceImpl(
-            DoctorPigEventManager doctorPigEventManager, EventBus eventBus,
+            DoctorPigEventManager doctorPigEventManager, CoreEventDispatcher coreEventDispatcher,
             DoctorPigTrackDao doctorPigTrackDao, DoctorPigReadService doctorPigReadService){
         this.doctorPigTrackDao = doctorPigTrackDao;
         this.doctorPigEventManager = doctorPigEventManager;
-        this.eventBus = eventBus;
+        this.coreEventDispatcher = coreEventDispatcher;
         this.doctorPigReadService = doctorPigReadService;
     }
 
@@ -94,7 +95,14 @@ public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteServic
             }else {
                 result = doctorPigEventManager.createCasualPigEvent(doctorBasicInputInfoDto, extra);
             }
+            // publish zk event
             publishEvent(result);
+
+            coreEventDispatcher.publish(DoctorPigCountEvent.builder()
+                    .farmId(doctorBasicInputInfoDto.getFarmId())
+                    .orgId(doctorBasicInputInfoDto.getOrgId())
+                    .pigType(doctorBasicInputInfoDto.getPigType()).build());
+
             return Response.ok(Params.getWithConvert(result,"eventId",a->Long.valueOf(a.toString())));
         }catch (Exception e){
             log.error("pig entry event create fail, cause:{}", Throwables.getStackTraceAsString(e));
@@ -379,7 +387,7 @@ public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteServic
      */
     private void publishEvent (Map<String,Object> results){
         if(publisher == null){
-            eventBus.post(new PigEventCreateEvent(results));
+            coreEventDispatcher.publish(new PigEventCreateEvent(results));
         }else{
             try {
                 publisher.publish(DataEvent.toBytes(DataEventType.PigEventCreate.getKey(), new PigEventCreateEvent(results)));

@@ -45,6 +45,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Date;
 import java.util.Objects;
 
 /**
@@ -101,6 +102,12 @@ public class DoctorGroupManager {
         groupTrack.setBoarQty(0);
         groupTrack.setSowQty(0);
         groupTrack.setQuantity(0);
+        groupTrack.setAvgDayAge(0);             //日龄
+        groupTrack.setBirthDate(new Date());    //出生日期(用于计算日龄)
+        groupTrack.setAvgWeight(0D);            //均重
+        groupTrack.setWeight(0D);               //总重
+        groupTrack.setPrice(0L);                //单价
+        groupTrack.setAmount(0L);               //金额
         groupTrack.setSex(EventUtil.getSex(groupTrack.getBoarQty(), groupTrack.getSowQty()));
         doctorGroupTrackDao.create(groupTrack);
 
@@ -131,6 +138,7 @@ public class DoctorGroupManager {
         groupEvent.setOrgId(group.getOrgId());
         groupEvent.setOrgName(group.getOrgName());
         groupEvent.setFarmId(group.getFarmId());
+        groupEvent.setFarmName(group.getFarmName());
         groupEvent.setGroupCode(group.getGroupCode());
 
         //事件信息
@@ -143,12 +151,12 @@ public class DoctorGroupManager {
         groupEvent.setBarnName(group.getInitBarnName());
         groupEvent.setPigType(group.getPigType());
 
+        groupEvent.setIsAuto(newGroupInput.getIsAuto());
         groupEvent.setCreatorId(group.getCreatorId());
         groupEvent.setCreatorName(group.getCreatorName());
         groupEvent.setRemark(group.getRemark());
 
         DoctorNewGroupEvent newGroupEvent = new DoctorNewGroupEvent();
-        newGroupEvent.setType(GroupEventType.NEW.getValue());
         newGroupEvent.setSource(newGroupInput.getSource());
         groupEvent.setExtraMap(newGroupEvent);
         return groupEvent;
@@ -165,6 +173,7 @@ public class DoctorGroupManager {
 
         //2.创建防疫事件
         DoctorGroupEvent<DoctorAntiepidemicGroupEvent> event = dozerGroupEvent(group, GroupEventType.ANTIEPIDEMIC, antiepidemic);
+        event.setQuantity(antiepidemic.getQuantity());
         event.setExtraMap(antiEvent);
         doctorGroupEventDao.create(event);
 
@@ -187,6 +196,7 @@ public class DoctorGroupManager {
 
         //2.创建疾病事件
         DoctorGroupEvent<DoctorDiseaseGroupEvent> event = dozerGroupEvent(group, GroupEventType.DISEASE, disease);
+        event.setQuantity(disease.getQuantity());
         event.setExtraMap(diseaseEvent);
         doctorGroupEventDao.create(event);
 
@@ -533,6 +543,7 @@ public class DoctorGroupManager {
         newGroupInput.setGeneticName(fromGroup.getGeneticName());
         newGroupInput.setSource(PigSource.OUTER.getKey());          //来源:外购
         newGroupInput.setIsAuto(IsOrNot.YES.getValue());
+        newGroupInput.setRemark(transFarm.getRemark());
 
         DoctorGroup toGroup = BeanMapper.map(newGroupInput, DoctorGroup.class);
         toGroup.setFarmName(transFarm.getToFarmName());
@@ -557,8 +568,11 @@ public class DoctorGroupManager {
         event.setBarnId(group.getCurrentBarnId());      //事件发生猪舍
         event.setBarnName(group.getCurrentBarnName());
         event.setPigType(group.getPigType());           //猪类
+        event.setIsAuto(baseInput.getIsAuto());
         event.setCreatorId(baseInput.getCreatorId());   //创建人
         event.setCreatorName(baseInput.getCreatorName());
+        event.setDesc("todo 事件描述");
+        event.setRemark(baseInput.getRemark());
         return event;
     }
 
