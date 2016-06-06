@@ -1,9 +1,13 @@
 package io.terminus.doctor.event.model;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.Builder;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.Objects;
 
 /**
  * Desc: 猪只数统计表Model类
@@ -11,7 +15,10 @@ import java.util.Date;
  * author: DreamYoung
  * Date: 2016-06-03
  */
+@Builder
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class DoctorPigTypeStatistic implements Serializable {
     private static final long serialVersionUID = 3053973085443889095L;
 
@@ -61,4 +68,19 @@ public class DoctorPigTypeStatistic implements Serializable {
      * 修改时间
      */
     private Date updatedAt;
+
+    /**
+     * 设置 猪数量
+     * @param pigType
+     * @see io.terminus.doctor.event.model.DoctorPig.PIG_TYPE
+     * @param pigCount
+     */
+    public void putPigTypeCount(Integer pigType, Integer pigCount){
+        if(Objects.equals(pigType, DoctorPig.PIG_TYPE.BOAR.getKey())){
+            this.boar = pigCount;
+        }else if(Objects.equals(pigType, DoctorPig.PIG_TYPE.SOW.getKey())){
+            this.sow = pigCount;
+        }
+        throw new IllegalArgumentException("input.pigType.error");
+    }
 }

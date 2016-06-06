@@ -1,16 +1,14 @@
 package io.terminus.doctor.event.event;
 
+import io.terminus.doctor.common.event.Event;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Builder;
 
-import java.io.Serializable;
-import java.util.Map;
-
 /**
  * Created by yaoqijun.
- * Date:2016-05-24
+ * Date:2016-06-06
  * Email:yaoqj@terminus.io
  * Descirbe:
  */
@@ -18,10 +16,15 @@ import java.util.Map;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class PigEventCreateEvent implements Serializable{
+public class DoctorPigCountEvent extends Event<Long> {
 
-    private static final long serialVersionUID = -7364318853701532344L;
+    private Long farmId;
 
-    private Map<String, Object> context;
+    private Long orgId;
+
+    /**
+     * @see io.terminus.doctor.event.model.DoctorPig.PIG_TYPE
+     */
+    private Integer pigType;
 
 }
