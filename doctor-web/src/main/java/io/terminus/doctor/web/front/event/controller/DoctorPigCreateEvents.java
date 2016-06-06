@@ -24,6 +24,7 @@ import io.terminus.pampas.common.UserUtil;
 import io.terminus.parana.user.model.User;
 import io.terminus.parana.user.service.UserReadService;
 import lombok.extern.slf4j.Slf4j;
+import net.sf.json.JSONException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
@@ -124,9 +125,9 @@ public class DoctorPigCreateEvents {
     @RequestMapping(value = "/createEntryInfo", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Long createEntryEvent(@RequestParam("farmId") Long farmId,
-                                 @RequestParam("pigId") Long pigId,
                                  @RequestParam("doctorFarmEntry") DoctorFarmEntryDto doctorFarmEntryDto){
-        return RespHelper.or500(doctorPigEventWriteService.pigEntryEvent(buildBasicInputInfoDto(farmId, pigId, PigEvent.ENTRY), doctorFarmEntryDto));
+        return RespHelper.or500(doctorPigEventWriteService.pigEntryEvent(
+                        buildBasicEntryInputInfo(farmId, doctorFarmEntryDto, PigEvent.ENTRY), doctorFarmEntryDto));
     }
 
     @RequestMapping(value = "/createSowEvent", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -135,6 +136,35 @@ public class DoctorPigCreateEvents {
                                    @RequestParam("pigId") Long pigId, @RequestParam("eventType") Integer eventType,
                                    @RequestParam("sowInfoDto") Map<String,Object> sowInfoDto){
         return RespHelper.or500(doctorSowEventCreateService.sowEventCreate(buildBasicInputInfoDto(farmId, pigId, PigEvent.from(eventType)), sowInfoDto));
+    }
+
+    /**
+     * 构建Basic 基础输入数据信息
+     * @param farmId
+     * @param doctorFarmEntryDto
+     * @return
+     */
+    public DoctorBasicInputInfoDto buildBasicEntryInputInfo(Long farmId, DoctorFarmEntryDto entryDto, PigEvent pigEvent){
+        try{
+            DoctorFarm doctorFarm = RespHelper.orServEx(this.doctorFarmReadService.findFarmById(farmId));
+            checkState(!isNull(pigEvent), "input.eventType.error");
+            Long userId = UserUtil.getUserId();
+            Response<User> userResponse = userReadService.findById(userId);
+            checkState(userResponse.isSuccess(), "loginUser.check.error");
+
+            return DoctorBasicInputInfoDto.builder()
+                    .pigType(entryDto.getPigType()).pigCode(entryDto.getPigCode()).barnId(entryDto.getBarnId()).barnName(entryDto.getBarnName())
+                    .farmId(doctorFarm.getId()).farmName(doctorFarm.getName()).orgId(doctorFarm.getOrgId()).orgName(doctorFarm.getOrgName())
+                    .staffId(userId).staffName(userResponse.getResult().getName())
+                    .eventType(pigEvent.getKey()).eventName(pigEvent.getDesc()).eventDesc(pigEvent.getDesc())
+                    .build();
+        }catch (IllegalStateException ee){
+            log.error("illegal state exception error, cause:{}", Throwables.getStackTraceAsString(ee));
+            throw new JsonResponseException(ee.getMessage());
+        }catch (Exception e){
+            log.error("basic entry info build fail, cause:{}", Throwables.getStackTraceAsString(e));
+            throw new JsonResponseException("build.basicEntry.fail");
+        }
     }
 
 
@@ -157,7 +187,7 @@ public class DoctorPigCreateEvents {
                     .pigId(pigDto.getId()).pigCode(pigDto.getPigCode()).pigType(pigDto.getPigType()).barnId(pigDto.getBarnId()).barnName(pigDto.getBarnName())
                     .farmId(doctorFarm.getId()).farmName(doctorFarm.getName()).orgId(doctorFarm.getOrgId()).orgName(doctorFarm.getOrgName())
                     .staffId(userId).staffName(userResponse.getResult().getName())
-                    .eventType(pigEvent.getKey()).eventName(pigEvent.getDesc())
+                    .eventType(pigEvent.getKey()).eventName(pigEvent.getDesc()).eventDesc(pigEvent.getDesc())
                     .build();
         }catch (Exception e){
             log.error("build basic input info dto fail, cause:{}", Throwables.getStackTraceAsString(e));
