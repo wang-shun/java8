@@ -1,6 +1,7 @@
 package io.terminus.doctor.web.front.event.impl;
 
 import com.google.common.base.Throwables;
+import com.google.common.collect.Lists;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.Response;
 import io.terminus.common.utils.BeanMapper;
@@ -125,7 +126,7 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
             DoctorGroupDetail groupDetail = checkGroupExist(groupId);
 
             //2.校验能否操作此事件
-            // TODO: 16/5/26
+            checkEventTypeIllegal(groupId, eventType);
 
             //3.put一些字段
             putFields(params);
@@ -191,6 +192,14 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
         List<DoctorGroup> groups = RespHelper.or500(doctorGroupReadService.findGroupsByFarmId(farmId));
         if (groups.stream().map(DoctorGroup::getGroupCode).collect(Collectors.toList()).contains(groupCode)) {
             throw new ServiceException("group.code.exist");
+        }
+    }
+
+    //校验事件类型是否合法
+    private void checkEventTypeIllegal(Long groupId, Integer eventType) {
+        List<Integer> eventTypes = RespHelper.or500(doctorGroupReadService.findEventTypesByGroupIds(Lists.newArrayList(groupId)));
+        if (!eventTypes.contains(eventType)) {
+            throw new ServiceException("event.type.illegal");
         }
     }
 
