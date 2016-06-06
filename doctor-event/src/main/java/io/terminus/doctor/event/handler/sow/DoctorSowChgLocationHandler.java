@@ -46,7 +46,7 @@ public class DoctorSowChgLocationHandler extends DoctorAbstractEventFlowHandler 
     }
 
     @Override
-    public DoctorPigTrack updateDoctorPigTrackInfo(Execution execution,DoctorPigTrack doctorPigTrack, DoctorBasicInputInfoDto basic, Map<String, Object> extra) {
+    public DoctorPigTrack updateDoctorPigTrackInfo(Execution execution,DoctorPigTrack doctorPigTrack, DoctorBasicInputInfoDto basic, Map<String, Object> extra, Map<String,Object> context) {
         doctorPigTrack.addAllExtraMap(extra);
 
         Long toBarnId = (Long) extra.get("chgLocationToBarnId");
@@ -75,6 +75,7 @@ public class DoctorSowChgLocationHandler extends DoctorAbstractEventFlowHandler 
         }else if(Objects.equals(basic.getEventType(), PigEvent.TO_FARROWING.getKey())){
             doctorPigTrack.setStatus(PigStatus.Farrow.getKey());
         }
+        doctorPigTrack.addPigEvent(basic.getPigType(), (Long) context.get("doctorPigEventId"));
         return doctorPigTrack;
     }
 }

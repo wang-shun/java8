@@ -692,7 +692,7 @@ CREATE TABLE `doctor_pig_tracks` (
   `current_barn_name` varchar(64) DEFAULT NULL COMMENT '当前猪舍名称',
   `weight` double DEFAULT NULL COMMENT '猪重量',
   `out_farm_date` datetime DEFAULT NULL COMMENT '猪离场时间',
-  `rel_event_id` bigint(20) DEFAULT NULL COMMENT '关联事件最近事件',
+  `rel_event_ids` text DEFAULT NULL COMMENT '关联事件最近事件',
   `extra` text COMMENT '事件修改猪对应信息',
   `current_parity` int(11) DEFAULT NULL COMMENT '当前胎次信息',
   `remark` text COMMENT '备注',

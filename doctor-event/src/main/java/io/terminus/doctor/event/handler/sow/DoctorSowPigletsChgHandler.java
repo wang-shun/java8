@@ -31,7 +31,7 @@ public class DoctorSowPigletsChgHandler extends DoctorAbstractEventFlowHandler{
     }
 
     @Override
-    public DoctorPigTrack updateDoctorPigTrackInfo(Execution execution, DoctorPigTrack doctorPigTrack, DoctorBasicInputInfoDto basic, Map<String, Object> extra) {
+    public DoctorPigTrack updateDoctorPigTrackInfo(Execution execution, DoctorPigTrack doctorPigTrack, DoctorBasicInputInfoDto basic, Map<String, Object> extra, Map<String,Object> context) {
         // 校验母猪的状态信息
         checkState(Objects.equals(doctorPigTrack.getStatus(), PigStatus.FEED.getKey()), "piglets.chgLocation.error");
 
@@ -49,6 +49,7 @@ public class DoctorSowPigletsChgHandler extends DoctorAbstractEventFlowHandler{
         extra.put("healthCount", healthPigCount);
         doctorPigTrack.addAllExtraMap(extra);
 
+        doctorPigTrack.addPigEvent(basic.getPigType(), (Long) context.get("doctorPigEventId"));
         return doctorPigTrack;
     }
 }

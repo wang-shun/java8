@@ -33,7 +33,7 @@ public class DoctorSowWeanHandler extends DoctorAbstractEventFlowHandler{
     }
 
     @Override
-    public DoctorPigTrack updateDoctorPigTrackInfo(Execution execution, DoctorPigTrack doctorPigTrack, DoctorBasicInputInfoDto basic, Map<String, Object> extra) {
+    public DoctorPigTrack updateDoctorPigTrackInfo(Execution execution, DoctorPigTrack doctorPigTrack, DoctorBasicInputInfoDto basic, Map<String, Object> extra, Map<String, Object> context) {
         // 校验断奶的数量信息
         Map<String,Object> extraMap = doctorPigTrack.getExtraMap();
         Integer healthCount = (Integer) extraMap.get("healthCount");
@@ -58,6 +58,7 @@ public class DoctorSowWeanHandler extends DoctorAbstractEventFlowHandler{
             doctorPigTrack.setStatus(PigStatus.Wean.getKey());
         }
 
+        doctorPigTrack.addPigEvent(basic.getPigType(), (Long) context.get("doctorPigEventId"));
         execution.getExpression().put("leftCount", (healthCount - toWeanCount));
         return doctorPigTrack;
     }

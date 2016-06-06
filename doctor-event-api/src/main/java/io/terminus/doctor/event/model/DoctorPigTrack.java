@@ -19,7 +19,9 @@ import java.io.Serializable;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Map;
+import java.util.Objects;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Objects.isNull;
 
 @Builder
@@ -48,7 +50,11 @@ public class DoctorPigTrack implements Serializable{
 
     private Date outFarmDate;
 
-    private Long relEventId;
+    /**
+     * 猪关联Id sow : {parity : "eventId1,eventId2,eventId3"}
+     * boar "eventId1,eventId2,eventId3" 对应的关联事件列表Ids
+     */
+    private String relEventIds;
 
     @Setter(AccessLevel.NONE)
     private Map<String, Object> extraMap;
@@ -103,5 +109,46 @@ public class DoctorPigTrack implements Serializable{
         }
         this.extraMap.putAll(extraMap);
         this.extra = OBJECT_MAPPER.writeValueAsString(this.extraMap);
+    }
+
+    /**
+     * 通过当前胎次信息添加猪 关联事件信息内容
+     * @param pigType
+     * @param relEventId
+     */
+    public void addPigEvent(Integer pigType, Long relEventId){
+        if(Objects.equals(pigType, DoctorPig.PIG_TYPE.BOAR.getKey())){
+            addBoarPigRelEvent(relEventId);
+        }else if(Objects.equals(pigType, DoctorPig.PIG_TYPE.SOW.getKey())){
+            addSowPigRelEvent(relEventId);
+        }else {
+            throw new IllegalStateException("input.pigType.notFund");
+        }
+    }
+
+    /**
+     * 添加母猪关联胎次信息
+     * @param relEventId
+     */
+    @SneakyThrows
+    private void addSowPigRelEvent(Long relEventId){
+        checkArgument(!isNull(currentParity), "input.parity.empty");
+        checkArgument(!isNull(relEventId), "input.relEventId.empty");
+        Map<String,String> relEventIdsMap = OBJECT_MAPPER.readValue(this.relEventIds, JacksonType.MAP_OF_STRING);
+        if(relEventIdsMap.containsKey(currentParity.toString())){
+            relEventIdsMap.put(currentParity.toString(), relEventIdsMap.get(currentParity.toString())+","+relEventId.toString());
+        }else {
+            relEventIdsMap.put(currentParity.toString(), relEventId.toString());
+        }
+        this.relEventIds = OBJECT_MAPPER.writeValueAsString(relEventIdsMap);
+    }
+
+    private void addBoarPigRelEvent(Long relEventId){
+        checkArgument(!isNull(relEventId), "pigTrack.revEventIdInput.error");
+        if(Strings.isNullOrEmpty(this.relEventIds)){
+            this.relEventIds = relEventId.toString();
+        }else {
+            this.relEventIds = this.relEventIds + "," + relEventId.toString();
+        }
     }
 }
