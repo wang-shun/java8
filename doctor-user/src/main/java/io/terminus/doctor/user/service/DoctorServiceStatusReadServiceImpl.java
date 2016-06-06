@@ -3,7 +3,6 @@ package io.terminus.doctor.user.service;
 import com.google.common.base.Throwables;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.user.dao.DoctorServiceStatusDao;
-import io.terminus.doctor.user.dto.DoctorServiceStatusDto;
 import io.terminus.doctor.user.model.DoctorServiceStatus;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,11 +27,11 @@ public class DoctorServiceStatusReadServiceImpl implements DoctorServiceStatusRe
     }
 
     @Override
-    public Response<DoctorServiceStatus> findServiceStatusById(Long serviceStatusId) {
+    public Response<DoctorServiceStatus> findById(Long id) {
         try {
-            return Response.ok(doctorServiceStatusDao.findById(serviceStatusId));
+            return Response.ok(doctorServiceStatusDao.findById(id));
         } catch (Exception e) {
-            log.error("find serviceStatus by id failed, serviceStatusId:{}, cause:{}", serviceStatusId, Throwables.getStackTraceAsString(e));
+            log.error("find serviceStatus by id failed, id:{}, cause:{}", id, Throwables.getStackTraceAsString(e));
             return Response.fail("serviceStatus.find.fail");
         }
     }
@@ -47,32 +46,4 @@ public class DoctorServiceStatusReadServiceImpl implements DoctorServiceStatusRe
         }
     }
 
-    @Override
-    public Response<DoctorServiceStatusDto> findDoctorServiceStatusDto(Long userId){
-        try {
-            DoctorServiceStatus status = doctorServiceStatusDao.findByUserId(userId);
-            DoctorServiceStatusDto dto = this.makeDoctorServiceStatusDto(status);
-            dto.setUserId(userId);
-            return Response.ok(dto);
-        } catch (Exception e) {
-            log.error("find serviceStatus by userId failed, userId:{}, cause:{}", userId, Throwables.getStackTraceAsString(e));
-            return Response.fail("serviceStatus.find.fail");
-        }
-    }
-
-    private DoctorServiceStatusDto makeDoctorServiceStatusDto(DoctorServiceStatus status){
-        DoctorServiceStatusDto dto = new DoctorServiceStatusDto();
-        //审核不通过或冻结申请资格的原因
-        dto.setPigDoctorReason(status.getPigdoctorReason());
-        dto.setPigmallReason(status.getPigmallReason());
-        dto.setNeverestReason(status.getNeverestReason());
-        dto.setPigTradeReason(status.getPigtradeReason());
-
-        //如果服务已开通,则设状态为1, 否则使用申请和审批的状态
-        dto.setPigDoctor(status.getPigdoctorStatus() == 1 ? 1 : status.getPigdoctorReviewStatus());
-        dto.setPigmall(status.getPigmallStatus() == 1 ? 1 : status.getPigmallReviewStatus());
-        dto.setNeverest(status.getNeverestStatus() == 1 ? 1 : status.getNeverestReviewStatus());
-        dto.setPigTrade(status.getPigtradeStatus() == 1 ? 1 : status.getPigtradeReviewStatus());
-        return dto;
-    }
 }

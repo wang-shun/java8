@@ -3,14 +3,18 @@ package io.terminus.doctor.open.rest.user;
 import com.google.common.base.Throwables;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.BaseUser;
+import io.terminus.common.utils.BeanMapper;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.enums.UserType;
+import io.terminus.doctor.open.dto.DoctorServiceReviewDto;
+import io.terminus.doctor.open.dto.ServiceReviewOpenDto;
 import io.terminus.doctor.open.util.OPRespHelper;
 import io.terminus.doctor.user.dto.DoctorMenuDto;
 import io.terminus.doctor.user.dto.DoctorServiceApplyDto;
-import io.terminus.doctor.user.dto.DoctorServiceStatusDto;
 import io.terminus.doctor.user.dto.DoctorUserInfoDto;
 import io.terminus.doctor.user.model.DoctorOrg;
+import io.terminus.doctor.user.model.DoctorServiceReview;
+import io.terminus.doctor.user.model.DoctorServiceStatus;
 import io.terminus.doctor.user.service.*;
 import io.terminus.doctor.user.service.business.DoctorServiceReviewService;
 import io.terminus.pampas.common.UserUtil;
@@ -28,6 +32,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import javax.validation.Valid;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Consumer;
 
 /**
  * Desc: 用户相关
@@ -77,8 +82,39 @@ public class OPDoctorUsers {
      * @return 服务开通情况
      */
     @OpenMethod(key = "get.user.service.status")
-    public DoctorServiceStatusDto getUserServiceStatus() {
-        return OPRespHelper.orOPEx(doctorServiceStatusReadService.findDoctorServiceStatusDto(UserUtil.getUserId()));
+    public DoctorServiceReviewDto getUserServiceStatus() {
+        Long userId = UserUtil.getUserId();
+        DoctorServiceReviewDto dto = new DoctorServiceReviewDto();
+        DoctorServiceStatus serviceStatus = OPRespHelper.orOPEx(doctorServiceStatusReadService.findByUserId(userId));
+        OPRespHelper.orOPEx(doctorServiceReviewReadService.findServiceReviewsByUserId(userId)).forEach(new Consumer<DoctorServiceReview>() {
+            @Override
+            public void accept(DoctorServiceReview review) {
+                ServiceReviewOpenDto innerDto = BeanMapper.map(review, ServiceReviewOpenDto.class);
+                switch (DoctorServiceReview.Type.from(review.getType())) {
+                    case PIG_DOCTOR:
+                        innerDto.setServiceStatus(serviceStatus.getPigdoctorStatus());
+                        innerDto.setReason(serviceStatus.getPigdoctorReason());
+                        dto.setPigDoctor(innerDto);
+                        break;
+                    case PIGMALL:
+                        innerDto.setServiceStatus(serviceStatus.getPigmallStatus());
+                        innerDto.setReason(serviceStatus.getPigmallReason());
+                        dto.setPigmall(innerDto);
+                        break;
+                    case NEVEREST:
+                        innerDto.setServiceStatus(serviceStatus.getNeverestStatus());
+                        innerDto.setReason(serviceStatus.getNeverestReason());
+                        dto.setNeverest(innerDto);
+                        break;
+                    case PIG_TRADE:
+                        innerDto.setServiceStatus(serviceStatus.getPigtradeStatus());
+                        innerDto.setReason(serviceStatus.getPigtradeReason());
+                        dto.setPigTrade(innerDto);
+                        break;
+                }
+            }
+        });
+        return dto;
     }
 
     /**

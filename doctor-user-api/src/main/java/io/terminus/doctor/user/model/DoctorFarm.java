@@ -14,7 +14,7 @@ import java.util.Date;
 @Data
 public class DoctorFarm implements Serializable {
     private static final long serialVersionUID = -4931160463332155938L;
-
+//TODO 添加 省市区(id, name)和详细地址
     private Long id;
     
     /**

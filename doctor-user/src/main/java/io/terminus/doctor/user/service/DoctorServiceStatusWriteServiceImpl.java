@@ -46,12 +46,22 @@ public class DoctorServiceStatusWriteServiceImpl implements DoctorServiceStatusW
     }
 
     @Override
-    public Response<Boolean> deleteServiceStatusById(Long serviceStatusId) {
+    public Response<Boolean> deleteById(Long id) {
         try {
-            return Response.ok(doctorServiceStatusDao.delete(serviceStatusId));
+            return Response.ok(doctorServiceStatusDao.delete(id));
         } catch (Exception e) {
-            log.error("delete serviceStatus failed, serviceStatusId:{}, cause:{}", serviceStatusId, Throwables.getStackTraceAsString(e));
+            log.error("delete serviceStatus failed, id:{}, cause:{}", id, Throwables.getStackTraceAsString(e));
             return Response.fail("serviceStatus.delete.fail");
+        }
+    }
+
+    @Override
+    public Response<Boolean> initDefaultServiceStatus(Long userId){
+        try {
+            return Response.ok(doctorServiceStatusDao.initdata(userId));
+        } catch (Exception e) {
+            log.error("init serviceStatus failed, userId:{}, cause:{}", userId, Throwables.getStackTraceAsString(e));
+            return Response.fail("ServiceStatus.init.fail");
         }
     }
 }

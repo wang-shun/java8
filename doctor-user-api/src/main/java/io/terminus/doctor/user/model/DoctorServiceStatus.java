@@ -1,6 +1,10 @@
 package io.terminus.doctor.user.model;
 
+import com.google.common.base.Objects;
+import com.google.common.collect.Lists;
+import io.terminus.common.exception.ServiceException;
 import lombok.Data;
+import lombok.Getter;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -81,4 +85,36 @@ public class DoctorServiceStatus implements Serializable {
     private Date createdAt;
 
     private Date updatedAt;
+
+    /**
+     * 服务状态
+     */
+    public enum Status {
+        OPENED(1, "已开通"),
+        CLOSED(0, "未开通");
+
+        private int value;
+        private String desc;
+
+        Status(int value, String desc) {
+            this.value = value;
+            this.desc = desc;
+        }
+
+        public static Status from(int number) {
+            return Lists.newArrayList(Status.values()).stream()
+                    .filter(s -> Objects.equal(s.value, number))
+                    .findFirst()
+                    .<ServiceException>orElseThrow(() -> {
+                        throw new ServiceException("doctor.service.status.error");
+                    });
+        }
+
+        public int value(){
+            return this.value;
+        }
+        public String toString(){
+            return this.desc;
+        }
+    }
 }

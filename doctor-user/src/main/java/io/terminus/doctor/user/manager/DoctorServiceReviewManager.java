@@ -75,7 +75,7 @@ public class DoctorServiceReviewManager {
         //更新状态为已提交,待审核
         doctorServiceReviewDao.updateStatus(user.getId(), type, DoctorServiceReview.Status.REVIEW);
         //添加状态变更记录
-        this.createServiceReviewTrack(null, user.getId(), review.getStatus(), DoctorServiceReview.Status.REVIEW.getValue(), type, "用户申请开通服务");
+        this.createServiceReviewTrack(null, user.getId(), review.getStatus(), DoctorServiceReview.Status.REVIEW.getValue(), type, null);
 
     }
     private void createDoctorStaff(BaseUser user, Long orgId, String orgName){
@@ -123,42 +123,30 @@ public class DoctorServiceReviewManager {
     }
     private void setPigDoctorField(DoctorServiceStatus status, Integer newStatus, String reason){
         status.setPigdoctorReviewStatus(newStatus);
-        if(Objects.equals(newStatus, DoctorServiceReview.Status.NOT_OK.getValue()) || Objects.equals(newStatus, DoctorServiceReview.Status.FROZEN.getValue())){
-            status.setPigdoctorReason(reason);
-        }else if(Objects.equals(newStatus, DoctorServiceReview.Status.OK.getValue())){
-            status.setPigdoctorStatus(1);
-        }else{
-            status.setPigdoctorReason(null);
+        status.setPigdoctorReason(reason);
+        if(Objects.equals(newStatus, DoctorServiceReview.Status.OK.getValue())){
+            status.setPigdoctorStatus(DoctorServiceStatus.Status.OPENED.value());
         }
     }
     private void setPigmallField(DoctorServiceStatus status, Integer newStatus, String reason){
         status.setPigmallReviewStatus(newStatus);
-        if(Objects.equals(newStatus, DoctorServiceReview.Status.NOT_OK.getValue()) || Objects.equals(newStatus, DoctorServiceReview.Status.FROZEN.getValue())){
-            status.setPigmallReason(reason);
-        }else if(Objects.equals(newStatus, DoctorServiceReview.Status.OK.getValue())){
-            status.setPigmallStatus(1);
-        }else{
-            status.setPigmallReason(null);
+        status.setPigmallReason(reason);
+        if(Objects.equals(newStatus, DoctorServiceReview.Status.OK.getValue())){
+            status.setPigmallStatus(DoctorServiceStatus.Status.OPENED.value());
         }
     }
     private void setNeverestField(DoctorServiceStatus status, Integer newStatus, String reason){
         status.setNeverestReviewStatus(newStatus);
-        if(Objects.equals(newStatus, DoctorServiceReview.Status.NOT_OK.getValue()) || Objects.equals(newStatus, DoctorServiceReview.Status.FROZEN.getValue())){
-            status.setNeverestReason(reason);
-        }else if(Objects.equals(newStatus, DoctorServiceReview.Status.OK.getValue())){
-            status.setNeverestStatus(1);
-        }else{
-            status.setNeverestReason(null);
+        status.setNeverestReason(reason);
+        if(Objects.equals(newStatus, DoctorServiceReview.Status.OK.getValue())){
+            status.setNeverestStatus(DoctorServiceStatus.Status.OPENED.value());
         }
     }
     private void setPigTradeField(DoctorServiceStatus status, Integer newStatus, String reason){
         status.setPigtradeReviewStatus(newStatus);
-        if(Objects.equals(newStatus, DoctorServiceReview.Status.NOT_OK.getValue()) || Objects.equals(newStatus, DoctorServiceReview.Status.FROZEN.getValue())){
-            status.setPigtradeReason(reason);
-        }else if(Objects.equals(newStatus, DoctorServiceReview.Status.OK.getValue())){
-            status.setPigtradeStatus(1);
-        }else{
-            status.setPigtradeReason(null);
+        status.setPigtradeReason(reason);
+        if(Objects.equals(newStatus, DoctorServiceReview.Status.OK.getValue())){
+            status.setPigtradeStatus(DoctorServiceStatus.Status.OPENED.value());
         }
     }
 
@@ -189,7 +177,7 @@ public class DoctorServiceReviewManager {
         doctorUserDataPermissionDao.create(permission);
 
         this.updateServiceReviewStatus(user, userId, DoctorServiceReview.Type.PIG_DOCTOR, DoctorServiceReview.Status.REVIEW,
-                DoctorServiceReview.Status.OK, "审核通过");
+                DoctorServiceReview.Status.OK, null);
     }
 
     @Transactional

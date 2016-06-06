@@ -6,7 +6,6 @@ import io.terminus.common.model.BaseUser;
 import io.terminus.doctor.common.enums.UserType;
 import io.terminus.doctor.user.dto.DoctorMenuDto;
 import io.terminus.doctor.user.dto.DoctorServiceApplyDto;
-import io.terminus.doctor.user.dto.DoctorServiceStatusDto;
 import io.terminus.doctor.user.dto.DoctorUserInfoDto;
 import io.terminus.doctor.user.model.DoctorOrg;
 import io.terminus.doctor.user.model.DoctorServiceStatus;
@@ -55,8 +54,8 @@ public class ServiceReviews {
      */
     @RequestMapping(value = "/getUserServiceStatus", method = RequestMethod.GET)
     @ResponseBody
-    public DoctorServiceStatusDto getUserServiceStatus() {
-        return RespHelper.or500(doctorServiceStatusReadService.findDoctorServiceStatusDto(UserUtil.getUserId()));
+    public DoctorServiceStatus getUserServiceStatus() {
+        return RespHelper.or500(doctorServiceStatusReadService.findByUserId(UserUtil.getUserId()));
     }
 
     /**

@@ -65,4 +65,15 @@ public class DoctorServiceReviewWriteServiceImpl implements DoctorServiceReviewW
         return response;
     }
 
+    @Override
+    public Response<Boolean> initServiceReview(Long userId){
+        Response<Boolean> response = new Response<>();
+        try {
+            response.setResult(doctorServiceReviewDao.initData(userId));
+        } catch (Exception e) {
+            log.error("init doctor service review failed, userId={}, cause : {}", userId, Throwables.getStackTraceAsString(e));
+            response.setError("init.doctor.service.review.failed");
+        }
+        return response;
+    }
 }
