@@ -51,7 +51,12 @@ public class DoctorGroupEvents {
     }
 
     /**
-     * 录入其他事件
+     * 录入猪群事件
+     * @param groupId 猪群id
+     * @param eventType 事件类型
+     * @see io.terminus.doctor.event.enums.GroupEventType
+     * @param params 入参
+     * @see io.terminus.doctor.event.dto.event.group.input.BaseGroupInput
      * @return 是否成功
      */
     @RequestMapping(value = "/other", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
