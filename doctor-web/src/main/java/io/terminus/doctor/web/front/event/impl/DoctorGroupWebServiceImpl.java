@@ -157,14 +157,14 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
                     RespHelper.or500(doctorGroupWriteService.groupEventMoveIn(groupDetail, BeanMapper.map(params, DoctorMoveInGroupInput.class)));
                     break;
                 case CHANGE:
-                    params.put("changeTypeName", getChangeTypeName(Params.get(params, "changeTypeId")));
-                    params.put("changeReasonName", getChangeReasonName(Params.get(params, "changeReasonId")));
-                    params.put("customerName", getCustomerName(Params.get(params, "customerId")));
+                    params.put("changeTypeName", getChangeTypeName(getLong(params, "changeTypeId")));
+                    params.put("changeReasonName", getChangeReasonName(getLong(params, "changeReasonId")));
+                    params.put("customerName", getCustomerName(getLong(params, "customerId")));
                     putBasicFields(params);
                     RespHelper.or500(doctorGroupWriteService.groupEventChange(groupDetail, BeanMapper.map(params, DoctorChangeGroupInput.class)));
                     break;
                 case TRANS_GROUP:
-                    params.put("toBarnName", getBarnName(Params.get(params, "toBarnId")));
+                    params.put("toBarnName", getBarnName(getLong(params, "toBarnId")));
                     putBasicFields(params);
                     RespHelper.or500(doctorGroupWriteService.groupEventTransGroup(groupDetail, BeanMapper.map(params, DoctorTransGroupInput.class)));
                     break;
@@ -177,19 +177,19 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
                     RespHelper.or500(doctorGroupWriteService.groupEventLiveStock(groupDetail, BeanMapper.map(params, DoctorLiveStockGroupInput.class)));
                     break;
                 case DISEASE:
-                    params.put("diseaseName", getDiseaseName(Params.get(params, "diseaseId")));
-                    params.put("doctorName", getStaffUserName(Params.get(params, "doctorId")));
+                    params.put("diseaseName", getDiseaseName(getLong(params, "diseaseId")));
+                    params.put("doctorName", getStaffUserName(getLong(params, "doctorId")));
                     putBasicFields(params);
                     RespHelper.or500(doctorGroupWriteService.groupEventDisease(groupDetail, BeanMapper.map(params, DoctorDiseaseGroupInput.class)));
                     break;
                 case ANTIEPIDEMIC:
-                    params.put("vaccinName", getVaccinName(Params.get(params, "vaccinId")));
-                    params.put("vaccinStaffName", getStaffUserName(Params.get(params, "vaccinStaffId")));
+                    params.put("vaccinName", getVaccinName(getLong(params, "vaccinId")));
+                    params.put("vaccinStaffName", getStaffUserName(getLong(params, "vaccinStaffId")));
                     putBasicFields(params);
                     RespHelper.or500(doctorGroupWriteService.groupEventAntiepidemic(groupDetail, BeanMapper.map(params, DoctorAntiepidemicGroupInput.class)));
                     break;
                 case TRANS_FARM:
-                    params.put("toFarmName", getFarmName(Params.get(params, "toFarmId")));
+                    params.put("toFarmName", getFarmName(getLong(params, "toFarmId")));
                     putBasicFields(params);
                     RespHelper.or500(doctorGroupWriteService.groupEventTransFarm(groupDetail, BeanMapper.map(params, DoctorTransFarmGroupInput.class)));
                     break;
@@ -304,9 +304,13 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
         params.put("creatorName", UserUtil.getCurrentUser().getName());
 
         //id关联字段
-        params.put("barnName", getBarnName(Params.get(params, "barnId")));
-        params.put("breedName", getBreedName(Params.get(params, "breedId")));
-        params.put("geneticName", getGeneticName(Params.get(params, "geneticId")));
+        params.put("barnName", getBarnName(getLong(params, "barnId")));
+        params.put("breedName", getBreedName(getLong(params, "breedId")));
+        params.put("geneticName", getGeneticName(getLong(params, "geneticId")));
         Params.filterNullOrEmpty(params);
+    }
+
+    private Long getLong(Map<String, Object> params, String key) {
+        return Long.valueOf(Params.get(params, key));
     }
 }
