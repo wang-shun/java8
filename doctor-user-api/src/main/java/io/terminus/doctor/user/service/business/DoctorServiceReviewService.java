@@ -3,6 +3,7 @@ package io.terminus.doctor.user.service.business;
 import io.terminus.common.model.BaseUser;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.user.dto.DoctorServiceApplyDto;
+import io.terminus.doctor.user.model.DoctorFarm;
 import io.terminus.doctor.user.model.DoctorOrg;
 import io.terminus.doctor.user.model.DoctorServiceReview;
 
@@ -31,7 +32,7 @@ public interface DoctorServiceReviewService {
      * @param org 公司名称
      * @return
      */
-    Response<Boolean> openDoctorService(BaseUser user, Long userId, List<String> farms, DoctorOrg org);
+    Response<Boolean> openDoctorService(BaseUser user, Long userId, List<DoctorFarm> farms, DoctorOrg org);
 
     /**
      * 开通服务, 更新服务状态并保存状态变更历史记录

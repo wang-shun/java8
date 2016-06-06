@@ -2,10 +2,13 @@ package io.terminus.doctor.user.manager;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Lists;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.BaseUser;
+import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.user.dao.*;
 import io.terminus.doctor.user.model.*;
+import io.terminus.parana.user.address.service.AddressReadService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -13,7 +16,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 /**
  * 陈增辉 16/5/30.
@@ -30,13 +32,15 @@ public class DoctorServiceReviewManager {
     private final DoctorUserDataPermissionDao doctorUserDataPermissionDao;
     private final ServiceReviewTrackDao serviceReviewTrackDao;
     private final DoctorServiceStatusDao doctorServiceStatusDao;
+    private final AddressReadService addressReadService;
 
     @Autowired
     public DoctorServiceReviewManager(DoctorOrgDao doctorOrgDao, DoctorStaffDao doctorStaffDao,
                                       DoctorServiceReviewDao doctorServiceReviewDao,
                                       DoctorFarmDao doctorFarmDao, DoctorServiceStatusDao doctorServiceStatusDao,
                                       DoctorUserDataPermissionDao doctorUserDataPermissionDao,
-                                      ServiceReviewTrackDao serviceReviewTrackDao) {
+                                      ServiceReviewTrackDao serviceReviewTrackDao,
+                                      AddressReadService addressReadService) {
         this.doctorOrgDao = doctorOrgDao;
         this.doctorStaffDao = doctorStaffDao;
         this.doctorServiceReviewDao = doctorServiceReviewDao;
@@ -44,6 +48,7 @@ public class DoctorServiceReviewManager {
         this.doctorUserDataPermissionDao = doctorUserDataPermissionDao;
         this.serviceReviewTrackDao = serviceReviewTrackDao;
         this.doctorServiceStatusDao = doctorServiceStatusDao;
+        this.addressReadService = addressReadService;
     }
 
     @Transactional
@@ -151,30 +156,48 @@ public class DoctorServiceReviewManager {
     }
 
     @Transactional
-    public void openDoctorService(BaseUser user, Long userId, List<String> farms, DoctorOrg org){
+    public void openDoctorService(BaseUser user, Long userId, List<DoctorFarm> farms, DoctorOrg org){
+        //更新org, 无论是否有修改,都可以update一下
         doctorOrgDao.update(org);
-        String farmIds = null;
-        if (farms != null) {
-            List<DoctorFarm> list = farms.stream().map(farmName -> {
-                DoctorFarm farm = new DoctorFarm();
-                farm.setOrgId(org.getId());
-                farm.setOrgName(org.getName());
-                farm.setName(farmName);
-                return farm;
-            }).collect(Collectors.toList());
-            doctorFarmDao.creates(list);
-            if (list.size() > 0) {
-                farmIds = Joiner.on(",").join(list.stream().map(DoctorFarm::getId).toArray());
+
+        List<Long> newFarmIds = Lists.newArrayList(); //将被保存下来的猪场
+        //保存猪场信息
+        farms.stream().forEach(farm -> {
+            farm.setOrgName(org.getName());
+            farm.setProvinceName(RespHelper.orServEx(addressReadService.findById(farm.getProvinceId())).getName());
+            farm.setCityName(RespHelper.orServEx(addressReadService.findById(farm.getCityId())).getName());
+            farm.setDistrictName(RespHelper.orServEx(addressReadService.findById(farm.getDistrictId())).getName());
+            if (farm.getId() != null) {
+                doctorFarmDao.update(farm);
+            } else {
+                doctorFarmDao.create(farm);
             }
+            newFarmIds.add(farm.getId());
+        });
+
+        String newFarmIdStr = Joiner.on(",").join(newFarmIds);
+        //查询并保存permission
+        DoctorUserDataPermission permission = doctorUserDataPermissionDao.findByUserId(userId);
+        if(permission != null){
+            permission.getFarmIdsList().stream().forEach(oldFarmId -> {
+                if (!newFarmIds.contains(oldFarmId)) {
+                    doctorFarmDao.delete(oldFarmId);
+                }
+            });
+            permission.setFarmIds(newFarmIdStr);
+            permission.setUpdatorId(user.getId());
+            permission.setUpdatorName(user.getName());
+            doctorUserDataPermissionDao.update(permission);
+        }else{
+            permission = new DoctorUserDataPermission();
+            permission.setUserId(userId);
+            permission.setFarmIds(newFarmIdStr);
+            permission.setCreatorName(user.getName());
+            permission.setCreatorId(user.getId());
+            permission.setUpdatorId(user.getId());
+            permission.setUpdatorName(user.getName());
+            doctorUserDataPermissionDao.create(permission);
         }
-        DoctorUserDataPermission permission = new DoctorUserDataPermission();
-        permission.setUserId(userId);
-        permission.setFarmIds(farmIds);
-        permission.setCreatorName(user.getName());
-        permission.setCreatorId(user.getId());
-        permission.setUpdatorId(user.getId());
-        permission.setUpdatorName(user.getName());
-        doctorUserDataPermissionDao.create(permission);
 
         this.updateServiceReviewStatus(user, userId, DoctorServiceReview.Type.PIG_DOCTOR, DoctorServiceReview.Status.REVIEW,
                 DoctorServiceReview.Status.OK, null);

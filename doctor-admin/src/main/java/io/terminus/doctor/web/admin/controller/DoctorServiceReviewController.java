@@ -60,6 +60,9 @@ public class DoctorServiceReviewController {
         if (dto.getUserId() == null) {
             throw new JsonResponseException(500, "user.id.invalid");
         }
+        if(dto.getFarms() == null || dto.getFarms().isEmpty()){
+            throw new JsonResponseException(500, "need.at.least.one.farm"); //需要至少一个猪场信息
+        }
         return RespHelper.or500(doctorServiceReviewService.openDoctorService(baseUser, dto.getUserId(), dto.getFarms(), dto.getOrg()));
     }
 
@@ -161,7 +164,7 @@ public class DoctorServiceReviewController {
     @ResponseBody
     public UserApplyServiceDetailDto findUserApplyDetail(@PathVariable Long userId){
         UserApplyServiceDetailDto dto = new UserApplyServiceDetailDto();
-        List<String> farms = RespHelper.or500(doctorFarmReadService.findFarmsByUserId(userId)).stream().map(DoctorFarm::getName).collect(Collectors.toList());
+        List<DoctorFarm> farms = RespHelper.or500(doctorFarmReadService.findFarmsByUserId(userId));
         DoctorOrg org = RespHelper.or500(doctorOrgReadService.findOrgByUserId(userId));
         dto.setFarms(farms);
         dto.setUserId(userId);

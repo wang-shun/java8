@@ -8,6 +8,7 @@ import io.terminus.common.model.Response;
 import io.terminus.doctor.user.dao.DoctorServiceReviewDao;
 import io.terminus.doctor.user.dto.DoctorServiceApplyDto;
 import io.terminus.doctor.user.manager.DoctorServiceReviewManager;
+import io.terminus.doctor.user.model.DoctorFarm;
 import io.terminus.doctor.user.model.DoctorOrg;
 import io.terminus.doctor.user.model.DoctorServiceReview;
 import lombok.extern.slf4j.Slf4j;
@@ -66,7 +67,7 @@ public class DoctorServiceReviewServiceImpl implements DoctorServiceReviewServic
         return response;
     }
     @Override
-    public Response<Boolean> openDoctorService(BaseUser user, Long userId, List<String> farms, DoctorOrg org){
+    public Response<Boolean> openDoctorService(BaseUser user, Long userId, List<DoctorFarm> farms, DoctorOrg org){
         Response<Boolean> response = new Response<>();
         try{
             DoctorServiceReview review = doctorServiceReviewDao.findByUserIdAndType(userId, DoctorServiceReview.Type.PIG_DOCTOR);
