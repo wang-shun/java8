@@ -11,7 +11,7 @@ mybatis:
   typeAliasesPackage: >
     io.terminus.doctor.warehouse.model,
     io.terminus.parana.(user|file|article|user.address).model,io.terminus.doctor.user.model,
-    io.terminus.parana.msg.model,
+    io.terminus.parana.msg.model,io.terminus.doctor.msg.model,
     io.terminus.doctor.event.model,io.terminus.doctor.workflow.model,
     io.terminus.parana.config.model,
     io.terminus.doctor.basic.model
@@ -29,6 +29,8 @@ oss:
 search:
   host: 127.0.0.1
   port: 9200
+
+esearch:
   pig:
     index-name: pigs
     index-type: pig

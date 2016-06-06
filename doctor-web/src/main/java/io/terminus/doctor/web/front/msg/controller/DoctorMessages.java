@@ -84,7 +84,13 @@ public class DoctorMessages {
      */
     @RequestMapping(value = "/message/detail")
     public DoctorMessage findMessageDetail(@RequestParam("id") Long id) {
-        return RespHelper.or500(doctorMessageReadService.findMessageById(id));
+        // 将消息设置为已读
+        DoctorMessage message = RespHelper.or500(doctorMessageReadService.findMessageById(id));
+        if (message != null) {
+            message.setStatus(DoctorMessage.Status.READED.getValue());
+            doctorMessageWriteService.updateMessage(message);
+        }
+        return message;
     }
 
     /**
