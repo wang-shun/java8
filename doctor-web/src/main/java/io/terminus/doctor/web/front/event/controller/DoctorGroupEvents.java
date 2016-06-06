@@ -1,8 +1,11 @@
 package io.terminus.doctor.web.front.event.controller;
 
 import com.google.common.collect.Lists;
+import io.terminus.common.model.Paging;
 import io.terminus.doctor.common.utils.RespHelper;
+import io.terminus.doctor.event.dto.DoctorGroupDetail;
 import io.terminus.doctor.event.dto.event.group.input.DoctorNewGroupInput;
+import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.service.DoctorGroupReadService;
 import io.terminus.doctor.web.front.event.service.DoctorGroupWebService;
 import lombok.extern.slf4j.Slf4j;
@@ -77,5 +80,31 @@ public class DoctorGroupEvents {
     @RequestMapping(value = "/code", method = RequestMethod.GET)
     public String generateGroupCode(@RequestParam(value = "barnName", required = false) String barnName) {
         return doctorGroupWebService.generateGroupCode(barnName).getResult();
+    }
+
+    /**
+     * 查询猪群详情
+     * @param groupId 猪群id
+     * @return 猪群详情
+     */
+    public DoctorGroupDetail findGroupDetailByGroupId(@RequestParam("groupId") Long groupId) {
+        return RespHelper.or500(doctorGroupReadService.findGroupDetailByGroupId(groupId));
+    }
+
+    /**
+     * 分页查询猪群历史事件
+     * @param farmId    猪场id
+     * @param groupId   猪群id
+     * @param type      事件类型
+     * @param pageNo    分页大小
+     * @param size      当前页码
+     * @return  分页结果
+     */
+    public Paging<DoctorGroupEvent> pagingGroupEvent(@RequestParam("farmId") Long farmId,
+                                                     @RequestParam(value = "groupId", required = false) Long groupId,
+                                                     @RequestParam(value = "type", required = false) Integer type,
+                                                     @RequestParam(value = "pageNo", required = false) Integer pageNo,
+                                                     @RequestParam(value = "size", required = false) Integer size) {
+        return RespHelper.or500(doctorGroupReadService.pagingGroupEvent(farmId, groupId, type, pageNo, size));
     }
 }
