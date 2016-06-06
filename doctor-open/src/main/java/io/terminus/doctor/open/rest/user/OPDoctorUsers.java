@@ -11,11 +11,7 @@ import io.terminus.doctor.user.dto.DoctorServiceApplyDto;
 import io.terminus.doctor.user.dto.DoctorServiceStatusDto;
 import io.terminus.doctor.user.dto.DoctorUserInfoDto;
 import io.terminus.doctor.user.model.DoctorOrg;
-import io.terminus.doctor.user.service.DoctorMobileMenuReadService;
-import io.terminus.doctor.user.service.DoctorOrgReadService;
-import io.terminus.doctor.user.service.DoctorServiceReviewReadService;
-import io.terminus.doctor.user.service.DoctorServiceReviewWriteService;
-import io.terminus.doctor.user.service.DoctorUserReadService;
+import io.terminus.doctor.user.service.*;
 import io.terminus.doctor.user.service.business.DoctorServiceReviewService;
 import io.terminus.pampas.common.UserUtil;
 import io.terminus.pampas.openplatform.annotations.OpenBean;
@@ -61,8 +57,7 @@ public class OPDoctorUsers {
                          DoctorUserReadService doctorUserReadService,
                          DoctorServiceReviewService doctorServiceReviewService,
                          DoctorOrgReadService doctorOrgReadService,
-                         DoctorServiceStatusReadService doctorServiceStatusReadService) {
-                         DoctorOrgReadService doctorOrgReadService,
+                         DoctorServiceStatusReadService doctorServiceStatusReadService,
                          DoctorMobileMenuReadService doctorMobileMenuReadService,
                          AclLoader aclLoader,
                          PermissionHelper permissionHelper) {
