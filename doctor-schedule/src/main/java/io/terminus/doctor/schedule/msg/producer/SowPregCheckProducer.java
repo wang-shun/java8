@@ -37,6 +37,7 @@ import java.util.stream.Collectors;
 
 /**
  * Desc: 母猪需妊娠检查提示
+ *      1. 已配种日期
  * Mail: chk@terminus.io
  * Created by icemimosa
  * Date: 16/6/3
@@ -95,7 +96,7 @@ public class SowPregCheckProducer extends AbstractProducer {
                 for (int j = 0; pigs != null && j < pigs.size(); j++) {
                     DoctorPigInfoDto pigDto = pigs.get(j);
                     // 母猪的updatedAt与当前时间差 (天)
-                    Double timeDiff = (double) (DateTime.now().minus(new DateTime(pigDto.getUpdatedAt()).getMillis()).getMillis() / 86400000);
+                    Double timeDiff = (double) (DateTime.now().minus(pigDto.getUpdatedAt().getTime()).getMillis() / 86400000);
                     // 1. 妊娠检查判断 -> id:1
                     if (checkRuleValue(ruleValueMap.get(1), timeDiff)) {
                         messages.addAll(getMessage(pigDto, rule.getChannels(), ruleRole, subUsers, timeDiff, rule.getUrl()));

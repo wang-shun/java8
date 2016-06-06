@@ -162,6 +162,7 @@ public class MsgManager {
             try{
                 // 获取用户信息
                 Map<String, Serializable> map = JsonMapper.JSON_NON_DEFAULT_MAPPER.fromJson(message.getData(), Map.class);
+                map.put("url", message.getUrl() + "?id=" + message.getId()); // 设置回调url
                 // 推送消息
                 if (message.getUserId() != null) {
                     appPushWebService.send("[" + message.getUserId() + "]", message.getMessageTemplate(), map, null);

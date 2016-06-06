@@ -99,13 +99,13 @@ public class SowBreedingProducer extends AbstractProducer {
                 for (int j = 0; pigs != null && j < pigs.size(); j++) {
                     DoctorPigInfoDto pigDto = pigs.get(j);
                     // 母猪的updatedAt与当前时间差 (天)
-                    Double timeDiff = (double) (DateTime.now().minus(new DateTime(pigDto.getUpdatedAt()).getMillis()).getMillis() / 86400000);
+                    Double timeDiff = (double) (DateTime.now().minus(pigDto.getUpdatedAt().getTime()).getMillis() / 86400000);
                     // 1. 断奶日期判断 -> id:1
-                    if (checkRuleValue(ruleValueMap.get(1), timeDiff)) {
+                    if (Objects.equals(PigStatus.Wean.getKey(), pigDto.getStatus()) && checkRuleValue(ruleValueMap.get(1), timeDiff)) {
                         messages.addAll(getMessage(pigDto, rule.getChannels(), ruleRole, subUsers, timeDiff, rule.getUrl()));
                     }
                     // 2. 初配日期 -> id:2
-                    if (checkRuleValue(ruleValueMap.get(2), timeDiff)) {
+                    if (Objects.equals(PigStatus.Entry.getKey(), pigDto.getStatus()) && checkRuleValue(ruleValueMap.get(2), timeDiff)) {
                         messages.addAll(getMessage(pigDto, rule.getChannels(), ruleRole, subUsers, timeDiff, rule.getUrl()));
                     }
                 }

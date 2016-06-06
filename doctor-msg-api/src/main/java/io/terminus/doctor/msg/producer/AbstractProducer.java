@@ -133,6 +133,9 @@ public abstract class AbstractProducer implements IProducer {
      * @return
      */
     protected boolean checkRuleValue (RuleValue ruleValue, Double value) {
+        if (ruleValue == null) {
+            return true;
+        }
         // 1. 值类型
         if (Objects.equals(RuleValue.RuleType.VALUE.getValue(), ruleValue.getRuleType())) {
             return Objects.equals(ruleValue.getValue(), value);
