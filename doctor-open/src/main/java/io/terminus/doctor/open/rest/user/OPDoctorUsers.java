@@ -1,7 +1,9 @@
 package io.terminus.doctor.open.rest.user;
 
-import com.google.common.collect.Lists;
+import com.google.common.base.Throwables;
+import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.BaseUser;
+import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.enums.UserType;
 import io.terminus.doctor.open.util.OPRespHelper;
 import io.terminus.doctor.user.dto.DoctorMenuDto;
@@ -9,13 +11,22 @@ import io.terminus.doctor.user.dto.DoctorServiceApplyDto;
 import io.terminus.doctor.user.dto.DoctorServiceStatusDto;
 import io.terminus.doctor.user.dto.DoctorUserInfoDto;
 import io.terminus.doctor.user.model.DoctorOrg;
-import io.terminus.doctor.user.model.DoctorUser;
-import io.terminus.doctor.user.service.*;
+import io.terminus.doctor.user.service.DoctorMobileMenuReadService;
+import io.terminus.doctor.user.service.DoctorOrgReadService;
+import io.terminus.doctor.user.service.DoctorServiceReviewReadService;
+import io.terminus.doctor.user.service.DoctorServiceReviewWriteService;
+import io.terminus.doctor.user.service.DoctorUserReadService;
 import io.terminus.doctor.user.service.business.DoctorServiceReviewService;
 import io.terminus.pampas.common.UserUtil;
 import io.terminus.pampas.openplatform.annotations.OpenBean;
 import io.terminus.pampas.openplatform.annotations.OpenMethod;
 import io.terminus.pampas.openplatform.exceptions.OPClientException;
+import io.terminus.parana.auth.core.AclLoader;
+import io.terminus.parana.auth.core.PermissionHelper;
+import io.terminus.parana.auth.model.Acl;
+import io.terminus.parana.auth.model.ParanaThreadVars;
+import io.terminus.parana.auth.model.PermissionData;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.validation.Valid;
@@ -30,6 +41,7 @@ import java.util.Objects;
  */
 @OpenBean
 @SuppressWarnings("unused")
+@Slf4j
 public class OPDoctorUsers {
 
     private final DoctorServiceReviewReadService doctorServiceReviewReadService;
@@ -38,6 +50,9 @@ public class OPDoctorUsers {
     private final DoctorServiceReviewService doctorServiceReviewService;
     private final DoctorOrgReadService doctorOrgReadService;
     private final DoctorUserReadService doctorUserReadService;
+    private final DoctorMobileMenuReadService doctorMobileMenuReadService;
+    private final AclLoader aclLoader;
+    private final PermissionHelper permissionHelper;
     private final DoctorServiceStatusReadService doctorServiceStatusReadService;
 
     @Autowired
@@ -47,12 +62,19 @@ public class OPDoctorUsers {
                          DoctorServiceReviewService doctorServiceReviewService,
                          DoctorOrgReadService doctorOrgReadService,
                          DoctorServiceStatusReadService doctorServiceStatusReadService) {
+                         DoctorOrgReadService doctorOrgReadService,
+                         DoctorMobileMenuReadService doctorMobileMenuReadService,
+                         AclLoader aclLoader,
+                         PermissionHelper permissionHelper) {
         this.doctorServiceReviewReadService = doctorServiceReviewReadService;
         this.doctorServiceReviewWriteService = doctorServiceReviewWriteService;
         this.doctorUserReadService = doctorUserReadService;
         this.doctorServiceReviewService = doctorServiceReviewService;
         this.doctorOrgReadService = doctorOrgReadService;
         this.doctorServiceStatusReadService = doctorServiceStatusReadService;
+        this.doctorMobileMenuReadService = doctorMobileMenuReadService;
+        this.aclLoader = aclLoader;
+        this.permissionHelper = permissionHelper;
     }
 
     /**
@@ -95,7 +117,19 @@ public class OPDoctorUsers {
      */
     @OpenMethod(key = "get.user.basic.info")
     public DoctorUserInfoDto getUserBasicInfo() {
-        return OPRespHelper.orOPEx(doctorUserReadService.findUserInfoByUserId(UserUtil.getUserId()));
+        DoctorUserInfoDto doctorUserInfoDto = OPRespHelper.orOPEx(doctorUserReadService.findUserInfoByUserId(UserUtil.getUserId()));
+        try {
+            Acl acl = aclLoader.getAcl(ParanaThreadVars.getApp());
+            BaseUser user = UserUtil.getCurrentUser();
+            PermissionData perm = permissionHelper.getPermissions(acl, user, true);
+            perm.setAllRequests(null); // empty it
+            doctorUserInfoDto.setAuth(JsonMapper.nonEmptyMapper().toJson(perm));
+        } catch (Exception e) {
+            Throwables.propagateIfInstanceOf(e, JsonResponseException.class);
+            log.error("get permissions of user failed, cause:{}", Throwables.getStackTraceAsString(e));
+            throw new OPClientException("auth.permission.find.fail");
+        }
+        return doctorUserInfoDto;
     }
 
     /**
@@ -107,21 +141,13 @@ public class OPDoctorUsers {
         return OPRespHelper.orOPEx(doctorOrgReadService.findOrgByUserId(UserUtil.getUserId()));
     }
 
+    /**
+     * 查询一级菜单
+     * @return
+     */
     @OpenMethod(key = "get.user.level.one.menu")
     public List<DoctorMenuDto> getUserLevelOneMenu() {
-        return Lists.newArrayList(mockMenuDto(1L), mockMenuDto(2L), mockMenuDto(3L));
+        return OPRespHelper.orOPEx(doctorMobileMenuReadService.findMenuByUserIdAndLevel(UserUtil.getUserId(), 1));
     }
 
-    private DoctorMenuDto mockMenuDto(Long id) {
-        DoctorMenuDto menuDto = new DoctorMenuDto();
-        menuDto.setId(id);
-        menuDto.setName("menu" + id);
-        menuDto.setLevel(1);
-        menuDto.setUrl("/user/info");
-        menuDto.setHasIcon(0);
-        menuDto.setType(3);
-        menuDto.setOrderNo(id.intValue());
-        menuDto.setNeedHiden(0);
-        return menuDto;
-    }
 }

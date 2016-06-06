@@ -2,9 +2,11 @@ package io.terminus.doctor.user.dto;
 
 import io.terminus.doctor.user.model.DoctorStaff;
 import io.terminus.parana.user.model.User;
+import io.terminus.parana.user.model.UserProfile;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.experimental.Builder;
 
 import java.io.Serializable;
 
@@ -17,10 +19,13 @@ import java.io.Serializable;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 public class DoctorUserInfoDto implements Serializable {
     private static final long serialVersionUID = 7144766865272567461L;
 
     private User user;
+
+    private UserProfile userProfile;
 
     /**
      * 角色类型
@@ -37,4 +42,14 @@ public class DoctorUserInfoDto implements Serializable {
      * 职员信息
      */
     private DoctorStaff staff;
+
+    /**
+     * 权限JSON字符串
+     */
+    private String auth;
+
+    /**
+     * 额外备用字段
+     */
+    private String extra;
 }

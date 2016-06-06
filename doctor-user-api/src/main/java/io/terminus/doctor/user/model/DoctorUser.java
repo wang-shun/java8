@@ -14,4 +14,6 @@ public class DoctorUser extends ParanaUser {
     private static final long serialVersionUID = 6527616850371469846L;
 
     private String mobile;
+
+    private String auth;
 }

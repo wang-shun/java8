@@ -1,14 +1,13 @@
 package io.terminus.doctor.user.model;
 
+import io.terminus.common.utils.Splitters;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.io.Serializable;
 import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * Desc: 用户数据权限表Model类
@@ -92,29 +91,22 @@ public class DoctorUserDataPermission implements Serializable {
      * 将 farmIds 转为集合, 方便使用,不存数据库
      */
     @Getter
-    private Set<Long> farmIdSet;
+    private List<Long> farmIdsList;
 
     public void setFarmIds(String farmIds){
         this.farmIds = farmIds;
-        try{
-            this.farmIdSet = Stream.of(farmIds.split(",")).map(Long::valueOf).collect(Collectors.toSet());
-        }catch(Exception e){
-            this.farmIdSet = new HashSet<>();
-        }
+        this.farmIdsList = Splitters.COMMA.splitToList(farmIds).stream().map(Long::valueOf).collect(Collectors.toList());
+
     }
 
     /**
      * 将 barnIds 转为集合, 方便使用,不存数据库
      */
     @Getter
-    private Set<Long> barnIdSet;
+    private List<Long> barnIdsList;
 
     public void setBarnIds(String barnIds) {
         this.barnIds = barnIds;
-        try{
-            this.barnIdSet = Stream.of(barnIds.split(",")).map(Long::valueOf).collect(Collectors.toSet());
-        }catch(Exception e){
-            this.barnIdSet = new HashSet<>();
-        }
+        this.barnIdsList = Splitters.COMMA.splitToList(barnIds).stream().map(Long::valueOf).collect(Collectors.toList());
     }
 }

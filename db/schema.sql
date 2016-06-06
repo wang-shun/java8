@@ -929,7 +929,7 @@ CREATE TABLE `doctor_material_consume_avgs` (
   `type` smallint(6) unsigned DEFAULT NULL COMMENT '领取货物属于的类型',
   `consume_avg_count` bigint(20) DEFAULT NULL COMMENT '平均消耗数量',
   `consume_count` bigint(20) DEFAULT NULL COMMENT '消耗数量',
-  `consime_date` datetime DEFAULT NULL comment '消耗日期',
+  `consume_date` datetime DEFAULT NULL comment '消耗日期',
   `extra` text DEFAULT NULL comment 'extra',
   `created_at` datetime DEFAULT NULL,
   `updated_at` datetime DEFAULT NULL,

@@ -34,6 +34,4 @@ public class DoctorWareHouseCreateDto implements Serializable{
      * @see io.terminus.doctor.warehouse.enums.WareHouseType
      */
     private Integer type;
-
-    private Long creatorId;
 }
