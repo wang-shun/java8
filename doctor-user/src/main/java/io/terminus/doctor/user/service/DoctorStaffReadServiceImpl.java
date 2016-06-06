@@ -43,4 +43,14 @@ public class DoctorStaffReadServiceImpl implements DoctorStaffReadService{
         }
         return response;
     }
+
+    @Override
+    public Response<DoctorStaff> findStaffById(Long staffId) {
+        try {
+            return Response.ok(doctorStaffDao.findById(staffId));
+        } catch (Exception e) {
+            log.error("find staff by id failed, staffId:{}, cause:{}", staffId, Throwables.getStackTraceAsString(e));
+            return Response.fail("staff.find.fail");
+        }
+    }
 }

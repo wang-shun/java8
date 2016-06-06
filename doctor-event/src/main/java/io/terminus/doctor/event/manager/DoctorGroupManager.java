@@ -45,6 +45,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Date;
 import java.util.Objects;
 
 /**
@@ -101,6 +102,12 @@ public class DoctorGroupManager {
         groupTrack.setBoarQty(0);
         groupTrack.setSowQty(0);
         groupTrack.setQuantity(0);
+        groupTrack.setAvgDayAge(0);             //日龄
+        groupTrack.setBirthDate(new Date());    //出生日期(用于计算日龄)
+        groupTrack.setAvgWeight(0D);            //均重
+        groupTrack.setWeight(0D);               //总重
+        groupTrack.setPrice(0L);                //单价
+        groupTrack.setAmount(0L);               //金额
         groupTrack.setSex(EventUtil.getSex(groupTrack.getBoarQty(), groupTrack.getSowQty()));
         doctorGroupTrackDao.create(groupTrack);
 
@@ -131,6 +138,7 @@ public class DoctorGroupManager {
         groupEvent.setOrgId(group.getOrgId());
         groupEvent.setOrgName(group.getOrgName());
         groupEvent.setFarmId(group.getFarmId());
+        groupEvent.setFarmName(group.getFarmName());
         groupEvent.setGroupCode(group.getGroupCode());
 
         //事件信息
@@ -143,6 +151,7 @@ public class DoctorGroupManager {
         groupEvent.setBarnName(group.getInitBarnName());
         groupEvent.setPigType(group.getPigType());
 
+        groupEvent.setIsAuto(newGroupInput.getIsAuto());
         groupEvent.setCreatorId(group.getCreatorId());
         groupEvent.setCreatorName(group.getCreatorName());
         groupEvent.setRemark(group.getRemark());
