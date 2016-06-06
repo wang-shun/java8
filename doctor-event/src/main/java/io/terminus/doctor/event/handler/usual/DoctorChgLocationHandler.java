@@ -36,10 +36,11 @@ public class DoctorChgLocationHandler extends DoctorAbstractEventHandler{
     }
 
     @Override
-    public DoctorPigTrack updateDoctorPigTrackInfo(DoctorPigTrack doctorPigTrack, DoctorBasicInputInfoDto basic, Map<String, Object> extra) {
+    public DoctorPigTrack updateDoctorPigTrackInfo(DoctorPigTrack doctorPigTrack, DoctorBasicInputInfoDto basic, Map<String, Object> extra, Map<String, Object> context) {
         doctorPigTrack.setCurrentBarnId(Params.getWithConvert(extra,"chgLocationFromBarnId",a->Long.valueOf(a.toString())));
         doctorPigTrack.setCurrentBarnName(Params.getWithConvert(extra, "chgLocationFromBarnName", String::valueOf));
         doctorPigTrack.addAllExtraMap(extra);
+        doctorPigTrack.addPigEvent(basic.getPigType(), (Long) context.get("doctorPigEventId"));
         return doctorPigTrack;
     }
 }

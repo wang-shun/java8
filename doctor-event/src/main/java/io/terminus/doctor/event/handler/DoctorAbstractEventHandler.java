@@ -67,10 +67,11 @@ public abstract class DoctorAbstractEventHandler implements DoctorEventCreateHan
             // create event info
             DoctorPigEvent doctorPigEvent = buildAllPigDoctorEvent(basic, extra);
             doctorPigEventDao.create(doctorPigEvent);
+            context.put("doctorPigEventId", doctorPigEvent.getId());
 
             // update track info
             DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(doctorPigEvent.getPigId());
-            DoctorPigTrack refreshPigTrack = updateDoctorPigTrackInfo(doctorPigTrack, basic, extra);
+            DoctorPigTrack refreshPigTrack = updateDoctorPigTrackInfo(doctorPigTrack, basic, extra, context);
             doctorPigTrackDao.update(refreshPigTrack);
 
             // create snapshot info
@@ -103,9 +104,12 @@ public abstract class DoctorAbstractEventHandler implements DoctorEventCreateHan
      * @param doctorPigTrack 基础的母猪事件信息
      * @param basic 录入基础信息内容
      * @param extra 事件关联的信息内容
+     * @param content  执行上下文信息
      * @return
      */
-    public abstract DoctorPigTrack updateDoctorPigTrackInfo(DoctorPigTrack doctorPigTrack, DoctorBasicInputInfoDto basic, Map<String,Object> extra);
+    public abstract DoctorPigTrack updateDoctorPigTrackInfo(DoctorPigTrack doctorPigTrack,
+                                                            DoctorBasicInputInfoDto basic,
+                                                            Map<String,Object> extra, Map<String, Object> content);
 
     private DoctorPigEvent buildAllPigDoctorEvent(DoctorBasicInputInfoDto basic, Map<String,Object> extra){
         DoctorPigEvent doctorPigEvent = DoctorPigEvent.builder()

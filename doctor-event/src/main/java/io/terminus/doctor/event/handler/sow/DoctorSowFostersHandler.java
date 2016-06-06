@@ -33,7 +33,7 @@ public class DoctorSowFostersHandler extends DoctorAbstractEventFlowHandler{
     }
 
     @Override
-    public DoctorPigTrack updateDoctorPigTrackInfo(Execution execution, DoctorPigTrack doctorPigTrack, DoctorBasicInputInfoDto basic, Map<String, Object> extra) {
+    public DoctorPigTrack updateDoctorPigTrackInfo(Execution execution, DoctorPigTrack doctorPigTrack, DoctorBasicInputInfoDto basic, Map<String, Object> extra, Map<String,Object> context) {
         // 校验当前的母猪状态 status 的存在方式
         Integer currentStatus = doctorPigTrack.getStatus();
         checkState(
@@ -49,6 +49,7 @@ public class DoctorSowFostersHandler extends DoctorAbstractEventFlowHandler{
 
         // 修改当前的母猪状态信息
         doctorPigTrack.setStatus(PigStatus.FEED.getKey());
+        doctorPigTrack.addPigEvent(basic.getPigType(), (Long) context.get("doctorPigEventId"));
         return doctorPigTrack;
     }
 }
