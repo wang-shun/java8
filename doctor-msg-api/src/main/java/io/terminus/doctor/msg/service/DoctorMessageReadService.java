@@ -1,5 +1,6 @@
 package io.terminus.doctor.msg.service;
 
+import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.msg.model.DoctorMessage;
 
@@ -23,11 +24,36 @@ public interface DoctorMessageReadService {
     Response<DoctorMessage> findMessageById(Long messageId);
 
     /**
+     * 分页预警消息列表
+     * @param criteria
+     * @param pageNo
+     * @param pageSize
+     * @return
+     */
+    Response<Paging<DoctorMessage>> pagingWarnMessages(Map<String, Object> criteria, Integer pageNo, Integer pageSize);
+
+    /**
+     * 分页系统消息列表
+     * @param criteria
+     * @param pageNo
+     * @param pageSize
+     * @return
+     */
+    Response<Paging<DoctorMessage>> pagingSysMessages(Map<String, Object> criteria, Integer pageNo, Integer pageSize);
+
+    /**
      * 根据查询条件查询
      * @param criteria
      * @return
      */
-    Response<List<DoctorMessage>> findMessageByCriteria(Map criteria);
+    Response<List<DoctorMessage>> findMessageByCriteria(Map<String, Object> criteria);
+
+    /**
+     * 获取未读站内信的数量
+     * @param userId    用户id
+     * @return
+     */
+    public Response<Long> findNoReadCount(Long userId);
 
     /**
      * 获取未发送的短信消息

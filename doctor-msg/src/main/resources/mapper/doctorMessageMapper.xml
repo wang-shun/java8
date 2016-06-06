@@ -102,10 +102,16 @@
             <if test="roleId != null">AND role_id = #{roleId}</if>
             <if test="userId != null">AND user_id = #{userId}</if>
             <if test="templateId != null">AND template_id = #{templateId}</if>
-            <if test="type != null">AND type = #{type}</if>
+            <if test="type != null">AND `type` = #{type}</if>
             <if test="category != null">AND category = #{category}</if>
             <if test="channel != null">AND channel = #{channel}</if>
             <if test="status != null">AND status = #{status}</if>
+            <if test="types != null &amp;&amp; types.size() > 0">
+                AND `type` IN
+                <foreach collection="types" item="i" open="(" separator="," close=")">
+                    #{i}
+                </foreach>
+            </if>
         </where>
     </sql>
 
@@ -113,6 +119,20 @@
         SELECT <include refid="cols_all"/>
         FROM <include refid="tb"/>
         <include refid="criteria"/>
+    </select>
+
+    <select id="paging" parameterType="map" resultMap="DoctorMessageMap">
+        SELECT <include refid="cols_all"/>
+        FROM <include refid="tb"/>
+        <include refid="criteria"/>
+        LIMIT #{offset}, #{limit}
+    </select>
+
+    <!-- 获取未读站内信的数量 -->
+    <select id="findNoReadCount" parameterType="long" resultType="long">
+        SELECT COUNT(1)
+        FROM <include refid="tb"/>
+        WHERE user_id = #{userId} AND status = 1 AND channel = 0
     </select>
 
 </mapper>

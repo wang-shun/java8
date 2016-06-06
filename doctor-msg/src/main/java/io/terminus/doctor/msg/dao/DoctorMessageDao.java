@@ -13,4 +13,13 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class DoctorMessageDao extends MyBatisDao<DoctorMessage> {
 
+    /**
+     * 获取未读站内信的数量
+     * @param userId    用户id
+     * @return
+     */
+    public Long findNoReadCount(Long userId) {
+        return getSqlSession().selectOne(sqlId("findNoReadCount"), userId);
+    }
+
 }

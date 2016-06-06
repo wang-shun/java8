@@ -1,7 +1,10 @@
 package io.terminus.doctor.msg.service;
 
 import com.google.common.base.Throwables;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import io.terminus.common.model.PageInfo;
+import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.msg.dao.DoctorMessageDao;
 import io.terminus.doctor.msg.dto.Rule;
@@ -41,11 +44,55 @@ public class DoctorMessageReadServiceImpl implements DoctorMessageReadService {
     }
 
     @Override
-    public Response<List<DoctorMessage>> findMessageByCriteria(Map criteria) {
+    public Response<Paging<DoctorMessage>> pagingWarnMessages(Map<String, Object> criteria, Integer pageNo, Integer pageSize) {
+        try{
+            PageInfo pageInfo = new PageInfo(pageNo, pageSize);
+            // 获取预警消息
+            criteria.put("types", ImmutableList.of(1, 2));
+            criteria.put("channel", Rule.Channel.SYSTEM.getValue());
+            if (criteria.get("status") == null) {
+                criteria.put("status", DoctorMessage.Status.NORMAL);
+            }
+            return Response.ok(doctorMessageDao.paging(pageInfo.getOffset(), pageInfo.getLimit(), criteria));
+        } catch (Exception e) {
+            log.error("paging message by criteria failed, criteria is {}, cause by {}", criteria, Throwables.getStackTraceAsString(e));
+            return Response.fail("message.find.fail");
+        }
+    }
+
+    @Override
+    public Response<Paging<DoctorMessage>> pagingSysMessages(Map<String, Object> criteria, Integer pageNo, Integer pageSize) {
+        try{
+            PageInfo pageInfo = new PageInfo(pageNo, pageSize);
+            // 获取系统消息
+            criteria.put("type", 0);
+            criteria.put("channel", Rule.Channel.SYSTEM.getValue());
+            if (criteria.get("status") == null) {
+                criteria.put("status", DoctorMessage.Status.NORMAL);
+            }
+            return Response.ok(doctorMessageDao.paging(pageInfo.getOffset(), pageInfo.getLimit(), criteria));
+        } catch (Exception e) {
+            log.error("paging message by criteria failed, criteria is {}, cause by {}", criteria, Throwables.getStackTraceAsString(e));
+            return Response.fail("message.find.fail");
+        }
+    }
+
+    @Override
+    public Response<List<DoctorMessage>> findMessageByCriteria(Map<String, Object> criteria) {
         try{
             return Response.ok(doctorMessageDao.list(criteria));
         } catch (Exception e) {
             log.error("find message by criteria failed, criteria:{}, cause:{}", criteria, Throwables.getStackTraceAsString(e));
+            return Response.fail("message.find.fail");
+        }
+    }
+
+    @Override
+    public Response<Long> findNoReadCount(Long userId) {
+        try{
+            return Response.ok(doctorMessageDao.findNoReadCount(userId));
+        } catch (Exception e) {
+            log.error("find no read message count failed, user id is {}, cause by {}", userId, Throwables.getStackTraceAsString(e));
             return Response.fail("message.find.fail");
         }
     }
