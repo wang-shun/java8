@@ -87,6 +87,7 @@ public class DoctorGroupEvents {
      * @param groupId 猪群id
      * @return 猪群详情
      */
+    @RequestMapping(value = "/detail", method = RequestMethod.GET)
     public DoctorGroupDetail findGroupDetailByGroupId(@RequestParam("groupId") Long groupId) {
         return RespHelper.or500(doctorGroupReadService.findGroupDetailByGroupId(groupId));
     }
@@ -100,6 +101,7 @@ public class DoctorGroupEvents {
      * @param size      当前页码
      * @return  分页结果
      */
+    @RequestMapping(value = "/paging", method = RequestMethod.GET)
     public Paging<DoctorGroupEvent> pagingGroupEvent(@RequestParam("farmId") Long farmId,
                                                      @RequestParam(value = "groupId", required = false) Long groupId,
                                                      @RequestParam(value = "type", required = false) Integer type,
