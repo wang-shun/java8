@@ -1181,3 +1181,18 @@ CREATE TABLE `doctor_pig_type_statistics` (
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COMMENT='猪只数统计表';
 CREATE UNIQUE INDEX idx_doctor_pig_type_statistics_farm_id ON doctor_pig_type_statistics(farm_id);
 CREATE INDEX idx_doctor_pig_type_statistics_org_id ON doctor_pig_type_statistics(org_id);
+
+-- 地址
+DROP TABLE IF EXISTS `parana_addresses`;
+
+CREATE TABLE `parana_addresses` (
+  `id` int(11) NOT NULL,
+  `pid` int(11) DEFAULT NULL COMMENT '父级ID',
+  `name` varchar(50) DEFAULT NULL COMMENT '名称',
+  `level` int(3) DEFAULT NULL COMMENT '级别',
+  `pinyin` varchar(100) DEFAULT NULL COMMENT '拼音',
+  `english_name` varchar(100) DEFAULT NULL COMMENT '英文名',
+  `unicode_code` varchar(200) DEFAULT NULL COMMENT 'ASCII码',
+  `order_no` varchar(32) DEFAULT NULL COMMENT '排序号',
+  PRIMARY KEY (`id`)
+);

@@ -930,3 +930,15 @@ CREATE TABLE `doctor_user_binds` (
   UNIQUE KEY `idx_user_bind_UNIQUE1` (`user_id`,`target_system`),
   UNIQUE KEY `idx_user_bind_UNIQUE2` (`uuid`)
 ) COMMENT='用户账户与其他系统账户的绑定关系';
+
+CREATE TABLE `parana_addresses` (
+  `id` int(11) NOT NULL,
+  `pid` int(11) DEFAULT NULL COMMENT '父级ID',
+  `name` varchar(50) DEFAULT NULL COMMENT '名称',
+  `level` int(3) DEFAULT NULL COMMENT '级别',
+  `pinyin` varchar(100) DEFAULT NULL COMMENT '拼音',
+  `english_name` varchar(100) DEFAULT NULL COMMENT '英文名',
+  `unicode_code` varchar(200) DEFAULT NULL COMMENT 'ASCII码',
+  `order_no` varchar(32) DEFAULT NULL COMMENT '排序号',
+  PRIMARY KEY (`id`)
+);
