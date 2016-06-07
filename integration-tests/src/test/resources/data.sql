@@ -5,6 +5,34 @@ INSERT INTO
   (`id`, `name`, `email`, `mobile`, `password`, `type`, `status`, `roles_json`, `extra_json`, `tags_json`, `created_at`, `updated_at`)
 VALUES
   (1, 'admin','admin@terminus.io', '18888888888', '9f8c@a97758b955efdaf60fe4', 1, 1, null, null, '{"good":"man"}', now(), now());
+INSERT INTO
+  `parana_users` (`id`, `name`, `email`, `mobile`, `password`, `type`, `status`, `roles_json`, `extra_json`, `tags_json`, `item_info_md5`, `created_at`, `updated_at`)
+VALUES
+	(2, 'primary', NULL, '18888888889', '9f8c@a97758b955efdaf60fe4', 5, 1, '["PRIMARY(OWNER)","PRIMARY"]', NULL, NULL, NULL, '2016-05-26 19:21:25', '2016-06-02 13:34:36');
+INSERT INTO `parana_users` (`id`, `name`, `email`, `mobile`, `password`, `type`, `status`, `roles_json`, `extra_json`, `tags_json`, `item_info_md5`, `created_at`, `updated_at`)
+VALUES
+	(3, '18888888890@18888888889', NULL, NULL, '9f8c@a97758b955efdaf60fe4', 6, 1, '["SUB","SUB(SUB(1))"]', '{"seller":"haha"}', '{"good":"man"}', NULL, '2016-05-17 17:08:43', '2016-06-02 12:28:15');
+
+INSERT INTO `parana_user_profiles` (`id`, `user_id`, `realname`, `gender`, `province_id`, `province`, `city_id`, `city`, `region_id`, `region`, `street`, `extra_json`, `avatar`, `birth`, `created_at`, `updated_at`)
+VALUES
+	(1, 3, '测试真实姓名', 1, 10001, '', NULL, NULL, NULL, NULL, NULL, NULL, '', NULL, '2016-06-06 00:00:00', '2016-06-06 00:00:00');
+
+INSERT
+  INTO `doctor_user_primarys` (`id`, `user_id`, `user_name`, `status`, `extra_json`, `created_at`, `updated_at`)
+VALUES
+	(1, 2, '18888888889', 1, NULL, '2016-05-26 19:21:25', '2016-05-26 19:21:25');
+
+
+INSERT INTO `doctor_user_subs` (`id`, `user_id`, `user_name`, `parent_user_id`, `parent_user_name`, `role_id`, `role_name`, `contact`, `status`, `extra_json`, `created_at`, `updated_at`)
+VALUES
+	(1, 3, '18888888890@18888888889', 2, '18888888889', 1, '测试', '18888888890', 1, NULL, '2016-06-02 00:00:00', '2016-06-02 00:00:00');
+
+
+INSERT INTO `doctor_sub_roles` (`id`, `name`, `desc`, `user_id`, `app_key`, `status`, `extra_json`, `allow_json`, `created_at`, `updated_at`)
+VALUES
+	(1, '测试', '测试', 2, 'MOBILE', 1, NULL, '["manage_back_category"]', '2016-06-02 00:00:00', '2016-06-02 00:00:00');
+
+
 
 INSERT INTO `parana_message_templates` (`id`, `creator_id`, `creator_name`, `name`, `title`, `content`, `context`, `channel`, `disabled`, `description`, `created_at`, `updated_at`)
 VALUES
@@ -167,4 +195,53 @@ VALUES
 	(11,3,NULL,NULL,1,2,'template.sow',1,3,'{"pigCode":"2333","barnName":"猪场3号"}',2,'http://m.doctor.com/message/message-detail',1,NULL,NULL,NULL,'2016-06-06 00:00:00','2016-06-06 00:00:00'),
 	(12,4,NULL,NULL,1,2,'template.sow',1,4,'{"pigCode":"2333","barnName":"猪场4号"}',0,'http://m.doctor.com/message/message-detail',1,NULL,NULL,NULL,'2016-06-06 00:00:00','2016-06-06 00:00:00');
 
--- 消息相关 end
+-- doctor farm
+INSERT INTO `doctor_farms` (`id`, `name`, `org_id`, `org_name`, `out_id`, `extra`, `created_at`, `updated_at`)
+VALUES
+	(12345, 'farmName', 1, 'orgName', '666666', null, now(), now());
+
+-- 测试数据
+INSERT INTO `parana_addresses` (`id`, `pid`, `name`, `level`, `pinyin`, `english_name`, `unicode_code`, `order_no`)
+VALUES (1,0,'中国',0,'zhong guo','China','\\u4e2d\\u56fd','');
+
+INSERT INTO `parana_addresses` (`id`, `pid`, `name`, `level`, `pinyin`, `english_name`, `unicode_code`, `order_no`)
+VALUES
+  (110000,1,'北京',1,'bei jing','','\\u5317\\u4eac',''),
+  (330000,1,'浙江省',1,'zhe jiang sheng','','\\u6d59\\u6c5f\\u7701','');
+
+INSERT INTO `parana_addresses` (`id`, `pid`, `name`, `level`, `pinyin`, `english_name`, `unicode_code`, `order_no`)
+VALUES
+	(330100,330000,'杭州市',2,'hang zhou shi','','\\u676d\\u5dde\\u5e02',''),
+	(330102,330100,'上城区',3,'shang cheng qu','','\\u4e0a\\u57ce\\u533a',''),
+	(330103,330100,'下城区',3,'xia cheng qu','','\\u4e0b\\u57ce\\u533a',''),
+	(330104,330100,'江干区',3,'jiang gan qu','','\\u6c5f\\u5e72\\u533a',''),
+	(330105,330100,'拱墅区',3,'gong shu qu','','\\u62f1\\u5885\\u533a',''),
+	(330106,330100,'西湖区',3,'xi hu qu','','\\u897f\\u6e56\\u533a',''),
+	(330108,330100,'滨江区',3,'bin jiang qu','','\\u6ee8\\u6c5f\\u533a',''),
+	(330109,330100,'萧山区',3,'xiao shan qu','','\\u8427\\u5c71\\u533a',''),
+	(330110,330100,'余杭区',3,'yu hang qu','','\\u4f59\\u676d\\u533a',''),
+	(330122,330100,'桐庐县',3,'tong lu xian','','\\u6850\\u5e90\\u53bf',''),
+	(330127,330100,'淳安县',3,'chun an xian','','\\u6df3\\u5b89\\u53bf',''),
+	(330182,330100,'建德市',3,'jian de shi','','\\u5efa\\u5fb7\\u5e02',''),
+	(330183,330100,'富阳市',3,'fu yang shi','','\\u5bcc\\u9633\\u5e02',''),
+	(330185,330100,'临安市',3,'lin an shi','','\\u4e34\\u5b89\\u5e02',''),
+	(330186,330100,'其它区',3,'qi ta qu','','\\u5176\\u5b83\\u533a',''),
+	(330200,330000,'宁波市',2,'ning bo shi','','\\u5b81\\u6ce2\\u5e02',''),
+	(330203,330200,'海曙区',3,'hai shu qu','','\\u6d77\\u66d9\\u533a',''),
+	(330204,330200,'江东区',3,'jiang dong qu','','\\u6c5f\\u4e1c\\u533a',''),
+	(330205,330200,'江北区',3,'jiang bei qu','','\\u6c5f\\u5317\\u533a',''),
+	(330206,330200,'北仑区',3,'bei lun qu','','\\u5317\\u4ed1\\u533a',''),
+	(330211,330200,'镇海区',3,'zhen hai qu','','\\u9547\\u6d77\\u533a',''),
+	(330212,330200,'鄞州区',3,'yin zhou qu','','\\u911e\\u5dde\\u533a',''),
+	(330225,330200,'象山县',3,'xiang shan xian','','\\u8c61\\u5c71\\u53bf',''),
+	(330226,330200,'宁海县',3,'ning hai xian','','\\u5b81\\u6d77\\u53bf',''),
+	(330281,330200,'余姚市',3,'yu yao shi','','\\u4f59\\u59da\\u5e02',''),
+	(330282,330200,'慈溪市',3,'ci xi shi','','\\u6148\\u6eaa\\u5e02',''),
+	(330283,330200,'奉化市',3,'feng hua shi','','\\u5949\\u5316\\u5e02',''),
+	(330284,330200,'其它区',3,'qi ta qu','','\\u5176\\u5b83\\u533a','');
+
+INSERT INTO `parana_addresses` (`id`, `pid`, `name`, `level`, `pinyin`, `english_name`, `unicode_code`, `order_no`)
+VALUES
+  (330108001,330108,'西兴街道',4,'xi xing jie dao','','\\u897f\\u5174\\u8857\\u9053',''),
+	(330108002,330108,'长河街道',4,'zhang he jie dao','','\\u957f\\u6cb3\\u8857\\u9053',''),
+	(330108003,330108,'浦沿街道',4,'pu yan jie dao','','\\u6d66\\u6cbf\\u8857\\u9053','');

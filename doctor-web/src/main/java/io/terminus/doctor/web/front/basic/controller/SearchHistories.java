@@ -21,12 +21,12 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/api/doctor/search")
-public class SearchHistory {
+public class SearchHistories {
 
     private final DoctorSearchHistoryService doctorSearchHistoryService;
 
     @Autowired
-    public SearchHistory(DoctorSearchHistoryService doctorSearchHistoryService) {
+    public SearchHistories(DoctorSearchHistoryService doctorSearchHistoryService) {
         this.doctorSearchHistoryService = doctorSearchHistoryService;
     }
 

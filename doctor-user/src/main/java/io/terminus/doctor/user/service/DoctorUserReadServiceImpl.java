@@ -74,7 +74,7 @@ public class DoctorUserReadServiceImpl extends UserReadServiceImpl implements Do
                     user = userDao.findByMobile(loginId);
                     break;
                 default:
-                    user = subAccountCheck(loginId);
+                    user = RespHelper.orServEx(subAccountCheck(loginId));
                     break;
             }
             if (user == null) {
@@ -89,20 +89,31 @@ public class DoctorUserReadServiceImpl extends UserReadServiceImpl implements Do
         }
     }
 
-    private User subAccountCheck(String loginId){
-        List<String> strings = Splitters.AT.splitToList(loginId);
-        if(strings.size() != 2){
-            throw new ServiceException("sub.account.not.avalid");
+    @Override
+    public Response<User> subAccountCheck(String loginId){
+        try {
+            List<String> strings = Splitters.AT.splitToList(loginId);
+            if(strings.size() != 2){
+                throw new ServiceException("sub.account.not.avalid");
+            }
+            //检查主账号是否存在
+            User parentUser = userDao.findByMobile(strings.get(1));
+            if (parentUser == null) {
+                log.error("user(loginId={}, loginType=subaccount check puser) not found", loginId);
+                throw new ServiceException("puser.not.found");
+            }
+            //检查子账号
+            User user = userDao.findByName(loginId);
+
+            return Response.ok(user);
+        } catch (ServiceException e) {
+            return Response.fail(e.getMessage());
+        } catch (Exception e) {
+            log.error("failed to check subuser(loginId={}), cause:{}",
+                    loginId, Throwables.getStackTraceAsString(e));
+            return Response.fail("sub.check.fail");
         }
-        //检查主账号是否存在
-        User parentUser = userDao.findByMobile(strings.get(1));
-        if (parentUser == null) {
-            log.error("user(loginId={}, loginType=subaccount check puser) not found", loginId);
-            throw new ServiceException("puser.not.found");
-        }
-        //检查子账号
-        User user = userDao.findByName(loginId);
-        return user;
+
     }
 
     @Override

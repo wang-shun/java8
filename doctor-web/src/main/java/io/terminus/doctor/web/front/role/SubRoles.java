@@ -53,6 +53,7 @@ public class SubRoles {
      */
     @RequestMapping(value = "", method = RequestMethod.POST)
     public Long createRole(@RequestBody SubRole role) {
+        role.setUserId(UserUtil.getUserId());
         checkRolePermission(role);
         role.setAppKey(ThreadVars.getAppKey());
         role.setStatus(1);
@@ -62,25 +63,26 @@ public class SubRoles {
     /**
      * 更新子账号角色
      *
-     * @param id   角色 ID
      * @param role 角色授权内容
      * @return 是否更新成功
      */
-    @RequestMapping(value = "/{id}", method = RequestMethod.PUT)
-    public Boolean updateRole(@PathVariable Long id, @RequestBody SubRole role) {
+    @RequestMapping(value = "", method = RequestMethod.PUT)
+    public Boolean updateRole(@RequestBody SubRole role) {
+        if(role.getId() == null){
+            throw new JsonResponseException(500, "sub.role.id.miss");
+        }
         //检查用户提交的数据
         checkRolePermission(role);
 
-        SubRole existRole = RespHelper.orServEx(subRoleReadService.findById(id));
+        SubRole existRole = RespHelper.orServEx(subRoleReadService.findById(role.getId()));
         if (existRole == null) {
             throw new JsonResponseException(500, "sub.role.not.exist");
         }
         //检查数据库查询出来的数据
         checkRolePermission(existRole);
 
-        role.setId(id);
+        role.setId(role.getId());
         role.setAppKey(null); // prevent update
-        role.setStatus(null); // prevent update
         return or500(subRoleWriteService.updateRole(role));
     }
 
@@ -91,6 +93,7 @@ public class SubRoles {
      */
     @RequestMapping(value = "/all", method = RequestMethod.GET)
     public List<SubRole> findAllRoles() {
+        checkAuth();
         return RespHelper.or500(subRoleReadService.findByUserIdAndStatus(ThreadVars.getAppKey(), UserUtil.getUserId(), 1));
     }
 
@@ -129,6 +132,11 @@ public class SubRoles {
      */
     private void checkRolePermission(SubRole role){
         checkAuth();
+        if(role.getId()!=null){
+            SubRole dbRole = RespHelper.or500(subRoleReadService.findById(role.getId()));
+            role.setUserId(dbRole.getUserId());
+        }
+
         if(!Objects.equals(UserUtil.getUserId(), role.getUserId())){
             throw new JsonResponseException(403, "user.no.permission");
         }

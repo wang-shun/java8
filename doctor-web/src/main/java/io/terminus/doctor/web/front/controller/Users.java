@@ -231,7 +231,24 @@ public class Users {
                                      @RequestParam(value = "type", required = false) Integer type,
                                      HttpServletRequest request, HttpServletResponse response) {
         loginBy = loginBy.toLowerCase();
-        LoginType loginType = isNull(type) ? LoginType.EMAIL : LoginType.from(type);
+
+        LoginType loginType = null;
+
+        if(isNull(type)){
+            if(mobilePattern.getPattern().matcher(loginBy).find()){
+                loginType = LoginType.MOBILE;
+            }
+            else if(loginBy.indexOf("@") != -1){
+                loginType = LoginType.OTHER;
+            }
+            else {
+                loginType = LoginType.NAME;
+            }
+        } else {
+            loginType = LoginType.from(type);
+        }
+
+
         Map<String, Object> map = new HashMap<>();
 
         Response<User> result = userReadService.login(loginBy, password, loginType);

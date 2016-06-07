@@ -1,8 +1,12 @@
 package io.terminus.doctor.web.component;
 
+import com.google.common.base.MoreObjects;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import io.terminus.common.model.Paging;
 import io.terminus.doctor.basic.enums.SearchType;
 import io.terminus.doctor.basic.service.DoctorSearchHistoryService;
+import io.terminus.doctor.common.utils.RandomUtil;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.search.barn.BarnSearchReadService;
@@ -20,7 +24,10 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.math.BigDecimal;
 import java.util.Collections;
+import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
 import static io.terminus.common.utils.Arguments.isEmpty;
@@ -111,8 +118,41 @@ public class DoctorSearches {
         if (farmIdNotExist(params)) {
             return new Paging<>(0L, Collections.emptyList());
         }
-        createSearchWord(SearchType.GROUP.getValue(), params);
-        return RespHelper.or500(groupSearchReadService.searchWithAggs(pageNo, pageSize, "search/search.mustache", params));
+//        createSearchWord(SearchType.GROUP.getValue(), params);
+//        return RespHelper.or500(groupSearchReadService.searchWithAggs(pageNo, pageSize, "search/search.mustache", params));
+        List<SearchedGroup> groups = Lists.newArrayList();
+
+        pageNo = MoreObjects.firstNonNull(pageNo, 1);
+        pageSize = MoreObjects.firstNonNull(pageSize, 8);
+
+        for (int i = 0; i < 40; i++) {
+            SearchedGroup group = new SearchedGroup();
+            group.setGroupCode("保育"+i+"舍(2016-06-06)");
+            group.setPigType(2);
+            group.setPigTypeName("保育猪");
+            group.setSex(1);
+            group.setStatus(1);
+            group.setFarmId(0L);
+            group.setFarmName("测试猪场");
+            group.setOpenAt(new Date());
+            group.setCurrentBarnId((long) i);
+            group.setCurrentBarnName("保育"+i+"舍");
+            group.setQuantity(RandomUtil.random(1, 50));
+            group.setAvgDayAge(RandomUtil.random(1, 30));
+            group.setAvgWeight(RandomUtil.random(30, 50) * 2.5D);
+            group.setWeight(group.getAvgWeight() * group.getQuantity());
+            group.setPrice(RandomUtil.random(20, 40) * 2L);
+            group.setAmount(group.getPrice() * group.getQuantity());
+            groups.add(group);
+        }
+
+        Map<Integer, List<SearchedGroup>> map = Maps.newHashMap();
+        List<List<SearchedGroup>> ggs = Lists.partition(groups, new BigDecimal(40).divide(new BigDecimal(pageSize), BigDecimal.ROUND_UP).intValue());
+        for (int i = 0; i < ggs.size(); i++) {
+            map.put(i+1, ggs.get(i));
+        }
+
+        return new Paging<>(40L, MoreObjects.firstNonNull(map.get(pageNo), Collections.emptyList()));
     }
 
     /**
