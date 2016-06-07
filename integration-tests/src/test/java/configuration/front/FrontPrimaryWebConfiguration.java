@@ -20,6 +20,7 @@ import io.terminus.doctor.web.core.msg.sms.LuoSiMaoSmsServiceConfig;
 import io.terminus.doctor.web.core.service.OtherSystemServiceConfig;
 import io.terminus.pampas.openplatform.core.Gateway;
 import io.terminus.parana.auth.core.AuthenticationConfiguration;
+import io.terminus.parana.auth.web.WebAuthenticationConfiguration;
 import io.terminus.parana.web.msg.config.MsgWebConfig;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -29,6 +30,7 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.FilterType;
 import org.springframework.context.annotation.Import;
+import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
@@ -57,6 +59,7 @@ import java.util.List;
         DoctorCoreWebConfiguration.class,
         OtherSystemServiceConfig.class,
         AuthenticationConfiguration.class,
+        WebAuthenticationConfiguration.class,
         MsgWebConfig.class,
         LuoSiMaoSmsServiceConfig.class,
         CommonEmailServiceConfig.class
@@ -64,6 +67,7 @@ import java.util.List;
 @ComponentScan(value = {
         "io.terminus.doctor.web.core.component",
         "io.terminus.doctor.web.front",
+        "io.terminus.parana.auth.web"
 }, excludeFilters = {
         @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = {
                 DoctorHbsHelpers.class,
@@ -72,8 +76,7 @@ import java.util.List;
         })
 })
 @EnableWebMvc
-//@Order
-@AutoConfigureAfter(AuthenticationConfiguration.class)
+@Order(Ordered.HIGHEST_PRECEDENCE)
 public class FrontPrimaryWebConfiguration extends WebMvcConfigurerAdapter {
 
     @Override

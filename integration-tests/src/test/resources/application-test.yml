@@ -101,5 +101,5 @@ msg:
 parana:
   auth:
     level: easy
-    path: ${user.home}/assets/pidgey/
+    path: classpath:auth/
     key: MOBILE
