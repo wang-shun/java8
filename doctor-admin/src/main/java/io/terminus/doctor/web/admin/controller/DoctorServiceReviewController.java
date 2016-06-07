@@ -134,6 +134,7 @@ public class DoctorServiceReviewController {
      * 分页查询用户提交的申请, 所有参数都可以为空
      * @param userId 申请服务的用户的id, 用于筛选, 不是当前登录者的id
      * @param type 服务类型, 枚举DoctorServiceReview.Type
+     * @param userMobile 用户注册时的手机号
      * @param pageNo 第几页
      * @param pageSize 每页数量
      * @return
@@ -142,13 +143,14 @@ public class DoctorServiceReviewController {
     @ResponseBody
     public Paging<DoctorServiceReview> pageServiceApplies(@RequestParam(value = "userId", required = false) Long userId,
                                      @RequestParam(value = "type", required = false) Integer type,
+                                     @RequestParam(value = "userMobile", required = false) String userMobile,
                                      @RequestParam(required = false) Integer pageNo, @RequestParam(required = false) Integer pageSize){
         try {
             DoctorServiceReview.Type servicetype = null;
             if (type != null) {
                 servicetype = DoctorServiceReview.Type.from(type);
             }
-            return RespHelper.or500(doctorServiceReviewReadService.page(pageNo, pageSize, userId, servicetype, DoctorServiceReview.Status.REVIEW));
+            return RespHelper.or500(doctorServiceReviewReadService.page(pageNo, pageSize, userId, userMobile, servicetype, DoctorServiceReview.Status.REVIEW));
         } catch (ServiceException e) {
             log.error("pageServiceApplies failed, cause : {}", Throwables.getStackTraceAsString(e));
             throw new JsonResponseException(500, e.getMessage());

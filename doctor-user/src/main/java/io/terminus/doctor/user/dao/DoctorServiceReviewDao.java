@@ -36,9 +36,15 @@ public class DoctorServiceReviewDao extends MyBatisDao<DoctorServiceReview> {
      * @param userId 用户id
      * @return 插入的数据的行数, 理论上应该等于枚举 ServiceReview.Type 的数量
      */
-    public boolean initData(Long userId){
+    public boolean initData(Long userId, String userMobile){
         int[] types = Stream.of(DoctorServiceReview.Type.values()).mapToInt(DoctorServiceReview.Type::getValue).toArray();
-        return sqlSession.insert(sqlId("initData"), ImmutableMap.of("userId", userId, "types", types)) == types.length;
+        ImmutableMap<String, Object> param;
+        if(userMobile == null){
+            param = ImmutableMap.of("userId", userId, "types", types);
+        }else{
+            param = ImmutableMap.of("userId", userId, "types", types, "userMobile", userMobile);
+        }
+        return sqlSession.insert(sqlId("initData"), param) == types.length;
     }
 
     public List<DoctorServiceReview> findByUserId(Long userId){

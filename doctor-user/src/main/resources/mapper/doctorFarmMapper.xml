@@ -32,11 +32,11 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        name, org_id, org_name, out_id, extra, created_at, updated_at
+        name, org_id, org_name, province_id, province_name, city_id, city_name, district_id, district_name, detail_address, out_id, extra, created_at, updated_at
     </sql>
 
     <sql id="vals">
-        #{name}, #{orgId}, #{orgName}, #{outId}, #{extra}, now(), now()
+        #{name}, #{orgId}, #{orgName}, #{provinceId}, #{provinceName}, #{cityId}, #{cityName}, #{districtId}, #{districtName}, #{detailAddress}, #{outId}, #{extra}, now(), now()
     </sql>
 
     <insert id="create" parameterType="DoctorFarm" keyProperty="id" useGeneratedKeys="true">
@@ -53,7 +53,7 @@
         (<include refid="cols_exclude_id" />)
         VALUES
         <foreach collection="list" separator="," item="i">
-            (#{i.name}, #{i.orgId}, #{i.orgName}, #{i.outId}, #{i.extra}, now(), now())
+            (#{i.name}, #{i.orgId}, #{i.orgName}, #{i.provinceId}, #{i.provinceName}, #{i.cityId}, #{i.cityName}, #{i.districtId}, #{i.districtName}, #{i.detailAddress}, #{i.outId}, #{i.extra}, now(), now())
         </foreach>
     </insert>
 

@@ -40,9 +40,11 @@ public interface DoctorServiceReviewReadService {
     /**
      * 分页查询, 所有参数都可以为空
      * @param userId 申请用户的id
+     * @param userMobile 用户注册时的手机号
      * @param type 参见枚举 DoctorServiceReview.Type
      * @param status 枚举 DoctorServiceReview.Status
      * @return
      */
-    Response<Paging<DoctorServiceReview>> page(Integer pageNo, Integer pageSize, Long userId, DoctorServiceReview.Type type, DoctorServiceReview.Status status);
+    Response<Paging<DoctorServiceReview>> page(Integer pageNo, Integer pageSize, Long userId, String userMobile,
+                                               DoctorServiceReview.Type type, DoctorServiceReview.Status status);
 }

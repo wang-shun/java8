@@ -41,5 +41,5 @@ public interface DoctorServiceReviewWriteService {
      * @param userId 用户id
      * @return 是否成功
      */
-    Response<Boolean> initServiceReview(Long userId);
+    Response<Boolean> initServiceReview(Long userId, String userMobile);
 }

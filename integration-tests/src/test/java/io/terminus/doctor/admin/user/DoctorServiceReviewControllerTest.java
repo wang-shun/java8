@@ -175,7 +175,7 @@ public class DoctorServiceReviewControllerTest  extends BaseAdminWebTest {
         applyUser.setId(4L);
         applyUser.setType(UserType.FARM_ADMIN_PRIMARY.value());
         //初始化数据
-        doctorServiceReviewWriteService.initServiceReview(applyUser.getId());
+        doctorServiceReviewWriteService.initServiceReview(applyUser.getId(), "4444444444");
         doctorServiceStatusWriteService.initDefaultServiceStatus(applyUser.getId());
         //申请
         DoctorServiceApplyDto serviceApplyDto = new DoctorServiceApplyDto();

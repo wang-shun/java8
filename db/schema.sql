@@ -1090,6 +1090,7 @@ DROP TABLE IF EXISTS `doctor_service_reviews`;
 CREATE TABLE `doctor_service_reviews` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '自增主键',
   `user_id` bigint(20) DEFAULT NULL COMMENT '用户id',
+  `user_mobile` VARCHAR (16) DEFAULT NULL COMMENT '用户手机号,冗余字段',
   `type` smallint(6) DEFAULT NULL COMMENT  '服务类型 1 猪场软件, 2 新融电商, 3 大数据, 4 生猪交易',
   `status` smallint(6) DEFAULT NULL COMMENT '审核状态 0 未审核, 2 待审核(提交申请) 1 通过，-1 不通过, -2 冻结',
   `reviewer_id` bigint(20) DEFAULT NULL COMMENT '审批人id',
