@@ -50,17 +50,17 @@ public class WorkFlowContext implements Context, ApplicationListener<ContextRefr
 
     @Override
     public void onApplicationEvent(ContextRefreshedEvent event) {
-        if (event.getApplicationContext ().getParent() == null) {
+        if (event.getApplicationContext().getParent() == null) {
             context = new ConcurrentHashMap();
-        if(applicationContext == null) {
-            log.error("[workflow context] -> get spring applicationContext failed");
-            AssertHelper.throwException("get spring applicationContext failed");
-        }
-        // 1. 初始化拦截器
-        initInterceptors(applicationContext.getBeansOfType(Interceptor.class));
+            if (applicationContext == null) {
+                log.error("[workflow context] -> get spring applicationContext failed");
+                AssertHelper.throwException("get spring applicationContext failed");
+            }
+            // 1. 初始化拦截器
+            initInterceptors(applicationContext.getBeansOfType(Interceptor.class));
 
-        // 2. 初始化事件
-        initEventHandlers(applicationContext.getBeansOfType(IHandler.class));
+            // 2. 初始化事件
+            initEventHandlers(applicationContext.getBeansOfType(IHandler.class));
         }
     }
 
@@ -77,10 +77,10 @@ public class WorkFlowContext implements Context, ApplicationListener<ContextRefr
     @Override
     public <T> T get(Class<T> clazz) {
         List<T> list = getList(clazz);
-        if(list == null) {
+        if (list == null) {
             return null;
         }
-        if(list.size() > 1) {
+        if (list.size() > 1) {
             log.error("[workflow context] -> get single class failed");
             AssertHelper.throwException("work flow context get single class error, the class is: {}", clazz);
         }
@@ -91,7 +91,7 @@ public class WorkFlowContext implements Context, ApplicationListener<ContextRefr
     public <T> List<T> getList(Class<T> clazz) {
         List list = Lists.newArrayList();
         // 上下文中获取
-        context.forEach((beanName, bean)-> {
+        context.forEach((beanName, bean) -> {
             if (clazz != null && clazz.isAssignableFrom(bean.getClass())) {
                 list.add(bean);
             }
@@ -101,20 +101,22 @@ public class WorkFlowContext implements Context, ApplicationListener<ContextRefr
 
     /**
      * 初始化系统全局拦截
+     *
      * @param interceptorsMap
      */
     private void initInterceptors(Map<String, Interceptor> interceptorsMap) {
-        if(interceptorsMap != null && interceptorsMap.size() > 0) {
+        if (interceptorsMap != null && interceptorsMap.size() > 0) {
             interceptorsMap.forEach((beanName, i) -> context.put(beanName, i));
         }
     }
 
     /**
      * 初始化所有的事件处理
+     *
      * @param IHandlersMap
      */
     private void initEventHandlers(Map<String, IHandler> IHandlersMap) {
-        if(IHandlersMap != null && IHandlersMap.size() > 0) {
+        if (IHandlersMap != null && IHandlersMap.size() > 0) {
             IHandlersMap.forEach((beanName, i) -> context.put(beanName, i));
         }
     }
