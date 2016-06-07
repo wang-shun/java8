@@ -56,10 +56,9 @@ public class DoctorUserManager {
     private final DoctorServiceStatusDao doctorServiceStatusDao;
 
     @Autowired
-    public DoctorUserManager(UserDao userDao, OperatorDao operatorDao, PrimaryUserDao primaryUserDao, SubDao subDao,
-                             DoctorServiceReviewDao doctorServiceReviewDao, DoctorServiceStatusDao doctorServiceStatusDao) {
     public DoctorUserManager(UserDao userDao, UserProfileDao userProfileDao, OperatorDao operatorDao, PrimaryUserDao primaryUserDao, SubDao subDao,
-                             SubRoleReadService subRoleReadService, DoctorServiceReviewDao doctorServiceReviewDao) {
+                             SubRoleReadService subRoleReadService, DoctorServiceReviewDao doctorServiceReviewDao,
+                             DoctorServiceStatusDao doctorServiceStatusDao) {
         this.userDao = userDao;
         this.userProfileDao = userProfileDao;
         this.operatorDao = operatorDao;

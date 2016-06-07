@@ -10,12 +10,6 @@ import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-<<<<<<< HEAD
-/**
- * 伪造type为主账号的登录者
- */
-=======
->>>>>>> 274dede896d4ee14071e5664b729df4bb437eeac
 public class MockPrimaryLoginInterceptor extends HandlerInterceptorAdapter {
 
     @Override
