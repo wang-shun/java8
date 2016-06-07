@@ -56,10 +56,6 @@ public class SubRole implements Serializable, CustomRole {
      */
     private Long userId;
 
-    /**
-     * 角色 ID
-     */
-    private Long roleId;
 
     /**
      * 角色所属 (PC / MOBILE)

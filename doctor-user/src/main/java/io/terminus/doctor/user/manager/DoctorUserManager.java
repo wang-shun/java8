@@ -1,16 +1,28 @@
 package io.terminus.doctor.user.manager;
 
+import io.terminus.common.exception.ServiceException;
 import io.terminus.doctor.common.enums.UserRole;
+import io.terminus.doctor.common.enums.UserStatus;
 import io.terminus.doctor.common.enums.UserType;
 import io.terminus.doctor.common.util.UserRoleUtil;
 import io.terminus.doctor.common.utils.Params;
 import io.terminus.doctor.user.dao.*;
+import io.terminus.doctor.common.utils.RespHelper;
+import io.terminus.doctor.user.dao.DoctorServiceReviewDao;
+import io.terminus.doctor.user.dao.OperatorDao;
+import io.terminus.doctor.user.dao.PrimaryUserDao;
+import io.terminus.doctor.user.dao.SubDao;
+import io.terminus.doctor.user.dao.SubRoleDao;
 import io.terminus.doctor.user.model.Operator;
 import io.terminus.doctor.user.model.PrimaryUser;
 import io.terminus.doctor.user.model.Sub;
+import io.terminus.doctor.user.model.SubRole;
+import io.terminus.doctor.user.service.SubRoleReadService;
 import io.terminus.parana.common.utils.Iters;
 import io.terminus.parana.user.impl.dao.UserDao;
+import io.terminus.parana.user.impl.dao.UserProfileDao;
 import io.terminus.parana.user.model.User;
+import io.terminus.parana.user.model.UserProfile;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -29,11 +41,15 @@ import static com.google.common.base.Preconditions.checkState;
 public class DoctorUserManager {
     private final UserDao userDao;
 
+    private final UserProfileDao userProfileDao;
+
     private final OperatorDao operatorDao;
 
     private final PrimaryUserDao primaryUserDao;
 
     private final SubDao subDao;
+
+    private final SubRoleReadService subRoleReadService;
 
     private final DoctorServiceReviewDao doctorServiceReviewDao;
 
@@ -42,10 +58,14 @@ public class DoctorUserManager {
     @Autowired
     public DoctorUserManager(UserDao userDao, OperatorDao operatorDao, PrimaryUserDao primaryUserDao, SubDao subDao,
                              DoctorServiceReviewDao doctorServiceReviewDao, DoctorServiceStatusDao doctorServiceStatusDao) {
+    public DoctorUserManager(UserDao userDao, UserProfileDao userProfileDao, OperatorDao operatorDao, PrimaryUserDao primaryUserDao, SubDao subDao,
+                             SubRoleReadService subRoleReadService, DoctorServiceReviewDao doctorServiceReviewDao) {
         this.userDao = userDao;
+        this.userProfileDao = userProfileDao;
         this.operatorDao = operatorDao;
         this.primaryUserDao = primaryUserDao;
         this.subDao = subDao;
+        this.subRoleReadService = subRoleReadService;
         this.doctorServiceReviewDao = doctorServiceReviewDao;
         this.doctorServiceStatusDao = doctorServiceStatusDao;
     }
@@ -82,6 +102,7 @@ public class DoctorUserManager {
             primaryUser.setUserId(userId);
             //暂时暂定手机号
             primaryUser.setUserName(user.getMobile());
+            primaryUser.setStatus(UserStatus.NORMAL.value());
             primaryUserDao.create(primaryUser);
 
             //初始化4个服务的申请审批数据, 均为未申请状态
@@ -98,12 +119,22 @@ public class DoctorUserManager {
                     roleId = Long.parseLong(UserRoleUtil.roleConsFrom(richRole.get(1)).get(1));
                 }
             }
+            SubRole subRole = RespHelper.orServEx(subRoleReadService.findById(roleId));
 
             Sub sub = new Sub();
             sub.setUserId(userId);
+            sub.setUserName(user.getName());
             sub.setRoleId(roleId);
-            sub.setParentUserId(Params.get(user.getExtra(), "pid"));
+            sub.setRoleName(subRole.getName());
+            sub.setParentUserId(Long.valueOf(Params.get(user.getExtra(), "pid")));
+            sub.setContact(Params.get(user.getExtra(), "contact"));
+            sub.setStatus(UserStatus.NORMAL.value());
             subDao.create(sub);
+
+            UserProfile userProfile = new UserProfile();
+            userProfile.setUserId(userId);
+            userProfile.setRealName(Params.get(user.getExtra(), "realName"));
+            userProfileDao.create(userProfile);
 
         }
         return userId;
@@ -111,7 +142,31 @@ public class DoctorUserManager {
 
     @Transactional
     public Boolean update(User user) {
-        return userDao.update(user);
+        userDao.update(user);
+
+        if (Objects.equals(user.getType(), UserType.FARM_SUB.value())){
+            //猪场子账号
+            Long roleId = null;
+            for (String role : Iters.nullToEmpty(user.getRoles())) {
+                List<String> richRole = UserRoleUtil.roleConsFrom(role);
+                if (richRole.get(0).equalsIgnoreCase("SUB") && richRole.size() > 1) {
+                    roleId = Long.parseLong(UserRoleUtil.roleConsFrom(richRole.get(1)).get(1));
+                }
+            }
+            SubRole subRole = RespHelper.orServEx(subRoleReadService.findById(roleId));
+
+            Sub sub = subDao.findByUserId(user.getId());
+            sub.setUserName(user.getName());
+            sub.setRoleId(roleId);
+            sub.setRoleName(subRole.getName());
+            sub.setContact(Params.get(user.getExtra(), "contact"));
+            subDao.update(sub);
+
+            UserProfile userProfile = userProfileDao.findByUserId(user.getId());
+            userProfile.setRealName(Params.get(user.getExtra(), "realName"));
+            userProfileDao.update(userProfile);
+        }
+        return true;
     }
 
 }

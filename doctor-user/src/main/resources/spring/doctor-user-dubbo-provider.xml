@@ -14,8 +14,10 @@
     <!-- user services -->
     <dubbo:service version="1.0.0" retries="0" interface="io.terminus.parana.user.service.UserReadService" ref="userReadServiceImpl"/>
     <dubbo:service version="1.0.0" retries="0" interface="io.terminus.parana.user.service.UserWriteService" ref="doctorUserWriteServiceImpl"/>
-    <dubbo:service version="1.0.0" retries="0" interface="io.terminus.parana.user.service.UserProfileReadService" ref="userProfileReadServiceImpl"/>
+    <dubbo:service version="1.0.0" retries="0" interface="io.terminus.parana.user.service.UserProfileReadService" ref="doctorUserProfileReadServiceImpl"/>
     <dubbo:service version="1.0.0" retries="0" interface="io.terminus.parana.user.service.UserProfileWriteService" ref="userProfileWriteServiceImpl"/>
+    <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.DoctorUserProfileReadService" ref="doctorUserProfileReadServiceImpl"/>
+
     <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.DoctorMobileMenuReadService" ref="doctorMobileMenuReadServiceImpl"/>
 
     <!-- user devices -->

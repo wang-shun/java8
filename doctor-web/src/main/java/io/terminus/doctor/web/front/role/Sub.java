@@ -2,6 +2,8 @@ package io.terminus.doctor.web.front.role;
 
 import lombok.Data;
 
+import java.util.Date;
+
 /**
  * Desc: 子账号
  * Mail: houly@terminus.io
@@ -13,9 +15,17 @@ public class Sub {
 
     private Long id;
 
-    private String username;
+    private String username; //用户名
 
     private String password;
 
-    private Long roleId;
+    private String contact; //联系方式
+
+    private String realName; //真实姓名
+
+    private Long roleId;    //角色ID
+
+    private String roleName;  //角色名称
+
+    private Date createdAt; //创建时间
 }

@@ -767,21 +767,25 @@ create index doctor_pig_events_farm_id on doctor_pig_events(farm_id);
 create index doctor_pig_events_pig_id on doctor_pig_events(pig_id);
 CREATE index doctor_pig_events_rel_event_id on doctor_pig_events(rel_event_id);
 
--- 猪只免疫信息统计方式
+-- 猪只设置免疫程序统计方式
 drop Table if exists doctor_vaccination_pig_warns;
 create table doctor_vaccination_pig_warns (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT 'id',
   `farm_id` bigint(20) unsigned DEFAULT NULL COMMENT '猪场仓库信息',
   `farm_name` varchar(64) DEFAULT NULL COMMENT '猪场名称',
-  `has_warn` smallint(6) default null comment '是否提示过了, 0-未提示，1-提示',
-  `warn_days` int default 7 comment '默认7 天提示用户信息',
-  `event_date` datetime DEFAULT null comment '事件日期信息',
-  `event_desc` varchar(64) default null comment '事件信息描述',
-  `extra` text DEFAULT NULL comment '扩展信息',
-  `creator_name` varchar(64) DEFAULT NULL COMMENT '创建人姓名',
-  `created_at` datetime DEFAULT NULL,
+  `pig_type_id` bigint(20) unsigned DEFAULT NULL comment '猪类id',
+  `pig_type_name` varchar(128) DEFAULT NULL comment '猪类名称',
+  `material_id` bigint(20) default null comment '疫苗Id',
+  `material_name` varchar(128) default null comment '疫苗名称',
+  `start_date` datetime default null comment '开始时间',
+  `end_date` datetime default null comment '结束时间',
+  `vaccination_date_type_id` bigint(20) default null comment '免疫日期类型',
+  `vaccination_date_type_name` varchar(128) default null comment '免疫日期名称',
+  `delay_days` int(11) default null comment '天数',
+  `dose` bigint(20) default null comment '消耗剂量',
+  `remark` varchar(128) default null comment '备注',
   PRIMARY KEY (`id`)
-)ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='猪只免疫预警信息';
+)ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='猪只设置免疫程序统计方式';
 create index doctor_vaccination_pig_warns_farm_id on doctor_vaccination_pig_warns(farm_id);
 
 -- 猪场级别的， 仓库数据类型
@@ -1013,6 +1017,8 @@ CREATE TABLE `doctor_user_subs` (
   `parent_user_id` bigint(20) DEFAULT NULL COMMENT '主账号ID',
   `parent_user_name` varchar(64) DEFAULT NULL COMMENT '主账号用户名(冗余)',
   `role_id` bigint(20) DEFAULT NULL COMMENT '子账号角色 ID',
+  `role_name` varchar(40) DEFAULT NULL COMMENT '子账号角色名称',
+  `contact` varchar(40) DEFAULT NULL COMMENT '子账号联系方式',
   `status` tinyint(4) DEFAULT NULL COMMENT '状态',
   `extra_json` varchar(1024) DEFAULT NULL COMMENT '用户额外信息, 建议json字符串',
   `created_at` datetime NOT NULL,
@@ -1027,7 +1033,7 @@ CREATE TABLE `doctor_user_subs` (
 DROP TABLE IF EXISTS `doctor_sub_roles`;
 CREATE TABLE `doctor_sub_roles` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `name` varchar(40) DEFAULT NULL COMMENT '用户名',
+  `name` varchar(40) DEFAULT NULL COMMENT '角色名',
   `desc` varchar(32) DEFAULT NULL COMMENT '角色描述',
   `user_id` bigint(20) DEFAULT NULL COMMENT '所属主账号ID',
   `app_key` varchar(16) DEFAULT NULL COMMENT '角色所属',

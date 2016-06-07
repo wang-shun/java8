@@ -14,6 +14,8 @@
         <result column="parent_user_id" property="parentUserId"/>
         <result column="parent_user_name" property="parentUserName"/>
         <result column="role_id" property="roleId"/>
+        <result column="role_name" property="roleName"/>
+        <result column="contact" property="contact"/>
         <result column="status" property="status"/>
         <result column="extra_json" property="extraJson"/>
         <result column="created_at" property="createdAt"/>
@@ -30,11 +32,11 @@
     </sql>
 
     <sql id="cols_exclude_id">
-      user_id, `user_name`, parent_user_id, parent_user_name, role_id, status, extra_json, created_at, updated_at
+      user_id, `user_name`, parent_user_id, parent_user_name, role_id, role_name, contact, status, extra_json, created_at, updated_at
     </sql>
 
     <sql id="vals">
-        #{userId}, #{userName}, #{parentUserId}, #{parentUserName}, #{roleId}, #{status}, #{extraJson}, now(), now()
+        #{userId}, #{userName}, #{parentUserId}, #{parentUserName}, #{roleId}, #{roleName}, #{contact}, #{status}, #{extraJson}, now(), now()
     </sql>
 
     <sql id="criteria">
