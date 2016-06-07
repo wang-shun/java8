@@ -175,3 +175,16 @@ VALUES
   (330108001,330108,'西兴街道',4,'xi xing jie dao','','\\u897f\\u5174\\u8857\\u9053',''),
 	(330108002,330108,'长河街道',4,'zhang he jie dao','','\\u957f\\u6cb3\\u8857\\u9053',''),
 	(330108003,330108,'浦沿街道',4,'pu yan jie dao','','\\u6d66\\u6cbf\\u8857\\u9053','');
+
+-- barn data info
+INSERT INTO `doctor_barns` (`id`, `name`, `org_id`, `org_name`, `farm_id`, `farm_name`, `pig_type`, `can_open_group`, `status`, `capacity`, `staff_id`, `staff_name`, `out_id`, `extra`, `created_at`, `updated_at`)
+VALUES
+	(1, 'barnName', 1, 'orgName', 12345, 'farmName', 1, 1, 1, 100, 1, 'staffName', '1', NULL, '2016-06-07 16:44:22', '2016-06-07 16:44:22'),
+	(2, 'barnName', 1, 'orgName', 12345, 'farmName', 2, 1, 1, 100, 1, 'staffName', '1', NULL, '2016-06-07 16:44:22', '2016-06-07 16:44:22'),
+	(3, 'barnName', 1, 'orgName', 12345, 'farmName', 3, 1, 1, 100, 1, 'staffName', '1', NULL, '2016-06-07 16:44:22', '2016-06-07 16:44:22'),
+	(4, 'barnName', 1, 'orgName', 12345, 'farmName', 4, 1, 1, 100, 1, 'staffName', '1', NULL, '2016-06-07 16:44:22', '2016-06-07 16:44:22'),
+	(5, 'barnName', 1, 'orgName', 12345, 'farmName', 5, 1, 1, 100, 1, 'staffName', '1', NULL, '2016-06-07 16:44:22', '2016-06-07 16:44:22'),
+	(6, 'barnName', 1, 'orgName', 12345, 'farmName', 6, 1, 1, 100, 1, 'staffName', '1', NULL, '2016-06-07 16:44:22', '2016-06-07 16:44:22'),
+	(7, 'barnName', 1, 'orgName', 12345, 'farmName', 7, 1, 1, 100, 1, 'staffName', '1', NULL, '2016-06-07 16:44:22', '2016-06-07 16:44:22'),
+	(8, 'barnName', 1, 'orgName', 12345, 'farmName', 8, 1, 1, 100, 1, 'staffName', '1', NULL, '2016-06-07 16:44:22', '2016-06-07 16:44:22'),
+	(9, 'barnName', 1, 'orgName', 12345, 'farmName', 9, 1, 1, 100, 1, 'staffName', '1', NULL, '2016-06-07 16:44:22', '2016-06-07 16:44:22');

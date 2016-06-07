@@ -285,6 +285,20 @@ public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteServic
     }
 
     @Override
+    public Response<Long> chgSowLocationEvent(DoctorChgLocationDto doctorChgLocationDto, DoctorBasicInputInfoDto doctorBasicInputInfoDto) {
+        try{
+            Map<String,Object> dto = Maps.newHashMap();
+            BeanMapper.copy(doctorChgLocationDto, dto);
+
+            Map<String,Object> result = doctorPigEventManager.createSowPigEvent(doctorBasicInputInfoDto, dto);
+            return Response.ok(Params.getWithConvert(result, "doctorEventId", a->Long.valueOf(a.toString())));
+        }catch (Exception e){
+            log.error("change sow location event create fail, cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("create.chgLocation.fail");
+        }
+    }
+
+    @Override
     public Response<Long> sowPregCheckEvent(DoctorPregChkResultDto doctorPregChkResultDto, DoctorBasicInputInfoDto doctorBasicInputInfoDto) {
         try{
             Map<String,Object> dto = Maps.newHashMap();

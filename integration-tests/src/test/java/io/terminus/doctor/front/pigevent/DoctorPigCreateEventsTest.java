@@ -8,11 +8,13 @@ import io.terminus.doctor.event.dao.DoctorPigEventDao;
 import io.terminus.doctor.event.dao.DoctorPigSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorPigTrackDao;
 import io.terminus.doctor.event.dto.event.sow.DoctorMatingDto;
+import io.terminus.doctor.event.dto.event.usual.DoctorChgLocationDto;
 import io.terminus.doctor.event.dto.event.usual.DoctorFarmEntryDto;
 import io.terminus.doctor.event.enums.BoarEntryType;
 import io.terminus.doctor.event.enums.MatingType;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PigSource;
+import io.terminus.doctor.event.handler.sow.DoctorSowChgLocationHandler;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.front.BaseFrontWebTest;
 import io.terminus.doctor.workflow.core.WorkFlowService;
@@ -22,6 +24,7 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.http.HttpEntity;
+import org.springframework.http.ResponseEntity;
 import utils.HttpPostRequest;
 
 import java.io.File;
@@ -55,6 +58,9 @@ public class DoctorPigCreateEventsTest extends BaseFrontWebTest{
     @Autowired
     private DoctorPigEventDao doctorPigEventDao;
 
+    @Autowired
+    private DoctorSowChgLocationHandler doctorSowChgLocationHandler;
+
     @Before
     public void before() throws Exception{
         basicUrl = "http://localhost:" + this.port + "/api/doctor/events/create";
@@ -74,11 +80,29 @@ public class DoctorPigCreateEventsTest extends BaseFrontWebTest{
 
         sowMatingEventCreate(pigId);
 
-        testCurrentSowInputStatus(pigId);
+        testToPregEventCreate(pigId);
 
         // 显示 state
-//        printCurrentState();
+        printCurrentState();
 
+        // 获取下一个事件信息
+        testCurrentSowInputStatus(pigId);
+    }
+
+    /**
+     * 去妊娠舍
+     */
+    private void testToPregEventCreate(Long pigId){
+        String url = basicUrl + "/createSowEvent";
+        HttpEntity httpEntity = HttpPostRequest.formRequest().param("farmId", 12345l)
+                .param("pigId", pigId).param("eventType", PigEvent.TO_PREG.getKey())
+                .param("sowInfoDtoJson", JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(DoctorChgLocationDto.builder()
+                        .changeLocationDate(new Date()).chgLocationFromBarnId(5l).chgLocationFromBarnName("fromBarnName")
+                        .chgLocationToBarnId(6l).chgLocationToBarnName("toBarnName")
+                        .build()))
+                .httpEntity();
+        Long result = this.restTemplate.postForObject(url, httpEntity, Long.class);
+        System.out.println(result);
     }
 
     /**
@@ -91,8 +115,8 @@ public class DoctorPigCreateEventsTest extends BaseFrontWebTest{
         ids.add(pigId);
         HttpEntity httpEntity = HttpPostRequest.bodyRequest().params(ids);
 
-        Object entity = this.restTemplate.postForEntity(url, httpEntity, Object.class);
-        System.out.println(JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(entity));
+        ResponseEntity entity = this.restTemplate.postForEntity(url, httpEntity, Object.class);
+        System.out.println(JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(entity.getBody()));
     }
 
     /**

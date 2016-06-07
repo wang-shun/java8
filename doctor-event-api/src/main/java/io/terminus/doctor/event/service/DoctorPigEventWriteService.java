@@ -143,6 +143,14 @@ public interface DoctorPigEventWriteService {
     Response<Long> sowMatingEvent(DoctorMatingDto doctorMatingDto, DoctorBasicInputInfoDto doctorBasicInputInfoDto);
 
     /**
+     * 对应的母猪转舍事件处理
+     * @param doctorChgLocationDto
+     * @param doctorBasicInputInfoDto
+     * @return
+     */
+    Response<Long> chgSowLocationEvent(DoctorChgLocationDto doctorChgLocationDto, DoctorBasicInputInfoDto doctorBasicInputInfoDto);
+
+    /**
      * 母猪妊娠事件
      * @param doctorPregChkResultDto
      * @param doctorBasicInputInfoDto

@@ -15,7 +15,6 @@ import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.event.service.DoctorBarnReadService;
 import io.terminus.doctor.workflow.core.Execution;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -32,7 +31,6 @@ import static java.util.Objects.isNull;
  * Descirbe: 对应的母猪状态信息流转(转舍)
  */
 @Component
-@Slf4j
 public class DoctorSowChgLocationHandler extends DoctorAbstractEventFlowHandler {
 
     private final DoctorBarnReadService doctorBarnReadService;

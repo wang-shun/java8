@@ -16,8 +16,8 @@
     </task>
 
     <decision name="配种后操作方式" pointx="" pointy="">
-        <transition name="配种后转舍事件" value="10" expression="#{eventType} equals 10" target="转舍A" handler="doctorSowChgLocationHandler"/>
-        <transition name="配种后妊娠检查" value="11" expression="#{eventType} equals 11" target="妊娠检查B" handler="doctorSowPregCheckHandler"/>
+        <transition name="配种后转舍事件" value="10" expression="${eventType} == 10" target="转舍A" handler="doctorSowChgLocationHandler"/>
+        <transition name="配种后妊娠检查" value="11" expression="${eventType} == 11" target="妊娠检查B" handler="doctorSowPregCheckHandler"/>
     </decision>
 
 

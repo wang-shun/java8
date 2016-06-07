@@ -12,6 +12,7 @@ import io.terminus.doctor.event.dao.DoctorPigSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorPigTrackDao;
 import io.terminus.doctor.event.dao.DoctorRevertLogDao;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
+import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.handler.DoctorEventHandlerChainInvocation;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigSnapshot;
@@ -120,7 +121,8 @@ public class DoctorPigEventManager {
          * 母猪创建对应的事件流信息
          */
         Map<String, Object> ids = null;
-        if(Objects.equals(doctorBasicInputInfoDto.getPigType(), DoctorPig.PIG_TYPE.SOW.getKey())){
+        if(Objects.equals(doctorBasicInputInfoDto.getPigType(), DoctorPig.PIG_TYPE.SOW.getKey()) &&
+                Objects.equals(doctorBasicInputInfoDto.getEventType(), PigEvent.ENTRY.getKey())){
             ids = OBJECT_MAPPER.readValue(context.get("entryResult").toString(), JacksonType.MAP_OF_OBJECT);
             Long pigId = Params.getWithConvert(ids, "doctorPigId", a->Long.valueOf(a.toString()));
             flowProcessService.startFlowInstance(sowFlowDefinitionKey, pigId);
@@ -161,8 +163,8 @@ public class DoctorPigEventManager {
         // execute
         Executor executor = flowProcessService.getExecutor(sowFlowDefinitionKey, basic.getPigId());
 
-        Map<String,String> express = Maps.newHashMap();
-        express.put("eventType", basic.getEventType().toString());
+        Map<String, Object> express = Maps.newHashMap();
+        express.put("eventType", basic.getEventType());
 
         // 添加对应的操作方式
         executor.execute(express, flowData);
