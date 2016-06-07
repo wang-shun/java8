@@ -129,6 +129,7 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
         newGroupInput.setCreatorName(UserUtil.getCurrentUser().getName());
 
         DoctorGroup group = BeanMapper.map(newGroupInput, DoctorGroup.class);
+        group.setRemark(null);  //dozer不需要转换remark
 
         //设置猪场公司信息
         DoctorFarm farm = RespHelper.orServEx(doctorFarmReadService.findFarmById(group.getFarmId()));

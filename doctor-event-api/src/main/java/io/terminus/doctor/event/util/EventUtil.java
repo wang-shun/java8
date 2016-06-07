@@ -69,13 +69,13 @@ public class EventUtil {
     }
 
     /**
-     * 重新计算出生日期(日期-日龄)
+     * 重新计算出生日期(日期-日龄 + 1)
      * @param date  日期
      * @param avgDayAge  日龄
      * @return 出生日期
      */
     public static Date getBirthDate(Date date, int avgDayAge) {
-        return new DateTime(date).minusDays(avgDayAge).withTimeAtStartOfDay().toDate();
+        return new DateTime(date).minusDays(avgDayAge - 1).withTimeAtStartOfDay().toDate();
     }
 
     public static long getPrice(long amount, int quantity) {
