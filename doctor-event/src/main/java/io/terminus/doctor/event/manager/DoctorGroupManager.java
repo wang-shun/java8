@@ -46,7 +46,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * Desc:
@@ -87,6 +89,9 @@ public class DoctorGroupManager {
      */
     @Transactional
     public Long createNewGroup(DoctorGroup group, DoctorNewGroupInput newGroupInput) {
+        //0.校验猪群号是否重复
+        checkGroupCodeExist(newGroupInput.getFarmId(), newGroupInput.getGroupCode());
+
         //1. 创建猪群
         doctorGroupDao.create(getNewGroup(group, newGroupInput));
         Long groupId = group.getId();
@@ -614,9 +619,16 @@ public class DoctorGroupManager {
 
     //校验 公 + 母 = 总和
     private static void checkQuantityEqual(Integer all, Integer boar, Integer sow) {
-
         if (all != (boar + sow)) {
             throw new ServiceException("quantity.not.equal");
+        }
+    }
+
+    //校验猪群号是否重复
+    private void checkGroupCodeExist(Long farmId, String groupCode) {
+        List<DoctorGroup> groups = RespHelper.or500(doctorGroupReadService.findGroupsByFarmId(farmId));
+        if (groups.stream().map(DoctorGroup::getGroupCode).collect(Collectors.toList()).contains(groupCode)) {
+            throw new ServiceException("group.code.exist");
         }
     }
 }
