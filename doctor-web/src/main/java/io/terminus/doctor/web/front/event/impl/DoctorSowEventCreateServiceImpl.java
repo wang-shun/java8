@@ -2,7 +2,7 @@ package io.terminus.doctor.web.front.event.impl;
 
 import com.google.common.base.Throwables;
 import io.terminus.common.model.Response;
-import io.terminus.common.utils.BeanMapper;
+import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorAbortionDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorFarrowingDto;
@@ -18,8 +18,6 @@ import io.terminus.doctor.web.front.event.service.DoctorSowEventCreateService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.util.Map;
 
 /**
  * Created by yaoqijun.
@@ -39,32 +37,32 @@ public class DoctorSowEventCreateServiceImpl implements DoctorSowEventCreateServ
     }
 
     @Override
-    public Response<Long> sowEventCreate(DoctorBasicInputInfoDto doctorBasicInputInfoDto, Map<String, Object> params) {
+    public Response<Long> sowEventCreate(DoctorBasicInputInfoDto doctorBasicInputInfoDto, String sowInfoDtoJson) {
         try{
 
             PigEvent pigEvent = PigEvent.from(doctorBasicInputInfoDto.getEventType());
 
             switch (pigEvent){
                 case MATING:
-                    return doctorPigEventWriteService.sowMatingEvent(BeanMapper.map(params, DoctorMatingDto.class), doctorBasicInputInfoDto);
+                    return doctorPigEventWriteService.sowMatingEvent(JsonMapper.JSON_NON_DEFAULT_MAPPER.fromJson(sowInfoDtoJson, DoctorMatingDto.class), doctorBasicInputInfoDto);
                 case TO_PREG:
-                    return doctorPigEventWriteService.chgLocationEvent(BeanMapper.map(params, DoctorChgLocationDto.class), doctorBasicInputInfoDto);
+                    return doctorPigEventWriteService.chgLocationEvent(JsonMapper.JSON_NON_DEFAULT_MAPPER.fromJson(sowInfoDtoJson, DoctorChgLocationDto.class), doctorBasicInputInfoDto);
                 case PREG_CHECK:
-                    return doctorPigEventWriteService.sowPregCheckEvent(BeanMapper.map(params, DoctorPregChkResultDto.class), doctorBasicInputInfoDto);
+                    return doctorPigEventWriteService.sowPregCheckEvent(JsonMapper.JSON_NON_DEFAULT_MAPPER.fromJson(sowInfoDtoJson, DoctorPregChkResultDto.class), doctorBasicInputInfoDto);
                 case TO_MATING:
-                    return doctorPigEventWriteService.chgLocationEvent(BeanMapper.map(params, DoctorChgLocationDto.class), doctorBasicInputInfoDto);
+                    return doctorPigEventWriteService.chgLocationEvent(JsonMapper.JSON_NON_DEFAULT_MAPPER.fromJson(sowInfoDtoJson, DoctorChgLocationDto.class), doctorBasicInputInfoDto);
                 case ABORTION:
-                    return doctorPigEventWriteService.abortionEvent(BeanMapper.map(params, DoctorAbortionDto.class), doctorBasicInputInfoDto);
+                    return doctorPigEventWriteService.abortionEvent(JsonMapper.JSON_NON_DEFAULT_MAPPER.fromJson(sowInfoDtoJson, DoctorAbortionDto.class), doctorBasicInputInfoDto);
                 case TO_FARROWING:
-                    return doctorPigEventWriteService.chgLocationEvent(BeanMapper.map(params, DoctorChgLocationDto.class), doctorBasicInputInfoDto);
+                    return doctorPigEventWriteService.chgLocationEvent(JsonMapper.JSON_NON_DEFAULT_MAPPER.fromJson(sowInfoDtoJson, DoctorChgLocationDto.class), doctorBasicInputInfoDto);
                 case FARROWING:
-                    return doctorPigEventWriteService.sowFarrowingEvent(BeanMapper.map(params, DoctorFarrowingDto.class), doctorBasicInputInfoDto);
+                    return doctorPigEventWriteService.sowFarrowingEvent(JsonMapper.JSON_NON_DEFAULT_MAPPER.fromJson(sowInfoDtoJson, DoctorFarrowingDto.class), doctorBasicInputInfoDto);
                 case WEAN:
-                    return doctorPigEventWriteService.sowPartWeanEvent(BeanMapper.map(params, DoctorPartWeanDto.class), doctorBasicInputInfoDto);
+                    return doctorPigEventWriteService.sowPartWeanEvent(JsonMapper.JSON_NON_DEFAULT_MAPPER.fromJson(sowInfoDtoJson, DoctorPartWeanDto.class), doctorBasicInputInfoDto);
                 case FOSTERS:
-                    return doctorPigEventWriteService.sowFostersEvent(BeanMapper.map(params, DoctorFostersDto.class), doctorBasicInputInfoDto);
+                    return doctorPigEventWriteService.sowFostersEvent(JsonMapper.JSON_NON_DEFAULT_MAPPER.fromJson(sowInfoDtoJson, DoctorFostersDto.class), doctorBasicInputInfoDto);
                 case PIGLETS_CHG:
-                    return doctorPigEventWriteService.sowPigletsChgEvent(BeanMapper.map(params, DoctorPigletsChgDto.class), doctorBasicInputInfoDto);
+                    return doctorPigEventWriteService.sowPigletsChgEvent(JsonMapper.JSON_NON_DEFAULT_MAPPER.fromJson(sowInfoDtoJson, DoctorPigletsChgDto.class), doctorBasicInputInfoDto);
                 default:
                     return Response.fail("create.sowEvent.fail");
             }

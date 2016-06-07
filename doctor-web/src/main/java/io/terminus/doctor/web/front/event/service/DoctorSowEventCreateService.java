@@ -20,6 +20,6 @@ public interface DoctorSowEventCreateService {
      * @param params
      * @return
      */
-    Response<Long> sowEventCreate(DoctorBasicInputInfoDto doctorBasicInputInfoDto, Map<String, Object> params);
+    Response<Long> sowEventCreate(DoctorBasicInputInfoDto doctorBasicInputInfoDto, String sowInfoDtoJson);
 
 }

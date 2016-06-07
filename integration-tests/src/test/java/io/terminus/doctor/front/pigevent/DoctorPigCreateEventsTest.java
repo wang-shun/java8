@@ -1,13 +1,22 @@
 package io.terminus.doctor.front.pigevent;
 
+import com.google.api.client.util.Lists;
 import configuration.front.FrontWebConfiguration;
 import io.terminus.common.utils.JsonMapper;
+import io.terminus.doctor.event.dao.DoctorPigDao;
+import io.terminus.doctor.event.dao.DoctorPigEventDao;
+import io.terminus.doctor.event.dao.DoctorPigSnapshotDao;
+import io.terminus.doctor.event.dao.DoctorPigTrackDao;
+import io.terminus.doctor.event.dto.event.sow.DoctorMatingDto;
 import io.terminus.doctor.event.dto.event.usual.DoctorFarmEntryDto;
 import io.terminus.doctor.event.enums.BoarEntryType;
+import io.terminus.doctor.event.enums.MatingType;
+import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PigSource;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.front.BaseFrontWebTest;
 import io.terminus.doctor.workflow.core.WorkFlowService;
+import org.joda.time.DateTime;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +27,7 @@ import utils.HttpPostRequest;
 import java.io.File;
 import java.io.FileInputStream;
 import java.util.Date;
+import java.util.List;
 
 /**
  * Created by yaoqijun.
@@ -32,6 +42,18 @@ public class DoctorPigCreateEventsTest extends BaseFrontWebTest{
 
     @Autowired
     private WorkFlowService workFlowService;
+
+    @Autowired
+    private DoctorPigDao doctorPigDao;
+
+    @Autowired
+    private DoctorPigTrackDao doctorPigTrackDao;
+
+    @Autowired
+    private DoctorPigSnapshotDao doctorPigSnapshotDao;
+
+    @Autowired
+    private DoctorPigEventDao doctorPigEventDao;
 
     @Before
     public void before() throws Exception{
@@ -48,6 +70,50 @@ public class DoctorPigCreateEventsTest extends BaseFrontWebTest{
     @Test
     public void sowEntryEventCreateTest(){
 
+        Long pigId = sowEntryEventCreate();
+
+        sowMatingEventCreate(pigId);
+
+        testCurrentSowInputStatus(pigId);
+
+        // 显示 state
+//        printCurrentState();
+
+    }
+
+    /**
+     * 当前 母猪 可录入事件信息
+     */
+    private void testCurrentSowInputStatus(Long pigId){
+        String url = "http://localhost:" + this.port + "/api/doctor/events/pig/queryPigEvents";
+
+        List<Long> ids = Lists.newArrayList();
+        ids.add(pigId);
+        HttpEntity httpEntity = HttpPostRequest.bodyRequest().params(ids);
+
+        Object entity = this.restTemplate.postForEntity(url, httpEntity, Object.class);
+        System.out.println(JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(entity));
+    }
+
+    /**
+     * 母猪配种事件测试
+     * @param pigId
+     */
+    private void sowMatingEventCreate(Long pigId){
+        String url = basicUrl + "/createSowEvent";
+        HttpEntity httpEntity = HttpPostRequest.formRequest().param("farmId", 12345l)
+                .param("pigId", pigId).param("eventType", PigEvent.MATING.getKey())
+                .param("sowInfoDtoJson", JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(DoctorMatingDto.builder()
+                        .matingDate(new Date()).judgePregDate(DateTime.now().plusDays(100).toDate()).matingType(MatingType.MANUAL.getKey())
+                        .matingStaff("staff").mattingMark("matingMark")
+                        .build())).httpEntity();
+
+        Long result = this.restTemplate.postForObject(url, httpEntity, Long.class);
+        System.out.println(result);
+
+    }
+
+    private Long sowEntryEventCreate(){
         String url = basicUrl + "/createEntryInfo";
         DoctorFarmEntryDto doctorFarmEntryDto = buildFarmEntryDto();
         doctorFarmEntryDto.setPigType(DoctorPig.PIG_TYPE.SOW.getKey());
@@ -57,7 +123,22 @@ public class DoctorPigCreateEventsTest extends BaseFrontWebTest{
                         JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(doctorFarmEntryDto))
                 .httpEntity();
         Long result = this.restTemplate.postForObject(url, httpEntity, Long.class);
-        System.out.println(result);
+        return result;
+    }
+
+    /**
+     * 打印当前的信息
+     */
+    private void printCurrentState(){
+        System.out.println("doctor pig ******************************************************");
+        System.out.println(JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(doctorPigDao.listAll()));
+        System.out.println("doctor pig track******************************************************");
+        System.out.println(JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(doctorPigTrackDao.listAll()));
+        System.out.println("doctor pig snap shot content******************************************************");
+        System.out.println(JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(doctorPigSnapshotDao.listAll()));
+        System.out.println("doctor pig event dao ******************************************************");
+        System.out.println(JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(doctorPigEventDao.listAll()));
+        return;
     }
 
     /**

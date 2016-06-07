@@ -33,8 +33,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import java.util.Map;
-
 import static com.google.common.base.Preconditions.checkState;
 import static java.util.Objects.isNull;
 
@@ -140,14 +138,15 @@ public class DoctorPigCreateEvents {
     @ResponseBody
     public Long createSowEventInfo(@RequestParam("farmId") Long farmId,
                                    @RequestParam("pigId") Long pigId, @RequestParam("eventType") Integer eventType,
-                                   @RequestParam("sowInfoDto") Map<String,Object> sowInfoDto){
-        return RespHelper.or500(doctorSowEventCreateService.sowEventCreate(buildBasicInputInfoDto(farmId, pigId, PigEvent.from(eventType)), sowInfoDto));
+                                   @RequestParam("sowInfoDtoJson") String sowInfoDtoJson){
+        return RespHelper.or500(doctorSowEventCreateService.sowEventCreate(buildBasicInputInfoDto(farmId, pigId, PigEvent.from(eventType)), sowInfoDtoJson));
     }
 
     /**
      * 构建Basic 基础输入数据信息
      * @param farmId
-     * @param doctorFarmEntryDto
+     * @param entryDto
+     * @param pigEvent
      * @return
      */
     private DoctorBasicInputInfoDto buildBasicEntryInputInfo(Long farmId, DoctorFarmEntryDto entryDto, PigEvent pigEvent){
@@ -173,12 +172,11 @@ public class DoctorPigCreateEvents {
         }
     }
 
-
     /**
      * 通过Id 获取对应的事件信息
      * @param farmId
      * @param pigId
-     * @param eventType
+     * @param pigEvent
      * @return
      */
     private DoctorBasicInputInfoDto buildBasicInputInfoDto(Long farmId, Long pigId, PigEvent pigEvent){

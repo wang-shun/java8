@@ -2,10 +2,14 @@
 <!-- 母猪状态简单流程开始 -->
 <workflow key="sow" name="母猪状态流图流转方式">
 
-    <!-- 开始节点 -->
-    <start name="待配种" assignee="" pointx="250" pointy="100">
-        <transition name="待配种" value="9" target="已配种" handler="doctorSowMatingHandle" describe="配种事件" />
+    <start name="开始节点信息" assignee="" pointx="" pointy="">
+        <transition name="开始连线" target="待配种" describe="去待配种"/>
     </start>
+
+    <!-- 开始节点 -->
+    <task name="待配种" assignee="" pointx="250" pointy="100">
+        <transition name="待配种" value="9" target="已配种" handler="doctorSowMatingHandler" describe="配种事件" />
+    </task>
 
     <task name="已配种" assignee="" pointx="250" pointy="100">
         <transition name="配种事件连线" target="配种后操作方式" describe="配种后操作方式"/>

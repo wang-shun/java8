@@ -89,8 +89,8 @@ public abstract class DoctorAbstractEventFlowHandler extends HandlerAware {
             // 当前事件影响的Id 方式
             flowDataMap.put("createEventResult",
                     JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(
-                            ImmutableMap.of("pigId", doctorBasicInputInfoDto.getPigId(),
-                                    "eventId",doctorPigEvent.getId(),"snapshotId",doctorPigSnapshot.getId())));
+                            ImmutableMap.of("doctorPigId", doctorBasicInputInfoDto.getPigId(),
+                                    "doctorEventId",doctorPigEvent.getId(),"doctorSnapshotId",doctorPigSnapshot.getId())));
             execution.setFlowData(JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(flowDataMap));
         }catch (Exception e){
             DoctorAbstractEventFlowHandler.log.error("handle execute fail, cause:{}", Throwables.getStackTraceAsString(e));

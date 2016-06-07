@@ -30,7 +30,6 @@ import io.terminus.doctor.event.dto.event.usual.DoctorVaccinationDto;
 import io.terminus.doctor.event.event.DoctorPigCountEvent;
 import io.terminus.doctor.event.event.PigEventCreateEvent;
 import io.terminus.doctor.event.manager.DoctorPigEventManager;
-import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.zookeeper.pubsub.Publisher;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,7 +37,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkState;
@@ -279,7 +277,7 @@ public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteServic
 
             Map<String,Object> result = doctorPigEventManager.createSowPigEvent(doctorBasicInputInfoDto, dto);
             publishEvent(result);
-            return Response.ok(Params.getWithConvert(result,"eventId",a->Long.valueOf(a.toString())));
+            return Response.ok(Params.getWithConvert(result,"doctorEventId",a->Long.valueOf(a.toString())));
         }catch (Exception e){
             log.error("vaccination event create fail, cause:{}", Throwables.getStackTraceAsString(e));
             return Response.fail("create.vaccination.fail");
