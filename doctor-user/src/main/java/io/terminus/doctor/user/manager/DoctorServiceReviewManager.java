@@ -88,7 +88,7 @@ public class DoctorServiceReviewManager {
         staff.setOrgId(orgId);
         staff.setOrgName(orgName);
         staff.setUserId(user.getId());
-        staff.setStatus(1);
+        staff.setStatus(DoctorStaff.Status.PRESENT.value());
         staff.setCreatorId(user.getId());
         staff.setCreatorName(user.getName());
         staff.setUpdatorId(user.getId());
@@ -159,6 +159,11 @@ public class DoctorServiceReviewManager {
     public void openDoctorService(BaseUser user, Long userId, List<DoctorFarm> farms, DoctorOrg org){
         //更新org, 无论是否有修改,都可以update一下
         doctorOrgDao.update(org);
+
+        //更新staff里的冗余字段orgName
+        DoctorStaff staff = doctorStaffDao.findByUserId(userId);
+        staff.setOrgName(org.getName());
+        doctorStaffDao.update(staff);
 
         List<Long> newFarmIds = Lists.newArrayList(); //将被保存下来的猪场
         //保存猪场信息
