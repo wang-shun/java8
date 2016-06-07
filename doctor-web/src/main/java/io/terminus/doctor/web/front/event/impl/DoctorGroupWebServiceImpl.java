@@ -53,6 +53,7 @@ import org.springframework.stereotype.Service;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -220,7 +221,11 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
 
     //校验猪群是否存在
     private DoctorGroupDetail checkGroupExist(Long groupId) {
-        return checkNotNull(RespHelper.or500(doctorGroupReadService.findGroupDetailByGroupId(groupId)), "group.not.exist");
+        DoctorGroupDetail groupDetail = checkNotNull(RespHelper.or500(doctorGroupReadService.findGroupDetailByGroupId(groupId)), "group.not.exist");
+        if (!Objects.equals(groupDetail.getGroup().getStatus(), DoctorGroup.Status.CREATED.getValue())) {
+            throw new ServiceException("group.is.closed");
+        }
+        return groupDetail;
     }
 
     //校验猪群号是否重复
