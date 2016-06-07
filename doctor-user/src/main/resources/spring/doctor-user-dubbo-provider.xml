@@ -69,4 +69,6 @@
     <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.user.interfaces.service.DoctorUserReadInterface" ref="doctorUserReadInterfaceImpl"/>
     <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.user.interfaces.service.DoctorUserWriteInterface" ref="doctorUserWriteInterfaceImpl"/>
 
+    <!-- staff service -->
+    <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.DoctorStaffReadService" ref="doctorStaffReadServiceImpl"/>
 </beans>

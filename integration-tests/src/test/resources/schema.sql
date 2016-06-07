@@ -1095,3 +1095,14 @@ CREATE TABLE IF NOT EXISTS `workflow_history_processes`(
 	PRIMARY KEY(`id`)
 ) COMMENT='流程实例的活动节点历史表';
 
+CREATE TABLE `parana_addresses` (
+  `id` int(11) NOT NULL,
+  `pid` int(11) DEFAULT NULL COMMENT '父级ID',
+  `name` varchar(50) DEFAULT NULL COMMENT '名称',
+  `level` int(3) DEFAULT NULL COMMENT '级别',
+  `pinyin` varchar(100) DEFAULT NULL COMMENT '拼音',
+  `english_name` varchar(100) DEFAULT NULL COMMENT '英文名',
+  `unicode_code` varchar(200) DEFAULT NULL COMMENT 'ASCII码',
+  `order_no` varchar(32) DEFAULT NULL COMMENT '排序号',
+  PRIMARY KEY (`id`)
+);
