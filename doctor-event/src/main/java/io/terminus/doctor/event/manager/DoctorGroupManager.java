@@ -303,6 +303,8 @@ public class DoctorGroupManager {
     @Transactional
     public void groupEventChange(DoctorGroup group, DoctorGroupTrack groupTrack, DoctorChangeGroupInput change) {
         checkQuantity(groupTrack.getQuantity(), change.getQuantity());
+        checkQuantity(groupTrack.getBoarQty(), change.getBoarQty());
+        checkQuantity(groupTrack.getSowQty(), change.getSowQty());
         checkQuantityEqual(change.getQuantity(), change.getBoarQty(), change.getSowQty());
 
         //1.转换猪群变动事件
@@ -348,6 +350,8 @@ public class DoctorGroupManager {
     @Transactional
     public void groupEventTransGroup(DoctorGroup group, DoctorGroupTrack groupTrack, DoctorTransGroupInput transGroup) {
         checkQuantity(groupTrack.getQuantity(), transGroup.getQuantity());
+        checkQuantity(groupTrack.getBoarQty(), transGroup.getBoarQty());
+        checkQuantity(groupTrack.getSowQty(), transGroup.getSowQty());
         checkQuantityEqual(transGroup.getQuantity(), transGroup.getBoarQty(), transGroup.getSowQty());
 
         //1.转换转群事件
@@ -474,6 +478,8 @@ public class DoctorGroupManager {
     @Transactional
     public void groupEventTransFarm(DoctorGroup group, DoctorGroupTrack groupTrack, DoctorTransFarmGroupInput transFarm) {
         checkQuantity(groupTrack.getQuantity(), transFarm.getQuantity());
+        checkQuantity(groupTrack.getBoarQty(), transFarm.getBoarQty());
+        checkQuantity(groupTrack.getSowQty(), transFarm.getSowQty());
         checkQuantityEqual(transFarm.getQuantity(), transFarm.getBoarQty(), transFarm.getSowQty());
 
         //1.转换转场事件
