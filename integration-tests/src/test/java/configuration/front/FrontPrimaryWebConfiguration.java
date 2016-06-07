@@ -8,6 +8,7 @@ import io.terminus.doctor.basic.DoctorBasicConfiguration;
 import io.terminus.doctor.converter.JsonMessageConverter;
 import io.terminus.doctor.event.DoctorEventConfiguration;
 import io.terminus.doctor.interceptor.MockLoginInterceptor;
+import io.terminus.doctor.interceptor.MockPrimaryLoginInterceptor;
 import io.terminus.doctor.msg.DoctorMsgConfig;
 import io.terminus.doctor.user.DoctorUserConfiguration;
 import io.terminus.doctor.warehouse.DoctorWarehouseConfiguration;
@@ -20,25 +21,20 @@ import io.terminus.doctor.web.core.service.OtherSystemServiceConfig;
 import io.terminus.pampas.openplatform.core.Gateway;
 import io.terminus.parana.auth.core.AuthenticationConfiguration;
 import io.terminus.parana.web.msg.config.MsgWebConfig;
-import io.terminus.parana.web.msg.config.db.DbAppPushConfig;
-import io.terminus.parana.web.msg.config.db.DbEmailConfig;
-import io.terminus.parana.web.msg.config.db.DbNotifyConfig;
-import io.terminus.parana.web.msg.config.db.DbSmsConfig;
-import io.terminus.parana.web.msg.config.gatewaybuilder.SimpleMsgGatewayBuilderConfig;
-import io.terminus.parana.web.msg.config.test.TestAppPushWebServiceConfig;
-import io.terminus.parana.web.msg.config.test.TestEmailWebServiceConfig;
-import io.terminus.parana.web.msg.config.test.TestNotifyWebServiceConfig;
-import io.terminus.parana.web.msg.config.test.TestSmsWebServiceConfig;
+import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.context.web.OrderedHttpPutFormContentFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.FilterType;
 import org.springframework.context.annotation.Import;
+import org.springframework.core.annotation.Order;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.web.filter.HiddenHttpMethodFilter;
+import org.springframework.web.filter.HttpPutFormContentFilter;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
@@ -73,20 +69,17 @@ import java.util.List;
                 DoctorHbsHelpers.class,
                 ParanaHbsHelpers.class,
                 Gateway.class
-        }),
-        @ComponentScan.Filter(type = FilterType.ASPECTJ, pattern = {"io.terminus.pampas.openplatform.*",
-        "io.terminus.pampas.openplatform..*", "io.terminus.doctor.open..*"})
-
+        })
 })
 @EnableWebMvc
-@EnableAutoConfiguration(excludeName = {"io.terminus.pampas.openplatform.core.OpenPlatformAutoConfiguration"})
-public class FrontWebConfiguration extends WebMvcConfigurerAdapter {
+//@Order
+@AutoConfigureAfter(AuthenticationConfiguration.class)
+public class FrontPrimaryWebConfiguration extends WebMvcConfigurerAdapter {
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(new MockLoginInterceptor());
+        registry.addInterceptor(new MockPrimaryLoginInterceptor());
     }
-
     @Bean
     public Filter hiddenHttpMethodFilter() {
         return new HiddenHttpMethodFilter();

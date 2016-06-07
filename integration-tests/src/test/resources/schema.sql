@@ -808,6 +808,8 @@ CREATE TABLE `doctor_user_subs` (
   `parent_user_id` bigint(20) DEFAULT NULL COMMENT '主账号ID',
   `parent_user_name` varchar(64) DEFAULT NULL COMMENT '主账号用户名(冗余)',
   `role_id` bigint(20) DEFAULT NULL COMMENT '子账号角色 ID',
+  `role_name` varchar(40) DEFAULT NULL COMMENT '子账号角色名称',
+  `contact` varchar(40) DEFAULT NULL COMMENT '子账号联系方式',
   `status` tinyint(4) DEFAULT NULL COMMENT '状态',
   `extra_json` varchar(1024) DEFAULT NULL COMMENT '用户额外信息, 建议json字符串',
   `created_at` datetime NOT NULL,

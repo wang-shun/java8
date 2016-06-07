@@ -5,6 +5,34 @@ INSERT INTO
   (`id`, `name`, `email`, `mobile`, `password`, `type`, `status`, `roles_json`, `extra_json`, `tags_json`, `created_at`, `updated_at`)
 VALUES
   (1, 'admin','admin@terminus.io', '18888888888', '9f8c@a97758b955efdaf60fe4', 1, 1, null, null, '{"good":"man"}', now(), now());
+INSERT INTO
+  `parana_users` (`id`, `name`, `email`, `mobile`, `password`, `type`, `status`, `roles_json`, `extra_json`, `tags_json`, `item_info_md5`, `created_at`, `updated_at`)
+VALUES
+	(2, 'primary', NULL, '18888888889', '9f8c@a97758b955efdaf60fe4', 5, 1, '["PRIMARY(OWNER)","PRIMARY"]', NULL, NULL, NULL, '2016-05-26 19:21:25', '2016-06-02 13:34:36');
+INSERT INTO `parana_users` (`id`, `name`, `email`, `mobile`, `password`, `type`, `status`, `roles_json`, `extra_json`, `tags_json`, `item_info_md5`, `created_at`, `updated_at`)
+VALUES
+	(3, '18888888890@18888888889', NULL, NULL, '9f8c@a97758b955efdaf60fe4', 6, 1, '["SUB","SUB(SUB(1))"]', '{"seller":"haha"}', '{"good":"man"}', NULL, '2016-05-17 17:08:43', '2016-06-02 12:28:15');
+
+INSERT INTO `parana_user_profiles` (`id`, `user_id`, `realname`, `gender`, `province_id`, `province`, `city_id`, `city`, `region_id`, `region`, `street`, `extra_json`, `avatar`, `birth`, `created_at`, `updated_at`)
+VALUES
+	(1, 3, '测试真实姓名', 1, 10001, '', NULL, NULL, NULL, NULL, NULL, NULL, '', NULL, '2016-06-06 00:00:00', '2016-06-06 00:00:00');
+
+INSERT
+  INTO `doctor_user_primarys` (`id`, `user_id`, `user_name`, `status`, `extra_json`, `created_at`, `updated_at`)
+VALUES
+	(1, 2, '18888888889', 1, NULL, '2016-05-26 19:21:25', '2016-05-26 19:21:25');
+
+
+INSERT INTO `doctor_user_subs` (`id`, `user_id`, `user_name`, `parent_user_id`, `parent_user_name`, `role_id`, `role_name`, `contact`, `status`, `extra_json`, `created_at`, `updated_at`)
+VALUES
+	(1, 3, '18888888890@18888888889', 2, '18888888889', 1, '测试', '18888888890', 1, NULL, '2016-06-02 00:00:00', '2016-06-02 00:00:00');
+
+
+INSERT INTO `doctor_sub_roles` (`id`, `name`, `desc`, `user_id`, `app_key`, `status`, `extra_json`, `allow_json`, `created_at`, `updated_at`)
+VALUES
+	(1, '测试', '测试', 2, 'MOBILE', 1, NULL, '["manage_back_category"]', '2016-06-02 00:00:00', '2016-06-02 00:00:00');
+
+
 
 INSERT INTO `parana_message_templates` (`id`, `creator_id`, `creator_name`, `name`, `title`, `content`, `context`, `channel`, `disabled`, `description`, `created_at`, `updated_at`)
 VALUES

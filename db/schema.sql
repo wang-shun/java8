@@ -1010,6 +1010,8 @@ CREATE TABLE `doctor_user_subs` (
   `parent_user_id` bigint(20) DEFAULT NULL COMMENT '主账号ID',
   `parent_user_name` varchar(64) DEFAULT NULL COMMENT '主账号用户名(冗余)',
   `role_id` bigint(20) DEFAULT NULL COMMENT '子账号角色 ID',
+  `role_name` varchar(40) DEFAULT NULL COMMENT '子账号角色名称',
+  `contact` varchar(40) DEFAULT NULL COMMENT '子账号联系方式',
   `status` tinyint(4) DEFAULT NULL COMMENT '状态',
   `extra_json` varchar(1024) DEFAULT NULL COMMENT '用户额外信息, 建议json字符串',
   `created_at` datetime NOT NULL,
@@ -1024,7 +1026,7 @@ CREATE TABLE `doctor_user_subs` (
 DROP TABLE IF EXISTS `doctor_sub_roles`;
 CREATE TABLE `doctor_sub_roles` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `name` varchar(40) DEFAULT NULL COMMENT '用户名',
+  `name` varchar(40) DEFAULT NULL COMMENT '角色名',
   `desc` varchar(32) DEFAULT NULL COMMENT '角色描述',
   `user_id` bigint(20) DEFAULT NULL COMMENT '所属主账号ID',
   `app_key` varchar(16) DEFAULT NULL COMMENT '角色所属',

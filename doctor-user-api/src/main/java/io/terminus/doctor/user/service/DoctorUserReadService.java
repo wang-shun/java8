@@ -3,6 +3,8 @@ package io.terminus.doctor.user.service;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.user.dto.DoctorUserInfoDto;
 import io.terminus.doctor.user.model.DoctorStaff;
+import io.terminus.parana.user.model.User;
+import io.terminus.parana.user.service.UserReadService;
 
 import javax.validation.constraints.NotNull;
 
@@ -13,7 +15,7 @@ import javax.validation.constraints.NotNull;
  * Date: 16/5/18
  */
 
-public interface DoctorUserReadService {
+public interface DoctorUserReadService extends UserReadService<User>{
 
     /**
      * 根据用户id查询用户前台角色类型
@@ -36,4 +38,11 @@ public interface DoctorUserReadService {
      * @return 猪场职员信息
      */
     Response<DoctorStaff> findStaffByUserId(@NotNull(message = "userId.not.null") Long userId);
+
+    /**
+     * 检查子账号是否存在
+     * @param loginId
+     * @return
+     */
+    Response<User> subAccountCheck(String loginId);
 }
