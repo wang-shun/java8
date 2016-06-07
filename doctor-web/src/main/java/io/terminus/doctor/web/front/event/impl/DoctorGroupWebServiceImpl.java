@@ -5,6 +5,7 @@ import com.google.common.collect.Lists;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.Response;
 import io.terminus.common.utils.BeanMapper;
+import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.basic.model.DoctorBreed;
 import io.terminus.doctor.basic.model.DoctorChangeReason;
 import io.terminus.doctor.basic.model.DoctorChangeType;
@@ -99,6 +100,8 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
         this.userReadService = userReadService;
     }
 
+    private static final JsonMapper JSON_MAPPER = JsonMapper.nonEmptyMapper();
+
     @Override
     public Response<Long> createNewGroup(DoctorNewGroupInput newGroupInput) {
         try {
@@ -138,13 +141,15 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
     }
 
     @Override
-    public Response<Boolean> createGroupEvent(Long groupId, Integer eventType, Map<String, Object> params) {
+    public Response<Boolean> createGroupEvent(Long groupId, Integer eventType, String data) {
         try {
             //1.校验猪群是否存在
             DoctorGroupDetail groupDetail = checkGroupExist(groupId);
 
             //2.校验能否操作此事件 // TODO: 16/6/6 当前没有猪只,不能防疫,疾病,存栏,转群,等等等
             checkEventTypeIllegal(groupId, eventType);
+
+            Map<String, Object> params = JSON_MAPPER.fromJson(data, JSON_MAPPER.createCollectionType(Map.class, String.class, Object.class));
 
             //3.根据不同的事件类型调用不同的录入接口
             GroupEventType groupEventType = checkNotNull(GroupEventType.from(eventType));
@@ -204,7 +209,7 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
             return Response.fail(e.getMessage());
         } catch (Exception e) {
             log.error("create group event failed, groupId:{}, eventType:{}, params:{}, cause:{}",
-                    groupId, eventType, params, Throwables.getStackTraceAsString(e));
+                    groupId, eventType, data, Throwables.getStackTraceAsString(e));
             return Response.fail("create.group.event.fail");
         }
     }
