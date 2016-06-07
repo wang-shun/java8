@@ -57,6 +57,7 @@ public class DoctorPigInfoDto implements Serializable{
     private String barnName;
 
     private String extraTrack;
+    private Integer currentParity; //  当前胎次
 
     private Date updatedAt;
 
@@ -72,6 +73,7 @@ public class DoctorPigInfoDto implements Serializable{
                     .barnId(doctorPigTrack.getCurrentBarnId())
                     .barnName(doctorPigTrack.getCurrentBarnName())
                     .extraTrack(doctorPigTrack.getExtra())
+                    .currentParity(doctorPigTrack.getCurrentParity())
                     .updatedAt(doctorPigTrack.getUpdatedAt());
         }
         return builder.build();

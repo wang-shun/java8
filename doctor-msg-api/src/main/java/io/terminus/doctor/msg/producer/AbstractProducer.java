@@ -144,10 +144,10 @@ public abstract class AbstractProducer implements IProducer {
         }
         // 2. 值范围类型
         if (Objects.equals(RuleValue.RuleType.VALUE_RANGE.getValue(), ruleValue.getRuleType())) {
-            if (ruleValue.getLeftValue() != null && value < ruleValue.getLeftValue()) {
+            if (ruleValue.getLeftValue() != null && value <= ruleValue.getLeftValue()) {
                 return false;
             }
-            if (ruleValue.getRightValue() != null && value > ruleValue.getRightValue()) {
+            if (ruleValue.getRightValue() != null && value >= ruleValue.getRightValue()) {
                 return false;
             }
             return true;
