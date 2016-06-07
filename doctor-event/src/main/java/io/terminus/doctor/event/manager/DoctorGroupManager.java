@@ -4,6 +4,7 @@ import com.google.common.base.MoreObjects;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.common.utils.JsonMapper;
+import io.terminus.doctor.common.event.CoreEventDispatcher;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dao.DoctorGroupDao;
@@ -34,6 +35,7 @@ import io.terminus.doctor.event.dto.event.group.input.DoctorTransGroupInput;
 import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.enums.PigSource;
+import io.terminus.doctor.event.event.DoctorGroupCountEvent;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorGroupSnapshot;
@@ -46,7 +48,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * Desc:
@@ -65,18 +69,21 @@ public class DoctorGroupManager {
     private final DoctorGroupSnapshotDao doctorGroupSnapshotDao;
     private final DoctorGroupTrackDao doctorGroupTrackDao;
     private final DoctorGroupReadService doctorGroupReadService;
+    private final CoreEventDispatcher coreEventDispatcher;
 
     @Autowired
     public DoctorGroupManager(DoctorGroupDao doctorGroupDao,
                               DoctorGroupEventDao doctorGroupEventDao,
                               DoctorGroupSnapshotDao doctorGroupSnapshotDao,
                               DoctorGroupTrackDao doctorGroupTrackDao,
-                              DoctorGroupReadService doctorGroupReadService) {
+                              DoctorGroupReadService doctorGroupReadService,
+                              CoreEventDispatcher coreEventDispatcher) {
         this.doctorGroupDao = doctorGroupDao;
         this.doctorGroupEventDao = doctorGroupEventDao;
         this.doctorGroupSnapshotDao = doctorGroupSnapshotDao;
         this.doctorGroupTrackDao = doctorGroupTrackDao;
         this.doctorGroupReadService = doctorGroupReadService;
+        this.coreEventDispatcher = coreEventDispatcher;
     }
 
     /**
@@ -87,6 +94,9 @@ public class DoctorGroupManager {
      */
     @Transactional
     public Long createNewGroup(DoctorGroup group, DoctorNewGroupInput newGroupInput) {
+        //0.校验猪群号是否重复
+        checkGroupCodeExist(newGroupInput.getFarmId(), newGroupInput.getGroupCode());
+
         //1. 创建猪群
         doctorGroupDao.create(getNewGroup(group, newGroupInput));
         Long groupId = group.getId();
@@ -97,6 +107,7 @@ public class DoctorGroupManager {
 
         //3. 创建猪群跟踪
         DoctorGroupTrack groupTrack = BeanMapper.map(groupEvent, DoctorGroupTrack.class);
+        groupTrack.setExtra(null);  //dozer不需要转换extra字段
         groupTrack.setGroupId(groupId);
         groupTrack.setRelEventId(groupEvent.getId());
         groupTrack.setBoarQty(0);
@@ -113,6 +124,9 @@ public class DoctorGroupManager {
 
         //4. 创建猪群镜像
         createGroupSnapShot(group, groupEvent, groupTrack, GroupEventType.NEW);
+
+        //发布统计事件
+        publishCountGroupEvent(group.getOrgId(), group.getFarmId());
         return groupId;
     }
 
@@ -229,6 +243,9 @@ public class DoctorGroupManager {
 
         //5.创建镜像
         createGroupSnapShot(group, event, groupTrack, GroupEventType.CLOSE);
+
+        //发布统计事件
+        publishCountGroupEvent(group.getOrgId(), group.getFarmId());
     }
 
     /**
@@ -280,9 +297,8 @@ public class DoctorGroupManager {
         groupTrack.setSowQty(EventUtil.plusQuantity(groupTrack.getSowQty(), moveIn.getSowQty()));
 
         //重新计算日龄
-        int deltaDayAge = EventUtil.deltaDayAge(groupTrack.getAvgDayAge(), groupTrack.getQuantity(), moveIn.getAvgDayAge(), moveIn.getQuantity());
-        groupTrack.setAvgDayAge(groupTrack.getAvgDayAge() + deltaDayAge);
-        groupTrack.setBirthDate(EventUtil.getBirthDate(groupTrack.getBirthDate(), deltaDayAge));
+        groupTrack.setAvgDayAge(EventUtil.getAvgDayAge(groupTrack.getAvgDayAge(), groupTrack.getQuantity(), moveIn.getAvgDayAge(), moveIn.getQuantity()));
+        groupTrack.setBirthDate(EventUtil.getBirthDate(new Date(), groupTrack.getAvgDayAge()));
 
         //重新计算重量
         groupTrack.setAvgWeight(EventUtil.getAvgWeight(groupTrack.getWeight(), EventUtil.getWeight(moveIn.getAvgWeight(), moveIn.getQuantity()), groupTrack.getQuantity()));
@@ -295,6 +311,9 @@ public class DoctorGroupManager {
 
         //4.创建镜像
         createGroupSnapShot(group, event, groupTrack, GroupEventType.MOVE_IN);
+
+        //发布统计事件
+        publishCountGroupEvent(group.getOrgId(), group.getFarmId());
     }
 
     /**
@@ -303,6 +322,8 @@ public class DoctorGroupManager {
     @Transactional
     public void groupEventChange(DoctorGroup group, DoctorGroupTrack groupTrack, DoctorChangeGroupInput change) {
         checkQuantity(groupTrack.getQuantity(), change.getQuantity());
+        checkQuantity(groupTrack.getBoarQty(), change.getBoarQty());
+        checkQuantity(groupTrack.getSowQty(), change.getSowQty());
         checkQuantityEqual(change.getQuantity(), change.getBoarQty(), change.getSowQty());
 
         //1.转换猪群变动事件
@@ -340,6 +361,9 @@ public class DoctorGroupManager {
         if (Objects.equals(oldQuantity, change.getQuantity())) {
             autoGroupEventClose(group, groupTrack, change);
         }
+
+        //发布统计事件
+        publishCountGroupEvent(group.getOrgId(), group.getFarmId());
     }
 
     /**
@@ -348,6 +372,8 @@ public class DoctorGroupManager {
     @Transactional
     public void groupEventTransGroup(DoctorGroup group, DoctorGroupTrack groupTrack, DoctorTransGroupInput transGroup) {
         checkQuantity(groupTrack.getQuantity(), transGroup.getQuantity());
+        checkQuantity(groupTrack.getBoarQty(), transGroup.getBoarQty());
+        checkQuantity(groupTrack.getSowQty(), transGroup.getSowQty());
         checkQuantityEqual(transGroup.getQuantity(), transGroup.getBoarQty(), transGroup.getSowQty());
 
         //1.转换转群事件
@@ -397,6 +423,9 @@ public class DoctorGroupManager {
         } else {
             autoTransEventMoveIn(group, groupTrack, transGroup);
         }
+
+        //发布统计事件
+        publishCountGroupEvent(group.getOrgId(), group.getFarmId());
     }
 
     /**
@@ -474,6 +503,8 @@ public class DoctorGroupManager {
     @Transactional
     public void groupEventTransFarm(DoctorGroup group, DoctorGroupTrack groupTrack, DoctorTransFarmGroupInput transFarm) {
         checkQuantity(groupTrack.getQuantity(), transFarm.getQuantity());
+        checkQuantity(groupTrack.getBoarQty(), transFarm.getBoarQty());
+        checkQuantity(groupTrack.getSowQty(), transFarm.getSowQty());
         checkQuantityEqual(transFarm.getQuantity(), transFarm.getBoarQty(), transFarm.getSowQty());
 
         //1.转换转场事件
@@ -523,6 +554,9 @@ public class DoctorGroupManager {
         } else {
             autoTransEventMoveIn(group, groupTrack, transFarm);
         }
+
+        //发布统计事件
+        publishCountGroupEvent(group.getOrgId(), group.getFarmId());
     }
 
     /**
@@ -608,9 +642,21 @@ public class DoctorGroupManager {
 
     //校验 公 + 母 = 总和
     private static void checkQuantityEqual(Integer all, Integer boar, Integer sow) {
-
         if (all != (boar + sow)) {
             throw new ServiceException("quantity.not.equal");
         }
+    }
+
+    //校验猪群号是否重复
+    private void checkGroupCodeExist(Long farmId, String groupCode) {
+        List<DoctorGroup> groups = RespHelper.or500(doctorGroupReadService.findGroupsByFarmId(farmId));
+        if (groups.stream().map(DoctorGroup::getGroupCode).collect(Collectors.toList()).contains(groupCode)) {
+            throw new ServiceException("group.code.exist");
+        }
+    }
+
+    //发布统计猪群事件
+    private void publishCountGroupEvent(Long orgId, Long farmId) {
+        coreEventDispatcher.publish(new DoctorGroupCountEvent(orgId, farmId));
     }
 }

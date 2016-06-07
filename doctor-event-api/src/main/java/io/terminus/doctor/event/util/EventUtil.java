@@ -56,26 +56,26 @@ public class EventUtil {
     }
 
     /**
-     * 重新计算下日龄差(四舍五入)
+     * 重新计算下日龄(四舍五入)
      * @param oldAge 旧猪日龄
      * @param oldQty 旧猪只数
      * @param newAge 新进猪日龄
      * @param newQty 新进猪只数
-     * @return 日龄差
+     * @return 日龄
      */
-    public static int deltaDayAge(int oldAge, int oldQty, int newAge, int newQty) {
+    public static int getAvgDayAge(int oldAge, int oldQty, int newAge, int newQty) {
         int allAge = oldAge * oldQty + newAge * newQty;
-        return new BigDecimal(allAge).divide(new BigDecimal(oldQty + newQty), BigDecimal.ROUND_HALF_UP).intValue() - oldAge;
+        return new BigDecimal(allAge).divide(new BigDecimal(oldQty + newQty), BigDecimal.ROUND_HALF_UP).intValue();
     }
 
     /**
-     * 重新计算出生日期
-     * @param birthDate 出生日期
-     * @param deltaAge  日龄差
+     * 重新计算出生日期(日期-日龄 + 1)
+     * @param date  日期
+     * @param avgDayAge  日龄
      * @return 出生日期
      */
-    public static Date getBirthDate(Date birthDate, int deltaAge) {
-        return new DateTime(birthDate).minusDays(deltaAge).toDate();
+    public static Date getBirthDate(Date date, int avgDayAge) {
+        return new DateTime(date).minusDays(avgDayAge - 1).withTimeAtStartOfDay().toDate();
     }
 
     public static long getPrice(long amount, int quantity) {
