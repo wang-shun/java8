@@ -97,6 +97,7 @@ public class DoctorGroupManager {
 
         //3. 创建猪群跟踪
         DoctorGroupTrack groupTrack = BeanMapper.map(groupEvent, DoctorGroupTrack.class);
+        groupTrack.setExtra(null);  //dozer不需要转换extra字段
         groupTrack.setGroupId(groupId);
         groupTrack.setRelEventId(groupEvent.getId());
         groupTrack.setBoarQty(0);
@@ -280,9 +281,8 @@ public class DoctorGroupManager {
         groupTrack.setSowQty(EventUtil.plusQuantity(groupTrack.getSowQty(), moveIn.getSowQty()));
 
         //重新计算日龄
-        int deltaDayAge = EventUtil.deltaDayAge(groupTrack.getAvgDayAge(), groupTrack.getQuantity(), moveIn.getAvgDayAge(), moveIn.getQuantity());
-        groupTrack.setAvgDayAge(groupTrack.getAvgDayAge() + deltaDayAge);
-        groupTrack.setBirthDate(EventUtil.getBirthDate(groupTrack.getBirthDate(), deltaDayAge));
+        groupTrack.setAvgDayAge(EventUtil.getAvgDayAge(groupTrack.getAvgDayAge(), groupTrack.getQuantity(), moveIn.getAvgDayAge(), moveIn.getQuantity()));
+        groupTrack.setBirthDate(EventUtil.getBirthDate(new Date(), groupTrack.getAvgDayAge()));
 
         //重新计算重量
         groupTrack.setAvgWeight(EventUtil.getAvgWeight(groupTrack.getWeight(), EventUtil.getWeight(moveIn.getAvgWeight(), moveIn.getQuantity()), groupTrack.getQuantity()));

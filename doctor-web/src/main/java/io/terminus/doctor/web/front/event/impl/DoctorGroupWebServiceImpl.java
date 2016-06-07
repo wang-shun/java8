@@ -153,7 +153,7 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
             GroupEventType groupEventType = checkNotNull(GroupEventType.from(eventType));
             switch (groupEventType) {
                 case MOVE_IN:
-                    params.put("inTypeName", DoctorMoveInGroupEvent.InType.from(Params.get(params, "inType")).getDesc());
+                    params.put("inTypeName", DoctorMoveInGroupEvent.InType.from(getInteger(params, "inType")).getDesc());
                     putBasicFields(params);
                     RespHelper.or500(doctorGroupWriteService.groupEventMoveIn(groupDetail, BeanMapper.map(params, DoctorMoveInGroupInput.class)));
                     break;
@@ -319,5 +319,10 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
     private Long getLong(Map<String, Object> params, String key) {
         Object o = params.get(key);
         return o == null ? null : Long.valueOf(String.valueOf(o));
+    }
+
+    private Integer getInteger(Map<String, Object> params, String key) {
+        Object o = params.get(key);
+        return o == null ? null : Integer.valueOf(String.valueOf(o));
     }
 }
