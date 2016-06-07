@@ -45,6 +45,14 @@ public interface FlowProcessQuery {
 
     /**
      * 获取当前流程的活动节点, 可能存在fork情况
+     * @param flowDefinitionKey     流程定义key
+     * @param businessId            业务id
+     * @return
+     */
+    List<FlowProcess> getCurrentProcesses(String flowDefinitionKey, Long businessId);
+
+    /**
+     * 获取当前流程的活动节点, 可能存在fork情况
      * @param flowInstanceId    流程实例id
      * @return
      */
