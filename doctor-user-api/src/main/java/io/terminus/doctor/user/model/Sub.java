@@ -63,7 +63,12 @@ public class Sub implements Serializable {
     private String roleName;
 
     /**
-     * 0: 未生效(待审核), 1: 生效(审核通过), -1: 审核不通过, -2: 冻结, -3: 删除
+     * 联系方式
+     */
+    private String contact;
+
+    /**
+     *  0: 未生效(冻结), 1: 生效, -1: 删除
      */
     private Integer status;
 

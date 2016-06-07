@@ -22,6 +22,12 @@ public class DoctorFarmEntryDto implements Serializable{
 
     private static final long serialVersionUID = -3221757737932679045L;
 
+    /**
+     * 公猪 & 母猪
+     * @see io.terminus.doctor.event.model.DoctorPig.PIG_TYPE
+     */
+    private Integer pigType;
+
     private String pigCode; // pig code 猪 编号
 
     private Date birthday; // 猪生日

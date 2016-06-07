@@ -1,27 +1,19 @@
 package io.terminus.doctor.web.front.role;
 
-import com.google.common.base.Joiner;
-import com.google.common.collect.Lists;
 import io.terminus.common.exception.JsonResponseException;
-import io.terminus.common.model.BaseUser;
 import io.terminus.common.model.Paging;
-import io.terminus.common.utils.MapBuilder;
-import io.terminus.doctor.common.enums.UserStatus;
 import io.terminus.doctor.common.enums.UserType;
-import io.terminus.doctor.user.model.DoctorUser;
 import io.terminus.pampas.common.UserUtil;
 import io.terminus.parana.common.utils.RespHelper;
-import io.terminus.parana.user.model.User;
-import io.terminus.parana.user.service.UserWriteService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
 import java.util.Objects;
 
 /**
@@ -35,43 +27,46 @@ import java.util.Objects;
 @RequestMapping("/api/sub")
 public class Subs {
 
-
-    private final UserWriteService<User> userWriteService;
-
     private final SubService subService;
 
-    public static final Joiner AT = Joiner.on("@").skipNulls();
-
     @Autowired
-    public Subs(UserWriteService<User> userWriteService, SubService subService) {
-        this.userWriteService = userWriteService;
+    public Subs(SubService subService) {
         this.subService = subService;
     }
 
+
     /**
-     * ADMIN 创建子账号
+     * 通过用户id查询到账号信息
+     * @param userId
+     * @return
+     */
+    @RequestMapping(value = "/{userId}", method = RequestMethod.GET)
+    public Sub info(@PathVariable Long userId){
+        checkAuth();
+        return RespHelper.or500(subService.findSubByUserId(UserUtil.getCurrentUser(), userId));
+    }
+
+    /**
+     * 创建子账号
      *
      * @param sub 子账号信息
      * @return 子账号 ID
      */
     @RequestMapping(value = "", method = RequestMethod.POST)
-    public Long createOperator(@RequestBody Sub sub) {
-        Long primaryId = getPrimaryUserId();
+    public Long createSub(@RequestBody Sub sub) {
+        checkAuth();
+        return RespHelper.or500(subService.createSub(UserUtil.getCurrentUser(), sub));
+    }
 
-        User user = new User();
-        //子账号@主账号
-        user.setName(AT.join(sub.getUsername(), ((DoctorUser)(UserUtil.getCurrentUser())).getMobile()));
-        user.setPassword(sub.getPassword());
-        user.setType(UserType.FARM_SUB.value());
-        user.setStatus(UserStatus.NORMAL.value());
-        // TODO: 自定义角色冗余进 user 表
-        List<String> roles = Lists.newArrayList("SUB");
-        if (sub.getRoleId() != null) {
-            roles.add("SUB(SUB(" + sub.getRoleId() + "))");
-        }
-        user.setRoles(roles);
-        user.setExtra(MapBuilder.<String, String>of().put("pid", primaryId.toString()).map());
-        return RespHelper.or500(userWriteService.create(user));
+    /**
+     * 更新子账号
+     * @param sub
+     * @return
+     */
+    @RequestMapping(value = "", method = RequestMethod.PUT)
+    public Boolean updateSub(@RequestBody Sub sub) {
+        checkAuth();
+        return RespHelper.or500(subService.updateSub(UserUtil.getCurrentUser(), sub));
     }
 
     /**
@@ -81,12 +76,24 @@ public class Subs {
      * @param pageSize
      * @return
      */
-    @RequestMapping(value = "/pagination", method = RequestMethod.POST)
+    @RequestMapping(value = "/pagination", method = RequestMethod.GET)
     public Paging<Sub> pagingSubs(@RequestParam(required = false) Long roleId,
                                   @RequestParam(required = false) Integer pageNo,
                                   @RequestParam(required = false) Integer pageSize) {
         checkAuth();
         return RespHelper.or500(subService.pagingSubs(UserUtil.getCurrentUser(), roleId, pageNo, pageSize));
+    }
+
+    /**
+     * 重置员工密码
+     * @param userId 员工用户ID
+     * @param resetPassword 重置的密码
+     * @return
+     */
+    @RequestMapping(value = "/reset/{userId}", method = RequestMethod.POST)
+    public Boolean resetPassword(@PathVariable Long userId, @RequestParam String resetPassword){
+        checkAuth();
+        return RespHelper.or500(subService.resetPassword(UserUtil.getCurrentUser(), userId, resetPassword));
     }
 
     /**
@@ -103,8 +110,4 @@ public class Subs {
         }
     }
 
-    private Long getPrimaryUserId() {
-        BaseUser user = UserUtil.getCurrentUser();
-        return user.getId();
-    }
 }

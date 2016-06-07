@@ -106,8 +106,8 @@ public class DoctorEntryHandler implements DoctorEventCreateHandler {
 
             context.put("entryResult",
                     JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(
-                            ImmutableMap.of("doctorPig", doctorPig.getId(), "eventId", doctorPigEvent.getId(),
-                                    "doctorPigTrack", doctorPigTrack.getId(), "snapshotId", doctorPigSnapshot.getId())
+                            ImmutableMap.of("doctorPigId", doctorPig.getId(), "eventId", doctorPigEvent.getId(),
+                                    "doctorPigTrackId", doctorPigTrack.getId(), "snapshotId", doctorPigSnapshot.getId())
                     ));
         }catch (Exception e){
             log.error("doctor abstract entry flow handle fail, cause:{}", Throwables.getStackTraceAsString(e));
