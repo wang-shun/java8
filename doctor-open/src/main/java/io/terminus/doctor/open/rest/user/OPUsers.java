@@ -298,9 +298,9 @@ public class OPUsers {
      * @param deviceId
      * @return
      */
-    @OpenMethod(key="user.login", paramNames = {"mobile", "password", "code", "sid", "deviceId"})
-    public Token login(String mobile, String password, String code, String sessionId, String deviceId) {
-        if (isEmpty(mobile)) {
+    @OpenMethod(key="user.login", paramNames = {"name", "password", "code", "sid", "deviceId"})
+    public Token login(String name, String password, String code, String sessionId, String deviceId) {
+        if (isEmpty(name)) {
             throw new OPClientException("user.mobile.miss");
         }
         if (isEmpty(password)) {
@@ -326,7 +326,7 @@ public class OPUsers {
         }
 
         // 手机 密码登录
-        User user = doLogin(mobile, password, sessionId);
+        User user = doLogin(name, password, sessionId);
 
         // 登录成功记录 sessionId 和 deviceId, 防止其他设备获得sessionId, 伪造登录
         sessionManager.save(Sessions.TOKEN_PREFIX, sessionId,
@@ -408,7 +408,21 @@ public class OPUsers {
     }
 
     private User doLogin(String name, String password, String type, String sessionId) {
-        LoginType loginType = isNull(type) ? LoginType.NAME : LoginType.from(Integer.parseInt(type));
+        LoginType loginType = null;
+
+        if(isNull(type)){
+            if(mobilePattern.getPattern().matcher(name).find()){
+                loginType = LoginType.MOBILE;
+            }
+            else if(name.indexOf("@") != -1){
+                loginType = LoginType.OTHER;
+            }
+            else {
+                loginType = LoginType.NAME;
+            }
+        } else {
+            loginType = LoginType.from(Integer.parseInt(type));
+        }
         Response<User> result = userReadService.login(name, password, loginType);
         if (!result.isSuccess()) {
             plusErrorCount(sessionId);

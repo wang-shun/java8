@@ -19,6 +19,7 @@ import io.terminus.doctor.web.core.msg.sms.LuoSiMaoSmsServiceConfig;
 import io.terminus.doctor.web.core.service.OtherSystemServiceConfig;
 import io.terminus.pampas.openplatform.core.Gateway;
 import io.terminus.parana.auth.core.AuthenticationConfiguration;
+import io.terminus.parana.auth.web.WebAuthenticationConfiguration;
 import io.terminus.parana.web.msg.config.MsgWebConfig;
 import io.terminus.parana.web.msg.config.db.DbAppPushConfig;
 import io.terminus.parana.web.msg.config.db.DbEmailConfig;
@@ -60,7 +61,7 @@ import java.util.List;
         DoctorWarehouseConfiguration.class,
         DoctorCoreWebConfiguration.class,
         OtherSystemServiceConfig.class,
-        AuthenticationConfiguration.class,
+        WebAuthenticationConfiguration.class,
         MsgWebConfig.class,
         LuoSiMaoSmsServiceConfig.class,
         CommonEmailServiceConfig.class

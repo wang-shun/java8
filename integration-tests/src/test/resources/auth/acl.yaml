@@ -1,0 +1,51 @@
+### 默认角色控制
+defaults:
+  ## 白名单 (不须登录)
+  GLOBAL:
+    requests:
+      # 登陆页面
+      - get: /login
+      # 登陆请求
+      - post: /api/user/login
+      # i18n
+      - get: /i18n
+      # auth inspect for debug
+      - get: /api/auth/inspect.*
+      # 错误页
+      - get: /error
+      - get: /api/auth/.*
+  ## 所有登录用户
+  LOGIN:
+    requests:
+      # 首页
+      - get: /(index)?
+      # 登出
+      - get: /api/user/logout
+      # 登录判断
+      - get: /api/user
+  PRIMARY:
+    resources:
+      - manage_group
+  SUB:
+    resources:
+      - manage_pig
+
+trees:
+  SUB:
+    manage_pig:
+      name: "猪(群)管理"
+      children:
+        manage_group:
+          name: 猪群管理
+          resources:
+            - manage_group
+
+### 子账户分权资源点
+resources:
+  # 请务必保留1个缩进
+  ## 商品模块 - ADMIN 可配置资源
+  manage_group:
+    name: 猪群管理
+    requests:
+      - get: /api/doctor/search/groups
+
