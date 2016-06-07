@@ -14,7 +14,6 @@ import io.terminus.doctor.event.enums.BoarEntryType;
 import io.terminus.doctor.event.enums.MatingType;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PigSource;
-import io.terminus.doctor.event.handler.sow.DoctorSowChgLocationHandler;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.front.BaseFrontWebTest;
 import io.terminus.doctor.workflow.core.WorkFlowService;
@@ -57,9 +56,6 @@ public class DoctorPigCreateEventsTest extends BaseFrontWebTest{
 
     @Autowired
     private DoctorPigEventDao doctorPigEventDao;
-
-    @Autowired
-    private DoctorSowChgLocationHandler doctorSowChgLocationHandler;
 
     @Before
     public void before() throws Exception{
