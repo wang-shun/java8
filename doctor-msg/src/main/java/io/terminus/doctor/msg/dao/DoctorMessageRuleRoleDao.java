@@ -1,5 +1,6 @@
 package io.terminus.doctor.msg.dao;
 
+import com.google.common.collect.ImmutableMap;
 import io.terminus.common.mysql.dao.MyBatisDao;
 import io.terminus.doctor.msg.model.DoctorMessageRuleRole;
 import org.springframework.stereotype.Repository;
@@ -22,5 +23,16 @@ public class DoctorMessageRuleRoleDao extends MyBatisDao<DoctorMessageRuleRole> 
      */
     public List<DoctorMessageRuleRole> findByTplId(Long tplId) {
         return getSqlSession().selectList(sqlId("findByTplId"), tplId);
+    }
+
+    /**
+     * 根据模板id和farmid获取与角色绑定的信息
+     * @param tplId     模板id
+     * @param farmId    猪场id
+     * @return
+     */
+    public List<DoctorMessageRuleRole> findByTplAndFarmId(Long tplId, Long farmId) {
+        return getSqlSession().selectList(sqlId("findByTplAndFarmId"),
+                ImmutableMap.of("templateId", tplId, "farmId", farmId));
     }
 }

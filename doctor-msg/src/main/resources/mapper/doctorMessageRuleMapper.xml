@@ -99,4 +99,11 @@
         WHERE farm_id = #{farmId} AND template_id = #{templateId} AND status != -1
     </select>
 
+    <!-- 获取猪场和规则关系 -->
+    <select id="findByTpl" parameterType="long" resultMap="DoctorMessageRuleMap">
+        SELECT <include refid="cols_all"/>
+        FROM <include refid="tb"/>
+        WHERE template_id = #{templateId} AND status != -1
+    </select>
+
 </mapper>

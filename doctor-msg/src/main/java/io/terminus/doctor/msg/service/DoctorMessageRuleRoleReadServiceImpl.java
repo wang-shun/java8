@@ -46,4 +46,15 @@ public class DoctorMessageRuleRoleReadServiceImpl implements DoctorMessageRuleRo
             return Response.fail("messageRuleRole.find.fail");
         }
     }
+
+    @Override
+    public Response<List<DoctorMessageRuleRole>> findByTplAndFarmId(Long templateId, Long farmId) {
+        try{
+            return Response.ok(doctorMessageRuleRoleDao.findByTplAndFarmId(templateId, farmId));
+        } catch (Exception e) {
+            log.error("find messageRuleRole by tplId and farmId failed, tplId:{}, farmId:{}",
+                    templateId, farmId, Throwables.getStackTraceAsString(e));
+            return Response.fail("messageRuleRole.find.fail");
+        }
+    }
 }

@@ -30,4 +30,12 @@ public interface DoctorMessageRuleRoleReadService {
      */
     Response<List<DoctorMessageRuleRole>> findByTplId(Long tplId);
 
+    /**
+     * 根据模板id和farmid获取与角色绑定的信息
+     * @param templateId     模板id
+     * @param farmId    猪场id
+     * @return
+     */
+    Response<List<DoctorMessageRuleRole>> findByTplAndFarmId(Long templateId, Long farmId);
+
 }

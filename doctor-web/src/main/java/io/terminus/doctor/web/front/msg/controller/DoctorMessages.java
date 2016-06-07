@@ -24,7 +24,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Desc:
+ * Desc: 与消息和消息模板相关
  * Mail: chk@terminus.io
  * Created by icemimosa
  * Date: 16/6/6

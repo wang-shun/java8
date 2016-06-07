@@ -6,12 +6,14 @@ import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.front.BaseFrontWebTest;
 import io.terminus.doctor.msg.model.DoctorMessage;
 import io.terminus.doctor.msg.model.DoctorMessageRuleTemplate;
+import io.terminus.doctor.web.front.msg.controller.DoctorMessages;
 import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.boot.test.SpringApplicationConfiguration;
 import utils.HttpGetRequest;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Desc: 消息中心
@@ -24,6 +26,7 @@ public class DoctorMessagesTest extends BaseFrontWebTest {
 
     /**
      * 未读消息数量查询
+     * @see DoctorMessages#findNoReadCount()
      */
     @Test
     public void test_NO_READ_DoctorMessages() {
@@ -34,6 +37,7 @@ public class DoctorMessagesTest extends BaseFrontWebTest {
 
     /**
      * 分页获取系统消息
+     * @see DoctorMessages#pagingSysDoctorMessages(Integer, Integer, Map)
      */
     @Test
     public void test_PAGE_SysDoctorMessages() {
@@ -47,6 +51,7 @@ public class DoctorMessagesTest extends BaseFrontWebTest {
 
     /**
      * 分页获取预警消息
+     * @see DoctorMessages#pagingWarnDoctorMessages(Integer, Integer, Map)
      */
     @Test
     public void test_PAGE_WarnDoctorMessages() {
@@ -60,6 +65,7 @@ public class DoctorMessagesTest extends BaseFrontWebTest {
 
     /**
      * 获取消息详情
+     * @see DoctorMessages#findMessageDetail(Long)
      */
     @Test
     public void test_DETAIL_Message() {
@@ -70,6 +76,10 @@ public class DoctorMessagesTest extends BaseFrontWebTest {
         System.out.println(message);
     }
 
+    /**
+     * 获取系统消息模板
+     * @see DoctorMessages#listSysTemplate(Map)
+     */
     @Test
     public void test_SYS_listTemplates() {
         String url = HttpGetRequest.url("http://localhost:{port}/api/doctor/msg/sys/templates").build();
@@ -77,6 +87,10 @@ public class DoctorMessagesTest extends BaseFrontWebTest {
         System.out.println(templates.size() + "----" + templates);
     }
 
+    /**
+     * 获取预警消息模板
+     * @see DoctorMessages#listWarnTemplate(Map)
+     */
     @Test
     public void test_WARN_listTemplates() {
         String url = HttpGetRequest.url("http://localhost:{port}/api/doctor/msg/warn/templates").build();
@@ -84,6 +98,11 @@ public class DoctorMessagesTest extends BaseFrontWebTest {
         System.out.println(templates.size() + "----" + templates);
     }
 
+    /**
+     * 删除消息模板
+     * @see DoctorMessages#deleteTemplate(Long)
+     * @see DoctorMessages#getTemplateById(Long)
+     */
     @Test
     public void test_DELETE_Template() {
         // 查询
