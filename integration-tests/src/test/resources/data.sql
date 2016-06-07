@@ -123,3 +123,8 @@ VALUES
 
 -- basic
 INSERT INTO doctor_units VALUES (1, 'unitName', null, now(), now());
+
+-- doctor farm
+INSERT INTO `doctor_farms` (`id`, `name`, `org_id`, `org_name`, `out_id`, `extra`, `created_at`, `updated_at`)
+VALUES
+	(12345, 'farmName', 1, 'orgName', '666666', null, now(), now());

@@ -1,14 +1,22 @@
 package io.terminus.doctor.front.pigevent;
 
 import configuration.front.FrontWebConfiguration;
+import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.event.dto.event.usual.DoctorFarmEntryDto;
 import io.terminus.doctor.event.enums.BoarEntryType;
 import io.terminus.doctor.event.enums.PigSource;
+import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.front.BaseFrontWebTest;
+import io.terminus.doctor.workflow.core.WorkFlowService;
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.SpringApplicationConfiguration;
+import org.springframework.http.HttpEntity;
+import utils.HttpPostRequest;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.util.Date;
 
 /**
@@ -22,24 +30,34 @@ public class DoctorPigCreateEventsTest extends BaseFrontWebTest{
 
     private String basicUrl = null;
 
+    @Autowired
+    private WorkFlowService workFlowService;
+
     @Before
-    public void before(){
+    public void before() throws Exception{
         basicUrl = "http://localhost:" + this.port + "/api/doctor/events/create";
-    }
+
+        // init node xml
+        File f = new File(getClass().getResource("/flow/sow.xml").getFile());
+        workFlowService.getFlowDefinitionService().deploy(new FileInputStream(f));
+   }
 
     /**
      * 测试母猪进厂事件信息
      */
     @Test
     public void sowEntryEventCreateTest(){
+
         String url = basicUrl + "/createEntryInfo";
-//
-//        DoctorFarmEntryDto doctorFarmEntryDto = buildFarmEntryDto();
-//        doctorFarmEntryDto.setPigType(DoctorPig.PIG_TYPE.SOW.getKey());
-//
-//        HttpEntity httpEntity = HttpPostRequest.formRequest().param("farmId", 12345l).param("doctorFarmEntry",buildFarmEntryDto()).httpEntity();
-//        Long result = this.restTemplate.postForObject(url, httpEntity, Long.class);
-//        System.out.println(result);
+        DoctorFarmEntryDto doctorFarmEntryDto = buildFarmEntryDto();
+        doctorFarmEntryDto.setPigType(DoctorPig.PIG_TYPE.SOW.getKey());
+
+        HttpEntity httpEntity = HttpPostRequest.formRequest().param("farmId", 12345l).
+                param("doctorFarmEntryJson",
+                        JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(doctorFarmEntryDto))
+                .httpEntity();
+        Long result = this.restTemplate.postForObject(url, httpEntity, Long.class);
+        System.out.println(result);
     }
 
     /**

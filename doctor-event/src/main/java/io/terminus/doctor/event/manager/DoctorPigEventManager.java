@@ -135,6 +135,7 @@ public class DoctorPigEventManager {
                 "dto",JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(extra)));
 
         // execute
+        flowProcessService.startFlowInstance(sowFlowDefinitionKey, basic.getPigId());   // 启动流程实例
         Executor executor = flowProcessService.getExecutor(sowFlowDefinitionKey, basic.getPigId());
 
         Map<String,String> express = Maps.newHashMap();

@@ -3,6 +3,7 @@ package io.terminus.doctor.web.front.event.controller;
 import com.google.common.base.Throwables;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.Response;
+import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
 import io.terminus.doctor.event.dto.DoctorPigInfoDto;
@@ -24,7 +25,6 @@ import io.terminus.pampas.common.UserUtil;
 import io.terminus.parana.user.model.User;
 import io.terminus.parana.user.service.UserReadService;
 import lombok.extern.slf4j.Slf4j;
-import net.sf.json.JSONException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
@@ -125,7 +125,13 @@ public class DoctorPigCreateEvents {
     @RequestMapping(value = "/createEntryInfo", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Long createEntryEvent(@RequestParam("farmId") Long farmId,
-                                 @RequestParam("doctorFarmEntry") DoctorFarmEntryDto doctorFarmEntryDto){
+                                 @RequestParam("doctorFarmEntryJson") String doctorFarmEntryDtoJson){
+
+        DoctorFarmEntryDto doctorFarmEntryDto = JsonMapper.JSON_NON_DEFAULT_MAPPER.fromJson(doctorFarmEntryDtoJson, DoctorFarmEntryDto.class);
+
+        if(isNull(doctorFarmEntryDto)){
+            throw new JsonResponseException("input.pigEntryJsonConvert.error");
+        }
         return RespHelper.or500(doctorPigEventWriteService.pigEntryEvent(
                         buildBasicEntryInputInfo(farmId, doctorFarmEntryDto, PigEvent.ENTRY), doctorFarmEntryDto));
     }
@@ -144,7 +150,7 @@ public class DoctorPigCreateEvents {
      * @param doctorFarmEntryDto
      * @return
      */
-    public DoctorBasicInputInfoDto buildBasicEntryInputInfo(Long farmId, DoctorFarmEntryDto entryDto, PigEvent pigEvent){
+    private DoctorBasicInputInfoDto buildBasicEntryInputInfo(Long farmId, DoctorFarmEntryDto entryDto, PigEvent pigEvent){
         try{
             DoctorFarm doctorFarm = RespHelper.orServEx(this.doctorFarmReadService.findFarmById(farmId));
             checkState(!isNull(pigEvent), "input.eventType.error");
