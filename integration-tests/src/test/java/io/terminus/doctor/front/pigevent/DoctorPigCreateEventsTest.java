@@ -7,13 +7,16 @@ import io.terminus.doctor.event.dao.DoctorPigDao;
 import io.terminus.doctor.event.dao.DoctorPigEventDao;
 import io.terminus.doctor.event.dao.DoctorPigSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorPigTrackDao;
+import io.terminus.doctor.event.dto.event.sow.DoctorAbortionDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorMatingDto;
+import io.terminus.doctor.event.dto.event.sow.DoctorPregChkResultDto;
 import io.terminus.doctor.event.dto.event.usual.DoctorChgLocationDto;
 import io.terminus.doctor.event.dto.event.usual.DoctorFarmEntryDto;
 import io.terminus.doctor.event.enums.BoarEntryType;
 import io.terminus.doctor.event.enums.MatingType;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PigSource;
+import io.terminus.doctor.event.enums.PregCheckResult;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.front.BaseFrontWebTest;
 import io.terminus.doctor.workflow.core.WorkFlowService;
@@ -76,7 +79,11 @@ public class DoctorPigCreateEventsTest extends BaseFrontWebTest{
 
         sowMatingEventCreate(pigId);
 
+        testPregCheckResultEventCreate(pigId, PregCheckResult.YANG);
+
         testToPregEventCreate(pigId);
+
+//        testAbortionEventCreate(pigId);
 
         // 显示 state
         printCurrentState();
@@ -84,6 +91,48 @@ public class DoctorPigCreateEventsTest extends BaseFrontWebTest{
         // 获取下一个事件信息
         testCurrentSowInputStatus(pigId);
     }
+
+    /**
+     * 测试对应的去分娩
+     */
+    private void testToFarrowing(){
+        // TODO
+    }
+
+    /**
+     * 创建对应的流产事件信息
+     */
+    public void testAbortionEventCreate(Long pigId){
+        String url = basicUrl + "/createSowEvent";
+        HttpEntity httpEntity = HttpPostRequest.formRequest().param("farmId", 12345l)
+                .param("pigId", pigId).param("eventType", PigEvent.ABORTION.getKey())
+                .param("sowInfoDtoJson", JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(
+                        DoctorAbortionDto.builder()
+                                .abortionDate(new Date()).abortionReason("abortionReason")
+                                .build()
+                ))
+                .httpEntity();
+        Long result = this.restTemplate.postForObject(url, httpEntity, Long.class);
+        System.out.println(result);
+    }
+
+    /**
+     * 创建妊娠检查方式
+     */
+    private void testPregCheckResultEventCreate(Long pigId,PregCheckResult pregCheckResult){
+        String url = basicUrl + "/createSowEvent";
+        HttpEntity httpEntity = HttpPostRequest.formRequest().param("farmId", 12345l)
+                .param("pigId", pigId).param("eventType", PigEvent.PREG_CHECK.getKey())
+                .param("sowInfoDtoJson", JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(
+                        DoctorPregChkResultDto.builder()
+                                .checkDate(new Date()).checkResult(pregCheckResult.getKey()).checkMark("checkMarkResult")
+                                .build()
+                ))
+                .httpEntity();
+        Long result = this.restTemplate.postForObject(url, httpEntity, Long.class);
+        System.out.println(result);
+    }
+
 
     /**
      * 去妊娠舍

@@ -47,7 +47,7 @@ public class DoctorSowChgLocationHandler extends DoctorAbstractEventFlowHandler 
     public DoctorPigTrack updateDoctorPigTrackInfo(Execution execution,DoctorPigTrack doctorPigTrack, DoctorBasicInputInfoDto basic, Map<String, Object> extra, Map<String,Object> context) {
         doctorPigTrack.addAllExtraMap(extra);
 
-        Long toBarnId = (Long) extra.get("chgLocationToBarnId");
+        Long toBarnId = Long.valueOf(extra.get("chgLocationToBarnId").toString());
         DoctorBarn doctorToBarn = RespHelper.orServEx(doctorBarnReadService.findBarnById(toBarnId));
         checkState(!isNull(toBarnId), "input.toBarnId.fail");
 

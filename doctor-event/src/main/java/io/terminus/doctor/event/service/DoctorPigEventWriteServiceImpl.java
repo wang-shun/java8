@@ -217,7 +217,7 @@ public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteServic
             Map<String,Object> dto = Maps.newHashMap();
             BeanMapper.copy(doctorAbortionDto, dto);
             Map<String,Object> result = doctorPigEventManager.createSowPigEvent(doctorBasicInputInfoDto, dto);
-            return Response.ok(Params.getWithConvert(result, "eventId", a->Long.valueOf(a.toString())));
+            return Response.ok(Params.getWithConvert(result, "doctorEventId", a->Long.valueOf(a.toString())));
         }catch (Exception e){
             log.error("abortion create event fail, cause:{}", Throwables.getStackTraceAsString(e));
             return Response.fail("create.abortionEvent.fail");
@@ -306,7 +306,7 @@ public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteServic
 
             Map<String,Object> result = doctorPigEventManager.createSowPigEvent(doctorBasicInputInfoDto, dto);
             publishEvent(result);
-            return Response.ok(Params.getWithConvert(result,"eventId",a->Long.valueOf(a.toString())));
+            return Response.ok(Params.getWithConvert(result,"doctorEventId",a->Long.valueOf(a.toString())));
         }catch (Exception e){
             log.error("vaccination event create fail, cause:{}", Throwables.getStackTraceAsString(e));
             return Response.fail("create.vaccination.fail");

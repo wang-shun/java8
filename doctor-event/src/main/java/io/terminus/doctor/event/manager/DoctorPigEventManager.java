@@ -163,8 +163,12 @@ public class DoctorPigEventManager {
         // execute
         Executor executor = flowProcessService.getExecutor(sowFlowDefinitionKey, basic.getPigId());
 
+        //  添加参数信息
         Map<String, Object> express = Maps.newHashMap();
         express.put("eventType", basic.getEventType());
+        if(Objects.equals(basic.getEventType(), PigEvent.PREG_CHECK.getKey())){
+            express.put("checkResult", extra.get("checkResult"));
+        }
 
         // 添加对应的操作方式
         executor.execute(express, flowData);
