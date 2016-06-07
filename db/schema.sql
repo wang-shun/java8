@@ -1181,3 +1181,85 @@ CREATE TABLE `doctor_pig_type_statistics` (
 ) ENGINE=INNODB DEFAULT CHARSET=utf8 COMMENT='猪只数统计表';
 CREATE UNIQUE INDEX idx_doctor_pig_type_statistics_farm_id ON doctor_pig_type_statistics(farm_id);
 CREATE INDEX idx_doctor_pig_type_statistics_org_id ON doctor_pig_type_statistics(org_id);
+
+
+DROP TABLE IF EXISTS `doctor_message_rule_templates`;
+CREATE TABLE IF NOT EXISTS `doctor_message_rule_templates` (
+	`id`	BIGINT(20) NOT NULL AUTO_INCREMENT COMMENT '自增主键',
+	`name` 	VARCHAR(128) DEFAULT NULL COMMENT '消息规则模板名称',
+	`type` 	SMALLINT(6) DEFAULT NULL COMMENT '消息类型: 0->系统消息, 1->预警消息, 2->警报消息',
+	`category`	SMALLINT(6) DEFAULT NULL COMMENT '消息种类',
+	`rule_value`	TEXT DEFAULT NULL COMMENT '规则, 是farm对应的默认值, json值, 类: Rule',
+	`status`	SMALLINT(6) DEFAULT NULL COMMENT '状态 1:正常, -1:删除, -2:禁用',
+	`message_template`	VARCHAR(128) DEFAULT NULL COMMENT '规则数据模板名称, 对应parana_message_templates表name字段',
+	`content`	TEXT DEFAULT NULL COMMENT '规则的内容, 针对系统消息',
+	`producer`	VARCHAR(128) DEFAULT NULL COMMENT '消息生成者(类的简单类名)',
+	`describe`	VARCHAR(1024) DEFAULT NULL COMMENT '消息规则模板描述',
+	`created_at`	DATETIME DEFAULT NULL COMMENT '创建时间',
+	`updated_at`	DATETIME DEFAULT NULL COMMENT '更新时间',
+	`updated_by`	BIGINT(20) DEFAULT NULL COMMENT '修改人id',
+	PRIMARY KEY(`id`)
+)ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='猪场软件消息规则模板表';
+
+
+DROP TABLE IF EXISTS `doctor_message_rules`;
+CREATE TABLE IF NOT EXISTS `doctor_message_rules` (
+	`id`	BIGINT(20) NOT NULL AUTO_INCREMENT COMMENT '自增主键',
+	`farm_id`	BIGINT(20) DEFAULT NULL COMMENT '猪场id',
+	`template_id` 	BIGINT(20) DEFAULT NULL COMMENT '消息规则模板id',
+	`template_name` 	VARCHAR(128) DEFAULT NULL COMMENT '消息规则模板名称',
+	`type` 	SMALLINT(6) DEFAULT NULL COMMENT '消息类型: 0->系统消息, 1->预警消息, 2->警报消息',
+	`category`	SMALLINT(6) DEFAULT NULL COMMENT '消息种类',
+	`rule_value`	TEXT DEFAULT NULL COMMENT '规则值, 是role对应表的默认值, json值, 类: Rule',
+	`use_default`	SMALLINT(6) DEFAULT NULL COMMENT '是否使用默认配置, 0:不使用, 1:使用',
+	`status`	SMALLINT(6) DEFAULT NULL COMMENT '状态 1:正常, -1:删除, -2:禁用',
+	`describe`	VARCHAR(1024) DEFAULT NULL COMMENT '消息规则模板描述',
+	`created_at`	DATETIME DEFAULT NULL COMMENT '创建时间',
+	`updated_at`	DATETIME DEFAULT NULL COMMENT '更新时间',
+	PRIMARY KEY(`id`)
+)ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='猪场软件消息规则表';
+CREATE INDEX idx_message_rules_farm_id ON doctor_message_rules(`farm_id`);
+CREATE INDEX idx_message_rules_tpl_id ON doctor_message_rules(`template_id`);
+
+
+DROP TABLE IF EXISTS `doctor_message_rule_roles`;
+CREATE TABLE IF NOT EXISTS `doctor_message_rule_roles` (
+	`id`	BIGINT(20) NOT NULL AUTO_INCREMENT COMMENT '自增主键',
+	`rule_id`	BIGINT(20) DEFAULT NULL COMMENT '消息规则id',
+	`template_id` 	BIGINT(20) DEFAULT NULL COMMENT '消息规则模板id',
+	`farm_id`	BIGINT(20) DEFAULT NULL COMMENT '猪场id',
+	`role_id`	BIGINT(20) DEFAULT NULL COMMENT '子账号的角色id',
+	`rule_value`	TEXT DEFAULT NULL COMMENT '规则值, json值, 类: Rule',
+	`use_default`	SMALLINT(6) DEFAULT NULL COMMENT '是否使用默认配置, 0:不使用, 1:使用',
+	`created_at`	DATETIME DEFAULT NULL COMMENT '创建时间',
+	`updated_at`	DATETIME DEFAULT NULL COMMENT '更新时间',
+	PRIMARY KEY(`id`)
+)ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='猪场软件消息规则与角色表';
+CREATE INDEX idx_message_rule_roles_role_id ON doctor_message_rule_roles(`role_id`);
+CREATE INDEX idx_message_rule_roles_farm_id ON doctor_message_rule_roles(`farm_id`);
+CREATE INDEX idx_message_rule_roles_rule_id ON doctor_message_rule_roles(`rule_id`);
+
+
+DROP TABLE IF EXISTS `doctor_messages`;
+CREATE TABLE IF NOT EXISTS `doctor_messages` (
+	`id`	BIGINT(20) NOT NULL AUTO_INCREMENT COMMENT '自增主键',
+	`farm_id`	BIGINT(20) DEFAULT NULL COMMENT '猪场id',
+	`rule_id`	BIGINT(20) DEFAULT NULL COMMENT '消息规则id',
+	`role_id`	BIGINT(20) DEFAULT NULL COMMENT '子账号的角色id',
+	`user_id` BIGINT(20) DEFAULT NULL COMMENT '用户id',
+	`template_id` 	BIGINT(20) DEFAULT NULL COMMENT '消息规则模板id',
+	`message_template`	VARCHAR(128) DEFAULT NULL COMMENT '规则数据模板名称, 对应parana_message_templates表name字段',
+	`type` 	SMALLINT(6) DEFAULT NULL COMMENT '消息类型: 0->系统消息, 1->预警消息, 2->警报消息',
+	`category`	SMALLINT(6) DEFAULT NULL COMMENT '消息种类',
+	`data`	TEXT DEFAULT NULL COMMENT '发送的内容填充数据, json(map). 或系统消息',
+	`channel`	SMALLINT(6) DEFAULT NULL COMMENT '消息发送渠道. 0->站内信, 1->短信, 2->邮箱, 3->app推送',
+	`url`		VARCHAR(4096)	DEFAULT NULL COMMENT 'app回调url',
+	`status`	SMALLINT(6) DEFAULT NULL COMMENT '状态 1:未发送, 2:已发送, 3:已读,  -1:删除, -2:发送失败',
+	`sended_at`	DATETIME DEFAULT NULL COMMENT '发送时间',
+	`failed_by`	VARCHAR(4096) DEFAULT NULL COMMENT '失败原因',
+	`created_by` BIGINT(20) DEFAULT NULL COMMENT '操作人id',
+	`created_at`	DATETIME DEFAULT NULL COMMENT '创建时间',
+	`updated_at`	DATETIME DEFAULT NULL COMMENT '更新时间',
+	PRIMARY KEY(`id`)
+)ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='猪场软件消息表';
+CREATE INDEX idx_messages_user_id ON doctor_messages(`user_id`);
