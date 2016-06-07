@@ -27,4 +27,11 @@ public interface DoctorMessageRuleReadService {
      * @return
      */
     Response<List<DoctorMessageRule>> findMessageRulesByTplId(Long tplId);
+
+    /**
+     * 根据猪场id查询
+     * @param farmId    猪场id
+     * @return
+     */
+    Response<List<DoctorMessageRule>> findMessageRulesByFarmId(Long farmId);
 }

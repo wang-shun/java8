@@ -47,6 +47,11 @@ public class DoctorMessageRuleWriteServiceImpl implements DoctorMessageRuleWrite
     @Override
     public Response<Boolean> updateMessageRule(DoctorMessageRule messageRule) {
         try {
+            // 如果是选择默认
+            if (1 == messageRule.getUseDefault()) {
+                DoctorMessageRuleTemplate template = doctorMessageRuleTemplateDao.findById(messageRule.getTemplateId());
+                messageRule.setRuleValue(template.getRuleValue());
+            }
             return Response.ok(doctorMessageRuleDao.update(messageRule));
         } catch (Exception e) {
             log.error("update messageRule failed, messageRule:{}, cause:{}", messageRule, Throwables.getStackTraceAsString(e));
@@ -57,7 +62,13 @@ public class DoctorMessageRuleWriteServiceImpl implements DoctorMessageRuleWrite
     @Override
     public Response<Boolean> deleteMessageRuleById(Long messageRuleId) {
         try {
-            return Response.ok(doctorMessageRuleDao.delete(messageRuleId));
+            // 逻辑删除
+            DoctorMessageRule rule = doctorMessageRuleDao.findById(messageRuleId);
+            if (rule != null) {
+                rule.setStatus(DoctorMessageRule.Status.DELETE.getValue());
+                return Response.ok(doctorMessageRuleDao.update(rule));
+            }
+            return Response.ok(Boolean.TRUE);
         } catch (Exception e) {
             log.error("delete messageRule failed, messageRuleId:{}, cause:{}", messageRuleId, Throwables.getStackTraceAsString(e));
             return Response.fail("messageRule.delete.fail");

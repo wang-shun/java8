@@ -83,8 +83,9 @@ public class DoctorMessageRuleTemplateWriteServiceImpl implements DoctorMessageR
             DoctorMessageRuleTemplate ruleTemplate = doctorMessageRuleTemplateDao.findById(messageRuleTemplateId);
             if (ruleTemplate != null) {
                 ruleTemplate.setStatus(DoctorMessageRuleTemplate.Status.DELETE.getValue());
+                return Response.ok(doctorMessageRuleTemplateDao.update(ruleTemplate));
             }
-            return Response.ok(doctorMessageRuleTemplateDao.update(ruleTemplate));
+            return Response.ok(Boolean.TRUE);
         } catch (Exception e) {
             log.error("delete messageRuleTemplate failed, messageRuleTemplateId:{}, cause:{}", messageRuleTemplateId, Throwables.getStackTraceAsString(e));
             return Response.fail("messageRuleTemplate.delete.fail");

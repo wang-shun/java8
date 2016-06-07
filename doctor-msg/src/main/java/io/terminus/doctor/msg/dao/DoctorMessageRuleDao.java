@@ -34,4 +34,13 @@ public class DoctorMessageRuleDao extends MyBatisDao<DoctorMessageRule> {
     public List<DoctorMessageRule> findByTpl(Long tplId) {
         return getSqlSession().selectList(sqlId("findByTpl"), tplId);
     }
+
+    /**
+     * 根据猪场id查询
+     * @param farmId    猪场id
+     * @return
+     */
+    public List<DoctorMessageRule> findByFarmId(Long farmId) {
+        return getSqlSession().selectList(sqlId("findByFarmId"), farmId);
+    }
 }

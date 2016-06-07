@@ -106,4 +106,10 @@
         WHERE template_id = #{templateId} AND status != -1
     </select>
 
+    <select id="findByFarmId" parameterType="long" resultMap="DoctorMessageRuleMap">
+        SELECT <include refid="cols_all"/>
+        FROM <include refid="tb"/>
+        WHERE farm_id = #{farmId} AND status != -1
+    </select>
+
 </mapper>

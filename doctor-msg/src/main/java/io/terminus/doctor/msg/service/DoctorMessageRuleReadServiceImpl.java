@@ -46,4 +46,14 @@ public class DoctorMessageRuleReadServiceImpl implements DoctorMessageRuleReadSe
             return Response.fail("messageRule.find.fail");
         }
     }
+
+    @Override
+    public Response<List<DoctorMessageRule>> findMessageRulesByFarmId(Long farmId) {
+        try{
+            return Response.ok(doctorMessageRuleDao.findByFarmId(farmId));
+        } catch (Exception e) {
+            log.error("find messageRule by farmId failed, farmId is {}, cause by {}", farmId, Throwables.getStackTraceAsString(e));
+            return Response.fail("messageRule.find.fail");
+        }
+    }
 }
