@@ -1,8 +1,10 @@
 package io.terminus.doctor.event.manager;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import io.terminus.common.utils.JsonMapper;
+import io.terminus.doctor.common.constants.JacksonType;
 import io.terminus.doctor.event.constants.DoctorPigSnapshotConstants;
 import io.terminus.doctor.event.dao.DoctorPigEventDao;
 import io.terminus.doctor.event.dao.DoctorPigSnapshotDao;
@@ -10,11 +12,14 @@ import io.terminus.doctor.event.dao.DoctorPigTrackDao;
 import io.terminus.doctor.event.dao.DoctorRevertLogDao;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
 import io.terminus.doctor.event.handler.DoctorEventHandlerChainInvocation;
+import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigSnapshot;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.event.model.DoctorRevertLog;
 import io.terminus.doctor.workflow.core.Executor;
 import io.terminus.doctor.workflow.service.FlowProcessService;
+import io.terminus.doctor.workflow.service.FlowQueryService;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -23,6 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import static com.google.common.base.Preconditions.checkState;
 
@@ -35,6 +41,8 @@ import static com.google.common.base.Preconditions.checkState;
 @Component
 @Slf4j
 public class DoctorPigEventManager {
+
+    private final ObjectMapper OBJECT_MAPPER = JsonMapper.JSON_NON_DEFAULT_MAPPER.getMapper();
 
     private final DoctorEventHandlerChainInvocation doctorEventHandlerChainInvocation;
 
@@ -50,12 +58,15 @@ public class DoctorPigEventManager {
 
     private final DoctorPigTrackDao doctorPigTrackDao;
 
+    private final FlowQueryService flowQueryService;
+
     @Autowired
     public DoctorPigEventManager(DoctorEventHandlerChainInvocation doctorEventHandlerChainInvocation,
                                  FlowProcessService flowProcessService,DoctorPigEventDao doctorPigEventDao,
                                  DoctorPigSnapshotDao doctorPigSnapshotDao,DoctorRevertLogDao doctorRevertLogDao,
                                  DoctorPigTrackDao doctorPigTrackDao,
-                                 @Value("${flow.definition.key.sow:sow}") String sowFlowDefinitionKey){
+                                 @Value("${flow.definition.key.sow:sow}") String sowFlowDefinitionKey,
+                                 FlowQueryService flowQueryService){
         this.doctorEventHandlerChainInvocation = doctorEventHandlerChainInvocation;
         this.flowProcessService = flowProcessService;
         this.sowFlowDefinitionKey = sowFlowDefinitionKey;
@@ -63,6 +74,7 @@ public class DoctorPigEventManager {
         this.doctorPigSnapshotDao = doctorPigSnapshotDao;
         this.doctorRevertLogDao = doctorRevertLogDao;
         this.doctorPigTrackDao = doctorPigTrackDao;
+        this.flowQueryService = flowQueryService;
     }
 
     @Transactional
@@ -99,9 +111,18 @@ public class DoctorPigEventManager {
      */
     @Transactional
     public Map<String, Object> createCasualPigEvent(DoctorBasicInputInfoDto doctorBasicInputInfoDto,
-                                                    Map<String, Object> extra){
+                                                    Map<String, Object> extra) throws Exception{
         Map<String,Object> context = Maps.newHashMap();
         doctorEventHandlerChainInvocation.invoke(doctorBasicInputInfoDto, extra, context);
+
+        /**
+         * 母猪创建对应的事件流信息
+         */
+        if(Objects.equals(doctorBasicInputInfoDto.getPigType(), DoctorPig.PIG_TYPE.SOW.getKey())){
+            Map<String, Long> ids = OBJECT_MAPPER.readValue(context.get("entryResult").toString(), JacksonType.MAP_OF_OBJECT);
+            Long pigId =  ids.get("doctorPigId");
+            flowProcessService.startFlowInstance(sowFlowDefinitionKey, pigId);
+        }
         return context;
     }
 
@@ -128,6 +149,7 @@ public class DoctorPigEventManager {
      * @return
      */
     @Transactional
+    @SneakyThrows
     public Map<String,Object> createSowPigEvent(DoctorBasicInputInfoDto basic, Map<String, Object> extra){
         // build data
         String flowData = JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(ImmutableMap.of(
@@ -144,10 +166,8 @@ public class DoctorPigEventManager {
         // 添加对应的操作方式
         executor.execute(express, flowData);
 
-        // TODO wait workflow context
-        // TODO from executor  取出对应的结果信息返回操作方式
-        String flowDataContent = "";
+        String flowDataContent = flowQueryService.getFlowProcessQuery().getCurrentProcesses(sowFlowDefinitionKey, basic.getPigId()).get(0).getFlowData();
 
-        return Maps.newHashMap(); // TODO
+        return OBJECT_MAPPER.readValue(flowDataContent, JacksonType.MAP_OF_OBJECT);
     }
 }
