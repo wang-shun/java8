@@ -188,6 +188,7 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
                     break;
                 case TRANS_FARM:
                     params.put("toFarmName", getFarmName(getLong(params, "toFarmId")));
+                    params.put("toBarnName", getBarnName(getLong(params, "toBarnId")));
                     putBasicFields(params);
                     RespHelper.orServEx(doctorGroupWriteService.groupEventTransFarm(groupDetail, BeanMapper.map(params, DoctorTransFarmGroupInput.class)));
                     break;

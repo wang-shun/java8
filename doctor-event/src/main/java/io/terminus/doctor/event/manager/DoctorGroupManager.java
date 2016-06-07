@@ -4,6 +4,7 @@ import com.google.common.base.MoreObjects;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.common.utils.JsonMapper;
+import io.terminus.doctor.common.event.CoreEventDispatcher;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dao.DoctorGroupDao;
@@ -34,6 +35,7 @@ import io.terminus.doctor.event.dto.event.group.input.DoctorTransGroupInput;
 import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.enums.PigSource;
+import io.terminus.doctor.event.event.DoctorGroupCountEvent;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorGroupSnapshot;
@@ -67,18 +69,21 @@ public class DoctorGroupManager {
     private final DoctorGroupSnapshotDao doctorGroupSnapshotDao;
     private final DoctorGroupTrackDao doctorGroupTrackDao;
     private final DoctorGroupReadService doctorGroupReadService;
+    private final CoreEventDispatcher coreEventDispatcher;
 
     @Autowired
     public DoctorGroupManager(DoctorGroupDao doctorGroupDao,
                               DoctorGroupEventDao doctorGroupEventDao,
                               DoctorGroupSnapshotDao doctorGroupSnapshotDao,
                               DoctorGroupTrackDao doctorGroupTrackDao,
-                              DoctorGroupReadService doctorGroupReadService) {
+                              DoctorGroupReadService doctorGroupReadService,
+                              CoreEventDispatcher coreEventDispatcher) {
         this.doctorGroupDao = doctorGroupDao;
         this.doctorGroupEventDao = doctorGroupEventDao;
         this.doctorGroupSnapshotDao = doctorGroupSnapshotDao;
         this.doctorGroupTrackDao = doctorGroupTrackDao;
         this.doctorGroupReadService = doctorGroupReadService;
+        this.coreEventDispatcher = coreEventDispatcher;
     }
 
     /**
@@ -119,6 +124,9 @@ public class DoctorGroupManager {
 
         //4. 创建猪群镜像
         createGroupSnapShot(group, groupEvent, groupTrack, GroupEventType.NEW);
+
+        //发布统计事件
+        publishCountGroupEvent(group.getOrgId(), group.getFarmId());
         return groupId;
     }
 
@@ -235,6 +243,9 @@ public class DoctorGroupManager {
 
         //5.创建镜像
         createGroupSnapShot(group, event, groupTrack, GroupEventType.CLOSE);
+
+        //发布统计事件
+        publishCountGroupEvent(group.getOrgId(), group.getFarmId());
     }
 
     /**
@@ -300,6 +311,9 @@ public class DoctorGroupManager {
 
         //4.创建镜像
         createGroupSnapShot(group, event, groupTrack, GroupEventType.MOVE_IN);
+
+        //发布统计事件
+        publishCountGroupEvent(group.getOrgId(), group.getFarmId());
     }
 
     /**
@@ -347,6 +361,9 @@ public class DoctorGroupManager {
         if (Objects.equals(oldQuantity, change.getQuantity())) {
             autoGroupEventClose(group, groupTrack, change);
         }
+
+        //发布统计事件
+        publishCountGroupEvent(group.getOrgId(), group.getFarmId());
     }
 
     /**
@@ -406,6 +423,9 @@ public class DoctorGroupManager {
         } else {
             autoTransEventMoveIn(group, groupTrack, transGroup);
         }
+
+        //发布统计事件
+        publishCountGroupEvent(group.getOrgId(), group.getFarmId());
     }
 
     /**
@@ -534,6 +554,9 @@ public class DoctorGroupManager {
         } else {
             autoTransEventMoveIn(group, groupTrack, transFarm);
         }
+
+        //发布统计事件
+        publishCountGroupEvent(group.getOrgId(), group.getFarmId());
     }
 
     /**
@@ -630,5 +653,10 @@ public class DoctorGroupManager {
         if (groups.stream().map(DoctorGroup::getGroupCode).collect(Collectors.toList()).contains(groupCode)) {
             throw new ServiceException("group.code.exist");
         }
+    }
+
+    //发布统计猪群事件
+    private void publishCountGroupEvent(Long orgId, Long farmId) {
+        coreEventDispatcher.publish(new DoctorGroupCountEvent(orgId, farmId));
     }
 }
