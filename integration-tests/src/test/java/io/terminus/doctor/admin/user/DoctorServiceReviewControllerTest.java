@@ -2,9 +2,9 @@ package io.terminus.doctor.admin.user;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
-import configuration.admin.AdminWebConfiguration;
 import configuration.admin.OperatorAdminWebConfiguration;
 import io.terminus.common.model.Paging;
+import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.admin.BaseAdminWebTest;
 import io.terminus.doctor.common.enums.UserType;
 import io.terminus.doctor.user.dto.DoctorServiceApplyDto;
@@ -13,16 +13,18 @@ import io.terminus.doctor.user.service.*;
 import io.terminus.doctor.user.service.business.DoctorServiceReviewService;
 import io.terminus.doctor.web.admin.dto.UserApplyServiceDetailDto;
 import io.terminus.parana.common.model.ParanaUser;
+import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.SpringApplicationConfiguration;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-
-import static org.hamcrest.core.Is.is;
-import org.junit.Assert;
+import utils.HttpPostRequest;
 
 import java.util.Map;
+
+import static org.hamcrest.core.Is.is;
 
 @SpringApplicationConfiguration({OperatorAdminWebConfiguration.class})
 public class DoctorServiceReviewControllerTest  extends BaseAdminWebTest {
@@ -143,8 +145,28 @@ public class DoctorServiceReviewControllerTest  extends BaseAdminWebTest {
         ParanaUser applyUser = this.applyService(DoctorServiceReview.Type.NEVEREST, null);
 
         String url = baseUrl + "/notopen";
-        Boolean result = restTemplate.postForObject(url, null, Boolean.class, ImmutableMap.of("port", port, "userId", applyUser.getId()));
-        Assert.assertTrue(result);
+        HttpEntity param = HttpPostRequest.formRequest()
+                .param("userId", applyUser.getId())
+                .param("type", DoctorServiceReview.Type.NEVEREST.getValue())
+                .param("reason", "reason")
+                .httpEntity();
+        ResponseEntity<Object> entity = restTemplate.postForEntity(url, param, Object.class, ImmutableMap.of("port", port));
+        Assert.assertThat(entity.getStatusCode(), is(HttpStatus.OK));
+    }
+
+    @Test
+    public void frozeApplyTest(){
+        //先申请
+        ParanaUser applyUser = this.applyService(DoctorServiceReview.Type.NEVEREST, null);
+
+        String url = baseUrl + "/froze";
+        HttpEntity param = HttpPostRequest.formRequest()
+                .param("userId", applyUser.getId())
+                .param("type", DoctorServiceReview.Type.NEVEREST.getValue())
+                .param("reason", "reason")
+                .httpEntity();
+        ResponseEntity<Object> entity = restTemplate.postForEntity(url, param, Object.class, ImmutableMap.of("port", port));
+        Assert.assertThat(entity.getStatusCode(), is(HttpStatus.OK));
     }
 
     private ParanaUser applyService(DoctorServiceReview.Type type, DoctorOrg org){

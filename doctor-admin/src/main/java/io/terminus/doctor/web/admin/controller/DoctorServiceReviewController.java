@@ -119,7 +119,7 @@ public class DoctorServiceReviewController {
      */
     @RequestMapping(value = "/froze", method = RequestMethod.POST)
     @ResponseBody
-    public Boolean frozeService(@RequestParam("userId") Long userId, @RequestParam("type") Integer type, @RequestParam("reason") String reason){
+    public Boolean frozeApply(@RequestParam("userId") Long userId, @RequestParam("type") Integer type, @RequestParam("reason") String reason){
         BaseUser baseUser = this.checkUserTypeOperator();
         try {
             DoctorServiceReview.Type serviceType = DoctorServiceReview.Type.from(type);
