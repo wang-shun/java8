@@ -1,10 +1,14 @@
 package io.terminus.doctor.web.front.msg.controller;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableList;
 import io.terminus.common.model.Paging;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.msg.model.DoctorMessage;
+import io.terminus.doctor.msg.model.DoctorMessageRuleTemplate;
 import io.terminus.doctor.msg.service.DoctorMessageReadService;
+import io.terminus.doctor.msg.service.DoctorMessageRuleTemplateReadService;
+import io.terminus.doctor.msg.service.DoctorMessageRuleTemplateWriteService;
 import io.terminus.doctor.msg.service.DoctorMessageWriteService;
 import io.terminus.pampas.common.UserUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -16,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -29,16 +34,24 @@ import java.util.Map;
 @RequestMapping("/api/doctor/msg")
 public class DoctorMessages {
 
+    private final DoctorMessageRuleTemplateReadService doctorMessageRuleTemplateReadService;
+    private final DoctorMessageRuleTemplateWriteService doctorMessageRuleTemplateWriteService;
     private final DoctorMessageReadService doctorMessageReadService;
-
     private final DoctorMessageWriteService doctorMessageWriteService;
 
     @Autowired
     public DoctorMessages(DoctorMessageReadService doctorMessageReadService,
-                          DoctorMessageWriteService doctorMessageWriteService) {
+                          DoctorMessageWriteService doctorMessageWriteService,
+                          DoctorMessageRuleTemplateReadService doctorMessageRuleTemplateReadService,
+                          DoctorMessageRuleTemplateWriteService doctorMessageRuleTemplateWriteService) {
         this.doctorMessageReadService = doctorMessageReadService;
         this.doctorMessageWriteService = doctorMessageWriteService;
+        this.doctorMessageRuleTemplateReadService = doctorMessageRuleTemplateReadService;
+        this.doctorMessageRuleTemplateWriteService = doctorMessageRuleTemplateWriteService;
     }
+
+
+    /************************** 消息相关 **************************/
 
     /**
      * 查询预警消息分页
@@ -120,5 +133,69 @@ public class DoctorMessages {
     @RequestMapping(value  = "/message", method = RequestMethod.DELETE)
     public Boolean deleteMessage(@RequestParam Long id) {
         return RespHelper.or500(doctorMessageWriteService.deleteMessageById(id));
+    }
+
+
+    /************************** 消息模板相关 **************************/
+
+    /**
+     * 查询系统消息模板列表
+     * @param criteria
+     * @return
+     */
+    @RequestMapping(value = "/sys/templates", method = RequestMethod.GET)
+    public List<DoctorMessageRuleTemplate> listSysTemplate(Map<String, Object> criteria) {
+        criteria.put("type", DoctorMessageRuleTemplate.Type.SYSTEM.getValue());
+        return RespHelper.or500(doctorMessageRuleTemplateReadService.findTemplatesByCriteria(criteria));
+    }
+
+    /**
+     * 查询预警消息模板列表
+     * @param criteria
+     * @return
+     */
+    @RequestMapping(value = "/warn/templates", method = RequestMethod.GET)
+    public List<DoctorMessageRuleTemplate> listWarnTemplate(Map<String, Object> criteria) {
+        criteria.put("types", ImmutableList.of(
+                DoctorMessageRuleTemplate.Type.WARNING.getValue(), DoctorMessageRuleTemplate.Type.ERROR.getValue()));
+        return RespHelper.or500(doctorMessageRuleTemplateReadService.findTemplatesByCriteria(criteria));
+    }
+
+    /**
+     * 根据id获取模板信息
+     * @param id
+     * @return
+     */
+    @RequestMapping(value = "/template/detail", method = RequestMethod.GET)
+    public DoctorMessageRuleTemplate getTemplateById(@RequestParam Long id) {
+        return RespHelper.or500(doctorMessageRuleTemplateReadService.findMessageRuleTemplateById(id));
+    }
+
+    /**
+     * 创建或者更新模板
+     * @param doctorMessageRuleTemplate
+     * @return
+     */
+    @RequestMapping(value = "/template", method = RequestMethod.POST)
+    public Boolean createOrUpdateTemplate(@RequestBody DoctorMessageRuleTemplate doctorMessageRuleTemplate) {
+        Preconditions.checkNotNull(doctorMessageRuleTemplate, "template.not.null");
+        if (doctorMessageRuleTemplate.getId() == null) {
+            doctorMessageRuleTemplate.setUpdatedBy(UserUtil.getUserId());
+            RespHelper.or500(doctorMessageRuleTemplateWriteService.createMessageRuleTemplate(doctorMessageRuleTemplate));
+        } else {
+            doctorMessageRuleTemplate.setUpdatedBy(UserUtil.getUserId());
+            RespHelper.or500(doctorMessageRuleTemplateWriteService.updateMessageRuleTemplate(doctorMessageRuleTemplate));
+        }
+        return Boolean.TRUE;
+    }
+
+    /**
+     * 删除一个模板
+     * @param id
+     * @return
+     */
+    @RequestMapping(value = "/template", method = RequestMethod.DELETE)
+    public Boolean deleteTemplate(@RequestParam Long id) {
+        return RespHelper.or500(doctorMessageRuleTemplateWriteService.deleteMessageRuleTemplateById(id));
     }
 }

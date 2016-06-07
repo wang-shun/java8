@@ -9,6 +9,7 @@ import io.terminus.common.model.Response;
 import io.terminus.doctor.msg.dao.DoctorMessageDao;
 import io.terminus.doctor.msg.dto.Rule;
 import io.terminus.doctor.msg.model.DoctorMessage;
+import io.terminus.doctor.msg.model.DoctorMessageRuleTemplate;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -48,11 +49,10 @@ public class DoctorMessageReadServiceImpl implements DoctorMessageReadService {
         try{
             PageInfo pageInfo = new PageInfo(pageNo, pageSize);
             // 获取预警消息
-            criteria.put("types", ImmutableList.of(1, 2));
+            criteria.put("types", ImmutableList.of(
+                    DoctorMessageRuleTemplate.Type.WARNING.getValue(), DoctorMessageRuleTemplate.Type.ERROR.getValue()));
             criteria.put("channel", Rule.Channel.SYSTEM.getValue());
-            if (criteria.get("status") == null) {
-                criteria.put("status", DoctorMessage.Status.NORMAL.getValue());
-            }
+            criteria.putIfAbsent("status", DoctorMessage.Status.NORMAL.getValue());
             return Response.ok(doctorMessageDao.paging(pageInfo.getOffset(), pageInfo.getLimit(), criteria));
         } catch (Exception e) {
             log.error("paging message by criteria failed, criteria is {}, cause by {}", criteria, Throwables.getStackTraceAsString(e));
@@ -65,11 +65,9 @@ public class DoctorMessageReadServiceImpl implements DoctorMessageReadService {
         try{
             PageInfo pageInfo = new PageInfo(pageNo, pageSize);
             // 获取系统消息
-            criteria.put("type", 0);
+            criteria.put("type", DoctorMessageRuleTemplate.Type.SYSTEM.getValue());
             criteria.put("channel", Rule.Channel.SYSTEM.getValue());
-            if (criteria.get("status") == null) {
-                criteria.put("status", DoctorMessage.Status.NORMAL.getValue());
-            }
+            criteria.putIfAbsent("status", DoctorMessage.Status.NORMAL.getValue());
             return Response.ok(doctorMessageDao.paging(pageInfo.getOffset(), pageInfo.getLimit(), criteria));
         } catch (Exception e) {
             log.error("paging message by criteria failed, criteria is {}, cause by {}", criteria, Throwables.getStackTraceAsString(e));

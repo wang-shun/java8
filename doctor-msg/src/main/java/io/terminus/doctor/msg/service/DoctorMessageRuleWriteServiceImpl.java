@@ -66,32 +66,37 @@ public class DoctorMessageRuleWriteServiceImpl implements DoctorMessageRuleWrite
 
     @Override
     public Response<Boolean> initTemplate(Long farmId) {
-        if (farmId == null) {
-            log.error("init template rule for farm failed, farm id can not be null");
-            return Response.fail("message.template.rule.fail");
-        }
-        List<DoctorMessageRuleTemplate> ruleTemplates = doctorMessageRuleTemplateDao.findAllWarnMessageTpl();
-        for (int i = 0; ruleTemplates != null && i < ruleTemplates.size(); i++) {
-            DoctorMessageRuleTemplate ruleTemplate = ruleTemplates.get(i);
-            // 1. 判断模板与farm的关系是否存在
-            DoctorMessageRule messageRules = doctorMessageRuleDao.findByTplAndFarm(ruleTemplate.getId(), farmId);
-            if (messageRules != null) {
-                continue;
+        try{
+            if (farmId == null) {
+                log.error("init template rule for farm failed, farm id can not be null");
+                return Response.fail("message.template.rule.fail");
             }
-            // 2. 将模板与farm建立关系
-            DoctorMessageRule rule = DoctorMessageRule.builder()
-                    .farmId(farmId)
-                    .templateId(ruleTemplate.getId())
-                    .templateName(ruleTemplate.getName())
-                    .type(ruleTemplate.getType())
-                    .category(ruleTemplate.getCategory())
-                    .ruleValue(ruleTemplate.getRuleValue())
-                    .useDefault(1) // 使用默认配置
-                    .status(DoctorMessageRule.Status.NORMAL.getValue())
-                    .describe(ruleTemplate.getDescribe())
-                    .build();
-            doctorMessageRuleDao.create(rule);
+            List<DoctorMessageRuleTemplate> ruleTemplates = doctorMessageRuleTemplateDao.findAllWarnMessageTpl();
+            for (int i = 0; ruleTemplates != null && i < ruleTemplates.size(); i++) {
+                DoctorMessageRuleTemplate ruleTemplate = ruleTemplates.get(i);
+                // 1. 判断模板与farm的关系是否存在
+                DoctorMessageRule messageRules = doctorMessageRuleDao.findByTplAndFarm(ruleTemplate.getId(), farmId);
+                if (messageRules != null) {
+                    continue;
+                }
+                // 2. 将模板与farm建立关系
+                DoctorMessageRule rule = DoctorMessageRule.builder()
+                        .farmId(farmId)
+                        .templateId(ruleTemplate.getId())
+                        .templateName(ruleTemplate.getName())
+                        .type(ruleTemplate.getType())
+                        .category(ruleTemplate.getCategory())
+                        .ruleValue(ruleTemplate.getRuleValue())
+                        .useDefault(1) // 使用默认配置
+                        .status(DoctorMessageRule.Status.NORMAL.getValue())
+                        .describe(ruleTemplate.getDescribe())
+                        .build();
+                doctorMessageRuleDao.create(rule);
+            }
+            return Response.ok(Boolean.TRUE);
+        } catch (Exception e) {
+            log.error("init msg template to farm failed, farm id is {}, cause by {}", farmId, Throwables.getStackTraceAsString(e));
+            return Response.fail("init.msg.template.fail");
         }
-        return Response.ok(Boolean.TRUE);
     }
 }

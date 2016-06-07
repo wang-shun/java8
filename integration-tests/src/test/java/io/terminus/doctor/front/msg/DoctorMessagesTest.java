@@ -5,10 +5,13 @@ import configuration.front.FrontWebConfiguration;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.front.BaseFrontWebTest;
 import io.terminus.doctor.msg.model.DoctorMessage;
+import io.terminus.doctor.msg.model.DoctorMessageRuleTemplate;
 import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.boot.test.SpringApplicationConfiguration;
 import utils.HttpGetRequest;
+
+import java.util.List;
 
 /**
  * Desc: 消息中心
@@ -65,5 +68,39 @@ public class DoctorMessagesTest extends BaseFrontWebTest {
                 .build();
         DoctorMessage message = this.restTemplate.getForObject(url, DoctorMessage.class, ImmutableMap.of("port", this.port));
         System.out.println(message);
+    }
+
+    @Test
+    public void test_SYS_listTemplates() {
+        String url = HttpGetRequest.url("http://localhost:{port}/api/doctor/msg/sys/templates").build();
+        List templates = this.restTemplate.getForObject(url, List.class, ImmutableMap.of("port", this.port));
+        System.out.println(templates.size() + "----" + templates);
+    }
+
+    @Test
+    public void test_WARN_listTemplates() {
+        String url = HttpGetRequest.url("http://localhost:{port}/api/doctor/msg/warn/templates").build();
+        List templates = this.restTemplate.getForObject(url, List.class, ImmutableMap.of("port", this.port));
+        System.out.println(templates.size() + "----" + templates);
+    }
+
+    @Test
+    public void test_DELETE_Template() {
+        // 查询
+        String url = HttpGetRequest.url("http://localhost:{port}/api/doctor/msg/template/detail")
+                .params("id", 1)
+                .build();
+        DoctorMessageRuleTemplate template = this.restTemplate.getForObject(url, DoctorMessageRuleTemplate.class, ImmutableMap.of("port", this.port));
+        System.out.println(template);
+        // 删除
+        url = "http://localhost:"+ this.port +"/api/doctor/msg/template?id=1";
+        this.restTemplate.delete(url);
+
+        // 查询
+        url = HttpGetRequest.url("http://localhost:{port}/api/doctor/msg/template/detail")
+                .params("id", 1)
+                .build();
+        template = this.restTemplate.getForObject(url, DoctorMessageRuleTemplate.class, ImmutableMap.of("port", this.port));
+        System.out.println(template);
     }
 }

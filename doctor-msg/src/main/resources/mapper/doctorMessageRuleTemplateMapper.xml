@@ -77,26 +77,42 @@
     </delete>
 
     <sql id="criteria">
-        <where>
-            <if test="name != null">AND = #{name}</if>
-            <if test="type != null">AND type = #{type}</if>
-            <if test="category != null">AND category = #{category}</if>
-            <if test="status != null">AND status = #{status}</if>
-            <if test="messageTemplate != null">AND message_template = #{messageTemplate}</if>
-            <if test="producer != null">AND producer = #{producer}</if>
-        </where>
+        <if test="name != null">AND = #{name}</if>
+        <if test="type != null">AND type = #{type}</if>
+        <if test="category != null">AND category = #{category}</if>
+        <if test="status != null">AND status = #{status}</if>
+        <if test="messageTemplate != null">AND message_template = #{messageTemplate}</if>
+        <if test="producer != null">AND producer = #{producer}</if>
+        <if test="types != null &amp;&amp; types.size() > 0">
+            AND `type` IN
+            <foreach collection="types" item="i" open="(" separator="," close=")">
+                #{i}
+            </foreach>
+        </if>
     </sql>
 
     <select id="list" parameterType="map" resultMap="DoctorMessageRuleTemplateMap">
         SELECT <include refid="cols_all"/>
         FROM <include refid="tb"/>
-        <include refid="criteria"/>
+        <where>
+            <include refid="criteria"/>
+        </where>
     </select>
 
+    <select id="listNotDelete" parameterType="map" resultMap="DoctorMessageRuleTemplateMap">
+        SELECT <include refid="cols_all"/>
+        FROM <include refid="tb"/>
+        <where>
+            `status` != -1
+            <include refid="criteria"/>
+        </where>
+    </select>
+
+    <!-- 根据消息种类获取 -->
     <select id="findByCategory" parameterType="int" resultMap="DoctorMessageRuleTemplateMap">
         SELECT <include refid="cols_all"/>
         FROM <include refid="tb"/>
-        WHERE category = #{category}
+        WHERE category = #{category} AND `status` != -1
     </select>
 
     <!-- 获取所有的预警和警报消息 -->

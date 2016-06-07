@@ -126,24 +126,31 @@ INSERT INTO doctor_units VALUES (1, 'unitName', null, now(), now());
 
 
 -- start 消息相关
-INSERT INTO `doctor_message_rule_templates` (`id`, `name`, `type`, `category`, `rule_value`, `status`, `message_template`, `content`, `producer`, `describe`, `created_at`, `updated_at`, `updated_by`)
+INSERT INTO `doctor_message_rule_templates`
+(name, type, category, rule_value, status, message_template, content, producer, `describe`, created_at, updated_at, updated_by)
 VALUES
-(1,'系统消息测试',0,0,
-'{\n
-    \"frequence\":-1,\n
-    \"channels\":\"0\",\n
-    \"url\":\"http://m.doctor.com/message/message-detail\"\n
-}',1,NULL,'系统消息测试','sysMessageProducer','系统消息测试','2016-06-03 11:39:26','2016-06-03 11:39:26',NULL),
-(2,'待配种母猪提示',1,1,
-'{\n
-    \"values\":[\n
-          {\"id\":1, \"ruleType\":2,\"leftValue\":7, \"describe\":\"断奶日期间隔(天)\"},\n
-          {\"id\":2, \"ruleType\":2,\"leftValue\":7, \"describe\":\"初配日期间隔(天)\"}\n
-    ],\n
-    \"frequence\":72,\n
-    \"channels\":\"0,1,2,3\",\n
-    \"url\":\"http://m.doctor.com/message/message-detail\"\n
-}',1,'template.sow',NULL,'sowBreedingProducer','待配种母猪提示','2016-06-03 11:39:26','2016-06-03 11:39:26',NULL);
+-- 系统消息(可配多少小时后)
+('系统消息测试', 0, 0, '{"frequence":-1,"channels":"0,1,2,3"}', 1, null, '系统消息测试', 'sysMessageProducer', '系统消息测试', now(), now(), null),
+-- id:1 (断奶、流产、返情日期间隔(天))
+('待配种母猪提示', 1, 1, '{"values":[{"id":1, "ruleType":1,"value":7, "describe":"断奶、流产、返情日期间隔(天)"}],"frequence":24,"channels":"0,1,2,3"}', 1, 'sow.breed', null, 'sowBreedingProducer', '待配种母猪提示', now(), now(), null),
+('待配种母猪警报', 2, 1, '{"values":[{"id":1, "ruleType":1,"value":21, "describe":"断奶、流产、返情日期间隔(天)"}],"frequence":24,"channels":"0,1,2,3"}', 1, 'sow.breed', null, 'sowBreedingProducer', '待配种母猪警报', now(), now(), null),
+-- id:1 (母猪已配种时间间隔(天))
+('母猪需妊娠检查提示', 1, 2,'{"values":[{"id":1, "ruleType":2,"leftValue":19,"rightValue":25, "describe":"母猪已配种时间间隔(天)"}],"frequence":24,"channels":"0,1,2,3"}',1, 'sow.preg.check', null, 'sowPregCheckProducer', '母猪需妊娠检查提示', now(), now(), null),
+-- 母猪需转入妊娠舍提示
+('母猪需转入妊娠舍提示', 1, 3,'{"frequence":24,"channels":"0,1,2,3"}',1, 'sow.preg.home', null, 'sowPregHomeProducer', '母猪需转入妊娠舍提示', now(), now(), null),
+-- id:1 (预产期提前多少天提醒)
+('母猪预产期提示', 1, 4,'{"values":[{"id":1, "ruleType":1,"value":7, "describe":"预产期提前多少天提醒"}],"frequence":24,"channels":"0,1,2,3"}',1, 'sow.birth.date', null, 'sowBirthDateProducer', '母猪预产期提示', now(), now(), null),
+-- id:1 (母猪分娩日期起的天数)
+('母猪需断奶提示', 1, 5,'{"values":[{"id":1, "ruleType":1,"value":21, "describe":"母猪分娩日期起的天数"}],"frequence":24,"channels":"0,1,2,3"}',
+1, 'sow.need.wean', null, 'sowNeedWeanProducer', '母猪需断奶提示', now(), now(), null),
+('母猪需断奶警报', 2, 5,'{"values":[{"id":1, "ruleType":1,"value":35, "describe":"母猪分娩日期起的天数"}],"frequence":24,"channels":"0,1,2,3"}',
+1, 'sow.need.wean', null, 'sowNeedWeanProducer', '母猪需断奶警报', now(), now(), null),
+-- id:1 (母猪胎次)
+('母猪应淘汰提示', 1, 6,'{"values":[{"id":1, "ruleType":2, "leftValue":9,"rightValue":10, "describe":"胎次"}],"frequence":24,"channels":"0,1,2,3"}',1, 'sow.eliminate', null, 'sowEliminateProducer', '母猪应淘汰提示', now(), now(), null),
+-- id:1 (母猪配种日期起的天数)
+('母猪未产仔警报', 2, 10,'{"values":[{"id":1, "ruleType":1,"value":120, "describe":"母猪配种日期起的天数"}],"frequence":24,"channels":"0,1,2,3"}',1, 'sow.not.litter', null, 'sowNotLitterProducer', '母猪未产仔警报', now(), now(), null)
+;
+
 
 INSERT INTO `doctor_messages` (`id`, `farm_id`, `rule_id`, `role_id`, `user_id`, `template_id`, `message_template`, `type`, `category`, `data`, `channel`, `url`, `status`, `sended_at`, `failed_by`, `created_by`, `created_at`, `updated_at`)
 VALUES
