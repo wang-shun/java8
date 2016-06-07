@@ -4,12 +4,16 @@
 
 package io.terminus.doctor;
 
+import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.TestRestTemplate;
 import org.springframework.boot.test.WebIntegrationTest;
-import org.springframework.http.*;
-import org.springframework.test.context.ActiveProfiles;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -28,6 +32,13 @@ public abstract class BaseWebTest {
 
     @Value("${local.server.port}")
     protected int port;
+
+    protected String gateway;
+
+    @Before
+    public void getGateway() {
+        this.gateway = url("");
+    }
 
     protected <T> T getForObject(String url, Class<T> responseType) {
         return restTemplate.getForObject(url(url), responseType);
