@@ -18,7 +18,8 @@ import java.util.List;
  */
 @Slf4j
 @Service
-public class DoctorMessageRuleRoleReadServiceImpl implements DoctorMessageRuleRoleReadService {
+public class DoctorMessageRuleRoleReadServiceImpl implements DoctorMessageRuleRoleReadService
+{
 
     private final DoctorMessageRuleRoleDao doctorMessageRuleRoleDao;
 
@@ -54,6 +55,16 @@ public class DoctorMessageRuleRoleReadServiceImpl implements DoctorMessageRuleRo
         } catch (Exception e) {
             log.error("find messageRuleRole by tplId and farmId failed, tplId:{}, farmId:{}",
                     templateId, farmId, Throwables.getStackTraceAsString(e));
+            return Response.fail("messageRuleRole.find.fail");
+        }
+    }
+
+    @Override
+    public Response<List<DoctorMessageRuleRole>> findByRuleId(Long ruleId) {
+        try{
+            return Response.ok(doctorMessageRuleRoleDao.findByRuleId(ruleId));
+        } catch (Exception e) {
+            log.error("find messageRuleRole by ruleId failed, ruleId:{}, ", ruleId, Throwables.getStackTraceAsString(e));
             return Response.fail("messageRuleRole.find.fail");
         }
     }

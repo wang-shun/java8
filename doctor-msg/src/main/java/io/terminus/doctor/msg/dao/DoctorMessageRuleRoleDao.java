@@ -35,4 +35,13 @@ public class DoctorMessageRuleRoleDao extends MyBatisDao<DoctorMessageRuleRole> 
         return getSqlSession().selectList(sqlId("findByTplAndFarmId"),
                 ImmutableMap.of("templateId", tplId, "farmId", farmId));
     }
+
+    /**
+     * 根据规则id获取
+     * @param ruleId    规则id
+     * @return
+     */
+    public List<DoctorMessageRuleRole> findByRuleId(Long ruleId) {
+        return getSqlSession().selectList(sqlId("findByRuleId"), ruleId);
+    }
 }

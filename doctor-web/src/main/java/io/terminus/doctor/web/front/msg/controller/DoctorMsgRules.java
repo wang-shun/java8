@@ -1,10 +1,18 @@
 package io.terminus.doctor.web.front.msg.controller;
 
+import com.google.api.client.util.Lists;
 import com.google.common.base.Preconditions;
+import io.terminus.common.utils.BeanMapper;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.msg.model.DoctorMessageRule;
+import io.terminus.doctor.msg.model.DoctorMessageRuleRole;
 import io.terminus.doctor.msg.service.DoctorMessageRuleReadService;
+import io.terminus.doctor.msg.service.DoctorMessageRuleRoleReadService;
+import io.terminus.doctor.msg.service.DoctorMessageRuleRoleWriteService;
 import io.terminus.doctor.msg.service.DoctorMessageRuleWriteService;
+import io.terminus.doctor.user.model.SubRole;
+import io.terminus.doctor.user.service.SubRoleReadService;
+import io.terminus.doctor.web.front.msg.dto.MsgRoleDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -29,11 +37,23 @@ public class DoctorMsgRules {
     private final DoctorMessageRuleReadService doctorMessageRuleReadService;
     private final DoctorMessageRuleWriteService doctorMessageRuleWriteService;
 
+    private final DoctorMessageRuleRoleReadService doctorMessageRuleRoleReadService;
+    private final DoctorMessageRuleRoleWriteService doctorMessageRuleRoleWriteService;
+
+    private final SubRoleReadService subRoleReadService;
+
+
     @Autowired
     public DoctorMsgRules(DoctorMessageRuleReadService doctorMessageRuleReadService,
-                          DoctorMessageRuleWriteService doctorMessageRuleWriteService) {
+                          DoctorMessageRuleWriteService doctorMessageRuleWriteService,
+                          DoctorMessageRuleRoleReadService doctorMessageRuleRoleReadService,
+                          DoctorMessageRuleRoleWriteService doctorMessageRuleRoleWriteService,
+                          SubRoleReadService subRoleReadService) {
         this.doctorMessageRuleReadService = doctorMessageRuleReadService;
         this.doctorMessageRuleWriteService = doctorMessageRuleWriteService;
+        this.doctorMessageRuleRoleReadService = doctorMessageRuleRoleReadService;
+        this.doctorMessageRuleRoleWriteService = doctorMessageRuleRoleWriteService;
+        this.subRoleReadService = subRoleReadService;
     }
 
     /**
@@ -41,7 +61,7 @@ public class DoctorMsgRules {
      * @param farmId    猪场id
      * @return
      */
-    @RequestMapping(value = "/rule/farm", method = RequestMethod.GET)
+    @RequestMapping(value = "/rule/farmId", method = RequestMethod.GET)
     public List<DoctorMessageRule> listRulesByFarmId(@RequestParam Long farmId) {
         return RespHelper.or500(doctorMessageRuleReadService.findMessageRulesByFarmId(farmId));
     }
@@ -65,5 +85,24 @@ public class DoctorMsgRules {
     public Boolean updateRule(@RequestBody DoctorMessageRule doctorMessageRule) {
         Preconditions.checkNotNull(doctorMessageRule, "template.rule.not.null");
         return RespHelper.or500(doctorMessageRuleWriteService.updateMessageRule(doctorMessageRule));
+    }
+
+    /**
+     * 获取角色想绑定的规则
+     * @param ruleId
+     */
+    @RequestMapping(value = "/role/ruleId", method = RequestMethod.POST)
+    public List<MsgRoleDto> findRolesByRuleId(@RequestParam Long ruleId) {
+        List<MsgRoleDto> dtos = Lists.newArrayList();
+        List<DoctorMessageRuleRole> ruleRoles = RespHelper.or500(doctorMessageRuleRoleReadService.findByRuleId(ruleId));
+        for (int i = 0; ruleRoles != null && i < ruleRoles.size(); i++) {
+            DoctorMessageRuleRole ruleRole = ruleRoles.get(i);
+            MsgRoleDto msgRoleDto = BeanMapper.map(ruleRole, MsgRoleDto.class);
+            // 获取角色信息
+            SubRole subRole = RespHelper.or500(subRoleReadService.findById(ruleRole.getRoleId()));
+            msgRoleDto.setRoleName(subRole.getName());
+            dtos.add(msgRoleDto);
+        }
+        return dtos;
     }
 }

@@ -38,4 +38,11 @@ public interface DoctorMessageRuleRoleReadService {
      */
     Response<List<DoctorMessageRuleRole>> findByTplAndFarmId(Long templateId, Long farmId);
 
+    /**
+     * 根据规则id获取
+     * @param ruleId    规则id
+     * @return
+     */
+    Response<List<DoctorMessageRuleRole>> findByRuleId(Long ruleId);
+
 }
