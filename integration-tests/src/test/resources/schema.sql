@@ -880,6 +880,40 @@ CREATE TABLE `doctor_service_reviews` (
   PRIMARY KEY (`id`)
 )  COMMENT='用户服务审批表';
 
+CREATE TABLE `doctor_service_status` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `user_id` bigint(20) NOT NULL,
+  `pigdoctor_status` smallint(6) NOT NULL DEFAULT '0' COMMENT '猪场软件服务状态，1-开通，0-关闭',
+  `pigdoctor_reason` varchar(256) DEFAULT NULL COMMENT '冗余，猪场软件审批不通过或被冻结申请资格的原因',
+  `pigdoctor_review_status` smallint(6) DEFAULT NULL COMMENT '冗余，猪场软件服务的审批状态',
+  `pigmall_status` smallint(6) NOT NULL DEFAULT '0' COMMENT '电商服务状态，1-开通，0-关闭',
+  `pigmall_reason` varchar(256) DEFAULT NULL COMMENT '冗余，电商服务审批不通过或被冻结申请资格的原因',
+  `pigmall_review_status` smallint(6) DEFAULT NULL COMMENT '冗余，电商服务的审批状态',
+  `neverest_status` smallint(6) NOT NULL DEFAULT '0' COMMENT '大数据服务状态，1-开通，0-关闭',
+  `neverest_reason` varchar(256) DEFAULT NULL COMMENT '冗余，大数据服务审批不通过或被冻结申请资格的原因',
+  `neverest_review_status` smallint(6) DEFAULT NULL COMMENT '冗余，大数据服务的审批状态',
+  `pigtrade_status` smallint(6) NOT NULL DEFAULT '0' COMMENT '生猪交易服务状态，1-开通，0-关闭',
+  `pigtrade_reason` varchar(256) DEFAULT NULL COMMENT '冗余，生猪交易审批不通过或被冻结申请资格的原因',
+  `pigtrade_review_status` smallint(6) DEFAULT NULL COMMENT '冗余，生猪交易服务的审批状态',
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `idx_doctor_service_status_UNIQUE` (`user_id`)
+) COMMENT='用户服务状态表';
+
+CREATE TABLE `doctor_service_review_tracks` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `user_id` bigint(20) NOT NULL,
+  `type` smallint(6) NOT NULL COMMENT '服务类型',
+  `old_status` smallint(6) NOT NULL COMMENT '原状态',
+  `new_status` smallint(6) NOT NULL COMMENT '新状态',
+  `reason` varchar(256) DEFAULT NULL COMMENT '状态变更的原因',
+  `reviewer_id` bigint(20) DEFAULT NULL COMMENT '操作人id',
+  `reviewer_name` varchar(64) DEFAULT NULL COMMENT '操作人姓名',
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) COMMENT='用户服务状态变更历史记录表';
 
 CREATE TABLE `doctor_group_snapshots` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '自增主键',

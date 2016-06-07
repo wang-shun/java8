@@ -162,18 +162,21 @@ public class DoctorServiceReviewManager {
 
         List<Long> newFarmIds = Lists.newArrayList(); //将被保存下来的猪场
         //保存猪场信息
-        farms.stream().forEach(farm -> {
-            farm.setOrgName(org.getName());
-            farm.setProvinceName(RespHelper.orServEx(addressReadService.findById(farm.getProvinceId())).getName());
-            farm.setCityName(RespHelper.orServEx(addressReadService.findById(farm.getCityId())).getName());
-            farm.setDistrictName(RespHelper.orServEx(addressReadService.findById(farm.getDistrictId())).getName());
-            if (farm.getId() != null) {
-                doctorFarmDao.update(farm);
-            } else {
-                doctorFarmDao.create(farm);
-            }
-            newFarmIds.add(farm.getId());
-        });
+        if(farms != null){
+            farms.stream().forEach(farm -> {
+                farm.setOrgName(org.getName());
+                farm.setOrgId(org.getId());
+                farm.setProvinceName(RespHelper.orServEx(addressReadService.findById(farm.getProvinceId())).getName());
+                farm.setCityName(RespHelper.orServEx(addressReadService.findById(farm.getCityId())).getName());
+                farm.setDistrictName(RespHelper.orServEx(addressReadService.findById(farm.getDistrictId())).getName());
+                if (farm.getId() != null) {
+                    doctorFarmDao.update(farm);
+                } else {
+                    doctorFarmDao.create(farm);
+                }
+                newFarmIds.add(farm.getId());
+            });
+        }
 
         String newFarmIdStr = Joiner.on(",").join(newFarmIds);
         //查询并保存permission
@@ -199,6 +202,7 @@ public class DoctorServiceReviewManager {
             doctorUserDataPermissionDao.create(permission);
         }
 
+        //更新审批状态, 记录track, 更新服务状态
         this.updateServiceReviewStatus(user, userId, DoctorServiceReview.Type.PIG_DOCTOR, DoctorServiceReview.Status.REVIEW,
                 DoctorServiceReview.Status.OK, null);
     }

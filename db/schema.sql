@@ -1132,7 +1132,7 @@ CREATE TABLE `doctor_service_status` (
   `updated_at` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `idx_doctor_service_status_UNIQUE` (`user_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8 COMMENT='用户服务状态表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='用户服务状态表';
 
 -- 数据回滚相关
 -- 猪群快照表
