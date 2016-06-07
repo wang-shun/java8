@@ -38,7 +38,7 @@ import java.util.stream.Collectors;
 
 /**
  * Desc: 母猪预产期提示
- *          1. 妊娠检查阳性 (预产期: 最近一次配种时间 + 3月)
+ *          1. 妊娠检查阳性 (预产期: 最近一次配种时间 + 3月, 当前是页面输入项)
  * Mail: chk@terminus.io
  * Created by icemimosa
  * Date: 16/6/5
@@ -101,7 +101,7 @@ public class SowBirthDateProducer extends AbstractProducer {
                     // 获取预产期, 并校验日期
                     DateTime birthDate = getBirthDate(pigDto);
                     if (birthDate != null && ruleValueMap.get(1) != null) {
-                        if (DateTime.now().isAfter(birthDate.minusHours(ruleValueMap.get(1).getValue().intValue()))) {
+                        if (DateTime.now().isAfter(birthDate.minusDays(ruleValueMap.get(1).getValue().intValue()))) {
                             messages.addAll(getMessage(pigDto, rule.getChannels(), ruleRole, subUsers, timeDiff, rule.getUrl()));
                         }
                     }
@@ -144,7 +144,7 @@ public class SowBirthDateProducer extends AbstractProducer {
                 return new DateTime(date);
             }
         } catch (Exception e) {
-            log.error("", Throwables.getStackTraceAsString(e));
+            log.error("[SowBirthDateProducer] get birth date failed, cause by {}", Throwables.getStackTraceAsString(e));
         }
         return null;
     }

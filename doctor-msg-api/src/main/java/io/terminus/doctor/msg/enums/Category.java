@@ -19,6 +19,7 @@ public enum Category {
     SOW_BIRTHDATE(4,"母猪预产期提示"),
     SOW_NEEDWEAN(5,"母猪需断奶提示"),
     SOW_ELIMINATE(6,"母猪应淘汰提示"),
+    SOW_NOTLITTER(10,"母猪未产仔警报"),
 
     BOAR_ELIMINATE(7,"公猪应淘汰提示"),
 

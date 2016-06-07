@@ -30,45 +30,47 @@ import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
- * Desc: 待配种母猪提示
+ * Desc: 母猪未产仔警报
  *
- *      1. 断奶/流产/返情日期
+ *          1. 距离最近一次配种日期的天数
  *
  * Mail: chk@terminus.io
  * Created by icemimosa
- * Date: 16/6/1
+ * Date: 16/6/7
  */
 @Component
 @Slf4j
-public class SowBreedingProducer extends AbstractProducer {
+public class SowNotLitterProducer extends AbstractProducer {
 
     private final DoctorPigReadService doctorPigReadService;
 
     @Autowired
-    public SowBreedingProducer(DoctorMessageRuleTemplateReadService doctorMessageRuleTemplateReadService,
-                               DoctorMessageRuleReadService doctorMessageRuleReadService,
-                               DoctorMessageRuleRoleReadService doctorMessageRuleRoleReadService,
-                               DoctorMessageReadService doctorMessageReadService,
-                               DoctorMessageWriteService doctorMessageWriteService,
-                               DoctorPigReadService doctorPigReadService) {
+    public SowNotLitterProducer(DoctorMessageRuleTemplateReadService doctorMessageRuleTemplateReadService,
+                                DoctorMessageRuleReadService doctorMessageRuleReadService,
+                                DoctorMessageRuleRoleReadService doctorMessageRuleRoleReadService,
+                                DoctorMessageReadService doctorMessageReadService,
+                                DoctorMessageWriteService doctorMessageWriteService,
+                                DoctorPigReadService doctorPigReadService) {
         super(doctorMessageRuleTemplateReadService,
                 doctorMessageRuleReadService,
                 doctorMessageRuleRoleReadService,
                 doctorMessageReadService,
                 doctorMessageWriteService,
-                Category.SOW_BREEDING);
+                Category.SOW_NOTLITTER);
         this.doctorPigReadService = doctorPigReadService;
     }
 
     @Override
     protected List<DoctorMessage> message(DoctorMessageRuleRole ruleRole, List<SubUser> subUsers) {
-        log.info("待配种母猪提示消息产生 --- SowBreedingProducer 开始执行");
+
+        log.info("母猪未产仔警报 --- SowNotLitterProducer 开始执行");
         List<DoctorMessage> messages = Lists.newArrayList();
 
         Rule rule = ruleRole.getRule();
@@ -85,34 +87,33 @@ public class SowBreedingProducer extends AbstractProducer {
                     DataRange.FARM.getKey(), ruleRole.getFarmId(), DoctorPig.PIG_TYPE.SOW.getKey()));
             // 计算size, 分批处理
             Long page = getPageSize(total, 100L);
-            DoctorPig pig =DoctorPig.builder()
+            DoctorPig pig = DoctorPig.builder()
                     .farmId(ruleRole.getFarmId())
                     .pigType(DoctorPig.PIG_TYPE.SOW.getKey())
                     .build();
             for (int i = 1; i <= page; i++) {
                 List<DoctorPigInfoDto> pigs = RespHelper.orServEx(doctorPigReadService.pagingDoctorInfoDtoByPig(pig, i, 100)).getData();
-                // 过滤出 断奶/流产/空怀 的母猪
                 pigs = pigs.stream().filter(pigDto ->
-                        Objects.equals(PigStatus.Wean.getKey(), pigDto.getStatus())
-                                || Objects.equals(PigStatus.Abortion.getKey(), pigDto.getStatus())
-                                || Objects.equals(PigStatus.KongHuai.getKey(), pigDto.getStatus())
-                                || Objects.equals(PigStatus.Entry.getKey(), pigDto.getStatus())
+                        Objects.equals(PigStatus.Entry.getKey(), pigDto.getStatus())
+                                || Objects.equals(PigStatus.Pregnancy.getKey(), pigDto.getStatus())
+                                || Objects.equals(PigStatus.Farrow.getKey(), pigDto.getStatus())
                 ).collect(Collectors.toList());
                 // 处理每个猪
                 for (int j = 0; pigs != null && j < pigs.size(); j++) {
                     DoctorPigInfoDto pigDto = pigs.get(j);
                     // 母猪的updatedAt与当前时间差 (天)
                     Double timeDiff = (double) (DateTime.now().minus(pigDto.getUpdatedAt().getTime()).getMillis() / 86400000);
-
-                    // 获取配置的天数, 并判断
-                    if (ruleValueMap.get(1) != null &&
-                            new DateTime(pigDto.getUpdatedAt()).isBefore(DateTime.now().minusDays(ruleValueMap.get(1).getValue().intValue()))) {
-                        messages.addAll(getMessage(pigDto, rule.getChannels(), ruleRole, subUsers, timeDiff, rule.getUrl()));
+                    DateTime matingDate = getBreedingDate(pigDto);
+                    if (ruleValueMap.get(1) != null && matingDate != null) {
+                        if (DateTime.now().minusDays(ruleValueMap.get(1).getValue().intValue()).isAfter(matingDate)) {
+                            messages.addAll(getMessage(pigDto, rule.getChannels(), ruleRole, subUsers, timeDiff, rule.getUrl()));
+                        }
                     }
                 }
             }
         }
-        log.info("待配种母猪提示消息产生 --- SowBreedingProducer 结束执行, 产生 {} 条消息", messages.size());
+
+        log.info("母猪未产仔警报 --- SowNotLitterProducer 结束执行, 产生 {} 条消息", messages.size());
         return messages;
     }
 
@@ -132,5 +133,19 @@ public class SowBreedingProducer extends AbstractProducer {
             }
         });
         return messages;
+    }
+
+    private DateTime getBreedingDate(DoctorPigInfoDto pigDto) {
+        // 获取配种日期
+        try{
+            // @see DoctorMatingDto
+            Date date = (Date) MAPPER.readValue(pigDto.getExtraTrack(), Map.class).get("matingDate");
+            if (date != null) {
+                return new DateTime(date);
+            }
+        } catch (Exception e) {
+            log.error("[SowBirthDateProducer] get birth date failed, cause by {}", Throwables.getStackTraceAsString(e));
+        }
+        return null;
     }
 }
