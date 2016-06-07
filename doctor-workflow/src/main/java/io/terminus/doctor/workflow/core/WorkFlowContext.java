@@ -7,9 +7,10 @@ import io.terminus.doctor.workflow.utils.AssertHelper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -22,7 +23,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 @Slf4j
 @Component
-public class WorkFlowContext implements Context{
+public class WorkFlowContext implements Context, ApplicationListener<ContextRefreshedEvent> {
 
     @Autowired
     private ApplicationContext applicationContext;
@@ -32,9 +33,25 @@ public class WorkFlowContext implements Context{
      */
     private ConcurrentHashMap context;
 
-    @PostConstruct
-    public void initContext() {
-        context = new ConcurrentHashMap();
+//    @PostConstruct
+//    public void initContext() {
+//        context = new ConcurrentHashMap();
+//        if(applicationContext == null) {
+//            log.error("[workflow context] -> get spring applicationContext failed");
+//            AssertHelper.throwException("get spring applicationContext failed");
+//        }
+//        // 1. 初始化拦截器
+//        initInterceptors(applicationContext.getBeansOfType(Interceptor.class));
+//
+//        // 2. 初始化事件
+//        initEventHandlers(applicationContext.getBeansOfType(IHandler.class));
+//
+//    }
+
+    @Override
+    public void onApplicationEvent(ContextRefreshedEvent event) {
+        if (event.getApplicationContext ().getParent() == null) {
+            context = new ConcurrentHashMap();
         if(applicationContext == null) {
             log.error("[workflow context] -> get spring applicationContext failed");
             AssertHelper.throwException("get spring applicationContext failed");
@@ -44,7 +61,7 @@ public class WorkFlowContext implements Context{
 
         // 2. 初始化事件
         initEventHandlers(applicationContext.getBeansOfType(IHandler.class));
-
+        }
     }
 
     @Override
