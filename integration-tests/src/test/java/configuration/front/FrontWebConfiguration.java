@@ -36,6 +36,8 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.FilterType;
 import org.springframework.context.annotation.Import;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
@@ -61,7 +63,7 @@ import java.util.List;
         DoctorWarehouseConfiguration.class,
         DoctorCoreWebConfiguration.class,
         OtherSystemServiceConfig.class,
-        WebAuthenticationConfiguration.class,
+        AuthenticationConfiguration.class,
         MsgWebConfig.class,
         LuoSiMaoSmsServiceConfig.class,
         CommonEmailServiceConfig.class
@@ -69,6 +71,7 @@ import java.util.List;
 @ComponentScan(value = {
         "io.terminus.doctor.web.core.component",
         "io.terminus.doctor.web.front",
+        "io.terminus.parana.auth.web"
 }, excludeFilters = {
         @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = {
                 DoctorHbsHelpers.class,
@@ -80,7 +83,7 @@ import java.util.List;
 
 })
 @EnableWebMvc
-@EnableAutoConfiguration(excludeName = {"io.terminus.pampas.openplatform.core.OpenPlatformAutoConfiguration"})
+@Order(Ordered.HIGHEST_PRECEDENCE)
 public class FrontWebConfiguration extends WebMvcConfigurerAdapter {
 
     @Override
