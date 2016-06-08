@@ -783,9 +783,9 @@ CREATE TABLE `doctor_user_operators` (
   `extra_json` varchar(1024) DEFAULT NULL COMMENT '运营额外信息, 建议json字符串',
   `created_at` datetime NOT NULL,
   `updated_at` datetime NOT NULL,
-  PRIMARY KEY (`id`),
-  KEY `idx_user_operator_user_id` (`user_id`),
-  KEY `idx_user_operator_role_id` (`role_id`)
+  PRIMARY KEY (`id`)
+  -- ,KEY `idx_user_operator_user_id` (`user_id`),
+  -- KEY `idx_user_operator_role_id` (`role_id`)
 )  COMMENT='用户运营表';
 
 CREATE TABLE `doctor_operator_roles` (
@@ -814,10 +814,10 @@ CREATE TABLE `doctor_user_subs` (
   `extra_json` varchar(1024) DEFAULT NULL COMMENT '用户额外信息, 建议json字符串',
   `created_at` datetime NOT NULL,
   `updated_at` datetime NOT NULL,
-  PRIMARY KEY (`id`),
-  KEY `idx_user_sub_user_id` (`user_id`),
-  KEY `idx_user_parent_sub_id` (`parent_user_id`),
-  KEY `idx_user_sub_roles_id` (`role_id`)
+  PRIMARY KEY (`id`)
+  -- ,KEY `idx_user_sub_user_id` (`user_id`),
+  -- KEY `idx_user_parent_sub_id` (`parent_user_id`),
+  -- KEY `idx_user_sub_roles_id` (`role_id`)
 ) COMMENT='猪场子账户表';
 
 CREATE TABLE `doctor_sub_roles` (
@@ -831,8 +831,8 @@ CREATE TABLE `doctor_sub_roles` (
   `allow_json` varchar(1024) DEFAULT NULL,
   `created_at` datetime NOT NULL,
   `updated_at` datetime NOT NULL,
-  PRIMARY KEY (`id`),
-  KEY `idx_sub_roles_user_id` (`user_id`)
+  PRIMARY KEY (`id`)
+  -- ,KEY `idx_sub_roles_user_id` (`user_id`)
 )  COMMENT='子账号角色表';
 
 
@@ -844,8 +844,8 @@ CREATE TABLE `doctor_user_primarys` (
   `extra_json` varchar(1024) DEFAULT NULL COMMENT '用户额外信息, 建议json字符串',
   `created_at` datetime NOT NULL,
   `updated_at` datetime NOT NULL,
-  PRIMARY KEY (`id`),
-  KEY `idx_user_primary_user_id` (`user_id`)
+  PRIMARY KEY (`id`)
+  -- ,KEY `idx_user_primary_user_id` (`user_id`)
 )  COMMENT='猪场主账户表';
 
 

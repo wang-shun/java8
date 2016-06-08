@@ -15,6 +15,7 @@ import io.terminus.doctor.user.service.SubRoleReadService;
 import io.terminus.doctor.web.front.msg.dto.MsgRoleDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -81,7 +82,7 @@ public class DoctorMsgRules {
      * @param doctorMessageRule
      * @return
      */
-    @RequestMapping(value = "/rule", method = RequestMethod.POST)
+    @RequestMapping(value = "/rule", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public Boolean updateRule(@RequestBody DoctorMessageRule doctorMessageRule) {
         Preconditions.checkNotNull(doctorMessageRule, "template.rule.not.null");
         return RespHelper.or500(doctorMessageRuleWriteService.updateMessageRule(doctorMessageRule));
@@ -91,7 +92,7 @@ public class DoctorMsgRules {
      * 获取角色想绑定的规则
      * @param ruleId
      */
-    @RequestMapping(value = "/role/ruleId", method = RequestMethod.POST)
+    @RequestMapping(value = "/role/ruleId", method = RequestMethod.GET)
     public List<MsgRoleDto> findRolesByRuleId(@RequestParam Long ruleId) {
         List<MsgRoleDto> dtos = Lists.newArrayList();
         List<DoctorMessageRuleRole> ruleRoles = RespHelper.or500(doctorMessageRuleRoleReadService.findByRuleId(ruleId));
@@ -104,5 +105,27 @@ public class DoctorMsgRules {
             dtos.add(msgRoleDto);
         }
         return dtos;
+    }
+
+    /**
+     * 关联rule模板与角色
+     * @return
+     */
+    @RequestMapping(value = "/role/relative/ruleId", method = RequestMethod.POST)
+    public Boolean relateRuleRolesByRuleId(@RequestParam("ruleId") Long ruleId,
+                               @RequestParam("roleIds") List<Long> roleIds) {
+        Preconditions.checkNotNull(ruleId, "template.ruleId.not.null");
+        return RespHelper.or500(doctorMessageRuleRoleWriteService.relateRuleRolesByRuleId(ruleId, roleIds));
+    }
+
+    /**
+     * 关联rule模板与角色
+     * @return
+     */
+    @RequestMapping(value = "/role/relative/roleId", method = RequestMethod.POST)
+    public Boolean relateRuleRolesByRoleId(@RequestParam("roleId") Long roleId,
+                                           @RequestParam("ruleIds") List<Long> ruleIds) {
+        Preconditions.checkNotNull(roleId, "template.roleId.not.null");
+        return RespHelper.or500(doctorMessageRuleRoleWriteService.relateRuleRolesByRoleId(roleId, ruleIds));
     }
 }

@@ -44,4 +44,24 @@ public class DoctorMessageRuleRoleDao extends MyBatisDao<DoctorMessageRuleRole> 
     public List<DoctorMessageRuleRole> findByRuleId(Long ruleId) {
         return getSqlSession().selectList(sqlId("findByRuleId"), ruleId);
     }
+
+    /**
+     * 根据角色id获取
+     * @param roleId    规则id
+     * @return
+     */
+    public List<DoctorMessageRuleRole> findByRoleId(Long roleId) {
+        return getSqlSession().selectList(sqlId("findByRoleId"), roleId);
+    }
+
+    /**
+     * 根据规则id和角色id查询
+     * @param ruleId    规则id
+     * @param roleId    角色id
+     * @return
+     */
+    public DoctorMessageRuleRole findByRuleAndRoleId(Long ruleId, Long roleId) {
+        return getSqlSession().selectOne(sqlId("findByRuleAndRoleId"),
+                ImmutableMap.of("ruleId", ruleId, "roleId", roleId));
+    }
 }

@@ -176,7 +176,7 @@ public class DoctorMessages {
      * @param doctorMessageRuleTemplate
      * @return
      */
-    @RequestMapping(value = "/template", method = RequestMethod.POST)
+    @RequestMapping(value = "/template", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public Boolean createOrUpdateTemplate(@RequestBody DoctorMessageRuleTemplate doctorMessageRuleTemplate) {
         Preconditions.checkNotNull(doctorMessageRuleTemplate, "template.not.null");
         if (doctorMessageRuleTemplate.getId() == null) {
