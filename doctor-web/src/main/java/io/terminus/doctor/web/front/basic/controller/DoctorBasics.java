@@ -93,7 +93,7 @@ public class DoctorBasics {
      * @return 是否成功
      */
     @RequestMapping(value = "/disease", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public Boolean createOrUpdateDisease(@RequestBody DoctorDisease disease) {
+    public Long createOrUpdateDisease(@RequestBody DoctorDisease disease) {
         checkNotNull(disease, "disease.not.null");
 
         // TODO: 权限中心校验权限
@@ -107,7 +107,7 @@ public class DoctorBasics {
             disease.setUpdatorName(UserUtil.getCurrentUser().getName());
             RespHelper.or500(doctorBasicWriteService.updateDisease(disease));
         }
-        return Boolean.TRUE;
+        return disease.getId();
     }
 
     /**
