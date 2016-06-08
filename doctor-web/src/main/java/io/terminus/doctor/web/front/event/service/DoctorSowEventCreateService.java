@@ -3,7 +3,7 @@ package io.terminus.doctor.web.front.event.service;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
 
-import java.util.Map;
+import java.util.List;
 
 /**
  * Created by yaoqijun.
@@ -22,4 +22,11 @@ public interface DoctorSowEventCreateService {
      */
     Response<Long> sowEventCreate(DoctorBasicInputInfoDto doctorBasicInputInfoDto, String sowInfoDtoJson);
 
+    /**
+     * 母猪事件信息批量创建方式
+     * @param dtoList
+     * @param sowInfoDtoJson
+     * @return
+     */
+    Response<Long> sowEventsCreate(List<DoctorBasicInputInfoDto> dtoList, String sowInfoDtoJson);
 }

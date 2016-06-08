@@ -69,12 +69,18 @@
 
     <decision name="哺乳后事件录入">
         <transition name="拼窝" value="17" expression="${eventType} == 17" target="哺乳" handler="doctorSowFostersHandler"/>
+        <transition name="被拼窝" value="19" expression="${eventType} == 19" target="被拼窝事件判断" handler="doctorSowFostersByHandler"/>
         <transition name="断奶事件" value="16" expression="${eventType} == 16" handler="doctorSowWeanHandler" target="断奶事件判断"/>
+    </decision>
+
+    <decision name="被拼窝事件判断断">
+        <transition name="进入哺乳" expression="${status} == 8" target="哺乳"/>
+        <transition name="进入断奶" expression="${status} == 9" target="断奶"/>
     </decision>
 
     <decision name="断奶事件判断">
         <transition name="部分断奶" expression="${leftCount} > 0" target="哺乳"/>
-        <transition name="全部断奶" expression="${leftCount} = 0" target="断奶"/>
+        <transition name="全部断奶" expression="${leftCount} == 0" target="断奶"/>
     </decision>
 
     <task name="断奶">

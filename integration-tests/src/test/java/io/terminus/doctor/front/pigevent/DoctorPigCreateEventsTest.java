@@ -8,11 +8,15 @@ import io.terminus.doctor.event.dao.DoctorPigEventDao;
 import io.terminus.doctor.event.dao.DoctorPigSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorPigTrackDao;
 import io.terminus.doctor.event.dto.event.sow.DoctorAbortionDto;
+import io.terminus.doctor.event.dto.event.sow.DoctorFarrowingDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorMatingDto;
+import io.terminus.doctor.event.dto.event.sow.DoctorPartWeanDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorPregChkResultDto;
 import io.terminus.doctor.event.dto.event.usual.DoctorChgLocationDto;
 import io.terminus.doctor.event.dto.event.usual.DoctorFarmEntryDto;
 import io.terminus.doctor.event.enums.BoarEntryType;
+import io.terminus.doctor.event.enums.FarrowingType;
+import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.enums.MatingType;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PigSource;
@@ -85,6 +89,12 @@ public class DoctorPigCreateEventsTest extends BaseFrontWebTest{
 
 //        testAbortionEventCreate(pigId);
 
+        testToFarrowing(pigId);
+
+        testFarrowingEventCreate(pigId);
+
+        testWeanMethod(pigId, 200);
+
         // 显示 state
         printCurrentState();
 
@@ -92,11 +102,51 @@ public class DoctorPigCreateEventsTest extends BaseFrontWebTest{
         testCurrentSowInputStatus(pigId);
     }
 
+
+    private void testWeanMethod(Long pigId, Integer count){
+        String url = basicUrl + "/createSowEvent";
+        HttpEntity httpEntity = HttpPostRequest.formRequest().param("farmId", 12345l)
+                .param("pigId", pigId).param("eventType", PigEvent.WEAN.getKey())
+                .param("sowInfoDtoJson", DoctorPartWeanDto.builder()
+                        .partWeanDate(new Date()).partWeanPigletsCount(count).partWeanAvgWeight(12345.123).partWeanRemark("partWeanRemark")
+                        .build())
+                .httpEntity();
+        Long result = this.restTemplate.postForObject(url, httpEntity, Long.class);
+        System.out.println(result);
+    }
+
+    /**
+     * 分娩事件测试
+     * @param pigId
+     */
+    private void testFarrowingEventCreate(Long pigId){
+        String url = basicUrl + "/createSowEvent";
+        HttpEntity httpEntity = (HttpPostRequest.formRequest().param("farmId", 12345l)
+                .param("pigId", pigId).param("eventType", PigEvent.FARROWING.getKey())
+                .param("sowInfoDtoJson", DoctorFarrowingDto.builder()
+                        .farrowingDate(new Date()).nestCode("12345").barnId(7l).barnName("farrowingBarnName").bedCode("bedCode")
+                        .farrowingType(FarrowingType.HELP.getKey()).isHelp(IsOrNot.YES.getValue())
+                        .birthNestAvg(1234.123).liveSowCount(100).liveBoarCount(100).healthCount(200)
+                        .weakCount(0).mnyCount(0).deadCount(0).blackCount(0).jxCount(0).toBarnId(-1l).toBarnName("notKnow")
+                        .farrowStaff1("staff").farrowStaff2("staff2").farrowRemark("farrowingReMark")
+                        .build()).httpEntity());
+        Long result = this.restTemplate.postForObject(url, httpEntity, Long.class);
+        System.out.println(result);
+    }
+
     /**
      * 测试对应的去分娩
      */
-    private void testToFarrowing(){
-        // TODO
+    private void testToFarrowing(Long pigId){
+        String url = basicUrl + "/createSowEvent";
+        HttpEntity httpEntity = (HttpPostRequest.formRequest().param("farmId", 12345l)
+                .param("pigId", pigId).param("eventType", PigEvent.TO_FARROWING.getKey())
+                .param("sowInfoDtoJson", DoctorChgLocationDto.builder()
+                        .changeLocationDate(new Date()).chgLocationFromBarnId(6l).chgLocationFromBarnName("matingBarnName")
+                        .chgLocationToBarnId(7l).chgLocationToBarnName("farrowingBarnName")
+                        .build()).httpEntity());
+        Long result = this.restTemplate.postForObject(url, httpEntity, Long.class);
+        System.out.println(result);
     }
 
     /**

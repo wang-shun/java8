@@ -155,6 +155,28 @@ public class DoctorPigEventManager {
     @Transactional
     @SneakyThrows
     public Map<String,Object> createSowPigEvent(DoctorBasicInputInfoDto basic, Map<String, Object> extra){
+        return createSingleSowEvents(basic, extra);
+    }
+
+    /**
+     * 批量创建Pig事件信息
+     * @param basicInputInfoDto
+     * @param extra
+     * @return
+     */
+    @Transactional
+    @SneakyThrows
+    public Map<String,Object> createSowEvents(List<DoctorBasicInputInfoDto> basicInputInfoDtos, Map<String, Object> extra){
+        Map<String,Object> results = Maps.newHashMap();
+        basicInputInfoDtos.forEach(dto->{
+            results.put(dto.getPigId().toString(),
+                    createSingleSowEvents(dto, extra));
+        });
+        return results;
+    }
+
+    @SneakyThrows
+    private Map<String, Object> createSingleSowEvents(DoctorBasicInputInfoDto basic, Map<String, Object> extra){
         // build data
         String flowData = JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(ImmutableMap.of(
                 "basic",JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(basic),

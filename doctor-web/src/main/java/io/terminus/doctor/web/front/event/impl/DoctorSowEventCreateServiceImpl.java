@@ -1,12 +1,13 @@
 package io.terminus.doctor.web.front.event.impl;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Throwables;
 import io.terminus.common.model.Response;
 import io.terminus.common.utils.JsonMapper;
+import io.terminus.doctor.common.constants.JacksonType;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorAbortionDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorFarrowingDto;
-import io.terminus.doctor.event.dto.event.sow.DoctorFostersDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorMatingDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorPartWeanDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorPigletsChgDto;
@@ -19,6 +20,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.Map;
+
 /**
  * Created by yaoqijun.
  * Date:2016-06-02
@@ -28,6 +32,8 @@ import org.springframework.stereotype.Service;
 @Service
 @Slf4j
 public class DoctorSowEventCreateServiceImpl implements DoctorSowEventCreateService{
+
+    private final ObjectMapper OBJECT_MAPPER = JsonMapper.JSON_NON_DEFAULT_MAPPER.getMapper();
 
     private final DoctorPigEventWriteService doctorPigEventWriteService;
 
@@ -59,8 +65,6 @@ public class DoctorSowEventCreateServiceImpl implements DoctorSowEventCreateServ
                     return doctorPigEventWriteService.sowFarrowingEvent(JsonMapper.JSON_NON_DEFAULT_MAPPER.fromJson(sowInfoDtoJson, DoctorFarrowingDto.class), doctorBasicInputInfoDto);
                 case WEAN:
                     return doctorPigEventWriteService.sowPartWeanEvent(JsonMapper.JSON_NON_DEFAULT_MAPPER.fromJson(sowInfoDtoJson, DoctorPartWeanDto.class), doctorBasicInputInfoDto);
-                case FOSTERS:
-                    return doctorPigEventWriteService.sowFostersEvent(JsonMapper.JSON_NON_DEFAULT_MAPPER.fromJson(sowInfoDtoJson, DoctorFostersDto.class), doctorBasicInputInfoDto);
                 case PIGLETS_CHG:
                     return doctorPigEventWriteService.sowPigletsChgEvent(JsonMapper.JSON_NON_DEFAULT_MAPPER.fromJson(sowInfoDtoJson, DoctorPigletsChgDto.class), doctorBasicInputInfoDto);
                 default:
@@ -71,4 +75,18 @@ public class DoctorSowEventCreateServiceImpl implements DoctorSowEventCreateServ
             return Response.fail("create.sowEvent.fail");
         }
     }
+
+    @Override
+    public Response<Long> sowEventsCreate(List<DoctorBasicInputInfoDto> dtoList, String sowInfoDtoJson) {
+        try{
+            Map<String, Object> extra = OBJECT_MAPPER.readValue(sowInfoDtoJson, JacksonType.MAP_OF_OBJECT);
+            doctorPigEventWriteService.sowPigsEventCreate(dtoList, extra);
+            return Response.ok();
+        }catch (Exception e){
+            log.error("create sow events list fail, cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("create.sowEvents.fail");
+        }
+    }
+
+
 }

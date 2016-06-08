@@ -1,5 +1,6 @@
 package io.terminus.doctor.web.front.event.controller;
 
+import com.google.api.client.util.Lists;
 import com.google.common.base.Throwables;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.Response;
@@ -32,6 +33,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+
+import java.util.List;
+import java.util.Objects;
 
 import static com.google.common.base.Preconditions.checkState;
 import static java.util.Objects.isNull;
@@ -138,8 +142,16 @@ public class DoctorPigCreateEvents {
     @ResponseBody
     public Long createSowEventInfo(@RequestParam("farmId") Long farmId,
                                    @RequestParam("pigId") Long pigId, @RequestParam("eventType") Integer eventType,
-                                   @RequestParam("sowInfoDtoJson") String sowInfoDtoJson){
-        return RespHelper.or500(doctorSowEventCreateService.sowEventCreate(buildBasicInputInfoDto(farmId, pigId, PigEvent.from(eventType)), sowInfoDtoJson));
+                                   @RequestParam("sowInfoDtoJson") String sowInfoDtoJson) {
+        if (Objects.equals(eventType, PigEvent.FOSTERS.getKey())) {
+            List<DoctorBasicInputInfoDto> basics = Lists.newArrayList();
+            basics.add(buildBasicInputInfoDto(farmId, pigId, PigEvent.FOSTERS));
+            basics.add(buildBasicInputInfoDto(farmId, pigId, PigEvent.FOSTERS_BY));
+            return RespHelper.or500(doctorSowEventCreateService.sowEventsCreate(basics, sowInfoDtoJson));
+        } else {
+            return RespHelper.or500(doctorSowEventCreateService.sowEventCreate(buildBasicInputInfoDto(farmId, pigId, PigEvent.from(eventType)), sowInfoDtoJson));
+
+        }
     }
 
     /**
@@ -199,5 +211,4 @@ public class DoctorPigCreateEvents {
         }
 
     }
-
 }

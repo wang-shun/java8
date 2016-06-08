@@ -5,12 +5,10 @@ import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
 import io.terminus.doctor.event.dto.event.boar.DoctorSemenDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorAbortionDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorFarrowingDto;
-import io.terminus.doctor.event.dto.event.sow.DoctorFostersDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorMatingDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorPartWeanDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorPigletsChgDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorPregChkResultDto;
-import io.terminus.doctor.event.dto.event.sow.DoctorWeanDto;
 import io.terminus.doctor.event.dto.event.usual.DoctorChgFarmDto;
 import io.terminus.doctor.event.dto.event.usual.DoctorChgLocationDto;
 import io.terminus.doctor.event.dto.event.usual.DoctorConditionDto;
@@ -20,6 +18,8 @@ import io.terminus.doctor.event.dto.event.usual.DoctorRemovalDto;
 import io.terminus.doctor.event.dto.event.usual.DoctorVaccinationDto;
 
 import javax.validation.constraints.NotNull;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Created by yaoqijun.
@@ -175,14 +175,6 @@ public interface DoctorPigEventWriteService {
     Response<Long> sowPigletsChgEvent(DoctorPigletsChgDto doctorPigletsChgDto, DoctorBasicInputInfoDto doctorBasicInputInfoDto);
 
     /**
-     * 拼窝事件信息
-     * @param doctorFostersDto
-     * @param doctorBasicInputInfoDto
-     * @return
-     */
-    Response<Long> sowFostersEvent(DoctorFostersDto doctorFostersDto, DoctorBasicInputInfoDto doctorBasicInputInfoDto);
-
-    /**
      * 部分断奶母猪
      * @param doctorPartWeanDto
      * @param doctorBasicInputInfoDto
@@ -191,10 +183,10 @@ public interface DoctorPigEventWriteService {
     Response<Long> sowPartWeanEvent(DoctorPartWeanDto doctorPartWeanDto, DoctorBasicInputInfoDto doctorBasicInputInfoDto);
 
     /**
-     * 母猪断奶事件
-     * @param doctorWeanDto
-     * @param doctorBasicInputInfoDto
+     * 不同的母猪的信息录入方式
+     * @param basics  不同的Pig
+     * @param extra 扩展信息
      * @return
      */
-    Response<Long> sowWeanEvent(DoctorWeanDto doctorWeanDto, DoctorBasicInputInfoDto doctorBasicInputInfoDto);
+    Response<Boolean> sowPigsEventCreate(List<DoctorBasicInputInfoDto> basics, Map<String,Object> extra);
 }
