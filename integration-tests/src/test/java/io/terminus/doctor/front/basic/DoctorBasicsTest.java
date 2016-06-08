@@ -95,7 +95,7 @@ public class DoctorBasicsTest extends BaseFrontWebTest {
     public void deleteDiseaseTest() {
         Long deleteId = 1L;
         String url = "/api/doctor/basic/disease";
-        deleteForEntity(url, ImmutableMap.of("diseaseId", deleteId));
+        delete(url, ImmutableMap.of("diseaseId", deleteId));
 
         DoctorDisease disease = findDiseaseById(deleteId);
         assertNull(disease);

@@ -34,7 +34,7 @@ public abstract class BaseWebTest {
     protected int port;
 
     /**
-     * get请求 @RequestBody 格式
+     * get请求 @RequestParam 格式
      * @param url  RequestMapping.value
      * @param params        请求参数
      * @param responseType  返回结果类
@@ -121,7 +121,7 @@ public abstract class BaseWebTest {
      * @param url   RequestMapping.value
      * @param params  参数
      */
-    protected void deleteForEntity(String url, Map<String, Object> params) {
+    protected void delete(String url, Map<String, Object> params) {
         restTemplate.delete(url(joinMap(url, params)));
     }
 
