@@ -5,13 +5,18 @@ import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.BaseUser;
 import io.terminus.common.model.Paging;
+import io.terminus.common.model.Response;
 import io.terminus.doctor.common.enums.UserType;
+import io.terminus.doctor.common.event.CoreEventDispatcher;
 import io.terminus.doctor.user.model.DoctorFarm;
 import io.terminus.doctor.user.model.DoctorOrg;
 import io.terminus.doctor.user.model.DoctorServiceReview;
-import io.terminus.doctor.user.service.*;
+import io.terminus.doctor.user.service.DoctorFarmReadService;
+import io.terminus.doctor.user.service.DoctorOrgReadService;
+import io.terminus.doctor.user.service.DoctorServiceReviewReadService;
 import io.terminus.doctor.user.service.business.DoctorServiceReviewService;
 import io.terminus.doctor.web.admin.dto.UserApplyServiceDetailDto;
+import io.terminus.doctor.user.event.OpenDoctorServiceEvent;
 import io.terminus.pampas.common.UserUtil;
 import io.terminus.parana.common.utils.RespHelper;
 import lombok.extern.slf4j.Slf4j;
@@ -20,7 +25,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 /**
  * 陈增辉 16/5/30.与用户开通\关闭服务相关的controller
@@ -34,16 +38,19 @@ public class DoctorServiceReviewController {
     private final DoctorServiceReviewReadService doctorServiceReviewReadService;
     private final DoctorOrgReadService doctorOrgReadService;
     private final DoctorFarmReadService doctorFarmReadService;
+    private final CoreEventDispatcher coreEventDispatcher;
 
     @Autowired
     public DoctorServiceReviewController(DoctorServiceReviewService doctorServiceReviewService,
                                          DoctorServiceReviewReadService doctorServiceReviewReadService,
                                          DoctorOrgReadService doctorOrgReadService,
-                                         DoctorFarmReadService doctorFarmReadService){
+                                         DoctorFarmReadService doctorFarmReadService,
+                                         CoreEventDispatcher coreEventDispatcher){
         this.doctorServiceReviewService = doctorServiceReviewService;
         this.doctorServiceReviewReadService = doctorServiceReviewReadService;
         this.doctorOrgReadService = doctorOrgReadService;
         this.doctorFarmReadService = doctorFarmReadService;
+        this.coreEventDispatcher = coreEventDispatcher;
     }
 
     /**
@@ -63,7 +70,16 @@ public class DoctorServiceReviewController {
         if(dto.getFarms() == null || dto.getFarms().isEmpty()){
             throw new JsonResponseException(500, "need.at.least.one.farm"); //需要至少一个猪场信息
         }
-        return RespHelper.or500(doctorServiceReviewService.openDoctorService(baseUser, dto.getUserId(), dto.getFarms(), dto.getOrg()));
+        RespHelper.or500(doctorServiceReviewService.openDoctorService(baseUser, dto.getUserId(), dto.getFarms(), dto.getOrg()));
+
+        //分发猪场软件已开通的事件
+        Response<List<DoctorFarm>> farmResp = doctorFarmReadService.findFarmsByUserId(dto.getUserId());
+        if(farmResp.isSuccess()){
+            coreEventDispatcher.publish(new OpenDoctorServiceEvent(dto.getUserId(), farmResp.getResult()));
+        }else{
+            log.error("failed to post OpenDoctorServiceEvent due to findFarmsByUserId failing");
+        }
+        return true;
     }
 
     /**
