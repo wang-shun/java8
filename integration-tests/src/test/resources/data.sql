@@ -229,7 +229,8 @@ VALUES
 
 INSERT INTO `doctor_customers` (`id`, `name`, `farm_id`, `farm_name`, `mobile`, `email`, `out_id`, `extra`, `creator_id`, `creator_name`, `updator_id`, `updator_name`, `created_at`, `updated_at`)
 VALUES
-	(1, '测试客户', 0, NULL, '18888889999', NULL, NULL, NULL, 1, 'admin', NULL, NULL, '2016-05-31 16:48:01', '2016-05-31 16:48:01');
+	(1, '测试客户', 0, NULL, '18888889999', NULL, NULL, NULL, 1, 'admin', NULL, NULL, '2016-05-31 16:48:01', '2016-05-31 16:48:01'),
+	(2, '测试客户2', 0, NULL, '18888887777', NULL, NULL, NULL, 1, 'admin', NULL, NULL, '2016-05-31 16:48:01', '2016-05-31 16:48:01');
 
 INSERT INTO `doctor_diseases` (`id`, `name`, `farm_id`, `farm_name`, `out_id`, `extra`, `creator_id`, `creator_name`, `updator_id`, `updator_name`, `created_at`, `updated_at`)
 VALUES

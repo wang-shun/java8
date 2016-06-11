@@ -149,7 +149,7 @@ public class DoctorBasics {
      * @return 是否成功
      */
     @RequestMapping(value = "/changeType", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public Boolean createOrUpdateChangeType(@RequestBody DoctorChangeType changeType) {
+    public Long createOrUpdateChangeType(@RequestBody DoctorChangeType changeType) {
         checkNotNull(changeType, "changeType.not.null");
 
         // TODO: 权限中心校验权限
@@ -163,7 +163,7 @@ public class DoctorBasics {
             changeType.setUpdatorName(UserUtil.getCurrentUser().getName());
             RespHelper.or500(doctorBasicWriteService.updateChangeType(changeType));
         }
-        return Boolean.TRUE;
+        return changeType.getId();
     }
 
     /**
@@ -204,8 +204,8 @@ public class DoctorBasics {
      * @return 是否成功
      */
     @RequestMapping(value = "/changeReason", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public Boolean createOrUpdateChangeReason(@RequestParam("changeTypeId") Long changeTypeId,
-                                              @RequestParam("reason") String reason) {
+    public Long createOrUpdateChangeReason(@RequestParam("changeTypeId") Long changeTypeId,
+                                           @RequestParam("reason") String reason) {
 
         DoctorChangeReason changeReason = JSON_MAPPER.fromJson(reason, DoctorChangeReason.class);
         checkNotNull(changeReason, "customer.not.null");
@@ -223,7 +223,7 @@ public class DoctorBasics {
             changeReason.setUpdatorName(UserUtil.getCurrentUser().getName());
             RespHelper.or500(doctorBasicWriteService.updateChangeReason(changeReason));
         }
-        return Boolean.TRUE;
+        return changeReason.getId();
     }
 
     /**
@@ -265,7 +265,7 @@ public class DoctorBasics {
      * @return 是否成功
      */
     @RequestMapping(value = "/customer", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public Boolean createOrUpdateCustomer(@RequestBody DoctorCustomer customer) {
+    public Long createOrUpdateCustomer(@RequestBody DoctorCustomer customer) {
         checkNotNull(customer, "customer.not.null");
 
         // TODO: 权限中心校验权限
@@ -279,7 +279,7 @@ public class DoctorBasics {
             customer.setUpdatorName(UserUtil.getCurrentUser().getName());
             RespHelper.or500(doctorBasicWriteService.updateCustomer(customer));
         }
-        return Boolean.TRUE;
+        return customer.getId();
     }
 
     /**
