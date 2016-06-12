@@ -32,15 +32,15 @@ public abstract class DoctorAbstractEventHandler implements DoctorEventCreateHan
 
     private static final ObjectMapper OBJECT_MAPPER = JsonMapper.JSON_NON_DEFAULT_MAPPER.getMapper();
 
-    private final DoctorPigDao doctorPigDao;
+    protected final DoctorPigDao doctorPigDao;
 
-    private final DoctorPigEventDao doctorPigEventDao;
+    protected final DoctorPigEventDao doctorPigEventDao;
 
-    private final DoctorPigTrackDao doctorPigTrackDao;
+    protected final DoctorPigTrackDao doctorPigTrackDao;
 
-    private final DoctorPigSnapshotDao doctorPigSnapshotDao;
+    protected final DoctorPigSnapshotDao doctorPigSnapshotDao;
 
-    private final DoctorRevertLogDao doctorRevertLogDao;
+    protected final DoctorRevertLogDao doctorRevertLogDao;
 
     @Autowired
     public DoctorAbstractEventHandler(DoctorPigDao doctorPigDao,
@@ -85,8 +85,8 @@ public abstract class DoctorAbstractEventHandler implements DoctorEventCreateHan
             // 当前事件影响的Id 方式
             context.put("createEventResult",
                     JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(
-                            ImmutableMap.of("pigId", basic.getPigId(),
-                                    "eventId", doctorPigEvent.getId(), "snapshotId", doctorPigSnapshot.getId())));
+                            ImmutableMap.of("doctorPigId", basic.getPigId(),
+                                    "doctorEventId", doctorPigEvent.getId(), "doctorSnapshotId", doctorPigSnapshot.getId())));
         }catch (Exception e){
             DoctorAbstractEventHandler.log.error("handle execute fail, basic:{}, extra:{}, context:{} cause:{}",
                     basic, extra, context, Throwables.getStackTraceAsString(e));

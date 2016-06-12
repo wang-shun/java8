@@ -195,12 +195,7 @@ public class FlowDefinitionNodeEventQueryImpl implements FlowDefinitionNodeEvent
             processes.forEach(process -> {
                 List<FlowDefinitionNodeEvent> nodeEvents = getNodeEventsBySourceId(instance.getFlowDefinitionId(), process.getFlowDefinitionNodeId());
                 nodeEvents.forEach(nodeEvent -> {
-                    // 如果存在事件, 直接返回
-                    if (StringHelper.isNotBlank(nodeEvent.getHandler())) {
-                        events.add(nodeEvent);
-                    }else{
-                        getTaskEvents(events, instance, nodeEvent);
-                    }
+                    getTaskEvents(events, instance, nodeEvent);
                 });
             });
         });
@@ -208,7 +203,12 @@ public class FlowDefinitionNodeEventQueryImpl implements FlowDefinitionNodeEvent
     }
 
     private void getTaskEvents(List<FlowDefinitionNodeEvent> events, FlowInstance instance, FlowDefinitionNodeEvent nodeEvent) {
-
+        // 如果存在事件, 直接返回
+        if (StringHelper.isNotBlank(nodeEvent.getHandler())) {
+            events.add(nodeEvent);
+            return;
+        }
+        // 否则继续
         FlowDefinitionNode nextNode = workFlowEngine.buildFlowQueryService().getFlowDefinitionNodeQuery()
                 .id(nodeEvent.getTargetNodeId())
                 .single();

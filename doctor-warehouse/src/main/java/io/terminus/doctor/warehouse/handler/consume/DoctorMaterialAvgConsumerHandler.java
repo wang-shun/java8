@@ -39,6 +39,7 @@ public class DoctorMaterialAvgConsumerHandler implements IHandler{
 
     @Override
     public void handle(DoctorMaterialConsumeProviderDto dto, Map<String, Object> context) throws RuntimeException {
+        Long lotNumber = (Long) context.get("lotNumber");
         DoctorMaterialConsumeAvg doctorMaterialConsumeAvg = doctorMaterialConsumeAvgDao.queryByIds(dto.getFarmId(), dto.getWareHouseId(), dto.getMaterialTypeId());
         if(isNull(doctorMaterialConsumeAvg)){
             // create consume avg
@@ -50,6 +51,7 @@ public class DoctorMaterialAvgConsumerHandler implements IHandler{
 
             if(Objects.equals(dto.getType(), WareHouseType.FEED.getKey())){
                 doctorMaterialConsumeAvg.setConsumeAvgCount(dto.getCount() / dto.getConsumeDays());
+                doctorMaterialConsumeAvg.setLotConsumeDay((int)(lotNumber / doctorMaterialConsumeAvg.getConsumeAvgCount()));
             }
             doctorMaterialConsumeAvgDao.create(doctorMaterialConsumeAvg);
         }else{
@@ -57,6 +59,7 @@ public class DoctorMaterialAvgConsumerHandler implements IHandler{
                 // calculate current avg rate
                 doctorMaterialConsumeAvg.setConsumeAvgCount(dto.getCount() / dto.getConsumeDays());
                 doctorMaterialConsumeAvg.setConsumeCount(dto.getCount());
+                doctorMaterialConsumeAvg.setLotConsumeDay((int)(lotNumber/doctorMaterialConsumeAvg.getConsumeAvgCount()) );
             }else {
                 Integer dayRange = Days.daysBetween(new DateTime(doctorMaterialConsumeAvg.getConsumeDate()), DateTime.now()).getDays();
                 if(dayRange == 0){
@@ -67,6 +70,7 @@ public class DoctorMaterialAvgConsumerHandler implements IHandler{
                     doctorMaterialConsumeAvg.setConsumeAvgCount(
                             doctorMaterialConsumeAvg.getConsumeCount() /dayRange);
                     doctorMaterialConsumeAvg.setConsumeCount(dto.getCount());
+                    doctorMaterialConsumeAvg.setLotConsumeDay((int)(lotNumber / doctorMaterialConsumeAvg.getConsumeAvgCount()));
                 }
             }
             doctorMaterialConsumeAvg.setConsumeDate(DateTime.now().withTimeAtStartOfDay().toDate());

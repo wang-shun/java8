@@ -59,11 +59,11 @@ public class DoctorMaterialInfoWriteServiceTest extends BasicServiceTest {
 
         // validate type
         DoctorFarmWareHouseType type = doctorFarmWareHouseTypeDao.findByFarmIdAndType(12345l, 2);
-        Assert.assertEquals(type.getLogNumber(), new Long(500));
+        Assert.assertEquals(type.getLotNumber(), new Long(500));
         DoctorFarmWareHouseType type1 = doctorFarmWareHouseTypeDao.findByFarmIdAndType(12345l, 4);
-        Assert.assertEquals(type.getLogNumber(), new Long(500));
+        Assert.assertEquals(type.getLotNumber(), new Long(500));
         DoctorFarmWareHouseType type2 = doctorFarmWareHouseTypeDao.findByFarmIdAndType(12345l, 3);
-        Assert.assertEquals(type2.getLogNumber(), new Long(2500));
+        Assert.assertEquals(type2.getLotNumber(), new Long(2500));
 
         // validate track
         DoctorWareHouseTrack track = doctorWareHouseTrackDao.findById(1l);

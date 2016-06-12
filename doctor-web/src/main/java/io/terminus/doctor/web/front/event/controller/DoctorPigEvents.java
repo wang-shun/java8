@@ -16,6 +16,7 @@ import org.joda.time.format.DateTimeFormatter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -77,9 +78,9 @@ public class DoctorPigEvents {
         }
     }
 
-    @RequestMapping(value = "/queryPigEvents", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(value = "/queryPigEvents", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public List<Integer> queryPigExecuteEvent(@RequestParam("pigIds") List<Long> pigIds){
+    public List<Integer> queryPigExecuteEvent(@RequestBody List<Long> pigIds){
         return RespHelper.or500(doctorPigEventReadService.queryPigEvents(pigIds));
     }
 }

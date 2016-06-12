@@ -34,6 +34,13 @@
         #{orgId},#{farmId},#{pigId},#{eventId},#{pigInfo},now(),now()
     </sql>
 
+    <sql id="criteria">
+        <if test="orgId != null" > AND `org_id` = #{orgId}</if>
+        <if test="farmId != null" > AND `farm_id` = #{farmId}</if>
+        <if test="pigId != null" > AND `pig_id` = #{pigId}</if>
+        <if test="eventId != null" > AND `event_id` = #{eventId}</if>
+    </sql>
+
     <insert id="create" parameterType="DoctorPigSnapshot" keyProperty="id" useGeneratedKeys="true">
         INSERT INTO <include refid="tb" />
         (<include refid="cols_exclude_id" />)
@@ -68,6 +75,13 @@
     <select id="queryByEventId" parameterType="long" resultMap="DoctorPigSnapshotMap">
         SELECT <include refid="cols_all"/> FROM <include refid="tb"/>
         WHERE event_id = #{eventId}
+    </select>
+
+    <select id="list" resultMap="DoctorPigSnapshotMap">
+        SELECT <include refid="cols_all"/> FROM <include refid="tb"/>
+        <where>
+            <include refid="criteria"/>
+        </where>
     </select>
 
     <update id="update" parameterType="DoctorPigSnapshot">

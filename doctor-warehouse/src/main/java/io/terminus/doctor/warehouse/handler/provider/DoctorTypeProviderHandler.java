@@ -42,7 +42,7 @@ public class DoctorTypeProviderHandler implements IHandler{
             doctorFarmWareHouseType = buildDoctorWareHouseType(dto);
             doctorFarmWareHouseTypeDao.create(doctorFarmWareHouseType);
         }else {
-            doctorFarmWareHouseType.setLogNumber(doctorFarmWareHouseType.getLogNumber() + dto.getCount());
+            doctorFarmWareHouseType.setLotNumber(doctorFarmWareHouseType.getLotNumber() + dto.getCount());
             doctorFarmWareHouseType.setUpdatorId(dto.getStaffId());
             doctorFarmWareHouseType.setUpdatorName(dto.getStaffName());
             doctorFarmWareHouseTypeDao.update(doctorFarmWareHouseType);
@@ -58,7 +58,7 @@ public class DoctorTypeProviderHandler implements IHandler{
     private DoctorFarmWareHouseType buildDoctorWareHouseType(DoctorMaterialConsumeProviderDto dto){
         return DoctorFarmWareHouseType.builder()
                 .farmId(dto.getFarmId()).farmName(dto.getFarmName()).type(dto.getType())
-                .logNumber(dto.getCount()).creatorId(dto.getStaffId()).creatorName(dto.getStaffName())
+                .lotNumber(dto.getCount()).creatorId(dto.getStaffId()).creatorName(dto.getStaffName())
                 .build();
     }
 }

@@ -10,6 +10,8 @@ import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.handler.DoctorAbstractEventFlowHandler;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.workflow.core.Execution;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.util.Map;
 
@@ -19,8 +21,10 @@ import java.util.Map;
  * Email:yaoqj@terminus.io
  * Descirbe: 母猪流产事件处理
  */
+@Component
 public class DoctorSowAbortionHandler extends DoctorAbstractEventFlowHandler {
 
+    @Autowired
     public DoctorSowAbortionHandler(DoctorPigDao doctorPigDao, DoctorPigEventDao doctorPigEventDao,
                                     DoctorPigTrackDao doctorPigTrackDao, DoctorPigSnapshotDao doctorPigSnapshotDao,
                                     DoctorRevertLogDao doctorRevertLogDao) {

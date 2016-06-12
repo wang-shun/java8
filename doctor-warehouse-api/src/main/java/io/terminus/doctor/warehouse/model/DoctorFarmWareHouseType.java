@@ -39,7 +39,7 @@ public class DoctorFarmWareHouseType implements Serializable{
 
     private Integer type;
 
-    private Long logNumber;
+    private Long lotNumber;
 
     @Setter(AccessLevel.NONE)
     private Map<String,Object> extraMap;

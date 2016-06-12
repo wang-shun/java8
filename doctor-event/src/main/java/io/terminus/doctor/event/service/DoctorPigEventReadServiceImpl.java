@@ -9,6 +9,7 @@ import io.terminus.common.model.PageInfo;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.event.dao.DoctorPigEventDao;
+import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.workflow.query.FlowDefinitionNodeEventQuery;
 import io.terminus.doctor.workflow.service.FlowQueryService;
@@ -96,6 +97,9 @@ public class DoctorPigEventReadServiceImpl implements DoctorPigEventReadService{
                         .map(s->Integer.valueOf(s.getValue()))
                         .collect(Collectors.toList()));
             }
+
+            // remove FOSTERS_BY
+            collectExecute.remove(PigEvent.FOSTERS_BY.getKey());
             return Response.ok(Lists.newArrayList(collectExecute));
         }catch (Exception e){
             log.error("query pig events fail, cause:{}", Throwables.getStackTraceAsString(e));
