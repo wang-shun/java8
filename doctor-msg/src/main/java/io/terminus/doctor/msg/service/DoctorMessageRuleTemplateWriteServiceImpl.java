@@ -1,13 +1,18 @@
 package io.terminus.doctor.msg.service;
 
 import com.google.common.base.Throwables;
+import io.terminus.common.model.BaseUser;
 import io.terminus.common.model.Response;
+import io.terminus.common.utils.BeanMapper;
 import io.terminus.doctor.msg.dao.DoctorMessageRuleDao;
 import io.terminus.doctor.msg.dao.DoctorMessageRuleRoleDao;
 import io.terminus.doctor.msg.dao.DoctorMessageRuleTemplateDao;
+import io.terminus.doctor.msg.dao.DoctorMessageRuleTemplateTrackDao;
 import io.terminus.doctor.msg.model.DoctorMessageRule;
 import io.terminus.doctor.msg.model.DoctorMessageRuleRole;
 import io.terminus.doctor.msg.model.DoctorMessageRuleTemplate;
+import io.terminus.doctor.msg.model.DoctorMessageRuleTemplateTrack;
+import io.terminus.pampas.common.UserUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -27,14 +32,17 @@ public class DoctorMessageRuleTemplateWriteServiceImpl implements DoctorMessageR
     private final DoctorMessageRuleTemplateDao doctorMessageRuleTemplateDao;
     private final DoctorMessageRuleDao doctorMessageRuleDao;
     private final DoctorMessageRuleRoleDao doctorMessageRuleRoleDao;
+    private final DoctorMessageRuleTemplateTrackDao doctorMessageRuleTemplateTrackDao;
 
     @Autowired
     public DoctorMessageRuleTemplateWriteServiceImpl(DoctorMessageRuleTemplateDao doctorMessageRuleTemplateDao,
                                                      DoctorMessageRuleDao doctorMessageRuleDao,
-                                                     DoctorMessageRuleRoleDao doctorMessageRuleRoleDao) {
+                                                     DoctorMessageRuleRoleDao doctorMessageRuleRoleDao,
+                                                     DoctorMessageRuleTemplateTrackDao doctorMessageRuleTemplateTrackDao) {
         this.doctorMessageRuleTemplateDao = doctorMessageRuleTemplateDao;
         this.doctorMessageRuleDao = doctorMessageRuleDao;
         this.doctorMessageRuleRoleDao = doctorMessageRuleRoleDao;
+        this.doctorMessageRuleTemplateTrackDao = doctorMessageRuleTemplateTrackDao;
     }
 
     @Override
@@ -51,6 +59,16 @@ public class DoctorMessageRuleTemplateWriteServiceImpl implements DoctorMessageR
     @Override
     public Response<Boolean> updateMessageRuleTemplate(DoctorMessageRuleTemplate messageRuleTemplate) {
         try {
+            // 记录历史
+            DoctorMessageRuleTemplateTrack track = BeanMapper.map(messageRuleTemplate, DoctorMessageRuleTemplateTrack.class);
+            track.setTemplateId(messageRuleTemplate.getId());
+            BaseUser user = UserUtil.getCurrentUser();
+            if (user != null) {
+                track.setUpdatorId(user.getId());
+                track.setUpdatorName(user.getName());
+            }
+            doctorMessageRuleTemplateTrackDao.create(track);
+
             // 1. 查询出于模板相管理的猪场, 并更新默认的rulevalue值
             List<DoctorMessageRule> farmTpls = doctorMessageRuleDao.findByTpl(messageRuleTemplate.getId());
             for (int i = 0; farmTpls != null && i < farmTpls.size(); i++) {
@@ -79,9 +97,19 @@ public class DoctorMessageRuleTemplateWriteServiceImpl implements DoctorMessageR
     @Override
     public Response<Boolean> deleteMessageRuleTemplateById(Long messageRuleTemplateId) {
         try {
-            // 逻辑删除
             DoctorMessageRuleTemplate ruleTemplate = doctorMessageRuleTemplateDao.findById(messageRuleTemplateId);
             if (ruleTemplate != null) {
+                // 记录历史
+                DoctorMessageRuleTemplateTrack track = BeanMapper.map(ruleTemplate, DoctorMessageRuleTemplateTrack.class);
+                track.setTemplateId(ruleTemplate.getId());
+                BaseUser user = UserUtil.getCurrentUser();
+                if (user != null) {
+                    track.setUpdatorId(user.getId());
+                    track.setUpdatorName(user.getName());
+                }
+                doctorMessageRuleTemplateTrackDao.create(track);
+
+                // 逻辑删除
                 ruleTemplate.setStatus(DoctorMessageRuleTemplate.Status.DELETE.getValue());
                 return Response.ok(doctorMessageRuleTemplateDao.update(ruleTemplate));
             }
