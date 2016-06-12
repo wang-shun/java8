@@ -103,12 +103,6 @@ public class DoctorUserManager {
             primaryUser.setUserName(user.getMobile());
             primaryUser.setStatus(UserStatus.NORMAL.value());
             primaryUserDao.create(primaryUser);
-
-            //初始化4个服务的申请审批数据, 均为未申请状态
-            doctorServiceReviewDao.initData(userId, user.getMobile());
-
-            //初始化4个服务是否开通的状态, 均为未开通状态
-            doctorServiceStatusDao.initdata(userId);
         } else if (Objects.equals(user.getType(), UserType.FARM_SUB.value())){
             //猪场子账号
             Long roleId = null;// TODO: read roleId from user.getRoles()

@@ -20,6 +20,7 @@ import io.terminus.common.utils.Splitters;
 import io.terminus.doctor.common.enums.UserRole;
 import io.terminus.doctor.common.enums.UserStatus;
 import io.terminus.doctor.common.enums.UserType;
+import io.terminus.doctor.common.event.CoreEventDispatcher;
 import io.terminus.doctor.user.model.DoctorUser;
 import io.terminus.doctor.user.util.DoctorUserMaker;
 import io.terminus.doctor.web.core.component.CaptchaGenerator;
@@ -91,6 +92,8 @@ public class Users {
 
     private final EventBus eventBus;
 
+    private final CoreEventDispatcher coreEventDispatcher;
+
     private final CaptchaGenerator captchaGenerator;
 
     private final MobilePattern mobilePattern;
@@ -116,7 +119,8 @@ public class Users {
                  MobilePattern mobilePattern,
                  @Qualifier("smsWebService") MsgWebService smsWebService,
                  AclLoader aclLoader,
-                 PermissionHelper permissionHelper) {
+                 PermissionHelper permissionHelper,
+                 CoreEventDispatcher coreEventDispatcher) {
         this.userWriteService = userWriteService;
         this.userReadService = userReadService;
         this.eventBus = eventBus;
@@ -125,6 +129,7 @@ public class Users {
         this.smsWebService =smsWebService;
         this.aclLoader = aclLoader;
         this.permissionHelper = permissionHelper;
+        this.coreEventDispatcher = coreEventDispatcher;
     }
 
     /**
@@ -204,7 +209,8 @@ public class Users {
                     user = registerByMobile(mobile, password, userName);
                     // session and event
                     request.getSession().setAttribute(Constants.SESSION_USER_ID, user.getId());
-                    eventBus.post(new RegisterEvent(null, null, DoctorUserMaker.from(user)));
+                    coreEventDispatcher.publish(new RegisterEvent(null, null, DoctorUserMaker.from(user)));
+                    //eventBus.post(new RegisterEvent(null, null, DoctorUserMaker.from(user)));
                 }
                 return user.getId();
             }else {

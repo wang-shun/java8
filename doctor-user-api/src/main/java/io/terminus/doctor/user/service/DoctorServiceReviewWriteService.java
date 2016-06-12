@@ -39,6 +39,7 @@ public interface DoctorServiceReviewWriteService {
     /**
      * 用户服务申请审批数据初始化
      * @param userId 用户id
+     * @param userMobile 用户手机号,冗余字段,可以为空
      * @return 是否成功
      */
     Response<Boolean> initServiceReview(Long userId, String userMobile);
