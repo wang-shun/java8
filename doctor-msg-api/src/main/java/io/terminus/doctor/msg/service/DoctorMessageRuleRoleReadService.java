@@ -45,4 +45,11 @@ public interface DoctorMessageRuleRoleReadService {
      */
     Response<List<DoctorMessageRuleRole>> findByRuleId(Long ruleId);
 
+    /**
+     * 根据角色id获取
+     * @param roleId    规则id
+     * @return
+     */
+    Response<List<DoctorMessageRuleRole>> findByRoleId(Long roleId);
+
 }

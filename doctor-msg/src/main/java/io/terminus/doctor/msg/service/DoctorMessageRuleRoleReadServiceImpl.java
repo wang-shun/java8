@@ -18,8 +18,7 @@ import java.util.List;
  */
 @Slf4j
 @Service
-public class DoctorMessageRuleRoleReadServiceImpl implements DoctorMessageRuleRoleReadService
-{
+public class DoctorMessageRuleRoleReadServiceImpl implements DoctorMessageRuleRoleReadService {
 
     private final DoctorMessageRuleRoleDao doctorMessageRuleRoleDao;
 
@@ -53,7 +52,7 @@ public class DoctorMessageRuleRoleReadServiceImpl implements DoctorMessageRuleRo
         try{
             return Response.ok(doctorMessageRuleRoleDao.findByTplAndFarmId(templateId, farmId));
         } catch (Exception e) {
-            log.error("find messageRuleRole by tplId and farmId failed, tplId:{}, farmId:{}",
+            log.error("find messageRuleRole by tplId and farmId failed, tplId:{}, farmId:{}, cause by {}",
                     templateId, farmId, Throwables.getStackTraceAsString(e));
             return Response.fail("messageRuleRole.find.fail");
         }
@@ -64,7 +63,17 @@ public class DoctorMessageRuleRoleReadServiceImpl implements DoctorMessageRuleRo
         try{
             return Response.ok(doctorMessageRuleRoleDao.findByRuleId(ruleId));
         } catch (Exception e) {
-            log.error("find messageRuleRole by ruleId failed, ruleId:{}, ", ruleId, Throwables.getStackTraceAsString(e));
+            log.error("find messageRuleRole by ruleId failed, ruleId:{}, cause by {}", ruleId, Throwables.getStackTraceAsString(e));
+            return Response.fail("messageRuleRole.find.fail");
+        }
+    }
+
+    @Override
+    public Response<List<DoctorMessageRuleRole>> findByRoleId(Long roleId) {
+        try{
+            return Response.ok(doctorMessageRuleRoleDao.findByRoleId(roleId));
+        } catch (Exception e) {
+            log.error("find messageRuleRole by roleId failed, ruleId:{}, cause by {}", roleId, Throwables.getStackTraceAsString(e));
             return Response.fail("messageRuleRole.find.fail");
         }
     }

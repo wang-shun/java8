@@ -1189,6 +1189,26 @@ CREATE UNIQUE INDEX idx_doctor_pig_type_statistics_farm_id ON doctor_pig_type_st
 CREATE INDEX idx_doctor_pig_type_statistics_org_id ON doctor_pig_type_statistics(org_id);
 
 -- 消息表 2016-06-07
+DROP TABLE IF EXISTS `doctor_message_rule_template_tracks`;
+CREATE TABLE IF NOT EXISTS `doctor_message_rule_template_tracks` (
+	`id`	BIGINT(20) NOT NULL AUTO_INCREMENT COMMENT '自增主键',
+	`template_id` 	BIGINT(20) DEFAULT NULL COMMENT '消息规则模板id',
+	`name` 	VARCHAR(128) DEFAULT NULL COMMENT '消息规则模板名称',
+	`type` 	SMALLINT(6) DEFAULT NULL COMMENT '消息类型: 0->系统消息, 1->预警消息, 2->警报消息',
+	`category`	SMALLINT(6) DEFAULT NULL COMMENT '消息种类',
+	`rule_value`	TEXT DEFAULT NULL COMMENT '规则, 是farm对应的默认值, json值, 类: Rule',
+	`status`	SMALLINT(6) DEFAULT NULL COMMENT '状态 1:正常, -1:删除, -2:禁用',
+	`message_template`	VARCHAR(128) DEFAULT NULL COMMENT '规则数据模板名称, 对应parana_message_templates表name字段',
+	`content`	TEXT DEFAULT NULL COMMENT '规则的内容, 针对系统消息',
+	`producer`	VARCHAR(128) DEFAULT NULL COMMENT '消息生成者(类的简单类名)',
+	`describe`	VARCHAR(1024) DEFAULT NULL COMMENT '消息规则模板描述',
+	`created_at`	DATETIME DEFAULT NULL COMMENT '创建时间',
+	`updated_at`	DATETIME DEFAULT NULL COMMENT '更新时间',
+	`updator_id`	BIGINT(20) DEFAULT NULL COMMENT '修改人id',
+	`updator_name`	VARCHAR(32) DEFAULT NULL COMMENT '修改人name',
+	PRIMARY KEY(`id`)
+)ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='猪场软件消息规则模板表(历史跟踪)';
+
 DROP TABLE IF EXISTS `doctor_message_rule_templates`;
 CREATE TABLE IF NOT EXISTS `doctor_message_rule_templates` (
 	`id`	BIGINT(20) NOT NULL AUTO_INCREMENT COMMENT '自增主键',

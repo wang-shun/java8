@@ -69,12 +69,12 @@ public class DoctorMsgRules {
 
     /**
      * 根据规格id获取规则详情
-     * @param ruleId    规则id
+     * @param id    规则id
      * @return
      */
     @RequestMapping(value = "/rule/detail", method = RequestMethod.GET)
-    public DoctorMessageRule findDetailById(@RequestParam Long ruleId) {
-        return RespHelper.or500(doctorMessageRuleReadService.findMessageRuleById(ruleId));
+    public DoctorMessageRule findDetailById(@RequestParam Long id) {
+        return RespHelper.or500(doctorMessageRuleReadService.findMessageRuleById(id));
     }
 
     /**
@@ -90,21 +90,39 @@ public class DoctorMsgRules {
 
     /**
      * 获取角色想绑定的规则
-     * @param ruleId
+     * @param ruleId    规则id
      */
     @RequestMapping(value = "/role/ruleId", method = RequestMethod.GET)
     public List<MsgRoleDto> findRolesByRuleId(@RequestParam Long ruleId) {
         List<MsgRoleDto> dtos = Lists.newArrayList();
         List<DoctorMessageRuleRole> ruleRoles = RespHelper.or500(doctorMessageRuleRoleReadService.findByRuleId(ruleId));
         for (int i = 0; ruleRoles != null && i < ruleRoles.size(); i++) {
-            DoctorMessageRuleRole ruleRole = ruleRoles.get(i);
-            MsgRoleDto msgRoleDto = BeanMapper.map(ruleRole, MsgRoleDto.class);
-            // 获取角色信息
-            SubRole subRole = RespHelper.or500(subRoleReadService.findById(ruleRole.getRoleId()));
-            msgRoleDto.setRoleName(subRole.getName());
-            dtos.add(msgRoleDto);
+            dtos.add(createMsgRoleDto(ruleRoles.get(i)));
         }
         return dtos;
+    }
+
+    /**
+     * 获取角色想绑定的规则
+     * @param roleId    角色id
+     * @return
+     */
+    @RequestMapping(value = "/role/roleId", method = RequestMethod.GET)
+    public List<MsgRoleDto> findRolesByRoleId(@RequestParam Long roleId) {
+        List<MsgRoleDto> dtos = Lists.newArrayList();
+        List<DoctorMessageRuleRole> ruleRoles = RespHelper.or500(doctorMessageRuleRoleReadService.findByRoleId(roleId));
+        for (int i = 0; ruleRoles != null && i < ruleRoles.size(); i++) {
+            dtos.add(createMsgRoleDto(ruleRoles.get(i)));
+        }
+        return dtos;
+    }
+
+    private MsgRoleDto createMsgRoleDto(DoctorMessageRuleRole ruleRole) {
+        MsgRoleDto msgRoleDto = BeanMapper.map(ruleRole, MsgRoleDto.class);
+        // 获取角色信息
+        SubRole subRole = RespHelper.or500(subRoleReadService.findById(ruleRole.getRoleId()));
+        msgRoleDto.setRoleName(subRole == null ? null : subRole.getName());
+        return msgRoleDto;
     }
 
     /**

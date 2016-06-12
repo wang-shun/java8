@@ -158,7 +158,7 @@ INSERT INTO `doctor_message_rule_templates`
 (name, type, category, rule_value, status, message_template, content, producer, `describe`, created_at, updated_at, updated_by)
 VALUES
 -- 系统消息(可配多少小时后)
-('系统消息测试', 0, 0, '{"frequence":-1,"channels":"0,1,2,3"}', 1, null, '系统消息测试', 'sysMessageProducer', '系统消息测试', now(), now(), null),
+('系统消息测试', 0, 0, '{"frequence":-1,"channels":"0,1,2,3"}', 1, null, '{"data":"系统消息测试"}', 'sysMessageProducer', '系统消息测试', now(), now(), null),
 -- id:1 (断奶、流产、返情日期间隔(天))
 ('待配种母猪提示', 1, 1, '{"values":[{"id":1, "ruleType":1,"value":7, "describe":"断奶、流产、返情日期间隔(天)"}],"frequence":24,"channels":"0,1,2,3"}', 1, 'sow.breed', null, 'sowBreedingProducer', '待配种母猪提示', now(), now(), null),
 ('待配种母猪警报', 2, 1, '{"values":[{"id":1, "ruleType":1,"value":21, "describe":"断奶、流产、返情日期间隔(天)"}],"frequence":24,"channels":"0,1,2,3"}', 1, 'sow.breed', null, 'sowBreedingProducer', '待配种母猪警报', now(), now(), null),
@@ -175,9 +175,29 @@ VALUES
 1, 'sow.need.wean', null, 'sowNeedWeanProducer', '母猪需断奶警报', now(), now(), null),
 -- id:1 (母猪胎次)
 ('母猪应淘汰提示', 1, 6,'{"values":[{"id":1, "ruleType":2, "leftValue":9,"rightValue":10, "describe":"胎次"}],"frequence":24,"channels":"0,1,2,3"}',1, 'sow.eliminate', null, 'sowEliminateProducer', '母猪应淘汰提示', now(), now(), null),
+-- id:1 (公猪配种次数)
+('公猪应淘汰提示', 1, 7,'{"values":[{"id":1, "ruleType":2, "leftValue":10,"rightValue":15, "describe":"公猪配种次数"}],"frequence":24,"channels":"0,1,2,3"}', 1, 'msg.boar.eliminate', null, 'boarEliminateProducer', '公猪应淘汰提示', now(), now(), null),
 -- id:1 (母猪配种日期起的天数)
-('母猪未产仔警报', 2, 10,'{"values":[{"id":1, "ruleType":1,"value":120, "describe":"母猪配种日期起的天数"}],"frequence":24,"channels":"0,1,2,3"}',1, 'sow.not.litter', null, 'sowNotLitterProducer', '母猪未产仔警报', now(), now(), null)
+('母猪未产仔警报', 2, 10,'{"values":[{"id":1, "ruleType":1,"value":120, "describe":"母猪配种日期起的天数"}],"frequence":24,"channels":"0,1,2,3"}',1, 'sow.not.litter', null, 'sowNotLitterProducer', '母猪未产仔警报', now(), now(), null),
+-- id:1 (库存量)
+('仓库库存不足提示', 1, 9,'{"values":[{"id":1, "ruleType":1,"value":7, "describe":"库存量"}],"frequence":24,"channels":"0,1,2,3"}', 1, 'msg.warehouse.store', null, 'storageShortageProducer', '仓库库存不足提示', now(), now(), null),
+('仓库库存不足警报', 2, 9,'{"values":[{"id":1, "ruleType":1,"value":3, "describe":"库存量"}],"frequence":24,"channels":"0,1,2,3"}', 1, 'msg.warehouse.store', null, 'storageShortageProducer', '仓库库存不足警报', now(), now(), null)
 ;
+
+INSERT INTO `doctor_message_rules` (`id`, `farm_id`, `template_id`, `template_name`, `type`, `category`, `rule_value`, `use_default`, `status`, `describe`, `created_at`, `updated_at`)
+VALUES
+(1,1,2,'待配种母猪提示',1,1,'{	"values":[		{"id":1, "ruleType":1,"value":7, "describe":"断奶、流产、返情日期间隔(天)"}	],	"frequence":24,	"channels":"0,1,2,3"}',1,1,'待配种母猪提示','2016-06-12 09:58:27','2016-06-12 09:58:27'),
+(2,1,3,'待配种母猪警报',2,1,'{	"values":[		{"id":1, "ruleType":1,"value":21, "describe":"断奶、流产、返情日期间隔(天)"}	],	"frequence":24,	"channels":"0,1,2,3"}',1,1,'待配种母猪警报','2016-06-12 09:58:27','2016-06-12 09:58:27'),
+(3,1,4,'母猪需妊娠检查提示',1,2,'{	"values":[		{"id":1, "ruleType":2,"leftValue":19,"rightValue":25, "describe":"母猪已配种时间间隔(天)"}	],	"frequence":24,	"channels":"0,1,2,3"}',1,1,'母猪需妊娠检查提示','2016-06-12 09:58:27','2016-06-12 09:58:27'),
+(4,1,5,'母猪需转入妊娠舍提示',1,3,'{	"frequence":24,	"channels":"0,1,2,3"}',1,1,'母猪需转入妊娠舍提示','2016-06-12 09:58:27','2016-06-12 09:58:27'),
+(5,1,6,'母猪预产期提示',1,4,'{	"values":[		{"id":1, "ruleType":1,"value":7, "describe":"预产期提前多少天提醒"}	],	"frequence":24,	"channels":"0,1,2,3"}',1,1,'母猪预产期提示','2016-06-12 09:58:27','2016-06-12 09:58:27'),
+(6,1,7,'母猪需断奶提示',1,5,'{	"values":[		{"id":1, "ruleType":1,"value":21, "describe":"母猪分娩日期起的天数"}	],	"frequence":24,	"channels":"0,1,2,3"}',1,1,'母猪需断奶提示','2016-06-12 09:58:27','2016-06-12 09:58:27'),
+(7,1,8,'母猪需断奶警报',2,5,'{	"values":[		{"id":1, "ruleType":1,"value":35, "describe":"母猪分娩日期起的天数"}	],	"frequence":24,	"channels":"0,1,2,3"}',1,1,'母猪需断奶警报','2016-06-12 09:58:27','2016-06-12 09:58:27'),
+(8,1,9,'母猪应淘汰提示',1,6,'{	"values":[		{"id":1, "ruleType":2, "leftValue":9,"rightValue":10, "describe":"胎次"}	],	"frequence":24,	"channels":"0,1,2,3"}',1,1,'母猪应淘汰提示','2016-06-12 09:58:27','2016-06-12 09:58:27'),
+(9,1,10,'公猪应淘汰提示',1,7,'{	"values":[		{"id":1, "ruleType":2, "leftValue":10,"rightValue":15, "describe":"公猪配种次数"}	],	"frequence":24,	"channels":"0,1,2,3"}',1,1,'公猪应淘汰提示','2016-06-12 09:58:27','2016-06-12 09:58:27'),
+(10,1,11,'母猪未产仔警报',2,10,'{	"values":[		{"id":1, "ruleType":1,"value":120, "describe":"母猪配种日期起的天数"}	],	"frequence":24,	"channels":"0,1,2,3"}',1,1,'母猪未产仔警报','2016-06-12 09:58:27','2016-06-12 09:58:27'),
+(11,1,12,'仓库库存不足提示',1,9,'{	"values":[		{"id":1, "ruleType":1,"value":7, "describe":"库存量"}	],	"frequence":24,	"channels":"0,1,2,3"}',1,1,'仓库库存不足提示','2016-06-12 09:58:27','2016-06-12 09:58:27'),
+(12,1,13,'仓库库存不足警报',2,9,'{	"values":[		{"id":1, "ruleType":1,"value":3, "describe":"库存量"}	],	"frequence":24,	"channels":"0,1,2,3"}',1,1,'仓库库存不足警报','2016-06-12 09:58:27','2016-06-12 09:58:27');
 
 
 INSERT INTO `doctor_messages` (`id`, `farm_id`, `rule_id`, `role_id`, `user_id`, `template_id`, `message_template`, `type`, `category`, `data`, `channel`, `url`, `status`, `sended_at`, `failed_by`, `created_by`, `created_at`, `updated_at`)

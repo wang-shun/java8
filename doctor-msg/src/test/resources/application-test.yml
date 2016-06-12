@@ -1,11 +1,11 @@
-#datasource:
-#  driver-class-name: org.h2.Driver
-#  url: jdbc:h2:mem:test;MODE=MySQL
-
 datasource:
-  url: jdbc:mysql://127.0.0.1:3306/pig_doctor?useUnicode=true&characterEncoding=UTF8
-  username: root
-  password: anywhere
+  driver-class-name: org.h2.Driver
+  url: jdbc:h2:mem:test;MODE=MySQL
+
+#datasource:
+#  url: jdbc:mysql://127.0.0.1:3306/pig_doctor?useUnicode=true&characterEncoding=UTF8
+#  username: root
+#  password: anywhere
 
 # MyBatis
 mybatis:

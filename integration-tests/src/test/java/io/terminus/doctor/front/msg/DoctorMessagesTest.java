@@ -11,6 +11,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.boot.test.SpringApplicationConfiguration;
 import utils.HttpGetRequest;
+import utils.HttpPostRequest;
 
 import java.util.List;
 import java.util.Map;
@@ -114,6 +115,32 @@ public class DoctorMessagesTest extends BaseFrontWebTest {
         // 删除
         url = "http://localhost:"+ this.port +"/api/doctor/msg/template?id=1";
         this.restTemplate.delete(url);
+
+        // 查询
+        url = HttpGetRequest.url("http://localhost:{port}/api/doctor/msg/template/detail")
+                .params("id", 1)
+                .build();
+        template = this.restTemplate.getForObject(url, DoctorMessageRuleTemplate.class, ImmutableMap.of("port", this.port));
+        System.out.println(template);
+    }
+
+    /**
+     * 更新模板信息
+     * @see DoctorMessages#createOrUpdateTemplate(DoctorMessageRuleTemplate)
+     */
+    @Test
+    public void test_UPDATE_Template() {
+        // 查询
+        String url = HttpGetRequest.url("http://localhost:{port}/api/doctor/msg/template/detail")
+                .params("id", 1)
+                .build();
+        DoctorMessageRuleTemplate template = this.restTemplate.getForObject(url, DoctorMessageRuleTemplate.class, ImmutableMap.of("port", this.port));
+        template.setName("测试测试11111修改了");
+        // 更新
+        url = "http://localhost:"+ this.port +"/api/doctor/msg/template";
+        this.restTemplate.postForObject(url,
+                HttpPostRequest.bodyRequest().params(JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(template)),
+                Object.class);
 
         // 查询
         url = HttpGetRequest.url("http://localhost:{port}/api/doctor/msg/template/detail")

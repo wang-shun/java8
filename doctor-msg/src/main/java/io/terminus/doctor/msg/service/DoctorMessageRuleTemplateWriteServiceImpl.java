@@ -60,14 +60,17 @@ public class DoctorMessageRuleTemplateWriteServiceImpl implements DoctorMessageR
     public Response<Boolean> updateMessageRuleTemplate(DoctorMessageRuleTemplate messageRuleTemplate) {
         try {
             // 记录历史
-            DoctorMessageRuleTemplateTrack track = BeanMapper.map(messageRuleTemplate, DoctorMessageRuleTemplateTrack.class);
-            track.setTemplateId(messageRuleTemplate.getId());
-            BaseUser user = UserUtil.getCurrentUser();
-            if (user != null) {
-                track.setUpdatorId(user.getId());
-                track.setUpdatorName(user.getName());
+            DoctorMessageRuleTemplate template = doctorMessageRuleTemplateDao.findById(messageRuleTemplate.getId());
+            if (template != null) {
+                DoctorMessageRuleTemplateTrack track = BeanMapper.map(template, DoctorMessageRuleTemplateTrack.class);
+                track.setTemplateId(template.getId());
+                BaseUser user = UserUtil.getCurrentUser();
+                if (user != null) {
+                    track.setUpdatorId(user.getId());
+                    track.setUpdatorName(user.getName());
+                }
+                doctorMessageRuleTemplateTrackDao.create(track);
             }
-            doctorMessageRuleTemplateTrackDao.create(track);
 
             // 1. 查询出于模板相管理的猪场, 并更新默认的rulevalue值
             List<DoctorMessageRule> farmTpls = doctorMessageRuleDao.findByTpl(messageRuleTemplate.getId());
