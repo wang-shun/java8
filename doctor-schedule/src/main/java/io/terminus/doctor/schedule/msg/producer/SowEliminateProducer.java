@@ -101,7 +101,8 @@ public class SowEliminateProducer extends AbstractProducer {
                     // 母猪的updatedAt与当前时间差 (天)
                     Double timeDiff = (double) (DateTime.now().minus(pigDto.getUpdatedAt().getTime()).getMillis() / 86400000);
                     if (ruleValueMap.get(1) != null && pigDto.getCurrentParity() != null) {
-                        if (checkRuleValue(ruleValueMap.get(1), pigDto.getCurrentParity().doubleValue())) {
+                        // 如果当前胎次 大于 配置的次数
+                        if (pigDto.getCurrentParity() > ruleValueMap.get(1).getValue()) {
                             messages.addAll(getMessage(pigDto, rule.getChannels(), ruleRole, subUsers, timeDiff, rule.getUrl()));
                         }
                     }

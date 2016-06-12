@@ -33,6 +33,9 @@
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.event.service.DoctorPigReadService" id="doctorPigReadService" check="false"/>
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.event.service.DoctorPigEventReadService" id="doctorPigEventReadService" check="false"/>
 
+    <!-- warehouse api -->
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.warehouse.service.DoctorMaterialConsumeAvgReadService" id="doctorMaterialConsumeAvgReadService" check="false"/>
+
     <!-- Doctor Message api -->
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.msg.service.DoctorMessageRuleTemplateReadService" id="doctorMessageRuleTemplateReadService" check="false"/>
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.msg.service.DoctorMessageRuleTemplateWriteService" id="doctorMessageRuleTemplateWriteService" check="false"/>

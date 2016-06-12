@@ -6,7 +6,7 @@ import io.terminus.doctor.event.dto.DoctorPigInfoDto;
 import java.util.Map;
 
 /**
- * Desc:
+ * Desc: 猪Dto消息创建
  * Mail: chk@terminus.io
  * Created by icemimosa
  * Date: 16/6/3

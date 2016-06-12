@@ -58,7 +58,7 @@ public class DoctorPigInfoDto implements Serializable{
     private String barnName;
 
     private String extraTrack;
-    private Integer currentParity; //  当前胎次
+    private Integer currentParity; //  当前胎次/配种次数
 
     private Date updatedAt;
 

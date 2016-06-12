@@ -174,9 +174,9 @@ VALUES
 ('母猪需断奶警报', 2, 5,'{"values":[{"id":1, "ruleType":1,"value":35, "describe":"母猪分娩日期起的天数"}],"frequence":24,"channels":"0,1,2,3"}',
 1, 'sow.need.wean', null, 'sowNeedWeanProducer', '母猪需断奶警报', now(), now(), null),
 -- id:1 (母猪胎次)
-('母猪应淘汰提示', 1, 6,'{"values":[{"id":1, "ruleType":2, "leftValue":9,"rightValue":10, "describe":"胎次"}],"frequence":24,"channels":"0,1,2,3"}',1, 'sow.eliminate', null, 'sowEliminateProducer', '母猪应淘汰提示', now(), now(), null),
+('母猪应淘汰提示', 1, 6,'{"values":[{"id":1, "ruleType":1, "value":10, "describe":"胎次"}],"frequence":24,"channels":"0,1,2,3"}',1, 'sow.eliminate', null, 'sowEliminateProducer', '母猪应淘汰提示', now(), now(), null),
 -- id:1 (公猪配种次数)
-('公猪应淘汰提示', 1, 7,'{"values":[{"id":1, "ruleType":2, "leftValue":10,"rightValue":15, "describe":"公猪配种次数"}],"frequence":24,"channels":"0,1,2,3"}', 1, 'msg.boar.eliminate', null, 'boarEliminateProducer', '公猪应淘汰提示', now(), now(), null),
+('公猪应淘汰提示', 1, 7,'{"values":[{"id":1, "ruleType":1, "value":20, "describe":"公猪配种次数"}],"frequence":24,"channels":"0,1,2,3"}', 1, 'msg.boar.eliminate', null, 'boarEliminateProducer', '公猪应淘汰提示', now(), now(), null),
 -- id:1 (母猪配种日期起的天数)
 ('母猪未产仔警报', 2, 10,'{"values":[{"id":1, "ruleType":1,"value":120, "describe":"母猪配种日期起的天数"}],"frequence":24,"channels":"0,1,2,3"}',1, 'sow.not.litter', null, 'sowNotLitterProducer', '母猪未产仔警报', now(), now(), null),
 -- id:1 (库存量)
@@ -193,8 +193,8 @@ VALUES
 (5,1,6,'母猪预产期提示',1,4,'{	"values":[		{"id":1, "ruleType":1,"value":7, "describe":"预产期提前多少天提醒"}	],	"frequence":24,	"channels":"0,1,2,3"}',1,1,'母猪预产期提示','2016-06-12 09:58:27','2016-06-12 09:58:27'),
 (6,1,7,'母猪需断奶提示',1,5,'{	"values":[		{"id":1, "ruleType":1,"value":21, "describe":"母猪分娩日期起的天数"}	],	"frequence":24,	"channels":"0,1,2,3"}',1,1,'母猪需断奶提示','2016-06-12 09:58:27','2016-06-12 09:58:27'),
 (7,1,8,'母猪需断奶警报',2,5,'{	"values":[		{"id":1, "ruleType":1,"value":35, "describe":"母猪分娩日期起的天数"}	],	"frequence":24,	"channels":"0,1,2,3"}',1,1,'母猪需断奶警报','2016-06-12 09:58:27','2016-06-12 09:58:27'),
-(8,1,9,'母猪应淘汰提示',1,6,'{	"values":[		{"id":1, "ruleType":2, "leftValue":9,"rightValue":10, "describe":"胎次"}	],	"frequence":24,	"channels":"0,1,2,3"}',1,1,'母猪应淘汰提示','2016-06-12 09:58:27','2016-06-12 09:58:27'),
-(9,1,10,'公猪应淘汰提示',1,7,'{	"values":[		{"id":1, "ruleType":2, "leftValue":10,"rightValue":15, "describe":"公猪配种次数"}	],	"frequence":24,	"channels":"0,1,2,3"}',1,1,'公猪应淘汰提示','2016-06-12 09:58:27','2016-06-12 09:58:27'),
+(8,1,9,'母猪应淘汰提示',1,6,'{	"values":[		{"id":1, "ruleType":1, "value":10, "describe":"胎次"}	],	"frequence":24,	"channels":"0,1,2,3"}',1,1,'母猪应淘汰提示','2016-06-12 09:58:27','2016-06-12 09:58:27'),
+(9,1,10,'公猪应淘汰提示',1,7,'{	"values":[		{"id":1, "ruleType":1, "value":20, "describe":"公猪配种次数"}	],	"frequence":24,	"channels":"0,1,2,3"}',1,1,'公猪应淘汰提示','2016-06-12 09:58:27','2016-06-12 09:58:27'),
 (10,1,11,'母猪未产仔警报',2,10,'{	"values":[		{"id":1, "ruleType":1,"value":120, "describe":"母猪配种日期起的天数"}	],	"frequence":24,	"channels":"0,1,2,3"}',1,1,'母猪未产仔警报','2016-06-12 09:58:27','2016-06-12 09:58:27'),
 (11,1,12,'仓库库存不足提示',1,9,'{	"values":[		{"id":1, "ruleType":1,"value":7, "describe":"库存量"}	],	"frequence":24,	"channels":"0,1,2,3"}',1,1,'仓库库存不足提示','2016-06-12 09:58:27','2016-06-12 09:58:27'),
 (12,1,13,'仓库库存不足警报',2,9,'{	"values":[		{"id":1, "ruleType":1,"value":3, "describe":"库存量"}	],	"frequence":24,	"channels":"0,1,2,3"}',1,1,'仓库库存不足警报','2016-06-12 09:58:27','2016-06-12 09:58:27');
