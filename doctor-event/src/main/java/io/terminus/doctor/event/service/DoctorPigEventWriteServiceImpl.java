@@ -187,7 +187,7 @@ public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteServic
     public Response<Long> conditionEvent(DoctorConditionDto doctorConditionDto, DoctorBasicInputInfoDto doctorBasicInputInfoDto) {
         try{
             Map<String,Object> dto = Maps.newHashMap();
-            BeanMapper.copy(doctorBasicInputInfoDto, dto);
+            BeanMapper.copy(doctorConditionDto, dto);
 
             Map<String,Object> result = doctorPigEventManager.createCasualPigEvent(doctorBasicInputInfoDto, dto);
             publishEvent(result);

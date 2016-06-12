@@ -73,7 +73,7 @@
         <transition name="断奶事件" value="16" expression="${eventType} == 16" handler="doctorSowWeanHandler" target="断奶事件判断"/>
     </decision>
 
-    <decision name="被拼窝事件判断断">
+    <decision name="被拼窝事件判断">
         <transition name="进入哺乳" expression="${status} == 8" target="哺乳"/>
         <transition name="进入断奶" expression="${status} == 9" target="断奶"/>
     </decision>

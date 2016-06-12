@@ -85,8 +85,8 @@ public abstract class DoctorAbstractEventHandler implements DoctorEventCreateHan
             // 当前事件影响的Id 方式
             context.put("createEventResult",
                     JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(
-                            ImmutableMap.of("pigId", basic.getPigId(),
-                                    "eventId", doctorPigEvent.getId(), "snapshotId", doctorPigSnapshot.getId())));
+                            ImmutableMap.of("doctorPigId", basic.getPigId(),
+                                    "doctorEventId", doctorPigEvent.getId(), "doctorSnapshotId", doctorPigSnapshot.getId())));
         }catch (Exception e){
             DoctorAbstractEventHandler.log.error("handle execute fail, basic:{}, extra:{}, context:{} cause:{}",
                     basic, extra, context, Throwables.getStackTraceAsString(e));

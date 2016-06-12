@@ -37,7 +37,7 @@ public class DoctorSemenHandler extends DoctorAbstractEventHandler{
 
     @Override
     public DoctorPigTrack updateDoctorPigTrackInfo(DoctorPigTrack doctorPigTrack, DoctorBasicInputInfoDto basic, Map<String, Object> extra, Map<String,Object> content) {
-        doctorPigTrack.setWeight(Params.getWithConvert(extra, "weight", a->Double.valueOf(a.toString())));
+        doctorPigTrack.setWeight(Params.getWithConvert(extra, "semenWeight", a->Double.valueOf(a.toString())));
         doctorPigTrack.addAllExtraMap(extra);
         doctorPigTrack.addPigEvent(basic.getPigType(), (Long) content.get("doctorPigEventId"));
         return doctorPigTrack;

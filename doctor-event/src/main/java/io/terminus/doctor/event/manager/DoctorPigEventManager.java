@@ -126,6 +126,8 @@ public class DoctorPigEventManager {
             ids = OBJECT_MAPPER.readValue(context.get("entryResult").toString(), JacksonType.MAP_OF_OBJECT);
             Long pigId = Params.getWithConvert(ids, "doctorPigId", a->Long.valueOf(a.toString()));
             flowProcessService.startFlowInstance(sowFlowDefinitionKey, pigId);
+        }else {
+            ids = OBJECT_MAPPER.readValue(context.get("createEventResult").toString(), JacksonType.MAP_OF_OBJECT);
         }
         return ids;
     }

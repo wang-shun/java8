@@ -7,13 +7,19 @@ import io.terminus.doctor.event.dao.DoctorPigDao;
 import io.terminus.doctor.event.dao.DoctorPigEventDao;
 import io.terminus.doctor.event.dao.DoctorPigSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorPigTrackDao;
+import io.terminus.doctor.event.dto.event.boar.DoctorSemenDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorAbortionDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorFarrowingDto;
+import io.terminus.doctor.event.dto.event.sow.DoctorFostersDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorMatingDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorPartWeanDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorPregChkResultDto;
 import io.terminus.doctor.event.dto.event.usual.DoctorChgLocationDto;
+import io.terminus.doctor.event.dto.event.usual.DoctorConditionDto;
+import io.terminus.doctor.event.dto.event.usual.DoctorDiseaseDto;
 import io.terminus.doctor.event.dto.event.usual.DoctorFarmEntryDto;
+import io.terminus.doctor.event.dto.event.usual.DoctorRemovalDto;
+import io.terminus.doctor.event.dto.event.usual.DoctorVaccinationDto;
 import io.terminus.doctor.event.enums.BoarEntryType;
 import io.terminus.doctor.event.enums.FarrowingType;
 import io.terminus.doctor.event.enums.IsOrNot;
@@ -74,12 +80,127 @@ public class DoctorPigCreateEventsTest extends BaseFrontWebTest{
    }
 
     /**
+     * 测试母猪普通事件信息
+     */
+    @Test
+    public void casualCasualEventCreateTest(){
+        Long pigId = 1l;
+
+        // 录入母猪信息测试内容
+        sowEntryEventCreate();
+
+//        chgLocationCasualEventCreate(pigId);
+
+//        createRemovalPigEventContent(pigId);
+
+//        createDiseaseVaccinationEvent(pigId);
+
+        createConditionEvent(pigId);
+        createSemseEvent(pigId);
+
+        printCurrentState();
+        testCurrentSowInputStatus(pigId);
+    }
+
+    public void createSemseEvent(Long pigId){
+
+        String url = basicUrl + "/createSemen";
+
+        HttpEntity httpEntity = HttpPostRequest.formRequest()
+                .param("pigId", pigId).param("farmId", 12345l).param("doctorSemenDtoJson", DoctorSemenDto.builder()
+                        .semenDate(new Date()).semenWeight(100d).dilutionWeight(100d).dilutionRatio(10d)
+                        .semenActive(100d).semenDensity(100d).semenJxRatio(100d).semenPh(100d).semenRemark("remark").semenTotal(100d)
+                        .build())
+                .httpEntity();
+
+        Long result = this.restTemplate.postForObject(url, httpEntity, Long.class);
+        System.out.println(result);
+    }
+
+    public void createConditionEvent(Long pigId){
+        String url = basicUrl + "/createConditionEvent";
+
+        HttpEntity httpEntity = HttpPostRequest.formRequest()
+                .param("pigId", pigId).param("farmId", 12345l).param("doctorConditionDtoJson", DoctorConditionDto.builder()
+                        .conditionDate(new Date()).conditionJudgeScore(100)
+                        .conditionWeight(100d).conditionBackWeight(100d)
+                        .conditionRemark("remark")
+                        .build())
+                .httpEntity();
+        Long result = this.restTemplate.postForObject(url, httpEntity, Long.class);
+
+        System.out.println(result);
+    }
+
+    /**
+     * 创建 疾病 免疫事件信息
+     */
+    private void createDiseaseVaccinationEvent(Long pigId){
+        String url = basicUrl + "/createDiseaseEvent";
+
+        HttpEntity httpEntity = HttpPostRequest.formRequest()
+                .param("pigId", pigId).param("farmId", 12345l).param("doctorDiseaseDtoJson", DoctorDiseaseDto.builder()
+                        .diseaseDate(new Date()).diseaseName("diseaseName").diseaseStaff("staff").diseaseRemark("remark")
+                        .build())
+                .httpEntity();
+
+        Long result = this.restTemplate.postForObject(url, httpEntity, Long.class);
+        System.out.println(result);
+
+        url = basicUrl + "/createVaccinationEvent";
+        HttpEntity httpEntityVa = HttpPostRequest.formRequest()
+                .param("pigId", pigId).param("farmId", 12345l).param("doctorVaccinationDtoJson", DoctorVaccinationDto.builder()
+                        .vaccinationDate(new Date()).vaccinationId(1l).vaccinationName("vaccinationName").vaccinationResult(1)
+                        .vaccinationStaffId(1l).vaccinationStaffName("vaccinationName").vaccinationRemark("remark")
+                        .build())
+                .httpEntity();
+        result = this.restTemplate.postForObject(url,httpEntityVa, Long.class);
+        System.out.println(result);
+    }
+
+    /**
+     * 离场母猪创建事件
+     */
+    private void createRemovalPigEventContent(Long pigId){
+        String url = basicUrl + "/createRemovalEvent";
+
+        HttpEntity httpEntity = HttpPostRequest.formRequest()
+                .param("pigId", pigId).param("farmId", 12345l).param("doctorRemovalDtoJson", DoctorRemovalDto.builder()
+                        .chgTypeId(1l).chgTypeName("chgTypeName").chgReasonId(1l).chgReasonName("chgReasonName").toBarnId(1l)
+                        .weight(100d).sum(100d).price(100d).customerId(1l).remark("remark")
+                        .build())
+                .httpEntity();
+
+        Long result = this.restTemplate.postForObject(url, httpEntity, Long.class);
+        System.out.println(result);
+    }
+
+    /**
+     * 录入转舍事件信息
+     */
+    private void chgLocationCasualEventCreate(Long pigId){
+        String url = basicUrl  + "/createChgLocation";
+
+        HttpEntity httpEntity = HttpPostRequest.formRequest()
+                .param("pigId", pigId).param("farmId", 12345l).param("doctorChgLocationDtoJson",DoctorChgLocationDto.builder()
+                        .changeLocationDate(new Date()).chgLocationFromBarnId(1l).chgLocationFromBarnName("fromBarnName")
+                        .chgLocationToBarnId(2l).chgLocationToBarnName("toBarnName")
+                        .build())
+                .httpEntity();
+
+        Long result = this.restTemplate.postForObject(url, httpEntity, Long.class);
+        System.out.println(result);
+    }
+
+    /**
      * 测试母猪进厂事件信息
      */
     @Test
     public void sowEntryEventCreateTest(){
 
-        Long pigId = sowEntryEventCreate();
+        Long pigId = 1l;
+
+        sowEntryEventCreate();
 
         sowMatingEventCreate(pigId);
 
@@ -95,11 +216,42 @@ public class DoctorPigCreateEventsTest extends BaseFrontWebTest{
 
         testWeanMethod(pigId, 200);
 
+        // 测试凭我事件信息
+//        testFostersEventCreate(pigId, 200);
+
+        //  录入转场事件信息
+        testToMating(pigId);
+
         // 显示 state
         printCurrentState();
 
         // 获取下一个事件信息
         testCurrentSowInputStatus(pigId);
+    }
+
+    private void testFostersEventCreate(Long pigId, Integer fosterCount){
+        // 创建一个可以被拼窝的母猪
+        Long pigFosterId = 2l;
+        sowEntryEventCreate();
+        sowMatingEventCreate(pigFosterId);
+        testPregCheckResultEventCreate(pigFosterId, PregCheckResult.YANG);
+        testToPregEventCreate(pigFosterId);
+        testToFarrowing(pigFosterId);
+        testFarrowingEventCreate(pigFosterId);
+
+        DoctorFostersDto doctorFostersDto = DoctorFostersDto.builder()
+                .fostersDate(new Date()).fostersCount(fosterCount).sowFostersCount(fosterCount / 2).boarFostersCount(fosterCount / 2)
+                .fosterSowId(pigFosterId).fosterReason(1l).fosterRemark("testFostersReMark")
+                .build();
+
+        String url = basicUrl + "/createSowEvent";
+        HttpEntity httpEntity = HttpPostRequest.formRequest().param("farmId", 12345l)
+                .param("pigId", pigId).param("eventType", PigEvent.FOSTERS.getKey())
+                .param("sowInfoDtoJson", JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(doctorFostersDto))
+                .httpEntity();
+
+        Long result = this.restTemplate.postForObject(url, httpEntity, Long.class);
+        System.out.println(result);
     }
 
 
@@ -130,6 +282,23 @@ public class DoctorPigCreateEventsTest extends BaseFrontWebTest{
                         .weakCount(0).mnyCount(0).deadCount(0).blackCount(0).jxCount(0).toBarnId(-1l).toBarnName("notKnow")
                         .farrowStaff1("staff").farrowStaff2("staff2").farrowRemark("farrowingReMark")
                         .build()).httpEntity());
+        Long result = this.restTemplate.postForObject(url, httpEntity, Long.class);
+        System.out.println(result);
+    }
+
+    /**
+     * 测试母猪转舍事件信息
+     * @param pigId
+     */
+    private void testToMating(Long pigId){
+        String url = basicUrl + "/createSowEvent";
+        HttpEntity httpEntity = HttpPostRequest.formRequest()
+                .param("farmId", 12345l).param("pigId", pigId).param("eventType", PigEvent.TO_MATING.getKey())
+                .param("sowInfoDtoJson", DoctorChgLocationDto.builder()
+                        .changeLocationDate(new Date()).chgLocationFromBarnId(7l).chgLocationFromBarnName("fromWeanBarnName")
+                        .chgLocationToBarnId(5l).chgLocationToBarnName("matingBarnName")
+                        .build()).httpEntity();
+
         Long result = this.restTemplate.postForObject(url, httpEntity, Long.class);
         System.out.println(result);
     }

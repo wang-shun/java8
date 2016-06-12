@@ -93,7 +93,7 @@ public class DoctorPigTrack implements Serializable{
     public void setExtraMap(Map<String,Object> extraMap){
         this.extraMap = extraMap;
         if(isNull(extraMap) || Iterables.isEmpty(extraMap.entrySet())){
-            this.extra = null;
+            this.extra = "";
         }else {
             this.extra = OBJECT_MAPPER.writeValueAsString(extraMap);
         }
