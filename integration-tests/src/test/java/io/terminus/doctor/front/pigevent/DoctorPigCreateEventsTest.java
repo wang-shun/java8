@@ -26,6 +26,7 @@ import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.enums.MatingType;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PigSource;
+import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.enums.PregCheckResult;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.front.BaseFrontWebTest;
@@ -78,6 +79,36 @@ public class DoctorPigCreateEventsTest extends BaseFrontWebTest{
         File f = new File(getClass().getResource("/flow/sow.xml").getFile());
         workFlowService.getFlowDefinitionService().deploy(new FileInputStream(f));
    }
+
+    /**
+     * 测试母猪事件信息
+     */
+    public void testPigEventPagingInfo(){
+
+    }
+
+    /**
+     * 测试猪 事件信息
+     */
+    @Test
+    public void testPigPagingInfo(){
+        // 录入母猪事件信息
+        for (int i = 0; i<30; i++){
+            sowEntryEventCreate();
+        }
+        HttpEntity httpEntity = HttpPostRequest.formRequest()
+                .param("farmId", 12345l).param("status", PigStatus.Entry.getKey()).param("pageNo", 1).param("pageSize", 10)
+                .httpEntity();
+
+        ResponseEntity responseEntity = this.restTemplate.postForEntity("http://localhost:" + this.port + "/api/doctor/pigs/queryByStatus", httpEntity, Object.class);
+        System.out.println(JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(responseEntity.getBody()));
+
+        HttpEntity httpEntityDetail = HttpPostRequest.formRequest()
+                .param("farmId", 12345l).param("pigId", 10l)
+                .httpEntity();
+        ResponseEntity responseEntityDetail = this.restTemplate.postForEntity("http://localhost:" + this.port + "/api/doctor/pigs/getPigDetail", httpEntityDetail, Object.class);
+        System.out.println(JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(responseEntityDetail.getBody()));
+    }
 
     /**
      * 测试母猪普通事件信息

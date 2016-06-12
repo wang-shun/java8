@@ -81,5 +81,6 @@ public class DoctorWareHouseTypeConsumerHandler implements IHandler{
         }
         doctorFarmWareHouseType.setExtraMap(extraMap);
         doctorFarmWareHouseTypeDao.update(doctorFarmWareHouseType);
+        context.put("doctorFarmWareHouseTypeId", doctorFarmWareHouseType.getId());
     }
 }
