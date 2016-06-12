@@ -120,14 +120,15 @@ public class DoctorPigEventManager {
         /**
          * 母猪创建对应的事件流信息
          */
-        Map<String, Object> ids = null;
-        if(Objects.equals(doctorBasicInputInfoDto.getPigType(), DoctorPig.PIG_TYPE.SOW.getKey()) &&
-                Objects.equals(doctorBasicInputInfoDto.getEventType(), PigEvent.ENTRY.getKey())){
-            ids = OBJECT_MAPPER.readValue(context.get("entryResult").toString(), JacksonType.MAP_OF_OBJECT);
+        Map<String, Object> ids = OBJECT_MAPPER.readValue(context.get("entryResult").toString(), JacksonType.MAP_OF_OBJECT);
+        if(Objects.equals(doctorBasicInputInfoDto.getPigType(), DoctorPig.PIG_TYPE.SOW.getKey())){
             Long pigId = Params.getWithConvert(ids, "doctorPigId", a->Long.valueOf(a.toString()));
-            flowProcessService.startFlowInstance(sowFlowDefinitionKey, pigId);
-        }else {
-            ids = OBJECT_MAPPER.readValue(context.get("createEventResult").toString(), JacksonType.MAP_OF_OBJECT);
+
+            if(Objects.equals(doctorBasicInputInfoDto.getEventType(), PigEvent.ENTRY.getKey())){
+                flowProcessService.startFlowInstance(sowFlowDefinitionKey, pigId);
+            }else if(Objects.equals(doctorBasicInputInfoDto.getEventType(), PigEvent.REMOVAL.getKey())){
+                flowProcessService.endFlowInstance(sowFlowDefinitionKey, pigId);
+            }
         }
         return ids;
     }

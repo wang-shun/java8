@@ -32,15 +32,15 @@ public abstract class DoctorAbstractEventHandler implements DoctorEventCreateHan
 
     private static final ObjectMapper OBJECT_MAPPER = JsonMapper.JSON_NON_DEFAULT_MAPPER.getMapper();
 
-    private final DoctorPigDao doctorPigDao;
+    protected final DoctorPigDao doctorPigDao;
 
-    private final DoctorPigEventDao doctorPigEventDao;
+    protected final DoctorPigEventDao doctorPigEventDao;
 
-    private final DoctorPigTrackDao doctorPigTrackDao;
+    protected final DoctorPigTrackDao doctorPigTrackDao;
 
-    private final DoctorPigSnapshotDao doctorPigSnapshotDao;
+    protected final DoctorPigSnapshotDao doctorPigSnapshotDao;
 
-    private final DoctorRevertLogDao doctorRevertLogDao;
+    protected final DoctorRevertLogDao doctorRevertLogDao;
 
     @Autowired
     public DoctorAbstractEventHandler(DoctorPigDao doctorPigDao,

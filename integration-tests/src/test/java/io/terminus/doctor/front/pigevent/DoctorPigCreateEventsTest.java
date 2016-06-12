@@ -230,28 +230,31 @@ public class DoctorPigCreateEventsTest extends BaseFrontWebTest{
     public void sowEntryEventCreateTest(){
 
         Long pigId = 1l;
-
         sowEntryEventCreate();
 
-        sowMatingEventCreate(pigId);
+        Long boarId = 2l;
+        sowEntryEventCreate();
 
-        testPregCheckResultEventCreate(pigId, PregCheckResult.YANG);
+        sowMatingEventCreate(pigId, boarId);
 
-        testToPregEventCreate(pigId);
+//        testPregCheckResultEventCreate(pigId, PregCheckResult.YANG);
 
+//        testToPregEventCreate(pigId);
+
+        // test
 //        testAbortionEventCreate(pigId);
 
-        testToFarrowing(pigId);
+//        testToFarrowing(pigId);
 
-        testFarrowingEventCreate(pigId);
+//        testFarrowingEventCreate(pigId);
 
-        testWeanMethod(pigId, 200);
+//        testWeanMethod(pigId, 200);
 
-        // 测试凭我事件信息
+        // 测试凭我事件信息test
 //        testFostersEventCreate(pigId, 200);
 
         //  录入转场事件信息
-        testToMating(pigId);
+//        testToMating(pigId);
 
         // 显示 state
         printCurrentState();
@@ -262,9 +265,12 @@ public class DoctorPigCreateEventsTest extends BaseFrontWebTest{
 
     private void testFostersEventCreate(Long pigId, Integer fosterCount){
         // 创建一个可以被拼窝的母猪
-        Long pigFosterId = 2l;
+        Long pigFosterId = 3l;
         sowEntryEventCreate();
-        sowMatingEventCreate(pigFosterId);
+
+        Long pigBoarId = 2l;
+
+        sowMatingEventCreate(pigFosterId, pigBoarId);
         testPregCheckResultEventCreate(pigFosterId, PregCheckResult.YANG);
         testToPregEventCreate(pigFosterId);
         testToFarrowing(pigFosterId);
@@ -418,13 +424,13 @@ public class DoctorPigCreateEventsTest extends BaseFrontWebTest{
      * 母猪配种事件测试
      * @param pigId
      */
-    private void sowMatingEventCreate(Long pigId){
+    private void sowMatingEventCreate(Long pigId, Long boarId){
         String url = basicUrl + "/createSowEvent";
         HttpEntity httpEntity = HttpPostRequest.formRequest().param("farmId", 12345l)
                 .param("pigId", pigId).param("eventType", PigEvent.MATING.getKey())
                 .param("sowInfoDtoJson", JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(DoctorMatingDto.builder()
                         .matingDate(new Date()).judgePregDate(DateTime.now().plusDays(100).toDate()).matingType(MatingType.MANUAL.getKey())
-                        .matingStaff("staff").mattingMark("matingMark")
+                        .matingStaff("staff").mattingMark("matingMark").matingBoarPigId(boarId)
                         .build())).httpEntity();
 
         Long result = this.restTemplate.postForObject(url, httpEntity, Long.class);
