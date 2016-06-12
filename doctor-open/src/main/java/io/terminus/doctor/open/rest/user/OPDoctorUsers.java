@@ -85,6 +85,7 @@ public class OPDoctorUsers {
     public DoctorServiceReviewDto getUserServiceStatus() {
         Long userId = UserUtil.getUserId();
         DoctorServiceReviewDto dto = new DoctorServiceReviewDto();
+        dto.setUserId(userId);
         DoctorServiceStatus serviceStatus = OPRespHelper.orOPEx(doctorServiceStatusReadService.findByUserId(userId));
         OPRespHelper.orOPEx(doctorServiceReviewReadService.findServiceReviewsByUserId(userId)).forEach(new Consumer<DoctorServiceReview>() {
             @Override
