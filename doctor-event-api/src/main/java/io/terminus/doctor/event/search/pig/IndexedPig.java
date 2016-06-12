@@ -47,9 +47,7 @@ public class IndexedPig implements Serializable {
     /**
      * 父亲和母亲
      */
-    private Long pigFatherId;
     private String pigFatherCode;
-    private Long pigMotherId;
     private String pigMotherCode;
 
     /**
