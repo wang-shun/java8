@@ -46,5 +46,6 @@ public class DoctorInWareHouseConsumeHandler implements IHandler{
         checkState(dto.getCount()<=doctorMaterialInWareHouse.getLotNumber(), "consume.not.enough");
         doctorMaterialInWareHouse.setLotNumber(doctorMaterialInWareHouse.getLotNumber() - dto.getCount());
         doctorMaterialInWareHouseDao.update(doctorMaterialInWareHouse);
+        context.put("lotNumber", doctorMaterialInWareHouse.getLotNumber());
     }
 }

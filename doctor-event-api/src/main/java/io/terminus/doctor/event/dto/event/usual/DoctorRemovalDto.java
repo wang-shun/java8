@@ -23,11 +23,11 @@ public class DoctorRemovalDto implements Serializable{
 
     private Long chgTypeId; // 变动类型Id basic 数据信息
 
-    private Long chgTypeName;   // 变动名称
+    private String chgTypeName;   // 变动名称
 
     private Long chgReasonId;   // 变动原因 Id
 
-    private Long chgReasonName; // 变动原因
+    private String chgReasonName; // 变动原因
 
     private Long toBarnId;  // 转入事件信息
 

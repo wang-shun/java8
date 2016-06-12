@@ -71,6 +71,13 @@
         id=#{id}
     </delete>
 
+    <select id="list" resultMap="DoctorMaterialInWareHouseMap">
+        SELECT <include refid="cols_all"/> FROM <include refid="tb"/>
+        <where>
+            <include refid="criteria"/>
+        </where>
+    </select>
+
     <select id="findById" parameterType="long" resultMap="DoctorMaterialInWareHouseMap" >
         SELECT <include refid="cols_all" />
         FROM <include refid="tb" />

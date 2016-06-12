@@ -40,7 +40,7 @@ public class DoctorWareHouseReadServiceTest extends BasicServiceTest{
         // validate each item
         types.stream().forEach(t->{
             Assert.assertEquals(t.getFarmId(), new Long(12345l));
-            Assert.assertEquals(t.getLogNumber(), new Long(1000));
+            Assert.assertEquals(t.getLotNumber(), new Long(1000));
         });
         Assert.assertThat(123, is(123));
     }

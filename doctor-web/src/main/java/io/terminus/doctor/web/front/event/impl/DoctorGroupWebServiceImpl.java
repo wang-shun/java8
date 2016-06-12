@@ -156,50 +156,51 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
             switch (groupEventType) {
                 case MOVE_IN:
                     params.put("inTypeName", DoctorMoveInGroupEvent.InType.from(getInteger(params, "inType")).getDesc());
-                    putBasicFields(params);
-                    RespHelper.orServEx(doctorGroupWriteService.groupEventMoveIn(groupDetail, BeanMapper.map(params, DoctorMoveInGroupInput.class)));
+                    RespHelper.orServEx(doctorGroupWriteService.groupEventMoveIn(groupDetail, BeanMapper.map(putBasicFields(params), DoctorMoveInGroupInput.class)));
                     break;
                 case CHANGE:
                     params.put("changeTypeName", getChangeTypeName(getLong(params, "changeTypeId")));
                     params.put("changeReasonName", getChangeReasonName(getLong(params, "changeReasonId")));
                     params.put("customerName", getCustomerName(getLong(params, "customerId")));
-                    putBasicFields(params);
-                    RespHelper.orServEx(doctorGroupWriteService.groupEventChange(groupDetail, BeanMapper.map(params, DoctorChangeGroupInput.class)));
+                    RespHelper.orServEx(doctorGroupWriteService.groupEventChange(groupDetail, BeanMapper.map(putBasicFields(params), DoctorChangeGroupInput.class)));
                     break;
                 case TRANS_GROUP:
                     params.put("toBarnName", getBarnName(getLong(params, "toBarnId")));
-                    putBasicFields(params);
-                    RespHelper.orServEx(doctorGroupWriteService.groupEventTransGroup(groupDetail, BeanMapper.map(params, DoctorTransGroupInput.class)));
+
+                    //如果不新建猪群, 拼上转入猪群号
+                    if (Integer.valueOf(String.valueOf(params.get("isCreateGroup"))).equals(IsOrNot.NO.getValue())) {
+                        params.put("toGroupCode", getGroupCode(getLong(params, "toGroupId")));
+                    }
+                    RespHelper.orServEx(doctorGroupWriteService.groupEventTransGroup(groupDetail, BeanMapper.map(putBasicFields(params), DoctorTransGroupInput.class)));
                     break;
                 case TURN_SEED:
-                    putBasicFields(params);
-                    RespHelper.orServEx(doctorGroupWriteService.groupEventTurnSeed(groupDetail, BeanMapper.map(params, DoctorTurnSeedGroupInput.class)));
+                    RespHelper.orServEx(doctorGroupWriteService.groupEventTurnSeed(groupDetail, BeanMapper.map(putBasicFields(params), DoctorTurnSeedGroupInput.class)));
                     break;
                 case LIVE_STOCK:
-                    putBasicFields(params);
-                    RespHelper.orServEx(doctorGroupWriteService.groupEventLiveStock(groupDetail, BeanMapper.map(params, DoctorLiveStockGroupInput.class)));
+                    RespHelper.orServEx(doctorGroupWriteService.groupEventLiveStock(groupDetail, BeanMapper.map(putBasicFields(params), DoctorLiveStockGroupInput.class)));
                     break;
                 case DISEASE:
                     params.put("diseaseName", getDiseaseName(getLong(params, "diseaseId")));
                     params.put("doctorName", getStaffUserName(getLong(params, "doctorId")));
-                    putBasicFields(params);
-                    RespHelper.orServEx(doctorGroupWriteService.groupEventDisease(groupDetail, BeanMapper.map(params, DoctorDiseaseGroupInput.class)));
+                    RespHelper.orServEx(doctorGroupWriteService.groupEventDisease(groupDetail, BeanMapper.map(putBasicFields(params), DoctorDiseaseGroupInput.class)));
                     break;
                 case ANTIEPIDEMIC:
                     params.put("vaccinName", getVaccinName(getLong(params, "vaccinId")));
                     params.put("vaccinStaffName", getStaffUserName(getLong(params, "vaccinStaffId")));
-                    putBasicFields(params);
-                    RespHelper.orServEx(doctorGroupWriteService.groupEventAntiepidemic(groupDetail, BeanMapper.map(params, DoctorAntiepidemicGroupInput.class)));
+                    RespHelper.orServEx(doctorGroupWriteService.groupEventAntiepidemic(groupDetail, BeanMapper.map(putBasicFields(params), DoctorAntiepidemicGroupInput.class)));
                     break;
                 case TRANS_FARM:
                     params.put("toFarmName", getFarmName(getLong(params, "toFarmId")));
                     params.put("toBarnName", getBarnName(getLong(params, "toBarnId")));
-                    putBasicFields(params);
-                    RespHelper.orServEx(doctorGroupWriteService.groupEventTransFarm(groupDetail, BeanMapper.map(params, DoctorTransFarmGroupInput.class)));
+
+                    //如果不新建猪群, 拼上转入猪群号
+                    if (Integer.valueOf(String.valueOf(params.get("isCreateGroup"))).equals(IsOrNot.NO.getValue())) {
+                        params.put("toGroupCode", getGroupCode(getLong(params, "toGroupId")));
+                    }
+                    RespHelper.orServEx(doctorGroupWriteService.groupEventTransFarm(groupDetail, BeanMapper.map(putBasicFields(params), DoctorTransFarmGroupInput.class)));
                     break;
                 case CLOSE:
-                    putBasicFields(params);
-                    RespHelper.orServEx(doctorGroupWriteService.groupEventClose(groupDetail, BeanMapper.map(params, DoctorCloseGroupInput.class)));
+                    RespHelper.orServEx(doctorGroupWriteService.groupEventClose(groupDetail, BeanMapper.map(putBasicFields(params), DoctorCloseGroupInput.class)));
                     break;
                 default:
                     return Response.fail("event.type.error");
@@ -246,7 +247,7 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
 
     //获取猪群号
     private String getGroupCode(Long groupId) {
-        return groupId == null ? null : RespHelper.or(doctorGroupReadService.findGroupById(groupId), new DoctorGroup()).getGroupCode();
+        return RespHelper.orServEx(doctorGroupReadService.findGroupById(groupId)).getGroupCode();
     }
 
     //获取猪舍名称
@@ -297,7 +298,9 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
     }
 
     //put一些关联字段
-    private void putBasicFields(Map<String, Object> params) {
+    private Map<String, Object> putBasicFields(Map<String, Object> params) {
+        params = Params.filterNullOrEmpty(params);
+
         //手工录入, 记录下创建人
         params.put("isAuto", IsOrNot.NO.getValue());
         params.put("creatorId", 1L);
@@ -308,7 +311,7 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
         params.put("barnName", getBarnName(getLong(params, "barnId")));
         params.put("breedName", getBreedName(getLong(params, "breedId")));
         params.put("geneticName", getGeneticName(getLong(params, "geneticId")));
-        Params.filterNullOrEmpty(params);
+        return Params.filterNullOrEmpty(params);
     }
 
     private Long getLong(Map<String, Object> params, String key) {

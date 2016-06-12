@@ -93,7 +93,7 @@ public class DoctorPigTrack implements Serializable{
     public void setExtraMap(Map<String,Object> extraMap){
         this.extraMap = extraMap;
         if(isNull(extraMap) || Iterables.isEmpty(extraMap.entrySet())){
-            this.extra = null;
+            this.extra = "";
         }else {
             this.extra = OBJECT_MAPPER.writeValueAsString(extraMap);
         }
@@ -134,7 +134,14 @@ public class DoctorPigTrack implements Serializable{
     private void addSowPigRelEvent(Long relEventId){
         checkArgument(!isNull(currentParity), "input.parity.empty");
         checkArgument(!isNull(relEventId), "input.relEventId.empty");
-        Map<String,String> relEventIdsMap = OBJECT_MAPPER.readValue(this.relEventIds, JacksonType.MAP_OF_STRING);
+
+        Map<String,String> relEventIdsMap = null;
+        if(Strings.isNullOrEmpty(this.relEventIds)){
+            relEventIdsMap = Maps.newHashMap();
+        }else {
+            relEventIdsMap = OBJECT_MAPPER.readValue(this.relEventIds, JacksonType.MAP_OF_STRING);
+        }
+
         if(relEventIdsMap.containsKey(currentParity.toString())){
             relEventIdsMap.put(currentParity.toString(), relEventIdsMap.get(currentParity.toString())+","+relEventId.toString());
         }else {

@@ -89,6 +89,13 @@
         </foreach>
     </select>
 
+    <select id="list" resultMap="DoctorPigTrackMap">
+        SELECT <include refid="cols_all"/> FROM <include refid="tb"/>
+        <where>
+            <include refid="criteria"/>
+        </where>
+    </select>
+
     <select id="findByEventId" parameterType="long" resultMap="DoctorPigTrackMap">
         SELECT <include refid="cols_all"/> FROM <include refid="tb"/>
         WHERE relEventIds = #{relEventIds};

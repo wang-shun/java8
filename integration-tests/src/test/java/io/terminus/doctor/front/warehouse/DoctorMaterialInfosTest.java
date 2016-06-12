@@ -4,7 +4,10 @@ import com.google.api.client.util.Lists;
 import configuration.front.FrontWebConfiguration;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.front.BaseFrontWebTest;
+import io.terminus.doctor.warehouse.dao.DoctorFarmWareHouseTypeDao;
+import io.terminus.doctor.warehouse.dao.DoctorMaterialInWareHouseDao;
 import io.terminus.doctor.warehouse.dao.DoctorMaterialInfoDao;
+import io.terminus.doctor.warehouse.dao.DoctorWareHouseTrackDao;
 import io.terminus.doctor.warehouse.dto.DoctorMaterialProductRatioDto;
 import io.terminus.doctor.warehouse.enums.WareHouseType;
 import io.terminus.doctor.warehouse.model.DoctorMaterialInfo;
@@ -30,6 +33,15 @@ public class DoctorMaterialInfosTest extends BaseFrontWebTest{
 
     @Autowired
     private DoctorMaterialInfoDao doctorMaterialInfoDao;
+
+    @Autowired
+    private DoctorFarmWareHouseTypeDao doctorFarmWareHouseTypeDao;
+
+    @Autowired
+    private DoctorMaterialInWareHouseDao doctorMaterialInWareHouseDao;
+
+    @Autowired
+    private DoctorWareHouseTrackDao doctorWareHouseTrackDao;
 
     @Test
     public void testCreateMaterial(){
@@ -89,9 +101,14 @@ public class DoctorMaterialInfosTest extends BaseFrontWebTest{
         String url3 = "http://localhost:" + this.port + "/api/doctor/warehouse/materialInfo/realProduceMaterial";
         Object result = this.restTemplate.postForObject(url3,
                 HttpPostRequest.formRequest()
-                        .param("farmId",12345l).param("wareHouseId",1l).param("materialId",1l).param("materialProduce", JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(objectResult))
+                        .param("farmId", 12345l).param("wareHouseId", 1l).param("materialId",1l).param("materialProduce", objectResult)
                         .httpEntity(), Object.class);
-        System.out.println(result);
+
+        // 输出生产信息
+        System.out.println(JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(result));
+        System.out.println(JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(doctorFarmWareHouseTypeDao.findByFarmId(12345l)));
+        System.out.println(JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(doctorWareHouseTrackDao.listAll()));
+        System.out.println(JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(doctorMaterialInWareHouseDao.listAll()));
     }
 
     private DoctorMaterialProductRatioDto buildDoctorMaterialProductRatioDto(){
