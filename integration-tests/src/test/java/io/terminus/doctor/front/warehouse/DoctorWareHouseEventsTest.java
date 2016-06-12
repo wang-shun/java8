@@ -3,6 +3,7 @@ package io.terminus.doctor.front.warehouse;
 import configuration.front.FrontWebConfiguration;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.front.BaseFrontWebTest;
+import io.terminus.doctor.warehouse.dao.DoctorFarmWareHouseTypeDao;
 import io.terminus.doctor.warehouse.dao.DoctorMaterialInWareHouseDao;
 import io.terminus.doctor.warehouse.model.DoctorMaterialInWareHouse;
 import io.terminus.doctor.web.front.warehouse.dto.DoctorConsumeProviderInputDto;
@@ -24,6 +25,9 @@ public class DoctorWareHouseEventsTest extends BaseFrontWebTest{
 
     @Autowired
     private DoctorMaterialInWareHouseDao doctorMaterialInWareHouseDao;
+
+    @Autowired
+    private DoctorFarmWareHouseTypeDao doctorFarmWareHouseTypeDao;
 
     @Test
     public void testListMaterialInWareHouse(){
@@ -63,16 +67,14 @@ public class DoctorWareHouseEventsTest extends BaseFrontWebTest{
     public void testConsumeMaterialInWareHouse(){
 
         DoctorConsumeProviderInputDto dto = DoctorConsumeProviderInputDto.builder()
-                .farmId(12345l).wareHouseId(2l).materialId(5l).barnId(5l).feederId(1l).count(50000l).consumeDays(10)
+                .farmId(12345l).wareHouseId(2l).materialId(5l).barnId(5l).feederId(1l).count(500000l).consumeDays(10)
                 .build();
 
         String url = "http://localhost:"+this.port+"/api/doctor/warehouse/event/consume";
         Long result = this.restTemplate.postForObject(url, dto, Long.class);
         System.out.println(result);
 
-        List<DoctorMaterialInWareHouse> doctorMaterialInWareHouseList =
-                doctorMaterialInWareHouseDao.queryByFarmAndWareHouseId(12345l, 2l);
-
-        System.out.println(JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(doctorMaterialInWareHouseList));
+        System.out.println(JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(doctorFarmWareHouseTypeDao.findByFarmId(12345l)));
+        System.out.println(JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(doctorMaterialInWareHouseDao.queryByFarmAndWareHouseId(12345l, 2l)));
     }
 }

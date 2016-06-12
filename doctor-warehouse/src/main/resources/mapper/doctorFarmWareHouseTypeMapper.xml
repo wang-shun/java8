@@ -13,7 +13,7 @@
         <result column="farm_id" property="farmId"/>
         <result column="farm_name" property="farmName"/>
         <result column="type" property="type"/>
-        <result column="log_number" property="logNumber"/>
+        <result column="lot_number" property="lotNumber"/>
         <result column="extra" property="extra"/>
         <result column="creator_id" property="creatorId"/>
         <result column="creator_name" property="creatorName"/>
@@ -31,11 +31,11 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        `farm_id`,`farm_name`,`type`,`log_number`,`extra`,`creator_id`,`creator_name`,`updator_id`,`updator_name`,`created_at`,`updated_at`
+        `farm_id`,`farm_name`,`type`,`lot_number`,`extra`,`creator_id`,`creator_name`,`updator_id`,`updator_name`,`created_at`,`updated_at`
     </sql>
 
     <sql id="vals">
-        #{farmId},#{farmName},#{type},#{logNumber},#{extra},#{creatorId},#{creatorName},#{updatorId},#{updatorName},now(),now()
+        #{farmId},#{farmName},#{type},#{lotNumber},#{extra},#{creatorId},#{creatorName},#{updatorId},#{updatorName},now(),now()
     </sql>
 
     <insert id="create" parameterType="DoctorFarmWareHouseType" keyProperty="id" useGeneratedKeys="true">
@@ -49,7 +49,7 @@
         ( <include refid="cols_exclude_id"/> )
         VALUES
         <foreach collection="list" item="i" separator=",">
-        (#{i.farmId},#{i.farmName},#{i.type},#{i.logNumber},#{i.extra},#{i.creatorId},#{i.creatorName},#{i.updatorId},#{i.updatorName},now(),now())
+        (#{i.farmId},#{i.farmName},#{i.type},#{i.lotNumber},#{i.extra},#{i.creatorId},#{i.creatorName},#{i.updatorId},#{i.updatorName},now(),now())
         </foreach>
     </insert>
 
@@ -82,7 +82,7 @@
         <if test="farmId != null" > ,`farm_id` = #{farmId}</if>
         <if test="farmName != null" > ,`farm_name` = #{farmName}</if>
         <if test="type != null" > ,`type` = #{type}</if>
-        <if test="logNumber != null" > ,`log_number` = #{logNumber}</if>
+        <if test="lotNumber != null" > ,`lot_number` = #{lotNumber}</if>
         <if test="extra != null" > ,`extra` = #{extra}</if>
         <if test="creatorId != null" > ,`creator_id` = #{creatorId}</if>
         <if test="creatorName != null" > ,`creator_name` = #{creatorName}</if>

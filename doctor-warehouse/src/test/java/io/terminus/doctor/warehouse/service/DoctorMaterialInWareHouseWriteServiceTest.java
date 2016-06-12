@@ -79,7 +79,7 @@ public class DoctorMaterialInWareHouseWriteServiceTest extends BasicServiceTest{
 
         // validate type
         DoctorFarmWareHouseType type = doctorFarmWareHouseTypeDao.findByFarmIdAndType(12345l, WareHouseType.VACCINATION.getKey());
-        Assert.assertEquals(type.getLogNumber(), providerLeft);
+        Assert.assertEquals(type.getLotNumber(), providerLeft);
 
         // validate track info
         DoctorWareHouseTrack doctorWareHouseTrack = doctorWareHouseTrackDao.findById(3l);
@@ -113,7 +113,7 @@ public class DoctorMaterialInWareHouseWriteServiceTest extends BasicServiceTest{
 
         // validate type
         DoctorFarmWareHouseType type = doctorFarmWareHouseTypeDao.findByFarmIdAndType(12345l, WareHouseType.MEDICINE.getKey());
-        Assert.assertEquals(type.getLogNumber(),consumeLeft);
+        Assert.assertEquals(type.getLotNumber(),consumeLeft);
 
         // validate track warehouse
         DoctorWareHouseTrack doctorWareHouseTrack = doctorWareHouseTrackDao.findById(2l);
@@ -148,7 +148,7 @@ public class DoctorMaterialInWareHouseWriteServiceTest extends BasicServiceTest{
 
         // validate type
         DoctorFarmWareHouseType type = doctorFarmWareHouseTypeDao.findByFarmIdAndType(12345l, WareHouseType.FEED.getKey());
-        Assert.assertEquals(type.getLogNumber(),consumeLeft);
+        Assert.assertEquals(type.getLotNumber(),consumeLeft);
 
         // validate track warehouse
         DoctorWareHouseTrack doctorWareHouseTrack = doctorWareHouseTrackDao.findById(1l);
