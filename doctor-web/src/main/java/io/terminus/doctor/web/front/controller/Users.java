@@ -210,7 +210,6 @@ public class Users {
                     // session and event
                     request.getSession().setAttribute(Constants.SESSION_USER_ID, user.getId());
                     coreEventDispatcher.publish(new RegisterEvent(null, null, DoctorUserMaker.from(user)));
-                    //eventBus.post(new RegisterEvent(null, null, DoctorUserMaker.from(user)));
                 }
                 return user.getId();
             }else {

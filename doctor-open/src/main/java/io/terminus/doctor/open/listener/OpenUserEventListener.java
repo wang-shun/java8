@@ -1,5 +1,6 @@
 package io.terminus.doctor.open.listener;
 
+import com.google.common.eventbus.Subscribe;
 import io.terminus.doctor.common.enums.UserType;
 import io.terminus.doctor.common.event.EventListener;
 import io.terminus.doctor.user.service.DoctorServiceReviewWriteService;
@@ -35,8 +36,8 @@ public class OpenUserEventListener implements EventListener {
         this.userReadService = userReadService;
     }
 
+    @Subscribe
     public void onUserRegister(RegisterEvent registerEvent){
-        log.warn("open层监听器监听到用户注册事件");
         ParanaUser paranaUser = registerEvent.getUser();
         if(paranaUser == null || paranaUser.getId() == null){
             log.error("catch user register event, but parameter ParanaUser or ParanaUserId is null.");
