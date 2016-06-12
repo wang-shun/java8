@@ -301,7 +301,6 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
         params.put("barnName", getBarnName(getLong(params, "barnId")));
         params.put("breedName", getBreedName(getLong(params, "breedId")));
         params.put("geneticName", getGeneticName(getLong(params, "geneticId")));
-        params.put("heheheh", null);
         return Params.filterNullOrEmpty(params);
     }
 
