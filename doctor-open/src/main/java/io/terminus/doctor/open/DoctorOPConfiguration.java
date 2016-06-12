@@ -4,6 +4,7 @@
 
 package io.terminus.doctor.open;
 
+import io.terminus.doctor.common.DoctorCommonConfiguration;
 import io.terminus.doctor.open.common.MessageSources;
 import io.terminus.doctor.web.core.image.FileHelper;
 import io.terminus.doctor.web.core.msg.email.CommonEmailServiceConfig;
@@ -36,7 +37,8 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
         MsgWebConfig.class,
         LuoSiMaoSmsServiceConfig.class,
         CommonEmailServiceConfig.class,
-        AuthenticationConfiguration.class
+        AuthenticationConfiguration.class,
+        DoctorCommonConfiguration.class
 })
 public class DoctorOPConfiguration {
     @Bean
