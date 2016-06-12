@@ -299,13 +299,12 @@ CREATE TABLE `doctor_barns` (
   `capacity` int(11) DEFAULT NULL COMMENT '猪舍容量',
   `staff_id` bigint(20) DEFAULT NULL COMMENT '工作人员id',
   `staff_name` varchar(64) DEFAULT NULL COMMENT '工作人员name',
-  `out_id`  varchar(128) DEFAULT NULL COMMENT  '外部id',
+  `out_id` varchar(128) DEFAULT NULL COMMENT '外部id',
   `extra` text COMMENT '附加字段',
   `created_at` datetime DEFAULT NULL COMMENT '创建时间',
   `updated_at` datetime DEFAULT NULL COMMENT '修改时间',
   PRIMARY KEY (`id`)
 )  COMMENT='猪舍表';
-
 
 CREATE TABLE `doctor_change_types` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '自增主键',
@@ -313,33 +312,31 @@ CREATE TABLE `doctor_change_types` (
   `is_count_out` smallint(6) DEFAULT NULL COMMENT '是否计入出栏猪 1:计入, -1:不计入',
   `farm_id` bigint(20) DEFAULT NULL COMMENT '猪场id',
   `farm_name` varchar(64) DEFAULT NULL COMMENT '猪场名称',
-  `out_id`  varchar(128) DEFAULT NULL COMMENT  '外部id',
+  `out_id` varchar(128) DEFAULT NULL COMMENT '外部id',
   `extra` text COMMENT '附加字段',
-  `creator_id` bigint(20) DEFAULT NULL COMMENT  '创建人id',
+  `creator_id` bigint(20) DEFAULT NULL COMMENT '创建人id',
   `creator_name` varchar(64) DEFAULT NULL COMMENT '创建人name',
-  `updator_id` bigint(20) DEFAULT NULL COMMENT  '更新人id',
+  `updator_id` bigint(20) DEFAULT NULL COMMENT '更新人id',
   `updator_name` varchar(64) DEFAULT NULL COMMENT '更新人name',
   `created_at` datetime DEFAULT NULL COMMENT '创建时间',
   `updated_at` datetime DEFAULT NULL COMMENT '修改时间',
   PRIMARY KEY (`id`)
 )  COMMENT='变动类型表';
 
-
 CREATE TABLE `doctor_change_reasons` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '自增主键',
   `change_type_id` bigint(20) DEFAULT NULL COMMENT '变动类型id',
   `reason` varchar(128) DEFAULT NULL COMMENT '变动原因',
-  `out_id`  varchar(128) DEFAULT NULL COMMENT  '外部id',
+  `out_id` varchar(128) DEFAULT NULL COMMENT '外部id',
   `extra` text COMMENT '附加字段',
-  `creator_id` bigint(20) DEFAULT NULL COMMENT  '创建人id',
+  `creator_id` bigint(20) DEFAULT NULL COMMENT '创建人id',
   `creator_name` varchar(64) DEFAULT NULL COMMENT '创建人name',
-  `updator_id` bigint(20) DEFAULT NULL COMMENT  '更新人id',
+  `updator_id` bigint(20) DEFAULT NULL COMMENT '更新人id',
   `updator_name` varchar(64) DEFAULT NULL COMMENT '更新人name',
   `created_at` datetime DEFAULT NULL COMMENT '创建时间',
   `updated_at` datetime DEFAULT NULL COMMENT '修改时间',
   PRIMARY KEY (`id`)
 )  COMMENT='变动原因表';
-
 
 CREATE TABLE `doctor_diseases` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '自增主键',
@@ -422,7 +419,6 @@ CREATE TABLE `doctor_groups` (
   `current_barn_id` bigint(20) DEFAULT NULL COMMENT '当前猪舍id',
   `current_barn_name` varchar(64) DEFAULT NULL COMMENT '当前猪舍名称',
   `pig_type` smallint(6) DEFAULT NULL COMMENT '猪类 枚举9种',
-  `sex` smallint(6) DEFAULT NULL COMMENT '性别 1:混合 2:母 3:公',
   `breed_id` bigint(20) DEFAULT NULL COMMENT '品种id',
   `breed_name` varchar(64) DEFAULT NULL COMMENT '品种name',
   `genetic_id` bigint(20) DEFAULT NULL COMMENT '品系id',
@@ -430,27 +426,27 @@ CREATE TABLE `doctor_groups` (
   `staff_id` bigint(20) DEFAULT NULL COMMENT '工作人员id',
   `staff_name` varchar(64) DEFAULT NULL COMMENT '工作人员name',
   `remark` text COMMENT '备注',
-  `out_id`  varchar(128) DEFAULT NULL COMMENT  '外部id',
+  `out_id` varchar(128) DEFAULT NULL COMMENT '外部id',
   `extra` text COMMENT '附加字段',
-  `creator_id` bigint(20) DEFAULT NULL COMMENT  '创建人id',
+  `creator_id` bigint(20) DEFAULT NULL COMMENT '创建人id',
   `creator_name` varchar(64) DEFAULT NULL COMMENT '创建人name',
-  `updator_id` bigint(20) DEFAULT NULL COMMENT  '更新人id',
+  `updator_id` bigint(20) DEFAULT NULL COMMENT '更新人id',
   `updator_name` varchar(64) DEFAULT NULL COMMENT '更新人name',
   `created_at` datetime DEFAULT NULL COMMENT '创建时间',
   `updated_at` datetime DEFAULT NULL COMMENT '修改时间',
   PRIMARY KEY (`id`)
 )  COMMENT='猪群卡片表';
 
-
-
-
-
 CREATE TABLE `doctor_group_tracks` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '自增主键',
   `group_id` bigint(20) DEFAULT NULL COMMENT '猪群卡片id',
   `rel_event_id` bigint(20) DEFAULT NULL COMMENT '关联的最新一次的事件id',
+  `sex` smallint(6) DEFAULT NULL COMMENT '性别 0母 1公 2混合',
   `quantity` int(11) DEFAULT NULL COMMENT '猪只数',
-  `avg_day_age` double DEFAULT NULL COMMENT '平均日龄',
+  `boar_qty` int(11) DEFAULT NULL COMMENT '公猪数',
+  `sow_qty` int(11) DEFAULT NULL COMMENT '母猪数',
+  `birth_date` datetime DEFAULT NULL COMMENT '出生日期(此日期仅用于计算日龄)',
+  `avg_day_age` int(11) DEFAULT NULL COMMENT '平均日龄',
   `weight` double DEFAULT NULL COMMENT '总活体重(公斤)',
   `avg_weight` double DEFAULT NULL COMMENT '平均体重(公斤)',
   `price` bigint(20) DEFAULT NULL COMMENT '单价(分)',
@@ -459,24 +455,22 @@ CREATE TABLE `doctor_group_tracks` (
   `customer_name` varchar(64) DEFAULT NULL COMMENT '客户名称',
   `sale_qty` int(11) DEFAULT NULL COMMENT '销售数量',
   `extra` text COMMENT '附加字段',
-  `creator_id` bigint(20) DEFAULT NULL COMMENT  '创建人id',
+  `creator_id` bigint(20) DEFAULT NULL COMMENT '创建人id',
   `creator_name` varchar(64) DEFAULT NULL COMMENT '创建人name',
-  `updator_id` bigint(20) DEFAULT NULL COMMENT  '更新人id',
+  `updator_id` bigint(20) DEFAULT NULL COMMENT '更新人id',
   `updator_name` varchar(64) DEFAULT NULL COMMENT '更新人name',
   `created_at` datetime DEFAULT NULL COMMENT '创建时间',
   `updated_at` datetime DEFAULT NULL COMMENT '修改时间',
   PRIMARY KEY (`id`)
 )  COMMENT='猪群卡片明细表';
 
-
-
 CREATE TABLE `doctor_group_events` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '自增主键',
-  `org_id` varchar(64) DEFAULT NULL COMMENT '公司id',
+  `org_id` bigint(20) DEFAULT NULL COMMENT '公司id',
   `org_name` varchar(64) DEFAULT NULL COMMENT '公司名称',
-  `farm_id` varchar(64) DEFAULT NULL COMMENT '猪场id',
+  `farm_id` bigint(20) DEFAULT NULL COMMENT '猪场id',
   `farm_name` varchar(64) DEFAULT NULL COMMENT '猪场名称',
-  `group_id` varchar(64) DEFAULT NULL COMMENT '猪群卡片id',
+  `group_id` bigint(20) DEFAULT NULL COMMENT '猪群卡片id',
   `group_code` varchar(64) DEFAULT NULL COMMENT '猪群号',
   `event_at` datetime DEFAULT NULL COMMENT '事件发生日期',
   `type` smallint(6) DEFAULT NULL COMMENT '事件类型 枚举 总共10种',
@@ -485,12 +479,13 @@ CREATE TABLE `doctor_group_events` (
   `barn_id` bigint(20) DEFAULT NULL COMMENT '事件发生猪舍id',
   `barn_name` varchar(64) DEFAULT NULL COMMENT '事件发生猪舍name',
   `pig_type` smallint(6) DEFAULT NULL COMMENT '猪类枚举 9种',
-  `quantity` int(11) DEFAULT 0 COMMENT '事件猪只数',
+  `quantity` int(11) DEFAULT '0' COMMENT '事件猪只数',
   `weight` double DEFAULT NULL COMMENT '总活体重(公斤)',
   `avg_weight` double DEFAULT NULL COMMENT '平均体重(公斤)',
-  `avg_day_age` double DEFAULT NULL COMMENT '平均日龄',
-  `out_id`  varchar(128) DEFAULT NULL COMMENT  '外部id',
-  `remark` text COMMENT  '备注',
+  `avg_day_age` int(11) DEFAULT NULL COMMENT '平均日龄',
+  `is_auto` smallint(6) DEFAULT NULL COMMENT '是否是自动生成事件, 0 不是, 1 是',
+  `out_id` varchar(128) DEFAULT NULL COMMENT '外部id',
+  `remark` text COMMENT '备注',
   `extra` text COMMENT '具体事件的内容通过json存储',
   `created_at` datetime DEFAULT NULL COMMENT '创建时间',
   `creator_id` bigint(20) DEFAULT NULL COMMENT '创建人id',
@@ -924,12 +919,13 @@ CREATE TABLE `doctor_service_review_tracks` (
 
 CREATE TABLE `doctor_group_snapshots` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '自增主键',
+  `event_type` smallint(6) DEFAULT NULL COMMENT '猪群事件类型',
   `from_group_id` bigint(20) DEFAULT NULL COMMENT '操作前的猪群id',
   `to_group_id` bigint(20) DEFAULT NULL COMMENT '操作后的猪群id',
   `from_event_id` bigint(20) DEFAULT NULL COMMENT '操作前的事件id',
   `to_event_id` bigint(20) DEFAULT NULL COMMENT '操作后的事件id',
-  `from_info` text COMMENT  '操作前的信息',
-  `to_info` text COMMENT  '操作后的信息',
+  `from_info` text COMMENT '操作前的信息',
+  `to_info` text COMMENT '操作后的信息',
   `created_at` datetime DEFAULT NULL COMMENT '创建时间',
   PRIMARY KEY (`id`)
 )  COMMENT='猪群快照表';

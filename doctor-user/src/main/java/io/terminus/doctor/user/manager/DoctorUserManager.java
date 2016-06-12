@@ -6,13 +6,14 @@ import io.terminus.doctor.common.enums.UserStatus;
 import io.terminus.doctor.common.enums.UserType;
 import io.terminus.doctor.common.util.UserRoleUtil;
 import io.terminus.doctor.common.utils.Params;
-import io.terminus.doctor.user.dao.*;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.user.dao.DoctorServiceReviewDao;
+import io.terminus.doctor.user.dao.DoctorStaffDao;
 import io.terminus.doctor.user.dao.OperatorDao;
 import io.terminus.doctor.user.dao.PrimaryUserDao;
 import io.terminus.doctor.user.dao.SubDao;
 import io.terminus.doctor.user.dao.SubRoleDao;
+import io.terminus.doctor.user.model.DoctorStaff;
 import io.terminus.doctor.user.model.Operator;
 import io.terminus.doctor.user.model.PrimaryUser;
 import io.terminus.doctor.user.model.Sub;
@@ -53,12 +54,9 @@ public class DoctorUserManager {
 
     private final DoctorServiceReviewDao doctorServiceReviewDao;
 
-    private final DoctorServiceStatusDao doctorServiceStatusDao;
-
     @Autowired
     public DoctorUserManager(UserDao userDao, UserProfileDao userProfileDao, OperatorDao operatorDao, PrimaryUserDao primaryUserDao, SubDao subDao,
-                             SubRoleReadService subRoleReadService, DoctorServiceReviewDao doctorServiceReviewDao,
-                             DoctorServiceStatusDao doctorServiceStatusDao) {
+                             SubRoleReadService subRoleReadService, DoctorServiceReviewDao doctorServiceReviewDao, DoctorStaffDao doctorStaffDao) {
         this.userDao = userDao;
         this.userProfileDao = userProfileDao;
         this.operatorDao = operatorDao;
@@ -66,7 +64,7 @@ public class DoctorUserManager {
         this.subDao = subDao;
         this.subRoleReadService = subRoleReadService;
         this.doctorServiceReviewDao = doctorServiceReviewDao;
-        this.doctorServiceStatusDao = doctorServiceStatusDao;
+        this.doctorStaffDao = doctorStaffDao;
     }
 
     @Transactional
@@ -103,6 +101,14 @@ public class DoctorUserManager {
             primaryUser.setUserName(user.getMobile());
             primaryUser.setStatus(UserStatus.NORMAL.value());
             primaryUserDao.create(primaryUser);
+
+            //用户个人信息
+            UserProfile userProfile = new UserProfile();
+            userProfile.setUserId(userId);
+            userProfileDao.create(userProfile);
+
+            //初始化4个服务, 均为未开通状态
+            doctorServiceReviewDao.initData(userId);
         } else if (Objects.equals(user.getType(), UserType.FARM_SUB.value())){
             //猪场子账号
             Long roleId = null;// TODO: read roleId from user.getRoles()
@@ -128,6 +134,15 @@ public class DoctorUserManager {
             userProfile.setUserId(userId);
             userProfile.setRealName(Params.get(user.getExtra(), "realName"));
             userProfileDao.create(userProfile);
+
+            DoctorStaff pstaff = doctorStaffDao.findByUserId(Long.valueOf(Params.get(user.getExtra(), "pid")));
+
+            DoctorStaff doctorStaff = new DoctorStaff();
+            doctorStaff.setUserId(userId);
+            doctorStaff.setOrgId(pstaff.getOrgId());
+            doctorStaff.setOrgName(pstaff.getOrgName());
+            doctorStaff.setStatus(pstaff.getStatus());
+            doctorStaffDao.create(pstaff);
 
         }
         return userId;
