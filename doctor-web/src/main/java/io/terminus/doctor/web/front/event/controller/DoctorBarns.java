@@ -32,7 +32,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 @Slf4j
 @RestController
-@RequestMapping("/api/doctor")
+@RequestMapping("/api/doctor/barn")
 public class DoctorBarns {
 
     private final DoctorBarnReadService doctorBarnReadService;
@@ -59,27 +59,27 @@ public class DoctorBarns {
      * @param barnId 主键id
      * @return 猪舍表
      */
-    @RequestMapping(value = "/barn/id", method = RequestMethod.GET)
+    @RequestMapping(value = "/id", method = RequestMethod.GET)
     public DoctorBarn findBarnById(@RequestParam("barnId") Long barnId) {
         return RespHelper.or500(doctorBarnReadService.findBarnById(barnId));
     }
 
     /**
-    * 根据farmId查询猪舍表
-    * @param farmId 猪场id
-    * @return 猪舍表列表
-    */
-    @RequestMapping(value = "/barn/farmId", method = RequestMethod.GET)
+     * 根据farmId查询猪舍表
+     * @param farmId 猪场id
+     * @return 猪舍表列表
+     */
+    @RequestMapping(value = "/farmId", method = RequestMethod.GET)
     public List<DoctorBarn> findBarnsByfarmId(@RequestParam("farmId") Long farmId) {
         return RespHelper.or500(doctorBarnReadService.findBarnsByFarmId(farmId));
     }
 
     /**
-    * 创建或更新DoctorBarn
-    * @return 是否成功
-    */
-    @RequestMapping(value = "/barn", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public Boolean createOrUpdateBarn(@RequestBody DoctorBarn barn) {
+     * 创建或更新DoctorBarn
+     * @return 是否成功
+     */
+    @RequestMapping(value = "", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    public Long createOrUpdateBarn(@RequestBody DoctorBarn barn) {
         checkNotNull(barn, "barn.not.null");
 
         // TODO: 权限中心校验权限
@@ -96,14 +96,14 @@ public class DoctorBarns {
         } else {
             RespHelper.or500(doctorBarnWriteService.updateBarn(barn));
         }
-        return Boolean.TRUE;
+        return barn.getId();
     }
 
     /**
      * 更新猪舍状态
      * @return 是否成功
      */
-    @RequestMapping(value = "/barn/status", method = RequestMethod.GET)
+    @RequestMapping(value = "/status", method = RequestMethod.GET)
     public Boolean updateBarnStatus(@RequestParam("barnId") Long barnId,
                                     @RequestParam("status") Integer status) {
         DoctorBarn barn = RespHelper.or500(doctorBarnReadService.findBarnById(barnId));
@@ -118,7 +118,7 @@ public class DoctorBarns {
      * @param barnId 主键id
      * @return 猪舍表
      */
-    @RequestMapping(value = "/barn/detail", method = RequestMethod.GET)
+    @RequestMapping(value = "/detail", method = RequestMethod.GET)
     public DoctorBarnDetail findBarnDetailByBarnId(@RequestParam("barnId") Long barnId,
                                                    @RequestParam(value = "pageNo", required = false) Integer pageNo,
                                                    @RequestParam(value = "size", required = false) Integer size) {

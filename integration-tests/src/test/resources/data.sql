@@ -262,3 +262,31 @@ VALUES
 INSERT INTO `doctor_orgs` (`id`, `name`, `mobile`, `license`, `out_id`, `extra`, `created_at`, `updated_at`)
 VALUES
 	(0, '测试公司', '1111111', NULL, NULL, NULL, '2016-05-31 19:26:07', '2016-05-31 19:26:07');
+
+-- 猪舍测试数据
+INSERT INTO `doctor_barns` (`id`, `name`, `org_id`, `org_name`, `farm_id`, `farm_name`, `pig_type`, `can_open_group`, `status`, `capacity`, `staff_id`, `staff_name`, `out_id`, `extra`, `created_at`, `updated_at`)
+VALUES
+	(1, '保育1舍', 0, '测试公司', 0, '测试猪场名称0', 2, -1, 1, 101, 1, NULL, NULL, NULL, '2016-06-01 10:51:18', '2016-06-01 11:03:46'),
+	(2, '妊娠2舍', 0, '测试公司', 0, '测试猪场名称0', 6, -1, 1, 10, 1, NULL, NULL, NULL, '2016-06-01 10:51:18', '2016-06-01 10:51:18'),
+	(3, '保育2舍', 0, '测试公司', 0, '测试猪场名称0', 2, 1, 1, 101, 1, NULL, NULL, NULL, '2016-06-01 10:51:18', '2016-06-01 11:03:46'),
+	(4, '保育北-1舍', 0, '测试公司', 1, '测试猪场1', 2, 1, 1, 101, 1, NULL, NULL, NULL, '2016-06-01 10:51:18', '2016-06-01 11:03:46');
+
+-- 猪群测试数据
+INSERT INTO `doctor_groups` (`id`, `org_id`, `org_name`, `farm_id`, `farm_name`, `group_code`, `batch_no`, `open_at`, `close_at`, `status`, `init_barn_id`, `init_barn_name`, `current_barn_id`, `current_barn_name`, `pig_type`, `breed_id`, `breed_name`, `genetic_id`, `genetic_name`, `staff_id`, `staff_name`, `remark`, `out_id`, `extra`, `creator_id`, `creator_name`, `updator_id`, `updator_name`, `created_at`, `updated_at`)
+VALUES
+	(5, 0, '测试公司', 0, '测试猪场', '保育1舍(2016-06-07)', NULL, '2016-06-07 00:00:00', NULL, 1, 1, '保育1舍', 1, '保育1舍', 2, 1, '长白', 2, '新美系', NULL, NULL, '手动新建猪群事件', NULL, NULL, 1, 'admin', NULL, NULL, '2016-06-07 11:12:02', '2016-06-07 11:12:02'),
+	(12, 0, '测试公司', 1, '测试猪场1', '保育北-1舍(2016-06-07)', NULL, '2016-06-07 00:00:00', NULL, 1, 4, '保育北-1舍', 4, '保育北-1舍', 2, 1, '长白', 2, '新美系', NULL, NULL, '录入转场事件', NULL, NULL, 0, NULL, NULL, NULL, '2016-06-07 15:13:24', '2016-06-07 15:13:24');
+
+INSERT INTO `doctor_group_tracks` (`id`, `group_id`, `rel_event_id`, `sex`, `quantity`, `boar_qty`, `sow_qty`, `birth_date`, `avg_day_age`, `weight`, `avg_weight`, `price`, `amount`, `customer_id`, `customer_name`, `sale_qty`, `extra`, `creator_id`, `creator_name`, `updator_id`, `updator_name`, `created_at`, `updated_at`)
+VALUES
+	(5, 4, 8, 2, 10, 5, 5, '2016-06-06 14:26:21', 0, 0, 0, 0, 0, NULL, NULL, NULL, '{\"type\":1,\"source\":1}', 1, '22', 1, 'admin', '2016-06-06 14:26:21', '2016-06-07 10:35:45'),
+	(12, 11, 35, 2, 15, 8, 7, '2016-05-30 00:00:00', 9, 1000.0000000000001, 66.66666666666667, 0, 0, NULL, NULL, NULL, NULL, 1, 'admin', 1, 'admin', '2016-06-07 15:00:21', '2016-06-07 15:00:22');
+
+INSERT INTO `doctor_group_events` (`id`, `org_id`, `org_name`, `farm_id`, `farm_name`, `group_id`, `group_code`, `event_at`, `type`, `name`, `desc`, `barn_id`, `barn_name`, `pig_type`, `quantity`, `weight`, `avg_weight`, `avg_day_age`, `is_auto`, `out_id`, `remark`, `extra`, `created_at`, `creator_id`, `creator_name`)
+VALUES
+	(9, 0, '测试公司', 0, '测试猪场', 5, '保育1舍(2016-06-07)', '2016-06-07 00:00:00', 1, '新建猪群', 'todo 事件描述', 1, '保育1舍', 2, NULL, NULL, NULL, NULL, 0, NULL, '手动新建猪群事件', '{\"source\":1}', '2016-06-07 11:12:06', 1, 'admin'),
+	(10, 0, '测试公司', 0, '测试猪场', 5, '保育1舍(2016-06-07)', '2016-06-07 00:00:00', 2, '转入猪群', 'todo 事件描述', 1, '保育1舍', 2, 25, 1250, 50, 22, 0, NULL, '录入转群事件', '{\"inType\":1,\"inTypeName\":\"仔猪转入\",\"source\":1,\"sex\":1,\"breedId\":1,\"breedName\":\"长白\",\"boarQty\":10,\"sowQty\":15}', '2016-06-07 11:47:43', 1, 'admin'),
+	(11, 0, '测试公司', 0, '测试猪场', 5, '保育1舍(2016-06-07)', '2016-06-07 00:00:00', 2, '转入猪群', 'todo 事件描述', 1, '保育1舍', 2, 25, 1250, 50, 22, 0, NULL, '录入转群事件', '{\"inType\":1,\"inTypeName\":\"仔猪转入\",\"source\":1,\"sex\":1,\"breedId\":1,\"breedName\":\"长白\",\"boarQty\":10,\"sowQty\":15}', '2016-06-07 13:37:05', 1, 'admin'),
+	(40, 0, '测试公司', 1, '测试猪场1', 12, '保育北-1舍(2016-06-07)', '2016-06-07 00:00:00', 1, '新建猪群', 'todo 事件描述', 4, '保育北-1舍', 2, NULL, NULL, NULL, NULL, 1, NULL, '录入转场事件', '{\"source\":2}', '2016-06-07 15:13:24', 0, NULL),
+	(41, 0, '测试公司', 1, '测试猪场1', 12, '保育北-1舍(2016-06-07)', '2016-06-07 00:00:00', 2, '转入猪群', 'todo 事件描述', 4, '保育北-1舍', 2, 15, 1000.0000000000001, 66.66666666666667, 18, 1, NULL, NULL, '{\"inType\":3,\"inTypeName\":\"群间转移\",\"source\":2,\"sex\":2,\"breedId\":1,\"breedName\":\"长白\",\"fromBarnId\":1,\"fromBarnName\":\"保育1舍\",\"fromGroupId\":5,\"fromGroupCode\":\"保育1舍(2016-06-07)\",\"boarQty\":8,\"sowQty\":7}', '2016-06-07 15:13:26', 1, 'admin');
+
