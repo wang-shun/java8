@@ -736,6 +736,7 @@ CREATE TABLE `doctor_material_consume_avgs` (
   `ware_house_id` bigint(20) unsigned DEFAULT NULL COMMENT '仓库信息',
   `material_id` bigint(20) DEFAULT NULL COMMENT '原料Id',
   `type` smallint(6) unsigned DEFAULT NULL COMMENT '领取货物属于的类型',
+  `lot_consume_day` int(11) DEFAULT NULL COMMENT '剩余消耗天数',
   `consume_avg_count` bigint(20) DEFAULT NULL COMMENT '平均消耗数量',
   `consume_count` bigint(20) DEFAULT NULL COMMENT '消耗数量',
   `consume_date` datetime DEFAULT NULL comment '消耗日期',

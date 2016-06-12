@@ -4,6 +4,7 @@ import configuration.front.FrontWebConfiguration;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.front.BaseFrontWebTest;
 import io.terminus.doctor.warehouse.dao.DoctorFarmWareHouseTypeDao;
+import io.terminus.doctor.warehouse.dao.DoctorMaterialConsumeAvgDao;
 import io.terminus.doctor.warehouse.dao.DoctorMaterialInWareHouseDao;
 import io.terminus.doctor.warehouse.model.DoctorMaterialInWareHouse;
 import io.terminus.doctor.web.front.warehouse.dto.DoctorConsumeProviderInputDto;
@@ -29,6 +30,9 @@ public class DoctorWareHouseEventsTest extends BaseFrontWebTest{
     @Autowired
     private DoctorFarmWareHouseTypeDao doctorFarmWareHouseTypeDao;
 
+    @Autowired
+    private DoctorMaterialConsumeAvgDao doctorMaterialConsumeAvgDao;
+
     @Test
     public void testListMaterialInWareHouse(){
         String url = "http://localhost:"+this.port+"/api/doctor/warehouse/event/list";
@@ -40,7 +44,7 @@ public class DoctorWareHouseEventsTest extends BaseFrontWebTest{
     @Test
     public void testPagingMaterialInWareHouse(){
         String url = "http://localhost:"+this.port+"/api/doctor/warehouse/event/paging";
-        String urlWithParam = HttpGetRequest.url(url).params("farmId", 12345l).params("wareHouseId",6).params("pageNo",1).params("pageSize",3).build();
+        String urlWithParam = HttpGetRequest.url(url).params("farmId", 12345l).params("wareHouseId", 6).params("pageNo",1).params("pageSize",3).build();
         Object o  = this.restTemplate.getForObject(urlWithParam, Object.class);
         System.out.println(JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(o));
     }
@@ -67,14 +71,15 @@ public class DoctorWareHouseEventsTest extends BaseFrontWebTest{
     public void testConsumeMaterialInWareHouse(){
 
         DoctorConsumeProviderInputDto dto = DoctorConsumeProviderInputDto.builder()
-                .farmId(12345l).wareHouseId(2l).materialId(5l).barnId(5l).feederId(1l).count(500000l).consumeDays(10)
+                .farmId(12345l).wareHouseId(1l).materialId(5l).barnId(5l).feederId(1l).count(500000l).consumeDays(10)
                 .build();
 
         String url = "http://localhost:"+this.port+"/api/doctor/warehouse/event/consume";
         Long result = this.restTemplate.postForObject(url, dto, Long.class);
         System.out.println(result);
 
-        System.out.println(JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(doctorFarmWareHouseTypeDao.findByFarmId(12345l)));
-        System.out.println(JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(doctorMaterialInWareHouseDao.queryByFarmAndWareHouseId(12345l, 2l)));
+//        System.out.println(JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(doctorFarmWareHouseTypeDao.findByFarmId(12345l)));
+//        System.out.println(JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(doctorMaterialInWareHouseDao.queryByFarmAndWareHouseId(12345l, 2l)));
+        System.out.println(JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(doctorMaterialConsumeAvgDao.listAll()));
     }
 }

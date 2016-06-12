@@ -266,10 +266,10 @@ VALUES
 -- 猪舍测试数据
 INSERT INTO `doctor_barns` (`id`, `name`, `org_id`, `org_name`, `farm_id`, `farm_name`, `pig_type`, `can_open_group`, `status`, `capacity`, `staff_id`, `staff_name`, `out_id`, `extra`, `created_at`, `updated_at`)
 VALUES
-	(1, '保育1舍', 0, '测试公司', 0, '测试猪场名称0', 2, -1, 1, 101, 1, NULL, NULL, NULL, '2016-06-01 10:51:18', '2016-06-01 11:03:46'),
-	(2, '妊娠2舍', 0, '测试公司', 0, '测试猪场名称0', 6, -1, 1, 10, 1, NULL, NULL, NULL, '2016-06-01 10:51:18', '2016-06-01 10:51:18'),
-	(3, '保育2舍', 0, '测试公司', 0, '测试猪场名称0', 2, 1, 1, 101, 1, NULL, NULL, NULL, '2016-06-01 10:51:18', '2016-06-01 11:03:46'),
-	(4, '保育北-1舍', 0, '测试公司', 1, '测试猪场1', 2, 1, 1, 101, 1, NULL, NULL, NULL, '2016-06-01 10:51:18', '2016-06-01 11:03:46');
+	(10, '保育1舍', 0, '测试公司', 0, '测试猪场名称0', 2, -1, 1, 101, 1, NULL, NULL, NULL, '2016-06-01 10:51:18', '2016-06-01 11:03:46'),
+	(11, '妊娠2舍', 0, '测试公司', 0, '测试猪场名称0', 6, -1, 1, 10, 1, NULL, NULL, NULL, '2016-06-01 10:51:18', '2016-06-01 10:51:18'),
+	(12, '保育2舍', 0, '测试公司', 0, '测试猪场名称0', 2, 1, 1, 101, 1, NULL, NULL, NULL, '2016-06-01 10:51:18', '2016-06-01 11:03:46'),
+	(13, '保育北-1舍', 0, '测试公司', 1, '测试猪场1', 2, 1, 1, 101, 1, NULL, NULL, NULL, '2016-06-01 10:51:18', '2016-06-01 11:03:46');
 
 -- 猪群测试数据
 INSERT INTO `doctor_groups` (`id`, `org_id`, `org_name`, `farm_id`, `farm_name`, `group_code`, `batch_no`, `open_at`, `close_at`, `status`, `init_barn_id`, `init_barn_name`, `current_barn_id`, `current_barn_name`, `pig_type`, `breed_id`, `breed_name`, `genetic_id`, `genetic_name`, `staff_id`, `staff_name`, `remark`, `out_id`, `extra`, `creator_id`, `creator_name`, `updator_id`, `updator_name`, `created_at`, `updated_at`)
