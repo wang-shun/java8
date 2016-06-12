@@ -89,8 +89,8 @@ public abstract class DoctorAbstractEventFlowHandler extends HandlerAware {
             // 当前事件影响的Id 方式
             flowDataMap.put("createEventResult",
                     JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(
-                            ImmutableMap.of("pigId", doctorBasicInputInfoDto.getPigId(),
-                                    "eventId",doctorPigEvent.getId(),"snapshotId",doctorPigSnapshot.getId())));
+                            ImmutableMap.of("doctorPigId", doctorBasicInputInfoDto.getPigId(),
+                                    "doctorEventId",doctorPigEvent.getId(),"doctorSnapshotId",doctorPigSnapshot.getId())));
             execution.setFlowData(JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(flowDataMap));
         }catch (Exception e){
             DoctorAbstractEventFlowHandler.log.error("handle execute fail, cause:{}", Throwables.getStackTraceAsString(e));
@@ -117,7 +117,7 @@ public abstract class DoctorAbstractEventFlowHandler extends HandlerAware {
                 .eventAt(DateTime.now().toDate()).type(basic.getEventType())
                 .kind(basic.getPigType()).name(basic.getEventName()).desc(basic.getEventDesc()).relEventId(basic.getRelEventId())
                 .barnId(basic.getBarnId()).barnName(basic.getBarnName())
-                .outId(UUID.randomUUID().toString()) //TODO uuid generate method
+                .outId(UUID.randomUUID().toString())
                 .creatorId(basic.getStaffId()).creatorName(basic.getStaffName())
                 .build();
         doctorPigEvent.setExtraMap(extra);

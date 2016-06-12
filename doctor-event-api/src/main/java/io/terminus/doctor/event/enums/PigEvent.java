@@ -31,6 +31,7 @@ public enum PigEvent {
     FARROWING(15, "分娩"),
     WEAN(16, "断奶事件"),
     FOSTERS(17, "拼窝事件"),
+    FOSTERS_BY(19, "被拼窝母猪"),
     PIGLETS_CHG(18, "母猪仔猪变动事件信息");
 
 

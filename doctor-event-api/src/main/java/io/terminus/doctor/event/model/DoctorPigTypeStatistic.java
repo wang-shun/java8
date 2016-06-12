@@ -80,7 +80,8 @@ public class DoctorPigTypeStatistic implements Serializable {
             this.boar = pigCount;
         }else if(Objects.equals(pigType, DoctorPig.PIG_TYPE.SOW.getKey())){
             this.sow = pigCount;
+        }else {
+            throw new IllegalArgumentException("input.pigType.error");
         }
-        throw new IllegalArgumentException("input.pigType.error");
     }
 }

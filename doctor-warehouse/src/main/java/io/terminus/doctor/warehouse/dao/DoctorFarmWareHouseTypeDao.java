@@ -1,11 +1,12 @@
 package io.terminus.doctor.warehouse.dao;
 
-import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Maps;
 import io.terminus.common.mysql.dao.MyBatisDao;
 import io.terminus.doctor.warehouse.model.DoctorFarmWareHouseType;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by yaoqijun.
@@ -21,6 +22,9 @@ public class DoctorFarmWareHouseTypeDao extends MyBatisDao<DoctorFarmWareHouseTy
     }
 
     public DoctorFarmWareHouseType findByFarmIdAndType(Long farmId, Integer type){
-        return this.getSqlSession().selectOne(sqlId("findByFarmIdAndType"), ImmutableMap.of("farmId",farmId,"type",type));
+        Map<String,Object> params = Maps.newHashMap();
+        params.put("farmId", farmId);
+        params.put("type", type);
+        return this.getSqlSession().selectOne(sqlId("findByFarmIdAndType"), params);
     }
 }

@@ -28,7 +28,7 @@ public class DoctorFarrowingDto implements Serializable{
 
     private Long barnId;   // 分娩猪舍
 
-    private Long barnName;  //分娩猪舍名称
+    private String barnName;  //分娩猪舍名称
 
     private String bedCode; // 床号
 

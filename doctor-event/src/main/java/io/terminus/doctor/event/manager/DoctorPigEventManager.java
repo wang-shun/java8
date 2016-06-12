@@ -5,12 +5,14 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.constants.JacksonType;
+import io.terminus.doctor.common.utils.Params;
 import io.terminus.doctor.event.constants.DoctorPigSnapshotConstants;
 import io.terminus.doctor.event.dao.DoctorPigEventDao;
 import io.terminus.doctor.event.dao.DoctorPigSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorPigTrackDao;
 import io.terminus.doctor.event.dao.DoctorRevertLogDao;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
+import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.handler.DoctorEventHandlerChainInvocation;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigSnapshot;
@@ -118,12 +120,16 @@ public class DoctorPigEventManager {
         /**
          * 母猪创建对应的事件流信息
          */
-        if(Objects.equals(doctorBasicInputInfoDto.getPigType(), DoctorPig.PIG_TYPE.SOW.getKey())){
-            Map<String, Long> ids = OBJECT_MAPPER.readValue(context.get("entryResult").toString(), JacksonType.MAP_OF_OBJECT);
-            Long pigId =  ids.get("doctorPigId");
+        Map<String, Object> ids = null;
+        if(Objects.equals(doctorBasicInputInfoDto.getPigType(), DoctorPig.PIG_TYPE.SOW.getKey()) &&
+                Objects.equals(doctorBasicInputInfoDto.getEventType(), PigEvent.ENTRY.getKey())){
+            ids = OBJECT_MAPPER.readValue(context.get("entryResult").toString(), JacksonType.MAP_OF_OBJECT);
+            Long pigId = Params.getWithConvert(ids, "doctorPigId", a->Long.valueOf(a.toString()));
             flowProcessService.startFlowInstance(sowFlowDefinitionKey, pigId);
+        }else {
+            ids = OBJECT_MAPPER.readValue(context.get("createEventResult").toString(), JacksonType.MAP_OF_OBJECT);
         }
-        return context;
+        return ids;
     }
 
     /**
@@ -151,23 +157,47 @@ public class DoctorPigEventManager {
     @Transactional
     @SneakyThrows
     public Map<String,Object> createSowPigEvent(DoctorBasicInputInfoDto basic, Map<String, Object> extra){
+        return createSingleSowEvents(basic, extra);
+    }
+
+    /**
+     * 批量创建Pig事件信息
+     * @param basicInputInfoDto
+     * @param extra
+     * @return
+     */
+    @Transactional
+    @SneakyThrows
+    public Map<String,Object> createSowEvents(List<DoctorBasicInputInfoDto> basicInputInfoDtos, Map<String, Object> extra){
+        Map<String,Object> results = Maps.newHashMap();
+        basicInputInfoDtos.forEach(dto->{
+            results.put(dto.getPigId().toString(),
+                    createSingleSowEvents(dto, extra));
+        });
+        return results;
+    }
+
+    @SneakyThrows
+    private Map<String, Object> createSingleSowEvents(DoctorBasicInputInfoDto basic, Map<String, Object> extra){
         // build data
         String flowData = JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(ImmutableMap.of(
                 "basic",JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(basic),
-                "dto",JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(extra)));
+                "extra",JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(extra)));
 
         // execute
-        flowProcessService.startFlowInstance(sowFlowDefinitionKey, basic.getPigId());   // 启动流程实例
         Executor executor = flowProcessService.getExecutor(sowFlowDefinitionKey, basic.getPigId());
 
-        Map<String,String> express = Maps.newHashMap();
-        express.put("eventType", basic.getEventType().toString());
+        //  添加参数信息
+        Map<String, Object> express = Maps.newHashMap();
+        express.put("eventType", basic.getEventType());
+        if(Objects.equals(basic.getEventType(), PigEvent.PREG_CHECK.getKey())){
+            express.put("checkResult", extra.get("checkResult"));
+        }
 
         // 添加对应的操作方式
         executor.execute(express, flowData);
-
         String flowDataContent = flowQueryService.getFlowProcessQuery().getCurrentProcesses(sowFlowDefinitionKey, basic.getPigId()).get(0).getFlowData();
-
-        return OBJECT_MAPPER.readValue(flowDataContent, JacksonType.MAP_OF_OBJECT);
+        Map<String,String> flowDataMap = OBJECT_MAPPER.readValue(flowDataContent, JacksonType.MAP_OF_STRING);
+        return OBJECT_MAPPER.readValue(flowDataMap.get("createEventResult"), JacksonType.MAP_OF_OBJECT);
     }
 }
