@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * Desc:
@@ -55,15 +54,15 @@ public class DoctorGroupEvents {
      * @param groupId 猪群id
      * @param eventType 事件类型
      * @see io.terminus.doctor.event.enums.GroupEventType
-     * @param params 入参
+     * @param data 入参
      * @see io.terminus.doctor.event.dto.event.group.input.BaseGroupInput
      * @return 是否成功
      */
     @RequestMapping(value = "/other", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public Boolean createGroupEvent(@RequestParam("groupId") Long groupId,
                                     @RequestParam("eventType") Integer eventType,
-                                    @RequestParam Map<String, Object> params) {
-        return RespHelper.or500(doctorGroupWebService.createGroupEvent(groupId, eventType, params));
+                                    @RequestParam("data") String data) {
+        return RespHelper.or500(doctorGroupWebService.createGroupEvent(groupId, eventType, data));
     }
 
     /**
