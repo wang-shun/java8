@@ -1104,3 +1104,19 @@ CREATE TABLE `parana_addresses` (
   `order_no` varchar(32) DEFAULT NULL COMMENT '排序号',
   PRIMARY KEY (`id`)
 );
+
+CREATE TABLE `doctor_pig_type_statistics` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '自增主键',
+  `org_id` bigint(20) DEFAULT NULL COMMENT '公司id',
+  `farm_id` bigint(20) DEFAULT NULL COMMENT '猪场id',
+  `boar` int(11) DEFAULT NULL COMMENT '公猪数',
+  `sow` int(11) DEFAULT NULL COMMENT '母猪数',
+  `farrow` int(11) DEFAULT NULL COMMENT '产房仔猪数',
+  `nursery` int(11) DEFAULT NULL COMMENT '保育猪数',
+  `fatten` int(11) DEFAULT NULL COMMENT '育肥猪数',
+  `created_at` datetime DEFAULT NULL COMMENT '创建时间',
+  `updated_at` datetime DEFAULT NULL COMMENT '修改时间',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `idx_doctor_pig_type_statistics_farm_id` (`farm_id`),
+  KEY `idx_doctor_pig_type_statistics_org_id` (`org_id`)
+) COMMENT='猪只数统计表';

@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import io.terminus.common.model.Paging;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dto.DoctorGroupDetail;
+import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
 import io.terminus.doctor.event.dto.event.group.input.DoctorNewGroupInput;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.service.DoctorGroupReadService;
@@ -112,5 +113,15 @@ public class DoctorGroupEvents {
                                                      @RequestParam(value = "pageNo", required = false) Integer pageNo,
                                                      @RequestParam(value = "size", required = false) Integer size) {
         return RespHelper.or500(doctorGroupReadService.pagingGroupEvent(farmId, groupId, type, pageNo, size));
+    }
+
+    /**
+     * 查询猪群镜像信息(猪群, 猪群跟踪, 最新event)
+     * @param groupId 猪群id
+     * @return 猪群镜像
+     */
+    @RequestMapping(value = "/snapshot", method = RequestMethod.GET)
+    public DoctorGroupSnapShotInfo findGroupSnapShotByGroupId(@RequestParam("groupId") Long groupId) {
+        return RespHelper.or500(doctorGroupReadService.findGroupSnapShotByGroupId(groupId));
     }
 }
