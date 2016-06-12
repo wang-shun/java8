@@ -166,6 +166,11 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
                     break;
                 case TRANS_GROUP:
                     params.put("toBarnName", getBarnName(getLong(params, "toBarnId")));
+
+                    //如果不新建猪群, 拼上转入猪群号
+                    if (Integer.valueOf(String.valueOf(params.get("isCreateGroup"))).equals(IsOrNot.NO.getValue())) {
+                        params.put("toGroupCode", getGroupCode(getLong(params, "toGroupId")));
+                    }
                     RespHelper.orServEx(doctorGroupWriteService.groupEventTransGroup(groupDetail, BeanMapper.map(putBasicFields(params), DoctorTransGroupInput.class)));
                     break;
                 case TURN_SEED:
@@ -187,6 +192,11 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
                 case TRANS_FARM:
                     params.put("toFarmName", getFarmName(getLong(params, "toFarmId")));
                     params.put("toBarnName", getBarnName(getLong(params, "toBarnId")));
+
+                    //如果不新建猪群, 拼上转入猪群号
+                    if (Integer.valueOf(String.valueOf(params.get("isCreateGroup"))).equals(IsOrNot.NO.getValue())) {
+                        params.put("toGroupCode", getGroupCode(getLong(params, "toGroupId")));
+                    }
                     RespHelper.orServEx(doctorGroupWriteService.groupEventTransFarm(groupDetail, BeanMapper.map(putBasicFields(params), DoctorTransFarmGroupInput.class)));
                     break;
                 case CLOSE:
@@ -237,7 +247,7 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
 
     //获取猪群号
     private String getGroupCode(Long groupId) {
-        return groupId == null ? null : RespHelper.or(doctorGroupReadService.findGroupById(groupId), new DoctorGroup()).getGroupCode();
+        return RespHelper.orServEx(doctorGroupReadService.findGroupById(groupId)).getGroupCode();
     }
 
     //获取猪舍名称
