@@ -1,5 +1,6 @@
 package io.terminus.doctor.msg.dao;
 
+import com.google.common.collect.ImmutableMap;
 import io.terminus.common.mysql.dao.MyBatisDao;
 import io.terminus.doctor.msg.model.DoctorMessage;
 import org.springframework.stereotype.Repository;
@@ -22,4 +23,24 @@ public class DoctorMessageDao extends MyBatisDao<DoctorMessage> {
         return getSqlSession().selectOne(sqlId("findNoReadCount"), userId);
     }
 
+    /**
+     * 获取系统消息(最新)
+     * @param templateId    模板id
+     * @return
+     */
+    public DoctorMessage findLatestSysMessage(Long templateId) {
+        return getSqlSession().selectOne(sqlId("findLatestSysMessage"), templateId);
+    }
+
+    /**
+     * 获取预警消息(最新)
+     * @param templateId    模板id
+     * @param farmId        猪场id
+     * @param roleId        角色id
+     * @return
+     */
+    public DoctorMessage findLatestWarnMessage(Long templateId, Long farmId, Long roleId) {
+        return getSqlSession().selectOne(sqlId("findLatestWarnMessage"),
+                ImmutableMap.of("templateId", templateId, "farmId", farmId, "roleId", roleId));
+    }
 }

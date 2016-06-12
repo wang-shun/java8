@@ -2,7 +2,6 @@ package io.terminus.doctor.msg.producer;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.MoreObjects;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.utils.RespHelper;
@@ -20,6 +19,7 @@ import io.terminus.doctor.msg.service.DoctorMessageRuleRoleReadService;
 import io.terminus.doctor.msg.service.DoctorMessageRuleTemplateReadService;
 import io.terminus.doctor.msg.service.DoctorMessageWriteService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 
 import java.util.Date;
@@ -68,8 +68,8 @@ public abstract class AbstractProducer implements IProducer {
     public void produce(List<SubUser> subUsers) {
 
         List<DoctorMessageRuleTemplate> ruleTemplates = RespHelper.orServEx(doctorMessageRuleTemplateReadService.findByCategory(category.getKey()));
-        for (int k = 0; ruleTemplates != null && k < ruleTemplates.size(); k++) {
-            DoctorMessageRuleTemplate ruleTemplate = ruleTemplates.get(k);
+        for (int i = 0; ruleTemplates != null && i < ruleTemplates.size(); i++) {
+            DoctorMessageRuleTemplate ruleTemplate = ruleTemplates.get(i);
             // 如果不正常, 则不继续执行
             if(ruleTemplate == null || !Objects.equals(ruleTemplate.getStatus(), DoctorMessageRuleTemplate.Status.NORMAL.getValue())) {
                 return;
@@ -77,10 +77,12 @@ public abstract class AbstractProducer implements IProducer {
 
             // 1. 如果是系统消息
             if (Objects.equals(DoctorMessageRuleTemplate.Type.SYSTEM.getValue(), ruleTemplate.getType())) {
+                log.info("[AbstractProducer] {} -> 系统消息产生, starting......", ruleTemplate.getName());
                 // 获取最新发送的系统消息(系统消息是对应到模板的)
                 DoctorMessage latestMessage = getLatestSysMessage(ruleTemplate.getId());
                 // 检查消息是否在频率范围之内
                 if (!checkFrequence(latestMessage, ruleTemplate.getRule())) {
+                    log.info("[AbstractProducer] {} -> 系统消息未在频率范围内, ending......", ruleTemplate.getName());
                     return;
                 }
                 DoctorMessageRuleRole ruleRole = DoctorMessageRuleRole.builder()
@@ -92,13 +94,15 @@ public abstract class AbstractProducer implements IProducer {
                 if(message != null && message.size() > 0) {
                     doctorMessageWriteService.createMessages(message);
                 }
+                log.info("[AbstractProducer] {} -> 系统消息产生正常结束, end......", ruleTemplate.getName());
             }
 
             // 2. 如果是预警或警报消息
             else{
+                log.info("[AbstractProducer] {} -> 预警消息产生, starting......", ruleTemplate.getName());
                 List<DoctorMessageRuleRole> ruleRoles = RespHelper.orServEx(doctorMessageRuleRoleReadService.findByTplId(ruleTemplate.getId()));
-                for (int i = 0; ruleRoles != null && i < ruleRoles.size(); i++) {
-                    DoctorMessageRuleRole ruleRole = ruleRoles.get(i);
+                for (int j = 0; ruleRoles != null && j < ruleRoles.size(); j++) {
+                    DoctorMessageRuleRole ruleRole = ruleRoles.get(j);
                     // 查询对应的message_rule
                     DoctorMessageRule messageRule = RespHelper.orServEx(doctorMessageRuleReadService.findMessageRuleById(ruleRole.getRuleId()));
                     if(messageRule == null || !Objects.equals(messageRule.getStatus(), DoctorMessageRule.Status.NORMAL.getValue())) {
@@ -108,15 +112,18 @@ public abstract class AbstractProducer implements IProducer {
                     DoctorMessage latestMessage = getLatestWarnMessage(ruleRole.getTemplateId(), ruleRole.getFarmId(), ruleRole.getRoleId());
                     // 检查消息是否在频率范围之内
                     if (!checkFrequence(latestMessage, ruleRole.getRule())) {
-                        return;
+                        continue;
                     }
                     // 获取信息
+                    log.info("[AbstractProducer] {} -> 预警消息产生, roleId: {}", ruleTemplate.getName(), ruleRole.getRoleId());
                     List<DoctorMessage> message = message(ruleRole,
                             subUsers.stream().filter(sub -> Objects.equals(sub.getRoleId(), ruleRole.getRoleId())).collect(Collectors.toList()));
                     if(message != null && message.size() > 0) {
                         doctorMessageWriteService.createMessages(message);
                     }
+
                 }
+                log.info("[AbstractProducer] {} -> 预警消息产生结束, ending......", ruleTemplate.getName());
             }
         }
     }
@@ -191,8 +198,8 @@ public abstract class AbstractProducer implements IProducer {
         List<DoctorMessage> messages = Lists.newArrayList();
         DoctorMessageRuleTemplate template = RespHelper.orServEx(doctorMessageRuleTemplateReadService.findMessageRuleTemplateById(ruleRole.getTemplateId()));
         if (subUsers != null && subUsers.size() > 0) {
-            // 主账户
-            subUsers.stream().map(SubUser::getParentUserId).collect(Collectors.toSet())
+            // 主账户 (预警类型会出现重复, 暂时取消) TODO
+            /*subUsers.stream().map(SubUser::getParentUserId).collect(Collectors.toSet())
                     .forEach(parentId -> messages.add(
                             DoctorMessage.builder()
                                     .farmId(ruleRole.getFarmId())
@@ -209,7 +216,7 @@ public abstract class AbstractProducer implements IProducer {
                                     .status(DoctorMessage.Status.NORMAL.getValue())
                                     .createdBy(template.getUpdatedBy())
                                     .build()
-                    ));
+                    ));*/
             // 子账户
             subUsers.stream().forEach(subUser -> messages.add(
                     DoctorMessage.builder()
@@ -240,12 +247,7 @@ public abstract class AbstractProducer implements IProducer {
      * @return
      */
     private DoctorMessage getLatestWarnMessage(Long templateId, Long farmId, Long roleId) {
-        List<DoctorMessage> messages = RespHelper.orServEx(doctorMessageReadService.findMessageByCriteria(
-                ImmutableMap.of("farmId", farmId, "templateId", templateId, "roleId", roleId)));
-        if (messages != null && messages.size() > 0) {
-            return messages.get(0);
-        }
-        return null;
+        return RespHelper.orServEx(doctorMessageReadService.findLatestWarnMessage(templateId, farmId, roleId));
     }
 
     /**
@@ -254,12 +256,7 @@ public abstract class AbstractProducer implements IProducer {
      * @return
      */
     private DoctorMessage getLatestSysMessage(Long templateId) {
-        List<DoctorMessage> messages = RespHelper.orServEx(doctorMessageReadService.findMessageByCriteria(
-                ImmutableMap.of("templateId", templateId)));
-        if (messages != null && messages.size() > 0) {
-            return messages.get(0);
-        }
-        return null;
+        return RespHelper.orServEx(doctorMessageReadService.findLatestSysMessage(templateId));
     }
 
     /**
@@ -293,9 +290,11 @@ public abstract class AbstractProducer implements IProducer {
      * @return
      */
     private String getTemplateName(String tplName, Integer channel) {
-        Rule.Channel type = Rule.Channel.from(channel);
-        if (type != null) {
-            return tplName + "." + type.getSuffix();
+        if (StringUtils.isNotBlank(tplName)) {
+            Rule.Channel type = Rule.Channel.from(channel);
+            if (type != null) {
+                return tplName + "." + type.getSuffix();
+            }
         }
         return tplName;
     }
@@ -306,6 +305,9 @@ public abstract class AbstractProducer implements IProducer {
      * @param channel   发送渠道, app推送需要带 http:// 的全url
      */
     private String getUrl(String url, Integer channel) {
+        if (StringUtils.isBlank(url)) {
+            return url;
+        }
         // 如果是 app 推送
         if (Objects.equals(channel, Rule.Channel.APPPUSH.getValue())) {
             return url;

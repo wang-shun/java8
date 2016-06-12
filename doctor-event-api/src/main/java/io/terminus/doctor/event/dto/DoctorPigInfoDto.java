@@ -1,5 +1,6 @@
 package io.terminus.doctor.event.dto;
 
+import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 import lombok.AllArgsConstructor;
@@ -69,7 +70,10 @@ public class DoctorPigInfoDto implements Serializable{
                 .inFarmDate(doctorPig.getInFarmDate()).dateAge(Days.daysBetween(new DateTime(doctorPig.getBirthDate()), DateTime.now()).getDays());
 
         if(!isNull(doctorPigTrack)){
-            builder.status(doctorPigTrack.getStatus()).parity(doctorPigTrack.getCurrentParity())
+            PigStatus pigStatus = PigStatus.from(doctorPigTrack.getStatus());
+            builder.status(doctorPigTrack.getStatus())
+                    .statusName(pigStatus == null ? null : pigStatus.getDesc())
+                    .parity(doctorPigTrack.getCurrentParity())
                     .barnId(doctorPigTrack.getCurrentBarnId())
                     .barnName(doctorPigTrack.getCurrentBarnName())
                     .extraTrack(doctorPigTrack.getExtra())

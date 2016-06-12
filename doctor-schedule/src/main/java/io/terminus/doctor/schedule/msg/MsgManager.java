@@ -170,7 +170,7 @@ public class MsgManager {
                     message.setStatus(DoctorMessage.Status.SENDED.getValue());
                 }
             } catch (Exception e) {
-                log.error("email message send error, cause by {}", Throwables.getStackTraceAsString(e));
+                log.error("app push message send error, cause by {}", Throwables.getStackTraceAsString(e));
                 message.setFailedBy(Throwables.getStackTraceAsString(e));
                 message.setStatus(DoctorMessage.Status.FAILED.getValue());
             }

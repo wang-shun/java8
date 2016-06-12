@@ -141,4 +141,24 @@
         WHERE user_id = #{userId} AND status = 1 AND channel = 0
     </select>
 
+    <!-- 获取最新的系统消息 -->
+    <select id="findLatestSysMessage" parameterType="long" resultMap="DoctorMessageMap">
+        SELECT <include refid="cols_all"/>
+        FROM <include refid="tb"/>
+        WHERE id = (
+            SELECT MAX(id) FROM <include refid="tb"/>
+            WHERE template_id = #{templateId}
+        )
+    </select>
+
+    <!-- 获取最新的预警消息 -->
+    <select id="findLatestWarnMessage" parameterType="map" resultMap="DoctorMessageMap">
+        SELECT <include refid="cols_all"/>
+        FROM <include refid="tb"/>
+        WHERE id = (
+            SELECT MAX(id) FROM <include refid="tb"/>
+            WHERE template_id = #{templateId} AND farm_id = #{farmId} AND role_id = #{roleId}
+        )
+    </select>
+
 </mapper>

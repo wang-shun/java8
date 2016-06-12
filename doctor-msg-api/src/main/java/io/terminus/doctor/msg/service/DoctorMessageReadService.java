@@ -49,11 +49,27 @@ public interface DoctorMessageReadService {
     Response<List<DoctorMessage>> findMessageByCriteria(Map<String, Object> criteria);
 
     /**
+     * 获取系统消息(最新)
+     * @param templateId    模板id
+     * @return
+     */
+    Response<DoctorMessage> findLatestSysMessage(Long templateId);
+
+    /**
+     * 获取预警消息(最新)
+     * @param templateId    模板id
+     * @param farmId        猪场id
+     * @param roleId        角色id
+     * @return
+     */
+    Response<DoctorMessage> findLatestWarnMessage(Long templateId, Long farmId, Long roleId);
+
+    /**
      * 获取未读站内信的数量
      * @param userId    用户id
      * @return
      */
-    public Response<Long> findNoReadCount(Long userId);
+    Response<Long> findNoReadCount(Long userId);
 
     /**
      * 获取未发送的短信消息

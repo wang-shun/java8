@@ -86,6 +86,27 @@ public class DoctorMessageReadServiceImpl implements DoctorMessageReadService {
     }
 
     @Override
+    public Response<DoctorMessage> findLatestSysMessage(Long templateId) {
+        try{
+            return Response.ok(doctorMessageDao.findLatestSysMessage(templateId));
+        } catch (Exception e) {
+            log.error("find latest sys message failed, templateId:{}, cause by {}", templateId, Throwables.getStackTraceAsString(e));
+            return Response.fail("latest.sys.msg.fail");
+        }
+    }
+
+    @Override
+    public Response<DoctorMessage> findLatestWarnMessage(Long templateId, Long farmId, Long roleId) {
+        try{
+            return Response.ok(doctorMessageDao.findLatestWarnMessage(templateId, farmId, roleId));
+        } catch (Exception e) {
+            log.error("find latest warn message failed, templateId:{}, farmId:{}, roleId:{}, cause by {}",
+                    templateId, farmId, roleId, Throwables.getStackTraceAsString(e));
+            return Response.fail("latest.warn.msg.fail");
+        }
+    }
+
+    @Override
     public Response<Long> findNoReadCount(Long userId) {
         try{
             return Response.ok(doctorMessageDao.findNoReadCount(userId));

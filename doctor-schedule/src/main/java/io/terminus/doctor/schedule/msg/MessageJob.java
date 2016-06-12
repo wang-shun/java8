@@ -30,7 +30,8 @@ public class MessageJob {
     /**
      * 产生消息
      */
-    @Scheduled(cron = "0 0/10 * * * ?")
+    // @Scheduled(cron = "0 0/10 * * * ?")
+    @Scheduled(cron = "0/10 * * * * ?")
     public void messageProduce() {
         try {
             if (!hostLeader.isLeader()) {

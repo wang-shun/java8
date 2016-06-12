@@ -16,10 +16,13 @@ public class DoctorMessageRuleWriteServiceTest extends BaseServiceTest {
     @Autowired
     private DoctorMessageRuleWriteService doctorMessageRuleWriteService;
 
+    /**
+     * 当farm审核通过后的与消息模板绑定的初始化
+     */
     @Test
     @Rollback(false)
-    public void test() {
-        doctorMessageRuleWriteService.initTemplate(1314L);
+    public void test_INIT_templateAndFarm() {
+        doctorMessageRuleWriteService.initTemplate(1L);
     }
 
 }
