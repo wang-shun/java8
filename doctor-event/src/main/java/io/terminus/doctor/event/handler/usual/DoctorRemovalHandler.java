@@ -6,6 +6,7 @@ import io.terminus.doctor.event.dao.DoctorPigSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorPigTrackDao;
 import io.terminus.doctor.event.dao.DoctorRevertLogDao;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
+import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.handler.DoctorAbstractEventHandler;
@@ -50,6 +51,7 @@ public class DoctorRemovalHandler extends DoctorAbstractEventHandler{
         }else {
             throw new IllegalStateException("basic.pigTypeValue.error");
         }
+        doctorPigTrack.setIsRemoval(IsOrNot.YES.getValue());
         return doctorPigTrack;
     }
 

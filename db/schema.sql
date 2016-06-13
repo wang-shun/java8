@@ -689,6 +689,7 @@ CREATE TABLE `doctor_pig_tracks` (
   `farm_id` bigint(20) unsigned NOT NULL comment '猪场Id',
   `pig_id` bigint(20) DEFAULT NULL COMMENT '猪id',
   `status` smallint(6) DEFAULT NULL COMMENT '猪状态信息',
+  `is_removal` smallint(6) DEFAULT 0 COMMENT '是否离场信息',
   `current_barn_id` bigint(20) unsigned DEFAULT NULL COMMENT '当前猪舍Id',
   `current_barn_name` varchar(64) DEFAULT NULL COMMENT '当前猪舍名称',
   `weight` double DEFAULT NULL COMMENT '猪重量',

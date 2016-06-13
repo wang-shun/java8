@@ -42,6 +42,11 @@ public class DoctorPigTrack implements Serializable{
 
     private Integer status;
 
+    /**
+     * @see io.terminus.doctor.event.enums.IsOrNot
+     */
+    private Integer isRemoval;
+
     private Long currentBarnId;
 
     private String currentBarnName;

@@ -473,7 +473,8 @@ public class DoctorPigCreateEventsTest extends BaseFrontWebTest{
         System.out.println(JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(doctorPigDao.list(ImmutableMap.of("isRemoval",1))));
         System.out.println(JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(doctorPigDao.list(ImmutableMap.of("isRemoval",0))));
         System.out.println("doctor pig track******************************************************");
-        System.out.println(JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(doctorPigTrackDao.listAll()));
+        System.out.println(JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(doctorPigTrackDao.list(ImmutableMap.of("isRemoval",1))));
+        System.out.println(JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(doctorPigTrackDao.list(ImmutableMap.of("isRemoval",0))));
         System.out.println("doctor pig snap shot content******************************************************");
         System.out.println(JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(doctorPigSnapshotDao.listAll()));
         System.out.println("doctor pig event dao ******************************************************");
