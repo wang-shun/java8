@@ -1,6 +1,7 @@
 package io.terminus.doctor.front.pigevent;
 
 import com.google.api.client.util.Lists;
+import com.google.common.collect.ImmutableMap;
 import configuration.front.FrontWebConfiguration;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.event.dao.DoctorPigDao;
@@ -118,22 +119,22 @@ public class DoctorPigCreateEventsTest extends BaseFrontWebTest{
         Long pigId = 1l;
 
         // 录入母猪信息测试内容
-        sowEntryEventCreate();
+        boarEntryEventCreate();
 
 //        chgLocationCasualEventCreate(pigId);
 
-//        createRemovalPigEventContent(pigId);
+        createRemovalPigEventContent(pigId);
 
 //        createDiseaseVaccinationEvent(pigId);
 
-        createConditionEvent(pigId);
-        createSemseEvent(pigId);
+//        createConditionEvent(pigId);
+//        createSemseEvent(pigId);
 
         printCurrentState();
-        testCurrentSowInputStatus(pigId);
+//        testCurrentSowInputStatus(pigId);
     }
 
-    public void createSemseEvent(Long pigId){
+    public void createSemenEvent(Long pigId){
 
         String url = basicUrl + "/createSemen";
 
@@ -438,6 +439,19 @@ public class DoctorPigCreateEventsTest extends BaseFrontWebTest{
 
     }
 
+    private Long boarEntryEventCreate(){
+        String url = basicUrl + "/createEntryInfo";
+        DoctorFarmEntryDto doctorFarmEntryDto = buildFarmEntryDto();
+        doctorFarmEntryDto.setPigType(DoctorPig.PIG_TYPE.BOAR.getKey());
+
+        HttpEntity httpEntity = HttpPostRequest.formRequest().param("farmId", 12345l).
+                param("doctorFarmEntryJson",
+                        JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(doctorFarmEntryDto))
+                .httpEntity();
+        Long result = this.restTemplate.postForObject(url, httpEntity, Long.class);
+        return result;
+    }
+
     private Long sowEntryEventCreate(){
         String url = basicUrl + "/createEntryInfo";
         DoctorFarmEntryDto doctorFarmEntryDto = buildFarmEntryDto();
@@ -456,7 +470,8 @@ public class DoctorPigCreateEventsTest extends BaseFrontWebTest{
      */
     private void printCurrentState(){
         System.out.println("doctor pig ******************************************************");
-        System.out.println(JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(doctorPigDao.listAll()));
+        System.out.println(JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(doctorPigDao.list(ImmutableMap.of("isRemoval",1))));
+        System.out.println(JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(doctorPigDao.list(ImmutableMap.of("isRemoval",0))));
         System.out.println("doctor pig track******************************************************");
         System.out.println(JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(doctorPigTrackDao.listAll()));
         System.out.println("doctor pig snap shot content******************************************************");

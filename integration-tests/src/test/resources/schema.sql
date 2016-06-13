@@ -496,6 +496,7 @@ CREATE TABLE `doctor_pigs` (
   `out_id` varchar(128) DEFAULT NULL COMMENT '关联猪外部Id',
   `pig_code` varchar(64) DEFAULT NULL COMMENT '猪编号',
   `pig_type` smallint(6) DEFAULT NULL COMMENT '猪类型(公猪，母猪， 仔猪)',
+  `is_removal` SMALLINT(6) DEFAULT NULL COMMENT '是否离场',
   `pig_father_code` VARCHAR(64) unsigned DEFAULT NULL COMMENT '猪父亲Id',
   `pig_mother_code` VARCHAR(64) unsigned DEFAULT NULL COMMENT '母猪Id',
   `source` smallint(6) DEFAULT NULL COMMENT '母猪来源',

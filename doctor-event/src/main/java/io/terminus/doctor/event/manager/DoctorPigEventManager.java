@@ -120,7 +120,7 @@ public class DoctorPigEventManager {
         /**
          * 母猪创建对应的事件流信息
          */
-        Map<String, Object> ids = OBJECT_MAPPER.readValue(context.get("entryResult").toString(), JacksonType.MAP_OF_OBJECT);
+        Map<String, Object> ids = OBJECT_MAPPER.readValue(context.get("createEventResult").toString(), JacksonType.MAP_OF_OBJECT);
         if(Objects.equals(doctorBasicInputInfoDto.getPigType(), DoctorPig.PIG_TYPE.SOW.getKey())){
             Long pigId = Params.getWithConvert(ids, "doctorPigId", a->Long.valueOf(a.toString()));
 
