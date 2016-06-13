@@ -111,7 +111,7 @@ VALUES
 	(19, 12345, 'farmName', 5, 'materialName', 'remark', 1, 'unitgroupName', 2, 'unit_name', 100000, 1000, NULL, 1, 'creatorName', 2, 'updatorName', '2016-06-02 16:43:17', '2016-06-02 16:43:17'),
 	(20, 12345, 'farmName', 5, 'materialName', 'remark', 1, 'unitgroupName', 2, 'unit_name', 100000, 1000, NULL, 1, 'creatorName', 2, 'updatorName', '2016-06-02 16:43:17', '2016-06-02 16:43:17');
 
---material in ware house info
+-- material in ware house info
 INSERT INTO `doctor_material_in_ware_houses` (`id`, `farm_id`, `farm_name`, `ware_house_id`, `ware_house_name`, `material_id`, `material_name`, `type`, `lot_number`, `unit_group_name`, `unit_name`, `extra`, `creator_id`, `creator_name`, `updator_id`, `updator_name`, `created_at`, `updated_at`)
 VALUES
 	(1, 12345, 'farmName', 1, 'warehouseName1', 1, 'materialName1', 1, 2500000, 'groupName', 'unitName', NULL, 1, 'creatorName', 1, 'updatorName', '2016-06-02 16:57:32', '2016-06-02 16:57:32'),
