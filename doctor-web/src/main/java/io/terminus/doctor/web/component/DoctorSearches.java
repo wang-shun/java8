@@ -78,9 +78,37 @@ public class DoctorSearches {
         if (farmIdNotExist(params)) {
             return new Paging<>(0L, Collections.emptyList());
         }
-        createSearchWord(SearchType.SOW.getValue(), params);
-        params.put("pigType", DoctorPig.PIG_TYPE.SOW.getKey().toString());
-        return RespHelper.or500(pigSearchReadService.searchWithAggs(pageNo, pageSize, "search/search.mustache", params));
+//        createSearchWord(SearchType.SOW.getValue(), params);
+//        params.put("pigType", DoctorPig.PIG_TYPE.SOW.getKey().toString());
+//        return RespHelper.or500(pigSearchReadService.searchWithAggs(pageNo, pageSize, "search/search.mustache", params));
+
+        pageNo = MoreObjects.firstNonNull(pageNo, 1);
+        pageSize = MoreObjects.firstNonNull(pageSize, 10);
+
+        List<SearchedPig> pigs = Lists.newArrayList();
+        for (int i = 1; i <= 42; i++) {
+            SearchedPig pig = SearchedPig.builder()
+                    .id((long) i)
+                    .pigCode("K300" + i)
+                    .pigType(1)
+                    .pigTypeName("母猪")
+                    .farmId((long) i)
+                    .farmName("天下第一猪场" + i)
+                    .outFarmDate(new Date())
+                    .inFarmDate(new Date())
+                    .status(1)
+                    .statusName("待配种")
+                    .currentBarnId((long) i)
+                    .currentBarnName("猪舍" + i)
+                    .dayAge(20)
+                    .currentParity(5)
+                    .build();
+            pigs.add(pig);
+        }
+        Map<Integer, List<SearchedGroup>> map = Maps.newHashMap();
+        List<List<SearchedPig>> ggs = Lists.partition(pigs, new BigDecimal(42).divide(new BigDecimal(pageSize), BigDecimal.ROUND_UP).intValue());
+
+        return new Paging<>(42L, ggs.get(pageNo - 1));
     }
 
     /**
