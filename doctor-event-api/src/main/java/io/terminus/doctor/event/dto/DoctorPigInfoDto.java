@@ -47,7 +47,7 @@ public class DoctorPigInfoDto implements Serializable{
 
     private Integer dateAge;    // 日龄信息
 
-    private Integer parity;
+    private Integer parity;     //  当前胎次/配种次数
 
     private Date birthDay;
 
@@ -58,7 +58,6 @@ public class DoctorPigInfoDto implements Serializable{
     private String barnName;
 
     private String extraTrack;
-    private Integer currentParity; //  当前胎次/配种次数
 
     private Date updatedAt;
 
@@ -77,7 +76,6 @@ public class DoctorPigInfoDto implements Serializable{
                     .barnId(doctorPigTrack.getCurrentBarnId())
                     .barnName(doctorPigTrack.getCurrentBarnName())
                     .extraTrack(doctorPigTrack.getExtra())
-                    .currentParity(doctorPigTrack.getCurrentParity())
                     .updatedAt(doctorPigTrack.getUpdatedAt());
         }
         return builder.build();

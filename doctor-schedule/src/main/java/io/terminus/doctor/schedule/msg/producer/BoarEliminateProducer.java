@@ -98,9 +98,9 @@ public class BoarEliminateProducer extends AbstractProducer {
                     DoctorPigInfoDto pigDto = boarPigs.get(j);
                     // 公猪的updatedAt与当前时间差 (天)
                     Double timeDiff = (double) (DateTime.now().minus(pigDto.getUpdatedAt().getTime()).getMillis() / 86400000);
-                    if (pigDto.getCurrentParity() != null && ruleValueMap.get(1) != null) {
+                    if (pigDto.getParity() != null && ruleValueMap.get(1) != null) {
                         // 如果当前配种次数 大于 配置的次数
-                        if (pigDto.getCurrentParity() > ruleValueMap.get(1).getValue()) {
+                        if (pigDto.getParity() > ruleValueMap.get(1).getValue()) {
                             messages.addAll(getMessage(pigDto, rule.getChannels(), ruleRole, subUsers, timeDiff, rule.getUrl()));
                         }
                     }
