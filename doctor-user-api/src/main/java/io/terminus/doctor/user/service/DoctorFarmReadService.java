@@ -2,7 +2,6 @@ package io.terminus.doctor.user.service;
 
 import io.terminus.common.model.Response;
 import io.terminus.doctor.user.model.DoctorFarm;
-import io.terminus.doctor.user.model.DoctorOrg;
 
 import java.util.List;
 
@@ -28,4 +27,10 @@ public interface DoctorFarmReadService {
      * @return 猪场信息列表
      */
     Response<List<DoctorFarm>> findFarmsByUserId(Long userId);
+
+    /**
+     * 查询所有猪场
+     * @return 所有猪场
+     */
+    Response<List<DoctorFarm>> findAllFarms();
 }

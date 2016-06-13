@@ -48,5 +48,5 @@
 
     <!--stat service-->
     <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.event.service.DoctorPigTypeStatisticReadService" ref="doctorPigTypeStatisticReadServiceImpl"/>
-
+    <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.event.service.DoctorPigTypeStatisticWriteService" ref="doctorPigTypeStatisticWriteServiceImpl"/>
 </beans>
