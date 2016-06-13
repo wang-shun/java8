@@ -12,7 +12,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import utils.HttpGetRequest;
 
 import java.util.Map;
 
@@ -83,15 +82,6 @@ public class UsersTest extends BaseFrontWebTest {
                 loginmap ,Map.class, ImmutableMap.of("port", port));
 
         assertThat(result.getStatusCode(), is(HttpStatus.OK));
-    }
-
-    @Test
-    public void test_Search() {
-        String url = HttpGetRequest
-                .url("http://localhost:" + this.port + "/api/doctor/search/sowpigs")
-                .build();
-        Object o = this.restTemplate.getForObject(url, Object.class);
-        System.out.println(o);
     }
 
 }

@@ -75,9 +75,9 @@ public class DoctorSearches {
     public Paging<SearchedPig> searchSowPigs(@RequestParam(required = false) Integer pageNo,
                                              @RequestParam(required = false) Integer pageSize,
                                              @RequestParam Map<String, String> params) {
-        if (farmIdNotExist(params)) {
-            return new Paging<>(0L, Collections.emptyList());
-        }
+//        if (farmIdNotExist(params)) {
+//            return new Paging<>(0L, Collections.emptyList());
+//        }
 //        createSearchWord(SearchType.SOW.getValue(), params);
 //        params.put("pigType", DoctorPig.PIG_TYPE.SOW.getKey().toString());
 //        return RespHelper.or500(pigSearchReadService.searchWithAggs(pageNo, pageSize, "search/search.mustache", params));
@@ -108,7 +108,7 @@ public class DoctorSearches {
         Map<Integer, List<SearchedGroup>> map = Maps.newHashMap();
         List<List<SearchedPig>> ggs = Lists.partition(pigs, new BigDecimal(42).divide(new BigDecimal(pageSize), BigDecimal.ROUND_UP).intValue());
 
-        return new Paging<>(42L, ggs.get(pageNo - 1));
+        return new Paging<>(42L, MoreObjects.firstNonNull(ggs.get(pageNo - 1), Collections.emptyList()));
     }
 
     /**
