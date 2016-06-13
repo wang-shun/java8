@@ -22,7 +22,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -73,11 +72,13 @@ public class DoctorStatisticReadServiceImpl implements DoctorStatisticReadServic
 
             //查询公司统计
             List<DoctorPigTypeStatistic> stats = OPRespHelper.orOPEx(doctorPigTypeStatisticReadService.findPigTypeStatisticsByOrgId(org.getId()));
-            Map<Long, DoctorPigTypeStatistic> farmStatMap = stats.stream().collect(Collectors.toMap(DoctorPigTypeStatistic::getFarmId, v -> v));
 
             //获取猪场统计
             List<DoctorFarmBasicDto> farmBasicDtos = farms.stream()
-                    .map(farm -> new DoctorFarmBasicDto(farm, getStatistics(Lists.newArrayList(farmStatMap.get(farm.getId())))))
+                    .map(farm -> {
+                        DoctorPigTypeStatistic stat = OPRespHelper.orOPEx(doctorPigTypeStatisticReadService.findPigTypeStatisticByFarmId(farm.getId()));
+                        return new DoctorFarmBasicDto(farm, getStatistics(Lists.newArrayList(stat)));
+                    })
                     .collect(Collectors.toList());
 
             return Response.ok(new DoctorBasicDto(org, getStatistics(stats), farmBasicDtos));
