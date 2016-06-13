@@ -17,6 +17,8 @@ public final class JacksonType {
 
     public static final TypeReference<List<String>> LIST_OF_STRING = new TypeReference<List<String>>() {};
 
+    public static final TypeReference<List<Long>> LIST_OF_LONG = new TypeReference<List<Long>>(){};
+
     public static final TypeReference<Map<String, String>> MAP_OF_STRING = new TypeReference<Map<String,String>>(){};
 
     public static final TypeReference<Map<String, Integer>> MAP_OF_INTEGER = new TypeReference<Map<String, Integer>>(){};

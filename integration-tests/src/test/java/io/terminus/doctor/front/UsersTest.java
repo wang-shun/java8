@@ -84,6 +84,4 @@ public class UsersTest extends BaseFrontWebTest {
         assertThat(result.getStatusCode(), is(HttpStatus.OK));
     }
 
-
-
 }

@@ -16,6 +16,7 @@ import io.terminus.doctor.event.dto.event.usual.DoctorChgLocationDto;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.service.DoctorPigEventWriteService;
 import io.terminus.doctor.web.front.event.service.DoctorSowEventCreateService;
+import io.terminus.zookeeper.pubsub.Subscriber;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -37,9 +38,27 @@ public class DoctorSowEventCreateServiceImpl implements DoctorSowEventCreateServ
 
     private final DoctorPigEventWriteService doctorPigEventWriteService;
 
+    @Autowired(required = false)
+    private Subscriber subscriber;
+
     @Autowired
     public DoctorSowEventCreateServiceImpl(DoctorPigEventWriteService doctorPigEventWriteService){
         this.doctorPigEventWriteService = doctorPigEventWriteService;
+
+        // TODO 确认消耗领取相关字段信息
+//        if(subscriber != null){
+//            try{
+//                subscriber.subscribe(data->{
+//                    DataEvent dataEvent = DataEvent.fromBytes(data);
+//                    if(!Objects.equals(dataEvent.getEventType(), DataEventType.VaccinationMedicalConsume.getKey())){
+//                        return;
+//                    }
+//                    sowPigsEventCreateByConsume(dataEvent.getContent());
+//                });
+//            }catch (Exception e){
+//                log.error("subscriber callback fail, cause:{}", Throwables.getStackTraceAsString(e));
+//            }
+//        }
     }
 
     @Override
@@ -88,5 +107,30 @@ public class DoctorSowEventCreateServiceImpl implements DoctorSowEventCreateServ
         }
     }
 
+    @Override
+    public Response<Boolean> casualEventsCreate(List<DoctorBasicInputInfoDto> dtoList, String sowInfoDtoJson) {
+        try{
+            Map<String,Object> extra = OBJECT_MAPPER.readValue(sowInfoDtoJson, JacksonType.MAP_OF_OBJECT);
+            return doctorPigEventWriteService.casualPigsEventCreate(dtoList, extra);
+        }catch (Exception e){
+            log.error("casual event create fail, cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("create.casualEvent.fail");
+        }
+    }
 
+//    @Override
+//    public Response<Boolean> sowPigsEventCreateByConsume(String paramsJson) {
+//        try{
+//            Map<String,Object> paramsMap = OBJECT_MAPPER.readValue(paramsJson, JacksonType.MAP_OF_OBJECT);
+//
+//            // basic input info
+//            Long barnId = Long.valueOf(paramsMap.get("barnId").toString());
+//
+//
+//            return Response.ok(Boolean.TRUE);
+//        }catch (Exception e){
+//            log.error("sow pigs event create fail, cause:{}", Throwables.getStackTraceAsString(e));
+//            return Response.fail("consume.eventCreate.fail");
+//        }
+//    }
 }

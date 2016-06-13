@@ -120,7 +120,7 @@ public class DoctorPigEventManager {
         /**
          * 母猪创建对应的事件流信息
          */
-        Map<String, Object> ids = OBJECT_MAPPER.readValue(context.get("entryResult").toString(), JacksonType.MAP_OF_OBJECT);
+        Map<String, Object> ids = OBJECT_MAPPER.readValue(context.get("createEventResult").toString(), JacksonType.MAP_OF_OBJECT);
         if(Objects.equals(doctorBasicInputInfoDto.getPigType(), DoctorPig.PIG_TYPE.SOW.getKey())){
             Long pigId = Params.getWithConvert(ids, "doctorPigId", a->Long.valueOf(a.toString()));
 
@@ -139,6 +139,7 @@ public class DoctorPigEventManager {
      * @param extra
      * @return 通过PigId 获取对应的返回结果信息
      */
+    @Transactional
     public Map<String, Object> createCasualPigEvents(List<DoctorBasicInputInfoDto> basicList, Map<String,Object> extra){
         Map<String,Object> result = Maps.newHashMap();
         basicList.forEach(basic->{
@@ -163,7 +164,7 @@ public class DoctorPigEventManager {
 
     /**
      * 批量创建Pig事件信息
-     * @param basicInputInfoDto
+     * @param basicInputInfoDtos
      * @param extra
      * @return
      */

@@ -346,26 +346,6 @@ public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteServic
         }
     }
 
-//    @Override
-//    public Response<Long> sowFostersEvent(DoctorFostersDto doctorFostersDto, List<DoctorBasicInputInfoDto> doctorBasicInputInfoDtos) {
-//        try{
-//            // 校验母猪数量信息
-//            checkState(doctorBasicInputInfoDtos.size() == 2, "inputFosters.count.error");
-//
-//            Map<String,Object> dto = Maps.newHashMap();
-//            BeanMapper.copy(doctorFostersDto, dto);
-//            Map<String,Object> result = doctorPigEventManager.createSowEvents(doctorBasicInputInfoDtos, dto);
-//            publishEvent(result);
-//            Map<String, Object> fostersPigResult = OBJECT_MAPPER.readValue(
-//                    result.get(doctorBasicInputInfoDtos.get(0).getPigId()).toString(),
-//                    JacksonType.MAP_OF_OBJECT);
-//            return Response.ok(Params.getWithConvert(result,"doctorEventId",a->Long.valueOf(a.toString())));
-//        }catch (Exception e){
-//            log.error("vaccination event create fail, cause:{}", Throwables.getStackTraceAsString(e));
-//            return Response.fail("create.vaccination.fail");
-//        }
-//    }
-
     @Override
     public Response<Long> sowPartWeanEvent(DoctorPartWeanDto doctorPartWeanDto, DoctorBasicInputInfoDto doctorBasicInputInfoDto) {
         try{
@@ -394,6 +374,22 @@ public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteServic
         }catch (Exception e){
             log.error("sow pigs event creates fail, cause:{}", Throwables.getStackTraceAsString(e));
             return Response.fail("create.pigsEvent.fail");
+        }
+    }
+
+    @Override
+    public Response<Boolean> casualPigsEventCreate(List<DoctorBasicInputInfoDto> basics, Map<String, Object> extra) {
+        try{
+            // 批量信息创建
+            Map<String, Object> result = doctorPigEventManager.createCasualPigEvents(basics, extra);
+
+            // pull result info
+            publishEvent(result);
+
+            return Response.ok(Boolean.TRUE);
+        }catch (Exception e){
+            log.error("casual events pigs event create fail, basics:{}, extra:{}, cause:{}",basics, extra, Throwables.getStackTraceAsString(e));
+            return Response.fail("create.casualPigsEvent.fail");
         }
     }
 

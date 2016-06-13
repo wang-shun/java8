@@ -16,8 +16,7 @@ public interface DoctorSowEventCreateService {
     /**
      * 母猪事件信息创建
      * @param doctorBasicInputInfoDto
-     * @param pigEvent
-     * @param params
+     * @param sowInfoDtoJson
      * @return
      */
     Response<Long> sowEventCreate(DoctorBasicInputInfoDto doctorBasicInputInfoDto, String sowInfoDtoJson);
@@ -29,4 +28,19 @@ public interface DoctorSowEventCreateService {
      * @return
      */
     Response<Long> sowEventsCreate(List<DoctorBasicInputInfoDto> dtoList, String sowInfoDtoJson);
+
+    /**
+     * 普通事件信息创建
+     * @param dtoList
+     * @param sowInfoDtoJson
+     * @return
+     */
+    Response<Boolean> casualEventsCreate(List<DoctorBasicInputInfoDto> dtoList, String sowInfoDtoJson);
+
+    /**
+     * Vaccination Medical Consume 事件领用信息 TODO 信息结果录入错误
+     * @param paramsJson
+     * @return
+     */
+//    Response<Boolean> sowPigsEventCreateByConsume(String paramsJson);
 }
