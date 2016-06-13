@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 /**
- * Desc:
+ * Desc: 猪场统计job controller
  * Mail: yangzl@terminus.io
  * author: DreamYoung
  * Date: 16/6/13

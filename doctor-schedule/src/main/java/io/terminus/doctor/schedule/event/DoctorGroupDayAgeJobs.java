@@ -1,6 +1,7 @@
 package io.terminus.doctor.schedule.event;
 
 import com.google.common.base.Throwables;
+import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.service.DoctorGroupWriteService;
 import io.terminus.zookeeper.leader.HostLeader;
 import lombok.extern.slf4j.Slf4j;
@@ -11,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * Desc:
+ * Desc: 猪群日龄job controller
  * Mail: yangzl@terminus.io
  * author: DreamYoung
  * Date: 16/6/13
@@ -44,7 +45,7 @@ public class DoctorGroupDayAgeJobs {
                 return;
             }
             log.info("group incrDayAge job start");
-            doctorGroupWriteService.incrDayAge();
+            RespHelper.or500(doctorGroupWriteService.incrDayAge());
             log.info("group incrDayAge job end");
         } catch (Exception e) {
             log.error("group incrDayAge job failed", Throwables.getStackTraceAsString(e));
