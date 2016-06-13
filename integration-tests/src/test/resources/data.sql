@@ -279,8 +279,8 @@ VALUES
 
 INSERT INTO `doctor_group_tracks` (`id`, `group_id`, `rel_event_id`, `sex`, `quantity`, `boar_qty`, `sow_qty`, `birth_date`, `avg_day_age`, `weight`, `avg_weight`, `price`, `amount`, `customer_id`, `customer_name`, `sale_qty`, `extra`, `creator_id`, `creator_name`, `updator_id`, `updator_name`, `created_at`, `updated_at`)
 VALUES
-	(5, 4, 8, 2, 10, 5, 5, '2016-06-06 14:26:21', 0, 0, 0, 0, 0, NULL, NULL, NULL, '{\"type\":1,\"source\":1}', 1, '22', 1, 'admin', '2016-06-06 14:26:21', '2016-06-07 10:35:45'),
-	(12, 11, 35, 2, 15, 8, 7, '2016-05-30 00:00:00', 9, 1000.0000000000001, 66.66666666666667, 0, 0, NULL, NULL, NULL, NULL, 1, 'admin', 1, 'admin', '2016-06-07 15:00:21', '2016-06-07 15:00:22');
+	(6, 5, 46, 2, 30, 3, 27, '2016-05-21 00:00:00', 18, 400, 13.333333333333334, 7777, 700000, NULL, NULL, NULL, NULL, 1, 'admin', 1, 'admin', '2016-06-07 11:12:13', '2016-06-08 09:31:51'),
+	(13, 12, 41, 2, 15, 8, 7, '2016-05-30 00:00:00', 9, 1000.0000000000001, 66.66666666666667, 0, 0, NULL, NULL, NULL, NULL, 0, NULL, 1, 'admin', '2016-06-07 15:13:24', '2016-06-07 15:13:27');
 
 INSERT INTO `doctor_group_events` (`id`, `org_id`, `org_name`, `farm_id`, `farm_name`, `group_id`, `group_code`, `event_at`, `type`, `name`, `desc`, `barn_id`, `barn_name`, `pig_type`, `quantity`, `weight`, `avg_weight`, `avg_day_age`, `is_auto`, `out_id`, `remark`, `extra`, `created_at`, `creator_id`, `creator_name`)
 VALUES

@@ -5,6 +5,7 @@ import io.terminus.common.model.Response;
 import io.terminus.doctor.event.dto.DoctorGroupCount;
 import io.terminus.doctor.event.dto.DoctorGroupDetail;
 import io.terminus.doctor.event.dto.DoctorGroupSearchDto;
+import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import org.hibernate.validator.constraints.NotEmpty;
@@ -42,6 +43,13 @@ public interface DoctorGroupReadService {
      * @return 猪群详情
      */
     Response<DoctorGroupDetail> findGroupDetailByGroupId(@NotNull(message = "groupId.not.null") Long groupId);
+
+    /**
+     * 查询猪群镜像信息(猪群, 猪群跟踪, 最新event)
+     * @param groupId 猪群id
+     * @return 猪群镜像
+     */
+    Response<DoctorGroupSnapShotInfo> findGroupSnapShotByGroupId(@NotNull(message = "groupId.not.null") Long groupId);
 
     /**
      * 根据查询条件分页查询猪群
