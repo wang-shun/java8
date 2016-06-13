@@ -10,12 +10,9 @@ import io.terminus.doctor.user.model.DoctorUserDataPermission;
 import io.terminus.parana.common.utils.RespHelper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * Desc:
@@ -53,9 +50,23 @@ public class DoctorFarmReadServiceImpl implements DoctorFarmReadService{
     public Response<List<DoctorFarm>> findFarmsByUserId(Long userId) {
         Response<List<DoctorFarm>> response = new Response<>();
         try {
+            response.setResult(doctorFarmDao.findByIds(RespHelper.orServEx(this.findFarmIdsByUserId(userId))));
+        } catch (ServiceException e) {
+            response.setError(e.getMessage());
+        } catch (Exception e) {
+            log.error("find farms by userId failed, cause : {}", Throwables.getStackTraceAsString(e));
+            response.setError("find.farms.by.userId.failed");
+        }
+        return response;
+    }
+
+    @Override
+    public Response<List<Long>> findFarmIdsByUserId(Long userId){
+        Response<List<Long>> response = new Response<>();
+        try {
             DoctorUserDataPermission permission = RespHelper.orServEx(doctorUserDataPermissionReadService.findDataPermissionByUserId(userId));
             if (permission != null) {
-                response.setResult(doctorFarmDao.findByIds(permission.getFarmIdsList()));
+                response.setResult(permission.getFarmIdsList());
             } else {
                 response.setResult(Lists.newArrayList());
             }

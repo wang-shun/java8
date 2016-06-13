@@ -1,18 +1,22 @@
 package io.terminus.doctor.user.service;
 
 import com.google.common.base.Throwables;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.user.dao.DoctorUserDataPermissionDao;
 import io.terminus.doctor.user.model.DoctorUserDataPermission;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
+
+import javax.annotation.PostConstruct;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Desc:
- * Mail: yangzl@terminus.io
- * author: DreamYoung
+ * author: 陈增辉
  * Date: 16/5/18
  */
 @Slf4j
@@ -26,12 +30,24 @@ public class DoctorUserDataPermissionReadServiceImpl implements DoctorUserDataPe
         this.doctorUserDataPermissionDao = doctorUserDataPermissionDao;
     }
 
+    //cache, key = userId, value = permission
+    private LoadingCache<Long, DoctorUserDataPermission> permissionLoadingCache;
+
+    @PostConstruct
+    public void initCache(){
+        permissionLoadingCache = CacheBuilder.newBuilder().expireAfterAccess(5L, TimeUnit.MINUTES).build(new CacheLoader<Long, DoctorUserDataPermission>() {
+            @Override
+            public DoctorUserDataPermission load(Long userId) throws Exception {
+                return doctorUserDataPermissionDao.findByUserId(userId);
+            }
+        });
+    }
+
     @Override
     public Response<DoctorUserDataPermission> findDataPermissionByUserId(Long userId) {
-        //TODO: 记得缓存!
         Response<DoctorUserDataPermission> response = new Response<>();
         try {
-            response.setResult(doctorUserDataPermissionDao.findByUserId(userId));
+            response.setResult(permissionLoadingCache.getUnchecked(userId));
         } catch (Exception e) {
             log.error("find DoctorUserDataPermission failed, cause : {}", Throwables.getStackTraceAsString(e));
             response.setError("find.doctor.user.data.permission");
