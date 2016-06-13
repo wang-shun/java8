@@ -54,9 +54,8 @@ public class DoctorFarmReadServiceImpl implements DoctorFarmReadService{
         Response<List<DoctorFarm>> response = new Response<>();
         try {
             DoctorUserDataPermission permission = RespHelper.orServEx(doctorUserDataPermissionReadService.findDataPermissionByUserId(userId));
-            if (permission != null && permission.getFarmIds() != null) {
-                List<Long> farmIds = Stream.of(permission.getFarmIds().split(",")).map(Long::parseLong).collect(Collectors.toList());
-                response.setResult(doctorFarmDao.findByIds(farmIds));
+            if (permission != null) {
+                response.setResult(doctorFarmDao.findByIds(permission.getFarmIdsList()));
             } else {
                 response.setResult(Lists.newArrayList());
             }
