@@ -189,4 +189,12 @@ public interface DoctorPigEventWriteService {
      * @return
      */
     Response<Boolean> sowPigsEventCreate(List<DoctorBasicInputInfoDto> basics, Map<String,Object> extra);
+
+    /**
+     * casual 事件信息 创建
+     * @param basics
+     * @param extra
+     * @return
+     */
+    Response<Boolean> casualPigsEventCreate(List<DoctorBasicInputInfoDto> basics, Map<String,Object> extra);
 }

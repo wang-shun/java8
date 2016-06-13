@@ -139,6 +139,7 @@ public class DoctorPigEventManager {
      * @param extra
      * @return 通过PigId 获取对应的返回结果信息
      */
+    @Transactional
     public Map<String, Object> createCasualPigEvents(List<DoctorBasicInputInfoDto> basicList, Map<String,Object> extra){
         Map<String,Object> result = Maps.newHashMap();
         basicList.forEach(basic->{
@@ -163,7 +164,7 @@ public class DoctorPigEventManager {
 
     /**
      * 批量创建Pig事件信息
-     * @param basicInputInfoDto
+     * @param basicInputInfoDtos
      * @param extra
      * @return
      */

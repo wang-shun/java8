@@ -1,6 +1,7 @@
 package io.terminus.doctor.common.event;
 
 import io.terminus.common.utils.JsonMapper;
+import io.terminus.doctor.common.enums.DataEventType;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -23,6 +24,9 @@ public class DataEvent {
 
     private Long eventType;     // 事件类型
 
+    /**
+     * @see DataEventType
+     */
     private String content;     //json 数据类型
 
     public static <T> DataEvent make(Long eventType, T content){

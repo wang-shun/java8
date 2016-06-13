@@ -43,6 +43,7 @@ import utils.HttpPostRequest;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -120,10 +121,14 @@ public class DoctorPigCreateEventsTest extends BaseFrontWebTest{
 
         // 录入母猪信息测试内容
         boarEntryEventCreate();
+        boarEntryEventCreate();
+        boarEntryEventCreate();
+        boarEntryEventCreate();
 
 //        chgLocationCasualEventCreate(pigId);
 
-        createRemovalPigEventContent(pigId);
+//        createRemovalPigEventContent(pigId);
+        createRemovalPigEventsContent(Arrays.asList(1l, 2l, 3l, 4l));
 
 //        createDiseaseVaccinationEvent(pigId);
 
@@ -132,6 +137,25 @@ public class DoctorPigCreateEventsTest extends BaseFrontWebTest{
 
         printCurrentState();
 //        testCurrentSowInputStatus(pigId);
+    }
+
+    /**
+     * 批量猪
+     * @param pigIds
+     */
+    public void createRemovalPigEventsContent(List<Long> pigIds){
+        String url = basicUrl + "/createCasualEvents";
+
+        HttpEntity httpEntity = HttpPostRequest.formRequest()
+                .param("pigIds", pigIds).param("farmId", 12345l)
+                .param("pigEvent", PigEvent.REMOVAL.getKey())
+                .param("doctorRemovalDtoJson", DoctorRemovalDto.builder()
+                        .chgTypeId(1l).chgTypeName("chgTypeName").chgReasonId(1l).chgReasonName("chgReasonName").toBarnId(1l)
+                        .weight(100d).sum(100d).price(100d).customerId(1l).remark("remark")
+                        .build())
+                .httpEntity();
+        Boolean result = this.restTemplate.postForObject(url, httpEntity, Boolean.class);
+        System.out.println(result);
     }
 
     public void createSemenEvent(Long pigId){
