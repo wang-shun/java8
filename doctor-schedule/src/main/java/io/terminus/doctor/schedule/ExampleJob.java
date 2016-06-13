@@ -2,9 +2,7 @@ package io.terminus.doctor.schedule;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Configurable;
-import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Component;
 
 /**
  * Desc:
@@ -13,7 +11,7 @@ import org.springframework.stereotype.Component;
  * Date: 16/4/20.
  */
 @Slf4j
-@Component
+//@Component
 @Configurable
 public class ExampleJob {
     @Scheduled(cron = "0/1  * * * * ?")
