@@ -46,4 +46,7 @@
     <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.event.service.DoctorRevertLogReadService" ref="doctorRevertLogReadServiceImpl"/>
     <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.event.service.DoctorRevertLogWriteService" ref="doctorRevertLogWriteServiceImpl"/>
 
+    <!--stat service-->
+    <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.event.service.DoctorPigTypeStatisticReadService" ref="doctorPigTypeStatisticReadServiceImpl"/>
+
 </beans>
