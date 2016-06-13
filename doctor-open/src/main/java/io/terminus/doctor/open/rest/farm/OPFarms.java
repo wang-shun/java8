@@ -1,13 +1,9 @@
 package io.terminus.doctor.open.rest.farm;
 
-import com.google.common.collect.Lists;
 import io.terminus.doctor.open.dto.DoctorBasicDto;
 import io.terminus.doctor.open.dto.DoctorFarmBasicDto;
-import io.terminus.doctor.open.dto.DoctorStatisticDto;
 import io.terminus.doctor.open.rest.farm.service.DoctorStatisticReadService;
 import io.terminus.doctor.open.util.OPRespHelper;
-import io.terminus.doctor.user.service.DoctorFarmReadService;
-import io.terminus.doctor.user.service.DoctorOrgReadService;
 import io.terminus.pampas.common.UserUtil;
 import io.terminus.pampas.openplatform.annotations.OpenBean;
 import io.terminus.pampas.openplatform.annotations.OpenMethod;
@@ -15,7 +11,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.validation.constraints.NotNull;
-import java.util.List;
 
 /**
  * Desc:
@@ -28,14 +23,11 @@ import java.util.List;
 @SuppressWarnings("unused")
 public class OPFarms {
 
-    private final DoctorFarmReadService doctorFarmReadService;
-    private final DoctorOrgReadService doctorOrgReadService;
-
+    private final DoctorStatisticReadService doctorStatisticReadService;
 
     @Autowired
-    private OPFarms(DoctorFarmReadService doctorFarmReadService, DoctorOrgReadService doctorOrgReadService) {
-        this.doctorFarmReadService = doctorFarmReadService;
-        this.doctorOrgReadService = doctorOrgReadService;
+    private OPFarms(DoctorStatisticReadService doctorStatisticReadService) {
+        this.doctorStatisticReadService = doctorStatisticReadService;
     }
 
     /**
@@ -46,10 +38,7 @@ public class OPFarms {
      */
     @OpenMethod(key = "get.farm.info", paramNames = "farmId")
     public DoctorFarmBasicDto getFarmInfo(@NotNull(message = "farmId.not.null") Long farmId) {
-        return new DoctorFarmBasicDto(
-                OPRespHelper.orOPEx(doctorFarmReadService.findFarmById(1L)),
-                mockFarmStats()
-        );
+        return OPRespHelper.orOPEx(doctorStatisticReadService.getFarmStatistic(farmId));
     }
 
     /**
@@ -59,39 +48,6 @@ public class OPFarms {
      */
     @OpenMethod(key = "get.company.info")
     public DoctorBasicDto getCompanyInfo() {
-        return new DoctorBasicDto(
-                        OPRespHelper.orOPEx(doctorOrgReadService.findOrgByUserId(UserUtil.getUserId())),
-                        mockOrgStats(),
-                Lists.newArrayList(
-                        new DoctorFarmBasicDto(
-                                OPRespHelper.orOPEx(doctorFarmReadService.findFarmById(1L)),
-                                mockFarmStats()
-                        ),
-                        new DoctorFarmBasicDto(
-                                OPRespHelper.orOPEx(doctorFarmReadService.findFarmById(2L)),
-                                mockFarmStats()
-                        )
-                )
-        );
-    }
-
-    private List<DoctorStatisticDto> mockOrgStats() {
-        return Lists.newArrayList(
-                new DoctorStatisticDto(DoctorStatisticDto.PigType.SOW.getDesc(), 100),
-                new DoctorStatisticDto(DoctorStatisticDto.PigType.FARROW_PIGLET.getDesc(), 200),
-                new DoctorStatisticDto(DoctorStatisticDto.PigType.NURSERY_PIGLET.getDesc(), 300),
-                new DoctorStatisticDto(DoctorStatisticDto.PigType.FATTEN_PIG.getDesc(), 400),
-                new DoctorStatisticDto(DoctorStatisticDto.PigType.BREEDING_PIG.getDesc(), 50)
-        );
-    }
-
-    private List<DoctorStatisticDto> mockFarmStats() {
-        return Lists.newArrayList(
-                new DoctorStatisticDto(DoctorStatisticDto.PigType.SOW.getCutDesc(), 100),
-                new DoctorStatisticDto(DoctorStatisticDto.PigType.FARROW_PIGLET.getCutDesc(), 200),
-                new DoctorStatisticDto(DoctorStatisticDto.PigType.NURSERY_PIGLET.getCutDesc(), 300),
-                new DoctorStatisticDto(DoctorStatisticDto.PigType.FATTEN_PIG.getCutDesc(), 400),
-                new DoctorStatisticDto(DoctorStatisticDto.PigType.BREEDING_PIG.getCutDesc(), 50)
-        );
+        return OPRespHelper.orOPEx(doctorStatisticReadService.getOrgStatistic(UserUtil.getUserId()));
     }
 }
