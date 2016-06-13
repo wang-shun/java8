@@ -26,12 +26,12 @@ import java.util.Objects;
 @RequestMapping("/api/user/service")
 public class ServiceReviews {
     private final DoctorServiceReviewReadService doctorServiceReviewReadService;
-
     private final DoctorServiceReviewWriteService doctorServiceReviewWriteService;
     private final DoctorServiceReviewService doctorServiceReviewService;
     private final DoctorOrgReadService doctorOrgReadService;
     private final DoctorUserReadService doctorUserReadService;
     private final DoctorServiceStatusReadService doctorServiceStatusReadService;
+    private final PrimaryUserReadService primaryUserReadService;
 
     @Autowired
     public ServiceReviews(DoctorServiceReviewReadService doctorServiceReviewReadService,
@@ -39,13 +39,15 @@ public class ServiceReviews {
                          DoctorUserReadService doctorUserReadService,
                          DoctorServiceReviewService doctorServiceReviewService,
                          DoctorOrgReadService doctorOrgReadService,
-                          DoctorServiceStatusReadService doctorServiceStatusReadService) {
+                         DoctorServiceStatusReadService doctorServiceStatusReadService,
+                         PrimaryUserReadService primaryUserReadService) {
         this.doctorServiceReviewReadService = doctorServiceReviewReadService;
         this.doctorServiceReviewWriteService = doctorServiceReviewWriteService;
         this.doctorUserReadService = doctorUserReadService;
         this.doctorServiceReviewService = doctorServiceReviewService;
         this.doctorOrgReadService = doctorOrgReadService;
         this.doctorServiceStatusReadService = doctorServiceStatusReadService;
+        this.primaryUserReadService = primaryUserReadService;
     }
 
     /**
@@ -55,7 +57,19 @@ public class ServiceReviews {
     @RequestMapping(value = "/getUserServiceStatus", method = RequestMethod.GET)
     @ResponseBody
     public DoctorServiceStatus getUserServiceStatus() {
-        return RespHelper.or500(doctorServiceStatusReadService.findByUserId(UserUtil.getUserId()));
+        BaseUser baseUser = UserUtil.getCurrentUser();
+        Long primaryUserId; //主账号id
+
+        if(Objects.equals(UserType.FARM_ADMIN_PRIMARY.value(), baseUser.getType())){
+            //当前用户是主账号,则直接查询
+            primaryUserId = baseUser.getId();
+        }else if(Objects.equals(UserType.FARM_SUB.value(), baseUser.getType())){
+            //当前用户是子账号, 找他的主账号
+            primaryUserId = RespHelper.or500(primaryUserReadService.findSubByUserId(baseUser.getId())).getParentUserId();
+        }else{
+            throw new JsonResponseException("authorize.fail");
+        }
+        return RespHelper.or500(doctorServiceStatusReadService.findByUserId(primaryUserId));
     }
 
     /**

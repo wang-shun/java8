@@ -32,7 +32,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import javax.validation.Valid;
 import java.util.List;
 import java.util.Objects;
-import java.util.function.Consumer;
 
 /**
  * Desc: 用户相关
@@ -55,6 +54,7 @@ public class OPDoctorUsers {
     private final AclLoader aclLoader;
     private final PermissionHelper permissionHelper;
     private final DoctorServiceStatusReadService doctorServiceStatusReadService;
+    private final PrimaryUserReadService primaryUserReadService;
 
     @Autowired
     public OPDoctorUsers(DoctorServiceReviewReadService doctorServiceReviewReadService,
@@ -65,7 +65,8 @@ public class OPDoctorUsers {
                          DoctorServiceStatusReadService doctorServiceStatusReadService,
                          DoctorMobileMenuReadService doctorMobileMenuReadService,
                          AclLoader aclLoader,
-                         PermissionHelper permissionHelper) {
+                         PermissionHelper permissionHelper,
+                         PrimaryUserReadService primaryUserReadService) {
         this.doctorServiceReviewReadService = doctorServiceReviewReadService;
         this.doctorServiceReviewWriteService = doctorServiceReviewWriteService;
         this.doctorUserReadService = doctorUserReadService;
@@ -75,6 +76,7 @@ public class OPDoctorUsers {
         this.doctorMobileMenuReadService = doctorMobileMenuReadService;
         this.aclLoader = aclLoader;
         this.permissionHelper = permissionHelper;
+        this.primaryUserReadService = primaryUserReadService;
     }
 
     /**
@@ -83,36 +85,44 @@ public class OPDoctorUsers {
      */
     @OpenMethod(key = "get.user.service.status")
     public DoctorServiceReviewDto getUserServiceStatus() {
-        Long userId = UserUtil.getUserId();
+        BaseUser baseUser = UserUtil.getCurrentUser();
+        Long primaryUserId; //主账号id
+
+        if(Objects.equals(UserType.FARM_ADMIN_PRIMARY.value(), baseUser.getType())){
+            //当前用户是主账号,则直接查询
+            primaryUserId = baseUser.getId();
+        }else if(Objects.equals(UserType.FARM_SUB.value(), baseUser.getType())){
+            //当前用户是子账号, 找他的主账号
+            primaryUserId = OPRespHelper.orOPEx(primaryUserReadService.findSubByUserId(baseUser.getId())).getParentUserId();
+        }else{
+            throw new JsonResponseException("authorize.fail");
+        }
         DoctorServiceReviewDto dto = new DoctorServiceReviewDto();
-        dto.setUserId(userId);
-        DoctorServiceStatus serviceStatus = OPRespHelper.orOPEx(doctorServiceStatusReadService.findByUserId(userId));
-        OPRespHelper.orOPEx(doctorServiceReviewReadService.findServiceReviewsByUserId(userId)).forEach(new Consumer<DoctorServiceReview>() {
-            @Override
-            public void accept(DoctorServiceReview review) {
-                ServiceReviewOpenDto innerDto = BeanMapper.map(review, ServiceReviewOpenDto.class);
-                switch (DoctorServiceReview.Type.from(review.getType())) {
-                    case PIG_DOCTOR:
-                        innerDto.setServiceStatus(serviceStatus.getPigdoctorStatus());
-                        innerDto.setReason(serviceStatus.getPigdoctorReason());
-                        dto.setPigDoctor(innerDto);
-                        break;
-                    case PIGMALL:
-                        innerDto.setServiceStatus(serviceStatus.getPigmallStatus());
-                        innerDto.setReason(serviceStatus.getPigmallReason());
-                        dto.setPigmall(innerDto);
-                        break;
-                    case NEVEREST:
-                        innerDto.setServiceStatus(serviceStatus.getNeverestStatus());
-                        innerDto.setReason(serviceStatus.getNeverestReason());
-                        dto.setNeverest(innerDto);
-                        break;
-                    case PIG_TRADE:
-                        innerDto.setServiceStatus(serviceStatus.getPigtradeStatus());
-                        innerDto.setReason(serviceStatus.getPigtradeReason());
-                        dto.setPigTrade(innerDto);
-                        break;
-                }
+        dto.setUserId(primaryUserId);
+        DoctorServiceStatus serviceStatus = OPRespHelper.orOPEx(doctorServiceStatusReadService.findByUserId(primaryUserId));
+        OPRespHelper.orOPEx(doctorServiceReviewReadService.findServiceReviewsByUserId(primaryUserId)).forEach(review -> {
+            ServiceReviewOpenDto innerDto = BeanMapper.map(review, ServiceReviewOpenDto.class);
+            switch (DoctorServiceReview.Type.from(review.getType())) {
+                case PIG_DOCTOR:
+                    innerDto.setServiceStatus(serviceStatus.getPigdoctorStatus());
+                    innerDto.setReason(serviceStatus.getPigdoctorReason());
+                    dto.setPigDoctor(innerDto);
+                    break;
+                case PIGMALL:
+                    innerDto.setServiceStatus(serviceStatus.getPigmallStatus());
+                    innerDto.setReason(serviceStatus.getPigmallReason());
+                    dto.setPigmall(innerDto);
+                    break;
+                case NEVEREST:
+                    innerDto.setServiceStatus(serviceStatus.getNeverestStatus());
+                    innerDto.setReason(serviceStatus.getNeverestReason());
+                    dto.setNeverest(innerDto);
+                    break;
+                case PIG_TRADE:
+                    innerDto.setServiceStatus(serviceStatus.getPigtradeStatus());
+                    innerDto.setReason(serviceStatus.getPigtradeReason());
+                    dto.setPigTrade(innerDto);
+                    break;
             }
         });
         return dto;
