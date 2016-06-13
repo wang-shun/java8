@@ -17,6 +17,7 @@ import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
 import io.terminus.doctor.event.dto.DoctorGroupCount;
 import io.terminus.doctor.event.dto.DoctorGroupDetail;
 import io.terminus.doctor.event.dto.DoctorGroupSearchDto;
+import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
 import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
@@ -85,6 +86,21 @@ public class DoctorGroupReadServiceImpl implements DoctorGroupReadService {
             return Response.fail(e.getMessage());
         } catch (Exception e) {
             log.error("find group detail by groupId failed, groupId:{}, cause:{}", groupId, Throwables.getStackTraceAsString(e));
+            return Response.fail("group.find.fail");
+        }
+    }
+
+    @Override
+    public Response<DoctorGroupSnapShotInfo> findGroupSnapShotByGroupId(Long groupId) {
+        try {
+            DoctorGroup group = checkGroupExist(groupId);
+            DoctorGroupTrack groupTrack = checkGroupTrackExist(groupId);
+            DoctorGroupEvent event = doctorGroupEventDao.findById(groupTrack.getRelEventId());
+            return Response.ok(new DoctorGroupSnapShotInfo(group, event, groupTrack));
+        } catch (ServiceException e) {
+            return Response.fail(e.getMessage());
+        } catch (Exception e) {
+            log.error("find group snapshot by groupId failed, groupId:{}, cause:{}", groupId, Throwables.getStackTraceAsString(e));
             return Response.fail("group.find.fail");
         }
     }

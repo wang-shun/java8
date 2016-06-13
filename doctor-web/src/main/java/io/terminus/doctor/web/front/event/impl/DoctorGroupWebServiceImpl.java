@@ -287,6 +287,9 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
 
     //获取职工用户的名称
     private String getStaffUserName(Long staffId) {
+        if (staffId == null) {
+            return null;
+        }
         DoctorStaff staff = RespHelper.or500(doctorStaffReadService.findStaffById(staffId));
         User user = RespHelper.or500(userReadService.findById(staff.getUserId()));
         return user.getName();

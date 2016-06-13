@@ -36,15 +36,15 @@ public abstract class DoctorAbstractEventFlowHandler extends HandlerAware {
 
     private static final ObjectMapper OBJECT_MAPPER = JsonMapper.JSON_NON_DEFAULT_MAPPER.getMapper();
 
-    private final DoctorPigDao doctorPigDao;
+    protected final DoctorPigDao doctorPigDao;
 
-    private final DoctorPigEventDao doctorPigEventDao;
+    protected final DoctorPigEventDao doctorPigEventDao;
 
-    private final DoctorPigTrackDao doctorPigTrackDao;
+    protected final DoctorPigTrackDao doctorPigTrackDao;
 
-    private final DoctorPigSnapshotDao doctorPigSnapshotDao;
+    protected final DoctorPigSnapshotDao doctorPigSnapshotDao;
 
-    private final DoctorRevertLogDao doctorRevertLogDao;
+    protected final DoctorRevertLogDao doctorRevertLogDao;
 
     @Autowired
     public DoctorAbstractEventFlowHandler(DoctorPigDao doctorPigDao,
@@ -86,6 +86,8 @@ public abstract class DoctorAbstractEventFlowHandler extends HandlerAware {
             doctorPigSnapshot.setPigInfoMap(ImmutableMap.of(DoctorPigSnapshotConstants.PIG_TRACK, JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(doctorPigTrack)));
             doctorPigSnapshotDao.create(doctorPigSnapshot);
 
+            specialFlowHandler(execution, doctorBasicInputInfoDto, extraInfo, context);
+
             // 当前事件影响的Id 方式
             flowDataMap.put("createEventResult",
                     JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(
@@ -108,6 +110,17 @@ public abstract class DoctorAbstractEventFlowHandler extends HandlerAware {
      */
     public abstract DoctorPigTrack updateDoctorPigTrackInfo(Execution execution, DoctorPigTrack doctorPigTrack,
                                                             DoctorBasicInputInfoDto basic, Map<String,Object> extra, Map<String,Object> context);
+
+    /**
+     * 不同子类调用方式
+     * @param execution
+     * @param basic
+     * @param extra
+     * @param context
+     */
+    public void specialFlowHandler(Execution execution, DoctorBasicInputInfoDto basic, Map<String,Object> extra, Map<String,Object> context){
+        return;
+    }
 
     public DoctorPigEvent buildAllPigDoctorEvent(DoctorBasicInputInfoDto basic, Map<String,Object> extra){
         DoctorPigEvent doctorPigEvent = DoctorPigEvent.builder()
