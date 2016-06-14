@@ -112,6 +112,12 @@
                     #{i}
                 </foreach>
             </if>
+            <if test="statuses != null &amp;&amp; statuses.size() > 0">
+                AND `status` IN
+                <foreach collection="statuses" item="i" open="(" separator="," close=")">
+                    #{i}
+                </foreach>
+            </if>
         </where>
     </sql>
 
@@ -131,7 +137,7 @@
         SELECT <include refid="cols_all"/>
         FROM <include refid="tb"/>
         <include refid="criteria"/>
-        order by `id` desc
+        order by `status` asc, `id` desc -- 未读排在前面, 其次最新
         LIMIT #{offset}, #{limit}
     </select>
 
