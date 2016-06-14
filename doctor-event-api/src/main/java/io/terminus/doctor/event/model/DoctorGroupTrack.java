@@ -5,8 +5,10 @@ import com.google.common.base.Objects;
 import com.google.common.base.Strings;
 import io.terminus.common.utils.JsonMapper;
 import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.SneakyThrows;
 import lombok.experimental.Builder;
@@ -203,6 +205,8 @@ public class DoctorGroupTrack implements Serializable {
      */
     @Data
     @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
     public static class Extra {
         private Date newAt;          //新建猪群时间
         private Date moveInAt;       //转入猪群时间
