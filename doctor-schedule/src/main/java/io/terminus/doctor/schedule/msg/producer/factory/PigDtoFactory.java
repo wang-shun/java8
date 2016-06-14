@@ -59,8 +59,8 @@ public class PigDtoFactory {
         // 获取配种日期
         try {
             // @see DoctorMatingDto
-            return (Date) JsonMapper.JSON_NON_DEFAULT_MAPPER.getMapper()
-                    .readValue(pigDto.getExtraTrack(), Map.class).get("matingDate");
+            return new Date((Long) JsonMapper.JSON_NON_DEFAULT_MAPPER.getMapper()
+                    .readValue(pigDto.getExtraTrack(), Map.class).get("matingDate"));
         } catch (Exception e) {
             log.error("[SowBirthDateProducer] get birth date failed, cause by {}", Throwables.getStackTraceAsString(e));
         }
@@ -75,12 +75,12 @@ public class PigDtoFactory {
         try{
             Map map = JsonMapper.JSON_NON_DEFAULT_MAPPER.getMapper().readValue(pigDto.getExtraTrack(), Map.class);
             // @see DoctorMatingDto
-            Date date = (Date) map.get("judgePregDate");
+            Date date = new Date((Long) map.get("judgePregDate"));
             if (date != null) {
                 return date;
             } else {
                 // 获取配种日期
-                date = (Date) map.get("matingDate");
+                date = new Date((Long) map.get("matingDate"));
                 if (date != null) {
                     // 配种日期 + 3 个月返回
                     return new DateTime(date).plusMonths(3).toDate();

@@ -139,12 +139,12 @@ public class SowBirthDateProducer extends AbstractProducer {
         // 获取预产期
         try{
             // @see DoctorMatingDto
-            Date date = (Date) MAPPER.readValue(pigDto.getExtraTrack(), Map.class).get("judgePregDate");
+            Date date = new Date((Long) MAPPER.readValue(pigDto.getExtraTrack(), Map.class).get("judgePregDate"));
             if (date != null) {
                 return new DateTime(date);
             } else {
                 // 获取配种日期
-                date = (Date) MAPPER.readValue(pigDto.getExtraTrack(), Map.class).get("matingDate");
+                date = new Date((Long) MAPPER.readValue(pigDto.getExtraTrack(), Map.class).get("matingDate"));
                 if (date != null) {
                     // 配种日期 + 3 个月返回
                     return new DateTime(date).plusMonths(3);
