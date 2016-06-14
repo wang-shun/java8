@@ -66,7 +66,7 @@ public class DoctorPigSnapshot implements Serializable{
     public void setPigInfoMap(Map<String,Object> pigInfoMap){
         this.pigInfoMap = pigInfoMap;
         if(isNull(pigInfoMap) || Iterables.isEmpty(pigInfoMap.entrySet())){
-            this.pigInfo = null;
+            this.pigInfo = "";
         }else {
             this.pigInfo = OBJECT_MAPPER.writeValueAsString(pigInfoMap);
         }

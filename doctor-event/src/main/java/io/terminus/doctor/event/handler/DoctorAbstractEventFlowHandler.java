@@ -75,6 +75,7 @@ public abstract class DoctorAbstractEventFlowHandler extends HandlerAware {
 
             // update track info
             DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(doctorPigEvent.getPigId());
+            String currentPigTrackSnapShot = JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(doctorPigTrack);
             DoctorPigTrack refreshPigTrack = updateDoctorPigTrackInfo(execution, doctorPigTrack, doctorBasicInputInfoDto, extraInfo, context);
             doctorPigTrackDao.update(refreshPigTrack);
 
@@ -83,7 +84,7 @@ public abstract class DoctorAbstractEventFlowHandler extends HandlerAware {
             DoctorPigSnapshot doctorPigSnapshot = DoctorPigSnapshot.builder()
                     .pigId(doctorPigEvent.getId()).farmId(doctorPigEvent.getFarmId()).orgId(doctorPigEvent.getOrgId()).eventId(doctorPigEvent.getId())
                     .build();
-            doctorPigSnapshot.setPigInfoMap(ImmutableMap.of(DoctorPigSnapshotConstants.PIG_TRACK, JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(doctorPigTrack)));
+            doctorPigSnapshot.setPigInfoMap(ImmutableMap.of(DoctorPigSnapshotConstants.PIG_TRACK, currentPigTrackSnapShot));
             doctorPigSnapshotDao.create(doctorPigSnapshot);
 
             specialFlowHandler(execution, doctorBasicInputInfoDto, extraInfo, context);

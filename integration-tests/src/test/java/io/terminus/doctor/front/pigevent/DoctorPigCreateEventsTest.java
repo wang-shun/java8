@@ -1,6 +1,7 @@
 package io.terminus.doctor.front.pigevent;
 
 import com.google.api.client.util.Lists;
+import com.google.common.collect.ImmutableMap;
 import configuration.front.FrontWebConfiguration;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.event.dao.DoctorPigDao;
@@ -42,6 +43,7 @@ import utils.HttpPostRequest;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -83,8 +85,9 @@ public class DoctorPigCreateEventsTest extends BaseFrontWebTest{
     /**
      * 测试母猪事件信息
      */
+    @Test
     public void testPigEventPagingInfo(){
-
+        System.out.println("test condition");
     }
 
     /**
@@ -118,22 +121,45 @@ public class DoctorPigCreateEventsTest extends BaseFrontWebTest{
         Long pigId = 1l;
 
         // 录入母猪信息测试内容
-        sowEntryEventCreate();
+        boarEntryEventCreate();
+        boarEntryEventCreate();
+        boarEntryEventCreate();
+        boarEntryEventCreate();
 
 //        chgLocationCasualEventCreate(pigId);
 
 //        createRemovalPigEventContent(pigId);
+        createRemovalPigEventsContent(Arrays.asList(1l, 2l, 3l, 4l));
 
 //        createDiseaseVaccinationEvent(pigId);
 
-        createConditionEvent(pigId);
-        createSemseEvent(pigId);
+//        createConditionEvent(pigId);
+//        createSemseEvent(pigId);
 
         printCurrentState();
-        testCurrentSowInputStatus(pigId);
+//        testCurrentSowInputStatus(pigId);
     }
 
-    public void createSemseEvent(Long pigId){
+    /**
+     * 批量猪
+     * @param pigIds
+     */
+    public void createRemovalPigEventsContent(List<Long> pigIds){
+        String url = basicUrl + "/createCasualEvents";
+
+        HttpEntity httpEntity = HttpPostRequest.formRequest()
+                .param("pigIds", pigIds).param("farmId", 12345l)
+                .param("pigEvent", PigEvent.REMOVAL.getKey())
+                .param("doctorRemovalDtoJson", DoctorRemovalDto.builder()
+                        .chgTypeId(1l).chgTypeName("chgTypeName").chgReasonId(1l).chgReasonName("chgReasonName").toBarnId(1l)
+                        .weight(100d).sum(100d).price(100d).customerId(1l).remark("remark")
+                        .build())
+                .httpEntity();
+        Boolean result = this.restTemplate.postForObject(url, httpEntity, Boolean.class);
+        System.out.println(result);
+    }
+
+    public void createSemenEvent(Long pigId){
 
         String url = basicUrl + "/createSemen";
 
@@ -221,6 +247,33 @@ public class DoctorPigCreateEventsTest extends BaseFrontWebTest{
 
         Long result = this.restTemplate.postForObject(url, httpEntity, Long.class);
         System.out.println(result);
+    }
+
+    /**
+     * 测试母猪回滚事件信息
+     */
+    @Test
+    public void testRollBackEventCreateTest(){
+
+        String url = "http://localhost:" + this.port + "/api/doctor/events/pig/rollBackPigEvent";
+
+        Long pigId = 1l;
+        sowEntryEventCreate();
+        Long boarId = 2l;
+        sowEntryEventCreate();
+        sowMatingEventCreate(pigId, boarId);
+        testPregCheckResultEventCreate(pigId, PregCheckResult.YANG);
+        testToPregEventCreate(pigId);
+
+        // test rollback info
+        HttpEntity httpEntity = HttpPostRequest.formRequest()
+                .param("pigEventId",5l).param("revertPigType",1)
+                .httpEntity();
+
+        Long result = this.restTemplate.postForObject(url, httpEntity, Long.class);
+        System.out.println(result);
+
+        printCurrentState();
     }
 
     /**
@@ -438,6 +491,19 @@ public class DoctorPigCreateEventsTest extends BaseFrontWebTest{
 
     }
 
+    private Long boarEntryEventCreate(){
+        String url = basicUrl + "/createEntryInfo";
+        DoctorFarmEntryDto doctorFarmEntryDto = buildFarmEntryDto();
+        doctorFarmEntryDto.setPigType(DoctorPig.PIG_TYPE.BOAR.getKey());
+
+        HttpEntity httpEntity = HttpPostRequest.formRequest().param("farmId", 12345l).
+                param("doctorFarmEntryJson",
+                        JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(doctorFarmEntryDto))
+                .httpEntity();
+        Long result = this.restTemplate.postForObject(url, httpEntity, Long.class);
+        return result;
+    }
+
     private Long sowEntryEventCreate(){
         String url = basicUrl + "/createEntryInfo";
         DoctorFarmEntryDto doctorFarmEntryDto = buildFarmEntryDto();
@@ -456,9 +522,11 @@ public class DoctorPigCreateEventsTest extends BaseFrontWebTest{
      */
     private void printCurrentState(){
         System.out.println("doctor pig ******************************************************");
-        System.out.println(JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(doctorPigDao.listAll()));
+        System.out.println(JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(doctorPigDao.list(ImmutableMap.of("isRemoval",1))));
+        System.out.println(JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(doctorPigDao.list(ImmutableMap.of("isRemoval",0))));
         System.out.println("doctor pig track******************************************************");
-        System.out.println(JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(doctorPigTrackDao.listAll()));
+        System.out.println(JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(doctorPigTrackDao.list(ImmutableMap.of("isRemoval",1))));
+        System.out.println(JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(doctorPigTrackDao.list(ImmutableMap.of("isRemoval",0))));
         System.out.println("doctor pig snap shot content******************************************************");
         System.out.println(JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(doctorPigSnapshotDao.listAll()));
         System.out.println("doctor pig event dao ******************************************************");

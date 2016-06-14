@@ -49,6 +49,10 @@
             <artifactId>spring-boot-starter-redis</artifactId>
         </dependency>
         <dependency>
+            <groupId>io.terminus.boot</groupId>
+            <artifactId>spring-boot-starter-zookeeper</artifactId>
+        </dependency>
+        <dependency>
             <groupId>com.github.sgroschupf</groupId>
             <artifactId>zkclient</artifactId>
         </dependency>

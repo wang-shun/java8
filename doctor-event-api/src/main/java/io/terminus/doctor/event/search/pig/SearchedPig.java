@@ -3,6 +3,7 @@ package io.terminus.doctor.event.search.pig;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.experimental.Builder;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -17,6 +18,7 @@ import java.util.Date;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 public class SearchedPig implements Serializable {
     private static final long serialVersionUID = 7185851187242120950L;
     /**

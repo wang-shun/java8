@@ -1,6 +1,7 @@
 debug: true
 logging:
-  level.*: TRACE
+  level.*: INFO
+  
 spring:
   datasource:
     driver-class-name: org.h2.Driver

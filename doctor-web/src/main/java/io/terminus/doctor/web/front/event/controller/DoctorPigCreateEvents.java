@@ -39,6 +39,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkState;
 import static java.util.Objects.isNull;
@@ -189,8 +190,30 @@ public class DoctorPigCreateEvents {
         }
     }
 
+    @RequestMapping(value = "/createCasualEvents", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public Boolean createCasualEvents(@RequestParam("farmId") Long farmId,
+                                      @RequestParam("pigIds") String pigIds,
+                                      @RequestParam("pigEvent") Integer pigEvent,
+                                      @RequestParam("doctorRemovalDtoJson") String doctorCasualDtoJson){
+        return RespHelper.or500(doctorSowEventCreateService.casualEventsCreate(
+                buildBasicInputPigDtoContent(farmId, pigIds, PigEvent.from(pigEvent)),
+                doctorCasualDtoJson
+        ));
+    }
+
+    private List<DoctorBasicInputInfoDto> buildBasicInputPigDtoContent(Long farmId, String pigIds, PigEvent pigEvent){
+        try{
+            List<Long> pigIdsList = OBJECT_MAPPER.readValue(pigIds, JacksonType.LIST_OF_LONG);
+            return pigIdsList.stream().map(id -> buildBasicInputInfoDto(farmId, id, pigEvent)).collect(Collectors.toList());
+        }catch (Exception e){
+            log.error("build basic input pig dto fail, farmId:{}, pigIds:{}, cause:{}", Throwables.getStackTraceAsString(e));
+            throw new JsonResponseException("pigIds.basicBuilder.fail");
+        }
+    }
+
     /**
-     *
+     * 拼窝事件， 获取被拼窝母猪信息
      * @return
      */
     private List<DoctorBasicInputInfoDto> buildBasicInputPigDtoContent(Long farmId, Long pigId, String fosterJson){
@@ -202,7 +225,7 @@ public class DoctorPigCreateEvents {
             return basics;
         }catch (Exception e){
             log.error("foster data build error fail, cause:{}", Throwables.getStackTraceAsString(e));
-            throw new JsonResponseException("foster builder error");
+            throw new JsonResponseException("foster.builder.error");
         }
     }
 
@@ -261,6 +284,5 @@ public class DoctorPigCreateEvents {
             log.error("build basic input info dto fail, cause:{}", Throwables.getStackTraceAsString(e));
             throw new JsonResponseException("build.basicInputInfo.error");
         }
-
     }
 }
