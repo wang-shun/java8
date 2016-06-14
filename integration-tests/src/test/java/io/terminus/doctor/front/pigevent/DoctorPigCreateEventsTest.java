@@ -85,8 +85,9 @@ public class DoctorPigCreateEventsTest extends BaseFrontWebTest{
     /**
      * 测试母猪事件信息
      */
+    @Test
     public void testPigEventPagingInfo(){
-
+        System.out.println("test condition");
     }
 
     /**
@@ -246,6 +247,33 @@ public class DoctorPigCreateEventsTest extends BaseFrontWebTest{
 
         Long result = this.restTemplate.postForObject(url, httpEntity, Long.class);
         System.out.println(result);
+    }
+
+    /**
+     * 测试母猪回滚事件信息
+     */
+    @Test
+    public void testRollBackEventCreateTest(){
+
+        String url = "http://localhost:" + this.port + "/api/doctor/events/pig/rollBackPigEvent";
+
+        Long pigId = 1l;
+        sowEntryEventCreate();
+        Long boarId = 2l;
+        sowEntryEventCreate();
+        sowMatingEventCreate(pigId, boarId);
+        testPregCheckResultEventCreate(pigId, PregCheckResult.YANG);
+        testToPregEventCreate(pigId);
+
+        // test rollback info
+        HttpEntity httpEntity = HttpPostRequest.formRequest()
+                .param("pigEventId",5l).param("revertPigType",1)
+                .httpEntity();
+
+        Long result = this.restTemplate.postForObject(url, httpEntity, Long.class);
+        System.out.println(result);
+
+        printCurrentState();
     }
 
     /**
