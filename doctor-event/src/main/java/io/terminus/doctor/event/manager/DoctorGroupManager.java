@@ -107,7 +107,7 @@ public class DoctorGroupManager {
 
         //3. 创建猪群跟踪
         DoctorGroupTrack groupTrack = BeanMapper.map(groupEvent, DoctorGroupTrack.class);
-        groupTrack.setExtra(null);  //dozer不需要转换extra字段
+        groupTrack.setExtraEntity(DoctorGroupTrack.Extra.builder().newAt(DateUtil.toDate(newGroupInput.getEventAt())).build());  //dozer不需要转换extra字段
         groupTrack.setGroupId(groupId);
         groupTrack.setRelEventId(groupEvent.getId());
         groupTrack.setBoarQty(0);
@@ -616,6 +616,40 @@ public class DoctorGroupManager {
         groupTrack.setUpdatorId(event.getCreatorId());
         groupTrack.setUpdatorName(event.getCreatorName());
         groupTrack.setSex(EventUtil.getSex(groupTrack.getBoarQty(), groupTrack.getSowQty()));
+
+        DoctorGroupTrack.Extra extra = groupTrack.getExtraEntity();
+        switch (GroupEventType.from(event.getType())) {
+            case MOVE_IN:
+                extra.setMoveInAt(event.getEventAt());
+                break;
+            case CHANGE:
+                extra.setChangeAt(event.getEventAt());
+                break;
+            case TRANS_GROUP:
+                extra.setTransGroupAt(event.getEventAt());
+                break;
+            case TURN_SEED:
+                extra.setTurnSeedAt(event.getEventAt());
+                break;
+            case LIVE_STOCK:
+                extra.setLiveStockAt(event.getEventAt());
+                break;
+            case DISEASE:
+                extra.setDiseaseAt(event.getEventAt());
+                break;
+            case ANTIEPIDEMIC:
+                extra.setAntiepidemicAt(event.getEventAt());
+                break;
+            case TRANS_FARM:
+                extra.setTransFarmAt(event.getEventAt());
+                break;
+            case CLOSE:
+                extra.setCloseAt(event.getEventAt());
+                break;
+            default:
+                break;
+        }
+        groupTrack.setExtraEntity(extra);
         doctorGroupTrackDao.update(groupTrack);
     }
 
