@@ -227,9 +227,17 @@ public class Users {
     @RequestMapping(value = "/login", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Map<String, Object> login(@RequestParam("loginBy") String loginBy, @RequestParam("password") String password,
+                                     @RequestParam(value = "checknum", required = false) String checknum,
                                      @RequestParam(value = "target", required = false) String target,
                                      @RequestParam(value = "type", required = false) Integer type,
                                      HttpServletRequest request, HttpServletResponse response) {
+
+        if(!Strings.isNullOrEmpty(checknum)){
+            if(!Objects.equal(captchaGenerator.getGeneratedKey(request.getSession()), checknum)){
+                throw new JsonResponseException(500, "user.token.unmatch");
+            }
+        }
+
         loginBy = loginBy.toLowerCase();
 
         LoginType loginType = null;
