@@ -45,7 +45,6 @@ import java.util.Objects;
 public class OPDoctorUsers {
 
     private final DoctorServiceReviewReadService doctorServiceReviewReadService;
-
     private final DoctorServiceReviewWriteService doctorServiceReviewWriteService;
     private final DoctorServiceReviewService doctorServiceReviewService;
     private final DoctorOrgReadService doctorOrgReadService;

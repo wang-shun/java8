@@ -12,9 +12,24 @@ import io.terminus.doctor.user.model.DoctorUserDataPermission;
 
 public interface DoctorUserDataPermissionWriteService {
 
+    /**
+     * 创建用户数据权限
+     * @param dataPermission 用户数据权限
+     * @return 主键id
+     */
     Response<Long> createDataPermission(DoctorUserDataPermission dataPermission);
 
+    /**
+     * 更新用户数据权限
+     * @param dataPermission 用户数据权限对象
+     * @return 是否成功
+     */
     Response<Boolean> updateDataPermission(DoctorUserDataPermission dataPermission);
 
+    /**
+     * 根据主键id删除用户数据权限
+     * @param dataPermissionId 主键id
+     * @return 是否成功
+     */
     Response<Boolean> deleteDataPermission(Long dataPermissionId);
 }

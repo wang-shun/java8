@@ -34,6 +34,8 @@
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.DoctorServiceStatusWriteService" id="doctorServiceStatusWriteService" check="false"/>
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.DoctorServiceStatusReadService" id="doctorServiceStatusReadService" check="false"/>
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.DoctorUserProfileReadService" id="doctorUserProfileReadService" check="false"/>
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.DoctorUserDataPermissionReadService" id="doctorUserDataPermissionReadService" check="false"/>
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.DoctorUserDataPermissionWriteService" id="doctorUserDataPermissionWriteService" check="false"/>
 
 
     <!-- address services -->
