@@ -126,7 +126,7 @@ public class DoctorMessageTemplateReadServiceImpl extends MessageTemplateReadSer
     }
 
     @Override
-    public Response<Boolean> reloadAllMessageTemplateByName(String templateName) {
+    public Response<Boolean> reloadAllMessageTemplateCacheByName(String templateName) {
         try {
             doctorMessageTemplateCacher.refreshByName(templateName);
             return Response.ok(Boolean.TRUE);

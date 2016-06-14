@@ -55,5 +55,5 @@ public interface DoctorMessageTemplateReadService extends MessageTemplateReadSer
      *
      * @return 是否成功
      */
-    Response<Boolean> reloadAllMessageTemplateByName(@NotEmpty(message = "template.name.not.empty") String templateName);
+    Response<Boolean> reloadAllMessageTemplateCacheByName(@NotEmpty(message = "template.name.not.empty") String templateName);
 }
