@@ -3,6 +3,7 @@ package io.terminus.doctor.msg.service;
 import io.terminus.common.model.Response;
 import io.terminus.parana.msg.dto.MessageInfo;
 import io.terminus.parana.msg.service.MessageTemplateReadService;
+import org.hibernate.validator.constraints.NotEmpty;
 
 import java.io.Serializable;
 import java.util.Map;
@@ -41,4 +42,18 @@ public interface DoctorMessageTemplateReadService extends MessageTemplateReadSer
      * @return 应用消息模板后生成的标题和消息内容
      */
     Response<MessageInfo> getMessageInfoWithCache(String templateName, Map<String, Serializable> context);
+
+    /**
+     * 清理所有message模板缓存
+     *
+     * @return 是否成功
+     */
+    Response<Boolean> cleanAllMessageTemplateCache();
+
+    /**
+     * 根据模板名称重新加载message模板缓存
+     *
+     * @return 是否成功
+     */
+    Response<Boolean> reloadAllMessageTemplateByName(@NotEmpty(message = "template.name.not.empty") String templateName);
 }
