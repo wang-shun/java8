@@ -15,7 +15,6 @@ import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.event.service.DoctorBarnReadService;
 import io.terminus.doctor.workflow.core.Execution;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -32,7 +31,6 @@ import static java.util.Objects.isNull;
  * Descirbe: 对应的母猪状态信息流转(转舍)
  */
 @Component
-@Slf4j
 public class DoctorSowChgLocationHandler extends DoctorAbstractEventFlowHandler {
 
     private final DoctorBarnReadService doctorBarnReadService;
@@ -47,9 +45,10 @@ public class DoctorSowChgLocationHandler extends DoctorAbstractEventFlowHandler 
 
     @Override
     public DoctorPigTrack updateDoctorPigTrackInfo(Execution execution,DoctorPigTrack doctorPigTrack, DoctorBasicInputInfoDto basic, Map<String, Object> extra, Map<String,Object> context) {
+
         doctorPigTrack.addAllExtraMap(extra);
 
-        Long toBarnId = (Long) extra.get("chgLocationToBarnId");
+        Long toBarnId = Long.valueOf(extra.get("chgLocationToBarnId").toString());
         DoctorBarn doctorToBarn = RespHelper.orServEx(doctorBarnReadService.findBarnById(toBarnId));
         checkState(!isNull(toBarnId), "input.toBarnId.fail");
 
@@ -60,16 +59,17 @@ public class DoctorSowChgLocationHandler extends DoctorAbstractEventFlowHandler 
 
         // 修改对应的状态信息
         if(Objects.equals(basic.getEventType(), PigEvent.TO_MATING.getKey())){
-            doctorPigTrack.setStatus(PigStatus.Entry.getKey());
-
             //清空对应的Map 信息内容 （有一次生产过程）
             doctorPigTrack.setExtraMap(Maps.newHashMap());
 
-            // 断奶后添加对应的胎次信息
-            if(Objects.equals(doctorPigTrack.getStatus(), PigStatus.Wean.getKey())){
+            // 断奶后添加对应的胎次信息 TODO 流产算作一个胎次信息 等待确认
+            if(Objects.equals(doctorPigTrack.getStatus(), PigStatus.Wean.getKey()) ||
+                    Objects.equals(doctorPigTrack.getStatus(), PigStatus.Abortion.getKey())){
                 // 断奶进入配种
                 doctorPigTrack.setCurrentParity(doctorPigTrack.getCurrentParity() + 1);
             }
+            doctorPigTrack.setStatus(PigStatus.Entry.getKey());
+
         }else if(Objects.equals(basic.getEventType(), PigEvent.TO_PREG.getKey())){
             // 状态妊娠检查相关， 而不是转舍相关
         }else if(Objects.equals(basic.getEventType(), PigEvent.TO_FARROWING.getKey())){

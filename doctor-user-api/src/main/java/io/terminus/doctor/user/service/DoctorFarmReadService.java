@@ -34,4 +34,10 @@ public interface DoctorFarmReadService {
      * @return 猪场id
      */
     Response<List<Long>> findFarmIdsByUserId(Long userId);
+
+    /**
+     * 查询所有猪场
+     * @return 所有猪场
+     */
+    Response<List<DoctorFarm>> findAllFarms();
 }

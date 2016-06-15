@@ -32,7 +32,7 @@ public class DoctorChangeGroupInput extends BaseGroupInput implements Serializab
     /**
      * 变动原因id
      */
-    private String changeReasonId;
+    private Long changeReasonId;
 
     /**
      * 变动原因

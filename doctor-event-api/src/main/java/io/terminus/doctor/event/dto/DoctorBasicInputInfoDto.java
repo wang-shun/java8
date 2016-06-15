@@ -60,6 +60,13 @@ public class DoctorBasicInputInfoDto implements Serializable{
 
     private Long relEventId;
 
+    /**
+     * 相同宿舍, 不同pig构建
+     * @param pigId
+     * @param pigType
+     * @param pigCode
+     * @return
+     */
     public DoctorBasicInputInfoDto buildSameBarnPigInfo(Long pigId, Integer pigType, String pigCode){
         return DoctorBasicInputInfoDto.builder()
                 .pigId(pigId).pigType(pigType).pigCode(pigCode).barnId(this.barnId).barnName(this.barnName)

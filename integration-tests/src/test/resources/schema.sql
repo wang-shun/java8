@@ -503,6 +503,7 @@ CREATE TABLE `doctor_pigs` (
   `out_id` varchar(128) DEFAULT NULL COMMENT '关联猪外部Id',
   `pig_code` varchar(64) DEFAULT NULL COMMENT '猪编号',
   `pig_type` smallint(6) DEFAULT NULL COMMENT '猪类型(公猪，母猪， 仔猪)',
+  `is_removal` SMALLINT(6) DEFAULT NULL COMMENT '是否离场',
   `pig_father_code` VARCHAR(64) unsigned DEFAULT NULL COMMENT '猪父亲Id',
   `pig_mother_code` VARCHAR(64) unsigned DEFAULT NULL COMMENT '母猪Id',
   `source` smallint(6) DEFAULT NULL COMMENT '母猪来源',
@@ -533,6 +534,7 @@ CREATE TABLE `doctor_pig_tracks` (
   `farm_id` bigint(20) unsigned NOT NULL comment '猪场Id',
   `pig_id` bigint(20) DEFAULT NULL COMMENT '猪id',
   `status` smallint(6) DEFAULT NULL COMMENT '猪状态信息',
+  `is_removal` smallint(6) DEFAULT 0 COMMENT '是否离场',
   `current_barn_id` bigint(20) unsigned DEFAULT NULL COMMENT '当前猪舍Id',
   `current_barn_name` varchar(64) DEFAULT NULL COMMENT '当前猪舍名称',
   `weight` double DEFAULT NULL COMMENT '猪重量',
@@ -614,7 +616,7 @@ create table doctor_farm_ware_house_types(
   `farm_id` bigint(20) unsigned DEFAULT NULL COMMENT '猪场仓库信息',
   `farm_name` varchar(64) DEFAULT NULL COMMENT '猪场名称',
   `type` SMALLINT(6) unsigned DEFAULT NULL COMMENT '猪场仓库类型',
-  `log_number` bigint(20) DEFAULT NULL COMMENT '类型原料的数量',
+  `lot_number` bigint(20) DEFAULT NULL COMMENT '类型原料的数量',
   `extra` text default null comment '扩展字段',
   `creator_id` bigint(20) DEFAULT NULL COMMENT '创建人id',
   `creator_name` varchar(64) DEFAULT NULL COMMENT '创建人姓名',
@@ -743,6 +745,7 @@ CREATE TABLE `doctor_material_consume_avgs` (
   `ware_house_id` bigint(20) unsigned DEFAULT NULL COMMENT '仓库信息',
   `material_id` bigint(20) DEFAULT NULL COMMENT '原料Id',
   `type` smallint(6) unsigned DEFAULT NULL COMMENT '领取货物属于的类型',
+  `lot_consume_day` int(11) DEFAULT NULL COMMENT '剩余消耗天数',
   `consume_avg_count` bigint(20) DEFAULT NULL COMMENT '平均消耗数量',
   `consume_count` bigint(20) DEFAULT NULL COMMENT '消耗数量',
   `consume_date` datetime DEFAULT NULL comment '消耗日期',
@@ -1146,3 +1149,19 @@ CREATE TABLE `parana_addresses` (
   `order_no` varchar(32) DEFAULT NULL COMMENT '排序号',
   PRIMARY KEY (`id`)
 );
+
+CREATE TABLE `doctor_pig_type_statistics` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '自增主键',
+  `org_id` bigint(20) DEFAULT NULL COMMENT '公司id',
+  `farm_id` bigint(20) DEFAULT NULL COMMENT '猪场id',
+  `boar` int(11) DEFAULT NULL COMMENT '公猪数',
+  `sow` int(11) DEFAULT NULL COMMENT '母猪数',
+  `farrow` int(11) DEFAULT NULL COMMENT '产房仔猪数',
+  `nursery` int(11) DEFAULT NULL COMMENT '保育猪数',
+  `fatten` int(11) DEFAULT NULL COMMENT '育肥猪数',
+  `created_at` datetime DEFAULT NULL COMMENT '创建时间',
+  `updated_at` datetime DEFAULT NULL COMMENT '修改时间',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `idx_doctor_pig_type_statistics_farm_id` (`farm_id`),
+  KEY `idx_doctor_pig_type_statistics_org_id` (`org_id`)
+) COMMENT='猪只数统计表';

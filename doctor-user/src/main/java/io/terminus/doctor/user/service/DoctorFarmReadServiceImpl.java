@@ -78,4 +78,14 @@ public class DoctorFarmReadServiceImpl implements DoctorFarmReadService{
         }
         return response;
     }
+
+    @Override
+    public Response<List<DoctorFarm>> findAllFarms() {
+        try {
+            return Response.ok(doctorFarmDao.findAll());
+        } catch (Exception e) {
+            log.error("find all farms failed, cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("farm.find.fail");
+        }
+    }
 }

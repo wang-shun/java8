@@ -36,15 +36,15 @@ public abstract class DoctorAbstractEventFlowHandler extends HandlerAware {
 
     private static final ObjectMapper OBJECT_MAPPER = JsonMapper.JSON_NON_DEFAULT_MAPPER.getMapper();
 
-    private final DoctorPigDao doctorPigDao;
+    protected final DoctorPigDao doctorPigDao;
 
-    private final DoctorPigEventDao doctorPigEventDao;
+    protected final DoctorPigEventDao doctorPigEventDao;
 
-    private final DoctorPigTrackDao doctorPigTrackDao;
+    protected final DoctorPigTrackDao doctorPigTrackDao;
 
-    private final DoctorPigSnapshotDao doctorPigSnapshotDao;
+    protected final DoctorPigSnapshotDao doctorPigSnapshotDao;
 
-    private final DoctorRevertLogDao doctorRevertLogDao;
+    protected final DoctorRevertLogDao doctorRevertLogDao;
 
     @Autowired
     public DoctorAbstractEventFlowHandler(DoctorPigDao doctorPigDao,
@@ -75,6 +75,7 @@ public abstract class DoctorAbstractEventFlowHandler extends HandlerAware {
 
             // update track info
             DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(doctorPigEvent.getPigId());
+            String currentPigTrackSnapShot = JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(doctorPigTrack);
             DoctorPigTrack refreshPigTrack = updateDoctorPigTrackInfo(execution, doctorPigTrack, doctorBasicInputInfoDto, extraInfo, context);
             doctorPigTrackDao.update(refreshPigTrack);
 
@@ -83,14 +84,16 @@ public abstract class DoctorAbstractEventFlowHandler extends HandlerAware {
             DoctorPigSnapshot doctorPigSnapshot = DoctorPigSnapshot.builder()
                     .pigId(doctorPigEvent.getId()).farmId(doctorPigEvent.getFarmId()).orgId(doctorPigEvent.getOrgId()).eventId(doctorPigEvent.getId())
                     .build();
-            doctorPigSnapshot.setPigInfoMap(ImmutableMap.of(DoctorPigSnapshotConstants.PIG_TRACK, JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(doctorPigTrack)));
+            doctorPigSnapshot.setPigInfoMap(ImmutableMap.of(DoctorPigSnapshotConstants.PIG_TRACK, currentPigTrackSnapShot));
             doctorPigSnapshotDao.create(doctorPigSnapshot);
+
+            specialFlowHandler(execution, doctorBasicInputInfoDto, extraInfo, context);
 
             // 当前事件影响的Id 方式
             flowDataMap.put("createEventResult",
                     JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(
-                            ImmutableMap.of("pigId", doctorBasicInputInfoDto.getPigId(),
-                                    "eventId",doctorPigEvent.getId(),"snapshotId",doctorPigSnapshot.getId())));
+                            ImmutableMap.of("doctorPigId", doctorBasicInputInfoDto.getPigId(),
+                                    "doctorEventId",doctorPigEvent.getId(),"doctorSnapshotId",doctorPigSnapshot.getId())));
             execution.setFlowData(JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(flowDataMap));
         }catch (Exception e){
             DoctorAbstractEventFlowHandler.log.error("handle execute fail, cause:{}", Throwables.getStackTraceAsString(e));
@@ -109,6 +112,17 @@ public abstract class DoctorAbstractEventFlowHandler extends HandlerAware {
     public abstract DoctorPigTrack updateDoctorPigTrackInfo(Execution execution, DoctorPigTrack doctorPigTrack,
                                                             DoctorBasicInputInfoDto basic, Map<String,Object> extra, Map<String,Object> context);
 
+    /**
+     * 不同子类调用方式
+     * @param execution
+     * @param basic
+     * @param extra
+     * @param context
+     */
+    public void specialFlowHandler(Execution execution, DoctorBasicInputInfoDto basic, Map<String,Object> extra, Map<String,Object> context){
+        return;
+    }
+
     public DoctorPigEvent buildAllPigDoctorEvent(DoctorBasicInputInfoDto basic, Map<String,Object> extra){
         DoctorPigEvent doctorPigEvent = DoctorPigEvent.builder()
                 .orgId(basic.getOrgId()).orgName(basic.getOrgName())
@@ -117,7 +131,7 @@ public abstract class DoctorAbstractEventFlowHandler extends HandlerAware {
                 .eventAt(DateTime.now().toDate()).type(basic.getEventType())
                 .kind(basic.getPigType()).name(basic.getEventName()).desc(basic.getEventDesc()).relEventId(basic.getRelEventId())
                 .barnId(basic.getBarnId()).barnName(basic.getBarnName())
-                .outId(UUID.randomUUID().toString()) //TODO uuid generate method
+                .outId(UUID.randomUUID().toString())
                 .creatorId(basic.getStaffId()).creatorName(basic.getStaffName())
                 .build();
         doctorPigEvent.setExtraMap(extra);

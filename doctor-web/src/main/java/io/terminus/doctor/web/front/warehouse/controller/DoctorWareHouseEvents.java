@@ -138,8 +138,8 @@ public class DoctorWareHouseEvents {
             DoctorMaterialInfo doctorMaterialInfo = RespHelper.orServEx(doctorMaterialInfoReadService.queryById(dto.getMaterialId()));
 
             doctorMaterialConsumeProviderDto = DoctorMaterialConsumeProviderDto.builder()
-                    .actionType(DoctorMaterialConsumeProvider.EVENT_TYPE.CONSUMER.getValue())
-                    .farmId(doctorMaterialInWareHouse.getFarmId()).farmName(doctorMaterialConsumeProviderDto.getFarmName())
+                    .actionType(DoctorMaterialConsumeProvider.EVENT_TYPE.CONSUMER.getValue()).type(doctorMaterialInWareHouse.getType())
+                    .farmId(doctorMaterialInWareHouse.getFarmId()).farmName(doctorMaterialInWareHouse.getFarmName())
                     .wareHouseId(doctorMaterialInWareHouse.getWareHouseId()).wareHouseName(doctorMaterialInWareHouse.getWareHouseName())
                     .materialTypeId(doctorMaterialInWareHouse.getMaterialId()).materialName(doctorMaterialInWareHouse.getMaterialName())
                     .barnId(dto.getBarnId()).barnName(barnName).staffId(dto.getFeederId()).staffName(userName)
@@ -177,7 +177,7 @@ public class DoctorWareHouseEvents {
 
             doctorMaterialConsumeProviderDto = DoctorMaterialConsumeProviderDto.builder()
                     .actionType(DoctorMaterialConsumeProvider.EVENT_TYPE.PROVIDER.getValue())
-                    .farmId(doctorMaterialInWareHouse.getFarmId()).farmName(doctorMaterialConsumeProviderDto.getFarmName())
+                    .farmId(doctorMaterialInWareHouse.getFarmId()).farmName(doctorMaterialInWareHouse.getFarmName())
                     .wareHouseId(doctorMaterialInWareHouse.getWareHouseId()).wareHouseName(doctorMaterialInWareHouse.getWareHouseName())
                     .materialTypeId(doctorMaterialInWareHouse.getMaterialId()).materialName(doctorMaterialInWareHouse.getMaterialName())
                     .barnId(dto.getBarnId()).barnName(barnName).staffId(dto.getFeederId()).staffName(userName)

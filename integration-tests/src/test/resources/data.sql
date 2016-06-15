@@ -65,7 +65,7 @@ values
 
 -- warehouse content
 -- ware house type
-INSERT INTO `doctor_farm_ware_house_types` (`id`, `farm_id`, `farm_name`, `type`, `log_number`, `extra`, `creator_id`, `creator_name`, `updator_id`, `updator_name`, `created_at`, `updated_at`)
+INSERT INTO `doctor_farm_ware_house_types` (`id`, `farm_id`, `farm_name`, `type`, `lot_number`, `extra`, `creator_id`, `creator_name`, `updator_id`, `updator_name`, `created_at`, `updated_at`)
 VALUES
 	(1, 12345, 'testFarm', 1, 10000000, NULL, 1, 'creator', 1, 'updator', '2016-05-25 12:34:17', '2016-05-25 12:34:17'),
 	(2, 12345, 'testFarm', 2, 10000000, NULL, 1, 'creator', 1, 'updator', '2016-05-25 12:34:17', '2016-05-25 12:34:17'),
@@ -111,7 +111,7 @@ VALUES
 	(19, 12345, 'farmName', 5, 'materialName', 'remark', 1, 'unitgroupName', 2, 'unit_name', 100000, 1000, NULL, 1, 'creatorName', 2, 'updatorName', '2016-06-02 16:43:17', '2016-06-02 16:43:17'),
 	(20, 12345, 'farmName', 5, 'materialName', 'remark', 1, 'unitgroupName', 2, 'unit_name', 100000, 1000, NULL, 1, 'creatorName', 2, 'updatorName', '2016-06-02 16:43:17', '2016-06-02 16:43:17');
 
---material in ware house info
+-- material in ware house info
 INSERT INTO `doctor_material_in_ware_houses` (`id`, `farm_id`, `farm_name`, `ware_house_id`, `ware_house_name`, `material_id`, `material_name`, `type`, `lot_number`, `unit_group_name`, `unit_name`, `extra`, `creator_id`, `creator_name`, `updator_id`, `updator_name`, `created_at`, `updated_at`)
 VALUES
 	(1, 12345, 'farmName', 1, 'warehouseName1', 1, 'materialName1', 1, 2500000, 'groupName', 'unitName', NULL, 1, 'creatorName', 1, 'updatorName', '2016-06-02 16:57:32', '2016-06-02 16:57:32'),
@@ -266,10 +266,10 @@ VALUES
 -- 猪舍测试数据
 INSERT INTO `doctor_barns` (`id`, `name`, `org_id`, `org_name`, `farm_id`, `farm_name`, `pig_type`, `can_open_group`, `status`, `capacity`, `staff_id`, `staff_name`, `out_id`, `extra`, `created_at`, `updated_at`)
 VALUES
-	(1, '保育1舍', 0, '测试公司', 0, '测试猪场名称0', 2, -1, 1, 101, 1, NULL, NULL, NULL, '2016-06-01 10:51:18', '2016-06-01 11:03:46'),
-	(2, '妊娠2舍', 0, '测试公司', 0, '测试猪场名称0', 6, -1, 1, 10, 1, NULL, NULL, NULL, '2016-06-01 10:51:18', '2016-06-01 10:51:18'),
-	(3, '保育2舍', 0, '测试公司', 0, '测试猪场名称0', 2, 1, 1, 101, 1, NULL, NULL, NULL, '2016-06-01 10:51:18', '2016-06-01 11:03:46'),
-	(4, '保育北-1舍', 0, '测试公司', 1, '测试猪场1', 2, 1, 1, 101, 1, NULL, NULL, NULL, '2016-06-01 10:51:18', '2016-06-01 11:03:46');
+	(10, '保育1舍', 0, '测试公司', 0, '测试猪场名称0', 2, -1, 1, 101, 1, NULL, NULL, NULL, '2016-06-01 10:51:18', '2016-06-01 11:03:46'),
+	(11, '妊娠2舍', 0, '测试公司', 0, '测试猪场名称0', 6, -1, 1, 10, 1, NULL, NULL, NULL, '2016-06-01 10:51:18', '2016-06-01 10:51:18'),
+	(12, '保育2舍', 0, '测试公司', 0, '测试猪场名称0', 2, 1, 1, 101, 1, NULL, NULL, NULL, '2016-06-01 10:51:18', '2016-06-01 11:03:46'),
+	(13, '保育北-1舍', 0, '测试公司', 1, '测试猪场1', 2, 1, 1, 101, 1, NULL, NULL, NULL, '2016-06-01 10:51:18', '2016-06-01 11:03:46');
 
 -- 猪群测试数据
 INSERT INTO `doctor_groups` (`id`, `org_id`, `org_name`, `farm_id`, `farm_name`, `group_code`, `batch_no`, `open_at`, `close_at`, `status`, `init_barn_id`, `init_barn_name`, `current_barn_id`, `current_barn_name`, `pig_type`, `breed_id`, `breed_name`, `genetic_id`, `genetic_name`, `staff_id`, `staff_name`, `remark`, `out_id`, `extra`, `creator_id`, `creator_name`, `updator_id`, `updator_name`, `created_at`, `updated_at`)
@@ -279,8 +279,8 @@ VALUES
 
 INSERT INTO `doctor_group_tracks` (`id`, `group_id`, `rel_event_id`, `sex`, `quantity`, `boar_qty`, `sow_qty`, `birth_date`, `avg_day_age`, `weight`, `avg_weight`, `price`, `amount`, `customer_id`, `customer_name`, `sale_qty`, `extra`, `creator_id`, `creator_name`, `updator_id`, `updator_name`, `created_at`, `updated_at`)
 VALUES
-	(5, 4, 8, 2, 10, 5, 5, '2016-06-06 14:26:21', 0, 0, 0, 0, 0, NULL, NULL, NULL, '{\"type\":1,\"source\":1}', 1, '22', 1, 'admin', '2016-06-06 14:26:21', '2016-06-07 10:35:45'),
-	(12, 11, 35, 2, 15, 8, 7, '2016-05-30 00:00:00', 9, 1000.0000000000001, 66.66666666666667, 0, 0, NULL, NULL, NULL, NULL, 1, 'admin', 1, 'admin', '2016-06-07 15:00:21', '2016-06-07 15:00:22');
+	(6, 5, 46, 2, 30, 3, 27, '2016-05-21 00:00:00', 18, 400, 13.333333333333334, 7777, 700000, NULL, NULL, NULL, NULL, 1, 'admin', 1, 'admin', '2016-06-07 11:12:13', '2016-06-08 09:31:51'),
+	(13, 12, 41, 2, 15, 8, 7, '2016-05-30 00:00:00', 9, 1000.0000000000001, 66.66666666666667, 0, 0, NULL, NULL, NULL, NULL, 0, NULL, 1, 'admin', '2016-06-07 15:13:24', '2016-06-07 15:13:27');
 
 INSERT INTO `doctor_group_events` (`id`, `org_id`, `org_name`, `farm_id`, `farm_name`, `group_id`, `group_code`, `event_at`, `type`, `name`, `desc`, `barn_id`, `barn_name`, `pig_type`, `quantity`, `weight`, `avg_weight`, `avg_day_age`, `is_auto`, `out_id`, `remark`, `extra`, `created_at`, `creator_id`, `creator_name`)
 VALUES
@@ -290,3 +290,15 @@ VALUES
 	(40, 0, '测试公司', 1, '测试猪场1', 12, '保育北-1舍(2016-06-07)', '2016-06-07 00:00:00', 1, '新建猪群', 'todo 事件描述', 4, '保育北-1舍', 2, NULL, NULL, NULL, NULL, 1, NULL, '录入转场事件', '{\"source\":2}', '2016-06-07 15:13:24', 0, NULL),
 	(41, 0, '测试公司', 1, '测试猪场1', 12, '保育北-1舍(2016-06-07)', '2016-06-07 00:00:00', 2, '转入猪群', 'todo 事件描述', 4, '保育北-1舍', 2, 15, 1000.0000000000001, 66.66666666666667, 18, 1, NULL, NULL, '{\"inType\":3,\"inTypeName\":\"群间转移\",\"source\":2,\"sex\":2,\"breedId\":1,\"breedName\":\"长白\",\"fromBarnId\":1,\"fromBarnName\":\"保育1舍\",\"fromGroupId\":5,\"fromGroupCode\":\"保育1舍(2016-06-07)\",\"boarQty\":8,\"sowQty\":7}', '2016-06-07 15:13:26', 1, 'admin');
 
+-- barn data info
+INSERT INTO `doctor_barns` (`id`, `name`, `org_id`, `org_name`, `farm_id`, `farm_name`, `pig_type`, `can_open_group`, `status`, `capacity`, `staff_id`, `staff_name`, `out_id`, `extra`, `created_at`, `updated_at`)
+VALUES
+	(1, 'barnName', 1, 'orgName', 12345, 'farmName', 1, 1, 1, 100, 1, 'staffName', '1', NULL, '2016-06-07 16:44:22', '2016-06-07 16:44:22'),
+	(2, 'barnName', 1, 'orgName', 12345, 'farmName', 2, 1, 1, 100, 1, 'staffName', '1', NULL, '2016-06-07 16:44:22', '2016-06-07 16:44:22'),
+	(3, 'barnName', 1, 'orgName', 12345, 'farmName', 3, 1, 1, 100, 1, 'staffName', '1', NULL, '2016-06-07 16:44:22', '2016-06-07 16:44:22'),
+	(4, 'barnName', 1, 'orgName', 12345, 'farmName', 4, 1, 1, 100, 1, 'staffName', '1', NULL, '2016-06-07 16:44:22', '2016-06-07 16:44:22'),
+	(5, 'barnName', 1, 'orgName', 12345, 'farmName', 5, 1, 1, 100, 1, 'staffName', '1', NULL, '2016-06-07 16:44:22', '2016-06-07 16:44:22'),
+	(6, 'barnName', 1, 'orgName', 12345, 'farmName', 6, 1, 1, 100, 1, 'staffName', '1', NULL, '2016-06-07 16:44:22', '2016-06-07 16:44:22'),
+	(7, 'barnName', 1, 'orgName', 12345, 'farmName', 7, 1, 1, 100, 1, 'staffName', '1', NULL, '2016-06-07 16:44:22', '2016-06-07 16:44:22'),
+	(8, 'barnName', 1, 'orgName', 12345, 'farmName', 8, 1, 1, 100, 1, 'staffName', '1', NULL, '2016-06-07 16:44:22', '2016-06-07 16:44:22'),
+	(9, 'barnName', 1, 'orgName', 12345, 'farmName', 9, 1, 1, 100, 1, 'staffName', '1', NULL, '2016-06-07 16:44:22', '2016-06-07 16:44:22');

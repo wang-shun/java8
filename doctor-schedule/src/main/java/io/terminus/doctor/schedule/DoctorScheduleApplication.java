@@ -9,13 +9,11 @@ import org.springframework.beans.factory.config.YamlPropertiesFactoryBean;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.scheduling.annotation.EnableScheduling;
 
 /**
  * Author:  <a href="mailto:i@terminus.io">jlchen</a>
  * Date: 2016-02-01
  */
-@EnableScheduling
 @SpringBootApplication
 public class DoctorScheduleApplication {
     public static void main(String[] args) {

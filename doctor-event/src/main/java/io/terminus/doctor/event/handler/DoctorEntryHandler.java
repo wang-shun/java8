@@ -15,6 +15,7 @@ import io.terminus.doctor.event.dao.DoctorPigTrackDao;
 import io.terminus.doctor.event.dao.DoctorRevertLogDao;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
 import io.terminus.doctor.event.dto.event.usual.DoctorFarmEntryDto;
+import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.model.DoctorPig;
@@ -104,10 +105,10 @@ public class DoctorEntryHandler implements DoctorEventCreateHandler {
             doctorPigSnapshot.setPigInfoMap(ImmutableMap.of(DoctorPigSnapshotConstants.PIG_TRACK, JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(doctorPigTrack)));
             doctorPigSnapshotDao.create(doctorPigSnapshot);
 
-            context.put("entryResult",
+            context.put("createEventResult",
                     JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(
-                            ImmutableMap.of("doctorPigId", doctorPig.getId(), "eventId", doctorPigEvent.getId(),
-                                    "doctorPigTrackId", doctorPigTrack.getId(), "snapshotId", doctorPigSnapshot.getId())
+                            ImmutableMap.of("doctorPigId", doctorPig.getId(), "doctorEventId", doctorPigEvent.getId(),
+                                    "doctorPigTrackId", doctorPigTrack.getId(), "doctorSnapshotId", doctorPigSnapshot.getId())
                     ));
         }catch (Exception e){
             log.error("doctor abstract entry flow handle fail, cause:{}", Throwables.getStackTraceAsString(e));
@@ -129,6 +130,7 @@ public class DoctorEntryHandler implements DoctorEventCreateHandler {
     private DoctorPigTrack buildEntryFarmPigDoctorTrack(DoctorFarmEntryDto dto, DoctorBasicInputInfoDto basic){
 
         DoctorPigTrack doctorPigTrack = DoctorPigTrack.builder().farmId(basic.getFarmId())
+                .isRemoval(IsOrNot.NO.getValue())
                 .currentBarnId(dto.getBarnId()).currentBarnName(dto.getBarnName())
                 .currentParity(dto.getParity())
                 .creatorId(basic.getStaffId()).creatorName(basic.getStaffName())
@@ -176,7 +178,9 @@ public class DoctorEntryHandler implements DoctorEventCreateHandler {
 
         DoctorPig doctorPig = DoctorPig.builder()
                 .farmId(basic.getFarmId()).farmName(basic.getFarmName()).orgId(basic.getOrgId()).orgName(basic.getOrgName())
-                .outId(UUID.randomUUID().toString()).pigCode(dto.getPigCode()).pigType(basic.getPigType()).pigFatherCode(dto.getFatherCode()).pigMotherCode(dto.getMotherCode())
+                .outId(UUID.randomUUID().toString()).pigCode(dto.getPigCode()).pigType(basic.getPigType())
+                .isRemoval(IsOrNot.NO.getValue())
+                .pigFatherCode(dto.getFatherCode()).pigMotherCode(dto.getMotherCode())
                 .source(dto.getSource()).birthDate(dto.getBirthday()).inFarmDate(dto.getInFarmDate()).inFarmDayAge(Years.yearsBetween(new DateTime(dto.getBirthday()), DateTime.now()).getYears())
                 .initBarnId(dto.getBarnId()).initBarnName(dto.getBarnName()).breedId(dto.getBreed()).breedName(dto.getBreedName()).geneticId(dto.getBreedType()).geneticName(dto.getBreedTypeName())
                 .remark(dto.getEntryMark()).creatorId(basic.getStaffId()).creatorName(basic.getStaffName())

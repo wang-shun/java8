@@ -32,15 +32,15 @@ public abstract class DoctorAbstractEventHandler implements DoctorEventCreateHan
 
     private static final ObjectMapper OBJECT_MAPPER = JsonMapper.JSON_NON_DEFAULT_MAPPER.getMapper();
 
-    private final DoctorPigDao doctorPigDao;
+    protected final DoctorPigDao doctorPigDao;
 
-    private final DoctorPigEventDao doctorPigEventDao;
+    protected final DoctorPigEventDao doctorPigEventDao;
 
-    private final DoctorPigTrackDao doctorPigTrackDao;
+    protected final DoctorPigTrackDao doctorPigTrackDao;
 
-    private final DoctorPigSnapshotDao doctorPigSnapshotDao;
+    protected final DoctorPigSnapshotDao doctorPigSnapshotDao;
 
-    private final DoctorRevertLogDao doctorRevertLogDao;
+    protected final DoctorRevertLogDao doctorRevertLogDao;
 
     @Autowired
     public DoctorAbstractEventHandler(DoctorPigDao doctorPigDao,
@@ -71,6 +71,7 @@ public abstract class DoctorAbstractEventHandler implements DoctorEventCreateHan
 
             // update track info
             DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(doctorPigEvent.getPigId());
+            String currentPigTrackSnapShot = JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(doctorPigTrack);
             DoctorPigTrack refreshPigTrack = updateDoctorPigTrackInfo(doctorPigTrack, basic, extra, context);
             doctorPigTrackDao.update(refreshPigTrack);
 
@@ -79,14 +80,14 @@ public abstract class DoctorAbstractEventHandler implements DoctorEventCreateHan
             DoctorPigSnapshot doctorPigSnapshot = DoctorPigSnapshot.builder()
                     .pigId(doctorPigEvent.getId()).farmId(doctorPigEvent.getFarmId()).orgId(doctorPigEvent.getOrgId()).eventId(doctorPigEvent.getId())
                     .build();
-            doctorPigSnapshot.setPigInfoMap(ImmutableMap.of(DoctorPigSnapshotConstants.PIG_TRACK, JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(doctorPigTrack)));
+            doctorPigSnapshot.setPigInfoMap(ImmutableMap.of(DoctorPigSnapshotConstants.PIG_TRACK, currentPigTrackSnapShot));
             doctorPigSnapshotDao.create(doctorPigSnapshot);
 
             // 当前事件影响的Id 方式
             context.put("createEventResult",
                     JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(
-                            ImmutableMap.of("pigId", basic.getPigId(),
-                                    "eventId", doctorPigEvent.getId(), "snapshotId", doctorPigSnapshot.getId())));
+                            ImmutableMap.of("doctorPigId", basic.getPigId(),
+                                    "doctorEventId", doctorPigEvent.getId(), "doctorSnapshotId", doctorPigSnapshot.getId())));
         }catch (Exception e){
             DoctorAbstractEventHandler.log.error("handle execute fail, basic:{}, extra:{}, context:{} cause:{}",
                     basic, extra, context, Throwables.getStackTraceAsString(e));

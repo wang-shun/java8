@@ -49,6 +49,11 @@ public class DoctorPig implements Serializable{
 
     private Integer pigType;
 
+    /**
+     * @see io.terminus.doctor.event.enums.IsOrNot
+     */
+    private Integer isRemoval;  // 默认没有离场
+
     private String pigFatherCode;
 
     private String pigMotherCode;
@@ -100,7 +105,7 @@ public class DoctorPig implements Serializable{
     public void setExtraMap(Map<String,Object> extraMap){
         this.extraMap = extraMap;
         if(isNull(extraMap) || Iterables.isEmpty(extraMap.entrySet())){
-            this.extra = null;
+            this.extra = "";
         }else {
             this.extra = OBJECT_MAPPER.writeValueAsString(extraMap);
         }

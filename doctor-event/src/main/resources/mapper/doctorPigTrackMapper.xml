@@ -13,6 +13,7 @@
         <result column="farm_id" property="farmId"/>
         <result column="pig_id" property="pigId"/>
         <result column="status" property="status"/>
+        <result column="is_removal" property="isRemoval"/>
         <result column="current_barn_id" property="currentBarnId"/>
         <result column="current_barn_name" property="currentBarnName"/>
         <result column="weight" property="weight"/>
@@ -37,17 +38,19 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        `farm_id`,`pig_id`,`status`,`current_barn_id`,`current_barn_name`,`weight`,`out_farm_date`,`rel_event_ids`,`extra`,`current_parity`,`remark`,`creator_id`,`creator_name`,`updator_id`,`updator_name`,`created_at`,`updated_at`
+        `farm_id`,`pig_id`,`status`,`is_removal`,`current_barn_id`,`current_barn_name`,`weight`,`out_farm_date`,`rel_event_ids`,`extra`,`current_parity`,`remark`,`creator_id`,`creator_name`,`updator_id`,`updator_name`,`created_at`,`updated_at`
     </sql>
 
     <sql id="vals">
-        #{farmId},#{pigId},#{status},#{currentBarnId},#{currentBarnName},#{weight},#{outFarmDate},#{relEventIds},#{extra},#{currentParity},#{remark},#{creatorId},#{creatorName},#{updatorId},#{updatorName},now(),now()
+        #{farmId},#{pigId},#{status},#{isRemoval},#{currentBarnId},#{currentBarnName},#{weight},#{outFarmDate},#{relEventIds},#{extra},#{currentParity},#{remark},#{creatorId},#{creatorName},#{updatorId},#{updatorName},now(),now()
     </sql>
 
     <sql id="criteria">
         <if test="farmId!=null"> AND `farm_id`=#{farmId}</if>
         <if test="pigId != null" > AND `pig_id` = #{pigId}</if>
         <if test="status != null" > AND `status` = #{status}</if>
+        <if test="isRemoval == null"> AND `is_removal` = 0 </if>
+        <if test="isRemoval != null"> AND `is_removal` = #{isRemoval}</if>
         <if test="currentBarnId != null" > AND `current_barn_id` = #{currentBarnId}</if>
         <if test="weight != null" > AND `weight` = #{weight}</if>
         <if test="relEventIds != null" > AND `rel_event_ids` = #{relEventIds}</if>
@@ -89,6 +92,13 @@
         </foreach>
     </select>
 
+    <select id="list" resultMap="DoctorPigTrackMap">
+        SELECT <include refid="cols_all"/> FROM <include refid="tb"/>
+        <where>
+            <include refid="criteria"/>
+        </where>
+    </select>
+
     <select id="findByEventId" parameterType="long" resultMap="DoctorPigTrackMap">
         SELECT <include refid="cols_all"/> FROM <include refid="tb"/>
         WHERE relEventIds = #{relEventIds};
@@ -116,6 +126,7 @@
             <if test="farmId!=null">, `farm_id`=#{farmId}</if>
             <if test="pigId != null" > ,`pig_id` = #{pigId}</if>
             <if test="status != null" > ,`status` = #{status}</if>
+            <if test="isRemoval != null">, `is_removal` = #{isRemoval} </if>
             <if test="currentBarnId != null" > ,`current_barn_id` = #{currentBarnId}</if>
             <if test="currentBarnName != null" > ,`current_barn_name` = #{currentBarnName}</if>
             <if test="weight != null" > ,`weight` = #{weight}</if>

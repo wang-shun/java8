@@ -31,31 +31,31 @@ public class DoctorPigEvent implements Serializable{
 
     private static final ObjectMapper OBJECT_MAPPER = JsonMapper.JSON_NON_EMPTY_MAPPER.getMapper();
 
-    private Long id;
+    private Long id;    //事件Id
 
-    private Long orgId;
+    private Long orgId; // 公司信息
 
     private String orgName;
 
-    private Long farmId;
+    private Long farmId; // 猪场信息
 
     private String farmName;
 
-    private Long pigId;
+    private Long pigId; // 猪Id
 
-    private String pigCode;
+    private String pigCode; // 猪Code
 
-    private Date eventAt;
+    private Date eventAt;   // 创建时间
 
-    private Integer type;
+    private Integer type;   // 事件类型
 
-    private Integer kind;
+    private Integer kind;   //类型
 
-    private String name;
+    private String name;    // 事件名称
 
-    private String desc;
+    private String desc;    // 事件描述
 
-    private Long barnId;
+    private Long barnId;    // 猪舍信息
 
     private String barnName;
 
@@ -98,7 +98,7 @@ public class DoctorPigEvent implements Serializable{
     public void setExtraMap(Map<String, Object> extraMap){
         this.extraMap = extraMap;
         if(isNull(extraMap) || Iterables.isEmpty(extraMap.entrySet())){
-            this.extra = null;
+            this.extra = "";
         }else {
             this.extra = OBJECT_MAPPER.writeValueAsString(extraMap);
         }

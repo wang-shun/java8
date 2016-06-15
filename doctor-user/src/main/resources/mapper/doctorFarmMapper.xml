@@ -104,4 +104,8 @@
         WHERE id = #{id}
     </delete>
 
+    <select id="findAll" resultMap="DoctorFarmMap" >
+        SELECT <include refid="cols_all" />
+        FROM <include refid="tb" />
+    </select>
 </mapper>

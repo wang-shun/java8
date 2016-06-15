@@ -3,6 +3,8 @@ package io.terminus.doctor.event.service;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.event.model.DoctorPigTypeStatistic;
 
+import javax.validation.constraints.NotNull;
+
 /**
  * Desc: 猪只数统计表写服务
  * Mail: yangzl@terminus.io
@@ -32,4 +34,25 @@ public interface DoctorPigTypeStatisticWriteService {
      * @return 是否成功
      */
     Response<Boolean> deletePigTypeStatisticById(Long pigTypeStatisticId);
+
+    /**
+     * 统计猪群数量
+     * @param orgId  公司id
+     * @param farmId 猪场id
+     * @return 是否成功
+     */
+    Response<Boolean> statisticGroup(@NotNull(message = "org.id.not.null") Long orgId,
+                                     @NotNull(message = "farm.id.not.null") Long farmId);
+
+    /**
+     * 统计猪数量
+     * @param orgId  公司id
+     * @param farmId 猪场id
+     * @param pigType 猪类
+     * @see io.terminus.doctor.event.model.DoctorPig.PIG_TYPE
+     * @return 是否成功
+     */
+    Response<Boolean> statisticPig(@NotNull(message = "org.id.not.null") Long orgId,
+                                   @NotNull(message = "farm.id.not.null") Long farmId,
+                                   @NotNull(message = "pig.type.not.null") Integer pigType);
 }

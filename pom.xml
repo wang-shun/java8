@@ -45,29 +45,32 @@
         <zkclient.version>0.1</zkclient.version>
         <dubbo.version>2.5.3</dubbo.version>
         <hikari.version>2.4.3</hikari.version>
-        <terminus.session.version>1.5-SNAPSHOT</terminus.session.version>
-        <terminus.search.version>3.0-SNAPSHOT</terminus.search.version>
-        <pampas.version>2.8.BUILD-SNAPSHOT</pampas.version>
-        <parana.core.version>4.2.BUILD-SNAPSHOT</parana.core.version>
-        <parana.extra.version>4.2.BUILD-SNAPSHOT</parana.extra.version>
-        <terminus.boot.version>1.3-SNAPSHOT</terminus.boot.version>
-        <terminus.file.version>1.2.BUILD-SNAPSHOT</terminus.file.version>
-        <terminus.pay.version>1.2.BUILD-SNAPSHOT</terminus.pay.version>
-        <terminus.sms.version>1.2.BUILD-SNAPSHOT</terminus.sms.version>
-        <terminus.email.version>1.2.BUILD-SNAPSHOT</terminus.email.version>
-        <terminus.apppush.version>1.2.BUILD-SNAPSHOT</terminus.apppush.version>
+        <terminus-common.version>2.0.1.RELEASE</terminus-common.version>
+        <terminus.session.version>1.5.RELEASE</terminus.session.version>
+        <terminus.search.version>3.0.RELEASE</terminus.search.version>
+        <pampas.version>2.8.RELEASE</pampas.version>
+        <parana.core.version>4.2.1.RELEASE</parana.core.version>
+        <parana.extra.version>4.2.1.RELEASE</parana.extra.version>
+        <terminus.boot.version>1.4.1.RELEASE</terminus.boot.version>
+        <terminus.file.version>1.2.1.RELEASE</terminus.file.version>
+        <terminus.pay.version>1.2.1.RELEASE</terminus.pay.version>
+        <terminus.sms.version>1.2.1.RELEASE</terminus.sms.version>
+        <terminus.email.version>1.2.1.RELEASE</terminus.email.version>
+        <terminus.apppush.version>1.2.1.RELEASE</terminus.apppush.version>
         <servlet-api.version>2.5</servlet-api.version>
         <!-- 暂时先用这个低版本 -->
         <jackson.version>2.5.5</jackson.version>
         <qrgen.version>1.3</qrgen.version>
         <jodd.version>3.5.1</jodd.version>
-        <openplatform.version>0.3.BUILD-SNAPSHOT</openplatform.version>
-        <jackson-guava.version>2.7.0</jackson-guava.version>
+        <openplatform.version>0.5.RELEASE</openplatform.version>
+        <jackson-guava.version>2.7.3</jackson-guava.version>
         <commons-codec.version>1.5</commons-codec.version>
         <bcprov-jdk15on.version>1.51</bcprov-jdk15on.version>
         <validation-api.version>1.1.0.Final</validation-api.version>
         <hibernate-validator.version>5.0.1.Final</hibernate-validator.version>
         <simple.mail.version>2.1</simple.mail.version>
+        <spring-platform.version>2.0.2.RELEASE</spring-platform.version>
+        <guava.version>19.0</guava.version>
     </properties>
 
     <dependencies>
@@ -92,7 +95,7 @@
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <version>19.0</version>
+            <version>${guava.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -119,21 +122,21 @@
             <dependency>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-dependencies</artifactId>
-                <version>1.3.1.RELEASE</version>
+                <version>1.3.5.RELEASE</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
             <dependency>
                 <groupId>io.spring.platform</groupId>
                 <artifactId>platform-bom</artifactId>
-                <version>2.0.1.RELEASE</version>
+                <version>${spring-platform.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
             <dependency>
                 <groupId>io.terminus</groupId>
                 <artifactId>terminus-common</artifactId>
-                <version>2.0-SNAPSHOT</version>
+                <version>${terminus-common.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.alibaba</groupId>

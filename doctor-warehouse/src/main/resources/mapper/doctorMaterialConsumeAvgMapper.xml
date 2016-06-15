@@ -14,6 +14,7 @@
         <result column="ware_house_id" property="wareHouseId"/>
         <result column="material_id" property="materialId"/>
         <result column="type" property="type"/>
+        <result column="lot_consume_day" property="lotConsumeDay"/>
         <result column="consume_avg_count" property="consumeAvgCount"/>
         <result column="consume_count" property="consumeCount"/>
         <result column="consume_date" property="consumeDate"/>
@@ -30,11 +31,11 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        `farm_id`,`ware_house_id`,`material_id`,`type`,`consume_avg_count`,`consume_count`,`consume_date`,`extra`,`created_at`,`updated_at`
+        `farm_id`,`ware_house_id`,`material_id`,`type`,`lot_consume_day`,`consume_avg_count`,`consume_count`,`consume_date`,`extra`,`created_at`,`updated_at`
     </sql>
 
     <sql id="vals">
-        #{farmId},#{wareHouseId},#{materialId},#{type},#{consumeAvgCount},#{consumeCount},#{consumeDate},#{extra},now(),now()
+        #{farmId},#{wareHouseId},#{materialId},#{type},#{lotConsumeDay},#{consumeAvgCount},#{consumeCount},#{consumeDate},#{extra},now(),now()
     </sql>
 
     <sql id="criteria">
@@ -55,7 +56,7 @@
         ( <include refid="cols_exclude_id"/> )
         VALUES
         <foreach collection="list" item="i" separator=",">
-        (#{i.farmId},#{i.wareHouseId},#{i.materialId},#{type},#{i.consumeAvgCount},#{i.consumeCount},#{i.consumeDate},#{i.extra},now(),now())
+        (#{i.farmId},#{i.wareHouseId},#{i.materialId},#{type},#{lotConsumeDay},#{i.consumeAvgCount},#{i.consumeCount},#{i.consumeDate},#{i.extra},now(),now())
         </foreach>
     </insert>
 
@@ -100,6 +101,7 @@
         <if test="wareHouseId != null" > ,`ware_house_id` = #{wareHouseId}</if>
         <if test="materialId != null" > ,`material_id` = #{materialId}</if>
         <if test="type != null"> ,`type` = #{type} </if>
+        <if test="lotConsumeDay != null">, `lot_consume_day`=#{lotConsumeDay}</if>
         <if test="consumeAvgCount != null" > ,`consume_avg_count` = #{consumeAvgCount}</if>
         <if test="consumeCount != null" > ,`consume_count` = #{consumeCount}</if>
         <if test="consumeDate != null" > ,`consume_date` = #{consumeDate}</if>

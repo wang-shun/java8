@@ -7,13 +7,13 @@
 package io.terminus.doctor.common.utils;
 
 import com.google.common.base.Strings;
-import com.google.common.collect.Maps;
 
 import javax.annotation.Nullable;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
-import static com.google.common.base.Preconditions.*;
+import static com.google.common.base.Preconditions.checkNotNull;
 /**
  * Author: haolin
  * On: 12/1/14
@@ -24,13 +24,15 @@ public final class Params {
      * 过滤Map中的NULL或""值
      */
     public static Map<String, Object> filterNullOrEmpty(Map<String, Object> criteria) {
-        return Maps.filterEntries(criteria, entry -> {
-            Object v = entry.getValue();
-            if (v instanceof String) {
-                return !Strings.isNullOrEmpty((String) v);
-            }
-            return v != null;
-        });
+        return criteria.entrySet().stream()
+                .filter(entry -> {
+                    Object v = entry.getValue();
+                    if (v instanceof String) {
+                        return !Strings.isNullOrEmpty(String.valueOf(v));
+                    }
+                    return v != null;
+                })
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
     public static @Nullable String trimToNull(@Nullable String str) {

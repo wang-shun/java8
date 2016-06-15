@@ -4,18 +4,24 @@ import com.google.api.client.repackaged.com.google.common.base.Strings;
 import com.google.common.base.Throwables;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.Paging;
+import io.terminus.common.model.Response;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dto.DoctorPigInfoDto;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.event.service.DoctorPigEventReadService;
+import io.terminus.doctor.event.service.DoctorPigEventWriteService;
 import io.terminus.doctor.event.service.DoctorPigReadService;
+import io.terminus.pampas.common.UserUtil;
+import io.terminus.parana.user.model.User;
+import io.terminus.parana.user.service.UserReadService;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -39,12 +45,44 @@ public class DoctorPigEvents {
 
     private final DoctorPigEventReadService doctorPigEventReadService;
 
+    private final DoctorPigEventWriteService doctorPigEventWriteService;
+
+    private final UserReadService userReadService;
+
     private static final DateTimeFormatter DTF = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss");
 
     @Autowired
-    public DoctorPigEvents(DoctorPigReadService doctorPigReadService, DoctorPigEventReadService doctorPigEventReadService){
+    public DoctorPigEvents(DoctorPigReadService doctorPigReadService,
+                           DoctorPigEventReadService doctorPigEventReadService,
+                           DoctorPigEventWriteService doctorPigEventWriteService,
+                           UserReadService userReadService){
         this.doctorPigReadService = doctorPigReadService;
         this.doctorPigEventReadService = doctorPigEventReadService;
+        this.doctorPigEventWriteService = doctorPigEventWriteService;
+        this.userReadService = userReadService;
+    }
+
+    /**
+     * 回滚事件信息
+     * @param pigEventId
+     * @param revertPigType
+     * @return
+     */
+    @RequestMapping(value = "/rollBackPigEvent", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public Long rollBackPigEvent(@RequestParam("pigEventId") Long pigEventId,
+                                 @RequestParam("revertPigType") Integer revertPigType){
+        Long userId = null;
+        String userName = null;
+        try{
+            userId = UserUtil.getUserId();
+            Response<User> userResponse = userReadService.findById(userId);
+            userName = userResponse.getResult().getName();
+        }catch (Exception e){
+            log.error("get user info error, cause:{}", Throwables.getStackTraceAsString(e));
+            throw new JsonResponseException("query.userInfo.error");
+        }
+        return RespHelper.or500(doctorPigEventWriteService.rollBackPigEvent(pigEventId, revertPigType, userId, userName));
     }
 
     @RequestMapping(value = "/pagingDoctorInfo", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -77,9 +115,9 @@ public class DoctorPigEvents {
         }
     }
 
-    @RequestMapping(value = "/queryPigEvents", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(value = "/queryPigEvents", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public List<Integer> queryPigExecuteEvent(@RequestParam("pigIds") List<Long> pigIds){
+    public List<Integer> queryPigExecuteEvent(@RequestBody List<Long> pigIds){
         return RespHelper.or500(doctorPigEventReadService.queryPigEvents(pigIds));
     }
 }

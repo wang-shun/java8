@@ -2,18 +2,22 @@
 <!-- 母猪状态简单流程开始 -->
 <workflow key="sow" name="母猪状态流图流转方式">
 
-    <!-- 开始节点 -->
-    <start name="待配种" assignee="" pointx="250" pointy="100">
-        <transition name="待配种" value="9" target="已配种" handler="doctorSowMatingHandle" describe="配种事件" />
+    <start name="开始节点信息" assignee="" pointx="" pointy="">
+        <transition name="开始连线" target="待配种" describe="去待配种"/>
     </start>
+
+    <!-- 开始节点 -->
+    <task name="待配种" assignee="" pointx="250" pointy="100">
+        <transition name="待配种" value="9" target="已配种" handler="doctorSowMatingHandler" describe="配种事件" />
+    </task>
 
     <task name="已配种" assignee="" pointx="250" pointy="100">
         <transition name="配种事件连线" target="配种后操作方式" describe="配种后操作方式"/>
     </task>
 
     <decision name="配种后操作方式" pointx="" pointy="">
-        <transition name="配种后转舍事件" value="10" expression="#{eventType} equals 10" target="转舍A" handler="doctorSowChgLocationHandler"/>
-        <transition name="配种后妊娠检查" value="11" expression="#{eventType} equals 11" target="妊娠检查B" handler="doctorSowPregCheckHandler"/>
+        <transition name="配种后转舍事件" value="10" expression="${eventType} == 10" target="转舍A" handler="doctorSowChgLocationHandler"/>
+        <transition name="配种后妊娠检查" value="11" expression="${eventType} == 11" target="妊娠检查B" handler="doctorSowPregCheckHandler"/>
     </decision>
 
 
@@ -23,15 +27,15 @@
 
     <!-- 选择节点 -->
     <decision name="妊娠检查A结果" pointx="" pointy="">
-        <transition name="妊娠检查不确定" expression="#{checkResult} equals 0" target="转舍A" />
-        <transition name="妊娠检查阳性" expression="#{checkResult} equals 1" target="妊娠检查阳性" />
-        <transition name="妊娠检查阴性/返情/流产" expression="#{checkResult} equals 2 || #{checkResult} equals 3 || #{checkResult} equals 4" target="空怀"/>
+        <transition name="妊娠检查不确定" expression="${checkResult} == 0" target="转舍A" />
+        <transition name="妊娠检查阳性" expression="${checkResult} == 1" target="妊娠检查阳性" />
+        <transition name="妊娠检查阴性/返情/流产" expression="${checkResult} == 2 || ${checkResult} == 3 || ${checkResult} == 4" target="空怀"/>
     </decision>
 
     <decision name="妊娠检查B">
-        <transition name="妊娠检查不确定" expression="#{checkResult} equals 0" target="已配种" />
-        <transition name="妊娠检查阳性" expression="#{checkResult} equals 1" target="转舍B" />
-        <transition name="妊娠检查阴性/返情/流产" expression="#{checkResult} equals 2 || #{checkResult} equals 3 || #{checkResult} equals 4" target="空怀"/>
+        <transition name="妊娠检查不确定" expression="${checkResult} == 0" target="已配种" />
+        <transition name="妊娠检查阳性" expression="${checkResult} == 1" target="转舍B" />
+        <transition name="妊娠检查阴性/返情/流产" expression="${checkResult} == 2 || ${checkResult} == 3 || ${checkResult} == 4" target="待配种"/>
     </decision>
 
     <task name="转舍B">
@@ -47,8 +51,8 @@
     </task>
 
     <decision name="妊娠检查阳性后事件录入">
-        <transition name="去分娩" value="14" expression="#{eventType} equals 14" target="待分娩" handler="doctorSowChgLocationHandler"/>
-        <transition name="去流产" value="13" expression="#{eventType} equals 13" target="流产" handler="doctorSowAbortionHandler"/>
+        <transition name="去分娩" value="14" expression="${eventType} == 14" target="待分娩" handler="doctorSowChgLocationHandler"/>
+        <transition name="去流产" value="13" expression="#{eventType} == 13" target="流产" handler="doctorSowAbortionHandler"/>
     </decision>
 
     <task name="流产">
@@ -64,13 +68,19 @@
     </task>
 
     <decision name="哺乳后事件录入">
-        <transition name="拼窝" value="17" expression="#{eventType} equals 17" target="哺乳" handler="doctorSowFostersHandler"/>
-        <transition name="断奶事件" value="16" expression="#{eventType} equals 16" handler="doctorSowWeanHandler" target="断奶事件判断"/>
+        <transition name="拼窝" value="17" expression="${eventType} == 17" target="哺乳" handler="doctorSowFostersHandler"/>
+        <transition name="被拼窝" value="19" expression="${eventType} == 19" target="被拼窝事件判断" handler="doctorSowFostersByHandler"/>
+        <transition name="断奶事件" value="16" expression="${eventType} == 16" handler="doctorSowWeanHandler" target="断奶事件判断"/>
+    </decision>
+
+    <decision name="被拼窝事件判断">
+        <transition name="进入哺乳" expression="${status} == 8" target="哺乳"/>
+        <transition name="进入断奶" expression="${status} == 9" target="断奶"/>
     </decision>
 
     <decision name="断奶事件判断">
-        <transition name="部分断奶" expression="#{leftCount} > 0" target="哺乳"/>
-        <transition name="全部断奶" expression="#{leftCount} = 0" target="断奶"/>
+        <transition name="部分断奶" expression="${leftCount} > 0" target="哺乳"/>
+        <transition name="全部断奶" expression="${leftCount} == 0" target="断奶"/>
     </decision>
 
     <task name="断奶">
@@ -78,8 +88,8 @@
     </task>
 
     <decision name="断奶后事件">
-        <transition name="拼窝" value="17" expression="#{eventType} equals 17" target="哺乳" handler="doctorSowFostersHandler"/>
-        <transition name="去配种" value="12" expression="#{eventType} equals 12" target="待配种" handler="doctorSowChgLocationHandler"/>
+        <transition name="拼窝" value="17" expression="${eventType} == 17" target="哺乳" handler="doctorSowFostersHandler"/>
+        <transition name="去配种" value="12" expression="${eventType} == 12" target="待配种" handler="doctorSowChgLocationHandler"/>
     </decision>
 
     <!-- 结束节点 -->

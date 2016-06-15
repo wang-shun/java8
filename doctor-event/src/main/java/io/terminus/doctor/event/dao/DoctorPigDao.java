@@ -48,4 +48,13 @@ public class DoctorPigDao extends MyBatisDao<DoctorPig> {
         return getSqlSession().selectList(sqlId("listSince"),
                 ImmutableMap.of("lastId", lastId, "limit", limit, "since", since));
     }
+
+    /**
+     * 母猪设置离场
+     * @param id
+     * @return
+     */
+    public Boolean removalPig(Long id){
+        return this.getSqlSession().update(sqlId("removalPig"), id) == 1;
+    }
 }

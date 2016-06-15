@@ -10,6 +10,8 @@ import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.handler.DoctorAbstractEventFlowHandler;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.workflow.core.Execution;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.util.Map;
 import java.util.Objects;
@@ -22,8 +24,10 @@ import static com.google.common.base.Preconditions.checkState;
  * Email:yaoqj@terminus.io
  * Descirbe: 仔猪变动事件 （仔猪转出信息的录入方式）
  */
+@Component
 public class DoctorSowPigletsChgHandler extends DoctorAbstractEventFlowHandler{
 
+    @Autowired
     public DoctorSowPigletsChgHandler(DoctorPigDao doctorPigDao, DoctorPigEventDao doctorPigEventDao,
                                       DoctorPigTrackDao doctorPigTrackDao, DoctorPigSnapshotDao doctorPigSnapshotDao,
                                       DoctorRevertLogDao doctorRevertLogDao) {

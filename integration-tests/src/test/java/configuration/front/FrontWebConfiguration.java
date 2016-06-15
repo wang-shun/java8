@@ -19,18 +19,7 @@ import io.terminus.doctor.web.core.msg.sms.LuoSiMaoSmsServiceConfig;
 import io.terminus.doctor.web.core.service.OtherSystemServiceConfig;
 import io.terminus.pampas.openplatform.core.Gateway;
 import io.terminus.parana.auth.core.AuthenticationConfiguration;
-import io.terminus.parana.auth.web.WebAuthenticationConfiguration;
 import io.terminus.parana.web.msg.config.MsgWebConfig;
-import io.terminus.parana.web.msg.config.db.DbAppPushConfig;
-import io.terminus.parana.web.msg.config.db.DbEmailConfig;
-import io.terminus.parana.web.msg.config.db.DbNotifyConfig;
-import io.terminus.parana.web.msg.config.db.DbSmsConfig;
-import io.terminus.parana.web.msg.config.gatewaybuilder.SimpleMsgGatewayBuilderConfig;
-import io.terminus.parana.web.msg.config.test.TestAppPushWebServiceConfig;
-import io.terminus.parana.web.msg.config.test.TestEmailWebServiceConfig;
-import io.terminus.parana.web.msg.config.test.TestNotifyWebServiceConfig;
-import io.terminus.parana.web.msg.config.test.TestSmsWebServiceConfig;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -71,6 +60,7 @@ import java.util.List;
 @ComponentScan(value = {
         "io.terminus.doctor.web.core.component",
         "io.terminus.doctor.web.front",
+        "io.terminus.doctor.web.component",
         "io.terminus.parana.auth.web"
 }, excludeFilters = {
         @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = {

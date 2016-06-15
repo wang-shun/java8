@@ -1,12 +1,13 @@
 package io.terminus.doctor.web.front.event.impl;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Throwables;
 import io.terminus.common.model.Response;
-import io.terminus.common.utils.BeanMapper;
+import io.terminus.common.utils.JsonMapper;
+import io.terminus.doctor.common.constants.JacksonType;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorAbortionDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorFarrowingDto;
-import io.terminus.doctor.event.dto.event.sow.DoctorFostersDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorMatingDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorPartWeanDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorPigletsChgDto;
@@ -15,10 +16,12 @@ import io.terminus.doctor.event.dto.event.usual.DoctorChgLocationDto;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.service.DoctorPigEventWriteService;
 import io.terminus.doctor.web.front.event.service.DoctorSowEventCreateService;
+import io.terminus.zookeeper.pubsub.Subscriber;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -31,40 +34,58 @@ import java.util.Map;
 @Slf4j
 public class DoctorSowEventCreateServiceImpl implements DoctorSowEventCreateService{
 
+    private final ObjectMapper OBJECT_MAPPER = JsonMapper.JSON_NON_DEFAULT_MAPPER.getMapper();
+
     private final DoctorPigEventWriteService doctorPigEventWriteService;
+
+    @Autowired(required = false)
+    private Subscriber subscriber;
 
     @Autowired
     public DoctorSowEventCreateServiceImpl(DoctorPigEventWriteService doctorPigEventWriteService){
         this.doctorPigEventWriteService = doctorPigEventWriteService;
+
+        // TODO 确认消耗领取相关字段信息
+//        if(subscriber != null){
+//            try{
+//                subscriber.subscribe(data->{
+//                    DataEvent dataEvent = DataEvent.fromBytes(data);
+//                    if(!Objects.equals(dataEvent.getEventType(), DataEventType.VaccinationMedicalConsume.getKey())){
+//                        return;
+//                    }
+//                    sowPigsEventCreateByConsume(dataEvent.getContent());
+//                });
+//            }catch (Exception e){
+//                log.error("subscriber callback fail, cause:{}", Throwables.getStackTraceAsString(e));
+//            }
+//        }
     }
 
     @Override
-    public Response<Long> sowEventCreate(DoctorBasicInputInfoDto doctorBasicInputInfoDto, Map<String, Object> params) {
+    public Response<Long> sowEventCreate(DoctorBasicInputInfoDto doctorBasicInputInfoDto, String sowInfoDtoJson) {
         try{
 
             PigEvent pigEvent = PigEvent.from(doctorBasicInputInfoDto.getEventType());
 
             switch (pigEvent){
                 case MATING:
-                    return doctorPigEventWriteService.sowMatingEvent(BeanMapper.map(params, DoctorMatingDto.class), doctorBasicInputInfoDto);
+                    return doctorPigEventWriteService.sowMatingEvent(JsonMapper.JSON_NON_DEFAULT_MAPPER.fromJson(sowInfoDtoJson, DoctorMatingDto.class), doctorBasicInputInfoDto);
                 case TO_PREG:
-                    return doctorPigEventWriteService.chgLocationEvent(BeanMapper.map(params, DoctorChgLocationDto.class), doctorBasicInputInfoDto);
+                    return doctorPigEventWriteService.chgSowLocationEvent(JsonMapper.JSON_NON_DEFAULT_MAPPER.fromJson(sowInfoDtoJson, DoctorChgLocationDto.class), doctorBasicInputInfoDto);
                 case PREG_CHECK:
-                    return doctorPigEventWriteService.sowPregCheckEvent(BeanMapper.map(params, DoctorPregChkResultDto.class), doctorBasicInputInfoDto);
+                    return doctorPigEventWriteService.sowPregCheckEvent(JsonMapper.JSON_NON_DEFAULT_MAPPER.fromJson(sowInfoDtoJson, DoctorPregChkResultDto.class), doctorBasicInputInfoDto);
                 case TO_MATING:
-                    return doctorPigEventWriteService.chgLocationEvent(BeanMapper.map(params, DoctorChgLocationDto.class), doctorBasicInputInfoDto);
+                    return doctorPigEventWriteService.chgSowLocationEvent(JsonMapper.JSON_NON_DEFAULT_MAPPER.fromJson(sowInfoDtoJson, DoctorChgLocationDto.class), doctorBasicInputInfoDto);
                 case ABORTION:
-                    return doctorPigEventWriteService.abortionEvent(BeanMapper.map(params, DoctorAbortionDto.class), doctorBasicInputInfoDto);
+                    return doctorPigEventWriteService.abortionEvent(JsonMapper.JSON_NON_DEFAULT_MAPPER.fromJson(sowInfoDtoJson, DoctorAbortionDto.class), doctorBasicInputInfoDto);
                 case TO_FARROWING:
-                    return doctorPigEventWriteService.chgLocationEvent(BeanMapper.map(params, DoctorChgLocationDto.class), doctorBasicInputInfoDto);
+                    return doctorPigEventWriteService.chgSowLocationEvent(JsonMapper.JSON_NON_DEFAULT_MAPPER.fromJson(sowInfoDtoJson, DoctorChgLocationDto.class), doctorBasicInputInfoDto);
                 case FARROWING:
-                    return doctorPigEventWriteService.sowFarrowingEvent(BeanMapper.map(params, DoctorFarrowingDto.class), doctorBasicInputInfoDto);
+                    return doctorPigEventWriteService.sowFarrowingEvent(JsonMapper.JSON_NON_DEFAULT_MAPPER.fromJson(sowInfoDtoJson, DoctorFarrowingDto.class), doctorBasicInputInfoDto);
                 case WEAN:
-                    return doctorPigEventWriteService.sowPartWeanEvent(BeanMapper.map(params, DoctorPartWeanDto.class), doctorBasicInputInfoDto);
-                case FOSTERS:
-                    return doctorPigEventWriteService.sowFostersEvent(BeanMapper.map(params, DoctorFostersDto.class), doctorBasicInputInfoDto);
+                    return doctorPigEventWriteService.sowPartWeanEvent(JsonMapper.JSON_NON_DEFAULT_MAPPER.fromJson(sowInfoDtoJson, DoctorPartWeanDto.class), doctorBasicInputInfoDto);
                 case PIGLETS_CHG:
-                    return doctorPigEventWriteService.sowPigletsChgEvent(BeanMapper.map(params, DoctorPigletsChgDto.class), doctorBasicInputInfoDto);
+                    return doctorPigEventWriteService.sowPigletsChgEvent(JsonMapper.JSON_NON_DEFAULT_MAPPER.fromJson(sowInfoDtoJson, DoctorPigletsChgDto.class), doctorBasicInputInfoDto);
                 default:
                     return Response.fail("create.sowEvent.fail");
             }
@@ -73,4 +94,43 @@ public class DoctorSowEventCreateServiceImpl implements DoctorSowEventCreateServ
             return Response.fail("create.sowEvent.fail");
         }
     }
+
+    @Override
+    public Response<Long> sowEventsCreate(List<DoctorBasicInputInfoDto> dtoList, String sowInfoDtoJson) {
+        try{
+            Map<String, Object> extra = OBJECT_MAPPER.readValue(sowInfoDtoJson, JacksonType.MAP_OF_OBJECT);
+            doctorPigEventWriteService.sowPigsEventCreate(dtoList, extra);
+            return Response.ok();
+        }catch (Exception e){
+            log.error("create sow events list fail, cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("create.sowEvents.fail");
+        }
+    }
+
+    @Override
+    public Response<Boolean> casualEventsCreate(List<DoctorBasicInputInfoDto> dtoList, String sowInfoDtoJson) {
+        try{
+            Map<String,Object> extra = OBJECT_MAPPER.readValue(sowInfoDtoJson, JacksonType.MAP_OF_OBJECT);
+            return doctorPigEventWriteService.casualPigsEventCreate(dtoList, extra);
+        }catch (Exception e){
+            log.error("casual event create fail, cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("create.casualEvent.fail");
+        }
+    }
+
+//    @Override
+//    public Response<Boolean> sowPigsEventCreateByConsume(String paramsJson) {
+//        try{
+//            Map<String,Object> paramsMap = OBJECT_MAPPER.readValue(paramsJson, JacksonType.MAP_OF_OBJECT);
+//
+//            // basic input info
+//            Long barnId = Long.valueOf(paramsMap.get("barnId").toString());
+//
+//
+//            return Response.ok(Boolean.TRUE);
+//        }catch (Exception e){
+//            log.error("sow pigs event create fail, cause:{}", Throwables.getStackTraceAsString(e));
+//            return Response.fail("consume.eventCreate.fail");
+//        }
+//    }
 }

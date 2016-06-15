@@ -27,6 +27,9 @@ public class DoctorMaterialConsumeProviderDto implements Serializable{
      */
     private Integer actionType;
 
+    /**
+     * @see io.terminus.doctor.warehouse.enums.WareHouseType
+     */
     private Integer type;   //领取物料类型
 
     private Long farmId;    //对应的猪场信息
