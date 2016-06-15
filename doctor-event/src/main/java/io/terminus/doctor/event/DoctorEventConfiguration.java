@@ -41,7 +41,6 @@ import io.terminus.zookeeper.pubsub.Publisher;
 import io.terminus.zookeeper.pubsub.Subscriber;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -64,7 +63,7 @@ import java.util.List;
         "io.terminus.doctor.event",
 })
 @Import({DoctorWorkflowConfiguration.class, DoctorCommonConfiguration.class})
-@AutoConfigureAfter(MybatisAutoConfiguration.class)
+@AutoConfigureAfter({MybatisAutoConfiguration.class})
 public class  DoctorEventConfiguration {
 
     @Bean
@@ -93,7 +92,6 @@ public class  DoctorEventConfiguration {
     }
 
     @Configuration
-    @ConditionalOnBean(ZKClientFactory.class)
     @Profile("zookeeper")
     public static class ZookeeperConfiguration{
 
@@ -105,7 +103,7 @@ public class  DoctorEventConfiguration {
 
         @Bean
         public Publisher cachePublisherBean(ZKClientFactory zkClientFactory,
-                                            @Value("${zookeeper.zkTopic}}") String zkTopic) throws Exception{
+                                            @Value("${zookeeper.zkTopic}") String zkTopic) throws Exception{
             return new Publisher(zkClientFactory, zkTopic);
         }
     }

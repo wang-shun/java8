@@ -15,18 +15,12 @@ import io.terminus.parana.auth.role.CustomRoleLoaderConfigurer;
 import io.terminus.parana.auth.role.CustomRoleLoaderRegistry;
 import io.terminus.parana.auth.web.WebAuthenticationConfiguration;
 import io.terminus.parana.web.msg.config.MsgWebConfig;
-import io.terminus.zookeeper.ZKClientFactory;
-import io.terminus.zookeeper.pubsub.Publisher;
-import io.terminus.zookeeper.pubsub.Subscriber;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.FilterType;
 import org.springframework.context.annotation.Import;
-import org.springframework.context.annotation.Profile;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
@@ -55,24 +49,6 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
         CommonEmailServiceConfig.class,
 })
 public class DoctorWebConfiguration extends WebMvcConfigurerAdapter {
-
-    @Configuration
-    @ConditionalOnBean(ZKClientFactory.class)
-    @Profile("zookeeper")
-    public static class ZookeeperConfiguration{
-
-        @Bean
-        public Subscriber cacheListenerBean(ZKClientFactory zkClientFactory,
-                                            @Value("${zookeeper.zkTopic}") String zkTopic) throws Exception{
-            return new Subscriber(zkClientFactory,zkTopic);
-        }
-
-        @Bean
-        public Publisher cachePublisherBean(ZKClientFactory zkClientFactory,
-                                            @Value("${zookeeper.zkTopic}}") String zkTopic) throws Exception{
-            return new Publisher(zkClientFactory, zkTopic);
-        }
-    }
 
     @Bean
     public CustomRoleLoaderConfigurer customRoleLoaderConfigurer(CustomRoleLoaderRegistry customRoleLoaderRegistry, SubRoleReadService subRoleReadService) {
