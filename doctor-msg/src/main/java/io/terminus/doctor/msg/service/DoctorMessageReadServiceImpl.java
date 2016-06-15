@@ -52,7 +52,9 @@ public class DoctorMessageReadServiceImpl implements DoctorMessageReadService {
             criteria.put("types", ImmutableList.of(
                     DoctorMessageRuleTemplate.Type.WARNING.getValue(), DoctorMessageRuleTemplate.Type.ERROR.getValue()));
             criteria.put("channel", Rule.Channel.SYSTEM.getValue());
-            criteria.putIfAbsent("status", DoctorMessage.Status.NORMAL.getValue());
+            if (criteria.get("status") == null) {
+                criteria.put("statuses", ImmutableList.of(DoctorMessage.Status.NORMAL.getValue(), DoctorMessage.Status.READED.getValue()));
+            }
             return Response.ok(doctorMessageDao.paging(pageInfo.getOffset(), pageInfo.getLimit(), criteria));
         } catch (Exception e) {
             log.error("paging message by criteria failed, criteria is {}, cause by {}", criteria, Throwables.getStackTraceAsString(e));
@@ -67,7 +69,9 @@ public class DoctorMessageReadServiceImpl implements DoctorMessageReadService {
             // 获取系统消息
             criteria.put("type", DoctorMessageRuleTemplate.Type.SYSTEM.getValue());
             criteria.put("channel", Rule.Channel.SYSTEM.getValue());
-            criteria.putIfAbsent("status", DoctorMessage.Status.NORMAL.getValue());
+            if (criteria.get("status") == null) {
+                criteria.put("statuses", ImmutableList.of(DoctorMessage.Status.NORMAL.getValue(), DoctorMessage.Status.READED.getValue()));
+            }
             return Response.ok(doctorMessageDao.paging(pageInfo.getOffset(), pageInfo.getLimit(), criteria));
         } catch (Exception e) {
             log.error("paging message by criteria failed, criteria is {}, cause by {}", criteria, Throwables.getStackTraceAsString(e));

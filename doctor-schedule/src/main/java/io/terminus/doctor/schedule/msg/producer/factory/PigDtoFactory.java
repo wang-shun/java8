@@ -62,7 +62,7 @@ public class PigDtoFactory {
             return new Date((Long) JsonMapper.JSON_NON_DEFAULT_MAPPER.getMapper()
                     .readValue(pigDto.getExtraTrack(), Map.class).get("matingDate"));
         } catch (Exception e) {
-            log.error("[SowBirthDateProducer] get birth date failed, cause by {}", Throwables.getStackTraceAsString(e));
+            log.error("[PigDtoFactory] get birth date failed, cause by {}", Throwables.getStackTraceAsString(e));
         }
         return null;
     }
@@ -87,7 +87,7 @@ public class PigDtoFactory {
                 }
             }
         } catch (Exception e) {
-            log.error("[SowBirthDateProducer] get birth date failed, cause by {}", Throwables.getStackTraceAsString(e));
+            log.error("[PigDtoFactory] get birth date failed, cause by {}", Throwables.getStackTraceAsString(e));
         }
         return null;
     }

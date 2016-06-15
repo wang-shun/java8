@@ -13,6 +13,7 @@ import io.terminus.doctor.event.dto.DoctorPigInfoDto;
 import io.terminus.doctor.event.enums.DataRange;
 import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.enums.VaccinationDateType;
+import io.terminus.doctor.event.model.DoctorGroupTrack;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorVaccinationPigWarn;
 import io.terminus.doctor.event.service.DoctorGroupReadService;
@@ -30,6 +31,7 @@ import io.terminus.doctor.msg.service.DoctorMessageRuleReadService;
 import io.terminus.doctor.msg.service.DoctorMessageRuleRoleReadService;
 import io.terminus.doctor.msg.service.DoctorMessageRuleTemplateReadService;
 import io.terminus.doctor.msg.service.DoctorMessageWriteService;
+import io.terminus.doctor.schedule.msg.producer.factory.GroupDetailFactory;
 import io.terminus.doctor.schedule.msg.producer.factory.PigDtoFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -99,6 +101,13 @@ public class PigVaccinationProducer extends AbstractProducer {
                 return messages;
             }
             for (DoctorVaccinationPigWarn warn : vaccinationWarns) {
+                // 判断规则是否在有效期内
+                if (warn.getStartDate() != null && DateTime.now().isBefore(new DateTime(warn.getStartDate()))) {
+                    continue;
+                }
+                if (warn.getEndDate() != null && DateTime.now().isAfter(new DateTime(warn.getEndDate()))) {
+                    continue;
+                }
                 PigType pigType = PigType.from(warn.getPigType());
                 if (pigType == null) {
                     continue;
@@ -124,6 +133,18 @@ public class PigVaccinationProducer extends AbstractProducer {
                     // 后备公猪/种公猪
                     case RESERVE_BOAR:case BOAR:
                         checkReservePig(warn, ruleRole, rule, subUsers, DoctorPig.PIG_TYPE.BOAR.getKey());
+                        break;
+                    // 保育猪
+                    case NURSERY_PIGLET:
+                        checkPigGroup(warn, ruleRole, rule, subUsers, PigType.NURSERY_PIGLET.getValue());
+                        break;
+                    // 育肥猪
+                    case FATTEN_PIG:
+                        checkPigGroup(warn, ruleRole, rule, subUsers, PigType.FATTEN_PIG.getValue());
+                        break;
+                    // 产房仔猪
+                    case FARROW_PIGLET:
+                        checkPigGroup(warn, ruleRole, rule, subUsers, PigType.FARROW_PIGLET.getValue());
                         break;
                     default:
                         break;
@@ -320,8 +341,30 @@ public class PigVaccinationProducer extends AbstractProducer {
         List<DoctorGroupDetail> groupInfos = getGroupInfos(ruleRole, pigType);
         for (int i = 0; groupInfos != null && i < groupInfos.size(); i++) {
             DoctorGroupDetail groupInfo = groupInfos.get(i);
-            // 1. 固定日龄
-
+            DoctorGroupTrack groupTrack = groupInfo.getGroupTrack();
+            if (groupTrack != null) {
+                DateTime vaccDate = getGroupVaccinationDate(groupTrack);
+                // 1. 固定日龄
+                if (checkFixedDayAge(warn, groupTrack.getAvgDayAge(), vaccDate)) {
+                    doctorMessageWriteService.createMessages(
+                            getGroupMessage(groupInfo, rule.getChannels(), ruleRole, subUsers, null, rule.getUrl()));
+                }
+                // 2. 固定日期
+                if (checkFixedDate(warn, vaccDate)) {
+                    doctorMessageWriteService.createMessages(
+                            getGroupMessage(groupInfo, rule.getChannels(), ruleRole, subUsers, null, rule.getUrl()));
+                }
+                // 3. 固定体重
+                if (checkFixedWeight(warn, vaccDate, groupTrack.getAvgWeight(), null)) {
+                    doctorMessageWriteService.createMessages(
+                            getGroupMessage(groupInfo, rule.getChannels(), ruleRole, subUsers, null, rule.getUrl()));
+                }
+                // 4. 转群
+                if (checkChangeGroup(warn, vaccDate, getChangeGroupDate(groupTrack))) {
+                    doctorMessageWriteService.createMessages(
+                            getGroupMessage(groupInfo, rule.getChannels(), ruleRole, subUsers, null, rule.getUrl()));
+                }
+            }
         }
     }
 
@@ -375,7 +418,7 @@ public class PigVaccinationProducer extends AbstractProducer {
         if (Objects.equals(VaccinationDateType.FIXED_WEIGHT.getValue(), warn.getVaccinationDateType())) {
             if (weight >= warn.getInputValue()) {
                 // 如果免疫时间 小于 (到达规则体重的日期), 则生成消息
-                DateTime weightTime = checkWeightTime;
+                // DateTime weightTime = checkWeightTime;
                 if (vaccDate == null /*|| vaccDate.isBefore(weightTime)*/) { //  如果没有免疫, 就免疫
                     return true;
                 }
@@ -395,6 +438,26 @@ public class PigVaccinationProducer extends AbstractProducer {
         if (Objects.equals(VaccinationDateType.CHANGE_LOC.getValue(), warn.getVaccinationDateType())) {
             // (当前日期 - 配置的天数) 大于 转舍日期
             if (DateTime.now().minusDays(warn.getInputValue()).isAfter(chgLocTime)) {
+                // 如果免疫过了, 就不提醒
+                if (vaccDate == null) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * 校验转群后是否达到规则要求
+     * @param warn          免疫程序
+     * @param vaccDate      免疫时间
+     * @param chgGroupTime    转舍时间
+     * @return
+     */
+    private boolean checkChangeGroup(DoctorVaccinationPigWarn warn, DateTime vaccDate, DateTime chgGroupTime) {
+        if (Objects.equals(VaccinationDateType.CHANGE_GROUP.getValue(), warn.getVaccinationDateType())) {
+            // (当前日期 - 配置的天数) 大于 转群日期
+            if (DateTime.now().minusDays(warn.getInputValue()).isAfter(chgGroupTime)) {
                 // 如果免疫过了, 就不提醒
                 if (vaccDate == null) {
                     return true;
@@ -455,7 +518,7 @@ public class PigVaccinationProducer extends AbstractProducer {
             Date date = new Date((Long) MAPPER.readValue(pigDto.getExtraTrack(), Map.class).get("vaccinationDate"));
             return new DateTime(date);
         } catch (Exception e) {
-            log.error("[SowBirthDateProducer] get vaccination date failed, cause by {}", Throwables.getStackTraceAsString(e));
+            log.error("[PigVaccinationProducer] get vaccination date failed, cause by {}", Throwables.getStackTraceAsString(e));
         }
         return null;
     }
@@ -463,11 +526,29 @@ public class PigVaccinationProducer extends AbstractProducer {
     /**
      * 获取猪群的最新免疫时间
      */
-    private DateTime getGroupVaccinationDate(DoctorGroupDetail detail) {
+    private DateTime getGroupVaccinationDate(DoctorGroupTrack track) {
         try{
-
+            Date antiepidemicAt = track.getExtraEntity().getAntiepidemicAt();
+            if (antiepidemicAt != null) {
+                return new DateTime(antiepidemicAt);
+            }
         } catch (Exception e) {
-            log.error(" ,cause by {}", Throwables.getStackTraceAsString(e));
+            log.error("[PigVaccinationProducer] get GroupVaccinationDate failed, cause by {}", Throwables.getStackTraceAsString(e));
+        }
+        return null;
+    }
+
+    /**
+     * 获取转群时间
+     */
+    private DateTime getChangeGroupDate(DoctorGroupTrack track) {
+        try{
+            Date trantsGroupAt = track.getExtraEntity().getTransGroupAt();
+            if (trantsGroupAt != null) {
+                return new DateTime(trantsGroupAt);
+            }
+        } catch (Exception e) {
+            log.error("[PigVaccinationProducer] get trantsGroup date failed, cause by {}", Throwables.getStackTraceAsString(e));
         }
         return null;
     }
@@ -481,7 +562,7 @@ public class PigVaccinationProducer extends AbstractProducer {
             Date date = new Date((Long) MAPPER.readValue(pigDto.getExtraTrack(), Map.class).get("conditionDate"));
             return new DateTime(date);
         } catch (Exception e) {
-            log.error("[SowBirthDateProducer] get check weight date failed, cause by {}", Throwables.getStackTraceAsString(e));
+            log.error("[PigVaccinationProducer] get check weight date failed, cause by {}", Throwables.getStackTraceAsString(e));
         }
         return null;
     }
@@ -495,7 +576,7 @@ public class PigVaccinationProducer extends AbstractProducer {
             Date date = new Date((Long) MAPPER.readValue(pigDto.getExtraTrack(), Map.class).get("changeLocationDate"));
             return new DateTime(date);
         } catch (Exception e) {
-            log.error("[SowBirthDateProducer] get change location date failed, cause by {}", Throwables.getStackTraceAsString(e));
+            log.error("[PigVaccinationProducer] get change location date failed, cause by {}", Throwables.getStackTraceAsString(e));
         }
         return null;
     }
@@ -508,6 +589,24 @@ public class PigVaccinationProducer extends AbstractProducer {
         List<DoctorMessage> messages = Lists.newArrayList();
         // 创建消息
         Map<String, Object> jsonData = PigDtoFactory.getInstance().createPigMessage(pigDto, timeDiff, url);
+
+        Splitters.COMMA.splitToList(channels).forEach(channel -> {
+            try {
+                messages.addAll(createMessage(subUsers, ruleRole, Integer.parseInt(channel), MAPPER.writeValueAsString(jsonData)));
+            } catch (JsonProcessingException e) {
+                log.error("message produce error, cause by {}", Throwables.getStackTraceAsString(e));
+            }
+        });
+        return messages;
+    }
+
+    /**
+     * 创建消息
+     */
+    private List<DoctorMessage> getGroupMessage(DoctorGroupDetail detail, String channels, DoctorMessageRuleRole ruleRole, List<SubUser> subUsers, Double timeDiff, String url) {
+        List<DoctorMessage> messages = Lists.newArrayList();
+        // 创建消息
+        Map<String, Object> jsonData = GroupDetailFactory.getInstance().createPigMessage(detail, timeDiff, url);
 
         Splitters.COMMA.splitToList(channels).forEach(channel -> {
             try {

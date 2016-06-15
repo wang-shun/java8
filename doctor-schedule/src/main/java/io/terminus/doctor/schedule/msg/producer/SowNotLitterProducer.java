@@ -142,7 +142,7 @@ public class SowNotLitterProducer extends AbstractProducer {
             Date date = new Date((Long) MAPPER.readValue(pigDto.getExtraTrack(), Map.class).get("matingDate"));
             return new DateTime(date);
         } catch (Exception e) {
-            log.error("[SowBirthDateProducer] get breeding date failed, cause by {}", Throwables.getStackTraceAsString(e));
+            log.error("[SowNotLitterProducer] get breeding date failed, cause by {}", Throwables.getStackTraceAsString(e));
         }
         return null;
     }
