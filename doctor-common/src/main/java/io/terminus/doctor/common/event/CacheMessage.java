@@ -9,7 +9,8 @@ import lombok.Getter;
  * Date: 2016年06月14日
  */
 public enum CacheMessage {
-    USER_DATA_PERMISSION(1, "用户数据权限更新");
+    USER_DATA_PERMISSION(1, "用户数据权限更新"),
+    USER_STAFF_INFO(2, "用户的员工信息变更");
 
     @Getter
     private long value;
