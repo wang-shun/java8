@@ -558,7 +558,7 @@ public class OPUsers {
      * @param dbpassword
      */
     private void checkPassword(String inputPassword, String dbpassword){
-        if(!Objects.equals(EncryptUtil.encrypt(inputPassword), dbpassword)){
+        if(!EncryptUtil.match(inputPassword, dbpassword)){
             throw new OPClientException("user.password.error");
         }
     }
