@@ -20,12 +20,10 @@ import org.springframework.context.annotation.*;
         "io.terminus.doctor.user"
 })
 @Import({UserAutoConfig.class, ExtraUserAutoConfig.class, FileAutoConfig.class, ArticleAutoConfig.class,
-        DoctorCommonConfiguration.class,
-        DoctorUserConfiguration.ZookeeperConfiguration.class})
+        DoctorCommonConfiguration.class})
 public class DoctorUserConfiguration {
 
     @Configuration
-    @ConditionalOnBean(ZKClientFactory.class)
     @Profile("zookeeper")
     public static class ZookeeperConfiguration{
 
