@@ -4,6 +4,7 @@ import com.github.jknack.handlebars.Template;
 import com.google.common.base.Throwables;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.Response;
+import io.terminus.doctor.msg.helper.DoctorHandleBarsHelper;
 import io.terminus.doctor.msg.helper.DoctorMessageTemplateCacher;
 import io.terminus.parana.msg.dto.MessageInfo;
 import io.terminus.parana.msg.impl.dao.mysql.MessageTemplateDao;
@@ -30,22 +31,26 @@ public class DoctorMessageTemplateReadServiceImpl extends MessageTemplateReadSer
 
     private final MessageTemplateDao messageTemplateDao;
     private final DoctorMessageTemplateCacher doctorMessageTemplateCacher;
+    private final DoctorHandleBarsHelper doctorHandleBarsHelper;
 
     @Autowired
     public DoctorMessageTemplateReadServiceImpl(MessageTemplateDao messageTemplateDao,
-                                                DoctorMessageTemplateCacher doctorMessageTemplateCacher) {
+                                                DoctorMessageTemplateCacher doctorMessageTemplateCacher,
+                                                DoctorHandleBarsHelper doctorHandleBarsHelper) {
         super(messageTemplateDao);
         this.messageTemplateDao = messageTemplateDao;
         this.doctorMessageTemplateCacher = doctorMessageTemplateCacher;
+        this.doctorHandleBarsHelper = doctorHandleBarsHelper;
     }
 
     @Override
     public Response<String> getMessageTitle(String templateName, Map<String, Serializable> context) {
         try {
             MessageTemplate template = messageTemplateDao.findByName(templateName);
-            return Response.ok(template != null ? template.getTitle() : null);
+            return Response.ok(template != null ? doctorHandleBarsHelper.compileInline(template.getTitle()).apply(context) : null);
         } catch (Exception e) {
-            log.error("get message title failed, templateName:{}, context:{}, cause:{}", templateName, context, Throwables.getStackTraceAsString(e));
+            log.error("get message title failed, templateName:{}, context:{}, cause:{}",
+                    templateName, context, Throwables.getStackTraceAsString(e));
             return Response.fail("get.message.title.failed");
         }
     }
@@ -54,7 +59,7 @@ public class DoctorMessageTemplateReadServiceImpl extends MessageTemplateReadSer
     public Response<String> getMessageContent(String templateName, Map<String, Serializable> context) {
         try {
             MessageTemplate template = messageTemplateDao.findByName(templateName);
-            return Response.ok(template != null ? template.getContent() : null);
+            return Response.ok(template != null ? doctorHandleBarsHelper.compileInline(template.getContent()).apply(context) : null);
         } catch (Exception e) {
             log.error("get message content failed, templateName:{}, context:{}, cause:{}", templateName, context, Throwables.getStackTraceAsString(e));
             return Response.fail("get.message.content.failed");
@@ -71,6 +76,8 @@ public class DoctorMessageTemplateReadServiceImpl extends MessageTemplateReadSer
                 messageInfo.setMessageTitle(template.getTitle());
                 messageInfo.setMessageContent(template.getContent());
             }
+            messageInfo.setMessageTitle(doctorHandleBarsHelper.compileInline(template.getTitle()).apply(context));
+            messageInfo.setMessageContent(doctorHandleBarsHelper.compileInline(template.getContent()).apply(context));
             return Response.ok(messageInfo);
         } catch (Exception e) {
             log.error("get message info failed, templateName:{}, context:{}, cause:{}", templateName, context, Throwables.getStackTraceAsString(e));
