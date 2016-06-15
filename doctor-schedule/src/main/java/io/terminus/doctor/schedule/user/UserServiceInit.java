@@ -10,6 +10,7 @@ import io.terminus.parana.user.model.User;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Configurable;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -22,7 +23,6 @@ import java.util.Objects;
  * 用户注册时有一个事件分发,在事件监听器中已经初始化了用户的服务状态,此job只是再做一次数据检查和处理,理论上不应该真的会有数据需要处理
  */
 @Slf4j
-@EnableScheduling
 @Component
 public class UserServiceInit {
     private final DoctorUserReadService doctorUserReadService;
