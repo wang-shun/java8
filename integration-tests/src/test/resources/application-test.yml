@@ -57,6 +57,10 @@ flow:
       sow: sow
       boar: boar
 
+zookeeper:
+  host: 101.201.44.35
+  port: 2181
+  zkTopic: pig.doctor.topic
 
 msg:
   test.enabled: true
@@ -104,3 +108,5 @@ parana:
     level: easy
     path: classpath:auth/
     key: MOBILE
+
+
