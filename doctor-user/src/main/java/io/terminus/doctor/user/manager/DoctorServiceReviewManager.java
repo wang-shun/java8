@@ -8,6 +8,8 @@ import io.terminus.common.model.BaseUser;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.user.dao.*;
 import io.terminus.doctor.user.model.*;
+import io.terminus.doctor.user.service.DoctorStaffWriteService;
+import io.terminus.doctor.user.service.DoctorUserDataPermissionWriteService;
 import io.terminus.parana.user.address.service.AddressReadService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,9 +29,11 @@ public class DoctorServiceReviewManager {
 
     private final DoctorOrgDao doctorOrgDao;
     private final DoctorStaffDao doctorStaffDao;
+    private final DoctorStaffWriteService doctorStaffWriteService;
     private final DoctorServiceReviewDao doctorServiceReviewDao;
     private final DoctorFarmDao doctorFarmDao;
     private final DoctorUserDataPermissionDao doctorUserDataPermissionDao;
+    private final DoctorUserDataPermissionWriteService doctorUserDataPermissionWriteService;
     private final ServiceReviewTrackDao serviceReviewTrackDao;
     private final DoctorServiceStatusDao doctorServiceStatusDao;
     private final AddressReadService addressReadService;
@@ -40,7 +44,9 @@ public class DoctorServiceReviewManager {
                                       DoctorFarmDao doctorFarmDao, DoctorServiceStatusDao doctorServiceStatusDao,
                                       DoctorUserDataPermissionDao doctorUserDataPermissionDao,
                                       ServiceReviewTrackDao serviceReviewTrackDao,
-                                      AddressReadService addressReadService) {
+                                      AddressReadService addressReadService,
+                                      DoctorStaffWriteService doctorStaffWriteService,
+                                      DoctorUserDataPermissionWriteService doctorUserDataPermissionWriteService) {
         this.doctorOrgDao = doctorOrgDao;
         this.doctorStaffDao = doctorStaffDao;
         this.doctorServiceReviewDao = doctorServiceReviewDao;
@@ -49,6 +55,8 @@ public class DoctorServiceReviewManager {
         this.serviceReviewTrackDao = serviceReviewTrackDao;
         this.doctorServiceStatusDao = doctorServiceStatusDao;
         this.addressReadService = addressReadService;
+        this.doctorStaffWriteService = doctorStaffWriteService;
+        this.doctorUserDataPermissionWriteService = doctorUserDataPermissionWriteService;
     }
 
     @Transactional
@@ -69,11 +77,11 @@ public class DoctorServiceReviewManager {
                 staff.setUpdatorName(user.getName());
                 staff.setUpdatorId(user.getId());
                 staff.setOrgName(org.getName());
-                doctorStaffDao.update(staff);
+                RespHelper.orServEx(doctorStaffWriteService.updateDoctorStaff(staff));
             }
         } else if (Objects.equals(DoctorServiceReview.Type.PIGMALL.getValue(), type.getValue())
                 || Objects.equals(DoctorServiceReview.Type.NEVEREST.getValue(), type.getValue())) {
-            //TODO extra things. 陈增辉: 目前没什么额外的数据需要处理,以后如有需要可在此添加
+            //TODO extra things. 目前没什么额外的数据需要处理,以后如有需要可在此添加
         } else {
             throw new ServiceException("doctor.service.review.type.error");
         }
@@ -163,7 +171,7 @@ public class DoctorServiceReviewManager {
         //更新staff里的冗余字段orgName
         DoctorStaff staff = doctorStaffDao.findByUserId(userId);
         staff.setOrgName(org.getName());
-        doctorStaffDao.update(staff);
+        RespHelper.orServEx(doctorStaffWriteService.updateDoctorStaff(staff));
 
         List<Long> newFarmIds = Lists.newArrayList(); //将被保存下来的猪场
         //保存猪场信息
@@ -195,7 +203,7 @@ public class DoctorServiceReviewManager {
             permission.setFarmIds(newFarmIdStr);
             permission.setUpdatorId(user.getId());
             permission.setUpdatorName(user.getName());
-            doctorUserDataPermissionDao.update(permission);
+            RespHelper.orServEx(doctorUserDataPermissionWriteService.updateDataPermission(permission));
         }else{
             permission = new DoctorUserDataPermission();
             permission.setUserId(userId);
