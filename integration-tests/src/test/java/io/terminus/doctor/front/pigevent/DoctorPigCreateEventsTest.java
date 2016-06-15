@@ -32,6 +32,7 @@ import io.terminus.doctor.event.enums.PregCheckResult;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.front.BaseFrontWebTest;
 import io.terminus.doctor.workflow.core.WorkFlowService;
+import io.terminus.zookeeper.pubsub.Subscriber;
 import org.joda.time.DateTime;
 import org.junit.Before;
 import org.junit.Test;
@@ -73,6 +74,9 @@ public class DoctorPigCreateEventsTest extends BaseFrontWebTest{
     @Autowired
     private DoctorPigEventDao doctorPigEventDao;
 
+    @Autowired
+    private Subscriber subscriber;
+
     @Before
     public void before() throws Exception{
         basicUrl = "http://localhost:" + this.port + "/api/doctor/events/create";
@@ -111,6 +115,15 @@ public class DoctorPigCreateEventsTest extends BaseFrontWebTest{
                 .httpEntity();
         ResponseEntity responseEntityDetail = this.restTemplate.postForEntity("http://localhost:" + this.port + "/api/doctor/pigs/getPigDetail", httpEntityDetail, Object.class);
         System.out.println(JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(responseEntityDetail.getBody()));
+    }
+
+    @Test
+    public void testZkClientCondition() throws Exception{
+        subscriber.subscribe(data->{
+            System.out.println(String.valueOf(data));
+        });
+
+        boarEntryEventCreate();
     }
 
     /**
