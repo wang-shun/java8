@@ -15,7 +15,7 @@ import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Desc:
+ * Desc: 消息模板缓存
  * Mail: yangzl@terminus.io
  * author: DreamYoung
  * Date: 16/6/14
@@ -39,7 +39,7 @@ public class DoctorMessageTemplateCacher {
         this.doctorHandleBarsHelper = doctorHandleBarsHelper;
         this.messageTemplateDao = messageTemplateDao;
 
-        templateTitleCache = CacheBuilder.newBuilder().expireAfterAccess(1L, TimeUnit.DAYS).build(new CacheLoader<String, Optional<Template>>() {
+        templateTitleCache = CacheBuilder.newBuilder().expireAfterAccess(1L, TimeUnit.HOURS).build(new CacheLoader<String, Optional<Template>>() {
             @Override
             public Optional<Template> load(String name) throws Exception {
                 MessageTemplate template = messageTemplateDao.findByName(name);
@@ -50,7 +50,7 @@ public class DoctorMessageTemplateCacher {
             }
         });
 
-        templateContentCache = CacheBuilder.newBuilder().expireAfterAccess(1L, TimeUnit.DAYS).build(new CacheLoader<String, Optional<Template>>() {
+        templateContentCache = CacheBuilder.newBuilder().expireAfterAccess(1L, TimeUnit.HOURS).build(new CacheLoader<String, Optional<Template>>() {
             @Override
             public Optional<Template> load(String name) throws Exception {
                 MessageTemplate template = messageTemplateDao.findByName(name);

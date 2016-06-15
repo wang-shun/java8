@@ -11,7 +11,7 @@ import java.io.IOException;
 import java.util.List;
 
 /**
- * Desc:
+ * Desc: 猪场消息HbsHelper
  * Mail: yangzl@terminus.io
  * author: DreamYoung
  * Date: 16/6/14

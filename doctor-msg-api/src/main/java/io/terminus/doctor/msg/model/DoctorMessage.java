@@ -75,6 +75,11 @@ public class DoctorMessage implements Serializable {
     private String data;
 
     /**
+     * 发送的内容(模板编译之后)
+     */
+    private String content;
+
+    /**
      * 消息发送渠道. 0->站内信, 1->短信, 2->邮箱, 3->app推送
      */
     private Integer channel;

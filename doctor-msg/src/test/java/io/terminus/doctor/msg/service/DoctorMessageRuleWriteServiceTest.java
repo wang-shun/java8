@@ -1,5 +1,6 @@
 package io.terminus.doctor.msg.service;
 
+import com.google.common.collect.ImmutableMap;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.utils.RespHelper;
@@ -32,6 +33,9 @@ public class DoctorMessageRuleWriteServiceTest extends BaseServiceTest {
     @Autowired
     private DoctorMessageRuleTemplateWriteService doctorMessageRuleTemplateWriteService;
 
+    @Autowired
+    private DoctorMessageTemplateReadService doctorMessageTemplateReadService;
+
     /**
      * 当farm审核通过后的与消息模板绑定的初始化
      * @see DoctorMessageRuleWriteService#initTemplate(Long) 
@@ -49,7 +53,7 @@ public class DoctorMessageRuleWriteServiceTest extends BaseServiceTest {
      */
     @Test
     public void test_UPDATE_Template() {
-        DoctorMessageRuleTemplate template = RespHelper.orServEx(doctorMessageRuleTemplateReadService.findMessageRuleTemplateById(1L));
+        DoctorMessageRuleTemplate template = RespHelper.orServEx(doctorMessageRuleTemplateReadService.findMessageRuleTemplateById(2L));
         if (template != null) {
             template = BeanMapper.map(template, DoctorMessageRuleTemplate.class);
             Rule rule = template.getRule();
@@ -58,7 +62,19 @@ public class DoctorMessageRuleWriteServiceTest extends BaseServiceTest {
             // 更新(记录历史)
             doctorMessageRuleTemplateWriteService.updateMessageRuleTemplate(template);
         }
-        template = RespHelper.orServEx(doctorMessageRuleTemplateReadService.findMessageRuleTemplateById(1L));
+        template = RespHelper.orServEx(doctorMessageRuleTemplateReadService.findMessageRuleTemplateById(2L));
         System.out.println(template);
+        // 查看绑定的默认rule是否修改了
+        List<DoctorMessageRule> rules = RespHelper.orServEx(doctorMessageRuleReadService.findMessageRulesByTplId(2L));
+        System.out.println(rules);
+    }
+
+    /**
+     * 获取parana模板编译后的内容
+     */
+    @Test
+    public void test_QUERY_MessageTemplate() {
+        String code = RespHelper.orServEx(doctorMessageTemplateReadService.getMessageContentWithCache("user.register.code", ImmutableMap.of("code", "888888")));
+        System.out.println(code);
     }
 }

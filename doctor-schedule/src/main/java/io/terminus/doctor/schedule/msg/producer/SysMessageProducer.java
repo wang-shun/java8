@@ -15,6 +15,7 @@ import io.terminus.doctor.msg.service.DoctorMessageReadService;
 import io.terminus.doctor.msg.service.DoctorMessageRuleReadService;
 import io.terminus.doctor.msg.service.DoctorMessageRuleRoleReadService;
 import io.terminus.doctor.msg.service.DoctorMessageRuleTemplateReadService;
+import io.terminus.doctor.msg.service.DoctorMessageTemplateReadService;
 import io.terminus.doctor.msg.service.DoctorMessageWriteService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -41,8 +42,10 @@ public class SysMessageProducer extends AbstractProducer {
                               DoctorMessageRuleReadService doctorMessageRuleReadService,
                               DoctorMessageRuleRoleReadService doctorMessageRuleRoleReadService,
                               DoctorMessageReadService doctorMessageReadService,
-                              DoctorMessageWriteService doctorMessageWriteService) {
-        super(doctorMessageRuleTemplateReadService,
+                              DoctorMessageWriteService doctorMessageWriteService,
+                              DoctorMessageTemplateReadService doctorMessageTemplateReadService) {
+        super(doctorMessageTemplateReadService,
+                doctorMessageRuleTemplateReadService,
                 doctorMessageRuleReadService,
                 doctorMessageRuleRoleReadService,
                 doctorMessageReadService,

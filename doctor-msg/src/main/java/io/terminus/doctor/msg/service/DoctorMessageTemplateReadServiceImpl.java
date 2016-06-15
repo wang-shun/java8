@@ -19,7 +19,7 @@ import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 
 /**
- * Desc:
+ * Desc: 消息模板解析服务类
  * Mail: yangzl@terminus.io
  * author: DreamYoung
  * Date: 16/6/14
@@ -43,7 +43,7 @@ public class DoctorMessageTemplateReadServiceImpl extends MessageTemplateReadSer
     public Response<String> getMessageTitle(String templateName, Map<String, Serializable> context) {
         try {
             MessageTemplate template = messageTemplateDao.findByName(templateName);
-            return Response.ok(template.getTitle());
+            return Response.ok(template != null ? template.getTitle() : null);
         } catch (Exception e) {
             log.error("get message title failed, templateName:{}, context:{}, cause:{}", templateName, context, Throwables.getStackTraceAsString(e));
             return Response.fail("get.message.title.failed");
@@ -54,7 +54,7 @@ public class DoctorMessageTemplateReadServiceImpl extends MessageTemplateReadSer
     public Response<String> getMessageContent(String templateName, Map<String, Serializable> context) {
         try {
             MessageTemplate template = messageTemplateDao.findByName(templateName);
-            return Response.ok(template.getContent());
+            return Response.ok(template != null ? template.getContent() : null);
         } catch (Exception e) {
             log.error("get message content failed, templateName:{}, context:{}, cause:{}", templateName, context, Throwables.getStackTraceAsString(e));
             return Response.fail("get.message.content.failed");
@@ -65,9 +65,12 @@ public class DoctorMessageTemplateReadServiceImpl extends MessageTemplateReadSer
     public Response<MessageInfo> getMessageInfo(String templateName, Map<String, Serializable> context) {
         try {
             MessageTemplate template = messageTemplateDao.findByName(templateName);
-            MessageInfo messageInfo = new MessageInfo();
-            messageInfo.setMessageTitle(template.getTitle());
-            messageInfo.setMessageContent(template.getContent());
+            MessageInfo messageInfo = null;
+            if (template != null) {
+                messageInfo = new MessageInfo();
+                messageInfo.setMessageTitle(template.getTitle());
+                messageInfo.setMessageContent(template.getContent());
+            }
             return Response.ok(messageInfo);
         } catch (Exception e) {
             log.error("get message info failed, templateName:{}, context:{}, cause:{}", templateName, context, Throwables.getStackTraceAsString(e));

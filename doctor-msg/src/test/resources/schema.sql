@@ -75,6 +75,7 @@ CREATE TABLE `doctor_messages` (
 	`type` 	SMALLINT(6) DEFAULT NULL COMMENT '消息类型: 0->系统消息, 1->预警消息, 2->警报消息',
 	`category`	SMALLINT(6) DEFAULT NULL COMMENT '消息种类',
 	`data`	TEXT DEFAULT NULL COMMENT '发送的内容填充数据, json(map). 或系统消息',
+	`content`	TEXT DEFAULT NULL COMMENT '发送的内容(模板编译之后)',
 	`channel`	SMALLINT(6) DEFAULT NULL COMMENT '消息发送渠道. 0->站内信, 1->短信, 2->邮箱, 3->app推送',
 	`url`		VARCHAR(4096)	DEFAULT NULL COMMENT 'app回调url',
 	`status`	SMALLINT(6) DEFAULT NULL COMMENT '状态 1:未发送, 2:已发送, 3:已读,  -1:删除, -2:发送失败',
@@ -86,6 +87,21 @@ CREATE TABLE `doctor_messages` (
 	PRIMARY KEY(`id`)
 )COMMENT='猪场软件消息表';
 
+CREATE TABLE parana_message_templates(
+  `id` BIGINT NOT NULL AUTO_INCREMENT  COMMENT '自增主键',
+  `creator_id`  BIGINT  NULL  COMMENT '创建者的用户id',
+  `creator_name`  VARCHAR(128)  NULL  COMMENT '创建者的名称, 冗余',
+  `name`  VARCHAR(128) NOT NULL  COMMENT '模板的名称, 具有唯一性',
+  `title`  VARCHAR(1024)  NULL  COMMENT '消息的默认标题',
+  `content`  VARCHAR(4096) NOT  NULL  COMMENT '消息的内容模板, handlebars格式',
+  `context`  VARCHAR(4096)  NULL  COMMENT '消息的内容模板相关连的上下文示例, 用于指导消息调用者有哪些变量可用',
+  `channel`  INT  NULL  COMMENT '消息渠道：-1-》非法，0-》站内信，1-》短信，2-》邮箱，3-》app消息推送',
+  `disabled`  BIT(1)  NULL  COMMENT '当配置为true时, 这个模板的调用者不应该发送这个消息.',
+  `description`  VARCHAR(256)  NULL  COMMENT '消息模板的备注',
+  `created_at`  DATETIME  NULL  COMMENT '创建时间',
+  `updated_at`  DATETIME  NULL  COMMENT '修改时间',
+  PRIMARY KEY (`id`)
+)COMMENT='消息模板表';
 
 
 -- data
@@ -239,4 +255,5 @@ VALUES
 	(11,1,12,'仓库库存不足提示',1,9,'{	"values":[		{"id":1, "ruleType":1,"value":7, "describe":"库存量"}	],	"frequence":24,	"channels":"0,1,2,3"}',1,1,'仓库库存不足提示','2016-06-12 09:58:27','2016-06-12 09:58:27'),
 	(12,1,13,'仓库库存不足警报',2,9,'{	"values":[		{"id":1, "ruleType":1,"value":3, "describe":"库存量"}	],	"frequence":24,	"channels":"0,1,2,3"}',1,1,'仓库库存不足警报','2016-06-12 09:58:27','2016-06-12 09:58:27');
 
-
+INSERT INTO `parana_message_templates` (`id`, `creator_id`, `creator_name`, `name`, `title`, `content`, `context`, `channel`, `disabled`, `description`, `created_at`, `updated_at`)
+VALUES (1, 1, 'admin', 'user.register.code', '用户中心手机注册码', '您的注册手机验证码是：{{code}}', '{"code":"123456"}', 1, 0, '用户中心手机注册码', '2016-05-17 17:08:43', '2016-05-17 17:08:43');

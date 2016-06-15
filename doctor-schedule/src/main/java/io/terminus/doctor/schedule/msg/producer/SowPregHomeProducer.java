@@ -25,6 +25,7 @@ import io.terminus.doctor.msg.service.DoctorMessageReadService;
 import io.terminus.doctor.msg.service.DoctorMessageRuleReadService;
 import io.terminus.doctor.msg.service.DoctorMessageRuleRoleReadService;
 import io.terminus.doctor.msg.service.DoctorMessageRuleTemplateReadService;
+import io.terminus.doctor.msg.service.DoctorMessageTemplateReadService;
 import io.terminus.doctor.msg.service.DoctorMessageWriteService;
 import io.terminus.doctor.schedule.msg.producer.factory.PigDtoFactory;
 import lombok.extern.slf4j.Slf4j;
@@ -40,7 +41,7 @@ import java.util.stream.Collectors;
 
 /**
  * Desc: 需转入妊娠舍提示
- *      1. 妊娠检查阳性未转入妊娠舍母猪
+ * 1. 妊娠检查阳性未转入妊娠舍母猪
  * Mail: chk@terminus.io
  * Created by icemimosa
  * Date: 16/6/4
@@ -60,8 +61,10 @@ public class SowPregHomeProducer extends AbstractProducer {
                                DoctorMessageReadService doctorMessageReadService,
                                DoctorMessageWriteService doctorMessageWriteService,
                                DoctorPigReadService doctorPigReadService,
-                               DoctorPigEventReadService doctorPigEventReadService) {
-        super(doctorMessageRuleTemplateReadService,
+                               DoctorPigEventReadService doctorPigEventReadService,
+                               DoctorMessageTemplateReadService doctorMessageTemplateReadService) {
+        super(doctorMessageTemplateReadService,
+                doctorMessageRuleTemplateReadService,
                 doctorMessageRuleReadService,
                 doctorMessageRuleRoleReadService,
                 doctorMessageReadService,

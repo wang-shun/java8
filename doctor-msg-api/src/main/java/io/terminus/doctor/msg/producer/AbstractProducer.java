@@ -2,6 +2,7 @@ package io.terminus.doctor.msg.producer;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.MoreObjects;
+import com.google.common.base.Stopwatch;
 import com.google.common.collect.Lists;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.utils.RespHelper;
@@ -17,14 +18,18 @@ import io.terminus.doctor.msg.service.DoctorMessageReadService;
 import io.terminus.doctor.msg.service.DoctorMessageRuleReadService;
 import io.terminus.doctor.msg.service.DoctorMessageRuleRoleReadService;
 import io.terminus.doctor.msg.service.DoctorMessageRuleTemplateReadService;
+import io.terminus.doctor.msg.service.DoctorMessageTemplateReadService;
 import io.terminus.doctor.msg.service.DoctorMessageWriteService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 
+import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
@@ -38,6 +43,8 @@ public abstract class AbstractProducer implements IProducer {
 
     protected ObjectMapper MAPPER = JsonMapper.JSON_NON_DEFAULT_MAPPER.getMapper();
 
+    protected DoctorMessageTemplateReadService doctorMessageTemplateReadService;
+
     protected DoctorMessageRuleTemplateReadService doctorMessageRuleTemplateReadService;
 
     protected DoctorMessageRuleReadService doctorMessageRuleReadService;
@@ -50,12 +57,14 @@ public abstract class AbstractProducer implements IProducer {
 
     protected Category category;
 
-    public AbstractProducer(DoctorMessageRuleTemplateReadService doctorMessageRuleTemplateReadService,
+    public AbstractProducer(DoctorMessageTemplateReadService doctorMessageTemplateReadService,
+                            DoctorMessageRuleTemplateReadService doctorMessageRuleTemplateReadService,
                             DoctorMessageRuleReadService doctorMessageRuleReadService,
                             DoctorMessageRuleRoleReadService doctorMessageRuleRoleReadService,
                             DoctorMessageReadService doctorMessageReadService,
                             DoctorMessageWriteService doctorMessageWriteService,
                             Category category) {
+        this.doctorMessageTemplateReadService = doctorMessageTemplateReadService;
         this.doctorMessageRuleTemplateReadService = doctorMessageRuleTemplateReadService;
         this.doctorMessageRuleReadService = doctorMessageRuleReadService;
         this.doctorMessageRuleRoleReadService = doctorMessageRuleRoleReadService;
@@ -77,6 +86,7 @@ public abstract class AbstractProducer implements IProducer {
 
             // 1. 如果是系统消息
             if (Objects.equals(DoctorMessageRuleTemplate.Type.SYSTEM.getValue(), ruleTemplate.getType())) {
+                Stopwatch stopwatch = Stopwatch.createStarted();
                 log.info("[AbstractProducer] {} -> 系统消息产生, starting......", ruleTemplate.getName());
                 // 获取最新发送的系统消息(系统消息是对应到模板的)
                 DoctorMessage latestMessage = getLatestSysMessage(ruleTemplate.getId());
@@ -94,11 +104,13 @@ public abstract class AbstractProducer implements IProducer {
                 if(message != null && message.size() > 0) {
                     doctorMessageWriteService.createMessages(message);
                 }
-                log.info("[AbstractProducer] {} -> 系统消息产生正常结束, end......", ruleTemplate.getName());
+                stopwatch.stop();
+                log.info("[AbstractProducer] {} -> 系统消息产生正常结束, 耗时 {}ms end......", ruleTemplate.getName(), stopwatch.elapsed(TimeUnit.MILLISECONDS));
             }
 
             // 2. 如果是预警或警报消息
             else{
+                Stopwatch stopWatch = Stopwatch.createStarted();
                 log.info("[AbstractProducer] {} -> 预警消息产生, starting......", ruleTemplate.getName());
                 List<DoctorMessageRuleRole> ruleRoles = RespHelper.orServEx(doctorMessageRuleRoleReadService.findByTplId(ruleTemplate.getId()));
                 for (int j = 0; ruleRoles != null && j < ruleRoles.size(); j++) {
@@ -121,9 +133,9 @@ public abstract class AbstractProducer implements IProducer {
                     if(message != null && message.size() > 0) {
                         doctorMessageWriteService.createMessages(message);
                     }
-
                 }
-                log.info("[AbstractProducer] {} -> 预警消息产生结束, ending......", ruleTemplate.getName());
+                stopWatch.stop();
+                log.info("[AbstractProducer] {} -> 预警消息产生结束, 耗时 {}ms, ending......", ruleTemplate.getName(), stopWatch.elapsed(TimeUnit.MILLISECONDS));
             }
         }
     }
@@ -218,23 +230,34 @@ public abstract class AbstractProducer implements IProducer {
                                     .build()
                     ));*/
             // 子账户
-            subUsers.stream().forEach(subUser -> messages.add(
-                    DoctorMessage.builder()
-                            .farmId(ruleRole.getFarmId())
-                            .ruleId(ruleRole.getRuleId())
-                            .roleId(ruleRole.getRoleId())
-                            .userId(subUser.getUserId())
-                            .templateId(ruleRole.getTemplateId())
-                            .messageTemplate(getTemplateName(template.getMessageTemplate(), channel))
-                            .type(template.getType())
-                            .category(template.getCategory())
-                            .data(jsonData)
-                            .channel(channel)
-                            .url(getUrl(ruleRole.getRule().getUrl(), channel))
-                            .status(DoctorMessage.Status.NORMAL.getValue())
-                            .createdBy(template.getUpdatedBy())
-                            .build()
-                    ));
+            subUsers.stream().forEach(subUser -> {
+                DoctorMessage message = DoctorMessage.builder()
+                        .farmId(ruleRole.getFarmId())
+                        .ruleId(ruleRole.getRuleId())
+                        .roleId(ruleRole.getRoleId())
+                        .userId(subUser.getUserId())
+                        .templateId(ruleRole.getTemplateId())
+                        .messageTemplate(getTemplateName(template.getMessageTemplate(), channel))
+                        .type(template.getType())
+                        .category(template.getCategory())
+                        .data(jsonData)
+                        .channel(channel)
+                        //.url(getUrl(ruleRole.getRule().getUrl(), channel))
+                        .url(ruleRole.getRule().getUrl())
+                        .status(DoctorMessage.Status.NORMAL.getValue())
+                        .createdBy(template.getUpdatedBy())
+                        .build();
+                // 模板编译
+                try{
+                    Map<String, Serializable> jsonContext = MAPPER.readValue(jsonData, Map.class);
+                    message.setContent(RespHelper.orServEx(
+                            doctorMessageTemplateReadService.getMessageContentWithCache(message.getMessageTemplate(), jsonContext)));
+                } catch (Exception e) {
+                    log.error("compile message template failed, template name is {}, json map is {}", message.getMessageTemplate(), jsonData);
+                }
+
+                messages.add(message);
+            });
         }
         return messages;
     }

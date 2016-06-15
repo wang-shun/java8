@@ -1,7 +1,6 @@
 package io.terminus.doctor.schedule.msg.producer.factory;
 
 import com.google.api.client.util.Maps;
-import com.google.common.base.Throwables;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.event.dto.DoctorPigInfoDto;
 import lombok.extern.slf4j.Slf4j;
@@ -62,7 +61,7 @@ public class PigDtoFactory {
             return new Date((Long) JsonMapper.JSON_NON_DEFAULT_MAPPER.getMapper()
                     .readValue(pigDto.getExtraTrack(), Map.class).get("matingDate"));
         } catch (Exception e) {
-            log.error("[PigDtoFactory] get birth date failed, cause by {}", Throwables.getStackTraceAsString(e));
+            log.error("[PigDtoFactory] get birth date failed, pigDto is {}", pigDto);
         }
         return null;
     }
@@ -87,7 +86,7 @@ public class PigDtoFactory {
                 }
             }
         } catch (Exception e) {
-            log.error("[PigDtoFactory] get birth date failed, cause by {}", Throwables.getStackTraceAsString(e));
+            log.error("[PigDtoFactory] get birth date failed, pigDto is {}", pigDto);
         }
         return null;
     }

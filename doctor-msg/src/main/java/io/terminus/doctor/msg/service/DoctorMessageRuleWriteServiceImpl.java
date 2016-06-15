@@ -3,8 +3,10 @@ package io.terminus.doctor.msg.service;
 import com.google.common.base.Throwables;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.msg.dao.DoctorMessageRuleDao;
+import io.terminus.doctor.msg.dao.DoctorMessageRuleRoleDao;
 import io.terminus.doctor.msg.dao.DoctorMessageRuleTemplateDao;
 import io.terminus.doctor.msg.model.DoctorMessageRule;
+import io.terminus.doctor.msg.model.DoctorMessageRuleRole;
 import io.terminus.doctor.msg.model.DoctorMessageRuleTemplate;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,13 +26,16 @@ public class DoctorMessageRuleWriteServiceImpl implements DoctorMessageRuleWrite
 
     private final DoctorMessageRuleDao doctorMessageRuleDao;
     private final DoctorMessageRuleTemplateDao doctorMessageRuleTemplateDao;
+    private final DoctorMessageRuleRoleDao doctorMessageRuleRoleDao;
 
 
     @Autowired
     public DoctorMessageRuleWriteServiceImpl(DoctorMessageRuleDao doctorMessageRuleDao,
-                                             DoctorMessageRuleTemplateDao doctorMessageRuleTemplateDao) {
+                                             DoctorMessageRuleTemplateDao doctorMessageRuleTemplateDao,
+                                             DoctorMessageRuleRoleDao doctorMessageRuleRoleDao) {
         this.doctorMessageRuleDao = doctorMessageRuleDao;
         this.doctorMessageRuleTemplateDao = doctorMessageRuleTemplateDao;
+        this.doctorMessageRuleRoleDao = doctorMessageRuleRoleDao;
     }
 
     @Override
@@ -51,6 +56,15 @@ public class DoctorMessageRuleWriteServiceImpl implements DoctorMessageRuleWrite
             if (1 == messageRule.getUseDefault()) {
                 DoctorMessageRuleTemplate template = doctorMessageRuleTemplateDao.findById(messageRule.getTemplateId());
                 messageRule.setRuleValue(template.getRuleValue());
+            }
+            // 更新与角色绑定的规则
+            List<DoctorMessageRuleRole> roles = doctorMessageRuleRoleDao.findByTplAndFarmId(messageRule.getId(), messageRule.getFarmId());
+            if (roles != null) {
+                roles.stream().filter(role -> role.getUseDefault() != null && 1 == role.getUseDefault())
+                        .forEach(role -> {
+                            role.setRuleValue(messageRule.getRuleValue());
+                            doctorMessageRuleRoleDao.update(role);
+                });
             }
             return Response.ok(doctorMessageRuleDao.update(messageRule));
         } catch (Exception e) {

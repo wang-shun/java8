@@ -30,7 +30,7 @@ public class MessageJob {
     /**
      * 产生消息
      */
-    @Scheduled(cron = "0 0/10 * * * ?")
+    @Scheduled(cron = "0 */15 * * * ?")
     public void messageProduce() {
         try {
             if (!hostLeader.isLeader()) {
@@ -48,7 +48,7 @@ public class MessageJob {
     /**
      * 消费短信消息
      */
-    @Scheduled(cron = "0 0/10 * * * ?")
+    @Scheduled(cron = "0 */15 * * * ?")
     public void messageConsume() {
         try {
             if (!hostLeader.isLeader()) {
@@ -66,7 +66,7 @@ public class MessageJob {
     /**
      * 消费邮件消息
      */
-    @Scheduled(cron = "0 0/10 * * * ?")
+    @Scheduled(cron = "0 */15 * * * ?")
     public void emailConsume() {
         try {
             if (!hostLeader.isLeader()) {
@@ -84,7 +84,7 @@ public class MessageJob {
     /**
      * 消费 app push 消息
      */
-    @Scheduled(cron = "0 0/10 * * * ?")
+    @Scheduled(cron = "0 */15 * * * ?")
     public void appPushConsume() {
         try {
             if (!hostLeader.isLeader()) {

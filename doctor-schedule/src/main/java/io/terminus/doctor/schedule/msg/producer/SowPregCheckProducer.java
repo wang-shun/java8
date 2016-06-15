@@ -22,6 +22,7 @@ import io.terminus.doctor.msg.service.DoctorMessageReadService;
 import io.terminus.doctor.msg.service.DoctorMessageRuleReadService;
 import io.terminus.doctor.msg.service.DoctorMessageRuleRoleReadService;
 import io.terminus.doctor.msg.service.DoctorMessageRuleTemplateReadService;
+import io.terminus.doctor.msg.service.DoctorMessageTemplateReadService;
 import io.terminus.doctor.msg.service.DoctorMessageWriteService;
 import io.terminus.doctor.schedule.msg.producer.factory.PigDtoFactory;
 import lombok.extern.slf4j.Slf4j;
@@ -37,9 +38,9 @@ import java.util.stream.Collectors;
 
 /**
  * Desc: 母猪需妊娠检查提示
- *
- *      1. 已配种日期
- *
+ * <p>
+ * 1. 已配种日期
+ * <p>
  * Mail: chk@terminus.io
  * Created by icemimosa
  * Date: 16/6/3
@@ -53,12 +54,14 @@ public class SowPregCheckProducer extends AbstractProducer {
 
     @Autowired
     public SowPregCheckProducer(DoctorMessageRuleTemplateReadService doctorMessageRuleTemplateReadService,
-                               DoctorMessageRuleReadService doctorMessageRuleReadService,
-                               DoctorMessageRuleRoleReadService doctorMessageRuleRoleReadService,
-                               DoctorMessageReadService doctorMessageReadService,
-                               DoctorMessageWriteService doctorMessageWriteService,
-                               DoctorPigReadService doctorPigReadService) {
-        super(doctorMessageRuleTemplateReadService,
+                                DoctorMessageRuleReadService doctorMessageRuleReadService,
+                                DoctorMessageRuleRoleReadService doctorMessageRuleRoleReadService,
+                                DoctorMessageReadService doctorMessageReadService,
+                                DoctorMessageWriteService doctorMessageWriteService,
+                                DoctorPigReadService doctorPigReadService,
+                                DoctorMessageTemplateReadService doctorMessageTemplateReadService) {
+        super(doctorMessageTemplateReadService,
+                doctorMessageRuleTemplateReadService,
                 doctorMessageRuleReadService,
                 doctorMessageRuleRoleReadService,
                 doctorMessageReadService,

@@ -1006,6 +1006,7 @@ CREATE TABLE `doctor_messages` (
 	`type` 	SMALLINT(6) DEFAULT NULL COMMENT '消息类型: 0->系统消息, 1->预警消息, 2->警报消息',
 	`category`	SMALLINT(6) DEFAULT NULL COMMENT '消息种类',
 	`data`	TEXT DEFAULT NULL COMMENT '发送的内容填充数据, json(map). 或系统消息',
+	`content`	TEXT DEFAULT NULL COMMENT '发送的内容(模板编译之后)',
 	`channel`	SMALLINT(6) DEFAULT NULL COMMENT '消息发送渠道. 0->站内信, 1->短信, 2->邮箱, 3->app推送',
 	`url`		VARCHAR(4096)	DEFAULT NULL COMMENT 'app回调url',
 	`status`	SMALLINT(6) DEFAULT NULL COMMENT '状态 1:未发送, 2:已发送, 3:已读,  -1:删除, -2:发送失败',

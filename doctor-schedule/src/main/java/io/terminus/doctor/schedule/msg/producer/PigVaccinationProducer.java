@@ -30,6 +30,7 @@ import io.terminus.doctor.msg.service.DoctorMessageReadService;
 import io.terminus.doctor.msg.service.DoctorMessageRuleReadService;
 import io.terminus.doctor.msg.service.DoctorMessageRuleRoleReadService;
 import io.terminus.doctor.msg.service.DoctorMessageRuleTemplateReadService;
+import io.terminus.doctor.msg.service.DoctorMessageTemplateReadService;
 import io.terminus.doctor.msg.service.DoctorMessageWriteService;
 import io.terminus.doctor.schedule.msg.producer.factory.GroupDetailFactory;
 import io.terminus.doctor.schedule.msg.producer.factory.PigDtoFactory;
@@ -68,8 +69,10 @@ public class PigVaccinationProducer extends AbstractProducer {
                                   DoctorMessageWriteService doctorMessageWriteService,
                                   DoctorPigReadService doctorPigReadService,
                                   DoctorVaccinationPigWarnReadService doctorVaccinationPigWarnReadService,
-                                  DoctorGroupReadService doctorGroupReadService) {
-        super(doctorMessageRuleTemplateReadService,
+                                  DoctorGroupReadService doctorGroupReadService,
+                                  DoctorMessageTemplateReadService doctorMessageTemplateReadService) {
+        super(doctorMessageTemplateReadService,
+                doctorMessageRuleTemplateReadService,
                 doctorMessageRuleReadService,
                 doctorMessageRuleRoleReadService,
                 doctorMessageReadService,
@@ -518,7 +521,7 @@ public class PigVaccinationProducer extends AbstractProducer {
             Date date = new Date((Long) MAPPER.readValue(pigDto.getExtraTrack(), Map.class).get("vaccinationDate"));
             return new DateTime(date);
         } catch (Exception e) {
-            log.error("[PigVaccinationProducer] get vaccination date failed, cause by {}", Throwables.getStackTraceAsString(e));
+            log.error("[PigVaccinationProducer] get vaccination date failed, pigDto is {}", pigDto);
         }
         return null;
     }
@@ -533,7 +536,7 @@ public class PigVaccinationProducer extends AbstractProducer {
                 return new DateTime(antiepidemicAt);
             }
         } catch (Exception e) {
-            log.error("[PigVaccinationProducer] get GroupVaccinationDate failed, cause by {}", Throwables.getStackTraceAsString(e));
+            log.error("[PigVaccinationProducer] get GroupVaccinationDate failed, DoctorGroupTrack is {}", track);
         }
         return null;
     }
@@ -548,7 +551,7 @@ public class PigVaccinationProducer extends AbstractProducer {
                 return new DateTime(trantsGroupAt);
             }
         } catch (Exception e) {
-            log.error("[PigVaccinationProducer] get trantsGroup date failed, cause by {}", Throwables.getStackTraceAsString(e));
+            log.error("[PigVaccinationProducer] get trantsGroup date failed, DoctorGroupTrack is {}", track);
         }
         return null;
     }
@@ -562,7 +565,7 @@ public class PigVaccinationProducer extends AbstractProducer {
             Date date = new Date((Long) MAPPER.readValue(pigDto.getExtraTrack(), Map.class).get("conditionDate"));
             return new DateTime(date);
         } catch (Exception e) {
-            log.error("[PigVaccinationProducer] get check weight date failed, cause by {}", Throwables.getStackTraceAsString(e));
+            log.error("[PigVaccinationProducer] get check weight date failed, pigDto is {}", pigDto);
         }
         return null;
     }
@@ -576,7 +579,7 @@ public class PigVaccinationProducer extends AbstractProducer {
             Date date = new Date((Long) MAPPER.readValue(pigDto.getExtraTrack(), Map.class).get("changeLocationDate"));
             return new DateTime(date);
         } catch (Exception e) {
-            log.error("[PigVaccinationProducer] get change location date failed, cause by {}", Throwables.getStackTraceAsString(e));
+            log.error("[PigVaccinationProducer] get change location date failed, pigDto is {}", pigDto);
         }
         return null;
     }

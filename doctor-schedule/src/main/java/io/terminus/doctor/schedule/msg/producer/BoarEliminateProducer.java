@@ -22,6 +22,7 @@ import io.terminus.doctor.msg.service.DoctorMessageReadService;
 import io.terminus.doctor.msg.service.DoctorMessageRuleReadService;
 import io.terminus.doctor.msg.service.DoctorMessageRuleRoleReadService;
 import io.terminus.doctor.msg.service.DoctorMessageRuleTemplateReadService;
+import io.terminus.doctor.msg.service.DoctorMessageTemplateReadService;
 import io.terminus.doctor.msg.service.DoctorMessageWriteService;
 import io.terminus.doctor.schedule.msg.producer.factory.PigDtoFactory;
 import lombok.extern.slf4j.Slf4j;
@@ -54,8 +55,10 @@ public class BoarEliminateProducer extends AbstractProducer {
                                  DoctorMessageRuleRoleReadService doctorMessageRuleRoleReadService,
                                  DoctorMessageReadService doctorMessageReadService,
                                  DoctorMessageWriteService doctorMessageWriteService,
-                                 DoctorPigReadService doctorPigReadService) {
-        super(doctorMessageRuleTemplateReadService,
+                                 DoctorPigReadService doctorPigReadService,
+                                 DoctorMessageTemplateReadService doctorMessageTemplateReadService) {
+        super(doctorMessageTemplateReadService,
+                doctorMessageRuleTemplateReadService,
                 doctorMessageRuleReadService,
                 doctorMessageRuleRoleReadService,
                 doctorMessageReadService,

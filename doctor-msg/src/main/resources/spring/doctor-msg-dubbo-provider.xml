@@ -36,6 +36,7 @@
     <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.msg.service.DoctorMessageRuleRoleWriteService" ref="doctorMessageRuleRoleWriteServiceImpl"/>
     <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.msg.service.DoctorMessageReadService" ref="doctorMessageReadServiceImpl"/>
     <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.msg.service.DoctorMessageWriteService" ref="doctorMessageWriteServiceImpl"/>
+    <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.msg.service.DoctorMessageTemplateReadService" ref="doctorMessageTemplateReadServiceImpl"/>
 
 
 </beans>
