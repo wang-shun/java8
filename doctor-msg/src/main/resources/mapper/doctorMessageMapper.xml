@@ -12,6 +12,7 @@
         <result column="role_id" property="roleId"/>
         <result column="user_id" property="userId"/>
         <result column="template_id" property="templateId"/>
+        <result column="template_name" property="templateName"/>
         <result column="message_template" property="messageTemplate"/>
         <result column="type" property="type"/>
         <result column="category" property="category"/>
@@ -36,11 +37,11 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        farm_id, rule_id, role_id, user_id, template_id, message_template, type, category, data, content , channel, url, status, sended_at, failed_by, created_by, created_at, updated_at
+        farm_id, rule_id, role_id, user_id, template_id, template_name, message_template, type, category, data, content , channel, url, status, sended_at, failed_by, created_by, created_at, updated_at
     </sql>
 
     <sql id="vals">
-        #{farmId}, #{ruleId}, #{roleId}, #{userId}, #{templateId}, #{messageTemplate}, #{type}, #{category}, #{data}, #{content}, #{channel}, #{url}, #{status}, #{sendedAt}, #{failedBy}, #{createdBy}, now(), now()
+        #{farmId}, #{ruleId}, #{roleId}, #{userId}, #{templateId}, #{templateName}, #{messageTemplate}, #{type}, #{category}, #{data}, #{content}, #{channel}, #{url}, #{status}, #{sendedAt}, #{failedBy}, #{createdBy}, now(), now()
     </sql>
 
     <insert id="create" parameterType="DoctorMessage" keyProperty="id" useGeneratedKeys="true">
@@ -57,7 +58,7 @@
         (<include refid="cols_exclude_id" />)
         VALUES
         <foreach collection="list" item="i" separator=",">
-            (#{i.farmId}, #{i.ruleId}, #{i.roleId}, #{i.userId}, #{i.templateId}, #{i.messageTemplate}, #{i.type}, #{i.category}, #{i.data}, #{i.content}, #{i.channel}, #{i.url} ,#{i.status}, #{i.sendedAt}, #{i.failedBy}, #{i.createdBy}, now(), now())
+            (#{i.farmId}, #{i.ruleId}, #{i.roleId}, #{i.userId}, #{i.templateId}, #{i.templateName}, #{i.messageTemplate}, #{i.type}, #{i.category}, #{i.data}, #{i.content}, #{i.channel}, #{i.url} ,#{i.status}, #{i.sendedAt}, #{i.failedBy}, #{i.createdBy}, now(), now())
         </foreach>
     </insert>
 
@@ -76,6 +77,7 @@
             <if test="roleId != null">role_id = #{roleId},</if>
             <if test="userId != null">user_id = #{userId},</if>
             <if test="templateId != null">template_id = #{templateId},</if>
+            <if test="templateName != null">template_name = #{templateName},</if>
             <if test="messageTemplate != null">message_template = #{messageTemplate},</if>
             <if test="type != null">type = #{type},</if>
             <if test="category != null">category = #{category},</if>
@@ -104,6 +106,7 @@
             <if test="roleId != null">AND role_id = #{roleId}</if>
             <if test="userId != null">AND user_id = #{userId}</if>
             <if test="templateId != null">AND template_id = #{templateId}</if>
+            <if test="templateName != null">AND template_name = #{templateName}</if>
             <if test="type != null">AND `type` = #{type}</if>
             <if test="category != null">AND category = #{category}</if>
             <if test="channel != null">AND channel = #{channel}</if>

@@ -4,9 +4,11 @@ import com.google.api.client.util.Maps;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.event.dto.DoctorPigInfoDto;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 
-import java.util.Date;
 import java.util.Map;
 
 /**
@@ -43,6 +45,7 @@ public class PigDtoFactory {
         jsonData.put("status", pigDto.getStatus());
         jsonData.put("statusName", pigDto.getStatusName());
         jsonData.put("dateAge", pigDto.getDateAge());
+        jsonData.put("weight", pigDto.getWeight());
         jsonData.put("parity", pigDto.getParity());
         jsonData.put("matingDate", getBreedingDate(pigDto));
         jsonData.put("judgePregDate", getBirthDate(pigDto));
@@ -54,40 +57,46 @@ public class PigDtoFactory {
     /**
      * 获取配种日期
      */
-    public Date getBreedingDate(DoctorPigInfoDto pigDto) {
+    public String getBreedingDate(DoctorPigInfoDto pigDto) {
         // 获取配种日期
         try {
             // @see DoctorMatingDto
-            return new Date((Long) JsonMapper.JSON_NON_DEFAULT_MAPPER.getMapper()
-                    .readValue(pigDto.getExtraTrack(), Map.class).get("matingDate"));
+            if (StringUtils.isNotBlank(pigDto.getExtraTrack())) {
+                Long breedingDate = (Long) JsonMapper.JSON_NON_DEFAULT_MAPPER.getMapper()
+                        .readValue(pigDto.getExtraTrack(), Map.class).get("matingDate");
+                return DateTimeFormat.forPattern("yyyy-MM-dd").print(breedingDate);
+            }
         } catch (Exception e) {
             log.error("[PigDtoFactory] get birth date failed, pigDto is {}", pigDto);
         }
-        return null;
+        return "";
     }
 
     /**
      * 获取预产期
      */
-    public Date getBirthDate(DoctorPigInfoDto pigDto) {
+    public String getBirthDate(DoctorPigInfoDto pigDto) {
         // 获取预产期
         try{
-            Map map = JsonMapper.JSON_NON_DEFAULT_MAPPER.getMapper().readValue(pigDto.getExtraTrack(), Map.class);
-            // @see DoctorMatingDto
-            Date date = new Date((Long) map.get("judgePregDate"));
-            if (date != null) {
-                return date;
-            } else {
-                // 获取配种日期
-                date = new Date((Long) map.get("matingDate"));
-                if (date != null) {
-                    // 配种日期 + 3 个月返回
-                    return new DateTime(date).plusMonths(3).toDate();
+            DateTimeFormatter formatter = DateTimeFormat.forPattern("yyyy-MM-dd");
+            if (StringUtils.isNotBlank(pigDto.getExtraTrack())) {
+                Map map = JsonMapper.JSON_NON_DEFAULT_MAPPER.getMapper().readValue(pigDto.getExtraTrack(), Map.class);
+                // @see DoctorMatingDto
+                Long dateMillis = (Long) map.get("judgePregDate");
+                if (dateMillis != null) {
+                    return formatter.print(dateMillis);
+                } else {
+                    // 获取配种日期
+                    dateMillis = (Long) map.get("matingDate");
+                    if (dateMillis != null) {
+                        // 配种日期 + 3 个月返回
+                        return formatter.print(new DateTime(dateMillis).plusMonths(3));
+                    }
                 }
             }
         } catch (Exception e) {
             log.error("[PigDtoFactory] get birth date failed, pigDto is {}", pigDto);
         }
-        return null;
+        return "";
     }
 }

@@ -237,6 +237,7 @@ public abstract class AbstractProducer implements IProducer {
                         .roleId(ruleRole.getRoleId())
                         .userId(subUser.getUserId())
                         .templateId(ruleRole.getTemplateId())
+                        .templateName(template.getName())
                         .messageTemplate(getTemplateName(template.getMessageTemplate(), channel))
                         .type(template.getType())
                         .category(template.getCategory())
@@ -250,8 +251,8 @@ public abstract class AbstractProducer implements IProducer {
                 // 模板编译
                 try{
                     Map<String, Serializable> jsonContext = MAPPER.readValue(jsonData, Map.class);
-                    message.setContent(RespHelper.orServEx(
-                            doctorMessageTemplateReadService.getMessageContentWithCache(message.getMessageTemplate(), jsonContext)));
+                    String content = RespHelper.orServEx(doctorMessageTemplateReadService.getMessageContentWithCache(message.getMessageTemplate(), jsonContext));
+                    message.setContent(content != null ? content.trim() : "");
                 } catch (Exception e) {
                     log.error("compile message template failed, template name is {}, json map is {}", message.getMessageTemplate(), jsonData);
                 }

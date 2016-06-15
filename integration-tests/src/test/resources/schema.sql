@@ -1002,6 +1002,7 @@ CREATE TABLE `doctor_messages` (
 	`role_id`	BIGINT(20) DEFAULT NULL COMMENT '子账号的角色id',
 	`user_id` BIGINT(20) DEFAULT NULL COMMENT '用户id',
 	`template_id` 	BIGINT(20) DEFAULT NULL COMMENT '消息规则模板id',
+	`template_name` 	VARCHAR(128) DEFAULT NULL COMMENT '消息规则模板名称',
 	`message_template`	VARCHAR(128) DEFAULT NULL COMMENT '规则数据模板名称, 对应parana_message_templates表name字段',
 	`type` 	SMALLINT(6) DEFAULT NULL COMMENT '消息类型: 0->系统消息, 1->预警消息, 2->警报消息',
 	`category`	SMALLINT(6) DEFAULT NULL COMMENT '消息种类',

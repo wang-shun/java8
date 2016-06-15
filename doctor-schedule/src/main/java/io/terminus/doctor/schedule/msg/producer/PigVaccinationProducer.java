@@ -6,6 +6,7 @@ import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
 import io.terminus.common.utils.Splitters;
 import io.terminus.doctor.common.enums.PigType;
+import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dto.DoctorGroupDetail;
 import io.terminus.doctor.event.dto.DoctorGroupSearchDto;
@@ -37,6 +38,7 @@ import io.terminus.doctor.schedule.msg.producer.factory.PigDtoFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -173,22 +175,22 @@ public class PigVaccinationProducer extends AbstractProducer {
                 // 1. 固定日龄
                 if (checkFixedDayAge(warn, sowPig.getDateAge(), vaccDate)) {
                     doctorMessageWriteService.createMessages(
-                            getMessage(sowPig, rule.getChannels(), ruleRole, subUsers, null, rule.getUrl()));
+                            getMessage(sowPig, rule.getChannels(), ruleRole, subUsers, null, rule.getUrl(), warn, vaccDate));
                 }
                 // 2. 固定日期
                 if (checkFixedDate(warn, vaccDate)) {
                     doctorMessageWriteService.createMessages(
-                            getMessage(sowPig, rule.getChannels(), ruleRole, subUsers, null, rule.getUrl()));
+                            getMessage(sowPig, rule.getChannels(), ruleRole, subUsers, null, rule.getUrl(), warn, vaccDate));
                 }
                 // 3. 固定体重
                 if (checkFixedWeight(warn, vaccDate, sowPig.getWeight(), getCheckWeightDate(sowPig))) {
                     doctorMessageWriteService.createMessages(
-                            getMessage(sowPig, rule.getChannels(), ruleRole, subUsers, null, rule.getUrl()));
+                            getMessage(sowPig, rule.getChannels(), ruleRole, subUsers, null, rule.getUrl(), warn, vaccDate));
                 }
                 // 4. 转舍
                 if (checkChangeLocation(warn, vaccDate, getChangeLocationDate(sowPig))) {
                     doctorMessageWriteService.createMessages(
-                            getMessage(sowPig, rule.getChannels(), ruleRole, subUsers, null, rule.getUrl()));
+                            getMessage(sowPig, rule.getChannels(), ruleRole, subUsers, null, rule.getUrl(), warn, vaccDate));
                 }
                 // 5. 配种, 母猪处于待配种状态
                 if (Objects.equals(VaccinationDateType.BREEDING.getValue(), warn.getVaccinationDateType()) &&
@@ -197,7 +199,7 @@ public class PigVaccinationProducer extends AbstractProducer {
                     if (DateTime.now().minusDays(warn.getInputValue()).isAfter(new DateTime(sowPig.getUpdatedAt()))) {
                         if (vaccDate == null || vaccDate.isBefore(new DateTime(sowPig.getUpdatedAt()))) {
                             doctorMessageWriteService.createMessages(
-                                    getMessage(sowPig, rule.getChannels(), ruleRole, subUsers, null, rule.getUrl()));
+                                    getMessage(sowPig, rule.getChannels(), ruleRole, subUsers, null, rule.getUrl(), warn, vaccDate));
                         }
                     }
                 }
@@ -219,22 +221,22 @@ public class PigVaccinationProducer extends AbstractProducer {
                 // 1. 固定日龄
                 if (checkFixedDayAge(warn, sowPig.getDateAge(), vaccDate)) {
                     doctorMessageWriteService.createMessages(
-                            getMessage(sowPig, rule.getChannels(), ruleRole, subUsers, null, rule.getUrl()));
+                            getMessage(sowPig, rule.getChannels(), ruleRole, subUsers, null, rule.getUrl(), warn, vaccDate));
                 }
                 // 2. 固定日期
                 if (checkFixedDate(warn, vaccDate)) {
                     doctorMessageWriteService.createMessages(
-                            getMessage(sowPig, rule.getChannels(), ruleRole, subUsers, null, rule.getUrl()));
+                            getMessage(sowPig, rule.getChannels(), ruleRole, subUsers, null, rule.getUrl(), warn, vaccDate));
                 }
                 // 3. 固定体重
                 if (checkFixedWeight(warn, vaccDate, sowPig.getWeight(), getCheckWeightDate(sowPig))) {
                     doctorMessageWriteService.createMessages(
-                            getMessage(sowPig, rule.getChannels(), ruleRole, subUsers, null, rule.getUrl()));
+                            getMessage(sowPig, rule.getChannels(), ruleRole, subUsers, null, rule.getUrl(), warn, vaccDate));
                 }
                 // 4. 转舍
                 if (checkChangeLocation(warn, vaccDate, getChangeLocationDate(sowPig))) {
                     doctorMessageWriteService.createMessages(
-                            getMessage(sowPig, rule.getChannels(), ruleRole, subUsers, null, rule.getUrl()));
+                            getMessage(sowPig, rule.getChannels(), ruleRole, subUsers, null, rule.getUrl(), warn, vaccDate));
                 }
                 // 5. 妊娠检测, 母猪处于阳性状态
                 if (Objects.equals(VaccinationDateType.PREG_CHECK.getValue(), warn.getVaccinationDateType()) &&
@@ -243,7 +245,7 @@ public class PigVaccinationProducer extends AbstractProducer {
                     if (DateTime.now().minusDays(warn.getInputValue()).isAfter(new DateTime(sowPig.getUpdatedAt()))) {
                         if (vaccDate == null || vaccDate.isBefore(new DateTime(sowPig.getUpdatedAt()))) {
                             doctorMessageWriteService.createMessages(
-                                    getMessage(sowPig, rule.getChannels(), ruleRole, subUsers, null, rule.getUrl()));
+                                    getMessage(sowPig, rule.getChannels(), ruleRole, subUsers, null, rule.getUrl(), warn, vaccDate));
                         }
                     }
                 }
@@ -266,22 +268,22 @@ public class PigVaccinationProducer extends AbstractProducer {
                 // 1. 固定日龄
                 if (checkFixedDayAge(warn, sowPig.getDateAge(), vaccDate)) {
                     doctorMessageWriteService.createMessages(
-                            getMessage(sowPig, rule.getChannels(), ruleRole, subUsers, null, rule.getUrl()));
+                            getMessage(sowPig, rule.getChannels(), ruleRole, subUsers, null, rule.getUrl(), warn, vaccDate));
                 }
                 // 2. 固定日期
                 if (checkFixedDate(warn, vaccDate)) {
                     doctorMessageWriteService.createMessages(
-                            getMessage(sowPig, rule.getChannels(), ruleRole, subUsers, null, rule.getUrl()));
+                            getMessage(sowPig, rule.getChannels(), ruleRole, subUsers, null, rule.getUrl(), warn, vaccDate));
                 }
                 // 3. 固定体重
                 if (checkFixedWeight(warn, vaccDate, sowPig.getWeight(), getCheckWeightDate(sowPig))) {
                     doctorMessageWriteService.createMessages(
-                            getMessage(sowPig, rule.getChannels(), ruleRole, subUsers, null, rule.getUrl()));
+                            getMessage(sowPig, rule.getChannels(), ruleRole, subUsers, null, rule.getUrl(), warn, vaccDate));
                 }
                 // 4. 转舍
                 if (checkChangeLocation(warn, vaccDate, getChangeLocationDate(sowPig))) {
                     doctorMessageWriteService.createMessages(
-                            getMessage(sowPig, rule.getChannels(), ruleRole, subUsers, null, rule.getUrl()));
+                            getMessage(sowPig, rule.getChannels(), ruleRole, subUsers, null, rule.getUrl(), warn, vaccDate));
                 }
                 // 5. 分娩, 母猪处于哺乳状态
                 if (Objects.equals(VaccinationDateType.DELIVER.getValue(), warn.getVaccinationDateType()) &&
@@ -290,7 +292,7 @@ public class PigVaccinationProducer extends AbstractProducer {
                     if (DateTime.now().minusDays(warn.getInputValue()).isAfter(new DateTime(sowPig.getUpdatedAt()))) {
                         if (vaccDate == null || vaccDate.isBefore(new DateTime(sowPig.getUpdatedAt()))) {
                             doctorMessageWriteService.createMessages(
-                                    getMessage(sowPig, rule.getChannels(), ruleRole, subUsers, null, rule.getUrl()));
+                                    getMessage(sowPig, rule.getChannels(), ruleRole, subUsers, null, rule.getUrl(), warn, vaccDate));
                         }
                     }
                 }
@@ -313,22 +315,22 @@ public class PigVaccinationProducer extends AbstractProducer {
                 // 1. 固定日龄
                 if (checkFixedDayAge(warn, sowPig.getDateAge(), vaccDate)) {
                     doctorMessageWriteService.createMessages(
-                            getMessage(sowPig, rule.getChannels(), ruleRole, subUsers, null, rule.getUrl()));
+                            getMessage(sowPig, rule.getChannels(), ruleRole, subUsers, null, rule.getUrl(), warn, vaccDate));
                 }
                 // 2. 固定日期
                 if (checkFixedDate(warn, vaccDate)) {
                     doctorMessageWriteService.createMessages(
-                            getMessage(sowPig, rule.getChannels(), ruleRole, subUsers, null, rule.getUrl()));
+                            getMessage(sowPig, rule.getChannels(), ruleRole, subUsers, null, rule.getUrl(), warn, vaccDate));
                 }
                 // 3. 固定体重
                 if (checkFixedWeight(warn, vaccDate, sowPig.getWeight(), getCheckWeightDate(sowPig))) {
                     doctorMessageWriteService.createMessages(
-                            getMessage(sowPig, rule.getChannels(), ruleRole, subUsers, null, rule.getUrl()));
+                            getMessage(sowPig, rule.getChannels(), ruleRole, subUsers, null, rule.getUrl(), warn, vaccDate));
                 }
                 // 4. 转舍
                 if (checkChangeLocation(warn, vaccDate, getChangeLocationDate(sowPig))) {
                     doctorMessageWriteService.createMessages(
-                            getMessage(sowPig, rule.getChannels(), ruleRole, subUsers, null, rule.getUrl()));
+                            getMessage(sowPig, rule.getChannels(), ruleRole, subUsers, null, rule.getUrl(), warn, vaccDate));
                 }
             });
         }
@@ -350,22 +352,22 @@ public class PigVaccinationProducer extends AbstractProducer {
                 // 1. 固定日龄
                 if (checkFixedDayAge(warn, groupTrack.getAvgDayAge(), vaccDate)) {
                     doctorMessageWriteService.createMessages(
-                            getGroupMessage(groupInfo, rule.getChannels(), ruleRole, subUsers, null, rule.getUrl()));
+                            getGroupMessage(groupInfo, rule.getChannels(), ruleRole, subUsers, rule.getUrl(), warn, vaccDate));
                 }
                 // 2. 固定日期
                 if (checkFixedDate(warn, vaccDate)) {
                     doctorMessageWriteService.createMessages(
-                            getGroupMessage(groupInfo, rule.getChannels(), ruleRole, subUsers, null, rule.getUrl()));
+                            getGroupMessage(groupInfo, rule.getChannels(), ruleRole, subUsers, rule.getUrl(), warn, vaccDate));
                 }
                 // 3. 固定体重
                 if (checkFixedWeight(warn, vaccDate, groupTrack.getAvgWeight(), null)) {
                     doctorMessageWriteService.createMessages(
-                            getGroupMessage(groupInfo, rule.getChannels(), ruleRole, subUsers, null, rule.getUrl()));
+                            getGroupMessage(groupInfo, rule.getChannels(), ruleRole, subUsers, rule.getUrl(), warn, vaccDate));
                 }
                 // 4. 转群
                 if (checkChangeGroup(warn, vaccDate, getChangeGroupDate(groupTrack))) {
                     doctorMessageWriteService.createMessages(
-                            getGroupMessage(groupInfo, rule.getChannels(), ruleRole, subUsers, null, rule.getUrl()));
+                            getGroupMessage(groupInfo, rule.getChannels(), ruleRole, subUsers, rule.getUrl(), warn, vaccDate));
                 }
             }
         }
@@ -517,9 +519,11 @@ public class PigVaccinationProducer extends AbstractProducer {
      */
     private DateTime getVaccinationDate(DoctorPigInfoDto pigDto) {
         try{
-            // @see DoctorMatingDto
-            Date date = new Date((Long) MAPPER.readValue(pigDto.getExtraTrack(), Map.class).get("vaccinationDate"));
-            return new DateTime(date);
+            if(StringUtils.isNotBlank(pigDto.getExtraTrack())) {
+                // @see DoctorMatingDto
+                Date date = new Date((Long) MAPPER.readValue(pigDto.getExtraTrack(), Map.class).get("vaccinationDate"));
+                return new DateTime(date);
+            }
         } catch (Exception e) {
             log.error("[PigVaccinationProducer] get vaccination date failed, pigDto is {}", pigDto);
         }
@@ -561,9 +565,11 @@ public class PigVaccinationProducer extends AbstractProducer {
      */
     private DateTime getCheckWeightDate(DoctorPigInfoDto pigDto) {
         try{
-            // @see DoctorMatingDto
-            Date date = new Date((Long) MAPPER.readValue(pigDto.getExtraTrack(), Map.class).get("conditionDate"));
-            return new DateTime(date);
+            if(StringUtils.isNotBlank(pigDto.getExtraTrack())) {
+                // @see DoctorMatingDto
+                Date date = new Date((Long) MAPPER.readValue(pigDto.getExtraTrack(), Map.class).get("conditionDate"));
+                return new DateTime(date);
+            }
         } catch (Exception e) {
             log.error("[PigVaccinationProducer] get check weight date failed, pigDto is {}", pigDto);
         }
@@ -575,9 +581,11 @@ public class PigVaccinationProducer extends AbstractProducer {
      */
     private DateTime getChangeLocationDate(DoctorPigInfoDto pigDto) {
         try{
-            // @see DoctorMatingDto
-            Date date = new Date((Long) MAPPER.readValue(pigDto.getExtraTrack(), Map.class).get("changeLocationDate"));
-            return new DateTime(date);
+            if(StringUtils.isNotBlank(pigDto.getExtraTrack())) {
+                // @see DoctorMatingDto
+                Date date = new Date((Long) MAPPER.readValue(pigDto.getExtraTrack(), Map.class).get("changeLocationDate"));
+                return new DateTime(date);
+            }
         } catch (Exception e) {
             log.error("[PigVaccinationProducer] get change location date failed, pigDto is {}", pigDto);
         }
@@ -588,10 +596,18 @@ public class PigVaccinationProducer extends AbstractProducer {
     /**
      * 创建消息
      */
-    private List<DoctorMessage> getMessage(DoctorPigInfoDto pigDto, String channels, DoctorMessageRuleRole ruleRole, List<SubUser> subUsers, Double timeDiff, String url) {
+    private List<DoctorMessage> getMessage(DoctorPigInfoDto pigDto, String channels, DoctorMessageRuleRole ruleRole, List<SubUser> subUsers, Double timeDiff, String url, DoctorVaccinationPigWarn warn, DateTime vaccDate) {
         List<DoctorMessage> messages = Lists.newArrayList();
         // 创建消息
         Map<String, Object> jsonData = PigDtoFactory.getInstance().createPigMessage(pigDto, timeDiff, url);
+        jsonData.put("pigType", warn.getPigType());
+        jsonData.put("materialId", warn.getMaterialId());
+        jsonData.put("materialName", warn.getMaterialName());
+        jsonData.put("inputValue", warn.getInputValue());
+        jsonData.put("inputDate", warn.getInputDate());
+        jsonData.put("dose", warn.getDose());
+        jsonData.put("vaccinationDateType", warn.getVaccinationDateType());
+        jsonData.put("vaccDate", DateTimeFormat.forPattern("yyyy-MM-dd").print(vaccDate));
 
         Splitters.COMMA.splitToList(channels).forEach(channel -> {
             try {
@@ -606,10 +622,19 @@ public class PigVaccinationProducer extends AbstractProducer {
     /**
      * 创建消息
      */
-    private List<DoctorMessage> getGroupMessage(DoctorGroupDetail detail, String channels, DoctorMessageRuleRole ruleRole, List<SubUser> subUsers, Double timeDiff, String url) {
+    private List<DoctorMessage> getGroupMessage(DoctorGroupDetail detail, String channels, DoctorMessageRuleRole ruleRole, List<SubUser> subUsers, String url, DoctorVaccinationPigWarn warn, DateTime vaccDate) {
         List<DoctorMessage> messages = Lists.newArrayList();
         // 创建消息
-        Map<String, Object> jsonData = GroupDetailFactory.getInstance().createPigMessage(detail, timeDiff, url);
+        Map<String, Object> jsonData = GroupDetailFactory.getInstance().createGroupMessage(detail, url);
+        jsonData.put("pigType", warn.getPigType());
+        jsonData.put("materialId", warn.getMaterialId());
+        jsonData.put("materialName", warn.getMaterialName());
+        jsonData.put("inputValue", warn.getInputValue());
+        jsonData.put("inputDate", DateUtil.toDateString(warn.getInputDate()));
+        jsonData.put("currDate", DateUtil.toDateString(new Date()));
+        jsonData.put("dose", warn.getDose());
+        jsonData.put("vaccinationDateType", warn.getVaccinationDateType());
+        jsonData.put("vaccDate", DateTimeFormat.forPattern("yyyy-MM-dd").print(vaccDate));
 
         Splitters.COMMA.splitToList(channels).forEach(channel -> {
             try {

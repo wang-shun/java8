@@ -23,14 +23,17 @@ public class GroupDetailFactory {
         return groupDetailFactory;
     }
 
-    public Map<String, Object> createPigMessage(DoctorGroupDetail detail, Double timeDiff, String url) {
+    public Map<String, Object> createGroupMessage(DoctorGroupDetail detail, String url) {
         DoctorGroup group = detail.getGroup();
         DoctorGroupTrack track = detail.getGroupTrack();
         // 创建数据
         Map<String, Object> jsonData = Maps.newHashMap();
         jsonData.put("groupId", group.getId());
+        jsonData.put("groupCode", group.getGroupCode());
         jsonData.put("farmId", group.getFarmId());
         jsonData.put("farmName", group.getFarmName());
+        jsonData.put("barnId", group.getCurrentBarnId());
+        jsonData.put("barnName", group.getCurrentBarnName());
         jsonData.put("groupCode", group.getGroupCode());
         jsonData.put("pigType", group.getPigType());
         jsonData.put("quantity", track.getQuantity());

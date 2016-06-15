@@ -138,12 +138,17 @@ public class SowNotLitterProducer extends AbstractProducer {
         return messages;
     }
 
+    /**
+     * 获取最近一次配种日期
+     */
     private DateTime getBreedingDate(DoctorPigInfoDto pigDto) {
         // 获取配种日期
         try {
-            // @see DoctorMatingDto
-            Date date = new Date((Long) MAPPER.readValue(pigDto.getExtraTrack(), Map.class).get("matingDate"));
-            return new DateTime(date);
+            if(StringUtils.isNotBlank(pigDto.getExtraTrack())) {
+                // @see DoctorMatingDto
+                Date date = new Date((Long) MAPPER.readValue(pigDto.getExtraTrack(), Map.class).get("matingDate"));
+                return new DateTime(date);
+            }
         } catch (Exception e) {
             log.error("[SowNotLitterProducer] get breeding date failed, pigDto is {}", pigDto);
         }

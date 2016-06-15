@@ -54,6 +54,11 @@ public class DoctorMessage implements Serializable {
     private Long templateId;
 
     /**
+     * 消息模板的名称
+     */
+    private String templateName;
+
+    /**
      * 消息数据填充模板的名称
      */
     private String messageTemplate;

@@ -141,16 +141,18 @@ public class SowBirthDateProducer extends AbstractProducer {
     private DateTime getBirthDate(DoctorPigInfoDto pigDto) {
         // 获取预产期
         try{
-            // @see DoctorMatingDto
-            Date date = new Date((Long) MAPPER.readValue(pigDto.getExtraTrack(), Map.class).get("judgePregDate"));
-            if (date != null) {
-                return new DateTime(date);
-            } else {
-                // 获取配种日期
-                date = new Date((Long) MAPPER.readValue(pigDto.getExtraTrack(), Map.class).get("matingDate"));
+            if(StringUtils.isNotBlank(pigDto.getExtraTrack())) {
+                // @see DoctorMatingDto
+                Date date = new Date((Long) MAPPER.readValue(pigDto.getExtraTrack(), Map.class).get("judgePregDate"));
                 if (date != null) {
-                    // 配种日期 + 3 个月返回
-                    return new DateTime(date).plusMonths(3);
+                    return new DateTime(date);
+                } else {
+                    // 获取配种日期
+                    date = new Date((Long) MAPPER.readValue(pigDto.getExtraTrack(), Map.class).get("matingDate"));
+                    if (date != null) {
+                        // 配种日期 + 3 个月返回
+                        return new DateTime(date).plusMonths(3);
+                    }
                 }
             }
         } catch (Exception e) {

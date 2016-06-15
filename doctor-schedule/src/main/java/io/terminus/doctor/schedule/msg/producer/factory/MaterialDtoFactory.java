@@ -31,8 +31,8 @@ public class MaterialDtoFactory {
         jsonDate.put("wareHouseName", dto.getWareHouseName());
         jsonDate.put("managerId", dto.getManagerId());
         jsonDate.put("managerName", dto.getManagerName());
-        jsonDate.put("materialId", dto.getManagerId());
-        jsonDate.put("materialName", dto.getManagerName());
+        jsonDate.put("materialId", dto.getMaterialId());
+        jsonDate.put("materialName", dto.getMaterialName());
         jsonDate.put("type", dto.getType());
         WareHouseType type = WareHouseType.from(dto.getType());
         jsonDate.put("typeName", type == null ? null : type.getDesc());
