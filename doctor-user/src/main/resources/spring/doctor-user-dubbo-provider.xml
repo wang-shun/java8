@@ -66,6 +66,9 @@
     <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.DoctorUserDataPermissionReadService" ref="doctorUserDataPermissionReadServiceImpl"/>
     <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.DoctorUserDataPermissionWriteService" ref="doctorUserDataPermissionWriteServiceImpl"/>
     <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.DoctorUserReadService" ref="doctorUserReadServiceImpl"/>
+    <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.DoctorServiceStatusReadService" ref="doctorServiceStatusReadServiceImpl"/>
+    <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.DoctorServiceStatusWriteService" ref="doctorServiceStatusWriteServiceImpl"/>
+
 
     <!-- dubbo interface -->
     <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.user.interfaces.service.DoctorUserReadInterface" ref="doctorUserReadInterfaceImpl"/>
@@ -73,4 +76,5 @@
 
     <!-- staff service -->
     <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.DoctorStaffReadService" ref="doctorStaffReadServiceImpl"/>
+    <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.DoctorStaffWriteService" ref="doctorStaffWriteServiceImpl"/>
 </beans>

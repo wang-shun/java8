@@ -25,6 +25,11 @@ public class DoctorServiceReview implements Serializable {
      * 用户id
      */
     private Long userId;
+
+    /**
+     * 用户手机号,冗余字段
+     */
+    private String userMobile;
     
     /**
      * 服务类型 1 猪场软件, 2 新融电商, 3 大数据, 4 生猪交易
@@ -33,7 +38,7 @@ public class DoctorServiceReview implements Serializable {
     private Integer type;
     
     /**
-     * 审核状态 0 未审核, 2 待审核(提交申请) 1 通过，-1 不通过, -2 冻结
+     * 审核状态 0 未申请, 2 待审核(已提交申请), 1 通过，-1 不通过, -2 冻结申请资格
      * @see io.terminus.doctor.user.model.DoctorServiceReview.Status
      */
     private Integer status;

@@ -6,8 +6,6 @@ import io.terminus.common.model.PageInfo;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.user.dao.DoctorServiceReviewDao;
-import io.terminus.doctor.user.dao.ServiceReviewTrackDao;
-import io.terminus.doctor.user.dto.DoctorServiceReviewDto;
 import io.terminus.doctor.user.model.DoctorServiceReview;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,13 +26,10 @@ import java.util.Objects;
 @Service
 public class DoctorServiceReviewReadServiceImpl implements DoctorServiceReviewReadService{
     private final DoctorServiceReviewDao doctorServiceReviewDao;
-    private final ServiceReviewTrackDao serviceReviewTrackDao;
 
     @Autowired
-    public DoctorServiceReviewReadServiceImpl(DoctorServiceReviewDao doctorServiceReviewDao,
-                                              ServiceReviewTrackDao serviceReviewTrackDao){
+    public DoctorServiceReviewReadServiceImpl(DoctorServiceReviewDao doctorServiceReviewDao){
         this.doctorServiceReviewDao = doctorServiceReviewDao;
-        this.serviceReviewTrackDao = serviceReviewTrackDao;
     }
 
     @Override
@@ -74,56 +69,8 @@ public class DoctorServiceReviewReadServiceImpl implements DoctorServiceReviewRe
     }
 
     @Override
-    public Response<DoctorServiceReviewDto> findServiceReviewDtoByUserId(Long userId) {
-        Response<DoctorServiceReviewDto> response = new Response<>();
-        DoctorServiceReviewDto dto = new DoctorServiceReviewDto();
-        dto.setUserId(userId);
-        try {
-            for (DoctorServiceReview review : doctorServiceReviewDao.findByUserId(userId)){
-                switch (DoctorServiceReview.Type.from(review.getType())) {
-                    case PIG_DOCTOR :
-                        dto.setPigDoctor(review);
-                        if (Objects.equals(review.getStatus(), DoctorServiceReview.Status.FROZEN.getValue())
-                                || Objects.equals(review.getStatus(), DoctorServiceReview.Status.NOT_OK.getValue())) {
-                            dto.setPigDoctorReason(serviceReviewTrackDao.findLastByUserIdAndType(userId, DoctorServiceReview.Type.PIG_DOCTOR).getReason());
-                        }
-                        break;
-                    case PIGMALL :
-                        dto.setPigmall(review);
-                        if (Objects.equals(review.getStatus(), DoctorServiceReview.Status.FROZEN.getValue())
-                                || Objects.equals(review.getStatus(), DoctorServiceReview.Status.NOT_OK.getValue())) {
-                            dto.setPigmallReason(serviceReviewTrackDao.findLastByUserIdAndType(userId, DoctorServiceReview.Type.PIGMALL).getReason());
-                        }
-                        break;
-                    case NEVEREST :
-                        dto.setNeverest(review);
-                        if (Objects.equals(review.getStatus(), DoctorServiceReview.Status.FROZEN.getValue())
-                                || Objects.equals(review.getStatus(), DoctorServiceReview.Status.NOT_OK.getValue())) {
-                            dto.setNeverestReason(serviceReviewTrackDao.findLastByUserIdAndType(userId, DoctorServiceReview.Type.NEVEREST).getReason());
-                        }
-                        break;
-                    case PIG_TRADE :
-                        dto.setPigTrade(review);
-                        if (Objects.equals(review.getStatus(), DoctorServiceReview.Status.FROZEN.getValue())
-                                || Objects.equals(review.getStatus(), DoctorServiceReview.Status.NOT_OK.getValue())) {
-                            dto.setPigTradeReason(serviceReviewTrackDao.findLastByUserIdAndType(userId, DoctorServiceReview.Type.PIG_TRADE).getReason());
-                        }
-                        break;
-                    default:
-                        log.error("doctor service review type error, type = {}", review.getType());
-                        return Response.fail("doctor.service.review.type.error");
-                }
-            }
-            response.setResult(dto);
-        } catch (Exception e) {
-            log.error("find doctor service review failed, cause : {}", Throwables.getStackTraceAsString(e));
-            response.setError("find.doctor.service.review.failed");
-        }
-        return response;
-    }
-
-    @Override
-    public Response<Paging<DoctorServiceReview>> page(Integer pageNo, Integer pageSize, Long userId, DoctorServiceReview.Type type, DoctorServiceReview.Status status){
+    public Response<Paging<DoctorServiceReview>> page(Integer pageNo, Integer pageSize, Long userId, String userMobile,
+                                                      DoctorServiceReview.Type type, DoctorServiceReview.Status status){
         Response<Paging<DoctorServiceReview>> response = new Response<>();
         Map<String, Object> criteria = Maps.newHashMap();
         if (type != null) {
@@ -133,6 +80,7 @@ public class DoctorServiceReviewReadServiceImpl implements DoctorServiceReviewRe
             criteria.put("status", status.getValue());
         }
         criteria.put("userId", userId);
+        criteria.put("userMobile", userMobile);
         PageInfo pageInfo = new PageInfo(pageNo, pageSize);
         criteria.putAll(pageInfo.toMap());
         try{
