@@ -34,7 +34,6 @@ public class GroupDetailFactory {
         jsonData.put("farmName", group.getFarmName());
         jsonData.put("barnId", group.getCurrentBarnId());
         jsonData.put("barnName", group.getCurrentBarnName());
-        jsonData.put("groupCode", group.getGroupCode());
         jsonData.put("pigType", group.getPigType());
         jsonData.put("quantity", track.getQuantity());
         jsonData.put("avgDayAge", track.getAvgDayAge());

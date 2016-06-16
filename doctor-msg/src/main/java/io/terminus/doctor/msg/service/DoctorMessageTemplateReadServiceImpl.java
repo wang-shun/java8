@@ -8,7 +8,6 @@ import io.terminus.doctor.msg.helper.DoctorHandleBarsHelper;
 import io.terminus.doctor.msg.helper.DoctorMessageTemplateCacher;
 import io.terminus.parana.msg.dto.MessageInfo;
 import io.terminus.parana.msg.impl.dao.mysql.MessageTemplateDao;
-import io.terminus.parana.msg.impl.service.MessageTemplateReadServiceImpl;
 import io.terminus.parana.msg.model.MessageTemplate;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +26,7 @@ import java.util.concurrent.ExecutionException;
  */
 @Slf4j
 @Service
-public class DoctorMessageTemplateReadServiceImpl extends MessageTemplateReadServiceImpl implements DoctorMessageTemplateReadService {
+public class DoctorMessageTemplateReadServiceImpl implements DoctorMessageTemplateReadService {
 
     private final MessageTemplateDao messageTemplateDao;
     private final DoctorMessageTemplateCacher doctorMessageTemplateCacher;
@@ -37,7 +36,6 @@ public class DoctorMessageTemplateReadServiceImpl extends MessageTemplateReadSer
     public DoctorMessageTemplateReadServiceImpl(MessageTemplateDao messageTemplateDao,
                                                 DoctorMessageTemplateCacher doctorMessageTemplateCacher,
                                                 DoctorHandleBarsHelper doctorHandleBarsHelper) {
-        super(messageTemplateDao);
         this.messageTemplateDao = messageTemplateDao;
         this.doctorMessageTemplateCacher = doctorMessageTemplateCacher;
         this.doctorHandleBarsHelper = doctorHandleBarsHelper;
