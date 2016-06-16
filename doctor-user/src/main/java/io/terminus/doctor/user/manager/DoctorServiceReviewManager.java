@@ -85,13 +85,14 @@ public class DoctorServiceReviewManager {
         } else {
             throw new ServiceException("doctor.service.review.type.error");
         }
+
+        //添加状态变更记录
+        this.createServiceReviewTrack(null, user.getId(), review.getStatus(), DoctorServiceReview.Status.REVIEW.getValue(), type, null);
+
         //更新状态为已提交,待审核
         review.setStatus(DoctorServiceReview.Status.REVIEW.getValue());
         review.setRealName(realName);
         doctorServiceReviewDao.update(review);
-        //添加状态变更记录
-        this.createServiceReviewTrack(null, user.getId(), review.getStatus(), DoctorServiceReview.Status.REVIEW.getValue(), type, null);
-
     }
     private void createDoctorStaff(BaseUser user, Long orgId, String orgName){
         DoctorStaff staff = new DoctorStaff();

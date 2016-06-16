@@ -45,6 +45,6 @@ public interface DoctorServiceReviewReadService {
      * @param status 枚举 DoctorServiceReview.Status
      * @return
      */
-    Response<Paging<DoctorServiceReview>> page(Integer pageNo, Integer pageSize, Long userId, String userMobile,
+    Response<Paging<DoctorServiceReview>> page(Integer pageNo, Integer pageSize, Long userId, String userMobile, String realName,
                                                DoctorServiceReview.Type type, DoctorServiceReview.Status status);
 }
