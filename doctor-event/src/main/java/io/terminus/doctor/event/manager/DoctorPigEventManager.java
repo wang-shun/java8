@@ -127,7 +127,7 @@ public class DoctorPigEventManager {
             if(Objects.equals(doctorBasicInputInfoDto.getEventType(), PigEvent.ENTRY.getKey())){
                 flowProcessService.startFlowInstance(sowFlowDefinitionKey, pigId);
             }else if(Objects.equals(doctorBasicInputInfoDto.getEventType(), PigEvent.REMOVAL.getKey())){
-                flowProcessService.endFlowInstance(sowFlowDefinitionKey, pigId);
+                flowProcessService.endFlowInstance(sowFlowDefinitionKey, pigId, true, null);
             }
         }
         return ids;
