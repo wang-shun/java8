@@ -33,15 +33,9 @@
         "type": "string",
         "index": "not_analyzed"
       },
-      "pigFatherId": {
-        "type": "long"
-      },
       "pigFatherCode": {
         "type": "string",
         "index": "not_analyzed"
-      },
-      "pigMotherId": {
-        "type": "long"
       },
       "pigMotherCode": {
         "type": "string",

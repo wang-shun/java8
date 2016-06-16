@@ -43,7 +43,7 @@ public class PigDumps {
             pigDumpService.fullDump(null);
             log.info("pig full dump end");
         } catch (Exception e) {
-            log.error("pig full dump failed", Throwables.getStackTraceAsString(e));
+            log.error("pig full dump failed, cause by {}", Throwables.getStackTraceAsString(e));
         }
     }
 
@@ -59,7 +59,7 @@ public class PigDumps {
             pigDumpService.deltaDump(15);
             log.info("pig delta dump end");
         } catch (Exception e) {
-            log.error("pig delta dump failed", Throwables.getStackTraceAsString(e));
+            log.error("pig delta dump failed, cause by {}", Throwables.getStackTraceAsString(e));
         }
     }
 }

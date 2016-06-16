@@ -73,6 +73,17 @@
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.parana.user.service.DeviceReadService" id="deviceReadService" check="false"/>
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.parana.user.service.DeviceWriteService" id="deviceWriteService" check="false"/>
 
+    <!-- Doctor message service -->
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.msg.service.DoctorMessageReadService" id="doctorMessageReadService" check="false"/>
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.msg.service.DoctorMessageWriteService" id="doctorMessageWriteService" check="false"/>
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.msg.service.DoctorMessageRuleTemplateReadService" id="doctorMessageRuleTemplateReadService" check="false"/>
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.msg.service.DoctorMessageRuleTemplateWriteService" id="doctorMessageRuleTemplateWriteService" check="false"/>
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.msg.service.DoctorMessageRuleReadService" id="doctorMessageRuleReadService" check="false"/>
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.msg.service.DoctorMessageRuleWriteService" id="doctorMessageRuleWriteService" check="false"/>
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.msg.service.DoctorMessageRuleRoleReadService" id="DoctorMessageRuleRoleReadService" check="false"/>
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.msg.service.DoctorMessageRuleRoleWriteService" id="doctorMessageRuleRoleWriteService" check="false"/>
+
+
     <!-- article service -->
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.parana.article.service.ArticleReadService" id="articleReadService" check="false"/>
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.parana.article.service.ArticleWriteService" id="articleWriteService" check="false"/>
@@ -99,6 +110,8 @@
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.event.search.group.GroupSearchWriteService" id="groupSearchWriteService" check="false" />
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.event.search.barn.BarnSearchReadService" id="barnSearchReadService" check="false" />
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.event.search.barn.BarnSearchWriteService" id="barnSearchWriteService" check="false" />
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.warehouse.search.material.MaterialSearchReadService" id="materialSearchReadService" check="false" />
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.warehouse.search.material.MaterialSearchWriteService" id="materialSearchWriteService" check="false" />
 
 
     <!-- doctor ware house  -->

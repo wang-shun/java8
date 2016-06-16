@@ -60,6 +60,16 @@
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.parana.msg.service.NotifyReadService" id="notifyReadService" check="false"/>
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.parana.msg.service.NotifyWriteService" id="notifyWriteService" check="false"/>
 
+    <!-- Doctor message service -->
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.msg.service.DoctorMessageReadService" id="doctorMessageReadService" check="false"/>
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.msg.service.DoctorMessageWriteService" id="doctorMessageWriteService" check="false"/>
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.msg.service.DoctorMessageRuleTemplateReadService" id="doctorMessageRuleTemplateReadService" check="false"/>
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.msg.service.DoctorMessageRuleTemplateWriteService" id="doctorMessageRuleTemplateWriteService" check="false"/>
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.msg.service.DoctorMessageRuleReadService" id="doctorMessageRuleReadService" check="false"/>
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.msg.service.DoctorMessageRuleWriteService" id="doctorMessageRuleWriteService" check="false"/>
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.msg.service.DoctorMessageRuleRoleReadService" id="DoctorMessageRuleRoleReadService" check="false"/>
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.msg.service.DoctorMessageRuleRoleWriteService" id="doctorMessageRuleRoleWriteService" check="false"/>
+
     <!--config-->
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.parana.config.service.ConfigReadService" id="configReadService" check="false"/>
 

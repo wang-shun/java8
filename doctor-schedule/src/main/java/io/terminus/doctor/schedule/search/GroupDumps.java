@@ -43,7 +43,7 @@ public class GroupDumps {
             groupDumpService.fullDump(null);
             log.info("group full dump end");
         } catch (Exception e) {
-            log.error("group full dump failed", Throwables.getStackTraceAsString(e));
+            log.error("group full dump failed, cause by {}", Throwables.getStackTraceAsString(e));
         }
     }
 
@@ -59,7 +59,7 @@ public class GroupDumps {
             groupDumpService.deltaDump(15);
             log.info("group delta dump end");
         } catch (Exception e) {
-            log.error("group delta dump failed", Throwables.getStackTraceAsString(e));
+            log.error("delta dump failed, cause by {}", Throwables.getStackTraceAsString(e));
         }
     }
 }
