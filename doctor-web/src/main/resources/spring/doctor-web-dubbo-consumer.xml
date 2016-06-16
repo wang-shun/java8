@@ -105,6 +105,8 @@
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.event.search.group.GroupSearchWriteService" id="groupSearchWriteService" check="false" />
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.event.search.barn.BarnSearchReadService" id="barnSearchReadService" check="false" />
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.event.search.barn.BarnSearchWriteService" id="barnSearchWriteService" check="false" />
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.warehouse.search.material.MaterialSearchReadService" id="materialSearchReadService" check="false" />
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.warehouse.search.material.MaterialSearchWriteService" id="materialSearchWriteService" check="false" />
 
 
     <!-- doctor ware house  -->

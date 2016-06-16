@@ -37,6 +37,10 @@ redis:
   test-on-borrow: true
 
 # search
+search:
+  host: 101.201.44.35
+  port: 9200
+
 esearch:
   material:
     index-name: materials

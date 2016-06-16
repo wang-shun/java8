@@ -11,3 +11,15 @@ datasource:
 mybatis:
   mapperLocations:  classpath*:mapper/*Mapper.xml
   typeAliasesPackage: io.terminus.doctor.warehouse.model
+
+# search
+search:
+  host: localhost
+
+esearch:
+  material:
+    index-name: materials
+    index-type: material
+    mapping-path: search/material_mapping.json
+    full-dump-range: 3
+    batch-size: 100
