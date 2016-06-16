@@ -1,10 +1,13 @@
 package io.terminus.doctor.web.front.event.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.api.client.repackaged.com.google.common.base.Strings;
 import com.google.common.base.Throwables;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
+import io.terminus.common.utils.JsonMapper;
+import io.terminus.doctor.common.constants.JacksonType;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dto.DoctorPigInfoDto;
 import io.terminus.doctor.event.model.DoctorPigEvent;
@@ -21,7 +24,6 @@ import org.joda.time.format.DateTimeFormatter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -48,6 +50,8 @@ public class DoctorPigEvents {
     private final DoctorPigEventWriteService doctorPigEventWriteService;
 
     private final UserReadService userReadService;
+
+    private static final ObjectMapper OBJECT_MAPPER = JsonMapper.JSON_NON_DEFAULT_MAPPER.getMapper();
 
     private static final DateTimeFormatter DTF = DateTimeFormat.forPattern("yyyy-MM-dd");
 
@@ -117,7 +121,14 @@ public class DoctorPigEvents {
 
     @RequestMapping(value = "/queryPigEvents", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public List<Integer> queryPigExecuteEvent(@RequestBody List<Long> pigIds){
+    public List<Integer> queryPigExecuteEvent(@RequestParam("ids") String ids){
+        List<Long> pigIds = null;
+        try{
+            pigIds = OBJECT_MAPPER.readValue(ids, JacksonType.LIST_OF_LONG);
+        }catch (Exception e){
+            log.error("query pig execute event error, ids:{} cause:{}", ids, Throwables.getStackTraceAsString(e));
+            throw new JsonResponseException("query.executeEvent.fail");
+        }
         return RespHelper.or500(doctorPigEventReadService.queryPigEvents(pigIds));
     }
 }
