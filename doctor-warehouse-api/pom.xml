@@ -16,5 +16,10 @@
             <groupId>io.terminus.doctor</groupId>
             <artifactId>doctor-common</artifactId>
         </dependency>
+
+        <dependency>
+            <groupId>io.terminus.search</groupId>
+            <artifactId>search-api</artifactId>
+        </dependency>
     </dependencies>
 </project>

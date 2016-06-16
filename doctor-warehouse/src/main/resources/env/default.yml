@@ -35,3 +35,12 @@ redis:
   max-total: 10
   max-idle: 2
   test-on-borrow: true
+
+# search
+esearch:
+  material:
+    index-name: materials
+    index-type: material
+    mapping-path: search/material_mapping.json
+    full-dump-range: 3
+    batch-size: 100
