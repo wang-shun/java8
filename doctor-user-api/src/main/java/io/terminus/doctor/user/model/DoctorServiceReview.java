@@ -30,6 +30,11 @@ public class DoctorServiceReview implements Serializable {
      * 用户手机号,冗余字段
      */
     private String userMobile;
+
+    /**
+     * 用户申请服务时填写的"真实姓名"
+     */
+    private String realName;
     
     /**
      * 服务类型 1 猪场软件, 2 新融电商, 3 大数据, 4 生猪交易
