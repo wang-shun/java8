@@ -12,17 +12,19 @@ import java.util.Objects;
  */
 public enum DataEventType {
 
-    PigEventCreate(1l, "猪创建事件信息"),
-    VaccinationMedicalConsume(2l, "免疫药品领用事件"),
-    MaterialInfoCreateEvent(3l, "物料信息创建事件信息");
+    PigEventCreate(1, "猪创建事件信息"),
+    VaccinationMedicalConsume(2, "免疫药品领用事件"),
+    MaterialInfoCreateEvent(3, "物料信息创建事件信息"),
+    GroupEventCreate(4, "猪群创建事件信息"),
+    BarnUpdate(5, "猪舍变动信息");
 
     @Getter
-    private Long key;
+    private int key;
 
     @Getter
     private String desc;
 
-    private DataEventType(Long key, String desc){
+    DataEventType(int key, String desc){
         this.key = key;
         this.desc = desc;
     }

@@ -8,7 +8,11 @@ import io.terminus.doctor.event.dto.DoctorPigInfoDetailDto;
 import io.terminus.doctor.event.dto.DoctorPigInfoDto;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.event.service.DoctorPigReadService;
+import io.terminus.doctor.web.front.event.dto.DoctorBoarDetailDto;
+import io.terminus.doctor.web.front.event.dto.DoctorSowDetailDto;
 import lombok.extern.slf4j.Slf4j;
+import org.joda.time.DateTime;
+import org.joda.time.Days;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
@@ -57,5 +61,36 @@ public class DoctorPigs {
     @ResponseBody
     public DoctorPigInfoDetailDto queryPigDetailInfoDto(@RequestParam("farmId") Long farmId, @RequestParam("pigId") Long pigId){
         return RespHelper.or500(doctorPigReadService.queryPigDetailInfoByPigId(pigId));
+    }
+
+    @RequestMapping(value = "/getSowPigDetail", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public DoctorSowDetailDto querySowPigDetailInfoDto(@RequestParam("farmId") Long farmId, @RequestParam("pigId") Long pigId){
+        return buildSowDetailDto(queryPigDetailInfoDto(farmId, pigId));
+    }
+
+    @RequestMapping(value = "/getBoarPigDetail", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public DoctorBoarDetailDto queryBoarPigDetailInfoDto(@RequestParam("farmId") Long farmId, @RequestParam("pigId") Long pigId){
+        return buildDoctorBoarDetailDto(queryPigDetailInfoDto(farmId, pigId));
+    }
+
+    private DoctorBoarDetailDto buildDoctorBoarDetailDto(DoctorPigInfoDetailDto dto){
+        DoctorBoarDetailDto doctorBoarDetailDto = DoctorBoarDetailDto.builder()
+                .pigBoarCode(dto.getDoctorPig().getPigCode()).breedName(dto.getDoctorPig().getBreedName())
+                .barnCode(dto.getDoctorPigTrack().getCurrentBarnName()).pigStatus(dto.getDoctorPigTrack().getStatus())
+                .field123456("wtfca")
+                .build();
+        return doctorBoarDetailDto;
+    }
+
+    private DoctorSowDetailDto buildSowDetailDto(DoctorPigInfoDetailDto dto){
+        DoctorSowDetailDto doctorSowDetailDto = DoctorSowDetailDto.builder()
+                .pigSowCode(dto.getDoctorPig().getPigCode()).breedName(dto.getDoctorPig().getBreedName()).barnCode(dto.getDoctorPigTrack().getCurrentBarnName())
+                .pigStatus(dto.getDoctorPigTrack().getStatus())
+                .dayAge(Days.daysBetween(new DateTime(dto.getDoctorPig().getBirthDate()), DateTime.now()).getDays())
+                .parity(dto.getDoctorPigTrack().getCurrentParity()).entryDate(dto.getDoctorPig().getInFarmDate())
+                .build();
+        return doctorSowDetailDto;
     }
 }
