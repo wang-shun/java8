@@ -67,7 +67,7 @@ public class DefaultGroupQueryBuilder extends BaseGroupQueryBuilder {
         String statuses = params.get("statuses");
         if (StringUtils.isNotBlank(statuses)) {
             List<String> statusList = Splitters.UNDERSCORE.splitToList(statuses);
-            termsList.add(new Terms("statuses", statusList));
+            termsList.add(new Terms("status", statusList));
         }
         return termsList;
     }

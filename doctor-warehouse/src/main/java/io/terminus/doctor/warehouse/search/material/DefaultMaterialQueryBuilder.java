@@ -84,7 +84,14 @@ public class DefaultMaterialQueryBuilder extends BaseMaterialQueryBuilder {
 
     @Override
     protected List<Terms> buildTerms(Map<String, String> params) {
-        return null;
+        List<Terms> termsList = Lists.newArrayList();
+        // 1. 多类型
+        String types = params.get("types");
+        if (StringUtils.isNotBlank(types)) {
+            List<String> statusList = Splitters.UNDERSCORE.splitToList(types);
+            termsList.add(new Terms("type", statusList));
+        }
+        return termsList;
     }
 
     @Override
