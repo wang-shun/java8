@@ -35,7 +35,7 @@ public class DoctorPigs {
         this.doctorPigReadService = doctorPigReadService;
     }
 
-    @RequestMapping(value = "/queryByStatus", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(value = "/queryByStatus", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Paging<DoctorPigInfoDto> pagingDoctorPigInfoDetail(@RequestParam("farmId") Long farmId,
                                                               @RequestParam("status") Integer status,
@@ -53,7 +53,7 @@ public class DoctorPigs {
         return RespHelper.or500(doctorPigReadService.pagingDoctorInfoDtoByPigTrack(doctorPigTrack, pageNo, pageSize));
     }
 
-    @RequestMapping(value = "/getPigDetail", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(value = "/getPigDetail", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public DoctorPigInfoDetailDto queryPigDetailInfoDto(@RequestParam("farmId") Long farmId, @RequestParam("pigId") Long pigId){
         return RespHelper.or500(doctorPigReadService.queryPigDetailInfoByPigId(pigId));

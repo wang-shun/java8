@@ -115,7 +115,7 @@ public class DoctorPigEvents {
         }
     }
 
-    @RequestMapping(value = "/queryPigEvents", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(value = "/queryPigEvents", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public List<Integer> queryPigExecuteEvent(@RequestBody List<Long> pigIds){
         return RespHelper.or500(doctorPigEventReadService.queryPigEvents(pigIds));
