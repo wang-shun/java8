@@ -105,32 +105,32 @@ public class PigDumpServiceImpl implements PigDumpService {
 
     private int doIndex(String since) {
         // 猪最大id
-        Long lastId = doctorPigDao.maxId() + 1;
+        Long lastId = doctorPigTrackDao.maxId() + 1;
 
         // 记录数量
         int dumpCount = 0;
         while (true) {
-            List<DoctorPig> pigs = doctorPigDao.listSince(lastId, since, pigSearchProperties.getBatchSize());
-            if (pigs == null || pigs.size() == 0) {
+            List<DoctorPigTrack> pigTracks = doctorPigTrackDao.listSince(lastId, since, pigSearchProperties.getBatchSize());
+            if (pigTracks == null || pigTracks.size() == 0) {
                 break;
             }
             // 建立索引
-            pigs.forEach(pig -> {
+            pigTracks.forEach(track -> {
                 try{
-                    DoctorPigTrack pigTrack = doctorPigTrackDao.findByPigId(pig.getId());
-                    IndexedPig indexedPig = indexedPigFactory.create(pig, pigTrack);
+                    DoctorPig pig = doctorPigDao.findById(track.getPigId());
+                    IndexedPig indexedPig = indexedPigFactory.create(pig, track);
                     indexExecutor.submit(indexedPigTaskAction.indexTask(indexedPig));
                 }catch (Exception e){
-                    log.error("failed to index pig(id={}),cause:{}", pig.getId(), Throwables.getStackTraceAsString(e));
+                    log.error("failed to index pig(id={}),cause:{}", track.getPigId(), Throwables.getStackTraceAsString(e));
                 }
             });
 
-            dumpCount += pigs.size();
+            dumpCount += pigTracks.size();
             log.info("has indexed {} pigs, and last handled id is {}", dumpCount, lastId);
-            lastId = Iterables.getLast(pigs).getId();
+            lastId = Iterables.getLast(pigTracks).getId();
 
             // 如果是最后一个, 结束
-            if (pigs.size() < pigSearchProperties.getBatchSize()) {
+            if (pigTracks.size() < pigSearchProperties.getBatchSize()) {
                 break;
             }
         }

@@ -105,32 +105,32 @@ public class GroupDumpServiceImpl implements GroupDumpService {
 
     private int doIndex(String since) {
         // 猪最大id
-        Long lastId = doctorGroupDao.maxId() + 1;
+        Long lastId = doctorGroupTrackDao.maxId() + 1;
 
         // 记录数量
         int dumpCount = 0;
         while (true) {
-            List<DoctorGroup> groups = doctorGroupDao.listSince(lastId, since, groupSearchProperties.getBatchSize());
-            if (groups == null || groups.size() == 0) {
+            List<DoctorGroupTrack> groupTracks = doctorGroupTrackDao.listSince(lastId, since, groupSearchProperties.getBatchSize());
+            if (groupTracks == null || groupTracks.size() == 0) {
                 break;
             }
             // 建立索引
-            groups.forEach(group -> {
+            groupTracks.forEach(track -> {
                 try{
-                    DoctorGroupTrack groupTrack = doctorGroupTrackDao.findByGroupId(group.getId());
-                    IndexedGroup indexedGroup = indexedGroupFactory.create(group, groupTrack);
+                    DoctorGroup group = doctorGroupDao.findById(track.getGroupId());
+                    IndexedGroup indexedGroup = indexedGroupFactory.create(group, track);
                     indexExecutor.submit(indexedGroupTaskAction.indexTask(indexedGroup));
                 }catch (Exception e){
-                    log.error("failed to index group(id={}),cause:{}", group.getId(), Throwables.getStackTraceAsString(e));
+                    log.error("failed to index group(id={}),cause:{}", track.getGroupId(), Throwables.getStackTraceAsString(e));
                 }
             });
 
-            dumpCount += groups.size();
+            dumpCount += groupTracks.size();
             log.info("has indexed {} groups, and last handled id is {}", dumpCount, lastId);
-            lastId = Iterables.getLast(groups).getId();
+            lastId = Iterables.getLast(groupTracks).getId();
 
             // 如果是最后一个, 结束
-            if (groups.size() < groupSearchProperties.getBatchSize()) {
+            if (groupTracks.size() < groupSearchProperties.getBatchSize()) {
                 break;
             }
         }
