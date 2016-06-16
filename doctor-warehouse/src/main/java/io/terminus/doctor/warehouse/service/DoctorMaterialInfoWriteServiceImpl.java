@@ -158,7 +158,7 @@ public class DoctorMaterialInfoWriteServiceImpl implements DoctorMaterialInfoWri
         checkState(Math.abs(dis)<=5, "produce.materialCountChange.error");
     }
 
-    private <T> void publishMaterialInfo(Long eventType, T data){
+    private <T> void publishMaterialInfo(Integer eventType, T data){
         if(!Objects.isNull(publisher)){
            try{
                publisher.publish(DataEvent.toBytes(eventType, data));
