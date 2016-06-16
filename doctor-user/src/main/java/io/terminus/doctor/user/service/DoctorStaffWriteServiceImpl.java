@@ -35,6 +35,7 @@ public class DoctorStaffWriteServiceImpl implements DoctorStaffWriteService{
         Response<Long> response = new Response<>();
         try{
             doctorStaffDao.create(staff);
+            this.publish(staff.getUserId());
             response.setResult(staff.getId());
         }catch(Exception e){
             log.error("createDoctorStaff failed, cause : {]", Throwables.getStackTraceAsString(e));
