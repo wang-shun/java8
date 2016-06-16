@@ -20,7 +20,7 @@ public class DoctorServiceApplyDto implements Serializable {
      * 开通服务类型
      * @see io.terminus.doctor.user.model.DoctorServiceReview.Type
      */
-    @NotNull(message = "service.type.not.null")
+    @NotNull(message = "service.type.can.not.be.null")
     private Integer type;
 
     /**

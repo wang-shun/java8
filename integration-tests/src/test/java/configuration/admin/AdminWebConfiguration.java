@@ -58,7 +58,11 @@ import java.util.List;
         "io.terminus.doctor.web.admin.jobs",
         "io.terminus.doctor.web.admin.article",
         "io.terminus.doctor.web.admin.role",
-        "io.terminus.doctor.web.admin.user"
+        "io.terminus.doctor.web.admin.user",
+        "io.terminus.doctor.web.admin.controller",
+        "io.terminus.doctor.web.admin.basic.controller",
+        "io.terminus.doctor.web.admin.service",
+        "io.terminus.doctor.basic"
 }, excludeFilters = {
         @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = {
                 DoctorHbsHelpers.class,

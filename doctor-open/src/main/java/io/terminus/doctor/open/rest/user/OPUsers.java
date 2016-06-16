@@ -16,10 +16,13 @@ import io.terminus.common.utils.Splitters;
 import io.terminus.doctor.common.enums.UserRole;
 import io.terminus.doctor.common.enums.UserStatus;
 import io.terminus.doctor.common.enums.UserType;
+import io.terminus.doctor.common.event.CoreEventDispatcher;
 import io.terminus.doctor.common.utils.Params;
 import io.terminus.doctor.open.common.CaptchaGenerator;
 import io.terminus.doctor.open.common.MobilePattern;
 import io.terminus.doctor.open.common.Sessions;
+import io.terminus.doctor.user.util.DoctorUserMaker;
+import io.terminus.doctor.web.core.events.user.RegisterEvent;
 import io.terminus.lib.sms.SmsException;
 import io.terminus.pampas.common.UserUtil;
 import io.terminus.pampas.openplatform.annotations.OpenBean;
@@ -91,6 +94,8 @@ public class OPUsers {
     private MsgWebService appPushWebService;
     @Autowired
     private MobilePattern mobilePattern;
+    @Autowired
+    private CoreEventDispatcher coreEventDispatcher;
 
     public OPUsers() {
         String hostIp;
@@ -214,6 +219,7 @@ public class OPUsers {
         // 校验手机验证码
         validateSmsCode(code, mobile, sessionId);
         user = registerByMobile(mobile, password, null);
+        coreEventDispatcher.publish(new RegisterEvent(null, null, DoctorUserMaker.from(user)));
         return user.getId();
     }
 
@@ -552,7 +558,7 @@ public class OPUsers {
      * @param dbpassword
      */
     private void checkPassword(String inputPassword, String dbpassword){
-        if(!Objects.equals(EncryptUtil.encrypt(inputPassword), dbpassword)){
+        if(!EncryptUtil.match(inputPassword, dbpassword)){
             throw new OPClientException("user.password.error");
         }
     }

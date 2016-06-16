@@ -1,5 +1,6 @@
 package io.terminus.doctor.web.admin.dto;
 
+import io.terminus.doctor.user.model.DoctorFarm;
 import io.terminus.doctor.user.model.DoctorOrg;
 import lombok.Getter;
 import lombok.Setter;
@@ -24,5 +25,5 @@ public class UserApplyServiceDetailDto implements Serializable{
      * 猪场名称
      */
     @Setter @Getter
-    private List<String> farms;
+    private List<DoctorFarm> farms;
 }

@@ -16,6 +16,7 @@
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.parana.user.service.UserReadService" id="userReadService" check="false"/>
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.parana.user.service.UserWriteService" id="userWriteService" check="false"/>
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.DoctorMobileMenuReadService" id="doctorMobileMenuReadService" check="false"/>
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.PrimaryUserReadService" id="primaryUserReadService" check="false"/>
 
     <!-- file services -->
     <dubbo:reference version="1.0.0" interface="io.terminus.parana.file.service.UserFileService" id="userFileService" check="false" retries="0"/>
@@ -34,6 +35,8 @@
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.DoctorOrgReadService" id="doctorOrgReadService" check="false"/>
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.DoctorOrgWriteService" id="doctorOrgWriteService" check="false"/>
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.business.DoctorServiceReviewService" id="doctorServiceReviewService" check="false"/>
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.DoctorServiceStatusReadService" id="doctorServiceStatusReadService" check="false"/>
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.DoctorServiceStatusWriteService" id="doctorServiceStatusWriteService" check="false"/>
 
     <!--image service-->
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.basic.service.DoctorCarouselFigureReadService" id="doctorCarouselFigureReadService" check="false"/>

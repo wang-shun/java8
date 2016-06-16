@@ -116,4 +116,13 @@ public class UserDaoExt extends UserDao {
     public List<User> listSince(Long lastId, String since, int limit){
         return sqlSession.selectList(NAMESPACE + "listSince", ImmutableMap.of("lastId", lastId, "since", since, "limit", limit));
     }
+
+    /**
+     * 查询指定时间之后创建的用户
+     * @param since
+     * @return
+     */
+    public List<User> listCreatedSince(Date since){
+        return sqlSession.selectList(NAMESPACE + "listCreatedSince", since);
+    }
 }
