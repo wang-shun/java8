@@ -49,7 +49,7 @@ public class DoctorPigEvents {
 
     private final UserReadService userReadService;
 
-    private static final DateTimeFormatter DTF = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss");
+    private static final DateTimeFormatter DTF = DateTimeFormat.forPattern("yyyy-MM-dd");
 
     @Autowired
     public DoctorPigEvents(DoctorPigReadService doctorPigReadService,
