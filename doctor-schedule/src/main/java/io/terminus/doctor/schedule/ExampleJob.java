@@ -16,6 +16,6 @@ import org.springframework.scheduling.annotation.Scheduled;
 public class ExampleJob {
     @Scheduled(cron = "0/1  * * * * ?")
     public void demo(){
-        System.out.println("Hello World");
+        // System.out.println("Hello World");
     }
 }

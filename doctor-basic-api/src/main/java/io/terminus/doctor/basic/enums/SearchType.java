@@ -30,7 +30,12 @@ public enum SearchType {
     /**
      * 猪舍
      */
-    BARN(4, "猪舍");
+    BARN(4, "猪舍"),
+
+    /**
+     * 物料
+     */
+    MATERIAL(5, "物料");
 
     @Getter
     private int value;

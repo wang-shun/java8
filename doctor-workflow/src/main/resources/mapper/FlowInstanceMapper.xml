@@ -106,7 +106,7 @@
             <if test="endAt != null">AND `created_at` &lt;= #{endAt}</if>
         </where>
     </sql>
-    <select id="list" resultMap="FlowInstanceMap">
+    <select id="list" parameterType="map" resultMap="FlowInstanceMap">
         SELECT
         <include refid="cols_all"/>
         FROM

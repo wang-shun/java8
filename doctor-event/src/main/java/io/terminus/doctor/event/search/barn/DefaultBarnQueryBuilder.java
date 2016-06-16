@@ -82,7 +82,6 @@ public class DefaultBarnQueryBuilder extends BaseBarnQueryBuilder {
     }
 
     private void sort(List<Sort> sorts, String part, String field) {
-        Sort sort = null;
         switch (Integer.parseInt(part)) {
             case 1:
                 sorts.add(new Sort(field, "asc"));

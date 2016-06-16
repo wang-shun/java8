@@ -15,6 +15,8 @@ import io.terminus.doctor.event.search.group.GroupSearchReadService;
 import io.terminus.doctor.event.search.group.SearchedGroup;
 import io.terminus.doctor.event.search.pig.PigSearchReadService;
 import io.terminus.doctor.event.search.pig.SearchedPig;
+import io.terminus.doctor.warehouse.search.material.MaterialSearchReadService;
+import io.terminus.doctor.warehouse.search.material.SearchedMaterial;
 import io.terminus.pampas.common.UserUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -51,16 +53,20 @@ public class DoctorSearches {
 
     private final BarnSearchReadService barnSearchReadService;
 
+    private final MaterialSearchReadService materialSearchReadService;
+
 
     @Autowired
     public DoctorSearches(PigSearchReadService pigSearchReadService,
                           GroupSearchReadService groupSearchReadService,
                           DoctorSearchHistoryService doctorSearchHistoryService,
-                          BarnSearchReadService barnSearchReadService) {
+                          BarnSearchReadService barnSearchReadService,
+                          MaterialSearchReadService materialSearchReadService) {
         this.pigSearchReadService = pigSearchReadService;
         this.groupSearchReadService = groupSearchReadService;
         this.doctorSearchHistoryService = doctorSearchHistoryService;
         this.barnSearchReadService = barnSearchReadService;
+        this.materialSearchReadService = materialSearchReadService;
     }
 
     /**
@@ -200,6 +206,25 @@ public class DoctorSearches {
         }
         createSearchWord(SearchType.BARN.getValue(), params);
         return RespHelper.or500(barnSearchReadService.searchWithAggs(pageNo, pageSize, "search/search.mustache", params));
+    }
+
+    /**
+     * 物料搜索方法
+     *
+     * @param pageNo   起始页
+     * @param pageSize 页大小
+     * @param params   搜索参数
+     * @return
+     */
+    @RequestMapping(value = "/materials", method = RequestMethod.GET)
+    public Paging<SearchedMaterial> searchMaterials(@RequestParam(required = false) Integer pageNo,
+                                                    @RequestParam(required = false) Integer pageSize,
+                                                    @RequestParam Map<String, String> params) {
+        if (farmIdNotExist(params)) {
+            return new Paging<>(0L, Collections.emptyList());
+        }
+        createSearchWord(SearchType.MATERIAL.getValue(), params);
+        return RespHelper.or500(materialSearchReadService.searchWithAggs(pageNo, pageSize, "search/search.mustache", params));
     }
 
     /**

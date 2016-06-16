@@ -67,7 +67,7 @@ public class DefaultGroupQueryBuilder extends BaseGroupQueryBuilder {
         String statuses = params.get("statuses");
         if (StringUtils.isNotBlank(statuses)) {
             List<String> statusList = Splitters.UNDERSCORE.splitToList(statuses);
-            termsList.add(new Terms("statuses", statusList));
+            termsList.add(new Terms("status", statusList));
         }
         return termsList;
     }
@@ -111,7 +111,6 @@ public class DefaultGroupQueryBuilder extends BaseGroupQueryBuilder {
         return sorts;
     }
     private void sort(List<Sort> sorts, String part, String field) {
-        Sort sort = null;
         switch (Integer.parseInt(part)) {
             case 1:
                 sorts.add(new Sort(field, "asc"));

@@ -17,5 +17,10 @@
             <groupId>io.terminus.parana</groupId>
             <artifactId>parana-msg-api</artifactId>
         </dependency>
+
+        <dependency>
+            <groupId>io.terminus.doctor</groupId>
+            <artifactId>doctor-common</artifactId>
+        </dependency>
     </dependencies>
 </project>

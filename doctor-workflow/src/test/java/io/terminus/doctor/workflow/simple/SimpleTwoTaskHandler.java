@@ -64,7 +64,6 @@ public class SimpleTwoTaskHandler extends BaseServiceTest{
     }
 
     @Test
-    @Rollback(false)
     public void test_FORCE_END_flowInstance() {
         // 1. 部署流程
         defService().deploy("simple/simple_two_task_handler.xml");

@@ -43,7 +43,7 @@ public class BarnDumps {
             barnSearchDumpService.fullDump(null);
             log.info("barn full dump end");
         } catch (Exception e) {
-            log.error("barn full dump failed", Throwables.getStackTraceAsString(e));
+            log.error("barn full dump failed, cause by {}", Throwables.getStackTraceAsString(e));
         }
     }
 
@@ -59,7 +59,7 @@ public class BarnDumps {
             barnSearchDumpService.deltaDump(15);
             log.info("barn delta dump end");
         } catch (Exception e) {
-            log.error("barn delta dump failed", Throwables.getStackTraceAsString(e));
+            log.error("barn delta dump failed, cause by {}", Throwables.getStackTraceAsString(e));
         }
     }
 }

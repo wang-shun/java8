@@ -103,7 +103,7 @@
         </where>
     </sql>
 
-    <select id="list" resultMap="FlowDefinitionNodeMap">
+    <select id="list" parameterType="map" resultMap="FlowDefinitionNodeMap">
         SELECT
         <include refid="cols_all"/>
         FROM

@@ -11,6 +11,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.Serializable;
 import java.util.List;
@@ -41,6 +42,7 @@ public class SchedulerImpl implements Scheduler {
     /**
      * 执行定时Task任务
      */
+    @Transactional
     public void doSchedule() {
         // 1. 获取所有的node ids
         List<Long> nodeIds = getTimerNodeIds();

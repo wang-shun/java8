@@ -98,7 +98,7 @@
         </where>
     </sql>
 
-    <select id="list" resultMap="FlowDefinitionMap">
+    <select id="list" parameterType="map" resultMap="FlowDefinitionMap">
         SELECT
         <include refid="cols_all"/>
         FROM

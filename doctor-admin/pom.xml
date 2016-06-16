@@ -29,6 +29,10 @@
             <groupId>io.terminus.doctor</groupId>
             <artifactId>doctor-web-core</artifactId>
         </dependency>
+        <dependency>
+            <groupId>io.terminus.doctor</groupId>
+            <artifactId>doctor-msg-api</artifactId>
+        </dependency>
 
         <!-- parana extra -->
         <dependency>
