@@ -29,6 +29,13 @@ public interface DoctorFarmReadService {
     Response<List<DoctorFarm>> findFarmsByUserId(Long userId);
 
     /**
+     * 根据用户id查询有权限的猪场的id
+     * @param userId 用户id
+     * @return 猪场id
+     */
+    Response<List<Long>> findFarmIdsByUserId(Long userId);
+
+    /**
      * 查询所有猪场
      * @return 所有猪场
      */

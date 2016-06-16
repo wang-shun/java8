@@ -7,6 +7,8 @@ import io.terminus.parana.user.model.User;
 import io.terminus.parana.user.service.UserReadService;
 
 import javax.validation.constraints.NotNull;
+import java.util.Date;
+import java.util.List;
 
 /**
  * Desc: 用户读服务
@@ -45,4 +47,11 @@ public interface DoctorUserReadService extends UserReadService<User>{
      * @return
      */
     Response<User> subAccountCheck(String loginId);
+
+    /**
+     * 查询指定时间之后创建的用户
+     * @param since
+     * @return
+     */
+    Response<List<User>> listCreatedUserSince(Date since);
 }

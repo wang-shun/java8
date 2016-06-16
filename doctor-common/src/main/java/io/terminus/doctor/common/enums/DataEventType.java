@@ -13,7 +13,8 @@ import java.util.Objects;
 public enum DataEventType {
 
     PigEventCreate(1l, "猪创建事件信息"),
-    VaccinationMedicalConsume(2l, "免疫药品领用事件");
+    VaccinationMedicalConsume(2l, "免疫药品领用事件"),
+    MaterialInfoCreateEvent(3l, "物料信息创建事件信息");
 
     @Getter
     private Long key;

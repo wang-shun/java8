@@ -32,10 +32,7 @@ import static io.terminus.common.utils.Arguments.isEmpty;
         "user.forget.password", //忘记密码
         "user.register",  //用户注册
         "get.mobile.code",
-        "user.test.push",
-        "get.org.info",
-        "get.user.level.one.menu",
-        "get.user.basic.info"
+        "user.test.push"
 })
 public class SessionHandle implements ParamPreHandle {
 

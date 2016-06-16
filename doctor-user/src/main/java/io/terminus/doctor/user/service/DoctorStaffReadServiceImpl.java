@@ -2,6 +2,7 @@ package io.terminus.doctor.user.service;
 
 import com.google.common.base.Throwables;
 import io.terminus.common.model.Response;
+import io.terminus.doctor.user.cache.CacheCenter;
 import io.terminus.doctor.user.dao.DoctorStaffDao;
 import io.terminus.doctor.user.model.DoctorStaff;
 import lombok.extern.slf4j.Slf4j;
@@ -14,17 +15,19 @@ import java.util.List;
 @Service
 public class DoctorStaffReadServiceImpl implements DoctorStaffReadService{
     private final DoctorStaffDao doctorStaffDao;
+    private final CacheCenter cacheCenter;
 
     @Autowired
-    public DoctorStaffReadServiceImpl(DoctorStaffDao doctorStaffDao){
+    public DoctorStaffReadServiceImpl(DoctorStaffDao doctorStaffDao, CacheCenter cacheCenter){
         this.doctorStaffDao = doctorStaffDao;
+        this.cacheCenter = cacheCenter;
     }
 
     @Override
     public Response<DoctorStaff> findStaffByUserId(Long userId) {
         Response<DoctorStaff> response = new Response<>();
         try {
-            response.setResult(doctorStaffDao.findByUserId(userId));
+            response.setResult(cacheCenter.getStaff(userId));
         } catch (Exception e) {
             log.error("findStaffByUserId failed, cause : {}", Throwables.getStackTraceAsString(e));
             response.setError("find.staff.failed");

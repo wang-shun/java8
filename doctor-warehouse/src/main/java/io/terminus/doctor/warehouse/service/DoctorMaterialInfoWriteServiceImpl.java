@@ -4,6 +4,8 @@ import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableMap;
 import io.terminus.common.model.Response;
 import io.terminus.common.utils.JsonMapper;
+import io.terminus.doctor.common.enums.DataEventType;
+import io.terminus.doctor.common.event.DataEvent;
 import io.terminus.doctor.warehouse.constants.DoctorMaterialInfoConstants;
 import io.terminus.doctor.warehouse.dao.DoctorMaterialInfoDao;
 import io.terminus.doctor.warehouse.dao.DoctorWareHouseDao;
@@ -12,6 +14,7 @@ import io.terminus.doctor.warehouse.dto.DoctorWareHouseBasicDto;
 import io.terminus.doctor.warehouse.manager.MaterialInWareHouseManager;
 import io.terminus.doctor.warehouse.model.DoctorMaterialInfo;
 import io.terminus.doctor.warehouse.model.DoctorWareHouse;
+import io.terminus.zookeeper.pubsub.Publisher;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -37,6 +40,9 @@ public class DoctorMaterialInfoWriteServiceImpl implements DoctorMaterialInfoWri
 
     private final MaterialInWareHouseManager materialInWareHouseManager;
 
+    @Autowired(required = false)
+    private Publisher publisher;
+
     @Autowired
     private DoctorMaterialInfoWriteServiceImpl(DoctorMaterialInfoDao doctorMaterialInfoDao,
                                                DoctorWareHouseDao doctorWareHouseDao,
@@ -51,6 +57,7 @@ public class DoctorMaterialInfoWriteServiceImpl implements DoctorMaterialInfoWri
     public Response<Long> createMaterialInfo(DoctorMaterialInfo doctorMaterialInfo) {
         try{
             checkState(doctorMaterialInfoDao.create(doctorMaterialInfo), "create.materialInfo.fail");
+            publishMaterialInfo(DataEventType.MaterialInfoCreateEvent.getKey(), ImmutableMap.of("materialInfoCreatedId", doctorMaterialInfo.getId()));
             return Response.ok(doctorMaterialInfo.getId());
         }catch (Exception e){
             log.error("create material info fail, cause:{}", Throwables.getStackTraceAsString(e));
@@ -149,5 +156,15 @@ public class DoctorMaterialInfoWriteServiceImpl implements DoctorMaterialInfoWri
         checkState(!Objects.equals(0l, realTotal), "input.materialProduceTotal.error");
         double dis = (realTotal-materialProduce.getTotal()) * 100d / materialProduce.getTotal();
         checkState(Math.abs(dis)<=5, "produce.materialCountChange.error");
+    }
+
+    private <T> void publishMaterialInfo(Long eventType, T data){
+        if(!Objects.isNull(publisher)){
+           try{
+               publisher.publish(DataEvent.toBytes(eventType, data));
+           }catch (Exception e){
+               log.error("material info publisher error, eventType:{} data:{} cause:{}", eventType, data, Throwables.getStackTraceAsString(e));
+           }
+        }
     }
 }

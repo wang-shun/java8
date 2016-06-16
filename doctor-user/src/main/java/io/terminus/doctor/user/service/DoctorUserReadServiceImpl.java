@@ -6,6 +6,7 @@ import io.terminus.common.model.Response;
 import io.terminus.common.utils.Splitters;
 import io.terminus.doctor.common.enums.UserType;
 import io.terminus.doctor.common.utils.RespHelper;
+import io.terminus.doctor.user.dao.UserDaoExt;
 import io.terminus.doctor.user.dto.DoctorUserInfoDto;
 import io.terminus.doctor.user.enums.RoleType;
 import io.terminus.doctor.user.model.DoctorStaff;
@@ -22,6 +23,7 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 
 import javax.validation.constraints.NotNull;
+import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
@@ -37,6 +39,7 @@ import java.util.Objects;
 public class DoctorUserReadServiceImpl extends UserReadServiceImpl implements DoctorUserReadService{
 
     private final UserDao userDao;
+    private final UserDaoExt userDaoExt;
     private final DoctorStaffReadService doctorStaffReadService;
     private final DoctorUserDataPermissionReadService doctorUserDataPermissionReadService;
     private final UserProfileReadService userProfileReadService;
@@ -44,12 +47,14 @@ public class DoctorUserReadServiceImpl extends UserReadServiceImpl implements Do
     @Autowired
     public DoctorUserReadServiceImpl(UserDao userDao, DoctorStaffReadService doctorStaffReadService,
                                      DoctorUserDataPermissionReadService doctorUserDataPermissionReadService,
-                                     UserProfileReadService userProfileReadService) {
+                                     UserProfileReadService userProfileReadService,
+                                     UserDaoExt userDaoExt) {
         super(userDao);
         this.userDao = userDao;
         this.doctorStaffReadService = doctorStaffReadService;
         this.doctorUserDataPermissionReadService = doctorUserDataPermissionReadService;
         this.userProfileReadService = userProfileReadService;
+        this.userDaoExt = userDaoExt;
     }
 
     /**
@@ -199,5 +204,15 @@ public class DoctorUserReadServiceImpl extends UserReadServiceImpl implements Do
     @Override
     public Response<DoctorStaff> findStaffByUserId(@NotNull(message = "userId.not.null") Long userId) {
         return doctorStaffReadService.findStaffByUserId(userId);
+    }
+
+    @Override
+    public Response<List<User>> listCreatedUserSince(Date since){
+        try{
+            return Response.ok(userDaoExt.listCreatedSince(since));
+        }catch(Exception e){
+            log.error("list created user since {} failed, cause : {}", since, Throwables.getStackTraceAsString(e));
+            return Response.fail("list.created.user.failed");
+        }
     }
 }

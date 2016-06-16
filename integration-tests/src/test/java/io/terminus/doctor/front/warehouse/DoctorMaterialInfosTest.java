@@ -12,6 +12,7 @@ import io.terminus.doctor.warehouse.dto.DoctorMaterialProductRatioDto;
 import io.terminus.doctor.warehouse.enums.WareHouseType;
 import io.terminus.doctor.warehouse.model.DoctorMaterialInfo;
 import io.terminus.doctor.web.front.warehouse.dto.DoctorMaterialInfoCreateDto;
+import io.terminus.zookeeper.pubsub.Subscriber;
 import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,8 +44,16 @@ public class DoctorMaterialInfosTest extends BaseFrontWebTest{
     @Autowired
     private DoctorWareHouseTrackDao doctorWareHouseTrackDao;
 
+    @Autowired(required = false)
+    private Subscriber subscriber;
+
     @Test
-    public void testCreateMaterial(){
+    public void testCreateMaterial() throws Exception{
+
+        subscriber.subscribe(data->{
+            System.out.println(String.valueOf(data));
+        });
+
         DoctorMaterialInfoCreateDto doctorMaterialInfoCreateDto = DoctorMaterialInfoCreateDto.builder()
                 .farmId(12345l).type(WareHouseType.FEED.getKey()).materialName("createMaterialName")
                 .mark("materialCreateMark").unitId(1l).unitGroupId(1l).defaultConsumeCount(1000l).price(1000l)

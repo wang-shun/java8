@@ -5,13 +5,18 @@ import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.BaseUser;
 import io.terminus.common.model.Paging;
+import io.terminus.common.model.Response;
 import io.terminus.doctor.common.enums.UserType;
+import io.terminus.doctor.common.event.CoreEventDispatcher;
 import io.terminus.doctor.user.model.DoctorFarm;
 import io.terminus.doctor.user.model.DoctorOrg;
 import io.terminus.doctor.user.model.DoctorServiceReview;
-import io.terminus.doctor.user.service.*;
+import io.terminus.doctor.user.service.DoctorFarmReadService;
+import io.terminus.doctor.user.service.DoctorOrgReadService;
+import io.terminus.doctor.user.service.DoctorServiceReviewReadService;
 import io.terminus.doctor.user.service.business.DoctorServiceReviewService;
 import io.terminus.doctor.web.admin.dto.UserApplyServiceDetailDto;
+import io.terminus.doctor.user.event.OpenDoctorServiceEvent;
 import io.terminus.pampas.common.UserUtil;
 import io.terminus.parana.common.utils.RespHelper;
 import lombok.extern.slf4j.Slf4j;
@@ -20,7 +25,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 /**
  * 陈增辉 16/5/30.与用户开通\关闭服务相关的controller
@@ -34,16 +38,19 @@ public class DoctorServiceReviewController {
     private final DoctorServiceReviewReadService doctorServiceReviewReadService;
     private final DoctorOrgReadService doctorOrgReadService;
     private final DoctorFarmReadService doctorFarmReadService;
+    private final CoreEventDispatcher coreEventDispatcher;
 
     @Autowired
     public DoctorServiceReviewController(DoctorServiceReviewService doctorServiceReviewService,
                                          DoctorServiceReviewReadService doctorServiceReviewReadService,
                                          DoctorOrgReadService doctorOrgReadService,
-                                         DoctorFarmReadService doctorFarmReadService){
+                                         DoctorFarmReadService doctorFarmReadService,
+                                         CoreEventDispatcher coreEventDispatcher){
         this.doctorServiceReviewService = doctorServiceReviewService;
         this.doctorServiceReviewReadService = doctorServiceReviewReadService;
         this.doctorOrgReadService = doctorOrgReadService;
         this.doctorFarmReadService = doctorFarmReadService;
+        this.coreEventDispatcher = coreEventDispatcher;
     }
 
     /**
@@ -60,7 +67,19 @@ public class DoctorServiceReviewController {
         if (dto.getUserId() == null) {
             throw new JsonResponseException(500, "user.id.invalid");
         }
-        return RespHelper.or500(doctorServiceReviewService.openDoctorService(baseUser, dto.getUserId(), dto.getFarms(), dto.getOrg()));
+        if(dto.getFarms() == null || dto.getFarms().isEmpty()){
+            throw new JsonResponseException(500, "need.at.least.one.farm"); //需要至少一个猪场信息
+        }
+        RespHelper.or500(doctorServiceReviewService.openDoctorService(baseUser, dto.getUserId(), dto.getFarms(), dto.getOrg()));
+
+        //分发猪场软件已开通的事件
+        Response<List<DoctorFarm>> farmResp = doctorFarmReadService.findFarmsByUserId(dto.getUserId());
+        if(farmResp.isSuccess()){
+            coreEventDispatcher.publish(new OpenDoctorServiceEvent(dto.getUserId(), farmResp.getResult()));
+        }else{
+            log.error("failed to post OpenDoctorServiceEvent due to findFarmsByUserId failing");
+        }
+        return true;
     }
 
     /**
@@ -68,9 +87,9 @@ public class DoctorServiceReviewController {
      * @param userId 被操作的用户的id, 注意不是当前登录者的id
      * @return
      */
-    @RequestMapping(value = "/pigmall/open", method = RequestMethod.GET)
+    @RequestMapping(value = "/pigmall/open/{userId}", method = RequestMethod.GET)
     @ResponseBody
-    public Boolean openPigmallService(@RequestParam("userId") Long userId){
+    public Boolean openPigmallService(@PathVariable Long userId){
         BaseUser baseUser = this.checkUserTypeOperator();
         //更新服务状态为开通
         return RespHelper.or500(doctorServiceReviewService.openService(baseUser, userId, DoctorServiceReview.Type.PIGMALL));
@@ -81,9 +100,9 @@ public class DoctorServiceReviewController {
      * @param userId 被操作的用户的id, 注意不是当前登录者的id
      * @return
      */
-    @RequestMapping(value = "/neverest/open", method = RequestMethod.GET)
+    @RequestMapping(value = "/neverest/open/{userId}", method = RequestMethod.GET)
     @ResponseBody
-    public Boolean openNeverestService(@RequestParam("userId") Long userId){
+    public Boolean openNeverestService(@PathVariable Long userId){
         BaseUser baseUser = this.checkUserTypeOperator();
         //更新服务状态为开通
         return RespHelper.or500(doctorServiceReviewService.openService(baseUser, userId, DoctorServiceReview.Type.NEVEREST));
@@ -94,7 +113,7 @@ public class DoctorServiceReviewController {
      * @param type 哪一个服务, 参见枚举 DoctorServiceReview.Type
      * @return
      */
-    @RequestMapping(value = "/notopen", method = RequestMethod.GET)
+    @RequestMapping(value = "/notopen", method = RequestMethod.POST)
     @ResponseBody
     public Boolean notOpenService(@RequestParam("userId") Long userId, @RequestParam("type") Integer type, @RequestParam("reason") String reason){
         BaseUser baseUser = this.checkUserTypeOperator();
@@ -108,19 +127,19 @@ public class DoctorServiceReviewController {
     }
 
     /**
-     * 管理员冻结用户的服务
+     * 管理员冻结用户申请服务的资格
      * @param userId 被操作的用户的id, 注意不是当前登录者的id
      * @param type 哪一个服务, 参见枚举 DoctorServiceReview.Type
      * @param reason 冻结服务的原因
      * @return
      */
-    @RequestMapping(value = "/froze", method = RequestMethod.GET)
+    @RequestMapping(value = "/froze", method = RequestMethod.POST)
     @ResponseBody
-    public Boolean frozeService(@RequestParam("userId") Long userId, @RequestParam("type") Integer type, @RequestParam("reason") String reason){
+    public Boolean frozeApply(@RequestParam("userId") Long userId, @RequestParam("type") Integer type, @RequestParam("reason") String reason){
         BaseUser baseUser = this.checkUserTypeOperator();
         try {
             DoctorServiceReview.Type serviceType = DoctorServiceReview.Type.from(type);
-            RespHelper.or500(doctorServiceReviewService.frozeService(baseUser, userId, serviceType, reason));
+            RespHelper.or500(doctorServiceReviewService.frozeApply(baseUser, userId, serviceType, reason));
         } catch (Exception e) {
             throw new JsonResponseException(500, e.getMessage());
         }
@@ -131,27 +150,23 @@ public class DoctorServiceReviewController {
      * 分页查询用户提交的申请, 所有参数都可以为空
      * @param userId 申请服务的用户的id, 用于筛选, 不是当前登录者的id
      * @param type 服务类型, 枚举DoctorServiceReview.Type
-     * @param status 审核状态 枚举DoctorServiceReview.Status
+     * @param userMobile 用户注册时的手机号
      * @param pageNo 第几页
      * @param pageSize 每页数量
      * @return
      */
-    @RequestMapping(value = "/page", method = RequestMethod.GET)
+    @RequestMapping(value = "/apply/page", method = RequestMethod.GET)
     @ResponseBody
     public Paging<DoctorServiceReview> pageServiceApplies(@RequestParam(value = "userId", required = false) Long userId,
                                      @RequestParam(value = "type", required = false) Integer type,
-                                     @RequestParam(value = "status", required = false)Integer status,
+                                     @RequestParam(value = "userMobile", required = false) String userMobile,
                                      @RequestParam(required = false) Integer pageNo, @RequestParam(required = false) Integer pageSize){
         try {
             DoctorServiceReview.Type servicetype = null;
             if (type != null) {
                 servicetype = DoctorServiceReview.Type.from(type);
             }
-            DoctorServiceReview.Status servicecStatus = null;
-            if(status != null){
-                servicecStatus = DoctorServiceReview.Status.from(status);
-            }
-            return RespHelper.or500(doctorServiceReviewReadService.page(pageNo, pageSize, userId, servicetype, servicecStatus));
+            return RespHelper.or500(doctorServiceReviewReadService.page(pageNo, pageSize, userId, userMobile, servicetype, DoctorServiceReview.Status.REVIEW));
         } catch (ServiceException e) {
             log.error("pageServiceApplies failed, cause : {}", Throwables.getStackTraceAsString(e));
             throw new JsonResponseException(500, e.getMessage());
@@ -163,11 +178,11 @@ public class DoctorServiceReviewController {
      * @param userId
      * @return
      */
-    @RequestMapping(value = "/pigdoctor/detail", method = RequestMethod.GET)
+    @RequestMapping(value = "/pigdoctor/detail/{userId}", method = RequestMethod.GET)
     @ResponseBody
-    public UserApplyServiceDetailDto findUserApplyDetail(@RequestParam("userId") Long userId){
+    public UserApplyServiceDetailDto findUserApplyDetail(@PathVariable Long userId){
         UserApplyServiceDetailDto dto = new UserApplyServiceDetailDto();
-        List<String> farms = RespHelper.or500(doctorFarmReadService.findFarmsByUserId(userId)).stream().map(DoctorFarm::getName).collect(Collectors.toList());
+        List<DoctorFarm> farms = RespHelper.or500(doctorFarmReadService.findFarmsByUserId(userId));
         DoctorOrg org = RespHelper.or500(doctorOrgReadService.findOrgByUserId(userId));
         dto.setFarms(farms);
         dto.setUserId(userId);

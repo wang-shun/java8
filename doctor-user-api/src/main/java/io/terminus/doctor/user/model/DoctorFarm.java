@@ -13,7 +13,7 @@ import java.util.Date;
  */
 @Data
 public class DoctorFarm implements Serializable {
-    private static final long serialVersionUID = -4931160463332155938L;
+    private static final long serialVersionUID = -8307446112600790028L;
 
     private Long id;
     
@@ -31,7 +31,21 @@ public class DoctorFarm implements Serializable {
      * 公司名称
      */
     private String orgName;
-    
+
+    private Integer provinceId;
+
+    private String provinceName;
+
+    private Integer cityId;
+
+    private String cityName;
+
+    private Integer districtId;
+
+    private String districtName;
+
+    private String detailAddress;
+
     /**
      * 外部id
      */

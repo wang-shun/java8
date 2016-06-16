@@ -23,18 +23,18 @@ CREATE TABLE `parana_users` (
 -- 用户详情表: parana_user_profiles
 CREATE TABLE `parana_user_profiles` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  `user_id` bigint(20) NULL COMMENT '用户id',
+  `user_id` bigint(20) NOT NULL COMMENT '用户id',
   `realname` VARCHAR(32) NULL COMMENT '真实姓名',
   `gender` SMALLINT NULL COMMENT '性别1男2女',
-  `province_id` bigint(20) NOT NULL COMMENT '省id',
-  `province` VARCHAR(100) NOT NULL COMMENT '省',
+  `province_id` bigint(20) NULL COMMENT '省id',
+  `province` VARCHAR(100) NULL COMMENT '省',
   `city_id` bigint(20) NULL COMMENT '城id',
   `city` VARCHAR(100) NULL COMMENT '城',
   `region_id` bigint(20) NULL COMMENT '区id',
   `region` VARCHAR(100) NULL COMMENT '区',
   `street` VARCHAR(130) NULL COMMENT '地址',
   `extra_json` VARCHAR(2048) NULL COMMENT '其他信息, 以json形式存储',
-  `avatar` VARCHAR(512) NOT NULL COMMENT '头像',
+  `avatar` VARCHAR(512) NULL COMMENT '头像',
   `birth` VARCHAR(40) NULL COMMENT '出生日期',
   `created_at` datetime NOT NULL,
   `updated_at` datetime NOT NULL,
@@ -286,6 +286,13 @@ CREATE TABLE `doctor_farms` (
   `name` varchar(64) DEFAULT NULL COMMENT '公司名称',
   `org_id` bigint(20) DEFAULT NULL COMMENT '公司id',
   `org_name` varchar(64) DEFAULT NULL COMMENT '公司名称',
+  `province_id` int(11) DEFAULT NULL COMMENT '所在省id',
+  `province_name` varchar(64) DEFAULT NULL COMMENT '所在省',
+  `city_id` int(11) DEFAULT NULL COMMENT '所在城市id',
+  `city_name` varchar(64) DEFAULT NULL COMMENT '所在城市',
+  `district_id` int(11) DEFAULT NULL COMMENT '区id',
+  `district_name` varchar(64) DEFAULT NULL COMMENT '区名称',
+  `detail_address` varchar(256) DEFAULT NULL COMMENT '区之后的具体地址',
   `out_id`  varchar(128) DEFAULT NULL COMMENT  '外部id',
   `extra` text COMMENT '附加字段',
   `created_at` datetime DEFAULT NULL COMMENT '创建时间',
@@ -1085,6 +1092,7 @@ DROP TABLE IF EXISTS `doctor_service_reviews`;
 CREATE TABLE `doctor_service_reviews` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '自增主键',
   `user_id` bigint(20) DEFAULT NULL COMMENT '用户id',
+  `user_mobile` VARCHAR (16) DEFAULT NULL COMMENT '用户手机号,冗余字段',
   `type` smallint(6) DEFAULT NULL COMMENT  '服务类型 1 猪场软件, 2 新融电商, 3 大数据, 4 生猪交易',
   `status` smallint(6) DEFAULT NULL COMMENT '审核状态 0 未审核, 2 待审核(提交申请) 1 通过，-1 不通过, -2 冻结',
   `reviewer_id` bigint(20) DEFAULT NULL COMMENT '审批人id',
@@ -1111,6 +1119,29 @@ CREATE TABLE `doctor_service_review_tracks` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='用户服务状态变更历史记录表';
 CREATE INDEX idx_doctor_service_reviews_track_user_id ON doctor_service_review_tracks(user_id);
+
+-- 用户服务状态表
+DROP TABLE IF EXISTS `doctor_service_status`;
+CREATE TABLE `doctor_service_status` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `user_id` bigint(20) NOT NULL,
+  `pigdoctor_status` smallint(6) NOT NULL DEFAULT '0' COMMENT '猪场软件服务状态，1-开通，0-关闭',
+  `pigdoctor_reason` varchar(256) DEFAULT NULL COMMENT '冗余，猪场软件审批不通过或被冻结申请资格的原因',
+  `pigdoctor_review_status` smallint(6) DEFAULT NULL COMMENT '冗余，猪场软件服务的审批状态',
+  `pigmall_status` smallint(6) NOT NULL DEFAULT '0' COMMENT '电商服务状态，1-开通，0-关闭',
+  `pigmall_reason` varchar(256) DEFAULT NULL COMMENT '冗余，电商服务审批不通过或被冻结申请资格的原因',
+  `pigmall_review_status` smallint(6) DEFAULT NULL COMMENT '冗余，电商服务的审批状态',
+  `neverest_status` smallint(6) NOT NULL DEFAULT '0' COMMENT '大数据服务状态，1-开通，0-关闭',
+  `neverest_reason` varchar(256) DEFAULT NULL COMMENT '冗余，大数据服务审批不通过或被冻结申请资格的原因',
+  `neverest_review_status` smallint(6) DEFAULT NULL COMMENT '冗余，大数据服务的审批状态',
+  `pigtrade_status` smallint(6) NOT NULL DEFAULT '0' COMMENT '生猪交易服务状态，1-开通，0-关闭',
+  `pigtrade_reason` varchar(256) DEFAULT NULL COMMENT '冗余，生猪交易审批不通过或被冻结申请资格的原因',
+  `pigtrade_review_status` smallint(6) DEFAULT NULL COMMENT '冗余，生猪交易服务的审批状态',
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `idx_doctor_service_status_UNIQUE` (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='用户服务状态表';
 
 -- 数据回滚相关
 -- 猪群快照表
