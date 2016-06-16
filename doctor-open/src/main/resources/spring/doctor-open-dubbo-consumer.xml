@@ -68,4 +68,6 @@
     <!--event service-->
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.event.service.DoctorPigTypeStatisticReadService" id="doctorPigTypeStatisticReadService" check="false"/>
 
+    <!-- Doctor Message Service -->
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.msg.service.DoctorMessageReadService" id="doctorMessageReadService" check="false"/>
 </beans>
