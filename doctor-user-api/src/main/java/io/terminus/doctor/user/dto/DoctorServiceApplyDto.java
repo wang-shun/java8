@@ -27,4 +27,6 @@ public class DoctorServiceApplyDto implements Serializable {
      * 公司信息(如果类型是猪场软件, 此项必填)
      */
     private DoctorOrg org;
+
+    private String realName;
 }
