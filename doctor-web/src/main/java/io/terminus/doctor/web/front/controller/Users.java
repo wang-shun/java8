@@ -481,7 +481,7 @@ public class Users {
         user.setType(UserType.FARM_ADMIN_PRIMARY.value());
 
         // 注册用户默认成为猪场管理员
-        user.setRoles(Lists.newArrayList(UserRole.PRIMARY.name()));
+        user.setRoles(Lists.newArrayList("PRIMARY", "PRIMARY(OWNER)"));
 
         Response<Long> resp = userWriteService.create(user);
         checkState(resp.isSuccess(), resp.getError());

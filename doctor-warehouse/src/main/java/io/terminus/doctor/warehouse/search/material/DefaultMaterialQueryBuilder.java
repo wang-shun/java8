@@ -88,8 +88,8 @@ public class DefaultMaterialQueryBuilder extends BaseMaterialQueryBuilder {
         // 1. 多类型
         String types = params.get("types");
         if (StringUtils.isNotBlank(types)) {
-            List<String> statusList = Splitters.UNDERSCORE.splitToList(types);
-            termsList.add(new Terms("type", statusList));
+            List<String> typeList = Splitters.UNDERSCORE.splitToList(types);
+            termsList.add(new Terms("type", typeList));
         }
         return termsList;
     }

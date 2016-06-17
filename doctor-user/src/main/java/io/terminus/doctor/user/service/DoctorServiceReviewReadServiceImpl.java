@@ -69,7 +69,7 @@ public class DoctorServiceReviewReadServiceImpl implements DoctorServiceReviewRe
     }
 
     @Override
-    public Response<Paging<DoctorServiceReview>> page(Integer pageNo, Integer pageSize, Long userId, String userMobile,
+    public Response<Paging<DoctorServiceReview>> page(Integer pageNo, Integer pageSize, Long userId, String userMobile, String realName,
                                                       DoctorServiceReview.Type type, DoctorServiceReview.Status status){
         Response<Paging<DoctorServiceReview>> response = new Response<>();
         Map<String, Object> criteria = Maps.newHashMap();
@@ -81,6 +81,7 @@ public class DoctorServiceReviewReadServiceImpl implements DoctorServiceReviewRe
         }
         criteria.put("userId", userId);
         criteria.put("userMobile", userMobile);
+        criteria.put("realName", realName);
         PageInfo pageInfo = new PageInfo(pageNo, pageSize);
         criteria.putAll(pageInfo.toMap());
         try{

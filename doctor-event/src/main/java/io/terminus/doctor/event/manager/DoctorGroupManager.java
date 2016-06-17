@@ -1,10 +1,14 @@
 package io.terminus.doctor.event.manager;
 
 import com.google.common.base.MoreObjects;
+import com.google.common.base.Throwables;
+import com.google.common.collect.ImmutableMap;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.common.utils.JsonMapper;
+import io.terminus.doctor.common.enums.DataEventType;
 import io.terminus.doctor.common.event.CoreEventDispatcher;
+import io.terminus.doctor.common.event.DataEvent;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dao.DoctorGroupDao;
@@ -42,6 +46,7 @@ import io.terminus.doctor.event.model.DoctorGroupSnapshot;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
 import io.terminus.doctor.event.service.DoctorGroupReadService;
 import io.terminus.doctor.event.util.EventUtil;
+import io.terminus.zookeeper.pubsub.Publisher;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -51,6 +56,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
+
+import static io.terminus.common.utils.Arguments.notNull;
 
 /**
  * Desc:
@@ -70,6 +77,9 @@ public class DoctorGroupManager {
     private final DoctorGroupTrackDao doctorGroupTrackDao;
     private final DoctorGroupReadService doctorGroupReadService;
     private final CoreEventDispatcher coreEventDispatcher;
+
+    @Autowired(required = false)
+    private Publisher publisher;
 
     @Autowired
     public DoctorGroupManager(DoctorGroupDao doctorGroupDao,
@@ -127,6 +137,7 @@ public class DoctorGroupManager {
 
         //发布统计事件
         publishCountGroupEvent(group.getOrgId(), group.getFarmId());
+        publistGroupAndBarn(group.getId(), group.getCurrentBarnId());
         return groupId;
     }
 
@@ -246,6 +257,7 @@ public class DoctorGroupManager {
 
         //发布统计事件
         publishCountGroupEvent(group.getOrgId(), group.getFarmId());
+        publistGroupAndBarn(group.getId(), group.getCurrentBarnId());
     }
 
     /**
@@ -314,6 +326,7 @@ public class DoctorGroupManager {
 
         //发布统计事件
         publishCountGroupEvent(group.getOrgId(), group.getFarmId());
+        publistGroupAndBarn(group.getId(), group.getCurrentBarnId());
     }
 
     /**
@@ -364,6 +377,7 @@ public class DoctorGroupManager {
 
         //发布统计事件
         publishCountGroupEvent(group.getOrgId(), group.getFarmId());
+        publistGroupAndBarn(group.getId(), group.getCurrentBarnId());
     }
 
     /**
@@ -426,6 +440,7 @@ public class DoctorGroupManager {
 
         //发布统计事件
         publishCountGroupEvent(group.getOrgId(), group.getFarmId());
+        publistGroupAndBarn(group.getId(), group.getCurrentBarnId());
     }
 
     /**
@@ -557,6 +572,7 @@ public class DoctorGroupManager {
 
         //发布统计事件
         publishCountGroupEvent(group.getOrgId(), group.getFarmId());
+        publistGroupAndBarn(group.getId(), group.getCurrentBarnId());
     }
 
     /**
@@ -689,8 +705,27 @@ public class DoctorGroupManager {
         }
     }
 
-    //发布统计猪群事件
+    //发布统计猪群事件 // TODO: 16/6/16 可以用 publishZookeeperEvent 替代
     private void publishCountGroupEvent(Long orgId, Long farmId) {
         coreEventDispatcher.publish(new DoctorGroupCountEvent(orgId, farmId));
+    }
+
+    //发布猪群猪舍事件
+    private void publistGroupAndBarn(Long groupId, Long barnId) {
+        publishZookeeperEvent(DataEventType.GroupEventCreate.getKey(), ImmutableMap.of("doctorGroupId", groupId));
+        publishZookeeperEvent(DataEventType.BarnUpdate.getKey(), ImmutableMap.of("doctorBarnId", barnId));
+    }
+
+    //发布zk事件, 用于更新es索引
+    private <T> void publishZookeeperEvent(Integer eventType, T data){
+        if(notNull(publisher)) {
+            try {
+                publisher.publish(DataEvent.toBytes(eventType, data));
+            } catch (Exception e) {
+                log.error("publish zk event, eventType:{}, data:{} cause:{}", eventType, data, Throwables.getStackTraceAsString(e));
+            }
+        } else {
+            coreEventDispatcher.publish(DataEvent.make(eventType, data));
+        }
     }
 }

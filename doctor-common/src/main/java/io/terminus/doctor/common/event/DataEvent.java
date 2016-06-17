@@ -22,14 +22,14 @@ import static java.util.Objects.isNull;
 @NoArgsConstructor
 public class DataEvent {
 
-    private Long eventType;     // 事件类型
+    private Integer eventType;     // 事件类型
 
     /**
      * @see DataEventType
      */
     private String content;     //json 数据类型
 
-    public static <T> DataEvent make(Long eventType, T content){
+    public static <T> DataEvent make(Integer eventType, T content){
         return DataEvent.builder()
                 .eventType(eventType)
                 .content(JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(content))
@@ -40,7 +40,7 @@ public class DataEvent {
         return JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(dataEvent).getBytes();
     }
 
-    public static <T> byte[] toBytes(Long eventType, T context){
+    public static <T> byte[] toBytes(Integer eventType, T context){
         return toBytes(DataEvent.make(eventType, context));
     }
 
