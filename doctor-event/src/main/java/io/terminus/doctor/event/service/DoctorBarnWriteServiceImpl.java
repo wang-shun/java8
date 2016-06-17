@@ -31,7 +31,7 @@ public class DoctorBarnWriteServiceImpl implements DoctorBarnWriteService {
 
     @Autowired(required = false)
     private Publisher publisher;
-    
+
     @Autowired
     public DoctorBarnWriteServiceImpl(DoctorBarnDao doctorBarnDao,
                                       CoreEventDispatcher coreEventDispatcher) {

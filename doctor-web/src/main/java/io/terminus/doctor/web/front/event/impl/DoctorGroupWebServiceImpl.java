@@ -306,10 +306,9 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
 
         //手工录入, 记录下创建人
         params.put("isAuto", IsOrNot.NO.getValue());
-        params.put("creatorId", 1L);
-        params.put("creatorName", "admin");
-//        params.put("creatorId", UserUtil.getUserId());
-//        params.put("creatorName", UserUtil.getCurrentUser().getName());
+        params.put("creatorId", UserUtil.getUserId());
+        params.put("creatorName", UserUtil.getCurrentUser().getName());
+        
         //id关联字段
         params.put("barnName", getBarnName(getLong(params, "barnId")));
         params.put("breedName", getBreedName(getLong(params, "breedId")));
