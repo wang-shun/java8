@@ -59,6 +59,8 @@ public class DoctorMaterialZKLinstener implements EventListener {
      */
     @Subscribe
     public void handleEvent(DataEvent dataEvent) {
+        log.info("data event data:{}", dataEvent);
+
         // 物料信息创建事件信息
         if (Objects.equals(DataEventType.MaterialInfoCreateEvent.getKey(), dataEvent.getEventType())) {
             Map<String, Serializable> map = DataEvent.analyseContent(dataEvent, Map.class);

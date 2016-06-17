@@ -29,7 +29,7 @@ import java.util.Map;
 @Slf4j
 public class DoctorZKListener implements EventListener {
 
-    @Autowired
+    @Autowired(required = false)
     private Subscriber subscriber;
 
     @Autowired
@@ -66,6 +66,7 @@ public class DoctorZKListener implements EventListener {
      */
     @Subscribe
     public void handleEvent(DataEvent dataEvent) {
+        log.info("data event data:{}", dataEvent);
 
         // 1. 如果是猪创建事件信息
         if (DataEventType.PigEventCreate.getKey() == dataEvent.getEventType()) {
