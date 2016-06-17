@@ -1,5 +1,6 @@
 package io.terminus.doctor.event.service;
 
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
@@ -84,7 +85,7 @@ public class DoctorPigReadServiceImpl implements DoctorPigReadService{
             List<DoctorPigEvent> doctorPigEvents = RespHelper.orServEx(
                     doctorPigEventReadService.queryPigDoctorEvents(doctorPig.getFarmId(), doctorPig.getId(), null, null, null, null)).getData();
 
-            eventSize = eventSize > doctorPigEvents.size() ?  doctorPigEvents.size() : eventSize;
+            eventSize = MoreObjects.firstNonNull(eventSize, 3) > doctorPigEvents.size() ?  doctorPigEvents.size() : eventSize;
 
             return Response.ok(DoctorPigInfoDetailDto.builder().doctorPig(doctorPig).doctorPigTrack(doctorPigTrack)
                     .doctorPigEvents(doctorPigEvents.subList(0, eventSize)).build());

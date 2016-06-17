@@ -61,7 +61,7 @@ public class DoctorPigs {
     @ResponseBody
     public DoctorPigInfoDetailDto queryPigDetailInfoDto(@RequestParam("farmId") Long farmId,
                                                         @RequestParam("pigId") Long pigId,
-                                                        @RequestParam("eventSize") Integer eventSize){
+                                                        @RequestParam(value = "eventSize", required = false) Integer eventSize){
         return RespHelper.or500(doctorPigReadService.queryPigDetailInfoByPigId(pigId, eventSize));
     }
 
@@ -69,7 +69,7 @@ public class DoctorPigs {
     @ResponseBody
     public DoctorSowDetailDto querySowPigDetailInfoDto(@RequestParam("farmId") Long farmId,
                                                        @RequestParam("pigId") Long pigId,
-                                                       @RequestParam("eventSize") Integer eventSize){
+                                                       @RequestParam(value = "eventSize", required = false) Integer eventSize){
         return buildSowDetailDto(queryPigDetailInfoDto(farmId, pigId, eventSize));
     }
 
@@ -77,7 +77,7 @@ public class DoctorPigs {
     @ResponseBody
     public DoctorBoarDetailDto queryBoarPigDetailInfoDto(@RequestParam("farmId") Long farmId,
                                                          @RequestParam("pigId") Long pigId,
-                                                         @RequestParam("eventSize") Integer eventSize){
+                                                         @RequestParam(value = "eventSize", required = false) Integer eventSize){
         return buildDoctorBoarDetailDto(queryPigDetailInfoDto(farmId, pigId, eventSize));
     }
 
