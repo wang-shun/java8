@@ -114,8 +114,8 @@ public class DoctorMessages {
      * @return
      */
     @RequestMapping(value = "/message", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public Boolean createOrUpdateMessgae(@RequestBody DoctorMessage doctorMessage) {
-        Preconditions.checkNotNull(doctorMessage, "messgae.not.null");
+    public Boolean createOrUpdateMessage(@RequestBody DoctorMessage doctorMessage) {
+        Preconditions.checkNotNull(doctorMessage, "message.not.null");
         if (doctorMessage.getId() == null) {
             doctorMessage.setCreatedBy(UserUtil.getUserId());
             RespHelper.or500(doctorMessageWriteService.createMessage(doctorMessage));
