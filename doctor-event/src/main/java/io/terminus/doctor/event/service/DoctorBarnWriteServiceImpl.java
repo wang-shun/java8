@@ -1,13 +1,20 @@
 package io.terminus.doctor.event.service;
 
 import com.google.common.base.Throwables;
+import com.google.common.collect.ImmutableMap;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.Response;
+import io.terminus.doctor.common.enums.DataEventType;
+import io.terminus.doctor.common.event.CoreEventDispatcher;
+import io.terminus.doctor.common.event.DataEvent;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.model.DoctorBarn;
+import io.terminus.zookeeper.pubsub.Publisher;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import static io.terminus.common.utils.Arguments.notNull;
 
 /**
  * Desc: 猪舍表写服务实现类
@@ -20,10 +27,16 @@ import org.springframework.stereotype.Service;
 public class DoctorBarnWriteServiceImpl implements DoctorBarnWriteService {
 
     private final DoctorBarnDao doctorBarnDao;
+    private final CoreEventDispatcher coreEventDispatcher;
 
+    @Autowired(required = false)
+    private Publisher publisher;
+    
     @Autowired
-    public DoctorBarnWriteServiceImpl(DoctorBarnDao doctorBarnDao) {
+    public DoctorBarnWriteServiceImpl(DoctorBarnDao doctorBarnDao,
+                                      CoreEventDispatcher coreEventDispatcher) {
         this.doctorBarnDao = doctorBarnDao;
+        this.coreEventDispatcher = coreEventDispatcher;
     }
 
     @Override
@@ -44,6 +57,7 @@ public class DoctorBarnWriteServiceImpl implements DoctorBarnWriteService {
     @Override
     public Response<Boolean> updateBarn(DoctorBarn barn) {
         try {
+            publishZookeeperEvent(DataEventType.BarnUpdate.getKey(), ImmutableMap.of("doctorBarnId", barn.getId()));
             return Response.ok(doctorBarnDao.update(barn));
         } catch (Exception e) {
             log.error("update barn failed, barn:{}, cause:{}", barn, Throwables.getStackTraceAsString(e));
@@ -80,6 +94,18 @@ public class DoctorBarnWriteServiceImpl implements DoctorBarnWriteService {
     private void checkBarnNameRepeat(Long farmId, String barnName) {
         if (doctorBarnDao.findByFarmId(farmId).stream().anyMatch(barn -> barnName.equals(barn.getName()))) {
             throw new ServiceException("barn.name.repeat");
+        }
+    }
+
+    private <T> void publishZookeeperEvent(Integer eventType, T data){
+        if(notNull(publisher)) {
+            try {
+                publisher.publish(DataEvent.toBytes(eventType, data));
+            } catch (Exception e) {
+                log.error("publish zk event, eventType:{}, data:{} cause:{}", eventType, data, Throwables.getStackTraceAsString(e));
+            }
+        } else {
+            coreEventDispatcher.publish(DataEvent.make(eventType, data));
         }
     }
 }
