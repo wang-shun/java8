@@ -1,7 +1,7 @@
 package io.terminus.doctor.warehouse;
 
 import com.google.common.collect.Lists;
-import io.terminus.boot.search.autoconfigure.SearchProperties;
+import io.terminus.doctor.common.DoctorCommonConfiguration;
 import io.terminus.doctor.warehouse.handler.DoctorWareHouseHandlerChain;
 import io.terminus.doctor.warehouse.handler.IHandler;
 import io.terminus.doctor.warehouse.handler.consume.DoctorConsumerEventHandler;
@@ -46,6 +46,7 @@ import java.util.List;
 @ComponentScan(basePackages = {
         "io.terminus.doctor.warehouse"
 })
+@Import({DoctorCommonConfiguration.class})
 public class DoctorWarehouseConfiguration {
 
     @Configuration

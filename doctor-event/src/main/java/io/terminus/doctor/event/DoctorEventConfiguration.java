@@ -3,7 +3,6 @@ package io.terminus.doctor.event;
 import com.google.common.collect.Lists;
 import io.terminus.boot.mybatis.autoconfigure.MybatisAutoConfiguration;
 import io.terminus.doctor.common.DoctorCommonConfiguration;
-import io.terminus.doctor.common.event.CoreEventDispatcher;
 import io.terminus.doctor.event.dao.DoctorPigDao;
 import io.terminus.doctor.event.handler.DoctorEntryHandler;
 import io.terminus.doctor.event.handler.DoctorEventCreateHandler;
@@ -65,11 +64,6 @@ import java.util.List;
 @Import({DoctorWorkflowConfiguration.class, DoctorCommonConfiguration.class})
 @AutoConfigureAfter({MybatisAutoConfiguration.class})
 public class  DoctorEventConfiguration {
-
-    @Bean
-    public CoreEventDispatcher coreEventDispatcher(){
-        return new CoreEventDispatcher();
-    }
 
     /**
      * 对应handler chain
