@@ -56,7 +56,7 @@ public class DoctorServiceReviewServiceImpl implements DoctorServiceReviewServic
                     "doctor.service.review.status.error");
 
             //处理数据
-            doctorServiceReviewManager.applyOpenService(user, serviceApplyDto.getOrg(), type, review);
+            doctorServiceReviewManager.applyOpenService(user, serviceApplyDto.getOrg(), type, review, serviceApplyDto.getRealName());
             response.setResult(true);
         } catch (ServiceException | IllegalStateException | IllegalArgumentException e) {
             response.setError(e.getMessage());

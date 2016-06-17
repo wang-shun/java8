@@ -20,7 +20,12 @@ public class ServiceReviewOpenDto implements Serializable {
      * 用户id
      */
     private Long userId;
-    
+
+    /**
+     * 用户申请服务时填写的"真实姓名"
+     */
+    private String realName;
+
     /**
      * 服务类型 1 猪场软件, 2 新融电商, 3 大数据, 4 生猪交易
      * @see io.terminus.doctor.user.model.DoctorServiceReview.Type

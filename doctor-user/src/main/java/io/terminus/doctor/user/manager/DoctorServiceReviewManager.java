@@ -60,7 +60,7 @@ public class DoctorServiceReviewManager {
     }
 
     @Transactional
-    public void applyOpenService(BaseUser user, DoctorOrg org, DoctorServiceReview.Type type, DoctorServiceReview  review){
+    public void applyOpenService(BaseUser user, DoctorOrg org, DoctorServiceReview.Type type, DoctorServiceReview  review, String realName){
         if (Objects.equals(DoctorServiceReview.Type.PIG_DOCTOR.getValue(), type.getValue())) {
             //校验入参
             Preconditions.checkArgument(org != null, "required.org.info.missing");
@@ -85,11 +85,14 @@ public class DoctorServiceReviewManager {
         } else {
             throw new ServiceException("doctor.service.review.type.error");
         }
-        //更新状态为已提交,待审核
-        doctorServiceReviewDao.updateStatus(user.getId(), type, DoctorServiceReview.Status.REVIEW);
+
         //添加状态变更记录
         this.createServiceReviewTrack(null, user.getId(), review.getStatus(), DoctorServiceReview.Status.REVIEW.getValue(), type, null);
 
+        //更新状态为已提交,待审核
+        review.setStatus(DoctorServiceReview.Status.REVIEW.getValue());
+        review.setRealName(realName);
+        doctorServiceReviewDao.update(review);
     }
     private void createDoctorStaff(BaseUser user, Long orgId, String orgName){
         DoctorStaff staff = new DoctorStaff();
