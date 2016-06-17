@@ -1,11 +1,13 @@
 package io.terminus.doctor.web.front.event.dto;
 
+import io.terminus.doctor.event.model.DoctorPigEvent;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Builder;
 
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * Created by yaoqijun.
@@ -30,5 +32,7 @@ public class DoctorBoarDetailDto implements Serializable{
     private Integer pigStatus; // 猪状态
 
     private String field123456; // 字段 123456 TODO
+
+    private List<DoctorPigEvent> doctorPigEvents;
 
 }

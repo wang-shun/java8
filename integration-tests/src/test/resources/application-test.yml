@@ -62,6 +62,7 @@ flow:
 zookeeper:
   host: 101.201.44.35
   port: 2181
+  cacheTopic: pig.user.topic
   zkTopic: pig.doctor.topic
 
 msg:

@@ -27,12 +27,10 @@ import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.enums.MatingType;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PigSource;
-import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.enums.PregCheckResult;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.front.BaseFrontWebTest;
 import io.terminus.doctor.workflow.core.WorkFlowService;
-import io.terminus.zookeeper.pubsub.Subscriber;
 import org.joda.time.DateTime;
 import org.junit.Before;
 import org.junit.Test;
@@ -40,6 +38,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.ResponseEntity;
+import utils.HttpGetRequest;
 import utils.HttpPostRequest;
 
 import java.io.File;
@@ -74,8 +73,8 @@ public class DoctorPigCreateEventsTest extends BaseFrontWebTest{
     @Autowired
     private DoctorPigEventDao doctorPigEventDao;
 
-    @Autowired
-    private Subscriber subscriber;
+//    @Autowired
+//    private Subscriber subscriber;
 
     @Before
     public void before() throws Exception{
@@ -101,27 +100,41 @@ public class DoctorPigCreateEventsTest extends BaseFrontWebTest{
     public void testPigPagingInfo(){
         // 录入母猪事件信息
         for (int i = 0; i<30; i++){
-            sowEntryEventCreate();
+//            sowEntryEventCreate();
+            boarEntryEventCreate();
         }
-        HttpEntity httpEntity = HttpPostRequest.formRequest()
-                .param("farmId", 12345l).param("status", PigStatus.Entry.getKey()).param("pageNo", 1).param("pageSize", 10)
-                .httpEntity();
+//        HttpEntity httpEntity = HttpPostRequest.formRequest()
+//                .param("farmId", 12345l).param("status", PigStatus.Entry.getKey()).param("pageNo", 1).param("pageSize", 10)
+//                .httpEntity();
+//
+//        ResponseEntity responseEntity = this.restTemplate.postForEntity("http://localhost:" + this.port + "/api/doctor/pigs/queryByStatus", httpEntity, Object.class);
+//        System.out.println(JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(responseEntity.getBody()));
 
-        ResponseEntity responseEntity = this.restTemplate.postForEntity("http://localhost:" + this.port + "/api/doctor/pigs/queryByStatus", httpEntity, Object.class);
+//        HttpEntity httpEntityDetail = HttpPostRequest.formRequest()
+//                .param("farmId", 12345l).param("pigId", 10l)
+//                .httpEntity();
+//        ResponseEntity responseEntityDetail = this.restTemplate.postForEntity("http://localhost:" + this.port + "/api/doctor/pigs/getPigDetail", httpEntityDetail, Object.class);
+//        System.out.println(JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(responseEntityDetail.getBody()));
+
+//        HttpEntity httpEntityDetail = HttpPostRequest.formRequest()
+//                .param("farmId", 12345l).param("pigId", 10l)
+//                .httpEntity();
+//        ResponseEntity responseEntityDetail = this.restTemplate.postForEntity(
+//                "http://localhost:" + this.port + "/api/doctor/pigs/getSowPigDetail",
+//                httpEntityDetail, Object.class);
+//        System.out.println(JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(responseEntityDetail.getBody()));
+
+        String url = HttpGetRequest.url("http://localhost:" + this.port + "/api/doctor/pigs/getBoarPigDetail")
+                .params("farmId", 12345l).params("pigId", 10l).params("eventSize", 3).build();
+        ResponseEntity responseEntity = this.restTemplate.getForEntity(url, Object.class);
         System.out.println(JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(responseEntity.getBody()));
-
-        HttpEntity httpEntityDetail = HttpPostRequest.formRequest()
-                .param("farmId", 12345l).param("pigId", 10l)
-                .httpEntity();
-        ResponseEntity responseEntityDetail = this.restTemplate.postForEntity("http://localhost:" + this.port + "/api/doctor/pigs/getPigDetail", httpEntityDetail, Object.class);
-        System.out.println(JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(responseEntityDetail.getBody()));
     }
 
     @Test
     public void testZkClientCondition() throws Exception{
-        subscriber.subscribe(data->{
-            System.out.println(String.valueOf(data));
-        });
+//        subscriber.subscribe(data->{
+//            System.out.println(String.valueOf(data));
+//        });
 
         boarEntryEventCreate();
     }

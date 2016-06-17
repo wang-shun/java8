@@ -68,14 +68,14 @@ public class ServiceConfiguration {
 
         @Bean
         public Subscriber cacheListenerBean(ZKClientFactory zkClientFactory,
-                                            @Value("${zookeeper.cacheTopic}") String cacheTopic) throws Exception{
-            return new Subscriber(zkClientFactory,cacheTopic);
+                                            @Value("${zookeeper.zkTopic}") String zkTopic) throws Exception{
+            return new Subscriber(zkClientFactory,zkTopic);
         }
 
         @Bean
         public Publisher cachePublisherBean(ZKClientFactory zkClientFactory,
-                                            @Value("${zookeeper.cacheTopic}}") String cacheTopic) throws Exception{
-            return new Publisher(zkClientFactory, cacheTopic);
+                                            @Value("${zookeeper.zkTopic}}") String zkTopic) throws Exception{
+            return new Publisher(zkClientFactory, zkTopic);
         }
     }
 
