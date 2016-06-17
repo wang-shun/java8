@@ -16,10 +16,6 @@ public class DoctorServiceStatusDao extends MyBatisDao<DoctorServiceStatus> {
         return sqlSession.selectOne(sqlId("findByUserId"), userId);
     }
 
-    public boolean initdata(Long userId){
-        return sqlSession.insert(sqlId("initdata"), userId) == 1;
-    }
-
     public boolean updateWithNull(DoctorServiceStatus doctorServiceStatus){
         return sqlSession.update(sqlId("updateWithNull"), doctorServiceStatus) == 1;
     }

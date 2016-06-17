@@ -54,14 +54,4 @@ public class DoctorServiceStatusWriteServiceImpl implements DoctorServiceStatusW
             return Response.fail("serviceStatus.delete.fail");
         }
     }
-
-    @Override
-    public Response<Boolean> initDefaultServiceStatus(Long userId){
-        try {
-            return Response.ok(doctorServiceStatusDao.initdata(userId));
-        } catch (Exception e) {
-            log.error("init serviceStatus failed, userId:{}, cause:{}", userId, Throwables.getStackTraceAsString(e));
-            return Response.fail("ServiceStatus.init.fail");
-        }
-    }
 }

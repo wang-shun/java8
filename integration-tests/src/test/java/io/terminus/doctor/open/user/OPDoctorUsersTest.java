@@ -7,6 +7,7 @@ import com.google.common.hash.Hashing;
 import configuration.open.OpenWebConfiguration;
 import io.terminus.doctor.open.BaseOpenWebTest;
 import io.terminus.doctor.open.common.Sessions;
+import io.terminus.doctor.open.service.ServiceBetaStatusService;
 import io.terminus.doctor.user.dto.DoctorServiceApplyDto;
 import io.terminus.doctor.user.model.DoctorOrg;
 import io.terminus.doctor.user.model.DoctorServiceReview;
@@ -37,6 +38,8 @@ public class OPDoctorUsersTest extends BaseOpenWebTest {
     private DoctorServiceReviewWriteService doctorServiceReviewWriteService;
     @Autowired
     private DoctorServiceStatusWriteService doctorServiceStatusWriteService;
+    @Autowired
+    private ServiceBetaStatusService serviceBetaStatusService;
 
     private final String sid = "testSessionId";
     private final String appKey = "pigDoctorAndroid";
@@ -48,7 +51,7 @@ public class OPDoctorUsersTest extends BaseOpenWebTest {
     public void getUserServiceStatusTest(){
         this.login(sid, userId, deviceId);
         doctorServiceReviewWriteService.initServiceReview(1L, "44444444444");
-        doctorServiceStatusWriteService.initDefaultServiceStatus(1L);
+        serviceBetaStatusService.initDefaultServiceStatus(1L);
         String pampasCall = "get.user.service.status";
         ResponseEntity<Object> result = restTemplate.getForEntity("http://localhost:{port}/api/gateway" +
                         "?pampasCall=" + pampasCall +
@@ -64,7 +67,7 @@ public class OPDoctorUsersTest extends BaseOpenWebTest {
     public void applyOpenServiceTest(){
         this.login(sid, userId, deviceId);
         doctorServiceReviewWriteService.initServiceReview(1L, "44444444444");
-        doctorServiceStatusWriteService.initDefaultServiceStatus(1L);
+        serviceBetaStatusService.initDefaultServiceStatus(1L);
         String pampasCall = "apply.open.service";
         DoctorServiceApplyDto dto = new DoctorServiceApplyDto();
         dto.setType(DoctorServiceReview.Type.PIG_DOCTOR.getValue());

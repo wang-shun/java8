@@ -6,6 +6,7 @@ import io.terminus.doctor.common.enums.UserType;
 import io.terminus.doctor.user.model.DoctorServiceReview;
 import io.terminus.doctor.user.model.DoctorServiceStatus;
 import io.terminus.doctor.user.service.*;
+import io.terminus.doctor.web.core.service.ServiceBetaStatusService;
 import io.terminus.parana.user.model.User;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
@@ -30,18 +31,21 @@ public class UserServiceInit {
     private final DoctorServiceReviewWriteService doctorServiceReviewWriteService;
     private final DoctorServiceStatusReadService doctorServiceStatusReadService;
     private final DoctorServiceStatusWriteService doctorServiceStatusWriteService;
+    private final ServiceBetaStatusService serviceBetaStatusService;
 
     @Autowired
     public UserServiceInit(DoctorUserReadService doctorUserReadService,
                            DoctorServiceReviewReadService doctorServiceReviewReadService,
                            DoctorServiceReviewWriteService doctorServiceReviewWriteService,
                            DoctorServiceStatusReadService doctorServiceStatusReadService,
-                           DoctorServiceStatusWriteService doctorServiceStatusWriteService){
+                           DoctorServiceStatusWriteService doctorServiceStatusWriteService,
+                           ServiceBetaStatusService serviceBetaStatusService){
         this.doctorUserReadService = doctorUserReadService;
         this.doctorServiceReviewReadService = doctorServiceReviewReadService;
         this.doctorServiceReviewWriteService = doctorServiceReviewWriteService;
         this.doctorServiceStatusReadService = doctorServiceStatusReadService;
         this.doctorServiceStatusWriteService = doctorServiceStatusWriteService;
+        this.serviceBetaStatusService = serviceBetaStatusService;
     }
 
     @Scheduled(cron = "0 */15 * * * ?")
@@ -58,7 +62,7 @@ public class UserServiceInit {
                 }
                 Response<DoctorServiceStatus> statusResponse = doctorServiceStatusReadService.findByUserId(userId);
                 if(statusResponse.isSuccess() && statusResponse.getResult() == null){
-                    doctorServiceStatusWriteService.initDefaultServiceStatus(userId);
+                    serviceBetaStatusService.initDefaultServiceStatus(userId);
                 }
             }
         }catch(Exception e){
