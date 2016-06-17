@@ -1,5 +1,6 @@
 package io.terminus.doctor.event.service;
 
+import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.event.model.DoctorVaccinationPigWarn;
 
@@ -20,6 +21,15 @@ public interface DoctorVaccinationPigWarnReadService {
      * @return 猪只设置免疫程序统计方式
      */
     Response<DoctorVaccinationPigWarn> findVaccinationPigWarnById(Long vaccinationPigWarnId);
+
+    /**
+     * 分页获取猪只免疫程序
+     * @param pageNo    第一页
+     * @param pageSize  页大小
+     * @param farmId    猪场id
+     * @return
+     */
+    Response<Paging<DoctorVaccinationPigWarn>> pagingVaccPigWarns(Integer pageNo, Integer pageSize, Long farmId);
 
     /**
      * 查询猪只免疫规则列表
