@@ -1,5 +1,6 @@
 package io.terminus.doctor.front.event;
 
+import com.google.common.collect.ImmutableMap;
 import configuration.front.FrontWebConfiguration;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.utils.RandomUtil;
@@ -7,12 +8,12 @@ import io.terminus.doctor.event.model.DoctorVaccinationPigWarn;
 import io.terminus.doctor.front.BaseFrontWebTest;
 import io.terminus.doctor.web.front.event.controller.DoctorVaccinations;
 import lombok.extern.slf4j.Slf4j;
+import org.hamcrest.core.Is;
 import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.boot.test.SpringApplicationConfiguration;
-import org.springframework.http.HttpEntity;
-import utils.HttpGetRequest;
-import utils.HttpPostRequest;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 
 import java.io.IOException;
 import java.util.Date;
@@ -37,15 +38,15 @@ public class DoctorVaccinationsTest extends BaseFrontWebTest {
     @Test
     public void test_CREATE_VaccWarns() {
         // 创建
-        String url = "http://localhost:" + port + "/api/doctor/vacc/warns";
-        HttpEntity entity = HttpPostRequest.bodyRequest()
-                .params(MAPPER.toJson(create()));
-        this.restTemplate.postForObject(url, entity, Object.class);
+        String url = "/api/doctor/vacc/warns";
+        ResponseEntity<Boolean> response = postForEntity(url, create(), Boolean.class);
+        Assert.assertThat(response.getStatusCode(), Is.is(HttpStatus.OK));
 
         // 查询
-        url = "http://localhost:" + port + "/api/doctor/vacc/warns/detail?id=1";
-        Object object = this.restTemplate.getForObject(url, Object.class);
-        Assert.assertNotNull(object);
+        url = "/api/doctor/vacc/warns/detail";
+        DoctorVaccinationPigWarn warn = getForEntity(url, ImmutableMap.of("id", 1), DoctorVaccinationPigWarn.class).getBody();
+        log.info("warn is {}", warn);
+        Assert.assertNotNull(warn);
     }
 
     /**
@@ -55,19 +56,18 @@ public class DoctorVaccinationsTest extends BaseFrontWebTest {
     @Test
     public void test_DELETE_VaccWarns() {
         // 创建
-        String url = "http://localhost:" + port + "/api/doctor/vacc/warns";
-        HttpEntity entity = HttpPostRequest.bodyRequest()
-                .params(MAPPER.toJson(create()));
-        this.restTemplate.postForObject(url, entity, Object.class);
+        String url = "/api/doctor/vacc/warns";
+        ResponseEntity<Boolean> response = postForEntity(url, create(), Boolean.class);
+        Assert.assertThat(response.getStatusCode(), Is.is(HttpStatus.OK));
 
         // 删除
-        url = "http://localhost:" + port + "/api/doctor/vacc/warns?id=1";
-        this.restTemplate.delete(url);
+        url = "/api/doctor/vacc/warns";
+        delete(url, ImmutableMap.of("id", 1));
 
         // 查询
-        url = "http://localhost:" + port + "/api/doctor/vacc/warns/detail?id=1";
-        Object object = this.restTemplate.getForObject(url, Object.class);
-        Assert.assertNull(object);
+        url = "/api/doctor/vacc/warns/detail";
+        DoctorVaccinationPigWarn warn = getForEntity(url, ImmutableMap.of("id", 1), DoctorVaccinationPigWarn.class).getBody();
+        Assert.assertNull(warn);
     }
 
     /**
@@ -77,20 +77,13 @@ public class DoctorVaccinationsTest extends BaseFrontWebTest {
     @Test
     public void test_PAGING_VaccWarns() throws IOException {
         // 创建
-        String url = "http://localhost:" + port + "/api/doctor/vacc/warns";
+        String url = "/api/doctor/vacc/warns";
         for (int i = 0; i < 8; i++) {
-            HttpEntity entity = HttpPostRequest.bodyRequest()
-                    .params(MAPPER.toJson(create()));
-            this.restTemplate.postForObject(url, entity, Object.class);
+            postForEntity(url, create(), Boolean.class);
         }
 
         // 查询
-        url = HttpGetRequest.url(url)
-                .params("pageNo", 1)
-                .params("pageSize", 5)
-                .params("farmId", 1L)
-                .build();
-        Object json = this.restTemplate.getForObject(url, Object.class);
+        Object json = getForEntity(url, ImmutableMap.of("pageNo", 1, "pageSize", 5, "farmId", 1L), Object.class).getBody();
         System.out.println(json); // Paging<DoctorVaccinationPigWarn>
     }
 
