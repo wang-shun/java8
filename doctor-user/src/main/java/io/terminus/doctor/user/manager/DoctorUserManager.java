@@ -17,6 +17,7 @@ import io.terminus.doctor.user.model.Operator;
 import io.terminus.doctor.user.model.PrimaryUser;
 import io.terminus.doctor.user.model.Sub;
 import io.terminus.doctor.user.model.SubRole;
+import io.terminus.doctor.user.service.DoctorStaffWriteService;
 import io.terminus.doctor.user.service.SubRoleReadService;
 import io.terminus.parana.common.utils.Iters;
 import io.terminus.parana.user.impl.dao.UserDao;
@@ -53,9 +54,12 @@ public class DoctorUserManager {
 
     private final DoctorStaffDao doctorStaffDao;
 
+    private final DoctorStaffWriteService doctorStaffWriteService;
+
     @Autowired
     public DoctorUserManager(UserDao userDao, UserProfileDao userProfileDao, OperatorDao operatorDao, PrimaryUserDao primaryUserDao, SubDao subDao,
-                             SubRoleReadService subRoleReadService, DoctorStaffDao doctorStaffDao) {
+                             SubRoleReadService subRoleReadService, DoctorStaffDao doctorStaffDao,
+                             DoctorStaffWriteService doctorStaffWriteService) {
         this.userDao = userDao;
         this.userProfileDao = userProfileDao;
         this.operatorDao = operatorDao;
@@ -63,6 +67,7 @@ public class DoctorUserManager {
         this.subDao = subDao;
         this.subRoleReadService = subRoleReadService;
         this.doctorStaffDao = doctorStaffDao;
+        this.doctorStaffWriteService = doctorStaffWriteService;
     }
 
     @Transactional
@@ -137,7 +142,7 @@ public class DoctorUserManager {
             doctorStaff.setOrgId(pstaff.getOrgId());
             doctorStaff.setOrgName(pstaff.getOrgName());
             doctorStaff.setStatus(pstaff.getStatus());
-            doctorStaffDao.create(pstaff);
+            doctorStaffWriteService.createDoctorStaff(doctorStaff);
 
         }
         return userId;

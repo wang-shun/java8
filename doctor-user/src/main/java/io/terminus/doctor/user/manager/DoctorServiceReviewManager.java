@@ -61,31 +61,22 @@ public class DoctorServiceReviewManager {
 
     @Transactional
     public void applyOpenService(BaseUser user, DoctorOrg org, DoctorServiceReview.Type type, DoctorServiceReview  review, String realName){
-        if (Objects.equals(DoctorServiceReview.Type.PIG_DOCTOR.getValue(), type.getValue())) {
-            //校验入参
-            Preconditions.checkArgument(org != null, "required.org.info.missing");
-            //保存org
-            DoctorStaff staff = doctorStaffDao.findByUserId(user.getId());
-            if (staff == null || staff.getOrgId() == null) {
-                doctorOrgDao.create(org);
-                //插入staff
-                this.createDoctorStaff(user, org.getId(), org.getName());
-            } else {
-                org.setId(staff.getOrgId());
-                doctorOrgDao.update(org);
-
-                staff.setUpdatorName(user.getName());
-                staff.setUpdatorId(user.getId());
-                staff.setOrgName(org.getName());
-                RespHelper.orServEx(doctorStaffWriteService.updateDoctorStaff(staff));
-            }
-        } else if (Objects.equals(DoctorServiceReview.Type.PIGMALL.getValue(), type.getValue())
-                || Objects.equals(DoctorServiceReview.Type.NEVEREST.getValue(), type.getValue())) {
-            //TODO extra things. 目前没什么额外的数据需要处理,以后如有需要可在此添加
-        } else if (Objects.equals(DoctorServiceReview.Type.PIG_TRADE.getValue(), type.getValue())) {
-            //TODO extra things. 目前没什么额外的数据需要处理,以后如有需要可在此添加
+        //校验入参
+        Preconditions.checkArgument(org != null, "required.org.info.missing");
+        //保存org
+        DoctorStaff staff = doctorStaffDao.findByUserId(user.getId());
+        if (staff == null || staff.getOrgId() == null) {
+            doctorOrgDao.create(org);
+            //插入staff
+            this.createDoctorStaff(user, org.getId(), org.getName());
         } else {
-            throw new ServiceException("doctor.service.review.type.error");
+            org.setId(staff.getOrgId());
+            doctorOrgDao.update(org);
+
+            staff.setUpdatorName(user.getName());
+            staff.setUpdatorId(user.getId());
+            staff.setOrgName(org.getName());
+            RespHelper.orServEx(doctorStaffWriteService.updateDoctorStaff(staff));
         }
 
         //添加状态变更记录
@@ -106,7 +97,7 @@ public class DoctorServiceReviewManager {
         staff.setCreatorName(user.getName());
         staff.setUpdatorId(user.getId());
         staff.setUpdatorName(user.getName());
-        doctorStaffDao.create(staff);
+        doctorStaffWriteService.createDoctorStaff(staff);
     }
     private void createServiceReviewTrack(BaseUser user, Long userId, Integer oldStatus, Integer newStatus,
                                           DoctorServiceReview.Type type, String reason){
@@ -217,7 +208,7 @@ public class DoctorServiceReviewManager {
             permission.setCreatorId(user.getId());
             permission.setUpdatorId(user.getId());
             permission.setUpdatorName(user.getName());
-            doctorUserDataPermissionDao.create(permission);
+            doctorUserDataPermissionWriteService.createDataPermission(permission);
         }
 
         //更新审批状态, 记录track, 更新服务状态
