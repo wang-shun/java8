@@ -9,6 +9,7 @@ import io.terminus.doctor.user.dto.DoctorMenuDto;
 import io.terminus.doctor.user.enums.RoleType;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -26,11 +27,15 @@ public class DoctorMobileMenuReadServiceImpl implements DoctorMobileMenuReadServ
 
     private final DoctorUserReadService doctorUserReadService;
 
-    private static Map<RoleType, List<DoctorMenuDto>> menuMap = Maps.newHashMap();
-    static {
-        DoctorMenuDto userInfo = DoctorMenuDto.builder().name("个人信息").url("/user/index").iconClass("icon_myfill").level(1).build();
-        DoctorMenuDto staffManage = DoctorMenuDto.builder().name("员工管理").url("/authority/manage-select").iconClass("icon_pengyoufill").level(1).build();
-        DoctorMenuDto farmManage = DoctorMenuDto.builder().name("猪场管理").url("/entry/mall").iconClass("icon_susheguanli").level(1).build();
+    private Map<RoleType, List<DoctorMenuDto>> menuMap = Maps.newHashMap();
+
+
+    @Autowired
+    public DoctorMobileMenuReadServiceImpl(DoctorUserReadService doctorUserReadService, @Value("${doctor.url:default}")String url){
+        this.doctorUserReadService = doctorUserReadService;
+        DoctorMenuDto userInfo = DoctorMenuDto.builder().name("个人信息").url(url+"/user/index").iconClass("icon_myfill").level(1).build();
+        DoctorMenuDto staffManage = DoctorMenuDto.builder().name("员工管理").url(url+"/authority/manage-select").iconClass("icon_pengyoufill").level(1).build();
+        DoctorMenuDto farmManage = DoctorMenuDto.builder().name("猪场管理").url(url+"/entry/mall").iconClass("icon_susheguanli").level(1).build();
         menuMap.put(
                 RoleType.MAIN, Lists.newArrayList(farmManage, staffManage, userInfo)
         );
@@ -40,11 +45,6 @@ public class DoctorMobileMenuReadServiceImpl implements DoctorMobileMenuReadServ
         menuMap.put(
                 RoleType.SUB_MULTI, Lists.newArrayList(farmManage, userInfo)
         );
-    }
-
-    @Autowired
-    public DoctorMobileMenuReadServiceImpl(DoctorUserReadService doctorUserReadService){
-        this.doctorUserReadService = doctorUserReadService;
     }
 
     @Override

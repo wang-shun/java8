@@ -8,9 +8,12 @@ import io.terminus.doctor.user.dto.DoctorMenuDto;
 import io.terminus.doctor.user.dto.DoctorServiceApplyDto;
 import io.terminus.doctor.user.dto.DoctorUserInfoDto;
 import io.terminus.doctor.user.model.DoctorOrg;
+import io.terminus.doctor.user.model.DoctorServiceReview;
 import io.terminus.doctor.user.model.DoctorServiceStatus;
 import io.terminus.doctor.user.service.*;
 import io.terminus.doctor.user.service.business.DoctorServiceReviewService;
+import io.terminus.doctor.web.core.dto.ServiceBetaStatusToken;
+import io.terminus.doctor.web.core.service.ServiceBetaStatusHandler;
 import io.terminus.pampas.common.UserUtil;
 import io.terminus.parana.common.utils.RespHelper;
 import lombok.extern.slf4j.Slf4j;
@@ -32,6 +35,7 @@ public class ServiceReviews {
     private final DoctorUserReadService doctorUserReadService;
     private final DoctorServiceStatusReadService doctorServiceStatusReadService;
     private final PrimaryUserReadService primaryUserReadService;
+    private final ServiceBetaStatusHandler serviceBetaStatusHandler;
 
     @Autowired
     public ServiceReviews(DoctorServiceReviewReadService doctorServiceReviewReadService,
@@ -40,7 +44,8 @@ public class ServiceReviews {
                          DoctorServiceReviewService doctorServiceReviewService,
                          DoctorOrgReadService doctorOrgReadService,
                          DoctorServiceStatusReadService doctorServiceStatusReadService,
-                         PrimaryUserReadService primaryUserReadService) {
+                         PrimaryUserReadService primaryUserReadService,
+                         ServiceBetaStatusHandler serviceBetaStatusHandler) {
         this.doctorServiceReviewReadService = doctorServiceReviewReadService;
         this.doctorServiceReviewWriteService = doctorServiceReviewWriteService;
         this.doctorUserReadService = doctorUserReadService;
@@ -48,6 +53,7 @@ public class ServiceReviews {
         this.doctorOrgReadService = doctorOrgReadService;
         this.doctorServiceStatusReadService = doctorServiceStatusReadService;
         this.primaryUserReadService = primaryUserReadService;
+        this.serviceBetaStatusHandler = serviceBetaStatusHandler;
     }
 
     /**
@@ -84,6 +90,10 @@ public class ServiceReviews {
         if(!Objects.equals(UserType.FARM_ADMIN_PRIMARY.value(), baseUser.getType())){
             //只有主账号(猪场管理员)才能申请开通服务
             throw new JsonResponseException("authorize.fail");
+        }
+        ServiceBetaStatusToken dto = serviceBetaStatusHandler.getServiceBetaStatusToken();
+        if(dto.inBeta(DoctorServiceReview.Type.from(serviceApplyDto.getType()))){
+            throw new JsonResponseException("service.in.beta");
         }
         return RespHelper.or500(doctorServiceReviewService.applyOpenService(baseUser, serviceApplyDto));
     }

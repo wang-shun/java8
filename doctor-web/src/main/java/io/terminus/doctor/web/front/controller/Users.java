@@ -21,6 +21,7 @@ import io.terminus.doctor.common.enums.UserRole;
 import io.terminus.doctor.common.enums.UserStatus;
 import io.terminus.doctor.common.enums.UserType;
 import io.terminus.doctor.common.event.CoreEventDispatcher;
+import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.user.model.DoctorUser;
 import io.terminus.doctor.user.util.DoctorUserMaker;
 import io.terminus.doctor.web.core.component.CaptchaGenerator;
@@ -34,6 +35,7 @@ import io.terminus.parana.auth.model.Acl;
 import io.terminus.parana.auth.model.ParanaThreadVars;
 import io.terminus.parana.auth.model.PermissionData;
 import io.terminus.parana.common.model.ParanaUser;
+import io.terminus.parana.common.utils.EncryptUtil;
 import io.terminus.parana.user.model.LoginType;
 import io.terminus.parana.user.model.User;
 import io.terminus.parana.user.service.UserReadService;
@@ -487,6 +489,45 @@ public class Users {
         checkState(resp.isSuccess(), resp.getError());
         user.setId(resp.getResult());
         return user;
+    }
+
+    /**
+     * 修改密码
+     * @param oldPassword  旧密码
+     * @param newPassword  新密码
+     * @return 是否成功
+     */
+    @RequestMapping(value = "/changePassword", method = RequestMethod.POST)
+    @ResponseBody
+    public Boolean changePassword(@RequestParam("oldPassword") String oldPassword,
+                                  @RequestParam("newPassword") String newPassword) {
+        //1.获取用户
+        checkUserLogin();
+        User user = RespHelper.or500(userReadService.findById(UserUtil.getUserId()));
+
+        //2.校验旧密码密码
+        checkPassword(oldPassword, user.getPassword());
+
+        //3.更新密码
+        user.setPassword(EncryptUtil.encrypt(newPassword));
+        return RespHelper.or500(userWriteService.update(user));
+    }
+
+    private void checkUserLogin() {
+        if (UserUtil.getCurrentUser() == null) {
+            throw new JsonResponseException("user.not.login");
+        }
+    }
+
+    /**
+     * 检查密码
+     * @param inputPassword
+     * @param dbpassword
+     */
+    private void checkPassword(String inputPassword, String dbpassword){
+        if(!EncryptUtil.match(inputPassword, dbpassword)){
+            throw new JsonResponseException("user.password.error");
+        }
     }
 
     /**

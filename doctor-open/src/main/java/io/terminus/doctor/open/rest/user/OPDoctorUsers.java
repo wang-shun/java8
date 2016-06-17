@@ -17,6 +17,8 @@ import io.terminus.doctor.user.model.DoctorServiceReview;
 import io.terminus.doctor.user.model.DoctorServiceStatus;
 import io.terminus.doctor.user.service.*;
 import io.terminus.doctor.user.service.business.DoctorServiceReviewService;
+import io.terminus.doctor.web.core.dto.ServiceBetaStatusToken;
+import io.terminus.doctor.web.core.service.ServiceBetaStatusHandler;
 import io.terminus.pampas.common.UserUtil;
 import io.terminus.pampas.openplatform.annotations.OpenBean;
 import io.terminus.pampas.openplatform.annotations.OpenMethod;
@@ -54,6 +56,7 @@ public class OPDoctorUsers {
     private final PermissionHelper permissionHelper;
     private final DoctorServiceStatusReadService doctorServiceStatusReadService;
     private final PrimaryUserReadService primaryUserReadService;
+    private final ServiceBetaStatusHandler serviceBetaStatusHandler;
 
     @Autowired
     public OPDoctorUsers(DoctorServiceReviewReadService doctorServiceReviewReadService,
@@ -65,7 +68,8 @@ public class OPDoctorUsers {
                          DoctorMobileMenuReadService doctorMobileMenuReadService,
                          AclLoader aclLoader,
                          PermissionHelper permissionHelper,
-                         PrimaryUserReadService primaryUserReadService) {
+                         PrimaryUserReadService primaryUserReadService,
+                         ServiceBetaStatusHandler serviceBetaStatusHandler) {
         this.doctorServiceReviewReadService = doctorServiceReviewReadService;
         this.doctorServiceReviewWriteService = doctorServiceReviewWriteService;
         this.doctorUserReadService = doctorUserReadService;
@@ -76,6 +80,7 @@ public class OPDoctorUsers {
         this.aclLoader = aclLoader;
         this.permissionHelper = permissionHelper;
         this.primaryUserReadService = primaryUserReadService;
+        this.serviceBetaStatusHandler = serviceBetaStatusHandler;
     }
 
     /**
@@ -138,6 +143,10 @@ public class OPDoctorUsers {
         if(!Objects.equals(UserType.FARM_ADMIN_PRIMARY.value(), baseUser.getType())){
             //只有主账号(猪场管理员)才能申请开通服务
             throw new OPClientException("authorize.fail");
+        }
+        ServiceBetaStatusToken token = serviceBetaStatusHandler.getServiceBetaStatusToken();
+        if(token.inBeta(DoctorServiceReview.Type.from(serviceApplyDto.getType()))){
+            throw new OPClientException("service.in.beta");
         }
         return OPRespHelper.orOPEx(doctorServiceReviewService.applyOpenService(baseUser, serviceApplyDto));
     }

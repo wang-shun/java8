@@ -6,12 +6,11 @@ import io.terminus.doctor.common.enums.UserType;
 import io.terminus.doctor.user.model.DoctorServiceReview;
 import io.terminus.doctor.user.model.DoctorServiceStatus;
 import io.terminus.doctor.user.service.*;
+import io.terminus.doctor.web.core.service.ServiceBetaStatusHandler;
 import io.terminus.parana.user.model.User;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Configurable;
-import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -30,18 +29,21 @@ public class UserServiceInit {
     private final DoctorServiceReviewWriteService doctorServiceReviewWriteService;
     private final DoctorServiceStatusReadService doctorServiceStatusReadService;
     private final DoctorServiceStatusWriteService doctorServiceStatusWriteService;
+    private final ServiceBetaStatusHandler serviceBetaStatusHandler;
 
     @Autowired
     public UserServiceInit(DoctorUserReadService doctorUserReadService,
                            DoctorServiceReviewReadService doctorServiceReviewReadService,
                            DoctorServiceReviewWriteService doctorServiceReviewWriteService,
                            DoctorServiceStatusReadService doctorServiceStatusReadService,
-                           DoctorServiceStatusWriteService doctorServiceStatusWriteService){
+                           DoctorServiceStatusWriteService doctorServiceStatusWriteService,
+                           ServiceBetaStatusHandler serviceBetaStatusHandler){
         this.doctorUserReadService = doctorUserReadService;
         this.doctorServiceReviewReadService = doctorServiceReviewReadService;
         this.doctorServiceReviewWriteService = doctorServiceReviewWriteService;
         this.doctorServiceStatusReadService = doctorServiceStatusReadService;
         this.doctorServiceStatusWriteService = doctorServiceStatusWriteService;
+        this.serviceBetaStatusHandler = serviceBetaStatusHandler;
     }
 
     @Scheduled(cron = "0 */15 * * * ?")
@@ -58,7 +60,7 @@ public class UserServiceInit {
                 }
                 Response<DoctorServiceStatus> statusResponse = doctorServiceStatusReadService.findByUserId(userId);
                 if(statusResponse.isSuccess() && statusResponse.getResult() == null){
-                    doctorServiceStatusWriteService.initDefaultServiceStatus(userId);
+                    serviceBetaStatusHandler.initDefaultServiceStatus(userId);
                 }
             }
         }catch(Exception e){

@@ -91,7 +91,8 @@ public class DoctorServiceStatus implements Serializable {
      */
     public enum Status {
         OPENED(1, "已开通"),
-        CLOSED(0, "未开通");
+        CLOSED(0, "未开通"),
+        BETA(-1, "服务内测中");
 
         private int value;
         private String desc;

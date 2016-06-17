@@ -19,7 +19,9 @@
         <result column="input_date" property="inputDate"/>
         <result column="dose" property="dose"/>
         <result column="remark" property="remark"/>
-        
+        <result column="creator_id" property="creatorId"/>
+        <result column="created_at" property="createdAt"/>
+        <result column="updated_at" property="updatedAt"/>
     </resultMap>
 
     <sql id="tb">
@@ -31,11 +33,11 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        farm_id, farm_name, pig_type, material_id, material_name, start_date, end_date, vaccination_date_type, input_value, input_date, dose, remark
+        farm_id, farm_name, pig_type, material_id, material_name, start_date, end_date, vaccination_date_type, input_value, input_date, dose, remark, `creator_id`, `created_at`,`updated_at`
     </sql>
 
     <sql id="vals">
-        #{farmId}, #{farmName}, #{pigType}, #{materialId}, #{materialName}, #{startDate}, #{endDate}, #{vaccinationDateType}, #{inputValue}, #{inputDate}, #{dose}, #{remark}
+        #{farmId}, #{farmName}, #{pigType}, #{materialId}, #{materialName}, #{startDate}, #{endDate}, #{vaccinationDateType}, #{inputValue}, #{inputDate}, #{dose}, #{remark}, #{creatorId}, now(), now()
     </sql>
 
     <insert id="create" parameterType="DoctorVaccinationPigWarn" keyProperty="id" useGeneratedKeys="true">
@@ -68,6 +70,8 @@
             <if test="inputDate != null">input_date = #{inputDate},</if>
             <if test="dose != null">dose = #{dose},</if>
             <if test="remark != null">remark = #{remark},</if>
+            <if test="creatorId != null">`creator_id` = #{creatorId},</if>
+            <if test="createdAt != null">`created_at` = #{createdAt},</if>
             updated_at=now()
         </set>
         WHERE id = #{id}
@@ -83,6 +87,7 @@
         <if test="pigType != null">AND pig_type = #{pigType}</if>
         <if test="materialId != null">AND material_id = #{materialId}</if>
         <if test="vaccinationDateType != null">AND vaccination_date_type = #{vaccinationDateType}</if>
+        <if test="creatorId != null">AND creator_id = #{creatorId}</if>
     </sql>
 
     <select id="list" parameterType="map" resultMap="DoctorVaccinationPigWarnMap">
@@ -91,5 +96,23 @@
         <where>
             <include refid="criteria"/>
         </where>
+    </select>
+
+    <select id="count" parameterType="map" resultType="long">
+        SELECT COUNT(1)
+        FROM <include refid="tb"/>
+        <where>
+            <include refid="criteria"/>
+        </where>
+    </select>
+
+    <select id="paging" parameterType="map" resultMap="DoctorVaccinationPigWarnMap">
+        SELECT <include refid="cols_all"/>
+        FROM <include refid="tb"/>
+        <where>
+            <include refid="criteria"/>
+        </where>
+        ORDER BY `id` DESC
+        LIMIT #{offset}, #{limit}
     </select>
 </mapper>

@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import configuration.admin.OperatorAdminWebConfiguration;
 import io.terminus.common.model.Paging;
-import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.admin.BaseAdminWebTest;
 import io.terminus.doctor.common.enums.UserType;
 import io.terminus.doctor.user.dto.DoctorServiceApplyDto;
@@ -12,6 +11,7 @@ import io.terminus.doctor.user.model.*;
 import io.terminus.doctor.user.service.*;
 import io.terminus.doctor.user.service.business.DoctorServiceReviewService;
 import io.terminus.doctor.web.admin.dto.UserApplyServiceDetailDto;
+import io.terminus.doctor.web.core.service.ServiceBetaStatusHandler;
 import io.terminus.parana.common.model.ParanaUser;
 import org.junit.Assert;
 import org.junit.Test;
@@ -21,8 +21,6 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import utils.HttpPostRequest;
-
-import java.util.Map;
 
 import static org.hamcrest.core.Is.is;
 
@@ -43,6 +41,8 @@ public class DoctorServiceReviewControllerTest  extends BaseAdminWebTest {
     private DoctorServiceStatusWriteService doctorServiceStatusWriteService;
     @Autowired
     private DoctorServiceReviewService doctorServiceReviewService;
+    @Autowired
+    private ServiceBetaStatusHandler serviceBetaStatusHandler;
 
     private static final String baseUrl = "http://localhost:{port}/api/doctor/admin/service";
     @Test
@@ -176,7 +176,7 @@ public class DoctorServiceReviewControllerTest  extends BaseAdminWebTest {
         applyUser.setType(UserType.FARM_ADMIN_PRIMARY.value());
         //初始化数据
         doctorServiceReviewWriteService.initServiceReview(applyUser.getId(), "4444444444");
-        doctorServiceStatusWriteService.initDefaultServiceStatus(applyUser.getId());
+        serviceBetaStatusHandler.initDefaultServiceStatus(applyUser.getId());
         //申请
         DoctorServiceApplyDto serviceApplyDto = new DoctorServiceApplyDto();
         serviceApplyDto.setType(type.getValue());

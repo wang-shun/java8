@@ -113,3 +113,5 @@ parana:
     key: MOBILE
 
 
+doctor:
+  url: http://doctor-test.xrnm.com

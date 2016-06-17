@@ -82,6 +82,8 @@ public class DoctorServiceReviewManager {
         } else if (Objects.equals(DoctorServiceReview.Type.PIGMALL.getValue(), type.getValue())
                 || Objects.equals(DoctorServiceReview.Type.NEVEREST.getValue(), type.getValue())) {
             //TODO extra things. 目前没什么额外的数据需要处理,以后如有需要可在此添加
+        } else if (Objects.equals(DoctorServiceReview.Type.PIG_TRADE.getValue(), type.getValue())) {
+            //TODO extra things. 目前没什么额外的数据需要处理,以后如有需要可在此添加
         } else {
             throw new ServiceException("doctor.service.review.type.error");
         }
