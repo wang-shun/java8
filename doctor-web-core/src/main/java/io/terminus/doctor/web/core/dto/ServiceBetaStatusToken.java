@@ -12,19 +12,28 @@ import java.util.Objects;
  * 该dto就是用于查询服务是否处于内测中
  */
 @Data
-public class ServiceBetaStatusDto implements Serializable{
+public class ServiceBetaStatusToken implements Serializable{
     private static final long serialVersionUID = -7243068897726350914L;
 
+    /**
+     * 猪场软件服务是否处于内测中,1-内测中,0-已开放使用
+     */
     private String pigdoctor;
-
+    /**
+     * 电商服务是否处于内测中,1-内测中,0-已开放使用
+     */
     private String pigmall;
-
+    /**
+     * 大数据服务是否处于内测中,1-内测中,0-已开放使用
+     */
     private String neverest;
-
+    /**
+     * 生猪交易服务是否处于内测中,1-内测中,0-已开放使用
+     */
     private String pigtrade;
 
     /**
-     * 对于内测这种特殊状态的描述
+     * 对于内测这种特殊状态的描述,其值来自configcenter
      */
     private String betaDesc;
 

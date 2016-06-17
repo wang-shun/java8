@@ -12,8 +12,8 @@ import io.terminus.doctor.user.model.DoctorServiceReview;
 import io.terminus.doctor.user.model.DoctorServiceStatus;
 import io.terminus.doctor.user.service.*;
 import io.terminus.doctor.user.service.business.DoctorServiceReviewService;
-import io.terminus.doctor.web.core.dto.ServiceBetaStatusDto;
-import io.terminus.doctor.web.core.service.ServiceBetaStatusService;
+import io.terminus.doctor.web.core.dto.ServiceBetaStatusToken;
+import io.terminus.doctor.web.core.service.ServiceBetaStatusHandler;
 import io.terminus.pampas.common.UserUtil;
 import io.terminus.parana.common.utils.RespHelper;
 import lombok.extern.slf4j.Slf4j;
@@ -35,7 +35,7 @@ public class ServiceReviews {
     private final DoctorUserReadService doctorUserReadService;
     private final DoctorServiceStatusReadService doctorServiceStatusReadService;
     private final PrimaryUserReadService primaryUserReadService;
-    private final ServiceBetaStatusService serviceBetaStatusService;
+    private final ServiceBetaStatusHandler serviceBetaStatusHandler;
 
     @Autowired
     public ServiceReviews(DoctorServiceReviewReadService doctorServiceReviewReadService,
@@ -45,7 +45,7 @@ public class ServiceReviews {
                          DoctorOrgReadService doctorOrgReadService,
                          DoctorServiceStatusReadService doctorServiceStatusReadService,
                          PrimaryUserReadService primaryUserReadService,
-                         ServiceBetaStatusService serviceBetaStatusService) {
+                         ServiceBetaStatusHandler serviceBetaStatusHandler) {
         this.doctorServiceReviewReadService = doctorServiceReviewReadService;
         this.doctorServiceReviewWriteService = doctorServiceReviewWriteService;
         this.doctorUserReadService = doctorUserReadService;
@@ -53,7 +53,7 @@ public class ServiceReviews {
         this.doctorOrgReadService = doctorOrgReadService;
         this.doctorServiceStatusReadService = doctorServiceStatusReadService;
         this.primaryUserReadService = primaryUserReadService;
-        this.serviceBetaStatusService  =serviceBetaStatusService;
+        this.serviceBetaStatusHandler = serviceBetaStatusHandler;
     }
 
     /**
@@ -91,7 +91,7 @@ public class ServiceReviews {
             //只有主账号(猪场管理员)才能申请开通服务
             throw new JsonResponseException("authorize.fail");
         }
-        ServiceBetaStatusDto dto = serviceBetaStatusService.getServiceBetaStatus();
+        ServiceBetaStatusToken dto = serviceBetaStatusHandler.getServiceBetaStatusToken();
         if(dto.inBeta(DoctorServiceReview.Type.from(serviceApplyDto.getType()))){
             throw new JsonResponseException("service.in.beta");
         }

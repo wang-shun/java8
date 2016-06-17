@@ -6,7 +6,7 @@ import io.terminus.doctor.common.event.EventListener;
 import io.terminus.doctor.user.service.DoctorServiceReviewWriteService;
 import io.terminus.doctor.user.service.DoctorServiceStatusWriteService;
 import io.terminus.doctor.web.core.events.user.RegisterEvent;
-import io.terminus.doctor.web.core.service.ServiceBetaStatusService;
+import io.terminus.doctor.web.core.service.ServiceBetaStatusHandler;
 import io.terminus.parana.common.model.ParanaUser;
 import io.terminus.parana.common.utils.RespHelper;
 import io.terminus.parana.user.model.User;
@@ -27,17 +27,17 @@ public class WebUserEventListener implements EventListener {
     private final DoctorServiceStatusWriteService doctorServiceStatusWriteService;
     private final DoctorServiceReviewWriteService doctorServiceReviewWriteService;
     private final UserReadService<User> userReadService;
-    private final ServiceBetaStatusService serviceBetaStatusService;
+    private final ServiceBetaStatusHandler serviceBetaStatusHandler;
 
     @Autowired
     public WebUserEventListener(DoctorServiceStatusWriteService doctorServiceStatusWriteService,
                                 DoctorServiceReviewWriteService doctorServiceReviewWriteService,
                                 UserReadService<User> userReadService,
-                                ServiceBetaStatusService serviceBetaStatusService){
+                                ServiceBetaStatusHandler serviceBetaStatusHandler){
         this.doctorServiceStatusWriteService = doctorServiceStatusWriteService;
         this.doctorServiceReviewWriteService = doctorServiceReviewWriteService;
         this.userReadService = userReadService;
-        this.serviceBetaStatusService = serviceBetaStatusService;
+        this.serviceBetaStatusHandler = serviceBetaStatusHandler;
     }
 
     @Subscribe
@@ -52,7 +52,7 @@ public class WebUserEventListener implements EventListener {
 
         //当注册用户是猪场管理员(主账号)
         if(Objects.equals(UserType.FARM_ADMIN_PRIMARY.value(), user.getType())){
-            serviceBetaStatusService.initDefaultServiceStatus(userId);
+            serviceBetaStatusHandler.initDefaultServiceStatus(userId);
             doctorServiceReviewWriteService.initServiceReview(userId, user.getMobile());
         }
     }

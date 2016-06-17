@@ -3,8 +3,8 @@ package io.terminus.doctor.web.core.service.impl;
 import io.terminus.doctor.user.model.DoctorServiceReview;
 import io.terminus.doctor.user.model.DoctorServiceStatus;
 import io.terminus.doctor.user.service.DoctorServiceStatusWriteService;
-import io.terminus.doctor.web.core.dto.ServiceBetaStatusDto;
-import io.terminus.doctor.web.core.service.ServiceBetaStatusService;
+import io.terminus.doctor.web.core.dto.ServiceBetaStatusToken;
+import io.terminus.doctor.web.core.service.ServiceBetaStatusHandler;
 import io.terminus.parana.config.ConfigCenter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -17,36 +17,36 @@ import java.util.Objects;
  * 该Service就是用于查询服务是否处于内测中
  */
 @Service
-public class ServiceBetaStatusServiceImpl implements ServiceBetaStatusService {
+public class ServiceBetaStatusHandlerImpl implements ServiceBetaStatusHandler {
     private final ConfigCenter configCenter;
     private final DoctorServiceStatusWriteService doctorServiceStatusWriteService;
 
     @Autowired
-    public ServiceBetaStatusServiceImpl(ConfigCenter configCenter,
+    public ServiceBetaStatusHandlerImpl(ConfigCenter configCenter,
                                         DoctorServiceStatusWriteService doctorServiceStatusWriteService){
         this.configCenter = configCenter;
         this.doctorServiceStatusWriteService = doctorServiceStatusWriteService;
     }
 
     @Override
-    public ServiceBetaStatusDto getServiceBetaStatus() {
-        ServiceBetaStatusDto dto = new ServiceBetaStatusDto();
-        dto.setPigdoctor(configCenter.get("user.service.pigdoctor.beta").or(ServiceBetaStatusDto.Status.OPEN.value()));
-        dto.setPigmall(configCenter.get("user.service.pigmall.beta").or(ServiceBetaStatusDto.Status.OPEN.value()));
-        dto.setNeverest(configCenter.get("user.service.neverest.beta").or(ServiceBetaStatusDto.Status.OPEN.value()));
-        dto.setPigtrade(configCenter.get("user.service.pigtrade.beta").or(ServiceBetaStatusDto.Status.OPEN.value()));
-        dto.setBetaDesc(configCenter.get("user.service.beta.desc").or(ServiceBetaStatusDto.Status.BETA.toString()));
+    public ServiceBetaStatusToken getServiceBetaStatusToken() {
+        ServiceBetaStatusToken dto = new ServiceBetaStatusToken();
+        dto.setPigdoctor(configCenter.get("user.service.pigdoctor.beta").or(ServiceBetaStatusToken.Status.OPEN.value()));
+        dto.setPigmall(configCenter.get("user.service.pigmall.beta").or(ServiceBetaStatusToken.Status.OPEN.value()));
+        dto.setNeverest(configCenter.get("user.service.neverest.beta").or(ServiceBetaStatusToken.Status.OPEN.value()));
+        dto.setPigtrade(configCenter.get("user.service.pigtrade.beta").or(ServiceBetaStatusToken.Status.OPEN.value()));
+        dto.setBetaDesc(configCenter.get("user.service.beta.desc").or(ServiceBetaStatusToken.Status.BETA.toString()));
         return dto;
     }
 
     @Override
     public void initDefaultServiceStatus(Long userId){
-        ServiceBetaStatusDto dto = this.getServiceBetaStatus();
+        ServiceBetaStatusToken dto = this.getServiceBetaStatusToken();
         DoctorServiceStatus status = new DoctorServiceStatus();
         status.setUserId(userId);
 
         //猪场软件初始状态
-        if(Objects.equals(dto.getPigdoctor(), ServiceBetaStatusDto.Status.BETA.value())){
+        if(Objects.equals(dto.getPigdoctor(), ServiceBetaStatusToken.Status.BETA.value())){
             status.setPigdoctorStatus(DoctorServiceStatus.Status.BETA.value());
             status.setPigdoctorReason(dto.getBetaDesc());
         }else{
@@ -55,7 +55,7 @@ public class ServiceBetaStatusServiceImpl implements ServiceBetaStatusService {
         status.setPigdoctorReviewStatus(DoctorServiceReview.Status.INIT.getValue());
 
         //电商初始状态
-        if(Objects.equals(dto.getPigmall(), ServiceBetaStatusDto.Status.BETA.value())){
+        if(Objects.equals(dto.getPigmall(), ServiceBetaStatusToken.Status.BETA.value())){
             status.setPigmallStatus(DoctorServiceStatus.Status.BETA.value());
             status.setPigmallReason(dto.getBetaDesc());
         }else{
@@ -64,7 +64,7 @@ public class ServiceBetaStatusServiceImpl implements ServiceBetaStatusService {
         status.setPigmallReviewStatus(DoctorServiceReview.Status.INIT.getValue());
 
         //大数据初始状态
-        if(Objects.equals(dto.getNeverest(), ServiceBetaStatusDto.Status.BETA.value())){
+        if(Objects.equals(dto.getNeverest(), ServiceBetaStatusToken.Status.BETA.value())){
             status.setNeverestStatus(DoctorServiceStatus.Status.BETA.value());
             status.setNeverestReason(dto.getBetaDesc());
         }else{
@@ -73,7 +73,7 @@ public class ServiceBetaStatusServiceImpl implements ServiceBetaStatusService {
         status.setNeverestReviewStatus(DoctorServiceReview.Status.INIT.getValue());
 
         //猪场软件初始状态
-        if(Objects.equals(dto.getPigtrade(), ServiceBetaStatusDto.Status.BETA.value())){
+        if(Objects.equals(dto.getPigtrade(), ServiceBetaStatusToken.Status.BETA.value())){
             status.setPigtradeStatus(DoctorServiceStatus.Status.BETA.value());
             status.setPigtradeReason(dto.getBetaDesc());
         }else{
