@@ -59,27 +59,33 @@ public class DoctorPigs {
 
     @RequestMapping(value = "/getPigDetail", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public DoctorPigInfoDetailDto queryPigDetailInfoDto(@RequestParam("farmId") Long farmId, @RequestParam("pigId") Long pigId){
-        return RespHelper.or500(doctorPigReadService.queryPigDetailInfoByPigId(pigId));
+    public DoctorPigInfoDetailDto queryPigDetailInfoDto(@RequestParam("farmId") Long farmId,
+                                                        @RequestParam("pigId") Long pigId,
+                                                        @RequestParam("eventSize") Integer eventSize){
+        return RespHelper.or500(doctorPigReadService.queryPigDetailInfoByPigId(pigId, eventSize));
     }
 
     @RequestMapping(value = "/getSowPigDetail", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public DoctorSowDetailDto querySowPigDetailInfoDto(@RequestParam("farmId") Long farmId, @RequestParam("pigId") Long pigId){
-        return buildSowDetailDto(queryPigDetailInfoDto(farmId, pigId));
+    public DoctorSowDetailDto querySowPigDetailInfoDto(@RequestParam("farmId") Long farmId,
+                                                       @RequestParam("pigId") Long pigId,
+                                                       @RequestParam("eventSize") Integer eventSize){
+        return buildSowDetailDto(queryPigDetailInfoDto(farmId, pigId, eventSize));
     }
 
     @RequestMapping(value = "/getBoarPigDetail", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public DoctorBoarDetailDto queryBoarPigDetailInfoDto(@RequestParam("farmId") Long farmId, @RequestParam("pigId") Long pigId){
-        return buildDoctorBoarDetailDto(queryPigDetailInfoDto(farmId, pigId));
+    public DoctorBoarDetailDto queryBoarPigDetailInfoDto(@RequestParam("farmId") Long farmId,
+                                                         @RequestParam("pigId") Long pigId,
+                                                         @RequestParam("eventSize") Integer eventSize){
+        return buildDoctorBoarDetailDto(queryPigDetailInfoDto(farmId, pigId, eventSize));
     }
 
     private DoctorBoarDetailDto buildDoctorBoarDetailDto(DoctorPigInfoDetailDto dto){
         DoctorBoarDetailDto doctorBoarDetailDto = DoctorBoarDetailDto.builder()
                 .pigBoarCode(dto.getDoctorPig().getPigCode()).breedName(dto.getDoctorPig().getBreedName())
                 .barnCode(dto.getDoctorPigTrack().getCurrentBarnName()).pigStatus(dto.getDoctorPigTrack().getStatus())
-                .field123456("wtfca")
+                .field123456("notKnow").doctorPigEvents(dto.getDoctorPigEvents())
                 .build();
         return doctorBoarDetailDto;
     }
@@ -90,6 +96,7 @@ public class DoctorPigs {
                 .pigStatus(dto.getDoctorPigTrack().getStatus())
                 .dayAge(Days.daysBetween(new DateTime(dto.getDoctorPig().getBirthDate()), DateTime.now()).getDays())
                 .parity(dto.getDoctorPigTrack().getCurrentParity()).entryDate(dto.getDoctorPig().getInFarmDate())
+                .doctorPigEvents(dto.getDoctorPigEvents())
                 .build();
         return doctorSowDetailDto;
     }

@@ -1,5 +1,6 @@
 package io.terminus.doctor.web.front.event.dto;
 
+import io.terminus.doctor.event.model.DoctorPigEvent;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -7,6 +8,7 @@ import lombok.experimental.Builder;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 
 /**
  * Created by yaoqijun.
@@ -37,4 +39,6 @@ public class DoctorSowDetailDto implements Serializable {
     private Date entryDate; //进厂日期
 
     private Date removalDate;   //离场日期
+
+    private List<DoctorPigEvent> doctorPigEvents;
 }

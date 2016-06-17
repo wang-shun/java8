@@ -74,7 +74,7 @@ public class DoctorPigReadServiceImpl implements DoctorPigReadService{
     }
 
     @Override
-    public Response<DoctorPigInfoDetailDto> queryPigDetailInfoByPigId(Long pigId) {
+    public Response<DoctorPigInfoDetailDto> queryPigDetailInfoByPigId(Long pigId, Integer eventSize) {
         try{
             DoctorPig doctorPig = doctorPigDao.findById(pigId);
             checkState(!isNull(doctorPig), "query.doctorPigId.fail");
@@ -84,7 +84,10 @@ public class DoctorPigReadServiceImpl implements DoctorPigReadService{
             List<DoctorPigEvent> doctorPigEvents = RespHelper.orServEx(
                     doctorPigEventReadService.queryPigDoctorEvents(doctorPig.getFarmId(), doctorPig.getId(), null, null, null, null)).getData();
 
-            return Response.ok(DoctorPigInfoDetailDto.builder().doctorPig(doctorPig).doctorPigTrack(doctorPigTrack).doctorPigEvents(doctorPigEvents).build());
+            eventSize = eventSize > doctorPigEvents.size() ?  doctorPigEvents.size() : eventSize;
+
+            return Response.ok(DoctorPigInfoDetailDto.builder().doctorPig(doctorPig).doctorPigTrack(doctorPigTrack)
+                    .doctorPigEvents(doctorPigEvents.subList(0, eventSize)).build());
         }catch (Exception e){
             log.error("query pig detail info fail, cause:{}", Throwables.getStackTraceAsString(e));
             return Response.fail("query.pigDetailInfo.fail");
