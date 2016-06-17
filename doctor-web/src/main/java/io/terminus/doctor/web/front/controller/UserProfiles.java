@@ -22,10 +22,10 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @RequestMapping("/api/profiles")
 public class UserProfiles {
 
-    @Autowired(required = false)
+    @Autowired
     private UserProfileWriteService userProfileWriteService;
 
-    @Autowired(required = false)
+    @Autowired
     private UserProfileReadService userProfileReadService;
 
     /**
