@@ -594,20 +594,28 @@ CREATE TABLE `doctor_pig_events` (
   PRIMARY KEY (`id`)
 ) COMMENT='用户设备信息表';
 
+-- 猪只设置免疫程序统计方式
 drop Table if exists doctor_vaccination_pig_warns;
 create table doctor_vaccination_pig_warns (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT 'id',
   `farm_id` bigint(20) unsigned DEFAULT NULL COMMENT '猪场仓库信息',
   `farm_name` varchar(64) DEFAULT NULL COMMENT '猪场名称',
-  `has_warn` smallint(6) default null comment '是否提示过了, 0-未提示，1-提示',
-  `warn_days` int default 7 comment '默认7 天提示用户信息',
-  `event_date` datetime DEFAULT null comment '事件日期信息',
-  `event_desc` varchar(64) default null comment '事件信息描述',
-  `extra` text DEFAULT NULL comment '扩展信息',
-  `creator_name` varchar(64) DEFAULT NULL COMMENT '创建人姓名',
+  `pig_type` smallint(6) unsigned DEFAULT NULL comment '猪类id',
+  `material_id` bigint(20) default null comment '疫苗Id',
+  `material_name` varchar(128) default null comment '疫苗名称',
+  `start_date` datetime default null comment '开始时间',
+  `end_date` datetime default null comment '结束时间',
+  `vaccination_date_type` bigint(20) default null comment '免疫日期类型, 枚举类VaccinationDateType',
+  `input_value` smallint(6) default null comment '录入的天数/重量',
+  `input_date` datetime default null comment '录入的日期',
+  `dose` bigint(20) default null comment '消耗剂量',
+  `remark` varchar(128) default null comment '备注',
+  `creator_id` bigint(20) DEFAULT NULL COMMENT '创建人id',
   `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
   PRIMARY KEY (`id`)
-) COMMENT='猪只免疫预警信息';
+) COMMENT='猪只设置免疫程序统计方式';
+
 
 
 drop table if exists doctor_farm_ware_house_types;

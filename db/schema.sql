@@ -785,6 +785,9 @@ create table doctor_vaccination_pig_warns (
   `input_date` datetime default null comment '录入的日期',
   `dose` bigint(20) default null comment '消耗剂量',
   `remark` varchar(128) default null comment '备注',
+  `creator_id` bigint(20) DEFAULT NULL COMMENT '创建人id',
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
   PRIMARY KEY (`id`)
 )ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='猪只设置免疫程序统计方式';
 create index doctor_vaccination_pig_warns_farm_id on doctor_vaccination_pig_warns(farm_id);

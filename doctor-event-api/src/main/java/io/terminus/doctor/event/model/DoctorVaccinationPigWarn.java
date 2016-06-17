@@ -1,6 +1,9 @@
 package io.terminus.doctor.event.model;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.Builder;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -11,6 +14,9 @@ import java.util.Date;
  * Date: 2016-06-13
  */
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
 public class DoctorVaccinationPigWarn implements Serializable {
 
     private static final long serialVersionUID = -8338877015067037775L;
@@ -69,7 +75,7 @@ public class DoctorVaccinationPigWarn implements Serializable {
      * 录入的日期
      */
     private Date inputDate;
-    
+
     /**
      * 消耗剂量
      */
@@ -79,4 +85,19 @@ public class DoctorVaccinationPigWarn implements Serializable {
      * 备注
      */
     private String remark;
+
+    /**
+     * 创建者id
+     */
+    private Long creatorId;
+
+    /**
+     * 创建时间
+     */
+    private Date createdAt;
+
+    /**
+     * 更新时间
+     */
+    private Date updatedAt;
 }

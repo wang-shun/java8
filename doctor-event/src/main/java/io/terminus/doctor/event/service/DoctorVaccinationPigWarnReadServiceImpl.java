@@ -2,7 +2,10 @@ package io.terminus.doctor.event.service;
 
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableMap;
+import io.terminus.common.model.PageInfo;
+import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
+import io.terminus.common.utils.MapBuilder;
 import io.terminus.doctor.event.dao.DoctorVaccinationPigWarnDao;
 import io.terminus.doctor.event.model.DoctorVaccinationPigWarn;
 import lombok.extern.slf4j.Slf4j;
@@ -34,6 +37,18 @@ public class DoctorVaccinationPigWarnReadServiceImpl implements DoctorVaccinatio
             return Response.ok(doctorVaccinationPigWarnDao.findById(vaccinationPigWarnId));
         } catch (Exception e) {
             log.error("find vaccinationPigWarn by id failed, vaccinationPigWarnId:{}, cause:{}", vaccinationPigWarnId, Throwables.getStackTraceAsString(e));
+            return Response.fail("vaccinationPigWarn.find.fail");
+        }
+    }
+
+    @Override
+    public Response<Paging<DoctorVaccinationPigWarn>> pagingVaccPigWarns(Integer pageNo, Integer pageSize, Long farmId) {
+        try{
+            PageInfo pageInfo = new PageInfo(pageNo, pageSize);
+            return Response.ok(doctorVaccinationPigWarnDao.
+                    paging(pageInfo.getOffset(), pageInfo.getLimit(), MapBuilder.<String, Object>of().put("farmId", farmId).map()));
+        } catch (Exception e) {
+            log.error("find vaccinationPigWarn by id failed, farm id:{} , cause by {}", farmId, Throwables.getStackTraceAsString(e));
             return Response.fail("vaccinationPigWarn.find.fail");
         }
     }
