@@ -6,15 +6,19 @@ package io.terminus.doctor.open;
 
 import io.terminus.doctor.common.DoctorCommonConfiguration;
 import io.terminus.doctor.open.common.MessageSources;
+import io.terminus.doctor.user.service.DoctorServiceStatusWriteService;
 import io.terminus.doctor.web.core.image.FileHelper;
 import io.terminus.doctor.web.core.msg.email.CommonEmailServiceConfig;
 import io.terminus.doctor.web.core.msg.sms.LuoSiMaoSmsServiceConfig;
+import io.terminus.doctor.web.core.service.ServiceBetaStatusHandler;
+import io.terminus.doctor.web.core.service.impl.ServiceBetaStatusHandlerImpl;
 import io.terminus.lib.file.FileServer;
 import io.terminus.lib.file.ImageServer;
 import io.terminus.lib.file.aliyun.AliyunFileServer;
 import io.terminus.lib.file.aliyun.AliyunImageServer;
 import io.terminus.pampas.openplatform.annotations.EnableOpenPlatform;
 import io.terminus.parana.auth.core.AuthenticationConfiguration;
+import io.terminus.parana.config.ConfigCenter;
 import io.terminus.parana.web.msg.config.MsgWebConfig;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -65,5 +69,11 @@ public class DoctorOPConfiguration {
                                           @Value("${oss.appSecret}")String appSecret,
                                           @Value("${oss.bucketName}")String bucketName){
         return new AliyunFileServer(endpoint,appKey, appSecret, bucketName);
+    }
+
+    @Bean
+    public ServiceBetaStatusHandler serviceBetaStatusHandler(ConfigCenter configCenter,
+                                                             DoctorServiceStatusWriteService doctorServiceStatusWriteService){
+        return new ServiceBetaStatusHandlerImpl(configCenter, doctorServiceStatusWriteService);
     }
 }

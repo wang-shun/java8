@@ -9,10 +9,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.eventbus.AsyncEventBus;
 import com.google.common.eventbus.EventBus;
 import io.terminus.doctor.common.DoctorCommonConfiguration;
+import io.terminus.doctor.user.service.DoctorServiceStatusWriteService;
+import io.terminus.doctor.web.core.service.ServiceBetaStatusHandler;
+import io.terminus.doctor.web.core.service.impl.ServiceBetaStatusHandlerImpl;
 import io.terminus.lib.file.FileServer;
 import io.terminus.lib.file.ImageServer;
 import io.terminus.lib.file.aliyun.AliyunFileServer;
 import io.terminus.lib.file.aliyun.AliyunImageServer;
+import io.terminus.parana.config.ConfigCenter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
@@ -85,5 +89,11 @@ public class DoctorCoreWebConfiguration extends WebMvcConfigurerAdapter {
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
         return objectMapper;
+    }
+
+    @Bean
+    public ServiceBetaStatusHandler serviceBetaStatusHandler(ConfigCenter configCenter,
+                                                             DoctorServiceStatusWriteService doctorServiceStatusWriteService){
+        return new ServiceBetaStatusHandlerImpl(configCenter, doctorServiceStatusWriteService);
     }
 }

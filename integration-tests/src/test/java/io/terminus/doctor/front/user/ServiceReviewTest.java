@@ -7,6 +7,7 @@ import io.terminus.doctor.user.dto.DoctorServiceApplyDto;
 import io.terminus.doctor.user.model.DoctorOrg;
 import io.terminus.doctor.user.service.DoctorServiceReviewWriteService;
 import io.terminus.doctor.user.service.DoctorServiceStatusWriteService;
+import io.terminus.doctor.web.core.service.ServiceBetaStatusHandler;
 import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +25,8 @@ public class ServiceReviewTest extends BaseFrontWebTest {
     private DoctorServiceReviewWriteService doctorServiceReviewWriteService;
     @Autowired
     private DoctorServiceStatusWriteService doctorServiceStatusWriteService;
+    @Autowired
+    private ServiceBetaStatusHandler serviceBetaStatusHandler;
 
     private static final String baseUrl = "http://localhost:{port}/api/user/service";
 
@@ -45,7 +48,7 @@ public class ServiceReviewTest extends BaseFrontWebTest {
         org.setName("orgname");
         serviceApplyDto.setOrg(org);
         doctorServiceReviewWriteService.initServiceReview(2L, "44444444444");
-        doctorServiceStatusWriteService.initDefaultServiceStatus(2L);
+        serviceBetaStatusHandler.initDefaultServiceStatus(2L);
         Boolean result = restTemplate.postForObject(url, serviceApplyDto, Boolean.class, ImmutableMap.of("port", port));
         Assert.assertTrue(result);
     }

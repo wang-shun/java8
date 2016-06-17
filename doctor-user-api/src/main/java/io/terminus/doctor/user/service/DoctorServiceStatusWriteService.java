@@ -32,10 +32,4 @@ public interface DoctorServiceStatusWriteService {
      */
     Response<Boolean> deleteById(Long id);
 
-    /**
-     * 初始化用户各项服务的状态, 即向表中插入一条数据, 所有服务都是未开通状态
-     * @param userId 用户id
-     * @return 是否成功
-     */
-    Response<Boolean> initDefaultServiceStatus(Long userId);
 }

@@ -12,6 +12,7 @@ import io.terminus.doctor.user.model.DoctorOrg;
 import io.terminus.doctor.user.model.DoctorServiceReview;
 import io.terminus.doctor.user.service.DoctorServiceReviewWriteService;
 import io.terminus.doctor.user.service.DoctorServiceStatusWriteService;
+import io.terminus.doctor.web.core.service.ServiceBetaStatusHandler;
 import io.terminus.session.AFSessionManager;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,6 +38,8 @@ public class OPDoctorUsersTest extends BaseOpenWebTest {
     private DoctorServiceReviewWriteService doctorServiceReviewWriteService;
     @Autowired
     private DoctorServiceStatusWriteService doctorServiceStatusWriteService;
+    @Autowired
+    private ServiceBetaStatusHandler serviceBetaStatusHandler;
 
     private final String sid = "testSessionId";
     private final String appKey = "pigDoctorAndroid";
@@ -48,7 +51,7 @@ public class OPDoctorUsersTest extends BaseOpenWebTest {
     public void getUserServiceStatusTest(){
         this.login(sid, userId, deviceId);
         doctorServiceReviewWriteService.initServiceReview(1L, "44444444444");
-        doctorServiceStatusWriteService.initDefaultServiceStatus(1L);
+        serviceBetaStatusHandler.initDefaultServiceStatus(1L);
         String pampasCall = "get.user.service.status";
         ResponseEntity<Object> result = restTemplate.getForEntity("http://localhost:{port}/api/gateway" +
                         "?pampasCall=" + pampasCall +
@@ -64,7 +67,7 @@ public class OPDoctorUsersTest extends BaseOpenWebTest {
     public void applyOpenServiceTest(){
         this.login(sid, userId, deviceId);
         doctorServiceReviewWriteService.initServiceReview(1L, "44444444444");
-        doctorServiceStatusWriteService.initDefaultServiceStatus(1L);
+        serviceBetaStatusHandler.initDefaultServiceStatus(1L);
         String pampasCall = "apply.open.service";
         DoctorServiceApplyDto dto = new DoctorServiceApplyDto();
         dto.setType(DoctorServiceReview.Type.PIG_DOCTOR.getValue());
