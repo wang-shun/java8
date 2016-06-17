@@ -63,8 +63,8 @@ public class DoctorMessageTemplateCacher {
     }
 
     public void cleanAll() {
-        templateTitleCache.cleanUp();
-        templateContentCache.cleanUp();
+        templateTitleCache.invalidateAll();
+        templateContentCache.invalidateAll();
     }
 
     public void refreshByName(String name) {
