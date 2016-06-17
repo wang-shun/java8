@@ -18,6 +18,7 @@ import io.terminus.parana.web.msg.MsgWebService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
@@ -62,6 +63,9 @@ public class MsgManager {
     private ApplicationContext applicationContext;
 
     private Map<String, IProducer> producerMap;
+
+    @Value("${message.app.domain}")
+    private String domain;
 
     @PostConstruct
     public void init() {
@@ -162,7 +166,7 @@ public class MsgManager {
             try{
                 // 获取用户信息
                 Map<String, Serializable> map = JsonMapper.JSON_NON_DEFAULT_MAPPER.fromJson(message.getData(), Map.class);
-                map.put("url", message.getUrl() + "?id=" + message.getId()); // 设置回调url
+                map.put("url", getAppUrl(message.getUrl(), message.getId())); // 设置回调url
                 // 推送消息
                 if (message.getUserId() != null) {
                     appPushWebService.send("[" + message.getUserId() + "]", message.getMessageTemplate(), map, null);
@@ -176,5 +180,20 @@ public class MsgManager {
             }
             doctorMessageWriteService.updateMessage(message);
         }
+    }
+
+    // 获取url
+    private String getAppUrl(String url, Long id) {
+        StringBuilder sb = new StringBuilder();
+        if (StringUtils.isNotBlank(domain)) {
+            sb.append("http://")
+                    .append(domain)
+                    .append(url)
+                    .append("?id=")
+                    .append(id);
+        } else {
+            sb.append(url).append("?id=").append(id);
+        }
+        return sb.toString();
     }
 }
