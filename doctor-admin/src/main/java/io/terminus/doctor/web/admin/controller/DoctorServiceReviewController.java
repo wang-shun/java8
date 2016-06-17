@@ -160,13 +160,15 @@ public class DoctorServiceReviewController {
     public Paging<DoctorServiceReview> pageServiceApplies(@RequestParam(value = "userId", required = false) Long userId,
                                      @RequestParam(value = "type", required = false) Integer type,
                                      @RequestParam(value = "userMobile", required = false) String userMobile,
+                                     @RequestParam(value = "realName", required = false) String realName,
                                      @RequestParam(required = false) Integer pageNo, @RequestParam(required = false) Integer pageSize){
         try {
             DoctorServiceReview.Type servicetype = null;
             if (type != null) {
                 servicetype = DoctorServiceReview.Type.from(type);
             }
-            return RespHelper.or500(doctorServiceReviewReadService.page(pageNo, pageSize, userId, userMobile, servicetype, DoctorServiceReview.Status.REVIEW));
+            return RespHelper.or500(doctorServiceReviewReadService.page(pageNo, pageSize, userId, userMobile, realName,
+                    servicetype, DoctorServiceReview.Status.REVIEW));
         } catch (ServiceException e) {
             log.error("pageServiceApplies failed, cause : {}", Throwables.getStackTraceAsString(e));
             throw new JsonResponseException(500, e.getMessage());

@@ -9,6 +9,7 @@
         <id column="id" property="id"/>
         <result column="user_id" property="userId"/>
         <result column="user_mobile" property="userMobile"/>
+        <result column="real_name" property="realName"/>
         <result column="type" property="type"/>
         <result column="status" property="status"/>
         <result column="reviewer_id" property="reviewerId"/>
@@ -26,11 +27,11 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        user_id, user_mobile, type, status, reviewer_id, created_at, updated_at
+        user_id, user_mobile, real_name, type, status, reviewer_id, created_at, updated_at
     </sql>
 
     <sql id="vals">
-        #{userId}, #{userMobile}, #{type}, #{status}, #{reviewerId}, now(), now()
+        #{userId}, #{userMobile}, #{realName}, #{type}, #{status}, #{reviewerId}, now(), now()
     </sql>
 
     <insert id="create" parameterType="DoctorServiceReview" keyProperty="id" useGeneratedKeys="true">
@@ -47,7 +48,7 @@
         (<include refid="cols_exclude_id" />)
         VALUES
         <foreach collection="types" close="" item="type" open="" separator=",">
-            (#{userId}, #{userMobile}, #{type}, 0, null, now(), now())
+            (#{userId}, #{userMobile}, #{realName}, #{type}, 0, null, now(), now())
         </foreach>
     </insert>
 
@@ -75,6 +76,7 @@
         <set>
             <if test="userId != null">user_id = #{userId},</if>
             <if test="userMobile != null">user_mobile = #{userMobile},</if>
+            <if test="realName != null">real_name = #{realName},</if>
             <if test="type != null">type = #{type},</if>
             <if test="status != null">status = #{status},</if>
             <if test="reviewerId != null">reviewer_id = #{reviewerId},</if>
@@ -111,6 +113,7 @@
         where 1 = 1
         <if test="userId"> and user_id = #{userId} </if>
         <if test="userMobile"> and user_mobile = #{userMobile} </if>
+        <if test="realName"> and real_name = #{realName} </if>
         <if test="type"> and type = #{type} </if>
         <if test="status"> and status = #{status} </if>
     </sql>
