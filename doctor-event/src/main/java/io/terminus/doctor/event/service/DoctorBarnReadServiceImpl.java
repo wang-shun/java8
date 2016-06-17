@@ -82,7 +82,7 @@ public class DoctorBarnReadServiceImpl implements DoctorBarnReadService {
                 searchDto.setCurrentBarnId(barnId);
                 searchDto.setStatus(DoctorGroup.Status.CREATED.getValue());
                 List<DoctorGroupDetail> groupDetails = RespHelper.orServEx(doctorGroupReadService.findGroupDetail(searchDto));
-                return Response.ok((int)groupDetails.stream().collect(Collectors.summarizingInt(g -> g.getGroupTrack().getQuantity())).getSum());
+                return Response.ok(groupDetails.stream().mapToInt(g -> g.getGroupTrack().getQuantity()).sum());
             }
 
             //过滤已离场的猪
