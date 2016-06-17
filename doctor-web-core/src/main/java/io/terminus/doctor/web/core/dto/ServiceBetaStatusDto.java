@@ -1,8 +1,10 @@
 package io.terminus.doctor.web.core.dto;
 
+import io.terminus.doctor.user.model.DoctorServiceReview;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 /**
  * 陈增辉 on 16/6/17.
@@ -44,5 +46,21 @@ public class ServiceBetaStatusDto implements Serializable{
         public String toString(){
             return this.desc;
         }
+    }
+
+    public boolean inBeta(DoctorServiceReview.Type serviceType){
+        String betaStatus;
+        if(Objects.equals(DoctorServiceReview.Type.PIG_DOCTOR, serviceType)){
+            betaStatus = this.pigdoctor;
+        }else if(Objects.equals(DoctorServiceReview.Type.PIGMALL, serviceType)){
+            betaStatus = this.pigmall;
+        }else if(Objects.equals(DoctorServiceReview.Type.NEVEREST, serviceType)){
+            betaStatus = this.neverest;
+        }else if(Objects.equals(DoctorServiceReview.Type.PIG_TRADE, serviceType)){
+            betaStatus = this.pigtrade;
+        }else{
+            throw new IllegalArgumentException("doctor.service.review.type.error");
+        }
+        return Objects.equals(betaStatus, Status.BETA.value());
     }
 }
