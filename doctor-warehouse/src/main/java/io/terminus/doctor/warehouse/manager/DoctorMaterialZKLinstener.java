@@ -1,8 +1,11 @@
 package io.terminus.doctor.warehouse.manager;
 
 import com.google.common.base.Throwables;
+import com.google.common.eventbus.Subscribe;
 import io.terminus.doctor.common.enums.DataEventType;
+import io.terminus.doctor.common.event.CoreEventDispatcher;
 import io.terminus.doctor.common.event.DataEvent;
+import io.terminus.doctor.common.event.EventListener;
 import io.terminus.doctor.common.utils.Params;
 import io.terminus.doctor.warehouse.search.material.MaterialSearchWriteService;
 import io.terminus.zookeeper.pubsub.Subscriber;
@@ -23,10 +26,13 @@ import java.util.Objects;
  */
 @Component
 @Slf4j
-public class DoctorMaterialZKLinstener {
+public class DoctorMaterialZKLinstener implements EventListener {
+
+    @Autowired(required = false)
+    private Subscriber subscriber;
 
     @Autowired
-    private Subscriber Subscriber;
+    private CoreEventDispatcher coreEventDispatcher;
 
     @Autowired
     private MaterialSearchWriteService materialSearchWriteService;
@@ -34,10 +40,13 @@ public class DoctorMaterialZKLinstener {
     @PostConstruct
     public void subs() {
         try{
-            Subscriber.subscribe(data -> {
+            if (subscriber == null) {
+                return;
+            }
+            subscriber.subscribe(data -> {
                 DataEvent dataEvent = DataEvent.fromBytes(data);
                 if (dataEvent != null && dataEvent.getEventType() != null) {
-                    handleEvent(dataEvent);
+                    coreEventDispatcher.publish(dataEvent);
                 }
             });
         } catch (Exception e) {
@@ -48,7 +57,8 @@ public class DoctorMaterialZKLinstener {
     /**
      * 物料信息修改事件监听
      */
-    private void handleEvent(DataEvent dataEvent) {
+    @Subscribe
+    public void handleEvent(DataEvent dataEvent) {
         // 物料信息创建事件信息
         if (Objects.equals(DataEventType.MaterialInfoCreateEvent.getKey(), dataEvent.getEventType())) {
             Map<String, Serializable> map = DataEvent.analyseContent(dataEvent, Map.class);

@@ -1,8 +1,11 @@
 package io.terminus.doctor.event.event;
 
 import com.google.common.base.Throwables;
+import com.google.common.eventbus.Subscribe;
 import io.terminus.doctor.common.enums.DataEventType;
+import io.terminus.doctor.common.event.CoreEventDispatcher;
 import io.terminus.doctor.common.event.DataEvent;
+import io.terminus.doctor.common.event.EventListener;
 import io.terminus.doctor.common.utils.Params;
 import io.terminus.doctor.event.search.barn.BarnSearchWriteService;
 import io.terminus.doctor.event.search.group.GroupSearchWriteService;
@@ -24,10 +27,13 @@ import java.util.Map;
  */
 @Component
 @Slf4j
-public class DoctorZKListener {
+public class DoctorZKListener implements EventListener {
 
     @Autowired
     private Subscriber subscriber;
+
+    @Autowired
+    private CoreEventDispatcher coreEventDispatcher;
 
     @Autowired
     private PigSearchWriteService pigSearchWriteService;
@@ -41,10 +47,13 @@ public class DoctorZKListener {
     @PostConstruct
     public void subs() {
         try{
+            if (subscriber == null) {
+                return;
+            }
             subscriber.subscribe(data -> {
                 DataEvent dataEvent = DataEvent.fromBytes(data);
                 if (dataEvent != null && dataEvent.getEventType() != null) {
-                    handleEvent(dataEvent);
+                    coreEventDispatcher.publish(dataEvent);
                 }
             });
         } catch (Exception e) {
@@ -55,7 +64,8 @@ public class DoctorZKListener {
     /**
      * 处理监听的信息
      */
-    private void handleEvent(DataEvent dataEvent) {
+    @Subscribe
+    public void handleEvent(DataEvent dataEvent) {
 
         // 1. 如果是猪创建事件信息
         if (DataEventType.PigEventCreate.getKey() == dataEvent.getEventType()) {
