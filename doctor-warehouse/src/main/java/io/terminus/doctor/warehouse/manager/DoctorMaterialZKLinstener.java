@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
+import java.io.Serializable;
 import java.util.Map;
 import java.util.Objects;
 
@@ -50,7 +51,7 @@ public class DoctorMaterialZKLinstener {
     private void handleEvent(DataEvent dataEvent) {
         // 物料信息创建事件信息
         if (Objects.equals(DataEventType.MaterialInfoCreateEvent.getKey(), dataEvent.getEventType())) {
-            Map map = DataEvent.analyseContent(dataEvent, Map.class);
+            Map<String, Serializable> map = DataEvent.analyseContent(dataEvent, Map.class);
             Long materialId = Params.getWithConvert(map, "materialInfoCreatedId", a -> Long.valueOf(a.toString()));
             materialSearchWriteService.update(materialId);
         }

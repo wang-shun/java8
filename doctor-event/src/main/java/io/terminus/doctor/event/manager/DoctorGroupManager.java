@@ -713,7 +713,7 @@ public class DoctorGroupManager {
     //发布猪群猪舍事件
     private void publistGroupAndBarn(Long groupId, Long barnId) {
         publishZookeeperEvent(DataEventType.GroupEventCreate.getKey(), ImmutableMap.of("doctorGroupId", groupId));
-        publishZookeeperEvent(DataEventType.BarnUpdate.getKey(), ImmutableMap.of("doctorGroupId", barnId));
+        publishZookeeperEvent(DataEventType.BarnUpdate.getKey(), ImmutableMap.of("doctorBarnId", barnId));
     }
 
     //发布zk事件, 用于更新es索引

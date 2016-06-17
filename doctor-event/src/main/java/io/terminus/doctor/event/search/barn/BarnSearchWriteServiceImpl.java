@@ -34,7 +34,9 @@ public class BarnSearchWriteServiceImpl implements BarnSearchWriteService {
     public Response<Boolean> index(Long barnId) {
         try {
             IndexedBarn indexedBarn = indexedBarnFactory.create(doctorBarnDao.findById(barnId));
-            indexExecutor.submit(indexedBarnTaskAction.indexTask(indexedBarn));
+            if (indexedBarn != null) {
+                indexExecutor.submit(indexedBarnTaskAction.indexTask(indexedBarn));
+            }
             return Response.ok(Boolean.TRUE);
         } catch (Exception e) {
             log.error("barn indexed failed, barn(id={}), cause by: {}",

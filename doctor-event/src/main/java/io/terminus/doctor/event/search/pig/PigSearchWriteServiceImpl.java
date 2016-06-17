@@ -43,7 +43,9 @@ public class PigSearchWriteServiceImpl implements PigSearchWriteService {
             DoctorPig pig = doctorPigDao.findById(pigId);
             DoctorPigTrack pigTrack = doctorPigTrackDao.findByPigId(pigId);
             IndexedPig indexedPig = indexedPigFactory.create(pig, pigTrack);
-            indexExecutor.submit(indexedPigTaskAction.indexTask(indexedPig));
+            if (indexedPig != null) {
+                indexExecutor.submit(indexedPigTaskAction.indexTask(indexedPig));
+            }
             return Response.ok(Boolean.TRUE);
         }catch (Exception e) {
             log.error("pig indexed failed, pig(id={}), cause by: {}",

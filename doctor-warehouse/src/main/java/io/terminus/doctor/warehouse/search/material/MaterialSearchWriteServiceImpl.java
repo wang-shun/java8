@@ -34,7 +34,9 @@ public class MaterialSearchWriteServiceImpl implements MaterialSearchWriteServic
     public Response<Boolean> index(Long materialId) {
         try {
             IndexedMaterial indexedBarn = indexedMaterialFactory.create(doctorMaterialInfoDao.findById(materialId));
-            indexExecutor.submit(indexedMaterialTaskAction.indexTask(indexedBarn));
+            if (indexedBarn != null) {
+                indexExecutor.submit(indexedMaterialTaskAction.indexTask(indexedBarn));
+            }
             return Response.ok(Boolean.TRUE);
         } catch (Exception e) {
             log.error("material indexed failed, material(id={}), cause by: {}",
