@@ -36,3 +36,6 @@ redis:
   max-total: 10
   max-idle: 2
   test-on-borrow: true
+
+doctor:
+  url: http://doctor-test.xrnm.com
