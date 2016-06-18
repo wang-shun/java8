@@ -193,7 +193,7 @@ public class MsgManager {
     private String getAppUrl(String url, Long id) {
         StringBuilder sb = new StringBuilder();
         if (StringUtils.isNotBlank(domain)) {
-            sb.append("http://")
+            sb//.append("http://")
                     .append(domain)
                     .append(url)
                     .append("?id=")
