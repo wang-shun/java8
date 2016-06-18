@@ -54,7 +54,7 @@ public class DoctorStatisticReadServiceImpl implements DoctorStatisticReadServic
 
             //查询猪只统计, 按照类型拼下list
             DoctorPigTypeStatistic stat = OPRespHelper.orOPEx(doctorPigTypeStatisticReadService.findPigTypeStatisticByFarmId(farmId));
-            return Response.ok(new DoctorFarmBasicDto(farm, getStatistics(Lists.newArrayList(stat))));
+            return Response.ok(new DoctorFarmBasicDto(farm, getStatistics(Lists.newArrayList(MoreObjects.firstNonNull(stat, new DoctorPigTypeStatistic())))));
         } catch (OPServerException e) {
             return Response.fail(e.getMessage());
         } catch (Exception e) {
@@ -77,7 +77,7 @@ public class DoctorStatisticReadServiceImpl implements DoctorStatisticReadServic
             List<DoctorFarmBasicDto> farmBasicDtos = farms.stream()
                     .map(farm -> {
                         DoctorPigTypeStatistic stat = OPRespHelper.orOPEx(doctorPigTypeStatisticReadService.findPigTypeStatisticByFarmId(farm.getId()));
-                        return new DoctorFarmBasicDto(farm, getStatistics(Lists.newArrayList(stat)));
+                        return new DoctorFarmBasicDto(farm, getStatistics(Lists.newArrayList(MoreObjects.firstNonNull(stat, new DoctorPigTypeStatistic()))));
                     })
                     .collect(Collectors.toList());
 
