@@ -1,6 +1,5 @@
 package io.terminus.doctor.schedule.msg;
 
-import com.fasterxml.jackson.databind.JavaType;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -38,9 +37,6 @@ import java.util.Map;
 @Component
 @Slf4j
 public class MsgManager {
-
-    private final static JavaType jsonMapType =
-            JsonMapper.nonEmptyMapper().createCollectionType(Map.class, String.class, Serializable.class);
 
     @Autowired
     private PrimaryUserReadService primaryUserReadService;
@@ -120,7 +116,7 @@ public class MsgManager {
                 // 获取用户信息
                 User user = (User) RespHelper.orServEx(userReadService.findById(message.getUserId()));
                 if (StringUtils.isNotBlank(user.getMobile())) {
-                    map = JsonMapper.JSON_NON_DEFAULT_MAPPER.fromJson(message.getData(), jsonMapType);
+                    map = JsonMapper.JSON_NON_DEFAULT_MAPPER.fromJson(message.getData(), Map.class);
                     // 发送短信
                     smsWebService.send(user.getMobile(), message.getMessageTemplate(), map, null);
                     message.setSendedAt(new Date());
@@ -147,7 +143,7 @@ public class MsgManager {
                 // 获取用户信息
                 User user = (User) RespHelper.orServEx(userReadService.findById(message.getUserId()));
                 if (StringUtils.isNotBlank(user.getEmail())) {
-                    map = JsonMapper.JSON_NON_DEFAULT_MAPPER.fromJson(message.getData(), jsonMapType);
+                    map = JsonMapper.JSON_NON_DEFAULT_MAPPER.fromJson(message.getData(), Map.class);
                     // 发送邮件
                     emailWebService.send(user.getEmail(), message.getMessageTemplate(), map, null);
                     message.setSendedAt(new Date());
@@ -172,7 +168,7 @@ public class MsgManager {
             Map<String, Serializable> map = null;
             try{
                 // 获取用户信息
-                map = JsonMapper.JSON_NON_DEFAULT_MAPPER.fromJson(message.getData(), jsonMapType);
+                map = JsonMapper.JSON_NON_DEFAULT_MAPPER.fromJson(message.getData(), Map.class);
                 map.put("url", getAppUrl(message.getUrl(), message.getId())); // 设置回调url
                 // 推送消息
                 if (message.getUserId() != null) {
