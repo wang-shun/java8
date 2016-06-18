@@ -1,5 +1,6 @@
 package io.terminus.doctor.schedule.msg;
 
+import com.fasterxml.jackson.databind.JavaType;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -37,6 +38,9 @@ import java.util.Map;
 @Component
 @Slf4j
 public class MsgManager {
+
+    private final static JavaType jsonMapType =
+            JsonMapper.nonEmptyMapper().createCollectionType(Map.class, String.class, Serializable.class);
 
     @Autowired
     private PrimaryUserReadService primaryUserReadService;
@@ -111,11 +115,12 @@ public class MsgManager {
         List<DoctorMessage> msgMessages = RespHelper.orServEx(doctorMessageReadService.findMsgMessage());
         for (int i = 0; msgMessages != null && i < msgMessages.size(); i++) {
             DoctorMessage message = msgMessages.get(i);
+            Map<String, Serializable> map = null;
             try{
                 // 获取用户信息
                 User user = (User) RespHelper.orServEx(userReadService.findById(message.getUserId()));
                 if (StringUtils.isNotBlank(user.getMobile())) {
-                    Map<String, Serializable> map = JsonMapper.JSON_NON_DEFAULT_MAPPER.fromJson(message.getData(), Map.class);
+                    map = JsonMapper.JSON_NON_DEFAULT_MAPPER.fromJson(message.getData(), jsonMapType);
                     // 发送短信
                     smsWebService.send(user.getMobile(), message.getMessageTemplate(), map, null);
                     message.setSendedAt(new Date());
@@ -123,7 +128,7 @@ public class MsgManager {
                 }
             } catch (Exception e) {
                 log.error("msg message send error, cause by {}", Throwables.getStackTraceAsString(e));
-                message.setFailedBy(Throwables.getStackTraceAsString(e));
+                message.setFailedBy("msg message send error, context is " + map + ", cause by " + Throwables.getStackTraceAsString(e));
                 message.setStatus(DoctorMessage.Status.FAILED.getValue());
             }
             doctorMessageWriteService.updateMessage(message);
@@ -137,11 +142,12 @@ public class MsgManager {
         List<DoctorMessage> emailMessages = RespHelper.orServEx(doctorMessageReadService.findEmailMessage());
         for (int i = 0; emailMessages != null && i < emailMessages.size(); i++) {
             DoctorMessage message = emailMessages.get(i);
+            Map<String, Serializable> map = null;
             try{
                 // 获取用户信息
                 User user = (User) RespHelper.orServEx(userReadService.findById(message.getUserId()));
                 if (StringUtils.isNotBlank(user.getEmail())) {
-                    Map<String, Serializable> map = JsonMapper.JSON_NON_DEFAULT_MAPPER.fromJson(message.getData(), Map.class);
+                    map = JsonMapper.JSON_NON_DEFAULT_MAPPER.fromJson(message.getData(), jsonMapType);
                     // 发送邮件
                     emailWebService.send(user.getEmail(), message.getMessageTemplate(), map, null);
                     message.setSendedAt(new Date());
@@ -149,7 +155,7 @@ public class MsgManager {
                 }
             } catch (Exception e) {
                 log.error("email message send error, cause by {}", Throwables.getStackTraceAsString(e));
-                message.setFailedBy(Throwables.getStackTraceAsString(e));
+                message.setFailedBy("email message send error, context is " + map + ", cause by " + Throwables.getStackTraceAsString(e));
                 message.setStatus(DoctorMessage.Status.FAILED.getValue());
             }
             doctorMessageWriteService.updateMessage(message);
@@ -166,7 +172,7 @@ public class MsgManager {
             Map<String, Serializable> map = null;
             try{
                 // 获取用户信息
-                map = JsonMapper.JSON_NON_DEFAULT_MAPPER.fromJson(message.getData(), Map.class);
+                map = JsonMapper.JSON_NON_DEFAULT_MAPPER.fromJson(message.getData(), jsonMapType);
                 map.put("url", getAppUrl(message.getUrl(), message.getId())); // 设置回调url
                 // 推送消息
                 if (message.getUserId() != null) {
