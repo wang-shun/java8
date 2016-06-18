@@ -163,9 +163,10 @@ public class MsgManager {
         List<DoctorMessage> appMessages = RespHelper.orServEx(doctorMessageReadService.findAppPushMessage());
         for (int i = 0; appMessages != null && i < appMessages.size(); i++) {
             DoctorMessage message = appMessages.get(i);
+            Map<String, Serializable> map = null;
             try{
                 // 获取用户信息
-                Map<String, Serializable> map = JsonMapper.JSON_NON_DEFAULT_MAPPER.fromJson(message.getData(), Map.class);
+                map = JsonMapper.JSON_NON_DEFAULT_MAPPER.fromJson(message.getData(), Map.class);
                 map.put("url", getAppUrl(message.getUrl(), message.getId())); // 设置回调url
                 // 推送消息
                 if (message.getUserId() != null) {
@@ -174,8 +175,8 @@ public class MsgManager {
                     message.setStatus(DoctorMessage.Status.SENDED.getValue());
                 }
             } catch (Exception e) {
-                log.error("app push message send error, cause by {}", Throwables.getStackTraceAsString(e));
-                message.setFailedBy(Throwables.getStackTraceAsString(e));
+                log.error("app push message send error, context is {}, cause by {}", map, Throwables.getStackTraceAsString(e));
+                message.setFailedBy("app push message send error, context is " + map + ", cause by " + Throwables.getStackTraceAsString(e));
                 message.setStatus(DoctorMessage.Status.FAILED.getValue());
             }
             doctorMessageWriteService.updateMessage(message);
