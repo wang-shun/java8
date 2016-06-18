@@ -98,7 +98,7 @@ public class DoctorSearches {
             return new Paging<>(0L, Collections.emptyList());
         }
         createSearchWord(SearchType.BOAR.getValue(), params);
-        params.put("pigType", DoctorPig.PIG_TYPE.BOAR.toString());
+        params.put("pigType", DoctorPig.PIG_TYPE.BOAR.getKey().toString());
         return RespHelper.or500(pigSearchReadService.searchWithAggs(pageNo, pageSize, "search/search.mustache", params));
     }
 
