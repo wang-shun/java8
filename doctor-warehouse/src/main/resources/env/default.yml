@@ -43,7 +43,7 @@ redis:
 
 # search
 search:
-  host: 101.201.44.35
+  host: 127.0.0.1
   port: 9200
 
 esearch:
