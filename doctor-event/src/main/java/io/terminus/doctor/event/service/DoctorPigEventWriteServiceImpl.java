@@ -100,7 +100,7 @@ public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteServic
                     .orgId(doctorBasicInputInfoDto.getOrgId())
                     .pigType(doctorBasicInputInfoDto.getPigType()).build());
 
-            return Response.ok(Params.getWithConvert(result,"doctorEventId",a->Long.valueOf(a.toString())));
+            return Response.ok(Params.getWithConvert(result,"doctorPigId",a->Long.valueOf(a.toString())));
         }catch (Exception e){
             log.error("pig entry event create fail, cause:{}", Throwables.getStackTraceAsString(e));
             return Response.fail("create.entryEvent.fail");
