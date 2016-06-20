@@ -207,7 +207,8 @@ public class DoctorGroupTrack implements Serializable {
     @Builder
     @NoArgsConstructor
     @AllArgsConstructor
-    public static class Extra {
+    public static class Extra implements Serializable {
+        private static final long serialVersionUID = -4134534768021946700L;
         private Date newAt;          //新建猪群时间
         private Date moveInAt;       //转入猪群时间
         private Date changeAt;       //猪群变动时间
