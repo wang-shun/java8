@@ -21,6 +21,7 @@ import io.terminus.doctor.common.utils.Params;
 import io.terminus.doctor.open.common.CaptchaGenerator;
 import io.terminus.doctor.open.common.MobilePattern;
 import io.terminus.doctor.open.common.Sessions;
+import io.terminus.doctor.open.enums.MobileDeviceType;
 import io.terminus.doctor.user.util.DoctorUserMaker;
 import io.terminus.doctor.web.core.events.user.RegisterEvent;
 import io.terminus.lib.sms.SmsException;
@@ -490,16 +491,20 @@ public class OPUsers {
         return code;
     }
 
-    @OpenMethod(key="user.device.bind", paramNames = {"deviceToken"})
-    public void bindDevice(String deviceToken) {
+    @OpenMethod(key="user.device.bind", paramNames = {"deviceToken", "deviceType"})
+    public void bindDevice(String deviceToken, Integer deviceType) {
         if (isEmpty(deviceToken)) {
             throw new OPClientException("device.token.miss");
+        }
+        MobileDeviceType type = MobileDeviceType.from(deviceType);
+        if(type == null){
+            throw new OPClientException("device.type.error");
         }
         UserDevice userDevice = new UserDevice();
         userDevice.setUserId(UserUtil.getUserId());
         userDevice.setUserName(UserUtil.getCurrentUser().getName());
         userDevice.setDeviceToken(deviceToken);
-        userDevice.setDeviceType("app");
+        userDevice.setDeviceType(type.name().toLowerCase());
         Response<Long> res = deviceWriteService.create(userDevice);
         if (!res.isSuccess()) {
             throw new OPClientException(res.getError());

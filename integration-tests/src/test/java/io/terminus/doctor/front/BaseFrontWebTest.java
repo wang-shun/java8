@@ -11,7 +11,7 @@ import org.springframework.web.client.RestTemplate;
  * Data: 下午6:46 16/5/31
  * Author: houly
  */
-@ActiveProfiles({"zookeeper", "test", "front"})
+@ActiveProfiles({"test", "front"})
 public abstract class BaseFrontWebTest extends BaseWebTest {
     protected RestTemplate restTemplate = new TestRestTemplate();
 }
