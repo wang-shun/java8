@@ -13,7 +13,7 @@ import lombok.Getter;
 public enum RoleType {
 
     ADMIN(0, "后台管理员"),
-    MAIN(1, "主账号,已开通猪场软件"),
+    MAIN(1, "主账号"),
     SUB_MULTI(2, "子账号-多个猪场"),
     SUB_SINGLE(3, "子账号-一个猪场"),
     MAIN_CLOSED(4, "主账号,未开通猪场软件");
