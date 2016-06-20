@@ -20,6 +20,9 @@ public class EventUtil {
     }
 
     public static double getAvgWeight(double weight, int quantity) {
+        if (quantity == 0) {
+            return 0D;
+        }
         return weight / quantity;
     }
 
