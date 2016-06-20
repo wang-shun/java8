@@ -39,9 +39,9 @@ public class DoctorMobileMenuReadServiceImpl implements DoctorMobileMenuReadServ
                                            @Value("${doctor.url:default}")String url){
         this.doctorUserReadService = doctorUserReadService;
         this.doctorServiceStatusReadService = doctorServiceStatusReadService;
-        DoctorMenuDto userInfo = DoctorMenuDto.builder().name("个人信息").url(url+"/user/index").iconClass("icon_myfill").level(1).build();
-        DoctorMenuDto staffManage = DoctorMenuDto.builder().name("员工管理").url(url+"/authority/manage-select").iconClass("icon_pengyoufill").level(1).build();
-        DoctorMenuDto farmManage = DoctorMenuDto.builder().name("猪场管理").url(url+"/entry/mall").iconClass("icon_susheguanli").level(1).build();
+        DoctorMenuDto userInfo = DoctorMenuDto.builder().name("个人信息").url(url+"/user/index").iconClass("user_info_icon").level(1).build();
+        DoctorMenuDto staffManage = DoctorMenuDto.builder().name("员工管理").url(url+"/authority/manage-select").iconClass("personnel_manager_icon").level(1).build();
+        DoctorMenuDto farmManage = DoctorMenuDto.builder().name("猪场管理").url(url+"/entry/mall").iconClass("pig_farm_manager_icon").level(1).build();
         menuMap.put(
                 RoleType.MAIN, Lists.newArrayList(farmManage, staffManage, userInfo)
         );
