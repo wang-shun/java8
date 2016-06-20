@@ -157,7 +157,7 @@ public class DoctorGroupManager {
         groupEvent.setEventAt(group.getOpenAt());
         groupEvent.setType(GroupEventType.NEW.getValue());
         groupEvent.setName(GroupEventType.NEW.getDesc());
-        groupEvent.setDesc("todo 事件描述");
+        groupEvent.setDesc("新建猪群事件, 猪群号:" + group.getGroupCode());
 
         groupEvent.setBarnId(group.getInitBarnId());
         groupEvent.setBarnName(group.getInitBarnName());

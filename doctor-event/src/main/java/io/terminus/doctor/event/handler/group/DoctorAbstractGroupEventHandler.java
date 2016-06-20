@@ -13,6 +13,7 @@ import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
 import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
 import io.terminus.doctor.event.dto.event.group.input.BaseGroupInput;
 import io.terminus.doctor.event.enums.GroupEventType;
+import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.event.DoctorGroupCountEvent;
 import io.terminus.doctor.event.handler.DoctorGroupEventHandler;
 import io.terminus.doctor.event.model.DoctorGroup;
@@ -23,6 +24,8 @@ import io.terminus.doctor.event.util.EventUtil;
 import io.terminus.zookeeper.pubsub.Publisher;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.Objects;
 
 import static io.terminus.common.utils.Arguments.notNull;
 
@@ -85,7 +88,7 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
         event.setIsAuto(baseInput.getIsAuto());
         event.setCreatorId(baseInput.getCreatorId());   //创建人
         event.setCreatorName(baseInput.getCreatorName());
-        event.setDesc("todo 事件描述");
+        event.setDesc(getDesc(eventType, baseInput.getIsAuto()));
         event.setRemark(baseInput.getRemark());
         return event;
     }
@@ -183,5 +186,12 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
         } else {
             coreEventDispatcher.publish(DataEvent.make(eventType, data));
         }
+    }
+
+    private String getDesc(GroupEventType eventType, Integer isAuto) {
+        if (Objects.equals(isAuto, IsOrNot.YES.getValue())) {
+            return "系统自动生成的" + eventType.getDesc() + "事件";
+        }
+        return "手工录入的" + eventType.getDesc() + "事件";
     }
 }
