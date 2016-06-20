@@ -8,6 +8,7 @@ import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
 import io.terminus.doctor.event.dto.event.group.input.DoctorNewGroupInput;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.service.DoctorGroupReadService;
+import io.terminus.doctor.web.front.auth.DoctorFarmAuthCenter;
 import io.terminus.doctor.web.front.event.service.DoctorGroupWebService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,12 +34,15 @@ public class DoctorGroupEvents {
 
     private final DoctorGroupWebService doctorGroupWebService;
     private final DoctorGroupReadService doctorGroupReadService;
+    private final DoctorFarmAuthCenter doctorFarmAuthCenter;
 
     @Autowired
     public DoctorGroupEvents(DoctorGroupWebService doctorGroupWebService,
-                             DoctorGroupReadService doctorGroupReadService) {
+                             DoctorGroupReadService doctorGroupReadService,
+                             DoctorFarmAuthCenter doctorFarmAuthCenter) {
         this.doctorGroupWebService = doctorGroupWebService;
         this.doctorGroupReadService = doctorGroupReadService;
+        this.doctorFarmAuthCenter = doctorFarmAuthCenter;
     }
 
     /**
@@ -47,6 +51,8 @@ public class DoctorGroupEvents {
      */
     @RequestMapping(value = "/new", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public Long createNewGroup(@RequestBody DoctorNewGroupInput newGroupDto) {
+        //权限中心校验权限
+        doctorFarmAuthCenter.checkFarmAuth(newGroupDto.getFarmId());
         return RespHelper.or500(doctorGroupWebService.createNewGroup(newGroupDto));
     }
 

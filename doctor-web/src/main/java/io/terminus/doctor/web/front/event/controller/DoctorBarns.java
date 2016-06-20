@@ -11,6 +11,7 @@ import io.terminus.doctor.event.service.DoctorGroupReadService;
 import io.terminus.doctor.event.service.DoctorPigReadService;
 import io.terminus.doctor.user.model.DoctorFarm;
 import io.terminus.doctor.user.service.DoctorFarmReadService;
+import io.terminus.doctor.web.front.auth.DoctorFarmAuthCenter;
 import io.terminus.doctor.web.front.event.dto.DoctorBarnDetail;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,18 +41,21 @@ public class DoctorBarns {
     private final DoctorFarmReadService doctorFarmReadService;
     private final DoctorPigReadService doctorPigReadService;
     private final DoctorGroupReadService doctorGroupReadService;
+    private final DoctorFarmAuthCenter doctorFarmAuthCenter;
 
     @Autowired
     public DoctorBarns(DoctorBarnReadService doctorBarnReadService,
                        DoctorBarnWriteService doctorBarnWriteService,
                        DoctorFarmReadService doctorFarmReadService,
                        DoctorPigReadService doctorPigReadService,
-                       DoctorGroupReadService doctorGroupReadService) {
+                       DoctorGroupReadService doctorGroupReadService,
+                       DoctorFarmAuthCenter doctorFarmAuthCenter) {
         this.doctorBarnReadService = doctorBarnReadService;
         this.doctorBarnWriteService = doctorBarnWriteService;
         this.doctorFarmReadService = doctorFarmReadService;
         this.doctorPigReadService = doctorPigReadService;
         this.doctorGroupReadService = doctorGroupReadService;
+        this.doctorFarmAuthCenter = doctorFarmAuthCenter;
     }
 
     /**
@@ -82,7 +86,8 @@ public class DoctorBarns {
     public Long createOrUpdateBarn(@RequestBody DoctorBarn barn) {
         checkNotNull(barn, "barn.not.null");
 
-        // TODO: 权限中心校验权限
+        //权限中心校验权限
+        doctorFarmAuthCenter.checkFarmAuth(barn.getFarmId());
 
         DoctorFarm farm = RespHelper.or500(doctorFarmReadService.findFarmById(barn.getFarmId()));
         barn.setOrgId(farm.getOrgId());
@@ -108,7 +113,8 @@ public class DoctorBarns {
                                     @RequestParam("status") Integer status) {
         DoctorBarn barn = RespHelper.or500(doctorBarnReadService.findBarnById(barnId));
 
-        // TODO: 权限中心校验权限
+        //权限中心校验权限
+        doctorFarmAuthCenter.checkFarmAuth(barn.getFarmId());
 
         return RespHelper.or500(doctorBarnWriteService.updateBarnStatus(barnId, status));
     }
