@@ -11,6 +11,7 @@ import io.terminus.doctor.basic.model.DoctorUnit;
 import io.terminus.doctor.basic.service.DoctorBasicReadService;
 import io.terminus.doctor.basic.service.DoctorBasicWriteService;
 import io.terminus.doctor.common.utils.RespHelper;
+import io.terminus.doctor.web.front.auth.DoctorFarmAuthCenter;
 import io.terminus.pampas.common.UserUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,12 +41,15 @@ public class DoctorBasics {
 
     private final DoctorBasicReadService doctorBasicReadService;
     private final DoctorBasicWriteService doctorBasicWriteService;
+    private final DoctorFarmAuthCenter doctorFarmAuthCenter;
 
     @Autowired
     public DoctorBasics(DoctorBasicReadService doctorBasicReadService,
-                        DoctorBasicWriteService doctorBasicWriteService) {
+                        DoctorBasicWriteService doctorBasicWriteService,
+                        DoctorFarmAuthCenter doctorFarmAuthCenter) {
         this.doctorBasicReadService = doctorBasicReadService;
         this.doctorBasicWriteService = doctorBasicWriteService;
+        this.doctorFarmAuthCenter = doctorFarmAuthCenter;
     }
 
     /************************** 品种品系相关 *************************/
@@ -96,7 +100,8 @@ public class DoctorBasics {
     public Long createOrUpdateDisease(@RequestBody DoctorDisease disease) {
         checkNotNull(disease, "disease.not.null");
 
-        // TODO: 权限中心校验权限
+        //权限中心校验权限
+        doctorFarmAuthCenter.checkFarmAuth(disease.getFarmId());
 
         if (disease.getId() == null) {
             disease.setCreatorId(UserUtil.getUserId());
@@ -118,7 +123,8 @@ public class DoctorBasics {
     public Boolean deleteDisease(@RequestParam("diseaseId") Long diseaseId) {
         DoctorDisease disease = RespHelper.or500(doctorBasicReadService.findDiseaseById(diseaseId));
 
-        // TODO: 权限中心校验权限
+        //权限中心校验权限
+        doctorFarmAuthCenter.checkFarmAuth(disease.getFarmId());
 
         return RespHelper.or500(doctorBasicWriteService.deleteDiseaseById(diseaseId));
     }
@@ -152,7 +158,8 @@ public class DoctorBasics {
     public Long createOrUpdateChangeType(@RequestBody DoctorChangeType changeType) {
         checkNotNull(changeType, "changeType.not.null");
 
-        // TODO: 权限中心校验权限
+        //权限中心校验权限
+        doctorFarmAuthCenter.checkFarmAuth(changeType.getFarmId());
 
         if (changeType.getId() == null) {
             changeType.setCreatorId(UserUtil.getUserId());
@@ -174,7 +181,8 @@ public class DoctorBasics {
     public Boolean deleteChangeType(@RequestParam("changeTypeId") Long changeTypeId) {
         DoctorChangeType changeType = RespHelper.or500(doctorBasicReadService.findChangeTypeById(changeTypeId));
 
-        // TODO: 权限中心校验权限
+        //权限中心校验权限
+        doctorFarmAuthCenter.checkFarmAuth(changeType.getFarmId());
 
         return RespHelper.or500(doctorBasicWriteService.deleteChangeTypeById(changeTypeId));
     }
@@ -210,7 +218,9 @@ public class DoctorBasics {
         DoctorChangeReason changeReason = JSON_MAPPER.fromJson(reason, DoctorChangeReason.class);
         checkNotNull(changeReason, "customer.not.null");
 
-        // TODO: 权限中心校验权限
+        //权限中心校验权限
+        DoctorChangeType changeType = RespHelper.or500(doctorBasicReadService.findChangeTypeById(changeReason.getChangeTypeId()));
+        doctorFarmAuthCenter.checkFarmAuth(changeType.getFarmId());
 
         //设置变动类型id
         changeReason.setChangeTypeId(changeTypeId);
@@ -233,8 +243,10 @@ public class DoctorBasics {
     @RequestMapping(value = "/changeReason", method = RequestMethod.DELETE)
     public Boolean deleteChangeReason(@RequestParam("changeReasonId") Long changeReasonId) {
         DoctorChangeReason changeReason = RespHelper.or500(doctorBasicReadService.findChangeReasonById(changeReasonId));
+        DoctorChangeType changeType = RespHelper.or500(doctorBasicReadService.findChangeTypeById(changeReason.getChangeTypeId()));
 
-        // TODO: 权限中心校验权限
+        //权限中心校验权限
+        doctorFarmAuthCenter.checkFarmAuth(changeType.getFarmId());
 
         return RespHelper.or500(doctorBasicWriteService.deleteChangeReasonById(changeReasonId));
     }
@@ -268,7 +280,8 @@ public class DoctorBasics {
     public Long createOrUpdateCustomer(@RequestBody DoctorCustomer customer) {
         checkNotNull(customer, "customer.not.null");
 
-        // TODO: 权限中心校验权限
+        //权限中心校验权限
+        doctorFarmAuthCenter.checkFarmAuth(customer.getFarmId());
 
         if (customer.getId() == null) {
             customer.setCreatorId(UserUtil.getUserId());
@@ -290,7 +303,8 @@ public class DoctorBasics {
     public Boolean deleteCustomer(@RequestParam("customerId") Long customerId) {
         DoctorCustomer customer = RespHelper.or500(doctorBasicReadService.findCustomerById(customerId));
 
-        // TODO: 权限中心校验权限
+        //权限中心校验权限
+        doctorFarmAuthCenter.checkFarmAuth(customer.getFarmId());
 
         return RespHelper.or500(doctorBasicWriteService.deleteCustomerById(customerId));
     }
