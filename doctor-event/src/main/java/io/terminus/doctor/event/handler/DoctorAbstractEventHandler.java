@@ -108,7 +108,7 @@ public abstract class DoctorAbstractEventHandler implements DoctorEventCreateHan
      * @param content  执行上下文信息
      * @return
      */
-    public abstract DoctorPigTrack updateDoctorPigTrackInfo(DoctorPigTrack doctorPigTrack,
+    protected abstract DoctorPigTrack updateDoctorPigTrackInfo(DoctorPigTrack doctorPigTrack,
                                                             DoctorBasicInputInfoDto basic,
                                                             Map<String,Object> extra, Map<String, Object> content);
 

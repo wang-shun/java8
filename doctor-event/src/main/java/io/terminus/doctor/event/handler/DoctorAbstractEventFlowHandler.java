@@ -109,7 +109,7 @@ public abstract class DoctorAbstractEventFlowHandler extends HandlerAware {
      * @param context 执行上下文环境
      * @return
      */
-    public abstract DoctorPigTrack updateDoctorPigTrackInfo(Execution execution, DoctorPigTrack doctorPigTrack,
+    protected abstract DoctorPigTrack updateDoctorPigTrackInfo(Execution execution, DoctorPigTrack doctorPigTrack,
                                                             DoctorBasicInputInfoDto basic, Map<String,Object> extra, Map<String,Object> context);
 
     /**
@@ -119,11 +119,11 @@ public abstract class DoctorAbstractEventFlowHandler extends HandlerAware {
      * @param extra
      * @param context
      */
-    public void specialFlowHandler(Execution execution, DoctorBasicInputInfoDto basic, Map<String,Object> extra, Map<String,Object> context){
+    protected void specialFlowHandler(Execution execution, DoctorBasicInputInfoDto basic, Map<String,Object> extra, Map<String,Object> context){
         return;
     }
 
-    public DoctorPigEvent buildAllPigDoctorEvent(DoctorBasicInputInfoDto basic, Map<String,Object> extra){
+    private DoctorPigEvent buildAllPigDoctorEvent(DoctorBasicInputInfoDto basic, Map<String,Object> extra){
         DoctorPigEvent doctorPigEvent = DoctorPigEvent.builder()
                 .orgId(basic.getOrgId()).orgName(basic.getOrgName())
                 .farmId(basic.getFarmId()).farmName(basic.getFarmName())

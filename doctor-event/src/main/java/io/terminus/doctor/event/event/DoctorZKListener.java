@@ -73,9 +73,15 @@ public class DoctorZKListener implements EventListener {
             PigEventCreateEvent pigEventCreateEvent = DataEvent.analyseContent(dataEvent, PigEventCreateEvent.class);
             if (pigEventCreateEvent != null && pigEventCreateEvent.getContext() != null) {
                 Map<String, Object> context = pigEventCreateEvent.getContext();
-                Long pigId = Params.getWithConvert(context, "doctorPigId", d -> Long.valueOf(d.toString()));
-                // update es index
-                pigSearchWriteService.update(pigId);
+                if("single".equals(context.get("contextType"))) {
+                    Long pigId = Params.getWithConvert(context, "doctorPigId", d -> Long.valueOf(d.toString()));
+                    pigSearchWriteService.update(pigId);
+                }else {
+                    context.remove("contextType");
+                    context.keySet().stream().forEach(s->{
+                        pigSearchWriteService.update(Long.valueOf(s));
+                    });
+                }
             }
         }
 
