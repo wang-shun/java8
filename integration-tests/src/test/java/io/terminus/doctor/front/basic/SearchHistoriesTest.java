@@ -3,6 +3,7 @@ package io.terminus.doctor.front.basic;
 import com.google.common.collect.ImmutableMap;
 import configuration.front.FrontWebConfiguration;
 import io.terminus.doctor.front.BaseFrontWebTest;
+import io.terminus.doctor.web.front.basic.controller.SearchHistories;
 import org.junit.Test;
 import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.http.HttpStatus;
@@ -25,6 +26,7 @@ public class SearchHistoriesTest extends BaseFrontWebTest {
 
     /**
      * 查询历史搜索词
+     * @see SearchHistories#findHistoryWords(java.lang.Integer, java.lang.Long)
      */
     @Test
     public void findHistoryWordsTest() {
@@ -36,6 +38,7 @@ public class SearchHistoriesTest extends BaseFrontWebTest {
 
     /**
      * 删除所有的搜索词记录
+     * @see SearchHistories#deleteAllHistoryWord(java.lang.Integer)
      */
     @Test
     public void deleteAllHistoryWordTest() {
@@ -46,6 +49,7 @@ public class SearchHistoriesTest extends BaseFrontWebTest {
 
     /**
      * 删除单个搜索词
+     * @see SearchHistories#deleteHistoryWord(java.lang.Integer, java.lang.String)
      */
     @Test
     public void deleteHistoryWordTest() {

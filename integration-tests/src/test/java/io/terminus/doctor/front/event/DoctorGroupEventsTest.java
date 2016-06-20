@@ -20,6 +20,7 @@ import io.terminus.doctor.event.dto.event.group.input.DoctorTransGroupInput;
 import io.terminus.doctor.event.enums.PigSource;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
 import io.terminus.doctor.front.BaseFrontWebTest;
+import io.terminus.doctor.web.front.event.controller.DoctorGroupEvents;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
 import org.springframework.boot.test.SpringApplicationConfiguration;
@@ -47,6 +48,7 @@ public class DoctorGroupEventsTest extends BaseFrontWebTest {
 
     /**
      * 新建猪群测试
+     * @see DoctorGroupEvents#createNewGroup(io.terminus.doctor.event.dto.event.group.input.DoctorNewGroupInput)
      */
     @Test
     public void createNewGroupTest() {
@@ -62,6 +64,7 @@ public class DoctorGroupEventsTest extends BaseFrontWebTest {
 
     /**
      * 录入猪群事件测试
+     * @see DoctorGroupEvents#createGroupEvent(java.lang.Long, java.lang.Integer, java.lang.String)
      */
     @Test
     public void createGroupEventTest() {
@@ -109,6 +112,7 @@ public class DoctorGroupEventsTest extends BaseFrontWebTest {
 
     /**
      * 根据猪群id查询可以操作的事件类型测试
+     * @see DoctorGroupEvents#findEventTypesByGroupIds(java.lang.Long[])
      */
     @Test
     public void findEventTypesByGroupIdsTest() {
@@ -121,6 +125,7 @@ public class DoctorGroupEventsTest extends BaseFrontWebTest {
 
     /**
      * 生成猪群号 猪舍名(yyyy-MM-dd)测试
+     * @see DoctorGroupEvents#generateGroupCode(java.lang.String)
      */
     @Test
     public void generateGroupCodeTest() {
@@ -133,6 +138,7 @@ public class DoctorGroupEventsTest extends BaseFrontWebTest {
 
     /**
      * 查询猪群详情测试
+     * @see DoctorGroupEvents#findGroupDetailByGroupId(java.lang.Long)
      */
     @Test
     public void findGroupDetailByGroupIdTest() {
@@ -150,6 +156,7 @@ public class DoctorGroupEventsTest extends BaseFrontWebTest {
 
     /**
      * 分页查询猪群历史事件测试
+     * @see DoctorGroupEvents#pagingGroupEvent(java.lang.Long, java.lang.Long, java.lang.Integer, java.lang.Integer, java.lang.Integer)
      */
     @Test
     public void pagingGroupEventTest() {
@@ -162,6 +169,7 @@ public class DoctorGroupEventsTest extends BaseFrontWebTest {
 
     /**
      * 查询猪群镜像信息(猪群, 猪群跟踪, 最新event)
+     * @see DoctorGroupEvents#findGroupSnapShotByGroupId(java.lang.Long)
      */
     @Test
     public void findGroupSnapShotByGroupIdTest() {
