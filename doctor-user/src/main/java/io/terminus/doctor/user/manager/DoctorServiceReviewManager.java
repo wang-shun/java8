@@ -3,7 +3,6 @@ package io.terminus.doctor.user.manager;
 import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
-import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.BaseUser;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.user.dao.*;
@@ -160,15 +159,8 @@ public class DoctorServiceReviewManager {
     }
 
     @Transactional
-    public void openDoctorService(BaseUser user, Long userId, List<DoctorFarm> farms, DoctorOrg org){
-        //更新org, 无论是否有修改,都可以update一下
-        doctorOrgDao.update(org);
-
-        //更新staff里的冗余字段orgName
-        DoctorStaff staff = doctorStaffDao.findByUserId(userId);
-        staff.setOrgName(org.getName());
-        RespHelper.orServEx(doctorStaffWriteService.updateDoctorStaff(staff));
-
+    public void openDoctorService(BaseUser user, Long userId, List<DoctorFarm> farms){
+        DoctorOrg org = doctorOrgDao.findById(doctorStaffDao.findByUserId(userId).getOrgId());
         List<Long> newFarmIds = Lists.newArrayList(); //将被保存下来的猪场
         //保存猪场信息
         if(farms != null){

@@ -61,16 +61,13 @@ public class DoctorServiceReviewController {
     @ResponseBody
     public Boolean openDoctorService(@RequestBody UserApplyServiceDetailDto dto){
         BaseUser baseUser = this.checkUserTypeOperator();
-        if (dto.getOrg() == null || dto.getOrg().getId() == null) {
-            throw new JsonResponseException(500, "org.id.can.not.be.null");
-        }
         if (dto.getUserId() == null) {
             throw new JsonResponseException(500, "user.id.invalid");
         }
         if(dto.getFarms() == null || dto.getFarms().isEmpty()){
             throw new JsonResponseException(500, "need.at.least.one.farm"); //需要至少一个猪场信息
         }
-        RespHelper.or500(doctorServiceReviewService.openDoctorService(baseUser, dto.getUserId(), dto.getFarms(), dto.getOrg()));
+        RespHelper.or500(doctorServiceReviewService.openDoctorService(baseUser, dto.getUserId(), dto.getFarms()));
 
         //分发猪场软件已开通的事件
         Response<List<DoctorFarm>> farmResp = doctorFarmReadService.findFarmsByUserId(dto.getUserId());
