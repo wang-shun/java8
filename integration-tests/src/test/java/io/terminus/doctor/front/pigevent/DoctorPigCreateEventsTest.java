@@ -98,7 +98,7 @@ public class DoctorPigCreateEventsTest extends BaseFrontWebTest{
         Long pigBoarId = boarEntryEventCreate();
 
         // 母猪信息创建方式
-        for (int i = 0; i < 2 ; i++){
+        for (int i = 0; i < 1 ; i++){
             Long pigId = sowEntryEventCreate();
             sowMatingEventCreate(pigId, pigBoarId); // 配种事件信息录入
 
@@ -120,10 +120,10 @@ public class DoctorPigCreateEventsTest extends BaseFrontWebTest{
 //            testWeanMethod(pigId, 100);
 
             // 测试 拼窝事件信息
-//            testFostersEventCreate(pigId, 100);
+            testFostersEventCreate(pigId, 100);
 
             // 回 配种 舍
-            testToMating(pigId);
+//            testToMating(pigId);
 
         }
 

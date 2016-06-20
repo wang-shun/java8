@@ -60,7 +60,7 @@ flow:
       boar: boar
 
 zookeeper:
-  host: 101.201.44.35
+  host: 127.0.0.1
   port: 2181
   cacheTopic: pig.user.topic
   zkTopic: pig.doctor.topic

@@ -121,6 +121,7 @@ public class DoctorPigEventManager {
          * 母猪创建对应的事件流信息
          */
         Map<String, Object> ids = OBJECT_MAPPER.readValue(context.get("createEventResult").toString(), JacksonType.MAP_OF_OBJECT);
+        ids.put("contextType","single");
         if(Objects.equals(doctorBasicInputInfoDto.getPigType(), DoctorPig.PIG_TYPE.SOW.getKey())){
             Long pigId = Params.getWithConvert(ids, "doctorPigId", a->Long.valueOf(a.toString()));
 
@@ -147,6 +148,7 @@ public class DoctorPigEventManager {
             doctorEventHandlerChainInvocation.invoke(basic, extra, currentContext);
             result.put(basic.getPigId().toString(), JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(currentContext));
         });
+        result.put("contextType", "mult");
         return result;
     }
 
@@ -176,6 +178,7 @@ public class DoctorPigEventManager {
             results.put(dto.getPigId().toString(),
                     createSingleSowEvents(dto, extra));
         });
+        results.put("contextType", "mult");
         return results;
     }
 
@@ -200,6 +203,8 @@ public class DoctorPigEventManager {
         executor.execute(express, flowData);
         String flowDataContent = flowQueryService.getFlowProcessQuery().getCurrentProcesses(sowFlowDefinitionKey, basic.getPigId()).get(0).getFlowData();
         Map<String,String> flowDataMap = OBJECT_MAPPER.readValue(flowDataContent, JacksonType.MAP_OF_STRING);
-        return OBJECT_MAPPER.readValue(flowDataMap.get("createEventResult"), JacksonType.MAP_OF_OBJECT);
+        Map<String, Object> results = OBJECT_MAPPER.readValue(flowDataMap.get("createEventResult"), JacksonType.MAP_OF_OBJECT);
+        results.put("contextType", "single");
+        return results;
     }
 }
