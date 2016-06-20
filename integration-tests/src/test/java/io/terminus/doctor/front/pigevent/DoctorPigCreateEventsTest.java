@@ -83,14 +83,50 @@ public class DoctorPigCreateEventsTest extends BaseFrontWebTest{
         // init node xml
         File f = new File(getClass().getResource("/flow/sow.xml").getFile());
         workFlowService.getFlowDefinitionService().deploy(new FileInputStream(f));
-   }
+    }
 
     /**
-     * 测试母猪事件信息
+     * 测试创建猪信息
      */
     @Test
-    public void testPigEventPagingInfo(){
-        System.out.println("test condition");
+    public void testCreateMockData(){
+        // 公猪信息创建方式
+//        for(int i=0; i<10; i++){
+//            boarEntryEventCreate();
+//        }
+
+        Long pigBoarId = boarEntryEventCreate();
+
+        // 母猪信息创建方式
+        for (int i = 0; i < 2 ; i++){
+            Long pigId = sowEntryEventCreate();
+            sowMatingEventCreate(pigId, pigBoarId); // 配种事件信息录入
+
+            testPregCheckResultEventCreate(pigId, PregCheckResult.YANG);
+
+            testToPregEventCreate(pigId);
+
+//            testAbortionEventCreate(pigId);
+
+            testToFarrowing(pigId);
+
+            // 测试 分娩数量200
+            testFarrowingEventCreate(pigId);
+
+            // 全部断奶
+            testWeanMethod(pigId, 200);
+
+            // 部分断奶事件信息
+//            testWeanMethod(pigId, 100);
+
+            // 测试 拼窝事件信息
+//            testFostersEventCreate(pigId, 100);
+
+            // 回 配种 舍
+            testToMating(pigId);
+
+        }
+
     }
 
     /**
@@ -185,7 +221,74 @@ public class DoctorPigCreateEventsTest extends BaseFrontWebTest{
         System.out.println(result);
     }
 
-    public void createSemenEvent(Long pigId){
+    /**
+     * 测试母猪进厂事件信息
+     */
+    @Test
+    public void sowEntryEventCreateTest(){
+
+        Long pigId = 1l;
+        sowEntryEventCreate();
+
+        Long boarId = 2l;
+        sowEntryEventCreate();
+
+        sowMatingEventCreate(pigId, boarId);
+
+//        testPregCheckResultEventCreate(pigId, PregCheckResult.YANG);
+
+//        testToPregEventCreate(pigId);
+
+        // test
+//        testAbortionEventCreate(pigId);
+
+//        testToFarrowing(pigId);
+
+//        testFarrowingEventCreate(pigId);
+
+//        testWeanMethod(pigId, 200);
+
+        // 测试凭我事件信息test
+        testFostersEventCreate(pigId, 200);
+
+        //  录入转场事件信息
+//        testToMating(pigId);
+
+        // 显示 state
+        printCurrentState();
+
+        // 获取下一个事件信息
+        testCurrentSowInputStatus(pigId);
+    }
+
+    /**
+     * 测试母猪回滚事件信息
+     */
+    @Test
+    public void testRollBackEventCreateTest(){
+
+        String url = "http://localhost:" + this.port + "/api/doctor/events/pig/rollBackPigEvent";
+
+        Long pigId = 1l;
+        sowEntryEventCreate();
+        Long boarId = 2l;
+        sowEntryEventCreate();
+        sowMatingEventCreate(pigId, boarId);
+        testPregCheckResultEventCreate(pigId, PregCheckResult.YANG);
+        testToPregEventCreate(pigId);
+
+        // test rollback info
+        HttpEntity httpEntity = HttpPostRequest.formRequest()
+                .param("pigEventId",5l).param("revertPigType",1)
+                .httpEntity();
+
+        Long result = this.restTemplate.postForObject(url, httpEntity, Long.class);
+        System.out.println(result);
+
+        printCurrentState();
+    }
+
+    private void createSemenEvent(Long pigId){
 
         String url = basicUrl + "/createSemen";
 
@@ -200,7 +303,7 @@ public class DoctorPigCreateEventsTest extends BaseFrontWebTest{
         System.out.println(result);
     }
 
-    public void createConditionEvent(Long pigId){
+    private void createConditionEvent(Long pigId){
         String url = basicUrl + "/createConditionEvent";
 
         HttpEntity httpEntity = HttpPostRequest.formRequest()
@@ -275,79 +378,11 @@ public class DoctorPigCreateEventsTest extends BaseFrontWebTest{
         System.out.println(result);
     }
 
-    /**
-     * 测试母猪回滚事件信息
-     */
-    @Test
-    public void testRollBackEventCreateTest(){
-
-        String url = "http://localhost:" + this.port + "/api/doctor/events/pig/rollBackPigEvent";
-
-        Long pigId = 1l;
-        sowEntryEventCreate();
-        Long boarId = 2l;
-        sowEntryEventCreate();
-        sowMatingEventCreate(pigId, boarId);
-        testPregCheckResultEventCreate(pigId, PregCheckResult.YANG);
-        testToPregEventCreate(pigId);
-
-        // test rollback info
-        HttpEntity httpEntity = HttpPostRequest.formRequest()
-                .param("pigEventId",5l).param("revertPigType",1)
-                .httpEntity();
-
-        Long result = this.restTemplate.postForObject(url, httpEntity, Long.class);
-        System.out.println(result);
-
-        printCurrentState();
-    }
-
-    /**
-     * 测试母猪进厂事件信息
-     */
-    @Test
-    public void sowEntryEventCreateTest(){
-
-        Long pigId = 1l;
-        sowEntryEventCreate();
-
-        Long boarId = 2l;
-        sowEntryEventCreate();
-
-        sowMatingEventCreate(pigId, boarId);
-
-//        testPregCheckResultEventCreate(pigId, PregCheckResult.YANG);
-
-//        testToPregEventCreate(pigId);
-
-        // test
-//        testAbortionEventCreate(pigId);
-
-//        testToFarrowing(pigId);
-
-//        testFarrowingEventCreate(pigId);
-
-//        testWeanMethod(pigId, 200);
-
-        // 测试凭我事件信息test
-//        testFostersEventCreate(pigId, 200);
-
-        //  录入转场事件信息
-//        testToMating(pigId);
-
-        // 显示 state
-        printCurrentState();
-
-        // 获取下一个事件信息
-        testCurrentSowInputStatus(pigId);
-    }
-
     private void testFostersEventCreate(Long pigId, Integer fosterCount){
         // 创建一个可以被拼窝的母猪
-        Long pigFosterId = 3l;
-        sowEntryEventCreate();
+        Long pigFosterId = sowEntryEventCreate();
 
-        Long pigBoarId = 2l;
+        Long pigBoarId = boarEntryEventCreate();
 
         sowMatingEventCreate(pigFosterId, pigBoarId);
         testPregCheckResultEventCreate(pigFosterId, PregCheckResult.YANG);
@@ -437,7 +472,7 @@ public class DoctorPigCreateEventsTest extends BaseFrontWebTest{
     /**
      * 创建对应的流产事件信息
      */
-    public void testAbortionEventCreate(Long pigId){
+    private void testAbortionEventCreate(Long pigId){
         String url = basicUrl + "/createSowEvent";
         HttpEntity httpEntity = HttpPostRequest.formRequest().param("farmId", 12345l)
                 .param("pigId", pigId).param("eventType", PigEvent.ABORTION.getKey())
