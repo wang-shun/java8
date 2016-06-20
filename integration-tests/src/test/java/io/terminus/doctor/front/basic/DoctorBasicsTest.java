@@ -8,6 +8,7 @@ import io.terminus.doctor.basic.model.DoctorChangeType;
 import io.terminus.doctor.basic.model.DoctorCustomer;
 import io.terminus.doctor.basic.model.DoctorDisease;
 import io.terminus.doctor.front.BaseFrontWebTest;
+import io.terminus.doctor.web.front.basic.controller.DoctorBasics;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
 import org.springframework.boot.test.SpringApplicationConfiguration;
@@ -34,6 +35,7 @@ public class DoctorBasicsTest extends BaseFrontWebTest {
 
     /**
      * 查询所有品种测试
+     * @see DoctorBasics#finaAllBreed()
      */
     @Test
     public void finaAllBreedTest() {
@@ -46,6 +48,7 @@ public class DoctorBasicsTest extends BaseFrontWebTest {
 
     /**
      * 查询所有品种测试
+     * @see DoctorBasics#finaAllGenetic()
      */
     @Test
     public void finaAllGeneticTest() {
@@ -58,6 +61,7 @@ public class DoctorBasicsTest extends BaseFrontWebTest {
 
     /**
      * 查询疾病详情测试
+     * @see DoctorBasics#findDiseaseById(java.lang.Long)
      */
     @Test
     public void findDiseaseByIdTest() {
@@ -68,6 +72,7 @@ public class DoctorBasicsTest extends BaseFrontWebTest {
 
     /**
      * 根据farmId查询疾病列表测试
+     * @see DoctorBasics#findDiseaseByfarmId(java.lang.Long)
      */
     @Test
     public void findDiseaseByfarmIdTest() {
@@ -80,6 +85,7 @@ public class DoctorBasicsTest extends BaseFrontWebTest {
 
     /**
      * 创建或更新疾病表测试
+     * @see @see DoctorBasics#createOrUpdateDisease(io.terminus.doctor.basic.model.DoctorDisease)
      */
     @Test
     public void createOrUpdateDiseaseTest() {
@@ -94,6 +100,7 @@ public class DoctorBasicsTest extends BaseFrontWebTest {
 
     /**
      * 根据主键id删除DoctorDisease测试
+     * @see DoctorBasics#deleteDisease(java.lang.Long)
      */
     @Test
     public void deleteDiseaseTest() {
@@ -114,6 +121,7 @@ public class DoctorBasicsTest extends BaseFrontWebTest {
 
     /**
      * 根据id查询变动类型表测试
+     * @see DoctorBasics#findChangeTypeById(java.lang.Long)
      */
     @Test
     public void findChangeTypeByIdTest() {
@@ -131,6 +139,7 @@ public class DoctorBasicsTest extends BaseFrontWebTest {
 
     /**
      * 根据farmId查询变动类型表测试
+     * @see DoctorBasics#findChangeTypesByfarmId(java.lang.Long)
      */
     @Test
     public void findChangeTypesByfarmIdTest() {
@@ -143,6 +152,7 @@ public class DoctorBasicsTest extends BaseFrontWebTest {
 
     /**
      * 创建或更新DoctorChangeType测试
+     * @see DoctorBasics#createOrUpdateChangeType(io.terminus.doctor.basic.model.DoctorChangeType)
      */
     @Test
     public void createOrUpdateChangeTypeTest() {
@@ -157,6 +167,7 @@ public class DoctorBasicsTest extends BaseFrontWebTest {
 
     /**
      * 根据主键id删除DoctorChangeType测试
+     * @see DoctorBasics#deleteChangeType(java.lang.Long)
      */
     @Test
     public void deleteChangeTypeTest() {
@@ -170,6 +181,7 @@ public class DoctorBasicsTest extends BaseFrontWebTest {
 
     /**
      * 根据id查询变动原因表测试
+     * @see DoctorBasics#findChangeReasonById(java.lang.Long)
      */
     @Test
     public void findChangeReasonByIdTest() {
@@ -187,6 +199,7 @@ public class DoctorBasicsTest extends BaseFrontWebTest {
 
     /**
      * 根据变动类型id查询变动原因表测试
+     * @see DoctorBasics#findChangeReasonByChangeTypeId(java.lang.Long)
      */
     @Test
     public void findChangeReasonByChangeTypeIdTest() {
@@ -199,6 +212,7 @@ public class DoctorBasicsTest extends BaseFrontWebTest {
 
     /**
      * 创建或更新DoctorChangeReason测试
+     * @see DoctorBasics#createOrUpdateChangeReason(java.lang.Long, java.lang.String)
      */
     @Test
     public void createOrUpdateChangeReasonTest() {
@@ -213,6 +227,7 @@ public class DoctorBasicsTest extends BaseFrontWebTest {
 
     /**
      * 根据主键id删除DoctorChangeReason测试
+     * @see DoctorBasics#deleteChangeReason(java.lang.Long)
      */
     @Test
     public void deleteChangeReasonTest() {
@@ -226,6 +241,7 @@ public class DoctorBasicsTest extends BaseFrontWebTest {
 
     /**
      * 根据id查询客户表测试
+     * @see DoctorBasics#findCustomerById(java.lang.Long)
      */
     @Test
     public void findCustomerByIdTest() {
@@ -243,6 +259,7 @@ public class DoctorBasicsTest extends BaseFrontWebTest {
 
     /**
      * 根据farmId查询客户表测试
+     * @see DoctorBasics#findCustomersByfarmId(java.lang.Long)
      */
     @Test
     public void findCustomersByfarmIdTest() {
@@ -255,6 +272,7 @@ public class DoctorBasicsTest extends BaseFrontWebTest {
 
     /**
      * 创建或更新DoctorCustomer测试
+     * @see DoctorBasics#createOrUpdateCustomer(io.terminus.doctor.basic.model.DoctorCustomer)
      */
     @Test
     public void createOrUpdateCustomerTest() {
@@ -269,6 +287,7 @@ public class DoctorBasicsTest extends BaseFrontWebTest {
 
     /**
      * 根据主键id删除DoctorCustomer测试
+     * @see DoctorBasics#deleteCustomer(java.lang.Long)
      */
     @Test
     public void deleteCustomerTest() {
@@ -282,6 +301,7 @@ public class DoctorBasicsTest extends BaseFrontWebTest {
 
     /**
      * 查询所有计量单位测试
+     * @see DoctorBasics#finaAllUnits()
      */
     @Test
     public void finaAllUnitsTest() {

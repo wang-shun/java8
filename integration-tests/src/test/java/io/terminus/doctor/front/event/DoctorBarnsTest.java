@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import configuration.front.FrontWebConfiguration;
 import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.front.BaseFrontWebTest;
+import io.terminus.doctor.web.front.event.controller.DoctorBarns;
 import io.terminus.doctor.web.front.event.dto.DoctorBarnDetail;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
@@ -30,6 +31,7 @@ public class DoctorBarnsTest extends BaseFrontWebTest {
 
     /**
      * 根据id查询猪舍表测试
+     * @see DoctorBarns#findBarnById(java.lang.Long)            `
      */
     @Test
     public void findBarnByIdTest() {
@@ -47,6 +49,7 @@ public class DoctorBarnsTest extends BaseFrontWebTest {
 
     /**
      * 根据farmId查询猪舍表测试
+     * @see DoctorBarns#findBarnsByfarmId(java.lang.Long)
      */
     @Test
     public void findBarnsByfarmIdTest() {
@@ -59,6 +62,7 @@ public class DoctorBarnsTest extends BaseFrontWebTest {
 
     /**
      * 创建或更新DoctorBarn测试
+     * @see DoctorBarns#createOrUpdateBarn(io.terminus.doctor.event.model.DoctorBarn)
      */
     @Test
     public void createOrUpdateBarnTest() {
@@ -73,6 +77,7 @@ public class DoctorBarnsTest extends BaseFrontWebTest {
 
     /**
      * 更新猪舍状态测试
+     * @see DoctorBarns#updateBarnStatus(java.lang.Long, java.lang.Integer)
      */
     @Test
     public void updateBarnStatusTest() {
@@ -87,6 +92,7 @@ public class DoctorBarnsTest extends BaseFrontWebTest {
 
     /**
      * 查询猪舍详情测试
+     * @see DoctorBarns#findBarnDetailByBarnId(java.lang.Long, java.lang.Integer, java.lang.Integer)
      */
     @Test
     public void findBarnDetailByBarnIdTest() {
