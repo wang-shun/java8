@@ -2,8 +2,6 @@ package io.terminus.doctor.event.handler.group;
 
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.doctor.common.event.CoreEventDispatcher;
-import io.terminus.doctor.common.utils.RespHelper;
-import io.terminus.doctor.event.dao.DoctorGroupDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorGroupSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
@@ -14,11 +12,10 @@ import io.terminus.doctor.event.dto.event.group.input.DoctorTransFarmGroupInput;
 import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.enums.PigSource;
+import io.terminus.doctor.event.manager.DoctorGroupManager;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
-import io.terminus.doctor.event.service.DoctorGroupReadService;
-import io.terminus.doctor.event.service.DoctorGroupWriteService;
 import io.terminus.doctor.event.util.EventUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,20 +34,20 @@ import java.util.Objects;
 public class DoctorTransFarmGroupEventHandler extends DoctorAbstractGroupEventHandler {
 
     private final DoctorGroupEventDao doctorGroupEventDao;
-    private final DoctorGroupWriteService doctorGroupWriteService;
+    private final DoctorCommonGroupEventHandler doctorCommonGroupEventHandler;
+    private final DoctorGroupManager doctorGroupManager;
 
     @Autowired
-    public DoctorTransFarmGroupEventHandler(DoctorGroupDao doctorGroupDao,
-                                            DoctorGroupEventDao doctorGroupEventDao,
-                                            DoctorGroupSnapshotDao doctorGroupSnapshotDao,
+    public DoctorTransFarmGroupEventHandler(DoctorGroupSnapshotDao doctorGroupSnapshotDao,
                                             DoctorGroupTrackDao doctorGroupTrackDao,
-                                            DoctorGroupReadService doctorGroupReadService,
                                             CoreEventDispatcher coreEventDispatcher,
-                                            DoctorGroupWriteService doctorGroupWriteService) {
-        super(doctorGroupDao, doctorGroupEventDao, doctorGroupSnapshotDao, doctorGroupTrackDao,
-                doctorGroupReadService, coreEventDispatcher, doctorGroupWriteService);
+                                            DoctorGroupEventDao doctorGroupEventDao,
+                                            DoctorCommonGroupEventHandler doctorCommonGroupEventHandler,
+                                            DoctorGroupManager doctorGroupManager) {
+        super(doctorGroupSnapshotDao, doctorGroupTrackDao, coreEventDispatcher);
         this.doctorGroupEventDao = doctorGroupEventDao;
-        this.doctorGroupWriteService = doctorGroupWriteService;
+        this.doctorCommonGroupEventHandler = doctorCommonGroupEventHandler;
+        this.doctorGroupManager = doctorGroupManager;
     }
 
     @Override
@@ -92,7 +89,7 @@ public class DoctorTransFarmGroupEventHandler extends DoctorAbstractGroupEventHa
 
         //5.判断转场数量, 如果 = 猪群数量, 触发关闭猪群事件
         if (Objects.equals(oldQuantity, transFarm.getQuantity())) {
-            autoGroupEventClose(group, groupTrack, transFarm);
+            doctorCommonGroupEventHandler.autoGroupEventClose(group, groupTrack, transFarm);
         }
 
         //设置来源为外场
@@ -105,9 +102,9 @@ public class DoctorTransFarmGroupEventHandler extends DoctorAbstractGroupEventHa
             transFarm.setToGroupId(toGroupId);
 
             //转入猪群
-            autoTransEventMoveIn(group, groupTrack, transFarm);
+            doctorCommonGroupEventHandler.autoTransEventMoveIn(group, groupTrack, transFarm);
         } else {
-            autoTransEventMoveIn(group, groupTrack, transFarm);
+            doctorCommonGroupEventHandler.autoTransEventMoveIn(group, groupTrack, transFarm);
         }
 
         //发布统计事件
@@ -140,6 +137,6 @@ public class DoctorTransFarmGroupEventHandler extends DoctorAbstractGroupEventHa
         toGroup.setOrgId(fromGroup.getOrgId());       //转入公司
         toGroup.setOrgName(fromGroup.getOrgName());
         toGroup.setCreatorId(0L);    //创建人id = 0, 标识系统自动创建
-        return RespHelper.orServEx(doctorGroupWriteService.createNewGroup(toGroup, newGroupInput));
+        return doctorGroupManager.createNewGroup(toGroup, newGroupInput);
     }
 }

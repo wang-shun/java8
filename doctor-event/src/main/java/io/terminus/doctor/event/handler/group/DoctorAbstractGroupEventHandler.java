@@ -8,35 +8,21 @@ import io.terminus.doctor.common.enums.DataEventType;
 import io.terminus.doctor.common.event.CoreEventDispatcher;
 import io.terminus.doctor.common.event.DataEvent;
 import io.terminus.doctor.common.utils.DateUtil;
-import io.terminus.doctor.common.utils.RespHelper;
-import io.terminus.doctor.event.dao.DoctorGroupDao;
-import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorGroupSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
-import io.terminus.doctor.event.dto.DoctorGroupDetail;
 import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
-import io.terminus.doctor.event.dto.event.group.DoctorMoveInGroupEvent;
 import io.terminus.doctor.event.dto.event.group.input.BaseGroupInput;
-import io.terminus.doctor.event.dto.event.group.input.DoctorCloseGroupInput;
-import io.terminus.doctor.event.dto.event.group.input.DoctorMoveInGroupInput;
-import io.terminus.doctor.event.dto.event.group.input.DoctorTransGroupInput;
 import io.terminus.doctor.event.enums.GroupEventType;
-import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.event.DoctorGroupCountEvent;
 import io.terminus.doctor.event.handler.DoctorGroupEventHandler;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorGroupSnapshot;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
-import io.terminus.doctor.event.service.DoctorGroupReadService;
-import io.terminus.doctor.event.service.DoctorGroupWriteService;
 import io.terminus.doctor.event.util.EventUtil;
 import io.terminus.zookeeper.pubsub.Publisher;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-
-import java.util.List;
-import java.util.stream.Collectors;
 
 import static io.terminus.common.utils.Arguments.notNull;
 
@@ -51,32 +37,20 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
 
     private static final JsonMapper JSON_MAPPER = JsonMapper.nonEmptyMapper();
 
-    private final DoctorGroupDao doctorGroupDao;
-    private final DoctorGroupEventDao doctorGroupEventDao;
     private final DoctorGroupSnapshotDao doctorGroupSnapshotDao;
     private final DoctorGroupTrackDao doctorGroupTrackDao;
-    private final DoctorGroupReadService doctorGroupReadService;
     private final CoreEventDispatcher coreEventDispatcher;
-    private final DoctorGroupWriteService doctorGroupWriteService;
 
     @Autowired(required = false)
     private Publisher publisher;
 
     @Autowired
-    public DoctorAbstractGroupEventHandler(DoctorGroupDao doctorGroupDao,
-                                           DoctorGroupEventDao doctorGroupEventDao,
-                                           DoctorGroupSnapshotDao doctorGroupSnapshotDao,
+    public DoctorAbstractGroupEventHandler(DoctorGroupSnapshotDao doctorGroupSnapshotDao,
                                            DoctorGroupTrackDao doctorGroupTrackDao,
-                                           DoctorGroupReadService doctorGroupReadService,
-                                           CoreEventDispatcher coreEventDispatcher,
-                                           DoctorGroupWriteService doctorGroupWriteService) {
-        this.doctorGroupDao = doctorGroupDao;
-        this.doctorGroupEventDao = doctorGroupEventDao;
+                                           CoreEventDispatcher coreEventDispatcher) {
         this.doctorGroupSnapshotDao = doctorGroupSnapshotDao;
         this.doctorGroupTrackDao = doctorGroupTrackDao;
-        this.doctorGroupReadService = doctorGroupReadService;
         this.coreEventDispatcher = coreEventDispatcher;
-        this.doctorGroupWriteService = doctorGroupWriteService;
     }
 
     @Override
@@ -173,47 +147,6 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
         doctorGroupSnapshotDao.create(groupSnapshot);
     }
 
-    /**
-     * 系统触发的自动关闭猪群事件
-     */
-    protected void autoGroupEventClose(DoctorGroup group, DoctorGroupTrack groupTrack, BaseGroupInput baseInput) {
-        DoctorCloseGroupInput closeInput = new DoctorCloseGroupInput();
-        closeInput.setIsAuto(IsOrNot.YES.getValue());   //系统触发事件, 属于自动生成
-        closeInput.setEventAt(baseInput.getEventAt());
-        RespHelper.orServEx(doctorGroupWriteService.groupEventClose(new DoctorGroupDetail(group, groupTrack), closeInput));
-    }
-
-    /**
-     * 系统触发的自动转入转入猪群事件(群间转移, 转群/转场触发)
-     */
-    protected void autoTransEventMoveIn(DoctorGroup fromGroup, DoctorGroupTrack fromGroupTrack, DoctorTransGroupInput transGroup) {
-        DoctorMoveInGroupInput moveIn = new DoctorMoveInGroupInput();
-        moveIn.setEventAt(transGroup.getEventAt());
-        moveIn.setIsAuto(IsOrNot.YES.getValue());
-        moveIn.setCreatorId(transGroup.getCreatorId());
-        moveIn.setCreatorName(transGroup.getCreatorName());
-
-        moveIn.setInType(DoctorMoveInGroupEvent.InType.GROUP.getValue());       //转入类型
-        moveIn.setInTypeName(DoctorMoveInGroupEvent.InType.GROUP.getDesc());
-        moveIn.setSource(transGroup.getSource());                 //来源可以分为 本场(转群), 外场(转场)
-        moveIn.setSex(fromGroupTrack.getSex());
-        moveIn.setBreedId(transGroup.getBreedId());
-        moveIn.setBreedName(transGroup.getBreedName());
-        moveIn.setFromBarnId(fromGroup.getCurrentBarnId());         //来源猪舍
-        moveIn.setFromBarnName(fromGroup.getCurrentBarnName());
-        moveIn.setFromGroupId(fromGroup.getId());                   //来源猪群
-        moveIn.setFromGroupCode(fromGroup.getGroupCode());
-        moveIn.setQuantity(transGroup.getQuantity());
-        moveIn.setBoarQty(transGroup.getBoarQty());
-        moveIn.setSowQty(transGroup.getSowQty());
-        moveIn.setAvgDayAge(fromGroupTrack.getAvgDayAge());     //日龄
-        moveIn.setAvgWeight(EventUtil.getAvgWeight(transGroup.getWeight(), transGroup.getQuantity()));  //转入均重
-
-        //调用转入猪群事件
-        DoctorGroupDetail groupDetail = RespHelper.orServEx(doctorGroupReadService.findGroupDetailByGroupId(transGroup.getToGroupId()));
-        RespHelper.orServEx(doctorGroupWriteService.groupEventMoveIn(groupDetail, moveIn));
-    }
-
     //校验数量
     protected static void checkQuantity(Integer max, Integer actual) {
         if (actual > max) {
@@ -225,14 +158,6 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
     protected static void checkQuantityEqual(Integer all, Integer boar, Integer sow) {
         if (all != (boar + sow)) {
             throw new ServiceException("quantity.not.equal");
-        }
-    }
-
-    //校验猪群号是否重复
-    protected void checkGroupCodeExist(Long farmId, String groupCode) {
-        List<DoctorGroup> groups = RespHelper.or500(doctorGroupReadService.findGroupsByFarmId(farmId));
-        if (groups.stream().map(DoctorGroup::getGroupCode).collect(Collectors.toList()).contains(groupCode)) {
-            throw new ServiceException("group.code.exist");
         }
     }
 

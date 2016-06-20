@@ -13,8 +13,6 @@ import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
-import io.terminus.doctor.event.service.DoctorGroupReadService;
-import io.terminus.doctor.event.service.DoctorGroupWriteService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -33,18 +31,16 @@ public class DoctorCloseGroupEventHandler extends DoctorAbstractGroupEventHandle
     private final DoctorGroupEventDao doctorGroupEventDao;
 
     @Autowired
-    public DoctorCloseGroupEventHandler(DoctorGroupDao doctorGroupDao,
-                                        DoctorGroupEventDao doctorGroupEventDao,
-                                        DoctorGroupSnapshotDao doctorGroupSnapshotDao,
+    public DoctorCloseGroupEventHandler(DoctorGroupSnapshotDao doctorGroupSnapshotDao,
                                         DoctorGroupTrackDao doctorGroupTrackDao,
-                                        DoctorGroupReadService doctorGroupReadService,
                                         CoreEventDispatcher coreEventDispatcher,
-                                        DoctorGroupWriteService doctorGroupWriteService) {
-        super(doctorGroupDao, doctorGroupEventDao, doctorGroupSnapshotDao, doctorGroupTrackDao,
-                doctorGroupReadService, coreEventDispatcher, doctorGroupWriteService);
-        this.doctorGroupEventDao = doctorGroupEventDao;
+                                        DoctorGroupDao doctorGroupDao,
+                                        DoctorGroupEventDao doctorGroupEventDao) {
+        super(doctorGroupSnapshotDao, doctorGroupTrackDao, coreEventDispatcher);
         this.doctorGroupDao = doctorGroupDao;
+        this.doctorGroupEventDao = doctorGroupEventDao;
     }
+
 
     @Override
     protected <I extends BaseGroupInput> void handleEvent(DoctorGroup group, DoctorGroupTrack groupTrack, I input) {

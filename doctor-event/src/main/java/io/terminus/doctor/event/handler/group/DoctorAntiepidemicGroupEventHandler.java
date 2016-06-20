@@ -2,7 +2,6 @@ package io.terminus.doctor.event.handler.group;
 
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.doctor.common.event.CoreEventDispatcher;
-import io.terminus.doctor.event.dao.DoctorGroupDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorGroupSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
@@ -13,8 +12,6 @@ import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
-import io.terminus.doctor.event.service.DoctorGroupReadService;
-import io.terminus.doctor.event.service.DoctorGroupWriteService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -32,15 +29,11 @@ public class DoctorAntiepidemicGroupEventHandler extends DoctorAbstractGroupEven
     private final DoctorGroupEventDao doctorGroupEventDao;
 
     @Autowired
-    public DoctorAntiepidemicGroupEventHandler(DoctorGroupDao doctorGroupDao,
-                                               DoctorGroupEventDao doctorGroupEventDao,
-                                               DoctorGroupSnapshotDao doctorGroupSnapshotDao,
+    public DoctorAntiepidemicGroupEventHandler(DoctorGroupSnapshotDao doctorGroupSnapshotDao,
                                                DoctorGroupTrackDao doctorGroupTrackDao,
-                                               DoctorGroupReadService doctorGroupReadService,
                                                CoreEventDispatcher coreEventDispatcher,
-                                               DoctorGroupWriteService doctorGroupWriteService) {
-        super(doctorGroupDao, doctorGroupEventDao, doctorGroupSnapshotDao, doctorGroupTrackDao,
-                doctorGroupReadService, coreEventDispatcher, doctorGroupWriteService);
+                                               DoctorGroupEventDao doctorGroupEventDao) {
+        super(doctorGroupSnapshotDao, doctorGroupTrackDao, coreEventDispatcher);
         this.doctorGroupEventDao = doctorGroupEventDao;
     }
 
