@@ -9,6 +9,7 @@ import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.user.dao.UserDaoExt;
 import io.terminus.doctor.user.dto.DoctorUserInfoDto;
 import io.terminus.doctor.user.enums.RoleType;
+import io.terminus.doctor.user.model.DoctorServiceStatus;
 import io.terminus.doctor.user.model.DoctorStaff;
 import io.terminus.doctor.user.model.DoctorUserDataPermission;
 import io.terminus.parana.user.impl.dao.UserDao;
@@ -43,18 +44,21 @@ public class DoctorUserReadServiceImpl extends UserReadServiceImpl implements Do
     private final DoctorStaffReadService doctorStaffReadService;
     private final DoctorUserDataPermissionReadService doctorUserDataPermissionReadService;
     private final UserProfileReadService userProfileReadService;
+    private final DoctorServiceStatusReadService doctorServiceStatusReadService;
 
     @Autowired
     public DoctorUserReadServiceImpl(UserDao userDao, DoctorStaffReadService doctorStaffReadService,
                                      DoctorUserDataPermissionReadService doctorUserDataPermissionReadService,
                                      UserProfileReadService userProfileReadService,
-                                     UserDaoExt userDaoExt) {
+                                     UserDaoExt userDaoExt,
+                                     DoctorServiceStatusReadService doctorServiceStatusReadService) {
         super(userDao);
         this.userDao = userDao;
         this.doctorStaffReadService = doctorStaffReadService;
         this.doctorUserDataPermissionReadService = doctorUserDataPermissionReadService;
         this.userProfileReadService = userProfileReadService;
         this.userDaoExt = userDaoExt;
+        this.doctorServiceStatusReadService = doctorServiceStatusReadService;
     }
 
     /**
@@ -133,7 +137,12 @@ public class DoctorUserReadServiceImpl extends UserReadServiceImpl implements Do
 
             //主账号
             if(Objects.equals(UserType.FARM_ADMIN_PRIMARY.value(), user.getType())){
-                return Response.ok(RoleType.MAIN.getValue());
+                DoctorServiceStatus serviceStatus = RespHelper.orServEx(doctorServiceStatusReadService.findByUserId(userId));
+                if(Objects.equals(DoctorServiceStatus.Status.OPENED.value(), serviceStatus.getPigdoctorStatus())){
+                    return Response.ok(RoleType.MAIN.getValue());
+                }else{
+                    return Response.ok(RoleType.MAIN_CLOSED.getValue());
+                }
             }
 
             //子账号

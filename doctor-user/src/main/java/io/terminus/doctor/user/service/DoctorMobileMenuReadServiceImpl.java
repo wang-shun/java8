@@ -40,6 +40,9 @@ public class DoctorMobileMenuReadServiceImpl implements DoctorMobileMenuReadServ
                 RoleType.MAIN, Lists.newArrayList(farmManage, staffManage, userInfo)
         );
         menuMap.put(
+                RoleType.MAIN_CLOSED, Lists.newArrayList(userInfo)
+        );
+        menuMap.put(
                 RoleType.SUB_SINGLE, Lists.newArrayList(userInfo)
         );
         menuMap.put(
