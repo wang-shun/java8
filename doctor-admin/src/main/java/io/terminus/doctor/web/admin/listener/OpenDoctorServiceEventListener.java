@@ -34,10 +34,9 @@ public class OpenDoctorServiceEventListener implements EventListener {
      */
     @Subscribe
     public void onFarmOpen(OpenDoctorServiceEvent event) {
-        List<DoctorFarm> farms = event.getFarms();
+        List<Long> farms = event.getFarmIds();
         for (int i = 0; farms != null && i < farms.size(); i++) {
-            DoctorFarm farm = farms.get(i);
-            doctorMessageRuleWriteService.initTemplate(farm.getId());
+            doctorMessageRuleWriteService.initTemplate(farms.get(i));
         }
     }
 }

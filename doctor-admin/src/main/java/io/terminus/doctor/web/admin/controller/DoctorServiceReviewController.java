@@ -70,7 +70,7 @@ public class DoctorServiceReviewController {
         RespHelper.or500(doctorServiceReviewService.openDoctorService(baseUser, dto.getUserId(), dto.getFarms()));
 
         //分发猪场软件已开通的事件
-        Response<List<DoctorFarm>> farmResp = doctorFarmReadService.findFarmsByUserId(dto.getUserId());
+        Response<List<Long>> farmResp = doctorFarmReadService.findFarmIdsByUserId(dto.getUserId());
         if(farmResp.isSuccess()){
             coreEventDispatcher.publish(new OpenDoctorServiceEvent(dto.getUserId(), farmResp.getResult()));
         }else{
