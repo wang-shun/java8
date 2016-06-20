@@ -7,6 +7,7 @@ import io.terminus.common.model.Response;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.user.dto.DoctorMenuDto;
 import io.terminus.doctor.user.enums.RoleType;
+import io.terminus.doctor.user.model.DoctorServiceStatus;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Desc: 菜单的读取
@@ -26,18 +28,25 @@ import java.util.Map;
 public class DoctorMobileMenuReadServiceImpl implements DoctorMobileMenuReadService {
 
     private final DoctorUserReadService doctorUserReadService;
+    private final DoctorServiceStatusReadService doctorServiceStatusReadService;
 
     private Map<RoleType, List<DoctorMenuDto>> menuMap = Maps.newHashMap();
 
 
     @Autowired
-    public DoctorMobileMenuReadServiceImpl(DoctorUserReadService doctorUserReadService, @Value("${doctor.url:default}")String url){
+    public DoctorMobileMenuReadServiceImpl(DoctorUserReadService doctorUserReadService,
+                                           DoctorServiceStatusReadService doctorServiceStatusReadService,
+                                           @Value("${doctor.url:default}")String url){
         this.doctorUserReadService = doctorUserReadService;
+        this.doctorServiceStatusReadService = doctorServiceStatusReadService;
         DoctorMenuDto userInfo = DoctorMenuDto.builder().name("个人信息").url(url+"/user/index").iconClass("icon_myfill").level(1).build();
         DoctorMenuDto staffManage = DoctorMenuDto.builder().name("员工管理").url(url+"/authority/manage-select").iconClass("icon_pengyoufill").level(1).build();
         DoctorMenuDto farmManage = DoctorMenuDto.builder().name("猪场管理").url(url+"/entry/mall").iconClass("icon_susheguanli").level(1).build();
         menuMap.put(
                 RoleType.MAIN, Lists.newArrayList(farmManage, staffManage, userInfo)
+        );
+        menuMap.put(
+                RoleType.MAIN_CLOSED, Lists.newArrayList(userInfo)
         );
         menuMap.put(
                 RoleType.SUB_SINGLE, Lists.newArrayList(userInfo)
@@ -52,6 +61,12 @@ public class DoctorMobileMenuReadServiceImpl implements DoctorMobileMenuReadServ
 
         try {
             RoleType roleType = RoleType.from(RespHelper.orServEx(doctorUserReadService.findUserRoleTypeByUserId(userId)));
+            if(Objects.equals(RoleType.MAIN, roleType)){
+                DoctorServiceStatus serviceStatus = RespHelper.orServEx(doctorServiceStatusReadService.findByUserId(userId));
+                if(!Objects.equals(DoctorServiceStatus.Status.OPENED.value(), serviceStatus.getPigdoctorStatus())){
+                    return Response.ok(menuMap.get(RoleType.MAIN_CLOSED));
+                }
+            }
             return Response.ok(menuMap.get(roleType));
         } catch (Exception e) {
             log.error("find menu role by user={} failed, cause:{}", userId, Throwables.getStackTraceAsString(e));
