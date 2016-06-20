@@ -522,7 +522,7 @@ public class OPUsers {
         Long userId = UserUtil.getUserId();
         for(UserDevice userDevice : OPRespHelper.orOPEx(deviceReadService.findByUserId(userId))){
             if(Objects.equals(userDevice.getDeviceToken(), deviceToken)){
-                deviceWriteService.delete(userDevice.getId());
+                OPRespHelper.orOPEx(deviceWriteService.delete(userDevice.getId()));
             }
         }
     }
