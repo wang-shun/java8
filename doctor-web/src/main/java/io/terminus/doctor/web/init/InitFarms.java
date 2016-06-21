@@ -65,7 +65,7 @@ public class InitFarms {
     @Autowired
     private DoctorOrgWriteService doctorOrgWriteService;
     @Autowired
-    private UserReadService<User> userUserReadService;
+    private UserReadService<User> userReadService;
     @Autowired
     private DoctorFarmReadService doctorFarmReadService;
     @Autowired
@@ -96,7 +96,7 @@ public class InitFarms {
      */
     @RequestMapping(value = "/farm", method = RequestMethod.GET)
     public Boolean initFarm(@RequestParam("userId") Long userId) {
-        User user = or500(userUserReadService.findById(userId));
+        User user = or500(userReadService.findById(userId));
         init(user);
         return Boolean.TRUE;
     }
