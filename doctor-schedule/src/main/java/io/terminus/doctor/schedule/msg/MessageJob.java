@@ -7,7 +7,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
 
 /**
  * Desc: 消息 job
@@ -15,7 +17,8 @@ import org.springframework.stereotype.Component;
  * Created by icemimosa
  * Date: 16/6/1
  */
-@Component
+@RestController
+@RequestMapping("/api/msg")
 @Configurable
 @EnableScheduling
 @Slf4j
@@ -31,6 +34,7 @@ public class MessageJob {
      * 产生消息
      */
     @Scheduled(cron = "0 */15 * * * ?")
+    @RequestMapping(value = "/produce", method = RequestMethod.GET)
     public void messageProduce() {
         try {
             if (!hostLeader.isLeader()) {
@@ -49,6 +53,7 @@ public class MessageJob {
      * 消费短信消息
      */
     @Scheduled(cron = "0 */15 * * * ?")
+    @RequestMapping(value = "/consume/sms", method = RequestMethod.GET)
     public void messageConsume() {
         try {
             if (!hostLeader.isLeader()) {
@@ -67,6 +72,7 @@ public class MessageJob {
      * 消费邮件消息
      */
     @Scheduled(cron = "0 */15 * * * ?")
+    @RequestMapping(value = "/consume/email", method = RequestMethod.GET)
     public void emailConsume() {
         try {
             if (!hostLeader.isLeader()) {
@@ -85,6 +91,7 @@ public class MessageJob {
      * 消费 app push 消息
      */
     @Scheduled(cron = "0 */15 * * * ?")
+    @RequestMapping(value = "/consume/app", method = RequestMethod.GET)
     public void appPushConsume() {
         try {
             if (!hostLeader.isLeader()) {
