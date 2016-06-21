@@ -99,7 +99,7 @@ public class OPDoctorUsers {
             //当前用户是子账号, 找他的主账号
             primaryUserId = OPRespHelper.orOPEx(primaryUserReadService.findSubByUserId(baseUser.getId())).getParentUserId();
         }else{
-            throw new JsonResponseException("authorize.fail");
+            throw new OPClientException("authorize.fail");
         }
         DoctorServiceReviewDto dto = new DoctorServiceReviewDto();
         dto.setUserId(primaryUserId);

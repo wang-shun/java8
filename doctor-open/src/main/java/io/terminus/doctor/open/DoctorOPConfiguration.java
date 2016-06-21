@@ -5,7 +5,6 @@
 package io.terminus.doctor.open;
 
 import io.terminus.doctor.common.DoctorCommonConfiguration;
-import io.terminus.doctor.open.common.MessageSources;
 import io.terminus.doctor.user.service.DoctorServiceStatusWriteService;
 import io.terminus.doctor.web.core.image.FileHelper;
 import io.terminus.doctor.web.core.msg.email.CommonEmailServiceConfig;
@@ -22,10 +21,12 @@ import io.terminus.parana.config.ConfigCenter;
 import io.terminus.parana.web.msg.config.MsgWebConfig;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.support.ReloadableResourceBundleMessageSource;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
 /**
@@ -46,8 +47,13 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 })
 public class DoctorOPConfiguration {
     @Bean
-    public MessageSources messageSources() {
-        return new MessageSources();
+    public MessageSource messageSource() {
+        ReloadableResourceBundleMessageSource messageSource = new ReloadableResourceBundleMessageSource();
+        messageSource.setBasename("classpath:messages");
+        messageSource.setCacheSeconds(3600);
+        messageSource.setUseCodeAsDefaultMessage(true);
+        messageSource.setDefaultEncoding("UTF-8");
+        return messageSource;
     }
 
     @Bean

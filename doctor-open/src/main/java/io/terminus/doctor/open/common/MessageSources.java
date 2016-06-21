@@ -3,6 +3,7 @@ package io.terminus.doctor.open.common;
 import io.terminus.pampas.openplatform.core.OPMessageSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
+import org.springframework.stereotype.Component;
 
 import java.util.Locale;
 
@@ -11,6 +12,7 @@ import java.util.Locale;
  * Date: 2016-03-21 6:42 PM  <br>
  * Author: xiao
  */
+@Component
 public class MessageSources implements OPMessageSource {
 
     @Autowired
