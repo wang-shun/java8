@@ -4,6 +4,7 @@ import io.terminus.common.mysql.dao.MyBatisDao;
 import io.terminus.doctor.event.model.DoctorPig;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -31,5 +32,9 @@ public class DoctorPigDao extends MyBatisDao<DoctorPig> {
      */
     public Boolean removalPig(Long id){
         return this.getSqlSession().update(sqlId("removalPig"), id) == 1;
+    }
+
+    public List<DoctorPig> findByFarmId(Long farmId) {
+        return getSqlSession().selectList("findByFarmId", farmId);
     }
 }

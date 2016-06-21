@@ -67,4 +67,11 @@ public interface DoctorPigReadService {
      * @return
      */
     Response<List<DoctorPigInfoDto>> queryDoctorPigInfoByBarnId(@NotNull(message = "input.barnId.empty") Long barnId);
+
+    /**
+     * 根据猪场id查询猪列表
+     * @param farmId 猪场id
+     * @return 猪列表
+     */
+    Response<List<DoctorPig>> findPigsByFarmId(@NotNull(message = "farmId.not.null") Long farmId);
 }

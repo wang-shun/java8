@@ -139,7 +139,7 @@ public interface JdbcAccess {
      * 创建一个流程实例
      * @param flowInstance
      */
-    void createFlowInstance(FlowInstance flowInstance);
+    Long createFlowInstance(FlowInstance flowInstance);
 
     /**
      * 更新一个流程实例
@@ -169,7 +169,7 @@ public interface JdbcAccess {
      * 创建当前活动节点
      * @param flowProcess
      */
-    void createFlowProcess(FlowProcess flowProcess);
+    Long createFlowProcess(FlowProcess flowProcess);
 
     /**
      * 更新活动节点
@@ -199,7 +199,7 @@ public interface JdbcAccess {
      * 创建当前活动节点跟踪
      * @param flowProcessTrack
      */
-    void createFlowProcessTrack(FlowProcessTrack flowProcessTrack);
+    Long createFlowProcessTrack(FlowProcessTrack flowProcessTrack);
     /**
      * 删除当前活动节点跟踪
      * @param flowProcessTrackId
@@ -239,7 +239,7 @@ public interface JdbcAccess {
      * 创建一个历史活动节点
      * @param flowHistoryProcess
      */
-    void createFlowHistoryProcess(FlowHistoryProcess flowHistoryProcess);
+    Long createFlowHistoryProcess(FlowHistoryProcess flowHistoryProcess);
     /** 历史活动节点公共查询接口 */
     List<FlowHistoryProcess> findFlowHistoryProcesses(FlowHistoryProcess flowHistoryProcess);
     List<FlowHistoryProcess> findFlowHistoryProcesses(Map criteria);

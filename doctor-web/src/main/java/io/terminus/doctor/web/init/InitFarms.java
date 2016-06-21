@@ -1,12 +1,16 @@
 package io.terminus.doctor.web.init;
 
 import com.google.common.base.MoreObjects;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import io.terminus.common.utils.Joiners;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.basic.service.DoctorBasicWriteService;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.dto.DoctorGroupDetail;
 import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
+import io.terminus.doctor.event.dto.DoctorPigInfoDetailDto;
 import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorGroup;
@@ -14,11 +18,16 @@ import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorGroupSnapshot;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
 import io.terminus.doctor.event.model.DoctorPig;
+import io.terminus.doctor.event.model.DoctorPigEvent;
+import io.terminus.doctor.event.model.DoctorPigSnapshot;
+import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.event.service.DoctorBarnReadService;
 import io.terminus.doctor.event.service.DoctorBarnWriteService;
 import io.terminus.doctor.event.service.DoctorGroupReadService;
 import io.terminus.doctor.event.service.DoctorGroupWriteService;
+import io.terminus.doctor.event.service.DoctorPigReadService;
 import io.terminus.doctor.event.service.DoctorPigTypeStatisticWriteService;
+import io.terminus.doctor.event.service.DoctorPigWriteService;
 import io.terminus.doctor.user.model.DoctorFarm;
 import io.terminus.doctor.user.model.DoctorOrg;
 import io.terminus.doctor.user.model.DoctorStaff;
@@ -28,6 +37,11 @@ import io.terminus.doctor.user.service.DoctorOrgReadService;
 import io.terminus.doctor.user.service.DoctorOrgWriteService;
 import io.terminus.doctor.user.service.DoctorStaffReadService;
 import io.terminus.doctor.user.service.DoctorStaffWriteService;
+import io.terminus.doctor.workflow.access.JdbcAccess;
+import io.terminus.doctor.workflow.model.FlowHistoryProcess;
+import io.terminus.doctor.workflow.model.FlowInstance;
+import io.terminus.doctor.workflow.model.FlowProcess;
+import io.terminus.doctor.workflow.model.FlowProcessTrack;
 import io.terminus.parana.user.model.User;
 import io.terminus.parana.user.service.UserReadService;
 import lombok.extern.slf4j.Slf4j;
@@ -43,7 +57,9 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
+import static io.terminus.common.utils.Arguments.notEmpty;
 import static io.terminus.doctor.common.utils.RespHelper.or500;
 
 /**
@@ -86,6 +102,12 @@ public class InitFarms {
     private DoctorGroupWriteService doctorGroupWriteService;
     @Autowired
     private DoctorPigTypeStatisticWriteService doctorPigTypeStatisticWriteService;
+    @Autowired
+    private DoctorPigReadService doctorPigReadService;
+    @Autowired
+    private DoctorPigWriteService doctorPigWriteService;
+    @Autowired
+    private JdbcAccess jdbcAccess;
 
     /**
      * 根据用户id初始化出所有的猪场相关数据(内测用)
@@ -125,7 +147,7 @@ public class InitFarms {
         initBarns(farm, staff);
 
         //6. 创建猪相关信息
-
+        initPigs(farm);
 
         //7. 创建猪群相关信息
         initGroups(farm, staff);
@@ -136,6 +158,7 @@ public class InitFarms {
         or500(doctorPigTypeStatisticWriteService.statisticPig(farm.getOrgId(), farm.getId(), DoctorPig.PIG_TYPE.SOW.getKey()));
 
         //9. 创建物料相关信息
+        // TODO: 16/6/21
     }
 
     private String getName(String name) {
@@ -181,10 +204,6 @@ public class InitFarms {
             barn.setStaffId(staff.getId());
             or500(doctorBarnWriteService.createBarn(barn));
         });
-    }
-
-    private void initPigs() {
-
     }
 
     private void initGroups(DoctorFarm farm, DoctorStaff staff) {
@@ -248,5 +267,109 @@ public class InitFarms {
                     .build()));
             or500(doctorGroupWriteService.createGroupSnapShot(groupSnapshot));
         });
+    }
+
+    //初始化猪
+    private void initPigs(DoctorFarm farm) {
+        or500(doctorPigReadService.findPigsByFarmId(farm.getId())).forEach(pig -> {
+            DoctorPigInfoDetailDto pigDetail = or500(doctorPigReadService.queryPigDetailInfoByPigId(pig.getId(), Integer.MAX_VALUE));
+            DoctorPigTrack pigTrack = pigDetail.getDoctorPigTrack();
+            List<DoctorPigEvent> events = pigDetail.getDoctorPigEvents();
+
+            //猪
+            pig.setOrgId(farm.getOrgId());
+            pig.setOrgName(farm.getOrgName());
+            pig.setFarmId(farm.getId());
+            pig.setFarmName(farm.getName());
+            DoctorBarn barn = getPigBarn(pig);
+            pig.setInitBarnId(barn.getId());
+            pig.setInitBarnName(barn.getName());
+            pig.setPigCode(getPigCode(pig.getPigType()));
+
+            Long oldPigId = pig.getId();
+            Long newPigId = or500(doctorPigWriteService.createPig(pig));
+            pig.setId(newPigId);
+
+            //猪事件
+            List<Long> eventIds = events.stream().map(event -> initPigEvent(event, farm, pig)).collect(Collectors.toList());
+
+            //猪跟踪
+            pigTrack.setPigId(newPigId);
+            pigTrack.setFarmId(farm.getId());
+            pigTrack.setCurrentBarnId(pig.getInitBarnId());
+            pigTrack.setCurrentBarnName(pig.getInitBarnName());
+            pigTrack.setRelEventIds(getRelEventIds(eventIds, pig, pigTrack));
+            Long pigTrackId = or500(doctorPigWriteService.createPigTrack(pigTrack));
+            pigTrack.setId(pigTrackId);
+
+            //猪镜像
+            DoctorPigSnapshot pigSnapshot = DoctorPigSnapshot.builder()
+                    .pigId(pig.getId()).farmId(pig.getFarmId()).orgId(pig.getOrgId()).eventId(Lists.reverse(eventIds).get(0)).build();
+            pigSnapshot.setPigInfoMap(ImmutableMap.of("doctorPigTrack", JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(pigTrack)));
+            or500(doctorPigWriteService.createPigSnapShot(pigSnapshot));
+
+            initWorkFlow(oldPigId, pig);
+        });
+    }
+
+    private Long initPigEvent(DoctorPigEvent event, DoctorFarm farm, DoctorPig pig) {
+        event.setOrgId(farm.getOrgId());
+        event.setOrgName(farm.getOrgName());
+        event.setFarmId(farm.getId());
+        event.setFarmName(farm.getName());
+        event.setPigId(pig.getId());
+        event.setPigCode(pig.getPigCode());
+        event.setEventAt(new Date());
+        event.setBarnId(pig.getInitBarnId());
+        event.setBarnName(pig.getInitBarnName());
+        return or500(doctorPigWriteService.createPigEvent(event));
+    }
+
+    //初始化工作流相关数据
+    private void initWorkFlow(Long oldPigId, DoctorPig pig) {
+        FlowInstance flowInstance = jdbcAccess.findFlowInstanceSingle(FlowInstance.builder().businessId(oldPigId).build());//获取流程实例
+        List<FlowProcess> flowProcesses = jdbcAccess.findFlowProcesses(FlowProcess.builder().flowInstanceId(flowInstance.getId()).build());
+        List<FlowProcessTrack> flowProcessTracks = jdbcAccess.findFlowProcessTracks(FlowProcessTrack.builder().flowInstanceId(flowInstance.getId()).build());
+        List<FlowHistoryProcess> flowHistoryProcesses = jdbcAccess.findFlowHistoryProcesses(FlowHistoryProcess.builder().flowInstanceId(flowInstance.getId()).build());
+
+        //流程实例
+        flowInstance.setBusinessId(pig.getId());
+        Long flowInstanceId = jdbcAccess.createFlowInstance(flowInstance);
+        flowInstance.setId(flowInstanceId);
+
+        //流程活动节点
+        flowProcesses.forEach(flowProcess -> {
+            flowProcess.setFlowInstanceId(flowInstanceId);
+            jdbcAccess.createFlowProcess(flowProcess);
+        });
+
+        //流程活动节点跟踪
+        flowProcessTracks.forEach(flowProcessTrack -> {
+            flowProcessTrack.setFlowInstanceId(flowInstanceId);
+            jdbcAccess.createFlowProcessTrack(flowProcessTrack);
+        });
+
+        //流程历史活动节点
+        flowHistoryProcesses.forEach(flowHistoryProcess -> {
+            flowHistoryProcess.setFlowInstanceId(flowInstanceId);
+            jdbcAccess.createFlowHistoryProcess(flowHistoryProcess);
+        });
+    }
+
+    private String getRelEventIds(List<Long> eventIds, DoctorPig pig, DoctorPigTrack pigTrack) {
+        if (DoctorPig.PIG_TYPE.SOW.getKey().equals(pig.getPigType())) {
+            return JsonMapper.nonEmptyMapper().toJson(ImmutableMap.of(pigTrack.getCurrentParity(), Joiners.COMMA.join(eventIds)));
+        }
+        return Joiners.COMMA.join(eventIds);
+    }
+
+    private String getPigCode(Integer pigType) {
+        return DoctorPig.PIG_TYPE.from(pigType).getDesc() + DateTime.now().toString(TIME);
+    }
+
+    private DoctorBarn getPigBarn(DoctorPig pig) {
+        DoctorBarn initBarn = or500(doctorBarnReadService.findBarnById(pig.getInitBarnId()));
+        List<DoctorBarn> barns = or500(doctorBarnReadService.findBarnsByEnums(pig.getFarmId(), initBarn.getPigType(), null, null));
+        return !notEmpty(barns) ? initBarn : barns.get(0);
     }
 }

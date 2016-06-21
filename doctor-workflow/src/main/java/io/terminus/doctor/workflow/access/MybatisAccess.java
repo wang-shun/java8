@@ -245,8 +245,9 @@ public class MybatisAccess implements JdbcAccess {
 
     /******************** 流程实例 相关 *******************************/
     @Override
-    public void createFlowInstance(FlowInstance flowInstance) {
+    public Long createFlowInstance(FlowInstance flowInstance) {
         flowInstanceDao.create(flowInstance);
+        return flowInstance.getId();
     }
 
     @Override
@@ -310,8 +311,9 @@ public class MybatisAccess implements JdbcAccess {
 
     /******************** 流程活动节点 相关 *******************************/
     @Override
-    public void createFlowProcess(FlowProcess flowProcess) {
+    public Long createFlowProcess(FlowProcess flowProcess) {
         flowProcessDao.create(flowProcess);
+        return flowProcess.getId();
     }
 
     @Override
@@ -376,8 +378,9 @@ public class MybatisAccess implements JdbcAccess {
 
     /******************** 流程活动节点追踪 相关 *******************************/
     @Override
-    public void createFlowProcessTrack(FlowProcessTrack flowProcessTrack) {
+    public Long createFlowProcessTrack(FlowProcessTrack flowProcessTrack) {
         flowProcessTrackDao.create(flowProcessTrack);
+        return flowProcessTrack.getId();
     }
 
     @Override
@@ -488,8 +491,9 @@ public class MybatisAccess implements JdbcAccess {
 
     /******************** 流程活动节点历史 相关 *******************************/
     @Override
-    public void createFlowHistoryProcess(FlowHistoryProcess flowHistoryProcess) {
+    public Long createFlowHistoryProcess(FlowHistoryProcess flowHistoryProcess) {
         flowHistoryProcessDao.create(flowHistoryProcess);
+        return flowHistoryProcess.getId();
     }
 
     @Override
