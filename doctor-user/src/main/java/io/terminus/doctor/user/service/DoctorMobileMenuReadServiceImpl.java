@@ -31,17 +31,16 @@ public class DoctorMobileMenuReadServiceImpl implements DoctorMobileMenuReadServ
     private final DoctorUserReadService doctorUserReadService;
     private final DoctorServiceStatusReadService doctorServiceStatusReadService;
     private final DoctorUserDataPermissionReadService doctorUserDataPermissionReadService;
-    @Value("${doctor.url:default}")
-    private String url;
 
-    private DoctorMenuDto userInfo;
-    private DoctorMenuDto staffManage;
-    private DoctorMenuDto farmManageMultiple;
+    private final DoctorMenuDto userInfo;
+    private final DoctorMenuDto staffManage;
+    private final DoctorMenuDto farmManageMultiple;
 
     @Autowired
     public DoctorMobileMenuReadServiceImpl(DoctorUserReadService doctorUserReadService,
                                            DoctorServiceStatusReadService doctorServiceStatusReadService,
-                                           DoctorUserDataPermissionReadService doctorUserDataPermissionReadService){
+                                           DoctorUserDataPermissionReadService doctorUserDataPermissionReadService,
+                                           @Value("${doctor.url:default}") String url){
         this.doctorUserReadService = doctorUserReadService;
         this.doctorServiceStatusReadService = doctorServiceStatusReadService;
         this.doctorUserDataPermissionReadService = doctorUserDataPermissionReadService;
