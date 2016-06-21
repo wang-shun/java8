@@ -80,7 +80,7 @@ public interface DoctorGroupReadService {
      * @return 统计结果
      */
     Response<DoctorGroupCount> countFarmGroups(@NotNull(message = "orgId.not.null") Long orgId,
-                                              @NotNull(message = "farmId.not.nulll") Long farmId);
+                                              @NotNull(message = "farmId.not.null") Long farmId);
 
     /**
      * 分页查询猪群历史事件
