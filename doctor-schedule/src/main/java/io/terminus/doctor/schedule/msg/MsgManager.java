@@ -170,6 +170,8 @@ public class MsgManager {
                 // 获取用户信息
                 map = JsonMapper.JSON_NON_DEFAULT_MAPPER.fromJson(message.getData(), Map.class);
                 map.put("after_open", "go_url");
+                map.put("title", message.getTemplateName());
+                map.put("ticker", message.getTemplateName());
                 map.put("url", getAppUrl(message.getUrl(), message.getId())); // 设置回调url
                 // 推送消息
                 if (message.getUserId() != null) {
