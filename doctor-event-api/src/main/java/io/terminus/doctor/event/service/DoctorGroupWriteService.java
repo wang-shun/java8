@@ -13,6 +13,9 @@ import io.terminus.doctor.event.dto.event.group.input.DoctorTransFarmGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorTransGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorTurnSeedGroupInput;
 import io.terminus.doctor.event.model.DoctorGroup;
+import io.terminus.doctor.event.model.DoctorGroupEvent;
+import io.terminus.doctor.event.model.DoctorGroupSnapshot;
+import io.terminus.doctor.event.model.DoctorGroupTrack;
 
 import javax.validation.Valid;
 
@@ -108,4 +111,9 @@ public interface DoctorGroupWriteService {
      * @return 是否成功
      */
     Response<Boolean> incrDayAge();
+
+    Response<Long> createGroup(DoctorGroup group);
+    Response<Long> createGroupTrack(DoctorGroupTrack groupTrack);
+    Response<Long> createGroupEvent(DoctorGroupEvent groupEvent);
+    Response<Long> createGroupSnapShot(DoctorGroupSnapshot groupSnapshot);
 }

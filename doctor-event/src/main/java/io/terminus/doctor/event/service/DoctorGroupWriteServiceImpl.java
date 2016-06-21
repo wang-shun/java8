@@ -4,6 +4,8 @@ import com.google.common.base.Throwables;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.event.dao.DoctorGroupDao;
+import io.terminus.doctor.event.dao.DoctorGroupEventDao;
+import io.terminus.doctor.event.dao.DoctorGroupSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
 import io.terminus.doctor.event.dto.DoctorGroupDetail;
 import io.terminus.doctor.event.dto.event.group.input.DoctorAntiepidemicGroupInput;
@@ -27,6 +29,9 @@ import io.terminus.doctor.event.handler.group.DoctorTransGroupEventHandler;
 import io.terminus.doctor.event.manager.DoctorGroupEventManager;
 import io.terminus.doctor.event.manager.DoctorGroupManager;
 import io.terminus.doctor.event.model.DoctorGroup;
+import io.terminus.doctor.event.model.DoctorGroupEvent;
+import io.terminus.doctor.event.model.DoctorGroupSnapshot;
+import io.terminus.doctor.event.model.DoctorGroupTrack;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -51,16 +56,22 @@ public class DoctorGroupWriteServiceImpl implements DoctorGroupWriteService {
     private final DoctorGroupTrackDao doctorGroupTrackDao;
     private final DoctorGroupManager doctorGroupManager;
     private final DoctorGroupEventManager doctorGroupEventManager;
+    private final DoctorGroupEventDao doctorGroupEventDao;
+    private final DoctorGroupSnapshotDao doctorGroupSnapshotDao;
 
     @Autowired
     public DoctorGroupWriteServiceImpl(DoctorGroupDao doctorGroupDao,
                                        DoctorGroupTrackDao doctorGroupTrackDao,
                                        DoctorGroupManager doctorGroupManager,
-                                       DoctorGroupEventManager doctorGroupEventManager) {
+                                       DoctorGroupEventManager doctorGroupEventManager,
+                                       DoctorGroupEventDao doctorGroupEventDao,
+                                       DoctorGroupSnapshotDao doctorGroupSnapshotDao) {
         this.doctorGroupDao = doctorGroupDao;
         this.doctorGroupTrackDao = doctorGroupTrackDao;
         this.doctorGroupManager = doctorGroupManager;
         this.doctorGroupEventManager = doctorGroupEventManager;
+        this.doctorGroupEventDao = doctorGroupEventDao;
+        this.doctorGroupSnapshotDao = doctorGroupSnapshotDao;
     }
 
     @Override
@@ -213,6 +224,50 @@ public class DoctorGroupWriteServiceImpl implements DoctorGroupWriteService {
         } catch (Exception e) {
             log.error("incr day age failed, cause:{}", Throwables.getStackTraceAsString(e));
             return Response.fail("incr.group.dayAge.fail");
+        }
+    }
+
+    @Override
+    public Response<Long> createGroup(DoctorGroup group) {
+        try {
+            doctorGroupDao.create(group);
+            return Response.ok(group.getId());
+        } catch (Exception e) {
+            log.error("create group failed, group:{}, cause:{}", group, Throwables.getStackTraceAsString(e));
+            return Response.fail("group.create.fail");
+        }
+    }
+
+    @Override
+    public Response<Long> createGroupTrack(DoctorGroupTrack groupTrack) {
+        try {
+            doctorGroupTrackDao.create(groupTrack);
+            return Response.ok(groupTrack.getId());
+        } catch (Exception e) {
+            log.error("create groupTrack failed, groupTrack:{}, cause:{}", groupTrack, Throwables.getStackTraceAsString(e));
+            return Response.fail("groupTrack.create.fail");
+        }
+    }
+
+    @Override
+    public Response<Long> createGroupEvent(DoctorGroupEvent groupEvent) {
+        try {
+            doctorGroupEventDao.create(groupEvent);
+            return Response.ok(groupEvent.getId());
+        } catch (Exception e) {
+            log.error("create groupEvent failed, groupEvent:{}, cause:{}", groupEvent, Throwables.getStackTraceAsString(e));
+            return Response.fail("groupEvent.create.fail");
+        }
+    }
+
+    @Override
+    public Response<Long> createGroupSnapShot(DoctorGroupSnapshot groupSnapshot) {
+        try {
+            doctorGroupSnapshotDao.create(groupSnapshot);
+            return Response.ok(groupSnapshot.getId());
+        } catch (Exception e) {
+            log.error("create groupSnapshot failed, groupSnapshot:{}, cause:{}", groupSnapshot, Throwables.getStackTraceAsString(e));
+            return Response.fail("groupSnapshot.create.fail");
         }
     }
 }
