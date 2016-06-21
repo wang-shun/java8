@@ -18,7 +18,7 @@ public class DoctorFarm implements Serializable {
     private Long id;
     
     /**
-     * 公司名称
+     * 猪场名称
      */
     private String name;
     

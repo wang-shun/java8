@@ -38,7 +38,6 @@ public class DoctorUserDataPermissionWriteServiceImpl implements DoctorUserDataP
         Response<Long> response = new Response<>();
         try {
             doctorUserDataPermissionDao.create(dataPermission);
-            this.publish(dataPermission.getUserId());
             response.setResult(dataPermission.getId());
         } catch (Exception e) {
             log.error("createDataPermission failed, cause : {}", Throwables.getStackTraceAsString(e));

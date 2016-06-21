@@ -45,25 +45,25 @@ public class CacheCenter {
     }
 
     //cache, key = userId, value = permission
-    private LoadingCache<Long, Optional<DoctorUserDataPermission>> permissionLoadingCache;
+    private LoadingCache<Long, DoctorUserDataPermission> permissionLoadingCache;
     //cache, key = userId, value = DoctorOrg
-    private LoadingCache<Long, Optional<DoctorStaff>> staffLoadingCache;
+    private LoadingCache<Long, DoctorStaff> staffLoadingCache;
 
     @PostConstruct
     public void initCache(){
         //初始化数据权限缓存对象
-        permissionLoadingCache = CacheBuilder.newBuilder().build(new CacheLoader<Long, Optional<DoctorUserDataPermission>>() {
+        permissionLoadingCache = CacheBuilder.newBuilder().build(new CacheLoader<Long, DoctorUserDataPermission>() {
             @Override
-            public Optional<DoctorUserDataPermission> load(Long userId) throws Exception {
-                return Optional.fromNullable(doctorUserDataPermissionDao.findByUserId(userId));
+            public DoctorUserDataPermission load(Long userId) throws Exception {
+                return doctorUserDataPermissionDao.findByUserId(userId);
             }
         });
 
         //初始化员工信息缓存对象
-        staffLoadingCache = CacheBuilder.newBuilder().build(new CacheLoader<Long, Optional<DoctorStaff>>() {
+        staffLoadingCache = CacheBuilder.newBuilder().build(new CacheLoader<Long, DoctorStaff>() {
             @Override
-            public Optional<DoctorStaff> load(Long userId) throws Exception {
-                return Optional.fromNullable(doctorStaffDao.findByUserId(userId));
+            public DoctorStaff load(Long userId) throws Exception {
+                return doctorStaffDao.findByUserId(userId);
             }
         });
 
@@ -89,7 +89,11 @@ public class CacheCenter {
     }
 
     public DoctorUserDataPermission getUserDataPermission(Long userId){
-        return permissionLoadingCache.getUnchecked(userId).orNull();
+        try{
+            return permissionLoadingCache.get(userId);
+        }catch(Exception e){
+            return null;
+        }
     }
 
     public void invalidateStaff(Long userId){
@@ -97,6 +101,10 @@ public class CacheCenter {
     }
 
     public DoctorStaff getStaff(Long userId){
-        return staffLoadingCache.getUnchecked(userId).orNull();
+        try{
+            return staffLoadingCache.get(userId);
+        }catch(Exception e){
+            return null;
+        }
     }
 }

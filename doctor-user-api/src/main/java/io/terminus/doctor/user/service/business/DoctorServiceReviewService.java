@@ -29,10 +29,9 @@ public interface DoctorServiceReviewService {
      * @param user 登录者
      * @param userId 被操作的用户
      * @param farms 猪场名称
-     * @param org 公司名称
      * @return
      */
-    Response<Boolean> openDoctorService(BaseUser user, Long userId, List<DoctorFarm> farms, DoctorOrg org);
+    Response<Boolean> openDoctorService(BaseUser user, Long userId, List<DoctorFarm> farms);
 
     /**
      * 开通服务, 更新服务状态并保存状态变更历史记录
@@ -60,4 +59,11 @@ public interface DoctorServiceReviewService {
      * @return
      */
     Response<Boolean> frozeApply(BaseUser user, Long userId, DoctorServiceReview.Type type, String reason);
+
+    /**
+     * 用于项目初期快速给用户开通服务, 运营端上线后就删除
+     * @param userId
+     * @return
+     */
+    Response<Boolean> openServiceDemo(Long userId);
 }

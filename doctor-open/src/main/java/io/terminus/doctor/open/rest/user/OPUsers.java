@@ -13,7 +13,6 @@ import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.Response;
 import io.terminus.common.utils.MapBuilder;
 import io.terminus.common.utils.Splitters;
-import io.terminus.doctor.common.enums.UserRole;
 import io.terminus.doctor.common.enums.UserStatus;
 import io.terminus.doctor.common.enums.UserType;
 import io.terminus.doctor.common.event.CoreEventDispatcher;
@@ -22,6 +21,7 @@ import io.terminus.doctor.open.common.CaptchaGenerator;
 import io.terminus.doctor.open.common.MobilePattern;
 import io.terminus.doctor.open.common.Sessions;
 import io.terminus.doctor.open.enums.MobileDeviceType;
+import io.terminus.doctor.open.util.OPRespHelper;
 import io.terminus.doctor.user.util.DoctorUserMaker;
 import io.terminus.doctor.web.core.events.user.RegisterEvent;
 import io.terminus.lib.sms.SmsException;
@@ -33,6 +33,7 @@ import io.terminus.parana.common.utils.EncryptUtil;
 import io.terminus.parana.user.model.LoginType;
 import io.terminus.parana.user.model.User;
 import io.terminus.parana.user.model.UserDevice;
+import io.terminus.parana.user.service.DeviceReadService;
 import io.terminus.parana.user.service.DeviceWriteService;
 import io.terminus.parana.user.service.UserReadService;
 import io.terminus.parana.user.service.UserWriteService;
@@ -47,20 +48,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.Base64Utils;
 import org.springframework.web.bind.annotation.RequestMethod;
 
-import javax.annotation.PostConstruct;
 import java.io.Serializable;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
-import static io.terminus.common.utils.Arguments.isEmpty;
-import static io.terminus.common.utils.Arguments.isNull;
-import static io.terminus.common.utils.Arguments.notNull;
+import static io.terminus.common.utils.Arguments.*;
 
 /**
  * Mail: xiao@terminus.io <br>
@@ -97,6 +91,8 @@ public class OPUsers {
     private MobilePattern mobilePattern;
     @Autowired
     private CoreEventDispatcher coreEventDispatcher;
+    @Autowired
+    private DeviceReadService deviceReadService;
 
     public OPUsers() {
         String hostIp;
@@ -500,27 +496,40 @@ public class OPUsers {
         if(type == null){
             throw new OPClientException("device.type.error");
         }
+        Long userId = UserUtil.getUserId();
+
+        //先查询下是否已经有绑定
+        for(UserDevice userDevice : OPRespHelper.orOPEx(deviceReadService.findByUserId(userId))){
+            if(Objects.equals(userDevice.getDeviceToken(), deviceToken)){
+                return;
+            }
+        }
+
+        //没有重复数据,则添加新数据
         UserDevice userDevice = new UserDevice();
-        userDevice.setUserId(UserUtil.getUserId());
+        userDevice.setUserId(userId);
         userDevice.setUserName(UserUtil.getCurrentUser().getName());
         userDevice.setDeviceToken(deviceToken);
         userDevice.setDeviceType(type.name().toLowerCase());
-        Response<Long> res = deviceWriteService.create(userDevice);
-        if (!res.isSuccess()) {
-            throw new OPClientException(res.getError());
+        OPRespHelper.orOPEx(deviceWriteService.create(userDevice));
+    }
+
+    @OpenMethod(key="user.device.unbind", paramNames = {"deviceToken"})
+    public void unbindDevice(String deviceToken){
+        if (isEmpty(deviceToken)) {
+            throw new OPClientException("device.token.miss");
+        }
+        Long userId = UserUtil.getUserId();
+        for(UserDevice userDevice : OPRespHelper.orOPEx(deviceReadService.findByUserId(userId))){
+            if(Objects.equals(userDevice.getDeviceToken(), deviceToken)){
+                OPRespHelper.orOPEx(deviceWriteService.delete(userDevice.getId()));
+            }
         }
     }
 
     @OpenMethod(key="user.logout", paramNames = {"sid"})
     public void logout(String sessionId) {
         sessionManager.deletePhysically(Sessions.TOKEN_PREFIX, sessionId);
-
-        // unbind user device
-        Long uid = UserUtil.getUserId();
-        Response<Integer> res = deviceWriteService.deleteByUserIdAndDeviceType(uid, "app");
-        if (!res.isSuccess()) {
-            throw new OPClientException("user.device.unbind.fail");
-        }
     }
 
     /**

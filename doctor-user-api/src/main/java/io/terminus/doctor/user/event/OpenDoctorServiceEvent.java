@@ -5,7 +5,6 @@
 package io.terminus.doctor.user.event;
 
 
-import io.terminus.doctor.user.model.DoctorFarm;
 import lombok.Getter;
 
 import java.util.List;
@@ -17,8 +16,8 @@ import java.util.List;
  */
 public class OpenDoctorServiceEvent {
 
-    public OpenDoctorServiceEvent(Long userId, List<DoctorFarm> farms){
-        this.farms = farms;
+    public OpenDoctorServiceEvent(Long userId, List<Long> farmIds){
+        this.farmIds = farmIds;
         this.userId = userId;
     }
 
@@ -26,7 +25,7 @@ public class OpenDoctorServiceEvent {
      * 开通猪场软件时运营人员为用户添加的猪场
      */
     @Getter
-    private List<DoctorFarm> farms;
+    private List<Long> farmIds;
 
     @Getter
     private Long userId;

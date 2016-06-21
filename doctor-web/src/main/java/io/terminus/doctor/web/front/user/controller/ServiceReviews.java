@@ -16,13 +16,15 @@ import io.terminus.doctor.web.core.dto.ServiceBetaStatusToken;
 import io.terminus.doctor.web.core.service.ServiceBetaStatusHandler;
 import io.terminus.pampas.common.UserUtil;
 import io.terminus.parana.common.utils.RespHelper;
+import io.terminus.parana.user.model.LoginType;
+import io.terminus.parana.user.model.User;
+import io.terminus.parana.user.service.UserReadService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 @Slf4j
 @RestController
@@ -36,16 +38,18 @@ public class ServiceReviews {
     private final DoctorServiceStatusReadService doctorServiceStatusReadService;
     private final PrimaryUserReadService primaryUserReadService;
     private final ServiceBetaStatusHandler serviceBetaStatusHandler;
+    private final UserReadService<User> userReadService;
 
     @Autowired
     public ServiceReviews(DoctorServiceReviewReadService doctorServiceReviewReadService,
-                         DoctorServiceReviewWriteService doctorServiceReviewWriteService,
-                         DoctorUserReadService doctorUserReadService,
-                         DoctorServiceReviewService doctorServiceReviewService,
-                         DoctorOrgReadService doctorOrgReadService,
-                         DoctorServiceStatusReadService doctorServiceStatusReadService,
-                         PrimaryUserReadService primaryUserReadService,
-                         ServiceBetaStatusHandler serviceBetaStatusHandler) {
+                          DoctorServiceReviewWriteService doctorServiceReviewWriteService,
+                          DoctorUserReadService doctorUserReadService,
+                          DoctorServiceReviewService doctorServiceReviewService,
+                          DoctorOrgReadService doctorOrgReadService,
+                          DoctorServiceStatusReadService doctorServiceStatusReadService,
+                          PrimaryUserReadService primaryUserReadService,
+                          ServiceBetaStatusHandler serviceBetaStatusHandler,
+                          UserReadService<User> userReadService) {
         this.doctorServiceReviewReadService = doctorServiceReviewReadService;
         this.doctorServiceReviewWriteService = doctorServiceReviewWriteService;
         this.doctorUserReadService = doctorUserReadService;
@@ -54,6 +58,7 @@ public class ServiceReviews {
         this.doctorServiceStatusReadService = doctorServiceStatusReadService;
         this.primaryUserReadService = primaryUserReadService;
         this.serviceBetaStatusHandler = serviceBetaStatusHandler;
+        this.userReadService = userReadService;
     }
 
     /**
@@ -133,5 +138,13 @@ public class ServiceReviews {
     @ResponseBody
     public List<DoctorMenuDto> getUserLevelOneMenu() {
         return Lists.newArrayList();
+    }
+
+    //TODO 用于项目初期快速给用户开通服务, 运营端上线后就删除,只需要手机号这一个参数就行了
+    @RequestMapping(value = "/openServiceDemo", method = RequestMethod.GET)
+    public boolean openServiceDemo(@RequestParam String mobile){
+        User user = RespHelper.or500(userReadService.findBy(mobile, LoginType.MOBILE));
+        RespHelper.or500(doctorServiceReviewService.openServiceDemo(user.getId()));
+        return true;
     }
 }
