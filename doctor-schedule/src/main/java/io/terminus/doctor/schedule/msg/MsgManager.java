@@ -124,7 +124,7 @@ public class MsgManager {
                 }
             } catch (Exception e) {
                 log.error("msg message send error, cause by {}", Throwables.getStackTraceAsString(e));
-                message.setFailedBy("msg message send error, context is " + map + ", cause by " + Throwables.getStackTraceAsString(e));
+                message.setFailedBy("msg message send error, context is " + map + ", cause by " + e.getMessage());
                 message.setStatus(DoctorMessage.Status.FAILED.getValue());
             }
             doctorMessageWriteService.updateMessage(message);
@@ -151,7 +151,7 @@ public class MsgManager {
                 }
             } catch (Exception e) {
                 log.error("email message send error, cause by {}", Throwables.getStackTraceAsString(e));
-                message.setFailedBy("email message send error, context is " + map + ", cause by " + Throwables.getStackTraceAsString(e));
+                message.setFailedBy("email message send error, context is " + map + ", cause by " + e.getMessage());
                 message.setStatus(DoctorMessage.Status.FAILED.getValue());
             }
             doctorMessageWriteService.updateMessage(message);
@@ -178,7 +178,7 @@ public class MsgManager {
                 }
             } catch (Exception e) {
                 log.error("app push message send error, context is {}, cause by {}", map, Throwables.getStackTraceAsString(e));
-                message.setFailedBy("app push message send error, context is " + map + ", cause by " + Throwables.getStackTraceAsString(e));
+                message.setFailedBy("app push message send error, context is " + map + ", cause by " + e.getMessage());
                 message.setStatus(DoctorMessage.Status.FAILED.getValue());
             }
             doctorMessageWriteService.updateMessage(message);
