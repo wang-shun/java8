@@ -135,4 +135,7 @@
 
     <!--statistic-->
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.event.service.DoctorPigTypeStatisticWriteService" id="doctorPigTypeStatisticWriteService" check="false"/>
+
+    <!--work-flow-->
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.workflow.access.JdbcAccess" id="jdbcAccess" check="false"/>
 </beans>

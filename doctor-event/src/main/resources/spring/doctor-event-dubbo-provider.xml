@@ -16,6 +16,7 @@
 
     <!-- workflow api -->
     <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.workflow.core.WorkFlowService" ref="workFlowServiceImpl" />
+    <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.workflow.access.JdbcAccess" ref="mybatisAccess" />
 
     <!-- search api -->
     <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.event.search.pig.PigSearchReadService" ref="pigSearchReadServiceImpl" />
