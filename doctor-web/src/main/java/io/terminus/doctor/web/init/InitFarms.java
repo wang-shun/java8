@@ -1,8 +1,8 @@
 package io.terminus.doctor.web.init;
 
+import com.google.common.base.MoreObjects;
 import com.google.common.collect.Maps;
 import io.terminus.common.utils.JsonMapper;
-import io.terminus.doctor.basic.service.DoctorBasicReadService;
 import io.terminus.doctor.basic.service.DoctorBasicWriteService;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.dto.DoctorGroupDetail;
@@ -71,8 +71,6 @@ public class InitFarms {
     @Autowired
     private DoctorFarmWriteService doctorFarmWriteService;
     @Autowired
-    private DoctorBasicReadService doctorBasicReadService;
-    @Autowired
     private DoctorBasicWriteService doctorBasicWriteService;
     @Autowired
     private DoctorBarnReadService doctorBarnReadService;
@@ -95,7 +93,7 @@ public class InitFarms {
      * @return  是否成功
      */
     @RequestMapping(value = "/farm", method = RequestMethod.GET)
-    public Boolean initFarm(@RequestParam("userId") Long userId) {
+    public Boolean initAllDataByUserId(@RequestParam("userId") Long userId) {
         User user = or500(userReadService.findById(userId));
         init(user);
         return Boolean.TRUE;
@@ -146,12 +144,10 @@ public class InitFarms {
 
     private DoctorOrg initOrg(User user) {
         DoctorOrg org = or500(doctorOrgReadService.findOrgById(INIT_ID));
-        if (org == null) {
-            org = or500(doctorOrgReadService.findOrgById(INIT_ID));
-            org.setName(getName(org.getName()));
-            org.setMobile(user.getMobile());
-            or500(doctorOrgWriteService.createOrg(org));
-        }
+        org.setName(getName(org.getName()));
+        org.setMobile(user.getMobile());
+        Long orgId = or500(doctorOrgWriteService.createOrg(org));
+        org.setId(orgId);
         return org;
     }
 
@@ -160,7 +156,8 @@ public class InitFarms {
         farm.setOrgId(org.getId());
         farm.setOrgName(org.getName());
         farm.setName(getName(farm.getName()));
-        or500(doctorFarmWriteService.createFarm(farm));
+        Long farmId = or500(doctorFarmWriteService.createFarm(farm));
+        farm.setId(farmId);
         return farm;
     }
 
@@ -169,7 +166,8 @@ public class InitFarms {
         staff.setUserId(user.getId());
         staff.setOrgId(farm.getOrgId());
         staff.setOrgName(farm.getOrgName());
-        or500(doctorStaffWriteService.createDoctorStaff(staff));
+        Long staffId = or500(doctorStaffWriteService.createDoctorStaff(staff));
+        staff.setId(staffId);
         return staff;
     }
 
@@ -211,6 +209,7 @@ public class InitFarms {
             group.setCurrentBarnName(barn.getName());
             group.setStaffId(staff.getId());
             Long groupId = or500(doctorGroupWriteService.createGroup(group));
+            group.setId(groupId);
 
             //copy 猪群事件(模板里只有两个事件:新建猪群和转入猪群)
             Map<Integer, DoctorGroupEvent> eventMap = Maps.newHashMap();
@@ -224,16 +223,18 @@ public class InitFarms {
                 event.setGroupCode(group.getGroupCode());
                 event.setBarnId(barn.getId());
                 event.setBarnName(barn.getName());
-                or500(doctorGroupWriteService.createGroupEvent(event));
+                Long eventId = or500(doctorGroupWriteService.createGroupEvent(event));
+                event.setId(eventId);
                 eventMap.put(event.getType(), event);
             });
 
             //copy 猪群跟踪
-            DoctorGroupEvent event = eventMap.get(GroupEventType.MOVE_IN.getValue());
+            DoctorGroupEvent event = MoreObjects.firstNonNull(eventMap.get(GroupEventType.MOVE_IN.getValue()), eventMap.get(GroupEventType.NEW.getValue()));
             DoctorGroupTrack groupTrack = groupDetail.getGroupTrack();
             groupTrack.setGroupId(groupId);
             groupTrack.setRelEventId(event.getId());
-            or500(doctorGroupWriteService.createGroupTrack(groupTrack));
+            Long groupTrackId = or500(doctorGroupWriteService.createGroupTrack(groupTrack));
+            groupTrack.setId(groupTrackId);
 
             //copy 猪群镜像
             DoctorGroupSnapshot groupSnapshot = new DoctorGroupSnapshot();
