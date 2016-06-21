@@ -35,7 +35,6 @@ import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -111,7 +110,6 @@ public class InitFarms {
         return Boolean.TRUE;
     }
 
-    @Transactional
     private void init(User user) {
         //1. 判断是否创建公司
         DoctorOrg org = initOrg(user);

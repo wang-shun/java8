@@ -16,12 +16,6 @@
     <artifactId>doctor-web</artifactId>
 
     <dependencies>
-        <!--为了InitFarms测试, 暂时先引入spring事务依赖-->
-        <dependency>
-            <groupId>io.terminus.boot</groupId>
-            <artifactId>spring-boot-starter-datasource</artifactId>
-        </dependency>
-
         <!-- doctor -->
         <dependency>
             <groupId>io.terminus.doctor</groupId>
