@@ -372,4 +372,9 @@ public class InitFarms {
         List<DoctorBarn> barns = or500(doctorBarnReadService.findBarnsByEnums(pig.getFarmId(), initBarn.getPigType(), null, null));
         return !notEmpty(barns) ? initBarn : barns.get(0);
     }
+
+//    @Override
+    public void run(String... strings) throws Exception {
+        initAllDataByUserId(23L);
+    }
 }
