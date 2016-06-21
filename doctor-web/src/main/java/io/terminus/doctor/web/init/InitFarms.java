@@ -52,7 +52,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Date;
 import java.util.List;
@@ -69,7 +68,7 @@ import static io.terminus.doctor.common.utils.RespHelper.or500;
  * Date: 16/6/21
  */
 @Slf4j
-@RestController
+//@RestController
 @RequestMapping("/api/test/init")
 public class InitFarms {
 
