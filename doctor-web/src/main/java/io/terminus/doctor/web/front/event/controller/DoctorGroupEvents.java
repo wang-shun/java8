@@ -6,6 +6,7 @@ import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dto.DoctorGroupDetail;
 import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
 import io.terminus.doctor.event.dto.event.group.input.DoctorNewGroupInput;
+import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.service.DoctorGroupReadService;
 import io.terminus.doctor.web.front.auth.DoctorFarmAuthCenter;
@@ -20,6 +21,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * Desc:
@@ -129,5 +132,17 @@ public class DoctorGroupEvents {
     @RequestMapping(value = "/snapshot", method = RequestMethod.GET)
     public DoctorGroupSnapShotInfo findGroupSnapShotByGroupId(@RequestParam("groupId") Long groupId) {
         return RespHelper.or500(doctorGroupReadService.findGroupSnapShotByGroupId(groupId));
+    }
+
+    /**
+     * 查询已建群的猪群
+     * @param farmId 猪场id
+     * @return 猪群
+     */
+    @RequestMapping(value = "/open", method = RequestMethod.GET)
+    public List<DoctorGroup> findOpenGroupsByFarmId(@RequestParam("farmId") Long farmId) {
+        return RespHelper.or500(doctorGroupReadService.findGroupsByFarmId(farmId)).stream()
+                .filter(group -> Objects.equals(DoctorGroup.Status.CREATED.getValue(), group.getStatus()))
+                .collect(Collectors.toList());
     }
 }

@@ -1,10 +1,24 @@
 package io.terminus.doctor.web.init;
 
+import com.google.common.collect.Maps;
+import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.basic.service.DoctorBasicReadService;
 import io.terminus.doctor.basic.service.DoctorBasicWriteService;
+import io.terminus.doctor.common.utils.DateUtil;
+import io.terminus.doctor.event.dto.DoctorGroupDetail;
+import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
+import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.model.DoctorBarn;
+import io.terminus.doctor.event.model.DoctorGroup;
+import io.terminus.doctor.event.model.DoctorGroupEvent;
+import io.terminus.doctor.event.model.DoctorGroupSnapshot;
+import io.terminus.doctor.event.model.DoctorGroupTrack;
+import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.service.DoctorBarnReadService;
 import io.terminus.doctor.event.service.DoctorBarnWriteService;
+import io.terminus.doctor.event.service.DoctorGroupReadService;
+import io.terminus.doctor.event.service.DoctorGroupWriteService;
+import io.terminus.doctor.event.service.DoctorPigTypeStatisticWriteService;
 import io.terminus.doctor.user.model.DoctorFarm;
 import io.terminus.doctor.user.model.DoctorOrg;
 import io.terminus.doctor.user.model.DoctorStaff;
@@ -21,13 +35,14 @@ import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import static io.terminus.doctor.common.utils.RespHelper.or500;
 
@@ -50,7 +65,7 @@ public class InitFarms {
     @Autowired
     private DoctorOrgWriteService doctorOrgWriteService;
     @Autowired
-    private UserReadService<User> userUserReadService;
+    private UserReadService<User> userReadService;
     @Autowired
     private DoctorFarmReadService doctorFarmReadService;
     @Autowired
@@ -67,7 +82,12 @@ public class InitFarms {
     private DoctorStaffReadService doctorStaffReadService;
     @Autowired
     private DoctorStaffWriteService doctorStaffWriteService;
-
+    @Autowired
+    private DoctorGroupReadService doctorGroupReadService;
+    @Autowired
+    private DoctorGroupWriteService doctorGroupWriteService;
+    @Autowired
+    private DoctorPigTypeStatisticWriteService doctorPigTypeStatisticWriteService;
 
     /**
      * 根据用户id初始化出所有的猪场相关数据(内测用)
@@ -76,7 +96,7 @@ public class InitFarms {
      */
     @RequestMapping(value = "/farm", method = RequestMethod.GET)
     public Boolean initFarm(@RequestParam("userId") Long userId) {
-        User user = or500(userUserReadService.findById(userId));
+        User user = or500(userReadService.findById(userId));
         init(user);
         return Boolean.TRUE;
     }
@@ -90,7 +110,6 @@ public class InitFarms {
         return Boolean.TRUE;
     }
 
-    @Transactional
     private void init(User user) {
         //1. 判断是否创建公司
         DoctorOrg org = initOrg(user);
@@ -108,9 +127,17 @@ public class InitFarms {
         initBarns(farm, staff);
 
         //6. 创建猪相关信息
-        //7. 创建猪群相关信息
-        //8. 创建物料相关信息
 
+
+        //7. 创建猪群相关信息
+        initGroups(farm, staff);
+
+        //8. 创建猪统计信息
+        or500(doctorPigTypeStatisticWriteService.statisticGroup(farm.getOrgId(), farm.getId()));
+        or500(doctorPigTypeStatisticWriteService.statisticPig(farm.getOrgId(), farm.getId(), DoctorPig.PIG_TYPE.BOAR.getKey()));
+        or500(doctorPigTypeStatisticWriteService.statisticPig(farm.getOrgId(), farm.getId(), DoctorPig.PIG_TYPE.SOW.getKey()));
+
+        //9. 创建物料相关信息
     }
 
     private String getName(String name) {
@@ -118,7 +145,7 @@ public class InitFarms {
     }
 
     private DoctorOrg initOrg(User user) {
-        DoctorOrg org = or500(doctorOrgReadService.findOrgByUserId(user.getId()));
+        DoctorOrg org = or500(doctorOrgReadService.findOrgById(INIT_ID));
         if (org == null) {
             org = or500(doctorOrgReadService.findOrgById(INIT_ID));
             org.setName(getName(org.getName()));
@@ -142,11 +169,12 @@ public class InitFarms {
         staff.setUserId(user.getId());
         staff.setOrgId(farm.getOrgId());
         staff.setOrgName(farm.getOrgName());
+        or500(doctorStaffWriteService.createDoctorStaff(staff));
         return staff;
     }
 
     private void initBarns(DoctorFarm farm, DoctorStaff staff) {
-        List<DoctorBarn> barns = or500(doctorBarnReadService.findBarnsByFarmId(farm.getId()));
+        List<DoctorBarn> barns = or500(doctorBarnReadService.findBarnsByFarmId(INIT_ID));
         barns.forEach(barn -> {
             barn.setFarmId(farm.getId());
             barn.setFarmName(farm.getName());
@@ -154,6 +182,70 @@ public class InitFarms {
             barn.setOrgName(farm.getOrgName());
             barn.setStaffId(staff.getId());
             or500(doctorBarnWriteService.createBarn(barn));
+        });
+    }
+
+    private void initPigs() {
+
+    }
+
+    private void initGroups(DoctorFarm farm, DoctorStaff staff) {
+        List<DoctorGroup> groups = or500(doctorGroupReadService.findGroupsByFarmId(INIT_ID));
+        groups.forEach(group -> {
+            DoctorGroupDetail groupDetail = or500(doctorGroupReadService.findGroupDetailByGroupId(group.getId()));
+            List<DoctorGroupEvent> groupEvents = or500(doctorGroupReadService.pagingGroupEvent(group.getFarmId(), group.getId(), null, null, Integer.MAX_VALUE)).getData();
+
+            //copy 猪群
+            group.setOrgId(farm.getOrgId());
+            group.setOrgName(farm.getOrgName());
+            group.setFarmId(farm.getId());
+            group.setFarmName(farm.getName());
+
+            DoctorBarn barn = or500(doctorBarnReadService.findBarnsByEnums(farm.getId(), group.getPigType(), null, null)).get(0);
+            group.setGroupCode(barn.getName() + "(" + DateUtil.toDateString(new Date()) + ")");
+            group.setOpenAt(new Date());
+
+            group.setInitBarnId(barn.getId());
+            group.setInitBarnName(barn.getName());
+            group.setCurrentBarnId(barn.getId());
+            group.setCurrentBarnName(barn.getName());
+            group.setStaffId(staff.getId());
+            Long groupId = or500(doctorGroupWriteService.createGroup(group));
+
+            //copy 猪群事件(模板里只有两个事件:新建猪群和转入猪群)
+            Map<Integer, DoctorGroupEvent> eventMap = Maps.newHashMap();
+            groupEvents.forEach(event -> {
+                event.setOrgId(group.getOrgId());
+                event.setOrgName(group.getOrgName());
+                event.setFarmId(group.getFarmId());
+                event.setFarmName(group.getFarmName());
+                event.setEventAt(new Date());
+                event.setGroupId(groupId);
+                event.setGroupCode(group.getGroupCode());
+                event.setBarnId(barn.getId());
+                event.setBarnName(barn.getName());
+                or500(doctorGroupWriteService.createGroupEvent(event));
+                eventMap.put(event.getType(), event);
+            });
+
+            //copy 猪群跟踪
+            DoctorGroupEvent event = eventMap.get(GroupEventType.MOVE_IN.getValue());
+            DoctorGroupTrack groupTrack = groupDetail.getGroupTrack();
+            groupTrack.setGroupId(groupId);
+            groupTrack.setRelEventId(event.getId());
+            or500(doctorGroupWriteService.createGroupTrack(groupTrack));
+
+            //copy 猪群镜像
+            DoctorGroupSnapshot groupSnapshot = new DoctorGroupSnapshot();
+            groupSnapshot.setEventType(GroupEventType.MOVE_IN.getValue());  //猪群事件类型
+            groupSnapshot.setToGroupId(group.getId());
+            groupSnapshot.setToEventId(event.getId());
+            groupSnapshot.setToInfo(JsonMapper.nonEmptyMapper().toJson(DoctorGroupSnapShotInfo.builder()
+                    .group(group)
+                    .groupEvent(event)
+                    .groupTrack(groupTrack)
+                    .build()));
+            or500(doctorGroupWriteService.createGroupSnapShot(groupSnapshot));
         });
     }
 }
