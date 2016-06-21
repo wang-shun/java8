@@ -22,6 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Desc: 与消息和消息模板相关
@@ -99,11 +100,15 @@ public class DoctorMessages {
      */
     @RequestMapping(value = "/message/detail", method = RequestMethod.GET)
     public DoctorMessage findMessageDetail(@RequestParam("id") Long id) {
-        // 将消息设置为已读
         DoctorMessage message = RespHelper.or500(doctorMessageReadService.findMessageById(id));
         if (message != null) {
-            message.setStatus(DoctorMessage.Status.READED.getValue());
-            doctorMessageWriteService.updateMessage(message);
+            // 如果消息是未读, 将消息设置为已读
+            if (Objects.equals(message.getStatus(), DoctorMessage.Status.NORMAL.getValue())) {
+                message.setStatus(DoctorMessage.Status.READED.getValue());
+                doctorMessageWriteService.updateMessage(message);
+            }
+            // 查询未读消息的数量
+            message.setNoReadCount(RespHelper.or500(doctorMessageReadService.findNoReadCount(UserUtil.getUserId())));
         }
         return message;
     }

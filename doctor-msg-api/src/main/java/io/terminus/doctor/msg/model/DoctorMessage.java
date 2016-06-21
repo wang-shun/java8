@@ -100,6 +100,12 @@ public class DoctorMessage implements Serializable {
     private Integer status;
 
     /**
+     * 未读消息的数量
+     * (数据库没有对应字段)
+     */
+    private Long noReadCount;
+
+    /**
      * 发送时间
      */
     private Date sendedAt;
