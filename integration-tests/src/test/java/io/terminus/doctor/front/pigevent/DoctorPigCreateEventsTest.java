@@ -130,6 +130,136 @@ public class DoctorPigCreateEventsTest extends BaseFrontWebTest{
     }
 
     /**
+     * 创建Mock 所有的数据内容
+     */
+    public void testCreateSingleMockData(){
+
+        // 创建公猪 进厂事件信息
+        for (int i=0; i<5; i++){
+            boarEntryEventCreate();
+        }
+
+        // 创建母猪进程事件信息
+        for(int i=0; i<2; i++){
+            sowEntryEventCreate();
+        }
+
+        // 创建配种事件
+        for(int i=0; i<2; i++){
+            Long pigId = sowEntryEventCreate();
+            Long pigBoarId = boarEntryEventCreate();
+            sowMatingEventCreate(pigId, pigBoarId);
+        }
+
+        // 没有转舍 ， 妊娠检查 阴 性
+        for(int i=0; i<2; i++){
+            Long pigId = sowEntryEventCreate();
+            Long pigBoarId = boarEntryEventCreate();
+            sowMatingEventCreate(pigId, pigBoarId);
+            testPregCheckResultEventCreate(pigId, PregCheckResult.YING);
+        }
+
+        // 没有转舍 妊娠检查 不确定
+        for(int i=0; i<2; i++){
+            Long pigId = sowEntryEventCreate();
+            Long pigBoarId = boarEntryEventCreate();
+            sowMatingEventCreate(pigId, pigBoarId);
+            testPregCheckResultEventCreate(pigId, PregCheckResult.UNSURE);
+        }
+
+        // 没有转舍 妊娠检查 阳性
+        for(int i=0; i<2; i++){
+            Long pigId = sowEntryEventCreate();
+            Long pigBoarId = boarEntryEventCreate();
+            sowMatingEventCreate(pigId, pigBoarId);
+            testPregCheckResultEventCreate(pigId, PregCheckResult.YANG);
+        }
+
+        // 配种后 -> 转舍
+        for(int i=0; i<2; i++){
+            Long pigId = sowEntryEventCreate();
+            Long pigBoarId = boarEntryEventCreate();
+            sowMatingEventCreate(pigId, pigBoarId);
+            testToPregEventCreate(pigId);
+        }
+
+        // 配种 -> 转舍 -> 妊娠 阴
+        for(int i=0; i<2; i++){
+            Long pigId = sowEntryEventCreate();
+            Long pigBoarId = boarEntryEventCreate();
+            sowMatingEventCreate(pigId, pigBoarId);
+            testToPregEventCreate(pigId);
+            testPregCheckResultEventCreate(pigId, PregCheckResult.YING);
+        }
+
+        // 配种 -> 转舍 -> 妊娠 阳性
+        for(int i=0; i<2; i++){
+            Long pigId = sowEntryEventCreate();
+            Long pigBoarId = boarEntryEventCreate();
+            sowMatingEventCreate(pigId, pigBoarId);
+            testToPregEventCreate(pigId);
+            testPregCheckResultEventCreate(pigId, PregCheckResult.YANG);
+        }
+
+        // 配种 -> 转舍 -> 妊娠 不确定
+        for(int i=0; i<2; i++){
+            Long pigId = sowEntryEventCreate();
+            Long pigBoarId = boarEntryEventCreate();
+            sowMatingEventCreate(pigId, pigBoarId);
+            testToPregEventCreate(pigId);
+            testPregCheckResultEventCreate(pigId, PregCheckResult.UNSURE);
+        }
+
+        // 配种 -> 转舍 -> 妊娠 -> 流产
+        for(int i=0; i<2; i++){
+            Long pigId = sowEntryEventCreate();
+            Long pigBoarId = boarEntryEventCreate();
+            sowMatingEventCreate(pigId, pigBoarId);
+            testToPregEventCreate(pigId);
+            testPregCheckResultEventCreate(pigId, PregCheckResult.YANG);
+            testAbortionEventCreate(pigId);
+        }
+
+        // 配种 -> 转舍 -> 妊娠 -> 去分娩
+        for(int i=0; i<2; i++){
+            Long pigId = sowEntryEventCreate();
+            Long pigBoarId = boarEntryEventCreate();
+            sowMatingEventCreate(pigId, pigBoarId);
+            testToPregEventCreate(pigId);
+            testPregCheckResultEventCreate(pigId, PregCheckResult.YANG);
+            testToFarrowing(pigId);
+        }
+
+        // 配种 -> 转舍 -> 妊娠 -> 去分娩 -> 分娩
+        for(int i=0; i<2; i++){
+            Long pigId = sowEntryEventCreate();
+            Long pigBoarId = boarEntryEventCreate();
+            sowMatingEventCreate(pigId, pigBoarId);
+            testToPregEventCreate(pigId);
+            testPregCheckResultEventCreate(pigId, PregCheckResult.YANG);
+            testToFarrowing(pigId);
+            testFarrowingEventCreate(pigId);
+        }
+
+        // 配种 -> 转舍 -> 妊娠 -》去分娩 -》分娩 -》 完全断奶
+        for(int i=0; i<4; i++){
+            Long pigId = sowEntryEventCreate();
+            Long pigBoarId = boarEntryEventCreate();
+            sowMatingEventCreate(pigId, pigBoarId);
+            testToPregEventCreate(pigId);
+            testPregCheckResultEventCreate(pigId, PregCheckResult.YANG);
+            testToFarrowing(pigId);
+            testFarrowingEventCreate(pigId);
+            if(i % 2 == 0){
+                testWeanMethod(pigId, 200);
+            }else {
+                testWeanMethod(pigId, 100);
+            }
+        }
+    }
+
+
+    /**
      * 测试猪 事件信息
      */
     @Test
