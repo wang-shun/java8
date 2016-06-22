@@ -34,12 +34,15 @@ import io.terminus.doctor.event.service.DoctorPigWriteService;
 import io.terminus.doctor.user.model.DoctorFarm;
 import io.terminus.doctor.user.model.DoctorOrg;
 import io.terminus.doctor.user.model.DoctorStaff;
+import io.terminus.doctor.user.model.DoctorUserDataPermission;
 import io.terminus.doctor.user.service.DoctorFarmReadService;
 import io.terminus.doctor.user.service.DoctorFarmWriteService;
 import io.terminus.doctor.user.service.DoctorOrgReadService;
 import io.terminus.doctor.user.service.DoctorOrgWriteService;
 import io.terminus.doctor.user.service.DoctorStaffReadService;
 import io.terminus.doctor.user.service.DoctorStaffWriteService;
+import io.terminus.doctor.user.service.DoctorUserDataPermissionReadService;
+import io.terminus.doctor.user.service.DoctorUserDataPermissionWriteService;
 import io.terminus.doctor.workflow.access.JdbcAccess;
 import io.terminus.doctor.workflow.model.FlowHistoryProcess;
 import io.terminus.doctor.workflow.model.FlowInstance;
@@ -111,6 +114,10 @@ public class InitFarms {
     private DoctorPigWriteService doctorPigWriteService;
     @Autowired
     private JdbcAccess jdbcAccess;
+    @Autowired
+    private DoctorUserDataPermissionWriteService doctorUserDataPermissionWriteService;
+    @Autowired
+    private DoctorUserDataPermissionReadService doctorUserDataPermissionReadService;
 
     /**
      * 根据用户id初始化出所有的猪场相关数据(内测用)
@@ -144,6 +151,7 @@ public class InitFarms {
 
         //2. 创建猪场
         DoctorFarm farm = initFarm(org);
+        initDataPermission(farm, user);
 
         //3. 创建staff
         DoctorStaff staff = initStaff(farm, user);
@@ -190,6 +198,15 @@ public class InitFarms {
         Long farmId = or500(doctorFarmWriteService.createFarm(farm));
         farm.setId(farmId);
         return farm;
+    }
+
+    private void initDataPermission(DoctorFarm farm, User user) {
+        if (or500(doctorUserDataPermissionReadService.findDataPermissionByUserId(user.getId())) == null) {
+            DoctorUserDataPermission permission = new DoctorUserDataPermission();
+            permission.setFarmIds(farm.getId().toString());
+            permission.setUserId(user.getId());
+            or500(doctorUserDataPermissionWriteService.createDataPermission(permission));
+        }
     }
 
     private DoctorStaff initStaff(DoctorFarm farm, User user) {
@@ -292,7 +309,6 @@ public class InitFarms {
             DoctorBarn barn = getPigBarn(pig);
             pig.setInitBarnId(barn.getId());
             pig.setInitBarnName(barn.getName());
-            pig.setPigCode(getPigCode(pig.getPigType()));
 
             Long oldPigId = pig.getId();
             Long newPigId = or500(doctorPigWriteService.createPig(pig));
@@ -379,10 +395,6 @@ public class InitFarms {
             return JsonMapper.nonEmptyMapper().toJson(ImmutableMap.of(pigTrack.getCurrentParity(), Joiners.COMMA.join(eventIds)));
         }
         return Joiners.COMMA.join(eventIds);
-    }
-
-    private String getPigCode(Integer pigType) {
-        return DoctorPig.PIG_TYPE.from(pigType).getDesc() + DateTime.now().toString(TIME);
     }
 
     private DoctorBarn getPigBarn(DoctorPig pig) {
