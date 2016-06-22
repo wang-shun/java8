@@ -109,8 +109,8 @@ public class DoctorPigEvents {
                                                        @RequestParam(value = "startDate",required = false) String startDate,
                                                        @RequestParam(value = "endDate", required = false) String endDate){
         try{
-            Date beginDateTime = Strings.isNullOrEmpty(startDate) ? null : DTF.parseDateTime(startDate).toDate();
-            Date endDateTime = Strings.isNullOrEmpty(endDate) ? null : (DTF).parseDateTime(endDate).toDate();
+            Date beginDateTime = Strings.isNullOrEmpty(startDate) ? null : DTF.parseDateTime(startDate).withTimeAtStartOfDay().toDate();
+            Date endDateTime = Strings.isNullOrEmpty(endDate) ? null : (DTF).parseDateTime(endDate).plusDays(1).withTimeAtStartOfDay().toDate(); // 添加一天
 
             return RespHelper.or500(doctorPigEventReadService.queryPigDoctorEvents(farmId,pigId,pageNo, pageSize, beginDateTime, endDateTime));
         }catch (Exception e){
