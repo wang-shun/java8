@@ -1,6 +1,9 @@
 package io.terminus.doctor.event.search.pig;
 
 import io.terminus.common.model.PageInfo;
+import io.terminus.common.utils.BeanMapper;
+import io.terminus.doctor.event.search.query.PigCriterias;
+import io.terminus.doctor.event.search.query.Prefix;
 import io.terminus.search.api.query.Aggs;
 import io.terminus.search.api.query.Criterias;
 import io.terminus.search.api.query.CriteriasBuilder;
@@ -60,7 +63,15 @@ public abstract class BasePigQueryBuilder {
         List<Aggs> aggsList = buildAggs(params);
         criteriasBuilder.withAggs(aggsList);
 
-        return criteriasBuilder.build();
+        // 处理Prefix
+        Criterias criterias = criteriasBuilder.build();
+        Prefix prefix = buildPrefix(params);
+        if(prefix != null) {
+            PigCriterias pigCriterias = new PigCriterias(criteriasBuilder);
+            pigCriterias.setPrefix(prefix);
+            return pigCriterias;
+        }
+        return criterias;
     }
 
     /**
@@ -69,6 +80,14 @@ public abstract class BasePigQueryBuilder {
      * @return  关键字, 如果没有指定关键字, 返回null
      */
     protected abstract Keyword buildKeyword(Map<String, String> params);
+
+    /**
+     * 构建前缀查询 Prefix. 如果存在Prefix, 则相应的 keyword 查询由Prefix替代
+     * 详情见 search.mustache 文件
+     * @param params    参数上下文
+     * @return  前缀对象, 如果没有指定, 返回null
+     */
+    protected abstract Prefix buildPrefix(Map<String, String> params);
 
     /**
      * 构建单值查询 term

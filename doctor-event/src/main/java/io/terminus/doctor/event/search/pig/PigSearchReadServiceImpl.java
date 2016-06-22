@@ -39,7 +39,8 @@ public class PigSearchReadServiceImpl implements PigSearchReadService {
             // 获取关键词, 设置高亮
             String q = params.get("q");
             if (StringUtils.isNotBlank(q)) {
-                params.put("highlight", "pigCode");
+                // 暂不做高亮处理
+                // params.put("highlight", "pigCode");
             }
             // 构建查询条件, 并查询
             Criterias criterias = basePigQueryBuilder.buildCriterias(pageNo, pageSize, params);

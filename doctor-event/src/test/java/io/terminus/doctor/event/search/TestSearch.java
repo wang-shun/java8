@@ -32,9 +32,12 @@ public class TestSearch extends BaseServiceTest {
         try{
             String template = "search/search.mustache";
             Map<String, String> params = Maps.newHashMap();
-            Paging<SearchedPig> paging = RespHelper.orServEx(pigSearchReadService.searchWithAggs(1, 2, template, params));
+            // 前缀查询 替代 关键字
+            params.put("q", "Y4");
+            Paging<SearchedPig> paging = RespHelper.orServEx(pigSearchReadService.searchWithAggs(1, 200, template, params));
             System.out.println(paging.getTotal());
-            System.out.println(paging.getData());
+            // updatedAt 降序排列
+            paging.getData().forEach(System.out::println);
         } catch (Exception e) {
             System.out.println("搜索失败!");
         }
@@ -45,9 +48,10 @@ public class TestSearch extends BaseServiceTest {
         try{
             String template = "search/search.mustache";
             Map<String, String> params = Maps.newHashMap();
-            Paging<SearchedGroup> paging = RespHelper.orServEx(groupSearchReadService.searchWithAggs(1, 2, template, params));
+            params.put("q", "保育");
+            Paging<SearchedGroup> paging = RespHelper.orServEx(groupSearchReadService.searchWithAggs(1, 200, template, params));
             System.out.println(paging.getTotal());
-            System.out.println(paging.getData());
+            paging.getData().forEach(System.out::println);
         } catch (Exception e) {
             System.out.println("搜索失败!");
         }

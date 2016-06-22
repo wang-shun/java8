@@ -55,6 +55,7 @@ public abstract class BaseIndexedPigFactory<T extends IndexedPig> implements Ind
             indexedPig.setWeight(pigTrack.getWeight());
             indexedPig.setOutFarmDate(pigTrack.getOutFarmDate());
             indexedPig.setCurrentParity(pigTrack.getCurrentParity());
+            indexedPig.setUpdatedAt(pigTrack.getUpdatedAt());
         }
 
         return indexedPig;

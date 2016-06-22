@@ -1,11 +1,23 @@
 package io.terminus.doctor.event.test;
 
+import com.google.common.collect.Lists;
 import com.google.common.eventbus.AsyncEventBus;
 import com.google.common.eventbus.EventBus;
 import io.terminus.boot.dubbo.autoconfigure.DubboAutoConfiguration;
 import io.terminus.boot.mybatis.autoconfigure.MybatisAutoConfiguration;
 import io.terminus.boot.search.autoconfigure.ESSearchAutoConfiguration;
+import io.terminus.doctor.common.DoctorCommonConfiguration;
 import io.terminus.doctor.event.dao.DoctorPigDao;
+import io.terminus.doctor.event.handler.DoctorEntryHandler;
+import io.terminus.doctor.event.handler.DoctorEventCreateHandler;
+import io.terminus.doctor.event.handler.DoctorEventHandlerChain;
+import io.terminus.doctor.event.handler.boar.DoctorSemenHandler;
+import io.terminus.doctor.event.handler.usual.DoctorChgFarmHandler;
+import io.terminus.doctor.event.handler.usual.DoctorChgLocationHandler;
+import io.terminus.doctor.event.handler.usual.DoctorConditionHandler;
+import io.terminus.doctor.event.handler.usual.DoctorDiseaseHandler;
+import io.terminus.doctor.event.handler.usual.DoctorRemovalHandler;
+import io.terminus.doctor.event.handler.usual.DoctorVaccinationHandler;
 import io.terminus.doctor.event.search.barn.BarnSearchProperties;
 import io.terminus.doctor.event.search.barn.BaseBarnQueryBuilder;
 import io.terminus.doctor.event.search.barn.DefaultBarnQueryBuilder;
@@ -25,6 +37,7 @@ import io.terminus.doctor.event.search.pig.IndexedPig;
 import io.terminus.doctor.event.search.pig.IndexedPigFactory;
 import io.terminus.doctor.event.search.pig.PigSearchProperties;
 import io.terminus.doctor.event.service.DoctorBarnReadService;
+import io.terminus.doctor.workflow.DoctorWorkflowConfiguration;
 import io.terminus.search.core.ESClient;
 import io.terminus.zookeeper.ZKClientFactory;
 import io.terminus.zookeeper.pubsub.Publisher;
@@ -39,8 +52,10 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Profile;
 
+import java.util.List;
 import java.util.concurrent.Executors;
 
 /**
@@ -51,9 +66,31 @@ import java.util.concurrent.Executors;
  */
 @Configuration
 @EnableAutoConfiguration(exclude = {DubboAutoConfiguration.class, ESSearchAutoConfiguration.class})
+@Import({DoctorCommonConfiguration.class})
 @ComponentScan({"io.terminus.doctor.event.*","io.terminus.doctor.workflow.*"})
 @AutoConfigureAfter(MybatisAutoConfiguration.class)
 public class ServiceConfiguration {
+
+
+    /**
+     * 对应handler chain
+     * @return
+     */
+    @Bean
+    public DoctorEventHandlerChain doctorEventHandlerChain(
+            DoctorSemenHandler doctorSemenHandler, DoctorEntryHandler doctorEntryHandler,
+            DoctorChgFarmHandler doctorChgFarmHandler, DoctorChgLocationHandler doctorChgLocationHandler,
+            DoctorConditionHandler doctorConditionHandler, DoctorDiseaseHandler doctorDiseaseHandler,
+            DoctorRemovalHandler doctorRemovalHandler, DoctorVaccinationHandler doctorVaccinationHandler){
+        DoctorEventHandlerChain chain = new DoctorEventHandlerChain();
+        List<DoctorEventCreateHandler> list = Lists.newArrayList(
+                doctorSemenHandler,doctorEntryHandler,
+                doctorChgFarmHandler, doctorChgLocationHandler,
+                doctorConditionHandler, doctorDiseaseHandler,
+                doctorRemovalHandler, doctorVaccinationHandler);
+        chain.setDoctorEventCreateHandlers(Lists.newArrayList(list));
+        return chain;
+    }
 
     @Bean
     public EventBus eventBus(){

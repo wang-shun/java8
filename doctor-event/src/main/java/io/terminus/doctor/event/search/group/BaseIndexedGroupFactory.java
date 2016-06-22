@@ -50,6 +50,7 @@ public abstract class BaseIndexedGroupFactory<T extends IndexedGroup> implements
             indexedGroup.setPrice(groupTrack.getPrice());
             indexedGroup.setAmount(groupTrack.getAmount());
             indexedGroup.setSaleQty(groupTrack.getSaleQty());
+            indexedGroup.setUpdatedAt(groupTrack.getUpdatedAt());
         }
         return indexedGroup;
     }
