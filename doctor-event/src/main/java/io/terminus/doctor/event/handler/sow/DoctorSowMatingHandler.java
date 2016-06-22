@@ -37,7 +37,6 @@ public class DoctorSowMatingHandler extends DoctorAbstractEventFlowHandler{
 
     @Override
     public void specialFlowHandler(Execution execution, DoctorBasicInputInfoDto basic, Map<String, Object> extra, Map<String, Object> context) {
-        log.info("**  extra info in handler :{}", extra);
         Long boarId = Long.valueOf(extra.get("matingBoarPigId").toString());
         DoctorPigTrack doctorPigTrack = this.doctorPigTrackDao.findByPigId(boarId);
         checkState(!isNull(doctorPigTrack), "createMating.boarPigId.fail");

@@ -185,8 +185,6 @@ public class DoctorPigEventManager {
     @SneakyThrows
     private Map<String, Object> createSingleSowEvents(DoctorBasicInputInfoDto basic, Map<String, Object> extra){
 
-        log.info("***** extra map info dto ;{}", extra);
-
         // build data
         String flowData = JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(ImmutableMap.of(
                 "basic",JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(basic),
