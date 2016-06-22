@@ -79,6 +79,19 @@ public class DoctorBarns {
     }
 
     /**
+     * 根据farmId和状态查询猪舍表
+     * @param farmId 猪场id
+     * @param pigType 猪舍类别
+     * @see PigType
+     * @return 猪舍表列表
+     */
+    @RequestMapping(value = "/pigType", method = RequestMethod.GET)
+    public List<DoctorBarn> findBarnsByfarmIdAndType(@RequestParam("farmId") Long farmId,
+                                                     @RequestParam("pigType") Integer pigType) {
+        return RespHelper.or500(doctorBarnReadService.findBarnsByEnums(farmId, pigType, null, null));
+    }
+
+    /**
      * 创建或更新DoctorBarn
      * @return 是否成功
      */
