@@ -7,6 +7,7 @@ import io.terminus.doctor.basic.dao.DoctorChangeReasonDao;
 import io.terminus.doctor.basic.dao.DoctorChangeTypeDao;
 import io.terminus.doctor.basic.dao.DoctorCustomerDao;
 import io.terminus.doctor.basic.dao.DoctorDiseaseDao;
+import io.terminus.doctor.basic.dao.DoctorFosterReasonDao;
 import io.terminus.doctor.basic.dao.DoctorGeneticDao;
 import io.terminus.doctor.basic.dao.DoctorUnitDao;
 import io.terminus.doctor.basic.manager.DoctorBasicManager;
@@ -15,6 +16,7 @@ import io.terminus.doctor.basic.model.DoctorChangeReason;
 import io.terminus.doctor.basic.model.DoctorChangeType;
 import io.terminus.doctor.basic.model.DoctorCustomer;
 import io.terminus.doctor.basic.model.DoctorDisease;
+import io.terminus.doctor.basic.model.DoctorFosterReason;
 import io.terminus.doctor.basic.model.DoctorGenetic;
 import io.terminus.doctor.basic.model.DoctorUnit;
 import lombok.extern.slf4j.Slf4j;
@@ -39,16 +41,18 @@ public class DoctorBasicWriteServiceImpl implements DoctorBasicWriteService {
     private final DoctorGeneticDao doctorGeneticDao;
     private final DoctorUnitDao doctorUnitDao;
     private final DoctorBasicManager doctorBasicManager;
+    private final DoctorFosterReasonDao doctorFosterReasonDao;
 
     @Autowired
     public DoctorBasicWriteServiceImpl(DoctorBreedDao doctorBreedDao,
-                                      DoctorChangeReasonDao doctorChangeReasonDao,
-                                      DoctorChangeTypeDao doctorChangeTypeDao,
-                                      DoctorCustomerDao doctorCustomerDao,
-                                      DoctorDiseaseDao doctorDiseaseDao,
-                                      DoctorGeneticDao doctorGeneticDao,
-                                      DoctorUnitDao doctorUnitDao,
-                                      DoctorBasicManager doctorBasicManager) {
+                                       DoctorChangeReasonDao doctorChangeReasonDao,
+                                       DoctorChangeTypeDao doctorChangeTypeDao,
+                                       DoctorCustomerDao doctorCustomerDao,
+                                       DoctorDiseaseDao doctorDiseaseDao,
+                                       DoctorGeneticDao doctorGeneticDao,
+                                       DoctorUnitDao doctorUnitDao,
+                                       DoctorBasicManager doctorBasicManager,
+                                       DoctorFosterReasonDao doctorFosterReasonDao) {
         this.doctorBreedDao = doctorBreedDao;
         this.doctorChangeReasonDao = doctorChangeReasonDao;
         this.doctorChangeTypeDao = doctorChangeTypeDao;
@@ -57,6 +61,7 @@ public class DoctorBasicWriteServiceImpl implements DoctorBasicWriteService {
         this.doctorGeneticDao = doctorGeneticDao;
         this.doctorUnitDao = doctorUnitDao;
         this.doctorBasicManager = doctorBasicManager;
+        this.doctorFosterReasonDao = doctorFosterReasonDao;
     }
 
     @Override
@@ -284,6 +289,37 @@ public class DoctorBasicWriteServiceImpl implements DoctorBasicWriteService {
         } catch (Exception e) {
             log.error("delete unit failed, unitId:{}, cause:{}", unitId, Throwables.getStackTraceAsString(e));
             return Response.fail("unit.delete.fail");
+        }
+    }
+
+    @Override
+    public Response<Long> createFosterReason(DoctorFosterReason fosterReason) {
+        try {
+            doctorFosterReasonDao.create(fosterReason);
+            return Response.ok(fosterReason.getId());
+        } catch (Exception e) {
+            log.error("create fosterReason failed, fosterReason:{}, cause:{}", fosterReason, Throwables.getStackTraceAsString(e));
+            return Response.fail("fosterReason.create.fail");
+        }
+    }
+
+    @Override
+    public Response<Boolean> updateFosterReason(DoctorFosterReason fosterReason) {
+        try {
+            return Response.ok(doctorFosterReasonDao.update(fosterReason));
+        } catch (Exception e) {
+            log.error("update fosterReason failed, fosterReason:{}, cause:{}", fosterReason, Throwables.getStackTraceAsString(e));
+            return Response.fail("fosterReason.update.fail");
+        }
+    }
+
+    @Override
+    public Response<Boolean> deleteFosterReasonById(Long fosterReasonId) {
+        try {
+            return Response.ok(doctorFosterReasonDao.delete(fosterReasonId));
+        } catch (Exception e) {
+            log.error("delete fosterReason failed, fosterReasonId:{}, cause:{}", fosterReasonId, Throwables.getStackTraceAsString(e));
+            return Response.fail("fosterReason.delete.fail");
         }
     }
 }

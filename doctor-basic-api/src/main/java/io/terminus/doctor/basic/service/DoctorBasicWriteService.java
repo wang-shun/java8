@@ -6,6 +6,7 @@ import io.terminus.doctor.basic.model.DoctorChangeReason;
 import io.terminus.doctor.basic.model.DoctorChangeType;
 import io.terminus.doctor.basic.model.DoctorCustomer;
 import io.terminus.doctor.basic.model.DoctorDisease;
+import io.terminus.doctor.basic.model.DoctorFosterReason;
 import io.terminus.doctor.basic.model.DoctorGenetic;
 import io.terminus.doctor.basic.model.DoctorUnit;
 
@@ -152,4 +153,25 @@ public interface DoctorBasicWriteService {
      * @return 是否成功
      */
     Response<Boolean> deleteUnitById(Long unitId);
+
+    /**
+     * 创建DoctorFosterReason
+     * @param fosterReason 寄养原因表实例
+     * @return 主键id
+     */
+    Response<Long> createFosterReason(DoctorFosterReason fosterReason);
+
+    /**
+     * 更新DoctorFosterReason
+     * @param fosterReason 寄养原因表实例
+     * @return 是否成功
+     */
+    Response<Boolean> updateFosterReason(DoctorFosterReason fosterReason);
+
+    /**
+     * 根据主键id删除DoctorFosterReason
+     * @param fosterReasonId 寄养原因表实例主键id
+     * @return 是否成功
+     */
+    Response<Boolean> deleteFosterReasonById(Long fosterReasonId);
 }
