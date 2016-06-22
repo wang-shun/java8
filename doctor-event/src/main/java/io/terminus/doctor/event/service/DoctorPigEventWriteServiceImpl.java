@@ -279,6 +279,8 @@ public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteServic
             Map<String,Object> dto = Maps.newHashMap();
             BeanMapper.copy(doctorMatingDto, dto);
 
+            log.info("******** mating doctor dto info:{}", doctorMatingDto);
+
             Map<String,Object> result = doctorPigEventManager.createSowPigEvent(doctorBasicInputInfoDto, dto);
             publishEvent(result);
             return Response.ok(Params.getWithConvert(result,"doctorEventId",a->Long.valueOf(a.toString())));
