@@ -65,4 +65,19 @@
         FROM <include refid="tb" />
         WHERE user_id = #{userId} and target_system = #{targetSystem}
     </select>
+
+    <update id="update" parameterType="UserBind">
+        update <include refid="tb" />
+        <set>
+            <if test="userId != null"> user_id = #{userId}, </if>
+            <if test="targetSystem != null"> target_system = #{targetSystem}, </if>
+            <if test="uuid != null"> uuid = #{uuid}, </if>
+            <if test="targetUserName != null"> target_user_name = #{targetUserName}, </if>
+            <if test="targetUserMobile != null"> target_user_mobile = #{targetUserMobile}, </if>
+            <if test="targetUserEmail != null"> target_user_email = #{targetUserEmail}, </if>
+            <if test="extra != null"> extra = #{extra}, </if>
+            updated_at = now()
+        </set>
+        where id = #{id}
+    </update>
 </mapper>

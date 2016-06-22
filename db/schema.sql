@@ -1205,7 +1205,7 @@ CREATE TABLE `doctor_user_binds` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `idx_user_bind_UNIQUE1` (`user_id`,`target_system`),
   UNIQUE KEY `idx_user_bind_UNIQUE2` (`uuid`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8 COMMENT='用户账户与其他系统账户的绑定关系';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='用户账户与其他系统账户的绑定关系';
 
 -- 2016-06-03 猪只数统计表
 DROP TABLE IF EXISTS `doctor_pig_type_statistics`;
