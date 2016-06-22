@@ -85,14 +85,11 @@ public class DoctorPigReadServiceImpl implements DoctorPigReadService{
             List<DoctorPigEvent> doctorPigEvents = RespHelper.orServEx(
                     doctorPigEventReadService.queryPigDoctorEvents(doctorPig.getFarmId(), doctorPig.getId(), null, null, null, null)).getData();
 
-            log.info("******* params is : farmId :{}, pigId:{}", doctorPig.getFarmId(), doctorPig.getId());
-            log.info("******* null validate content evetSize:{}", eventSize);
-            log.info("*******  result is events :{}",doctorPigEvents);
-            log.info("*******  evets size is :{}", doctorPigEvents.size());
-            eventSize = MoreObjects.firstNonNull(eventSize, 3) > doctorPigEvents.size() ?  doctorPigEvents.size() : eventSize;
+            Integer targetEventSize = MoreObjects.firstNonNull(eventSize, 3);
+            targetEventSize = targetEventSize > doctorPigEvents.size() ? doctorPigEvents.size() : targetEventSize;
 
             return Response.ok(DoctorPigInfoDetailDto.builder().doctorPig(doctorPig).doctorPigTrack(doctorPigTrack)
-                    .doctorPigEvents(doctorPigEvents.subList(0, eventSize)).build());
+                    .doctorPigEvents(doctorPigEvents.subList(0, targetEventSize)).build());
         }catch (Exception e){
             log.error("query pig detail info fail, cause:{}", Throwables.getStackTraceAsString(e));
             return Response.fail("query.pigDetailInfo.fail");
