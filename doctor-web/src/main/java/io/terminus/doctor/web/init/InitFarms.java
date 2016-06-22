@@ -33,12 +33,18 @@ import io.terminus.doctor.event.service.DoctorPigTypeStatisticWriteService;
 import io.terminus.doctor.event.service.DoctorPigWriteService;
 import io.terminus.doctor.user.model.DoctorFarm;
 import io.terminus.doctor.user.model.DoctorOrg;
+import io.terminus.doctor.user.model.DoctorServiceReview;
+import io.terminus.doctor.user.model.DoctorServiceStatus;
 import io.terminus.doctor.user.model.DoctorStaff;
 import io.terminus.doctor.user.model.DoctorUserDataPermission;
 import io.terminus.doctor.user.service.DoctorFarmReadService;
 import io.terminus.doctor.user.service.DoctorFarmWriteService;
 import io.terminus.doctor.user.service.DoctorOrgReadService;
 import io.terminus.doctor.user.service.DoctorOrgWriteService;
+import io.terminus.doctor.user.service.DoctorServiceReviewReadService;
+import io.terminus.doctor.user.service.DoctorServiceReviewWriteService;
+import io.terminus.doctor.user.service.DoctorServiceStatusReadService;
+import io.terminus.doctor.user.service.DoctorServiceStatusWriteService;
 import io.terminus.doctor.user.service.DoctorStaffReadService;
 import io.terminus.doctor.user.service.DoctorStaffWriteService;
 import io.terminus.doctor.user.service.DoctorUserDataPermissionReadService;
@@ -118,6 +124,14 @@ public class InitFarms {
     private DoctorUserDataPermissionWriteService doctorUserDataPermissionWriteService;
     @Autowired
     private DoctorUserDataPermissionReadService doctorUserDataPermissionReadService;
+    @Autowired
+    private DoctorServiceStatusReadService doctorServiceStatusReadService;
+    @Autowired
+    private DoctorServiceStatusWriteService doctorServiceStatusWriteService;
+    @Autowired
+    private DoctorServiceReviewReadService doctorServiceReviewReadService;
+    @Autowired
+    private DoctorServiceReviewWriteService doctorServiceReviewWriteService;
 
     /**
      * 根据用户id初始化出所有的猪场相关数据(内测用)
@@ -146,6 +160,9 @@ public class InitFarms {
     }
 
     private void init(User user) {
+        //0. 服务审核
+        initServiceReview(user);
+
         //1. 判断是否创建公司
         DoctorOrg org = initOrg(user);
 
@@ -206,6 +223,24 @@ public class InitFarms {
             permission.setFarmIds(farm.getId().toString());
             permission.setUserId(user.getId());
             or500(doctorUserDataPermissionWriteService.createDataPermission(permission));
+        }
+    }
+
+    private void initServiceReview(User user) {
+        DoctorServiceStatus status = or500(doctorServiceStatusReadService.findByUserId(user.getId()));
+        if (status == null) {
+            status = or500(doctorServiceStatusReadService.findById(INIT_ID));
+            status.setUserId(user.getId());
+            or500(doctorServiceStatusWriteService.createServiceStatus(status));
+        }
+        List<DoctorServiceReview> reviews = or500(doctorServiceReviewReadService.findServiceReviewsByUserId(user.getId()));
+        if (!notEmpty(reviews)) {
+            reviews = or500(doctorServiceReviewReadService.findServiceReviewsByUserId(INIT_ID));
+            reviews.forEach(review -> {
+                review.setUserId(user.getId());
+                review.setUserMobile(user.getMobile());
+                or500(doctorServiceReviewWriteService.createReview(review));
+            });
         }
     }
 
