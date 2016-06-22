@@ -38,7 +38,8 @@ public class GroupSearchReadServiceImpl implements GroupSearchReadService {
             // 获取关键词, 设置高亮
             String q = params.get("q");
             if (StringUtils.isNotBlank(q)) {
-                params.put("highlight", "groupCode");
+                // 暂不做高亮处理
+                // params.put("highlight", "groupCode");
             }
             // 构建查询条件, 并查询
             Criterias criterias = baseGroupQueryBuilder.buildCriterias(pageNo, pageSize, params);

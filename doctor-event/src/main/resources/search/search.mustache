@@ -5,20 +5,28 @@
      "filtered": {
         "query": {
             {{#keyword}}
-            {{#multiField}}
-            "bool": {
-              "should": [
-                 {{#fields}}
-                 {"match": { "{{field}}": "{{value}}" }} {{^last}},{{/last}}
-                 {{/fields}}
-              ]
-            }
-            {{/multiField}}
-            {{^multiField}}
-                {{#fields}}
-                "match": { "{{field}}": "{{value}}" }
-                {{/fields}}
-            {{/multiField}}
+                {{#prefix}}
+                    "prefix": {
+                        "{{field}}" : "{{value}}"
+                    }
+                {{/prefix}}
+
+                {{^prefix}}
+                    {{#multiField}}
+                        "bool": {
+                        "should": [
+                        {{#fields}}
+                            {"match": { "{{field}}": "{{value}}" }} {{^last}},{{/last}}
+                        {{/fields}}
+                        ]
+                        }
+                    {{/multiField}}
+                    {{^multiField}}
+                        {{#fields}}
+                            "match": { "{{field}}": "{{value}}" }
+                        {{/fields}}
+                    {{/multiField}}
+                {{/prefix}}
             {{/keyword}}
 
             {{^keyword}}

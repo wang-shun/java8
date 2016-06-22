@@ -4,6 +4,7 @@ import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import io.terminus.common.utils.Splitters;
+import io.terminus.doctor.event.search.query.Prefix;
 import io.terminus.search.api.query.Aggs;
 import io.terminus.search.api.query.Highlight;
 import io.terminus.search.api.query.Keyword;
@@ -30,6 +31,16 @@ public class DefaultPigQueryBuilder extends BasePigQueryBuilder {
         String q = params.get("q");
         if (StringUtils.isNotBlank(q)) {
             return new Keyword(ImmutableList.of("pigCode"), q);
+        }
+        return null;
+    }
+
+    @Override
+    protected Prefix buildPrefix(Map<String, String> params) {
+        // 猪号使用搜索前缀查询搜索前缀
+        String q = params.get("q");
+        if (StringUtils.isNotBlank(q)) {
+            return new Prefix("pigCode", q);
         }
         return null;
     }
@@ -78,8 +89,23 @@ public class DefaultPigQueryBuilder extends BasePigQueryBuilder {
 
     @Override
     protected List<Sort> buildSort(Map<String, String> params) {
-        // 暂无排序
-        return null;
+        // 默认按updatedAt进行降序排序
+        List<Sort> sorts = Lists.newArrayList();
+        sort(sorts, "2", "updatedAt");
+
+        return sorts;
+    }
+    private void sort(List<Sort> sorts, String part, String field) {
+        switch (Integer.parseInt(part)) {
+            case 1:
+                sorts.add(new Sort(field, "asc"));
+                break;
+            case 2:
+                sorts.add(new Sort(field, "desc"));
+                break;
+            default:
+                break;
+        }
     }
 
     @Override
