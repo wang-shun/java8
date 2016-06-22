@@ -11,6 +11,7 @@ import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.handler.DoctorAbstractEventFlowHandler;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.workflow.core.Execution;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -26,6 +27,7 @@ import static java.util.Objects.isNull;
  * Descirbe:
  */
 @Component
+@Slf4j
 public class DoctorSowMatingHandler extends DoctorAbstractEventFlowHandler{
 
     @Autowired
@@ -35,6 +37,7 @@ public class DoctorSowMatingHandler extends DoctorAbstractEventFlowHandler{
 
     @Override
     public void specialFlowHandler(Execution execution, DoctorBasicInputInfoDto basic, Map<String, Object> extra, Map<String, Object> context) {
+        log.info("**  extra info in handler :{}", extra);
         Long boarId = Long.valueOf(extra.get("matingBoarPigId").toString());
         DoctorPigTrack doctorPigTrack = this.doctorPigTrackDao.findByPigId(boarId);
         checkState(!isNull(doctorPigTrack), "createMating.boarPigId.fail");
