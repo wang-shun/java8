@@ -67,8 +67,6 @@ public class DoctorSowEventCreateServiceImpl implements DoctorSowEventCreateServ
 
             PigEvent pigEvent = PigEvent.from(doctorBasicInputInfoDto.getEventType());
 
-            log.info("******* input json content :{}", sowInfoDtoJson);
-
             switch (pigEvent){
                 case MATING:
                     return doctorPigEventWriteService.sowMatingEvent(JsonMapper.JSON_NON_DEFAULT_MAPPER.fromJson(sowInfoDtoJson, DoctorMatingDto.class), doctorBasicInputInfoDto);

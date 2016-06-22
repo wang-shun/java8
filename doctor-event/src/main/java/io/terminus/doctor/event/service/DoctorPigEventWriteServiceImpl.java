@@ -323,8 +323,6 @@ public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteServic
     @Override
     public Response<Long> sowFarrowingEvent(DoctorFarrowingDto doctorFarrowingDto, DoctorBasicInputInfoDto doctorBasicInputInfoDto) {
         try{
-            log.info("******* from json fto :{}", doctorFarrowingDto);
-
             Map<String,Object> dto = Maps.newHashMap();
             BeanMapper.copy(doctorFarrowingDto, dto);
 
