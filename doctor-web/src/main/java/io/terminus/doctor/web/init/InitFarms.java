@@ -71,6 +71,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static io.terminus.common.utils.Arguments.isEmpty;
 import static io.terminus.common.utils.Arguments.notEmpty;
 import static io.terminus.doctor.common.utils.RespHelper.or500;
 
@@ -139,14 +140,16 @@ public class InitFarms {
      * @return  是否成功
      */
     @RequestMapping(value = "/farm", method = RequestMethod.GET)
-    public Boolean initAllDataByUserId(@RequestParam("userId") Long userId) {
+    public Boolean initAllDataByUserId(@RequestParam("userId") Long userId,
+                                       @RequestParam(value = "orgName", required = false) String orgName,
+                                       @RequestParam(value = "farmName", required = false) String farmName) {
         User user = or500(userReadService.findById(userId));
         //判断下,如果staff已经创建了,就不在初始化其他数据
         DoctorStaff staff = or500(doctorStaffReadService.findStaffByUserId(userId));
         if (staff != null) {
             throw new JsonResponseException("staff不为空, 数据已经初始化!");
         }
-        init(user);
+        init(user, orgName, farmName);
         return Boolean.TRUE;
     }
 
@@ -159,15 +162,15 @@ public class InitFarms {
         return Boolean.TRUE;
     }
 
-    private void init(User user) {
+    private void init(User user, String orgName, String farmName) {
         //0. 服务审核
         initServiceReview(user);
 
         //1. 判断是否创建公司
-        DoctorOrg org = initOrg(user);
+        DoctorOrg org = initOrg(user, orgName);
 
         //2. 创建猪场
-        DoctorFarm farm = initFarm(org);
+        DoctorFarm farm = initFarm(org, farmName);
         initDataPermission(farm, user);
 
         //3. 创建staff
@@ -198,20 +201,20 @@ public class InitFarms {
         return name + DateTime.now().toString(TIME);
     }
 
-    private DoctorOrg initOrg(User user) {
+    private DoctorOrg initOrg(User user, String orgName) {
         DoctorOrg org = or500(doctorOrgReadService.findOrgById(INIT_ID));
-        org.setName(getName(org.getName()));
+        org.setName(isEmpty(orgName) ? getName(org.getName()) : orgName);
         org.setMobile(user.getMobile());
         Long orgId = or500(doctorOrgWriteService.createOrg(org));
         org.setId(orgId);
         return org;
     }
 
-    private DoctorFarm initFarm(DoctorOrg org) {
+    private DoctorFarm initFarm(DoctorOrg org, String farmName) {
         DoctorFarm farm = or500(doctorFarmReadService.findFarmById(INIT_ID));
         farm.setOrgId(org.getId());
         farm.setOrgName(org.getName());
-        farm.setName(getName(farm.getName()));
+        farm.setName(isEmpty(farmName) ? getName(farm.getName()) : farmName);
         Long farmId = or500(doctorFarmWriteService.createFarm(farm));
         farm.setId(farmId);
         return farm;
