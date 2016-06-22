@@ -45,7 +45,7 @@ public class DoctorMobileMenuReadServiceImpl implements DoctorMobileMenuReadServ
         this.doctorServiceStatusReadService = doctorServiceStatusReadService;
         this.doctorUserDataPermissionReadService = doctorUserDataPermissionReadService;
 
-        userInfo = DoctorMenuDto.builder().name("个人信息").url(url+"/user/index").iconClass("user_info_icon").level(1).build();
+        userInfo = DoctorMenuDto.builder().name("个人信息").url(url+"/user-center").iconClass("user_info_icon").level(1).build();
         staffManage = DoctorMenuDto.builder().name("员工管理").url(url+"/authority/manage-select").iconClass("personnel_manager_icon").level(1).build();
         farmManageMultiple = DoctorMenuDto.builder().name("猪场管理").url("pigdoctor://company?homepage_type=1").iconClass("pig_farm_manager_icon").level(1).build();
     }
