@@ -47,7 +47,7 @@ public class PigDumps {
         }
     }
 
-    @Scheduled(cron = "0 */15 * * * ?")
+    @Scheduled(cron = "*/10 * * * * ?")
     @RequestMapping(value = "/delta", method = RequestMethod.GET)
     public void deltaDump() {
         try{
