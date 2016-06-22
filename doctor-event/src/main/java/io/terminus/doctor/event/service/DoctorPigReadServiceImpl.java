@@ -188,7 +188,7 @@ public class DoctorPigReadServiceImpl implements DoctorPigReadService{
     @Override
     public Response<List<DoctorPig>> findPigsByFarmId(Long farmId) {
         try {
-            return Response.ok(doctorPigDao.findByFarmId(farmId));
+            return Response.ok(doctorPigDao.findPigsByFarmId(farmId));
         } catch (Exception e) {
             log.error("find pigs by farmId failed, farmId:{}, cause:{}", farmId, Throwables.getStackTraceAsString(e));
             return Response.fail("pig.find.fail");

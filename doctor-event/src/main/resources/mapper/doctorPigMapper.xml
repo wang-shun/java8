@@ -100,7 +100,7 @@
         WHERE id = #{id}
     </select>
 
-    <select id="findByFarmId" parameterType="long" resultMap="DoctorPigMap" >
+    <select id="findPigsByFarmId" parameterType="long" resultMap="DoctorPigMap" >
         SELECT <include refid="cols_all" />
         FROM <include refid="tb" />
         WHERE farm_id = #{farmId}

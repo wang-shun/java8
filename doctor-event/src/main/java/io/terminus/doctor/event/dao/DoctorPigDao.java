@@ -34,7 +34,7 @@ public class DoctorPigDao extends MyBatisDao<DoctorPig> {
         return this.getSqlSession().update(sqlId("removalPig"), id) == 1;
     }
 
-    public List<DoctorPig> findByFarmId(Long farmId) {
-        return getSqlSession().selectList("findByFarmId", farmId);
+    public List<DoctorPig> findPigsByFarmId(Long farmId) {
+        return getSqlSession().selectList("findPigsByFarmId", farmId);
     }
 }

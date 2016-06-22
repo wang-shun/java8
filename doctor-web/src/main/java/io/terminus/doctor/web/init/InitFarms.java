@@ -1,11 +1,14 @@
 package io.terminus.doctor.web.init;
 
+import com.google.api.client.repackaged.com.google.common.base.Throwables;
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.utils.Joiners;
 import io.terminus.common.utils.JsonMapper;
+import io.terminus.common.utils.MapBuilder;
 import io.terminus.doctor.basic.service.DoctorBasicWriteService;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.dto.DoctorGroupDetail;
@@ -117,6 +120,11 @@ public class InitFarms {
     @RequestMapping(value = "/farm", method = RequestMethod.GET)
     public Boolean initAllDataByUserId(@RequestParam("userId") Long userId) {
         User user = or500(userReadService.findById(userId));
+        //判断下,如果staff已经创建了,就不在初始化其他数据
+        DoctorStaff staff = or500(doctorStaffReadService.findStaffByUserId(userId));
+        if (staff != null) {
+            throw new JsonResponseException("staff不为空, 数据已经初始化!");
+        }
         init(user);
         return Boolean.TRUE;
     }
@@ -271,7 +279,7 @@ public class InitFarms {
 
     //初始化猪
     private void initPigs(DoctorFarm farm) {
-        or500(doctorPigReadService.findPigsByFarmId(farm.getId())).forEach(pig -> {
+        or500(doctorPigReadService.findPigsByFarmId(INIT_ID)).forEach(pig -> {
             DoctorPigInfoDetailDto pigDetail = or500(doctorPigReadService.queryPigDetailInfoByPigId(pig.getId(), Integer.MAX_VALUE));
             DoctorPigTrack pigTrack = pigDetail.getDoctorPigTrack();
             List<DoctorPigEvent> events = pigDetail.getDoctorPigEvents();
@@ -327,10 +335,20 @@ public class InitFarms {
 
     //初始化工作流相关数据
     private void initWorkFlow(Long oldPigId, DoctorPig pig) {
-        FlowInstance flowInstance = jdbcAccess.findFlowInstanceSingle(FlowInstance.builder().businessId(oldPigId).build());//获取流程实例
-        List<FlowProcess> flowProcesses = jdbcAccess.findFlowProcesses(FlowProcess.builder().flowInstanceId(flowInstance.getId()).build());
-        List<FlowProcessTrack> flowProcessTracks = jdbcAccess.findFlowProcessTracks(FlowProcessTrack.builder().flowInstanceId(flowInstance.getId()).build());
-        List<FlowHistoryProcess> flowHistoryProcesses = jdbcAccess.findFlowHistoryProcesses(FlowHistoryProcess.builder().flowInstanceId(flowInstance.getId()).build());
+        FlowInstance flowInstance;
+        try {
+            flowInstance = jdbcAccess.findFlowInstanceSingle(MapBuilder.of().put("businessId", oldPigId).map());//获取流程实例
+            if (flowInstance == null) {
+                log.warn("flow instance not found, businessId:{}", oldPigId);
+                return;
+            }
+        } catch (Exception e) {
+            log.error("find flow instance fail, businessId:{}, cause:{}", oldPigId, Throwables.getStackTraceAsString(e));
+            return;
+        }
+        List<FlowProcess> flowProcesses = jdbcAccess.findFlowProcesses(MapBuilder.of().put("flowInstanceId", flowInstance.getId()).map());
+        List<FlowProcessTrack> flowProcessTracks = jdbcAccess.findFlowProcessTracks(MapBuilder.of().put("flowInstanceId", flowInstance.getId()).map());
+        List<FlowHistoryProcess> flowHistoryProcesses = jdbcAccess.findFlowHistoryProcesses(MapBuilder.of().put("flowInstanceId", flowInstance.getId()).map());
 
         //流程实例
         flowInstance.setBusinessId(pig.getId());

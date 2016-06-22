@@ -11,9 +11,6 @@
         http://code.alibabatech.com/schema/dubbo
         http://code.alibabatech.com/schema/dubbo/dubbo.xsd">
 
-    <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.event.service.DoctorBarnReadService" ref="doctorBarnReadServiceImpl"/>
-    <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.event.service.DoctorBarnWriteService" ref="doctorBarnWriteServiceImpl" />
-
     <!-- workflow api -->
     <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.workflow.core.WorkFlowService" ref="workFlowServiceImpl" />
     <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.workflow.access.JdbcAccess" ref="mybatisAccess" />
