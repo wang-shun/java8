@@ -3,10 +3,14 @@ package io.terminus.doctor.open.common;
 import com.github.cage.Cage;
 import com.github.cage.image.EffectConfig;
 import com.github.cage.image.Painter;
+import com.github.cage.token.RandomCharacterGeneratorFactory;
 import com.github.cage.token.RandomTokenGenerator;
 import org.springframework.stereotype.Component;
 
 import javax.servlet.http.HttpSession;
+import java.util.Random;
+
+import static com.github.cage.token.RandomCharacterGeneratorFactory.ARABIC_NUMERALS;
 
 
 /**
@@ -22,7 +26,7 @@ public class CaptchaGenerator {
 
     public CaptchaGenerator() {
         Painter painter = new Painter(150, 70, null, null, new EffectConfig(true, true, true, true, null), null);
-        RandomTokenGenerator tokenGenerator = new RandomTokenGenerator(null, 4, 0);
+        RandomTokenGenerator tokenGenerator = new RandomTokenGenerator(null, new RandomCharacterGeneratorFactory(ARABIC_NUMERALS, null, new Random()), 4, 0);
         cage = new Cage(painter, null, null, null, Cage.DEFAULT_COMPRESS_RATIO, tokenGenerator, null);
     }
 
