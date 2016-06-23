@@ -33,7 +33,7 @@ public class TestSearch extends BaseServiceTest {
             String template = "search/search.mustache";
             Map<String, String> params = Maps.newHashMap();
             // 前缀查询 替代 关键字
-            params.put("q", "Y4");
+            params.put("q", "16");
             Paging<SearchedPig> paging = RespHelper.orServEx(pigSearchReadService.searchWithAggs(1, 200, template, params));
             System.out.println(paging.getTotal());
             // updatedAt 降序排列

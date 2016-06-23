@@ -5,13 +5,13 @@
      "filtered": {
         "query": {
             {{#keyword}}
-                {{#prefix}}
-                    "prefix": {
+                {{#wildCard}}
+                    "wildcard": {
                         "{{field}}" : "{{value}}"
                     }
-                {{/prefix}}
+                {{/wildCard}}
 
-                {{^prefix}}
+                {{^wildCard}}
                     {{#multiField}}
                         "bool": {
                         "should": [
@@ -26,7 +26,7 @@
                             "match": { "{{field}}": "{{value}}" }
                         {{/fields}}
                     {{/multiField}}
-                {{/prefix}}
+                {{/wildCard}}
             {{/keyword}}
 
             {{^keyword}}
