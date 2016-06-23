@@ -16,6 +16,8 @@ public class PigCriterias extends Criterias {
 
     private Prefix prefix;
 
+    private WildCard wildCard;
+
     public PigCriterias(CriteriasBuilder cb) {
         super(cb);
     }

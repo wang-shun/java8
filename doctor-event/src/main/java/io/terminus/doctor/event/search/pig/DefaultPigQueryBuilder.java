@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import io.terminus.common.utils.Splitters;
 import io.terminus.doctor.event.search.query.Prefix;
+import io.terminus.doctor.event.search.query.WildCard;
 import io.terminus.search.api.query.Aggs;
 import io.terminus.search.api.query.Highlight;
 import io.terminus.search.api.query.Keyword;
@@ -38,9 +39,19 @@ public class DefaultPigQueryBuilder extends BasePigQueryBuilder {
     @Override
     protected Prefix buildPrefix(Map<String, String> params) {
         // 猪号使用搜索前缀查询搜索前缀
-        String q = params.get("q");
+        /* String q = params.get("q");
         if (StringUtils.isNotBlank(q)) {
             return new Prefix("pigCode", q);
+        }*/
+        return null;
+    }
+
+    @Override
+    protected WildCard buildWildCard(Map<String, String> params) {
+        // 猪号使用搜索通配符查询搜索前缀
+        String q = params.get("q");
+        if (StringUtils.isNotBlank(q)) {
+            return new WildCard("pigCode", "*" + q + "*");
         }
         return null;
     }
