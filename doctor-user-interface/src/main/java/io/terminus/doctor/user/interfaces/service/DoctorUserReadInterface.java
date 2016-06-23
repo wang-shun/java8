@@ -1,8 +1,8 @@
 package io.terminus.doctor.user.interfaces.service;
 
-import io.terminus.doctor.user.interfaces.model.Paging;
-import io.terminus.doctor.user.interfaces.model.Response;
-import io.terminus.doctor.user.interfaces.model.User;
+import io.terminus.doctor.user.interfaces.model.PagingDto;
+import io.terminus.doctor.user.interfaces.model.RespDto;
+import io.terminus.doctor.user.interfaces.model.UserDto;
 
 import java.util.Date;
 import java.util.List;
@@ -17,44 +17,44 @@ public interface DoctorUserReadInterface {
     /**
      * 按用户名查询
      * @param nickname 按用户名
-     * @return 如果查询不到不会返回异常, 而是在Response中放null
+     * @return 如果查询不到不会返回异常, 而是在RespDto中放null
      */
-    Response<User> findByNick(String nickname);
+    RespDto<UserDto> findByNick(String nickname);
 
     /**
      * 按邮箱查询
      * @param email 邮箱
-     * @return 如果查询不到不会返回异常, 而是在Response中放null
+     * @return 如果查询不到不会返回异常, 而是在RespDto中放null
      */
-    Response<User> findByEmail(String email);
+    RespDto<UserDto> findByEmail(String email);
 
     /**
      * 按手机号查询
      * @param mobile 手机号
-     * @return 如果查询不到不会返回异常, 而是在Response中放null
+     * @return 如果查询不到不会返回异常, 而是在RespDto中放null
      */
-    Response<User> findByMobile(String mobile);
+    RespDto<UserDto> findByMobile(String mobile);
 
     /**
      * 按id查询用户
      * @param id 用户id
      * @return 如果查询不到将会返回异常 user.not.found
      */
-    Response<User> load(Integer id);
+    RespDto<UserDto> load(Integer id);
 
     /**
      * 按id查询用户
      * @param id 用户id
      * @return 如果查询不到将会返回异常 user.not.found
      */
-    Response<User> load(Long id);
+    RespDto<UserDto> load(Long id);
 
     /**
      * 批量查询用户
      * @param ids  用户id
      * @return 如果查询不到不会返回异常
      */
-    Response<List<User>> loads(List<Long> ids);
+    RespDto<List<UserDto>> loads(List<Long> ids);
 
     /**
      * 批量查询用户
@@ -63,7 +63,7 @@ public interface DoctorUserReadInterface {
      * @param idn  用户id
      * @return 如果查询不到不会返回异常
      */
-    Response<List<User>> loads(Long id0, Long id1, Long... idn);
+    RespDto<List<UserDto>> loads(Long id0, Long id1, Long... idn);
 
     /**
      * 多条件查询表 parana_users
@@ -80,19 +80,19 @@ public interface DoctorUserReadInterface {
      *                 <br>10.searchValue[String], email\mobile\name 任一字段与此值相等
      * @return 如果查询不到不会返回异常
      */
-    Response<List<User>> loadsBy(Map<String, Object> criteria);
+    RespDto<List<UserDto>> loadsBy(Map<String, Object> criteria);
 
     /**
      * 查询表中最大的id
      * @return
      */
-    Response<Long> maxId();
+    RespDto<Long> maxId();
 
     /**
      * 查询表中最小的 updated_at
      * @return
      */
-    Response<Date> minDate();
+    RespDto<Date> minDate();
 
     /**
      * 查询id小于lastId内的limit个用戶
@@ -100,7 +100,7 @@ public interface DoctorUserReadInterface {
      * @param limit 用戶个数
      * @return id小于lastId内的pageSize个用戶
      */
-    Response<List<User>> listTo(Long lastId, int limit);
+    RespDto<List<UserDto>> listTo(Long lastId, int limit);
     /**
      * 查询id小于lastId内且更新时间大于since的limit个用戶
      * @param lastId lastId 最大的用戶id
@@ -108,7 +108,7 @@ public interface DoctorUserReadInterface {
      * @param limit 用戶个数
      * @return id小于lastId内且更新时间大于since的limit个用戶
      */
-    Response<List<User>> listSince(Long lastId, String since, int limit);
+    RespDto<List<UserDto>> listSince(Long lastId, String since, int limit);
 
     /**
      * 分页查询
@@ -116,7 +116,7 @@ public interface DoctorUserReadInterface {
      * @param limit 数量
      * @return
      */
-    Response<Paging<User>> paging(Integer offset, Integer limit);
+    RespDto<PagingDto<UserDto>> paging(Integer offset, Integer limit);
 
     /**
      * 分页查询用户基本信息
@@ -125,7 +125,7 @@ public interface DoctorUserReadInterface {
      * @param criteria 关于字段的匹配规则,参见loadsBy方法
      * @return
      */
-    Response<Paging<User>> paging(Integer offset, Integer limit, User criteria);
+    RespDto<PagingDto<UserDto>> paging(Integer offset, Integer limit, UserDto criteria);
 
     /**
      * 分页查询用户基本信息
@@ -134,12 +134,26 @@ public interface DoctorUserReadInterface {
      * @param criteria 关于字段的匹配规则,参见loadsBy方法
      * @return
      */
-    Response<Paging<User>> paging(Integer offset, Integer limit, Map<String, Object> criteria);
+    RespDto<PagingDto<UserDto>> paging(Integer offset, Integer limit, Map<String, Object> criteria);
 
     /**
      * 分页查询用户基本信息
      * @param criteria 关于字段的匹配规则,参见loadsBy方法
      * @return
      */
-    Response<Paging<User>> paging(Map<String, Object> criteria);
+    RespDto<PagingDto<UserDto>> paging(Map<String, Object> criteria);
+
+    /**
+     * 查询所有的用户邮箱
+     * @param userTypeName 用户类型(类型的英文名称)
+     * @return
+     */
+    RespDto<List<String>> listAllUserEmails(String userTypeName);
+
+    /**
+     * 查询所有的用户手机号
+     * @param userTypeName 用户类型(类型的英文名称)
+     * @return
+     */
+    RespDto<List<String>> listAllUserMobiles(String userTypeName);
 }
