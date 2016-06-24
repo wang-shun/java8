@@ -57,6 +57,17 @@ public class DoctorPigs {
         return RespHelper.or500(doctorPigReadService.pagingDoctorInfoDtoByPigTrack(doctorPigTrack, pageNo, pageSize));
     }
 
+    /**
+     * pig id 获取 pig track 信息内容
+     * @param pigId
+     * @return
+     */
+    @RequestMapping(value = "/getPigInfoDto", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public DoctorPigInfoDto queryDoctorInfoDtoById(@RequestParam("pigId") Long pigId){
+        return RespHelper.or500(doctorPigReadService.queryDoctorInfoDtoById(pigId));
+    }
+
     @RequestMapping(value = "/getPigDetail", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public DoctorPigInfoDetailDto queryPigDetailInfoDto(@RequestParam("farmId") Long farmId,
