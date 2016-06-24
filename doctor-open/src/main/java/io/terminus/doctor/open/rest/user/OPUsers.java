@@ -554,6 +554,7 @@ public class OPUsers {
 
     @OpenMethod(key="user.logout", paramNames = {"sid"})
     public void logout(String sessionId) {
+        log.info("logout session :{}", sessionId);
         sessionManager.deletePhysically(Sessions.TOKEN_PREFIX, sessionId);
     }
 
