@@ -360,6 +360,13 @@ public class OPUsers {
         });
         log.info("login session:{} ttl:{}", sessionId, ttls);
 
+        jedisTemplate.execute(new JedisTemplate.JedisActionNoResult() {
+            @Override
+            public void action(Jedis jedis) {
+                jedis.expire(Sessions.TOKEN_PREFIX + ":" + sessionId, 99999);
+            }
+        });
+
         // 清除 limit & code
         sessionManager.deletePhysically(Sessions.LIMIT_PREFIX, sessionId);
         sessionManager.deletePhysically(Sessions.CODE_PREFIX, sessionId);
