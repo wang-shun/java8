@@ -11,6 +11,7 @@ import com.google.common.hash.Hashing;
 import io.terminus.boot.session.properties.SessionProperties;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.Response;
+import io.terminus.common.redis.utils.JedisTemplate;
 import io.terminus.common.utils.MapBuilder;
 import io.terminus.common.utils.Splitters;
 import io.terminus.doctor.common.enums.UserStatus;
@@ -47,14 +48,21 @@ import org.joda.time.format.DateTimeFormat;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.Base64Utils;
 import org.springframework.web.bind.annotation.RequestMethod;
+import redis.clients.jedis.Jedis;
 
 import java.io.Serializable;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
-import static io.terminus.common.utils.Arguments.*;
+import static io.terminus.common.utils.Arguments.isEmpty;
+import static io.terminus.common.utils.Arguments.isNull;
+import static io.terminus.common.utils.Arguments.notNull;
 
 /**
  * Mail: xiao@terminus.io <br>
@@ -93,6 +101,9 @@ public class OPUsers {
     private CoreEventDispatcher coreEventDispatcher;
     @Autowired
     private DeviceReadService deviceReadService;
+    @Autowired
+    private JedisTemplate jedisTemplate;
+
 
     public OPUsers() {
         String hostIp;
@@ -335,6 +346,18 @@ public class OPUsers {
         sessionManager.save(Sessions.TOKEN_PREFIX, sessionId,
                 ImmutableMap.of(Sessions.USER_ID, (Object) user.getId(), Sessions.DEVICE_ID, (Object) deviceId),
                 Sessions.LONG_INACTIVE_INTERVAL);
+
+        ////////// test log
+        log.info("Session LONG_INACTIVE_INTERVAL", Sessions.LONG_INACTIVE_INTERVAL);
+
+        Long ttl = jedisTemplate.execute(new JedisTemplate.JedisAction<Long>() {
+            @Override
+            public Long action(Jedis jedis) {
+                return jedis.ttl(Sessions.TOKEN_PREFIX + ":" + sessionId);
+            }
+        });
+        log.info("test session:{}, ttl:{}", ttl);
+
         // 清除 limit & code
         sessionManager.deletePhysically(Sessions.LIMIT_PREFIX, sessionId);
         sessionManager.deletePhysically(Sessions.CODE_PREFIX, sessionId);
@@ -348,6 +371,7 @@ public class OPUsers {
         token.setSessionId(sessionId);
         token.setDeviceId(deviceId);
         token.setCookieName(sessionProperties.getCookieName());
+        log.info("login token:{}", token);
         return token;
     }
 
