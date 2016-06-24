@@ -74,4 +74,12 @@ public interface DoctorPigReadService {
      * @return 猪列表
      */
     Response<List<DoctorPig>> findPigsByFarmId(@NotNull(message = "farmId.not.null") Long farmId);
+
+    /**
+     * 校验 farmId pigCode 不存在
+     * @param farmId
+     * @param pigCode
+     * @return
+     */
+    Response<Boolean> validatePigCodeByFarmId(Long farmId, String pigCode);
 }

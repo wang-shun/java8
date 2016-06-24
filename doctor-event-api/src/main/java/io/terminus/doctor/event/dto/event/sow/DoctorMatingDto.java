@@ -22,7 +22,7 @@ public class DoctorMatingDto implements Serializable {
 
     private static final long serialVersionUID = 2732269011148894160L;
 
-    private Date matingDate; // 品种日期
+    private Date matingDate; // 配种日期
 
     private Long matingBoarPigId;   //配种公猪Id
 

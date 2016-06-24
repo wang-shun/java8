@@ -87,7 +87,6 @@ public abstract class DoctorAbstractEventFlowHandler extends HandlerAware {
             doctorPigSnapshot.setPigInfoMap(ImmutableMap.of(DoctorPigSnapshotConstants.PIG_TRACK, currentPigTrackSnapShot));
             doctorPigSnapshotDao.create(doctorPigSnapshot);
 
-            log.info("**** pig extra info dto :{}", extraInfo);
             specialFlowHandler(execution, doctorBasicInputInfoDto, extraInfo, context);
 
             // 当前事件影响的Id 方式
