@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static io.terminus.common.utils.Arguments.isEmpty;
+import static io.terminus.common.utils.Arguments.notEmpty;
 
 /**
  * Desc: 基础数据读服务实现类
@@ -172,7 +173,9 @@ public class DoctorBasicReadServiceImpl implements DoctorBasicReadService {
             if (isEmpty(srm)) {
                 return Response.ok(diseases);
             }
-            return Response.ok(diseases.stream().filter(disease -> disease.getSrm().contains(srm)).collect(Collectors.toList()));
+            return Response.ok(diseases.stream()
+                    .filter(disease -> notEmpty(disease.getSrm()) && disease.getSrm().toLowerCase().contains(srm.toLowerCase()))
+                    .collect(Collectors.toList()));
         } catch (Exception e) {
             log.error("find disease by farm id and srm fail, farmId:{}, srm:{}, cause:{}", farmId, srm, Throwables.getStackTraceAsString(e));
             return Response.fail("disease.find.fail");
