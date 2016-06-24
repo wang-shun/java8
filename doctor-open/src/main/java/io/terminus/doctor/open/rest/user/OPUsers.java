@@ -104,7 +104,6 @@ public class OPUsers {
     @Autowired
     private JedisTemplate jedisTemplate;
 
-
     public OPUsers() {
         String hostIp;
         try {
@@ -359,6 +358,8 @@ public class OPUsers {
                 log.info("expire session:{}", sessionId);
             }
         });
+
+        coreEventDispatcher.publish(new DoctorLoginEvent(sessionId));
 
         // 清除 limit & code
         sessionManager.deletePhysically(Sessions.LIMIT_PREFIX, sessionId);
