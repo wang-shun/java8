@@ -5,7 +5,7 @@ server:
 session:
   cookie-context-path: /
   cookie-domain: doctor.com
-  cookie-max-age: 1800
+  cookie-max-age: 333333
   cookie-name: msid
   source: redis
   serialize-type: json
