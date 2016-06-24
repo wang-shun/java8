@@ -355,8 +355,8 @@ public class OPUsers {
         jedisTemplate.execute(new JedisTemplate.JedisActionNoResult() {
             @Override
             public void action(Jedis jedis) {
-                jedis.expire(Sessions.TOKEN_PREFIX + ":" + sessionId, 77777);
-                log.info("expire  session:{}", sessionId);
+                jedis.expire(Sessions.TOKEN_PREFIX + ":" + sessionId, 888);
+                log.info("expire session:{}", sessionId);
             }
         });
 
