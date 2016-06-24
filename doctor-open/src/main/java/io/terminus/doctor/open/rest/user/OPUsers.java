@@ -11,7 +11,6 @@ import com.google.common.hash.Hashing;
 import io.terminus.boot.session.properties.SessionProperties;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.Response;
-import io.terminus.common.redis.utils.JedisTemplate;
 import io.terminus.common.utils.MapBuilder;
 import io.terminus.common.utils.Splitters;
 import io.terminus.doctor.common.enums.UserStatus;
@@ -40,6 +39,8 @@ import io.terminus.parana.user.service.UserReadService;
 import io.terminus.parana.user.service.UserWriteService;
 import io.terminus.parana.web.msg.MsgWebService;
 import io.terminus.session.AFSessionManager;
+import io.terminus.session.redis.JedisCallback;
+import io.terminus.session.redis.JedisPoolExecutor;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.validator.constraints.NotEmpty;
@@ -102,7 +103,7 @@ public class OPUsers {
     @Autowired
     private DeviceReadService deviceReadService;
     @Autowired
-    private JedisTemplate jedisTemplate;
+    private JedisPoolExecutor jedisTemplate;
 
 
     public OPUsers() {
@@ -350,9 +351,9 @@ public class OPUsers {
         ////////// test log
         log.info("Session LONG_INACTIVE_INTERVAL", Sessions.LONG_INACTIVE_INTERVAL);
 
-        Long ttl = jedisTemplate.execute(new JedisTemplate.JedisAction<Long>() {
+        Long ttl = jedisTemplate.execute(new JedisCallback<Long>() {
             @Override
-            public Long action(Jedis jedis) {
+            public Long execute(Jedis jedis) {
                 return jedis.ttl(Sessions.TOKEN_PREFIX + ":" + sessionId);
             }
         });
