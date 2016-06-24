@@ -10,6 +10,7 @@ import io.terminus.pampas.openplatform.exceptions.OPClientException;
 import io.terminus.parana.user.model.User;
 import io.terminus.parana.user.service.UserReadService;
 import io.terminus.session.AFSessionManager;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Map;
@@ -34,6 +35,7 @@ import static io.terminus.common.utils.Arguments.isEmpty;
         "get.mobile.code",
         "user.test.push"
 })
+@Slf4j
 public class SessionHandle implements ParamPreHandle {
 
     @Autowired
@@ -59,6 +61,8 @@ public class SessionHandle implements ParamPreHandle {
         }
 
         checkDeviceId(snapshot.get(Sessions.DEVICE_ID), params.get("deviceId"));
+
+        log.info("test session handle info:{}", params);
 
         // refresh
         sessionManager.refreshExpireTime(Sessions.TOKEN_PREFIX, sessionId, Sessions.LONG_INACTIVE_INTERVAL);
