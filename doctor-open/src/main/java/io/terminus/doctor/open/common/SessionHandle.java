@@ -65,7 +65,7 @@ public class SessionHandle implements ParamPreHandle {
         log.info("test session handle info:{}", params);
 
         // refresh
-        sessionManager.refreshExpireTime(Sessions.TOKEN_PREFIX, sessionId, Sessions.LONG_INACTIVE_INTERVAL);
+        sessionManager.refreshExpireTime(Sessions.TOKEN_PREFIX, sessionId, 99999);
         Long uid = Long.parseLong(snapshot.get(Sessions.USER_ID).toString());
         Response<User> res = userReadService.findById(uid);
         if (!res.isSuccess()) {

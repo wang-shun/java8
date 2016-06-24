@@ -348,7 +348,7 @@ public class OPUsers {
         Map<String, Object> map = ImmutableMap.of(Sessions.USER_ID, (Object) user.getId(), Sessions.DEVICE_ID, (Object) deviceId);
         Integer ttl = Sessions.LONG_INACTIVE_INTERVAL;
         log.info("before prefix:{}, map:{}, ttl:{}", prefix, map, ttl);
-        sessionManager.save(Sessions.TOKEN_PREFIX, sessionId, map, ttl);
+        sessionManager.save(Sessions.TOKEN_PREFIX, sessionId, map, 99999);
         log.info("after prefix:{}, map:{}, ttl:{}", prefix, map, ttl);
 
         ////////// test log
