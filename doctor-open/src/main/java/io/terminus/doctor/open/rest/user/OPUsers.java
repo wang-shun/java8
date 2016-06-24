@@ -344,20 +344,23 @@ public class OPUsers {
         log.info("login user info :{}", user);
 
         // 登录成功记录 sessionId 和 deviceId, 防止其他设备获得sessionId, 伪造登录
-        sessionManager.save(Sessions.TOKEN_PREFIX, sessionId,
-                ImmutableMap.of(Sessions.USER_ID, (Object) user.getId(), Sessions.DEVICE_ID, (Object) deviceId),
-                Sessions.LONG_INACTIVE_INTERVAL);
+        String prefix = Sessions.TOKEN_PREFIX;
+        Map<String, Object> map = ImmutableMap.of(Sessions.USER_ID, (Object) user.getId(), Sessions.DEVICE_ID, (Object) deviceId);
+        Integer ttl = Sessions.LONG_INACTIVE_INTERVAL;
+        log.info("before prefix:{}, map:{}, ttl:{}", prefix, map, ttl);
+        sessionManager.save(Sessions.TOKEN_PREFIX, sessionId, map, Sessions.LONG_INACTIVE_INTERVAL);
+        log.info("after prefix:{}, map:{}, ttl:{}", prefix, map, ttl);
 
         ////////// test log
         log.info("Session LONG_INACTIVE_INTERVAL:{}", Sessions.LONG_INACTIVE_INTERVAL);
 
-        Long ttl = jedisTemplate.execute(new JedisTemplate.JedisAction<Long>() {
+        Long ttls = jedisTemplate.execute(new JedisTemplate.JedisAction<Long>() {
             @Override
             public Long action(Jedis jedis) {
                 return jedis.ttl(Sessions.TOKEN_PREFIX+":"+sessionId);
             }
         });
-        log.info("login session:{} ttl:{}", sessionId, ttl);
+        log.info("login session:{} ttl:{}", sessionId, ttls);
 
         // 清除 limit & code
         sessionManager.deletePhysically(Sessions.LIMIT_PREFIX, sessionId);
