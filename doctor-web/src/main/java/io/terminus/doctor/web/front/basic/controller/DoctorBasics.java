@@ -94,6 +94,18 @@ public class DoctorBasics {
     }
 
     /**
+     * 根据farmId和输入码查询疾病表(模糊匹配)
+     * @param farmId 猪场id
+     * @param srm    输入码
+     * @return 疾病表
+     */
+    @RequestMapping(value = "/disease/srm", method = RequestMethod.GET)
+    public List<DoctorDisease> findDiseaseByfarmIdAndSrm(@RequestParam("farmId") Long farmId,
+                                                         @RequestParam(value = "srm", required = false) String srm) {
+        return RespHelper.or500(doctorBasicReadService.findDiseasesByFarmIdAndSrm(farmId, srm));
+    }
+
+    /**
      * 创建或更新疾病表
      * @return 是否成功
      */

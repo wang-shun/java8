@@ -23,6 +23,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
+
+import static io.terminus.common.utils.Arguments.isEmpty;
 
 /**
  * Desc: 基础数据读服务实现类
@@ -158,6 +161,20 @@ public class DoctorBasicReadServiceImpl implements DoctorBasicReadService {
             return Response.ok(doctorDiseaseDao.findByFarmId(farmId));
         } catch (Exception e) {
             log.error("find disease by farm id fail, farmId:{}, cause:{}", farmId, Throwables.getStackTraceAsString(e));
+            return Response.fail("disease.find.fail");
+        }
+    }
+
+    @Override
+    public Response<List<DoctorDisease>> findDiseasesByFarmIdAndSrm(Long farmId, String srm) {
+        try {
+            List<DoctorDisease> diseases = doctorDiseaseDao.findByFarmId(farmId);
+            if (isEmpty(srm)) {
+                return Response.ok(diseases);
+            }
+            return Response.ok(diseases.stream().filter(disease -> disease.getSrm().contains(srm)).collect(Collectors.toList()));
+        } catch (Exception e) {
+            log.error("find disease by farm id and srm fail, farmId:{}, srm:{}, cause:{}", farmId, srm, Throwables.getStackTraceAsString(e));
             return Response.fail("disease.find.fail");
         }
     }

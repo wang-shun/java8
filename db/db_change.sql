@@ -93,3 +93,6 @@ CREATE TABLE `doctor_foster_reasons` (
   PRIMARY KEY (`id`)
 ) ENGINE=Myisam DEFAULT CHARSET=utf8 COMMENT='寄养原因表';
 CREATE INDEX idx_doctor_foster_reasons_farm_id ON doctor_foster_reasons(farm_id);
+
+-- 2016-06-24 增加输入码, 增加基础数据表
+ALTER TABLE doctor_diseases ADD COLUMN `srm` VARCHAR (32) DEFAULT NULL COMMENT '输入码(快捷输入)' AFTER farm_name;

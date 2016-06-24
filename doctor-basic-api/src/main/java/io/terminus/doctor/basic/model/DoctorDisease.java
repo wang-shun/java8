@@ -31,6 +31,11 @@ public class DoctorDisease implements Serializable {
      * 猪场名称
      */
     private String farmName;
+
+    /**
+     * 输入码
+     */
+    private String srm;
     
     /**
      * 外部id

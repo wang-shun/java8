@@ -10,6 +10,7 @@ import io.terminus.doctor.basic.model.DoctorFosterReason;
 import io.terminus.doctor.basic.model.DoctorGenetic;
 import io.terminus.doctor.basic.model.DoctorUnit;
 
+import javax.annotation.Nullable;
 import javax.validation.constraints.NotNull;
 import java.util.List;
 
@@ -107,6 +108,14 @@ public interface DoctorBasicReadService {
      * @return 疾病表
      */
     Response<List<DoctorDisease>> findDiseasesByFarmId(@NotNull(message = "farmId.not.null") Long farmId);
+
+    /**
+     * 根据farmId和输入码查询疾病表(模糊匹配)
+     * @param farmId 猪场id
+     * @param srm    输入码
+     * @return 疾病表
+     */
+    Response<List<DoctorDisease>> findDiseasesByFarmIdAndSrm(@NotNull(message = "farmId.not.null") Long farmId, @Nullable String srm);
 
     //////////////////////////// 计量单位相关 ////////////////////////////
     /**
