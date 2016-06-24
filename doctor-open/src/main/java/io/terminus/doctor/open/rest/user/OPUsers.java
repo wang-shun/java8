@@ -102,9 +102,6 @@ public class OPUsers {
     private CoreEventDispatcher coreEventDispatcher;
     @Autowired
     private DeviceReadService deviceReadService;
-    @Autowired
-    private JedisPoolExecutor jedisTemplate;
-
 
     public OPUsers() {
         String hostIp;
@@ -351,14 +348,7 @@ public class OPUsers {
         ////////// test log
         log.info("Session LONG_INACTIVE_INTERVAL", Sessions.LONG_INACTIVE_INTERVAL);
 
-        Long ttl = jedisTemplate.execute(new JedisCallback<Long>() {
-            @Override
-            public Long execute(Jedis jedis) {
-                return jedis.ttl(Sessions.TOKEN_PREFIX + ":" + sessionId);
-            }
-        });
-        log.info("test session:{}, ttl:{}", ttl);
-
+        
         // 清除 limit & code
         sessionManager.deletePhysically(Sessions.LIMIT_PREFIX, sessionId);
         sessionManager.deletePhysically(Sessions.CODE_PREFIX, sessionId);
