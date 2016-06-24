@@ -9,6 +9,7 @@ import io.terminus.common.model.PageInfo;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.common.utils.RespHelper;
+import io.terminus.doctor.event.cache.DoctorPigInfoCache;
 import io.terminus.doctor.event.dao.DoctorPigDao;
 import io.terminus.doctor.event.dao.DoctorPigTrackDao;
 import io.terminus.doctor.event.dto.DoctorPigInfoDetailDto;
@@ -47,12 +48,16 @@ public class DoctorPigReadServiceImpl implements DoctorPigReadService{
 
     private final DoctorPigEventReadService doctorPigEventReadService;
 
+    private final DoctorPigInfoCache doctorPigInfoCache;
+
     @Autowired
     public DoctorPigReadServiceImpl(DoctorPigDao doctorPigDao, DoctorPigTrackDao doctorPigTrackDao,
-                                    DoctorPigEventReadService doctorPigEventReadService){
+                                    DoctorPigEventReadService doctorPigEventReadService,
+                                    DoctorPigInfoCache doctorPigInfoCache){
         this.doctorPigDao = doctorPigDao;
         this.doctorPigTrackDao = doctorPigTrackDao;
         this.doctorPigEventReadService = doctorPigEventReadService;
+        this.doctorPigInfoCache = doctorPigInfoCache;
     }
 
     @Override
@@ -193,6 +198,16 @@ public class DoctorPigReadServiceImpl implements DoctorPigReadService{
         } catch (Exception e) {
             log.error("find pigs by farmId failed, farmId:{}, cause:{}", farmId, Throwables.getStackTraceAsString(e));
             return Response.fail("pig.find.fail");
+        }
+    }
+
+    @Override
+    public Response<Boolean> validatePigCodeByFarmId(Long farmId, String pigCode) {
+        try{
+            return Response.ok(doctorPigInfoCache.judgePigCodeNotContain(farmId, pigCode));
+        }catch (Exception e){
+            log.error("validate pig code not in farm fail, farmId:{}, pigCode:{}, cause:{}", farmId, pigCode, Throwables.getStackTraceAsString(e));
+            return Response.fail("validate.pigCode.fail");
         }
     }
 }

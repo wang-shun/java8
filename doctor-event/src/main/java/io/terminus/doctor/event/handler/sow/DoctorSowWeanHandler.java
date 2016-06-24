@@ -36,7 +36,7 @@ public class DoctorSowWeanHandler extends DoctorAbstractEventFlowHandler{
     public DoctorPigTrack updateDoctorPigTrackInfo(Execution execution, DoctorPigTrack doctorPigTrack, DoctorBasicInputInfoDto basic, Map<String, Object> extra, Map<String, Object> context) {
         // 校验断奶的数量信息
         Map<String,Object> extraMap = doctorPigTrack.getExtraMap();
-        Integer healthCount = (Integer) extraMap.get("healthCount");
+        Integer healthCount = (Integer) extraMap.get("farrowingLiveCount");
         Integer toWeanCount = (Integer)extra.get("partWeanPigletsCount");
         Double weanAvgWeight = (Double)extra.get("partWeanAvgWeight");
 

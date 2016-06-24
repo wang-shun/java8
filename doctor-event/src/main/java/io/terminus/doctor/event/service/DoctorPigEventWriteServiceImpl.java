@@ -37,6 +37,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkState;
@@ -323,12 +324,23 @@ public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteServic
     @Override
     public Response<Long> sowFarrowingEvent(DoctorFarrowingDto doctorFarrowingDto, DoctorBasicInputInfoDto doctorBasicInputInfoDto) {
         try{
+            // validate count
+            checkState(Objects.equals(
+                            doctorFarrowingDto.getFarrowingLiveCount(),
+                            doctorFarrowingDto.getHealthCount() + doctorFarrowingDto.getWeakCount()), "validate.farrowingCount.fail");
+            checkState(Objects.equals(doctorFarrowingDto.getFarrowingLiveCount(),
+                            doctorFarrowingDto.getLiveBoarCount() + doctorFarrowingDto.getLiveSowCount()),
+                    "validate.farrowingCount.fail");
+
             Map<String,Object> dto = Maps.newHashMap();
             BeanMapper.copy(doctorFarrowingDto, dto);
 
             Map<String,Object> result = doctorPigEventManager.createSowPigEvent(doctorBasicInputInfoDto, dto);
             publishEvent(result);
             return Response.ok(Params.getWithConvert(result,"doctorEventId",a->Long.valueOf(a.toString())));
+        }catch (IllegalStateException e){
+            log.error("illegal state validate farrow count error, cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail(e.getMessage());
         }catch (Exception e){
             log.error("vaccination event create fail, cause:{}", Throwables.getStackTraceAsString(e));
             return Response.fail("create.vaccination.fail");
