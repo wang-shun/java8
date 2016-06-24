@@ -348,12 +348,10 @@ public class OPUsers {
         Map<String, Object> map = ImmutableMap.of(Sessions.USER_ID, (Object) user.getId(), Sessions.DEVICE_ID, (Object) deviceId);
         Integer ttl = Sessions.LONG_INACTIVE_INTERVAL;
         log.info("before prefix:{}, map:{}, ttl:{}", prefix, map, ttl);
-        sessionManager.save(Sessions.TOKEN_PREFIX, sessionId, map, Sessions.LONG_INACTIVE_INTERVAL);
+        sessionManager.save(Sessions.TOKEN_PREFIX, sessionId, map, ttl);
         log.info("after prefix:{}, map:{}, ttl:{}", prefix, map, ttl);
 
         ////////// test log
-        log.info("Session LONG_INACTIVE_INTERVAL:{}", Sessions.LONG_INACTIVE_INTERVAL);
-
         Long ttls = jedisTemplate.execute(new JedisTemplate.JedisAction<Long>() {
             @Override
             public Long action(Jedis jedis) {
