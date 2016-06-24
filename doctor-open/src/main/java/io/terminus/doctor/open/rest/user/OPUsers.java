@@ -352,18 +352,11 @@ public class OPUsers {
         log.info("after prefix:{}, map:{}, ttl:{}", prefix, map, ttl);
 
         ////////// test log
-        Long ttls = jedisTemplate.execute(new JedisTemplate.JedisAction<Long>() {
-            @Override
-            public Long action(Jedis jedis) {
-                return jedis.ttl(Sessions.TOKEN_PREFIX+":"+sessionId);
-            }
-        });
-        log.info("login session:{} ttl:{}", sessionId, ttls);
-
         jedisTemplate.execute(new JedisTemplate.JedisActionNoResult() {
             @Override
             public void action(Jedis jedis) {
-                jedis.expire(Sessions.TOKEN_PREFIX + ":" + sessionId, 99999);
+                jedis.expire(Sessions.TOKEN_PREFIX + ":" + sessionId, 77777);
+                log.info("expire  session:{}", sessionId);
             }
         });
 
