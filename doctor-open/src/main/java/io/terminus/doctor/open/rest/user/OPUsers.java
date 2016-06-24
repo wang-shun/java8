@@ -11,7 +11,6 @@ import com.google.common.hash.Hashing;
 import io.terminus.boot.session.properties.SessionProperties;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.Response;
-import io.terminus.common.redis.utils.JedisTemplate;
 import io.terminus.common.utils.MapBuilder;
 import io.terminus.common.utils.Splitters;
 import io.terminus.doctor.common.enums.UserStatus;
@@ -48,7 +47,6 @@ import org.joda.time.format.DateTimeFormat;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.Base64Utils;
 import org.springframework.web.bind.annotation.RequestMethod;
-import redis.clients.jedis.Jedis;
 
 import java.io.Serializable;
 import java.net.InetAddress;
@@ -101,8 +99,6 @@ public class OPUsers {
     private CoreEventDispatcher coreEventDispatcher;
     @Autowired
     private DeviceReadService deviceReadService;
-    @Autowired
-    private JedisTemplate jedisTemplate;
 
     public OPUsers() {
         String hostIp;
@@ -340,26 +336,13 @@ public class OPUsers {
 
         // 手机 密码登录
         User user = doLogin(name, password, sessionId);
-        log.info("login user info :{}", user);
 
         // 登录成功记录 sessionId 和 deviceId, 防止其他设备获得sessionId, 伪造登录
-        String prefix = Sessions.TOKEN_PREFIX;
-        Map<String, Object> map = ImmutableMap.of(Sessions.USER_ID, (Object) user.getId(), Sessions.DEVICE_ID, (Object) deviceId);
-        Integer ttl = Sessions.LONG_INACTIVE_INTERVAL;
-        log.info("before prefix:{}, map:{}, ttl:{}", prefix, map, ttl);
-        sessionManager.save(Sessions.TOKEN_PREFIX, sessionId, map, 99999);
-        log.info("after prefix:{}, map:{}, ttl:{}", prefix, map, ttl);
-
-        ////////// test log
-        jedisTemplate.execute(new JedisTemplate.JedisActionNoResult() {
-            @Override
-            public void action(Jedis jedis) {
-                jedis.expire(Sessions.TOKEN_PREFIX + ":" + sessionId, 888);
-                log.info("expire session:{}", sessionId);
-            }
-        });
-
-        coreEventDispatcher.publish(new DoctorLoginEvent(sessionId));
+        sessionManager.save(
+                Sessions.TOKEN_PREFIX,
+                sessionId,
+                ImmutableMap.of(Sessions.USER_ID, (Object) user.getId(), Sessions.DEVICE_ID, (Object) deviceId),
+                Sessions.LONG_INACTIVE_INTERVAL);
 
         // 清除 limit & code
         sessionManager.deletePhysically(Sessions.LIMIT_PREFIX, sessionId);
