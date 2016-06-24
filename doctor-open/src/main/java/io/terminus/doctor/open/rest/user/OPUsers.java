@@ -11,6 +11,7 @@ import com.google.common.hash.Hashing;
 import io.terminus.boot.session.properties.SessionProperties;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.Response;
+import io.terminus.common.redis.utils.JedisTemplate;
 import io.terminus.common.utils.MapBuilder;
 import io.terminus.common.utils.Splitters;
 import io.terminus.doctor.common.enums.UserStatus;
@@ -39,8 +40,6 @@ import io.terminus.parana.user.service.UserReadService;
 import io.terminus.parana.user.service.UserWriteService;
 import io.terminus.parana.web.msg.MsgWebService;
 import io.terminus.session.AFSessionManager;
-import io.terminus.session.redis.JedisCallback;
-import io.terminus.session.redis.JedisPoolExecutor;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.validator.constraints.NotEmpty;
@@ -102,6 +101,9 @@ public class OPUsers {
     private CoreEventDispatcher coreEventDispatcher;
     @Autowired
     private DeviceReadService deviceReadService;
+    @Autowired
+    private JedisTemplate jedisTemplate;
+
 
     public OPUsers() {
         String hostIp;
@@ -339,6 +341,7 @@ public class OPUsers {
 
         // 手机 密码登录
         User user = doLogin(name, password, sessionId);
+        log.info("login user info :{}", user);
 
         // 登录成功记录 sessionId 和 deviceId, 防止其他设备获得sessionId, 伪造登录
         sessionManager.save(Sessions.TOKEN_PREFIX, sessionId,
@@ -346,9 +349,16 @@ public class OPUsers {
                 Sessions.LONG_INACTIVE_INTERVAL);
 
         ////////// test log
-        log.info("Session LONG_INACTIVE_INTERVAL", Sessions.LONG_INACTIVE_INTERVAL);
+        log.info("Session LONG_INACTIVE_INTERVAL:{}", Sessions.LONG_INACTIVE_INTERVAL);
 
-        
+        Long ttl = jedisTemplate.execute(new JedisTemplate.JedisAction<Long>() {
+            @Override
+            public Long action(Jedis jedis) {
+                return jedis.ttl(Sessions.TOKEN_PREFIX+":"+sessionId);
+            }
+        });
+        log.info("login session:{} ttl:{}", sessionId, ttl);
+
         // 清除 limit & code
         sessionManager.deletePhysically(Sessions.LIMIT_PREFIX, sessionId);
         sessionManager.deletePhysically(Sessions.CODE_PREFIX, sessionId);
