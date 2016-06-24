@@ -46,6 +46,7 @@ import java.io.FileInputStream;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Created by yaoqijun.
@@ -365,21 +366,21 @@ public class DoctorPigCreateEventsTest extends BaseFrontWebTest{
 
         sowMatingEventCreate(pigId, boarId);
 
-//        testPregCheckResultEventCreate(pigId, PregCheckResult.YANG);
+        testPregCheckResultEventCreate(pigId, PregCheckResult.YANG);
 
-//        testToPregEventCreate(pigId);
+        testToPregEventCreate(pigId);
 
         // test
 //        testAbortionEventCreate(pigId);
 
-//        testToFarrowing(pigId);
+        testToFarrowing(pigId);
 
-//        testFarrowingEventCreate(pigId);
+        testFarrowingEventCreate(pigId);
 
 //        testWeanMethod(pigId, 200);
 
         // 测试凭我事件信息test
-        testFostersEventCreate(pigId, 200);
+//        testFostersEventCreate(pigId, 200);
 
         //  录入转场事件信息
 //        testToMating(pigId);
@@ -559,8 +560,8 @@ public class DoctorPigCreateEventsTest extends BaseFrontWebTest{
                 .param("sowInfoDtoJson", DoctorFarrowingDto.builder()
                         .farrowingDate(new Date()).nestCode("12345").barnId(7l).barnName("farrowingBarnName").bedCode("bedCode")
                         .farrowingType(FarrowingType.HELP.getKey()).isHelp(IsOrNot.YES.getValue())
-                        .birthNestAvg(1234.123).liveSowCount(100).liveBoarCount(100).healthCount(200)
-                        .weakCount(0).mnyCount(0).deadCount(0).blackCount(0).jxCount(0).toBarnId(-1l).toBarnName("notKnow")
+                        .birthNestAvg(1234.123).farrowingLiveCount(200).liveSowCount(100).liveBoarCount(100).healthCount(100)
+                        .weakCount(100).mnyCount(0).deadCount(0).blackCount(0).jxCount(0).toBarnId(-1l).toBarnName("notKnow")
                         .farrowStaff1("staff").farrowStaff2("staff2").farrowRemark("farrowingReMark")
                         .build()).httpEntity());
         Long result = this.restTemplate.postForObject(url, httpEntity, Long.class);
@@ -673,7 +674,7 @@ public class DoctorPigCreateEventsTest extends BaseFrontWebTest{
         HttpEntity httpEntity = HttpPostRequest.formRequest().param("farmId", 12345l)
                 .param("pigId", pigId).param("eventType", PigEvent.MATING.getKey())
                 .param("sowInfoDtoJson", JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(DoctorMatingDto.builder()
-                        .matingDate(new Date()).judgePregDate(DateTime.now().plusDays(100).toDate()).matingType(MatingType.MANUAL.getKey())
+                        .matingDate(DateTime.now().toDate()).judgePregDate(DateTime.now().plusDays(114).toDate()).matingType(MatingType.MANUAL.getKey())
                         .matingStaff("staff").mattingMark("matingMark").matingBoarPigId(boarId)
                         .build())).httpEntity();
 
@@ -732,7 +733,7 @@ public class DoctorPigCreateEventsTest extends BaseFrontWebTest{
     private DoctorFarmEntryDto buildFarmEntryDto(){
 
         return DoctorFarmEntryDto.builder()
-                .pigCode("pigCode").birthday(new Date()).inFarmDate(new Date()).barnId(1l).barnName("barnName")
+                .pigCode(UUID.randomUUID().toString()).birthday(new Date()).inFarmDate(new Date()).barnId(1l).barnName("barnName")
                 .source(PigSource.LOCAL.getKey()).breed(1l).breedName("breedName").breedType(1l).breedTypeName("breedTypeName")
                 .fatherCode("fatherCode").motherCode("motherCode").entryMark("entryMark")
                 .boarTypeId(BoarEntryType.HGZ.getKey()).boarTypeName(BoarEntryType.HGZ.getDesc())

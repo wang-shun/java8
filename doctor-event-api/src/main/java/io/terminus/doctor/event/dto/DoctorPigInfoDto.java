@@ -35,6 +35,7 @@ public class DoctorPigInfoDto implements Serializable{
     private Long pigId;
 
     private Long farmId;
+
     private String farmName;
 
     private Integer pigType;

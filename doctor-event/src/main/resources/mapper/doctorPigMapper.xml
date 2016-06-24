@@ -136,6 +136,10 @@
         </where>
     </select>
 
+    <select id="findPigCodesByFarmId" parameterType="long" resultType="list">
+        select pig_code from doctor_pigs where farm_id = #{farmId};
+    </select>
+
     <update id="removalPig" parameterType="long">
         UPDATE <include refid="tb"/>
         SET `is_removal` = 1

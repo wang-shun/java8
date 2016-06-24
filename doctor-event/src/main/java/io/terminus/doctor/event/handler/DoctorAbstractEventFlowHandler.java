@@ -68,13 +68,18 @@ public abstract class DoctorAbstractEventFlowHandler extends HandlerAware {
             Map<String,Object> extraInfo = OBJECT_MAPPER.readValue(flowDataMap.get("extra"), JacksonType.MAP_OF_OBJECT);
             Map<String,Object> context = Maps.newHashMap();
 
-            // create event info
+            // bean date
             DoctorPigEvent doctorPigEvent = buildAllPigDoctorEvent(doctorBasicInputInfoDto, extraInfo);
+            DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(doctorPigEvent.getPigId());
+
+            // 当前 猪 状态 对录入数据影响
+            eventCreatePrepare(execution, doctorPigTrack, doctorBasicInputInfoDto, extraInfo, context);
+
+            // create event info
             doctorPigEventDao.create(doctorPigEvent);
             context.put("doctorPigEventId", doctorPigEvent.getId());
 
             // update track info
-            DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(doctorPigEvent.getPigId());
             String currentPigTrackSnapShot = JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(doctorPigTrack);
             DoctorPigTrack refreshPigTrack = updateDoctorPigTrackInfo(execution, doctorPigTrack, doctorBasicInputInfoDto, extraInfo, context);
             doctorPigTrackDao.update(refreshPigTrack);
@@ -87,7 +92,7 @@ public abstract class DoctorAbstractEventFlowHandler extends HandlerAware {
             doctorPigSnapshot.setPigInfoMap(ImmutableMap.of(DoctorPigSnapshotConstants.PIG_TRACK, currentPigTrackSnapShot));
             doctorPigSnapshotDao.create(doctorPigSnapshot);
 
-            log.info("**** pig extra info dto :{}", extraInfo);
+            // 特殊 事件信息处理
             specialFlowHandler(execution, doctorBasicInputInfoDto, extraInfo, context);
 
             // 当前事件影响的Id 方式
@@ -100,6 +105,18 @@ public abstract class DoctorAbstractEventFlowHandler extends HandlerAware {
             DoctorAbstractEventFlowHandler.log.error("handle execute fail, cause:{}", Throwables.getStackTraceAsString(e));
             throw new RuntimeException("create.flowEventInfo.fail");
         }
+    }
+
+    /**
+     * event 事件 回掉类型接口
+     * @param execution
+     * @param basicInputInfoDto
+     * @param extra
+     * @param context
+     */
+    protected void eventCreatePrepare(Execution execution, final DoctorPigTrack doctorPigTrack, DoctorBasicInputInfoDto basicInputInfoDto,
+                                      Map<String,Object> extra, Map<String, Object> context){
+        return;
     }
 
     /**

@@ -7,6 +7,7 @@ import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.Response;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.constants.JacksonType;
+import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
 import io.terminus.doctor.event.dto.DoctorPigInfoDto;
@@ -19,6 +20,9 @@ import io.terminus.doctor.event.dto.event.usual.DoctorFarmEntryDto;
 import io.terminus.doctor.event.dto.event.usual.DoctorRemovalDto;
 import io.terminus.doctor.event.dto.event.usual.DoctorVaccinationDto;
 import io.terminus.doctor.event.enums.PigEvent;
+import io.terminus.doctor.event.model.DoctorBarn;
+import io.terminus.doctor.event.model.DoctorPig;
+import io.terminus.doctor.event.service.DoctorBarnReadService;
 import io.terminus.doctor.event.service.DoctorPigEventWriteService;
 import io.terminus.doctor.event.service.DoctorPigReadService;
 import io.terminus.doctor.user.model.DoctorFarm;
@@ -67,17 +71,21 @@ public class DoctorPigCreateEvents {
 
     private final DoctorSowEventCreateService doctorSowEventCreateService;
 
+    private final DoctorBarnReadService doctorBarnReadService;
+
     @Autowired
     public DoctorPigCreateEvents(DoctorPigEventWriteService doctorPigEventWriteService,
                                  DoctorFarmReadService doctorFarmReadService,
                                  DoctorPigReadService doctorPigReadService,
                                  UserReadService userReadService,
-                                 DoctorSowEventCreateService doctorSowEventCreateService){
+                                 DoctorSowEventCreateService doctorSowEventCreateService,
+                                 DoctorBarnReadService doctorBarnReadService){
         this.doctorPigEventWriteService = doctorPigEventWriteService;
         this.doctorFarmReadService = doctorFarmReadService;
         this.doctorPigReadService = doctorPigReadService;
         this.userReadService =userReadService;
         this.doctorSowEventCreateService = doctorSowEventCreateService;
+        this.doctorBarnReadService = doctorBarnReadService;
     }
 
     @RequestMapping(value = "/createChgLocation", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -92,8 +100,7 @@ public class DoctorPigCreateEvents {
             throw new JsonResponseException("create.chgLocation.fail");
         }
 
-        return RespHelper.or500(doctorPigEventWriteService.chgLocationEvent(doctorChgLocationDto,
-                buildBasicInputInfoDto(farmId, pigId, PigEvent.CHG_LOCATION)));
+        return createCasualChangeLocationInfo(doctorChgLocationDto, buildBasicInputInfoDto(farmId, pigId, PigEvent.CHG_LOCATION));
     }
 
     @RequestMapping(value = "/createChgFarm", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -199,6 +206,29 @@ public class DoctorPigCreateEvents {
                 buildBasicInputPigDtoContent(farmId, pigIds, PigEvent.from(pigEvent)),
                 doctorCasualDtoJson
         ));
+    }
+
+    // 猪舍变动 信息
+    private Long createCasualChangeLocationInfo(DoctorChgLocationDto doctorChgLocationDto, DoctorBasicInputInfoDto basicInputInfoDto){
+        DoctorBarn doctorFromBarn = RespHelper.or500(doctorBarnReadService.findBarnById(doctorChgLocationDto.getChgLocationFromBarnId()));
+        DoctorBarn doctorToBarn = RespHelper.or500(doctorBarnReadService.findBarnById(doctorChgLocationDto.getChgLocationToBarnId()));
+
+        if(Objects.equals(basicInputInfoDto.getPigType(), DoctorPig.PIG_TYPE.SOW.getKey()) &&
+                !Objects.equals(doctorFromBarn.getPigType(), doctorToBarn.getPigType())){
+            // 录入母猪
+            if(Objects.equals(doctorToBarn.getPigType(), PigType.MATE_SOW.getValue())){
+                basicInputInfoDto.setEventType(PigEvent.TO_MATING.getKey());
+            }else if(Objects.equals(doctorToBarn.getPigType(), PigType.PREG_SOW.getValue())){
+                basicInputInfoDto.setEventType(PigEvent.TO_PREG.getKey());
+            }else if(Objects.equals(doctorToBarn.getPigType(), PigType.FARROW_PIGLET.getValue())){
+                basicInputInfoDto.setEventType(PigEvent.TO_FARROWING.getKey());
+            }else {
+                throw new JsonResponseException(500, "input.sowToBarnId.error");
+            }
+            return RespHelper.or500(doctorPigEventWriteService.chgSowLocationEvent(doctorChgLocationDto, basicInputInfoDto));
+        }
+
+        return RespHelper.or500(doctorPigEventWriteService.chgLocationEvent(doctorChgLocationDto, basicInputInfoDto));
     }
 
     private List<DoctorBasicInputInfoDto> buildBasicInputPigDtoContent(Long farmId, String pigIds, PigEvent pigEvent){
