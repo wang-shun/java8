@@ -3,7 +3,6 @@ package io.terminus.doctor.basic.manager;
 import io.terminus.doctor.basic.dao.DoctorChangeReasonDao;
 import io.terminus.doctor.basic.dao.DoctorChangeTypeDao;
 import io.terminus.doctor.basic.dao.DoctorDiseaseDao;
-import io.terminus.doctor.basic.dao.DoctorFosterReasonDao;
 import io.terminus.doctor.basic.model.DoctorChangeReason;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +24,6 @@ public class DoctorBasicManager {
     private final DoctorChangeReasonDao doctorChangeReasonDao;
     private final DoctorChangeTypeDao doctorChangeTypeDao;
     private final DoctorDiseaseDao doctorDiseaseDao;
-    private final DoctorFosterReasonDao doctorFosterReasonDao;
 
     /**
      * 模板猪场id
@@ -35,12 +33,10 @@ public class DoctorBasicManager {
     @Autowired
     public DoctorBasicManager(DoctorChangeReasonDao doctorChangeReasonDao,
                               DoctorChangeTypeDao doctorChangeTypeDao,
-                              DoctorDiseaseDao doctorDiseaseDao,
-                              DoctorFosterReasonDao doctorFosterReasonDao) {
+                              DoctorDiseaseDao doctorDiseaseDao) {
         this.doctorChangeReasonDao = doctorChangeReasonDao;
         this.doctorChangeTypeDao = doctorChangeTypeDao;
         this.doctorDiseaseDao = doctorDiseaseDao;
-        this.doctorFosterReasonDao = doctorFosterReasonDao;
     }
 
     /**
@@ -67,12 +63,6 @@ public class DoctorBasicManager {
                 reason.setChangeTypeId(chgType.getId());
                 doctorChangeReasonDao.create(reason);
             });
-        });
-
-        //初始化寄养原因
-        doctorFosterReasonDao.findByFarmId(TEMPLATE_FARM_ID).forEach(foster -> {
-            foster.setFarmId(farmId);
-            doctorFosterReasonDao.create(foster);
         });
 
         // TODO: 16/5/23 其他基础数据初始化

@@ -8,7 +8,6 @@ import io.terminus.doctor.basic.dao.DoctorChangeReasonDao;
 import io.terminus.doctor.basic.dao.DoctorChangeTypeDao;
 import io.terminus.doctor.basic.dao.DoctorCustomerDao;
 import io.terminus.doctor.basic.dao.DoctorDiseaseDao;
-import io.terminus.doctor.basic.dao.DoctorFosterReasonDao;
 import io.terminus.doctor.basic.dao.DoctorGeneticDao;
 import io.terminus.doctor.basic.dao.DoctorUnitDao;
 import io.terminus.doctor.basic.manager.DoctorBasicManager;
@@ -42,7 +41,6 @@ public class DoctorBasicWriteServiceImpl implements DoctorBasicWriteService {
     private final DoctorGeneticDao doctorGeneticDao;
     private final DoctorUnitDao doctorUnitDao;
     private final DoctorBasicManager doctorBasicManager;
-    private final DoctorFosterReasonDao doctorFosterReasonDao;
     private final DoctorBasicDao doctorBasicDao;
 
     @Autowired
@@ -54,7 +52,6 @@ public class DoctorBasicWriteServiceImpl implements DoctorBasicWriteService {
                                        DoctorGeneticDao doctorGeneticDao,
                                        DoctorUnitDao doctorUnitDao,
                                        DoctorBasicManager doctorBasicManager,
-                                       DoctorFosterReasonDao doctorFosterReasonDao,
                                        DoctorBasicDao doctorBasicDao) {
         this.doctorBreedDao = doctorBreedDao;
         this.doctorChangeReasonDao = doctorChangeReasonDao;
@@ -64,7 +61,6 @@ public class DoctorBasicWriteServiceImpl implements DoctorBasicWriteService {
         this.doctorGeneticDao = doctorGeneticDao;
         this.doctorUnitDao = doctorUnitDao;
         this.doctorBasicManager = doctorBasicManager;
-        this.doctorFosterReasonDao = doctorFosterReasonDao;
         this.doctorBasicDao = doctorBasicDao;
     }
 
