@@ -6,6 +6,7 @@ import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.Response;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.common.utils.JsonMapper;
+import io.terminus.doctor.basic.model.DoctorBasic;
 import io.terminus.doctor.basic.model.DoctorBreed;
 import io.terminus.doctor.basic.model.DoctorChangeReason;
 import io.terminus.doctor.basic.model.DoctorChangeType;
@@ -187,6 +188,7 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
                 case ANTIEPIDEMIC:
                     params.put("vaccinName", getVaccinName(getLong(params, "vaccinId")));
                     params.put("vaccinStaffName", getStaffUserName(getLong(params, "vaccinStaffId")));
+                    params.put("vaccinItemName", getVaccinItemName(getLong(params, "vaccinItemId")));
                     RespHelper.orServEx(doctorGroupWriteService.groupEventAntiepidemic(groupDetail, BeanMapper.map(putBasicFields(params), DoctorAntiepidemicGroupInput.class)));
                     break;
                 case TRANS_FARM:
@@ -293,6 +295,11 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
         DoctorStaff staff = RespHelper.or500(doctorStaffReadService.findStaffById(staffId));
         User user = RespHelper.or500(userReadService.findById(staff.getUserId()));
         return user.getName();
+    }
+
+    //获取防疫项目名称
+    private String getVaccinItemName(Long vaccinItemId) {
+        return vaccinItemId == null ? null : RespHelper.or(doctorBasicReadService.findBasicById(vaccinItemId), new DoctorBasic()).getName();
     }
 
     //获取客户名称
