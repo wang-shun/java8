@@ -17,7 +17,6 @@ import io.terminus.doctor.basic.model.DoctorChangeReason;
 import io.terminus.doctor.basic.model.DoctorChangeType;
 import io.terminus.doctor.basic.model.DoctorCustomer;
 import io.terminus.doctor.basic.model.DoctorDisease;
-import io.terminus.doctor.basic.model.DoctorFosterReason;
 import io.terminus.doctor.basic.model.DoctorGenetic;
 import io.terminus.doctor.basic.model.DoctorUnit;
 import lombok.extern.slf4j.Slf4j;
@@ -228,31 +227,27 @@ public class DoctorBasicReadServiceImpl implements DoctorBasicReadService {
     }
 
     @Override
-    public Response<DoctorFosterReason> findFosterReasonById(Long fosterReasonId) {
-        try {
-            return Response.ok(doctorFosterReasonDao.findById(fosterReasonId));
-        } catch (Exception e) {
-            log.error("find fosterReason by id failed, fosterReasonId:{}, cause:{}", fosterReasonId, Throwables.getStackTraceAsString(e));
-            return Response.fail("fosterReason.find.fail");
-        }
-    }
-
-    @Override
-    public Response<List<DoctorFosterReason>> findFosterReasonsByFarmId(Long farmId) {
-        try {
-            return Response.ok(doctorFosterReasonDao.findByFarmId(farmId));
-        } catch (Exception e) {
-            log.error("find fosterReason by farm id fail, farmId:{}, cause:{}", farmId, Throwables.getStackTraceAsString(e));
-            return Response.fail("fosterReason.find.fail");
-        }
-    }
-
-    @Override
     public Response<DoctorBasic> findBasicById(Long basicId) {
         try {
             return Response.ok(doctorBasicDao.findById(basicId));
         } catch (Exception e) {
             log.error("find basic by id failed, basicId:{}, cause:{}", basicId, Throwables.getStackTraceAsString(e));
+            return Response.fail("basic.find.fail");
+        }
+    }
+
+    @Override
+    public Response<List<DoctorBasic>> findBasicByTypeAndSrm(Integer type, String srm) {
+        try {
+            List<DoctorBasic> basics = doctorBasicDao.findByType(type);
+            if (isEmpty(srm)) {
+                return Response.ok(basics);
+            }
+            return Response.ok(basics.stream()
+                    .filter(basic -> notEmpty(basic.getSrm()) && basic.getSrm().toLowerCase().contains(srm.toLowerCase()))
+                    .collect(Collectors.toList()));
+        } catch (Exception e) {
+            log.error("find basic by type and srm failed, type:{}, srm:{}, cause:{}", type, srm, Throwables.getStackTraceAsString(e));
             return Response.fail("basic.find.fail");
         }
     }

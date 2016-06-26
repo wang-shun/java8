@@ -7,7 +7,6 @@ import io.terminus.doctor.basic.model.DoctorChangeReason;
 import io.terminus.doctor.basic.model.DoctorChangeType;
 import io.terminus.doctor.basic.model.DoctorCustomer;
 import io.terminus.doctor.basic.model.DoctorDisease;
-import io.terminus.doctor.basic.model.DoctorFosterReason;
 import io.terminus.doctor.basic.model.DoctorGenetic;
 import io.terminus.doctor.basic.model.DoctorUnit;
 
@@ -132,21 +131,6 @@ public interface DoctorBasicReadService {
      */
     Response<List<DoctorUnit>> findAllUnits();
 
-    //////////////////////////// 寄养原因 //////////////////////////////
-    /**
-     * 根据id查询寄养原因表
-     * @param fosterReasonId 主键id
-     * @return 寄养原因表
-     */
-    Response<DoctorFosterReason> findFosterReasonById(@NotNull(message = "fosterReasonId.not.null") Long fosterReasonId);
-
-    /**
-     * 根据farmId查询寄养原因表
-     * @param farmId 猪场id
-     * @return 寄养原因表
-     */
-    Response<List<DoctorFosterReason>> findFosterReasonsByFarmId(@NotNull(message = "farmId.not.null") Long farmId);
-
     /////////////////////////// 基础数据表 ///////////////////////////
 
     /**
@@ -156,5 +140,12 @@ public interface DoctorBasicReadService {
      */
     Response<DoctorBasic> findBasicById(@NotNull(message = "basicId.not.null") Long basicId);
 
-
+    /**
+     * 根据基础数据类型和输入码查询
+     * @param type  类型
+     * @see io.terminus.doctor.basic.model.DoctorBasic.Type
+     * @param srm   输入码
+     * @return 基础数据信息
+     */
+    Response<List<DoctorBasic>> findBasicByTypeAndSrm(@NotNull(message = "type.not.null") Integer type, @Nullable String srm);
 }

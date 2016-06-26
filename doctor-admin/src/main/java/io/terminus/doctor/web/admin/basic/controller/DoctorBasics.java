@@ -1,11 +1,13 @@
 package io.terminus.doctor.web.admin.basic.controller;
 
+import io.terminus.doctor.basic.model.DoctorBasic;
 import io.terminus.doctor.basic.model.DoctorBreed;
 import io.terminus.doctor.basic.model.DoctorGenetic;
 import io.terminus.doctor.basic.model.DoctorUnit;
 import io.terminus.doctor.basic.service.DoctorBasicReadService;
 import io.terminus.doctor.basic.service.DoctorBasicWriteService;
 import io.terminus.doctor.common.utils.RespHelper;
+import io.terminus.pampas.common.UserUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -163,5 +165,32 @@ public class DoctorBasics {
         // TODO: 权限中心校验权限
 
         return RespHelper.or500(doctorBasicWriteService.deleteUnitById(unitId));
+    }
+
+    /**
+     * 创建或更新DoctorBasic
+     * @return 是否成功
+     */
+    @RequestMapping(value = "/basic", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    public Boolean createOrUpdateBasic(@RequestBody DoctorBasic basic) {
+        checkNotNull(basic, "basic.not.null");
+        if (basic.getId() == null) {
+
+            RespHelper.or500(doctorBasicWriteService.createBasic(basic));
+        } else {
+            basic.setUpdatorId(UserUtil.getUserId());
+            basic.setUpdatorName(UserUtil.getCurrentUser().getName());
+            RespHelper.or500(doctorBasicWriteService.updateBasic(basic));
+        }
+        return Boolean.TRUE;
+    }
+
+    /**
+     * 根据主键id删除DoctorBasic
+     * @return 是否成功
+     */
+    @RequestMapping(value = "/basic", method = RequestMethod.DELETE)
+    public Boolean deleteBasic(@RequestParam("basicId") Long basicId) {
+        return RespHelper.or500(doctorBasicWriteService.deleteBasicById(basicId));
     }
 }

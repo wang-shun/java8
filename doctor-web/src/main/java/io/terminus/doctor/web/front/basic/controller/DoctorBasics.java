@@ -7,7 +7,6 @@ import io.terminus.doctor.basic.model.DoctorChangeReason;
 import io.terminus.doctor.basic.model.DoctorChangeType;
 import io.terminus.doctor.basic.model.DoctorCustomer;
 import io.terminus.doctor.basic.model.DoctorDisease;
-import io.terminus.doctor.basic.model.DoctorFosterReason;
 import io.terminus.doctor.basic.model.DoctorGenetic;
 import io.terminus.doctor.basic.model.DoctorUnit;
 import io.terminus.doctor.basic.service.DoctorBasicReadService;
@@ -333,64 +332,6 @@ public class DoctorBasics {
         return RespHelper.or500(doctorBasicReadService.findAllUnits());
     }
 
-    /************************ 寄养原因 *************************/
-    /**
-     * 根据id查询寄养原因表
-     * @param fosterReasonId 主键id
-     * @return 寄养原因表
-     */
-    @RequestMapping(value = "/fosterReason/id", method = RequestMethod.GET)
-    public DoctorFosterReason findFosterReasonById(@RequestParam("fosterReasonId") Long fosterReasonId) {
-        return RespHelper.or500(doctorBasicReadService.findFosterReasonById(fosterReasonId));
-    }
-
-    /**
-     * 根据farmId查询寄养原因表
-     * @param farmId 猪场id
-     * @return 寄养原因表列表
-     */
-    @RequestMapping(value = "/fosterReason/farmId", method = RequestMethod.GET)
-    public List<DoctorFosterReason> findFosterReasonsByfarmId(@RequestParam("farmId") Long farmId) {
-        return RespHelper.or500(doctorBasicReadService.findFosterReasonsByFarmId(farmId));
-    }
-
-    /**
-     * 创建或更新DoctorFosterReason
-     * @return 是否成功
-     */
-    @RequestMapping(value = "/fosterReason", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public Boolean createOrUpdateFosterReason(@RequestBody DoctorFosterReason fosterReason) {
-        checkNotNull(fosterReason, "fosterReason.not.null");
-
-        //权限中心校验权限
-        doctorFarmAuthCenter.checkFarmAuth(fosterReason.getFarmId());
-
-        if (fosterReason.getId() == null) {
-            fosterReason.setCreatorId(UserUtil.getUserId());
-            fosterReason.setCreatorName(UserUtil.getCurrentUser().getName());
-            RespHelper.or500(doctorBasicWriteService.createFosterReason(fosterReason));
-        } else {
-            fosterReason.setUpdatorId(UserUtil.getUserId());
-            fosterReason.setUpdatorName(UserUtil.getCurrentUser().getName());
-            RespHelper.or500(doctorBasicWriteService.updateFosterReason(fosterReason));
-        }
-        return Boolean.TRUE;
-    }
-
-    /**
-     * 根据主键id删除DoctorFosterReason
-     * @return 是否成功
-     */
-    @RequestMapping(value = "/fosterReason", method = RequestMethod.DELETE)
-    public Boolean deleteFosterReason(@RequestParam("fosterReasonId") Long fosterReasonId) {
-        DoctorFosterReason fosterReason = RespHelper.or500(doctorBasicReadService.findFosterReasonById(fosterReasonId));
-
-        //权限中心校验权限
-        doctorFarmAuthCenter.checkFarmAuth(fosterReason.getFarmId());
-
-        return RespHelper.or500(doctorBasicWriteService.deleteFosterReasonById(fosterReasonId));
-    }
-
     /**
      * 根据id查询基础数据表
      * @param basicId 主键id
@@ -402,29 +343,15 @@ public class DoctorBasics {
     }
 
     /**
-     * 创建或更新DoctorBasic
-     * @return 是否成功
+     * 根据基础数据类型和输入码查询基础数据
+     * @param type  类型
+     * @see io.terminus.doctor.basic.model.DoctorBasic.Type
+     * @param srm   输入码
+     * @return 基础数据信息
      */
-    @RequestMapping(value = "/basic", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public Boolean createOrUpdateBasic(@RequestBody DoctorBasic basic) {
-        checkNotNull(basic, "basic.not.null");
-        if (basic.getId() == null) {
-
-            RespHelper.or500(doctorBasicWriteService.createBasic(basic));
-        } else {
-            basic.setUpdatorId(UserUtil.getUserId());
-            basic.setUpdatorName(UserUtil.getCurrentUser().getName());
-            RespHelper.or500(doctorBasicWriteService.updateBasic(basic));
-        }
-        return Boolean.TRUE;
-    }
-
-    /**
-     * 根据主键id删除DoctorBasic
-     * @return 是否成功
-     */
-    @RequestMapping(value = "/basic", method = RequestMethod.DELETE)
-    public Boolean deleteBasic(@RequestParam("basicId") Long basicId) {
-        return RespHelper.or500(doctorBasicWriteService.deleteBasicById(basicId));
+    @RequestMapping(value = "/basic/type", method = RequestMethod.GET)
+    public List<DoctorBasic> findBasicByTypeAndSrm(@RequestParam("type") Integer type,
+                                                   @RequestParam(value = "srm", required = false) String srm) {
+        return RespHelper.or500(doctorBasicReadService.findBasicByTypeAndSrm(type, srm));
     }
 }

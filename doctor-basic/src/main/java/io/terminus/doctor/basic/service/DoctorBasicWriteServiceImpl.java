@@ -18,7 +18,6 @@ import io.terminus.doctor.basic.model.DoctorChangeReason;
 import io.terminus.doctor.basic.model.DoctorChangeType;
 import io.terminus.doctor.basic.model.DoctorCustomer;
 import io.terminus.doctor.basic.model.DoctorDisease;
-import io.terminus.doctor.basic.model.DoctorFosterReason;
 import io.terminus.doctor.basic.model.DoctorGenetic;
 import io.terminus.doctor.basic.model.DoctorUnit;
 import lombok.extern.slf4j.Slf4j;
@@ -294,37 +293,6 @@ public class DoctorBasicWriteServiceImpl implements DoctorBasicWriteService {
         } catch (Exception e) {
             log.error("delete unit failed, unitId:{}, cause:{}", unitId, Throwables.getStackTraceAsString(e));
             return Response.fail("unit.delete.fail");
-        }
-    }
-
-    @Override
-    public Response<Long> createFosterReason(DoctorFosterReason fosterReason) {
-        try {
-            doctorFosterReasonDao.create(fosterReason);
-            return Response.ok(fosterReason.getId());
-        } catch (Exception e) {
-            log.error("create fosterReason failed, fosterReason:{}, cause:{}", fosterReason, Throwables.getStackTraceAsString(e));
-            return Response.fail("fosterReason.create.fail");
-        }
-    }
-
-    @Override
-    public Response<Boolean> updateFosterReason(DoctorFosterReason fosterReason) {
-        try {
-            return Response.ok(doctorFosterReasonDao.update(fosterReason));
-        } catch (Exception e) {
-            log.error("update fosterReason failed, fosterReason:{}, cause:{}", fosterReason, Throwables.getStackTraceAsString(e));
-            return Response.fail("fosterReason.update.fail");
-        }
-    }
-
-    @Override
-    public Response<Boolean> deleteFosterReasonById(Long fosterReasonId) {
-        try {
-            return Response.ok(doctorFosterReasonDao.delete(fosterReasonId));
-        } catch (Exception e) {
-            log.error("delete fosterReason failed, fosterReasonId:{}, cause:{}", fosterReasonId, Throwables.getStackTraceAsString(e));
-            return Response.fail("fosterReason.delete.fail");
         }
     }
 
