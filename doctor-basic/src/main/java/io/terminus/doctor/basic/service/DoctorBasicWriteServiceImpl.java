@@ -2,6 +2,7 @@ package io.terminus.doctor.basic.service;
 
 import com.google.common.base.Throwables;
 import io.terminus.common.model.Response;
+import io.terminus.doctor.basic.dao.DoctorBasicDao;
 import io.terminus.doctor.basic.dao.DoctorBreedDao;
 import io.terminus.doctor.basic.dao.DoctorChangeReasonDao;
 import io.terminus.doctor.basic.dao.DoctorChangeTypeDao;
@@ -11,6 +12,7 @@ import io.terminus.doctor.basic.dao.DoctorFosterReasonDao;
 import io.terminus.doctor.basic.dao.DoctorGeneticDao;
 import io.terminus.doctor.basic.dao.DoctorUnitDao;
 import io.terminus.doctor.basic.manager.DoctorBasicManager;
+import io.terminus.doctor.basic.model.DoctorBasic;
 import io.terminus.doctor.basic.model.DoctorBreed;
 import io.terminus.doctor.basic.model.DoctorChangeReason;
 import io.terminus.doctor.basic.model.DoctorChangeType;
@@ -42,6 +44,7 @@ public class DoctorBasicWriteServiceImpl implements DoctorBasicWriteService {
     private final DoctorUnitDao doctorUnitDao;
     private final DoctorBasicManager doctorBasicManager;
     private final DoctorFosterReasonDao doctorFosterReasonDao;
+    private final DoctorBasicDao doctorBasicDao;
 
     @Autowired
     public DoctorBasicWriteServiceImpl(DoctorBreedDao doctorBreedDao,
@@ -52,7 +55,8 @@ public class DoctorBasicWriteServiceImpl implements DoctorBasicWriteService {
                                        DoctorGeneticDao doctorGeneticDao,
                                        DoctorUnitDao doctorUnitDao,
                                        DoctorBasicManager doctorBasicManager,
-                                       DoctorFosterReasonDao doctorFosterReasonDao) {
+                                       DoctorFosterReasonDao doctorFosterReasonDao,
+                                       DoctorBasicDao doctorBasicDao) {
         this.doctorBreedDao = doctorBreedDao;
         this.doctorChangeReasonDao = doctorChangeReasonDao;
         this.doctorChangeTypeDao = doctorChangeTypeDao;
@@ -62,6 +66,7 @@ public class DoctorBasicWriteServiceImpl implements DoctorBasicWriteService {
         this.doctorUnitDao = doctorUnitDao;
         this.doctorBasicManager = doctorBasicManager;
         this.doctorFosterReasonDao = doctorFosterReasonDao;
+        this.doctorBasicDao = doctorBasicDao;
     }
 
     @Override
@@ -320,6 +325,37 @@ public class DoctorBasicWriteServiceImpl implements DoctorBasicWriteService {
         } catch (Exception e) {
             log.error("delete fosterReason failed, fosterReasonId:{}, cause:{}", fosterReasonId, Throwables.getStackTraceAsString(e));
             return Response.fail("fosterReason.delete.fail");
+        }
+    }
+
+    @Override
+    public Response<Long> createBasic(DoctorBasic basic) {
+        try {
+            doctorBasicDao.create(basic);
+            return Response.ok(basic.getId());
+        } catch (Exception e) {
+            log.error("create basic failed, basic:{}, cause:{}", basic, Throwables.getStackTraceAsString(e));
+            return Response.fail("basic.create.fail");
+        }
+    }
+
+    @Override
+    public Response<Boolean> updateBasic(DoctorBasic basic) {
+        try {
+            return Response.ok(doctorBasicDao.update(basic));
+        } catch (Exception e) {
+            log.error("update basic failed, basic:{}, cause:{}", basic, Throwables.getStackTraceAsString(e));
+            return Response.fail("basic.update.fail");
+        }
+    }
+
+    @Override
+    public Response<Boolean> deleteBasicById(Long basicId) {
+        try {
+            return Response.ok(doctorBasicDao.delete(basicId));
+        } catch (Exception e) {
+            log.error("delete basic failed, basicId:{}, cause:{}", basicId, Throwables.getStackTraceAsString(e));
+            return Response.fail("basic.delete.fail");
         }
     }
 }

@@ -1,6 +1,7 @@
 package io.terminus.doctor.basic.service;
 
 import io.terminus.common.model.Response;
+import io.terminus.doctor.basic.model.DoctorBasic;
 import io.terminus.doctor.basic.model.DoctorBreed;
 import io.terminus.doctor.basic.model.DoctorChangeReason;
 import io.terminus.doctor.basic.model.DoctorChangeType;
@@ -174,4 +175,25 @@ public interface DoctorBasicWriteService {
      * @return 是否成功
      */
     Response<Boolean> deleteFosterReasonById(Long fosterReasonId);
+
+    /**
+     * 创建DoctorBasic
+     * @param basic 基础数据表实例
+     * @return 主键id
+     */
+    Response<Long> createBasic(DoctorBasic basic);
+
+    /**
+     * 更新DoctorBasic
+     * @param basic 基础数据表实例
+     * @return 是否成功
+     */
+    Response<Boolean> updateBasic(DoctorBasic basic);
+
+    /**
+     * 根据主键id删除DoctorBasic
+     * @param basicId 基础数据表实例主键id
+     * @return 是否成功
+     */
+    Response<Boolean> deleteBasicById(Long basicId);
 }

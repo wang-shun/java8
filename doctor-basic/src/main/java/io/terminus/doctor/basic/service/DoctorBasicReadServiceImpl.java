@@ -2,6 +2,7 @@ package io.terminus.doctor.basic.service;
 
 import com.google.common.base.Throwables;
 import io.terminus.common.model.Response;
+import io.terminus.doctor.basic.dao.DoctorBasicDao;
 import io.terminus.doctor.basic.dao.DoctorBreedDao;
 import io.terminus.doctor.basic.dao.DoctorChangeReasonDao;
 import io.terminus.doctor.basic.dao.DoctorChangeTypeDao;
@@ -10,6 +11,7 @@ import io.terminus.doctor.basic.dao.DoctorDiseaseDao;
 import io.terminus.doctor.basic.dao.DoctorFosterReasonDao;
 import io.terminus.doctor.basic.dao.DoctorGeneticDao;
 import io.terminus.doctor.basic.dao.DoctorUnitDao;
+import io.terminus.doctor.basic.model.DoctorBasic;
 import io.terminus.doctor.basic.model.DoctorBreed;
 import io.terminus.doctor.basic.model.DoctorChangeReason;
 import io.terminus.doctor.basic.model.DoctorChangeType;
@@ -46,6 +48,7 @@ public class DoctorBasicReadServiceImpl implements DoctorBasicReadService {
     private final DoctorGeneticDao doctorGeneticDao;
     private final DoctorUnitDao doctorUnitDao;
     private final DoctorFosterReasonDao doctorFosterReasonDao;
+    private final DoctorBasicDao doctorBasicDao;
 
     @Autowired
     public DoctorBasicReadServiceImpl(DoctorBreedDao doctorBreedDao,
@@ -55,7 +58,8 @@ public class DoctorBasicReadServiceImpl implements DoctorBasicReadService {
                                       DoctorDiseaseDao doctorDiseaseDao,
                                       DoctorGeneticDao doctorGeneticDao,
                                       DoctorUnitDao doctorUnitDao,
-                                      DoctorFosterReasonDao doctorFosterReasonDao) {
+                                      DoctorFosterReasonDao doctorFosterReasonDao,
+                                      DoctorBasicDao doctorBasicDao) {
         this.doctorBreedDao = doctorBreedDao;
         this.doctorChangeReasonDao = doctorChangeReasonDao;
         this.doctorChangeTypeDao = doctorChangeTypeDao;
@@ -64,6 +68,7 @@ public class DoctorBasicReadServiceImpl implements DoctorBasicReadService {
         this.doctorGeneticDao = doctorGeneticDao;
         this.doctorUnitDao = doctorUnitDao;
         this.doctorFosterReasonDao = doctorFosterReasonDao;
+        this.doctorBasicDao = doctorBasicDao;
     }
 
     @Override
@@ -239,6 +244,16 @@ public class DoctorBasicReadServiceImpl implements DoctorBasicReadService {
         } catch (Exception e) {
             log.error("find fosterReason by farm id fail, farmId:{}, cause:{}", farmId, Throwables.getStackTraceAsString(e));
             return Response.fail("fosterReason.find.fail");
+        }
+    }
+
+    @Override
+    public Response<DoctorBasic> findBasicById(Long basicId) {
+        try {
+            return Response.ok(doctorBasicDao.findById(basicId));
+        } catch (Exception e) {
+            log.error("find basic by id failed, basicId:{}, cause:{}", basicId, Throwables.getStackTraceAsString(e));
+            return Response.fail("basic.find.fail");
         }
     }
 }

@@ -96,3 +96,20 @@ CREATE INDEX idx_doctor_foster_reasons_farm_id ON doctor_foster_reasons(farm_id)
 
 -- 2016-06-24 增加输入码, 增加基础数据表
 ALTER TABLE doctor_diseases ADD COLUMN `srm` VARCHAR (32) DEFAULT NULL COMMENT '输入码(快捷输入)' AFTER farm_name;
+
+-- 新增基础数据表, 整合一些基础数据
+DROP TABLE IF EXISTS `doctor_basics`;
+CREATE TABLE `doctor_basics` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '自增主键',
+  `name` varchar(32) DEFAULT NULL COMMENT '基础数据内容',
+  `type` smallint(6) DEFAULT NULL COMMENT '基础数据类型 枚举',
+  `type_name` varchar(32) DEFAULT NULL COMMENT '数据类型名称',
+  `srm` varchar(32) DEFAULT NULL COMMENT '输入码(快捷输入用)',
+  `out_id` varchar(128) DEFAULT NULL COMMENT '外部id',
+  `extra` text COMMENT '附加字段',
+  `updator_id` bigint(20) DEFAULT NULL COMMENT '更新人id',
+  `updator_name` varchar(64) DEFAULT NULL COMMENT '更新人name',
+  `created_at` datetime DEFAULT NULL COMMENT '创建时间',
+  `updated_at` datetime DEFAULT NULL COMMENT '修改时间',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='基础数据表';

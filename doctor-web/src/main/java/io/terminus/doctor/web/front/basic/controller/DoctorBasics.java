@@ -1,6 +1,7 @@
 package io.terminus.doctor.web.front.basic.controller;
 
 import io.terminus.common.utils.JsonMapper;
+import io.terminus.doctor.basic.model.DoctorBasic;
 import io.terminus.doctor.basic.model.DoctorBreed;
 import io.terminus.doctor.basic.model.DoctorChangeReason;
 import io.terminus.doctor.basic.model.DoctorChangeType;
@@ -388,5 +389,42 @@ public class DoctorBasics {
         doctorFarmAuthCenter.checkFarmAuth(fosterReason.getFarmId());
 
         return RespHelper.or500(doctorBasicWriteService.deleteFosterReasonById(fosterReasonId));
+    }
+
+    /**
+     * 根据id查询基础数据表
+     * @param basicId 主键id
+     * @return 基础数据表
+     */
+    @RequestMapping(value = "/basic/id", method = RequestMethod.GET)
+    public DoctorBasic findBasicById(@RequestParam("basicId") Long basicId) {
+        return RespHelper.or500(doctorBasicReadService.findBasicById(basicId));
+    }
+
+    /**
+     * 创建或更新DoctorBasic
+     * @return 是否成功
+     */
+    @RequestMapping(value = "/basic", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    public Boolean createOrUpdateBasic(@RequestBody DoctorBasic basic) {
+        checkNotNull(basic, "basic.not.null");
+        if (basic.getId() == null) {
+
+            RespHelper.or500(doctorBasicWriteService.createBasic(basic));
+        } else {
+            basic.setUpdatorId(UserUtil.getUserId());
+            basic.setUpdatorName(UserUtil.getCurrentUser().getName());
+            RespHelper.or500(doctorBasicWriteService.updateBasic(basic));
+        }
+        return Boolean.TRUE;
+    }
+
+    /**
+     * 根据主键id删除DoctorBasic
+     * @return 是否成功
+     */
+    @RequestMapping(value = "/basic", method = RequestMethod.DELETE)
+    public Boolean deleteBasic(@RequestParam("basicId") Long basicId) {
+        return RespHelper.or500(doctorBasicWriteService.deleteBasicById(basicId));
     }
 }

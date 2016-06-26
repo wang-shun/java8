@@ -1,6 +1,7 @@
 package io.terminus.doctor.basic.service;
 
 import io.terminus.common.model.Response;
+import io.terminus.doctor.basic.model.DoctorBasic;
 import io.terminus.doctor.basic.model.DoctorBreed;
 import io.terminus.doctor.basic.model.DoctorChangeReason;
 import io.terminus.doctor.basic.model.DoctorChangeType;
@@ -145,4 +146,15 @@ public interface DoctorBasicReadService {
      * @return 寄养原因表
      */
     Response<List<DoctorFosterReason>> findFosterReasonsByFarmId(@NotNull(message = "farmId.not.null") Long farmId);
+
+    /////////////////////////// 基础数据表 ///////////////////////////
+
+    /**
+     * 根据id查询基础数据表
+     * @param basicId 主键id
+     * @return 基础数据表
+     */
+    Response<DoctorBasic> findBasicById(@NotNull(message = "basicId.not.null") Long basicId);
+
+
 }
