@@ -10,8 +10,8 @@ import io.terminus.doctor.web.front.msg.controller.DoctorMessages;
 import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.boot.test.SpringApplicationConfiguration;
-import utils.HttpGetRequest;
-import utils.HttpPostRequest;
+import io.terminus.doctor.utils.HttpGetRequest;
+import io.terminus.doctor.utils.HttpPostRequest;
 
 import java.util.List;
 import java.util.Map;

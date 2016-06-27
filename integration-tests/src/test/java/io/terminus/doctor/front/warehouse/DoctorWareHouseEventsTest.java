@@ -11,7 +11,7 @@ import io.terminus.doctor.web.front.warehouse.dto.DoctorConsumeProviderInputDto;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.SpringApplicationConfiguration;
-import utils.HttpGetRequest;
+import io.terminus.doctor.utils.HttpGetRequest;
 
 import java.util.List;
 

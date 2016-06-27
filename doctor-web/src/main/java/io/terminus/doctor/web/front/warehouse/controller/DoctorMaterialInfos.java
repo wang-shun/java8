@@ -88,7 +88,7 @@ public class DoctorMaterialInfos {
 
             doctorMaterialInfo = DoctorMaterialInfo.builder()
                     .farmId(doctorMaterialInfoCreateDto.getFarmId()).farmName(doctorFarm.getName())
-                    .type(doctorMaterialInfoCreateDto.getType()).materialName(doctorMaterialInfoCreateDto.getMaterialName())
+                    .type(doctorMaterialInfoCreateDto.getType()).materialName(doctorMaterialInfoCreateDto.getMaterialName()).inputCode(doctorMaterialInfoCreateDto.getInputCode())
                     .remark(doctorMaterialInfoCreateDto.getMark())
                     .unitId(doctorMaterialInfoCreateDto.getUnitId()).unitName(unitName)
                     .unitGroupId(doctorMaterialInfoCreateDto.getUnitGroupId()).unitGroupName(unitGroupName)

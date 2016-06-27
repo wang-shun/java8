@@ -38,8 +38,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.ResponseEntity;
-import utils.HttpGetRequest;
-import utils.HttpPostRequest;
+import io.terminus.doctor.utils.HttpGetRequest;
+import io.terminus.doctor.utils.HttpPostRequest;
 
 import java.io.File;
 import java.io.FileInputStream;
