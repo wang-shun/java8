@@ -3,7 +3,6 @@ package io.terminus.doctor.basic.service;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.basic.model.DoctorBasic;
 import io.terminus.doctor.basic.model.DoctorChangeReason;
-import io.terminus.doctor.basic.model.DoctorChangeType;
 import io.terminus.doctor.basic.model.DoctorCustomer;
 
 import javax.annotation.Nullable;
@@ -60,20 +59,6 @@ public interface DoctorBasicReadService {
      * @return 变动原因列表
      */
     Response<List<DoctorChangeReason>> findChangeReasonByChangeTypeId(@NotNull(message = "changeTypeId.not.null") Long changeTypeId);
-
-    /**
-     * 根据id查询变动类型表
-     * @param changeTypeId 主键id
-     * @return 变动类型表
-     */
-    Response<DoctorChangeType> findChangeTypeById(@NotNull(message = "changeTypeId.not.null") Long changeTypeId);
-
-    /**
-     * 根据farmId查询变动类型表
-     * @param farmId 猪场id
-     * @return 变动类型表
-     */
-    Response<List<DoctorChangeType>> findChangeTypesByFarmId(@NotNull(message = "farmId.not.null") Long farmId);
 
     //////////////////////////// 猪场客户相关 ////////////////////////////
     /**

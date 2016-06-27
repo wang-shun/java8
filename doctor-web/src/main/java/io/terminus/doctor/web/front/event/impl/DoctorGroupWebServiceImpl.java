@@ -8,7 +8,6 @@ import io.terminus.common.utils.BeanMapper;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.basic.model.DoctorBasic;
 import io.terminus.doctor.basic.model.DoctorChangeReason;
-import io.terminus.doctor.basic.model.DoctorChangeType;
 import io.terminus.doctor.basic.model.DoctorCustomer;
 import io.terminus.doctor.basic.service.DoctorBasicReadService;
 import io.terminus.doctor.common.utils.DateUtil;
@@ -157,7 +156,7 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
                     RespHelper.orServEx(doctorGroupWriteService.groupEventMoveIn(groupDetail, BeanMapper.map(putBasicFields(params), DoctorMoveInGroupInput.class)));
                     break;
                 case CHANGE:
-                    params.put("changeTypeName", getChangeTypeName(getLong(params, "changeTypeId")));
+                    params.put("changeTypeName", getBasicName(getLong(params, "changeTypeId")));
                     params.put("changeReasonName", getChangeReasonName(getLong(params, "changeReasonId")));
                     params.put("customerName", getCustomerName(getLong(params, "customerId")));
                     RespHelper.orServEx(doctorGroupWriteService.groupEventChange(groupDetail, BeanMapper.map(putBasicFields(params), DoctorChangeGroupInput.class)));
@@ -262,11 +261,6 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
     //获取疫苗名称
     private String getVaccinName(Long vaccinId) {
         return vaccinId == null ? null : RespHelper.or(doctorMaterialInfoReadService.queryById(vaccinId), new DoctorMaterialInfo()).getMaterialName();
-    }
-
-    //获取变动类型名称
-    private String getChangeTypeName(Long changeTypeId) {
-        return changeTypeId == null ? null : RespHelper.or(doctorBasicReadService.findChangeTypeById(changeTypeId), new DoctorChangeType()).getName();
     }
 
     //获取变动原因

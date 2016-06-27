@@ -5,7 +5,6 @@ import configuration.front.FrontWebConfiguration;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.basic.model.DoctorBasic;
 import io.terminus.doctor.basic.model.DoctorChangeReason;
-import io.terminus.doctor.basic.model.DoctorChangeType;
 import io.terminus.doctor.basic.model.DoctorCustomer;
 import io.terminus.doctor.front.BaseFrontWebTest;
 import io.terminus.doctor.web.front.basic.controller.DoctorBasics;
@@ -46,7 +45,7 @@ public class DoctorBasicsTest extends BaseFrontWebTest {
 
     /**
      * 根据基础数据类型和输入码查询基础数据测试
-     * @see DoctorBasics#findBasicByTypeAndSrm(java.lang.Integer, java.lang.String)
+     * @see DoctorBasics#findBasicByTypeAndSrmWithCache(java.lang.Integer, java.lang.String)
      */
     @Test
     public void findBasicByTypeAndSrm() {
@@ -64,65 +63,6 @@ public class DoctorBasicsTest extends BaseFrontWebTest {
         return result.getBody();
     }
 
-    /**
-     * 根据id查询变动类型表测试
-     * @see DoctorBasics#findChangeTypeById(java.lang.Long)
-     */
-    @Test
-    public void findChangeTypeByIdTest() {
-        DoctorChangeType changeType = findChangeTypeById(2L);
-        assertNotNull(changeType);
-        log.info("findChangeTypeByIdTest result:{}", changeType);
-    }
-
-    private DoctorChangeType findChangeTypeById(Long changeTypeId) {
-        String url = "/api/doctor/basic/changeType/id";
-        ResponseEntity<DoctorChangeType> result = getForEntity(url, ImmutableMap.of("changeTypeId", changeTypeId), DoctorChangeType.class);
-        assertThat(result.getStatusCode(), is(HttpStatus.OK));
-        return result.getBody();
-    }
-
-    /**
-     * 根据farmId查询变动类型表测试
-     * @see DoctorBasics#findChangeTypesByfarmId(java.lang.Long)
-     */
-    @Test
-    public void findChangeTypesByfarmIdTest() {
-        String url = "/api/doctor/basic/changeType/farmId";
-        ResponseEntity<List> result = getForEntity(url, ImmutableMap.of("farmId", 0L), List.class);
-        assertThat(result.getStatusCode(), is(HttpStatus.OK));
-        assertThat(result.getBody().size(), not(0));
-        log.info("findChangeTypesByfarmIdTest result:{}", result.getBody());
-    }
-
-    /**
-     * 创建或更新DoctorChangeType测试
-     * @see DoctorBasics#createOrUpdateChangeType(io.terminus.doctor.basic.model.DoctorChangeType)
-     */
-    @Test
-    public void createOrUpdateChangeTypeTest() {
-        String url = "/api/doctor/basic/changeType";
-        ResponseEntity<Long> result = postForEntity(url, mockChangeType(), Long.class);
-        assertThat(result.getStatusCode(), is(HttpStatus.OK));
-
-        DoctorChangeType changeType = findChangeTypeById(result.getBody());
-        assertNotNull(changeType);
-        log.info("createOrUpdateChangeTypeTest result:{}", changeType);
-    }
-
-    /**
-     * 根据主键id删除DoctorChangeType测试
-     * @see DoctorBasics#deleteChangeType(java.lang.Long)
-     */
-    @Test
-    public void deleteChangeTypeTest() {
-        Long deleteId = 1L;
-        String url = "/api/doctor/basic/changeType";
-        delete(url, ImmutableMap.of("changeTypeId", deleteId));
-
-        DoctorChangeType changeType = findChangeTypeById(deleteId);
-        assertNull(changeType);
-    }
 
     /**
      * 根据id查询变动原因表测试
@@ -242,15 +182,6 @@ public class DoctorBasicsTest extends BaseFrontWebTest {
 
         DoctorCustomer customer = findCustomerById(deleteId);
         assertNull(customer);
-    }
-
-    private DoctorChangeType mockChangeType() {
-        DoctorChangeType changeType = new DoctorChangeType();
-        changeType.setName("变动类型啊");
-        changeType.setIsCountOut(1);
-        changeType.setFarmId(0L);
-        changeType.setFarmName("测试猪场");
-        return changeType;
     }
 
     private DoctorChangeReason mockChangeReason() {

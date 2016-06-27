@@ -4,11 +4,9 @@ import com.google.common.base.Throwables;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.basic.dao.DoctorBasicDao;
 import io.terminus.doctor.basic.dao.DoctorChangeReasonDao;
-import io.terminus.doctor.basic.dao.DoctorChangeTypeDao;
 import io.terminus.doctor.basic.dao.DoctorCustomerDao;
 import io.terminus.doctor.basic.model.DoctorBasic;
 import io.terminus.doctor.basic.model.DoctorChangeReason;
-import io.terminus.doctor.basic.model.DoctorChangeType;
 import io.terminus.doctor.basic.model.DoctorCustomer;
 import io.terminus.doctor.common.enums.DataEventType;
 import io.terminus.doctor.common.event.CoreEventDispatcher;
@@ -31,7 +29,6 @@ import static io.terminus.common.utils.Arguments.notNull;
 public class DoctorBasicWriteServiceImpl implements DoctorBasicWriteService {
 
     private final DoctorChangeReasonDao doctorChangeReasonDao;
-    private final DoctorChangeTypeDao doctorChangeTypeDao;
     private final DoctorCustomerDao doctorCustomerDao;
     private final DoctorBasicDao doctorBasicDao;
     private final CoreEventDispatcher coreEventDispatcher;
@@ -41,12 +38,10 @@ public class DoctorBasicWriteServiceImpl implements DoctorBasicWriteService {
 
     @Autowired
     public DoctorBasicWriteServiceImpl(DoctorChangeReasonDao doctorChangeReasonDao,
-                                       DoctorChangeTypeDao doctorChangeTypeDao,
                                        DoctorCustomerDao doctorCustomerDao,
                                        DoctorBasicDao doctorBasicDao,
                                        CoreEventDispatcher coreEventDispatcher) {
         this.doctorChangeReasonDao = doctorChangeReasonDao;
-        this.doctorChangeTypeDao = doctorChangeTypeDao;
         this.doctorCustomerDao = doctorCustomerDao;
         this.doctorBasicDao = doctorBasicDao;
         this.coreEventDispatcher = coreEventDispatcher;
@@ -116,37 +111,6 @@ public class DoctorBasicWriteServiceImpl implements DoctorBasicWriteService {
         } catch (Exception e) {
             log.error("delete changeReason failed, changeReasonId:{}, cause:{}", changeReasonId, Throwables.getStackTraceAsString(e));
             return Response.fail("changeReason.delete.fail");
-        }
-    }
-
-    @Override
-    public Response<Long> createChangeType(DoctorChangeType changeType) {
-        try {
-            doctorChangeTypeDao.create(changeType);
-            return Response.ok(changeType.getId());
-        } catch (Exception e) {
-            log.error("create changeType failed, changeType:{}, cause:{}", changeType, Throwables.getStackTraceAsString(e));
-            return Response.fail("changeType.create.fail");
-        }
-    }
-
-    @Override
-    public Response<Boolean> updateChangeType(DoctorChangeType changeType) {
-        try {
-            return Response.ok(doctorChangeTypeDao.update(changeType));
-        } catch (Exception e) {
-            log.error("update changeType failed, changeType:{}, cause:{}", changeType, Throwables.getStackTraceAsString(e));
-            return Response.fail("changeType.update.fail");
-        }
-    }
-
-    @Override
-    public Response<Boolean> deleteChangeTypeById(Long changeTypeId) {
-        try {
-            return Response.ok(doctorChangeTypeDao.delete(changeTypeId));
-        } catch (Exception e) {
-            log.error("delete changeType failed, changeTypeId:{}, cause:{}", changeTypeId, Throwables.getStackTraceAsString(e));
-            return Response.fail("changeType.delete.fail");
         }
     }
 

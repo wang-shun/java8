@@ -3,7 +3,6 @@ package io.terminus.doctor.basic.service;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.basic.model.DoctorBasic;
 import io.terminus.doctor.basic.model.DoctorChangeReason;
-import io.terminus.doctor.basic.model.DoctorChangeType;
 import io.terminus.doctor.basic.model.DoctorCustomer;
 
 /**
@@ -53,24 +52,6 @@ public interface DoctorBasicWriteService {
      * @return 是否成功
      */
     Response<Boolean> deleteChangeReasonById(Long changeReasonId);
-
-    /**
-     * 创建DoctorChangeType
-     * @return 主键id
-     */
-    Response<Long> createChangeType(DoctorChangeType changeType);
-
-    /**
-     * 更新DoctorChangeType
-     * @return 是否成功
-     */
-    Response<Boolean> updateChangeType(DoctorChangeType changeType);
-
-    /**
-     * 根据主键id删除DoctorChangeType
-     * @return 是否成功
-     */
-    Response<Boolean> deleteChangeTypeById(Long changeTypeId);
 
     /**
      * 创建DoctorCustomer

@@ -3,7 +3,6 @@ package io.terminus.doctor.web.front.basic.controller;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.basic.model.DoctorBasic;
 import io.terminus.doctor.basic.model.DoctorChangeReason;
-import io.terminus.doctor.basic.model.DoctorChangeType;
 import io.terminus.doctor.basic.model.DoctorCustomer;
 import io.terminus.doctor.basic.service.DoctorBasicReadService;
 import io.terminus.doctor.basic.service.DoctorBasicWriteService;
@@ -74,26 +73,6 @@ public class DoctorBasics {
 
     /************************** 猪群变动相关 **************************/
     /**
-     * 根据id查询变动类型表
-     * @param changeTypeId 主键id
-     * @return 变动类型表
-     */
-    @RequestMapping(value = "/changeType/id", method = RequestMethod.GET)
-    public DoctorChangeType findChangeTypeById(@RequestParam("changeTypeId") Long changeTypeId) {
-        return RespHelper.or500(doctorBasicReadService.findChangeTypeById(changeTypeId));
-    }
-
-    /**
-     * 根据farmId查询变动类型表
-     * @param farmId 猪场id
-     * @return 变动类型表列表
-     */
-    @RequestMapping(value = "/changeType/farmId", method = RequestMethod.GET)
-    public List<DoctorChangeType> findChangeTypesByfarmId(@RequestParam("farmId") Long farmId) {
-        return RespHelper.or500(doctorBasicReadService.findChangeTypesByFarmId(farmId));
-    }
-
-    /**
      * 根据id查询变动原因表
      * @param changeReasonId 主键id
      * @return 变动原因表
@@ -125,8 +104,8 @@ public class DoctorBasics {
         checkNotNull(changeReason, "customer.not.null");
 
         //权限中心校验权限
-        DoctorChangeType changeType = RespHelper.or500(doctorBasicReadService.findChangeTypeById(changeReason.getChangeTypeId()));
-        doctorFarmAuthCenter.checkFarmAuth(changeType.getFarmId());
+//        DoctorChangeType changeType = RespHelper.or500(doctorBasicReadService.findChangeTypeById(changeReason.getChangeTypeId()));
+//        doctorFarmAuthCenter.checkFarmAuth(changeType.getFarmId());
 
         //设置变动类型id
         changeReason.setChangeTypeId(changeTypeId);
@@ -149,10 +128,10 @@ public class DoctorBasics {
     @RequestMapping(value = "/changeReason", method = RequestMethod.DELETE)
     public Boolean deleteChangeReason(@RequestParam("changeReasonId") Long changeReasonId) {
         DoctorChangeReason changeReason = RespHelper.or500(doctorBasicReadService.findChangeReasonById(changeReasonId));
-        DoctorChangeType changeType = RespHelper.or500(doctorBasicReadService.findChangeTypeById(changeReason.getChangeTypeId()));
-
-        //权限中心校验权限
-        doctorFarmAuthCenter.checkFarmAuth(changeType.getFarmId());
+//        DoctorChangeType changeType = RespHelper.or500(doctorBasicReadService.findChangeTypeById(changeReason.getChangeTypeId()));
+//
+//        //权限中心校验权限
+//        doctorFarmAuthCenter.checkFarmAuth(changeType.getFarmId());
 
         return RespHelper.or500(doctorBasicWriteService.deleteChangeReasonById(changeReasonId));
     }
