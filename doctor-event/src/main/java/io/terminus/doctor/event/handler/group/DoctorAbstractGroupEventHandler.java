@@ -194,4 +194,11 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
         }
         return "手工录入的" + eventType.getDesc() + "事件";
     }
+
+    //品种校验, 如果猪群的品种已经确定, 那么录入的品种必须和猪群的品种一致
+    protected static void checkBreed(Long groupBreedId, Long breedId) {
+        if (notNull(groupBreedId) && notNull(breedId) && !groupBreedId.equals(breedId)) {
+            throw new ServiceException("breed.not.equal");
+        }
+    }
 }
