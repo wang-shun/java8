@@ -14,6 +14,7 @@
         <result column="farm_name" property="farmName"/>
         <result column="type" property="type"/>
         <result column="material_name" property="materialName"/>
+        <result column="input_code" property="inputCode"/>
         <result column="remark" property="remark"/>
         <result column="unit_group_id" property="unitGroupId"/>
         <result column="unit_group_name" property="unitGroupName"/>
@@ -38,16 +39,17 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        `farm_id`,`farm_name`,`type`,`material_name`,`remark`,`unit_group_id`,`unit_group_name`,`unit_id`,`unit_name`,`default_consume_count`,`price`,`extra`,`creator_id`,`creator_name`,`updator_id`,`updator_name`,`created_at`,`updated_at`
+        `farm_id`,`farm_name`,`type`,`material_name`,`input_code`,`remark`,`unit_group_id`,`unit_group_name`,`unit_id`,`unit_name`,`default_consume_count`,`price`,`extra`,`creator_id`,`creator_name`,`updator_id`,`updator_name`,`created_at`,`updated_at`
     </sql>
 
     <sql id="vals">
-        #{farmId},#{farmName},#{type},#{materialName},#{remark},#{unitGroupId},#{unitGroupName},#{unitId},#{unitName},#{defaultConsumeCount},#{price},#{extra},#{creatorId},#{creatorName},#{updatorId},#{updatorName},now(),now()
+        #{farmId},#{farmName},#{type},#{materialName},#{inputCode},#{remark},#{unitGroupId},#{unitGroupName},#{unitId},#{unitName},#{defaultConsumeCount},#{price},#{extra},#{creatorId},#{creatorName},#{updatorId},#{updatorName},now(),now()
     </sql>
 
     <sql id="criteria">
         <if test="farmId != null" > AND `farm_id` = #{farmId}</if>
         <if test="type != null" > AND `type` = #{type}</if>
+        <if test="inputCode!=null"> AND `input_code`=#{inputCode} </if>
         <if test="remark != null" > AND `remark` = #{remark}</if>
         <if test="unitGroupId != null" > AND `unit_group_id` = #{unitGroupId}</if>
         <if test="unitId != null" > AND `unit_id` = #{unitId}</if>
@@ -65,7 +67,7 @@
         ( <include refid="cols_exclude_id"/> )
         VALUES
         <foreach collection="list" item="i" separator=",">
-        (#{i.farmId},#{i.farmName},#{i.type},#{i.remark},#{i.unitGroupId},#{i.unitGroupName},#{i.unitId},#{i.unitName},#{i.defaultConsumeCount},#{i.price},#{i.extra},#{i.creatorId},#{i.creatorName},#{i.updatorId},#{i.updatorName},now(),now())
+        (#{i.farmId},#{i.farmName},#{i.type},#{i.materialName},#{i.inputCode},#{i.remark},#{i.unitGroupId},#{i.unitGroupName},#{i.unitId},#{i.unitName},#{i.defaultConsumeCount},#{i.price},#{i.extra},#{i.creatorId},#{i.creatorName},#{i.updatorId},#{i.updatorName},now(),now())
         </foreach>
     </insert>
 
@@ -113,6 +115,7 @@
         <if test="farmName != null" > ,`farm_name` = #{farmName}</if>
         <if test="type != null" > ,`type` = #{type}</if>
         <if test="materialName != null">, material_name=#{materialName} </if>
+        <if test="inputCode!=null">, input_code=#{inputCode} </if>
         <if test="remark != null" > ,`remark` = #{remark}</if>
         <if test="unitGroupId != null" > ,`unit_group_id` = #{unitGroupId}</if>
         <if test="unitGroupName != null" > ,`unit_group_name` = #{unitGroupName}</if>

@@ -8,8 +8,8 @@ import io.terminus.doctor.web.front.msg.controller.DoctorMsgRules;
 import org.junit.Test;
 import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.http.HttpEntity;
-import utils.HttpGetRequest;
-import utils.HttpPostRequest;
+import io.terminus.doctor.utils.HttpGetRequest;
+import io.terminus.doctor.utils.HttpPostRequest;
 
 import java.util.List;
 

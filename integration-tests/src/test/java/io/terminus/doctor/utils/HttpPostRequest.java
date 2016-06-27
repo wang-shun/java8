@@ -1,4 +1,4 @@
-package utils;
+package io.terminus.doctor.utils;
 
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;

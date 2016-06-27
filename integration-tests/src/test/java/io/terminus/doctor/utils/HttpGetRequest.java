@@ -1,4 +1,4 @@
-package utils;
+package io.terminus.doctor.utils;
 
 /**
  * Created by yaoqijun.
