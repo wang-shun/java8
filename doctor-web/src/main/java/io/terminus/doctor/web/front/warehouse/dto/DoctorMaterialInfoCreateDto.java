@@ -31,6 +31,8 @@ public class DoctorMaterialInfoCreateDto implements Serializable{
 
     private String materialName;    // 原料名称
 
+    private String inputCode;
+
     private String mark;    // 标注信息 (非必填信息)
 
     private Long unitId;    //单位
