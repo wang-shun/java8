@@ -71,8 +71,12 @@ public class DoctorBasic implements Serializable {
     private Date updatedAt;
 
     public enum Type {
-        ANTIEPIDEMIC(1, "防疫项目"),
-        FOSTER_REASON(2, "寄养原因");
+        BREED(1, "品种"),
+        GENETICS(2, "品系"),
+        ANTIEPIDEMIC(3, "防疫项目"),
+        DISEASE(4, "疾病"),
+        UNIT(5, "计量单位"),
+        FOSTER_REASON(6, "寄养原因");
 
         @Getter
         private final int value;
