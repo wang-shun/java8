@@ -98,11 +98,12 @@ public class DoctorBasicReadServiceImpl implements DoctorBasicReadService {
     }
 
     @Override
-    public Response<List<DoctorChangeReason>> findChangeReasonByChangeTypeId(Long changeTypeId) {
+    public Response<List<DoctorChangeReason>> findChangeReasonByFarmIdAndChangeTypeId(Long farmId, Long changeTypeId) {
         try {
-            return Response.ok(doctorChangeReasonDao.findByChangeTypeId(changeTypeId));
+            return Response.ok(doctorChangeReasonDao.findByFarmIdChangeTypeId(farmId, changeTypeId));
         } catch (Exception e) {
-            log.error("find changeReason by id failed, changeTypeId:{}, cause:{}", changeTypeId, Throwables.getStackTraceAsString(e));
+            log.error("find changeReason by farmId and changeTypeId failed, farmId:{}, changeTypeId:{}, cause:{}",
+                    farmId, changeTypeId, Throwables.getStackTraceAsString(e));
             return Response.fail("changeReason.find.fail");
         }
     }

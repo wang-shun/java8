@@ -2,7 +2,6 @@ package io.terminus.doctor.front.basic;
 
 import com.google.common.collect.ImmutableMap;
 import configuration.front.FrontWebConfiguration;
-import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.basic.model.DoctorBasic;
 import io.terminus.doctor.basic.model.DoctorChangeReason;
 import io.terminus.doctor.basic.model.DoctorCustomer;
@@ -63,7 +62,6 @@ public class DoctorBasicsTest extends BaseFrontWebTest {
         return result.getBody();
     }
 
-
     /**
      * 根据id查询变动原因表测试
      * @see DoctorBasics#findChangeReasonById(java.lang.Long)
@@ -84,12 +82,12 @@ public class DoctorBasicsTest extends BaseFrontWebTest {
 
     /**
      * 根据变动类型id查询变动原因表测试
-     * @see DoctorBasics#findChangeReasonByChangeTypeId(java.lang.Long)
+     * @see DoctorBasics#findChangeReasonByFarmIdChangeTypeId(java.lang.Long, java.lang.Long)
      */
     @Test
-    public void findChangeReasonByChangeTypeIdTest() {
+    public void findChangeReasonByFarmIdChangeTypeId() {
         String url = "/api/doctor/basic/changeReason/typeId";
-        ResponseEntity<List> result = getForEntity(url, ImmutableMap.of("changeTypeId", 3L), List.class);
+        ResponseEntity<List> result = getForEntity(url, ImmutableMap.of("farmId", 0L, "changeTypeId", 3L), List.class);
         assertThat(result.getStatusCode(), is(HttpStatus.OK));
         assertThat(result.getBody().size(), not(0));
         log.info("findChangeReasonByChangeTypeIdTest result:{}", result.getBody());
@@ -97,12 +95,12 @@ public class DoctorBasicsTest extends BaseFrontWebTest {
 
     /**
      * 创建或更新DoctorChangeReason测试
-     * @see DoctorBasics#createOrUpdateChangeReason(java.lang.Long, java.lang.String)
+     * @see DoctorBasics#createOrUpdateChangeReason(io.terminus.doctor.basic.model.DoctorChangeReason)
      */
     @Test
     public void createOrUpdateChangeReasonTest() {
         String url = "/api/doctor/basic/changeReason";
-        ResponseEntity<Long> result = postFormForEntity(url, ImmutableMap.of("changeTypeId", 3L, "reason", JsonMapper.nonEmptyMapper().toJson(mockChangeReason())), Long.class);
+        ResponseEntity<Long> result = postForEntity(url, mockChangeReason(), Long.class);
         assertThat(result.getStatusCode(), is(HttpStatus.OK));
 
         DoctorChangeReason changeReason = findChangeReasonById(result.getBody());
@@ -186,6 +184,7 @@ public class DoctorBasicsTest extends BaseFrontWebTest {
 
     private DoctorChangeReason mockChangeReason() {
         DoctorChangeReason changeReason = new DoctorChangeReason();
+        changeReason.setFarmId(0L);
         changeReason.setChangeTypeId(3L);
         changeReason.setReason("没啥原因!");
         return changeReason;

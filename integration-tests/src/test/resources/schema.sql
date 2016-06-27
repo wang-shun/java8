@@ -325,6 +325,7 @@ CREATE TABLE `doctor_change_types` (
 
 CREATE TABLE `doctor_change_reasons` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '自增主键',
+  `farm_id` bigint(20) DEFAULT NULL COMMENT '猪场id',
   `change_type_id` bigint(20) DEFAULT NULL COMMENT '变动类型id',
   `reason` varchar(128) DEFAULT NULL COMMENT '变动原因',
   `out_id` varchar(128) DEFAULT NULL COMMENT '外部id',

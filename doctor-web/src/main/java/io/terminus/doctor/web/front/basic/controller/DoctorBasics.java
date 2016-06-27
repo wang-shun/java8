@@ -83,13 +83,15 @@ public class DoctorBasics {
     }
 
     /**
-     * 根据变动类型id查询变动原因表
+     * 根据猪场id和变动类型id查询变动原因表
+     * @param farmId 猪场id
      * @param changeTypeId 变动类型id
-     * @return 变动原因表
+     * @return 变动原因列表
      */
     @RequestMapping(value = "/changeReason/typeId", method = RequestMethod.GET)
-    public List<DoctorChangeReason> findChangeReasonByChangeTypeId(@RequestParam("changeTypeId") Long changeTypeId) {
-        return RespHelper.or500(doctorBasicReadService.findChangeReasonByChangeTypeId(changeTypeId));
+    public List<DoctorChangeReason> findChangeReasonByFarmIdChangeTypeId(@RequestParam("farmId") Long farmId,
+                                                                         @RequestParam("changeTypeId") Long changeTypeId) {
+        return RespHelper.or500(doctorBasicReadService.findChangeReasonByFarmIdAndChangeTypeId(farmId, changeTypeId));
     }
 
     /**
@@ -97,18 +99,13 @@ public class DoctorBasics {
      * @return 是否成功
      */
     @RequestMapping(value = "/changeReason", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public Long createOrUpdateChangeReason(@RequestParam("changeTypeId") Long changeTypeId,
-                                           @RequestParam("reason") String reason) {
-
-        DoctorChangeReason changeReason = JSON_MAPPER.fromJson(reason, DoctorChangeReason.class);
+    public Long createOrUpdateChangeReason(@RequestBody DoctorChangeReason changeReason) {
         checkNotNull(changeReason, "customer.not.null");
 
         //权限中心校验权限
-//        DoctorChangeType changeType = RespHelper.or500(doctorBasicReadService.findChangeTypeById(changeReason.getChangeTypeId()));
-//        doctorFarmAuthCenter.checkFarmAuth(changeType.getFarmId());
+        doctorFarmAuthCenter.checkFarmAuth(changeReason.getFarmId());
 
         //设置变动类型id
-        changeReason.setChangeTypeId(changeTypeId);
         if (changeReason.getId() == null) {
             changeReason.setCreatorId(UserUtil.getUserId());
             changeReason.setCreatorName(UserUtil.getCurrentUser().getName());
@@ -128,10 +125,9 @@ public class DoctorBasics {
     @RequestMapping(value = "/changeReason", method = RequestMethod.DELETE)
     public Boolean deleteChangeReason(@RequestParam("changeReasonId") Long changeReasonId) {
         DoctorChangeReason changeReason = RespHelper.or500(doctorBasicReadService.findChangeReasonById(changeReasonId));
-//        DoctorChangeType changeType = RespHelper.or500(doctorBasicReadService.findChangeTypeById(changeReason.getChangeTypeId()));
-//
-//        //权限中心校验权限
-//        doctorFarmAuthCenter.checkFarmAuth(changeType.getFarmId());
+
+        //权限中心校验权限
+        doctorFarmAuthCenter.checkFarmAuth(changeReason.getFarmId());
 
         return RespHelper.or500(doctorBasicWriteService.deleteChangeReasonById(changeReasonId));
     }

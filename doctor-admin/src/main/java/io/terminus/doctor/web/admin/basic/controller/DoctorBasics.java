@@ -60,7 +60,6 @@ public class DoctorBasics {
     public Boolean createOrUpdateBasic(@RequestBody DoctorBasic basic) {
         checkNotNull(basic, "basic.not.null");
         if (basic.getId() == null) {
-
             RespHelper.or500(doctorBasicWriteService.createBasic(basic));
         } else {
             basic.setUpdatorId(UserUtil.getUserId());
@@ -71,7 +70,7 @@ public class DoctorBasics {
     }
 
     /**
-     * 根据主键id删除DoctorBasic
+     * 根据主键id删除DoctorBasic(逻辑删除)
      * @return 是否成功
      */
     @RequestMapping(value = "/basic", method = RequestMethod.DELETE)

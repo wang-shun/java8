@@ -1,7 +1,9 @@
 package io.terminus.doctor.basic.model;
 
 import lombok.Data;
+import org.hibernate.validator.constraints.NotEmpty;
 
+import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.util.Date;
 
@@ -16,15 +18,23 @@ public class DoctorChangeReason implements Serializable {
     private static final long serialVersionUID = 6395413596819548653L;
 
     private Long id;
-    
+
+    /**
+     * 猪场id
+     */
+    @NotNull(message = "farmId.not.null")
+    private Long farmId;
+
     /**
      * 变动类型id
      */
+    @NotNull(message = "changeTypeId.not.null")
     private Long changeTypeId;
     
     /**
      * 变动原因
      */
+    @NotEmpty(message = "reason.not.empty")
     private String reason;
     
     /**

@@ -3,7 +3,9 @@ package io.terminus.doctor.basic.model;
 import com.google.common.base.Objects;
 import lombok.Data;
 import lombok.Getter;
+import org.hibernate.validator.constraints.NotEmpty;
 
+import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.util.Date;
 
@@ -22,12 +24,14 @@ public class DoctorBasic implements Serializable {
     /**
      * 基础数据内容
      */
+    @NotEmpty(message = "name.not.empty")
     private String name;
     
     /**
      * 基础数据类型 枚举
      * @see Type
      */
+    @NotNull(message = "type.not.empty")
     private Integer type;
     
     /**

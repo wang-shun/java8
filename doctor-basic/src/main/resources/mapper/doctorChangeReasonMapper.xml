@@ -7,6 +7,7 @@
 <mapper namespace="DoctorChangeReason">
     <resultMap id="DoctorChangeReasonMap" type="DoctorChangeReason">
         <id column="id" property="id"/>
+        <result column="farm_id" property="farmId"/>
         <result column="change_type_id" property="changeTypeId"/>
         <result column="reason" property="reason"/>
         <result column="out_id" property="outId"/>
@@ -29,11 +30,11 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        change_type_id, reason, out_id, extra, creator_id, creator_name, updator_id, updator_name, created_at, updated_at
+        farm_id, change_type_id, reason, out_id, extra, creator_id, creator_name, updator_id, updator_name, created_at, updated_at
     </sql>
 
     <sql id="vals">
-        #{changeTypeId}, #{reason}, #{outId}, #{extra}, #{creatorId}, #{creatorName}, #{updatorId}, #{updatorName}, now(), now()
+        #{farmId}, #{changeTypeId}, #{reason}, #{outId}, #{extra}, #{creatorId}, #{creatorName}, #{updatorId}, #{updatorName}, now(), now()
     </sql>
 
     <insert id="create" parameterType="DoctorChangeReason" keyProperty="id" useGeneratedKeys="true">
@@ -54,6 +55,7 @@
         UPDATE
         <include refid="tb"/>
         <set>
+            <if test="farmId != null">farm_id = #{farmId},</if>
             <if test="changeTypeId != null">change_type_id = #{changeTypeId},</if>
             <if test="reason != null">reason = #{reason},</if>
             <if test="outId != null">out_id = #{outId},</if>
@@ -72,9 +74,9 @@
         WHERE id = #{id}
     </delete>
 
-    <select id="findByChangeTypeId" parameterType="long" resultMap="DoctorChangeReasonMap" >
+    <select id="findByFarmIdChangeTypeId" parameterType="map" resultMap="DoctorChangeReasonMap" >
         SELECT <include refid="cols_all" />
         FROM <include refid="tb" />
-        WHERE change_type_id = #{changeTypeId}
+        WHERE farm_id = #{farmId} AND change_type_id = #{changeTypeId}
     </select>
 </mapper>

@@ -270,10 +270,10 @@ VALUES
 	(6, '自宰', 1, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
 	(7, '转出', -1, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
 
-INSERT INTO `doctor_change_reasons` (`id`, `change_type_id`, `reason`, `out_id`, `extra`, `creator_id`, `creator_name`, `updator_id`, `updator_name`, `created_at`, `updated_at`)
+INSERT INTO `doctor_change_reasons` (`id`, `farm_id`, `change_type_id`, `reason`, `out_id`, `extra`, `creator_id`, `creator_name`, `updator_id`, `updator_name`, `created_at`, `updated_at`)
 VALUES
-	(1, 3, '猪流感淘汰', NULL, NULL, 0, NULL, NULL, NULL, NULL, NULL),
-	(2, 3, '弱仔淘汰', NULL, NULL, 0, NULL, NULL, NULL, NULL, NULL);
+	(1, 0, 3, '猪流感淘汰', NULL, NULL, 0, NULL, NULL, NULL, NULL, NULL),
+	(2, 0, 3, '弱仔淘汰', NULL, NULL, 0, NULL, NULL, NULL, NULL, NULL);
 
 INSERT INTO `doctor_customers` (`id`, `name`, `farm_id`, `farm_name`, `mobile`, `email`, `out_id`, `extra`, `creator_id`, `creator_name`, `updator_id`, `updator_name`, `created_at`, `updated_at`)
 VALUES

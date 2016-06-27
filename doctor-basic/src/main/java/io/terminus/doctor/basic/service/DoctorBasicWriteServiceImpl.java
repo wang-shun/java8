@@ -50,6 +50,7 @@ public class DoctorBasicWriteServiceImpl implements DoctorBasicWriteService {
     @Override
     public Response<Long> createBasic(DoctorBasic basic) {
         try {
+            basic.setIsValid(1);
             doctorBasicDao.create(basic);
             publishBasicEvent(basic);
             return Response.ok(basic.getId());
@@ -74,8 +75,12 @@ public class DoctorBasicWriteServiceImpl implements DoctorBasicWriteService {
     @Override
     public Response<Boolean> deleteBasicById(Long basicId) {
         try {
-            publishBasicEvent(doctorBasicDao.findById(basicId));
-            doctorBasicDao.delete(basicId);
+            DoctorBasic basic = doctorBasicDao.findById(basicId);
+            if (notNull(basic)) {
+                basic.setIsValid(-1);
+                doctorBasicDao.update(basic);
+                publishBasicEvent(basic);
+            }
             return Response.ok(Boolean.TRUE);
         } catch (Exception e) {
             log.error("delete basic failed, basicId:{}, cause:{}", basicId, Throwables.getStackTraceAsString(e));
