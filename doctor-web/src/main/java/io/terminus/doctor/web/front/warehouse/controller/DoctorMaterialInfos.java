@@ -83,8 +83,8 @@ public class DoctorMaterialInfos {
             Response<User> userResponse = userReadService.findById(userId);
             String username = RespHelper.orServEx(userResponse).getName();
 
-            String unitName = RespHelper.orServEx(doctorBasicReadService.findUnitById(doctorMaterialInfoCreateDto.getUnitId())).getName();
-            String unitGroupName = RespHelper.orServEx(doctorBasicReadService.findUnitById(doctorMaterialInfoCreateDto.getUnitGroupId())).getName();
+            String unitName = RespHelper.orServEx(doctorBasicReadService.findBasicById(doctorMaterialInfoCreateDto.getUnitId())).getName();
+            String unitGroupName = RespHelper.orServEx(doctorBasicReadService.findBasicById(doctorMaterialInfoCreateDto.getUnitGroupId())).getName();
 
             doctorMaterialInfo = DoctorMaterialInfo.builder()
                     .farmId(doctorMaterialInfoCreateDto.getFarmId()).farmName(doctorFarm.getName())

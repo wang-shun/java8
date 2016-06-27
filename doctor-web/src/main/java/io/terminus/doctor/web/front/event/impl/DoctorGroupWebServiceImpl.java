@@ -7,12 +7,9 @@ import io.terminus.common.model.Response;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.basic.model.DoctorBasic;
-import io.terminus.doctor.basic.model.DoctorBreed;
 import io.terminus.doctor.basic.model.DoctorChangeReason;
 import io.terminus.doctor.basic.model.DoctorChangeType;
 import io.terminus.doctor.basic.model.DoctorCustomer;
-import io.terminus.doctor.basic.model.DoctorDisease;
-import io.terminus.doctor.basic.model.DoctorGenetic;
 import io.terminus.doctor.basic.service.DoctorBasicReadService;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.Params;
@@ -121,8 +118,8 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
         newGroupInput.setIsAuto(IsOrNot.NO.getValue());
 
         newGroupInput.setBarnName(getBarnName(newGroupInput.getBarnId()));
-        newGroupInput.setBreedName(getBreedName(newGroupInput.getBreedId()));
-        newGroupInput.setGeneticName(getGeneticName(newGroupInput.getGeneticId()));
+        newGroupInput.setBreedName(getBasicName(newGroupInput.getBreedId()));
+        newGroupInput.setGeneticName(getBasicName(newGroupInput.getGeneticId()));
 
         //事件录入人信息
         newGroupInput.setCreatorId(UserUtil.getUserId());
@@ -181,7 +178,7 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
                     RespHelper.orServEx(doctorGroupWriteService.groupEventLiveStock(groupDetail, BeanMapper.map(putBasicFields(params), DoctorLiveStockGroupInput.class)));
                     break;
                 case DISEASE:
-                    params.put("diseaseName", getDiseaseName(getLong(params, "diseaseId")));
+                    params.put("diseaseName", getBasicName(getLong(params, "diseaseId")));
                     params.put("doctorName", getStaffUserName(getLong(params, "doctorId")));
                     RespHelper.orServEx(doctorGroupWriteService.groupEventDisease(groupDetail, BeanMapper.map(putBasicFields(params), DoctorDiseaseGroupInput.class)));
                     break;
@@ -257,24 +254,14 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
         return barnId == null ? null : RespHelper.or(doctorBarnReadService.findBarnById(barnId), new DoctorBarn()).getName();
     }
 
-    //获取品种名称
-    private String getBreedName(Long breedId) {
-        return breedId == null ? null : RespHelper.or(doctorBasicReadService.findBreedById(breedId), new DoctorBreed()).getName();
-    }
-
-    //获取品系名称
-    private String getGeneticName(Long geneticId) {
-        return geneticId == null ? null : RespHelper.or(doctorBasicReadService.findGeneticById(geneticId), new DoctorGenetic()).getName();
+    //获取基础数据名称
+    private String getBasicName(Long basicId) {
+        return basicId == null ? null : RespHelper.or(doctorBasicReadService.findBasicById(basicId), new DoctorBasic()).getName();
     }
 
     //获取疫苗名称
     private String getVaccinName(Long vaccinId) {
         return vaccinId == null ? null : RespHelper.or(doctorMaterialInfoReadService.queryById(vaccinId), new DoctorMaterialInfo()).getMaterialName();
-    }
-
-    //获取疾病名称
-    private String getDiseaseName(Long diseaseId) {
-        return diseaseId == null ? null : RespHelper.or(doctorBasicReadService.findDiseaseById(diseaseId), new DoctorDisease()).getName();
     }
 
     //获取变动类型名称
@@ -318,8 +305,8 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
         
         //id关联字段
         params.put("barnName", getBarnName(getLong(params, "barnId")));
-        params.put("breedName", getBreedName(getLong(params, "breedId")));
-        params.put("geneticName", getGeneticName(getLong(params, "geneticId")));
+        params.put("breedName", getBasicName(getLong(params, "breedId")));
+        params.put("geneticName", getBasicName(getLong(params, "geneticId")));
         return Params.filterNullOrEmpty(params);
     }
 

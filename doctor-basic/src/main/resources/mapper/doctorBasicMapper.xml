@@ -49,6 +49,12 @@
         WHERE id = #{id}
     </select>
 
+    <select id="findByType" parameterType="int" resultMap="DoctorBasicMap" >
+        SELECT <include refid="cols_all" />
+        FROM <include refid="tb" />
+        WHERE type = #{type}
+    </select>
+
     <update id="update" parameterType="DoctorBasic">
         UPDATE
         <include refid="tb"/>
@@ -61,9 +67,6 @@
             <if test="extra != null">extra = #{extra},</if>
             <if test="updatorId != null">updator_id = #{updatorId},</if>
             <if test="updatorName != null">updator_name = #{updatorName},</if>
-            
-            
-            
             updated_at=now()
         </set>
         WHERE id = #{id}

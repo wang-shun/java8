@@ -3,10 +3,10 @@ package io.terminus.doctor.front.basic;
 import com.google.common.collect.ImmutableMap;
 import configuration.front.FrontWebConfiguration;
 import io.terminus.common.utils.JsonMapper;
+import io.terminus.doctor.basic.model.DoctorBasic;
 import io.terminus.doctor.basic.model.DoctorChangeReason;
 import io.terminus.doctor.basic.model.DoctorChangeType;
 import io.terminus.doctor.basic.model.DoctorCustomer;
-import io.terminus.doctor.basic.model.DoctorDisease;
 import io.terminus.doctor.front.BaseFrontWebTest;
 import io.terminus.doctor.web.front.basic.controller.DoctorBasics;
 import lombok.extern.slf4j.Slf4j;
@@ -34,87 +34,32 @@ import static org.junit.Assert.assertThat;
 public class DoctorBasicsTest extends BaseFrontWebTest {
 
     /**
-     * 查询所有品种测试
-     * @see DoctorBasics#finaAllBreed()
+     * 根据id查询基础数据表测试
+     * @see DoctorBasics#findBasicById(java.lang.Long)
      */
     @Test
-    public void finaAllBreedTest() {
-        String url = "/api/doctor/basic/breed/all";
-        ResponseEntity<List> result= getForEntity(url, null, List.class);
+    public void findBasicByIdTest() {
+        DoctorBasic basic = findBasicById(20L);
+        assertNotNull(basic);
+        log.info("findBasicByIdTest result:{}", basic);
+    }
+
+    /**
+     * 根据基础数据类型和输入码查询基础数据测试
+     * @see DoctorBasics#findBasicByTypeAndSrm(java.lang.Integer, java.lang.String)
+     */
+    @Test
+    public void findBasicByTypeAndSrm() {
+        String url = "/api/doctor/basic/type";
+        ResponseEntity<List> result = getForEntity(url, ImmutableMap.of("type", 4, "srm", "xm"), List.class);
         assertThat(result.getStatusCode(), is(HttpStatus.OK));
         assertThat(result.getBody().size(), not(0));
-        log.info("finaAllBreedTest result:{}", result.getBody());
+        log.info("findBasicByTypeAndSrm result:{}", result.getBody());
     }
 
-    /**
-     * 查询所有品种测试
-     * @see DoctorBasics#finaAllGenetic()
-     */
-    @Test
-    public void finaAllGeneticTest() {
-        String url = "/api/doctor/basic/genetic/all";
-        ResponseEntity<List> result= getForEntity(url, null, List.class);
-        assertThat(result.getStatusCode(), is(HttpStatus.OK));
-        assertThat(result.getBody().size(), not(0));
-        log.info("finaAllGeneticTest result:{}", result.getBody());
-    }
-
-    /**
-     * 查询疾病详情测试
-     * @see DoctorBasics#findDiseaseById(java.lang.Long)
-     */
-    @Test
-    public void findDiseaseByIdTest() {
-        DoctorDisease disease = findDiseaseById(3L);
-        assertNotNull(disease);
-        log.info("findDiseaseByIdTest result:{}", disease);
-    }
-
-    /**
-     * 根据farmId查询疾病列表测试
-     * @see DoctorBasics#findDiseaseByfarmId(java.lang.Long)
-     */
-    @Test
-    public void findDiseaseByfarmIdTest() {
-        String url = "/api/doctor/basic/disease/farmId";
-        ResponseEntity<List> result = getForEntity(url, ImmutableMap.of("farmId", 0L), List.class);
-        assertThat(result.getStatusCode(), is(HttpStatus.OK));
-        assertThat(result.getBody().size(), not(0));
-        log.info("findDiseaseByfarmIdTest result:{}", result.getBody());
-    }
-
-    /**
-     * 创建或更新疾病表测试
-     * @see @see DoctorBasics#createOrUpdateDisease(io.terminus.doctor.basic.model.DoctorDisease)
-     */
-    @Test
-    public void createOrUpdateDiseaseTest() {
-        String url = "/api/doctor/basic/disease";
-        ResponseEntity<Long> result = postForEntity(url, mockDisease(), Long.class);
-        assertThat(result.getStatusCode(), is(HttpStatus.OK));
-
-        DoctorDisease disease = findDiseaseById(result.getBody());
-        assertNotNull(disease);
-        log.info("createOrUpdateDiseaseTest result:{}", disease);
-    }
-
-    /**
-     * 根据主键id删除DoctorDisease测试
-     * @see DoctorBasics#deleteDisease(java.lang.Long)
-     */
-    @Test
-    public void deleteDiseaseTest() {
-        Long deleteId = 1L;
-        String url = "/api/doctor/basic/disease";
-        delete(url, ImmutableMap.of("diseaseId", deleteId));
-
-        DoctorDisease disease = findDiseaseById(deleteId);
-        assertNull(disease);
-    }
-
-    private DoctorDisease findDiseaseById(Long diseaseId) {
-        String url = "/api/doctor/basic/disease/id";
-        ResponseEntity<DoctorDisease> result = getForEntity(url, ImmutableMap.of("diseaseId", diseaseId), DoctorDisease.class);
+    private DoctorBasic findBasicById(Long basicId) {
+        String url = "/api/doctor/basic/id";
+        ResponseEntity<DoctorBasic> result = getForEntity(url, ImmutableMap.of("basicId", basicId), DoctorBasic.class);
         assertThat(result.getStatusCode(), is(HttpStatus.OK));
         return result.getBody();
     }
@@ -297,27 +242,6 @@ public class DoctorBasicsTest extends BaseFrontWebTest {
 
         DoctorCustomer customer = findCustomerById(deleteId);
         assertNull(customer);
-    }
-
-    /**
-     * 查询所有计量单位测试
-     * @see DoctorBasics#finaAllUnits()
-     */
-    @Test
-    public void finaAllUnitsTest() {
-        String url = "/api/doctor/basic/unit/all";
-        ResponseEntity<List> result= getForEntity(url, null, List.class);
-        assertThat(result.getStatusCode(), is(HttpStatus.OK));
-        assertThat(result.getBody().size(), not(0));
-        log.info("finaAllUnitsTest result:{}", result.getBody());
-    }
-
-    private DoctorDisease mockDisease() {
-        DoctorDisease disease = new DoctorDisease();
-        disease.setName("病");
-        disease.setFarmId(1L);
-        disease.setFarmName("猪场猪场");
-        return disease;
     }
 
     private DoctorChangeType mockChangeType() {

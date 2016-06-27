@@ -2,7 +2,6 @@ package io.terminus.doctor.basic.manager;
 
 import io.terminus.doctor.basic.dao.DoctorChangeReasonDao;
 import io.terminus.doctor.basic.dao.DoctorChangeTypeDao;
-import io.terminus.doctor.basic.dao.DoctorDiseaseDao;
 import io.terminus.doctor.basic.model.DoctorChangeReason;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +22,6 @@ public class DoctorBasicManager {
 
     private final DoctorChangeReasonDao doctorChangeReasonDao;
     private final DoctorChangeTypeDao doctorChangeTypeDao;
-    private final DoctorDiseaseDao doctorDiseaseDao;
 
     /**
      * 模板猪场id
@@ -32,11 +30,9 @@ public class DoctorBasicManager {
 
     @Autowired
     public DoctorBasicManager(DoctorChangeReasonDao doctorChangeReasonDao,
-                              DoctorChangeTypeDao doctorChangeTypeDao,
-                              DoctorDiseaseDao doctorDiseaseDao) {
+                              DoctorChangeTypeDao doctorChangeTypeDao) {
         this.doctorChangeReasonDao = doctorChangeReasonDao;
         this.doctorChangeTypeDao = doctorChangeTypeDao;
-        this.doctorDiseaseDao = doctorDiseaseDao;
     }
 
     /**
@@ -45,12 +41,6 @@ public class DoctorBasicManager {
      */
     @Transactional
     public void initFarmBasic(Long farmId) {
-        //初始化 疾病表
-        doctorDiseaseDao.findByFarmId(TEMPLATE_FARM_ID).forEach(disease -> {
-            disease.setFarmId(farmId);
-            doctorDiseaseDao.create(disease);
-        });
-
         //初始化猪群变动
         doctorChangeTypeDao.findByFarmId(TEMPLATE_FARM_ID).forEach(chgType -> {
             List<DoctorChangeReason> reasons = doctorChangeReasonDao.findByChangeTypeId(chgType.getId());

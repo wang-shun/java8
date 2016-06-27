@@ -2,13 +2,9 @@ package io.terminus.doctor.web.front.basic.controller;
 
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.basic.model.DoctorBasic;
-import io.terminus.doctor.basic.model.DoctorBreed;
 import io.terminus.doctor.basic.model.DoctorChangeReason;
 import io.terminus.doctor.basic.model.DoctorChangeType;
 import io.terminus.doctor.basic.model.DoctorCustomer;
-import io.terminus.doctor.basic.model.DoctorDisease;
-import io.terminus.doctor.basic.model.DoctorGenetic;
-import io.terminus.doctor.basic.model.DoctorUnit;
 import io.terminus.doctor.basic.service.DoctorBasicReadService;
 import io.terminus.doctor.basic.service.DoctorBasicWriteService;
 import io.terminus.doctor.common.utils.RespHelper;
@@ -53,93 +49,27 @@ public class DoctorBasics {
         this.doctorFarmAuthCenter = doctorFarmAuthCenter;
     }
 
-    /************************** 品种品系相关 *************************/
     /**
-     * 查询所有品种
-     * @return 品种列表
+     * 根据id查询基础数据表
+     * @param basicId 主键id
+     * @return 基础数据表
      */
-    @RequestMapping(value = "/breed/all", method = RequestMethod.GET)
-    public List<DoctorBreed> finaAllBreed() {
-        return RespHelper.or500(doctorBasicReadService.findAllBreeds());
+    @RequestMapping(value = "/id", method = RequestMethod.GET)
+    public DoctorBasic findBasicById(@RequestParam("basicId") Long basicId) {
+        return RespHelper.or500(doctorBasicReadService.findBasicById(basicId));
     }
 
     /**
-     * 查询所有品种
-     * @return 品种列表
+     * 根据基础数据类型和输入码查询基础数据
+     * @param type  类型
+     * @see io.terminus.doctor.basic.model.DoctorBasic.Type
+     * @param srm   输入码
+     * @return 基础数据信息
      */
-    @RequestMapping(value = "/genetic/all", method = RequestMethod.GET)
-    public List<DoctorGenetic> finaAllGenetic() {
-        return RespHelper.or500(doctorBasicReadService.findAllGenetics());
-    }
-
-    /************************** 疾病防疫相关 **************************/
-    /**
-     * 查询疾病详情
-     * @param diseaseId 主键id
-     * @return 疾病表
-     */
-    @RequestMapping(value = "/disease/id", method = RequestMethod.GET)
-    public DoctorDisease findDiseaseById(@RequestParam("diseaseId") Long diseaseId) {
-        return RespHelper.or500(doctorBasicReadService.findDiseaseById(diseaseId));
-    }
-
-    /**
-     * 根据farmId查询疾病列表
-     * @param farmId 猪场id
-     * @return 疾病列表
-     */
-    @RequestMapping(value = "/disease/farmId", method = RequestMethod.GET)
-    public List<DoctorDisease> findDiseaseByfarmId(@RequestParam("farmId") Long farmId) {
-        return RespHelper.or500(doctorBasicReadService.findDiseasesByFarmId(farmId));
-    }
-
-    /**
-     * 根据farmId和输入码查询疾病表(模糊匹配)
-     * @param farmId 猪场id
-     * @param srm    输入码
-     * @return 疾病表
-     */
-    @RequestMapping(value = "/disease/srm", method = RequestMethod.GET)
-    public List<DoctorDisease> findDiseaseByfarmIdAndSrm(@RequestParam("farmId") Long farmId,
-                                                         @RequestParam(value = "srm", required = false) String srm) {
-        return RespHelper.or500(doctorBasicReadService.findDiseasesByFarmIdAndSrm(farmId, srm));
-    }
-
-    /**
-     * 创建或更新疾病表
-     * @return 是否成功
-     */
-    @RequestMapping(value = "/disease", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public Long createOrUpdateDisease(@RequestBody DoctorDisease disease) {
-        checkNotNull(disease, "disease.not.null");
-
-        //权限中心校验权限
-        doctorFarmAuthCenter.checkFarmAuth(disease.getFarmId());
-
-        if (disease.getId() == null) {
-            disease.setCreatorId(UserUtil.getUserId());
-            disease.setCreatorName(UserUtil.getCurrentUser().getName());
-            RespHelper.or500(doctorBasicWriteService.createDisease(disease));
-        } else {
-            disease.setUpdatorId(UserUtil.getUserId());
-            disease.setUpdatorName(UserUtil.getCurrentUser().getName());
-            RespHelper.or500(doctorBasicWriteService.updateDisease(disease));
-        }
-        return disease.getId();
-    }
-
-    /**
-     * 根据主键id删除DoctorDisease
-     * @return 是否成功
-     */
-    @RequestMapping(value = "/disease", method = RequestMethod.DELETE)
-    public Boolean deleteDisease(@RequestParam("diseaseId") Long diseaseId) {
-        DoctorDisease disease = RespHelper.or500(doctorBasicReadService.findDiseaseById(diseaseId));
-
-        //权限中心校验权限
-        doctorFarmAuthCenter.checkFarmAuth(disease.getFarmId());
-
-        return RespHelper.or500(doctorBasicWriteService.deleteDiseaseById(diseaseId));
+    @RequestMapping(value = "/type", method = RequestMethod.GET)
+    public List<DoctorBasic> findBasicByTypeAndSrm(@RequestParam("type") Integer type,
+                                                   @RequestParam(value = "srm", required = false) String srm) {
+        return RespHelper.or500(doctorBasicReadService.findBasicByTypeAndSrm(type, srm));
     }
 
     /************************** 猪群变动相关 **************************/
@@ -320,38 +250,5 @@ public class DoctorBasics {
         doctorFarmAuthCenter.checkFarmAuth(customer.getFarmId());
 
         return RespHelper.or500(doctorBasicWriteService.deleteCustomerById(customerId));
-    }
-
-    /************************* 计量单位 **************************/
-    /**
-     * 查询所有计量单位
-     * @return 计量单位列表
-     */
-    @RequestMapping(value = "/unit/all", method = RequestMethod.GET)
-    public List<DoctorUnit> finaAllUnits() {
-        return RespHelper.or500(doctorBasicReadService.findAllUnits());
-    }
-
-    /**
-     * 根据id查询基础数据表
-     * @param basicId 主键id
-     * @return 基础数据表
-     */
-    @RequestMapping(value = "/basic/id", method = RequestMethod.GET)
-    public DoctorBasic findBasicById(@RequestParam("basicId") Long basicId) {
-        return RespHelper.or500(doctorBasicReadService.findBasicById(basicId));
-    }
-
-    /**
-     * 根据基础数据类型和输入码查询基础数据
-     * @param type  类型
-     * @see io.terminus.doctor.basic.model.DoctorBasic.Type
-     * @param srm   输入码
-     * @return 基础数据信息
-     */
-    @RequestMapping(value = "/basic/type", method = RequestMethod.GET)
-    public List<DoctorBasic> findBasicByTypeAndSrm(@RequestParam("type") Integer type,
-                                                   @RequestParam(value = "srm", required = false) String srm) {
-        return RespHelper.or500(doctorBasicReadService.findBasicByTypeAndSrm(type, srm));
     }
 }
