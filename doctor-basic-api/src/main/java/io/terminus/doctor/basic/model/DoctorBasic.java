@@ -34,11 +34,21 @@ public class DoctorBasic implements Serializable {
      * 数据类型名称
      */
     private String typeName;
-    
+
+    /**
+     * 逻辑删除字段, -1 无效数据, 1 有效数据
+     */
+    private Integer isValid;
+
     /**
      * 输入码(快捷输入用)
      */
     private String srm;
+
+    /**
+     * 基础数据内容
+     */
+    private String context;
     
     /**
      * 外部id
@@ -76,7 +86,8 @@ public class DoctorBasic implements Serializable {
         ANTIEPIDEMIC(3, "防疫项目"),
         DISEASE(4, "疾病"),
         UNIT(5, "计量单位"),
-        FOSTER_REASON(6, "寄养原因");
+        FOSTER_REASON(6, "寄养原因"),
+        CHANGE_TYPE(7, "变动类型");
 
         @Getter
         private final int value;

@@ -95,3 +95,6 @@ CREATE TABLE `doctor_basics` (
   `updated_at` datetime DEFAULT NULL COMMENT '修改时间',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='基础数据表';
+
+ALTER TABLE doctor_basics ADD COLUMN `is_valid` smallint(6) DEFAULT NULL COMMENT '逻辑删除字段, -1 表示删除' AFTER type_name;
+ALTER TABLE doctor_basics ADD COLUMN `context` VARCHAR(64) DEFAULT NULL COMMENT '基础数据内容' AFTER srm;

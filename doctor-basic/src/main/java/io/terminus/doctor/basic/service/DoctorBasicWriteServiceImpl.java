@@ -6,7 +6,6 @@ import io.terminus.doctor.basic.dao.DoctorBasicDao;
 import io.terminus.doctor.basic.dao.DoctorChangeReasonDao;
 import io.terminus.doctor.basic.dao.DoctorChangeTypeDao;
 import io.terminus.doctor.basic.dao.DoctorCustomerDao;
-import io.terminus.doctor.basic.manager.DoctorBasicManager;
 import io.terminus.doctor.basic.model.DoctorBasic;
 import io.terminus.doctor.basic.model.DoctorChangeReason;
 import io.terminus.doctor.basic.model.DoctorChangeType;
@@ -34,7 +33,6 @@ public class DoctorBasicWriteServiceImpl implements DoctorBasicWriteService {
     private final DoctorChangeReasonDao doctorChangeReasonDao;
     private final DoctorChangeTypeDao doctorChangeTypeDao;
     private final DoctorCustomerDao doctorCustomerDao;
-    private final DoctorBasicManager doctorBasicManager;
     private final DoctorBasicDao doctorBasicDao;
     private final CoreEventDispatcher coreEventDispatcher;
 
@@ -45,26 +43,13 @@ public class DoctorBasicWriteServiceImpl implements DoctorBasicWriteService {
     public DoctorBasicWriteServiceImpl(DoctorChangeReasonDao doctorChangeReasonDao,
                                        DoctorChangeTypeDao doctorChangeTypeDao,
                                        DoctorCustomerDao doctorCustomerDao,
-                                       DoctorBasicManager doctorBasicManager,
                                        DoctorBasicDao doctorBasicDao,
                                        CoreEventDispatcher coreEventDispatcher) {
         this.doctorChangeReasonDao = doctorChangeReasonDao;
         this.doctorChangeTypeDao = doctorChangeTypeDao;
         this.doctorCustomerDao = doctorCustomerDao;
-        this.doctorBasicManager = doctorBasicManager;
         this.doctorBasicDao = doctorBasicDao;
         this.coreEventDispatcher = coreEventDispatcher;
-    }
-
-    @Override
-    public Response<Boolean> initFarmBasic(Long farmId) {
-        try {
-            doctorBasicManager.initFarmBasic(farmId);
-            return Response.ok(Boolean.TRUE);
-        } catch (Exception e) {
-            log.error("init farm basic data failed, farmId:{}, cause:{}", farmId, Throwables.getStackTraceAsString(e));
-            return Response.fail("init.farm.basic.fail");
-        }
     }
 
     @Override

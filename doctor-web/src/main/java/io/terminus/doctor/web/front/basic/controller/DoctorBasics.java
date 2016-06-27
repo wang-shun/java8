@@ -94,43 +94,6 @@ public class DoctorBasics {
     }
 
     /**
-     * 创建或更新DoctorChangeType
-     * @return 是否成功
-     */
-    @RequestMapping(value = "/changeType", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public Long createOrUpdateChangeType(@RequestBody DoctorChangeType changeType) {
-        checkNotNull(changeType, "changeType.not.null");
-
-        //权限中心校验权限
-        doctorFarmAuthCenter.checkFarmAuth(changeType.getFarmId());
-
-        if (changeType.getId() == null) {
-            changeType.setCreatorId(UserUtil.getUserId());
-            changeType.setCreatorName(UserUtil.getCurrentUser().getName());
-            RespHelper.or500(doctorBasicWriteService.createChangeType(changeType));
-        } else {
-            changeType.setUpdatorId(UserUtil.getUserId());
-            changeType.setUpdatorName(UserUtil.getCurrentUser().getName());
-            RespHelper.or500(doctorBasicWriteService.updateChangeType(changeType));
-        }
-        return changeType.getId();
-    }
-
-    /**
-     * 根据主键id删除DoctorChangeType
-     * @return 是否成功
-     */
-    @RequestMapping(value = "/changeType", method = RequestMethod.DELETE)
-    public Boolean deleteChangeType(@RequestParam("changeTypeId") Long changeTypeId) {
-        DoctorChangeType changeType = RespHelper.or500(doctorBasicReadService.findChangeTypeById(changeTypeId));
-
-        //权限中心校验权限
-        doctorFarmAuthCenter.checkFarmAuth(changeType.getFarmId());
-
-        return RespHelper.or500(doctorBasicWriteService.deleteChangeTypeById(changeTypeId));
-    }
-
-    /**
      * 根据id查询变动原因表
      * @param changeReasonId 主键id
      * @return 变动原因表

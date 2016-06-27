@@ -9,14 +9,16 @@
         <result column="name" property="name"/>
         <result column="type" property="type"/>
         <result column="type_name" property="typeName"/>
+        <result column="is_valid" property="isValid"/>
         <result column="srm" property="srm"/>
+        <result column="context" property="context"/>
         <result column="out_id" property="outId"/>
         <result column="extra" property="extra"/>
         <result column="updator_id" property="updatorId"/>
         <result column="updator_name" property="updatorName"/>
         <result column="created_at" property="createdAt"/>
         <result column="updated_at" property="updatedAt"/>
-        
+
     </resultMap>
 
     <sql id="tb">
@@ -28,11 +30,11 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        name, type, type_name, srm, out_id, extra, updator_id, updator_name, created_at, updated_at
+        name, type, type_name, is_valid, srm, context, out_id, extra, updator_id, updator_name, created_at, updated_at
     </sql>
 
     <sql id="vals">
-        #{name}, #{type}, #{typeName}, #{srm}, #{outId}, #{extra}, #{updatorId}, #{updatorName}, now(), now()
+        #{name}, #{type}, #{typeName}, #{isValid}, #{srm}, #{context}, #{outId}, #{extra}, #{updatorId}, #{updatorName}, now(), now()
     </sql>
 
     <insert id="create" parameterType="DoctorBasic" keyProperty="id" useGeneratedKeys="true">
@@ -52,7 +54,7 @@
     <select id="findByType" parameterType="int" resultMap="DoctorBasicMap" >
         SELECT <include refid="cols_all" />
         FROM <include refid="tb" />
-        WHERE type = #{type}
+        WHERE type = #{type} AND is_valid = 1
     </select>
 
     <update id="update" parameterType="DoctorBasic">
@@ -62,7 +64,9 @@
             <if test="name != null">name = #{name},</if>
             <if test="type != null">type = #{type},</if>
             <if test="typeName != null">type_name = #{typeName},</if>
+            <if test="isValid != null">is_valid = #{isValid},</if>
             <if test="srm != null">srm = #{srm},</if>
+            <if test="context != null">context = #{context},</if>
             <if test="outId != null">out_id = #{outId},</if>
             <if test="extra != null">extra = #{extra},</if>
             <if test="updatorId != null">updator_id = #{updatorId},</if>
@@ -76,5 +80,5 @@
         DELETE FROM <include refid="tb"/>
         WHERE id = #{id}
     </delete>
-    
+
 </mapper>

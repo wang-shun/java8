@@ -331,12 +331,12 @@ VALUES
 	(9, 'barnName', 1, 'orgName', 12345, 'farmName', 9, 1, 1, 100, 1, 'staffName', '1', NULL, '2016-06-07 16:44:22', '2016-06-07 16:44:22');
 
 -- 2016-06-27 基础数据测试
-INSERT INTO `doctor_basics` (`id`, `name`, `type`, `type_name`, `srm`, `out_id`, `extra`, `updator_id`, `updator_name`, `created_at`, `updated_at`)
+INSERT INTO `doctor_basics` (`id`, `name`, `type`, `type_name`, `is_valid`, `srm`, `context`, `out_id`, `extra`, `updator_id`, `updator_name`, `created_at`, `updated_at`)
 VALUES
-	(17, '猪丹毒', 3, '防疫项目', NULL, NULL, NULL, NULL, NULL, NULL, NULL),
-	(18, '猪瘟', 3, '防疫项目', NULL, NULL, NULL, NULL, NULL, NULL, NULL),
-	(19, '胸膜肺炎', 4, '疾病', 'xmfy', NULL, NULL, NULL, NULL, NULL, NULL),
-	(20, '胸膜炎', 4, '疾病', 'xmy', NULL, NULL, NULL, NULL, NULL, NULL);
+	(17, '猪丹毒', 3, '防疫项目', 1, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+	(18, '猪瘟', 3, '防疫项目', 1, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+	(19, '胸膜肺炎', 4, '疾病', 1, 'xmfy', NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+	(20, '胸膜炎', 4, '疾病', 1, 'xmy', NULL, NULL, NULL, NULL, NULL, NULL, NULL);
 
 INSERT INTO `doctor_user_data_permissions` (`id`, `user_id`, `farm_ids`, `barn_ids`, `ware_house_types`, `extra`, `creator_id`, `creator_name`, `updator_id`, `updator_name`, `created_at`, `updated_at`)
 VALUES

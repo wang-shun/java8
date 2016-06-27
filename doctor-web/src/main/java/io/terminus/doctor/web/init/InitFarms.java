@@ -176,9 +176,6 @@ public class InitFarms {
         //3. 创建staff
         DoctorStaff staff = initStaff(farm, user);
 
-        //4. 创建基础数据
-        or500(doctorBasicWriteService.initFarmBasic(farm.getId()));
-
         //5. 创建猪舍
         initBarns(farm, staff);
 

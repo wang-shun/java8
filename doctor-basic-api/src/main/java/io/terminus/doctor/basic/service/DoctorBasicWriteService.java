@@ -6,8 +6,6 @@ import io.terminus.doctor.basic.model.DoctorChangeReason;
 import io.terminus.doctor.basic.model.DoctorChangeType;
 import io.terminus.doctor.basic.model.DoctorCustomer;
 
-import javax.validation.constraints.NotNull;
-
 /**
  * Desc: 基础数据写服务
  * Mail: yangzl@terminus.io
@@ -16,13 +14,6 @@ import javax.validation.constraints.NotNull;
  */
 
 public interface DoctorBasicWriteService {
-
-    /**
-     * 创建猪场时, 初始化一些基础数据
-     * @param farmId 猪场id
-     * @return 是否成功
-     */
-    Response<Boolean> initFarmBasic(@NotNull(message = "farmId.not.null") Long farmId);
 
     /**
      * 创建DoctorBasic
