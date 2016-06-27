@@ -2,6 +2,7 @@ package io.terminus.doctor.basic.service;
 
 import com.google.common.base.Throwables;
 import io.terminus.common.model.Response;
+import io.terminus.doctor.basic.cache.DoctorBasicCacher;
 import io.terminus.doctor.basic.dao.DoctorBasicDao;
 import io.terminus.doctor.basic.dao.DoctorChangeReasonDao;
 import io.terminus.doctor.basic.dao.DoctorChangeTypeDao;
@@ -34,16 +35,19 @@ public class DoctorBasicReadServiceImpl implements DoctorBasicReadService {
     private final DoctorChangeTypeDao doctorChangeTypeDao;
     private final DoctorCustomerDao doctorCustomerDao;
     private final DoctorBasicDao doctorBasicDao;
+    private final DoctorBasicCacher doctorBasicCacher;
 
     @Autowired
     public DoctorBasicReadServiceImpl(DoctorChangeReasonDao doctorChangeReasonDao,
                                       DoctorChangeTypeDao doctorChangeTypeDao,
                                       DoctorCustomerDao doctorCustomerDao,
-                                      DoctorBasicDao doctorBasicDao) {
+                                      DoctorBasicDao doctorBasicDao,
+                                      DoctorBasicCacher doctorBasicCacher) {
         this.doctorChangeReasonDao = doctorChangeReasonDao;
         this.doctorChangeTypeDao = doctorChangeTypeDao;
         this.doctorCustomerDao = doctorCustomerDao;
         this.doctorBasicDao = doctorBasicDao;
+        this.doctorBasicCacher = doctorBasicCacher;
     }
 
     @Override
@@ -60,6 +64,22 @@ public class DoctorBasicReadServiceImpl implements DoctorBasicReadService {
     public Response<List<DoctorBasic>> findBasicByTypeAndSrm(Integer type, String srm) {
         try {
             List<DoctorBasic> basics = doctorBasicDao.findByType(type);
+            if (isEmpty(srm)) {
+                return Response.ok(basics);
+            }
+            return Response.ok(basics.stream()
+                    .filter(basic -> notEmpty(basic.getSrm()) && basic.getSrm().toLowerCase().contains(srm.toLowerCase()))
+                    .collect(Collectors.toList()));
+        } catch (Exception e) {
+            log.error("find basic by type and srm failed, type:{}, srm:{}, cause:{}", type, srm, Throwables.getStackTraceAsString(e));
+            return Response.fail("basic.find.fail");
+        }
+    }
+
+    @Override
+    public Response<List<DoctorBasic>> findBasicByTypeAndSrmWithCache(Integer type, String srm) {
+        try {
+            List<DoctorBasic> basics = doctorBasicCacher.getBasicCache().getUnchecked(type);
             if (isEmpty(srm)) {
                 return Response.ok(basics);
             }

@@ -60,16 +60,16 @@ public class DoctorBasics {
     }
 
     /**
-     * 根据基础数据类型和输入码查询基础数据
+     * 根据基础数据类型和输入码查询基础数据(缓存)
      * @param type  类型
      * @see io.terminus.doctor.basic.model.DoctorBasic.Type
      * @param srm   输入码
      * @return 基础数据信息
      */
     @RequestMapping(value = "/type", method = RequestMethod.GET)
-    public List<DoctorBasic> findBasicByTypeAndSrm(@RequestParam("type") Integer type,
-                                                   @RequestParam(value = "srm", required = false) String srm) {
-        return RespHelper.or500(doctorBasicReadService.findBasicByTypeAndSrm(type, srm));
+    public List<DoctorBasic> findBasicByTypeAndSrmWithCache(@RequestParam("type") Integer type,
+                                                            @RequestParam(value = "srm", required = false) String srm) {
+        return RespHelper.or500(doctorBasicReadService.findBasicByTypeAndSrmWithCache(type, srm));
     }
 
     /************************** 猪群变动相关 **************************/

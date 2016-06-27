@@ -11,9 +11,15 @@ import io.terminus.doctor.basic.model.DoctorBasic;
 import io.terminus.doctor.basic.model.DoctorChangeReason;
 import io.terminus.doctor.basic.model.DoctorChangeType;
 import io.terminus.doctor.basic.model.DoctorCustomer;
+import io.terminus.doctor.common.enums.DataEventType;
+import io.terminus.doctor.common.event.CoreEventDispatcher;
+import io.terminus.doctor.common.event.DataEvent;
+import io.terminus.zookeeper.pubsub.Publisher;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import static io.terminus.common.utils.Arguments.notNull;
 
 /**
  * Desc: 基础数据写服务实现类
@@ -30,18 +36,24 @@ public class DoctorBasicWriteServiceImpl implements DoctorBasicWriteService {
     private final DoctorCustomerDao doctorCustomerDao;
     private final DoctorBasicManager doctorBasicManager;
     private final DoctorBasicDao doctorBasicDao;
+    private final CoreEventDispatcher coreEventDispatcher;
+
+    @Autowired(required = false)
+    private Publisher publisher;
 
     @Autowired
     public DoctorBasicWriteServiceImpl(DoctorChangeReasonDao doctorChangeReasonDao,
                                        DoctorChangeTypeDao doctorChangeTypeDao,
                                        DoctorCustomerDao doctorCustomerDao,
                                        DoctorBasicManager doctorBasicManager,
-                                       DoctorBasicDao doctorBasicDao) {
+                                       DoctorBasicDao doctorBasicDao,
+                                       CoreEventDispatcher coreEventDispatcher) {
         this.doctorChangeReasonDao = doctorChangeReasonDao;
         this.doctorChangeTypeDao = doctorChangeTypeDao;
         this.doctorCustomerDao = doctorCustomerDao;
         this.doctorBasicManager = doctorBasicManager;
         this.doctorBasicDao = doctorBasicDao;
+        this.coreEventDispatcher = coreEventDispatcher;
     }
 
     @Override
@@ -59,6 +71,7 @@ public class DoctorBasicWriteServiceImpl implements DoctorBasicWriteService {
     public Response<Long> createBasic(DoctorBasic basic) {
         try {
             doctorBasicDao.create(basic);
+            publishBasicEvent(basic);
             return Response.ok(basic.getId());
         } catch (Exception e) {
             log.error("create basic failed, basic:{}, cause:{}", basic, Throwables.getStackTraceAsString(e));
@@ -69,7 +82,9 @@ public class DoctorBasicWriteServiceImpl implements DoctorBasicWriteService {
     @Override
     public Response<Boolean> updateBasic(DoctorBasic basic) {
         try {
-            return Response.ok(doctorBasicDao.update(basic));
+            doctorBasicDao.update(basic);
+            publishBasicEvent(basic);
+            return Response.ok(Boolean.TRUE);
         } catch (Exception e) {
             log.error("update basic failed, basic:{}, cause:{}", basic, Throwables.getStackTraceAsString(e));
             return Response.fail("basic.update.fail");
@@ -79,7 +94,9 @@ public class DoctorBasicWriteServiceImpl implements DoctorBasicWriteService {
     @Override
     public Response<Boolean> deleteBasicById(Long basicId) {
         try {
-            return Response.ok(doctorBasicDao.delete(basicId));
+            publishBasicEvent(doctorBasicDao.findById(basicId));
+            doctorBasicDao.delete(basicId);
+            return Response.ok(Boolean.TRUE);
         } catch (Exception e) {
             log.error("delete basic failed, basicId:{}, cause:{}", basicId, Throwables.getStackTraceAsString(e));
             return Response.fail("basic.delete.fail");
@@ -176,6 +193,19 @@ public class DoctorBasicWriteServiceImpl implements DoctorBasicWriteService {
         } catch (Exception e) {
             log.error("delete customer failed, customerId:{}, cause:{}", customerId, Throwables.getStackTraceAsString(e));
             return Response.fail("customer.delete.fail");
+        }
+    }
+
+    //发布清理基础数据缓存的事件
+    private void publishBasicEvent(DoctorBasic basic){
+        if(notNull(publisher)) {
+            try {
+                publisher.publish(DataEvent.toBytes(DataEventType.BasicUpdate.getKey(), basic));
+            } catch (Exception e) {
+                log.error("publish basic zk event fail, data:{} cause:{}", basic, Throwables.getStackTraceAsString(e));
+            }
+        } else {
+            coreEventDispatcher.publish(DataEvent.make(DataEventType.BasicUpdate.getKey(), basic));
         }
     }
 }

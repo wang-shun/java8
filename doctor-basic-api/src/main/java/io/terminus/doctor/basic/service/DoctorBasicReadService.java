@@ -29,13 +29,22 @@ public interface DoctorBasicReadService {
     Response<DoctorBasic> findBasicById(@NotNull(message = "basicId.not.null") Long basicId);
 
     /**
-     * 根据基础数据类型和输入码查询
+     * 根据基础数据类型和输入码查询(非缓存)
      * @param type  类型
      * @see io.terminus.doctor.basic.model.DoctorBasic.Type
      * @param srm   输入码
      * @return 基础数据信息
      */
     Response<List<DoctorBasic>> findBasicByTypeAndSrm(@NotNull(message = "type.not.null") Integer type, @Nullable String srm);
+
+    /**
+     * 根据基础数据类型和输入码查询(缓存)
+     * @param type  类型
+     * @see io.terminus.doctor.basic.model.DoctorBasic.Type
+     * @param srm   输入码
+     * @return 基础数据信息
+     */
+    Response<List<DoctorBasic>> findBasicByTypeAndSrmWithCache(@NotNull(message = "type.not.null") Integer type, @Nullable String srm);
 
     //////////////////////////// 猪群变动相关 ////////////////////////////
     /**

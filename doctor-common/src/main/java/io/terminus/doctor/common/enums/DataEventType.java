@@ -16,7 +16,8 @@ public enum DataEventType {
     VaccinationMedicalConsume(2, "免疫药品领用事件"),
     MaterialInfoCreateEvent(3, "物料信息创建事件信息"),
     GroupEventCreate(4, "猪群创建事件信息"),
-    BarnUpdate(5, "猪舍变动信息");
+    BarnUpdate(5, "猪舍变动信息"),
+    BasicUpdate(6, "基础数据变动信息");
 
     @Getter
     private int key;
