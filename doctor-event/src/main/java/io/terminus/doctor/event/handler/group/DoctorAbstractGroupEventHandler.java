@@ -38,7 +38,7 @@ import static io.terminus.common.utils.Arguments.notNull;
 @Slf4j
 public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEventHandler {
 
-    private static final JsonMapper JSON_MAPPER = JsonMapper.nonEmptyMapper();
+    protected static final JsonMapper JSON_MAPPER = JsonMapper.nonEmptyMapper();
 
     private final DoctorGroupSnapshotDao doctorGroupSnapshotDao;
     private final DoctorGroupTrackDao doctorGroupTrackDao;
@@ -140,6 +140,11 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
     protected void createGroupSnapShot(DoctorGroup group, DoctorGroupEvent groupEvent, DoctorGroupTrack groupTrack, GroupEventType eventType) {
         DoctorGroupSnapshot groupSnapshot = new DoctorGroupSnapshot();
         groupSnapshot.setEventType(eventType.getValue());  //猪群事件类型
+
+        groupSnapshot.setFromGroupId();
+        groupSnapshot.setFromEventId();
+        groupSnapshot.setFromInfo();
+
         groupSnapshot.setToGroupId(group.getId());
         groupSnapshot.setToEventId(groupEvent.getId());
         groupSnapshot.setToInfo(JSON_MAPPER.toJson(DoctorGroupSnapShotInfo.builder()
