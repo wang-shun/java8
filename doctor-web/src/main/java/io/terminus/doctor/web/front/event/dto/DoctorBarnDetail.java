@@ -7,7 +7,7 @@ import lombok.Data;
 import lombok.Getter;
 
 import java.io.Serializable;
-import java.util.List;
+import java.util.Set;
 
 /**
  * Desc: 猪舍详情(猪与猪群的分页)
@@ -38,7 +38,7 @@ public class DoctorBarnDetail implements Serializable {
     /**
      * 猪: 猪的状态, 猪群: 猪类
      */
-    private List<Integer> status;
+    private Set<Integer> statuses;
 
     public enum Type {
 

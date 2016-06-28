@@ -1,10 +1,12 @@
 package io.terminus.doctor.web.front.event.controller;
 
+import com.google.common.collect.Sets;
 import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dto.DoctorGroupSearchDto;
 import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorPig;
+import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.event.service.DoctorBarnReadService;
 import io.terminus.doctor.event.service.DoctorBarnWriteService;
 import io.terminus.doctor.event.service.DoctorGroupReadService;
@@ -142,35 +144,36 @@ public class DoctorBarns {
                                                    @RequestParam(value = "status", required = false) Integer status,
                                                    @RequestParam(value = "pageNo", required = false) Integer pageNo,
                                                    @RequestParam(value = "size", required = false) Integer size) {
-
-        //// TODO: 16/6/1 其他搜索条件, 排序条件
-
         DoctorBarn barn = RespHelper.or500(doctorBarnReadService.findBarnById(barnId));
         DoctorBarnDetail barnDetail = new DoctorBarnDetail();
 
         //公猪舍
         if (PigType.isBoar(barn.getPigType())) {
             barnDetail.setType(DoctorBarnDetail.Type.BOAR.getValue());
-            barnDetail.setPigPaging(RespHelper.or500(doctorPigReadService.pagingDoctorInfoDtoByPig(
-                    DoctorPig.builder().initBarnId(barnId).pigType(DoctorPig.PIG_TYPE.BOAR.getKey()).farmId(barn.getFarmId()).build(), pageNo, size)));
+            barnDetail.setPigPaging(RespHelper.or500(doctorPigReadService.pagingDoctorInfoDtoByPigTrack(
+                    DoctorPigTrack.builder().currentBarnId(barnId).pigType(DoctorPig.PIG_TYPE.BOAR.getKey()).farmId(barn.getFarmId()).build(), pageNo, size)));
+            barnDetail.setStatuses(RespHelper.or500(doctorPigReadService.findPigStatusByBarnId(barnId)));
             return barnDetail;
         }
 
         //母猪舍
         if (PigType.isSow(barn.getPigType())) {
             barnDetail.setType(DoctorBarnDetail.Type.SOW.getValue());
-            barnDetail.setPigPaging(RespHelper.or500(doctorPigReadService.pagingDoctorInfoDtoByPig(
-                    DoctorPig.builder().initBarnId(barnId).pigType(DoctorPig.PIG_TYPE.SOW.getKey()).farmId(barn.getFarmId()).build(), pageNo, size)));
+            barnDetail.setPigPaging(RespHelper.or500(doctorPigReadService.pagingDoctorInfoDtoByPigTrack(
+                    DoctorPigTrack.builder().currentBarnId(barnId).pigType(DoctorPig.PIG_TYPE.SOW.getKey()).farmId(barn.getFarmId()).build(), pageNo, size)));
+            barnDetail.setStatuses(RespHelper.or500(doctorPigReadService.findPigStatusByBarnId(barnId)));
             return barnDetail;
         }
 
         //猪群舍
         if (PigType.isGroup(barn.getPigType())) {
             barnDetail.setType(DoctorBarnDetail.Type.GROUP.getValue());
+            barnDetail.setStatuses(Sets.newHashSet(barn.getPigType())); //一类猪舍只能放一类猪群
 
             DoctorGroupSearchDto searchDto = new DoctorGroupSearchDto();
             searchDto.setFarmId(barn.getFarmId());
             searchDto.setCurrentBarnId(barnId);
+            searchDto.setPigType(status);   //这里的状态就是猪群的猪类
             barnDetail.setGroupPaging(RespHelper.or500(doctorGroupReadService.pagingGroup(searchDto, pageNo, size)));
             return barnDetail;
         }

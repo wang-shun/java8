@@ -149,6 +149,7 @@
         <where>
             <include refid="criteria"/>
         </where>
+        ORDER BY updated_at DESC
         LIMIT #{offset}, #{limit}
     </select>
 

@@ -118,6 +118,7 @@
         <where>
             <include refid="criteria"/>
         </where>
+        ORDER BY updated_at DESC
         LIMIT #{offset}, #{limit}
     </select>
 
@@ -165,4 +166,8 @@
     </select>
     <!-- search api end -->
 
+    <select id="findStatusByBarnId" parameterType="long" resultType="int">
+        SELECT DISTINCT status FROM <include refid="tb"/>
+        WHERE barn_id = #{barnId};
+    </select>
 </mapper>

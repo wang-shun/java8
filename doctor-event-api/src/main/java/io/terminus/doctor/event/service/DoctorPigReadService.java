@@ -9,6 +9,7 @@ import io.terminus.doctor.event.model.DoctorPigTrack;
 
 import javax.validation.constraints.NotNull;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Created by yaoqijun.
@@ -82,4 +83,11 @@ public interface DoctorPigReadService {
      * @return
      */
     Response<Boolean> validatePigCodeByFarmId(Long farmId, String pigCode);
+
+    /**
+     * 获取猪舍内的所有猪的猪类
+     * @param barnId 猪舍id
+     * @return 猪类set
+     */
+    Response<Set<Integer>> findPigStatusByBarnId(@NotNull(message = "barnId.not.null") Long barnId);
 }

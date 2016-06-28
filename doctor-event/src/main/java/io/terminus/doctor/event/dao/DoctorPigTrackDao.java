@@ -19,6 +19,15 @@ import java.util.List;
 public class DoctorPigTrackDao extends MyBatisDao<DoctorPigTrack>{
 
     /**
+     * 查询猪舍内猪状态
+     * @param barnId 猪舍id
+     * @return 猪状态
+     */
+    public List<Integer> findStatusByBarnId(Long barnId) {
+        return getSqlSession().selectList(sqlId("findStatusByBarnId"), barnId);
+    }
+
+    /**
      * pigIds 获取对应的PigTrack
      * @param pigIds
      * @return
