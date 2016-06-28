@@ -325,6 +325,7 @@ CREATE TABLE `doctor_change_types` (
 
 CREATE TABLE `doctor_change_reasons` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '自增主键',
+  `farm_id` bigint(20) DEFAULT NULL COMMENT '猪场id',
   `change_type_id` bigint(20) DEFAULT NULL COMMENT '变动类型id',
   `reason` varchar(128) DEFAULT NULL COMMENT '变动原因',
   `out_id` varchar(128) DEFAULT NULL COMMENT '外部id',
@@ -337,23 +338,6 @@ CREATE TABLE `doctor_change_reasons` (
   `updated_at` datetime DEFAULT NULL COMMENT '修改时间',
   PRIMARY KEY (`id`)
 )  COMMENT='变动原因表';
-
-CREATE TABLE `doctor_diseases` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '自增主键',
-  `name` varchar(64) DEFAULT NULL COMMENT '疾病名称',
-  `farm_id` bigint(20) DEFAULT NULL COMMENT '猪场id',
-  `farm_name` varchar(64) DEFAULT NULL COMMENT '猪场名称',
-  `out_id`  varchar(128) DEFAULT NULL COMMENT  '外部id',
-  `extra` text COMMENT '附加字段',
-  `creator_id` bigint(20) DEFAULT NULL COMMENT  '创建人id',
-  `creator_name` varchar(64) DEFAULT NULL COMMENT '创建人name',
-  `updator_id` bigint(20) DEFAULT NULL COMMENT  '更新人id',
-  `updator_name` varchar(64) DEFAULT NULL COMMENT '更新人name',
-  `created_at` datetime DEFAULT NULL COMMENT '创建时间',
-  `updated_at` datetime DEFAULT NULL COMMENT '修改时间',
-  PRIMARY KEY (`id`)
-)  COMMENT='疾病表';
-
 
 CREATE TABLE `doctor_customers` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '自增主键',
@@ -372,36 +356,6 @@ CREATE TABLE `doctor_customers` (
   `updated_at` datetime DEFAULT NULL COMMENT '修改时间',
   PRIMARY KEY (`id`)
 )  COMMENT='客户表';
-
-
-CREATE TABLE `doctor_breeds` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '自增主键',
-  `name` varchar(64) DEFAULT NULL COMMENT '品种名称',
-  `out_id`  varchar(128) DEFAULT NULL COMMENT  '外部id',
-  `extra` text COMMENT '附加字段',
-  `created_at` datetime DEFAULT NULL COMMENT '创建时间',
-  `updated_at` datetime DEFAULT NULL COMMENT '修改时间',
-  PRIMARY KEY (`id`)
-)  COMMENT='品种表';
-
-CREATE TABLE `doctor_genetics` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '自增主键',
-  `name` varchar(64) DEFAULT NULL COMMENT '品系名称',
-  `out_id`  varchar(128) DEFAULT NULL COMMENT  '外部id',
-  `extra` text COMMENT '附加字段',
-  `created_at` datetime DEFAULT NULL COMMENT '创建时间',
-  `updated_at` datetime DEFAULT NULL COMMENT '修改时间',
-  PRIMARY KEY (`id`)
-)  COMMENT='品系表';
-
-CREATE TABLE `doctor_units` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '自增主键',
-  `name` varchar(64) DEFAULT NULL COMMENT '品系名称',
-  `extra` text COMMENT '附加字段',
-  `created_at` datetime DEFAULT NULL COMMENT '创建时间',
-  `updated_at` datetime DEFAULT NULL COMMENT '修改时间',
-  PRIMARY KEY (`id`)
-)  COMMENT='计量单位表';
 
 CREATE TABLE `doctor_groups` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '自增主键',
@@ -642,6 +596,7 @@ CREATE TABLE `doctor_material_infos` (
   `farm_name` varchar(64) DEFAULT NULL COMMENT '猪场名称',
   `type` smallint(6) DEFAULT NULL comment '物料所属原料的名称',
   `material_name` VARCHAR (128) DEFAULT NULL comment '物料名称',
+  `input_code` VARCHAR(128) DEFAULT NULL comment '输入码信息',
   `remark` text COMMENT '标注',
   `unit_group_id` bigint(20) unsigned DEFAULT NULL COMMENT '单位组Id',
   `unit_group_name` varchar(64) DEFAULT NULL COMMENT '单位组名称',
@@ -1265,3 +1220,21 @@ CREATE TABLE `doctor_pig_type_statistics` (
   UNIQUE KEY `idx_doctor_pig_type_statistics_farm_id` (`farm_id`),
   KEY `idx_doctor_pig_type_statistics_org_id` (`org_id`)
 ) COMMENT='猪只数统计表';
+
+-- 2016-06-27 增加基础表
+CREATE TABLE `doctor_basics` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '自增主键',
+  `name` varchar(32) DEFAULT NULL COMMENT '基础数据内容',
+  `type` smallint(6) DEFAULT NULL COMMENT '基础数据类型 枚举',
+  `type_name` varchar(32) DEFAULT NULL COMMENT '数据类型名称',
+  `is_valid` smallint(6) DEFAULT NULL COMMENT '逻辑删除字段, -1 表示删除',
+  `srm` varchar(32) DEFAULT NULL COMMENT '输入码(快捷输入用)',
+  `context` varchar(64) DEFAULT NULL COMMENT '基础数据内容',
+  `out_id` varchar(128) DEFAULT NULL COMMENT '外部id',
+  `extra` text COMMENT '附加字段',
+  `updator_id` bigint(20) DEFAULT NULL COMMENT '更新人id',
+  `updator_name` varchar(64) DEFAULT NULL COMMENT '更新人name',
+  `created_at` datetime DEFAULT NULL COMMENT '创建时间',
+  `updated_at` datetime DEFAULT NULL COMMENT '修改时间',
+  PRIMARY KEY (`id`)
+) COMMENT='基础数据表';

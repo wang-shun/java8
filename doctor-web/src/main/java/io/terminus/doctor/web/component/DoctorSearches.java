@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 import static io.terminus.common.utils.Arguments.isEmpty;
@@ -100,6 +101,34 @@ public class DoctorSearches {
         createSearchWord(SearchType.BOAR.getValue(), params);
         params.put("pigType", DoctorPig.PIG_TYPE.BOAR.getKey().toString());
         return RespHelper.or500(pigSearchReadService.searchWithAggs(pageNo, pageSize, "search/search.mustache", params));
+    }
+
+    /**
+     * 所有公猪搜索方法
+     *
+     * @param params   搜索参数
+     * @return
+     */
+    @RequestMapping(value = "/boarpigs/all", method = RequestMethod.GET)
+    public List<SearchedPig> searchAllBoarPigs(@RequestParam Map<String, String> params) {
+        if (farmIdNotExist(params)) {
+            return Collections.emptyList();
+        }
+        params.put("pigType", DoctorPig.PIG_TYPE.BOAR.getKey().toString());
+
+        // 游标法获取数据
+        Integer pageNo = 1;
+        Integer pageSize = 100;
+        Paging<SearchedPig> searchBoars = RespHelper.or500(pigSearchReadService.searchWithAggs(pageNo, pageSize, "search/search.mustache", params));
+        while (!searchBoars.isEmpty()) {
+            pageNo ++;
+            Paging<SearchedPig> tempSearchBoars = RespHelper.or500(pigSearchReadService.searchWithAggs(pageNo, pageSize, "search/search.mustache", params));
+            if (tempSearchBoars.isEmpty()) {
+                break;
+            }
+            searchBoars.getData().addAll(tempSearchBoars.getData());
+        }
+        return searchBoars.getData();
     }
 
     /**

@@ -1,7 +1,9 @@
 package io.terminus.doctor.basic.model;
 
 import lombok.Data;
+import org.hibernate.validator.constraints.NotEmpty;
 
+import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.util.Date;
 
@@ -20,11 +22,13 @@ public class DoctorCustomer implements Serializable {
     /**
      * 客户名称
      */
+    @NotEmpty(message = "name.not.empty")
     private String name;
     
     /**
      * 猪场id
      */
+    @NotNull(message = "farmId.not.null")
     private Long farmId;
     
     /**

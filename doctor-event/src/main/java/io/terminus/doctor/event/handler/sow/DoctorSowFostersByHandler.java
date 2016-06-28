@@ -47,13 +47,13 @@ public class DoctorSowFostersByHandler extends DoctorAbstractEventFlowHandler{
 
         //添加当前母猪的健崽猪的数量信息
         Map<String,Object> extraMap = doctorPigTrack.getExtraMap();
-        Integer healthCount = (Integer) extraMap.get("healthCount");
+        Integer healthCount = (Integer) extraMap.get("farrowingLiveCount");
         Integer partWeanCount = extraMap.containsKey("partWeanPigletsCount") ? (Integer) extraMap.get("partWeanPigletsCount") : 0;
         Integer fosterCount= (Integer) extra.get("fostersCount");
 
         Integer afterHealthCount = healthCount - fosterCount;
         checkState(afterHealthCount >= partWeanCount, "create.fostersBy.notEnough");
-        extra.put("healthCount", afterHealthCount);
+        extra.put("farrowingLiveCount", afterHealthCount);
         doctorPigTrack.addAllExtraMap(extra);
 
         // 修改当前的母猪状态信息

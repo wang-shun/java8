@@ -16,7 +16,7 @@ public class Sessions {
     //设备号
     public static final String DEVICE_ID = "session_device_id";
 
-    // 7 days
+    // 3 days
     public static final int LONG_INACTIVE_INTERVAL = 259200;
     // 15 mins
     public static final int MIDDLE_INACTIVE_INTERVAL = 900;

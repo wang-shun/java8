@@ -149,10 +149,6 @@ VALUES
 	(9, 12345, 'farmName', 4, 'managerName', NULL, 5000000, 5, '{"17":2500000,"18":2500000}', '2016-05-25 18:43:53', '2016-05-25 18:43:53'),
 	(10, 12345, 'farmName', 5, 'managerName', NULL, 5000000, 5, '{"19":2500000,"20":2500000}', '2016-05-25 18:43:53', '2016-05-25 18:43:53');
 
--- basic
-INSERT INTO doctor_units VALUES (1, 'unitName', null, now(), now());
-
-
 -- start 消息相关
 INSERT INTO `doctor_message_rule_templates`
 (name, type, category, rule_value, status, message_template, content, producer, `describe`, created_at, updated_at, updated_by)
@@ -263,12 +259,6 @@ VALUES
 	(330108003,330108,'浦沿街道',4,'pu yan jie dao','','\\u6d66\\u6cbf\\u8857\\u9053','');
 
 -- 2016-06-08 基础表测试数据
-INSERT INTO `doctor_breeds` (`id`, `name`, `out_id`, `extra`, `created_at`, `updated_at`)
-VALUES
-	(1, '长白', NULL, NULL, NULL, NULL),
-	(2, '二元', NULL, NULL, NULL, NULL),
-	(3, '杜洛克', NULL, NULL, NULL, NULL),
-	(4, '大白', NULL, NULL, NULL, NULL);
 
 INSERT INTO `doctor_change_types` (`id`, `name`, `is_count_out`, `farm_id`, `farm_name`, `out_id`, `extra`, `creator_id`, `creator_name`, `updator_id`, `updator_name`, `created_at`, `updated_at`)
 VALUES
@@ -280,36 +270,15 @@ VALUES
 	(6, '自宰', 1, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
 	(7, '转出', -1, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
 
-INSERT INTO `doctor_change_reasons` (`id`, `change_type_id`, `reason`, `out_id`, `extra`, `creator_id`, `creator_name`, `updator_id`, `updator_name`, `created_at`, `updated_at`)
+INSERT INTO `doctor_change_reasons` (`id`, `farm_id`, `change_type_id`, `reason`, `out_id`, `extra`, `creator_id`, `creator_name`, `updator_id`, `updator_name`, `created_at`, `updated_at`)
 VALUES
-	(1, 3, '猪流感淘汰', NULL, NULL, 0, NULL, NULL, NULL, NULL, NULL),
-	(2, 3, '弱仔淘汰', NULL, NULL, 0, NULL, NULL, NULL, NULL, NULL);
+	(1, 0, 3, '猪流感淘汰', NULL, NULL, 0, NULL, NULL, NULL, NULL, NULL),
+	(2, 0, 3, '弱仔淘汰', NULL, NULL, 0, NULL, NULL, NULL, NULL, NULL);
 
 INSERT INTO `doctor_customers` (`id`, `name`, `farm_id`, `farm_name`, `mobile`, `email`, `out_id`, `extra`, `creator_id`, `creator_name`, `updator_id`, `updator_name`, `created_at`, `updated_at`)
 VALUES
 	(1, '测试客户', 0, NULL, '18888889999', NULL, NULL, NULL, 1, 'admin', NULL, NULL, '2016-05-31 16:48:01', '2016-05-31 16:48:01'),
 	(2, '测试客户2', 0, NULL, '18888887777', NULL, NULL, NULL, 1, 'admin', NULL, NULL, '2016-05-31 16:48:01', '2016-05-31 16:48:01');
-
-INSERT INTO `doctor_diseases` (`id`, `name`, `farm_id`, `farm_name`, `out_id`, `extra`, `creator_id`, `creator_name`, `updator_id`, `updator_name`, `created_at`, `updated_at`)
-VALUES
-	(1, '胸膜肺炎', 0, NULL, NULL, NULL, 1, NULL, NULL, NULL, NULL, NULL),
-	(2, '胸膜炎', 0, NULL, NULL, NULL, 1, NULL, NULL, NULL, NULL, NULL),
-	(3, '阴道流脓', 0, NULL, NULL, NULL, 1, NULL, NULL, NULL, NULL, NULL),
-	(4, '阴道脱垂', 0, NULL, NULL, NULL, 1, NULL, NULL, NULL, NULL, NULL),
-	(5, '应激综合症', 0, NULL, NULL, NULL, 1, NULL, NULL, NULL, NULL, NULL),
-	(6, '油猪病', 0, NULL, NULL, NULL, 1, NULL, NULL, NULL, NULL, NULL);
-
-INSERT INTO `doctor_genetics` (`id`, `name`, `out_id`, `extra`, `created_at`, `updated_at`)
-VALUES
-	(1, '台系', NULL, NULL, NULL, NULL),
-	(2, '新美系', NULL, NULL, NULL, NULL),
-	(3, '英系', NULL, NULL, NULL, NULL),
-	(4, '美系', NULL, NULL, NULL, NULL);
-
-INSERT INTO `doctor_units` (`id`, `name`, `extra`, `created_at`, `updated_at`)
-VALUES
-	(2, '吨', NULL, NULL, NULL),
-	(3, '千克', NULL, NULL, NULL);
 
 -- 猪场测试数据
 INSERT INTO `doctor_farms` (`id`, `name`, `org_id`, `org_name`, `out_id`, `extra`, `created_at`, `updated_at`)
@@ -360,3 +329,15 @@ VALUES
 	(7, 'barnName', 1, 'orgName', 12345, 'farmName', 7, 1, 1, 100, 1, 'staffName', '1', NULL, '2016-06-07 16:44:22', '2016-06-07 16:44:22'),
 	(8, 'barnName', 1, 'orgName', 12345, 'farmName', 8, 1, 1, 100, 1, 'staffName', '1', NULL, '2016-06-07 16:44:22', '2016-06-07 16:44:22'),
 	(9, 'barnName', 1, 'orgName', 12345, 'farmName', 9, 1, 1, 100, 1, 'staffName', '1', NULL, '2016-06-07 16:44:22', '2016-06-07 16:44:22');
+
+-- 2016-06-27 基础数据测试
+INSERT INTO `doctor_basics` (`id`, `name`, `type`, `type_name`, `is_valid`, `srm`, `context`, `out_id`, `extra`, `updator_id`, `updator_name`, `created_at`, `updated_at`)
+VALUES
+	(17, '猪丹毒', 3, '防疫项目', 1, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+	(18, '猪瘟', 3, '防疫项目', 1, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+	(19, '胸膜肺炎', 4, '疾病', 1, 'xmfy', NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+	(20, '胸膜炎', 4, '疾病', 1, 'xmy', NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+
+INSERT INTO `doctor_user_data_permissions` (`id`, `user_id`, `farm_ids`, `barn_ids`, `ware_house_types`, `extra`, `creator_id`, `creator_name`, `updator_id`, `updator_name`, `created_at`, `updated_at`)
+VALUES
+	(3, 1, '0,1', NULL, NULL, NULL, 7, '18811111111@15988388257', 7, '18811111111@15988388257', NULL, NULL);

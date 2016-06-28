@@ -18,8 +18,8 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.http.HttpEntity;
-import utils.HttpGetRequest;
-import utils.HttpPostRequest;
+import io.terminus.doctor.utils.HttpGetRequest;
+import io.terminus.doctor.utils.HttpPostRequest;
 
 import java.util.List;
 
@@ -55,7 +55,7 @@ public class DoctorMaterialInfosTest extends BaseFrontWebTest{
         });
 
         DoctorMaterialInfoCreateDto doctorMaterialInfoCreateDto = DoctorMaterialInfoCreateDto.builder()
-                .farmId(12345l).type(WareHouseType.FEED.getKey()).materialName("createMaterialName")
+                .farmId(12345l).type(WareHouseType.FEED.getKey()).materialName("createMaterialName").inputCode("inputCodeTestContent")
                 .mark("materialCreateMark").unitId(1l).unitGroupId(1l).defaultConsumeCount(1000l).price(1000l)
                 .build();
 

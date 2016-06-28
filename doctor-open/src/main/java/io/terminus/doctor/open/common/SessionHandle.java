@@ -1,12 +1,12 @@
 package io.terminus.doctor.open.common;
 
 import io.terminus.common.model.Response;
-import io.terminus.parana.common.model.ParanaUser;
 import io.terminus.doctor.user.util.DoctorUserMaker;
 import io.terminus.pampas.common.UserUtil;
 import io.terminus.pampas.openplatform.annotations.OpenParamHandler;
 import io.terminus.pampas.openplatform.core.ParamPreHandle;
 import io.terminus.pampas.openplatform.exceptions.OPClientException;
+import io.terminus.parana.common.model.ParanaUser;
 import io.terminus.parana.user.model.User;
 import io.terminus.parana.user.service.UserReadService;
 import io.terminus.session.AFSessionManager;

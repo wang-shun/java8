@@ -6,6 +6,7 @@ session:
   cookie-context-path: /
   cookie-domain: doctor.com
   cookie-max-age: 1800
+  maxInactiveInterval: 259200
   cookie-name: msid
   source: redis
   serialize-type: json
@@ -17,7 +18,6 @@ session:
   redis-max-total: 10
   redis-max-idle: 0
   redis-prefix: afsession
-
 
 dubbo:
   name: doctor-open

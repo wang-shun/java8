@@ -1,11 +1,10 @@
 package io.terminus.doctor.web.admin.basic.controller;
 
-import io.terminus.doctor.basic.model.DoctorBreed;
-import io.terminus.doctor.basic.model.DoctorGenetic;
-import io.terminus.doctor.basic.model.DoctorUnit;
+import io.terminus.doctor.basic.model.DoctorBasic;
 import io.terminus.doctor.basic.service.DoctorBasicReadService;
 import io.terminus.doctor.basic.service.DoctorBasicWriteService;
 import io.terminus.doctor.common.utils.RespHelper;
+import io.terminus.pampas.common.UserUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -14,6 +13,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -38,130 +39,42 @@ public class DoctorBasics {
         this.doctorBasicWriteService = doctorBasicWriteService;
     }
 
-    /********************** 品种相关 *************************/
     /**
-     * 根据id查询品种表
-     * @param breedId 主键id
-     * @return 品种表
+     * 根据基础数据类型和输入码查询基础数据
+     * @param type  类型
+     * @see io.terminus.doctor.basic.model.DoctorBasic.Type
+     * @param srm   输入码
+     * @return 基础数据信息
      */
-    @RequestMapping(value = "/breed/id", method = RequestMethod.GET)
-    public DoctorBreed findBreedById(@RequestParam("breedId") Long breedId) {
-        return RespHelper.or500(doctorBasicReadService.findBreedById(breedId));
+    @RequestMapping(value = "/basic/type", method = RequestMethod.GET)
+    public List<DoctorBasic> findBasicByTypeAndSrm(@RequestParam("type") Integer type,
+                                                   @RequestParam(value = "srm", required = false) String srm) {
+        return RespHelper.or500(doctorBasicReadService.findBasicByTypeAndSrm(type, srm));
     }
 
-
     /**
-     * 创建或更新DoctorBreed
+     * 创建或更新DoctorBasic
      * @return 是否成功
      */
-    @RequestMapping(value = "/breed", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public Boolean createOrUpdateBreed(@RequestBody DoctorBreed breed) {
-        checkNotNull(breed, "breed.not.null");
-
-        // TODO: 权限中心校验权限
-
-        if (breed.getId() == null) {
-            RespHelper.or500(doctorBasicWriteService.createBreed(breed));
+    @RequestMapping(value = "/basic", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    public Boolean createOrUpdateBasic(@RequestBody DoctorBasic basic) {
+        checkNotNull(basic, "basic.not.null");
+        if (basic.getId() == null) {
+            RespHelper.or500(doctorBasicWriteService.createBasic(basic));
         } else {
-            RespHelper.or500(doctorBasicWriteService.updateBreed(breed));
+            basic.setUpdatorId(UserUtil.getUserId());
+            basic.setUpdatorName(UserUtil.getCurrentUser().getName());
+            RespHelper.or500(doctorBasicWriteService.updateBasic(basic));
         }
         return Boolean.TRUE;
     }
 
     /**
-     * 根据主键id删除DoctorBreed
+     * 根据主键id删除DoctorBasic(逻辑删除)
      * @return 是否成功
      */
-    @RequestMapping(value = "/breed", method = RequestMethod.DELETE)
-    public Boolean deleteBreed(@RequestParam("breedId") Long breedId) {
-        DoctorBreed breed = RespHelper.or500(doctorBasicReadService.findBreedById(breedId));
-
-        // TODO: 权限中心校验权限
-
-        return RespHelper.or500(doctorBasicWriteService.deleteBreedById(breedId));
-    }
-
-    /********************* 品系相关 ***************************/
-    /**
-     * 根据id查询品系表
-     * @param geneticId 主键id
-     * @return 品系表
-     */
-    @RequestMapping(value = "/genetic/id", method = RequestMethod.GET)
-    public DoctorGenetic findGeneticById(@RequestParam("geneticId") Long geneticId) {
-        return RespHelper.or500(doctorBasicReadService.findGeneticById(geneticId));
-    }
-
-    /**
-     * 创建或更新DoctorGenetic
-     * @return 是否成功
-     */
-    @RequestMapping(value = "/genetic", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public Boolean createOrUpdateGenetic(@RequestBody DoctorGenetic genetic) {
-        checkNotNull(genetic, "genetic.not.null");
-
-        // TODO: 权限中心校验权限
-
-        if (genetic.getId() == null) {
-            RespHelper.or500(doctorBasicWriteService.createGenetic(genetic));
-        } else {
-            RespHelper.or500(doctorBasicWriteService.updateGenetic(genetic));
-        }
-        return Boolean.TRUE;
-    }
-
-    /**
-     * 根据主键id删除DoctorGenetic
-     * @return 是否成功
-     */
-    @RequestMapping(value = "/genetic", method = RequestMethod.DELETE)
-    public Boolean deleteGenetic(@RequestParam("geneticId") Long geneticId) {
-        DoctorGenetic genetic = RespHelper.or500(doctorBasicReadService.findGeneticById(geneticId));
-
-        // TODO: 权限中心校验权限
-
-        return RespHelper.or500(doctorBasicWriteService.deleteGeneticById(geneticId));
-    }
-
-    /********************** 品系相关 ***************************/
-    /**
-     * 根据id查询计量单位表
-     * @param unitId 主键id
-     * @return 计量单位表
-     */
-    @RequestMapping(value = "/unit/id", method = RequestMethod.GET)
-    public DoctorUnit findUnitById(@RequestParam("unitId") Long unitId) {
-        return RespHelper.or500(doctorBasicReadService.findUnitById(unitId));
-    }
-
-    /**
-     * 创建或更新DoctorUnit
-     * @return 是否成功
-     */
-    @RequestMapping(value = "/unit", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public Boolean createOrUpdateUnit(@RequestBody DoctorUnit unit) {
-        checkNotNull(unit, "unit.not.null");
-
-        // TODO: 权限中心校验权限
-
-        if (unit.getId() == null) {
-            RespHelper.or500(doctorBasicWriteService.createUnit(unit));
-        } else {
-            RespHelper.or500(doctorBasicWriteService.updateUnit(unit));
-        }
-        return Boolean.TRUE;
-    }
-
-    /**
-     * 根据主键id删除DoctorUnit
-     * @return 是否成功
-     */
-    @RequestMapping(value = "/unit", method = RequestMethod.DELETE)
-    public Boolean deleteUnit(@RequestParam("unitId") Long unitId) {
-        DoctorUnit unit = RespHelper.or500(doctorBasicReadService.findUnitById(unitId));
-
-        // TODO: 权限中心校验权限
-
-        return RespHelper.or500(doctorBasicWriteService.deleteUnitById(unitId));
+    @RequestMapping(value = "/basic", method = RequestMethod.DELETE)
+    public Boolean deleteBasic(@RequestParam("basicId") Long basicId) {
+        return RespHelper.or500(doctorBasicWriteService.deleteBasicById(basicId));
     }
 }

@@ -5,10 +5,12 @@ import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import io.terminus.common.model.PageInfo;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.common.utils.RespHelper;
+import io.terminus.doctor.event.cache.DoctorPigInfoCache;
 import io.terminus.doctor.event.dao.DoctorPigDao;
 import io.terminus.doctor.event.dao.DoctorPigTrackDao;
 import io.terminus.doctor.event.dto.DoctorPigInfoDetailDto;
@@ -26,6 +28,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkState;
@@ -47,12 +50,16 @@ public class DoctorPigReadServiceImpl implements DoctorPigReadService{
 
     private final DoctorPigEventReadService doctorPigEventReadService;
 
+    private final DoctorPigInfoCache doctorPigInfoCache;
+
     @Autowired
     public DoctorPigReadServiceImpl(DoctorPigDao doctorPigDao, DoctorPigTrackDao doctorPigTrackDao,
-                                    DoctorPigEventReadService doctorPigEventReadService){
+                                    DoctorPigEventReadService doctorPigEventReadService,
+                                    DoctorPigInfoCache doctorPigInfoCache){
         this.doctorPigDao = doctorPigDao;
         this.doctorPigTrackDao = doctorPigTrackDao;
         this.doctorPigEventReadService = doctorPigEventReadService;
+        this.doctorPigInfoCache = doctorPigInfoCache;
     }
 
     @Override
@@ -193,6 +200,26 @@ public class DoctorPigReadServiceImpl implements DoctorPigReadService{
         } catch (Exception e) {
             log.error("find pigs by farmId failed, farmId:{}, cause:{}", farmId, Throwables.getStackTraceAsString(e));
             return Response.fail("pig.find.fail");
+        }
+    }
+
+    @Override
+    public Response<Boolean> validatePigCodeByFarmId(Long farmId, String pigCode) {
+        try{
+            return Response.ok(doctorPigInfoCache.judgePigCodeNotContain(farmId, pigCode));
+        }catch (Exception e){
+            log.error("validate pig code not in farm fail, farmId:{}, pigCode:{}, cause:{}", farmId, pigCode, Throwables.getStackTraceAsString(e));
+            return Response.fail("validate.pigCode.fail");
+        }
+    }
+
+    @Override
+    public Response<Set<Integer>> findPigStatusByBarnId(Long barnId) {
+        try {
+            return Response.ok(Sets.newHashSet(doctorPigTrackDao.findStatusByBarnId(barnId)));
+        } catch (Exception e) {
+            log.error("find pig status by barnId failed, barnId:{}, cause:{}", barnId, Throwables.getStackTraceAsString(e));
+            return Response.fail("pig.status.find.fail");
         }
     }
 }

@@ -12,10 +12,13 @@ import io.terminus.doctor.event.handler.DoctorAbstractEventFlowHandler;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.workflow.core.Execution;
 import lombok.extern.slf4j.Slf4j;
+import org.joda.time.DateTime;
+import org.joda.time.Days;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
+import java.util.Objects;
 
 import static com.google.common.base.Preconditions.checkState;
 import static java.util.Objects.isNull;
@@ -29,6 +32,9 @@ import static java.util.Objects.isNull;
 @Component
 @Slf4j
 public class DoctorSowMatingHandler extends DoctorAbstractEventFlowHandler{
+
+    // 默认114 天 预产日期
+    public static final Integer MATING_PREG_DAYS = 114;
 
     @Autowired
     public DoctorSowMatingHandler(DoctorPigDao doctorPigDao, DoctorPigEventDao doctorPigEventDao, DoctorPigTrackDao doctorPigTrackDao, DoctorPigSnapshotDao doctorPigSnapshotDao, DoctorRevertLogDao doctorRevertLogDao) {
@@ -47,6 +53,11 @@ public class DoctorSowMatingHandler extends DoctorAbstractEventFlowHandler{
 
     @Override
     public DoctorPigTrack updateDoctorPigTrackInfo(Execution execution, DoctorPigTrack doctorPigTrack, DoctorBasicInputInfoDto basic, Map<String, Object> extra, Map<String,Object> context) {
+        // validate extra 配种日期信息
+        DateTime matingDate = new DateTime(Long.valueOf(extra.get("matingDate").toString()));
+        DateTime judgePregDate = new DateTime(Long.valueOf(extra.get("judgePregDate").toString()));
+        checkState(Objects.equals(Days.daysBetween(matingDate, judgePregDate).getDays(), 114), "input.judgePregDate.error");
+
         // 构建母猪配种信息
         doctorPigTrack.addAllExtraMap(extra);
         doctorPigTrack.setStatus(PigStatus.Mate.getKey());

@@ -44,8 +44,6 @@ public class DoctorChangeGroupEventHandler extends DoctorAbstractGroupEventHandl
         this.doctorCommonGroupEventHandler = doctorCommonGroupEventHandler;
     }
 
-
-    // TODO: 16/5/30 销售要记录销售数量
     @Override
     protected <I extends BaseGroupInput> void handleEvent(DoctorGroup group, DoctorGroupTrack groupTrack, I input) {
         DoctorChangeGroupInput change = (DoctorChangeGroupInput) input;

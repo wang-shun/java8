@@ -1,7 +1,9 @@
 package io.terminus.doctor.basic;
 
+import io.terminus.doctor.common.DoctorCommonConfiguration;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 
 /**
  * Created by yaoqijun.
@@ -13,5 +15,6 @@ import org.springframework.context.annotation.Configuration;
 @ComponentScan(basePackages = {
         "io.terminus.doctor.basic"
 })
+@Import({DoctorCommonConfiguration.class})
 public class DoctorBasicConfiguration {
 }

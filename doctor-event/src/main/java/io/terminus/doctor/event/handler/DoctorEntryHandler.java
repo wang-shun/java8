@@ -6,6 +6,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.common.utils.JsonMapper;
+import io.terminus.doctor.event.cache.DoctorPigInfoCache;
 import io.terminus.doctor.event.constants.DoctorFarmEntryConstants;
 import io.terminus.doctor.event.constants.DoctorPigSnapshotConstants;
 import io.terminus.doctor.event.dao.DoctorPigDao;
@@ -32,6 +33,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 
+import static com.google.common.base.Preconditions.checkState;
 import static java.util.Objects.isNull;
 
 /**
@@ -56,17 +58,21 @@ public class DoctorEntryHandler implements DoctorEventCreateHandler {
 
     private final DoctorRevertLogDao doctorRevertLogDao;
 
+    private final DoctorPigInfoCache doctorPigInfoCache;
+
     @Autowired
     public DoctorEntryHandler(DoctorPigDao doctorPigDao,
                               DoctorPigEventDao doctorPigEventDao,
                               DoctorPigTrackDao doctorPigTrackDao,
                               DoctorPigSnapshotDao doctorPigSnapshotDao,
-                              DoctorRevertLogDao doctorRevertLogDao){
+                              DoctorRevertLogDao doctorRevertLogDao,
+                              DoctorPigInfoCache doctorPigInfoCache){
         this.doctorPigEventDao = doctorPigEventDao;
         this.doctorPigDao = doctorPigDao;
         this.doctorPigTrackDao = doctorPigTrackDao;
         this.doctorPigSnapshotDao = doctorPigSnapshotDao;
         this.doctorRevertLogDao = doctorRevertLogDao;
+        this.doctorPigInfoCache = doctorPigInfoCache;
     }
 
     @Override
@@ -87,6 +93,8 @@ public class DoctorEntryHandler implements DoctorEventCreateHandler {
             DoctorPigTrack doctorPigTrack = buildEntryFarmPigDoctorTrack(doctorFarmEntryDto, basic);
 
             // pig create
+            checkState(doctorPigInfoCache.judgePigCodeNotContain(doctorPig.getFarmId(), doctorPig.getPigCode()), "validate.pigCode.fail");
+            doctorPigInfoCache.addPigCodeToFarm(doctorPig.getFarmId(), doctorPig.getPigCode());
             doctorPigDao.create(doctorPig);
 
             // event create
@@ -95,6 +103,7 @@ public class DoctorEntryHandler implements DoctorEventCreateHandler {
 
             // track create
             doctorPigTrack.setPigId(doctorPig.getId());
+            doctorPigTrack.setPigType(doctorPig.getPigType());
             doctorPigTrack.addPigEvent(doctorPig.getPigType(), doctorPigEvent.getId());
             doctorPigTrackDao.create(doctorPigTrack);
 
@@ -129,7 +138,7 @@ public class DoctorEntryHandler implements DoctorEventCreateHandler {
      */
     private DoctorPigTrack buildEntryFarmPigDoctorTrack(DoctorFarmEntryDto dto, DoctorBasicInputInfoDto basic){
 
-        DoctorPigTrack doctorPigTrack = DoctorPigTrack.builder().farmId(basic.getFarmId())
+        DoctorPigTrack doctorPigTrack = DoctorPigTrack.builder().farmId(basic.getFarmId()).pigType(basic.getPigType())
                 .isRemoval(IsOrNot.NO.getValue())
                 .currentBarnId(dto.getBarnId()).currentBarnName(dto.getBarnName())
                 .currentParity(dto.getParity())

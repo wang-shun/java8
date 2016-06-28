@@ -20,7 +20,7 @@ import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import utils.HttpPostRequest;
+import io.terminus.doctor.utils.HttpPostRequest;
 
 import static org.hamcrest.core.Is.is;
 

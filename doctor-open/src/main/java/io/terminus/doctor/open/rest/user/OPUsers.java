@@ -51,10 +51,16 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import java.io.Serializable;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
-import static io.terminus.common.utils.Arguments.*;
+import static io.terminus.common.utils.Arguments.isEmpty;
+import static io.terminus.common.utils.Arguments.isNull;
+import static io.terminus.common.utils.Arguments.notNull;
 
 /**
  * Mail: xiao@terminus.io <br>
@@ -332,9 +338,12 @@ public class OPUsers {
         User user = doLogin(name, password, sessionId);
 
         // 登录成功记录 sessionId 和 deviceId, 防止其他设备获得sessionId, 伪造登录
-        sessionManager.save(Sessions.TOKEN_PREFIX, sessionId,
+        sessionManager.save(
+                Sessions.TOKEN_PREFIX,
+                sessionId,
                 ImmutableMap.of(Sessions.USER_ID, (Object) user.getId(), Sessions.DEVICE_ID, (Object) deviceId),
                 Sessions.LONG_INACTIVE_INTERVAL);
+
         // 清除 limit & code
         sessionManager.deletePhysically(Sessions.LIMIT_PREFIX, sessionId);
         sessionManager.deletePhysically(Sessions.CODE_PREFIX, sessionId);
@@ -348,6 +357,7 @@ public class OPUsers {
         token.setSessionId(sessionId);
         token.setDeviceId(deviceId);
         token.setCookieName(sessionProperties.getCookieName());
+        log.info("login token:{}", token);
         return token;
     }
 
@@ -529,6 +539,7 @@ public class OPUsers {
 
     @OpenMethod(key="user.logout", paramNames = {"sid"})
     public void logout(String sessionId) {
+        log.info("logout session :{}", sessionId);
         sessionManager.deletePhysically(Sessions.TOKEN_PREFIX, sessionId);
     }
 

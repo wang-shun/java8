@@ -45,6 +45,16 @@ public class DoctorAntiepidemicGroupInput extends BaseGroupInput implements Seri
     private Integer vaccinResult;
 
     /**
+     * 防疫项目id
+     */
+    private Long vaccinItemId;
+
+    /**
+     * 防疫项目名称
+     */
+    private Long vaccinItemName;
+
+    /**
      *  防疫人员id
      */
     private Integer vaccinStaffId;

@@ -4,23 +4,25 @@
   -->
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 
-<mapper namespace="DoctorFosterReason">
-    <resultMap id="DoctorFosterReasonMap" type="DoctorFosterReason">
-        <result column="reason" property="reason"/>
-        <result column="farm_id" property="farmId"/>
+<mapper namespace="DoctorBasic">
+    <resultMap id="DoctorBasicMap" type="DoctorBasic">
+        <result column="name" property="name"/>
+        <result column="type" property="type"/>
+        <result column="type_name" property="typeName"/>
+        <result column="is_valid" property="isValid"/>
+        <result column="srm" property="srm"/>
+        <result column="context" property="context"/>
         <result column="out_id" property="outId"/>
         <result column="extra" property="extra"/>
-        <result column="creator_id" property="creatorId"/>
-        <result column="creator_name" property="creatorName"/>
         <result column="updator_id" property="updatorId"/>
         <result column="updator_name" property="updatorName"/>
         <result column="created_at" property="createdAt"/>
         <result column="updated_at" property="updatedAt"/>
-        
+
     </resultMap>
 
     <sql id="tb">
-        doctor_foster_reasons
+        doctor_basics
     </sql>
 
     <sql id="cols_all">
@@ -28,14 +30,14 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        reason, farm_id, out_id, extra, creator_id, creator_name, updator_id, updator_name, created_at, updated_at
+        name, type, type_name, is_valid, srm, context, out_id, extra, updator_id, updator_name, created_at, updated_at
     </sql>
 
     <sql id="vals">
-        #{reason}, #{farmId}, #{outId}, #{extra}, #{creatorId}, #{creatorName}, #{updatorId}, #{updatorName}, now(), now()
+        #{name}, #{type}, #{typeName}, #{isValid}, #{srm}, #{context}, #{outId}, #{extra}, #{updatorId}, #{updatorName}, now(), now()
     </sql>
 
-    <insert id="create" parameterType="DoctorFosterReason" keyProperty="id" useGeneratedKeys="true">
+    <insert id="create" parameterType="DoctorBasic" keyProperty="id" useGeneratedKeys="true">
         INSERT INTO
         <include refid="tb" />
         (<include refid="cols_exclude_id" />)
@@ -43,27 +45,32 @@
         (<include refid="vals" />)
     </insert>
 
-    <select id="findById" parameterType="long" resultMap="DoctorFosterReasonMap" >
+    <select id="findById" parameterType="long" resultMap="DoctorBasicMap" >
         SELECT <include refid="cols_all" />
         FROM <include refid="tb" />
         WHERE id = #{id}
     </select>
 
-    <update id="update" parameterType="DoctorFosterReason">
+    <select id="findByType" parameterType="int" resultMap="DoctorBasicMap" >
+        SELECT <include refid="cols_all" />
+        FROM <include refid="tb" />
+        WHERE type = #{type} AND is_valid = 1
+    </select>
+
+    <update id="update" parameterType="DoctorBasic">
         UPDATE
         <include refid="tb"/>
         <set>
-            <if test="reason != null">reason = #{reason},</if>
-            <if test="farmId != null">farm_id = #{farmId},</if>
+            <if test="name != null">name = #{name},</if>
+            <if test="type != null">type = #{type},</if>
+            <if test="typeName != null">type_name = #{typeName},</if>
+            <if test="isValid != null">is_valid = #{isValid},</if>
+            <if test="srm != null">srm = #{srm},</if>
+            <if test="context != null">context = #{context},</if>
             <if test="outId != null">out_id = #{outId},</if>
             <if test="extra != null">extra = #{extra},</if>
-            <if test="creatorId != null">creator_id = #{creatorId},</if>
-            <if test="creatorName != null">creator_name = #{creatorName},</if>
             <if test="updatorId != null">updator_id = #{updatorId},</if>
             <if test="updatorName != null">updator_name = #{updatorName},</if>
-            
-            
-            
             updated_at=now()
         </set>
         WHERE id = #{id}
@@ -73,10 +80,5 @@
         DELETE FROM <include refid="tb"/>
         WHERE id = #{id}
     </delete>
-    
-    <select id="findByFarmId" parameterType="long" resultMap="DoctorFosterReasonMap">
-        SELECT <include refid="cols_all"/>
-        FROM <include refid="tb"/>
-        WHERE farm_id = #{farmId}
-    </select>
+
 </mapper>

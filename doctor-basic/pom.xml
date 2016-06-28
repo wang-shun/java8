@@ -31,6 +31,10 @@
             <groupId>io.terminus.boot</groupId>
             <artifactId>spring-boot-starter-datasource</artifactId>
         </dependency>
+        <dependency>
+            <groupId>io.terminus.boot</groupId>
+            <artifactId>spring-boot-starter-zookeeper</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>com.zaxxer</groupId>

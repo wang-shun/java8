@@ -49,6 +49,8 @@ public class DoctorMaterialInfo implements Serializable{
 
     private String materialName;
 
+    private String inputCode;
+
     private String remark;
 
     private Long unitGroupId;

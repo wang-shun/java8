@@ -1,16 +1,9 @@
 package io.terminus.doctor.basic.service;
 
 import io.terminus.common.model.Response;
-import io.terminus.doctor.basic.model.DoctorBreed;
+import io.terminus.doctor.basic.model.DoctorBasic;
 import io.terminus.doctor.basic.model.DoctorChangeReason;
-import io.terminus.doctor.basic.model.DoctorChangeType;
 import io.terminus.doctor.basic.model.DoctorCustomer;
-import io.terminus.doctor.basic.model.DoctorDisease;
-import io.terminus.doctor.basic.model.DoctorFosterReason;
-import io.terminus.doctor.basic.model.DoctorGenetic;
-import io.terminus.doctor.basic.model.DoctorUnit;
-
-import javax.validation.constraints.NotNull;
 
 /**
  * Desc: 基础数据写服务
@@ -22,29 +15,25 @@ import javax.validation.constraints.NotNull;
 public interface DoctorBasicWriteService {
 
     /**
-     * 创建猪场时, 初始化一些基础数据
-     * @param farmId 猪场id
-     * @return 是否成功
-     */
-    Response<Boolean> initFarmBasic(@NotNull(message = "farmId.not.null") Long farmId);
-
-    /**
-     * 创建DoctorBreed
+     * 创建DoctorBasic
+     * @param basic 基础数据表实例
      * @return 主键id
      */
-    Response<Long> createBreed(DoctorBreed breed);
+    Response<Long> createBasic(DoctorBasic basic);
 
     /**
-     * 更新DoctorBreed
+     * 更新DoctorBasic
+     * @param basic 基础数据表实例
      * @return 是否成功
      */
-    Response<Boolean> updateBreed(DoctorBreed breed);
+    Response<Boolean> updateBasic(DoctorBasic basic);
 
     /**
-     * 根据主键id删除DoctorBreed
+     * 根据主键id删除DoctorBasic
+     * @param basicId 基础数据表实例主键id
      * @return 是否成功
      */
-    Response<Boolean> deleteBreedById(Long breedId);
+    Response<Boolean> deleteBasicById(Long basicId);
 
     /**
      * 创建DoctorChangeReason
@@ -65,24 +54,6 @@ public interface DoctorBasicWriteService {
     Response<Boolean> deleteChangeReasonById(Long changeReasonId);
 
     /**
-     * 创建DoctorChangeType
-     * @return 主键id
-     */
-    Response<Long> createChangeType(DoctorChangeType changeType);
-
-    /**
-     * 更新DoctorChangeType
-     * @return 是否成功
-     */
-    Response<Boolean> updateChangeType(DoctorChangeType changeType);
-
-    /**
-     * 根据主键id删除DoctorChangeType
-     * @return 是否成功
-     */
-    Response<Boolean> deleteChangeTypeById(Long changeTypeId);
-
-    /**
      * 创建DoctorCustomer
      * @return 主键id
      */
@@ -99,79 +70,4 @@ public interface DoctorBasicWriteService {
      * @return 是否成功
      */
     Response<Boolean> deleteCustomerById(Long customerId);
-
-    /**
-     * 创建DoctorDisease
-     * @return 主键id
-     */
-    Response<Long> createDisease(DoctorDisease disease);
-
-    /**
-     * 更新DoctorDisease
-     * @return 是否成功
-     */
-    Response<Boolean> updateDisease(DoctorDisease disease);
-
-    /**
-     * 根据主键id删除DoctorDisease
-     * @return 是否成功
-     */
-    Response<Boolean> deleteDiseaseById(Long diseaseId);
-
-    /**
-     * 创建DoctorGenetic
-     * @return 主键id
-     */
-    Response<Long> createGenetic(DoctorGenetic genetic);
-
-    /**
-     * 更新DoctorGenetic
-     * @return 是否成功
-     */
-    Response<Boolean> updateGenetic(DoctorGenetic genetic);
-
-    /**
-     * 根据主键id删除DoctorGenetic
-     * @return 是否成功
-     */
-    Response<Boolean> deleteGeneticById(Long geneticId);
-
-    /**
-     * 创建DoctorUnit
-     * @return 主键id
-     */
-    Response<Long> createUnit(DoctorUnit unit);
-
-    /**
-     * 更新DoctorUnit
-     * @return 是否成功
-     */
-    Response<Boolean> updateUnit(DoctorUnit unit);
-
-    /**
-     * 根据主键id删除DoctorUnit
-     * @return 是否成功
-     */
-    Response<Boolean> deleteUnitById(Long unitId);
-
-    /**
-     * 创建DoctorFosterReason
-     * @param fosterReason 寄养原因表实例
-     * @return 主键id
-     */
-    Response<Long> createFosterReason(DoctorFosterReason fosterReason);
-
-    /**
-     * 更新DoctorFosterReason
-     * @param fosterReason 寄养原因表实例
-     * @return 是否成功
-     */
-    Response<Boolean> updateFosterReason(DoctorFosterReason fosterReason);
-
-    /**
-     * 根据主键id删除DoctorFosterReason
-     * @param fosterReasonId 寄养原因表实例主键id
-     * @return 是否成功
-     */
-    Response<Boolean> deleteFosterReasonById(Long fosterReasonId);
 }

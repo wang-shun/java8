@@ -43,7 +43,6 @@
             <groupId>io.terminus.boot</groupId>
             <artifactId>spring-boot-starter-zookeeper</artifactId>
         </dependency>
-
         <dependency>
             <groupId>io.terminus.doctor</groupId>
             <artifactId>doctor-common</artifactId>

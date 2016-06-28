@@ -36,7 +36,7 @@ public class DoctorChangeGroupEvent extends BaseGroupEvent implements Serializab
      */
     private String changeReasonName;
 
-    private Integer breedId;
+    private Long breedId;
 
     private String breedName;
 

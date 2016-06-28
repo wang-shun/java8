@@ -41,7 +41,7 @@ public class DoctorMoveInGroupEvent extends BaseGroupEvent implements Serializab
      */
     private Integer sex;
 
-    private Integer breedId;
+    private Long breedId;
 
     private String breedName;
 
