@@ -103,6 +103,34 @@ public class DoctorSearches {
     }
 
     /**
+     * 所有公猪搜索方法
+     *
+     * @param params   搜索参数
+     * @return
+     */
+    @RequestMapping(value = "/boarpigs/all", method = RequestMethod.GET)
+    public Paging<SearchedPig> searchAllBoarPigs(@RequestParam Map<String, String> params) {
+        if (farmIdNotExist(params)) {
+            return new Paging<>(0L, Collections.emptyList());
+        }
+        params.put("pigType", DoctorPig.PIG_TYPE.BOAR.getKey().toString());
+
+        // 游标法获取数据
+        Integer pageNo = 1;
+        Integer pageSize = 100;
+        Paging<SearchedPig> searchBoars = RespHelper.or500(pigSearchReadService.searchWithAggs(pageNo, pageSize, "search/search.mustache", params));
+        while (!searchBoars.isEmpty()) {
+            pageNo ++;
+            Paging<SearchedPig> tempSearchBoars = RespHelper.or500(pigSearchReadService.searchWithAggs(pageNo, pageSize, "search/search.mustache", params));
+            if (tempSearchBoars.isEmpty()) {
+                break;
+            }
+            searchBoars.getData().addAll(tempSearchBoars.getData());
+        }
+        return searchBoars;
+    }
+
+    /**
      * 猪群搜索方法
      *
      * @param pageNo   起始页
