@@ -91,7 +91,8 @@ public class DoctorBasic implements Serializable {
         DISEASE(4, "疾病"),
         UNIT(5, "计量单位"),
         FOSTER_REASON(6, "寄养原因"),
-        CHANGE_TYPE(7, "变动类型");
+        CHANGE_TYPE(7, "变动类型"),
+        ABORTION_REASON(8, "流产原因");
 
         @Getter
         private final int value;
