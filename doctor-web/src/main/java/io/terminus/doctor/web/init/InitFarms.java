@@ -354,6 +354,7 @@ public class InitFarms {
 
             //猪跟踪
             pigTrack.setPigId(newPigId);
+            pigTrack.setPigType(pig.getPigType());
             pigTrack.setFarmId(farm.getId());
             pigTrack.setCurrentBarnId(pig.getInitBarnId());
             pigTrack.setCurrentBarnName(pig.getInitBarnName());

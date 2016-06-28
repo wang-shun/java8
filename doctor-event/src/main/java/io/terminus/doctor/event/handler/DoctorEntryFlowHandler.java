@@ -91,6 +91,7 @@ public class DoctorEntryFlowHandler extends HandlerAware {
 
             // track create
             doctorPigTrack.setPigId(doctorPig.getId());
+            doctorPigTrack.setPigType(doctorPig.getPigType());
             doctorPigTrack.addPigEvent(doctorPig.getPigType(), doctorPigEvent.getId());
             doctorPigTrackDao.create(doctorPigTrack);
 

@@ -101,4 +101,5 @@ ALTER TABLE doctor_basics ADD COLUMN `context` VARCHAR(64) DEFAULT NULL COMMENT 
 
 ALTER TABLE doctor_change_reasons ADD COLUMN `farm_id` bigint(20) DEFAULT NULL COMMENT '猪场id' AFTER id;
 
-
+-- 2016-06-28 doctor_pig_tracks 表增加 pig_type 猪类冗余字段
+ALTER TABLE doctor_pig_tracks ADD COLUMN `pig_type` smallint(6) DEFAULT NULL COMMENT '猪类型(公猪，母猪， 仔猪)' AFTER pig_id;

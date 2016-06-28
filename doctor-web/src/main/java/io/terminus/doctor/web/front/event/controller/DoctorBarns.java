@@ -139,13 +139,14 @@ public class DoctorBarns {
      */
     @RequestMapping(value = "/detail", method = RequestMethod.GET)
     public DoctorBarnDetail findBarnDetailByBarnId(@RequestParam("barnId") Long barnId,
+                                                   @RequestParam(value = "status", required = false) Integer status,
                                                    @RequestParam(value = "pageNo", required = false) Integer pageNo,
                                                    @RequestParam(value = "size", required = false) Integer size) {
 
         //// TODO: 16/6/1 其他搜索条件, 排序条件
 
-        DoctorBarnDetail barnDetail = new DoctorBarnDetail();
         DoctorBarn barn = RespHelper.or500(doctorBarnReadService.findBarnById(barnId));
+        DoctorBarnDetail barnDetail = new DoctorBarnDetail();
 
         //公猪舍
         if (PigType.isBoar(barn.getPigType())) {

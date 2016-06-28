@@ -40,6 +40,12 @@ public class DoctorPigTrack implements Serializable{
 
     private Long pigId;
 
+    /**
+     * 猪类型信息表数据
+     * @see io.terminus.doctor.event.model.DoctorPig.PIG_TYPE
+     */
+    private Integer pigType;
+
     private Integer status;
 
     /**

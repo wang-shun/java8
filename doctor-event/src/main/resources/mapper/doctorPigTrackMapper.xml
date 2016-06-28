@@ -12,6 +12,7 @@
         <result column="id" property="id"/>
         <result column="farm_id" property="farmId"/>
         <result column="pig_id" property="pigId"/>
+        <result column="pig_type" property="pigType"/>
         <result column="status" property="status"/>
         <result column="is_removal" property="isRemoval"/>
         <result column="current_barn_id" property="currentBarnId"/>
@@ -38,16 +39,17 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        `farm_id`,`pig_id`,`status`,`is_removal`,`current_barn_id`,`current_barn_name`,`weight`,`out_farm_date`,`rel_event_ids`,`extra`,`current_parity`,`remark`,`creator_id`,`creator_name`,`updator_id`,`updator_name`,`created_at`,`updated_at`
+        `farm_id`,`pig_id`, `pig_type`, `status`,`is_removal`,`current_barn_id`,`current_barn_name`,`weight`,`out_farm_date`,`rel_event_ids`,`extra`,`current_parity`,`remark`,`creator_id`,`creator_name`,`updator_id`,`updator_name`,`created_at`,`updated_at`
     </sql>
 
     <sql id="vals">
-        #{farmId},#{pigId},#{status},#{isRemoval},#{currentBarnId},#{currentBarnName},#{weight},#{outFarmDate},#{relEventIds},#{extra},#{currentParity},#{remark},#{creatorId},#{creatorName},#{updatorId},#{updatorName},now(),now()
+        #{farmId},#{pigId},#{pigType},#{status},#{isRemoval},#{currentBarnId},#{currentBarnName},#{weight},#{outFarmDate},#{relEventIds},#{extra},#{currentParity},#{remark},#{creatorId},#{creatorName},#{updatorId},#{updatorName},now(),now()
     </sql>
 
     <sql id="criteria">
         <if test="farmId!=null"> AND `farm_id`=#{farmId}</if>
         <if test="pigId != null" > AND `pig_id` = #{pigId}</if>
+        <if test="pigType != null" > AND `pig_type` = #{pigType}</if>
         <if test="status != null" > AND `status` = #{status}</if>
         <if test="isRemoval == null"> AND `is_removal` = 0 </if>
         <if test="isRemoval != null"> AND `is_removal` = #{isRemoval}</if>
@@ -68,7 +70,7 @@
         ( <include refid="cols_exclude_id"/> )
         VALUES
         <foreach collection="list" item="i" separator=",">
-        (#{i.farmId}, #{i.pigId},#{i.status},#{i.currentBarnId},#{i.currentBarnName},#{i.weight},#{i.outFarmDate},#{i.relEventIds},#{i.extra},#{i.currentParity},#{i.remark},#{i.creatorId},#{i.creatorName},#{i.updatorId},#{i.updatorName},now(),now()
+        (#{i.farmId}, #{i.pigId},#{i.pigType},#{i.status},#{i.currentBarnId},#{i.currentBarnName},#{i.weight},#{i.outFarmDate},#{i.relEventIds},#{i.extra},#{i.currentParity},#{i.remark},#{i.creatorId},#{i.creatorName},#{i.updatorId},#{i.updatorName},now(),now()
  )
         </foreach>
     </insert>
@@ -125,6 +127,7 @@
         updated_at = now()
             <if test="farmId!=null">, `farm_id`=#{farmId}</if>
             <if test="pigId != null" > ,`pig_id` = #{pigId}</if>
+            <if test="pigType != null" > ,`pig_type` = #{pigType}</if>
             <if test="status != null" > ,`status` = #{status}</if>
             <if test="isRemoval != null">, `is_removal` = #{isRemoval} </if>
             <if test="currentBarnId != null" > ,`current_barn_id` = #{currentBarnId}</if>
