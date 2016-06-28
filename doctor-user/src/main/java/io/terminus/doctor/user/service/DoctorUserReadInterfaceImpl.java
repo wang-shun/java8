@@ -154,16 +154,7 @@ public class DoctorUserReadInterfaceImpl implements DoctorUserReadInterface {
     public RespDto<List<UserDto>> loadsBy(Map<String, Object> criteria) {
         RespDto<List<UserDto>> response = new RespDto<>();
         try {
-            criteria = Params.filterNullOrEmpty(criteria);
-            if(criteria.containsKey("type")){
-                String type = criteria.get("type").toString();
-                criteria.remove("type");
-                criteria.put("roles", Lists.newArrayList(type));
-            }else if(criteria.containsKey("types")){
-                criteria.put("roles", criteria.get("types"));
-                criteria.remove("types");
-            }
-            List<UserDto> list = BeanMapper.mapList(userDaoExt.list(criteria), UserDto.class);
+            List<UserDto> list = BeanMapper.mapList(userDaoExt.list(this.changeMapKey(criteria)), UserDto.class);
             response.setResult(list);
         } catch (Exception e) {
             log.error("find user failed, cause:{}", Throwables.getStackTraceAsString(e));
