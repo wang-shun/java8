@@ -168,6 +168,6 @@
 
     <select id="findStatusByBarnId" parameterType="long" resultType="int">
         SELECT DISTINCT status FROM <include refid="tb"/>
-        WHERE barn_id = #{barnId};
+        WHERE current_barn_id = #{barnId};
     </select>
 </mapper>

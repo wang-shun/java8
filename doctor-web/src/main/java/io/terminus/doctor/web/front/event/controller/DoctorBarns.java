@@ -150,8 +150,11 @@ public class DoctorBarns {
         //公猪舍
         if (PigType.isBoar(barn.getPigType())) {
             barnDetail.setType(DoctorBarnDetail.Type.BOAR.getValue());
-            barnDetail.setPigPaging(RespHelper.or500(doctorPigReadService.pagingDoctorInfoDtoByPigTrack(
-                    DoctorPigTrack.builder().currentBarnId(barnId).pigType(DoctorPig.PIG_TYPE.BOAR.getKey()).farmId(barn.getFarmId()).build(), pageNo, size)));
+            barnDetail.setPigPaging(RespHelper.or500(doctorPigReadService.pagingDoctorInfoDtoByPigTrack(DoctorPigTrack.builder()
+                    .status(status)
+                    .currentBarnId(barnId)
+                    .pigType(DoctorPig.PIG_TYPE.BOAR.getKey())
+                    .farmId(barn.getFarmId()).build(), pageNo, size)));
             barnDetail.setStatuses(RespHelper.or500(doctorPigReadService.findPigStatusByBarnId(barnId)));
             return barnDetail;
         }
@@ -159,8 +162,11 @@ public class DoctorBarns {
         //母猪舍
         if (PigType.isSow(barn.getPigType())) {
             barnDetail.setType(DoctorBarnDetail.Type.SOW.getValue());
-            barnDetail.setPigPaging(RespHelper.or500(doctorPigReadService.pagingDoctorInfoDtoByPigTrack(
-                    DoctorPigTrack.builder().currentBarnId(barnId).pigType(DoctorPig.PIG_TYPE.SOW.getKey()).farmId(barn.getFarmId()).build(), pageNo, size)));
+            barnDetail.setPigPaging(RespHelper.or500(doctorPigReadService.pagingDoctorInfoDtoByPigTrack(DoctorPigTrack.builder()
+                    .status(status)
+                    .currentBarnId(barnId)
+                    .pigType(DoctorPig.PIG_TYPE.SOW.getKey())
+                    .farmId(barn.getFarmId()).build(), pageNo, size)));
             barnDetail.setStatuses(RespHelper.or500(doctorPigReadService.findPigStatusByBarnId(barnId)));
             return barnDetail;
         }
