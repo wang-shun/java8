@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 import static io.terminus.common.utils.Arguments.isEmpty;
@@ -109,9 +110,9 @@ public class DoctorSearches {
      * @return
      */
     @RequestMapping(value = "/boarpigs/all", method = RequestMethod.GET)
-    public Paging<SearchedPig> searchAllBoarPigs(@RequestParam Map<String, String> params) {
+    public List<SearchedPig> searchAllBoarPigs(@RequestParam Map<String, String> params) {
         if (farmIdNotExist(params)) {
-            return new Paging<>(0L, Collections.emptyList());
+            return Collections.emptyList();
         }
         params.put("pigType", DoctorPig.PIG_TYPE.BOAR.getKey().toString());
 
@@ -127,7 +128,7 @@ public class DoctorSearches {
             }
             searchBoars.getData().addAll(tempSearchBoars.getData());
         }
-        return searchBoars;
+        return searchBoars.getData();
     }
 
     /**
