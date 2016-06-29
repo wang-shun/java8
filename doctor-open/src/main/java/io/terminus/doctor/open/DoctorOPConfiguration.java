@@ -19,6 +19,8 @@ import io.terminus.pampas.openplatform.annotations.EnableOpenPlatform;
 import io.terminus.parana.auth.core.AuthenticationConfiguration;
 import io.terminus.parana.config.ConfigCenter;
 import io.terminus.parana.web.msg.config.MsgWebConfig;
+import io.terminus.zookeeper.ZKClientFactory;
+import io.terminus.zookeeper.pubsub.Publisher;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.MessageSource;
@@ -81,5 +83,11 @@ public class DoctorOPConfiguration {
     public ServiceBetaStatusHandler serviceBetaStatusHandler(ConfigCenter configCenter,
                                                              DoctorServiceStatusWriteService doctorServiceStatusWriteService){
         return new ServiceBetaStatusHandlerImpl(configCenter, doctorServiceStatusWriteService);
+    }
+
+    @Bean(name = "publish2Pigmall")
+    public Publisher publish2PigmallBean(ZKClientFactory zkClientFactory,
+                                         @Value("${zookeeper.cacheTopic-pigmall}") String cacheTopicPigmall) throws Exception {
+        return new Publisher(zkClientFactory, cacheTopicPigmall);
     }
 }

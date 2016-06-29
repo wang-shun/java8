@@ -13,11 +13,10 @@ import io.terminus.parana.common.model.ParanaUser;
 import io.terminus.parana.common.utils.RespHelper;
 import io.terminus.parana.user.model.User;
 import io.terminus.parana.user.service.UserReadService;
-import io.terminus.zookeeper.ZKClientFactory;
 import io.terminus.zookeeper.pubsub.Publisher;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import java.util.Objects;
@@ -41,13 +40,12 @@ public class OpenUserEventListener implements EventListener {
                                  DoctorServiceReviewWriteService doctorServiceReviewWriteService,
                                  UserReadService<User> userReadService,
                                  ServiceBetaStatusHandler serviceBetaStatusHandler,
-                                 ZKClientFactory zkClientFactory,
-                                 @Value("${zookeeper.cacheTopic-pigmall}") String cacheTopicPigmall) throws Exception {
+                                 @Qualifier(value = "publish2Pigmall") Publisher publisher) {
         this.doctorServiceStatusWriteService = doctorServiceStatusWriteService;
         this.doctorServiceReviewWriteService = doctorServiceReviewWriteService;
         this.userReadService = userReadService;
         this.serviceBetaStatusHandler = serviceBetaStatusHandler;
-        publish2Pigmall = new Publisher(zkClientFactory, cacheTopicPigmall);
+        this.publish2Pigmall = publisher;
     }
 
     @Subscribe
