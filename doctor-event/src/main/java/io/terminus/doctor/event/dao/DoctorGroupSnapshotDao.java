@@ -13,4 +13,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class DoctorGroupSnapshotDao extends MyBatisDao<DoctorGroupSnapshot> {
 
+    public DoctorGroupSnapshot findGroupSnapshotByToEventId(Long toEventId) {
+        return getSqlSession().selectOne(sqlId("findGroupSnapshotByToEventId"), toEventId);
+    }
 }

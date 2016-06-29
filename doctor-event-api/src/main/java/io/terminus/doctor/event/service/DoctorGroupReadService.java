@@ -8,6 +8,7 @@ import io.terminus.doctor.event.dto.DoctorGroupSearchDto;
 import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
+import io.terminus.doctor.event.model.DoctorGroupSnapshot;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.validation.Valid;
@@ -49,7 +50,14 @@ public interface DoctorGroupReadService {
      * @param groupId 猪群id
      * @return 猪群镜像
      */
-    Response<DoctorGroupSnapShotInfo> findGroupSnapShotByGroupId(@NotNull(message = "groupId.not.null") Long groupId);
+    Response<DoctorGroupSnapShotInfo> findGroupSnapShotInfoByGroupId(@NotNull(message = "groupId.not.null") Long groupId);
+
+    /**
+     * 根据toEventId查询订单镜像
+     * @param toEventId toEventId
+     * @return 订单镜像
+     */
+    Response<DoctorGroupSnapshot> findGroupSnapShotByToEventId(@NotNull(message = "toEventId.not.null") Long toEventId);
 
     /**
      * 根据查询条件分页查询猪群
@@ -80,7 +88,7 @@ public interface DoctorGroupReadService {
      * @return 统计结果
      */
     Response<DoctorGroupCount> countFarmGroups(@NotNull(message = "orgId.not.null") Long orgId,
-                                              @NotNull(message = "farmId.not.null") Long farmId);
+                                               @NotNull(message = "farmId.not.null") Long farmId);
 
     /**
      * 分页查询猪群历史事件
@@ -93,4 +101,11 @@ public interface DoctorGroupReadService {
      */
     Response<Paging<DoctorGroupEvent>> pagingGroupEvent(@NotNull(message = "farmId.not.null") Long farmId,
                                                         Long groupId, Integer type, Integer pageNo, Integer size);
+
+    /**
+     * 根据事件id查询猪群事件
+     * @param eventId    事件id
+     * @return 猪群事件
+     */
+    Response<DoctorGroupEvent> findGroupEventById(@NotNull(message = "evenId.not.null") Long eventId);
 }

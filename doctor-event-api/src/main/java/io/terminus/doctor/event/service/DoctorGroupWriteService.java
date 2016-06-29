@@ -18,6 +18,7 @@ import io.terminus.doctor.event.model.DoctorGroupSnapshot;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
 
 import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 
 /**
  * Desc: 猪群卡片表写服务
@@ -105,6 +106,17 @@ public interface DoctorGroupWriteService {
      * @return 是否成功
      */
     Response<Boolean> groupEventTurnSeed(DoctorGroupDetail groupDetail, @Valid DoctorTurnSeedGroupInput turnSeed);
+
+    /**
+     * 回滚猪群事件, 回滚规则: 自动生成的事件不可回滚, 不是最新录入的事件需要先回滚上层事件后再回滚
+     * @param groupEvent 回滚的事件
+     * @param reveterId 回滚人id
+     * @param reveterName 回滚人姓名
+     * @return 是否成功
+     */
+    Response<Boolean> rollbackGroupEvent(@NotNull(message = "eventId.not.null") DoctorGroupEvent groupEvent,
+                                         @NotNull(message = "reveterId.not.null") Long reveterId,
+                                         String reveterName);
 
     /**
      * job调用, 用于每日更新日龄
