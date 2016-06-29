@@ -3,6 +3,7 @@ package io.terminus.doctor.event.handler.group;
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableMap;
 import io.terminus.common.exception.ServiceException;
+import io.terminus.common.utils.BeanMapper;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.enums.DataEventType;
 import io.terminus.doctor.common.event.CoreEventDispatcher;
@@ -143,7 +144,10 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
     //获取旧镜像
     protected DoctorGroupSnapShotInfo getOldSnapShotInfo(DoctorGroup group, DoctorGroupTrack groupTrack) {
         DoctorGroupEvent event = doctorGroupEventDao.findById(groupTrack.getRelEventId());
-        return new DoctorGroupSnapShotInfo(group, event, groupTrack);
+        return new DoctorGroupSnapShotInfo(
+                BeanMapper.map(group, DoctorGroup.class),
+                BeanMapper.map(event, DoctorGroupEvent.class),
+                BeanMapper.map(groupTrack, DoctorGroupTrack.class));
     }
 
     //创建猪群镜像信息
