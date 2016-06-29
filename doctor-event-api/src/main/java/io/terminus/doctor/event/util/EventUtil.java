@@ -82,6 +82,9 @@ public class EventUtil {
     }
 
     public static long getPrice(long amount, int quantity) {
+        if (quantity == 0) {
+            return 0L;
+        }
         return amount / quantity;
     }
 }
