@@ -12,6 +12,7 @@ import org.joda.time.Days;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkState;
 import static java.util.Objects.isNull;
@@ -62,6 +63,8 @@ public class DoctorPigInfoDto implements Serializable{
 
     private String extraTrack;
 
+    private Map<String,Object> extraTrackMap;
+
     private Date updatedAt;
 
     public static DoctorPigInfoDto buildDoctorPigInfoDto(DoctorPig doctorPig, DoctorPigTrack doctorPigTrack){
@@ -80,6 +83,7 @@ public class DoctorPigInfoDto implements Serializable{
                     .barnId(doctorPigTrack.getCurrentBarnId())
                     .barnName(doctorPigTrack.getCurrentBarnName())
                     .extraTrack(doctorPigTrack.getExtra())
+                    .extraTrackMap(doctorPigTrack.getExtraMap())
                     .updatedAt(doctorPigTrack.getUpdatedAt());
         }
         return builder.build();
