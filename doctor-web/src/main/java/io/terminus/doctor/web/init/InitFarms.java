@@ -9,8 +9,10 @@ import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.utils.Joiners;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.common.utils.MapBuilder;
+import io.terminus.doctor.basic.service.DoctorBasicReadService;
 import io.terminus.doctor.basic.service.DoctorBasicWriteService;
 import io.terminus.doctor.common.utils.DateUtil;
+import io.terminus.doctor.common.utils.RandomUtil;
 import io.terminus.doctor.event.dto.DoctorGroupDetail;
 import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
 import io.terminus.doctor.event.dto.DoctorPigInfoDetailDto;
@@ -69,6 +71,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static io.terminus.common.utils.Arguments.isEmpty;
@@ -99,6 +102,8 @@ public class InitFarms {
     private DoctorFarmReadService doctorFarmReadService;
     @Autowired
     private DoctorFarmWriteService doctorFarmWriteService;
+    @Autowired
+    private DoctorBasicReadService doctorBasicReadService;
     @Autowired
     private DoctorBasicWriteService doctorBasicWriteService;
     @Autowired
@@ -176,6 +181,9 @@ public class InitFarms {
         //3. 创建staff
         DoctorStaff staff = initStaff(farm, user);
 
+        //4. 初始化客户
+        initCustomer(farm, user);
+
         //5. 创建猪舍
         initBarns(farm, staff);
 
@@ -252,6 +260,17 @@ public class InitFarms {
         Long staffId = or500(doctorStaffWriteService.createDoctorStaff(staff));
         staff.setId(staffId);
         return staff;
+    }
+
+    private void initCustomer(DoctorFarm farm, User user) {
+        or500(doctorBasicReadService.findCustomersByFarmId(INIT_ID)).forEach(customer -> {
+            customer.setName(customer.getName() + RandomUtil.random(0, 10) + UUID.randomUUID().toString().substring(0, 2));
+            customer.setFarmId(farm.getId());
+            customer.setFarmName(farm.getName());
+            customer.setCreatorId(user.getId());
+            customer.setCreatorName(user.getName());
+            doctorBasicWriteService.createCustomer(customer);
+        });
     }
 
     private void initBarns(DoctorFarm farm, DoctorStaff staff) {
