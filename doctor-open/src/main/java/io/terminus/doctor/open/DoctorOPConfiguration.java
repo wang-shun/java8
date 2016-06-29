@@ -87,7 +87,7 @@ public class DoctorOPConfiguration {
 
     @Bean
     public Publisher publish2Pigmall(ZKClientFactory zkClientFactory,
-                                         @Value("${zookeeper.cacheTopic-pigmall}") String cacheTopicPigmall) throws Exception {
+                                     @Value("${zookeeper.cacheTopic-pigmall:pigmall.cache.user.clear}") String cacheTopicPigmall) throws Exception {
         return new Publisher(zkClientFactory, cacheTopicPigmall);
     }
 }
