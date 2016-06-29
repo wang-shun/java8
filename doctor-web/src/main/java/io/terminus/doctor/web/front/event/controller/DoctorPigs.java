@@ -107,6 +107,7 @@ public class DoctorPigs {
                 .pigStatus(dto.getDoctorPigTrack().getStatus())
                 .dayAge(Days.daysBetween(new DateTime(dto.getDoctorPig().getBirthDate()), DateTime.now()).getDays())
                 .parity(dto.getDoctorPigTrack().getCurrentParity()).entryDate(dto.getDoctorPig().getInFarmDate())
+                .birthDate(dto.getDoctorPig().getBirthDate())
                 .doctorPigEvents(dto.getDoctorPigEvents())
                 .build();
         return doctorSowDetailDto;
