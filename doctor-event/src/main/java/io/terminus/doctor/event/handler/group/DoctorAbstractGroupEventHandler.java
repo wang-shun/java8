@@ -8,6 +8,7 @@ import io.terminus.doctor.common.enums.DataEventType;
 import io.terminus.doctor.common.event.CoreEventDispatcher;
 import io.terminus.doctor.common.event.DataEvent;
 import io.terminus.doctor.common.utils.DateUtil;
+import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorGroupSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
 import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
@@ -43,6 +44,7 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
     private final DoctorGroupSnapshotDao doctorGroupSnapshotDao;
     private final DoctorGroupTrackDao doctorGroupTrackDao;
     private final CoreEventDispatcher coreEventDispatcher;
+    private final DoctorGroupEventDao doctorGroupEventDao;
 
     @Autowired(required = false)
     private Publisher publisher;
@@ -50,10 +52,12 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
     @Autowired
     public DoctorAbstractGroupEventHandler(DoctorGroupSnapshotDao doctorGroupSnapshotDao,
                                            DoctorGroupTrackDao doctorGroupTrackDao,
-                                           CoreEventDispatcher coreEventDispatcher) {
+                                           CoreEventDispatcher coreEventDispatcher,
+                                           DoctorGroupEventDao doctorGroupEventDao) {
         this.doctorGroupSnapshotDao = doctorGroupSnapshotDao;
         this.doctorGroupTrackDao = doctorGroupTrackDao;
         this.coreEventDispatcher = coreEventDispatcher;
+        this.doctorGroupEventDao = doctorGroupEventDao;
     }
 
     @Override
@@ -136,21 +140,33 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
         doctorGroupTrackDao.update(groupTrack);
     }
 
+    //获取旧镜像
+    protected DoctorGroupSnapShotInfo getOldSnapShotInfo(DoctorGroup group, DoctorGroupTrack groupTrack) {
+        DoctorGroupEvent event = doctorGroupEventDao.findById(groupTrack.getRelEventId());
+        return new DoctorGroupSnapShotInfo(group, event, groupTrack);
+    }
+
     //创建猪群镜像信息
-    protected void createGroupSnapShot(DoctorGroup group, DoctorGroupEvent groupEvent, DoctorGroupTrack groupTrack, GroupEventType eventType) {
+    protected void createGroupSnapShot(DoctorGroupSnapShotInfo oldShot, DoctorGroupSnapShotInfo newShot, GroupEventType eventType) {
         DoctorGroupSnapshot groupSnapshot = new DoctorGroupSnapshot();
         groupSnapshot.setEventType(eventType.getValue());  //猪群事件类型
 
-        groupSnapshot.setFromGroupId();
-        groupSnapshot.setFromEventId();
-        groupSnapshot.setFromInfo();
+        //录入前的数据
+        groupSnapshot.setFromGroupId(oldShot.getGroup().getId());
+        groupSnapshot.setFromEventId(oldShot.getGroupEvent().getId());
+        groupSnapshot.setFromInfo(JSON_MAPPER.toJson(DoctorGroupSnapShotInfo.builder()
+                .group(oldShot.getGroup())
+                .groupEvent(oldShot.getGroupEvent())
+                .groupTrack(oldShot.getGroupTrack())
+                .build()));
 
-        groupSnapshot.setToGroupId(group.getId());
-        groupSnapshot.setToEventId(groupEvent.getId());
+        //录入后的数据
+        groupSnapshot.setToGroupId(newShot.getGroup().getId());
+        groupSnapshot.setToEventId(newShot.getGroupEvent().getId());
         groupSnapshot.setToInfo(JSON_MAPPER.toJson(DoctorGroupSnapShotInfo.builder()
-                .group(group)
-                .groupEvent(groupEvent)
-                .groupTrack(groupTrack)
+                .group(newShot.getGroup())
+                .groupEvent(newShot.getGroupEvent())
+                .groupTrack(newShot.getGroupTrack())
                 .build()));
         doctorGroupSnapshotDao.create(groupSnapshot);
     }

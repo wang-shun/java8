@@ -6,6 +6,7 @@ import io.terminus.doctor.event.dao.DoctorGroupDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorGroupSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
+import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
 import io.terminus.doctor.event.dto.event.group.DoctorCloseGroupEvent;
 import io.terminus.doctor.event.dto.event.group.input.BaseGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorCloseGroupInput;
@@ -36,7 +37,7 @@ public class DoctorCloseGroupEventHandler extends DoctorAbstractGroupEventHandle
                                         CoreEventDispatcher coreEventDispatcher,
                                         DoctorGroupDao doctorGroupDao,
                                         DoctorGroupEventDao doctorGroupEventDao) {
-        super(doctorGroupSnapshotDao, doctorGroupTrackDao, coreEventDispatcher);
+        super(doctorGroupSnapshotDao, doctorGroupTrackDao, coreEventDispatcher, doctorGroupEventDao);
         this.doctorGroupDao = doctorGroupDao;
         this.doctorGroupEventDao = doctorGroupEventDao;
     }
@@ -44,6 +45,7 @@ public class DoctorCloseGroupEventHandler extends DoctorAbstractGroupEventHandle
 
     @Override
     protected <I extends BaseGroupInput> void handleEvent(DoctorGroup group, DoctorGroupTrack groupTrack, I input) {
+        DoctorGroupSnapShotInfo oldShot = getOldSnapShotInfo(group, groupTrack);
         DoctorCloseGroupInput close = (DoctorCloseGroupInput) input;
 
         //1.转换下信息
@@ -62,7 +64,7 @@ public class DoctorCloseGroupEventHandler extends DoctorAbstractGroupEventHandle
         doctorGroupDao.update(group);
 
         //5.创建镜像
-        createGroupSnapShot(group, event, groupTrack, GroupEventType.CLOSE);
+        createGroupSnapShot(oldShot, new DoctorGroupSnapShotInfo(group, event, groupTrack), GroupEventType.CLOSE);
 
         //发布统计事件
         publishCountGroupEvent(group.getOrgId(), group.getFarmId());

@@ -6,6 +6,7 @@ import io.terminus.doctor.common.event.CoreEventDispatcher;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorGroupSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
+import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
 import io.terminus.doctor.event.dto.event.group.DoctorMoveInGroupEvent;
 import io.terminus.doctor.event.dto.event.group.input.BaseGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorMoveInGroupInput;
@@ -37,13 +38,14 @@ public class DoctorMoveInGroupEventHandler extends DoctorAbstractGroupEventHandl
                                          DoctorGroupTrackDao doctorGroupTrackDao,
                                          CoreEventDispatcher coreEventDispatcher,
                                          DoctorGroupEventDao doctorGroupEventDao) {
-        super(doctorGroupSnapshotDao, doctorGroupTrackDao, coreEventDispatcher);
+        super(doctorGroupSnapshotDao, doctorGroupTrackDao, coreEventDispatcher, doctorGroupEventDao);
         this.doctorGroupEventDao = doctorGroupEventDao;
     }
 
 
     @Override
     protected <I extends BaseGroupInput> void handleEvent(DoctorGroup group, DoctorGroupTrack groupTrack, I input) {
+        DoctorGroupSnapShotInfo oldShot = getOldSnapShotInfo(group, groupTrack);
         DoctorMoveInGroupInput moveIn = (DoctorMoveInGroupInput) input;
 
         checkQuantityEqual(moveIn.getQuantity(), moveIn.getBoarQty(), moveIn.getSowQty());
@@ -80,7 +82,7 @@ public class DoctorMoveInGroupEventHandler extends DoctorAbstractGroupEventHandl
         updateGroupTrack(groupTrack, event);
 
         //4.创建镜像
-        createGroupSnapShot(group, event, groupTrack, GroupEventType.MOVE_IN);
+        createGroupSnapShot(oldShot, new DoctorGroupSnapShotInfo(group, event, groupTrack), GroupEventType.MOVE_IN);
 
         //发布统计事件
         publishCountGroupEvent(group.getOrgId(), group.getFarmId());

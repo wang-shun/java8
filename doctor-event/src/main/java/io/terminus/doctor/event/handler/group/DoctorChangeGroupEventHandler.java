@@ -6,6 +6,7 @@ import io.terminus.doctor.common.event.CoreEventDispatcher;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorGroupSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
+import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
 import io.terminus.doctor.event.dto.event.group.DoctorChangeGroupEvent;
 import io.terminus.doctor.event.dto.event.group.input.BaseGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorChangeGroupInput;
@@ -39,13 +40,14 @@ public class DoctorChangeGroupEventHandler extends DoctorAbstractGroupEventHandl
                                          CoreEventDispatcher coreEventDispatcher,
                                          DoctorGroupEventDao doctorGroupEventDao,
                                          DoctorCommonGroupEventHandler doctorCommonGroupEventHandler) {
-        super(doctorGroupSnapshotDao, doctorGroupTrackDao, coreEventDispatcher);
+        super(doctorGroupSnapshotDao, doctorGroupTrackDao, coreEventDispatcher, doctorGroupEventDao);
         this.doctorGroupEventDao = doctorGroupEventDao;
         this.doctorCommonGroupEventHandler = doctorCommonGroupEventHandler;
     }
 
     @Override
     protected <I extends BaseGroupInput> void handleEvent(DoctorGroup group, DoctorGroupTrack groupTrack, I input) {
+        DoctorGroupSnapShotInfo oldShot = getOldSnapShotInfo(group, groupTrack);
         DoctorChangeGroupInput change = (DoctorChangeGroupInput) input;
 
         checkQuantity(groupTrack.getQuantity(), change.getQuantity());
@@ -83,7 +85,7 @@ public class DoctorChangeGroupEventHandler extends DoctorAbstractGroupEventHandl
         updateGroupTrack(groupTrack, event);
 
         //4.创建镜像
-        createGroupSnapShot(group, event, groupTrack, GroupEventType.CHANGE);
+        createGroupSnapShot(oldShot, new DoctorGroupSnapShotInfo(group, event, groupTrack), GroupEventType.CHANGE);
 
         //5.判断变动数量, 如果 = 猪群数量, 触发关闭猪群事件
         if (Objects.equals(oldQuantity, change.getQuantity())) {
