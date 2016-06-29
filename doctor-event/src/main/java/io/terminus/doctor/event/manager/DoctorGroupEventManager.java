@@ -104,15 +104,11 @@ public class DoctorGroupEventManager {
     }
 
     //校验能否回滚
-    private void checkCanRollback(DoctorGroupEvent groupEvent) {
-        DoctorGroupEvent event = doctorGroupEventDao.findById(groupEvent.getId());
-        if (event == null) {
-            throw new ServiceException("group.event.not.found");
-        }
+    private void checkCanRollback(DoctorGroupEvent event) {
         DoctorGroupTrack groupTrack = doctorGroupTrackDao.findByGroupId(event.getGroupId());
 
         //判断此事件是否是最新事件
-        if (!Objects.equals(groupEvent.getId(), groupTrack.getRelEventId())) {
+        if (!Objects.equals(event.getId(), groupTrack.getRelEventId())) {
             log.error("group event not the latest, can not rollback, event:{}", event);
             throw new ServiceException("group.event.not.the.latest");
         }
