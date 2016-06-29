@@ -24,5 +24,7 @@ public class DoctorAbortionDto implements Serializable{
 
     private Date abortionDate;  // 流产日期
 
-    private String abortionReason;  //流产原因
+    private Long abortionReasonId;  // 流产原因
+
+    private String abortionReasonName;  //流产原因
 }

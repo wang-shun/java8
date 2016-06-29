@@ -113,6 +113,8 @@ public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteServic
     @Override
     public Response<Long> diseaseEvent(DoctorDiseaseDto doctorDiseaseDto, DoctorBasicInputInfoDto doctorBasicInputInfoDto) {
         try{
+            doctorDiseaseDto.setDiseaseStaff(doctorBasicInputInfoDto.getStaffName());
+
             Map<String,Object> dto = Maps.newHashMap();
             BeanMapper.copy(doctorDiseaseDto, dto);
 
@@ -151,6 +153,9 @@ public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteServic
     @Override
     public Response<Long> vaccinationEvent(DoctorVaccinationDto doctorVaccinationDto, DoctorBasicInputInfoDto doctorBasicInputInfoDto) {
         try{
+            doctorVaccinationDto.setVaccinationStaffId(doctorBasicInputInfoDto.getStaffId());
+            doctorVaccinationDto.setVaccinationStaffName(doctorBasicInputInfoDto.getStaffName());
+
             Map<String,Object> dto = Maps.newHashMap();
             BeanMapper.copy(doctorVaccinationDto, dto);
 
@@ -277,6 +282,8 @@ public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteServic
     @Override
     public Response<Long> sowMatingEvent(DoctorMatingDto doctorMatingDto, DoctorBasicInputInfoDto doctorBasicInputInfoDto) {
         try{
+            doctorMatingDto.setMatingStaff(doctorBasicInputInfoDto.getStaffName());
+
             Map<String,Object> dto = Maps.newHashMap();
             BeanMapper.copy(doctorMatingDto, dto);
 
@@ -324,6 +331,9 @@ public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteServic
     @Override
     public Response<Long> sowFarrowingEvent(DoctorFarrowingDto doctorFarrowingDto, DoctorBasicInputInfoDto doctorBasicInputInfoDto) {
         try{
+            doctorFarrowingDto.setFarrowStaff1(doctorBasicInputInfoDto.getStaffName());
+            doctorFarrowingDto.setFarrowStaff2(doctorBasicInputInfoDto.getStaffName());
+
             // validate count
             checkState(Objects.equals(
                             doctorFarrowingDto.getFarrowingLiveCount(),
