@@ -2,6 +2,7 @@ package io.terminus.doctor.open.listener;
 
 import com.google.common.base.Throwables;
 import com.google.common.eventbus.Subscribe;
+import io.terminus.doctor.common.enums.PigmallCacheMessage;
 import io.terminus.doctor.common.enums.UserType;
 import io.terminus.doctor.common.event.CacheEvent;
 import io.terminus.doctor.common.event.EventListener;
@@ -65,7 +66,7 @@ public class OpenUserEventListener implements EventListener {
 
         //向电商系统分发注册事件
         try {
-            publish2Pigmall.publish(CacheEvent.toBytes(CacheEvent.make(6L, userId)));
+            publish2Pigmall.publish(CacheEvent.toBytes(CacheEvent.make(PigmallCacheMessage.REGISTER_FROM_PIGDOCTOR.getValue(), userId)));
         } catch (Exception e) {
             log.error("failed to publish cache event, cause: {}", Throwables.getStackTraceAsString(e));
         }
