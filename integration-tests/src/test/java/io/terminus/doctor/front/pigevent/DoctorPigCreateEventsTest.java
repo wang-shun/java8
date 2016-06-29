@@ -609,7 +609,7 @@ public class DoctorPigCreateEventsTest extends BaseFrontWebTest{
                 .param("pigId", pigId).param("eventType", PigEvent.ABORTION.getKey())
                 .param("sowInfoDtoJson", JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(
                         DoctorAbortionDto.builder()
-                                .abortionDate(new Date()).abortionReason("abortionReason")
+                                .abortionDate(new Date()).abortionReasonName("abortionReason")
                                 .build()
                 ))
                 .httpEntity();
