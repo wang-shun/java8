@@ -6,6 +6,7 @@ import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorGroupSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
+import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
 import io.terminus.doctor.event.dto.event.group.DoctorTransGroupEvent;
 import io.terminus.doctor.event.dto.event.group.input.BaseGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorNewGroupInput;
@@ -49,7 +50,7 @@ public class DoctorTransGroupEventHandler extends DoctorAbstractGroupEventHandle
                                         DoctorCommonGroupEventHandler doctorCommonGroupEventHandler,
                                         DoctorGroupManager doctorGroupManager,
                                         DoctorBarnReadService doctorBarnReadService) {
-        super(doctorGroupSnapshotDao, doctorGroupTrackDao, coreEventDispatcher);
+        super(doctorGroupSnapshotDao, doctorGroupTrackDao, coreEventDispatcher, doctorGroupEventDao);
         this.doctorGroupEventDao = doctorGroupEventDao;
         this.doctorCommonGroupEventHandler = doctorCommonGroupEventHandler;
         this.doctorGroupManager = doctorGroupManager;
@@ -58,6 +59,7 @@ public class DoctorTransGroupEventHandler extends DoctorAbstractGroupEventHandle
 
     @Override
     protected <I extends BaseGroupInput> void handleEvent(DoctorGroup group, DoctorGroupTrack groupTrack, I input) {
+        DoctorGroupSnapShotInfo oldShot = getOldSnapShotInfo(group, groupTrack);
         DoctorTransGroupInput transGroup = (DoctorTransGroupInput) input;
 
         checkQuantity(groupTrack.getQuantity(), transGroup.getQuantity());
@@ -91,8 +93,8 @@ public class DoctorTransGroupEventHandler extends DoctorAbstractGroupEventHandle
 
         updateGroupTrack(groupTrack, event);
 
-        //4.创建镜像 todo 其他字段
-        createGroupSnapShot(group, event, groupTrack, GroupEventType.TRANS_GROUP);
+        //4.创建镜像
+        createGroupSnapShot(oldShot, new DoctorGroupSnapShotInfo(group, event, groupTrack), GroupEventType.TRANS_GROUP);
 
         //5.判断转群数量, 如果 = 猪群数量, 触发关闭猪群事件
         if (Objects.equals(oldQuantity, transGroup.getQuantity())) {

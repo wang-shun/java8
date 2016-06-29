@@ -5,6 +5,7 @@ import io.terminus.doctor.common.event.CoreEventDispatcher;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorGroupSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
+import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
 import io.terminus.doctor.event.dto.event.group.DoctorLiveStockGroupEvent;
 import io.terminus.doctor.event.dto.event.group.input.BaseGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorLiveStockGroupInput;
@@ -33,13 +34,14 @@ public class DoctorLiveStockGroupEventHandler extends DoctorAbstractGroupEventHa
                                             DoctorGroupTrackDao doctorGroupTrackDao,
                                             CoreEventDispatcher coreEventDispatcher,
                                             DoctorGroupEventDao doctorGroupEventDao) {
-        super(doctorGroupSnapshotDao, doctorGroupTrackDao, coreEventDispatcher);
+        super(doctorGroupSnapshotDao, doctorGroupTrackDao, coreEventDispatcher, doctorGroupEventDao);
         this.doctorGroupEventDao = doctorGroupEventDao;
     }
 
 
     @Override
     protected <I extends BaseGroupInput> void handleEvent(DoctorGroup group, DoctorGroupTrack groupTrack, I input) {
+        DoctorGroupSnapShotInfo oldShot = getOldSnapShotInfo(group, groupTrack);
         DoctorLiveStockGroupInput liveStock = (DoctorLiveStockGroupInput) input;
 
         //1.转换下猪只存栏信息
@@ -58,6 +60,6 @@ public class DoctorLiveStockGroupEventHandler extends DoctorAbstractGroupEventHa
         updateGroupTrack(groupTrack, event);
 
         //4.创建镜像
-        createGroupSnapShot(group, event, groupTrack, GroupEventType.LIVE_STOCK);
+        createGroupSnapShot(oldShot, new DoctorGroupSnapShotInfo(group, event, groupTrack), GroupEventType.LIVE_STOCK);
     }
 }

@@ -214,6 +214,22 @@ public class DoctorGroupWriteServiceImpl implements DoctorGroupWriteService {
     }
 
     @Override
+    public Response<Boolean> rollbackGroupEvent(DoctorGroupEvent groupEvent, Long reveterId, String reveterName) {
+        try {
+            doctorGroupEventManager.rollbackEvent(groupEvent, reveterId, reveterName);
+            return Response.ok(Boolean.TRUE);
+        } catch (ServiceException e) {
+            log.error("rollback group event failed, groupEvent:{}, reveterId:{}, reveterName:{}, cause:{}",
+                    groupEvent, reveterId, reveterName, Throwables.getStackTraceAsString(e));
+            return Response.fail(e.getMessage());
+        } catch (Exception e) {
+            log.error("rollback group event failed, groupEvent:{}, reveterId:{}, reveterName:{}, cause:{}",
+                    groupEvent, reveterId, reveterName, Throwables.getStackTraceAsString(e));
+            return Response.fail("group.event.rollback.fail");
+        }
+    }
+
+    @Override
     public Response<Boolean> incrDayAge() {
         try {
             List<DoctorGroup> groups = doctorGroupDao.fingByStatus(DoctorGroup.Status.CREATED.getValue());

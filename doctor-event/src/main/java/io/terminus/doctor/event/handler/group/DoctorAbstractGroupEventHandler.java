@@ -3,11 +3,13 @@ package io.terminus.doctor.event.handler.group;
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableMap;
 import io.terminus.common.exception.ServiceException;
+import io.terminus.common.utils.BeanMapper;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.enums.DataEventType;
 import io.terminus.doctor.common.event.CoreEventDispatcher;
 import io.terminus.doctor.common.event.DataEvent;
 import io.terminus.doctor.common.utils.DateUtil;
+import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorGroupSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
 import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
@@ -38,11 +40,12 @@ import static io.terminus.common.utils.Arguments.notNull;
 @Slf4j
 public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEventHandler {
 
-    private static final JsonMapper JSON_MAPPER = JsonMapper.nonEmptyMapper();
+    protected static final JsonMapper JSON_MAPPER = JsonMapper.nonEmptyMapper();
 
     private final DoctorGroupSnapshotDao doctorGroupSnapshotDao;
     private final DoctorGroupTrackDao doctorGroupTrackDao;
     private final CoreEventDispatcher coreEventDispatcher;
+    private final DoctorGroupEventDao doctorGroupEventDao;
 
     @Autowired(required = false)
     private Publisher publisher;
@@ -50,10 +53,12 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
     @Autowired
     public DoctorAbstractGroupEventHandler(DoctorGroupSnapshotDao doctorGroupSnapshotDao,
                                            DoctorGroupTrackDao doctorGroupTrackDao,
-                                           CoreEventDispatcher coreEventDispatcher) {
+                                           CoreEventDispatcher coreEventDispatcher,
+                                           DoctorGroupEventDao doctorGroupEventDao) {
         this.doctorGroupSnapshotDao = doctorGroupSnapshotDao;
         this.doctorGroupTrackDao = doctorGroupTrackDao;
         this.coreEventDispatcher = coreEventDispatcher;
+        this.doctorGroupEventDao = doctorGroupEventDao;
     }
 
     @Override
@@ -136,16 +141,36 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
         doctorGroupTrackDao.update(groupTrack);
     }
 
+    //获取旧镜像
+    protected DoctorGroupSnapShotInfo getOldSnapShotInfo(DoctorGroup group, DoctorGroupTrack groupTrack) {
+        DoctorGroupEvent event = doctorGroupEventDao.findById(groupTrack.getRelEventId());
+        return new DoctorGroupSnapShotInfo(
+                BeanMapper.map(group, DoctorGroup.class),
+                BeanMapper.map(event, DoctorGroupEvent.class),
+                BeanMapper.map(groupTrack, DoctorGroupTrack.class));
+    }
+
     //创建猪群镜像信息
-    protected void createGroupSnapShot(DoctorGroup group, DoctorGroupEvent groupEvent, DoctorGroupTrack groupTrack, GroupEventType eventType) {
+    protected void createGroupSnapShot(DoctorGroupSnapShotInfo oldShot, DoctorGroupSnapShotInfo newShot, GroupEventType eventType) {
         DoctorGroupSnapshot groupSnapshot = new DoctorGroupSnapshot();
         groupSnapshot.setEventType(eventType.getValue());  //猪群事件类型
-        groupSnapshot.setToGroupId(group.getId());
-        groupSnapshot.setToEventId(groupEvent.getId());
+
+        //录入前的数据
+        groupSnapshot.setFromGroupId(oldShot.getGroup().getId());
+        groupSnapshot.setFromEventId(oldShot.getGroupEvent().getId());
+        groupSnapshot.setFromInfo(JSON_MAPPER.toJson(DoctorGroupSnapShotInfo.builder()
+                .group(oldShot.getGroup())
+                .groupEvent(oldShot.getGroupEvent())
+                .groupTrack(oldShot.getGroupTrack())
+                .build()));
+
+        //录入后的数据
+        groupSnapshot.setToGroupId(newShot.getGroup().getId());
+        groupSnapshot.setToEventId(newShot.getGroupEvent().getId());
         groupSnapshot.setToInfo(JSON_MAPPER.toJson(DoctorGroupSnapShotInfo.builder()
-                .group(group)
-                .groupEvent(groupEvent)
-                .groupTrack(groupTrack)
+                .group(newShot.getGroup())
+                .groupEvent(newShot.getGroupEvent())
+                .groupTrack(newShot.getGroupTrack())
                 .build()));
         doctorGroupSnapshotDao.create(groupSnapshot);
     }

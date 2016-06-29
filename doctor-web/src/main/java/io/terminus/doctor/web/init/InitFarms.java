@@ -181,8 +181,9 @@ public class InitFarms {
         //3. 创建staff
         DoctorStaff staff = initStaff(farm, user);
 
-        //4. 初始化客户
+        //4. 初始化客户与变动原因
         initCustomer(farm, user);
+        initChangeReason(farm);
 
         //5. 创建猪舍
         initBarns(farm, staff);
@@ -260,6 +261,13 @@ public class InitFarms {
         Long staffId = or500(doctorStaffWriteService.createDoctorStaff(staff));
         staff.setId(staffId);
         return staff;
+    }
+
+    private void initChangeReason(DoctorFarm farm) {
+        or500(doctorBasicReadService.findChangeReasonByFarmId(INIT_ID)).forEach(reason -> {
+            reason.setFarmId(farm.getId());
+            or500(doctorBasicWriteService.createChangeReason(reason));
+        });
     }
 
     private void initCustomer(DoctorFarm farm, User user) {

@@ -70,5 +70,10 @@
         DELETE FROM <include refid="tb"/>
         WHERE id = #{id}
     </delete>
-    
+
+    <select id="findGroupSnapshotByToEventId" parameterType="long" resultMap="DoctorGroupSnapshotMap" >
+        SELECT <include refid="cols_all" />
+        FROM <include refid="tb" />
+        WHERE to_event_id = #{toEventId}
+    </select>
 </mapper>

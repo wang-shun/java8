@@ -79,4 +79,10 @@
         FROM <include refid="tb" />
         WHERE farm_id = #{farmId} AND change_type_id = #{changeTypeId}
     </select>
+
+    <select id="findByFarmId" parameterType="long" resultMap="DoctorChangeReasonMap" >
+        SELECT <include refid="cols_all" />
+        FROM <include refid="tb" />
+        WHERE farm_id = #{farmId}
+    </select>
 </mapper>
