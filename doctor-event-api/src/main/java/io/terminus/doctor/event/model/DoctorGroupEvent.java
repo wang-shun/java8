@@ -1,6 +1,5 @@
 package io.terminus.doctor.event.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.event.dto.event.group.BaseGroupEvent;
 import lombok.AccessLevel;
@@ -131,7 +130,6 @@ public class DoctorGroupEvent<T extends BaseGroupEvent> implements Serializable 
     /**
      * 具体事件的内容通过json存储
      */
-    @JsonIgnore
     private String extra;
 
     /**

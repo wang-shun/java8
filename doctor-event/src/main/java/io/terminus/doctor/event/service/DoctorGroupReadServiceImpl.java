@@ -21,11 +21,13 @@ import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
 import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
+import io.terminus.doctor.event.model.DoctorGroupSnapshot;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.validation.constraints.NotNull;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -91,7 +93,7 @@ public class DoctorGroupReadServiceImpl implements DoctorGroupReadService {
     }
 
     @Override
-    public Response<DoctorGroupSnapShotInfo> findGroupSnapShotByGroupId(Long groupId) {
+    public Response<DoctorGroupSnapShotInfo> findGroupSnapShotInfoByGroupId(Long groupId) {
         try {
             DoctorGroup group = checkGroupExist(groupId);
             DoctorGroupTrack groupTrack = checkGroupTrackExist(groupId);
@@ -102,6 +104,16 @@ public class DoctorGroupReadServiceImpl implements DoctorGroupReadService {
         } catch (Exception e) {
             log.error("find group snapshot by groupId failed, groupId:{}, cause:{}", groupId, Throwables.getStackTraceAsString(e));
             return Response.fail("group.find.fail");
+        }
+    }
+
+    @Override
+    public Response<DoctorGroupSnapshot> findGroupSnapShotByToEventId(Long toEventId) {
+        try {
+            return Response.ok(doctorGroupSnapshotDao.findGroupSnapshotByToEventId(toEventId));
+        } catch (Exception e) {
+            log.error("find group snapshot by toEventId failed, toEventId:{}, cause:{}", toEventId, Throwables.getStackTraceAsString(e));
+            return Response.fail("group.snapshot.find.fail");
         }
     }
 
@@ -191,6 +203,16 @@ public class DoctorGroupReadServiceImpl implements DoctorGroupReadService {
             log.error("paging group event failed, farmId:{}, groupId:{}, type:{}, pageNo:{}, size:{}, cause:{}",
                     farmId, groupId, type, pageNo, size, Throwables.getStackTraceAsString(e));
             return Response.fail("group.event.paging.fail");
+        }
+    }
+
+    @Override
+    public Response<DoctorGroupEvent> findGroupEventById(@NotNull(message = "evenId.not.null") Long eventId) {
+        try {
+            return Response.ok(doctorGroupEventDao.findById(eventId));
+        } catch (Exception e) {
+            log.error("find group event failed, eventId:{}, cause:{}", eventId, Throwables.getStackTraceAsString(e));
+            return Response.fail("group.event.find.fail");
         }
     }
 

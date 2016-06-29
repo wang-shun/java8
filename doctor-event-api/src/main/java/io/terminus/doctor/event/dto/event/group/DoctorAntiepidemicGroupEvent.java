@@ -41,7 +41,7 @@ public class DoctorAntiepidemicGroupEvent extends BaseGroupEvent implements Seri
     /**
      * 防疫项目名称
      */
-    private Long vaccinItemName;
+    private String vaccinItemName;
 
     /**
      *  防疫人员id

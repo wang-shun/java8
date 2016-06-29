@@ -9,8 +9,10 @@ import io.terminus.doctor.event.dto.event.group.input.DoctorNewGroupInput;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.service.DoctorGroupReadService;
+import io.terminus.doctor.event.service.DoctorGroupWriteService;
 import io.terminus.doctor.web.front.auth.DoctorFarmAuthCenter;
 import io.terminus.doctor.web.front.event.service.DoctorGroupWebService;
+import io.terminus.pampas.common.UserUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -38,14 +40,17 @@ public class DoctorGroupEvents {
     private final DoctorGroupWebService doctorGroupWebService;
     private final DoctorGroupReadService doctorGroupReadService;
     private final DoctorFarmAuthCenter doctorFarmAuthCenter;
+    private final DoctorGroupWriteService doctorGroupWriteService;
 
     @Autowired
     public DoctorGroupEvents(DoctorGroupWebService doctorGroupWebService,
                              DoctorGroupReadService doctorGroupReadService,
-                             DoctorFarmAuthCenter doctorFarmAuthCenter) {
+                             DoctorFarmAuthCenter doctorFarmAuthCenter,
+                             DoctorGroupWriteService doctorGroupWriteService) {
         this.doctorGroupWebService = doctorGroupWebService;
         this.doctorGroupReadService = doctorGroupReadService;
         this.doctorFarmAuthCenter = doctorFarmAuthCenter;
+        this.doctorGroupWriteService = doctorGroupWriteService;
     }
 
     /**
@@ -131,7 +136,7 @@ public class DoctorGroupEvents {
      */
     @RequestMapping(value = "/snapshot", method = RequestMethod.GET)
     public DoctorGroupSnapShotInfo findGroupSnapShotByGroupId(@RequestParam("groupId") Long groupId) {
-        return RespHelper.or500(doctorGroupReadService.findGroupSnapShotByGroupId(groupId));
+        return RespHelper.or500(doctorGroupReadService.findGroupSnapShotInfoByGroupId(groupId));
     }
 
     /**
@@ -144,5 +149,19 @@ public class DoctorGroupEvents {
         return RespHelper.or500(doctorGroupReadService.findGroupsByFarmId(farmId)).stream()
                 .filter(group -> Objects.equals(DoctorGroup.Status.CREATED.getValue(), group.getStatus()))
                 .collect(Collectors.toList());
+    }
+
+    /**
+     * 回滚猪群事件
+     * @param eventId 回滚事件的id
+     * @return 猪群镜像
+     */
+    @RequestMapping(value = "/rollback", method = RequestMethod.GET)
+    public Boolean rolllbackGroupEvent(@RequestParam("eventId") Long eventId) {
+        DoctorGroupEvent event = RespHelper.or500(doctorGroupReadService.findGroupEventById(eventId));
+
+        //权限中心校验权限
+        doctorFarmAuthCenter.checkFarmAuth(event.getFarmId());
+        return RespHelper.or500(doctorGroupWriteService.rollbackGroupEvent(event, UserUtil.getUserId(), UserUtil.getCurrentUser().getName()));
     }
 }

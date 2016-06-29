@@ -5,6 +5,7 @@ import io.terminus.doctor.common.event.CoreEventDispatcher;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorGroupSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
+import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
 import io.terminus.doctor.event.dto.event.group.DoctorAntiepidemicGroupEvent;
 import io.terminus.doctor.event.dto.event.group.input.BaseGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorAntiepidemicGroupInput;
@@ -33,12 +34,13 @@ public class DoctorAntiepidemicGroupEventHandler extends DoctorAbstractGroupEven
                                                DoctorGroupTrackDao doctorGroupTrackDao,
                                                CoreEventDispatcher coreEventDispatcher,
                                                DoctorGroupEventDao doctorGroupEventDao) {
-        super(doctorGroupSnapshotDao, doctorGroupTrackDao, coreEventDispatcher);
+        super(doctorGroupSnapshotDao, doctorGroupTrackDao, coreEventDispatcher, doctorGroupEventDao);
         this.doctorGroupEventDao = doctorGroupEventDao;
     }
 
     @Override
     protected <I extends BaseGroupInput> void handleEvent(DoctorGroup group, DoctorGroupTrack groupTrack, I input) {
+        DoctorGroupSnapShotInfo oldShot = getOldSnapShotInfo(group, groupTrack);
         DoctorAntiepidemicGroupInput antiepidemic = (DoctorAntiepidemicGroupInput) input;
 
         checkQuantity(groupTrack.getQuantity(), antiepidemic.getQuantity());
@@ -55,6 +57,6 @@ public class DoctorAntiepidemicGroupEventHandler extends DoctorAbstractGroupEven
         updateGroupTrack(groupTrack, event);
 
         //4.创建镜像
-        createGroupSnapShot(group, event, groupTrack, GroupEventType.ANTIEPIDEMIC);
+        createGroupSnapShot(oldShot, new DoctorGroupSnapShotInfo(group, event, groupTrack), GroupEventType.ANTIEPIDEMIC);
     }
 }
