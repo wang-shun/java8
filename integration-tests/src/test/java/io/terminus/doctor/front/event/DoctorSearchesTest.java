@@ -2,6 +2,7 @@ package io.terminus.doctor.front.event;
 
 import com.google.common.collect.ImmutableMap;
 import configuration.front.FrontWebConfiguration;
+import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.front.BaseFrontWebTest;
 import io.terminus.doctor.web.component.DoctorSearches;
 import org.junit.Test;
@@ -29,5 +30,12 @@ public class DoctorSearchesTest extends BaseFrontWebTest {
         List body = getForEntity(url, ImmutableMap.of("farmId", 12355), List.class).getBody();
         System.out.println(body.size());
         System.out.println(body);
+    }
+
+    @Test
+    public void test_QUERY_Barns() {
+        String url = "/api/doctor/search/barns";
+        Object body = getForEntity(url, ImmutableMap.of("farmId", 12355), Object.class).getBody();
+        System.out.println(JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(body));
     }
 }

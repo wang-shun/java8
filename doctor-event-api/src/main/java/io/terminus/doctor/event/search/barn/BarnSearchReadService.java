@@ -1,6 +1,5 @@
 package io.terminus.doctor.event.search.barn;
 
-import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
 
 import java.util.Map;
@@ -23,5 +22,5 @@ public interface BarnSearchReadService {
      * @param params        查询参数
      * @return 分页后的猪舍搜索时结果
      */
-    Response<Paging<SearchedBarn>> searchWithAggs(Integer pageNo, Integer pageSize, String template, Map<String, String> params);
+    Response<SearchedBarnDto> searchWithAggs(Integer pageNo, Integer pageSize, String template, Map<String, String> params);
 }

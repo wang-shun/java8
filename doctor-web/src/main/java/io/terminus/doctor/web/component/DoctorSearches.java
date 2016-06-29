@@ -6,7 +6,7 @@ import io.terminus.doctor.basic.service.DoctorSearchHistoryService;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.search.barn.BarnSearchReadService;
-import io.terminus.doctor.event.search.barn.SearchedBarn;
+import io.terminus.doctor.event.search.barn.SearchedBarnDto;
 import io.terminus.doctor.event.search.group.GroupSearchReadService;
 import io.terminus.doctor.event.search.group.SearchedGroup;
 import io.terminus.doctor.event.search.pig.PigSearchReadService;
@@ -159,11 +159,11 @@ public class DoctorSearches {
      * @return
      */
     @RequestMapping(value = "/barns", method = RequestMethod.GET)
-    public Paging<SearchedBarn> searchBarns(@RequestParam(required = false) Integer pageNo,
-                                            @RequestParam(required = false) Integer pageSize,
-                                            @RequestParam Map<String, String> params) {
+    public SearchedBarnDto searchBarns(@RequestParam(required = false) Integer pageNo,
+                                       @RequestParam(required = false) Integer pageSize,
+                                       @RequestParam Map<String, String> params) {
         if (farmIdNotExist(params)) {
-            return new Paging<>(0L, Collections.emptyList());
+            return new SearchedBarnDto(new Paging<>(0L, Collections.emptyList()), Collections.emptyList());
         }
         createSearchWord(SearchType.BARN.getValue(), params);
         return RespHelper.or500(barnSearchReadService.searchWithAggs(pageNo, pageSize, "search/search.mustache", params));
