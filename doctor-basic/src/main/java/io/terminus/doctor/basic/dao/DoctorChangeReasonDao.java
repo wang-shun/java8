@@ -16,6 +16,10 @@ import java.util.List;
 @Repository
 public class DoctorChangeReasonDao extends MyBatisDao<DoctorChangeReason> {
 
+    public List<DoctorChangeReason> findByFarmId(Long farmId) {
+        return getSqlSession().selectList(sqlId("findByFarmId"), farmId);
+    }
+
     /**
      * 根据变动类型查询
      * @param farmId 猪场id

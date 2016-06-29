@@ -60,7 +60,14 @@ public interface DoctorBasicReadService {
      * @return 变动原因列表
      */
     Response<List<DoctorChangeReason>> findChangeReasonByFarmIdAndChangeTypeId(@NotNull(message = "farmId.not.null") Long farmId,
-                                                                      @NotNull(message = "changeTypeId.not.null") Long changeTypeId);
+                                                                               @NotNull(message = "changeTypeId.not.null") Long changeTypeId);
+
+    /**
+     * 根据猪场id查询变动原因表
+     * @param farmId 猪场id
+     * @return 变动原因列表
+     */
+    Response<List<DoctorChangeReason>> findChangeReasonByFarmId(@NotNull(message = "farmId.not.null") Long farmId);
 
     //////////////////////////// 猪场客户相关 ////////////////////////////
     /**
