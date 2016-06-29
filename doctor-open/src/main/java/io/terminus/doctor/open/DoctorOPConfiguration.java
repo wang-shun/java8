@@ -85,8 +85,8 @@ public class DoctorOPConfiguration {
         return new ServiceBetaStatusHandlerImpl(configCenter, doctorServiceStatusWriteService);
     }
 
-    @Bean(name = "publish2Pigmall")
-    public Publisher publish2PigmallBean(ZKClientFactory zkClientFactory,
+    @Bean
+    public Publisher publish2Pigmall(ZKClientFactory zkClientFactory,
                                          @Value("${zookeeper.cacheTopic-pigmall}") String cacheTopicPigmall) throws Exception {
         return new Publisher(zkClientFactory, cacheTopicPigmall);
     }

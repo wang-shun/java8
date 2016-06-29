@@ -16,7 +16,6 @@ import io.terminus.parana.user.service.UserReadService;
 import io.terminus.zookeeper.pubsub.Publisher;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import java.util.Objects;
@@ -40,12 +39,12 @@ public class OpenUserEventListener implements EventListener {
                                  DoctorServiceReviewWriteService doctorServiceReviewWriteService,
                                  UserReadService<User> userReadService,
                                  ServiceBetaStatusHandler serviceBetaStatusHandler,
-                                 @Qualifier(value = "publish2Pigmall") Publisher publisher) {
+                                 Publisher publish2Pigmall) {
         this.doctorServiceStatusWriteService = doctorServiceStatusWriteService;
         this.doctorServiceReviewWriteService = doctorServiceReviewWriteService;
         this.userReadService = userReadService;
         this.serviceBetaStatusHandler = serviceBetaStatusHandler;
-        this.publish2Pigmall = publisher;
+        this.publish2Pigmall = publish2Pigmall;
     }
 
     @Subscribe
