@@ -86,8 +86,9 @@ public class DoctorOPConfiguration {
     }
 
     @Bean
-    public Publisher publish2Pigmall(ZKClientFactory zkClientFactory,
-                                     @Value("${zookeeper.cacheTopic-pigmall:pigmall.cache.user.clear}") String cacheTopicPigmall) throws Exception {
-        return new Publisher(zkClientFactory, cacheTopicPigmall);
+    public Publisher publish2Pigmall(@Value("${zookeeper-pigmall.cacheTopic:pigmall.cache.user.clear}") String cacheTopicPigmall,
+                                     @Value("${zookeeper-pigmall.host:127.0.0.1}")String host,
+                                     @Value("${zookeeper-pigmall.port:2181}")String port) throws Exception {
+        return new Publisher(new ZKClientFactory(host + ":" + port), cacheTopicPigmall);
     }
 }

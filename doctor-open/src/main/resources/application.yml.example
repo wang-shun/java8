@@ -27,3 +27,9 @@ oss:
   appKey: n67jFjUcEjZxPOZf
   appSecret: ZOPL1A33iQB52g60Dgvs3xT2FJqeaf
   bucketName: pigmall
+
+#电商系统的 zookeeper 配置
+zookeeper-pigmall:
+  host: 127.0.0.1
+  port: 2181
+  cacheTopic: pigmall.cache.user.clear # pigmall 电商系统的 cacheTopic
