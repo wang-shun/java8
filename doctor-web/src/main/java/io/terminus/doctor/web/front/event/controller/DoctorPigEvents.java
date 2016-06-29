@@ -124,6 +124,7 @@ public class DoctorPigEvents {
     public List<Integer> queryPigExecuteEvent(@RequestParam("ids") String ids){
         List<Long> pigIds = null;
         try{
+            log.info("************* input ids info :{} ", ids);
             pigIds = OBJECT_MAPPER.readValue(ids, JacksonType.LIST_OF_LONG);
         }catch (Exception e){
             log.error("query pig execute event error, ids:{} cause:{}", ids, Throwables.getStackTraceAsString(e));
