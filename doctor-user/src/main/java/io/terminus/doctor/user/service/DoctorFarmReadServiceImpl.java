@@ -12,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.validation.constraints.NotNull;
 import java.util.List;
 
 /**
@@ -85,6 +86,16 @@ public class DoctorFarmReadServiceImpl implements DoctorFarmReadService{
             return Response.ok(doctorFarmDao.findAll());
         } catch (Exception e) {
             log.error("find all farms failed, cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("farm.find.fail");
+        }
+    }
+
+    @Override
+    public Response<List<DoctorFarm>> findFarmsByOrgId(@NotNull(message = "orgId.not.null") Long orgId) {
+        try {
+            return Response.ok(doctorFarmDao.findByOrgId(orgId));
+        } catch (Exception e) {
+            log.error("find farms by orgId failed, orgId:{}, cause:{}", orgId, Throwables.getStackTraceAsString(e));
             return Response.fail("farm.find.fail");
         }
     }

@@ -3,6 +3,7 @@ package io.terminus.doctor.user.service;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.user.model.DoctorFarm;
 
+import javax.validation.constraints.NotNull;
 import java.util.List;
 
 /**
@@ -40,4 +41,11 @@ public interface DoctorFarmReadService {
      * @return 所有猪场
      */
     Response<List<DoctorFarm>> findAllFarms();
+
+    /**
+     * 根据公司id查询猪场信息列表
+     * @param orgId 公司id
+     * @return 猪场信息列表
+     */
+    Response<List<DoctorFarm>> findFarmsByOrgId(@NotNull(message = "orgId.not.null") Long orgId);
 }
