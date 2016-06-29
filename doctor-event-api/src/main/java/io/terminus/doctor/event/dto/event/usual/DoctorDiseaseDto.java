@@ -24,6 +24,8 @@ public class DoctorDiseaseDto implements Serializable{
 
     private Date diseaseDate;   // 疾病日期
 
+    private Long diseaseId; // 疾病Id
+
     private String diseaseName; // 疾病名称
 
     private String diseaseStaff;    // 疾病操作人员
