@@ -1,16 +1,20 @@
 package io.terminus.doctor.event.search.barn;
 
 import com.google.common.base.Throwables;
+import com.google.common.collect.Lists;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
+import io.terminus.doctor.common.enums.PigType;
 import io.terminus.search.api.Searcher;
 import io.terminus.search.api.model.WithAggregations;
 import io.terminus.search.api.query.Criterias;
+import io.terminus.search.model.Bucket;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -33,7 +37,7 @@ public class BarnSearchReadServiceImpl implements BarnSearchReadService {
     private BarnSearchProperties barnSearchProperties;
 
     @Override
-    public Response<Paging<SearchedBarn>> searchWithAggs(Integer pageNo, Integer pageSize, String template, Map<String, String> params) {
+    public Response<SearchedBarnDto> searchWithAggs(Integer pageNo, Integer pageSize, String template, Map<String, String> params) {
         try{
             // 获取关键词, 设置高亮
             String q = params.get("q");
@@ -41,6 +45,13 @@ public class BarnSearchReadServiceImpl implements BarnSearchReadService {
                 // 暂不做高亮处理
                 // params.put("highlight", "name");
             }
+
+            // 1. 猪群类型聚合处理, ... 其他
+            String aggs = params.get("aggs");
+            if (StringUtils.isBlank(aggs)) {
+                params.put("aggs", "aggs_pigType:pigType:0"); // id:field:size
+            }
+
             // 构建查询条件, 并查询
             Criterias criterias = baseBarnQueryBuilder.buildCriterias(pageNo, pageSize, params);
             WithAggregations<SearchedBarn> searchedBarns = searcher.searchWithAggs(
@@ -51,7 +62,23 @@ public class BarnSearchReadServiceImpl implements BarnSearchReadService {
                     SearchedBarn.class
             );
             Paging<SearchedBarn> paging = new Paging<>(searchedBarns.getTotal(), searchedBarns.getData());
-            return Response.ok(paging);
+
+            // 获取聚合后的数据
+            List<SearchedBarnDto.PigType> aggPigTypes = Lists.newArrayList();
+            Map<String, List<Bucket>> aggregations = searchedBarns.getAggregations();
+            if (aggregations != null) {
+                // 猪群类型
+                aggregations.get("aggs_pigType").forEach(bucket ->
+                        aggPigTypes.add(SearchedBarnDto.createPigType(
+                                PigType.from(Integer.parseInt(bucket.getKey())))));
+            }
+
+            // 构建返回对象
+            SearchedBarnDto searchedBarnDto = SearchedBarnDto.builder()
+                    .barns(paging)
+                    .aggPigTypes(aggPigTypes)
+                    .build();
+            return Response.ok(searchedBarnDto);
         } catch (Exception e) {
             log.error("barn search failed, cause by {}", Throwables.getStackTraceAsString(e));
             return Response.fail("search.barn.fail");
