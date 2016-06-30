@@ -34,6 +34,8 @@ public class SearchedBarnDto implements Serializable {
     private List<PigType> aggPigTypes;
 
     @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
     @Builder
     public static class PigType implements Serializable{
         private static final long serialVersionUID = 8317574572260219323L;

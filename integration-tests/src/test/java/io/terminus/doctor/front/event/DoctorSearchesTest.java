@@ -21,6 +21,18 @@ import java.util.Map;
 public class DoctorSearchesTest extends BaseFrontWebTest {
 
     /**
+     * 查询母猪的状态
+     * @see DoctorSearches#searchSowStatus(Map)
+     */
+    @Test
+    public void test_QUERY_SowStatus() {
+        String url = "/api/doctor/search/sowpigs/status";
+        List body = getForEntity(url, ImmutableMap.of("farmId", 12355), List.class).getBody();
+        System.out.println(body.size());
+        System.out.println(JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(body));
+    }
+
+    /**
      * 查询所有的公猪
      * @see DoctorSearches#searchAllBoarPigs(Map)
      */
@@ -32,6 +44,10 @@ public class DoctorSearchesTest extends BaseFrontWebTest {
         System.out.println(body);
     }
 
+    /**
+     * 查询所有猪舍
+     * @see DoctorSearches#searchBarns(Integer, Integer, Map)
+     */
     @Test
     public void test_QUERY_Barns() {
         String url = "/api/doctor/search/barns";

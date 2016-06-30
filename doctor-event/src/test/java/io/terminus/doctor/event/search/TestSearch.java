@@ -2,6 +2,7 @@ package io.terminus.doctor.event.search;
 
 import com.google.common.collect.Maps;
 import io.terminus.common.model.Paging;
+import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.search.group.GroupSearchReadService;
@@ -55,6 +56,7 @@ public class TestSearch extends BaseServiceTest {
             List<SearchedPigDto.SowStatus> sowStatuses = RespHelper.orServEx(pigSearchReadService.searchWithAggs(1, 200, template, params)).getSowStatuses();
             // updatedAt 降序排列
             sowStatuses.forEach(System.out::println);
+            System.out.println(JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(sowStatuses));
         } catch (Exception e) {
             System.out.println("搜索失败!");
         }
