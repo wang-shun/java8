@@ -1,5 +1,6 @@
 package io.terminus.doctor.event.handler.group;
 
+import io.terminus.common.exception.ServiceException;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.doctor.common.event.CoreEventDispatcher;
 import io.terminus.doctor.event.dao.DoctorGroupDao;
@@ -45,6 +46,9 @@ public class DoctorCloseGroupEventHandler extends DoctorAbstractGroupEventHandle
 
     @Override
     protected <I extends BaseGroupInput> void handleEvent(DoctorGroup group, DoctorGroupTrack groupTrack, I input) {
+        //校验能否关闭
+        checkCanClose(groupTrack);
+
         DoctorGroupSnapShotInfo oldShot = getOldSnapShotInfo(group, groupTrack);
         DoctorCloseGroupInput close = (DoctorCloseGroupInput) input;
 
@@ -69,5 +73,12 @@ public class DoctorCloseGroupEventHandler extends DoctorAbstractGroupEventHandle
         //发布统计事件
         publishCountGroupEvent(group.getOrgId(), group.getFarmId());
         publistGroupAndBarn(group.getId(), group.getCurrentBarnId());
+    }
+
+    //猪群里还有猪不可关闭!
+    private void checkCanClose(DoctorGroupTrack groupTrack) {
+        if (groupTrack.getQuantity() > 0) {
+            throw new ServiceException("group.not.empty.cannot.close");
+        }
     }
 }
