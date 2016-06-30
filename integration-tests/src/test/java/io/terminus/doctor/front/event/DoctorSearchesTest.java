@@ -35,7 +35,7 @@ public class DoctorSearchesTest extends BaseFrontWebTest {
     @Test
     public void test_QUERY_Barns() {
         String url = "/api/doctor/search/barns";
-        Object body = getForEntity(url, ImmutableMap.of("farmId", 12355), Object.class).getBody();
+        Object body = getForEntity(url, ImmutableMap.of("farmId", 12355, "pigType", "3"), Object.class).getBody();
         System.out.println(JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(body));
     }
 }

@@ -1,6 +1,5 @@
 package io.terminus.doctor.event.search.pig;
 
-import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
 
 import java.util.Map;
@@ -21,6 +20,6 @@ public interface PigSearchReadService {
      * @param params        查询参数
      * @return
      */
-    Response<Paging<SearchedPig>> searchWithAggs(Integer pageNo, Integer pageSize, String template, Map<String, String> params);
+    Response<SearchedPigDto> searchWithAggs(Integer pageNo, Integer pageSize, String template, Map<String, String> params);
 
 }

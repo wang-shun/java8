@@ -3,14 +3,17 @@ package io.terminus.doctor.event.search;
 import com.google.common.collect.Maps;
 import io.terminus.common.model.Paging;
 import io.terminus.doctor.common.utils.RespHelper;
+import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.search.group.GroupSearchReadService;
 import io.terminus.doctor.event.search.group.SearchedGroup;
 import io.terminus.doctor.event.search.pig.PigSearchReadService;
 import io.terminus.doctor.event.search.pig.SearchedPig;
+import io.terminus.doctor.event.search.pig.SearchedPigDto;
 import io.terminus.doctor.event.test.BaseServiceTest;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -34,10 +37,24 @@ public class TestSearch extends BaseServiceTest {
             Map<String, String> params = Maps.newHashMap();
             // 前缀查询 替代 关键字
             params.put("q", "16");
-            Paging<SearchedPig> paging = RespHelper.orServEx(pigSearchReadService.searchWithAggs(1, 200, template, params));
+            Paging<SearchedPig> paging = RespHelper.orServEx(pigSearchReadService.searchWithAggs(1, 200, template, params)).getPigs();
             System.out.println(paging.getTotal());
             // updatedAt 降序排列
             paging.getData().forEach(System.out::println);
+        } catch (Exception e) {
+            System.out.println("搜索失败!");
+        }
+    }
+
+    @Test
+    public void testSowPigStatusSearch() {
+        try{
+            String template = "search/search.mustache";
+            Map<String, String> params = Maps.newHashMap();
+            params.put("pigType", DoctorPig.PIG_TYPE.SOW.getKey().toString());
+            List<SearchedPigDto.SowStatus> sowStatuses = RespHelper.orServEx(pigSearchReadService.searchWithAggs(1, 200, template, params)).getSowStatuses();
+            // updatedAt 降序排列
+            sowStatuses.forEach(System.out::println);
         } catch (Exception e) {
             System.out.println("搜索失败!");
         }
