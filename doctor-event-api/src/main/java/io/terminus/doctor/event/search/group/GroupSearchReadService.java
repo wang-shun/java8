@@ -1,6 +1,5 @@
 package io.terminus.doctor.event.search.group;
 
-import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
 
 import java.util.Map;
@@ -21,6 +20,6 @@ public interface GroupSearchReadService {
      * @param params        查询参数
      * @return
      */
-    Response<Paging<SearchedGroup>> searchWithAggs(Integer pageNo, Integer pageSize, String template, Map<String, String> params);
+    Response<SearchedGroupDto> searchWithAggs(Integer pageNo, Integer pageSize, String template, Map<String, String> params);
 
 }
