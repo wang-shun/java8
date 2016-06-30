@@ -13,29 +13,33 @@ import java.util.Objects;
 public enum PigStatus {
 
     // 公猪状态信息
-    BOAR_ENTRY(11, "公猪已进场"),
-    BOAR_LEAVE(12, "公猪已离场"),
+    BOAR_ENTRY(11,"公猪已进场", "公猪已进场"),
+    BOAR_LEAVE(12,"公猪已离场", "公猪已离场"),
 
     // 母猪状态
-    Entry (1,"待配种"),
-    Removal(2,"已离场"),
-    Mate(3,"已配种"),
-    Pregnancy(4,"妊娠检查阳性"),
-    KongHuai(5,"空怀"),
-    Abortion(6,"流产"),
-    Farrow(7,"等待分娩"),
-    FEED(8, "哺乳状态"),
-    Wean(9,"断奶"),
-    FanQing(10,"返情");
+    Entry (1,"待配种","待配种"),
+    Removal(2,"已离场","已离场"),
+    Mate(3,"已配种","已配种"),
+    Pregnancy(4,"阳性","妊娠检查阳性"),
+    KongHuai(5,"空怀","空怀"),
+    Abortion(6,"流产","流产"),
+    Farrow(7,"待分娩","等待分娩"),
+    FEED(8,"哺乳","哺乳状态"),
+    Wean(9,"断奶","断奶"),
+    FanQing(10,"返情","返情");
 
     @Getter
     private Integer key;
 
     @Getter
+    private String name;
+
+    @Getter
     private String desc;
 
-    private PigStatus(Integer key, String desc){
+    private PigStatus(Integer key, String name, String desc){
         this.key = key;
+        this.name = name;
         this.desc = desc;
     }
 
