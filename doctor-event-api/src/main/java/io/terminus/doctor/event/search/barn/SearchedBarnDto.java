@@ -35,7 +35,9 @@ public class SearchedBarnDto implements Serializable {
 
     @Data
     @Builder
-    static class PigType {
+    public static class PigType implements Serializable{
+        private static final long serialVersionUID = 8317574572260219323L;
+
         private int value;
         private String desc;
         private String type;
@@ -43,12 +45,11 @@ public class SearchedBarnDto implements Serializable {
 
     public static PigType createPigType(io.terminus.doctor.common.enums.PigType pigType) {
         if (pigType != null) {
-            PigType aggPigType = PigType.builder()
+            return PigType.builder()
                     .value(pigType.getValue())
                     .desc(pigType.getDesc())
                     .type(pigType.getType())
                     .build();
-            return aggPigType;
         }
         return null;
     }
