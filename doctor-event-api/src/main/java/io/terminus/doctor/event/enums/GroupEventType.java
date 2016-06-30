@@ -1,7 +1,10 @@
 package io.terminus.doctor.event.enums;
 
 import com.google.common.base.Objects;
+import com.google.common.collect.Lists;
 import lombok.Getter;
+
+import java.util.List;
 
 /**
  * Desc: 猪群事件类型枚举
@@ -41,4 +44,15 @@ public enum GroupEventType {
         }
         return null;
     }
+
+    //空猪群不能操作事件的类型
+    public static final List<Integer> EMPTY_GROUPS = Lists.newArrayList(
+            GroupEventType.CHANGE.getValue(),
+            GroupEventType.TRANS_GROUP.getValue(),
+            GroupEventType.TURN_SEED.getValue(),
+            GroupEventType.LIVE_STOCK.getValue(),
+            GroupEventType.DISEASE.getValue(),
+            GroupEventType.ANTIEPIDEMIC.getValue(),
+            GroupEventType.TRANS_FARM.getValue()
+    );
 }

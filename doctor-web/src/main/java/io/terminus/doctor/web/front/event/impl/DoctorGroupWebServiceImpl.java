@@ -143,8 +143,8 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
             //1.校验猪群是否存在
             DoctorGroupDetail groupDetail = checkGroupExist(groupId);
 
-            //2.校验能否操作此事件 // TODO: 16/6/6 当前没有猪只,不能防疫,疾病,存栏,转群,等等等
-            checkEventTypeIllegal(groupId, eventType);
+            //2.校验能否操作此事件
+            checkEventTypeIllegal(groupDetail, eventType);
 
             Map<String, Object> params = JSON_MAPPER.fromJson(data, JSON_MAPPER.createCollectionType(Map.class, String.class, Object.class));
 
@@ -231,10 +231,14 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
     }
 
     //校验事件类型是否合法
-    private void checkEventTypeIllegal(Long groupId, Integer eventType) {
-        List<Integer> eventTypes = RespHelper.or500(doctorGroupReadService.findEventTypesByGroupIds(Lists.newArrayList(groupId)));
+    private void checkEventTypeIllegal(DoctorGroupDetail groupDetail, Integer eventType) {
+        List<Integer> eventTypes = RespHelper.or500(doctorGroupReadService.findEventTypesByGroupIds(Lists.newArrayList(groupDetail.getGroup().getId())));
         if (!eventTypes.contains(eventType)) {
             throw new ServiceException("event.type.illegal");
+        }
+        //若当前没有猪只,不能变动, 转群, 转种猪, 存栏,疾病, 防疫, 转场等等
+        if (GroupEventType.EMPTY_GROUPS.contains(eventType)) {
+            throw new ServiceException("empty.group.can.not.event");
         }
     }
 

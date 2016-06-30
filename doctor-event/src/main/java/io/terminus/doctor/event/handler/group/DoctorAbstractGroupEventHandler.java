@@ -14,6 +14,7 @@ import io.terminus.doctor.event.dao.DoctorGroupSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
 import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
 import io.terminus.doctor.event.dto.event.group.input.BaseGroupInput;
+import io.terminus.doctor.event.dto.event.group.input.DoctorTransGroupInput;
 import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.event.DoctorGroupCountEvent;
@@ -224,6 +225,16 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
     protected static void checkBreed(Long groupBreedId, Long breedId) {
         if (notNull(groupBreedId) && notNull(breedId) && !groupBreedId.equals(breedId)) {
             throw new ServiceException("breed.not.equal");
+        }
+    }
+
+    //日龄校验, 如果日龄相差超过100天, 则不允许转群
+    protected void checkDayAge(Integer dayAge, DoctorTransGroupInput input) {
+        if (!Objects.equals(input.getIsCreateGroup(), IsOrNot.YES.getValue())) {
+            DoctorGroupTrack groupTrack = doctorGroupTrackDao.findByGroupId(input.getToGroupId());
+            if (Math.abs(dayAge - groupTrack.getAvgDayAge()) > 100) {
+                throw new ServiceException("delta.dayAge.over.100");
+            }
         }
     }
 }
