@@ -3,7 +3,7 @@ package io.terminus.doctor.user.interfaces.model;
 import java.io.Serializable;
 import java.util.Date;
 
-public class User implements Serializable{
+public class UserDto implements Serializable{
     private static final long serialVersionUID = -2196001047486486653L;
 
     private Long id;

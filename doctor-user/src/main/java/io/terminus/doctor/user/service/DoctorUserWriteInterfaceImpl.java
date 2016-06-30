@@ -5,9 +5,10 @@ import com.google.common.collect.Lists;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.doctor.common.enums.UserType;
 import io.terminus.doctor.user.dao.UserDaoExt;
-import io.terminus.doctor.user.interfaces.model.Response;
-import io.terminus.doctor.user.interfaces.model.User;
+import io.terminus.doctor.user.interfaces.model.RespDto;
+import io.terminus.doctor.user.interfaces.model.UserDto;
 import io.terminus.doctor.user.interfaces.service.DoctorUserWriteInterface;
+import io.terminus.parana.user.model.User;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -28,8 +29,8 @@ public class DoctorUserWriteInterfaceImpl implements DoctorUserWriteInterface {
     }
 
     @Override
-    public Response<Integer> updateStatus(Long userId, Integer status) {
-        Response<Integer> response = new Response<>();
+    public RespDto<Integer> updateStatus(Long userId, Integer status) {
+        RespDto<Integer> response = new RespDto<>();
         try {
             response.setResult(userDaoExt.updateStatus(userId, status));
         } catch (Exception e) {
@@ -40,8 +41,8 @@ public class DoctorUserWriteInterfaceImpl implements DoctorUserWriteInterface {
     }
 
     @Override
-    public Response<Integer> batchUpdateStatus(List<Long> userIds, Integer status) {
-        Response<Integer> response = new Response<>();
+    public RespDto<Integer> batchUpdateStatus(List<Long> userIds, Integer status) {
+        RespDto<Integer> response = new RespDto<>();
         try {
             response.setResult(userDaoExt.batchUpdateStatus(userIds, status));
         } catch (Exception e) {
@@ -52,12 +53,12 @@ public class DoctorUserWriteInterfaceImpl implements DoctorUserWriteInterface {
     }
 
     @Override
-    public Response<Integer> updateType(Long userId, String typeName) {
-        Response<Integer> response = new Response<>();
+    public RespDto<Integer> updateType(Long userId, String typeName) {
+        RespDto<Integer> response = new RespDto<>();
         try {
-            io.terminus.parana.user.model.User user = userDaoExt.findById(userId);
+            User user = userDaoExt.findById(userId);
             if (user == null) {
-                return Response.fail("user.not.found");
+                return RespDto.fail("user.not.found");
             }
             List<String> roles = user.getRoles();
             if (roles == null) {
@@ -78,10 +79,10 @@ public class DoctorUserWriteInterfaceImpl implements DoctorUserWriteInterface {
     }
 
     @Override
-    public Response<Boolean> update(User user) {
-        Response<Boolean> response = new Response<>();
+    public RespDto<Boolean> update(UserDto user) {
+        RespDto<Boolean> response = new RespDto<>();
         try {
-            io.terminus.parana.user.model.User paranaUser = BeanMapper.map(user, io.terminus.parana.user.model.User.class);
+            User paranaUser = BeanMapper.map(user, User.class);
             userDaoExt.update(paranaUser);
             if(paranaUser.getRoles().size() > 0){
                 String typeName = paranaUser.getRoles().get(0);
@@ -96,19 +97,19 @@ public class DoctorUserWriteInterfaceImpl implements DoctorUserWriteInterface {
     }
 
     @Override
-    public Response<User> createUser(User user) {
-        Response<User> response = new Response<>();
+    public RespDto<UserDto> createUser(UserDto user) {
+        RespDto<UserDto> response = new RespDto<>();
         try {
             if(userDaoExt.findByName(user.getName()) != null){
-                return Response.fail("duplicated.name");
+                return RespDto.fail("duplicated.name");
             }
             if(userDaoExt.findByMobile(user.getMobile()) != null){
-                return Response.fail("duplicated.mobile");
+                return RespDto.fail("duplicated.mobile");
             }
             if(userDaoExt.findByEmail(user.getEmail()) != null){
-                return Response.fail("duplicated.email");
+                return RespDto.fail("duplicated.email");
             }
-            io.terminus.parana.user.model.User paranaUser = this.makeParanaUserFromInterface(user);
+            User paranaUser = this.makeParanaUserFromInterface(user);
             userDaoExt.create(paranaUser);
             BeanMapper.copy(paranaUser, user);
             response.setResult(user);
@@ -120,8 +121,8 @@ public class DoctorUserWriteInterfaceImpl implements DoctorUserWriteInterface {
     }
 
     @Override
-    public Response<Boolean> delete(Long id) {
-        Response<Boolean> response = new Response<>();
+    public RespDto<Boolean> delete(Long id) {
+        RespDto<Boolean> response = new RespDto<>();
         try {
             response.setResult(userDaoExt.delete(id));
         } catch (Exception e) {
@@ -132,8 +133,8 @@ public class DoctorUserWriteInterfaceImpl implements DoctorUserWriteInterface {
     }
 
     @Override
-    public Response<Integer> deletes(List<Long> ids) {
-        Response<Integer> response = new Response<>();
+    public RespDto<Integer> deletes(List<Long> ids) {
+        RespDto<Integer> response = new RespDto<>();
         try {
             response.setResult(userDaoExt.deletes(ids));
         } catch (Exception e) {
@@ -144,8 +145,8 @@ public class DoctorUserWriteInterfaceImpl implements DoctorUserWriteInterface {
     }
 
     @Override
-    public Response<Integer> deletes(Long id0, Long id1, Long... idn) {
-        Response<Integer> response = new Response<>();
+    public RespDto<Integer> deletes(Long id0, Long id1, Long... idn) {
+        RespDto<Integer> response = new RespDto<>();
         try {
             response.setResult(userDaoExt.deletes(id0, id1, idn));
         } catch (Exception e) {
@@ -155,15 +156,15 @@ public class DoctorUserWriteInterfaceImpl implements DoctorUserWriteInterface {
         return response;
     }
 
-    private io.terminus.parana.user.model.User makeParanaUserFromInterface(User user){
-        io.terminus.parana.user.model.User paranaUser = BeanMapper.map(user, io.terminus.parana.user.model.User.class);
+    private User makeParanaUserFromInterface(UserDto user){
+        User paranaUser = BeanMapper.map(user, User.class);
         if(paranaUser.getType() == null){
             paranaUser.setType(UserType.NORMAL.value());
         }
         return paranaUser;
     }
-    private List<io.terminus.parana.user.model.User> makeParanaUserFromInterface(List<User> users){
-        List<io.terminus.parana.user.model.User> list = users.stream().map(this::makeParanaUserFromInterface).collect(Collectors.toList());
+    private List<User> makeParanaUserFromInterface(List<UserDto> users){
+        List<User> list = users.stream().map(this::makeParanaUserFromInterface).collect(Collectors.toList());
         return list;
     }
 }

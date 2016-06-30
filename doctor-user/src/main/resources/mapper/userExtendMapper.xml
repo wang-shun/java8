@@ -134,4 +134,18 @@
           created_at >= #{since}
         ]]>
     </select>
+
+    <select id="listAllUserEmails" resultType="string">
+        select email from <include refid="tb" />
+        <if test="role != null">
+            where <![CDATA[ instr(roles_json, #{role}) > 0 ]]>
+        </if>
+    </select>
+
+    <select id="listAllUserMobiles" resultType="string">
+        select mobile from <include refid="tb" />
+        <if test="role != null">
+            where <![CDATA[ instr(roles_json, #{role}) > 0 ]]>
+        </if>
+    </select>
 </mapper>
