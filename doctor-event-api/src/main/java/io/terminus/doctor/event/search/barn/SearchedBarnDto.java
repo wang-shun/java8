@@ -35,7 +35,9 @@ public class SearchedBarnDto implements Serializable {
 
     @Data
     @Builder
-    public static class PigType {
+    public static class PigType implements Serializable{
+        private static final long serialVersionUID = 8317574572260219323L;
+
         private int value;
         private String desc;
         private String type;

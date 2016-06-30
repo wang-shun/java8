@@ -32,7 +32,9 @@ public class SearchedPigDto implements Serializable {
      */
     @Data
     @Builder
-    public static class SowStatus {
+    public static class SowStatus implements Serializable{
+        private static final long serialVersionUID = 7792826158693919446L;
+
         private Integer key;
         private String name;
         private String desc;
