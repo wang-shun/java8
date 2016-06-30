@@ -63,6 +63,13 @@ public interface DoctorPigReadService {
     Response<DoctorPigInfoDto> queryDoctorInfoDtoById(@NotNull(message = "input.pigId.empty") Long pigId);
 
     /**
+     * 生成对应的窝号 年+月+胎次
+     * @param pigId
+     * @return
+     */
+    Response<String> generateFostersCode(@NotNull(message = "input.pigId.empty") Long pigId);
+
+    /**
      * 获取猪舍pig 信息内容
      * @param barnId
      * @return
