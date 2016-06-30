@@ -20,6 +20,9 @@ import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 import lombok.extern.slf4j.Slf4j;
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -51,6 +54,8 @@ public class DoctorPigReadServiceImpl implements DoctorPigReadService{
     private final DoctorPigEventReadService doctorPigEventReadService;
 
     private final DoctorPigInfoCache doctorPigInfoCache;
+
+    private static final DateTimeFormatter DTF = DateTimeFormat.forPattern("yyyy-MM");
 
     @Autowired
     public DoctorPigReadServiceImpl(DoctorPigDao doctorPigDao, DoctorPigTrackDao doctorPigTrackDao,
@@ -166,6 +171,22 @@ public class DoctorPigReadServiceImpl implements DoctorPigReadService{
         }catch (Exception e){
             log.error(" fail, cause:{}", Throwables.getStackTraceAsString(e));
             return Response.fail("query.doctorInfoDto.fail");
+        }
+    }
+
+    @Override
+    public Response<String> generateFostersCode(Long pigId) {
+        try{
+            DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(pigId);
+            checkState(!isNull(doctorPigTrack), "input.pigId.error");
+
+            return Response.ok(DateTime.now().toString(DTF)+ "-"+ doctorPigTrack.getCurrentParity());
+        }catch (IllegalStateException e){
+            log.error(" input pigId not exist, pigId:{} ", pigId);
+            return Response.fail(e.getMessage());
+        }catch (Exception e){
+            log.error("generate foster code fail,pigId:{}, cause:{}",pigId, Throwables.getStackTraceAsString(e));
+            return Response.fail("generate.fostersCode.fail");
         }
     }
 

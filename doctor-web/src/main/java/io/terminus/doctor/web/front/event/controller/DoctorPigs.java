@@ -58,6 +58,17 @@ public class DoctorPigs {
     }
 
     /**
+     * 生成FostersCode
+     * @param pigId
+     * @return
+     */
+    @RequestMapping(value = "/generate/fostersCode", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public String generateFostersCode(@RequestParam("pigId") Long pigId){
+        return RespHelper.or500(doctorPigReadService.generateFostersCode(pigId));
+    }
+
+    /**
      * pig id 获取 pig track 信息内容
      * @param pigId
      * @return
