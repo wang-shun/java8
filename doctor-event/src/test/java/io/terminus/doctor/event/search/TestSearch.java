@@ -68,7 +68,7 @@ public class TestSearch extends BaseServiceTest {
             String template = "search/search.mustache";
             Map<String, String> params = Maps.newHashMap();
             params.put("q", "保育");
-            Paging<SearchedGroup> paging = RespHelper.orServEx(groupSearchReadService.searchWithAggs(1, 200, template, params));
+            Paging<SearchedGroup> paging = RespHelper.orServEx(groupSearchReadService.searchWithAggs(1, 200, template, params)).getGroups();
             System.out.println(paging.getTotal());
             paging.getData().forEach(System.out::println);
         } catch (Exception e) {

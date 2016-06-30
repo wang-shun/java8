@@ -1,6 +1,7 @@
 package io.terminus.doctor.web.front.event.controller;
 
 import com.google.common.collect.Sets;
+import io.terminus.doctor.common.enums.PigSearchType;
 import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dto.DoctorGroupSearchDto;
@@ -149,7 +150,7 @@ public class DoctorBarns {
 
         //公猪舍
         if (PigType.isBoar(barn.getPigType())) {
-            barnDetail.setType(DoctorBarnDetail.Type.BOAR.getValue());
+            barnDetail.setType(PigSearchType.BOAR.getValue());
             barnDetail.setPigPaging(RespHelper.or500(doctorPigReadService.pagingDoctorInfoDtoByPigTrack(DoctorPigTrack.builder()
                     .status(status)
                     .currentBarnId(barnId)
@@ -161,7 +162,7 @@ public class DoctorBarns {
 
         //母猪舍
         if (PigType.isSow(barn.getPigType())) {
-            barnDetail.setType(DoctorBarnDetail.Type.SOW.getValue());
+            barnDetail.setType(PigSearchType.SOW.getValue());
             barnDetail.setPigPaging(RespHelper.or500(doctorPigReadService.pagingDoctorInfoDtoByPigTrack(DoctorPigTrack.builder()
                     .status(status)
                     .currentBarnId(barnId)
@@ -173,7 +174,7 @@ public class DoctorBarns {
 
         //猪群舍
         if (PigType.isGroup(barn.getPigType())) {
-            barnDetail.setType(DoctorBarnDetail.Type.GROUP.getValue());
+            barnDetail.setType(PigSearchType.GROUP.getValue());
             barnDetail.setStatuses(Sets.newHashSet(barn.getPigType())); //一类猪舍只能放一类猪群
 
             DoctorGroupSearchDto searchDto = new DoctorGroupSearchDto();

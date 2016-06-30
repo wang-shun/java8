@@ -4,6 +4,7 @@ import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
+import io.terminus.doctor.common.enums.PigSearchType;
 import io.terminus.doctor.common.enums.PigType;
 import io.terminus.search.api.Searcher;
 import io.terminus.search.api.model.WithAggregations;
@@ -61,6 +62,17 @@ public class BarnSearchReadServiceImpl implements BarnSearchReadService {
                     criterias,
                     SearchedBarn.class
             );
+            searchedBarns.getData().forEach(barn -> { // 处理猪舍详情类型
+                if (PigType.isSow(barn.getPigType())) {
+                    barn.setType(PigSearchType.SOW.getValue());
+                }
+                if (PigType.isBoar(barn.getPigType())) {
+                    barn.setType(PigSearchType.BOAR.getValue());
+                }
+                if (PigType.isGroup(barn.getPigType())) {
+                    barn.setType(PigSearchType.GROUP.getValue());
+                }
+            });
             Paging<SearchedBarn> paging = new Paging<>(searchedBarns.getTotal(), searchedBarns.getData());
 
             // 获取聚合后的数据

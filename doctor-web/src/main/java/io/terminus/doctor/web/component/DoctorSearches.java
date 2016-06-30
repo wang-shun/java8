@@ -10,6 +10,7 @@ import io.terminus.doctor.event.search.barn.SearchedBarn;
 import io.terminus.doctor.event.search.barn.SearchedBarnDto;
 import io.terminus.doctor.event.search.group.GroupSearchReadService;
 import io.terminus.doctor.event.search.group.SearchedGroup;
+import io.terminus.doctor.event.search.group.SearchedGroupDto;
 import io.terminus.doctor.event.search.pig.PigSearchReadService;
 import io.terminus.doctor.event.search.pig.SearchedPig;
 import io.terminus.doctor.event.search.pig.SearchedPigDto;
@@ -86,22 +87,38 @@ public class DoctorSearches {
     }
 
     /**
-     * 获取母猪聚合后的状态
+     * 获取母猪聚合后的状态 数据
+     * @param pageNo   起始页
+     * @param pageSize 页大小
      * @param params    搜索参数
      * @return
      */
     @RequestMapping(value = "/sowpigs/status", method = RequestMethod.GET)
-    public List<SearchedPigDto.SowStatus>  searchSowStatus(@RequestParam Map<String, String> params) {
+    public SearchedPigDto  searchSowStatus(@RequestParam(required = false) Integer pageNo,
+                                           @RequestParam(required = false) Integer pageSize,
+                                           @RequestParam Map<String, String> params) {
         if (farmIdNotExist(params)) {
-            return Collections.emptyList();
+            return new SearchedPigDto(new Paging<>(0L, Collections.emptyList()), Collections.emptyList());
         }
+        createSearchWord(SearchType.SOW.getValue(), params);
+        params.put("pigType", DoctorPig.PIG_TYPE.SOW.getKey().toString());
+
+        // 获取分页后的猪数据
+        Paging<SearchedPig> pigs = RespHelper.or500(
+                pigSearchReadService.searchWithAggs(pageNo, pageSize, "search/search.mustache", params)).getPigs();
 
         // 因为要聚合猪状态, 所以去除状态属性
         if (params.containsKey("status")) {
             params.remove("status");
         }
-        params.put("pigType", DoctorPig.PIG_TYPE.SOW.getKey().toString());
-        return RespHelper.or500(pigSearchReadService.searchWithAggs(1, 20, "search/search.mustache", params)).getSowStatuses();
+
+        List<SearchedPigDto.SowStatus> sowStatuses = RespHelper.or500(
+                pigSearchReadService.searchWithAggs(pageNo, pageSize, "search/search.mustache", params)).getSowStatuses();
+
+        return SearchedPigDto.builder()
+                .pigs(pigs)
+                .sowStatuses(sowStatuses)
+                .build();
     }
 
     /**
@@ -170,7 +187,41 @@ public class DoctorSearches {
             return new Paging<>(0L, Collections.emptyList());
         }
         createSearchWord(SearchType.GROUP.getValue(), params);
-        return RespHelper.or500(groupSearchReadService.searchWithAggs(pageNo, pageSize, "search/search.mustache", params));
+        return RespHelper.or500(groupSearchReadService.searchWithAggs(pageNo, pageSize, "search/search.mustache", params)).getGroups();
+    }
+
+    /**
+     * 获取猪群聚合后的状态 数据
+     * @param pageNo   起始页
+     * @param pageSize 页大小
+     * @param params   搜索参数
+     * @return
+     */
+    @RequestMapping(value = "/groups/status", method = RequestMethod.GET)
+    public SearchedGroupDto searchGroupStatus(@RequestParam(required = false) Integer pageNo,
+                                              @RequestParam(required = false) Integer pageSize,
+                                              @RequestParam Map<String, String> params) {
+        if (farmIdNotExist(params)) {
+            return new SearchedGroupDto(new Paging<>(0L, Collections.emptyList()), Collections.emptyList());
+        }
+        createSearchWord(SearchType.GROUP.getValue(), params);
+
+        // 获取分页后的猪群数据
+        createSearchWord(SearchType.GROUP.getValue(), params);
+        Paging<SearchedGroup> groups = RespHelper.or500(
+                groupSearchReadService.searchWithAggs(pageNo, pageSize, "search/search.mustache", params)).getGroups();
+
+        // 查询已存在的猪类型, 因为聚合猪类型, 所以去除
+        if (params.containsKey("pigType")) {
+            params.remove("pigType");
+        }
+        List<SearchedBarnDto.PigType> aggPigTypes = RespHelper.or500(
+                groupSearchReadService.searchWithAggs(pageNo, pageSize, "search/search.mustache", params)).getAggPigTypes();
+
+        return SearchedGroupDto.builder()
+                .groups(groups)
+                .aggPigTypes(aggPigTypes)
+                .build();
     }
 
     /**

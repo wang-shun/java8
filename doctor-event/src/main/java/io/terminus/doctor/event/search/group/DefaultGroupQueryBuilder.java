@@ -38,25 +38,27 @@ public class DefaultGroupQueryBuilder extends BaseGroupQueryBuilder {
     @Override
     protected List<Term> buildTerm(Map<String, String> params) {
         List<Term> termList = Lists.newArrayList();
-        // 1. 公司id
-        term(termList, params, "orgId");
-        // 2. 猪场id
-        term(termList, params, "farmId");
-        // 3. 猪群类型
-        term(termList, params, "pigType");
-        term(termList, params, "sex");
-        // 4. 品种
-        term(termList, params, "breedId");
-        // 5. 品系
-        term(termList, params, "geneticId");
-        // 6. 状态
-        term(termList, params, "status");
+        // 公司id
+        term(termList, params, "orgId", "orgId");
+        // 猪场id
+        term(termList, params, "farmId", "farmId");
+        // 猪舍id
+        term(termList, params, "barnId", "currentBarnId");
+        // 猪群类型
+        term(termList, params, "pigType", "pigType");
+        term(termList, params, "sex", "sex");
+        // 品种
+        term(termList, params, "breedId", "breedId");
+        // 品系
+        term(termList, params, "geneticId", "geneticId");
+        // 状态
+        term(termList, params, "status", "status");
         return termList;
     }
-    private void term(List<Term> termList, Map<String, String> params, String key) {
+    private void term(List<Term> termList, Map<String, String> params, String key, String field) {
         String value = params.get(key);
         if (StringUtils.isNotBlank(value)) {
-            termList.add(new Term(key, value));
+            termList.add(new Term(field, value));
         }
     }
 

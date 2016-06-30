@@ -59,24 +59,26 @@ public class DefaultPigQueryBuilder extends BasePigQueryBuilder {
     @Override
     protected List<Term> buildTerm(Map<String, String> params) {
         List<Term> termList = Lists.newArrayList();
-        // 1. 公司id
-        term(termList, params, "orgId");
-        // 2. 猪场id
-        term(termList, params, "farmId");
-        // 3. 猪类型pigType
-        term(termList, params, "pigType");
-        // 4. 品种
-        term(termList, params, "breedId");
-        // 5. 品系
-        term(termList, params, "geneticId");
-        // 6. 状态
-        term(termList, params, "status");
+        // 公司id
+        term(termList, params, "orgId", "orgId");
+        // 猪场id
+        term(termList, params, "farmId", "farmId");
+        // 猪舍
+        term(termList, params, "barnId", "currentBarnId");
+        // 猪类型pigType
+        term(termList, params, "pigType", "pigType");
+        // 品种
+        term(termList, params, "breedId", "breedId");
+        // 品系
+        term(termList, params, "geneticId","geneticId");
+        // 状态
+        term(termList, params, "status", "status");
         return termList;
     }
-    private void term(List<Term> termList, Map<String, String> params, String key) {
+    private void term(List<Term> termList, Map<String, String> params, String key, String field) {
         String value = params.get(key);
         if (StringUtils.isNotBlank(value)) {
-            termList.add(new Term(key, value));
+            termList.add(new Term(field, value));
         }
     }
 
