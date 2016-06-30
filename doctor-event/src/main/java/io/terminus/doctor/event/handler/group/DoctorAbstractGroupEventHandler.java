@@ -67,6 +67,11 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
         handleEvent(group, groupTrack, input);
     }
 
+    @Override
+    public void edit() {
+
+    }
+
     /**
      * 处理事件的抽象方法, 由继承的子类去实现
      * @param group       猪群

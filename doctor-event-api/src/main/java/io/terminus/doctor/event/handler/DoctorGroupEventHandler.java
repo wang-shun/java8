@@ -22,4 +22,9 @@ public interface DoctorGroupEventHandler {
      * @param <I>           录入信息继承自 BaseGroupInput
      */
     <I extends BaseGroupInput> void handle(DoctorGroup group, DoctorGroupTrack groupTrack, @Valid I input);
+
+    /**
+     * 编辑猪群事件的接口
+     */
+    void edit();
 }
