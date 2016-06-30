@@ -1,7 +1,7 @@
 package io.terminus.doctor.user.interfaces.service;
 
-import io.terminus.doctor.user.interfaces.model.Response;
-import io.terminus.doctor.user.interfaces.model.User;
+import io.terminus.doctor.user.interfaces.model.RespDto;
+import io.terminus.doctor.user.interfaces.model.UserDto;
 
 import java.util.List;
 
@@ -17,7 +17,7 @@ public interface DoctorUserWriteInterface {
      * @param status 0:未激活, 1:正常, -1:锁定, -2:冻结, -3: 删除
      * @return
      */
-    Response<Integer> updateStatus(Long userId, Integer status);
+    RespDto<Integer> updateStatus(Long userId, Integer status);
 
     /**
      * 批量更新用户状态
@@ -25,7 +25,7 @@ public interface DoctorUserWriteInterface {
      * @param status 0:未激活, 1:正常, -1:锁定, -2:冻结, -3: 删除
      * @return
      */
-    Response<Integer> batchUpdateStatus(List<Long> userIds, Integer status);
+    RespDto<Integer> batchUpdateStatus(List<Long> userIds, Integer status);
 
     /**
      * 更新用户类型
@@ -33,35 +33,35 @@ public interface DoctorUserWriteInterface {
      * @param typeName 可选: ADMIN, SELLER, BUYER, SITE_OWNER, AGENT, OPERATOR
      * @return
      */
-    Response<Integer> updateType(Long userId, String typeName);
+    RespDto<Integer> updateType(Long userId, String typeName);
 
     /**
      * 更新用户基本信息, 仅支持更新 name, email, mobile, password, roles_json
      * @param user
      * @return
      */
-    Response<Boolean> update(User user);
+    RespDto<Boolean> update(UserDto user);
 
     /**
      * 创建用户
      * @param user
      * @return
      */
-    Response<User> createUser(User user);
+    RespDto<UserDto> createUser(UserDto user);
 
     /**
      * 删除用户
      * @param id 用户id
      * @return
      */
-    Response<Boolean> delete(Long id);
+    RespDto<Boolean> delete(Long id);
 
     /**
      * 批量删除用户
      * @param ids 用户id
      * @return
      */
-    Response<Integer> deletes(List<Long> ids);
+    RespDto<Integer> deletes(List<Long> ids);
 
     /**
      * 批量删除用户
@@ -70,5 +70,5 @@ public interface DoctorUserWriteInterface {
      * @param idn 用户id
      * @return
      */
-    Response<Integer> deletes(Long id0, Long id1, Long... idn);
+    RespDto<Integer> deletes(Long id0, Long id1, Long... idn);
 }

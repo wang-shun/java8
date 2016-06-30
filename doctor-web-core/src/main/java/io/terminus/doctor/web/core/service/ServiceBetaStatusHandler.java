@@ -1,5 +1,6 @@
 package io.terminus.doctor.web.core.service;
 
+import io.terminus.common.model.Response;
 import io.terminus.doctor.web.core.dto.ServiceBetaStatusToken;
 
 /**
@@ -11,5 +12,5 @@ public interface ServiceBetaStatusHandler {
 
     ServiceBetaStatusToken getServiceBetaStatusToken();
 
-    void initDefaultServiceStatus(Long userId);
+    Response<Long> initDefaultServiceStatus(Long userId);
 }

@@ -4,7 +4,7 @@ import com.google.common.base.MoreObjects;
 
 import java.io.Serializable;
 
-public class Response<T> implements Serializable {
+public class RespDto<T> implements Serializable {
     private static final long serialVersionUID = -6586901193547572760L;
 
     private boolean success; //调用是否成功
@@ -49,18 +49,18 @@ public class Response<T> implements Serializable {
                 .toString();
     }
 
-    public static <T> Response<T> ok(T data) {
-        Response<T> resp = new Response<>();
+    public static <T> RespDto<T> ok(T data) {
+        RespDto<T> resp = new RespDto<>();
         resp.setResult(data);
         return resp;
     }
 
-    public static <T> Response<T> ok() {
-        return Response.ok(null);
+    public static <T> RespDto<T> ok() {
+        return RespDto.ok(null);
     }
 
-    public static <T> Response<T> fail(String error) {
-        Response<T> resp = new Response<>();
+    public static <T> RespDto<T> fail(String error) {
+        RespDto<T> resp = new RespDto<>();
         resp.setError(error);
         return resp;
     }

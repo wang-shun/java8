@@ -1,13 +1,12 @@
 package io.terminus.doctor.web.core.service.impl;
 
+import io.terminus.common.model.Response;
 import io.terminus.doctor.user.model.DoctorServiceReview;
 import io.terminus.doctor.user.model.DoctorServiceStatus;
 import io.terminus.doctor.user.service.DoctorServiceStatusWriteService;
 import io.terminus.doctor.web.core.dto.ServiceBetaStatusToken;
 import io.terminus.doctor.web.core.service.ServiceBetaStatusHandler;
 import io.terminus.parana.config.ConfigCenter;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 import java.util.Objects;
 
@@ -38,7 +37,7 @@ public class ServiceBetaStatusHandlerImpl implements ServiceBetaStatusHandler {
     }
 
     @Override
-    public void initDefaultServiceStatus(Long userId){
+    public Response<Long> initDefaultServiceStatus(Long userId){
         ServiceBetaStatusToken dto = this.getServiceBetaStatusToken();
         DoctorServiceStatus status = new DoctorServiceStatus();
         status.setUserId(userId);
@@ -79,6 +78,6 @@ public class ServiceBetaStatusHandlerImpl implements ServiceBetaStatusHandler {
         }
         status.setPigtradeReviewStatus(DoctorServiceReview.Status.INIT.getValue());
 
-        doctorServiceStatusWriteService.createServiceStatus(status);
+        return doctorServiceStatusWriteService.createServiceStatus(status);
     }
 }

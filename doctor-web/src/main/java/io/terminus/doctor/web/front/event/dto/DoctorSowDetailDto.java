@@ -40,5 +40,7 @@ public class DoctorSowDetailDto implements Serializable {
 
     private Date removalDate;   //离场日期
 
+    private Date birthDate; //出生日期
+
     private List<DoctorPigEvent> doctorPigEvents;
 }

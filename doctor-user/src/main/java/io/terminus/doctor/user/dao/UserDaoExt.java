@@ -125,4 +125,12 @@ public class UserDaoExt extends UserDao {
     public List<User> listCreatedSince(Date since){
         return sqlSession.selectList(NAMESPACE + "listCreatedSince", since);
     }
+
+    public List<String> listAllUserEmails(String role){
+        return sqlSession.selectList(NAMESPACE + "listAllUserEmails", role);
+    }
+
+    public List<String> listAllUserMobiles(String role){
+        return sqlSession.selectList(NAMESPACE + "listAllUserMobiles", role);
+    }
 }
