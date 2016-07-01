@@ -71,4 +71,12 @@ public interface DoctorUserWriteInterface {
      * @return
      */
     RespDto<Integer> deletes(Long id0, Long id1, Long... idn);
+
+    /**
+     * 删除用户的一个角色
+     * @param userId
+     * @param userTypeName 角色英文名称
+     * @return
+     */
+    RespDto<Boolean> removeRole(Long userId, String userTypeName);
 }

@@ -156,6 +156,30 @@ public class DoctorUserWriteInterfaceImpl implements DoctorUserWriteInterface {
         return response;
     }
 
+    @Override
+    public RespDto<Boolean> removeRole(Long userId, String userTypeName){
+        try{
+            User user = userDaoExt.findById(userId);
+            if (user == null) {
+                return RespDto.fail("user.not.found");
+            }
+            List<String> roles = user.getRoles();
+            if (roles == null) {
+                return RespDto.ok(true);
+            }else{
+                roles = Lists.newArrayList(roles);
+            }
+            if(roles.contains(userTypeName)){
+                roles.remove(userTypeName);
+            }
+            userDaoExt.updateRoles(userId, roles);
+            return RespDto.ok(true);
+        }catch(Exception e){
+            log.error("remove user role failed, userId={}, role={}, cause:{}", userId, userTypeName, Throwables.getStackTraceAsString(e));
+            return RespDto.fail("update.user.failed");
+        }
+    }
+
     private User makeParanaUserFromInterface(UserDto user){
         User paranaUser = BeanMapper.map(user, User.class);
         if(paranaUser.getType() == null){
