@@ -47,7 +47,7 @@ public class MaterialDumps {
         }
     }
 
-    @Scheduled(cron = "*/10 * * * * ?")
+    @Scheduled(cron = "0 */15 * * * ?")
     @RequestMapping(value = "/delta", method = RequestMethod.GET)
     public void deltaDump() {
         try{
