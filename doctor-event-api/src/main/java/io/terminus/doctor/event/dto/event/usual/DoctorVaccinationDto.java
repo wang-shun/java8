@@ -28,7 +28,11 @@ public class DoctorVaccinationDto implements Serializable{
 
     private String vaccinationName; // 疫苗名称
 
-    private Integer vaccinationResult;  // 防疫结果
+//    private Integer vaccinationResult;  // 防疫结果
+
+    private Long vaccinationItemId; // 免疫项目Id
+
+    private String vaccinationItemName; //免疫项目 名称
 
     private Long vaccinationStaffId;    // 防疫人员Id
 

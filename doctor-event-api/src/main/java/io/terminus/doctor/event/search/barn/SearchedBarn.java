@@ -48,6 +48,12 @@ public class SearchedBarn implements Serializable {
     private Integer status;
 
     /**
+     * 查询详情的类型
+     * @see io.terminus.doctor.common.enums.PigSearchType
+     */
+    private Integer type;
+
+    /**
      * 存栏量
      */
     private Integer storage;

@@ -1,16 +1,21 @@
 package io.terminus.doctor.event.search.group;
 
 import com.google.common.base.Throwables;
+import com.google.common.collect.Lists;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
+import io.terminus.doctor.common.enums.PigType;
+import io.terminus.doctor.event.search.barn.SearchedBarnDto;
 import io.terminus.search.api.Searcher;
 import io.terminus.search.api.model.WithAggregations;
 import io.terminus.search.api.query.Criterias;
+import io.terminus.search.model.Bucket;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -33,7 +38,7 @@ public class GroupSearchReadServiceImpl implements GroupSearchReadService {
     private GroupSearchProperties groupSearchProperties;
 
     @Override
-    public Response<Paging<SearchedGroup>> searchWithAggs(Integer pageNo, Integer pageSize, String template, Map<String, String> params) {
+    public Response<SearchedGroupDto> searchWithAggs(Integer pageNo, Integer pageSize, String template, Map<String, String> params) {
         try{
             // 获取关键词, 设置高亮
             String q = params.get("q");
@@ -41,6 +46,12 @@ public class GroupSearchReadServiceImpl implements GroupSearchReadService {
                 // 暂不做高亮处理
                 // params.put("highlight", "groupCode");
             }
+            // 1. 猪群类型聚合处理, ... 其他
+            String aggs = params.get("aggs");
+            if (StringUtils.isBlank(aggs)) {
+                params.put("aggs", "aggs_pigType:pigType:0"); // id:field:size
+            }
+
             // 构建查询条件, 并查询
             Criterias criterias = baseGroupQueryBuilder.buildCriterias(pageNo, pageSize, params);
             WithAggregations<SearchedGroup> searchedGroups = searcher.searchWithAggs(
@@ -51,7 +62,22 @@ public class GroupSearchReadServiceImpl implements GroupSearchReadService {
                     SearchedGroup.class
             );
             Paging<SearchedGroup> paging = new Paging<>(searchedGroups.getTotal(), searchedGroups.getData());
-            return Response.ok(paging);
+
+            // 获取聚合后的数据
+            List<SearchedBarnDto.PigType> aggPigTypes = Lists.newArrayList();
+            Map<String, List<Bucket>> aggregations = searchedGroups.getAggregations();
+            if (aggregations != null) {
+                // 猪群类型
+                aggregations.get("aggs_pigType").forEach(bucket ->
+                        aggPigTypes.add(SearchedBarnDto.createPigType(
+                                PigType.from(Integer.parseInt(bucket.getKey())))));
+            }
+
+            SearchedGroupDto searchedGroupDto = SearchedGroupDto.builder()
+                    .groups(paging)
+                    .aggPigTypes(aggPigTypes)
+                    .build();
+            return Response.ok(searchedGroupDto);
         } catch (Exception e) {
             log.error("group search failed, cause by {}", Throwables.getStackTraceAsString(e));
             return Response.fail("search.group.fail");

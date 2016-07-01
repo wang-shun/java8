@@ -34,21 +34,21 @@ public class SearchedBarnDto implements Serializable {
     private List<PigType> aggPigTypes;
 
     @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
     @Builder
     public static class PigType implements Serializable{
         private static final long serialVersionUID = 8317574572260219323L;
 
-        private int value;
-        private String desc;
-        private String type;
+        private int key;
+        private String name;
     }
 
     public static PigType createPigType(io.terminus.doctor.common.enums.PigType pigType) {
         if (pigType != null) {
             return PigType.builder()
-                    .value(pigType.getValue())
-                    .desc(pigType.getDesc())
-                    .type(pigType.getType())
+                    .key(pigType.getValue())
+                    .name(pigType.getDesc())
                     .build();
         }
         return null;
