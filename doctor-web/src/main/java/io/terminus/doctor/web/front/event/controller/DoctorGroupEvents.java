@@ -2,6 +2,8 @@ package io.terminus.doctor.web.front.event.controller;
 
 import com.google.common.collect.Lists;
 import io.terminus.common.model.Paging;
+import io.terminus.doctor.basic.model.DoctorBasic;
+import io.terminus.doctor.basic.service.DoctorBasicReadService;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dto.DoctorGroupDetail;
 import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
@@ -41,16 +43,19 @@ public class DoctorGroupEvents {
     private final DoctorGroupReadService doctorGroupReadService;
     private final DoctorFarmAuthCenter doctorFarmAuthCenter;
     private final DoctorGroupWriteService doctorGroupWriteService;
+    private final DoctorBasicReadService doctorBasicReadService;
 
     @Autowired
     public DoctorGroupEvents(DoctorGroupWebService doctorGroupWebService,
                              DoctorGroupReadService doctorGroupReadService,
                              DoctorFarmAuthCenter doctorFarmAuthCenter,
-                             DoctorGroupWriteService doctorGroupWriteService) {
+                             DoctorGroupWriteService doctorGroupWriteService,
+                             DoctorBasicReadService doctorBasicReadService) {
         this.doctorGroupWebService = doctorGroupWebService;
         this.doctorGroupReadService = doctorGroupReadService;
         this.doctorFarmAuthCenter = doctorFarmAuthCenter;
         this.doctorGroupWriteService = doctorGroupWriteService;
+        this.doctorBasicReadService = doctorBasicReadService;
     }
 
     /**
@@ -163,5 +168,19 @@ public class DoctorGroupEvents {
         //权限中心校验权限
         doctorFarmAuthCenter.checkFarmAuth(event.getFarmId());
         return RespHelper.or500(doctorGroupWriteService.rollbackGroupEvent(event, UserUtil.getUserId(), UserUtil.getCurrentUser().getName()));
+    }
+
+    /**
+     * 查询可以转入的品种
+     * @param groupId 猪群id
+     * @return 可转入品种
+     */
+    @RequestMapping(value = "/breeds", method = RequestMethod.GET)
+    public List<DoctorBasic> findCanBreed(@RequestParam("groupId") Long groupId) {
+        DoctorGroup group = RespHelper.or500(doctorGroupReadService.findGroupById(groupId));
+        if (group.getBreedId() == null) {
+            return RespHelper.or500(doctorBasicReadService.findBasicByTypeAndSrmWithCache(DoctorBasic.Type.BREED.getValue(), null));
+        }
+        return Lists.newArrayList(RespHelper.or500(doctorBasicReadService.findBasicById(group.getBreedId())));
     }
 }
