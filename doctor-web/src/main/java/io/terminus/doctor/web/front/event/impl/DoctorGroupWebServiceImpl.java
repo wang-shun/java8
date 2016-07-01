@@ -237,7 +237,7 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
             throw new ServiceException("event.type.illegal");
         }
         //若当前没有猪只,不能变动, 转群, 转种猪, 存栏,疾病, 防疫, 转场等等
-        if (GroupEventType.EMPTY_GROUPS.contains(eventType)) {
+        if (groupDetail.getGroupTrack().getQuantity() <= 0 && GroupEventType.EMPTY_GROUPS.contains(eventType)) {
             throw new ServiceException("empty.group.can.not.event");
         }
     }
