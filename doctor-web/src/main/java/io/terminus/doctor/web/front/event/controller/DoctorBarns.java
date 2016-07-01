@@ -16,6 +16,7 @@ import io.terminus.doctor.user.model.DoctorFarm;
 import io.terminus.doctor.user.service.DoctorFarmReadService;
 import io.terminus.doctor.web.front.auth.DoctorFarmAuthCenter;
 import io.terminus.doctor.web.front.event.dto.DoctorBarnDetail;
+import io.terminus.pampas.common.UserUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -109,6 +110,8 @@ public class DoctorBarns {
         barn.setOrgId(farm.getOrgId());
         barn.setOrgName(farm.getOrgName());
         barn.setFarmName(farm.getName());
+        barn.setStaffId(UserUtil.getUserId());
+        barn.setStaffName(UserUtil.getCurrentUser().getName());
 
         if (barn.getId() == null) {
             barn.setStatus(DoctorBarn.Status.NOUSE.getValue());     //初始猪舍状态: 未用
