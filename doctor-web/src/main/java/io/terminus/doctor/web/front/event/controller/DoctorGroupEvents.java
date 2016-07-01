@@ -81,6 +81,18 @@ public class DoctorGroupEvents {
     }
 
     /**
+     * 编辑猪群事件
+     * @param eventId 猪群事件id
+     * @param data 入参
+     * @see io.terminus.doctor.event.dto.event.group.edit.BaseGroupEdit
+     * @return 是否成功
+     */
+    @RequestMapping(value = "/edit", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    public Boolean editGroupEvent(@RequestParam("eventId") Long eventId, @RequestParam("data") String data) {
+        return RespHelper.or500(doctorGroupWebService.editGroupEvent(eventId, data));
+    }
+
+    /**
      * 根据猪群id查询可以操作的事件类型
      * @param groupIds 猪群ids
      * @return 事件类型s

@@ -29,6 +29,7 @@ import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorGroup;
+import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.service.DoctorBarnReadService;
 import io.terminus.doctor.event.service.DoctorGroupReadService;
 import io.terminus.doctor.event.service.DoctorGroupWriteService;
@@ -214,6 +215,37 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
     }
 
     @Override
+    public Response<Boolean> editGroupEvent(Long eventId, String data) {
+        try {
+            //1.校验猪群是否存在
+            DoctorGroupEvent event = RespHelper.or500(doctorGroupReadService.findGroupEventById(eventId));
+            DoctorGroupDetail groupDetail = checkGroupExist(event.getGroupId());
+
+            //2.校验系统自动事件, 自动事件不可编辑
+            checkEventAuto(event);
+
+            //3.根据不同的事件类型调用不同的接口
+            Map<String, Object> params = JSON_MAPPER.fromJson(data, JSON_MAPPER.createCollectionType(Map.class, String.class, Object.class));
+            switch (checkNotNull(GroupEventType.from(event.getType()))) {
+                case MOVE_IN:
+                    RespHelper.orServEx(doctorGroupWriteService.groupEventMoveIn(groupDetail, BeanMapper.map(putBasicFields(params), DoctorMoveInGroupInput.class)));
+                    break;
+                case CHANGE:
+                    RespHelper.orServEx(doctorGroupWriteService.groupEventChange(groupDetail, BeanMapper.map(putBasicFields(params), DoctorChangeGroupInput.class)));
+                    break;
+                default:
+                    return Response.fail("event.type.error");
+            }
+            return Response.ok(Boolean.TRUE);
+        } catch (ServiceException e) {
+            return Response.fail(e.getMessage());
+        } catch (Exception e) {
+            log.error("edit group event failed, eventId:{}, data:{}, cause:{}", eventId, data, Throwables.getStackTraceAsString(e));
+            return Response.fail("edit.group.event.fail");
+        }
+    }
+
+    @Override
     public Response<String> generateGroupCode(String barnName) {
         if (isEmpty(barnName)) {
             return Response.ok();
@@ -316,5 +348,12 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
     private Integer getInteger(Map<String, Object> params, String key) {
         Object o = params.get(key);
         return o == null ? null : Integer.valueOf(String.valueOf(o));
+    }
+
+    //校验是否是系统自动生成的事件, 自动事件不可编辑!
+    private static void checkEventAuto(DoctorGroupEvent event) {
+        if (Objects.equals(event.getIsAuto(), IsOrNot.YES.getValue())) {
+            throw new ServiceException("group.event.is.auto");
+        }
     }
 }
