@@ -24,6 +24,12 @@ public class SearchedMaterial implements Serializable {
     private String materialName; // 物料名称
 
     /**
+     * 猪场
+     */
+    private Long farmId;
+    private String farmName;
+
+    /**
      * 物料类型
      * @see io.terminus.doctor.warehouse.enums.WareHouseType
      */

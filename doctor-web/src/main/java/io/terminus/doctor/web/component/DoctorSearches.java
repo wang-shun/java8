@@ -72,6 +72,8 @@ public class DoctorSearches {
      * @param pageNo   起始页
      * @param pageSize 页大小
      * @param params   搜索参数
+     *                 搜索参数可以参照:
+     *                 @see `DefaultPigQueryBuilder#buildTerm`
      * @return
      */
     @RequestMapping(value = "/sowpigs", method = RequestMethod.GET)
@@ -88,9 +90,11 @@ public class DoctorSearches {
 
     /**
      * 获取母猪聚合后的状态 数据
-     * @param pageNo   起始页
-     * @param pageSize 页大小
+     * @param pageNo    起始页
+     * @param pageSize  页大小
      * @param params    搜索参数
+     *                  搜索参数可以参照:
+     *                  @see `DefaultPigQueryBuilder#buildTerm`
      * @return
      */
     @RequestMapping(value = "/sowpigs/status", method = RequestMethod.GET)
@@ -127,6 +131,8 @@ public class DoctorSearches {
      * @param pageNo   起始页
      * @param pageSize 页大小
      * @param params   搜索参数
+     *                 搜索参数可以参照:
+     *                 @see `DefaultPigQueryBuilder#buildTerm`
      * @return
      */
     @RequestMapping(value = "/boarpigs", method = RequestMethod.GET)
@@ -145,6 +151,8 @@ public class DoctorSearches {
      * 所有公猪搜索方法
      *
      * @param params   搜索参数
+     *                 搜索参数可以参照:
+     *                 @see `DefaultPigQueryBuilder#buildTerm`
      * @return
      */
     @RequestMapping(value = "/boarpigs/all", method = RequestMethod.GET)
@@ -177,6 +185,8 @@ public class DoctorSearches {
      * @param pageNo   起始页
      * @param pageSize 页大小
      * @param params   搜索参数
+     *                 搜索参数可以参照:
+     *                 @see `DefaultGroupQueryBuilder#buildTerm`
      * @return
      */
     @RequestMapping(value = "/groups", method = RequestMethod.GET)
@@ -195,6 +205,8 @@ public class DoctorSearches {
      * @param pageNo   起始页
      * @param pageSize 页大小
      * @param params   搜索参数
+     *                 搜索参数可以参照:
+     *                 @see `DefaultGroupQueryBuilder#buildTerm`
      * @return
      */
     @RequestMapping(value = "/groups/status", method = RequestMethod.GET)
@@ -230,6 +242,8 @@ public class DoctorSearches {
      * @param pageNo   起始页
      * @param pageSize 页大小
      * @param params   搜索参数
+     *                 搜索参数可以参照:
+     *                 @see `DefaultBarnQueryBuilder#buildTerm`
      * @return
      */
     @RequestMapping(value = "/barns", method = RequestMethod.GET)
@@ -258,11 +272,42 @@ public class DoctorSearches {
     }
 
     /**
+     * 获取所有的猪舍信息
+     * @param params 搜索参数
+     *               搜索参数可以参照:
+     *               @see `DefaultBarnQueryBuilder#buildTerm`
+     * @return
+     */
+    @RequestMapping(value = "/barns/all", method = RequestMethod.GET)
+    public List<SearchedBarn> searchAllBarns(@RequestParam Map<String, String> params) {
+        if (farmIdNotExist(params)) {
+            return Collections.emptyList();
+        }
+        // 游标法获取数据
+        Integer pageNo = 1;
+        Integer pageSize = 100;
+        Paging<SearchedBarn> searchBarns =
+                RespHelper.or500(barnSearchReadService.searchWithAggs(pageNo, pageSize, "search/search.mustache", params)).getBarns();
+        while (!searchBarns.isEmpty()) {
+            pageNo ++;
+            Paging<SearchedBarn> tempSearchBarns =
+                    RespHelper.or500(barnSearchReadService.searchWithAggs(pageNo, pageSize, "search/search.mustache", params)).getBarns();
+            if (tempSearchBarns.isEmpty()) {
+                break;
+            }
+            searchBarns.getData().addAll(tempSearchBarns.getData());
+        }
+        return searchBarns.getData();
+    }
+
+    /**
      * 物料搜索方法
      *
      * @param pageNo   起始页
      * @param pageSize 页大小
      * @param params   搜索参数
+     *                 搜索参数可以参照:
+     *                 @see `DefaultMaterialQueryBuilder#buildTerm`
      * @return
      */
     @RequestMapping(value = "/materials", method = RequestMethod.GET)
@@ -274,6 +319,36 @@ public class DoctorSearches {
         }
         createSearchWord(SearchType.MATERIAL.getValue(), params);
         return RespHelper.or500(materialSearchReadService.searchWithAggs(pageNo, pageSize, "search/search.mustache", params));
+    }
+
+    /**
+     * 获取所有的物料
+     *
+     * @param params   搜索参数
+     *                 搜索参数可以参照:
+     *                 @see `DefaultMaterialQueryBuilder#buildTerm`
+     * @return
+     */
+    @RequestMapping(value = "/materials/all", method = RequestMethod.GET)
+    public List<SearchedMaterial> searchAllMaterials(@RequestParam Map<String, String> params) {
+        if (farmIdNotExist(params)) {
+            return Collections.emptyList();
+        }
+        // 游标法获取数据
+        Integer pageNo = 1;
+        Integer pageSize = 100;
+        Paging<SearchedMaterial> searchMaterials =
+                RespHelper.or500(materialSearchReadService.searchWithAggs(pageNo, pageSize, "search/search.mustache", params));
+        while (!searchMaterials.isEmpty()) {
+            pageNo ++;
+            Paging<SearchedMaterial> tempSearchMaterials =
+                    RespHelper.or500(materialSearchReadService.searchWithAggs(pageNo, pageSize, "search/search.mustache", params));
+            if (tempSearchMaterials.isEmpty()) {
+                break;
+            }
+            searchMaterials.getData().addAll(tempSearchMaterials.getData());
+        }
+        return searchMaterials.getData();
     }
 
     /**

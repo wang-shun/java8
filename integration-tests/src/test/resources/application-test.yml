@@ -52,6 +52,12 @@ esearch:
     mapping-path: search/barn_mapping.json
     full-dump-range: 3
     batch-size: 100
+  material:
+      index-name: materials
+      index-type: material
+      mapping-path: search/material_mapping.json
+      full-dump-range: 3
+      batch-size: 100
 
 flow:
   definition:

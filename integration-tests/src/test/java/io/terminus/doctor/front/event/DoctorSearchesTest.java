@@ -72,4 +72,28 @@ public class DoctorSearchesTest extends BaseFrontWebTest {
         Object body = getForEntity(url, ImmutableMap.of("farmId", 12355, "pigType", "3"), Object.class).getBody();
         System.out.println(JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(body));
     }
+
+    /**
+     * 查询所有的猪舍
+     * @see DoctorSearches#searchAllBarns(Map)
+     */
+    @Test
+    public void test_QUERY_AllBarns() {
+        String url = "/api/doctor/search/barns/all";
+        List body = getForEntity(url, ImmutableMap.of("farmId", 12355), List.class).getBody();
+        System.out.println(body.size());
+        System.out.println(JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(body));
+    }
+
+    /**
+     * 查询所有的物料
+     * @see DoctorSearches#searchAllMaterials(Map)
+     */
+    @Test
+    public void test_QUERY_AllMaterials() {
+        String url = "/api/doctor/search/materials/all";
+        List body = getForEntity(url, ImmutableMap.of("farmId", 12355), List.class).getBody();
+        System.out.println(body.size());
+        System.out.println(JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(body));
+    }
 }
