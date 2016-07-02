@@ -56,6 +56,22 @@
                   } {{^last}},{{/last}}
               {{/ranges}}
             ]
+            {{#mustNotTerms}}
+            ,"must_not" : [
+                {{#term}}
+                    {"term": {"{{field}}":"{{value}}"}} {{^last}},{{/last}}
+                {{/term}}
+                {{#terms}}
+                    {"terms": {
+                        "{{field}}":
+                            [{{#values}}
+                                "{{value}}" {{^last}},{{/last}}
+                             {{/values}}
+                            ]
+                    }}
+                {{/terms}}
+            ]
+            {{/mustNotTerms}}
           }
         }
      }

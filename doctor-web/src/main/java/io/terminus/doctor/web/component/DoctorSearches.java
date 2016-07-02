@@ -338,11 +338,11 @@ public class DoctorSearches {
         Integer pageNo = 1;
         Integer pageSize = 100;
         Paging<SearchedMaterial> searchMaterials =
-                RespHelper.or500(materialSearchReadService.searchWithAggs(pageNo, pageSize, "search/search.mustache", params));
+                RespHelper.or500(materialSearchReadService.searchWithAggs(pageNo, pageSize, "search/masearch.mustache", params));
         while (!searchMaterials.isEmpty()) {
             pageNo ++;
             Paging<SearchedMaterial> tempSearchMaterials =
-                    RespHelper.or500(materialSearchReadService.searchWithAggs(pageNo, pageSize, "search/search.mustache", params));
+                    RespHelper.or500(materialSearchReadService.searchWithAggs(pageNo, pageSize, "search/masearch.mustache", params));
             if (tempSearchMaterials.isEmpty()) {
                 break;
             }
