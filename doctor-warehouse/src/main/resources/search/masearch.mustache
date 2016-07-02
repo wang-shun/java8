@@ -8,9 +8,14 @@
             {{#multiField}}
             "bool": {
               "should": [
-                 {{#fields}}
-                 {"match": { "{{field}}": "{{value}}" }} {{^last}},{{/last}}
-                 {{/fields}}
+                 {{#myFields}}
+                     {{#isWildCard}}
+                         {"wildcard": { "{{field}}": "{{value}}" }} {{^last}},{{/last}}
+                     {{/isWildCard}}
+                     {{^isWildCard}}
+                         {"match": { "{{field}}": "{{value}}" }} {{^last}},{{/last}}
+                     {{/isWildCard}}
+                 {{/myFields}}
               ]
             }
             {{/multiField}}
