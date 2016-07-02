@@ -16,6 +16,7 @@ import io.terminus.doctor.event.dao.DoctorGroupSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
 import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
 import io.terminus.doctor.event.dto.event.group.DoctorNewGroupEvent;
+import io.terminus.doctor.event.dto.event.group.edit.DoctorNewGroupEdit;
 import io.terminus.doctor.event.dto.event.group.input.DoctorNewGroupInput;
 import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.event.DoctorGroupCountEvent;
@@ -126,6 +127,18 @@ public class DoctorGroupManager {
         publishCountGroupEvent(group.getOrgId(), group.getFarmId());
         publistGroupAndBarn(group.getId(), group.getCurrentBarnId());
         return groupId;
+    }
+
+    /**
+     * 编辑新建猪群事件
+     * @param group         猪群
+     * @param groupTrack    猪群跟踪
+     * @param event         猪群事件
+     * @param newEdit       编辑信息
+     */
+    @Transactional
+    public void editNewGroupEvent(DoctorGroup group, DoctorGroupTrack groupTrack, DoctorGroupEvent event, DoctorNewGroupEdit newEdit) {
+
     }
 
     private DoctorGroup getNewGroup(DoctorGroup group, DoctorNewGroupInput newGroupInput) {

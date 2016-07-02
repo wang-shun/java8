@@ -4,7 +4,6 @@ import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.Response;
-import io.terminus.common.utils.BeanMapper;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.basic.model.DoctorBasic;
 import io.terminus.doctor.basic.model.DoctorChangeReason;
@@ -15,6 +14,13 @@ import io.terminus.doctor.common.utils.Params;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dto.DoctorGroupDetail;
 import io.terminus.doctor.event.dto.event.group.DoctorMoveInGroupEvent;
+import io.terminus.doctor.event.dto.event.group.edit.DoctorAntiepidemicGroupEdit;
+import io.terminus.doctor.event.dto.event.group.edit.DoctorChangeGroupEdit;
+import io.terminus.doctor.event.dto.event.group.edit.DoctorDiseaseGroupEdit;
+import io.terminus.doctor.event.dto.event.group.edit.DoctorLiveStockGroupEdit;
+import io.terminus.doctor.event.dto.event.group.edit.DoctorMoveInGroupEdit;
+import io.terminus.doctor.event.dto.event.group.edit.DoctorNewGroupEdit;
+import io.terminus.doctor.event.dto.event.group.edit.DoctorTransEdit;
 import io.terminus.doctor.event.dto.event.group.input.DoctorAntiepidemicGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorChangeGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorCloseGroupInput;
@@ -29,6 +35,7 @@ import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorGroup;
+import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.service.DoctorBarnReadService;
 import io.terminus.doctor.event.service.DoctorGroupReadService;
 import io.terminus.doctor.event.service.DoctorGroupWriteService;
@@ -55,6 +62,8 @@ import java.util.Objects;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.terminus.common.utils.Arguments.isEmpty;
+import static io.terminus.common.utils.BeanMapper.map;
+import static io.terminus.doctor.common.utils.RespHelper.orServEx;
 
 /**
  * Desc:
@@ -124,14 +133,14 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
         newGroupInput.setCreatorId(UserUtil.getUserId());
         newGroupInput.setCreatorName(UserUtil.getCurrentUser().getName());
 
-        DoctorGroup group = BeanMapper.map(newGroupInput, DoctorGroup.class);
+        DoctorGroup group = map(newGroupInput, DoctorGroup.class);
         group.setRemark(null);  //dozer不需要转换remark
 
         //设置猪场公司信息
-        DoctorFarm farm = RespHelper.orServEx(doctorFarmReadService.findFarmById(group.getFarmId()));
+        DoctorFarm farm = orServEx(doctorFarmReadService.findFarmById(group.getFarmId()));
         group.setFarmName(farm.getName());
 
-        DoctorOrg org = RespHelper.orServEx(doctorOrgReadService.findOrgById(farm.getOrgId()));
+        DoctorOrg org = orServEx(doctorOrgReadService.findOrgById(farm.getOrgId()));
         group.setOrgId(org.getId());
         group.setOrgName(org.getName());
         return group;
@@ -153,13 +162,13 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
             switch (groupEventType) {
                 case MOVE_IN:
                     params.put("inTypeName", DoctorMoveInGroupEvent.InType.from(getInteger(params, "inType")).getDesc());
-                    RespHelper.orServEx(doctorGroupWriteService.groupEventMoveIn(groupDetail, BeanMapper.map(putBasicFields(params), DoctorMoveInGroupInput.class)));
+                    orServEx(doctorGroupWriteService.groupEventMoveIn(groupDetail, map(putBasicFields(params), DoctorMoveInGroupInput.class)));
                     break;
                 case CHANGE:
                     params.put("changeTypeName", getBasicName(getLong(params, "changeTypeId")));
                     params.put("changeReasonName", getChangeReasonName(getLong(params, "changeReasonId")));
                     params.put("customerName", getCustomerName(getLong(params, "customerId")));
-                    RespHelper.orServEx(doctorGroupWriteService.groupEventChange(groupDetail, BeanMapper.map(putBasicFields(params), DoctorChangeGroupInput.class)));
+                    orServEx(doctorGroupWriteService.groupEventChange(groupDetail, map(putBasicFields(params), DoctorChangeGroupInput.class)));
                     break;
                 case TRANS_GROUP:
                     params.put("toBarnName", getBarnName(getLong(params, "toBarnId")));
@@ -168,24 +177,24 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
                     if (Integer.valueOf(String.valueOf(params.get("isCreateGroup"))).equals(IsOrNot.NO.getValue())) {
                         params.put("toGroupCode", getGroupCode(getLong(params, "toGroupId")));
                     }
-                    RespHelper.orServEx(doctorGroupWriteService.groupEventTransGroup(groupDetail, BeanMapper.map(putBasicFields(params), DoctorTransGroupInput.class)));
+                    orServEx(doctorGroupWriteService.groupEventTransGroup(groupDetail, map(putBasicFields(params), DoctorTransGroupInput.class)));
                     break;
                 case TURN_SEED:
-                    RespHelper.orServEx(doctorGroupWriteService.groupEventTurnSeed(groupDetail, BeanMapper.map(putBasicFields(params), DoctorTurnSeedGroupInput.class)));
+                    orServEx(doctorGroupWriteService.groupEventTurnSeed(groupDetail, map(putBasicFields(params), DoctorTurnSeedGroupInput.class)));
                     break;
                 case LIVE_STOCK:
-                    RespHelper.orServEx(doctorGroupWriteService.groupEventLiveStock(groupDetail, BeanMapper.map(putBasicFields(params), DoctorLiveStockGroupInput.class)));
+                    orServEx(doctorGroupWriteService.groupEventLiveStock(groupDetail, map(putBasicFields(params), DoctorLiveStockGroupInput.class)));
                     break;
                 case DISEASE:
                     params.put("diseaseName", getBasicName(getLong(params, "diseaseId")));
                     params.put("doctorName", getStaffUserName(getLong(params, "doctorId")));
-                    RespHelper.orServEx(doctorGroupWriteService.groupEventDisease(groupDetail, BeanMapper.map(putBasicFields(params), DoctorDiseaseGroupInput.class)));
+                    orServEx(doctorGroupWriteService.groupEventDisease(groupDetail, map(putBasicFields(params), DoctorDiseaseGroupInput.class)));
                     break;
                 case ANTIEPIDEMIC:
                     params.put("vaccinName", getVaccinName(getLong(params, "vaccinId")));
                     params.put("vaccinStaffName", getStaffUserName(getLong(params, "vaccinStaffId")));
                     params.put("vaccinItemName", getVaccinItemName(getLong(params, "vaccinItemId")));
-                    RespHelper.orServEx(doctorGroupWriteService.groupEventAntiepidemic(groupDetail, BeanMapper.map(putBasicFields(params), DoctorAntiepidemicGroupInput.class)));
+                    orServEx(doctorGroupWriteService.groupEventAntiepidemic(groupDetail, map(putBasicFields(params), DoctorAntiepidemicGroupInput.class)));
                     break;
                 case TRANS_FARM:
                     params.put("toFarmName", getFarmName(getLong(params, "toFarmId")));
@@ -195,10 +204,10 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
                     if (Integer.valueOf(String.valueOf(params.get("isCreateGroup"))).equals(IsOrNot.NO.getValue())) {
                         params.put("toGroupCode", getGroupCode(getLong(params, "toGroupId")));
                     }
-                    RespHelper.orServEx(doctorGroupWriteService.groupEventTransFarm(groupDetail, BeanMapper.map(putBasicFields(params), DoctorTransFarmGroupInput.class)));
+                    orServEx(doctorGroupWriteService.groupEventTransFarm(groupDetail, map(putBasicFields(params), DoctorTransFarmGroupInput.class)));
                     break;
                 case CLOSE:
-                    RespHelper.orServEx(doctorGroupWriteService.groupEventClose(groupDetail, BeanMapper.map(putBasicFields(params), DoctorCloseGroupInput.class)));
+                    orServEx(doctorGroupWriteService.groupEventClose(groupDetail, map(putBasicFields(params), DoctorCloseGroupInput.class)));
                     break;
                 default:
                     return Response.fail("event.type.error");
@@ -210,6 +219,60 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
             log.error("create group event failed, groupId:{}, eventType:{}, params:{}, cause:{}",
                     groupId, eventType, data, Throwables.getStackTraceAsString(e));
             return Response.fail("create.group.event.fail");
+        }
+    }
+
+    @Override
+    public Response<Boolean> editGroupEvent(Long eventId, String data) {
+        try {
+            //1.校验猪群是否存在
+            DoctorGroupEvent event = RespHelper.or500(doctorGroupReadService.findGroupEventById(eventId));
+            DoctorGroupDetail groupDetail = checkGroupExist(event.getGroupId());
+
+            //2.校验系统自动事件, 自动事件不可编辑
+            checkEventAuto(event);
+
+            //3.根据不同的事件类型调用不同的接口
+            Map<String, Object> params = JSON_MAPPER.fromJson(data, JSON_MAPPER.createCollectionType(Map.class, String.class, Object.class));
+            if (params == null || params.isEmpty()) {
+                log.info("edit group event data is empty, eventId:{}, data:{}", eventId, data);
+                return Response.ok(Boolean.TRUE);
+            }
+
+            switch (checkNotNull(GroupEventType.from(event.getType()))) {
+                case NEW:
+                    orServEx(doctorGroupWriteService.editEventNew(groupDetail, event, map(params, DoctorNewGroupEdit.class)));
+                    break;
+                case MOVE_IN:
+                    orServEx(doctorGroupWriteService.editEventMoveIn(groupDetail, event, map(params, DoctorMoveInGroupEdit.class)));
+                    break;
+                case CHANGE:
+                    orServEx(doctorGroupWriteService.editEventChange(groupDetail, event, map(params, DoctorChangeGroupEdit.class)));
+                    break;
+                case TRANS_GROUP:
+                    orServEx(doctorGroupWriteService.editEventTrans(groupDetail, event, map(params, DoctorTransEdit.class)));
+                    break;
+                case LIVE_STOCK:
+                    orServEx(doctorGroupWriteService.editEventLiveStock(groupDetail, event, map(params, DoctorLiveStockGroupEdit.class)));
+                    break;
+                case DISEASE:
+                    orServEx(doctorGroupWriteService.editEventDisease(groupDetail, event, map(params, DoctorDiseaseGroupEdit.class)));
+                    break;
+                case ANTIEPIDEMIC:
+                    orServEx(doctorGroupWriteService.editEventAntiepidemic(groupDetail, event, map(params, DoctorAntiepidemicGroupEdit.class)));
+                    break;
+                case TRANS_FARM:
+                    orServEx(doctorGroupWriteService.editEventTrans(groupDetail, event, map(params, DoctorTransEdit.class)));
+                    break;
+                default:
+                    return Response.fail("event.type.error");
+            }
+            return Response.ok(Boolean.TRUE);
+        } catch (ServiceException e) {
+            return Response.fail(e.getMessage());
+        } catch (Exception e) {
+            log.error("edit group event failed, eventId:{}, data:{}, cause:{}", eventId, data, Throwables.getStackTraceAsString(e));
+            return Response.fail("edit.group.event.fail");
         }
     }
 
@@ -249,7 +312,7 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
 
     //获取猪群号
     private String getGroupCode(Long groupId) {
-        return RespHelper.orServEx(doctorGroupReadService.findGroupById(groupId)).getGroupCode();
+        return orServEx(doctorGroupReadService.findGroupById(groupId)).getGroupCode();
     }
 
     //获取猪舍名称
@@ -316,5 +379,12 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
     private Integer getInteger(Map<String, Object> params, String key) {
         Object o = params.get(key);
         return o == null ? null : Integer.valueOf(String.valueOf(o));
+    }
+
+    //校验是否是系统自动生成的事件, 自动事件不可编辑!
+    private static void checkEventAuto(DoctorGroupEvent event) {
+        if (Objects.equals(event.getIsAuto(), IsOrNot.YES.getValue())) {
+            throw new ServiceException("group.event.is.auto");
+        }
     }
 }

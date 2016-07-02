@@ -7,6 +7,7 @@ import io.terminus.doctor.event.dao.DoctorGroupSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
 import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
 import io.terminus.doctor.event.dto.event.group.DoctorAntiepidemicGroupEvent;
+import io.terminus.doctor.event.dto.event.group.edit.BaseGroupEdit;
 import io.terminus.doctor.event.dto.event.group.input.BaseGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorAntiepidemicGroupInput;
 import io.terminus.doctor.event.enums.GroupEventType;
@@ -58,5 +59,10 @@ public class DoctorAntiepidemicGroupEventHandler extends DoctorAbstractGroupEven
 
         //4.创建镜像
         createGroupSnapShot(oldShot, new DoctorGroupSnapShotInfo(group, event, groupTrack), GroupEventType.ANTIEPIDEMIC);
+    }
+
+    @Override
+    protected <E extends BaseGroupEdit> void editEvent(DoctorGroup group, DoctorGroupTrack groupTrack, DoctorGroupEvent event, E edit) {
+
     }
 }

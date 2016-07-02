@@ -8,6 +8,7 @@ import io.terminus.doctor.event.dao.DoctorGroupSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
 import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
 import io.terminus.doctor.event.dto.event.group.DoctorMoveInGroupEvent;
+import io.terminus.doctor.event.dto.event.group.edit.BaseGroupEdit;
 import io.terminus.doctor.event.dto.event.group.input.BaseGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorMoveInGroupInput;
 import io.terminus.doctor.event.enums.GroupEventType;
@@ -87,5 +88,10 @@ public class DoctorMoveInGroupEventHandler extends DoctorAbstractGroupEventHandl
         //发布统计事件
         publishCountGroupEvent(group.getOrgId(), group.getFarmId());
         publistGroupAndBarn(group.getId(), group.getCurrentBarnId());
+    }
+
+    @Override
+    protected <E extends BaseGroupEdit> void editEvent(DoctorGroup group, DoctorGroupTrack groupTrack, DoctorGroupEvent event, E edit) {
+
     }
 }
