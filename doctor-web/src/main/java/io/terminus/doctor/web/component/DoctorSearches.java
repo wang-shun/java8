@@ -318,7 +318,7 @@ public class DoctorSearches {
             return new Paging<>(0L, Collections.emptyList());
         }
         createSearchWord(SearchType.MATERIAL.getValue(), params);
-        return RespHelper.or500(materialSearchReadService.searchWithAggs(pageNo, pageSize, "search/search.mustache", params));
+        return RespHelper.or500(materialSearchReadService.searchWithAggs(pageNo, pageSize, "search/masearch.mustache", params));
     }
 
     /**
