@@ -164,14 +164,14 @@ public class DoctorMaterialInfos {
                                                                @RequestParam(value = "canProduce", required = false) Integer canProduce,
                                                                @RequestParam(value = "pageNo", required = false) Integer pageNo,
                                                                @RequestParam(value = "pageSize",required = false)Integer pageSize){
-        return RespHelper.or500(doctorMaterialInfoReadService.pagingMaterialInfos(farmId, type, pageNo, pageSize));
+        return RespHelper.or500(doctorMaterialInfoReadService.pagingMaterialInfos(farmId, type, canProduce, pageNo, pageSize));
     }
 
     @RequestMapping(value = "/queryAllMaterialInfo", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public List<DoctorMaterialInfo> queryAllMaterialInfo(@RequestParam("farmId") Long farmId,
                                                          @RequestParam(value = "type", required = false) Integer type){
-        Paging<DoctorMaterialInfo> paging = RespHelper.or500(doctorMaterialInfoReadService.pagingMaterialInfos(farmId, type, 1, Integer.MAX_VALUE));
+        Paging<DoctorMaterialInfo> paging = RespHelper.or500(doctorMaterialInfoReadService.pagingMaterialInfos(farmId, type, null, 1, Integer.MAX_VALUE));
         return paging.getData();
     }
 
