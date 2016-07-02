@@ -66,6 +66,20 @@ public class DoctorMaterialInfoWriteServiceImpl implements DoctorMaterialInfoWri
     }
 
     @Override
+    public Response<Boolean> updateMaterialInfo(DoctorMaterialInfo doctorMaterialInfo) {
+        try{
+            checkState(!isNull(doctorMaterialInfo.getId()), "update.id.empty");
+            return Response.ok(doctorMaterialInfoDao.update(doctorMaterialInfo));
+        }catch (IllegalStateException e){
+            log.error("update material info illegal state, cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail(e.getMessage());
+        }catch (Exception e){
+            log.error("update material info fail, cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("update.materialInfo.fail");
+        }
+    }
+
+    @Override
     public Response<Boolean> createMaterialProductRatioInfo(DoctorMaterialProductRatioDto doctorMaterialProductRatioDto) {
         try{
             // 校验物料信息存在

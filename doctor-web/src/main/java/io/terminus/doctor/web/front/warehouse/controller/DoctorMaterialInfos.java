@@ -17,6 +17,7 @@ import io.terminus.doctor.warehouse.service.DoctorMaterialInWareHouseReadService
 import io.terminus.doctor.warehouse.service.DoctorMaterialInfoReadService;
 import io.terminus.doctor.warehouse.service.DoctorMaterialInfoWriteService;
 import io.terminus.doctor.web.front.warehouse.dto.DoctorMaterialInfoCreateDto;
+import io.terminus.doctor.web.front.warehouse.dto.DoctorMaterialInfoUpdateDto;
 import io.terminus.pampas.common.UserUtil;
 import io.terminus.parana.user.model.User;
 import io.terminus.parana.user.service.UserReadService;
@@ -71,6 +72,37 @@ public class DoctorMaterialInfos {
         this.userReadService = userReadService;
         this.doctorBasicReadService = doctorBasicReadService;
         this.doctorMaterialInWareHouseReadService = doctorMaterialInWareHouseReadService;
+    }
+
+    @RequestMapping(value = "/update", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public Boolean updateMaterialInfo(@RequestBody DoctorMaterialInfoUpdateDto doctorMaterialInfoUpdateDto){
+        DoctorMaterialInfo doctorMaterialInfo = null;
+        try{
+
+            Long userId = UserUtil.getUserId();
+            Response<User> userResponse = userReadService.findById(userId);
+            String username = RespHelper.orServEx(userResponse).getName();
+
+            String unitName = RespHelper.orServEx(doctorBasicReadService.findBasicById(doctorMaterialInfoUpdateDto.getUnitId())).getName();
+            String unitGroupName = RespHelper.orServEx(doctorBasicReadService.findBasicById(doctorMaterialInfoUpdateDto.getUnitGroupId())).getName();
+
+            doctorMaterialInfo = DoctorMaterialInfo.builder()
+                    .id(doctorMaterialInfoUpdateDto.getMaterialInfoId())
+                    .materialName(doctorMaterialInfoUpdateDto.getMaterialName())
+                    .inputCode(doctorMaterialInfoUpdateDto.getInputCode())
+                    .remark(doctorMaterialInfoUpdateDto.getMark())
+                    .unitId(doctorMaterialInfoUpdateDto.getUnitId()).unitName(unitName)
+                    .unitGroupId(doctorMaterialInfoUpdateDto.getUnitGroupId()).unitGroupName(unitGroupName)
+                    .defaultConsumeCount(doctorMaterialInfoUpdateDto.getDefaultConsumeCount()).price(doctorMaterialInfoUpdateDto.getPrice())
+                    .updatorId(userId).updatorName(username)
+                    .build();
+
+        }catch (Exception e){
+            log.error("update material info fail, cause:{}", Throwables.getStackTraceAsString(e));
+        }
+
+        return RespHelper.or500(doctorMaterialInfoWriteService.updateMaterialInfo(doctorMaterialInfo));
     }
 
     @RequestMapping(value = "/create", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)

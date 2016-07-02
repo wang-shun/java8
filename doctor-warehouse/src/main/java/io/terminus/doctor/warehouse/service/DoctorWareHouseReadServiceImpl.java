@@ -16,9 +16,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.validation.constraints.NotNull;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import static com.google.common.base.Preconditions.checkState;
+import static java.util.Objects.isNull;
 
 /**
  * Created by yaoqijun.
@@ -85,5 +89,21 @@ public class DoctorWareHouseReadServiceImpl implements DoctorWareHouseReadServic
         }
     }
 
+    @Override
+    public Response<DoctorWareHouseDto> queryDoctorWareHouseById(@NotNull(message = "input.warehouseId.empty") Long warehouseId) {
+        try{
+            DoctorWareHouse doctorWareHouse = doctorWareHouseDao.findById(warehouseId);
+            checkState(!isNull(doctorWareHouse), "input.warehouseId.error");
 
+            DoctorWareHouseTrack doctorWareHouseTrack = doctorWareHouseTrackDao.findById(warehouseId);
+
+        	return Response.ok(DoctorWareHouseDto.buildWareHouseDto(doctorWareHouse, doctorWareHouseTrack));
+        }catch (IllegalStateException se){
+            log.warn("illegal state fail, warehouseId:{}, cause:{}", warehouseId,  Throwables.getStackTraceAsString(se));
+            return Response.fail(se.getMessage());
+        }catch (Exception e){
+            log.error("warehouse info find by id error, warehouseId:{}, cause:{}", warehouseId, Throwables.getStackTraceAsString(e));
+            return Response.fail("findBy.warehouseId.fail");
+        }
+    }
 }

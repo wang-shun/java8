@@ -21,9 +21,9 @@ public interface DoctorWareHouseWriteService {
     Response<Long> createWareHouse(@NotNull(message = "input.wareHouse.empty") DoctorWareHouse doctorWareHouse);
 
     /**
-     * 修改warehouse 信息
+     * 修改warehouse 信息, 修改ManagerId, ManagerName, address 地址信息， WareHouseName 仓库名称
      * @param wareHouse
      * @return
      */
-//    Response<Boolean> updateWareHouse(DoctorWareHouse wareHouse);
+    Response<Boolean> updateWareHouse(@NotNull(message = "input.warehouse.empty") DoctorWareHouse wareHouse);
 }
