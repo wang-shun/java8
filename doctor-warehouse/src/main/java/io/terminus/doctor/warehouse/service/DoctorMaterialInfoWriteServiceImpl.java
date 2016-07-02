@@ -98,6 +98,9 @@ public class DoctorMaterialInfoWriteServiceImpl implements DoctorMaterialInfoWri
             doctorMaterialInfo.setCanProduce(IsOrNot.YES.getKey());
             doctorMaterialInfoDao.update(doctorMaterialInfo);
             return Response.ok(Boolean.TRUE);
+        }catch (IllegalStateException e){
+            log.error("create material product ratio info error, cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail(e.getMessage());
         }catch (Exception e){
             log.error("create material product ratio fail,cause:{}", Throwables.getStackTraceAsString(e));
             return Response.fail("create.materialProduct.fail");
