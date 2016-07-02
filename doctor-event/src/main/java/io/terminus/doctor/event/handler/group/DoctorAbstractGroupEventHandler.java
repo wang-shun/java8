@@ -13,6 +13,7 @@ import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorGroupSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
 import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
+import io.terminus.doctor.event.dto.event.group.edit.BaseGroupEdit;
 import io.terminus.doctor.event.dto.event.group.input.BaseGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorTransGroupInput;
 import io.terminus.doctor.event.enums.GroupEventType;
@@ -68,8 +69,8 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
     }
 
     @Override
-    public void edit() {
-
+    public <E extends BaseGroupEdit> void edit(DoctorGroup group, DoctorGroupTrack groupTrack, DoctorGroupEvent event, E edit) {
+        editEvent(group, groupTrack, event, edit);
     }
 
     /**
@@ -80,6 +81,16 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
      * @param <I>         规定输入上界
      */
     protected abstract <I extends BaseGroupInput> void handleEvent(DoctorGroup group, DoctorGroupTrack groupTrack, I input);
+
+    /**
+     * 编辑事件的抽象方法, 由继承的子类去实现
+     * @param group       猪群
+     * @param groupTrack  猪群跟踪
+     * @param event       猪群事件
+     * @param edit        编辑信息
+     * @param <E>         规定输入上界
+     */
+    protected abstract <E extends BaseGroupEdit> void editEvent(DoctorGroup group, DoctorGroupTrack groupTrack, DoctorGroupEvent event, E edit);
 
     //转换下猪群基本数据
     protected DoctorGroupEvent dozerGroupEvent(DoctorGroup group, GroupEventType eventType, BaseGroupInput baseInput) {
@@ -207,7 +218,7 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
     }
 
     //发布zk事件, 用于更新es索引
-    protected  <T> void publishZookeeperEvent(Integer eventType, T data) {
+    protected <T> void publishZookeeperEvent(Integer eventType, T data) {
         if (notNull(publisher)) {
             try {
                 publisher.publish(DataEvent.toBytes(eventType, data));

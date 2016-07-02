@@ -8,6 +8,13 @@ import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorGroupSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
 import io.terminus.doctor.event.dto.DoctorGroupDetail;
+import io.terminus.doctor.event.dto.event.group.edit.DoctorAntiepidemicGroupEdit;
+import io.terminus.doctor.event.dto.event.group.edit.DoctorChangeGroupEdit;
+import io.terminus.doctor.event.dto.event.group.edit.DoctorDiseaseGroupEdit;
+import io.terminus.doctor.event.dto.event.group.edit.DoctorLiveStockGroupEdit;
+import io.terminus.doctor.event.dto.event.group.edit.DoctorMoveInGroupEdit;
+import io.terminus.doctor.event.dto.event.group.edit.DoctorNewGroupEdit;
+import io.terminus.doctor.event.dto.event.group.edit.DoctorTransEdit;
 import io.terminus.doctor.event.dto.event.group.input.DoctorAntiepidemicGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorChangeGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorCloseGroupInput;
@@ -210,6 +217,104 @@ public class DoctorGroupWriteServiceImpl implements DoctorGroupWriteService {
         } catch (Exception e) {
             log.error("groupEventTurnSeed failed, groupDetail:{}, turnSeed:{}, cause:{}", groupDetail, turnSeed, Throwables.getStackTraceAsString(e));
             return Response.fail("group.event.turnSeed.fail");
+        }
+    }
+
+    @Override
+    public Response<Boolean> editEventNew(DoctorGroupDetail groupDetail, DoctorGroupEvent event, @Valid DoctorNewGroupEdit newEdit) {
+        try {
+            doctorGroupManager.editNewGroupEvent(groupDetail.getGroup(), groupDetail.getGroupTrack(), event, newEdit);
+            return Response.ok(Boolean.TRUE);
+        } catch (ServiceException e) {
+            return Response.fail(e.getMessage());
+        } catch (Exception e) {
+            log.error("edit new event failed, groupDetail:{}, event:{}, newEdit:{}, cause:{}",
+                    groupDetail, event, newEdit, Throwables.getStackTraceAsString(e));
+            return Response.fail("edit.group.event.fail");
+        }
+    }
+
+    @Override
+    public Response<Boolean> editEventAntiepidemic(DoctorGroupDetail groupDetail, DoctorGroupEvent event, @Valid DoctorAntiepidemicGroupEdit antiepidemic) {
+        try {
+            doctorGroupEventManager.editEvent(groupDetail, event, antiepidemic, DoctorAntiepidemicGroupEventHandler.class);
+            return Response.ok(Boolean.TRUE);
+        } catch (ServiceException e) {
+            return Response.fail(e.getMessage());
+        } catch (Exception e) {
+            log.error("edit antiepidemic event failed, groupDetail:{}, event:{}, antiepidemic:{}, cause:{}",
+                    groupDetail, event, antiepidemic, Throwables.getStackTraceAsString(e));
+            return Response.fail("edit.group.event.fail");
+        }
+    }
+
+    @Override
+    public Response<Boolean> editEventChange(DoctorGroupDetail groupDetail, DoctorGroupEvent event, @Valid DoctorChangeGroupEdit change) {
+        try {
+            doctorGroupEventManager.editEvent(groupDetail, event, change, DoctorChangeGroupEventHandler.class);
+            return Response.ok(Boolean.TRUE);
+        } catch (ServiceException e) {
+            return Response.fail(e.getMessage());
+        } catch (Exception e) {
+            log.error("edit change event failed, groupDetail:{}, event:{}, change:{}, cause:{}",
+                    groupDetail, event, change, Throwables.getStackTraceAsString(e));
+            return Response.fail("edit.group.event.fail");
+        }
+    }
+
+    @Override
+    public Response<Boolean> editEventDisease(DoctorGroupDetail groupDetail, DoctorGroupEvent event, @Valid DoctorDiseaseGroupEdit disease) {
+        try {
+            doctorGroupEventManager.editEvent(groupDetail, event, disease, DoctorDiseaseGroupEventHandler.class);
+            return Response.ok(Boolean.TRUE);
+        } catch (ServiceException e) {
+            return Response.fail(e.getMessage());
+        } catch (Exception e) {
+            log.error("edit disease event failed, groupDetail:{}, event:{}, disease:{}, cause:{}",
+                    groupDetail, event, disease, Throwables.getStackTraceAsString(e));
+            return Response.fail("edit.group.event.fail");
+        }
+    }
+
+    @Override
+    public Response<Boolean> editEventLiveStock(DoctorGroupDetail groupDetail, DoctorGroupEvent event, @Valid DoctorLiveStockGroupEdit liveStock) {
+        try {
+            doctorGroupEventManager.editEvent(groupDetail, event, liveStock, DoctorLiveStockGroupEventHandler.class);
+            return Response.ok(Boolean.TRUE);
+        } catch (ServiceException e) {
+            return Response.fail(e.getMessage());
+        } catch (Exception e) {
+            log.error("edit liveStock event failed, groupDetail:{}, event:{}, liveStock:{}, cause:{}",
+                    groupDetail, event, liveStock, Throwables.getStackTraceAsString(e));
+            return Response.fail("edit.group.event.fail");
+        }
+    }
+
+    @Override
+    public Response<Boolean> editEventMoveIn(DoctorGroupDetail groupDetail, DoctorGroupEvent event, @Valid DoctorMoveInGroupEdit moveIn) {
+        try {
+            doctorGroupEventManager.editEvent(groupDetail, event, moveIn, DoctorMoveInGroupEventHandler.class);
+            return Response.ok(Boolean.TRUE);
+        } catch (ServiceException e) {
+            return Response.fail(e.getMessage());
+        } catch (Exception e) {
+            log.error("edit moveIn event failed, groupDetail:{}, event:{}, moveIn:{}, cause:{}",
+                    groupDetail, event, moveIn, Throwables.getStackTraceAsString(e));
+            return Response.fail("edit.group.event.fail");
+        }
+    }
+
+    @Override
+    public Response<Boolean> editEventTrans(DoctorGroupDetail groupDetail, DoctorGroupEvent event, @Valid DoctorTransEdit trans) {
+        try {
+            doctorGroupEventManager.editEvent(groupDetail, event, trans, DoctorTransGroupEventHandler.class);
+            return Response.ok(Boolean.TRUE);
+        } catch (ServiceException e) {
+            return Response.fail(e.getMessage());
+        } catch (Exception e) {
+            log.error("edit trans event failed, groupDetail:{}, event:{}, trans:{}, cause:{}",
+                    groupDetail, event, trans, Throwables.getStackTraceAsString(e));
+            return Response.fail("edit.group.event.fail");
         }
     }
 

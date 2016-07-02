@@ -1,7 +1,9 @@
 package io.terminus.doctor.event.handler;
 
+import io.terminus.doctor.event.dto.event.group.edit.BaseGroupEdit;
 import io.terminus.doctor.event.dto.event.group.input.BaseGroupInput;
 import io.terminus.doctor.event.model.DoctorGroup;
+import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
 
 import javax.validation.Valid;
@@ -25,6 +27,11 @@ public interface DoctorGroupEventHandler {
 
     /**
      * 编辑猪群事件的接口
+     * @param group         猪群
+     * @param groupTrack    猪群跟踪
+     * @param event         需要编辑的事件
+     * @param edit          编辑信息
+     * @param <E>           编辑信息继承自 BaseGroupEdit
      */
-    void edit();
+    <E extends BaseGroupEdit> void edit(DoctorGroup group, DoctorGroupTrack groupTrack, DoctorGroupEvent event, @Valid E edit);
 }
