@@ -95,6 +95,18 @@ public class DefaultMaterialQueryBuilder extends BaseMaterialQueryBuilder {
     }
 
     @Override
+    protected List<Terms> buildNotMustTerms(Map<String, String> params) {
+        List<Terms> termsList = Lists.newArrayList();
+        // 1. 不包含的物料 ids
+        String exIds = params.get("exIds");
+        if (StringUtils.isNotBlank(exIds)) {
+            List<String> exIdsList = Splitters.COMMA.splitToList(exIds);
+            termsList.add(new Terms("id", exIdsList));
+        }
+        return termsList;
+    }
+
+    @Override
     protected List<Range> buildRanges(Map<String, String> params) {
         return null;
     }

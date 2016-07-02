@@ -1,6 +1,8 @@
 package io.terminus.doctor.warehouse.search.material;
 
 import io.terminus.common.model.PageInfo;
+import io.terminus.doctor.warehouse.search.query.MaterialCriterias;
+import io.terminus.doctor.warehouse.search.query.MustNotTerms;
 import io.terminus.search.api.query.Aggs;
 import io.terminus.search.api.query.Criterias;
 import io.terminus.search.api.query.CriteriasBuilder;
@@ -16,7 +18,7 @@ import java.util.Map;
 
 /**
  * Desc: 公共查询条件创建类
- *      模板路径 /search/search.mustache
+ *      模板路径 /search/masearch.mustache
  * Mail: chk@terminus.io
  * Created by icemimosa
  * Date: 16/6/16
@@ -59,8 +61,20 @@ public abstract class BaseMaterialQueryBuilder {
         // 8. 构建聚合查询
         List<Aggs> aggsList = buildAggs(params);
         criteriasBuilder.withAggs(aggsList);
+        Criterias criterias = criteriasBuilder.build();
 
-        return criteriasBuilder.build();
+        // 构建不包含的多个值查询
+        List<Terms> notTermsList = buildNotMustTerms(params);
+        if (notTermsList != null && !notTermsList.isEmpty()) {
+            MaterialCriterias materialCriterias = new MaterialCriterias(criteriasBuilder);
+            MustNotTerms mustNotTerms = MustNotTerms.builder().build();
+            mustNotTerms.setTerms(notTermsList);
+
+            materialCriterias.setMustNotTerms(mustNotTerms);
+            criterias = materialCriterias;
+        }
+
+        return criterias;
     }
 
     /**
@@ -85,6 +99,13 @@ public abstract class BaseMaterialQueryBuilder {
      */
     protected abstract List<Terms> buildTerms(Map<String, String> params);
 
+    /**
+     * 构建不包含的多个值
+     *
+     * @param params    参数上下文
+     * @return  多值查询列表, 如果没有指定的多值查询, 返回null或者空列表
+     */
+    protected abstract List<Terms> buildNotMustTerms(Map<String, String> params);
 
     /**
      * 构建范围查询 ranges

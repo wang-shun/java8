@@ -24,7 +24,7 @@ public class DoctorMaterialSearchTest extends BasicServiceTest {
     @Test
     public void testMaterialSearch() throws InterruptedException {
         try{
-            String template = "search/search.mustache";
+            String template = "search/masearch.mustache";
             Map<String, String> params = Maps.newHashMap();
             Paging<SearchedMaterial> paging = RespHelper.orServEx(materialSearchReadService.searchWithAggs(1, 5, template, params));
             System.out.println(paging.getTotal());
