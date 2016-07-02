@@ -1,10 +1,10 @@
 package io.terminus.doctor.warehouse.search.material;
 
 import com.google.common.base.Splitter;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import io.terminus.common.utils.Splitters;
+import io.terminus.doctor.warehouse.search.query.MyKeyWord;
 import io.terminus.search.api.query.Aggs;
 import io.terminus.search.api.query.Highlight;
 import io.terminus.search.api.query.Keyword;
@@ -29,7 +29,7 @@ public class DefaultMaterialQueryBuilder extends BaseMaterialQueryBuilder {
         // 处理关键词
         String q = params.get("q");
         if (StringUtils.isNotBlank(q)) {
-            return new Keyword(ImmutableList.of("materialName"), q);
+            return new MyKeyWord("materialName", q);
         }
         return null;
     }

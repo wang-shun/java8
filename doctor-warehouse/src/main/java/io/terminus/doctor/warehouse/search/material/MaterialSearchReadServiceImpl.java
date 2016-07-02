@@ -38,7 +38,8 @@ public class MaterialSearchReadServiceImpl implements MaterialSearchReadService 
             // 获取关键词, 设置高亮
             String q = params.get("q");
             if (StringUtils.isNotBlank(q)) {
-                params.put("highlight", "materialName");
+                // 暂不做高亮处理
+                // params.put("highlight", "materialName");
             }
             // 构建查询条件, 并查询
             Criterias criterias = baseMaterialQueryBuilder.buildCriterias(pageNo, pageSize, params);

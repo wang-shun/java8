@@ -108,4 +108,18 @@ public class DoctorSearchesTest extends BaseFrontWebTest {
         System.out.println(body.size());
         System.out.println(JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(body));
     }
+
+    /**
+     * 查询所有的物料
+     * @see DoctorSearches#searchAllMaterials(Map)
+     */
+    @Test
+    public void test_QUERY_AllMaterialsWithKeyWord() {
+        String url = "/api/doctor/search/materials/all";
+//        String q = "物料测试19";
+        String q = "物料测试material";
+        List body = getForEntity(url, ImmutableMap.of("q", q,"farmId", 12355), List.class).getBody();
+        System.out.println(body.size());
+        System.out.println(JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(body));
+    }
 }
