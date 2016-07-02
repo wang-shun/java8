@@ -11,6 +11,7 @@ import io.terminus.doctor.warehouse.dao.DoctorMaterialInfoDao;
 import io.terminus.doctor.warehouse.dao.DoctorWareHouseDao;
 import io.terminus.doctor.warehouse.dto.DoctorMaterialProductRatioDto;
 import io.terminus.doctor.warehouse.dto.DoctorWareHouseBasicDto;
+import io.terminus.doctor.warehouse.enums.IsOrNot;
 import io.terminus.doctor.warehouse.manager.MaterialInWareHouseManager;
 import io.terminus.doctor.warehouse.model.DoctorMaterialInfo;
 import io.terminus.doctor.warehouse.model.DoctorWareHouse;
@@ -94,6 +95,7 @@ public class DoctorMaterialInfoWriteServiceImpl implements DoctorMaterialInfoWri
 
             doctorMaterialInfo.setExtraMap(ImmutableMap.of(DoctorMaterialInfoConstants.MATERIAL_PRODUCE,
                     JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(doctorMaterialProductRatioDto.getProduce())));
+            doctorMaterialInfo.setCanProduce(IsOrNot.YES.getKey());
             doctorMaterialInfoDao.update(doctorMaterialInfo);
             return Response.ok(Boolean.TRUE);
         }catch (Exception e){

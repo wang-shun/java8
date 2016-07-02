@@ -11,6 +11,7 @@ import io.terminus.doctor.user.model.DoctorFarm;
 import io.terminus.doctor.user.service.DoctorFarmReadService;
 import io.terminus.doctor.warehouse.dto.DoctorMaterialProductRatioDto;
 import io.terminus.doctor.warehouse.dto.DoctorWareHouseBasicDto;
+import io.terminus.doctor.warehouse.enums.IsOrNot;
 import io.terminus.doctor.warehouse.model.DoctorMaterialInWareHouse;
 import io.terminus.doctor.warehouse.model.DoctorMaterialInfo;
 import io.terminus.doctor.warehouse.service.DoctorMaterialInWareHouseReadService;
@@ -122,7 +123,8 @@ public class DoctorMaterialInfos {
 
             doctorMaterialInfo = DoctorMaterialInfo.builder()
                     .farmId(doctorMaterialInfoCreateDto.getFarmId()).farmName(doctorFarm.getName())
-                    .type(doctorMaterialInfoCreateDto.getType()).materialName(doctorMaterialInfoCreateDto.getMaterialName()).inputCode(doctorMaterialInfoCreateDto.getInputCode())
+                    .type(doctorMaterialInfoCreateDto.getType()).canProduce(IsOrNot.NO.getKey())
+                    .materialName(doctorMaterialInfoCreateDto.getMaterialName()).inputCode(doctorMaterialInfoCreateDto.getInputCode())
                     .remark(doctorMaterialInfoCreateDto.getMark())
                     .unitId(doctorMaterialInfoCreateDto.getUnitId()).unitName(unitName)
                     .unitGroupId(doctorMaterialInfoCreateDto.getUnitGroupId()).unitGroupName(unitGroupName)
@@ -159,6 +161,7 @@ public class DoctorMaterialInfos {
     @ResponseBody
     public Paging<DoctorMaterialInfo> pagingDoctorMaterialInfo(@RequestParam("farmId") Long farmId,
                                                                @RequestParam(value = "type", required = false) Integer type,
+                                                               @RequestParam(value = "canProduce", required = false) Integer canProduce,
                                                                @RequestParam(value = "pageNo", required = false) Integer pageNo,
                                                                @RequestParam(value = "pageSize",required = false)Integer pageSize){
         return RespHelper.or500(doctorMaterialInfoReadService.pagingMaterialInfos(farmId, type, pageNo, pageSize));
