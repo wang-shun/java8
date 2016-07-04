@@ -136,7 +136,7 @@ public class DoctorGroupManager {
      * @param newEdit       编辑信息
      */
     @Transactional
-    public void editNewGroupEvent(DoctorGroup group, DoctorGroupEvent event, DoctorNewGroupEdit newEdit) {
+    public void editNewGroupEvent(DoctorGroup group, DoctorGroupTrack groupTrack, DoctorGroupEvent event, DoctorNewGroupEdit newEdit) {
         //1. 更新猪群
         group.setGroupCode(newEdit.getGroupCode());
         group.setBreedId(newEdit.getBreedId());
@@ -147,6 +147,15 @@ public class DoctorGroupManager {
 
         //2. 更新事件
         event.setRemark(newEdit.getRemark());
+        doctorGroupEventDao.update(event);
+
+        //3. 更新所有事件的猪群号
+        doctorGroupEventDao.updateGroupCodeByGroupId(group.getId(), group.getGroupCode());
+
+        //4. 更新镜像
+        DoctorGroupSnapshot snapshot = doctorGroupSnapshotDao.findGroupSnapshotByToEventId(event.getId());
+        snapshot.setToInfo(JSON_MAPPER.toJson(new DoctorGroupSnapShotInfo(group, event, groupTrack)));
+        doctorGroupSnapshotDao.update(snapshot);
     }
 
     private DoctorGroup getNewGroup(DoctorGroup group, DoctorNewGroupInput newGroupInput) {

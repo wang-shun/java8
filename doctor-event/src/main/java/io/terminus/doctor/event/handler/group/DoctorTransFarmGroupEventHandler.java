@@ -8,7 +8,9 @@ import io.terminus.doctor.event.dao.DoctorGroupSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
 import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
 import io.terminus.doctor.event.dto.event.group.DoctorTransFarmGroupEvent;
+import io.terminus.doctor.event.dto.event.group.DoctorTransGroupEvent;
 import io.terminus.doctor.event.dto.event.group.edit.BaseGroupEdit;
+import io.terminus.doctor.event.dto.event.group.edit.DoctorTransEdit;
 import io.terminus.doctor.event.dto.event.group.input.BaseGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorNewGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorTransFarmGroupInput;
@@ -36,6 +38,7 @@ import java.util.Objects;
  */
 @Slf4j
 @Component
+@SuppressWarnings("unchecked")
 public class DoctorTransFarmGroupEventHandler extends DoctorAbstractGroupEventHandler {
 
     private final DoctorGroupEventDao doctorGroupEventDao;
@@ -126,6 +129,10 @@ public class DoctorTransFarmGroupEventHandler extends DoctorAbstractGroupEventHa
 
     @Override
     protected <E extends BaseGroupEdit> void editEvent(DoctorGroup group, DoctorGroupTrack groupTrack, DoctorGroupEvent event, E edit) {
+        DoctorTransEdit transEdit = (DoctorTransEdit) edit;
+
+        //更新字段
+        DoctorTransGroupEvent transEvent = JSON_MAPPER.fromJson(event.getExtra(), DoctorTransGroupEvent.class);
 
     }
 

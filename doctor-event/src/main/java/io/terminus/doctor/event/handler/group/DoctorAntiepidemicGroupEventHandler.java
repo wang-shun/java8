@@ -8,6 +8,7 @@ import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
 import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
 import io.terminus.doctor.event.dto.event.group.DoctorAntiepidemicGroupEvent;
 import io.terminus.doctor.event.dto.event.group.edit.BaseGroupEdit;
+import io.terminus.doctor.event.dto.event.group.edit.DoctorAntiepidemicGroupEdit;
 import io.terminus.doctor.event.dto.event.group.input.BaseGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorAntiepidemicGroupInput;
 import io.terminus.doctor.event.enums.GroupEventType;
@@ -26,6 +27,7 @@ import org.springframework.stereotype.Component;
  */
 @Slf4j
 @Component
+@SuppressWarnings("unchecked")
 public class DoctorAntiepidemicGroupEventHandler extends DoctorAbstractGroupEventHandler {
 
     private final DoctorGroupEventDao doctorGroupEventDao;
@@ -63,6 +65,18 @@ public class DoctorAntiepidemicGroupEventHandler extends DoctorAbstractGroupEven
 
     @Override
     protected <E extends BaseGroupEdit> void editEvent(DoctorGroup group, DoctorGroupTrack groupTrack, DoctorGroupEvent event, E edit) {
+        DoctorAntiepidemicGroupEdit antiEdit = (DoctorAntiepidemicGroupEdit) edit;
 
+        //更新字段
+        DoctorAntiepidemicGroupEvent antiEvent = JSON_MAPPER.fromJson(event.getExtra(), DoctorAntiepidemicGroupEvent.class);
+        antiEvent.setVaccinResult(antiEdit.getVaccinResult());
+        antiEvent.setVaccinItemId(antiEdit.getVaccinItemId());
+        antiEvent.setVaccinItemName(antiEdit.getVaccinItemName());
+        antiEvent.setVaccinStaffId(antiEdit.getVaccinStaffId());
+        antiEvent.setVaccinStaffName(antiEdit.getVaccinStaffName());
+        event.setRemark(antiEdit.getRemark());
+        event.setExtraMap(antiEvent);
+
+        doctorGroupEventDao.update(event);
     }
 }

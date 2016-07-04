@@ -28,6 +28,7 @@ import org.springframework.stereotype.Component;
  */
 @Slf4j
 @Component
+@SuppressWarnings("unchecked")
 public class DoctorCloseGroupEventHandler extends DoctorAbstractGroupEventHandler {
 
     private final DoctorGroupDao doctorGroupDao;
@@ -78,7 +79,7 @@ public class DoctorCloseGroupEventHandler extends DoctorAbstractGroupEventHandle
 
     @Override
     protected <E extends BaseGroupEdit> void editEvent(DoctorGroup group, DoctorGroupTrack groupTrack, DoctorGroupEvent event, E edit) {
-
+        // 关闭猪群事件不可编辑, 因为已经关闭的猪群不可操作了
     }
 
     //猪群里还有猪不可关闭!
