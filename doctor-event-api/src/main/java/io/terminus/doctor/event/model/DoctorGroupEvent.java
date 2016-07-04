@@ -148,11 +148,18 @@ public class DoctorGroupEvent<T extends BaseGroupEvent> implements Serializable 
      * 创建人id
      */
     private Long creatorId;
-    
+
     /**
      * 创建人name
      */
     private String creatorName;
+
+    /**
+     * 更新信息
+     */
+    private Date updatedAt;
+    private Long updatorId;
+    private String updatorName;
 
     @SneakyThrows
     public void setExtraMap(T extraMap){

@@ -34,6 +34,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static io.terminus.common.utils.Arguments.notNull;
@@ -132,13 +133,32 @@ public class DoctorGroupManager {
     /**
      * 编辑新建猪群事件
      * @param group         猪群
-     * @param groupTrack    猪群跟踪
      * @param event         猪群事件
      * @param newEdit       编辑信息
      */
     @Transactional
     public void editNewGroupEvent(DoctorGroup group, DoctorGroupTrack groupTrack, DoctorGroupEvent event, DoctorNewGroupEdit newEdit) {
+        //1. 更新猪群
+        group.setGroupCode(newEdit.getGroupCode());
+        group.setBreedId(newEdit.getBreedId());
+        group.setBreedName(newEdit.getBreedName());
+        group.setGeneticId(newEdit.getGeneticId());
+        group.setGeneticName(newEdit.getGeneticName());
+        doctorGroupDao.update(group);
 
+        //2. 更新事件
+        event.setRemark(newEdit.getRemark());
+        doctorGroupEventDao.update(event);
+
+        //3. 更新所有事件的猪群号(如果有变更)
+        if (!Objects.equals(group.getGroupCode(), newEdit.getGroupCode())) {
+            doctorGroupEventDao.updateGroupCodeByGroupId(group.getId(), group.getGroupCode());
+        }
+
+        //4. 更新镜像
+        DoctorGroupSnapshot snapshot = doctorGroupSnapshotDao.findGroupSnapshotByToEventId(event.getId());
+        snapshot.setToInfo(JSON_MAPPER.toJson(new DoctorGroupSnapShotInfo(group, event, groupTrack)));
+        doctorGroupSnapshotDao.update(snapshot);
     }
 
     private DoctorGroup getNewGroup(DoctorGroup group, DoctorNewGroupInput newGroupInput) {

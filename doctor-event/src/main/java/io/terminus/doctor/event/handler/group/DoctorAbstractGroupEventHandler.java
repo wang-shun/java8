@@ -192,6 +192,21 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
         doctorGroupSnapshotDao.create(groupSnapshot);
     }
 
+    //更新猪群事件
+    protected <E extends BaseGroupEdit> void editGroupEvent(DoctorGroupEvent event, E edit) {
+        event.setRemark(edit.getRemark());
+        event.setUpdatorId(edit.getUpdatorId());
+        event.setUpdatorName(edit.getUpdatorName());
+        doctorGroupEventDao.update(event);
+    }
+
+    //更新猪群跟踪
+    protected void editGroupSnapShot(DoctorGroup group, DoctorGroupTrack groupTrack, DoctorGroupEvent event) {
+        DoctorGroupSnapshot snapshot = doctorGroupSnapshotDao.findGroupSnapshotByToEventId(event.getId());
+        snapshot.setToInfo(JSON_MAPPER.toJson(new DoctorGroupSnapShotInfo(group, event, groupTrack)));
+        doctorGroupSnapshotDao.update(snapshot);
+    }
+
     //校验数量
     protected static void checkQuantity(Integer max, Integer actual) {
         if (actual > max) {
