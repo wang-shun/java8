@@ -18,4 +18,14 @@ public class BaseGroupEdit implements Serializable {
      * 备注
      */
     private String remark;
+
+    /**
+     * 更新人id
+     */
+    private Long updatorId;
+
+    /**
+     * 更新人name
+     */
+    private String updatorName;
 }

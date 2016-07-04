@@ -107,5 +107,7 @@ public class DoctorChangeGroupEventHandler extends DoctorAbstractGroupEventHandl
         //更新字段
         DoctorChangeGroupEvent changeEvent = JSON_MAPPER.fromJson(event.getExtra(), DoctorChangeGroupEvent.class);
 
+        event.setExtraMap(changeEvent);
+        editGroupEvent(event, edit);
     }
 }

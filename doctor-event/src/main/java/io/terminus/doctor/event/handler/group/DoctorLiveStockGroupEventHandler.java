@@ -8,7 +8,6 @@ import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
 import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
 import io.terminus.doctor.event.dto.event.group.DoctorLiveStockGroupEvent;
 import io.terminus.doctor.event.dto.event.group.edit.BaseGroupEdit;
-import io.terminus.doctor.event.dto.event.group.edit.DoctorLiveStockGroupEdit;
 import io.terminus.doctor.event.dto.event.group.input.BaseGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorLiveStockGroupInput;
 import io.terminus.doctor.event.enums.GroupEventType;
@@ -68,10 +67,6 @@ public class DoctorLiveStockGroupEventHandler extends DoctorAbstractGroupEventHa
 
     @Override
     protected <E extends BaseGroupEdit> void editEvent(DoctorGroup group, DoctorGroupTrack groupTrack, DoctorGroupEvent event, E edit) {
-        DoctorLiveStockGroupEdit liveStockEdit = (DoctorLiveStockGroupEdit) edit;
-
-        //更新字段
-        DoctorLiveStockGroupEvent liveStockEvent = JSON_MAPPER.fromJson(event.getExtra(), DoctorLiveStockGroupEvent.class);
-
+        editGroupEvent(event, edit);
     }
 }

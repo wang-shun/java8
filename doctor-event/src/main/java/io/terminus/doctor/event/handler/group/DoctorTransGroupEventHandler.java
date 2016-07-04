@@ -44,6 +44,7 @@ public class DoctorTransGroupEventHandler extends DoctorAbstractGroupEventHandle
     private final DoctorCommonGroupEventHandler doctorCommonGroupEventHandler;
     private final DoctorGroupManager doctorGroupManager;
     private final DoctorBarnReadService doctorBarnReadService;
+    private final DoctorGroupTrackDao doctorGroupTrackDao;
 
     @Autowired
     public DoctorTransGroupEventHandler(DoctorGroupSnapshotDao doctorGroupSnapshotDao,
@@ -58,6 +59,7 @@ public class DoctorTransGroupEventHandler extends DoctorAbstractGroupEventHandle
         this.doctorCommonGroupEventHandler = doctorCommonGroupEventHandler;
         this.doctorGroupManager = doctorGroupManager;
         this.doctorBarnReadService = doctorBarnReadService;
+        this.doctorGroupTrackDao = doctorGroupTrackDao;
     }
 
     @Override
@@ -130,9 +132,20 @@ public class DoctorTransGroupEventHandler extends DoctorAbstractGroupEventHandle
     protected <E extends BaseGroupEdit> void editEvent(DoctorGroup group, DoctorGroupTrack groupTrack, DoctorGroupEvent event, E edit) {
         DoctorTransEdit transEdit = (DoctorTransEdit) edit;
 
-        //更新字段
+        //更新事件字段
         DoctorTransGroupEvent transEvent = JSON_MAPPER.fromJson(event.getExtra(), DoctorTransGroupEvent.class);
+        transEvent.setBreedId(transEdit.getBreedId());
+        transEvent.setBreedName(transEdit.getBreedName());
 
+        event.setExtraMap(transEvent);
+        editGroupEvent(event, edit);
+
+        //更新跟踪字段
+        if (transEdit.getWeight() != null) {
+            groupTrack.setWeight(groupTrack.getAvgWeight() + event.getWeight() - transEdit.getWeight());
+            groupTrack.setAvgWeight(EventUtil.getAvgWeight(groupTrack.getWeight(), groupTrack.getQuantity()));
+            doctorGroupTrackDao.update(groupTrack);
+        }
     }
 
     /**

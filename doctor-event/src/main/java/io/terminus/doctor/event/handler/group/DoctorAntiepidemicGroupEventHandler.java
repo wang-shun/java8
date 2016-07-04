@@ -74,9 +74,8 @@ public class DoctorAntiepidemicGroupEventHandler extends DoctorAbstractGroupEven
         antiEvent.setVaccinItemName(antiEdit.getVaccinItemName());
         antiEvent.setVaccinStaffId(antiEdit.getVaccinStaffId());
         antiEvent.setVaccinStaffName(antiEdit.getVaccinStaffName());
-        event.setRemark(antiEdit.getRemark());
-        event.setExtraMap(antiEvent);
 
-        doctorGroupEventDao.update(event);
+        event.setExtraMap(antiEvent);
+        editGroupEvent(event, edit);
     }
 }

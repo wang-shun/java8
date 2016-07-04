@@ -70,6 +70,12 @@ public class DoctorDiseaseGroupEventHandler extends DoctorAbstractGroupEventHand
 
         //更新字段
         DoctorDiseaseGroupEvent diseaseEvent = JSON_MAPPER.fromJson(event.getExtra(), DoctorDiseaseGroupEvent.class);
+        diseaseEvent.setDiseaseId(diseaseEdit.getDiseaseId());
+        diseaseEvent.setDiseaseName(diseaseEdit.getDiseaseName());
+        diseaseEvent.setDoctorId(diseaseEdit.getDoctorId());
+        diseaseEvent.setDoctorName(diseaseEdit.getDoctorName());
+        event.setExtraMap(diseaseEvent);
 
+        editGroupEvent(event, edit);
     }
 }
