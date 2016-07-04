@@ -132,20 +132,24 @@ public class DoctorTransGroupEventHandler extends DoctorAbstractGroupEventHandle
     protected <E extends BaseGroupEdit> void editEvent(DoctorGroup group, DoctorGroupTrack groupTrack, DoctorGroupEvent event, E edit) {
         DoctorTransEdit transEdit = (DoctorTransEdit) edit;
 
-        //更新事件字段
-        DoctorTransGroupEvent transEvent = JSON_MAPPER.fromJson(event.getExtra(), DoctorTransGroupEvent.class);
-        transEvent.setBreedId(transEdit.getBreedId());
-        transEvent.setBreedName(transEdit.getBreedName());
-
-        event.setExtraMap(transEvent);
-        editGroupEvent(event, edit);
-
-        //更新跟踪字段
-        if (transEdit.getWeight() != null) {
+        //更新跟踪字段(如果总重有变更)
+        if (!Objects.equals(transEdit.getWeight(), event.getWeight())) {
             groupTrack.setWeight(groupTrack.getAvgWeight() + event.getWeight() - transEdit.getWeight());
             groupTrack.setAvgWeight(EventUtil.getAvgWeight(groupTrack.getWeight(), groupTrack.getQuantity()));
             doctorGroupTrackDao.update(groupTrack);
         }
+
+        //更新事件字段
+        DoctorTransGroupEvent transEvent = JSON_MAPPER.fromJson(event.getExtra(), DoctorTransGroupEvent.class);
+        transEvent.setBreedId(transEdit.getBreedId());
+        transEvent.setBreedName(transEdit.getBreedName());
+        event.setExtraMap(transEvent);
+
+        if (!Objects.equals(transEdit.getWeight(), event.getWeight())) {
+            event.setWeight(transEdit.getWeight());
+            event.setAvgWeight(EventUtil.getAvgWeight(event.getWeight(), event.getQuantity()));
+        }
+        editGroupEvent(event, edit);
 
         //更新猪群镜像
         editGroupSnapShot(group, groupTrack, event);

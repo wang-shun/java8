@@ -29,7 +29,7 @@ public class DoctorChangeGroupEdit extends BaseGroupEdit implements Serializable
     /**
      * 品种id
      */
-    private Integer breedId;
+    private Long breedId;
 
     private String breedName;
 

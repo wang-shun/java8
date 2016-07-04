@@ -34,6 +34,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static io.terminus.common.utils.Arguments.notNull;
@@ -149,8 +150,10 @@ public class DoctorGroupManager {
         event.setRemark(newEdit.getRemark());
         doctorGroupEventDao.update(event);
 
-        //3. 更新所有事件的猪群号
-        doctorGroupEventDao.updateGroupCodeByGroupId(group.getId(), group.getGroupCode());
+        //3. 更新所有事件的猪群号(如果有变更)
+        if (!Objects.equals(group.getGroupCode(), newEdit.getGroupCode())) {
+            doctorGroupEventDao.updateGroupCodeByGroupId(group.getId(), group.getGroupCode());
+        }
 
         //4. 更新镜像
         DoctorGroupSnapshot snapshot = doctorGroupSnapshotDao.findGroupSnapshotByToEventId(event.getId());
