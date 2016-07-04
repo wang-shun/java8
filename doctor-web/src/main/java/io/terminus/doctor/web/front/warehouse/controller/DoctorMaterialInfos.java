@@ -12,6 +12,7 @@ import io.terminus.doctor.user.service.DoctorFarmReadService;
 import io.terminus.doctor.warehouse.dto.DoctorMaterialProductRatioDto;
 import io.terminus.doctor.warehouse.dto.DoctorWareHouseBasicDto;
 import io.terminus.doctor.warehouse.enums.IsOrNot;
+import io.terminus.doctor.warehouse.enums.WareHouseType;
 import io.terminus.doctor.warehouse.model.DoctorMaterialInWareHouse;
 import io.terminus.doctor.warehouse.model.DoctorMaterialInfo;
 import io.terminus.doctor.warehouse.service.DoctorMaterialInWareHouseReadService;
@@ -165,6 +166,15 @@ public class DoctorMaterialInfos {
                                                                @RequestParam(value = "pageNo", required = false) Integer pageNo,
                                                                @RequestParam(value = "pageSize",required = false)Integer pageSize){
         return RespHelper.or500(doctorMaterialInfoReadService.pagingMaterialInfos(farmId, type, canProduce, pageNo, pageSize));
+    }
+
+    @RequestMapping(value = "/pagingDoctorFeedInfo", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public Paging<DoctorMaterialInfo> pagingDoctorFeedInfo(@RequestParam("farmId") Long farmId,
+                                                           @RequestParam(value = "pageNo", required = false) Integer pageNo,
+                                                           @RequestParam(value = "pageSize", required = false) Integer pageSize){
+
+        return pagingDoctorMaterialInfo(farmId, WareHouseType.FEED.getKey(), IsOrNot.YES.getKey(), pageNo, pageSize);
     }
 
     @RequestMapping(value = "/queryAllMaterialInfo", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
