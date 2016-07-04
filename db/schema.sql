@@ -818,6 +818,7 @@ CREATE TABLE `doctor_material_infos` (
   `farm_id` bigint(20) unsigned DEFAULT NULL COMMENT '猪场信息',
   `farm_name` varchar(64) DEFAULT NULL COMMENT '猪场名称',
   `type` smallint(6) DEFAULT NULL comment '物料所属原料的名称',
+  `can_produce` SMALLINT(6) DEFAULT NULL comment '是否可以生产',
   `material_name` VARCHAR (128) DEFAULT NULL comment '物料名称',
   `input_code` varchar(128) DEFAULT NULL comment '输入码信息',
   `remark` text COMMENT '标注',

@@ -25,7 +25,7 @@ public class DoctorWareHouseCreateDto implements Serializable{
 
     private Long farmId;    // 猪场Id
 
-    private Long managerId; // 原料Id
+    private Long managerId; // 员工Id
 
     private String address; // 地址信息
 

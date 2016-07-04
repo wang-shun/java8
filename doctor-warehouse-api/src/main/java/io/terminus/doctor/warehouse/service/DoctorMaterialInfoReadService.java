@@ -26,12 +26,13 @@ public interface DoctorMaterialInfoReadService {
      * 分页查询公司的原料信息
      * @param farmId
      * @param type
+     * @param canProduce
      * @param pageNo
      * @param pageSize
      * @return
      */
     Response<Paging<DoctorMaterialInfo>> pagingMaterialInfos(@NotNull(message = "input.farmId.empty") Long farmId,
-                                                             Integer type, Integer pageNo, Integer pageSize);
+                                                             Integer type, Integer canProduce, Integer pageNo, Integer pageSize);
 
     /**
      * id 查询对应的物料信息

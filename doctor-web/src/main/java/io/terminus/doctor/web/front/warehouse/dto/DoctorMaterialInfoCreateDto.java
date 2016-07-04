@@ -11,7 +11,7 @@ import java.io.Serializable;
  * Created by yaoqijun.
  * Date:2016-05-31
  * Email:yaoqj@terminus.io
- * Descirbe: 创建对应的Material Info 数据信息
+ * Descirbe: 创建，修改 对应的Material Info 数据信息
  */
 @Builder
 @Data

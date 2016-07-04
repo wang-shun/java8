@@ -45,7 +45,15 @@ public class DoctorMaterialInfo implements Serializable{
 
     private String farmName;
 
+    /**
+     * @see io.terminus.doctor.warehouse.enums.WareHouseType
+     */
     private Integer type;
+
+    /**
+     * @see io.terminus.doctor.warehouse.enums.IsOrNot
+     */
+    private Integer canProduce; // 是否可以生产物料信息
 
     private String materialName;
 

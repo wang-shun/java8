@@ -43,15 +43,16 @@ public class DoctorMaterialInfoReadServiceImpl implements DoctorMaterialInfoRead
     }
 
     @Override
-    public Response<Paging<DoctorMaterialInfo>> pagingMaterialInfos(Long farmId, Integer type, Integer pageNo, Integer pageSize) {
+    public Response<Paging<DoctorMaterialInfo>> pagingMaterialInfos(Long farmId, Integer type, Integer canProduce, Integer pageNo, Integer pageSize) {
         try{
             PageInfo pageInfo = new PageInfo(pageNo, pageSize);
             Map<String,Object> params = Maps.newHashMap();
             params.put("farmId",farmId);
             params.put("type", type);
+            params.put("canProduce", canProduce);
             return Response.ok(doctorMaterialInfoDao.paging(pageInfo.getOffset(),pageInfo.getLimit(), params));
         }catch (Exception e){
-            log.error("paging material infos fail ,cause:{}", Throwables.getStackTraceAsString(e));
+            log.error("paging material info fail ,cause:{}", Throwables.getStackTraceAsString(e));
             return Response.fail("paging.materialInfo.fail");
         }
     }

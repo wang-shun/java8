@@ -13,6 +13,7 @@ import io.terminus.doctor.warehouse.model.DoctorWareHouse;
 import io.terminus.doctor.warehouse.service.DoctorWareHouseReadService;
 import io.terminus.doctor.warehouse.service.DoctorWareHouseWriteService;
 import io.terminus.doctor.web.front.warehouse.dto.DoctorWareHouseCreateDto;
+import io.terminus.doctor.web.front.warehouse.dto.DoctorWareHouseUpdateDto;
 import io.terminus.pampas.common.UserUtil;
 import io.terminus.parana.user.model.User;
 import io.terminus.parana.user.service.UserReadService;
@@ -72,6 +73,40 @@ public class DoctorWareHouseQuery {
                                                                @RequestParam(value = "pageNo", required = false) Integer pageNo,
                                                                @RequestParam(value = "pageSize", required = false) Integer pageSize){
         return RespHelper.or500(doctorWareHouseReadService.queryDoctorWarehouseDto(farmId, type, pageNo, pageSize));
+    }
+
+    /**
+     * 通过WareHouseId 获取仓库详细信息内容
+     * @param warehouseId
+     * @return
+     */
+    @RequestMapping(value = "/queryDtoByWareHouseId", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public DoctorWareHouseDto queryDtoByWareHouseId(@RequestParam("warehouseId") Long warehouseId){
+        return RespHelper.or500(doctorWareHouseReadService.queryDoctorWareHouseById(warehouseId));
+    }
+
+    @RequestMapping(value = "/updateWareHouse", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public Boolean updateWareHouse(@RequestBody DoctorWareHouseUpdateDto doctorWareHouseUpdateDto){
+        DoctorWareHouse doctorWareHouse = null;
+        try{
+            // get user reader info
+            Response<User> userResponse = userReadService.findById(UserUtil.getUserId());
+            checkState(userResponse.isSuccess(), "read.userInfo.fail");
+            User user = userResponse.getResult();
+
+            doctorWareHouse = DoctorWareHouse.builder()
+                    .address(doctorWareHouseUpdateDto.getAddress())
+                    .managerId(doctorWareHouseUpdateDto.getManagerId()).managerName(doctorWareHouseUpdateDto.getWarehouseName())
+                    .wareHouseName(doctorWareHouseUpdateDto.getWarehouseName())
+                    .updatorName(user.getName()).build();
+        }catch (Exception e){
+            log.error("update warehouse fail, cause:{}", Throwables.getStackTraceAsString(e));
+            throw new JsonResponseException("update.warehouse.fail");
+        }
+
+        return RespHelper.or500(doctorWareHouseWriteService.updateWareHouse(doctorWareHouse));
     }
 
     @RequestMapping(value = "/createWareHouse", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)

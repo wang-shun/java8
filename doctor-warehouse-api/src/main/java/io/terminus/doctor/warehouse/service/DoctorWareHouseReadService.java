@@ -35,4 +35,11 @@ public interface DoctorWareHouseReadService {
                                                                  Integer type,
                                                                  Integer pageNo,Integer pageSize);
 
+
+    /**
+     * 通过WareHouseId 获取仓库信息
+     * @param warehouseId
+     * @return
+     */
+    Response<DoctorWareHouseDto> queryDoctorWareHouseById(@NotNull(message = "input.warehouseId.empty") Long warehouseId);
 }

@@ -468,7 +468,6 @@ public class DoctorPigCreateEventsTest extends BaseFrontWebTest{
         HttpEntity httpEntityVa = HttpPostRequest.formRequest()
                 .param("pigId", pigId).param("farmId", 12345l).param("doctorVaccinationDtoJson", DoctorVaccinationDto.builder()
                         .vaccinationDate(new Date()).vaccinationId(1l).vaccinationName("vaccinationName")
-                        //.vaccinationResult(1)
                         .vaccinationStaffId(1l).vaccinationStaffName("vaccinationName").vaccinationRemark("remark")
                         .build())
                 .httpEntity();
