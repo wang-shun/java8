@@ -42,7 +42,11 @@ public class DoctorFarrowingDto implements Serializable{
      */
     private Integer isHelp;     //  是否帮助
 
+    private String groupCode;   // 仔猪猪群Code
+
     private double birthNestAvg;    //出生窝重
+
+    private Integer dayAgeAvg;  // 平均日龄计算
 
     private Integer farrowingLiveCount; // 分娩猪的数量 = 活公猪 + 活母猪 = 健崽数量 + 弱仔数量 (拼窝后， 可能不相等， 差值 拼窝数量)
 
