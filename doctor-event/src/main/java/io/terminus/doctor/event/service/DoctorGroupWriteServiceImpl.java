@@ -228,7 +228,7 @@ public class DoctorGroupWriteServiceImpl implements DoctorGroupWriteService {
     @Override
     public Response<Boolean> editEventNew(DoctorGroupDetail groupDetail, DoctorGroupEvent event, @Valid DoctorNewGroupEdit newEdit) {
         try {
-            doctorGroupManager.editNewGroupEvent(groupDetail.getGroup(), groupDetail.getGroupTrack(), event, newEdit);
+            doctorGroupManager.editNewGroupEvent(groupDetail.getGroup(), event, newEdit);
             return Response.ok(Boolean.TRUE);
         } catch (ServiceException e) {
             return Response.fail(e.getMessage());

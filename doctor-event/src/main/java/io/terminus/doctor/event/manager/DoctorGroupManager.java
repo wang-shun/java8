@@ -132,13 +132,21 @@ public class DoctorGroupManager {
     /**
      * 编辑新建猪群事件
      * @param group         猪群
-     * @param groupTrack    猪群跟踪
      * @param event         猪群事件
      * @param newEdit       编辑信息
      */
     @Transactional
-    public void editNewGroupEvent(DoctorGroup group, DoctorGroupTrack groupTrack, DoctorGroupEvent event, DoctorNewGroupEdit newEdit) {
+    public void editNewGroupEvent(DoctorGroup group, DoctorGroupEvent event, DoctorNewGroupEdit newEdit) {
+        //1. 更新猪群
+        group.setGroupCode(newEdit.getGroupCode());
+        group.setBreedId(newEdit.getBreedId());
+        group.setBreedName(newEdit.getBreedName());
+        group.setGeneticId(newEdit.getGeneticId());
+        group.setGeneticName(newEdit.getGeneticName());
+        doctorGroupDao.update(group);
 
+        //2. 更新事件
+        event.setRemark(newEdit.getRemark());
     }
 
     private DoctorGroup getNewGroup(DoctorGroup group, DoctorNewGroupInput newGroupInput) {
