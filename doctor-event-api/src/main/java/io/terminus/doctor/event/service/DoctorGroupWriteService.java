@@ -103,9 +103,9 @@ public interface DoctorGroupWriteService {
      * 录入猪群转群事件
      * @param groupDetail 操作猪群信息
      * @param transGroup 猪群转群信息
-     * @return 是否成功
+     * @return 转入猪群的id
      */
-    Response<Boolean> groupEventTransGroup(DoctorGroupDetail groupDetail, @Valid DoctorTransGroupInput transGroup);
+    Response<Long> groupEventTransGroup(DoctorGroupDetail groupDetail, @Valid DoctorTransGroupInput transGroup);
 
     /**
      * 录入商品猪转为种猪事件

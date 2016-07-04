@@ -26,6 +26,7 @@ import io.terminus.doctor.event.dto.event.group.input.DoctorSowMoveInGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorTransFarmGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorTransGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorTurnSeedGroupInput;
+import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.handler.group.DoctorAntiepidemicGroupEventHandler;
 import io.terminus.doctor.event.handler.group.DoctorChangeGroupEventHandler;
 import io.terminus.doctor.event.handler.group.DoctorCloseGroupEventHandler;
@@ -47,6 +48,7 @@ import org.springframework.stereotype.Service;
 
 import javax.validation.Valid;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static io.terminus.common.utils.Arguments.notEmpty;
@@ -196,10 +198,14 @@ public class DoctorGroupWriteServiceImpl implements DoctorGroupWriteService {
     }
 
     @Override
-    public Response<Boolean> groupEventTransGroup(DoctorGroupDetail groupDetail, @Valid DoctorTransGroupInput transGroup) {
+    public Response<Long> groupEventTransGroup(DoctorGroupDetail groupDetail, @Valid DoctorTransGroupInput transGroup) {
         try {
             doctorGroupEventManager.handleEvent(groupDetail, transGroup, DoctorTransGroupEventHandler.class);
-            return Response.ok(Boolean.TRUE);
+            if (Objects.equals(transGroup.getIsCreateGroup(), IsOrNot.YES.getValue())) {
+                DoctorGroup toGroup = doctorGroupDao.findByFarmIdAndGroupCode(groupDetail.getGroup().getFarmId(), transGroup.getToGroupCode());
+                return Response.ok(toGroup.getId());
+            }
+            return Response.ok(transGroup.getToGroupId());
         } catch (ServiceException e) {
             log.error("groupEventTransGroup failed, groupDetail:{}, transGroup:{}, cause:{}", groupDetail, transGroup, Throwables.getStackTraceAsString(e));
             return Response.fail(e.getMessage());
