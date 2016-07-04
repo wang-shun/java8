@@ -98,13 +98,16 @@ public class DoctorCommonGroupEventHandler {
 
         //1. 转换新建猪群字段
         DoctorGroup group = BeanMapper.map(input, DoctorGroup.class);
+        group.setRemark(null);  //dozer不需要转换remark
+
+        //2. 转换录入信息字段
         DoctorNewGroupInput newGroupInput = BeanMapper.map(input, DoctorNewGroupInput.class);
         DoctorMoveInGroupInput moveIn = BeanMapper.map(input, DoctorMoveInGroupInput.class);
 
-        //2. 新建猪群
+        //3. 新建猪群事件
         Long groupId = doctorGroupManager.createNewGroup(group, newGroupInput);
 
-        //3. 转入猪群
+        //4. 转入猪群事件
         DoctorGroupDetail groupDetail = RespHelper.orServEx(doctorGroupReadService.findGroupDetailByGroupId(groupId));
         doctorMoveInGroupEventHandler.handleEvent(groupDetail.getGroup(), groupDetail.getGroupTrack(), moveIn);
         return groupId;

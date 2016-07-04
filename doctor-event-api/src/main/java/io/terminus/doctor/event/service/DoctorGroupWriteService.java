@@ -189,7 +189,6 @@ public interface DoctorGroupWriteService {
                                          @NotNull(message = "reveterId.not.null") Long reveterId,
                                          String reveterName);
 
-
     /**
      * 母猪事件触发的仔猪转入猪群事件(注意: 此方法是要新建猪群的, 如果不新建猪群,应该调用 groupEventMoveIn方法)
      * @see DoctorGroupWriteService#groupEventMoveIn(DoctorGroupDetail, DoctorMoveInGroupInput)
