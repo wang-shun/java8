@@ -3,6 +3,7 @@ package io.terminus.doctor.event.dto.event.group.edit;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
+import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 
 /**
@@ -26,5 +27,6 @@ public class DoctorTransEdit extends BaseGroupEdit implements Serializable {
     /**
      * 总活体重(kg)
      */
+    @NotNull(message = "weight.not.null")
     private Double weight;
 }

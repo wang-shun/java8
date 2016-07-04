@@ -3,6 +3,7 @@ package io.terminus.doctor.event.dto.event.group.edit;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
+import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 
 /**
@@ -33,13 +34,16 @@ public class DoctorChangeGroupEdit extends BaseGroupEdit implements Serializable
 
     private String breedName;
 
+    @NotNull(message = "boarQty.not.null")
     private Integer boarQty;
 
+    @NotNull(message = "boarQty.not.null")
     private Integer sowQty;
 
     /**
      * 总活体重(单位:kg)
      */
+    @NotNull(message = "weight.not.null")
     private Double weight;
 
     /**

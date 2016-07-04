@@ -3,6 +3,7 @@ package io.terminus.doctor.event.dto.event.group.edit;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
+import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 
 /**
@@ -20,6 +21,7 @@ public class DoctorMoveInGroupEdit extends BaseGroupEdit implements Serializable
      * 来源 1 本场, 2 外购
      * @see io.terminus.doctor.event.enums.PigSource
      */
+    @NotNull(message = "source.not.null")
     private Integer source;
 
     /**
@@ -32,6 +34,7 @@ public class DoctorMoveInGroupEdit extends BaseGroupEdit implements Serializable
     /**
      * 平均体重(单位:kg)
      */
+    @NotNull(message = "avgWeight.not.null")
     private Double avgWeight;
 
     /**

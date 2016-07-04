@@ -2,7 +2,9 @@ package io.terminus.doctor.event.dto.event.group.edit;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import org.hibernate.validator.constraints.NotEmpty;
 
+import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 
 /**
@@ -19,11 +21,13 @@ public class DoctorDiseaseGroupEdit extends BaseGroupEdit implements Serializabl
     /**
      * 疾病id
      */
+    @NotNull(message = "diseaseId.not.null")
     private Long diseaseId;
 
     /**
      * 疾病名称
      */
+    @NotEmpty(message = "diseaseName.not.empty")
     private String diseaseName;
 
     /**

@@ -2,6 +2,7 @@ package io.terminus.doctor.event.dto.event.group.edit;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import org.hibernate.validator.constraints.NotEmpty;
 
 import java.io.Serializable;
 
@@ -19,6 +20,7 @@ public class DoctorNewGroupEdit extends BaseGroupEdit implements Serializable {
     /**
      * 猪群号
      */
+    @NotEmpty(message = "groupCode.not.empty")
     private String groupCode;
 
     /**
