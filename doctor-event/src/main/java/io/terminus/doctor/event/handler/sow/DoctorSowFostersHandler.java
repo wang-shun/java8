@@ -9,6 +9,8 @@ import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
 import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.handler.DoctorAbstractEventFlowHandler;
 import io.terminus.doctor.event.model.DoctorPigTrack;
+import io.terminus.doctor.event.service.DoctorGroupReadService;
+import io.terminus.doctor.event.service.DoctorGroupWriteService;
 import io.terminus.doctor.workflow.core.Execution;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -27,9 +29,18 @@ import static com.google.common.base.Preconditions.checkState;
 @Component
 public class DoctorSowFostersHandler extends DoctorAbstractEventFlowHandler{
 
+    private final DoctorGroupWriteService doctorGroupWriteService;
+
+    private final DoctorGroupReadService doctorGroupReadService;
+
     @Autowired
-    public DoctorSowFostersHandler(DoctorPigDao doctorPigDao, DoctorPigEventDao doctorPigEventDao, DoctorPigTrackDao doctorPigTrackDao, DoctorPigSnapshotDao doctorPigSnapshotDao, DoctorRevertLogDao doctorRevertLogDao) {
+    public DoctorSowFostersHandler(DoctorPigDao doctorPigDao, DoctorPigEventDao doctorPigEventDao,
+                                   DoctorPigTrackDao doctorPigTrackDao, DoctorPigSnapshotDao doctorPigSnapshotDao,
+                                   DoctorRevertLogDao doctorRevertLogDao,
+                                   DoctorGroupWriteService doctorGroupWriteService, DoctorGroupReadService doctorGroupReadService) {
         super(doctorPigDao, doctorPigEventDao, doctorPigTrackDao, doctorPigSnapshotDao, doctorRevertLogDao);
+        this.doctorGroupWriteService = doctorGroupWriteService;
+        this.doctorGroupReadService = doctorGroupReadService;
     }
 
     @Override
@@ -51,5 +62,20 @@ public class DoctorSowFostersHandler extends DoctorAbstractEventFlowHandler{
         doctorPigTrack.setStatus(PigStatus.FEED.getKey());
         doctorPigTrack.addPigEvent(basic.getPigType(), (Long) context.get("doctorPigEventId"));
         return doctorPigTrack;
+    }
+
+    /**
+     * 对应的仔猪转群操作
+     * @param basicInputInfoDto
+     * @param extra
+     */
+    private void groupSowEventCreate(DoctorBasicInputInfoDto basicInputInfoDto, Map<String,Object> extra){
+
+        Long fosterById = Long.valueOf(extra.get("fosterSowId").toString());
+
+        DoctorPigTrack doctorFosterByPigTrack = doctorPigTrackDao.findByPigId(fosterById);
+        Map<String,Object> fosterByPigExtra = doctorFosterByPigTrack.getExtraMap();
+//        Long groupId = fosterByPigExtra.get("").toString();
+
     }
 }
