@@ -1,5 +1,6 @@
 package io.terminus.doctor.event.dao;
 
+import com.google.common.collect.ImmutableMap;
 import io.terminus.common.mysql.dao.MyBatisDao;
 import io.terminus.doctor.event.dto.DoctorGroupSearchDto;
 import io.terminus.doctor.event.model.DoctorGroup;
@@ -28,4 +29,13 @@ public class DoctorGroupDao extends MyBatisDao<DoctorGroup> {
         return getSqlSession().selectList(sqlId("findBySearchDto"), searchDto);
     }
 
+    /**
+     * 根据groupCode查询某猪场内的猪群
+     * @param farmId    猪场id
+     * @param groupCode 猪群号
+     * @return 猪群
+     */
+    public DoctorGroup findByFarmIdAndGroupCode(Long farmId, String groupCode) {
+        return getSqlSession().selectOne(sqlId("findByFarmIdAndGroupCode"), ImmutableMap.of("farmId", farmId, "groupCode", groupCode));
+    }
 }
