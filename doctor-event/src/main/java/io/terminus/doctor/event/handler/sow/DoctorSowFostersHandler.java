@@ -113,10 +113,8 @@ public class DoctorSowFostersHandler extends DoctorAbstractEventFlowHandler{
         doctorTransGroupInput.setCreatorId(basicInputInfoDto.getStaffId());
         doctorTransGroupInput.setCreatorName(basicInputInfoDto.getStaffName());
 
-        doctorGroupWriteService.groupEventTransGroup(
+        return RespHelper.orServEx(doctorGroupWriteService.groupEventTransGroup(
                 RespHelper.orServEx(doctorGroupReadService.findGroupDetailByGroupId(fosterByGroupId)),
-                doctorTransGroupInput);
-
-        return 1l;
+                doctorTransGroupInput));
     }
 }
