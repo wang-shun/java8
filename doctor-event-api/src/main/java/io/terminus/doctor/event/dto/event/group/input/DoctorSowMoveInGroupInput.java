@@ -19,10 +19,28 @@ public class DoctorSowMoveInGroupInput extends DoctorMoveInGroupInput implements
     private static final long serialVersionUID = -8922843195140861816L;
 
     /**
+     * 公司id
+     */
+    @NotNull(message = "orgId.not.null")
+    private Long orgId;
+
+    /**
+     * 公司名称
+     */
+    @NotEmpty(message = "orgName.not.empty")
+    private String orgName;
+
+    /**
      * 猪场id
      */
     @NotNull(message = "farmId.not.null")
     private Long farmId;
+
+    /**
+     * 猪场名称
+     */
+    @NotEmpty(message = "farmName.not.empty")
+    private String farmName;
 
     /**
      * 猪群号

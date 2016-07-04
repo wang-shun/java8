@@ -21,6 +21,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import static io.terminus.common.utils.Arguments.notEmpty;
+
 /**
  * Desc: 通用事件处理器
  * Mail: yangzl@terminus.io
@@ -95,13 +97,19 @@ public class DoctorCommonGroupEventHandler {
      */
     @Transactional
     public Long sowGroupEventMoveIn(DoctorSowMoveInGroupInput input) {
+        input.setIsAuto(IsOrNot.YES.getValue());    //设置为自动事件
+        input.setRemark(notEmpty(input.getRemark()) ? input.getRemark() : "系统自动生成的从母猪舍转入猪群的仔猪转入事件");
 
         //1. 转换新建猪群字段
         DoctorGroup group = BeanMapper.map(input, DoctorGroup.class);
         group.setRemark(null);  //dozer不需要转换remark
+        group.setStaffId(input.getCreatorId());
+        group.setStaffName(input.getCreatorName());
 
         //2. 转换录入信息字段
         DoctorNewGroupInput newGroupInput = BeanMapper.map(input, DoctorNewGroupInput.class);
+        newGroupInput.setBarnId(input.getToBarnId());
+        newGroupInput.setBarnName(input.getToBarnName());
         DoctorMoveInGroupInput moveIn = BeanMapper.map(input, DoctorMoveInGroupInput.class);
 
         //3. 新建猪群事件
