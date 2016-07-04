@@ -77,5 +77,7 @@ public class DoctorDiseaseGroupEventHandler extends DoctorAbstractGroupEventHand
         event.setExtraMap(diseaseEvent);
 
         editGroupEvent(event, edit);
+        //更新猪群镜像
+        editGroupSnapShot(group, groupTrack, event);
     }
 }

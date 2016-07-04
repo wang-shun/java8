@@ -77,5 +77,7 @@ public class DoctorAntiepidemicGroupEventHandler extends DoctorAbstractGroupEven
 
         event.setExtraMap(antiEvent);
         editGroupEvent(event, edit);
+        //更新猪群镜像
+        editGroupSnapShot(group, groupTrack, event);
     }
 }

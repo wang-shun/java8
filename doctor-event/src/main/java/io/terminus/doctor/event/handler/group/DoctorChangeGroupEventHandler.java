@@ -109,5 +109,8 @@ public class DoctorChangeGroupEventHandler extends DoctorAbstractGroupEventHandl
 
         event.setExtraMap(changeEvent);
         editGroupEvent(event, edit);
+
+        //更新猪群镜像
+        editGroupSnapShot(group, groupTrack, event);
     }
 }

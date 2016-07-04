@@ -146,6 +146,9 @@ public class DoctorTransGroupEventHandler extends DoctorAbstractGroupEventHandle
             groupTrack.setAvgWeight(EventUtil.getAvgWeight(groupTrack.getWeight(), groupTrack.getQuantity()));
             doctorGroupTrackDao.update(groupTrack);
         }
+
+        //更新猪群镜像
+        editGroupSnapShot(group, groupTrack, event);
     }
 
     /**
