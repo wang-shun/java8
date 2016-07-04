@@ -37,7 +37,7 @@ public class DoctorCommonGroupEventHandler {
     private final DoctorGroupManager doctorGroupManager;
 
     @Autowired
-    private DoctorCommonGroupEventHandler(DoctorCloseGroupEventHandler doctorCloseGroupEventHandler,
+    public DoctorCommonGroupEventHandler(DoctorCloseGroupEventHandler doctorCloseGroupEventHandler,
                                           DoctorMoveInGroupEventHandler doctorMoveInGroupEventHandler,
                                           DoctorGroupReadService doctorGroupReadService,
                                           DoctorGroupManager doctorGroupManager) {
