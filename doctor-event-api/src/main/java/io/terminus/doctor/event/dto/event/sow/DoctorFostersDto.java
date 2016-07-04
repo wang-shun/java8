@@ -30,6 +30,8 @@ public class DoctorFostersDto implements Serializable{
 
     private Integer boarFostersCount;   // 拼窝公猪数量
 
+    private Double fosterTotalWeight;   //拼窝总重量
+
     private Long fosterReason;  //寄养原因
 
     private Long fosterSowId;   // 拼窝母猪Id
