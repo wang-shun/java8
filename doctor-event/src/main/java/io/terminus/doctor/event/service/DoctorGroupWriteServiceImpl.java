@@ -22,12 +22,14 @@ import io.terminus.doctor.event.dto.event.group.input.DoctorDiseaseGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorLiveStockGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorMoveInGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorNewGroupInput;
+import io.terminus.doctor.event.dto.event.group.input.DoctorSowMoveInGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorTransFarmGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorTransGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorTurnSeedGroupInput;
 import io.terminus.doctor.event.handler.group.DoctorAntiepidemicGroupEventHandler;
 import io.terminus.doctor.event.handler.group.DoctorChangeGroupEventHandler;
 import io.terminus.doctor.event.handler.group.DoctorCloseGroupEventHandler;
+import io.terminus.doctor.event.handler.group.DoctorCommonGroupEventHandler;
 import io.terminus.doctor.event.handler.group.DoctorDiseaseGroupEventHandler;
 import io.terminus.doctor.event.handler.group.DoctorLiveStockGroupEventHandler;
 import io.terminus.doctor.event.handler.group.DoctorMoveInGroupEventHandler;
@@ -65,6 +67,7 @@ public class DoctorGroupWriteServiceImpl implements DoctorGroupWriteService {
     private final DoctorGroupEventManager doctorGroupEventManager;
     private final DoctorGroupEventDao doctorGroupEventDao;
     private final DoctorGroupSnapshotDao doctorGroupSnapshotDao;
+    private final DoctorCommonGroupEventHandler doctorCommonGroupEventHandler;
 
     @Autowired
     public DoctorGroupWriteServiceImpl(DoctorGroupDao doctorGroupDao,
@@ -72,13 +75,15 @@ public class DoctorGroupWriteServiceImpl implements DoctorGroupWriteService {
                                        DoctorGroupManager doctorGroupManager,
                                        DoctorGroupEventManager doctorGroupEventManager,
                                        DoctorGroupEventDao doctorGroupEventDao,
-                                       DoctorGroupSnapshotDao doctorGroupSnapshotDao) {
+                                       DoctorGroupSnapshotDao doctorGroupSnapshotDao,
+                                       DoctorCommonGroupEventHandler doctorCommonGroupEventHandler) {
         this.doctorGroupDao = doctorGroupDao;
         this.doctorGroupTrackDao = doctorGroupTrackDao;
         this.doctorGroupManager = doctorGroupManager;
         this.doctorGroupEventManager = doctorGroupEventManager;
         this.doctorGroupEventDao = doctorGroupEventDao;
         this.doctorGroupSnapshotDao = doctorGroupSnapshotDao;
+        this.doctorCommonGroupEventHandler = doctorCommonGroupEventHandler;
     }
 
     @Override
@@ -331,6 +336,18 @@ public class DoctorGroupWriteServiceImpl implements DoctorGroupWriteService {
             log.error("rollback group event failed, groupEvent:{}, reveterId:{}, reveterName:{}, cause:{}",
                     groupEvent, reveterId, reveterName, Throwables.getStackTraceAsString(e));
             return Response.fail("group.event.rollback.fail");
+        }
+    }
+
+    @Override
+    public Response<Long> sowGroupEventMoveIn(@Valid DoctorSowMoveInGroupInput input) {
+        try {
+            return Response.ok(doctorCommonGroupEventHandler.sowGroupEventMoveIn(input));
+        } catch (ServiceException e) {
+            return Response.fail(e.getMessage());
+        } catch (Exception e) {
+            log.error("sow event move in group event failed, input:{}, cause:{}", input, Throwables.getStackTraceAsString(e));
+            return Response.fail("group.event.moveIn.fail");
         }
     }
 

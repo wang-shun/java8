@@ -1,13 +1,17 @@
 package io.terminus.doctor.event.handler.group;
 
+import io.terminus.common.utils.BeanMapper;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dto.DoctorGroupDetail;
 import io.terminus.doctor.event.dto.event.group.DoctorMoveInGroupEvent;
 import io.terminus.doctor.event.dto.event.group.input.BaseGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorCloseGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorMoveInGroupInput;
+import io.terminus.doctor.event.dto.event.group.input.DoctorNewGroupInput;
+import io.terminus.doctor.event.dto.event.group.input.DoctorSowMoveInGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorTransGroupInput;
 import io.terminus.doctor.event.enums.IsOrNot;
+import io.terminus.doctor.event.manager.DoctorGroupManager;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
 import io.terminus.doctor.event.service.DoctorGroupReadService;
@@ -15,6 +19,9 @@ import io.terminus.doctor.event.util.EventUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+
+import static io.terminus.common.utils.Arguments.notEmpty;
 
 /**
  * Desc: 通用事件处理器
@@ -29,14 +36,17 @@ public class DoctorCommonGroupEventHandler {
     private final DoctorCloseGroupEventHandler doctorCloseGroupEventHandler;
     private final DoctorMoveInGroupEventHandler doctorMoveInGroupEventHandler;
     private final DoctorGroupReadService doctorGroupReadService;
+    private final DoctorGroupManager doctorGroupManager;
 
     @Autowired
-    private DoctorCommonGroupEventHandler(DoctorCloseGroupEventHandler doctorCloseGroupEventHandler,
+    public DoctorCommonGroupEventHandler(DoctorCloseGroupEventHandler doctorCloseGroupEventHandler,
                                           DoctorMoveInGroupEventHandler doctorMoveInGroupEventHandler,
-                                          DoctorGroupReadService doctorGroupReadService) {
+                                          DoctorGroupReadService doctorGroupReadService,
+                                          DoctorGroupManager doctorGroupManager) {
         this.doctorCloseGroupEventHandler = doctorCloseGroupEventHandler;
         this.doctorMoveInGroupEventHandler = doctorMoveInGroupEventHandler;
         this.doctorGroupReadService = doctorGroupReadService;
+        this.doctorGroupManager = doctorGroupManager;
     }
 
     /**
@@ -78,5 +88,36 @@ public class DoctorCommonGroupEventHandler {
         //调用转入猪群事件
         DoctorGroupDetail groupDetail = RespHelper.orServEx(doctorGroupReadService.findGroupDetailByGroupId(transGroup.getToGroupId()));
         doctorMoveInGroupEventHandler.handleEvent(groupDetail.getGroup(), groupDetail.getGroupTrack(), moveIn);
+    }
+
+    /**
+     * 母猪事件触发的仔猪转入猪群事件, 同时新建猪群
+     * @param input 录入信息
+     * @return 创建的猪群id
+     */
+    @Transactional
+    public Long sowGroupEventMoveIn(DoctorSowMoveInGroupInput input) {
+        input.setIsAuto(IsOrNot.YES.getValue());    //设置为自动事件
+        input.setRemark(notEmpty(input.getRemark()) ? input.getRemark() : "系统自动生成的从母猪舍转入猪群的仔猪转入事件");
+
+        //1. 转换新建猪群字段
+        DoctorGroup group = BeanMapper.map(input, DoctorGroup.class);
+        group.setRemark(null);  //dozer不需要转换remark
+        group.setStaffId(input.getCreatorId());
+        group.setStaffName(input.getCreatorName());
+
+        //2. 转换录入信息字段
+        DoctorNewGroupInput newGroupInput = BeanMapper.map(input, DoctorNewGroupInput.class);
+        newGroupInput.setBarnId(input.getToBarnId());
+        newGroupInput.setBarnName(input.getToBarnName());
+        DoctorMoveInGroupInput moveIn = BeanMapper.map(input, DoctorMoveInGroupInput.class);
+
+        //3. 新建猪群事件
+        Long groupId = doctorGroupManager.createNewGroup(group, newGroupInput);
+
+        //4. 转入猪群事件
+        DoctorGroupDetail groupDetail = RespHelper.orServEx(doctorGroupReadService.findGroupDetailByGroupId(groupId));
+        doctorMoveInGroupEventHandler.handleEvent(groupDetail.getGroup(), groupDetail.getGroupTrack(), moveIn);
+        return groupId;
     }
 }

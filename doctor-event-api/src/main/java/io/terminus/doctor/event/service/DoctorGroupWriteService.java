@@ -16,6 +16,7 @@ import io.terminus.doctor.event.dto.event.group.input.DoctorDiseaseGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorLiveStockGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorMoveInGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorNewGroupInput;
+import io.terminus.doctor.event.dto.event.group.input.DoctorSowMoveInGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorTransFarmGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorTransGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorTurnSeedGroupInput;
@@ -187,6 +188,14 @@ public interface DoctorGroupWriteService {
     Response<Boolean> rollbackGroupEvent(@NotNull(message = "eventId.not.null") DoctorGroupEvent groupEvent,
                                          @NotNull(message = "reveterId.not.null") Long reveterId,
                                          String reveterName);
+
+    /**
+     * 母猪事件触发的仔猪转入猪群事件(注意: 此方法是要新建猪群的, 如果不新建猪群,应该调用 groupEventMoveIn方法)
+     * @see DoctorGroupWriteService#groupEventMoveIn(DoctorGroupDetail, DoctorMoveInGroupInput)
+     * @param input 录入信息
+     * @return 创建的猪群id
+     */
+    Response<Long> sowGroupEventMoveIn(@Valid DoctorSowMoveInGroupInput input);
 
     /**
      * job调用, 用于每日更新日龄
