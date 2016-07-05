@@ -1021,6 +1021,7 @@ CREATE TABLE `doctor_user_subs` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `user_id` bigint(20) DEFAULT NULL COMMENT '用户 ID',
   `user_name` varchar(64) DEFAULT NULL COMMENT '用户名 (冗余)',
+  `real_name` varchar(64) DEFAULT NULL COMMENT '真实姓名 (冗余),跟随 user_profile 表的 real_name 字段',
   `parent_user_id` bigint(20) DEFAULT NULL COMMENT '主账号ID',
   `parent_user_name` varchar(64) DEFAULT NULL COMMENT '主账号用户名(冗余)',
   `role_id` bigint(20) DEFAULT NULL COMMENT '子账号角色 ID',
@@ -1034,7 +1035,7 @@ CREATE TABLE `doctor_user_subs` (
   KEY `idx_user_sub_user_id` (`user_id`),
   KEY `idx_user_parent_sub_id` (`parent_user_id`),
   KEY `idx_user_sub_roles_id` (`role_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8 COMMENT='猪场子账户表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='猪场子账户表';
 
 -- 猪场 子账号角色表
 DROP TABLE IF EXISTS `doctor_sub_roles`;

@@ -123,6 +123,7 @@ public class DoctorUserManager {
             Sub sub = new Sub();
             sub.setUserId(userId);
             sub.setUserName(user.getName());
+            sub.setRealName(Params.get(user.getExtra(), "realName"));
             sub.setRoleId(roleId);
             sub.setRoleName(subRole.getName());
             sub.setParentUserId(Long.valueOf(Params.get(user.getExtra(), "pid")));
@@ -165,6 +166,7 @@ public class DoctorUserManager {
 
             Sub sub = subDao.findByUserId(user.getId());
             sub.setUserName(user.getName());
+            sub.setRealName(Params.get(user.getExtra(), "realName"));
             sub.setRoleId(roleId);
             sub.setRoleName(subRole.getName());
             sub.setContact(Params.get(user.getExtra(), "contact"));

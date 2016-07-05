@@ -108,3 +108,9 @@ ALTER TABLE doctor_pig_tracks ADD COLUMN `pig_type` smallint(6) DEFAULT NULL COM
 ALTER TABLE doctor_group_events ADD COLUMN `updated_at` datetime DEFAULT NULL COMMENT '更新时间' AFTER creator_name;
 ALTER TABLE doctor_group_events ADD COLUMN `updator_id` bigint(20) DEFAULT NULL COMMENT '更新人id' AFTER updated_at;
 ALTER TABLE doctor_group_events ADD COLUMN `updator_name` varchar(64) DEFAULT NULL COMMENT '更新人name' AFTER updator_id;
+
+alter table doctor_user_subs
+add column `real_name` VARCHAR(64) DEFAULT NULL COMMENT '真实姓名 (冗余),跟随 user_profile 表的 real_name 字段' after `user_name`;
+
+update doctor_user_subs o
+set o.real_name = (select i.realname from parana_user_profiles i where i.user_id = o.user_id);

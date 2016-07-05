@@ -43,6 +43,11 @@ public class Sub implements Serializable {
     private String userName;
 
     /**
+     * 子账号(员工)真实名, 这是个冗余字段, 跟随 user_profile 表的 real_name 字段
+     */
+    private String realName;
+
+    /**
      * 主账号 ID
      */
     private Long parentUserId;

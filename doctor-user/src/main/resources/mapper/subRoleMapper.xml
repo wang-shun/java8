@@ -96,6 +96,7 @@
 
     <sql id="criteria">
         app_key = #{appKey}
+        <if test="name != null">AND `name` like CONCAT('%', #{name}, '%')</if>
         <if test="status != null">AND status = #{status}</if>
         <if test="userId != null">AND user_id = #{userId}</if>
     </sql>

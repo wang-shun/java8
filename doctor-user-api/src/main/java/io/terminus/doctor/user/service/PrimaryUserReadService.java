@@ -69,7 +69,8 @@ public interface PrimaryUserReadService {
      * @param size   查询数量
      * @return 子账户分页
      */
-    Response<Paging<Sub>> subPagination(Long parentUserId, Long roleId, Integer status, Integer pageNo, Integer size);
+    Response<Paging<Sub>> subPagination(Long parentUserId, Long roleId, String roleName, String userName,
+                                        String realName, Integer status, Integer pageNo, Integer size);
 
     /**
      * 获取所有审核通过的子账号
