@@ -554,6 +554,9 @@ public class OPUsers {
                                   @NotEmpty(message = "newPassword.not.empty") String newPassword,
                                   @NotEmpty(message = "session.id.miss")String sessionId) {
 
+        //检查密码格式
+        checkPasswordFormat(newPassword);
+
         //1.从session中获取用户信息
         Map<String, Object> snapshot = sessionManager.findSessionById(Sessions.TOKEN_PREFIX, sessionId);
         if (snapshot == null || snapshot.size() == 0 || snapshot.get(Sessions.USER_ID) == null) {
