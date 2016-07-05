@@ -139,13 +139,15 @@ public class DoctorUserReadServiceImpl extends UserReadServiceImpl implements Do
             //子账号
             if(Objects.equals(UserType.FARM_SUB.value(), user.getType())){
                 DoctorUserDataPermission permission = RespHelper.orServEx(doctorUserDataPermissionReadService.findDataPermissionByUserId(userId));
-                if(!permission.getFarmIdsList().isEmpty()){
+                if(permission != null && !permission.getFarmIdsList().isEmpty()){
                     if(permission.getFarmIdsList().size() == 1){
                         return Response.ok(RoleType.SUB_SINGLE.getValue());
                     }
                     else{
                         return Response.ok(RoleType.SUB_MULTI.getValue());
                     }
+                }else{
+                    return Response.ok(RoleType.SUB_NONE.getValue());
                 }
             }
             //其他
