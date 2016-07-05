@@ -1238,3 +1238,6 @@ CREATE TABLE `doctor_basics` (
   `updated_at` datetime DEFAULT NULL COMMENT '修改时间',
   PRIMARY KEY (`id`)
 ) COMMENT='基础数据表';
+
+-- pig track info update
+ALTER TABLE doctor_pig_tracks ADD COLUMN `pig_type` smallint(6) DEFAULT NULL COMMENT '猪类型(公猪，母猪， 仔猪)' AFTER pig_id;

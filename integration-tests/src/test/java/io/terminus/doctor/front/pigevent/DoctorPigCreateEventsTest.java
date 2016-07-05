@@ -364,18 +364,18 @@ public class DoctorPigCreateEventsTest extends BaseFrontWebTest{
         Long boarId = 2l;
         sowEntryEventCreate();
 
-        sowMatingEventCreate(pigId, boarId);
+//        sowMatingEventCreate(pigId, boarId);
 
-        testPregCheckResultEventCreate(pigId, PregCheckResult.YANG);
+//        testPregCheckResultEventCreate(pigId, PregCheckResult.YANG);
 
-        testToPregEventCreate(pigId);
+//        testToPregEventCreate(pigId);
 
         // test
 //        testAbortionEventCreate(pigId);
 
-        testToFarrowing(pigId);
+//        testToFarrowing(pigId);
 
-        testFarrowingEventCreate(pigId);
+//        testFarrowingEventCreate(pigId);
 
 //        testWeanMethod(pigId, 200);
 
