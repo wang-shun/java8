@@ -4,7 +4,10 @@ import io.terminus.common.mysql.dao.MyBatisDao;
 import io.terminus.parana.user.model.UserProfile;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collections;
 import java.util.List;
+
+import static io.terminus.common.utils.Arguments.isEmpty;
 
 /**
  * Desc: 用户个人信息扩展Dao
@@ -21,6 +24,9 @@ public class UserProfileExtraDao extends MyBatisDao<UserProfile>{
      * @return 用户信息
      */
     public List<UserProfile> findByUserIds(List<Long> userIds){
+        if (isEmpty(userIds)) {
+            return Collections.emptyList();
+        }
         return getSqlSession().selectList(sqlId("findByUserIds"), userIds);
     }
 

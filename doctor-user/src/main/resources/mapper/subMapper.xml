@@ -40,9 +40,13 @@
     </sql>
 
     <sql id="criteria">
+        1 = 1
         <if test="userId != null">AND user_id = #{userId}</if>
+        <if test="userName != null">AND user_name = #{userName}</if>
         <if test="parentUserId != null">AND parent_user_id = #{parentUserId}</if>
         <if test="status != null">AND status = #{status}</if>
+        <if test="roleId != null">AND role_id = #{roleId}</if>
+        <if test="roleName != null">AND role_name = #{roleName}</if>
     </sql>
 
     <insert id="create" parameterType="Sub" keyProperty="id" useGeneratedKeys="true">

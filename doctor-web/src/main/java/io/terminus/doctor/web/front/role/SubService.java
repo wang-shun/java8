@@ -197,29 +197,24 @@ public class SubService {
             Paging<io.terminus.doctor.user.model.Sub> paging = RespHelper.orServEx(primaryUserReadService.subPagination(userId, roleId, null, pageNo, pageSize));
 
             List<Long> userIds = paging.getData().stream().map(s -> s.getUserId()).collect(Collectors.toList());
-            Response<List<User>> userResp = doctorUserReadService.findByIds(userIds);
+            List<User> users = RespHelper.orServEx(doctorUserReadService.findByIds(userIds));
 
-            Response<List<UserProfile>> profileResp = doctorUserProfileReadService.findProfileByUserIds(userIds);
+            List<UserProfile> profiles = RespHelper.orServEx(doctorUserProfileReadService.findProfileByUserIds(userIds));
 
-            Map<Long, User> userMap = userResp.getResult().stream().collect(Collectors.toMap(User::getId, u -> u));
-            Map<Long, UserProfile> profileMap = profileResp.getResult().stream().collect(Collectors.toMap(UserProfile::getUserId, u -> u));
-            List<Sub> result = Lists.newArrayList();
-            if (userResp.isSuccess()) {
-                result = paging.getData().stream().map(s -> {
-                    User u = userMap.get(s.getUserId());
-                    UserProfile up = profileMap.get(s.getUserId());
-                    return makeSub(s, u, up);
-                }).collect(Collectors.toList());
-            }
+            Map<Long, User> userMap = users.stream().collect(Collectors.toMap(User::getId, u -> u));
+            Map<Long, UserProfile> profileMap = profiles.stream().collect(Collectors.toMap(UserProfile::getUserId, u -> u));
+            List<Sub> result = paging.getData().stream().map(s -> {
+                User u = userMap.get(s.getUserId());
+                UserProfile up = profileMap.get(s.getUserId());
+                return makeSub(s, u, up);
+            }).collect(Collectors.toList());
 
             return Response.ok(new Paging<>(paging.getTotal(), result));
         } catch (ServiceException e) {
-            log.warn("paging sub failed, user={}, pageNo={}, pageSize={}, error={}",
-                    user, pageNo, pageSize, e.getMessage());
-            return Response.fail("sub.paging.fail");
+            log.error("paging sub failed, user={}, pageNo={}, pageSize={}, error={}", user, pageNo, pageSize, e.getMessage());
+            return Response.fail(e.getMessage());
         } catch (Exception e) {
-            log.error("paging sub failed, user={}, pageNo={}, pageSize={}, cause:{}",
-                    user, pageNo, pageSize, Throwables.getStackTraceAsString(e));
+            log.error("paging sub failed, user={}, pageNo={}, pageSize={}, cause:{}", user, pageNo, pageSize, Throwables.getStackTraceAsString(e));
             return Response.fail("sub.paging.fail");
         }
     }

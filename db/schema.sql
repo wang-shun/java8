@@ -1034,7 +1034,7 @@ CREATE TABLE `doctor_user_subs` (
   KEY `idx_user_sub_user_id` (`user_id`),
   KEY `idx_user_parent_sub_id` (`parent_user_id`),
   KEY `idx_user_sub_roles_id` (`role_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8 COMMENT='猪场子账户表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='猪场子账户表';
 
 -- 猪场 子账号角色表
 DROP TABLE IF EXISTS `doctor_sub_roles`;
