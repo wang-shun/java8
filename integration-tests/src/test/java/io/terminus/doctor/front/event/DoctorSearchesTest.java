@@ -36,6 +36,13 @@ public class DoctorSearchesTest extends BaseFrontWebTest {
         System.out.println(JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(body));
     }
 
+    @Test
+    public void test_QUERY_SowSuggest() {
+        String url = "/api/doctor/search/sowpigs/suggest";
+        List body = getForEntity(url, ImmutableMap.of("farmId", 12355, "size", 2, "q", "Y1"), List.class).getBody();
+        System.out.println(JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(body));
+    }
+
     /**
      * 查询所有的公猪
      * @see DoctorSearches#searchAllBoarPigs(Map)

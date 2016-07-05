@@ -126,6 +126,36 @@ public class DoctorSearches {
     }
 
     /**
+     * 搜索母猪的suggest
+     * @param size      数量
+     * @param params    查询参数
+     * @return
+     */
+    @RequestMapping(value = "/sowpigs/suggest", method = RequestMethod.GET)
+    public List<SearchedPig> searchSowsSuggest(@RequestParam(required = false) Integer size,
+                                               @RequestParam Map<String, String> params) {
+        if (farmIdNotExist(params)) {
+            return Collections.emptyList();
+        }
+        params.put("pigType", DoctorPig.PIG_TYPE.SOW.getKey().toString());
+        if (size == null) {
+            size = 8; // 默认获取 8 条
+        }
+        // 如果 q 为空
+        if (StringUtils.isBlank(params.get("q"))) {
+            return Collections.emptyList();
+        }
+
+        Integer pageNo = 1; // 默认取第一页的数据
+        Integer pageSize = size;
+        Paging<SearchedPig> searchBoars =
+                RespHelper.or500(pigSearchReadService.searchWithAggs(pageNo, pageSize, "search/search.mustache", params)).getPigs();
+
+        return searchBoars.getData();
+    }
+
+
+    /**
      * 公猪搜索方法
      *
      * @param pageNo   起始页
