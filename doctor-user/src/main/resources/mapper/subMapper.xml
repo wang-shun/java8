@@ -11,6 +11,7 @@
         <id column="id" property="id"/>
         <result column="user_id" property="userId"/>
         <result column="user_name" property="userName"/>
+        <result column="real_name" property="realName"/>
         <result column="parent_user_id" property="parentUserId"/>
         <result column="parent_user_name" property="parentUserName"/>
         <result column="role_id" property="roleId"/>
@@ -32,21 +33,23 @@
     </sql>
 
     <sql id="cols_exclude_id">
-      user_id, `user_name`, parent_user_id, parent_user_name, role_id, role_name, contact, status, extra_json, created_at, updated_at
+      user_id, `user_name`, real_name, parent_user_id, parent_user_name, role_id, role_name, contact, status, extra_json, created_at, updated_at
     </sql>
 
     <sql id="vals">
-        #{userId}, #{userName}, #{parentUserId}, #{parentUserName}, #{roleId}, #{roleName}, #{contact}, #{status}, #{extraJson}, now(), now()
+        #{userId}, #{userName}, #{realName}, #{parentUserId}, #{parentUserName}, #{roleId}, #{roleName}, #{contact}, #{status}, #{extraJson}, now(), now()
     </sql>
 
     <sql id="criteria">
         1 = 1
         <if test="userId != null">AND user_id = #{userId}</if>
+        <if test="realName != null">AND real_name = #{realName}</if>
         <if test="userName != null">AND user_name = #{userName}</if>
         <if test="parentUserId != null">AND parent_user_id = #{parentUserId}</if>
         <if test="status != null">AND status = #{status}</if>
         <if test="roleId != null">AND role_id = #{roleId}</if>
         <if test="roleName != null">AND role_name = #{roleName}</if>
+        <if test="contact != null">AND contact = #{contact}</if>
     </sql>
 
     <insert id="create" parameterType="Sub" keyProperty="id" useGeneratedKeys="true">
@@ -63,6 +66,7 @@
         SET
         <if test="userId != null">user_id = #{userId},</if>
         <if test="userName != null">user_name = #{userName},</if>
+        <if test="realName != null">real_name = #{realName},</if>
         <if test="parentUserId != null">parent_user_id = #{parentUserId},</if>
         <if test="parentUserName != null">parent_user_name = #{parentUserName},</if>
         <if test="status != null">status = #{status},</if>

@@ -72,12 +72,14 @@ public class Subs {
     /**
      * 分页查询子用户
      * @param roleId
+     * @param realName 员工真实姓名, 匹配 user_profile 表中的 real_name 字段
      * @param pageNo
      * @param pageSize
      * @return
      */
     @RequestMapping(value = "/pagination", method = RequestMethod.GET)
     public Paging<Sub> pagingSubs(@RequestParam(required = false) Long roleId,
+                                  @RequestParam(required = false) String realName,
                                   @RequestParam(required = false) Integer pageNo,
                                   @RequestParam(required = false) Integer pageSize) {
         checkAuth();
