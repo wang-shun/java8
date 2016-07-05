@@ -190,11 +190,14 @@ public class SubService {
 
 
     @Export(paramNames = {"user", "roleId", "pageNo", "pageSize"})
-    public Response<Paging<Sub>> pagingSubs(BaseUser user, Long roleId, Integer pageNo, Integer pageSize) {
+    public Response<Paging<Sub>> pagingSubs(BaseUser user, Long roleId,String roleName, String userName,
+                                            String realName, Integer pageNo, Integer pageSize) {
         try {
             Long userId = user.getId();
 
-            Paging<io.terminus.doctor.user.model.Sub> paging = RespHelper.orServEx(primaryUserReadService.subPagination(userId, roleId, null, pageNo, pageSize));
+            Paging<io.terminus.doctor.user.model.Sub> paging = RespHelper.orServEx(
+                    primaryUserReadService.subPagination(userId, roleId, roleName, userName, realName, null, pageNo, pageSize)
+            );
 
             List<Long> userIds = paging.getData().stream().map(s -> s.getUserId()).collect(Collectors.toList());
             List<User> users = RespHelper.orServEx(doctorUserReadService.findByIds(userIds));
