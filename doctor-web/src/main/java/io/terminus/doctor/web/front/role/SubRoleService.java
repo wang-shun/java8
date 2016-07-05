@@ -44,14 +44,21 @@ public class SubRoleService {
      * @param pageSize 查询数量
      * @return 分页结果
      */
-    @Export(paramNames = {"user", "id", "status", "pageNo", "pageSize"})
-    public Response<Paging<SubRole>> pagination(BaseUser user, Long id, Integer status, Integer pageNo, Integer pageSize) {
+    @Export(paramNames = {"user", "id", "status", "roleName", "pageNo", "pageSize"})
+    public Response<Paging<SubRole>> pagination(BaseUser user, Long id, Integer status, String roleName, Integer pageNo, Integer pageSize) {
         try {
             if (id != null) {
                 SubRole role = RespHelper.orServEx(subRoleReadService.findById(id));
+                if(role == null){
+                    return Response.ok(Paging.empty());
+                }
+                if(pageNo > 1){
+                    //当按照主键id查询时,只应该有一页
+                    return Response.ok(new Paging<>(1L, Lists.newArrayList()));
+                }
                 return Response.ok(new Paging<>(1L, Lists.newArrayList(role)));
             }
-            return subRoleReadService.pagination(ThreadVars.getAppKey(), user.getId(), status, pageNo, pageSize);
+            return subRoleReadService.pagination(ThreadVars.getAppKey(), user.getId(), status, roleName, pageNo, pageSize);
         } catch (ServiceException e) {
             log.warn("paging sub roles failed, user={}, id={}, status={}, pageNo={}, pageSize={}, error={}",
                     user, id, status, pageNo, pageSize, e.getMessage());

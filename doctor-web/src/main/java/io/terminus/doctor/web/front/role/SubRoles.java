@@ -108,10 +108,11 @@ public class SubRoles {
     @RequestMapping(value = "/pagination", method = RequestMethod.GET)
     public Paging<SubRole> pagination(@RequestParam(required = false) Long id,
                                       @RequestParam(required = false) Integer status,
+                                      @RequestParam(required = false) String roleName,
                                       @RequestParam(required = false) Integer pageNo,
                                       @RequestParam(required = false) Integer pageSize) {
         checkAuth();
-        return or500(subRoleService.pagination(UserUtil.getCurrentUser(), id, status, pageNo, pageSize));
+        return or500(subRoleService.pagination(UserUtil.getCurrentUser(), id, status, roleName, pageNo, pageSize));
     }
 
     /**
