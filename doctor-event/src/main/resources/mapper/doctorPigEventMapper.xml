@@ -105,6 +105,12 @@
         </where>
     </select>
 
+    <select id="queryLastPigEventById" parameterType="long" resultMap="DoctorPigEventMap">
+        select <include refid="cols_all"/> from <include refid="tb"/>
+        where pig_id = #{pig_id}
+        order by created_at desc limit 1;
+    </select>
+
     <select id="paging" parameterType="map" resultMap="DoctorPigEventMap">
         SELECT <include refid="cols_all"/> from <include refid="tb"/>
         <where>
