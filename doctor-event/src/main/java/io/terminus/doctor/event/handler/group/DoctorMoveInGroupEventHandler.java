@@ -9,6 +9,7 @@ import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
 import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
 import io.terminus.doctor.event.dto.event.group.DoctorMoveInGroupEvent;
 import io.terminus.doctor.event.dto.event.group.edit.BaseGroupEdit;
+import io.terminus.doctor.event.dto.event.group.edit.DoctorMoveInGroupEdit;
 import io.terminus.doctor.event.dto.event.group.input.BaseGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorMoveInGroupInput;
 import io.terminus.doctor.event.enums.GroupEventType;
@@ -21,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
+import java.util.Objects;
 
 /**
  * Desc: 转入猪群事件处理器
@@ -30,9 +32,11 @@ import java.util.Date;
  */
 @Slf4j
 @Component
+@SuppressWarnings("unchecked")
 public class DoctorMoveInGroupEventHandler extends DoctorAbstractGroupEventHandler {
 
     private final DoctorGroupEventDao doctorGroupEventDao;
+    private final DoctorGroupTrackDao doctorGroupTrackDao;
 
     @Autowired
     public DoctorMoveInGroupEventHandler(DoctorGroupSnapshotDao doctorGroupSnapshotDao,
@@ -41,6 +45,7 @@ public class DoctorMoveInGroupEventHandler extends DoctorAbstractGroupEventHandl
                                          DoctorGroupEventDao doctorGroupEventDao) {
         super(doctorGroupSnapshotDao, doctorGroupTrackDao, coreEventDispatcher, doctorGroupEventDao);
         this.doctorGroupEventDao = doctorGroupEventDao;
+        this.doctorGroupTrackDao = doctorGroupTrackDao;
     }
 
 
@@ -92,6 +97,40 @@ public class DoctorMoveInGroupEventHandler extends DoctorAbstractGroupEventHandl
 
     @Override
     protected <E extends BaseGroupEdit> void editEvent(DoctorGroup group, DoctorGroupTrack groupTrack, DoctorGroupEvent event, E edit) {
+        DoctorMoveInGroupEdit moveInEdit = (DoctorMoveInGroupEdit) edit;
+        DoctorMoveInGroupEvent moveInEvent = JSON_MAPPER.fromJson(event.getExtra(), DoctorMoveInGroupEvent.class);
 
+        //更新track(更新均重和金额)
+        if (!Objects.equals(event.getAvgWeight(), moveInEdit.getAvgWeight())) {
+            groupTrack.setAvgWeight(editAvgWeight(groupTrack, event, moveInEdit));
+            groupTrack.setWeight(EventUtil.getWeight(groupTrack.getAvgWeight(), groupTrack.getQuantity()));
+        }
+        if (moveInEdit.getAmount() != null) {
+            groupTrack.setAmount(groupTrack.getAmount() - MoreObjects.firstNonNull(moveInEvent.getAmount(), 0) + moveInEdit.getAmount());
+            groupTrack.setPrice(EventUtil.getPrice(groupTrack.getAmount(), groupTrack.getQuantity()));
+        }
+        doctorGroupTrackDao.update(groupTrack);
+
+        //更新事件字段
+        moveInEvent.setSource(moveInEdit.getSource());
+        moveInEvent.setBreedId(moveInEdit.getBreedId());
+        moveInEvent.setBreedName(moveInEdit.getBreedName());
+        event.setExtraMap(moveInEvent);
+
+        if (!Objects.equals(event.getAvgWeight(), moveInEdit.getAvgWeight())) {
+            event.setAvgWeight(moveInEdit.getAvgWeight());
+            event.setWeight(EventUtil.getWeight(event.getAvgWeight(), event.getQuantity()));
+        }
+        editGroupEvent(event, edit);
+
+        //更新猪群镜像
+        editGroupSnapShot(group, groupTrack, event);
+    }
+
+    //重新计算下均重
+    private Double editAvgWeight(DoctorGroupTrack groupTrack, DoctorGroupEvent event, DoctorMoveInGroupEdit moveInEdit) {
+        Double allWeight = groupTrack.getAvgWeight() * groupTrack.getQuantity() -
+                event.getAvgWeight() * event.getQuantity() + moveInEdit.getAvgWeight() * event.getQuantity();
+        return allWeight / groupTrack.getQuantity();
     }
 }

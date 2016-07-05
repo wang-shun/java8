@@ -8,6 +8,7 @@ import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
 import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
 import io.terminus.doctor.event.dto.event.group.DoctorDiseaseGroupEvent;
 import io.terminus.doctor.event.dto.event.group.edit.BaseGroupEdit;
+import io.terminus.doctor.event.dto.event.group.edit.DoctorDiseaseGroupEdit;
 import io.terminus.doctor.event.dto.event.group.input.BaseGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorDiseaseGroupInput;
 import io.terminus.doctor.event.enums.GroupEventType;
@@ -26,6 +27,7 @@ import org.springframework.stereotype.Component;
  */
 @Slf4j
 @Component
+@SuppressWarnings("unchecked")
 public class DoctorDiseaseGroupEventHandler extends DoctorAbstractGroupEventHandler {
 
     private final DoctorGroupEventDao doctorGroupEventDao;
@@ -64,6 +66,18 @@ public class DoctorDiseaseGroupEventHandler extends DoctorAbstractGroupEventHand
 
     @Override
     protected <E extends BaseGroupEdit> void editEvent(DoctorGroup group, DoctorGroupTrack groupTrack, DoctorGroupEvent event, E edit) {
+        DoctorDiseaseGroupEdit diseaseEdit = (DoctorDiseaseGroupEdit) edit;
 
+        //更新字段
+        DoctorDiseaseGroupEvent diseaseEvent = JSON_MAPPER.fromJson(event.getExtra(), DoctorDiseaseGroupEvent.class);
+        diseaseEvent.setDiseaseId(diseaseEdit.getDiseaseId());
+        diseaseEvent.setDiseaseName(diseaseEdit.getDiseaseName());
+        diseaseEvent.setDoctorId(diseaseEdit.getDoctorId());
+        diseaseEvent.setDoctorName(diseaseEdit.getDoctorName());
+        event.setExtraMap(diseaseEvent);
+
+        editGroupEvent(event, edit);
+        //更新猪群镜像
+        editGroupSnapShot(group, groupTrack, event);
     }
 }

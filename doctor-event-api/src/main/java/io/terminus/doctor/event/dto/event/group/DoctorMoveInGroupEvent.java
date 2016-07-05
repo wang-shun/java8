@@ -67,6 +67,11 @@ public class DoctorMoveInGroupEvent extends BaseGroupEvent implements Serializab
 
     private Integer sowQty;
 
+    /**
+     * 金额(分)
+     */
+    private Integer amount;
+
     public enum InType {
         PIGLET(1, "仔猪转入"),
         SEED(2, "种猪转商品猪"),

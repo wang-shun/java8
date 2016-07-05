@@ -9,6 +9,7 @@ import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
 import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
 import io.terminus.doctor.event.dto.event.group.DoctorTransGroupEvent;
 import io.terminus.doctor.event.dto.event.group.edit.BaseGroupEdit;
+import io.terminus.doctor.event.dto.event.group.edit.DoctorTransEdit;
 import io.terminus.doctor.event.dto.event.group.input.BaseGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorNewGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorTransGroupInput;
@@ -36,12 +37,14 @@ import java.util.Objects;
  */
 @Slf4j
 @Component
+@SuppressWarnings("unchecked")
 public class DoctorTransGroupEventHandler extends DoctorAbstractGroupEventHandler {
 
     private final DoctorGroupEventDao doctorGroupEventDao;
     private final DoctorCommonGroupEventHandler doctorCommonGroupEventHandler;
     private final DoctorGroupManager doctorGroupManager;
     private final DoctorBarnReadService doctorBarnReadService;
+    private final DoctorGroupTrackDao doctorGroupTrackDao;
 
     @Autowired
     public DoctorTransGroupEventHandler(DoctorGroupSnapshotDao doctorGroupSnapshotDao,
@@ -56,6 +59,7 @@ public class DoctorTransGroupEventHandler extends DoctorAbstractGroupEventHandle
         this.doctorCommonGroupEventHandler = doctorCommonGroupEventHandler;
         this.doctorGroupManager = doctorGroupManager;
         this.doctorBarnReadService = doctorBarnReadService;
+        this.doctorGroupTrackDao = doctorGroupTrackDao;
     }
 
     @Override
@@ -126,7 +130,29 @@ public class DoctorTransGroupEventHandler extends DoctorAbstractGroupEventHandle
 
     @Override
     protected <E extends BaseGroupEdit> void editEvent(DoctorGroup group, DoctorGroupTrack groupTrack, DoctorGroupEvent event, E edit) {
+        DoctorTransEdit transEdit = (DoctorTransEdit) edit;
 
+        //更新跟踪字段(如果总重有变更)
+        if (!Objects.equals(transEdit.getWeight(), event.getWeight())) {
+            groupTrack.setWeight(groupTrack.getAvgWeight() + event.getWeight() - transEdit.getWeight());
+            groupTrack.setAvgWeight(EventUtil.getAvgWeight(groupTrack.getWeight(), groupTrack.getQuantity()));
+            doctorGroupTrackDao.update(groupTrack);
+        }
+
+        //更新事件字段
+        DoctorTransGroupEvent transEvent = JSON_MAPPER.fromJson(event.getExtra(), DoctorTransGroupEvent.class);
+        transEvent.setBreedId(transEdit.getBreedId());
+        transEvent.setBreedName(transEdit.getBreedName());
+        event.setExtraMap(transEvent);
+
+        if (!Objects.equals(transEdit.getWeight(), event.getWeight())) {
+            event.setWeight(transEdit.getWeight());
+            event.setAvgWeight(EventUtil.getAvgWeight(event.getWeight(), event.getQuantity()));
+        }
+        editGroupEvent(event, edit);
+
+        //更新猪群镜像
+        editGroupSnapShot(group, groupTrack, event);
     }
 
     /**

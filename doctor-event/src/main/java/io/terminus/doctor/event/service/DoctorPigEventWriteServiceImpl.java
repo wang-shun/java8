@@ -2,6 +2,7 @@ package io.terminus.doctor.event.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Throwables;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import io.terminus.common.model.Response;
 import io.terminus.common.utils.BeanMapper;
@@ -10,6 +11,7 @@ import io.terminus.doctor.common.enums.DataEventType;
 import io.terminus.doctor.common.event.CoreEventDispatcher;
 import io.terminus.doctor.common.event.DataEvent;
 import io.terminus.doctor.common.utils.Params;
+import io.terminus.doctor.event.dao.DoctorPigEventDao;
 import io.terminus.doctor.event.dao.DoctorPigTrackDao;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
 import io.terminus.doctor.event.dto.DoctorPigInfoDto;
@@ -27,9 +29,11 @@ import io.terminus.doctor.event.dto.event.usual.DoctorDiseaseDto;
 import io.terminus.doctor.event.dto.event.usual.DoctorFarmEntryDto;
 import io.terminus.doctor.event.dto.event.usual.DoctorRemovalDto;
 import io.terminus.doctor.event.dto.event.usual.DoctorVaccinationDto;
+import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.event.DoctorPigCountEvent;
 import io.terminus.doctor.event.event.PigEventCreateEvent;
 import io.terminus.doctor.event.manager.DoctorPigEventManager;
+import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.zookeeper.pubsub.Publisher;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,6 +45,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkState;
+import static java.util.Objects.isNull;
 
 /**
  * Created by yaoqijun.
@@ -62,23 +67,43 @@ public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteServic
 
     private final CoreEventDispatcher coreEventDispatcher;
 
+    private final DoctorPigEventDao doctorPigEventDao;
+
+    public static final List<Integer> NOT_ALLOW_ROLL_BACK_EVENTS =Lists.newArrayList(
+            PigEvent.ENTRY.getKey(),PigEvent.FARROWING.getKey(),
+            PigEvent.FOSTERS.getKey(),PigEvent.FOSTERS_BY.getKey());
+
     @Autowired(required = false)
     private Publisher publisher;
 
     @Autowired
     public DoctorPigEventWriteServiceImpl(
             DoctorPigEventManager doctorPigEventManager, CoreEventDispatcher coreEventDispatcher,
-            DoctorPigTrackDao doctorPigTrackDao, DoctorPigReadService doctorPigReadService){
+            DoctorPigTrackDao doctorPigTrackDao, DoctorPigReadService doctorPigReadService,
+            DoctorPigEventDao doctorPigEventDao){
         this.doctorPigTrackDao = doctorPigTrackDao;
         this.doctorPigEventManager = doctorPigEventManager;
         this.coreEventDispatcher = coreEventDispatcher;
         this.doctorPigReadService = doctorPigReadService;
+        this.doctorPigEventDao = doctorPigEventDao;
     }
 
     @Override
     public Response<Long> rollBackPigEvent(Long pigEventId,Integer revertPigType,Long staffId, String staffName) {
         try{
+            // validate lastest event
+            DoctorPigEvent doctorPigEvent = doctorPigEventDao.findById(pigEventId);
+            checkState(!isNull(doctorPigEvent), "input.pigEventId.error");
+
+            DoctorPigEvent doctorPigEventLast = doctorPigEventDao.queryLastPigEventById(doctorPigEvent.getPigId());
+            checkState(Objects.equals(doctorPigEventLast.getId(), pigEventId), "pigRollBack.error.notLastly");
+
+            checkState(!NOT_ALLOW_ROLL_BACK_EVENTS.contains(doctorPigEvent.getType()), "pigRollBack.eventType.notAllow");
+
             return Response.ok(doctorPigEventManager.rollBackPigEvent(pigEventId,revertPigType,staffId,staffName));
+        }catch (IllegalStateException e){
+            log.error("illegal state pig roll back info, doctorEventId:{}, cause:{}", pigEventId, Throwables.getStackTraceAsString(e));
+            return Response.fail(e.getMessage());
         }catch (Exception e){
             log.error("pig roll back fail, doctorEventId:{}, cause:{}",pigEventId, Throwables.getStackTraceAsString(e));
             return Response.fail("pig.rollBack.fail");

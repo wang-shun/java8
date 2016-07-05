@@ -241,28 +241,40 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
 
             switch (checkNotNull(GroupEventType.from(event.getType()))) {
                 case NEW:
-                    orServEx(doctorGroupWriteService.editEventNew(groupDetail, event, map(params, DoctorNewGroupEdit.class)));
+                    params.put("breedName", getBasicName(getLong(params, "breedId")));
+                    params.put("geneticName", getBasicName(getLong(params, "geneticId")));
+                    orServEx(doctorGroupWriteService.editEventNew(groupDetail, event, map(pubUpdatorFields(params), DoctorNewGroupEdit.class)));
                     break;
                 case MOVE_IN:
-                    orServEx(doctorGroupWriteService.editEventMoveIn(groupDetail, event, map(params, DoctorMoveInGroupEdit.class)));
+                    params.put("breedName", getBasicName(getLong(params, "breedId")));
+                    orServEx(doctorGroupWriteService.editEventMoveIn(groupDetail, event, map(pubUpdatorFields(params), DoctorMoveInGroupEdit.class)));
                     break;
                 case CHANGE:
-                    orServEx(doctorGroupWriteService.editEventChange(groupDetail, event, map(params, DoctorChangeGroupEdit.class)));
+                    params.put("changeReasonName", getChangeReasonName(getLong(params, "changeReasonId")));
+                    params.put("customerName", getCustomerName(getLong(params, "customerId")));
+                    params.put("breedName", getBasicName(getLong(params, "breedId")));
+                    orServEx(doctorGroupWriteService.editEventChange(groupDetail, event, map(pubUpdatorFields(params), DoctorChangeGroupEdit.class)));
                     break;
                 case TRANS_GROUP:
-                    orServEx(doctorGroupWriteService.editEventTrans(groupDetail, event, map(params, DoctorTransEdit.class)));
+                    params.put("breedName", getBasicName(getLong(params, "breedId")));
+                    orServEx(doctorGroupWriteService.editEventTrans(groupDetail, event, map(pubUpdatorFields(params), DoctorTransEdit.class)));
                     break;
                 case LIVE_STOCK:
-                    orServEx(doctorGroupWriteService.editEventLiveStock(groupDetail, event, map(params, DoctorLiveStockGroupEdit.class)));
+                    orServEx(doctorGroupWriteService.editEventLiveStock(groupDetail, event, map(pubUpdatorFields(params), DoctorLiveStockGroupEdit.class)));
                     break;
                 case DISEASE:
-                    orServEx(doctorGroupWriteService.editEventDisease(groupDetail, event, map(params, DoctorDiseaseGroupEdit.class)));
+                    params.put("diseaseName", getBasicName(getLong(params, "diseaseId")));
+                    params.put("doctorName", getStaffUserName(getLong(params, "doctorId")));
+                    orServEx(doctorGroupWriteService.editEventDisease(groupDetail, event, map(pubUpdatorFields(params), DoctorDiseaseGroupEdit.class)));
                     break;
                 case ANTIEPIDEMIC:
-                    orServEx(doctorGroupWriteService.editEventAntiepidemic(groupDetail, event, map(params, DoctorAntiepidemicGroupEdit.class)));
+                    params.put("vaccinStaffName", getStaffUserName(getLong(params, "vaccinStaffId")));
+                    params.put("vaccinItemName", getVaccinItemName(getLong(params, "vaccinItemId")));
+                    orServEx(doctorGroupWriteService.editEventAntiepidemic(groupDetail, event, map(pubUpdatorFields(params), DoctorAntiepidemicGroupEdit.class)));
                     break;
                 case TRANS_FARM:
-                    orServEx(doctorGroupWriteService.editEventTrans(groupDetail, event, map(params, DoctorTransEdit.class)));
+                    params.put("breedName", getBasicName(getLong(params, "breedId")));
+                    orServEx(doctorGroupWriteService.editEventTrans(groupDetail, event, map(pubUpdatorFields(params), DoctorTransEdit.class)));
                     break;
                 default:
                     return Response.fail("event.type.error");
@@ -368,6 +380,14 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
         params.put("barnName", getBarnName(getLong(params, "barnId")));
         params.put("breedName", getBasicName(getLong(params, "breedId")));
         params.put("geneticName", getBasicName(getLong(params, "geneticId")));
+        return Params.filterNullOrEmpty(params);
+    }
+
+    //put一下更新人信息
+    private Map<String, Object> pubUpdatorFields(Map<String, Object> params) {
+        params = Params.filterNullOrEmpty(params);
+        params.put("updatorId", UserUtil.getUserId());
+        params.put("updatorName", UserUtil.getCurrentUser().getName());
         return Params.filterNullOrEmpty(params);
     }
 

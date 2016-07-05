@@ -36,6 +36,7 @@ import java.util.Objects;
  */
 @Slf4j
 @Component
+@SuppressWarnings("unchecked")
 public class DoctorTransFarmGroupEventHandler extends DoctorAbstractGroupEventHandler {
 
     private final DoctorGroupEventDao doctorGroupEventDao;
@@ -126,7 +127,7 @@ public class DoctorTransFarmGroupEventHandler extends DoctorAbstractGroupEventHa
 
     @Override
     protected <E extends BaseGroupEdit> void editEvent(DoctorGroup group, DoctorGroupTrack groupTrack, DoctorGroupEvent event, E edit) {
-
+        // 转出与转群是更新字段是一样的, 这里就没用到了
     }
 
     /**

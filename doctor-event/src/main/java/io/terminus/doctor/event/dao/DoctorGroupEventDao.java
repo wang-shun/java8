@@ -1,10 +1,13 @@
 package io.terminus.doctor.event.dao;
 
+import com.google.common.collect.ImmutableMap;
 import io.terminus.common.mysql.dao.MyBatisDao;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+
+import static io.terminus.common.utils.Arguments.notEmpty;
 
 /**
  * Desc: 猪群事件表Dao类
@@ -19,4 +22,14 @@ public class DoctorGroupEventDao extends MyBatisDao<DoctorGroupEvent> {
         return getSqlSession().selectList(sqlId("findByFarmId"), farmId);
     }
 
+    /**
+     * 根据猪群id更新猪群号
+     * @param groupId 猪群id
+     */
+    public void updateGroupCodeByGroupId(Long groupId, String groupCode) {
+        if (notEmpty(groupCode)) {
+            getSqlSession().update(sqlId("updateGroupCodeByGroupId"),
+                    ImmutableMap.of("groupId", groupId, "groupCode", groupCode));
+        }
+    }
 }

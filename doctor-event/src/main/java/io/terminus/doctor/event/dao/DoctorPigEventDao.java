@@ -13,4 +13,8 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent>{
 
+    public DoctorPigEvent queryLastPigEventById(Long pigId){
+        return this.getSqlSession().selectOne(sqlId("queryLastPigEventById"), pigId);
+    }
+
 }
