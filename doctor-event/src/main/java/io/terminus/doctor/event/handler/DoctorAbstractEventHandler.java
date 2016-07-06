@@ -83,6 +83,8 @@ public abstract class DoctorAbstractEventHandler implements DoctorEventCreateHan
             doctorPigSnapshot.setPigInfoMap(ImmutableMap.of(DoctorPigSnapshotConstants.PIG_TRACK, currentPigTrackSnapShot));
             doctorPigSnapshotDao.create(doctorPigSnapshot);
 
+            afterEventCreateHandle(doctorPigEvent, refreshPigTrack, doctorPigSnapshot, extra);
+
             // 当前事件影响的Id 方式
             context.put("createEventResult",
                     JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(
@@ -111,6 +113,11 @@ public abstract class DoctorAbstractEventHandler implements DoctorEventCreateHan
     protected abstract DoctorPigTrack updateDoctorPigTrackInfo(DoctorPigTrack doctorPigTrack,
                                                             DoctorBasicInputInfoDto basic,
                                                             Map<String,Object> extra, Map<String, Object> content);
+
+    protected void afterEventCreateHandle(DoctorPigEvent doctorPigEvent, DoctorPigTrack doctorPigTrack,
+                                          DoctorPigSnapshot doctorPigSnapshot, Map<String,Object> extra){
+
+    }
 
     private DoctorPigEvent buildAllPigDoctorEvent(DoctorBasicInputInfoDto basic, Map<String,Object> extra){
         DoctorPigEvent doctorPigEvent = DoctorPigEvent.builder()
