@@ -33,7 +33,7 @@ public class DoctorMessagesTest extends BaseFrontWebTest {
     public void test_NO_READ_DoctorMessages() {
         String url = HttpGetRequest.url("http://localhost:{port}/api/doctor/msg/noReadCount").build();
         Long count = this.restTemplate.getForObject(url, Long.class, ImmutableMap.of("port", this.port));
-        Assert.assertEquals(new Long(5), count);
+        Assert.assertEquals(new Long(2), count);
     }
 
     /**
