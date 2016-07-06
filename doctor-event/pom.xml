@@ -29,8 +29,8 @@
 
         <!-- terminus lib -->
         <dependency>
-            <groupId>io.terminus.boot</groupId>
-            <artifactId>spring-boot-starter-dubbo</artifactId>
+            <groupId>io.terminus.boot.rpc</groupId>
+            <artifactId>rpc-dubbo</artifactId>
         </dependency>
         <dependency>
             <groupId>io.terminus.boot</groupId>
@@ -44,37 +44,25 @@
             <groupId>io.terminus.search</groupId>
             <artifactId>spring-boot-starter-search</artifactId>
         </dependency>
-
         <dependency>
-            <groupId>com.zaxxer</groupId>
-            <artifactId>HikariCP</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.alibaba</groupId>
-            <artifactId>dubbo</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>mysql</groupId>
-            <artifactId>mysql-connector-java</artifactId>
+            <groupId>io.terminus.boot</groupId>
+            <artifactId>spring-boot-starter-mybatis</artifactId>
         </dependency>
         <dependency>
             <groupId>io.terminus.boot</groupId>
             <artifactId>spring-boot-starter-redis</artifactId>
         </dependency>
+
+        <dependency>
+            <groupId>com.zaxxer</groupId>
+            <artifactId>HikariCP</artifactId>
+        </dependency>
+
         <dependency>
             <groupId>com.github.sgroschupf</groupId>
             <artifactId>zkclient</artifactId>
         </dependency>
-        <dependency>
-            <groupId>com.h2database</groupId>
-            <artifactId>h2</artifactId>
-            <scope>test</scope>
-        </dependency>
 
-        <dependency>
-            <groupId>io.terminus.boot</groupId>
-            <artifactId>spring-boot-starter-mybatis</artifactId>
-        </dependency>
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
@@ -85,11 +73,6 @@
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
             <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
-            <version>19.0</version>
         </dependency>
     </dependencies>
 

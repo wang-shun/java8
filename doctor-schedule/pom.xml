@@ -49,15 +49,6 @@
         </dependency>
 
         <dependency>
-            <groupId>io.terminus.doctor</groupId>
-            <artifactId>doctor-web-core</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>io.terminus.boot</groupId>
-            <artifactId>spring-boot-starter-dubbo</artifactId>
-        </dependency>
-        <dependency>
             <groupId>com.alibaba</groupId>
             <artifactId>dubbo</artifactId>
         </dependency>
