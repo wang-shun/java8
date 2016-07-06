@@ -4,12 +4,14 @@ import com.github.cage.Cage;
 import com.github.cage.token.RandomTokenGenerator;
 import com.google.common.base.Charsets;
 import com.google.common.base.Strings;
+import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.hash.Hashing;
 import io.terminus.boot.session.properties.SessionProperties;
 import io.terminus.common.exception.JsonResponseException;
+import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.Response;
 import io.terminus.common.utils.MapBuilder;
 import io.terminus.common.utils.Splitters;
@@ -147,7 +149,7 @@ public class OPUsers {
     }
 
     /**
-     * 获取手机验证码(不需要sessionId)
+     * 获取手机验证码
      * @param mobile
      * @return
      */
@@ -632,18 +634,16 @@ public class OPUsers {
     private Response<Boolean> doSendSms(String code, String mobile){
         Response<Boolean> r = new Response<Boolean>();
         try {
-            Map<String, Serializable> context=new HashMap<>();
-            context.put("code",code);
-            String result=smsWebService.send(mobile, "user.register.code",context, null);
-            log.info("send sms result : {}", result);
+            Map<String, Serializable> context = new HashMap<>();
+            context.put("code", code);
+            String result = smsWebService.send(mobile, "user.register.code", context, null);
             r.setResult(Boolean.TRUE);
             return r;
-        }catch (SmsException e) {
-            log.info("send sms failed, error : {} ", e.getMessage());
-            throw new JsonResponseException(500, "sms.send.fail");
+        }catch(JsonResponseException | ServiceException e){
+            throw new OPClientException(e.getMessage());
         }catch (Exception e) {
-            log.error("send sms failed , error : {}", e.getMessage());
-            throw new JsonResponseException(500, "sms.send.fail");
+            log.error("send sms failed, error : {}", Throwables.getStackTraceAsString(e));
+            throw new OPClientException("sms.send.fail");
         }
     }
 
