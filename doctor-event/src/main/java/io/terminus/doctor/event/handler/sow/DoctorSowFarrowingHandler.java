@@ -76,7 +76,7 @@ public class DoctorSowFarrowingHandler extends DoctorAbstractEventFlowHandler {
 
         // 对应的 猪群信息
         extra.put("farrowingPigletGroupId",buildPigGroupCountInfo(basic, extra));
-        
+
         doctorPigTrack.addAllExtraMap(extra);
         doctorPigTrack.setStatus(PigStatus.FEED.getKey());  //母猪进入哺乳的状态
         doctorPigTrack.addPigEvent(basic.getPigType(), (Long) context.get("doctorPigEventId"));
