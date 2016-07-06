@@ -156,7 +156,7 @@ public class OPUsers {
     @OpenMethod(key = "get.mobile.code", paramNames = {"mobile", "sid"})
     public Boolean sendSms(@NotEmpty(message = "user.mobile.miss") String mobile, @NotEmpty(message = "session.id.miss")String sessionId) {
         if (mobilePattern.getPattern().matcher(mobile).matches()) {
-            Map<String, Object> snapshot = sessionManager.findSessionById(Sessions.CODE_PREFIX, sessionId);
+            Map<String, Object> snapshot = sessionManager.findSessionById(Sessions.MSG_PREFIX, sessionId);
             String activateCode = null;
             if(notNull(snapshot)){
                 activateCode = Params.get(snapshot, "code");
@@ -168,7 +168,7 @@ public class OPUsers {
                 long sendTime = Long.parseLong(parts.get(1));
                 if (System.currentTimeMillis() - sendTime < TimeUnit.MINUTES.toMillis(1)) { //
                     log.error("could not send sms, sms only can be sent once in one minute");
-                    throw new OPClientException("1分钟内只能获取一次验证码");
+                    throw new OPClientException("sms.code.once.a.minute");
                 } else {
                     String code = generateMsgCode();
 
