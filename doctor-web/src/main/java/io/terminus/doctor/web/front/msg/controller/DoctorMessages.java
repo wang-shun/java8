@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -65,6 +66,9 @@ public class DoctorMessages {
     public Paging<DoctorMessage> pagingWarnDoctorMessages(@RequestParam("pageNo") Integer pageNo,
                                                       @RequestParam("pageSize") Integer pageSize,
                                                       @RequestParam Map<String, Object> criteria) {
+        if (!isUserLogin()) {
+            return new Paging<>(0L, Collections.emptyList());
+        }
         criteria.put("userId", UserUtil.getUserId());
         return RespHelper.or500(doctorMessageReadService.pagingWarnMessages(criteria, pageNo, pageSize));
     }
@@ -80,6 +84,9 @@ public class DoctorMessages {
     public Paging<DoctorMessage> pagingSysDoctorMessages(@RequestParam("pageNo") Integer pageNo,
                                                           @RequestParam("pageSize") Integer pageSize,
                                                           @RequestParam Map<String, Object> criteria) {
+        if (!isUserLogin()) {
+            return new Paging<>(0L, Collections.emptyList());
+        }
         criteria.put("userId", UserUtil.getUserId());
         return RespHelper.or500(doctorMessageReadService.pagingSysMessages(criteria, pageNo, pageSize));
     }
@@ -90,6 +97,9 @@ public class DoctorMessages {
      */
     @RequestMapping(value = "/noReadCount", method = RequestMethod.GET)
     public Long findNoReadCount() {
+        if (!isUserLogin()) {
+            return 0L;
+        }
         return RespHelper.or500(doctorMessageReadService.findNoReadCount(UserUtil.getUserId()));
     }
 
@@ -202,5 +212,15 @@ public class DoctorMessages {
     @RequestMapping(value = "/template", method = RequestMethod.DELETE)
     public Boolean deleteTemplate(@RequestParam Long id) {
         return RespHelper.or500(doctorMessageRuleTemplateWriteService.deleteMessageRuleTemplateById(id));
+    }
+
+    /**
+     * 判断当前用户是否登录
+     * @return
+     *  如果登录: true
+     *  否则:    false
+     */
+    private boolean isUserLogin() {
+        return UserUtil.getCurrentUser() != null;
     }
 }
