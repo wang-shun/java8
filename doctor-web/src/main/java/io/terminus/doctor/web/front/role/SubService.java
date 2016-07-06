@@ -260,8 +260,8 @@ public class SubService {
     }
 
     private void checkPasswordFormat(String password){
-        if (!password.matches("[\\s\\S]{6,16}")){
-            throw new ServiceException("user.password.6to16");
+        if (!password.matches("[\\s\\S]{6,25}")){
+            throw new ServiceException("user.password.6to25");
         }
     }
 

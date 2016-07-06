@@ -233,8 +233,8 @@ public class OPUsers {
      * @param password
      */
     private void checkPasswordFormat(String password){
-        if (!password.matches("[\\s\\S]{6,16}")){
-            throw new OPClientException("user.password.6to16");
+        if (!password.matches("[\\s\\S]{6,25}")){
+            throw new OPClientException("user.password.6to25");
         }
     }
 

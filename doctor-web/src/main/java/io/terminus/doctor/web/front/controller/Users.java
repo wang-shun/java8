@@ -182,7 +182,7 @@ public class Users {
             if (notEmpty(mobile)) {
                 checkArgument(notEmpty(code), "user.register.mobile.code.empty");
             }
-            if (password.matches("[\\s\\S]{6,16}")) {
+            if (password.matches("[\\s\\S]{6,25}")) {
                 Set<String> defaultParams = Sets.newHashSet("password", "userName", "email", "mobile");
 
                 Map<String, Serializable> context = new HashMap<>();
@@ -215,7 +215,7 @@ public class Users {
                 }
                 return user.getId();
             }else {
-                throw new JsonResponseException(500,"user.password.6to16") ;
+                throw new JsonResponseException(500,"user.password.6to25") ;
             }
         }catch (IllegalArgumentException | JsonResponseException e) {
             log.warn("failed to sign up userName={}, email={}, mobile={}, error:{}",
