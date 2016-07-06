@@ -190,7 +190,9 @@ public class DoctorPigCreateEvents {
                                    @RequestParam("sowInfoDtoJson") String sowInfoDtoJson) {
         if (Objects.equals(eventType, PigEvent.FOSTERS.getKey())) {
             List<DoctorBasicInputInfoDto> basics = buildBasicInputPigDtoContent(farmId, pigId, sowInfoDtoJson);
-            return RespHelper.or500(doctorSowEventCreateService.sowEventsCreate(basics, sowInfoDtoJson));
+            RespHelper.or500(doctorSowEventCreateService.sowEventsCreate(basics, sowInfoDtoJson));
+            // 猪批量事件操作， 返回PigId
+            return pigId;
         } else {
             return RespHelper.or500(doctorSowEventCreateService.sowEventCreate(buildBasicInputInfoDto(farmId, pigId, PigEvent.from(eventType)), sowInfoDtoJson));
         }

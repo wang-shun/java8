@@ -5,6 +5,7 @@ import com.google.common.base.Throwables;
 import io.terminus.common.model.Response;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.constants.JacksonType;
+import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorAbortionDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorFarrowingDto;
@@ -96,11 +97,11 @@ public class DoctorSowEventCreateServiceImpl implements DoctorSowEventCreateServ
     }
 
     @Override
-    public Response<Long> sowEventsCreate(List<DoctorBasicInputInfoDto> dtoList, String sowInfoDtoJson) {
+    public Response<Boolean> sowEventsCreate(List<DoctorBasicInputInfoDto> dtoList, String sowInfoDtoJson) {
         try{
             Map<String, Object> extra = OBJECT_MAPPER.readValue(sowInfoDtoJson, JacksonType.MAP_OF_OBJECT);
-            doctorPigEventWriteService.sowPigsEventCreate(dtoList, extra);
-            return Response.ok();
+            RespHelper.orServEx(doctorPigEventWriteService.sowPigsEventCreate(dtoList, extra));
+            return Response.ok(Boolean.TRUE);
         }catch (Exception e){
             log.error("create sow events list fail, cause:{}", Throwables.getStackTraceAsString(e));
             return Response.fail("create.sowEvents.fail");

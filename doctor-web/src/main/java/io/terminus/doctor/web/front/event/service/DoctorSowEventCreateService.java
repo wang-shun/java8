@@ -27,7 +27,7 @@ public interface DoctorSowEventCreateService {
      * @param sowInfoDtoJson
      * @return
      */
-    Response<Long> sowEventsCreate(List<DoctorBasicInputInfoDto> dtoList, String sowInfoDtoJson);
+    Response<Boolean> sowEventsCreate(List<DoctorBasicInputInfoDto> dtoList, String sowInfoDtoJson);
 
     /**
      * 普通事件信息创建
