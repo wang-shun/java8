@@ -452,7 +452,7 @@ public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteServic
     private void publishEvent (Map<String,Object> results){
         if(publisher == null){
             // coreEventDispatcher.publish(new PigEventCreateEvent(results));
-            coreEventDispatcher.publish(DataEvent.make(DataEventType.PigEventCreate.getKey(), results));
+            coreEventDispatcher.publish(DataEvent.make(DataEventType.PigEventCreate.getKey(), new PigEventCreateEvent(results)));
         }else{
             try {
                 publisher.publish(DataEvent.toBytes(DataEventType.PigEventCreate.getKey(), new PigEventCreateEvent(results)));
