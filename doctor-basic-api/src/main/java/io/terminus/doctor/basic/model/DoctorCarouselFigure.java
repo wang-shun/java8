@@ -7,8 +7,7 @@ import java.util.Date;
 
 /**
  * Desc: 轮播图表Model类
- * Mail: yangzl@terminus.io
- * author: DreamYoung
+ * author: 陈增辉
  * Date: 2016-05-17
  */
 @Data
@@ -46,4 +45,19 @@ public class DoctorCarouselFigure implements Serializable {
      * 修改时间
      */
     private Date updatedAt;
+
+    public enum Status{
+        ENABLED(1),
+        DISABLED(-1);
+
+        private int value;
+
+        Status(int value){
+            this.value = value;
+        }
+
+        public int value(){
+            return this.value;
+        }
+    }
 }

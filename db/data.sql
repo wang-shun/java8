@@ -3564,3 +3564,9 @@ VALUES
 	( 0, 'user.service.neverest.beta', '1', 'string', '0', '大数据服务是否处于内测中，1-是，0-否', now(), now()),
 	( 0, 'user.service.pigtrade.beta', '1', 'string', '0', '生猪交易服务是否处于内测中，1-是，0-否', now(), now()),
 	( 0, 'user.service.beta.desc', '内测中，敬请期待', 'string', '0', '对内测中服务的描述', now(), now());
+
+INSERT INTO `doctor_carousel_figures` (`id`, `index`, `status`, `url`, `forward`, `created_at`, `updated_at`)
+VALUES
+	(1, 1, 1, 'http://img.xrnm.com/20160616-ad115c7ce911aaa925327ecee812fbfc.png', 'https://www.baidu.com/', now(), now()),
+	(2, 2, 1, 'http://img.xrnm.com/20160616-85900d92c238fe79afa3e1b45a865f9f.png', 'https://www.baidu.com/', now(), now()),
+	(3, 3, 1, 'http://img.xrnm.com/20160616-f9c07f1b71f08a3e85ccea3188f15a54.png', 'https://www.baidu.com/', now(), now());
