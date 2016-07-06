@@ -4,12 +4,14 @@ import com.github.cage.Cage;
 import com.github.cage.token.RandomTokenGenerator;
 import com.google.common.base.Charsets;
 import com.google.common.base.Strings;
+import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.hash.Hashing;
 import io.terminus.boot.session.properties.SessionProperties;
 import io.terminus.common.exception.JsonResponseException;
+import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.Response;
 import io.terminus.common.utils.MapBuilder;
 import io.terminus.common.utils.Splitters;
@@ -147,14 +149,14 @@ public class OPUsers {
     }
 
     /**
-     * 获取手机验证码(不需要sessionId)
+     * 获取手机验证码
      * @param mobile
      * @return
      */
     @OpenMethod(key = "get.mobile.code", paramNames = {"mobile", "sid"})
     public Boolean sendSms(@NotEmpty(message = "user.mobile.miss") String mobile, @NotEmpty(message = "session.id.miss")String sessionId) {
         if (mobilePattern.getPattern().matcher(mobile).matches()) {
-            Map<String, Object> snapshot = sessionManager.findSessionById(Sessions.CODE_PREFIX, sessionId);
+            Map<String, Object> snapshot = sessionManager.findSessionById(Sessions.MSG_PREFIX, sessionId);
             String activateCode = null;
             if(notNull(snapshot)){
                 activateCode = Params.get(snapshot, "code");
@@ -166,7 +168,7 @@ public class OPUsers {
                 long sendTime = Long.parseLong(parts.get(1));
                 if (System.currentTimeMillis() - sendTime < TimeUnit.MINUTES.toMillis(1)) { //
                     log.error("could not send sms, sms only can be sent once in one minute");
-                    throw new OPClientException("1分钟内只能获取一次验证码");
+                    throw new OPClientException("sms.code.once.a.minute");
                 } else {
                     String code = generateMsgCode();
 
@@ -231,8 +233,8 @@ public class OPUsers {
      * @param password
      */
     private void checkPasswordFormat(String password){
-        if (!password.matches("[\\s\\S]{6,16}")){
-            throw new OPClientException("user.password.6to16");
+        if (!password.matches("[\\s\\S]{6,25}")){
+            throw new OPClientException("user.password.6to25");
         }
     }
 
@@ -632,18 +634,16 @@ public class OPUsers {
     private Response<Boolean> doSendSms(String code, String mobile){
         Response<Boolean> r = new Response<Boolean>();
         try {
-            Map<String, Serializable> context=new HashMap<>();
-            context.put("code",code);
-            String result=smsWebService.send(mobile, "user.register.code",context, null);
-            log.info("send sms result : {}", result);
+            Map<String, Serializable> context = new HashMap<>();
+            context.put("code", code);
+            String result = smsWebService.send(mobile, "user.register.code", context, null);
             r.setResult(Boolean.TRUE);
             return r;
-        }catch (SmsException e) {
-            log.info("send sms failed, error : {} ", e.getMessage());
-            throw new JsonResponseException(500, "sms.send.fail");
+        }catch(JsonResponseException | ServiceException e){
+            throw new OPClientException(e.getMessage());
         }catch (Exception e) {
-            log.error("send sms failed , error : {}", e.getMessage());
-            throw new JsonResponseException(500, "sms.send.fail");
+            log.error("send sms failed, error : {}", Throwables.getStackTraceAsString(e));
+            throw new OPClientException("sms.send.fail");
         }
     }
 

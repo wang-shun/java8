@@ -42,10 +42,10 @@ public enum TextValidator {
     },
 
     /**
-     * 密码长度限制 6~16
+     * 密码长度限制 6~25
      */
     PASSWORD() {
-        private Pattern pattern = Pattern.compile("[\\s\\S]{6,16}");
+        private Pattern pattern = Pattern.compile("[\\s\\S]{6,25}");
 
         @Override
         public boolean boolCheck(String text) {
