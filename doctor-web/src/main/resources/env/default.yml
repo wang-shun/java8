@@ -38,6 +38,7 @@ session:
   redis-max-idle: 0
   redis-prefix: afsession
 
+# dubbo
 rpc.mode: true
 rpc.dubbo:
     module: doctor-web
