@@ -97,7 +97,7 @@ public class DoctorPigCreateEvents {
                 doctorChgLocationDtoJson, DoctorChgLocationDto.class);
 
         if (isNull(doctorChgLocationDto)){
-            throw new JsonResponseException("create.chgLocation.fail");
+            throw new JsonResponseException("chgLocation.inputParam.error");
         }
 
         return createCasualChangeLocationInfo(doctorChgLocationDto, buildBasicInputInfoDto(farmId, pigId, PigEvent.CHG_LOCATION));

@@ -332,6 +332,9 @@ public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteServic
 
             Map<String,Object> result = doctorPigEventManager.createSowPigEvent(doctorBasicInputInfoDto, dto);
             return Response.ok(Params.getWithConvert(result, "doctorEventId", a->Long.valueOf(a.toString())));
+        }catch(IllegalStateException e){
+            log.error("change sow location event illegal status, cause:{}", e.getMessage());
+            return Response.fail(e.getMessage());
         }catch (Exception e){
             log.error("change sow location event create fail, cause:{}", Throwables.getStackTraceAsString(e));
             return Response.fail("create.chgLocation.fail");
