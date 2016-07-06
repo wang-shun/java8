@@ -27,11 +27,11 @@ public class DoctorConsumeProviderInputDto implements Serializable{
 
     private Long materialId;    // 对应的物料Id
 
-    private Long barnId;    //对应的消耗 猪舍Id
-
-    private Long feederId;  //对应的饲养员Id
-
     private Long count;  //对应的数量
 
     private Integer consumeDays;    // 对应的消耗日期
+
+    private Long barnId;    //对应的消耗 猪舍Id
+
+    private String barnName;    //对应的猪舍名称
 }

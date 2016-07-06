@@ -96,7 +96,7 @@ public class DoctorWareHouseQuery {
             checkState(userResponse.isSuccess(), "read.userInfo.fail");
             User user = userResponse.getResult();
 
-            doctorWareHouse = DoctorWareHouse.builder()
+            doctorWareHouse = DoctorWareHouse.builder().id(doctorWareHouseUpdateDto.getDoctorWareHouseId())
                     .address(doctorWareHouseUpdateDto.getAddress())
                     .managerId(doctorWareHouseUpdateDto.getManagerId()).managerName(doctorWareHouseUpdateDto.getWarehouseName())
                     .wareHouseName(doctorWareHouseUpdateDto.getWarehouseName())

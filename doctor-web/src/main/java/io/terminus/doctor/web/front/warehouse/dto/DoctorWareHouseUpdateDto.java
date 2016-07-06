@@ -15,6 +15,8 @@ public class DoctorWareHouseUpdateDto implements Serializable{
 
     private static final long serialVersionUID = 5856516410957509148L;
 
+    private Long doctorWareHouseId; //修改的WareHouseId 信息
+
     private Long managerId; //管理员Id
 
     private String managerName; // 管理员姓名
