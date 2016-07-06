@@ -149,12 +149,32 @@ public class OPUsers {
     }
 
     /**
+     * 注册时发送短信验证码
+     * @param mobile
+     * @param sessionId
+     * @return
+     */
+    @OpenMethod(key = "get.mobile.code", paramNames = {"mobile", "sid"})
+    public Boolean sendRegisterSmsCode(@NotEmpty(message = "user.mobile.miss") String mobile, @NotEmpty(message = "session.id.miss")String sessionId) {
+        if (!mobilePattern.getPattern().matcher(mobile).matches()) {
+            throw new OPClientException("mobile.format.error");
+        }
+
+        Response<User> result = userReadService.findBy(mobile, LoginType.MOBILE);
+        // 如果该手机号已注册
+        if(result.isSuccess() && result.getResult() != null){
+            throw new OPClientException("user.register.mobile.has.been.used");
+        }
+        return this.sendSmsCode(mobile, sessionId);
+    }
+
+    /**
      * 获取手机验证码
      * @param mobile
      * @return
      */
-    @OpenMethod(key = "get.mobile.code", paramNames = {"mobile", "sid"})
-    public Boolean sendSms(@NotEmpty(message = "user.mobile.miss") String mobile, @NotEmpty(message = "session.id.miss")String sessionId) {
+    @OpenMethod(key = "send.sms.code", paramNames = {"mobile", "sid"})
+    public Boolean sendSmsCode(@NotEmpty(message = "user.mobile.miss") String mobile, @NotEmpty(message = "session.id.miss")String sessionId) {
         if (mobilePattern.getPattern().matcher(mobile).matches()) {
             Map<String, Object> snapshot = sessionManager.findSessionById(Sessions.MSG_PREFIX, sessionId);
             String activateCode = null;
