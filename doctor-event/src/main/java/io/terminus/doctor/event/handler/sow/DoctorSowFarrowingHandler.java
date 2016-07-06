@@ -70,6 +70,11 @@ public class DoctorSowFarrowingHandler extends DoctorAbstractEventFlowHandler {
                                                    DoctorPigTrack doctorPigTrack, DoctorBasicInputInfoDto basic,
                                                    Map<String, Object> extra, Map<String,Object> context) {
 
+        // 对应的 仔猪 猪舍的 信息
+        extra.put("toBarnId", doctorPigTrack.getCurrentBarnId());
+        extra.put("toBarnName", doctorPigTrack.getCurrentBarnName());
+
+        // 对应的 猪群信息
         extra.put("farrowingPigletGroupId",buildPigGroupCountInfo(basic, extra));
 
         doctorPigTrack.addAllExtraMap(extra);

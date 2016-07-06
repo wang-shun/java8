@@ -130,9 +130,8 @@ public class DoctorWareHouseEvents {
                     dto.getFarmId(),dto.getMaterialId(),dto.getWareHouseId()));
             checkState(!isNull(doctorMaterialInWareHouse), "input.materialInfo.error");
 
-            String barnName = RespHelper.orServEx(doctorBarnReadService.findBarnById(dto.getBarnId())).getName();
-
-            Response<User> userResponse = userReadService.findById(dto.getFeederId());
+            Long currentUserId = UserUtil.getUserId();
+            Response<User> userResponse = userReadService.findById(currentUserId);
             String userName = RespHelper.orServEx(userResponse).getName();
 
             DoctorMaterialInfo doctorMaterialInfo = RespHelper.orServEx(doctorMaterialInfoReadService.queryById(dto.getMaterialId()));
@@ -142,7 +141,8 @@ public class DoctorWareHouseEvents {
                     .farmId(doctorMaterialInWareHouse.getFarmId()).farmName(doctorMaterialInWareHouse.getFarmName())
                     .wareHouseId(doctorMaterialInWareHouse.getWareHouseId()).wareHouseName(doctorMaterialInWareHouse.getWareHouseName())
                     .materialTypeId(doctorMaterialInWareHouse.getMaterialId()).materialName(doctorMaterialInWareHouse.getMaterialName())
-                    .barnId(dto.getBarnId()).barnName(barnName).staffId(dto.getFeederId()).staffName(userName)
+                    .barnId(dto.getBarnId()).barnName(dto.getBarnName())
+                    .staffId(currentUserId).staffName(userName)
                     .count(dto.getCount()).consumeDays(dto.getConsumeDays())
                     .unitId(doctorMaterialInfo.getUnitId()).unitName(doctorMaterialInfo.getUnitName())
                     .build();
@@ -168,9 +168,8 @@ public class DoctorWareHouseEvents {
                     dto.getFarmId(),dto.getMaterialId(),dto.getWareHouseId()));
             checkState(!isNull(doctorMaterialInWareHouse), "input.materialInfo.error");
 
-            String barnName = RespHelper.orServEx(doctorBarnReadService.findBarnById(dto.getBarnId())).getName();
-
-            Response<User> userResponse = userReadService.findById(dto.getFeederId());
+            Long userId = UserUtil.getUserId();
+            Response<User> userResponse = userReadService.findById(userId);
             String userName = RespHelper.orServEx(userResponse).getName();
 
             DoctorMaterialInfo doctorMaterialInfo = RespHelper.orServEx(doctorMaterialInfoReadService.queryById(dto.getMaterialId()));
@@ -180,7 +179,7 @@ public class DoctorWareHouseEvents {
                     .farmId(doctorMaterialInWareHouse.getFarmId()).farmName(doctorMaterialInWareHouse.getFarmName())
                     .wareHouseId(doctorMaterialInWareHouse.getWareHouseId()).wareHouseName(doctorMaterialInWareHouse.getWareHouseName())
                     .materialTypeId(doctorMaterialInWareHouse.getMaterialId()).materialName(doctorMaterialInWareHouse.getMaterialName())
-                    .barnId(dto.getBarnId()).barnName(barnName).staffId(dto.getFeederId()).staffName(userName)
+                    .staffId(userId).staffName(userName)
                     .count(dto.getCount()).unitId(doctorMaterialInfo.getUnitId()).unitName(doctorMaterialInfo.getUnitName())
                     .build();
         }catch (Exception e){
