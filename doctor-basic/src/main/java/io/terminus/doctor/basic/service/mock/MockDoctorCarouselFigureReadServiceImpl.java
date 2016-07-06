@@ -28,21 +28,21 @@ public class MockDoctorCarouselFigureReadServiceImpl implements DoctorCarouselFi
         f1.setIndex(1);
         f1.setStatus(1);
         f1.setUrl("http://img.xrnm.com/20160616-ad115c7ce911aaa925327ecee812fbfc.png");
-        f1.setForward("https://www.baidu.com/");
+    //    f1.setForward("https://www.baidu.com/");
 
         DoctorCarouselFigure f2 = new DoctorCarouselFigure();
         f2.setId(2L);
         f2.setIndex(2);
         f2.setStatus(1);
         f2.setUrl("http://img.xrnm.com/20160616-85900d92c238fe79afa3e1b45a865f9f.png");
-        f2.setForward("https://www.baidu.com/");
+    //    f2.setForward("https://www.baidu.com/");
 
         DoctorCarouselFigure f3 = new DoctorCarouselFigure();
         f3.setId(3L);
         f3.setIndex(3);
         f3.setStatus(1);
         f3.setUrl("http://img.xrnm.com/20160616-f9c07f1b71f08a3e85ccea3188f15a54.png");
-        f3.setForward("https://www.baidu.com/");
+    //    f3.setForward("https://www.baidu.com/");
         return Response.ok(Lists.newArrayList(f1, f2, f3));
     }
 
@@ -53,7 +53,7 @@ public class MockDoctorCarouselFigureReadServiceImpl implements DoctorCarouselFi
         f1.setIndex(1);
         f1.setStatus(1);
         f1.setUrl("http://img.xrnm.com/20160616-ad115c7ce911aaa925327ecee812fbfc.png");
-        f1.setForward("https://www.baidu.com/");
+    //    f1.setForward("https://www.baidu.com/");
         return Response.ok(f1);
     }
 }
