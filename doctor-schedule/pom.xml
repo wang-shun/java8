@@ -49,11 +49,6 @@
         </dependency>
 
         <dependency>
-            <groupId>com.alibaba</groupId>
-            <artifactId>dubbo</artifactId>
-        </dependency>
-
-        <dependency>
             <groupId>io.terminus.parana</groupId>
             <artifactId>parana-boot-starter-config</artifactId>
         </dependency>

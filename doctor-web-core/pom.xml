@@ -16,6 +16,10 @@
     <artifactId>doctor-web-core</artifactId>
 
     <dependencies>
+        <dependency>
+            <groupId>io.terminus.boot.rpc</groupId>
+            <artifactId>rpc-dubbo</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>io.terminus.doctor</groupId>

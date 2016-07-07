@@ -62,12 +62,6 @@
             <artifactId>search-api</artifactId>
         </dependency>
 
-        <!-- dubbo -->
-        <dependency>
-            <groupId>io.terminus.boot.rpc</groupId>
-            <artifactId>rpc-dubbo</artifactId>
-        </dependency>
-
         <!-- pamas -->
         <dependency>
             <groupId>io.terminus.pampas</groupId>

@@ -24,10 +24,6 @@
 
         <!-- terminus lib -->
         <dependency>
-            <groupId>io.terminus.boot.rpc</groupId>
-            <artifactId>rpc-dubbo</artifactId>
-        </dependency>
-        <dependency>
             <groupId>io.terminus.boot</groupId>
             <artifactId>spring-boot-starter-datasource</artifactId>
         </dependency>

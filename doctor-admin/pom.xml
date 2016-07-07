@@ -69,10 +69,6 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-jetty</artifactId>
         </dependency>
-        <dependency>
-            <groupId>io.terminus.boot.rpc</groupId>
-            <artifactId>rpc-dubbo</artifactId>
-        </dependency>
         <!-- zookeeper -->
         <dependency>
             <groupId>com.github.sgroschupf</groupId>

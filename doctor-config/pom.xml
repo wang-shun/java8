@@ -41,10 +41,6 @@
             <artifactId>HikariCP</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.alibaba</groupId>
-            <artifactId>dubbo</artifactId>
-        </dependency>
-        <dependency>
             <groupId>io.terminus.boot</groupId>
             <artifactId>spring-boot-starter-mybatis</artifactId>
         </dependency>
