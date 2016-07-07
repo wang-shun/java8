@@ -1,6 +1,7 @@
 package io.terminus.doctor.user.service;
 
 import com.google.common.base.Throwables;
+import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.Response;
 import io.terminus.common.utils.Splitters;
@@ -36,6 +37,7 @@ import java.util.Objects;
 @Slf4j
 @Service
 @Primary
+@RpcProvider
 public class DoctorUserReadServiceImpl extends UserReadServiceImpl implements DoctorUserReadService{
 
     private final UserDao userDao;

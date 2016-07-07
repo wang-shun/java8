@@ -1,16 +1,13 @@
 package io.terminus.doctor.user.service;
 
 import com.google.common.base.Throwables;
-import io.terminus.common.model.BaseUser;
+import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.user.dao.DoctorServiceReviewDao;
 import io.terminus.doctor.user.model.DoctorServiceReview;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
-
-import java.util.Objects;
 
 /**
  * Desc:
@@ -20,6 +17,7 @@ import java.util.Objects;
  */
 @Slf4j
 @Service
+@RpcProvider
 public class DoctorServiceReviewWriteServiceImpl implements DoctorServiceReviewWriteService{
     private final DoctorServiceReviewDao doctorServiceReviewDao;
 

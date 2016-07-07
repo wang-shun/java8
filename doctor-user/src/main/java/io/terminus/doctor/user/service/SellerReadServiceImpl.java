@@ -2,6 +2,7 @@ package io.terminus.doctor.user.service;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Throwables;
+import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.model.PageInfo;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
@@ -18,6 +19,7 @@ import org.springframework.stereotype.Service;
  */
 @Slf4j
 @Service
+@RpcProvider
 public class SellerReadServiceImpl implements SellerReadService {
 
     private final SellerDao sellerDao;

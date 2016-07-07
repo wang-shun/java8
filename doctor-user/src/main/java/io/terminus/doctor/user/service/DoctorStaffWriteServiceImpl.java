@@ -2,6 +2,7 @@ package io.terminus.doctor.user.service;
 
 
 import com.google.common.base.Throwables;
+import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.common.event.CacheEvent;
 import io.terminus.doctor.common.event.CacheMessage;
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Service;
 
 @Slf4j
 @Service
+@RpcProvider
 public class DoctorStaffWriteServiceImpl implements DoctorStaffWriteService{
     private final DoctorStaffDao doctorStaffDao;
     private final CoreEventDispatcher coreEventDispatcher;

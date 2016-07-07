@@ -1,6 +1,7 @@
 package io.terminus.doctor.user.service;
 
 import com.google.common.base.Throwables;
+import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.user.manager.DoctorUserManager;
 import io.terminus.parana.common.utils.EncryptUtil;
@@ -19,6 +20,7 @@ import org.springframework.util.StringUtils;
 @Slf4j
 @Service
 @Primary
+@RpcProvider
 public class DoctorUserWriteServiceImpl implements UserWriteService<User> {
 
     private final DoctorUserManager doctorUserManager;

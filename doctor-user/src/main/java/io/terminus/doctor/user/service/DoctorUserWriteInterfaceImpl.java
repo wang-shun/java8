@@ -2,6 +2,7 @@ package io.terminus.doctor.user.service;
 
 import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
+import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.doctor.common.enums.UserType;
 import io.terminus.doctor.user.dao.UserDaoExt;
@@ -19,6 +20,7 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Service
+@RpcProvider
 public class DoctorUserWriteInterfaceImpl implements DoctorUserWriteInterface {
     private final UserDaoExt userDaoExt;
 

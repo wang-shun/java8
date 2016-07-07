@@ -2,6 +2,7 @@ package io.terminus.doctor.user.service.business;
 
 import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
+import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.BaseUser;
 import io.terminus.common.model.Response;
@@ -9,7 +10,6 @@ import io.terminus.doctor.user.dao.DoctorServiceReviewDao;
 import io.terminus.doctor.user.dto.DoctorServiceApplyDto;
 import io.terminus.doctor.user.manager.DoctorServiceReviewManager;
 import io.terminus.doctor.user.model.DoctorFarm;
-import io.terminus.doctor.user.model.DoctorOrg;
 import io.terminus.doctor.user.model.DoctorServiceReview;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +25,7 @@ import java.util.Objects;
  */
 @Slf4j
 @Service
+@RpcProvider
 public class DoctorServiceReviewServiceImpl implements DoctorServiceReviewService{
 
     private final DoctorServiceReviewDao doctorServiceReviewDao;

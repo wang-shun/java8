@@ -2,6 +2,7 @@ package io.terminus.doctor.user.service;
 
 import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
+import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.user.dao.DoctorFarmDao;
@@ -23,6 +24,7 @@ import java.util.List;
  */
 @Slf4j
 @Service
+@RpcProvider
 public class DoctorFarmReadServiceImpl implements DoctorFarmReadService{
 
     private final DoctorFarmDao doctorFarmDao;
