@@ -247,6 +247,6 @@ public class DoctorMaterialInfos {
             log.error("build ware house basic dto fail, cause:{}", Throwables.getStackTraceAsString(e));
             throw new JsonResponseException(e.getMessage());
         }
-        return RespHelper.orFalse(doctorMaterialInfoWriteService.realProduceMaterial(doctorWareHouseBasicDto, materialProduce));
+        return RespHelper.or500(doctorMaterialInfoWriteService.realProduceMaterial(doctorWareHouseBasicDto, materialProduce));
     }
 }
