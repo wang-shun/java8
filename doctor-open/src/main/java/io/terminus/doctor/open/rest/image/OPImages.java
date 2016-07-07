@@ -31,6 +31,6 @@ public class OPImages {
      */
     @OpenMethod(key = "get.carousel.figure")
     public List<DoctorCarouselFigure> getCarouselFigures() {
-        return OPRespHelper.orOPEx(doctorCarouselFigureReadService.findFiguresByStatus(1));
+        return OPRespHelper.orOPEx(doctorCarouselFigureReadService.findFiguresByStatus(DoctorCarouselFigure.Status.ENABLED.value()));
     }
 }

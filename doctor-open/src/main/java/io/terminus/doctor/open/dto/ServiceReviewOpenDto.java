@@ -48,6 +48,11 @@ public class ServiceReviewOpenDto implements Serializable {
      * 服务审批不通过或申请资格被冻结的原因
      */
     private String reason;
+
+    /**
+     * 该服务在APP首页的跳转链接
+     */
+    private String url;
     
     /**
      * 审批人id
