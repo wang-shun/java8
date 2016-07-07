@@ -2,6 +2,7 @@ package io.terminus.doctor.msg.service;
 
 import com.github.jknack.handlebars.Template;
 import com.google.common.base.Throwables;
+import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.msg.helper.DoctorHandleBarsHelper;
@@ -26,6 +27,7 @@ import java.util.concurrent.ExecutionException;
  */
 @Slf4j
 @Service
+@RpcProvider
 public class DoctorMessageTemplateReadServiceImpl implements DoctorMessageTemplateReadService {
 
     private final MessageTemplateDao messageTemplateDao;
