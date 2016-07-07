@@ -9,7 +9,7 @@ VALUES
 INSERT INTO `parana_message_templates` (`id`, `creator_id`, `creator_name`, `name`, `title`, `content`, `context`, `channel`, `disabled`, `description`, `created_at`, `updated_at`)
 VALUES
 	(1, 1, 'admin', 'user.register.code', '用户中心手机注册码', '您的注册手机验证码是：{{code}}', '{\"code\":\"123456\"}', 1, 0, '用户中心手机注册码', now(), now()),
-	(2, 1, 'admin', 'user.reset.password.code', '用户中心重置密码', '您重置密码的手机验证码是：{{code}}', '{\"code\":\"123456\"}', 1, 0, '用户中心重置密码', now(), now());
+	(2, 1, 'admin', 'user.sms.code', '用户中心短信验证码', '您的短信验证码是：{{code}}', '{\"code\":\"123456\"}', 1, 0, '用户中心短信验证码', now(), now());
 
 
 INSERT INTO `parana_configs` (`biz_type`, `key`, `value`, `data_type`, `group`, `description`, `created_at`, `updated_at`)
@@ -3564,7 +3564,7 @@ VALUES
 	( 0, 'user.service.pigmall.beta', '1', 'string', '0', '电商服务是否处于内测中，1-是，0-否', now(), now()),
 	( 0, 'user.service.neverest.beta', '1', 'string', '0', '大数据服务是否处于内测中，1-是，0-否', now(), now()),
 	( 0, 'user.service.pigtrade.beta', '1', 'string', '0', '生猪交易服务是否处于内测中，1-是，0-否', now(), now()),
-	( 0, 'user.service.beta.desc', '内测中，敬请期待', 'string', '0', '对内测中服务的描述', now(), now());
+	( 0, 'user.service.beta.desc', '敬请期待', 'string', '0', '对内测中服务的描述', now(), now());
 
 INSERT INTO `doctor_carousel_figures` (`id`, `index`, `status`, `url`, `forward`, `created_at`, `updated_at`)
 VALUES

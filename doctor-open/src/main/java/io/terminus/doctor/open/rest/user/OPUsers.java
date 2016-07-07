@@ -149,39 +149,38 @@ public class OPUsers {
     }
 
     /**
-     * 重置密码时发送短信验证码
+     * 发送短信验证码
      * @param mobile
      * @param sessionId
+     * @param type 此字段决定如何校验用户是否存在, 我们默认(type == null)是在注册环节, 所以要求相应手机号还未注册;
+     *             当type == 1 时则要求手机号已经注册
      * @return
      */
-    @OpenMethod(key = "get.mobile.code.reset.password", paramNames = {"mobile", "sid"})
-    public Boolean sendResetPasswordSmsCode(@NotEmpty(message = "user.mobile.miss") String mobile, @NotEmpty(message = "session.id.miss")String sessionId) {
-        if (!mobilePattern.getPattern().matcher(mobile).matches()) {
-            throw new OPClientException("mobile.format.error");
-        }
-        //如果手机号未注册,则抛出异常
-        OPRespHelper.orOPEx(userReadService.findBy(mobile, LoginType.MOBILE));
-        return this.sendSmsCode(mobile, sessionId, "user.reset.password.code");
-    }
-
-    /**
-     * 注册时发送短信验证码
-     * @param mobile
-     * @param sessionId
-     * @return
-     */
-    @OpenMethod(key = "get.mobile.code", paramNames = {"mobile", "sid"})
-    public Boolean sendRegisterSmsCode(@NotEmpty(message = "user.mobile.miss") String mobile, @NotEmpty(message = "session.id.miss")String sessionId) {
+    @OpenMethod(key = "get.mobile.code", paramNames = {"mobile", "sid", "type"})
+    public Boolean getMobileCode(@NotEmpty(message = "user.mobile.miss") String mobile,
+                                 @NotEmpty(message = "session.id.miss")String sessionId,
+                                 Integer type) {
         if (!mobilePattern.getPattern().matcher(mobile).matches()) {
             throw new OPClientException("mobile.format.error");
         }
 
+        String smsTemplateName;
         Response<User> result = userReadService.findBy(mobile, LoginType.MOBILE);
-        // 如果该手机号已注册
-        if(result.isSuccess() && result.getResult() != null){
-            throw new OPClientException("user.register.mobile.has.been.used");
+        if(type == null){
+            // 如果该手机号已注册
+            if(result.isSuccess() && result.getResult() != null){
+                throw new OPClientException("user.register.mobile.has.been.used");
+            }
+            smsTemplateName = "user.register.code";
+        }else{
+            //如果手机号未注册,则抛出异常
+            if(!result.isSuccess() || result.getResult() == null){
+                throw new OPClientException(result.getError() == null ? "user.not.found" : result.getError());
+            }
+            smsTemplateName = "user.sms.code";
         }
-        return this.sendSmsCode(mobile, sessionId, "user.register.code");
+
+        return this.sendSmsCode(mobile, sessionId, smsTemplateName);
     }
 
     /**
