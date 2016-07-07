@@ -2,6 +2,7 @@ package io.terminus.doctor.basic.service;
 
 import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
+import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.basic.dao.redis.DoctorSearchHistoryDao;
 import io.terminus.doctor.basic.enums.SearchType;
@@ -21,6 +22,7 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 @Service
+@RpcProvider
 public class DoctorSearchHistoryServiceImpl implements DoctorSearchHistoryService {
 
     private final DoctorSearchHistoryDao doctorSearchHistoryDao;

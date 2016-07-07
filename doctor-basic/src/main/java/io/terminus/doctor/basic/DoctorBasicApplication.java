@@ -15,8 +15,7 @@ import org.springframework.core.io.ClassPathResource;
 @SpringBootApplication
 public class DoctorBasicApplication {
     public static void main(String[] args) {
-        SpringApplication application = new SpringApplication(DoctorBasicApplication.class,
-                "classpath:/spring/doctor-basic-dubbo-provider.xml");
+        SpringApplication application = new SpringApplication(DoctorBasicApplication.class);
         YamlPropertiesFactoryBean yml = new YamlPropertiesFactoryBean();
         yml.setResources(new ClassPathResource("env/default.yml"));
         application.setDefaultProperties(yml.getObject());
