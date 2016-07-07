@@ -6,6 +6,7 @@ import io.terminus.common.model.BaseUser;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.enums.UserType;
+import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.open.dto.DoctorServiceReviewDto;
 import io.terminus.doctor.open.dto.ServiceReviewOpenDto;
 import io.terminus.doctor.open.util.OPRespHelper;
@@ -15,6 +16,7 @@ import io.terminus.doctor.user.dto.DoctorUserInfoDto;
 import io.terminus.doctor.user.model.DoctorOrg;
 import io.terminus.doctor.user.model.DoctorServiceReview;
 import io.terminus.doctor.user.model.DoctorServiceStatus;
+import io.terminus.doctor.user.model.DoctorUserDataPermission;
 import io.terminus.doctor.user.service.*;
 import io.terminus.doctor.user.service.business.DoctorServiceReviewService;
 import io.terminus.doctor.web.core.dto.ServiceBetaStatusToken;
@@ -47,7 +49,7 @@ import java.util.Objects;
 public class OPDoctorUsers {
 
     private final DoctorServiceReviewReadService doctorServiceReviewReadService;
-    private final DoctorServiceReviewWriteService doctorServiceReviewWriteService;
+    private final DoctorUserDataPermissionReadService doctorUserDataPermissionReadService;
     private final DoctorServiceReviewService doctorServiceReviewService;
     private final DoctorOrgReadService doctorOrgReadService;
     private final DoctorUserReadService doctorUserReadService;
@@ -58,9 +60,12 @@ public class OPDoctorUsers {
     private final PrimaryUserReadService primaryUserReadService;
     private final ServiceBetaStatusHandler serviceBetaStatusHandler;
 
+    //猪场软件链接url
+    private final String farmManageMultiple = "pigdoctor://company?homepage_type=1";;
+
     @Autowired
     public OPDoctorUsers(DoctorServiceReviewReadService doctorServiceReviewReadService,
-                         DoctorServiceReviewWriteService doctorServiceReviewWriteService,
+                         DoctorUserDataPermissionReadService doctorUserDataPermissionReadService,
                          DoctorUserReadService doctorUserReadService,
                          DoctorServiceReviewService doctorServiceReviewService,
                          DoctorOrgReadService doctorOrgReadService,
@@ -71,7 +76,7 @@ public class OPDoctorUsers {
                          PrimaryUserReadService primaryUserReadService,
                          ServiceBetaStatusHandler serviceBetaStatusHandler) {
         this.doctorServiceReviewReadService = doctorServiceReviewReadService;
-        this.doctorServiceReviewWriteService = doctorServiceReviewWriteService;
+        this.doctorUserDataPermissionReadService = doctorUserDataPermissionReadService;
         this.doctorUserReadService = doctorUserReadService;
         this.doctorServiceReviewService = doctorServiceReviewService;
         this.doctorOrgReadService = doctorOrgReadService;
@@ -109,6 +114,9 @@ public class OPDoctorUsers {
             switch (DoctorServiceReview.Type.from(review.getType())) {
                 case PIG_DOCTOR:
                     innerDto.setServiceStatus(serviceStatus.getPigdoctorStatus());
+                    if(Objects.equals(serviceStatus.getPigdoctorStatus(), DoctorServiceStatus.Status.OPENED.value())){
+                        innerDto.setUrl(this.getPigdoctorUrl(baseUser.getId()));
+                    }
                     innerDto.setReason(serviceStatus.getPigdoctorReason());
                     dto.setPigDoctor(innerDto);
                     break;
@@ -200,4 +208,19 @@ public class OPDoctorUsers {
         return OPRespHelper.orOPEx(doctorMobileMenuReadService.findMenuByUserIdAndLevel(UserUtil.getUserId(), 1));
     }
 
+    private String getPigdoctorUrl(Long userId){
+        //查询关联猪场
+        DoctorUserDataPermission permission = RespHelper.orServEx(doctorUserDataPermissionReadService.findDataPermissionByUserId(userId));
+        if(permission != null && permission.getFarmIdsList() != null){
+            //只有一个猪场
+            if(permission.getFarmIdsList().size() == 1){
+                return "pigdoctor://pigfarm?homepage_type=2&pig_farm_id=" + permission.getFarmIdsList().get(0);
+            }
+            //有多个猪场
+            if(permission.getFarmIdsList().size() > 1){
+                return farmManageMultiple;
+            }
+        }
+        return null;
+    }
 }
