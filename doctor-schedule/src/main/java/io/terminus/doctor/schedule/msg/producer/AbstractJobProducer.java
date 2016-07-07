@@ -19,6 +19,7 @@ import io.terminus.doctor.msg.service.DoctorMessageRuleRoleReadService;
 import io.terminus.doctor.msg.service.DoctorMessageRuleTemplateReadService;
 import io.terminus.doctor.msg.service.DoctorMessageTemplateReadService;
 import io.terminus.doctor.msg.service.DoctorMessageWriteService;
+import io.terminus.doctor.user.model.DoctorUserDataPermission;
 import io.terminus.doctor.user.service.DoctorUserDataPermissionReadService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -60,14 +61,14 @@ public abstract class AbstractJobProducer extends AbstractProducer {
 
     @Override
     protected boolean hasUserAuth(Long userId, Long farmId) {
-        /*cif (userId != null && farmId != null) {
+        if (userId != null && farmId != null) {
             DoctorUserDataPermission doctorUserDataPermission = RespHelper.orServEx(
                     doctorUserDataPermissionReadService.findDataPermissionByUserId(userId));
             if (doctorUserDataPermission != null) {
                 List<Long> farmIdsList = doctorUserDataPermission.getFarmIdsList();
                 return farmIdsList != null && farmIdsList.contains(farmId);
             }
-        }*/
+        }
         return true;
     }
 
