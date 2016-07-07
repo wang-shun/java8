@@ -174,8 +174,6 @@ public class OPUsers {
             throw new OPClientException("sms.code.type.error");
         }
 
-
-        String smsTemplateName = "user.sms.code";
         Response<User> result = userReadService.findBy(mobile, LoginType.MOBILE);
         switch (smsCodeType){
             case REGISTER:
@@ -183,7 +181,6 @@ public class OPUsers {
                 if(result.isSuccess() && result.getResult() != null){
                     throw new OPClientException("user.register.mobile.has.been.used");
                 }
-                smsTemplateName = "user.register.code";
                 break;
             case RESET_PASSWORD:
                 //如果手机号未注册,则抛出异常
@@ -199,7 +196,7 @@ public class OPUsers {
                 break;
         }
 
-        return this.sendSmsCode(mobile, sessionId, smsTemplateName);
+        return this.sendSmsCode(mobile, sessionId, smsCodeType.template());
     }
 
     /**

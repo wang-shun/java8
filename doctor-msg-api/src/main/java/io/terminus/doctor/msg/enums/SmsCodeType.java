@@ -7,14 +7,16 @@ import java.util.Objects;
  * 短信验证码类型
  */
 public enum SmsCodeType {
-    REGISTER(0, "注册"),
-    RESET_PASSWORD(1, "重置密码");
+    REGISTER(0, "user.register.code", "注册"),
+    RESET_PASSWORD(1, "user.sms.code", "重置密码");
 
     private int value;
+    private String template; //短信内容模板名称, 用于查询表 parana_message_templates 的 name 字段
     private String desc;
 
-    SmsCodeType(int value, String desc){
+    SmsCodeType(int value, String template, String desc){
         this.value = value;
+        this.template = template;
         this.desc = desc;
     }
 
@@ -31,7 +33,11 @@ public enum SmsCodeType {
         return this.value;
     }
 
-    public String toString(){
+    public String template(){
+        return this.template;
+    }
+
+    public String desc(){
         return this.desc;
     }
 }
