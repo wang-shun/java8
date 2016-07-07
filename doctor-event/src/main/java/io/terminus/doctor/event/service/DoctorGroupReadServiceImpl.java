@@ -3,6 +3,7 @@ package io.terminus.doctor.event.service;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
+import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.PageInfo;
 import io.terminus.common.model.Paging;
@@ -41,6 +42,7 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 @Service
+@RpcProvider
 public class DoctorGroupReadServiceImpl implements DoctorGroupReadService {
 
     private final DoctorGroupDao doctorGroupDao;

@@ -1,6 +1,7 @@
 package io.terminus.doctor.event.search.barn;
 
 import com.google.common.base.Throwables;
+import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.search.api.IndexExecutor;
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Service;
  */
 @Slf4j
 @Service
+@RpcProvider
 public class BarnSearchWriteServiceImpl implements BarnSearchWriteService {
 
     @Autowired

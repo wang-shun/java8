@@ -2,6 +2,7 @@ package io.terminus.doctor.event.search.group;
 
 import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
+import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.common.enums.PigType;
@@ -26,6 +27,7 @@ import java.util.Map;
  */
 @Service
 @Slf4j
+@RpcProvider
 public class GroupSearchReadServiceImpl implements GroupSearchReadService {
 
     @Autowired

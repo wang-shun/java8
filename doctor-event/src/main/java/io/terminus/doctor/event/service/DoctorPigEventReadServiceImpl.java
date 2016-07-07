@@ -5,6 +5,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.model.PageInfo;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
@@ -35,6 +36,7 @@ import static java.util.Objects.isNull;
  */
 @Service
 @Slf4j
+@RpcProvider
 public class DoctorPigEventReadServiceImpl implements DoctorPigEventReadService {
 
     private final DoctorPigEventDao doctorPigEventDao;

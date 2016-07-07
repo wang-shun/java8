@@ -1,5 +1,6 @@
 package io.terminus.doctor.workflow.access;
 
+import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.model.Paging;
 import io.terminus.doctor.workflow.dao.FlowDefinitionDao;
 import io.terminus.doctor.workflow.dao.FlowDefinitionNodeDao;
@@ -31,6 +32,7 @@ import java.util.Map;
  * Date: 16/4/25
  */
 @Repository
+@RpcProvider
 public class MybatisAccess implements JdbcAccess {
 
     @Autowired

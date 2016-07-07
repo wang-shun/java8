@@ -1,7 +1,7 @@
 package io.terminus.doctor.workflow.base;
 
-import io.terminus.boot.dubbo.autoconfigure.DubboAutoConfiguration;
 import io.terminus.boot.mybatis.autoconfigure.MybatisAutoConfiguration;
+import io.terminus.boot.rpc.dubbo.config.DubboBaseAutoConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.annotation.ComponentScan;
@@ -14,7 +14,7 @@ import org.springframework.context.annotation.Configuration;
  * Date: 16/4/25
  */
 @Configuration
-@EnableAutoConfiguration(exclude = DubboAutoConfiguration.class)
+@EnableAutoConfiguration(exclude = DubboBaseAutoConfiguration.class)
 @ComponentScan({"io.terminus.doctor.workflow.*"})
 @AutoConfigureAfter(MybatisAutoConfiguration.class)
 public class ServiceConfiguration {

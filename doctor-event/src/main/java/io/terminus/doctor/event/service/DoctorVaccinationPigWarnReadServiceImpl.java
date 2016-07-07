@@ -2,6 +2,7 @@ package io.terminus.doctor.event.service;
 
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableMap;
+import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.model.PageInfo;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
@@ -22,6 +23,7 @@ import java.util.Map;
  */
 @Slf4j
 @Service
+@RpcProvider
 public class DoctorVaccinationPigWarnReadServiceImpl implements DoctorVaccinationPigWarnReadService {
 
     private final DoctorVaccinationPigWarnDao doctorVaccinationPigWarnDao;

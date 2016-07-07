@@ -2,6 +2,7 @@ package io.terminus.doctor.event.service;
 
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableMap;
+import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.common.enums.DataEventType;
@@ -24,6 +25,7 @@ import static io.terminus.common.utils.Arguments.notNull;
  */
 @Slf4j
 @Service
+@RpcProvider
 public class DoctorBarnWriteServiceImpl implements DoctorBarnWriteService {
 
     private final DoctorBarnDao doctorBarnDao;

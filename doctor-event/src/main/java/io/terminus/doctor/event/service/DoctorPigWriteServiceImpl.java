@@ -1,6 +1,7 @@
 package io.terminus.doctor.event.service;
 
 import com.google.common.base.Throwables;
+import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.event.cache.DoctorPigInfoCache;
 import io.terminus.doctor.event.dao.DoctorPigDao;
@@ -25,6 +26,7 @@ import static com.google.common.base.Preconditions.checkState;
  */
 @Slf4j
 @Service
+@RpcProvider
 public class DoctorPigWriteServiceImpl implements DoctorPigWriteService {
 
     private final DoctorPigDao doctorPigDao;

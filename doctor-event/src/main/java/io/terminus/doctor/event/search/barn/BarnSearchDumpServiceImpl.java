@@ -3,6 +3,7 @@ package io.terminus.doctor.event.search.barn;
 import com.google.common.base.Stopwatch;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Iterables;
+import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.model.DoctorBarn;
@@ -26,6 +27,7 @@ import java.util.concurrent.TimeUnit;
  */
 @Slf4j
 @Service
+@RpcProvider
 public class BarnSearchDumpServiceImpl implements BarnSearchDumpService {
 
     private DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss");

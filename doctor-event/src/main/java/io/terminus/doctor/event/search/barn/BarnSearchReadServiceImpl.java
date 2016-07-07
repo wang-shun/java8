@@ -2,6 +2,7 @@ package io.terminus.doctor.event.search.barn;
 
 import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
+import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.common.enums.PigSearchType;
@@ -26,6 +27,7 @@ import java.util.Map;
  */
 @Slf4j
 @Service
+@RpcProvider
 public class BarnSearchReadServiceImpl implements BarnSearchReadService {
 
     @Autowired

@@ -1,8 +1,8 @@
 package io.terminus.doctor.warehouse.service;
 
 import com.google.common.collect.Lists;
-import io.terminus.boot.dubbo.autoconfigure.DubboAutoConfiguration;
 import io.terminus.boot.mybatis.autoconfigure.MybatisAutoConfiguration;
+import io.terminus.boot.rpc.dubbo.config.DubboBaseAutoConfiguration;
 import io.terminus.boot.search.autoconfigure.ESSearchAutoConfiguration;
 import io.terminus.doctor.warehouse.handler.DoctorWareHouseHandlerChain;
 import io.terminus.doctor.warehouse.handler.IHandler;
@@ -45,7 +45,7 @@ import java.util.List;
  * Descirbe: Service 信息配置工具类
  */
 @Configuration
-@EnableAutoConfiguration(exclude = {DubboAutoConfiguration.class, ESSearchAutoConfiguration.class})
+@EnableAutoConfiguration(exclude = {DubboBaseAutoConfiguration.class, ESSearchAutoConfiguration.class})
 @ComponentScan("io.terminus.doctor.warehouse.*")
 @AutoConfigureAfter(MybatisAutoConfiguration.class)
 public class ServiceTestConfiguration {
