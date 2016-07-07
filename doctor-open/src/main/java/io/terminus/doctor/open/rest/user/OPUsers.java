@@ -19,6 +19,7 @@ import io.terminus.doctor.common.enums.UserStatus;
 import io.terminus.doctor.common.enums.UserType;
 import io.terminus.doctor.common.event.CoreEventDispatcher;
 import io.terminus.doctor.common.utils.Params;
+import io.terminus.doctor.msg.enums.SmsCodeType;
 import io.terminus.doctor.open.common.CaptchaGenerator;
 import io.terminus.doctor.open.common.MobilePattern;
 import io.terminus.doctor.open.common.Sessions;
@@ -152,8 +153,8 @@ public class OPUsers {
      * 发送短信验证码
      * @param mobile
      * @param sessionId
-     * @param type 此字段决定如何校验用户是否存在, 我们默认(type == null)是在注册环节, 所以要求相应手机号还未注册;
-     *             当type == 1 时则要求手机号已经注册
+     * @param type 枚举 io.terminus.doctor.msg.enums.SmsCodeType.
+     *             允许type == null, 此时认为是注册场景
      * @return
      */
     @OpenMethod(key = "get.mobile.code", paramNames = {"mobile", "sid", "type"})
@@ -163,21 +164,35 @@ public class OPUsers {
         if (!mobilePattern.getPattern().matcher(mobile).matches()) {
             throw new OPClientException("mobile.format.error");
         }
-
-        String smsTemplateName;
-        Response<User> result = userReadService.findBy(mobile, LoginType.MOBILE);
+        SmsCodeType smsCodeType;
         if(type == null){
-            // 如果该手机号已注册
-            if(result.isSuccess() && result.getResult() != null){
-                throw new OPClientException("user.register.mobile.has.been.used");
-            }
-            smsTemplateName = "user.register.code";
+            smsCodeType = SmsCodeType.REGISTER;
         }else{
-            //如果手机号未注册,则抛出异常
-            if(!result.isSuccess() || result.getResult() == null){
-                throw new OPClientException(result.getError() == null ? "user.not.found" : result.getError());
-            }
-            smsTemplateName = "user.sms.code";
+            smsCodeType = SmsCodeType.from(type);
+        }
+        if(smsCodeType == null){
+            throw new OPClientException("sms.code.type.error");
+        }
+
+
+        String smsTemplateName = "user.sms.code";
+        Response<User> result = userReadService.findBy(mobile, LoginType.MOBILE);
+        switch (smsCodeType){
+            case REGISTER:
+                // 如果该手机号已注册
+                if(result.isSuccess() && result.getResult() != null){
+                    throw new OPClientException("user.register.mobile.has.been.used");
+                }
+                smsTemplateName = "user.register.code";
+                break;
+            case RESET_PASSWORD:
+                //如果手机号未注册,则抛出异常
+                if(!result.isSuccess() || result.getResult() == null){
+                    throw new OPClientException(result.getError());
+                }
+                break;
+            default:
+                throw new OPClientException("sms.code.type.error");
         }
 
         return this.sendSmsCode(mobile, sessionId, smsTemplateName);
