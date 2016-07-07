@@ -81,9 +81,9 @@
     </insert>
 
     <delete id="delete" parameterType="Long">
-        DELETE FROM <include refid="tb"/> WHERE
-        id=#{id}
-    </delete>
+    DELETE FROM <include refid="tb"/> WHERE
+    id=#{id}
+</delete>
 
     <select id="findById" parameterType="long" resultMap="DoctorPigEventMap" >
         SELECT <include refid="cols_all" />

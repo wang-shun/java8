@@ -11,13 +11,13 @@ import io.terminus.doctor.event.enums.DataRange;
 import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.service.DoctorPigReadService;
+import io.terminus.doctor.event.service.DoctorPigWriteService;
 import io.terminus.doctor.msg.dto.Rule;
 import io.terminus.doctor.msg.dto.RuleValue;
 import io.terminus.doctor.msg.dto.SubUser;
 import io.terminus.doctor.msg.enums.Category;
 import io.terminus.doctor.msg.model.DoctorMessage;
 import io.terminus.doctor.msg.model.DoctorMessageRuleRole;
-import io.terminus.doctor.msg.producer.AbstractProducer;
 import io.terminus.doctor.msg.service.DoctorMessageReadService;
 import io.terminus.doctor.msg.service.DoctorMessageRuleReadService;
 import io.terminus.doctor.msg.service.DoctorMessageRuleRoleReadService;
@@ -25,6 +25,7 @@ import io.terminus.doctor.msg.service.DoctorMessageRuleTemplateReadService;
 import io.terminus.doctor.msg.service.DoctorMessageTemplateReadService;
 import io.terminus.doctor.msg.service.DoctorMessageWriteService;
 import io.terminus.doctor.schedule.msg.producer.factory.PigDtoFactory;
+import io.terminus.doctor.user.service.DoctorUserDataPermissionReadService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
@@ -47,9 +48,7 @@ import java.util.stream.Collectors;
  */
 @Component
 @Slf4j
-public class SowEliminateProducer extends AbstractProducer {
-
-    private final DoctorPigReadService doctorPigReadService;
+public class SowEliminateProducer extends AbstractJobProducer {
 
     @Autowired
     public SowEliminateProducer(DoctorMessageRuleTemplateReadService doctorMessageRuleTemplateReadService,
@@ -58,15 +57,19 @@ public class SowEliminateProducer extends AbstractProducer {
                                 DoctorMessageReadService doctorMessageReadService,
                                 DoctorMessageWriteService doctorMessageWriteService,
                                 DoctorPigReadService doctorPigReadService,
-                                DoctorMessageTemplateReadService doctorMessageTemplateReadService) {
+                                DoctorPigWriteService doctorPigWriteService,
+                                DoctorMessageTemplateReadService doctorMessageTemplateReadService,
+                                DoctorUserDataPermissionReadService doctorUserDataPermissionReadService) {
         super(doctorMessageTemplateReadService,
                 doctorMessageRuleTemplateReadService,
                 doctorMessageRuleReadService,
                 doctorMessageRuleRoleReadService,
                 doctorMessageReadService,
                 doctorMessageWriteService,
+                doctorPigReadService,
+                doctorPigWriteService,
+                doctorUserDataPermissionReadService,
                 Category.SOW_ELIMINATE);
-        this.doctorPigReadService = doctorPigReadService;
     }
 
     @Override

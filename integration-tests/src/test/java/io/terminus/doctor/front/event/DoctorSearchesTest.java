@@ -7,6 +7,7 @@ import io.terminus.doctor.event.search.group.SearchedGroupDto;
 import io.terminus.doctor.event.search.pig.SearchedPigDto;
 import io.terminus.doctor.front.BaseFrontWebTest;
 import io.terminus.doctor.web.component.DoctorSearches;
+import io.terminus.doctor.web.front.event.controller.DoctorPigs;
 import org.junit.Test;
 import org.springframework.boot.test.SpringApplicationConfiguration;
 
@@ -128,5 +129,17 @@ public class DoctorSearchesTest extends BaseFrontWebTest {
         List body = getForEntity(url, ImmutableMap.of("q", q,"farmId", 12355), List.class).getBody();
         System.out.println(body.size());
         System.out.println(JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(body));
+    }
+
+    /**
+     * 获取猪只提示的消息
+     * @see DoctorPigs#queryPigNotifyMessages(Long)
+     */
+    @Test
+    public void test_QUERY_PigNotifyMessage() {
+        String url = "/api/doctor/pigs/notify/message";
+        List messages = getForEntity(url, ImmutableMap.of("pigId", "144"), List.class).getBody();
+        System.out.println(messages.size());
+        System.out.println(JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(messages));
     }
 }

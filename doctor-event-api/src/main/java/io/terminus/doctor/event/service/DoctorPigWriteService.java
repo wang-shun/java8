@@ -16,6 +16,7 @@ public interface DoctorPigWriteService {
 
     Response<Long> createPig(DoctorPig pig);
     Response<Long> createPigTrack(DoctorPigTrack pigTrack);
+    Response<Integer> updatePigTrackExtraMessage(DoctorPigTrack pigTrack);
     Response<Long> createPigEvent(DoctorPigEvent pigEvent);
     Response<Long> createPigSnapShot(DoctorPigSnapshot pigSnapshot);
 }

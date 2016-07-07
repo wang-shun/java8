@@ -27,6 +27,7 @@
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.DoctorServiceReviewWriteService" id="doctorServiceReviewWriteService" check="false"/>
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.DoctorServiceStatusReadService" id="doctorServiceStatusReadService" check="false"/>
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.DoctorServiceStatusWriteService" id="doctorServiceStatusWriteService" check="false"/>
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.DoctorUserDataPermissionReadService" id="doctorUserDataPermissionReadService" check="false"/>
 
     <!-- workflow api -->
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.workflow.core.WorkFlowService" id="workFlowService" check="false"/>
@@ -37,6 +38,7 @@
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.event.search.barn.BarnSearchDumpService" id="barnSearchDumpService" check="false"/>
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.warehouse.search.material.MaterialDumpService" id="materialDumpService" check="false"/>
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.event.service.DoctorPigReadService" id="doctorPigReadService" check="false"/>
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.event.service.DoctorPigWriteService" id="doctorPigWriteService" check="false"/>
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.event.service.DoctorPigEventReadService" id="doctorPigEventReadService" check="false"/>
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.event.service.DoctorGroupReadService" id="doctorGroupReadService" check="false"/>
 

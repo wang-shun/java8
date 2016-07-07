@@ -8,16 +8,18 @@ import io.terminus.common.utils.Splitters;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dto.DoctorPigInfoDto;
 import io.terminus.doctor.event.enums.DataRange;
+import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.service.DoctorPigReadService;
+import io.terminus.doctor.event.service.DoctorPigWriteService;
 import io.terminus.doctor.msg.dto.Rule;
 import io.terminus.doctor.msg.dto.RuleValue;
 import io.terminus.doctor.msg.dto.SubUser;
 import io.terminus.doctor.msg.enums.Category;
 import io.terminus.doctor.msg.model.DoctorMessage;
 import io.terminus.doctor.msg.model.DoctorMessageRuleRole;
-import io.terminus.doctor.msg.producer.AbstractProducer;
+import io.terminus.doctor.msg.model.DoctorMessageRuleTemplate;
 import io.terminus.doctor.msg.service.DoctorMessageReadService;
 import io.terminus.doctor.msg.service.DoctorMessageRuleReadService;
 import io.terminus.doctor.msg.service.DoctorMessageRuleRoleReadService;
@@ -25,6 +27,7 @@ import io.terminus.doctor.msg.service.DoctorMessageRuleTemplateReadService;
 import io.terminus.doctor.msg.service.DoctorMessageTemplateReadService;
 import io.terminus.doctor.msg.service.DoctorMessageWriteService;
 import io.terminus.doctor.schedule.msg.producer.factory.PigDtoFactory;
+import io.terminus.doctor.user.service.DoctorUserDataPermissionReadService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
@@ -45,9 +48,7 @@ import java.util.stream.Collectors;
  */
 @Component
 @Slf4j
-public class SowNeedWeanProducer extends AbstractProducer {
-
-    private final DoctorPigReadService doctorPigReadService;
+public class SowNeedWeanProducer extends AbstractJobProducer {
 
     @Autowired
     public SowNeedWeanProducer(DoctorMessageRuleTemplateReadService doctorMessageRuleTemplateReadService,
@@ -56,15 +57,19 @@ public class SowNeedWeanProducer extends AbstractProducer {
                                 DoctorMessageReadService doctorMessageReadService,
                                 DoctorMessageWriteService doctorMessageWriteService,
                                 DoctorPigReadService doctorPigReadService,
-                                DoctorMessageTemplateReadService doctorMessageTemplateReadService) {
+                               DoctorPigWriteService doctorPigWriteService,
+                                DoctorMessageTemplateReadService doctorMessageTemplateReadService,
+                               DoctorUserDataPermissionReadService doctorUserDataPermissionReadService) {
         super(doctorMessageTemplateReadService,
                 doctorMessageRuleTemplateReadService,
                 doctorMessageRuleReadService,
                 doctorMessageRuleRoleReadService,
                 doctorMessageReadService,
                 doctorMessageWriteService,
+                doctorPigReadService,
+                doctorPigWriteService,
+                doctorUserDataPermissionReadService,
                 Category.SOW_NEEDWEAN);
-        this.doctorPigReadService = doctorPigReadService;
     }
 
     @Override
@@ -79,6 +84,8 @@ public class SowNeedWeanProducer extends AbstractProducer {
             RuleValue ruleValue = rule.getValues().get(i);
             ruleValueMap.put(ruleValue.getId(), ruleValue);
         }
+
+        DoctorMessageRuleTemplate ruleTemplate = RespHelper.orServEx(doctorMessageRuleTemplateReadService.findMessageRuleTemplateById(ruleRole.getTemplateId()));
 
         if (StringUtils.isNotBlank(rule.getChannels())) {
             // 批量获取猪信息
@@ -100,9 +107,16 @@ public class SowNeedWeanProducer extends AbstractProducer {
                     // 母猪的updatedAt与当前时间差 (天)
                     Double timeDiff = (double) (DateTime.now().minus(pigDto.getUpdatedAt().getTime()).getMillis() / 86400000);
                     // 1. 哺乳状态日期判断 -> id:1
-                    if (ruleValueMap.get(1) != null &&
-                            DateTime.now().minusDays(ruleValueMap.get(1).getValue().intValue()).isAfter(new DateTime(pigDto.getUpdatedAt()))) {
-                        messages.addAll(getMessage(pigDto, rule.getChannels(), ruleRole, subUsers, timeDiff, rule.getUrl()));
+                    if (ruleValueMap.get(1) != null) {
+                        if (Objects.equals(ruleTemplate.getType(), DoctorMessageRuleTemplate.Type.WARNING.getValue())) {
+                            // 记录每只猪的消息提醒
+                            recordPigMessage(pigDto, PigEvent.WEAN, ruleValueMap.get(1).getValue().intValue(),
+                                    PigStatus.FEED);
+                        }
+
+                        if (DateTime.now().minusDays(ruleValueMap.get(1).getValue().intValue()).isAfter(new DateTime(pigDto.getUpdatedAt()))) {
+                            messages.addAll(getMessage(pigDto, rule.getChannels(), ruleRole, subUsers, timeDiff, rule.getUrl()));
+                        }
                     }
                 }
             }
