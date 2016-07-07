@@ -2,6 +2,7 @@ package io.terminus.doctor.warehouse.service;
 
 import com.google.common.base.Throwables;
 import com.google.common.collect.Maps;
+import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.model.PageInfo;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
@@ -26,6 +27,7 @@ import java.util.stream.Collectors;
  */
 @Service
 @Slf4j
+@RpcProvider
 public class DoctorMaterialInWareHouseReadServiceImpl implements DoctorMaterialInWareHouseReadService{
 
     private final DoctorMaterialInWareHouseDao doctorMaterialInWareHouseDao;

@@ -2,6 +2,7 @@ package io.terminus.doctor.warehouse.service;
 
 import com.google.common.base.Throwables;
 import com.google.common.collect.Maps;
+import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.model.PageInfo;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
@@ -9,7 +10,7 @@ import io.terminus.doctor.warehouse.dao.DoctorMaterialInfoDao;
 import io.terminus.doctor.warehouse.model.DoctorMaterialInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import javax.validation.constraints.NotNull;
 import java.util.List;
@@ -22,7 +23,8 @@ import java.util.Map;
  * Descirbe:
  */
 @Slf4j
-@Component
+@Service
+@RpcProvider
 public class DoctorMaterialInfoReadServiceImpl implements DoctorMaterialInfoReadService{
 
     private final DoctorMaterialInfoDao doctorMaterialInfoDao;

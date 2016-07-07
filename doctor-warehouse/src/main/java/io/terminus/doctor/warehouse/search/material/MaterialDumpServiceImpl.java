@@ -3,6 +3,7 @@ package io.terminus.doctor.warehouse.search.material;
 import com.google.common.base.Stopwatch;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Iterables;
+import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.warehouse.dao.DoctorMaterialInfoDao;
 import io.terminus.doctor.warehouse.model.DoctorMaterialInfo;
@@ -13,7 +14,7 @@ import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -24,8 +25,9 @@ import java.util.concurrent.TimeUnit;
  * Created by icemimosa
  * Date: 16/5/23
  */
-@Component
 @Slf4j
+@Service
+@RpcProvider
 public class MaterialDumpServiceImpl implements MaterialDumpService {
 
     private DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss");

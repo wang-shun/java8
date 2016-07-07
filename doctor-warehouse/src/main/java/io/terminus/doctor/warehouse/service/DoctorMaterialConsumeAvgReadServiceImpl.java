@@ -3,6 +3,7 @@ package io.terminus.doctor.warehouse.service;
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
+import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.model.Response;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.doctor.warehouse.dao.DoctorMaterialConsumeAvgDao;
@@ -28,6 +29,7 @@ import java.util.List;
  */
 @Slf4j
 @Service
+@RpcProvider
 public class DoctorMaterialConsumeAvgReadServiceImpl implements DoctorMaterialConsumeAvgReadService {
 
     private final DoctorMaterialConsumeAvgDao doctorMaterialConsumeAvgDao;
