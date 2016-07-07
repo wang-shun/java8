@@ -454,7 +454,10 @@ public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteServic
      */
     private void publishEvent (Map<String,Object> results){
         if(publisher == null){
-            // coreEventDispatcher.publish(new PigEventCreateEvent(results));
+            // 发送 PigEventCreateEvent 事件
+            coreEventDispatcher.publish(new PigEventCreateEvent(results));
+
+            // 发送 DataEvent 事件
             coreEventDispatcher.publish(DataEvent.make(DataEventType.PigEventCreate.getKey(), new PigEventCreateEvent(results)));
         }else{
             try {

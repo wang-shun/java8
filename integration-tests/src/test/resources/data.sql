@@ -341,3 +341,10 @@ VALUES
 INSERT INTO `doctor_user_data_permissions` (`id`, `user_id`, `farm_ids`, `barn_ids`, `ware_house_types`, `extra`, `creator_id`, `creator_name`, `updator_id`, `updator_name`, `created_at`, `updated_at`)
 VALUES
 	(3, 1, '0,1', NULL, NULL, NULL, 7, '18811111111@15988388257', 7, '18811111111@15988388257', NULL, NULL);
+
+-- 2016-07-07 doctor_pig_tracks 数据
+INSERT INTO `doctor_pig_tracks` (`id`, `farm_id`, `pig_id`, `pig_type`, `status`, `is_removal`, `current_barn_id`, `current_barn_name`, `weight`, `out_farm_date`, `rel_event_ids`, `extra`, `extra_message`, `current_parity`, `remark`, `creator_id`, `creator_name`, `updator_id`, `updator_name`, `created_at`, `updated_at`)
+VALUES
+	(143, 12355, 143, 1, 1, 0, 10, '产房1舍', NULL, NULL, '{"1":"486,488"}', '{"diseaseName":"阴道流脓","diseaseDate":1467763200000,"diseaseStaff":null,"diseaseId":21,"diseaseRemark":"remark"}', '[{"pigId":143,"eventType":9,"eventTypeName":"配种","timeDiff":6.0,"status":1},{"pigId":143,"eventType":9,"eventTypeName":"配种","timeDiff":6.0,"status":1}]', 1, NULL, 16, NULL, NULL, NULL, '2016-07-06 16:52:52', '2016-07-06 17:25:01');INSERT INTO `doctor_pig_tracks` (`id`, `farm_id`, `pig_id`, `pig_type`, `status`, `is_removal`, `current_barn_id`, `current_barn_name`, `weight`, `out_farm_date`, `rel_event_ids`, `extra`, `extra_message`, `current_parity`, `remark`, `creator_id`, `creator_name`, `updator_id`, `updator_name`, `created_at`, `updated_at`)
+VALUES
+	(144, 12355, 143, 1, 1, 0, 10, '产房1舍', NULL, NULL, '{"1":"486,488"}', '{"diseaseName":"阴道流脓","diseaseDate":1467763200000,"diseaseStaff":null,"diseaseId":21,"diseaseRemark":"remark"}', NULL , 1, NULL, 16, NULL, NULL, NULL, '2016-07-06 16:52:52', '2016-07-06 17:25:01');

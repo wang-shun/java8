@@ -38,4 +38,4 @@ redis:
   test-on-borrow: true
 
 doctor:
-  url: http://doctor-test.xrnm.com
+  url: https://doctor-test.xrnm.com

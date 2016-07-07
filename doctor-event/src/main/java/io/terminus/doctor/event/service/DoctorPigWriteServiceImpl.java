@@ -74,6 +74,16 @@ public class DoctorPigWriteServiceImpl implements DoctorPigWriteService {
     }
 
     @Override
+    public Response<Integer> updatePigTrackExtraMessage(DoctorPigTrack pigTrack) {
+        try{
+            return Response.ok(doctorPigTrackDao.updateExtraMessage(pigTrack));
+        } catch (Exception e) {
+            log.error("update pig track filed, pig id is {}, cause by {}", pigTrack.getPigId(), Throwables.getStackTraceAsString(e));
+            return Response.fail("pigTrack.update.fail");
+        }
+    }
+
+    @Override
     public Response<Long> createPigEvent(DoctorPigEvent pigEvent) {
         try {
             doctorPigEventDao.create(pigEvent);
