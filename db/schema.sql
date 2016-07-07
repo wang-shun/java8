@@ -1186,7 +1186,8 @@ CREATE TABLE `doctor_carousel_figures` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '自增主键',
   `index` int(11) DEFAULT NULL COMMENT '轮播图顺序, asc排序',
   `status` smallint(6) DEFAULT NULL COMMENT '状态: 1 启用, -1 不启用',
-  `url` varchar(512) DEFAULT NULL COMMENT '轮播图链接地址',
+  `url` varchar(512) DEFAULT NULL COMMENT '轮播图图片地址',
+  `forward` varchar(512) DEFAULT NULL COMMENT '轮播图链接地址',
   `created_at` datetime DEFAULT NULL COMMENT '创建时间',
   `updated_at` datetime DEFAULT NULL COMMENT '修改时间',
   PRIMARY KEY (`id`)

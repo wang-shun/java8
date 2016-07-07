@@ -19,6 +19,7 @@ import io.terminus.doctor.common.enums.UserStatus;
 import io.terminus.doctor.common.enums.UserType;
 import io.terminus.doctor.common.event.CoreEventDispatcher;
 import io.terminus.doctor.common.utils.Params;
+import io.terminus.doctor.msg.enums.SmsCodeType;
 import io.terminus.doctor.open.common.CaptchaGenerator;
 import io.terminus.doctor.open.common.MobilePattern;
 import io.terminus.doctor.open.common.Sessions;
@@ -149,12 +150,64 @@ public class OPUsers {
     }
 
     /**
+     * 发送短信验证码
+     * @param mobile
+     * @param sessionId
+     * @param type 枚举 io.terminus.doctor.msg.enums.SmsCodeType.
+     *             允许type == null, 此时认为是注册场景
+     * @return
+     */
+    @OpenMethod(key = "get.mobile.code", paramNames = {"mobile", "sid", "type"})
+    public Boolean getMobileCode(@NotEmpty(message = "user.mobile.miss") String mobile,
+                                 @NotEmpty(message = "session.id.miss")String sessionId,
+                                 Integer type) {
+        if (!mobilePattern.getPattern().matcher(mobile).matches()) {
+            throw new OPClientException("mobile.format.error");
+        }
+        SmsCodeType smsCodeType;
+        if(type == null){
+            smsCodeType = SmsCodeType.REGISTER;
+        }else{
+            smsCodeType = SmsCodeType.from(type);
+        }
+        if(smsCodeType == null){
+            throw new OPClientException("sms.code.type.error");
+        }
+
+        Response<User> result = userReadService.findBy(mobile, LoginType.MOBILE);
+        switch (smsCodeType){
+            case REGISTER:
+                // 如果该手机号已注册
+                if(result.isSuccess() && result.getResult() != null){
+                    throw new OPClientException("user.register.mobile.has.been.used");
+                }
+                break;
+            case RESET_PASSWORD:
+                //如果手机号未注册,则抛出异常
+                if(!result.isSuccess() || result.getResult() == null){
+                    throw new OPClientException(result.getError());
+                }
+                break;
+            default:
+                //如果手机号未注册,则抛出异常
+                if(!result.isSuccess() || result.getResult() == null){
+                    throw new OPClientException(result.getError());
+                }
+                break;
+        }
+
+        return this.sendSmsCode(mobile, sessionId, smsCodeType.template());
+    }
+
+    /**
      * 获取手机验证码
      * @param mobile
      * @return
      */
-    @OpenMethod(key = "get.mobile.code", paramNames = {"mobile", "sid"})
-    public Boolean sendSms(@NotEmpty(message = "user.mobile.miss") String mobile, @NotEmpty(message = "session.id.miss")String sessionId) {
+    @OpenMethod(key = "send.sms.code", paramNames = {"mobile", "sid", "templateName"})
+    public Boolean sendSmsCode(@NotEmpty(message = "user.mobile.miss") String mobile,
+                               @NotEmpty(message = "session.id.miss")String sessionId,
+                               @NotEmpty(message = "template.name.miss")String templateName) {
         if (mobilePattern.getPattern().matcher(mobile).matches()) {
             Map<String, Object> snapshot = sessionManager.findSessionById(Sessions.MSG_PREFIX, sessionId);
             String activateCode = null;
@@ -177,7 +230,7 @@ public class OPUsers {
                             ImmutableMap.of("code", code + "@" + System.currentTimeMillis()+"@"+mobile),
                             Sessions.SHORT_INACTIVE_INTERVAL);
                     // 发送验证码
-                    result = doSendSms(code, mobile);
+                    result = doSendSms(code, mobile, templateName);
                 }
             } else { //新发送激活码
                 String code = generateMsgCode();
@@ -186,7 +239,7 @@ public class OPUsers {
                         ImmutableMap.of("code", code + "@" + System.currentTimeMillis()+"@"+mobile),
                         Sessions.SHORT_INACTIVE_INTERVAL);
                 // 发送验证码
-                result = doSendSms(code, mobile);
+                result = doSendSms(code, mobile, templateName);
             }
             if(!result.isSuccess()) {
                 log.warn("send sms single fail, cause:{}", result.getError());
@@ -631,12 +684,12 @@ public class OPUsers {
      * @param mobile 手机号
      * @return 发送结果
      */
-    private Response<Boolean> doSendSms(String code, String mobile){
+    private Response<Boolean> doSendSms(String code, String mobile, String templateName){
         Response<Boolean> r = new Response<Boolean>();
         try {
             Map<String, Serializable> context = new HashMap<>();
             context.put("code", code);
-            String result = smsWebService.send(mobile, "user.register.code", context, null);
+            String result = smsWebService.send(mobile, templateName, context, null);
             r.setResult(Boolean.TRUE);
             return r;
         }catch(JsonResponseException | ServiceException e){

@@ -25,7 +25,7 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        index, status, url, forward, created_at, updated_at
+        `index`, `status`, url, forward, created_at, updated_at
     </sql>
 
     <sql id="vals">
@@ -46,12 +46,18 @@
         WHERE id = #{id}
     </select>
 
+    <select id="findByStatus" resultMap="DoctorCarouselFigureMap" parameterType="integer">
+        SELECT <include refid="cols_all" />
+        FROM <include refid="tb" />
+        WHERE `status` = #{status}
+    </select>
+
     <update id="update" parameterType="DoctorCarouselFigure">
         UPDATE
         <include refid="tb"/>
         <set>
-            <if test="index != null">index = #{index},</if>
-            <if test="status != null">status = #{status},</if>
+            <if test="index != null">`index` = #{index},</if>
+            <if test="status != null">`status` = #{status},</if>
             <if test="url != null">url = #{url},</if>
             <if test="forward != null">forward = #{forward},</if>
             
