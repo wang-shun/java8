@@ -19,6 +19,7 @@ import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorVaccinationPigWarn;
 import io.terminus.doctor.event.service.DoctorGroupReadService;
 import io.terminus.doctor.event.service.DoctorPigReadService;
+import io.terminus.doctor.event.service.DoctorPigWriteService;
 import io.terminus.doctor.event.service.DoctorVaccinationPigWarnReadService;
 import io.terminus.doctor.msg.dto.Rule;
 import io.terminus.doctor.msg.dto.RuleValue;
@@ -26,7 +27,6 @@ import io.terminus.doctor.msg.dto.SubUser;
 import io.terminus.doctor.msg.enums.Category;
 import io.terminus.doctor.msg.model.DoctorMessage;
 import io.terminus.doctor.msg.model.DoctorMessageRuleRole;
-import io.terminus.doctor.msg.producer.AbstractProducer;
 import io.terminus.doctor.msg.service.DoctorMessageReadService;
 import io.terminus.doctor.msg.service.DoctorMessageRuleReadService;
 import io.terminus.doctor.msg.service.DoctorMessageRuleRoleReadService;
@@ -35,6 +35,7 @@ import io.terminus.doctor.msg.service.DoctorMessageTemplateReadService;
 import io.terminus.doctor.msg.service.DoctorMessageWriteService;
 import io.terminus.doctor.schedule.msg.producer.factory.GroupDetailFactory;
 import io.terminus.doctor.schedule.msg.producer.factory.PigDtoFactory;
+import io.terminus.doctor.user.service.DoctorUserDataPermissionReadService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
@@ -57,9 +58,8 @@ import java.util.stream.Collectors;
  */
 @Component
 @Slf4j
-public class PigVaccinationProducer extends AbstractProducer {
+public class PigVaccinationProducer extends AbstractJobProducer {
 
-    private final DoctorPigReadService doctorPigReadService;
     private final DoctorGroupReadService doctorGroupReadService;
     private final DoctorVaccinationPigWarnReadService doctorVaccinationPigWarnReadService;
 
@@ -70,17 +70,21 @@ public class PigVaccinationProducer extends AbstractProducer {
                                   DoctorMessageReadService doctorMessageReadService,
                                   DoctorMessageWriteService doctorMessageWriteService,
                                   DoctorPigReadService doctorPigReadService,
+                                  DoctorPigWriteService doctorPigWriteService,
                                   DoctorVaccinationPigWarnReadService doctorVaccinationPigWarnReadService,
                                   DoctorGroupReadService doctorGroupReadService,
-                                  DoctorMessageTemplateReadService doctorMessageTemplateReadService) {
+                                  DoctorMessageTemplateReadService doctorMessageTemplateReadService,
+                                  DoctorUserDataPermissionReadService doctorUserDataPermissionReadService) {
         super(doctorMessageTemplateReadService,
                 doctorMessageRuleTemplateReadService,
                 doctorMessageRuleReadService,
                 doctorMessageRuleRoleReadService,
                 doctorMessageReadService,
                 doctorMessageWriteService,
+                doctorPigReadService,
+                doctorPigWriteService,
+                doctorUserDataPermissionReadService,
                 Category.PIG_VACCINATION);
-        this.doctorPigReadService = doctorPigReadService;
         this.doctorGroupReadService = doctorGroupReadService;
         this.doctorVaccinationPigWarnReadService = doctorVaccinationPigWarnReadService;
     }

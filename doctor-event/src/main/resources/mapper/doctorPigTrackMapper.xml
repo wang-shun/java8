@@ -21,6 +21,7 @@
         <result column="out_farm_date" property="outFarmDate"/>
         <result column="rel_event_ids" property="relEventIds"/>
         <result column="extra" property="extra"/>
+        <result column="extra_message" property="extraMessage"/>
         <result column="current_parity" property="currentParity"/>
         <result column="remark" property="remark"/>
         <result column="creator_id" property="creatorId"/>
@@ -39,11 +40,11 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        `farm_id`,`pig_id`, `pig_type`, `status`,`is_removal`,`current_barn_id`,`current_barn_name`,`weight`,`out_farm_date`,`rel_event_ids`,`extra`,`current_parity`,`remark`,`creator_id`,`creator_name`,`updator_id`,`updator_name`,`created_at`,`updated_at`
+        `farm_id`,`pig_id`, `pig_type`, `status`,`is_removal`,`current_barn_id`,`current_barn_name`,`weight`,`out_farm_date`,`rel_event_ids`,`extra`,`extra_message`,`current_parity`,`remark`,`creator_id`,`creator_name`,`updator_id`,`updator_name`,`created_at`,`updated_at`
     </sql>
 
     <sql id="vals">
-        #{farmId},#{pigId},#{pigType},#{status},#{isRemoval},#{currentBarnId},#{currentBarnName},#{weight},#{outFarmDate},#{relEventIds},#{extra},#{currentParity},#{remark},#{creatorId},#{creatorName},#{updatorId},#{updatorName},now(),now()
+        #{farmId},#{pigId},#{pigType},#{status},#{isRemoval},#{currentBarnId},#{currentBarnName},#{weight},#{outFarmDate},#{relEventIds},#{extra},#{extraMessage},#{currentParity},#{remark},#{creatorId},#{creatorName},#{updatorId},#{updatorName},now(),now()
     </sql>
 
     <sql id="criteria">
@@ -70,7 +71,7 @@
         ( <include refid="cols_exclude_id"/> )
         VALUES
         <foreach collection="list" item="i" separator=",">
-        (#{i.farmId}, #{i.pigId},#{i.pigType},#{i.status},#{i.currentBarnId},#{i.currentBarnName},#{i.weight},#{i.outFarmDate},#{i.relEventIds},#{i.extra},#{i.currentParity},#{i.remark},#{i.creatorId},#{i.creatorName},#{i.updatorId},#{i.updatorName},now(),now()
+        (#{i.farmId}, #{i.pigId},#{i.pigType},#{i.status},#{i.currentBarnId},#{i.currentBarnName},#{i.weight},#{i.outFarmDate},#{i.relEventIds},#{i.extra},#{i.extraMessage},#{i.currentParity},#{i.remark},#{i.creatorId},#{i.creatorName},#{i.updatorId},#{i.updatorName},now(),now()
  )
         </foreach>
     </insert>
@@ -137,6 +138,7 @@
             <if test="outFarmDate != null" > ,`out_farm_date` = #{outFarmDate}</if>
             <if test="relEventIds != null" > ,`rel_event_ids` = #{relEventIds}</if>
             <if test="extra != null" > ,`extra` = #{extra}</if>
+            <if test="extraMessage != null" > ,`extra_message` = #{extraMessage}</if>
             <if test="currentParity != null" > ,`current_parity` = #{currentParity}</if>
             <if test="remark != null" > ,`remark` = #{remark}</if>
             <if test="creatorId != null" > ,`creator_id` = #{creatorId}</if>
@@ -144,6 +146,14 @@
             <if test="updatorId != null" > ,`updator_id` = #{updatorId}</if>
             <if test="updatorName != null" > ,`updator_name` = #{updatorName}</if>
             <if test="createdAt != null" > ,`created_at` = #{createdAt}</if>
+        </set>
+        WHERE id=#{id}
+    </update>
+
+    <update id="updateExtraMessage" parameterType="DoctorPigTrack">
+        UPDATE <include refid="tb"/>
+        <set>
+            `extra_message` = #{extraMessage}
         </set>
         WHERE id=#{id}
     </update>

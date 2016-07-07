@@ -148,6 +148,12 @@ public abstract class AbstractProducer implements IProducer {
     protected abstract List<DoctorMessage> message(DoctorMessageRuleRole ruleRole, List<SubUser> subUsers);
 
     /**
+     * 检查用户是否含有数据的权限
+     * @return
+     */
+    protected abstract boolean hasUserAuth(Long userId, Long farmId);
+
+    /**
      * 检查消息符合规则RuleValue
      * @param ruleValue     规则
      * @param value         比较值
@@ -231,33 +237,36 @@ public abstract class AbstractProducer implements IProducer {
                     ));*/
             // 子账户
             subUsers.stream().forEach(subUser -> {
-                DoctorMessage message = DoctorMessage.builder()
-                        .farmId(ruleRole.getFarmId())
-                        .ruleId(ruleRole.getRuleId())
-                        .roleId(ruleRole.getRoleId())
-                        .userId(subUser.getUserId())
-                        .templateId(ruleRole.getTemplateId())
-                        .templateName(template.getName())
-                        .messageTemplate(getTemplateName(template.getMessageTemplate(), channel))
-                        .type(template.getType())
-                        .category(template.getCategory())
-                        .data(jsonData)
-                        .channel(channel)
-                        //.url(getUrl(ruleRole.getRule().getUrl(), channel))
-                        .url(ruleRole.getRule().getUrl())
-                        .status(DoctorMessage.Status.NORMAL.getValue())
-                        .createdBy(template.getUpdatedBy())
-                        .build();
-                // 模板编译
-                try{
-                    Map<String, Serializable> jsonContext = MAPPER.readValue(jsonData, Map.class);
-                    String content = RespHelper.orServEx(doctorMessageTemplateReadService.getMessageContentWithCache(message.getMessageTemplate(), jsonContext));
-                    message.setContent(content != null ? content.trim() : "");
-                } catch (Exception e) {
-                    log.error("compile message template failed, template name is {}, json map is {}", message.getMessageTemplate(), jsonData);
-                }
+                // 检查该用户是否含有farm权限
+                if (hasUserAuth(subUser.getUserId(), ruleRole.getFarmId())) {
+                    DoctorMessage message = DoctorMessage.builder()
+                            .farmId(ruleRole.getFarmId())
+                            .ruleId(ruleRole.getRuleId())
+                            .roleId(ruleRole.getRoleId())
+                            .userId(subUser.getUserId())
+                            .templateId(ruleRole.getTemplateId())
+                            .templateName(template.getName())
+                            .messageTemplate(getTemplateName(template.getMessageTemplate(), channel))
+                            .type(template.getType())
+                            .category(template.getCategory())
+                            .data(jsonData)
+                            .channel(channel)
+                            //.url(getUrl(ruleRole.getRule().getUrl(), channel))
+                            .url(ruleRole.getRule().getUrl())
+                            .status(DoctorMessage.Status.NORMAL.getValue())
+                            .createdBy(template.getUpdatedBy())
+                            .build();
+                    // 模板编译
+                    try{
+                        Map<String, Serializable> jsonContext = MAPPER.readValue(jsonData, Map.class);
+                        String content = RespHelper.orServEx(doctorMessageTemplateReadService.getMessageContentWithCache(message.getMessageTemplate(), jsonContext));
+                        message.setContent(content != null ? content.trim() : "");
+                    } catch (Exception e) {
+                        log.error("compile message template failed, template name is {}, json map is {}", message.getMessageTemplate(), jsonData);
+                    }
 
-                messages.add(message);
+                    messages.add(message);
+                }
             });
         }
         return messages;

@@ -1,15 +1,23 @@
 package io.terminus.doctor.event.event;
 
 import com.google.common.base.Throwables;
+import com.google.common.collect.Lists;
 import com.google.common.eventbus.Subscribe;
 import io.terminus.doctor.common.enums.DataEventType;
 import io.terminus.doctor.common.event.CoreEventDispatcher;
 import io.terminus.doctor.common.event.DataEvent;
 import io.terminus.doctor.common.event.EventListener;
 import io.terminus.doctor.common.utils.Params;
+import io.terminus.doctor.common.utils.RespHelper;
+import io.terminus.doctor.event.dto.DoctorPigMessage;
+import io.terminus.doctor.event.model.DoctorPigEvent;
+import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.event.search.barn.BarnSearchWriteService;
 import io.terminus.doctor.event.search.group.GroupSearchWriteService;
 import io.terminus.doctor.event.search.pig.PigSearchWriteService;
+import io.terminus.doctor.event.service.DoctorPigEventReadService;
+import io.terminus.doctor.event.service.DoctorPigReadService;
+import io.terminus.doctor.event.service.DoctorPigWriteService;
 import io.terminus.zookeeper.pubsub.Subscriber;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +25,9 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import java.io.Serializable;
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Desc: 猪/猪群/猪舍 信息修改刷新ES事件监听
@@ -34,6 +44,15 @@ public class DoctorZKListener implements EventListener {
 
     @Autowired
     private CoreEventDispatcher coreEventDispatcher;
+
+    @Autowired
+    private DoctorPigEventReadService doctorPigEventReadService;
+
+    @Autowired
+    private DoctorPigReadService doctorPigReadService;
+
+    @Autowired
+    private DoctorPigWriteService doctorPigWriteService;
 
     @Autowired
     private PigSearchWriteService pigSearchWriteService;
@@ -99,6 +118,54 @@ public class DoctorZKListener implements EventListener {
             Long barnId = Params.getWithConvert(context, "doctorBarnId", d -> Long.valueOf(d.toString()));
             // update es index
             barnSearchWriteService.update(barnId);
+        }
+    }
+
+    /**
+     * 监听猪事件
+     * @param pigEventCreateEvent
+     */
+    @Subscribe
+    public void handlePigEvent(PigEventCreateEvent pigEventCreateEvent) {
+        if (pigEventCreateEvent != null && pigEventCreateEvent.getContext() != null) {
+            Map<String, Object> context = pigEventCreateEvent.getContext();
+            if("single".equals(context.get("contextType"))) {
+                Long pigId = Params.getWithConvert(context, "doctorPigId", d -> Long.valueOf(d.toString()));
+                Long doctorEventId = Params.getWithConvert(context, "doctorEventId", d -> Long.valueOf(d.toString()));
+                updateTrackExtraMessage(pigId, doctorEventId);
+            }else {
+                context.remove("contextType");
+                context.values().forEach(inContext -> {
+                    if (inContext != null) {
+                        Map inContextMap = (Map) inContext;
+                        Long pigId = Params.getWithConvert(inContextMap, "doctorPigId", d -> Long.valueOf(d.toString()));
+                        Long doctorEventId = Params.getWithConvert(inContextMap, "doctorEventId", d -> Long.valueOf(d.toString()));
+                        updateTrackExtraMessage(pigId, doctorEventId);
+                    }
+                });
+            }
+        }
+    }
+
+    /**
+     * 当猪触发事件之后, 清除 extra_message 中对应的 event 类型的数据.
+     * @param pigId
+     * @param doctorEventId
+     */
+    private void updateTrackExtraMessage(Long pigId, Long doctorEventId) {
+        DoctorPigTrack pigTrack = RespHelper.orServEx(doctorPigReadService.findPigTrackByPigId(pigId));
+        DoctorPigEvent doctorPigEvent = RespHelper.orServEx(doctorPigEventReadService.queryPigEventById(doctorEventId));
+        if (pigTrack != null && doctorPigEvent != null) {
+            List<DoctorPigMessage> tempMessageList = Lists.newArrayList();
+            pigTrack.setExtraMessage(pigTrack.getExtraMessage());
+            // 去除当前事件执行后的消息提示
+            pigTrack.getExtraMessageList().forEach(doctorPigMessage -> {
+                if (!Objects.equals(doctorPigMessage.getEventType(), doctorPigEvent.getType())) {
+                    tempMessageList.add(doctorPigMessage);
+                }
+            });
+            pigTrack.setExtraMessageList(tempMessageList);
+            doctorPigWriteService.updatePigTrackExtraMessage(pigTrack);
         }
     }
 }

@@ -495,6 +495,7 @@ CREATE TABLE `doctor_pig_tracks` (
   `out_farm_date` datetime DEFAULT NULL COMMENT '猪离场时间',
   `rel_event_ids` text DEFAULT NULL COMMENT '关联事件最近事件',
   `extra` text COMMENT '事件修改猪对应信息',
+  `extra_message` text DEFAULT NULL COMMENT '每只猪的消息提醒',
   `current_parity` int(11) DEFAULT NULL COMMENT '当前胎次信息',
   `remark` text COMMENT '备注',
   `creator_id` bigint(20) DEFAULT NULL COMMENT '创建人id',

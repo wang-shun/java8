@@ -4,6 +4,7 @@ import com.google.common.base.MoreObjects;
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import io.terminus.common.model.PageInfo;
@@ -15,6 +16,7 @@ import io.terminus.doctor.event.dao.DoctorPigDao;
 import io.terminus.doctor.event.dao.DoctorPigTrackDao;
 import io.terminus.doctor.event.dto.DoctorPigInfoDetailDto;
 import io.terminus.doctor.event.dto.DoctorPigInfoDto;
+import io.terminus.doctor.event.dto.DoctorPigMessage;
 import io.terminus.doctor.event.enums.DataRange;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigEvent;
@@ -45,7 +47,7 @@ import static java.util.Objects.isNull;
  */
 @Slf4j
 @Service
-public class DoctorPigReadServiceImpl implements DoctorPigReadService{
+public class DoctorPigReadServiceImpl implements DoctorPigReadService {
 
     private final DoctorPigDao doctorPigDao;
 
@@ -221,6 +223,31 @@ public class DoctorPigReadServiceImpl implements DoctorPigReadService{
         } catch (Exception e) {
             log.error("find pigs by farmId failed, farmId:{}, cause:{}", farmId, Throwables.getStackTraceAsString(e));
             return Response.fail("pig.find.fail");
+        }
+    }
+
+    @Override
+    public Response<DoctorPigTrack> findPigTrackByPigId(@NotNull(message = "input.pigId.empty") Long pigId) {
+        try{
+            return Response.ok(doctorPigTrackDao.findByPigId(pigId));
+        } catch (Exception e) {
+            log.error("find pig track by pig id failed, pig id is {}, cause by {}", pigId, Throwables.getStackTraceAsString(e));
+            return Response.fail("pig.track.find.fail");
+        }
+    }
+
+    @Override
+    public Response<List<DoctorPigMessage>> findPigMessageByPigId(@NotNull(message = "input.pigId.empty") Long pigId) {
+        try{
+            DoctorPigTrack pigTrack = doctorPigTrackDao.findByPigId(pigId);
+            if (pigTrack != null) {
+                pigTrack.setExtraMessage(pigTrack.getExtraMessage());
+                return Response.ok(pigTrack.getExtraMessageList());
+            }
+            return Response.ok(Lists.newArrayList());
+        } catch (Exception e) {
+            log.error(", cause by {}", Throwables.getStackTraceAsString(e));
+            return Response.fail("");
         }
     }
 

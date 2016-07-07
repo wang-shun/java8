@@ -35,7 +35,7 @@ import static java.util.Objects.isNull;
  */
 @Service
 @Slf4j
-public class DoctorPigEventReadServiceImpl implements DoctorPigEventReadService{
+public class DoctorPigEventReadServiceImpl implements DoctorPigEventReadService {
 
     private final DoctorPigEventDao doctorPigEventDao;
 
@@ -104,6 +104,16 @@ public class DoctorPigEventReadServiceImpl implements DoctorPigEventReadService{
         }catch (Exception e){
             log.error("query pig events fail, cause:{}", Throwables.getStackTraceAsString(e));
             return Response.fail("query.pigEvents.fail");
+        }
+    }
+
+    @Override
+    public Response<DoctorPigEvent> queryPigEventById(Long id) {
+        try{
+            return Response.ok(doctorPigEventDao.findById(id));
+        } catch (Exception e) {
+            log.error("find pig event by id failed, id is {}, cause by {}", id, Throwables.getStackTraceAsString(e));
+            return Response.fail("query.pigEvent.fail");
         }
     }
 }

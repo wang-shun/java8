@@ -4,6 +4,7 @@ import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.event.dto.DoctorPigInfoDetailDto;
 import io.terminus.doctor.event.dto.DoctorPigInfoDto;
+import io.terminus.doctor.event.dto.DoctorPigMessage;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 
@@ -82,6 +83,20 @@ public interface DoctorPigReadService {
      * @return 猪列表
      */
     Response<List<DoctorPig>> findPigsByFarmId(@NotNull(message = "farmId.not.null") Long farmId);
+
+    /**
+     * 获取猪的track信息
+     * @param pigId 猪id
+     * @return
+     */
+    Response<DoctorPigTrack> findPigTrackByPigId(@NotNull(message = "input.pigId.empty") Long pigId);
+
+    /**
+     * 获取猪详情当前需要提醒的消息
+     * @param pigId
+     * @return
+     */
+    Response<List<DoctorPigMessage>> findPigMessageByPigId(@NotNull(message = "input.pigId.empty") Long pigId);
 
     /**
      * 校验 farmId pigCode 不存在
