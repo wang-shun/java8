@@ -192,7 +192,11 @@ public class OPUsers {
                 }
                 break;
             default:
-                throw new OPClientException("sms.code.type.error");
+                //如果手机号未注册,则抛出异常
+                if(!result.isSuccess() || result.getResult() == null){
+                    throw new OPClientException(result.getError());
+                }
+                break;
         }
 
         return this.sendSmsCode(mobile, sessionId, smsTemplateName);
