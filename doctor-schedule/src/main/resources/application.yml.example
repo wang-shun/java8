@@ -2,8 +2,10 @@ server:
   context-path: /schedule
   port: 8087
 
-dubbo:
-  name: doctor-schedule
+# Dubbo
+rpc.dubbo:
+    registryAddress: 127.0.0.1:2181
+    check: false   # 默认是true, 检查provider
 
 logging:
   file: ${user.home}/logs/doctor/schedule.log

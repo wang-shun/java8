@@ -15,13 +15,10 @@ datasource:
   password: anywhere
 
 # Dubbo
-dubbo:
-  name: doctor-event
-  registry: zookeeper://101.201.44.35:2181
-  port: -1
-  timeout: 10000
-  threads: 100
-  heartBeats: 10000
+rpc.mode: true
+rpc.dubbo:
+    module: doctor-event
+    registryAddress: 101.201.44.35:2181
 
 logging:
   file: /var/log/doctor/event.log
