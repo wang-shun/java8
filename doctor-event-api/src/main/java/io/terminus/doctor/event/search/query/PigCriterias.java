@@ -31,7 +31,7 @@ public class PigCriterias extends Criterias {
         } else if(this.getTerms() != null && !this.getTerms().isEmpty()) {
             Terms t1 = this.getTerms().get(this.getTerms().size() - 1);
             t1.setLast(true);
-        } else if(this.getTerms() != null && !this.getTerms().isEmpty()) {
+        } else if(this.getTerm() != null && !this.getTerm().isEmpty()) {
             Term t = this.getTerm().get(this.getTerm().size() - 1);
             t.setLast(true);
         }
