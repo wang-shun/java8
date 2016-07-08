@@ -35,6 +35,5 @@ public interface DoctorMaterialInWareHouseWriteService {
      * @return
      */
     Response<Boolean> deleteMaterialInWareHouseInfo(@NotNull(message = "input.materialInWareHouseId.empty") Long materialInWareHouseId,
-                                                    @NotNull(message = "input.userId.empty") Long userId,
-                                                    @NotNull(message = "input.userName.empty") String userName);
+                                                    @NotNull(message = "input.userId.empty") Long userId, String userName);
 }
