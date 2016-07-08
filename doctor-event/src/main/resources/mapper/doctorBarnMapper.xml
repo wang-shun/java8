@@ -102,6 +102,19 @@
         </where>
     </select>
 
+    <select id="findByPigTypes" parameterType="map" resultMap="DoctorBarnMap">
+        SELECT <include refid="cols_all"/>
+        FROM <include refid="tb"/>
+        <where>
+            <if test="farmId != null">AND farm_id = #{farmId}</if>
+            <if test="pigTypes != null  &amp;&amp; pigTypes.size() > 0">AND pig_type IN
+                <foreach collection="pigTypes" item="type" open="(" separator="," close=")">
+                    #{type}
+                </foreach>
+            </if>
+        </where>
+    </select>
+
     <!-- search api start -->
     <select id="maxId" resultType="long">
         SELECT MAX(id) FROM

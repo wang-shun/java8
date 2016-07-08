@@ -1,6 +1,8 @@
 package io.terminus.doctor.web.front.event.controller;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import io.terminus.common.utils.Splitters;
 import io.terminus.doctor.common.enums.PigSearchType;
 import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.utils.RespHelper;
@@ -29,6 +31,8 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.terminus.common.utils.Arguments.notEmpty;
+
 /**
  * Desc: 猪舍表Controller
  * Mail: yangzl@terminus.io
@@ -93,6 +97,23 @@ public class DoctorBarns {
     public List<DoctorBarn> findBarnsByfarmIdAndType(@RequestParam("farmId") Long farmId,
                                                      @RequestParam("pigType") Integer pigType) {
         return RespHelper.or500(doctorBarnReadService.findBarnsByEnums(farmId, pigType, null, null));
+    }
+
+    /**
+     * 根据farmId和状态查询猪舍表
+     * @param farmId 猪场id
+     * @param pigTypes 猪舍类别 逗号分隔
+     * @see PigType
+     * @return 猪舍表列表
+     */
+    @RequestMapping(value = "/pigTypes", method = RequestMethod.GET)
+    public List<DoctorBarn> findBarnsByfarmIdAndType(@RequestParam("farmId") Long farmId,
+                                                     @RequestParam(value = "pigTypes", required = false) String pigTypes) {
+        List<Integer> types = Lists.newArrayList();
+        if (notEmpty(pigTypes)) {
+            types = Splitters.splitToInteger(pigTypes, Splitters.COMMA);
+        }
+        return RespHelper.or500(doctorBarnReadService.findBarnsByFarmIdAndPigTypes(farmId, types));
     }
 
     /**
