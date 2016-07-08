@@ -1,5 +1,6 @@
 package io.terminus.doctor.workflow.core;
 
+import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.doctor.workflow.service.FlowDefinitionService;
 import io.terminus.doctor.workflow.service.FlowProcessService;
 import io.terminus.doctor.workflow.service.FlowQueryService;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Service;
  * Date: 16/5/12
  */
 @Service
+@RpcProvider
 public class WorkFlowServiceImpl implements WorkFlowService {
 
     @Autowired

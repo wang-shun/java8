@@ -25,9 +25,10 @@
             <artifactId>doctor-common</artifactId>
         </dependency>
         <dependency>
-            <groupId>io.terminus.boot</groupId>
-            <artifactId>spring-boot-starter-dubbo</artifactId>
+            <groupId>io.terminus.boot.rpc</groupId>
+            <artifactId>rpc-dubbo</artifactId>
         </dependency>
+
         <dependency>
             <groupId>io.terminus.boot</groupId>
             <artifactId>spring-boot-starter-datasource</artifactId>
@@ -35,10 +36,6 @@
         <dependency>
             <groupId>com.zaxxer</groupId>
             <artifactId>HikariCP</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.alibaba</groupId>
-            <artifactId>dubbo</artifactId>
         </dependency>
         <dependency>
             <groupId>mysql</groupId>

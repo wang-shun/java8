@@ -1,6 +1,7 @@
 package io.terminus.doctor.user.service;
 
 import com.google.common.base.Throwables;
+import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.user.dao.UserProfileExtraDao;
 import io.terminus.parana.user.impl.dao.UserDao;
@@ -23,6 +24,7 @@ import java.util.List;
 @Service
 @Slf4j
 @Primary
+@RpcProvider
 public class DoctorUserProfileReadServiceImpl extends UserProfileReadServiceImpl implements DoctorUserProfileReadService {
     private final UserProfileExtraDao userProfileExtraDao;
 

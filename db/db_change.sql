@@ -114,3 +114,7 @@ add column `real_name` VARCHAR(64) DEFAULT NULL COMMENT '真实姓名 (冗余),�
 
 update doctor_user_subs o
 set o.real_name = (select i.realname from parana_user_profiles i where i.user_id = o.user_id);
+
+-- 20160-07-06 doctor_pig_track 表增加消息提醒字段
+ALTER TABLE doctor_pig_tracks
+ADD COLUMN `extra_message` text DEFAULT NULL COMMENT '每只猪的消息提醒' AFTER `extra`;

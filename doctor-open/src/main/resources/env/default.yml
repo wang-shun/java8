@@ -19,14 +19,11 @@ session:
   redis-max-idle: 0
   redis-prefix: afsession
 
-dubbo:
-  name: doctor-open
-  registry: zookeeper://101.201.44.35:2181
-  port: -1
-  timeout: 10000
-  threads: 100
-  heartBeats: 10000
-  mode: consumer
+# Dubbo
+rpc.mode: true
+rpc.dubbo:
+    module: doctor-open
+    registryAddress: 101.201.44.35:2181
 
 logging:
   file: /var/log/doctor/open.log

@@ -16,9 +16,6 @@
     <dubbo:service version="1.0.0" retries="0" interface="io.terminus.parana.user.service.UserWriteService" ref="doctorUserWriteServiceImpl"/>
     <dubbo:service version="1.0.0" retries="0" interface="io.terminus.parana.user.service.UserProfileReadService" ref="doctorUserProfileReadServiceImpl"/>
     <dubbo:service version="1.0.0" retries="0" interface="io.terminus.parana.user.service.UserProfileWriteService" ref="userProfileWriteServiceImpl"/>
-    <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.DoctorUserProfileReadService" ref="doctorUserProfileReadServiceImpl"/>
-
-    <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.DoctorMobileMenuReadService" ref="doctorMobileMenuReadServiceImpl"/>
 
     <!-- user devices -->
     <dubbo:service version="1.0.0" retries="0" interface="io.terminus.parana.user.service.DeviceReadService" ref="deviceReadServiceImpl"/>
@@ -35,46 +32,8 @@
 
     <!-- auth services -->
     <dubbo:service version="1.0.0" retries="0" interface="io.terminus.parana.user.auth.UserRoleLoader" ref="doctorUserRoleLoaderImpl"/>
-    <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.SellerReadService" ref="sellerReadServiceImpl"/>
-    <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.SellerWriteService" ref="sellerWriteServiceImpl"/>
-    <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.SellerRoleReadService" ref="sellerRoleReadServiceImpl"/>
-    <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.SellerRoleWriteService" ref="sellerRoleWriteServiceImpl"/>
-    <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.OperatorRoleReadService" ref="operatorRoleReadServiceImpl"/>
-    <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.OperatorRoleWriteService" ref="operatorRoleWriteServiceImpl"/>
-    <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.OperatorReadService" ref="operatorReadServiceImpl"/>
-    <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.UserBindWriteService" ref="userBindWriteServiceImpl"/>
-    <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.UserBindReadService" ref="userBindReadServiceImpl"/>
-    <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.PrimaryUserWriteService" ref="primaryUserWriteServiceImpl"/>
-    <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.PrimaryUserReadService" ref="primaryUserReadServiceImpl"/>
-    <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.SubRoleWriteService" ref="subRoleWriteServiceImpl"/>
-    <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.SubRoleReadService" ref="subRoleReadServiceImpl"/>
 
     <!-- article service -->
     <dubbo:service version="1.0.0" retries="0" interface="io.terminus.parana.article.service.ArticleReadService" ref="articleReadServiceImpl"/>
     <dubbo:service version="1.0.0" retries="0" interface="io.terminus.parana.article.service.ArticleWriteService" ref="articleWriteServiceImpl"/>
-
-    <!-- farm org services -->
-    <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.DoctorFarmReadService" ref="doctorFarmReadServiceImpl"/>
-    <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.DoctorFarmWriteService" ref="doctorFarmWriteServiceImpl"/>
-    <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.DoctorOrgReadService" ref="doctorOrgReadServiceImpl"/>
-    <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.DoctorOrgWriteService" ref="doctorOrgWriteServiceImpl"/>
-
-    <!-- data services -->
-    <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.business.DoctorServiceReviewService" ref="doctorServiceReviewServiceImpl"/>
-    <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.DoctorServiceReviewReadService" ref="doctorServiceReviewReadServiceImpl"/>
-    <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.DoctorServiceReviewWriteService" ref="doctorServiceReviewWriteServiceImpl"/>
-    <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.DoctorUserDataPermissionReadService" ref="doctorUserDataPermissionReadServiceImpl"/>
-    <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.DoctorUserDataPermissionWriteService" ref="doctorUserDataPermissionWriteServiceImpl"/>
-    <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.DoctorUserReadService" ref="doctorUserReadServiceImpl"/>
-    <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.DoctorServiceStatusReadService" ref="doctorServiceStatusReadServiceImpl"/>
-    <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.DoctorServiceStatusWriteService" ref="doctorServiceStatusWriteServiceImpl"/>
-
-
-    <!-- dubbo interface -->
-    <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.user.interfaces.service.DoctorUserReadInterface" ref="doctorUserReadInterfaceImpl"/>
-    <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.user.interfaces.service.DoctorUserWriteInterface" ref="doctorUserWriteInterfaceImpl"/>
-
-    <!-- staff service -->
-    <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.DoctorStaffReadService" ref="doctorStaffReadServiceImpl"/>
-    <dubbo:service version="1.0.0" retries="0" interface="io.terminus.doctor.user.service.DoctorStaffWriteService" ref="doctorStaffWriteServiceImpl"/>
 </beans>

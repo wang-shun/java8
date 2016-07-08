@@ -3,6 +3,7 @@ package io.terminus.doctor.event.search.group;
 import com.google.common.base.Stopwatch;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Iterables;
+import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.event.dao.DoctorGroupDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
@@ -28,6 +29,7 @@ import java.util.concurrent.TimeUnit;
  */
 @Component
 @Slf4j
+@RpcProvider
 public class GroupDumpServiceImpl implements GroupDumpService {
 
     private DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss");

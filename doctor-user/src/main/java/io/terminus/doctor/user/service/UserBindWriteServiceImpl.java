@@ -1,6 +1,7 @@
 package io.terminus.doctor.user.service;
 
 import com.google.common.base.Throwables;
+import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.user.dao.UserBindDao;
 import io.terminus.doctor.user.enums.TargetSystem;
@@ -9,13 +10,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-
 /**
  * @author 陈增辉
  */
 @Slf4j
 @Service
+@RpcProvider
 public class UserBindWriteServiceImpl implements UserBindWriteService{
 
     private final UserBindDao userBindDao;

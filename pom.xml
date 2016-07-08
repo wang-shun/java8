@@ -43,7 +43,6 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <java.version>1.8</java.version>
         <zkclient.version>0.1</zkclient.version>
-        <dubbo.version>2.5.3</dubbo.version>
         <hikari.version>2.4.3</hikari.version>
         <terminus-common.version>2.0.1.RELEASE</terminus-common.version>
         <terminus.session.version>1.5.RELEASE</terminus.session.version>
@@ -71,6 +70,7 @@
         <simple.mail.version>2.1</simple.mail.version>
         <spring-platform.version>2.0.2.RELEASE</spring-platform.version>
         <guava.version>19.0</guava.version>
+        <terminus.boot.rpc.version>1.0-SNAPSHOT</terminus.boot.rpc.version>
     </properties>
 
     <dependencies>
@@ -106,6 +106,12 @@
 
     <dependencyManagement>
         <dependencies>
+            <!-- rpc dubbo -->
+            <dependency>
+                <groupId>io.terminus.boot.rpc</groupId>
+                <artifactId>rpc-dubbo</artifactId>
+                <version>${terminus.boot.rpc.version}</version>
+            </dependency>
 
             <!-- validate -->
             <dependency>
@@ -137,22 +143,6 @@
                 <groupId>io.terminus</groupId>
                 <artifactId>terminus-common</artifactId>
                 <version>${terminus-common.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.alibaba</groupId>
-                <artifactId>dubbo</artifactId>
-                <version>${dubbo.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.springframework</groupId>
-                        <artifactId>spring</artifactId>
-                    </exclusion>
-                </exclusions>
-            </dependency>
-            <dependency>
-                <groupId>io.terminus.boot</groupId>
-                <artifactId>spring-boot-starter-dubbo</artifactId>
-                <version>${terminus.boot.version}</version>
             </dependency>
             <dependency>
                 <groupId>io.terminus.boot</groupId>

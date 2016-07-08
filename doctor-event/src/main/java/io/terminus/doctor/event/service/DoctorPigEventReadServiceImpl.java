@@ -5,6 +5,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.model.PageInfo;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
@@ -35,7 +36,8 @@ import static java.util.Objects.isNull;
  */
 @Service
 @Slf4j
-public class DoctorPigEventReadServiceImpl implements DoctorPigEventReadService{
+@RpcProvider
+public class DoctorPigEventReadServiceImpl implements DoctorPigEventReadService {
 
     private final DoctorPigEventDao doctorPigEventDao;
 
@@ -104,6 +106,16 @@ public class DoctorPigEventReadServiceImpl implements DoctorPigEventReadService{
         }catch (Exception e){
             log.error("query pig events fail, cause:{}", Throwables.getStackTraceAsString(e));
             return Response.fail("query.pigEvents.fail");
+        }
+    }
+
+    @Override
+    public Response<DoctorPigEvent> queryPigEventById(Long id) {
+        try{
+            return Response.ok(doctorPigEventDao.findById(id));
+        } catch (Exception e) {
+            log.error("find pig event by id failed, id is {}, cause by {}", id, Throwables.getStackTraceAsString(e));
+            return Response.fail("query.pigEvent.fail");
         }
     }
 }

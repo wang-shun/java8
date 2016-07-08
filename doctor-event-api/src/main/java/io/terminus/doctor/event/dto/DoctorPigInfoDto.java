@@ -65,6 +65,8 @@ public class DoctorPigInfoDto implements Serializable{
 
     private Map<String,Object> extraTrackMap;
 
+    private String extraTrackMessage;
+
     private Date updatedAt;
 
     public static DoctorPigInfoDto buildDoctorPigInfoDto(DoctorPig doctorPig, DoctorPigTrack doctorPigTrack){
@@ -84,6 +86,7 @@ public class DoctorPigInfoDto implements Serializable{
                     .barnName(doctorPigTrack.getCurrentBarnName())
                     .extraTrack(doctorPigTrack.getExtra())
                     .extraTrackMap(doctorPigTrack.getExtraMap())
+                    .extraTrackMessage(doctorPigTrack.getExtraMessage())
                     .updatedAt(doctorPigTrack.getUpdatedAt());
         }
         return builder.build();

@@ -69,4 +69,13 @@ public class DoctorPigTrackDao extends MyBatisDao<DoctorPigTrack>{
         return getSqlSession().selectList(sqlId("listSince"),
                 ImmutableMap.of("lastId", lastId, "limit", limit, "since", since));
     }
+
+    /**
+     * 更新 extra_message 信息
+     * @param pigTrack
+     * @return
+     */
+    public int updateExtraMessage(DoctorPigTrack pigTrack) {
+        return getSqlSession().update("updateExtraMessage", pigTrack);
+    }
 }

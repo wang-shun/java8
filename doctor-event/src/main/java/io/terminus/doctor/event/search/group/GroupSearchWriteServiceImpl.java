@@ -1,6 +1,7 @@
 package io.terminus.doctor.event.search.group;
 
 import com.google.common.base.Throwables;
+import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.event.dao.DoctorGroupDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
@@ -19,6 +20,7 @@ import org.springframework.stereotype.Service;
  */
 @Service
 @Slf4j
+@RpcProvider
 public class GroupSearchWriteServiceImpl implements GroupSearchWriteService {
 
     @Autowired

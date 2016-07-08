@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.model.Response;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.common.utils.JsonMapper;
@@ -55,6 +56,7 @@ import static java.util.Objects.isNull;
  */
 @Service
 @Slf4j
+@RpcProvider
 public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteService{
 
     private final ObjectMapper OBJECT_MAPPER = JsonMapper.JSON_NON_DEFAULT_MAPPER.getMapper();
@@ -454,7 +456,10 @@ public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteServic
      */
     private void publishEvent (Map<String,Object> results){
         if(publisher == null){
-            // coreEventDispatcher.publish(new PigEventCreateEvent(results));
+            // 发送 PigEventCreateEvent 事件
+            coreEventDispatcher.publish(new PigEventCreateEvent(results));
+
+            // 发送 DataEvent 事件
             coreEventDispatcher.publish(DataEvent.make(DataEventType.PigEventCreate.getKey(), new PigEventCreateEvent(results)));
         }else{
             try {

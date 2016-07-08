@@ -1,6 +1,7 @@
 package io.terminus.doctor.event.service;
 
 import com.google.common.base.Throwables;
+import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.event.dao.DoctorGroupDao;
@@ -61,6 +62,7 @@ import static io.terminus.common.utils.Arguments.notEmpty;
  */
 @Slf4j
 @Service
+@RpcProvider
 public class DoctorGroupWriteServiceImpl implements DoctorGroupWriteService {
 
     private final DoctorGroupDao doctorGroupDao;

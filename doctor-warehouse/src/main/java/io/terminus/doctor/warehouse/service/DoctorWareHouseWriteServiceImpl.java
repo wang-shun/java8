@@ -1,6 +1,7 @@
 package io.terminus.doctor.warehouse.service;
 
 import com.google.common.base.Throwables;
+import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.warehouse.dao.DoctorWareHouseDao;
 import io.terminus.doctor.warehouse.manager.DoctorWareHouseManager;
@@ -20,6 +21,7 @@ import static java.util.Objects.isNull;
  */
 @Service
 @Slf4j
+@RpcProvider
 public class DoctorWareHouseWriteServiceImpl implements DoctorWareHouseWriteService{
 
     private final DoctorWareHouseDao doctorWareHouseDao;

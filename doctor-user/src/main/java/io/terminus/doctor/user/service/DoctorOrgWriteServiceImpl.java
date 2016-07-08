@@ -1,6 +1,7 @@
 package io.terminus.doctor.user.service;
 
 import com.google.common.base.Throwables;
+import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.user.dao.DoctorOrgDao;
 import io.terminus.doctor.user.model.DoctorOrg;
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 @Slf4j
 @Service
+@RpcProvider
 public class DoctorOrgWriteServiceImpl implements DoctorOrgWriteService{
     private final DoctorOrgDao doctorOrgDao;
 

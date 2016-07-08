@@ -14,6 +14,11 @@
 
     <dependencies>
         <dependency>
+            <groupId>io.terminus.boot.rpc</groupId>
+            <artifactId>rpc-dubbo</artifactId>
+        </dependency>
+
+        <dependency>
             <groupId>io.terminus.parana</groupId>
             <artifactId>parana-config</artifactId>
         </dependency>
@@ -26,10 +31,7 @@
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
         </dependency>
-        <dependency>
-            <groupId>io.terminus.boot</groupId>
-            <artifactId>spring-boot-starter-dubbo</artifactId>
-        </dependency>
+
         <dependency>
             <groupId>io.terminus.boot</groupId>
             <artifactId>spring-boot-starter-datasource</artifactId>
@@ -37,10 +39,6 @@
         <dependency>
             <groupId>com.zaxxer</groupId>
             <artifactId>HikariCP</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.alibaba</groupId>
-            <artifactId>dubbo</artifactId>
         </dependency>
         <dependency>
             <groupId>io.terminus.boot</groupId>

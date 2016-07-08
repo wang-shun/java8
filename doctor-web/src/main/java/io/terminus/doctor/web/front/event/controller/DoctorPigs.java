@@ -6,6 +6,7 @@ import io.terminus.common.model.Paging;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dto.DoctorPigInfoDetailDto;
 import io.terminus.doctor.event.dto.DoctorPigInfoDto;
+import io.terminus.doctor.event.dto.DoctorPigMessage;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.event.service.DoctorPigReadService;
 import io.terminus.doctor.web.front.event.dto.DoctorBoarDetailDto;
@@ -20,6 +21,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+
+import java.util.List;
 
 /**
  * Created by yaoqijun.
@@ -122,5 +125,16 @@ public class DoctorPigs {
                 .doctorPigEvents(dto.getDoctorPigEvents())
                 .build();
         return doctorSowDetailDto;
+    }
+
+    /**
+     * 获取猪只提示的消息
+     * @param pigId 猪id
+     * @return
+     */
+    @RequestMapping(value = "/notify/message", method = RequestMethod.GET)
+    @ResponseBody
+    public List<DoctorPigMessage> queryPigNotifyMessages(Long pigId) {
+        return RespHelper.or500(doctorPigReadService.findPigMessageByPigId(pigId));
     }
 }

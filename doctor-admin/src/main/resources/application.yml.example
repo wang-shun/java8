@@ -9,10 +9,6 @@ pampas:
 session:
   cookie-domain: doctor.com
 
-dubbo:
-  name: doctor-admin
-  registry: zookeeper://127.0.0.1:2181
-
 logging:
   file: ${user.home}/logs/doctor/admin.log
   level.*: DEBUG

@@ -2,6 +2,7 @@ package io.terminus.doctor.warehouse.service;
 
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableMap;
+import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.model.Response;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.enums.DataEventType;
@@ -33,6 +34,7 @@ import static java.util.Objects.isNull;
  */
 @Service
 @Slf4j
+@RpcProvider
 public class DoctorMaterialInfoWriteServiceImpl implements DoctorMaterialInfoWriteService{
 
     private final DoctorMaterialInfoDao doctorMaterialInfoDao;

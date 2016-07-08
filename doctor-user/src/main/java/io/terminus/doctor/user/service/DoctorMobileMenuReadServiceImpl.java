@@ -2,6 +2,7 @@ package io.terminus.doctor.user.service;
 
 import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
+import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.common.enums.UserType;
@@ -26,6 +27,7 @@ import java.util.Objects;
  */
 @Slf4j
 @Service
+@RpcProvider
 public class DoctorMobileMenuReadServiceImpl implements DoctorMobileMenuReadService {
 
     private final DoctorUserReadService doctorUserReadService;

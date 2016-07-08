@@ -1,6 +1,7 @@
 package io.terminus.doctor.user.service;
 
 import com.google.common.base.Throwables;
+import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.user.dao.UserBindDao;
 import io.terminus.doctor.user.enums.TargetSystem;
@@ -13,6 +14,7 @@ import java.util.List;
 
 @Slf4j
 @Service
+@RpcProvider
 public class UserBindReadServiceImpl implements UserBindReadService{
     private final UserBindDao userBindDao;
 

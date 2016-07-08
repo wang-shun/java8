@@ -1,6 +1,7 @@
 package io.terminus.doctor.msg.service;
 
 import com.google.common.base.Throwables;
+import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.msg.dao.DoctorMessageDao;
 import io.terminus.doctor.msg.model.DoctorMessage;
@@ -17,6 +18,7 @@ import java.util.List;
  */
 @Slf4j
 @Service
+@RpcProvider
 public class DoctorMessageWriteServiceImpl implements DoctorMessageWriteService {
 
     private final DoctorMessageDao doctorMessageDao;

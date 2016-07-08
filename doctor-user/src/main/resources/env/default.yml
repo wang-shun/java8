@@ -11,13 +11,10 @@ datasource:
   password: anywhere
 
 # Dubbo
-dubbo:
-  name: doctor-user
-  registry: zookeeper://101.201.44.35:2181
-  port: -1
-  timeout: 10000
-  threads: 100
-  heartBeats: 10000
+rpc.mode: true
+rpc.dubbo:
+    module: doctor-user
+    registryAddress: 101.201.44.35:2181
 
 logging:
   file: /var/log/doctor/user.log
@@ -38,4 +35,4 @@ redis:
   test-on-borrow: true
 
 doctor:
-  url: http://doctor-test.xrnm.com
+  url: https://doctor-test.xrnm.com

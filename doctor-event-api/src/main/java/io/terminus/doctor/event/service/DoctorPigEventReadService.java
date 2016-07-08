@@ -43,4 +43,11 @@ public interface DoctorPigEventReadService {
      * @return
      */
     Response<List<Integer>> queryPigEvents(@NotNull(message = "input.pigIds.empty") List<Long> pigIds);
+
+    /**
+     * 通过 id 获取 PigEvent
+     * @param id
+     * @return
+     */
+    Response<DoctorPigEvent> queryPigEventById(Long id);
 }

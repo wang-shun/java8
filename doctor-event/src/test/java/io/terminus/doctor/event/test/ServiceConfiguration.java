@@ -3,8 +3,8 @@ package io.terminus.doctor.event.test;
 import com.google.common.collect.Lists;
 import com.google.common.eventbus.AsyncEventBus;
 import com.google.common.eventbus.EventBus;
-import io.terminus.boot.dubbo.autoconfigure.DubboAutoConfiguration;
 import io.terminus.boot.mybatis.autoconfigure.MybatisAutoConfiguration;
+import io.terminus.boot.rpc.dubbo.config.DubboBaseAutoConfiguration;
 import io.terminus.boot.search.autoconfigure.ESSearchAutoConfiguration;
 import io.terminus.doctor.common.DoctorCommonConfiguration;
 import io.terminus.doctor.event.dao.DoctorPigDao;
@@ -65,7 +65,7 @@ import java.util.concurrent.Executors;
  * Date: 16/4/25
  */
 @Configuration
-@EnableAutoConfiguration(exclude = {DubboAutoConfiguration.class, ESSearchAutoConfiguration.class})
+@EnableAutoConfiguration(exclude = {DubboBaseAutoConfiguration.class, ESSearchAutoConfiguration.class})
 @Import({DoctorCommonConfiguration.class})
 @ComponentScan({"io.terminus.doctor.event.*","io.terminus.doctor.workflow.*"})
 @AutoConfigureAfter(MybatisAutoConfiguration.class)

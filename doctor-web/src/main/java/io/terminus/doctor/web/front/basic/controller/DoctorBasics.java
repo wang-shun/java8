@@ -1,16 +1,19 @@
 package io.terminus.doctor.web.front.basic.controller;
 
+import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.basic.model.DoctorBasic;
 import io.terminus.doctor.basic.model.DoctorChangeReason;
 import io.terminus.doctor.basic.model.DoctorCustomer;
 import io.terminus.doctor.basic.service.DoctorBasicReadService;
 import io.terminus.doctor.basic.service.DoctorBasicWriteService;
+import io.terminus.doctor.basic.service.TestService;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.web.front.auth.DoctorFarmAuthCenter;
 import io.terminus.pampas.common.UserUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.CommandLineRunner;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -31,13 +34,16 @@ import static com.google.common.base.Preconditions.checkNotNull;
 @Slf4j
 @RestController
 @RequestMapping("/api/doctor/basic")
-public class DoctorBasics {
+public class DoctorBasics implements CommandLineRunner {
 
     private static final JsonMapper JSON_MAPPER = JsonMapper.nonEmptyMapper();
 
     private final DoctorBasicReadService doctorBasicReadService;
     private final DoctorBasicWriteService doctorBasicWriteService;
     private final DoctorFarmAuthCenter doctorFarmAuthCenter;
+
+    @RpcConsumer
+    private TestService testService;
 
     @Autowired
     public DoctorBasics(DoctorBasicReadService doctorBasicReadService,
@@ -188,5 +194,10 @@ public class DoctorBasics {
         doctorFarmAuthCenter.checkFarmAuth(customer.getFarmId());
 
         return RespHelper.or500(doctorBasicWriteService.deleteCustomerById(customerId));
+    }
+
+    @Override
+    public void run(String... strings) throws Exception {
+        testService.say("yzl");
     }
 }

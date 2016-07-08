@@ -4,8 +4,8 @@
 
 package io.terminus.doctor.user.dao;
 
-import io.terminus.boot.dubbo.autoconfigure.DubboAutoConfiguration;
 import io.terminus.boot.mybatis.autoconfigure.MybatisAutoConfiguration;
+import io.terminus.boot.rpc.dubbo.config.DubboBaseAutoConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.annotation.ComponentScan;
@@ -17,7 +17,7 @@ import org.springframework.context.annotation.Configuration;
  *  updated by panxin@terminus.io
  */
 @Configuration
-@EnableAutoConfiguration(exclude = DubboAutoConfiguration.class)
+@EnableAutoConfiguration(exclude = DubboBaseAutoConfiguration.class)
 @ComponentScan({"io.terminus.doctor.user.dao"})
 @AutoConfigureAfter(MybatisAutoConfiguration.class)
 public class DaoConfiguration {

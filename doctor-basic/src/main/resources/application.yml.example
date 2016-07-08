@@ -4,8 +4,9 @@ datasource:
   password: anywhere
 
 # dubbo
-dubbo:
-  registry: zookeeper://127.0.0.1:2181
+rpc.dubbo:
+    registryAddress: 127.0.0.1:2181
+    check: false   # 默认是true, 检查provider
 
 redis:
   host: 127.0.0.1

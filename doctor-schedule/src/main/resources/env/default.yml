@@ -2,14 +2,11 @@ server:
   context-path: /schedule
   port: 8087
 
-dubbo:
-  name: doctor-schedule
-  registry: zookeeper://101.201.44.35:2181
-  port: -1
-  timeout: 10000
-  threads: 100
-  heartBeats: 10000
-  mode: consumer
+# Dubbo
+rpc.mode: true
+rpc.dubbo:
+    module: doctor-schedule
+    registryAddress: 101.201.44.35:2181
 
 # zookeeper
 zookeeper:

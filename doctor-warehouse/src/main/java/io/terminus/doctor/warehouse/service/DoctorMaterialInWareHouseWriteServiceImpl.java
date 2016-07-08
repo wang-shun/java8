@@ -1,6 +1,7 @@
 package io.terminus.doctor.warehouse.service;
 
 import com.google.common.base.Throwables;
+import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.warehouse.dto.DoctorMaterialConsumeProviderDto;
 import io.terminus.doctor.warehouse.manager.MaterialInWareHouseManager;
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Service;
  */
 @Service
 @Slf4j
+@RpcProvider
 public class DoctorMaterialInWareHouseWriteServiceImpl implements DoctorMaterialInWareHouseWriteService{
 
     private final MaterialInWareHouseManager materialInWareHouseManager;

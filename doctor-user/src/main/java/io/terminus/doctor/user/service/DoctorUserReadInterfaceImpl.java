@@ -2,6 +2,7 @@ package io.terminus.doctor.user.service;
 
 import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
+import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.Paging;
 import io.terminus.common.utils.BeanMapper;
@@ -25,6 +26,7 @@ import java.util.Map;
  */
 @Slf4j
 @Service
+@RpcProvider
 public class DoctorUserReadInterfaceImpl implements DoctorUserReadInterface {
 
     private final UserDaoExt userDaoExt;

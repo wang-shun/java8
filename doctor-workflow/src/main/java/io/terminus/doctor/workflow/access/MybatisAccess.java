@@ -1,5 +1,6 @@
 package io.terminus.doctor.workflow.access;
 
+import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.model.Paging;
 import io.terminus.doctor.workflow.dao.FlowDefinitionDao;
 import io.terminus.doctor.workflow.dao.FlowDefinitionNodeDao;
@@ -19,7 +20,7 @@ import io.terminus.doctor.workflow.model.FlowProcess;
 import io.terminus.doctor.workflow.model.FlowProcessTrack;
 import io.terminus.doctor.workflow.utils.AssertHelper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Repository;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
@@ -30,7 +31,8 @@ import java.util.Map;
  * Created by icemimosa
  * Date: 16/4/25
  */
-@Repository
+@Service
+@RpcProvider
 public class MybatisAccess implements JdbcAccess {
 
     @Autowired
