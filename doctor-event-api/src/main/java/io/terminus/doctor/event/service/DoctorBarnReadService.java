@@ -44,6 +44,15 @@ public interface DoctorBarnReadService {
                                                 Integer pigType, Integer canOpenGroup, Integer status);
 
     /**
+     * 根据猪场id和猪类list查
+     * @param farmId  猪场id
+     * @param pigTypes 猪类list, 如果为null或empty, 返回全部的结果
+     * @return 猪舍list
+     */
+    Response<List<DoctorBarn>> findBarnsByFarmIdAndPigTypes(@NotNull(message = "farmId.not.null") Long farmId,
+                                                           List<Integer> pigTypes);
+
+    /**
      * 查询当前猪舍的存栏量
      * @param barnId 猪舍id
      * @return 存栏量

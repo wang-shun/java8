@@ -31,6 +31,13 @@ public class DoctorBarnDao extends MyBatisDao<DoctorBarn> {
                 .map());
     }
 
+    public List<DoctorBarn> findByPigTypes(Long farmId, List<Integer> pigTypes) {
+        return getSqlSession().selectList(sqlId("findByPigTypes"), MapBuilder.<String, Object>newHashMap()
+                .put("farmId", farmId)
+                .put("pigTypes", pigTypes)
+                .map());
+    }
+
     /**
      * 猪舍的当前最大的id
      */

@@ -75,6 +75,17 @@ public class DoctorBarnReadServiceImpl implements DoctorBarnReadService {
     }
 
     @Override
+    public Response<List<DoctorBarn>> findBarnsByFarmIdAndPigTypes(Long farmId, List<Integer> pigTypes) {
+        try {
+            return Response.ok(doctorBarnDao.findByPigTypes(farmId, pigTypes));
+        } catch (Exception e) {
+            log.error("find barns by farm id and pig types failed, farmId:{}, pigTypes:{}, cause:{}",
+                    farmId, pigTypes, Throwables.getStackTraceAsString(e));
+            return Response.fail("barn.find.fail");
+        }
+    }
+
+    @Override
     public Response<Integer> countPigByBarnId(Long barnId) {
         try {
             DoctorBarn barn = doctorBarnDao.findById(barnId);
