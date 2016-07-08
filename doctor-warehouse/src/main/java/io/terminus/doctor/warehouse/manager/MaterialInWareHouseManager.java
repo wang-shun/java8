@@ -151,11 +151,11 @@ public class MaterialInWareHouseManager {
         Integer consumeDays = (int)(doctorMaterialInWareHouse.getLotNumber() / doctorMaterialInfo.getDefaultConsumeCount());
 
         // 消耗对应的物资信息
-        consumeMaterialInner(DoctorMaterialConsumeProviderDto.builder()
-                .type(doctorMaterialInWareHouse.getType())
+        consumeMaterialInner(DoctorMaterialConsumeProviderDto.builder().type(doctorMaterialInWareHouse.getType())
                 .farmId(doctorMaterialInWareHouse.getFarmId()).farmName(doctorMaterialInWareHouse.getFarmName())
                 .materialTypeId(doctorMaterialInWareHouse.getMaterialId()).materialName(doctorMaterialInWareHouse.getMaterialName())
                 .wareHouseId(doctorMaterialInWareHouse.getWareHouseId()).wareHouseName(doctorMaterialInWareHouse.getWareHouseName())
+                .barnId(0l).barnName("")   //默认消耗仓库信息
                 .staffId(userId).staffName(userName).count(doctorMaterialInWareHouse.getLotNumber())
                 .unitId(doctorMaterialInfo.getUnitId()).unitName(userName).consumeDays(consumeDays)
                 .build());
