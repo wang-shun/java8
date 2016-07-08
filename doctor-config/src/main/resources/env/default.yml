@@ -15,6 +15,7 @@ rpc.mode: true
 rpc.dubbo:
     module: doctor-config
     registryAddress: 101.201.44.35:2181
+    version: 1.0.0
 
 logging:
   file: /var/log/doctor/config.log
