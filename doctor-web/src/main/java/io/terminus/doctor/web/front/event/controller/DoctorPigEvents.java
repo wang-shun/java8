@@ -10,6 +10,7 @@ import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.constants.JacksonType;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dto.DoctorPigInfoDto;
+import io.terminus.doctor.event.dto.DoctorSowParityCount;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.event.service.DoctorPigEventReadService;
@@ -130,5 +131,11 @@ public class DoctorPigEvents {
             throw new JsonResponseException("query.executeEvent.fail");
         }
         return RespHelper.or500(doctorPigEventReadService.queryPigEvents(pigIds));
+    }
+
+    @RequestMapping(value = "/queryDoctorSowParityCount", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public List<DoctorSowParityCount> queryDoctorSowParityCount(@RequestParam("pigId") Long pigId){
+        return  RespHelper.or500(doctorPigEventReadService.querySowParityCount(pigId));
     }
 }

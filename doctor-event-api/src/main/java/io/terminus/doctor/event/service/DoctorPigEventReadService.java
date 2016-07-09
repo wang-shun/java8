@@ -2,6 +2,7 @@ package io.terminus.doctor.event.service;
 
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
+import io.terminus.doctor.event.dto.DoctorSowParityCount;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 
 import javax.validation.constraints.NotNull;
@@ -50,4 +51,11 @@ public interface DoctorPigEventReadService {
      * @return
      */
     Response<DoctorPigEvent> queryPigEventById(Long id);
+
+    /**
+     * 母猪胎次信息总结
+     * @param pigId 母猪Id
+     * @return
+     */
+    Response<List<DoctorSowParityCount>> querySowParityCount(@NotNull(message = "input.pigId.empty") Long pigId);
 }
