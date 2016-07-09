@@ -108,4 +108,12 @@ public interface DoctorGroupReadService {
      * @return 猪群事件
      */
     Response<DoctorGroupEvent> findGroupEventById(@NotNull(message = "evenId.not.null") Long eventId);
+
+    /**
+     * 校验猪群号是否重复
+     * @param farmId  猪场id
+     * @param groupCode 猪群号
+     * @return true 重复, false 不重复
+     */
+    Response<Boolean> checkGroupRepeat(@NotNull(message = "farmId.not.null") Long farmId, @NotEmpty(message = "groupCode.not.empty") String groupCode);
 }

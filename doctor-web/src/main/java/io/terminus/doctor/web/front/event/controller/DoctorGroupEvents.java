@@ -59,6 +59,18 @@ public class DoctorGroupEvents {
     }
 
     /**
+     * 校验猪群号是否重复
+     * @param farmId  猪场id
+     * @param groupCode 猪群号
+     * @return true 重复, false 不重复
+     */
+    @RequestMapping(value = "/check/groupCode", method = RequestMethod.GET)
+    public Boolean checkGroupRepeat(@RequestParam("farmId") Long farmId,
+                                    @RequestParam("groupCode") String groupCode) {
+        return RespHelper.or500(doctorGroupReadService.checkGroupRepeat(farmId, groupCode));
+    }
+    
+    /**
      * 新建猪群
      * @return 猪群id
      */

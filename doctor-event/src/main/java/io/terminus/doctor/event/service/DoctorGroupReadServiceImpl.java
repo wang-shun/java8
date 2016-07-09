@@ -220,6 +220,21 @@ public class DoctorGroupReadServiceImpl implements DoctorGroupReadService {
         }
     }
 
+    @Override
+    public Response<Boolean> checkGroupRepeat(Long farmId, String groupCode) {
+        try {
+            List<DoctorGroup> groups = RespHelper.orServEx(findGroupsByFarmId(farmId));
+            if (groups.stream().map(DoctorGroup::getGroupCode).collect(Collectors.toList()).contains(groupCode)) {
+                return Response.ok(Boolean.TRUE);
+            }
+            return Response.ok(Boolean.FALSE);
+        } catch (Exception e) {
+            log.error("check group repeat failed, farmId:{}, groupCode:{}, cause:{}",
+                    farmId, groupCode, Throwables.getStackTraceAsString(e));
+            return Response.fail("groupCode.check.failed");
+        }
+    }
+
     private DoctorGroup checkGroupExist(Long groupId) {
         DoctorGroup group = doctorGroupDao.findById(groupId);
         if (group == null) {
