@@ -129,6 +129,10 @@ public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteServic
                     .pigType(doctorBasicInputInfoDto.getPigType()).build());
 
             return Response.ok(Params.getWithConvert(result,"doctorPigId",a->Long.valueOf(a.toString())));
+        }catch(IllegalStateException e){
+            log.error("pig entry event illegal state fail, basicInfo:{}, doctorFarmEntryDto:{}, cause:{}",
+                    doctorBasicInputInfoDto, doctorFarmEntryDto, Throwables.getStackTraceAsString(e));
+            return Response.fail(e.getMessage());
         }catch (Exception e){
             log.error("pig entry event create fail,basicInfo:{}, doctorFarmEntryDto:{}, cause:{}",
                     doctorBasicInputInfoDto, doctorFarmEntryDto,
