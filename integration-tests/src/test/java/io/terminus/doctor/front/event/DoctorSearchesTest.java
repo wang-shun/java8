@@ -2,6 +2,7 @@ package io.terminus.doctor.front.event;
 
 import com.google.common.collect.ImmutableMap;
 import configuration.front.FrontWebConfiguration;
+import io.terminus.common.model.Paging;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.event.search.group.SearchedGroupDto;
 import io.terminus.doctor.event.search.pig.SearchedPigDto;
@@ -67,6 +68,17 @@ public class DoctorSearchesTest extends BaseFrontWebTest {
         System.out.println(body.getGroups().getTotal());
         System.out.println(body.getGroups().getData());
         System.out.println(body.getAggPigTypes());
+        System.out.println(JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(body));
+    }
+
+    /**
+     * 查询猪群
+     * @see DoctorSearches#searchGroups(Integer, Integer, Map)
+     */
+    @Test
+    public void test_QUERY_PigGroups() {
+        String url = "/api/doctor/search/groups";
+        Paging body = getForEntity(url, ImmutableMap.of("farmId", 12355, "q", "yy"), Paging.class).getBody();
         System.out.println(JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(body));
     }
 
