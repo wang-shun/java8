@@ -121,7 +121,7 @@ public class DoctorPigCreateEvents {
      */
     @RequestMapping(value = "/createChgLocations", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public void createChangeLocationEvent(@RequestParam("pigIds") String pigIds,
+    public Boolean createChangeLocationEvent(@RequestParam("pigIds") String pigIds,
                                           @RequestParam("farmId") Long farmId,
                                           @RequestParam("doctorChgLocationDtoJson") String doctorChgLocationDtoJson){
         DoctorChgLocationDto doctorChgLocationDto = JsonMapper.JSON_NON_DEFAULT_MAPPER.fromJson(
@@ -138,6 +138,8 @@ public class DoctorPigCreateEvents {
         Splitters.COMMA.splitToList(pigIds).forEach(pigId -> {
             createCasualChangeLocationInfo(doctorChgLocationDto, buildBasicInputInfoDto(farmId, Long.valueOf(pigId), PigEvent.CHG_LOCATION));
         });
+
+        return Boolean.TRUE;
 
     }
 
@@ -168,7 +170,7 @@ public class DoctorPigCreateEvents {
      */
     @RequestMapping(value = "/createChgFarms", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public void createChangeFarmEvents(@RequestParam("doctorChgFarmDtoJson") String doctorChgFarmDtoJson,
+    public Boolean createChangeFarmEvents(@RequestParam("doctorChgFarmDtoJson") String doctorChgFarmDtoJson,
                                       @RequestParam("pigIds") String pigIds, @RequestParam("farmId") Long farmId){
 
         DoctorChgFarmDto doctorChgFarmDto = JsonMapper.JSON_NON_DEFAULT_MAPPER.fromJson(doctorChgFarmDtoJson, DoctorChgFarmDto.class);
@@ -181,6 +183,7 @@ public class DoctorPigCreateEvents {
         Splitters.COMMA.splitToList(pigIds).forEach(pigId -> {
             RespHelper.or500(doctorPigEventWriteService.chgFarmEvent(doctorChgFarmDto, buildBasicInputInfoDto(farmId, Long.valueOf(pigId), PigEvent.CHG_FARM)));
         });
+        return Boolean.TRUE;
     }
 
     private void checkPigIds(String pigIds){
@@ -217,7 +220,7 @@ public class DoctorPigCreateEvents {
      */
     @RequestMapping(value = "/createRemovalEvents", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public void createRemovalEvent(@RequestParam("doctorRemovalDtoJson") String doctorRemovalDtoJson,
+    public Boolean createRemovalEvent(@RequestParam("doctorRemovalDtoJson") String doctorRemovalDtoJson,
                                    @RequestParam("pigIds") String pigIds, @RequestParam("farmId") Long farmId){
 
         DoctorRemovalDto doctorRemovalDto = JsonMapper.JSON_NON_DEFAULT_MAPPER.fromJson(doctorRemovalDtoJson, DoctorRemovalDto.class);
@@ -230,6 +233,7 @@ public class DoctorPigCreateEvents {
         Splitters.COMMA.splitToList(pigIds).forEach(pigId -> {
             RespHelper.or500(doctorPigEventWriteService.removalEvent(doctorRemovalDto, buildBasicInputInfoDto(farmId, Long.valueOf(pigId), PigEvent.REMOVAL)));
         });
+        return Boolean.TRUE;
     }
 
     /**
@@ -260,7 +264,7 @@ public class DoctorPigCreateEvents {
      */
     @RequestMapping(value = "/createDiseaseEvents", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public void createDiseaseEvent(@RequestParam("doctorDiseaseDtoJson") String doctorDiseaseDtoJson,
+    public Boolean createDiseaseEvent(@RequestParam("doctorDiseaseDtoJson") String doctorDiseaseDtoJson,
                                    @RequestParam("pigIds") String pigIds, @RequestParam("farmId") Long farmId){
 
         DoctorDiseaseDto doctorDiseaseDto = JsonMapper.JSON_NON_DEFAULT_MAPPER.fromJson(doctorDiseaseDtoJson, DoctorDiseaseDto.class);
@@ -272,6 +276,7 @@ public class DoctorPigCreateEvents {
         Splitters.COMMA.splitToList(pigIds).forEach(pigId -> {
             RespHelper.or500(doctorPigEventWriteService.diseaseEvent(doctorDiseaseDto, buildBasicInputInfoDto(farmId, Long.valueOf(pigId), PigEvent.DISEASE)));
         });
+        return Boolean.TRUE;
     }
 
     /**
@@ -300,7 +305,7 @@ public class DoctorPigCreateEvents {
      */
     @RequestMapping(value = "/createVaccinationEvents", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public void createVaccinationEvent(@RequestParam("doctorVaccinationDtoJson") String doctorVaccinationDtoJson,
+    public Boolean createVaccinationEvent(@RequestParam("doctorVaccinationDtoJson") String doctorVaccinationDtoJson,
                                        @RequestParam("pigIds") String pigIds, @RequestParam("farmId") Long farmId){
         DoctorVaccinationDto doctorVaccinationDto = JsonMapper.JSON_NON_DEFAULT_MAPPER.fromJson(doctorVaccinationDtoJson, DoctorVaccinationDto.class);
         if(isNull(doctorVaccinationDto))
@@ -310,6 +315,7 @@ public class DoctorPigCreateEvents {
 
         Splitters.COMMA.splitToList(pigIds).forEach(pigId -> {
             RespHelper.or500(doctorPigEventWriteService.vaccinationEvent(doctorVaccinationDto, buildBasicInputInfoDto(farmId, Long.valueOf(pigId), PigEvent.VACCINATION)));        });
+        return Boolean.TRUE;
     }
 
     /**
@@ -338,7 +344,7 @@ public class DoctorPigCreateEvents {
      */
     @RequestMapping(value = "/createConditionEvents", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public void createConditionEvent(@RequestParam("doctorConditionDtoJson") String doctorConditionDtoJson,
+    public Boolean createConditionEvent(@RequestParam("doctorConditionDtoJson") String doctorConditionDtoJson,
                                      @RequestParam("pigIds") String pigIds, @RequestParam("farmId") Long farmId){
         DoctorConditionDto doctorConditionDto = JsonMapper.JSON_NON_DEFAULT_MAPPER.fromJson(doctorConditionDtoJson, DoctorConditionDto.class);
         if(isNull(doctorConditionDto))
@@ -349,6 +355,7 @@ public class DoctorPigCreateEvents {
         Splitters.COMMA.splitToList(pigIds).forEach(pigId -> {
             RespHelper.or500(doctorPigEventWriteService.conditionEvent(doctorConditionDto, buildBasicInputInfoDto(farmId, Long.valueOf(pigId), PigEvent.CONDITION)));
         });
+        return Boolean.TRUE;
     }
 
     @RequestMapping(value = "/createSemen", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -395,13 +402,14 @@ public class DoctorPigCreateEvents {
 
     @RequestMapping(value = "/createSowEvents", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public void createSowEventInfo(@RequestParam("farmId") Long farmId,
+    public Boolean createSowEventInfo(@RequestParam("farmId") Long farmId,
                                    @RequestParam("pigIds") String pigIds, @RequestParam("eventType") Integer eventType,
                                    @RequestParam("sowInfoDtoJson") String sowInfoDtoJson) {
         checkPigIds(pigIds);
         Splitters.COMMA.splitToList(pigIds).forEach(pigId -> {
             RespHelper.or500(doctorSowEventCreateService.sowEventCreate(buildBasicInputInfoDto(farmId, Long.valueOf(pigId), PigEvent.from(eventType)), sowInfoDtoJson));
         });
+        return Boolean.TRUE;
     }
 
     @RequestMapping(value = "/createCasualEvents", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
