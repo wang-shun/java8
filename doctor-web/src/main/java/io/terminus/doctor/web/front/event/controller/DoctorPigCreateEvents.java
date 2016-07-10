@@ -2,10 +2,12 @@ package io.terminus.doctor.web.front.event.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.api.client.util.Lists;
+import com.google.common.base.Strings;
 import com.google.common.base.Throwables;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.Response;
 import io.terminus.common.utils.JsonMapper;
+import io.terminus.common.utils.Splitters;
 import io.terminus.doctor.common.constants.JacksonType;
 import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.utils.RespHelper;
@@ -88,6 +90,13 @@ public class DoctorPigCreateEvents {
         this.doctorBarnReadService = doctorBarnReadService;
     }
 
+    /**
+     * 创建转舍事件
+     * @param pigId
+     * @param farmId
+     * @param doctorChgLocationDtoJson
+     * @return
+     */
     @RequestMapping(value = "/createChgLocation", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Long createChangeLocationEvent(@RequestParam("pigId") Long pigId,
@@ -103,10 +112,47 @@ public class DoctorPigCreateEvents {
         return createCasualChangeLocationInfo(doctorChgLocationDto, buildBasicInputInfoDto(farmId, pigId, PigEvent.CHG_LOCATION));
     }
 
+    /**
+     * 创建批量转舍事件
+     * @param pigIds
+     * @param farmId
+     * @param doctorChgLocationDtoJson
+     * @return
+     */
+    @RequestMapping(value = "/createChgLocations", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public void createChangeLocationEvent(@RequestParam("pigIds") String pigIds,
+                                          @RequestParam("farmId") Long farmId,
+                                          @RequestParam("doctorChgLocationDtoJson") String doctorChgLocationDtoJson){
+        DoctorChgLocationDto doctorChgLocationDto = JsonMapper.JSON_NON_DEFAULT_MAPPER.fromJson(
+                doctorChgLocationDtoJson, DoctorChgLocationDto.class);
+
+        if (isNull(doctorChgLocationDto)){
+            throw new JsonResponseException("chgLocation.inputParam.error");
+        }
+        //TODO: 需要增加对猪转舍是否能进行转舍的校验,如果有一头不符合不能批量
+        //TODO: 增加检查猪是否含有哺乳状态的仔猪,如果有不能操作
+        //检查猪ids是否合格
+        checkPigIds(pigIds);
+
+        Splitters.COMMA.splitToList(pigIds).forEach(pigId -> {
+            createCasualChangeLocationInfo(doctorChgLocationDto, buildBasicInputInfoDto(farmId, Long.valueOf(pigId), PigEvent.CHG_LOCATION));
+        });
+
+    }
+
+    /**
+     * 创建母猪猪场变动
+     * @param doctorChgFarmDtoJson
+     * @param pigId
+     * @param farmId
+     * @return
+     */
     @RequestMapping(value = "/createChgFarm", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Long createChangeFarmEvent(@RequestParam("doctorChgFarmDtoJson") String doctorChgFarmDtoJson,
                                       @RequestParam("pigId") Long pigId, @RequestParam("farmId") Long farmId){
+
 
         DoctorChgFarmDto doctorChgFarmDto = JsonMapper.JSON_NON_DEFAULT_MAPPER.fromJson(doctorChgFarmDtoJson, DoctorChgFarmDto.class);
         if (isNull(doctorChgFarmDto))
@@ -114,6 +160,42 @@ public class DoctorPigCreateEvents {
         return RespHelper.or500(doctorPigEventWriteService.chgFarmEvent(doctorChgFarmDto, buildBasicInputInfoDto(farmId, pigId, PigEvent.CHG_FARM)));
     }
 
+    /**
+     * 批量操作转场事件
+     * @param doctorChgFarmDtoJson
+     * @param pigIds
+     * @param farmId
+     */
+    @RequestMapping(value = "/createChgFarms", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public void createChangeFarmEvents(@RequestParam("doctorChgFarmDtoJson") String doctorChgFarmDtoJson,
+                                      @RequestParam("pigIds") String pigIds, @RequestParam("farmId") Long farmId){
+
+        DoctorChgFarmDto doctorChgFarmDto = JsonMapper.JSON_NON_DEFAULT_MAPPER.fromJson(doctorChgFarmDtoJson, DoctorChgFarmDto.class);
+        if (isNull(doctorChgFarmDto))
+            throw new JsonResponseException("create.chgFarm.error");
+        //TODO: 增加检查猪是否含有哺乳状态的仔猪,如果有不能操作
+        //检查猪ids是否合格
+        checkPigIds(pigIds);
+
+        Splitters.COMMA.splitToList(pigIds).forEach(pigId -> {
+            RespHelper.or500(doctorPigEventWriteService.chgFarmEvent(doctorChgFarmDto, buildBasicInputInfoDto(farmId, Long.valueOf(pigId), PigEvent.CHG_FARM)));
+        });
+    }
+
+    private void checkPigIds(String pigIds){
+        if(Strings.isNullOrEmpty(pigIds)){
+            throw new JsonResponseException("pigid.is.null");
+        }
+    }
+
+    /**
+     * 母猪离场事件
+     * @param doctorRemovalDtoJson
+     * @param pigId
+     * @param farmId
+     * @return
+     */
     @RequestMapping(value = "/createRemovalEvent", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Long createRemovalEvent(@RequestParam("doctorRemovalDtoJson") String doctorRemovalDtoJson,
@@ -126,6 +208,37 @@ public class DoctorPigCreateEvents {
         return RespHelper.or500(doctorPigEventWriteService.removalEvent(doctorRemovalDto, buildBasicInputInfoDto(farmId,pigId, PigEvent.REMOVAL)));
     }
 
+    /**
+     * 母猪批量离场事件
+     * @param doctorRemovalDtoJson
+     * @param pigIds
+     * @param farmId
+     * @return
+     */
+    @RequestMapping(value = "/createRemovalEvents", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public void createRemovalEvent(@RequestParam("doctorRemovalDtoJson") String doctorRemovalDtoJson,
+                                   @RequestParam("pigIds") String pigIds, @RequestParam("farmId") Long farmId){
+
+        DoctorRemovalDto doctorRemovalDto = JsonMapper.JSON_NON_DEFAULT_MAPPER.fromJson(doctorRemovalDtoJson, DoctorRemovalDto.class);
+        if(isNull(doctorRemovalDto))
+            throw new JsonResponseException("create.removalEvent.fail");
+        //检查猪ids是否合格
+        checkPigIds(pigIds);
+        //TODO: 增加检查猪是否含有哺乳状态的仔猪,如果有不能操作
+
+        Splitters.COMMA.splitToList(pigIds).forEach(pigId -> {
+            RespHelper.or500(doctorPigEventWriteService.removalEvent(doctorRemovalDto, buildBasicInputInfoDto(farmId, Long.valueOf(pigId), PigEvent.REMOVAL)));
+        });
+    }
+
+    /**
+     * 创建疾病事件
+     * @param doctorDiseaseDtoJson
+     * @param pigId
+     * @param farmId
+     * @return
+     */
     @RequestMapping(value = "/createDiseaseEvent", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Long createDiseaseEvent(@RequestParam("doctorDiseaseDtoJson") String doctorDiseaseDtoJson,
@@ -137,6 +250,37 @@ public class DoctorPigCreateEvents {
         return RespHelper.or500(doctorPigEventWriteService.diseaseEvent(doctorDiseaseDto, buildBasicInputInfoDto(farmId, pigId, PigEvent.DISEASE)));
     }
 
+
+    /**
+     * 创建批量疾病事件
+     * @param doctorDiseaseDtoJson
+     * @param pigIds
+     * @param farmId
+     * @return
+     */
+    @RequestMapping(value = "/createDiseaseEvents", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public void createDiseaseEvent(@RequestParam("doctorDiseaseDtoJson") String doctorDiseaseDtoJson,
+                                   @RequestParam("pigIds") String pigIds, @RequestParam("farmId") Long farmId){
+
+        DoctorDiseaseDto doctorDiseaseDto = JsonMapper.JSON_NON_DEFAULT_MAPPER.fromJson(doctorDiseaseDtoJson, DoctorDiseaseDto.class);
+        if(isNull(doctorDiseaseDto))
+            throw new JsonResponseException("create.diseaseEvent.fail");
+        //检查猪ids是否合格
+        checkPigIds(pigIds);
+
+        Splitters.COMMA.splitToList(pigIds).forEach(pigId -> {
+            RespHelper.or500(doctorPigEventWriteService.diseaseEvent(doctorDiseaseDto, buildBasicInputInfoDto(farmId, Long.valueOf(pigId), PigEvent.DISEASE)));
+        });
+    }
+
+    /**
+     * 创建免疫事件
+     * @param doctorVaccinationDtoJson
+     * @param pigId
+     * @param farmId
+     * @return
+     */
     @RequestMapping(value = "/createVaccinationEvent", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Long createVaccinationEvent(@RequestParam("doctorVaccinationDtoJson") String doctorVaccinationDtoJson,
@@ -147,6 +291,34 @@ public class DoctorPigCreateEvents {
         return RespHelper.or500(doctorPigEventWriteService.vaccinationEvent(doctorVaccinationDto, buildBasicInputInfoDto(farmId, pigId, PigEvent.VACCINATION)));
     }
 
+    /**
+     * 创建批量免疫事件
+     * @param doctorVaccinationDtoJson
+     * @param pigIds
+     * @param farmId
+     * @return
+     */
+    @RequestMapping(value = "/createVaccinationEvents", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public void createVaccinationEvent(@RequestParam("doctorVaccinationDtoJson") String doctorVaccinationDtoJson,
+                                       @RequestParam("pigIds") String pigIds, @RequestParam("farmId") Long farmId){
+        DoctorVaccinationDto doctorVaccinationDto = JsonMapper.JSON_NON_DEFAULT_MAPPER.fromJson(doctorVaccinationDtoJson, DoctorVaccinationDto.class);
+        if(isNull(doctorVaccinationDto))
+            throw new JsonResponseException("create.diseaseEvent.fail");
+        //检查猪ids是否合格
+        checkPigIds(pigIds);
+
+        Splitters.COMMA.splitToList(pigIds).forEach(pigId -> {
+            RespHelper.or500(doctorPigEventWriteService.vaccinationEvent(doctorVaccinationDto, buildBasicInputInfoDto(farmId, Long.valueOf(pigId), PigEvent.VACCINATION)));        });
+    }
+
+    /**
+     * 创建体况事件
+     * @param doctorConditionDtoJson
+     * @param pigId
+     * @param farmId
+     * @return
+     */
     @RequestMapping(value = "/createConditionEvent", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Long createConditionEvent(@RequestParam("doctorConditionDtoJson") String doctorConditionDtoJson,
@@ -155,6 +327,28 @@ public class DoctorPigCreateEvents {
         if(isNull(doctorConditionDto))
             throw new JsonResponseException("create.conditionEvent.fail");
         return RespHelper.or500(doctorPigEventWriteService.conditionEvent(doctorConditionDto, buildBasicInputInfoDto(farmId, pigId, PigEvent.CONDITION)));
+    }
+
+    /**
+     * 创建批量体况事件
+     * @param doctorConditionDtoJson
+     * @param pigIds
+     * @param farmId
+     * @return
+     */
+    @RequestMapping(value = "/createConditionEvents", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public void createConditionEvent(@RequestParam("doctorConditionDtoJson") String doctorConditionDtoJson,
+                                     @RequestParam("pigIds") String pigIds, @RequestParam("farmId") Long farmId){
+        DoctorConditionDto doctorConditionDto = JsonMapper.JSON_NON_DEFAULT_MAPPER.fromJson(doctorConditionDtoJson, DoctorConditionDto.class);
+        if(isNull(doctorConditionDto))
+            throw new JsonResponseException("create.conditionEvent.fail");
+        //检查猪ids是否合格
+        checkPigIds(pigIds);
+
+        Splitters.COMMA.splitToList(pigIds).forEach(pigId -> {
+            RespHelper.or500(doctorPigEventWriteService.conditionEvent(doctorConditionDto, buildBasicInputInfoDto(farmId, Long.valueOf(pigId), PigEvent.CONDITION)));
+        });
     }
 
     @RequestMapping(value = "/createSemen", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -196,6 +390,18 @@ public class DoctorPigCreateEvents {
         } else {
             return RespHelper.or500(doctorSowEventCreateService.sowEventCreate(buildBasicInputInfoDto(farmId, pigId, PigEvent.from(eventType)), sowInfoDtoJson));
         }
+    }
+
+
+    @RequestMapping(value = "/createSowEvents", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public void createSowEventInfo(@RequestParam("farmId") Long farmId,
+                                   @RequestParam("pigIds") String pigIds, @RequestParam("eventType") Integer eventType,
+                                   @RequestParam("sowInfoDtoJson") String sowInfoDtoJson) {
+        checkPigIds(pigIds);
+        Splitters.COMMA.splitToList(pigIds).forEach(pigId -> {
+            RespHelper.or500(doctorSowEventCreateService.sowEventCreate(buildBasicInputInfoDto(farmId, Long.valueOf(pigId), PigEvent.from(eventType)), sowInfoDtoJson));
+        });
     }
 
     @RequestMapping(value = "/createCasualEvents", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
