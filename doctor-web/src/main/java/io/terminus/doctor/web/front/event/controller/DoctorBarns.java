@@ -123,6 +123,7 @@ public class DoctorBarns {
     @RequestMapping(value = "", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public Long createOrUpdateBarn(@RequestBody DoctorBarn barn) {
         checkNotNull(barn, "barn.not.null");
+        log.info("createOrUpdateBarn info:{}", barn);
 
         //权限中心校验权限
         doctorFarmAuthCenter.checkFarmAuth(barn.getFarmId());
@@ -141,6 +142,8 @@ public class DoctorBarns {
         } else {
             RespHelper.or500(doctorBarnWriteService.updateBarn(barn));
         }
+
+        log.info("createOrUpdateBarn succeed, barnId:{}", barn.getId());
         return barn.getId();
     }
 
