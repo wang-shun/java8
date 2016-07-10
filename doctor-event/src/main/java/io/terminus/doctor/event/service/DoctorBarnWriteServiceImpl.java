@@ -47,6 +47,7 @@ public class DoctorBarnWriteServiceImpl implements DoctorBarnWriteService {
             //校验猪舍名称是否重复
             checkBarnNameRepeat(barn.getFarmId(), barn.getName());
             doctorBarnDao.create(barn);
+            publishZookeeperEvent(DataEventType.BarnUpdate.getKey(), ImmutableMap.of("doctorBarnId", barn.getId()));
             return Response.ok(barn.getId());
         } catch (ServiceException e) {
             return Response.fail(e.getMessage());
