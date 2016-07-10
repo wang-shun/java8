@@ -123,10 +123,11 @@ public class DoctorBarns {
     @RequestMapping(value = "", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public Long createOrUpdateBarn(@RequestBody DoctorBarn barn) {
         checkNotNull(barn, "barn.not.null");
-        log.info("createOrUpdateBarn info:{}", barn);
 
         //权限中心校验权限
         doctorFarmAuthCenter.checkFarmAuth(barn.getFarmId());
+
+        Long barnId;
 
         DoctorFarm farm = RespHelper.or500(doctorFarmReadService.findFarmById(barn.getFarmId()));
         barn.setOrgId(farm.getOrgId());
@@ -138,13 +139,12 @@ public class DoctorBarns {
         if (barn.getId() == null) {
             barn.setStatus(DoctorBarn.Status.NOUSE.getValue());     //初始猪舍状态: 未用
             barn.setCanOpenGroup(DoctorBarn.CanOpenGroup.YES.getValue());  //初始是否可建群: 可建群
-            RespHelper.or500(doctorBarnWriteService.createBarn(barn));
+            barnId = RespHelper.or500(doctorBarnWriteService.createBarn(barn));
         } else {
             RespHelper.or500(doctorBarnWriteService.updateBarn(barn));
+            barnId = barn.getId();
         }
-
-        log.info("createOrUpdateBarn succeed, barnId:{}", barn.getId());
-        return barn.getId();
+        return barnId;
     }
 
     /**
