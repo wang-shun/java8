@@ -129,6 +129,10 @@ public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteServic
                     .pigType(doctorBasicInputInfoDto.getPigType()).build());
 
             return Response.ok(Params.getWithConvert(result,"doctorPigId",a->Long.valueOf(a.toString())));
+        }catch(IllegalStateException e){
+            log.error("pig entry event illegal state fail, basicInfo:{}, doctorFarmEntryDto:{}, cause:{}",
+                    doctorBasicInputInfoDto, doctorFarmEntryDto, Throwables.getStackTraceAsString(e));
+            return Response.fail(e.getMessage());
         }catch (Exception e){
             log.error("pig entry event create fail,basicInfo:{}, doctorFarmEntryDto:{}, cause:{}",
                     doctorBasicInputInfoDto, doctorFarmEntryDto,
@@ -270,6 +274,9 @@ public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteServic
             Map<String,Object> result = doctorPigEventManager.createCasualPigEvent(doctorBasicInputInfoDto, dto);
             publishEvent(result);
             return Response.ok(Params.getWithConvert(result,"doctorEventId",a->Long.valueOf(a.toString())));
+        }catch (IllegalStateException e){
+            log.error("chg farm event illegal state, cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail(e.getMessage());
         }catch (Exception e){
             log.error("vaccination event create fail, cause:{}", Throwables.getStackTraceAsString(e));
             return Response.fail("create.vaccination.fail");
