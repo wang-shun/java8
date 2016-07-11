@@ -10,7 +10,6 @@ import com.google.common.eventbus.EventBus;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.BaseUser;
 import io.terminus.common.model.Response;
-import io.terminus.common.utils.BeanMapper;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.enums.UserStatus;
 import io.terminus.doctor.user.model.DoctorUser;
