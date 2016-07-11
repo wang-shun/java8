@@ -72,10 +72,10 @@ public class Users {
 
     @RequestMapping("")
     public BaseUser getLoginUser() {
-        BaseUser user = UserUtil.getCurrentUser();
-        DoctorUser doctorUser = BeanMapper.map(user, DoctorUser.class);
+        DoctorUser doctorUser = (DoctorUser) UserUtil.getCurrentUser();
         try {
             Acl acl = aclLoader.getAcl(ParanaThreadVars.getApp());
+            BaseUser user = UserUtil.getCurrentUser();
             PermissionData perm = permissionHelper.getPermissions(acl, user, true);
             perm.setAllRequests(null); // empty it
             doctorUser.setAuth(JsonMapper.nonEmptyMapper().toJson(perm));
