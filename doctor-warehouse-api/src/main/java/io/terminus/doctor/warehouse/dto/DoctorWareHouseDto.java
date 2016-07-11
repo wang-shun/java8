@@ -31,6 +31,8 @@ public class DoctorWareHouseDto implements Serializable{
 
     private static final String REST_CONSUME_DATE = "restConsumeDate";
 
+    private Long warehouseId;
+
     private String warehouseName;
 
     private String manager;
@@ -46,7 +48,9 @@ public class DoctorWareHouseDto implements Serializable{
             return null;
         }
 
-        DoctorWareHouseDtoBuilder builder = DoctorWareHouseDto.builder().warehouseName(doctorWareHouse.getWareHouseName())
+        DoctorWareHouseDtoBuilder builder = DoctorWareHouseDto.builder()
+                .warehouseId(doctorWareHouse.getId())
+                .warehouseName(doctorWareHouse.getWareHouseName())
                 .manager(doctorWareHouse.getManagerName());
 
         Map<String,Object> extraMap = doctorWareHouseTrack.getExtraMap();
