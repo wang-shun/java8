@@ -149,6 +149,8 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
     @Override
     public Response<Boolean> createGroupEvent(Long groupId, Integer eventType, String data) {
         try {
+            log.info("create group event, groupId:{}, eventType:{}, data:{}", groupId, eventType, data);
+
             //1.校验猪群是否存在
             DoctorGroupDetail groupDetail = checkGroupExist(groupId);
 
