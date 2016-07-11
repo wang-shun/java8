@@ -26,6 +26,8 @@ public class DoctorSowDetailDto implements Serializable {
 
     private String pigSowCode;  // 母猪Code
 
+    private String warnMessage; // 事件信息提醒方式
+
     private String breedName; // 品种名称
 
     private String barnCode; // barn Code

@@ -101,6 +101,8 @@ public class DoctorZKListener implements EventListener {
                         pigSearchWriteService.update(Long.valueOf(s));
                     });
                 }
+                // 发送 PigEventCreateEvent 事件
+                coreEventDispatcher.publish(pigEventCreateEvent);
             }
         }
 

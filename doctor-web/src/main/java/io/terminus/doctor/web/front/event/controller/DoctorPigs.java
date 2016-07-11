@@ -117,7 +117,9 @@ public class DoctorPigs {
 
     private DoctorSowDetailDto buildSowDetailDto(DoctorPigInfoDetailDto dto){
         DoctorSowDetailDto doctorSowDetailDto = DoctorSowDetailDto.builder()
-                .pigSowCode(dto.getDoctorPig().getPigCode()).breedName(dto.getDoctorPig().getBreedName()).barnCode(dto.getDoctorPigTrack().getCurrentBarnName())
+                .pigSowCode(dto.getDoctorPig().getPigCode())
+                .warnMessage(dto.getDoctorPigTrack().getExtraMessage())
+                .breedName(dto.getDoctorPig().getBreedName()).barnCode(dto.getDoctorPigTrack().getCurrentBarnName())
                 .pigStatus(dto.getDoctorPigTrack().getStatus())
                 .dayAge(Days.daysBetween(new DateTime(dto.getDoctorPig().getBirthDate()), DateTime.now()).getDays())
                 .parity(dto.getDoctorPigTrack().getCurrentParity()).entryDate(dto.getDoctorPig().getInFarmDate())
