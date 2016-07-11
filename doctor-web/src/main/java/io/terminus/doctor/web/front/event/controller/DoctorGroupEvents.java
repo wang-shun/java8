@@ -13,6 +13,7 @@ import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.service.DoctorGroupReadService;
 import io.terminus.doctor.event.service.DoctorGroupWriteService;
 import io.terminus.doctor.web.front.auth.DoctorFarmAuthCenter;
+import io.terminus.doctor.web.front.event.dto.DoctorGroupDetailEventsDto;
 import io.terminus.doctor.web.front.event.service.DoctorGroupWebService;
 import io.terminus.pampas.common.UserUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -136,8 +137,14 @@ public class DoctorGroupEvents {
      * @return 猪群详情
      */
     @RequestMapping(value = "/detail", method = RequestMethod.GET)
-    public DoctorGroupDetail findGroupDetailByGroupId(@RequestParam("groupId") Long groupId) {
-        return RespHelper.or500(doctorGroupReadService.findGroupDetailByGroupId(groupId));
+    public DoctorGroupDetailEventsDto findGroupDetailByGroupId(@RequestParam("groupId") Long groupId) {
+        DoctorGroupDetail groupDetail = RespHelper.or500(doctorGroupReadService.findGroupDetailByGroupId(groupId));
+
+        //查询猪群的事件, 默认3条
+        List<DoctorGroupEvent> groupEvents = RespHelper.or500(doctorGroupReadService.pagingGroupEvent(
+                groupDetail.getGroup().getFarmId(), groupId, null, null, 3)).getData();
+
+        return new DoctorGroupDetailEventsDto(groupDetail.getGroup(), groupDetail.getGroupTrack(), groupEvents);
     }
 
     /**
