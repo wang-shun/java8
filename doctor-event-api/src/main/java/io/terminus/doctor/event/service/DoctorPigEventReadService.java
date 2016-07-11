@@ -58,4 +58,11 @@ public interface DoctorPigEventReadService {
      * @return
      */
     Response<List<DoctorSowParityCount>> querySowParityCount(@NotNull(message = "input.pigId.empty") Long pigId);
+
+    /**
+     * 校验母猪不处于分娩状态
+     * @param pigIds
+     * @return
+     */
+    Response<Boolean> validatePigNotInFeed(@NotNull(message = "input.pigIds.empty") String pigIds);
 }
