@@ -7,7 +7,6 @@ package io.terminus.doctor.web.admin.interceptors;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
-import com.google.common.collect.Lists;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.common.enums.UserType;
 import io.terminus.doctor.user.util.DoctorUserMaker;
@@ -73,16 +72,6 @@ public class DoctorLoginInterceptor extends HandlerInterceptorAdapter {
                 }
             }
         }
-        //TODO delete
-        if(UserUtil.getCurrentUser() == null){
-            ParanaUser mock = new ParanaUser();
-            mock.setId(1L);
-            mock.setType(UserType.OPERATOR.value());
-            mock.setName("MockOperator");
-            mock.setRoles(Lists.newArrayList("OPERATOR"));
-            UserUtil.putCurrentUser(mock);
-        }
-        // 上面的代码是为了方便前台开发, 临时添加的固定登录用户, 运营端开发完成后务必删除
         return true;
     }
 
