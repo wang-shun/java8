@@ -13,6 +13,7 @@ import io.terminus.doctor.basic.service.DoctorBasicReadService;
 import io.terminus.doctor.basic.service.DoctorBasicWriteService;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.RandomUtil;
+import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dto.DoctorGroupDetail;
 import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
 import io.terminus.doctor.event.dto.DoctorPigInfoDetailDto;
@@ -155,6 +156,18 @@ public class InitFarms {
             throw new JsonResponseException("staff不为空, 数据已经初始化!");
         }
         init(user, orgName, farmName);
+        return Boolean.TRUE;
+    }
+
+    /**
+     * 仅初始化母猪数据(内测用)
+     * @param farmId  猪场id
+     * @return 是否成功
+     */
+    @RequestMapping(value = "/sow", method = RequestMethod.GET)
+    public Boolean initSows(@RequestParam("farmId") Long farmId) {
+        DoctorFarm farm = RespHelper.or500(doctorFarmReadService.findFarmById(farmId));
+        initPigs(farm);
         return Boolean.TRUE;
     }
 
