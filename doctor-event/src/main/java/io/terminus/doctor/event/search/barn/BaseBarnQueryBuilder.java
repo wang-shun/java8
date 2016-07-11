@@ -1,6 +1,8 @@
 package io.terminus.doctor.event.search.barn;
 
 import io.terminus.common.model.PageInfo;
+import io.terminus.doctor.event.search.query.PigCriterias;
+import io.terminus.doctor.event.search.query.WildCard;
 import io.terminus.search.api.query.Aggs;
 import io.terminus.search.api.query.Criterias;
 import io.terminus.search.api.query.CriteriasBuilder;
@@ -60,6 +62,14 @@ public abstract class BaseBarnQueryBuilder {
         List<Aggs> aggsList = buildAggs(params);
         criteriasBuilder.withAggs(aggsList);
 
+        // 处理WildCard
+        WildCard wildCard = buildWildCard(params);
+        if (wildCard != null) {
+            PigCriterias pigCriterias = new PigCriterias(criteriasBuilder);
+            pigCriterias.setWildCard(wildCard);
+            return pigCriterias;
+        }
+
         return criteriasBuilder.build();
     }
 
@@ -69,6 +79,14 @@ public abstract class BaseBarnQueryBuilder {
      * @return  关键字, 如果没有指定关键字, 返回null
      */
     protected abstract Keyword buildKeyword(Map<String, String> params);
+
+    /**
+     * 构建通配符查询 WildCard. 如果存在WildCard, 则相应的 keyword 查询由WildCard替代
+     * 详情见 search.mustache 文件
+     * @param params    参数上下文
+     * @return  前缀对象, 如果没有指定, 返回null
+     */
+    protected abstract WildCard buildWildCard(Map<String, String> params);
 
     /**
      * 构建单值查询 term
