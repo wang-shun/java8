@@ -166,6 +166,16 @@ public class DoctorGroupEvents {
     }
 
     /**
+     * 查询猪群事件详情
+     * @param eventId 事件id
+     * @return  猪群事件
+     */
+    @RequestMapping(value = "/event", method = RequestMethod.GET)
+    public DoctorGroupEvent findGroupEventById(@RequestParam("eventId") Long eventId) {
+        return RespHelper.or500(doctorGroupReadService.findGroupEventById(eventId));
+    }
+
+    /**
      * 查询猪群镜像信息(猪群, 猪群跟踪, 最新event)
      * @param groupId 猪群id
      * @return 猪群镜像

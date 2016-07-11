@@ -131,7 +131,7 @@
             <if test="groupId != null">AND group_id = #{groupId}</if>
             <if test="type != null">AND type = #{type}</if>
         </where>
-        ORDER BY event_at DESC
+        ORDER BY event_at DESC, created_at DESC
         LIMIT #{offset}, #{limit}
     </select>
 </mapper>
