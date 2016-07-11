@@ -10,6 +10,7 @@ import com.google.common.eventbus.EventBus;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.BaseUser;
 import io.terminus.common.model.Response;
+import io.terminus.common.utils.BeanMapper;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.enums.UserStatus;
 import io.terminus.doctor.user.model.DoctorUser;
@@ -71,10 +72,10 @@ public class Users {
 
     @RequestMapping("")
     public BaseUser getLoginUser() {
-        DoctorUser doctorUser = (DoctorUser) UserUtil.getCurrentUser();
+        BaseUser user = UserUtil.getCurrentUser();
+        DoctorUser doctorUser = BeanMapper.map(user, DoctorUser.class);
         try {
             Acl acl = aclLoader.getAcl(ParanaThreadVars.getApp());
-            BaseUser user = UserUtil.getCurrentUser();
             PermissionData perm = permissionHelper.getPermissions(acl, user, true);
             perm.setAllRequests(null); // empty it
             doctorUser.setAuth(JsonMapper.nonEmptyMapper().toJson(perm));
