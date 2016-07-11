@@ -12,6 +12,7 @@ pampas:
       - Login
       - Auth
     customInterceptors:
+      - mockOperatorInterceptor
       - loginInterceptor
       - authInterceptor
   redis:
