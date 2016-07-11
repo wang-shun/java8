@@ -141,10 +141,6 @@ public class DoctorSearches {
         if (size == null) {
             size = 8; // 默认获取 8 条
         }
-        // 如果 q 为空
-        if (StringUtils.isBlank(params.get("q"))) {
-            return Collections.emptyList();
-        }
 
         Integer pageNo = 1; // 默认取第一页的数据
         Integer pageSize = size;
