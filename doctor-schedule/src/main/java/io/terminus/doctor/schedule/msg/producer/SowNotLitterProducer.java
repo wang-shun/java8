@@ -32,7 +32,6 @@ import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -108,7 +107,7 @@ public class SowNotLitterProducer extends AbstractJobProducer {
                 for (int j = 0; pigs != null && j < pigs.size(); j++) {
                     DoctorPigInfoDto pigDto = pigs.get(j);
                     // 母猪的updatedAt与当前时间差 (天)
-                    Double timeDiff = (double) (DateTime.now().minus(pigDto.getUpdatedAt().getTime()).getMillis() / 86400000);
+                    Double timeDiff = (double) (DateTime.now().minus(getStatusDate(pigDto).getMillis()).getMillis() / 86400000);
                     DateTime matingDate = getBreedingDate(pigDto);
                     if (ruleValueMap.get(1) != null && matingDate != null) {
                         if (DateTime.now().minusDays(ruleValueMap.get(1).getValue().intValue()).isAfter(matingDate)) {
@@ -139,22 +138,5 @@ public class SowNotLitterProducer extends AbstractJobProducer {
             }
         });
         return messages;
-    }
-
-    /**
-     * 获取最近一次配种日期
-     */
-    private DateTime getBreedingDate(DoctorPigInfoDto pigDto) {
-        // 获取配种日期
-        try {
-            if(StringUtils.isNotBlank(pigDto.getExtraTrack())) {
-                // @see DoctorMatingDto
-                Date date = new Date((Long) MAPPER.readValue(pigDto.getExtraTrack(), Map.class).get("matingDate"));
-                return new DateTime(date);
-            }
-        } catch (Exception e) {
-            log.error("[SowNotLitterProducer] get breeding date failed, pigDto is {}", pigDto);
-        }
-        return null;
     }
 }

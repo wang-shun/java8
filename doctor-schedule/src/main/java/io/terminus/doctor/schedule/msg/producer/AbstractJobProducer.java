@@ -12,6 +12,7 @@ import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.event.service.DoctorPigReadService;
 import io.terminus.doctor.event.service.DoctorPigWriteService;
 import io.terminus.doctor.msg.enums.Category;
+import io.terminus.doctor.msg.model.DoctorMessageRule;
 import io.terminus.doctor.msg.producer.AbstractProducer;
 import io.terminus.doctor.msg.service.DoctorMessageReadService;
 import io.terminus.doctor.msg.service.DoctorMessageRuleReadService;
@@ -27,6 +28,7 @@ import org.joda.time.DateTime;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -70,6 +72,11 @@ public abstract class AbstractJobProducer extends AbstractProducer {
             }
         }
         return true;
+    }
+
+    @Override
+    protected void recordPigMessages(DoctorMessageRule messageRule) {
+        // 子类实现
     }
 
     /**
@@ -132,4 +139,125 @@ public abstract class AbstractJobProducer extends AbstractProducer {
         return (double) (millis / 86400000);
     }
 
+    /**
+     * 获取猪的妊娠检查日期
+     * @param pigDto
+     * @return
+     */
+    protected DateTime getCheckDate(DoctorPigInfoDto pigDto) {
+        try{
+            if(StringUtils.isNotBlank(pigDto.getExtraTrack())) {
+                // @see DoctorPregChkResultDto
+                Date date = new Date((Long) MAPPER.readValue(pigDto.getExtraTrack(), Map.class).get("checkDate"));
+                return new DateTime(date);
+            }
+        } catch (Exception e) {
+            log.error("[SowBirthDateProducer] get check date failed, pigDto is {}", pigDto);
+        }
+        return new DateTime(pigDto.getUpdatedAt());
+    }
+
+    /**
+     * 获取预产期
+     * @param pigDto
+     */
+    protected DateTime getBirthDate(DoctorPigInfoDto pigDto) {
+        // 获取预产期
+        try{
+            if(StringUtils.isNotBlank(pigDto.getExtraTrack())) {
+                // @see DoctorMatingDto
+                Date date = new Date((Long) MAPPER.readValue(pigDto.getExtraTrack(), Map.class).get("judgePregDate"));
+                if (date != null) {
+                    return new DateTime(date);
+                } else {
+                    // 获取配种日期
+                    date = new Date((Long) MAPPER.readValue(pigDto.getExtraTrack(), Map.class).get("matingDate"));
+                    if (date != null) {
+                        // 配种日期 + 3 个月返回
+                        return new DateTime(date).plusMonths(3);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            log.error("[SowBirthDateProducer] get birth date failed, pigDto is {}", pigDto);
+        }
+        return new DateTime(pigDto.getUpdatedAt());
+    }
+
+    /**
+     * 获取最近一次配种日期
+     */
+    protected DateTime getBreedingDate(DoctorPigInfoDto pigDto) {
+        // 获取配种日期
+        try {
+            if(StringUtils.isNotBlank(pigDto.getExtraTrack())) {
+                // @see DoctorMatingDto
+                Date date = new Date((Long) MAPPER.readValue(pigDto.getExtraTrack(), Map.class).get("matingDate"));
+                return new DateTime(date);
+            }
+        } catch (Exception e) {
+            log.error("[SowNotLitterProducer] get breeding date failed, pigDto is {}", pigDto);
+        }
+        return new DateTime(pigDto.getUpdatedAt());
+    }
+
+
+    /**
+     * 获取到达当前状态的时间
+     * @param pigDto
+     * @return
+     */
+    protected DateTime getStatusDate(DoctorPigInfoDto pigDto) {
+        try {
+            PigStatus STATUS = PigStatus.from(pigDto.getStatus());
+            DateTime dateTime = null;
+            if(StringUtils.isNotBlank(pigDto.getExtraTrack()) && STATUS != null) {
+                switch (STATUS) {
+                    case Wean:  // 断奶
+                        // @see DoctorWeanDto
+                        dateTime = new DateTime(
+                                new Date((Long) MAPPER.readValue(pigDto.getExtraTrack(), Map.class).get("weanDate")));
+                        break;
+                    case Abortion:  // 流产
+                        // @see DoctorAbortionDto
+                        dateTime = new DateTime(
+                                new Date((Long) MAPPER.readValue(pigDto.getExtraTrack(), Map.class).get("abortionDate")));
+                        break;
+                    case KongHuai:case Pregnancy: case Farrow:  // 空怀, 阳性, 待分娩
+                        // @see DoctorPregChkResultDto
+                        dateTime = new DateTime(
+                                new Date((Long) MAPPER.readValue(pigDto.getExtraTrack(), Map.class).get("checkDate")));
+                        break;
+                    case Entry: // 待配种
+                        // @see DoctorChgLocationDto
+                        dateTime = new DateTime(
+                                new Date((Long) MAPPER.readValue(pigDto.getExtraTrack(), Map.class).get("changeLocationDate")));
+                        break;
+                }
+            }
+            return dateTime != null ? dateTime : new DateTime(pigDto.getUpdatedAt());
+        } catch (Exception e) {
+            log.error("[SowNotLitterProducer] get breeding date failed, pigDto is {}", pigDto);
+        }
+        return null;
+    }
+
+    /**
+     * 获取分娩时间
+     * @param pigDto
+     * @return
+     */
+    protected DateTime getFarrowingDate(DoctorPigInfoDto pigDto) {
+        // 获取配种日期
+        try {
+            if(StringUtils.isNotBlank(pigDto.getExtraTrack())) {
+                // @see DoctorFarrowingDto
+                Date date = new Date((Long) MAPPER.readValue(pigDto.getExtraTrack(), Map.class).get("farrowingDate"));
+                return new DateTime(date);
+            }
+        } catch (Exception e) {
+            log.error("[SowNotLitterProducer] get farrowing date failed, pigDto is {}", pigDto);
+        }
+        return new DateTime(pigDto.getUpdatedAt());
+    }
 }
