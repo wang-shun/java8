@@ -78,7 +78,7 @@ public class SysMessageProducer extends AbstractJobProducer {
                 if (1 == ruleValue.getRuleType() || 2 == ruleValue.getRuleType()) {
                     if (!checkRuleValue(
                             ruleValue,
-                            (double) (DateTime.now().minus(template.getUpdatedAt().getTime()).getMillis() / 3600000)
+                            (double) (DateTime.now().minus(template.getCreatedAt().getTime()).getMillis() / 3600000)
                     )) {
                         return messages;
                     }

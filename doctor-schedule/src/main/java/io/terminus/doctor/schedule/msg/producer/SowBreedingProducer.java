@@ -18,6 +18,7 @@ import io.terminus.doctor.msg.dto.RuleValue;
 import io.terminus.doctor.msg.dto.SubUser;
 import io.terminus.doctor.msg.enums.Category;
 import io.terminus.doctor.msg.model.DoctorMessage;
+import io.terminus.doctor.msg.model.DoctorMessageRule;
 import io.terminus.doctor.msg.model.DoctorMessageRuleRole;
 import io.terminus.doctor.msg.model.DoctorMessageRuleTemplate;
 import io.terminus.doctor.msg.service.DoctorMessageReadService;
@@ -78,24 +79,33 @@ public class SowBreedingProducer extends AbstractJobProducer {
     protected List<DoctorMessage> message(DoctorMessageRuleRole ruleRole, List<SubUser> subUsers) {
         log.info("待配种母猪提示消息产生 --- SowBreedingProducer 开始执行");
         List<DoctorMessage> messages = Lists.newArrayList();
+        handleMessages(ruleRole.getRule(), ruleRole.getTemplateId(), ruleRole.getFarmId(), true, messages, ruleRole, subUsers);
+        log.info("待配种母猪提示消息产生 --- SowBreedingProducer 结束执行, 产生 {} 条消息", messages.size());
+        return messages;
+    }
 
-        Rule rule = ruleRole.getRule();
+    @Override
+    protected void recordPigMessages(DoctorMessageRule messageRule) {
+        handleMessages(messageRule.getRule(), messageRule.getTemplateId(), messageRule.getFarmId(), false, null, null, null);
+    }
+
+    private void handleMessages(Rule rule, Long tplId, Long farmId, boolean isMessage, List<DoctorMessage> messages, DoctorMessageRuleRole ruleRole, List<SubUser> subUsers) {
         // ruleValue map
         Map<Integer, RuleValue> ruleValueMap = Maps.newHashMap();
         for (int i = 0; rule.getValues() != null && i < rule.getValues().size(); i++) {
             RuleValue ruleValue = rule.getValues().get(i);
             ruleValueMap.put(ruleValue.getId(), ruleValue);
         }
-        DoctorMessageRuleTemplate ruleTemplate = RespHelper.orServEx(doctorMessageRuleTemplateReadService.findMessageRuleTemplateById(ruleRole.getTemplateId()));
+        DoctorMessageRuleTemplate ruleTemplate = RespHelper.orServEx(doctorMessageRuleTemplateReadService.findMessageRuleTemplateById(tplId));
 
         if (StringUtils.isNotBlank(rule.getChannels())) {
             // 批量获取猪信息
             Long total = RespHelper.orServEx(doctorPigReadService.queryPigCount(
-                    DataRange.FARM.getKey(), ruleRole.getFarmId(), DoctorPig.PIG_TYPE.SOW.getKey()));
+                    DataRange.FARM.getKey(), farmId, DoctorPig.PIG_TYPE.SOW.getKey()));
             // 计算size, 分批处理
             Long page = getPageSize(total, 100L);
             DoctorPig pig =DoctorPig.builder()
-                    .farmId(ruleRole.getFarmId())
+                    .farmId(farmId)
                     .pigType(DoctorPig.PIG_TYPE.SOW.getKey())
                     .build();
             for (int i = 1; i <= page; i++) {
@@ -111,30 +121,28 @@ public class SowBreedingProducer extends AbstractJobProducer {
                 for (int j = 0; pigs != null && j < pigs.size(); j++) {
                     DoctorPigInfoDto pigDto = pigs.get(j);
                     // 母猪的updatedAt与当前时间差 (天)
-                    Double timeDiff = (double) (DateTime.now().minus(pigDto.getUpdatedAt().getTime()).getMillis() / 86400000);
+                    Double timeDiff = (double) (DateTime.now().minus(getStatusDate(pigDto).getMillis()).getMillis() / 86400000);
 
                     // 获取配置的天数, 并判断
                     if (ruleValueMap.get(1) != null) {
                         // 记录每只猪的消息提醒
-                        if (Objects.equals(ruleTemplate.getType(), DoctorMessageRuleTemplate.Type.WARNING.getValue())) {
+                        if (!isMessage && Objects.equals(ruleTemplate.getType(), DoctorMessageRuleTemplate.Type.WARNING.getValue())) {
                             recordPigMessage(pigDto, PigEvent.MATING, ruleValueMap.get(1).getValue().intValue(),
                                     PigStatus.Wean, PigStatus.Abortion, PigStatus.KongHuai, PigStatus.Entry);
                         }
 
-                        if (new DateTime(pigDto.getUpdatedAt()).isBefore(DateTime.now().minusDays(ruleValueMap.get(1).getValue().intValue()))) {
+                        if (isMessage && getStatusDate(pigDto).isBefore(DateTime.now().minusDays(ruleValueMap.get(1).getValue().intValue()))) {
                             messages.addAll(getMessage(pigDto, rule.getChannels(), ruleRole, subUsers, timeDiff, rule.getUrl()));
                         }
                     }
                 }
             }
         }
-        log.info("待配种母猪提示消息产生 --- SowBreedingProducer 结束执行, 产生 {} 条消息", messages.size());
-        return messages;
     }
 
-    /**
-     * 创建消息
-     */
+        /**
+         * 创建消息
+         */
     private List<DoctorMessage> getMessage(DoctorPigInfoDto pigDto, String channels, DoctorMessageRuleRole ruleRole, List<SubUser> subUsers, Double timeDiff, String url) {
         List<DoctorMessage> messages = Lists.newArrayList();
         // 创建消息

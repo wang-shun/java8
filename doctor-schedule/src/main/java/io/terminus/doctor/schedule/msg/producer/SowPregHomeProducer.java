@@ -108,7 +108,7 @@ public class SowPregHomeProducer extends AbstractJobProducer {
                 for (int j = 0; pigs != null && j < pigs.size(); j++) {
                     DoctorPigInfoDto pigDto = pigs.get(j);
                     // 母猪的updatedAt与当前时间差 (天)
-                    Double timeDiff = (double) (DateTime.now().minus(pigDto.getUpdatedAt().getTime()).getMillis() / 86400000);
+                    Double timeDiff = (double) (DateTime.now().minus(getCheckDate(pigDto).getMillis()).getMillis() / 86400000);
                     // 获取下个执行的事件, 如果含有转舍, 则通知转舍
                     List<Integer> events = RespHelper.orServEx(doctorPigEventReadService.queryPigEvents(ImmutableList.of(pigDto.getPigId())));
                     if (events.contains(PigEvent.TO_PREG.getKey())) {

@@ -3,6 +3,7 @@ package io.terminus.doctor.msg.producer;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Stopwatch;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.utils.RespHelper;
@@ -113,6 +114,8 @@ public abstract class AbstractProducer implements IProducer {
                 Stopwatch stopWatch = Stopwatch.createStarted();
                 log.info("[AbstractProducer] {} -> 预警消息产生, starting......", ruleTemplate.getName());
                 List<DoctorMessageRuleRole> ruleRoles = RespHelper.orServEx(doctorMessageRuleRoleReadService.findByTplId(ruleTemplate.getId()));
+
+                // > 记录对应每个用户的消息
                 for (int j = 0; ruleRoles != null && j < ruleRoles.size(); j++) {
                     DoctorMessageRuleRole ruleRole = ruleRoles.get(j);
                     // 查询对应的message_rule
@@ -134,6 +137,20 @@ public abstract class AbstractProducer implements IProducer {
                         doctorMessageWriteService.createMessages(message);
                     }
                 }
+
+                // > 记录对应每只猪类型的消息
+                ImmutableList<Integer> ofCategories = ImmutableList.of(
+                        // 当前支持这些消息提醒
+                        Category.SOW_NEEDWEAN.getKey(),
+                        Category.SOW_BREEDING.getKey(),
+                        Category.SOW_BIRTHDATE.getKey(),
+                        Category.SOW_PREGCHECK.getKey());
+                RespHelper.orServEx(doctorMessageRuleReadService.findMessageRulesByTplId(ruleTemplate.getId())).forEach(doctorMessageRule -> {
+                    if (ofCategories.contains(doctorMessageRule.getCategory())) {
+                        recordPigMessages(doctorMessageRule);
+                    }
+                });
+
                 stopWatch.stop();
                 log.info("[AbstractProducer] {} -> 预警消息产生结束, 耗时 {}ms, ending......", ruleTemplate.getName(), stopWatch.elapsed(TimeUnit.MILLISECONDS));
             }
@@ -146,6 +163,12 @@ public abstract class AbstractProducer implements IProducer {
      * @return
      */
     protected abstract List<DoctorMessage> message(DoctorMessageRuleRole ruleRole, List<SubUser> subUsers);
+
+    /**
+     * 根据规则与猪场的绑定, 获取每只猪的消息
+     * @return
+     */
+    protected abstract void recordPigMessages(DoctorMessageRule messageRule);
 
     /**
      * 检查用户是否含有数据的权限
