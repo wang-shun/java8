@@ -44,6 +44,8 @@ import javax.servlet.http.HttpSession;
 import java.util.HashMap;
 import java.util.Map;
 
+import static io.terminus.common.utils.Arguments.isNull;
+
 /**
  * Author:  <a href="mailto:i@terminus.io">jlchen</a>
  * Date: 2016-01-30
@@ -101,15 +103,22 @@ public class Users {
     @ResponseBody
     public Map<String, Object> login(@RequestParam("loginBy") String loginBy, @RequestParam("password") String password,
                                      @RequestParam(value = "target", required = false) String target,
+                                     @RequestParam(value = "type", required = false) Integer type,
                                      HttpServletRequest request, HttpServletResponse response) {
         loginBy = loginBy.toLowerCase();
         LoginType loginType;
-        if(mobilePattern.getPattern().matcher(loginBy).find()){
-            loginType = LoginType.MOBILE;
-        } else if(loginBy.indexOf("@") > 0){
-            throw new JsonResponseException("authorize.fail"); // 很明显的,子账号不允许登录运营端
+        if(isNull(type)){
+            if(mobilePattern.getPattern().matcher(loginBy).find()){
+                loginType = LoginType.MOBILE;
+            }
+            else if(loginBy.indexOf("@") != -1){
+                loginType = LoginType.OTHER;
+            }
+            else {
+                loginType = LoginType.NAME;
+            }
         } else {
-            loginType = LoginType.NAME;
+            loginType = LoginType.from(type);
         }
 
         Map<String, Object> map = new HashMap<>();
