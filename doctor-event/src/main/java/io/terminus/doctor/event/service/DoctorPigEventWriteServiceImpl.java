@@ -159,6 +159,7 @@ public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteServic
     }
 
     @Override
+    @Deprecated
     public Response<Boolean> diseaseEvents(DoctorDiseaseDto doctorDiseaseDto, DoctorBasicInputInfoDto basicInputInfoDto) {
         try{
             Response<List<DoctorPigInfoDto>> listResponse = this.doctorPigReadService.queryDoctorPigInfoByBarnId(basicInputInfoDto.getBarnId());
@@ -200,6 +201,7 @@ public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteServic
     }
 
     @Override
+    @Deprecated
     public Response<Boolean> vaccinationEvents(DoctorVaccinationDto doctorVaccinationDto, DoctorBasicInputInfoDto doctorBasicInputInfoDto) {
         try{
             Response<List<DoctorPigInfoDto>> listResponse = this.doctorPigReadService.queryDoctorPigInfoByBarnId(doctorBasicInputInfoDto.getBarnId());
@@ -258,6 +260,7 @@ public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteServic
             Map<String,Object> dto = Maps.newHashMap();
             BeanMapper.copy(doctorAbortionDto, dto);
             Map<String,Object> result = doctorPigEventManager.createSowPigEvent(doctorBasicInputInfoDto, dto);
+            publishEvent(result);
             return Response.ok(Params.getWithConvert(result, "doctorEventId", a->Long.valueOf(a.toString())));
         }catch (Exception e){
             log.error("abortion create event fail, cause:{}", Throwables.getStackTraceAsString(e));
@@ -340,6 +343,7 @@ public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteServic
             doctorChgLocationDto.setChgLocationFromBarnName(doctorBasicInputInfoDto.getBarnName());
 
             Map<String,Object> result = doctorPigEventManager.createSowPigEvent(doctorBasicInputInfoDto, dto);
+            publishEvent(result);
             return Response.ok(Params.getWithConvert(result, "doctorEventId", a->Long.valueOf(a.toString())));
         }catch(IllegalStateException e){
             log.error("change sow location event illegal status, cause:{}", e.getMessage());
