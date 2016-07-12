@@ -13,7 +13,12 @@ import io.terminus.common.model.Response;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.enums.UserStatus;
 import io.terminus.doctor.user.model.DoctorUser;
+import io.terminus.doctor.user.service.DoctorUserReadService;
 import io.terminus.doctor.user.util.DoctorUserMaker;
+import io.terminus.doctor.web.core.Constants;
+import io.terminus.doctor.web.core.component.MobilePattern;
+import io.terminus.doctor.web.core.events.user.LoginEvent;
+import io.terminus.doctor.web.core.events.user.LogoutEvent;
 import io.terminus.pampas.common.UserUtil;
 import io.terminus.parana.auth.core.AclLoader;
 import io.terminus.parana.auth.core.PermissionHelper;
@@ -23,22 +28,23 @@ import io.terminus.parana.auth.model.PermissionData;
 import io.terminus.parana.common.model.ParanaUser;
 import io.terminus.parana.user.model.LoginType;
 import io.terminus.parana.user.model.User;
-import io.terminus.parana.user.service.UserReadService;
-import io.terminus.doctor.web.core.Constants;
-import io.terminus.doctor.web.core.events.user.LoginEvent;
-import io.terminus.doctor.web.core.events.user.LogoutEvent;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 
-import static io.terminus.common.utils.Arguments.*;
+import static io.terminus.common.utils.Arguments.isNull;
 
 /**
  * Author:  <a href="mailto:i@terminus.io">jlchen</a>
@@ -50,7 +56,9 @@ import static io.terminus.common.utils.Arguments.*;
 public class Users {
 
 
-    private final UserReadService<User> userReadService;
+    private final DoctorUserReadService doctorUserReadService;
+
+    private final MobilePattern mobilePattern;
 
     private final EventBus eventBus;
 
@@ -59,14 +67,16 @@ public class Users {
     private final PermissionHelper permissionHelper;
 
     @Autowired
-    public Users(UserReadService<User> userReadService,
+    public Users(DoctorUserReadService doctorUserReadService,
                  EventBus eventBus,
                  AclLoader aclLoader,
-                 PermissionHelper permissionHelper) {
-        this.userReadService = userReadService;
+                 PermissionHelper permissionHelper,
+                 MobilePattern mobilePattern) {
+        this.doctorUserReadService = doctorUserReadService;
         this.eventBus = eventBus;
         this.aclLoader = aclLoader;
         this.permissionHelper = permissionHelper;
+        this.mobilePattern = mobilePattern;
     }
 
     @RequestMapping("")
@@ -96,10 +106,24 @@ public class Users {
                                      @RequestParam(value = "type", required = false) Integer type,
                                      HttpServletRequest request, HttpServletResponse response) {
         loginBy = loginBy.toLowerCase();
-        LoginType loginType = isNull(type) ? LoginType.EMAIL : LoginType.from(type);
+        LoginType loginType;
+        if(isNull(type)){
+            if(mobilePattern.getPattern().matcher(loginBy).find()){
+                loginType = LoginType.MOBILE;
+            }
+            else if(loginBy.indexOf("@") != -1){
+                loginType = LoginType.OTHER;
+            }
+            else {
+                loginType = LoginType.NAME;
+            }
+        } else {
+            loginType = LoginType.from(type);
+        }
+
         Map<String, Object> map = new HashMap<>();
 
-        Response<User> result = userReadService.login(loginBy, password, loginType);
+        Response<User> result = doctorUserReadService.login(loginBy, password, loginType);
 
         if (!result.isSuccess()) {
             log.warn("failed to login with(loginBy={}), error: {}", loginBy, result.getError());

@@ -23,6 +23,7 @@ import io.terminus.doctor.common.enums.UserType;
 import io.terminus.doctor.common.event.CoreEventDispatcher;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.user.model.DoctorUser;
+import io.terminus.doctor.user.service.DoctorUserReadService;
 import io.terminus.doctor.user.util.DoctorUserMaker;
 import io.terminus.doctor.web.core.component.CaptchaGenerator;
 import io.terminus.doctor.web.core.component.MobilePattern;
@@ -38,7 +39,6 @@ import io.terminus.parana.common.model.ParanaUser;
 import io.terminus.parana.common.utils.EncryptUtil;
 import io.terminus.parana.user.model.LoginType;
 import io.terminus.parana.user.model.User;
-import io.terminus.parana.user.service.UserReadService;
 import io.terminus.parana.user.service.UserWriteService;
 import io.terminus.doctor.web.core.Constants;
 import io.terminus.doctor.web.core.events.user.LoginEvent;
@@ -90,7 +90,7 @@ public class Users {
 
     private final UserWriteService<User> userWriteService;
 
-    private final UserReadService<User> userReadService;
+    private final DoctorUserReadService doctorUserReadService;
 
     private final EventBus eventBus;
 
@@ -115,7 +115,7 @@ public class Users {
 
     @Autowired
     public Users(UserWriteService<User> userWriteService,
-                 UserReadService<User> userReadService,
+                 DoctorUserReadService doctorUserReadService,
                  EventBus eventBus,
                  CaptchaGenerator captchaGenerator,
                  MobilePattern mobilePattern,
@@ -124,7 +124,7 @@ public class Users {
                  PermissionHelper permissionHelper,
                  CoreEventDispatcher coreEventDispatcher) {
         this.userWriteService = userWriteService;
-        this.userReadService = userReadService;
+        this.doctorUserReadService = doctorUserReadService;
         this.eventBus = eventBus;
         this.captchaGenerator = captchaGenerator;
         this.mobilePattern = mobilePattern;
@@ -266,7 +266,7 @@ public class Users {
 
         Map<String, Object> map = new HashMap<>();
 
-        Response<User> result = userReadService.login(loginBy, password, loginType);
+        Response<User> result = doctorUserReadService.login(loginBy, password, loginType);
 
         if (!result.isSuccess()) {
             log.warn("failed to login with(loginBy={}), error: {}", loginBy, result.getError());
@@ -328,7 +328,7 @@ public class Users {
         if (!Objects.equal(operation, 1) && !Objects.equal(operation, 2)) {
             throw new JsonResponseException("unknown operation");
         }
-        Response<User> result = userReadService.findBy(loginBy, loginType);
+        Response<User> result = doctorUserReadService.findBy(loginBy, loginType);
         if (Objects.equal(operation, 1)) {
             if (result.isSuccess()) {
                 log.warn("user info {} already exists", loginBy);
@@ -466,7 +466,7 @@ public class Users {
      * @return 注册成功之后的用户
      */
     private User registerByMobile(String mobile, String password, String userName) {
-        Response<User> result = userReadService.findBy(mobile, LoginType.MOBILE);
+        Response<User> result = doctorUserReadService.findBy(mobile, LoginType.MOBILE);
         // 检测手机号是否已存在
         if(result.isSuccess() && result.getResult() != null){
             throw new JsonResponseException("user.register.mobile.has.been.used");
@@ -503,7 +503,7 @@ public class Users {
                                   @RequestParam("newPassword") String newPassword) {
         //1.获取用户
         checkUserLogin();
-        User user = RespHelper.or500(userReadService.findById(UserUtil.getUserId()));
+        User user = RespHelper.or500(doctorUserReadService.findById(UserUtil.getUserId()));
 
         //2.校验旧密码密码
         checkPassword(oldPassword, user.getPassword());
@@ -573,7 +573,7 @@ public class Users {
      * @return 注册成功之后用户
      */
     public User registerByEmail(String email, String password, String userName){
-        Response<User> result = userReadService.findBy(email, LoginType.EMAIL);
+        Response<User> result = doctorUserReadService.findBy(email, LoginType.EMAIL);
         // 检测邮箱是否已存在
         if(result.isSuccess() && result.getResult() != null){
             throw new JsonResponseException("user.register.email.has.been.used");
@@ -633,7 +633,7 @@ public class Users {
         } else {
             type = LoginType.NAME;
         }
-        Response<User> resp = userReadService.findBy(query, type);
+        Response<User> resp = doctorUserReadService.findBy(query, type);
         if (!resp.isSuccess() || resp.getResult() == null) {
             return Collections.emptyList();
         }
