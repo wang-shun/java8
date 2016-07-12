@@ -151,6 +151,19 @@ public class DoctorSearchesTest extends BaseFrontWebTest {
     }
 
     /**
+     * 查询物料
+     * @see DoctorSearches#searchSuggestMaterials(Integer, Map)
+     */
+    @Test
+    public void test_QUERY_SuggestMaterialsWithKeyWord() {
+        String url = "/api/doctor/search/materials/suggest";
+        String q = "物料测试ma";
+        List body = getForEntity(url, ImmutableMap.of("farmId", 12355, "size", 2 ,"q", q), List.class).getBody();
+        System.out.println(body.size());
+        System.out.println(JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(body));
+    }
+
+    /**
      * 获取猪只提示的消息
      * @see DoctorPigs#queryPigNotifyMessages(Long)
      */
