@@ -25,9 +25,9 @@ import io.terminus.doctor.open.common.MobilePattern;
 import io.terminus.doctor.open.common.Sessions;
 import io.terminus.doctor.open.enums.MobileDeviceType;
 import io.terminus.doctor.open.util.OPRespHelper;
+import io.terminus.doctor.user.service.DoctorUserReadService;
 import io.terminus.doctor.user.util.DoctorUserMaker;
 import io.terminus.doctor.web.core.events.user.RegisterEvent;
-import io.terminus.lib.sms.SmsException;
 import io.terminus.pampas.common.UserUtil;
 import io.terminus.pampas.openplatform.annotations.OpenBean;
 import io.terminus.pampas.openplatform.annotations.OpenMethod;
@@ -38,7 +38,6 @@ import io.terminus.parana.user.model.User;
 import io.terminus.parana.user.model.UserDevice;
 import io.terminus.parana.user.service.DeviceReadService;
 import io.terminus.parana.user.service.DeviceWriteService;
-import io.terminus.parana.user.service.UserReadService;
 import io.terminus.parana.user.service.UserWriteService;
 import io.terminus.parana.web.msg.MsgWebService;
 import io.terminus.session.AFSessionManager;
@@ -62,7 +61,6 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import static io.terminus.common.utils.Arguments.isEmpty;
-import static io.terminus.common.utils.Arguments.isNull;
 import static io.terminus.common.utils.Arguments.notNull;
 
 /**
@@ -85,7 +83,7 @@ public class OPUsers {
     @Autowired
     private SessionProperties sessionProperties;
     @Autowired
-    private UserReadService<User> userReadService;
+    private DoctorUserReadService doctorUserReadService;
     @Autowired
     private UserWriteService<User> userWriteService;
     @Autowired
@@ -174,7 +172,7 @@ public class OPUsers {
             throw new OPClientException("sms.code.type.error");
         }
 
-        Response<User> result = userReadService.findBy(mobile, LoginType.MOBILE);
+        Response<User> result = doctorUserReadService.findBy(mobile, LoginType.MOBILE);
         switch (smsCodeType){
             case REGISTER:
                 // 如果该手机号已注册
@@ -326,7 +324,7 @@ public class OPUsers {
      * @return 注册成功之后的用户
      */
     private User registerByMobile(String mobile, String password, String userName) {
-        Response<User> result = userReadService.findBy(mobile, LoginType.MOBILE);
+        Response<User> result = doctorUserReadService.findBy(mobile, LoginType.MOBILE);
         // 检测手机号是否已存在
         if(result.isSuccess() && result.getResult() != null){
             throw new OPClientException("user.register.mobile.has.been.used");
@@ -442,7 +440,7 @@ public class OPUsers {
         // refresh
         sessionManager.refreshExpireTime(Sessions.TOKEN_PREFIX, sessionId, Sessions.LONG_INACTIVE_INTERVAL);
         Long uid = Long.parseLong(snapshot.get(Sessions.USER_ID).toString());
-        Response<User> res = userReadService.findById(uid);
+        Response<User> res = doctorUserReadService.findById(uid);
         if (!res.isSuccess()) {
             throw new OPClientException(400, res.getError());
         }
@@ -479,7 +477,7 @@ public class OPUsers {
         } else {
             loginType = LoginType.NAME;
         }
-        Response<User> result = userReadService.login(name, password, loginType);
+        Response<User> result = doctorUserReadService.login(name, password, loginType);
         if (!result.isSuccess()) {
             plusErrorCount(sessionId);
             refreshCaptcher(sessionId);
@@ -606,7 +604,7 @@ public class OPUsers {
             throw new OPClientException(400, "session.id.expired");
         }
         //2.获取用户
-        Response<User> userResp = userReadService.findById(Long.valueOf(snapshot.get(Sessions.USER_ID).toString()));
+        Response<User> userResp = doctorUserReadService.findById(Long.valueOf(snapshot.get(Sessions.USER_ID).toString()));
         if(!userResp.isSuccess()){
             throw new OPClientException(userResp.getError());
         }
@@ -651,7 +649,7 @@ public class OPUsers {
         User user = null;
         // 校验手机验证码
         validateSmsCode(code, mobile, sessionId);
-        Response<User> userResp = userReadService.findBy(mobile, LoginType.MOBILE);
+        Response<User> userResp = doctorUserReadService.findBy(mobile, LoginType.MOBILE);
         if(!userResp.isSuccess()){
             throw new OPClientException(userResp.getError());
         }

@@ -89,6 +89,8 @@ public class DoctorUserReadServiceImpl extends UserReadServiceImpl implements Do
                 return Response.fail("user.not.found");
             }
             return Response.ok(user);
+        }catch(ServiceException e){
+            return Response.fail(e.getMessage());
         } catch (Exception e) {
             log.error("failed to find user(loginId={}, loginType={}), cause:{}",
                     loginId, loginType, Throwables.getStackTraceAsString(e));
