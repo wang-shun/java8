@@ -27,7 +27,7 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        user_id, user_mobile, real_name, type, status, reviewer_id, created_at, updated_at
+        user_id, user_mobile, real_name, `type`, status, reviewer_id, created_at, updated_at
     </sql>
 
     <sql id="vals">
@@ -67,7 +67,7 @@
     <select id="findByUserIdAndType" parameterType="map" resultMap="DoctorServiceReviewMap" >
         SELECT <include refid="cols_all" />
         FROM <include refid="tb" />
-        WHERE user_id = #{userId} and type = #{type}
+        WHERE user_id = #{userId} and `type` = #{type}
     </select>
 
     <update id="update" parameterType="DoctorServiceReview">
@@ -77,7 +77,7 @@
             <if test="userId != null">user_id = #{userId},</if>
             <if test="userMobile != null">user_mobile = #{userMobile},</if>
             <if test="realName != null">real_name = #{realName},</if>
-            <if test="type != null">type = #{type},</if>
+            <if test="type != null">`type` = #{type},</if>
             <if test="status != null">status = #{status},</if>
             <if test="reviewerId != null">reviewer_id = #{reviewerId},</if>
             updated_at=now()
@@ -88,7 +88,7 @@
     <update id="updateStatus" parameterType="map">
         update <include refid="tb"/>
         set status = #{status}, reviewer_id = #{reviewerId}, updated_at = now()
-        where user_id = #{userId} and type = #{type}
+        where user_id = #{userId} and `type` = #{type}
     </update>
 
     <delete id="delete" parameterType="long">
@@ -114,7 +114,7 @@
         <if test="userId"> and user_id = #{userId} </if>
         <if test="userMobile"> and user_mobile = #{userMobile} </if>
         <if test="realName"> and real_name = #{realName} </if>
-        <if test="type"> and type = #{type} </if>
+        <if test="type"> and `type` = #{type} </if>
         <if test="status"> and status = #{status} </if>
     </sql>
 </mapper>
