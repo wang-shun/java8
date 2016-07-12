@@ -378,6 +378,28 @@ public class DoctorSearches {
     }
 
     /**
+     * 获取所有的物料
+     *
+     * @param params   搜索参数
+     *                 搜索参数可以参照:
+     *                 @see `DefaultMaterialQueryBuilder#buildTerm`
+     * @return
+     */
+    @RequestMapping(value = "/materials/suggest", method = RequestMethod.GET)
+    public List<SearchedMaterial> searchSuggestMaterials(@RequestParam(required = false) Integer size,
+                                                         @RequestParam Map<String, String> params) {
+        if (farmIdNotExist(params)) {
+            return Collections.emptyList();
+        }
+        if (size == null) {
+            size = 8; // 默认获取 8 条
+        }
+        Integer pageNo = 1; // 默认取第一页的数据
+        Integer pageSize = size;
+        return RespHelper.or500(materialSearchReadService.searchWithAggs(pageNo, pageSize, "search/masearch.mustache", params)).getData();
+    }
+
+    /**
      * 创建搜索词
      *
      * @param searchType 搜索类型
