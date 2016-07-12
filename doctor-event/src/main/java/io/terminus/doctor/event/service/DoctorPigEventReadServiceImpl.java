@@ -17,6 +17,7 @@ import io.terminus.doctor.event.dao.DoctorPigEventDao;
 import io.terminus.doctor.event.dao.DoctorPigTrackDao;
 import io.terminus.doctor.event.dto.DoctorSowParityCount;
 import io.terminus.doctor.event.enums.PigEvent;
+import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
@@ -28,6 +29,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import javax.validation.constraints.NotNull;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -166,6 +168,25 @@ public class DoctorPigEventReadServiceImpl implements DoctorPigEventReadService 
         }catch (Exception e){
             log.error("query sow parity fail, cause:{}", Throwables.getStackTraceAsString(e));
             return Response.fail("query.sowParityCount.fail");
+        }
+    }
+
+    @Override
+    public Response<Boolean> validatePigNotInFeed(@NotNull(message = "input.pigIds.empty") String pigIds) {
+        try{
+            Splitters.COMMA.split(pigIds).forEach(pigId->{
+                Boolean hasEquals = Objects.equals(
+                        doctorPigTrackDao.findById(Long.valueOf(pigId)).getStatus(),
+                        PigStatus.FEED.getKey());
+                checkState(!hasEquals, "pigsState.notFeedValidate.fail");
+            });
+        	return Response.ok(Boolean.TRUE);
+        }catch (IllegalStateException se){
+            log.warn("validate pig not in farrowing state illegal state fail, cause:{}", Throwables.getStackTraceAsString(se));
+            return Response.fail(se.getMessage());
+        }catch (Exception e){
+            log.error("validate pig not in farrowing state fail, cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("..fail");
         }
     }
 

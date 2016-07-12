@@ -25,6 +25,7 @@ import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.service.DoctorBarnReadService;
+import io.terminus.doctor.event.service.DoctorPigEventReadService;
 import io.terminus.doctor.event.service.DoctorPigEventWriteService;
 import io.terminus.doctor.event.service.DoctorPigReadService;
 import io.terminus.doctor.user.model.DoctorFarm;
@@ -75,19 +76,23 @@ public class DoctorPigCreateEvents {
 
     private final DoctorBarnReadService doctorBarnReadService;
 
+    private final DoctorPigEventReadService doctorPigEventReadService;
+
     @Autowired
     public DoctorPigCreateEvents(DoctorPigEventWriteService doctorPigEventWriteService,
                                  DoctorFarmReadService doctorFarmReadService,
                                  DoctorPigReadService doctorPigReadService,
                                  UserReadService userReadService,
                                  DoctorSowEventCreateService doctorSowEventCreateService,
-                                 DoctorBarnReadService doctorBarnReadService){
+                                 DoctorBarnReadService doctorBarnReadService,
+                                 DoctorPigEventReadService doctorPigEventReadService){
         this.doctorPigEventWriteService = doctorPigEventWriteService;
         this.doctorFarmReadService = doctorFarmReadService;
         this.doctorPigReadService = doctorPigReadService;
         this.userReadService =userReadService;
         this.doctorSowEventCreateService = doctorSowEventCreateService;
         this.doctorBarnReadService = doctorBarnReadService;
+        this.doctorPigEventReadService = doctorPigEventReadService;
     }
 
     /**
@@ -130,9 +135,7 @@ public class DoctorPigCreateEvents {
         if (isNull(doctorChgLocationDto)){
             throw new JsonResponseException("chgLocation.inputParam.error");
         }
-        //TODO: 需要增加对猪转舍是否能进行转舍的校验,如果有一头不符合不能批量
-        //TODO: 增加检查猪是否含有哺乳状态的仔猪,如果有不能操作
-        //检查猪ids是否合格
+
         checkPigIds(pigIds);
 
         Splitters.COMMA.splitToList(pigIds).forEach(pigId -> {
@@ -176,7 +179,7 @@ public class DoctorPigCreateEvents {
         DoctorChgFarmDto doctorChgFarmDto = JsonMapper.JSON_NON_DEFAULT_MAPPER.fromJson(doctorChgFarmDtoJson, DoctorChgFarmDto.class);
         if (isNull(doctorChgFarmDto))
             throw new JsonResponseException("create.chgFarm.error");
-        //TODO: 增加检查猪是否含有哺乳状态的仔猪,如果有不能操作
+
         //检查猪ids是否合格
         checkPigIds(pigIds);
 
@@ -228,7 +231,8 @@ public class DoctorPigCreateEvents {
             throw new JsonResponseException("create.removalEvent.fail");
         //检查猪ids是否合格
         checkPigIds(pigIds);
-        //TODO: 增加检查猪是否含有哺乳状态的仔猪,如果有不能操作
+
+        RespHelper.orServEx(doctorPigEventReadService.validatePigNotInFeed(pigIds));
 
         Splitters.COMMA.splitToList(pigIds).forEach(pigId -> {
             RespHelper.or500(doctorPigEventWriteService.removalEvent(doctorRemovalDto, buildBasicInputInfoDto(farmId, Long.valueOf(pigId), PigEvent.REMOVAL)));
