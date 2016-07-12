@@ -470,26 +470,14 @@ public class OPUsers {
         }
     }
 
-    //手机登录
-    private User doLogin(String mobile, String password, String sessionId) {
-        return doLogin(mobile, password, "3", sessionId);
-    }
-
-    private User doLogin(String name, String password, String type, String sessionId) {
-        LoginType loginType = null;
-
-        if(isNull(type)){
-            if(mobilePattern.getPattern().matcher(name).find()){
-                loginType = LoginType.MOBILE;
-            }
-            else if(name.indexOf("@") != -1){
-                loginType = LoginType.OTHER;
-            }
-            else {
-                loginType = LoginType.NAME;
-            }
+    private User doLogin(String name, String password, String sessionId) {
+        LoginType loginType;
+        if(mobilePattern.getPattern().matcher(name).find()){
+            loginType = LoginType.MOBILE;
+        } else if(name.indexOf("@") != -1){
+            loginType = LoginType.OTHER;
         } else {
-            loginType = LoginType.from(Integer.parseInt(type));
+            loginType = LoginType.NAME;
         }
         Response<User> result = userReadService.login(name, password, loginType);
         if (!result.isSuccess()) {
