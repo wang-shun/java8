@@ -135,4 +135,15 @@
         FROM <include refid="tb"/>
         WHERE `status` = 1
     </select>
+
+    <select id="findByConditions" parameterType="map" resultMap="SubMap">
+        SELECT <include refid="cols_all"/>
+        FROM <include refid="tb"/>
+        <where>
+            <include refid="criteria"/>
+        </where>
+        <if test="limit != null">
+            LIMIT #{limit}
+        </if>
+    </select>
 </mapper>
