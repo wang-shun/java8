@@ -100,7 +100,7 @@ public class DoctorServiceReview implements Serializable {
         OK(1, "审核通过"),
         REVIEW(2, "用户已提交申请,正在审核中"),
         NOT_OK(-1, "审核不通过"),
-        FROZEN(-2, "冻结");
+        FROZEN(-2, "冻结申请资格");
 
         @Getter
         private int value;
