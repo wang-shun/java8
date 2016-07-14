@@ -42,4 +42,12 @@ public interface PrimaryUserWriteService {
      * @return 是否更新
      */
     Response<Boolean> updateSub(Sub sub);
+
+    /**
+     * 子账号角色名称更新后,表 doctor_user_subs 中的冗余字段也需要跟着更新
+     * @param subRoleId 表 doctor_sub_roles 的 主键id, 关联表 doctor_user_subs 的 role_id
+     * @param newRoleName 新的角色名称
+     * @return
+     */
+    Response<Boolean> updateRoleName(Long subRoleId, String newRoleName);
 }

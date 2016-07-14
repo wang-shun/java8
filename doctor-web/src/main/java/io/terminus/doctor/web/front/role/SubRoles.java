@@ -4,6 +4,7 @@ import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.Paging;
 import io.terminus.doctor.common.enums.UserType;
 import io.terminus.doctor.user.model.SubRole;
+import io.terminus.doctor.user.service.PrimaryUserWriteService;
 import io.terminus.doctor.user.service.SubRoleReadService;
 import io.terminus.doctor.user.service.SubRoleWriteService;
 import io.terminus.pampas.common.UserUtil;
@@ -38,11 +39,17 @@ public class SubRoles {
 
     private final SubRoleService subRoleService;
 
+    private final PrimaryUserWriteService primaryUserWriteService;
+
     @Autowired
-    public SubRoles(SubRoleReadService subRoleReadService, SubRoleWriteService subRoleWriteService, SubRoleService subRoleService) {
+    public SubRoles(SubRoleReadService subRoleReadService,
+                    SubRoleWriteService subRoleWriteService,
+                    SubRoleService subRoleService,
+                    PrimaryUserWriteService primaryUserWriteService) {
         this.subRoleReadService = subRoleReadService;
         this.subRoleWriteService = subRoleWriteService;
         this.subRoleService = subRoleService;
+        this.primaryUserWriteService = primaryUserWriteService;
     }
 
     /**
@@ -83,7 +90,13 @@ public class SubRoles {
 
         role.setId(role.getId());
         role.setAppKey(null); // prevent update
-        return or500(subRoleWriteService.updateRole(role));
+        or500(subRoleWriteService.updateRole(role));
+
+        //如果角色名称发生了改变, 则更新冗余字段
+        if(!Objects.equals(existRole.getName(), role.getName())){
+            or500(primaryUserWriteService.updateRoleName(role.getId(), role.getName()));
+        }
+        return true;
     }
 
     /**

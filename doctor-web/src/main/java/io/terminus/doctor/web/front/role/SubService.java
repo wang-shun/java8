@@ -341,7 +341,7 @@ public class SubService {
     }
 
     /**
-     * 检查子账号是否存在
+     * 检查子账号是否存在, 如果存在则抛出异常
      * @param userName
      */
     private void checkSubUserAccount(String userName){

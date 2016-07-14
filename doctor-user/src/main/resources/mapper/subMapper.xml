@@ -146,4 +146,10 @@
             LIMIT #{limit}
         </if>
     </select>
+
+    <update id="updateRoleName" parameterType="map">
+        update <include refid="tb"/>
+        set role_name = #{roleName}
+        where role_id = #{roleId}
+    </update>
 </mapper>
