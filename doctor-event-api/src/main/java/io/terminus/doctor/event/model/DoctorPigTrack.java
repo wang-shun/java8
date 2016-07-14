@@ -107,7 +107,7 @@ public class DoctorPigTrack implements Serializable{
     public void setExtra(String extra) {
         this.extra = Strings.nullToEmpty(extra);
         if(Strings.isNullOrEmpty(extra)){
-            this.extraMap = Collections.emptyMap();
+            this.extraMap = Maps.newHashMap();
         }else {
             this.extraMap = OBJECT_MAPPER.readValue(extra, JacksonType.MAP_OF_OBJECT);
         }
@@ -131,10 +131,6 @@ public class DoctorPigTrack implements Serializable{
         if(isNull(this.extraMap)){
             this.extraMap = Maps.newHashMap();
         }
-
-        log.info("******this extraMap type :{}", this.extraMap);
-        log.info("***** extra content {}", extra);
-        log.info("***** type:{}, {}", this.extraMap.getClass().getName(), extra.getClass().getName());
         this.extraMap.putAll(extra);
         this.extra = OBJECT_MAPPER.writeValueAsString(this.extraMap);
     }
