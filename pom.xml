@@ -48,8 +48,8 @@
         <terminus.session.version>1.5.RELEASE</terminus.session.version>
         <terminus.search.version>3.0.RELEASE</terminus.search.version>
         <pampas.version>2.8.RELEASE</pampas.version>
-        <parana.core.version>4.2.1.RELEASE</parana.core.version>
-        <parana.extra.version>4.2.1.RELEASE</parana.extra.version>
+        <parana.core.version>4.2.7-SNAPSHOT</parana.core.version>
+        <parana.extra.version>4.2.7-SNAPSHOT</parana.extra.version>
         <terminus.boot.version>1.4.1.RELEASE</terminus.boot.version>
         <terminus.file.version>1.2.1.RELEASE</terminus.file.version>
         <terminus.pay.version>1.2.1.RELEASE</terminus.pay.version>
