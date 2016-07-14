@@ -17,6 +17,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.SneakyThrows;
 import lombok.experimental.Builder;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.Serializable;
 import java.util.Collections;
@@ -32,6 +33,7 @@ import static java.util.Objects.isNull;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Slf4j
 public class DoctorPigTrack implements Serializable{
 
     private static final long serialVersionUID = 6287905644724949716L;
@@ -122,14 +124,18 @@ public class DoctorPigTrack implements Serializable{
     }
 
     @SneakyThrows
-    public void addAllExtraMap(Map<String, Object> extraMap){
-        if(isNull(extraMap) || Iterables.isEmpty(extraMap.entrySet())){
+    public void addAllExtraMap(Map<String, Object> extra){
+        if(isNull(extra) || Iterables.isEmpty(extra.entrySet())){
             return;
         }
         if(isNull(this.extraMap)){
             this.extraMap = Maps.newHashMap();
         }
-        this.extraMap.putAll(extraMap);
+
+        log.info("******this extraMap type :{}", this.extraMap);
+        log.info("***** extra content {}", extra);
+        log.info("***** type:{}, {}", this.extraMap.getClass().getName(), extra.getClass().getName());
+        this.extraMap.putAll(extra);
         this.extra = OBJECT_MAPPER.writeValueAsString(this.extraMap);
     }
 
