@@ -165,6 +165,13 @@ public class SubService {
     public Response<Long> createSub(BaseUser user, Sub sub){
         try {
             Long primaryId = user.getId();
+            //先查下主账号的猪场, 以避免子账号的猪场不属于主账号
+            List<Long> primaryFarms = RespHelper.orServEx(doctorUserDataPermissionReadService.findDataPermissionByUserId(primaryId)).getFarmIdsList();
+            for(Long farmId : sub.getFarmIds()){
+                if(!primaryFarms.contains(farmId)){
+                    throw new ServiceException("authorize.fail");
+                }
+            }
 
             User subUser = new User();
 
@@ -200,14 +207,6 @@ public class SubService {
     }
 
     private void createPermission(BaseUser primaryUser, Long subUserId, List<Long> farmIds){
-        //先查下主账号的猪场, 以避免子账号的猪场不属于主账号
-        List<Long> primaryFarms = RespHelper.orServEx(doctorUserDataPermissionReadService.findDataPermissionByUserId(primaryUser.getId())).getFarmIdsList();
-        for(Long farmId : farmIds){
-            if(!primaryFarms.contains(farmId)){
-                throw new ServiceException("authorize.fail");
-            }
-        }
-
         //创建 数据权限
         DoctorUserDataPermission permission = new DoctorUserDataPermission();
         permission.setUserId(subUserId);
