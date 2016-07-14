@@ -103,7 +103,7 @@ public abstract class DoctorAbstractEventFlowHandler extends HandlerAware {
             execution.setFlowData(JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(flowDataMap));
         }catch (Exception e){
             DoctorAbstractEventFlowHandler.log.error("handle execute fail, cause:{}", Throwables.getStackTraceAsString(e));
-            throw new RuntimeException("create.flowEventInfo.fail");
+            throw new RuntimeException(e.getMessage());
         }
     }
 
