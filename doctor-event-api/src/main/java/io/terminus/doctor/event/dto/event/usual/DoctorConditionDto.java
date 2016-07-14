@@ -24,7 +24,7 @@ public class DoctorConditionDto implements Serializable{
 
     private Date conditionDate; //体况日期
 
-    private Integer conditionJudgeScore;    //体况评分
+    private Double conditionJudgeScore;    //体况评分
 
     private Double conditionWeight; // 体况重量
 
