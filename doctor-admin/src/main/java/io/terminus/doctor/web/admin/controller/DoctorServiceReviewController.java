@@ -84,7 +84,7 @@ public class DoctorServiceReviewController {
      * @param userId 被操作的用户的id, 注意不是当前登录者的id
      * @return
      */
-    @RequestMapping(value = "/pigmall/open/{userId}", method = RequestMethod.GET)
+    @RequestMapping(value = "/pigmall/open/{userId}", method = RequestMethod.POST)
     @ResponseBody
     public Boolean openPigmallService(@PathVariable Long userId){
         BaseUser baseUser = this.checkUserTypeOperator();
@@ -97,7 +97,7 @@ public class DoctorServiceReviewController {
      * @param userId 被操作的用户的id, 注意不是当前登录者的id
      * @return
      */
-    @RequestMapping(value = "/neverest/open/{userId}", method = RequestMethod.GET)
+    @RequestMapping(value = "/neverest/open/{userId}", method = RequestMethod.POST)
     @ResponseBody
     public Boolean openNeverestService(@PathVariable Long userId){
         BaseUser baseUser = this.checkUserTypeOperator();

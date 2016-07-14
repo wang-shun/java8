@@ -55,6 +55,9 @@ public class Subs {
      */
     @RequestMapping(value = "", method = RequestMethod.POST)
     public Long createSub(@RequestBody Sub sub) {
+        if(sub.getFarmIds() == null || sub.getFarmIds().isEmpty()){
+            throw new JsonResponseException(500, "need.at.least.one.farm");
+        }
         checkAuth();
         return RespHelper.or500(subService.createSub(UserUtil.getCurrentUser(), sub));
     }
