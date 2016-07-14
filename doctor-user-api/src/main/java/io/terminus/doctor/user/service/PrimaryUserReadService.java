@@ -73,6 +73,20 @@ public interface PrimaryUserReadService {
                                         String realName, Integer status, Integer pageNo, Integer size);
 
     /**
+     * 多条件筛选, 相当于分页查询去掉了分页参数, 所有参数都可以为空
+     * @param parentUserId 主账号用户 ID
+     * @param roleId 角色ID ID
+     * @param roleName
+     * @param userName
+     * @param realName
+     * @param status 子账户绑定状态
+     * @param limit 限制数量, 可为空
+     * @return
+     */
+    Response<List<Sub>> findByConditions(Long parentUserId, Long roleId, String roleName, String userName,
+                                         String realName, Integer status, Integer limit);
+
+    /**
      * 获取所有审核通过的子账号
      * @return  子账户
      */

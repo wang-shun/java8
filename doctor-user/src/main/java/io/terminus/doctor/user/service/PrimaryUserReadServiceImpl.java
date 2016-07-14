@@ -14,7 +14,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by houluyao on 16/5/24.
@@ -121,6 +123,24 @@ public class PrimaryUserReadServiceImpl implements PrimaryUserReadService {
             log.error("paging sub seller failed, parentUserId={}, status={}, pageNo={}, size={}, cause:{}",
                     parentUserId, status, pageNo, size, Throwables.getStackTraceAsString(e));
             return Response.fail("sub.paging.fail");
+        }
+    }
+
+    @Override
+    public Response<List<Sub>> findByConditions(Long parentUserId, Long roleId, String roleName, String userName,
+                                         String realName, Integer status, Integer limit){
+        try {
+            Map<String, Object> map = new HashMap<>();
+            map.put("parentUserId", parentUserId);
+            map.put("roleId", roleId);
+            map.put("roleName", roleName);
+            map.put("userName", userName);
+            map.put("realName", realName);
+            map.put("status", status);
+            return Response.ok(subDao.findByConditions(map, limit));
+        } catch (Exception e) {
+            log.error("find sub failed, parentUserId={}, status={}, cause:{}", parentUserId, status, Throwables.getStackTraceAsString(e));
+            return Response.fail("find.sub.by.conditions.fail");
         }
     }
 
