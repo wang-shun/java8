@@ -51,7 +51,7 @@ public class DoctorWareHouseWriteServiceImpl implements DoctorWareHouseWriteServ
                 return Response.fail("input.wareHouseType.empty");
             }
 
-            checkState(doctorWareHouseDao.create(doctorWareHouse), "warehouse.create.fail");
+            checkState(doctorWareHouseManager.createWareHouseInfo(doctorWareHouse), "warehouse.create.fail");
             return Response.ok(doctorWareHouse.getId());
         }catch (Exception e){
             log.error("create ware house error, cause:{}", Throwables.getStackTraceAsString(e));

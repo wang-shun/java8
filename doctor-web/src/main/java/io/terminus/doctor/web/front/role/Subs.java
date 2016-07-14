@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -86,6 +87,16 @@ public class Subs {
                                   @RequestParam(required = false) Integer pageSize) {
         checkAuth();
         return RespHelper.or500(subService.pagingSubs(UserUtil.getCurrentUser(), roleId, roleName, username, realName, pageNo, pageSize));
+    }
+
+    @RequestMapping(value = "/all", method = RequestMethod.GET)
+    public List<Sub> findByConditions(@RequestParam(required = false) Long roleId,
+                                  @RequestParam(required = false) String roleName,
+                                  @RequestParam(required = false) String username,
+                                  @RequestParam(required = false) String realName,
+                                  @RequestParam(required = false) Integer size) {
+        checkAuth();
+        return RespHelper.or500(subService.findByConditions(UserUtil.getCurrentUser(), roleId, roleName, username, realName, size));
     }
 
     /**

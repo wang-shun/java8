@@ -187,7 +187,21 @@ public class SubService {
         }
     }
 
-
+    public Response<List<Sub>> findByConditions(BaseUser user, Long roleId, String roleName, String userName,
+                                                String realName, Integer limit){
+        try{
+            Long userId = user.getId();
+            List<io.terminus.doctor.user.model.Sub> subList = RespHelper.orServEx(
+                    primaryUserReadService.findByConditions(userId, roleId, roleName, userName, realName, null, limit)
+            );
+            return Response.ok(this.setSubInfo(subList));
+        } catch (ServiceException e) {
+            return Response.fail(e.getMessage());
+        } catch (Exception e) {
+            log.error("find sub failed, user={}, cause:{}", user, Throwables.getStackTraceAsString(e));
+            return Response.fail("sub.find.fail");
+        }
+    }
 
     @Export(paramNames = {"user", "roleId", "pageNo", "pageSize"})
     public Response<Paging<Sub>> pagingSubs(BaseUser user, Long roleId,String roleName, String userName,
@@ -199,27 +213,29 @@ public class SubService {
                     primaryUserReadService.subPagination(userId, roleId, roleName, userName, realName, null, pageNo, pageSize)
             );
 
-            List<Long> userIds = paging.getData().stream().map(s -> s.getUserId()).collect(Collectors.toList());
-            List<User> users = RespHelper.orServEx(doctorUserReadService.findByIds(userIds));
-
-            List<UserProfile> profiles = RespHelper.orServEx(doctorUserProfileReadService.findProfileByUserIds(userIds));
-
-            Map<Long, User> userMap = users.stream().collect(Collectors.toMap(User::getId, u -> u));
-            Map<Long, UserProfile> profileMap = profiles.stream().collect(Collectors.toMap(UserProfile::getUserId, u -> u));
-            List<Sub> result = paging.getData().stream().map(s -> {
-                User u = userMap.get(s.getUserId());
-                UserProfile up = profileMap.get(s.getUserId());
-                return makeSub(s, u, up);
-            }).collect(Collectors.toList());
-
-            return Response.ok(new Paging<>(paging.getTotal(), result));
+            return Response.ok(new Paging<>(paging.getTotal(), this.setSubInfo(paging.getData())));
         } catch (ServiceException e) {
-            log.error("paging sub failed, user={}, pageNo={}, pageSize={}, error={}", user, pageNo, pageSize, e.getMessage());
             return Response.fail(e.getMessage());
         } catch (Exception e) {
             log.error("paging sub failed, user={}, pageNo={}, pageSize={}, cause:{}", user, pageNo, pageSize, Throwables.getStackTraceAsString(e));
             return Response.fail("sub.paging.fail");
         }
+    }
+
+    private List<Sub> setSubInfo(List<io.terminus.doctor.user.model.Sub> subList){
+        List<Long> userIds = subList.stream().map(s -> s.getUserId()).collect(Collectors.toList());
+        List<User> users = RespHelper.orServEx(doctorUserReadService.findByIds(userIds));
+
+        List<UserProfile> profiles = RespHelper.orServEx(doctorUserProfileReadService.findProfileByUserIds(userIds));
+
+        Map<Long, User> userMap = users.stream().collect(Collectors.toMap(User::getId, u -> u));
+        Map<Long, UserProfile> profileMap = profiles.stream().collect(Collectors.toMap(UserProfile::getUserId, u -> u));
+        List<Sub> result = subList.stream().map(s -> {
+            User u = userMap.get(s.getUserId());
+            UserProfile up = profileMap.get(s.getUserId());
+            return makeSub(s, u, up);
+        }).collect(Collectors.toList());
+        return result;
     }
 
     /**
