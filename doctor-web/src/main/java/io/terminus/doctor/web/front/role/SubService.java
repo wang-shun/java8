@@ -13,6 +13,7 @@ import io.terminus.doctor.common.enums.UserStatus;
 import io.terminus.doctor.common.enums.UserType;
 import io.terminus.doctor.user.model.DoctorUser;
 import io.terminus.doctor.user.model.DoctorUserDataPermission;
+import io.terminus.doctor.user.service.DoctorUserDataPermissionReadService;
 import io.terminus.doctor.user.service.DoctorUserDataPermissionWriteService;
 import io.terminus.doctor.user.service.DoctorUserProfileReadService;
 import io.terminus.doctor.user.service.DoctorUserReadService;
@@ -58,15 +59,19 @@ public class SubService {
 
     private final DoctorUserDataPermissionWriteService doctorUserDataPermissionWriteService;
 
+    private final DoctorUserDataPermissionReadService doctorUserDataPermissionReadService;
+
     @Autowired
     public SubService(DoctorUserReadService doctorUserReadService, UserWriteService<User> userWriteService,
                       DoctorUserProfileReadService doctorUserProfileReadService, PrimaryUserReadService primaryUserReadService,
-                      DoctorUserDataPermissionWriteService doctorUserDataPermissionWriteService) {
+                      DoctorUserDataPermissionWriteService doctorUserDataPermissionWriteService,
+                      DoctorUserDataPermissionReadService doctorUserDataPermissionReadService) {
         this.doctorUserReadService = doctorUserReadService;
         this.userWriteService = userWriteService;
         this.doctorUserProfileReadService = doctorUserProfileReadService;
         this.primaryUserReadService = primaryUserReadService;
         this.doctorUserDataPermissionWriteService = doctorUserDataPermissionWriteService;
+        this.doctorUserDataPermissionReadService = doctorUserDataPermissionReadService;
     }
 
     public Response<Sub> findSubByUserId(BaseUser user, Long userId) {
@@ -194,15 +199,24 @@ public class SubService {
         }
     }
 
-    private void createPermission(BaseUser user, Long userId, List<Long> farmIds){
+    private void createPermission(BaseUser primaryUser, Long subUserId, List<Long> farmIds){
+        //先查下主账号的猪场, 以避免子账号的猪场不属于主账号
+        List<Long> primaryFarms = RespHelper.orServEx(doctorUserDataPermissionReadService.findDataPermissionByUserId(primaryUser.getId())).getFarmIdsList();
+        for(Long farmId : farmIds){
+            if(!primaryFarms.contains(farmId)){
+                throw new ServiceException("authorize.fail");
+            }
+        }
+
+        //创建 数据权限
         DoctorUserDataPermission permission = new DoctorUserDataPermission();
-        permission.setUserId(userId);
+        permission.setUserId(subUserId);
         permission.setFarmIds(Joiner.on(",").join(farmIds));
-        permission.setCreatorId(user.getId());
-        permission.setCreatorName(user.getName());
-        permission.setUpdatorId(user.getId());
-        permission.setUpdatorName(user.getName());
-        doctorUserDataPermissionWriteService.createDataPermission(permission);
+        permission.setCreatorId(primaryUser.getId());
+        permission.setCreatorName(primaryUser.getName());
+        permission.setUpdatorId(primaryUser.getId());
+        permission.setUpdatorName(primaryUser.getName());
+        RespHelper.orServEx(doctorUserDataPermissionWriteService.createDataPermission(permission));
     }
 
     public Response<List<Sub>> findByConditions(BaseUser user, Long roleId, String roleName, String userName,
