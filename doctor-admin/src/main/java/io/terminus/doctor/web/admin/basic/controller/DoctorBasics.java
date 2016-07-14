@@ -1,9 +1,12 @@
 package io.terminus.doctor.web.admin.basic.controller;
 
+import io.terminus.boot.rpc.common.annotation.RpcConsumer;
+import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.basic.model.DoctorBasic;
 import io.terminus.doctor.basic.service.DoctorBasicReadService;
 import io.terminus.doctor.basic.service.DoctorBasicWriteService;
 import io.terminus.doctor.common.utils.RespHelper;
+import io.terminus.doctor.user.service.DoctorAddressReadService;
 import io.terminus.pampas.common.UserUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +34,9 @@ public class DoctorBasics {
 
     private final DoctorBasicReadService doctorBasicReadService;
     private final DoctorBasicWriteService doctorBasicWriteService;
+
+    @RpcConsumer
+    private DoctorAddressReadService doctorAddressReadService;
 
     @Autowired
     public DoctorBasics(DoctorBasicReadService doctorBasicReadService,
@@ -76,5 +82,16 @@ public class DoctorBasics {
     @RequestMapping(value = "/basic", method = RequestMethod.DELETE)
     public Boolean deleteBasic(@RequestParam("basicId") Long basicId) {
         return RespHelper.or500(doctorBasicWriteService.deleteBasicById(basicId));
+    }
+
+    /**
+     * 获取地址树(取缓存到内存里的数据, 启动时加载)
+     * @see io.terminus.doctor.user.service.DoctorAddressReadService
+     *
+     * @return 地址树
+     */
+    @RequestMapping(value = "/addressTree", method = RequestMethod.GET)
+    public String findAddressTree() {
+        return JsonMapper.nonEmptyMapper().toJson(RespHelper.or500(doctorAddressReadService.findAllAddress()));
     }
 }
