@@ -44,6 +44,7 @@ public class DoctorRemovalHandler extends DoctorAbstractEventHandler{
     public DoctorPigTrack updateDoctorPigTrackInfo(DoctorPigTrack doctorPigTrack, DoctorBasicInputInfoDto basic, Map<String, Object> extra, Map<String,Object> context) {
         System.out.println("********** "+extra.getClass().getName());
         System.out.println("********* "+extra.keySet().toString());
+        
         doctorPigTrack.addAllExtraMap(extra);
         doctorPigTrack.addPigEvent(basic.getPigType(), (Long) context.get("doctorPigEventId"));
         if(Objects.equals(DoctorPig.PIG_TYPE.BOAR.getKey(), basic.getPigType())){
