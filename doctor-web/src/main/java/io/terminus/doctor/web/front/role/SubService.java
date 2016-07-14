@@ -12,6 +12,8 @@ import io.terminus.common.utils.MapBuilder;
 import io.terminus.doctor.common.enums.UserStatus;
 import io.terminus.doctor.common.enums.UserType;
 import io.terminus.doctor.user.model.DoctorUser;
+import io.terminus.doctor.user.model.DoctorUserDataPermission;
+import io.terminus.doctor.user.service.DoctorUserDataPermissionWriteService;
 import io.terminus.doctor.user.service.DoctorUserProfileReadService;
 import io.terminus.doctor.user.service.DoctorUserReadService;
 import io.terminus.doctor.user.service.PrimaryUserReadService;
@@ -54,13 +56,17 @@ public class SubService {
 
     private final PrimaryUserReadService primaryUserReadService;
 
+    private final DoctorUserDataPermissionWriteService doctorUserDataPermissionWriteService;
+
     @Autowired
     public SubService(DoctorUserReadService doctorUserReadService, UserWriteService<User> userWriteService,
-                      DoctorUserProfileReadService doctorUserProfileReadService, PrimaryUserReadService primaryUserReadService) {
+                      DoctorUserProfileReadService doctorUserProfileReadService, PrimaryUserReadService primaryUserReadService,
+                      DoctorUserDataPermissionWriteService doctorUserDataPermissionWriteService) {
         this.doctorUserReadService = doctorUserReadService;
         this.userWriteService = userWriteService;
         this.doctorUserProfileReadService = doctorUserProfileReadService;
         this.primaryUserReadService = primaryUserReadService;
+        this.doctorUserDataPermissionWriteService = doctorUserDataPermissionWriteService;
     }
 
     public Response<Sub> findSubByUserId(BaseUser user, Long userId) {
@@ -177,14 +183,26 @@ public class SubService {
                     .put("contact", sub.getContact())
                     .put("realName", sub.getRealName())
                     .map());
-            return userWriteService.create(subUser);
+            Long subUserId = RespHelper.orServEx(userWriteService.create(subUser));
+            this.createPermission(user, subUserId, sub.getFarmIds());
+            return Response.ok(subUserId);
         } catch (ServiceException e) {
             return Response.fail(e.getMessage());
         } catch (Exception e) {
-            log.error("creat sub failed, user={}, sub={}, cause:{}",
-                    user, sub, Throwables.getStackTraceAsString(e));
+            log.error("creat sub failed, user={}, sub={}, cause:{}", user, sub, Throwables.getStackTraceAsString(e));
             return Response.fail("sub.create.fail");
         }
+    }
+
+    private void createPermission(BaseUser user, Long userId, List<Long> farmIds){
+        DoctorUserDataPermission permission = new DoctorUserDataPermission();
+        permission.setUserId(userId);
+        permission.setFarmIds(Joiner.on(",").join(farmIds));
+        permission.setCreatorId(user.getId());
+        permission.setCreatorName(user.getName());
+        permission.setUpdatorId(user.getId());
+        permission.setUpdatorName(user.getName());
+        doctorUserDataPermissionWriteService.createDataPermission(permission);
     }
 
     public Response<List<Sub>> findByConditions(BaseUser user, Long roleId, String roleName, String userName,
