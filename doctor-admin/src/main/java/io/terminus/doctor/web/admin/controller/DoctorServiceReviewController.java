@@ -169,8 +169,12 @@ public class DoctorServiceReviewController {
             if (type != null) {
                 servicetype = DoctorServiceReview.Type.from(type);
             }
+            DoctorServiceReview.Status statusEnum = null;
+            if(status != null){
+                statusEnum = DoctorServiceReview.Status.from(status);
+            }
             return RespHelper.or500(doctorServiceReviewReadService.page(pageNo, pageSize, userId, userMobile, realName,
-                    servicetype, DoctorServiceReview.Status.from(status)));
+                    servicetype, statusEnum));
         } catch (ServiceException e) {
             log.error("pageServiceApplies failed, cause : {}", Throwables.getStackTraceAsString(e));
             throw new JsonResponseException(500, e.getMessage());
