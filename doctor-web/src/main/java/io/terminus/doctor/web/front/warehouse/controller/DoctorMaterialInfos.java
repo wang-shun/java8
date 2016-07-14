@@ -1,6 +1,7 @@
 package io.terminus.doctor.web.front.warehouse.controller;
 
 import com.google.common.base.Throwables;
+import com.sun.org.apache.regexp.internal.RE;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
@@ -18,6 +19,7 @@ import io.terminus.doctor.warehouse.model.DoctorMaterialInfo;
 import io.terminus.doctor.warehouse.service.DoctorMaterialInWareHouseReadService;
 import io.terminus.doctor.warehouse.service.DoctorMaterialInfoReadService;
 import io.terminus.doctor.warehouse.service.DoctorMaterialInfoWriteService;
+import io.terminus.doctor.warehouse.service.DoctorWareHouseReadService;
 import io.terminus.doctor.web.front.warehouse.dto.DoctorMaterialInfoCreateDto;
 import io.terminus.doctor.web.front.warehouse.dto.DoctorMaterialInfoUpdateDto;
 import io.terminus.pampas.common.UserUtil;
@@ -55,6 +57,8 @@ public class DoctorMaterialInfos {
 
     private final DoctorMaterialInWareHouseReadService doctorMaterialInWareHouseReadService;
 
+    private final DoctorWareHouseReadService doctorWareHouseReadService;
+
     private final DoctorFarmReadService doctorFarmReadService;
 
     private final UserReadService userReadService;
@@ -67,13 +71,15 @@ public class DoctorMaterialInfos {
                                DoctorFarmReadService doctorFarmReadService,
                                UserReadService userReadService,
                                DoctorBasicReadService doctorBasicReadService,
-                               DoctorMaterialInWareHouseReadService doctorMaterialInWareHouseReadService){
+                               DoctorMaterialInWareHouseReadService doctorMaterialInWareHouseReadService,
+                               DoctorWareHouseReadService doctorWareHouseReadService){
         this.doctorMaterialInfoWriteService = doctorMaterialInfoWriteService;
         this.doctorMaterialInfoReadService = doctorMaterialInfoReadService;
         this.doctorFarmReadService = doctorFarmReadService;
         this.userReadService = userReadService;
         this.doctorBasicReadService = doctorBasicReadService;
         this.doctorMaterialInWareHouseReadService = doctorMaterialInWareHouseReadService;
+        this.doctorWareHouseReadService = doctorWareHouseReadService;
     }
 
     @RequestMapping(value = "/update", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -232,15 +238,19 @@ public class DoctorMaterialInfos {
         DoctorMaterialInfo.MaterialProduce materialProduce = null;
         try{
             materialProduce = JsonMapper.JSON_NON_DEFAULT_MAPPER.fromJson(materialProduceJson, DoctorMaterialInfo.MaterialProduce.class);
-            DoctorMaterialInWareHouse dto= RespHelper.orServEx(doctorMaterialInWareHouseReadService.queryByMaterialWareHouseIds(farmId, materialId, wareHouseId));
+
+            String farmName = RespHelper.orServEx(doctorFarmReadService.findFarmById(farmId)).getName();
+            String wareHouseName = RespHelper.orServEx(doctorWareHouseReadService.queryDoctorWareHouseById(wareHouseId)).getWarehouseName();
+            String materialName = RespHelper.orServEx(doctorMaterialInfoReadService.queryById(materialId)).getMaterialName();
+
             Long userId = UserUtil.getUserId();
             Response<User> response =  userReadService.findById(userId);
             String userName = RespHelper.orServEx(response).getName();
 
             doctorWareHouseBasicDto = DoctorWareHouseBasicDto.builder()
-                    .farmId(farmId).farmName(dto.getFarmName())
-                    .wareHouseId(wareHouseId).wareHouseName(dto.getWareHouseName())
-                    .materialId(materialId).materialName(dto.getMaterialName())
+                    .farmId(farmId).farmName(farmName)
+                    .wareHouseId(wareHouseId).wareHouseName(wareHouseName)
+                    .materialId(materialId).materialName(materialName)
                     .staffId(userId).staffName(userName)
                     .build();
         }catch (Exception e){
