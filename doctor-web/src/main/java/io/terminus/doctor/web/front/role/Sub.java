@@ -3,6 +3,7 @@ package io.terminus.doctor.web.front.role;
 import lombok.Data;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * Desc: 子账号
@@ -28,4 +29,6 @@ public class Sub {
     private String roleName;  //角色名称
 
     private Date createdAt; //创建时间
+
+    private List<Long> farmIds;
 }
