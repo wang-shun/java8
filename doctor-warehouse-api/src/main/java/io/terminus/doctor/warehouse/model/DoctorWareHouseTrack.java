@@ -71,7 +71,7 @@ public class DoctorWareHouseTrack implements Serializable{
     @SneakyThrows
     public void setExtraMap(Map<String,Object> extraMap){
         this.extraMap = extraMap;
-        if(isNull(extraMap) || Iterables.isEmpty(extraMap.entrySet())){
+        if(isNull(extraMap)){
             this.extra = null;
         }else {
             this.extra = OBJECT_MAPPER.writeValueAsString(extraMap);
