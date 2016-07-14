@@ -439,7 +439,7 @@ public class DoctorPigCreateEventsTest extends BaseFrontWebTest{
 
         HttpEntity httpEntity = HttpPostRequest.formRequest()
                 .param("pigId", pigId).param("farmId", 12345l).param("doctorConditionDtoJson", DoctorConditionDto.builder()
-                        .conditionDate(new Date()).conditionJudgeScore(100)
+                        .conditionDate(new Date()).conditionJudgeScore(100d)
                         .conditionWeight(100d).conditionBackWeight(100d)
                         .conditionRemark("remark")
                         .build())
