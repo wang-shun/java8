@@ -12,6 +12,7 @@ import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.handler.DoctorAbstractEventHandler;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigTrack;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -28,6 +29,7 @@ import static java.util.Objects.isNull;
  * Descirbe:
  */
 @Component
+@Slf4j
 public class DoctorRemovalHandler extends DoctorAbstractEventHandler{
 
     @Autowired
@@ -42,9 +44,7 @@ public class DoctorRemovalHandler extends DoctorAbstractEventHandler{
 
     @Override
     public DoctorPigTrack updateDoctorPigTrackInfo(DoctorPigTrack doctorPigTrack, DoctorBasicInputInfoDto basic, Map<String, Object> extra, Map<String,Object> context) {
-        System.out.println("********** "+extra.getClass().getName());
-        System.out.println("********* "+extra.keySet().toString());
-        
+        log.info("******************* classType:{}, content:{}", extra.getClass().getName(), extra);
         doctorPigTrack.addAllExtraMap(extra);
         doctorPigTrack.addPigEvent(basic.getPigType(), (Long) context.get("doctorPigEventId"));
         if(Objects.equals(DoctorPig.PIG_TYPE.BOAR.getKey(), basic.getPigType())){
