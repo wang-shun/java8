@@ -59,6 +59,10 @@ public class DoctorWareHouseDto implements Serializable{
             builder.remainder(doctorWareHouseTrack.getLotNumber());
         }
 
+        if(isNull(extraMap)) {
+            return builder.build();
+        }
+
         if(extraMap.containsKey(RECENT_CONSUME_DATE)){
             builder.recentlyConsume(new Date((Long) extraMap.get(RECENT_CONSUME_DATE)));
         }
