@@ -146,7 +146,9 @@ public class SubService {
                     .put("contact", sub.getContact())
                     .put("realName", sub.getRealName())
                     .map());
-            return userWriteService.update(subUser);
+            RespHelper.orServEx(userWriteService.update(subUser));
+            this.updateSubPermission(user, subUser.getId(), sub.getFarmIds());
+            return Response.ok(true);
         } catch (ServiceException e) {
             return Response.fail(e.getMessage());
         } catch (Exception e) {
@@ -154,6 +156,22 @@ public class SubService {
                     user, sub, Throwables.getStackTraceAsString(e));
             return Response.fail("sub.update.fail");
         }
+    }
+
+    private void updateSubPermission(BaseUser primaryUser, Long subUserId, List<Long> farmIds){
+        //先查下主账号的猪场, 以避免子账号的猪场不属于主账号
+        List<Long> primaryFarms = RespHelper.orServEx(doctorUserDataPermissionReadService.findDataPermissionByUserId(primaryUser.getId())).getFarmIdsList();
+        for(Long farmId : farmIds){
+            if(!primaryFarms.contains(farmId)){
+                throw new ServiceException("authorize.fail");
+            }
+        }
+        //先查再改
+        DoctorUserDataPermission permission = RespHelper.orServEx(doctorUserDataPermissionReadService.findDataPermissionByUserId(subUserId));
+        permission.setFarmIds(Joiner.on(",").join(farmIds));
+        permission.setUpdatorId(primaryUser.getId());
+        permission.setUpdatorName(primaryUser.getName());
+        RespHelper.orServEx(doctorUserDataPermissionWriteService.updateDataPermission(permission));
     }
 
     /**
