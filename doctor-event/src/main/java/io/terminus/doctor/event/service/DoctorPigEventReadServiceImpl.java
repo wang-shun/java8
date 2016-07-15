@@ -176,7 +176,7 @@ public class DoctorPigEventReadServiceImpl implements DoctorPigEventReadService 
         try{
             Splitters.COMMA.split(pigIds).forEach(pigId->{
                 Boolean hasEquals = Objects.equals(
-                        doctorPigTrackDao.findById(Long.valueOf(pigId)).getStatus(),
+                        doctorPigTrackDao.findByPigId(Long.valueOf(pigId)).getStatus(),
                         PigStatus.FEED.getKey());
                 checkState(!hasEquals, "pigsState.notFeedValidate.fail");
             });
@@ -186,7 +186,7 @@ public class DoctorPigEventReadServiceImpl implements DoctorPigEventReadService 
             return Response.fail(se.getMessage());
         }catch (Exception e){
             log.error("validate pig not in farrowing state fail, cause:{}", Throwables.getStackTraceAsString(e));
-            return Response.fail("..fail");
+            return Response.fail("validate.pigNotIn.fail");
         }
     }
 
