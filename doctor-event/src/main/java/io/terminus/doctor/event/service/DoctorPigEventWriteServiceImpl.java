@@ -34,6 +34,7 @@ import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.event.DoctorPigCountEvent;
 import io.terminus.doctor.event.event.PigEventCreateEvent;
 import io.terminus.doctor.event.manager.DoctorPigEventManager;
+import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.zookeeper.pubsub.Publisher;
 import lombok.extern.slf4j.Slf4j;
@@ -115,6 +116,12 @@ public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteServic
     @Override
     public Response<Long> pigEntryEvent(DoctorBasicInputInfoDto doctorBasicInputInfoDto, DoctorFarmEntryDto doctorFarmEntryDto) {
         try{
+            // validate 左右乳头数量大于0
+            if(Objects.equals(doctorFarmEntryDto.getPigType(), DoctorPig.PIG_TYPE.SOW)){
+                checkState(isNull(doctorFarmEntryDto.getLeft()) || doctorFarmEntryDto.getLeft()>=0, "input.sowLeft.error");
+                checkState(isNull(doctorFarmEntryDto.getRight()) || doctorFarmEntryDto.getRight()>=0, "input.sowRight.error");
+            }
+
             Map<String,Object> extra = Maps.newHashMap();
             BeanMapper.copy(doctorFarmEntryDto, extra);
             Map<String,Object> result = Maps.newHashMap();
