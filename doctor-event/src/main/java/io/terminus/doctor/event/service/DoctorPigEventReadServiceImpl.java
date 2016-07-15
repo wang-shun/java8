@@ -91,6 +91,7 @@ public class DoctorPigEventReadServiceImpl implements DoctorPigEventReadService 
             criteria.put("pigId", pigId);
             criteria.put("beginDate",beginDate);
             criteria.put("endDate", endDate);
+            criteria.put("ordered", 0);
             return Response.ok(doctorPigEventDao.paging(pageInfo.getOffset(),pageInfo.getLimit(), criteria));
         }catch (Exception e){
             log.error("query pig doctor events fail, cause:{}", Throwables.getStackTraceAsString(e));
