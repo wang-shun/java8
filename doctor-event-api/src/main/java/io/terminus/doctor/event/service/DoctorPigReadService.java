@@ -5,6 +5,7 @@ import io.terminus.common.model.Response;
 import io.terminus.doctor.event.dto.DoctorPigInfoDetailDto;
 import io.terminus.doctor.event.dto.DoctorPigInfoDto;
 import io.terminus.doctor.event.dto.DoctorPigMessage;
+import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 
@@ -112,4 +113,11 @@ public interface DoctorPigReadService {
      * @return 猪类set
      */
     Response<Set<Integer>> findPigStatusByBarnId(@NotNull(message = "barnId.not.null") Long barnId);
+
+    /**
+     * 查询猪所在的猪舍信息
+     * @param pigId 猪id
+     * @return 猪舍信息
+     */
+    Response<DoctorBarn> findBarnByPigId(@NotNull(message = "pigId.not.null") Long pigId);
 }
