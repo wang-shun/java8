@@ -1,5 +1,6 @@
 package io.terminus.doctor.event.search.pig;
 
+import com.google.common.collect.Maps;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -7,6 +8,7 @@ import lombok.experimental.Builder;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.Map;
 
 /**
  * Desc: 猪查询信息
@@ -81,4 +83,10 @@ public class SearchedPig implements Serializable {
      * 当前胎次
      */
     private Integer currentParity;
+
+    /**
+     * 扩展字段:
+     *      1. Date checkDate : 妊娠检查的时间
+     */
+    private Map<String, Object> extra = Maps.newHashMap();
 }

@@ -5,7 +5,11 @@ import com.google.common.collect.Lists;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
+import io.terminus.common.utils.JsonMapper;
+import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.enums.PigStatus;
+import io.terminus.doctor.event.model.DoctorPigTrack;
+import io.terminus.doctor.event.service.DoctorPigReadService;
 import io.terminus.search.api.Searcher;
 import io.terminus.search.api.model.WithAggregations;
 import io.terminus.search.api.query.Criterias;
@@ -16,8 +20,10 @@ import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Desc: 猪(索引对象)查询服务
@@ -38,6 +44,9 @@ public class PigSearchReadServiceImpl implements PigSearchReadService {
 
     @Autowired
     private PigSearchProperties pigSearchProperties;
+
+    @Autowired
+    private DoctorPigReadService doctorPigReadService;
 
     @Override
     public Response<SearchedPigDto> searchWithAggs(Integer pageNo, Integer pageSize, String template, Map<String, String> params) {
@@ -70,6 +79,14 @@ public class PigSearchReadServiceImpl implements PigSearchReadService {
                     searchedPig.setDayAge((int)(DateTime.now()
                             .minus(searchedPig.getBirthDate().getTime()).getMillis() / (1000 * 60 * 60 * 24) + 1));
                 }
+                // 如果是待分娩状态, 获取妊娠检查的时间
+                if (Objects.equals(searchedPig.getStatus(), PigStatus.Farrow.getKey())) {
+                    DoctorPigTrack pigTrack = RespHelper.orServEx(
+                            doctorPigReadService.findPigTrackByPigId(searchedPig.getId()));
+                    if (pigTrack != null && StringUtils.isNotBlank(pigTrack.getExtra())) {
+                        setCheckDate(searchedPig, pigTrack);
+                    }
+                }
             });
             Paging<SearchedPig> paging = new Paging<>(searchedPigs.getTotal(), searchedPigs.getData());
 
@@ -93,6 +110,18 @@ public class PigSearchReadServiceImpl implements PigSearchReadService {
         } catch (Exception e) {
             log.error("pig search failed, cause by {}", Throwables.getStackTraceAsString(e));
             return Response.fail("search.pig.fail");
+        }
+    }
+
+    /**
+     * 获取妊娠检查的时间
+     * @return
+     */
+    private void setCheckDate(SearchedPig searchedPig, DoctorPigTrack pigTrack) {
+        Map map = JsonMapper.JSON_NON_DEFAULT_MAPPER.fromJson(pigTrack.getExtra(), Map.class);
+        String key = "checkDate";
+        if (map != null && map.get(key) != null) {
+            searchedPig.getExtra().put(key, new Date((long)map.get(key)));
         }
     }
 }
