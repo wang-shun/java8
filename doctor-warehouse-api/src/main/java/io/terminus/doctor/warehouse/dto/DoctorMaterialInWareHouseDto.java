@@ -23,6 +23,8 @@ public class DoctorMaterialInWareHouseDto implements Serializable{
 
     private static final long serialVersionUID = 8244463624009674472L;
 
+    private Long materialInWareHouseId; //对应的仓库原料的Id
+
     private Long materialId;    // 原料Id
 
     private String materialName;    // 原料名称
@@ -37,7 +39,7 @@ public class DoctorMaterialInWareHouseDto implements Serializable{
 
     public static DoctorMaterialInWareHouseDto buildDoctorMaterialInWareHouseInfo(DoctorMaterialInWareHouse inWareHouse,
                                                                                   DoctorWareHouse doctorWareHouse){
-        return DoctorMaterialInWareHouseDto.builder()
+        return DoctorMaterialInWareHouseDto.builder().materialInWareHouseId(inWareHouse.getId())
                 .materialId(inWareHouse.getMaterialId()).materialName(inWareHouse.getMaterialName())
                 .lotNumber(inWareHouse.getLotNumber()).unitName(inWareHouse.getUnitName())
                 .staffId(doctorWareHouse.getManagerId()).staffName(doctorWareHouse.getManagerName())
