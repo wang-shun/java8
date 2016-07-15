@@ -90,6 +90,9 @@ public class DoctorSowEventCreateServiceImpl implements DoctorSowEventCreateServ
                 default:
                     return Response.fail("create.sowEvent.fail");
             }
+        }catch (IllegalStateException e){
+            log.error("sow event create fail, cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail(e.getMessage());
         }catch (Exception e){
             log.error("sow event create fail, cause:{}", Throwables.getStackTraceAsString(e));
             return Response.fail("create.sowEvent.fail");
