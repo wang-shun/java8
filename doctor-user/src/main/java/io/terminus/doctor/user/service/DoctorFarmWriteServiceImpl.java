@@ -4,6 +4,7 @@ import com.google.common.base.Throwables;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.user.dao.DoctorFarmDao;
+import io.terminus.doctor.user.manager.DoctorFarmManager;
 import io.terminus.doctor.user.model.DoctorFarm;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,11 +23,13 @@ import java.util.List;
 @RpcProvider
 public class DoctorFarmWriteServiceImpl implements DoctorFarmWriteService{
     private final DoctorFarmDao doctorFarmDao;
-
+    private final DoctorFarmManager doctorFarmManager;
 
     @Autowired
-    public DoctorFarmWriteServiceImpl (DoctorFarmDao doctorFarmDao) {
+    public DoctorFarmWriteServiceImpl (DoctorFarmDao doctorFarmDao,
+                                       DoctorFarmManager doctorFarmManager) {
         this.doctorFarmDao = doctorFarmDao;
+        this.doctorFarmManager = doctorFarmManager;
     }
 
 
@@ -74,6 +77,19 @@ public class DoctorFarmWriteServiceImpl implements DoctorFarmWriteService{
         } catch (Exception e) {
             log.error("delete org farm, cause : {}", Throwables.getStackTraceAsString(e));
             response.setError("delete.farm.failed");
+        }
+        return response;
+    }
+
+    @Override
+    public Response<Boolean> addFarms4PrimaryUser(Long userId, List<DoctorFarm> farms) {
+        Response<Boolean> response = new Response<>();
+        try {
+            doctorFarmManager.addFarms4PrimaryUser(userId, farms);
+            response.setResult(true);
+        } catch (Exception e) {
+            log.error("create farm failed, cause : {}", Throwables.getStackTraceAsString(e));
+            response.setError("create.farm.failed");
         }
         return response;
     }
