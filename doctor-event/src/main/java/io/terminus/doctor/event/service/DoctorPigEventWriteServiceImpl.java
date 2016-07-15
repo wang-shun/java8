@@ -397,9 +397,11 @@ public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteServic
             publishEvent(result);
             return Response.ok(Params.getWithConvert(result,"doctorEventId",a->Long.valueOf(a.toString())));
         }catch (IllegalStateException e){
+            log.info("*********      exception info is :{}", e.getClass().getName());
             log.error("illegal state validate farrow count error, cause:{}", Throwables.getStackTraceAsString(e));
             return Response.fail(e.getMessage());
         }catch (Exception e){
+            log.info("********   exception info os :{} ", e.getClass().getName());
             log.error("vaccination event create fail, cause:{}", Throwables.getStackTraceAsString(e));
             return Response.fail("create.farrowing.fail");
         }
