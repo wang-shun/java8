@@ -5,7 +5,9 @@
 package io.terminus.doctor.open;
 
 import io.terminus.doctor.common.DoctorCommonConfiguration;
+import io.terminus.doctor.open.auth.DoctorCustomRoleLoaderConfigurer;
 import io.terminus.doctor.user.service.DoctorServiceStatusWriteService;
+import io.terminus.doctor.user.service.SubRoleReadService;
 import io.terminus.doctor.web.core.image.FileHelper;
 import io.terminus.doctor.web.core.msg.email.CommonEmailServiceConfig;
 import io.terminus.doctor.web.core.msg.sms.LuoSiMaoSmsServiceConfig;
@@ -17,6 +19,8 @@ import io.terminus.lib.file.aliyun.AliyunFileServer;
 import io.terminus.lib.file.aliyun.AliyunImageServer;
 import io.terminus.pampas.openplatform.annotations.EnableOpenPlatform;
 import io.terminus.parana.auth.core.AuthenticationConfiguration;
+import io.terminus.parana.auth.role.CustomRoleLoaderConfigurer;
+import io.terminus.parana.auth.role.CustomRoleLoaderRegistry;
 import io.terminus.parana.config.ConfigCenter;
 import io.terminus.parana.web.msg.config.MsgWebConfig;
 import io.terminus.zookeeper.ZKClientFactory;
@@ -90,5 +94,12 @@ public class DoctorOPConfiguration {
                                      @Value("${zookeeper-pigmall.host:127.0.0.1}")String host,
                                      @Value("${zookeeper-pigmall.port:2181}")String port) throws Exception {
         return new Publisher(new ZKClientFactory(host + ":" + port), cacheTopicPigmall);
+    }
+
+    @Bean
+    public CustomRoleLoaderConfigurer customRoleLoaderConfigurer(CustomRoleLoaderRegistry customRoleLoaderRegistry, SubRoleReadService subRoleReadService) {
+        CustomRoleLoaderConfigurer configurer = new DoctorCustomRoleLoaderConfigurer(subRoleReadService);
+        configurer.configureCustomRoleLoader(customRoleLoaderRegistry);
+        return configurer;
     }
 }
