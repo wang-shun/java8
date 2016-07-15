@@ -13,12 +13,14 @@ import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.cache.DoctorPigInfoCache;
+import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorPigDao;
 import io.terminus.doctor.event.dao.DoctorPigTrackDao;
 import io.terminus.doctor.event.dto.DoctorPigInfoDetailDto;
 import io.terminus.doctor.event.dto.DoctorPigInfoDto;
 import io.terminus.doctor.event.dto.DoctorPigMessage;
 import io.terminus.doctor.event.enums.DataRange;
+import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
@@ -57,6 +59,8 @@ public class DoctorPigReadServiceImpl implements DoctorPigReadService {
 
     private final DoctorPigEventReadService doctorPigEventReadService;
 
+    private final DoctorBarnDao doctorBarnDao;
+
     private final DoctorPigInfoCache doctorPigInfoCache;
 
     private static final DateTimeFormatter DTF = DateTimeFormat.forPattern("yyyy-MM");
@@ -64,10 +68,11 @@ public class DoctorPigReadServiceImpl implements DoctorPigReadService {
     @Autowired
     public DoctorPigReadServiceImpl(DoctorPigDao doctorPigDao, DoctorPigTrackDao doctorPigTrackDao,
                                     DoctorPigEventReadService doctorPigEventReadService,
-                                    DoctorPigInfoCache doctorPigInfoCache){
+                                    DoctorBarnDao doctorBarnDao, DoctorPigInfoCache doctorPigInfoCache){
         this.doctorPigDao = doctorPigDao;
         this.doctorPigTrackDao = doctorPigTrackDao;
         this.doctorPigEventReadService = doctorPigEventReadService;
+        this.doctorBarnDao = doctorBarnDao;
         this.doctorPigInfoCache = doctorPigInfoCache;
     }
 
@@ -248,8 +253,8 @@ public class DoctorPigReadServiceImpl implements DoctorPigReadService {
             }
             return Response.ok(Lists.newArrayList());
         } catch (Exception e) {
-            log.error(", cause by {}", Throwables.getStackTraceAsString(e));
-            return Response.fail("");
+            log.error("find pig message by pidId, pigId:{}, cause by {}", pigId, Throwables.getStackTraceAsString(e));
+            return Response.fail("message.find.fail");
         }
     }
 
@@ -270,6 +275,18 @@ public class DoctorPigReadServiceImpl implements DoctorPigReadService {
         } catch (Exception e) {
             log.error("find pig status by barnId failed, barnId:{}, cause:{}", barnId, Throwables.getStackTraceAsString(e));
             return Response.fail("pig.status.find.fail");
+        }
+    }
+
+    @Override
+    public Response<DoctorBarn> findBarnByPigId(Long pigId) {
+        try {
+            //查当前猪舍
+            DoctorPigTrack pigTrack = doctorPigTrackDao.findByPigId(pigId);
+            return Response.ok(doctorBarnDao.findById(pigTrack.getCurrentBarnId()));
+        } catch (Exception e) {
+            log.error("find barn by pig id failed, pigId:{}, cause:{}", pigId, Throwables.getStackTraceAsString(e));
+            return Response.fail("pig.find.fail");
         }
     }
 }

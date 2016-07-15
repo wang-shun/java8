@@ -1,5 +1,6 @@
 package io.terminus.doctor.web.front.event.controller;
 
+import com.google.common.base.MoreObjects;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import io.terminus.common.utils.Splitters;
@@ -29,8 +30,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.terminus.common.utils.Arguments.isEmpty;
 import static io.terminus.common.utils.Arguments.notEmpty;
 
 /**
@@ -77,26 +80,42 @@ public class DoctorBarns {
     }
 
     /**
-     * 根据farmId查询猪舍表
+     * 根据farmId查询猪舍表, 根据pigIds过滤
      * @param farmId 猪场id
+     * @param pigIds 猪id 逗号分隔
      * @return 猪舍表列表
      */
     @RequestMapping(value = "/farmId", method = RequestMethod.GET)
-    public List<DoctorBarn> findBarnsByfarmId(@RequestParam("farmId") Long farmId) {
-        return RespHelper.or500(doctorBarnReadService.findBarnsByFarmId(farmId));
+    public List<DoctorBarn> findBarnsByfarmId(@RequestParam("farmId") Long farmId,
+                                              @RequestParam(value = "pigIds", required = false) String pigIds) {
+        return filterBarnByPigIds(RespHelper.or500(doctorBarnReadService.findBarnsByFarmId(farmId)), pigIds);
     }
 
     /**
      * 根据farmId和状态查询猪舍表
      * @param farmId 猪场id
      * @param pigType 猪舍类别
+     * @param pigIds 猪id 逗号分隔
      * @see PigType
      * @return 猪舍表列表
      */
     @RequestMapping(value = "/pigType", method = RequestMethod.GET)
     public List<DoctorBarn> findBarnsByfarmIdAndType(@RequestParam("farmId") Long farmId,
-                                                     @RequestParam("pigType") Integer pigType) {
-        return RespHelper.or500(doctorBarnReadService.findBarnsByEnums(farmId, pigType, null, null));
+                                                     @RequestParam("pigType") Integer pigType,
+                                                     @RequestParam(value = "pigIds", required = false) String pigIds) {
+        return filterBarnByPigIds(RespHelper.or500(doctorBarnReadService.findBarnsByEnums(farmId, pigType, null, null)), pigIds);
+    }
+
+    //根据猪id过滤猪舍: 取出猪的猪舍type, 过滤一把
+    private List<DoctorBarn> filterBarnByPigIds(List<DoctorBarn> barns, String pigIds) {
+        if (barns == null || isEmpty(pigIds)) {
+            return MoreObjects.firstNonNull(barns, Lists.newArrayList());
+        }
+
+        List<Integer> barnTypes = Splitters.splitToLong(pigIds, Splitters.COMMA).stream()
+                .map(pigId -> RespHelper.or500(doctorPigReadService.findBarnByPigId(pigId)).getPigType())
+                .collect(Collectors.toList());
+        return barns.stream().filter(barn -> barnTypes.contains(barn.getPigType())).collect(Collectors.toList());
     }
 
     /**
