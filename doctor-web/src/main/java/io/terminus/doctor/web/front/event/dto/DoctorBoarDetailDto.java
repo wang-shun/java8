@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.Builder;
 
 import java.io.Serializable;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -31,7 +32,9 @@ public class DoctorBoarDetailDto implements Serializable{
 
     private Integer pigStatus; // 猪状态
 
-    private String field123456; // 字段 123456 TODO
+    private Date entryDate; // 进厂日期
+
+    private Date birthDate; //出生日期
 
     private List<DoctorPigEvent> doctorPigEvents;
 

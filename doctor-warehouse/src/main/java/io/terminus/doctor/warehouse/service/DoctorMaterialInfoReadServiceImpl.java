@@ -1,5 +1,6 @@
 package io.terminus.doctor.warehouse.service;
 
+import com.google.common.base.Strings;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Maps;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
@@ -45,13 +46,14 @@ public class DoctorMaterialInfoReadServiceImpl implements DoctorMaterialInfoRead
     }
 
     @Override
-    public Response<Paging<DoctorMaterialInfo>> pagingMaterialInfos(Long farmId, Integer type, Integer canProduce, Integer pageNo, Integer pageSize) {
+    public Response<Paging<DoctorMaterialInfo>> pagingMaterialInfos(Long farmId, Integer type, Integer canProduce, String materialName, Integer pageNo, Integer pageSize) {
         try{
             PageInfo pageInfo = new PageInfo(pageNo, pageSize);
             Map<String,Object> params = Maps.newHashMap();
             params.put("farmId",farmId);
             params.put("type", type);
             params.put("canProduce", canProduce);
+            params.put("materialName", Strings.emptyToNull(materialName));
             return Response.ok(doctorMaterialInfoDao.paging(pageInfo.getOffset(),pageInfo.getLimit(), params));
         }catch (Exception e){
             log.error("paging material info fail ,cause:{}", Throwables.getStackTraceAsString(e));

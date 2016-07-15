@@ -1,6 +1,7 @@
 package io.terminus.doctor.event.handler.sow;
 
 import com.google.common.base.MoreObjects;
+import io.terminus.common.model.Response;
 import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dao.DoctorPigDao;
@@ -19,6 +20,7 @@ import io.terminus.doctor.event.handler.DoctorAbstractEventFlowHandler;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.event.service.DoctorGroupWriteService;
 import io.terminus.doctor.workflow.core.Execution;
+import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
@@ -34,6 +36,7 @@ import java.util.Map;
  * Descirbe:
  */
 @Component
+@Slf4j
 public class DoctorSowFarrowingHandler extends DoctorAbstractEventFlowHandler {
 
     private static final DateTimeFormatter DTF = DateTimeFormat.forPattern("yyyy-MM-dd");
@@ -89,7 +92,7 @@ public class DoctorSowFarrowingHandler extends DoctorAbstractEventFlowHandler {
      * @param extra
      */
     protected Long buildPigGroupCountInfo(DoctorBasicInputInfoDto basic, Map<String, Object> extra) {
-        DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findById(basic.getPigId());
+        DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(basic.getPigId());
 
         // Build 新建猪群操作方式
         DoctorSowMoveInGroupInput input = new DoctorSowMoveInGroupInput();
@@ -121,7 +124,12 @@ public class DoctorSowFarrowingHandler extends DoctorAbstractEventFlowHandler {
         input.setIsAuto(1);
         input.setCreatorId(basic.getStaffId());
         input.setCreatorName(basic.getStaffName());
-        return RespHelper.orServEx(doctorGroupWriteService.sowGroupEventMoveIn(input));
+        Response<Long> response = doctorGroupWriteService.sowGroupEventMoveIn(input);
+        if(response.isSuccess()){
+            return response.getResult();
+        }else {
+            throw new IllegalStateException(response.getError());
+        }
     }
 
     private PigSex judgePigSex(Integer sowCount, Integer boarCount){

@@ -110,7 +110,8 @@ public class DoctorPigs {
         DoctorBoarDetailDto doctorBoarDetailDto = DoctorBoarDetailDto.builder()
                 .pigBoarCode(dto.getDoctorPig().getPigCode()).breedName(dto.getDoctorPig().getBreedName())
                 .barnCode(dto.getDoctorPigTrack().getCurrentBarnName()).pigStatus(dto.getDoctorPigTrack().getStatus())
-                .field123456("notKnow").doctorPigEvents(dto.getDoctorPigEvents())
+                .entryDate(dto.getDoctorPig().getInFarmDate()).birthDate(dto.getDoctorPig().getBirthDate())
+                .doctorPigEvents(dto.getDoctorPigEvents())
                 .build();
         return doctorBoarDetailDto;
     }

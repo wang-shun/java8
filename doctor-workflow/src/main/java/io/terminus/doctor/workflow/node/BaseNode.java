@@ -69,7 +69,10 @@ public abstract class BaseNode implements Node {
                 handler.handle(execution);
                 handler.afterHandle(execution);
             }
-        } catch (Exception e) {
+        } catch (IllegalStateException e){
+            log.error("[handler execute] -> handler execute failed cause by {}", Throwables.getStackTraceAsString(e));
+            throw e;
+        }catch (Exception e) {
             log.error("[handler execute] -> handler execute failed cause by {}", Throwables.getStackTraceAsString(e));
             AssertHelper.throwException("[handler execute] -> handler [{}] execute failed cause by {}",
                     handler.getClass().getSimpleName(), Throwables.getStackTraceAsString(e));
