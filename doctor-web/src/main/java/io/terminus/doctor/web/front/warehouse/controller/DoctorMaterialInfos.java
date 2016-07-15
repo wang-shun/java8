@@ -177,6 +177,7 @@ public class DoctorMaterialInfos {
     @RequestMapping(value = "/pagingDoctorFeedInfo", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Paging<DoctorMaterialInfo> pagingDoctorFeedInfo(@RequestParam("farmId") Long farmId,
+                                                           @RequestParam("materialName") String materialName,
                                                            @RequestParam(value = "pageNo", required = false) Integer pageNo,
                                                            @RequestParam(value = "pageSize", required = false) Integer pageSize){
 
