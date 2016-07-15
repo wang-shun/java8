@@ -178,7 +178,7 @@ public class OPDoctorUsers {
         DoctorUserInfoDto doctorUserInfoDto = OPRespHelper.orOPEx(doctorUserReadService.findUserInfoByUserId(UserUtil.getUserId()));
         // 对于子账号, 设置下手机号
         if(Objects.equals(UserType.FARM_SUB.value(), doctorUserInfoDto.getUser().getType()) && doctorUserInfoDto.getUser().getMobile() == null){
-            doctorUserInfoDto.getUser().setMobile(doctorUserInfoDto.getUserProfile().getExtra().get("concat"));
+            doctorUserInfoDto.getUser().setMobile(doctorUserInfoDto.getUser().getExtra().get("contact"));
         }
         try {
             Acl acl = aclLoader.getAcl(ParanaThreadVars.getApp());
