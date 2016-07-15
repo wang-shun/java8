@@ -64,8 +64,8 @@ public class DoctorFarms {
 
         //排除的字段
         if (notEmpty(excludeFarmIds)) {
-            List<Long> requiredFarmIds = Splitters.splitToLong(excludeFarmIds, Splitters.COMMA);
-            farms = farms.stream().filter(farm -> requiredFarmIds.contains(farm.getId())).collect(Collectors.toList());
+            List<Long> exFarmIds = Splitters.splitToLong(excludeFarmIds, Splitters.COMMA);
+            farms = farms.stream().filter(farm -> !exFarmIds.contains(farm.getId())).collect(Collectors.toList());
         }
         return farms;
     }
