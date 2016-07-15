@@ -36,6 +36,7 @@ import io.terminus.doctor.event.event.PigEventCreateEvent;
 import io.terminus.doctor.event.manager.DoctorPigEventManager;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigEvent;
+import io.terminus.doctor.workflow.core.WorkFlowException;
 import io.terminus.zookeeper.pubsub.Publisher;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -396,12 +397,13 @@ public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteServic
             Map<String,Object> result = doctorPigEventManager.createSowPigEvent(doctorBasicInputInfoDto, dto);
             publishEvent(result);
             return Response.ok(Params.getWithConvert(result,"doctorEventId",a->Long.valueOf(a.toString())));
+        }catch(WorkFlowException e){
+            log.error("illegal state validate farrow count error, cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail(e.getMessage());
         }catch (IllegalStateException e){
-            log.info("*********      exception info is :{}", e.getClass().getName());
             log.error("illegal state validate farrow count error, cause:{}", Throwables.getStackTraceAsString(e));
             return Response.fail(e.getMessage());
         }catch (Exception e){
-            log.info("********   exception info os :{} ", e.getClass().getName());
             log.error("vaccination event create fail, cause:{}", Throwables.getStackTraceAsString(e));
             return Response.fail("create.farrowing.fail");
         }
