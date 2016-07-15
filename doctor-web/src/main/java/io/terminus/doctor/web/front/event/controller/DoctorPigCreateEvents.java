@@ -24,6 +24,7 @@ import io.terminus.doctor.event.dto.event.usual.DoctorVaccinationDto;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorPig;
+import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.event.service.DoctorBarnReadService;
 import io.terminus.doctor.event.service.DoctorPigEventReadService;
 import io.terminus.doctor.event.service.DoctorPigEventWriteService;
@@ -430,6 +431,11 @@ public class DoctorPigCreateEvents {
 
     // 猪舍变动 信息
     private Long createCasualChangeLocationInfo(DoctorChgLocationDto doctorChgLocationDto, DoctorBasicInputInfoDto basicInputInfoDto){
+        // init pig bran from info
+        DoctorPigTrack doctorPigTrack = RespHelper.or500(doctorPigReadService.findPigTrackByPigId(basicInputInfoDto.getPigId()));
+        doctorChgLocationDto.setChgLocationFromBarnId(doctorPigTrack.getCurrentBarnId());
+        doctorChgLocationDto.setChgLocationFromBarnName(doctorPigTrack.getCurrentBarnName());
+
         DoctorBarn doctorFromBarn = RespHelper.or500(doctorBarnReadService.findBarnById(doctorChgLocationDto.getChgLocationFromBarnId()));
         DoctorBarn doctorToBarn = RespHelper.or500(doctorBarnReadService.findBarnById(doctorChgLocationDto.getChgLocationToBarnId()));
 
