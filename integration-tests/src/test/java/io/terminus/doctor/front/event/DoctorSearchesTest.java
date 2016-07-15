@@ -38,6 +38,10 @@ public class DoctorSearchesTest extends BaseFrontWebTest {
         System.out.println(JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(body));
     }
 
+    /**
+     * 查询母猪suggest
+     * @see DoctorSearches#searchSowsSuggest(Integer, Map)
+     */
     @Test
     public void test_QUERY_SowSuggest() {
         String url = "/api/doctor/search/sowpigs/suggest";
