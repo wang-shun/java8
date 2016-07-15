@@ -6,6 +6,7 @@ import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.model.PageInfo;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
+import io.terminus.doctor.common.utils.Params;
 import io.terminus.doctor.user.dao.DoctorServiceReviewDao;
 import io.terminus.doctor.user.model.DoctorServiceReview;
 import lombok.extern.slf4j.Slf4j;
@@ -84,6 +85,7 @@ public class DoctorServiceReviewReadServiceImpl implements DoctorServiceReviewRe
         criteria.put("realName", realName);
         PageInfo pageInfo = new PageInfo(pageNo, pageSize);
         criteria.putAll(pageInfo.toMap());
+        criteria = Params.filterNullOrEmpty(criteria);
         try{
             response.setResult(doctorServiceReviewDao.paging(criteria));
         }catch(Exception e){

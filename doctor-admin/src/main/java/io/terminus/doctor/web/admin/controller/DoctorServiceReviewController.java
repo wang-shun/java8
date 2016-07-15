@@ -204,7 +204,7 @@ public class DoctorServiceReviewController {
      */
     private BaseUser checkUserTypeOperator(){
         BaseUser baseUser = UserUtil.getCurrentUser();
-        if(!Objects.equals(UserType.OPERATOR.value(), baseUser.getType())){
+        if(!Objects.equals(UserType.ADMIN.value(), baseUser.getType())){
             throw new JsonResponseException("authorize.fail");
         }
         return baseUser;

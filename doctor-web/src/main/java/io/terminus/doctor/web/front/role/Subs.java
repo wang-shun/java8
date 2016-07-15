@@ -3,6 +3,7 @@ package io.terminus.doctor.web.front.role;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.Paging;
 import io.terminus.doctor.common.enums.UserType;
+import io.terminus.doctor.web.core.component.MobilePattern;
 import io.terminus.pampas.common.UserUtil;
 import io.terminus.parana.common.utils.RespHelper;
 import lombok.extern.slf4j.Slf4j;
@@ -30,9 +31,13 @@ public class Subs {
 
     private final SubService subService;
 
+    private final MobilePattern mobilePattern;
+
     @Autowired
-    public Subs(SubService subService) {
+    public Subs(SubService subService,
+                MobilePattern mobilePattern) {
         this.subService = subService;
+        this.mobilePattern = mobilePattern;
     }
 
 
@@ -58,6 +63,9 @@ public class Subs {
         if(sub.getFarmIds() == null || sub.getFarmIds().isEmpty()){
             throw new JsonResponseException(500, "need.at.least.one.farm");
         }
+        if(sub.getContact() == null || !mobilePattern.getPattern().matcher(sub.getContact()).matches()){
+            throw new JsonResponseException(500, "mobile.format.error");
+        }
         checkAuth();
         return RespHelper.or500(subService.createSub(UserUtil.getCurrentUser(), sub));
     }
@@ -71,6 +79,9 @@ public class Subs {
     public Boolean updateSub(@RequestBody Sub sub) {
         if(sub.getFarmIds() == null || sub.getFarmIds().isEmpty()){
             throw new JsonResponseException(500, "need.at.least.one.farm");
+        }
+        if(sub.getContact() == null || !mobilePattern.getPattern().matcher(sub.getContact()).matches()){
+            throw new JsonResponseException(500, "mobile.format.error");
         }
         checkAuth();
         return RespHelper.or500(subService.updateSub(UserUtil.getCurrentUser(), sub));

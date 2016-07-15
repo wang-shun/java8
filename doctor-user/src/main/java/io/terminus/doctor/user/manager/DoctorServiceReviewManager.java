@@ -3,11 +3,24 @@ package io.terminus.doctor.user.manager;
 import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
+import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.BaseUser;
 import io.terminus.doctor.common.enums.UserType;
 import io.terminus.doctor.common.utils.RespHelper;
-import io.terminus.doctor.user.dao.*;
-import io.terminus.doctor.user.model.*;
+import io.terminus.doctor.user.dao.DoctorFarmDao;
+import io.terminus.doctor.user.dao.DoctorOrgDao;
+import io.terminus.doctor.user.dao.DoctorServiceReviewDao;
+import io.terminus.doctor.user.dao.DoctorServiceStatusDao;
+import io.terminus.doctor.user.dao.DoctorStaffDao;
+import io.terminus.doctor.user.dao.DoctorUserDataPermissionDao;
+import io.terminus.doctor.user.dao.ServiceReviewTrackDao;
+import io.terminus.doctor.user.model.DoctorFarm;
+import io.terminus.doctor.user.model.DoctorOrg;
+import io.terminus.doctor.user.model.DoctorServiceReview;
+import io.terminus.doctor.user.model.DoctorServiceStatus;
+import io.terminus.doctor.user.model.DoctorStaff;
+import io.terminus.doctor.user.model.DoctorUserDataPermission;
+import io.terminus.doctor.user.model.ServiceReviewTrack;
 import io.terminus.doctor.user.service.DoctorStaffWriteService;
 import io.terminus.doctor.user.service.DoctorUserDataPermissionWriteService;
 import io.terminus.parana.common.model.ParanaUser;
@@ -168,11 +181,20 @@ public class DoctorServiceReviewManager {
         //保存猪场信息
         if(farms != null){
             farms.stream().forEach(farm -> {
+                if(farm.getName() == null || farm.getName().trim().isEmpty()){
+                    throw new ServiceException("farm.name.not.null");
+                }
                 farm.setOrgName(org.getName());
                 farm.setOrgId(org.getId());
-                farm.setProvinceName(RespHelper.orServEx(addressReadService.findById(farm.getProvinceId())).getName());
-                farm.setCityName(RespHelper.orServEx(addressReadService.findById(farm.getCityId())).getName());
-                farm.setDistrictName(RespHelper.orServEx(addressReadService.findById(farm.getDistrictId())).getName());
+                if(farm.getProvinceId() != null){
+                    farm.setProvinceName(RespHelper.orServEx(addressReadService.findById(farm.getProvinceId())).getName());
+                }
+                if(farm.getCityId() != null){
+                    farm.setCityName(RespHelper.orServEx(addressReadService.findById(farm.getCityId())).getName());
+                }
+                if(farm.getDistrictId() != null){
+                    farm.setDistrictName(RespHelper.orServEx(addressReadService.findById(farm.getDistrictId())).getName());
+                }
                 if (farm.getId() != null) {
                     doctorFarmDao.update(farm);
                 } else {
