@@ -176,6 +176,10 @@ public class OPDoctorUsers {
     @OpenMethod(key = "get.user.basic.info")
     public DoctorUserInfoDto getUserBasicInfo() {
         DoctorUserInfoDto doctorUserInfoDto = OPRespHelper.orOPEx(doctorUserReadService.findUserInfoByUserId(UserUtil.getUserId()));
+        // 对于子账号, 设置下手机号
+        if(Objects.equals(UserType.FARM_SUB.value(), doctorUserInfoDto.getUser().getType()) && doctorUserInfoDto.getUser().getMobile() == null){
+            doctorUserInfoDto.getUser().setMobile(doctorUserInfoDto.getUserProfile().getExtra().get("concat"));
+        }
         try {
             Acl acl = aclLoader.getAcl(ParanaThreadVars.getApp());
             BaseUser user = UserUtil.getCurrentUser();
