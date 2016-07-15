@@ -15,12 +15,14 @@ import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.cache.DoctorPigInfoCache;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorPigDao;
+import io.terminus.doctor.event.dao.DoctorPigEventDao;
 import io.terminus.doctor.event.dao.DoctorPigTrackDao;
 import io.terminus.doctor.event.dto.DoctorPigInfoDetailDto;
 import io.terminus.doctor.event.dto.DoctorPigInfoDto;
 import io.terminus.doctor.event.dto.DoctorPigMessage;
 import io.terminus.doctor.event.enums.DataRange;
 import io.terminus.doctor.event.model.DoctorBarn;
+import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
@@ -63,17 +65,21 @@ public class DoctorPigReadServiceImpl implements DoctorPigReadService {
 
     private final DoctorPigInfoCache doctorPigInfoCache;
 
+    private final DoctorPigEventDao doctorPigEventDao;
+
     private static final DateTimeFormatter DTF = DateTimeFormat.forPattern("yyyy-MM");
 
     @Autowired
     public DoctorPigReadServiceImpl(DoctorPigDao doctorPigDao, DoctorPigTrackDao doctorPigTrackDao,
                                     DoctorPigEventReadService doctorPigEventReadService,
-                                    DoctorBarnDao doctorBarnDao, DoctorPigInfoCache doctorPigInfoCache){
+                                    DoctorBarnDao doctorBarnDao, DoctorPigInfoCache doctorPigInfoCache,
+                                    DoctorPigEventDao doctorPigEventDao){
         this.doctorPigDao = doctorPigDao;
         this.doctorPigTrackDao = doctorPigTrackDao;
         this.doctorPigEventReadService = doctorPigEventReadService;
         this.doctorBarnDao = doctorBarnDao;
         this.doctorPigInfoCache = doctorPigInfoCache;
+        this.doctorPigEventDao = doctorPigEventDao;
     }
 
     @Override
@@ -184,17 +190,19 @@ public class DoctorPigReadServiceImpl implements DoctorPigReadService {
     }
 
     @Override
-    public Response<String> generateFostersCode(Long pigId) {
+    public Response<String> generateFostersCode(Long farmId) {
         try{
-            DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(pigId);
-            checkState(!isNull(doctorPigTrack), "input.pigId.error");
-
-            return Response.ok(DateTime.now().toString(DTF)+ "-"+ doctorPigTrack.getCurrentParity());
+            Long farrowingCount =  doctorPigEventDao.countPigEventTypeDuration(
+                    farmId, PigEvent.FARROWING.getKey(),
+                    DateTime.now().withDayOfMonth(1).withTimeAtStartOfDay().toDate(),
+                    DateTime.now().plusMonths(1).withDayOfMonth(1).withTimeAtStartOfDay().toDate());
+            farrowingCount += 1;
+            return Response.ok(DateTime.now().toString(DTF)+ "-"+ farrowingCount);
         }catch (IllegalStateException e){
-            log.error(" input pigId not exist, pigId:{} ", pigId);
+            log.error(" input pigId not exist, farmId:{} ", farmId);
             return Response.fail(e.getMessage());
         }catch (Exception e){
-            log.error("generate foster code fail,pigId:{}, cause:{}",pigId, Throwables.getStackTraceAsString(e));
+            log.error("generate foster code fail,farmId:{}, cause:{}", farmId, Throwables.getStackTraceAsString(e));
             return Response.fail("generate.fostersCode.fail");
         }
     }
@@ -281,7 +289,7 @@ public class DoctorPigReadServiceImpl implements DoctorPigReadService {
     @Override
     public Response<DoctorBarn> findBarnByPigId(Long pigId) {
         try {
-            //查当前猪舍
+            //从pigTrack查当前猪舍
             DoctorPigTrack pigTrack = doctorPigTrackDao.findByPigId(pigId);
             return Response.ok(doctorBarnDao.findById(pigTrack.getCurrentBarnId()));
         } catch (Exception e) {

@@ -69,7 +69,7 @@ public interface DoctorPigReadService {
      * @param pigId
      * @return
      */
-    Response<String> generateFostersCode(@NotNull(message = "input.pigId.empty") Long pigId);
+    Response<String> generateFostersCode(@NotNull(message = "input.farmId.empty") Long farmId);
 
     /**
      * 获取猪舍pig 信息内容

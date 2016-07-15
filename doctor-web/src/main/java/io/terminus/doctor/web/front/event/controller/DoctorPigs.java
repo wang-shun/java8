@@ -62,13 +62,13 @@ public class DoctorPigs {
 
     /**
      * 生成FostersCode
-     * @param pigId
+     * @param farmId
      * @return
      */
     @RequestMapping(value = "/generate/fostersCode", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public String generateFostersCode(@RequestParam("pigId") Long pigId){
-        return RespHelper.or500(doctorPigReadService.generateFostersCode(pigId));
+    public String generateFostersCode(@RequestParam("farmId") Long farmId){
+        return RespHelper.or500(doctorPigReadService.generateFostersCode(farmId));
     }
 
     /**
