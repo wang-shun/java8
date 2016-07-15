@@ -69,6 +69,9 @@ public class Subs {
      */
     @RequestMapping(value = "", method = RequestMethod.PUT)
     public Boolean updateSub(@RequestBody Sub sub) {
+        if(sub.getFarmIds() == null || sub.getFarmIds().isEmpty()){
+            throw new JsonResponseException(500, "need.at.least.one.farm");
+        }
         checkAuth();
         return RespHelper.or500(subService.updateSub(UserUtil.getCurrentUser(), sub));
     }

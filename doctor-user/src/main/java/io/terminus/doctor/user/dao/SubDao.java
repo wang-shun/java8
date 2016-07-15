@@ -43,4 +43,14 @@ public class SubDao extends MyBatisDao<Sub> {
         criteria.put("limit", limit);
         return getSqlSession().selectList(sqlId("findByConditions"), ImmutableMap.copyOf(Params.filterNullOrEmpty(criteria)));
     }
+
+    /**
+     * 子账号角色名称更新后,此表中的冗余字段也需要跟着更新
+     * @param subRoleId 表 doctor_sub_roles 的 主键id, 关联表 doctor_user_subs 的 role_id
+     * @param newRoleName 新的角色名称
+     * @return
+     */
+    public void updateRoleName(Long subRoleId, String newRoleName){
+        getSqlSession().update("updateRoleName", ImmutableMap.of("roleId", subRoleId, "roleName", newRoleName));
+    }
 }

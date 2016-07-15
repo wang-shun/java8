@@ -74,4 +74,16 @@ public class PrimaryUserWriteServiceImpl implements PrimaryUserWriteService {
             return Response.fail("sub.update.fail");
         }
     }
+
+    @Override
+    public Response<Boolean> updateRoleName(Long subRoleId, String newRoleName){
+        try{
+            subDao.updateRoleName(subRoleId, newRoleName);
+            return Response.ok(true);
+        }catch(Exception e){
+            log.error("updateRoleName failed, subRoleId={}, newRoleName={}, cause:{}",
+                    subRoleId, newRoleName, Throwables.getStackTraceAsString(e));
+            return Response.fail("update.role.name.fail");
+        }
+    }
 }
