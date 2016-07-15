@@ -100,7 +100,10 @@ public class ExecutorImpl implements Executor {
             }
             NodeHelper.buildTaskNode().execute(workFlowEngine.buildExecution(currentProcess, expression, flowData, operatorId, operatorName));
 
-        } catch (Exception e) {
+        }catch (IllegalStateException e){
+            log.error("[Flow Process Execute] -> 流程任务执行异常, cause by {}", Throwables.getStackTraceAsString(e));
+            throw e;
+        }catch (Exception e) {
             log.error("[Flow Process Execute] -> 流程任务执行异常, cause by {}", Throwables.getStackTraceAsString(e));
             AssertHelper.throwException("[Flow Process Execute] -> 流程任务执行异常, cause by {}", Throwables.getStackTraceAsString(e));
         }
