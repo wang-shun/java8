@@ -190,7 +190,7 @@ public class DoctorPigReadServiceImpl implements DoctorPigReadService {
                     farmId, PigEvent.FARROWING.getKey(),
                     DateTime.now().withDayOfMonth(1).withTimeAtStartOfDay().toDate(),
                     DateTime.now().plusMonths(1).withDayOfMonth(1).withTimeAtStartOfDay().toDate());
-
+            farrowingCount += 1;
             return Response.ok(DateTime.now().toString(DTF)+ "-"+ farrowingCount);
         }catch (IllegalStateException e){
             log.error(" input pigId not exist, farmId:{} ", farmId);
