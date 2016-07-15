@@ -89,7 +89,7 @@ public class DoctorSowFarrowingHandler extends DoctorAbstractEventFlowHandler {
      * @param extra
      */
     protected Long buildPigGroupCountInfo(DoctorBasicInputInfoDto basic, Map<String, Object> extra) {
-        DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findById(basic.getPigId());
+        DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(basic.getPigId());
 
         // Build 新建猪群操作方式
         DoctorSowMoveInGroupInput input = new DoctorSowMoveInGroupInput();
