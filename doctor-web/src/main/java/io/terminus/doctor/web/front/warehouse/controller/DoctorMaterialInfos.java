@@ -169,26 +169,27 @@ public class DoctorMaterialInfos {
     public Paging<DoctorMaterialInfo> pagingDoctorMaterialInfo(@RequestParam("farmId") Long farmId,
                                                                @RequestParam(value = "type", required = false) Integer type,
                                                                @RequestParam(value = "canProduce", required = false) Integer canProduce,
+                                                               @RequestParam(value = "materialName", required = false) String materialName,
                                                                @RequestParam(value = "pageNo", required = false) Integer pageNo,
                                                                @RequestParam(value = "pageSize",required = false)Integer pageSize){
-        return RespHelper.or500(doctorMaterialInfoReadService.pagingMaterialInfos(farmId, type, canProduce, pageNo, pageSize));
+        return RespHelper.or500(doctorMaterialInfoReadService.pagingMaterialInfos(farmId, type, canProduce, materialName, pageNo, pageSize));
     }
 
     @RequestMapping(value = "/pagingDoctorFeedInfo", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Paging<DoctorMaterialInfo> pagingDoctorFeedInfo(@RequestParam("farmId") Long farmId,
-//                                                           @RequestParam("materialName") String materialName,
+                                                           @RequestParam("materialName") String materialName,
                                                            @RequestParam(value = "pageNo", required = false) Integer pageNo,
                                                            @RequestParam(value = "pageSize", required = false) Integer pageSize){
 
-        return pagingDoctorMaterialInfo(farmId, WareHouseType.FEED.getKey(), IsOrNot.YES.getKey(), pageNo, pageSize);
+        return pagingDoctorMaterialInfo(farmId, WareHouseType.FEED.getKey(), IsOrNot.YES.getKey(), materialName, pageNo, pageSize);
     }
 
     @RequestMapping(value = "/queryAllMaterialInfo", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public List<DoctorMaterialInfo> queryAllMaterialInfo(@RequestParam("farmId") Long farmId,
                                                          @RequestParam(value = "type", required = false) Integer type){
-        Paging<DoctorMaterialInfo> paging = RespHelper.or500(doctorMaterialInfoReadService.pagingMaterialInfos(farmId, type, null, 1, Integer.MAX_VALUE));
+        Paging<DoctorMaterialInfo> paging = RespHelper.or500(doctorMaterialInfoReadService.pagingMaterialInfos(farmId, type, null, null, 1, Integer.MAX_VALUE));
         return paging.getData();
     }
 

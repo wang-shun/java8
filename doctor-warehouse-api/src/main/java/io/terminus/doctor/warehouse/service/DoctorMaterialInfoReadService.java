@@ -32,7 +32,10 @@ public interface DoctorMaterialInfoReadService {
      * @return
      */
     Response<Paging<DoctorMaterialInfo>> pagingMaterialInfos(@NotNull(message = "input.farmId.empty") Long farmId,
-                                                             Integer type, Integer canProduce, Integer pageNo, Integer pageSize);
+                                                             Integer type,
+                                                             Integer canProduce,
+                                                             String materialName,
+                                                             Integer pageNo, Integer pageSize);
 
     /**
      * id 查询对应的物料信息
