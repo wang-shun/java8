@@ -117,7 +117,7 @@ public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteServic
     public Response<Long> pigEntryEvent(DoctorBasicInputInfoDto doctorBasicInputInfoDto, DoctorFarmEntryDto doctorFarmEntryDto) {
         try{
             // validate 左右乳头数量大于0
-            if(Objects.equals(doctorFarmEntryDto.getPigType(), DoctorPig.PIG_TYPE.SOW)){
+            if(Objects.equals(doctorFarmEntryDto.getPigType(), DoctorPig.PIG_TYPE.SOW.getKey())){
                 checkState(isNull(doctorFarmEntryDto.getLeft()) || doctorFarmEntryDto.getLeft()>=0, "input.sowLeft.error");
                 checkState(isNull(doctorFarmEntryDto.getRight()) || doctorFarmEntryDto.getRight()>=0, "input.sowRight.error");
             }
