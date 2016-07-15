@@ -120,6 +120,12 @@ public class DoctorPigEvents {
         }
     }
 
+    @RequestMapping(value = "/queryPigEventById", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public DoctorPigEvent queryPigEventById(@RequestParam("eventId") Long eventId){
+        return RespHelper.or500(doctorPigEventReadService.queryPigEventById(eventId));
+    }
+
     @RequestMapping(value = "/queryPigEvents", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public List<Integer> queryPigExecuteEvent(@RequestParam("ids") String ids){
