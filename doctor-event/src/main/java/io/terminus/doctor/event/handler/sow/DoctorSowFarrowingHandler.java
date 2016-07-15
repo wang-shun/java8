@@ -128,7 +128,6 @@ public class DoctorSowFarrowingHandler extends DoctorAbstractEventFlowHandler {
         if(response.isSuccess()){
             return response.getResult();
         }else {
-            log.info("********** error message : {}", response.getError());
             throw new IllegalStateException(response.getError());
         }
     }

@@ -397,10 +397,6 @@ public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteServic
             Map<String,Object> result = doctorPigEventManager.createSowPigEvent(doctorBasicInputInfoDto, dto);
             publishEvent(result);
             return Response.ok(Params.getWithConvert(result,"doctorEventId",a->Long.valueOf(a.toString())));
-        }catch(WorkFlowException e){
-            log.info("***************** error message content is : {}", e.getMessage());
-            log.error("illegal state validate farrow count error, cause:{}", Throwables.getStackTraceAsString(e));
-            return Response.fail(e.getMessage());
         }catch (IllegalStateException e){
             log.error("illegal state validate farrow count error, cause:{}", Throwables.getStackTraceAsString(e));
             return Response.fail(e.getMessage());
