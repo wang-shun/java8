@@ -379,7 +379,6 @@ public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteServic
     @Override
     public Response<Long> sowFarrowingEvent(DoctorFarrowingDto doctorFarrowingDto, DoctorBasicInputInfoDto doctorBasicInputInfoDto) {
         try{
-            log.info("*********** farrowing dto :{}, basic :{}", doctorFarrowingDto, doctorBasicInputInfoDto);
             doctorFarrowingDto.setFarrowStaff1(doctorBasicInputInfoDto.getStaffName());
             doctorFarrowingDto.setFarrowStaff2(doctorBasicInputInfoDto.getStaffName());
 
