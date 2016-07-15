@@ -32,7 +32,7 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent>{
         return this.getSqlSession().selectList(sqlId("queryAllEventsByPigId"), pigId);
     }
 
-    public Integer countPigEventTypeDuration(Long farmId, Integer eventType, Date startDate, Date endDate){
+    public Long countPigEventTypeDuration(Long farmId, Integer eventType, Date startDate, Date endDate){
         return this.getSqlSession().selectOne(sqlId("countPigEventTypeDuration"),
                 ImmutableMap.of("farmId", farmId, "eventType", eventType, "startDate", startDate, "endDate", endDate));
     }

@@ -186,7 +186,7 @@ public class DoctorPigReadServiceImpl implements DoctorPigReadService {
     @Override
     public Response<String> generateFostersCode(Long farmId) {
         try{
-            Integer farrowingCount =  doctorPigEventDao.countPigEventTypeDuration(
+            Long farrowingCount =  doctorPigEventDao.countPigEventTypeDuration(
                     farmId, PigEvent.FARROWING.getKey(),
                     DateTime.now().withDayOfMonth(1).withTimeAtStartOfDay().toDate(),
                     DateTime.now().plusMonths(1).withDayOfMonth(1).withTimeAtStartOfDay().toDate());
