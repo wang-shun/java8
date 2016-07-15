@@ -3,6 +3,7 @@ package io.terminus.doctor.event.dto.event.group.input;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 
@@ -65,5 +66,6 @@ public class DoctorTurnSeedGroupInput extends BaseGroupInput implements Serializ
 
     private String toBarnName;
 
+    @Min(value = 0, message = "weight.gt.0")
     private Double weight;
 }
