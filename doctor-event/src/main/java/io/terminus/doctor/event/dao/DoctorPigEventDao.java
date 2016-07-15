@@ -1,9 +1,13 @@
 package io.terminus.doctor.event.dao;
 
+import com.google.common.collect.ImmutableMap;
 import io.terminus.common.mysql.dao.MyBatisDao;
 import io.terminus.doctor.event.model.DoctorPigEvent;
+import jdk.nashorn.internal.ir.annotations.Immutable;
 import org.springframework.stereotype.Repository;
+import sun.util.resources.cldr.ga.LocaleNames_ga;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -26,5 +30,10 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent>{
      */
     public List<DoctorPigEvent> queryAllEventsByPigId(Long pigId){
         return this.getSqlSession().selectList(sqlId("queryAllEventsByPigId"), pigId);
+    }
+
+    public Integer countPigEventTypeDuration(Long farmId, Integer eventType, Date startDate, Date endDate){
+        return this.getSqlSession().selectOne(sqlId("countPigEventTypeDuration"),
+                ImmutableMap.of("farmId", farmId, "eventType", eventType, "startDate", startDate, "endDate", endDate));
     }
 }
