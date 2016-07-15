@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
+import io.terminus.common.exception.ServiceException;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.constants.JacksonType;
 import io.terminus.doctor.event.constants.DoctorPigSnapshotConstants;
@@ -101,6 +102,9 @@ public abstract class DoctorAbstractEventFlowHandler extends HandlerAware {
                             ImmutableMap.of("doctorPigId", doctorBasicInputInfoDto.getPigId(),
                                     "doctorEventId",doctorPigEvent.getId(),"doctorSnapshotId",doctorPigSnapshot.getId())));
             execution.setFlowData(JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(flowDataMap));
+        }catch (ServiceException e){
+            log.error("handle execute fail, cause:{}", Throwables.getStackTraceAsString(e));
+            throw new IllegalStateException(e.getMessage());
         }catch (IllegalStateException e){
             log.error("handle execute fail, cause:{}", Throwables.getStackTraceAsString(e));
             throw e;

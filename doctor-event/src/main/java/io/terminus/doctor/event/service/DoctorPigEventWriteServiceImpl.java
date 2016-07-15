@@ -401,7 +401,7 @@ public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteServic
             return Response.fail(e.getMessage());
         }catch (Exception e){
             log.error("vaccination event create fail, cause:{}", Throwables.getStackTraceAsString(e));
-            return Response.fail("create.vaccination.fail");
+            return Response.fail("create.farrowing.fail");
         }
     }
 
