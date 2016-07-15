@@ -46,17 +46,26 @@ public class DoctorFarms {
      * @return 猪场list
      */
     @RequestMapping(value = "/loginUser", method = RequestMethod.GET)
-    public List<DoctorFarm> findFarmsByLoginUser(@RequestParam(value = "farmIds", required = false) String farmIds) {
+    public List<DoctorFarm> findFarmsByLoginUser(@RequestParam(value = "farmIds", required = false) String farmIds,
+                                                 @RequestParam(value = "excludeFarmIds", required = false) String excludeFarmIds) {
         if (UserUtil.getUserId() == null) {
             throw new JsonResponseException("user.not.login");
         }
         DoctorStaff staff = RespHelper.or500(doctorStaffReadService.findStaffByUserId(UserUtil.getUserId()));
-        List<DoctorFarm> farms = RespHelper.or500(doctorFarmReadService.findFarmsByOrgId(staff.getOrgId()));
+        return filterFarm(RespHelper.or500(doctorFarmReadService.findFarmsByOrgId(staff.getOrgId())), farmIds, excludeFarmIds);
+    }
 
-        //根据farmIds过滤一把
+    private List<DoctorFarm> filterFarm(List<DoctorFarm> farms, String farmIds, String excludeFarmIds) {
+        //保留的字段
         if (notEmpty(farmIds)) {
             List<Long> requiredFarmIds = Splitters.splitToLong(farmIds, Splitters.COMMA);
-            return farms.stream().filter(farm -> requiredFarmIds.contains(farm.getId())).collect(Collectors.toList());
+            farms = farms.stream().filter(farm -> requiredFarmIds.contains(farm.getId())).collect(Collectors.toList());
+        }
+
+        //排除的字段
+        if (notEmpty(excludeFarmIds)) {
+            List<Long> requiredFarmIds = Splitters.splitToLong(excludeFarmIds, Splitters.COMMA);
+            farms = farms.stream().filter(farm -> requiredFarmIds.contains(farm.getId())).collect(Collectors.toList());
         }
         return farms;
     }
