@@ -96,12 +96,6 @@ public class DoctorSowEventCreateServiceImpl implements DoctorSowEventCreateServ
         }
     }
 
-    public static void main(String[] args) {
-        String test = "{\"farrowingDate\":\"2016-07-15\",\"nestCode\":\"2016-07-14\",\"groupCode\":\"wt\",\"farrowingType\":1,\"dayAgeAvg\":\"1.8\",\"birthNestAvg\":\"1.8\",\"liveSowCount\":\"1\",\"liveBoarCount\":\"1\",\"healthCount\":2,\"farrowingLiveCount\":2,\"weakCount\":0,\"mnyCount\":0,\"jxCount\":0,\"deadCount\":0,\"blackCount\":0}";
-        System.out.println(JsonMapper.JSON_NON_DEFAULT_MAPPER.fromJson(test, DoctorChgLocationDto.class));
-
-    }
-
     @Override
     public Response<Boolean> sowEventsCreate(List<DoctorBasicInputInfoDto> dtoList, String sowInfoDtoJson) {
         try{
