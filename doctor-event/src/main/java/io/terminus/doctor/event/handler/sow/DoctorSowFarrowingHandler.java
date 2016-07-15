@@ -1,6 +1,7 @@
 package io.terminus.doctor.event.handler.sow;
 
 import com.google.common.base.MoreObjects;
+import io.terminus.common.model.Response;
 import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dao.DoctorPigDao;
@@ -121,7 +122,12 @@ public class DoctorSowFarrowingHandler extends DoctorAbstractEventFlowHandler {
         input.setIsAuto(1);
         input.setCreatorId(basic.getStaffId());
         input.setCreatorName(basic.getStaffName());
-        return RespHelper.orServEx(doctorGroupWriteService.sowGroupEventMoveIn(input));
+        Response<Long> response = doctorGroupWriteService.sowGroupEventMoveIn(input);
+        if(response.isSuccess()){
+            return response.getResult();
+        }else {
+            throw new IllegalStateException(response.getError());
+        }
     }
 
     private PigSex judgePigSex(Integer sowCount, Integer boarCount){
