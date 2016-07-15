@@ -170,9 +170,15 @@ public class DoctorServiceReviewManager {
             farms.stream().forEach(farm -> {
                 farm.setOrgName(org.getName());
                 farm.setOrgId(org.getId());
-                farm.setProvinceName(RespHelper.orServEx(addressReadService.findById(farm.getProvinceId())).getName());
-                farm.setCityName(RespHelper.orServEx(addressReadService.findById(farm.getCityId())).getName());
-                farm.setDistrictName(RespHelper.orServEx(addressReadService.findById(farm.getDistrictId())).getName());
+                if(farm.getProvinceId() != null){
+                    farm.setProvinceName(RespHelper.orServEx(addressReadService.findById(farm.getProvinceId())).getName());
+                }
+                if(farm.getCityId() != null){
+                    farm.setCityName(RespHelper.orServEx(addressReadService.findById(farm.getCityId())).getName());
+                }
+                if(farm.getDistrictId() != null){
+                    farm.setDistrictName(RespHelper.orServEx(addressReadService.findById(farm.getDistrictId())).getName());
+                }
                 if (farm.getId() != null) {
                     doctorFarmDao.update(farm);
                 } else {
