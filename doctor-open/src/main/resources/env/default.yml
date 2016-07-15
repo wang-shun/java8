@@ -48,7 +48,7 @@ zookeeper:
 
 #电商系统的 zookeeper 配置
 zookeeper-pigmall:
-  host: 123.57.190.67
+  host: 101.201.44.35
   port: 2181
   cacheTopic: pigmall.cache.user.clear # pigmall 电商系统的 cacheTopic
 
