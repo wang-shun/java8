@@ -123,6 +123,7 @@
 
         UPDATE <include refid="tb"/>
         <set>
+            updated_at = now()
             <if test="materialName != null" > ,`material_name` = #{materialName}</if>
             <if test="unitGroupName != null" > ,`unit_group_name` = #{unitGroupName}</if>
             <if test="unitName != null" > ,`unit_name` = #{unitName}</if>
