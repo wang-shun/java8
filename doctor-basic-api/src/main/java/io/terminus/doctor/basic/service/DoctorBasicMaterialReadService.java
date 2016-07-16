@@ -1,10 +1,11 @@
 package io.terminus.doctor.basic.service;
 
+import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
+import io.terminus.doctor.basic.dto.DoctorBasicMaterialSearchDto;
 import io.terminus.doctor.basic.model.DoctorBasicMaterial;
 
 import javax.validation.constraints.NotNull;
-import java.util.List;
 
 /**
  * Desc: 基础物料表读服务
@@ -23,12 +24,10 @@ public interface DoctorBasicMaterialReadService {
     Response<DoctorBasicMaterial> findBasicMaterialById(@NotNull(message = "basicMaterialId.not.null") Long basicMaterialId);
 
     /**
-     * 查询全部基础物料(可以根据输入码过滤)
-     * @param type 基础物料类型
-     * @see io.terminus.doctor.common.enums.WareHouseType
-     * @param srm 输入码
+     * 分页查询基础物料
+     * @param basicMaterial 基础物料
      * @return 基础物料list
      */
-    Response<List<DoctorBasicMaterial>> finaBasicMaterialByTypeFilterBySrm(Integer type, String srm);
+    Response<Paging<DoctorBasicMaterial>> pagingBasicMaterialByTypeFilterBySrm(DoctorBasicMaterialSearchDto basicMaterial);
 
 }

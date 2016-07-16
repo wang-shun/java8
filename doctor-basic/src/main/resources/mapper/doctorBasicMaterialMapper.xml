@@ -37,6 +37,18 @@
         #{type}, #{name}, #{srm}, #{unitGroupId}, #{unitGroupName}, #{unitId}, #{unitName}, #{defaultConsumeCount}, #{price}, #{remark}, now(), now()
     </sql>
 
+    <sql id="criteria">
+        <if test="type != null">AND type = #{type}</if>
+        <if test="name != null">AND name = #{name}</if>
+        <if test="srm != null">AND srm = #{srm}</if>
+        <if test="unitGroupId != null">AND unit_group_id = #{unitGroupId}</if>
+        <if test="unitGroupName != null">AND unit_group_name = #{unitGroupName}</if>
+        <if test="unitId != null">AND unit_id = #{unitId}</if>
+        <if test="unitName != null">AND unit_name = #{unitName}</if>
+        <if test="defaultConsumeCount != null">AND default_consume_count = #{defaultConsumeCount}</if>
+        <if test="price != null">AND price = #{price}</if>
+    </sql>
+
     <insert id="create" parameterType="DoctorBasicMaterial" keyProperty="id" useGeneratedKeys="true">
         INSERT INTO
         <include refid="tb" />
@@ -82,5 +94,20 @@
         DELETE FROM <include refid="tb"/>
         WHERE id = #{id}
     </delete>
-    
+
+    <select id="count" parameterType="map" resultType="long">
+        SELECT count(1) from <include refid="tb"/>
+        <where>
+            <include refid="criteria"/>
+        </where>
+    </select>
+
+    <select id="paging" parameterType="map" resultMap="DoctorBasicMaterialMap">
+        SELECT <include refid="cols_all"/> from <include refid="tb"/>
+        <where>
+            <include refid="criteria"/>
+        </where>
+        ORDER BY updated_at DESC
+        LIMIT #{offset}, #{limit}
+    </select>
 </mapper>
