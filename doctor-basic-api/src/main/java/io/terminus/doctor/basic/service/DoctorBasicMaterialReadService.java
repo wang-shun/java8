@@ -4,6 +4,7 @@ import io.terminus.common.model.Response;
 import io.terminus.doctor.basic.model.DoctorBasicMaterial;
 
 import javax.validation.constraints.NotNull;
+import java.util.List;
 
 /**
  * Desc: 基础物料表读服务
@@ -20,5 +21,11 @@ public interface DoctorBasicMaterialReadService {
      * @return 基础物料表
      */
     Response<DoctorBasicMaterial> findBasicMaterialById(@NotNull(message = "basicMaterialId.not.null") Long basicMaterialId);
+
+    /**
+     * 查询全部基础物料(可以根据输入码过滤)
+     * @return 基础物料list
+     */
+    Response<List<DoctorBasicMaterial>> finaBasicMaterialFilterBySrm(String srm);
 
 }

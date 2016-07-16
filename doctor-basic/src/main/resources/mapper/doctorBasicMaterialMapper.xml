@@ -51,6 +51,11 @@
         WHERE id = #{id}
     </select>
 
+    <select id="findAll" parameterType="long" resultMap="DoctorBasicMaterialMap" >
+        SELECT <include refid="cols_all" />
+        FROM <include refid="tb" />
+    </select>
+
     <update id="update" parameterType="DoctorBasicMaterial">
         UPDATE
         <include refid="tb"/>
