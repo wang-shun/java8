@@ -17,6 +17,7 @@ import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigSnapshot;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.event.service.DoctorBarnReadService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -30,6 +31,7 @@ import java.util.Objects;
  * Descirbe:
  */
 @Component
+@Slf4j
 public class DoctorChgFarmHandler extends DoctorAbstractEventHandler{
 
     private final DoctorBarnReadService doctorBarnReadService;
@@ -74,7 +76,7 @@ public class DoctorChgFarmHandler extends DoctorAbstractEventHandler{
                                           DoctorPigSnapshot doctorPigSnapshot, Map<String, Object> extra) {
 
         // doctor pig update farm info
-        DoctorPig doctorPig = doctorPigDao.findById(doctorPigTrack.getId());
+        DoctorPig doctorPig = doctorPigDao.findById(doctorPigTrack.getPigId());
         doctorPig.setFarmId(Long.valueOf(extra.get("toFarmId").toString()));
         doctorPig.setFarmName(extra.get("toFarmName").toString());
         doctorPigDao.update(doctorPig);
