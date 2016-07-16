@@ -2,7 +2,7 @@ package io.terminus.doctor.warehouse.handler.consume;
 
 import io.terminus.doctor.warehouse.dao.DoctorMaterialConsumeAvgDao;
 import io.terminus.doctor.warehouse.dto.DoctorMaterialConsumeProviderDto;
-import io.terminus.doctor.warehouse.enums.WareHouseType;
+import io.terminus.doctor.common.enums.WareHouseType;
 import io.terminus.doctor.warehouse.handler.IHandler;
 import io.terminus.doctor.warehouse.model.DoctorMaterialConsumeAvg;
 import io.terminus.doctor.warehouse.model.DoctorMaterialConsumeProvider;

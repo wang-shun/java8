@@ -6,6 +6,7 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Iterables;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.constants.JacksonType;
+import io.terminus.doctor.common.enums.WareHouseType;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -46,7 +47,7 @@ public class DoctorMaterialInfo implements Serializable{
     private String farmName;
 
     /**
-     * @see io.terminus.doctor.warehouse.enums.WareHouseType
+     * @see WareHouseType
      */
     private Integer type;
 

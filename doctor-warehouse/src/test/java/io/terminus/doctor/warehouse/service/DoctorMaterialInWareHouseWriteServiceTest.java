@@ -8,7 +8,7 @@ import io.terminus.doctor.warehouse.dao.DoctorMaterialConsumeProviderDao;
 import io.terminus.doctor.warehouse.dao.DoctorMaterialInWareHouseDao;
 import io.terminus.doctor.warehouse.dao.DoctorWareHouseTrackDao;
 import io.terminus.doctor.warehouse.dto.DoctorMaterialConsumeProviderDto;
-import io.terminus.doctor.warehouse.enums.WareHouseType;
+import io.terminus.doctor.common.enums.WareHouseType;
 import io.terminus.doctor.warehouse.model.DoctorFarmWareHouseType;
 import io.terminus.doctor.warehouse.model.DoctorMaterialConsumeAvg;
 import io.terminus.doctor.warehouse.model.DoctorMaterialConsumeProvider;

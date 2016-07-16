@@ -3,7 +3,7 @@ package io.terminus.doctor.warehouse.handler.consume;
 import com.google.common.collect.ImmutableMap;
 import io.terminus.doctor.warehouse.dao.DoctorMaterialConsumeProviderDao;
 import io.terminus.doctor.warehouse.dto.DoctorMaterialConsumeProviderDto;
-import io.terminus.doctor.warehouse.enums.WareHouseType;
+import io.terminus.doctor.common.enums.WareHouseType;
 import io.terminus.doctor.warehouse.handler.IHandler;
 import io.terminus.doctor.warehouse.model.DoctorMaterialConsumeProvider;
 import org.springframework.beans.factory.annotation.Autowired;

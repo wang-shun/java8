@@ -1,7 +1,6 @@
 package io.terminus.doctor.web.front.warehouse.controller;
 
 import com.google.common.base.Throwables;
-import com.sun.org.apache.regexp.internal.RE;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
@@ -13,8 +12,7 @@ import io.terminus.doctor.user.service.DoctorFarmReadService;
 import io.terminus.doctor.warehouse.dto.DoctorMaterialProductRatioDto;
 import io.terminus.doctor.warehouse.dto.DoctorWareHouseBasicDto;
 import io.terminus.doctor.warehouse.enums.IsOrNot;
-import io.terminus.doctor.warehouse.enums.WareHouseType;
-import io.terminus.doctor.warehouse.model.DoctorMaterialInWareHouse;
+import io.terminus.doctor.common.enums.WareHouseType;
 import io.terminus.doctor.warehouse.model.DoctorMaterialInfo;
 import io.terminus.doctor.warehouse.service.DoctorMaterialInWareHouseReadService;
 import io.terminus.doctor.warehouse.service.DoctorMaterialInfoReadService;
