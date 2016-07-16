@@ -12,6 +12,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
+import static io.terminus.common.utils.Arguments.notEmpty;
+
 /**
  * Desc: 基础物料表读服务实现类
  * Mail: yangzl@terminus.io
@@ -47,6 +52,22 @@ public class DoctorBasicMaterialReadServiceImpl implements DoctorBasicMaterialRe
             return Response.ok(doctorBasicMaterialDao.paging(page.getOffset(), page.getLimit(), basicMaterial));
         } catch (Exception e) {
             log.error("find basicMaterial filter by srm failed, basicMaterial:{}, cause:{}", basicMaterial, Throwables.getStackTraceAsString(e));
+            return Response.fail("basicMaterial.find.fail");
+        }
+    }
+
+    @Override
+    public Response<List<DoctorBasicMaterial>> findBasicMaterialByTypeFilterBySrm(Integer type, String srm) {
+        try {
+            List<DoctorBasicMaterial> basicMaterials = doctorBasicMaterialDao.findByType(type);
+            if (notEmpty(srm)) {
+                return Response.ok(basicMaterials);
+            }
+            return Response.ok(basicMaterials.stream()
+                    .filter(basic -> notEmpty(basic.getSrm()) && basic.getSrm().toLowerCase().contains(srm.toLowerCase()))
+                    .collect(Collectors.toList()));
+        } catch (Exception e) {
+            log.error("find basicMaterial filter by srm failed, type:{}, srm:{}, cause:{}", type, srm, Throwables.getStackTraceAsString(e));
             return Response.fail("basicMaterial.find.fail");
         }
     }

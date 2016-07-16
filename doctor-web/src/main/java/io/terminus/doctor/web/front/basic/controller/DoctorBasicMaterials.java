@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 /**
  * Desc: 基础物料表Controller
  * Mail: yangzl@terminus.io
@@ -43,7 +45,20 @@ public class DoctorBasicMaterials {
      * @return 基础物料list
      */
     @RequestMapping(value = "/paging", method = RequestMethod.POST)
-    public Paging<DoctorBasicMaterial> finaBasicMaterialByTypeFilterBySrm(@RequestBody DoctorBasicMaterialSearchDto basicMaterial) {
+    public Paging<DoctorBasicMaterial> pagingBasicMaterialByTypeFilterBySrm(@RequestBody DoctorBasicMaterialSearchDto basicMaterial) {
         return RespHelper.or500(doctorBasicMaterialReadService.pagingBasicMaterialByTypeFilterBySrm(basicMaterial));
+    }
+
+    /**
+     * 查询全部基础物料(可以根据输入码过滤)
+     * @param type 基础物料类型
+     * @see io.terminus.doctor.common.enums.WareHouseType
+     * @param srm 输入码
+     * @return 基础物料list
+     */
+    @RequestMapping(value = "/type", method = RequestMethod.GET)
+    public List<DoctorBasicMaterial> finaBasicMaterialByTypeFilterBySrm(@RequestParam(value = "type", required = false) Integer type,
+                                                                        @RequestParam(value = "srm", required = false) String srm) {
+        return RespHelper.or500(doctorBasicMaterialReadService.findBasicMaterialByTypeFilterBySrm(type, srm));
     }
 }
