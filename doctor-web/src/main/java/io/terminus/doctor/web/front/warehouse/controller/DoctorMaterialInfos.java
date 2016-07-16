@@ -24,6 +24,7 @@ import io.terminus.pampas.common.UserUtil;
 import io.terminus.parana.user.model.User;
 import io.terminus.parana.user.service.UserReadService;
 import lombok.extern.slf4j.Slf4j;
+import org.jsoup.select.Evaluator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
@@ -80,8 +81,9 @@ public class DoctorMaterialInfos {
         this.doctorWareHouseReadService = doctorWareHouseReadService;
     }
 
-    @RequestMapping(value = "/update", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseBody
+//    @RequestMapping(value = "/update", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+//    @ResponseBody
+    @Deprecated
     public Boolean updateMaterialInfo(@RequestBody DoctorMaterialInfoUpdateDto doctorMaterialInfoUpdateDto){
         DoctorMaterialInfo doctorMaterialInfo = null;
         try{
@@ -111,8 +113,9 @@ public class DoctorMaterialInfos {
         return RespHelper.or500(doctorMaterialInfoWriteService.updateMaterialInfo(doctorMaterialInfo));
     }
 
-    @RequestMapping(value = "/create", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseBody
+//    @RequestMapping(value = "/create", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
+//    @ResponseBody
+    @Deprecated
     public Long createMaterialInfo(@RequestBody DoctorMaterialInfoCreateDto doctorMaterialInfoCreateDto){
         DoctorMaterialInfo doctorMaterialInfo = null;
         try{
@@ -148,8 +151,9 @@ public class DoctorMaterialInfos {
      * @param id
      * @return
      */
-    @RequestMapping(value = "/queryMaterialById", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseBody
+//    @RequestMapping(value = "/queryMaterialById", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+//    @ResponseBody
+    @Deprecated
     public DoctorMaterialInfo queryMaterialInfoById(@RequestParam("id") Long id){
         return RespHelper.or500(doctorMaterialInfoReadService.queryById(id));
     }
@@ -162,8 +166,9 @@ public class DoctorMaterialInfos {
      * @param pageSize
      * @return
      */
-    @RequestMapping(value = "/pagingMaterialInfo", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseBody
+//    @RequestMapping(value = "/pagingMaterialInfo", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+//    @ResponseBody
+    @Deprecated
     public Paging<DoctorMaterialInfo> pagingDoctorMaterialInfo(@RequestParam("farmId") Long farmId,
                                                                @RequestParam(value = "type", required = false) Integer type,
                                                                @RequestParam(value = "canProduce", required = false) Integer canProduce,
@@ -180,11 +185,12 @@ public class DoctorMaterialInfos {
                                                            @RequestParam(value = "pageNo", required = false) Integer pageNo,
                                                            @RequestParam(value = "pageSize", required = false) Integer pageSize){
 
-        return pagingDoctorMaterialInfo(farmId, WareHouseType.FEED.getKey(), IsOrNot.YES.getKey(), materialName, pageNo, pageSize);
+        return RespHelper.or500(doctorMaterialInfoReadService.pagingMaterialInfos(farmId, WareHouseType.FEED.getKey(), IsOrNot.YES.getKey(), materialName, pageNo, pageSize));
+//        return pagingDoctorMaterialInfo(farmId, WareHouseType.FEED.getKey(), IsOrNot.YES.getKey(), materialName, pageNo, pageSize);
     }
 
-    @RequestMapping(value = "/queryAllMaterialInfo", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseBody
+//    @RequestMapping(value = "/queryAllMaterialInfo", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+//    @ResponseBody
     public List<DoctorMaterialInfo> queryAllMaterialInfo(@RequestParam("farmId") Long farmId,
                                                          @RequestParam(value = "type", required = false) Integer type){
         Paging<DoctorMaterialInfo> paging = RespHelper.or500(doctorMaterialInfoReadService.pagingMaterialInfos(farmId, type, null, null, 1, Integer.MAX_VALUE));
@@ -241,6 +247,8 @@ public class DoctorMaterialInfos {
 
             String farmName = RespHelper.orServEx(doctorFarmReadService.findFarmById(farmId)).getName();
             String wareHouseName = RespHelper.orServEx(doctorWareHouseReadService.queryDoctorWareHouseById(wareHouseId)).getWarehouseName();
+
+            // TODO 获取对应的MaterialName, 名称
             String materialName = RespHelper.orServEx(doctorMaterialInfoReadService.queryById(materialId)).getMaterialName();
 
             Long userId = UserUtil.getUserId();

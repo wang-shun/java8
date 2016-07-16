@@ -47,13 +47,17 @@ public class DoctorMaterialInfo implements Serializable{
     private String farmName;
 
     /**
+     * 物料移动Basic, type = 1 均是可以生产的饲料信息
      * @see WareHouseType
      */
+    @Deprecated
     private Integer type;
 
     /**
      * @see io.terminus.doctor.warehouse.enums.IsOrNot
+     * 默认是 可以生产的 canProduce = 1
      */
+    @Deprecated
     private Integer canProduce; // 是否可以生产物料信息
 
     private String materialName;
