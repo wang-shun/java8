@@ -811,7 +811,7 @@ create table doctor_farm_ware_house_types(
 )ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='猪场仓库类型数量';
 create index doctor_farm_ware_house_types_farm_id on doctor_farm_ware_house_types(farm_id);
 
--- 物料信息数据表, 不同的公司，不同的物料信息
+-- 物料信息数据表, 不同的公司，不同的物料生产规则信息使用方式
 DROP TABLE IF EXISTS `doctor_material_infos`;
 CREATE TABLE `doctor_material_infos` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT 'id',
