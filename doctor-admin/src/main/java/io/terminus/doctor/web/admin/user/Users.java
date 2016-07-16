@@ -12,6 +12,7 @@ import io.terminus.common.model.BaseUser;
 import io.terminus.common.model.Response;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.enums.UserStatus;
+import io.terminus.doctor.common.enums.UserType;
 import io.terminus.doctor.user.model.DoctorUser;
 import io.terminus.doctor.user.service.DoctorUserReadService;
 import io.terminus.doctor.user.util.DoctorUserMaker;
@@ -131,6 +132,11 @@ public class Users {
         }
 
         User user = result.getResult();
+        //判断下user type, 只允许admin和运维能登录
+        if(!Objects.equal(user.getType(), UserType.ADMIN.value()) && !Objects.equal(user.getType(), UserType.OPERATOR.value())){
+            throw new JsonResponseException("authorize.fail");
+        }
+
         //判断当前用户是否激活
         if (Objects.equal(user.getStatus(), UserStatus.NOT_ACTIVATE.value())) {
             log.warn("user({}) isn't active", user);
