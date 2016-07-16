@@ -13,6 +13,7 @@ import io.terminus.doctor.warehouse.dao.DoctorWareHouseDao;
 import io.terminus.doctor.warehouse.dto.DoctorMaterialProductRatioDto;
 import io.terminus.doctor.warehouse.dto.DoctorWareHouseBasicDto;
 import io.terminus.doctor.warehouse.enums.IsOrNot;
+import io.terminus.doctor.warehouse.manager.DoctorMaterialInfoManager;
 import io.terminus.doctor.warehouse.manager.MaterialInWareHouseManager;
 import io.terminus.doctor.warehouse.model.DoctorMaterialInfo;
 import io.terminus.doctor.warehouse.model.DoctorWareHouse;
@@ -43,16 +44,20 @@ public class DoctorMaterialInfoWriteServiceImpl implements DoctorMaterialInfoWri
 
     private final MaterialInWareHouseManager materialInWareHouseManager;
 
+    private final DoctorMaterialInfoManager doctorMaterialInfoManager;
+
     @Autowired(required = false)
     private Publisher publisher;
 
     @Autowired
     private DoctorMaterialInfoWriteServiceImpl(DoctorMaterialInfoDao doctorMaterialInfoDao,
                                                DoctorWareHouseDao doctorWareHouseDao,
-                                               MaterialInWareHouseManager materialInWareHouseManager){
+                                               MaterialInWareHouseManager materialInWareHouseManager,
+                                               DoctorMaterialInfoManager doctorMaterialInfoManager){
         this.doctorMaterialInfoDao = doctorMaterialInfoDao;
         this.doctorWareHouseDao = doctorWareHouseDao;
         this.materialInWareHouseManager = materialInWareHouseManager;
+        this.doctorMaterialInfoManager = doctorMaterialInfoManager;
     }
 
 
@@ -72,7 +77,8 @@ public class DoctorMaterialInfoWriteServiceImpl implements DoctorMaterialInfoWri
     public Response<Boolean> updateMaterialInfo(DoctorMaterialInfo doctorMaterialInfo) {
         try{
             checkState(!isNull(doctorMaterialInfo.getId()), "update.id.empty");
-            return Response.ok(doctorMaterialInfoDao.update(doctorMaterialInfo));
+            doctorMaterialInfoManager.updateMaterialInfo(doctorMaterialInfo);
+            return Response.ok(Boolean.TRUE);
         }catch (IllegalStateException e){
             log.error("update material info illegal state, cause:{}", Throwables.getStackTraceAsString(e));
             return Response.fail(e.getMessage());

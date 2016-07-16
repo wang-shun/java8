@@ -6,6 +6,7 @@ import io.terminus.doctor.warehouse.model.DoctorMaterialInWareHouse;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by yaoqijun.
@@ -49,5 +50,13 @@ public class DoctorMaterialInWareHouseDao extends MyBatisDao<DoctorMaterialInWar
      */
     public List<DoctorMaterialInWareHouse> queryByFarmMaterial(Long farmId, Long materialId){
         return this.getSqlSession().selectList(sqlId("queryByFarmMaterial"), ImmutableMap.of("farmId",farmId, "materialId", materialId));
+    }
+
+    /**
+     * 修改对应的原料信息信息
+     * @param params    MaterialId 原料Id, 修改 MaterialName, unit, unitName 内容的修改方式
+     */
+    public boolean updateMaterialInfoByMaterialId(Map<String, Object> params){
+        return this.getSqlSession().update(sqlId("updateMaterialInfoByMaterialId"), params) >= 0;
     }
 }

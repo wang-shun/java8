@@ -119,6 +119,17 @@
         LIMIT #{offset}, #{limit}
     </select>
 
+    <update id="updateMaterialInfoByMaterialId" parameterType="map">
+
+        UPDATE <include refid="tb"/>
+        <set>
+            <if test="materialName != null" > ,`material_name` = #{materialName}</if>
+            <if test="unitGroupName != null" > ,`unit_group_name` = #{unitGroupName}</if>
+            <if test="unitName != null" > ,`unit_name` = #{unitName}</if>
+        </set>
+        WHERE  `material_id` = #{materialId}
+    </update>
+
     <update id="update" parameterType="DoctorMaterialInWareHouse">
         UPDATE <include refid="tb"/>
         <set>
