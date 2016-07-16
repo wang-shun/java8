@@ -77,7 +77,7 @@ public class DoctorChgFarmHandler extends DoctorAbstractEventHandler{
 
         // doctor pig update farm info
         log.info("************* start to change Pig : extra:{}", extra);
-        DoctorPig doctorPig = doctorPigDao.findById(doctorPigTrack.getId());
+        DoctorPig doctorPig = doctorPigDao.findById(doctorPigTrack.getPigId());
         doctorPig.setFarmId(Long.valueOf(extra.get("toFarmId").toString()));
         doctorPig.setFarmName(extra.get("toFarmName").toString());
         doctorPigDao.update(doctorPig);
