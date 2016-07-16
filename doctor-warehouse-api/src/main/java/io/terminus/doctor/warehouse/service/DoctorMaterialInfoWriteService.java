@@ -23,18 +23,13 @@ public interface DoctorMaterialInfoWriteService {
     Response<Long> createMaterialInfo(@NotNull(message = "input.materialInfo.empty") DoctorMaterialInfo doctorMaterialInfo);
 
     /**
-     * 修改原料信息 material info
-     * @param doctorMaterialInfo
-     * @return
-     */
-    Response<Boolean> updateMaterialInfo(@NotNull(message = "input.materialInfo.empty") DoctorMaterialInfo doctorMaterialInfo);
-
-    /**
      * 录入生产物料的配比信息
      * @param doctorMaterialProductRatioDto
      * @return
      */
-    Response<Boolean> createMaterialProductRatioInfo(@NotNull(message = "input.materialProduct.empty") DoctorMaterialProductRatioDto doctorMaterialProductRatioDto);
+    Response<Boolean> createMaterialProductRatioInfo(
+            @NotNull(message = "input.doctorMaterialInfo.empty") DoctorMaterialInfo doctorMaterialInfo,
+            @NotNull(message = "input.materialProduct.empty") DoctorMaterialProductRatioDto doctorMaterialProductRatioDto);
 
     /**
      * 根据生产的数量， 获取对应的生产的比例

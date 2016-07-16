@@ -13,7 +13,6 @@ import io.terminus.doctor.warehouse.dao.DoctorWareHouseDao;
 import io.terminus.doctor.warehouse.dto.DoctorMaterialProductRatioDto;
 import io.terminus.doctor.warehouse.dto.DoctorWareHouseBasicDto;
 import io.terminus.doctor.warehouse.enums.IsOrNot;
-import io.terminus.doctor.warehouse.manager.DoctorMaterialInfoManager;
 import io.terminus.doctor.warehouse.manager.MaterialInWareHouseManager;
 import io.terminus.doctor.warehouse.model.DoctorMaterialInfo;
 import io.terminus.doctor.warehouse.model.DoctorWareHouse;
@@ -44,24 +43,21 @@ public class DoctorMaterialInfoWriteServiceImpl implements DoctorMaterialInfoWri
 
     private final MaterialInWareHouseManager materialInWareHouseManager;
 
-    private final DoctorMaterialInfoManager doctorMaterialInfoManager;
-
     @Autowired(required = false)
     private Publisher publisher;
 
     @Autowired
     private DoctorMaterialInfoWriteServiceImpl(DoctorMaterialInfoDao doctorMaterialInfoDao,
                                                DoctorWareHouseDao doctorWareHouseDao,
-                                               MaterialInWareHouseManager materialInWareHouseManager,
-                                               DoctorMaterialInfoManager doctorMaterialInfoManager){
+                                               MaterialInWareHouseManager materialInWareHouseManager){
         this.doctorMaterialInfoDao = doctorMaterialInfoDao;
         this.doctorWareHouseDao = doctorWareHouseDao;
         this.materialInWareHouseManager = materialInWareHouseManager;
-        this.doctorMaterialInfoManager = doctorMaterialInfoManager;
     }
 
 
     @Override
+    @Deprecated
     public Response<Long> createMaterialInfo(DoctorMaterialInfo doctorMaterialInfo) {
         try{
             checkState(doctorMaterialInfoDao.create(doctorMaterialInfo), "create.materialInfo.fail");
@@ -74,27 +70,9 @@ public class DoctorMaterialInfoWriteServiceImpl implements DoctorMaterialInfoWri
     }
 
     @Override
-    public Response<Boolean> updateMaterialInfo(DoctorMaterialInfo doctorMaterialInfo) {
+    public Response<Boolean> createMaterialProductRatioInfo(DoctorMaterialInfo doctorMaterialInfo,
+                                                            DoctorMaterialProductRatioDto doctorMaterialProductRatioDto) {
         try{
-            checkState(!isNull(doctorMaterialInfo.getId()), "update.id.empty");
-            doctorMaterialInfoManager.updateMaterialInfo(doctorMaterialInfo);
-            return Response.ok(Boolean.TRUE);
-        }catch (IllegalStateException e){
-            log.error("update material info illegal state, cause:{}", Throwables.getStackTraceAsString(e));
-            return Response.fail(e.getMessage());
-        }catch (Exception e){
-            log.error("update material info fail, cause:{}", Throwables.getStackTraceAsString(e));
-            return Response.fail("update.materialInfo.fail");
-        }
-    }
-
-    @Override
-    public Response<Boolean> createMaterialProductRatioInfo(DoctorMaterialProductRatioDto doctorMaterialProductRatioDto) {
-        try{
-            // 校验物料信息存在
-            DoctorMaterialInfo doctorMaterialInfo = doctorMaterialInfoDao.findById(doctorMaterialProductRatioDto.getMaterialId());
-            checkState(!isNull(doctorMaterialInfo),"doctor.materialRatio.error");
-
             // 选择物料信息不校验， 可能物料信息删除等， 等待生产的时候校验对应的物料信息
             // calculate percent
             DoctorMaterialInfo.MaterialProduce materialProduce = doctorMaterialProductRatioDto.getProduce();
@@ -104,7 +82,7 @@ public class DoctorMaterialInfoWriteServiceImpl implements DoctorMaterialInfoWri
             doctorMaterialInfo.setExtraMap(ImmutableMap.of(DoctorMaterialInfoConstants.MATERIAL_PRODUCE,
                     JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(doctorMaterialProductRatioDto.getProduce())));
             doctorMaterialInfo.setCanProduce(IsOrNot.YES.getKey());
-            doctorMaterialInfoDao.update(doctorMaterialInfo);
+            doctorMaterialInfoDao.createOrUpdate(doctorMaterialInfo);
             return Response.ok(Boolean.TRUE);
         }catch (IllegalStateException e){
             log.error("create material product ratio info error, cause:{}", Throwables.getStackTraceAsString(e));

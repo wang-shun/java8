@@ -24,5 +24,7 @@ public class DoctorMaterialProductRatioDto implements Serializable{
 
     private Long materialId; // 原料Id
 
+    private Long farmId;    // 对应的猪场Id
+
     private DoctorMaterialInfo.MaterialProduce produce; // 原料配比信息
 }
