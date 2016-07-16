@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static io.terminus.common.utils.Arguments.isEmpty;
 import static io.terminus.common.utils.Arguments.notEmpty;
 
 /**
@@ -60,7 +61,7 @@ public class DoctorBasicMaterialReadServiceImpl implements DoctorBasicMaterialRe
     public Response<List<DoctorBasicMaterial>> findBasicMaterialByTypeFilterBySrm(Integer type, String srm) {
         try {
             List<DoctorBasicMaterial> basicMaterials = doctorBasicMaterialDao.findByType(type);
-            if (notEmpty(srm)) {
+            if (isEmpty(srm)) {
                 return Response.ok(basicMaterials);
             }
             return Response.ok(basicMaterials.stream()
