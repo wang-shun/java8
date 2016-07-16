@@ -51,9 +51,12 @@
         WHERE id = #{id}
     </select>
 
-    <select id="findAll" parameterType="long" resultMap="DoctorBasicMaterialMap" >
+    <select id="findByType" parameterType="int" resultMap="DoctorBasicMaterialMap" >
         SELECT <include refid="cols_all" />
         FROM <include refid="tb" />
+        <where>
+            <if test="type != null">type = #{type}</if>
+        </where>
     </select>
 
     <update id="update" parameterType="DoctorBasicMaterial">
@@ -70,9 +73,6 @@
             <if test="defaultConsumeCount != null">default_consume_count = #{defaultConsumeCount},</if>
             <if test="price != null">price = #{price},</if>
             <if test="remark != null">remark = #{remark},</if>
-            
-            
-            
             updated_at=now()
         </set>
         WHERE id = #{id}

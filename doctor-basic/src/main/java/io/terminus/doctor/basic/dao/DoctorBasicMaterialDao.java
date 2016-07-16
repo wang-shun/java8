@@ -1,6 +1,7 @@
 package io.terminus.doctor.basic.dao;
 
 import io.terminus.common.mysql.dao.MyBatisDao;
+import io.terminus.common.utils.MapBuilder;
 import io.terminus.doctor.basic.model.DoctorBasicMaterial;
 import org.springframework.stereotype.Repository;
 
@@ -15,7 +16,7 @@ import java.util.List;
 @Repository
 public class DoctorBasicMaterialDao extends MyBatisDao<DoctorBasicMaterial> {
 
-    public List<DoctorBasicMaterial> findAll() {
-        return getSqlSession().selectList(sqlId("findAll"));
+    public List<DoctorBasicMaterial> findByType(Integer type) {
+        return getSqlSession().selectList(sqlId("findByType"), MapBuilder.<String, Integer>of().put("type", type).map());
     }
 }

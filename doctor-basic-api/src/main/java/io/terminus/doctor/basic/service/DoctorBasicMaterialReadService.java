@@ -24,8 +24,11 @@ public interface DoctorBasicMaterialReadService {
 
     /**
      * 查询全部基础物料(可以根据输入码过滤)
+     * @param type 基础物料类型
+     * @see io.terminus.doctor.common.enums.WareHouseType
+     * @param srm 输入码
      * @return 基础物料list
      */
-    Response<List<DoctorBasicMaterial>> finaBasicMaterialFilterBySrm(String srm);
+    Response<List<DoctorBasicMaterial>> finaBasicMaterialByTypeFilterBySrm(Integer type, String srm);
 
 }

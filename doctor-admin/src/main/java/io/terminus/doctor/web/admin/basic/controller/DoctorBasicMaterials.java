@@ -70,17 +70,21 @@ public class DoctorBasicMaterials {
      */
     @RequestMapping(value = "", method = RequestMethod.DELETE)
     public Boolean deleteBasicMaterial(@RequestParam("basicMaterialId") Long basicMaterialId) {
-        DoctorBasicMaterial basicMaterial = RespHelper.or500(doctorBasicMaterialReadService.findBasicMaterialById(basicMaterialId));
+        // TODO: 权限中心校验权限
 
         return RespHelper.or500(doctorBasicMaterialWriteService.deleteBasicMaterialById(basicMaterialId));
     }
 
     /**
      * 查询全部基础物料(可以根据输入码过滤)
+     * @param type 基础物料类型
+     * @see io.terminus.doctor.common.enums.WareHouseType
+     * @param srm 输入码
      * @return 基础物料list
      */
-    @RequestMapping(value = "/srm", method = RequestMethod.GET)
-    public List<DoctorBasicMaterial> deleteBasicMaterial(@RequestParam(value = "srm", required = false) String srm) {
-        return RespHelper.or500(doctorBasicMaterialReadService.finaBasicMaterialFilterBySrm(srm));
+    @RequestMapping(value = "/type", method = RequestMethod.GET)
+    public List<DoctorBasicMaterial> finaBasicMaterialByTypeFilterBySrm(@RequestParam(value = "type", required = false) Integer type,
+                                                                        @RequestParam(value = "srm", required = false) String srm) {
+        return RespHelper.or500(doctorBasicMaterialReadService.finaBasicMaterialByTypeFilterBySrm(type, srm));
     }
 }

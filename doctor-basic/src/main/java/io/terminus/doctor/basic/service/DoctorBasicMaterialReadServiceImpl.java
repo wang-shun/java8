@@ -12,7 +12,6 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static io.terminus.common.utils.Arguments.isEmpty;
 import static io.terminus.common.utils.Arguments.notEmpty;
 
 /**
@@ -44,17 +43,17 @@ public class DoctorBasicMaterialReadServiceImpl implements DoctorBasicMaterialRe
     }
 
     @Override
-    public Response<List<DoctorBasicMaterial>> finaBasicMaterialFilterBySrm(String srm) {
+    public Response<List<DoctorBasicMaterial>> finaBasicMaterialByTypeFilterBySrm(Integer type, String srm) {
         try {
-            List<DoctorBasicMaterial> basicMaterials = doctorBasicMaterialDao.findAll();
-            if (isEmpty(srm)) {
+            List<DoctorBasicMaterial> basicMaterials = doctorBasicMaterialDao.findByType(type);
+            if (notEmpty(srm)) {
                 return Response.ok(basicMaterials);
             }
             return Response.ok(basicMaterials.stream()
                     .filter(basic -> notEmpty(basic.getSrm()) && basic.getSrm().toLowerCase().contains(srm.toLowerCase()))
                     .collect(Collectors.toList()));
         } catch (Exception e) {
-            log.error("find basicMaterial filter by srm failed, srm:{}, cause:{}", srm, Throwables.getStackTraceAsString(e));
+            log.error("find basicMaterial filter by srm failed, type:{}, srm:{}, cause:{}", type, srm, Throwables.getStackTraceAsString(e));
             return Response.fail("basicMaterial.find.fail");
         }
     }
