@@ -118,3 +118,22 @@ set o.real_name = (select i.realname from parana_user_profiles i where i.user_id
 -- 20160-07-06 doctor_pig_track 表增加消息提醒字段
 ALTER TABLE doctor_pig_tracks
 ADD COLUMN `extra_message` text DEFAULT NULL COMMENT '每只猪的消息提醒' AFTER `extra`;
+
+-- 2016-07-16 新建基础物料表
+DROP TABLE IF EXISTS `doctor_basic_materials`;
+CREATE TABLE `doctor_basic_materials` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT 'id',
+  `type` smallint(6) DEFAULT NULL COMMENT '物料类型',
+  `name` varchar(128) DEFAULT NULL COMMENT '物料名称',
+  `srm` varchar(32) DEFAULT NULL,
+  `unit_group_id` bigint(20) unsigned DEFAULT NULL COMMENT '单位组id',
+  `unit_group_name` varchar(64) DEFAULT NULL COMMENT '单位组名称',
+  `unit_id` bigint(20) unsigned DEFAULT NULL COMMENT '单位id',
+  `unit_name` varchar(64) DEFAULT NULL COMMENT '单位名称',
+  `default_consume_count` int(11) DEFAULT NULL COMMENT '默认消耗数量',
+  `price` bigint(20) DEFAULT NULL COMMENT '价格(元)',
+  `remark` text COMMENT '标注',
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='基础物料表';

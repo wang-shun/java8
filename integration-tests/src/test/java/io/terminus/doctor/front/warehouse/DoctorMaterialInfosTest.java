@@ -9,7 +9,7 @@ import io.terminus.doctor.warehouse.dao.DoctorMaterialInWareHouseDao;
 import io.terminus.doctor.warehouse.dao.DoctorMaterialInfoDao;
 import io.terminus.doctor.warehouse.dao.DoctorWareHouseTrackDao;
 import io.terminus.doctor.warehouse.dto.DoctorMaterialProductRatioDto;
-import io.terminus.doctor.warehouse.enums.WareHouseType;
+import io.terminus.doctor.common.enums.WareHouseType;
 import io.terminus.doctor.warehouse.model.DoctorMaterialInfo;
 import io.terminus.doctor.web.front.warehouse.dto.DoctorMaterialInfoCreateDto;
 import io.terminus.zookeeper.pubsub.Subscriber;

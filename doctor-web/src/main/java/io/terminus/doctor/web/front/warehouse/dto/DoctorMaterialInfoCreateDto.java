@@ -1,5 +1,6 @@
 package io.terminus.doctor.web.front.warehouse.dto;
 
+import io.terminus.doctor.common.enums.WareHouseType;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -25,7 +26,7 @@ public class DoctorMaterialInfoCreateDto implements Serializable{
 
     /**
      * 对应的猪场类型
-     * @see io.terminus.doctor.warehouse.enums.WareHouseType
+     * @see WareHouseType
      */
     private Integer type;
 

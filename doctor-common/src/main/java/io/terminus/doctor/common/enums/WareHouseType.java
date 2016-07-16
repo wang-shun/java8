@@ -1,4 +1,4 @@
-package io.terminus.doctor.warehouse.enums;
+package io.terminus.doctor.common.enums;
 
 import lombok.Getter;
 
@@ -24,7 +24,7 @@ public enum WareHouseType {
     @Getter
     private String desc;
 
-    private WareHouseType(Integer key, String desc){
+    WareHouseType(Integer key, String desc){
         this.key = key;
         this.desc = desc;
     }

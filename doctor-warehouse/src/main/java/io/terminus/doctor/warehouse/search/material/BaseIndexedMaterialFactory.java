@@ -1,7 +1,7 @@
 package io.terminus.doctor.warehouse.search.material;
 
 import io.terminus.common.utils.BeanMapper;
-import io.terminus.doctor.warehouse.enums.WareHouseType;
+import io.terminus.doctor.common.enums.WareHouseType;
 import io.terminus.doctor.warehouse.model.DoctorMaterialInfo;
 
 import java.lang.reflect.ParameterizedType;

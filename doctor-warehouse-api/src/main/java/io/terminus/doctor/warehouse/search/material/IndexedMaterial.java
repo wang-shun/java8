@@ -1,5 +1,6 @@
 package io.terminus.doctor.warehouse.search.material;
 
+import io.terminus.doctor.common.enums.WareHouseType;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -33,7 +34,7 @@ public class IndexedMaterial implements Serializable {
 
     /**
      * 物料类型
-     * @see io.terminus.doctor.warehouse.enums.WareHouseType
+     * @see WareHouseType
      */
     private Integer type;
     private String typeName;

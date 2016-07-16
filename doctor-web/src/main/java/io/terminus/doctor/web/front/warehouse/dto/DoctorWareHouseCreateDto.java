@@ -1,5 +1,6 @@
 package io.terminus.doctor.web.front.warehouse.dto;
 
+import io.terminus.doctor.common.enums.WareHouseType;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -31,7 +32,7 @@ public class DoctorWareHouseCreateDto implements Serializable{
 
     /**
      * 不同的仓库类型，见枚举类型
-     * @see io.terminus.doctor.warehouse.enums.WareHouseType
+     * @see WareHouseType
      */
     private Integer type;
 }
