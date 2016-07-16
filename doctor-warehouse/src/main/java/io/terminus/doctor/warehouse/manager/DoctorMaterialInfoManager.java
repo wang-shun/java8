@@ -6,6 +6,7 @@ import io.terminus.doctor.warehouse.dao.DoctorMaterialInWareHouseDao;
 import io.terminus.doctor.warehouse.dao.DoctorMaterialInfoDao;
 import io.terminus.doctor.warehouse.model.DoctorMaterialInWareHouse;
 import io.terminus.doctor.warehouse.model.DoctorMaterialInfo;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import static com.google.common.base.Preconditions.checkState;
@@ -23,6 +24,7 @@ public class DoctorMaterialInfoManager {
 
     private final DoctorMaterialInWareHouseDao doctorMaterialInWareHouseDao;
 
+    @Autowired
     public DoctorMaterialInfoManager(
             DoctorMaterialInfoDao doctorMaterialInfoDao,
             DoctorMaterialInWareHouseDao doctorMaterialInWareHouseDao){
