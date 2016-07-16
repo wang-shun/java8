@@ -69,6 +69,9 @@
         <if test="realName != null">real_name = #{realName},</if>
         <if test="parentUserId != null">parent_user_id = #{parentUserId},</if>
         <if test="parentUserName != null">parent_user_name = #{parentUserName},</if>
+        <if test="roleId != null">role_id = #{roleId},</if>
+        <if test="roleName != null">role_name = #{roleName},</if>
+        <if test="contact != null">contact = #{contact},</if>
         <if test="status != null">status = #{status},</if>
         <if test="extraJson != null">extra_json = #{extraJson},</if>
         updated_at = now()

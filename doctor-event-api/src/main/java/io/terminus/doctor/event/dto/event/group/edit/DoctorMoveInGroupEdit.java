@@ -3,6 +3,7 @@ package io.terminus.doctor.event.dto.event.group.edit;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 
@@ -40,5 +41,6 @@ public class DoctorMoveInGroupEdit extends BaseGroupEdit implements Serializable
     /**
      * 总价值(分)
      */
+    @Min(value = 0L, message = "amount.gt.0")
     private Long amount;
 }

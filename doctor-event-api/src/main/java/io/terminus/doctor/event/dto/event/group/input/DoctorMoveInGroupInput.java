@@ -4,6 +4,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.hibernate.validator.constraints.NotEmpty;
 
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 
@@ -93,5 +94,6 @@ public class DoctorMoveInGroupInput extends BaseGroupInput implements Serializab
     /**
      * 总价值(分)
      */
+    @Min(value = 0L, message = "amount.gt.0")
     private Long amount;
 }

@@ -3,6 +3,7 @@ package io.terminus.doctor.event.dto.event.group.input;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 
@@ -67,11 +68,13 @@ public class DoctorChangeGroupInput extends BaseGroupInput implements Serializab
     /**
      * 单价(分)
      */
+    @Min(value = 0L, message = "price.gt.0")
     private Long price;
 
     /**
      * 金额(分)
      */
+    @Min(value = 0L, message = "amount.gt.0")
     private Long amount;
 
     /**
