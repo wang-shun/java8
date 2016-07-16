@@ -185,6 +185,7 @@ public class DoctorPigCreateEvents {
         checkPigIds(pigIds);
 
         Splitters.COMMA.splitToList(pigIds).forEach(pigId -> {
+            log.info("********** start creates pigId:{}", pigId);
             RespHelper.or500(doctorPigEventWriteService.chgFarmEvent(doctorChgFarmDto, buildBasicInputInfoDto(farmId, Long.valueOf(pigId), PigEvent.CHG_FARM)));
         });
         return Boolean.TRUE;
