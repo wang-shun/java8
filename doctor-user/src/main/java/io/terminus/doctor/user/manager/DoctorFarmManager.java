@@ -8,7 +8,6 @@ import io.terminus.doctor.user.model.DoctorFarm;
 import io.terminus.doctor.user.model.DoctorOrg;
 import io.terminus.doctor.user.model.DoctorUserDataPermission;
 import io.terminus.doctor.user.service.DoctorOrgReadService;
-import io.terminus.doctor.user.service.DoctorUserDataPermissionReadService;
 import io.terminus.doctor.user.service.DoctorUserDataPermissionWriteService;
 import io.terminus.parana.common.utils.RespHelper;
 import io.terminus.parana.user.address.service.AddressReadService;
@@ -18,6 +17,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Created by chenzenghui on 16/7/15.
@@ -51,28 +51,29 @@ public class DoctorFarmManager {
      * @param farms
      */
     @Transactional
-    public void addFarms4PrimaryUser(Long userId, List<DoctorFarm> farms){
+    public List<DoctorFarm> addFarms4PrimaryUser(Long userId, List<DoctorFarm> farms){
         DoctorOrg org = RespHelper.orServEx(doctorOrgReadService.findOrgByUserId(userId));
-        List<Long> newFarmIds = Lists.newArrayList(); //将被保存下来的新猪场
-        farms.stream().forEach(farm -> {
+        List<DoctorFarm> newFarms = Lists.newArrayList(); //将被保存下来的新猪场
+        farms.forEach(farm -> {
             farm.setOrgName(org.getName());
             farm.setOrgId(org.getId());
-            if(farm.getProvinceId() != null){
+            if (farm.getProvinceId() != null) {
                 farm.setProvinceName(RespHelper.orServEx(addressReadService.findById(farm.getProvinceId())).getName());
             }
-            if(farm.getCityId() != null){
+            if (farm.getCityId() != null) {
                 farm.setCityName(RespHelper.orServEx(addressReadService.findById(farm.getCityId())).getName());
             }
-            if(farm.getDistrictId() != null){
+            if (farm.getDistrictId() != null) {
                 farm.setDistrictName(RespHelper.orServEx(addressReadService.findById(farm.getDistrictId())).getName());
             }
             doctorFarmDao.create(farm);
-            newFarmIds.add(farm.getId());
+            newFarms.add(farm);
         });
 
         //更新下数据权限
         DoctorUserDataPermission permission = doctorUserDataPermissionDao.findByUserId(userId);
-        permission.setFarmIds(permission.getFarmIds() + "," + Joiner.on(",").join(newFarmIds));
+        permission.setFarmIds(permission.getFarmIds() + "," + Joiner.on(",").join(newFarms.stream().map(DoctorFarm::getId).collect(Collectors.toList())));
         RespHelper.orServEx(doctorUserDataPermissionWriteService.updateDataPermission(permission));
+        return newFarms;
     }
 }

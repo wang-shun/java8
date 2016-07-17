@@ -46,6 +46,7 @@ public class DoctorMaterialInfoReadServiceImpl implements DoctorMaterialInfoRead
     }
 
     @Override
+    @Deprecated
     public Response<Paging<DoctorMaterialInfo>> pagingMaterialInfos(Long farmId, Integer type, Integer canProduce, String materialName, Integer pageNo, Integer pageSize) {
         try{
             PageInfo pageInfo = new PageInfo(pageNo, pageSize);
@@ -62,6 +63,7 @@ public class DoctorMaterialInfoReadServiceImpl implements DoctorMaterialInfoRead
     }
 
     @Override
+    @Deprecated
     public Response<DoctorMaterialInfo> queryById(@NotNull(message = "input.id.empty") Long id) {
         try{
             return Response.ok(doctorMaterialInfoDao.findById(id));

@@ -78,11 +78,9 @@ public class MaterialInWareHouseManager {
     }
 
     private void produceMaterialConsumeEntry(DoctorWareHouseBasicDto basicDto, DoctorMaterialInfo.MaterialProduceEntry materialProduceEntry){
-        // get material
-        DoctorMaterialInfo materialInfo = doctorMaterialInfoDao.findById(materialProduceEntry.getMaterialId());
-        checkState(!isNull(materialInfo), "produce.sourceMaterial.empty");
-
-        List<DoctorMaterialInWareHouse> doctorMaterialInWareHouses = doctorMaterialInWareHouseDao.queryByFarmMaterial(basicDto.getFarmId(), materialInfo.getId());
+        List<DoctorMaterialInWareHouse> doctorMaterialInWareHouses = doctorMaterialInWareHouseDao.queryByFarmMaterial(
+                basicDto.getFarmId(),
+                materialProduceEntry.getMaterialId());
 
         long totalCount = doctorMaterialInWareHouses.stream().map(DoctorMaterialInWareHouse::getLotNumber).reduce(Math::addExact).orElse(0l);
         checkState(totalCount >= materialProduceEntry.getMaterialCount(), "not.enough.source");
@@ -105,11 +103,11 @@ public class MaterialInWareHouseManager {
             }
 
             consumeMaterialInner(DoctorMaterialConsumeProviderDto.builder()
-                    .type(materialInfo.getType()).farmId(materialInfo.getFarmId()).farmName(materialInfo.getFarmName())
-                    .materialTypeId(materialInfo.getId()).materialName(materialInfo.getMaterialName())
+                    .type(doctorMaterialInWareHouse.getType()).farmId(doctorMaterialInWareHouse.getFarmId()).farmName(doctorMaterialInWareHouse.getFarmName())
+                    .materialTypeId(doctorMaterialInWareHouse.getId()).materialName(doctorMaterialInWareHouse.getMaterialName())
                     .wareHouseId(doctorMaterialInWareHouse.getWareHouseId()).wareHouseName(doctorMaterialInWareHouse.getWareHouseName())
                     .barnId(basicDto.getBarnId()).barnName(basicDto.getBarnName()).staffId(basicDto.getStaffId()).staffName(basicDto.getStaffName())
-                    .count(toConsume).unitId(materialInfo.getUnitId()).unitName(materialInfo.getUnitName())
+                    .count(toConsume).unitName(doctorMaterialInWareHouse.getUnitName())
                     .build());
         }
 
