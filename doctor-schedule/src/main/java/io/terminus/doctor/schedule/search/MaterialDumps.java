@@ -1,7 +1,7 @@
 package io.terminus.doctor.schedule.search;
 
 import com.google.common.base.Throwables;
-import io.terminus.doctor.warehouse.search.material.MaterialDumpService;
+import io.terminus.doctor.basic.search.material.MaterialDumpService;
 import io.terminus.zookeeper.leader.HostLeader;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;

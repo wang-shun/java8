@@ -1,4 +1,4 @@
-package io.terminus.doctor.warehouse.search.material;
+package io.terminus.doctor.basic.search.material;
 
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;

@@ -1,4 +1,4 @@
-package io.terminus.doctor.warehouse.search.material;
+package io.terminus.doctor.basic.search.material;
 
 /**
  * Desc: 物料(索引对象)创建默认实现

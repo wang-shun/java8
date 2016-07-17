@@ -1,4 +1,4 @@
-package io.terminus.doctor.warehouse.search.query;
+package io.terminus.doctor.basic.search.query;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
@@ -19,7 +19,7 @@ public class MyKeyWord extends Keyword implements Serializable {
 
     private static final long serialVersionUID = 4552756085176686755L;
 
-    private List<MyKeyWord.Field> myFields;
+    private List<Field> myFields;
     private boolean multiField;
 
     public MyKeyWord(String field, String q) {

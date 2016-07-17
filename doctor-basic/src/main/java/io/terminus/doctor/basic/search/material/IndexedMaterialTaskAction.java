@@ -1,4 +1,4 @@
-package io.terminus.doctor.warehouse.search.material;
+package io.terminus.doctor.basic.search.material;
 
 import io.terminus.search.api.IndexTaskBuilder;
 import io.terminus.search.api.model.IndexAction;
