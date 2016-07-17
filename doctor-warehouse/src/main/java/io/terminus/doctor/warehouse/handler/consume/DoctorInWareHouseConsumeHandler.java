@@ -42,7 +42,7 @@ public class DoctorInWareHouseConsumeHandler implements IHandler{
         // 校验库存数量信息
         DoctorMaterialInWareHouse doctorMaterialInWareHouse = doctorMaterialInWareHouseDao.queryByFarmHouseMaterial(
                 dto.getFarmId(), dto.getWareHouseId(), dto.getMaterialTypeId());
-        checkState(!isNull(doctorMaterialInWareHouse), "query.doctorMaterialConsume.fail");
+        checkState(!isNull(doctorMaterialInWareHouse), "no.material.consume");
         checkState(dto.getCount()<=doctorMaterialInWareHouse.getLotNumber(), "consume.not.enough");
         doctorMaterialInWareHouse.setLotNumber(doctorMaterialInWareHouse.getLotNumber() - dto.getCount());
         doctorMaterialInWareHouseDao.update(doctorMaterialInWareHouse);
