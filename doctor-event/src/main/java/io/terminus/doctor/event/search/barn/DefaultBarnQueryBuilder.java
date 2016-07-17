@@ -89,6 +89,10 @@ public class DefaultBarnQueryBuilder extends BaseBarnQueryBuilder {
             sort(sorts, createdAt, "createdAt");
             sort(sorts, capacity, "capacity");
         }
+        // 否则默认按 updatedAt 降序
+        else {
+            sort(sorts, "2", "updatedAt");
+        }
         return sorts;
     }
 
