@@ -90,7 +90,7 @@ public class DefaultBarnQueryBuilder extends BaseBarnQueryBuilder {
             sort(sorts, capacity, "capacity");
         }
         // 否则默认按 updatedAt 降序
-        else {
+        if (sorts.size() == 0) {
             sort(sorts, "2", "updatedAt");
         }
         return sorts;
