@@ -34,17 +34,14 @@ public class DoctorMaterialConsumeAvgReadServiceImpl implements DoctorMaterialCo
 
     private final DoctorMaterialConsumeAvgDao doctorMaterialConsumeAvgDao;
     private final DoctorWareHouseDao doctorWareHouseDao;
-    private final DoctorMaterialInfoDao doctorMaterialInfoDao;
     private final DoctorMaterialInWareHouseDao doctorMaterialInWareHouseDao;
 
     @Autowired
     public DoctorMaterialConsumeAvgReadServiceImpl(DoctorMaterialConsumeAvgDao doctorMaterialConsumeAvgDao,
                                                    DoctorWareHouseDao doctorWareHouseDao,
-                                                   DoctorMaterialInfoDao doctorMaterialInfoDao,
                                                    DoctorMaterialInWareHouseDao doctorMaterialInWareHouseDao) {
         this.doctorMaterialConsumeAvgDao = doctorMaterialConsumeAvgDao;
         this.doctorWareHouseDao = doctorWareHouseDao;
-        this.doctorMaterialInfoDao = doctorMaterialInfoDao;
         this.doctorMaterialInWareHouseDao = doctorMaterialInWareHouseDao;
     }
 
@@ -66,12 +63,6 @@ public class DoctorMaterialConsumeAvgReadServiceImpl implements DoctorMaterialCo
                     dmcAvgDto.setManagerName(wareHouse.getManagerName());
                 }
 
-                // 获取物料名称
-                DoctorMaterialInfo materialInfo = doctorMaterialInfoDao.findById(materialConsumeAvg.getMaterialId());
-                if (materialInfo != null) {
-                    dmcAvgDto.setMaterialName(materialInfo.getMaterialName());
-                }
-
                 // 获取剩余量信息
                 DoctorMaterialInWareHouse materialInWareHouse = doctorMaterialInWareHouseDao.
                         queryByFarmHouseMaterial(
@@ -79,6 +70,7 @@ public class DoctorMaterialConsumeAvgReadServiceImpl implements DoctorMaterialCo
                                 materialConsumeAvg.getWareHouseId(),
                                 materialConsumeAvg.getMaterialId());
                 if (materialInWareHouse != null) {
+                    dmcAvgDto.setMaterialName(materialInWareHouse.getMaterialName());
                     dmcAvgDto.setLotNumber(materialInWareHouse.getLotNumber());
                 }
 

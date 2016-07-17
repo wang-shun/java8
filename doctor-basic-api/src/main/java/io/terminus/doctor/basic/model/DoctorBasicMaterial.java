@@ -56,7 +56,7 @@ public class DoctorBasicMaterial implements Serializable {
     /**
      * 默认消耗数量
      */
-    private Integer defaultConsumeCount;
+    private Long defaultConsumeCount;
     
     /**
      * 价格(元)

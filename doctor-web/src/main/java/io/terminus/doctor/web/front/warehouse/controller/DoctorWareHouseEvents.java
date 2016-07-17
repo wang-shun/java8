@@ -4,6 +4,8 @@ import com.google.common.base.Throwables;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
+import io.terminus.doctor.basic.model.DoctorBasicMaterial;
+import io.terminus.doctor.basic.service.DoctorBasicMaterialReadService;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.service.DoctorBarnReadService;
 import io.terminus.doctor.warehouse.dto.DoctorMaterialConsumeProviderDto;
@@ -52,18 +54,18 @@ public class DoctorWareHouseEvents {
 
     private final DoctorBarnReadService doctorBarnReadService;
 
-    private final DoctorMaterialInfoReadService doctorMaterialInfoReadService;
+    private final DoctorBasicMaterialReadService doctorBasicMaterialReadService;
 
     @Autowired
     public DoctorWareHouseEvents(DoctorMaterialInWareHouseWriteService doctorMaterialInWareHouseWriteService,
                                  DoctorMaterialInWareHouseReadService doctorMaterialInWareHouseReadService,
                                  UserReadService userReadService, DoctorBarnReadService doctorBarnReadService,
-                                 DoctorMaterialInfoReadService doctorMaterialInfoReadService){
+                                 DoctorBasicMaterialReadService doctorBasicMaterialReadService){
         this.doctorMaterialInWareHouseWriteService = doctorMaterialInWareHouseWriteService;
         this.doctorMaterialInWareHouseReadService = doctorMaterialInWareHouseReadService;
         this.userReadService = userReadService;
         this.doctorBarnReadService = doctorBarnReadService;
-        this.doctorMaterialInfoReadService = doctorMaterialInfoReadService;
+        this.doctorBasicMaterialReadService = doctorBasicMaterialReadService;
     }
 
     /**
@@ -134,7 +136,7 @@ public class DoctorWareHouseEvents {
             Response<User> userResponse = userReadService.findById(currentUserId);
             String userName = RespHelper.orServEx(userResponse).getName();
 
-            DoctorMaterialInfo doctorMaterialInfo = RespHelper.orServEx(doctorMaterialInfoReadService.queryById(dto.getMaterialId()));
+            DoctorBasicMaterial doctorBasicMaterial = RespHelper.orServEx(doctorBasicMaterialReadService.findBasicMaterialById(dto.getMaterialId()));
 
             doctorMaterialConsumeProviderDto = DoctorMaterialConsumeProviderDto.builder()
                     .actionType(DoctorMaterialConsumeProvider.EVENT_TYPE.CONSUMER.getValue()).type(doctorMaterialInWareHouse.getType())
@@ -144,7 +146,7 @@ public class DoctorWareHouseEvents {
                     .barnId(dto.getBarnId()).barnName(dto.getBarnName())
                     .staffId(currentUserId).staffName(userName)
                     .count(dto.getCount()).consumeDays(dto.getConsumeDays())
-                    .unitId(doctorMaterialInfo.getUnitId()).unitName(doctorMaterialInfo.getUnitName())
+                    .unitId(doctorBasicMaterial.getUnitId()).unitName(doctorBasicMaterial.getUnitName())
                     .build();
         }catch (Exception e){
             log.error("consume material fail, cause:{}", Throwables.getStackTraceAsString(e));
@@ -172,7 +174,7 @@ public class DoctorWareHouseEvents {
             Response<User> userResponse = userReadService.findById(userId);
             String userName = RespHelper.orServEx(userResponse).getName();
 
-            DoctorMaterialInfo doctorMaterialInfo = RespHelper.orServEx(doctorMaterialInfoReadService.queryById(dto.getMaterialId()));
+            DoctorBasicMaterial doctorBasicMaterial = RespHelper.orServEx(doctorBasicMaterialReadService.findBasicMaterialById(dto.getMaterialId()));
 
             doctorMaterialConsumeProviderDto = DoctorMaterialConsumeProviderDto.builder()
                     .actionType(DoctorMaterialConsumeProvider.EVENT_TYPE.PROVIDER.getValue())
@@ -180,7 +182,7 @@ public class DoctorWareHouseEvents {
                     .wareHouseId(doctorMaterialInWareHouse.getWareHouseId()).wareHouseName(doctorMaterialInWareHouse.getWareHouseName())
                     .materialTypeId(doctorMaterialInWareHouse.getMaterialId()).materialName(doctorMaterialInWareHouse.getMaterialName())
                     .staffId(userId).staffName(userName)
-                    .count(dto.getCount()).unitId(doctorMaterialInfo.getUnitId()).unitName(doctorMaterialInfo.getUnitName())
+                    .count(dto.getCount()).unitId(doctorBasicMaterial.getUnitId()).unitName(doctorBasicMaterial.getUnitName())
                     .build();
         }catch (Exception e){
             log.error("provider material fail, cause:{}", Throwables.getStackTraceAsString(e));

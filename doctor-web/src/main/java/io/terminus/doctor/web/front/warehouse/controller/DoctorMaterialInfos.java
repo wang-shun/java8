@@ -5,6 +5,8 @@ import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
 import io.terminus.common.utils.JsonMapper;
+import io.terminus.doctor.basic.model.DoctorBasicMaterial;
+import io.terminus.doctor.basic.service.DoctorBasicMaterialReadService;
 import io.terminus.doctor.basic.service.DoctorBasicReadService;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.user.model.DoctorFarm;
@@ -64,6 +66,8 @@ public class DoctorMaterialInfos {
 
     private final DoctorBasicReadService doctorBasicReadService;
 
+    private final DoctorBasicMaterialReadService doctorBasicMaterialReadService;
+
     @Autowired
     public DoctorMaterialInfos(DoctorMaterialInfoWriteService doctorMaterialInfoWriteService,
                                DoctorMaterialInfoReadService doctorMaterialInfoReadService,
@@ -71,7 +75,8 @@ public class DoctorMaterialInfos {
                                UserReadService userReadService,
                                DoctorBasicReadService doctorBasicReadService,
                                DoctorMaterialInWareHouseReadService doctorMaterialInWareHouseReadService,
-                               DoctorWareHouseReadService doctorWareHouseReadService){
+                               DoctorWareHouseReadService doctorWareHouseReadService,
+                               DoctorBasicMaterialReadService doctorBasicMaterialReadService){
         this.doctorMaterialInfoWriteService = doctorMaterialInfoWriteService;
         this.doctorMaterialInfoReadService = doctorMaterialInfoReadService;
         this.doctorFarmReadService = doctorFarmReadService;
@@ -79,38 +84,7 @@ public class DoctorMaterialInfos {
         this.doctorBasicReadService = doctorBasicReadService;
         this.doctorMaterialInWareHouseReadService = doctorMaterialInWareHouseReadService;
         this.doctorWareHouseReadService = doctorWareHouseReadService;
-    }
-
-//    @RequestMapping(value = "/update", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-//    @ResponseBody
-    @Deprecated
-    public Boolean updateMaterialInfo(@RequestBody DoctorMaterialInfoUpdateDto doctorMaterialInfoUpdateDto){
-        DoctorMaterialInfo doctorMaterialInfo = null;
-        try{
-
-            Long userId = UserUtil.getUserId();
-            Response<User> userResponse = userReadService.findById(userId);
-            String username = RespHelper.orServEx(userResponse).getName();
-
-            String unitName = RespHelper.orServEx(doctorBasicReadService.findBasicById(doctorMaterialInfoUpdateDto.getUnitId())).getName();
-            String unitGroupName = RespHelper.orServEx(doctorBasicReadService.findBasicById(doctorMaterialInfoUpdateDto.getUnitGroupId())).getName();
-
-            doctorMaterialInfo = DoctorMaterialInfo.builder()
-                    .id(doctorMaterialInfoUpdateDto.getMaterialInfoId())
-                    .materialName(doctorMaterialInfoUpdateDto.getMaterialName())
-                    .inputCode(doctorMaterialInfoUpdateDto.getInputCode())
-                    .remark(doctorMaterialInfoUpdateDto.getMark())
-                    .unitId(doctorMaterialInfoUpdateDto.getUnitId()).unitName(unitName)
-                    .unitGroupId(doctorMaterialInfoUpdateDto.getUnitGroupId()).unitGroupName(unitGroupName)
-                    .defaultConsumeCount(doctorMaterialInfoUpdateDto.getDefaultConsumeCount()).price(doctorMaterialInfoUpdateDto.getPrice())
-                    .updatorId(userId).updatorName(username)
-                    .build();
-
-        }catch (Exception e){
-            log.error("update material info fail, cause:{}", Throwables.getStackTraceAsString(e));
-        }
-
-        return RespHelper.or500(doctorMaterialInfoWriteService.updateMaterialInfo(doctorMaterialInfo));
+        this.doctorBasicMaterialReadService = doctorBasicMaterialReadService;
     }
 
 //    @RequestMapping(value = "/create", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -205,12 +179,13 @@ public class DoctorMaterialInfos {
     @RequestMapping(value = "/rules", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Boolean createMaterialRules(@RequestBody DoctorMaterialProductRatioDto doctorMaterialProductRatioDto){
-        return RespHelper.or500(doctorMaterialInfoWriteService.createMaterialProductRatioInfo(doctorMaterialProductRatioDto));
+        return RespHelper.or500(doctorMaterialInfoWriteService.createMaterialProductRatioInfo(
+                doctorMaterialInfoBuild(doctorMaterialProductRatioDto.getMaterialId(),doctorMaterialProductRatioDto.getFarmId()),
+                doctorMaterialProductRatioDto));
     }
 
     /**
      * 预生产数量信息 （通过默认规则设定，原料配比的数量）
-     * @param produceId 对应的Material 生产原料的种类
      * @param produceCount 生产的数量
      * @return
      */
@@ -222,16 +197,9 @@ public class DoctorMaterialInfos {
 
     /**
      * 生产对应的物料信息
-     * @param doctorWareHouseBasicDto Basic Info
-     * @param materialProduce 生产信息
-     * @return
-     */
-    /**
-     * 生产对应的物料信息
      * @param farmId 对应的猪场Id
      * @param wareHouseId 对应的仓库Id
      * @param materialId 对应的原料MaterialId
-     * @param materialProduce 对应的用户定义生产规则
      * @return
      */
     @RequestMapping(value = "/realProduceMaterial", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -266,5 +234,30 @@ public class DoctorMaterialInfos {
             throw new JsonResponseException(e.getMessage());
         }
         return RespHelper.or500(doctorMaterialInfoWriteService.realProduceMaterial(doctorWareHouseBasicDto, materialProduce));
+    }
+
+    /**
+     * 构建对应的DoctorMaterialInfo
+     * @param materialInfoId
+     * @return
+     */
+    private DoctorMaterialInfo doctorMaterialInfoBuild(Long materialInfoId, Long farmId){
+        DoctorBasicMaterial doctorBasicMaterial = RespHelper.or500(
+                doctorBasicMaterialReadService.findBasicMaterialById(materialInfoId));
+
+        String farmName = RespHelper.or500(doctorFarmReadService.findFarmById(farmId)).getName();
+        Response<User> userResponse = userReadService.findById(UserUtil.getUserId());
+        User user = userResponse.getResult();
+
+        return DoctorMaterialInfo.builder()
+                .id(materialInfoId).farmId(farmId).farmName(farmName)
+                .type(doctorBasicMaterial.getType()).canProduce(IsOrNot.YES.getKey())
+                .materialName(doctorBasicMaterial.getName()).inputCode(doctorBasicMaterial.getName())
+                .unitId(doctorBasicMaterial.getUnitId()).unitName(doctorBasicMaterial.getUnitName())
+                .unitGroupId(doctorBasicMaterial.getUnitGroupId()).unitGroupName(doctorBasicMaterial.getUnitGroupName())
+                .defaultConsumeCount(doctorBasicMaterial.getDefaultConsumeCount()).price(doctorBasicMaterial.getPrice())
+                .creatorId(user.getId()).creatorName(user.getName())
+                .updatorId(user.getId()).updatorName(user.getName())
+                .build();
     }
 }
