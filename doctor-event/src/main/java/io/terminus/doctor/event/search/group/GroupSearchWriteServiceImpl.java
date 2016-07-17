@@ -45,6 +45,7 @@ public class GroupSearchWriteServiceImpl implements GroupSearchWriteService {
             DoctorGroup group = doctorGroupDao.findById(groupId);
             DoctorGroupTrack groupTrack = doctorGroupTrackDao.findByGroupId(groupId);
             IndexedGroup indexedGroup = indexedGroupFactory.create(group, groupTrack);
+            log.info("[GroupSearchWriteServiceImpl] -> indexedGroup is {}", indexedGroup);
             if (indexedGroup != null) {
                 indexExecutor.submit(indexedGroupTaskAction.indexTask(indexedGroup));
             }
