@@ -33,6 +33,10 @@
             <artifactId>spring-boot-starter-datasource</artifactId>
         </dependency>
         <dependency>
+            <groupId>io.terminus.search</groupId>
+            <artifactId>spring-boot-starter-search</artifactId>
+        </dependency>
+        <dependency>
             <groupId>io.terminus.boot</groupId>
             <artifactId>spring-boot-starter-zookeeper</artifactId>
         </dependency>

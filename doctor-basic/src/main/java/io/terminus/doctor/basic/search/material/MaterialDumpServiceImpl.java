@@ -1,12 +1,12 @@
-package io.terminus.doctor.warehouse.search.material;
+package io.terminus.doctor.basic.search.material;
 
 import com.google.common.base.Stopwatch;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Iterables;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.model.Response;
-import io.terminus.doctor.warehouse.dao.DoctorMaterialInfoDao;
-import io.terminus.doctor.warehouse.model.DoctorMaterialInfo;
+import io.terminus.doctor.basic.dao.DoctorBasicMaterialDao;
+import io.terminus.doctor.basic.model.DoctorBasicMaterial;
 import io.terminus.search.api.IndexExecutor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -45,7 +45,7 @@ public class MaterialDumpServiceImpl implements MaterialDumpService {
     private IndexedMaterialTaskAction indexedMaterialTaskAction;
 
     @Autowired
-    private DoctorMaterialInfoDao doctorMaterialInfoDao;
+    private DoctorBasicMaterialDao doctorBasicMaterialDao;
 
     /**
      * 全量dump
@@ -101,12 +101,12 @@ public class MaterialDumpServiceImpl implements MaterialDumpService {
 
     private int doIndex(String since) {
         // 猪最大id
-        Long lastId = doctorMaterialInfoDao.maxId() + 1;
+        Long lastId = doctorBasicMaterialDao.maxId() + 1;
 
         // 记录数量
         int dumpCount = 0;
         while (true) {
-            List<DoctorMaterialInfo> materials = doctorMaterialInfoDao.listSince(lastId, since, materialSearchProperties.getBatchSize());
+            List<DoctorBasicMaterial> materials = doctorBasicMaterialDao.listSince(lastId, since, materialSearchProperties.getBatchSize());
             if (materials == null || materials.size() == 0) {
                 break;
             }

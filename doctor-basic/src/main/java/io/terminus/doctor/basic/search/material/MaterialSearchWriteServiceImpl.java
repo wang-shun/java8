@@ -1,9 +1,9 @@
-package io.terminus.doctor.warehouse.search.material;
+package io.terminus.doctor.basic.search.material;
 
 import com.google.common.base.Throwables;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.model.Response;
-import io.terminus.doctor.warehouse.dao.DoctorMaterialInfoDao;
+import io.terminus.doctor.basic.dao.DoctorBasicMaterialDao;
 import io.terminus.search.api.IndexExecutor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,12 +30,12 @@ public class MaterialSearchWriteServiceImpl implements MaterialSearchWriteServic
     private IndexedMaterialTaskAction indexedMaterialTaskAction;
 
     @Autowired
-    private DoctorMaterialInfoDao doctorMaterialInfoDao;
+    private DoctorBasicMaterialDao doctorBasicMaterialDao;
 
     @Override
     public Response<Boolean> index(Long materialId) {
         try {
-            IndexedMaterial indexedBarn = indexedMaterialFactory.create(doctorMaterialInfoDao.findById(materialId));
+            IndexedMaterial indexedBarn = indexedMaterialFactory.create(doctorBasicMaterialDao.findById(materialId));
             if (indexedBarn != null) {
                 indexExecutor.submit(indexedMaterialTaskAction.indexTask(indexedBarn));
             }

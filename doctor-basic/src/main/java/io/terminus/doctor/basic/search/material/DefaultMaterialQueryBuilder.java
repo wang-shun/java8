@@ -1,10 +1,10 @@
-package io.terminus.doctor.warehouse.search.material;
+package io.terminus.doctor.basic.search.material;
 
 import com.google.common.base.Splitter;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import io.terminus.common.utils.Splitters;
-import io.terminus.doctor.warehouse.search.query.MyKeyWord;
+import io.terminus.doctor.basic.search.query.MyKeyWord;
 import io.terminus.search.api.query.Aggs;
 import io.terminus.search.api.query.Highlight;
 import io.terminus.search.api.query.Keyword;
@@ -16,6 +16,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
 import java.util.Map;
+
 
 /**
  * Desc: 物料查询builder
@@ -37,8 +38,8 @@ public class DefaultMaterialQueryBuilder extends BaseMaterialQueryBuilder {
     @Override
     protected List<Term> buildTerm(Map<String, String> params) {
         List<Term> termList = Lists.newArrayList();
-        // 1. 猪场id
-        term(termList, params, "farmId");
+        // 1. 猪场id TODO: 暂不处理
+        // term(termList, params, "farmId");
         // 2. 物料类型
         term(termList, params, "type");
 

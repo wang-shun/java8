@@ -1,13 +1,13 @@
-package io.terminus.doctor.warehouse.manager;
+package io.terminus.doctor.basic.event;
 
 import com.google.common.base.Throwables;
 import com.google.common.eventbus.Subscribe;
+import io.terminus.doctor.basic.search.material.MaterialSearchWriteService;
 import io.terminus.doctor.common.enums.DataEventType;
 import io.terminus.doctor.common.event.CoreEventDispatcher;
 import io.terminus.doctor.common.event.DataEvent;
 import io.terminus.doctor.common.event.EventListener;
 import io.terminus.doctor.common.utils.Params;
-import io.terminus.doctor.warehouse.search.material.MaterialSearchWriteService;
 import io.terminus.zookeeper.pubsub.Subscriber;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;

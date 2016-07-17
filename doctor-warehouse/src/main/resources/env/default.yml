@@ -39,15 +39,3 @@ redis:
   max-idle: 2
   test-on-borrow: true
 
-# search
-search:
-  host: 127.0.0.1
-  port: 9200
-
-esearch:
-  material:
-    index-name: materials
-    index-type: material
-    mapping-path: search/material_mapping.json
-    full-dump-range: 3
-    batch-size: 100

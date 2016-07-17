@@ -2,6 +2,8 @@ package io.terminus.doctor.web.component;
 
 import io.terminus.common.model.Paging;
 import io.terminus.doctor.basic.enums.SearchType;
+import io.terminus.doctor.basic.search.material.MaterialSearchReadService;
+import io.terminus.doctor.basic.search.material.SearchedMaterial;
 import io.terminus.doctor.basic.service.DoctorSearchHistoryService;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.model.DoctorPig;
@@ -14,8 +16,6 @@ import io.terminus.doctor.event.search.group.SearchedGroupDto;
 import io.terminus.doctor.event.search.pig.PigSearchReadService;
 import io.terminus.doctor.event.search.pig.SearchedPig;
 import io.terminus.doctor.event.search.pig.SearchedPigDto;
-import io.terminus.doctor.warehouse.search.material.MaterialSearchReadService;
-import io.terminus.doctor.warehouse.search.material.SearchedMaterial;
 import io.terminus.pampas.common.UserUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;

@@ -48,5 +48,5 @@ public interface DoctorFarmWriteService {
      * @param farms
      * @return
      */
-    Response<Boolean> addFarms4PrimaryUser(Long userId, List<DoctorFarm> farms);
+    Response<List<DoctorFarm>> addFarms4PrimaryUser(Long userId, List<DoctorFarm> farms);
 }

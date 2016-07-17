@@ -1,8 +1,8 @@
-package io.terminus.doctor.warehouse.search.material;
+package io.terminus.doctor.basic.search.material;
 
 import io.terminus.common.model.PageInfo;
-import io.terminus.doctor.warehouse.search.query.MaterialCriterias;
-import io.terminus.doctor.warehouse.search.query.MustNotTerms;
+import io.terminus.doctor.basic.search.query.MaterialCriterias;
+import io.terminus.doctor.basic.search.query.MustNotTerms;
 import io.terminus.search.api.query.Aggs;
 import io.terminus.search.api.query.Criterias;
 import io.terminus.search.api.query.CriteriasBuilder;

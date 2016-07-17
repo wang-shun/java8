@@ -1,6 +1,6 @@
-package io.terminus.doctor.warehouse.search.material;
+package io.terminus.doctor.basic.search.material;
 
-import io.terminus.doctor.warehouse.model.DoctorMaterialInfo;
+import io.terminus.doctor.basic.model.DoctorBasicMaterial;
 
 /**
  * Desc: 物料(索引对象)创建接口
@@ -17,5 +17,5 @@ public interface IndexedMaterialFactory<T extends IndexedMaterial> {
      * @param others    其他一些信息
      * @return
      */
-    T create(DoctorMaterialInfo material, Object... others);
+    T create(DoctorBasicMaterial material, Object... others);
 }

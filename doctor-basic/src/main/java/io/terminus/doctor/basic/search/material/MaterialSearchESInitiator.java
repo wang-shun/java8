@@ -1,4 +1,4 @@
-package io.terminus.doctor.warehouse.search.material;
+package io.terminus.doctor.basic.search.material;
 
 import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
