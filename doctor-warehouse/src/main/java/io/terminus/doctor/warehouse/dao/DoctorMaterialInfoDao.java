@@ -8,6 +8,8 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
+import static java.util.Objects.isNull;
+
 /**
  * Created by yaoqijun.
  * Date:2016-05-17
@@ -23,6 +25,22 @@ public class DoctorMaterialInfoDao extends MyBatisDao<DoctorMaterialInfo>{
 
     public List<DoctorMaterialInfo> findByFarmIdType(Long farmId, Integer type){
         return this.getSqlSession().selectList(sqlId("findByFarmIdType"), ImmutableMap.of("farmId",farmId,"type",type));
+    }
+
+    /**
+     * 创建或者修改原料生产信息
+     * @param doctorMaterialInfo
+     * @return
+     */
+    public Boolean createOrUpdate(DoctorMaterialInfo doctorMaterialInfo){
+        DoctorMaterialInfo exist =  this.findById(doctorMaterialInfo.getId());
+        if(isNull(exist)){
+            doctorMaterialInfo.setCreatorId(exist.getCreatorId());
+            doctorMaterialInfo.setCreatorName(exist.getCreatorName());
+            return this.create(doctorMaterialInfo);
+        }else {
+            return this.update(doctorMaterialInfo);
+        }
     }
 
     /**
