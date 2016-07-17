@@ -34,6 +34,11 @@
             <artifactId>doctor-msg-api</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>io.terminus.doctor</groupId>
+            <artifactId>doctor-warehouse-api</artifactId>
+        </dependency>
+
         <!-- parana extra -->
         <dependency>
             <groupId>io.terminus.parana</groupId>

@@ -9,6 +9,9 @@ import io.terminus.doctor.user.service.DoctorFarmReadService;
 import io.terminus.doctor.user.service.DoctorFarmWriteService;
 import io.terminus.doctor.user.service.DoctorServiceStatusReadService;
 import io.terminus.doctor.user.service.DoctorUserReadService;
+import io.terminus.doctor.warehouse.model.DoctorFarmWareHouseType;
+import io.terminus.doctor.warehouse.service.DoctorWareHouseTypeWriteService;
+import io.terminus.doctor.warehouse.service.DoctorWareHouseWriteService;
 import io.terminus.doctor.web.admin.dto.UserApplyServiceDetailDto;
 import io.terminus.pampas.common.UserUtil;
 import io.terminus.parana.common.utils.RespHelper;
@@ -37,16 +40,19 @@ public class FarmController {
     private final DoctorFarmWriteService doctorFarmWriteService;
     private final DoctorUserReadService doctorUserReadService;
     private final DoctorServiceStatusReadService doctorServiceStatusReadService;
+    private final DoctorWareHouseTypeWriteService doctorWareHouseTypeWriteService;
 
     @Autowired
     public FarmController(DoctorFarmReadService doctorFarmReadService,
                           DoctorUserReadService doctorUserReadService,
                           DoctorServiceStatusReadService doctorServiceStatusReadService,
-                          DoctorFarmWriteService doctorFarmWriteService){
+                          DoctorFarmWriteService doctorFarmWriteService,
+                          DoctorWareHouseTypeWriteService doctorWareHouseTypeWriteService){
         this.doctorFarmReadService = doctorFarmReadService;
         this.doctorUserReadService = doctorUserReadService;
         this.doctorServiceStatusReadService = doctorServiceStatusReadService;
         this.doctorFarmWriteService = doctorFarmWriteService;
+        this.doctorWareHouseTypeWriteService = doctorWareHouseTypeWriteService;
     }
 
     /**
@@ -96,6 +102,8 @@ public class FarmController {
         if(addFarmName.size() < dto.getFarms().size()){
             throw new JsonResponseException("farm.name.duplicate"); //猪场名称重复
         }
+
+        farms.stream().forEach(f->doctorWareHouseTypeWriteService.initDoctorWareHouseType(f.getId(), f.getName(), dto.getUserId(), "initUser"));
 
         //终于可以添加猪场了...
         return RespHelper.or500(doctorFarmWriteService.addFarms4PrimaryUser(primaryUser.getId(), dto.getFarms()));
