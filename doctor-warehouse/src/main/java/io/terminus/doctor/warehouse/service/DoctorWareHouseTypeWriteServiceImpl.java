@@ -8,6 +8,7 @@ import io.terminus.doctor.common.enums.WareHouseType;
 import io.terminus.doctor.warehouse.dao.DoctorFarmWareHouseTypeDao;
 import io.terminus.doctor.warehouse.model.DoctorFarmWareHouseType;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
@@ -23,6 +24,7 @@ public class DoctorWareHouseTypeWriteServiceImpl implements DoctorWareHouseTypeW
 
     private final DoctorFarmWareHouseTypeDao doctorFarmWareHouseTypeDao;
 
+    @Autowired
     public DoctorWareHouseTypeWriteServiceImpl(DoctorFarmWareHouseTypeDao doctorFarmWareHouseTypeDao){
         this.doctorFarmWareHouseTypeDao = doctorFarmWareHouseTypeDao;
     }
