@@ -193,7 +193,7 @@ public class DoctorWareHouseEvents {
             DoctorFarm doctorFarm = RespHelper.orServEx(doctorFarmReadService.findFarmById(dto.getFarmId()));
 
             doctorMaterialConsumeProviderDto = DoctorMaterialConsumeProviderDto.builder()
-                    .actionType(DoctorMaterialConsumeProvider.EVENT_TYPE.PROVIDER.getValue())
+                    .actionType(DoctorMaterialConsumeProvider.EVENT_TYPE.PROVIDER.getValue()).type(doctorBasicMaterial.getType())
                     .farmId(doctorFarm.getId()).farmName(doctorFarm.getName())
                     .wareHouseId(doctorWareHouseDto.getWarehouseId()).wareHouseName(doctorWareHouseDto.getWarehouseName())
                     .materialTypeId(doctorBasicMaterial.getId()).materialName(doctorBasicMaterial.getName())
