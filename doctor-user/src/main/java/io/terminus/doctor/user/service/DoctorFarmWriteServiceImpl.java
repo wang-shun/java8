@@ -82,15 +82,12 @@ public class DoctorFarmWriteServiceImpl implements DoctorFarmWriteService{
     }
 
     @Override
-    public Response<Boolean> addFarms4PrimaryUser(Long userId, List<DoctorFarm> farms) {
-        Response<Boolean> response = new Response<>();
+    public Response<List<DoctorFarm>> addFarms4PrimaryUser(Long userId, List<DoctorFarm> farms) {
         try {
-            doctorFarmManager.addFarms4PrimaryUser(userId, farms);
-            response.setResult(true);
+            return Response.ok(doctorFarmManager.addFarms4PrimaryUser(userId, farms));
         } catch (Exception e) {
             log.error("create farm failed, cause : {}", Throwables.getStackTraceAsString(e));
-            response.setError("create.farm.failed");
+            return Response.fail("create.farm.failed");
         }
-        return response;
     }
 }

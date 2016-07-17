@@ -1,8 +1,11 @@
 package io.terminus.doctor.web.admin.controller;
 
+import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.BaseUser;
 import io.terminus.doctor.common.enums.UserType;
+import io.terminus.doctor.event.service.DoctorBarnReadService;
+import io.terminus.doctor.event.service.DoctorBarnWriteService;
 import io.terminus.doctor.user.model.DoctorFarm;
 import io.terminus.doctor.user.model.DoctorServiceStatus;
 import io.terminus.doctor.user.service.DoctorFarmReadService;
@@ -25,6 +28,8 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static io.terminus.doctor.common.utils.RespHelper.or500;
+
 /**
  * Created by chenzenghui on 16/7/15.
  */
@@ -37,6 +42,12 @@ public class FarmController {
     private final DoctorFarmWriteService doctorFarmWriteService;
     private final DoctorUserReadService doctorUserReadService;
     private final DoctorServiceStatusReadService doctorServiceStatusReadService;
+
+    @RpcConsumer
+    private DoctorBarnWriteService doctorBarnWriteService;
+
+    @RpcConsumer
+    private DoctorBarnReadService doctorBarnReadService;
 
     @Autowired
     public FarmController(DoctorFarmReadService doctorFarmReadService,
@@ -65,7 +76,7 @@ public class FarmController {
         }
 
         //检查当前登录用户权限
-        BaseUser baseUser = this.checkUserTypeOperator();
+        checkUserTypeOperator();
 
         //检查参数中的用户是否为主账号
         User primaryUser = RespHelper.or500(doctorUserReadService.findById(dto.getUserId()));
@@ -98,7 +109,23 @@ public class FarmController {
         }
 
         //终于可以添加猪场了...
-        return RespHelper.or500(doctorFarmWriteService.addFarms4PrimaryUser(primaryUser.getId(), dto.getFarms()));
+        List<DoctorFarm> newFarms = RespHelper.or500(doctorFarmWriteService.addFarms4PrimaryUser(primaryUser.getId(), dto.getFarms()));
+
+        //初始化猪舍
+        newFarms.forEach(farm -> initBarns(farm, dto.getUserId()));
+
+        return Boolean.TRUE;
+    }
+
+    private void initBarns(DoctorFarm farm, Long userId) {
+        or500(doctorBarnReadService.findBarnsByFarmId(0L)).forEach(barn -> {
+            barn.setFarmId(farm.getId());
+            barn.setFarmName(farm.getName());
+            barn.setOrgId(farm.getOrgId());
+            barn.setOrgName(farm.getOrgName());
+            barn.setStaffId(userId);
+            or500(doctorBarnWriteService.createBarn(barn));
+        });
     }
 
     /**
