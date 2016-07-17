@@ -31,7 +31,7 @@ oss:
 
 search:
   host: 127.0.0.1
-  port: 19200
+  port: 9200
 
 esearch:
   pig:
