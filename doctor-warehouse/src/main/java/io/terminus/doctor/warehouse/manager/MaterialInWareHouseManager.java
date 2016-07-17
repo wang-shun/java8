@@ -147,6 +147,7 @@ public class MaterialInWareHouseManager {
         DoctorMaterialInfo doctorMaterialInfo = doctorMaterialInfoDao.findById(doctorMaterialInWareHouse.getMaterialId());
         checkState(!isNull(doctorMaterialInfo), "query.materialInfo.fail");
         Integer consumeDays = (int)(doctorMaterialInWareHouse.getLotNumber() / doctorMaterialInfo.getDefaultConsumeCount());
+        if (consumeDays == 0 ) consumeDays = 1; // 修改1
 
         // 消耗对应的物资信息
         consumeMaterialInner(DoctorMaterialConsumeProviderDto.builder().type(doctorMaterialInWareHouse.getType())
