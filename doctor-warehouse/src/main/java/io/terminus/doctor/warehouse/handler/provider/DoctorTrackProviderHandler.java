@@ -1,6 +1,7 @@
 package io.terminus.doctor.warehouse.handler.provider;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Maps;
 import io.terminus.doctor.common.utils.Params;
 import io.terminus.doctor.warehouse.dao.DoctorWareHouseTrackDao;
 import io.terminus.doctor.warehouse.dto.DoctorMaterialConsumeProviderDto;
@@ -47,7 +48,7 @@ public class DoctorTrackProviderHandler implements IHandler{
             doctorWareHouseTrack.setLotNumber(doctorWareHouseTrack.getLotNumber() + dto.getCount());
             String key = dto.getMaterialTypeId().toString();
             Map<String,Object> trackExtraMap = doctorWareHouseTrack.getExtraMap();
-            log.info("******* extra map info is :{}", trackExtraMap);
+            if (trackExtraMap == null) trackExtraMap = Maps.newHashMap();
             if(trackExtraMap.containsKey(key)){
                 trackExtraMap.put(key, dto.getCount() + Params.getWithConvert(trackExtraMap, key, a -> Long.valueOf(a.toString())));
             }else {
