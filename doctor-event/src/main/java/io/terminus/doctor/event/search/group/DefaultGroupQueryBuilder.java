@@ -121,6 +121,10 @@ public class DefaultGroupQueryBuilder extends BaseGroupQueryBuilder {
             sort(sorts, avgDayAge, "avgDayAge");
             sort(sorts, quantity, "quantity");
         }
+        // 否则默认按 updatedAt 降序
+        else {
+            sort(sorts, "2", "updatedAt");
+        }
         return sorts;
     }
     private void sort(List<Sort> sorts, String part, String field) {
