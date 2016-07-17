@@ -70,9 +70,12 @@ public class GroupSearchWriteServiceImpl implements GroupSearchWriteService {
             return group;
         }
         int count = 50; // 尝试50次
-        while(count > 0 && group == null) {
+        while(count > 0) {
             count --;
             group = doctorGroupDao.findById(groupId);
+            if (group != null) {
+                break;
+            }
             try{
                 Thread.sleep(10); // 睡眠
             } catch (Exception ignored) {
