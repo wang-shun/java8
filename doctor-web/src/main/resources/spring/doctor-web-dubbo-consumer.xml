@@ -111,12 +111,13 @@
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.event.search.group.GroupSearchReadService" id="groupSearchReadService" check="false" />
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.event.search.group.GroupSearchWriteService" id="groupSearchWriteService" check="false" />
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.event.search.barn.BarnSearchReadService" id="barnSearchReadService" check="false" />
-    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.event.search.barn.BarnSearchWriteService" idch="barnSearchWriteService" check="false" />
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.event.search.barn.BarnSearchWriteService" id="barnSearchWriteService" check="false" />
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.basic.search.material.MaterialSearchReadService" id="materialSearchReadService" check="false" />
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.basic.search.material.MaterialSearchWriteService" id="materialSearchWriteService" check="false" />
 
 
     <!-- doctor ware house  -->
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.warehouse.service.DoctorWareHouseTypeWriteService" id="doctorWareHouseTypeWriteService" check="false"/>
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.warehouse.service.DoctorWareHouseReadService" id="doctorWareHouseReadService" check="false"/>
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.warehouse.service.DoctorWareHouseWriteService" id="doctorWareHouseWriteService" check="false"/>
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.warehouse.service.DoctorMaterialInWareHouseWriteService" id="doctorMaterialInWareHouseWriteService" check="false"/>
