@@ -1,10 +1,11 @@
-package io.terminus.doctor.warehouse.service;
+package io.terminus.doctor.basic.service;
 
 import com.google.common.collect.Maps;
 import io.terminus.common.model.Paging;
+import io.terminus.doctor.basic.base.BaseServiceTest;
+import io.terminus.doctor.basic.search.material.MaterialSearchReadService;
+import io.terminus.doctor.basic.search.material.SearchedMaterial;
 import io.terminus.doctor.common.utils.RespHelper;
-import io.terminus.doctor.warehouse.search.material.MaterialSearchReadService;
-import io.terminus.doctor.warehouse.search.material.SearchedMaterial;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -16,7 +17,7 @@ import java.util.Map;
  * Created by IceMimosa
  * Date: 16/6/16
  */
-public class DoctorMaterialSearchTest extends BasicServiceTest {
+public class DoctorMaterialSearchTest extends BaseServiceTest {
 
     @Autowired
     private MaterialSearchReadService materialSearchReadService;

@@ -1,4 +1,4 @@
-package io.terminus.doctor.warehouse.search.query;
+package io.terminus.doctor.basic.search.query;
 
 import io.terminus.search.api.query.Criterias;
 import io.terminus.search.api.query.CriteriasBuilder;

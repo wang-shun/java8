@@ -30,6 +30,11 @@
 
         <dependency>
             <groupId>io.terminus.doctor</groupId>
+            <artifactId>doctor-basic-api</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>io.terminus.doctor</groupId>
             <artifactId>doctor-warehouse-api</artifactId>
         </dependency>
 

@@ -1,4 +1,4 @@
-package io.terminus.doctor.warehouse.search.query;
+package io.terminus.doctor.basic.search.query;
 
 import com.google.common.base.Throwables;
 import io.terminus.search.api.query.Term;
@@ -8,7 +8,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Builder;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.beanutils.PropertyUtils;
 import org.springframework.util.CollectionUtils;
 
 import java.io.Serializable;

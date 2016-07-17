@@ -1,4 +1,4 @@
-package io.terminus.doctor.warehouse.search.material;
+package io.terminus.doctor.basic.search.material;
 
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;

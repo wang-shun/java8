@@ -1,8 +1,8 @@
-package io.terminus.doctor.warehouse.search.material;
+package io.terminus.doctor.basic.search.material;
 
 import io.terminus.common.utils.BeanMapper;
+import io.terminus.doctor.basic.model.DoctorBasicMaterial;
 import io.terminus.doctor.common.enums.WareHouseType;
-import io.terminus.doctor.warehouse.model.DoctorMaterialInfo;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -29,13 +29,14 @@ public abstract class BaseIndexedMaterialFactory<T extends IndexedMaterial> impl
     }
 
     @Override
-    public T create(DoctorMaterialInfo material, Object... others) {
+    public T create(DoctorBasicMaterial material, Object... others) {
         if (material == null) {
             return null;
         }
         T indexedMaterial = BeanMapper.map(material, clazz);
         WareHouseType type = WareHouseType.from(material.getType());
         indexedMaterial.setTypeName(type != null ? type.getDesc() : "");
+        indexedMaterial.setMaterialName(material.getName());
         return indexedMaterial;
     }
 }
