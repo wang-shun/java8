@@ -15,6 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.validation.constraints.NotNull;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -89,6 +90,16 @@ public class DoctorMaterialInWareHouseReadServiceImpl implements DoctorMaterialI
         }catch (Exception e){
             log.error("query by farm material ware house ids fail, cause:{}", Throwables.getStackTraceAsString(e));
             return Response.fail("query.byIds.fail");
+        }
+    }
+
+    @Override
+    public Response<DoctorMaterialInWareHouse> queryDoctorMaterialInWareHouse(@NotNull(message = "input.id.empty") Long id) {
+        try {
+            return Response.ok(doctorMaterialInWareHouseDao.findById(id));
+        }catch (Exception e){
+            log.error("query doctor material in warehouse, id:{}, cause:{}", id, Throwables.getStackTraceAsString(e));
+            return Response.fail("query.byId.fail");
         }
     }
 

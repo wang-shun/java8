@@ -15,6 +15,7 @@ import io.terminus.doctor.warehouse.dto.DoctorMaterialProductRatioDto;
 import io.terminus.doctor.warehouse.dto.DoctorWareHouseBasicDto;
 import io.terminus.doctor.warehouse.enums.IsOrNot;
 import io.terminus.doctor.common.enums.WareHouseType;
+import io.terminus.doctor.warehouse.model.DoctorMaterialInWareHouse;
 import io.terminus.doctor.warehouse.model.DoctorMaterialInfo;
 import io.terminus.doctor.warehouse.service.DoctorMaterialInWareHouseReadService;
 import io.terminus.doctor.warehouse.service.DoctorMaterialInfoReadService;
@@ -169,6 +170,12 @@ public class DoctorMaterialInfos {
                                                          @RequestParam(value = "type", required = false) Integer type){
         Paging<DoctorMaterialInfo> paging = RespHelper.or500(doctorMaterialInfoReadService.pagingMaterialInfos(farmId, type, null, null, 1, Integer.MAX_VALUE));
         return paging.getData();
+    }
+
+    @RequestMapping(value = "/queryMaterialInWareHouseInfo", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public DoctorMaterialInWareHouse queryDoctorMaterialInWareHouseById(@RequestParam("materialInWareHouseId") Long materialInWareHouseId){
+        return RespHelper.or500(doctorMaterialInWareHouseReadService.queryDoctorMaterialInWareHouse(materialInWareHouseId));
     }
 
     /**
