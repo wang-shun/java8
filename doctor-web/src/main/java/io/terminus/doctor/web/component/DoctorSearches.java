@@ -379,7 +379,6 @@ public class DoctorSearches {
 
     /**
      * 获取所有的物料
-     *
      * @param params   搜索参数
      *                 搜索参数可以参照:
      *                 @see `DefaultMaterialQueryBuilder#buildTerm`
