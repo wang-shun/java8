@@ -8,14 +8,19 @@ import io.terminus.doctor.basic.model.DoctorBasicMaterial;
 import io.terminus.doctor.basic.service.DoctorBasicMaterialReadService;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.service.DoctorBarnReadService;
+import io.terminus.doctor.user.model.DoctorFarm;
+import io.terminus.doctor.user.service.DoctorFarmReadService;
 import io.terminus.doctor.warehouse.dto.DoctorMaterialConsumeProviderDto;
 import io.terminus.doctor.warehouse.dto.DoctorMaterialInWareHouseDto;
+import io.terminus.doctor.warehouse.dto.DoctorWareHouseDto;
 import io.terminus.doctor.warehouse.model.DoctorMaterialConsumeProvider;
 import io.terminus.doctor.warehouse.model.DoctorMaterialInWareHouse;
 import io.terminus.doctor.warehouse.model.DoctorMaterialInfo;
+import io.terminus.doctor.warehouse.model.DoctorWareHouse;
 import io.terminus.doctor.warehouse.service.DoctorMaterialInWareHouseReadService;
 import io.terminus.doctor.warehouse.service.DoctorMaterialInWareHouseWriteService;
 import io.terminus.doctor.warehouse.service.DoctorMaterialInfoReadService;
+import io.terminus.doctor.warehouse.service.DoctorWareHouseReadService;
 import io.terminus.doctor.web.front.warehouse.dto.DoctorConsumeProviderInputDto;
 import io.terminus.pampas.common.UserUtil;
 import io.terminus.parana.user.model.User;
@@ -54,18 +59,26 @@ public class DoctorWareHouseEvents {
 
     private final DoctorBarnReadService doctorBarnReadService;
 
+    private final DoctorWareHouseReadService doctorWareHouseReadService;
+
     private final DoctorBasicMaterialReadService doctorBasicMaterialReadService;
+
+    private final DoctorFarmReadService doctorFarmReadService;
 
     @Autowired
     public DoctorWareHouseEvents(DoctorMaterialInWareHouseWriteService doctorMaterialInWareHouseWriteService,
                                  DoctorMaterialInWareHouseReadService doctorMaterialInWareHouseReadService,
                                  UserReadService userReadService, DoctorBarnReadService doctorBarnReadService,
-                                 DoctorBasicMaterialReadService doctorBasicMaterialReadService){
+                                 DoctorBasicMaterialReadService doctorBasicMaterialReadService,
+                                 DoctorWareHouseReadService doctorWareHouseReadService,
+                                 DoctorFarmReadService doctorFarmReadService){
         this.doctorMaterialInWareHouseWriteService = doctorMaterialInWareHouseWriteService;
         this.doctorMaterialInWareHouseReadService = doctorMaterialInWareHouseReadService;
         this.userReadService = userReadService;
         this.doctorBarnReadService = doctorBarnReadService;
         this.doctorBasicMaterialReadService = doctorBasicMaterialReadService;
+        this.doctorWareHouseReadService = doctorWareHouseReadService;
+        this.doctorFarmReadService = doctorFarmReadService;
     }
 
     /**
@@ -166,21 +179,24 @@ public class DoctorWareHouseEvents {
         DoctorMaterialConsumeProviderDto doctorMaterialConsumeProviderDto = null;
         try{
 
-            DoctorMaterialInWareHouse doctorMaterialInWareHouse = RespHelper.orServEx(doctorMaterialInWareHouseReadService.queryByMaterialWareHouseIds(
-                    dto.getFarmId(),dto.getMaterialId(),dto.getWareHouseId()));
-            checkState(!isNull(doctorMaterialInWareHouse), "input.materialInfo.error");
+//            DoctorMaterialInWareHouse doctorMaterialInWareHouse = RespHelper.orServEx(doctorMaterialInWareHouseReadService.queryByMaterialWareHouseIds(
+//                    dto.getFarmId(),dto.getMaterialId(),dto.getWareHouseId()));
+//            checkState(!isNull(doctorMaterialInWareHouse), "input.materialInfo.error");
+
+            DoctorWareHouseDto doctorWareHouseDto = RespHelper.orServEx(doctorWareHouseReadService.queryDoctorWareHouseById(dto.getWareHouseId()));
 
             Long userId = UserUtil.getUserId();
             Response<User> userResponse = userReadService.findById(userId);
             String userName = RespHelper.orServEx(userResponse).getName();
 
             DoctorBasicMaterial doctorBasicMaterial = RespHelper.orServEx(doctorBasicMaterialReadService.findBasicMaterialById(dto.getMaterialId()));
+            DoctorFarm doctorFarm = RespHelper.orServEx(doctorFarmReadService.findFarmById(dto.getFarmId()));
 
             doctorMaterialConsumeProviderDto = DoctorMaterialConsumeProviderDto.builder()
                     .actionType(DoctorMaterialConsumeProvider.EVENT_TYPE.PROVIDER.getValue())
-                    .farmId(doctorMaterialInWareHouse.getFarmId()).farmName(doctorMaterialInWareHouse.getFarmName())
-                    .wareHouseId(doctorMaterialInWareHouse.getWareHouseId()).wareHouseName(doctorMaterialInWareHouse.getWareHouseName())
-                    .materialTypeId(doctorMaterialInWareHouse.getMaterialId()).materialName(doctorMaterialInWareHouse.getMaterialName())
+                    .farmId(doctorFarm.getId()).farmName(doctorFarm.getName())
+                    .wareHouseId(doctorWareHouseDto.getWarehouseId()).wareHouseName(doctorWareHouseDto.getWarehouseName())
+                    .materialTypeId(doctorBasicMaterial.getId()).materialName(doctorBasicMaterial.getName())
                     .staffId(userId).staffName(userName)
                     .count(dto.getCount()).unitId(doctorBasicMaterial.getUnitId()).unitName(doctorBasicMaterial.getUnitName())
                     .build();
