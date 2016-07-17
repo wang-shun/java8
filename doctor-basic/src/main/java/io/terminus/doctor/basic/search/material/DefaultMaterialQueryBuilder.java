@@ -67,6 +67,10 @@ public class DefaultMaterialQueryBuilder extends BaseMaterialQueryBuilder {
             // 新增sort
             sort(sorts, price, "price");
         }
+        // 否则默认按 updatedAt 降序
+        else {
+            sort(sorts, "2", "updatedAt");
+        }
         return sorts;
     }
 

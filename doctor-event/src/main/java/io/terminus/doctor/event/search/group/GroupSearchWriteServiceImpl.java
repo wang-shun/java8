@@ -43,6 +43,8 @@ public class GroupSearchWriteServiceImpl implements GroupSearchWriteService {
     public Response<Boolean> index(Long groupId) {
         try {
             DoctorGroup group = doctorGroupDao.findById(groupId);
+            // 校验是否获取成功
+            group = checkSuccess(group, groupId);
             DoctorGroupTrack groupTrack = doctorGroupTrackDao.findByGroupId(groupId);
             IndexedGroup indexedGroup = indexedGroupFactory.create(group, groupTrack);
             log.info("[GroupSearchWriteServiceImpl] -> indexedGroup is {}", indexedGroup);
@@ -55,6 +57,28 @@ public class GroupSearchWriteServiceImpl implements GroupSearchWriteService {
                     groupId, Throwables.getStackTraceAsString(e));
             return Response.fail("group.index.fail");
         }
+    }
+
+    /**
+     * 校验是否获取成功, 不成功继续获取
+     * @param group     group
+     * @param groupId   groupId
+     * @return
+     */
+    private DoctorGroup checkSuccess(DoctorGroup group, Long groupId) {
+        if (group != null) {
+            return group;
+        }
+        int count = 50; // 尝试50次
+        while(count > 0 && group == null) {
+            count --;
+            group = doctorGroupDao.findById(groupId);
+            try{
+                Thread.sleep(10); // 睡眠
+            } catch (Exception ignored) {
+            }
+        }
+        return group;
     }
 
     @Override
