@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Strings;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Maps;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.constants.JacksonType;
 import lombok.AccessLevel;
@@ -62,7 +63,7 @@ public class DoctorWareHouseTrack implements Serializable{
     public void setExtra(String extra){
         this.extra = extra;
         if(Strings.isNullOrEmpty(extra)){
-            this.extraMap = Collections.emptyMap();
+            this.extraMap = Maps.newHashMap();
         }else {
             this.extraMap = OBJECT_MAPPER.readValue(extra, JacksonType.MAP_OF_OBJECT);
         }

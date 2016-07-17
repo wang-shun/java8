@@ -7,6 +7,7 @@ import io.terminus.doctor.warehouse.dto.DoctorMaterialConsumeProviderDto;
 import io.terminus.doctor.warehouse.handler.IHandler;
 import io.terminus.doctor.warehouse.model.DoctorMaterialConsumeProvider;
 import io.terminus.doctor.warehouse.model.DoctorWareHouseTrack;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -21,6 +22,7 @@ import static java.util.Objects.isNull;
  * Descirbe:
  */
 @Component
+@Slf4j
 public class DoctorTrackProviderHandler implements IHandler{
 
     private final DoctorWareHouseTrackDao doctorWareHouseTrackDao;
@@ -45,6 +47,7 @@ public class DoctorTrackProviderHandler implements IHandler{
             doctorWareHouseTrack.setLotNumber(doctorWareHouseTrack.getLotNumber() + dto.getCount());
             String key = dto.getMaterialTypeId().toString();
             Map<String,Object> trackExtraMap = doctorWareHouseTrack.getExtraMap();
+            log.info("******* extra map info is :{}", trackExtraMap);
             if(trackExtraMap.containsKey(key)){
                 trackExtraMap.put(key, dto.getCount() + Params.getWithConvert(trackExtraMap, key, a -> Long.valueOf(a.toString())));
             }else {
