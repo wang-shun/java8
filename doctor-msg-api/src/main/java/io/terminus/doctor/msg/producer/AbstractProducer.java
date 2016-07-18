@@ -113,10 +113,39 @@ public abstract class AbstractProducer implements IProducer {
             else{
                 Stopwatch stopWatch = Stopwatch.createStarted();
                 log.info("[AbstractProducer] {} -> 预警消息产生, starting......", ruleTemplate.getName());
-                List<DoctorMessageRuleRole> ruleRoles = RespHelper.orServEx(doctorMessageRuleRoleReadService.findByTplId(ruleTemplate.getId()));
 
                 // > 记录对应每个用户的消息
-                for (int j = 0; ruleRoles != null && j < ruleRoles.size(); j++) {
+                List<DoctorMessageRule> messageRules = RespHelper.orServEx(doctorMessageRuleReadService.findMessageRulesByTplId(ruleTemplate.getId()));
+
+                for (int j = 0; messageRules != null && j < messageRules.size(); j++) {
+                    DoctorMessageRule messageRule = messageRules.get(j);
+                    if(!Objects.equals(messageRule.getStatus(), DoctorMessageRule.Status.NORMAL.getValue())) {
+                        continue;
+                    }
+                    // 获取最新的发送消息
+                    DoctorMessage latestMessage = getLatestWarnMessage(messageRule.getTemplateId(), messageRule.getFarmId());
+                    // 检查消息是否在频率范围之内
+                    if (!checkFrequence(latestMessage, messageRule.getRule())) {
+                        continue;
+                    }
+                    // 获取信息
+                    log.info("[AbstractProducer] {} -> 预警消息产生", ruleTemplate.getName());
+                    DoctorMessageRuleRole ruleRole = DoctorMessageRuleRole.builder()
+                            .ruleId(messageRule.getId())
+                            .templateId(messageRule.getTemplateId())
+                            .farmId(messageRule.getFarmId())
+                            .ruleValue(messageRule.getRuleValue())
+                            .build();
+                    List<DoctorMessage> message = message(ruleRole,
+                            subUsers.stream().filter(sub -> sub.getFarmIds().contains(messageRule.getFarmId())).collect(Collectors.toList()));
+                    if(message != null && message.size() > 0) {
+                        doctorMessageWriteService.createMessages(message);
+                    }
+                }
+
+                // List<DoctorMessageRuleRole> ruleRoles = RespHelper.orServEx(doctorMessageRuleRoleReadService.findByTplId(ruleTemplate.getId()));
+                // > 记录对应每个用户的消息
+                /*for (int j = 0; ruleRoles != null && j < ruleRoles.size(); j++) {
                     DoctorMessageRuleRole ruleRole = ruleRoles.get(j);
                     // 查询对应的message_rule
                     DoctorMessageRule messageRule = RespHelper.orServEx(doctorMessageRuleReadService.findMessageRuleById(ruleRole.getRuleId()));
@@ -136,24 +165,23 @@ public abstract class AbstractProducer implements IProducer {
                     if(message != null && message.size() > 0) {
                         doctorMessageWriteService.createMessages(message);
                     }
-                }
-
-                // > 记录对应每只猪类型的消息
-                ImmutableList<Integer> ofCategories = ImmutableList.of(
-                        // 当前支持这些消息提醒
-                        Category.SOW_NEEDWEAN.getKey(),
-                        Category.SOW_BREEDING.getKey(),
-                        Category.SOW_BIRTHDATE.getKey(),
-                        Category.SOW_PREGCHECK.getKey());
-                RespHelper.orServEx(doctorMessageRuleReadService.findMessageRulesByTplId(ruleTemplate.getId())).forEach(doctorMessageRule -> {
-                    if (ofCategories.contains(doctorMessageRule.getCategory())) {
-                        recordPigMessages(doctorMessageRule);
-                    }
-                });
-
+                }*/
                 stopWatch.stop();
                 log.info("[AbstractProducer] {} -> 预警消息产生结束, 耗时 {}ms, ending......", ruleTemplate.getName(), stopWatch.elapsed(TimeUnit.MILLISECONDS));
             }
+
+            // > 记录对应每只猪类型的消息
+            ImmutableList<Integer> ofCategories = ImmutableList.of(
+                    // 当前支持这些消息提醒
+                    Category.SOW_NEEDWEAN.getKey(),
+                    Category.SOW_BREEDING.getKey(),
+                    Category.SOW_BIRTHDATE.getKey(),
+                    Category.SOW_PREGCHECK.getKey());
+            RespHelper.orServEx(doctorMessageRuleReadService.findMessageRulesByTplId(ruleTemplate.getId())).forEach(doctorMessageRule -> {
+                if (ofCategories.contains(doctorMessageRule.getCategory())) {
+                    recordPigMessages(doctorMessageRule);
+                }
+            });
         }
     }
 
@@ -265,7 +293,8 @@ public abstract class AbstractProducer implements IProducer {
                     DoctorMessage message = DoctorMessage.builder()
                             .farmId(ruleRole.getFarmId())
                             .ruleId(ruleRole.getRuleId())
-                            .roleId(ruleRole.getRoleId())
+                            // .roleId(ruleRole.getRoleId())
+                            .roleId(subUser.getRoleId())
                             .userId(subUser.getUserId())
                             .templateId(ruleRole.getTemplateId())
                             .templateName(template.getName())
@@ -304,6 +333,16 @@ public abstract class AbstractProducer implements IProducer {
      */
     private DoctorMessage getLatestWarnMessage(Long templateId, Long farmId, Long roleId) {
         return RespHelper.orServEx(doctorMessageReadService.findLatestWarnMessage(templateId, farmId, roleId));
+    }
+
+    /**
+     * 获取最新发送的预警或警报的消息
+     * @param templateId    规则模板id
+     * @param farmId        猪场id
+     * @return
+     */
+    private DoctorMessage getLatestWarnMessage(Long templateId, Long farmId) {
+        return RespHelper.orServEx(doctorMessageReadService.findLatestWarnMessage(templateId, farmId));
     }
 
     /**

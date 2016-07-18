@@ -13,6 +13,7 @@ import io.terminus.doctor.msg.service.DoctorMessageRuleWriteService;
 import io.terminus.doctor.user.model.SubRole;
 import io.terminus.doctor.user.service.SubRoleReadService;
 import io.terminus.doctor.web.front.msg.dto.MsgRoleDto;
+import io.terminus.doctor.web.front.msg.dto.MsgRuleDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -23,6 +24,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Desc: 与消息模板与猪场绑定相关
@@ -86,6 +88,30 @@ public class DoctorMsgRules {
     public Boolean updateRule(@RequestBody DoctorMessageRule doctorMessageRule) {
         Preconditions.checkNotNull(doctorMessageRule, "template.rule.not.null");
         return RespHelper.or500(doctorMessageRuleWriteService.updateMessageRule(doctorMessageRule));
+    }
+
+    /**
+     * 获取与角色相关的规则(包含绑定和未绑定)
+     * @return
+     */
+    @RequestMapping(value = "/rule/hasFlag", method = RequestMethod.GET)
+    public List<MsgRuleDto> findHasCheckedRule(@RequestParam Long farmId,
+                                               @RequestParam Long roleId) {
+        List<MsgRuleDto> dtos = Lists.newArrayList();
+        List<DoctorMessageRule> doctorMessageRules = RespHelper.or500(
+                doctorMessageRuleReadService.findMessageRulesByFarmId(farmId));
+        List<Long> ruleIds = findRolesByRoleId(roleId).stream().map(MsgRoleDto::getRuleId).collect(Collectors.toList());
+        doctorMessageRules.forEach(doctorMessageRule -> {
+            MsgRuleDto msgRuleDto = MsgRuleDto.builder()
+                    .doctorMessageRule(doctorMessageRule)
+                    .roleId(roleId)
+                    .build();
+            if (ruleIds.contains(doctorMessageRule.getId())) {
+                msgRuleDto.setFlag(Boolean.TRUE);
+            }
+            dtos.add(msgRuleDto);
+        });
+        return dtos;
     }
 
     /**
