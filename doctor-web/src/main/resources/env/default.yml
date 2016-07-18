@@ -1,6 +1,6 @@
 server:
   context-path: /
-  port: 8080
+  port: 8081
 
 pampas:
   rootPath: /home/admin/assets
@@ -17,7 +17,7 @@ pampas:
       - loginInterceptor
       - authInterceptor
   redis:
-    host: 127.0.0.1
+    host: 101.201.44.35
     port: 6379
   design:
     enable: true
@@ -29,7 +29,7 @@ session:
   cookie-name: msid
   source: redis
   serialize-type: json
-  redis-host: 127.0.0.1
+  redis-host: 101.201.44.35
   redis-port: 6379
   redis-index: 1
   redis-cluster: false
@@ -42,12 +42,12 @@ session:
 rpc.mode: true
 rpc.dubbo:
     module: doctor-web
-    registryAddress: 127.0.0.1:2181
+    registryAddress: 101.201.44.35:2181
     version: 1.0.0
 
 # zookeeper
 zookeeper:
-  host: 127.0.0.1
+  host: 101.201.44.35
   port: 2181
 
 logging:
