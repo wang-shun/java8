@@ -45,7 +45,9 @@ public class FarmController {
     private final DoctorFarmWriteService doctorFarmWriteService;
     private final DoctorUserReadService doctorUserReadService;
     private final DoctorServiceStatusReadService doctorServiceStatusReadService;
-    private final DoctorWareHouseTypeWriteService doctorWareHouseTypeWriteService;
+
+    @RpcConsumer
+    private DoctorWareHouseTypeWriteService doctorWareHouseTypeWriteService;
 
     @RpcConsumer
     private DoctorBarnWriteService doctorBarnWriteService;
@@ -57,13 +59,11 @@ public class FarmController {
     public FarmController(DoctorFarmReadService doctorFarmReadService,
                           DoctorUserReadService doctorUserReadService,
                           DoctorServiceStatusReadService doctorServiceStatusReadService,
-                          DoctorFarmWriteService doctorFarmWriteService,
-                          DoctorWareHouseTypeWriteService doctorWareHouseTypeWriteService){
+                          DoctorFarmWriteService doctorFarmWriteService){
         this.doctorFarmReadService = doctorFarmReadService;
         this.doctorUserReadService = doctorUserReadService;
         this.doctorServiceStatusReadService = doctorServiceStatusReadService;
         this.doctorFarmWriteService = doctorFarmWriteService;
-        this.doctorWareHouseTypeWriteService = doctorWareHouseTypeWriteService;
     }
 
     /**

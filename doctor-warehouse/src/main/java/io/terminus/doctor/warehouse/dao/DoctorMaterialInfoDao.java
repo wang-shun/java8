@@ -34,12 +34,12 @@ public class DoctorMaterialInfoDao extends MyBatisDao<DoctorMaterialInfo>{
      */
     public Boolean createOrUpdate(DoctorMaterialInfo doctorMaterialInfo){
         DoctorMaterialInfo exist =  this.findById(doctorMaterialInfo.getId());
-        if(isNull(exist)){
+        if(!isNull(exist)){
             doctorMaterialInfo.setCreatorId(exist.getCreatorId());
             doctorMaterialInfo.setCreatorName(exist.getCreatorName());
-            return this.create(doctorMaterialInfo);
-        }else {
             return this.update(doctorMaterialInfo);
+        }else {
+            return this.create(doctorMaterialInfo);
         }
     }
 
