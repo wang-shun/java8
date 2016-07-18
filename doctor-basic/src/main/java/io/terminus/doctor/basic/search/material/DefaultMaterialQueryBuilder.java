@@ -61,15 +61,13 @@ public class DefaultMaterialQueryBuilder extends BaseMaterialQueryBuilder {
         if (StringUtils.isNotBlank(sort)) {
             List<String> parts = Splitters.UNDERSCORE.splitToList(sort);
             if (parts.size() < 1) {
+                // 否则默认按 updatedAt 降序
+                sort(sorts, "2", "updatedAt");
                 return sorts;
             }
             String price = Iterables.getFirst(parts, "0");
             // 新增sort
             sort(sorts, price, "price");
-        }
-        // 否则默认按 updatedAt 降序
-        if (sorts.size() == 0) {
-            sort(sorts, "2", "updatedAt");
         }
         return sorts;
     }

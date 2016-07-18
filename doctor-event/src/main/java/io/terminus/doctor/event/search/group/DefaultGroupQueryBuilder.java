@@ -111,6 +111,8 @@ public class DefaultGroupQueryBuilder extends BaseGroupQueryBuilder {
         if (StringUtils.isNotBlank(sort)) {
             List<String> parts = Splitters.UNDERSCORE.splitToList(sort);
             if (parts.size() < 3) {
+                // 否则默认按 updatedAt 降序
+                sort(sorts, "2", "updatedAt");
                 return sorts;
             }
             String open = Iterables.getFirst(parts, "0");
@@ -120,10 +122,6 @@ public class DefaultGroupQueryBuilder extends BaseGroupQueryBuilder {
             sort(sorts, open, "openAt");
             sort(sorts, avgDayAge, "avgDayAge");
             sort(sorts, quantity, "quantity");
-        }
-        // 否则默认按 updatedAt 降序
-        if (sorts.size() == 0) {
-            sort(sorts, "2", "updatedAt");
         }
         return sorts;
     }

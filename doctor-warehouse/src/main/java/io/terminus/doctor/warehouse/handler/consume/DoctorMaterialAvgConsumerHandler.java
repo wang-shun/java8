@@ -6,6 +6,7 @@ import io.terminus.doctor.common.enums.WareHouseType;
 import io.terminus.doctor.warehouse.handler.IHandler;
 import io.terminus.doctor.warehouse.model.DoctorMaterialConsumeAvg;
 import io.terminus.doctor.warehouse.model.DoctorMaterialConsumeProvider;
+import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
 import org.joda.time.Days;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +24,7 @@ import static java.util.Objects.isNull;
  * Descirbe: 计算平均消耗信息 TODO
  */
 @Component
+@Slf4j
 public class DoctorMaterialAvgConsumerHandler implements IHandler{
 
     private final DoctorMaterialConsumeAvgDao doctorMaterialConsumeAvgDao;
@@ -62,6 +64,9 @@ public class DoctorMaterialAvgConsumerHandler implements IHandler{
                 doctorMaterialConsumeAvg.setLotConsumeDay((int)(lotNumber/doctorMaterialConsumeAvg.getConsumeAvgCount()) );
             }else {
                 Integer dayRange = Days.daysBetween(new DateTime(doctorMaterialConsumeAvg.getConsumeDate()), DateTime.now()).getDays();
+
+                log.info("********* consume date :{}, dayRange :{}", new DateTime(doctorMaterialConsumeAvg.getConsumeDate()).toString(), dayRange);
+                log.info("********** dto:{}", doctorMaterialConsumeAvg);
                 if(dayRange == 0){
                     // 同一天领用 0
                     doctorMaterialConsumeAvg.setConsumeCount(doctorMaterialConsumeAvg.getConsumeCount() + dto.getCount());
