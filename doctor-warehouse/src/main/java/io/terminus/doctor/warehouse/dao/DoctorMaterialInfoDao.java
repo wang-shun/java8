@@ -37,9 +37,9 @@ public class DoctorMaterialInfoDao extends MyBatisDao<DoctorMaterialInfo>{
         if(!isNull(exist)){
             doctorMaterialInfo.setCreatorId(exist.getCreatorId());
             doctorMaterialInfo.setCreatorName(exist.getCreatorName());
-            return this.create(doctorMaterialInfo);
-        }else {
             return this.update(doctorMaterialInfo);
+        }else {
+            return this.create(doctorMaterialInfo);
         }
     }
 
