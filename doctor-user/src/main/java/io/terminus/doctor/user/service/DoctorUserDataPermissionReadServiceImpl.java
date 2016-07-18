@@ -10,6 +10,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 /**
  * Desc:
  * author: 陈增辉
@@ -35,6 +37,18 @@ public class DoctorUserDataPermissionReadServiceImpl implements DoctorUserDataPe
         Response<DoctorUserDataPermission> response = new Response<>();
         try {
             response.setResult(cacheCenter.getUserDataPermission(userId));
+        } catch (Exception e) {
+            log.error("find DoctorUserDataPermission failed, cause : {}", Throwables.getStackTraceAsString(e));
+            response.setError("find.doctor.user.data.permission");
+        }
+        return response;
+    }
+
+    @Override
+    public Response<List<DoctorUserDataPermission>> findDataPermissionByUserIds(List<Long> userIds){
+        Response<List<DoctorUserDataPermission>> response = new Response<>();
+        try {
+            response.setResult(doctorUserDataPermissionDao.findByUserIds(userIds));
         } catch (Exception e) {
             log.error("find DoctorUserDataPermission failed, cause : {}", Throwables.getStackTraceAsString(e));
             response.setError("find.doctor.user.data.permission");
