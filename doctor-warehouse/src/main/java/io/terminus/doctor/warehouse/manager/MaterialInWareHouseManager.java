@@ -82,8 +82,6 @@ public class MaterialInWareHouseManager {
                 basicDto.getFarmId(),
                 materialProduceEntry.getMaterialId());
 
-        log.info("************** basic :{}, materialProduce:{}, inWareHouseInfo:{}", basicDto, materialProduceEntry, doctorMaterialInWareHouses);
-
         long totalCount = doctorMaterialInWareHouses.stream().map(DoctorMaterialInWareHouse::getLotNumber).reduce(Math::addExact).orElse(0l);
         checkState(totalCount >= materialProduceEntry.getMaterialCount(), "not.enough.source");
 
@@ -183,7 +181,6 @@ public class MaterialInWareHouseManager {
     private Long consumeMaterialInner(DoctorMaterialConsumeProviderDto doctorMaterialConsumeProviderDto){
         doctorMaterialConsumeProviderDto.setActionType(DoctorMaterialConsumeProvider.EVENT_TYPE.CONSUMER.getValue());
         Map<String,Object> context = Maps.newHashMap();
-        log.info("********** material onsume provider :{}", doctorMaterialConsumeProviderDto);
         this.doctorWareHouseHandlerInvocation.invoke(doctorMaterialConsumeProviderDto, context);
         return Long.valueOf(context.get("eventId").toString());
     }
