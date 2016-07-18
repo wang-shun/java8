@@ -1,13 +1,8 @@
 package io.terminus.doctor.web.front.role;
 
-import com.google.common.collect.Lists;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.Paging;
 import io.terminus.doctor.common.enums.UserType;
-import io.terminus.doctor.user.model.DoctorFarm;
-import io.terminus.doctor.user.service.DoctorFarmReadService;
-import io.terminus.doctor.user.service.DoctorStaffReadService;
-import io.terminus.doctor.user.service.DoctorUserDataPermissionReadService;
 import io.terminus.doctor.web.core.component.MobilePattern;
 import io.terminus.pampas.common.UserUtil;
 import io.terminus.parana.common.utils.RespHelper;
@@ -20,11 +15,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 /**
  * Desc: 子账号
@@ -41,23 +33,11 @@ public class Subs {
 
     private final MobilePattern mobilePattern;
 
-    private final DoctorUserDataPermissionReadService doctorUserDataPermissionReadService;
-
-    private final DoctorFarmReadService doctorFarmReadService;
-    
-    private final DoctorStaffReadService doctorStaffReadService;
-
     @Autowired
     public Subs(SubService subService,
-                MobilePattern mobilePattern,
-                DoctorUserDataPermissionReadService doctorUserDataPermissionReadService,
-                DoctorFarmReadService doctorFarmReadService,
-                DoctorStaffReadService doctorStaffReadService) {
+                MobilePattern mobilePattern) {
         this.subService = subService;
         this.mobilePattern = mobilePattern;
-        this.doctorUserDataPermissionReadService = doctorUserDataPermissionReadService;
-        this.doctorFarmReadService = doctorFarmReadService;
-        this.doctorStaffReadService = doctorStaffReadService;
     }
 
 
@@ -134,24 +114,6 @@ public class Subs {
                                   @RequestParam(required = false) Integer size) {
         checkAuth();
         return RespHelper.or500(subService.findByConditions(UserUtil.getCurrentUser(), roleId, roleName, username, realName, size));
-    }
-
-    @RequestMapping(value = "/find/{farmId}", method = RequestMethod.GET)
-    public List<Sub> findByFarmId(@PathVariable Long farmId){
-        DoctorFarm farm = RespHelper.or500(doctorFarmReadService.findFarmById(farmId));
-        Map<Long, Long> userIdJoinStaffId = new HashMap<>(); // key =userId, value = staffId
-        RespHelper.or500(doctorStaffReadService.findStaffByOrgId(farm.getOrgId()))
-                .forEach(staff -> userIdJoinStaffId.put(staff.getUserId(), staff.getId()));
-        List<Long> matchUserIds = Lists.newArrayList();
-        RespHelper.or500(doctorUserDataPermissionReadService.findDataPermissionByUserIds(userIdJoinStaffId.keySet().stream().collect(Collectors.toList())))
-                .forEach(permission -> {
-                    if (permission.getFarmIdsList().contains(farmId)) {
-                        matchUserIds.add(permission.getUserId());
-                    }
-                });
-        List<Sub> subs = RespHelper.or500(subService.findByUserIds(matchUserIds));
-        subs.forEach(sub -> sub.setStaffId(userIdJoinStaffId.get(sub.getId())));
-        return subs;
     }
 
     /**

@@ -19,19 +19,14 @@ import io.terminus.doctor.user.service.DoctorUserProfileReadService;
 import io.terminus.doctor.user.service.DoctorUserReadService;
 import io.terminus.doctor.user.service.PrimaryUserReadService;
 import io.terminus.pampas.client.Export;
-import io.terminus.pampas.common.UserUtil;
 import io.terminus.parana.common.utils.EncryptUtil;
 import io.terminus.parana.common.utils.RespHelper;
 import io.terminus.parana.user.model.User;
 import io.terminus.parana.user.model.UserProfile;
-import io.terminus.parana.user.service.UserProfileReadService;
-import io.terminus.parana.user.service.UserReadService;
 import io.terminus.parana.user.service.UserWriteService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 import java.util.Map;
@@ -248,18 +243,6 @@ public class SubService {
             return Response.fail(e.getMessage());
         } catch (Exception e) {
             log.error("find sub failed, user={}, cause:{}", user, Throwables.getStackTraceAsString(e));
-            return Response.fail("sub.find.fail");
-        }
-    }
-
-    public Response<List<Sub>> findByUserIds(List<Long> userIds){
-        try{
-            List<io.terminus.doctor.user.model.Sub> subList = RespHelper.orServEx(primaryUserReadService.findSubByUserIds(userIds));
-            return Response.ok(this.setSubInfo(subList));
-        } catch (ServiceException e) {
-            return Response.fail(e.getMessage());
-        } catch (Exception e) {
-            log.error("find sub failed, cause:{}", Throwables.getStackTraceAsString(e));
             return Response.fail("sub.find.fail");
         }
     }

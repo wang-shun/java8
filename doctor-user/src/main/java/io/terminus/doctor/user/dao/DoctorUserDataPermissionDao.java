@@ -4,6 +4,7 @@ import io.terminus.common.mysql.dao.MyBatisDao;
 import io.terminus.doctor.user.model.DoctorUserDataPermission;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -20,6 +21,9 @@ public class DoctorUserDataPermissionDao extends MyBatisDao<DoctorUserDataPermis
     }
 
     public List<DoctorUserDataPermission> findByUserIds(List<Long> userIds){
+        if(userIds == null || userIds.isEmpty()){
+            return Collections.emptyList();
+        }
         return sqlSession.selectList(sqlId("findByUserIds"), userIds);
     }
 }

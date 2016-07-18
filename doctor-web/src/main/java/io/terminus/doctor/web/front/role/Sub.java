@@ -16,8 +16,6 @@ public class Sub {
 
     private Long id;
 
-    private Long staffId;
-
     private String username; //用户名
 
     private String password;

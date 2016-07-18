@@ -2,12 +2,10 @@ package io.terminus.doctor.user.dao;
 
 import com.google.common.collect.ImmutableMap;
 import io.terminus.common.mysql.dao.MyBatisDao;
-import io.terminus.common.utils.MapBuilder;
 import io.terminus.doctor.common.utils.Params;
 import io.terminus.doctor.user.model.Sub;
 import org.springframework.stereotype.Repository;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -19,10 +17,6 @@ public class SubDao extends MyBatisDao<Sub> {
 
     public Sub findByUserId(Long userId) {
         return getSqlSession().selectOne(sqlId("findByUserId"), userId);
-    }
-
-    public List<Sub> findByUserIds(List<Long> userIds) {
-        return getSqlSession().selectOne(sqlId("findByUserIds"), userIds);
     }
 
     public Sub findByParentUserIdAndUserId(Long parentUserId, Long userId) {
