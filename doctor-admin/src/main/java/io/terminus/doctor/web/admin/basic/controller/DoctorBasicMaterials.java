@@ -80,7 +80,7 @@ public class DoctorBasicMaterials {
      * @param basicMaterial 基础物料
      * @return 基础物料list
      */
-    @RequestMapping(value = "/paging", method = RequestMethod.POST)
+    @RequestMapping(value = "/paging", method = RequestMethod.GET)
     public Paging<DoctorBasicMaterial> finaBasicMaterialByTypeFilterBySrm(@RequestBody DoctorBasicMaterialSearchDto basicMaterial) {
         return RespHelper.or500(doctorBasicMaterialReadService.pagingBasicMaterialByTypeFilterBySrm(basicMaterial));
     }
