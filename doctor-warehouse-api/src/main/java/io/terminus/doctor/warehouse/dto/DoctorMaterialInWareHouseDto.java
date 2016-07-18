@@ -37,6 +37,8 @@ public class DoctorMaterialInWareHouseDto implements Serializable{
 
     private String staffName;   //人员姓名
 
+    private String realName;    // 人员真实姓名
+
     public static DoctorMaterialInWareHouseDto buildDoctorMaterialInWareHouseInfo(DoctorMaterialInWareHouse inWareHouse,
                                                                                   DoctorWareHouse doctorWareHouse){
         return DoctorMaterialInWareHouseDto.builder().materialInWareHouseId(inWareHouse.getId())

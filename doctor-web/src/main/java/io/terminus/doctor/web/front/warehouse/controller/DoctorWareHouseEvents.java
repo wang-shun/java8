@@ -108,7 +108,20 @@ public class DoctorWareHouseEvents {
                                                                                 @RequestParam("wareHouseId") Long wareHouseId,
                                                                                 @RequestParam("pageNo") Integer pageNo,
                                                                                 @RequestParam("pageSize") Integer pageSize){
-        return RespHelper.or500(doctorMaterialInWareHouseReadService.pagingDoctorMaterialInWareHouse(farmId, wareHouseId, pageNo, pageSize));
+        Paging<DoctorMaterialInWareHouseDto> result = RespHelper.or500(doctorMaterialInWareHouseReadService.pagingDoctorMaterialInWareHouse(farmId, wareHouseId, pageNo, pageSize));
+
+        try{
+            result.getData().forEach(s->{
+                Response<User> response = userReadService.findById(s.getStaffId());
+                s.setRealName(RespHelper.orServEx(response).getName());
+            });
+
+        }catch (Exception e){
+            log.error("get user data info fail, cause:{}", Throwables.getStackTraceAsString(e));
+            throw new JsonResponseException(e.getMessage());
+        }
+
+        return result;
     }
 
     @RequestMapping(value = "/materialInWareHouse/delete", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE)
