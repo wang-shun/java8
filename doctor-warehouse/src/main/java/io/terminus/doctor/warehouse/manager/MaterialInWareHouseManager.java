@@ -82,6 +82,8 @@ public class MaterialInWareHouseManager {
                 basicDto.getFarmId(),
                 materialProduceEntry.getMaterialId());
 
+        log.info("************** basic :{}, materialProduce:{}, inWareHouseInfo:{}", basicDto, materialProduceEntry, doctorMaterialInWareHouses);
+
         long totalCount = doctorMaterialInWareHouses.stream().map(DoctorMaterialInWareHouse::getLotNumber).reduce(Math::addExact).orElse(0l);
         checkState(totalCount >= materialProduceEntry.getMaterialCount(), "not.enough.source");
 
