@@ -1,6 +1,7 @@
 package io.terminus.doctor.event.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -284,6 +285,12 @@ public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteServic
 
             Map<String,Object> result = doctorPigEventManager.createCasualPigEvent(doctorBasicInputInfoDto, dto);
             publishEvent(result);
+
+            coreEventDispatcher.publish(DoctorPigCountEvent.builder()
+                    .farmId(doctorBasicInputInfoDto.getFarmId())
+                    .orgId(doctorBasicInputInfoDto.getOrgId())
+                    .pigType(doctorBasicInputInfoDto.getPigType()).build());
+
             return Response.ok(Params.getWithConvert(result,"doctorEventId",a->Long.valueOf(a.toString())));
         }catch (IllegalStateException e){
             log.error("chg farm event illegal state, cause:{}", Throwables.getStackTraceAsString(e));
@@ -384,12 +391,27 @@ public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteServic
             doctorFarrowingDto.setFarrowStaff2(doctorBasicInputInfoDto.getStaffName());
 
             // validate count
-            checkState(Objects.equals(
-                            doctorFarrowingDto.getFarrowingLiveCount(),
-                            doctorFarrowingDto.getHealthCount() + doctorFarrowingDto.getWeakCount()), "validate.farrowingCount.fail");
-            checkState(Objects.equals(doctorFarrowingDto.getFarrowingLiveCount(),
-                            doctorFarrowingDto.getLiveBoarCount() + doctorFarrowingDto.getLiveSowCount()),
+            Integer liveCount = doctorFarrowingDto.getFarrowingLiveCount();
+            Integer healthCount = doctorFarrowingDto.getHealthCount();
+            Integer weakCount = doctorFarrowingDto.getWeakCount();
+            checkState(Objects.equals(liveCount, healthCount + weakCount),
                     "validate.farrowingCount.fail");
+
+            // 校验活仔的数量
+            checkState(liveCount > 0 && liveCount <= 25, "sowFarrow.liveCount.error");
+
+            // 校验健仔的数量
+            checkState(healthCount>0 && healthCount<=25, "sowFarrow.healthCount.error");
+
+            // 校验对应的公猪, 母猪的数量信息
+            if(!Objects.isNull(doctorFarrowingDto.getLiveBoarCount()) || !Objects.isNull(doctorFarrowingDto.getLiveSowCount())){
+
+                Integer sowCount = MoreObjects.firstNonNull(doctorFarrowingDto.getLiveSowCount(), 0);
+                Integer boarCount = MoreObjects.firstNonNull(doctorFarrowingDto.getLiveBoarCount(), 0);
+
+                checkState(Objects.equals(doctorFarrowingDto.getFarrowingLiveCount(), sowCount + boarCount),
+                        "validate.farrowingCount.fail");
+            }
 
             Map<String,Object> dto = Maps.newHashMap();
             BeanMapper.copy(doctorFarrowingDto, dto);
@@ -428,12 +450,18 @@ public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteServic
             Map<String,Object> dto = Maps.newHashMap();
             BeanMapper.copy(doctorPartWeanDto, dto);
 
+            double avgWeight = doctorPartWeanDto.getPartWeanAvgWeight();
+            checkState(avgWeight <= 9.0 && avgWeight >= 5.0, "input.weanAvgWeight.error");
+
             Map<String,Object> result = doctorPigEventManager.createSowPigEvent(doctorBasicInputInfoDto, dto);
             publishEvent(result);
             return Response.ok(Params.getWithConvert(result,"doctorEventId",a->Long.valueOf(a.toString())));
+        }catch (IllegalStateException e){
+            log.error("part wean event illegal state, cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail(e.getMessage());
         }catch (Exception e){
-            log.error("vaccination event create fail, cause:{}", Throwables.getStackTraceAsString(e));
-            return Response.fail("create.vaccination.fail");
+            log.error("part wean event create fail, cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("create.partWean.fail");
         }
     }
 
