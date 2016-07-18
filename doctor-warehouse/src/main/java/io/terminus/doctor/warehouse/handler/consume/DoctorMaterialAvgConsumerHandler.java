@@ -52,30 +52,33 @@ public class DoctorMaterialAvgConsumerHandler implements IHandler{
                     .build();
 
             if(Objects.equals(dto.getType(), WareHouseType.FEED.getKey())){
-                doctorMaterialConsumeAvg.setConsumeAvgCount(dto.getCount() / dto.getConsumeDays());
-                doctorMaterialConsumeAvg.setLotConsumeDay((int)(lotNumber / doctorMaterialConsumeAvg.getConsumeAvgCount()));
+                doctorMaterialConsumeAvg.setConsumeAvgCount(dto.getCount() * 100 / dto.getConsumeDays());   // * 100 默认精度 0.001
+                if(doctorMaterialConsumeAvg.getConsumeAvgCount() != 0) {
+                    doctorMaterialConsumeAvg.setLotConsumeDay((int) (lotNumber * 100 / doctorMaterialConsumeAvg.getConsumeAvgCount()));
+                }
             }
             doctorMaterialConsumeAvgDao.create(doctorMaterialConsumeAvg);
         }else{
             if(Objects.equals(dto.getType(), WareHouseType.FEED.getKey())){
                 // calculate current avg rate
-                doctorMaterialConsumeAvg.setConsumeAvgCount(dto.getCount() / dto.getConsumeDays());
+                doctorMaterialConsumeAvg.setConsumeAvgCount(dto.getCount() * 100 / dto.getConsumeDays());
                 doctorMaterialConsumeAvg.setConsumeCount(dto.getCount());
-                doctorMaterialConsumeAvg.setLotConsumeDay((int)(lotNumber/doctorMaterialConsumeAvg.getConsumeAvgCount()) );
+                if(doctorMaterialConsumeAvg.getConsumeAvgCount() != 0) {
+                    doctorMaterialConsumeAvg.setLotConsumeDay((int) (lotNumber * 100 / doctorMaterialConsumeAvg.getConsumeAvgCount()));
+                }
             }else {
                 Integer dayRange = Days.daysBetween(new DateTime(doctorMaterialConsumeAvg.getConsumeDate()), DateTime.now()).getDays();
 
-                log.info("********* consume date :{}, dayRange :{}", new DateTime(doctorMaterialConsumeAvg.getConsumeDate()).toString(), dayRange);
-                log.info("********** dto:{}", doctorMaterialConsumeAvg);
                 if(dayRange == 0){
                     // 同一天领用 0
                     doctorMaterialConsumeAvg.setConsumeCount(doctorMaterialConsumeAvg.getConsumeCount() + dto.getCount());
                 }else {
                     // calculate avg date content
-                    doctorMaterialConsumeAvg.setConsumeAvgCount(
-                            doctorMaterialConsumeAvg.getConsumeCount() /dayRange);
+                    doctorMaterialConsumeAvg.setConsumeAvgCount(doctorMaterialConsumeAvg.getConsumeCount() * 100 / dayRange);
                     doctorMaterialConsumeAvg.setConsumeCount(dto.getCount());
-                    doctorMaterialConsumeAvg.setLotConsumeDay((int)(lotNumber / doctorMaterialConsumeAvg.getConsumeAvgCount()));
+                    if(doctorMaterialConsumeAvg.getConsumeAvgCount() != 0) {
+                        doctorMaterialConsumeAvg.setLotConsumeDay((int) (lotNumber * 100 / doctorMaterialConsumeAvg.getConsumeAvgCount()));
+                    }
                 }
             }
             doctorMaterialConsumeAvg.setConsumeDate(DateTime.now().withTimeAtStartOfDay().toDate());
