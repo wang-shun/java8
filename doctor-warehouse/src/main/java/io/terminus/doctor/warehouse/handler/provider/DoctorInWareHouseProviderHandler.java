@@ -65,12 +65,10 @@ public class DoctorInWareHouseProviderHandler implements IHandler{
         DoctorMaterialInWareHouse doctorMaterialInWareHouse = DoctorMaterialInWareHouse.builder()
                 .farmId(dto.getFarmId()).farmName(dto.getFarmName()).wareHouseId(dto.getWareHouseId()).wareHouseName(dto.getWareHouseName())
                 .materialId(dto.getMaterialTypeId()).materialName(dto.getMaterialName()).lotNumber(dto.getCount()).type(dto.getType())
+                .unitName(dto.getUnitName()).unitGroupName(dto.getUnitGroupName())
                 .creatorId(dto.getStaffId()).creatorName(dto.getStaffName())
                 .build();
 
-        DoctorMaterialInfo materialInfo = doctorMaterialInfoDao.findById(dto.getMaterialTypeId());
-        doctorMaterialInWareHouse.setUnitGroupName(materialInfo.getUnitGroupName());
-        doctorMaterialInWareHouse.setUnitName(materialInfo.getUnitName());
         return doctorMaterialInWareHouse;
     }
 }

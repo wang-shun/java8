@@ -59,5 +59,9 @@ public class DoctorMaterialConsumeProviderDto implements Serializable{
 
     private String unitName;    // 单位信息
 
+    private Long unitGroupId;
+
+    private String unitGroupName;   //组民称
+
     private Integer consumeDays; // 耗用天数
 }

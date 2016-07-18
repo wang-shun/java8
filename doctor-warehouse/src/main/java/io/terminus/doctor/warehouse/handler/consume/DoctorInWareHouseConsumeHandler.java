@@ -40,6 +40,7 @@ public class DoctorInWareHouseConsumeHandler implements IHandler{
     public void handle(DoctorMaterialConsumeProviderDto dto, Map<String, Object> context) throws RuntimeException {
 
         // 校验库存数量信息
+        log.info("******************** consume in house dto:{}", dto);
         DoctorMaterialInWareHouse doctorMaterialInWareHouse = doctorMaterialInWareHouseDao.queryByFarmHouseMaterial(
                 dto.getFarmId(), dto.getWareHouseId(), dto.getMaterialTypeId());
         checkState(!isNull(doctorMaterialInWareHouse), "no.material.consume");
