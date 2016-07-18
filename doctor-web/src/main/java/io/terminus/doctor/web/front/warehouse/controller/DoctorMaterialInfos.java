@@ -245,13 +245,18 @@ public class DoctorMaterialInfos {
     }
 
     public void buildProduceInfo(DoctorMaterialInfo.MaterialProduce materialProduce){
-        materialProduce.getMaterialProduceEntries().forEach(s->{
-            s.setMaterialName(RespHelper.or500(doctorBasicMaterialReadService.findBasicMaterialById(s.getMaterialId())).getName());
-        });
+        try{
+            materialProduce.getMaterialProduceEntries().forEach(s->{
+                s.setMaterialName(RespHelper.or500(doctorBasicMaterialReadService.findBasicMaterialById(s.getMaterialId())).getName());
+            });
 
-        materialProduce.getMedicalProduceEntries().forEach(s->{
-            s.setMaterialName(RespHelper.or500(doctorBasicMaterialReadService.findBasicMaterialById(s.getMaterialId())).getName());
-        });
+            materialProduce.getMedicalProduceEntries().forEach(s->{
+                s.setMaterialName(RespHelper.or500(doctorBasicMaterialReadService.findBasicMaterialById(s.getMaterialId())).getName());
+            });
+        }catch (Exception e){
+            log.error("build produce info fail, materialProduce:{}, cause:{}", materialProduce, Throwables.getStackTraceAsString(e));
+            throw new JsonResponseException("convert.buildProduce.fail");
+        }
     }
 
     /**
