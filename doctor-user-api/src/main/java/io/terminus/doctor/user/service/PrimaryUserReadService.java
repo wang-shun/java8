@@ -98,4 +98,5 @@ public interface PrimaryUserReadService {
      * @return 主子账号关联信息,即表doctor_user_subs中的一行数据
      */
     Response<Sub> findSubByUserId(Long subUserId);
+
 }

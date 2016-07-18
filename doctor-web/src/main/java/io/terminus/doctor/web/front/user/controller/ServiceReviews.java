@@ -140,11 +140,4 @@ public class ServiceReviews {
         return Lists.newArrayList();
     }
 
-    //TODO 用于项目初期快速给用户开通服务, 运营端上线后就删除,只需要手机号这一个参数就行了
-    @RequestMapping(value = "/openServiceDemo", method = RequestMethod.GET)
-    public boolean openServiceDemo(@RequestParam String mobile){
-        User user = RespHelper.or500(userReadService.findBy(mobile, LoginType.MOBILE));
-        RespHelper.or500(doctorServiceReviewService.openServiceDemo(user.getId()));
-        return true;
-    }
 }

@@ -2,12 +2,10 @@ package io.terminus.doctor.user.dao;
 
 import com.google.common.collect.ImmutableMap;
 import io.terminus.common.mysql.dao.MyBatisDao;
-import io.terminus.common.utils.MapBuilder;
 import io.terminus.doctor.common.utils.Params;
 import io.terminus.doctor.user.model.Sub;
 import org.springframework.stereotype.Repository;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -51,6 +49,6 @@ public class SubDao extends MyBatisDao<Sub> {
      * @return
      */
     public void updateRoleName(Long subRoleId, String newRoleName){
-        getSqlSession().update("updateRoleName", ImmutableMap.of("roleId", subRoleId, "roleName", newRoleName));
+        getSqlSession().update(sqlId("updateRoleName"), ImmutableMap.of("roleId", subRoleId, "roleName", newRoleName));
     }
 }
