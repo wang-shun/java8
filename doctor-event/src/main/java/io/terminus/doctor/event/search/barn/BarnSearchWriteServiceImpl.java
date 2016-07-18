@@ -4,6 +4,7 @@ import com.google.common.base.Throwables;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
+import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.search.api.IndexExecutor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,7 +36,10 @@ public class BarnSearchWriteServiceImpl implements BarnSearchWriteService {
     @Override
     public Response<Boolean> index(Long barnId) {
         try {
-            IndexedBarn indexedBarn = indexedBarnFactory.create(doctorBarnDao.findById(barnId));
+            DoctorBarn doctorBarn = doctorBarnDao.findById(barnId);
+            // 校验是否获取成功
+            doctorBarn = checkSuccess(doctorBarn, barnId);
+            IndexedBarn indexedBarn = indexedBarnFactory.create(doctorBarn);
             if (indexedBarn != null) {
                 indexExecutor.submit(indexedBarnTaskAction.indexTask(indexedBarn));
             }
@@ -45,6 +49,31 @@ public class BarnSearchWriteServiceImpl implements BarnSearchWriteService {
                 barnId, Throwables.getStackTraceAsString(e));
             return Response.fail("barn.index.fail");
         }
+    }
+
+    /**
+     * 校验是否获取成功, 不成功继续获取
+     * @param barn      猪舍
+     * @param barnId    猪舍id
+     * @return
+     */
+    private DoctorBarn checkSuccess(DoctorBarn barn, Long barnId) {
+        if (barn != null) {
+            return barn;
+        }
+        int count = 50; // 尝试50次
+        while(count > 0) {
+            count --;
+            barn = doctorBarnDao.findById(barnId);
+            if (barn != null) {
+                break;
+            }
+            try{
+                Thread.sleep(10); // 睡眠
+            } catch (Exception ignored) {
+            }
+        }
+        return barn;
     }
 
     @Override
