@@ -136,15 +136,4 @@ public class DoctorServiceReviewServiceImpl implements DoctorServiceReviewServic
         return response;
     }
 
-    @Override
-    public Response<Boolean> openServiceDemo(Long userId){
-        try{
-            DoctorServiceReview review = doctorServiceReviewDao.findByUserIdAndType(userId, DoctorServiceReview.Type.PIG_DOCTOR);
-            Preconditions.checkState(Objects.equals(DoctorServiceReview.Status.REVIEW.getValue(), review.getStatus()), "user.service.not.applied");
-            doctorServiceReviewManager.openServiceDemo(userId);
-            return Response.ok(true);
-        }catch(Exception e){
-            return Response.fail(e.getMessage());
-        }
-    }
 }

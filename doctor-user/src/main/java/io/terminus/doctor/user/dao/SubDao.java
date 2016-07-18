@@ -21,6 +21,10 @@ public class SubDao extends MyBatisDao<Sub> {
         return getSqlSession().selectOne(sqlId("findByUserId"), userId);
     }
 
+    public List<Sub> findByUserIds(List<Long> userIds) {
+        return getSqlSession().selectOne(sqlId("findByUserIds"), userIds);
+    }
+
     public Sub findByParentUserIdAndUserId(Long parentUserId, Long userId) {
         return getSqlSession().selectOne(sqlId("findByParentUserIdAndUserId"), ImmutableMap.of("parentUserId", parentUserId, "userId", userId));
     }
@@ -51,6 +55,6 @@ public class SubDao extends MyBatisDao<Sub> {
      * @return
      */
     public void updateRoleName(Long subRoleId, String newRoleName){
-        getSqlSession().update("updateRoleName", ImmutableMap.of("roleId", subRoleId, "roleName", newRoleName));
+        getSqlSession().update(sqlId("updateRoleName"), ImmutableMap.of("roleId", subRoleId, "roleName", newRoleName));
     }
 }

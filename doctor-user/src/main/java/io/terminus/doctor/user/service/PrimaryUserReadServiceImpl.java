@@ -163,4 +163,14 @@ public class PrimaryUserReadServiceImpl implements PrimaryUserReadService {
             return Response.fail("sub.find.fail");
         }
     }
+
+    @Override
+    public Response<List<Sub>> findSubByUserIds(List<Long> subUserIds){
+        try{
+            return Response.ok(subDao.findByUserIds(subUserIds));
+        } catch (Exception e) {
+            log.error("find sub info by sub user id failed, subUserIds={}, cause by {}", subUserIds, Throwables.getStackTraceAsString(e));
+            return Response.fail("sub.find.fail");
+        }
+    }
 }

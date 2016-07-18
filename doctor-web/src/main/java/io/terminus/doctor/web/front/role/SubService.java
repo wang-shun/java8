@@ -252,6 +252,18 @@ public class SubService {
         }
     }
 
+    public Response<List<Sub>> findByUserIds(List<Long> userIds){
+        try{
+            List<io.terminus.doctor.user.model.Sub> subList = RespHelper.orServEx(primaryUserReadService.findSubByUserIds(userIds));
+            return Response.ok(this.setSubInfo(subList));
+        } catch (ServiceException e) {
+            return Response.fail(e.getMessage());
+        } catch (Exception e) {
+            log.error("find sub failed, cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("sub.find.fail");
+        }
+    }
+
     @Export(paramNames = {"user", "roleId", "pageNo", "pageSize"})
     public Response<Paging<Sub>> pagingSubs(BaseUser user, Long roleId,String roleName, String userName,
                                             String realName, Integer pageNo, Integer pageSize) {

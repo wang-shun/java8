@@ -51,6 +51,15 @@
         WHERE id = #{id}
     </select>
 
+    <select id="findByIds" parameterType="long" resultMap="DoctorUserDataPermissionMap" >
+        SELECT <include refid="cols_all" />
+        FROM <include refid="tb" />
+        WHERE id in
+        <foreach collection="userIds" open="(" separator="," close=")" item="id">
+            #{id}
+        </foreach>
+    </select>
+
     <select id="findByUserId" parameterType="long" resultMap="DoctorUserDataPermissionMap" >
         SELECT <include refid="cols_all" />
         FROM <include refid="tb" />
