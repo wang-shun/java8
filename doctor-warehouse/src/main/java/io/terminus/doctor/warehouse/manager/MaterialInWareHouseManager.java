@@ -105,8 +105,9 @@ public class MaterialInWareHouseManager {
             }
 
             consumeMaterialInner(DoctorMaterialConsumeProviderDto.builder()
-                    .type(doctorMaterialInWareHouse.getType()).farmId(doctorMaterialInWareHouse.getFarmId()).farmName(doctorMaterialInWareHouse.getFarmName())
-                    .materialTypeId(doctorMaterialInWareHouse.getId()).materialName(doctorMaterialInWareHouse.getMaterialName())
+                    .type(doctorMaterialInWareHouse.getType())
+                    .farmId(doctorMaterialInWareHouse.getFarmId()).farmName(doctorMaterialInWareHouse.getFarmName())
+                    .materialTypeId(doctorMaterialInWareHouse.getMaterialId()).materialName(doctorMaterialInWareHouse.getMaterialName())
                     .wareHouseId(doctorMaterialInWareHouse.getWareHouseId()).wareHouseName(doctorMaterialInWareHouse.getWareHouseName())
                     .barnId(basicDto.getBarnId()).barnName(basicDto.getBarnName()).staffId(basicDto.getStaffId()).staffName(basicDto.getStaffName())
                     .count(toConsume).unitName(doctorMaterialInWareHouse.getUnitName())
