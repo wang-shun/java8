@@ -186,6 +186,7 @@ public class DoctorMaterialInfos {
     @RequestMapping(value = "/rules", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Boolean createMaterialRules(@RequestBody DoctorMaterialProductRatioDto doctorMaterialProductRatioDto){
+        buildProduceInfo(doctorMaterialProductRatioDto.getProduce());
         return RespHelper.or500(doctorMaterialInfoWriteService.createMaterialProductRatioInfo(
                 doctorMaterialInfoBuild(doctorMaterialProductRatioDto.getMaterialId(),doctorMaterialProductRatioDto.getFarmId()),
                 doctorMaterialProductRatioDto));
@@ -241,6 +242,16 @@ public class DoctorMaterialInfos {
             throw new JsonResponseException(e.getMessage());
         }
         return RespHelper.or500(doctorMaterialInfoWriteService.realProduceMaterial(doctorWareHouseBasicDto, materialProduce));
+    }
+
+    public void buildProduceInfo(DoctorMaterialInfo.MaterialProduce materialProduce){
+        materialProduce.getMaterialProduceEntries().forEach(s->{
+            s.setMaterialName(RespHelper.or500(doctorBasicMaterialReadService.findBasicMaterialById(s.getMaterialId())).getName());
+        });
+
+        materialProduce.getMedicalProduceEntries().forEach(s->{
+            s.setMaterialName(RespHelper.or500(doctorBasicMaterialReadService.findBasicMaterialById(s.getMaterialId())).getName());
+        });
     }
 
     /**
