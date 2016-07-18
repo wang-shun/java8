@@ -2,12 +2,15 @@ package io.terminus.doctor.web.front.event.impl;
 
 import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
+import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.Response;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.basic.model.DoctorBasic;
+import io.terminus.doctor.basic.model.DoctorBasicMaterial;
 import io.terminus.doctor.basic.model.DoctorChangeReason;
 import io.terminus.doctor.basic.model.DoctorCustomer;
+import io.terminus.doctor.basic.service.DoctorBasicMaterialReadService;
 import io.terminus.doctor.basic.service.DoctorBasicReadService;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.Params;
@@ -45,8 +48,6 @@ import io.terminus.doctor.user.model.DoctorStaff;
 import io.terminus.doctor.user.service.DoctorFarmReadService;
 import io.terminus.doctor.user.service.DoctorOrgReadService;
 import io.terminus.doctor.user.service.DoctorStaffReadService;
-import io.terminus.doctor.warehouse.model.DoctorMaterialInfo;
-import io.terminus.doctor.warehouse.service.DoctorMaterialInfoReadService;
 import io.terminus.doctor.web.front.event.service.DoctorGroupWebService;
 import io.terminus.pampas.common.UserUtil;
 import io.terminus.parana.user.model.User;
@@ -81,9 +82,11 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
     private final DoctorBarnReadService doctorBarnReadService;
     private final DoctorGroupReadService doctorGroupReadService;
     private final DoctorOrgReadService doctorOrgReadService;
-    private final DoctorMaterialInfoReadService doctorMaterialInfoReadService;
     private final DoctorStaffReadService doctorStaffReadService;
     private final UserReadService<User> userReadService;
+
+    @RpcConsumer
+    private DoctorBasicMaterialReadService doctorBasicMaterialReadService;
 
     @Autowired
     public DoctorGroupWebServiceImpl(DoctorGroupWriteService doctorGroupWriteService,
@@ -92,7 +95,6 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
                                      DoctorBarnReadService doctorBarnReadService,
                                      DoctorGroupReadService doctorGroupReadService,
                                      DoctorOrgReadService doctorOrgReadService,
-                                     DoctorMaterialInfoReadService doctorMaterialInfoReadService,
                                      DoctorStaffReadService doctorStaffReadService,
                                      UserReadService<User> userReadService) {
         this.doctorGroupWriteService = doctorGroupWriteService;
@@ -101,7 +103,6 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
         this.doctorBarnReadService = doctorBarnReadService;
         this.doctorGroupReadService = doctorGroupReadService;
         this.doctorOrgReadService = doctorOrgReadService;
-        this.doctorMaterialInfoReadService = doctorMaterialInfoReadService;
         this.doctorStaffReadService = doctorStaffReadService;
         this.userReadService = userReadService;
     }
@@ -341,7 +342,7 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
 
     //获取疫苗名称
     private String getVaccinName(Long vaccinId) {
-        return vaccinId == null ? null : RespHelper.or(doctorMaterialInfoReadService.queryById(vaccinId), new DoctorMaterialInfo()).getMaterialName();
+        return vaccinId == null ? null : RespHelper.or(doctorBasicMaterialReadService.findBasicMaterialById(vaccinId), new DoctorBasicMaterial()).getName();
     }
 
     //获取变动原因
