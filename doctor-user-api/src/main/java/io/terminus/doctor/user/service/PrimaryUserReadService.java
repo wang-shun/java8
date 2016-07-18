@@ -99,10 +99,4 @@ public interface PrimaryUserReadService {
      */
     Response<Sub> findSubByUserId(Long subUserId);
 
-    /**
-     * 根据子账号userId 批量查询 主子账号关联信息
-     * @param subUserIds 子账号的userId
-     * @return
-     */
-    Response<List<Sub>> findSubByUserIds(List<Long> subUserIds);
 }
