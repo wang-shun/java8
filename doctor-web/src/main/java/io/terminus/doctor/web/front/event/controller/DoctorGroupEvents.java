@@ -1,6 +1,7 @@
 package io.terminus.doctor.web.front.event.controller;
 
 import com.google.common.collect.Lists;
+import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.model.Paging;
 import io.terminus.doctor.basic.model.DoctorBasic;
 import io.terminus.doctor.basic.service.DoctorBasicReadService;
@@ -10,8 +11,10 @@ import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
 import io.terminus.doctor.event.dto.event.group.input.DoctorNewGroupInput;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
+import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.event.service.DoctorGroupReadService;
 import io.terminus.doctor.event.service.DoctorGroupWriteService;
+import io.terminus.doctor.event.service.DoctorPigReadService;
 import io.terminus.doctor.web.front.auth.DoctorFarmAuthCenter;
 import io.terminus.doctor.web.front.event.dto.DoctorGroupDetailEventsDto;
 import io.terminus.doctor.web.front.event.service.DoctorGroupWebService;
@@ -45,6 +48,9 @@ public class DoctorGroupEvents {
     private final DoctorFarmAuthCenter doctorFarmAuthCenter;
     private final DoctorGroupWriteService doctorGroupWriteService;
     private final DoctorBasicReadService doctorBasicReadService;
+
+    @RpcConsumer
+    private DoctorPigReadService doctorPigReadService;
 
     @Autowired
     public DoctorGroupEvents(DoctorGroupWebService doctorGroupWebService,
@@ -129,6 +135,20 @@ public class DoctorGroupEvents {
     @RequestMapping(value = "/code", method = RequestMethod.GET)
     public String generateGroupCode(@RequestParam(value = "barnName", required = false) String barnName) {
         return doctorGroupWebService.generateGroupCode(barnName).getResult();
+    }
+
+    /**
+     * 生成猪群号 猪舍名(yyyy-MM-dd)
+     * @param pigId 猪id
+     * @return  猪群号
+     */
+    @RequestMapping(value = "/pigCode", method = RequestMethod.GET)
+    public String generateGroupCodeByPigId(@RequestParam(value = "pigId", required = false) Long pigId) {
+        if (pigId == null) {
+            return null;
+        }
+        DoctorPigTrack pigTrack = RespHelper.or500(doctorPigReadService.findPigTrackByPigId(pigId));
+        return doctorGroupWebService.generateGroupCode(pigTrack.getCurrentBarnName()).getResult();
     }
 
     /**

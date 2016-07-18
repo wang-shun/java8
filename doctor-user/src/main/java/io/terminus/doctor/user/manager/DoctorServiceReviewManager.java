@@ -245,33 +245,4 @@ public class DoctorServiceReviewManager {
         }
     }
 
-    //TODO 用于项目初期快速给用户开通服务, 运营端上线后就删除
-    @Transactional
-    public void openServiceDemo(Long userId){
-        DoctorStaff staff = doctorStaffDao.findByUserId(userId);
-        DoctorOrg org = doctorOrgDao.findById(staff.getOrgId());
-        ParanaUser user = new ParanaUser();
-        user.setId(-1L);
-        user.setName("test");
-        user.setType(UserType.OPERATOR.value());
-        this.openDoctorService(user, userId, this.addFarms(org));
-    }
-    private List<DoctorFarm> addFarms(DoctorOrg org){
-        List<DoctorFarm> farms = new ArrayList<>();
-        for(int i = 1; i <= 3 ;i++){
-            DoctorFarm farm = new DoctorFarm();
-            farm.setName("猪场" + i);
-            farm.setOrgId(org.getId());
-            farm.setOrgName(org.getName());
-            farm.setProvinceId(330000);
-            farm.setProvinceName("浙江省");
-            farm.setCityId(330100);
-            farm.setCityName("杭州市");
-            farm.setDistrictId(330102);
-            farm.setDistrictName("上城区");
-            farm.setDetailAddress("黄泉大街4444号");
-            farms.add(farm);
-        }
-        return farms;
-    }
 }
