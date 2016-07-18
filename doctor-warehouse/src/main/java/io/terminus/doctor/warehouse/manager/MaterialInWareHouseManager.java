@@ -182,6 +182,7 @@ public class MaterialInWareHouseManager {
     private Long consumeMaterialInner(DoctorMaterialConsumeProviderDto doctorMaterialConsumeProviderDto){
         doctorMaterialConsumeProviderDto.setActionType(DoctorMaterialConsumeProvider.EVENT_TYPE.CONSUMER.getValue());
         Map<String,Object> context = Maps.newHashMap();
+        log.info("********** material onsume provider :{}", doctorMaterialConsumeProviderDto);
         this.doctorWareHouseHandlerInvocation.invoke(doctorMaterialConsumeProviderDto, context);
         return Long.valueOf(context.get("eventId").toString());
     }
