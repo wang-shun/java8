@@ -160,6 +160,7 @@ public class DoctorWareHouseEvents {
                     .staffId(currentUserId).staffName(userName)
                     .count(dto.getCount()).consumeDays(dto.getConsumeDays())
                     .unitId(doctorBasicMaterial.getUnitId()).unitName(doctorBasicMaterial.getUnitName())
+                    .unitGroupId(doctorBasicMaterial.getUnitGroupId()).unitGroupName(doctorBasicMaterial.getUnitGroupName())
                     .build();
         }catch (Exception e){
             log.error("consume material fail, cause:{}", Throwables.getStackTraceAsString(e));
@@ -199,6 +200,7 @@ public class DoctorWareHouseEvents {
                     .materialTypeId(doctorBasicMaterial.getId()).materialName(doctorBasicMaterial.getName())
                     .staffId(userId).staffName(userName)
                     .count(dto.getCount()).unitId(doctorBasicMaterial.getUnitId()).unitName(doctorBasicMaterial.getUnitName())
+                    .unitGroupId(doctorBasicMaterial.getUnitGroupId()).unitGroupName(doctorBasicMaterial.getUnitGroupName())
                     .build();
         }catch (Exception e){
             log.error("provider material fail, cause:{}", Throwables.getStackTraceAsString(e));
