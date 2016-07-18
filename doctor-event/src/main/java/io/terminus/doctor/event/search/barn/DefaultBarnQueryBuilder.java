@@ -79,6 +79,8 @@ public class DefaultBarnQueryBuilder extends BaseBarnQueryBuilder {
         if (StringUtils.isNotBlank(sort)) {
             List<String> parts = Splitters.UNDERSCORE.splitToList(sort);
             if (parts.size() < 3) {
+                // 否则默认按 updatedAt 降序
+                sort(sorts, "2", "updatedAt");
                 return sorts;
             }
             String storage = Iterables.getFirst(parts, "0");
@@ -88,10 +90,6 @@ public class DefaultBarnQueryBuilder extends BaseBarnQueryBuilder {
             sort(sorts, storage, "storage");
             sort(sorts, createdAt, "createdAt");
             sort(sorts, capacity, "capacity");
-        }
-        // 否则默认按 updatedAt 降序
-        if (sorts.size() == 0) {
-            sort(sorts, "2", "updatedAt");
         }
         return sorts;
     }
