@@ -1,12 +1,14 @@
 package io.terminus.doctor.web.front.warehouse.controller;
 
 import com.google.common.base.Throwables;
+import com.google.common.collect.Lists;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.user.model.DoctorFarm;
 import io.terminus.doctor.user.service.DoctorFarmReadService;
+import io.terminus.doctor.user.service.DoctorUserProfileReadService;
 import io.terminus.doctor.warehouse.dto.DoctorWareHouseDto;
 import io.terminus.doctor.warehouse.model.DoctorFarmWareHouseType;
 import io.terminus.doctor.warehouse.model.DoctorWareHouse;
@@ -16,6 +18,7 @@ import io.terminus.doctor.web.front.warehouse.dto.DoctorWareHouseCreateDto;
 import io.terminus.doctor.web.front.warehouse.dto.DoctorWareHouseUpdateDto;
 import io.terminus.pampas.common.UserUtil;
 import io.terminus.parana.user.model.User;
+import io.terminus.parana.user.model.UserProfile;
 import io.terminus.parana.user.service.UserReadService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,14 +53,18 @@ public class DoctorWareHouseQuery {
 
     private final UserReadService userReadService;
 
+    private final DoctorUserProfileReadService doctorUserProfileReadService;
+
     @Autowired
     public DoctorWareHouseQuery(DoctorWareHouseReadService doctorWareHouseReadService,
                                 DoctorWareHouseWriteService doctorWareHouseWriteService,
-                                DoctorFarmReadService doctorFarmReadService, UserReadService userReadService){
+                                DoctorFarmReadService doctorFarmReadService, UserReadService userReadService,
+                                DoctorUserProfileReadService doctorUserProfileReadService){
         this.doctorWareHouseReadService = doctorWareHouseReadService;
         this.doctorWareHouseWriteService = doctorWareHouseWriteService;
         this.doctorFarmReadService = doctorFarmReadService;
         this.userReadService = userReadService;
+        this.doctorUserProfileReadService = doctorUserProfileReadService;
     }
 
     @RequestMapping(value = "/listWareHouseType", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -120,9 +127,9 @@ public class DoctorWareHouseQuery {
             DoctorFarm doctorFarm = farmResponse.getResult();
 
             // get user reader info
-            Response<User> userResponse = userReadService.findById(doctorWareHouseCreateDto.getManagerId());
-            checkState(userResponse.isSuccess(), "read.userInfo.fail");
-            User user = userResponse.getResult();
+            UserProfile userProfile = RespHelper.orServEx(
+                    doctorUserProfileReadService.findProfileByUserIds(
+                            Lists.newArrayList(doctorWareHouseCreateDto.getManagerId()))).get(0);
 
             Response<User> currentUserResponse = userReadService.findById(UserUtil.getUserId());
             User currentUser = currentUserResponse.getResult();
@@ -130,7 +137,7 @@ public class DoctorWareHouseQuery {
             doctorWareHouse = DoctorWareHouse.builder()
                     .wareHouseName(doctorWareHouseCreateDto.getWareHouseName())
                     .farmId(doctorWareHouseCreateDto.getFarmId()).farmName(doctorFarm.getName())
-                    .managerId(doctorWareHouseCreateDto.getManagerId()).managerName(user.getName())
+                    .managerId(doctorWareHouseCreateDto.getManagerId()).managerName(userProfile.getRealName())
                     .address(doctorWareHouseCreateDto.getAddress()).type(doctorWareHouseCreateDto.getType())
                     .creatorId(currentUser.getId()).creatorName(currentUser.getName())
                     .build();
