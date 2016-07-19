@@ -120,7 +120,7 @@ public class DoctorSowFarrowingHandler extends DoctorAbstractEventFlowHandler {
         input.setQuantity(farrowingLiveCount);
         input.setSowQty(sowCount);
         input.setBoarQty(boarCount);
-        input.setAvgDayAge(Integer.valueOf(extra.get("dayAgeAvg").toString()));
+        input.setAvgDayAge(Integer.valueOf(MoreObjects.firstNonNull(extra.get("dayAgeAvg"), 1).toString()));
         input.setAvgWeight(Double.valueOf(extra.get("birthNestAvg").toString()));
         input.setEventAt(DateTime.now().toString(DTF));
         input.setIsAuto(1);
