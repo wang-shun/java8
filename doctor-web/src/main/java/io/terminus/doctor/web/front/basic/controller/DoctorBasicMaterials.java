@@ -54,11 +54,13 @@ public class DoctorBasicMaterials {
      * @param type 基础物料类型
      * @see io.terminus.doctor.common.enums.WareHouseType
      * @param srm 输入码
+     * @param exIds 排除掉的ids
      * @return 基础物料list
      */
     @RequestMapping(value = "/type", method = RequestMethod.GET)
     public List<DoctorBasicMaterial> finaBasicMaterialByTypeFilterBySrm(@RequestParam(value = "type", required = false) Integer type,
-                                                                        @RequestParam(value = "srm", required = false) String srm) {
-        return RespHelper.or500(doctorBasicMaterialReadService.findBasicMaterialByTypeFilterBySrm(type, srm));
+                                                                        @RequestParam(value = "srm", required = false) String srm,
+                                                                        @RequestParam(value = "exIds", required = false) String exIds) {
+        return RespHelper.or500(doctorBasicMaterialReadService.findBasicMaterialByTypeFilterBySrm(type, srm, exIds));
     }
 }
