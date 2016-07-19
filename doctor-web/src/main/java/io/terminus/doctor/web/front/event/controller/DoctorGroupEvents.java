@@ -138,7 +138,7 @@ public class DoctorGroupEvents {
     }
 
     /**
-     * 生成猪群号 猪舍名(yyyy-MM-dd)
+     * 根据id生成猪群号(主要用于分娩舍: 如果当前猪舍存在猪群直接返回此猪群号, 如果不存在, 新生成猪群号
      * @param pigId 猪id
      * @return  猪群号
      */
@@ -148,20 +148,7 @@ public class DoctorGroupEvents {
             return null;
         }
         DoctorPigTrack pigTrack = RespHelper.or500(doctorPigReadService.findPigTrackByPigId(pigId));
-        return doctorGroupWebService.generateGroupCode(pigTrack.getCurrentBarnName()).getResult();
-    }
-
-    /**
-     * 根据猪舍id生成猪群号(主要用于分娩舍: 如果当前猪舍存在猪群直接返回此猪群号, 如果不存在, 新生成猪群号
-     * @param barnId 猪舍id
-     * @return  猪群号
-     */
-    @RequestMapping(value = "/barnIdCode", method = RequestMethod.GET)
-    public String generateGroupCodeByBarnId(@RequestParam(value = "barnId", required = false) Long barnId) {
-        if (barnId == null) {
-            return null;
-        }
-        return doctorGroupWebService.generateGroupCode(barnId).getResult();
+        return doctorGroupWebService.generateGroupCode(pigTrack.getCurrentBarnId()).getResult();
     }
 
     /**
