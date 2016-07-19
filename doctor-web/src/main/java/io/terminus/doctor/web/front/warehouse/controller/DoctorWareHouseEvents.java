@@ -1,6 +1,7 @@
 package io.terminus.doctor.web.front.warehouse.controller;
 
 import com.google.common.base.Throwables;
+import com.google.common.collect.Lists;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
@@ -10,6 +11,7 @@ import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.service.DoctorBarnReadService;
 import io.terminus.doctor.user.model.DoctorFarm;
 import io.terminus.doctor.user.service.DoctorFarmReadService;
+import io.terminus.doctor.user.service.DoctorUserProfileReadService;
 import io.terminus.doctor.warehouse.dto.DoctorMaterialConsumeProviderDto;
 import io.terminus.doctor.warehouse.dto.DoctorMaterialInWareHouseDto;
 import io.terminus.doctor.warehouse.dto.DoctorWareHouseDto;
@@ -57,6 +59,8 @@ public class DoctorWareHouseEvents {
 
     private final UserReadService userReadService;
 
+    private final DoctorUserProfileReadService doctorUserProfileReadService;
+
     private final DoctorBarnReadService doctorBarnReadService;
 
     private final DoctorWareHouseReadService doctorWareHouseReadService;
@@ -71,7 +75,8 @@ public class DoctorWareHouseEvents {
                                  UserReadService userReadService, DoctorBarnReadService doctorBarnReadService,
                                  DoctorBasicMaterialReadService doctorBasicMaterialReadService,
                                  DoctorWareHouseReadService doctorWareHouseReadService,
-                                 DoctorFarmReadService doctorFarmReadService){
+                                 DoctorFarmReadService doctorFarmReadService,
+                                 DoctorUserProfileReadService doctorUserProfileReadService){
         this.doctorMaterialInWareHouseWriteService = doctorMaterialInWareHouseWriteService;
         this.doctorMaterialInWareHouseReadService = doctorMaterialInWareHouseReadService;
         this.userReadService = userReadService;
@@ -79,6 +84,7 @@ public class DoctorWareHouseEvents {
         this.doctorBasicMaterialReadService = doctorBasicMaterialReadService;
         this.doctorWareHouseReadService = doctorWareHouseReadService;
         this.doctorFarmReadService = doctorFarmReadService;
+        this.doctorUserProfileReadService = doctorUserProfileReadService;
     }
 
     /**
@@ -200,8 +206,7 @@ public class DoctorWareHouseEvents {
             DoctorWareHouseDto doctorWareHouseDto = RespHelper.orServEx(doctorWareHouseReadService.queryDoctorWareHouseById(dto.getWareHouseId()));
 
             Long userId = UserUtil.getUserId();
-            Response<User> userResponse = userReadService.findById(userId);
-            String userName = RespHelper.orServEx(userResponse).getName();
+            String userName = RespHelper.orServEx(doctorUserProfileReadService.findProfileByUserIds(Lists.newArrayList(userId))).get(0).getRealName();
 
             DoctorBasicMaterial doctorBasicMaterial = RespHelper.orServEx(doctorBasicMaterialReadService.findBasicMaterialById(dto.getMaterialId()));
             DoctorFarm doctorFarm = RespHelper.orServEx(doctorFarmReadService.findFarmById(dto.getFarmId()));
