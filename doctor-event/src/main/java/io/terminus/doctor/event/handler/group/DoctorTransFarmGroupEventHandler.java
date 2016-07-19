@@ -64,11 +64,12 @@ public class DoctorTransFarmGroupEventHandler extends DoctorAbstractGroupEventHa
         DoctorGroupSnapShotInfo oldShot = getOldSnapShotInfo(group, groupTrack);
         DoctorTransFarmGroupInput transFarm = (DoctorTransFarmGroupInput) input;
 
-        //校验数量, 日龄差
+        //校验数量, 日龄差, 转群总重
         checkQuantity(groupTrack.getQuantity(), transFarm.getQuantity());
         checkQuantity(groupTrack.getBoarQty(), transFarm.getBoarQty());
         checkQuantity(groupTrack.getSowQty(), transFarm.getSowQty());
         checkQuantityEqual(transFarm.getQuantity(), transFarm.getBoarQty(), transFarm.getSowQty());
+        checkTranWeight(groupTrack.getWeight(), transFarm.getWeight());
         checkDayAge(groupTrack.getAvgDayAge(), transFarm);
 
         //1.转换转场事件
