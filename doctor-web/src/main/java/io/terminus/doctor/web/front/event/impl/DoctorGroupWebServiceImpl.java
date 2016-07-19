@@ -63,6 +63,7 @@ import java.util.Objects;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.terminus.common.utils.Arguments.isEmpty;
+import static io.terminus.common.utils.Arguments.notEmpty;
 import static io.terminus.common.utils.BeanMapper.map;
 import static io.terminus.doctor.common.utils.RespHelper.orServEx;
 
@@ -297,6 +298,20 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
             return Response.ok();
         }
         return Response.ok(barnName + "(" +DateUtil.toDateString(new Date()) + ")");
+    }
+
+    @Override
+    public Response<String> generateGroupCode(Long barnId) {
+        try {
+            List<DoctorGroup> groups = RespHelper.orServEx(doctorGroupReadService.findGroupByCurrentBarnId(barnId));
+            if (notEmpty(groups)) {
+                return Response.ok(groups.get(0).getGroupCode());
+            }
+            return generateGroupCode(getBarnName(barnId));
+        } catch (Exception e) {
+            log.error("generate group code failed, barnId:{}, cause:{}", barnId, Throwables.getStackTraceAsString(e));
+            return Response.ok();
+        }
     }
 
     //校验猪群是否存在

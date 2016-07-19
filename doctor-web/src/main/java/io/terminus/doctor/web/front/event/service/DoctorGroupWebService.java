@@ -50,4 +50,11 @@ public interface DoctorGroupWebService {
      * @return  猪群号
      */
     Response<String> generateGroupCode(String barnName);
+
+    /**
+     * 根据猪舍id生成猪群号(主要用于分娩舍: 如果当前猪舍存在猪群直接返回此猪群号, 如果不存在, 新生成猪群号)
+     * @param barnId 猪舍id
+     * @return 猪群号
+     */
+    Response<String> generateGroupCode(@NotNull(message = "barnId.not.null") Long barnId);
 }

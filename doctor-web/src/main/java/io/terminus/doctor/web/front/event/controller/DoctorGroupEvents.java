@@ -152,6 +152,19 @@ public class DoctorGroupEvents {
     }
 
     /**
+     * 根据猪舍id生成猪群号(主要用于分娩舍: 如果当前猪舍存在猪群直接返回此猪群号, 如果不存在, 新生成猪群号
+     * @param barnId 猪舍id
+     * @return  猪群号
+     */
+    @RequestMapping(value = "/barnIdCode", method = RequestMethod.GET)
+    public String generateGroupCodeByBarnId(@RequestParam(value = "barnId", required = false) Long barnId) {
+        if (barnId == null) {
+            return null;
+        }
+        return doctorGroupWebService.generateGroupCode(barnId).getResult();
+    }
+
+    /**
      * 查询猪群详情
      * @param groupId 猪群id
      * @return 猪群详情
