@@ -207,6 +207,13 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
         doctorGroupSnapshotDao.update(snapshot);
     }
 
+    //转群总重不能大于猪群总重
+    protected static void checkTranWeight(Double weight, Double transWeight) {
+        if (transWeight > weight) {
+            throw new ServiceException("tranWeight.over.weight");
+        }
+    }
+
     //校验数量
     protected static void checkQuantity(Integer max, Integer actual) {
         if (actual > max) {
