@@ -43,4 +43,15 @@ public class DoctorMessageDao extends MyBatisDao<DoctorMessage> {
         return getSqlSession().selectOne(sqlId("findLatestWarnMessage"),
                 ImmutableMap.of("templateId", templateId, "farmId", farmId, "roleId", roleId));
     }
+
+    /**
+     * 获取预警消息(最新)
+     * @param templateId    模板id
+     * @param farmId        猪场id
+     * @return
+     */
+    public DoctorMessage findLatestWarnMessage(Long templateId, Long farmId) {
+        return getSqlSession().selectOne(sqlId("findLatestWarnMessage2"),
+                ImmutableMap.of("templateId", templateId, "farmId", farmId));
+    }
 }
