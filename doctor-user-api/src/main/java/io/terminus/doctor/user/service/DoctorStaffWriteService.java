@@ -27,4 +27,11 @@ public interface DoctorStaffWriteService {
      * @return
      */
     Response<Boolean> deleteDoctorStaff(Long staffId);
+
+    /**
+     * 清除下指定用户的缓存
+     * @param userId 用户id
+     * @return
+     */
+    Response clearUserCache(Long userId);
 }

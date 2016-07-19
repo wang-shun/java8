@@ -90,4 +90,10 @@ public class DoctorStaffWriteServiceImpl implements DoctorStaffWriteService{
             coreEventDispatcher.publish(new UserStaffInfoModifyEvent(userId));
         }
     }
+
+    @Override
+    public Response clearUserCache(Long userId){
+        this.publish(userId);
+        return Response.ok();
+    }
 }

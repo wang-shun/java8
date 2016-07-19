@@ -93,4 +93,10 @@ public class DoctorUserDataPermissionWriteServiceImpl implements DoctorUserDataP
             coreEventDispatcher.publish(new UserDataPermissionModifyEvent(userId));
         }
     }
+
+    @Override
+    public Response clearUserCache(Long userId){
+        this.publish(userId);
+        return Response.ok();
+    }
 }
