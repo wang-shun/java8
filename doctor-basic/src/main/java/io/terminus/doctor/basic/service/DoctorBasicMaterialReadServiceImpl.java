@@ -5,6 +5,7 @@ import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.model.PageInfo;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
+import io.terminus.common.utils.Splitters;
 import io.terminus.doctor.basic.dao.DoctorBasicMaterialDao;
 import io.terminus.doctor.basic.dto.DoctorBasicMaterialSearchDto;
 import io.terminus.doctor.basic.model.DoctorBasicMaterial;
@@ -15,7 +16,6 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static io.terminus.common.utils.Arguments.isEmpty;
 import static io.terminus.common.utils.Arguments.notEmpty;
 
 /**
@@ -58,17 +58,23 @@ public class DoctorBasicMaterialReadServiceImpl implements DoctorBasicMaterialRe
     }
 
     @Override
-    public Response<List<DoctorBasicMaterial>> findBasicMaterialByTypeFilterBySrm(Integer type, String srm) {
+    public Response<List<DoctorBasicMaterial>> findBasicMaterialByTypeFilterBySrm(Integer type, String srm, String exIds) {
         try {
             List<DoctorBasicMaterial> basicMaterials = doctorBasicMaterialDao.findByType(type);
-            if (isEmpty(srm)) {
-                return Response.ok(basicMaterials);
+            if (notEmpty(srm)) {
+                basicMaterials = basicMaterials.stream()
+                        .filter(basic -> notEmpty(basic.getSrm()) && basic.getSrm().toLowerCase().contains(srm.toLowerCase()))
+                        .collect(Collectors.toList());
             }
-            return Response.ok(basicMaterials.stream()
-                    .filter(basic -> notEmpty(basic.getSrm()) && basic.getSrm().toLowerCase().contains(srm.toLowerCase()))
-                    .collect(Collectors.toList()));
+            if (notEmpty(exIds)) {
+                List<Long> exMaterialIds = Splitters.splitToLong(exIds, Splitters.COMMA);
+                basicMaterials = basicMaterials.stream()
+                        .filter(material -> !exMaterialIds.contains(material.getId()))
+                        .collect(Collectors.toList());
+            }
+            return Response.ok(basicMaterials);
         } catch (Exception e) {
-            log.error("find basicMaterial filter by srm failed, type:{}, srm:{}, cause:{}", type, srm, Throwables.getStackTraceAsString(e));
+            log.error("find basicMaterial filter by srm failed, type:{}, srm:{}, exIds:{}, cause:{}", type, srm, exIds, Throwables.getStackTraceAsString(e));
             return Response.fail("basicMaterial.find.fail");
         }
     }
