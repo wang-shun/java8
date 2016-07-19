@@ -105,7 +105,7 @@
         SELECT <include refid="cols_all" />
         FROM <include refid="tb" />
         <include refid="criteria" />
-        order by updated_at desc
+        order by `status` desc, updated_at desc
         limit #{offset}, #{limit}
     </select>
 
