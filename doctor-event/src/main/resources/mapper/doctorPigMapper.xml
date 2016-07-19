@@ -140,6 +140,10 @@
         select pig_code from doctor_pigs where farm_id = #{farmId};
     </select>
 
+    <select id="findPigCodesByCompanyId" parameterType="long" resultType="string">
+        select pig_code from doctor_pigs WHERE `org_id` = #{orgId}
+    </select>
+
     <update id="removalPig" parameterType="long">
         UPDATE <include refid="tb"/>
         SET `is_removal` = 1

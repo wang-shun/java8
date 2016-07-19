@@ -93,8 +93,8 @@ public class DoctorEntryHandler implements DoctorEventCreateHandler {
             DoctorPigTrack doctorPigTrack = buildEntryFarmPigDoctorTrack(doctorFarmEntryDto, basic);
 
             // pig create
-            checkState(doctorPigInfoCache.judgePigCodeNotContain(doctorPig.getFarmId(), doctorPig.getPigCode()), "validate.pigCode.fail");
-            doctorPigInfoCache.addPigCodeToFarm(doctorPig.getFarmId(), doctorPig.getPigCode());
+            checkState(doctorPigInfoCache.judgePigCodeNotContain(doctorPig.getOrgId(), doctorPig.getPigCode()), "validate.pigCode.fail");
+            doctorPigInfoCache.addPigCodeToFarm(doctorPig.getOrgId(), doctorPig.getPigCode());
             doctorPigDao.create(doctorPig);
 
             // event create
@@ -158,7 +158,6 @@ public class DoctorEntryHandler implements DoctorEventCreateHandler {
      * build pig event 构建进厂事件信息
      * @param basic
      * @param dto
-     * @param pigType
      * @return
      */
     private DoctorPigEvent buildDoctorPigEntryEvent(DoctorBasicInputInfoDto basic, DoctorFarmEntryDto dto){

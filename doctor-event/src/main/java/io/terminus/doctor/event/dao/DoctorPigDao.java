@@ -46,4 +46,13 @@ public class DoctorPigDao extends MyBatisDao<DoctorPig> {
     public List<String> findPigCodesByFarmId(Long farmId){
         return this.getSqlSession().selectList(sqlId("findPigCodesByFarmId"), farmId);
     }
+
+    /**
+     * 通过CompanyId 获取对应的PigCode
+     * @param companyId
+     * @return
+     */
+    public List<String> findPigCodesByCompanyId(Long companyId){
+        return this.getSqlSession().selectList(sqlId("findPigCodesByCompanyId"), companyId);
+    }
 }

@@ -101,11 +101,11 @@ public interface DoctorPigReadService {
 
     /**
      * 校验 farmId pigCode 不存在
-     * @param farmId
+     * @param orgId
      * @param pigCode
      * @return
      */
-    Response<Boolean> validatePigCodeByFarmId(Long farmId, String pigCode);
+    Response<Boolean> validatePigCodeByFarmId(Long orgId, String pigCode);
 
     /**
      * 获取猪舍内的所有猪的猪类
