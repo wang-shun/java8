@@ -17,20 +17,20 @@ public class DoctorSaleDailyReport implements Serializable {
     /**
      * 公猪
      */
-    private int boar;
+    private long boar;
 
     /**
      * 母猪
      */
-    private int sow;
+    private long sow;
 
     /**
      * 保育猪(产房 + 保育)
      */
-    private int nursery;
+    private long nursery;
 
     /**
      * 育肥猪
      */
-    private int fatten;
+    private long fatten;
 }
