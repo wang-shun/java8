@@ -14,7 +14,13 @@ import java.io.Serializable;
 public class DoctorWeanDailyReport implements Serializable {
     private static final long serialVersionUID = 5413097064736038911L;
 
-    private Integer count;
+    /**
+     * 断奶数
+     */
+    private int count;
 
-    private Double weight;
+    /**
+     * 断奶均重(kg)
+     */
+    private double weight;
 }

@@ -14,19 +14,43 @@ import java.io.Serializable;
 public class DoctorLiveStockDailyReport implements Serializable {
     private static final long serialVersionUID = 2428304354860017632L;
 
-    private Integer houbeiSow;
+    /**
+     * 后备母猪
+     */
+    private int houbeiSow;
 
-    private Integer peihuaiSow;
+    /**
+     * 配怀母猪(已配种 + 怀孕)
+     */
+    private int peihuaiSow;
 
-    private Integer buruSow;
+    /**
+     * 哺乳母猪
+     */
+    private int buruSow;
 
-    private Integer konghuaiSow;
+    /**
+     * 空怀母猪(断奶 + 返情 + 流产)
+     */
+    private int konghuaiSow;
 
-    private Integer boar;
+    /**
+     * 公猪
+     */
+    private int boar;
 
-    private Integer farrow;
+    /**
+     * 产房仔猪
+     */
+    private int farrow;
 
-    private Integer nursery;
+    /**
+     * 保育猪
+     */
+    private int nursery;
 
-    private Integer fatten;
+    /**
+     * 育肥猪
+     */
+    private int fatten;
 }

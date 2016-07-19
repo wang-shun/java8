@@ -14,11 +14,23 @@ import java.io.Serializable;
 public class DoctorSaleDailyReport implements Serializable {
     private static final long serialVersionUID = -1170948612908091614L;
 
-    private Integer boar;
+    /**
+     * 公猪
+     */
+    private int boar;
 
-    private Integer sow;
+    /**
+     * 母猪
+     */
+    private int sow;
 
-    private Integer nursery;
+    /**
+     * 保育猪(产房 + 保育)
+     */
+    private int nursery;
 
-    private Integer fatten;
+    /**
+     * 育肥猪
+     */
+    private int fatten;
 }

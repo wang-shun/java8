@@ -14,11 +14,23 @@ import java.io.Serializable;
 public class DoctorCheckPregDailyReport implements Serializable {
     private static final long serialVersionUID = 4570313490797897082L;
 
-    private Integer positive;
+    /**
+     * 妊娠检查阳性
+     */
+    private int positive;
 
-    private Integer negative;
+    /**
+     * 妊娠检查阴性
+     */
+    private int negative;
 
-    private Integer duannai;
+    /**
+     * 返情
+     */
+    private int fanqing;
 
-    private Integer fanqing;
+    /**
+     * 流产
+     */
+    private int liuchan;
 }

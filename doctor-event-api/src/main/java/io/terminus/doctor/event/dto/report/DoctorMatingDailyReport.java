@@ -14,11 +14,23 @@ import java.io.Serializable;
 public class DoctorMatingDailyReport implements Serializable {
     private static final long serialVersionUID = -7708318908444027462L;
 
-    private Integer houbei;
+    /**
+     * 后备
+     */
+    private int houbei;
 
-    private Integer duannai;
+    /**
+     * 断奶
+     */
+    private int duannai;
 
-    private Integer fanqing;
+    /**
+     * 返情
+     */
+    private int fanqing;
 
-    private Integer liuchan;
+    /**
+     * 流产
+     */
+    private int liuchan;
 }

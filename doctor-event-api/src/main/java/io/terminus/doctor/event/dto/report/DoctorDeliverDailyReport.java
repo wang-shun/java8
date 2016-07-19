@@ -14,13 +14,28 @@ import java.io.Serializable;
 public class DoctorDeliverDailyReport implements Serializable {
     private static final long serialVersionUID = 2753759652989219311L;
 
-    private Integer nest;
+    /**
+     * 分娩窝数
+     */
+    private int nest;
 
-    private Integer live;
+    /**
+     * 活仔数
+     */
+    private int live;
 
-    private Integer health;
+    /**
+     * 健仔数
+     */
+    private int health;
 
-    private Integer weak;
+    /**
+     * 弱仔数
+     */
+    private int weak;
 
-    private Integer black;
+    /**
+     * 死黑木畸
+     */
+    private int black;
 }
