@@ -1,11 +1,13 @@
 package io.terminus.doctor.msg.dto;
 
+import com.google.common.collect.Lists;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Builder;
 
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * Desc: 子账号消息传递对象
@@ -34,5 +36,10 @@ public class SubUser implements Serializable {
      * 角色id
      */
     private Long roleId;
+
+    /**
+     * 有权限的猪场
+     */
+    private List<Long> farmIds = Lists.newArrayList();
 
 }

@@ -10,7 +10,9 @@ import io.terminus.doctor.msg.model.DoctorMessage;
 import io.terminus.doctor.msg.producer.IProducer;
 import io.terminus.doctor.msg.service.DoctorMessageReadService;
 import io.terminus.doctor.msg.service.DoctorMessageWriteService;
+import io.terminus.doctor.user.model.DoctorUserDataPermission;
 import io.terminus.doctor.user.model.Sub;
+import io.terminus.doctor.user.service.DoctorUserDataPermissionReadService;
 import io.terminus.doctor.user.service.PrimaryUserReadService;
 import io.terminus.parana.user.model.User;
 import io.terminus.parana.user.service.UserReadService;
@@ -46,6 +48,9 @@ public class MsgManager {
 
     @Autowired
     private DoctorMessageWriteService doctorMessageWriteService;
+
+    @Autowired
+    private DoctorUserDataPermissionReadService doctorUserDataPermissionReadService;
 
     @Autowired
     private UserReadService userReadService;
@@ -84,11 +89,18 @@ public class MsgManager {
             List<Sub> subs = RespHelper.orServEx(primaryUserReadService.findAllActiveSubs());
             for (int i = 0; subs!= null && i < subs.size(); i++) {
                 Sub sub = subs.get(i);
-                subUsers.add(SubUser.builder()
+                SubUser subUser = SubUser.builder()
                         .userId(sub.getUserId())
                         .parentUserId(sub.getParentUserId())
                         .roleId(sub.getRoleId())
-                        .build());
+                        .build();
+                // 获取猪场权限
+                DoctorUserDataPermission dataPermission = RespHelper.orServEx(
+                        doctorUserDataPermissionReadService.findDataPermissionByUserId(sub.getUserId()));
+                if (dataPermission != null) {
+                    subUser.getFarmIds().addAll(dataPermission.getFarmIdsList());
+                }
+                subUsers.add(subUser);
             }
             // 执行
             producerMap.forEach((beanName, producer) -> {

@@ -113,6 +113,17 @@ public class DoctorMessageReadServiceImpl implements DoctorMessageReadService {
     }
 
     @Override
+    public Response<DoctorMessage> findLatestWarnMessage(Long templateId, Long farmId) {
+        try{
+            return Response.ok(doctorMessageDao.findLatestWarnMessage(templateId, farmId));
+        } catch (Exception e) {
+            log.error("find latest warn message failed, templateId:{}, farmId:{}, cause by {}",
+                    templateId, farmId,  Throwables.getStackTraceAsString(e));
+            return Response.fail("latest.warn.msg.fail");
+        }
+    }
+
+    @Override
     public Response<Long> findNoReadCount(Long userId) {
         try{
             return Response.ok(doctorMessageDao.findNoReadCount(userId));

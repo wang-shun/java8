@@ -4,12 +4,12 @@ import com.google.common.collect.ImmutableList;
 import configuration.front.FrontWebConfiguration;
 import io.terminus.doctor.front.BaseFrontWebTest;
 import io.terminus.doctor.msg.model.DoctorMessageRule;
+import io.terminus.doctor.utils.HttpGetRequest;
+import io.terminus.doctor.utils.HttpPostRequest;
 import io.terminus.doctor.web.front.msg.controller.DoctorMsgRules;
 import org.junit.Test;
 import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.http.HttpEntity;
-import io.terminus.doctor.utils.HttpGetRequest;
-import io.terminus.doctor.utils.HttpPostRequest;
 
 import java.util.List;
 
@@ -34,6 +34,30 @@ public class DoctorMsgRulesTest extends BaseFrontWebTest {
                 .build();
         List list = (List)this.restTemplate.getForObject(url, Object.class);
         System.out.println(list.size());
+    }
+
+    /**
+     * 查询角色与猪场规则绑定
+     * @see DoctorMsgRules#findHasCheckedRule(Long, Long)
+     */
+    @Test
+    public void test_QUERY_HasCheckRuls() {
+        // 绑定规则 (多个 模板 id)
+        String url = "http://localhost:" + this.port + "/api/doctor/msg/role/relative/roleId";
+        HttpEntity httpEntity = HttpPostRequest.formRequest()
+                .param("roleId", 1)
+                .params("ruleIds", ImmutableList.of(1, 2, 3))
+                .httpEntity();
+        this.restTemplate.postForObject(url, httpEntity, Boolean.class);
+
+        // 查询
+        url = HttpGetRequest
+                .url("http://localhost:" + this.port + "/api/doctor/msg/rule/hasFlag")
+                .params("roleId", 1)
+                .params("farmId", 1)
+                .build();
+        Object ruleRoles = this.restTemplate.getForObject(url, Object.class);
+        System.out.println(ruleRoles);
     }
 
     /**

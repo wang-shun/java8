@@ -65,6 +65,14 @@ public interface DoctorMessageReadService {
     Response<DoctorMessage> findLatestWarnMessage(Long templateId, Long farmId, Long roleId);
 
     /**
+     * 获取预警消息(最新)
+     * @param templateId    模板id
+     * @param farmId        猪场id
+     * @return
+     */
+    Response<DoctorMessage> findLatestWarnMessage(Long templateId, Long farmId);
+
+    /**
      * 获取未读站内信的数量
      * @param userId    用户id
      * @return

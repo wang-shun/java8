@@ -21,6 +21,7 @@ import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.event.service.DoctorGroupWriteService;
 import io.terminus.doctor.workflow.core.Execution;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.ibatis.type.IntegerTypeHandler;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
@@ -111,11 +112,12 @@ public class DoctorSowFarrowingHandler extends DoctorAbstractEventFlowHandler {
         input.setInTypeName(DoctorMoveInGroupEvent.InType.PIGLET.getDesc());
         input.setSource(PigSource.LOCAL.getKey());
 
-        Integer sowCount = Integer.valueOf(MoreObjects.firstNonNull(extra.get("liveSowCount"), "").toString());
-        Integer boarCount = Integer.valueOf(MoreObjects.firstNonNull(extra.get("liveBoarCount"), "").toString());
+        Integer farrowingLiveCount = Integer.valueOf(MoreObjects.firstNonNull(extra.get("farrowingLiveCount"),0).toString());
+        Integer sowCount = Integer.valueOf(MoreObjects.firstNonNull(extra.get("liveSowCount"), 0).toString());
+        Integer boarCount = Integer.valueOf(MoreObjects.firstNonNull(extra.get("liveBoarCount"), 0).toString());
 
         input.setSex(judgePigSex(sowCount, boarCount).getKey());
-        input.setQuantity(sowCount + boarCount);
+        input.setQuantity(farrowingLiveCount);
         input.setSowQty(sowCount);
         input.setBoarQty(boarCount);
         input.setAvgDayAge(Integer.valueOf(extra.get("dayAgeAvg").toString()));
@@ -134,7 +136,8 @@ public class DoctorSowFarrowingHandler extends DoctorAbstractEventFlowHandler {
 
     private PigSex judgePigSex(Integer sowCount, Integer boarCount){
         if(sowCount == 0 && boarCount == 0){
-            throw new IllegalStateException("farrow.pigCount.error");
+//            throw new IllegalStateException("farrow.pigCount.error");
+            return PigSex.MIX;
         }
 
         if(sowCount == 0){
