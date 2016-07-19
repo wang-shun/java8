@@ -4,10 +4,14 @@ import com.google.common.base.Throwables;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.event.dao.DoctorDailyReportDao;
+import io.terminus.doctor.event.dto.report.DoctorDailyReportDto;
 import io.terminus.doctor.event.model.DoctorDailyReport;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.Date;
+import java.util.List;
 
 /**
  * Desc: 猪场日报表读服务实现类
@@ -44,6 +48,18 @@ public class DoctorDailyReportReadServiceImpl implements DoctorDailyReportReadSe
         } catch (Exception e) {
             log.error("find dailyReport by farm id fail, farmId:{}, cause:{}", farmId, Throwables.getStackTraceAsString(e));
             return Response.fail("dailyReport.find.fail");
+        }
+    }
+
+    @Override
+    public Response<List<DoctorDailyReportDto>> initDailyReportByDate(Date date) {
+        try {
+
+
+            return Response.ok();
+        } catch (Exception e) {
+            log.error("init daily reprot failed, date:{}, cause:{}", date, Throwables.getStackTraceAsString(e));
+            return Response.fail("init.daily.report.fail");
         }
     }
 }

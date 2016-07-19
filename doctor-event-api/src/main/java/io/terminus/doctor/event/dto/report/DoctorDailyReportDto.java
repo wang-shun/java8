@@ -3,6 +3,7 @@ package io.terminus.doctor.event.dto.report;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.util.Date;
 
 /**
  * Desc: 日报统计dto
@@ -48,4 +49,14 @@ public class DoctorDailyReportDto implements Serializable {
      * 断奶仔猪日报
      */
     private DoctorWeanDailyReport wean;
+
+    /**
+     * 猪场id
+     */
+    private Long farmId;
+
+    /**
+     * 统计时间
+     */
+    private Date sumAt;
 }
