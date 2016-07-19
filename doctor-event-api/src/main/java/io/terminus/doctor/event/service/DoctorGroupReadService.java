@@ -116,4 +116,11 @@ public interface DoctorGroupReadService {
      * @return true 重复, false 不重复
      */
     Response<Boolean> checkGroupRepeat(@NotNull(message = "farmId.not.null") Long farmId, @NotEmpty(message = "groupCode.not.empty") String groupCode);
+
+    /**
+     * 查询当前猪舍猪群
+     * @param barnId 猪舍id
+     * @return 猪群list
+     */
+    Response<List<DoctorGroup>> findGroupByCurrentBarnId(@NotNull(message = "barnId.not.null") Long barnId);
 }

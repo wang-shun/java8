@@ -4,6 +4,7 @@ import com.google.common.base.Throwables;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.Response;
+import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dao.DoctorGroupDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorGroupSnapshotDao;
@@ -350,7 +351,24 @@ public class DoctorGroupWriteServiceImpl implements DoctorGroupWriteService {
     @Override
     public Response<Long> sowGroupEventMoveIn(@Valid DoctorSowMoveInGroupInput input) {
         try {
-            return Response.ok(doctorCommonGroupEventHandler.sowGroupEventMoveIn(input));
+            List<DoctorGroup> groups = doctorGroupDao.findByCurrentBarnId(input.getToBarnId());
+
+            //没有猪群, 新建
+            if (!notEmpty(groups)) {
+                return Response.ok(doctorCommonGroupEventHandler.sowGroupEventMoveIn(input));
+            }
+
+            //多个猪群, 报错
+            if (groups.size() > 1) {
+                throw new ServiceException("group.count.over.1");
+            }
+
+            //已有猪群, 转入
+            DoctorGroup group = groups.get(0);
+            DoctorGroupTrack groupTrack = doctorGroupTrackDao.findByGroupId(group.getId());
+            RespHelper.orServEx(groupEventMoveIn(new DoctorGroupDetail(group, groupTrack), input));
+            return Response.ok(group.getId());
+
         } catch (ServiceException e) {
             return Response.fail(e.getMessage());
         } catch (Exception e) {

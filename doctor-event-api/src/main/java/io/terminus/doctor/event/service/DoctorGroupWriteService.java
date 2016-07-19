@@ -190,8 +190,7 @@ public interface DoctorGroupWriteService {
                                          String reveterName);
 
     /**
-     * 母猪事件触发的仔猪转入猪群事件(注意: 此方法是要新建猪群的, 如果不新建猪群,应该调用 groupEventMoveIn方法)
-     * @see DoctorGroupWriteService#groupEventMoveIn(DoctorGroupDetail, DoctorMoveInGroupInput)
+     * 母猪事件触发的仔猪转入猪群事件(注意:分娩舍只允许一个猪群, 所以以后分娩的都要并到第一个猪群里)
      * @param input 录入信息
      * @return 创建的猪群id
      */

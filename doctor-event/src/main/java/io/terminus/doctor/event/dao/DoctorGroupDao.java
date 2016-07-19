@@ -17,6 +17,10 @@ import java.util.List;
 @Repository
 public class DoctorGroupDao extends MyBatisDao<DoctorGroup> {
 
+    public List<DoctorGroup> findByCurrentBarnId(Long currentBarnId) {
+        return getSqlSession().selectList(sqlId("findByCurrentBarnId"), currentBarnId);
+    }
+
     public List<DoctorGroup> findByFarmId(Long farmId) {
         return getSqlSession().selectList(sqlId("findByFarmId"), farmId);
     }

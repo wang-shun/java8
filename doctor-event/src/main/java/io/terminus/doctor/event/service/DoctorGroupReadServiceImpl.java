@@ -235,6 +235,16 @@ public class DoctorGroupReadServiceImpl implements DoctorGroupReadService {
         }
     }
 
+    @Override
+    public Response<List<DoctorGroup>> findGroupByCurrentBarnId(Long barnId) {
+        try {
+            return Response.ok(doctorGroupDao.findByCurrentBarnId(barnId));
+        } catch (Exception e) {
+            log.error("find group by current barn id failed, barnId:{}, cause:{}", barnId, Throwables.getStackTraceAsString(e));
+            return Response.fail("group.find.fail");
+        }
+    }
+
     private DoctorGroup checkGroupExist(Long groupId) {
         DoctorGroup group = doctorGroupDao.findById(groupId);
         if (group == null) {
