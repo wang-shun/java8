@@ -1,7 +1,6 @@
 package io.terminus.doctor.user.cache;
 
 import com.google.common.base.Objects;
-import com.google.common.base.Optional;
 import com.google.common.base.Throwables;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
@@ -21,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 陈增辉 on 16/6/14.
@@ -52,7 +52,7 @@ public class CacheCenter {
     @PostConstruct
     public void initCache(){
         //初始化数据权限缓存对象
-        permissionLoadingCache = CacheBuilder.newBuilder().build(new CacheLoader<Long, DoctorUserDataPermission>() {
+        permissionLoadingCache = CacheBuilder.newBuilder().expireAfterWrite(10L, TimeUnit.MINUTES).build(new CacheLoader<Long, DoctorUserDataPermission>() {
             @Override
             public DoctorUserDataPermission load(Long userId) throws Exception {
                 return doctorUserDataPermissionDao.findByUserId(userId);
@@ -60,7 +60,7 @@ public class CacheCenter {
         });
 
         //初始化员工信息缓存对象
-        staffLoadingCache = CacheBuilder.newBuilder().build(new CacheLoader<Long, DoctorStaff>() {
+        staffLoadingCache = CacheBuilder.newBuilder().expireAfterWrite(10L, TimeUnit.MINUTES).build(new CacheLoader<Long, DoctorStaff>() {
             @Override
             public DoctorStaff load(Long userId) throws Exception {
                 return doctorStaffDao.findByUserId(userId);
