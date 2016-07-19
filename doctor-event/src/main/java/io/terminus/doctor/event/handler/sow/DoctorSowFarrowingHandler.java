@@ -94,6 +94,8 @@ public class DoctorSowFarrowingHandler extends DoctorAbstractEventFlowHandler {
     protected Long buildPigGroupCountInfo(DoctorBasicInputInfoDto basic, Map<String, Object> extra) {
         DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(basic.getPigId());
 
+        log.info("********** extra:{}", extra);
+
         // Build 新建猪群操作方式
         DoctorSowMoveInGroupInput input = new DoctorSowMoveInGroupInput();
         input.setOrgId(basic.getOrgId());
@@ -111,8 +113,8 @@ public class DoctorSowFarrowingHandler extends DoctorAbstractEventFlowHandler {
         input.setInTypeName(DoctorMoveInGroupEvent.InType.PIGLET.getDesc());
         input.setSource(PigSource.LOCAL.getKey());
 
-        Integer sowCount = Integer.valueOf(MoreObjects.firstNonNull(extra.get("liveSowCount"), "").toString());
-        Integer boarCount = Integer.valueOf(MoreObjects.firstNonNull(extra.get("liveBoarCount"), "").toString());
+        Integer sowCount = Integer.valueOf(MoreObjects.firstNonNull(extra.get("liveSowCount"), 0).toString());
+        Integer boarCount = Integer.valueOf(MoreObjects.firstNonNull(extra.get("liveBoarCount"), 0).toString());
 
         input.setSex(judgePigSex(sowCount, boarCount).getKey());
         input.setQuantity(sowCount + boarCount);
