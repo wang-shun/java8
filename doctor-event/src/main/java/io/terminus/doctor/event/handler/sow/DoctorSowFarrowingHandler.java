@@ -115,12 +115,13 @@ public class DoctorSowFarrowingHandler extends DoctorAbstractEventFlowHandler {
         Integer farrowingLiveCount = Integer.valueOf(MoreObjects.firstNonNull(extra.get("farrowingLiveCount"),0).toString());
         Integer sowCount = Integer.valueOf(MoreObjects.firstNonNull(extra.get("liveSowCount"), 0).toString());
         Integer boarCount = Integer.valueOf(MoreObjects.firstNonNull(extra.get("liveBoarCount"), 0).toString());
+        if(sowCount == 0 && boarCount == 0) sowCount = farrowingLiveCount;
 
         input.setSex(judgePigSex(sowCount, boarCount).getKey());
         input.setQuantity(farrowingLiveCount);
         input.setSowQty(sowCount);
         input.setBoarQty(boarCount);
-        input.setAvgDayAge(Integer.valueOf(extra.get("dayAgeAvg").toString()));
+        input.setAvgDayAge(Integer.valueOf(MoreObjects.firstNonNull(extra.get("dayAgeAvg"), 1).toString()));
         input.setAvgWeight(Double.valueOf(extra.get("birthNestAvg").toString()));
         input.setEventAt(DateTime.now().toString(DTF));
         input.setIsAuto(1);
