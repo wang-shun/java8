@@ -152,9 +152,9 @@ public class DoctorDailyGroupReportReadServiceImpl implements DoctorDailyGroupRe
             report.setLiveStock(liveStockReport);
         }
 
-        //取出转换好的事件(按时间区间和事件类型查询的事件)
+        //取出转换好的事件(按时间区间和事件类型查询的事件, 为保险起见, 查询区间为一天的开始与结束)
         List<ChangeEvent> events = RespHelper.orServEx(
-                doctorGroupReadService.findGroupEventsByEventTypeAndDate(farmId, GroupEventType.CHANGE.getValue(), Dates.startOfDay(date), date))
+                doctorGroupReadService.findGroupEventsByEventTypeAndDate(farmId, GroupEventType.CHANGE.getValue(), Dates.startOfDay(date), Dates.endOfDay(date)))
                 .stream()
                 .map(this::getChangeEvent)
                 .collect(Collectors.toList());
