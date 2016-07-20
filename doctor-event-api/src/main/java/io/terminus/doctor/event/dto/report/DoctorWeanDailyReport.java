@@ -23,4 +23,9 @@ public class DoctorWeanDailyReport implements Serializable {
      * 断奶均重(kg)
      */
     private double weight;
+
+    public void addWeanCount(DoctorWeanDailyReport dto){
+        this.count += dto.getCount();
+        this.weight += dto.getWeight();
+    }
 }

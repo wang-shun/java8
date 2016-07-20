@@ -1,5 +1,6 @@
 package io.terminus.doctor.event.dto.report;
 
+import io.terminus.doctor.event.daily.DoctorDailyEventCount;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -38,4 +39,9 @@ public class DoctorDeadDailyReport implements Serializable {
      * 育肥猪
      */
     private int fatten;
+
+    public void addSowBoar(DoctorDeadDailyReport doctorDeadDailyReport){
+        this.boar += doctorDeadDailyReport.getBoar();
+        this.sow += doctorDeadDailyReport.getSow();
+    }
 }

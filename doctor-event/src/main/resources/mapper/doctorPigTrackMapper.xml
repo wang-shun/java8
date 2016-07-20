@@ -32,6 +32,11 @@
         <result column="updated_at" property="updatedAt"/>
     
     </resultMap>
+    
+    <resultMap id="DoctorPigStatusCountMap" type="DoctorPigStatusCount">
+        <result column="status" property="status"/>
+        <result column="count" property="count"/>
+    </resultMap>
 
     <sql id="tb"> doctor_pig_tracks </sql>
 
@@ -121,6 +126,11 @@
         </where>
         ORDER BY updated_at DESC
         LIMIT #{offset}, #{limit}
+    </select>
+
+    <select id="countPigTrackByStatus" resultMap="DoctorPigStatusCountMap">
+        select `status` as `status`, count(1) as `count` FROM <include refid="tb"/>
+        WHERE farm_id = #{farmId}
     </select>
 
     <update id="update" parameterType="DoctorPigTrack">

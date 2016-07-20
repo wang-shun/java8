@@ -3,6 +3,7 @@ package io.terminus.doctor.event;
 import com.google.common.collect.Lists;
 import io.terminus.boot.mybatis.autoconfigure.MybatisAutoConfiguration;
 import io.terminus.doctor.common.DoctorCommonConfiguration;
+import io.terminus.doctor.event.daily.DoctorDailyEventCount;
 import io.terminus.doctor.event.dao.DoctorPigDao;
 import io.terminus.doctor.event.handler.DoctorEntryHandler;
 import io.terminus.doctor.event.handler.DoctorEventCreateHandler;
@@ -14,6 +15,8 @@ import io.terminus.doctor.event.handler.usual.DoctorConditionHandler;
 import io.terminus.doctor.event.handler.usual.DoctorDiseaseHandler;
 import io.terminus.doctor.event.handler.usual.DoctorRemovalHandler;
 import io.terminus.doctor.event.handler.usual.DoctorVaccinationHandler;
+import io.terminus.doctor.event.report.DoctorDailyPigCountChain;
+import io.terminus.doctor.event.report.count.*;
 import io.terminus.doctor.event.search.barn.BarnSearchProperties;
 import io.terminus.doctor.event.search.barn.BaseBarnQueryBuilder;
 import io.terminus.doctor.event.search.barn.DefaultBarnQueryBuilder;
@@ -83,6 +86,19 @@ public class  DoctorEventConfiguration {
                 doctorRemovalHandler, doctorVaccinationHandler);
         chain.setDoctorEventCreateHandlers(Lists.newArrayList(list));
         return chain;
+    }
+
+    @Bean
+    public DoctorDailyPigCountChain doctorDailyPigCountChain(DoctorDailyEntryEventCount doctorDailyEntryEventCount,
+                                                             DoctorDailyFarrowingEventCount doctorDailyFarrowingEventCount,
+                                                             DoctorDailyMatingEventCount doctorDailyMatingEventCount,
+                                                             DoctorDailyPregEventCount doctorDailyPregEventCount,
+                                                             DoctorDailyRemovalEventCount doctorDailyRemovalEventCount,
+                                                             DoctorDailyWeanEventCount doctorDailyWeanEventCount){
+        List<DoctorDailyEventCount> doctorDailyEventCounts = Lists.newArrayList(
+                doctorDailyEntryEventCount, doctorDailyFarrowingEventCount, doctorDailyMatingEventCount,
+                doctorDailyPregEventCount,doctorDailyRemovalEventCount, doctorDailyWeanEventCount);
+        return new DoctorDailyPigCountChain(doctorDailyEventCounts);
     }
 
     @Configuration

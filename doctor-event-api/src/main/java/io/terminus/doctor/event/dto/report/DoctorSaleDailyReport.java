@@ -17,12 +17,12 @@ public class DoctorSaleDailyReport implements Serializable {
     /**
      * 公猪
      */
-    private long boar;
+    private double boar;
 
     /**
      * 母猪
      */
-    private long sow;
+    private double sow;
 
     /**
      * 保育猪(产房 + 保育)
@@ -33,4 +33,9 @@ public class DoctorSaleDailyReport implements Serializable {
      * 育肥猪
      */
     private long fatten;
+
+    public void addBoarSowCount(DoctorSaleDailyReport doctorSaleDailyReport){
+        this.boar += doctorSaleDailyReport.getBoar();
+        this.sow += doctorSaleDailyReport.getSow();
+    }
 }

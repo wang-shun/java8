@@ -98,6 +98,10 @@
         </where>
     </select>
 
+    <select id="queryAllFarmInEvent" resultType="long">
+        select distinct(farm_id) from <include refid="tb"/>
+    </select>
+
     <select id="countPigEventTypeDuration" parameterType="map" resultType="long">
         SELECT count(1) FROM <include refid="tb"/>
         <where>

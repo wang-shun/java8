@@ -38,4 +38,12 @@ public class DoctorDeliverDailyReport implements Serializable {
      * 死黑木畸
      */
     private int black;
+
+    public void addDeliverCount(DoctorDeliverDailyReport dto){
+        this.nest += dto.getNest();
+        this.live += dto.getLive();
+        this.health += dto.getHealth();
+        this.weak += dto.getWeak();
+        this.black += dto.getBlack();
+    }
 }
