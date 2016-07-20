@@ -30,4 +30,11 @@ public interface DoctorDailyGroupReportReadService {
      * @return 日报统计list
      */
     Response<List<DoctorDailyReportDto>> getGroupDailyReportsByDate(@NotNull(message = "date.not.null") Date date);
+
+    /**
+     * 根据事件id猪群日报缓存
+     * @param eventId 事件id
+     * @return 日报统计
+     */
+    Response<DoctorDailyReportDto> getGroupDailyReportByEventId(@NotNull(message = "eventId.not.null") Long eventId);
 }

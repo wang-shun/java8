@@ -40,7 +40,7 @@ import static io.terminus.doctor.common.utils.CountUtil.intStream;
  */
 @Slf4j
 @Service
-public class DoctorDailyGroupReportReadServiceImpl implements DoctorDailyGroupReportReadService {
+public class DoctorDailyGroupReportReadReadServiceImpl implements DoctorDailyGroupReportReadService {
 
     private static final JsonMapper JSON_MAPPER = JsonMapper.nonEmptyMapper();
 
@@ -48,8 +48,8 @@ public class DoctorDailyGroupReportReadServiceImpl implements DoctorDailyGroupRe
     private final DoctorGroupReadService doctorGroupReadService;
 
     @Autowired
-    public DoctorDailyGroupReportReadServiceImpl(DoctorPigTypeStatisticReadService doctorPigTypeStatisticReadService,
-                                                 DoctorGroupReadService doctorGroupReadService) {
+    public DoctorDailyGroupReportReadReadServiceImpl(DoctorPigTypeStatisticReadService doctorPigTypeStatisticReadService,
+                                                     DoctorGroupReadService doctorGroupReadService) {
         this.doctorPigTypeStatisticReadService = doctorPigTypeStatisticReadService;
         this.doctorGroupReadService = doctorGroupReadService;
     }
@@ -83,6 +83,58 @@ public class DoctorDailyGroupReportReadServiceImpl implements DoctorDailyGroupRe
                     date, Throwables.getStackTraceAsString(e));
             return Response.fail("get.group.daily.report.fail");
         }
+    }
+
+    @Override
+    public Response<DoctorDailyReportDto> getGroupDailyReportByEventId(Long eventId) {
+        try {
+            DoctorGroupEvent event = RespHelper.orServEx(doctorGroupReadService.findGroupEventById(eventId));
+            return Response.ok(doReportByEvent(event));
+        } catch (ServiceException e) {
+            return Response.fail(e.getMessage());
+        } catch (Exception e) {
+            log.error("get group daily report by eventId failed, eventId:{}, cause:{}", eventId, Throwables.getStackTraceAsString(e));
+            return Response.fail("get.group.daily.report.fail");
+        }
+    }
+
+    //根据事件获取report
+    private DoctorDailyReportDto doReportByEvent(DoctorGroupEvent event) {
+        DoctorDailyReportDto report = new DoctorDailyReportDto();
+        report.setFarmId(event.getFarmId());
+        report.setSumAt(Dates.startOfDay(event.getEventAt()));
+
+        //存栏每次一定要更新
+        DoctorPigTypeStatistic statistic = RespHelper.orServEx(doctorPigTypeStatisticReadService.findPigTypeStatisticByFarmId(event.getFarmId()));
+        DoctorLiveStockDailyReport liveStockReport = new DoctorLiveStockDailyReport();
+        liveStockReport.setFarrow(MoreObjects.firstNonNull(statistic.getFarrow(), 0));
+        liveStockReport.setNursery(MoreObjects.firstNonNull(statistic.getNursery(), 0));
+        liveStockReport.setFatten(MoreObjects.firstNonNull(statistic.getFatten(), 0));
+        report.setLiveStock(liveStockReport);
+
+        //不是变动事件, 直接返回
+        if (!Objects.equals(event.getType(), GroupEventType.CHANGE.getValue())) {
+            return report;
+        }
+
+        ChangeEvent changeEvent = getChangeEvent(event);
+        //死淘
+        DoctorDeadDailyReport deadReport = new DoctorDeadDailyReport();
+        deadReport.setFarrow(isDeadEvent(changeEvent, PigType.FARROW_PIGLET) ? changeEvent.getQuantity() : 0);
+        deadReport.setNursery(isDeadEvent(changeEvent, PigType.NURSERY_PIGLET) ? changeEvent.getQuantity() : 0);
+        deadReport.setFatten(isDeadEvent(changeEvent, PigType.FATTEN_PIG) ? changeEvent.getQuantity() : 0);
+        report.setDead(deadReport);
+
+        //销售 (保育 = 产房 + 保育)
+        DoctorSaleDailyReport saleReport = new DoctorSaleDailyReport();
+        saleReport.setNursery(isSaleEvent(changeEvent, PigType.FARROW_PIGLET)
+                || isSaleEvent(changeEvent, PigType.NURSERY_PIGLET) ? changeEvent.getQuantity() : 0);
+        saleReport.setFatten(isSaleEvent(changeEvent, PigType.FATTEN_PIG) ? changeEvent.getQuantity() : 0);
+        report.setSale(saleReport);
+
+        log.info("daily group report doReportByEvent:{}", report);
+
+        return report;
     }
 
     //执行统计方法
@@ -120,6 +172,8 @@ public class DoctorDailyGroupReportReadServiceImpl implements DoctorDailyGroupRe
                 + intStream(filterChangeEvent(events, e -> isSaleEvent(e, PigType.NURSERY_PIGLET)), ChangeEvent::getQuantity).sum());
         saleReport.setFatten(intStream(filterChangeEvent(events, e -> isSaleEvent(e, PigType.FATTEN_PIG)), ChangeEvent::getQuantity).sum());
         report.setSale(saleReport);
+
+        log.info("daily group report doReport:{}", report);
 
         return report;
     }

@@ -16,6 +16,7 @@ import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.event.search.barn.BarnSearchWriteService;
 import io.terminus.doctor.event.search.group.GroupSearchWriteService;
 import io.terminus.doctor.event.search.pig.PigSearchWriteService;
+import io.terminus.doctor.event.service.DoctorDailyGroupReportWriteService;
 import io.terminus.doctor.event.service.DoctorDailyPigReportWriteService;
 import io.terminus.doctor.event.service.DoctorPigEventReadService;
 import io.terminus.doctor.event.service.DoctorPigReadService;
@@ -72,6 +73,9 @@ public class DoctorZKListener implements EventListener {
     @Autowired
     private DoctorPigTypeStatisticWriteService doctorPigTypeStatisticWriteService;
 
+    @Autowired
+    private DoctorDailyGroupReportWriteService doctorDailyGroupReportWriteService;
+
     @PostConstruct
     public void subs() {
         try{
@@ -120,11 +124,11 @@ public class DoctorZKListener implements EventListener {
             Map<String, Serializable> context = DataEvent.analyseContent(dataEvent, Map.class);
             Long groupId = Params.getWithConvert(context, "doctorGroupId", d -> Long.valueOf(d.toString()));
 
-            //修改统计信息
-            groupDailyReportUpdate(context);
-
             // update es index
             groupSearchWriteService.update(groupId);
+
+            //更新猪群统计信息
+            groupDailyReportUpdate(context);
         }
 
         // 3. 如果是猪舍信息修改
@@ -182,10 +186,10 @@ public class DoctorZKListener implements EventListener {
         Long eventId = Params.getWithConvert(context, "doctorGroupEventId", d -> Long.valueOf(d.toString()));
         
         //更新数据库的存栏统计
-        RespHelper.or500(doctorPigTypeStatisticWriteService.statisticGroup(orgId, farmId));
+        doctorPigTypeStatisticWriteService.statisticGroup(orgId, farmId);
         
         //更新日报缓存
-        // TODO: 16/7/20  
+        doctorDailyGroupReportWriteService.updateDailyGroupReportCache(eventId);
     }
 
     /**
