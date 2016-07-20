@@ -2,6 +2,7 @@ package io.terminus.doctor.event.service;
 
 import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
+import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.event.cache.DoctorDailyReportCache;
 import io.terminus.doctor.event.dao.DoctorPigEventDao;
@@ -19,6 +20,7 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @Slf4j
+@RpcProvider
 public class DoctorDailyPigReportWriteServiceImpl implements DoctorDailyPigReportWriteService{
 
     private final DoctorDailyPigCountInvocation doctorDailyPigCountInvocation;

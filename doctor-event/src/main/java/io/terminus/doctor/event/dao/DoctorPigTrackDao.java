@@ -85,6 +85,6 @@ public class DoctorPigTrackDao extends MyBatisDao<DoctorPigTrack>{
      * @return
      */
     public List<DoctorPigStatusCount> countPigTrackByStatus(Long farmId){
-        return getSqlSession().selectList(sqlId("countPigByStatus"), farmId);
+        return getSqlSession().selectList(sqlId("countPigTrackByStatus"), farmId);
     }
 }

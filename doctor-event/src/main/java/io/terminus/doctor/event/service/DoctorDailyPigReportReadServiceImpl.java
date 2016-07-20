@@ -3,6 +3,7 @@ package io.terminus.doctor.event.service;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dao.DoctorPigEventDao;
@@ -27,6 +28,7 @@ import java.util.stream.Collectors;
  */
 @Service
 @Slf4j
+@RpcProvider
 public class DoctorDailyPigReportReadServiceImpl implements DoctorDailyPigReportReadService{
 
     private final DoctorPigEventDao doctorPigEventDao;
