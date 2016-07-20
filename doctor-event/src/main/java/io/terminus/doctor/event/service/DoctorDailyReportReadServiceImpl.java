@@ -1,8 +1,13 @@
 package io.terminus.doctor.event.service;
 
+import com.google.common.base.Strings;
 import com.google.common.base.Throwables;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.model.Response;
+import io.terminus.common.utils.JsonMapper;
+import io.terminus.doctor.common.utils.DateUtil;
+import io.terminus.doctor.common.utils.RespHelper;
+import io.terminus.doctor.event.cache.DoctorDailyReportCache;
 import io.terminus.doctor.event.dao.DoctorDailyReportDao;
 import io.terminus.doctor.event.dto.report.DoctorDailyReportDto;
 import io.terminus.doctor.event.model.DoctorDailyReport;
@@ -25,10 +30,15 @@ import java.util.List;
 public class DoctorDailyReportReadServiceImpl implements DoctorDailyReportReadService {
 
     private final DoctorDailyReportDao doctorDailyReportDao;
+    private final DoctorDailyReportCache doctorDailyReportCache;
+
+    private static final JsonMapper JSON_MAPPER = JsonMapper.nonEmptyMapper();
 
     @Autowired
-    public DoctorDailyReportReadServiceImpl(DoctorDailyReportDao doctorDailyReportDao) {
+    public DoctorDailyReportReadServiceImpl(DoctorDailyReportDao doctorDailyReportDao,
+                                            DoctorDailyReportCache doctorDailyReportCache) {
         this.doctorDailyReportDao = doctorDailyReportDao;
+        this.doctorDailyReportCache = doctorDailyReportCache;
     }
 
     @Override
@@ -42,11 +52,30 @@ public class DoctorDailyReportReadServiceImpl implements DoctorDailyReportReadSe
     }
 
     @Override
-    public Response<DoctorDailyReport> findDailyReportByFarmIdAndSumAt(Long farmId, String suAt) {
+    public Response<DoctorDailyReportDto> findDailyReportByFarmIdAndSumAtWithCache(Long farmId, String sumAt) {
         try {
-            return null;
+            Date date = DateUtil.toDate(sumAt);
+            DoctorDailyReportDto report = doctorDailyReportCache.getDailyReport(farmId, date);
+
+            //如果缓存里不存在, 直接查数据库
+            if (report == null) {
+                report = getDailyReport(farmId, date);
+            }
+
+            //如果数据库里不存在, 重新计算
+            if (report == null) {
+                report = RespHelper.orServEx(initDailyReportByFarmIdAndDate(farmId, date));
+            }
+
+            //如果计算结果为空, 返回初始化的日报
+            if (report == null) {
+                return Response.ok(new DoctorDailyReportDto());
+            }
+            doctorDailyReportCache.putDailyReport(farmId, date, report);
+            return Response.ok(report);
         } catch (Exception e) {
-            log.error("find dailyReport by farm id fail, farmId:{}, cause:{}", farmId, Throwables.getStackTraceAsString(e));
+            log.error("find dailyReport by farm id and sumat fail, farmId:{}, sumat:{}, cause:{}",
+                    farmId, sumAt, Throwables.getStackTraceAsString(e));
             return Response.fail("dailyReport.find.fail");
         }
     }
@@ -55,11 +84,32 @@ public class DoctorDailyReportReadServiceImpl implements DoctorDailyReportReadSe
     public Response<List<DoctorDailyReportDto>> initDailyReportByDate(Date date) {
         try {
 
+            return Response.ok();
+        } catch (Exception e) {
+            log.error("init daily report failed, date:{}, cause:{}", date, Throwables.getStackTraceAsString(e));
+            return Response.fail("init.daily.report.fail");
+        }
+    }
+
+    @Override
+    public Response<DoctorDailyReportDto> initDailyReportByFarmIdAndDate(Long farmId, Date date) {
+        try {
 
             return Response.ok();
         } catch (Exception e) {
-            log.error("init daily reprot failed, date:{}, cause:{}", date, Throwables.getStackTraceAsString(e));
+            log.error("init daily report failed, farmId:{}, date:{}, cause:{}", farmId, date, Throwables.getStackTraceAsString(e));
             return Response.fail("init.daily.report.fail");
         }
+    }
+
+    //根据farmId和sumAt从数据库查询, 并转换成日报统计
+    private DoctorDailyReportDto getDailyReport(Long farmId, Date sumAt) {
+        DoctorDailyReport report = doctorDailyReportDao.findByFarmIdAndSumAt(farmId, sumAt);
+
+        //如果没有查到, 要返回null, 交给上层判断
+        if (report == null || Strings.isNullOrEmpty(report.getData())) {
+            return null;
+        }
+        return JSON_MAPPER.fromJson(report.getData(), JSON_MAPPER.createCollectionType(DoctorDailyReportDao.class));
     }
 }

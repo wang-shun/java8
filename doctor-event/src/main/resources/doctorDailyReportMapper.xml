@@ -12,7 +12,6 @@
         <result column="extra" property="extra"/>
         <result column="sum_at" property="sumAt"/>
         <result column="created_at" property="createdAt"/>
-        
     </resultMap>
 
     <sql id="tb">
@@ -54,9 +53,6 @@
             <if test="data != null">data = #{data},</if>
             <if test="extra != null">extra = #{extra},</if>
             <if test="sumAt != null">sum_at = #{sumAt},</if>
-            
-            
-            updated_at=now()
         </set>
         WHERE id = #{id}
     </update>
@@ -66,9 +62,15 @@
         WHERE id = #{id}
     </delete>
     
-    <select id="findByFarmId" parameterType="long" resultMap="DoctorDailyReportMap">
+    <select id="findByFarmIdAndSumAt" parameterType="map" resultMap="DoctorDailyReportMap">
         SELECT <include refid="cols_all"/>
         FROM <include refid="tb"/>
-        WHERE farm_id = #{farmId}
+        WHERE farm_id = #{farmId} AND sum_at = #{sumAt}
+        limit 1
     </select>
+
+    <delete id="deleteBySumAt" parameterType="date">
+        DELETE FROM <include refid="tb"/>
+        WHERE sum_at = #{sumAt}
+    </delete>
 </mapper>

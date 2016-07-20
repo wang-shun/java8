@@ -52,7 +52,7 @@ public class DoctorDailyReportCache {
      * 取出日报缓存
      * @param farmId 猪场id
      * @param date   统计日期
-     * @return
+     * @return 日报统计
      */
     public DoctorDailyReportDto getDailyReport(Long farmId, Date date) {
         try {

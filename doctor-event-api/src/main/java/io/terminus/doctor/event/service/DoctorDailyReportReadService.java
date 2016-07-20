@@ -26,18 +26,27 @@ public interface DoctorDailyReportReadService {
     Response<DoctorDailyReport> findDailyReportById(@NotNull(message = "dailyReportId.not.null") Long dailyReportId);
 
     /**
-     * 根据farmId和日期查询猪场日报表
+     * 根据farmId和日期查询猪场日报表(缓存方式)
      * @param farmId 猪场id
      * @param sumAt  统计日期
      * @return 猪场日报表
      */
-    Response<DoctorDailyReport> findDailyReportByFarmIdAndSumAt(@NotNull(message = "farmId.not.null") Long farmId,
-                                                                @NotEmpty(message = "sumat.not.empty") String sumAt);
+    Response<DoctorDailyReportDto> findDailyReportByFarmIdAndSumAtWithCache(@NotNull(message = "farmId.not.null") Long farmId,
+                                                                            @NotEmpty(message = "date.not.null") String sumAt);
 
     /**
      * 根据日期初始化日报统计(job 和 event模块启动init使用)
      * @param date 日期
-     * @return 日报统计
+     * @return 日报统计list
      */
     Response<List<DoctorDailyReportDto>> initDailyReportByDate(@NotNull(message = "date.not.null") Date date);
+
+    /**
+     * 根据猪场和日期初始化当天的日报统计
+     * @param farmId 猪场id
+     * @param date 日期
+     * @return 日报统计
+     */
+    Response<DoctorDailyReportDto> initDailyReportByFarmIdAndDate(@NotNull(message = "farmId.not.null") Long farmId,
+                                                                  @NotNull(message = "date.not.null") Date date);
 }

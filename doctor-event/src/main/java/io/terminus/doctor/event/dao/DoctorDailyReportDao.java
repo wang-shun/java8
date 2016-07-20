@@ -1,10 +1,11 @@
 package io.terminus.doctor.event.dao;
 
+import com.google.common.collect.ImmutableMap;
 import io.terminus.common.mysql.dao.MyBatisDao;
 import io.terminus.doctor.event.model.DoctorDailyReport;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
+import java.util.Date;
 
 /**
  * Desc: 猪场日报表Dao类
@@ -15,7 +16,11 @@ import java.util.List;
 @Repository
 public class DoctorDailyReportDao extends MyBatisDao<DoctorDailyReport> {
 
-    public List<DoctorDailyReport> findByFarmId(Long farmId) {
-        return getSqlSession().selectList(sqlId("findByFarmId"), farmId);
+    public DoctorDailyReport findByFarmIdAndSumAt(Long farmId, Date sumAt) {
+        return getSqlSession().selectOne(sqlId("findByFarmIdAndSumAt"), ImmutableMap.of("farmId", farmId, "sumAt", sumAt));
+    }
+
+    public void deleteBySumAt(Date sumAt) {
+        getSqlSession().delete(sqlId("deleteBySumAt"), sumAt);
     }
 }
