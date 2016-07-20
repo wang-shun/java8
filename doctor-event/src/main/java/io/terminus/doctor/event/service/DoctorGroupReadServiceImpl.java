@@ -30,6 +30,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.validation.constraints.NotNull;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -242,6 +243,17 @@ public class DoctorGroupReadServiceImpl implements DoctorGroupReadService {
         } catch (Exception e) {
             log.error("find group by current barn id failed, barnId:{}, cause:{}", barnId, Throwables.getStackTraceAsString(e));
             return Response.fail("group.find.fail");
+        }
+    }
+
+    @Override
+    public Response<List<DoctorGroupEvent>> findGroupEventsByEventTypeAndDate(Long farmId, Integer eventType, Date startAt, Date endAt) {
+        try {
+            return Response.ok(doctorGroupEventDao.findGroupEventsByEventTypeAndDate(farmId, eventType, startAt, endAt));
+        } catch (Exception e) {
+            log.error("find group events by event type and date failed, farmId:{}, eventType:{}, startAt:{}, endAt:{}, cause:{}",
+                    farmId, eventType, startAt, endAt, Throwables.getStackTraceAsString(e));
+            return Response.fail("group.event.find.fail");
         }
     }
 

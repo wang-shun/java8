@@ -13,6 +13,7 @@ import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -123,4 +124,15 @@ public interface DoctorGroupReadService {
      * @return 猪群list
      */
     Response<List<DoctorGroup>> findGroupByCurrentBarnId(@NotNull(message = "barnId.not.null") Long barnId);
+
+    /**
+     * 根据日期区间和事件类型查询事件列表
+     * @param farmId    猪场id
+     * @param eventType 事件类型
+     * @param startAt   开始事件
+     * @param endAt     结束事件
+     * @return 猪群事件list
+     */
+    Response<List<DoctorGroupEvent>> findGroupEventsByEventTypeAndDate(@NotNull(message = "farmId.not.null") Long farmId,
+                                                                       Integer eventType, Date startAt, Date endAt);
 }
