@@ -5,6 +5,7 @@ import com.google.common.base.Throwables;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.Response;
+import io.terminus.common.utils.Dates;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.cache.DoctorDailyReportCache;
@@ -66,7 +67,7 @@ public class DoctorDailyReportReadServiceImpl implements DoctorDailyReportReadSe
 
             //如果缓存里不存在, 直接查数据库
             if (report == null) {
-                report = getDailyReport(farmId, date);
+                report = getDailyReportWithSql(farmId, date);
             }
 
             //如果数据库里不存在, 重新计算
@@ -114,7 +115,7 @@ public class DoctorDailyReportReadServiceImpl implements DoctorDailyReportReadSe
     }
 
     //根据farmId和sumAt从数据库查询, 并转换成日报统计
-    private DoctorDailyReportDto getDailyReport(Long farmId, Date sumAt) {
+    private DoctorDailyReportDto getDailyReportWithSql(Long farmId, Date sumAt) {
         DoctorDailyReport report = doctorDailyReportDao.findByFarmIdAndSumAt(farmId, sumAt);
 
         //如果没有查到, 要返回null, 交给上层判断
@@ -136,11 +137,14 @@ public class DoctorDailyReportReadServiceImpl implements DoctorDailyReportReadSe
         //求下 farmIds 的并集
         Set<Long> farmIds = pigReportMap.keySet();
         farmIds.addAll(groupReportMap.keySet());
+        Date dateStart = Dates.startOfDay(date);
 
         //拼接数据
         return farmIds.stream()
                 .map(farmId -> {
                     DoctorDailyReportDto report = new DoctorDailyReportDto();
+                    report.setFarmId(farmId);
+                    report.setSumAt(dateStart);
                     report.setPig(pigReportMap.get(farmId));
                     report.setGroup(groupReportMap.get(farmId));
                     return report;

@@ -82,11 +82,11 @@ public class DoctorDailyReportDto implements Serializable {
         this.deliver.setBlack(this.deliver.getBlack() + report.getDeliver().getBlack());
 
         //存栏
-        this.liveStock.setBoar(this.liveStock.getBoar() + report.getLiveStock().getBoar());
-        this.liveStock.setHoubeiSow(this.liveStock.getHoubeiSow() + report.getLiveStock().getHoubeiSow());
-        this.liveStock.setPeihuaiSow(this.liveStock.getPeihuaiSow() + report.getLiveStock().getPeihuaiSow());
-        this.liveStock.setBuruSow(this.liveStock.getBuruSow() + report.getLiveStock().getBuruSow());
-        this.liveStock.setKonghuaiSow(this.liveStock.getKonghuaiSow() + report.getLiveStock().getKonghuaiSow());
+        this.liveStock.setBoar(report.getLiveStock().getBoar());
+        this.liveStock.setHoubeiSow(report.getLiveStock().getHoubeiSow());
+        this.liveStock.setPeihuaiSow(report.getLiveStock().getPeihuaiSow());
+        this.liveStock.setBuruSow(report.getLiveStock().getBuruSow());
+        this.liveStock.setKonghuaiSow(report.getLiveStock().getKonghuaiSow());
 
         //配种
         this.mating.setHoubei(this.mating.getHoubei() + report.getMating().getHoubei());
@@ -113,9 +113,9 @@ public class DoctorDailyReportDto implements Serializable {
         this.dead.setFatten(this.dead.getFatten() + report.getDead().getFatten());
 
         //存栏
-        this.liveStock.setFarrow(this.liveStock.getFarrow() + report.getLiveStock().getFarrow());
-        this.liveStock.setNursery(this.liveStock.getNursery() + report.getLiveStock().getNursery());
-        this.liveStock.setFatten(this.liveStock.getFatten() + report.getLiveStock().getFatten());
+        this.liveStock.setFarrow(report.getLiveStock().getFarrow());
+        this.liveStock.setNursery(report.getLiveStock().getNursery());
+        this.liveStock.setFatten(report.getLiveStock().getFatten());
 
         //销售
         this.sale.setNursery(this.sale.getNursery() + report.getSale().getNursery());
