@@ -9,6 +9,7 @@ import sun.util.resources.cldr.ga.LocaleNames_ga;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by yaoqijun.
@@ -30,6 +31,15 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent>{
      */
     public List<DoctorPigEvent> queryAllEventsByPigId(Long pigId){
         return this.getSqlSession().selectList(sqlId("queryAllEventsByPigId"), pigId);
+    }
+
+    /**
+     * 通过pigId 修改Event相关事件信息
+     * @param params 修改对应的参数
+     * @return
+     */
+    public Boolean updatePigEventFarmIdByPigId(Map<String, Object> params){
+        return this.getSqlSession().update(sqlId("updatePigEventFarmIdByPigId"), params) >= 0;
     }
 
     public Long countPigEventTypeDuration(Long farmId, Integer eventType, Date startDate, Date endDate){

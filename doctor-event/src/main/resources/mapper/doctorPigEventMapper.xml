@@ -141,6 +141,15 @@
         LIMIT #{offset}, #{limit}
     </select>
 
+    <update id="updatePigEventFarmIdByPigId" parameterType="map">
+        UPDATE <include refid="tb"/>
+        <set>
+            <if test="farmId != null" > ,`farm_id` = #{farmId}</if>
+            <if test="farmName != null" > ,`farm_name` = #{farmName}</if>
+        </set>
+        WHERE `pig_id` = #{pigId}
+    </update>
+
     <update id="update" parameterType="DoctorPigEvent">
         UPDATE <include refid="tb"/>
         <set>

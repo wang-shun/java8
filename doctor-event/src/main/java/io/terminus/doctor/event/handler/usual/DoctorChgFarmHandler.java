@@ -1,6 +1,7 @@
 package io.terminus.doctor.event.handler.usual;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.Maps;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dao.DoctorPigDao;
 import io.terminus.doctor.event.dao.DoctorPigEventDao;
@@ -23,6 +24,8 @@ import org.springframework.stereotype.Component;
 
 import java.util.Map;
 import java.util.Objects;
+
+import static com.google.common.base.Preconditions.checkState;
 
 /**
  * Created by yaoqijun.
@@ -54,12 +57,12 @@ public class DoctorChgFarmHandler extends DoctorAbstractEventHandler{
     public DoctorPigTrack updateDoctorPigTrackInfo(DoctorPigTrack doctorPigTrack, DoctorBasicInputInfoDto basic, Map<String, Object> extra, Map<String,Object> context) {
 
         // 当前状态为哺乳状态的母猪不允许转
-        Preconditions.checkState(!Objects.equals(doctorPigTrack.getStatus(), PigStatus.FEED.getKey()), "feedStatus.sowChangFarm.error");
+        checkState(!Objects.equals(doctorPigTrack.getStatus(), PigStatus.FEED.getKey()), "feedStatus.sowChangFarm.error");
 
         // 校验转相同的猪舍
         DoctorBarn doctorCurrentBarn = RespHelper.orServEx(doctorBarnReadService.findBarnById(doctorPigTrack.getCurrentBarnId()));
         DoctorBarn doctorToBarn = RespHelper.orServEx(doctorBarnReadService.findBarnById(Long.valueOf(extra.get("toBarnId").toString())));
-        Preconditions.checkState(Objects.equals(doctorCurrentBarn.getPigType(), doctorToBarn.getPigType()), "sowChgFarm.diffBarn.error");
+        checkState(Objects.equals(doctorCurrentBarn.getPigType(), doctorToBarn.getPigType()), "sowChgFarm.diffBarn.error");
 
         // update barn info
         doctorPigTrack.setFarmId(Long.valueOf(extra.get("toFarmId").toString()));
@@ -80,5 +83,12 @@ public class DoctorChgFarmHandler extends DoctorAbstractEventHandler{
         doctorPig.setFarmId(Long.valueOf(extra.get("toFarmId").toString()));
         doctorPig.setFarmName(extra.get("toFarmName").toString());
         doctorPigDao.update(doctorPig);
+
+        // 修改对应的 pig event 对应的事件信息转入对应的猪场
+        Map<String,Object> params = Maps.newHashMap();
+        params.put("pigId", doctorPig.getId());
+        params.put("farmId",Long.valueOf(extra.get("toFarmId").toString()));
+        params.put("farmName", extra.get("toFarmName").toString());
+        checkState(doctorPigEventDao.updatePigEventFarmIdByPigId(params), "chgFarm.updateEventInfo.fail");
     }
 }
