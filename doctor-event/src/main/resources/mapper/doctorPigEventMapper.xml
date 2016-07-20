@@ -144,6 +144,7 @@
     <update id="updatePigEventFarmIdByPigId" parameterType="map">
         UPDATE <include refid="tb"/>
         <set>
+            updated_at = now()
             <if test="farmId != null" > ,`farm_id` = #{farmId}</if>
             <if test="farmName != null" > ,`farm_name` = #{farmName}</if>
         </set>
