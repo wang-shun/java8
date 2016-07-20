@@ -3,6 +3,7 @@ package io.terminus.doctor.event.service;
 import com.google.common.base.Strings;
 import com.google.common.base.Throwables;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
+import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.RespHelper;
@@ -16,6 +17,9 @@ import org.springframework.stereotype.Service;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Desc: 猪场日报表读服务实现类
@@ -30,12 +34,18 @@ public class DoctorDailyReportReadServiceImpl implements DoctorDailyReportReadSe
 
     private final DoctorDailyReportDao doctorDailyReportDao;
     private final DoctorDailyReportCache doctorDailyReportCache;
+    private final DoctorDailyPigReportReadService doctorDailyPigReportReadService;
+    private final DoctorDailyGroupReportReadService doctorDailyGroupReportReadService;
 
     @Autowired
     public DoctorDailyReportReadServiceImpl(DoctorDailyReportDao doctorDailyReportDao,
-                                            DoctorDailyReportCache doctorDailyReportCache) {
+                                            DoctorDailyReportCache doctorDailyReportCache,
+                                            DoctorDailyPigReportReadService doctorDailyPigReportReadService,
+                                            DoctorDailyGroupReportReadService doctorDailyGroupReportReadService) {
         this.doctorDailyReportDao = doctorDailyReportDao;
         this.doctorDailyReportCache = doctorDailyReportCache;
+        this.doctorDailyPigReportReadService = doctorDailyPigReportReadService;
+        this.doctorDailyGroupReportReadService = doctorDailyGroupReportReadService;
     }
 
     @Override
@@ -80,8 +90,7 @@ public class DoctorDailyReportReadServiceImpl implements DoctorDailyReportReadSe
     @Override
     public Response<List<DoctorDailyReportDto>> initDailyReportByDate(Date date) {
         try {
-
-            return Response.ok();
+            return Response.ok(setReportFromPigAndGroupByDate(date));
         } catch (Exception e) {
             log.error("init daily report failed, date:{}, cause:{}", date, Throwables.getStackTraceAsString(e));
             return Response.fail("init.daily.report.fail");
@@ -91,8 +100,13 @@ public class DoctorDailyReportReadServiceImpl implements DoctorDailyReportReadSe
     @Override
     public Response<DoctorDailyReportDto> initDailyReportByFarmIdAndDate(Long farmId, Date date) {
         try {
-
-            return Response.ok();
+            //设置统计结果, 不修改report的引用
+            DoctorDailyReportDto report = doctorDailyReportCache.getDailyReport(farmId, date);
+            report.setPig(RespHelper.orServEx(doctorDailyPigReportReadService.countByFarmIdDate(farmId, date)));
+            report.setGroup(RespHelper.orServEx(doctorDailyGroupReportReadService.getGroupDailyReportByFarmIdAndDate(farmId, date)));
+            return Response.ok(report);
+        } catch (ServiceException e) {
+            return Response.fail(e.getMessage());
         } catch (Exception e) {
             log.error("init daily report failed, farmId:{}, date:{}, cause:{}", farmId, date, Throwables.getStackTraceAsString(e));
             return Response.fail("init.daily.report.fail");
@@ -108,5 +122,29 @@ public class DoctorDailyReportReadServiceImpl implements DoctorDailyReportReadSe
             return null;
         }
         return report.getReportData();
+    }
+
+    //拼接猪和猪群的日报统计
+    private List<DoctorDailyReportDto> setReportFromPigAndGroupByDate(Date date) {
+        Map<Long, DoctorDailyReportDto> pigReportMap = RespHelper.orServEx(doctorDailyPigReportReadService.countByDate(date))
+                .stream().collect(Collectors.toMap(DoctorDailyReportDto::getFarmId, v -> v));
+        Map<Long, DoctorDailyReportDto> groupReportMap = RespHelper.orServEx(doctorDailyGroupReportReadService.getGroupDailyReportsByDate(date))
+                .stream().collect(Collectors.toMap(DoctorDailyReportDto::getFarmId, v -> v));
+
+        log.info("daily report info: date:{}, pigReport:{}, groupReport:{}", date, pigReportMap, groupReportMap);
+
+        //求下 farmIds 的并集
+        Set<Long> farmIds = pigReportMap.keySet();
+        farmIds.addAll(groupReportMap.keySet());
+
+        //拼接数据
+        return farmIds.stream()
+                .map(farmId -> {
+                    DoctorDailyReportDto report = new DoctorDailyReportDto();
+                    report.setPig(pigReportMap.get(farmId));
+                    report.setGroup(groupReportMap.get(farmId));
+                    return report;
+                })
+                .collect(Collectors.toList());
     }
 }
