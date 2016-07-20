@@ -4,6 +4,7 @@ import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import io.terminus.common.mysql.dao.MyBatisDao;
+import io.terminus.doctor.event.model.DoctorPigStatusCount;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 import org.springframework.stereotype.Repository;
 
@@ -77,5 +78,13 @@ public class DoctorPigTrackDao extends MyBatisDao<DoctorPigTrack>{
      */
     public int updateExtraMessage(DoctorPigTrack pigTrack) {
         return getSqlSession().update("updateExtraMessage", pigTrack);
+    }
+
+    /**
+     * 统计不同的状态母猪数量信息(统计一个猪场的数据)
+     * @return
+     */
+    public List<DoctorPigStatusCount> countPigTrackByStatus(Long farmId){
+        return getSqlSession().selectList(sqlId("countPigByStatus"), farmId);
     }
 }

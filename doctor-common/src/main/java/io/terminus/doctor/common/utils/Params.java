@@ -59,6 +59,13 @@ public final class Params {
         return (T)source.get(key);
     }
 
+    public static <K, V> V getNullDefault(Map<K, V> source, K key, V defaultValue){
+        if(source.get(key) == null){
+            return defaultValue;
+        }
+        return source.get(key);
+    }
+
     public static <T, F> T getWithConvert(Map<String, F> source, String key, Function<F, T> convert){
         checkNotNull(source.get(key));
         return convert.apply(source.get(key));
