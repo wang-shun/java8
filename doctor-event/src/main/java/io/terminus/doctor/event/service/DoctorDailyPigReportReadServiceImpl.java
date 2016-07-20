@@ -49,7 +49,11 @@ public class DoctorDailyPigReportReadServiceImpl implements DoctorDailyPigReport
             params.put("endDate", dateTime.plusDays(1).withTimeAtStartOfDay());
             List<DoctorPigEvent> doctorPigEvents = doctorPigEventDao.list(params);
 
-        	return Response.ok(doctorDailyPigCountInvocation.countPigEvent(doctorPigEvents));
+            DoctorDailyReportDto doctorDailyReportDto = doctorDailyPigCountInvocation.countPigEvent(doctorPigEvents);
+            doctorDailyReportDto.setFarmId(farmId);
+            doctorDailyReportDto.setSumAt(sumAt);
+
+        	return Response.ok(doctorDailyReportDto);
         }catch (IllegalStateException se){
             log.warn("count by farmId date illegal state fail, farmId:{}, date:{}, cause:{}",farmId, sumAt, Throwables.getStackTraceAsString(se));
             return Response.fail(se.getMessage());
@@ -79,6 +83,10 @@ public class DoctorDailyPigReportReadServiceImpl implements DoctorDailyPigReport
     @Override
     public Response<DoctorDailyReportDto> countSinglePigEvent(DoctorPigEvent doctorPigEvent) {
         try{
+            DoctorDailyReportDto result = new DoctorDailyReportDto();
+            result.setFarmId(doctorPigEvent.getFarmId());
+            result.setSumAt(doctorPigEvent.getEventAt());
+            
         	return Response.ok(doctorDailyPigCountInvocation.countPigEvent(Lists.newArrayList(doctorPigEvent)));
         }catch (IllegalStateException se){
             log.warn("daily single event count illegal state fail, cause:{}", Throwables.getStackTraceAsString(se));
