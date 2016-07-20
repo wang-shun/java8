@@ -40,7 +40,8 @@ public class DoctorDailyEntryEventCount implements DoctorDailyEventCount {
 
     @Override
     public List<DoctorPigEvent> preDailyEventHandleValidate(List<DoctorPigEvent> t) {
-        return t.stream().filter(e -> Objects.equals(e.getType(), PigEvent.ENTRY.getKey())).collect(Collectors.toList());
+//        return t.stream().filter(e -> Objects.equals(e.getType(), PigEvent.ENTRY.getKey())).collect(Collectors.toList());
+        return t;
     }
 
     @Override
