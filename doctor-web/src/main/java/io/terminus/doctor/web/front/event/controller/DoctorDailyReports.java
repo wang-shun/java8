@@ -35,4 +35,13 @@ public class DoctorDailyReports {
                                                                          @RequestParam("date") String date) {
         return RespHelper.or500(doctorDailyReportReadService.findDailyReportByFarmIdAndSumAtWithCache(farmId, date));
     }
+
+    /**
+     * 清理日报缓存
+     * @return 是否成功
+     */
+    @RequestMapping(value = "/daily/clear", method = RequestMethod.GET)
+    public Boolean clearCache() {
+        return RespHelper.or500(doctorDailyReportReadService.clearAllReportCache());
+    }
 }

@@ -76,6 +76,17 @@ public class DoctorDailyReportReadServiceImpl implements DoctorDailyReportReadSe
         }
     }
 
+    @Override
+    public Response<Boolean> clearAllReportCache() {
+        try {
+            doctorDailyReportCache.clearAllReport();
+            return Response.ok(Boolean.TRUE);
+        } catch (Exception e) {
+            log.error("clear report cache failed, cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.ok(Boolean.FALSE);
+        }
+    }
+
     //根据farmId和sumAt从数据库查询, 并转换成日报统计
     private DoctorDailyReportDto getDailyReportWithSql(Long farmId, Date sumAt) {
         DoctorDailyReport report = doctorDailyReportDao.findByFarmIdAndSumAt(farmId, sumAt);

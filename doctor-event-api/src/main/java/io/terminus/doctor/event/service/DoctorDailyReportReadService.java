@@ -32,4 +32,10 @@ public interface DoctorDailyReportReadService {
      * @return 日报统计list
      */
     Response<List<DoctorDailyReportDto>> initDailyReportByDate(@NotNull(message = "date.not.null") Date date);
+
+    /**
+     * 清理全部的日报缓存
+     * @return 是否成功
+     */
+    Response<Boolean> clearAllReportCache();
 }

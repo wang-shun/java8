@@ -128,6 +128,13 @@ public class DoctorDailyReportCache {
         }
     }
 
+    /**
+     * 清理所有的缓存
+     */
+    public void clearAllReport() {
+        reportCache.invalidateAll();
+    }
+
     //实时查询某猪场的日报统计
     public DoctorDailyReportDto initDailyReportByFarmIdAndDate(Long farmId, Date date) {
         DoctorDailyReportDto report = new DoctorDailyReportDto();
