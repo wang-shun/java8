@@ -37,5 +37,4 @@ public interface DoctorDailyPigReportReadService {
      * @return
      */
     Response<DoctorDailyReportDto> countSinglePigEvent(DoctorPigEvent doctorPigEvent);
-
 }
