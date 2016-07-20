@@ -5,6 +5,7 @@ import com.google.common.base.Throwables;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import com.google.common.collect.Sets;
 import io.terminus.common.utils.Dates;
 import io.terminus.common.utils.Splitters;
 import io.terminus.doctor.common.utils.DateUtil;
@@ -140,8 +141,9 @@ public class DoctorDailyReportCache {
         log.info("daily report info: date:{}, pigReport:{}, groupReport:{}", date, pigReportMap, groupReportMap);
 
         //求下 farmIds 的并集
-        Set<Long> farmIds = pigReportMap.keySet();
+        Set<Long> farmIds = Sets.newHashSet();
         farmIds.addAll(groupReportMap.keySet());
+        farmIds.addAll(pigReportMap.keySet());
         Date dateStart = Dates.startOfDay(date);
 
         //拼接数据
