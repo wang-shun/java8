@@ -98,7 +98,7 @@ public class DoctorDailyReportCache {
      */
     public void putDailyGroupReport(DoctorDailyReportDto report) {
         synchronized (reportCache) {
-            getDailyReport(report.getFarmId(), report.getSumAt()).setPig(report);
+            getDailyReport(report.getFarmId(), report.getSumAt()).setGroup(report);
         }
     }
 
