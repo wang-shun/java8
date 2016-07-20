@@ -4,7 +4,6 @@ import com.google.common.base.Strings;
 import com.google.common.base.Throwables;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.model.Response;
-import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.cache.DoctorDailyReportCache;
@@ -31,8 +30,6 @@ public class DoctorDailyReportReadServiceImpl implements DoctorDailyReportReadSe
 
     private final DoctorDailyReportDao doctorDailyReportDao;
     private final DoctorDailyReportCache doctorDailyReportCache;
-
-    private static final JsonMapper JSON_MAPPER = JsonMapper.nonEmptyMapper();
 
     @Autowired
     public DoctorDailyReportReadServiceImpl(DoctorDailyReportDao doctorDailyReportDao,
@@ -110,6 +107,6 @@ public class DoctorDailyReportReadServiceImpl implements DoctorDailyReportReadSe
         if (report == null || Strings.isNullOrEmpty(report.getData())) {
             return null;
         }
-        return JSON_MAPPER.fromJson(report.getData(), JSON_MAPPER.createCollectionType(DoctorDailyReportDao.class));
+        return report.getReportData();
     }
 }

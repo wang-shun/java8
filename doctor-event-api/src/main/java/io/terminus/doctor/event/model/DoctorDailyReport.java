@@ -68,7 +68,7 @@ public class DoctorDailyReport implements Serializable {
 
     public DoctorDailyReportDto getReportData() {
         if (isEmpty(this.data)) {
-            return new DoctorDailyReportDto();
+            return null;
         }
         return JSON_MAPPER.fromJson(this.data, JSON_MAPPER.createCollectionType(DoctorDailyReportDto.class));
     }

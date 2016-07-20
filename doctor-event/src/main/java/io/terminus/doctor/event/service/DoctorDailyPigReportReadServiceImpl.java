@@ -11,6 +11,7 @@ import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.report.DoctorDailyPigCountInvocation;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
@@ -32,6 +33,7 @@ public class DoctorDailyPigReportReadServiceImpl implements DoctorDailyPigReport
 
     private final DoctorDailyPigCountInvocation doctorDailyPigCountInvocation;
 
+    @Autowired
     public DoctorDailyPigReportReadServiceImpl(DoctorPigEventDao doctorPigEventDao, DoctorDailyPigCountInvocation doctorDailyPigCountInvocation){
         this.doctorDailyPigCountInvocation = doctorDailyPigCountInvocation;
         this.doctorPigEventDao = doctorPigEventDao;

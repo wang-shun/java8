@@ -1,7 +1,11 @@
 package io.terminus.doctor.event.service;
 
 import io.terminus.common.model.Response;
-import io.terminus.doctor.event.model.DoctorDailyReport;
+import io.terminus.doctor.event.dto.report.DoctorDailyReportDto;
+
+import javax.validation.constraints.NotNull;
+import java.util.Date;
+import java.util.List;
 
 /**
  * Desc: 猪场日报表写服务
@@ -13,23 +17,11 @@ import io.terminus.doctor.event.model.DoctorDailyReport;
 public interface DoctorDailyReportWriteService {
 
     /**
-     * 创建DoctorDailyReport
-     * @param dailyReport 猪场日报表实例
-     * @return 主键id
-     */
-    Response<Long> createDailyReport(DoctorDailyReport dailyReport);
-
-    /**
-     * 更新DoctorDailyReport
-     * @param dailyReport 猪场日报表实例
+     * 批量创建DoctorDailyReport(先删除, 再创建)
+     * @param dailyReportDtos 日报统计list
+     * @param sumAt 统计时间
      * @return 是否成功
      */
-    Response<Boolean> updateDailyReport(DoctorDailyReport dailyReport);
-
-    /**
-     * 根据主键id删除DoctorDailyReport
-     * @param dailyReportId 猪场日报表实例主键id
-     * @return 是否成功
-     */
-    Response<Boolean> deleteDailyReportById(Long dailyReportId);
+    Response<Boolean> createDailyReports(List<DoctorDailyReportDto> dailyReportDtos,
+                                         @NotNull(message = "date.not.null") Date sumAt);
 }
