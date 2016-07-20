@@ -3,8 +3,10 @@ package io.terminus.doctor.event.service;
 import com.google.common.base.Strings;
 import com.google.common.base.Throwables;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
+import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.common.utils.DateUtil;
+import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.cache.DoctorDailyReportCache;
 import io.terminus.doctor.event.dao.DoctorDailyReportDao;
 import io.terminus.doctor.event.dto.report.DoctorDailyReportDto;
@@ -13,6 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
 import java.util.Date;
 import java.util.List;
 
@@ -35,6 +38,17 @@ public class DoctorDailyReportReadServiceImpl implements DoctorDailyReportReadSe
                                             DoctorDailyReportCache doctorDailyReportCache) {
         this.doctorDailyReportDao = doctorDailyReportDao;
         this.doctorDailyReportCache = doctorDailyReportCache;
+    }
+
+    @PostConstruct
+    public void init() {
+        try {
+            Date now = new Date();
+            List<DoctorDailyReportDto> reportDtos = RespHelper.orServEx(initDailyReportByDate(now));
+            reportDtos.forEach(report -> doctorDailyReportCache.putDailyReport(report.getFarmId(), now, report));
+        } catch (ServiceException e) {
+            log.error("init daily report failed, cause:{}", Throwables.getStackTraceAsString(e));
+        }
     }
 
     @Override

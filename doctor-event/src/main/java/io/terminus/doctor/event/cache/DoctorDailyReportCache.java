@@ -5,7 +5,6 @@ import com.google.common.base.Throwables;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
-import io.terminus.common.exception.ServiceException;
 import io.terminus.common.utils.Dates;
 import io.terminus.common.utils.Splitters;
 import io.terminus.doctor.common.utils.DateUtil;
@@ -20,7 +19,6 @@ import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -57,17 +55,6 @@ public class DoctorDailyReportCache {
                 return farmDate == null ? null : initDailyReportByFarmIdAndDate(farmDate.getFarmId(), farmDate.getDate());
             }
         });
-    }
-
-    @PostConstruct
-    public void init() {
-        try {
-            Date now = new Date();
-            List<DoctorDailyReportDto> reportDtos = initDailyReportByDate(now);
-            reportDtos.forEach(report -> putDailyReport(report.getFarmId(), now, report));
-        } catch (ServiceException e) {
-            log.error("init daily report failed, cause:{}", Throwables.getStackTraceAsString(e));
-        }
     }
 
     /**
