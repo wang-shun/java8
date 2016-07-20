@@ -11,9 +11,9 @@ import lombok.Getter;
 
 public enum DoctorBasicEnums {
 
+    SALE(109L, "销售"),
     DEAD(110L, "死亡"),
-    ELIMINATE(111L, "淘汰"),
-    SALE(119L, "销售");
+    ELIMINATE(111L, "淘汰");
 
     @Getter
     private final long id;
