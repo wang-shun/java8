@@ -6,7 +6,6 @@ import io.terminus.common.model.Response;
 import io.terminus.doctor.event.cache.DoctorDailyReportCache;
 import io.terminus.doctor.event.dao.DoctorPigEventDao;
 import io.terminus.doctor.event.model.DoctorPigEvent;
-import io.terminus.doctor.event.report.DoctorDailyPigCountChain;
 import io.terminus.doctor.event.report.DoctorDailyPigCountInvocation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,7 +40,7 @@ public class DoctorDailyPigReportWriteServiceImpl implements DoctorDailyPigRepor
     public Response<Boolean> updateDailyPigReportInfo(Long pigEventId) {
         try{
             DoctorPigEvent doctorPigEvent = doctorPigEventDao.findById(pigEventId);
-            doctorDailyReportCache.addDailyReport(doctorPigEvent.getFarmId(), doctorPigEvent.getEventAt(),
+            doctorDailyReportCache.putDailyPigReport(doctorPigEvent.getFarmId(), doctorPigEvent.getEventAt(),
                     doctorDailyPigCountInvocation.countPigEvent(Lists.newArrayList(doctorPigEvent)));
         	return Response.ok(Boolean.TRUE);
         }catch (IllegalStateException se){

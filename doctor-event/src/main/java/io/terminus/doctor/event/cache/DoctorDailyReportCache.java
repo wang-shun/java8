@@ -1,23 +1,32 @@
 package io.terminus.doctor.event.cache;
 
+import com.google.common.base.Strings;
 import com.google.common.base.Throwables;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import io.terminus.common.exception.ServiceException;
+import io.terminus.common.utils.Dates;
+import io.terminus.common.utils.Splitters;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dto.report.DoctorDailyReportDto;
-import io.terminus.doctor.event.model.DoctorDailyReport;
-import io.terminus.doctor.event.service.DoctorDailyReportReadService;
+import io.terminus.doctor.event.service.DoctorDailyGroupReportReadService;
+import io.terminus.doctor.event.service.DoctorDailyPigReportReadService;
+import lombok.AllArgsConstructor;
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import static java.util.Objects.isNull;
 
@@ -31,17 +40,21 @@ import static java.util.Objects.isNull;
 @Component
 public class DoctorDailyReportCache {
 
-    private final DoctorDailyReportReadService doctorDailyReportReadService;
     private final LoadingCache<String, DoctorDailyReportDto> reportCache;
+    private final DoctorDailyPigReportReadService doctorDailyPigReportReadService;
+    private final DoctorDailyGroupReportReadService doctorDailyGroupReportReadService;
 
     @Autowired
-    public DoctorDailyReportCache(DoctorDailyReportReadService doctorDailyReportReadService) {
-        this.doctorDailyReportReadService = doctorDailyReportReadService;
+    public DoctorDailyReportCache(DoctorDailyPigReportReadService doctorDailyPigReportReadService,
+                                  DoctorDailyGroupReportReadService doctorDailyGroupReportReadService) {
+        this.doctorDailyPigReportReadService = doctorDailyPigReportReadService;
+        this.doctorDailyGroupReportReadService = doctorDailyGroupReportReadService;
 
         this.reportCache = CacheBuilder.newBuilder().expireAfterAccess(1L, TimeUnit.DAYS).build(new CacheLoader<String, DoctorDailyReportDto>() {
             @Override
             public DoctorDailyReportDto load(String key) throws Exception {
-                return null;
+                FarmDate farmDate = parseReportKey(key);
+                return farmDate == null ? null : initDailyReportByFarmIdAndDate(farmDate.getFarmId(), farmDate.getDate());
             }
         });
     }
@@ -50,7 +63,7 @@ public class DoctorDailyReportCache {
     public void init() {
         try {
             Date now = new Date();
-            List<DoctorDailyReportDto> reportDtos = RespHelper.orServEx(doctorDailyReportReadService.initDailyReportByDate(now));
+            List<DoctorDailyReportDto> reportDtos = initDailyReportByDate(now);
             reportDtos.forEach(report -> putDailyReport(report.getFarmId(), now, report));
         } catch (ServiceException e) {
             log.error("init daily report failed, cause:{}", Throwables.getStackTraceAsString(e));
@@ -86,44 +99,95 @@ public class DoctorDailyReportCache {
     }
 
     /**
-     * 添加对应的report 数据信息
-     * @param farmId
-     * @param date
-     * @param reportDto
-     */
-    public void addDailyReport(Long farmId, Date date, DoctorDailyReportDto reportDto){
-        DoctorDailyReportDto doctorDailyReportDto = reportCache.getUnchecked(getReportKey(farmId, date));
-        if(isNull(doctorDailyReportDto)){
-            putDailyReport(farmId, date, reportDto);
-        }else {
-            doctorDailyReportDto.setPig(doctorDailyReportDto);
-        }
-    }
-
-    /**
      * 仅put猪日报, 不修改引用
-     * @param report 猪日报
+     * @param reportDto 猪日报
      */
-    public void putDailyPigReport(DoctorDailyReportDto report) {
+    public void putDailyPigReport(Long farmId, Date date, DoctorDailyReportDto reportDto) {
         synchronized (reportCache) {
-            getDailyReport(report.getFarmId(), report.getSumAt()).setPig(report);
+            DoctorDailyReportDto report = getDailyReport(farmId,  date);
+            if (isNull(report)) {
+                putDailyReport(farmId, date, reportDto);
+            } else {
+                report.setPig(reportDto);
+            }
         }
     }
 
     /**
      * 仅put猪群日报, 不修改引用
-     * @param report 猪群日报
+     * @param reportDto 猪群日报
      */
-    public void putDailyGroupReport(DoctorDailyReportDto report) {
+    public void putDailyGroupReport(Long farmId, Date date, DoctorDailyReportDto reportDto) {
         synchronized (reportCache) {
-            getDailyReport(report.getFarmId(), report.getSumAt()).setGroup(report);
+            DoctorDailyReportDto report = getDailyReport(farmId,  date);
+            if (isNull(report)) {
+                putDailyReport(farmId, date, reportDto);
+            } else {
+                report.setGroup(reportDto);
+            }
         }
+    }
+
+    //实时查询某猪场的日报统计
+    public DoctorDailyReportDto initDailyReportByFarmIdAndDate(Long farmId, Date date) {
+        DoctorDailyReportDto report = new DoctorDailyReportDto();
+        report.setPig(RespHelper.orServEx(doctorDailyPigReportReadService.countByFarmIdDate(farmId, date)));
+        report.setGroup(RespHelper.orServEx(doctorDailyGroupReportReadService.getGroupDailyReportByFarmIdAndDate(farmId, date)));
+        return report;
+    }
+
+    //实时查询全部猪场猪和猪群的日报统计
+    public List<DoctorDailyReportDto> initDailyReportByDate(Date date) {
+        Map<Long, DoctorDailyReportDto> pigReportMap = RespHelper.orServEx(doctorDailyPigReportReadService.countByDate(date))
+                .stream().collect(Collectors.toMap(DoctorDailyReportDto::getFarmId, v -> v));
+        Map<Long, DoctorDailyReportDto> groupReportMap = RespHelper.orServEx(doctorDailyGroupReportReadService.getGroupDailyReportsByDate(date))
+                .stream().collect(Collectors.toMap(DoctorDailyReportDto::getFarmId, v -> v));
+
+        log.info("daily report info: date:{}, pigReport:{}, groupReport:{}", date, pigReportMap, groupReportMap);
+
+        //求下 farmIds 的并集
+        Set<Long> farmIds = pigReportMap.keySet();
+        farmIds.addAll(groupReportMap.keySet());
+        Date dateStart = Dates.startOfDay(date);
+
+        //拼接数据
+        return farmIds.stream()
+                .map(farmId -> {
+                    DoctorDailyReportDto report = new DoctorDailyReportDto();
+                    report.setFarmId(farmId);
+                    report.setSumAt(dateStart);
+                    report.setPig(pigReportMap.get(farmId));
+                    report.setGroup(groupReportMap.get(farmId));
+                    return report;
+                })
+                .collect(Collectors.toList());
     }
 
     private static String getReportKey(Long farmId, Date date) {
         if (farmId == null || date == null) {
             return null;
         }
-        return farmId + DateUtil.toDateString(date);
+        return farmId + ":" + DateUtil.toDateString(date);
+    }
+
+    private static FarmDate parseReportKey(String key) {
+        if (Strings.isNullOrEmpty(key)) {
+            return null;
+        }
+        List<String> strs = Splitters.COLON.splitToList(key);
+        if (strs.size() != 2) {
+            return null;
+        }
+
+        //这里的时间必须是这一天的最后1秒!
+        Date tomorrow = Dates.endOfDay(DateUtil.toDate(strs.get(1)));
+        return new FarmDate(Long.valueOf(strs.get(0)), new DateTime(tomorrow).plusSeconds(-1).toDate());
+    }
+
+    @Data
+    @AllArgsConstructor
+    private static class FarmDate {
+        private Long farmId;
+        private Date date;
     }
 }
