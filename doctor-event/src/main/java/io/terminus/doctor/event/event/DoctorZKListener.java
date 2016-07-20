@@ -19,6 +19,7 @@ import io.terminus.doctor.event.search.pig.PigSearchWriteService;
 import io.terminus.doctor.event.service.DoctorDailyPigReportWriteService;
 import io.terminus.doctor.event.service.DoctorPigEventReadService;
 import io.terminus.doctor.event.service.DoctorPigReadService;
+import io.terminus.doctor.event.service.DoctorPigTypeStatisticWriteService;
 import io.terminus.doctor.event.service.DoctorPigWriteService;
 import io.terminus.zookeeper.pubsub.Subscriber;
 import lombok.extern.slf4j.Slf4j;
@@ -66,7 +67,10 @@ public class DoctorZKListener implements EventListener {
     private BarnSearchWriteService barnSearchWriteService;
 
     @Autowired
-    DoctorDailyPigReportWriteService doctorDailyPigReportWriteService;
+    private DoctorDailyPigReportWriteService doctorDailyPigReportWriteService;
+    
+    @Autowired
+    private DoctorPigTypeStatisticWriteService doctorPigTypeStatisticWriteService;
 
     @PostConstruct
     public void subs() {
@@ -115,6 +119,10 @@ public class DoctorZKListener implements EventListener {
         if (DataEventType.GroupEventCreate.getKey() == dataEvent.getEventType()) {
             Map<String, Serializable> context = DataEvent.analyseContent(dataEvent, Map.class);
             Long groupId = Params.getWithConvert(context, "doctorGroupId", d -> Long.valueOf(d.toString()));
+
+            //修改统计信息
+            groupDailyReportUpdate(context);
+
             // update es index
             groupSearchWriteService.update(groupId);
         }
@@ -165,6 +173,19 @@ public class DoctorZKListener implements EventListener {
         if(! response.isSuccess()){
             log.error("update daily pig report error, cause:{}", response.getError());
         }
+    }
+
+    //猪群的统计
+    private void groupDailyReportUpdate(Map<String, Serializable> context) {
+        Long orgId = Params.getWithConvert(context, "doctorOrgId", d -> Long.valueOf(d.toString()));
+        Long farmId = Params.getWithConvert(context, "doctorFarmId", d -> Long.valueOf(d.toString()));
+        Long eventId = Params.getWithConvert(context, "doctorGroupEventId", d -> Long.valueOf(d.toString()));
+        
+        //更新数据库的存栏统计
+        RespHelper.or500(doctorPigTypeStatisticWriteService.statisticGroup(orgId, farmId));
+        
+        //更新日报缓存
+        // TODO: 16/7/20  
     }
 
     /**

@@ -1,11 +1,9 @@
 package io.terminus.doctor.event.report.count;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.terminus.common.utils.BeanMapper;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.constants.JacksonType;
 import io.terminus.doctor.event.daily.DoctorDailyEventCount;
-import io.terminus.doctor.event.dao.DoctorPigEventDao;
 import io.terminus.doctor.event.dao.DoctorPigTrackDao;
 import io.terminus.doctor.event.dto.report.DoctorDailyReportDto;
 import io.terminus.doctor.event.dto.report.DoctorMatingDailyReport;
@@ -13,7 +11,7 @@ import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PregCheckResult;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
-import org.omg.SendingContext.RunTime;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -35,6 +33,7 @@ public class DoctorDailyMatingEventCount implements DoctorDailyEventCount {
 
     private final DoctorPigTrackDao doctorPigTrackDao;
 
+    @Autowired
     public DoctorDailyMatingEventCount(DoctorPigTrackDao doctorPigTrackDao){
         this.doctorPigTrackDao = doctorPigTrackDao;
     }

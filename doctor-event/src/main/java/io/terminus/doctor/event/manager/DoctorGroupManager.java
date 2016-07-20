@@ -19,7 +19,6 @@ import io.terminus.doctor.event.dto.event.group.DoctorNewGroupEvent;
 import io.terminus.doctor.event.dto.event.group.edit.DoctorNewGroupEdit;
 import io.terminus.doctor.event.dto.event.group.input.DoctorNewGroupInput;
 import io.terminus.doctor.event.enums.GroupEventType;
-import io.terminus.doctor.event.event.DoctorGroupCountEvent;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorGroupSnapshot;
@@ -125,8 +124,7 @@ public class DoctorGroupManager {
         doctorGroupSnapshotDao.create(groupSnapshot);
 
         //发布统计事件
-        publishCountGroupEvent(group.getOrgId(), group.getFarmId());
-        publistGroupAndBarn(group.getId(), group.getCurrentBarnId());
+        publistGroupAndBarn(group.getOrgId(), group.getFarmId(), group.getId(), group.getCurrentBarnId(), groupEvent.getId());
         return groupId;
     }
 
@@ -215,14 +213,10 @@ public class DoctorGroupManager {
         }
     }
 
-    //发布统计猪群事件 // TODO: 16/6/16 可以用 publishZookeeperEvent 替代
-    private void publishCountGroupEvent(Long orgId, Long farmId) {
-        coreEventDispatcher.publish(new DoctorGroupCountEvent(orgId, farmId));
-    }
-
     //发布猪群猪舍事件
-    private void publistGroupAndBarn(Long groupId, Long barnId) {
-        publishZookeeperEvent(DataEventType.GroupEventCreate.getKey(), ImmutableMap.of("doctorGroupId", groupId));
+    private void publistGroupAndBarn(Long orgId, Long farmId, Long groupId, Long barnId, Long eventId) {
+        publishZookeeperEvent(DataEventType.GroupEventCreate.getKey(), ImmutableMap.of(
+                "doctorOrgId", orgId, "doctorFarmId", farmId, "doctorGroupId", groupId, "doctorGroupEventId", eventId));
         publishZookeeperEvent(DataEventType.BarnUpdate.getKey(), ImmutableMap.of("doctorBarnId", barnId));
     }
 
