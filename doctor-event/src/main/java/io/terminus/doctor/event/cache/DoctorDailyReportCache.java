@@ -8,6 +8,7 @@ import io.terminus.common.exception.ServiceException;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dto.report.DoctorDailyReportDto;
+import io.terminus.doctor.event.model.DoctorDailyReport;
 import io.terminus.doctor.event.service.DoctorDailyReportReadService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +18,8 @@ import javax.annotation.PostConstruct;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+
+import static java.util.Objects.isNull;
 
 /**
  * Desc: 日报统计缓存
@@ -79,6 +82,21 @@ public class DoctorDailyReportCache {
     public void putDailyReport(Long farmId, Date date, DoctorDailyReportDto report) {
         synchronized(reportCache) {
             reportCache.put(getReportKey(farmId, date), report);
+        }
+    }
+
+    /**
+     * 添加对应的report 数据信息
+     * @param farmId
+     * @param date
+     * @param reportDto
+     */
+    public void addDailyReport(Long farmId, Date date, DoctorDailyReportDto reportDto){
+        DoctorDailyReportDto doctorDailyReportDto = reportCache.getUnchecked(getReportKey(farmId, date));
+        if(isNull(doctorDailyReportDto)){
+            putDailyReport(farmId, date, reportDto);
+        }else {
+            doctorDailyReportDto.setPig(doctorDailyReportDto);
         }
     }
 

@@ -3,6 +3,7 @@ package io.terminus.doctor.event.event;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
 import com.google.common.eventbus.Subscribe;
+import io.terminus.common.model.Response;
 import io.terminus.doctor.common.enums.DataEventType;
 import io.terminus.doctor.common.event.CoreEventDispatcher;
 import io.terminus.doctor.common.event.DataEvent;
@@ -15,6 +16,7 @@ import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.event.search.barn.BarnSearchWriteService;
 import io.terminus.doctor.event.search.group.GroupSearchWriteService;
 import io.terminus.doctor.event.search.pig.PigSearchWriteService;
+import io.terminus.doctor.event.service.DoctorDailyPigReportWriteService;
 import io.terminus.doctor.event.service.DoctorPigEventReadService;
 import io.terminus.doctor.event.service.DoctorPigReadService;
 import io.terminus.doctor.event.service.DoctorPigWriteService;
@@ -62,6 +64,9 @@ public class DoctorZKListener implements EventListener {
 
     @Autowired
     private BarnSearchWriteService barnSearchWriteService;
+
+    @Autowired
+    DoctorDailyPigReportWriteService doctorDailyPigReportWriteService;
 
     @PostConstruct
     public void subs() {
@@ -135,6 +140,9 @@ public class DoctorZKListener implements EventListener {
                 Long pigId = Params.getWithConvert(context, "doctorPigId", d -> Long.valueOf(d.toString()));
                 Long doctorEventId = Params.getWithConvert(context, "doctorEventId", d -> Long.valueOf(d.toString()));
                 updateTrackExtraMessage(pigId, doctorEventId);
+
+                // add event daily reduce
+                pigDailyReportUpdate(doctorEventId);
             }else {
                 context.remove("contextType");
                 context.values().forEach(inContext -> {
@@ -143,9 +151,19 @@ public class DoctorZKListener implements EventListener {
                         Long pigId = Params.getWithConvert(inContextMap, "doctorPigId", d -> Long.valueOf(d.toString()));
                         Long doctorEventId = Params.getWithConvert(inContextMap, "doctorEventId", d -> Long.valueOf(d.toString()));
                         updateTrackExtraMessage(pigId, doctorEventId);
+
+                        // add event daily
+                        pigDailyReportUpdate(doctorEventId);
                     }
                 });
             }
+        }
+    }
+
+    private void pigDailyReportUpdate(Long eventId){
+        Response<Boolean> response = doctorDailyPigReportWriteService.updateDailyPigReportInfo(eventId);
+        if(! response.isSuccess()){
+            log.error("update daily pig report error, cause:{}", response.getError());
         }
     }
 
