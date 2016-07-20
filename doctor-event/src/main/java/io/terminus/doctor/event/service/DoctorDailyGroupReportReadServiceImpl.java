@@ -40,7 +40,7 @@ import static io.terminus.doctor.common.utils.CountUtil.intStream;
  */
 @Slf4j
 @Service
-public class DoctorDailyGroupReportReadReadServiceImpl implements DoctorDailyGroupReportReadService {
+public class DoctorDailyGroupReportReadServiceImpl implements DoctorDailyGroupReportReadService {
 
     private static final JsonMapper JSON_MAPPER = JsonMapper.nonEmptyMapper();
 
@@ -48,8 +48,8 @@ public class DoctorDailyGroupReportReadReadServiceImpl implements DoctorDailyGro
     private final DoctorGroupReadService doctorGroupReadService;
 
     @Autowired
-    public DoctorDailyGroupReportReadReadServiceImpl(DoctorPigTypeStatisticReadService doctorPigTypeStatisticReadService,
-                                                     DoctorGroupReadService doctorGroupReadService) {
+    public DoctorDailyGroupReportReadServiceImpl(DoctorPigTypeStatisticReadService doctorPigTypeStatisticReadService,
+                                                 DoctorGroupReadService doctorGroupReadService) {
         this.doctorPigTypeStatisticReadService = doctorPigTypeStatisticReadService;
         this.doctorGroupReadService = doctorGroupReadService;
     }
