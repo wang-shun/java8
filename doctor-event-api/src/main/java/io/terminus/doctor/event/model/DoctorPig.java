@@ -2,6 +2,7 @@ package io.terminus.doctor.event.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.introspect.ClassIntrospector;
 import com.google.common.base.Strings;
 import com.google.common.collect.Iterables;
 import io.terminus.common.utils.JsonMapper;

@@ -3,6 +3,7 @@ package io.terminus.doctor.event.event;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
 import com.google.common.eventbus.Subscribe;
+import io.terminus.common.model.Response;
 import io.terminus.doctor.common.enums.DataEventType;
 import io.terminus.doctor.common.event.CoreEventDispatcher;
 import io.terminus.doctor.common.event.DataEvent;
@@ -15,8 +16,11 @@ import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.event.search.barn.BarnSearchWriteService;
 import io.terminus.doctor.event.search.group.GroupSearchWriteService;
 import io.terminus.doctor.event.search.pig.PigSearchWriteService;
+import io.terminus.doctor.event.service.DoctorDailyGroupReportWriteService;
+import io.terminus.doctor.event.service.DoctorDailyPigReportWriteService;
 import io.terminus.doctor.event.service.DoctorPigEventReadService;
 import io.terminus.doctor.event.service.DoctorPigReadService;
+import io.terminus.doctor.event.service.DoctorPigTypeStatisticWriteService;
 import io.terminus.doctor.event.service.DoctorPigWriteService;
 import io.terminus.zookeeper.pubsub.Subscriber;
 import lombok.extern.slf4j.Slf4j;
@@ -62,6 +66,15 @@ public class DoctorZKListener implements EventListener {
 
     @Autowired
     private BarnSearchWriteService barnSearchWriteService;
+
+    @Autowired
+    private DoctorDailyPigReportWriteService doctorDailyPigReportWriteService;
+    
+    @Autowired
+    private DoctorPigTypeStatisticWriteService doctorPigTypeStatisticWriteService;
+
+    @Autowired
+    private DoctorDailyGroupReportWriteService doctorDailyGroupReportWriteService;
 
     @PostConstruct
     public void subs() {
@@ -110,8 +123,12 @@ public class DoctorZKListener implements EventListener {
         if (DataEventType.GroupEventCreate.getKey() == dataEvent.getEventType()) {
             Map<String, Serializable> context = DataEvent.analyseContent(dataEvent, Map.class);
             Long groupId = Params.getWithConvert(context, "doctorGroupId", d -> Long.valueOf(d.toString()));
+
             // update es index
             groupSearchWriteService.update(groupId);
+
+            //更新猪群统计信息
+            groupDailyReportUpdate(context);
         }
 
         // 3. 如果是猪舍信息修改
@@ -135,6 +152,9 @@ public class DoctorZKListener implements EventListener {
                 Long pigId = Params.getWithConvert(context, "doctorPigId", d -> Long.valueOf(d.toString()));
                 Long doctorEventId = Params.getWithConvert(context, "doctorEventId", d -> Long.valueOf(d.toString()));
                 updateTrackExtraMessage(pigId, doctorEventId);
+
+                // add event daily reduce
+                pigDailyReportUpdate(doctorEventId);
             }else {
                 context.remove("contextType");
                 context.values().forEach(inContext -> {
@@ -143,10 +163,33 @@ public class DoctorZKListener implements EventListener {
                         Long pigId = Params.getWithConvert(inContextMap, "doctorPigId", d -> Long.valueOf(d.toString()));
                         Long doctorEventId = Params.getWithConvert(inContextMap, "doctorEventId", d -> Long.valueOf(d.toString()));
                         updateTrackExtraMessage(pigId, doctorEventId);
+
+                        // add event daily
+                        pigDailyReportUpdate(doctorEventId);
                     }
                 });
             }
         }
+    }
+
+    private void pigDailyReportUpdate(Long eventId){
+        Response<Boolean> response = doctorDailyPigReportWriteService.updateDailyPigReportInfo(eventId);
+        if(! response.isSuccess()){
+            log.error("update daily pig report error, cause:{}", response.getError());
+        }
+    }
+
+    //猪群的统计
+    private void groupDailyReportUpdate(Map<String, Serializable> context) {
+        Long orgId = Params.getWithConvert(context, "doctorOrgId", d -> Long.valueOf(d.toString()));
+        Long farmId = Params.getWithConvert(context, "doctorFarmId", d -> Long.valueOf(d.toString()));
+        Long eventId = Params.getWithConvert(context, "doctorGroupEventId", d -> Long.valueOf(d.toString()));
+        
+        //更新数据库的存栏统计
+        doctorPigTypeStatisticWriteService.statisticGroup(orgId, farmId);
+        
+        //更新日报缓存
+        doctorDailyGroupReportWriteService.updateDailyGroupReportCache(eventId);
     }
 
     /**

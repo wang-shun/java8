@@ -47,4 +47,8 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent>{
                 ImmutableMap.of("farmId", farmId, "eventType", eventType,
                         "startDate", startDate, "endDate", endDate));
     }
+
+    public List<Long> queryAllFarmInEvent(){
+        return this.getSqlSession().selectList(sqlId("queryAllFarmInEvent"));
+    }
 }

@@ -122,8 +122,7 @@ public class DoctorTransFarmGroupEventHandler extends DoctorAbstractGroupEventHa
         }
 
         //发布统计事件
-        publishCountGroupEvent(group.getOrgId(), group.getFarmId());
-        publistGroupAndBarn(group.getId(), group.getCurrentBarnId());
+        publistGroupAndBarn(group.getOrgId(), group.getFarmId(), group.getId(), group.getCurrentBarnId(), event.getId());
     }
 
     @Override

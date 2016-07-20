@@ -48,4 +48,14 @@ public class DoctorPigTypeStatisticReadServiceImpl implements DoctorPigTypeStati
             return Response.fail("pigTypeStatistic.find.fail");
         }
     }
+
+    @Override
+    public Response<List<DoctorPigTypeStatistic>> finaAllPigTypeStatistics() {
+        try {
+            return Response.ok(doctorPigTypeStatisticDao.findAll());
+        } catch (Exception e) {
+            log.error("find all pigTypeStatistic fail, cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("pigTypeStatistic.find.fail");
+        }
+    }
 }

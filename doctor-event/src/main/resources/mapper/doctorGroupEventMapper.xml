@@ -134,4 +134,14 @@
         ORDER BY event_at DESC, created_at DESC
         LIMIT #{offset}, #{limit}
     </select>
+
+    <select id="findGroupEventsByEventTypeAndDate" parameterType="map" resultMap="DoctorGroupEventMap">
+        SELECT <include refid="cols_all"/> from <include refid="tb"/>
+        <where>
+            <if test="farmId != null">AND farm_id = #{farmId}</if>
+            <if test="eventType != null">AND type = #{eventType}</if>
+            <if test="startAt != null">AND event_at &gt;= #{startAt}</if>
+            <if test="endAt != null">AND event_at &lt;= #{endAt}</if>
+        </where>
+    </select>
 </mapper>

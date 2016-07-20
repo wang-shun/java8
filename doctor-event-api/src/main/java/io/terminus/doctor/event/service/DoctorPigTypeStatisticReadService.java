@@ -28,4 +28,10 @@ public interface DoctorPigTypeStatisticReadService {
      * @return 猪只数统计表
      */
     Response<List<DoctorPigTypeStatistic>> findPigTypeStatisticsByOrgId(@NotNull(message = "orgId.not.null") Long orgId);
+
+    /**
+     * 查询全部统计
+     * @return 猪只数统计表
+     */
+    Response<List<DoctorPigTypeStatistic>> finaAllPigTypeStatistics();
 }

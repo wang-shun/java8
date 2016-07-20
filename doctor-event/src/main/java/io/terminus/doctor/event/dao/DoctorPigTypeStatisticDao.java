@@ -23,6 +23,10 @@ public class DoctorPigTypeStatisticDao extends MyBatisDao<DoctorPigTypeStatistic
         return getSqlSession().selectList(sqlId("findByOrgId"), orgId);
     }
 
+    public List<DoctorPigTypeStatistic> findAll() {
+        return getSqlSession().selectList(sqlId("findAll"));
+    }
+
     /**
      * 根据farmId更新统计数据(只更新统计, 不更新其他信息)
      */

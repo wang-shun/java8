@@ -18,7 +18,6 @@ import io.terminus.doctor.event.dto.event.group.input.BaseGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorTransGroupInput;
 import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.enums.IsOrNot;
-import io.terminus.doctor.event.event.DoctorGroupCountEvent;
 import io.terminus.doctor.event.handler.DoctorGroupEventHandler;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
@@ -228,14 +227,10 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
         }
     }
 
-    //发布统计猪群事件 // TODO: 16/6/16 可以用 publishZookeeperEvent 替代
-    protected void publishCountGroupEvent(Long orgId, Long farmId) {
-        coreEventDispatcher.publish(new DoctorGroupCountEvent(orgId, farmId));
-    }
-
     //发布猪群猪舍事件
-    protected void publistGroupAndBarn(Long groupId, Long barnId) {
-        publishZookeeperEvent(DataEventType.GroupEventCreate.getKey(), ImmutableMap.of("doctorGroupId", groupId));
+    protected void publistGroupAndBarn(Long orgId, Long farmId, Long groupId, Long barnId, Long eventId) {
+        publishZookeeperEvent(DataEventType.GroupEventCreate.getKey(), ImmutableMap.of(
+                "doctorOrgId", orgId, "doctorFarmId", farmId, "doctorGroupId", groupId, "doctorGroupEventId", eventId));
         publishZookeeperEvent(DataEventType.BarnUpdate.getKey(), ImmutableMap.of("doctorBarnId", barnId));
     }
 

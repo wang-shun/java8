@@ -2,9 +2,11 @@ package io.terminus.doctor.event.dao;
 
 import com.google.common.collect.ImmutableMap;
 import io.terminus.common.mysql.dao.MyBatisDao;
+import io.terminus.common.utils.MapBuilder;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import org.springframework.stereotype.Repository;
 
+import java.util.Date;
 import java.util.List;
 
 import static io.terminus.common.utils.Arguments.notEmpty;
@@ -31,5 +33,14 @@ public class DoctorGroupEventDao extends MyBatisDao<DoctorGroupEvent> {
             getSqlSession().update(sqlId("updateGroupCodeByGroupId"),
                     ImmutableMap.of("groupId", groupId, "groupCode", groupCode));
         }
+    }
+
+    public List<DoctorGroupEvent> findGroupEventsByEventTypeAndDate(Long farmId, Integer eventType, Date startAt, Date endAt) {
+        return getSqlSession().selectList(sqlId("findGroupEventsByEventTypeAndDate"), MapBuilder.<String, Object>of()
+                .put("farmId", farmId)
+                .put("eventType", eventType)
+                .put("startAt", startAt)
+                .put("endAt", endAt)
+                .map());
     }
 }

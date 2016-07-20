@@ -137,3 +137,16 @@ CREATE TABLE `doctor_basic_materials` (
   `updated_at` datetime DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='基础物料表';
+
+-- 2016-07-19 猪场日报表
+CREATE TABLE `doctor_daily_reports` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '自增主键',
+  `farm_id` bigint(20) DEFAULT NULL COMMENT '猪场id',
+  `farm_name` varchar(64) DEFAULT NULL COMMENT '猪场名称',
+  `data` text COMMENT '日报数据，json存储',
+  `extra` text COMMENT '附加字段',
+  `sum_at` date DEFAULT NULL COMMENT '统计时间',
+  `created_at` datetime DEFAULT NULL COMMENT '创建时间(仅做记录创建时间，不参与查询)',
+  PRIMARY KEY (`id`),
+  KEY `idx_doctor_daily_reports_farm_id_agg_sumat` (`farm_id`,`sum_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='猪场日报表';
