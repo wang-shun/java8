@@ -152,8 +152,14 @@ public class DoctorDailyReportCache {
                     DoctorDailyReportDto report = new DoctorDailyReportDto();
                     report.setFarmId(farmId);
                     report.setSumAt(dateStart);
-                    report.setPig(pigReportMap.get(farmId));
-                    report.setGroup(groupReportMap.get(farmId));
+                    DoctorDailyReportDto pigReport = pigReportMap.get(farmId);
+                    if (pigReport != null) {
+                        report.setPig(pigReport);
+                    }
+                    DoctorDailyReportDto groupReport = groupReportMap.get(farmId);
+                    if (groupReport != null) {
+                        report.setGroup(groupReport);
+                    }
                     return report;
                 })
                 .collect(Collectors.toList());
