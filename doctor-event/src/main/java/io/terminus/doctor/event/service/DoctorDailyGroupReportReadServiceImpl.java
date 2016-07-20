@@ -31,6 +31,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import static io.terminus.doctor.common.utils.CountUtil.intStream;
+import static io.terminus.doctor.common.utils.CountUtil.longStream;
 
 /**
  * Desc:
@@ -128,8 +129,8 @@ public class DoctorDailyGroupReportReadServiceImpl implements DoctorDailyGroupRe
         //销售 (保育 = 产房 + 保育)
         DoctorSaleDailyReport saleReport = new DoctorSaleDailyReport();
         saleReport.setNursery(isSaleEvent(changeEvent, PigType.FARROW_PIGLET)
-                || isSaleEvent(changeEvent, PigType.NURSERY_PIGLET) ? changeEvent.getQuantity() : 0);
-        saleReport.setFatten(isSaleEvent(changeEvent, PigType.FATTEN_PIG) ? changeEvent.getQuantity() : 0);
+                || isSaleEvent(changeEvent, PigType.NURSERY_PIGLET) ? changeEvent.getChange().getAmount() / 100 : 0);
+        saleReport.setFatten(isSaleEvent(changeEvent, PigType.FATTEN_PIG) ? changeEvent.getChange().getAmount() / 100 : 0);
         report.setSale(saleReport);
 
         log.info("daily group report doReportByEvent:{}", report);
@@ -168,9 +169,9 @@ public class DoctorDailyGroupReportReadServiceImpl implements DoctorDailyGroupRe
 
         //销售 (保育 = 产房 + 保育)
         DoctorSaleDailyReport saleReport = new DoctorSaleDailyReport();
-        saleReport.setNursery(intStream(filterChangeEvent(events, e -> isSaleEvent(e, PigType.FARROW_PIGLET)), ChangeEvent::getQuantity).sum()
-                + intStream(filterChangeEvent(events, e -> isSaleEvent(e, PigType.NURSERY_PIGLET)), ChangeEvent::getQuantity).sum());
-        saleReport.setFatten(intStream(filterChangeEvent(events, e -> isSaleEvent(e, PigType.FATTEN_PIG)), ChangeEvent::getQuantity).sum());
+        saleReport.setNursery(longStream(filterChangeEvent(events, e -> isSaleEvent(e, PigType.FARROW_PIGLET)), c -> c.getChange().getAmount()).sum() / 100
+                + (longStream(filterChangeEvent(events, e -> isSaleEvent(e, PigType.NURSERY_PIGLET)), c -> c.getChange().getAmount()).sum() / 100));
+        saleReport.setFatten(longStream(filterChangeEvent(events, e -> isSaleEvent(e, PigType.FATTEN_PIG)), c -> c.getChange().getAmount()).sum() / 100);
         report.setSale(saleReport);
 
         log.info("daily group report doReport:{}", report);
@@ -181,14 +182,14 @@ public class DoctorDailyGroupReportReadServiceImpl implements DoctorDailyGroupRe
     //区别出猪类的死淘
     private boolean isDeadEvent(ChangeEvent e, PigType pigType) {
         return Objects.equals(e.getPigType(), pigType.getValue())
-                && (Objects.equals(DoctorBasicEnums.DEAD.getId(), e.getChange().getChangeReasonId())
-                || Objects.equals(DoctorBasicEnums.ELIMINATE.getId(), e.getChange().getChangeReasonId()));
+                && (Objects.equals(DoctorBasicEnums.DEAD.getId(), e.getChange().getChangeTypeId())
+                || Objects.equals(DoctorBasicEnums.ELIMINATE.getId(), e.getChange().getChangeTypeId()));
     }
 
     //区别出猪类的销售
     private boolean isSaleEvent(ChangeEvent e, PigType pigType) {
         return Objects.equals(e.getPigType(), pigType.getValue())
-                && Objects.equals(DoctorBasicEnums.SALE.getId(), e.getChange().getChangeReasonId());
+                && Objects.equals(DoctorBasicEnums.SALE.getId(), e.getChange().getChangeTypeId());
     }
 
     //过滤事件

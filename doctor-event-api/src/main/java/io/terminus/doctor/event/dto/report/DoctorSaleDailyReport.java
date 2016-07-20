@@ -27,12 +27,12 @@ public class DoctorSaleDailyReport implements Serializable {
     /**
      * 保育猪(产房 + 保育)
      */
-    private long nursery;
+    private double nursery;
 
     /**
      * 育肥猪
      */
-    private long fatten;
+    private double fatten;
 
     public void addBoarSowCount(DoctorSaleDailyReport doctorSaleDailyReport){
         this.boar += doctorSaleDailyReport.getBoar();
