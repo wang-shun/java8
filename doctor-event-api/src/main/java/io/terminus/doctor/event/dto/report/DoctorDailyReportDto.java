@@ -61,6 +61,11 @@ public class DoctorDailyReportDto implements Serializable {
     private Date sumAt;
 
     /**
+     * 是否失败, true 失败
+     */
+    private boolean fail;
+
+    /**
      * 只修改猪相关的统计
      */
     public void setPig(DoctorDailyReportDto report) {

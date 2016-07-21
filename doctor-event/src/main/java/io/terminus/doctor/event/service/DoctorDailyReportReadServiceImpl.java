@@ -60,7 +60,9 @@ public class DoctorDailyReportReadServiceImpl implements DoctorDailyReportReadSe
             //如果查未来的时间, 直接返回0
             if (date != null && date.after(new Date())) {
                 log.info("search date not after now! date:{}", date);
-                return Response.ok();
+                DoctorDailyReportDto dto = new DoctorDailyReportDto();
+                dto.setFail(true);
+                return Response.ok(dto);
             }
 
             DoctorDailyReportDto report = doctorDailyReportCache.getDailyReport(farmId, date);
