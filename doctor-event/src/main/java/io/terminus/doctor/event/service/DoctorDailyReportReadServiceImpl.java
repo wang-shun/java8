@@ -46,6 +46,7 @@ public class DoctorDailyReportReadServiceImpl implements DoctorDailyReportReadSe
             Date now = new Date();
             List<DoctorDailyReportDto> reportDtos = RespHelper.orServEx(initDailyReportByDate(now));
             reportDtos.forEach(report -> doctorDailyReportCache.putDailyReport(report.getFarmId(), now, report));
+            log.info("init daily report cache success!");
         } catch (ServiceException e) {
             log.error("init daily report failed, cause:{}", Throwables.getStackTraceAsString(e));
         }

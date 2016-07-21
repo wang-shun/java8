@@ -1,18 +1,14 @@
 package io.terminus.doctor.web.front.event.controller;
 
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
-import io.terminus.doctor.common.utils.RandomUtil;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dto.report.DoctorDailyReportDto;
-import io.terminus.doctor.event.dto.report.DoctorLiveStockDailyReport;
 import io.terminus.doctor.event.service.DoctorDailyReportReadService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.Random;
 
 /**
  * Desc:
@@ -25,7 +21,7 @@ import java.util.Random;
 @RequestMapping("/api/doctor/report")
 public class DoctorDailyReports {
 
-//    @RpcConsumer
+    @RpcConsumer
     private DoctorDailyReportReadService doctorDailyReportReadService;
 
     /**
@@ -37,18 +33,7 @@ public class DoctorDailyReports {
     @RequestMapping(value = "/daily", method = RequestMethod.GET)
     public DoctorDailyReportDto findDailyReportByFarmIdAndSumAtWithCache(@RequestParam("farmId") Long farmId,
                                                                          @RequestParam("date") String date) {
-        DoctorLiveStockDailyReport report = new DoctorLiveStockDailyReport();
-        report.setFarrow(RandomUtil.random(1,100));
-        report.setFatten(RandomUtil.random(1,100));
-        report.setBoar(RandomUtil.random(1,100));
-        report.setPeihuaiSow(RandomUtil.random(1,100));
-        report.setNursery(RandomUtil.random(1,100));
-        report.setHoubeiSow(RandomUtil.random(1,100));
-        report.setKonghuaiSow(RandomUtil.random(1,100));
-        DoctorDailyReportDto d = new DoctorDailyReportDto();
-        d.setLiveStock(report);
-        return d;
-//        return RespHelper.or500(doctorDailyReportReadService.findDailyReportByFarmIdAndSumAtWithCache(farmId, date));
+        return RespHelper.or500(doctorDailyReportReadService.findDailyReportByFarmIdAndSumAtWithCache(farmId, date));
     }
 
     /**
