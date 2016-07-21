@@ -1,5 +1,6 @@
 package io.terminus.doctor.event.report.count;
 
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.doctor.event.daily.DoctorDailyEventCount;
@@ -32,6 +33,9 @@ public class DoctorDailyFarrowingEventCount implements DoctorDailyEventCount{
 
     @Override
     public void dailyEventHandle(List<DoctorPigEvent> t, DoctorDailyReportDto doctorDailyReportDto, Map<String, Object> context) {
+
+        if(Iterables.isEmpty(t))
+            return;
 
         DoctorDeliverDailyReport doctorDeliverDailyReport = new DoctorDeliverDailyReport();
 

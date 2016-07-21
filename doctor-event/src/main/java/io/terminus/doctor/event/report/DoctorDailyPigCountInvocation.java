@@ -1,5 +1,6 @@
 package io.terminus.doctor.event.report;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import io.terminus.doctor.event.daily.DoctorDailyEventCount;
 import io.terminus.doctor.event.dto.report.DoctorDailyReportDto;
@@ -38,21 +39,23 @@ public class DoctorDailyPigCountInvocation {
      * @param doctorPigEvents
      * @return
      */
-    public DoctorDailyReportDto countPigEvent(List<DoctorPigEvent> doctorPigEvents){
+    public DoctorDailyReportDto countPigEvent(List<DoctorPigEvent> doctorPigEvents, Map<String, Object> context){
 
         DoctorDailyReportDto doctorDailyReportDto = new DoctorDailyReportDto();
-        Map<String,Object> context = Maps.newHashMap();
 
         List<DoctorDailyEventCount> doctorDailyEventCounts = doctorDailyPigCountChain.getDoctorDailyEventCounts();
+
+        if(isNull(doctorDailyEventCounts)){
+            doctorDailyEventCounts = Lists.newArrayList();
+        }
+
         for (DoctorDailyEventCount doctorDailyEventCount : doctorDailyEventCounts) {
 
             // filter to execute event
             List<DoctorPigEvent> toExe = doctorDailyEventCount.preDailyEventHandleValidate(doctorPigEvents);
 
-            if(! isNull(toExe) && toExe.size() != 0 ){
-                // execute count result
-                doctorDailyEventCount.dailyEventHandle(toExe, doctorDailyReportDto, context);
-            }
+            // execute count result
+            doctorDailyEventCount.dailyEventHandle(toExe, doctorDailyReportDto, context);
         }
         return doctorDailyReportDto;
     }

@@ -50,11 +50,18 @@ public class DoctorDailyEntryEventCount implements DoctorDailyEventCount {
         DoctorLiveStockDailyReport doctorLiveStockDailyReport = new DoctorLiveStockDailyReport();
 
         // validate same farm
-        checkState(t.size() > 0, "dailyEntry.eventCount.fail");
-        Long farmId = t.get(0).getFarmId();
-        t.forEach(e->{
-            checkState(Objects.equals(e.getFarmId(), farmId), "dailyEntry.notSameFarm.fail");
-        });
+        Long farmId = null;
+        if(t.size() == 0){
+            farmId = Long.valueOf(context.get("farmId").toString());
+        }else {
+            checkState(t.size() > 0, "dailyEntry.eventCount.fail");
+            Long currentFarmId = t.get(0).getFarmId();
+            t.forEach(e->{
+                checkState(Objects.equals(e.getFarmId(), currentFarmId), "dailyEntry.notSameFarm.fail");
+            });
+            farmId = currentFarmId;
+        }
+
 
         // check result
         List<DoctorPigStatusCount> statusCounts = doctorPigTrackDao.countPigTrackByStatus(farmId);
