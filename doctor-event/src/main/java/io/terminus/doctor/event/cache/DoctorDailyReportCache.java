@@ -10,7 +10,9 @@ import io.terminus.common.utils.Dates;
 import io.terminus.common.utils.Splitters;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.RespHelper;
+import io.terminus.doctor.event.dao.DoctorDailyReportDao;
 import io.terminus.doctor.event.dto.report.DoctorDailyReportDto;
+import io.terminus.doctor.event.model.DoctorDailyReport;
 import io.terminus.doctor.event.service.DoctorDailyGroupReportReadService;
 import io.terminus.doctor.event.service.DoctorDailyPigReportReadService;
 import lombok.AllArgsConstructor;
@@ -42,12 +44,15 @@ public class DoctorDailyReportCache {
     private final LoadingCache<String, DoctorDailyReportDto> reportCache;
     private final DoctorDailyPigReportReadService doctorDailyPigReportReadService;
     private final DoctorDailyGroupReportReadService doctorDailyGroupReportReadService;
+    private final DoctorDailyReportDao doctorDailyReportDao;
 
     @Autowired
     public DoctorDailyReportCache(DoctorDailyPigReportReadService doctorDailyPigReportReadService,
-                                  DoctorDailyGroupReportReadService doctorDailyGroupReportReadService) {
+                                  DoctorDailyGroupReportReadService doctorDailyGroupReportReadService,
+                                  DoctorDailyReportDao doctorDailyReportDao) {
         this.doctorDailyPigReportReadService = doctorDailyPigReportReadService;
         this.doctorDailyGroupReportReadService = doctorDailyGroupReportReadService;
+        this.doctorDailyReportDao = doctorDailyReportDao;
 
         this.reportCache = CacheBuilder.newBuilder().expireAfterAccess(1L, TimeUnit.DAYS).build(new CacheLoader<String, DoctorDailyReportDto>() {
             @Override
@@ -124,11 +129,26 @@ public class DoctorDailyReportCache {
     }
 
     //实时查询某猪场的日报统计
-    public DoctorDailyReportDto initDailyReportByFarmIdAndDate(Long farmId, Date date) {
-        DoctorDailyReportDto report = new DoctorDailyReportDto();
+    private DoctorDailyReportDto initDailyReportByFarmIdAndDate(Long farmId, Date date) {
+        DoctorDailyReportDto report = getDailyReportWithSql(farmId, date);
+        if (report != null) {
+            return report;
+        }
+        report = new DoctorDailyReportDto();
         report.setPig(RespHelper.orServEx(doctorDailyPigReportReadService.countByFarmIdDate(farmId, date)));
         report.setGroup(RespHelper.orServEx(doctorDailyGroupReportReadService.getGroupDailyReportByFarmIdAndDate(farmId, date)));
         return report;
+    }
+
+    //根据farmId和sumAt从数据库查询, 并转换成日报统计
+    private DoctorDailyReportDto getDailyReportWithSql(Long farmId, Date sumAt) {
+        DoctorDailyReport report = doctorDailyReportDao.findByFarmIdAndSumAt(farmId, sumAt);
+
+        //如果没有查到, 要返回null, 交给上层判断
+        if (report == null || Strings.isNullOrEmpty(report.getData())) {
+            return null;
+        }
+        return report.getReportData();
     }
 
     //实时查询全部猪场猪和猪群的日报统计
