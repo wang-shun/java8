@@ -56,8 +56,14 @@ public class DoctorDailyReportReadServiceImpl implements DoctorDailyReportReadSe
     public Response<DoctorDailyReportDto> findDailyReportByFarmIdAndSumAtWithCache(Long farmId, String sumAt) {
         try {
             Date date = DateUtil.toDate(sumAt);
-            DoctorDailyReportDto report = doctorDailyReportCache.getDailyReport(farmId, date);
 
+            //如果查未来的时间, 直接返回0
+            if (date != null && date.after(new Date())) {
+                log.info("search date not after now! date:{}", date);
+                return Response.ok(new DoctorDailyReportDto());
+            }
+
+            DoctorDailyReportDto report = doctorDailyReportCache.getDailyReport(farmId, date);
             if (report != null) {
                 return Response.ok(report);
             }
