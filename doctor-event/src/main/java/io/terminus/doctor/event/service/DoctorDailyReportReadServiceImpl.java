@@ -57,17 +57,19 @@ public class DoctorDailyReportReadServiceImpl implements DoctorDailyReportReadSe
             Date date = DateUtil.toDate(sumAt);
             DoctorDailyReportDto report = doctorDailyReportCache.getDailyReport(farmId, date);
 
-            //如果缓存里不存在, 直接查数据库
-            if (report == null) {
-                report = getDailyReportWithSql(farmId, date);
+            if (report != null) {
+                return Response.ok(report);
             }
+
+            //如果缓存里不存在, 直接查数据库
+            report = getDailyReportWithSql(farmId, date);
 
             //如果数据库里不存在, 重新计算
             if (report == null) {
                 report = doctorDailyReportCache.initDailyReportByFarmIdAndDate(farmId, date);
             }
 
-            //如果计算结果为空, 返回初始化的日报
+            //如果计算结果为空, 返回初始化的日报, 不放入缓存
             if (report == null) {
                 return Response.ok(new DoctorDailyReportDto());
             }
