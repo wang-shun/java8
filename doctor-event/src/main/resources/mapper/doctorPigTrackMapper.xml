@@ -131,6 +131,7 @@
     <select id="countPigTrackByStatus" resultMap="DoctorPigStatusCountMap">
         select `status` as `status`, count(1) as `count` FROM <include refid="tb"/>
         WHERE farm_id = #{farmId}
+        group by `status`
     </select>
 
     <update id="update" parameterType="DoctorPigTrack">

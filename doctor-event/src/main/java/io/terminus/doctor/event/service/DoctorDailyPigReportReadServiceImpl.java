@@ -51,7 +51,10 @@ public class DoctorDailyPigReportReadServiceImpl implements DoctorDailyPigReport
             params.put("endDate", dateTime.plusDays(1).withTimeAtStartOfDay());
             List<DoctorPigEvent> doctorPigEvents = doctorPigEventDao.list(params);
 
-            DoctorDailyReportDto doctorDailyReportDto = doctorDailyPigCountInvocation.countPigEvent(doctorPigEvents);
+            Map<String,Object> context = Maps.newHashMap();
+            context.put("farmId", farmId);
+
+            DoctorDailyReportDto doctorDailyReportDto = doctorDailyPigCountInvocation.countPigEvent(doctorPigEvents, context);
             doctorDailyReportDto.setFarmId(farmId);
             doctorDailyReportDto.setSumAt(sumAt);
 
@@ -70,7 +73,9 @@ public class DoctorDailyPigReportReadServiceImpl implements DoctorDailyPigReport
         try{
             List<Long> farmIds = doctorPigEventDao.queryAllFarmInEvent();
 
-            List<DoctorDailyReportDto> results = farmIds.stream().map(farmId-> RespHelper.orServEx(countByFarmIdDate(farmId, sumAt))).collect(Collectors.toList());
+            List<DoctorDailyReportDto> results = farmIds.stream().
+                    map(farmId-> RespHelper.orServEx(countByFarmIdDate(farmId, sumAt)))
+                    .collect(Collectors.toList());
 
         	return Response.ok(results);
         }catch (IllegalStateException se){
@@ -85,11 +90,10 @@ public class DoctorDailyPigReportReadServiceImpl implements DoctorDailyPigReport
     @Override
     public Response<DoctorDailyReportDto> countSinglePigEvent(DoctorPigEvent doctorPigEvent) {
         try{
-            DoctorDailyReportDto result = new DoctorDailyReportDto();
+            DoctorDailyReportDto result = doctorDailyPigCountInvocation.countPigEvent(Lists.newArrayList(doctorPigEvent), Maps.newHashMap());
             result.setFarmId(doctorPigEvent.getFarmId());
             result.setSumAt(doctorPigEvent.getEventAt());
-            
-        	return Response.ok(doctorDailyPigCountInvocation.countPigEvent(Lists.newArrayList(doctorPigEvent)));
+        	return Response.ok(result);
         }catch (IllegalStateException se){
             log.warn("daily single event count illegal state fail, cause:{}", Throwables.getStackTraceAsString(se));
             return Response.fail(se.getMessage());
