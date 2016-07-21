@@ -108,4 +108,14 @@ public class DoctorBarnReadServiceImpl implements DoctorBarnReadService {
             return Response.fail("count.pig.fail");
         }
     }
+
+    @Override
+    public Response<DoctorBarn> findBarnByOutId(String outId) {
+        try {
+            return Response.ok(doctorBarnDao.findByOutId(outId));
+        } catch (Exception e) {
+            log.error("find barn by out id failed, outId:{}, cause:{}", outId, Throwables.getStackTraceAsString(e));
+            return Response.fail("barn.find.fail");
+        }
+    }
 }

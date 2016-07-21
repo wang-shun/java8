@@ -18,6 +18,10 @@ import java.util.List;
 @Repository
 public class DoctorBarnDao extends MyBatisDao<DoctorBarn> {
 
+    public DoctorBarn findByOutId(String outId) {
+        return getSqlSession().selectOne(sqlId("findByOutId"), outId);
+    }
+
     public List<DoctorBarn> findByFarmId(Long farmId) {
         return getSqlSession().selectList(sqlId("findByFarmId"), farmId);
     }

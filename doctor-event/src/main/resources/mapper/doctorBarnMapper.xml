@@ -91,6 +91,12 @@
         WHERE farm_id = #{farmId}
     </select>
 
+    <select id="findByOutId" parameterType="string" resultMap="DoctorBarnMap">
+        SELECT <include refid="cols_all"/>
+        FROM <include refid="tb"/>
+        WHERE out_id = #{outId}
+    </select>
+
     <select id="findByEnums" parameterType="map" resultMap="DoctorBarnMap">
         SELECT <include refid="cols_all"/>
         FROM <include refid="tb"/>

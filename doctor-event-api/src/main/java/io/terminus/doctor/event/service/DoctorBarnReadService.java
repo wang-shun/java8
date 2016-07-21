@@ -2,6 +2,7 @@ package io.terminus.doctor.event.service;
 
 import io.terminus.common.model.Response;
 import io.terminus.doctor.event.model.DoctorBarn;
+import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.validation.constraints.NotNull;
 import java.util.List;
@@ -58,4 +59,11 @@ public interface DoctorBarnReadService {
      * @return 存栏量
      */
     Response<Integer> countPigByBarnId(@NotNull(message = "barnId.not.null") Long barnId);
+
+    /**
+     * 根据外部编码查询猪舍
+     * @param outId 外部编码
+     * @return 猪舍
+     */
+    Response<DoctorBarn> findBarnByOutId(@NotEmpty(message = "outId.not.empty") String outId);
 }
