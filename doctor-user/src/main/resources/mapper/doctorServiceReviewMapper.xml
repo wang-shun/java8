@@ -111,10 +111,10 @@
 
     <sql id="criteria">
         where 1 = 1
-        <if test="userId"> and user_id = #{userId} </if>
-        <if test="userMobile"> and user_mobile = #{userMobile} </if>
-        <if test="realName"> and real_name = #{realName} </if>
-        <if test="type"> and `type` = #{type} </if>
-        <if test="status"> and status = #{status} </if>
+        <if test="userId != null"> and user_id = #{userId} </if>
+        <if test="userMobile != null"> and user_mobile = #{userMobile} </if>
+        <if test="realName != null"> and real_name = #{realName} </if>
+        <if test="type != null"> and `type` = #{type} </if>
+        <if test="status != null"> and status = #{status} </if>
     </sql>
 </mapper>
