@@ -1,6 +1,5 @@
 package io.terminus.doctor.web.admin.controller;
 
-import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.BaseUser;
 import io.terminus.doctor.common.enums.UserType;
@@ -10,7 +9,6 @@ import io.terminus.doctor.user.service.DoctorFarmReadService;
 import io.terminus.doctor.user.service.DoctorFarmWriteService;
 import io.terminus.doctor.user.service.DoctorServiceStatusReadService;
 import io.terminus.doctor.user.service.DoctorUserReadService;
-import io.terminus.doctor.warehouse.service.DoctorWareHouseTypeWriteService;
 import io.terminus.doctor.web.admin.dto.UserApplyServiceDetailDto;
 import io.terminus.doctor.web.admin.service.DoctorInitBarnService;
 import io.terminus.pampas.common.UserUtil;
@@ -41,9 +39,6 @@ public class FarmController {
     private final DoctorUserReadService doctorUserReadService;
     private final DoctorServiceStatusReadService doctorServiceStatusReadService;
     private final DoctorInitBarnService doctorInitBarnService;
-
-    @RpcConsumer
-    private DoctorWareHouseTypeWriteService doctorWareHouseTypeWriteService;
 
     @Autowired
     public FarmController(DoctorFarmReadService doctorFarmReadService,
@@ -109,10 +104,7 @@ public class FarmController {
         //终于可以添加猪场了...
         List<DoctorFarm> newFarms = RespHelper.or500(doctorFarmWriteService.addFarms4PrimaryUser(primaryUser.getId(), dto.getFarms()));
 
-        newFarms.forEach(f -> doctorWareHouseTypeWriteService.initDoctorWareHouseType(f.getId(), f.getName(), dto.getUserId(), "initUser"));
-
         log.info("init barn start, userId:{}, farms:{}", dto.getUserId(), newFarms);
-
         //初始化猪舍
         newFarms.forEach(farm -> doctorInitBarnService.initBarns(farm, dto.getUserId()));
 

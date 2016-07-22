@@ -18,14 +18,11 @@ import io.terminus.doctor.user.model.DoctorServiceReview;
 import io.terminus.doctor.user.service.DoctorFarmReadService;
 import io.terminus.doctor.user.service.DoctorOrgReadService;
 import io.terminus.doctor.user.service.DoctorServiceReviewReadService;
-import io.terminus.doctor.user.service.DoctorUserReadService;
 import io.terminus.doctor.user.service.business.DoctorServiceReviewService;
-import io.terminus.doctor.warehouse.service.DoctorWareHouseTypeWriteService;
 import io.terminus.doctor.web.admin.dto.UserApplyServiceDetailDto;
 import io.terminus.doctor.web.admin.service.DoctorInitBarnService;
 import io.terminus.pampas.common.UserUtil;
 import io.terminus.parana.common.utils.RespHelper;
-import io.terminus.parana.user.model.User;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -99,8 +96,11 @@ public class DoctorServiceReviewController {
             log.error("failed to post OpenDoctorServiceEvent due to findFarmsByUserId failing");
         }
 
+        log.info("init barn start, userId:{}, farms:{}", dto.getUserId(), newFarms);
         //初始化猪舍和仓库大类
         newFarms.forEach(farm -> doctorInitBarnService.initBarns(farm, dto.getUserId()));
+
+        log.info("init barn end");
         return true;
     }
 
