@@ -23,9 +23,11 @@ import io.terminus.doctor.warehouse.service.DoctorMaterialInWareHouseReadService
 import io.terminus.doctor.warehouse.service.DoctorMaterialInWareHouseWriteService;
 import io.terminus.doctor.warehouse.service.DoctorMaterialInfoReadService;
 import io.terminus.doctor.warehouse.service.DoctorWareHouseReadService;
+import io.terminus.doctor.web.front.controller.UserProfiles;
 import io.terminus.doctor.web.front.warehouse.dto.DoctorConsumeProviderInputDto;
 import io.terminus.pampas.common.UserUtil;
 import io.terminus.parana.user.model.User;
+import io.terminus.parana.user.model.UserProfile;
 import io.terminus.parana.user.service.UserReadService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -118,8 +120,8 @@ public class DoctorWareHouseEvents {
 
         try{
             result.getData().forEach(s->{
-                Response<User> response = userReadService.findById(s.getStaffId());
-                s.setRealName(RespHelper.orServEx(response).getName());
+                Response<UserProfile> response = doctorUserProfileReadService.findProfileByUserId(s.getStaffId());
+                s.setRealName(RespHelper.orServEx(response).getRealName());
             });
 
         }catch (Exception e){
