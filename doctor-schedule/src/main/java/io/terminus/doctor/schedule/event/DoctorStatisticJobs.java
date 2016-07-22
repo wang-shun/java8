@@ -62,9 +62,9 @@ public class DoctorStatisticJobs {
 
     /**
      * 猪场猪类存栏统计job delta
-     * 每个小时统计一次
+     * 每6个小时统计一次
      */
-    @Scheduled(cron = "0 0 */1 * * ?")
+    @Scheduled(cron = "0 0 */6 * * ?")
     public void deltaStatisticPigType() {
         try {
             if(!hostLeader.isLeader()) {
