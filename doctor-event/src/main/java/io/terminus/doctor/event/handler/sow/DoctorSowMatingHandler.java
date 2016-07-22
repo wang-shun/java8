@@ -59,6 +59,14 @@ public class DoctorSowMatingHandler extends DoctorAbstractEventFlowHandler{
 //        DateTime judgePregDate = new DateTime(Long.valueOf(extra.get("judgePregDate").toString()));
 //        checkState(Objects.equals(Days.daysBetween(matingDate, judgePregDate).getDays(), 114), "input.judgePregDate.error");
 
+        //  校验断奶后, 第一次配种, 增加胎次
+        if(extra.containsKey("hasWeanToMating") &&
+                Objects.equals(Integer.valueOf(extra.get("hasWeanToMating").toString()), 1)){
+
+            extra.put("hasWeanToMating", 0);
+            doctorPigTrack.setCurrentParity(doctorPigTrack.getCurrentParity() + 1);
+        }
+
         // 构建母猪配种信息
         doctorPigTrack.addAllExtraMap(extra);
         doctorPigTrack.setStatus(PigStatus.Mate.getKey());
