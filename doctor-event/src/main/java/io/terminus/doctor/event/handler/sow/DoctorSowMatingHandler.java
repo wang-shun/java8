@@ -61,8 +61,8 @@ public class DoctorSowMatingHandler extends DoctorAbstractEventFlowHandler{
 //        checkState(Objects.equals(Days.daysBetween(matingDate, judgePregDate).getDays(), 114), "input.judgePregDate.error");
 
         //  校验断奶后, 第一次配种, 增加胎次
-        log.info("to mating sow info extra is :{}", extra);
-        if(extra.containsKey("hasWeanToMating") && Boolean.valueOf(extra.get("hasWeanToMating").toString())){
+        Map<String,Object> trackExtraMap = doctorPigTrack.getExtraMap();
+        if(trackExtraMap.containsKey("hasWeanToMating") && Boolean.valueOf(trackExtraMap.get("hasWeanToMating").toString())){
 
             extra.put("hasWeanToMating", false);
             doctorPigTrack.setCurrentParity(doctorPigTrack.getCurrentParity() + 1);
