@@ -179,7 +179,10 @@ public class DoctorGroupReadServiceImpl implements DoctorGroupReadService {
             Map<Integer, List<DoctorGroupDetail>> groupMap = RespHelper.orServEx(findGroupDetail(searchDto)).stream()
                     .collect(Collectors.groupingBy(gd -> gd.getGroup().getPigType()));
 
-            List<DoctorGroupDetail> farrows = MoreObjects.firstNonNull(groupMap.get(PigType.FARROW_PIGLET.getValue()), Lists.newArrayList());
+            List<DoctorGroupDetail> farrows = Lists.newArrayList();
+            farrows.addAll(MoreObjects.firstNonNull(groupMap.get(PigType.FARROW_PIGLET.getValue()), Lists.newArrayList()));
+            farrows.addAll(MoreObjects.firstNonNull(groupMap.get(PigType.DELIVER_SOW.getValue()), Lists.newArrayList()));   //实际情况,分娩母猪舍也有产房仔猪!!
+
             List<DoctorGroupDetail> nurseries = MoreObjects.firstNonNull(groupMap.get(PigType.NURSERY_PIGLET.getValue()), Lists.newArrayList());
             List<DoctorGroupDetail> fattens = MoreObjects.firstNonNull(groupMap.get(PigType.FATTEN_PIG.getValue()), Lists.newArrayList());
 
