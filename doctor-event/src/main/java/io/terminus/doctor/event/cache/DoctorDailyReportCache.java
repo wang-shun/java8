@@ -130,25 +130,10 @@ public class DoctorDailyReportCache {
 
     //实时查询某猪场的日报统计
     private DoctorDailyReportDto initDailyReportByFarmIdAndDate(Long farmId, Date date) {
-        DoctorDailyReportDto report = getDailyReportWithSql(farmId, date);
-        if (report != null) {
-            return report;
-        }
-        report = new DoctorDailyReportDto();
+        DoctorDailyReportDto report = new DoctorDailyReportDto();
         report.setPig(RespHelper.orServEx(doctorDailyPigReportReadService.countByFarmIdDate(farmId, date)));
         report.setGroup(RespHelper.orServEx(doctorDailyGroupReportReadService.getGroupDailyReportByFarmIdAndDate(farmId, date)));
         return report;
-    }
-
-    //根据farmId和sumAt从数据库查询, 并转换成日报统计
-    private DoctorDailyReportDto getDailyReportWithSql(Long farmId, Date sumAt) {
-        DoctorDailyReport report = doctorDailyReportDao.findByFarmIdAndSumAt(farmId, sumAt);
-
-        //如果没有查到, 要返回null, 交给上层判断
-        if (report == null || Strings.isNullOrEmpty(report.getData())) {
-            return null;
-        }
-        return report.getReportData();
     }
 
     //实时查询全部猪场猪和猪群的日报统计
