@@ -17,6 +17,9 @@ import java.util.List;
 @Repository
 public class DoctorGroupDao extends MyBatisDao<DoctorGroup> {
 
+    /**
+     * 过滤掉已关闭的群
+     */
     public List<DoctorGroup> findByCurrentBarnId(Long currentBarnId) {
         return getSqlSession().selectList(sqlId("findByCurrentBarnId"), currentBarnId);
     }

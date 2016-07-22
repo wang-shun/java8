@@ -119,7 +119,7 @@ public interface DoctorGroupReadService {
     Response<Boolean> checkGroupRepeat(@NotNull(message = "farmId.not.null") Long farmId, @NotEmpty(message = "groupCode.not.empty") String groupCode);
 
     /**
-     * 查询当前猪舍猪群
+     * 查询当前猪舍猪群(过滤掉已关闭的群)
      * @param barnId 猪舍id
      * @return 猪群list
      */
