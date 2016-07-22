@@ -112,10 +112,10 @@ public class FarmController {
             throw new JsonResponseException("farm.name.duplicate"); //猪场名称重复
         }
 
-        farms.stream().forEach(f->doctorWareHouseTypeWriteService.initDoctorWareHouseType(f.getId(), f.getName(), dto.getUserId(), "initUser"));
-
         //终于可以添加猪场了...
         List<DoctorFarm> newFarms = RespHelper.or500(doctorFarmWriteService.addFarms4PrimaryUser(primaryUser.getId(), dto.getFarms()));
+
+        newFarms.stream().forEach(f->doctorWareHouseTypeWriteService.initDoctorWareHouseType(f.getId(), f.getName(), dto.getUserId(), "initUser"));
 
         log.info("init barn start, userId:{}, farms:{}", dto.getUserId(), newFarms);
 

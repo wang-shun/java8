@@ -17,11 +17,15 @@ import io.terminus.doctor.user.model.DoctorServiceReview;
 import io.terminus.doctor.user.service.DoctorFarmReadService;
 import io.terminus.doctor.user.service.DoctorOrgReadService;
 import io.terminus.doctor.user.service.DoctorServiceReviewReadService;
+import io.terminus.doctor.user.service.DoctorUserReadService;
 import io.terminus.doctor.user.service.business.DoctorServiceReviewService;
+import io.terminus.doctor.warehouse.service.DoctorWareHouseTypeWriteService;
+import io.terminus.doctor.warehouse.service.DoctorWareHouseWriteService;
 import io.terminus.doctor.web.admin.dto.UserApplyServiceDetailDto;
 import io.terminus.doctor.user.event.OpenDoctorServiceEvent;
 import io.terminus.pampas.common.UserUtil;
 import io.terminus.parana.common.utils.RespHelper;
+import io.terminus.parana.user.model.User;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -29,6 +33,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Objects;
 
+import static com.google.common.base.Preconditions.checkState;
 import static io.terminus.doctor.common.utils.RespHelper.or500;
 
 /**
@@ -44,6 +49,8 @@ public class DoctorServiceReviewController {
     private final DoctorOrgReadService doctorOrgReadService;
     private final DoctorFarmReadService doctorFarmReadService;
     private final CoreEventDispatcher coreEventDispatcher;
+    private final DoctorWareHouseTypeWriteService doctorWareHouseTypeWriteService;
+    private final DoctorUserReadService doctorUserReadService;
 
     @RpcConsumer
     private DoctorBarnWriteService doctorBarnWriteService;
@@ -56,12 +63,16 @@ public class DoctorServiceReviewController {
                                          DoctorServiceReviewReadService doctorServiceReviewReadService,
                                          DoctorOrgReadService doctorOrgReadService,
                                          DoctorFarmReadService doctorFarmReadService,
-                                         CoreEventDispatcher coreEventDispatcher){
+                                         CoreEventDispatcher coreEventDispatcher,
+                                         DoctorWareHouseTypeWriteService doctorWareHouseWriteService,
+                                         DoctorUserReadService doctorUserReadService){
         this.doctorServiceReviewService = doctorServiceReviewService;
         this.doctorServiceReviewReadService = doctorServiceReviewReadService;
         this.doctorOrgReadService = doctorOrgReadService;
         this.doctorFarmReadService = doctorFarmReadService;
         this.coreEventDispatcher = coreEventDispatcher;
+        this.doctorWareHouseTypeWriteService = doctorWareHouseWriteService;
+        this.doctorUserReadService = doctorUserReadService;
     }
 
     /**
@@ -94,6 +105,14 @@ public class DoctorServiceReviewController {
     }
 
     private void initBarns(DoctorFarm farm, Long userId) {
+
+        Response<User> response = doctorUserReadService.findById(userId);
+        String userName = RespHelper.orServEx(response).getName();
+
+        checkState(RespHelper.orFalse(
+                doctorWareHouseTypeWriteService.initDoctorWareHouseType(farm.getId(), farm.getName(), userId, userName)),
+                "init.wareHouseType.error");
+
         or500(doctorBarnReadService.findBarnsByFarmId(0L)).forEach(barn -> {
             barn.setFarmId(farm.getId());
             barn.setFarmName(farm.getName());
