@@ -1,6 +1,7 @@
 package io.terminus.doctor.open.rest.user;
 
 import com.github.cage.Cage;
+import com.github.cage.token.RandomCharacterGeneratorFactory;
 import com.github.cage.token.RandomTokenGenerator;
 import com.google.common.base.Charsets;
 import com.google.common.base.Strings;
@@ -57,9 +58,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
+import static com.github.cage.token.RandomCharacterGeneratorFactory.ARABIC_NUMERALS;
 import static io.terminus.common.utils.Arguments.isEmpty;
 import static io.terminus.common.utils.Arguments.notNull;
 
@@ -530,7 +533,7 @@ public class OPUsers {
 
     private String refreshCaptcher(String sessionId) {
         // 将图片验证码存入session
-        RandomTokenGenerator tokenGenerator = new RandomTokenGenerator(null, 4, 2);
+        RandomTokenGenerator tokenGenerator = new RandomTokenGenerator(null, new RandomCharacterGeneratorFactory(ARABIC_NUMERALS, null, new Random()), 4, 0);
         String code = tokenGenerator.next();
         Map<String, Object> snapshot = Maps.newHashMap();
         snapshot.put("code", code);
