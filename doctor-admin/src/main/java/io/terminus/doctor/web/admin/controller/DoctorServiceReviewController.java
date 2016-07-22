@@ -1,7 +1,6 @@
 package io.terminus.doctor.web.admin.controller;
 
 import com.google.common.base.Throwables;
-import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.BaseUser;
@@ -9,8 +8,7 @@ import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.common.enums.UserType;
 import io.terminus.doctor.common.event.CoreEventDispatcher;
-import io.terminus.doctor.event.service.DoctorBarnReadService;
-import io.terminus.doctor.event.service.DoctorBarnWriteService;
+import io.terminus.doctor.user.event.OpenDoctorServiceEvent;
 import io.terminus.doctor.user.model.DoctorFarm;
 import io.terminus.doctor.user.model.DoctorOrg;
 import io.terminus.doctor.user.model.DoctorServiceReview;
@@ -19,17 +17,21 @@ import io.terminus.doctor.user.service.DoctorOrgReadService;
 import io.terminus.doctor.user.service.DoctorServiceReviewReadService;
 import io.terminus.doctor.user.service.business.DoctorServiceReviewService;
 import io.terminus.doctor.web.admin.dto.UserApplyServiceDetailDto;
-import io.terminus.doctor.user.event.OpenDoctorServiceEvent;
+import io.terminus.doctor.web.admin.service.DoctorInitBarnService;
 import io.terminus.pampas.common.UserUtil;
 import io.terminus.parana.common.utils.RespHelper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 import java.util.Objects;
-
-import static io.terminus.doctor.common.utils.RespHelper.or500;
 
 /**
  * 陈增辉 16/5/30.与用户开通\关闭服务相关的controller
@@ -44,24 +46,21 @@ public class DoctorServiceReviewController {
     private final DoctorOrgReadService doctorOrgReadService;
     private final DoctorFarmReadService doctorFarmReadService;
     private final CoreEventDispatcher coreEventDispatcher;
-
-    @RpcConsumer
-    private DoctorBarnWriteService doctorBarnWriteService;
-
-    @RpcConsumer
-    private DoctorBarnReadService doctorBarnReadService;
+    private final DoctorInitBarnService doctorInitBarnService;
 
     @Autowired
     public DoctorServiceReviewController(DoctorServiceReviewService doctorServiceReviewService,
                                          DoctorServiceReviewReadService doctorServiceReviewReadService,
                                          DoctorOrgReadService doctorOrgReadService,
                                          DoctorFarmReadService doctorFarmReadService,
-                                         CoreEventDispatcher coreEventDispatcher){
+                                         CoreEventDispatcher coreEventDispatcher,
+                                         DoctorInitBarnService doctorInitBarnService){
         this.doctorServiceReviewService = doctorServiceReviewService;
         this.doctorServiceReviewReadService = doctorServiceReviewReadService;
         this.doctorOrgReadService = doctorOrgReadService;
         this.doctorFarmReadService = doctorFarmReadService;
         this.coreEventDispatcher = coreEventDispatcher;
+        this.doctorInitBarnService = doctorInitBarnService;
     }
 
     /**
@@ -89,20 +88,8 @@ public class DoctorServiceReviewController {
         }
 
         //初始化猪舍
-        newFarms.forEach(farm -> initBarns(farm, dto.getUserId()));
+        newFarms.forEach(farm -> doctorInitBarnService.initBarns(farm, dto.getUserId()));
         return true;
-    }
-
-    private void initBarns(DoctorFarm farm, Long userId) {
-        or500(doctorBarnReadService.findBarnsByFarmId(0L)).forEach(barn -> {
-            barn.setFarmId(farm.getId());
-            barn.setFarmName(farm.getName());
-            barn.setOrgId(farm.getOrgId());
-            barn.setOrgName(farm.getOrgName());
-            barn.setStaffId(userId);
-            or500(doctorBarnWriteService.createBarn(barn));
-            log.info("init barn info, barn:{}", barn);
-        });
     }
 
     /**

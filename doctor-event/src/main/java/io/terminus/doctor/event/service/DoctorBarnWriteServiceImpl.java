@@ -15,6 +15,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Map;
+
 import static io.terminus.common.utils.Arguments.notNull;
 
 /**
@@ -47,7 +49,7 @@ public class DoctorBarnWriteServiceImpl implements DoctorBarnWriteService {
             //校验猪舍名称是否重复
             checkBarnNameRepeat(barn.getFarmId(), barn.getName());
             doctorBarnDao.create(barn);
-            publishZookeeperEvent(DataEventType.BarnUpdate.getKey(), ImmutableMap.of("doctorBarnId", barn.getId()));
+            publistBarnEvent(barn.getId());
             return Response.ok(barn.getId());
         } catch (ServiceException e) {
             return Response.fail(e.getMessage());
@@ -60,8 +62,9 @@ public class DoctorBarnWriteServiceImpl implements DoctorBarnWriteService {
     @Override
     public Response<Boolean> updateBarn(DoctorBarn barn) {
         try {
-            publishZookeeperEvent(DataEventType.BarnUpdate.getKey(), ImmutableMap.of("doctorBarnId", barn.getId()));
-            return Response.ok(doctorBarnDao.update(barn));
+            doctorBarnDao.update(barn);
+            publistBarnEvent(barn.getId());
+            return Response.ok(Boolean.TRUE);
         } catch (Exception e) {
             log.error("update barn failed, barn:{}, cause:{}", barn, Throwables.getStackTraceAsString(e));
             return Response.fail("barn.update.fail");
@@ -94,13 +97,20 @@ public class DoctorBarnWriteServiceImpl implements DoctorBarnWriteService {
         }
     }
 
-    private void checkBarnNameRepeat(Long farmId, String barnName) {
-        if (doctorBarnDao.findByFarmId(farmId).stream().anyMatch(barn -> barnName.equals(barn.getName()))) {
-            throw new ServiceException("barn.name.repeat");
+    @Override
+    public Response<Boolean> publistBarnEvent(Long barnId) {
+        try {
+            publishZookeeperEvent(barnId);
+            return Response.ok(Boolean.TRUE);
+        } catch (Exception e) {
+            log.error("pub barn event failed, barnId:{}, cause:{}", barnId, Throwables.getStackTraceAsString(e));
+            return Response.fail("publist.barn.event.fail");
         }
     }
 
-    private <T> void publishZookeeperEvent(Integer eventType, T data){
+    private void publishZookeeperEvent(Long barnId){
+        Integer eventType = DataEventType.BarnUpdate.getKey();
+        Map<String, Long> data = ImmutableMap.of("doctorBarnId", barnId);
         if(notNull(publisher)) {
             try {
                 publisher.publish(DataEvent.toBytes(eventType, data));
@@ -109,6 +119,12 @@ public class DoctorBarnWriteServiceImpl implements DoctorBarnWriteService {
             }
         } else {
             coreEventDispatcher.publish(DataEvent.make(eventType, data));
+        }
+    }
+
+    private void checkBarnNameRepeat(Long farmId, String barnName) {
+        if (doctorBarnDao.findByFarmId(farmId).stream().anyMatch(barn -> barnName.equals(barn.getName()))) {
+            throw new ServiceException("barn.name.repeat");
         }
     }
 }

@@ -44,4 +44,11 @@ public interface DoctorBarnWriteService {
      */
     Response<Boolean> updateBarnStatus(@NotNull(message = "barnId.not.null") Long barnId,
                                     @NotNull(message = "status.not.null") Integer status);
+
+    /**
+     * 发猪舍变动事件
+     * @param barnId 猪舍id
+     * @return 是否成功
+     */
+    Response<Boolean> publistBarnEvent(@NotNull(message = "barnId.not.null") Long barnId);
 }
