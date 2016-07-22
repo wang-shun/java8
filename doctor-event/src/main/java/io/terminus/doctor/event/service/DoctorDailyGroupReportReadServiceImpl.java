@@ -121,15 +121,16 @@ public class DoctorDailyGroupReportReadServiceImpl implements DoctorDailyGroupRe
         ChangeEvent changeEvent = getChangeEvent(event);
         //死淘
         DoctorDeadDailyReport deadReport = new DoctorDeadDailyReport();
-        deadReport.setFarrow(isDeadEvent(changeEvent, PigType.FARROW_PIGLET) ? changeEvent.getQuantity() : 0);
+        deadReport.setFarrow((isDeadEvent(changeEvent, PigType.FARROW_PIGLET) ? changeEvent.getQuantity() : 0) +
+                (isDeadEvent(changeEvent, PigType.DELIVER_SOW) ? changeEvent.getQuantity() : 0));
         deadReport.setNursery(isDeadEvent(changeEvent, PigType.NURSERY_PIGLET) ? changeEvent.getQuantity() : 0);
         deadReport.setFatten(isDeadEvent(changeEvent, PigType.FATTEN_PIG) ? changeEvent.getQuantity() : 0);
         report.setDead(deadReport);
 
         //销售 (保育 = 产房 + 保育)
         DoctorSaleDailyReport saleReport = new DoctorSaleDailyReport();
-        saleReport.setNursery(isSaleEvent(changeEvent, PigType.FARROW_PIGLET)
-                || isSaleEvent(changeEvent, PigType.NURSERY_PIGLET) ? changeEvent.getChange().getAmount() / 100 : 0);
+        saleReport.setNursery(isSaleEvent(changeEvent, PigType.FARROW_PIGLET) || isSaleEvent(changeEvent, PigType.NURSERY_PIGLET)
+                || isSaleEvent(changeEvent, PigType.DELIVER_SOW) ? changeEvent.getChange().getAmount() / 100 : 0);
         saleReport.setFatten(isSaleEvent(changeEvent, PigType.FATTEN_PIG) ? changeEvent.getChange().getAmount() / 100 : 0);
         report.setSale(saleReport);
 
@@ -162,7 +163,8 @@ public class DoctorDailyGroupReportReadServiceImpl implements DoctorDailyGroupRe
 
         //死淘
         DoctorDeadDailyReport deadReport = new DoctorDeadDailyReport();
-        deadReport.setFarrow(intStream(filterChangeEvent(events, e -> isDeadEvent(e, PigType.FARROW_PIGLET)), ChangeEvent::getQuantity).sum());
+        //分娩舍里有产房仔猪
+        deadReport.setFarrow(intStream(filterChangeEvent(events, e -> isDeadEvent(e, PigType.FARROW_PIGLET) || isDeadEvent(e, PigType.DELIVER_SOW)), ChangeEvent::getQuantity).sum());
         deadReport.setNursery(intStream(filterChangeEvent(events, e -> isDeadEvent(e, PigType.NURSERY_PIGLET)), ChangeEvent::getQuantity).sum());
         deadReport.setFatten(intStream(filterChangeEvent(events, e -> isDeadEvent(e, PigType.FATTEN_PIG)), ChangeEvent::getQuantity).sum());
         report.setDead(deadReport);
@@ -170,7 +172,8 @@ public class DoctorDailyGroupReportReadServiceImpl implements DoctorDailyGroupRe
         //销售 (保育 = 产房 + 保育)
         DoctorSaleDailyReport saleReport = new DoctorSaleDailyReport();
         saleReport.setNursery(longStream(filterChangeEvent(events, e -> isSaleEvent(e, PigType.FARROW_PIGLET)), c -> c.getChange().getAmount()).sum() / 100
-                + (longStream(filterChangeEvent(events, e -> isSaleEvent(e, PigType.NURSERY_PIGLET)), c -> c.getChange().getAmount()).sum() / 100));
+                + (longStream(filterChangeEvent(events, e -> isSaleEvent(e, PigType.NURSERY_PIGLET)), c -> c.getChange().getAmount()).sum() / 100)
+                + (longStream(filterChangeEvent(events, e -> isSaleEvent(e, PigType.DELIVER_SOW)), c -> c.getChange().getAmount()).sum() / 100));
         saleReport.setFatten(longStream(filterChangeEvent(events, e -> isSaleEvent(e, PigType.FATTEN_PIG)), c -> c.getChange().getAmount()).sum() / 100);
         report.setSale(saleReport);
 

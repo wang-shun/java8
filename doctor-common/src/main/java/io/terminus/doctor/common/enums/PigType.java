@@ -55,9 +55,10 @@ public enum PigType {
                 DELIVER_SOW.getValue() == value;
     }
 
+    //按照实际情况, 分娩母猪舍也有猪群!
     public static boolean isGroup(int value) {
         return FARROW_PIGLET.getValue() == value ||
                 NURSERY_PIGLET.getValue() == value ||
-                FATTEN_PIG.getValue() == value;
+                FATTEN_PIG.getValue() == value || NURSERY_PIGLET.getValue() == value;
     }
 }

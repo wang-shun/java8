@@ -172,7 +172,8 @@ public class DoctorGroupReadServiceImpl implements DoctorGroupReadService {
             DoctorGroupSearchDto searchDto = new DoctorGroupSearchDto();
             searchDto.setFarmId(farmId);
             searchDto.setStatus(DoctorGroup.Status.CREATED.getValue());
-            searchDto.setPigTypes(Lists.newArrayList(PigType.FARROW_PIGLET.getValue(), PigType.NURSERY_PIGLET.getValue(), PigType.FATTEN_PIG.getValue()));
+            searchDto.setPigTypes(Lists.newArrayList(PigType.FARROW_PIGLET.getValue(), PigType.DELIVER_SOW.getValue(),
+                    PigType.NURSERY_PIGLET.getValue(), PigType.FATTEN_PIG.getValue()));
 
             //过滤猪群类型, 然后按照类型分组
             Map<Integer, List<DoctorGroupDetail>> groupMap = RespHelper.orServEx(findGroupDetail(searchDto)).stream()

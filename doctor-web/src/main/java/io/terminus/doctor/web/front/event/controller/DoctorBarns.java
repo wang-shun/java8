@@ -218,7 +218,7 @@ public class DoctorBarns {
             return barnDetail;
         }
 
-        //猪群舍
+        //猪群舍(实际情况: 分娩母猪舍里也有猪群)
         if (PigType.isGroup(barn.getPigType())) {
             barnDetail.setType(PigSearchType.GROUP.getValue());
             barnDetail.setStatuses(Sets.newHashSet(barn.getPigType())); //一类猪舍只能放一类猪群
