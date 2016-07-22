@@ -1,6 +1,7 @@
 package io.terminus.doctor.web.admin.controller;
 
 import com.google.common.base.Throwables;
+import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.BaseUser;
@@ -8,6 +9,8 @@ import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.common.enums.UserType;
 import io.terminus.doctor.common.event.CoreEventDispatcher;
+import io.terminus.doctor.event.service.DoctorBarnReadService;
+import io.terminus.doctor.event.service.DoctorBarnWriteService;
 import io.terminus.doctor.user.event.OpenDoctorServiceEvent;
 import io.terminus.doctor.user.model.DoctorFarm;
 import io.terminus.doctor.user.model.DoctorOrg;
@@ -15,11 +18,14 @@ import io.terminus.doctor.user.model.DoctorServiceReview;
 import io.terminus.doctor.user.service.DoctorFarmReadService;
 import io.terminus.doctor.user.service.DoctorOrgReadService;
 import io.terminus.doctor.user.service.DoctorServiceReviewReadService;
+import io.terminus.doctor.user.service.DoctorUserReadService;
 import io.terminus.doctor.user.service.business.DoctorServiceReviewService;
+import io.terminus.doctor.warehouse.service.DoctorWareHouseTypeWriteService;
 import io.terminus.doctor.web.admin.dto.UserApplyServiceDetailDto;
 import io.terminus.doctor.web.admin.service.DoctorInitBarnService;
 import io.terminus.pampas.common.UserUtil;
 import io.terminus.parana.common.utils.RespHelper;
+import io.terminus.parana.user.model.User;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -47,6 +53,12 @@ public class DoctorServiceReviewController {
     private final DoctorFarmReadService doctorFarmReadService;
     private final CoreEventDispatcher coreEventDispatcher;
     private final DoctorInitBarnService doctorInitBarnService;
+
+    @RpcConsumer
+    private DoctorBarnWriteService doctorBarnWriteService;
+
+    @RpcConsumer
+    private DoctorBarnReadService doctorBarnReadService;
 
     @Autowired
     public DoctorServiceReviewController(DoctorServiceReviewService doctorServiceReviewService,
@@ -87,7 +99,7 @@ public class DoctorServiceReviewController {
             log.error("failed to post OpenDoctorServiceEvent due to findFarmsByUserId failing");
         }
 
-        //初始化猪舍
+        //初始化猪舍和仓库大类
         newFarms.forEach(farm -> doctorInitBarnService.initBarns(farm, dto.getUserId()));
         return true;
     }

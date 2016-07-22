@@ -6,6 +6,10 @@ import io.terminus.common.model.Response;
 import io.terminus.doctor.event.service.DoctorBarnReadService;
 import io.terminus.doctor.event.service.DoctorBarnWriteService;
 import io.terminus.doctor.user.model.DoctorFarm;
+import io.terminus.doctor.user.service.DoctorUserReadService;
+import io.terminus.doctor.warehouse.service.DoctorWareHouseTypeWriteService;
+import io.terminus.parana.common.utils.RespHelper;
+import io.terminus.parana.user.model.User;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -27,6 +31,12 @@ public class DoctorInitBarnService {
     @RpcConsumer
     private DoctorBarnReadService doctorBarnReadService;
 
+    @RpcConsumer
+    private DoctorWareHouseTypeWriteService doctorWareHouseTypeWriteService;
+
+    @RpcConsumer
+    private DoctorUserReadService doctorUserReadService;
+
     /**
      * 初始化猪舍
      * @param farm 猪场
@@ -35,6 +45,9 @@ public class DoctorInitBarnService {
      */
     public Response<Boolean> initBarns(DoctorFarm farm, Long userId) {
         try {
+            Response<User> response = doctorUserReadService.findById(userId);
+            String userName = RespHelper.orServEx(response).getName();
+
             or500(doctorBarnReadService.findBarnsByFarmId(0L)).forEach(barn -> {
                 barn.setFarmId(farm.getId());
                 barn.setFarmName(farm.getName());
@@ -44,6 +57,8 @@ public class DoctorInitBarnService {
                 Long barnId = or500(doctorBarnWriteService.createBarn(barn));
                 doctorBarnWriteService.publistBarnEvent(barnId);
                 log.info("init barn info, barn:{}", barn);
+
+                doctorWareHouseTypeWriteService.initDoctorWareHouseType(farm.getId(), farm.getName(), userId, userName);
             });
             //发事件
             return Response.ok(Boolean.TRUE);
