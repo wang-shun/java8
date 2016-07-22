@@ -11,30 +11,30 @@ import io.terminus.doctor.common.enums.UserType;
 import io.terminus.doctor.common.event.CoreEventDispatcher;
 import io.terminus.doctor.event.service.DoctorBarnReadService;
 import io.terminus.doctor.event.service.DoctorBarnWriteService;
+import io.terminus.doctor.user.event.OpenDoctorServiceEvent;
 import io.terminus.doctor.user.model.DoctorFarm;
 import io.terminus.doctor.user.model.DoctorOrg;
 import io.terminus.doctor.user.model.DoctorServiceReview;
 import io.terminus.doctor.user.service.DoctorFarmReadService;
 import io.terminus.doctor.user.service.DoctorOrgReadService;
 import io.terminus.doctor.user.service.DoctorServiceReviewReadService;
-import io.terminus.doctor.user.service.DoctorUserReadService;
 import io.terminus.doctor.user.service.business.DoctorServiceReviewService;
-import io.terminus.doctor.warehouse.service.DoctorWareHouseTypeWriteService;
-import io.terminus.doctor.warehouse.service.DoctorWareHouseWriteService;
 import io.terminus.doctor.web.admin.dto.UserApplyServiceDetailDto;
-import io.terminus.doctor.user.event.OpenDoctorServiceEvent;
+import io.terminus.doctor.web.admin.service.DoctorInitBarnService;
 import io.terminus.pampas.common.UserUtil;
 import io.terminus.parana.common.utils.RespHelper;
-import io.terminus.parana.user.model.User;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 import java.util.Objects;
-
-import static com.google.common.base.Preconditions.checkState;
-import static io.terminus.doctor.common.utils.RespHelper.or500;
 
 /**
  * 陈增辉 16/5/30.与用户开通\关闭服务相关的controller
@@ -49,8 +49,7 @@ public class DoctorServiceReviewController {
     private final DoctorOrgReadService doctorOrgReadService;
     private final DoctorFarmReadService doctorFarmReadService;
     private final CoreEventDispatcher coreEventDispatcher;
-    private final DoctorWareHouseTypeWriteService doctorWareHouseTypeWriteService;
-    private final DoctorUserReadService doctorUserReadService;
+    private final DoctorInitBarnService doctorInitBarnService;
 
     @RpcConsumer
     private DoctorBarnWriteService doctorBarnWriteService;
@@ -64,15 +63,13 @@ public class DoctorServiceReviewController {
                                          DoctorOrgReadService doctorOrgReadService,
                                          DoctorFarmReadService doctorFarmReadService,
                                          CoreEventDispatcher coreEventDispatcher,
-                                         DoctorWareHouseTypeWriteService doctorWareHouseWriteService,
-                                         DoctorUserReadService doctorUserReadService){
+                                         DoctorInitBarnService doctorInitBarnService){
         this.doctorServiceReviewService = doctorServiceReviewService;
         this.doctorServiceReviewReadService = doctorServiceReviewReadService;
         this.doctorOrgReadService = doctorOrgReadService;
         this.doctorFarmReadService = doctorFarmReadService;
         this.coreEventDispatcher = coreEventDispatcher;
-        this.doctorWareHouseTypeWriteService = doctorWareHouseWriteService;
-        this.doctorUserReadService = doctorUserReadService;
+        this.doctorInitBarnService = doctorInitBarnService;
     }
 
     /**
@@ -99,29 +96,12 @@ public class DoctorServiceReviewController {
             log.error("failed to post OpenDoctorServiceEvent due to findFarmsByUserId failing");
         }
 
-        //初始化猪舍
-        newFarms.forEach(farm -> initBarns(farm, dto.getUserId()));
+        log.info("init barn start, userId:{}, farms:{}", dto.getUserId(), newFarms);
+        //初始化猪舍和仓库大类
+        newFarms.forEach(farm -> doctorInitBarnService.initBarns(farm, dto.getUserId()));
+
+        log.info("init barn end");
         return true;
-    }
-
-    private void initBarns(DoctorFarm farm, Long userId) {
-
-        Response<User> response = doctorUserReadService.findById(userId);
-        String userName = RespHelper.orServEx(response).getName();
-
-        checkState(RespHelper.orFalse(
-                doctorWareHouseTypeWriteService.initDoctorWareHouseType(farm.getId(), farm.getName(), userId, userName)),
-                "init.wareHouseType.error");
-
-        or500(doctorBarnReadService.findBarnsByFarmId(0L)).forEach(barn -> {
-            barn.setFarmId(farm.getId());
-            barn.setFarmName(farm.getName());
-            barn.setOrgId(farm.getOrgId());
-            barn.setOrgName(farm.getOrgName());
-            barn.setStaffId(userId);
-            or500(doctorBarnWriteService.createBarn(barn));
-            log.info("init barn info, barn:{}", barn);
-        });
     }
 
     /**

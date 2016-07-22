@@ -9,6 +9,7 @@ import lombok.SneakyThrows;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.Map;
 
 /**
  * Desc: 猪群事件表Model类
@@ -160,6 +161,8 @@ public class DoctorGroupEvent<T extends BaseGroupEvent> implements Serializable 
     private Date updatedAt;
     private Long updatorId;
     private String updatorName;
+
+    private Map<String, Object> extraData;
 
     @SneakyThrows
     public void setExtraMap(T extraMap){

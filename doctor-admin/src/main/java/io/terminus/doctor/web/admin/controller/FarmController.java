@@ -1,19 +1,16 @@
 package io.terminus.doctor.web.admin.controller;
 
-import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.BaseUser;
 import io.terminus.doctor.common.enums.UserType;
-import io.terminus.doctor.event.service.DoctorBarnReadService;
-import io.terminus.doctor.event.service.DoctorBarnWriteService;
 import io.terminus.doctor.user.model.DoctorFarm;
 import io.terminus.doctor.user.model.DoctorServiceStatus;
 import io.terminus.doctor.user.service.DoctorFarmReadService;
 import io.terminus.doctor.user.service.DoctorFarmWriteService;
 import io.terminus.doctor.user.service.DoctorServiceStatusReadService;
 import io.terminus.doctor.user.service.DoctorUserReadService;
-import io.terminus.doctor.warehouse.service.DoctorWareHouseTypeWriteService;
 import io.terminus.doctor.web.admin.dto.UserApplyServiceDetailDto;
+import io.terminus.doctor.web.admin.service.DoctorInitBarnService;
 import io.terminus.pampas.common.UserUtil;
 import io.terminus.parana.common.utils.RespHelper;
 import io.terminus.parana.user.model.User;
@@ -29,8 +26,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static io.terminus.doctor.common.utils.RespHelper.or500;
-
 /**
  * Created by chenzenghui on 16/7/15.
  */
@@ -43,25 +38,19 @@ public class FarmController {
     private final DoctorFarmWriteService doctorFarmWriteService;
     private final DoctorUserReadService doctorUserReadService;
     private final DoctorServiceStatusReadService doctorServiceStatusReadService;
-
-    @RpcConsumer
-    private DoctorWareHouseTypeWriteService doctorWareHouseTypeWriteService;
-
-    @RpcConsumer
-    private DoctorBarnWriteService doctorBarnWriteService;
-
-    @RpcConsumer
-    private DoctorBarnReadService doctorBarnReadService;
+    private final DoctorInitBarnService doctorInitBarnService;
 
     @Autowired
     public FarmController(DoctorFarmReadService doctorFarmReadService,
                           DoctorUserReadService doctorUserReadService,
                           DoctorServiceStatusReadService doctorServiceStatusReadService,
-                          DoctorFarmWriteService doctorFarmWriteService){
+                          DoctorFarmWriteService doctorFarmWriteService,
+                          DoctorInitBarnService doctorInitBarnService){
         this.doctorFarmReadService = doctorFarmReadService;
         this.doctorUserReadService = doctorUserReadService;
         this.doctorServiceStatusReadService = doctorServiceStatusReadService;
         this.doctorFarmWriteService = doctorFarmWriteService;
+        this.doctorInitBarnService = doctorInitBarnService;
     }
 
     /**
@@ -115,27 +104,12 @@ public class FarmController {
         //终于可以添加猪场了...
         List<DoctorFarm> newFarms = RespHelper.or500(doctorFarmWriteService.addFarms4PrimaryUser(primaryUser.getId(), dto.getFarms()));
 
-        newFarms.stream().forEach(f->doctorWareHouseTypeWriteService.initDoctorWareHouseType(f.getId(), f.getName(), dto.getUserId(), "initUser"));
-
         log.info("init barn start, userId:{}, farms:{}", dto.getUserId(), newFarms);
-
         //初始化猪舍
-        newFarms.forEach(farm -> initBarns(farm, dto.getUserId()));
+        newFarms.forEach(farm -> doctorInitBarnService.initBarns(farm, dto.getUserId()));
 
         log.info("init barn end");
         return Boolean.TRUE;
-    }
-
-    private void initBarns(DoctorFarm farm, Long userId) {
-        or500(doctorBarnReadService.findBarnsByFarmId(0L)).forEach(barn -> {
-            barn.setFarmId(farm.getId());
-            barn.setFarmName(farm.getName());
-            barn.setOrgId(farm.getOrgId());
-            barn.setOrgName(farm.getOrgName());
-            barn.setStaffId(userId);
-            or500(doctorBarnWriteService.createBarn(barn));
-            log.info("init barn info, barn:{}", barn);
-        });
     }
 
     /**
