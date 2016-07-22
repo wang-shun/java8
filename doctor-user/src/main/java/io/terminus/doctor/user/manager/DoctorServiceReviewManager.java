@@ -5,7 +5,6 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.BaseUser;
-import io.terminus.doctor.common.enums.UserType;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.user.dao.DoctorFarmDao;
 import io.terminus.doctor.user.dao.DoctorOrgDao;
@@ -23,16 +22,15 @@ import io.terminus.doctor.user.model.DoctorUserDataPermission;
 import io.terminus.doctor.user.model.ServiceReviewTrack;
 import io.terminus.doctor.user.service.DoctorStaffWriteService;
 import io.terminus.doctor.user.service.DoctorUserDataPermissionWriteService;
-import io.terminus.parana.common.model.ParanaUser;
 import io.terminus.parana.user.address.service.AddressReadService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * 陈增辉 16/5/30.
@@ -175,24 +173,24 @@ public class DoctorServiceReviewManager {
     }
 
     @Transactional
-    public void openDoctorService(BaseUser user, Long userId, List<DoctorFarm> farms){
+    public List<DoctorFarm> openDoctorService(BaseUser user, Long userId, List<DoctorFarm> farms){
         DoctorOrg org = doctorOrgDao.findById(doctorStaffDao.findByUserId(userId).getOrgId());
-        List<Long> newFarmIds = Lists.newArrayList(); //将被保存下来的猪场
+        List<DoctorFarm> newFarms = Lists.newArrayList(); //将被保存下来的猪场
         //保存猪场信息
         if(farms != null){
-            farms.stream().forEach(farm -> {
-                if(farm.getName() == null || farm.getName().trim().isEmpty()){
+            farms.forEach(farm -> {
+                if (farm.getName() == null || farm.getName().trim().isEmpty()) {
                     throw new ServiceException("farm.name.not.null");
                 }
                 farm.setOrgName(org.getName());
                 farm.setOrgId(org.getId());
-                if(farm.getProvinceId() != null){
+                if (farm.getProvinceId() != null) {
                     farm.setProvinceName(RespHelper.orServEx(addressReadService.findById(farm.getProvinceId())).getName());
                 }
-                if(farm.getCityId() != null){
+                if (farm.getCityId() != null) {
                     farm.setCityName(RespHelper.orServEx(addressReadService.findById(farm.getCityId())).getName());
                 }
-                if(farm.getDistrictId() != null){
+                if (farm.getDistrictId() != null) {
                     farm.setDistrictName(RespHelper.orServEx(addressReadService.findById(farm.getDistrictId())).getName());
                 }
                 if (farm.getId() != null) {
@@ -200,10 +198,10 @@ public class DoctorServiceReviewManager {
                 } else {
                     doctorFarmDao.create(farm);
                 }
-                newFarmIds.add(farm.getId());
+                newFarms.add(farm);
             });
         }
-
+        List<Long> newFarmIds = newFarms.stream().map(DoctorFarm::getId).collect(Collectors.toList());
         String newFarmIdStr = Joiner.on(",").join(newFarmIds);
         //查询并保存permission
         DoctorUserDataPermission permission = doctorUserDataPermissionDao.findByUserId(userId);
@@ -231,6 +229,8 @@ public class DoctorServiceReviewManager {
         //更新审批状态, 记录track, 更新服务状态
         this.updateServiceReviewStatus(user, userId, DoctorServiceReview.Type.PIG_DOCTOR, DoctorServiceReview.Status.REVIEW,
                 DoctorServiceReview.Status.OK, null);
+
+        return newFarms;
     }
 
     @Transactional

@@ -1,6 +1,7 @@
 package io.terminus.doctor.web.admin.controller;
 
 import com.google.common.base.Throwables;
+import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.BaseUser;
@@ -8,6 +9,8 @@ import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.common.enums.UserType;
 import io.terminus.doctor.common.event.CoreEventDispatcher;
+import io.terminus.doctor.event.service.DoctorBarnReadService;
+import io.terminus.doctor.event.service.DoctorBarnWriteService;
 import io.terminus.doctor.user.model.DoctorFarm;
 import io.terminus.doctor.user.model.DoctorOrg;
 import io.terminus.doctor.user.model.DoctorServiceReview;
@@ -26,6 +29,8 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Objects;
 
+import static io.terminus.doctor.common.utils.RespHelper.or500;
+
 /**
  * 陈增辉 16/5/30.与用户开通\关闭服务相关的controller
  */
@@ -39,6 +44,12 @@ public class DoctorServiceReviewController {
     private final DoctorOrgReadService doctorOrgReadService;
     private final DoctorFarmReadService doctorFarmReadService;
     private final CoreEventDispatcher coreEventDispatcher;
+
+    @RpcConsumer
+    private DoctorBarnWriteService doctorBarnWriteService;
+
+    @RpcConsumer
+    private DoctorBarnReadService doctorBarnReadService;
 
     @Autowired
     public DoctorServiceReviewController(DoctorServiceReviewService doctorServiceReviewService,
@@ -67,7 +78,7 @@ public class DoctorServiceReviewController {
         if(dto.getFarms() == null || dto.getFarms().isEmpty()){
             throw new JsonResponseException(500, "need.at.least.one.farm"); //需要至少一个猪场信息
         }
-        RespHelper.or500(doctorServiceReviewService.openDoctorService(baseUser, dto.getUserId(), dto.getFarms()));
+        List<DoctorFarm> newFarms = RespHelper.or500(doctorServiceReviewService.openDoctorService(baseUser, dto.getUserId(), dto.getFarms()));
 
         //分发猪场软件已开通的事件
         Response<List<Long>> farmResp = doctorFarmReadService.findFarmIdsByUserId(dto.getUserId());
@@ -76,7 +87,22 @@ public class DoctorServiceReviewController {
         }else{
             log.error("failed to post OpenDoctorServiceEvent due to findFarmsByUserId failing");
         }
+
+        //初始化猪舍
+        newFarms.forEach(farm -> initBarns(farm, dto.getUserId()));
         return true;
+    }
+
+    private void initBarns(DoctorFarm farm, Long userId) {
+        or500(doctorBarnReadService.findBarnsByFarmId(0L)).forEach(barn -> {
+            barn.setFarmId(farm.getId());
+            barn.setFarmName(farm.getName());
+            barn.setOrgId(farm.getOrgId());
+            barn.setOrgName(farm.getOrgName());
+            barn.setStaffId(userId);
+            or500(doctorBarnWriteService.createBarn(barn));
+            log.info("init barn info, barn:{}", barn);
+        });
     }
 
     /**
