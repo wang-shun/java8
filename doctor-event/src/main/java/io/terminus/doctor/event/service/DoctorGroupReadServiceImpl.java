@@ -8,6 +8,7 @@ import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.PageInfo;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
+import io.terminus.common.utils.JsonMapper;
 import io.terminus.common.utils.MapBuilder;
 import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.utils.CountUtil;
@@ -45,6 +46,8 @@ import java.util.stream.Collectors;
 @Service
 @RpcProvider
 public class DoctorGroupReadServiceImpl implements DoctorGroupReadService {
+
+    private static final JsonMapper JSON_MAPPER = JsonMapper.nonEmptyMapper();
 
     private final DoctorGroupDao doctorGroupDao;
     private final DoctorGroupEventDao doctorGroupEventDao;
@@ -206,13 +209,23 @@ public class DoctorGroupReadServiceImpl implements DoctorGroupReadService {
     public Response<Paging<DoctorGroupEvent>> pagingGroupEvent(Long farmId, Long groupId, Integer type, Integer pageNo, Integer size) {
         try {
             PageInfo pageInfo = PageInfo.of(pageNo, size);
-            return Response.ok(doctorGroupEventDao.paging(pageInfo.getOffset(), pageInfo.getLimit(),
-                    MapBuilder.<String, Object>of().put("farmId", farmId).put("groupId", groupId).put("type", type).map()));
+            Paging<DoctorGroupEvent> paging = doctorGroupEventDao.paging(pageInfo.getOffset(), pageInfo.getLimit(),
+                    MapBuilder.<String, Object>of().put("farmId", farmId).put("groupId", groupId).put("type", type).map());
+
+            paging.setData(setExtraData(paging.getData()));
+            return Response.ok(paging);
         } catch (Exception e) {
             log.error("paging group event failed, farmId:{}, groupId:{}, type:{}, pageNo:{}, size:{}, cause:{}",
                     farmId, groupId, type, pageNo, size, Throwables.getStackTraceAsString(e));
             return Response.fail("group.event.paging.fail");
         }
+    }
+
+    private List<DoctorGroupEvent> setExtraData(List<DoctorGroupEvent> events) {
+        return events.stream().map(e -> {
+            e.setExtraData(JSON_MAPPER.fromJson(e.getExtra(), JSON_MAPPER.createCollectionType(Map.class, String.class, Object.class)));
+            return e;
+        }).collect(Collectors.toList());
     }
 
     @Override
