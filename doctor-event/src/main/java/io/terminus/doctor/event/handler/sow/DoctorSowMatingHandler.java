@@ -1,6 +1,7 @@
 package io.terminus.doctor.event.handler.sow;
 
 import com.google.common.base.MoreObjects;
+import com.google.common.primitives.Booleans;
 import io.terminus.doctor.event.dao.DoctorPigDao;
 import io.terminus.doctor.event.dao.DoctorPigEventDao;
 import io.terminus.doctor.event.dao.DoctorPigSnapshotDao;
@@ -58,6 +59,14 @@ public class DoctorSowMatingHandler extends DoctorAbstractEventFlowHandler{
         extra.put("judgePregDate", matingDate.plusDays(114).toDate());
 //        DateTime judgePregDate = new DateTime(Long.valueOf(extra.get("judgePregDate").toString()));
 //        checkState(Objects.equals(Days.daysBetween(matingDate, judgePregDate).getDays(), 114), "input.judgePregDate.error");
+
+        //  校验断奶后, 第一次配种, 增加胎次
+        Map<String,Object> trackExtraMap = doctorPigTrack.getExtraMap();
+        if(trackExtraMap.containsKey("hasWeanToMating") && Boolean.valueOf(trackExtraMap.get("hasWeanToMating").toString())){
+
+            extra.put("hasWeanToMating", false);
+            doctorPigTrack.setCurrentParity(doctorPigTrack.getCurrentParity() + 1);
+        }
 
         // 构建母猪配种信息
         doctorPigTrack.addAllExtraMap(extra);
