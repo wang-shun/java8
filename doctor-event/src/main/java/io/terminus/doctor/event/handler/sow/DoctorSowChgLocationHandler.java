@@ -66,7 +66,7 @@ public class DoctorSowChgLocationHandler extends DoctorAbstractEventFlowHandler 
             if(Objects.equals(doctorPigTrack.getStatus(), PigStatus.Wean.getKey())){
                 // 断奶进入配种
 //                doctorPigTrack.setCurrentParity(doctorPigTrack.getCurrentParity() + 1);
-                newExtraMap.put("hasWeanToMating", 1);  // 设置断奶到配置舍标志
+                newExtraMap.put("hasWeanToMating", true);  // 设置断奶到配置舍标志
             }
 
             //清空对应的Map 信息内容 （有一次生产过程）

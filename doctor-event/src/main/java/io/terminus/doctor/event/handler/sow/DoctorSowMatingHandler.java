@@ -1,6 +1,7 @@
 package io.terminus.doctor.event.handler.sow;
 
 import com.google.common.base.MoreObjects;
+import com.google.common.primitives.Booleans;
 import io.terminus.doctor.event.dao.DoctorPigDao;
 import io.terminus.doctor.event.dao.DoctorPigEventDao;
 import io.terminus.doctor.event.dao.DoctorPigSnapshotDao;
@@ -60,10 +61,10 @@ public class DoctorSowMatingHandler extends DoctorAbstractEventFlowHandler{
 //        checkState(Objects.equals(Days.daysBetween(matingDate, judgePregDate).getDays(), 114), "input.judgePregDate.error");
 
         //  校验断奶后, 第一次配种, 增加胎次
-        if(extra.containsKey("hasWeanToMating") &&
-                Objects.equals(Integer.valueOf(extra.get("hasWeanToMating").toString()), 1)){
+        log.info("to mating sow info extra is :{}", extra);
+        if(extra.containsKey("hasWeanToMating") && Boolean.valueOf(extra.get("hasWeanToMating").toString())){
 
-            extra.put("hasWeanToMating", 0);
+            extra.put("hasWeanToMating", false);
             doctorPigTrack.setCurrentParity(doctorPigTrack.getCurrentParity() + 1);
         }
 
