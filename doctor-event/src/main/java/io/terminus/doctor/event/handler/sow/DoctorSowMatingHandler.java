@@ -62,7 +62,9 @@ public class DoctorSowMatingHandler extends DoctorAbstractEventFlowHandler{
 
         //  校验断奶后, 第一次配种, 增加胎次
         Map<String,Object> trackExtraMap = doctorPigTrack.getExtraMap();
-        if(trackExtraMap.containsKey("hasWeanToMating") && Boolean.valueOf(trackExtraMap.get("hasWeanToMating").toString())){
+        if(!isNull(trackExtraMap) &&
+                trackExtraMap.containsKey("hasWeanToMating")
+                && Boolean.valueOf(trackExtraMap.get("hasWeanToMating").toString())){
 
             extra.put("hasWeanToMating", false);
             doctorPigTrack.setCurrentParity(doctorPigTrack.getCurrentParity() + 1);
