@@ -70,7 +70,7 @@
         <simple.mail.version>2.1</simple.mail.version>
         <spring-platform.version>2.0.2.RELEASE</spring-platform.version>
         <guava.version>19.0</guava.version>
-        <terminus.boot.rpc.version>1.0-SNAPSHOT</terminus.boot.rpc.version>
+        <terminus.boot.rpc.version>1.0.RELEASE</terminus.boot.rpc.version>
     </properties>
 
     <dependencies>
