@@ -77,6 +77,7 @@ import static io.terminus.common.utils.Arguments.notNull;
 public class OPUsers {
     public static final Character SEP='Z';
     private final String hostIpMd5;
+    private final RandomTokenGenerator tokenGenerator = new RandomTokenGenerator(null, new RandomCharacterGeneratorFactory(ARABIC_NUMERALS, null, new Random()), 4, 0);
 
     @Autowired
     private CaptchaGenerator captchaGenerator;
@@ -533,7 +534,6 @@ public class OPUsers {
 
     private String refreshCaptcher(String sessionId) {
         // 将图片验证码存入session
-        RandomTokenGenerator tokenGenerator = new RandomTokenGenerator(null, new RandomCharacterGeneratorFactory(ARABIC_NUMERALS, null, new Random()), 4, 0);
         String code = tokenGenerator.next();
         Map<String, Object> snapshot = Maps.newHashMap();
         snapshot.put("code", code);
