@@ -160,6 +160,10 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
     //获取旧镜像
     protected DoctorGroupSnapShotInfo getOldSnapShotInfo(DoctorGroup group, DoctorGroupTrack groupTrack) {
         DoctorGroupEvent event = doctorGroupEventDao.findById(groupTrack.getRelEventId());
+        if (event == null) {
+            log.warn("this group has no relEventId, groupId:{}", group.getId());
+            event = new DoctorGroupEvent();
+        }
         return new DoctorGroupSnapShotInfo(
                 BeanMapper.map(group, DoctorGroup.class),
                 BeanMapper.map(event, DoctorGroupEvent.class),
