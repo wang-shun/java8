@@ -24,6 +24,8 @@ public class IndexedPig implements Serializable {
 
     private Long id;
     private String pigCode;
+    // 搜索pigCode
+    private String pigCodeSearch;
 
     /**
      * 公司
