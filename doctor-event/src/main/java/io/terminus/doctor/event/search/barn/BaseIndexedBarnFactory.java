@@ -44,6 +44,7 @@ public abstract class BaseIndexedBarnFactory<T extends IndexedBarn> implements I
         T indexedBarn = BeanMapper.map(barn, clazz);
         PigType pigType = PigType.from(indexedBarn.getPigType());
         indexedBarn.setPigTypeName(pigType == null ? "" : ( pigType.getDesc() + "[" + pigType.getType() + "]"));
+        indexedBarn.setNameSearch(barn.getName().toLowerCase());
         indexedBarn.setStorage(RespHelper.orServEx(doctorBarnReadService.countPigByBarnId(indexedBarn.getId())));
         return indexedBarn;
     }

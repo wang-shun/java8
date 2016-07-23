@@ -20,6 +20,9 @@ public class IndexedBarn implements Serializable {
      * 猪舍名
      */
     private String name;
+    // 搜索词
+    private String nameSearch;
+
 
     /**
      * 公司

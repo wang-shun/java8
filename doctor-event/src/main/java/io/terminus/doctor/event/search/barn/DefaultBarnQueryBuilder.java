@@ -31,7 +31,8 @@ public class DefaultBarnQueryBuilder extends BaseBarnQueryBuilder {
         // 处理关键词
         String q = params.get("q");
         if (StringUtils.isNotBlank(q)) {
-            return new Keyword(ImmutableList.of("name"), q);
+            // return new Keyword(ImmutableList.of("name"), q);
+            return new Keyword(ImmutableList.of("nameSearch"), q);
         }
         return null;
     }
@@ -41,7 +42,8 @@ public class DefaultBarnQueryBuilder extends BaseBarnQueryBuilder {
         // 猪舍号使用搜索通配符查询搜索前缀
         String q = params.get("q");
         if (StringUtils.isNotBlank(q)) {
-            return new WildCard("name", "*" + q + "*");
+            // return new WildCard("name", "*" + q + "*");
+            return new WildCard("nameSearch", "*" + q + "*");
         }
         return null;
     }

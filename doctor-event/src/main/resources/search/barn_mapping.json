@@ -12,6 +12,11 @@
         "analyzer": "jieba",
         "search_analyzer": "jieba"
       },
+      "nameSearch": {
+        "type": "string",
+        "analyzer": "jieba",
+        "search_analyzer": "jieba"
+      },
       "orgId": {
         "type": "long"
       },
