@@ -2,6 +2,7 @@ package io.terminus.doctor.event.dto.event.group.input;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
@@ -23,6 +24,6 @@ public class DoctorTransFarmGroupInput extends DoctorTransGroupInput implements 
     @NotNull(message = "to.farm.not.null")
     private Long toFarmId;
 
-    @NotNull(message = "to.farm.not.null")
+    @NotEmpty(message = "to.farm.not.null")
     private String toFarmName;
 }

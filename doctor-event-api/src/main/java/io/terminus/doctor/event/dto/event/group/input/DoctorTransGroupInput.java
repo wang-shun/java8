@@ -3,6 +3,7 @@ package io.terminus.doctor.event.dto.event.group.input;
 import io.terminus.doctor.event.enums.IsOrNot;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
@@ -24,7 +25,7 @@ public class DoctorTransGroupInput extends BaseGroupInput implements Serializabl
     @NotNull(message = "to.barn.not.null")
     private Long toBarnId;
 
-    @NotNull(message = "to.barn.not.null")
+    @NotEmpty(message = "to.barn.not.null")
     private String toBarnName;
 
     /**
