@@ -97,7 +97,6 @@ public class DoctorDailyReportCache {
     public void putDailyPigReport(Long farmId, Date date, DoctorDailyReportDto reportDto) {
         synchronized (reportCache) {
             DoctorDailyReportDto report = getDailyReport(farmId,  date);
-            log.info("*************** get report info :{}, put daily report info :{}", report, reportDto);
             if (isNull(report)) {
                 putDailyReport(farmId, date, reportDto);
             } else {
