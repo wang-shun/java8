@@ -50,16 +50,17 @@ public enum PigType {
     }
 
     public static boolean isSow(int value) {
-        return RESERVE_SOW.getValue() == value ||
-                MATE_SOW.getValue() == value ||
+        return MATE_SOW.getValue() == value ||
                 PREG_SOW.getValue() == value ||
                 DELIVER_SOW.getValue() == value;
     }
 
-    //按照实际情况, 分娩母猪舍也有猪群!
+    //按照实际情况, 分娩母猪舍也有猪群! 后备母猪也是猪群!!
     public static boolean isGroup(int value) {
         return FARROW_PIGLET.getValue() == value ||
                 NURSERY_PIGLET.getValue() == value ||
-                FATTEN_PIG.getValue() == value || NURSERY_PIGLET.getValue() == value;
+                FATTEN_PIG.getValue() == value ||
+                NURSERY_PIGLET.getValue() == value ||
+                RESERVE_SOW.getValue() == value;
     }
 }
