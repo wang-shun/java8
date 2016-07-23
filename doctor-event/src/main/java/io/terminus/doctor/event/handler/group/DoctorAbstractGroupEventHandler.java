@@ -11,6 +11,7 @@ import io.terminus.doctor.common.event.CoreEventDispatcher;
 import io.terminus.doctor.common.event.DataEvent;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.RespHelper;
+import io.terminus.doctor.event.dao.DoctorGroupDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorGroupSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
@@ -31,8 +32,10 @@ import io.terminus.zookeeper.pubsub.Publisher;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.List;
 import java.util.Objects;
 
+import static io.terminus.common.utils.Arguments.notEmpty;
 import static io.terminus.common.utils.Arguments.notNull;
 
 /**
@@ -51,6 +54,9 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
     private final CoreEventDispatcher coreEventDispatcher;
     private final DoctorGroupEventDao doctorGroupEventDao;
     private final DoctorBarnReadService doctorBarnReadService;
+
+    @Autowired
+    private DoctorGroupDao doctorGroupDao;
 
     @Autowired(required = false)
     private Publisher publisher;
@@ -277,6 +283,16 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
             DoctorGroupTrack groupTrack = doctorGroupTrackDao.findByGroupId(input.getToGroupId());
             if (Math.abs(dayAge - groupTrack.getAvgDayAge()) > 100) {
                 throw new ServiceException("delta.dayAge.over.100");
+            }
+        }
+    }
+
+    //产房(分娩母猪舍)只允许有一个猪群
+    protected void checkFarrowGroupUnique(Integer isCreateGroup, Long barnId) {
+        if (isCreateGroup.equals(IsOrNot.YES.getValue())) {
+            List<DoctorGroup> groups = doctorGroupDao.findByCurrentBarnId(barnId);
+            if (notEmpty(groups)) {
+                throw new ServiceException("group.count.over.1");
             }
         }
     }
