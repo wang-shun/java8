@@ -114,6 +114,7 @@ public class DoctorPigEventReadServiceImpl implements DoctorPigEventReadService 
 
             for(int i = 1; i<pigIds.size(); i++){
                 Long pigId = pigIds.get(i);
+
                 collectExecute.retainAll(definitionNodeDao.getNextTaskNodeEvents(sowFlowKey, pigId).stream()
                         .map(s->Integer.valueOf(s.getValue()))
                         .collect(Collectors.toList()));
