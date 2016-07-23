@@ -21,6 +21,7 @@ import io.terminus.doctor.event.dto.DoctorPigInfoDetailDto;
 import io.terminus.doctor.event.dto.DoctorPigInfoDto;
 import io.terminus.doctor.event.dto.DoctorPigMessage;
 import io.terminus.doctor.event.enums.DataRange;
+import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.model.DoctorPig;
@@ -228,6 +229,25 @@ public class DoctorPigReadServiceImpl implements DoctorPigReadService {
         }catch (Exception e){
             log.error("query pig info by barn id fail, cause:{}", Throwables.getStackTraceAsString(e));
             return Response.fail("query.doctorPigInfo.fail");
+        }
+    }
+
+    /**
+     * 查询当前猪舍里的猪只列表(注意是当前猪舍)
+     * @param barnId 猪舍id
+     * @return 猪只列表
+     */
+    @Override
+    public Response<List<DoctorPigTrack>> findActivePigTrackByCurrentBarnId(Long barnId) {
+        try {
+            List<DoctorPigTrack> pigTracks = doctorPigTrackDao.findByBarnId(barnId);
+
+            //过滤掉公母猪已离场的
+            return Response.ok(pigTracks.stream().filter(pig -> !pig.getStatus().equals(PigStatus.BOAR_LEAVE.getKey())
+                    && !pig.getStatus().equals(PigStatus.Removal.getKey())).collect(Collectors.toList()));
+        } catch (Exception e) {
+            log.error("find active pig track by current barn id fail, barnId:{}, cause:{}", barnId, Throwables.getStackTraceAsString(e));
+            return Response.fail("pig.track.find.fail");
         }
     }
 

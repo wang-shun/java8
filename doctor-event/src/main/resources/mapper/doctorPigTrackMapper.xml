@@ -189,6 +189,11 @@
 
     <select id="findStatusByBarnId" parameterType="long" resultType="int">
         SELECT DISTINCT status FROM <include refid="tb"/>
-        WHERE current_barn_id = #{barnId};
+        WHERE current_barn_id = #{barnId}
+    </select>
+
+    <select id="findByBarnId" parameterType="long" resultType="int">
+        SELECT <include refid="cols_all"/> FROM <include refid="tb"/>
+        WHERE current_barn_id = #{barnId}
     </select>
 </mapper>

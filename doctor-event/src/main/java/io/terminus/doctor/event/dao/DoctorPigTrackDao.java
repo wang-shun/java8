@@ -29,6 +29,15 @@ public class DoctorPigTrackDao extends MyBatisDao<DoctorPigTrack>{
     }
 
     /**
+     * 根据猪舍id查询猪跟踪
+     * @param barnId 猪舍id
+     * @return 猪跟踪
+     */
+    public List<DoctorPigTrack> findByBarnId(Long barnId) {
+        return getSqlSession().selectList(sqlId("findByBarnId"), barnId);
+    }
+
+    /**
      * pigIds 获取对应的PigTrack
      * @param pigIds
      * @return

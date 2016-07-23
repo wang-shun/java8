@@ -7,16 +7,14 @@ import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dto.DoctorGroupDetail;
 import io.terminus.doctor.event.dto.DoctorGroupSearchDto;
-import io.terminus.doctor.event.dto.DoctorPigInfoDto;
-import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorGroup;
+import io.terminus.doctor.event.model.DoctorPigTrack;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * Desc: 猪舍表读服务实现类
@@ -98,12 +96,10 @@ public class DoctorBarnReadServiceImpl implements DoctorBarnReadService {
             Integer groupCount = groupDetails.stream().mapToInt(g -> g.getGroupTrack().getQuantity()).sum();
 
             //过滤已离场的猪
-            List<DoctorPigInfoDto> pigInfoDtos = RespHelper.orServEx(doctorPigReadService.queryDoctorPigInfoByBarnId(barnId)).stream()
-                    .filter(pig -> !pig.getStatus().equals(PigStatus.BOAR_LEAVE.getKey()) && !pig.getStatus().equals(PigStatus.Removal.getKey()))
-                    .collect(Collectors.toList());
-            return Response.ok(groupCount + pigInfoDtos.size());
+            List<DoctorPigTrack> pigTracks = RespHelper.orServEx(doctorPigReadService.findActivePigTrackByCurrentBarnId(barnId));
+            return Response.ok(groupCount + pigTracks.size());
         } catch (Exception e) {
-            log.error("coutn pigt by barn id failed, barnId:{}, cause:{}", barnId, Throwables.getStackTraceAsString(e));
+            log.error("count pig by barn id failed, barnId:{}, cause:{}", barnId, Throwables.getStackTraceAsString(e));
             return Response.fail("count.pig.fail");
         }
     }
