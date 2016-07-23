@@ -438,9 +438,13 @@ public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteServic
             Map<String,Object> result = doctorPigEventManager.createSowPigEvent(doctorBasicInputInfoDto, dto);
             publishEvent(result);
             return Response.ok(Params.getWithConvert(result,"doctorEventId",a->Long.valueOf(a.toString())));
+
+        }catch (IllegalStateException e){
+            log.error("illegal state piglet chg event create, cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail(e.getMessage());
         }catch (Exception e){
-            log.error("vaccination event create fail, cause:{}", Throwables.getStackTraceAsString(e));
-            return Response.fail("create.vaccination.fail");
+            log.error("piglets event create fail, cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("create.piglets.fail");
         }
     }
 
@@ -449,6 +453,13 @@ public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteServic
         try{
             Map<String,Object> dto = Maps.newHashMap();
             BeanMapper.copy(doctorPartWeanDto, dto);
+
+            if(!Objects.isNull(doctorPartWeanDto.getQualifiedCount()) || !Objects.isNull(doctorPartWeanDto.getNotQualifiedCount())){
+                checkState(Objects.equals(doctorPartWeanDto.getPartWeanPigletsCount(),
+                        MoreObjects.firstNonNull(doctorPartWeanDto.getQualifiedCount(), 0) +
+                                MoreObjects.firstNonNull(doctorPartWeanDto.getNotQualifiedCount(), 0)
+                        ), "partWean.qualified.error");
+            }
 
             double avgWeight = doctorPartWeanDto.getPartWeanAvgWeight();
             checkState(avgWeight <= 9.0 && avgWeight >= 5.0, "input.weanAvgWeight.error");
