@@ -70,6 +70,16 @@ public class DoctorBarns {
     }
 
     /**
+     * 根据id查询猪舍里猪的数量
+     * @param barnId 主键id
+     * @return 猪存栏数量
+     */
+    @RequestMapping(value = "/count", method = RequestMethod.GET)
+    public Integer countPigByBarnId(@RequestParam("barnId") Long barnId) {
+        return RespHelper.or500(doctorBarnReadService.countPigByBarnId(barnId));
+    }
+
+    /**
      * 根据id查询猪舍表
      * @param barnId 主键id
      * @return 猪舍表
