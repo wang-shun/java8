@@ -63,6 +63,18 @@ public class SearchedPig implements Serializable {
     private String statusName;
 
     /**
+     * 品种
+     */
+    private Long breedId;
+    private String breedName;
+
+    /**
+     * 品系
+     */
+    private Long geneticId;
+    private String geneticName;
+
+    /**
      * 当前猪舍
      */
     private Long currentBarnId;

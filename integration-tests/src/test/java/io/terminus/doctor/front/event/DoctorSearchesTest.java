@@ -45,7 +45,7 @@ public class DoctorSearchesTest extends BaseFrontWebTest {
     @Test
     public void test_QUERY_SowSuggest() {
         String url = "/api/doctor/search/sowpigs/suggest";
-        List body = getForEntity(url, ImmutableMap.of("farmId", 12355, "size", 2, "q", "Y1"), List.class).getBody();
+        List body = getForEntity(url, ImmutableMap.of("farmId", 12355, "size", 2, "q", "lY1"), List.class).getBody();
         System.out.println(JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(body));
     }
 
@@ -177,5 +177,12 @@ public class DoctorSearchesTest extends BaseFrontWebTest {
         List messages = getForEntity(url, ImmutableMap.of("pigId", "144"), List.class).getBody();
         System.out.println(messages.size());
         System.out.println(JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(messages));
+    }
+
+    @Test
+    public void test_Report() {
+        String url = "/api/doctor/report/daily";
+        Object body = getForEntity(url, ImmutableMap.of("farmId", 12355, "date", "2016-07-25"), Object.class).getBody();
+        System.out.println(JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(body));
     }
 }

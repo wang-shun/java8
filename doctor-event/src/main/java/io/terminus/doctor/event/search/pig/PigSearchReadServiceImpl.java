@@ -56,6 +56,9 @@ public class PigSearchReadServiceImpl implements PigSearchReadService {
             if (StringUtils.isNotBlank(q)) {
                 // 暂不做高亮处理
                 // params.put("highlight", "pigCode");
+
+                // 关键字 转化为 小写
+                params.put("q", q.toLowerCase());
             }
 
             // 获取存在的猪状态

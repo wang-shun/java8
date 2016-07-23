@@ -31,7 +31,8 @@ public class DefaultGroupQueryBuilder extends BaseGroupQueryBuilder {
         // 搜索关键词 处理
         String q = params.get("q");
         if (StringUtils.isNotBlank(q)) {
-            return new Keyword(ImmutableList.of("groupCode"), q);
+            // return new Keyword(ImmutableList.of("groupCode"), q);
+            return new Keyword(ImmutableList.of("groupCodeSearch"), q);
         }
         return null;
     }
@@ -41,7 +42,8 @@ public class DefaultGroupQueryBuilder extends BaseGroupQueryBuilder {
         // 猪群号使用搜索通配符查询搜索前缀
         String q = params.get("q");
         if (StringUtils.isNotBlank(q)) {
-            return new WildCard("groupCode", "*" + q + "*");
+            // return new WildCard("groupCode", "*" + q + "*");
+            return new WildCard("groupCodeSearch", "*" + q + "*");
         }
         return null;
     }
