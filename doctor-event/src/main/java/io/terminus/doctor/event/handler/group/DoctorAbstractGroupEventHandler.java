@@ -21,7 +21,6 @@ import io.terminus.doctor.event.dto.event.group.input.DoctorTransGroupInput;
 import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.handler.DoctorGroupEventHandler;
-import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorGroupSnapshot;
@@ -282,20 +281,22 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
         }
     }
 
-    //校验能否转入此舍(产房 => 保育舍，保育舍 => 育肥舍/育种舍，同类型可以互转)
+    //校验能否转入此舍(产房 => 产房/保育舍，保育舍 => 保育舍/育肥舍/育种舍，同类型可以互转)
     protected void checkCanTransBarn(Integer pigType, Long barnId) {
-        DoctorBarn barn = RespHelper.orServEx(doctorBarnReadService.findBarnById(barnId));
+        Integer barnType = RespHelper.orServEx(doctorBarnReadService.findBarnById(barnId)).getPigType();
 
-        //产房 => 保育舍
+        //产房 => 产房/保育舍
         if (Objects.equals(pigType, PigType.FARROW_PIGLET.getValue()) &&
-                !Objects.equals(barn.getPigType(), PigType.NURSERY_PIGLET.getValue())) {
+                !(Objects.equals(barnType, PigType.NURSERY_PIGLET.getValue()) ||
+                        Objects.equals(barnType, PigType.FARROW_PIGLET.getValue()))) {
             throw new ServiceException("group.only.trans.farrow");
         }
 
-        //保育舍 => 育肥舍/育种舍
+        //保育舍 => 保育舍/育肥舍/育种舍
         if (Objects.equals(pigType, PigType.NURSERY_PIGLET.getValue()) &&
-                !(Objects.equals(barn.getPigType(), PigType.FATTEN_PIG.getValue()) ||
-                        Objects.equals(barn.getPigType(), PigType.BREEDING.getValue()))) {
+                !(Objects.equals(barnType, PigType.FATTEN_PIG.getValue()) ||
+                        Objects.equals(barnType, PigType.BREEDING.getValue()) ||
+                        Objects.equals(barnType, PigType.NURSERY_PIGLET.getValue()))) {
             throw new ServiceException("group.only.trans.fatten");
         }
     }
