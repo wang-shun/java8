@@ -52,7 +52,7 @@ public class DoctorTransFarmGroupEventHandler extends DoctorAbstractGroupEventHa
                                             DoctorCommonGroupEventHandler doctorCommonGroupEventHandler,
                                             DoctorGroupManager doctorGroupManager,
                                             DoctorBarnReadService doctorBarnReadService) {
-        super(doctorGroupSnapshotDao, doctorGroupTrackDao, coreEventDispatcher, doctorGroupEventDao);
+        super(doctorGroupSnapshotDao, doctorGroupTrackDao, coreEventDispatcher, doctorGroupEventDao, doctorBarnReadService);
         this.doctorGroupEventDao = doctorGroupEventDao;
         this.doctorCommonGroupEventHandler = doctorCommonGroupEventHandler;
         this.doctorGroupManager = doctorGroupManager;
@@ -64,7 +64,8 @@ public class DoctorTransFarmGroupEventHandler extends DoctorAbstractGroupEventHa
         DoctorGroupSnapShotInfo oldShot = getOldSnapShotInfo(group, groupTrack);
         DoctorTransFarmGroupInput transFarm = (DoctorTransFarmGroupInput) input;
 
-        //校验数量, 日龄差, 转群总重
+        //校验能否转群, 数量, 日龄差, 转群总重
+        checkCanTransBarn(group.getPigType(), transFarm.getToBarnId());
         checkQuantity(groupTrack.getQuantity(), transFarm.getQuantity());
         checkQuantity(groupTrack.getBoarQty(), transFarm.getBoarQty());
         checkQuantity(groupTrack.getSowQty(), transFarm.getSowQty());

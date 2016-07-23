@@ -9,6 +9,7 @@ import io.terminus.doctor.event.dto.event.group.input.BaseGroupInput;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
+import io.terminus.doctor.event.service.DoctorBarnReadService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -27,8 +28,9 @@ public class DoctorTurnSeedGroupEventHandler extends DoctorAbstractGroupEventHan
     public DoctorTurnSeedGroupEventHandler(DoctorGroupSnapshotDao doctorGroupSnapshotDao,
                                            DoctorGroupEventDao doctorGroupEventDao,
                                            DoctorGroupTrackDao doctorGroupTrackDao,
+                                           DoctorBarnReadService doctorBarnReadService,
                                            CoreEventDispatcher coreEventDispatcher) {
-        super(doctorGroupSnapshotDao, doctorGroupTrackDao, coreEventDispatcher, doctorGroupEventDao);
+        super(doctorGroupSnapshotDao, doctorGroupTrackDao, coreEventDispatcher, doctorGroupEventDao, doctorBarnReadService);
     }
     
     @Override

@@ -54,7 +54,7 @@ public class DoctorTransGroupEventHandler extends DoctorAbstractGroupEventHandle
                                         DoctorCommonGroupEventHandler doctorCommonGroupEventHandler,
                                         DoctorGroupManager doctorGroupManager,
                                         DoctorBarnReadService doctorBarnReadService) {
-        super(doctorGroupSnapshotDao, doctorGroupTrackDao, coreEventDispatcher, doctorGroupEventDao);
+        super(doctorGroupSnapshotDao, doctorGroupTrackDao, coreEventDispatcher, doctorGroupEventDao, doctorBarnReadService);
         this.doctorGroupEventDao = doctorGroupEventDao;
         this.doctorCommonGroupEventHandler = doctorCommonGroupEventHandler;
         this.doctorGroupManager = doctorGroupManager;
@@ -67,7 +67,8 @@ public class DoctorTransGroupEventHandler extends DoctorAbstractGroupEventHandle
         DoctorGroupSnapShotInfo oldShot = getOldSnapShotInfo(group, groupTrack);
         DoctorTransGroupInput transGroup = (DoctorTransGroupInput) input;
 
-        //校验数量, 日龄差, 转群总重
+        //校验能否转群, 数量, 日龄差, 转群总重
+        checkCanTransBarn(group.getPigType(), transGroup.getToBarnId());
         checkQuantity(groupTrack.getQuantity(), transGroup.getQuantity());
         checkQuantity(groupTrack.getBoarQty(), transGroup.getBoarQty());
         checkQuantity(groupTrack.getSowQty(), transGroup.getSowQty());

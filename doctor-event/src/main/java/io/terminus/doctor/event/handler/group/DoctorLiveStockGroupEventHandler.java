@@ -14,6 +14,7 @@ import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
+import io.terminus.doctor.event.service.DoctorBarnReadService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -35,8 +36,9 @@ public class DoctorLiveStockGroupEventHandler extends DoctorAbstractGroupEventHa
     public DoctorLiveStockGroupEventHandler(DoctorGroupSnapshotDao doctorGroupSnapshotDao,
                                             DoctorGroupTrackDao doctorGroupTrackDao,
                                             CoreEventDispatcher coreEventDispatcher,
-                                            DoctorGroupEventDao doctorGroupEventDao) {
-        super(doctorGroupSnapshotDao, doctorGroupTrackDao, coreEventDispatcher, doctorGroupEventDao);
+                                            DoctorGroupEventDao doctorGroupEventDao,
+                                            DoctorBarnReadService doctorBarnReadService) {
+        super(doctorGroupSnapshotDao, doctorGroupTrackDao, coreEventDispatcher, doctorGroupEventDao, doctorBarnReadService);
         this.doctorGroupEventDao = doctorGroupEventDao;
     }
 

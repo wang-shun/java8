@@ -6,9 +6,11 @@ import io.terminus.common.exception.ServiceException;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.enums.DataEventType;
+import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.event.CoreEventDispatcher;
 import io.terminus.doctor.common.event.DataEvent;
 import io.terminus.doctor.common.utils.DateUtil;
+import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorGroupSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
@@ -23,6 +25,7 @@ import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorGroupSnapshot;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
+import io.terminus.doctor.event.service.DoctorBarnReadService;
 import io.terminus.doctor.event.util.EventUtil;
 import io.terminus.zookeeper.pubsub.Publisher;
 import lombok.extern.slf4j.Slf4j;
@@ -47,6 +50,7 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
     private final DoctorGroupTrackDao doctorGroupTrackDao;
     private final CoreEventDispatcher coreEventDispatcher;
     private final DoctorGroupEventDao doctorGroupEventDao;
+    private final DoctorBarnReadService doctorBarnReadService;
 
     @Autowired(required = false)
     private Publisher publisher;
@@ -55,11 +59,13 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
     public DoctorAbstractGroupEventHandler(DoctorGroupSnapshotDao doctorGroupSnapshotDao,
                                            DoctorGroupTrackDao doctorGroupTrackDao,
                                            CoreEventDispatcher coreEventDispatcher,
-                                           DoctorGroupEventDao doctorGroupEventDao) {
+                                           DoctorGroupEventDao doctorGroupEventDao,
+                                           DoctorBarnReadService doctorBarnReadService) {
         this.doctorGroupSnapshotDao = doctorGroupSnapshotDao;
         this.doctorGroupTrackDao = doctorGroupTrackDao;
         this.coreEventDispatcher = coreEventDispatcher;
         this.doctorGroupEventDao = doctorGroupEventDao;
+        this.doctorBarnReadService = doctorBarnReadService;
     }
 
     @Override
@@ -272,6 +278,26 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
             if (Math.abs(dayAge - groupTrack.getAvgDayAge()) > 100) {
                 throw new ServiceException("delta.dayAge.over.100");
             }
+        }
+    }
+
+    //校验能否转入此舍(产房 => 产房/保育舍，保育舍 => 保育舍/育肥舍/育种舍，同类型可以互转)
+    protected void checkCanTransBarn(Integer pigType, Long barnId) {
+        Integer barnType = RespHelper.orServEx(doctorBarnReadService.findBarnById(barnId)).getPigType();
+
+        //产房 => 产房/保育舍
+        if (Objects.equals(pigType, PigType.FARROW_PIGLET.getValue()) &&
+                !(Objects.equals(barnType, PigType.NURSERY_PIGLET.getValue()) ||
+                        Objects.equals(barnType, PigType.FARROW_PIGLET.getValue()))) {
+            throw new ServiceException("group.only.trans.farrow");
+        }
+
+        //保育舍 => 保育舍/育肥舍/育种舍
+        if (Objects.equals(pigType, PigType.NURSERY_PIGLET.getValue()) &&
+                !(Objects.equals(barnType, PigType.FATTEN_PIG.getValue()) ||
+                        Objects.equals(barnType, PigType.BREEDING.getValue()) ||
+                        Objects.equals(barnType, PigType.NURSERY_PIGLET.getValue()))) {
+            throw new ServiceException("group.only.trans.fatten");
         }
     }
 }
