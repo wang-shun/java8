@@ -47,6 +47,9 @@ public class BarnSearchReadServiceImpl implements BarnSearchReadService {
             if (StringUtils.isNotBlank(q)) {
                 // 暂不做高亮处理
                 // params.put("highlight", "name");
+
+                // 搜索词做小写处理
+                params.put("q", q.toLowerCase());
             }
 
             // 1. 猪群类型聚合处理, ... 其他
