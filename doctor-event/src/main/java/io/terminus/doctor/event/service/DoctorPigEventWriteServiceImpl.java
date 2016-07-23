@@ -450,6 +450,13 @@ public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteServic
             Map<String,Object> dto = Maps.newHashMap();
             BeanMapper.copy(doctorPartWeanDto, dto);
 
+            if(!Objects.isNull(doctorPartWeanDto.getQualifiedCount()) || !Objects.isNull(doctorPartWeanDto.getNotQualifiedCount())){
+                checkState(Objects.equals(doctorPartWeanDto.getPartWeanPigletsCount(),
+                        MoreObjects.firstNonNull(doctorPartWeanDto.getQualifiedCount(), 0) +
+                                MoreObjects.firstNonNull(doctorPartWeanDto.getNotQualifiedCount(), 0)
+                        ), "partWean.qualified.error");
+            }
+
             double avgWeight = doctorPartWeanDto.getPartWeanAvgWeight();
             checkState(avgWeight <= 9.0 && avgWeight >= 5.0, "input.weanAvgWeight.error");
 

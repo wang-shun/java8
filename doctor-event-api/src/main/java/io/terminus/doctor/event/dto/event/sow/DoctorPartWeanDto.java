@@ -29,4 +29,8 @@ public class DoctorPartWeanDto implements Serializable{
     private Double partWeanAvgWeight;   //断奶平均重量
 
     private String partWeanRemark;  //部分断奶标识
+
+    private Integer qualifiedCount; // 合格数量
+
+    private Integer notQualifiedCount; //不合格的数量
 }
