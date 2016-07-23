@@ -204,6 +204,25 @@ public class DoctorBarns {
         DoctorBarn barn = RespHelper.or500(doctorBarnReadService.findBarnById(barnId));
         DoctorBarnDetail barnDetail = new DoctorBarnDetail();
 
+        //猪群舍(实际情况: 分娩母猪舍里也有猪群)
+        if (PigType.isGroup(barn.getPigType())) {
+            barnDetail.setType(PigSearchType.GROUP.getValue());
+
+            //根据实际情况, 如果是猪舍类型是分娩母猪, 需要指定猪舍类型产房
+            if (barn.getPigType().equals(PigType.DELIVER_SOW.getValue())) {
+                barnDetail.setStatuses(Sets.newHashSet(PigType.FARROW_PIGLET.getValue()));
+            } else {
+                barnDetail.setStatuses(Sets.newHashSet(barn.getPigType())); //一类猪舍只能放一类猪群
+            }
+
+            DoctorGroupSearchDto searchDto = new DoctorGroupSearchDto();
+            searchDto.setFarmId(barn.getFarmId());
+            searchDto.setCurrentBarnId(barnId);
+            searchDto.setPigType(status);   //这里的状态就是猪群的猪类
+            barnDetail.setGroupPaging(RespHelper.or500(doctorGroupReadService.pagingGroup(searchDto, pageNo, size)));
+            return barnDetail;
+        }
+
         //公猪舍
         if (PigType.isBoar(barn.getPigType())) {
             barnDetail.setType(PigSearchType.BOAR.getValue());
@@ -225,19 +244,6 @@ public class DoctorBarns {
                     .pigType(DoctorPig.PIG_TYPE.SOW.getKey())
                     .farmId(barn.getFarmId()).build(), pageNo, size)));
             barnDetail.setStatuses(RespHelper.or500(doctorPigReadService.findPigStatusByBarnId(barnId)));
-            return barnDetail;
-        }
-
-        //猪群舍(实际情况: 分娩母猪舍里也有猪群)
-        if (PigType.isGroup(barn.getPigType())) {
-            barnDetail.setType(PigSearchType.GROUP.getValue());
-            barnDetail.setStatuses(Sets.newHashSet(barn.getPigType())); //一类猪舍只能放一类猪群
-
-            DoctorGroupSearchDto searchDto = new DoctorGroupSearchDto();
-            searchDto.setFarmId(barn.getFarmId());
-            searchDto.setCurrentBarnId(barnId);
-            searchDto.setPigType(status);   //这里的状态就是猪群的猪类
-            barnDetail.setGroupPaging(RespHelper.or500(doctorGroupReadService.pagingGroup(searchDto, pageNo, size)));
             return barnDetail;
         }
         return barnDetail;

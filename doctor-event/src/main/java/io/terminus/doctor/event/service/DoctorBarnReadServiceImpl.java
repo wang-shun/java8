@@ -3,7 +3,6 @@ package io.terminus.doctor.event.service;
 import com.google.common.base.Throwables;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.model.Response;
-import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dto.DoctorGroupDetail;
@@ -89,20 +88,20 @@ public class DoctorBarnReadServiceImpl implements DoctorBarnReadService {
     public Response<Integer> countPigByBarnId(Long barnId) {
         try {
             DoctorBarn barn = doctorBarnDao.findById(barnId);
-            if (PigType.isGroup(barn.getPigType())) {
-                DoctorGroupSearchDto searchDto = new DoctorGroupSearchDto();
-                searchDto.setFarmId(barn.getFarmId());
-                searchDto.setCurrentBarnId(barnId);
-                searchDto.setStatus(DoctorGroup.Status.CREATED.getValue());
-                List<DoctorGroupDetail> groupDetails = RespHelper.orServEx(doctorGroupReadService.findGroupDetail(searchDto));
-                return Response.ok(groupDetails.stream().mapToInt(g -> g.getGroupTrack().getQuantity()).sum());
-            }
+
+            //先统计猪群数量
+            DoctorGroupSearchDto searchDto = new DoctorGroupSearchDto();
+            searchDto.setFarmId(barn.getFarmId());
+            searchDto.setCurrentBarnId(barnId);
+            searchDto.setStatus(DoctorGroup.Status.CREATED.getValue());
+            List<DoctorGroupDetail> groupDetails = RespHelper.orServEx(doctorGroupReadService.findGroupDetail(searchDto));
+            Integer groupCount = groupDetails.stream().mapToInt(g -> g.getGroupTrack().getQuantity()).sum();
 
             //过滤已离场的猪
             List<DoctorPigInfoDto> pigInfoDtos = RespHelper.orServEx(doctorPigReadService.queryDoctorPigInfoByBarnId(barnId)).stream()
-                    .filter(pig -> !pig.getStatus().equals(PigStatus.BOAR_LEAVE.getKey()))
+                    .filter(pig -> !pig.getStatus().equals(PigStatus.BOAR_LEAVE.getKey()) && !pig.getStatus().equals(PigStatus.Removal.getKey()))
                     .collect(Collectors.toList());
-            return Response.ok(pigInfoDtos.size());
+            return Response.ok(groupCount + pigInfoDtos.size());
         } catch (Exception e) {
             log.error("coutn pigt by barn id failed, barnId:{}, cause:{}", barnId, Throwables.getStackTraceAsString(e));
             return Response.fail("count.pig.fail");
