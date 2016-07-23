@@ -27,6 +27,9 @@ public class IndexedGroup implements Serializable {
      * 猪群号
      */
     private String groupCode;
+    // 搜索字段
+    private String groupCodeSearch;
+
 
     /**
      * 猪类

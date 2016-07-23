@@ -44,6 +44,7 @@ public abstract class BaseIndexedPigFactory<T extends IndexedPig> implements Ind
         T indexedPig = BeanMapper.map(pig, clazz);
         DoctorPig.PIG_TYPE pigType = DoctorPig.PIG_TYPE.from(indexedPig.getPigType());
         indexedPig.setPigTypeName(pigType == null ? "" : pigType.getDesc());
+        indexedPig.setPigCodeSearch(pig.getPigCode().toLowerCase());
 
         // 2. 处理猪Track信息
         if (pigTrack != null) {

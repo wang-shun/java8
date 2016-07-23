@@ -40,6 +40,7 @@ public abstract class BaseIndexedGroupFactory<T extends IndexedGroup> implements
         T indexedGroup = BeanMapper.map(group, clazz);
         PigType pigType = PigType.from(indexedGroup.getPigType());
         indexedGroup.setPigTypeName(pigType == null ? "" : ( pigType.getDesc() + "[" + pigType.getType() + "]"));
+        indexedGroup.setGroupCodeSearch(group.getGroupCode().toLowerCase());
 
         // 2. 处理 Track 信息
         if (groupTrack != null) {

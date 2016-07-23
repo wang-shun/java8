@@ -47,6 +47,9 @@ public class GroupSearchReadServiceImpl implements GroupSearchReadService {
             if (StringUtils.isNotBlank(q)) {
                 // 暂不做高亮处理
                 // params.put("highlight", "groupCode");
+
+                // 关键字小写处理
+                params.put("q", q.toLowerCase());
             }
             // 1. 猪群类型聚合处理, ... 其他
             String aggs = params.get("aggs");
