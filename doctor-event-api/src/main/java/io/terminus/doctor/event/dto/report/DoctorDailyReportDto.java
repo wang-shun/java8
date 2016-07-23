@@ -87,11 +87,11 @@ public class DoctorDailyReportDto implements Serializable {
         this.deliver.setBlack(this.deliver.getBlack() + report.getDeliver().getBlack());
 
         //存栏
-        this.liveStock.setBoar(report.getLiveStock().getBoar());
-        this.liveStock.setHoubeiSow(report.getLiveStock().getHoubeiSow());
-        this.liveStock.setPeihuaiSow(report.getLiveStock().getPeihuaiSow());
-        this.liveStock.setBuruSow(report.getLiveStock().getBuruSow());
-        this.liveStock.setKonghuaiSow(report.getLiveStock().getKonghuaiSow());
+        this.liveStock.setBoar(report.getLiveStock().getBoar()==0 ? this.liveStock.getBoar() : report.getLiveStock().getBoar());
+        this.liveStock.setHoubeiSow(report.getLiveStock().getHoubeiSow() == 0? this.liveStock.getHoubeiSow() : report.getLiveStock().getHoubeiSow());
+        this.liveStock.setPeihuaiSow(report.getLiveStock().getPeihuaiSow() == 0? this.liveStock.getPeihuaiSow() : report.getLiveStock().getPeihuaiSow());
+        this.liveStock.setBuruSow(report.getLiveStock().getBuruSow() == 0 ? this.liveStock.getBuruSow(): report.getLiveStock().getBuruSow());
+        this.liveStock.setKonghuaiSow(report.getLiveStock().getKonghuaiSow() == 0 ? this.liveStock.getKonghuaiSow() : report.getLiveStock().getKonghuaiSow());
 
         //配种
         this.mating.setHoubei(this.mating.getHoubei() + report.getMating().getHoubei());

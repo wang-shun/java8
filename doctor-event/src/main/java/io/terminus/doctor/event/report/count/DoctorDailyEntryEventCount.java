@@ -82,9 +82,6 @@ public class DoctorDailyEntryEventCount implements DoctorDailyEventCount {
         doctorLiveStockDailyReport.setKonghuaiSow(Params.getNullDefault(statusCount, PigStatus.Abortion.getKey(), 0) +
                 Params.getNullDefault(statusCount, PigStatus.KongHuai.getKey(), 0));
 
-        log.info("map info is map:{}, key:{}", statusCount, PigStatus.BOAR_ENTRY.getKey());
-        log.info("map get value is :{}", statusCount.get(PigStatus.BOAR_ENTRY.getKey()));
-        log.info("result is :{}", Params.getNullDefault(statusCount, PigStatus.BOAR_ENTRY.getKey(), 0));
         doctorLiveStockDailyReport.setBoar(Params.getNullDefault(statusCount, PigStatus.BOAR_ENTRY.getKey(), 0));
 
         // add to total
