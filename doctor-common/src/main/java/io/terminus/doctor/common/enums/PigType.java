@@ -60,7 +60,7 @@ public enum PigType {
         return FARROW_PIGLET.getValue() == value ||
                 NURSERY_PIGLET.getValue() == value ||
                 FATTEN_PIG.getValue() == value ||
-                NURSERY_PIGLET.getValue() == value ||
+                DELIVER_SOW.getValue() == value ||
                 RESERVE_SOW.getValue() == value;
     }
 }
