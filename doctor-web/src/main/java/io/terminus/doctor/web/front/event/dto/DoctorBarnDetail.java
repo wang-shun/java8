@@ -30,12 +30,17 @@ public class DoctorBarnDetail implements Serializable {
     private Paging<DoctorPigInfoDto> pigPaging;
 
     /**
+     * 猪群: 猪类
+     */
+    private Integer groupType;
+
+    /**
      * 猪群分页
      */
     private Paging<DoctorGroupDetail> groupPaging;
 
     /**
-     * 猪: 猪的状态, 猪群: 猪类
+     * 猪: 猪的状态
      */
     private Set<Integer> statuses;
 }

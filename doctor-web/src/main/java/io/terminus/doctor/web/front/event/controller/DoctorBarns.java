@@ -2,12 +2,14 @@ package io.terminus.doctor.web.front.event.controller;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
+import io.terminus.common.model.Paging;
 import io.terminus.common.utils.Splitters;
 import io.terminus.doctor.common.enums.PigSearchType;
 import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.utils.RespHelper;
+import io.terminus.doctor.event.dto.DoctorGroupDetail;
 import io.terminus.doctor.event.dto.DoctorGroupSearchDto;
+import io.terminus.doctor.event.dto.DoctorPigInfoDto;
 import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigTrack;
@@ -204,22 +206,38 @@ public class DoctorBarns {
         DoctorBarn barn = RespHelper.or500(doctorBarnReadService.findBarnById(barnId));
         DoctorBarnDetail barnDetail = new DoctorBarnDetail();
 
+        Paging<DoctorGroupDetail> groupPaging = getGroupPaging(barn, status, pageNo, size);
+        Paging<DoctorPigInfoDto> pigPaging = RespHelper.or500(doctorPigReadService.pagingDoctorInfoDtoByPigTrack(DoctorPigTrack.builder()
+                .status(status)
+                .currentBarnId(barnId)
+                .pigType(DoctorPig.PIG_TYPE.SOW.getKey())
+                .farmId(barn.getFarmId()).build(), pageNo, size));
+
+        //如果母猪和猪群都存在, 全部返回, 由前台选择取哪里的数据
+        if (groupPaging.getTotal() != 0 && pigPaging.getTotal() != 0) {
+            barnDetail.setType(PigSearchType.SOW_GROUP.getValue());
+
+            //猪群
+            barnDetail.setGroupPaging(groupPaging);
+            barnDetail.setGroupType(barn.getPigType());
+
+            //母猪
+            barnDetail.setPigPaging(pigPaging);
+            barnDetail.setStatuses(RespHelper.or500(doctorPigReadService.findPigStatusByBarnId(barnId)));
+            return barnDetail;
+        }
+
         //猪群舍(实际情况: 分娩母猪舍里也有猪群)
         if (PigType.isGroup(barn.getPigType())) {
             barnDetail.setType(PigSearchType.GROUP.getValue());
 
             //根据实际情况, 如果是猪舍类型是分娩母猪, 需要指定猪舍类型产房
             if (barn.getPigType().equals(PigType.DELIVER_SOW.getValue())) {
-                barnDetail.setStatuses(Sets.newHashSet(PigType.FARROW_PIGLET.getValue()));
+                barnDetail.setGroupType(PigType.FARROW_PIGLET.getValue());
             } else {
-                barnDetail.setStatuses(Sets.newHashSet(barn.getPigType())); //一类猪舍只能放一类猪群
+                barnDetail.setGroupType(barn.getPigType()); //一类猪舍只能放一类猪群
             }
-
-            DoctorGroupSearchDto searchDto = new DoctorGroupSearchDto();
-            searchDto.setFarmId(barn.getFarmId());
-            searchDto.setCurrentBarnId(barnId);
-            searchDto.setPigType(status);   //这里的状态就是猪群的猪类
-            barnDetail.setGroupPaging(RespHelper.or500(doctorGroupReadService.pagingGroup(searchDto, pageNo, size)));
+            barnDetail.setGroupPaging(groupPaging);
             return barnDetail;
         }
 
@@ -238,14 +256,19 @@ public class DoctorBarns {
         //母猪舍
         if (PigType.isSow(barn.getPigType())) {
             barnDetail.setType(PigSearchType.SOW.getValue());
-            barnDetail.setPigPaging(RespHelper.or500(doctorPigReadService.pagingDoctorInfoDtoByPigTrack(DoctorPigTrack.builder()
-                    .status(status)
-                    .currentBarnId(barnId)
-                    .pigType(DoctorPig.PIG_TYPE.SOW.getKey())
-                    .farmId(barn.getFarmId()).build(), pageNo, size)));
+            barnDetail.setPigPaging(pigPaging);
             barnDetail.setStatuses(RespHelper.or500(doctorPigReadService.findPigStatusByBarnId(barnId)));
             return barnDetail;
         }
         return barnDetail;
     }
+
+    private Paging<DoctorGroupDetail> getGroupPaging(DoctorBarn barn, Integer status, Integer pageNo, Integer size) {
+        DoctorGroupSearchDto searchDto = new DoctorGroupSearchDto();
+        searchDto.setFarmId(barn.getFarmId());
+        searchDto.setCurrentBarnId(barn.getId());
+        searchDto.setPigType(status);   //这里的状态就是猪群的猪类
+        return RespHelper.or500(doctorGroupReadService.pagingGroup(searchDto, pageNo, size));
+    }
+
 }

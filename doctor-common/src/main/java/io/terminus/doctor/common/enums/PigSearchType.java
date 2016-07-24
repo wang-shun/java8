@@ -13,7 +13,8 @@ public enum PigSearchType {
 
     BOAR(1, "公猪"),
     SOW(2, "母猪"),
-    GROUP(3, "猪群");
+    GROUP(3, "猪群"),
+    SOW_GROUP(4, "母群共存");
 
     @Getter
     private final int value;
