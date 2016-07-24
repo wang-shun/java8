@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Desc:
@@ -68,13 +69,14 @@ public class BarnSearchReadServiceImpl implements BarnSearchReadService {
                     SearchedBarn.class
             );
             searchedBarns.getData().forEach(barn -> { // 处理猪舍详情类型
-                if (PigType.isSow(barn.getPigType())) {
+                //分娩舍特殊处理
+                if (Objects.equals(barn.getPigType(), PigType.DELIVER_SOW.getValue())) {
+                    barn.setType(PigSearchType.SOW_GROUP.getValue());
+                } else if (PigType.isSow(barn.getPigType())) {
                     barn.setType(PigSearchType.SOW.getValue());
-                }
-                if (PigType.isBoar(barn.getPigType())) {
+                } else if (PigType.isBoar(barn.getPigType())) {
                     barn.setType(PigSearchType.BOAR.getValue());
-                }
-                if (PigType.isGroup(barn.getPigType())) {
+                } else if (PigType.isGroup(barn.getPigType())) {
                     barn.setType(PigSearchType.GROUP.getValue());
                 }
             });
