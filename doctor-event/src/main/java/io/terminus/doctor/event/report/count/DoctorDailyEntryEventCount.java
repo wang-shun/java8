@@ -74,8 +74,6 @@ public class DoctorDailyEntryEventCount implements DoctorDailyEventCount {
         //count result
         Map<Integer, Integer> statusCount = statusCounts.stream().collect(Collectors.toMap(k->k.getStatus() , v->v.getCount()));
 
-        log.info("***************** count lot number status map:{}", statusCount);
-
         doctorLiveStockDailyReport.setHoubeiSow(Params.getNullDefault(statusCount, PigStatus.Entry.getKey(), 0));
         doctorLiveStockDailyReport.setPeihuaiSow(Params.getNullDefault(statusCount,PigStatus.Mate.getKey(), 0) +
                 Params.getNullDefault(statusCount, PigStatus.Pregnancy.getKey(),0) +
@@ -83,6 +81,7 @@ public class DoctorDailyEntryEventCount implements DoctorDailyEventCount {
         doctorLiveStockDailyReport.setBuruSow(Params.getNullDefault(statusCount, PigStatus.FEED.getKey(), 0));
         doctorLiveStockDailyReport.setKonghuaiSow(Params.getNullDefault(statusCount, PigStatus.Abortion.getKey(), 0) +
                 Params.getNullDefault(statusCount, PigStatus.KongHuai.getKey(), 0));
+
         doctorLiveStockDailyReport.setBoar(Params.getNullDefault(statusCount, PigStatus.BOAR_ENTRY.getKey(), 0));
 
         // add to total

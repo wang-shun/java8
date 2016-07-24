@@ -56,6 +56,7 @@ public class DoctorDailyPigCountInvocation {
 
             // execute count result
             doctorDailyEventCount.dailyEventHandle(toExe, doctorDailyReportDto, context);
+
         }
         return doctorDailyReportDto;
     }

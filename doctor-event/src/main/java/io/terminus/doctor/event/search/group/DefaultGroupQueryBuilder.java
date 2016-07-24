@@ -84,6 +84,13 @@ public class DefaultGroupQueryBuilder extends BaseGroupQueryBuilder {
             List<String> statusList = Splitters.UNDERSCORE.splitToList(statuses);
             termsList.add(new Terms("status", statusList));
         }
+
+        // 2. 多类型
+        String pigTypes = params.get("pigTypes");
+        if (StringUtils.isNoneBlank(pigTypes)) {
+            List<String> typesList = Splitters.UNDERSCORE.splitToList(pigTypes);
+            termsList.add(new Terms("pigType", typesList));
+        }
         return termsList;
     }
 

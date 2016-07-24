@@ -59,6 +59,6 @@ public class DoctorLiveStockDailyReport implements Serializable {
         this.peihuaiSow += dto.getPeihuaiSow();
         this.buruSow += dto.getBuruSow();
         this.konghuaiSow += dto.getKonghuaiSow();
-        this.farrow += dto.getFarrow();
+        this.boar += dto.getBoar();
     }
 }
