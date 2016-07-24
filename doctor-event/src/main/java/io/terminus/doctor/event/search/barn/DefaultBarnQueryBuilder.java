@@ -111,7 +111,14 @@ public class DefaultBarnQueryBuilder extends BaseBarnQueryBuilder {
 
     @Override
     protected List<Terms> buildTerms(Map<String, String> params) {
-        return null;
+        List<Terms> termsList = Lists.newArrayList();
+        // 1. 多类型
+        String pigTypes = params.get("pigTypes");
+        if (StringUtils.isNoneBlank(pigTypes)) {
+            List<String> typesList = Splitters.UNDERSCORE.splitToList(pigTypes);
+            termsList.add(new Terms("pigType", typesList));
+        }
+        return termsList;
     }
 
     @Override

@@ -50,6 +50,17 @@ public class DoctorSearchesTest extends BaseFrontWebTest {
     }
 
     /**
+     * 查询多状态的母猪
+     * @see DoctorSearches#searchSowPigs(Integer, Integer, Map)
+     */
+    @Test
+    public void test_QUERY_SowStatuses() {
+        String url = "/api/doctor/search/sowpigs";
+        Paging paging = getForEntity(url, ImmutableMap.of("farmId", 12355, "statuses", "1_3_4"), Paging.class).getBody();
+        System.out.println(JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(paging.getData()));
+    }
+
+    /**
      * 查询所有的公猪
      * @see DoctorSearches#searchAllBoarPigs(Map)
      */
@@ -87,13 +98,25 @@ public class DoctorSearchesTest extends BaseFrontWebTest {
     }
 
     /**
+     * 查询多状态的猪群
+     * @see DoctorSearches#searchGroups(Integer, Integer, Map)
+     */
+    @Test
+    public void test_QUERY_GroupStatuses() {
+        String url = "/api/doctor/search/groups";
+        Paging body = getForEntity(url, ImmutableMap.of("farmId", 12355, "pigTypes", "1_2"), Paging.class).getBody();
+        System.out.println(JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(body));
+    }
+
+    /**
      * 查询所有猪舍
      * @see DoctorSearches#searchBarns(Integer, Integer, Map)
      */
     @Test
     public void test_QUERY_Barns() {
         String url = "/api/doctor/search/barns";
-        Object body = getForEntity(url, ImmutableMap.of("farmId", 12355, "pigType", "3"), Object.class).getBody();
+        // Object body = getForEntity(url, ImmutableMap.of("farmId", 12355, "pigType", "3"), Object.class).getBody();
+        Object body = getForEntity(url, ImmutableMap.of("farmId", 12355, "pigTypes", "1_2"), Object.class).getBody();
         System.out.println(JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(body));
     }
 
