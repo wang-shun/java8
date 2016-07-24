@@ -40,7 +40,7 @@ public class DoctorDailyReportManager {
         dailyReports.stream()
                 .map(r -> {
                     DoctorDailyReport report = new DoctorDailyReport();
-                    report.setFarmId(report.getFarmId());
+                    report.setFarmId(r.getFarmId());
                     report.setReportData(r);
                     report.setSumAt(sumAt);
                     return report;
