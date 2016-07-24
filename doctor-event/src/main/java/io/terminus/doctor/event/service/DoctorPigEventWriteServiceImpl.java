@@ -463,7 +463,7 @@ public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteServic
 
             double avgWeight = doctorPartWeanDto.getPartWeanAvgWeight();
             log.info("断奶事件: 均重" + avgWeight);
-            checkState(avgWeight <= 9.0 && avgWeight >= 5.0, "input.weanAvgWeight.error");
+            checkState(avgWeight <= 9000.0 && avgWeight >= 5000.0, "input.weanAvgWeight.error");
 
             Map<String,Object> result = doctorPigEventManager.createSowPigEvent(doctorBasicInputInfoDto, dto);
             publishEvent(result);
