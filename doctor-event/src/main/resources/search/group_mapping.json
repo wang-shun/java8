@@ -9,18 +9,15 @@
       },
       "groupCode": {
         "type": "string",
-        "analyzer": "jieba",
-        "search_analyzer": "jieba"
+        "index": "not_analyzed"
       },
       "groupCodeSearch": {
         "type": "string",
-        "analyzer": "jieba",
-        "search_analyzer": "jieba"
+        "index": "not_analyzed"
       },
       "batchNo": {
         "type": "string",
-        "analyzer": "jieba",
-        "search_analyzer": "jieba"
+        "index": "not_analyzed"
       },
       "orgId": {
         "type": "long"

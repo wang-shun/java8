@@ -9,13 +9,11 @@
       },
       "name": {
         "type": "string",
-        "analyzer": "jieba",
-        "search_analyzer": "jieba"
+        "index": "not_analyzed"
       },
       "nameSearch": {
         "type": "string",
-        "analyzer": "jieba",
-        "search_analyzer": "jieba"
+        "index": "not_analyzed"
       },
       "orgId": {
         "type": "long"
