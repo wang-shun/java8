@@ -288,11 +288,15 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
     }
 
     //产房(分娩母猪舍)只允许有一个猪群
-    protected void checkFarrowGroupUnique(Integer isCreateGroup, Long barnId) {
+    protected void  checkFarrowGroupUnique(Integer isCreateGroup, Long barnId) {
         if (isCreateGroup.equals(IsOrNot.YES.getValue())) {
-            List<DoctorGroup> groups = doctorGroupDao.findByCurrentBarnId(barnId);
-            if (notEmpty(groups)) {
-                throw new ServiceException("group.count.over.1");
+            Integer barnType = RespHelper.orServEx(doctorBarnReadService.findBarnById(barnId)).getPigType();
+            //如果是分娩舍或者产房
+            if (barnType.equals(PigType.DELIVER_SOW.getValue()) || barnType.equals(PigType.FARROW_PIGLET.getValue())) {
+                List<DoctorGroup> groups = doctorGroupDao.findByCurrentBarnId(barnId);
+                if (notEmpty(groups)) {
+                    throw new ServiceException("group.count.over.1");
+                }
             }
         }
     }
