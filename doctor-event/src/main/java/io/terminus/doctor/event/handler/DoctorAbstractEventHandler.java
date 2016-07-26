@@ -77,7 +77,7 @@ public abstract class DoctorAbstractEventHandler implements DoctorEventCreateHan
         // create snapshot info
         // snapshot create
         DoctorPigSnapshot doctorPigSnapshot = DoctorPigSnapshot.builder()
-                .pigId(doctorPigEvent.getId()).farmId(doctorPigEvent.getFarmId()).orgId(doctorPigEvent.getOrgId()).eventId(doctorPigEvent.getId())
+                .pigId(doctorPigEvent.getPigId()).farmId(doctorPigEvent.getFarmId()).orgId(doctorPigEvent.getOrgId()).eventId(doctorPigEvent.getId())
                 .build();
         doctorPigSnapshot.setPigInfoMap(ImmutableMap.of(DoctorPigSnapshotConstants.PIG_TRACK, currentPigTrackSnapShot));
         doctorPigSnapshotDao.create(doctorPigSnapshot);

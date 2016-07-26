@@ -940,7 +940,7 @@ create index doctor_material_consume_providers_material_id on doctor_material_co
 drop table if exists doctor_material_consume_avgs;
 CREATE TABLE `doctor_material_consume_avgs` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT 'id',
-  `farm_id` bigint(20) unsigned DEFAULT NULL COMMENT '冗余仓库信息',
+  `farm_id` bigint(20) unsigned DEFAULT NULL COMMENT '猪场信息',
   `ware_house_id` bigint(20) unsigned DEFAULT NULL COMMENT '仓库信息',
   `material_id` bigint(20) DEFAULT NULL COMMENT '原料Id',
   `type` smallint(6) unsigned DEFAULT NULL COMMENT '领取货物属于的类型',
