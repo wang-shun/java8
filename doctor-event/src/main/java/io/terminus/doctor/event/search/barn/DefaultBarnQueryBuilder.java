@@ -87,10 +87,10 @@ public class DefaultBarnQueryBuilder extends BaseBarnQueryBuilder {
                 sort(sorts, "2", "createdAt");
                 return sorts;
             }
-            String storage = Iterables.getFirst(parts, "0");
-            String createdAt = Iterables.get(parts, 1, "0");
-            String capacity = Iterables.get(parts, 2, "0");
-            String pigType = Iterables.get(parts, 3, "0");
+            String pigType = Iterables.getFirst(parts, "0");
+            String storage = Iterables.get(parts, 1, "0");
+            String createdAt = Iterables.get(parts, 2, "0");
+            String capacity = Iterables.get(parts, 3, "0");
             // 新增sort
             sort(sorts, capacity, "pigType");
             sort(sorts, storage, "storage");
