@@ -76,19 +76,23 @@ public class DefaultBarnQueryBuilder extends BaseBarnQueryBuilder {
     @Override
     protected List<Sort> buildSort(Map<String, String> params) {
         List<Sort> sorts = Lists.newArrayList();
-        // 排序: 存栏_创建日期_容量
+        // 排序: 类型_存栏_创建日期_容量
         String sort = params.get("sort");
         if (StringUtils.isNotBlank(sort)) {
             List<String> parts = Splitters.UNDERSCORE.splitToList(sort);
-            if (parts.size() < 3) {
-                // 否则默认按 updatedAt 降序
-                sort(sorts, "2", "updatedAt");
+            if (parts.size() < 4) {
+                // 否则默认按 pigType升序 storage升序 createdAt降序
+                sort(sorts, "1", "pigType");
+                sort(sorts, "1", "storage");
+                sort(sorts, "2", "createdAt");
                 return sorts;
             }
             String storage = Iterables.getFirst(parts, "0");
             String createdAt = Iterables.get(parts, 1, "0");
             String capacity = Iterables.get(parts, 2, "0");
+            String pigType = Iterables.get(parts, 3, "0");
             // 新增sort
+            sort(sorts, capacity, "pigType");
             sort(sorts, storage, "storage");
             sort(sorts, createdAt, "createdAt");
             sort(sorts, capacity, "capacity");
