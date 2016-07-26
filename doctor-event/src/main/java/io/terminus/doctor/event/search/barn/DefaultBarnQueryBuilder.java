@@ -92,7 +92,7 @@ public class DefaultBarnQueryBuilder extends BaseBarnQueryBuilder {
             String createdAt = Iterables.get(parts, 2, "0");
             String capacity = Iterables.get(parts, 3, "0");
             // 新增sort
-            sort(sorts, capacity, "pigType");
+            sort(sorts, pigType, "pigType");
             sort(sorts, storage, "storage");
             sort(sorts, createdAt, "createdAt");
             sort(sorts, capacity, "capacity");
