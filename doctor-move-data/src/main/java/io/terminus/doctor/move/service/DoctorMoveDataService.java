@@ -18,11 +18,14 @@ import io.terminus.doctor.user.model.DoctorOrg;
 import io.terminus.doctor.user.model.DoctorUser;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static io.terminus.common.utils.Arguments.notEmpty;
 
 /**
  * Desc:
@@ -32,16 +35,11 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 @Service
-public class DoctorMoveDataService {
+public class DoctorMoveDataService implements CommandLineRunner {
 
     private final DoctorMoveDatasourceHandler doctorMoveDatasourceHandler;
     private final DoctorBarnDao doctorBarnDao;
     private final DoctorCustomerDao doctorCustomerDao;
-
-    //Just for mock!
-    private final DoctorFarm farm;
-    private final DoctorOrg org;
-    private final DoctorUser user;
 
     @Autowired
     public DoctorMoveDataService(DoctorMoveDatasourceHandler doctorMoveDatasourceHandler,
@@ -50,10 +48,6 @@ public class DoctorMoveDataService {
         this.doctorMoveDatasourceHandler = doctorMoveDatasourceHandler;
         this.doctorBarnDao = doctorBarnDao;
         this.doctorCustomerDao = doctorCustomerDao;
-
-        this.farm = new DoctorFarm();
-        this.org = new DoctorOrg();
-        this.user = new DoctorUser();
     }
 
     /**
@@ -64,10 +58,12 @@ public class DoctorMoveDataService {
         try {
             List<DoctorBarn> barns = RespHelper.orServEx(doctorMoveDatasourceHandler
                     .findAllData(moveId, View_PigLocationList.class, DoctorMoveTableEnum.view_PigLocationList)).stream()
-                    .map(this::getBarn)
+                    .map(location -> getBarn(mockOrg(), mockFarm(), mockUser(), location))
                     .collect(Collectors.toList());
 
-            doctorBarnDao.creates(barns);
+            if (notEmpty(barns)) {
+                doctorBarnDao.creates(barns);
+            }
             return Response.ok(Boolean.TRUE);
         } catch (ServiceException e) {
             return Response.fail(e.getMessage());
@@ -85,10 +81,12 @@ public class DoctorMoveDataService {
         try {
             List<DoctorCustomer> customers = RespHelper.orServEx(doctorMoveDatasourceHandler
                     .findAllData(moveId, B_Customer.class, DoctorMoveTableEnum.B_Customer)).stream()
-                    .map(this::getCustomer)
+                    .map(cus -> getCustomer(mockOrg(), mockFarm(), mockUser(), cus))
                     .collect(Collectors.toList());
 
-            doctorCustomerDao.creates(customers);
+            if (notEmpty(customers)) {
+                doctorCustomerDao.creates(customers);
+            }
             return Response.ok(Boolean.TRUE);
         } catch (ServiceException e) {
             return Response.fail(e.getMessage());
@@ -99,7 +97,7 @@ public class DoctorMoveDataService {
     }
 
     //拼接客户
-    private DoctorCustomer getCustomer(B_Customer cus) {
+    private DoctorCustomer getCustomer(DoctorOrg org, DoctorFarm farm, DoctorUser user, B_Customer cus) {
         DoctorCustomer customer = new DoctorCustomer();
         customer.setName(cus.getCustomerName());
         customer.setFarmId(farm.getId());
@@ -113,7 +111,7 @@ public class DoctorMoveDataService {
     }
 
     //拼接barn
-    private DoctorBarn getBarn(View_PigLocationList location) {
+    private DoctorBarn getBarn(DoctorOrg org, DoctorFarm farm, DoctorUser user, View_PigLocationList location) {
         //转换pigtype
         PigType pigType = PigType.from(location.getTypeName());
 
@@ -130,5 +128,32 @@ public class DoctorMoveDataService {
         barn.setStaffName(user.getName());
         barn.setOutId(location.getOID());
         return barn;
+    }
+
+    private static DoctorFarm mockFarm() {
+        DoctorFarm farm = new DoctorFarm();
+        farm.setId(9999L);
+        farm.setName("测试迁移猪场");
+        return farm;
+    }
+
+    private static DoctorOrg mockOrg() {
+        DoctorOrg org = new DoctorOrg();
+        org.setId(9999L);
+        org.setName("测试迁移公司");
+        return org;
+    }
+
+    private static DoctorUser mockUser() {
+        DoctorUser user = new DoctorUser();
+        user.setId(9999L);
+        user.setName("测试迁移管理员");
+        return user;
+    }
+
+    @Override
+    public void run(String... strings) throws Exception {
+        // Just for test!
+
     }
 }
