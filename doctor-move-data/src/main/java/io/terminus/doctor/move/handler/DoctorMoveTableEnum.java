@@ -7,6 +7,8 @@ import io.terminus.doctor.move.model.View_BoarCardList;
 import io.terminus.doctor.move.model.View_EventListBoar;
 import io.terminus.doctor.move.model.View_EventListGain;
 import io.terminus.doctor.move.model.View_EventListSow;
+import io.terminus.doctor.move.model.View_FarmInfo;
+import io.terminus.doctor.move.model.View_FarmMember;
 import io.terminus.doctor.move.model.View_GainCardList;
 import io.terminus.doctor.move.model.View_PigLocationList;
 import io.terminus.doctor.move.model.View_SowCardList;
@@ -31,10 +33,10 @@ public enum DoctorMoveTableEnum {
     B_Customer(B_Customer.class),
 
     //公司猪场
-    view_FarmInfo(io.terminus.doctor.move.model.view_FarmInfo.class),
+    view_FarmInfo(View_FarmInfo.class),
 
     //职员
-    view_FarmMember(io.terminus.doctor.move.model.view_FarmMember.class),
+    view_FarmMember(View_FarmMember.class),
 
     //猪舍
     view_PigLocationList(View_PigLocationList.class),
