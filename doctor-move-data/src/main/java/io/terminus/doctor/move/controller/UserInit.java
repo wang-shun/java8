@@ -74,7 +74,6 @@ public class UserInit {
     private DoctorUserDataPermissionDao doctorUserDataPermissionDao;
     @Autowired
     private SubRoleDao subRoleDao;
-    @Autowired
 
 
     @RequestMapping(value = "/init", method = RequestMethod.GET)
