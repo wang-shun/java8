@@ -1,0 +1,39 @@
+# MyBatis
+mybatis:
+  mapper-locations: classpath*:mapper/*Mapper.xml
+  type-aliases-package: io.terminus.doctor.(basic|event|warehouse).model
+
+# Datasource
+datasource:
+  driver-class-name: com.mysql.jdbc.Driver
+  url: jdbc:mysql://127.0.0.1:3306/pig_doctor?useUnicode=true&characterEncoding=UTF8
+  username: root
+  password: anywhere
+# Dubbo
+rpc.mode: false
+rpc.dubbo:
+    module: doctor-move-data
+    registryAddress: 127.0.0.1:2181
+    version: 1.0.0
+
+logging:
+  file: /Users/dream/logs/doctor/move-data.log
+  level.*: INFO
+
+# zookeeper
+zookeeper:
+  host: 127.0.0.1
+  port: 2181
+
+# Redis
+redis:
+  host: 127.0.0.1
+  port: 6379
+  max-total: 10
+  max-idle: 2
+  test-on-borrow: true
+
+# search
+search:
+  host: 127.0.0.1
+  port: 9200

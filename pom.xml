@@ -33,6 +33,7 @@
         <module>doctor-schedule</module>
         <module>doctor-common</module>
         <module>integration-tests</module>
+        <module>doctor-move-data</module>
     </modules>
     <packaging>pom</packaging>
 
@@ -332,6 +333,12 @@
             <dependency>
                 <groupId>io.terminus.doctor</groupId>
                 <artifactId>doctor-web</artifactId>
+                <version>${project.parent.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>io.terminus.doctor</groupId>
+                <artifactId>doctor-move-data</artifactId>
                 <version>${project.parent.version}</version>
             </dependency>
 
