@@ -6,7 +6,6 @@ import io.terminus.common.model.Response;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.doctor.basic.dao.DoctorMoveDatasourceDao;
 import io.terminus.doctor.basic.model.DoctorMoveDatasource;
-import io.terminus.doctor.move.model.TB_FieldValue;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.dbcp.BasicDataSource;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,20 +42,24 @@ public class DoctorMoveDatasourceHandler {
 
     /**
      * 查询基础数据
-     * @param moveDatasoureId 数据源id
+     * @param id 数据源id
      * @return 基础数据
      */
-    public Response<List<TB_FieldValue>> findAllTB_FieldValue(Long moveDatasoureId) {
+    public <T> Response<List<T>> findAllData(Long id, Class<T> clazz, DoctorMoveTableEnum table) {
         try {
-            JdbcTemplate jdbcTemplate = jdbcMap.get(moveDatasoureId);
+            if (clazz != table.getClazz()) {
+                return Response.fail("class.not.equal");
+            }
+
+            JdbcTemplate jdbcTemplate = jdbcMap.get(id);
             if (jdbcTemplate == null) {
                 return Response.fail("jdbc.not.found");
             }
 
-            List<Map<String, Object>> map = jdbcTemplate.queryForList(getSql(DoctorMoveTableEnum.TB_FieldValue));
-            return Response.ok(BeanMapper.mapList(map, TB_FieldValue.class));
+            List<Map<String, Object>> map = jdbcTemplate.queryForList(getSql(table));
+            return Response.ok(BeanMapper.mapList(map, clazz));
         } catch (Exception e) {
-            log.error("find all TB_FieldValue failed, id:{}, cause:{}", moveDatasoureId, Throwables.getStackTraceAsString(e));
+            log.error("find all data failed, id:{}, clazz:{}, table:{}, cause:{}", id, clazz, table, Throwables.getStackTraceAsString(e));
             return Response.fail("move.data.find.all.fail");
         }
     }
