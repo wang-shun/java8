@@ -1,4 +1,4 @@
-package io.terminus.doctor.basic.datasource;
+package io.terminus.doctor.move.handler;
 
 /**
  * Desc:
@@ -7,7 +7,7 @@ package io.terminus.doctor.basic.datasource;
  * Date: 16/7/27
  */
 
-public enum DoctorMoveTables {
+public enum DoctorMoveTableEnum {
 
     //基础数据
     TB_FieldValue,

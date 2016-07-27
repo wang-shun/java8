@@ -1,12 +1,12 @@
-package io.terminus.doctor.basic.datasource;
+package io.terminus.doctor.move.handler;
 
 import com.google.common.base.Throwables;
 import com.google.common.collect.Maps;
 import io.terminus.common.model.Response;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.doctor.basic.dao.DoctorMoveDatasourceDao;
-import io.terminus.doctor.basic.datasource.model.TB_FieldValue;
 import io.terminus.doctor.basic.model.DoctorMoveDatasource;
+import io.terminus.doctor.move.model.TB_FieldValue;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.dbcp.BasicDataSource;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,11 +53,11 @@ public class DoctorMoveDatasourceHandler {
                 return Response.fail("jdbc.not.found");
             }
 
-            List<Map<String, Object>> map = jdbcTemplate.queryForList(getSql(DoctorMoveTables.TB_FieldValue));
+            List<Map<String, Object>> map = jdbcTemplate.queryForList(getSql(DoctorMoveTableEnum.TB_FieldValue));
             return Response.ok(BeanMapper.mapList(map, TB_FieldValue.class));
         } catch (Exception e) {
             log.error("find all TB_FieldValue failed, id:{}, cause:{}", moveDatasoureId, Throwables.getStackTraceAsString(e));
-            return Response.fail("move.data.fina.all.fail");
+            return Response.fail("move.data.find.all.fail");
         }
     }
 
@@ -79,7 +79,7 @@ public class DoctorMoveDatasourceHandler {
         return new JdbcTemplate(dataSource);
     }
 
-    private static String getSql(DoctorMoveTables table) {
+    private static String getSql(DoctorMoveTableEnum table) {
         return "SELECT * FROM " + table.name();
     }
 

@@ -1,4 +1,4 @@
-package io.terminus.doctor.basic.datasource.model;
+package io.terminus.doctor.move.model;
 
 import lombok.Data;
 
