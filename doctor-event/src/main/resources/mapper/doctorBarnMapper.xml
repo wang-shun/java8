@@ -50,7 +50,7 @@
     </insert>
 
     <insert id="creates" parameterType="list">
-        INSERT INTO <include refid="table" />
+        INSERT INTO <include refid="tb" />
         (<include refid="cols_exclude_id" />)
         VALUES
         <foreach collection="list" separator="," item="item">
