@@ -131,4 +131,33 @@ public class DoctorStaff implements Serializable {
             return this.desc;
         }
     }
+
+    public enum Sex {
+        MALE(1, "男"),
+        FEFMALE(2, "女");
+
+        private int value;
+        private String desc;
+
+        Sex(int value, String desc) {
+            this.value = value;
+            this.desc = desc;
+        }
+
+        public static Sex from(int number) {
+            return Lists.newArrayList(Sex.values()).stream()
+                    .filter(s -> Objects.equal(s.value, number))
+                    .findFirst()
+                    .<ServiceException>orElseThrow(() -> {
+                        throw new ServiceException("staff.sex.error");
+                    });
+        }
+
+        public int value(){
+            return this.value;
+        }
+        public String toString(){
+            return this.desc;
+        }
+    }
 }
