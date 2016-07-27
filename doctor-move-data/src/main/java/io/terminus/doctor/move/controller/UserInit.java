@@ -1,6 +1,7 @@
 package io.terminus.doctor.move.controller;
 
 import com.google.common.base.Joiner;
+import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.Response;
@@ -78,6 +79,16 @@ public class UserInit {
 
     @RequestMapping(value = "/init", method = RequestMethod.GET)
     public String userInit(@RequestParam String mobile, @RequestParam Long dataSourceId) {
+        try{
+            this.init(mobile, dataSourceId);
+            return "ok";
+        }catch(Exception e){
+            log.error("init user data error:{}", Throwables.getStackTraceAsString(e));
+            return "error";
+        }
+    }
+
+    private void init(String mobile, Long dataSourceId){
         List<View_FarmMember> list = doctorMoveDatasourceHandler.findAllData(dataSourceId, View_FarmMember.class, DoctorMoveTableEnum.view_FarmMember).getResult();
         List<DoctorFarm> farms = new ArrayList<>();
         doctorMoveDatasourceHandler.findAllData(dataSourceId, View_FarmInfo.class, DoctorMoveTableEnum.view_FarmInfo).getResult().forEach(farmInfo -> {
@@ -125,8 +136,6 @@ public class UserInit {
                 this.createSubUser(member, roleId, primaryUser.getId(), mobile, farmIds);
             }
         }
-
-        return "ok";
     }
 
     /**
