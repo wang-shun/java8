@@ -49,6 +49,31 @@
         (<include refid="vals" />)
     </insert>
 
+    <insert id="creates" parameterType="list">
+        INSERT INTO <include refid="table" />
+        (<include refid="cols_exclude_id" />)
+        VALUES
+        <foreach collection="list" separator="," item="item">
+            (
+            #{item.name},
+            #{item.orgId},
+            #{item.orgName},
+            #{item.farmId},
+            #{item.farmName},
+            #{item.pigType},
+            #{item.canOpenGroup},
+            #{item.status},
+            #{item.capacity},
+            #{item.staffId},
+            #{item.staffName},
+            #{item.outId},
+            #{item.extra},
+            now(),
+            now()
+            )
+        </foreach>
+    </insert>
+
     <select id="findById" parameterType="long" resultMap="DoctorBarnMap" >
         SELECT <include refid="cols_all" />
         FROM <include refid="tb" />
