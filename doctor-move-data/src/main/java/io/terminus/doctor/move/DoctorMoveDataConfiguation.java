@@ -1,6 +1,8 @@
 package io.terminus.doctor.move;
 
 import io.terminus.doctor.basic.DoctorBasicConfiguration;
+import io.terminus.doctor.event.DoctorEventConfiguration;
+import io.terminus.doctor.warehouse.DoctorWarehouseConfiguration;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -17,7 +19,11 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 @ComponentScan(basePackages = {"io.terminus.doctor.move"})
 @EnableWebMvc
 @EnableAutoConfiguration
-@Import({DoctorBasicConfiguration.class})
+@Import({DoctorBasicConfiguration.class,
+        DoctorEventConfiguration.class,
+        DoctorWarehouseConfiguration.class
+})
 public class DoctorMoveDataConfiguation {
 
+    
 }
