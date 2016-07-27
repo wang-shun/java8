@@ -47,6 +47,29 @@
         (<include refid="vals" />)
     </insert>
 
+    <insert id="creates" parameterType="list">
+        INSERT INTO <include refid="tb" />
+        (<include refid="cols_exclude_id" />)
+        VALUES
+        <foreach collection="list" separator="," item="item">
+            (
+                #{item.name},
+                #{item.farmId},
+                #{item.farmName},
+                #{item.mobile},
+                #{item.email},
+                #{item.outId},
+                #{item.extra},
+                #{item.creatorId},
+                #{item.creatorName},
+                #{item.updatorId},
+                #{item.updatorName},
+                now(),
+                now()
+            )
+        </foreach>
+    </insert>
+
     <select id="findById" parameterType="long" resultMap="DoctorCustomerMap" >
         SELECT <include refid="cols_all" />
         FROM <include refid="tb" />
@@ -68,9 +91,6 @@
             <if test="creatorName != null">creator_name = #{creatorName},</if>
             <if test="updatorId != null">updator_id = #{updatorId},</if>
             <if test="updatorName != null">updator_name = #{updatorName},</if>
-            
-            
-            
             updated_at=now()
         </set>
         WHERE id = #{id}

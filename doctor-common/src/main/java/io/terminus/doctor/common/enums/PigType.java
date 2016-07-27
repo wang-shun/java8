@@ -45,6 +45,15 @@ public enum PigType {
         return null;
     }
 
+    public static PigType from(String desc) {
+        for (PigType type : PigType.values()) {
+            if (Objects.equal(type.desc, desc)) {
+                return type;
+            }
+        }
+        return null;
+    }
+
     public static boolean isBoar(int value) {
         return RESERVE_BOAR.getValue() == value || BOAR.getValue() == value;
     }
