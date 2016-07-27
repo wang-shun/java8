@@ -23,7 +23,7 @@ rpc.dubbo:
     version: 1.0.0
 
 logging:
-  file: /Users/dream/logs/doctor/move-data.log
+  file: ${user.name}/logs/doctor/move-data.log
   level.*: INFO
 
 # zookeeper
@@ -43,3 +43,9 @@ redis:
 search:
   host: 127.0.0.1
   port: 9200
+
+flow:
+  definition:
+    key:
+      sow: sow
+      boar: boar
