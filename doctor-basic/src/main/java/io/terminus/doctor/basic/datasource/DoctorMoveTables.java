@@ -1,4 +1,4 @@
-package io.terminus.doctor.basic.enums;
+package io.terminus.doctor.basic.datasource;
 
 /**
  * Desc:
@@ -7,7 +7,7 @@ package io.terminus.doctor.basic.enums;
  * Date: 16/7/27
  */
 
-public enum DoctorMoveDatasourceTables {
+public enum DoctorMoveTables {
 
     //基础数据
     TB_FieldValue,
@@ -37,5 +37,5 @@ public enum DoctorMoveDatasourceTables {
 
     //母猪
     view_SowCardList,
-    view_EventListSow;
+    view_EventListSow
 }

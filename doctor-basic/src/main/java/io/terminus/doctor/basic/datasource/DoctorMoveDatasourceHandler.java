@@ -1,8 +1,11 @@
 package io.terminus.doctor.basic.datasource;
 
 import com.google.common.base.Throwables;
+import com.google.common.collect.Maps;
 import io.terminus.common.model.Response;
+import io.terminus.common.utils.BeanMapper;
 import io.terminus.doctor.basic.dao.DoctorMoveDatasourceDao;
+import io.terminus.doctor.basic.datasource.model.TB_FieldValue;
 import io.terminus.doctor.basic.model.DoctorMoveDatasource;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.dbcp.BasicDataSource;
@@ -10,7 +13,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
-import javax.sql.DataSource;
+import javax.annotation.PostConstruct;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Desc: move-data数据源信息读服务实现类
@@ -23,32 +28,43 @@ import javax.sql.DataSource;
 public class DoctorMoveDatasourceHandler {
 
     private final DoctorMoveDatasourceDao doctorMoveDatasourceDao;
+    private final Map<Long, JdbcTemplate> jdbcMap = Maps.newHashMap();
 
     @Autowired
     public DoctorMoveDatasourceHandler(DoctorMoveDatasourceDao doctorMoveDatasourceDao) {
         this.doctorMoveDatasourceDao = doctorMoveDatasourceDao;
     }
 
+    @PostConstruct
+    public void init() {
+        List<DoctorMoveDatasource> moves = doctorMoveDatasourceDao.listAll();
+        moves.forEach(move -> jdbcMap.put(move.getId(), getJdbcTempalte(move)));
+    }
+
     /**
-     * 获取 JdbcTemplate
-     *
-     * @param moveDatasourceId 主键id
-     * @return JdbcTemplate
+     * 查询基础数据
+     * @param moveDatasoureId 数据源id
+     * @return 基础数据
      */
-    public Response<JdbcTemplate> findMoveDataJdbcTemplateById(Long moveDatasourceId) {
+    public Response<List<TB_FieldValue>> findAllTB_FieldValue(Long moveDatasoureId) {
         try {
-            DoctorMoveDatasource datasource = doctorMoveDatasourceDao.findById(moveDatasourceId);
-            if (datasource == null) {
-                return Response.fail("moveDatasource.find.fail");
+            JdbcTemplate jdbcTemplate = jdbcMap.get(moveDatasoureId);
+            if (jdbcTemplate == null) {
+                return Response.fail("jdbc.not.found");
             }
-            return Response.ok(new JdbcTemplate(getDataSource(datasource)));
+
+            List<Map<String, Object>> map = jdbcTemplate.queryForList(getSql(DoctorMoveTables.TB_FieldValue));
+            return Response.ok(BeanMapper.mapList(map, TB_FieldValue.class));
         } catch (Exception e) {
-            log.error("find move data failed, id:{}, cause:{}", moveDatasourceId, Throwables.getStackTraceAsString(e));
-            return Response.fail("find.move.data.fail");
+            log.error("find all TB_FieldValue failed, id:{}, cause:{}", moveDatasoureId, Throwables.getStackTraceAsString(e));
+            return Response.fail("move.data.fina.all.fail");
         }
     }
 
-    private DataSource getDataSource(DoctorMoveDatasource db){
+
+
+    //获取JdbcTemplate
+    private JdbcTemplate getJdbcTempalte(DoctorMoveDatasource db){
         BasicDataSource dataSource = new BasicDataSource();
         dataSource.setDriverClassName(db.getDriver());
         dataSource.setUrl(db.getUrl());
@@ -60,6 +76,11 @@ public class DoctorMoveDatasourceHandler {
         dataSource.setInitialSize(2);
         dataSource.setTimeBetweenEvictionRunsMillis(600000L);
         dataSource.setMinEvictableIdleTimeMillis(1800000L);
-        return dataSource;
+        return new JdbcTemplate(dataSource);
     }
+
+    private static String getSql(DoctorMoveTables table) {
+        return "SELECT * FROM " + table.name();
+    }
+
 }
