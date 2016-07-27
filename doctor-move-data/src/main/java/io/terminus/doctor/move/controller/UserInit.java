@@ -10,6 +10,7 @@ import io.terminus.doctor.common.enums.UserStatus;
 import io.terminus.doctor.common.enums.UserType;
 import io.terminus.doctor.move.handler.DoctorMoveDatasourceHandler;
 import io.terminus.doctor.move.handler.DoctorMoveTableEnum;
+import io.terminus.doctor.move.model.RoleTemplate;
 import io.terminus.doctor.move.model.View_FarmInfo;
 import io.terminus.doctor.move.model.View_FarmMember;
 import io.terminus.doctor.user.dao.DoctorFarmDao;
@@ -98,7 +99,7 @@ public class UserInit {
         });
 
         User primaryUser = null;
-        List<Long> farmIds = new ArrayList<>();
+        List<Long> farmIds = Lists.newArrayList();
         for(View_FarmMember member : list){
             if(member.getLevels() == 0){
                 // 主账号注册,内含事务
@@ -128,7 +129,7 @@ public class UserInit {
         }
 
         //创建子账号角色,后面创建子账号需要用到
-        Map<String, Long> roleId = this.createSubRole(primaryUser.getId());
+        Map<String, Long> roleId = this.createSubRole(primaryUser.getId(), dataSourceId);
 
         //现在轮到子账号了
         for(View_FarmMember member : list) {
@@ -245,19 +246,19 @@ public class UserInit {
         return farm;
     }
 
-    private String[] roles = new String[]{"一般工作人员", "二场场长", "配种主管", "生产管理人员", "仓库管理人员", "管理员", "生产场长", "技术总监", "统计"};
-    private Map<String, Long> createSubRole(Long primaryUserId){
+    private Map<String, Long> createSubRole(Long primaryUserId, Long dataSourceId){
         Map<String, Long> roleId = new HashMap<>(); // key = roleName, value = roleId
+        List<RoleTemplate> roleTemplates = doctorMoveDatasourceHandler.findAllData(dataSourceId, RoleTemplate.class, DoctorMoveTableEnum.RoleTemplate).getResult();
 
         SubRole role = new SubRole();
         role.setAppKey("MOBILE");
         role.setStatus(1);
         role.setUserId(primaryUserId);
         role.setAllowJson("[\"message_user_center\",\"manage_user_info\",\"manage_user_changepwd\"]");
-        for(String rolename : roles){
-            role.setName(rolename);
+        for(RoleTemplate roleTemplate : roleTemplates){
+            role.setName(roleTemplate.getRoleName());
             subRoleDao.create(role);
-            roleId.put(rolename, role.getId());
+            roleId.put(roleTemplate.getRoleName(), role.getId());
         }
 
         return roleId;

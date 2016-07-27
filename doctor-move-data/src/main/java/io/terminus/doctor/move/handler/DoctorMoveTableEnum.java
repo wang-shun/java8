@@ -2,6 +2,7 @@ package io.terminus.doctor.move.handler;
 
 import io.terminus.doctor.move.model.B_ChangeReason;
 import io.terminus.doctor.move.model.B_Customer;
+import io.terminus.doctor.move.model.RoleTemplate;
 import io.terminus.doctor.move.model.TB_FieldValue;
 import io.terminus.doctor.move.model.View_BoarCardList;
 import io.terminus.doctor.move.model.View_EventListBoar;
@@ -51,7 +52,10 @@ public enum DoctorMoveTableEnum {
 
     //母猪
     view_SowCardList(View_SowCardList.class),
-    view_EventListSow(View_EventListSow.class);
+    view_EventListSow(View_EventListSow.class),
+
+    //子账号角色
+    RoleTemplate(io.terminus.doctor.move.model.RoleTemplate.class);
 
     @Getter
     private final Class clazz;
