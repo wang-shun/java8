@@ -1,8 +1,11 @@
 package io.terminus.doctor.move.model;
 
+import lombok.Data;
+
 /**
  * Created by chenzenghui on 16/7/27.
  */
+@Data
 public class View_FarmInfo {
     private	String	OID	;
     private	String	Address	;
