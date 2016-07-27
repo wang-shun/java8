@@ -2,6 +2,7 @@ package io.terminus.doctor.move.service;
 
 import io.terminus.doctor.basic.dao.DoctorBasicDao;
 import io.terminus.doctor.event.dao.DoctorGroupDao;
+import io.terminus.doctor.user.dao.DoctorFarmDao;
 import io.terminus.doctor.warehouse.dao.DoctorWareHouseDao;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
@@ -22,6 +23,8 @@ public class Test implements CommandLineRunner {
     private DoctorGroupDao doctorGroupDao;
     @Autowired
     private DoctorWareHouseDao doctorWareHouseDao;
+    @Autowired
+    private DoctorFarmDao doctorFarmDao;
 
     @Override
     public void run(String... strings) throws Exception {
@@ -29,6 +32,7 @@ public class Test implements CommandLineRunner {
         System.out.println(doctorBasicDao.findById(1L));
         System.out.println(doctorGroupDao.findById(1L));
         System.out.println(doctorWareHouseDao.findById(1L));
+        System.out.println(doctorFarmDao.findById(1L));
         System.out.println("***********************");
     }
 }

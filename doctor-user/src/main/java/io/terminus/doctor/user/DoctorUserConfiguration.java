@@ -24,6 +24,7 @@ import org.springframework.context.annotation.*;
 public class DoctorUserConfiguration {
 
     @Configuration
+    @Profile("zookeeper")
     public static class ZookeeperConfiguration{
 
         @Bean

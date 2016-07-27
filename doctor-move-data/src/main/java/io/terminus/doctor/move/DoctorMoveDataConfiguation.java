@@ -2,12 +2,14 @@ package io.terminus.doctor.move;
 
 import io.terminus.doctor.basic.DoctorBasicConfiguration;
 import io.terminus.doctor.event.DoctorEventConfiguration;
+import io.terminus.doctor.user.DoctorUserConfiguration;
 import io.terminus.doctor.warehouse.DoctorWarehouseConfiguration;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
 /**
  * Desc: 单例模式启动 move-data 配置
@@ -21,9 +23,7 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 @EnableAutoConfiguration
 @Import({DoctorBasicConfiguration.class,
         DoctorEventConfiguration.class,
-        DoctorWarehouseConfiguration.class
+        DoctorWarehouseConfiguration.class, DoctorUserConfiguration.class
 })
-public class DoctorMoveDataConfiguation {
-
-    
+public class DoctorMoveDataConfiguation extends WebMvcConfigurerAdapter {
 }
