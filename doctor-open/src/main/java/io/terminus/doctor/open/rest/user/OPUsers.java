@@ -184,12 +184,6 @@ public class OPUsers {
                     throw new OPClientException("user.register.mobile.has.been.used");
                 }
                 break;
-            case RESET_PASSWORD:
-                //如果手机号未注册,则抛出异常
-                if(!result.isSuccess() || result.getResult() == null){
-                    throw new OPClientException(result.getError());
-                }
-                break;
             default:
                 //如果手机号未注册,则抛出异常
                 if(!result.isSuccess() || result.getResult() == null){
