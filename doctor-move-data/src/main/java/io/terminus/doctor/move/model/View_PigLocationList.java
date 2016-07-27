@@ -1,11 +1,15 @@
 package io.terminus.doctor.move.model;
 
+import lombok.Data;
+
 import java.io.Serializable;
 
 /**
  * Created by chenzenghui on 16/7/27.
  */
+@Data
 public class View_PigLocationList implements Serializable{
+    private static final long serialVersionUID = -2947199299070135625L;
     private String OID;
     private String PigTypeOID;
     private String FarmOID;

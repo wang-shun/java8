@@ -1,12 +1,16 @@
 package io.terminus.doctor.move.model;
 
+import lombok.Data;
+
 import java.io.Serializable;
 import java.util.Date;
 
 /**
  * Created by chenzenghui on 16/7/27.
  */
+@Data
 public class View_BoarCardList implements Serializable{
+    private static final long serialVersionUID = -8085241787217620564L;
     private String OID;
     private String Status;
     private String FarmOID;
