@@ -12,7 +12,14 @@
     <artifactId>doctor-move-data</artifactId>
 
     <dependencies>
-        <!--  datasource pool just for move data -->
+        <!-- handlebars template for generate sql -->
+        <dependency>
+            <groupId>com.github.jknack</groupId>
+            <artifactId>handlebars</artifactId>
+            <version>4.0.5</version>
+        </dependency>
+
+        <!-- datasource pool just for move data -->
         <dependency>
             <groupId>commons-dbcp</groupId>
             <artifactId>commons-dbcp</artifactId>

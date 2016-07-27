@@ -3,7 +3,9 @@ package io.terminus.doctor.move.service;
 import com.google.common.base.Throwables;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.Response;
+import io.terminus.doctor.basic.dao.DoctorChangeReasonDao;
 import io.terminus.doctor.basic.dao.DoctorCustomerDao;
+import io.terminus.doctor.basic.model.DoctorChangeReason;
 import io.terminus.doctor.basic.model.DoctorCustomer;
 import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.utils.RespHelper;
@@ -11,6 +13,7 @@ import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.move.handler.DoctorMoveDatasourceHandler;
 import io.terminus.doctor.move.handler.DoctorMoveTableEnum;
+import io.terminus.doctor.move.model.B_ChangeReason;
 import io.terminus.doctor.move.model.B_Customer;
 import io.terminus.doctor.move.model.View_PigLocationList;
 import io.terminus.doctor.user.model.DoctorFarm;
@@ -40,14 +43,17 @@ public class DoctorMoveDataService implements CommandLineRunner {
     private final DoctorMoveDatasourceHandler doctorMoveDatasourceHandler;
     private final DoctorBarnDao doctorBarnDao;
     private final DoctorCustomerDao doctorCustomerDao;
+    private final DoctorChangeReasonDao doctorChangeReasonDao;
 
     @Autowired
     public DoctorMoveDataService(DoctorMoveDatasourceHandler doctorMoveDatasourceHandler,
                                  DoctorBarnDao doctorBarnDao,
-                                 DoctorCustomerDao doctorCustomerDao) {
+                                 DoctorCustomerDao doctorCustomerDao,
+                                 DoctorChangeReasonDao doctorChangeReasonDao) {
         this.doctorMoveDatasourceHandler = doctorMoveDatasourceHandler;
         this.doctorBarnDao = doctorBarnDao;
         this.doctorCustomerDao = doctorCustomerDao;
+        this.doctorChangeReasonDao = doctorChangeReasonDao;
     }
 
     /**
@@ -94,6 +100,36 @@ public class DoctorMoveDataService implements CommandLineRunner {
             log.error("move customer failed, moveId:{}, cause:{}", moveId, Throwables.getStackTraceAsString(e));
             return Response.fail("move.customer.fail");
         }
+    }
+
+    /**
+     * 迁移变动原因
+     */
+    @Transactional
+    public Response<Boolean> moveChangeReason(Long moveId) {
+        try {
+            List<DoctorChangeReason> reasons = RespHelper.orServEx(doctorMoveDatasourceHandler
+                    .findAllData(moveId, B_ChangeReason.class, DoctorMoveTableEnum.B_ChangeReason)).stream()
+                    .map(reason -> getReason(mockOrg(), mockFarm(), mockUser(), reason))
+                    .collect(Collectors.toList());
+
+            if (notEmpty(reasons)) {
+                doctorChangeReasonDao.creates(reasons);
+            }
+            return Response.ok(Boolean.TRUE);
+        } catch (ServiceException e) {
+            return Response.fail(e.getMessage());
+        } catch (Exception e) {
+            log.error("move customer failed, moveId:{}, cause:{}", moveId, Throwables.getStackTraceAsString(e));
+            return Response.fail("move.customer.fail");
+        }
+    }
+
+    //拼接变动原因
+    private DoctorChangeReason getReason(DoctorOrg org, DoctorFarm farm, DoctorUser user, B_ChangeReason reason) {
+        DoctorChangeReason changeReason = new DoctorChangeReason();
+        // TODO: 16/7/27
+        return changeReason;
     }
 
     //拼接客户

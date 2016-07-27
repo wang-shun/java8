@@ -1,0 +1,9 @@
+-- 查询变动原因
+SELECT
+    a.OID AS OID,
+    b.FieldText AS changeType, -- 变动类型
+    a.ReasonName AS ReasonName,
+    a.srm AS srm
+FROM B_ChangeReason a
+LEFT JOIN TB_FieldValue b
+ON a.changeTypeOID = b.OID

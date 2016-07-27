@@ -6,9 +6,12 @@ import io.terminus.common.model.Response;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.doctor.basic.dao.DoctorMoveDatasourceDao;
 import io.terminus.doctor.basic.model.DoctorMoveDatasource;
+import io.terminus.doctor.move.model.B_ChangeReason;
+import io.terminus.doctor.move.sql.DoctorSqlFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.dbcp.BasicDataSource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.CommandLineRunner;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
@@ -24,14 +27,17 @@ import java.util.Map;
  */
 @Slf4j
 @Component
-public class DoctorMoveDatasourceHandler {
+public class DoctorMoveDatasourceHandler implements CommandLineRunner {
 
     private final DoctorMoveDatasourceDao doctorMoveDatasourceDao;
+    private final DoctorSqlFactory doctorSqlFactory;
     private final Map<Long, JdbcTemplate> jdbcMap = Maps.newHashMap();
 
     @Autowired
-    public DoctorMoveDatasourceHandler(DoctorMoveDatasourceDao doctorMoveDatasourceDao) {
+    public DoctorMoveDatasourceHandler(DoctorMoveDatasourceDao doctorMoveDatasourceDao,
+                                       DoctorSqlFactory doctorSqlFactory) {
         this.doctorMoveDatasourceDao = doctorMoveDatasourceDao;
+        this.doctorSqlFactory = doctorSqlFactory;
     }
 
     @PostConstruct
@@ -64,6 +70,20 @@ public class DoctorMoveDatasourceHandler {
         }
     }
 
+    public <T> Response<List<T>> findByHbsSql(Long id, Class<T> clazz, String hbsName) {
+        try {
+            JdbcTemplate jdbcTemplate = jdbcMap.get(id);
+            if (jdbcTemplate == null) {
+                return Response.fail("jdbc.not.found");
+            }
+
+            List<Map<String, Object>> map = jdbcTemplate.queryForList(doctorSqlFactory.getSql(hbsName, null));
+            return Response.ok(BeanMapper.mapList(map, clazz));
+        } catch (Exception e) {
+            log.error("find all data failed, id:{}, clazz:{}, cause:{}", id, clazz, Throwables.getStackTraceAsString(e));
+            return Response.fail("move.data.find.by.sql.fail");
+        }
+    }
 
 
     //获取JdbcTemplate
@@ -85,5 +105,11 @@ public class DoctorMoveDatasourceHandler {
     //查询全部的语句
     private static String getSql(DoctorMoveTableEnum table) {
         return "SELECT * FROM " + table.name();
+    }
+
+    @Override
+    public void run(String... strings) throws Exception {
+        List<B_ChangeReason> reasons = findByHbsSql(1L, B_ChangeReason.class, "changeReason").getResult();
+        System.out.println(reasons);
     }
 }
