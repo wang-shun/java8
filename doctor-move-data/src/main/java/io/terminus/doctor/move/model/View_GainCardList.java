@@ -1,13 +1,14 @@
 package io.terminus.doctor.move.model;
 
 import java.io.Serializable;
+import java.util.Date;
 
 /**
  * Created by chenzenghui on 16/7/27.
  */
 public class View_GainCardList implements Serializable{
     private String OID;
-    private String GainOpenDate;
+    private Date GainOpenDate;
     private String Status;
     private String FarmOID;
     private String PigID;
@@ -16,12 +17,12 @@ public class View_GainCardList implements Serializable{
     private String Breed;
     private String Genetic;
     private String Remark;
-    private String MaximumMarketingAge;
+    private Integer MaximumMarketingAge;
     private String Location;
     private String GainCloseDate;
     private String EventOID;
     private String ProductionStage;
-    private String Weight;
+    private Double Weight;
     private String Srm;
     private String MngByPig;
     private String FarmOIDText;

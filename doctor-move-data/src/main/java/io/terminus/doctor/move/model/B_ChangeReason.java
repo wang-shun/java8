@@ -9,5 +9,5 @@ public class B_ChangeReason {
     private String ReasonName;
     private String srm;
     private String Remark;
-    private String Ord;
+    private Integer Ord;
 }

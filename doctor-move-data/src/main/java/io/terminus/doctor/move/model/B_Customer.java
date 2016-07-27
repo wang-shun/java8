@@ -13,5 +13,5 @@ public class B_Customer {
     private String PostCode;
     private String EMail;
     private String Srm;
-    private String Ord;
+    private Integer Ord;
 }

@@ -13,7 +13,7 @@ public class View_PigLocationList implements Serializable{
     private String Room;
     private String Pen;
     private String barnName;
-    private String Ord;
+    private Integer Ord;
     private String Remark;
     private String StaffName;
     private String CanOpenGroup;
@@ -24,7 +24,7 @@ public class View_PigLocationList implements Serializable{
     private String pigType;
     private String PigTypeName;
     private String sex;
-    private String ColID;
+    private Integer ColID;
     private String SexName;
     private String CanOpenGroupText;
     private String IsStopUseText;
