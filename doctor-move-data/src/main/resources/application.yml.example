@@ -1,3 +1,6 @@
+server:
+  port: 8091
+
 # MyBatis
 mybatis:
   mapperLocations: classpath*:mapper/*Mapper.xml
