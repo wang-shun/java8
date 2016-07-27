@@ -51,7 +51,7 @@ public class UserInit {
     @RequestMapping(value = "/init", method = RequestMethod.GET)
     public String userInit(HttpServletRequest request, HttpServletResponse response,
                            @RequestParam String mobile) {
-        List<TB_FieldValue> list = doctorMoveDatasourceHandler.findAll(1L, TB_FieldValue.class, DoctorMoveTableEnum.TB_FieldValue).getResult();
+        List<TB_FieldValue> list = doctorMoveDatasourceHandler.findAllData(1L, TB_FieldValue.class, DoctorMoveTableEnum.TB_FieldValue).getResult();
 
         // 主账号注册逻辑
 //        User user = this.registerByMobile(mobile, "123456", userName);
