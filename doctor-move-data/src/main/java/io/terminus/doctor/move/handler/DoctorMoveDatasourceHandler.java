@@ -79,8 +79,8 @@ public class DoctorMoveDatasourceHandler {
         return new JdbcTemplate(dataSource);
     }
 
+    //查询全部的语句
     private static String getSql(DoctorMoveTableEnum table) {
         return "SELECT * FROM " + table.name();
     }
-
 }
