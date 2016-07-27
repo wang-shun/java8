@@ -150,3 +150,19 @@ CREATE TABLE `doctor_daily_reports` (
   PRIMARY KEY (`id`),
   KEY `idx_doctor_daily_reports_farm_id_agg_sumat` (`farm_id`,`sum_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='猪场日报表';
+
+-- 数据迁移的数据源信息
+CREATE TABLE `doctor_move_datasource` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '自增主键',
+  `name` varchar(128) DEFAULT NULL COMMENT '数据源名称',
+  `username` varchar(32) DEFAULT NULL COMMENT '数据库用户名',
+  `password` varchar(32) DEFAULT NULL COMMENT '数据库密码',
+  `driver` varchar(32) DEFAULT NULL COMMENT 'jdbc driver',
+  `url` varchar(128) DEFAULT NULL COMMENT '链接url',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='move-data数据源信息';
+
+-- 添加灵宝融利的数据源信息
+INSERT INTO `doctor_move_datasource` (`id`, `name`, `username`, `password`, `driver`, `url`)
+VALUES
+	(1, '灵宝融利', 'sa', 'pigmall', 'net.sourceforge.jtds.jdbc.Driver', 'jdbc:jtds:sqlserver://101.201.146.171:1433/lbrl;tds=8.0;lastupdatecount=true');
