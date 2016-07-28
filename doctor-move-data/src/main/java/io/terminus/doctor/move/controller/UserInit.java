@@ -80,11 +80,13 @@ public class UserInit {
 
     @RequestMapping(value = "/init", method = RequestMethod.GET)
     public String userInit(@RequestParam String mobile, @RequestParam Long dataSourceId) {
+        log.warn("start to init user and farm data, mobile = {}, dataSourceId = {}", mobile, dataSourceId);
         try{
             this.init(mobile, dataSourceId);
+            log.warn("init user and farm data succeed, mobile = {}, dataSourceId = {}", mobile, dataSourceId);
             return "ok";
         }catch(Exception e){
-            log.error("init user data error:{}", Throwables.getStackTraceAsString(e));
+            log.error("init user data, mobile={}, dataSourceId={}, error:{}", mobile, dataSourceId, Throwables.getStackTraceAsString(e));
             return "error";
         }
     }
@@ -110,9 +112,9 @@ public class UserInit {
                 //初始化服务的申请审批状态
                 RespHelper.or500(doctorServiceReviewWriteService.initServiceReview(userId, mobile));
                 //创建org
-                DoctorOrg org = this.createOrg(member.getFarmName(), mobile, null, null);
+                DoctorOrg org = this.createOrg(member.getFarmName(), mobile, null, member.getFarmOID());
                 //创建staff
-                this.createStaff(member, primaryUser, org);
+                this.createStaff(member, primaryUser, org, member.getOID());
                 //创建猪场
                 for(DoctorFarm farm : farms){
                     farm.setOrgId(org.getId());
@@ -134,7 +136,7 @@ public class UserInit {
         //现在轮到子账号了
         for(View_FarmMember member : list) {
             if(member.getLevels() == 1){
-                this.createSubUser(member, roleId, primaryUser.getId(), mobile, farmIds);
+                this.createSubUser(member, roleId, primaryUser.getId(), mobile, farmIds, member.getOID());
             }
         }
     }
@@ -210,11 +212,12 @@ public class UserInit {
         return org;
     }
 
-    private void createStaff(View_FarmMember member, User user, DoctorOrg org){
+    private void createStaff(View_FarmMember member, User user, DoctorOrg org, String outId){
         DoctorStaff staff = new DoctorStaff();
         staff.setOrgName(org.getName());
         staff.setOrgId(org.getId());
         staff.setUserId(user.getId());
+        staff.setOutId(outId);
         staff.setCreatorId(user.getId());
         staff.setCreatorName(user.getName());
         staff.setUpdatorId(user.getId());
@@ -264,7 +267,7 @@ public class UserInit {
         return roleId;
     }
 
-    private void createSubUser(View_FarmMember member, Map<String, Long> roleIdMap, Long primaryUserId, String primaryUserMobile, List<Long> farmIds){
+    private void createSubUser(View_FarmMember member, Map<String, Long> roleIdMap, Long primaryUserId, String primaryUserMobile, List<Long> farmIds, String staffoutId){
         User subUser = new User();
         subUser.setName(member.getLoginName() + "@" + primaryUserMobile);
         subUser.setPassword("123456");
@@ -280,6 +283,11 @@ public class UserInit {
                 .put("realName", member.getOrganizeName())
                 .map());
         Long subUserId = RespHelper.or500(userWriteService.create(subUser));
+
+        // 给staff 设置下outId, fuck...
+        DoctorStaff staff = doctorStaffDao.findByUserId(subUserId);
+        staff.setOutId(staffoutId);
+        doctorStaffDao.update(staff);
 
         //现在是数据权限
         DoctorUserDataPermission permission = new DoctorUserDataPermission();

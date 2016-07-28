@@ -22,4 +22,8 @@ public class DoctorFarmDao extends MyBatisDao<DoctorFarm> {
     public List<DoctorFarm> findAll() {
         return sqlSession.selectList(sqlId("findAll"));
     }
+
+    public DoctorFarm findByOutId(String outId){
+        return sqlSession.selectOne(sqlId("findByOutId"), outId);
+    }
 }
