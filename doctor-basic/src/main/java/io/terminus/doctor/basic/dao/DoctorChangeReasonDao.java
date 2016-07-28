@@ -3,6 +3,7 @@ package io.terminus.doctor.basic.dao;
 import com.google.common.collect.ImmutableMap;
 import io.terminus.common.mysql.dao.MyBatisDao;
 import io.terminus.doctor.basic.model.DoctorChangeReason;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Repository;
 
 import java.util.HashMap;
@@ -29,7 +30,7 @@ public class DoctorChangeReasonDao extends MyBatisDao<DoctorChangeReason> {
         if(changeTypeId != null){
             param.put("changeTypeId", changeTypeId);
         }
-        if(srm != null){
+        if(StringUtils.isNotBlank(srm)){
             param.put("srm", srm);
         }
         return getSqlSession().selectList(sqlId("findByChangeTypeIdAndSrm"), ImmutableMap.copyOf(param));
