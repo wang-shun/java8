@@ -102,6 +102,8 @@ ALTER TABLE doctor_basics ADD COLUMN `context` VARCHAR(64) DEFAULT NULL COMMENT 
 -- 2016-06-28 doctor_pig_tracks 表增加 pig_type 猪类冗余字段
 ALTER TABLE doctor_pig_tracks ADD COLUMN `pig_type` smallint(6) DEFAULT NULL COMMENT '猪类型(公猪，母猪， 仔猪)' AFTER pig_id;
 
+ALTER TABLE doctor_change_reasons ADD COLUMN `farm_id` bigint(20) DEFAULT NULL COMMENT '猪场id' AFTER id;
+
 -- 2016-07-04 groupEvent表增加更新信息字段
 ALTER TABLE doctor_group_events ADD COLUMN `updated_at` datetime DEFAULT NULL COMMENT '更新时间' AFTER creator_name;
 ALTER TABLE doctor_group_events ADD COLUMN `updator_id` bigint(20) DEFAULT NULL COMMENT '更新人id' AFTER updated_at;
