@@ -65,8 +65,9 @@ public class DoctorMsgRules {
      * @return
      */
     @RequestMapping(value = "/rule/farmId", method = RequestMethod.GET)
-    public List<DoctorMessageRule> listRulesByFarmId(@RequestParam Long farmId,@RequestParam( required = false) String templateName) {
-        return RespHelper.or500(doctorMessageRuleReadService.findMessageRulesByFarmIdAndTemplateName(farmId,templateName));
+    public List<DoctorMessageRule> listRulesByFarmId(@RequestParam Long farmId,
+                                                     @RequestParam(required = false, name = "name") String templateName) {
+        return RespHelper.or500(doctorMessageRuleReadService.findMessageRulesByFarmIdAndTemplateName(farmId, templateName));
     }
 
     /**
