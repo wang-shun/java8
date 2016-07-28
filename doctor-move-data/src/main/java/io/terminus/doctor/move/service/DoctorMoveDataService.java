@@ -13,6 +13,7 @@ import io.terminus.doctor.basic.model.DoctorCustomer;
 import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
+import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.move.handler.DoctorMoveDatasourceHandler;
 import io.terminus.doctor.move.handler.DoctorMoveTableEnum;
@@ -79,24 +80,18 @@ public class DoctorMoveDataService implements CommandLineRunner {
 
             //按照遍历doctor里的基础数据, 如果有缺失的, 就补充进来
             for (Map.Entry<String, List<DoctorBasic>> basic : basicsMap.entrySet()) {
-                List<TB_FieldValue> fieldValues = fieldsMap.get(basic.getKey());
+                //取出基础字段名称
+                List<String> basicNames = basic.getValue().stream().map(DoctorBasic::getName).collect(Collectors.toList());
 
+                List<TB_FieldValue> fieldValues = fieldsMap.get(basic.getKey());
                 if (!notEmpty(fieldValues)) {
                     continue;
                 }
 
-                //猪场里的基础数据存放成map
-                Map<String, TB_FieldValue> fieldMap = Maps.newHashMap();
-                fieldValues.forEach(f -> fieldMap.put(f.getFieldText(), f));
-
-                //字段名字的list
-                List<String> fieldNames = fieldValues.stream().map(TB_FieldValue::getFieldText).collect(Collectors.toList());
-
-                //求差
-                fieldNames.removeAll(basic.getValue().stream().map(DoctorBasic::getName).collect(Collectors.toList()));
-
-                //把求差的结果放到doctor_basics里
-                fieldNames.forEach(fn -> doctorBasicDao.create(getBasic(fieldMap.get(fn))));
+                //把过滤的结果放到doctor_basics里
+                fieldValues.stream()
+                        .filter(field -> !basicNames.contains(field.getFieldText()))
+                        .forEach(fn -> doctorBasicDao.create(getBasic(fn)));
             }
             return Response.ok(Boolean.TRUE);
         } catch (Exception e) {
@@ -115,6 +110,7 @@ public class DoctorMoveDataService implements CommandLineRunner {
         basic.setContext(field.getRemark());
         basic.setOutId(field.getOID());
         basic.setSrm(field.getSrm());
+        basic.setIsValid(IsOrNot.YES.getValue());
         return basic;
     }
 
@@ -280,5 +276,6 @@ public class DoctorMoveDataService implements CommandLineRunner {
     @Override
     public void run(String... strings) throws Exception {
         // Just for test!
+        
     }
 }
