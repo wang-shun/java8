@@ -88,53 +88,15 @@ public class DoctorBasics {
     }
 
     /**
-     * 根据猪场id和变动类型id查询变动原因表
-     * @param farmId 猪场id
+     * 根据变动类型和输入码查询
      * @param changeTypeId 变动类型id
+     * @param srm 不区分大小写模糊匹配
      * @return 变动原因列表
      */
     @RequestMapping(value = "/changeReason/typeId", method = RequestMethod.GET)
-    public List<DoctorChangeReason> findChangeReasonByFarmIdChangeTypeId(@RequestParam("farmId") Long farmId,
-                                                                         @RequestParam("changeTypeId") Long changeTypeId) {
-        return RespHelper.or500(doctorBasicReadService.findChangeReasonByFarmIdAndChangeTypeId(farmId, changeTypeId));
-    }
-
-    /**
-     * 创建或更新DoctorChangeReason
-     * @return 是否成功
-     */
-    @RequestMapping(value = "/changeReason", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public Long createOrUpdateChangeReason(@RequestBody DoctorChangeReason changeReason) {
-        checkNotNull(changeReason, "customer.not.null");
-
-        //权限中心校验权限
-        doctorFarmAuthCenter.checkFarmAuth(changeReason.getFarmId());
-
-        //设置变动类型id
-        if (changeReason.getId() == null) {
-            changeReason.setCreatorId(UserUtil.getUserId());
-            changeReason.setCreatorName(UserUtil.getCurrentUser().getName());
-            RespHelper.or500(doctorBasicWriteService.createChangeReason(changeReason));
-        } else {
-            changeReason.setUpdatorId(UserUtil.getUserId());
-            changeReason.setUpdatorName(UserUtil.getCurrentUser().getName());
-            RespHelper.or500(doctorBasicWriteService.updateChangeReason(changeReason));
-        }
-        return changeReason.getId();
-    }
-
-    /**
-     * 根据主键id删除DoctorChangeReason
-     * @return 是否成功
-     */
-    @RequestMapping(value = "/changeReason", method = RequestMethod.DELETE)
-    public Boolean deleteChangeReason(@RequestParam("changeReasonId") Long changeReasonId) {
-        DoctorChangeReason changeReason = RespHelper.or500(doctorBasicReadService.findChangeReasonById(changeReasonId));
-
-        //权限中心校验权限
-        doctorFarmAuthCenter.checkFarmAuth(changeReason.getFarmId());
-
-        return RespHelper.or500(doctorBasicWriteService.deleteChangeReasonById(changeReasonId));
+    public List<DoctorChangeReason> findChangeReasonByChangeTypeIdAndSrm(@RequestParam("changeTypeId") Long changeTypeId,
+                                                                         @RequestParam(required = false) String srm) {
+        return RespHelper.or500(doctorBasicReadService.findChangeReasonByChangeTypeIdAndSrm(changeTypeId, srm));
     }
 
     /*********************** 猪场客户相关 ************************/

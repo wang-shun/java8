@@ -5,7 +5,9 @@ import io.terminus.common.mysql.dao.MyBatisDao;
 import io.terminus.doctor.basic.model.DoctorChangeReason;
 import org.springframework.stereotype.Repository;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Desc: 变动类型表Dao类
@@ -16,17 +18,20 @@ import java.util.List;
 @Repository
 public class DoctorChangeReasonDao extends MyBatisDao<DoctorChangeReason> {
 
-    public List<DoctorChangeReason> findByFarmId(Long farmId) {
-        return getSqlSession().selectList(sqlId("findByFarmId"), farmId);
-    }
-
     /**
-     * 根据变动类型查询
-     * @param farmId 猪场id
+     * 根据变动类型和输入码查询
      * @param changeTypeId 变动类型id
+     * @param srm 不区分大小写模糊匹配
      * @return 变动原因列表
      */
-    public List<DoctorChangeReason> findByFarmIdChangeTypeId(Long farmId, Long changeTypeId) {
-        return getSqlSession().selectList(sqlId("findByFarmIdChangeTypeId"), ImmutableMap.of("farmId", farmId, "changeTypeId", changeTypeId));
+    public List<DoctorChangeReason> findByChangeTypeIdAndSrm(Long changeTypeId, String srm) {
+        Map<String, Object> param = new HashMap<>();
+        if(changeTypeId != null){
+            param.put("changeTypeId", changeTypeId);
+        }
+        if(srm != null){
+            param.put("srm", srm);
+        }
+        return getSqlSession().selectList(sqlId("findByChangeTypeIdAndSrm"), ImmutableMap.copyOf(param));
     }
 }

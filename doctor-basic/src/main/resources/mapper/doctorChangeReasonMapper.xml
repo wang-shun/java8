@@ -7,7 +7,7 @@
 <mapper namespace="DoctorChangeReason">
     <resultMap id="DoctorChangeReasonMap" type="DoctorChangeReason">
         <id column="id" property="id"/>
-        <result column="farm_id" property="farmId"/>
+        <result column="srm" property="srm"/>
         <result column="change_type_id" property="changeTypeId"/>
         <result column="reason" property="reason"/>
         <result column="out_id" property="outId"/>
@@ -30,11 +30,11 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        farm_id, change_type_id, reason, out_id, extra, creator_id, creator_name, updator_id, updator_name, created_at, updated_at
+        srm, change_type_id, reason, out_id, extra, creator_id, creator_name, updator_id, updator_name, created_at, updated_at
     </sql>
 
     <sql id="vals">
-        #{farmId}, #{changeTypeId}, #{reason}, #{outId}, #{extra}, #{creatorId}, #{creatorName}, #{updatorId}, #{updatorName}, now(), now()
+        #{srm}, #{changeTypeId}, #{reason}, #{outId}, #{extra}, #{creatorId}, #{creatorName}, #{updatorId}, #{updatorName}, now(), now()
     </sql>
 
     <insert id="create" parameterType="DoctorChangeReason" keyProperty="id" useGeneratedKeys="true">
@@ -55,7 +55,7 @@
         UPDATE
         <include refid="tb"/>
         <set>
-            <if test="farmId != null">farm_id = #{farmId},</if>
+            <if test="srm != null">srm = #{srm},</if>
             <if test="changeTypeId != null">change_type_id = #{changeTypeId},</if>
             <if test="reason != null">reason = #{reason},</if>
             <if test="outId != null">out_id = #{outId},</if>
@@ -74,15 +74,16 @@
         WHERE id = #{id}
     </delete>
 
-    <select id="findByFarmIdChangeTypeId" parameterType="map" resultMap="DoctorChangeReasonMap" >
+    <select id="findByChangeTypeIdAndSrm" parameterType="map" resultMap="DoctorChangeReasonMap" >
         SELECT <include refid="cols_all" />
         FROM <include refid="tb" />
-        WHERE farm_id = #{farmId} AND change_type_id = #{changeTypeId}
+        WHERE 1 =1
+        <if test="changeTypeId != null">
+            and change_type_id = #{changeTypeId}
+        </if>
+        <if test="srm != null">
+            and UPPER(srm) like concat('%', UPPER(#{srm}), '%')
+        </if>
     </select>
 
-    <select id="findByFarmId" parameterType="long" resultMap="DoctorChangeReasonMap" >
-        SELECT <include refid="cols_all" />
-        FROM <include refid="tb" />
-        WHERE farm_id = #{farmId}
-    </select>
 </mapper>
