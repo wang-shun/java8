@@ -176,7 +176,7 @@ public class DoctorMoveDataService implements CommandLineRunner {
 
             //查出每个变动下的变动原因, 组装成map
             Map<DoctorBasic, List<DoctorChangeReason>> changeTypeMap = Maps.newHashMap();
-            changeTypes.forEach(type -> changeTypeMap.put(type, doctorChangeReasonDao.findByFarmIdChangeTypeId(0L, type.getId())));
+            changeTypes.forEach(type -> changeTypeMap.put(type, doctorChangeReasonDao.findByChangeTypeIdAndSrm(type.getId(), null)));
 
             //查出猪场软件里的所有变动原因, 并按照变动类型 group by
             Map<String, List<B_ChangeReason>> reasonMap = RespHelper.orServEx(doctorMoveDatasourceHandler
