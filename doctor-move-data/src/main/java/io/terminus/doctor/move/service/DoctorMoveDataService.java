@@ -88,7 +88,7 @@ public class DoctorMoveDataService implements CommandLineRunner {
         try {
             List<DoctorCustomer> customers = RespHelper.orServEx(doctorMoveDatasourceHandler
                     .findAllData(moveId, B_Customer.class, DoctorMoveTableEnum.B_Customer)).stream()
-                    .map(cus -> getCustomer(mockOrg(), mockFarm(), mockUser(), cus))
+                    .map(cus -> getCustomer(mockFarm(), mockUser(), cus))
                     .collect(Collectors.toList());
 
             if (notEmpty(customers)) {
@@ -110,7 +110,7 @@ public class DoctorMoveDataService implements CommandLineRunner {
     public Response<Boolean> moveChangeReason(Long moveId) {
         try {
             List<DoctorChangeReason> reasons = RespHelper.orServEx(doctorMoveDatasourceHandler
-                    .findAllData(moveId, B_ChangeReason.class, DoctorMoveTableEnum.B_ChangeReason)).stream()
+                    .findByHbsSql(moveId, B_ChangeReason.class, "changeReason")).stream()
                     .map(reason -> getReason(mockFarm(), mockUser(), reason))
                     .collect(Collectors.toList());
 
@@ -141,7 +141,7 @@ public class DoctorMoveDataService implements CommandLineRunner {
     }
 
     //拼接客户
-    private DoctorCustomer getCustomer(DoctorOrg org, DoctorFarm farm, DoctorUser user, B_Customer cus) {
+    private DoctorCustomer getCustomer(DoctorFarm farm, DoctorUser user, B_Customer cus) {
         DoctorCustomer customer = new DoctorCustomer();
         customer.setName(cus.getCustomerName());
         customer.setFarmId(farm.getId());
@@ -198,6 +198,6 @@ public class DoctorMoveDataService implements CommandLineRunner {
     @Override
     public void run(String... strings) throws Exception {
         // Just for test!
-        moveChangeReason(1L);
+        
     }
 }
