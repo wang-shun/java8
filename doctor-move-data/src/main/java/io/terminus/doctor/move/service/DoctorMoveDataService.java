@@ -1,6 +1,8 @@
 package io.terminus.doctor.move.service;
 
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Throwables;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.Response;
@@ -17,13 +19,17 @@ import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorGroupDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
+import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorGroup;
+import io.terminus.doctor.event.model.DoctorGroupEvent;
+import io.terminus.doctor.event.model.DoctorGroupTrack;
 import io.terminus.doctor.move.handler.DoctorMoveDatasourceHandler;
 import io.terminus.doctor.move.handler.DoctorMoveTableEnum;
 import io.terminus.doctor.move.model.B_ChangeReason;
 import io.terminus.doctor.move.model.B_Customer;
+import io.terminus.doctor.move.model.Proc_InventoryGain;
 import io.terminus.doctor.move.model.TB_FieldValue;
 import io.terminus.doctor.move.model.View_GainCardList;
 import io.terminus.doctor.move.model.View_PigLocationList;
@@ -34,11 +40,13 @@ import io.terminus.doctor.user.model.DoctorUser;
 import io.terminus.parana.user.impl.dao.UserProfileDao;
 import io.terminus.parana.user.model.UserProfile;
 import lombok.extern.slf4j.Slf4j;
+import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -249,9 +257,20 @@ public class DoctorMoveDataService implements CommandLineRunner {
                     .map(gain -> getGroup(mockOrg(), mockFarm(), gain, barnMap, basicMap, staffMap)).collect(Collectors.toList());
 
             //2. 迁移DoctorGroupEvent
-            
+            Map<Long, List<DoctorGroupEvent>> eventMap = Maps.newHashMap();
 
             //3. 迁移DoctorTrack
+            //统计结果转换成map
+            Map<String, Proc_InventoryGain> gainMap = RespHelper.orServEx(doctorMoveDatasourceHandler
+                    .findByHbsSql(moveId, Proc_InventoryGain.class, "DoctorGroupTrack-Proc_InventoryGain.hbs", ImmutableMap.of("date", new Date()))).stream()
+                    .filter(f -> true) // TODO: 16/7/28 多个猪场注意过滤outId
+                    .collect(Collectors.toMap(Proc_InventoryGain::getGroupOutId, v -> v));
+
+            List<DoctorGroupTrack> groupTracks = groups.stream()
+                    .map(group -> getGroupTrack(group, gainMap.get(group.getOutId()), eventMap.get(group.getId())))
+                    .collect(Collectors.toList());
+
+
 
             return Response.ok(Boolean.TRUE);
         } catch (ServiceException e) {
@@ -260,6 +279,55 @@ public class DoctorMoveDataService implements CommandLineRunner {
             log.error("move group failed, moveId:{}, cause:{}", moveId, Throwables.getStackTraceAsString(e));
             return Response.fail("move.group.fail");
         }
+    }
+
+    //拼接猪群跟踪
+    private DoctorGroupTrack getGroupTrack(DoctorGroup group, Proc_InventoryGain gain, List<DoctorGroupEvent> events) {
+        DoctorGroupTrack groupTrack = new DoctorGroupTrack();
+        groupTrack.setGroupId(group.getId());
+        groupTrack.setSex(DoctorGroupTrack.Sex.MIX.getValue());
+
+        //如果猪群已经关闭, 大部分的统计值可以置成0
+        if (Objects.equals(group.getStatus(), DoctorGroup.Status.CLOSED.getValue())) {
+            return getCloseGroupTrack(groupTrack, events);
+        }
+
+        //未关闭的猪群, 拼接
+        groupTrack.setQuantity(MoreObjects.firstNonNull(gain.getQuantity(), 0));
+        groupTrack.setBoarQty(gain.getQuantity() / 2);
+        groupTrack.setSowQty(groupTrack.getQuantity() - groupTrack.getBoarQty());
+        groupTrack.setAvgDayAge(gain.getAvgDayAge());
+        groupTrack.setBirthDate(DateTime.now().minusDays(groupTrack.getAvgDayAge()).toDate());
+        groupTrack.setAvgWeight(MoreObjects.firstNonNull(gain.getAvgWeight(), 0D));
+        groupTrack.setWeight(groupTrack.getAvgWeight() * groupTrack.getQuantity());
+//        groupTrack.setRelEventId();
+//        groupTrack.setPrice();
+//        groupTrack.setAmount();
+//        groupTrack.setCustomerId();
+//        groupTrack.setCustomerName();
+//        groupTrack.setSaleQty();
+//        groupTrack.setExtra();
+//        groupTrack.setExtraEntity();
+        return groupTrack;
+    }
+
+    //关闭猪群的猪群跟踪
+    private DoctorGroupTrack getCloseGroupTrack(DoctorGroupTrack groupTrack, List<DoctorGroupEvent> events) {
+        DoctorGroupEvent closeEvent = events.stream().filter(e -> Objects.equals(GroupEventType.CLOSE.getValue(), e.getType())).findFirst().orElse(null);
+        if (closeEvent != null) {
+            groupTrack.setRelEventId(closeEvent.getId());
+        }
+        groupTrack.setQuantity(0);
+        groupTrack.setBoarQty(0);
+        groupTrack.setSowQty(0);
+        groupTrack.setAvgDayAge(0);
+        groupTrack.setBirthDate(DateTime.now().toDate());
+        groupTrack.setAvgWeight(0D);
+        groupTrack.setWeight(0D);
+        groupTrack.setPrice(0L);
+        groupTrack.setAmount(0L);
+        groupTrack.setSaleQty(0);
+        return groupTrack;
     }
 
     //拼接猪群

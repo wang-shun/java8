@@ -45,7 +45,7 @@ public class DoctorMoveDatasourceHandler {
     }
 
     /**
-     * 查询基础数据
+     * 查询猪场软件(SqlServer)基础数据
      * @param id 数据源id
      * @return 基础数据
      */
@@ -68,21 +68,39 @@ public class DoctorMoveDatasourceHandler {
         }
     }
 
+    /**
+     * 查询猪场软件(SqlServer)基础数据
+     * @param id       数据源id
+     * @param clazz    返回的类型
+     * @param hbsName  sql文件名称
+     * @return  sql执行结果
+     */
     public <T> Response<List<T>> findByHbsSql(Long id, Class<T> clazz, String hbsName) {
+        return findByHbsSql(id, clazz, hbsName, null);
+    }
+
+    /**
+     * 查询猪场软件(SqlServer)基础数据
+     * @param id       数据源id
+     * @param clazz    返回的类型
+     * @param hbsName  sql文件名称
+     * @param params   hbs参数
+     * @return  sql执行结果
+     */
+    public <T> Response<List<T>> findByHbsSql(Long id, Class<T> clazz, String hbsName, Map<String, Object> params) {
         try {
             JdbcTemplate jdbcTemplate = jdbcMap.get(id);
             if (jdbcTemplate == null) {
                 return Response.fail("jdbc.not.found");
             }
 
-            List<Map<String, Object>> map = jdbcTemplate.queryForList(doctorSqlFactory.getSql(hbsName, null));
+            List<Map<String, Object>> map = jdbcTemplate.queryForList(doctorSqlFactory.getSql(hbsName, params));
             return Response.ok(BeanMapper.mapList(map, clazz));
         } catch (Exception e) {
             log.error("find all data failed, id:{}, clazz:{}, cause:{}", id, clazz, Throwables.getStackTraceAsString(e));
             return Response.fail("move.data.find.by.sql.fail");
         }
     }
-
 
     //获取JdbcTemplate
     private JdbcTemplate getJdbcTempalte(DoctorMoveDatasource db){
