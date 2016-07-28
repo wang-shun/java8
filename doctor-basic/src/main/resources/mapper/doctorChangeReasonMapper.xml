@@ -7,9 +7,9 @@
 <mapper namespace="DoctorChangeReason">
     <resultMap id="DoctorChangeReasonMap" type="DoctorChangeReason">
         <id column="id" property="id"/>
-        <result column="srm" property="srm"/>
         <result column="change_type_id" property="changeTypeId"/>
         <result column="reason" property="reason"/>
+        <result column="srm" property="srm"/>
         <result column="out_id" property="outId"/>
         <result column="extra" property="extra"/>
         <result column="creator_id" property="creatorId"/>
@@ -30,11 +30,11 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        srm, change_type_id, reason, out_id, extra, creator_id, creator_name, updator_id, updator_name, created_at, updated_at
+        change_type_id, reason, srm, out_id, extra, creator_id, creator_name, updator_id, updator_name, created_at, updated_at
     </sql>
 
     <sql id="vals">
-        #{srm}, #{changeTypeId}, #{reason}, #{outId}, #{extra}, #{creatorId}, #{creatorName}, #{updatorId}, #{updatorName}, now(), now()
+        #{changeTypeId}, #{reason}, #{srm}, #{outId}, #{extra}, #{creatorId}, #{creatorName}, #{updatorId}, #{updatorName}, now(), now()
     </sql>
 
     <insert id="create" parameterType="DoctorChangeReason" keyProperty="id" useGeneratedKeys="true">
@@ -55,9 +55,9 @@
         UPDATE
         <include refid="tb"/>
         <set>
-            <if test="srm != null">srm = #{srm},</if>
             <if test="changeTypeId != null">change_type_id = #{changeTypeId},</if>
             <if test="reason != null">reason = #{reason},</if>
+            <if test="srm != null">srm = #{srm},</if>
             <if test="outId != null">out_id = #{outId},</if>
             <if test="extra != null">extra = #{extra},</if>
             <if test="creatorId != null">creator_id = #{creatorId},</if>
@@ -85,25 +85,5 @@
             and UPPER(srm) like concat('%', UPPER(#{srm}), '%')
         </if>
     </select>
-
-    <insert id="creates" parameterType="list">
-        INSERT INTO <include refid="tb" />
-        (<include refid="cols_exclude_id" />)
-        VALUES
-        <foreach collection="list" separator="," item="item">
-            (
-            #{item.farmId},
-            #{item.changeTypeId},
-            #{item.reason},
-            #{item.outId},
-            #{item.extra},
-            #{item.creatorId},
-            #{item.creatorName},
-            #{item.updatorId},
-            #{item.updatorName},
-            now(),
-            now()
-            )
-        </foreach>
-    </insert>
+    
 </mapper>

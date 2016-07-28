@@ -99,10 +99,10 @@ CREATE TABLE `doctor_basics` (
 ALTER TABLE doctor_basics ADD COLUMN `is_valid` smallint(6) DEFAULT NULL COMMENT '逻辑删除字段, -1 表示删除' AFTER type_name;
 ALTER TABLE doctor_basics ADD COLUMN `context` VARCHAR(64) DEFAULT NULL COMMENT '基础数据内容' AFTER srm;
 
-ALTER TABLE doctor_change_reasons ADD COLUMN `srm` VARCHAR(20) DEFAULT NULL COMMENT 'reason字段的输入码' AFTER reason;
-
 -- 2016-06-28 doctor_pig_tracks 表增加 pig_type 猪类冗余字段
 ALTER TABLE doctor_pig_tracks ADD COLUMN `pig_type` smallint(6) DEFAULT NULL COMMENT '猪类型(公猪，母猪， 仔猪)' AFTER pig_id;
+
+ALTER TABLE doctor_change_reasons ADD COLUMN `farm_id` bigint(20) DEFAULT NULL COMMENT '猪场id' AFTER id;
 
 -- 2016-07-04 groupEvent表增加更新信息字段
 ALTER TABLE doctor_group_events ADD COLUMN `updated_at` datetime DEFAULT NULL COMMENT '更新时间' AFTER creator_name;
@@ -166,3 +166,8 @@ CREATE TABLE `doctor_move_datasource` (
 INSERT INTO `doctor_move_datasource` (`id`, `name`, `username`, `password`, `driver`, `url`)
 VALUES
 	(1, '灵宝融利', 'sa', 'pigmall', 'net.sourceforge.jtds.jdbc.Driver', 'jdbc:jtds:sqlserver://101.201.146.171:1433/lbrl;tds=8.0;lastupdatecount=true');
+
+
+-- 2016-07-28 变动原因删除farm_id, 增加srm列
+ALTER TABLE doctor_change_reasons DROP COLUMN farm_id;
+ALTER TABLE doctor_change_reasons ADD COLUMN `srm` VARCHAR(64) DEFAULT NULL COMMENT 'reason字段的输入码' AFTER reason;
