@@ -11,29 +11,16 @@ import java.util.Date;
 @Data
 public class View_GainCardList implements Serializable{
     private static final long serialVersionUID = 5256246992598006428L;
-    private String OID;
-    private Date GainOpenDate;
-    private String Status;
-    private String FarmOID;
-    private String PigID;
-    private String InitLocation;
-    private String Sex;
-    private String Breed;
-    private String Genetic;
-    private String Remark;
-    private Integer MaximumMarketingAge;
-    private String Location;
-    private String GainCloseDate;
-    private String EventOID;
-    private String ProductionStage;
-    private Double Weight;
-    private String Srm;
-    private String MngByPig;
-    private String FarmOIDText;
-    private String LocationCaption;
-    private String LocationTypeOID;
-    private String LocationTypeName;
-    private String StaffName;
-    private String PigTypeOID;
-    private String TypeName;
+    private String outId;
+    private Date openAt;
+    private Date closeAt;
+    private Integer status;      //转换后的状态 1 -1
+    private String farmOutId;
+    private String groupCode;
+    private Integer sex;         //转换后的性别 0 1 2
+    private String breedName;
+    private String geneticName;
+    private String remark;
+    private String barnOutId;
+    private String staffName;
 }

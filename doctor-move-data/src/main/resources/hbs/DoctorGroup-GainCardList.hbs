@@ -1,0 +1,15 @@
+-- 查询DoctorGroup需要的字段
+SELECT
+    OID AS outId,
+    GainOpenDate AS openAt,
+    CASE WHEN GainCloseDate IS NULL THEN GETDATE() ELSE CONVERT(VARCHAR(100), gainclosedate, 20) END AS closeAt,
+    CASE Status WHEN '已建群' THEN '1' ELSE '-1' END AS status,
+    FarmOID AS farmOutId,
+    PigID AS groupCode,
+    CASE sex WHEN '混合' THEN '2' WHEN '母猪' THEN '0' ELSE '1' END AS sex,
+    Breed as breedName,
+    Genetic as geneticName,
+    Remark as remark,
+    Location as barnOutId,
+    StaffName as staffName
+FROM view_GainCardList

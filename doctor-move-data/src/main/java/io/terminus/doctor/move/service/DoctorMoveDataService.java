@@ -4,6 +4,7 @@ import com.google.common.base.Throwables;
 import com.google.common.collect.Maps;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.Response;
+import io.terminus.common.utils.BeanMapper;
 import io.terminus.doctor.basic.dao.DoctorBasicDao;
 import io.terminus.doctor.basic.dao.DoctorChangeReasonDao;
 import io.terminus.doctor.basic.dao.DoctorCustomerDao;
@@ -15,15 +16,20 @@ import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.model.DoctorBarn;
+import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.move.handler.DoctorMoveDatasourceHandler;
 import io.terminus.doctor.move.handler.DoctorMoveTableEnum;
 import io.terminus.doctor.move.model.B_ChangeReason;
 import io.terminus.doctor.move.model.B_Customer;
 import io.terminus.doctor.move.model.TB_FieldValue;
+import io.terminus.doctor.move.model.View_GainCardList;
 import io.terminus.doctor.move.model.View_PigLocationList;
+import io.terminus.doctor.user.dao.DoctorStaffDao;
 import io.terminus.doctor.user.model.DoctorFarm;
 import io.terminus.doctor.user.model.DoctorOrg;
 import io.terminus.doctor.user.model.DoctorUser;
+import io.terminus.parana.user.impl.dao.UserProfileDao;
+import io.terminus.parana.user.model.UserProfile;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
@@ -38,7 +44,7 @@ import java.util.stream.Collectors;
 import static io.terminus.common.utils.Arguments.notEmpty;
 
 /**
- * Desc: 迁移数据, 注意如果一个数据源有多个猪场的情况!!!
+ * Desc: 迁移数据, TODO: 注意如果一个数据源有多个猪场的情况!!!
  * Mail: yangzl@terminus.io
  * author: DreamYoung
  * Date: 16/7/27
@@ -52,18 +58,24 @@ public class DoctorMoveDataService implements CommandLineRunner {
     private final DoctorCustomerDao doctorCustomerDao;
     private final DoctorChangeReasonDao doctorChangeReasonDao;
     private final DoctorBasicDao doctorBasicDao;
+    private final DoctorStaffDao doctorStaffDao;
+    private final UserProfileDao userProfileDao;
 
     @Autowired
     public DoctorMoveDataService(DoctorMoveDatasourceHandler doctorMoveDatasourceHandler,
                                  DoctorBarnDao doctorBarnDao,
                                  DoctorCustomerDao doctorCustomerDao,
                                  DoctorChangeReasonDao doctorChangeReasonDao,
-                                 DoctorBasicDao doctorBasicDao) {
+                                 DoctorBasicDao doctorBasicDao,
+                                 DoctorStaffDao doctorStaffDao,
+                                 UserProfileDao userProfileDao) {
         this.doctorMoveDatasourceHandler = doctorMoveDatasourceHandler;
         this.doctorBarnDao = doctorBarnDao;
         this.doctorCustomerDao = doctorCustomerDao;
         this.doctorChangeReasonDao = doctorChangeReasonDao;
         this.doctorBasicDao = doctorBasicDao;
+        this.doctorStaffDao = doctorStaffDao;
+        this.userProfileDao = userProfileDao;
     }
 
     /**
@@ -123,6 +135,7 @@ public class DoctorMoveDataService implements CommandLineRunner {
             List<DoctorBarn> barns = RespHelper.orServEx(doctorMoveDatasourceHandler
                     .findAllData(moveId, View_PigLocationList.class, DoctorMoveTableEnum.view_PigLocationList)).stream()
                     .filter(loc -> isFarm(loc.getFarmOID(), mockFarm().getOutId()))     //这一步很重要, 如果一个公司有多个猪场, 猪场id必须匹配!
+                    .filter(f -> true) // TODO: 16/7/28 多个猪场注意过滤outId
                     .map(location -> getBarn(mockOrg(), mockFarm(), mockUser(), location))
                     .collect(Collectors.toList());
 
@@ -146,6 +159,7 @@ public class DoctorMoveDataService implements CommandLineRunner {
         try {
             List<DoctorCustomer> customers = RespHelper.orServEx(doctorMoveDatasourceHandler
                     .findAllData(moveId, B_Customer.class, DoctorMoveTableEnum.B_Customer)).stream()
+                    .filter(f -> true) // TODO: 16/7/28 多个猪场注意过滤outId
                     .map(cus -> getCustomer(mockFarm(), mockUser(), cus))
                     .collect(Collectors.toList());
 
@@ -202,6 +216,92 @@ public class DoctorMoveDataService implements CommandLineRunner {
             log.error("move customer failed, moveId:{}, cause:{}", moveId, Throwables.getStackTraceAsString(e));
             return Response.fail("move.customer.fail");
         }
+    }
+
+    /**
+     * 迁移猪群
+     */
+    @Transactional
+    public Response<Boolean> moveGroup(Long moveId) {
+        try {
+            //0. 基础数据准备: barn, basic, staff
+            Map<String, DoctorBarn> barnMap = doctorBarnDao.findByFarmId(mockFarm().getId()).stream()
+                    .collect(Collectors.toMap(DoctorBarn::getOutId, v -> v));
+            Map<Integer, Map<String, Long>> basicMap = getBasicMap();
+            Map<String, Long> staffMap = getStaffName(mockOrg().getId());
+
+            //1. 迁移DoctorGroup
+            List<DoctorGroup> groups = RespHelper.orServEx(doctorMoveDatasourceHandler
+                    .findByHbsSql(moveId, View_GainCardList.class, "DoctorGroup-GainCardList")).stream()
+                    .filter(f -> true) // TODO: 16/7/28 多个猪场注意过滤outId
+                    .map(gain -> getGroup(mockOrg(), mockFarm(), gain, barnMap, basicMap, staffMap)).collect(Collectors.toList());
+
+            //2. 迁移DoctorGroupEvent
+
+            //3. 迁移DoctorTrack
+
+            return Response.ok(Boolean.TRUE);
+        } catch (ServiceException e) {
+            return Response.fail(e.getMessage());
+        } catch (Exception e) {
+            log.error("move group failed, moveId:{}, cause:{}", moveId, Throwables.getStackTraceAsString(e));
+            return Response.fail("move.group.fail");
+        }
+    }
+
+    //拼接猪群
+    private DoctorGroup getGroup(DoctorOrg org, DoctorFarm farm, View_GainCardList gain,
+                                 Map<String, DoctorBarn> barnMap, Map<Integer, Map<String, Long>> basicMap, Map<String, Long> staffMap) {
+        DoctorGroup group = BeanMapper.map(gain, DoctorGroup.class);
+
+        group.setOrgId(org.getId());
+        group.setOrgName(org.getName());
+        group.setFarmId(farm.getId());
+        group.setFarmName(farm.getName());
+
+        //猪舍
+        DoctorBarn barn = barnMap.get(gain.getBarnOutId());
+        if (barn != null) {
+            group.setInitBarnId(barn.getId());
+            group.setInitBarnName(barn.getName());
+            group.setCurrentBarnId(barn.getId());
+            group.setCurrentBarnName(barn.getName());
+            group.setPigType(barn.getPigType());
+        }
+        //品种
+        if (notEmpty(gain.getBreedName())) {
+            group.setBreedId(basicMap.get(DoctorBasic.Type.BREED.getValue()).get(gain.getBreedName()));
+        }
+        //品系
+        if (notEmpty(gain.getGeneticName())) {
+            group.setGeneticId(basicMap.get(DoctorBasic.Type.GENETICS.getValue()).get(gain.getGeneticName()));
+        }
+        if (notEmpty(gain.getStaffName())) {
+            group.setStaffId(staffMap.get(gain.getStaffName()));
+        }
+        return group;
+    }
+
+    //分别是 Map<DoctorBasic.TypeEnum, Map<DoctorBasic.name, DoctorBasic.id>>
+    private Map<Integer, Map<String, Long>> getBasicMap() {
+        Map<Integer, Map<String, Long>> basicMap = Maps.newHashMap();
+        doctorBasicDao.listAll().stream()
+                .collect(Collectors.groupingBy(DoctorBasic::getType)).entrySet()
+                .forEach(basic -> basicMap.put(basic.getKey(),
+                        basic.getValue().stream().collect(Collectors.toMap(DoctorBasic::getName, DoctorBasic::getId))));
+        return basicMap;
+    }
+
+    //拼接staff,  Map<真实姓名, DoctorStaff>
+    public Map<String, Long> getStaffName(Long orgId) {
+        Map<String, Long> staffMap = Maps.newHashMap();
+        doctorStaffDao.findByOrgId(orgId).forEach(staff -> {
+            UserProfile profile = userProfileDao.findByUserId(staff.getUserId());
+            if (profile != null && notEmpty(profile.getRealName())) {
+                staffMap.put(profile.getRealName(), staff.getId());
+            }
+        });
+        return staffMap;
     }
 
     //拼接变动原因
@@ -276,6 +376,6 @@ public class DoctorMoveDataService implements CommandLineRunner {
     @Override
     public void run(String... strings) throws Exception {
         // Just for test!
-        
+
     }
 }
