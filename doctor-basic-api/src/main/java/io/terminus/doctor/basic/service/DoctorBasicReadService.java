@@ -54,11 +54,13 @@ public interface DoctorBasicReadService {
     Response<DoctorChangeReason> findChangeReasonById(@NotNull(message = "changeReasonId.not.null") Long changeReasonId);
 
     /**
-     * 根据变动类型id查询变动原因表
+     * 根据变动类型和输入码查询
      * @param changeTypeId 变动类型id
+     * @param srm 不区分大小写模糊匹配
      * @return 变动原因列表
      */
-    Response<List<DoctorChangeReason>> findChangeReasonByChangeTypeId(@NotNull(message = "changeTypeId.not.null") Long changeTypeId);
+    Response<List<DoctorChangeReason>> findChangeReasonByChangeTypeIdAndSrm(@NotNull(message = "changeTypeId.not.null") Long changeTypeId,
+                                                                            String srm);
 
 
     //////////////////////////// 猪场客户相关 ////////////////////////////

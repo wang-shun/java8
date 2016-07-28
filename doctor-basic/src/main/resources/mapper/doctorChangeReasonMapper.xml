@@ -74,15 +74,16 @@
         WHERE id = #{id}
     </delete>
 
-    <select id="findByChangeTypeId" parameterType="Long" resultMap="DoctorChangeReasonMap" >
+    <select id="findByChangeTypeIdAndSrm" parameterType="map" resultMap="DoctorChangeReasonMap" >
         SELECT <include refid="cols_all" />
         FROM <include refid="tb" />
-        WHERE change_type_id = #{changeTypeId}
+        WHERE 1 =1
+        <if test="changeTypeId != null">
+            and change_type_id = #{changeTypeId}
+        </if>
+        <if test="srm != null">
+            and UPPER(srm) like concat('%', UPPER(#{srm}), '%')
+        </if>
     </select>
 
-    <select id="findBySrm" parameterType="string" resultMap="DoctorChangeReasonMap" >
-        SELECT <include refid="cols_all" />
-        FROM <include refid="tb" />
-        WHERE srm like concat('%', #{srm}, '%')
-    </select>
 </mapper>

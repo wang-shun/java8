@@ -17,15 +17,12 @@ import java.util.List;
 public class DoctorChangeReasonDao extends MyBatisDao<DoctorChangeReason> {
 
     /**
-     * 根据变动类型查询
+     * 根据变动类型和输入码查询
      * @param changeTypeId 变动类型id
+     * @param srm 不区分大小写模糊匹配
      * @return 变动原因列表
      */
-    public List<DoctorChangeReason> findByChangeTypeId(Long changeTypeId) {
-        return getSqlSession().selectList(sqlId("findByChangeTypeId"), changeTypeId);
-    }
-
-    public List<DoctorChangeReason> findBySrm(String srm) {
-        return getSqlSession().selectList(sqlId("findBySrm"), srm);
+    public List<DoctorChangeReason> findByChangeTypeIdAndSrm(Long changeTypeId, String srm) {
+        return getSqlSession().selectList(sqlId("findByChangeTypeIdAndSrm"), ImmutableMap.of("changeTypeId", changeTypeId, "srm", srm));
     }
 }

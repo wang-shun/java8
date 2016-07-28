@@ -88,13 +88,15 @@ public class DoctorBasics {
     }
 
     /**
-     * 根据变动类型id查询变动原因表
+     * 根据变动类型和输入码查询
      * @param changeTypeId 变动类型id
+     * @param srm 不区分大小写模糊匹配
      * @return 变动原因列表
      */
     @RequestMapping(value = "/changeReason/typeId", method = RequestMethod.GET)
-    public List<DoctorChangeReason> findChangeReasonByChangeTypeId(@RequestParam("changeTypeId") Long changeTypeId) {
-        return RespHelper.or500(doctorBasicReadService.findChangeReasonByChangeTypeId(changeTypeId));
+    public List<DoctorChangeReason> findChangeReasonByChangeTypeIdAndSrm(@RequestParam("changeTypeId") Long changeTypeId,
+                                                                         @RequestParam(required = false) String srm) {
+        return RespHelper.or500(doctorBasicReadService.findChangeReasonByChangeTypeIdAndSrm(changeTypeId, srm));
     }
 
     /*********************** 猪场客户相关 ************************/
