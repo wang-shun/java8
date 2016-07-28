@@ -5,7 +5,9 @@ import io.terminus.common.mysql.dao.MyBatisDao;
 import io.terminus.doctor.basic.model.DoctorChangeReason;
 import org.springframework.stereotype.Repository;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Desc: 变动类型表Dao类
@@ -23,6 +25,13 @@ public class DoctorChangeReasonDao extends MyBatisDao<DoctorChangeReason> {
      * @return 变动原因列表
      */
     public List<DoctorChangeReason> findByChangeTypeIdAndSrm(Long changeTypeId, String srm) {
-        return getSqlSession().selectList(sqlId("findByChangeTypeIdAndSrm"), ImmutableMap.of("changeTypeId", changeTypeId, "srm", srm));
+        Map<String, Object> param = new HashMap<>();
+        if(changeTypeId != null){
+            param.put("changeTypeId", changeTypeId);
+        }
+        if(srm != null){
+            param.put("srm", srm);
+        }
+        return getSqlSession().selectList(sqlId("findByChangeTypeIdAndSrm"), ImmutableMap.copyOf(param));
     }
 }
