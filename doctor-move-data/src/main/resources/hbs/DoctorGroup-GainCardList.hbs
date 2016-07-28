@@ -7,8 +7,8 @@ SELECT
     FarmOID AS farmOutId,
     PigID AS groupCode,
     CASE sex WHEN '混合' THEN '2' WHEN '母猪' THEN '0' ELSE '1' END AS sex,
-    Breed as breedName,
-    Genetic as geneticName,
+    Breed as breed,
+    Genetic as genetic,
     Remark as remark,
     Location as barnOutId,
     StaffName as staffName

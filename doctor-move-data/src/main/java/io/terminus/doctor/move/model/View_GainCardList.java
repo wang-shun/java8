@@ -18,8 +18,8 @@ public class View_GainCardList implements Serializable{
     private String farmOutId;
     private String groupCode;
     private Integer sex;         //转换后的性别 0 1 2
-    private String breedName;
-    private String geneticName;
+    private String breed;
+    private String genetic;
     private String remark;
     private String barnOutId;
     private String staffName;

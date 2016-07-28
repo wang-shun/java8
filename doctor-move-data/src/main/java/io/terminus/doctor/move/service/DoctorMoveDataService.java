@@ -14,6 +14,9 @@ import io.terminus.doctor.basic.model.DoctorCustomer;
 import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
+import io.terminus.doctor.event.dao.DoctorGroupDao;
+import io.terminus.doctor.event.dao.DoctorGroupEventDao;
+import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
 import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorGroup;
@@ -60,6 +63,9 @@ public class DoctorMoveDataService implements CommandLineRunner {
     private final DoctorBasicDao doctorBasicDao;
     private final DoctorStaffDao doctorStaffDao;
     private final UserProfileDao userProfileDao;
+    private final DoctorGroupDao doctorGroupDao;
+    private final DoctorGroupEventDao doctorGroupEventDao;
+    private final DoctorGroupTrackDao doctorGroupTrackDao;
 
     @Autowired
     public DoctorMoveDataService(DoctorMoveDatasourceHandler doctorMoveDatasourceHandler,
@@ -68,7 +74,10 @@ public class DoctorMoveDataService implements CommandLineRunner {
                                  DoctorChangeReasonDao doctorChangeReasonDao,
                                  DoctorBasicDao doctorBasicDao,
                                  DoctorStaffDao doctorStaffDao,
-                                 UserProfileDao userProfileDao) {
+                                 UserProfileDao userProfileDao,
+                                 DoctorGroupDao doctorGroupDao,
+                                 DoctorGroupEventDao doctorGroupEventDao,
+                                 DoctorGroupTrackDao doctorGroupTrackDao) {
         this.doctorMoveDatasourceHandler = doctorMoveDatasourceHandler;
         this.doctorBarnDao = doctorBarnDao;
         this.doctorCustomerDao = doctorCustomerDao;
@@ -76,6 +85,9 @@ public class DoctorMoveDataService implements CommandLineRunner {
         this.doctorBasicDao = doctorBasicDao;
         this.doctorStaffDao = doctorStaffDao;
         this.userProfileDao = userProfileDao;
+        this.doctorGroupDao = doctorGroupDao;
+        this.doctorGroupEventDao = doctorGroupEventDao;
+        this.doctorGroupTrackDao = doctorGroupTrackDao;
     }
 
     /**
@@ -227,7 +239,7 @@ public class DoctorMoveDataService implements CommandLineRunner {
             //0. 基础数据准备: barn, basic, staff
             Map<String, DoctorBarn> barnMap = doctorBarnDao.findByFarmId(mockFarm().getId()).stream()
                     .collect(Collectors.toMap(DoctorBarn::getOutId, v -> v));
-            Map<Integer, Map<String, Long>> basicMap = getBasicMap();
+            Map<Integer, Map<String, DoctorBasic>> basicMap = getBasicMap();
             Map<String, Long> staffMap = getStaffName(mockOrg().getId());
 
             //1. 迁移DoctorGroup
@@ -237,6 +249,7 @@ public class DoctorMoveDataService implements CommandLineRunner {
                     .map(gain -> getGroup(mockOrg(), mockFarm(), gain, barnMap, basicMap, staffMap)).collect(Collectors.toList());
 
             //2. 迁移DoctorGroupEvent
+            
 
             //3. 迁移DoctorTrack
 
@@ -251,7 +264,7 @@ public class DoctorMoveDataService implements CommandLineRunner {
 
     //拼接猪群
     private DoctorGroup getGroup(DoctorOrg org, DoctorFarm farm, View_GainCardList gain,
-                                 Map<String, DoctorBarn> barnMap, Map<Integer, Map<String, Long>> basicMap, Map<String, Long> staffMap) {
+                                 Map<String, DoctorBarn> barnMap, Map<Integer, Map<String, DoctorBasic>> basicMap, Map<String, Long> staffMap) {
         DoctorGroup group = BeanMapper.map(gain, DoctorGroup.class);
 
         group.setOrgId(org.getId());
@@ -269,12 +282,16 @@ public class DoctorMoveDataService implements CommandLineRunner {
             group.setPigType(barn.getPigType());
         }
         //品种
-        if (notEmpty(gain.getBreedName())) {
-            group.setBreedId(basicMap.get(DoctorBasic.Type.BREED.getValue()).get(gain.getBreedName()));
+        if (notEmpty(gain.getBreed())) {
+            DoctorBasic breed = basicMap.get(DoctorBasic.Type.BREED.getValue()).get(gain.getBreed());
+            group.setBreedId(breed.getId());
+            group.setBreedName(breed.getName());
         }
         //品系
-        if (notEmpty(gain.getGeneticName())) {
-            group.setGeneticId(basicMap.get(DoctorBasic.Type.GENETICS.getValue()).get(gain.getGeneticName()));
+        if (notEmpty(gain.getGenetic())) {
+            DoctorBasic gene = basicMap.get(DoctorBasic.Type.GENETICS.getValue()).get(gain.getGenetic());
+            group.setGeneticId(gene.getId());
+            group.setGeneticName(gene.getName());
         }
         if (notEmpty(gain.getStaffName())) {
             group.setStaffId(staffMap.get(gain.getStaffName()));
@@ -282,13 +299,13 @@ public class DoctorMoveDataService implements CommandLineRunner {
         return group;
     }
 
-    //分别是 Map<DoctorBasic.TypeEnum, Map<DoctorBasic.name, DoctorBasic.id>>
-    private Map<Integer, Map<String, Long>> getBasicMap() {
-        Map<Integer, Map<String, Long>> basicMap = Maps.newHashMap();
+    //分别是 Map<DoctorBasic.TypeEnum, Map<DoctorBasic.name, DoctorBasic>>
+    private Map<Integer, Map<String, DoctorBasic>> getBasicMap() {
+        Map<Integer, Map<String, DoctorBasic>> basicMap = Maps.newHashMap();
         doctorBasicDao.listAll().stream()
                 .collect(Collectors.groupingBy(DoctorBasic::getType)).entrySet()
                 .forEach(basic -> basicMap.put(basic.getKey(),
-                        basic.getValue().stream().collect(Collectors.toMap(DoctorBasic::getName, DoctorBasic::getId))));
+                        basic.getValue().stream().collect(Collectors.toMap(DoctorBasic::getName, v -> v))));
         return basicMap;
     }
 

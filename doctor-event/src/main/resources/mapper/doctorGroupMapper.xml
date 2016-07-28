@@ -178,4 +178,44 @@
             <include refid="criteria"/>
         </where>
     </select>
+
+    <insert id="creates" parameterType="list">
+        INSERT INTO <include refid="tb" />
+        (<include refid="cols_exclude_id" />)
+        VALUES
+        <foreach collection="list" separator="," item="item">
+            (
+            #{item.orgId},
+            #{item.orgName},
+            #{item.farmId},
+            #{item.farmName},
+            #{item.groupCode},
+            #{item.batchNo},
+            #{item.openAt},
+            #{item.closeAt},
+            #{item.status},
+            #{item.initBarnId},
+            #{item.initBarnName},
+            #{item.currentBarnId},
+            #{item.currentBarnName},
+            #{item.pigType},
+            #{item.breedId},
+            #{item.breedName},
+            #{item.geneticId},
+            #{item.geneticName},
+            #{item.staffId},
+            #{item.staffName},
+            #{item.remark},
+            #{item.outId},
+            #{item.extra},
+            #{item.creatorId},
+            #{item.creatorName},
+            #{item.updatorId},
+            #{item.updatorName},
+            now(),
+            now()
+
+            )
+        </foreach>
+    </insert>
 </mapper>
