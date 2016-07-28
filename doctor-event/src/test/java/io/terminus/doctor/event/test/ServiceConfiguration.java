@@ -7,6 +7,7 @@ import io.terminus.boot.mybatis.autoconfigure.MybatisAutoConfiguration;
 import io.terminus.boot.rpc.dubbo.config.DubboBaseAutoConfiguration;
 import io.terminus.boot.search.autoconfigure.ESSearchAutoConfiguration;
 import io.terminus.doctor.common.DoctorCommonConfiguration;
+import io.terminus.doctor.event.daily.DoctorDailyEventCount;
 import io.terminus.doctor.event.dao.DoctorPigDao;
 import io.terminus.doctor.event.handler.DoctorEntryHandler;
 import io.terminus.doctor.event.handler.DoctorEventCreateHandler;
@@ -18,6 +19,13 @@ import io.terminus.doctor.event.handler.usual.DoctorConditionHandler;
 import io.terminus.doctor.event.handler.usual.DoctorDiseaseHandler;
 import io.terminus.doctor.event.handler.usual.DoctorRemovalHandler;
 import io.terminus.doctor.event.handler.usual.DoctorVaccinationHandler;
+import io.terminus.doctor.event.report.DoctorDailyPigCountChain;
+import io.terminus.doctor.event.report.count.DoctorDailyEntryEventCount;
+import io.terminus.doctor.event.report.count.DoctorDailyFarrowingEventCount;
+import io.terminus.doctor.event.report.count.DoctorDailyMatingEventCount;
+import io.terminus.doctor.event.report.count.DoctorDailyPregEventCount;
+import io.terminus.doctor.event.report.count.DoctorDailyRemovalEventCount;
+import io.terminus.doctor.event.report.count.DoctorDailyWeanEventCount;
 import io.terminus.doctor.event.search.barn.BarnSearchProperties;
 import io.terminus.doctor.event.search.barn.BaseBarnQueryBuilder;
 import io.terminus.doctor.event.search.barn.DefaultBarnQueryBuilder;
@@ -78,7 +86,7 @@ public class ServiceConfiguration {
      */
     @Bean
     public DoctorEventHandlerChain doctorEventHandlerChain(
-            DoctorSemenHandler doctorSemenHandler, DoctorEntryHandler doctorEntryHandler,
+            DoctorSemenHandler doctorSemenHandler,DoctorEntryHandler doctorEntryHandler,
             DoctorChgFarmHandler doctorChgFarmHandler, DoctorChgLocationHandler doctorChgLocationHandler,
             DoctorConditionHandler doctorConditionHandler, DoctorDiseaseHandler doctorDiseaseHandler,
             DoctorRemovalHandler doctorRemovalHandler, DoctorVaccinationHandler doctorVaccinationHandler){
@@ -90,6 +98,19 @@ public class ServiceConfiguration {
                 doctorRemovalHandler, doctorVaccinationHandler);
         chain.setDoctorEventCreateHandlers(Lists.newArrayList(list));
         return chain;
+    }
+
+    @Bean
+    public DoctorDailyPigCountChain doctorDailyPigCountChain(DoctorDailyEntryEventCount doctorDailyEntryEventCount,
+                                                             DoctorDailyFarrowingEventCount doctorDailyFarrowingEventCount,
+                                                             DoctorDailyMatingEventCount doctorDailyMatingEventCount,
+                                                             DoctorDailyPregEventCount doctorDailyPregEventCount,
+                                                             DoctorDailyRemovalEventCount doctorDailyRemovalEventCount,
+                                                             DoctorDailyWeanEventCount doctorDailyWeanEventCount){
+        List<DoctorDailyEventCount> doctorDailyEventCounts = Lists.newArrayList(
+                doctorDailyEntryEventCount, doctorDailyFarrowingEventCount, doctorDailyMatingEventCount,
+                doctorDailyPregEventCount,doctorDailyRemovalEventCount, doctorDailyWeanEventCount);
+        return new DoctorDailyPigCountChain(doctorDailyEventCounts);
     }
 
     @Bean
