@@ -20,12 +20,6 @@ public class DoctorChangeReason implements Serializable {
     private Long id;
 
     /**
-     * 猪场id
-     */
-    @NotNull(message = "farmId.not.null")
-    private Long farmId;
-
-    /**
      * 变动类型id
      */
     @NotNull(message = "changeTypeId.not.null")
@@ -36,7 +30,12 @@ public class DoctorChangeReason implements Serializable {
      */
     @NotEmpty(message = "reason.not.empty")
     private String reason;
-    
+
+    /**
+     * 输入码
+     */
+    private String srm;
+
     /**
      * 外部id
      */
