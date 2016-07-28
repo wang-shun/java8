@@ -110,15 +110,6 @@ public class DoctorBasicReadServiceImpl implements DoctorBasicReadService {
         }
     }
 
-    @Override
-    public Response<List<DoctorChangeReason>> findChangeReasonByFarmId(Long farmId) {
-        try {
-            return Response.ok(doctorChangeReasonDao.findByFarmId(farmId));
-        } catch (Exception e) {
-            log.error("find changeReason by farmId failed, farmId:{}, cause:{}", farmId, Throwables.getStackTraceAsString(e));
-            return Response.fail("changeReason.find.fail");
-        }
-    }
 
     @Override
     public Response<DoctorCustomer> findCustomerById(Long customerId) {
