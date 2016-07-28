@@ -176,14 +176,14 @@ public class DoctorMoveDataService implements CommandLineRunner {
 
             //查出每个变动下的变动原因, 组装成map
             Map<DoctorBasic, List<DoctorChangeReason>> changeTypeMap = Maps.newHashMap();
-            changeTypes.forEach(type -> changeTypeMap.put(type, doctorChangeReasonDao.findByChangeTypeId(type.getId())));
+            changeTypes.forEach(type -> changeTypeMap.put(type, doctorChangeReasonDao.findByFarmIdChangeTypeId(0L, type.getId())));
 
             //查出猪场软件里的所有变动原因, 并按照变动类型 group by
             Map<String, List<B_ChangeReason>> reasonMap = RespHelper.orServEx(doctorMoveDatasourceHandler
                     .findByHbsSql(moveId, B_ChangeReason.class, "changeReason")).stream()
                     .collect(Collectors.groupingBy(B_ChangeReason::getChangeType));
 
-
+            //遍历每个变动类型的变动原因, 过滤掉重复的插入
             for (Map.Entry<DoctorBasic, List<DoctorChangeReason>> changeType : changeTypeMap.entrySet()) {
                 //当前doctor里存在的reason名称
                 List<String> changeReasons = changeType.getValue().stream().map(DoctorChangeReason::getReason).collect(Collectors.toList());

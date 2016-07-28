@@ -24,7 +24,7 @@ public class DoctorChangeReason implements Serializable {
      */
     @NotNull(message = "changeTypeId.not.null")
     private Long changeTypeId;
-    
+
     /**
      * 变动原因
      */
