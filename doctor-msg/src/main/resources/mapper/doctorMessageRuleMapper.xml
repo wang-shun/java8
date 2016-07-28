@@ -112,4 +112,10 @@
         WHERE farm_id = #{farmId} AND status != -1
     </select>
 
+    <select id="findByFarmIdAndTemplateName" parameterType="map" resultMap="DoctorMessageRuleMap">
+        SELECT <include refid="cols_all"/>
+        FROM <include refid="tb"/>
+        WHERE farm_id = #{farmId} AND status != -1 AND template_name LIKE CONCAT('%',#{templateName},'%')
+    </select>
+
 </mapper>

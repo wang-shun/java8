@@ -34,4 +34,13 @@ public interface DoctorMessageRuleReadService {
      * @return
      */
     Response<List<DoctorMessageRule>> findMessageRulesByFarmId(Long farmId);
+
+    /**
+     *根据 farmId 和templateName查询
+     * @param farmId
+     * @param templateName
+     * @return
+     */
+    Response<List<DoctorMessageRule>> findMessageRulesByFarmIdAndTemplateName(Long farmId,String templateName);
+
 }

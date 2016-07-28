@@ -82,7 +82,7 @@ public class DoctorBasicsTest extends BaseFrontWebTest {
 
     /**
      * 根据变动类型id查询变动原因表测试
-     * @see DoctorBasics#findChangeReasonByFarmIdChangeTypeId(java.lang.Long, java.lang.Long)
+     * @see DoctorBasics#findChangeReasonByChangeTypeId(java.lang.Long)
      */
     @Test
     public void findChangeReasonByFarmIdChangeTypeId() {
@@ -91,35 +91,6 @@ public class DoctorBasicsTest extends BaseFrontWebTest {
         assertThat(result.getStatusCode(), is(HttpStatus.OK));
         assertThat(result.getBody().size(), not(0));
         log.info("findChangeReasonByChangeTypeIdTest result:{}", result.getBody());
-    }
-
-    /**
-     * 创建或更新DoctorChangeReason测试
-     * @see DoctorBasics#createOrUpdateChangeReason(io.terminus.doctor.basic.model.DoctorChangeReason)
-     */
-    @Test
-    public void createOrUpdateChangeReasonTest() {
-        String url = "/api/doctor/basic/changeReason";
-        ResponseEntity<Long> result = postForEntity(url, mockChangeReason(), Long.class);
-        assertThat(result.getStatusCode(), is(HttpStatus.OK));
-
-        DoctorChangeReason changeReason = findChangeReasonById(result.getBody());
-        assertNotNull(changeReason);
-        log.info("createOrUpdateChangeReasonTest result:{}", changeReason);
-    }
-
-    /**
-     * 根据主键id删除DoctorChangeReason测试
-     * @see DoctorBasics#deleteChangeReason(java.lang.Long)
-     */
-    @Test
-    public void deleteChangeReasonTest() {
-        Long deleteId = 1L;
-        String url = "/api/doctor/basic/changeReason";
-        delete(url, ImmutableMap.of("changeReasonId", deleteId));
-
-        DoctorChangeReason changeReason = findChangeReasonById(deleteId);
-        assertNull(changeReason);
     }
 
     /**
@@ -184,7 +155,7 @@ public class DoctorBasicsTest extends BaseFrontWebTest {
 
     private DoctorChangeReason mockChangeReason() {
         DoctorChangeReason changeReason = new DoctorChangeReason();
-        changeReason.setFarmId(0L);
+        changeReason.setSrm("srm");
         changeReason.setChangeTypeId(3L);
         changeReason.setReason("没啥原因!");
         return changeReason;
