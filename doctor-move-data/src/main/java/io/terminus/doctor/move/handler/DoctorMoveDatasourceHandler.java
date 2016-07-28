@@ -6,12 +6,10 @@ import io.terminus.common.model.Response;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.doctor.basic.dao.DoctorMoveDatasourceDao;
 import io.terminus.doctor.basic.model.DoctorMoveDatasource;
-import io.terminus.doctor.move.model.B_ChangeReason;
 import io.terminus.doctor.move.sql.DoctorSqlFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.dbcp.BasicDataSource;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.CommandLineRunner;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
@@ -27,7 +25,7 @@ import java.util.Map;
  */
 @Slf4j
 @Component
-public class DoctorMoveDatasourceHandler implements CommandLineRunner {
+public class DoctorMoveDatasourceHandler {
 
     private final DoctorMoveDatasourceDao doctorMoveDatasourceDao;
     private final DoctorSqlFactory doctorSqlFactory;
@@ -105,11 +103,5 @@ public class DoctorMoveDatasourceHandler implements CommandLineRunner {
     //查询全部的语句
     private static String getSql(DoctorMoveTableEnum table) {
         return "SELECT * FROM " + table.name();
-    }
-
-    @Override
-    public void run(String... strings) throws Exception {
-        List<B_ChangeReason> reasons = findByHbsSql(1L, B_ChangeReason.class, "changeReason").getResult();
-        System.out.println(reasons);
     }
 }

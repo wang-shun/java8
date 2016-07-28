@@ -9,6 +9,7 @@ import io.terminus.doctor.basic.model.DoctorChangeReason;
 import io.terminus.doctor.basic.model.DoctorCustomer;
 import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.utils.RespHelper;
+import io.terminus.doctor.event.constants.DoctorBasicEnums;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.move.handler.DoctorMoveDatasourceHandler;
@@ -110,7 +111,7 @@ public class DoctorMoveDataService implements CommandLineRunner {
         try {
             List<DoctorChangeReason> reasons = RespHelper.orServEx(doctorMoveDatasourceHandler
                     .findAllData(moveId, B_ChangeReason.class, DoctorMoveTableEnum.B_ChangeReason)).stream()
-                    .map(reason -> getReason(mockOrg(), mockFarm(), mockUser(), reason))
+                    .map(reason -> getReason(mockFarm(), mockUser(), reason))
                     .collect(Collectors.toList());
 
             if (notEmpty(reasons)) {
@@ -126,9 +127,16 @@ public class DoctorMoveDataService implements CommandLineRunner {
     }
 
     //拼接变动原因
-    private DoctorChangeReason getReason(DoctorOrg org, DoctorFarm farm, DoctorUser user, B_ChangeReason reason) {
+    private DoctorChangeReason getReason(DoctorFarm farm, DoctorUser user, B_ChangeReason reason) {
+        DoctorBasicEnums changeType = DoctorBasicEnums.from(reason.getChangeType());
+
         DoctorChangeReason changeReason = new DoctorChangeReason();
-        // TODO: 16/7/27
+        changeReason.setFarmId(farm.getId());
+        changeReason.setChangeTypeId(changeType == null ? 0 : changeType.getId());
+        changeReason.setReason(reason.getReasonName());
+        changeReason.setOutId(reason.getOID());
+        changeReason.setCreatorId(user.getId());
+        changeReason.setCreatorName(user.getName());
         return changeReason;
     }
 
@@ -190,6 +198,6 @@ public class DoctorMoveDataService implements CommandLineRunner {
     @Override
     public void run(String... strings) throws Exception {
         // Just for test!
-
+        moveChangeReason(1L);
     }
 }

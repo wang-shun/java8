@@ -85,4 +85,25 @@
         FROM <include refid="tb" />
         WHERE farm_id = #{farmId}
     </select>
+
+    <insert id="creates" parameterType="list">
+        INSERT INTO <include refid="tb" />
+        (<include refid="cols_exclude_id" />)
+        VALUES
+        <foreach collection="list" separator="," item="item">
+            (
+            #{item.farmId},
+            #{item.changeTypeId},
+            #{item.reason},
+            #{item.outId},
+            #{item.extra},
+            #{item.creatorId},
+            #{item.creatorName},
+            #{item.updatorId},
+            #{item.updatorName},
+            now(),
+            now()
+            )
+        </foreach>
+    </insert>
 </mapper>
