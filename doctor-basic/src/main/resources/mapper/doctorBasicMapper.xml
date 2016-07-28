@@ -37,6 +37,20 @@
         #{name}, #{type}, #{typeName}, #{isValid}, #{srm}, #{context}, #{outId}, #{extra}, #{updatorId}, #{updatorName}, now(), now()
     </sql>
 
+    <sql id="criteria">
+        <if test="id != null">AND id = #{id}</if>
+        <if test="name != null">AND name = #{name}</if>
+        <if test="type != null">AND type = #{type}</if>
+        <if test="typeName != null">AND type_name = #{typeName}</if>
+        <if test="isValid != null">AND is_valid = #{isValid}</if>
+        <if test="srm != null">AND srm = #{srm}</if>
+        <if test="context != null">AND context = #{context}</if>
+        <if test="outId != null">AND out_id = #{outId}</if>
+        <if test="extra != null">AND extra = #{extra}</if>
+        <if test="updatorId != null">AND updator_id = #{updatorId}</if>
+        <if test="updatorName != null">AND updator_name = #{updatorName}</if>
+    </sql>
+
     <insert id="create" parameterType="DoctorBasic" keyProperty="id" useGeneratedKeys="true">
         INSERT INTO
         <include refid="tb" />
@@ -81,4 +95,10 @@
         WHERE id = #{id}
     </delete>
 
+    <select id="list" parameterType="map" resultMap="DoctorBasicMap">
+        SELECT <include refid="cols_all"/> FROM <include refid="tb"/>
+        <where>
+            <include refid="criteria"/>
+        </where>
+    </select>
 </mapper>

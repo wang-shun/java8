@@ -1,21 +1,25 @@
 package io.terminus.doctor.move.service;
 
 import com.google.common.base.Throwables;
+import com.google.common.collect.Maps;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.Response;
+import io.terminus.doctor.basic.dao.DoctorBasicDao;
 import io.terminus.doctor.basic.dao.DoctorChangeReasonDao;
 import io.terminus.doctor.basic.dao.DoctorCustomerDao;
+import io.terminus.doctor.basic.model.DoctorBasic;
 import io.terminus.doctor.basic.model.DoctorChangeReason;
 import io.terminus.doctor.basic.model.DoctorCustomer;
 import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.utils.RespHelper;
-import io.terminus.doctor.event.constants.DoctorBasicEnums;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
+import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.move.handler.DoctorMoveDatasourceHandler;
 import io.terminus.doctor.move.handler.DoctorMoveTableEnum;
 import io.terminus.doctor.move.model.B_ChangeReason;
 import io.terminus.doctor.move.model.B_Customer;
+import io.terminus.doctor.move.model.TB_FieldValue;
 import io.terminus.doctor.move.model.View_PigLocationList;
 import io.terminus.doctor.user.model.DoctorFarm;
 import io.terminus.doctor.user.model.DoctorOrg;
@@ -27,6 +31,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -46,16 +51,67 @@ public class DoctorMoveDataService implements CommandLineRunner {
     private final DoctorBarnDao doctorBarnDao;
     private final DoctorCustomerDao doctorCustomerDao;
     private final DoctorChangeReasonDao doctorChangeReasonDao;
+    private final DoctorBasicDao doctorBasicDao;
 
     @Autowired
     public DoctorMoveDataService(DoctorMoveDatasourceHandler doctorMoveDatasourceHandler,
                                  DoctorBarnDao doctorBarnDao,
                                  DoctorCustomerDao doctorCustomerDao,
-                                 DoctorChangeReasonDao doctorChangeReasonDao) {
+                                 DoctorChangeReasonDao doctorChangeReasonDao,
+                                 DoctorBasicDao doctorBasicDao) {
         this.doctorMoveDatasourceHandler = doctorMoveDatasourceHandler;
         this.doctorBarnDao = doctorBarnDao;
         this.doctorCustomerDao = doctorCustomerDao;
         this.doctorChangeReasonDao = doctorChangeReasonDao;
+        this.doctorBasicDao = doctorBasicDao;
+    }
+
+    /**
+     * 迁移基础数据
+     */
+    @Transactional
+    public Response<Boolean> moveBasic(Long moveId) {
+        try {
+            //基础数据按照类型名称分组
+            Map<String, List<DoctorBasic>> basicsMap = doctorBasicDao.listAll().stream().collect(Collectors.groupingBy(DoctorBasic::getTypeName));
+            Map<String, List<TB_FieldValue>> fieldsMap = RespHelper.orServEx(doctorMoveDatasourceHandler
+                    .findByHbsSql(moveId, TB_FieldValue.class, "TB_FieldValue")).stream()
+                    .collect(Collectors.groupingBy(TB_FieldValue::getTypeId));
+
+            //按照遍历doctor里的基础数据, 如果有缺失的, 就补充进来
+            for (Map.Entry<String, List<DoctorBasic>> basic : basicsMap.entrySet()) {
+                //取出基础字段名称
+                List<String> basicNames = basic.getValue().stream().map(DoctorBasic::getName).collect(Collectors.toList());
+
+                List<TB_FieldValue> fieldValues = fieldsMap.get(basic.getKey());
+                if (!notEmpty(fieldValues)) {
+                    continue;
+                }
+
+                //把过滤的结果放到doctor_basics里
+                fieldValues.stream()
+                        .filter(field -> !basicNames.contains(field.getFieldText()))
+                        .forEach(fn -> doctorBasicDao.create(getBasic(fn)));
+            }
+            return Response.ok(Boolean.TRUE);
+        } catch (Exception e) {
+            log.error("move basic failed, moveId:{}, cause:{}", moveId, Throwables.getStackTraceAsString(e));
+            return Response.fail("move.basic.fail");
+        }
+    }
+
+    //拼接基础数据
+    private DoctorBasic getBasic(TB_FieldValue field) {
+        DoctorBasic.Type type = DoctorBasic.Type.from(field.getTypeId());
+        DoctorBasic basic = new DoctorBasic();
+        basic.setName(field.getFieldText());
+        basic.setType(type == null ? null : type.getValue());
+        basic.setTypeName(field.getTypeId());
+        basic.setContext(field.getRemark());
+        basic.setOutId(field.getOID());
+        basic.setSrm(field.getSrm());
+        basic.setIsValid(IsOrNot.YES.getValue());
+        return basic;
     }
 
     /**
@@ -111,14 +167,34 @@ public class DoctorMoveDataService implements CommandLineRunner {
     @Transactional
     public Response<Boolean> moveChangeReason(Long moveId) {
         try {
-            List<DoctorChangeReason> reasons = RespHelper.orServEx(doctorMoveDatasourceHandler
-                    .findByHbsSql(moveId, B_ChangeReason.class, "changeReason")).stream()
-                    .map(reason -> getReason(mockFarm(), mockUser(), reason))
-                    .collect(Collectors.toList());
+            //查出所有的变动
+            List<DoctorBasic> changeTypes = doctorBasicDao.findByType(DoctorBasic.Type.CHANGE_TYPE.getValue());
 
-            if (notEmpty(reasons)) {
-                doctorChangeReasonDao.creates(reasons);
+            //查出每个变动下的变动原因, 组装成map
+            Map<DoctorBasic, List<DoctorChangeReason>> changeTypeMap = Maps.newHashMap();
+            changeTypes.forEach(type -> changeTypeMap.put(type, doctorChangeReasonDao.findByChangeTypeIdAndSrm(type.getId(), null)));
+
+            //查出猪场软件里的所有变动原因, 并按照变动类型 group by
+            Map<String, List<B_ChangeReason>> reasonMap = RespHelper.orServEx(doctorMoveDatasourceHandler
+                    .findByHbsSql(moveId, B_ChangeReason.class, "changeReason")).stream()
+                    .collect(Collectors.groupingBy(B_ChangeReason::getChangeType));
+
+            //遍历每个变动类型的变动原因, 过滤掉重复的插入
+            for (Map.Entry<DoctorBasic, List<DoctorChangeReason>> changeType : changeTypeMap.entrySet()) {
+                //当前doctor里存在的reason名称
+                List<String> changeReasons = changeType.getValue().stream().map(DoctorChangeReason::getReason).collect(Collectors.toList());
+                List<B_ChangeReason> reasons = reasonMap.get(changeType.getKey().getName());
+
+                if (!notEmpty(reasons)) {
+                    continue;
+                }
+
+                //过滤掉重复的原因, 插入doctor_change_reasons 表
+                reasons.stream()
+                        .filter(r -> !changeReasons.contains(r.getReasonName()))
+                        .forEach(reason -> doctorChangeReasonDao.create(getReason(reason, changeType.getKey().getId())));
             }
+
             return Response.ok(Boolean.TRUE);
         } catch (ServiceException e) {
             return Response.fail(e.getMessage());
@@ -129,16 +205,11 @@ public class DoctorMoveDataService implements CommandLineRunner {
     }
 
     //拼接变动原因
-    private DoctorChangeReason getReason(DoctorFarm farm, DoctorUser user, B_ChangeReason reason) {
-        DoctorBasicEnums changeType = DoctorBasicEnums.from(reason.getChangeType());
-
+    private DoctorChangeReason getReason(B_ChangeReason reason, Long changeTypeId) {
         DoctorChangeReason changeReason = new DoctorChangeReason();
-        changeReason.setFarmId(farm.getId());
-        changeReason.setChangeTypeId(changeType == null ? 0 : changeType.getId());
+        changeReason.setChangeTypeId(changeTypeId);
         changeReason.setReason(reason.getReasonName());
         changeReason.setOutId(reason.getOID());
-        changeReason.setCreatorId(user.getId());
-        changeReason.setCreatorName(user.getName());
         return changeReason;
     }
 
@@ -205,6 +276,6 @@ public class DoctorMoveDataService implements CommandLineRunner {
     @Override
     public void run(String... strings) throws Exception {
         // Just for test!
-
+        
     }
 }
