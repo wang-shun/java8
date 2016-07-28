@@ -29,4 +29,8 @@ public class DoctorChangeReasonDao extends MyBatisDao<DoctorChangeReason> {
     public List<DoctorChangeReason> findByFarmIdChangeTypeId(Long farmId, Long changeTypeId) {
         return getSqlSession().selectList(sqlId("findByFarmIdChangeTypeId"), ImmutableMap.of("farmId", farmId, "changeTypeId", changeTypeId));
     }
+
+    public List<DoctorChangeReason> findByChangeTypeId(Long changeTypeId) {
+        return getSqlSession().selectList(sqlId("findByChangeTypeId"), ImmutableMap.of("changeTypeId", changeTypeId));
+    }
 }

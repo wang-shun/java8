@@ -12,7 +12,6 @@ import io.terminus.doctor.basic.model.DoctorChangeReason;
 import io.terminus.doctor.basic.model.DoctorCustomer;
 import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.utils.RespHelper;
-import io.terminus.doctor.event.constants.DoctorBasicEnums;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.move.handler.DoctorMoveDatasourceHandler;
@@ -172,14 +171,34 @@ public class DoctorMoveDataService implements CommandLineRunner {
     @Transactional
     public Response<Boolean> moveChangeReason(Long moveId) {
         try {
-            List<DoctorChangeReason> reasons = RespHelper.orServEx(doctorMoveDatasourceHandler
-                    .findByHbsSql(moveId, B_ChangeReason.class, "changeReason")).stream()
-                    .map(reason -> getReason(mockFarm(), mockUser(), reason))
-                    .collect(Collectors.toList());
+            //查出所有的变动
+            List<DoctorBasic> changeTypes = doctorBasicDao.findByType(DoctorBasic.Type.CHANGE_TYPE.getValue());
 
-            if (notEmpty(reasons)) {
-                doctorChangeReasonDao.creates(reasons);
+            //查出每个变动下的变动原因, 组装成map
+            Map<DoctorBasic, List<DoctorChangeReason>> changeTypeMap = Maps.newHashMap();
+            changeTypes.forEach(type -> changeTypeMap.put(type, doctorChangeReasonDao.findByChangeTypeId(type.getId())));
+
+            //查出猪场软件里的所有变动原因, 并按照变动类型 group by
+            Map<String, List<B_ChangeReason>> reasonMap = RespHelper.orServEx(doctorMoveDatasourceHandler
+                    .findByHbsSql(moveId, B_ChangeReason.class, "changeReason")).stream()
+                    .collect(Collectors.groupingBy(B_ChangeReason::getChangeType));
+
+
+            for (Map.Entry<DoctorBasic, List<DoctorChangeReason>> changeType : changeTypeMap.entrySet()) {
+                //当前doctor里存在的reason名称
+                List<String> changeReasons = changeType.getValue().stream().map(DoctorChangeReason::getReason).collect(Collectors.toList());
+                List<B_ChangeReason> reasons = reasonMap.get(changeType.getKey().getName());
+
+                if (!notEmpty(reasons)) {
+                    continue;
+                }
+
+                //过滤掉重复的原因, 插入doctor_change_reasons 表
+                reasons.stream()
+                        .filter(r -> !changeReasons.contains(r.getReasonName()))
+                        .forEach(reason -> doctorChangeReasonDao.create(getReason(reason, changeType.getKey().getId())));
             }
+
             return Response.ok(Boolean.TRUE);
         } catch (ServiceException e) {
             return Response.fail(e.getMessage());
@@ -190,15 +209,11 @@ public class DoctorMoveDataService implements CommandLineRunner {
     }
 
     //拼接变动原因
-    private DoctorChangeReason getReason(DoctorFarm farm, DoctorUser user, B_ChangeReason reason) {
-        DoctorBasicEnums changeType = DoctorBasicEnums.from(reason.getChangeType());
-
+    private DoctorChangeReason getReason(B_ChangeReason reason, Long changeTypeId) {
         DoctorChangeReason changeReason = new DoctorChangeReason();
-        changeReason.setChangeTypeId(changeType == null ? 0 : changeType.getId());
+        changeReason.setChangeTypeId(changeTypeId);
         changeReason.setReason(reason.getReasonName());
         changeReason.setOutId(reason.getOID());
-        changeReason.setCreatorId(user.getId());
-        changeReason.setCreatorName(user.getName());
         return changeReason;
     }
 
