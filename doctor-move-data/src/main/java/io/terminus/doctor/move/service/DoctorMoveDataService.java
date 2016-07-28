@@ -78,8 +78,13 @@ public class DoctorMoveDataService implements CommandLineRunner {
                     .findByHbsSql(moveId, TB_FieldValue.class, "TB_FieldValue")).stream()
                     .collect(Collectors.groupingBy(TB_FieldValue::getTypeId));
 
-            basicsMap.entrySet().forEach(basic -> {
+            //按照遍历doctor里的基础数据, 如果有缺失的, 就补充进来
+            for (Map.Entry<String, List<DoctorBasic>> basic : basicsMap.entrySet()) {
                 List<TB_FieldValue> fieldValues = fieldsMap.get(basic.getKey());
+
+                if (!notEmpty(fieldValues)) {
+                    continue;
+                }
 
                 //猪场里的基础数据存放成map
                 Map<String, TB_FieldValue> fieldMap = Maps.newHashMap();
@@ -93,7 +98,7 @@ public class DoctorMoveDataService implements CommandLineRunner {
 
                 //把求差的结果放到doctor_basics里
                 fieldNames.forEach(fn -> doctorBasicDao.create(getBasic(fieldMap.get(fn))));
-            });
+            }
             return Response.ok(Boolean.TRUE);
         } catch (Exception e) {
             log.error("move basic failed, moveId:{}, cause:{}", moveId, Throwables.getStackTraceAsString(e));
@@ -260,6 +265,5 @@ public class DoctorMoveDataService implements CommandLineRunner {
     @Override
     public void run(String... strings) throws Exception {
         // Just for test!
-
     }
 }

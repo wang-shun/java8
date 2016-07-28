@@ -32,7 +32,7 @@ import java.util.stream.Collectors;
  * Created by IceMimosa
  * Date: 16/7/27
  */
-@Component
+//@Component
 public class DoctorMoveWorkflowHandler {
 
     @Autowired
