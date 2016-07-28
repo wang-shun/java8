@@ -58,6 +58,17 @@ public class DoctorMoveDataService implements CommandLineRunner {
         this.doctorChangeReasonDao = doctorChangeReasonDao;
     }
 
+    @Transactional
+    public Response<Boolean> moveBasic(Long moveId) {
+        try {
+            
+            return Response.ok();
+        } catch (Exception e) {
+            log.error("failed, cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("");
+        }
+    }
+
     /**
      * 迁移Barn
      */
