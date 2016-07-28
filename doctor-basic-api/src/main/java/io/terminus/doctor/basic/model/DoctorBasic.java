@@ -112,5 +112,14 @@ public class DoctorBasic implements Serializable {
             }
             return null;
         }
+
+        public static Type from(String desc) {
+            for (Type type : Type.values()) {
+                if (Objects.equal(type.desc, desc)) {
+                    return type;
+                }
+            }
+            return null;
+        }
     }
 }

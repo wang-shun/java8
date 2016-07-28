@@ -18,18 +18,9 @@ public class TB_FieldValue implements Serializable {
 
     private String TypeId;
 
-    private String FieldValue;
-
     private String FieldText;
 
     private String Remark;
 
-    private Integer Ord;
-
-    private Boolean IsStopUse;
-
     private String Srm;
-
-    private Integer ColID;
-
 }
