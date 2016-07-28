@@ -108,7 +108,7 @@ public class UserInit {
                 //初始化服务状态
                 this.initDefaultServiceStatus(userId);
                 //初始化服务的申请审批状态
-                doctorServiceReviewWriteService.initServiceReview(userId, mobile);
+                RespHelper.or500(doctorServiceReviewWriteService.initServiceReview(userId, mobile));
                 //创建org
                 DoctorOrg org = this.createOrg(member.getFarmName(), mobile, null, null);
                 //创建staff
@@ -175,7 +175,7 @@ public class UserInit {
         return user;
     }
 
-    public Response<Long> initDefaultServiceStatus(Long userId){
+    public Long initDefaultServiceStatus(Long userId){
         DoctorServiceStatus status = new DoctorServiceStatus();
         status.setUserId(userId);
 
@@ -197,7 +197,7 @@ public class UserInit {
         status.setPigtradeReason("敬请期待");
         status.setPigtradeReviewStatus(DoctorServiceReview.Status.INIT.getValue());
 
-        return doctorServiceStatusWriteService.createServiceStatus(status);
+        return RespHelper.or500(doctorServiceStatusWriteService.createServiceStatus(status));
     }
 
     private DoctorOrg createOrg(String orgName, String orgMobile, String license, String outId){
@@ -279,7 +279,7 @@ public class UserInit {
                 .put("contact", "")
                 .put("realName", member.getOrganizeName())
                 .map());
-        Long subUserId = RespHelper.orServEx(userWriteService.create(subUser));
+        Long subUserId = RespHelper.or500(userWriteService.create(subUser));
 
         //现在是数据权限
         DoctorUserDataPermission permission = new DoctorUserDataPermission();
