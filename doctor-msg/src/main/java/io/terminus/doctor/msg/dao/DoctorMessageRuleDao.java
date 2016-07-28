@@ -43,4 +43,14 @@ public class DoctorMessageRuleDao extends MyBatisDao<DoctorMessageRule> {
     public List<DoctorMessageRule> findByFarmId(Long farmId) {
         return getSqlSession().selectList(sqlId("findByFarmId"), farmId);
     }
+
+    /**
+     * 根据 farmId和templateName 查询
+     * @param farmId
+     * @param templateName
+     * @return
+     */
+    public List<DoctorMessageRule> findByFarmIdAndTemplateName(Long farmId,String templateName) {
+        return getSqlSession().selectList(sqlId("findByFarmIdAndTemplateName"), ImmutableMap.of("farmId",farmId,"templateName",templateName));
+    }
 }
