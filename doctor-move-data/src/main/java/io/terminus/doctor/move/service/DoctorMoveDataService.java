@@ -27,12 +27,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static io.terminus.common.utils.Arguments.notEmpty;
 
 /**
- * Desc:
+ * Desc: 迁移数据, 注意如果一个数据源有多个猪场的情况!!!
  * Mail: yangzl@terminus.io
  * author: DreamYoung
  * Date: 16/7/27
@@ -65,6 +66,7 @@ public class DoctorMoveDataService implements CommandLineRunner {
         try {
             List<DoctorBarn> barns = RespHelper.orServEx(doctorMoveDatasourceHandler
                     .findAllData(moveId, View_PigLocationList.class, DoctorMoveTableEnum.view_PigLocationList)).stream()
+                    .filter(loc -> isFarm(loc.getFarmOID(), mockFarm().getOutId()))     //这一步很重要, 如果一个公司有多个猪场, 猪场id必须匹配!
                     .map(location -> getBarn(mockOrg(), mockFarm(), mockUser(), location))
                     .collect(Collectors.toList());
 
@@ -174,6 +176,11 @@ public class DoctorMoveDataService implements CommandLineRunner {
         return barn;
     }
 
+    //判断猪场id是否相同
+    private static boolean isFarm(String farmOID, String outId) {
+        return Objects.equals(farmOID, outId);
+    }
+
     private static DoctorFarm mockFarm() {
         DoctorFarm farm = new DoctorFarm();
         farm.setId(9999L);
@@ -198,6 +205,6 @@ public class DoctorMoveDataService implements CommandLineRunner {
     @Override
     public void run(String... strings) throws Exception {
         // Just for test!
-        
+
     }
 }
