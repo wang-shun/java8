@@ -37,7 +37,9 @@ public class DoctorConditionHandler extends DoctorAbstractEventHandler{
 
     @Override
     public DoctorPigTrack updateDoctorPigTrackInfo(DoctorPigTrack doctorPigTrack, DoctorBasicInputInfoDto basic, Map<String, Object> extra, Map<String,Object> context) {
-        doctorPigTrack.setWeight(Params.getWithConvert(extra, "conditionWeight", a->Double.valueOf(a.toString())));
+        if(extra.get("conditionWeight") != null){
+            doctorPigTrack.setWeight(Params.getWithConvert(extra, "conditionWeight", a->Double.valueOf(a.toString())));
+        }
         doctorPigTrack.addAllExtraMap(extra);
         doctorPigTrack.addPigEvent(basic.getPigType(), (Long) context.get("doctorPigEventId"));
         return doctorPigTrack;
