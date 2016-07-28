@@ -417,7 +417,7 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
 
     private Long getLong(Map<String, Object> params, String key) {
         Object o = params.get(key);
-        return o == null&& !Strings.isNullOrEmpty(o.toString()) ? null : Long.valueOf(String.valueOf(o));
+        return o == null || Strings.isNullOrEmpty(o.toString()) ? null : Long.valueOf(String.valueOf(o));
     }
 
     private Integer getInteger(Map<String, Object> params, String key) {
