@@ -52,7 +52,7 @@ public class DoctorMessageRuleReadServiceImpl implements DoctorMessageRuleReadSe
     @Override
     public Response<List<DoctorMessageRule>> findMessageRulesByFarmId(Long farmId) {
         try{
-                return Response.ok(doctorMessageRuleDao.findByFarmId(farmId));
+            return Response.ok(doctorMessageRuleDao.findByFarmId(farmId));
         } catch (Exception e) {
             log.error("find messageRule by farmId failed, farmId is {}, cause by {}", farmId, Throwables.getStackTraceAsString(e));
             return Response.fail("messageRule.find.fail");
@@ -62,7 +62,7 @@ public class DoctorMessageRuleReadServiceImpl implements DoctorMessageRuleReadSe
     @Override
     public Response<List<DoctorMessageRule>> findMessageRulesByFarmIdAndTemplateName(Long farmId,String templateName) {
         try{
-            if (templateName!=null&&templateName.isEmpty())
+            if (templateName!=null&&!templateName.isEmpty())
             return Response.ok(doctorMessageRuleDao.findByFarmIdAndTemplateName(farmId,templateName));
             else
                 return Response.ok(doctorMessageRuleDao.findByFarmId(farmId));
