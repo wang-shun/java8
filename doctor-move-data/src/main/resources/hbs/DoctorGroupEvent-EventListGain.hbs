@@ -37,6 +37,6 @@ FROM
         SourceGainID as toGroupOutId, -- 猪群转群的 目标猪群outId
         EventDetail AS eventDesc
     FROM view_EventListGain a
-    LEFT JOIN TB_FieldValue b ON a.ChgType = b.ColID  -- join一下, 取出变动名称
+    LEFT JOIN TB_FieldValue b ON a.ChgType = cast(b.ColID AS VARCHAR(16))  -- join一下, 取出变动名称, 为什么要cast一下呢? 因为ChgType不是int类型!!!
 ) AS d
 LEFT JOIN TB_FieldValue c ON d.diseaseName = c.ColID -- join一下, 取出疾病名称

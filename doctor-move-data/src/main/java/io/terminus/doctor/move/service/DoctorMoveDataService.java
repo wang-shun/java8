@@ -464,8 +464,6 @@ public class DoctorMoveDataService implements CommandLineRunner {
     @Override
     public void run(String... strings) throws Exception {
         // Just for test!
-//        List<View_EventListGain> gainEvents = RespHelper.orServEx(doctorMoveDatasourceHandler.findByHbsSql(1L, View_EventListGain.class, "DoctorGroupEvent-EventListGain"));
-//        System.out.println(gainEvents);
-        //// TODO: 16/7/29  int 转换保存 
+
     }
 }
