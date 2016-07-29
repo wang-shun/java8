@@ -38,7 +38,9 @@ public class SubDao extends MyBatisDao<Sub> {
      * @return
      */
     public List<Sub> findByConditions(Map<String, Object> criteria, Integer limit){
-        criteria.put("limit", limit);
+        if(limit != null){
+            criteria.put("limit", limit);
+        }
         return getSqlSession().selectList(sqlId("findByConditions"), ImmutableMap.copyOf(Params.filterNullOrEmpty(criteria)));
     }
 
