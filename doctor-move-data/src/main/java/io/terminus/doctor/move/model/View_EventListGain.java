@@ -2,7 +2,6 @@ package io.terminus.doctor.move.model;
 
 import lombok.Data;
 
-import javax.annotation.sql.DataSourceDefinitions;
 import java.io.Serializable;
 import java.util.Date;
 
@@ -12,63 +11,67 @@ import java.util.Date;
 @Data
 public class View_EventListGain implements Serializable{
     private static final long serialVersionUID = 5363694163735495420L;
-    private String OID;
-    private Date GainOpenDate;
-    private String Status;
-    private String FarmOID;
-    private String PigID;
-    private String InitLocation;
-    private String Sex;
-    private String Breed;
-    private String Genetic;
-    private String Remark;
-    private Integer MaximumMarketingAge;
-    private String Location;
-    private String GainCloseDate;
-    private String EventOID;
-    private String ProductionStage;
-    private Double Weight;
-    private String Srm;
-    private String EOID;
-    private Date EventDate;
-    private String EventName;
-    private String EventDetail;
-    private String RelMainOID;
-    private String ERemark;
-    private String EventType;
-    private String EventEName;
-    private String EventLocation;
-    private Double EWeight;
-    private String ChgType;
-    private String ChgReason;
-    private Double Price;
-    private Double SumJe;
-    private String Customer;
-    private String OutDestination;
-    private String Disease;
-    private String Treament;
-    private String Operator;
-    private String AutoGenerate;
-    private String RelEventOID;
-    private String MoveCategory;
-    private String ESex;
-    private String EBreed;
-    private String Source;
-    private String SourceGainID;
-    private Integer NumberOfPigs;
-    private Integer NumberOfMale;
-    private Integer NumberOfFemale;
-    private Integer AverageAge;
-    private String LitterID;
-    private Date BirthDate;
-    private String Staff;
-    private String SowPigOID;
-    private Integer SowCurrentParity;
-    private String FarmOIDText;
-    private String LocationCaption;
-    private String EventTypeName;
-    private String CurrentLocationCaption;
-    private String PigTypeOID;
-    private String TypeName;
-    private String MoveCategoryText;
+    private String diseaseName;        // 疾病名称
+    private Date birthDate;
+    private Date eventAt;
+    private String eventTypeName;
+    private String changTypeName;      // 猪群变动的变动类型名称
+    private String changeReasonName;   // 变动原因名称
+    private String inTypeName;         //转入猪群事件的转入类型
+    private Double weight;
+    private Double avgWeight;
+    private Long price;
+    private Long amount;
+    private String customer;
+    private String context;            //此字段有多个意思
+    private String sexName;
+    private String breed;
+    private String source;             // 来源或其他乱七八糟的值
+    private Integer quantity;
+    private Integer sowQty;
+    private Integer boarQty;
+    private Integer avgDayAge;
+    private String staffName;
+    private String groupOutId;         // 管理的猪群OID
+    private String groupEventOutId;    // 猪群事件的OID
+    private String barnOutId;          // 事件发生的猪舍OID
+    private String toBarnOutId;        // 转入猪舍的OID, 不一定是在猪舍oid, 也可能是猪群oid
+    private String notDisease;         // 不是疾病, 可能有多个值
+    private String toGroupOutId;       // 猪群转群的 目标猪群outId
+    private String eventDesc;          // 事件详情
+
+/*
+防疫：
+Disease: 疫苗名称
+Treatment: 防疫结果
+防疫人员直接取 staffName
+
+疾病：
+Disease: 疾病名称的ColID 关联 TB_FieldValue
+疾病人员直接取 staffName
+
+新建猪群：
+来源：可能为空，如果为空，默认本场
+
+转入猪群：
+SourceGainOID 来源猪群
+来源猪舍从来源猪群取
+
+猪群变动：
+ChgType: 变动类型id
+ChgReason:变动原因名称
+如果ChgType.name=转出，ChgReason=群间转移， 说明这是转群事件！！ sql已经转换
+  群间转移（转群）：Treament: 转入猪舍， OutDest: 转入猪群
+  选后备（？）: Treament: 转入猪舍， OutDest: 转入猪群
+
+猪群转群：
+TreatMent: 是否新建猪群
+OutDestnation: 转入猪舍
+SourceGainOID: 转入猪群
+
+商品猪转为种猪:
+LitterId: 转种猪的name = pigCode
+birthDate:
+Treament: 转入猪舍
+*/
 }

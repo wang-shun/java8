@@ -1,0 +1,42 @@
+-- 查询DoctorGroupEvent的字段(View_EventListGain)
+SELECT
+    c.FieldText AS diseaseName, -- 疾病名称
+    d.*
+FROM
+(
+    SELECT
+        BirthDate as birthDate,
+        EventDate AS eventAt,
+        CASE
+            WHEN EventName = '猪群转舍' OR (EventName = '猪群变动' AND ChgReason = '群间转移') THEN '猪群转群'
+            WHEN EventName = '猪群变动' AND ChgReason = '选后备' THEN '商品猪转为种猪'
+            ELSE EventName END AS eventTypeName,
+        b.FieldText AS changTypeName,       -- 猪群变动的变动类型名称
+        ChgReason AS changeReasonName,      -- 变动原因名称
+        MoveCategoryText AS inTypeName,     --转入猪群事件的转入类型
+        EWeight AS weight,
+        CASE WHEN EWeight = 0 OR NumberOfPigs = 0 THEN 0 ELSE  CONVERT(DECIMAL(18,2), EWeight/NumberOfPigs) END AS avgWeight,
+        cast(isnull(Price, 0) * 100 AS INT) as price,   -- 金额 * 100
+        cast(isnull(SumJe, 0) * 100 AS INT) as amount,  -- 金额 * 100
+        Customer as customer,
+        Treament AS context,  --此字段有多个意思
+        CASE WHEN AutoGenerate = 'true' THEN 1 ELSE 0 END isAuto, -- 是否是自动生成的事件
+        ESex as sexName,
+        EBreed AS breedName,
+        Source as source,   -- 来源或其他乱七八糟的值
+        NumberOfPigs as quantity,
+        NumberOfFemale as sowQty,
+        NumberOfMale as boarQty,
+        AverageAge as avgDayAge,
+        Staff AS  staffName,
+        a.OID AS groupOutId,   -- 管理的猪群OID
+        EOID AS groupEventOutId, -- 猪群事件的OID
+        EventLocation AS barnOutId, -- 事件发生的猪舍OID
+        OutDestination as toBarnOutId, --转入猪舍的OID
+        CASE WHEN EventName = '疾病' THEN Disease ELSE NULL END AS diseaseName,
+        SourceGainID as toGroupOutId, -- 猪群转群的 目标猪群outId
+        EventDetail AS eventDesc
+    FROM view_EventListGain a
+    LEFT JOIN TB_FieldValue b ON a.ChgType = b.ColID  -- join一下, 取出变动名称
+) AS d
+LEFT JOIN TB_FieldValue c ON d.diseaseName = c.ColID -- join一下, 取出疾病名称
