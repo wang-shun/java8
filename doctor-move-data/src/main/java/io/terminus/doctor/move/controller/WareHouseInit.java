@@ -26,6 +26,7 @@ import io.terminus.doctor.user.model.DoctorUserDataPermission;
 import io.terminus.doctor.user.model.Sub;
 import io.terminus.doctor.user.service.DoctorUserReadService;
 import io.terminus.doctor.warehouse.dao.DoctorWareHouseDao;
+import io.terminus.doctor.warehouse.manager.MaterialInWareHouseManager;
 import io.terminus.doctor.warehouse.model.DoctorWareHouse;
 import io.terminus.parana.user.model.LoginType;
 import io.terminus.parana.user.model.User;
@@ -83,24 +84,25 @@ public class WareHouseInit {
     private void init(String mobile, Long dataSourceId){
         User user = RespHelper.or500(doctorUserReadService.findBy(mobile, LoginType.MOBILE));
         Long userId = user.getId();
-        DoctorStaff staff = doctorStaffDao.findByUserId(userId);
         DoctorUserDataPermission permission = doctorUserDataPermissionDao.findByUserId(userId);
         List<Long> farmIds = permission.getFarmIdsList();
+
+        //猪场
+        List<DoctorFarm> farms = doctorFarmDao.findByIds(farmIds);
+        //猪场Map, key = outId, value = farm
+        Map<String, DoctorFarm> farmMap = farms.stream().collect(Collectors.toMap(DoctorFarm::getOutId, v -> v));
+
         //子账号
         List<Sub> subs = subDao.findByConditions(ImmutableMap.of("parentUserId", userId), null);
-        // key = realName, value = Sub
+        //子账号map, key = realName, value = Sub
         Map<String, Sub> subMap = subs.stream().collect(Collectors.toMap(Sub::getRealName, v -> v));
 
-        this.createWareHouse(dataSourceId, farmIds, subMap);
-    }
 
-    //每种类型的仓库都创建一个吧
-    private void createWareHouse(Long dataSourceId, List<Long> farmIds, Map<String, Sub> subMap){
+        //1..先初始化仓库, 每种类型的仓库各一个
         List<B_WareHouse> list = RespHelper.or500(doctorMoveDatasourceHandler.findAllData(dataSourceId, B_WareHouse.class, DoctorMoveTableEnum.B_WareHouse));
         if(list != null && !list.isEmpty()){
             String managerName = list.get(0).getManager().split(",")[0];
-
-            for(DoctorFarm farm : doctorFarmDao.findByIds(farmIds)){
+            for(DoctorFarm farm : farmMap.values()){
                 DoctorWareHouse wareHouse = new DoctorWareHouse();
                 wareHouse.setFarmId(farm.getId());
                 wareHouse.setFarmName(farm.getName());
@@ -112,9 +114,13 @@ public class WareHouseInit {
                     doctorWareHouseDao.create(wareHouse);
                 }
             }
-
+            // 用户有仓库信息,则应当继续
             this.insertBasicMaterial(dataSourceId);
+
+            //往仓库里添加物料
+            this.addMaterial2Warehouse(dataSourceId, farmMap);
         }
+        // 这个 if 外面不能写代码
     }
 
     //往基础物料表加数据
@@ -183,5 +189,10 @@ public class WareHouseInit {
             basicMaterial.setRemark(medicine.getRemark());
             doctorBasicMaterialDao.create(basicMaterial);
         });
+    }
+
+    //往仓库里添加物料
+    private void addMaterial2Warehouse(Long dataSourceId, Map<String, DoctorFarm> farmMap){
+
     }
 }
