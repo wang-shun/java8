@@ -115,10 +115,10 @@ public class WareHouseInit {
         //药品
         DoctorBasicMaterial basicMaterial = new DoctorBasicMaterial();
         basicMaterial.setType(WareHouseType.MEDICINE.getKey());
-        basicMaterial.setName();
-        basicMaterial.setSrm();
-        basicMaterial.setUnitGroupName();
-        basicMaterial.setUnitName();
-        basicMaterial.setRemark();
+//        basicMaterial.setName();
+//        basicMaterial.setSrm();
+//        basicMaterial.setUnitGroupName();
+//        basicMaterial.setUnitName();
+//        basicMaterial.setRemark();
     }
 }
