@@ -2,12 +2,18 @@ package io.terminus.doctor.move.controller;
 
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableMap;
+import io.terminus.doctor.basic.dao.DoctorBasicMaterialDao;
 import io.terminus.doctor.basic.model.DoctorBasicMaterial;
 import io.terminus.doctor.common.enums.WareHouseType;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.move.handler.DoctorMoveDatasourceHandler;
 import io.terminus.doctor.move.handler.DoctorMoveTableEnum;
 import io.terminus.doctor.move.model.B_WareHouse;
+import io.terminus.doctor.move.model.View_AssetList;
+import io.terminus.doctor.move.model.View_FeedList;
+import io.terminus.doctor.move.model.View_MedicineList;
+import io.terminus.doctor.move.model.View_RawMaterialList;
+import io.terminus.doctor.move.model.View_VaccinationList;
 import io.terminus.doctor.user.dao.DoctorFarmDao;
 import io.terminus.doctor.user.dao.DoctorOrgDao;
 import io.terminus.doctor.user.dao.DoctorStaffDao;
@@ -58,6 +64,8 @@ public class WareHouseInit {
     private DoctorFarmDao doctorFarmDao;
     @Autowired
     private SubDao subDao;
+    @Autowired
+    private DoctorBasicMaterialDao doctorBasicMaterialDao;
 
     @RequestMapping(value = "/init", method = RequestMethod.GET)
     public String initWareHouse(@RequestParam String mobile, @RequestParam Long dataSourceId){
@@ -76,7 +84,6 @@ public class WareHouseInit {
         User user = RespHelper.or500(doctorUserReadService.findBy(mobile, LoginType.MOBILE));
         Long userId = user.getId();
         DoctorStaff staff = doctorStaffDao.findByUserId(userId);
-        DoctorOrg org = doctorOrgDao.findById(staff.getOrgId());
         DoctorUserDataPermission permission = doctorUserDataPermissionDao.findByUserId(userId);
         List<Long> farmIds = permission.getFarmIdsList();
         //子账号
@@ -113,12 +120,68 @@ public class WareHouseInit {
     //往基础物料表加数据
     private void insertBasicMaterial(Long dataSourceId){
         //药品
-        DoctorBasicMaterial basicMaterial = new DoctorBasicMaterial();
-        basicMaterial.setType(WareHouseType.MEDICINE.getKey());
-        basicMaterial.setName();
-        basicMaterial.setSrm();
-        basicMaterial.setUnitGroupName();
-        basicMaterial.setUnitName();
-        basicMaterial.setRemark();
+        List<View_MedicineList> medicines = RespHelper.or500(doctorMoveDatasourceHandler.findAllData(dataSourceId, View_MedicineList.class, DoctorMoveTableEnum.View_MedicineList));
+        medicines.stream().filter(medicine -> doctorBasicMaterialDao.findByTypeAndName(WareHouseType.MEDICINE, medicine.getMaterialName()) == null).forEach(medicine -> {
+            DoctorBasicMaterial basicMaterial = new DoctorBasicMaterial();
+            basicMaterial.setType(WareHouseType.MEDICINE.getKey());
+            basicMaterial.setName(medicine.getMaterialName());
+            basicMaterial.setSrm(medicine.getSrm());
+            basicMaterial.setUnitGroupName(medicine.getUnitGroupText());
+            basicMaterial.setUnitName(medicine.getUnitName());
+            basicMaterial.setRemark(medicine.getRemark());
+            doctorBasicMaterialDao.create(basicMaterial);
+        });
+
+        //疫苗
+        List<View_VaccinationList> vaccinationLists = RespHelper.or500(doctorMoveDatasourceHandler.findAllData(dataSourceId, View_VaccinationList.class, DoctorMoveTableEnum.View_VaccinationList));
+        vaccinationLists.stream().filter(medicine -> doctorBasicMaterialDao.findByTypeAndName(WareHouseType.VACCINATION, medicine.getMaterialName()) == null).forEach(medicine -> {
+            DoctorBasicMaterial basicMaterial = new DoctorBasicMaterial();
+            basicMaterial.setType(WareHouseType.VACCINATION.getKey());
+            basicMaterial.setName(medicine.getMaterialName());
+            basicMaterial.setSrm(medicine.getSrm());
+            basicMaterial.setUnitGroupName(medicine.getUnitGroupText());
+            basicMaterial.setUnitName(medicine.getUnitName());
+            basicMaterial.setRemark(medicine.getRemark());
+            doctorBasicMaterialDao.create(basicMaterial);
+        });
+
+        //原料
+        List<View_RawMaterialList> rawMaterialLists = RespHelper.or500(doctorMoveDatasourceHandler.findAllData(dataSourceId, View_RawMaterialList.class, DoctorMoveTableEnum.View_RawMaterialList));
+        rawMaterialLists.stream().filter(medicine -> doctorBasicMaterialDao.findByTypeAndName(WareHouseType.MATERIAL, medicine.getMaterialName()) == null).forEach(medicine -> {
+            DoctorBasicMaterial basicMaterial = new DoctorBasicMaterial();
+            basicMaterial.setType(WareHouseType.MATERIAL.getKey());
+            basicMaterial.setName(medicine.getMaterialName());
+            basicMaterial.setSrm(medicine.getSrm());
+            basicMaterial.setUnitGroupName(medicine.getUnitGroupText());
+            basicMaterial.setUnitName(medicine.getUnitName());
+            basicMaterial.setRemark(medicine.getRemark());
+            doctorBasicMaterialDao.create(basicMaterial);
+        });
+
+        //饲料
+        List<View_FeedList> feedLists = RespHelper.or500(doctorMoveDatasourceHandler.findAllData(dataSourceId, View_FeedList.class, DoctorMoveTableEnum.View_FeedList));
+        feedLists.stream().filter(medicine -> doctorBasicMaterialDao.findByTypeAndName(WareHouseType.FEED, medicine.getMaterialName()) == null).forEach(medicine -> {
+            DoctorBasicMaterial basicMaterial = new DoctorBasicMaterial();
+            basicMaterial.setType(WareHouseType.FEED.getKey());
+            basicMaterial.setName(medicine.getMaterialName());
+            basicMaterial.setSrm(medicine.getSrm());
+            basicMaterial.setUnitGroupName(medicine.getUnitGroupText());
+            basicMaterial.setUnitName(medicine.getUnitName());
+            basicMaterial.setRemark(medicine.getRemark());
+            doctorBasicMaterialDao.create(basicMaterial);
+        });
+
+        // 消耗品
+        List<View_AssetList> assetLists = RespHelper.or500(doctorMoveDatasourceHandler.findAllData(dataSourceId, View_AssetList.class, DoctorMoveTableEnum.View_AssetList));
+        assetLists.stream().filter(medicine -> doctorBasicMaterialDao.findByTypeAndName(WareHouseType.CONSUME, medicine.getMaterialName()) == null).forEach(medicine -> {
+            DoctorBasicMaterial basicMaterial = new DoctorBasicMaterial();
+            basicMaterial.setType(WareHouseType.CONSUME.getKey());
+            basicMaterial.setName(medicine.getMaterialName());
+            basicMaterial.setSrm(medicine.getSrm());
+            basicMaterial.setUnitGroupName(medicine.getUnitGroupText());
+            basicMaterial.setUnitName(medicine.getUnitName());
+            basicMaterial.setRemark(medicine.getRemark());
+            doctorBasicMaterialDao.create(basicMaterial);
+        });
     }
 }
