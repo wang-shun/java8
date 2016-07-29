@@ -31,6 +31,7 @@ import io.terminus.doctor.move.model.B_ChangeReason;
 import io.terminus.doctor.move.model.B_Customer;
 import io.terminus.doctor.move.model.Proc_InventoryGain;
 import io.terminus.doctor.move.model.TB_FieldValue;
+import io.terminus.doctor.move.model.View_EventListGain;
 import io.terminus.doctor.move.model.View_GainCardList;
 import io.terminus.doctor.move.model.View_PigLocationList;
 import io.terminus.doctor.user.dao.DoctorStaffDao;
@@ -259,10 +260,12 @@ public class DoctorMoveDataService implements CommandLineRunner {
             //2. 迁移DoctorGroupEvent
             Map<Long, List<DoctorGroupEvent>> eventMap = Maps.newHashMap();
 
+            List<View_EventListGain> gainEvents = RespHelper.orServEx(doctorMoveDatasourceHandler.findByHbsSql(moveId, View_EventListGain.class, "DoctorGroupEvent-EventListGain"));
+
             //3. 迁移DoctorTrack
             //统计结果转换成map
             Map<String, Proc_InventoryGain> gainMap = RespHelper.orServEx(doctorMoveDatasourceHandler
-                    .findByHbsSql(moveId, Proc_InventoryGain.class, "DoctorGroupTrack-Proc_InventoryGain.hbs", ImmutableMap.of("date", new Date()))).stream()
+                    .findByHbsSql(moveId, Proc_InventoryGain.class, "DoctorGroupTrack-Proc_InventoryGain", ImmutableMap.of("date", new Date()))).stream()
                     .filter(f -> true) // TODO: 16/7/28 多个猪场注意过滤outId
                     .collect(Collectors.toMap(Proc_InventoryGain::getGroupOutId, v -> v));
 
@@ -461,6 +464,8 @@ public class DoctorMoveDataService implements CommandLineRunner {
     @Override
     public void run(String... strings) throws Exception {
         // Just for test!
-
+//        List<View_EventListGain> gainEvents = RespHelper.orServEx(doctorMoveDatasourceHandler.findByHbsSql(1L, View_EventListGain.class, "DoctorGroupEvent-EventListGain"));
+//        System.out.println(gainEvents);
+        //// TODO: 16/7/29  int 转换保存 
     }
 }
