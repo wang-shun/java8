@@ -1,16 +1,26 @@
 package io.terminus.doctor.move.controller;
 
 import com.google.common.base.Throwables;
+import com.google.common.collect.ImmutableMap;
+import io.terminus.doctor.basic.model.DoctorBasicMaterial;
+import io.terminus.doctor.common.enums.WareHouseType;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.move.handler.DoctorMoveDatasourceHandler;
+import io.terminus.doctor.move.handler.DoctorMoveTableEnum;
+import io.terminus.doctor.move.model.B_WareHouse;
 import io.terminus.doctor.user.dao.DoctorFarmDao;
 import io.terminus.doctor.user.dao.DoctorOrgDao;
 import io.terminus.doctor.user.dao.DoctorStaffDao;
 import io.terminus.doctor.user.dao.DoctorUserDataPermissionDao;
+import io.terminus.doctor.user.dao.SubDao;
+import io.terminus.doctor.user.model.DoctorFarm;
 import io.terminus.doctor.user.model.DoctorOrg;
 import io.terminus.doctor.user.model.DoctorStaff;
 import io.terminus.doctor.user.model.DoctorUserDataPermission;
+import io.terminus.doctor.user.model.Sub;
 import io.terminus.doctor.user.service.DoctorUserReadService;
+import io.terminus.doctor.warehouse.dao.DoctorWareHouseDao;
+import io.terminus.doctor.warehouse.model.DoctorWareHouse;
 import io.terminus.parana.user.model.LoginType;
 import io.terminus.parana.user.model.User;
 import lombok.extern.slf4j.Slf4j;
@@ -21,6 +31,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Created by chenzenghui on 16/7/28.
@@ -37,11 +49,15 @@ public class WareHouseInit {
     @Autowired
     private DoctorStaffDao doctorStaffDao;
     @Autowired
-    private DoctorFarmDao doctorFarmDao;
+    private DoctorWareHouseDao doctorWareHouseDao;
     @Autowired
     private DoctorUserDataPermissionDao doctorUserDataPermissionDao;
     @Autowired
     private DoctorMoveDatasourceHandler doctorMoveDatasourceHandler;
+    @Autowired
+    private DoctorFarmDao doctorFarmDao;
+    @Autowired
+    private SubDao subDao;
 
     @RequestMapping(value = "/init", method = RequestMethod.GET)
     public String initWareHouse(@RequestParam String mobile, @RequestParam Long dataSourceId){
@@ -52,7 +68,7 @@ public class WareHouseInit {
             return "ok";
         }catch(Exception e){
             log.error("init warehouse data, mobile={}, dataSourceId={}, error:{}", mobile, dataSourceId, Throwables.getStackTraceAsString(e));
-            return "error";
+            return Throwables.getStackTraceAsString(e);
         }
     }
 
@@ -63,6 +79,46 @@ public class WareHouseInit {
         DoctorOrg org = doctorOrgDao.findById(staff.getOrgId());
         DoctorUserDataPermission permission = doctorUserDataPermissionDao.findByUserId(userId);
         List<Long> farmIds = permission.getFarmIdsList();
+        //子账号
+        List<Sub> subs = subDao.findByConditions(ImmutableMap.of("parentUserId", userId), null);
+        // key = realName, value = Sub
+        Map<String, Sub> subMap = subs.stream().collect(Collectors.toMap(Sub::getRealName, v -> v));
 
+        this.createWareHouse(dataSourceId, farmIds, subMap);
+    }
+
+    //每种类型的仓库都创建一个吧
+    private void createWareHouse(Long dataSourceId, List<Long> farmIds, Map<String, Sub> subMap){
+        List<B_WareHouse> list = RespHelper.or500(doctorMoveDatasourceHandler.findAllData(dataSourceId, B_WareHouse.class, DoctorMoveTableEnum.B_WareHouse));
+        if(list != null && !list.isEmpty()){
+            String managerName = list.get(0).getManager().split(",")[0];
+
+            for(DoctorFarm farm : doctorFarmDao.findByIds(farmIds)){
+                DoctorWareHouse wareHouse = new DoctorWareHouse();
+                wareHouse.setFarmId(farm.getId());
+                wareHouse.setFarmName(farm.getName());
+                wareHouse.setManagerId(subMap.get(managerName).getUserId());
+                wareHouse.setManagerName(managerName);
+                for(WareHouseType type : WareHouseType.values()){
+                    wareHouse.setType(type.getKey());
+                    wareHouse.setWareHouseName(type.getDesc() + "仓库");
+                    doctorWareHouseDao.create(wareHouse);
+                }
+            }
+
+            this.insertBasicMaterial(dataSourceId);
+        }
+    }
+
+    //往基础物料表加数据
+    private void insertBasicMaterial(Long dataSourceId){
+        //药品
+        DoctorBasicMaterial basicMaterial = new DoctorBasicMaterial();
+        basicMaterial.setType(WareHouseType.MEDICINE.getKey());
+        basicMaterial.setName();
+        basicMaterial.setSrm();
+        basicMaterial.setUnitGroupName();
+        basicMaterial.setUnitName();
+        basicMaterial.setRemark();
     }
 }

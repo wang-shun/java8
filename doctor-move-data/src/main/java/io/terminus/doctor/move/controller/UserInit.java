@@ -87,7 +87,7 @@ public class UserInit {
             return "ok";
         }catch(Exception e){
             log.error("init user data, mobile={}, dataSourceId={}, error:{}", mobile, dataSourceId, Throwables.getStackTraceAsString(e));
-            return "error";
+            return Throwables.getStackTraceAsString(e);
         }
     }
 
