@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableMap;
 import io.terminus.common.mysql.dao.MyBatisDao;
 import io.terminus.common.utils.MapBuilder;
 import io.terminus.doctor.basic.model.DoctorBasicMaterial;
+import io.terminus.doctor.common.enums.WareHouseType;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -42,5 +43,9 @@ public class DoctorBasicMaterialDao extends MyBatisDao<DoctorBasicMaterial> {
     public List<DoctorBasicMaterial> listSince(Long lastId, String since, int limit) {
         return getSqlSession().selectList(sqlId("listSince"),
                 ImmutableMap.of("lastId", lastId, "limit", limit, "since", since));
+    }
+
+    public DoctorBasicMaterial findByTypeAndName(WareHouseType type, String name){
+        return sqlSession.selectOne(sqlId("findByTypeAndName"), ImmutableMap.of("type", type.getKey(), "name", name));
     }
 }

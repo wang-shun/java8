@@ -71,6 +71,12 @@
         </where>
     </select>
 
+    <select id="findByTypeAndName" parameterType="map" resultMap="DoctorBasicMaterialMap" >
+        SELECT <include refid="cols_all" />
+        FROM <include refid="tb" />
+        where `type` = #{type} and `name` = #{name}
+    </select>
+
     <update id="update" parameterType="DoctorBasicMaterial">
         UPDATE
         <include refid="tb"/>

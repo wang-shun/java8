@@ -1,10 +1,13 @@
 package io.terminus.doctor.move.model;
 
+import lombok.Data;
+
 import java.io.Serializable;
 
 /**
  * Created by chenzenghui on 16/7/29.
  */
+@Data
 public class View_RawMaterialList implements Serializable {
     private String OID;
     private String RawMaterialName;
