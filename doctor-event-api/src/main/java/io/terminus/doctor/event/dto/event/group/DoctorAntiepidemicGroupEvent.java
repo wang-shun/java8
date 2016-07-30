@@ -1,10 +1,12 @@
 package io.terminus.doctor.event.dto.event.group;
 
+import io.terminus.doctor.event.enums.PigSource;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 /**
  * Desc: 防疫事件
@@ -46,7 +48,7 @@ public class DoctorAntiepidemicGroupEvent extends BaseGroupEvent implements Seri
     /**
      *  防疫人员id
      */
-    private Integer vaccinStaffId;
+    private Long vaccinStaffId;
 
     /**
      *  防疫人员名称
@@ -70,6 +72,15 @@ public class DoctorAntiepidemicGroupEvent extends BaseGroupEvent implements Seri
         VaccinResult(int value, String desc) {
             this.value = value;
             this.desc = desc;
+        }
+
+        public static VaccinResult from(String desc){
+            for(VaccinResult result : VaccinResult.values()){
+                if(Objects.equals(result.desc, desc)){
+                    return result;
+                }
+            }
+            return null;
         }
     }
 }

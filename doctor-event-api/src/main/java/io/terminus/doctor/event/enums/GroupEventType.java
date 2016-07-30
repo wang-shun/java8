@@ -45,6 +45,15 @@ public enum GroupEventType {
         return null;
     }
 
+    public static GroupEventType from(String desc) {
+        for (GroupEventType type : GroupEventType.values()) {
+            if (Objects.equal(type.desc, desc)) {
+                return type;
+            }
+        }
+        return null;
+    }
+
     //空猪群不能操作事件的类型
     public static final List<Integer> EMPTY_GROUPS = Lists.newArrayList(
             GroupEventType.CHANGE.getValue(),

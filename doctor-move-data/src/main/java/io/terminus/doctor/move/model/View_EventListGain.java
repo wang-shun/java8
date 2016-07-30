@@ -9,7 +9,7 @@ import java.util.Date;
  * Created by chenzenghui on 16/7/27.
  */
 @Data
-public class View_EventListGain implements Serializable{
+public class View_EventListGain implements Serializable {
     private static final long serialVersionUID = 5363694163735495420L;
     private String diseaseName;        // 疾病名称
     private Date birthDate;
@@ -24,6 +24,7 @@ public class View_EventListGain implements Serializable{
     private Long amount;
     private String customer;
     private String context;            //此字段有多个意思
+    private Integer isAuto;            //是否是自动生成的事件
     private String sexName;
     private String breed;
     private String source;             // 来源或其他乱七八糟的值
@@ -39,6 +40,8 @@ public class View_EventListGain implements Serializable{
     private String notDisease;         // 不是疾病, 可能有多个值
     private String toGroupOutId;       // 猪群转群的 目标猪群outId
     private String eventDesc;          // 事件详情
+    private String remark;
+}
 
 /*
 防疫：
@@ -74,4 +77,4 @@ LitterId: 转种猪的name = pigCode
 birthDate:
 Treament: 转入猪舍
 */
-}
+

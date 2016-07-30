@@ -38,4 +38,13 @@ public enum PigSource {
         }
         return null;
     }
+
+    public static PigSource from(String desc){
+        for(PigSource pigSource : PigSource.values()){
+            if(Objects.equals(pigSource.desc, desc)){
+                return pigSource;
+            }
+        }
+        return null;
+    }
 }

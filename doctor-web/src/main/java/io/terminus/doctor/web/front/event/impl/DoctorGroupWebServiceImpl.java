@@ -46,14 +46,12 @@ import io.terminus.doctor.event.service.DoctorGroupReadService;
 import io.terminus.doctor.event.service.DoctorGroupWriteService;
 import io.terminus.doctor.user.model.DoctorFarm;
 import io.terminus.doctor.user.model.DoctorOrg;
-import io.terminus.doctor.user.model.DoctorStaff;
+import io.terminus.doctor.user.model.Sub;
 import io.terminus.doctor.user.service.DoctorFarmReadService;
 import io.terminus.doctor.user.service.DoctorOrgReadService;
-import io.terminus.doctor.user.service.DoctorStaffReadService;
+import io.terminus.doctor.user.service.PrimaryUserReadService;
 import io.terminus.doctor.web.front.event.service.DoctorGroupWebService;
 import io.terminus.pampas.common.UserUtil;
-import io.terminus.parana.user.model.User;
-import io.terminus.parana.user.service.UserReadService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -85,11 +83,12 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
     private final DoctorBarnReadService doctorBarnReadService;
     private final DoctorGroupReadService doctorGroupReadService;
     private final DoctorOrgReadService doctorOrgReadService;
-    private final DoctorStaffReadService doctorStaffReadService;
-    private final UserReadService<User> userReadService;
 
     @RpcConsumer
     private DoctorBasicMaterialReadService doctorBasicMaterialReadService;
+
+    @RpcConsumer
+    private PrimaryUserReadService primaryUserReadService;
 
     @Autowired
     public DoctorGroupWebServiceImpl(DoctorGroupWriteService doctorGroupWriteService,
@@ -97,17 +96,13 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
                                      DoctorBasicReadService doctorBasicReadService,
                                      DoctorBarnReadService doctorBarnReadService,
                                      DoctorGroupReadService doctorGroupReadService,
-                                     DoctorOrgReadService doctorOrgReadService,
-                                     DoctorStaffReadService doctorStaffReadService,
-                                     UserReadService<User> userReadService) {
+                                     DoctorOrgReadService doctorOrgReadService) {
         this.doctorGroupWriteService = doctorGroupWriteService;
         this.doctorFarmReadService = doctorFarmReadService;
         this.doctorBasicReadService = doctorBasicReadService;
         this.doctorBarnReadService = doctorBarnReadService;
         this.doctorGroupReadService = doctorGroupReadService;
         this.doctorOrgReadService = doctorOrgReadService;
-        this.doctorStaffReadService = doctorStaffReadService;
-        this.userReadService = userReadService;
     }
 
     private static final JsonMapper JSON_MAPPER = JsonMapper.nonEmptyMapper();
@@ -197,12 +192,12 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
                     break;
                 case DISEASE:
                     params.put("diseaseName", getBasicName(getLong(params, "diseaseId")));
-                    params.put("doctorName", getStaffUserName(getLong(params, "doctorId")));
+                    params.put("doctorName", getSubUserName(getLong(params, "doctorId")));
                     orServEx(doctorGroupWriteService.groupEventDisease(groupDetail, map(putBasicFields(params), DoctorDiseaseGroupInput.class)));
                     break;
                 case ANTIEPIDEMIC:
                     params.put("vaccinName", getVaccinName(getLong(params, "vaccinId")));
-                    params.put("vaccinStaffName", getStaffUserName(getLong(params, "vaccinStaffId")));
+                    params.put("vaccinStaffName", getSubUserName(getLong(params, "vaccinStaffId")));
                     params.put("vaccinItemName", getVaccinItemName(getLong(params, "vaccinItemId")));
                     orServEx(doctorGroupWriteService.groupEventAntiepidemic(groupDetail, map(putBasicFields(params), DoctorAntiepidemicGroupInput.class)));
                     break;
@@ -274,11 +269,11 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
                     break;
                 case DISEASE:
                     params.put("diseaseName", getBasicName(getLong(params, "diseaseId")));
-                    params.put("doctorName", getStaffUserName(getLong(params, "doctorId")));
+                    params.put("doctorName", getSubUserName(getLong(params, "doctorId")));
                     orServEx(doctorGroupWriteService.editEventDisease(groupDetail, event, map(pubUpdatorFields(params), DoctorDiseaseGroupEdit.class)));
                     break;
                 case ANTIEPIDEMIC:
-                    params.put("vaccinStaffName", getStaffUserName(getLong(params, "vaccinStaffId")));
+                    params.put("vaccinStaffName", getSubUserName(getLong(params, "vaccinStaffId")));
                     params.put("vaccinItemName", getVaccinItemName(getLong(params, "vaccinItemId")));
                     orServEx(doctorGroupWriteService.editEventAntiepidemic(groupDetail, event, map(pubUpdatorFields(params), DoctorAntiepidemicGroupEdit.class)));
                     break;
@@ -372,13 +367,12 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
     }
 
     //获取职工用户的名称
-    private String getStaffUserName(Long staffId) {
-        if (staffId == null) {
+    private String getSubUserName(Long userId) {
+        if (userId == null) {
             return null;
         }
-        DoctorStaff staff = RespHelper.or500(doctorStaffReadService.findStaffById(staffId));
-        User user = RespHelper.or500(userReadService.findById(staff.getUserId()));
-        return user.getName();
+        Sub sub = RespHelper.or(primaryUserReadService.findSubByUserId(userId), new Sub());
+        return sub.getRealName();
     }
 
     //获取防疫项目名称

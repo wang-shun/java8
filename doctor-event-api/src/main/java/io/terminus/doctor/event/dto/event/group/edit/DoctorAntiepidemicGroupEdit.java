@@ -35,7 +35,7 @@ public class DoctorAntiepidemicGroupEdit extends BaseGroupEdit implements Serial
     /**
      *  防疫人员id
      */
-    private Integer vaccinStaffId;
+    private Long vaccinStaffId;
 
     /**
      *  防疫人员名称

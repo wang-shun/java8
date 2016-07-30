@@ -14,13 +14,25 @@ import io.terminus.doctor.basic.model.DoctorBasic;
 import io.terminus.doctor.basic.model.DoctorChangeReason;
 import io.terminus.doctor.basic.model.DoctorCustomer;
 import io.terminus.doctor.common.enums.PigType;
+import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorGroupDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
+import io.terminus.doctor.event.dto.event.group.DoctorAntiepidemicGroupEvent;
+import io.terminus.doctor.event.dto.event.group.DoctorChangeGroupEvent;
+import io.terminus.doctor.event.dto.event.group.DoctorCloseGroupEvent;
+import io.terminus.doctor.event.dto.event.group.DoctorDiseaseGroupEvent;
+import io.terminus.doctor.event.dto.event.group.DoctorLiveStockGroupEvent;
+import io.terminus.doctor.event.dto.event.group.DoctorMoveInGroupEvent;
+import io.terminus.doctor.event.dto.event.group.DoctorNewGroupEvent;
+import io.terminus.doctor.event.dto.event.group.DoctorTransFarmGroupEvent;
+import io.terminus.doctor.event.dto.event.group.DoctorTransGroupEvent;
+import io.terminus.doctor.event.dto.event.group.DoctorTurnSeedGroupEvent;
 import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.enums.IsOrNot;
+import io.terminus.doctor.event.enums.PigSource;
 import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
@@ -37,7 +49,9 @@ import io.terminus.doctor.move.model.View_PigLocationList;
 import io.terminus.doctor.user.dao.DoctorStaffDao;
 import io.terminus.doctor.user.model.DoctorFarm;
 import io.terminus.doctor.user.model.DoctorOrg;
+import io.terminus.doctor.user.model.DoctorStaff;
 import io.terminus.doctor.user.model.DoctorUser;
+import io.terminus.doctor.user.model.Sub;
 import io.terminus.parana.user.impl.dao.UserProfileDao;
 import io.terminus.parana.user.model.UserProfile;
 import lombok.extern.slf4j.Slf4j;
@@ -157,7 +171,7 @@ public class DoctorMoveDataService implements CommandLineRunner {
                     .findAllData(moveId, View_PigLocationList.class, DoctorMoveTableEnum.view_PigLocationList)).stream()
                     .filter(loc -> isFarm(loc.getFarmOID(), mockFarm().getOutId()))     //这一步很重要, 如果一个公司有多个猪场, 猪场id必须匹配!
                     .filter(f -> true) // TODO: 16/7/28 多个猪场注意过滤outId
-                    .map(location -> getBarn(mockOrg(), mockFarm(), mockUser(), location))
+                    .map(location -> getBarn(mockOrg(), mockFarm(), mockSub(), location))
                     .collect(Collectors.toList());
 
             if (notEmpty(barns)) {
@@ -249,18 +263,19 @@ public class DoctorMoveDataService implements CommandLineRunner {
             Map<String, DoctorBarn> barnMap = doctorBarnDao.findByFarmId(mockFarm().getId()).stream()
                     .collect(Collectors.toMap(DoctorBarn::getOutId, v -> v));
             Map<Integer, Map<String, DoctorBasic>> basicMap = getBasicMap();
-            Map<String, Long> staffMap = getStaffName(mockOrg().getId());
+            Map<String, Long> subMap = getSubMap(mockOrg().getId());
 
             //1. 迁移DoctorGroup
             List<DoctorGroup> groups = RespHelper.orServEx(doctorMoveDatasourceHandler
                     .findByHbsSql(moveId, View_GainCardList.class, "DoctorGroup-GainCardList")).stream()
                     .filter(f -> true) // TODO: 16/7/28 多个猪场注意过滤outId
-                    .map(gain -> getGroup(mockOrg(), mockFarm(), gain, barnMap, basicMap, staffMap)).collect(Collectors.toList());
+                    .map(gain -> getGroup(mockOrg(), mockFarm(), gain, barnMap, basicMap, subMap)).collect(Collectors.toList());
 
             //2. 迁移DoctorGroupEvent
             Map<Long, List<DoctorGroupEvent>> eventMap = Maps.newHashMap();
 
             List<View_EventListGain> gainEvents = RespHelper.orServEx(doctorMoveDatasourceHandler.findByHbsSql(moveId, View_EventListGain.class, "DoctorGroupEvent-EventListGain"));
+
 
             //3. 迁移DoctorTrack
             //统计结果转换成map
@@ -282,6 +297,114 @@ public class DoctorMoveDataService implements CommandLineRunner {
             log.error("move group failed, moveId:{}, cause:{}", moveId, Throwables.getStackTraceAsString(e));
             return Response.fail("move.group.fail");
         }
+    }
+
+    //拼接猪群事件
+    private DoctorGroupEvent getGroupEvent(DoctorGroup group, View_EventListGain gainEvent, DoctorBarn barn, Map<Integer, Map<String, DoctorBasic>> basicMap, DoctorStaff staff) {
+        DoctorGroupEvent event = new DoctorGroupEvent();
+        event.setOrgId(group.getOrgId());
+        event.setOrgName(group.getOrgName());
+        event.setFarmId(group.getFarmId());
+        event.setFarmName(group.getFarmName());
+        event.setGroupId(group.getId());
+        event.setGroupCode(group.getGroupCode());
+        event.setEventAt(gainEvent.getEventAt());
+
+        //转换事件类型
+        GroupEventType type = GroupEventType.from(gainEvent.getEventTypeName());
+
+        event.setType(type == null ? null : type.getValue());
+        event.setName(gainEvent.getEventTypeName());
+        event.setDesc(gainEvent.getEventDesc());
+        event.setBarnId(barn.getId());
+        event.setBarnName(barn.getName());
+        event.setPigType(group.getPigType());
+        event.setQuantity(gainEvent.getQuantity());
+        event.setWeight(gainEvent.getWeight());
+        event.setAvgWeight(gainEvent.getAvgWeight());
+        event.setAvgDayAge(gainEvent.getAvgDayAge());
+        event.setIsAuto(gainEvent.getIsAuto());
+        event.setOutId(gainEvent.getGroupEventOutId());
+        event.setRemark(gainEvent.getRemark());
+        return getGroupEventExtra(type, event, gainEvent, basicMap, staff);
+    }
+
+    //根据类型拼接猪群事件明细
+    @SuppressWarnings("unchecked")
+    private DoctorGroupEvent getGroupEventExtra(GroupEventType type, DoctorGroupEvent event, View_EventListGain gainEvent,
+                                                Map<Integer, Map<String, DoctorBasic>> basicMap, Sub sub) {
+        if (type == null) {
+            return event;
+        }
+
+        switch (type) {
+            case NEW:
+                DoctorNewGroupEvent newEvent = new DoctorNewGroupEvent();
+                PigSource source = PigSource.from(gainEvent.getSource());
+                newEvent.setSource(source == null ? null : source.getKey());
+                event.setExtraMap(newEvent);
+                break;
+            case MOVE_IN:
+                DoctorMoveInGroupEvent moveIn = new DoctorMoveInGroupEvent();
+                // TODO: 16/7/30
+                event.setExtraMap(moveIn);
+                break;
+            case CHANGE:
+                DoctorChangeGroupEvent change = new DoctorChangeGroupEvent();
+                // TODO: 16/7/30
+                event.setExtraMap(change);
+                break;
+            case TRANS_GROUP:
+                DoctorTransGroupEvent transGroup = new DoctorTransGroupEvent();
+                // TODO: 16/7/30
+                event.setExtraMap(transGroup);
+                break;
+            case TURN_SEED:
+                DoctorTurnSeedGroupEvent turnSeed = new DoctorTurnSeedGroupEvent();
+                // TODO: 16/7/30
+                event.setExtraMap(turnSeed);
+                break;
+            case LIVE_STOCK:
+                DoctorLiveStockGroupEvent liveStock = new DoctorLiveStockGroupEvent();
+                liveStock.setMeasureAt(DateUtil.toDateTimeString(gainEvent.getEventAt()));
+                event.setExtraMap(liveStock);
+                break;
+            case DISEASE:
+                DoctorDiseaseGroupEvent disease = new DoctorDiseaseGroupEvent();
+                DoctorBasic basic = basicMap.get(DoctorBasic.Type.DISEASE.getValue()).get(gainEvent.getDiseaseName());
+                disease.setDiseaseId(basic == null ? null : basic.getId());
+                disease.setDiseaseName(gainEvent.getDiseaseName());
+                disease.setDoctorId(sub.getUserId());
+                disease.setDoctorName(sub.getRealName());
+                disease.setQuantity(gainEvent.getQuantity());
+                event.setExtraMap(disease);
+                break;
+            case ANTIEPIDEMIC:
+                DoctorAntiepidemicGroupEvent anti = new DoctorAntiepidemicGroupEvent();
+                //anti.setVaccinId(); // TODO: 16/7/30 需要疫苗的基础数据
+                anti.setVaccinName(gainEvent.getNotDisease());
+
+                DoctorAntiepidemicGroupEvent.VaccinResult result = DoctorAntiepidemicGroupEvent.VaccinResult.from(gainEvent.getContext());
+                anti.setVaccinResult(result == null ? null : result.getValue());
+                anti.setVaccinStaffId(sub.getUserId());
+                anti.setVaccinStaffName(sub.getRealName());
+                anti.setQuantity(gainEvent.getQuantity());
+                event.setExtraMap(anti);
+                break;
+            case TRANS_FARM:
+                DoctorTransFarmGroupEvent transFarm = new DoctorTransFarmGroupEvent();
+                // TODO: 16/7/30
+                event.setExtraMap(transFarm);
+                break;
+            case CLOSE:
+                DoctorCloseGroupEvent close = new DoctorCloseGroupEvent();
+                close.setCloseAt(DateUtil.toDateTimeString(gainEvent.getEventAt()));
+                event.setExtraMap(close);
+                break;
+            default:
+                break;
+        }
+        return event;
     }
 
     //拼接猪群跟踪
@@ -335,7 +458,7 @@ public class DoctorMoveDataService implements CommandLineRunner {
 
     //拼接猪群
     private DoctorGroup getGroup(DoctorOrg org, DoctorFarm farm, View_GainCardList gain,
-                                 Map<String, DoctorBarn> barnMap, Map<Integer, Map<String, DoctorBasic>> basicMap, Map<String, Long> staffMap) {
+                                 Map<String, DoctorBarn> barnMap, Map<Integer, Map<String, DoctorBasic>> basicMap, Map<String, Long> subMap) {
         DoctorGroup group = BeanMapper.map(gain, DoctorGroup.class);
 
         group.setOrgId(org.getId());
@@ -365,7 +488,7 @@ public class DoctorMoveDataService implements CommandLineRunner {
             group.setGeneticName(gene.getName());
         }
         if (notEmpty(gain.getStaffName())) {
-            group.setStaffId(staffMap.get(gain.getStaffName()));
+            group.setStaffId(subMap.get(gain.getStaffName()));
         }
         return group;
     }
@@ -380,13 +503,13 @@ public class DoctorMoveDataService implements CommandLineRunner {
         return basicMap;
     }
 
-    //拼接staff,  Map<真实姓名, DoctorStaff>
-    public Map<String, Long> getStaffName(Long orgId) {
+    //拼接staff,  Map<真实姓名, userId>
+    public Map<String, Long> getSubMap(Long orgId) {
         Map<String, Long> staffMap = Maps.newHashMap();
         doctorStaffDao.findByOrgId(orgId).forEach(staff -> {
             UserProfile profile = userProfileDao.findByUserId(staff.getUserId());
             if (profile != null && notEmpty(profile.getRealName())) {
-                staffMap.put(profile.getRealName(), staff.getId());
+                staffMap.put(profile.getRealName(), staff.getUserId());
             }
         });
         return staffMap;
@@ -416,7 +539,7 @@ public class DoctorMoveDataService implements CommandLineRunner {
     }
 
     //拼接barn
-    private DoctorBarn getBarn(DoctorOrg org, DoctorFarm farm, DoctorUser user, View_PigLocationList location) {
+    private DoctorBarn getBarn(DoctorOrg org, DoctorFarm farm, Sub sub, View_PigLocationList location) {
         //转换pigtype
         PigType pigType = PigType.from(location.getTypeName());
 
@@ -429,8 +552,8 @@ public class DoctorMoveDataService implements CommandLineRunner {
         barn.setPigType(pigType == null ? 0: pigType.getValue());
         barn.setCanOpenGroup("可以".equals(location.getCanOpenGroupText()) ? 1 : -1);
         barn.setStatus("在用".equals(location.getIsStopUseText()) ? 1 : 0);
-        barn.setStaffId(user.getId());
-        barn.setStaffName(user.getName());
+        barn.setStaffId(sub.getUserId());
+        barn.setStaffName(sub.getRealName());
         barn.setOutId(location.getOID());
         return barn;
     }
@@ -460,6 +583,14 @@ public class DoctorMoveDataService implements CommandLineRunner {
         user.setName("测试迁移管理员");
         return user;
     }
+
+    private static Sub mockSub() {
+        Sub sub = new Sub();
+        sub.setUserId(9999L);
+        sub.setRealName("测试姓名");
+        return sub;
+    }
+
 
     @Override
     public void run(String... strings) throws Exception {
