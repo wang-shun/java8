@@ -49,7 +49,6 @@ import io.terminus.doctor.move.model.View_PigLocationList;
 import io.terminus.doctor.user.dao.DoctorStaffDao;
 import io.terminus.doctor.user.model.DoctorFarm;
 import io.terminus.doctor.user.model.DoctorOrg;
-import io.terminus.doctor.user.model.DoctorStaff;
 import io.terminus.doctor.user.model.DoctorUser;
 import io.terminus.doctor.user.model.Sub;
 import io.terminus.parana.user.impl.dao.UserProfileDao;
@@ -300,7 +299,7 @@ public class DoctorMoveDataService implements CommandLineRunner {
     }
 
     //拼接猪群事件
-    private DoctorGroupEvent getGroupEvent(DoctorGroup group, View_EventListGain gainEvent, DoctorBarn barn, Map<Integer, Map<String, DoctorBasic>> basicMap, DoctorStaff staff) {
+    private DoctorGroupEvent getGroupEvent(DoctorGroup group, View_EventListGain gainEvent, DoctorBarn barn, Map<Integer, Map<String, DoctorBasic>> basicMap, Sub sub) {
         DoctorGroupEvent event = new DoctorGroupEvent();
         event.setOrgId(group.getOrgId());
         event.setOrgName(group.getOrgName());
@@ -326,7 +325,7 @@ public class DoctorMoveDataService implements CommandLineRunner {
         event.setIsAuto(gainEvent.getIsAuto());
         event.setOutId(gainEvent.getGroupEventOutId());
         event.setRemark(gainEvent.getRemark());
-        return getGroupEventExtra(type, event, gainEvent, basicMap, staff);
+        return getGroupEventExtra(type, event, gainEvent, basicMap, sub);
     }
 
     //根据类型拼接猪群事件明细
