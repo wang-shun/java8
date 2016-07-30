@@ -1,5 +1,6 @@
 package io.terminus.doctor.event.enums;
 
+import com.google.common.base.Objects;
 import lombok.Getter;
 
 /**
@@ -21,5 +22,14 @@ public enum IsOrNot {
     IsOrNot(Integer value, String desc){
         this.value = value;
         this.desc = desc;
+    }
+
+    public static IsOrNot from(String desc) {
+        for (IsOrNot is : IsOrNot.values()) {
+            if (Objects.equal(is.desc, desc)) {
+                return is;
+            }
+        }
+        return null;
     }
 }

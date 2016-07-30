@@ -1,5 +1,6 @@
 package io.terminus.doctor.event.dto.event.group;
 
+import com.google.common.base.Objects;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -72,6 +73,15 @@ public class DoctorTurnSeedGroupEvent extends BaseGroupEvent implements Serializ
         Sex(int value, String desc) {
             this.value = value;
             this.desc = desc;
+        }
+
+        public static Sex from(String desc) {
+            for (Sex sex : Sex.values()) {
+                if (Objects.equal(sex.desc, desc)) {
+                    return sex;
+                }
+            }
+            return null;
         }
     }
 }

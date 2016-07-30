@@ -107,7 +107,7 @@ public class DoctorMoveInGroupEventHandler extends DoctorAbstractGroupEventHandl
             groupTrack.setWeight(EventUtil.getWeight(groupTrack.getAvgWeight(), groupTrack.getQuantity()));
         }
         if (moveInEdit.getAmount() != null) {
-            groupTrack.setAmount(groupTrack.getAmount() - MoreObjects.firstNonNull(moveInEvent.getAmount(), 0) + moveInEdit.getAmount());
+            groupTrack.setAmount(groupTrack.getAmount() - MoreObjects.firstNonNull(moveInEvent.getAmount(), 0L) + moveInEdit.getAmount());
             groupTrack.setPrice(EventUtil.getPrice(groupTrack.getAmount(), groupTrack.getQuantity()));
         }
         doctorGroupTrackDao.update(groupTrack);

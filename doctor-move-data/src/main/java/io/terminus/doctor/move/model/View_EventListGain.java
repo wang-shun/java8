@@ -38,9 +38,10 @@ public class View_EventListGain implements Serializable {
     private String barnOutId;          // 事件发生的猪舍OID
     private String toBarnOutId;        // 转入猪舍的OID, 不一定是在猪舍oid, 也可能是猪群oid
     private String notDisease;         // 不是疾病, 可能有多个值
-    private String toGroupOutId;       // 猪群转群的 目标猪群outId
+    private String toGroupOutId;       // SourceGainOID 猪群转群的 目标猪群outId, 转入猪群的 toGroupOutId
     private String eventDesc;          // 事件详情
     private String remark;
+    private String pigCode;            // LitterId 转种猪事件的猪号
 }
 
 /*

@@ -144,4 +144,41 @@
             <if test="endAt != null">AND event_at &lt;= #{endAt}</if>
         </where>
     </select>
+
+    <insert id="creates" parameterType="list">
+        INSERT INTO <include refid="tb" />
+        (<include refid="cols_exclude_id" />)
+        VALUES
+        <foreach collection="list" separator="," item="item">
+            (
+            #{item.orgId},
+            #{item.orgName},
+            #{item.farmId},
+            #{item.farmName},
+            #{item.groupId},
+            #{item.groupCode},
+            #{item.eventAt},
+            #{item.type},
+            #{item.name},
+            #{item.desc},
+            #{item.barnId},
+            #{item.barnName},
+            #{item.pigType},
+            #{item.quantity},
+            #{item.weight},
+            #{item.avgWeight},
+            #{item.avgDayAge},
+            #{item.isAuto},
+            #{item.outId},
+            #{item.remark},
+            #{item.extra},
+            now(),
+            #{item.creatorId},
+            #{item.creatorName},
+            now(),
+            #{item.updatorId},
+            #{item.updatorName}
+            )
+        </foreach>
+    </insert>
 </mapper>

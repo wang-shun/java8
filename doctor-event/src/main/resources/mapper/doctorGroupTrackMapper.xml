@@ -130,4 +130,38 @@
         ORDER BY id DESC LIMIT #{limit}
     </select>
     <!-- search api end -->
+
+    <insert id="creates" parameterType="list">
+        INSERT INTO <include refid="tb" />
+        (<include refid="cols_exclude_id" />)
+        VALUES
+        <foreach collection="list" separator="," item="item">
+            (
+            #{item.groupId},
+            #{item.relEventId},
+            #{item.sex},
+            #{item.quantity},
+            #{item.boarQty},
+            #{item.sowQty},
+            #{item.birthDate},
+            #{item.avgDayAge},
+            #{item.weight},
+            #{item.avgWeight},
+            #{item.price},
+            #{item.amount},
+            #{item.customerId},
+            #{item.customerName},
+            #{item.saleQty},
+            #{item.extra},
+            #{item.creatorId},
+            #{item.creatorName},
+            #{item.updatorId},
+            #{item.updatorName},
+            now(),
+            now()
+
+            )
+        </foreach>
+    </insert>
+
 </mapper>

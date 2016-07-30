@@ -37,6 +37,19 @@
         #{changeTypeId}, #{reason}, #{srm}, #{outId}, #{extra}, #{creatorId}, #{creatorName}, #{updatorId}, #{updatorName}, now(), now()
     </sql>
 
+    <sql id="criteria">
+        <if test="id != null">AND id = #{id}</if>
+        <if test="changeTypeId != null">AND change_type_id = #{changeTypeId}</if>
+        <if test="reason != null">AND reason = #{reason}</if>
+        <if test="srm != null">AND srm = #{srm}</if>
+        <if test="outId != null">AND out_id = #{outId}</if>
+        <if test="extra != null">AND extra = #{extra}</if>
+        <if test="creatorId != null">AND creator_id = #{creatorId}</if>
+        <if test="creatorName != null">AND creator_name = #{creatorName}</if>
+        <if test="updatorId != null">AND updator_id = #{updatorId}</if>
+        <if test="updatorName != null">AND updator_name = #{updatorName}</if>
+    </sql>
+
     <insert id="create" parameterType="DoctorChangeReason" keyProperty="id" useGeneratedKeys="true">
         INSERT INTO
         <include refid="tb" />
@@ -86,4 +99,10 @@
         </if>
     </select>
 
+    <select id="list" parameterType="map" resultMap="DoctorChangeReasonMap">
+        SELECT <include refid="cols_all"/> FROM <include refid="tb"/>
+        <where>
+            <include refid="criteria"/>
+        </where>
+    </select>
 </mapper>

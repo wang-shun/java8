@@ -70,7 +70,7 @@ public class DoctorMoveInGroupEvent extends BaseGroupEvent implements Serializab
     /**
      * 金额(分)
      */
-    private Integer amount;
+    private Long amount;
 
     public enum InType {
         PIGLET(1, "仔猪转入"),
@@ -91,6 +91,15 @@ public class DoctorMoveInGroupEvent extends BaseGroupEvent implements Serializab
         public static InType from(Integer value){
             for (InType type : InType.values()){
                 if(Objects.equals(value, type.getValue())){
+                    return type;
+                }
+            }
+            return null;
+        }
+
+        public static InType from(String desc){
+            for (InType type : InType.values()){
+                if(Objects.equals(desc, type.desc)){
                     return type;
                 }
             }
