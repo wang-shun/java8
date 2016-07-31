@@ -712,14 +712,14 @@ public class DoctorMoveDataService implements CommandLineRunner {
         //品种
         if (notEmpty(gain.getBreed())) {
             DoctorBasic breed = basicMap.get(DoctorBasic.Type.BREED.getValue()).get(gain.getBreed());
-            group.setBreedId(breed.getId());
-            group.setBreedName(breed.getName());
+            group.setBreedId(breed == null ? null : breed.getId());
+            group.setBreedName(gain.getBreed());
         }
         //品系
         if (notEmpty(gain.getGenetic())) {
             DoctorBasic gene = basicMap.get(DoctorBasic.Type.GENETICS.getValue()).get(gain.getGenetic());
-            group.setGeneticId(gene.getId());
-            group.setGeneticName(gene.getName());
+            group.setGeneticId(gene == null ? null : gene.getId());
+            group.setGeneticName(gain.getGenetic());
         }
         if (notEmpty(gain.getStaffName())) {
             group.setStaffId(subMap.get(gain.getStaffName()));
@@ -843,6 +843,5 @@ public class DoctorMoveDataService implements CommandLineRunner {
     @Override
     public void run(String... strings) throws Exception {
         // Just for test!
-
     }
 }
