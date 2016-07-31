@@ -36,7 +36,7 @@ FROM
         CASE WHEN EventName = '疾病' THEN Disease ELSE NULL END AS diseaseName,
         SourceGainID as toGroupOutId, -- 猪群转群的 目标猪群outId
         EventDetail AS eventDesc,
-        LitterID as pigCode
+        LitterID as pigCode,
         ERemark AS remark
     FROM view_EventListGain a
     LEFT JOIN TB_FieldValue b ON a.ChgType = cast(b.ColID AS VARCHAR(16))  -- join一下, 取出变动名称, 为什么要cast一下呢? 因为ChgType不是int类型!!!
