@@ -33,7 +33,7 @@ FROM
         EOID AS groupEventOutId, -- 猪群事件的OID
         EventLocation AS barnOutId, -- 事件发生的猪舍OID
         OutDestination as toBarnOutId, --转入猪舍的OID
-        CASE WHEN EventName = '疾病' THEN Disease ELSE NULL END AS diseaseName,
+        CASE WHEN EventName = '疾病' THEN Disease ELSE NULL END AS notDisease,
         SourceGainID as toGroupOutId, -- 猪群转群的 目标猪群outId
         EventDetail AS eventDesc,
         LitterID as pigCode,
@@ -41,4 +41,4 @@ FROM
     FROM view_EventListGain a
     LEFT JOIN TB_FieldValue b ON a.ChgType = cast(b.ColID AS VARCHAR(16))  -- join一下, 取出变动名称, 为什么要cast一下呢? 因为ChgType不是int类型!!!
 ) AS d
-LEFT JOIN TB_FieldValue c ON d.diseaseName = c.ColID -- join一下, 取出疾病名称
+LEFT JOIN TB_FieldValue c ON d.notDisease = c.ColID -- join一下, 取出疾病名称

@@ -286,12 +286,13 @@ public class DoctorMoveDataService implements CommandLineRunner {
             Map<Long, List<DoctorGroupEvent>> eventMap = doctorGroupEventDao.findByFarmId(mockFarm().getId()).stream().collect(Collectors.groupingBy(DoctorGroupEvent::getGroupId));
 
             //3. 迁移DoctorTrack, 先把统计结果转换成map, 在转换track
+            String now = DateUtil.toDateTimeString(new Date());
             Map<String, Proc_InventoryGain> gainMap = RespHelper.orServEx(doctorMoveDatasourceHandler
-                    .findByHbsSql(moveId, Proc_InventoryGain.class, "DoctorGroupTrack-Proc_InventoryGain", ImmutableMap.of("date", new Date()))).stream()
+                    .findByHbsSql(moveId, Proc_InventoryGain.class, "DoctorGroupTrack-Proc_InventoryGain", ImmutableMap.of("date", now))).stream()
                     .filter(f -> true) // TODO: 16/7/28 多个猪场注意过滤outId
                     .collect(Collectors.toMap(Proc_InventoryGain::getGroupOutId, v -> v));
 
-            List<DoctorGroupTrack> groupTracks = groups.stream()
+            List<DoctorGroupTrack> groupTracks = groupMap.values().stream()
                     .map(group -> getGroupTrack(group, gainMap.get(group.getOutId()), eventMap.get(group.getId())))
                     .collect(Collectors.toList());
             doctorGroupTrackDao.creates(groupTracks);
@@ -607,29 +608,34 @@ public class DoctorMoveDataService implements CommandLineRunner {
 
         //如果猪群已经关闭, 大部分的统计值可以置成0
         if (Objects.equals(group.getStatus(), DoctorGroup.Status.CLOSED.getValue())) {
-            return getCloseGroupTrack(groupTrack, events);
+            return getCloseGroupTrack(groupTrack, group, events);
         }
 
         //未关闭的猪群, 拼接
-        groupTrack.setQuantity(MoreObjects.firstNonNull(gain.getQuantity(), 0));
-        groupTrack.setBoarQty(gain.getQuantity() / 2);
-        groupTrack.setSowQty(groupTrack.getQuantity() - groupTrack.getBoarQty());
-        groupTrack.setAvgDayAge(gain.getAvgDayAge());
-        groupTrack.setBirthDate(DateTime.now().minusDays(groupTrack.getAvgDayAge()).toDate());
-        groupTrack.setAvgWeight(MoreObjects.firstNonNull(gain.getAvgWeight(), 0D));
-        groupTrack.setWeight(groupTrack.getAvgWeight() * groupTrack.getQuantity());
-
-        DoctorGroupEvent lastEvent = events.stream().sorted((a, b) -> a.getEventAt().compareTo(b.getEventAt())).findFirst().orElse(null);
+        if (gain != null) {
+            groupTrack.setQuantity(MoreObjects.firstNonNull(gain.getQuantity(), 0));
+            groupTrack.setBoarQty(gain.getQuantity() / 2);
+            groupTrack.setSowQty(groupTrack.getQuantity() - groupTrack.getBoarQty());
+            groupTrack.setAvgDayAge(gain.getAvgDayAge());
+            groupTrack.setBirthDate(DateTime.now().minusDays(groupTrack.getAvgDayAge()).toDate());
+            groupTrack.setAvgWeight(MoreObjects.firstNonNull(gain.getAvgWeight(), 0D));
+            groupTrack.setWeight(groupTrack.getAvgWeight() * groupTrack.getQuantity());
+            groupTrack.setPrice(MoreObjects.firstNonNull(groupTrack.getPrice(), 0L));
+            groupTrack.setAmount(MoreObjects.firstNonNull(groupTrack.getAmount(), 0L));
+            groupTrack.setSaleQty(MoreObjects.firstNonNull(groupTrack.getSaleQty(), 0));
+        }
+        DoctorGroupEvent lastEvent = events.stream().sorted((a, b) -> b.getEventAt().compareTo(a.getEventAt())).findFirst().orElse(null);
         groupTrack.setRelEventId(lastEvent == null ? null : lastEvent.getId());
         return groupTrack;
     }
 
     //关闭猪群的猪群跟踪
-    private DoctorGroupTrack getCloseGroupTrack(DoctorGroupTrack groupTrack, List<DoctorGroupEvent> events) {
+    private DoctorGroupTrack getCloseGroupTrack(DoctorGroupTrack groupTrack, DoctorGroup group, List<DoctorGroupEvent> events) {
         DoctorGroupEvent closeEvent = events.stream().filter(e -> Objects.equals(GroupEventType.CLOSE.getValue(), e.getType())).findFirst().orElse(null);
         if (closeEvent != null) {
             groupTrack.setRelEventId(closeEvent.getId());
         }
+        groupTrack.setBirthDate(group.getOpenAt());
         groupTrack.setQuantity(0);
         groupTrack.setBoarQty(0);
         groupTrack.setSowQty(0);
