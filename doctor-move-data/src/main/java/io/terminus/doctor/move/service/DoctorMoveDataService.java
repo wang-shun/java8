@@ -8,6 +8,7 @@ import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.Response;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.common.utils.Joiners;
+import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.basic.dao.DoctorBasicDao;
 import io.terminus.doctor.basic.dao.DoctorChangeReasonDao;
 import io.terminus.doctor.basic.dao.DoctorCustomerDao;
@@ -25,6 +26,8 @@ import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
 import io.terminus.doctor.event.dao.DoctorPigDao;
 import io.terminus.doctor.event.dao.DoctorPigEventDao;
 import io.terminus.doctor.event.dao.DoctorPigTrackDao;
+import io.terminus.doctor.event.dto.event.boar.DoctorBoarConditionDto;
+import io.terminus.doctor.event.dto.event.boar.DoctorSemenDto;
 import io.terminus.doctor.event.dto.event.group.DoctorAntiepidemicGroupEvent;
 import io.terminus.doctor.event.dto.event.group.DoctorChangeGroupEvent;
 import io.terminus.doctor.event.dto.event.group.DoctorCloseGroupEvent;
@@ -35,6 +38,12 @@ import io.terminus.doctor.event.dto.event.group.DoctorNewGroupEvent;
 import io.terminus.doctor.event.dto.event.group.DoctorTransFarmGroupEvent;
 import io.terminus.doctor.event.dto.event.group.DoctorTransGroupEvent;
 import io.terminus.doctor.event.dto.event.group.DoctorTurnSeedGroupEvent;
+import io.terminus.doctor.event.dto.event.usual.DoctorChgFarmDto;
+import io.terminus.doctor.event.dto.event.usual.DoctorChgLocationDto;
+import io.terminus.doctor.event.dto.event.usual.DoctorDiseaseDto;
+import io.terminus.doctor.event.dto.event.usual.DoctorFarmEntryDto;
+import io.terminus.doctor.event.dto.event.usual.DoctorRemovalDto;
+import io.terminus.doctor.event.dto.event.usual.DoctorVaccinationDto;
 import io.terminus.doctor.event.enums.BoarEntryType;
 import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.enums.IsOrNot;
@@ -91,6 +100,8 @@ import static io.terminus.common.utils.Arguments.notEmpty;
 @Slf4j
 @Service
 public class DoctorMoveDataService implements CommandLineRunner {
+
+    private static final JsonMapper JSON_MAPPER = JsonMapper.nonEmptyMapper();
 
     private final DoctorMoveDatasourceHandler doctorMoveDatasourceHandler;
     private final DoctorBarnDao doctorBarnDao;
@@ -506,7 +517,8 @@ public class DoctorMoveDataService implements CommandLineRunner {
 
     //拼接公猪事件
     private DoctorPigEvent getBoarEvent(View_EventListBoar event, Map<String, DoctorPig> boarMap, Map<String, DoctorBarn> barnMap,
-                                        Map<Integer, Map<String, DoctorBasic>> basicMap, Map<String, Long> subMap) {
+                                        Map<Integer, Map<String, DoctorBasic>> basicMap, Map<String, Long> subMap,
+                                        Map<String, DoctorCustomer> customerMap, Map<String, DoctorChangeReason> changeReasonMap) {
         DoctorPig boar = boarMap.get(event.getGroupOutId());
         if (boar == null) {
             return null;
@@ -538,16 +550,166 @@ public class DoctorMoveDataService implements CommandLineRunner {
 
         boarEvent.setRelEventId(null); //// TODO: 16/8/1 关联上个事件的id
 
-        return getBoarEventExtra(eventType, boarEvent);
+        return getBoarEventExtra(eventType, boarEvent, event, subMap, basicMap, barnMap, customerMap, changeReasonMap);
     }
 
-    private DoctorPigEvent getBoarEventExtra(PigEvent eventType, DoctorPigEvent boarEvent) {
+    //拼接公猪事件额外信息
+    private DoctorPigEvent getBoarEventExtra(PigEvent eventType, DoctorPigEvent boarEvent, View_EventListBoar event, Map<String, Long> subMap,
+                                             Map<Integer, Map<String, DoctorBasic>> basicMap, Map<String, DoctorBarn> barnMap,
+                                             Map<String, DoctorCustomer> customerMap, Map<String, DoctorChangeReason> changeReasonMap) {
         if (eventType == null) {
             return boarEvent;
         }
+        //switch 公猪事件
+        switch (eventType) {
+            case CHG_LOCATION:  //转舍
+                DoctorChgLocationDto transBarn = new DoctorChgLocationDto();
+                transBarn.setChangeLocationDate(event.getEventAt());
+                DoctorBarn fromBarn = barnMap.get(event.getBarnOutId());    //来源猪舍
+                if (fromBarn != null) {
+                    transBarn.setChgLocationFromBarnId(fromBarn.getId());
+                    transBarn.setChgLocationFromBarnName(fromBarn.getName());
+                }
+                DoctorBarn toBarn = barnMap.get(event.getToBarnOutId());    //去往猪舍
+                if (toBarn != null) {
+                    transBarn.setChgLocationToBarnId(toBarn.getId());
+                    transBarn.setChgLocationToBarnName(toBarn.getName());
+                }
+                boarEvent.setExtra(JSON_MAPPER.toJson(transBarn));
+                break;
+            case CHG_FARM:    //转场(一般没有, 简单处理)
+                DoctorChgFarmDto tranFarm = new DoctorChgFarmDto();
+                tranFarm.setChgFarmDate(event.getEventAt());
+                tranFarm.setFromFarmId(boarEvent.getFarmId());
+                tranFarm.setFromFarmName(boarEvent.getFarmName());
+                tranFarm.setFromBarnId(boarEvent.getBarnId());
+                tranFarm.setFromBarnName(boarEvent.getBarnName());
+                tranFarm.setRemark(event.getChgReason());
+                boarEvent.setExtra(JSON_MAPPER.toJson(tranFarm));
+                break;
+            case CONDITION:  //体况
+                DoctorBoarConditionDto condition = new DoctorBoarConditionDto();
+                condition.setCheckAt(event.getEventAt());
+                condition.setScoreHuoli(event.getScoreHuoli());
+                condition.setScoreMidu(event.getScoreHuoli());
+                condition.setScoreXingtai(event.getScoreXingtai());
+                condition.setScoreShuliang(event.getScoreShuliang());
+                condition.setWeight(event.getEventWeight());
+                boarEvent.setExtra(JSON_MAPPER.toJson(condition));
+                break;
+            case DISEASE:   //疾病
+                DoctorDiseaseDto disease = new DoctorDiseaseDto();
+                disease.setDiseaseDate(event.getEventAt());
 
-        //boarEvent.setExtraMap(); switch
+                //疾病
+                DoctorBasic ddd = basicMap.get(DoctorBasic.Type.DISEASE.getValue()).get(event.getDiseaseName());
+                disease.setDiseaseId(ddd == null ? null : ddd.getId());
+                disease.setDiseaseName(event.getDiseaseName());
+                disease.setDiseaseStaff(event.getChgReason());  //疾病事件的人员名称
+                disease.setDiseaseRemark(event.getRemark());
+                boarEvent.setExtra(JSON_MAPPER.toJson(disease));
+                break;
+            case VACCINATION:  //防疫
+                DoctorVaccinationDto vacc = new DoctorVaccinationDto();
+                vacc.setVaccinationDate(event.getEventAt());
+                // vacc.setVaccinationId(); // TODO: 16/8/2 疫苗的基础数据
+                vacc.setVaccinationName(event.getVaccName());
+                vacc.setVaccinationStaffId(subMap.get(event.getChgReason()));
+                vacc.setVaccinationStaffName(event.getChgReason()); //防疫事件人员名称
+                vacc.setVaccinationRemark(event.getRemark());
+                boarEvent.setExtra(JSON_MAPPER.toJson(vacc));
+                break;
+            case REMOVAL:   //离场
+                boarEvent.setExtra(JSON_MAPPER.toJson(getBoarRemovalExtra(event, customerMap, basicMap, barnMap, changeReasonMap)));
+                break;
+            case ENTRY:     //进场
+                boarEvent.setExtra(JSON_MAPPER.toJson(getBoarEntryExtra(event, basicMap, barnMap)));
+                break;
+            case SEMEN:     //采精
+                boarEvent.setExtra(JSON_MAPPER.toJson(getBoarSemenExtra(event)));
+                break;
+            default:
+                break;
+        }
         return boarEvent;
+    }
+
+    //拼接公猪离场extra
+    private DoctorRemovalDto getBoarRemovalExtra(View_EventListBoar event, Map<String, DoctorCustomer> customerMap,
+                                                 Map<Integer, Map<String, DoctorBasic>> basicMap, Map<String, DoctorBarn> barnMap,
+                                                 Map<String, DoctorChangeReason> changeReasonMap) {
+        DoctorRemovalDto remove = new DoctorRemovalDto();
+
+        //变动类型, 变动原因
+        DoctorBasic changeType = basicMap.get(DoctorBasic.Type.CHANGE_TYPE.getValue()).get(event.getChgType());
+        remove.setChgTypeId(changeType == null ? null : changeType.getId());
+        remove.setChgTypeName(event.getChgType());
+        DoctorChangeReason reason = changeReasonMap.get(event.getChgReason());
+        remove.setChgReasonId(reason == null ? null : reason.getId());
+        remove.setChgReasonName(event.getChgReason());
+
+        //重量 金额等
+        remove.setWeight(event.getEventWeight());
+        remove.setPrice(event.getPrice());
+        remove.setSum(event.getAmount());
+        remove.setRemark(event.getRemark());
+
+        //猪舍 客户
+        DoctorBarn barn = barnMap.get(event.getBarnOutId());
+        remove.setToBarnId(barn == null ? null : barn.getId());
+        DoctorCustomer customer = customerMap.get(event.getCustomer());
+        remove.setCustomerId(customer == null ? null : customer.getId());
+        return remove;
+    }
+
+    //拼接公猪进场extra
+    private DoctorFarmEntryDto getBoarEntryExtra(View_EventListBoar event, Map<Integer, Map<String, DoctorBasic>> basicMap, Map<String, DoctorBarn> barnMap) {
+        DoctorFarmEntryDto entry = new DoctorFarmEntryDto();
+
+        //公猪进场类型
+        BoarEntryType type = BoarEntryType.from(event.getBoarType());
+        entry.setBoarTypeId(type == null ? null : type.getKey());
+        entry.setBoarTypeName(event.getBoarType());
+        entry.setPigType(DoctorPig.PIG_TYPE.BOAR.getKey());  //类型: 公猪
+        entry.setPigCode(event.getPigCode());       // pig code 猪 编号
+        entry.setBirthday(event.getBirthDate());      // 猪生日
+        entry.setInFarmDate(event.getInFarmDate());    // 进厂时间
+        entry.setFatherCode(event.getPigFatherCode());    // 父类Code （非必填）
+        entry.setMotherCode(event.getPigMotherCode());    // 母Code （非必填）
+        entry.setEntryMark(event.getRemark());     // 非必填
+        entry.setSource(event.getSource());
+
+        //todo 猪舍Id是哪个id? outdest? eventBarn?
+        DoctorBarn barn = barnMap.get(event.getBarnOutId());
+        if (barn != null) {
+            entry.setBarnId(barn.getId());
+            entry.setBarnName(barn.getName());
+        }
+        //品种 品系
+        DoctorBasic breed = basicMap.get(DoctorBasic.Type.BREED.getValue()).get(event.getBreed());
+        entry.setBreed(breed == null ? null : breed.getId());         //品种Id （basic Info）
+        entry.setBreedName(event.getBreed());     //品种名称
+
+        DoctorBasic gene = basicMap.get(DoctorBasic.Type.GENETICS.getValue()).get(event.getGenetic());
+        entry.setBreedType(gene == null ? null : gene.getId());     //品系Id  (basic info)
+        entry.setBreedTypeName(event.getGenetic()); //品系名称
+        return entry;
+    }
+
+    //拼接公猪采精extra
+    private DoctorSemenDto getBoarSemenExtra(View_EventListBoar event) {
+        DoctorSemenDto semen = new DoctorSemenDto();
+        semen.setSemenDate(event.getEventAt());       //采精日期
+        semen.setSemenWeight(event.getEventWeight());     //采精重量
+        semen.setDilutionRatio(event.getDilutionRatio());   //稀释倍数
+        semen.setDilutionWeight(event.getDilutionWeight());  //稀释后重量
+        semen.setSemenDensity(event.getSemenDensity());    //精液密度
+        semen.setSemenActive(event.getSemenActive());     //精液活力
+        semen.setSemenJxRatio(event.getSemenJxRatio());    //精液畸形率
+        semen.setSemenPh(event.getSemenPh());         //精液PH
+        semen.setSemenTotal(Double.valueOf(event.getScore()));      //精液总评!!!
+        semen.setSemenRemark(event.getRemark());     //精液备注（非必填）
+        return semen;
     }
 
     //拼接公猪跟踪
