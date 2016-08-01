@@ -317,4 +317,16 @@ public class DoctorPigReadServiceImpl implements DoctorPigReadService {
             return Response.fail("pig.find.fail");
         }
     }
+
+    @Override
+    public Response<Long> getCountOfMating(@NotNull(message = "pigId.not.null") Long pigId, @NotNull(message = "farmId.not.null") Long farmId) {
+        try {
+            Map<String, Object> criteria = ImmutableMap.of("farmId", farmId, "pigId", pigId);
+            Long matingCount = doctorPigEventDao.getMatingCount(criteria);
+            return Response.ok(matingCount);
+        } catch (Exception e) {
+            log.error("fail to get count of mating of pig id:{}, from farm id:{}, cause:{}", pigId, farmId, Throwables.getStackTraceAsString(e));
+            return Response.fail(e.getMessage());
+        }
+    }
 }

@@ -184,4 +184,14 @@
         </set>
         WHERE id=#{id}
     </update>
+
+    <select id="getMatingCount" parameterType="map" resultType="long">
+        SELECT COUNT(1)
+        FROM <include refid="tb"/>
+        <where>
+            <if test="farmId != null" >`farm_id` = #{farmId}</if>
+            <if test="pigId != null" > AND `pig_id` = #{pigId}</if>
+            AND type = 9 AND kind = 1
+        </where>
+    </select>
 </mapper>

@@ -12,6 +12,7 @@ import io.terminus.doctor.basic.model.DoctorChangeReason;
 import io.terminus.doctor.basic.model.DoctorCustomer;
 import io.terminus.doctor.basic.service.DoctorBasicMaterialReadService;
 import io.terminus.doctor.basic.service.DoctorBasicReadService;
+import io.terminus.doctor.basic.service.DoctorBasicWriteService;
 import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.Params;
@@ -86,6 +87,7 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
     private final DoctorOrgReadService doctorOrgReadService;
     private final DoctorStaffReadService doctorStaffReadService;
     private final UserReadService<User> userReadService;
+    private final DoctorBasicWriteService doctorBasicWriteService;
 
     @RpcConsumer
     private DoctorBasicMaterialReadService doctorBasicMaterialReadService;
@@ -98,7 +100,8 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
                                      DoctorGroupReadService doctorGroupReadService,
                                      DoctorOrgReadService doctorOrgReadService,
                                      DoctorStaffReadService doctorStaffReadService,
-                                     UserReadService<User> userReadService) {
+                                     UserReadService<User> userReadService,
+                                     DoctorBasicWriteService doctorBasicWriteService) {
         this.doctorGroupWriteService = doctorGroupWriteService;
         this.doctorFarmReadService = doctorFarmReadService;
         this.doctorBasicReadService = doctorBasicReadService;
@@ -107,9 +110,12 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
         this.doctorOrgReadService = doctorOrgReadService;
         this.doctorStaffReadService = doctorStaffReadService;
         this.userReadService = userReadService;
+        this.doctorBasicWriteService = doctorBasicWriteService;
     }
 
     private static final JsonMapper JSON_MAPPER = JsonMapper.nonEmptyMapper();
+
+    private static final Long CHANGE_TYPE_SALE = 109L;
 
     @Override
     public Response<Long> createNewGroup(DoctorNewGroupInput newGroupInput) {
@@ -170,10 +176,15 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
                     orServEx(doctorGroupWriteService.groupEventMoveIn(groupDetail, map(putBasicFields(params), DoctorMoveInGroupInput.class)));
                     break;
                 case CHANGE:
+                    checkParam(params);
                     params.put("changeTypeName", getBasicName(getLong(params, "changeTypeId")));
                     params.put("changeReasonName", getChangeReasonName(getLong(params, "changeReasonId")));
-                    params.put("customerName", getCustomerName(getLong(params, "customerId")));
+                    if (getLong(params, "customerName") == null) {
+                        params.put("customerName", getCustomerName(getLong(params, "customerId")));
+                    }
                     orServEx(doctorGroupWriteService.groupEventChange(groupDetail, map(putBasicFields(params), DoctorChangeGroupInput.class)));
+                    DoctorChangeGroupEdit doctorChangeGroupEdit = map(pubUpdatorFields(params), DoctorChangeGroupEdit.class);
+                    addCustomer(groupDetail, doctorChangeGroupEdit);
                     break;
                 case TRANS_GROUP:
                     params.put("toBarnName", getBarnName(getLong(params, "toBarnId")));
@@ -259,6 +270,7 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
                     orServEx(doctorGroupWriteService.editEventMoveIn(groupDetail, event, map(pubUpdatorFields(params), DoctorMoveInGroupEdit.class)));
                     break;
                 case CHANGE:
+                    checkParam(params);
                     params.put("changeReasonName", getChangeReasonName(getLong(params, "changeReasonId")));
                     params.put("customerName", getCustomerName(getLong(params, "customerId")));
                     params.put("breedName", getBasicName(getLong(params, "breedId")));
@@ -416,7 +428,7 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
 
     private Long getLong(Map<String, Object> params, String key) {
         Object o = params.get(key);
-        return o == null ? null : Long.valueOf(String.valueOf(o));
+        return (o == "" || o == null) ? null : Long.valueOf(String.valueOf(o));
     }
 
     private Integer getInteger(Map<String, Object> params, String key) {
@@ -428,6 +440,41 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
     private static void checkEventAuto(DoctorGroupEvent event) {
         if (Objects.equals(event.getIsAuto(), IsOrNot.YES.getValue())) {
             throw new ServiceException("group.event.is.auto");
+        }
+    }
+
+    //录入客户信息
+    private void addCustomer(DoctorGroupDetail doctorGroupDetail, DoctorChangeGroupEdit doctorChangeGroupEdit) {
+        if (doctorChangeGroupEdit.getCustomerId() == null) {
+            String customerName = doctorChangeGroupEdit.getCustomerName();
+            if (customerName != null) {
+                Response<Boolean> respIsExistCustomer = doctorBasicReadService.isExistUserByName(customerName);
+                if (respIsExistCustomer.isSuccess() && respIsExistCustomer.getResult()) {
+                    throw new ServiceException("customer.name.is.duplicate");
+                }
+                DoctorCustomer doctorCustomer = new DoctorCustomer();
+                doctorCustomer.setName(customerName);
+                doctorCustomer.setFarmId(doctorGroupDetail.getGroup().getFarmId());
+                doctorCustomer.setFarmName(doctorGroupDetail.getGroup().getFarmName());
+                doctorCustomer.setCreatorId(UserUtil.getUserId());
+                doctorCustomer.setCreatorName(UserUtil.getCurrentUser().getName());
+                Response<Long> respCreateCustomer = doctorBasicWriteService.createCustomer(doctorCustomer);
+                if (!respCreateCustomer.isSuccess()) {
+                    throw new ServiceException(respCreateCustomer.getError());
+                }
+            }
+        }
+    }
+
+    //检验参数是否为空
+    private void checkParam(Map<String, Object> params) {
+        if (params.get("changeTypeId") == null || params.get("sowQty") == null
+                || params.get("boarQty") == null || params.get("weight") == null) {
+            throw new ServiceException("some.param.is.null");
+        }
+        Boolean isSaleType = Objects.equals(getLong(params, "changeTypeId"), CHANGE_TYPE_SALE);
+        if (isSaleType && (getLong(params, "customerId") == null || getLong(params, "price") == null)) {
+            throw new ServiceException("price.or.customer.id.is.null.when.sale");
         }
     }
 }

@@ -127,4 +127,12 @@ public interface DoctorPigReadService {
      * @return 猪舍信息
      */
     Response<DoctorBarn> findBarnByPigId(@NotNull(message = "pigId.not.null") Long pigId);
+
+    /**
+     * 查询母猪配种次数
+     * @param pigId 猪id
+     * @param farmId 猪场id
+     * @return 母猪配种次数
+     */
+    Response<Long> getCountOfMating(@NotNull(message = "pigId.not.null")Long pigId, @NotNull(message = "farmId.not.null") Long farmId);
 }

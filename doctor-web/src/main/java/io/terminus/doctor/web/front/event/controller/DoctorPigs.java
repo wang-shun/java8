@@ -140,4 +140,17 @@ public class DoctorPigs {
     public List<DoctorPigMessage> queryPigNotifyMessages(Long pigId) {
         return RespHelper.or500(doctorPigReadService.findPigMessageByPigId(pigId));
     }
+
+    /**
+     * 获取母猪配种次数
+     * @param farmId 猪场id
+     * @param pigId 猪Id
+     * @return 母猪配种次数
+     */
+    @RequestMapping(value = "/getMatingCount", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public Long getCountOfMating(@RequestParam("farmId") Long farmId,
+                                 @RequestParam("pigId") Long pigId) {
+        return RespHelper.or500(doctorPigReadService.getCountOfMating(pigId, farmId));
+    }
 }
