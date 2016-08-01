@@ -1,0 +1,31 @@
+-- 查询母猪卡片
+SELECT
+    OID AS pigOutId,
+    CASE
+        WHEN Status = '没有怀孕' OR Status = '妊娠检查阴性' THEN '空怀'
+        WHEN Status = '已进场' THEN '已配种'
+        WHEN Status = '等待分娩' THEN '待分娩'
+        WHEN Status = '即将离场' THEN ''     -- TODO: 即将离场状态需要转换成上次的状态
+        ELSE Status END AS status,               -- 猪群状态
+    FarmOID AS farmOutId,
+    PigID AS pigCode,                          -- 猪群号
+    PigFatherID AS pigFatherCode,
+    PigMotherID AS pigMotherCode,
+    CASE WHEN Source = '本场' THEN 1 ELSE 2 END AS source,
+    BirthDate AS birthDate,
+    BirthWeight AS birthWeight,
+    HerdEntryDate AS inFarmDate,               -- 进场日期
+    isnull(HerdEntryDays, 0) AS inFarmDayAge,  -- 进场日龄
+    InitLocation AS initBarnName,
+    Location AS currentBarnOutId,              -- 当前猪舍outId
+    isnull(InitialParity, 0) AS firstParity,   -- 初始胎次
+    isnull(CurrentParity, 0) AS currentParity, -- 当前胎次
+    isnull(LnippleCount, 0) AS leftCount,      -- 左乳头数
+    isnull(RnippleCount, 0) AS rightCount,     -- 右乳头数
+    CASE WHEN Breed = '' THEN NULL ELSE Breed END AS breed,
+    CASE WHEN Genetic = '' THEN NULL ELSE Genetic END AS genetic,
+    isnull(Weight, 0.00) AS weight,
+    Remark AS remark,
+    HerdRemovalDate AS outFarmDate,            -- 离场日期
+    TypeName AS pigType
+FROM view_SowCardList

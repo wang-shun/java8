@@ -7,6 +7,7 @@ import com.google.common.collect.Maps;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.Response;
 import io.terminus.common.utils.BeanMapper;
+import io.terminus.common.utils.Joiners;
 import io.terminus.doctor.basic.dao.DoctorBasicDao;
 import io.terminus.doctor.basic.dao.DoctorChangeReasonDao;
 import io.terminus.doctor.basic.dao.DoctorCustomerDao;
@@ -16,6 +17,7 @@ import io.terminus.doctor.basic.model.DoctorCustomer;
 import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.RespHelper;
+import io.terminus.doctor.event.constants.DoctorFarmEntryConstants;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorGroupDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
@@ -36,11 +38,14 @@ import io.terminus.doctor.event.dto.event.group.DoctorTurnSeedGroupEvent;
 import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.enums.PigSource;
+import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
 import io.terminus.doctor.event.model.DoctorPig;
+import io.terminus.doctor.event.model.DoctorPigEvent;
+import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.move.handler.DoctorMoveDatasourceHandler;
 import io.terminus.doctor.move.handler.DoctorMoveTableEnum;
 import io.terminus.doctor.move.model.B_ChangeReason;
@@ -50,6 +55,7 @@ import io.terminus.doctor.move.model.TB_FieldValue;
 import io.terminus.doctor.move.model.View_EventListGain;
 import io.terminus.doctor.move.model.View_GainCardList;
 import io.terminus.doctor.move.model.View_PigLocationList;
+import io.terminus.doctor.move.model.View_SowCardList;
 import io.terminus.doctor.user.dao.DoctorStaffDao;
 import io.terminus.doctor.user.model.DoctorFarm;
 import io.terminus.doctor.user.model.DoctorOrg;
@@ -330,7 +336,7 @@ public class DoctorMoveDataService implements CommandLineRunner {
            Map<String, Long> subMap = getSubMap(mockOrg().getId());
 
            //1. 迁移sow
-           moveSow(moveId);
+           moveSow(moveId, mockOrg(), mockFarm(), basicMap);
 
            //2. 迁移boar
            moveBoar();
@@ -342,13 +348,13 @@ public class DoctorMoveDataService implements CommandLineRunner {
     }
 
     //迁移母猪
-    private void moveSow(Long moveId) {
+    private void moveSow(Long moveId, DoctorOrg org, DoctorFarm farm, Map<Integer, Map<String, DoctorBasic>> basicMap) {
         //1. 迁移DoctorPig
-        List<DoctorPig> pigs = RespHelper.orServEx(doctorMoveDatasourceHandler
-                .findByHbsSql(moveId, View_GainCardList.class, "DoctorGroup-GainCardList")).stream()
+        List<DoctorPig> sows = RespHelper.orServEx(doctorMoveDatasourceHandler
+                .findByHbsSql(moveId, View_SowCardList.class, "DoctorPig-SowCardList")).stream()
                 .filter(f -> true) // TODO: 16/7/28 多个猪场注意过滤outId
-                .map(gain -> getSow()).collect(Collectors.toList());
-        doctorPigDao.creates(pigs);
+                .map(card -> getSow(card, org, farm, basicMap)).collect(Collectors.toList());
+        doctorPigDao.creates(sows);
 
 
         //2. 迁移DoctorPigEvent
@@ -356,10 +362,78 @@ public class DoctorMoveDataService implements CommandLineRunner {
         //3. 迁移DoctorPigTrack
     }
 
-    private DoctorPig getSow() {
-        DoctorPig pig = new DoctorPig();
+    //拼接母猪
+    private DoctorPig getSow(View_SowCardList card, DoctorOrg org, DoctorFarm farm, Map<Integer, Map<String, DoctorBasic>> basicMap) {
+        DoctorPig sow = new DoctorPig();
+        sow.setOrgId(org.getId());
+        sow.setOrgName(org.getName());
+        sow.setFarmId(farm.getId());
+        sow.setFarmName(farm.getName());
+        sow.setOutId(card.getPigOutId());           //外部OID
+        sow.setPigCode(card.getPigCode());
+        sow.setPigType(DoctorPig.PIG_TYPE.SOW.getKey());  //猪类是母猪
+        sow.setIsRemoval("已离场".equals(card.getStatus()) ? IsOrNot.YES.getValue() : IsOrNot.NO.getValue());
+        sow.setPigFatherCode(card.getPigFatherCode());
+        sow.setPigMotherCode(card.getPigMotherCode());
+        sow.setSource(card.getSource());
+        sow.setBirthDate(card.getBirthDate());
+        sow.setBirthWeight(card.getBirthWeight());
+        sow.setInFarmDate(card.getInFarmDate());
+        sow.setInFarmDayAge(card.getInFarmDayAge());
+        sow.setInitBarnName(card.getInitBarnName());
+        sow.setRemark(card.getRemark());
 
-        return pig;
+        //品种
+        DoctorBasic breed = basicMap.get(DoctorBasic.Type.BREED.getValue()).get(card.getBreed());
+        sow.setBreedId(breed == null ? null : breed.getId());
+        sow.setBreedName(card.getBreed());
+
+        //品系
+        DoctorBasic gene = basicMap.get(DoctorBasic.Type.GENETICS.getValue()).get(card.getGenetic());
+        sow.setGeneticId(gene == null ? null : gene.getId());
+        sow.setGeneticName(card.getGenetic());
+
+        //附加字段
+        sow.setExtraMap(ImmutableMap.of(
+                DoctorFarmEntryConstants.EAR_CODE, card.getPigCode(),   //耳缺号取猪号
+                DoctorFarmEntryConstants.FIRST_PARITY, card.getFirstParity(),
+                DoctorFarmEntryConstants.LEFT_COUNT, card.getLeftCount(),
+                DoctorFarmEntryConstants.RIGHT_COUNT, card.getRightCount()
+        ));
+        return sow;
+    }
+
+    //拼接母猪跟踪
+    private DoctorPigTrack getSowTrack(View_SowCardList card, DoctorPig sow, Map<String, DoctorBarn> barnMap, List<DoctorPigEvent> events) {
+        //card.getStatus(); // TODO: 16/8/1 即将离场 的情况
+
+        //母猪状态枚举
+        PigStatus status = PigStatus.from(card.getStatus());
+
+        DoctorPigTrack track = new DoctorPigTrack();
+        track.setFarmId(sow.getFarmId());
+        track.setPigId(sow.getId());
+        track.setPigType(sow.getPigType());
+        track.setStatus(status == null ? null : status.getKey());
+        track.setIsRemoval(sow.getIsRemoval());
+        track.setWeight(card.getWeight());
+        track.setOutFarmDate(card.getOutFarmDate());
+        track.setCurrentParity(card.getCurrentParity());
+
+        if (notEmpty(events)) {
+            //按照时间 asc 排序
+            events = events.stream().sorted((a, b) -> a.getEventAt().compareTo(b.getEventAt())).collect(Collectors.toList());
+            track.setExtra(events.get(events.size() - 1).getExtra());   //extra字段保存最后一次event的extra
+            track.setRelEventIds(Joiners.COMMA.join(events.stream().map(DoctorPigEvent::getId).collect(Collectors.toList()))); //关联事件ids, 逗号分隔
+        }
+
+        //猪舍
+        DoctorBarn barn = barnMap.get(card.getCurrentBarnOutId());
+        if (barn != null) {
+            track.setCurrentBarnId(barn.getId());
+            track.setCurrentBarnName(barn.getName());
+        }
+        return track;
     }
 
     //迁移公猪
