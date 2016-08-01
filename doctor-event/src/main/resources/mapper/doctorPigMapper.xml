@@ -80,12 +80,41 @@
     </insert>
 
     <insert id="creates" parameterType="list">
-        INSERT INTO <include refid="tb"/>
-        ( <include refid="cols_exclude_id"/> )
+        INSERT INTO <include refid="tb" />
+        (<include refid="cols_exclude_id" />)
         VALUES
-        <foreach collection="list" item="i" separator=",">
-        ( #{i.orgId},#{i.orgName},#{i.farmId},#{i.farmName},#{i.outId},#{i.pigCode},#{i.pigType},#{i.isRemoval},#{i.pigFatherCode},#{i.pigMotherCode},#{i.source},#{i.birthDate},#{i.birthWeight},#{i.inFarmDate},#{i.inFarmDayAge},#{i.initBarnId},#{i.initBarnName},#{i.breedId},#{i.breedName},#{i.geneticId},#{i.geneticName},#{i.extra},#{i.remark},#{i.creatorId},#{i.creatorName},#{i.updatorId},#{i.updatorName},now(),now()
- )
+        <foreach collection="list" separator="," item="item">
+            (
+                #{item.orgId},
+                #{item.orgName},
+                #{item.farmId},
+                #{item.farmName},
+                #{item.outId},
+                #{item.pigCode},
+                #{item.pigType},
+                #{item.isRemoval},
+                #{item.pigFatherCode},
+                #{item.pigMotherCode},
+                #{item.source},
+                #{item.birthDate},
+                #{item.birthWeight},
+                #{item.inFarmDate},
+                #{item.inFarmDayAge},
+                #{item.initBarnId},
+                #{item.initBarnName},
+                #{item.breedId},
+                #{item.breedName},
+                #{item.geneticId},
+                #{item.geneticName},
+                #{item.extra},
+                #{item.remark},
+                #{item.creatorId},
+                #{item.creatorName},
+                #{item.updatorId},
+                #{item.updatorName},
+                now(),
+                now()
+            )
         </foreach>
     </insert>
 

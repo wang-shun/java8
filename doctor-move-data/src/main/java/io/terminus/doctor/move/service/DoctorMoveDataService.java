@@ -20,6 +20,9 @@ import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorGroupDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
+import io.terminus.doctor.event.dao.DoctorPigDao;
+import io.terminus.doctor.event.dao.DoctorPigEventDao;
+import io.terminus.doctor.event.dao.DoctorPigTrackDao;
 import io.terminus.doctor.event.dto.event.group.DoctorAntiepidemicGroupEvent;
 import io.terminus.doctor.event.dto.event.group.DoctorChangeGroupEvent;
 import io.terminus.doctor.event.dto.event.group.DoctorCloseGroupEvent;
@@ -37,6 +40,7 @@ import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
+import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.move.handler.DoctorMoveDatasourceHandler;
 import io.terminus.doctor.move.handler.DoctorMoveTableEnum;
 import io.terminus.doctor.move.model.B_ChangeReason;
@@ -88,6 +92,9 @@ public class DoctorMoveDataService implements CommandLineRunner {
     private final DoctorGroupDao doctorGroupDao;
     private final DoctorGroupEventDao doctorGroupEventDao;
     private final DoctorGroupTrackDao doctorGroupTrackDao;
+    private final DoctorPigDao doctorPigDao;
+    private final DoctorPigTrackDao doctorPigTrackDao;
+    private final DoctorPigEventDao doctorPigEventDao;
 
     @Autowired
     public DoctorMoveDataService(DoctorMoveDatasourceHandler doctorMoveDatasourceHandler,
@@ -99,7 +106,10 @@ public class DoctorMoveDataService implements CommandLineRunner {
                                  UserProfileDao userProfileDao,
                                  DoctorGroupDao doctorGroupDao,
                                  DoctorGroupEventDao doctorGroupEventDao,
-                                 DoctorGroupTrackDao doctorGroupTrackDao) {
+                                 DoctorGroupTrackDao doctorGroupTrackDao,
+                                 DoctorPigDao doctorPigDao,
+                                 DoctorPigTrackDao doctorPigTrackDao,
+                                 DoctorPigEventDao doctorPigEventDao) {
         this.doctorMoveDatasourceHandler = doctorMoveDatasourceHandler;
         this.doctorBarnDao = doctorBarnDao;
         this.doctorCustomerDao = doctorCustomerDao;
@@ -110,6 +120,9 @@ public class DoctorMoveDataService implements CommandLineRunner {
         this.doctorGroupDao = doctorGroupDao;
         this.doctorGroupEventDao = doctorGroupEventDao;
         this.doctorGroupTrackDao = doctorGroupTrackDao;
+        this.doctorPigDao = doctorPigDao;
+        this.doctorPigTrackDao = doctorPigTrackDao;
+        this.doctorPigEventDao = doctorPigEventDao;
     }
 
     /**
@@ -303,6 +316,59 @@ public class DoctorMoveDataService implements CommandLineRunner {
             log.error("move group failed, moveId:{}, cause:{}", moveId, Throwables.getStackTraceAsString(e));
             return Response.fail("move.group.fail");
         }
+    }
+
+    /**
+     * 迁移母猪公猪
+     */
+    @Transactional
+    public Response<Boolean> movePig(Long moveId) {
+       try {
+           //0. 基础数据准备: barn, basic, subUser
+           Map<String, DoctorBarn> barnMap = doctorBarnDao.findByFarmId(mockFarm().getId()).stream().collect(Collectors.toMap(DoctorBarn::getOutId, v -> v));
+           Map<Integer, Map<String, DoctorBasic>> basicMap = getBasicMap();
+           Map<String, Long> subMap = getSubMap(mockOrg().getId());
+
+           //1. 迁移sow
+           moveSow(moveId);
+
+           //2. 迁移boar
+           moveBoar();
+           return Response.ok(Boolean.TRUE);
+       } catch (Exception e) {
+           log.error("move pig failed, moveId:{}, cause:{}", moveId, Throwables.getStackTraceAsString(e));
+           return Response.fail("move.pig.fail");
+       }
+    }
+
+    //迁移母猪
+    private void moveSow(Long moveId) {
+        //1. 迁移DoctorPig
+        List<DoctorPig> pigs = RespHelper.orServEx(doctorMoveDatasourceHandler
+                .findByHbsSql(moveId, View_GainCardList.class, "DoctorGroup-GainCardList")).stream()
+                .filter(f -> true) // TODO: 16/7/28 多个猪场注意过滤outId
+                .map(gain -> getSow()).collect(Collectors.toList());
+        doctorPigDao.creates(pigs);
+
+
+        //2. 迁移DoctorPigEvent
+
+        //3. 迁移DoctorPigTrack
+    }
+
+    private DoctorPig getSow() {
+        DoctorPig pig = new DoctorPig();
+
+        return pig;
+    }
+
+    //迁移公猪
+    private void moveBoar() {
+        //1. 迁移DoctorPig
+
+        //2. 迁移DoctorPigEvent
+
+        //3. 迁移DoctorPigTrack
     }
 
     //拼接猪群事件

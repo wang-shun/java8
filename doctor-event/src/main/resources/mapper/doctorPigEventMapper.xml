@@ -70,15 +70,41 @@
             VALUES (<include refid="vals" />)
     </insert>
 
+
     <insert id="creates" parameterType="list">
-        INSERT INTO <include refid="tb"/>
-        ( <include refid="cols_exclude_id"/> )
+        INSERT INTO <include refid="tb" />
+        (<include refid="cols_exclude_id" />)
         VALUES
-        <foreach collection="list" item="i" separator=",">
-        ( #{i.orgId},#{i.orgName},#{i.farmId},#{i.farmName},#{i.pigId},#{i.pigCode},#{i.eventAt},#{i.type},#{i.kind},#{i.name},#{i.desc},#{i.barnId},#{i.barnName},#{i.relEventId},#{i.outId},#{i.extra},#{i.remark},#{i.creatorId},#{i.creatorName},#{i.updatorId},#{i.updatorName},now(),now()
- )
+        <foreach collection="list" separator="," item="item">
+            (
+            #{item.orgId},
+            #{item.orgName},
+            #{item.farmId},
+            #{item.farmName},
+            #{item.pigId},
+            #{item.pigCode},
+            #{item.eventAt},
+            #{item.type},
+            #{item.kind},
+            #{item.name},
+            #{item.desc},
+            #{item.barnId},
+            #{item.barnName},
+            #{item.relEventId},
+            #{item.outId},
+            #{item.extra},
+            #{item.remark},
+            #{item.creatorId},
+            #{item.creatorName},
+            #{item.updatorId},
+            #{item.updatorName},
+            now(),
+            now()
+
+            )
         </foreach>
     </insert>
+
 
     <delete id="delete" parameterType="Long">
     DELETE FROM <include refid="tb"/> WHERE
