@@ -1,0 +1,23 @@
+-- 查询公猪卡片
+SELECT
+    OID AS pigOutId,
+    Status AS status,               -- 猪群状态
+    FarmOID AS farmOutId,
+    PigID AS pigCode,                          -- 猪群号
+    CASE WHEN PigFatherID = '' THEN NULL ELSE PigFatherID END AS pigFatherCode,
+    CASE WHEN PigMotherID = '' THEN NULL ELSE PigMotherID END AS pigMotherCode,
+    CASE WHEN Source = '本场' THEN 1 ELSE 2 END AS source,
+    BirthDate AS birthDate,
+    BirthWeight AS birthWeight,
+    HerdEntryDate AS inFarmDate,               -- 进场日期
+    isnull(HerdEntryDays, 0) AS inFarmDayAge,  -- 进场日龄
+    CASE WHEN InitLocation = '' THEN NULL ELSE InitLocation END AS initBarnName,
+    Location AS currentBarnOutId,              -- 当前猪舍outId
+    CASE WHEN Breed = '' THEN NULL ELSE Breed END AS breed,
+    CASE WHEN Genetic = '' THEN NULL ELSE Genetic END AS genetic,
+    isnull(Weight, 0.00) AS weight,
+    Remark AS remark,
+    HerdRemovalDate AS outFarmDate,
+    TypeName AS pigType,
+    BoarType AS boarType
+FROM view_BoarCardList;

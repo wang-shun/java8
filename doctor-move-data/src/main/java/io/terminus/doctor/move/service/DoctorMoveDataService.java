@@ -35,6 +35,7 @@ import io.terminus.doctor.event.dto.event.group.DoctorNewGroupEvent;
 import io.terminus.doctor.event.dto.event.group.DoctorTransFarmGroupEvent;
 import io.terminus.doctor.event.dto.event.group.DoctorTransGroupEvent;
 import io.terminus.doctor.event.dto.event.group.DoctorTurnSeedGroupEvent;
+import io.terminus.doctor.event.enums.BoarEntryType;
 import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.enums.PigSource;
@@ -52,6 +53,7 @@ import io.terminus.doctor.move.model.B_ChangeReason;
 import io.terminus.doctor.move.model.B_Customer;
 import io.terminus.doctor.move.model.Proc_InventoryGain;
 import io.terminus.doctor.move.model.TB_FieldValue;
+import io.terminus.doctor.move.model.View_BoarCardList;
 import io.terminus.doctor.move.model.View_EventListGain;
 import io.terminus.doctor.move.model.View_GainCardList;
 import io.terminus.doctor.move.model.View_PigLocationList;
@@ -339,7 +341,7 @@ public class DoctorMoveDataService implements CommandLineRunner {
            moveSow(moveId, mockOrg(), mockFarm(), basicMap);
 
            //2. 迁移boar
-           moveBoar();
+           moveBoar(moveId, mockOrg(), mockFarm(), basicMap);
            return Response.ok(Boolean.TRUE);
        } catch (Exception e) {
            log.error("move pig failed, moveId:{}, cause:{}", moveId, Throwables.getStackTraceAsString(e));
@@ -403,6 +405,13 @@ public class DoctorMoveDataService implements CommandLineRunner {
         return sow;
     }
 
+    //拼接母猪事件
+    private DoctorPigEvent getSowEvent() {
+        DoctorPigEvent sowEvent = new DoctorPigEvent();
+
+        return sowEvent;
+    }
+
     //拼接母猪跟踪
     private DoctorPigTrack getSowTrack(View_SowCardList card, DoctorPig sow, Map<String, DoctorBarn> barnMap, List<DoctorPigEvent> events) {
         //card.getStatus(); // TODO: 16/8/1 即将离场 的情况
@@ -419,6 +428,7 @@ public class DoctorMoveDataService implements CommandLineRunner {
         track.setWeight(card.getWeight());
         track.setOutFarmDate(DateUtil.toDate(card.getOutFarmDate()));
         track.setCurrentParity(card.getCurrentParity());
+        track.setRemark(card.getRemark());
 
         if (notEmpty(events)) {
             //按照时间 asc 排序
@@ -437,12 +447,95 @@ public class DoctorMoveDataService implements CommandLineRunner {
     }
 
     //迁移公猪
-    private void moveBoar() {
+    private void moveBoar(Long moveId, DoctorOrg org, DoctorFarm farm, Map<Integer, Map<String, DoctorBasic>> basicMap) {
         //1. 迁移DoctorPig
+        List<DoctorPig> boars = RespHelper.orServEx(doctorMoveDatasourceHandler
+                .findByHbsSql(moveId, View_BoarCardList.class, "DoctorPig-BoarCardList")).stream()
+                .filter(f -> true) // TODO: 16/7/28 多个猪场注意过滤outId
+                .map(card -> getBoar(card, org, farm, basicMap)).collect(Collectors.toList());
+        doctorPigDao.creates(boars);
 
         //2. 迁移DoctorPigEvent
 
         //3. 迁移DoctorPigTrack
+    }
+
+    //拼接公猪
+    private DoctorPig getBoar(View_BoarCardList card, DoctorOrg org, DoctorFarm farm, Map<Integer, Map<String, DoctorBasic>> basicMap) {
+        DoctorPig boar = new DoctorPig();
+        boar.setOrgId(org.getId());
+        boar.setOrgName(org.getName());
+        boar.setFarmId(farm.getId());
+        boar.setFarmName(farm.getName());
+        boar.setOutId(card.getPigOutId());           //外部OID
+        boar.setPigCode(card.getPigCode());
+        boar.setPigType(DoctorPig.PIG_TYPE.BOAR.getKey());  //猪类是母猪
+        boar.setIsRemoval("已离场".equals(card.getStatus()) ? IsOrNot.YES.getValue() : IsOrNot.NO.getValue());
+        boar.setPigFatherCode(card.getPigFatherCode());
+        boar.setPigMotherCode(card.getPigMotherCode());
+        boar.setSource(card.getSource());
+        boar.setBirthDate(card.getBirthDate());
+        boar.setBirthWeight(card.getBirthWeight());
+        boar.setInFarmDate(card.getInFarmDate());
+        boar.setInFarmDayAge(card.getInFarmDayAge());
+        boar.setInitBarnName(card.getInitBarnName());
+        boar.setRemark(card.getRemark());
+
+        //品种
+        DoctorBasic breed = basicMap.get(DoctorBasic.Type.BREED.getValue()).get(card.getBreed());
+        boar.setBreedId(breed == null ? null : breed.getId());
+        boar.setBreedName(card.getBreed());
+
+        //品系
+        DoctorBasic gene = basicMap.get(DoctorBasic.Type.GENETICS.getValue()).get(card.getGenetic());
+        boar.setGeneticId(gene == null ? null : gene.getId());
+        boar.setGeneticName(card.getGenetic());
+
+        //附加字段, 公猪类型
+        BoarEntryType boarType = BoarEntryType.from(card.getBoarType());
+        if (boarType != null) {
+            boar.setExtraMap(ImmutableMap.of(
+                    DoctorFarmEntryConstants.BOAR_TYPE_ID, boarType.getKey(),
+                    DoctorFarmEntryConstants.BOAR_TYPE_NAME, boarType.getDesc()
+            ));
+        }
+        return boar;
+    }
+
+    //拼接公猪事件
+    private DoctorPigEvent getBoarEvent() {
+        DoctorPigEvent boarEvent = new DoctorPigEvent();
+
+        return boarEvent;
+    }
+
+    private DoctorPigTrack getBoarTrack(View_BoarCardList card, DoctorPig boar, Map<String, DoctorBarn> barnMap, List<DoctorPigEvent> events) {
+        DoctorPigTrack track = new DoctorPigTrack();
+        track.setFarmId(boar.getFarmId());
+        track.setPigId(boar.getId());
+        track.setPigType(boar.getPigType());
+        track.setStatus(Objects.equals(boar.getIsRemoval(), IsOrNot.NO.getValue()) ? PigStatus.BOAR_ENTRY.getKey() : PigStatus.BOAR_LEAVE.getKey());
+        track.setIsRemoval(boar.getIsRemoval());
+        track.setWeight(card.getWeight());
+        track.setOutFarmDate(DateUtil.toDate(card.getOutFarmDate()));
+        track.setRemark(card.getRemark());
+        
+        //track.setCurrentParity(null);  // TODO: 16/8/1 公猪的胎次如何获取?
+
+        if (notEmpty(events)) {
+            //按照时间 asc 排序
+            events = events.stream().sorted((a, b) -> a.getEventAt().compareTo(b.getEventAt())).collect(Collectors.toList());
+            track.setExtra(events.get(events.size() - 1).getExtra());   //extra字段保存最后一次event的extra
+            track.setRelEventIds(Joiners.COMMA.join(events.stream().map(DoctorPigEvent::getId).collect(Collectors.toList()))); //关联事件ids, 逗号分隔
+        }
+
+        //猪舍
+        DoctorBarn barn = barnMap.get(card.getCurrentBarnOutId());
+        if (barn != null) {
+            track.setCurrentBarnId(barn.getId());
+            track.setCurrentBarnName(barn.getName());
+        }
+        return track;
     }
 
     //拼接猪群事件
@@ -989,6 +1082,5 @@ public class DoctorMoveDataService implements CommandLineRunner {
     @Override
     public void run(String... strings) throws Exception {
         // Just for test!
-        movePig(1L);
     }
 }

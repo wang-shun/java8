@@ -13,8 +13,8 @@ import java.util.Objects;
 public enum PigStatus {
 
     // 公猪状态信息
-    BOAR_ENTRY(11,"公猪已进场", "已进场"),
-    BOAR_LEAVE(12,"公猪已离场", "已离场"),
+    BOAR_ENTRY(11,"公猪已进场", "公猪已进场"),
+    BOAR_LEAVE(12,"公猪已离场", "公猪已离场"),
 
     // 母猪状态
     Entry (1,"待配种","待配种"),
