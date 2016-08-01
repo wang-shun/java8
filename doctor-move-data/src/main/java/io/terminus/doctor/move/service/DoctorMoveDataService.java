@@ -338,7 +338,7 @@ public class DoctorMoveDataService implements CommandLineRunner {
            Map<String, Long> subMap = getSubMap(mockOrg().getId());
 
            //1. 迁移sow
-           moveSow(moveId, mockOrg(), mockFarm(), basicMap);
+//           moveSow(moveId, mockOrg(), mockFarm(), basicMap);
 
            //2. 迁移boar
            moveBoar(moveId, mockOrg(), mockFarm(), basicMap);
@@ -469,7 +469,7 @@ public class DoctorMoveDataService implements CommandLineRunner {
         boar.setFarmName(farm.getName());
         boar.setOutId(card.getPigOutId());           //外部OID
         boar.setPigCode(card.getPigCode());
-        boar.setPigType(DoctorPig.PIG_TYPE.BOAR.getKey());  //猪类是母猪
+        boar.setPigType(DoctorPig.PIG_TYPE.BOAR.getKey());  //猪类是公猪猪
         boar.setIsRemoval("已离场".equals(card.getStatus()) ? IsOrNot.YES.getValue() : IsOrNot.NO.getValue());
         boar.setPigFatherCode(card.getPigFatherCode());
         boar.setPigMotherCode(card.getPigMotherCode());
