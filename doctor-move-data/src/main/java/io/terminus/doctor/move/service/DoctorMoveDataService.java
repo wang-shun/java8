@@ -349,12 +349,14 @@ public class DoctorMoveDataService implements CommandLineRunner {
            Map<String, DoctorBarn> barnMap = doctorBarnDao.findByFarmId(mockFarm().getId()).stream().collect(Collectors.toMap(DoctorBarn::getOutId, v -> v));
            Map<Integer, Map<String, DoctorBasic>> basicMap = getBasicMap();
            Map<String, Long> subMap = getSubMap(mockOrg().getId());
-
+           Map<String, DoctorChangeReason> changeReasonMap = getReasonMap();
+           Map<String, DoctorCustomer> customerMap = getCustomerMap(mockFarm().getId());
+           
            //1. 迁移sow
 //           moveSow(moveId, mockOrg(), mockFarm(), basicMap);
 
            //2. 迁移boar
-           moveBoar(moveId, mockOrg(), mockFarm(), basicMap);
+           moveBoar(moveId, mockOrg(), mockFarm(), barnMap, basicMap, changeReasonMap, customerMap, subMap);
            return Response.ok(Boolean.TRUE);
        } catch (Exception e) {
            log.error("move pig failed, moveId:{}, cause:{}", moveId, Throwables.getStackTraceAsString(e));
@@ -460,15 +462,25 @@ public class DoctorMoveDataService implements CommandLineRunner {
     }
 
     //迁移公猪
-    private void moveBoar(Long moveId, DoctorOrg org, DoctorFarm farm, Map<Integer, Map<String, DoctorBasic>> basicMap) {
+    private void moveBoar(Long moveId, DoctorOrg org, DoctorFarm farm, Map<String, DoctorBarn> barnMap, Map<Integer, Map<String, DoctorBasic>> basicMap,
+                          Map<String, DoctorChangeReason> changeReasonMap, Map<String, DoctorCustomer> customerMap, Map<String, Long> subMap) {
         //1. 迁移DoctorPig
         List<DoctorPig> boars = RespHelper.orServEx(doctorMoveDatasourceHandler
                 .findByHbsSql(moveId, View_BoarCardList.class, "DoctorPig-BoarCardList")).stream()
                 .filter(f -> true) // TODO: 16/7/28 多个猪场注意过滤outId
                 .map(card -> getBoar(card, org, farm, basicMap)).collect(Collectors.toList());
         doctorPigDao.creates(boars);
+        
+        Map<String, DoctorPig> boarMap = doctorPigDao.findPigsByFarmId(mockFarm().getId()).stream()
+                .collect(Collectors.toMap(DoctorPig::getOutId, v -> v)); // TODO: 16/8/2 只查公猪!
 
         //2. 迁移DoctorPigEvent
+        List<DoctorPigEvent> boarEvents = RespHelper.orServEx(doctorMoveDatasourceHandler
+                .findByHbsSql(moveId, View_EventListBoar.class, "DoctorPig-BoarCardList")).stream()
+                .filter(f -> true) // TODO: 16/7/28 多个猪场注意过滤outId
+                .map(event -> getBoarEvent(event, boarMap, barnMap, basicMap, subMap, customerMap, changeReasonMap)).collect(Collectors.toList());
+        doctorPigEventDao.creates(boarEvents);
+        // TODO: 16/8/2 更新relEventId
 
         //3. 迁移DoctorPigTrack
     }
