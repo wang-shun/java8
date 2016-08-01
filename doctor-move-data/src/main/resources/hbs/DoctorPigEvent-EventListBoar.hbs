@@ -1,0 +1,37 @@
+-- 查询DoctorPigEvent的字段(View_EventListBoar)
+SELECT
+    a.OID AS groupOutId,
+    PigID AS pigCode,
+    PigFatherID AS pigFatherCode,
+    PigMotherID AS pigMotherCode,
+    BirthDate AS birthDate,
+    BirthWeight as birthWeight,   -- 进场重量
+    HerdEntryDate AS inFarmDate,  -- 进场日期
+    HerdEntryDays AS inFarmDayAge,-- 进场日龄
+    BoarType AS boarType,         -- 公猪类型
+    Breed AS breed,
+    Genetic AS genetic,
+    EOID AS eventOutId,
+    eventDate AS eventAt,
+    CASE
+        WHEN EventName = '猪群转进' THEN '进场'
+        WHEN EventName = '猪群转出' THEN '离场'
+        ELSE EventName END AS eventName,    -- 事件名称,转换成枚举里需要的值
+    EventDetail AS eventDesc,
+    ERemark AS remark,            -- 采精的remark和event的remark
+    EventLocation AS barnOutId,   -- 事件发生猪舍outId
+    cast(isnull(Price, 0) * 100 AS INT) as price,   -- 金额 * 100
+    cast(isnull(SumJe, 0) * 100 AS INT) as amount,  -- 金额 * 100
+    Dilution AS dilutionRatio,         -- 稀释倍数
+    DilutionWeight AS dilutionWeight,  -- 稀释后重量
+    Density AS semenDensity,           -- 精液密度
+    Vitality AS semenActive,           -- 精液活力
+    PHValue AS semenPh,                -- 精液pH
+    Score AS score,  --??
+    AbnormalRate AS semenJxRatio,      -- 畸形率  todo: 其他采精事件相关字段需要确认
+    EWeight AS eventWeight,
+    b.FieldText AS chgType,   -- 变动(当是猪群转出事件时才有值)
+    CASE WHEN ChgType = '' OR ChgType IS NULL THEN NULL ELSE ChgReason END AS chgReason, -- 变动原因(当是疾病事件时,为疾病人员名称)
+    OutDestination AS toBarnOutId    -- 进场事件: 进场猪舍outId
+FROM view_EventListBoar AS a
+    LEFT JOIN TB_FieldValue AS b ON a.ChgType = b.ColID

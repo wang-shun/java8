@@ -38,6 +38,7 @@ import io.terminus.doctor.event.dto.event.group.DoctorTurnSeedGroupEvent;
 import io.terminus.doctor.event.enums.BoarEntryType;
 import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.enums.IsOrNot;
+import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PigSource;
 import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.model.DoctorBarn;
@@ -54,6 +55,7 @@ import io.terminus.doctor.move.model.B_Customer;
 import io.terminus.doctor.move.model.Proc_InventoryGain;
 import io.terminus.doctor.move.model.TB_FieldValue;
 import io.terminus.doctor.move.model.View_BoarCardList;
+import io.terminus.doctor.move.model.View_EventListBoar;
 import io.terminus.doctor.move.model.View_EventListGain;
 import io.terminus.doctor.move.model.View_GainCardList;
 import io.terminus.doctor.move.model.View_PigLocationList;
@@ -503,12 +505,52 @@ public class DoctorMoveDataService implements CommandLineRunner {
     }
 
     //拼接公猪事件
-    private DoctorPigEvent getBoarEvent() {
-        DoctorPigEvent boarEvent = new DoctorPigEvent();
+    private DoctorPigEvent getBoarEvent(View_EventListBoar event, Map<String, DoctorPig> boarMap, Map<String, DoctorBarn> barnMap,
+                                        Map<Integer, Map<String, DoctorBasic>> basicMap, Map<String, Long> subMap) {
+        DoctorPig boar = boarMap.get(event.getGroupOutId());
+        if (boar == null) {
+            return null;
+        }
 
+        DoctorPigEvent boarEvent = new DoctorPigEvent();
+        boarEvent.setOrgId(boar.getOrgId());
+        boarEvent.setOrgName(boar.getOrgName());
+        boarEvent.setFarmId(boar.getFarmId());
+        boarEvent.setFarmName(boar.getFarmName());
+        boarEvent.setPigId(boar.getId());
+        boarEvent.setPigCode(boar.getPigCode());
+        boarEvent.setEventAt(event.getEventAt());
+        boarEvent.setKind(boar.getPigType());       // 猪类(公猪2,母猪1)
+        boarEvent.setName(event.getEventName());
+        boarEvent.setDesc(event.getEventDesc());
+        boarEvent.setOutId(event.getEventOutId());
+        boarEvent.setRemark(event.getRemark());
+
+        //事件类型
+        PigEvent eventType = PigEvent.from(event.getEventName());
+        boarEvent.setType(eventType == null ? null : eventType.getKey());
+
+        DoctorBarn barn = barnMap.get(event.getBarnOutId());
+        if (barn != null) {
+            boarEvent.setBarnId(barn.getId());
+            boarEvent.setBarnName(barn.getName());
+        }
+
+        boarEvent.setRelEventId(null); //// TODO: 16/8/1 关联上个事件的id
+
+        return getBoarEventExtra(eventType, boarEvent);
+    }
+
+    private DoctorPigEvent getBoarEventExtra(PigEvent eventType, DoctorPigEvent boarEvent) {
+        if (eventType == null) {
+            return boarEvent;
+        }
+
+        //boarEvent.setExtraMap(); switch
         return boarEvent;
     }
 
+    //拼接公猪跟踪
     private DoctorPigTrack getBoarTrack(View_BoarCardList card, DoctorPig boar, Map<String, DoctorBarn> barnMap, List<DoctorPigEvent> events) {
         DoctorPigTrack track = new DoctorPigTrack();
         track.setFarmId(boar.getFarmId());

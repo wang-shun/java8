@@ -11,63 +11,34 @@ import java.util.Date;
 @Data
 public class View_EventListBoar implements Serializable {
     private static final long serialVersionUID = 5918176765258406604L;
-    private String OID;
-    private String Status;
-    private String FarmOID;
-    private String PigID;
-    private String PigFatherID;
-    private String PigMotherID;
-    private String Source;
-    private Date BirthDate;
-    private Double BirthWeight;
-    private Date HerdEntryDate;
-    private Integer HerdEntryDays;
-    private String InitLocation;
-    private String Location;
-    private String BoarType;
-    private String Breed;
-    private String Genetic;
-    private String Remark;
-    private Double Weight;
-    private String HerdRemovalDate;
-    private String EventOID;
-    private String Srm;
-    private String EOID;
-    private Date EventDate;
-    private String EventName;
-    private String EventDetail;
-    private String RelMainOID;
-    private String ERemark;
-    private String EventType;
-    private String EventEName;
-    private String EventLocation;
-    private Double Price;
-    private Double SumJe;
-    private String Customer;
-    private String Disease;
-    private String Treament;
-    private Integer Dilution;
-    private Double DilutionWeight;
-    private Double Density;
-    private Double Vitality;
-    private Double PHValue;
-    private Integer Score;
-    private Double AbnormalRate;
-    private Integer ScoreHl;
-    private Integer ScoreMd;
-    private Integer ScoreXt;
-    private Integer ScoreSl;
-    private Double EWeight;
-    private Integer ChgCount;
-    private String ChgType;
-    private String ChgReason;
-    private String OutDestination;
-    private String Operator;
-    private String AutoGenerate;
-    private String RelEventOID;
-    private String FarmOIDText;
-    private String LocationCaption;
-    private String CurrentLocationCaption;
-    private String PigTypeOID;
-    private String TypeName;
+    private String groupOutId;
+    private String pigCode;
+    private String pigFatherCode;
+    private String pigMotherCode;
+    private String birthDate;
+    private String birthWeight;     // 进场重量
+    private Date inFarmDate;      // 进场日期
+    private Integer inFarmDayAge;    // 进场日龄
+    private String boarType;        // 公猪类型
+    private String breed;
+    private String genetic;
+    private String eventOutId;
+    private Date eventAt;
+    private String eventName;       // 事件名称 转换成枚举里需要的值
+    private String eventDesc;
+    private String remark;          // 采精的remark和event的remark
+    private String barnOutId;       // 事件发生猪舍outId
+    private Long pirce;
+    private Long amount;
+    private Double dilutionRatio;   // 稀释倍数
+    private Double dilutionWeight;  // 稀释后重量
+    private Double semenDensity;    // 精液密度
+    private Double semenActive;     // 精液活力
+    private Double semenPh;         // 精液pH
+    private Integer score;           //??
+    private Double semenJxRatio;    // 畸形率  todo: 其他采精事件相关字段需要确认
+    private Double eventWeight;
+    private String chgType;         // 变动(当是猪群转出事件时才有值)
+    private String chgReason;       // 变动原因(当是疾病事件时 为疾病人员名称)
+    private String toBarnOutId;     // 进场事件: 进场猪舍outId
 }
