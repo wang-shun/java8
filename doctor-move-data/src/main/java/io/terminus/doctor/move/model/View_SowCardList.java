@@ -32,6 +32,6 @@ public class View_SowCardList implements Serializable {
     private String genetic;
     private Double weight;
     private String remark;
-    private Date outFarmDate;      // 离场日期
+    private String outFarmDate;      // 离场日期
     private String pigType;
 }

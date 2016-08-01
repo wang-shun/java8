@@ -417,7 +417,7 @@ public class DoctorMoveDataService implements CommandLineRunner {
         track.setStatus(status == null ? null : status.getKey());
         track.setIsRemoval(sow.getIsRemoval());
         track.setWeight(card.getWeight());
-        track.setOutFarmDate(card.getOutFarmDate());
+        track.setOutFarmDate(DateUtil.toDate(card.getOutFarmDate()));
         track.setCurrentParity(card.getCurrentParity());
 
         if (notEmpty(events)) {
@@ -989,5 +989,6 @@ public class DoctorMoveDataService implements CommandLineRunner {
     @Override
     public void run(String... strings) throws Exception {
         // Just for test!
+        movePig(1L);
     }
 }
