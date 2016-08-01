@@ -25,7 +25,7 @@ SELECT
     CASE WHEN Breed = '' THEN NULL ELSE Breed END AS breed,
     CASE WHEN Genetic = '' THEN NULL ELSE Genetic END AS genetic,
     isnull(Weight, 0.00) AS weight,
-    Remark AS remark,
+    CASE WHEN Remark = '' THEN NULL ELSE Remark END AS remark,
     HerdRemovalDate AS outFarmDate,            -- 离场日期
     TypeName AS pigType
 FROM view_SowCardList
