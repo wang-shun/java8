@@ -1,0 +1,9 @@
+-- 原料采购、领用记录
+select main.EventType, main.EventDate, main.Zdr, main.WareHouse,
+detail.RawMaterial, detail.Count, detail.Staff, detail.UsedDays,
+rm.RawMaterialName as materialName, fieldtype.Name as UnitGroupText, unit.UnitName
+from Y_RawMaterialPUMain main, Y_RawMaterialPUDetail detail, B_RawMaterial rm
+join TB_FieldValueType fieldtype on rm.UnitGroup = fieldtype.oid
+join B_CalUnit unit on rm.UnitGroup = unit.RelMainOID
+where main.OID = detail.RelMainOID and detail.RawMaterial = rm.OID
+order by main.EventDate

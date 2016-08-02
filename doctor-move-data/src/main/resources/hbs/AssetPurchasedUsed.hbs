@@ -1,0 +1,9 @@
+-- 易耗品采购、领用记录
+select main.EventType, main.EventDate, main.Zdr, main.WareHouse,
+detail.Asset, detail.[Count], detail.Staff, detail.UsedDays,
+asset.AssetName as materialName, fieldtype.Name as UnitGroupText, unit.UnitName
+from Y_AssetPurchaseUsedMain main, Y_AssetPurchaseUsedDetail detail, B_Asset asset
+join TB_FieldValueType fieldtype on asset.UnitGroup = fieldtype.oid
+join B_CalUnit unit on asset.UnitGroup = unit.RelMainOID
+where main.OID = detail.RelMainOID and detail.Asset = asset.OID
+order by main.EventDate
