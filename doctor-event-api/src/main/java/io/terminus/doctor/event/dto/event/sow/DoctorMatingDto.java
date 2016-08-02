@@ -26,6 +26,8 @@ public class DoctorMatingDto implements Serializable {
 
     private Long matingBoarPigId;   //配种公猪Id
 
+    private String matingBoarPigCode; //配种公猪号
+
     private Date judgePregDate; //预产日期
 
     /**

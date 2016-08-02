@@ -13,6 +13,7 @@ import java.util.Date;
  * Date:2016-05-16
  * Email:yaoqj@terminus.io
  * Descirbe: 部分断奶事件录入
+ * (每次断奶都是部分断奶, 旧软件的最后一次断奶会触发转舍事件, 新软件不会触发)
  */
 @Builder
 @Data
