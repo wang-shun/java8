@@ -1,0 +1,9 @@
+-- 饲料采购、领用记录
+select main.EventType, main.EventDate, main.Zdr, main.WareHouse,
+detail.Feed, detail.[Count], detail.Staff, detail.UsedDays,
+f.FeedName as materialName, fieldtype.Name as UnitGroupText, unit.UnitName
+from Y_FeedPurchaseUsedMain main, Y_FeedPurchaseUsedDetail detail, B_Feed f
+join TB_FieldValueType fieldtype on f.UnitGroup = fieldtype.oid
+join B_CalUnit unit on f.UnitGroup = unit.RelMainOID
+where main.OID = detail.RelMainOID and detail.Feed = f.OID
+order by main.EventDate
