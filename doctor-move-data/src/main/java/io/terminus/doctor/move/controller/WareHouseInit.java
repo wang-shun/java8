@@ -29,12 +29,14 @@ import io.terminus.doctor.user.model.DoctorStaff;
 import io.terminus.doctor.user.model.DoctorUserDataPermission;
 import io.terminus.doctor.user.model.Sub;
 import io.terminus.doctor.user.service.DoctorUserReadService;
+import io.terminus.doctor.warehouse.dao.DoctorFarmWareHouseTypeDao;
 import io.terminus.doctor.warehouse.dao.DoctorMaterialConsumeAvgDao;
 import io.terminus.doctor.warehouse.dao.DoctorMaterialConsumeProviderDao;
 import io.terminus.doctor.warehouse.dao.DoctorMaterialInWareHouseDao;
 import io.terminus.doctor.warehouse.dao.DoctorWareHouseDao;
 import io.terminus.doctor.warehouse.dao.DoctorWareHouseTrackDao;
 import io.terminus.doctor.warehouse.manager.MaterialInWareHouseManager;
+import io.terminus.doctor.warehouse.model.DoctorFarmWareHouseType;
 import io.terminus.doctor.warehouse.model.DoctorMaterialConsumeAvg;
 import io.terminus.doctor.warehouse.model.DoctorMaterialConsumeProvider;
 import io.terminus.doctor.warehouse.model.DoctorMaterialInWareHouse;
@@ -49,6 +51,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -91,6 +94,8 @@ public class WareHouseInit {
     private DoctorWareHouseTrackDao doctorWareHouseTrackDao;
     @Autowired
     private DoctorBarnDao doctorBarnDao;
+    @Autowired
+    private DoctorFarmWareHouseTypeDao doctorFarmWareHouseTypeDao;
 
 
     @RequestMapping(value = "/init", method = RequestMethod.GET)
@@ -155,7 +160,7 @@ public class WareHouseInit {
                     warehouseMap.put(type, wareHouse);
                 }
                 //往仓库里添加物料
-                this.addMaterial2Warehouse(dataSourceId, warehouseMap, basicMaterialMap, staffMap);
+                this.addMaterial2Warehouse(dataSourceId, warehouseMap, basicMaterialMap, staffMap, barnMap);
 
                 //TODO 配方
             }
@@ -269,39 +274,45 @@ public class WareHouseInit {
     }
 
     //往仓库里添加物料
-    private void addMaterial2Warehouse(Long dataSourceId, Map<WareHouseType, DoctorWareHouse> warehouseType, Map<String, DoctorBasicMaterial> basicMaterialMap, Map<String, DoctorStaff> staffMap){
+    private void addMaterial2Warehouse(Long dataSourceId, Map<WareHouseType, DoctorWareHouse> warehouseType, Map<String, DoctorBasicMaterial> basicMaterialMap, Map<String, DoctorStaff> staffMap, Map<String, DoctorBarn> barnMap){
         // 易耗品
         List<MaterialPurchasedUsed> consumes = RespHelper.or500(doctorMoveDatasourceHandler.findByHbsSql(dataSourceId, MaterialPurchasedUsed.class, "AssetPurchasedUsed"));
-        this.addMaterial2Warehouse(warehouseType.get(WareHouseType.CONSUME), consumes, basicMaterialMap, staffMap);
+        this.addMaterial2Warehouse(warehouseType.get(WareHouseType.CONSUME), consumes, basicMaterialMap, staffMap, barnMap);
 
         // 饲料
         List<MaterialPurchasedUsed> feeds = RespHelper.or500(doctorMoveDatasourceHandler.findByHbsSql(dataSourceId, MaterialPurchasedUsed.class, "FeedPurchasedUsed"));
-        this.addMaterial2Warehouse(warehouseType.get(WareHouseType.FEED), feeds, basicMaterialMap, staffMap);
+        this.addMaterial2Warehouse(warehouseType.get(WareHouseType.FEED), feeds, basicMaterialMap, staffMap, barnMap);
 
         // 原料
         List<MaterialPurchasedUsed> raws = RespHelper.or500(doctorMoveDatasourceHandler.findByHbsSql(dataSourceId, MaterialPurchasedUsed.class, "RawMaterialPurchasedUsed"));
-        this.addMaterial2Warehouse(warehouseType.get(WareHouseType.MATERIAL), raws, basicMaterialMap, staffMap);
+        this.addMaterial2Warehouse(warehouseType.get(WareHouseType.MATERIAL), raws, basicMaterialMap, staffMap, barnMap);
 
         // 药品
         List<MaterialPurchasedUsed> med = RespHelper.or500(doctorMoveDatasourceHandler.findByHbsSql(dataSourceId, MaterialPurchasedUsed.class, "MedicinePurchasedUsed"));
-        this.addMaterial2Warehouse(warehouseType.get(WareHouseType.MEDICINE), med, basicMaterialMap, staffMap);
+        this.addMaterial2Warehouse(warehouseType.get(WareHouseType.MEDICINE), med, basicMaterialMap, staffMap, barnMap);
 
         // 疫苗
         List<MaterialPurchasedUsed> vaccinationPurchasedUsed = RespHelper.or500(doctorMoveDatasourceHandler.findByHbsSql(dataSourceId, MaterialPurchasedUsed.class, "VaccinationPurchasedUsed"));
-        this.addMaterial2Warehouse(warehouseType.get(WareHouseType.VACCINATION), vaccinationPurchasedUsed, basicMaterialMap, staffMap);
+        this.addMaterial2Warehouse(warehouseType.get(WareHouseType.VACCINATION), vaccinationPurchasedUsed, basicMaterialMap, staffMap, barnMap);
     }
 
-    private void addMaterial2Warehouse(DoctorWareHouse wareHouse, List<MaterialPurchasedUsed> list, Map<String, DoctorBasicMaterial> basicMaterialMap, Map<String, DoctorStaff> staffMap){
-        // 1. 领用和添加物料的历史记录
+    private void addMaterial2Warehouse(DoctorWareHouse wareHouse, List<MaterialPurchasedUsed> list, Map<String, DoctorBasicMaterial> basicMaterialMap, Map<String, DoctorStaff> staffMap, Map<String, DoctorBarn> barnMap){
+        // 往表 doctor_material_in_ware_houses 写数的Map, key = 类型数值 | materialName, value = lotNumber(最新数量)
+        Map<String, Long> materialInWarehouseMap = new HashMap<>();
+
+        // 往表 doctor_material_consume_avgs 写数的Map, key = 类型数值 | materialName, value = [eventCount(最后一次领用数量), 时间]
+        Map<String, Object[]> lastConsumeMap = new HashMap<>();
+
+        // 领用和添加物料的历史记录
         DoctorMaterialConsumeProvider materialCP = new DoctorMaterialConsumeProvider();
         materialCP.setType(wareHouse.getType());
         materialCP.setFarmId(wareHouse.getFarmId());
         materialCP.setFarmName(wareHouse.getFarmName());
         materialCP.setWareHouseId(wareHouse.getId());
         materialCP.setWareHouseName(wareHouse.getWareHouseName());
-        for(int i = 0; i < list.size(); i++){
-            MaterialPurchasedUsed pu = list.get(i);
-            materialCP.setMaterialId(basicMaterialMap.get(wareHouse.getType() + "|" + pu.getMaterialName()).getId());
+        for(MaterialPurchasedUsed pu : list){
+            String typeAndmaterialName = wareHouse.getType() + "|" + pu.getMaterialName();
+            materialCP.setMaterialId(basicMaterialMap.get(typeAndmaterialName).getId());
             materialCP.setMaterialName(pu.getMaterialName());
             materialCP.setEventTime(pu.getEventDate());
             if("采购".equals(pu.getEventType())){
@@ -319,15 +330,88 @@ public class WareHouseInit {
 
             //如果是饲料领用, 需要设置 extra
             if("领用".equals(pu.getEventType()) && Objects.equals(wareHouse.getType(), WareHouseType.FEED.getKey())){
-                materialCP.setExtraMap(ImmutableMap.of("consumeDays", pu.getUsedDays(), "barnId", null, "barnName", null));
+                DoctorBarn barn = barnMap.get(pu.getBarnOId());
+                if(barn != null){
+                    Map<String, Object> extraMap = new HashMap<>();
+                    extraMap.put("barnId", barn.getId());
+                    extraMap.put("barnName", barn.getName());
+                    materialCP.setExtraMap(extraMap);
+                }
             }
-
             doctorMaterialConsumeProviderDao.create(materialCP);
 
-            // 最后一条, 就是最新数量
-            if(i == list.size() - 1){
-
+            // todo materialInWarehouseMap.put(typeAndmaterialName, materialCP.);
+            if("领用".equals(pu.getEventType())) {
+                lastConsumeMap.put(typeAndmaterialName, new Object[]{materialCP.getEventCount(), pu.getEventDate()});
             }
         }
+
+        // 仓库中各种物料的最新数量 TODO
+        DoctorMaterialInWareHouse materialInWareHouse = new DoctorMaterialInWareHouse();
+        materialInWareHouse.setFarmId(wareHouse.getFarmId());
+        materialInWareHouse.setFarmName(wareHouse.getFarmName());
+        materialInWareHouse.setWareHouseId(wareHouse.getId());
+        materialInWareHouse.setWareHouseName(wareHouse.getWareHouseName());
+        materialInWareHouse.setType(wareHouse.getType());
+        for(Map.Entry<String, Long> entry : materialInWarehouseMap.entrySet()){
+            DoctorBasicMaterial basicMaterial = basicMaterialMap.get(entry.getKey());
+            materialInWareHouse.setMaterialId(basicMaterial.getId());
+            materialInWareHouse.setMaterialName(basicMaterial.getName());
+            materialInWareHouse.setLotNumber(entry.getValue());
+            materialInWareHouse.setUnitGroupName(basicMaterial.getUnitGroupName());
+            materialInWareHouse.setUnitName(basicMaterial.getUnitName());
+            doctorMaterialInWareHouseDao.create(materialInWareHouse);
+        }
+
+        // 仓库中各种物料的最后一次领用数量
+        DoctorMaterialConsumeAvg avg = new DoctorMaterialConsumeAvg();
+        avg.setFarmId(wareHouse.getFarmId());
+        avg.setWareHouseId(wareHouse.getId());
+        avg.setType(wareHouse.getType());
+        for(Map.Entry<String, Object[]> entry : lastConsumeMap.entrySet()){
+            avg.setMaterialId(basicMaterialMap.get(entry.getKey()).getId());
+            avg.setConsumeCount((Long) entry.getValue()[0]);
+            avg.setConsumeDate((Date) entry.getValue()[1]);
+            doctorMaterialConsumeAvgDao.create(avg);
+        }
+
+        //仓库所有物料的总数量
+        long total = 0L;
+        Map<String, Object> trackMap = new HashMap<>(); // key = materialId, value = 相应物料在该仓库的数量
+        for(DoctorMaterialInWareHouse item : doctorMaterialInWareHouseDao.queryByFarmAndWareHouseId(wareHouse.getFarmId(), wareHouse.getId())){
+            if(item.getLotNumber() != null){
+                total = total + item.getLotNumber();
+            }
+            trackMap.put(item.getMaterialId().toString(), item.getLotNumber());
+        }
+        //最近一次领用事件
+        DoctorMaterialConsumeProvider lastConsumeEvent = doctorMaterialConsumeProviderDao.findLastEvent(wareHouse.getId(), DoctorMaterialConsumeProvider.EVENT_TYPE.CONSUMER);
+        if(lastConsumeEvent != null){
+            trackMap.put("recentConsumeDate", lastConsumeEvent.getEventTime());
+        }
+        DoctorWareHouseTrack track = new DoctorWareHouseTrack();
+        track.setWareHouseId(wareHouse.getId());
+        track.setFarmId(wareHouse.getFarmId());
+        track.setFarmName(wareHouse.getFarmName());
+        track.setManagerId(wareHouse.getManagerId());
+        track.setManagerName(wareHouse.getManagerName());
+        track.setLotNumber(total);
+        track.setExtraMap(trackMap);
+        doctorWareHouseTrackDao.create(track);
+
+        // 相应猪场此类型的仓库总物资数量
+        DoctorFarmWareHouseType farmWareHouseType = new DoctorFarmWareHouseType();
+        farmWareHouseType.setFarmId(wareHouse.getFarmId());
+        farmWareHouseType.setFarmName(wareHouse.getFarmName());
+        farmWareHouseType.setType(wareHouse.getType());
+        farmWareHouseType.setLotNumber(track.getLotNumber());
+        DoctorMaterialConsumeAvg lastAVG = doctorMaterialConsumeAvgDao.findLastByFarmId(wareHouse.getFarmId());
+        if(lastAVG != null){
+            Map<String, Object> extramap = new HashMap<>();
+            extramap.put("consumeCount", lastAVG.getConsumeCount());
+            extramap.put("consumeDate", lastAVG.getConsumeDate());
+            farmWareHouseType.setExtraMap(extramap);
+        }
+        doctorFarmWareHouseTypeDao.create(farmWareHouseType);
     }
 }
