@@ -466,11 +466,11 @@ public class DoctorMoveDataService implements CommandLineRunner {
     private void moveBoar(Long moveId, DoctorOrg org, DoctorFarm farm, Map<String, DoctorBarn> barnMap, Map<Integer, Map<String, DoctorBasic>> basicMap,
                           Map<String, DoctorChangeReason> changeReasonMap, Map<String, DoctorCustomer> customerMap, Map<String, Long> subMap) {
         //1. 迁移DoctorPig
-        List<View_BoarCardList> eventBoars = RespHelper.orServEx(doctorMoveDatasourceHandler
+        List<View_BoarCardList> boarCards = RespHelper.orServEx(doctorMoveDatasourceHandler
                 .findByHbsSql(moveId, View_BoarCardList.class, "DoctorPig-BoarCardList")).stream()
                 .filter(f -> true)  // TODO: 16/7/28 多个猪场注意过滤outId
                 .collect(Collectors.toList());
-        doctorPigDao.creates(eventBoars.stream().map(card -> getBoar(card, org, farm, basicMap)).collect(Collectors.toList()));
+        doctorPigDao.creates(boarCards.stream().map(card -> getBoar(card, org, farm, basicMap)).collect(Collectors.toList()));
 
         //查出公猪, 转换成map
         Map<String, DoctorPig> boarMap = doctorPigDao.findPigsByFarmIdAndPigType(mockFarm().getId(), DoctorPig.PIG_TYPE.BOAR.getKey()).stream()
@@ -490,7 +490,7 @@ public class DoctorMoveDataService implements CommandLineRunner {
         updatePigRelEventId(boarEventMap);
 
         //3. 迁移DoctorPigTrack
-        List<DoctorPigTrack> boarTracks = eventBoars.stream()
+        List<DoctorPigTrack> boarTracks = boarCards.stream()
                 .map(card -> {
                     DoctorPig boar = boarMap.get(card.getPigOutId());
                     return getBoarTrack(card, boar, barnMap, boar == null ? null : boarEventMap.get(boar.getId()));
