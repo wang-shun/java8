@@ -21,7 +21,10 @@ import io.terminus.doctor.event.dto.DoctorPigInfoDetailDto;
 import io.terminus.doctor.event.dto.DoctorPigInfoDto;
 import io.terminus.doctor.event.dto.DoctorPigMessage;
 import io.terminus.doctor.event.enums.DataRange;
+import io.terminus.doctor.event.enums.FarrowingType;
+import io.terminus.doctor.event.enums.MatingType;
 import io.terminus.doctor.event.enums.PigStatus;
+import io.terminus.doctor.event.enums.PregCheckResult;
 import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.model.DoctorPig;
@@ -113,6 +116,23 @@ public class DoctorPigReadServiceImpl implements DoctorPigReadService {
             List<DoctorPigEvent> doctorPigEvents = RespHelper.orServEx(
                     doctorPigEventReadService.queryPigDoctorEvents(doctorPig.getFarmId(), doctorPig.getId(), null, null, null, null)).getData();
 
+            for (DoctorPigEvent doctorPigEvent : doctorPigEvents) {
+                Map<String,Object> extraMap = doctorPigEvent.getExtraMap();
+                if (extraMap != null) {
+                    Integer matingType = (Integer) extraMap.get("matingType");
+                    Integer checkResult = (Integer) extraMap.get("checkResult");
+                    Integer farrowingType = (Integer) extraMap.get("farrowingType");
+                    if (matingType != null) {
+                        extraMap.put("matingType", MatingType.from(matingType).getDesc());
+                    }
+                    if (checkResult != null) {
+                        extraMap.put("checkResult", PregCheckResult.from(checkResult).getDesc());
+                    }
+                    if (farrowingType != null) {
+                        extraMap.put("farrowingType", FarrowingType.from(farrowingType).getDesc());
+                    }
+                }
+            }
             Integer targetEventSize = MoreObjects.firstNonNull(eventSize, 3);
             targetEventSize = targetEventSize > doctorPigEvents.size() ? doctorPigEvents.size() : targetEventSize;
 
