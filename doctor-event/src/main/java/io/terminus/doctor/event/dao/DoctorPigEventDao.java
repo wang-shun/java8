@@ -51,12 +51,13 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent>{
     }
 
     /**
-     * 根据猪场id查询
+     * 根据猪场id和Kind查询
      * @param farmId 猪场id
+     * @param kind 猪类(公猪, 母猪)
      * @return 事件list
      */
-    public List<DoctorPigEvent> findByFarmId(Long farmId) {
-        return getSqlSession().selectList(sqlId("findByFarmId"), farmId);
+    public List<DoctorPigEvent> findByFarmIdAndKind(Long farmId, Integer kind) {
+        return getSqlSession().selectList(sqlId("findByFarmIdAndKind"), ImmutableMap.of("farmId", farmId, "kind", kind));
     }
 
     /**

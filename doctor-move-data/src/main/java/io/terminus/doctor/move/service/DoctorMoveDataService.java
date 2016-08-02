@@ -354,10 +354,10 @@ public class DoctorMoveDataService implements CommandLineRunner {
            Map<String, DoctorCustomer> customerMap = getCustomerMap(mockFarm().getId());
            
            //1. 迁移sow
-//           moveSow(moveId, mockOrg(), mockFarm(), basicMap);
+           moveSow(moveId, mockOrg(), mockFarm(), basicMap, barnMap);
 
            //2. 迁移boar
-           moveBoar(moveId, mockOrg(), mockFarm(), barnMap, basicMap, changeReasonMap, customerMap, subMap);
+           //moveBoar(moveId, mockOrg(), mockFarm(), barnMap, basicMap, changeReasonMap, customerMap, subMap);
            return Response.ok(Boolean.TRUE);
        } catch (Exception e) {
            log.error("move pig failed, moveId:{}, cause:{}", moveId, Throwables.getStackTraceAsString(e));
@@ -366,18 +366,38 @@ public class DoctorMoveDataService implements CommandLineRunner {
     }
 
     //迁移母猪
-    private void moveSow(Long moveId, DoctorOrg org, DoctorFarm farm, Map<Integer, Map<String, DoctorBasic>> basicMap) {
+    private void moveSow(Long moveId, DoctorOrg org, DoctorFarm farm, Map<Integer, Map<String, DoctorBasic>> basicMap, Map<String, DoctorBarn> barnMap) {
         //1. 迁移DoctorPig
-        List<DoctorPig> sows = RespHelper.orServEx(doctorMoveDatasourceHandler
+        List<View_SowCardList> sowCards = RespHelper.orServEx(doctorMoveDatasourceHandler
                 .findByHbsSql(moveId, View_SowCardList.class, "DoctorPig-SowCardList")).stream()
                 .filter(f -> true) // TODO: 16/7/28 多个猪场注意过滤outId
-                .map(card -> getSow(card, org, farm, basicMap)).collect(Collectors.toList());
-        doctorPigDao.creates(sows);
+                .collect(Collectors.toList());
+        doctorPigDao.creates(sowCards.stream().map(card -> getSow(card, org, farm, basicMap)).collect(Collectors.toList()));
 
+        //查出母猪, 转换成map
+        Map<String, DoctorPig> sowMap = doctorPigDao.findPigsByFarmIdAndPigType(mockFarm().getId(), DoctorPig.PIG_TYPE.SOW.getKey()).stream()
+                .collect(Collectors.toMap(DoctorPig::getOutId, v -> v));
 
         //2. 迁移DoctorPigEvent
+        // TODO: 16/8/2
+
+
+        //查出母猪事件, 按照母猪分组
+        Map<Long, List<DoctorPigEvent>> sowEventMap = doctorPigEventDao.findByFarmIdAndKind(mockFarm().getId(), DoctorPig.PIG_TYPE.SOW.getKey())
+                .stream().collect(Collectors.groupingBy(DoctorPigEvent::getPigId));
+
+        //更新relEventId
+        updatePigRelEventId(sowEventMap);
 
         //3. 迁移DoctorPigTrack
+        List<DoctorPigTrack> boarTracks = sowCards.stream()
+                .map(card -> {
+                    DoctorPig sow = sowMap.get(card.getPigOutId());
+                    return getSowTrack(card, sow, barnMap, sow == null ? null : sowEventMap.get(sow.getId()));
+                })
+                .filter(Arguments::notNull)
+                .collect(Collectors.toList());
+        doctorPigTrackDao.creates(boarTracks);
     }
 
     //拼接母猪
@@ -431,6 +451,9 @@ public class DoctorMoveDataService implements CommandLineRunner {
     //拼接母猪跟踪
     private DoctorPigTrack getSowTrack(View_SowCardList card, DoctorPig sow, Map<String, DoctorBarn> barnMap, List<DoctorPigEvent> events) {
         //card.getStatus(); // TODO: 16/8/1 即将离场 的情况
+        if (sow == null) {
+            return null;
+        }
 
         //母猪状态枚举
         PigStatus status = PigStatus.from(card.getStatus());
@@ -484,7 +507,8 @@ public class DoctorMoveDataService implements CommandLineRunner {
         doctorPigEventDao.creates(boarEvents);
 
         //查出公猪事件, 按照公猪分组
-        Map<Long, List<DoctorPigEvent>> boarEventMap = doctorPigEventDao.findByFarmId(mockFarm().getId()).stream().collect(Collectors.groupingBy(DoctorPigEvent::getPigId));
+        Map<Long, List<DoctorPigEvent>> boarEventMap = doctorPigEventDao.findByFarmIdAndKind(mockFarm().getId(), DoctorPig.PIG_TYPE.BOAR.getKey())
+                .stream().collect(Collectors.groupingBy(DoctorPigEvent::getPigId));
 
         //更新relEventId
         updatePigRelEventId(boarEventMap);
