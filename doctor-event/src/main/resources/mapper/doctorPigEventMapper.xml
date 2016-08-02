@@ -210,4 +210,15 @@
         </set>
         WHERE id=#{id}
     </update>
+
+    <select id="findByFarmId" parameterType="long" resultMap="DoctorPigEventMap">
+        SELECT <include refid="cols_all"/> FROM <include refid="tb"/>
+        WHERE farm_id = #{farmId}
+    </select>
+
+    <update id="updateRelEventId" parameterType="DoctorPigEvent">
+        UPDATE <include refid="tb"/>
+        SET rel_event_id = #{relEventId}, updated_at = now()
+        WHERE id=#{id}
+    </update>
 </mapper>

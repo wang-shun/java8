@@ -6,6 +6,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.Response;
+import io.terminus.common.utils.Arguments;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.common.utils.Joiners;
 import io.terminus.common.utils.JsonMapper;
@@ -465,24 +466,54 @@ public class DoctorMoveDataService implements CommandLineRunner {
     private void moveBoar(Long moveId, DoctorOrg org, DoctorFarm farm, Map<String, DoctorBarn> barnMap, Map<Integer, Map<String, DoctorBasic>> basicMap,
                           Map<String, DoctorChangeReason> changeReasonMap, Map<String, DoctorCustomer> customerMap, Map<String, Long> subMap) {
         //1. 迁移DoctorPig
-        List<DoctorPig> boars = RespHelper.orServEx(doctorMoveDatasourceHandler
+        List<View_BoarCardList> eventBoars = RespHelper.orServEx(doctorMoveDatasourceHandler
                 .findByHbsSql(moveId, View_BoarCardList.class, "DoctorPig-BoarCardList")).stream()
-                .filter(f -> true) // TODO: 16/7/28 多个猪场注意过滤outId
-                .map(card -> getBoar(card, org, farm, basicMap)).collect(Collectors.toList());
-        doctorPigDao.creates(boars);
-        
-        Map<String, DoctorPig> boarMap = doctorPigDao.findPigsByFarmId(mockFarm().getId()).stream()
-                .collect(Collectors.toMap(DoctorPig::getOutId, v -> v)); // TODO: 16/8/2 只查公猪!
+                .filter(f -> true)  // TODO: 16/7/28 多个猪场注意过滤outId
+                .collect(Collectors.toList());
+        doctorPigDao.creates(eventBoars.stream().map(card -> getBoar(card, org, farm, basicMap)).collect(Collectors.toList()));
+
+        //查出公猪, 转换成map
+        Map<String, DoctorPig> boarMap = doctorPigDao.findPigsByFarmIdAndPigType(mockFarm().getId(), DoctorPig.PIG_TYPE.BOAR.getKey()).stream()
+                .collect(Collectors.toMap(DoctorPig::getOutId, v -> v));
 
         //2. 迁移DoctorPigEvent
         List<DoctorPigEvent> boarEvents = RespHelper.orServEx(doctorMoveDatasourceHandler
-                .findByHbsSql(moveId, View_EventListBoar.class, "DoctorPig-BoarCardList")).stream()
+                .findByHbsSql(moveId, View_EventListBoar.class, "DoctorPigEvent-EventListBoar")).stream()
                 .filter(f -> true) // TODO: 16/7/28 多个猪场注意过滤outId
                 .map(event -> getBoarEvent(event, boarMap, barnMap, basicMap, subMap, customerMap, changeReasonMap)).collect(Collectors.toList());
         doctorPigEventDao.creates(boarEvents);
-        // TODO: 16/8/2 更新relEventId
+
+        //查出公猪事件, 按照公猪分组
+        Map<Long, List<DoctorPigEvent>> boarEventMap = doctorPigEventDao.findByFarmId(mockFarm().getId()).stream().collect(Collectors.groupingBy(DoctorPigEvent::getPigId));
+
+        //更新relEventId
+        updatePigRelEventId(boarEventMap);
 
         //3. 迁移DoctorPigTrack
+        List<DoctorPigTrack> boarTracks = eventBoars.stream()
+                .map(card -> {
+                    DoctorPig boar = boarMap.get(card.getPigOutId());
+                    return getBoarTrack(card, boar, barnMap, boar == null ? null : boarEventMap.get(boar.getId()));
+                })
+                .filter(Arguments::notNull)
+                .collect(Collectors.toList());
+        doctorPigTrackDao.creates(boarTracks);
+    }
+
+    //更新猪的relEventId, 后面的事件存一下前面事件的id
+    private void updatePigRelEventId(Map<Long, List<DoctorPigEvent>> pigEventMap) {
+        pigEventMap.values().forEach(events -> {
+            //时间 ASC 排序
+            events = events.stream().sorted((a, b) -> a.getEventAt().compareTo(b.getEventAt())).collect(Collectors.toList());
+            List<Long> eventIds = events.stream().map(DoctorPigEvent::getId).collect(Collectors.toList());
+            eventIds.add(0, null);  // 首位增加个null, 作为第一个事件的relEventId
+
+            for (int i = 0; i < events.size(); i++) {
+                DoctorPigEvent e = events.get(i);
+                e.setRelEventId(eventIds.get(i));
+                doctorPigEventDao.updateRelEventId(e);
+            }
+        });
     }
 
     //拼接公猪
@@ -726,6 +757,9 @@ public class DoctorMoveDataService implements CommandLineRunner {
 
     //拼接公猪跟踪
     private DoctorPigTrack getBoarTrack(View_BoarCardList card, DoctorPig boar, Map<String, DoctorBarn> barnMap, List<DoctorPigEvent> events) {
+        if (boar == null) {
+            return null;
+        }
         DoctorPigTrack track = new DoctorPigTrack();
         track.setFarmId(boar.getFarmId());
         track.setPigId(boar.getId());
