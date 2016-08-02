@@ -69,7 +69,7 @@ FROM
     WeanCount AS weanCount,            -- 断奶数量
     WeanWeight AS weanWeight,          -- 断奶重量
     CASE WHEN EventName = '疾病' THEN Disease ELSE NULL END AS diseaseColId,
-    CASE WHEN EventName = '猪群转出' THEN ChgType ELSE NULL END AS changeTypeColId,
+    CASE WHEN EventName = '猪群转出' OR EventName = '仔猪变动' THEN ChgType ELSE NULL END AS changeTypeColId,
     CASE WHEN EventName = '仔猪拼窝' THEN ChgReason ELSE NULL END AS fosterReasonColId
     FROM view_EventListSow
 ) AS a

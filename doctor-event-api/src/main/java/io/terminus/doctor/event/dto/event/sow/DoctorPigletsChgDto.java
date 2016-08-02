@@ -32,7 +32,11 @@ public class DoctorPigletsChgDto implements Serializable{
 
     private Long pigletsChangeType;   // 仔猪变动类型
 
+    private String pigletsChangeTypeName;   // 仔猪变动类型内容
+
     private Long pigletsChangeReason;   // 仔猪变动原因
+
+    private String pigletsChangeReasonName;   // 仔猪变动原因内容
 
     private Double pigletsWeight;  // 变动重量 (非必填)
 
