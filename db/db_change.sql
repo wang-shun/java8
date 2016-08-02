@@ -150,3 +150,6 @@ CREATE TABLE `doctor_daily_reports` (
   PRIMARY KEY (`id`),
   KEY `idx_doctor_daily_reports_farm_id_agg_sumat` (`farm_id`,`sum_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='猪场日报表';
+
+-- 增加当前配种次数
+alter table `doctor_pig_tracks` add COLUMN `current_mating_count` int(11) DEFAULT 0 COMMENT '当前配种次数' after `current_parity`;

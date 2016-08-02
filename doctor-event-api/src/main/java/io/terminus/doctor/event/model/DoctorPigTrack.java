@@ -89,6 +89,11 @@ public class DoctorPigTrack implements Serializable{
 
     private Integer currentParity;
 
+    /**
+     * 当前配种次数
+     */
+    private Integer currentMatingCount;
+
     private String remark;
 
     private Long creatorId;

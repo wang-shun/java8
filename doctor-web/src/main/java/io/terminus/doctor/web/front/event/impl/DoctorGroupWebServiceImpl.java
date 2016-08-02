@@ -179,7 +179,7 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
                     checkParam(params);
                     params.put("changeTypeName", getBasicName(getLong(params, "changeTypeId")));
                     params.put("changeReasonName", getChangeReasonName(getLong(params, "changeReasonId")));
-                    if (getLong(params, "customerName") == null) {
+                    if (params.get("customerName") == null || params.get("customerName") == "") {
                         params.put("customerName", getCustomerName(getLong(params, "customerId")));
                     }
                     orServEx(doctorGroupWriteService.groupEventChange(groupDetail, map(putBasicFields(params), DoctorChangeGroupInput.class)));
@@ -473,8 +473,9 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
             throw new ServiceException("some.param.is.null");
         }
         Boolean isSaleType = Objects.equals(getLong(params, "changeTypeId"), CHANGE_TYPE_SALE);
-        if (isSaleType && (getLong(params, "customerId") == null || getLong(params, "price") == null)) {
-            throw new ServiceException("price.or.customer.id.is.null.when.sale");
+        Boolean canGetCustomer = getLong(params, "customerId") != null || params.get("customerName") != null;
+        if (isSaleType && (!canGetCustomer || getLong(params, "price") == null)) {
+            throw new ServiceException("price.or.customer.info.is.null.when.sale");
         }
     }
 }

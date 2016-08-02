@@ -185,13 +185,15 @@
         WHERE id=#{id}
     </update>
 
-    <select id="getMatingCount" parameterType="map" resultType="long">
-        SELECT COUNT(1)
+    <select id="getFirstMatingTime" parameterType="map" resultMap="DoctorPigEventMap">
+        SELECT <include refid="cols_all"/>
         FROM <include refid="tb"/>
         <where>
             <if test="farmId != null" >`farm_id` = #{farmId}</if>
             <if test="pigId != null" > AND `pig_id` = #{pigId}</if>
             AND type = 9 AND kind = 1
         </where>
+        order by id DESC
+        limit #{count},1
     </select>
 </mapper>

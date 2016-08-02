@@ -23,6 +23,7 @@
         <result column="extra" property="extra"/>
         <result column="extra_message" property="extraMessage"/>
         <result column="current_parity" property="currentParity"/>
+        <result column="current_mating_count" property="currentMatingCount"/>
         <result column="remark" property="remark"/>
         <result column="creator_id" property="creatorId"/>
         <result column="creator_name" property="creatorName"/>
@@ -45,11 +46,11 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        `farm_id`,`pig_id`, `pig_type`, `status`,`is_removal`,`current_barn_id`,`current_barn_name`,`weight`,`out_farm_date`,`rel_event_ids`,`extra`,`extra_message`,`current_parity`,`remark`,`creator_id`,`creator_name`,`updator_id`,`updator_name`,`created_at`,`updated_at`
+        `farm_id`,`pig_id`, `pig_type`, `status`,`is_removal`,`current_barn_id`,`current_barn_name`,`weight`,`out_farm_date`,`rel_event_ids`,`extra`,`extra_message`,`current_parity`,`current_mating_count`,`remark`,`creator_id`,`creator_name`,`updator_id`,`updator_name`,`created_at`,`updated_at`
     </sql>
 
     <sql id="vals">
-        #{farmId},#{pigId},#{pigType},#{status},#{isRemoval},#{currentBarnId},#{currentBarnName},#{weight},#{outFarmDate},#{relEventIds},#{extra},#{extraMessage},#{currentParity},#{remark},#{creatorId},#{creatorName},#{updatorId},#{updatorName},now(),now()
+        #{farmId},#{pigId},#{pigType},#{status},#{isRemoval},#{currentBarnId},#{currentBarnName},#{weight},#{outFarmDate},#{relEventIds},#{extra},#{extraMessage},#{currentParity},0,#{remark},#{creatorId},#{creatorName},#{updatorId},#{updatorName},now(),now()
     </sql>
 
     <sql id="criteria">
@@ -63,6 +64,7 @@
         <if test="weight != null" > AND `weight` = #{weight}</if>
         <if test="relEventIds != null" > AND `rel_event_ids` = #{relEventIds}</if>
         <if test="currentParity != null" > AND `current_parity` = #{currentParity}</if>
+        <if test="currentMatingCount != null"> AND `current_mating_count` = #{currentMatingCount}</if>
     </sql>
 
     <insert id="create" parameterType="DoctorPigTrack" keyProperty="id" useGeneratedKeys="true">
@@ -76,7 +78,7 @@
         ( <include refid="cols_exclude_id"/> )
         VALUES
         <foreach collection="list" item="i" separator=",">
-        (#{i.farmId}, #{i.pigId},#{i.pigType},#{i.status},#{i.currentBarnId},#{i.currentBarnName},#{i.weight},#{i.outFarmDate},#{i.relEventIds},#{i.extra},#{i.extraMessage},#{i.currentParity},#{i.remark},#{i.creatorId},#{i.creatorName},#{i.updatorId},#{i.updatorName},now(),now()
+        (#{i.farmId}, #{i.pigId},#{i.pigType},#{i.status},#{i.currentBarnId},#{i.currentBarnName},#{i.weight},#{i.outFarmDate},#{i.relEventIds},#{i.extra},#{i.extraMessage},#{i.currentParity},0,#{i.remark},#{i.creatorId},#{i.creatorName},#{i.updatorId},#{i.updatorName},now(),now()
  )
         </foreach>
     </insert>
@@ -151,6 +153,7 @@
             <if test="extra != null" > ,`extra` = #{extra}</if>
             <if test="extraMessage != null" > ,`extra_message` = #{extraMessage}</if>
             <if test="currentParity != null" > ,`current_parity` = #{currentParity}</if>
+            <if test="currentMatingCount != null"> ,`current_mating_count` = #{currentMatingCount}</if>
             <if test="remark != null" > ,`remark` = #{remark}</if>
             <if test="creatorId != null" > ,`creator_id` = #{creatorId}</if>
             <if test="creatorName != null" > ,`creator_name` = #{creatorName}</if>

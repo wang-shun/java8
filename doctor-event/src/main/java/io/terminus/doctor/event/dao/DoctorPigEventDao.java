@@ -52,7 +52,7 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent>{
         return this.getSqlSession().selectList(sqlId("queryAllFarmInEvent"));
     }
 
-    public Long getMatingCount(Map<String, Object> criteria) {
-        return (Long)this.getSqlSession().selectOne(sqlId("getMatingCount"), criteria);
+    public DoctorPigEvent getFirstMatingTime(Map<String, Object> criteria) {
+        return this.getSqlSession().selectOne(sqlId("getFirstMatingTime"), criteria);
     }
 }

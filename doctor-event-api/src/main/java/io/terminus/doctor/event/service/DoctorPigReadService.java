@@ -10,6 +10,7 @@ import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 
 import javax.validation.constraints.NotNull;
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
@@ -131,8 +132,15 @@ public interface DoctorPigReadService {
     /**
      * 查询母猪配种次数
      * @param pigId 猪id
-     * @param farmId 猪场id
      * @return 母猪配种次数
      */
-    Response<Long> getCountOfMating(@NotNull(message = "pigId.not.null")Long pigId, @NotNull(message = "farmId.not.null") Long farmId);
+    Response<Integer> getCountOfMating(@NotNull(message = "pigId.not.null")Long pigId);
+
+    /**
+     * 查询母猪第一次配种的时间
+     * @param farmId 猪场id
+     * @param pigId 猪id
+     * @return 第一次配种的时间
+     */
+    Response<Date> getFirstMatingTime(@NotNull(message = "pigId.not.null")Long pigId, @NotNull(message = "farmId.not.null") Long farmId);
 }
