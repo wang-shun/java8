@@ -11,29 +11,24 @@ import java.util.Date;
 @Data
 public class View_BoarCardList implements Serializable{
     private static final long serialVersionUID = -8085241787217620564L;
-    private String OID;
-    private String Status;
-    private String FarmOID;
-    private String PigID;
-    private String PigFatherID;
-    private String PigMotherID;
-    private String Source;
-    private Date BirthDate;
-    private Double BirthWeight;
-    private Date HerdEntryDate;
-    private Integer HerdEntryDays;
-    private String InitLocation;
-    private String Location;
-    private String BoarType;
-    private String Breed;
-    private String Genetic;
-    private String Remark;
-    private Double Weight;
-    private String HerdRemovalDate;
-    private String EventOID;
-    private String Srm;
-    private String FarmOIDText;
-    private String LocationCaption;
-    private String PigTypeOID;
-    private String TypeName;
+    private String pigOutId;         // 猪的OID
+    private String status;           // 猪群状态
+    private String farmOutId;
+    private String pigCode;          // 猪群号
+    private String pigFatherCode;
+    private String pigMotherCode;
+    private Integer source;
+    private Date birthDate;
+    private Double birthWeight;
+    private Date inFarmDate;       // 进场日期
+    private Integer inFarmDayAge;     // 进场日龄
+    private String initBarnName;
+    private String currentBarnOutId; // 当前猪舍outId
+    private String breed;
+    private String genetic;
+    private Double weight;
+    private String remark;
+    private String outFarmDate;      // 离场日期
+    private String pigType;
+    private String boarType;         // 公猪类型 活公猪, 新鲜精液, 冷冻精液
 }

@@ -3,9 +3,7 @@ package io.terminus.doctor.event.dao;
 import com.google.common.collect.ImmutableMap;
 import io.terminus.common.mysql.dao.MyBatisDao;
 import io.terminus.doctor.event.model.DoctorPigEvent;
-import jdk.nashorn.internal.ir.annotations.Immutable;
 import org.springframework.stereotype.Repository;
-import sun.util.resources.cldr.ga.LocaleNames_ga;
 
 import java.util.Date;
 import java.util.List;
@@ -50,5 +48,23 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent>{
 
     public List<Long> queryAllFarmInEvent(){
         return this.getSqlSession().selectList(sqlId("queryAllFarmInEvent"));
+    }
+
+    /**
+     * 根据猪场id和Kind查询
+     * @param farmId 猪场id
+     * @param kind 猪类(公猪, 母猪)
+     * @return 事件list
+     */
+    public List<DoctorPigEvent> findByFarmIdAndKind(Long farmId, Integer kind) {
+        return getSqlSession().selectList(sqlId("findByFarmIdAndKind"), ImmutableMap.of("farmId", farmId, "kind", kind));
+    }
+
+    /**
+     * 仅更新relEventId
+     * @param pigEvent relEventId
+     */
+    public void updateRelEventId(DoctorPigEvent pigEvent){
+        getSqlSession().update(sqlId("updateRelEventId"), pigEvent);
     }
 }

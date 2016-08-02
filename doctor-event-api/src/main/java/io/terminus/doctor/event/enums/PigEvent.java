@@ -14,13 +14,13 @@ public enum PigEvent {
 
     CHG_LOCATION(1, "转舍" ,"转舍事件"),
     CHG_FARM(2, "转场", "转场事件"),
-    CONDITION(3, "体况检查", "体况事件"),
-    DISEASE(4, "疾病检查" , "疾病事件"),
-    VACCINATION(5, "免疫检查", "免疫事件"),
+    CONDITION(3, "体况", "体况事件"),
+    DISEASE(4, "疾病" , "疾病事件"),
+    VACCINATION(5, "防疫", "免疫事件"),
     REMOVAL(6, "离场", "离场事件"),
-    ENTRY(7, "进场","进厂事件"),   // 后备舍 进厂事件， 进入单个猪管理方式
+    ENTRY(7, "进场","进场事件"),       //进场事件
 
-    SEMEN(8, "采精","公猪采精事件信息"),   // 公猪只有采精事件信息
+    SEMEN(8, "采精","公猪采精事件信息"),     //只有公猪有此事件
 
     MATING(9, "配种", "母猪配种事件"),
     TO_PREG(10, "转入妊娠舍" ,"转入妊娠舍"),
@@ -44,7 +44,7 @@ public enum PigEvent {
     @Getter
     private String desc;
 
-    private PigEvent(Integer key, String name, String desc){
+    PigEvent(Integer key, String name, String desc){
         this.key = key;
         this.name = name;
         this.desc = desc;
@@ -53,6 +53,15 @@ public enum PigEvent {
     public static PigEvent from(Integer key){
         for(PigEvent pigEvent : PigEvent.values()){
             if(Objects.equals(pigEvent.getKey(), key)){
+                return pigEvent;
+            }
+        }
+        return null;
+    }
+
+    public static PigEvent from(String name){
+        for(PigEvent pigEvent : PigEvent.values()){
+            if(Objects.equals(pigEvent.name, name)){
                 return pigEvent;
             }
         }

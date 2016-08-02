@@ -72,12 +72,33 @@
     </insert>
 
     <insert id="creates" parameterType="list">
-        INSERT INTO <include refid="tb"/>
-        ( <include refid="cols_exclude_id"/> )
+        INSERT INTO <include refid="tb" />
+        (<include refid="cols_exclude_id" />)
         VALUES
-        <foreach collection="list" item="i" separator=",">
-        (#{i.farmId}, #{i.pigId},#{i.pigType},#{i.status},#{i.currentBarnId},#{i.currentBarnName},#{i.weight},#{i.outFarmDate},#{i.relEventIds},#{i.extra},#{i.extraMessage},#{i.currentParity},#{i.remark},#{i.creatorId},#{i.creatorName},#{i.updatorId},#{i.updatorName},now(),now()
- )
+        <foreach collection="list" separator="," item="item">
+            (
+            #{item.farmId},
+            #{item.pigId},
+            #{item.pigType},
+            #{item.status},
+            #{item.isRemoval},
+            #{item.currentBarnId},
+            #{item.currentBarnName},
+            #{item.weight},
+            #{item.outFarmDate},
+            #{item.relEventIds},
+            #{item.extra},
+            #{item.extraMessage},
+            #{item.currentParity},
+            #{item.remark},
+            #{item.creatorId},
+            #{item.creatorName},
+            #{item.updatorId},
+            #{item.updatorName},
+            now(),
+            now()
+
+            )
         </foreach>
     </insert>
 

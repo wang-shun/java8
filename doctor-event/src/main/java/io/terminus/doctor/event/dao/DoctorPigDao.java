@@ -1,5 +1,6 @@
 package io.terminus.doctor.event.dao;
 
+import com.google.common.collect.ImmutableMap;
 import io.terminus.common.mysql.dao.MyBatisDao;
 import io.terminus.doctor.event.model.DoctorPig;
 import org.springframework.stereotype.Repository;
@@ -54,5 +55,15 @@ public class DoctorPigDao extends MyBatisDao<DoctorPig> {
      */
     public List<String> findPigCodesByCompanyId(Long companyId){
         return this.getSqlSession().selectList(sqlId("findPigCodesByCompanyId"), companyId);
+    }
+
+    /**
+     * 根据猪场id和猪类查猪
+     * @param farmId  猪场id
+     * @param pigType 猪类(公猪, 母猪)
+     * @return 猪list
+     */
+    public List<DoctorPig> findPigsByFarmIdAndPigType(Long farmId, Integer pigType) {
+        return getSqlSession().selectList(sqlId("findPigsByFarmIdAndPigType"), ImmutableMap.of("farmId", farmId, "pigType", pigType));
     }
 }

@@ -23,8 +23,8 @@ public enum PigStatus {
     Pregnancy(4,"阳性","妊娠检查阳性"),
     KongHuai(5,"空怀","空怀"),
     Abortion(6,"流产","流产"),
-    Farrow(7,"待分娩","等待分娩"),
-    FEED(8,"哺乳","哺乳状态"),
+    Farrow(7,"待分娩","待分娩"),
+    FEED(8,"哺乳","哺乳"),
     Wean(9,"断奶","断奶"),
     FanQing(10,"返情","返情");
 
@@ -37,7 +37,7 @@ public enum PigStatus {
     @Getter
     private String desc;
 
-    private PigStatus(Integer key, String name, String desc){
+    PigStatus(Integer key, String name, String desc){
         this.key = key;
         this.name = name;
         this.desc = desc;
@@ -46,6 +46,15 @@ public enum PigStatus {
     public static PigStatus from(Integer key){
         for(PigStatus pigStatus : PigStatus.values()){
             if(Objects.equals(pigStatus.getKey(), key)){
+                return pigStatus;
+            }
+        }
+        return null;
+    }
+
+    public static PigStatus from(String desc){
+        for(PigStatus pigStatus : PigStatus.values()){
+            if(Objects.equals(pigStatus.desc, desc)){
                 return pigStatus;
             }
         }

@@ -25,7 +25,7 @@ public enum BoarEntryType {
     @Getter
     private String desc;
 
-    private BoarEntryType(Integer key, String code, String desc){
+    BoarEntryType(Integer key, String code, String desc){
         this.key = key;
         this.code = code;
         this.desc = desc;
@@ -34,6 +34,15 @@ public enum BoarEntryType {
     public static BoarEntryType from(Integer key){
         for(BoarEntryType boarEntryType : BoarEntryType.values()){
             if(Objects.equals(boarEntryType.getKey(), key)){
+                return boarEntryType;
+            }
+        }
+        return null;
+    }
+
+    public static BoarEntryType from(String desc){
+        for(BoarEntryType boarEntryType : BoarEntryType.values()){
+            if(Objects.equals(boarEntryType.desc, desc)){
                 return boarEntryType;
             }
         }
