@@ -32,7 +32,9 @@ public class DoctorFostersDto implements Serializable{
 
     private Double fosterTotalWeight;   //拼窝总重量
 
-    private Long fosterReason;  //寄养原因
+    private Long fosterReason;  //寄养原因id
+
+    private String fosterReasonName;  //寄养原因名称
 
     private Long fosterSowId;   // 拼窝母猪Id
 

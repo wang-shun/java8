@@ -26,7 +26,7 @@ public enum PregCheckResult {
     @Getter
     private String desc;
 
-    private PregCheckResult(Integer key, String inputCode, String desc){
+    PregCheckResult(Integer key, String inputCode, String desc){
         this.key = key;
         this.inputCode = inputCode;
         this.desc = desc;
@@ -41,4 +41,12 @@ public enum PregCheckResult {
         return null;
     }
 
+    public static PregCheckResult from(String desc){
+        for(PregCheckResult pregCheckResult : PregCheckResult.values()){
+            if(Objects.equals(pregCheckResult.desc, desc)){
+                return pregCheckResult;
+            }
+        }
+        return null;
+    }
 }
