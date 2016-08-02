@@ -578,20 +578,17 @@ public class DoctorMoveDataService implements CommandLineRunner {
                 sowEvent.setExtra(JSON_MAPPER.toJson(getSowFarrowExtra()));
                 break;
             case WEAN:          //断奶
-                //TODO
-                sowEvent.setExtra(JSON_MAPPER.toJson(getSowWeanExtra()));
+                sowEvent.setExtra(JSON_MAPPER.toJson(getSowWeanExtra(event)));
                 break;
             case FOSTERS:       //拼窝
-                //TODO
-                sowEvent.setExtra(JSON_MAPPER.toJson(getSowFosterExtra()));
+                sowEvent.setExtra(JSON_MAPPER.toJson(getSowFosterExtra(event, basicMap)));
                 break;
             case FOSTERS_BY:    //被拼窝
-                //TODO
-                sowEvent.setExtra(JSON_MAPPER.toJson(getSowFosterByExtra()));
+                sowEvent.setExtra(JSON_MAPPER.toJson(getSowFosterExtra(event, basicMap)));
                 break;
             case PIGLETS_CHG:   //仔猪变动
                 //TODO
-                sowEvent.setExtra(JSON_MAPPER.toJson(getSowPigletChangeExtra()));
+                sowEvent.setExtra(JSON_MAPPER.toJson(getSowPigletChangeExtra(event)));
                 break;
             default:
                 break;
@@ -700,30 +697,44 @@ public class DoctorMoveDataService implements CommandLineRunner {
     }
 
     //拼接断奶事件extra
-    private DoctorPartWeanDto getSowWeanExtra() {
+    private DoctorPartWeanDto getSowWeanExtra(View_EventListSow event) {
         DoctorPartWeanDto wean = new DoctorPartWeanDto();
-
+        wean.setPartWeanDate(event.getEventAt()); //断奶日期
+        wean.setPartWeanRemark(event.getRemark());
+        wean.setPartWeanPigletsCount(event.getWeanCount()); //断奶数量
+        wean.setPartWeanAvgWeight(event.getWeanWeight());   //断奶平均重量
         return wean;
     }
 
-    //拼接拼窝事件extra
-    private DoctorFostersDto getSowFosterExtra() {
+    //拼接拼窝事件extra // TODO: 16/8/2 拼窝母猪id
+    private DoctorFostersDto getSowFosterExtra(View_EventListSow event, Map<Integer, Map<String, DoctorBasic>> basicMap) {
         DoctorFostersDto foster = new DoctorFostersDto();
+        foster.setFostersDate(event.getEventAt());   // 拼窝日期
+        foster.setFostersCount(event.getNetOutCount());   //  拼窝数量
+        foster.setFosterTotalWeight(event.getWeanWeight());   //拼窝总重量
 
-        return foster;
-    }
-
-    //拼接被拼窝事件extra
-    private DoctorFostersDto getSowFosterByExtra() {
-        DoctorFostersDto foster = new DoctorFostersDto();
-
+        //寄养原因
+        DoctorBasic reason = basicMap.get(DoctorBasic.Type.FOSTER_REASON.getValue()).get(event.getFosterReasonName());
+        foster.setFosterReason(reason == null ? null : reason.getId());
+        foster.setFosterReasonName(event.getFosterReasonName());
+        foster.setFosterRemark(event.getRemark());
         return foster;
     }
 
     //拼接母猪分娩extra
-    private DoctorPigletsChgDto getSowPigletChangeExtra() {
+    private DoctorPigletsChgDto getSowPigletChangeExtra(View_EventListSow event) {
         DoctorPigletsChgDto change = new DoctorPigletsChgDto();
-
+//        change.setPigletsChangeDate(); // 仔猪变动日期
+//        change.setPigletsCount();   // 仔猪数量
+//        change.setSowPigletsCount();    // 仔母猪数量
+//        change.setBoarPigletsCount();   // 崽公猪数量
+//        change.setPigletsChangeType();   // 仔猪变动类型
+//        change.setPigletsChangeReason();   // 仔猪变动原因
+//        change.setPigletsWeight();  // 变动重量 (非必填)
+//        change.setPigletsPrice();   // 变动价格 （非必填）
+//        change.setPigletsSum(); //  总价（非必填）
+//        change.setPigletsCustomerId();    //客户Id （非必填）
+//        change.setPigletsMark();  //标识(非必填)
         return change;
     }
 

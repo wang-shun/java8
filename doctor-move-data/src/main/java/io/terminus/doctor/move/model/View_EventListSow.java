@@ -57,12 +57,13 @@ public class View_EventListSow implements Serializable {
     private String toBarnOutId;     // 进场/转舍/分娩/被拼窝/断奶 复用事件 一般是outId或猪舍名称(分娩)
     private String disease;         // 防疫(疫苗名称)/仔猪变动/分娩/断奶/疾病(TB_FieldValue的ColID) 复用字段
     private String treatment;       // 防疫(防疫结果)/拼窝/被拼窝/转舍 复用字段
-    private String netInCount;
-    private String netOutCount;
+    private Integer netInCount;
+    private Integer netOutCount;
     private Integer score;           // 体况得分
-    private Double backFat;         // 背镖
+    private Double backFat;          // 背镖
     private Integer weanCount;       // 断奶数量
-    private Double weanWeight;      // 断奶重量
-    private String diseaseName;     // 疾病事件的疾病名称
-    private String changeTypeName;  // 变动类型名称
+    private Double weanWeight;       // 断奶重量
+    private String diseaseName;      // 疾病事件的疾病名称
+    private String changeTypeName;   // 变动类型名称
+    private String fosterReasonName; // 寄养原因名称
 }
