@@ -111,7 +111,7 @@ import static io.terminus.common.utils.Arguments.notEmpty;
  */
 @Slf4j
 @Service
-public class DoctorMoveDataService implements CommandLineRunner {
+public class DoctorMoveDataService {
 
     private static final JsonMapper JSON_MAPPER = JsonMapper.nonEmptyMapper();
 
@@ -215,7 +215,7 @@ public class DoctorMoveDataService implements CommandLineRunner {
         try {
             List<DoctorBarn> barns = RespHelper.orServEx(doctorMoveDatasourceHandler
                     .findAllData(moveId, View_PigLocationList.class, DoctorMoveTableEnum.view_PigLocationList)).stream()
-                    .filter(loc -> isFarm(loc.getFarmOID(), mockFarm().getOutId()))     //这一步很重要, 如果一个公司有多个猪场, 猪场id必须匹配!
+                   // .filter(loc -> isFarm(loc.getFarmOID(), mockFarm().getOutId()))     //这一步很重要, 如果一个公司有多个猪场, 猪场id必须匹配!
                     .filter(f -> true) // TODO: 16/7/28 多个猪场注意过滤outId
                     .map(location -> getBarn(mockOrg(), mockFarm(), mockSub(), location))
                     .collect(Collectors.toList());
@@ -1653,7 +1653,7 @@ public class DoctorMoveDataService implements CommandLineRunner {
     }
 
 
-    @Override
+
     public void run(String... strings) throws Exception {
         // Just for test!
     }
