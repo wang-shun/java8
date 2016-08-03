@@ -1,6 +1,7 @@
 package io.terminus.doctor.move.service;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
 import io.terminus.doctor.basic.dao.DoctorBasicMaterialDao;
 import io.terminus.doctor.basic.model.DoctorBasicMaterial;
 import io.terminus.doctor.common.enums.WareHouseType;
@@ -310,7 +311,7 @@ public class WareHouseInitService {
             materialCP.setMaterialId(basicMaterialMap.get(typeAndmaterialName).getId());
             materialCP.setMaterialName(pu.getMaterialName());
             materialCP.setEventTime(pu.getEventDate());
-            if("采购".equals(pu.getEventType())){
+            if(isProvide(pu.getEventType(), WareHouseType.from(wareHouse.getType()))){
                 materialCP.setEventType(DoctorMaterialConsumeProvider.EVENT_TYPE.PROVIDER.getValue());
             }else{
                 materialCP.setEventType(DoctorMaterialConsumeProvider.EVENT_TYPE.CONSUMER.getValue());
@@ -334,7 +335,7 @@ public class WareHouseInitService {
             }
 
             //如果是饲料领用, 需要设置 extra
-            if("领用".equals(pu.getEventType()) && Objects.equals(wareHouse.getType(), WareHouseType.FEED.getKey())){
+            if(isConsume(pu.getEventType(), WareHouseType.from(wareHouse.getType())) && Objects.equals(wareHouse.getType(), WareHouseType.FEED.getKey())){
                 DoctorBarn barn = barnMap.get(pu.getBarnOId());
                 if(barn != null){
                     Map<String, Object> extraMap = new HashMap<>();
@@ -345,8 +346,7 @@ public class WareHouseInitService {
             }
             doctorMaterialConsumeProviderDao.create(materialCP);
 
-            // todo materialInWarehouseMap.put(typeAndmaterialName, materialCP.);
-            if("领用".equals(pu.getEventType())) {
+            if(isConsume(pu.getEventType(), WareHouseType.from(wareHouse.getType()))) {
                 lastMaterialConsumeMap.put(typeAndmaterialName, new Object[]{materialCP.getEventCount(), pu.getEventDate()});
 
                 if(lastHouseConsumeDate == null || !pu.getEventDate().before(lastHouseConsumeDate)){
@@ -355,18 +355,17 @@ public class WareHouseInitService {
             }
         }
 
-        // 仓库中各种物料的最新数量 TODO
+        // 仓库中各种物料的最新数量 , 目前只能库存都是0
         DoctorMaterialInWareHouse materialInWareHouse = new DoctorMaterialInWareHouse();
         materialInWareHouse.setFarmId(wareHouse.getFarmId());
         materialInWareHouse.setFarmName(wareHouse.getFarmName());
         materialInWareHouse.setWareHouseId(wareHouse.getId());
         materialInWareHouse.setWareHouseName(wareHouse.getWareHouseName());
         materialInWareHouse.setType(wareHouse.getType());
-        for(Map.Entry<String, Long> entry : materialInWarehouseMap.entrySet()){
-            DoctorBasicMaterial basicMaterial = basicMaterialMap.get(entry.getKey());
+        for(DoctorBasicMaterial basicMaterial : basicMaterialMap.values()){
             materialInWareHouse.setMaterialId(basicMaterial.getId());
             materialInWareHouse.setMaterialName(basicMaterial.getName());
-            materialInWareHouse.setLotNumber(entry.getValue());
+            materialInWareHouse.setLotNumber(0L);
             materialInWareHouse.setUnitGroupName(basicMaterial.getUnitGroupName());
             materialInWareHouse.setUnitName(basicMaterial.getUnitName());
             doctorMaterialInWareHouseDao.create(materialInWareHouse);
@@ -424,5 +423,15 @@ public class WareHouseInitService {
         extramap.put("consumeDate", recentAVG.getConsumeDate());
         farmWareHouseType.setExtraMap(extramap);
         doctorFarmWareHouseTypeDao.create(farmWareHouseType);
+    }
+
+    private static final List<String> event_type_provide = Lists.newArrayList("采购", "调入", "盘盈");
+    private boolean isProvide(String eventType, WareHouseType wareHouseType) {
+        return event_type_provide.contains(eventType) || (Objects.equals(wareHouseType, WareHouseType.FEED) && "生产".equals(eventType));
+    }
+
+    private static final List<String> event_type_consume = Lists.newArrayList("领用", "调出", "盘亏");
+    private boolean isConsume(String eventType, WareHouseType wareHouseType) {
+        return event_type_consume.contains(eventType) || (Objects.equals(wareHouseType, WareHouseType.MATERIAL) && "生产".equals(eventType));
     }
 }
