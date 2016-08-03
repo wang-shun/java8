@@ -9,6 +9,7 @@ import io.terminus.doctor.event.dto.DoctorPigInfoDto;
 import io.terminus.doctor.event.dto.DoctorPigMessage;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.event.service.DoctorPigReadService;
+import io.terminus.doctor.event.service.DoctorPigWriteService;
 import io.terminus.doctor.web.front.event.dto.DoctorBoarDetailDto;
 import io.terminus.doctor.web.front.event.dto.DoctorSowDetailDto;
 import lombok.extern.slf4j.Slf4j;
@@ -36,10 +37,11 @@ import java.util.List;
 public class DoctorPigs {
 
     private final DoctorPigReadService doctorPigReadService;
-
+    private final DoctorPigWriteService doctorPigWriteService;
     @Autowired
-    public DoctorPigs(DoctorPigReadService doctorPigReadService){
+    public DoctorPigs(DoctorPigReadService doctorPigReadService, DoctorPigWriteService doctorPigWriteService){
         this.doctorPigReadService = doctorPigReadService;
+        this.doctorPigWriteService = doctorPigWriteService;
     }
 
     @RequestMapping(value = "/queryByStatus", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -139,5 +141,15 @@ public class DoctorPigs {
     @ResponseBody
     public List<DoctorPigMessage> queryPigNotifyMessages(Long pigId) {
         return RespHelper.or500(doctorPigReadService.findPigMessageByPigId(pigId));
+    }
+
+    /**
+     * 部署母猪流程
+     * @return
+     */
+    @RequestMapping(value = "/sow/flow/deploy", method = RequestMethod.GET)
+    @ResponseBody
+    public Boolean deploy() {
+        return RespHelper.or500(doctorPigWriteService.deploy());
     }
 }
