@@ -327,13 +327,15 @@ public class DoctorMoveDataService {
                     .map(gain -> getGroup(mockOrg(), mockFarm(), gain, barnMap, basicMap, subMap)).collect(Collectors.toList());
             doctorGroupDao.creates(groups);
 
-            //查出刚插入的group, key = outId
+            //查出刚插入的group, key = outId, 查询猪, 为转种猪事件做准备
             Map<String, DoctorGroup> groupMap = doctorGroupDao.findByFarmId(mockFarm().getId()).stream().collect(Collectors.toMap(DoctorGroup::getOutId, v -> v));
+            Map<String, DoctorPig> pigMap = Maps.newHashMap();
+            doctorPigDao.findPigsByFarmId(mockFarm().getId()).forEach(pig -> pigMap.put(pig.getPigCode(), pig));
 
             //2. 迁移DoctorGroupEvent
             List<DoctorGroupEvent> events = RespHelper.orServEx(doctorMoveDatasourceHandler
                     .findByHbsSql(moveId, View_EventListGain.class, "DoctorGroupEvent-EventListGain")).stream()
-                    .map(gainEvent -> getGroupEvent(groupMap, gainEvent, subMap, barnMap, basicMap, changeReasonMap, customerMap, vaccMap))
+                    .map(gainEvent -> getGroupEvent(groupMap, gainEvent, subMap, barnMap, basicMap, changeReasonMap, customerMap, vaccMap, pigMap))
                     .collect(Collectors.toList());
             doctorGroupEventDao.creates(events);
 
@@ -411,7 +413,7 @@ public class DoctorMoveDataService {
                 .filter(f -> true) // TODO: 16/7/28 多个猪场注意过滤outId
                 .map(event -> getSowEvent(event, sowMap, barnMap, basicMap, subMap, customerMap, changeReasonMap, boarMap, vaccMap)).collect(Collectors.toList());
         doctorPigEventDao.creates(sowEvents);
-        
+
         //查出母猪事件, 按照母猪分组
         Map<Long, List<DoctorPigEvent>> sowEventMap = doctorPigEventDao.findByFarmIdAndKind(mockFarm().getId(), DoctorPig.PIG_TYPE.SOW.getKey())
                 .stream().collect(Collectors.groupingBy(DoctorPigEvent::getPigId));
@@ -1187,7 +1189,7 @@ public class DoctorMoveDataService {
     private DoctorGroupEvent getGroupEvent(Map<String, DoctorGroup> groupMap, View_EventListGain gainEvent, Map<String, Long> subMap,
                                            Map<String, DoctorBarn> barnMap, Map<Integer, Map<String, DoctorBasic>> basicMap,
                                            Map<String, DoctorChangeReason> changeReasonMap, Map<String, DoctorCustomer> customerMap,
-                                           Map<String, DoctorBasicMaterial> vaccMap) {
+                                           Map<String, DoctorBasicMaterial> vaccMap, Map<String, DoctorPig> pigMap) {
         DoctorGroup group = groupMap.get(gainEvent.getGroupOutId());
         if (group == null) {
             return null;
@@ -1223,7 +1225,7 @@ public class DoctorMoveDataService {
         event.setIsAuto(gainEvent.getIsAuto());
         event.setOutId(gainEvent.getGroupEventOutId());
         event.setRemark(gainEvent.getRemark());
-        return getGroupEventExtra(type, event, gainEvent, basicMap, barnMap, groupMap, group, subMap, changeReasonMap, customerMap, vaccMap);
+        return getGroupEventExtra(type, event, gainEvent, basicMap, barnMap, groupMap, group, subMap, changeReasonMap, customerMap, vaccMap, pigMap);
     }
 
     //根据类型拼接猪群事件明细
@@ -1232,7 +1234,7 @@ public class DoctorMoveDataService {
                                                 Map<Integer, Map<String, DoctorBasic>> basicMap, Map<String, DoctorBarn> barnMap,
                                                 Map<String, DoctorGroup> groupMap, DoctorGroup group, Map<String, Long> subMap,
                                                 Map<String, DoctorChangeReason> changeReasonMap, Map<String, DoctorCustomer> customerMap,
-                                                Map<String, DoctorBasicMaterial> vaccMap) {
+                                                Map<String, DoctorBasicMaterial> vaccMap, Map<String, DoctorPig> pigMap) {
         if (type == null) {
             return event;
         }
@@ -1254,7 +1256,7 @@ public class DoctorMoveDataService {
                 event.setExtraMap(getTranGroupEvent(gainEvent, basicMap, barnMap, groupMap, group));
                 break;
             case TURN_SEED:
-                event.setExtraMap(getTurnSeedEvent(gainEvent, basicMap, barnMap));
+                event.setExtraMap(getTurnSeedEvent(gainEvent, basicMap, barnMap, pigMap));
                 break;
             case LIVE_STOCK:
                 DoctorLiveStockGroupEvent liveStock = new DoctorLiveStockGroupEvent();
@@ -1451,10 +1453,11 @@ public class DoctorMoveDataService {
     }
 
     //商品猪转为种猪事件
-    private DoctorTurnSeedGroupEvent getTurnSeedEvent(View_EventListGain gainEvent, Map<Integer, Map<String, DoctorBasic>> basicMap, Map<String, DoctorBarn> barnMap) {
+    private DoctorTurnSeedGroupEvent getTurnSeedEvent(View_EventListGain gainEvent, Map<Integer, Map<String, DoctorBasic>> basicMap,
+                                                      Map<String, DoctorBarn> barnMap, Map<String, DoctorPig> pigMap) {
         DoctorTurnSeedGroupEvent turnSeed = new DoctorTurnSeedGroupEvent();
-        //turnSeed.setPigId();  // TODO: 16/7/30 需要先迁移pig
-        //turnSeed.setMotherPigCode();
+        DoctorPig pig = pigMap.get(gainEvent.getPigCode());
+        turnSeed.setPigId(pig == null ? null : pig.getId());
 
         //转后的猪号
         turnSeed.setPigCode(gainEvent.getPigCode());
