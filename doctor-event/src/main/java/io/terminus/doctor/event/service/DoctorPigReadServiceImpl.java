@@ -353,14 +353,19 @@ public class DoctorPigReadServiceImpl implements DoctorPigReadService {
     @Override
     public Response<Date> getFirstMatingTime(@NotNull(message = "pigId.not.null") Long pigId, @NotNull(message = "farmId.not.null") Long farmId) {
         DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(pigId);
-        DateTime matingDate = DateTime.now();
+        DateTime matingDate;
+        if (doctorPigTrack.getCurrentMatingCount() == null) {
+            log.error("fail to get first mating time by pig id:{}",pigId);
+            return Response.fail("get.first.mating.time.fail");
+        }
         if (doctorPigTrack.getCurrentMatingCount() > 0) {
             Map<String, Object> criteria = ImmutableMap.of("pigId", pigId, "farmId", farmId, "count", doctorPigTrack.getCurrentMatingCount()-1);
             DoctorPigEvent doctorPigEvent = doctorPigEventDao.getFirstMatingTime(criteria);
             matingDate = new DateTime(Long.valueOf(doctorPigEvent.getExtraMap().get("matingDate").toString()));
             return Response.ok(matingDate.plusDays(114).toDate());
+        } else {
+            return Response.ok(null);
         }
-        return Response.ok(matingDate.plusDays(114).toDate());
     }
 
 }
