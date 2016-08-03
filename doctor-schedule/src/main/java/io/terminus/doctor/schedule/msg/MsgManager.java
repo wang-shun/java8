@@ -93,6 +93,7 @@ public class MsgManager {
                         .userId(sub.getUserId())
                         .parentUserId(sub.getParentUserId())
                         .roleId(sub.getRoleId())
+                        .farmIds(Lists.newArrayList())
                         .build();
                 // 获取猪场权限
                 DoctorUserDataPermission dataPermission = RespHelper.orServEx(
