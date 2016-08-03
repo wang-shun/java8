@@ -25,7 +25,7 @@ public enum FarrowingType {
     @Getter
     private String desc;
 
-    private FarrowingType(Integer key, String inputCode, String desc){
+    FarrowingType(Integer key, String inputCode, String desc){
         this.key = key;
         this.inputCode = inputCode;
         this.desc = desc;
@@ -40,4 +40,12 @@ public enum FarrowingType {
         return null;
     }
 
+    public static FarrowingType from(String desc){
+        for(FarrowingType farrowingType : FarrowingType.values()){
+            if(Objects.equals(desc, farrowingType.desc)){
+                return farrowingType;
+            }
+        }
+        return null;
+    }
 }
