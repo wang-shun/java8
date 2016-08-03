@@ -74,6 +74,7 @@ import io.terminus.doctor.move.handler.DoctorMoveTableEnum;
 import io.terminus.doctor.move.model.B_ChangeReason;
 import io.terminus.doctor.move.model.B_Customer;
 import io.terminus.doctor.move.model.Proc_InventoryGain;
+import io.terminus.doctor.move.model.SowOutFarmSoon;
 import io.terminus.doctor.move.model.TB_FieldValue;
 import io.terminus.doctor.move.model.View_BoarCardList;
 import io.terminus.doctor.move.model.View_EventListBoar;
@@ -92,7 +93,6 @@ import io.terminus.parana.user.model.UserProfile;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -406,7 +406,7 @@ public class DoctorMoveDataService {
         List<DoctorPigTrack> boarTracks = sowCards.stream()
                 .map(card -> {
                     DoctorPig sow = sowMap.get(card.getPigOutId());
-                    return getSowTrack(card, sow, barnMap, sow == null ? null : sowEventMap.get(sow.getId()));
+                    return getSowTrack(card, sow, barnMap, sow == null ? null : sowEventMap.get(sow.getId()), moveId);
                 })
                 .filter(Arguments::notNull)
                 .collect(Collectors.toList());
@@ -640,7 +640,6 @@ public class DoctorMoveDataService {
         entry.setEntryMark(event.getRemark());     // 非必填
         entry.setSource(event.getSource());
 
-        //todo 猪舍Id是哪个id? outdest? eventBarn?
         DoctorBarn barn = barnMap.get(event.getBarnOutId());
         if (barn != null) {
             entry.setBarnId(barn.getId());
@@ -785,10 +784,14 @@ public class DoctorMoveDataService {
     }
 
     //拼接母猪跟踪
-    private DoctorPigTrack getSowTrack(View_SowCardList card, DoctorPig sow, Map<String, DoctorBarn> barnMap, List<DoctorPigEvent> events) {
-        //card.getStatus(); // TODO: 16/8/1 即将离场 的情况
+    private DoctorPigTrack getSowTrack(View_SowCardList card, DoctorPig sow, Map<String, DoctorBarn> barnMap, List<DoctorPigEvent> events, Long moveId) {
         if (sow == null) {
             return null;
+        }
+
+        //即将离场的状态是因为录离场事件录错了, 撤销后, 会到即将离场状态, 其实应该是上次的状态
+        if ("即将离场".equals(card.getStatus())) {
+            card.setStatus(getLeaveType(moveId, card.getPigOutId()));
         }
 
         //母猪状态枚举
@@ -819,6 +822,18 @@ public class DoctorMoveDataService {
             track.setCurrentBarnName(barn.getName());
         }
         return track;
+    }
+
+    //获取即将离场的母猪状态
+    private String getLeaveType(Long moveId, String sowOutId) {
+        try {
+            List<SowOutFarmSoon> soons = RespHelper.orServEx(doctorMoveDatasourceHandler
+                    .findByHbsSql(moveId, SowOutFarmSoon.class, "SowOutFarmSoon", ImmutableMap.of("sowOutId", sowOutId)));
+            return notEmpty(soons) ? soons.get(0).getLeaveType() : "";
+        } catch (Exception e) {
+            log.error("get sow leave type failed, sowOutId:{}, cause:{}", sowOutId, Throwables.getStackTraceAsString(e));
+            return "";
+        }
     }
 
     //迁移公猪
@@ -1079,7 +1094,6 @@ public class DoctorMoveDataService {
         entry.setEntryMark(event.getRemark());     // 非必填
         entry.setSource(event.getSource());
 
-        //todo 猪舍Id是哪个id? outdest? eventBarn?
         DoctorBarn barn = barnMap.get(event.getBarnOutId());
         if (barn != null) {
             entry.setBarnId(barn.getId());
@@ -1684,7 +1698,6 @@ public class DoctorMoveDataService {
         sub.setRealName("测试姓名");
         return sub;
     }
-
 
 
     public void run(String... strings) throws Exception {

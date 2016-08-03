@@ -1,0 +1,19 @@
+-- 母猪即将离场状态的转换
+SELECT
+    CASE
+        WHEN a.EventName = '分娩' THEN '哺乳'
+        WHEN a.EventName = '断奶' OR a.EventName = '部分断奶' THEN '断奶'
+        WHEN a.EventName = '配种' THEN '已配种'
+        WHEN a.EventName = '妊娠检查' AND PregChkResult = '妊娠检查阳性' THEN '待分娩'
+        WHEN a.EventName = '妊娠检查' AND PregChkResult IN ('空怀','返情','没有怀孕') THEN '空怀'
+        WHEN a.EventName = '妊娠检查' AND PregChkResult = '流产' THEN '流产'
+        WHEN a.EventName = '猪群转进' THEN '待配种'
+        ELSE '' END AS leaveType
+FROM (
+    SELECT
+        TOP 1 *
+    FROM view_EventListSow
+    WHERE OID = '{{sowOutId}}'
+        AND EventName NOT IN ('转场','体况','转舍','疾病','防疫','窝重','仔猪代哺','仔猪拼窝','仔猪变动')
+    ORDER BY EventDate DESC
+) AS a
