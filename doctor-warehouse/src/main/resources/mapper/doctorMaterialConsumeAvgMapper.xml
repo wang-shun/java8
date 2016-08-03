@@ -110,4 +110,10 @@
         </set>
         WHERE id=#{id}
     </update>
+
+    <select id="findLastByFarmId" parameterType="long" resultMap="DoctorMaterialConsumeAvgMap">
+        select <include refid="cols_all"/> from <include refid="tb"/> where farm_id = #{farmId} and `updated_at` = (
+            select max(updated_at) from <include refid="tb"/> where farm_id = #{farmId}
+        )
+    </select>
 </mapper>

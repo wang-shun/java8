@@ -22,4 +22,6 @@ public class MaterialPurchasedUsed implements Serializable {
     private String materialName;
     private String UnitGroupText;
     private String UnitName;
+    private String barnOId;
+    private String Barn;
 }

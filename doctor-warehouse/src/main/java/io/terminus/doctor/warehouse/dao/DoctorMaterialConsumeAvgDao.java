@@ -40,4 +40,8 @@ public class DoctorMaterialConsumeAvgDao extends MyBatisDao<DoctorMaterialConsum
     public List<DoctorMaterialConsumeAvg> queryByFarmIdAndType(Long farmId, Integer type){
         return this.getSqlSession().selectList(sqlId("queryByFarmIdAndType"), ImmutableMap.of("farmId",farmId, "type", type));
     }
+
+    public DoctorMaterialConsumeAvg findLastByFarmId(Long farmId){
+        return sqlSession.selectOne(sqlId("findLastByFarmId"), farmId);
+    }
 }
