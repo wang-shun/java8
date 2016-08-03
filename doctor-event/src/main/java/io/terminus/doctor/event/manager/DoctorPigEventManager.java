@@ -162,7 +162,6 @@ public class DoctorPigEventManager {
     @Transactional
     @SneakyThrows
     public Map<String,Object> createSowPigEvent(DoctorBasicInputInfoDto basic, Map<String, Object> extra){
-        checkMatingCount(basic, extra);
         return createSingleSowEvents(basic, extra);
     }
 
@@ -186,6 +185,8 @@ public class DoctorPigEventManager {
 
     @SneakyThrows
     private Map<String, Object> createSingleSowEvents(DoctorBasicInputInfoDto basic, Map<String, Object> extra){
+
+        checkMatingCount(basic, extra);
 
         // build data
         String flowData = JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(ImmutableMap.of(
