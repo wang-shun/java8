@@ -5,7 +5,6 @@ SELECT
         WHEN Status = '没有怀孕' OR Status = '妊娠检查阴性' THEN '空怀'
         WHEN Status = '已进场' THEN '已配种'
         WHEN Status = '等待分娩' THEN '待分娩'
-        WHEN Status = '即将离场' THEN ''     -- TODO: 即将离场状态需要转换成上次的状态
         ELSE Status END AS status,               -- 猪群状态
     FarmOID AS farmOutId,
     PigID AS pigCode,                          -- 猪群号
