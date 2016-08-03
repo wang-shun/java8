@@ -132,12 +132,12 @@ public class WareHouseInitService {
                 Map<String, DoctorBarn> barnMap = this.findBarnMap(dataSourceId, farm.getId());
 
                 Map<WareHouseType, DoctorWareHouse> warehouseMap = new HashMap<>(); // key = WareHouseType, value = DoctorWareHouse
-                DoctorWareHouse wareHouse = new DoctorWareHouse();
-                wareHouse.setFarmId(farm.getId());
-                wareHouse.setFarmName(farm.getName());
-                wareHouse.setManagerId(subMap.get(managerName).getUserId());
-                wareHouse.setManagerName(managerName);
                 for(WareHouseType type : WareHouseType.values()){
+                    DoctorWareHouse wareHouse = new DoctorWareHouse();
+                    wareHouse.setFarmId(farm.getId());
+                    wareHouse.setFarmName(farm.getName());
+                    wareHouse.setManagerId(subMap.get(managerName).getUserId());
+                    wareHouse.setManagerName(managerName);
                     wareHouse.setType(type.getKey());
                     wareHouse.setWareHouseName(type.getDesc() + "仓库");
                     doctorWareHouseDao.create(wareHouse);
@@ -295,6 +295,9 @@ public class WareHouseInitService {
         // 往表 doctor_material_consume_avgs 写数的Map, key = 类型数值 | materialName, value = [eventCount(最后一次领用数量), 时间]
         Map<String, Object[]> lastConsumeMap = new HashMap<>();
 
+        // 该仓库最近一次领用发生的时间
+        Date lastConsumeDate = null;
+
         // 领用和添加物料的历史记录
         DoctorMaterialConsumeProvider materialCP = new DoctorMaterialConsumeProvider();
         materialCP.setType(wareHouse.getType());
@@ -345,6 +348,9 @@ public class WareHouseInitService {
             // todo materialInWarehouseMap.put(typeAndmaterialName, materialCP.);
             if("领用".equals(pu.getEventType())) {
                 lastConsumeMap.put(typeAndmaterialName, new Object[]{materialCP.getEventCount(), pu.getEventDate()});
+                if(lastConsumeDate == null || !pu.getEventDate().before(lastConsumeDate)){
+                    lastConsumeDate = pu.getEventDate();
+                }
             }
         }
 
@@ -365,6 +371,8 @@ public class WareHouseInitService {
             doctorMaterialInWareHouseDao.create(materialInWareHouse);
         }
 
+        //该仓库最近的一条avg数据
+        DoctorMaterialConsumeAvg recentAVG = new DoctorMaterialConsumeAvg();
         // 仓库中各种物料的最后一次领用数量
         DoctorMaterialConsumeAvg avg = new DoctorMaterialConsumeAvg();
         avg.setFarmId(wareHouse.getFarmId());
@@ -375,6 +383,10 @@ public class WareHouseInitService {
             avg.setConsumeCount((Long) entry.getValue()[0]);
             avg.setConsumeDate((Date) entry.getValue()[1]);
             doctorMaterialConsumeAvgDao.create(avg);
+            if(recentAVG.getConsumeDate() == null || !avg.getConsumeDate().before(recentAVG.getConsumeDate())){
+                recentAVG.setConsumeDate(avg.getConsumeDate());
+                recentAVG.setConsumeCount(avg.getConsumeCount());
+            }
         }
 
         //仓库所有物料的总数量
@@ -386,10 +398,9 @@ public class WareHouseInitService {
             }
             trackMap.put(item.getMaterialId().toString(), item.getLotNumber());
         }
-        //最近一次领用事件
-        DoctorMaterialConsumeProvider lastConsumeEvent = doctorMaterialConsumeProviderDao.findLastEvent(wareHouse.getId(), DoctorMaterialConsumeProvider.EVENT_TYPE.CONSUMER);
-        if(lastConsumeEvent != null){
-            trackMap.put("recentConsumeDate", lastConsumeEvent.getEventTime());
+        //最近一次领用时间
+        if(lastConsumeDate != null){
+            trackMap.put("recentConsumeDate", lastConsumeDate);
         }
         DoctorWareHouseTrack track = new DoctorWareHouseTrack();
         track.setWareHouseId(wareHouse.getId());
@@ -407,13 +418,10 @@ public class WareHouseInitService {
         farmWareHouseType.setFarmName(wareHouse.getFarmName());
         farmWareHouseType.setType(wareHouse.getType());
         farmWareHouseType.setLotNumber(track.getLotNumber());
-        DoctorMaterialConsumeAvg lastAVG = doctorMaterialConsumeAvgDao.findLastByFarmId(wareHouse.getFarmId());
-        if(lastAVG != null){
-            Map<String, Object> extramap = new HashMap<>();
-            extramap.put("consumeCount", lastAVG.getConsumeCount());
-            extramap.put("consumeDate", lastAVG.getConsumeDate());
-            farmWareHouseType.setExtraMap(extramap);
-        }
+        Map<String, Object> extramap = new HashMap<>();
+        extramap.put("consumeCount", recentAVG.getConsumeCount());
+        extramap.put("consumeDate", recentAVG.getConsumeDate());
+        farmWareHouseType.setExtraMap(extramap);
         doctorFarmWareHouseTypeDao.create(farmWareHouseType);
     }
 }

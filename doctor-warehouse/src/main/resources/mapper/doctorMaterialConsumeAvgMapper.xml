@@ -115,5 +115,6 @@
         select <include refid="cols_all"/> from <include refid="tb"/> where farm_id = #{farmId} and `updated_at` = (
             select max(updated_at) from <include refid="tb"/> where farm_id = #{farmId}
         )
+        order by id desc limit 1
     </select>
 </mapper>
