@@ -293,10 +293,10 @@ public class WareHouseInitService {
         Map<String, Long> materialInWarehouseMap = new HashMap<>();
 
         // 往表 doctor_material_consume_avgs 写数的Map, key = 类型数值 | materialName, value = [eventCount(最后一次领用数量), 时间]
-        Map<String, Object[]> lastConsumeMap = new HashMap<>();
+        Map<String, Object[]> lastMaterialConsumeMap = new HashMap<>();
 
-        // 该仓库最近一次领用发生的时间
-        Date lastConsumeDate = null;
+        // 该仓库最近一次领用发生的时间和数量
+        Date lastHouseConsumeDate = null;
 
         // 领用和添加物料的历史记录
         DoctorMaterialConsumeProvider materialCP = new DoctorMaterialConsumeProvider();
@@ -347,9 +347,10 @@ public class WareHouseInitService {
 
             // todo materialInWarehouseMap.put(typeAndmaterialName, materialCP.);
             if("领用".equals(pu.getEventType())) {
-                lastConsumeMap.put(typeAndmaterialName, new Object[]{materialCP.getEventCount(), pu.getEventDate()});
-                if(lastConsumeDate == null || !pu.getEventDate().before(lastConsumeDate)){
-                    lastConsumeDate = pu.getEventDate();
+                lastMaterialConsumeMap.put(typeAndmaterialName, new Object[]{materialCP.getEventCount(), pu.getEventDate()});
+
+                if(lastHouseConsumeDate == null || !pu.getEventDate().before(lastHouseConsumeDate)){
+                    lastHouseConsumeDate = pu.getEventDate();
                 }
             }
         }
@@ -378,7 +379,7 @@ public class WareHouseInitService {
         avg.setFarmId(wareHouse.getFarmId());
         avg.setWareHouseId(wareHouse.getId());
         avg.setType(wareHouse.getType());
-        for(Map.Entry<String, Object[]> entry : lastConsumeMap.entrySet()){
+        for(Map.Entry<String, Object[]> entry : lastMaterialConsumeMap.entrySet()){
             avg.setMaterialId(basicMaterialMap.get(entry.getKey()).getId());
             avg.setConsumeCount((Long) entry.getValue()[0]);
             avg.setConsumeDate((Date) entry.getValue()[1]);
@@ -399,8 +400,8 @@ public class WareHouseInitService {
             trackMap.put(item.getMaterialId().toString(), item.getLotNumber());
         }
         //最近一次领用时间
-        if(lastConsumeDate != null){
-            trackMap.put("recentConsumeDate", lastConsumeDate);
+        if(lastHouseConsumeDate != null){
+            trackMap.put("recentConsumeDate", lastHouseConsumeDate);
         }
         DoctorWareHouseTrack track = new DoctorWareHouseTrack();
         track.setWareHouseId(wareHouse.getId());
