@@ -290,9 +290,6 @@ public class WareHouseInitService {
         // 主账号的 staff
         Long primaryStaffId = doctorStaffDao.findByUserId(userProfile.getUserId()).getId();
 
-        // 往表 doctor_material_in_ware_houses 写数的Map, key = 类型数值 | materialName, value = lotNumber(最新数量)
-        Map<String, Long> materialInWarehouseMap = new HashMap<>();
-
         // 往表 doctor_material_consume_avgs 写数的Map, key = 类型数值 | materialName, value = [eventCount(最后一次领用数量), 时间]
         Map<String, Object[]> lastMaterialConsumeMap = new HashMap<>();
 
@@ -363,12 +360,14 @@ public class WareHouseInitService {
         materialInWareHouse.setWareHouseName(wareHouse.getWareHouseName());
         materialInWareHouse.setType(wareHouse.getType());
         for(DoctorBasicMaterial basicMaterial : basicMaterialMap.values()){
-            materialInWareHouse.setMaterialId(basicMaterial.getId());
-            materialInWareHouse.setMaterialName(basicMaterial.getName());
-            materialInWareHouse.setLotNumber(0L);
-            materialInWareHouse.setUnitGroupName(basicMaterial.getUnitGroupName());
-            materialInWareHouse.setUnitName(basicMaterial.getUnitName());
-            doctorMaterialInWareHouseDao.create(materialInWareHouse);
+            if(basicMaterial.getType().equals(wareHouse.getType())){
+                materialInWareHouse.setMaterialId(basicMaterial.getId());
+                materialInWareHouse.setMaterialName(basicMaterial.getName());
+                materialInWareHouse.setLotNumber(0L);
+                materialInWareHouse.setUnitGroupName(basicMaterial.getUnitGroupName());
+                materialInWareHouse.setUnitName(basicMaterial.getUnitName());
+                doctorMaterialInWareHouseDao.create(materialInWareHouse);
+            }
         }
 
         //该仓库最近的一条avg数据
