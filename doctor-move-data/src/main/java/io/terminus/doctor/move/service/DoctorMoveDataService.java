@@ -574,8 +574,7 @@ public class DoctorMoveDataService {
                 sowEvent.setExtra(JSON_MAPPER.toJson(DoctorAbortionDto.builder().abortionDate(event.getEventAt()).build()));
                 break;
             case FARROWING:     //分娩
-                //TODO
-                sowEvent.setExtra(JSON_MAPPER.toJson(getSowFarrowExtra()));
+                sowEvent.setExtra(JSON_MAPPER.toJson(getSowFarrowExtra(event)));
                 break;
             case WEAN:          //断奶
                 sowEvent.setExtra(JSON_MAPPER.toJson(getSowWeanExtra(event)));
@@ -587,8 +586,7 @@ public class DoctorMoveDataService {
                 sowEvent.setExtra(JSON_MAPPER.toJson(getSowFosterExtra(event, basicMap)));
                 break;
             case PIGLETS_CHG:   //仔猪变动
-                //TODO
-                sowEvent.setExtra(JSON_MAPPER.toJson(getSowPigletChangeExtra(event)));
+                sowEvent.setExtra(JSON_MAPPER.toJson(getSowPigletChangeExtra(event, basicMap, changeReasonMap, customerMap)));
                 break;
             default:
                 break;
@@ -690,7 +688,7 @@ public class DoctorMoveDataService {
     }
 
     //拼接母猪分娩extra
-    private DoctorFarrowingDto getSowFarrowExtra() {
+    private DoctorFarrowingDto getSowFarrowExtra(View_EventListSow event) {
         DoctorFarrowingDto farrow = new DoctorFarrowingDto();
 
         return farrow;
@@ -721,20 +719,26 @@ public class DoctorMoveDataService {
         return foster;
     }
 
-    //拼接母猪分娩extra
-    private DoctorPigletsChgDto getSowPigletChangeExtra(View_EventListSow event) {
+    //拼接母猪变动extra
+    private DoctorPigletsChgDto getSowPigletChangeExtra(View_EventListSow event, Map<Integer, Map<String, DoctorBasic>> basicMap,
+                                                        Map<String, DoctorChangeReason> changeReasonMap, Map<String, DoctorCustomer> customerMap) {
         DoctorPigletsChgDto change = new DoctorPigletsChgDto();
-//        change.setPigletsChangeDate(); // 仔猪变动日期
-//        change.setPigletsCount();   // 仔猪数量
-//        change.setSowPigletsCount();    // 仔母猪数量
-//        change.setBoarPigletsCount();   // 崽公猪数量
-//        change.setPigletsChangeType();   // 仔猪变动类型
-//        change.setPigletsChangeReason();   // 仔猪变动原因
-//        change.setPigletsWeight();  // 变动重量 (非必填)
-//        change.setPigletsPrice();   // 变动价格 （非必填）
-//        change.setPigletsSum(); //  总价（非必填）
-//        change.setPigletsCustomerId();    //客户Id （非必填）
-//        change.setPigletsMark();  //标识(非必填)
+        change.setPigletsChangeDate(event.getEventAt()); // 仔猪变动日期
+        change.setPigletsCount(event.getChgCount());   // 仔猪数量
+        change.setPigletsWeight(event.getEventWeight());  // 变动重量 (非必填)
+        change.setPigletsPrice(event.getPrice());   // 变动价格 （非必填）
+        change.setPigletsSum(event.getAmount()); //  总价（非必填）
+        change.setPigletsMark(event.getRemark());  //标识(非必填)
+        change.setPigletsChangeTypeName(event.getChangeTypeName());
+        change.setPigletsChangeReasonName(event.getChgReason());   // 仔猪变动原因
+
+        //变动类型, 原因, 客户
+        DoctorBasic changeType = basicMap.get(DoctorBasic.Type.CHANGE_TYPE.getValue()).get(event.getChangeTypeName());
+        change.setPigletsChangeType(changeType == null ? null : changeType.getId());   // 仔猪变动类型
+        DoctorChangeReason reason = changeReasonMap.get(event.getChgReason());
+        change.setPigletsChangeReason(reason == null ? null : reason.getId());   // 仔猪变动原因
+        DoctorCustomer customer = customerMap.get(event.getCustomer());
+        change.setPigletsCustomerId(customer == null ? null : customer.getId());    //客户Id （非必填）
         return change;
     }
 

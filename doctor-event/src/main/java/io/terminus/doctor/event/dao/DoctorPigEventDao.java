@@ -2,6 +2,8 @@ package io.terminus.doctor.event.dao;
 
 import com.google.common.collect.ImmutableMap;
 import io.terminus.common.mysql.dao.MyBatisDao;
+import io.terminus.doctor.event.enums.PigEvent;
+import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import org.springframework.stereotype.Repository;
 
@@ -64,7 +66,16 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent>{
      * 仅更新relEventId
      * @param pigEvent relEventId
      */
-    public void updateRelEventId(DoctorPigEvent pigEvent){
+    public void updateRelEventId(DoctorPigEvent pigEvent) {
         getSqlSession().update(sqlId("updateRelEventId"), pigEvent);
+    }
+
+    /**
+     * 获取初次配种时间(公猪)
+     */
+    public DoctorPigEvent getFirstMatingTime(Map<String, Object> criteria) {
+        criteria.put("type", PigEvent.MATING.getKey());
+        criteria.put("kind", DoctorPig.PIG_TYPE.SOW.getKey());
+        return this.getSqlSession().selectOne(sqlId("getFirstMatingTime"), criteria);
     }
 }

@@ -21,7 +21,10 @@ import io.terminus.doctor.event.dto.DoctorPigInfoDetailDto;
 import io.terminus.doctor.event.dto.DoctorPigInfoDto;
 import io.terminus.doctor.event.dto.DoctorPigMessage;
 import io.terminus.doctor.event.enums.DataRange;
+import io.terminus.doctor.event.enums.FarrowingType;
+import io.terminus.doctor.event.enums.MatingType;
 import io.terminus.doctor.event.enums.PigStatus;
+import io.terminus.doctor.event.enums.PregCheckResult;
 import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.model.DoctorPig;
@@ -36,6 +39,7 @@ import org.springframework.stereotype.Service;
 
 import javax.validation.constraints.NotNull;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -113,6 +117,23 @@ public class DoctorPigReadServiceImpl implements DoctorPigReadService {
             List<DoctorPigEvent> doctorPigEvents = RespHelper.orServEx(
                     doctorPigEventReadService.queryPigDoctorEvents(doctorPig.getFarmId(), doctorPig.getId(), null, null, null, null)).getData();
 
+            for (DoctorPigEvent doctorPigEvent : doctorPigEvents) {
+                Map<String,Object> extraMap = doctorPigEvent.getExtraMap();
+                if (extraMap != null) {
+                    Integer matingType = (Integer) extraMap.get("matingType");
+                    Integer checkResult = (Integer) extraMap.get("checkResult");
+                    Integer farrowingType = (Integer) extraMap.get("farrowingType");
+                    if (matingType != null) {
+                        extraMap.put("matingType", MatingType.from(matingType).getDesc());
+                    }
+                    if (checkResult != null) {
+                        extraMap.put("checkResult", PregCheckResult.from(checkResult).getDesc());
+                    }
+                    if (farrowingType != null) {
+                        extraMap.put("farrowingType", FarrowingType.from(farrowingType).getDesc());
+                    }
+                }
+            }
             Integer targetEventSize = MoreObjects.firstNonNull(eventSize, 3);
             targetEventSize = targetEventSize > doctorPigEvents.size() ? doctorPigEvents.size() : targetEventSize;
 
@@ -317,4 +338,29 @@ public class DoctorPigReadServiceImpl implements DoctorPigReadService {
             return Response.fail("pig.find.fail");
         }
     }
+
+    @Override
+    public Response<Integer> getCountOfMating(@NotNull(message = "pigId.not.null") Long pigId) {
+        try {
+            DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(pigId);
+            return Response.ok(doctorPigTrack.getCurrentMatingCount() + 1);
+        } catch (Exception e) {
+            log.error("fail to get count of mating of pig id:{}, cause:{}", pigId, Throwables.getStackTraceAsString(e));
+            return Response.fail(e.getMessage());
+        }
+    }
+
+    @Override
+    public Response<Date> getFirstMatingTime(@NotNull(message = "pigId.not.null") Long pigId, @NotNull(message = "farmId.not.null") Long farmId) {
+        DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(pigId);
+        DateTime matingDate = DateTime.now();
+        if (doctorPigTrack.getCurrentMatingCount() > 0) {
+            Map<String, Object> criteria = ImmutableMap.of("pigId", pigId, "farmId", farmId, "count", doctorPigTrack.getCurrentMatingCount()-1);
+            DoctorPigEvent doctorPigEvent = doctorPigEventDao.getFirstMatingTime(criteria);
+            matingDate = new DateTime(Long.valueOf(doctorPigEvent.getExtraMap().get("matingDate").toString()));
+            return Response.ok(matingDate.plusDays(114).toDate());
+        }
+        return Response.ok(matingDate.plusDays(114).toDate());
+    }
+
 }

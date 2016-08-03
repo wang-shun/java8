@@ -3,6 +3,7 @@ package io.terminus.doctor.web.front.event.controller;
 import com.google.common.base.Throwables;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.Paging;
+import io.terminus.common.model.Response;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dto.DoctorPigInfoDetailDto;
 import io.terminus.doctor.event.dto.DoctorPigInfoDto;
@@ -10,6 +11,7 @@ import io.terminus.doctor.event.dto.DoctorPigMessage;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.event.service.DoctorPigReadService;
 import io.terminus.doctor.web.front.event.dto.DoctorBoarDetailDto;
+import io.terminus.doctor.web.front.event.dto.DoctorMatingDetail;
 import io.terminus.doctor.web.front.event.dto.DoctorSowDetailDto;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
@@ -22,6 +24,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -139,5 +142,31 @@ public class DoctorPigs {
     @ResponseBody
     public List<DoctorPigMessage> queryPigNotifyMessages(Long pigId) {
         return RespHelper.or500(doctorPigReadService.findPigMessageByPigId(pigId));
+    }
+
+    /**
+     * 获取母猪配种次数和第一次配种时间
+     * @param farmId 猪场id
+     * @param pigId 猪Id
+     * @return 母猪配种次数和第一次配种时间
+     */
+    @RequestMapping(value = "/getMatingDetail", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public DoctorMatingDetail getMatingDetail(@RequestParam("farmId") Long farmId,
+                                               @RequestParam("pigId") Long pigId) {
+        DoctorMatingDetail doctorMatingDetail = new DoctorMatingDetail();
+        Response<Integer> respMatingCount =  doctorPigReadService.getCountOfMating(pigId);
+        if (respMatingCount.isSuccess()) {
+            doctorMatingDetail.setMatingCount(respMatingCount.getResult());
+        } else {
+            throw new JsonResponseException(respMatingCount.getError());
+        }
+        Response<Date> respFirstMatingTime = doctorPigReadService.getFirstMatingTime(pigId, farmId);
+        if (respMatingCount.isSuccess()) {
+            doctorMatingDetail.setFirstMatingTime(respFirstMatingTime.getResult());
+        } else {
+            throw new JsonResponseException(respFirstMatingTime.getError());
+        }
+        return doctorMatingDetail;
     }
 }

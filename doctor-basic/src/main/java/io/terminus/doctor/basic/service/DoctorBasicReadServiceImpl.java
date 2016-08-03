@@ -14,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.validation.constraints.NotNull;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -127,6 +128,16 @@ public class DoctorBasicReadServiceImpl implements DoctorBasicReadService {
             return Response.ok(doctorCustomerDao.findByFarmId(farmId));
         } catch (Exception e) {
             log.error("find customer by farm id fail, farmId:{}, cause:{}", farmId, Throwables.getStackTraceAsString(e));
+            return Response.fail("customer.find.fail");
+        }
+    }
+
+    @Override
+    public Response<Boolean> isExistUserByName(String name) {
+        try {
+            return Response.ok(doctorCustomerDao.findByName(name) > 0L);
+        } catch (Exception e) {
+            log.error("find customer by name fail, name:{}, cause:{}", name, Throwables.getStackTraceAsString(e));
             return Response.fail("customer.find.fail");
         }
     }

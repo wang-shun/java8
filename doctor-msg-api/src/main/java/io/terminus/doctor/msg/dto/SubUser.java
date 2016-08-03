@@ -1,6 +1,5 @@
 package io.terminus.doctor.msg.dto;
 
-import com.google.common.collect.Lists;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -40,6 +39,6 @@ public class SubUser implements Serializable {
     /**
      * 有权限的猪场
      */
-    private List<Long> farmIds = Lists.newArrayList();
+    private List<Long> farmIds;
 
 }
