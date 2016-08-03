@@ -1,6 +1,7 @@
 package io.terminus.doctor.move.service;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
 import io.terminus.doctor.basic.dao.DoctorBasicMaterialDao;
 import io.terminus.doctor.basic.model.DoctorBasicMaterial;
 import io.terminus.doctor.common.enums.WareHouseType;
@@ -289,14 +290,11 @@ public class WareHouseInitService {
         // 主账号的 staff
         Long primaryStaffId = doctorStaffDao.findByUserId(userProfile.getUserId()).getId();
 
-        // 往表 doctor_material_in_ware_houses 写数的Map, key = 类型数值 | materialName, value = lotNumber(最新数量)
-        Map<String, Long> materialInWarehouseMap = new HashMap<>();
-
         // 往表 doctor_material_consume_avgs 写数的Map, key = 类型数值 | materialName, value = [eventCount(最后一次领用数量), 时间]
-        Map<String, Object[]> lastConsumeMap = new HashMap<>();
+        Map<String, Object[]> lastMaterialConsumeMap = new HashMap<>();
 
-        // 该仓库最近一次领用发生的时间
-        Date lastConsumeDate = null;
+        // 该仓库最近一次领用发生的时间和数量
+        Date lastHouseConsumeDate = null;
 
         // 领用和添加物料的历史记录
         DoctorMaterialConsumeProvider materialCP = new DoctorMaterialConsumeProvider();
@@ -310,7 +308,7 @@ public class WareHouseInitService {
             materialCP.setMaterialId(basicMaterialMap.get(typeAndmaterialName).getId());
             materialCP.setMaterialName(pu.getMaterialName());
             materialCP.setEventTime(pu.getEventDate());
-            if("采购".equals(pu.getEventType())){
+            if(isProvide(pu.getEventType(), WareHouseType.from(wareHouse.getType()))){
                 materialCP.setEventType(DoctorMaterialConsumeProvider.EVENT_TYPE.PROVIDER.getValue());
             }else{
                 materialCP.setEventType(DoctorMaterialConsumeProvider.EVENT_TYPE.CONSUMER.getValue());
@@ -334,7 +332,7 @@ public class WareHouseInitService {
             }
 
             //如果是饲料领用, 需要设置 extra
-            if("领用".equals(pu.getEventType()) && Objects.equals(wareHouse.getType(), WareHouseType.FEED.getKey())){
+            if(isConsume(pu.getEventType(), WareHouseType.from(wareHouse.getType())) && Objects.equals(wareHouse.getType(), WareHouseType.FEED.getKey())){
                 DoctorBarn barn = barnMap.get(pu.getBarnOId());
                 if(barn != null){
                     Map<String, Object> extraMap = new HashMap<>();
@@ -345,30 +343,31 @@ public class WareHouseInitService {
             }
             doctorMaterialConsumeProviderDao.create(materialCP);
 
-            // todo materialInWarehouseMap.put(typeAndmaterialName, materialCP.);
-            if("领用".equals(pu.getEventType())) {
-                lastConsumeMap.put(typeAndmaterialName, new Object[]{materialCP.getEventCount(), pu.getEventDate()});
-                if(lastConsumeDate == null || !pu.getEventDate().before(lastConsumeDate)){
-                    lastConsumeDate = pu.getEventDate();
+            if(isConsume(pu.getEventType(), WareHouseType.from(wareHouse.getType()))) {
+                lastMaterialConsumeMap.put(typeAndmaterialName, new Object[]{materialCP.getEventCount(), pu.getEventDate()});
+
+                if(lastHouseConsumeDate == null || !pu.getEventDate().before(lastHouseConsumeDate)){
+                    lastHouseConsumeDate = pu.getEventDate();
                 }
             }
         }
 
-        // 仓库中各种物料的最新数量 TODO
+        // 仓库中各种物料的最新数量 , 目前只能库存都是0
         DoctorMaterialInWareHouse materialInWareHouse = new DoctorMaterialInWareHouse();
         materialInWareHouse.setFarmId(wareHouse.getFarmId());
         materialInWareHouse.setFarmName(wareHouse.getFarmName());
         materialInWareHouse.setWareHouseId(wareHouse.getId());
         materialInWareHouse.setWareHouseName(wareHouse.getWareHouseName());
         materialInWareHouse.setType(wareHouse.getType());
-        for(Map.Entry<String, Long> entry : materialInWarehouseMap.entrySet()){
-            DoctorBasicMaterial basicMaterial = basicMaterialMap.get(entry.getKey());
-            materialInWareHouse.setMaterialId(basicMaterial.getId());
-            materialInWareHouse.setMaterialName(basicMaterial.getName());
-            materialInWareHouse.setLotNumber(entry.getValue());
-            materialInWareHouse.setUnitGroupName(basicMaterial.getUnitGroupName());
-            materialInWareHouse.setUnitName(basicMaterial.getUnitName());
-            doctorMaterialInWareHouseDao.create(materialInWareHouse);
+        for(DoctorBasicMaterial basicMaterial : basicMaterialMap.values()){
+            if(basicMaterial.getType().equals(wareHouse.getType())){
+                materialInWareHouse.setMaterialId(basicMaterial.getId());
+                materialInWareHouse.setMaterialName(basicMaterial.getName());
+                materialInWareHouse.setLotNumber(0L);
+                materialInWareHouse.setUnitGroupName(basicMaterial.getUnitGroupName());
+                materialInWareHouse.setUnitName(basicMaterial.getUnitName());
+                doctorMaterialInWareHouseDao.create(materialInWareHouse);
+            }
         }
 
         //该仓库最近的一条avg数据
@@ -378,7 +377,7 @@ public class WareHouseInitService {
         avg.setFarmId(wareHouse.getFarmId());
         avg.setWareHouseId(wareHouse.getId());
         avg.setType(wareHouse.getType());
-        for(Map.Entry<String, Object[]> entry : lastConsumeMap.entrySet()){
+        for(Map.Entry<String, Object[]> entry : lastMaterialConsumeMap.entrySet()){
             avg.setMaterialId(basicMaterialMap.get(entry.getKey()).getId());
             avg.setConsumeCount((Long) entry.getValue()[0]);
             avg.setConsumeDate((Date) entry.getValue()[1]);
@@ -399,8 +398,8 @@ public class WareHouseInitService {
             trackMap.put(item.getMaterialId().toString(), item.getLotNumber());
         }
         //最近一次领用时间
-        if(lastConsumeDate != null){
-            trackMap.put("recentConsumeDate", lastConsumeDate);
+        if(lastHouseConsumeDate != null){
+            trackMap.put("recentConsumeDate", lastHouseConsumeDate);
         }
         DoctorWareHouseTrack track = new DoctorWareHouseTrack();
         track.setWareHouseId(wareHouse.getId());
@@ -423,5 +422,15 @@ public class WareHouseInitService {
         extramap.put("consumeDate", recentAVG.getConsumeDate());
         farmWareHouseType.setExtraMap(extramap);
         doctorFarmWareHouseTypeDao.create(farmWareHouseType);
+    }
+
+    private static final List<String> event_type_provide = Lists.newArrayList("采购", "调入", "盘盈");
+    private boolean isProvide(String eventType, WareHouseType wareHouseType) {
+        return event_type_provide.contains(eventType) || (Objects.equals(wareHouseType, WareHouseType.FEED) && "生产".equals(eventType));
+    }
+
+    private static final List<String> event_type_consume = Lists.newArrayList("领用", "调出", "盘亏");
+    private boolean isConsume(String eventType, WareHouseType wareHouseType) {
+        return event_type_consume.contains(eventType) || (Objects.equals(wareHouseType, WareHouseType.MATERIAL) && "生产".equals(eventType));
     }
 }
