@@ -167,7 +167,9 @@ INSERT INTO `doctor_move_datasource` (`id`, `name`, `username`, `password`, `dri
 VALUES
 	(1, '灵宝融利', 'sa', 'pigmall', 'net.sourceforge.jtds.jdbc.Driver', 'jdbc:jtds:sqlserver://101.201.146.171:1433/lbrl;tds=8.0;lastupdatecount=true');
 
-
 -- 2016-07-28 变动原因删除farm_id, 增加srm列
 ALTER TABLE doctor_change_reasons DROP COLUMN farm_id;
 ALTER TABLE doctor_change_reasons ADD COLUMN `srm` VARCHAR(64) DEFAULT NULL COMMENT 'reason字段的输入码' AFTER reason;
+
+-- 增加当前配种次数
+alter table `doctor_pig_tracks` add COLUMN `current_mating_count` int(11) DEFAULT 0 COMMENT '当前配种次数' after `current_parity`;

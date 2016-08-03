@@ -161,6 +161,7 @@ public class DoctorPigEventManager {
     @Transactional
     @SneakyThrows
     public Map<String,Object> createSowPigEvent(DoctorBasicInputInfoDto basic, Map<String, Object> extra){
+        checkMatingCount(basic, extra);
         return createSingleSowEvents(basic, extra);
     }
 
@@ -207,5 +208,21 @@ public class DoctorPigEventManager {
         Map<String, Object> results = OBJECT_MAPPER.readValue(flowDataMap.get("createEventResult"), JacksonType.MAP_OF_OBJECT);
         results.put("contextType", "single");
         return results;
+    }
+
+    @SneakyThrows
+    private void checkMatingCount(DoctorBasicInputInfoDto basic, Map<String, Object> extra) {
+        // 如果妊娠检查非阳性 或 转入配种舍,置当前配种数为0
+        if ((extra.containsKey("checkResult") && (Integer)extra.get("checkResult") != 1) || basic.getEventType() == 12) {
+            DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(basic.getPigId());
+            doctorPigTrack.setCurrentMatingCount(0);
+            doctorPigTrackDao.update(doctorPigTrack);
+        }
+        // 重复配种就加次数
+        if (basic.getEventType() == 9) {
+            DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(basic.getPigId());
+            doctorPigTrack.setCurrentMatingCount(doctorPigTrack.getCurrentMatingCount() + 1);
+            doctorPigTrackDao.update(doctorPigTrack);
+        }
     }
 }

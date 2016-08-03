@@ -77,4 +77,11 @@ public interface DoctorBasicReadService {
      * @return 客户表
      */
     Response<List<DoctorCustomer>> findCustomersByFarmId(@NotNull(message = "farmId.not.null") Long farmId);
+
+    /**
+     * 根据name查询是否已有同名客户
+     * @param name 客户名称
+     * @return 是否存在
+     */
+    Response<Boolean> isExistUserByName(@NotNull(message = "customer.name.not.null") String name);
 }
