@@ -11,12 +11,15 @@ import io.terminus.common.utils.BeanMapper;
 import io.terminus.common.utils.Joiners;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.basic.dao.DoctorBasicDao;
+import io.terminus.doctor.basic.dao.DoctorBasicMaterialDao;
 import io.terminus.doctor.basic.dao.DoctorChangeReasonDao;
 import io.terminus.doctor.basic.dao.DoctorCustomerDao;
 import io.terminus.doctor.basic.model.DoctorBasic;
+import io.terminus.doctor.basic.model.DoctorBasicMaterial;
 import io.terminus.doctor.basic.model.DoctorChangeReason;
 import io.terminus.doctor.basic.model.DoctorCustomer;
 import io.terminus.doctor.common.enums.PigType;
+import io.terminus.doctor.common.enums.WareHouseType;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.constants.DoctorFarmEntryConstants;
@@ -129,6 +132,7 @@ public class DoctorMoveDataService {
     private final DoctorPigDao doctorPigDao;
     private final DoctorPigTrackDao doctorPigTrackDao;
     private final DoctorPigEventDao doctorPigEventDao;
+    private final DoctorBasicMaterialDao doctorBasicMaterialDao;
 
     @Autowired
     public DoctorMoveDataService(DoctorMoveDatasourceHandler doctorMoveDatasourceHandler,
@@ -143,7 +147,8 @@ public class DoctorMoveDataService {
                                  DoctorGroupTrackDao doctorGroupTrackDao,
                                  DoctorPigDao doctorPigDao,
                                  DoctorPigTrackDao doctorPigTrackDao,
-                                 DoctorPigEventDao doctorPigEventDao) {
+                                 DoctorPigEventDao doctorPigEventDao,
+                                 DoctorBasicMaterialDao doctorBasicMaterialDao) {
         this.doctorMoveDatasourceHandler = doctorMoveDatasourceHandler;
         this.doctorBarnDao = doctorBarnDao;
         this.doctorCustomerDao = doctorCustomerDao;
@@ -157,6 +162,7 @@ public class DoctorMoveDataService {
         this.doctorPigDao = doctorPigDao;
         this.doctorPigTrackDao = doctorPigTrackDao;
         this.doctorPigEventDao = doctorPigEventDao;
+        this.doctorBasicMaterialDao = doctorBasicMaterialDao;
     }
 
     /**
@@ -312,6 +318,7 @@ public class DoctorMoveDataService {
             Map<String, Long> subMap = getSubMap(mockOrg().getId());
             Map<String, DoctorChangeReason> changeReasonMap = getReasonMap();
             Map<String, DoctorCustomer> customerMap = getCustomerMap(mockFarm().getId());
+            Map<String, DoctorBasicMaterial> vaccMap = getVaccMap();
 
             //1. 迁移DoctorGroup
             List<DoctorGroup> groups = RespHelper.orServEx(doctorMoveDatasourceHandler
@@ -326,7 +333,7 @@ public class DoctorMoveDataService {
             //2. 迁移DoctorGroupEvent
             List<DoctorGroupEvent> events = RespHelper.orServEx(doctorMoveDatasourceHandler
                     .findByHbsSql(moveId, View_EventListGain.class, "DoctorGroupEvent-EventListGain")).stream()
-                    .map(gainEvent -> getGroupEvent(groupMap, gainEvent, subMap, barnMap, basicMap, changeReasonMap, customerMap))
+                    .map(gainEvent -> getGroupEvent(groupMap, gainEvent, subMap, barnMap, basicMap, changeReasonMap, customerMap, vaccMap))
                     .collect(Collectors.toList());
             doctorGroupEventDao.creates(events);
 
@@ -458,7 +465,7 @@ public class DoctorMoveDataService {
     private DoctorPigEvent getSowEvent(View_EventListSow event, Map<String, DoctorPig> sowMap, Map<String, DoctorBarn> barnMap,
                                        Map<Integer, Map<String, DoctorBasic>> basicMap, Map<String, Long> subMap,
                                        Map<String, DoctorCustomer> customerMap, Map<String, DoctorChangeReason> changeReasonMap,
-                                       Map<String, DoctorPig> boarMap) {
+                                       Map<String, DoctorPig> boarMap, Map<String, DoctorBasicMaterial> vaccMap) {
         DoctorPig sow = sowMap.get(event.getSowOutId());
         if (sow == null) {
             return null;
@@ -488,14 +495,14 @@ public class DoctorMoveDataService {
             sowEvent.setBarnId(barn.getId());
             sowEvent.setBarnName(barn.getName());
         }
-        return getSowEventExtra(eventType, sowEvent, event, subMap, basicMap, barnMap, customerMap, changeReasonMap, boarMap);
+        return getSowEventExtra(eventType, sowEvent, event, subMap, basicMap, barnMap, customerMap, changeReasonMap, boarMap, vaccMap);
     }
 
     //拼接母猪事件extra字段
     private DoctorPigEvent getSowEventExtra(PigEvent eventType, DoctorPigEvent sowEvent, View_EventListSow event, Map<String, Long> subMap,
                                             Map<Integer, Map<String, DoctorBasic>> basicMap, Map<String, DoctorBarn> barnMap,
                                             Map<String, DoctorCustomer> customerMap, Map<String, DoctorChangeReason> changeReasonMap,
-                                            Map<String, DoctorPig> boarMap) {
+                                            Map<String, DoctorPig> boarMap, Map<String, DoctorBasicMaterial> vaccMap) {
 
         if (eventType == null) {
             return sowEvent;
@@ -552,7 +559,10 @@ public class DoctorMoveDataService {
             case VACCINATION:   //防疫
                 DoctorVaccinationDto vacc = new DoctorVaccinationDto();
                 vacc.setVaccinationDate(event.getEventAt());
-                // vacc.setVaccinationId(); // TODO: 16/8/2 疫苗的基础数据
+
+                //疫苗
+                DoctorBasicMaterial vaccBasic = vaccMap.get(event.getDisease());
+                vacc.setVaccinationId(vaccBasic == null ? null : vaccBasic.getId());
                 vacc.setVaccinationName(event.getDisease());  //其实是疫苗名称
                 vacc.setVaccinationStaffId(subMap.get(event.getChgReason()));
                 vacc.setVaccinationStaffName(event.getStaffName());
@@ -838,7 +848,7 @@ public class DoctorMoveDataService {
 
     //迁移公猪
     private void moveBoar(Long moveId, DoctorOrg org, DoctorFarm farm, Map<String, DoctorBarn> barnMap, Map<Integer, Map<String, DoctorBasic>> basicMap,
-                          Map<String, DoctorChangeReason> changeReasonMap, Map<String, DoctorCustomer> customerMap, Map<String, Long> subMap) {
+                          Map<String, DoctorChangeReason> changeReasonMap, Map<String, DoctorCustomer> customerMap, Map<String, Long> subMap, Map<String, DoctorBasicMaterial> vaccMap) {
         //1. 迁移DoctorPig
         List<View_BoarCardList> boarCards = RespHelper.orServEx(doctorMoveDatasourceHandler
                 .findByHbsSql(moveId, View_BoarCardList.class, "DoctorPig-BoarCardList")).stream()
@@ -854,7 +864,7 @@ public class DoctorMoveDataService {
         List<DoctorPigEvent> boarEvents = RespHelper.orServEx(doctorMoveDatasourceHandler
                 .findByHbsSql(moveId, View_EventListBoar.class, "DoctorPigEvent-EventListBoar")).stream()
                 .filter(f -> true) // TODO: 16/7/28 多个猪场注意过滤outId
-                .map(event -> getBoarEvent(event, boarMap, barnMap, basicMap, subMap, customerMap, changeReasonMap)).collect(Collectors.toList());
+                .map(event -> getBoarEvent(event, boarMap, barnMap, basicMap, subMap, customerMap, changeReasonMap, vaccMap)).collect(Collectors.toList());
         doctorPigEventDao.creates(boarEvents);
 
         //查出公猪事件, 按照公猪分组
@@ -936,7 +946,8 @@ public class DoctorMoveDataService {
     //拼接公猪事件
     private DoctorPigEvent getBoarEvent(View_EventListBoar event, Map<String, DoctorPig> boarMap, Map<String, DoctorBarn> barnMap,
                                         Map<Integer, Map<String, DoctorBasic>> basicMap, Map<String, Long> subMap,
-                                        Map<String, DoctorCustomer> customerMap, Map<String, DoctorChangeReason> changeReasonMap) {
+                                        Map<String, DoctorCustomer> customerMap, Map<String, DoctorChangeReason> changeReasonMap,
+                                        Map<String, DoctorBasicMaterial> vaccMap) {
         DoctorPig boar = boarMap.get(event.getGroupOutId());
         if (boar == null) {
             return null;
@@ -965,13 +976,14 @@ public class DoctorMoveDataService {
             boarEvent.setBarnId(barn.getId());
             boarEvent.setBarnName(barn.getName());
         }
-        return getBoarEventExtra(eventType, boarEvent, event, subMap, basicMap, barnMap, customerMap, changeReasonMap);
+        return getBoarEventExtra(eventType, boarEvent, event, subMap, basicMap, barnMap, customerMap, changeReasonMap, vaccMap);
     }
 
     //拼接公猪事件额外信息
     private DoctorPigEvent getBoarEventExtra(PigEvent eventType, DoctorPigEvent boarEvent, View_EventListBoar event, Map<String, Long> subMap,
                                              Map<Integer, Map<String, DoctorBasic>> basicMap, Map<String, DoctorBarn> barnMap,
-                                             Map<String, DoctorCustomer> customerMap, Map<String, DoctorChangeReason> changeReasonMap) {
+                                             Map<String, DoctorCustomer> customerMap, Map<String, DoctorChangeReason> changeReasonMap,
+                                             Map<String, DoctorBasicMaterial> vaccMap) {
         if (eventType == null) {
             return boarEvent;
         }
@@ -1027,7 +1039,9 @@ public class DoctorMoveDataService {
             case VACCINATION:  //防疫
                 DoctorVaccinationDto vacc = new DoctorVaccinationDto();
                 vacc.setVaccinationDate(event.getEventAt());
-                // vacc.setVaccinationId(); // TODO: 16/8/2 疫苗的基础数据
+
+                DoctorBasicMaterial vaccBasic = vaccMap.get(event.getVaccName());
+                vacc.setVaccinationId(vaccBasic == null ? null : vaccBasic.getId());
                 vacc.setVaccinationName(event.getVaccName());
                 vacc.setVaccinationStaffId(subMap.get(event.getChgReason()));
                 vacc.setVaccinationStaffName(event.getChgReason()); //防疫事件人员名称
@@ -1160,8 +1174,10 @@ public class DoctorMoveDataService {
     }
 
     //拼接猪群事件
-    private DoctorGroupEvent getGroupEvent(Map<String, DoctorGroup> groupMap, View_EventListGain gainEvent, Map<String, Long> subMap, Map<String, DoctorBarn> barnMap,
-                                           Map<Integer, Map<String, DoctorBasic>> basicMap, Map<String, DoctorChangeReason> changeReasonMap, Map<String, DoctorCustomer> customerMap) {
+    private DoctorGroupEvent getGroupEvent(Map<String, DoctorGroup> groupMap, View_EventListGain gainEvent, Map<String, Long> subMap,
+                                           Map<String, DoctorBarn> barnMap, Map<Integer, Map<String, DoctorBasic>> basicMap,
+                                           Map<String, DoctorChangeReason> changeReasonMap, Map<String, DoctorCustomer> customerMap,
+                                           Map<String, DoctorBasicMaterial> vaccMap) {
         DoctorGroup group = groupMap.get(gainEvent.getGroupOutId());
         if (group == null) {
             return null;
@@ -1197,7 +1213,7 @@ public class DoctorMoveDataService {
         event.setIsAuto(gainEvent.getIsAuto());
         event.setOutId(gainEvent.getGroupEventOutId());
         event.setRemark(gainEvent.getRemark());
-        return getGroupEventExtra(type, event, gainEvent, basicMap, barnMap, groupMap, group, subMap, changeReasonMap, customerMap);
+        return getGroupEventExtra(type, event, gainEvent, basicMap, barnMap, groupMap, group, subMap, changeReasonMap, customerMap, vaccMap);
     }
 
     //根据类型拼接猪群事件明细
@@ -1205,7 +1221,8 @@ public class DoctorMoveDataService {
     private DoctorGroupEvent getGroupEventExtra(GroupEventType type, DoctorGroupEvent event, View_EventListGain gainEvent,
                                                 Map<Integer, Map<String, DoctorBasic>> basicMap, Map<String, DoctorBarn> barnMap,
                                                 Map<String, DoctorGroup> groupMap, DoctorGroup group, Map<String, Long> subMap,
-                                                Map<String, DoctorChangeReason> changeReasonMap, Map<String, DoctorCustomer> customerMap) {
+                                                Map<String, DoctorChangeReason> changeReasonMap, Map<String, DoctorCustomer> customerMap,
+                                                Map<String, DoctorBasicMaterial> vaccMap) {
         if (type == null) {
             return event;
         }
@@ -1246,7 +1263,10 @@ public class DoctorMoveDataService {
                 break;
             case ANTIEPIDEMIC:
                 DoctorAntiepidemicGroupEvent anti = new DoctorAntiepidemicGroupEvent();
-                //anti.setVaccinId(); // TODO: 16/7/30 需要疫苗的基础数据
+
+                //疫苗
+                DoctorBasicMaterial vaccBasic = vaccMap.get(gainEvent.getNotDisease());
+                anti.setVaccinId(vaccBasic == null ? null : vaccBasic.getId());
                 anti.setVaccinName(gainEvent.getNotDisease());
 
                 DoctorAntiepidemicGroupEvent.VaccinResult result = DoctorAntiepidemicGroupEvent.VaccinResult.from(gainEvent.getContext());
@@ -1607,6 +1627,13 @@ public class DoctorMoveDataService {
             }
         });
         return staffMap;
+    }
+
+    //拼接疫苗, Map<疫苗名称, 疫苗id>
+    private Map<String, DoctorBasicMaterial> getVaccMap() {
+        Map<String, DoctorBasicMaterial> vaccMap = Maps.newHashMap();
+        doctorBasicMaterialDao.findByType(WareHouseType.VACCINATION.getKey()).forEach(vacc -> vaccMap.put(vacc.getName(), vacc));
+        return vaccMap;
     }
 
     //拼接变动原因map
