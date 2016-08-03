@@ -358,6 +358,7 @@ public class DoctorPigReadServiceImpl implements DoctorPigReadService {
             log.error("fail to get first mating time by pig id:{}",pigId);
             return Response.fail("get.first.mating.time.fail");
         }
+
         if (doctorPigTrack.getCurrentMatingCount() > 0) {
             Map<String, Object> criteria = ImmutableMap.of("pigId", pigId, "farmId", farmId, "count", doctorPigTrack.getCurrentMatingCount()-1);
             DoctorPigEvent doctorPigEvent = doctorPigEventDao.getFirstMatingTime(criteria);
@@ -367,5 +368,4 @@ public class DoctorPigReadServiceImpl implements DoctorPigReadService {
             return Response.ok(null);
         }
     }
-
 }
