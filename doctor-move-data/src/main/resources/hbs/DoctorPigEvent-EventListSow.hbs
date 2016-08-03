@@ -82,3 +82,4 @@ FROM
     LEFT JOIN TB_FieldValue AS rm ON a.changeTypeColId = rm.ColID
     LEFT JOIN TB_FieldValue AS foster ON a.fosterReasonColId = foster.ColID
     LEFT JOIN view_GainCardList AS gain ON a.toGroupOutId = gain.OID
+WHERE a.sowOutId IN ({{{sowOutIds}}})

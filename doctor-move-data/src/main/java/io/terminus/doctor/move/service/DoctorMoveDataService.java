@@ -3,6 +3,7 @@ package io.terminus.doctor.move.service;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.Response;
@@ -407,12 +408,28 @@ public class DoctorMoveDataService {
         Map<String, DoctorPig> sowMap = doctorPigDao.findPigsByFarmIdAndPigType(mockFarm().getId(), DoctorPig.PIG_TYPE.SOW.getKey()).stream()
                 .collect(Collectors.toMap(DoctorPig::getOutId, v -> v));
 
+        //数据量太大, 分成5页获取母猪事件
+        List<View_EventListSow> sowEventViews = Lists.newArrayList();
+        List<List<View_SowCardList>> sowLists = Lists.partition(sowCards, sowCards.size()/5 + 1);
+        long a = DateTime.now().getMillis();
+        String b = DateUtil.toDateTimeString(new Date());
+        sowLists.forEach(ss -> {
+            String sowOutIds = Joiners.COMMA.join(ss.stream().map(s -> brace(s.getPigOutId())).collect(Collectors.toList()));
+            sowEventViews.addAll(RespHelper.orServEx(doctorMoveDatasourceHandler
+                    .findByHbsSql(moveId, View_EventListSow.class, "DoctorPigEvent-EventListSow", ImmutableMap.of("sowOutIds", sowOutIds))).stream()
+                    .filter(f -> true) // TODO: 16/7/28 多个猪场注意过滤outId
+                    .collect(Collectors.toList())
+            );
+        });
+
         //2. 迁移DoctorPigEvent
-        List<DoctorPigEvent> sowEvents = RespHelper.orServEx(doctorMoveDatasourceHandler
-                .findByHbsSql(moveId, View_EventListSow.class, "DoctorPigEvent-EventListSow")).stream()
-                .filter(f -> true) // TODO: 16/7/28 多个猪场注意过滤outId
-                .map(event -> getSowEvent(event, sowMap, barnMap, basicMap, subMap, customerMap, changeReasonMap, boarMap, vaccMap)).collect(Collectors.toList());
-        doctorPigEventDao.creates(sowEvents);
+        List<DoctorPigEvent> sowEvents = sowEventViews.stream()
+                .map(event -> getSowEvent(event, sowMap, barnMap, basicMap, subMap, customerMap, changeReasonMap, boarMap, vaccMap))
+                .collect(Collectors.toList());
+
+        //数据量略大, 分成5份插入吧
+        Lists.partition(sowEvents, 5).forEach(doctorPigEventDao::creates);
+        log.info("*********************** b:{}, now:{}, delta:{}", b, DateUtil.toDateTimeString(new Date()), DateTime.now().getMillis() - a);
 
         //查出母猪事件, 按照母猪分组
         Map<Long, List<DoctorPigEvent>> sowEventMap = doctorPigEventDao.findByFarmIdAndKind(mockFarm().getId(), DoctorPig.PIG_TYPE.SOW.getKey())
@@ -422,14 +439,14 @@ public class DoctorMoveDataService {
         updatePigRelEventId(sowEventMap);
 
         //3. 迁移DoctorPigTrack
-        List<DoctorPigTrack> boarTracks = sowCards.stream()
+        List<DoctorPigTrack> sowTracks = sowCards.stream()
                 .map(card -> {
                     DoctorPig sow = sowMap.get(card.getPigOutId());
                     return getSowTrack(card, sow, barnMap, sow == null ? null : sowEventMap.get(sow.getId()), moveId);
                 })
                 .filter(Arguments::notNull)
                 .collect(Collectors.toList());
-        doctorPigTrackDao.creates(boarTracks);
+        doctorPigTrackDao.creates(sowTracks);
     }
 
     //拼接母猪
@@ -1706,6 +1723,10 @@ public class DoctorMoveDataService {
         return barn;
     }
 
+    private static String brace(String name) {
+        return "'" + name + "'";
+    }
+
     //判断猪场id是否相同
     private static boolean isFarm(String farmOID, String outId) {
         return Objects.equals(farmOID, outId);
@@ -1737,10 +1758,5 @@ public class DoctorMoveDataService {
         sub.setUserId(9999L);
         sub.setRealName("测试姓名");
         return sub;
-    }
-
-
-    public void run(String... strings) throws Exception {
-        // Just for test!
     }
 }
