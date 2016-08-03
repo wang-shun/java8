@@ -372,12 +372,17 @@ public class DoctorMoveDataService {
            Map<String, Long> subMap = getSubMap(mockOrg().getId());
            Map<String, DoctorChangeReason> changeReasonMap = getReasonMap();
            Map<String, DoctorCustomer> customerMap = getCustomerMap(mockFarm().getId());
+           Map<String, DoctorBasicMaterial> vaccMap = getVaccMap();
            
-           //1. 迁移sow
-           moveSow(moveId, mockOrg(), mockFarm(), basicMap, barnMap);
+           //1. 迁移boar
+           moveBoar(moveId, mockOrg(), mockFarm(), barnMap, basicMap, changeReasonMap, customerMap, subMap, vaccMap);
 
-           //2. 迁移boar
-           //moveBoar(moveId, mockOrg(), mockFarm(), barnMap, basicMap, changeReasonMap, customerMap, subMap);
+           //查出boar, 转换成map
+           Map<String, DoctorPig> boarMap = Maps.newHashMap();
+           doctorPigDao.findPigsByFarmIdAndPigType(mockFarm().getId(), DoctorPig.PIG_TYPE.BOAR.getKey()).forEach(boar -> boarMap.put(boar.getPigCode(), boar));
+
+           //2. 迁移sow
+           moveSow(moveId, mockOrg(), mockFarm(), basicMap, barnMap, subMap, customerMap, changeReasonMap, boarMap, vaccMap);
            return Response.ok(Boolean.TRUE);
        } catch (Exception e) {
            log.error("move pig failed, moveId:{}, cause:{}", moveId, Throwables.getStackTraceAsString(e));
@@ -386,7 +391,9 @@ public class DoctorMoveDataService {
     }
 
     //迁移母猪
-    private void moveSow(Long moveId, DoctorOrg org, DoctorFarm farm, Map<Integer, Map<String, DoctorBasic>> basicMap, Map<String, DoctorBarn> barnMap) {
+    private void moveSow(Long moveId, DoctorOrg org, DoctorFarm farm, Map<Integer, Map<String, DoctorBasic>> basicMap, Map<String, DoctorBarn> barnMap,
+                         Map<String, Long> subMap, Map<String, DoctorCustomer> customerMap, Map<String, DoctorChangeReason> changeReasonMap,
+                         Map<String, DoctorPig> boarMap, Map<String, DoctorBasicMaterial> vaccMap) {
         //1. 迁移DoctorPig
         List<View_SowCardList> sowCards = RespHelper.orServEx(doctorMoveDatasourceHandler
                 .findByHbsSql(moveId, View_SowCardList.class, "DoctorPig-SowCardList")).stream()
@@ -399,9 +406,12 @@ public class DoctorMoveDataService {
                 .collect(Collectors.toMap(DoctorPig::getOutId, v -> v));
 
         //2. 迁移DoctorPigEvent
-        // TODO: 16/8/2
-
-
+        List<DoctorPigEvent> sowEvents = RespHelper.orServEx(doctorMoveDatasourceHandler
+                .findByHbsSql(moveId, View_EventListSow.class, "DoctorPigEvent-EventListSow")).stream()
+                .filter(f -> true) // TODO: 16/7/28 多个猪场注意过滤outId
+                .map(event -> getSowEvent(event, sowMap, barnMap, basicMap, subMap, customerMap, changeReasonMap, boarMap, vaccMap)).collect(Collectors.toList());
+        doctorPigEventDao.creates(sowEvents);
+        
         //查出母猪事件, 按照母猪分组
         Map<Long, List<DoctorPigEvent>> sowEventMap = doctorPigEventDao.findByFarmIdAndKind(mockFarm().getId(), DoctorPig.PIG_TYPE.SOW.getKey())
                 .stream().collect(Collectors.groupingBy(DoctorPigEvent::getPigId));
