@@ -38,5 +38,9 @@ public class DoctorFostersDto implements Serializable{
 
     private Long fosterSowId;   // 拼窝母猪Id
 
+    private String fosterSowCode; // 拼窝母猪code
+
+    private String fosterSowOutId; // 拼窝母猪outId(做关联用)
+
     private String fosterRemark;    // 拼窝标识
 }

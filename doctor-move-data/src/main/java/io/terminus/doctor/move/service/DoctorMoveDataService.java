@@ -54,6 +54,7 @@ import io.terminus.doctor.event.dto.event.usual.DoctorFarmEntryDto;
 import io.terminus.doctor.event.dto.event.usual.DoctorRemovalDto;
 import io.terminus.doctor.event.dto.event.usual.DoctorVaccinationDto;
 import io.terminus.doctor.event.enums.BoarEntryType;
+import io.terminus.doctor.event.enums.FarrowingType;
 import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.enums.MatingType;
@@ -574,7 +575,7 @@ public class DoctorMoveDataService {
                 sowEvent.setExtra(JSON_MAPPER.toJson(DoctorAbortionDto.builder().abortionDate(event.getEventAt()).build()));
                 break;
             case FARROWING:     //分娩
-                sowEvent.setExtra(JSON_MAPPER.toJson(getSowFarrowExtra(event)));
+                sowEvent.setExtra(JSON_MAPPER.toJson(getSowFarrowExtra(event, barnMap)));
                 break;
             case WEAN:          //断奶
                 sowEvent.setExtra(JSON_MAPPER.toJson(getSowWeanExtra(event)));
@@ -688,9 +689,35 @@ public class DoctorMoveDataService {
     }
 
     //拼接母猪分娩extra
-    private DoctorFarrowingDto getSowFarrowExtra(View_EventListSow event) {
+    private DoctorFarrowingDto getSowFarrowExtra(View_EventListSow event, Map<String, DoctorBarn> barnMap) {
         DoctorFarrowingDto farrow = new DoctorFarrowingDto();
+        farrow.setFarrowingDate(event.getEventAt());       // 分娩日期
+        farrow.setWeakCount(event.getWeakCount());         // 弱崽数量
+        farrow.setMnyCount(event.getMummyCount());         // 木乃伊数量
+        farrow.setJxCount(event.getJxCount());             // 畸形数量
+        farrow.setDeadCount(event.getDeadCount());         // 死亡数量
+        farrow.setBlackCount(event.getBlackCount());       // 黑太数量
+        farrow.setHealthCount(event.getHealthyCount());    // 健仔数量
+        farrow.setFarrowingLiveCount(event.getHealthyCount() + event.getWeakCount()); //活仔数 = 健 + 弱
+        farrow.setFarrowRemark(event.getRemark());
+        farrow.setBirthNestAvg(event.getEventWeight());    //出生窝重
+        farrow.setFarrowStaff1(event.getStaffName());  //接生员1
+        farrow.setFarrowStaff2(event.getStaffName());  //接生员2
+        farrow.setIsHelp(event.getNeedHelp());     //  是否帮助
+        farrow.setFarrowIsSingleManager(event.getIsSingleManage());    //是否个体管理
+        farrow.setGroupCode(event.getToGroupCode());   // 仔猪猪群Code
+        farrow.setNestCode(event.getNestCode()); // 窝号
 
+        //分娩类型
+        FarrowingType farrowingType = FarrowingType.from(event.getFarrowType());
+        farrow.setFarrowingType(farrowingType == null ? null : farrowingType.getKey());
+
+        //分娩猪舍
+        DoctorBarn farrowBarn = barnMap.get(event.getBarnOutId());
+        if (farrowBarn != null) {
+            farrow.setBarnId(farrowBarn.getId());
+            farrow.setBarnName(farrowBarn.getName());
+        }
         return farrow;
     }
 
@@ -710,6 +737,8 @@ public class DoctorMoveDataService {
         foster.setFostersDate(event.getEventAt());   // 拼窝日期
         foster.setFostersCount(event.getNetOutCount());   //  拼窝数量
         foster.setFosterTotalWeight(event.getWeanWeight());   //拼窝总重量
+        foster.setFosterSowCode(event.getDisease());      //拼窝母猪号
+        foster.setFosterSowOutId(event.getNurseSow());      //拼窝母猪号
 
         //寄养原因
         DoctorBasic reason = basicMap.get(DoctorBasic.Type.FOSTER_REASON.getValue()).get(event.getFosterReasonName());
