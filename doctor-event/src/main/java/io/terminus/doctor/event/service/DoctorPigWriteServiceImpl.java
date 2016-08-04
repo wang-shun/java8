@@ -15,6 +15,7 @@ import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.workflow.core.WorkFlowService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
@@ -117,8 +118,7 @@ public class DoctorPigWriteServiceImpl implements DoctorPigWriteService {
     @Override
     public Response<Boolean> deploy() {
         try {
-            File f = new File(getClass().getClassLoader().getResource("flow/sow.xml").getFile());
-            workFlowService.getFlowDefinitionService().deploy(new FileInputStream(f));
+            workFlowService.getFlowDefinitionService().deploy(new ClassPathResource("flow/sow.xml").getInputStream());
             return Response.ok(Boolean.TRUE);
         } catch (Exception e) {
             log.error("deploy() failed, cause:{}", Throwables.getStackTraceAsString(e));
