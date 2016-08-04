@@ -160,7 +160,7 @@ public class WareHouseInitService {
         List<DoctorBarn> barns = doctorBarnDao.findByFarmId(farm.getId());
         if(barns.isEmpty()){
             //throw new ServiceException("please init barn data first");
-            RespHelper.or500(doctorMoveBasicService.moveBarn(dataSourceId, farm));
+            doctorMoveBasicService.moveBarn(dataSourceId, farm);
             barns = doctorBarnDao.findByFarmId(farm.getId());
         }
         return barns.stream().collect(Collectors.toMap(DoctorBarn::getOutId, v -> v));

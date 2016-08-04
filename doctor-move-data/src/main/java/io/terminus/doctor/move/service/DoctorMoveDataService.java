@@ -5,8 +5,6 @@ import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import io.terminus.common.exception.ServiceException;
-import io.terminus.common.model.Response;
 import io.terminus.common.utils.Arguments;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.common.utils.Joiners;
@@ -136,90 +134,75 @@ public class DoctorMoveDataService {
      * 迁移猪群
      */
     @Transactional
-    public Response<Boolean> moveGroup(Long moveId, DoctorOrg org, DoctorFarm farm) {
-        try {
-            //0. 基础数据准备: barn, basic, subUser, changeReason, customer
-            Map<String, DoctorBarn> barnMap = doctorMoveBasicService.getBarnMap(farm.getId());
-            Map<Integer, Map<String, DoctorBasic>> basicMap = doctorMoveBasicService.getBasicMap();
-            Map<String, Long> subMap = doctorMoveBasicService.getSubMap(org.getId());
-            Map<String, DoctorChangeReason> changeReasonMap = doctorMoveBasicService.getReasonMap();
-            Map<String, DoctorCustomer> customerMap = doctorMoveBasicService.getCustomerMap(farm.getId());
-            Map<String, DoctorBasicMaterial> vaccMap = doctorMoveBasicService.getVaccMap();
+    public void moveGroup(Long moveId, DoctorOrg org, DoctorFarm farm) {
+        //0. 基础数据准备: barn, basic, subUser, changeReason, customer
+        Map<String, DoctorBarn> barnMap = doctorMoveBasicService.getBarnMap(farm.getId());
+        Map<Integer, Map<String, DoctorBasic>> basicMap = doctorMoveBasicService.getBasicMap();
+        Map<String, Long> subMap = doctorMoveBasicService.getSubMap(org.getId());
+        Map<String, DoctorChangeReason> changeReasonMap = doctorMoveBasicService.getReasonMap();
+        Map<String, DoctorCustomer> customerMap = doctorMoveBasicService.getCustomerMap(farm.getId());
+        Map<String, DoctorBasicMaterial> vaccMap = doctorMoveBasicService.getVaccMap();
 
-            //1. 迁移DoctorGroup
-            List<DoctorGroup> groups = RespHelper.orServEx(doctorMoveDatasourceHandler
-                    .findByHbsSql(moveId, View_GainCardList.class, "DoctorGroup-GainCardList")).stream()
-                    .filter(loc -> isFarm(loc.getFarmOutId(), farm.getOutId()))
-                    .map(gain -> getGroup(org, farm, gain, barnMap, basicMap, subMap)).collect(Collectors.toList());
-            doctorGroupDao.creates(groups);
+        //1. 迁移DoctorGroup
+        List<DoctorGroup> groups = RespHelper.orServEx(doctorMoveDatasourceHandler
+                .findByHbsSql(moveId, View_GainCardList.class, "DoctorGroup-GainCardList")).stream()
+                .filter(loc -> isFarm(loc.getFarmOutId(), farm.getOutId()))
+                .map(gain -> getGroup(org, farm, gain, barnMap, basicMap, subMap)).collect(Collectors.toList());
+        doctorGroupDao.creates(groups);
 
-            //查出刚插入的group, key = outId, 查询猪, 为转种猪事件做准备
-            Map<String, DoctorGroup> groupMap = doctorGroupDao.findByFarmId(farm.getId()).stream().collect(Collectors.toMap(DoctorGroup::getOutId, v -> v));
-            Map<String, DoctorPig> pigMap = Maps.newHashMap();
-            doctorPigDao.findPigsByFarmId(farm.getId()).forEach(pig -> pigMap.put(pig.getPigCode(), pig));
+        //查出刚插入的group, key = outId, 查询猪, 为转种猪事件做准备
+        Map<String, DoctorGroup> groupMap = doctorGroupDao.findByFarmId(farm.getId()).stream().collect(Collectors.toMap(DoctorGroup::getOutId, v -> v));
+        Map<String, DoctorPig> pigMap = Maps.newHashMap();
+        doctorPigDao.findPigsByFarmId(farm.getId()).forEach(pig -> pigMap.put(pig.getPigCode(), pig));
 
-            //2. 迁移DoctorGroupEvent
-            List<DoctorGroupEvent> events = RespHelper.orServEx(doctorMoveDatasourceHandler
-                    .findByHbsSql(moveId, View_EventListGain.class, "DoctorGroupEvent-EventListGain")).stream()
-                    .map(gainEvent -> getGroupEvent(groupMap, gainEvent, subMap, barnMap, basicMap, changeReasonMap, customerMap, vaccMap, pigMap))
-                    .collect(Collectors.toList());
-            doctorGroupEventDao.creates(events);
+        //2. 迁移DoctorGroupEvent
+        List<DoctorGroupEvent> events = RespHelper.orServEx(doctorMoveDatasourceHandler
+                .findByHbsSql(moveId, View_EventListGain.class, "DoctorGroupEvent-EventListGain")).stream()
+                .map(gainEvent -> getGroupEvent(groupMap, gainEvent, subMap, barnMap, basicMap, changeReasonMap, customerMap, vaccMap, pigMap))
+                .collect(Collectors.toList());
+        doctorGroupEventDao.creates(events);
 
-            //查出刚才插入的groupEvent, 按照猪群id groupBy
-            Map<Long, List<DoctorGroupEvent>> eventMap = doctorGroupEventDao.findByFarmId(farm.getId()).stream().collect(Collectors.groupingBy(DoctorGroupEvent::getGroupId));
+        //查出刚才插入的groupEvent, 按照猪群id groupBy
+        Map<Long, List<DoctorGroupEvent>> eventMap = doctorGroupEventDao.findByFarmId(farm.getId()).stream().collect(Collectors.groupingBy(DoctorGroupEvent::getGroupId));
 
-            //3. 迁移DoctorTrack, 先把统计结果转换成map, 在转换track
-            String now = DateUtil.toDateTimeString(new Date());
-            Map<String, Proc_InventoryGain> gainMap = RespHelper.orServEx(doctorMoveDatasourceHandler
-                    .findByHbsSql(moveId, Proc_InventoryGain.class, "DoctorGroupTrack-Proc_InventoryGain", ImmutableMap.of("date", now))).stream()
-                    .filter(loc -> isFarm(loc.getFarmOutId(), farm.getOutId()))
-                    .collect(Collectors.toMap(Proc_InventoryGain::getGroupOutId, v -> v));
+        //3. 迁移DoctorTrack, 先把统计结果转换成map, 在转换track
+        String now = DateUtil.toDateTimeString(new Date());
+        Map<String, Proc_InventoryGain> gainMap = RespHelper.orServEx(doctorMoveDatasourceHandler
+                .findByHbsSql(moveId, Proc_InventoryGain.class, "DoctorGroupTrack-Proc_InventoryGain", ImmutableMap.of("date", now))).stream()
+                .filter(loc -> isFarm(loc.getFarmOutId(), farm.getOutId()))
+                .collect(Collectors.toMap(Proc_InventoryGain::getGroupOutId, v -> v));
 
-            List<DoctorGroupTrack> groupTracks = groupMap.values().stream()
-                    .map(group -> getGroupTrack(group, gainMap.get(group.getOutId()), eventMap.get(group.getId())))
-                    .collect(Collectors.toList());
-            doctorGroupTrackDao.creates(groupTracks);
-            return Response.ok(Boolean.TRUE);
-        } catch (ServiceException e) {
-            return Response.fail(e.getMessage());
-        } catch (Exception e) {
-            log.error("move group failed, moveId:{}, cause:{}", moveId, Throwables.getStackTraceAsString(e));
-            return Response.fail("move.group.fail");
-        }
+        List<DoctorGroupTrack> groupTracks = groupMap.values().stream()
+                .map(group -> getGroupTrack(group, gainMap.get(group.getOutId()), eventMap.get(group.getId())))
+                .collect(Collectors.toList());
+        doctorGroupTrackDao.creates(groupTracks);
     }
 
     /**
      * 迁移母猪公猪
      */
-    @Transactional
-    public Response<Boolean> movePig(Long moveId, DoctorOrg org, DoctorFarm farm) {
-       try {
-           //0. 基础数据准备: barn, basic, subUser
-           Map<String, DoctorBarn> barnMap = doctorMoveBasicService.getBarnMap(farm.getId());
-           Map<Integer, Map<String, DoctorBasic>> basicMap = doctorMoveBasicService.getBasicMap();
-           Map<String, Long> subMap = doctorMoveBasicService.getSubMap(org.getId());
-           Map<String, DoctorChangeReason> changeReasonMap = doctorMoveBasicService.getReasonMap();
-           Map<String, DoctorCustomer> customerMap = doctorMoveBasicService.getCustomerMap(farm.getId());
-           Map<String, DoctorBasicMaterial> vaccMap = doctorMoveBasicService.getVaccMap();
-           
-           //1. 迁移boar
-           moveBoar(moveId, org, farm, barnMap, basicMap, changeReasonMap, customerMap, subMap, vaccMap);
+    public void movePig(Long moveId, DoctorFarm farm) {
+        //0. 基础数据准备: barn, basic, subUser
+        Map<String, DoctorBarn> barnMap = doctorMoveBasicService.getBarnMap(farm.getId());
+        Map<Integer, Map<String, DoctorBasic>> basicMap = doctorMoveBasicService.getBasicMap();
+        Map<String, Long> subMap = doctorMoveBasicService.getSubMap(farm.getOrgId());
+        Map<String, DoctorChangeReason> changeReasonMap = doctorMoveBasicService.getReasonMap();
+        Map<String, DoctorCustomer> customerMap = doctorMoveBasicService.getCustomerMap(farm.getId());
+        Map<String, DoctorBasicMaterial> vaccMap = doctorMoveBasicService.getVaccMap();
 
-           //查出boar, 转换成map
-           Map<String, DoctorPig> boarMap = Maps.newHashMap();
-           doctorPigDao.findPigsByFarmIdAndPigType(farm.getId(), DoctorPig.PIG_TYPE.BOAR.getKey()).forEach(boar -> boarMap.put(boar.getPigCode(), boar));
+        //1. 迁移boar
+        moveBoar(moveId, farm, barnMap, basicMap, changeReasonMap, customerMap, subMap, vaccMap);
 
-           //2. 迁移sow
-           moveSow(moveId, org, farm, basicMap, barnMap, subMap, customerMap, changeReasonMap, boarMap, vaccMap);
-           return Response.ok(Boolean.TRUE);
-       } catch (Exception e) {
-           log.error("move pig failed, moveId:{}, cause:{}", moveId, Throwables.getStackTraceAsString(e));
-           return Response.fail("move.pig.fail");
-       }
+        //查出boar, 转换成map
+        Map<String, DoctorPig> boarMap = Maps.newHashMap();
+        doctorPigDao.findPigsByFarmIdAndPigType(farm.getId(), DoctorPig.PIG_TYPE.BOAR.getKey()).forEach(boar -> boarMap.put(boar.getPigCode(), boar));
+
+        //2. 迁移sow
+        moveSow(moveId, farm, basicMap, barnMap, subMap, customerMap, changeReasonMap, boarMap, vaccMap);
     }
 
     //迁移母猪
-    private void moveSow(Long moveId, DoctorOrg org, DoctorFarm farm, Map<Integer, Map<String, DoctorBasic>> basicMap, Map<String, DoctorBarn> barnMap,
+    private void moveSow(Long moveId, DoctorFarm farm, Map<Integer, Map<String, DoctorBasic>> basicMap, Map<String, DoctorBarn> barnMap,
                          Map<String, Long> subMap, Map<String, DoctorCustomer> customerMap, Map<String, DoctorChangeReason> changeReasonMap,
                          Map<String, DoctorPig> boarMap, Map<String, DoctorBasicMaterial> vaccMap) {
         //1. 迁移DoctorPig
@@ -227,7 +210,7 @@ public class DoctorMoveDataService {
                 .findByHbsSql(moveId, View_SowCardList.class, "DoctorPig-SowCardList")).stream()
                 .filter(loc -> isFarm(loc.getFarmOutId(), farm.getOutId()))
                 .collect(Collectors.toList());
-        doctorPigDao.creates(sowCards.stream().map(card -> getSow(card, org, farm, basicMap)).collect(Collectors.toList()));
+        doctorPigDao.creates(sowCards.stream().map(card -> getSow(card, farm, basicMap)).collect(Collectors.toList()));
 
         //查出母猪, 转换成map
         Map<String, DoctorPig> sowMap = doctorPigDao.findPigsByFarmIdAndPigType(farm.getId(), DoctorPig.PIG_TYPE.SOW.getKey()).stream()
@@ -273,10 +256,10 @@ public class DoctorMoveDataService {
     }
 
     //拼接母猪
-    private DoctorPig getSow(View_SowCardList card, DoctorOrg org, DoctorFarm farm, Map<Integer, Map<String, DoctorBasic>> basicMap) {
+    private DoctorPig getSow(View_SowCardList card, DoctorFarm farm, Map<Integer, Map<String, DoctorBasic>> basicMap) {
         DoctorPig sow = new DoctorPig();
-        sow.setOrgId(org.getId());
-        sow.setOrgName(org.getName());
+        sow.setOrgId(farm.getOrgId());
+        sow.setOrgName(farm.getOrgName());
         sow.setFarmId(farm.getId());
         sow.setFarmName(farm.getName());
         sow.setOutId(card.getPigOutId());           //外部OID
@@ -699,14 +682,14 @@ public class DoctorMoveDataService {
     }
 
     //迁移公猪
-    private void moveBoar(Long moveId, DoctorOrg org, DoctorFarm farm, Map<String, DoctorBarn> barnMap, Map<Integer, Map<String, DoctorBasic>> basicMap,
+    private void moveBoar(Long moveId, DoctorFarm farm, Map<String, DoctorBarn> barnMap, Map<Integer, Map<String, DoctorBasic>> basicMap,
                           Map<String, DoctorChangeReason> changeReasonMap, Map<String, DoctorCustomer> customerMap, Map<String, Long> subMap, Map<String, DoctorBasicMaterial> vaccMap) {
         //1. 迁移DoctorPig
         List<View_BoarCardList> boarCards = RespHelper.orServEx(doctorMoveDatasourceHandler
                 .findByHbsSql(moveId, View_BoarCardList.class, "DoctorPig-BoarCardList")).stream()
                 .filter(loc -> isFarm(loc.getFarmOutId(), farm.getOutId()))
                 .collect(Collectors.toList());
-        doctorPigDao.creates(boarCards.stream().map(card -> getBoar(card, org, farm, basicMap)).collect(Collectors.toList()));
+        doctorPigDao.creates(boarCards.stream().map(card -> getBoar(card, farm, basicMap)).collect(Collectors.toList()));
 
         //查出公猪, 转换成map
         Map<String, DoctorPig> boarMap = doctorPigDao.findPigsByFarmIdAndPigType(farm.getId(), DoctorPig.PIG_TYPE.BOAR.getKey()).stream()
@@ -754,10 +737,10 @@ public class DoctorMoveDataService {
     }
 
     //拼接公猪
-    private DoctorPig getBoar(View_BoarCardList card, DoctorOrg org, DoctorFarm farm, Map<Integer, Map<String, DoctorBasic>> basicMap) {
+    private DoctorPig getBoar(View_BoarCardList card, DoctorFarm farm, Map<Integer, Map<String, DoctorBasic>> basicMap) {
         DoctorPig boar = new DoctorPig();
-        boar.setOrgId(org.getId());
-        boar.setOrgName(org.getName());
+        boar.setOrgId(farm.getOrgId());
+        boar.setOrgName(farm.getOrgName());
         boar.setFarmId(farm.getId());
         boar.setFarmName(farm.getName());
         boar.setOutId(card.getPigOutId());           //外部OID

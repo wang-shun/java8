@@ -73,7 +73,7 @@ public class UserInitService {
 
     @Transactional
     public void init(String mobile, Long dataSourceId){
-        List<View_FarmMember> list = doctorMoveDatasourceHandler.findAllData(dataSourceId, View_FarmMember.class, DoctorMoveTableEnum.view_FarmMember).getResult();
+        List<View_FarmMember> list = getFarmMember(dataSourceId);
         List<DoctorFarm> farms = new ArrayList<>();
         doctorMoveDatasourceHandler.findAllData(dataSourceId, View_FarmInfo.class, DoctorMoveTableEnum.view_FarmInfo).getResult().forEach(farmInfo -> {
             if(farmInfo.getLevels() == 1){
@@ -120,6 +120,10 @@ public class UserInitService {
                 this.createSubUser(member, roleId, primaryUser.getId(), mobile, farmIds, member.getOID());
             }
         }
+    }
+
+    public List<View_FarmMember> getFarmMember(Long datasourceId) {
+        return doctorMoveDatasourceHandler.findAllData(datasourceId, View_FarmMember.class, DoctorMoveTableEnum.view_FarmMember).getResult();
     }
 
     /**
