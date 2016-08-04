@@ -20,6 +20,10 @@ import java.util.Map;
 @Repository
 public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent>{
 
+    public void deleteByFarmId(Long farmId) {
+        getSqlSession().delete(sqlId("deleteByFarmId"), farmId);
+    }
+
     public DoctorPigEvent queryLastPigEventById(Long pigId){
         return this.getSqlSession().selectOne(sqlId("queryLastPigEventById"), pigId);
     }

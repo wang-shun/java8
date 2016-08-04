@@ -11,6 +11,7 @@ import io.terminus.doctor.move.handler.DoctorMoveWorkflowHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 import java.util.Map;
@@ -26,8 +27,8 @@ import java.util.stream.Collectors;
  * Created by IceMimosa
  * Date: 16/7/27
  */
-//@RestController
-//@RequestMapping("/api/doctor/import")
+@RestController
+@RequestMapping("/api/doctor/import")
 public class workflows {
 
     @Autowired

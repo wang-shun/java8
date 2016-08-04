@@ -19,6 +19,10 @@ import java.util.List;
 @Repository
 public class DoctorPigTrackDao extends MyBatisDao<DoctorPigTrack>{
 
+    public void deleteByFarmId(Long farmId) {
+        getSqlSession().delete(sqlId("deleteByFarmId"), farmId);
+    }
+
     /**
      * 查询猪舍内猪状态
      * @param barnId 猪舍id

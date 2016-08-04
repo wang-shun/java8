@@ -221,4 +221,9 @@
         FROM <include refid="tb" />
         WHERE farm_id = #{farmId} AND pig_type = ${pigType}
     </select>
+
+    <delete id="deleteByFarmId" parameterType="long">
+        DELETE FROM <include refid="tb"/>
+        WHERE farm_id=#{farmId}
+    </delete>
 </mapper>

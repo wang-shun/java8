@@ -129,6 +129,13 @@ public class DoctorMoveDataService {
         this.doctorMoveBasicService = doctorMoveBasicService;
     }
 
+    //删除猪场所有猪相关的数据
+    public void deleteAllPigs(Long farmId) {
+        doctorPigDao.deleteByFarmId(farmId);
+        doctorPigEventDao.deleteByFarmId(farmId);
+        doctorPigTrackDao.deleteByFarmId(farmId);
+    }
+
     /**
      * 迁移猪群
      */
