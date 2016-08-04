@@ -19,4 +19,10 @@ public interface DoctorPigWriteService {
     Response<Integer> updatePigTrackExtraMessage(DoctorPigTrack pigTrack);
     Response<Long> createPigEvent(DoctorPigEvent pigEvent);
     Response<Long> createPigSnapShot(DoctorPigSnapshot pigSnapshot);
+
+    /**
+     * 部署流程定义
+     * @return
+     */
+    Response<Boolean> deploy();
 }
