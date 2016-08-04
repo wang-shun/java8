@@ -90,7 +90,7 @@ public class WareHouseInitService {
     @Autowired
     private DoctorFarmWareHouseTypeDao doctorFarmWareHouseTypeDao;
     @Autowired
-    private DoctorMoveDataService doctorMoveDataService;
+    private DoctorMoveBasicService doctorMoveBasicService;
     @Autowired
     private UserProfileDao userProfileDao;
 
@@ -130,7 +130,7 @@ public class WareHouseInitService {
             for(DoctorFarm farm : farmMap.values()){
                 // 查找该猪场下的所有猪舍
                 // key = outId, value = barn
-                Map<String, DoctorBarn> barnMap = this.findBarnMap(dataSourceId, farm.getId());
+                Map<String, DoctorBarn> barnMap = this.findBarnMap(dataSourceId, farm);
 
                 Map<WareHouseType, DoctorWareHouse> warehouseMap = new HashMap<>(); // key = WareHouseType, value = DoctorWareHouse
                 for(WareHouseType type : WareHouseType.values()){
@@ -156,12 +156,12 @@ public class WareHouseInitService {
      *
      * @return key = outId, value = barn
      */
-    private Map<String, DoctorBarn> findBarnMap(Long dataSourceId, Long farmId){
-        List<DoctorBarn> barns = doctorBarnDao.findByFarmId(farmId);
+    private Map<String, DoctorBarn> findBarnMap(Long dataSourceId, DoctorFarm farm){
+        List<DoctorBarn> barns = doctorBarnDao.findByFarmId(farm.getId());
         if(barns.isEmpty()){
             //throw new ServiceException("please init barn data first");
-            RespHelper.or500(doctorMoveDataService.moveBarn(dataSourceId));
-            barns = doctorBarnDao.findByFarmId(farmId);
+            RespHelper.or500(doctorMoveBasicService.moveBarn(dataSourceId, farm));
+            barns = doctorBarnDao.findByFarmId(farm.getId());
         }
         return barns.stream().collect(Collectors.toMap(DoctorBarn::getOutId, v -> v));
     }
