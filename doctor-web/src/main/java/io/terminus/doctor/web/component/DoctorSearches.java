@@ -429,10 +429,10 @@ public class DoctorSearches {
     }
 
     @RequestMapping(value = "/all", method = RequestMethod.GET)
-    public List<Long> getAllPigIds (@RequestParam Map<String, String> params,
-                                 @RequestParam String ids,
-                                 @RequestParam Integer searchType,
-                                 @RequestParam(required = false) Integer pigType) {
+    public List<Long> getAllPigIds (@RequestParam String ids,
+                                    @RequestParam Integer searchType,
+                                    @RequestParam(required = false) Integer pigType,
+                                    @RequestParam Map<String, String> params) {
 
         try {
             List<Long> excludePigIds = OBJECT_MAPPER.readValue(ids, JacksonType.LIST_OF_LONG);
@@ -444,6 +444,10 @@ public class DoctorSearches {
             if (pigType != null) {
                 params.put("pigType", pigType.toString());
             }
+            params.remove("ids");
+            params.remove("searchType");
+            params.put("pageNo", "1");
+            params.put("pageSize", String.valueOf(Integer.MAX_VALUE));
             Paging<SearchedPig> searchResultPaging = RespHelper.or500(pigSearchReadService.searchWithAggs(1, Integer.MAX_VALUE, "search/search.mustache", params)).getPigs();
             List<Long> allPigIds = FluentIterable.from(searchResultPaging.getData()).transform(new Function<SearchedPig, Long>() {
                 @Nullable
