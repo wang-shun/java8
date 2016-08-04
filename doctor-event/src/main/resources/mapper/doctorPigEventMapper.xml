@@ -228,7 +228,7 @@
         <where>
             <if test="farmId != null" >`farm_id` = #{farmId}</if>
             <if test="pigId != null" > AND `pig_id` = #{pigId}</if>
-            AND type = ${type} AND kind = ${kind}
+            AND type = #{type} AND kind = #{kind}
         </where>
         order by id DESC
         limit #{count},1
