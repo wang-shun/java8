@@ -75,7 +75,6 @@ import io.terminus.doctor.move.model.View_EventListSow;
 import io.terminus.doctor.move.model.View_GainCardList;
 import io.terminus.doctor.move.model.View_SowCardList;
 import io.terminus.doctor.user.model.DoctorFarm;
-import io.terminus.doctor.user.model.DoctorOrg;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -134,11 +133,11 @@ public class DoctorMoveDataService {
      * 迁移猪群
      */
     @Transactional
-    public void moveGroup(Long moveId, DoctorOrg org, DoctorFarm farm) {
+    public void moveGroup(Long moveId, DoctorFarm farm) {
         //0. 基础数据准备: barn, basic, subUser, changeReason, customer
         Map<String, DoctorBarn> barnMap = doctorMoveBasicService.getBarnMap(farm.getId());
         Map<Integer, Map<String, DoctorBasic>> basicMap = doctorMoveBasicService.getBasicMap();
-        Map<String, Long> subMap = doctorMoveBasicService.getSubMap(org.getId());
+        Map<String, Long> subMap = doctorMoveBasicService.getSubMap(farm.getOrgId());
         Map<String, DoctorChangeReason> changeReasonMap = doctorMoveBasicService.getReasonMap();
         Map<String, DoctorCustomer> customerMap = doctorMoveBasicService.getCustomerMap(farm.getId());
         Map<String, DoctorBasicMaterial> vaccMap = doctorMoveBasicService.getVaccMap();
@@ -147,7 +146,7 @@ public class DoctorMoveDataService {
         List<DoctorGroup> groups = RespHelper.orServEx(doctorMoveDatasourceHandler
                 .findByHbsSql(moveId, View_GainCardList.class, "DoctorGroup-GainCardList")).stream()
                 .filter(loc -> isFarm(loc.getFarmOutId(), farm.getOutId()))
-                .map(gain -> getGroup(org, farm, gain, barnMap, basicMap, subMap)).collect(Collectors.toList());
+                .map(gain -> getGroup(farm, gain, barnMap, basicMap, subMap)).collect(Collectors.toList());
         doctorGroupDao.creates(groups);
 
         //查出刚插入的group, key = outId, 查询猪, 为转种猪事件做准备
@@ -1407,12 +1406,12 @@ public class DoctorMoveDataService {
     }
 
     //拼接猪群
-    private DoctorGroup getGroup(DoctorOrg org, DoctorFarm farm, View_GainCardList gain,
-                                 Map<String, DoctorBarn> barnMap, Map<Integer, Map<String, DoctorBasic>> basicMap, Map<String, Long> subMap) {
+    private DoctorGroup getGroup(DoctorFarm farm, View_GainCardList gain, Map<String, DoctorBarn> barnMap,
+                                 Map<Integer, Map<String, DoctorBasic>> basicMap, Map<String, Long> subMap) {
         DoctorGroup group = BeanMapper.map(gain, DoctorGroup.class);
 
-        group.setOrgId(org.getId());
-        group.setOrgName(org.getName());
+        group.setOrgId(farm.getOrgId());
+        group.setOrgName(farm.getOrgName());
         group.setFarmId(farm.getId());
         group.setFarmName(farm.getName());
 

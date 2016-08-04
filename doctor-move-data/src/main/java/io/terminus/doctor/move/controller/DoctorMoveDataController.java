@@ -144,6 +144,12 @@ public class DoctorMoveDataController {
         }
     }
 
+    /**
+     * 迁移猪
+     * @param moveId 数据源id
+     * @param farmId 猪场id
+     * @return 是否成功
+     */
     public Boolean movePig(@RequestParam("moveId") Long moveId, @RequestParam("farmId") Long farmId) {
         try {
             DoctorFarm farm = doctorFarmDao.findById(farmId);
@@ -154,6 +160,26 @@ public class DoctorMoveDataController {
         } catch (Exception e) {
             // TODO: 16/8/4 失败了 删除之 
             log.error("move pig failed, moveId:{}, farmId:{}, cause:{}",
+                    moveId, farmId, Throwables.getStackTraceAsString(e));
+            return false;
+        }
+    }
+
+    /**
+     * 迁移猪群
+     * @param moveId 数据源id
+     * @param farmId 猪场id
+     * @return 是否成功
+     */
+    public Boolean moveGroup(@RequestParam("moveId") Long moveId, @RequestParam("farmId") Long farmId) {
+        try {
+            DoctorFarm farm = doctorFarmDao.findById(farmId);
+            log.warn("move group start, moveId:{}", moveId);
+            doctorMoveDataService.moveGroup(moveId, farm);
+            log.warn("move group end");
+            return true;
+        } catch (Exception e) {
+            log.error("move group failed, moveId:{}, farmId:{}, cause:{}",
                     moveId, farmId, Throwables.getStackTraceAsString(e));
             return false;
         }
