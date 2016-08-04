@@ -13,6 +13,7 @@ public class View_EventListSow implements Serializable {
     private static final long serialVersionUID = 8185298029467518284L;
     private String eventName;       // 转换事件的名称, 以适应新版的事件
     private String sowOutId;
+    private String farmOutId;
     private String pigCode;
     private String pigFatherCode;
     private String pigMotherCode;

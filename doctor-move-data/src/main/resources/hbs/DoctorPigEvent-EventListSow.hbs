@@ -18,6 +18,7 @@ FROM
         WHEN EventName = '妊娠检查' AND PregChkResult = '流产' THEN '流产'
         ELSE EventName END AS eventName,     -- 转换事件的名称, 以适应新版的事件
     OID AS sowOutId,
+    FarmOID AS farmOutId,
     PigID AS pigCode,
     PigFatherID AS pigFatherCode,
     PigMotherID AS pigMotherCode,
