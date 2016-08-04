@@ -75,8 +75,8 @@ public class UserInitService {
     public void init(String mobile, Long dataSourceId){
         List<View_FarmMember> list = getFarmMember(dataSourceId);
         List<DoctorFarm> farms = new ArrayList<>();
-        doctorMoveDatasourceHandler.findAllData(dataSourceId, View_FarmInfo.class, DoctorMoveTableEnum.view_FarmInfo).getResult().forEach(farmInfo -> {
-            if(farmInfo.getLevels() == 1){
+        RespHelper.or500(doctorMoveDatasourceHandler.findAllData(dataSourceId, View_FarmInfo.class, DoctorMoveTableEnum.view_FarmInfo)).forEach(farmInfo -> {
+            if (farmInfo.getLevels() == 1) {
                 farms.add(makeFarm(farmInfo));
             }
         });
@@ -236,7 +236,7 @@ public class UserInitService {
 
     private Map<String, Long> createSubRole(Long primaryUserId, Long dataSourceId){
         Map<String, Long> roleId = new HashMap<>(); // key = roleName, value = roleId
-        List<RoleTemplate> roleTemplates = doctorMoveDatasourceHandler.findAllData(dataSourceId, RoleTemplate.class, DoctorMoveTableEnum.RoleTemplate).getResult();
+        List<RoleTemplate> roleTemplates = RespHelper.or500(doctorMoveDatasourceHandler.findAllData(dataSourceId, RoleTemplate.class, DoctorMoveTableEnum.RoleTemplate));
 
         SubRole role = new SubRole();
         role.setAppKey("MOBILE");
