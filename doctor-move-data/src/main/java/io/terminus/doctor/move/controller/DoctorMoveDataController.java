@@ -123,17 +123,19 @@ public class DoctorMoveDataController {
         wareHouseInitService.init(mobile, moveId);
         log.warn("move warehouse end");
 
-        //4.迁移公猪母猪
+        //4.迁移公猪 母猪 工作流
         try {
             log.warn("move pig start, moveId:{}", moveId);
             doctorMoveDataService.movePig(moveId, farm);
-            // TODO: 16/8/8 workflow
             log.warn("move pig end");
         } catch (Exception e) {
             doctorMoveDataService.deleteAllPigs(farm.getId());
             log.error("move pig failed, moveId:{}, cause:{}", moveId, Throwables.getStackTraceAsString(e));
             throw new ServiceException("move.pig.error");
         }
+        log.warn("move workflow start");
+        doctorMoveDataService.moveWorkflow(farm);
+        log.warn("move workflow end");
 
         //5.迁移猪群
         log.warn("move group start, moveId:{}", moveId);
@@ -248,7 +250,10 @@ public class DoctorMoveDataController {
     @RequestMapping(value = "/workflow", method = RequestMethod.GET)
     public Boolean moveWorkflow(@RequestParam("farmId") Long farmId) {
         try {
-            // TODO: 16/8/8 待移植
+            DoctorFarm farm = doctorFarmDao.findById(farmId);
+            log.warn("move workflow start, farmId:{}", farmId);
+            doctorMoveDataService.moveWorkflow(farm);
+            log.warn("move workflow end");
             return true;
         } catch (Exception e) {
             log.error("move workflow failed, farmId:{}, cause:{}", farmId, Throwables.getStackTraceAsString(e));

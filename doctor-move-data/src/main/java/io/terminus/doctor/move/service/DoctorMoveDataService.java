@@ -65,7 +65,9 @@ import io.terminus.doctor.event.model.DoctorGroupTrack;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
+import io.terminus.doctor.event.service.DoctorPigReadService;
 import io.terminus.doctor.move.handler.DoctorMoveDatasourceHandler;
+import io.terminus.doctor.move.handler.DoctorMoveWorkflowHandler;
 import io.terminus.doctor.move.model.Proc_InventoryGain;
 import io.terminus.doctor.move.model.SowOutFarmSoon;
 import io.terminus.doctor.move.model.View_BoarCardList;
@@ -109,6 +111,8 @@ public class DoctorMoveDataService {
     private final DoctorPigTrackDao doctorPigTrackDao;
     private final DoctorPigEventDao doctorPigEventDao;
     private final DoctorMoveBasicService doctorMoveBasicService;
+    private final DoctorPigReadService doctorPigReadService;
+    private final DoctorMoveWorkflowHandler doctorMoveWorkflowHandler;
 
     @Autowired
     public DoctorMoveDataService(DoctorMoveDatasourceHandler doctorMoveDatasourceHandler,
@@ -118,7 +122,9 @@ public class DoctorMoveDataService {
                                  DoctorPigDao doctorPigDao,
                                  DoctorPigTrackDao doctorPigTrackDao,
                                  DoctorPigEventDao doctorPigEventDao,
-                                 DoctorMoveBasicService doctorMoveBasicService) {
+                                 DoctorMoveBasicService doctorMoveBasicService,
+                                 DoctorPigReadService doctorPigReadService,
+                                 DoctorMoveWorkflowHandler doctorMoveWorkflowHandler) {
         this.doctorMoveDatasourceHandler = doctorMoveDatasourceHandler;
         this.doctorGroupDao = doctorGroupDao;
         this.doctorGroupEventDao = doctorGroupEventDao;
@@ -127,6 +133,8 @@ public class DoctorMoveDataService {
         this.doctorPigTrackDao = doctorPigTrackDao;
         this.doctorPigEventDao = doctorPigEventDao;
         this.doctorMoveBasicService = doctorMoveBasicService;
+        this.doctorPigReadService = doctorPigReadService;
+        this.doctorMoveWorkflowHandler = doctorMoveWorkflowHandler;
     }
 
     //删除猪场所有猪相关的数据
@@ -134,6 +142,19 @@ public class DoctorMoveDataService {
         doctorPigDao.deleteByFarmId(farmId);
         doctorPigEventDao.deleteByFarmId(farmId);
         doctorPigTrackDao.deleteByFarmId(farmId);
+    }
+
+    /**
+     * 迁移母猪工作流
+     */
+    @Transactional
+    public void moveWorkflow(DoctorFarm farm) {
+        DoctorPig search = new DoctorPig();
+        search.setPigType(DoctorPig.PIG_TYPE.SOW.getKey());
+        search.setIsRemoval(IsOrNot.NO.getValue());
+        search.setFarmId(farm.getId());
+        doctorMoveWorkflowHandler.handle(RespHelper.orServEx(
+                doctorPigReadService.pagingDoctorInfoDtoByPig(search, 1, Integer.MAX_VALUE)).getData());
     }
 
     /**
