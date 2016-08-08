@@ -3,6 +3,7 @@ package io.terminus.doctor.move.service;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
 import io.terminus.common.exception.JsonResponseException;
+import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.Response;
 import io.terminus.common.utils.MapBuilder;
 import io.terminus.doctor.common.enums.UserStatus;
@@ -41,6 +42,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * Created by chenzenghui on 16/8/3.
@@ -74,6 +76,8 @@ public class UserInitService {
     @Transactional
     public void init(String mobile, Long dataSourceId){
         List<View_FarmMember> list = getFarmMember(dataSourceId);
+        checkFarmNameRepeat(list);
+
         List<DoctorFarm> farms = new ArrayList<>();
         RespHelper.or500(doctorMoveDatasourceHandler.findAllData(dataSourceId, View_FarmInfo.class, DoctorMoveTableEnum.view_FarmInfo)).forEach(farmInfo -> {
             if (farmInfo.getLevels() == 1) {
@@ -124,6 +128,16 @@ public class UserInitService {
 
     public List<View_FarmMember> getFarmMember(Long datasourceId) {
         return doctorMoveDatasourceHandler.findAllData(datasourceId, View_FarmMember.class, DoctorMoveTableEnum.view_FarmMember).getResult();
+    }
+
+    //校验猪场名称重复
+    private void checkFarmNameRepeat(List<View_FarmMember> farmList) {
+        List<String> farmNames = doctorFarmDao.listAll().stream().map(DoctorFarm::getName).collect(Collectors.toList());
+        for (View_FarmMember member : farmList) {
+            if (farmNames.contains(member.getFarmName())) {
+                throw new ServiceException("farm.name.repeat");
+            }
+        }
     }
 
     /**

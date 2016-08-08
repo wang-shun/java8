@@ -68,6 +68,7 @@ public class DoctorMoveDataController {
      * @param moveId 数据源id
      * @return 是否正常
      */
+    @RequestMapping(value = "/test", method = RequestMethod.GET)
     public Boolean testMoveIdConnect(@RequestParam("moveId") Long moveId) {
         try {
             return notEmpty(userInitService.getFarmMember(moveId));
