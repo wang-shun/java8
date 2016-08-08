@@ -36,7 +36,7 @@ public interface WorkFlowService {
     void doTimerSchedule();
 
     /**
-     *更新数据库数据
+     *更新数据库有关流程的表数据包含(workflow_process_instances,workflow_process_tracks,workflow_processes)三张表
      * @param flowDefinitionKey
      * @param businessId
      * @return

@@ -62,28 +62,10 @@ public class WorkFlowServiceImpl implements WorkFlowService {
                 if (businessId == null?flowInstance.getFlowDefinitionId() != flowDefinition.getId():flowInstance.getFlowDefinitionId() != flowDefinition.getId() && flowInstance.getBusinessId() == businessId) {
                     Long oldFlowDefinitionNodeId = flowQueryService.getFlowProcessQuery().flowInstanceId(flowInstance.getId()).single().getFlowDefinitionNodeId();
                     Long oldPreFlowDefinitionNodeId = Long.parseLong(flowQueryService.getFlowProcessQuery().flowInstanceId(flowInstance.getId()).single().getPreFlowDefinitionNodeId());
-                    Long lastFlowDefinitionNodeId = null;
-                    Long lastPreFlowDefinitionNodeId = null;
-                    FlowDefinitionNode flowDefinitionNode;
-
-                    if (map.containsKey(oldFlowDefinitionNodeId)) {
-                        lastFlowDefinitionNodeId = map.get(oldFlowDefinitionNodeId);
-                    } else {
-                       flowDefinitionNode = flowQueryService.getFlowDefinitionNodeQuery().getDefinitionNodeByName(flowDefinition.getId(), flowQueryService.getFlowDefinitionNodeQuery().id(oldFlowDefinitionNodeId).single().getName());
-                        if (flowDefinitionNode != null)
-                            lastFlowDefinitionNodeId = flowDefinitionNode.getId();
-                        map.put(oldFlowDefinitionNodeId, lastFlowDefinitionNodeId);
-                    }
-
-                    if (map.containsKey(oldPreFlowDefinitionNodeId)) {
-                        lastPreFlowDefinitionNodeId = map.get(oldPreFlowDefinitionNodeId);
-                    } else {
-                        flowDefinitionNode = flowQueryService.getFlowDefinitionNodeQuery().getDefinitionNodeByName(flowDefinition.getId(), flowQueryService.getFlowDefinitionNodeQuery().id(oldPreFlowDefinitionNodeId).single().getName());
-                        if(flowDefinitionNode != null)
-                            lastPreFlowDefinitionNodeId = flowDefinitionNode.getId();
-                        map.put(oldPreFlowDefinitionNodeId, lastPreFlowDefinitionNodeId);
-                    }
-
+                    Long lastFlowDefinitionNodeId;
+                    Long lastPreFlowDefinitionNodeId;
+                    lastFlowDefinitionNodeId = getLastNodeId(map, oldFlowDefinitionNodeId, flowQueryService, flowDefinition);
+                    lastPreFlowDefinitionNodeId = getLastNodeId(map, oldPreFlowDefinitionNodeId, flowQueryService, flowDefinition);
                     FlowProcess flowProcess = flowQueryService.getFlowProcessQuery().flowInstanceId(flowInstance.getId()).single();
                     if (lastFlowDefinitionNodeId !=null)
                     flowProcess.setFlowDefinitionNodeId(lastFlowDefinitionNodeId);
@@ -93,6 +75,8 @@ public class WorkFlowServiceImpl implements WorkFlowService {
                     List<FlowProcessTrack> flowProcessTracks = flowQueryService.getFlowProcessTrackQuery().flowInstanceId(flowInstance.getId()).list();
                     for (FlowProcessTrack flowProcessTrack: flowProcessTracks
                          ) {
+                        lastFlowDefinitionNodeId = getLastNodeId(map, flowProcessTrack.getFlowDefinitionNodeId(), flowQueryService, flowDefinition);
+                        lastPreFlowDefinitionNodeId = getLastNodeId(map, Long.parseLong(flowProcessTrack.getPreFlowDefinitionNodeId()), flowQueryService, flowDefinition);
                         if (lastFlowDefinitionNodeId !=null)
                         flowProcessTrack.setFlowDefinitionNodeId(lastFlowDefinitionNodeId);
                         if (lastPreFlowDefinitionNodeId != null )
@@ -117,4 +101,19 @@ public class WorkFlowServiceImpl implements WorkFlowService {
         return workFlowEngine.buildJdbcAccess();
     }
 
+    private Long getLastNodeId(Map<Long, Long > map, Long oldFlowDefinitionNodeId, FlowQueryService flowQueryService, FlowDefinition flowDefinition){
+        Long lastFlowDefinitionNodeId = null;
+        FlowDefinitionNode flowDefinitionNode;
+        if (map.containsKey(oldFlowDefinitionNodeId)) {
+            lastFlowDefinitionNodeId = map.get(oldFlowDefinitionNodeId);
+        } else {
+            if (oldFlowDefinitionNodeId != -1) {
+                flowDefinitionNode = flowQueryService.getFlowDefinitionNodeQuery().getDefinitionNodeByName(flowDefinition.getId(), flowQueryService.getFlowDefinitionNodeQuery().id(oldFlowDefinitionNodeId).single().getName());
+                if (flowDefinitionNode != null)
+                    lastFlowDefinitionNodeId = flowDefinitionNode.getId();
+            }
+            map.put(oldFlowDefinitionNodeId, lastFlowDefinitionNodeId);
+        }
+        return lastFlowDefinitionNodeId;
+    }
 }
