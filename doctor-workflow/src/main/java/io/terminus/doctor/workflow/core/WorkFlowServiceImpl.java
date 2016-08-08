@@ -55,6 +55,12 @@ public class WorkFlowServiceImpl implements WorkFlowService {
         try {
             FlowQueryService flowQueryService = getFlowQueryService();
             Map<Long, Long> map = Maps.newHashMap();
+            Map<Long, String> flowDefinitionNodeCacheMap = Maps.newHashMap();
+            List<FlowDefinitionNode> flowDefinitionNodes = flowQueryService.getFlowDefinitionNodeQuery().list();
+            flowDefinitionNodes.forEach(flowDefinitionNode -> {
+                flowDefinitionNodeCacheMap.put(flowDefinitionNode.getId(),flowDefinitionNode.getName());
+            });
+
             FlowDefinition flowDefinition = flowQueryService.getFlowDefinitionQuery().getLatestDefinitionByKey(flowDefinitionKey);
             List<FlowInstance> flowInstanceList = flowQueryService.getFlowInstanceQuery().flowDefinitionKey(flowDefinitionKey).list();
             for (FlowInstance flowInstance : flowInstanceList
@@ -64,8 +70,8 @@ public class WorkFlowServiceImpl implements WorkFlowService {
                     Long oldPreFlowDefinitionNodeId = Long.parseLong(flowQueryService.getFlowProcessQuery().flowInstanceId(flowInstance.getId()).single().getPreFlowDefinitionNodeId());
                     Long lastFlowDefinitionNodeId;
                     Long lastPreFlowDefinitionNodeId;
-                    lastFlowDefinitionNodeId = getLastNodeId(map, oldFlowDefinitionNodeId, flowQueryService, flowDefinition);
-                    lastPreFlowDefinitionNodeId = getLastNodeId(map, oldPreFlowDefinitionNodeId, flowQueryService, flowDefinition);
+                    lastFlowDefinitionNodeId = getLastNodeId(map, oldFlowDefinitionNodeId, flowQueryService, flowDefinition, flowDefinitionNodeCacheMap);
+                    lastPreFlowDefinitionNodeId = getLastNodeId(map, oldPreFlowDefinitionNodeId, flowQueryService, flowDefinition, flowDefinitionNodeCacheMap);
                     FlowProcess flowProcess = flowQueryService.getFlowProcessQuery().flowInstanceId(flowInstance.getId()).single();
                     if (lastFlowDefinitionNodeId !=null)
                     flowProcess.setFlowDefinitionNodeId(lastFlowDefinitionNodeId);
@@ -75,8 +81,8 @@ public class WorkFlowServiceImpl implements WorkFlowService {
                     List<FlowProcessTrack> flowProcessTracks = flowQueryService.getFlowProcessTrackQuery().flowInstanceId(flowInstance.getId()).list();
                     for (FlowProcessTrack flowProcessTrack: flowProcessTracks
                          ) {
-                        lastFlowDefinitionNodeId = getLastNodeId(map, flowProcessTrack.getFlowDefinitionNodeId(), flowQueryService, flowDefinition);
-                        lastPreFlowDefinitionNodeId = getLastNodeId(map, Long.parseLong(flowProcessTrack.getPreFlowDefinitionNodeId()), flowQueryService, flowDefinition);
+                        lastFlowDefinitionNodeId = getLastNodeId(map, flowProcessTrack.getFlowDefinitionNodeId(), flowQueryService, flowDefinition, flowDefinitionNodeCacheMap);
+                        lastPreFlowDefinitionNodeId = getLastNodeId(map, Long.parseLong(flowProcessTrack.getPreFlowDefinitionNodeId()), flowQueryService, flowDefinition, flowDefinitionNodeCacheMap);
                         if (lastFlowDefinitionNodeId !=null)
                         flowProcessTrack.setFlowDefinitionNodeId(lastFlowDefinitionNodeId);
                         if (lastPreFlowDefinitionNodeId != null )
@@ -101,14 +107,14 @@ public class WorkFlowServiceImpl implements WorkFlowService {
         return workFlowEngine.buildJdbcAccess();
     }
 
-    private Long getLastNodeId(Map<Long, Long > map, Long oldFlowDefinitionNodeId, FlowQueryService flowQueryService, FlowDefinition flowDefinition){
+    private Long getLastNodeId(Map<Long, Long > map, Long oldFlowDefinitionNodeId, FlowQueryService flowQueryService, FlowDefinition flowDefinition, Map<Long, String> flowDefinitionNodeCacheMap){
         Long lastFlowDefinitionNodeId = null;
         FlowDefinitionNode flowDefinitionNode;
         if (map.containsKey(oldFlowDefinitionNodeId)) {
             lastFlowDefinitionNodeId = map.get(oldFlowDefinitionNodeId);
         } else {
             if (oldFlowDefinitionNodeId != -1) {
-                flowDefinitionNode = flowQueryService.getFlowDefinitionNodeQuery().getDefinitionNodeByName(flowDefinition.getId(), flowQueryService.getFlowDefinitionNodeQuery().id(oldFlowDefinitionNodeId).single().getName());
+                flowDefinitionNode = flowQueryService.getFlowDefinitionNodeQuery().getDefinitionNodeByName(flowDefinition.getId(), flowDefinitionNodeCacheMap.get(oldFlowDefinitionNodeId));
                 if (flowDefinitionNode != null)
                     lastFlowDefinitionNodeId = flowDefinitionNode.getId();
             }
