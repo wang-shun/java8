@@ -259,6 +259,18 @@ public class DoctorMoveDataService {
                 .filter(Arguments::notNull)
                 .collect(Collectors.toList());
         doctorPigTrackDao.creates(sowTracks);
+
+        //4. 更新公猪的全部配种次数
+        updateBoarCurrentParity(sowEvents);
+    }
+
+    //更新公猪的配种数(根据配种事件)
+    private void updateBoarCurrentParity(List<DoctorPigEvent> sowEvents) {
+        sowEvents.stream()
+                .filter(e -> Objects.equals(e.getType(), PigEvent.MATING.getKey()))
+                .map(m -> JSON_MAPPER.fromJson(m.getExtra(), DoctorMatingDto.class))
+                .collect(Collectors.groupingBy(DoctorMatingDto::getMatingBoarPigId))
+                .forEach((k, v) -> doctorPigTrackDao.updateBoarCurrentParity(k, v.size()));
     }
 
     //拼接母猪
@@ -581,7 +593,7 @@ public class DoctorMoveDataService {
         return wean;
     }
 
-    //拼接拼窝事件extra // TODO: 16/8/2 拼窝母猪id
+    //拼接拼窝事件extra
     private DoctorFostersDto getSowFosterExtra(View_EventListSow event, Map<Integer, Map<String, DoctorBasic>> basicMap) {
         DoctorFostersDto foster = new DoctorFostersDto();
         foster.setFostersDate(event.getEventAt());   // 拼窝日期
@@ -656,8 +668,11 @@ public class DoctorMoveDataService {
         track.setIsRemoval(sow.getIsRemoval());
         track.setWeight(card.getWeight());
         track.setOutFarmDate(DateUtil.toDate(card.getOutFarmDate()));
-        track.setCurrentParity(card.getCurrentParity());
         track.setRemark(card.getRemark());
+        track.setCurrentParity(card.getCurrentParity());
+
+        //母猪当前配种次数
+        track.setCurrentMatingCount(getSowCurrentMatingCount());
 
         if (notEmpty(events)) {
             //按照时间 asc 排序
@@ -673,6 +688,10 @@ public class DoctorMoveDataService {
             track.setCurrentBarnName(barn.getName());
         }
         return track;
+    }
+
+    private Integer getSowCurrentMatingCount() {
+        return 0;
     }
 
     //获取即将离场的母猪状态
@@ -995,8 +1014,6 @@ public class DoctorMoveDataService {
         track.setWeight(card.getWeight());
         track.setOutFarmDate(DateUtil.toDate(card.getOutFarmDate()));
         track.setRemark(card.getRemark());
-        
-        //track.setCurrentParity(null);  // TODO: 16/8/1 公猪的胎次如何获取?
 
         if (notEmpty(events)) {
             //按照时间 asc 排序

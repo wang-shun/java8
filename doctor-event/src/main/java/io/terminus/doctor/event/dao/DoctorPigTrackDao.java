@@ -19,6 +19,15 @@ import java.util.List;
 @Repository
 public class DoctorPigTrackDao extends MyBatisDao<DoctorPigTrack>{
 
+    /**
+     * 更新公猪的当前配种次数
+     * @param boarId  公猪id
+     * @param currentParity  当前配种次数
+     */
+    public void updateBoarCurrentParity(Long boarId, Integer currentParity) {
+        getSqlSession().update(sqlId("updateBoarCurrentParity"), ImmutableMap.of("boarId", boarId, "currentParity", currentParity));
+    }
+
     public void deleteByFarmId(Long farmId) {
         getSqlSession().delete(sqlId("deleteByFarmId"), farmId);
     }

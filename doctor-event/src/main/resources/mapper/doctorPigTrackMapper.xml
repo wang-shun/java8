@@ -225,4 +225,10 @@
         DELETE FROM <include refid="tb"/>
         WHERE farm_id=#{farmId}
     </delete>
+
+    <update id="updateBoarCurrentParity" parameterType="map">
+        UPDATE <include refid="tb"/>
+        SET current_parity = #{currentParity}
+        WHERE pig_id = #{boarId}
+    </update>
 </mapper>
