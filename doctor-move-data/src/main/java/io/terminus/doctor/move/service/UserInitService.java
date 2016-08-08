@@ -132,7 +132,7 @@ public class UserInitService {
 
     //校验猪场名称重复
     private void checkFarmNameRepeat(List<View_FarmMember> farmList) {
-        List<String> farmNames = doctorFarmDao.listAll().stream().map(DoctorFarm::getName).collect(Collectors.toList());
+        List<String> farmNames = doctorFarmDao.findAll().stream().map(DoctorFarm::getName).collect(Collectors.toList());
         for (View_FarmMember member : farmList) {
             if (farmNames.contains(member.getFarmName())) {
                 throw new ServiceException("farm.name.repeat");
