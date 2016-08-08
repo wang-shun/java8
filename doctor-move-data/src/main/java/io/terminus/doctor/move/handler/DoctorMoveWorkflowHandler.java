@@ -17,7 +17,6 @@ import io.terminus.doctor.workflow.model.FlowProcess;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.PostConstruct;
@@ -73,24 +72,24 @@ public class DoctorMoveWorkflowHandler {
                 .getDefinitionNodes(flowDefinition.getId())
                 .stream()
                 .collect(Collectors.toMap(FlowDefinitionNode::getName, v -> v));
-        nodesMapById = workFlowService.getFlowQueryService().getFlowDefinitionNodeQuery()
+        /*nodesMapById = workFlowService.getFlowQueryService().getFlowDefinitionNodeQuery()
                 .getDefinitionNodes(flowDefinition.getId())
                 .stream()
-                .collect(Collectors.toMap(FlowDefinitionNode::getId, v -> v));
+                .collect(Collectors.toMap(FlowDefinitionNode::getId, v -> v));*/
         // 流程事件连线缓存
-        eventsMapByValue = workFlowService.getFlowQueryService().getFlowDefinitionNodeEventQuery()
+        workFlowService.getFlowQueryService().getFlowDefinitionNodeEventQuery()
                 .getNodeEvents(flowDefinition.getId())
                 .stream()
                 .filter(event -> StringUtils.isNoneBlank(event.getValue()))
-                .collect(Collectors.toMap(k -> Integer.parseInt(k.getValue()), v -> v));
-        eventsMapBySourceId = workFlowService.getFlowQueryService().getFlowDefinitionNodeQuery()
+                .forEach(event -> eventsMapByValue.put(Integer.parseInt(event.getValue()), event));
+        /*eventsMapBySourceId = workFlowService.getFlowQueryService().getFlowDefinitionNodeQuery()
                 .getDefinitionNodes(flowDefinition.getId())
                 .stream()
                 .collect(Collectors.toMap(
                         FlowDefinitionNode::getId,
                         v -> workFlowService.getFlowQueryService().getFlowDefinitionNodeEventQuery()
                                 .getNodeEventsBySourceId(flowDefinition.getId(), v.getId())
-                ));
+                ));*/
     }
 
 
@@ -116,7 +115,7 @@ public class DoctorMoveWorkflowHandler {
             // 2. 获取猪最新的一次事件类型, 获取下一个节点对象
             DoctorPigEvent pigEvent = doctorPigEventDao.queryLastPigEventById(pig.getPigId());
             Integer type = pigEvent.getType();
-            FlowDefinitionNode sourceNode = nodesMapById.get(eventsMapByValue.get(type).getSourceNodeId());
+            FlowDefinitionNode sourceNode = nodesMapById.get(eventsMapByValue.get(type).getSourceNodeId()); // 可能存在多个, 随机一个(无所谓)
             FlowDefinitionNode targetNode = nodesMapById.get(eventsMapByValue.get(type).getTargetNodeId());
 
             // 2.1 如果 Task 节点
