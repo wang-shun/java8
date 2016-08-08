@@ -396,6 +396,9 @@ public class MybatisAccess implements JdbcAccess {
     }
 
     @Override
+    public void updateFlowProcessTrack(FlowProcessTrack flowProcessTrack) { flowProcessTrackDao.update(flowProcessTrack); }
+
+    @Override
     public List<FlowProcessTrack> findFlowProcessTracks(FlowProcessTrack flowProcessTrack) {
         return flowProcessTrackDao.list(flowProcessTrack);
     }

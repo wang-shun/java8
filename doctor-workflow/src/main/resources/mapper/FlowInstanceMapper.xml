@@ -92,7 +92,7 @@
     <sql id="criteria">
         <where>
             <if test="id != null">AND `id` = #{id}</if>
-            <if test="name != null">AND `name` LIKE CONCAT('%',#{name},'%')</if>
+            <if test="name != null">AND `name` = #{name}</if>
             <if test="flowDefinitionId != null">AND `flow_definition_id` = #{flowDefinitionId}</if>
             <if test="flowDefinitionKey != null">AND `flow_definition_key` = #{flowDefinitionKey}</if>
             <if test="businessId != null">AND `business_id` = #{businessId}</if>
