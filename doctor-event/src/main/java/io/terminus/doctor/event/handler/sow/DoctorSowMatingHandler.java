@@ -56,7 +56,9 @@ public class DoctorSowMatingHandler extends DoctorAbstractEventFlowHandler{
     public DoctorPigTrack updateDoctorPigTrackInfo(Execution execution, DoctorPigTrack doctorPigTrack, DoctorBasicInputInfoDto basic, Map<String, Object> extra, Map<String,Object> context) {
         // validate extra 配种日期信息
         DateTime matingDate = new DateTime(Long.valueOf(extra.get("matingDate").toString()));
-        extra.put("judgePregDate", matingDate.plusDays(114).toDate());
+        if (doctorPigTrack.getCurrentMatingCount() == 0) {
+            extra.put("judgePregDate", matingDate.plusDays(MATING_PREG_DAYS).toDate());
+        }
 //        DateTime judgePregDate = new DateTime(Long.valueOf(extra.get("judgePregDate").toString()));
 //        checkState(Objects.equals(Days.daysBetween(matingDate, judgePregDate).getDays(), 114), "input.judgePregDate.error");
 
