@@ -165,7 +165,7 @@ public class MybatisAccess implements JdbcAccess {
     public FlowDefinitionNode findFlowDefinitionNodeSingle(Map criteria) {
         List<FlowDefinitionNode> flowDefinitionNodes = findFlowDefinitionNodes(criteria);
         if(flowDefinitionNodes != null && flowDefinitionNodes.size() > 1) {
-            AssertHelper.throwException("查询唯一流程节点的数量大于 1, 当前数量为:{}, {}", flowDefinitionNodes.size(), criteria);
+            AssertHelper.throwException("查询唯一流程节点的数量大于 1, 当前数量为:{}, {}", flowDefinitionNodes.size());
         }
         if(flowDefinitionNodes != null && flowDefinitionNodes.size() == 1) {
             return flowDefinitionNodes.get(0);
