@@ -18,7 +18,7 @@ CREATE TABLE `parana_users` (
   UNIQUE KEY idx_users_name(name),
   UNIQUE KEY idx_users_email(email),
   UNIQUE KEY idx_users_mobile(mobile)
-) COMMENT='用户表';
+) ENGINE=InnoDB AUTO_INCREMENT=1001 DEFAULT CHARSET=utf8 COMMENT='用户表';
 
 -- 用户详情表: parana_user_profiles
 CREATE TABLE `parana_user_profiles` (
