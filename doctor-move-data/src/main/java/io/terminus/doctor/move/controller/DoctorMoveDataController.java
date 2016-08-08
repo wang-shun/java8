@@ -126,6 +126,7 @@ public class DoctorMoveDataController {
         try {
             log.warn("move pig start, moveId:{}", moveId);
             doctorMoveDataService.movePig(moveId, farm);
+            // TODO: 16/8/8 workflow
             log.warn("move pig end");
         } catch (Exception e) {
             doctorMoveDataService.deleteAllPigs(farm.getId());
@@ -239,6 +240,17 @@ public class DoctorMoveDataController {
         } catch (Exception e) {
             log.error("move group failed, moveId:{}, farmId:{}, cause:{}",
                     moveId, farmId, Throwables.getStackTraceAsString(e));
+            return false;
+        }
+    }
+
+    @RequestMapping(value = "/workflow", method = RequestMethod.GET)
+    public Boolean moveWorkflow(@RequestParam("farmId") Long farmId) {
+        try {
+            // TODO: 16/8/8 待移植
+            return true;
+        } catch (Exception e) {
+            log.error("move workflow failed, farmId:{}, cause:{}", farmId, Throwables.getStackTraceAsString(e));
             return false;
         }
     }
