@@ -301,14 +301,15 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
         }
     }
 
-    //校验能否转入此舍(产房 => 产房/保育舍，保育舍 => 保育舍/育肥舍/育种舍，同类型可以互转)
+    //校验能否转入此舍(产房 => 产房(分娩母猪舍)/保育舍，保育舍 => 保育舍/育肥舍/育种舍，同类型可以互转)
     protected void checkCanTransBarn(Integer pigType, Long barnId) {
         Integer barnType = RespHelper.orServEx(doctorBarnReadService.findBarnById(barnId)).getPigType();
 
-        //产房 => 产房/保育舍
+        //产房 => 产房(分娩母猪舍)/保育舍
         if (Objects.equals(pigType, PigType.FARROW_PIGLET.getValue()) &&
                 !(Objects.equals(barnType, PigType.NURSERY_PIGLET.getValue()) ||
-                        Objects.equals(barnType, PigType.FARROW_PIGLET.getValue()))) {
+                        Objects.equals(barnType, PigType.FARROW_PIGLET.getValue()) ||
+                                Objects.equals(barnType, PigType.DELIVER_SOW.getValue()))) {
             throw new ServiceException("group.only.trans.farrow");
         }
 
