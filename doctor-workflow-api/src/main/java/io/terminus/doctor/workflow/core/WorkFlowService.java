@@ -1,5 +1,6 @@
 package io.terminus.doctor.workflow.core;
 
+import io.terminus.common.model.Response;
 import io.terminus.doctor.workflow.service.FlowDefinitionService;
 import io.terminus.doctor.workflow.service.FlowProcessService;
 import io.terminus.doctor.workflow.service.FlowQueryService;
@@ -33,4 +34,12 @@ public interface WorkFlowService {
      * 执行定时Task任务, 此方法供job模块运行
      */
     void doTimerSchedule();
+
+    /**
+     *更新数据库数据
+     * @param flowDefinitionKey
+     * @param businessId
+     * @return
+     */
+    Response<Boolean> updateData(String flowDefinitionKey, Long businessId);
 }

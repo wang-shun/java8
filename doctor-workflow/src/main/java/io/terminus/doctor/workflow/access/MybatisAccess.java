@@ -165,7 +165,7 @@ public class MybatisAccess implements JdbcAccess {
     public FlowDefinitionNode findFlowDefinitionNodeSingle(Map criteria) {
         List<FlowDefinitionNode> flowDefinitionNodes = findFlowDefinitionNodes(criteria);
         if(flowDefinitionNodes != null && flowDefinitionNodes.size() > 1) {
-            AssertHelper.throwException("查询唯一流程节点的数量大于 1, 当前数量为:{}", flowDefinitionNodes.size());
+            AssertHelper.throwException("查询唯一流程节点的数量大于 1, 当前数量为:{}, {}", flowDefinitionNodes.size(), criteria);
         }
         if(flowDefinitionNodes != null && flowDefinitionNodes.size() == 1) {
             return flowDefinitionNodes.get(0);
@@ -394,6 +394,9 @@ public class MybatisAccess implements JdbcAccess {
     public void deleteFlowProcessTrack(List<Long> flowProcessTrackIds) {
         flowProcessTrackDao.deletes(flowProcessTrackIds);
     }
+
+    @Override
+    public void updateFlowProcessTrack(FlowProcessTrack flowProcessTrack) { flowProcessTrackDao.update(flowProcessTrack); }
 
     @Override
     public List<FlowProcessTrack> findFlowProcessTracks(FlowProcessTrack flowProcessTrack) {
