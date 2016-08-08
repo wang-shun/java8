@@ -5,7 +5,6 @@ import io.terminus.doctor.event.dao.DoctorPigDao;
 import io.terminus.doctor.event.dao.DoctorPigTrackDao;
 import io.terminus.doctor.event.dto.DoctorPigInfoDto;
 import io.terminus.doctor.event.enums.IsOrNot;
-import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.move.handler.DoctorMoveWorkflowHandler;
@@ -17,7 +16,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -63,7 +61,7 @@ public class workflows {
             List<DoctorPigInfoDto> pigInfoDtos = doctorPigs.stream().map(s -> DoctorPigInfoDto.buildDoctorPigInfoDto(s, doctorPigTrackMap.get(s.getId()))).collect(Collectors.toList());
 
             // 迭代处理
-            doctorMoveWorkflowHandler.handle(pigInfoDtos.stream().filter(pig -> !Objects.equals(pig.getStatus(), PigStatus.Removal.getKey())).collect(Collectors.toList()));
+            doctorMoveWorkflowHandler.handle(pigInfoDtos);
 
             // 页数 +1
             pageNo++;
