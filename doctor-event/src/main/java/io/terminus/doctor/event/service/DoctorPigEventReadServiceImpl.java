@@ -17,6 +17,7 @@ import io.terminus.doctor.event.dao.DoctorPigEventDao;
 import io.terminus.doctor.event.dao.DoctorPigTrackDao;
 import io.terminus.doctor.event.dto.DoctorSowParityCount;
 import io.terminus.doctor.event.enums.FarrowingType;
+import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.enums.MatingType;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PigStatus;
@@ -96,12 +97,14 @@ public class DoctorPigEventReadServiceImpl implements DoctorPigEventReadService 
             criteria.put("endDate", endDate);
             criteria.put("ordered", 0);
             Paging<DoctorPigEvent> doctorPigEventPaging = doctorPigEventDao.paging(pageInfo.getOffset(),pageInfo.getLimit(), criteria);
+
             for (DoctorPigEvent doctorPigEvent : doctorPigEventPaging.getData()) {
                 Map<String,Object> extraMap = doctorPigEvent.getExtraMap();
                 if (extraMap != null) {
                     Integer matingType = (Integer) extraMap.get("matingType");
                     Integer checkResult = (Integer) extraMap.get("checkResult");
                     Integer farrowingType = (Integer) extraMap.get("farrowingType");
+                    Integer farrowIsSingleManager = (Integer) extraMap.get("farrowIsSingleManager");
                     if (matingType != null) {
                         extraMap.put("matingType", MatingType.from(matingType).getDesc());
                     }
@@ -110,6 +113,9 @@ public class DoctorPigEventReadServiceImpl implements DoctorPigEventReadService 
                     }
                     if (farrowingType != null) {
                         extraMap.put("farrowingType", FarrowingType.from(farrowingType).getDesc());
+                    }
+                    if (farrowIsSingleManager != null) {
+                        extraMap.put("farrowIsSingleManager", (farrowIsSingleManager == 1) ? IsOrNot.YES.getDesc() : IsOrNot.NO.getDesc());
                     }
                 }
             }
