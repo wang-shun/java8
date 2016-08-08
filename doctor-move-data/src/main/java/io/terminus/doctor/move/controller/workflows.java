@@ -4,6 +4,7 @@ import io.terminus.common.model.PageInfo;
 import io.terminus.doctor.event.dao.DoctorPigDao;
 import io.terminus.doctor.event.dao.DoctorPigTrackDao;
 import io.terminus.doctor.event.dto.DoctorPigInfoDto;
+import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigTrack;
@@ -11,6 +12,7 @@ import io.terminus.doctor.move.handler.DoctorMoveWorkflowHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -39,7 +41,7 @@ public class workflows {
     private DoctorMoveWorkflowHandler doctorMoveWorkflowHandler;
 
     @RequestMapping(value = "/workflow", method = RequestMethod.GET)
-    public Boolean importData() {
+    public Boolean importData(@RequestParam(required = false) Long farmId) {
 
         // 批量获取Sow Pigs进行处理
         Integer pageNo = 1;
@@ -47,6 +49,10 @@ public class workflows {
         PageInfo pageInfo = new PageInfo(pageNo, pageSize);
         DoctorPig doctorPig = DoctorPig.builder().build();
         doctorPig.setPigType(DoctorPig.PIG_TYPE.SOW.getKey());
+        doctorPig.setIsRemoval(IsOrNot.NO.getValue());
+        if (farmId != null) {
+            doctorPig.setFarmId(farmId);
+        }
 
         // 处理 母猪
         List<DoctorPig> doctorPigs = doctorPigDao.paging(pageInfo.getOffset(), pageInfo.getLimit(), doctorPig).getData();
