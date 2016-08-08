@@ -1,5 +1,6 @@
 package io.terminus.doctor.move.handler;
 
+import com.google.common.collect.ImmutableList;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.event.dao.DoctorPigEventDao;
 import io.terminus.doctor.event.dao.DoctorPigSnapshotDao;
@@ -17,7 +18,6 @@ import io.terminus.doctor.workflow.model.FlowProcess;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.PostConstruct;
@@ -114,7 +114,9 @@ public class DoctorMoveWorkflowHandler {
             jdbcAccess.createFlowInstance(flowInstance);
 
             // 2. 获取猪最新的一次事件类型, 获取下一个节点对象
-            DoctorPigEvent pigEvent = doctorPigEventDao.queryLastPigEventById(pig.getPigId());
+            // DoctorPigEvent pigEvent = doctorPigEventDao.queryLastPigEventById(pig.getPigId());
+            DoctorPigEvent pigEvent = doctorPigEventDao.queryLastPigEventInWorkflow(pig.getPigId(),
+                    ImmutableList.of(9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19));
             Integer type = pigEvent.getType();
             FlowDefinitionNode sourceNode = nodesMapById.get(eventsMapByValue.get(type).getSourceNodeId());
             FlowDefinitionNode targetNode = nodesMapById.get(eventsMapByValue.get(type).getTargetNodeId());
