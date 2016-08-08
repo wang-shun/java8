@@ -671,14 +671,15 @@ public class DoctorMoveDataService {
         track.setRemark(card.getRemark());
         track.setCurrentParity(card.getCurrentParity());
 
-        //母猪当前配种次数
-        track.setCurrentMatingCount(getSowCurrentMatingCount());
-
         if (notEmpty(events)) {
             //按照时间 asc 排序
             events = events.stream().sorted((a, b) -> a.getEventAt().compareTo(b.getEventAt())).collect(Collectors.toList());
-            track.setExtra(events.get(events.size() - 1).getExtra());   //extra字段保存最后一次event的extra
+            DoctorPigEvent lastEvent = events.get(events.size() - 1);
+            track.setExtra(lastEvent.getExtra());   //extra字段保存最后一次event的extra
             track.setRelEventIds(Joiners.COMMA.join(events.stream().map(DoctorPigEvent::getId).collect(Collectors.toList()))); //关联事件ids, 逗号分隔
+
+            //母猪当前配种次数
+            track.setCurrentMatingCount(getSowCurrentMatingCount(events, sow));
         }
 
         //猪舍
@@ -690,8 +691,34 @@ public class DoctorMoveDataService {
         return track;
     }
 
-    private Integer getSowCurrentMatingCount() {
-        return 0;
+    //母猪的当前配种次数(初配, 复配等等)
+    private static int getSowCurrentMatingCount(List<DoctorPigEvent> events, DoctorPig sow) {
+        //离场的都置成0
+        if (Objects.equals(sow.getIsRemoval(), IsOrNot.YES.getValue())) {
+            return 0;
+        }
+
+        //未离场的重新从头判断下母猪的当前配种次数
+        int count = 0;
+        for (DoctorPigEvent event : events) {
+            if (Objects.equals(event.getType(), PigEvent.MATING.getKey())) {
+                count ++;
+            }
+            else if (Objects.equals(event.getType(), PigEvent.TO_MATING.getKey()) || isNotPreg(event) ||
+                    Objects.equals(event.getType(), PigEvent.ABORTION.getKey())) {
+                count = 0;
+            }
+        }
+        return count;
+    }
+
+    //判断妊娠检查结果
+    private static boolean isNotPreg(DoctorPigEvent event) {
+        if (!Objects.equals(event.getType(), PigEvent.PREG_CHECK.getKey())) {
+            return false;
+        }
+        DoctorPregChkResultDto result = JSON_MAPPER.fromJson(event.getExtra(), DoctorPregChkResultDto.class);
+        return result != null && !Objects.equals(result.getCheckResult(), PregCheckResult.YANG.getKey());
     }
 
     //获取即将离场的母猪状态
