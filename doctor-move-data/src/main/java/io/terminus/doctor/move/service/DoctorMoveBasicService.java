@@ -109,7 +109,7 @@ public class DoctorMoveBasicService {
 
             //把过滤的结果放到doctor_basics里,(过滤变动类型是转出的)
             fieldValues.stream()
-                    .filter(field -> !basicNames.contains(field.getFieldText()) ||
+                    .filter(field -> !basicNames.contains(field.getFieldText()) &&
                             !("变动类型".equals(field.getTypeId()) && "转出".equals(field.getFieldText())))
                     .forEach(fn -> doctorBasicDao.create(getBasic(fn)));
         }
