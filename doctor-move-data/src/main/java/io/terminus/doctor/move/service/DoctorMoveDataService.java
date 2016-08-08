@@ -290,6 +290,7 @@ public class DoctorMoveDataService {
         sowEvents.stream()
                 .filter(e -> Objects.equals(e.getType(), PigEvent.MATING.getKey()))
                 .map(m -> JSON_MAPPER.fromJson(m.getExtra(), DoctorMatingDto.class))
+                .filter(p -> p != null && p.getMatingBoarPigId() != null)
                 .collect(Collectors.groupingBy(DoctorMatingDto::getMatingBoarPigId))
                 .forEach((k, v) -> doctorPigTrackDao.updateBoarCurrentParity(k, v.size()));
     }
