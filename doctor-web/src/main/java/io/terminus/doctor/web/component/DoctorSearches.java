@@ -1,6 +1,7 @@
 package io.terminus.doctor.web.component;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.api.client.util.Lists;
 import com.google.common.base.Function;
 import com.google.common.collect.FluentIterable;
 import io.terminus.common.exception.JsonResponseException;
@@ -457,32 +458,52 @@ public class DoctorSearches {
             params.remove("ids");
             params.remove("searchType");
 
+            List<Long> allPigOrGroupIds;
             Integer pageNo = 1;
             Integer pageSize = 100;
-            Paging<SearchedPig> searchResultPaging =
-                    RespHelper.or500(pigSearchReadService.searchWithAggs(pageNo, pageSize, "search/search.mustache", params)).getPigs();
-            while (!searchResultPaging.isEmpty()) {
-                pageNo ++;
-                Paging<SearchedPig> tempSearchPigs =
-                        RespHelper.or500(pigSearchReadService.searchWithAggs(pageNo, pageSize, "search/search.mustache", params)).getPigs();
-                if (tempSearchPigs.isEmpty()) {
-                    break;
+            if (searchType.equals(SearchType.GROUP.getValue())) {
+                Paging<SearchedGroup> searchGroupPaging = RespHelper.or500(groupSearchReadService.searchWithAggs(pageNo, pageSize, "search/search.mustache", params)).getGroups();
+                while (!searchGroupPaging.isEmpty()) {
+                    pageNo ++;
+                    Paging<SearchedGroup> tempSearchGroups =
+                            RespHelper.or500(groupSearchReadService.searchWithAggs(pageNo, pageSize, "search/search.mustache", params)).getGroups();
+                    if (tempSearchGroups.isEmpty()) {
+                        break;
+                    }
+                    searchGroupPaging.getData().addAll(tempSearchGroups.getData());
                 }
-                searchResultPaging.getData().addAll(tempSearchPigs.getData());
+                allPigOrGroupIds = FluentIterable.from(searchGroupPaging.getData()).transform(new Function<SearchedGroup, Long>() {
+                    @Nullable
+                    @Override
+                    public Long apply(@Nullable SearchedGroup searchedGroup) {
+                        return searchedGroup.getId();
+                    }
+                }).toList();
+            } else {
+                Paging<SearchedPig> searchPigPaging =
+                        RespHelper.or500(pigSearchReadService.searchWithAggs(pageNo, pageSize, "search/search.mustache", params)).getPigs();
+                while (!searchPigPaging.isEmpty()) {
+                    pageNo ++;
+                    Paging<SearchedPig> tempSearchPigs =
+                            RespHelper.or500(pigSearchReadService.searchWithAggs(pageNo, pageSize, "search/search.mustache", params)).getPigs();
+                    if (tempSearchPigs.isEmpty()) {
+                        break;
+                    }
+                    searchPigPaging.getData().addAll(tempSearchPigs.getData());
+                }
+                allPigOrGroupIds = FluentIterable.from(searchPigPaging.getData()).transform(new Function<SearchedPig, Long>() {
+                    @Nullable
+                    @Override
+                    public Long apply(@Nullable SearchedPig searchedPig) {
+                        return searchedPig.getId();
+                    }
+                }).toList();
             }
 
-            List<Long> allPigIds = FluentIterable.from(searchResultPaging.getData()).transform(new Function<SearchedPig, Long>() {
-                @Nullable
-                @Override
-                public Long apply(@Nullable SearchedPig searchedPig) {
-                    return searchedPig.getId();
-                }
-            }).toList();
-
             List<Long> result = new ArrayList<>();
-            for (Long pigId : allPigIds) {
-                if (!excludePigIds.contains(pigId)) {
-                    result.add(pigId);
+            for (Long id : allPigOrGroupIds) {
+                if (!excludePigIds.contains(id)) {
+                    result.add(id);
                 }
             }
             return result;
