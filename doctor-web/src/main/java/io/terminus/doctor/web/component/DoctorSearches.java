@@ -1,12 +1,10 @@
 package io.terminus.doctor.web.component;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.api.client.util.Lists;
 import com.google.common.base.Function;
 import com.google.common.collect.FluentIterable;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.Paging;
-import io.terminus.common.model.Response;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.basic.enums.SearchType;
 import io.terminus.doctor.basic.search.material.MaterialSearchReadService;
@@ -26,7 +24,6 @@ import io.terminus.doctor.event.search.group.SearchedGroupDto;
 import io.terminus.doctor.event.search.pig.PigSearchReadService;
 import io.terminus.doctor.event.search.pig.SearchedPig;
 import io.terminus.doctor.event.search.pig.SearchedPigDto;
-import io.terminus.doctor.event.service.DoctorPigEventReadService;
 import io.terminus.pampas.common.UserUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -37,7 +34,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Nullable;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -66,8 +62,6 @@ public class DoctorSearches {
 
     private final MaterialSearchReadService materialSearchReadService;
 
-    private final DoctorPigEventReadService doctorPigEventReadService;
-
     private static final ObjectMapper OBJECT_MAPPER = JsonMapper.JSON_NON_DEFAULT_MAPPER.getMapper();
 
 
@@ -76,14 +70,12 @@ public class DoctorSearches {
                           GroupSearchReadService groupSearchReadService,
                           DoctorSearchHistoryService doctorSearchHistoryService,
                           BarnSearchReadService barnSearchReadService,
-                          MaterialSearchReadService materialSearchReadService,
-                          DoctorPigEventReadService doctorPigEventReadService) {
+                          MaterialSearchReadService materialSearchReadService) {
         this.pigSearchReadService = pigSearchReadService;
         this.groupSearchReadService = groupSearchReadService;
         this.doctorSearchHistoryService = doctorSearchHistoryService;
         this.barnSearchReadService = barnSearchReadService;
         this.materialSearchReadService = materialSearchReadService;
-        this.doctorPigEventReadService = doctorPigEventReadService;
     }
 
     /**
@@ -437,8 +429,8 @@ public class DoctorSearches {
         return isEmpty(params.get("farmId"));
     }
 
-    @RequestMapping(value = "/query/events/all", method = RequestMethod.GET)
-    public List<Integer> getEventsIdByAllPigs (@RequestParam String ids,
+    @RequestMapping(value = "/all", method = RequestMethod.GET)
+    public List<Long> getAllPigIds (@RequestParam String ids,
                                     @RequestParam Integer searchType,
                                     @RequestParam(required = false) Integer pigType,
                                     @RequestParam Map<String, String> params) {
@@ -511,8 +503,7 @@ public class DoctorSearches {
                     result.add(id);
                 }
             }
-
-            return RespHelper.or500(doctorPigEventReadService.queryPigEvents(result));
+            return result;
         } catch (Exception e) {
             throw new JsonResponseException(500, e.getMessage());
         }
