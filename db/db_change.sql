@@ -173,3 +173,6 @@ ALTER TABLE doctor_change_reasons ADD COLUMN `srm` VARCHAR(64) DEFAULT NULL COMM
 
 -- 增加当前配种次数
 alter table `doctor_pig_tracks` add COLUMN `current_mating_count` int(11) DEFAULT 0 COMMENT '当前配种次数' after `current_parity`;
+
+-- 2016-08-03 更新猪跟踪的 当前配种次数
+update `doctor_pig_tracks` set current_mating_count = 1 where pig_type = 1 and status in (3,4,7,8,9);

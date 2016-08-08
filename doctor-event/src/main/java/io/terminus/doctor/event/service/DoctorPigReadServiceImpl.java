@@ -117,23 +117,6 @@ public class DoctorPigReadServiceImpl implements DoctorPigReadService {
             List<DoctorPigEvent> doctorPigEvents = RespHelper.orServEx(
                     doctorPigEventReadService.queryPigDoctorEvents(doctorPig.getFarmId(), doctorPig.getId(), null, null, null, null)).getData();
 
-            for (DoctorPigEvent doctorPigEvent : doctorPigEvents) {
-                Map<String,Object> extraMap = doctorPigEvent.getExtraMap();
-                if (extraMap != null) {
-                    Integer matingType = (Integer) extraMap.get("matingType");
-                    Integer checkResult = (Integer) extraMap.get("checkResult");
-                    Integer farrowingType = (Integer) extraMap.get("farrowingType");
-                    if (matingType != null) {
-                        extraMap.put("matingType", MatingType.from(matingType).getDesc());
-                    }
-                    if (checkResult != null) {
-                        extraMap.put("checkResult", PregCheckResult.from(checkResult).getDesc());
-                    }
-                    if (farrowingType != null) {
-                        extraMap.put("farrowingType", FarrowingType.from(farrowingType).getDesc());
-                    }
-                }
-            }
             Integer targetEventSize = MoreObjects.firstNonNull(eventSize, 3);
             targetEventSize = targetEventSize > doctorPigEvents.size() ? doctorPigEvents.size() : targetEventSize;
 
@@ -353,14 +336,19 @@ public class DoctorPigReadServiceImpl implements DoctorPigReadService {
     @Override
     public Response<Date> getFirstMatingTime(@NotNull(message = "pigId.not.null") Long pigId, @NotNull(message = "farmId.not.null") Long farmId) {
         DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(pigId);
-        DateTime matingDate = DateTime.now();
+        DateTime matingDate;
+        if (doctorPigTrack.getCurrentMatingCount() == null) {
+            log.error("fail to get first mating time by pig id:{}",pigId);
+            return Response.fail("get.first.mating.time.fail");
+        }
+
         if (doctorPigTrack.getCurrentMatingCount() > 0) {
-            Map<String, Object> criteria = ImmutableMap.of("pigId", pigId, "farmId", farmId, "count", doctorPigTrack.getCurrentMatingCount()-1);
+            Map<String, Object> criteria = ImmutableMap.of("pigId", pigId, "farmId", farmId, "count", doctorPigTrack.getCurrentMatingCount()-1, "type", PigEvent.MATING.getKey(), "kind", DoctorPig.PIG_TYPE.SOW.getKey());
             DoctorPigEvent doctorPigEvent = doctorPigEventDao.getFirstMatingTime(criteria);
             matingDate = new DateTime(Long.valueOf(doctorPigEvent.getExtraMap().get("matingDate").toString()));
             return Response.ok(matingDate.plusDays(114).toDate());
+        } else {
+            return Response.ok(null);
         }
-        return Response.ok(matingDate.plusDays(114).toDate());
     }
-
 }

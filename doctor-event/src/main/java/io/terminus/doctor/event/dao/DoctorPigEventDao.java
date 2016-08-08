@@ -78,8 +78,6 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent>{
      * 获取初次配种时间(公猪)
      */
     public DoctorPigEvent getFirstMatingTime(Map<String, Object> criteria) {
-        criteria.put("type", PigEvent.MATING.getKey());
-        criteria.put("kind", DoctorPig.PIG_TYPE.SOW.getKey());
         return this.getSqlSession().selectOne(sqlId("getFirstMatingTime"), criteria);
     }
 }

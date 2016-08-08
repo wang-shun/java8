@@ -1,11 +1,20 @@
 package io.terminus.doctor.web.component;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.Function;
+import com.google.common.collect.FluentIterable;
+import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.Paging;
+import io.terminus.common.model.Response;
+import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.basic.enums.SearchType;
 import io.terminus.doctor.basic.search.material.MaterialSearchReadService;
 import io.terminus.doctor.basic.search.material.SearchedMaterial;
 import io.terminus.doctor.basic.service.DoctorSearchHistoryService;
+import io.terminus.doctor.common.constants.JacksonType;
 import io.terminus.doctor.common.utils.RespHelper;
+import io.terminus.doctor.event.enums.PigStatus;
+import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.search.barn.BarnSearchReadService;
 import io.terminus.doctor.event.search.barn.SearchedBarn;
@@ -25,6 +34,9 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.annotation.Nullable;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -51,6 +63,8 @@ public class DoctorSearches {
     private final BarnSearchReadService barnSearchReadService;
 
     private final MaterialSearchReadService materialSearchReadService;
+
+    private static final ObjectMapper OBJECT_MAPPER = JsonMapper.JSON_NON_DEFAULT_MAPPER.getMapper();
 
 
     @Autowired
@@ -415,5 +429,65 @@ public class DoctorSearches {
 
     private boolean farmIdNotExist(Map<String, String> params) {
         return isEmpty(params.get("farmId"));
+    }
+
+    @RequestMapping(value = "/all", method = RequestMethod.GET)
+    public List<Long> getAllPigIds (@RequestParam String ids,
+                                    @RequestParam Integer searchType,
+                                    @RequestParam(required = false) Integer pigType,
+                                    @RequestParam Map<String, String> params) {
+
+        try {
+            List<Long> excludePigIds = OBJECT_MAPPER.readValue(ids, JacksonType.LIST_OF_LONG);
+
+            if (farmIdNotExist(params)) {
+                return Collections.emptyList();
+            }
+            createSearchWord(searchType, params);
+            if (pigType != null) {
+                params.put("pigType", pigType.toString());
+            }
+            if (searchType.equals(SearchType.GROUP.getValue())) {
+                params.put("status", String.valueOf(DoctorGroup.Status.CREATED.getValue()));
+            } else if (searchType.equals(SearchType.SOW.getValue())) {
+                params.put("statuses", "1_3_4_5_6_7_8_9_10");
+            } else if (searchType.equals(SearchType.BOAR.getValue())) {
+                params.put("statuses", PigStatus.BOAR_ENTRY.toString());
+            }
+            params.remove("ids");
+            params.remove("searchType");
+
+            Integer pageNo = 1;
+            Integer pageSize = 100;
+            Paging<SearchedPig> searchResultPaging =
+                    RespHelper.or500(pigSearchReadService.searchWithAggs(pageNo, pageSize, "search/search.mustache", params)).getPigs();
+            while (!searchResultPaging.isEmpty()) {
+                pageNo ++;
+                Paging<SearchedPig> tempSearchPigs =
+                        RespHelper.or500(pigSearchReadService.searchWithAggs(pageNo, pageSize, "search/search.mustache", params)).getPigs();
+                if (tempSearchPigs.isEmpty()) {
+                    break;
+                }
+                searchResultPaging.getData().addAll(tempSearchPigs.getData());
+            }
+
+            List<Long> allPigIds = FluentIterable.from(searchResultPaging.getData()).transform(new Function<SearchedPig, Long>() {
+                @Nullable
+                @Override
+                public Long apply(@Nullable SearchedPig searchedPig) {
+                    return searchedPig.getId();
+                }
+            }).toList();
+
+            List<Long> result = new ArrayList<>();
+            for (Long pigId : allPigIds) {
+                if (!excludePigIds.contains(pigId)) {
+                    result.add(pigId);
+                }
+            }
+            return result;
+        } catch (Exception e) {
+            throw new JsonResponseException(500, e.getMessage());
+        }
     }
 }

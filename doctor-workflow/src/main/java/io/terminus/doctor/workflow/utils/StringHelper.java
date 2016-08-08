@@ -141,16 +141,19 @@ public class StringHelper {
             for (Map.Entry<String, Object> entry : vars.entrySet()) {
                 String key = entry.getKey();
                 // 1. 替换表达式的所有 ${} 或者 #{} 占位符
-                String regex = "(\\$\\{" + key + "\\}(?!.*['\"])|(?<!['\"].{0,1000000})\\$\\{" + key + "\\})";
+                // String regex = "(\\$\\{" + key + "\\}(?!.*['\"])|(?<!['\"].{0,1000000})\\$\\{" + key + "\\})";
+                String regex = "\\$\\{" + key + "\\}";
                 expression = expression.replaceAll(regex, "#" + key);
-                regex = "(#\\{" + key + "\\}(?!.*['\"])|(?<!['\"].{0,1000000})#\\{" + key + "\\})";
+                // regex = "(#\\{" + key + "\\}(?!.*['\"])|(?<!['\"].{0,1000000})#\\{" + key + "\\})";
+                regex = "#\\{" + key + "\\}";
                 expression = expression.replaceAll(regex, "#" + key);
                 // 存入context中
                 context.setVariable(entry.getKey(), entry.getValue());
             }
         }
         // 2. 替换 equals 关键字
-        String regex = "(equals(?!.*['\"])|(?<!['\"].{0,1000000})equals)";
+        // String regex = "(equals(?!.*['\"])|(?<!['\"].{0,1000000})equals)";
+        String regex = "equals";
         expression = expression.replaceAll(regex, "matches");
         return parser.parseExpression(expression).getValue(context, clazz);
     }
