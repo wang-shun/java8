@@ -43,7 +43,7 @@
         (<include refid="vals"/>)
     </insert>
 
-    <select id="findById" parameterType="int" resultMap="FlowProcessMap">
+    <select id="findById" parameterType="long" resultMap="FlowProcessMap">
         SELECT
         <include refid="cols_all"/>
         FROM
