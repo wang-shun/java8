@@ -206,6 +206,7 @@ public interface JdbcAccess {
      */
     void deleteFlowProcessTrack(Long flowProcessTrackId);
     void deleteFlowProcessTrack(List<Long> flowProcessTrackIds);
+    void updateFlowProcessTrack(FlowProcessTrack flowProcessTrack);
 
     /** 活动节点跟踪公共查新接口 */
     List<FlowProcessTrack> findFlowProcessTracks(FlowProcessTrack flowProcessTrack);

@@ -2,8 +2,6 @@ package io.terminus.doctor.event.dao;
 
 import com.google.common.collect.ImmutableMap;
 import io.terminus.common.mysql.dao.MyBatisDao;
-import io.terminus.doctor.event.enums.PigEvent;
-import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import org.springframework.stereotype.Repository;
 
@@ -26,6 +24,16 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent>{
 
     public DoctorPigEvent queryLastPigEventById(Long pigId){
         return this.getSqlSession().selectOne(sqlId("queryLastPigEventById"), pigId);
+    }
+
+    /**
+     * 获取母猪流转中最新的事件
+     * @param pigId 猪Id
+     * @param types 事件类型
+     * @return
+     */
+    public DoctorPigEvent queryLastPigEventInWorkflow(Long pigId, List<Integer> types) {
+        return this.getSqlSession().selectOne(sqlId("queryLastPigEventInWorkflow"), ImmutableMap.of("pigId", pigId, "types", types));
     }
 
     /**
