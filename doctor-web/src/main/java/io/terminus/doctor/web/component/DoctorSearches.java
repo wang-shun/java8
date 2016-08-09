@@ -432,7 +432,6 @@ public class DoctorSearches {
     @RequestMapping(value = "/all", method = RequestMethod.GET)
     public List<Long> getAllPigIds (@RequestParam String ids,
                                     @RequestParam Integer searchType,
-                                    @RequestParam(required = false) Integer pigType,
                                     @RequestParam Map<String, String> params) {
 
         try {
@@ -442,15 +441,15 @@ public class DoctorSearches {
                 return Collections.emptyList();
             }
             createSearchWord(searchType, params);
-            if (pigType != null) {
-                params.put("pigType", pigType.toString());
-            }
 
             // 母猪状态由前台传
             if (searchType.equals(SearchType.GROUP.getValue())) {
                 params.put("status", String.valueOf(DoctorGroup.Status.CREATED.getValue()));
             } else if (searchType.equals(SearchType.BOAR.getValue())) {
+                params.put("pigType", DoctorPig.PIG_TYPE.BOAR.getKey().toString());
                 params.put("statuses", PigStatus.BOAR_ENTRY.toString());
+            } else if (searchType.equals(SearchType.SOW.getValue())) {
+                params.put("pigType", DoctorPig.PIG_TYPE.SOW.getKey().toString());
             }
             params.remove("ids");
             params.remove("searchType");
