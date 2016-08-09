@@ -45,7 +45,7 @@
         (<include refid="vals"/>)
     </insert>
 
-    <select id="findById" parameterType="int" resultMap="FlowDefinitionNodeMap">
+    <select id="findById" parameterType="long" resultMap="FlowDefinitionNodeMap">
         SELECT
         <include refid="cols_all"/>
         FROM
