@@ -445,10 +445,10 @@ public class DoctorSearches {
             if (pigType != null) {
                 params.put("pigType", pigType.toString());
             }
+
+            // 母猪状态由前台传
             if (searchType.equals(SearchType.GROUP.getValue())) {
                 params.put("status", String.valueOf(DoctorGroup.Status.CREATED.getValue()));
-            } else if (searchType.equals(SearchType.SOW.getValue())) {
-                params.put("statuses", "1_3_4_5_6_7_8_9_10");
             } else if (searchType.equals(SearchType.BOAR.getValue())) {
                 params.put("statuses", PigStatus.BOAR_ENTRY.toString());
             }
