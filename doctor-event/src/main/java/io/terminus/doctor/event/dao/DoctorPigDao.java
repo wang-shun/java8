@@ -17,6 +17,10 @@ import java.util.Map;
 @Repository
 public class DoctorPigDao extends MyBatisDao<DoctorPig> {
 
+    public void deleteByFarmId(Long farmId) {
+        getSqlSession().delete(sqlId("deleteByFarmId"), farmId);
+    }
+
     /**
      * 条目数量信息统计
      * @param criteria

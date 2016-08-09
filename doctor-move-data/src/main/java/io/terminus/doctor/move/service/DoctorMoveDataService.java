@@ -3,24 +3,20 @@ package io.terminus.doctor.move.service;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import io.terminus.common.exception.ServiceException;
-import io.terminus.common.model.Response;
 import io.terminus.common.utils.Arguments;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.common.utils.Joiners;
 import io.terminus.common.utils.JsonMapper;
-import io.terminus.doctor.basic.dao.DoctorBasicDao;
-import io.terminus.doctor.basic.dao.DoctorChangeReasonDao;
-import io.terminus.doctor.basic.dao.DoctorCustomerDao;
 import io.terminus.doctor.basic.model.DoctorBasic;
+import io.terminus.doctor.basic.model.DoctorBasicMaterial;
 import io.terminus.doctor.basic.model.DoctorChangeReason;
 import io.terminus.doctor.basic.model.DoctorCustomer;
 import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.constants.DoctorFarmEntryConstants;
-import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorGroupDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
@@ -54,6 +50,7 @@ import io.terminus.doctor.event.dto.event.usual.DoctorFarmEntryDto;
 import io.terminus.doctor.event.dto.event.usual.DoctorRemovalDto;
 import io.terminus.doctor.event.dto.event.usual.DoctorVaccinationDto;
 import io.terminus.doctor.event.enums.BoarEntryType;
+import io.terminus.doctor.event.enums.FarrowingType;
 import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.enums.MatingType;
@@ -68,30 +65,21 @@ import io.terminus.doctor.event.model.DoctorGroupTrack;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
+import io.terminus.doctor.event.service.DoctorPigReadService;
 import io.terminus.doctor.move.handler.DoctorMoveDatasourceHandler;
-import io.terminus.doctor.move.handler.DoctorMoveTableEnum;
-import io.terminus.doctor.move.model.B_ChangeReason;
-import io.terminus.doctor.move.model.B_Customer;
+import io.terminus.doctor.move.handler.DoctorMoveWorkflowHandler;
 import io.terminus.doctor.move.model.Proc_InventoryGain;
-import io.terminus.doctor.move.model.TB_FieldValue;
+import io.terminus.doctor.move.model.SowOutFarmSoon;
 import io.terminus.doctor.move.model.View_BoarCardList;
 import io.terminus.doctor.move.model.View_EventListBoar;
 import io.terminus.doctor.move.model.View_EventListGain;
 import io.terminus.doctor.move.model.View_EventListSow;
 import io.terminus.doctor.move.model.View_GainCardList;
-import io.terminus.doctor.move.model.View_PigLocationList;
 import io.terminus.doctor.move.model.View_SowCardList;
-import io.terminus.doctor.user.dao.DoctorStaffDao;
 import io.terminus.doctor.user.model.DoctorFarm;
-import io.terminus.doctor.user.model.DoctorOrg;
-import io.terminus.doctor.user.model.DoctorUser;
-import io.terminus.doctor.user.model.Sub;
-import io.terminus.parana.user.impl.dao.UserProfileDao;
-import io.terminus.parana.user.model.UserProfile;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -104,319 +92,214 @@ import java.util.stream.Collectors;
 import static io.terminus.common.utils.Arguments.notEmpty;
 
 /**
- * Desc: 迁移数据, TODO: 注意如果一个数据源有多个猪场的情况!!!
+ * Desc: 迁移数据
  * Mail: yangzl@terminus.io
  * author: DreamYoung
  * Date: 16/7/27
  */
 @Slf4j
 @Service
-public class DoctorMoveDataService implements CommandLineRunner {
+public class DoctorMoveDataService {
 
     private static final JsonMapper JSON_MAPPER = JsonMapper.nonEmptyMapper();
 
     private final DoctorMoveDatasourceHandler doctorMoveDatasourceHandler;
-    private final DoctorBarnDao doctorBarnDao;
-    private final DoctorCustomerDao doctorCustomerDao;
-    private final DoctorChangeReasonDao doctorChangeReasonDao;
-    private final DoctorBasicDao doctorBasicDao;
-    private final DoctorStaffDao doctorStaffDao;
-    private final UserProfileDao userProfileDao;
     private final DoctorGroupDao doctorGroupDao;
     private final DoctorGroupEventDao doctorGroupEventDao;
     private final DoctorGroupTrackDao doctorGroupTrackDao;
     private final DoctorPigDao doctorPigDao;
     private final DoctorPigTrackDao doctorPigTrackDao;
     private final DoctorPigEventDao doctorPigEventDao;
+    private final DoctorMoveBasicService doctorMoveBasicService;
+    private final DoctorPigReadService doctorPigReadService;
+    private final DoctorMoveWorkflowHandler doctorMoveWorkflowHandler;
 
     @Autowired
     public DoctorMoveDataService(DoctorMoveDatasourceHandler doctorMoveDatasourceHandler,
-                                 DoctorBarnDao doctorBarnDao,
-                                 DoctorCustomerDao doctorCustomerDao,
-                                 DoctorChangeReasonDao doctorChangeReasonDao,
-                                 DoctorBasicDao doctorBasicDao,
-                                 DoctorStaffDao doctorStaffDao,
-                                 UserProfileDao userProfileDao,
                                  DoctorGroupDao doctorGroupDao,
                                  DoctorGroupEventDao doctorGroupEventDao,
                                  DoctorGroupTrackDao doctorGroupTrackDao,
                                  DoctorPigDao doctorPigDao,
                                  DoctorPigTrackDao doctorPigTrackDao,
-                                 DoctorPigEventDao doctorPigEventDao) {
+                                 DoctorPigEventDao doctorPigEventDao,
+                                 DoctorMoveBasicService doctorMoveBasicService,
+                                 DoctorPigReadService doctorPigReadService,
+                                 DoctorMoveWorkflowHandler doctorMoveWorkflowHandler) {
         this.doctorMoveDatasourceHandler = doctorMoveDatasourceHandler;
-        this.doctorBarnDao = doctorBarnDao;
-        this.doctorCustomerDao = doctorCustomerDao;
-        this.doctorChangeReasonDao = doctorChangeReasonDao;
-        this.doctorBasicDao = doctorBasicDao;
-        this.doctorStaffDao = doctorStaffDao;
-        this.userProfileDao = userProfileDao;
         this.doctorGroupDao = doctorGroupDao;
         this.doctorGroupEventDao = doctorGroupEventDao;
         this.doctorGroupTrackDao = doctorGroupTrackDao;
         this.doctorPigDao = doctorPigDao;
         this.doctorPigTrackDao = doctorPigTrackDao;
         this.doctorPigEventDao = doctorPigEventDao;
+        this.doctorMoveBasicService = doctorMoveBasicService;
+        this.doctorPigReadService = doctorPigReadService;
+        this.doctorMoveWorkflowHandler = doctorMoveWorkflowHandler;
+    }
+
+    //删除猪场所有猪相关的数据
+    public void deleteAllPigs(Long farmId) {
+        doctorPigDao.deleteByFarmId(farmId);
+        doctorPigEventDao.deleteByFarmId(farmId);
+        doctorPigTrackDao.deleteByFarmId(farmId);
     }
 
     /**
-     * 迁移基础数据
+     * 迁移母猪工作流
      */
     @Transactional
-    public Response<Boolean> moveBasic(Long moveId) {
-        try {
-            //基础数据按照类型名称分组
-            Map<String, List<DoctorBasic>> basicsMap = doctorBasicDao.listAll().stream().collect(Collectors.groupingBy(DoctorBasic::getTypeName));
-            Map<String, List<TB_FieldValue>> fieldsMap = RespHelper.orServEx(doctorMoveDatasourceHandler
-                    .findByHbsSql(moveId, TB_FieldValue.class, "TB_FieldValue")).stream()
-                    .collect(Collectors.groupingBy(TB_FieldValue::getTypeId));
-
-            //按照遍历doctor里的基础数据, 如果有缺失的, 就补充进来
-            for (Map.Entry<String, List<DoctorBasic>> basic : basicsMap.entrySet()) {
-                //取出基础字段名称
-                List<String> basicNames = basic.getValue().stream().map(DoctorBasic::getName).collect(Collectors.toList());
-
-                List<TB_FieldValue> fieldValues = fieldsMap.get(basic.getKey());
-                if (!notEmpty(fieldValues)) {
-                    continue;
-                }
-
-                //把过滤的结果放到doctor_basics里,(过滤变动类型是转出的)
-                fieldValues.stream()
-                        .filter(field -> !basicNames.contains(field.getFieldText()) ||
-                                !("变动类型".equals(field.getTypeId()) && "转出".equals(field.getFieldText())))
-                        .forEach(fn -> doctorBasicDao.create(getBasic(fn)));
-            }
-            return Response.ok(Boolean.TRUE);
-        } catch (Exception e) {
-            log.error("move basic failed, moveId:{}, cause:{}", moveId, Throwables.getStackTraceAsString(e));
-            return Response.fail("move.basic.fail");
-        }
-    }
-
-    //拼接基础数据
-    private DoctorBasic getBasic(TB_FieldValue field) {
-        DoctorBasic.Type type = DoctorBasic.Type.from(field.getTypeId());
-        DoctorBasic basic = new DoctorBasic();
-        basic.setName(field.getFieldText());
-        basic.setType(type == null ? null : type.getValue());
-        basic.setTypeName(field.getTypeId());
-        basic.setContext(field.getRemark());
-        basic.setOutId(field.getOID());
-        basic.setSrm(field.getSrm());
-        basic.setIsValid(IsOrNot.YES.getValue());
-        return basic;
-    }
-
-    /**
-     * 迁移Barn
-     */
-    @Transactional
-    public Response<Boolean> moveBarn(Long moveId) {
-        try {
-            List<DoctorBarn> barns = RespHelper.orServEx(doctorMoveDatasourceHandler
-                    .findAllData(moveId, View_PigLocationList.class, DoctorMoveTableEnum.view_PigLocationList)).stream()
-                    .filter(loc -> isFarm(loc.getFarmOID(), mockFarm().getOutId()))     //这一步很重要, 如果一个公司有多个猪场, 猪场id必须匹配!
-                    .filter(f -> true) // TODO: 16/7/28 多个猪场注意过滤outId
-                    .map(location -> getBarn(mockOrg(), mockFarm(), mockSub(), location))
-                    .collect(Collectors.toList());
-
-            if (notEmpty(barns)) {
-                doctorBarnDao.creates(barns);
-            }
-            return Response.ok(Boolean.TRUE);
-        } catch (ServiceException e) {
-            return Response.fail(e.getMessage());
-        } catch (Exception e) {
-            log.error("move barn failed, moveId:{}, cause:{}", moveId, Throwables.getStackTraceAsString(e));
-            return Response.fail("move.barn.fail");
-        }
-    }
-
-    /**
-     * 迁移客户
-     */
-    @Transactional
-    public Response<Boolean> moveCustomer(Long moveId) {
-        try {
-            List<DoctorCustomer> customers = RespHelper.orServEx(doctorMoveDatasourceHandler
-                    .findAllData(moveId, B_Customer.class, DoctorMoveTableEnum.B_Customer)).stream()
-                    .filter(f -> true) // TODO: 16/7/28 多个猪场注意过滤outId
-                    .map(cus -> getCustomer(mockFarm(), mockUser(), cus))
-                    .collect(Collectors.toList());
-
-            if (notEmpty(customers)) {
-                doctorCustomerDao.creates(customers);
-            }
-            return Response.ok(Boolean.TRUE);
-        } catch (ServiceException e) {
-            return Response.fail(e.getMessage());
-        } catch (Exception e) {
-            log.error("move customer failed, moveId:{}, cause:{}", moveId, Throwables.getStackTraceAsString(e));
-            return Response.fail("move.customer.fail");
-        }
-    }
-
-    /**
-     * 迁移变动原因
-     */
-    @Transactional
-    public Response<Boolean> moveChangeReason(Long moveId) {
-        try {
-            //查出所有的变动
-            List<DoctorBasic> changeTypes = doctorBasicDao.findByType(DoctorBasic.Type.CHANGE_TYPE.getValue());
-
-            //查出每个变动下的变动原因, 组装成map
-            Map<DoctorBasic, List<DoctorChangeReason>> changeTypeMap = Maps.newHashMap();
-            changeTypes.forEach(type -> changeTypeMap.put(type, doctorChangeReasonDao.findByChangeTypeIdAndSrm(type.getId(), null)));
-
-            //查出猪场软件里的所有变动原因, 并按照变动类型 group by
-            Map<String, List<B_ChangeReason>> reasonMap = RespHelper.orServEx(doctorMoveDatasourceHandler
-                    .findByHbsSql(moveId, B_ChangeReason.class, "changeReason")).stream()
-                    .collect(Collectors.groupingBy(B_ChangeReason::getChangeType));
-
-            //遍历每个变动类型的变动原因, 过滤掉重复的插入
-            for (Map.Entry<DoctorBasic, List<DoctorChangeReason>> changeType : changeTypeMap.entrySet()) {
-                //当前doctor里存在的reason名称
-                List<String> changeReasons = changeType.getValue().stream().map(DoctorChangeReason::getReason).collect(Collectors.toList());
-                List<B_ChangeReason> reasons = reasonMap.get(changeType.getKey().getName());
-
-                if (!notEmpty(reasons)) {
-                    continue;
-                }
-
-                //过滤掉重复的原因, 插入doctor_change_reasons 表
-                reasons.stream()
-                        .filter(r -> !changeReasons.contains(r.getReasonName()))
-                        .forEach(reason -> doctorChangeReasonDao.create(getReason(reason, changeType.getKey().getId())));
-            }
-
-            return Response.ok(Boolean.TRUE);
-        } catch (ServiceException e) {
-            return Response.fail(e.getMessage());
-        } catch (Exception e) {
-            log.error("move customer failed, moveId:{}, cause:{}", moveId, Throwables.getStackTraceAsString(e));
-            return Response.fail("move.customer.fail");
-        }
+    public void moveWorkflow(DoctorFarm farm) {
+        DoctorPig search = new DoctorPig();
+        search.setPigType(DoctorPig.PIG_TYPE.SOW.getKey());
+        search.setIsRemoval(IsOrNot.NO.getValue());
+        search.setFarmId(farm.getId());
+        doctorMoveWorkflowHandler.handle(RespHelper.orServEx(
+                doctorPigReadService.pagingDoctorInfoDtoByPig(search, 1, Integer.MAX_VALUE)).getData());
     }
 
     /**
      * 迁移猪群
      */
     @Transactional
-    public Response<Boolean> moveGroup(Long moveId) {
-        try {
-            //0. 基础数据准备: barn, basic, subUser, changeReason, customer
-            Map<String, DoctorBarn> barnMap = doctorBarnDao.findByFarmId(mockFarm().getId()).stream().collect(Collectors.toMap(DoctorBarn::getOutId, v -> v));
-            Map<Integer, Map<String, DoctorBasic>> basicMap = getBasicMap();
-            Map<String, Long> subMap = getSubMap(mockOrg().getId());
-            Map<String, DoctorChangeReason> changeReasonMap = getReasonMap();
-            Map<String, DoctorCustomer> customerMap = getCustomerMap(mockFarm().getId());
+    public void moveGroup(Long moveId, DoctorFarm farm) {
+        //0. 基础数据准备: barn, basic, subUser, changeReason, customer
+        Map<String, DoctorBarn> barnMap = doctorMoveBasicService.getBarnMap(farm.getId());
+        Map<Integer, Map<String, DoctorBasic>> basicMap = doctorMoveBasicService.getBasicMap();
+        Map<String, Long> subMap = doctorMoveBasicService.getSubMap(farm.getOrgId());
+        Map<String, DoctorChangeReason> changeReasonMap = doctorMoveBasicService.getReasonMap();
+        Map<String, DoctorCustomer> customerMap = doctorMoveBasicService.getCustomerMap(farm.getId());
+        Map<String, DoctorBasicMaterial> vaccMap = doctorMoveBasicService.getVaccMap();
 
-            //1. 迁移DoctorGroup
-            List<DoctorGroup> groups = RespHelper.orServEx(doctorMoveDatasourceHandler
-                    .findByHbsSql(moveId, View_GainCardList.class, "DoctorGroup-GainCardList")).stream()
-                    .filter(f -> true) // TODO: 16/7/28 多个猪场注意过滤outId
-                    .map(gain -> getGroup(mockOrg(), mockFarm(), gain, barnMap, basicMap, subMap)).collect(Collectors.toList());
-            doctorGroupDao.creates(groups);
+        //1. 迁移DoctorGroup
+        List<DoctorGroup> groups = RespHelper.orServEx(doctorMoveDatasourceHandler
+                .findByHbsSql(moveId, View_GainCardList.class, "DoctorGroup-GainCardList")).stream()
+                .filter(loc -> isFarm(loc.getFarmOutId(), farm.getOutId()))
+                .map(gain -> getGroup(farm, gain, barnMap, basicMap, subMap)).collect(Collectors.toList());
+        doctorGroupDao.creates(groups);
 
-            //查出刚插入的group, key = outId
-            Map<String, DoctorGroup> groupMap = doctorGroupDao.findByFarmId(mockFarm().getId()).stream().collect(Collectors.toMap(DoctorGroup::getOutId, v -> v));
+        //查出刚插入的group, key = outId, 查询猪, 为转种猪事件做准备
+        Map<String, DoctorGroup> groupMap = doctorGroupDao.findByFarmId(farm.getId()).stream().collect(Collectors.toMap(DoctorGroup::getOutId, v -> v));
+        Map<String, DoctorPig> pigMap = Maps.newHashMap();
+        doctorPigDao.findPigsByFarmId(farm.getId()).forEach(pig -> pigMap.put(pig.getPigCode(), pig));
 
-            //2. 迁移DoctorGroupEvent
-            List<DoctorGroupEvent> events = RespHelper.orServEx(doctorMoveDatasourceHandler
-                    .findByHbsSql(moveId, View_EventListGain.class, "DoctorGroupEvent-EventListGain")).stream()
-                    .map(gainEvent -> getGroupEvent(groupMap, gainEvent, subMap, barnMap, basicMap, changeReasonMap, customerMap))
-                    .collect(Collectors.toList());
-            doctorGroupEventDao.creates(events);
+        //2. 迁移DoctorGroupEvent
+        List<DoctorGroupEvent> events = RespHelper.orServEx(doctorMoveDatasourceHandler
+                .findByHbsSql(moveId, View_EventListGain.class, "DoctorGroupEvent-EventListGain")).stream()
+                .map(gainEvent -> getGroupEvent(groupMap, gainEvent, subMap, barnMap, basicMap, changeReasonMap, customerMap, vaccMap, pigMap))
+                .collect(Collectors.toList());
+        doctorGroupEventDao.creates(events);
 
-            //查出刚才插入的groupEvent, 按照猪群id groupBy
-            Map<Long, List<DoctorGroupEvent>> eventMap = doctorGroupEventDao.findByFarmId(mockFarm().getId()).stream().collect(Collectors.groupingBy(DoctorGroupEvent::getGroupId));
+        //查出刚才插入的groupEvent, 按照猪群id groupBy
+        Map<Long, List<DoctorGroupEvent>> eventMap = doctorGroupEventDao.findByFarmId(farm.getId()).stream().collect(Collectors.groupingBy(DoctorGroupEvent::getGroupId));
 
-            //3. 迁移DoctorTrack, 先把统计结果转换成map, 在转换track
-            String now = DateUtil.toDateTimeString(new Date());
-            Map<String, Proc_InventoryGain> gainMap = RespHelper.orServEx(doctorMoveDatasourceHandler
-                    .findByHbsSql(moveId, Proc_InventoryGain.class, "DoctorGroupTrack-Proc_InventoryGain", ImmutableMap.of("date", now))).stream()
-                    .filter(f -> true) // TODO: 16/7/28 多个猪场注意过滤outId
-                    .collect(Collectors.toMap(Proc_InventoryGain::getGroupOutId, v -> v));
+        //3. 迁移DoctorTrack, 先把统计结果转换成map, 在转换track
+        String now = DateUtil.toDateTimeString(new Date());
+        Map<String, Proc_InventoryGain> gainMap = RespHelper.orServEx(doctorMoveDatasourceHandler
+                .findByHbsSql(moveId, Proc_InventoryGain.class, "DoctorGroupTrack-Proc_InventoryGain", ImmutableMap.of("date", now))).stream()
+                .filter(loc -> isFarm(loc.getFarmOutId(), farm.getOutId()))
+                .collect(Collectors.toMap(Proc_InventoryGain::getGroupOutId, v -> v));
 
-            List<DoctorGroupTrack> groupTracks = groupMap.values().stream()
-                    .map(group -> getGroupTrack(group, gainMap.get(group.getOutId()), eventMap.get(group.getId())))
-                    .collect(Collectors.toList());
-            doctorGroupTrackDao.creates(groupTracks);
-            return Response.ok(Boolean.TRUE);
-        } catch (ServiceException e) {
-            return Response.fail(e.getMessage());
-        } catch (Exception e) {
-            log.error("move group failed, moveId:{}, cause:{}", moveId, Throwables.getStackTraceAsString(e));
-            return Response.fail("move.group.fail");
-        }
+        List<DoctorGroupTrack> groupTracks = groupMap.values().stream()
+                .map(group -> getGroupTrack(group, gainMap.get(group.getOutId()), eventMap.get(group.getId())))
+                .collect(Collectors.toList());
+        doctorGroupTrackDao.creates(groupTracks);
     }
 
     /**
      * 迁移母猪公猪
      */
-    @Transactional
-    public Response<Boolean> movePig(Long moveId) {
-       try {
-           //0. 基础数据准备: barn, basic, subUser
-           Map<String, DoctorBarn> barnMap = doctorBarnDao.findByFarmId(mockFarm().getId()).stream().collect(Collectors.toMap(DoctorBarn::getOutId, v -> v));
-           Map<Integer, Map<String, DoctorBasic>> basicMap = getBasicMap();
-           Map<String, Long> subMap = getSubMap(mockOrg().getId());
-           Map<String, DoctorChangeReason> changeReasonMap = getReasonMap();
-           Map<String, DoctorCustomer> customerMap = getCustomerMap(mockFarm().getId());
-           
-           //1. 迁移sow
-           moveSow(moveId, mockOrg(), mockFarm(), basicMap, barnMap);
+    public void movePig(Long moveId, DoctorFarm farm) {
+        //0. 基础数据准备: barn, basic, subUser
+        Map<String, DoctorBarn> barnMap = doctorMoveBasicService.getBarnMap(farm.getId());
+        Map<Integer, Map<String, DoctorBasic>> basicMap = doctorMoveBasicService.getBasicMap();
+        Map<String, Long> subMap = doctorMoveBasicService.getSubMap(farm.getOrgId());
+        Map<String, DoctorChangeReason> changeReasonMap = doctorMoveBasicService.getReasonMap();
+        Map<String, DoctorCustomer> customerMap = doctorMoveBasicService.getCustomerMap(farm.getId());
+        Map<String, DoctorBasicMaterial> vaccMap = doctorMoveBasicService.getVaccMap();
 
-           //2. 迁移boar
-           //moveBoar(moveId, mockOrg(), mockFarm(), barnMap, basicMap, changeReasonMap, customerMap, subMap);
-           return Response.ok(Boolean.TRUE);
-       } catch (Exception e) {
-           log.error("move pig failed, moveId:{}, cause:{}", moveId, Throwables.getStackTraceAsString(e));
-           return Response.fail("move.pig.fail");
-       }
+        //1. 迁移boar
+        moveBoar(moveId, farm, barnMap, basicMap, changeReasonMap, customerMap, subMap, vaccMap);
+
+        //查出boar, 转换成map
+        Map<String, DoctorPig> boarMap = Maps.newHashMap();
+        doctorPigDao.findPigsByFarmIdAndPigType(farm.getId(), DoctorPig.PIG_TYPE.BOAR.getKey()).forEach(boar -> boarMap.put(boar.getPigCode(), boar));
+
+        //2. 迁移sow
+        moveSow(moveId, farm, basicMap, barnMap, subMap, customerMap, changeReasonMap, boarMap, vaccMap);
     }
 
     //迁移母猪
-    private void moveSow(Long moveId, DoctorOrg org, DoctorFarm farm, Map<Integer, Map<String, DoctorBasic>> basicMap, Map<String, DoctorBarn> barnMap) {
+    private void moveSow(Long moveId, DoctorFarm farm, Map<Integer, Map<String, DoctorBasic>> basicMap, Map<String, DoctorBarn> barnMap,
+                         Map<String, Long> subMap, Map<String, DoctorCustomer> customerMap, Map<String, DoctorChangeReason> changeReasonMap,
+                         Map<String, DoctorPig> boarMap, Map<String, DoctorBasicMaterial> vaccMap) {
         //1. 迁移DoctorPig
         List<View_SowCardList> sowCards = RespHelper.orServEx(doctorMoveDatasourceHandler
                 .findByHbsSql(moveId, View_SowCardList.class, "DoctorPig-SowCardList")).stream()
-                .filter(f -> true) // TODO: 16/7/28 多个猪场注意过滤outId
+                .filter(loc -> isFarm(loc.getFarmOutId(), farm.getOutId()))
                 .collect(Collectors.toList());
-        doctorPigDao.creates(sowCards.stream().map(card -> getSow(card, org, farm, basicMap)).collect(Collectors.toList()));
+        doctorPigDao.creates(sowCards.stream().map(card -> getSow(card, farm, basicMap)).collect(Collectors.toList()));
 
         //查出母猪, 转换成map
-        Map<String, DoctorPig> sowMap = doctorPigDao.findPigsByFarmIdAndPigType(mockFarm().getId(), DoctorPig.PIG_TYPE.SOW.getKey()).stream()
+        Map<String, DoctorPig> sowMap = doctorPigDao.findPigsByFarmIdAndPigType(farm.getId(), DoctorPig.PIG_TYPE.SOW.getKey()).stream()
                 .collect(Collectors.toMap(DoctorPig::getOutId, v -> v));
 
-        //2. 迁移DoctorPigEvent
-        // TODO: 16/8/2
+        //数据量太大, 分成5页获取母猪事件
+        List<View_EventListSow> sowEventViews = Lists.newArrayList();
+        List<List<View_SowCardList>> sowLists = Lists.partition(sowCards, sowCards.size()/5 + 1);
 
+        sowLists.forEach(ss -> {
+            String sowOutIds = Joiners.COMMA.join(ss.stream().map(s -> brace(s.getPigOutId())).collect(Collectors.toList()));
+            sowEventViews.addAll(RespHelper.orServEx(doctorMoveDatasourceHandler
+                    .findByHbsSql(moveId, View_EventListSow.class, "DoctorPigEvent-EventListSow", ImmutableMap.of("sowOutIds", sowOutIds))).stream()
+                    .filter(loc -> isFarm(loc.getFarmOutId(), farm.getOutId()))
+                    .collect(Collectors.toList())
+            );
+        });
+
+        //2. 迁移DoctorPigEvent
+        List<DoctorPigEvent> sowEvents = sowEventViews.stream()
+                .map(event -> getSowEvent(event, sowMap, barnMap, basicMap, subMap, customerMap, changeReasonMap, boarMap, vaccMap))
+                .collect(Collectors.toList());
+
+        //数据量略大, 分成5份插入吧
+        Lists.partition(sowEvents, 5).forEach(doctorPigEventDao::creates);
 
         //查出母猪事件, 按照母猪分组
-        Map<Long, List<DoctorPigEvent>> sowEventMap = doctorPigEventDao.findByFarmIdAndKind(mockFarm().getId(), DoctorPig.PIG_TYPE.SOW.getKey())
+        Map<Long, List<DoctorPigEvent>> sowEventMap = doctorPigEventDao.findByFarmIdAndKind(farm.getId(), DoctorPig.PIG_TYPE.SOW.getKey())
                 .stream().collect(Collectors.groupingBy(DoctorPigEvent::getPigId));
 
         //更新relEventId
         updatePigRelEventId(sowEventMap);
 
         //3. 迁移DoctorPigTrack
-        List<DoctorPigTrack> boarTracks = sowCards.stream()
+        List<DoctorPigTrack> sowTracks = sowCards.stream()
                 .map(card -> {
                     DoctorPig sow = sowMap.get(card.getPigOutId());
-                    return getSowTrack(card, sow, barnMap, sow == null ? null : sowEventMap.get(sow.getId()));
+                    return getSowTrack(card, sow, barnMap, sow == null ? null : sowEventMap.get(sow.getId()), moveId);
                 })
                 .filter(Arguments::notNull)
                 .collect(Collectors.toList());
-        doctorPigTrackDao.creates(boarTracks);
+        doctorPigTrackDao.creates(sowTracks);
+
+        //4. 更新公猪的全部配种次数
+        updateBoarCurrentParity(sowEvents);
+    }
+
+    //更新公猪的配种数(根据配种事件)
+    private void updateBoarCurrentParity(List<DoctorPigEvent> sowEvents) {
+        sowEvents.stream()
+                .filter(e -> Objects.equals(e.getType(), PigEvent.MATING.getKey()))
+                .map(m -> JSON_MAPPER.fromJson(m.getExtra(), DoctorMatingDto.class))
+                .filter(p -> p != null && p.getMatingBoarPigId() != null)
+                .collect(Collectors.groupingBy(DoctorMatingDto::getMatingBoarPigId))
+                .forEach((k, v) -> doctorPigTrackDao.updateBoarCurrentParity(k, v.size()));
     }
 
     //拼接母猪
-    private DoctorPig getSow(View_SowCardList card, DoctorOrg org, DoctorFarm farm, Map<Integer, Map<String, DoctorBasic>> basicMap) {
+    private DoctorPig getSow(View_SowCardList card, DoctorFarm farm, Map<Integer, Map<String, DoctorBasic>> basicMap) {
         DoctorPig sow = new DoctorPig();
-        sow.setOrgId(org.getId());
-        sow.setOrgName(org.getName());
+        sow.setOrgId(farm.getOrgId());
+        sow.setOrgName(farm.getOrgName());
         sow.setFarmId(farm.getId());
         sow.setFarmName(farm.getName());
         sow.setOutId(card.getPigOutId());           //外部OID
@@ -457,7 +340,7 @@ public class DoctorMoveDataService implements CommandLineRunner {
     private DoctorPigEvent getSowEvent(View_EventListSow event, Map<String, DoctorPig> sowMap, Map<String, DoctorBarn> barnMap,
                                        Map<Integer, Map<String, DoctorBasic>> basicMap, Map<String, Long> subMap,
                                        Map<String, DoctorCustomer> customerMap, Map<String, DoctorChangeReason> changeReasonMap,
-                                       Map<String, DoctorPig> boarMap) {
+                                       Map<String, DoctorPig> boarMap, Map<String, DoctorBasicMaterial> vaccMap) {
         DoctorPig sow = sowMap.get(event.getSowOutId());
         if (sow == null) {
             return null;
@@ -487,14 +370,14 @@ public class DoctorMoveDataService implements CommandLineRunner {
             sowEvent.setBarnId(barn.getId());
             sowEvent.setBarnName(barn.getName());
         }
-        return getSowEventExtra(eventType, sowEvent, event, subMap, basicMap, barnMap, customerMap, changeReasonMap, boarMap);
+        return getSowEventExtra(eventType, sowEvent, event, subMap, basicMap, barnMap, customerMap, changeReasonMap, boarMap, vaccMap);
     }
 
     //拼接母猪事件extra字段
     private DoctorPigEvent getSowEventExtra(PigEvent eventType, DoctorPigEvent sowEvent, View_EventListSow event, Map<String, Long> subMap,
                                             Map<Integer, Map<String, DoctorBasic>> basicMap, Map<String, DoctorBarn> barnMap,
                                             Map<String, DoctorCustomer> customerMap, Map<String, DoctorChangeReason> changeReasonMap,
-                                            Map<String, DoctorPig> boarMap) {
+                                            Map<String, DoctorPig> boarMap, Map<String, DoctorBasicMaterial> vaccMap) {
 
         if (eventType == null) {
             return sowEvent;
@@ -551,7 +434,10 @@ public class DoctorMoveDataService implements CommandLineRunner {
             case VACCINATION:   //防疫
                 DoctorVaccinationDto vacc = new DoctorVaccinationDto();
                 vacc.setVaccinationDate(event.getEventAt());
-                // vacc.setVaccinationId(); // TODO: 16/8/2 疫苗的基础数据
+
+                //疫苗
+                DoctorBasicMaterial vaccBasic = vaccMap.get(event.getDisease());
+                vacc.setVaccinationId(vaccBasic == null ? null : vaccBasic.getId());
                 vacc.setVaccinationName(event.getDisease());  //其实是疫苗名称
                 vacc.setVaccinationStaffId(subMap.get(event.getChgReason()));
                 vacc.setVaccinationStaffName(event.getStaffName());
@@ -574,7 +460,7 @@ public class DoctorMoveDataService implements CommandLineRunner {
                 sowEvent.setExtra(JSON_MAPPER.toJson(DoctorAbortionDto.builder().abortionDate(event.getEventAt()).build()));
                 break;
             case FARROWING:     //分娩
-                sowEvent.setExtra(JSON_MAPPER.toJson(getSowFarrowExtra(event)));
+                sowEvent.setExtra(JSON_MAPPER.toJson(getSowFarrowExtra(event, barnMap)));
                 break;
             case WEAN:          //断奶
                 sowEvent.setExtra(JSON_MAPPER.toJson(getSowWeanExtra(event)));
@@ -639,7 +525,6 @@ public class DoctorMoveDataService implements CommandLineRunner {
         entry.setEntryMark(event.getRemark());     // 非必填
         entry.setSource(event.getSource());
 
-        //todo 猪舍Id是哪个id? outdest? eventBarn?
         DoctorBarn barn = barnMap.get(event.getBarnOutId());
         if (barn != null) {
             entry.setBarnId(barn.getId());
@@ -688,9 +573,35 @@ public class DoctorMoveDataService implements CommandLineRunner {
     }
 
     //拼接母猪分娩extra
-    private DoctorFarrowingDto getSowFarrowExtra(View_EventListSow event) {
+    private DoctorFarrowingDto getSowFarrowExtra(View_EventListSow event, Map<String, DoctorBarn> barnMap) {
         DoctorFarrowingDto farrow = new DoctorFarrowingDto();
+        farrow.setFarrowingDate(event.getEventAt());       // 分娩日期
+        farrow.setWeakCount(event.getWeakCount());         // 弱崽数量
+        farrow.setMnyCount(event.getMummyCount());         // 木乃伊数量
+        farrow.setJxCount(event.getJxCount());             // 畸形数量
+        farrow.setDeadCount(event.getDeadCount());         // 死亡数量
+        farrow.setBlackCount(event.getBlackCount());       // 黑太数量
+        farrow.setHealthCount(event.getHealthyCount());    // 健仔数量
+        farrow.setFarrowingLiveCount(event.getHealthyCount() + event.getWeakCount()); //活仔数 = 健 + 弱
+        farrow.setFarrowRemark(event.getRemark());
+        farrow.setBirthNestAvg(event.getEventWeight());    //出生窝重
+        farrow.setFarrowStaff1(event.getStaffName());  //接生员1
+        farrow.setFarrowStaff2(event.getStaffName());  //接生员2
+        farrow.setIsHelp(event.getNeedHelp());     //  是否帮助
+        farrow.setFarrowIsSingleManager(event.getIsSingleManage());    //是否个体管理
+        farrow.setGroupCode(event.getToGroupCode());   // 仔猪猪群Code
+        farrow.setNestCode(event.getNestCode()); // 窝号
 
+        //分娩类型
+        FarrowingType farrowingType = FarrowingType.from(event.getFarrowType());
+        farrow.setFarrowingType(farrowingType == null ? null : farrowingType.getKey());
+
+        //分娩猪舍
+        DoctorBarn farrowBarn = barnMap.get(event.getBarnOutId());
+        if (farrowBarn != null) {
+            farrow.setBarnId(farrowBarn.getId());
+            farrow.setBarnName(farrowBarn.getName());
+        }
         return farrow;
     }
 
@@ -704,12 +615,14 @@ public class DoctorMoveDataService implements CommandLineRunner {
         return wean;
     }
 
-    //拼接拼窝事件extra // TODO: 16/8/2 拼窝母猪id
+    //拼接拼窝事件extra
     private DoctorFostersDto getSowFosterExtra(View_EventListSow event, Map<Integer, Map<String, DoctorBasic>> basicMap) {
         DoctorFostersDto foster = new DoctorFostersDto();
         foster.setFostersDate(event.getEventAt());   // 拼窝日期
         foster.setFostersCount(event.getNetOutCount());   //  拼窝数量
         foster.setFosterTotalWeight(event.getWeanWeight());   //拼窝总重量
+        foster.setFosterSowCode(event.getDisease());      //拼窝母猪号
+        foster.setFosterSowOutId(event.getNurseSow());      //拼窝母猪号
 
         //寄养原因
         DoctorBasic reason = basicMap.get(DoctorBasic.Type.FOSTER_REASON.getValue()).get(event.getFosterReasonName());
@@ -756,10 +669,14 @@ public class DoctorMoveDataService implements CommandLineRunner {
     }
 
     //拼接母猪跟踪
-    private DoctorPigTrack getSowTrack(View_SowCardList card, DoctorPig sow, Map<String, DoctorBarn> barnMap, List<DoctorPigEvent> events) {
-        //card.getStatus(); // TODO: 16/8/1 即将离场 的情况
+    private DoctorPigTrack getSowTrack(View_SowCardList card, DoctorPig sow, Map<String, DoctorBarn> barnMap, List<DoctorPigEvent> events, Long moveId) {
         if (sow == null) {
             return null;
+        }
+
+        //即将离场的状态是因为录离场事件录错了, 撤销后, 会到即将离场状态, 其实应该是上次的状态
+        if ("即将离场".equals(card.getStatus())) {
+            card.setStatus(getLeaveType(moveId, card.getPigOutId()));
         }
 
         //母猪状态枚举
@@ -773,14 +690,18 @@ public class DoctorMoveDataService implements CommandLineRunner {
         track.setIsRemoval(sow.getIsRemoval());
         track.setWeight(card.getWeight());
         track.setOutFarmDate(DateUtil.toDate(card.getOutFarmDate()));
-        track.setCurrentParity(card.getCurrentParity());
         track.setRemark(card.getRemark());
+        track.setCurrentParity(card.getCurrentParity());
 
         if (notEmpty(events)) {
             //按照时间 asc 排序
             events = events.stream().sorted((a, b) -> a.getEventAt().compareTo(b.getEventAt())).collect(Collectors.toList());
-            track.setExtra(events.get(events.size() - 1).getExtra());   //extra字段保存最后一次event的extra
+            DoctorPigEvent lastEvent = events.get(events.size() - 1);
+            track.setExtra(lastEvent.getExtra());   //extra字段保存最后一次event的extra
             track.setRelEventIds(Joiners.COMMA.join(events.stream().map(DoctorPigEvent::getId).collect(Collectors.toList()))); //关联事件ids, 逗号分隔
+
+            //母猪当前配种次数
+            track.setCurrentMatingCount(getSowCurrentMatingCount(events, sow));
         }
 
         //猪舍
@@ -792,29 +713,71 @@ public class DoctorMoveDataService implements CommandLineRunner {
         return track;
     }
 
+    //母猪的当前配种次数(初配, 复配等等)
+    private static int getSowCurrentMatingCount(List<DoctorPigEvent> events, DoctorPig sow) {
+        //离场的都置成0
+        if (Objects.equals(sow.getIsRemoval(), IsOrNot.YES.getValue())) {
+            return 0;
+        }
+
+        //未离场的重新从头判断下母猪的当前配种次数
+        int count = 0;
+        for (DoctorPigEvent event : events) {
+            if (Objects.equals(event.getType(), PigEvent.MATING.getKey())) {
+                count ++;
+            }
+            else if (Objects.equals(event.getType(), PigEvent.TO_MATING.getKey()) || isNotPreg(event) ||
+                    Objects.equals(event.getType(), PigEvent.ABORTION.getKey())) {
+                count = 0;
+            }
+        }
+        return count;
+    }
+
+    //判断妊娠检查结果
+    private static boolean isNotPreg(DoctorPigEvent event) {
+        if (!Objects.equals(event.getType(), PigEvent.PREG_CHECK.getKey())) {
+            return false;
+        }
+        DoctorPregChkResultDto result = JSON_MAPPER.fromJson(event.getExtra(), DoctorPregChkResultDto.class);
+        return result != null && !Objects.equals(result.getCheckResult(), PregCheckResult.YANG.getKey());
+    }
+
+    //获取即将离场的母猪状态
+    private String getLeaveType(Long moveId, String sowOutId) {
+        try {
+            List<SowOutFarmSoon> soons = RespHelper.orServEx(doctorMoveDatasourceHandler
+                    .findByHbsSql(moveId, SowOutFarmSoon.class, "SowOutFarmSoon", ImmutableMap.of("sowOutId", sowOutId)));
+            return notEmpty(soons) ? soons.get(0).getLeaveType() : "";
+        } catch (Exception e) {
+            log.error("get sow leave type failed, sowOutId:{}, cause:{}", sowOutId, Throwables.getStackTraceAsString(e));
+            return "";
+        }
+    }
+
     //迁移公猪
-    private void moveBoar(Long moveId, DoctorOrg org, DoctorFarm farm, Map<String, DoctorBarn> barnMap, Map<Integer, Map<String, DoctorBasic>> basicMap,
-                          Map<String, DoctorChangeReason> changeReasonMap, Map<String, DoctorCustomer> customerMap, Map<String, Long> subMap) {
+    private void moveBoar(Long moveId, DoctorFarm farm, Map<String, DoctorBarn> barnMap, Map<Integer, Map<String, DoctorBasic>> basicMap,
+                          Map<String, DoctorChangeReason> changeReasonMap, Map<String, DoctorCustomer> customerMap, Map<String, Long> subMap, Map<String, DoctorBasicMaterial> vaccMap) {
         //1. 迁移DoctorPig
         List<View_BoarCardList> boarCards = RespHelper.orServEx(doctorMoveDatasourceHandler
                 .findByHbsSql(moveId, View_BoarCardList.class, "DoctorPig-BoarCardList")).stream()
-                .filter(f -> true)  // TODO: 16/7/28 多个猪场注意过滤outId
+                .filter(loc -> isFarm(loc.getFarmOutId(), farm.getOutId()))
                 .collect(Collectors.toList());
-        doctorPigDao.creates(boarCards.stream().map(card -> getBoar(card, org, farm, basicMap)).collect(Collectors.toList()));
+        doctorPigDao.creates(boarCards.stream().map(card -> getBoar(card, farm, basicMap)).collect(Collectors.toList()));
 
         //查出公猪, 转换成map
-        Map<String, DoctorPig> boarMap = doctorPigDao.findPigsByFarmIdAndPigType(mockFarm().getId(), DoctorPig.PIG_TYPE.BOAR.getKey()).stream()
+        Map<String, DoctorPig> boarMap = doctorPigDao.findPigsByFarmIdAndPigType(farm.getId(), DoctorPig.PIG_TYPE.BOAR.getKey()).stream()
                 .collect(Collectors.toMap(DoctorPig::getOutId, v -> v));
 
         //2. 迁移DoctorPigEvent
         List<DoctorPigEvent> boarEvents = RespHelper.orServEx(doctorMoveDatasourceHandler
                 .findByHbsSql(moveId, View_EventListBoar.class, "DoctorPigEvent-EventListBoar")).stream()
-                .filter(f -> true) // TODO: 16/7/28 多个猪场注意过滤outId
-                .map(event -> getBoarEvent(event, boarMap, barnMap, basicMap, subMap, customerMap, changeReasonMap)).collect(Collectors.toList());
+                .filter(loc -> isFarm(loc.getFarmOutId(), farm.getOutId()))
+                .map(event -> getBoarEvent(event, boarMap, barnMap, basicMap, subMap, customerMap, changeReasonMap, vaccMap)).collect(Collectors.toList());
         doctorPigEventDao.creates(boarEvents);
 
         //查出公猪事件, 按照公猪分组
-        Map<Long, List<DoctorPigEvent>> boarEventMap = doctorPigEventDao.findByFarmIdAndKind(mockFarm().getId(), DoctorPig.PIG_TYPE.BOAR.getKey())
+        Map<Long, List<DoctorPigEvent>> boarEventMap = doctorPigEventDao.findByFarmIdAndKind(farm.getId(), DoctorPig.PIG_TYPE.BOAR.getKey())
                 .stream().collect(Collectors.groupingBy(DoctorPigEvent::getPigId));
 
         //更新relEventId
@@ -848,10 +811,10 @@ public class DoctorMoveDataService implements CommandLineRunner {
     }
 
     //拼接公猪
-    private DoctorPig getBoar(View_BoarCardList card, DoctorOrg org, DoctorFarm farm, Map<Integer, Map<String, DoctorBasic>> basicMap) {
+    private DoctorPig getBoar(View_BoarCardList card, DoctorFarm farm, Map<Integer, Map<String, DoctorBasic>> basicMap) {
         DoctorPig boar = new DoctorPig();
-        boar.setOrgId(org.getId());
-        boar.setOrgName(org.getName());
+        boar.setOrgId(farm.getOrgId());
+        boar.setOrgName(farm.getOrgName());
         boar.setFarmId(farm.getId());
         boar.setFarmName(farm.getName());
         boar.setOutId(card.getPigOutId());           //外部OID
@@ -892,7 +855,8 @@ public class DoctorMoveDataService implements CommandLineRunner {
     //拼接公猪事件
     private DoctorPigEvent getBoarEvent(View_EventListBoar event, Map<String, DoctorPig> boarMap, Map<String, DoctorBarn> barnMap,
                                         Map<Integer, Map<String, DoctorBasic>> basicMap, Map<String, Long> subMap,
-                                        Map<String, DoctorCustomer> customerMap, Map<String, DoctorChangeReason> changeReasonMap) {
+                                        Map<String, DoctorCustomer> customerMap, Map<String, DoctorChangeReason> changeReasonMap,
+                                        Map<String, DoctorBasicMaterial> vaccMap) {
         DoctorPig boar = boarMap.get(event.getGroupOutId());
         if (boar == null) {
             return null;
@@ -921,13 +885,14 @@ public class DoctorMoveDataService implements CommandLineRunner {
             boarEvent.setBarnId(barn.getId());
             boarEvent.setBarnName(barn.getName());
         }
-        return getBoarEventExtra(eventType, boarEvent, event, subMap, basicMap, barnMap, customerMap, changeReasonMap);
+        return getBoarEventExtra(eventType, boarEvent, event, subMap, basicMap, barnMap, customerMap, changeReasonMap, vaccMap);
     }
 
     //拼接公猪事件额外信息
     private DoctorPigEvent getBoarEventExtra(PigEvent eventType, DoctorPigEvent boarEvent, View_EventListBoar event, Map<String, Long> subMap,
                                              Map<Integer, Map<String, DoctorBasic>> basicMap, Map<String, DoctorBarn> barnMap,
-                                             Map<String, DoctorCustomer> customerMap, Map<String, DoctorChangeReason> changeReasonMap) {
+                                             Map<String, DoctorCustomer> customerMap, Map<String, DoctorChangeReason> changeReasonMap,
+                                             Map<String, DoctorBasicMaterial> vaccMap) {
         if (eventType == null) {
             return boarEvent;
         }
@@ -983,7 +948,9 @@ public class DoctorMoveDataService implements CommandLineRunner {
             case VACCINATION:  //防疫
                 DoctorVaccinationDto vacc = new DoctorVaccinationDto();
                 vacc.setVaccinationDate(event.getEventAt());
-                // vacc.setVaccinationId(); // TODO: 16/8/2 疫苗的基础数据
+
+                DoctorBasicMaterial vaccBasic = vaccMap.get(event.getVaccName());
+                vacc.setVaccinationId(vaccBasic == null ? null : vaccBasic.getId());
                 vacc.setVaccinationName(event.getVaccName());
                 vacc.setVaccinationStaffId(subMap.get(event.getChgReason()));
                 vacc.setVaccinationStaffName(event.getChgReason()); //防疫事件人员名称
@@ -1050,7 +1017,6 @@ public class DoctorMoveDataService implements CommandLineRunner {
         entry.setEntryMark(event.getRemark());     // 非必填
         entry.setSource(event.getSource());
 
-        //todo 猪舍Id是哪个id? outdest? eventBarn?
         DoctorBarn barn = barnMap.get(event.getBarnOutId());
         if (barn != null) {
             entry.setBarnId(barn.getId());
@@ -1097,8 +1063,6 @@ public class DoctorMoveDataService implements CommandLineRunner {
         track.setWeight(card.getWeight());
         track.setOutFarmDate(DateUtil.toDate(card.getOutFarmDate()));
         track.setRemark(card.getRemark());
-        
-        //track.setCurrentParity(null);  // TODO: 16/8/1 公猪的胎次如何获取?
 
         if (notEmpty(events)) {
             //按照时间 asc 排序
@@ -1117,8 +1081,10 @@ public class DoctorMoveDataService implements CommandLineRunner {
     }
 
     //拼接猪群事件
-    private DoctorGroupEvent getGroupEvent(Map<String, DoctorGroup> groupMap, View_EventListGain gainEvent, Map<String, Long> subMap, Map<String, DoctorBarn> barnMap,
-                                           Map<Integer, Map<String, DoctorBasic>> basicMap, Map<String, DoctorChangeReason> changeReasonMap, Map<String, DoctorCustomer> customerMap) {
+    private DoctorGroupEvent getGroupEvent(Map<String, DoctorGroup> groupMap, View_EventListGain gainEvent, Map<String, Long> subMap,
+                                           Map<String, DoctorBarn> barnMap, Map<Integer, Map<String, DoctorBasic>> basicMap,
+                                           Map<String, DoctorChangeReason> changeReasonMap, Map<String, DoctorCustomer> customerMap,
+                                           Map<String, DoctorBasicMaterial> vaccMap, Map<String, DoctorPig> pigMap) {
         DoctorGroup group = groupMap.get(gainEvent.getGroupOutId());
         if (group == null) {
             return null;
@@ -1154,7 +1120,7 @@ public class DoctorMoveDataService implements CommandLineRunner {
         event.setIsAuto(gainEvent.getIsAuto());
         event.setOutId(gainEvent.getGroupEventOutId());
         event.setRemark(gainEvent.getRemark());
-        return getGroupEventExtra(type, event, gainEvent, basicMap, barnMap, groupMap, group, subMap, changeReasonMap, customerMap);
+        return getGroupEventExtra(type, event, gainEvent, basicMap, barnMap, groupMap, group, subMap, changeReasonMap, customerMap, vaccMap, pigMap);
     }
 
     //根据类型拼接猪群事件明细
@@ -1162,7 +1128,8 @@ public class DoctorMoveDataService implements CommandLineRunner {
     private DoctorGroupEvent getGroupEventExtra(GroupEventType type, DoctorGroupEvent event, View_EventListGain gainEvent,
                                                 Map<Integer, Map<String, DoctorBasic>> basicMap, Map<String, DoctorBarn> barnMap,
                                                 Map<String, DoctorGroup> groupMap, DoctorGroup group, Map<String, Long> subMap,
-                                                Map<String, DoctorChangeReason> changeReasonMap, Map<String, DoctorCustomer> customerMap) {
+                                                Map<String, DoctorChangeReason> changeReasonMap, Map<String, DoctorCustomer> customerMap,
+                                                Map<String, DoctorBasicMaterial> vaccMap, Map<String, DoctorPig> pigMap) {
         if (type == null) {
             return event;
         }
@@ -1184,7 +1151,7 @@ public class DoctorMoveDataService implements CommandLineRunner {
                 event.setExtraMap(getTranGroupEvent(gainEvent, basicMap, barnMap, groupMap, group));
                 break;
             case TURN_SEED:
-                event.setExtraMap(getTurnSeedEvent(gainEvent, basicMap, barnMap));
+                event.setExtraMap(getTurnSeedEvent(gainEvent, basicMap, barnMap, pigMap));
                 break;
             case LIVE_STOCK:
                 DoctorLiveStockGroupEvent liveStock = new DoctorLiveStockGroupEvent();
@@ -1203,7 +1170,10 @@ public class DoctorMoveDataService implements CommandLineRunner {
                 break;
             case ANTIEPIDEMIC:
                 DoctorAntiepidemicGroupEvent anti = new DoctorAntiepidemicGroupEvent();
-                //anti.setVaccinId(); // TODO: 16/7/30 需要疫苗的基础数据
+
+                //疫苗
+                DoctorBasicMaterial vaccBasic = vaccMap.get(gainEvent.getNotDisease());
+                anti.setVaccinId(vaccBasic == null ? null : vaccBasic.getId());
                 anti.setVaccinName(gainEvent.getNotDisease());
 
                 DoctorAntiepidemicGroupEvent.VaccinResult result = DoctorAntiepidemicGroupEvent.VaccinResult.from(gainEvent.getContext());
@@ -1378,10 +1348,11 @@ public class DoctorMoveDataService implements CommandLineRunner {
     }
 
     //商品猪转为种猪事件
-    private DoctorTurnSeedGroupEvent getTurnSeedEvent(View_EventListGain gainEvent, Map<Integer, Map<String, DoctorBasic>> basicMap, Map<String, DoctorBarn> barnMap) {
+    private DoctorTurnSeedGroupEvent getTurnSeedEvent(View_EventListGain gainEvent, Map<Integer, Map<String, DoctorBasic>> basicMap,
+                                                      Map<String, DoctorBarn> barnMap, Map<String, DoctorPig> pigMap) {
         DoctorTurnSeedGroupEvent turnSeed = new DoctorTurnSeedGroupEvent();
-        //turnSeed.setPigId();  // TODO: 16/7/30 需要先迁移pig
-        //turnSeed.setMotherPigCode();
+        DoctorPig pig = pigMap.get(gainEvent.getPigCode());
+        turnSeed.setPigId(pig == null ? null : pig.getId());
 
         //转后的猪号
         turnSeed.setPigCode(gainEvent.getPigCode());
@@ -1508,12 +1479,12 @@ public class DoctorMoveDataService implements CommandLineRunner {
     }
 
     //拼接猪群
-    private DoctorGroup getGroup(DoctorOrg org, DoctorFarm farm, View_GainCardList gain,
-                                 Map<String, DoctorBarn> barnMap, Map<Integer, Map<String, DoctorBasic>> basicMap, Map<String, Long> subMap) {
+    private DoctorGroup getGroup(DoctorFarm farm, View_GainCardList gain, Map<String, DoctorBarn> barnMap,
+                                 Map<Integer, Map<String, DoctorBasic>> basicMap, Map<String, Long> subMap) {
         DoctorGroup group = BeanMapper.map(gain, DoctorGroup.class);
 
-        group.setOrgId(org.getId());
-        group.setOrgName(org.getName());
+        group.setOrgId(farm.getOrgId());
+        group.setOrgName(farm.getOrgName());
         group.setFarmId(farm.getId());
         group.setFarmName(farm.getName());
 
@@ -1544,121 +1515,12 @@ public class DoctorMoveDataService implements CommandLineRunner {
         return group;
     }
 
-    //分别是 Map<DoctorBasic.TypeEnum, Map<DoctorBasic.name, DoctorBasic>>
-    private Map<Integer, Map<String, DoctorBasic>> getBasicMap() {
-        Map<Integer, Map<String, DoctorBasic>> basicMap = Maps.newHashMap();
-        doctorBasicDao.listAll().stream()
-                .collect(Collectors.groupingBy(DoctorBasic::getType)).entrySet()
-                .forEach(basic -> basicMap.put(basic.getKey(),
-                        basic.getValue().stream().collect(Collectors.toMap(DoctorBasic::getName, v -> v))));
-        return basicMap;
-    }
-
-    //拼接staff,  Map<真实姓名, userId>
-    private Map<String, Long> getSubMap(Long orgId) {
-        Map<String, Long> staffMap = Maps.newHashMap();
-        doctorStaffDao.findByOrgId(orgId).forEach(staff -> {
-            UserProfile profile = userProfileDao.findByUserId(staff.getUserId());
-            if (profile != null && notEmpty(profile.getRealName())) {
-                staffMap.put(profile.getRealName(), staff.getUserId());
-            }
-        });
-        return staffMap;
-    }
-
-    //拼接变动原因map
-    private Map<String, DoctorChangeReason> getReasonMap() {
-        Map<String, DoctorChangeReason> reasonMap = Maps.newHashMap();
-        doctorChangeReasonDao.listAll().forEach(reason -> reasonMap.put(reason.getReason(), reason));
-        return reasonMap;
-    }
-
-    //拼接客户map
-    private Map<String, DoctorCustomer> getCustomerMap(Long farmId) {
-        Map<String, DoctorCustomer> customerMap = Maps.newHashMap();
-        doctorCustomerDao.findByFarmId(farmId).forEach(customer -> customerMap.put(customer.getName(), customer));
-        return customerMap;
-    }
-
-    //拼接变动原因
-    private DoctorChangeReason getReason(B_ChangeReason reason, Long changeTypeId) {
-        DoctorChangeReason changeReason = new DoctorChangeReason();
-        changeReason.setChangeTypeId(changeTypeId);
-        changeReason.setReason(reason.getReasonName());
-        changeReason.setOutId(reason.getOID());
-        return changeReason;
-    }
-
-    //拼接客户
-    private DoctorCustomer getCustomer(DoctorFarm farm, DoctorUser user, B_Customer cus) {
-        DoctorCustomer customer = new DoctorCustomer();
-        customer.setName(cus.getCustomerName());
-        customer.setFarmId(farm.getId());
-        customer.setFarmName(farm.getName());
-        customer.setMobile(cus.getMobilePhone());
-        customer.setEmail(cus.getEMail());
-        customer.setOutId(cus.getOID());
-        customer.setCreatorId(user.getId());
-        customer.setCreatorName(user.getName());
-        return customer;
-    }
-
-    //拼接barn
-    private DoctorBarn getBarn(DoctorOrg org, DoctorFarm farm, Sub sub, View_PigLocationList location) {
-        //转换pigtype
-        PigType pigType = PigType.from(location.getTypeName());
-
-        DoctorBarn barn = new DoctorBarn();
-        barn.setName(location.getBarn());
-        barn.setOrgId(org.getId());
-        barn.setOrgName(org.getName());
-        barn.setFarmId(farm.getId());
-        barn.setFarmName(farm.getName());
-        barn.setPigType(pigType == null ? 0: pigType.getValue());
-        barn.setCanOpenGroup("可以".equals(location.getCanOpenGroupText()) ? 1 : -1);
-        barn.setStatus("在用".equals(location.getIsStopUseText()) ? 1 : 0);
-        barn.setStaffId(sub.getUserId());
-        barn.setStaffName(sub.getRealName());
-        barn.setOutId(location.getOID());
-        return barn;
+    private static String brace(String name) {
+        return "'" + name + "'";
     }
 
     //判断猪场id是否相同
     private static boolean isFarm(String farmOID, String outId) {
         return Objects.equals(farmOID, outId);
-    }
-
-    private static DoctorFarm mockFarm() {
-        DoctorFarm farm = new DoctorFarm();
-        farm.setId(9999L);
-        farm.setName("测试迁移猪场");
-        return farm;
-    }
-
-    private static DoctorOrg mockOrg() {
-        DoctorOrg org = new DoctorOrg();
-        org.setId(9999L);
-        org.setName("测试迁移公司");
-        return org;
-    }
-
-    private static DoctorUser mockUser() {
-        DoctorUser user = new DoctorUser();
-        user.setId(9999L);
-        user.setName("测试迁移管理员");
-        return user;
-    }
-
-    private static Sub mockSub() {
-        Sub sub = new Sub();
-        sub.setUserId(9999L);
-        sub.setRealName("测试姓名");
-        return sub;
-    }
-
-
-    @Override
-    public void run(String... strings) throws Exception {
-        // Just for test!
     }
 }

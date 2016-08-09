@@ -1,0 +1,7 @@
+-- 客户表与猪场表笛卡尔一下
+SELECT
+    a.*,
+    b.FarmOID AS FarmOID
+FROM  B_Customer a
+    CROSS JOIN
+    (SELECT * FROM view_FarmInfo WHERE levels = 1) AS b

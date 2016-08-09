@@ -13,6 +13,7 @@ public class View_EventListSow implements Serializable {
     private static final long serialVersionUID = 8185298029467518284L;
     private String eventName;       // 转换事件的名称, 以适应新版的事件
     private String sowOutId;
+    private String farmOutId;
     private String pigCode;
     private String pigFatherCode;
     private String pigMotherCode;
@@ -41,9 +42,11 @@ public class View_EventListSow implements Serializable {
     private String pregCheckResult; // 妊娠检查/断奶复用字段
     private String litterId;        // 分娩事件字段, 其他事件均为0, 需要join
     private String farrowType;      // 分娩/断奶复用字段, 分娩类型, 断奶转入猪舍名?
+    private Integer needHelp;       // 是否需要帮助
+    private Integer isSingleManage; // 是否个体管理
     private Double eventWeight;
-    private Integer allCount;        // 分娩总数
-    private Integer aliveCount;      // 健仔数
+    private Integer allCount;        // 分娩总数(活仔数)
+    private Integer healthyCount;    // 健仔数
     private Integer deadCount;       // 死胎数
     private Integer mummyCount;      // 木乃伊数
     private Integer jxCount;         // 畸形数
@@ -63,7 +66,9 @@ public class View_EventListSow implements Serializable {
     private Double backFat;          // 背镖
     private Integer weanCount;       // 断奶数量
     private Double weanWeight;       // 断奶重量
+    private String nestCode;         // 断奶重量
     private String diseaseName;      // 疾病事件的疾病名称
     private String changeTypeName;   // 变动类型名称
     private String fosterReasonName; // 寄养原因名称
+    private String toGroupCode;      // 分娩转入猪群code
 }
