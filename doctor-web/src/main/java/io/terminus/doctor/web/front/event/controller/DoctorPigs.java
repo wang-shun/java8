@@ -5,10 +5,13 @@ import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.common.utils.RespHelper;
+import io.terminus.doctor.event.dto.DoctorGroupDetail;
 import io.terminus.doctor.event.dto.DoctorPigInfoDetailDto;
 import io.terminus.doctor.event.dto.DoctorPigInfoDto;
 import io.terminus.doctor.event.dto.DoctorPigMessage;
+import io.terminus.doctor.event.model.DoctorGroupTrack;
 import io.terminus.doctor.event.model.DoctorPigTrack;
+import io.terminus.doctor.event.service.DoctorGroupReadService;
 import io.terminus.doctor.event.service.DoctorPigReadService;
 import io.terminus.doctor.event.service.DoctorPigWriteService;
 import io.terminus.doctor.web.front.event.dto.DoctorBoarDetailDto;
@@ -27,6 +30,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by yaoqijun.
@@ -41,10 +45,12 @@ public class DoctorPigs {
 
     private final DoctorPigReadService doctorPigReadService;
     private final DoctorPigWriteService doctorPigWriteService;
+    private final DoctorGroupReadService doctorGroupReadService;
     @Autowired
-    public DoctorPigs(DoctorPigReadService doctorPigReadService, DoctorPigWriteService doctorPigWriteService){
+    public DoctorPigs(DoctorPigReadService doctorPigReadService, DoctorPigWriteService doctorPigWriteService, DoctorGroupReadService doctorGroupReadService){
         this.doctorPigReadService = doctorPigReadService;
         this.doctorPigWriteService = doctorPigWriteService;
+        this.doctorGroupReadService = doctorGroupReadService;
     }
 
     @RequestMapping(value = "/queryByStatus", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -174,10 +180,31 @@ public class DoctorPigs {
 
     /* 部署母猪流程
      * @return
-     */
+        @ResponseBody
+ */
     @RequestMapping(value = "/sow/flow/deploy", method = RequestMethod.GET)
     @ResponseBody
     public Boolean deploy() {
         return RespHelper.or500(doctorPigWriteService.deploy());
+    }
+
+    @RequestMapping(value = "/getGroupTrack", method = RequestMethod.GET)
+    @ResponseBody
+    public DoctorGroupTrack getDoctorGroupTrackByPigId (@RequestParam("pigId") Long pigId) {
+        Response<DoctorPigTrack> doctorPigTrackResp = doctorPigReadService.findPigTrackByPigId(pigId);
+        if (!doctorPigTrackResp.isSuccess()) {
+            throw new JsonResponseException(500, doctorPigTrackResp.getError());
+        }
+        DoctorPigTrack doctorPigTrack = doctorPigTrackResp.getResult();
+        Map<String,Object> extraMap = doctorPigTrack.getExtraMap();
+        if (!extraMap.containsKey("farrowingPigletGroupId")) {
+            throw new JsonResponseException(500, "not.exist.farrowing.pig.let.group.Id");
+        }
+        Long groupId = Long.valueOf(extraMap.get("farrowingPigletGroupId").toString());
+        Response<DoctorGroupDetail> doctorGroupDetailResponse = doctorGroupReadService.findGroupDetailByGroupId(groupId);
+        if (!doctorGroupDetailResponse.isSuccess()) {
+            throw new JsonResponseException(500, doctorGroupDetailResponse.getError());
+        }
+        return doctorGroupDetailResponse.getResult().getGroupTrack();
     }
 }
