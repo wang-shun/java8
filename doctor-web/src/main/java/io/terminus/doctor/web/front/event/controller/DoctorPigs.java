@@ -15,6 +15,7 @@ import io.terminus.doctor.event.service.DoctorGroupReadService;
 import io.terminus.doctor.event.service.DoctorPigReadService;
 import io.terminus.doctor.event.service.DoctorPigWriteService;
 import io.terminus.doctor.web.front.event.dto.DoctorBoarDetailDto;
+import io.terminus.doctor.web.front.event.dto.DoctorFosterDetail;
 import io.terminus.doctor.web.front.event.dto.DoctorMatingDetail;
 import io.terminus.doctor.web.front.event.dto.DoctorSowDetailDto;
 import lombok.extern.slf4j.Slf4j;
@@ -188,15 +189,13 @@ public class DoctorPigs {
         return RespHelper.or500(doctorPigWriteService.deploy());
     }
 
-    @RequestMapping(value = "/getGroupTrack", method = RequestMethod.GET)
+    @RequestMapping(value = "/getFosterDetail", method = RequestMethod.GET)
     @ResponseBody
-    public DoctorGroupTrack getDoctorGroupTrackByPigId (@RequestParam("pigId") Long pigId) {
-        Response<DoctorPigTrack> doctorPigTrackResp = doctorPigReadService.findPigTrackByPigId(pigId);
-        if (!doctorPigTrackResp.isSuccess()) {
-            throw new JsonResponseException(500, doctorPigTrackResp.getError());
-        }
-        DoctorPigTrack doctorPigTrack = doctorPigTrackResp.getResult();
-        Map<String,Object> extraMap = doctorPigTrack.getExtraMap();
+    public DoctorFosterDetail getFosterDetailByPigId (@RequestParam("pigId") Long pigId) {
+
+        DoctorPigInfoDto doctorPigInfoDto = RespHelper.or500(doctorPigReadService.queryDoctorInfoDtoById(pigId));
+
+        Map<String,Object> extraMap = doctorPigInfoDto.getExtraTrackMap();
         if (!extraMap.containsKey("farrowingPigletGroupId")) {
             throw new JsonResponseException(500, "not.exist.farrowing.pig.let.group.Id");
         }
@@ -205,6 +204,11 @@ public class DoctorPigs {
         if (!doctorGroupDetailResponse.isSuccess()) {
             throw new JsonResponseException(500, doctorGroupDetailResponse.getError());
         }
-        return doctorGroupDetailResponse.getResult().getGroupTrack();
+
+        DoctorGroupTrack doctorGroupTrack = doctorGroupDetailResponse.getResult().getGroupTrack();
+        DoctorFosterDetail doctorFosterDetail = new DoctorFosterDetail();
+        doctorFosterDetail.setDoctorGroupTrack(doctorGroupTrack);
+        doctorFosterDetail.setDoctorPigInfoDto(doctorPigInfoDto);
+        return doctorFosterDetail;
     }
 }
