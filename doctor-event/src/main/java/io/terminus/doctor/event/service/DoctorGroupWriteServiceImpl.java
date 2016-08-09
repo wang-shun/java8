@@ -96,6 +96,8 @@ public class DoctorGroupWriteServiceImpl implements DoctorGroupWriteService {
         try {
             Long groupId = doctorGroupManager.createNewGroup(group, newGroupInput);
             return Response.ok(groupId);
+        } catch (ServiceException e) {
+            return Response.fail(e.getMessage());
         } catch (Exception e) {
             log.error("create group failed, group:{}, newGroupInput:{}, cause:{}", group, newGroupInput, Throwables.getStackTraceAsString(e));
             return Response.fail("group.create.fail");
