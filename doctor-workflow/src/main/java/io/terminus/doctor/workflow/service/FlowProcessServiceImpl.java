@@ -195,6 +195,7 @@ public class FlowProcessServiceImpl implements FlowProcessService {
                     .build();
             BeanHelper.copy(flowHistoryInstance, existFlowInstance);
             flowHistoryInstance.setStatus(FlowInstance.Status.END.value());
+            flowHistoryInstance.setExternalHistoryId(existFlowInstance.getId());
             access().createFlowHistoryInstance(flowHistoryInstance);
             // 删除所有的流程跟踪 (暂不考虑删除)
             /*access().deleteFlowProcessTrack(
@@ -262,6 +263,7 @@ public class FlowProcessServiceImpl implements FlowProcessService {
                 flowHistoryInstance.setOperatorId(operatorId);
                 flowHistoryInstance.setOperatorName(operatorName);
                 flowHistoryInstance.setStatus(FlowInstance.Status.DELETE.value());
+                flowHistoryInstance.setExternalHistoryId(flowInstance.getId());
                 access().createFlowHistoryInstance(flowHistoryInstance);
 
                 // 删除所有的流程跟踪 (暂不考虑删除)
