@@ -262,6 +262,7 @@ public class ExecutorImpl implements Executor {
         BeanHelper.copy(flowHistoryInstance, currentInstance);
         flowHistoryInstance.setParentInstanceId(null);
         flowHistoryInstance.setStatus(FlowInstance.Status.END.value());
+        flowHistoryInstance.setExternalHistoryId(currentInstance.getId());
         workFlowEngine.buildJdbcAccess().createFlowHistoryInstance(flowHistoryInstance);
 
         // 将父流程恢复

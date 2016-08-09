@@ -80,4 +80,8 @@ public class FlowHistoryInstance implements Serializable {
      * 更新时间
      */
     private Date updatedAt;
+    /**
+     * 记录删除的实例id
+     */
+    private Long externalHistoryId;
 }

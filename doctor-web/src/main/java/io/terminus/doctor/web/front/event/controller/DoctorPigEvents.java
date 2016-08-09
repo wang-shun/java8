@@ -16,6 +16,7 @@ import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.event.service.DoctorPigEventReadService;
 import io.terminus.doctor.event.service.DoctorPigEventWriteService;
 import io.terminus.doctor.event.service.DoctorPigReadService;
+import io.terminus.doctor.workflow.core.WorkFlowService;
 import io.terminus.pampas.common.UserUtil;
 import io.terminus.parana.user.model.User;
 import io.terminus.parana.user.service.UserReadService;
@@ -52,6 +53,8 @@ public class DoctorPigEvents {
 
     private final UserReadService userReadService;
 
+    private final WorkFlowService workFlowService;
+
     private static final ObjectMapper OBJECT_MAPPER = JsonMapper.JSON_NON_DEFAULT_MAPPER.getMapper();
 
     private static final DateTimeFormatter DTF = DateTimeFormat.forPattern("yyyy-MM-dd");
@@ -60,11 +63,13 @@ public class DoctorPigEvents {
     public DoctorPigEvents(DoctorPigReadService doctorPigReadService,
                            DoctorPigEventReadService doctorPigEventReadService,
                            DoctorPigEventWriteService doctorPigEventWriteService,
-                           UserReadService userReadService){
+                           UserReadService userReadService,
+                           WorkFlowService workFlowService){
         this.doctorPigReadService = doctorPigReadService;
         this.doctorPigEventReadService = doctorPigEventReadService;
         this.doctorPigEventWriteService = doctorPigEventWriteService;
         this.userReadService = userReadService;
+        this.workFlowService = workFlowService;
     }
 
     /**
@@ -143,5 +148,11 @@ public class DoctorPigEvents {
     @ResponseBody
     public List<DoctorSowParityCount> queryDoctorSowParityCount(@RequestParam("pigId") Long pigId){
         return  RespHelper.or500(doctorPigEventReadService.querySowParityCount(pigId));
+    }
+
+    @RequestMapping(value = "/updateData", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public Boolean updateData(@RequestParam("key") String key, @RequestParam("businessId") Long businessId){
+        return RespHelper.or500(workFlowService.updateData(key, businessId));
     }
 }
