@@ -63,7 +63,7 @@ public class DoctorMaterialInfos {
 
     private final DoctorFarmReadService doctorFarmReadService;
 
-    private final UserReadService userReadService;
+    private final UserReadService<User> userReadService;
 
     private final DoctorBasicReadService doctorBasicReadService;
 
@@ -73,7 +73,7 @@ public class DoctorMaterialInfos {
     public DoctorMaterialInfos(DoctorMaterialInfoWriteService doctorMaterialInfoWriteService,
                                DoctorMaterialInfoReadService doctorMaterialInfoReadService,
                                DoctorFarmReadService doctorFarmReadService,
-                               UserReadService userReadService,
+                               UserReadService<User> userReadService,
                                DoctorBasicReadService doctorBasicReadService,
                                DoctorMaterialInWareHouseReadService doctorMaterialInWareHouseReadService,
                                DoctorWareHouseReadService doctorWareHouseReadService,
