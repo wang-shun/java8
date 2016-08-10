@@ -1,8 +1,12 @@
 package io.terminus.doctor.event.service;
 
+import com.google.common.base.Objects;
 import com.google.common.base.Throwables;
+import com.google.common.collect.Lists;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
+import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.Response;
+import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dto.DoctorGroupDetail;
@@ -14,6 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.validation.constraints.NotNull;
 import java.util.List;
 
 /**
@@ -111,6 +116,45 @@ public class DoctorBarnReadServiceImpl implements DoctorBarnReadService {
         } catch (Exception e) {
             log.error("find barn by out id failed, outId:{}, cause:{}", outId, Throwables.getStackTraceAsString(e));
             return Response.fail("barn.find.fail");
+        }
+    }
+
+    @Override
+    public Response<List<DoctorBarn>> findAvailableBarns(@NotNull(message = "input.farm.id.null") Long farmId,
+                                                         @NotNull(message = "input.barn.id.null") Long barnId) {
+        try {
+            /**
+             * 当前所属猪舍
+             */
+            Integer barnType = doctorBarnDao.findById(barnId).getPigType();
+            /**
+             * 要转入猪场的猪舍
+             */
+            List<DoctorBarn> doctorBarns = doctorBarnDao.findByFarmId(farmId);
+            List<DoctorBarn> availableBarns = Lists.newArrayList();
+
+            for (DoctorBarn doctorBarn : doctorBarns) {
+                if (Objects.equal(doctorBarn.getPigType(), PigType.FARROW_PIGLET.getValue()) &&
+                        !(Objects.equal(barnType, PigType.NURSERY_PIGLET.getValue()) ||
+                                Objects.equal(barnType, PigType.FARROW_PIGLET.getValue()) ||
+                                Objects.equal(barnType, PigType.DELIVER_SOW.getValue()))) {
+                    continue;
+                }
+
+                if (Objects.equal(doctorBarn.getPigType(), PigType.NURSERY_PIGLET.getValue()) &&
+                        !(Objects.equal(barnType, PigType.FATTEN_PIG.getValue()) ||
+                                Objects.equal(barnType, PigType.BREEDING.getValue()) ||
+                                Objects.equal(barnType, PigType.NURSERY_PIGLET.getValue()))) {
+                    continue;
+                }
+                availableBarns.add(doctorBarn);
+            }
+
+            return Response.ok(availableBarns);
+        } catch (Exception e) {
+            log.error("fail to find available barns,current barn id:{},farm id:{},cause:{}",
+                    barnId, farmId, Throwables.getStackTraceAsString(e));
+            return Response.fail("find.available.barns.failed");
         }
     }
 }

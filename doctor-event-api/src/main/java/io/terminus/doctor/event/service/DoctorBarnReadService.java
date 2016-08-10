@@ -66,4 +66,13 @@ public interface DoctorBarnReadService {
      * @return 猪舍
      */
     Response<DoctorBarn> findBarnByOutId(@NotEmpty(message = "outId.not.empty") String outId);
+
+    /**
+     * 根据当前猪舍查询可以转入的猪舍
+     * @param farmId  转入的猪场id
+     * @param barnId  当前猪舍id
+     * @return  可以转入的猪舍
+     */
+    Response<List<DoctorBarn>> findAvailableBarns(Long farmId,Long barnId);
+
 }
