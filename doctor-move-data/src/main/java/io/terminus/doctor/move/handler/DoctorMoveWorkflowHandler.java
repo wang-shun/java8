@@ -139,6 +139,10 @@ public class DoctorMoveWorkflowHandler {
                             .build();
 
                     jdbcAccess.createFlowProcess(flowProcess);
+
+                    // 事件发生时间(定时流转需要)
+                    flowProcess.setCreatedAt(pigEvent.getEventAt());
+                    jdbcAccess.updateFlowProcess(flowProcess);
                 }
             }
 
