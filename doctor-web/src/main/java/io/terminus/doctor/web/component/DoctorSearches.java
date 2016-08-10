@@ -430,13 +430,11 @@ public class DoctorSearches {
     }
 
     @RequestMapping(value = "/all", method = RequestMethod.GET)
-    public List<Long> getAllPigIds (@RequestParam String ids,
+    public List<Long> getAllPigIds (@RequestParam(required = false) String ids,
                                     @RequestParam Integer searchType,
                                     @RequestParam Map<String, String> params) {
 
         try {
-            List<Long> excludePigIds = OBJECT_MAPPER.readValue(ids, JacksonType.LIST_OF_LONG);
-
             if (farmIdNotExist(params)) {
                 return Collections.emptyList();
             }
@@ -496,13 +494,18 @@ public class DoctorSearches {
                 }).toList();
             }
 
-            List<Long> result = new ArrayList<>();
-            for (Long id : allPigOrGroupIds) {
-                if (!excludePigIds.contains(id)) {
-                    result.add(id);
+            if (ids != null) {
+                List<Long> excludePigIds = OBJECT_MAPPER.readValue(ids, JacksonType.LIST_OF_LONG);
+                List<Long> result = new ArrayList<>();
+                for (Long id : allPigOrGroupIds) {
+                    if (!excludePigIds.contains(id)) {
+                        result.add(id);
+                    }
                 }
+                return result;
+            } else {
+                return allPigOrGroupIds;
             }
-            return result;
         } catch (Exception e) {
             throw new JsonResponseException(500, e.getMessage());
         }
