@@ -8,9 +8,12 @@ import io.terminus.doctor.basic.service.DoctorBasicReadService;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dto.DoctorGroupDetail;
 import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
+import io.terminus.doctor.event.dto.event.group.DoctorAntiepidemicGroupEvent;
 import io.terminus.doctor.event.dto.event.group.input.DoctorNewGroupInput;
+import io.terminus.doctor.event.enums.PigSource;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
+import io.terminus.doctor.event.model.DoctorGroupTrack;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.event.service.DoctorGroupReadService;
 import io.terminus.doctor.event.service.DoctorGroupWriteService;
@@ -29,6 +32,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -164,7 +168,7 @@ public class DoctorGroupEvents {
         List<DoctorGroupEvent> groupEvents = RespHelper.or500(doctorGroupReadService.pagingGroupEvent(
                 groupDetail.getGroup().getFarmId(), groupId, null, null, 3)).getData();
 
-        return new DoctorGroupDetailEventsDto(groupDetail.getGroup(), groupDetail.getGroupTrack(), groupEvents);
+        return new DoctorGroupDetailEventsDto(groupDetail.getGroup(), groupDetail.getGroupTrack(), transFrom(groupEvents));
     }
 
     /**
@@ -243,5 +247,23 @@ public class DoctorGroupEvents {
             return RespHelper.or500(doctorBasicReadService.findBasicByTypeAndSrmWithCache(DoctorBasic.Type.BREED.getValue(), null));
         }
         return Lists.newArrayList(RespHelper.or500(doctorBasicReadService.findBasicById(group.getBreedId())));
+    }
+
+    private List<DoctorGroupEvent> transFrom(List<DoctorGroupEvent> doctorGroupEvents) {
+        for (DoctorGroupEvent doctorGroupEvent : doctorGroupEvents) {
+            Map<String,Object> extraMap = doctorGroupEvent.getExtraData();
+            if (extraMap != null) {
+                if (extraMap.get("sex") != null) {
+                    extraMap.put("sex", DoctorGroupTrack.Sex.from((Integer) extraMap.get("sex")).getDesc());
+                }
+                if (extraMap.get("source") != null) {
+                    extraMap.put("source", PigSource.from((Integer) extraMap.get("source")).getDesc());
+                }
+                if (extraMap.get("vaccinResult") != null) {
+                    extraMap.put("vaccinResult", ((Integer) extraMap.get("vaccinResult") == 1) ? DoctorAntiepidemicGroupEvent.VaccinResult.POSITIVE : DoctorAntiepidemicGroupEvent.VaccinResult.NEGATIVE);
+                }
+            }
+        }
+        return doctorGroupEvents;
     }
 }

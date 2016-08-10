@@ -46,7 +46,6 @@ public class DoctorNewGroupInput extends BaseGroupInput implements Serializable 
      * 猪类 枚举9种
      * @see io.terminus.doctor.common.enums.PigType
      */
-    @NotNull(message = "pig.type.not.null")
     private Integer pigType;
 
     /**
