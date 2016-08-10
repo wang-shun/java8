@@ -61,6 +61,8 @@ public class DoctorChangeGroupEventHandler extends DoctorAbstractGroupEventHandl
         checkQuantity(groupTrack.getBoarQty(), change.getBoarQty());
         checkQuantity(groupTrack.getSowQty(), change.getSowQty());
         checkQuantityEqual(change.getQuantity(), change.getBoarQty(), change.getSowQty());
+        checkTranWeight(groupTrack.getWeight(), change.getWeight());
+        checkChangeAmount(groupTrack.getAmount(), change.getAmount());
 
         //1.转换猪群变动事件
         DoctorChangeGroupEvent changeEvent = BeanMapper.map(change, DoctorChangeGroupEvent.class);

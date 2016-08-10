@@ -5,7 +5,6 @@ import com.google.common.base.Function;
 import com.google.common.collect.FluentIterable;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.Paging;
-import io.terminus.common.model.Response;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.basic.enums.SearchType;
 import io.terminus.doctor.basic.search.material.MaterialSearchReadService;
@@ -35,7 +34,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Nullable;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -434,7 +432,6 @@ public class DoctorSearches {
     @RequestMapping(value = "/all", method = RequestMethod.GET)
     public List<Long> getAllPigIds (@RequestParam String ids,
                                     @RequestParam Integer searchType,
-                                    @RequestParam(required = false) Integer pigType,
                                     @RequestParam Map<String, String> params) {
 
         try {
@@ -444,45 +441,65 @@ public class DoctorSearches {
                 return Collections.emptyList();
             }
             createSearchWord(searchType, params);
-            if (pigType != null) {
-                params.put("pigType", pigType.toString());
-            }
+
+            // 母猪状态由前台传
             if (searchType.equals(SearchType.GROUP.getValue())) {
                 params.put("status", String.valueOf(DoctorGroup.Status.CREATED.getValue()));
-            } else if (searchType.equals(SearchType.SOW.getValue())) {
-                params.put("statuses", "1_3_4_5_6_7_8_9_10");
             } else if (searchType.equals(SearchType.BOAR.getValue())) {
+                params.put("pigType", DoctorPig.PIG_TYPE.BOAR.getKey().toString());
                 params.put("statuses", PigStatus.BOAR_ENTRY.toString());
+            } else if (searchType.equals(SearchType.SOW.getValue())) {
+                params.put("pigType", DoctorPig.PIG_TYPE.SOW.getKey().toString());
             }
             params.remove("ids");
             params.remove("searchType");
 
+            List<Long> allPigOrGroupIds;
             Integer pageNo = 1;
             Integer pageSize = 100;
-            Paging<SearchedPig> searchResultPaging =
-                    RespHelper.or500(pigSearchReadService.searchWithAggs(pageNo, pageSize, "search/search.mustache", params)).getPigs();
-            while (!searchResultPaging.isEmpty()) {
-                pageNo ++;
-                Paging<SearchedPig> tempSearchPigs =
-                        RespHelper.or500(pigSearchReadService.searchWithAggs(pageNo, pageSize, "search/search.mustache", params)).getPigs();
-                if (tempSearchPigs.isEmpty()) {
-                    break;
+            if (searchType.equals(SearchType.GROUP.getValue())) {
+                Paging<SearchedGroup> searchGroupPaging = RespHelper.or500(groupSearchReadService.searchWithAggs(pageNo, pageSize, "search/search.mustache", params)).getGroups();
+                while (!searchGroupPaging.isEmpty()) {
+                    pageNo ++;
+                    Paging<SearchedGroup> tempSearchGroups =
+                            RespHelper.or500(groupSearchReadService.searchWithAggs(pageNo, pageSize, "search/search.mustache", params)).getGroups();
+                    if (tempSearchGroups.isEmpty()) {
+                        break;
+                    }
+                    searchGroupPaging.getData().addAll(tempSearchGroups.getData());
                 }
-                searchResultPaging.getData().addAll(tempSearchPigs.getData());
+                allPigOrGroupIds = FluentIterable.from(searchGroupPaging.getData()).transform(new Function<SearchedGroup, Long>() {
+                    @Nullable
+                    @Override
+                    public Long apply(@Nullable SearchedGroup searchedGroup) {
+                        return searchedGroup.getId();
+                    }
+                }).toList();
+            } else {
+                Paging<SearchedPig> searchPigPaging =
+                        RespHelper.or500(pigSearchReadService.searchWithAggs(pageNo, pageSize, "search/search.mustache", params)).getPigs();
+                while (!searchPigPaging.isEmpty()) {
+                    pageNo ++;
+                    Paging<SearchedPig> tempSearchPigs =
+                            RespHelper.or500(pigSearchReadService.searchWithAggs(pageNo, pageSize, "search/search.mustache", params)).getPigs();
+                    if (tempSearchPigs.isEmpty()) {
+                        break;
+                    }
+                    searchPigPaging.getData().addAll(tempSearchPigs.getData());
+                }
+                allPigOrGroupIds = FluentIterable.from(searchPigPaging.getData()).transform(new Function<SearchedPig, Long>() {
+                    @Nullable
+                    @Override
+                    public Long apply(@Nullable SearchedPig searchedPig) {
+                        return searchedPig.getId();
+                    }
+                }).toList();
             }
 
-            List<Long> allPigIds = FluentIterable.from(searchResultPaging.getData()).transform(new Function<SearchedPig, Long>() {
-                @Nullable
-                @Override
-                public Long apply(@Nullable SearchedPig searchedPig) {
-                    return searchedPig.getId();
-                }
-            }).toList();
-
             List<Long> result = new ArrayList<>();
-            for (Long pigId : allPigIds) {
-                if (!excludePigIds.contains(pigId)) {
-                    result.add(pigId);
+            for (Long id : allPigOrGroupIds) {
+                if (!excludePigIds.contains(id)) {
+                    result.add(id);
                 }
             }
             return result;

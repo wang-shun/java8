@@ -11,6 +11,7 @@ import java.util.Date;
 @Data
 public class View_EventListBoar implements Serializable {
     private static final long serialVersionUID = 5918176765258406604L;
+    private String farmOutId;
     private String groupOutId;
     private String pigCode;
     private String pigFatherCode;

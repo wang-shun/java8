@@ -76,7 +76,7 @@ public class DoctorSqlFactory {
         }
         try {
             String sql = template.apply(context);
-            log.info("[SQL]file: {} print excute sql is {}", fileName, sql);
+            log.debug("[SQL]file: {} print excute sql is {}", fileName, sql);
 
             return sql;
         } catch (IOException e) {

@@ -115,4 +115,20 @@
         </set>
         WHERE id=#{id}
     </update>
+
+    <select id="findLastEvent" parameterType="map" resultMap="DoctorMaterialConsumeProviderMap">
+        select <include refid="cols_all" /> from <include refid="tb"/>
+        where `ware_house_id` = #{wareHouseId}
+        <if test="eventType != null">
+            and `event_type` = #{eventType}
+        </if>
+        and event_time = (
+            select max(`event_time`) from <include refid="tb"/>
+            where `ware_house_id` = #{wareHouseId}
+            <if test="eventType != null">
+                and `event_type` = #{eventType}
+            </if>
+        )
+        order by id desc limit 1
+    </select>
 </mapper>

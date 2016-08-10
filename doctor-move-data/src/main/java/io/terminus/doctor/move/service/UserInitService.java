@@ -1,9 +1,9 @@
-package io.terminus.doctor.move.controller;
+package io.terminus.doctor.move.service;
 
 import com.google.common.base.Joiner;
-import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
 import io.terminus.common.exception.JsonResponseException;
+import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.Response;
 import io.terminus.common.utils.MapBuilder;
 import io.terminus.doctor.common.enums.UserStatus;
@@ -34,27 +34,23 @@ import io.terminus.parana.user.model.User;
 import io.terminus.parana.user.service.UserWriteService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-import sun.awt.ModalExclude;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 /**
- * Created by chenzenghui on 16/7/27.
+ * Created by chenzenghui on 16/8/3.
  */
 
 @Slf4j
-@RestController
-@RequestMapping("/api/data/user")
-public class UserInit {
+@Service
+public class UserInitService {
 
     @Autowired
     private DoctorUserReadService doctorUserReadService;
@@ -77,25 +73,14 @@ public class UserInit {
     @Autowired
     private SubRoleDao subRoleDao;
 
+    @Transactional
+    public void init(String mobile, Long dataSourceId){
+        List<View_FarmMember> list = getFarmMember(dataSourceId);
+        checkFarmNameRepeat(list);
 
-    @RequestMapping(value = "/init", method = RequestMethod.GET)
-    public String userInit(@RequestParam String mobile, @RequestParam Long dataSourceId) {
-        log.warn("start to init user and farm data, mobile = {}, dataSourceId = {}", mobile, dataSourceId);
-        try{
-            this.init(mobile, dataSourceId);
-            log.warn("init user and farm data succeed, mobile = {}, dataSourceId = {}", mobile, dataSourceId);
-            return "ok";
-        }catch(Exception e){
-            log.error("init user data, mobile={}, dataSourceId={}, error:{}", mobile, dataSourceId, Throwables.getStackTraceAsString(e));
-            return Throwables.getStackTraceAsString(e);
-        }
-    }
-
-    private void init(String mobile, Long dataSourceId){
-        List<View_FarmMember> list = doctorMoveDatasourceHandler.findAllData(dataSourceId, View_FarmMember.class, DoctorMoveTableEnum.view_FarmMember).getResult();
         List<DoctorFarm> farms = new ArrayList<>();
-        doctorMoveDatasourceHandler.findAllData(dataSourceId, View_FarmInfo.class, DoctorMoveTableEnum.view_FarmInfo).getResult().forEach(farmInfo -> {
-            if(farmInfo.getLevels() == 1){
+        RespHelper.or500(doctorMoveDatasourceHandler.findAllData(dataSourceId, View_FarmInfo.class, DoctorMoveTableEnum.view_FarmInfo)).forEach(farmInfo -> {
+            if (farmInfo.getLevels() == 1) {
                 farms.add(makeFarm(farmInfo));
             }
         });
@@ -137,6 +122,20 @@ public class UserInit {
         for(View_FarmMember member : list) {
             if(member.getLevels() == 1){
                 this.createSubUser(member, roleId, primaryUser.getId(), mobile, farmIds, member.getOID());
+            }
+        }
+    }
+
+    public List<View_FarmMember> getFarmMember(Long datasourceId) {
+        return doctorMoveDatasourceHandler.findAllData(datasourceId, View_FarmMember.class, DoctorMoveTableEnum.view_FarmMember).getResult();
+    }
+
+    //校验猪场名称重复
+    private void checkFarmNameRepeat(List<View_FarmMember> farmList) {
+        List<String> farmNames = doctorFarmDao.findAll().stream().map(DoctorFarm::getName).collect(Collectors.toList());
+        for (View_FarmMember member : farmList) {
+            if (farmNames.contains(member.getFarmName())) {
+                throw new ServiceException("farm.name.repeat");
             }
         }
     }
@@ -251,7 +250,7 @@ public class UserInit {
 
     private Map<String, Long> createSubRole(Long primaryUserId, Long dataSourceId){
         Map<String, Long> roleId = new HashMap<>(); // key = roleName, value = roleId
-        List<RoleTemplate> roleTemplates = doctorMoveDatasourceHandler.findAllData(dataSourceId, RoleTemplate.class, DoctorMoveTableEnum.RoleTemplate).getResult();
+        List<RoleTemplate> roleTemplates = RespHelper.or500(doctorMoveDatasourceHandler.findAllData(dataSourceId, RoleTemplate.class, DoctorMoveTableEnum.RoleTemplate));
 
         SubRole role = new SubRole();
         role.setAppKey("MOBILE");

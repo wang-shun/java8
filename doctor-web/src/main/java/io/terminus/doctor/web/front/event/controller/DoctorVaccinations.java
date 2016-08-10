@@ -6,6 +6,8 @@ import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.model.DoctorVaccinationPigWarn;
 import io.terminus.doctor.event.service.DoctorVaccinationPigWarnReadService;
 import io.terminus.doctor.event.service.DoctorVaccinationPigWarnWriteService;
+import io.terminus.doctor.user.model.DoctorFarm;
+import io.terminus.doctor.user.service.DoctorFarmReadService;
 import io.terminus.pampas.common.UserUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,12 +31,15 @@ public class DoctorVaccinations {
 
     private final DoctorVaccinationPigWarnReadService doctorVaccinationPigWarnReadService;
     private final DoctorVaccinationPigWarnWriteService doctorVaccinationPigWarnWriteService;
+    private final DoctorFarmReadService doctorFarmReadService;
 
     @Autowired
     public DoctorVaccinations(DoctorVaccinationPigWarnReadService doctorVaccinationPigWarnReadService,
-                              DoctorVaccinationPigWarnWriteService doctorVaccinationPigWarnWriteService) {
+                              DoctorVaccinationPigWarnWriteService doctorVaccinationPigWarnWriteService,
+                              DoctorFarmReadService doctorFarmReadService) {
         this.doctorVaccinationPigWarnReadService = doctorVaccinationPigWarnReadService;
         this.doctorVaccinationPigWarnWriteService = doctorVaccinationPigWarnWriteService;
+        this.doctorFarmReadService = doctorFarmReadService;
     }
 
     /**
@@ -70,6 +75,9 @@ public class DoctorVaccinations {
         Preconditions.checkNotNull(warn, "pig.vacc.warn.null");
         if (warn.getId() == null) {
             warn.setCreatorId(UserUtil.getUserId());
+            // 获取猪场name
+            DoctorFarm farm = RespHelper.or500(doctorFarmReadService.findFarmById(warn.getFarmId()));
+            warn.setFarmName(farm != null ? farm.getName() : "");
             RespHelper.or500(doctorVaccinationPigWarnWriteService.createVaccinationPigWarn(warn));
         } else {
             RespHelper.or500(doctorVaccinationPigWarnWriteService.updateVaccinationPigWarn(warn));

@@ -229,6 +229,13 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
         }
     }
 
+    //变动金额不能大于原来的金额
+    protected static void checkChangeAmount(Long amount, Long changeAmount) {
+        if (changeAmount != null && changeAmount >= amount) {
+            throw new ServiceException("changeAmount.over.amount");
+        }
+    }
+
     //校验数量
     protected static void checkQuantity(Integer max, Integer actual) {
         if (actual > max) {

@@ -2,6 +2,7 @@
 SELECT c.* , d.FieldText AS diseaseName
 FROM (
     SELECT
+        FarmOID AS farmOutId,
         a.OID AS groupOutId,
         PigID AS pigCode,
         PigFatherID AS pigFatherCode,

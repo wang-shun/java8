@@ -1,6 +1,7 @@
 package io.terminus.doctor.move.handler;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Maps;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.event.dao.DoctorPigEventDao;
 import io.terminus.doctor.event.dao.DoctorPigSnapshotDao;
@@ -18,6 +19,7 @@ import io.terminus.doctor.workflow.model.FlowProcess;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.PostConstruct;
@@ -32,7 +34,7 @@ import java.util.stream.Collectors;
  * Created by IceMimosa
  * Date: 16/7/27
  */
-//@Component
+@Component
 public class DoctorMoveWorkflowHandler {
 
     @Autowired
@@ -78,19 +80,19 @@ public class DoctorMoveWorkflowHandler {
                 .stream()
                 .collect(Collectors.toMap(FlowDefinitionNode::getId, v -> v));
         // 流程事件连线缓存
-        eventsMapByValue = workFlowService.getFlowQueryService().getFlowDefinitionNodeEventQuery()
+        workFlowService.getFlowQueryService().getFlowDefinitionNodeEventQuery()
                 .getNodeEvents(flowDefinition.getId())
                 .stream()
                 .filter(event -> StringUtils.isNoneBlank(event.getValue()))
-                .collect(Collectors.toMap(k -> Integer.parseInt(k.getValue()), v -> v));
-        eventsMapBySourceId = workFlowService.getFlowQueryService().getFlowDefinitionNodeQuery()
+                .forEach(event -> eventsMapByValue.put(Integer.parseInt(event.getValue()), event));
+        /*eventsMapBySourceId = workFlowService.getFlowQueryService().getFlowDefinitionNodeQuery()
                 .getDefinitionNodes(flowDefinition.getId())
                 .stream()
                 .collect(Collectors.toMap(
                         FlowDefinitionNode::getId,
                         v -> workFlowService.getFlowQueryService().getFlowDefinitionNodeEventQuery()
                                 .getNodeEventsBySourceId(flowDefinition.getId(), v.getId())
-                ));
+                ));*/
     }
 
 
@@ -116,19 +118,40 @@ public class DoctorMoveWorkflowHandler {
             // 2. 获取猪最新的一次事件类型, 获取下一个节点对象
             // DoctorPigEvent pigEvent = doctorPigEventDao.queryLastPigEventById(pig.getPigId());
             DoctorPigEvent pigEvent = doctorPigEventDao.queryLastPigEventInWorkflow(pig.getPigId(),
-                    ImmutableList.of(9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19));
-            Integer type = pigEvent.getType();
-            FlowDefinitionNode sourceNode = nodesMapById.get(eventsMapByValue.get(type).getSourceNodeId());
-            FlowDefinitionNode targetNode = nodesMapById.get(eventsMapByValue.get(type).getTargetNodeId());
+                    ImmutableList.of(9, 10, 11, 12, 13, 14, 15, 16, 17, 18)); //,19));
 
-            // 2.1 如果 Task 节点
-            if (targetNode.getType() == FlowDefinitionNode.Type.TASK.value()) {
+            if (pigEvent != null) {
+                Integer type = pigEvent.getType();
+                FlowDefinitionNode sourceNode = nodesMapById.get(eventsMapByValue.get(type).getSourceNodeId()); // 可能存在多个, 随机一个(无所谓)
+                FlowDefinitionNode targetNode = nodesMapById.get(eventsMapByValue.get(type).getTargetNodeId());
+
+                // 2.1 如果 Task 节点
+                if (targetNode.getType() == FlowDefinitionNode.Type.TASK.value()) {
+                    // 生成 Flow Process 对象
+                    FlowProcess flowProcess = FlowProcess.builder()
+                            .flowDefinitionNodeId(targetNode.getId())
+                            .preFlowDefinitionNodeId(sourceNode.getId() + "")
+                            .flowInstanceId(flowInstance.getId())
+                            .flowData(getFlowData(pig, pigEvent))
+                            .status(FlowProcess.Status.NORMAL.value())
+                            .assignee(targetNode.getAssignee())
+                            .forkNodeId(null)
+                            .build();
+
+                    jdbcAccess.createFlowProcess(flowProcess);
+                }
+            }
+
+            // 否则处于待配种状态
+            else {
+                FlowDefinitionNode sourceNode = nodesMapByName.get("开始节点信息");
+                FlowDefinitionNode targetNode = nodesMapByName.get("待配种");
                 // 生成 Flow Process 对象
                 FlowProcess flowProcess = FlowProcess.builder()
                         .flowDefinitionNodeId(targetNode.getId())
                         .preFlowDefinitionNodeId(sourceNode.getId() + "")
                         .flowInstanceId(flowInstance.getId())
-                        .flowData(getFlowData(pig, pigEvent))
+                        .flowData(JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(Maps.newHashMap())) // 清空数据
                         .status(FlowProcess.Status.NORMAL.value())
                         .assignee(targetNode.getAssignee())
                         .forkNodeId(null)

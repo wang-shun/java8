@@ -20,4 +20,5 @@ public class B_Customer implements Serializable {
     private String EMail;
     private String Srm;
     private Integer Ord;
+    private String FarmOID;
 }

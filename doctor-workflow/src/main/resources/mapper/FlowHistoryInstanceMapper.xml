@@ -22,6 +22,7 @@
         <result column="parent_instance_id" property="parentInstanceId"/>
         <result column="created_at" property="createdAt"/>
         <result column="updated_at" property="updatedAt"/>
+        <result column="external_history_id" property="externalHistoryId"/>
     </resultMap>
 
     <sql id="tb">
@@ -34,10 +35,10 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        `name`,`flow_definition_id`,`flow_definition_key`,`business_id`,`business_data`,`status`,`type`,`describe`,`operator_id`,`operator_name`,`parent_instance_id`,`created_at`,`updated_at`    </sql>
+        `name`,`flow_definition_id`,`flow_definition_key`,`business_id`,`business_data`,`status`,`type`,`describe`,`operator_id`,`operator_name`,`parent_instance_id`,`external_history_id`,`created_at`,`updated_at`    </sql>
 
     <sql id="vals">
-        #{name},#{flowDefinitionId},#{flowDefinitionKey},#{businessId},#{businessData},#{status},#{type},#{describe},#{operatorId},#{operatorName},#{parentInstanceId},now(),now()    </sql>
+        #{name},#{flowDefinitionId},#{flowDefinitionKey},#{businessId},#{businessData},#{status},#{type},#{describe},#{operatorId},#{operatorName},#{parentInstanceId},#{externalHistoryId},now(),now()    </sql>
 
     <insert id="create" parameterType="FlowHistoryInstance" keyProperty="id" useGeneratedKeys="true">
         INSERT INTO
@@ -47,7 +48,7 @@
         (<include refid="vals"/>)
     </insert>
 
-    <select id="findById" parameterType="int" resultMap="FlowHistoryInstanceMap">
+    <select id="findById" parameterType="long" resultMap="FlowHistoryInstanceMap">
         SELECT
         <include refid="cols_all"/>
         FROM
@@ -72,6 +73,7 @@
             <if test="operatorName != null">,`operator_name` = #{operatorName}</if>
             <if test="parentInstanceId != null">,`parent_instance_id` = #{parentInstanceId}</if>
             <if test="createdAt != null">,`created_at` = #{createdAt}</if>
+            <if test="externalHistoryId != null">,`external_history_id` = #{externalHistoryId}</if>
         </set>
         WHERE id=#{id}
     </update>
@@ -105,6 +107,7 @@
             <if test="parentInstanceId != null">AND `parent_instance_id` = #{parentInstanceId}</if>
             <if test="startAt != null">AND `created_at` >= #{startAt}</if>
             <if test="endAt != null">AND `created_at` &lt;= #{endAt}</if>
+            <if test="externalHistoryId != null">AND `external_history_id` = #{externalHistoryId}</if>
         </where>
     </sql>
     <select id="list" parameterType="map" resultMap="FlowHistoryInstanceMap">
