@@ -17,6 +17,7 @@ import io.terminus.doctor.event.dao.DoctorPigEventDao;
 import io.terminus.doctor.event.dao.DoctorPigTrackDao;
 import io.terminus.doctor.event.dto.DoctorSowParityCount;
 import io.terminus.doctor.event.enums.FarrowingType;
+import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.enums.MatingType;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PigStatus;
@@ -96,23 +97,7 @@ public class DoctorPigEventReadServiceImpl implements DoctorPigEventReadService 
             criteria.put("endDate", endDate);
             criteria.put("ordered", 0);
             Paging<DoctorPigEvent> doctorPigEventPaging = doctorPigEventDao.paging(pageInfo.getOffset(),pageInfo.getLimit(), criteria);
-            for (DoctorPigEvent doctorPigEvent : doctorPigEventPaging.getData()) {
-                Map<String,Object> extraMap = doctorPigEvent.getExtraMap();
-                if (extraMap != null) {
-                    Integer matingType = (Integer) extraMap.get("matingType");
-                    Integer checkResult = (Integer) extraMap.get("checkResult");
-                    Integer farrowingType = (Integer) extraMap.get("farrowingType");
-                    if (matingType != null) {
-                        extraMap.put("matingType", MatingType.from(matingType).getDesc());
-                    }
-                    if (checkResult != null) {
-                        extraMap.put("checkResult", PregCheckResult.from(checkResult).getDesc());
-                    }
-                    if (farrowingType != null) {
-                        extraMap.put("farrowingType", FarrowingType.from(farrowingType).getDesc());
-                    }
-                }
-            }
+
             return Response.ok(doctorPigEventPaging);
         }catch (Exception e){
             log.error("query pig doctor events fail, cause:{}", Throwables.getStackTraceAsString(e));
