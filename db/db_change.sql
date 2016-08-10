@@ -179,3 +179,40 @@ update `doctor_pig_tracks` set current_mating_count = 1 where pig_type = 1 and s
 
 -- 2016-08-09 工作流历史实例关联实例id
 alter table workflow_history_process_instances add column `external_history_id` BIGINT(20) DEFAULT NULL COMMENT '记录删除的实例id' AFTER `parent_instance_id`;
+
+-- 2016-08-10 生产月报冗余数据
+-- 猪群事件表
+ALTER TABLE doctor_group_events ADD COLUMN change_type_id BIGINT(20) DEFAULT NULL COMMENT '变动类型id' AFTER is_auto;
+ALTER TABLE doctor_group_events ADD COLUMN price BIGINT(20) DEFAULT NULL COMMENT '销售单价(分)' AFTER change_type_id;
+ALTER TABLE doctor_group_events ADD COLUMN amount BIGINT(20) DEFAULT NULL COMMENT '销售总额(分)' AFTER price;
+ALTER TABLE doctor_group_events ADD COLUMN trans_group_type SMALLINT(6) DEFAULT NULL COMMENT '转群类型 0 内转 1 外转' AFTER amount;
+
+-- 猪事件表
+ALTER TABLE doctor_pig_events ADD COLUMN change_type_id BIGINT(20) DEFAULT NULL COMMENT '变动类型id' AFTER rel_event_id;
+ALTER TABLE doctor_pig_events ADD COLUMN price BIGINT(20) DEFAULT NULL COMMENT '销售单价(分)' AFTER change_type_id;
+ALTER TABLE doctor_pig_events ADD COLUMN amount BIGINT(20) DEFAULT NULL COMMENT '销售总额(分)' AFTER price;
+ALTER TABLE doctor_pig_events ADD COLUMN pig_status_before SMALLINT(6) DEFAULT NULL COMMENT '事件发生之前猪的状态' AFTER amount;
+ALTER TABLE doctor_pig_events ADD COLUMN pig_status_after SMALLINT(6) DEFAULT NULL COMMENT '事件发生之后猪的状态' AFTER pig_status_before;
+ALTER TABLE doctor_pig_events ADD COLUMN parity INT(11) DEFAULT NULL COMMENT '事件发生母猪的胎次），记住是前一个事件是妊娠检查事件' AFTER pig_status_after;
+ALTER TABLE doctor_pig_events ADD COLUMN is_impregnation SMALLINT(6) DEFAULT NULL COMMENT '是否可以进行受胎统计，就是妊娠检查阳性之后这个字段为true 0否1是' AFTER parity;
+ALTER TABLE doctor_pig_events ADD COLUMN is_delivery SMALLINT(6) DEFAULT NULL COMMENT '是否可以进行分娩，就是分娩事件之后这个字段为true 0否1是' AFTER is_impregnation;
+ALTER TABLE doctor_pig_events ADD COLUMN preg_days INT(11) DEFAULT NULL COMMENT '孕期，分娩时候统计' AFTER is_delivery;
+ALTER TABLE doctor_pig_events ADD COLUMN feed_days INT(11) DEFAULT NULL COMMENT '哺乳天数，断奶事件发生统计' AFTER preg_days;
+ALTER TABLE doctor_pig_events ADD COLUMN preg_check_result SMALLINT(6) DEFAULT NULL COMMENT '妊娠检查结果，从extra中拆出来' AFTER feed_days;
+ALTER TABLE doctor_pig_events ADD COLUMN dp_npd INT(11) DEFAULT NULL COMMENT '断奶到配种的非生产天数' AFTER preg_check_result;
+ALTER TABLE doctor_pig_events ADD COLUMN pf_npd INT(11) DEFAULT NULL COMMENT '配种到返情非生产天数' AFTER dp_npd;
+ALTER TABLE doctor_pig_events ADD COLUMN pl_npd INT(11) DEFAULT NULL COMMENT '配种到流产非生产天数' AFTER pf_npd;
+ALTER TABLE doctor_pig_events ADD COLUMN ps_npd INT(11) DEFAULT NULL COMMENT '配种到死亡非生产天数' AFTER pl_npd;
+ALTER TABLE doctor_pig_events ADD COLUMN py_npd INT(11) DEFAULT NULL COMMENT '配种到阴性非生产天数' AFTER ps_npd;
+ALTER TABLE doctor_pig_events ADD COLUMN pt_npd INT(11) DEFAULT NULL COMMENT '配种到淘汰非生产天数' AFTER py_npd;
+ALTER TABLE doctor_pig_events ADD COLUMN jp_npd INT(11) DEFAULT NULL COMMENT '配种到配种非生产天数' AFTER pt_npd;
+ALTER TABLE doctor_pig_events ADD COLUMN npd INT(11) DEFAULT NULL COMMENT '非生产天数 前面的总和' AFTER jp_npd;
+ALTER TABLE doctor_pig_events ADD COLUMN live_count INT(11) DEFAULT NULL COMMENT '活仔数' AFTER npd;
+ALTER TABLE doctor_pig_events ADD COLUMN health_count INT(11) DEFAULT NULL COMMENT '键仔数' AFTER live_count;
+ALTER TABLE doctor_pig_events ADD COLUMN weak_count INT(11) DEFAULT NULL COMMENT '弱仔数' AFTER health_count;
+ALTER TABLE doctor_pig_events ADD COLUMN mny_count INT(11) DEFAULT NULL COMMENT '木乃伊数' AFTER weak_count;
+ALTER TABLE doctor_pig_events ADD COLUMN jx_count INT(11) DEFAULT NULL COMMENT '畸形数' AFTER mny_count;
+ALTER TABLE doctor_pig_events ADD COLUMN dead_count INT(11) DEFAULT NULL COMMENT '死胎数' AFTER jxv;
+ALTER TABLE doctor_pig_events ADD COLUMN black_count INT(11) DEFAULT NULL COMMENT '黑胎数' AFTER dead_count;
+ALTER TABLE doctor_pig_events ADD COLUMN wean_count INT(11) DEFAULT NULL COMMENT '断奶数' AFTER black_count;
+ALTER TABLE doctor_pig_events ADD COLUMN wean_avg_weight DOUBLE DEFAULT NULL COMMENT '断奶均重(kg)' AFTER wean_count;

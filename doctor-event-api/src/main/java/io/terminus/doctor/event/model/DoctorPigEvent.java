@@ -61,6 +61,150 @@ public class DoctorPigEvent implements Serializable{
 
     private Long relEventId;
 
+    /**
+     * 变动类型的id
+     */
+    private Long changeTypeId;
+
+    /**
+     * 销售单价(分)
+     */
+    private Long price;
+
+    /**
+     * 销售总额(分)
+     */
+    private Long amount;
+
+    /**
+     * 事件发生之前猪的状态
+     * @see io.terminus.doctor.event.enums.PigStatus
+     */
+    private Integer pigStatusBefore;
+
+    /**
+     * 事件发生之后猪的状态
+     * @see io.terminus.doctor.event.enums.PigStatus
+     */
+    private Integer pigStatusAfter;
+
+    /**
+     * 事件发生母猪的胎次），记住是前一个事件是妊娠检查事件
+     */
+    private Integer parity;
+
+    /**
+     * 是否可以进行受胎统计，就是妊娠检查阳性之后这个字段为true
+     * @see io.terminus.doctor.event.enums.IsOrNot
+     */
+    private Integer isImpregnation;
+
+    /**
+     * 是否可以进行分娩，就是分娩事件之后这个字段为true
+     * @see io.terminus.doctor.event.enums.IsOrNot
+     */
+    private Integer isDelivery;
+
+    /**
+     * 孕期，分娩时候统计
+     */
+    private Integer pregDays;
+
+    /**
+     * 哺乳天数，断奶事件发生统计
+     */
+    private Integer feedDays;
+
+    /**
+     * 妊娠检查结果，从extra中拆出来
+     */
+    private Integer pregCheckResult;
+
+    /**
+     * 断奶到配种的非生产天数
+     */
+    private Integer dpNpd;
+
+    /**
+     * 配种到返情非生产天数
+     */
+    private Integer pfNpd;
+
+    /**
+     * 配种到流产非生产天数
+     */
+    private Integer plNpd;
+
+    /**
+     * 配种到死亡非生产天数
+     */
+    private Integer psNpd;
+
+    /**
+     * 配种到阴性非生产天数
+     */
+    private Integer pyNpd;
+
+    /**
+     * 配种到淘汰非生产天数
+     */
+    private Integer ptNpd;
+
+    /**
+     * 配种到配种非生产天数
+     */
+    private Integer jpNpd;
+
+    /**
+     * 非生产天数 前面的总和
+     */
+    private Integer npd;
+
+    /**
+     * 活仔数
+     */
+    private Integer liveCount;
+
+    /**
+     * 键仔数
+     */
+    private Integer healthCount;
+
+    /**
+     * 弱仔数
+     */
+    private Integer weakCount;
+
+    /**
+     * 木乃伊数
+     */
+    private Integer mnyCount;
+
+    /**
+     * 畸形数
+     */
+    private Integer jxCount;
+
+    /**
+     * 死胎数
+     */
+    private Integer deadCount;
+
+    /**
+     * 黑胎数
+     */
+    private Integer blackCount;
+
+    /**
+     * 断奶数
+     */
+    private Integer weanCount;
+
+    /**
+     * 断奶均重(kg)
+     */
+    private Double weanAvgWeight;
+
     private String outId;
 
     @Setter(AccessLevel.NONE)
