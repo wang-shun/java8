@@ -1,8 +1,6 @@
 package io.terminus.doctor.web.component;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.base.Function;
-import com.google.common.collect.FluentIterable;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.Paging;
 import io.terminus.common.utils.JsonMapper;
@@ -33,11 +31,10 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.annotation.Nullable;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static io.terminus.common.utils.Arguments.isEmpty;
 
@@ -466,13 +463,7 @@ public class DoctorSearches {
                     }
                     searchGroupPaging.getData().addAll(tempSearchGroups.getData());
                 }
-                allPigOrGroupIds = FluentIterable.from(searchGroupPaging.getData()).transform(new Function<SearchedGroup, Long>() {
-                    @Nullable
-                    @Override
-                    public Long apply(@Nullable SearchedGroup searchedGroup) {
-                        return searchedGroup.getId();
-                    }
-                }).toList();
+                allPigOrGroupIds = searchGroupPaging.getData().stream().map(SearchedGroup::getId).collect(Collectors.toList());
             } else {
                 Paging<SearchedPig> searchPigPaging =
                         RespHelper.or500(pigSearchReadService.searchWithAggs(pageNo, pageSize, "search/search.mustache", params)).getPigs();
@@ -485,24 +476,12 @@ public class DoctorSearches {
                     }
                     searchPigPaging.getData().addAll(tempSearchPigs.getData());
                 }
-                allPigOrGroupIds = FluentIterable.from(searchPigPaging.getData()).transform(new Function<SearchedPig, Long>() {
-                    @Nullable
-                    @Override
-                    public Long apply(@Nullable SearchedPig searchedPig) {
-                        return searchedPig.getId();
-                    }
-                }).toList();
+                allPigOrGroupIds = searchPigPaging.getData().stream().map(SearchedPig::getId).collect(Collectors.toList());
             }
 
             if (ids != null) {
                 List<Long> excludePigIds = OBJECT_MAPPER.readValue(ids, JacksonType.LIST_OF_LONG);
-                List<Long> result = new ArrayList<>();
-                for (Long id : allPigOrGroupIds) {
-                    if (!excludePigIds.contains(id)) {
-                        result.add(id);
-                    }
-                }
-                return result;
+                return allPigOrGroupIds.stream().filter(id -> !excludePigIds.contains(id)).collect(Collectors.toList());
             } else {
                 return allPigOrGroupIds;
             }
