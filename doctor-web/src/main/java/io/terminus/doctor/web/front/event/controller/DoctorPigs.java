@@ -17,6 +17,7 @@ import io.terminus.doctor.event.enums.PregCheckResult;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
+import io.terminus.doctor.event.service.DoctorBarnReadService;
 import io.terminus.doctor.event.service.DoctorGroupReadService;
 import io.terminus.doctor.event.service.DoctorPigReadService;
 import io.terminus.doctor.event.service.DoctorPigWriteService;
@@ -56,14 +57,16 @@ public class DoctorPigs {
     private final DoctorGroupReadService doctorGroupReadService;
     private final DoctorBasicReadService doctorBasicReadService;
     private final UserProfileReadService userProfileReadService;
+    private final DoctorBarnReadService doctorBarnReadService;
     @Autowired
     public DoctorPigs(DoctorPigReadService doctorPigReadService, DoctorPigWriteService doctorPigWriteService, DoctorGroupReadService doctorGroupReadService,
-                      DoctorBasicReadService doctorBasicReadService, UserProfileReadService userProfileReadService){
+                      DoctorBasicReadService doctorBasicReadService, UserProfileReadService userProfileReadService, DoctorBarnReadService doctorBarnReadService){
         this.doctorPigReadService = doctorPigReadService;
         this.doctorPigWriteService = doctorPigWriteService;
         this.doctorGroupReadService = doctorGroupReadService;
         this.doctorBasicReadService = doctorBasicReadService;
         this.userProfileReadService = userProfileReadService;
+        this.doctorBarnReadService = doctorBarnReadService;
     }
 
     @RequestMapping(value = "/queryByStatus", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -246,6 +249,9 @@ public class DoctorPigs {
                 }
                 if (extraMap.get("vaccinationStaffId") != null) {
                     extraMap.put("vaccinationStaffName", RespHelper.or500(userProfileReadService.findProfileByUserId(Long.valueOf((Integer)extraMap.get("vaccinationStaffId")))).getRealName());
+                }
+                if (extraMap.get("toBarnId") != null) {
+                    extraMap.put("toBarnId", RespHelper.or500(doctorBarnReadService.findBarnById(Long.valueOf((Integer) extraMap.get("toBarnId")))).getName());
                 }
             }
         }
