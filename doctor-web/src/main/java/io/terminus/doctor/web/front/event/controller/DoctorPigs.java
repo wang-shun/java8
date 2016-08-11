@@ -5,6 +5,7 @@ import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.basic.service.DoctorBasicReadService;
+import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dto.DoctorGroupDetail;
 import io.terminus.doctor.event.dto.DoctorPigInfoDetailDto;
@@ -14,6 +15,7 @@ import io.terminus.doctor.event.enums.FarrowingType;
 import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.enums.MatingType;
 import io.terminus.doctor.event.enums.PregCheckResult;
+import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
@@ -40,6 +42,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Created by yaoqijun.
@@ -256,5 +259,21 @@ public class DoctorPigs {
             }
         }
         return doctorPigInfoDetailDto;
+    }
+
+    /**
+     * 帮助前台判断参数中的猪群是否都是后备群
+     * @param groupIds 猪群id
+     * @return
+     */
+    @RequestMapping(value = "/checkGroupReserve", method = RequestMethod.POST)
+    @ResponseBody
+    public boolean checkGroupReserve(@RequestParam("groupIds") List<Long> groupIds){
+        for(DoctorGroup group : RespHelper.or500(doctorGroupReadService.findGroupByIds(groupIds))){
+            if(!Objects.equals(group.getPigType(), PigType.RESERVE_BOAR.getValue()) && !Objects.equals(group.getPigType(), PigType.RESERVE_SOW.getValue())){
+                return false;
+            }
+        }
+        return true;
     }
 }

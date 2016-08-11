@@ -33,6 +33,13 @@ public interface DoctorGroupReadService {
     Response<DoctorGroup> findGroupById(Long groupId);
 
     /**
+     * 根据id批量查询猪群卡片表
+     * @param groupIds 主键id
+     * @return 猪群卡片表
+     */
+    Response<List<DoctorGroup>> findGroupByIds(List<Long> groupIds);
+
+    /**
      * 根据farmId查询猪群卡片表
      * @param farmId 猪场id
      * @return 猪群卡片表
