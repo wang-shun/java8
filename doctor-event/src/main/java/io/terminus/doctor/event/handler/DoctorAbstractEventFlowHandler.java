@@ -99,6 +99,8 @@ public abstract class DoctorAbstractEventFlowHandler extends HandlerAware {
             // 特殊 事件信息处理
             specialFlowHandler(execution, doctorBasicInputInfoDto, extraInfo, context);
 
+            afterEventCreateHandle(doctorPigEvent, doctorPigTrack, doctorPigSnapshot, context);
+
             // 当前事件影响的Id 方式
             flowDataMap.put("createEventResult",
                     JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(
@@ -127,8 +129,6 @@ public abstract class DoctorAbstractEventFlowHandler extends HandlerAware {
         // create event info
         //添加当前事件发生前猪的状态
         doctorPigEvent.setPigStatusBefore(doctorPigTrack.getStatus());
-        //添加时间发生之前母猪的胎次
-        doctorPigEvent.setParity(doctorPigTrack.getCurrentParity());
 
         eventCreatePreHandler(execution, doctorPigEvent, doctorPigTrack, basicInputInfoDto, extra, context);
     }
@@ -165,6 +165,8 @@ public abstract class DoctorAbstractEventFlowHandler extends HandlerAware {
 
         //往事件当中添加事件发生之后猪的状态
         doctorPigEvent.setPigStatusAfter(doctorPigTrack.getStatus());
+        //添加时间发生之后母猪的胎次
+        doctorPigEvent.setParity(doctorPigTrack.getCurrentParity());
         doctorPigEventDao.update(doctorPigEvent);
     }
 
@@ -180,6 +182,11 @@ public abstract class DoctorAbstractEventFlowHandler extends HandlerAware {
      */
     protected void eventCreateAfterHandler(Execution execution, DoctorPigEvent doctorPigEvent, final DoctorPigTrack doctorPigTrack, DoctorBasicInputInfoDto basicInputInfoDto,
                                            Map<String, Object> extra, Map<String, Object> context) {
+
+    }
+
+    protected void afterEventCreateHandle(DoctorPigEvent doctorPigEvent, DoctorPigTrack doctorPigTrack,
+                                          DoctorPigSnapshot doctorPigSnapshot, Map<String, Object> extra) {
 
     }
 

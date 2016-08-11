@@ -216,3 +216,4 @@ ALTER TABLE doctor_pig_events ADD COLUMN dead_count INT(11) DEFAULT NULL COMMENT
 ALTER TABLE doctor_pig_events ADD COLUMN black_count INT(11) DEFAULT NULL COMMENT '黑胎数' AFTER dead_count;
 ALTER TABLE doctor_pig_events ADD COLUMN wean_count INT(11) DEFAULT NULL COMMENT '断奶数' AFTER black_count;
 ALTER TABLE doctor_pig_events ADD COLUMN wean_avg_weight DOUBLE DEFAULT NULL COMMENT '断奶均重(kg)' AFTER wean_count;
+ALTER TABLE doctor_pig_events ADD COLUMN current_mating_count DOUBLE DEFAULT NULL COMMENT '当前配种次数' AFTER wean_avg_weight;

@@ -381,6 +381,28 @@
         order by event_at desc limit 1;
     </select>
 
+    <select id="queryLastFirstMate" parameterType="map" resultMap="DoctorPigEventMap">
+        select
+        <include refid="cols_all"/>
+        from
+        <include refid="tb"/>
+        where pig_id = #{pigId}
+        and parity = #{parity}
+        and current_mating_count = #{currentMatingCount}
+        and type = ${type}
+        order by event_at desc limit 1;
+    </select>
+
+    <select id="queryLastFarrowing" parameterType="map" resultMap="DoctorPigEventMap">
+        select
+        <include refid="cols_all"/>
+        from
+        <include refid="tb"/>
+        where pig_id = #{pigId}
+        and type = ${type}
+        order by event_at desc limit 1;
+    </select>
+
     <select id="queryAllEventsByPigId" parameterType="long" resultMap="DoctorPigEventMap">
         SELECT
         <include refid="cols_all"/>
