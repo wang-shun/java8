@@ -67,10 +67,7 @@ public abstract class DoctorAbstractEventHandler implements DoctorEventCreateHan
         DoctorPigEvent doctorPigEvent = buildAllPigDoctorEvent(basic, extra);
         DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(doctorPigEvent.getPigId());
 
-        //添加当前事件发生前猪的状态
-        doctorPigEvent.setPigStatusBefore(doctorPigTrack.getStatus());
-        //添加时间发生之前母猪的胎次
-        doctorPigEvent.setParity(doctorPigTrack.getCurrentParity());
+        eventCreatePrepare(doctorPigEvent, doctorPigTrack, basic, extra, context);
         doctorPigEventDao.create(doctorPigEvent);
         context.put("doctorPigEventId", doctorPigEvent.getId());
 
@@ -80,6 +77,38 @@ public abstract class DoctorAbstractEventHandler implements DoctorEventCreateHan
 
     @Override
     public void afterHandler(DoctorBasicInputInfoDto basic, Map<String, Object> extra, Map<String, Object> context) throws RuntimeException {
+
+    }
+
+
+    /**
+     * event 事件 回掉类型接口
+     *
+     * @param basicInputInfoDto
+     * @param extra
+     * @param context
+     */
+    private void eventCreatePrepare(DoctorPigEvent doctorPigEvent, final DoctorPigTrack doctorPigTrack, DoctorBasicInputInfoDto basicInputInfoDto,
+                                    Map<String, Object> extra, Map<String, Object> context) {
+        //添加当前事件发生前猪的状态
+        doctorPigEvent.setPigStatusBefore(doctorPigTrack.getStatus());
+        //添加时间发生之前母猪的胎次
+        doctorPigEvent.setParity(doctorPigTrack.getCurrentParity());
+
+        eventCreatePreHandler(doctorPigEvent, doctorPigTrack, basicInputInfoDto, extra, context);
+    }
+
+    /**
+     * 用于子类的覆盖
+     *
+     * @param doctorPigEvent
+     * @param doctorPigTrack
+     * @param basicInputInfoDto
+     * @param extra
+     * @param context
+     */
+    protected void eventCreatePreHandler(DoctorPigEvent doctorPigEvent, final DoctorPigTrack doctorPigTrack, DoctorBasicInputInfoDto basicInputInfoDto,
+                                         Map<String, Object> extra, Map<String, Object> context) {
 
     }
 
@@ -101,7 +130,7 @@ public abstract class DoctorAbstractEventHandler implements DoctorEventCreateHan
 
     }
 
-    protected DoctorPigEvent buildAllPigDoctorEvent(DoctorBasicInputInfoDto basic, Map<String,Object> extra){
+    protected DoctorPigEvent buildAllPigDoctorEvent(DoctorBasicInputInfoDto basic, Map<String, Object> extra) {
         DoctorPigEvent doctorPigEvent = DoctorPigEvent.builder()
                 .orgId(basic.getOrgId()).orgName(basic.getOrgName())
                 .farmId(basic.getFarmId()).farmName(basic.getFarmName())

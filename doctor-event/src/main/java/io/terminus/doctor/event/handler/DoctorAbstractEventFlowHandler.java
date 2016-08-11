@@ -75,13 +75,8 @@ public abstract class DoctorAbstractEventFlowHandler extends HandlerAware {
             DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(doctorPigEvent.getPigId());
 
             // 当前 猪 状态 对录入数据影响
-            eventCreatePrepare(execution, doctorPigTrack, doctorBasicInputInfoDto, extraInfo, context);
+            eventCreatePrepare(execution, doctorPigEvent, doctorPigTrack, doctorBasicInputInfoDto, extraInfo, context);
 
-            // create event info
-            //添加当前事件发生前猪的状态
-            doctorPigEvent.setPigStatusBefore(doctorPigTrack.getStatus());
-            //添加时间发生之前母猪的胎次
-            doctorPigEvent.setParity(doctorPigTrack.getCurrentParity());
             doctorPigEventDao.create(doctorPigEvent);
             context.put("doctorPigEventId", doctorPigEvent.getId());
 
@@ -128,9 +123,30 @@ public abstract class DoctorAbstractEventFlowHandler extends HandlerAware {
      * @param extra
      * @param context
      */
-    protected void eventCreatePrepare(Execution execution, final DoctorPigTrack doctorPigTrack, DoctorBasicInputInfoDto basicInputInfoDto,
-                                      Map<String, Object> extra, Map<String, Object> context) {
-        return;
+    private void eventCreatePrepare(Execution execution, DoctorPigEvent doctorPigEvent, final DoctorPigTrack doctorPigTrack, DoctorBasicInputInfoDto basicInputInfoDto,
+                                    Map<String, Object> extra, Map<String, Object> context) {
+        // create event info
+        //添加当前事件发生前猪的状态
+        doctorPigEvent.setPigStatusBefore(doctorPigTrack.getStatus());
+        //添加时间发生之前母猪的胎次
+        doctorPigEvent.setParity(doctorPigTrack.getCurrentParity());
+
+        eventCreatePreHandler(execution, doctorPigEvent, doctorPigTrack, basicInputInfoDto, extra, context);
+    }
+
+    /**
+     * 用于子类的覆盖
+     *
+     * @param execution
+     * @param doctorPigEvent
+     * @param doctorPigTrack
+     * @param basicInputInfoDto
+     * @param extra
+     * @param context
+     */
+    protected void eventCreatePreHandler(Execution execution, DoctorPigEvent doctorPigEvent, final DoctorPigTrack doctorPigTrack, DoctorBasicInputInfoDto basicInputInfoDto,
+                                         Map<String, Object> extra, Map<String, Object> context) {
+
     }
 
     /**

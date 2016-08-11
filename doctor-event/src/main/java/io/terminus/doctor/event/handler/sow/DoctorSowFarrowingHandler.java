@@ -3,7 +3,6 @@ package io.terminus.doctor.event.handler.sow;
 import com.google.common.base.MoreObjects;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.common.enums.PigType;
-import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dao.DoctorPigDao;
 import io.terminus.doctor.event.dao.DoctorPigEventDao;
 import io.terminus.doctor.event.dao.DoctorPigSnapshotDao;
@@ -17,11 +16,11 @@ import io.terminus.doctor.event.enums.PigSex;
 import io.terminus.doctor.event.enums.PigSource;
 import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.handler.DoctorAbstractEventFlowHandler;
+import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.event.service.DoctorGroupWriteService;
 import io.terminus.doctor.workflow.core.Execution;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.ibatis.type.IntegerTypeHandler;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
@@ -54,8 +53,7 @@ public class DoctorSowFarrowingHandler extends DoctorAbstractEventFlowHandler {
     }
 
     @Override
-    protected void eventCreatePrepare(Execution execution, DoctorPigTrack doctorPigTrack, DoctorBasicInputInfoDto basicInputInfoDto, Map<String, Object> extra, Map<String, Object> context) {
-
+    protected void eventCreatePreHandler(Execution execution, DoctorPigEvent doctorPigEvent, DoctorPigTrack doctorPigTrack, DoctorBasicInputInfoDto basicInputInfoDto, Map<String, Object> extra, Map<String, Object> context) {
         // 助产 信息
         extra.put("isHelp", 1);
 
@@ -72,14 +70,14 @@ public class DoctorSowFarrowingHandler extends DoctorAbstractEventFlowHandler {
     @Override
     public DoctorPigTrack updateDoctorPigTrackInfo(Execution execution,
                                                    DoctorPigTrack doctorPigTrack, DoctorBasicInputInfoDto basic,
-                                                   Map<String, Object> extra, Map<String,Object> context) {
+                                                   Map<String, Object> extra, Map<String, Object> context) {
 
         // 对应的 仔猪 猪舍的 信息
         extra.put("toBarnId", doctorPigTrack.getCurrentBarnId());
         extra.put("toBarnName", doctorPigTrack.getCurrentBarnName());
 
         // 对应的 猪群信息
-        extra.put("farrowingPigletGroupId",buildPigGroupCountInfo(basic, extra));
+        extra.put("farrowingPigletGroupId", buildPigGroupCountInfo(basic, extra));
 
         doctorPigTrack.addAllExtraMap(extra);
         doctorPigTrack.setStatus(PigStatus.FEED.getKey());  //母猪进入哺乳的状态
@@ -89,6 +87,7 @@ public class DoctorSowFarrowingHandler extends DoctorAbstractEventFlowHandler {
 
     /**
      * 创建对应的猪群
+     *
      * @param basic
      * @param extra
      */
@@ -112,10 +111,10 @@ public class DoctorSowFarrowingHandler extends DoctorAbstractEventFlowHandler {
         input.setInTypeName(DoctorMoveInGroupEvent.InType.PIGLET.getDesc());
         input.setSource(PigSource.LOCAL.getKey());
 
-        Integer farrowingLiveCount = Integer.valueOf(MoreObjects.firstNonNull(extra.get("farrowingLiveCount"),0).toString());
+        Integer farrowingLiveCount = Integer.valueOf(MoreObjects.firstNonNull(extra.get("farrowingLiveCount"), 0).toString());
         Integer sowCount = Integer.valueOf(MoreObjects.firstNonNull(extra.get("liveSowCount"), 0).toString());
         Integer boarCount = Integer.valueOf(MoreObjects.firstNonNull(extra.get("liveBoarCount"), 0).toString());
-        if(sowCount == 0 && boarCount == 0) sowCount = farrowingLiveCount;
+        if (sowCount == 0 && boarCount == 0) sowCount = farrowingLiveCount;
 
         input.setSex(judgePigSex(sowCount, boarCount).getKey());
         input.setQuantity(farrowingLiveCount);
@@ -128,24 +127,24 @@ public class DoctorSowFarrowingHandler extends DoctorAbstractEventFlowHandler {
         input.setCreatorId(basic.getStaffId());
         input.setCreatorName(basic.getStaffName());
         Response<Long> response = doctorGroupWriteService.sowGroupEventMoveIn(input);
-        if(response.isSuccess()){
+        if (response.isSuccess()) {
             return response.getResult();
-        }else {
+        } else {
             throw new IllegalStateException(response.getError());
         }
     }
 
-    private PigSex judgePigSex(Integer sowCount, Integer boarCount){
-        if(sowCount == 0 && boarCount == 0){
+    private PigSex judgePigSex(Integer sowCount, Integer boarCount) {
+        if (sowCount == 0 && boarCount == 0) {
 //            throw new IllegalStateException("farrow.pigCount.error");
             return PigSex.MIX;
         }
 
-        if(sowCount == 0){
+        if (sowCount == 0) {
             return PigSex.BOAR;
         }
 
-        if(boarCount == 0){
+        if (boarCount == 0) {
             return PigSex.SOW;
         }
         return PigSex.MIX;
