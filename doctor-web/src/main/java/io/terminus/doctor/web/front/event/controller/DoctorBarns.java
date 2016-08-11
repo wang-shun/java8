@@ -277,16 +277,17 @@ public class DoctorBarns {
 
 
     /**
-     *  查询可以转入的猪舍
+     * 查询可以转入的猪舍
+     *
      * @param farmId  转入的猪场
-     * @param barnId  当前猪舍id
-     * @return  可以转入的猪舍
+     * @param groupId 当前猪群id
+     * @return 可以转入的猪舍
      */
     @RequestMapping(value = "/findAvailableBarns", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public List<DoctorBarn> findAvailableBarns(@RequestParam("farmId") Long farmId,
-                                               @RequestParam("barnId") Long barnId) {
-        return RespHelper.orServEx(doctorBarnReadService.findAvailableBarns(farmId, barnId));
+                                               @RequestParam("groupId") Long groupId) {
+        return RespHelper.orServEx(doctorBarnReadService.findAvailableBarns(farmId, groupId));
     }
 
 }

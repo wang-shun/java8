@@ -4,11 +4,11 @@ import com.google.common.base.Objects;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
-import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
+import io.terminus.doctor.event.dao.DoctorGroupDao;
 import io.terminus.doctor.event.dto.DoctorGroupDetail;
 import io.terminus.doctor.event.dto.DoctorGroupSearchDto;
 import io.terminus.doctor.event.model.DoctorBarn;
@@ -33,14 +33,17 @@ import java.util.List;
 public class DoctorBarnReadServiceImpl implements DoctorBarnReadService {
 
     private final DoctorBarnDao doctorBarnDao;
+    private final DoctorGroupDao doctorGroupDao;
     private final DoctorGroupReadService doctorGroupReadService;
     private final DoctorPigReadService doctorPigReadService;
 
     @Autowired
     public DoctorBarnReadServiceImpl(DoctorBarnDao doctorBarnDao,
+                                     DoctorGroupDao doctorGroupDao,
                                      DoctorGroupReadService doctorGroupReadService,
                                      DoctorPigReadService doctorPigReadService) {
         this.doctorBarnDao = doctorBarnDao;
+        this.doctorGroupDao = doctorGroupDao;
         this.doctorGroupReadService = doctorGroupReadService;
         this.doctorPigReadService = doctorPigReadService;
     }
@@ -121,12 +124,18 @@ public class DoctorBarnReadServiceImpl implements DoctorBarnReadService {
 
     @Override
     public Response<List<DoctorBarn>> findAvailableBarns(@NotNull(message = "input.farm.id.null") Long farmId,
-                                                         @NotNull(message = "input.barn.id.null") Long barnId) {
+                                                         @NotNull(message = "input.barn.id.null") Long groupId) {
         try {
+            DoctorGroup existed = doctorGroupDao.findById(groupId);
+            if (existed == null) {
+                return Response.fail("doctor.group.not.exist");
+            }
+            //获取当前猪舍id
+            Long currentBarnId = existed.getCurrentBarnId();
             /**
              * 当前所属猪舍
              */
-            Integer barnType = doctorBarnDao.findById(barnId).getPigType();
+            Integer barnType = doctorBarnDao.findById(currentBarnId).getPigType();
             /**
              * 要转入猪场的猪舍
              */
@@ -153,7 +162,7 @@ public class DoctorBarnReadServiceImpl implements DoctorBarnReadService {
             return Response.ok(availableBarns);
         } catch (Exception e) {
             log.error("fail to find available barns,current barn id:{},farm id:{},cause:{}",
-                    barnId, farmId, Throwables.getStackTraceAsString(e));
+                    groupId, farmId, Throwables.getStackTraceAsString(e));
             return Response.fail("find.available.barns.failed");
         }
     }
