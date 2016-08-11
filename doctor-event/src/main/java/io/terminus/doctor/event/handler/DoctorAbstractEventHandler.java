@@ -1,7 +1,6 @@
 package io.terminus.doctor.event.handler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableMap;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.event.constants.DoctorPigSnapshotConstants;
@@ -30,7 +29,7 @@ import static io.terminus.common.utils.Arguments.notNull;
  * Descirbe: workflow 事件处理方式
  */
 @Slf4j
-public abstract class DoctorAbstractEventHandler implements DoctorEventCreateHandler{
+public abstract class DoctorAbstractEventHandler implements DoctorEventCreateHandler {
 
     private static final ObjectMapper OBJECT_MAPPER = JsonMapper.JSON_NON_DEFAULT_MAPPER.getMapper();
 
@@ -49,7 +48,7 @@ public abstract class DoctorAbstractEventHandler implements DoctorEventCreateHan
                                       DoctorPigEventDao doctorPigEventDao,
                                       DoctorPigTrackDao doctorPigTrackDao,
                                       DoctorPigSnapshotDao doctorPigSnapshotDao,
-                                      DoctorRevertLogDao doctorRevertLogDao){
+                                      DoctorRevertLogDao doctorRevertLogDao) {
         this.doctorPigEventDao = doctorPigEventDao;
         this.doctorPigDao = doctorPigDao;
         this.doctorPigTrackDao = doctorPigTrackDao;
@@ -67,14 +66,22 @@ public abstract class DoctorAbstractEventHandler implements DoctorEventCreateHan
     public void handler(DoctorBasicInputInfoDto basic, Map<String, Object> extra, Map<String, Object> context) throws RuntimeException {
         // create event info
         DoctorPigEvent doctorPigEvent = buildAllPigDoctorEvent(basic, extra);
+        DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(doctorPigEvent.getPigId());
+
+        //添加当前事件发生前猪的状态
+        doctorPigEvent.setPigStatusBefore(doctorPigTrack.getStatus());
+
         doctorPigEventDao.create(doctorPigEvent);
         context.put("doctorPigEventId", doctorPigEvent.getId());
 
         // update track info
-        DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(doctorPigEvent.getPigId());
         String currentPigTrackSnapShot = JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(doctorPigTrack);
         DoctorPigTrack refreshPigTrack = updateDoctorPigTrackInfo(doctorPigTrack, basic, extra, context);
         doctorPigTrackDao.update(refreshPigTrack);
+
+        //往事件当中添加事件发生之后猪的状态
+        doctorPigEvent.setPigStatusAfter(doctorPigTrack.getStatus());
+        doctorPigEventDao.update(doctorPigEvent);
 
         // create snapshot info
         // snapshot create
@@ -100,22 +107,23 @@ public abstract class DoctorAbstractEventHandler implements DoctorEventCreateHan
 
     /**
      * 事件对母猪的状态信息的影响
+     *
      * @param doctorPigTrack 基础的母猪事件信息
-     * @param basic 录入基础信息内容
-     * @param extra 事件关联的信息内容
-     * @param content  执行上下文信息
+     * @param basic          录入基础信息内容
+     * @param extra          事件关联的信息内容
+     * @param content        执行上下文信息
      * @return
      */
     protected abstract DoctorPigTrack updateDoctorPigTrackInfo(DoctorPigTrack doctorPigTrack,
-                                                            DoctorBasicInputInfoDto basic,
-                                                            Map<String,Object> extra, Map<String, Object> content);
+                                                               DoctorBasicInputInfoDto basic,
+                                                               Map<String, Object> extra, Map<String, Object> content);
 
     protected void afterEventCreateHandle(DoctorPigEvent doctorPigEvent, DoctorPigTrack doctorPigTrack,
-                                          DoctorPigSnapshot doctorPigSnapshot, Map<String,Object> extra){
+                                          DoctorPigSnapshot doctorPigSnapshot, Map<String, Object> extra) {
 
     }
 
-    private DoctorPigEvent buildAllPigDoctorEvent(DoctorBasicInputInfoDto basic, Map<String,Object> extra){
+    private DoctorPigEvent buildAllPigDoctorEvent(DoctorBasicInputInfoDto basic, Map<String, Object> extra) {
         DoctorPigEvent doctorPigEvent = DoctorPigEvent.builder()
                 .orgId(basic.getOrgId()).orgName(basic.getOrgName())
                 .farmId(basic.getFarmId()).farmName(basic.getFarmName())
@@ -129,7 +137,7 @@ public abstract class DoctorAbstractEventHandler implements DoctorEventCreateHan
         doctorPigEvent.setExtraMap(extra);
         //查询上次的事件
         DoctorPigEvent lastEvent = doctorPigEventDao.queryLastPigEventInWorkflow(basic.getPigId(), null);
-        if(notNull(lastEvent)){
+        if (notNull(lastEvent)) {
             doctorPigEvent.setRelEventId(lastEvent.getId());
         }
         return doctorPigEvent;
