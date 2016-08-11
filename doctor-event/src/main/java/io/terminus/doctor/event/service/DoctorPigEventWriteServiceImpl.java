@@ -37,8 +37,6 @@ import io.terminus.doctor.event.event.PigEventCreateEvent;
 import io.terminus.doctor.event.manager.DoctorPigEventManager;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigEvent;
-import io.terminus.doctor.event.model.DoctorPigTrack;
-import io.terminus.doctor.workflow.core.WorkFlowException;
 import io.terminus.zookeeper.pubsub.Publisher;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -464,7 +462,7 @@ public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteServic
 
             double avgWeight = doctorPartWeanDto.getPartWeanAvgWeight();
             log.info("断奶事件: 均重" + avgWeight);
-            checkState(avgWeight <= 9000.0 && avgWeight >= 5000.0, "input.weanAvgWeight.error");
+            checkState(avgWeight <= 9.0 && avgWeight >= 5.0, "input.weanAvgWeight.error");
 
             Map<String,Object> result = doctorPigEventManager.createSowPigEvent(doctorBasicInputInfoDto, dto);
             publishEvent(result);
