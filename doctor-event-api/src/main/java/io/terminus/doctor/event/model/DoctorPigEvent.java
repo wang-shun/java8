@@ -127,37 +127,37 @@ public class DoctorPigEvent implements Serializable {
     /**
      * 断奶到配种的非生产天数
      */
-    private Integer dpNpd = 0;
+    private Integer dpnpd = 0;
 
     /**
      * 配种到返情非生产天数
      */
-    private Integer pfNpd = 0;
+    private Integer pfnpd = 0;
 
     /**
      * 配种到流产非生产天数
      */
-    private Integer plNpd = 0;
+    private Integer plnpd = 0;
 
     /**
      * 配种到死亡非生产天数
      */
-    private Integer psNpd = 0;
+    private Integer psnpd = 0;
 
     /**
      * 配种到阴性非生产天数
      */
-    private Integer pyNpd = 0;
+    private Integer pynpd = 0;
 
     /**
      * 配种到淘汰非生产天数
      */
-    private Integer ptNpd = 0;
+    private Integer ptnpd = 0;
 
     /**
      * 配种到配种非生产天数
      */
-    private Integer jpNpd = 0;
+    private Integer jpnpd = 0;
 
     /**
      * 非生产天数 前面的总和

@@ -7,6 +7,7 @@ import io.terminus.doctor.event.DoctorEventConfiguration;
 import io.terminus.doctor.msg.DoctorMsgConfig;
 import io.terminus.doctor.schedule.DoctorScheduleConfiguration;
 import io.terminus.doctor.user.DoctorUserConfiguration;
+import io.terminus.doctor.warehouse.DoctorWarehouseConfiguration;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.ComponentScan;
@@ -21,6 +22,7 @@ import org.springframework.context.annotation.Import;
 @Import({
         DoctorConfigConfiguration.class,
         DoctorEventConfiguration.class,
+        DoctorWarehouseConfiguration.class,
         DoctorBasicConfiguration.class,
         DoctorMsgConfig.class,
         DoctorUserConfiguration.class,

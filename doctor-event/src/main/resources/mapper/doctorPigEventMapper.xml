@@ -34,13 +34,13 @@
         <result column="preg_days" property="pregDays"/>
         <result column="feed_days" property="feedDays"/>
         <result column="preg_check_result" property="pregCheckResult"/>
-        <result column="dp_npd" property="dpNpd"/>
-        <result column="pf_npd" property="pfNpd"/>
-        <result column="pl_npd" property="plNpd"/>
-        <result column="ps_npd" property="psNpd"/>
-        <result column="py_npd" property="pyNpd"/>
-        <result column="pt_npd" property="ptNpd"/>
-        <result column="jp_npd" property="jpNpd"/>
+        <result column="dp_npd" property="dpnpd"/>
+        <result column="pf_npd" property="pfnpd"/>
+        <result column="pl_npd" property="plnpd"/>
+        <result column="ps_npd" property="psnpd"/>
+        <result column="py_npd" property="pynpd"/>
+        <result column="pt_npd" property="ptnpd"/>
+        <result column="jp_npd" property="jpnpd"/>
         <result column="npd" property="npd"/>
         <result column="live_count" property="liveCount"/>
         <result column="health_count" property="healthCount"/>
@@ -152,13 +152,13 @@
         #{pregDays},
         #{feedDays},
         #{pregCheckResult},
-        #{dpNpd},
-        #{pfNpd},
-        #{plNpd},
-        #{psNpd},
-        #{pyNpd},
-        #{ptNpd},
-        #{jpNpd},
+        #{dpnpd},
+        #{pfnpd},
+        #{plnpd},
+        #{psnpd},
+        #{pynpd},
+        #{ptnpd},
+        #{jpnpd},
         #{npd},
         #{liveCount},
         #{healthCount},
@@ -210,13 +210,13 @@
         <if test="pregDays != null">AND preg_days = #{pregDays}</if>
         <if test="feedDays != null">AND feed_days = #{feedDays}</if>
         <if test="pregCheckResult != null">AND preg_check_result = #{pregCheckResult}</if>
-        <if test="dpNpd != null">AND dp_npd = #{dpNpd}</if>
-        <if test="pfNpd != null">AND pf_npd = #{pfNpd}</if>
-        <if test="plNpd != null">AND pl_npd = #{plNpd}</if>
-        <if test="psNpd != null">AND ps_npd = #{psNpd}</if>
-        <if test="pyNpd != null">AND py_npd = #{pyNpd}</if>
-        <if test="ptNpd != null">AND pt_npd = #{ptNpd}</if>
-        <if test="jpNpd != null">AND jp_npd = #{jpNpd}</if>
+        <if test="dpnpd != null">AND dp_npd = #{dpnpd}</if>
+        <if test="pfnpd != null">AND pf_npd = #{pfnpd}</if>
+        <if test="plnpd != null">AND pl_npd = #{plnpd}</if>
+        <if test="psnpd != null">AND ps_npd = #{psnpd}</if>
+        <if test="pynpd != null">AND py_npd = #{pynpd}</if>
+        <if test="ptnpd != null">AND pt_npd = #{ptnpd}</if>
+        <if test="jpnpd != null">AND jp_npd = #{jpnpd}</if>
         <if test="npd != null">AND npd = #{npd}</if>
         <if test="liveCount != null">AND live_count = #{liveCount}</if>
         <if test="healthCount != null">AND health_count = #{healthCount}</if>
@@ -276,13 +276,13 @@
             #{item.pregDays},
             #{item.feedDays},
             #{item.pregCheckResult},
-            #{item.dpNpd},
-            #{item.pfNpd},
-            #{item.plNpd},
-            #{item.psNpd},
-            #{item.pyNpd},
-            #{item.ptNpd},
-            #{item.jpNpd},
+            #{item.dpnpd},
+            #{item.pfnpd},
+            #{item.plnpd},
+            #{item.psnpd},
+            #{item.pynpd},
+            #{item.ptnpd},
+            #{item.jpnpd},
             #{item.npd},
             #{item.liveCount},
             #{item.healthCount},
@@ -469,13 +469,13 @@
             <if test="pregDays != null">preg_days = #{pregDays},</if>
             <if test="feedDays != null">feed_days = #{feedDays},</if>
             <if test="pregCheckResult != null">preg_check_result = #{pregCheckResult},</if>
-            <if test="dpNpd != null">dp_npd = #{dpNpd},</if>
-            <if test="pfNpd != null">pf_npd = #{pfNpd},</if>
-            <if test="plNpd != null">pl_npd = #{plNpd},</if>
-            <if test="psNpd != null">ps_npd = #{psNpd},</if>
-            <if test="pyNpd != null">py_npd = #{pyNpd},</if>
-            <if test="ptNpd != null">pt_npd = #{ptNpd},</if>
-            <if test="jpNpd != null">jp_npd = #{jpNpd},</if>
+            <if test="dpnpd != null">dp_npd = #{dpnpd},</if>
+            <if test="pfnpd != null">pf_npd = #{pfnpd},</if>
+            <if test="plnpd != null">pl_npd = #{plnpd},</if>
+            <if test="psnpd != null">ps_npd = #{psnpd},</if>
+            <if test="pynpd != null">py_npd = #{pynpd},</if>
+            <if test="ptnpd != null">pt_npd = #{ptnpd},</if>
+            <if test="jpnpd != null">jp_npd = #{jpnpd},</if>
             <if test="npd != null">npd = #{npd},</if>
             <if test="liveCount != null">live_count = #{liveCount},</if>
             <if test="healthCount != null">health_count = #{healthCount},</if>

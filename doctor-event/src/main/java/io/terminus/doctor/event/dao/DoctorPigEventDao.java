@@ -47,7 +47,7 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
      * @return
      */
     public DoctorPigEvent queryLastFirstMate(Long pigId, Integer parity) {
-        return this.getSqlSession().selectOne(sqlId("queryLastFirstMate"), MapBuilder.<String, Object>of().put("pigId", pigId).put("type", PigEvent.MATING.getKey()).put("currentMatingCount", 1).map());
+        return this.getSqlSession().selectOne(sqlId("queryLastFirstMate"), MapBuilder.<String, Object>of().put("pigId", pigId).put("type", PigEvent.MATING.getKey()).put("parity", parity).put("currentMatingCount", 1).map());
     }
 
     /**

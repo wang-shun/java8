@@ -163,6 +163,14 @@ public class DoctorEntryFlowHandler extends HandlerAware {
                 .barnId(dto.getBarnId()).barnName(dto.getBarnName()).relEventId(basic.getRelEventId())
                 .outId(UUID.randomUUID().toString()).remark(dto.getEntryMark())
                 .creatorId(basic.getStaffId()).creatorName(basic.getStaffName())
+                .npd(0)
+                .dpnpd(0)
+                .pfnpd(0)
+                .plnpd(0)
+                .psnpd(0)
+                .pynpd(0)
+                .ptnpd(0)
+                .jpnpd(0)
                 .build();
         return doctorPigEvent;
     }
