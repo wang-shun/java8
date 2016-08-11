@@ -8,6 +8,10 @@
     <resultMap id="DoctorDailyReportMap" type="DoctorDailyReport">
         <result column="farm_id" property="farmId"/>
         <result column="farm_name" property="farmName"/>
+        <result column="sow_count" property="sowCount"/>
+        <result column="farrow_count" property="farrowCount"/>
+        <result column="nursery_count" property="nurseryCount"/>
+        <result column="fatten_count" property="fattenCount"/>
         <result column="data" property="data"/>
         <result column="extra" property="extra"/>
         <result column="sum_at" property="sumAt"/>
@@ -23,11 +27,29 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        farm_id, farm_name, data, extra, sum_at, created_at
+        farm_id,
+        farm_name,
+        sow_count,
+        farrow_count,
+        nursery_count,
+        fatten_count,
+        data,
+        extra,
+        sum_at,
+        created_at
     </sql>
 
     <sql id="vals">
-        #{farmId}, #{farmName}, #{data}, #{extra}, #{sumAt}, now()
+        #{farmId},
+        #{farmName},
+        #{sowCount},
+        #{farrowCount},
+        #{nurseryCount},
+        #{fattenCount},
+        #{data},
+        #{extra},
+        #{sumAt},
+        now()
     </sql>
 
     <insert id="create" parameterType="DoctorDailyReport" keyProperty="id" useGeneratedKeys="true">
@@ -45,14 +67,18 @@
     </select>
 
     <update id="update" parameterType="DoctorDailyReport">
-        UPDATE
-        <include refid="tb"/>
+        UPDATE <include refid="tb"/>
         <set>
             <if test="farmId != null">farm_id = #{farmId},</if>
             <if test="farmName != null">farm_name = #{farmName},</if>
+            <if test="sowCount != null">sow_count = #{sowCount},</if>
+            <if test="farrowCount != null">farrow_count = #{farrowCount},</if>
+            <if test="nurseryCount != null">nursery_count = #{nurseryCount},</if>
+            <if test="fattenCount != null">fatten_count = #{fattenCount},</if>
             <if test="data != null">data = #{data},</if>
             <if test="extra != null">extra = #{extra},</if>
             <if test="sumAt != null">sum_at = #{sumAt},</if>
+            updated_at=now()
         </set>
         WHERE id = #{id}
     </update>

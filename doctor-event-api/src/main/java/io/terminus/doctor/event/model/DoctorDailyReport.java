@@ -35,6 +35,26 @@ public class DoctorDailyReport implements Serializable {
      * 猪场名称
      */
     private String farmName;
+
+    /**
+     * 母猪存栏
+     */
+    private int sowCount;
+
+    /**
+     * 产房仔猪存栏
+     */
+    private int farrowCount;
+
+    /**
+     * 保育猪存栏
+     */
+    private int nurseryCount;
+
+    /**
+     * 育肥猪存栏
+     */
+    private int fattenCount;
     
     /**
      * 日报数据，json存储

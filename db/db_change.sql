@@ -216,3 +216,9 @@ ALTER TABLE doctor_pig_events ADD COLUMN dead_count INT(11) DEFAULT NULL COMMENT
 ALTER TABLE doctor_pig_events ADD COLUMN black_count INT(11) DEFAULT NULL COMMENT '黑胎数' AFTER dead_count;
 ALTER TABLE doctor_pig_events ADD COLUMN wean_count INT(11) DEFAULT NULL COMMENT '断奶数' AFTER black_count;
 ALTER TABLE doctor_pig_events ADD COLUMN wean_avg_weight DOUBLE DEFAULT NULL COMMENT '断奶均重(kg)' AFTER wean_count;
+
+-- 2016-08-11 生产日报增加
+ALTER TABLE doctor_daily_reports ADD COLUMN sow_count int(11) DEFAULT 0 COMMENT '母猪存栏' AFTER farm_name;
+ALTER TABLE doctor_daily_reports ADD COLUMN farrow_count int(11) DEFAULT 0 COMMENT '产房仔猪存栏' AFTER sow_count;
+ALTER TABLE doctor_daily_reports ADD COLUMN nursery_count int(11) DEFAULT 0 COMMENT '保育猪存栏' AFTER farrow_count;
+ALTER TABLE doctor_daily_reports ADD COLUMN fatten_count int(11) DEFAULT 0 COMMENT '育肥猪存栏' AFTER nursery_count;

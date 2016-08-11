@@ -3,6 +3,7 @@ package io.terminus.doctor.event.manager;
 import com.google.common.base.Throwables;
 import io.terminus.doctor.event.dao.DoctorDailyReportDao;
 import io.terminus.doctor.event.dto.report.DoctorDailyReportDto;
+import io.terminus.doctor.event.dto.report.DoctorLiveStockDailyReport;
 import io.terminus.doctor.event.model.DoctorDailyReport;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,6 +42,13 @@ public class DoctorDailyReportManager {
                 .map(r -> {
                     DoctorDailyReport report = new DoctorDailyReport();
                     report.setFarmId(r.getFarmId());
+
+                    //保存当天的母猪与各阶段的仔猪存栏
+                    report.setSowCount(r.getSowCount());
+                    DoctorLiveStockDailyReport lv = r.getLiveStock();
+                    report.setFarrowCount(lv.getFarrow());
+                    report.setNurseryCount(lv.getNursery());
+                    report.setFattenCount(lv.getFatten());
                     report.setReportData(r);
                     report.setSumAt(sumAt);
                     return report;
