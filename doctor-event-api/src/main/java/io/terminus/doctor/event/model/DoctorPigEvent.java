@@ -25,7 +25,7 @@ import static java.util.Objects.isNull;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class DoctorPigEvent implements Serializable{
+public class DoctorPigEvent implements Serializable {
 
     private static final long serialVersionUID = -6226648504842984629L;
 
@@ -78,29 +78,33 @@ public class DoctorPigEvent implements Serializable{
 
     /**
      * 事件发生之前猪的状态
+     *
      * @see io.terminus.doctor.event.enums.PigStatus
      */
     private Integer pigStatusBefore;
 
     /**
      * 事件发生之后猪的状态
+     *
      * @see io.terminus.doctor.event.enums.PigStatus
      */
     private Integer pigStatusAfter;
 
     /**
-     * 事件发生母猪的胎次），记住是前一个事件是妊娠检查事件
+     * 事件发生母猪的胎次 注意这个胎次是事件发生之前母猪的胎次
      */
     private Integer parity;
 
     /**
      * 是否可以进行受胎统计，就是妊娠检查阳性之后这个字段为true
+     *
      * @see io.terminus.doctor.event.enums.IsOrNot
      */
     private Integer isImpregnation;
 
     /**
      * 是否可以进行分娩，就是分娩事件之后这个字段为true
+     *
      * @see io.terminus.doctor.event.enums.IsOrNot
      */
     private Integer isDelivery;
@@ -208,7 +212,7 @@ public class DoctorPigEvent implements Serializable{
     private String outId;
 
     @Setter(AccessLevel.NONE)
-    private Map<String,Object> extraMap;
+    private Map<String, Object> extraMap;
 
     @Setter(AccessLevel.NONE)
     @JsonIgnore
@@ -229,21 +233,21 @@ public class DoctorPigEvent implements Serializable{
     private Date updatedAt;
 
     @SneakyThrows
-    public void setExtra(String extra){
+    public void setExtra(String extra) {
         this.extra = extra;
-        if(Strings.isNullOrEmpty(extra)){
+        if (Strings.isNullOrEmpty(extra)) {
             this.extraMap = Collections.emptyMap();
-        }else {
+        } else {
             this.extraMap = OBJECT_MAPPER.readValue(extra, JacksonType.MAP_OF_OBJECT);
         }
     }
 
     @SneakyThrows
-    public void setExtraMap(Map<String, Object> extraMap){
+    public void setExtraMap(Map<String, Object> extraMap) {
         this.extraMap = extraMap;
-        if(isNull(extraMap) || Iterables.isEmpty(extraMap.entrySet())){
+        if (isNull(extraMap) || Iterables.isEmpty(extraMap.entrySet())) {
             this.extra = "";
-        }else {
+        } else {
             this.extra = OBJECT_MAPPER.writeValueAsString(extraMap);
         }
     }

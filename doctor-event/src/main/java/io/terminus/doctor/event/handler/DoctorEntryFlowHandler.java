@@ -97,6 +97,8 @@ public class DoctorEntryFlowHandler extends HandlerAware {
 
             //往事件当中添加事件发生之后猪的状态
             doctorPigEvent.setPigStatusAfter(doctorPigTrack.getStatus());
+            //添加时间发生之前母猪的胎次
+            doctorPigEvent.setParity(doctorPigTrack.getCurrentParity());
             doctorPigEventDao.update(doctorPigEvent);
 
             // snapshot create
@@ -147,7 +149,6 @@ public class DoctorEntryFlowHandler extends HandlerAware {
      *
      * @param basic
      * @param dto
-     * @param pigType
      * @return
      */
     private DoctorPigEvent buildDoctorPigEntryEvent(DoctorBasicInputInfoDto basic, DoctorFarmEntryDto dto) {

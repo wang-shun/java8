@@ -80,6 +80,8 @@ public abstract class DoctorAbstractEventFlowHandler extends HandlerAware {
             // create event info
             //添加当前事件发生前猪的状态
             doctorPigEvent.setPigStatusBefore(doctorPigTrack.getStatus());
+            //添加时间发生之前母猪的胎次
+            doctorPigEvent.setParity(doctorPigTrack.getCurrentParity());
             doctorPigEventDao.create(doctorPigEvent);
             context.put("doctorPigEventId", doctorPigEvent.getId());
 
