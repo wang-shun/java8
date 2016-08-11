@@ -1,5 +1,7 @@
 package io.terminus.doctor.event.handler.sow;
 
+import com.google.common.primitives.Doubles;
+import com.google.common.primitives.Ints;
 import io.terminus.doctor.event.dao.DoctorPigDao;
 import io.terminus.doctor.event.dao.DoctorPigEventDao;
 import io.terminus.doctor.event.dao.DoctorPigSnapshotDao;
@@ -46,6 +48,10 @@ public class DoctorSowWeanHandler extends DoctorAbstractEventFlowHandler {
 
         //哺乳天数
         doctorPigEvent.setFeedDays(Days.daysBetween(farrowingDate, partWeanDate).getDays());
+
+        //断奶只数和断奶均重
+        doctorPigEvent.setWeanCount(Ints.tryParse(Objects.toString(extra.get("partWeanPigletsCount"))));
+        doctorPigEvent.setWeanAvgWeight(Doubles.tryParse(Objects.toString(extra.get("partWeanAvgWeight"))));
 
     }
 

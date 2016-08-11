@@ -78,10 +78,10 @@
         pig_id,
         pig_code,
         event_at,
-        type,
+        `type`,
         kind,
-        name,
-        desc,
+        `name`,
+        `desc`,
         barn_id,
         barn_name,
         rel_event_id,
@@ -192,10 +192,10 @@
         <if test="pigCode != null">AND pig_code = #{pigCode}</if>
         <if test="beginDate != null">AND <![CDATA[ event_at >= #{beginDate} ]]> </if>
         <if test="endDate != null">AND <![CDATA[ event_at <= #{endDate} ]]> </if>
-        <if test="type != null">AND type = #{type}</if>
+        <if test="type != null">AND `type` = #{type}</if>
         <if test="kind != null">AND kind = #{kind}</if>
-        <if test="name != null">AND name = #{name}</if>
-        <if test="desc != null">AND desc = #{desc}</if>
+        <if test="name != null">AND `name` = #{name}</if>
+        <if test="desc != null">AND `desc` = #{desc}</if>
         <if test="barnId != null">AND barn_id = #{barnId}</if>
         <if test="barnName != null">AND barn_name = #{barnName}</if>
         <if test="relEventId != null">AND rel_event_id = #{relEventId}</if>
@@ -451,10 +451,10 @@
             <if test="pigId != null">pig_id = #{pigId},</if>
             <if test="pigCode != null">pig_code = #{pigCode},</if>
             <if test="eventAt != null">event_at = #{eventAt},</if>
-            <if test="type != null">type = #{type},</if>
+            <if test="type != null">`type` = #{type},</if>
             <if test="kind != null">kind = #{kind},</if>
-            <if test="name != null">name = #{name},</if>
-            <if test="desc != null">desc = #{desc},</if>
+            <if test="name != null">`name` = #{name},</if>
+            <if test="desc != null">`desc` = #{desc},</if>
             <if test="barnId != null">barn_id = #{barnId},</if>
             <if test="barnName != null">barn_name = #{barnName},</if>
             <if test="relEventId != null">rel_event_id = #{relEventId},</if>

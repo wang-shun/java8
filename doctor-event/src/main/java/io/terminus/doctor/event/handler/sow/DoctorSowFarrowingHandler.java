@@ -1,6 +1,7 @@
 package io.terminus.doctor.event.handler.sow;
 
 import com.google.common.base.MoreObjects;
+import com.google.common.primitives.Ints;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.event.dao.DoctorPigDao;
@@ -30,6 +31,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Created by yaoqijun.
@@ -65,10 +67,19 @@ public class DoctorSowFarrowingHandler extends DoctorAbstractEventFlowHandler {
         DateTime farrowingDate = new DateTime(Long.valueOf(extra.get("farrowingDate").toString()));
         //查找最近一次初配种事件
         DoctorPigEvent firstMate = doctorPigEventDao.queryLastFirstMate(doctorPigTrack.getPigId(), doctorPigTrack.getCurrentParity());
-        DateTime mattingDate = new DateTime(firstMate.getExtraMap().get("matingDate").toString());
+        DateTime mattingDate = new DateTime(firstMate.getExtraMap().get("matingDate"));
 
         //计算孕期
         doctorPigEvent.setPregDays(Days.daysBetween(farrowingDate, mattingDate).getDays());
+
+        //分娩仔猪只数信息
+        doctorPigEvent.setLiveCount(Ints.tryParse(Objects.toString(extra.get("farrowingLiveCount"))));
+        doctorPigEvent.setHealthCount(Ints.tryParse(Objects.toString(extra.get("healthCount"))));
+        doctorPigEvent.setWeakCount(Ints.tryParse(Objects.toString(extra.get("weakCount"))));
+        doctorPigEvent.setMnyCount(Ints.tryParse(Objects.toString(extra.get("mnyCount"))));
+        doctorPigEvent.setJxCount(Ints.tryParse(Objects.toString(extra.get("jxCount"))));
+        doctorPigEvent.setDeadCount(Ints.tryParse(Objects.toString(extra.get("deadCount"))));
+        doctorPigEvent.setBlackCount(Ints.tryParse(Objects.toString(extra.get("blackCount"))));
 
         if (farrowingDate.isBefore(pregJudgeDate)) {
             extra.put("farrowingType", FarrowingType.EARLY.getKey());
