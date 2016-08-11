@@ -186,7 +186,8 @@
         <if test="farmName != null">AND farm_name = #{farmName}</if>
         <if test="pigId != null">AND pig_id = #{pigId}</if>
         <if test="pigCode != null">AND pig_code = #{pigCode}</if>
-        <if test="eventAt != null">AND event_at = #{eventAt}</if>
+        <if test="beginDate != null"> AND <![CDATA[ event_at >= #{beginDate} ]]> </if>
+        <if test="endDate != null"> AND <![CDATA[ event_at <= #{endDate} ]]> </if>
         <if test="type != null">AND type = #{type}</if>
         <if test="kind != null">AND kind = #{kind}</if>
         <if test="name != null">AND name = #{name}</if>
