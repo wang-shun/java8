@@ -73,6 +73,7 @@ public interface DoctorBarnReadService {
      * @param groupId  当前猪群id
      * @return  可以转入的猪舍
      */
-    Response<List<DoctorBarn>> findAvailableBarns(Long farmId,Long groupId);
+    Response<List<DoctorBarn>> findAvailableBarns(@NotNull(message = "farmId.can.not.be.null") Long farmId,
+                                                  @NotNull(message = "groupId.can.not.be.null") Long groupId);
 
 }
