@@ -90,6 +90,15 @@
         WHERE id = #{id}
     </select>
 
+    <select id="findByIds" parameterType="long" resultMap="DoctorGroupMap" >
+        SELECT <include refid="cols_all" />
+        FROM <include refid="tb" />
+        WHERE id in
+        <foreach collection="list" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </select>
+
     <update id="update" parameterType="DoctorGroup">
         UPDATE
         <include refid="tb"/>

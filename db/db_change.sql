@@ -177,5 +177,3 @@ alter table `doctor_pig_tracks` add COLUMN `current_mating_count` int(11) DEFAUL
 -- 2016-08-03 更新猪跟踪的 当前配种次数
 update `doctor_pig_tracks` set current_mating_count = 1 where pig_type = 1 and status in (3,4,7,8,9);
 
--- 2016-08-09 工作流历史实例关联实例id
-alter table workflow_history_process_instances add column `external_history_id` BIGINT(20) DEFAULT NULL COMMENT '记录删除的实例id' AFTER `parent_instance_id`;

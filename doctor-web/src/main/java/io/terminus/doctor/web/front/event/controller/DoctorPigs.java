@@ -4,15 +4,15 @@ import com.google.common.base.Throwables;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
-import io.terminus.doctor.basic.service.DoctorBasicReadService;
+import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dto.DoctorGroupDetail;
 import io.terminus.doctor.event.dto.DoctorPigInfoDetailDto;
 import io.terminus.doctor.event.dto.DoctorPigInfoDto;
 import io.terminus.doctor.event.dto.DoctorPigMessage;
+import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
 import io.terminus.doctor.event.model.DoctorPigTrack;
-import io.terminus.doctor.event.service.DoctorBarnReadService;
 import io.terminus.doctor.event.service.DoctorGroupReadService;
 import io.terminus.doctor.event.service.DoctorPigReadService;
 import io.terminus.doctor.event.service.DoctorPigWriteService;
@@ -21,7 +21,6 @@ import io.terminus.doctor.web.front.event.dto.DoctorFosterDetail;
 import io.terminus.doctor.web.front.event.dto.DoctorMatingDetail;
 import io.terminus.doctor.web.front.event.dto.DoctorSowDetailDto;
 import io.terminus.doctor.web.util.TransFromUtil;
-import io.terminus.parana.user.service.UserProfileReadService;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
 import org.joda.time.Days;
@@ -36,6 +35,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Created by yaoqijun.
@@ -218,5 +218,21 @@ public class DoctorPigs {
         doctorFosterDetail.setDoctorGroupTrack(doctorGroupTrack);
         doctorFosterDetail.setDoctorPigInfoDto(doctorPigInfoDto);
         return doctorFosterDetail;
+    }
+
+    /**
+     * 帮助前台判断参数中的猪群是否都是后备群
+     * @param groupIds 猪群id
+     * @return
+     */
+    @RequestMapping(value = "/checkGroupReserve", method = RequestMethod.POST)
+    @ResponseBody
+    public boolean checkGroupReserve(@RequestParam("groupIds") List<Long> groupIds){
+        for(DoctorGroup group : RespHelper.or500(doctorGroupReadService.findGroupByIds(groupIds))){
+            if(!Objects.equals(group.getPigType(), PigType.RESERVE_BOAR.getValue()) && !Objects.equals(group.getPigType(), PigType.RESERVE_SOW.getValue())){
+                return false;
+            }
+        }
+        return true;
     }
 }

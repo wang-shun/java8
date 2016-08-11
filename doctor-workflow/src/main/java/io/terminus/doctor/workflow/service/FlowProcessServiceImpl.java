@@ -1,6 +1,7 @@
 package io.terminus.doctor.workflow.service;
 
 import com.google.common.base.Throwables;
+import com.google.common.collect.Lists;
 import io.terminus.doctor.workflow.access.JdbcAccess;
 import io.terminus.doctor.workflow.core.Execution;
 import io.terminus.doctor.workflow.core.Executor;
@@ -321,11 +322,13 @@ public class FlowProcessServiceImpl implements FlowProcessService {
                     .list();
             int count = 0;
             FlowProcessTrack currTrack = null;
+            List<Long> deleteTrackIds = Lists.newArrayList();
             for (FlowProcessTrack flowTrack : flowTracks) {
                 FlowDefinitionNode trackNode = workFlowEngine.buildFlowQueryService().getFlowDefinitionNodeQuery()
                         .id(flowTrack.getFlowDefinitionNodeId())
                         .type(FlowDefinitionNode.Type.TASK.value())
                         .single();
+                deleteTrackIds.add(flowTrack.getId());
                 if (trackNode == null)
                     continue;
                 count ++;
@@ -338,7 +341,7 @@ public class FlowProcessServiceImpl implements FlowProcessService {
                     "回滚的深度过大, 不能执行回滚操作, 流程定义key为: {}, 业务id为: {}", flowDefinitionKey, businessId);
             // 回滚
             access().deleteFlowProcess(currentProcesses.get(0).getId());
-            access().deleteFlowProcessTrack(currTrack.getId());
+            access().deleteFlowProcessTrack(deleteTrackIds);
             FlowProcess rollBackProcess = FlowProcess.builder().build();
             BeanHelper.copy(rollBackProcess, currTrack);
             access().createFlowProcess(rollBackProcess);
