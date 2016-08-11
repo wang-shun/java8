@@ -38,6 +38,7 @@ import java.util.Objects;
 
 import static io.terminus.common.utils.Arguments.notEmpty;
 import static io.terminus.common.utils.Arguments.notNull;
+import static io.terminus.doctor.common.enums.PigType.FARROW_TYPES;
 
 /**
  * Desc:
@@ -332,7 +333,7 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
 
     //判断内转还是外转
     protected static DoctorGroupEvent.TransGroupType getTransType(Integer pigType, DoctorBarn toBarn) {
-        return Objects.equals(pigType, toBarn.getPigType()) ?
+        return Objects.equals(pigType, toBarn.getPigType()) || (FARROW_TYPES.contains(pigType) && FARROW_TYPES.contains(toBarn.getPigType())) ?
                 DoctorGroupEvent.TransGroupType.IN : DoctorGroupEvent.TransGroupType.OUT;
     }
 }

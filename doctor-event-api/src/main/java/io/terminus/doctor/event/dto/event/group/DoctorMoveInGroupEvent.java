@@ -45,10 +45,18 @@ public class DoctorMoveInGroupEvent extends BaseGroupEvent implements Serializab
 
     private String breedName;
 
+    /**
+     * 群间转移来源猪舍信息
+     */
     private Long fromBarnId;
 
     private String fromBarnName;
 
+    private Integer fromBarnType;
+
+    /**
+     * 群间转移来源猪群信息
+     */
     private Long fromGroupId;
 
     private String fromGroupCode;

@@ -90,6 +90,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static io.terminus.common.utils.Arguments.notEmpty;
+import static io.terminus.doctor.common.enums.PigType.FARROW_TYPES;
 
 /**
  * Desc: 迁移数据
@@ -1150,7 +1151,9 @@ public class DoctorMoveDataService {
                 event.setExtraMap(newEvent);
                 break;
             case MOVE_IN:
-                event.setExtraMap(getMoveInEvent(gainEvent, basicMap, groupMap, group));
+                DoctorMoveInGroupEvent moveIn = getMoveInEvent(gainEvent, basicMap, groupMap, group);
+                event.setExtraMap(moveIn);
+                event.setTransGroupType(getTransType(event.getPigType(), moveIn.getFromBarnType()).getValue());
                 break;
             case CHANGE:
                 DoctorChangeGroupEvent changeEvent = getChangeEvent(gainEvent, basicMap, changeReasonMap, customerMap);
@@ -1215,7 +1218,7 @@ public class DoctorMoveDataService {
 
     //判断内转还是外转
     private static DoctorGroupEvent.TransGroupType getTransType(Integer pigType, Integer toBarnType) {
-        return Objects.equals(pigType, toBarnType) ?
+        return Objects.equals(pigType, toBarnType) || (FARROW_TYPES.contains(pigType) && FARROW_TYPES.contains(toBarnType)) ?
                 DoctorGroupEvent.TransGroupType.IN : DoctorGroupEvent.TransGroupType.OUT;
     }
 
@@ -1240,6 +1243,7 @@ public class DoctorMoveDataService {
         //来源猪舍
         moveIn.setFromBarnId(group.getCurrentBarnId());
         moveIn.setFromBarnName(group.getCurrentBarnName());
+        moveIn.setFromBarnType(group.getPigType());
 
         //再转入猪舍里, 表示的是来源猪群
         DoctorGroup fromGroup = groupMap.get(gainEvent.getToGroupOutId());

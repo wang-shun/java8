@@ -1,7 +1,10 @@
 package io.terminus.doctor.common.enums;
 
 import com.google.common.base.Objects;
+import com.google.common.collect.Lists;
 import lombok.Getter;
+
+import java.util.List;
 
 /**
  * Desc: 猪类枚举
@@ -72,4 +75,7 @@ public enum PigType {
                 DELIVER_SOW.getValue() == value ||
                 RESERVE_SOW.getValue() == value;
     }
+
+    //产房仔猪的类型
+    public static final List<Integer> FARROW_TYPES = Lists.newArrayList(FARROW_PIGLET.getValue(), DELIVER_SOW.getValue());
 }
