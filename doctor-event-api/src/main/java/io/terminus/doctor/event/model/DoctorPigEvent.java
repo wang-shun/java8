@@ -209,6 +209,11 @@ public class DoctorPigEvent implements Serializable {
      */
     private Double weanAvgWeight;
 
+    /**
+     * 当前配种次数
+     */
+    private Integer currentMatingCount;
+
     private String outId;
 
     @Setter(AccessLevel.NONE)

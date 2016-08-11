@@ -60,9 +60,9 @@ public class DoctorSowFarrowingHandler extends DoctorAbstractEventFlowHandler {
         // 校验 是否早产信息
         DateTime pregJudgeDate = new DateTime(Long.valueOf(doctorPigTrack.getExtraMap().get("judgePregDate").toString()));
         DateTime farrowingDate = new DateTime(Long.valueOf(extra.get("farrowingDate").toString()));
-        if(farrowingDate.isBefore(pregJudgeDate)){
+        if (farrowingDate.isBefore(pregJudgeDate)) {
             extra.put("farrowingType", FarrowingType.EARLY.getKey());
-        }else {
+        } else {
             extra.put("farrowingType", FarrowingType.USUAL.getKey());
         }
     }

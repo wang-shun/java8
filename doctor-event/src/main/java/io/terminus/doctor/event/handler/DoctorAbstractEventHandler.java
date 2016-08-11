@@ -113,6 +113,38 @@ public abstract class DoctorAbstractEventHandler implements DoctorEventCreateHan
     }
 
     /**
+     * event 事件创建后用于二次更新
+     *
+     * @param basicInputInfoDto
+     * @param extra
+     * @param context
+     */
+    private void eventCreatedAfter(DoctorPigEvent doctorPigEvent, final DoctorPigTrack doctorPigTrack, DoctorBasicInputInfoDto basicInputInfoDto,
+                                   Map<String, Object> extra, Map<String, Object> context) {
+
+
+        eventCreateAfterHandler(doctorPigEvent, doctorPigTrack, basicInputInfoDto, extra, context);
+
+        //往事件当中添加事件发生之后猪的状态
+        doctorPigEvent.setPigStatusAfter(doctorPigTrack.getStatus());
+        doctorPigEventDao.update(doctorPigEvent);
+    }
+
+    /**
+     * event 事件创建后用于二次更新 用于子类的覆盖
+     *
+     * @param doctorPigEvent
+     * @param doctorPigTrack
+     * @param basicInputInfoDto
+     * @param extra
+     * @param context
+     */
+    protected void eventCreateAfterHandler(DoctorPigEvent doctorPigEvent, final DoctorPigTrack doctorPigTrack, DoctorBasicInputInfoDto basicInputInfoDto,
+                                           Map<String, Object> extra, Map<String, Object> context) {
+
+    }
+
+    /**
      * 事件对母猪的状态信息的影响
      *
      * @param doctorPigTrack 基础的母猪事件信息
@@ -156,7 +188,8 @@ public abstract class DoctorAbstractEventHandler implements DoctorEventCreateHan
         String currentPigTrackSnapShot = JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(doctorPigTrack);
         DoctorPigTrack refreshPigTrack = updateDoctorPigTrackInfo(doctorPigTrack, basic, extra, context);
         doctorPigTrackDao.update(refreshPigTrack);
-
+        //二次更新event
+        eventCreatedAfter(doctorPigEvent, refreshPigTrack, basic, extra, context);
         // create snapshot info
         // snapshot create
         DoctorPigSnapshot doctorPigSnapshot = DoctorPigSnapshot.builder()

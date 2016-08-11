@@ -85,9 +85,8 @@ public abstract class DoctorAbstractEventFlowHandler extends HandlerAware {
             DoctorPigTrack refreshPigTrack = updateDoctorPigTrackInfo(execution, doctorPigTrack, doctorBasicInputInfoDto, extraInfo, context);
             doctorPigTrackDao.update(refreshPigTrack);
 
-            //往事件当中添加事件发生之后猪的状态
-            doctorPigEvent.setPigStatusAfter(doctorPigTrack.getStatus());
-            doctorPigEventDao.update(doctorPigEvent);
+
+            eventCreatedAfter(execution, doctorPigEvent, doctorPigTrack, doctorBasicInputInfoDto, extraInfo, context);
 
             // create snapshot info
             // snapshot create
@@ -146,6 +145,41 @@ public abstract class DoctorAbstractEventFlowHandler extends HandlerAware {
      */
     protected void eventCreatePreHandler(Execution execution, DoctorPigEvent doctorPigEvent, final DoctorPigTrack doctorPigTrack, DoctorBasicInputInfoDto basicInputInfoDto,
                                          Map<String, Object> extra, Map<String, Object> context) {
+
+    }
+
+
+    /**
+     * event 事件创建后用于二次更新
+     *
+     * @param execution
+     * @param basicInputInfoDto
+     * @param extra
+     * @param context
+     */
+    private void eventCreatedAfter(Execution execution, DoctorPigEvent doctorPigEvent, final DoctorPigTrack doctorPigTrack, DoctorBasicInputInfoDto basicInputInfoDto,
+                                   Map<String, Object> extra, Map<String, Object> context) {
+
+
+        eventCreateAfterHandler(execution, doctorPigEvent, doctorPigTrack, basicInputInfoDto, extra, context);
+
+        //往事件当中添加事件发生之后猪的状态
+        doctorPigEvent.setPigStatusAfter(doctorPigTrack.getStatus());
+        doctorPigEventDao.update(doctorPigEvent);
+    }
+
+    /**
+     * event 事件创建后用于二次更新 用于子类的覆盖
+     *
+     * @param execution
+     * @param doctorPigEvent
+     * @param doctorPigTrack
+     * @param basicInputInfoDto
+     * @param extra
+     * @param context
+     */
+    protected void eventCreateAfterHandler(Execution execution, DoctorPigEvent doctorPigEvent, final DoctorPigTrack doctorPigTrack, DoctorBasicInputInfoDto basicInputInfoDto,
+                                           Map<String, Object> extra, Map<String, Object> context) {
 
     }
 
