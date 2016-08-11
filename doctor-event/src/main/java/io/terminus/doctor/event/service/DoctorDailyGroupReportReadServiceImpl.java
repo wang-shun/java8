@@ -9,6 +9,7 @@ import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.constants.DoctorBasicEnums;
+import io.terminus.doctor.event.dto.DoctorGroupSearchDto;
 import io.terminus.doctor.event.dto.event.group.DoctorChangeGroupEvent;
 import io.terminus.doctor.event.dto.report.DoctorDailyReportDto;
 import io.terminus.doctor.event.dto.report.DoctorDeadDailyReport;
@@ -26,6 +27,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -177,6 +179,12 @@ public class DoctorDailyGroupReportReadServiceImpl implements DoctorDailyGroupRe
         saleReport.setFatten(longStream(filterChangeEvent(events, e -> isSaleEvent(e, PigType.FATTEN_PIG)), c -> c.getChange().getAmount()).sum() / 100);
         report.setSale(saleReport);
 
+        //猪群每日的存栏 Map: key = groupId, value = quantity
+        DoctorGroupSearchDto search = new DoctorGroupSearchDto();
+        search.setFarmId(farmId);
+        Map<Long, Integer> groupCountMap = RespHelper.orServEx(doctorGroupReadService.findGroupDetail(search)).stream()
+                .collect(Collectors.toMap(k -> k.getGroup().getId(), v -> v.getGroupTrack().getQuantity()));
+        report.setGroupCountMap(groupCountMap);
         log.info("daily group report doReport:{}", report);
 
         return report;

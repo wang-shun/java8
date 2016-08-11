@@ -1,9 +1,11 @@
 package io.terminus.doctor.event.dto.report;
 
+import com.google.common.collect.Maps;
 import lombok.Data;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.Map;
 
 /**
  * Desc: 日报统计dto
@@ -49,6 +51,16 @@ public class DoctorDailyReportDto implements Serializable {
      * 断奶仔猪日报
      */
     private DoctorWeanDailyReport wean = new DoctorWeanDailyReport();
+
+    /**
+     * 每个猪群的存栏
+     */
+    private Map<Long, Integer> groupCountMap = Maps.newHashMap();
+
+    /**
+     * 母猪存栏
+     */
+    private int sowCount;
 
     /**
      * 猪场id
