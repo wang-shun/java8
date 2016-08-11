@@ -161,7 +161,7 @@ public class DoctorBarnReadServiceImpl implements DoctorBarnReadService {
 
             return Response.ok(availableBarns);
         } catch (Exception e) {
-            log.error("fail to find available barns,current barn id:{},farm id:{},cause:{}",
+            log.error("fail to find available barns,current group id:{},farm id:{},cause:{}",
                     groupId, farmId, Throwables.getStackTraceAsString(e));
             return Response.fail("find.available.barns.failed");
         }
