@@ -12,7 +12,7 @@
         <result column="extra" property="extra"/>
         <result column="sum_at" property="sumAt"/>
         <result column="created_at" property="createdAt"/>
-
+        
     </resultMap>
 
     <sql id="tb">
@@ -47,8 +47,8 @@
         <if test="data != null">AND data = #{data}</if>
         <if test="extra != null">AND extra = #{extra}</if>
         <if test="sumAt != null">AND sum_at = #{sumAt}</if>
-
-
+        
+        
     </sql>
 
     <insert id="create" parameterType="DoctorMonthlyReport" keyProperty="id" useGeneratedKeys="true">
@@ -64,12 +64,12 @@
         VALUES
         <foreach collection="list" separator="," item="item">
             (
-            #{item.farmId},
-            #{item.data},
-            #{item.extra},
-            #{item.sumAt},
-            now()
-
+                #{item.farmId}, 
+                #{item.data}, 
+                #{item.extra}, 
+                #{item.sumAt}, 
+                now()
+                
             )
         </foreach>
     </insert>
@@ -86,8 +86,8 @@
             <if test="data != null">data = #{data},</if>
             <if test="extra != null">extra = #{extra},</if>
             <if test="sumAt != null">sum_at = #{sumAt},</if>
-
-
+            
+            
             updated_at=now()
         </set>
         WHERE id = #{id}
