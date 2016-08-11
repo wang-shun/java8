@@ -22,6 +22,7 @@ import io.terminus.doctor.event.dto.event.group.input.DoctorTransGroupInput;
 import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.handler.DoctorGroupEventHandler;
+import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorGroupSnapshot;
@@ -327,5 +328,11 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
                         Objects.equals(barnType, PigType.NURSERY_PIGLET.getValue()))) {
             throw new ServiceException("group.only.trans.fatten");
         }
+    }
+
+    //判断内转还是外转
+    protected DoctorGroupEvent.TransGroupType getTransType(Integer pigType, DoctorBarn toBarn) {
+        return Objects.equals(pigType, toBarn.getPigType()) ?
+                DoctorGroupEvent.TransGroupType.IN : DoctorGroupEvent.TransGroupType.OUT;
     }
 }
