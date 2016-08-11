@@ -8,8 +8,11 @@ import io.terminus.doctor.event.dao.DoctorRevertLogDao;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
 import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.handler.DoctorAbstractEventFlowHandler;
+import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.workflow.core.Execution;
+import org.joda.time.DateTime;
+import org.joda.time.Days;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -32,7 +35,21 @@ public class DoctorSowAbortionHandler extends DoctorAbstractEventFlowHandler {
     }
 
     @Override
-    public DoctorPigTrack updateDoctorPigTrackInfo(Execution execution, DoctorPigTrack doctorPigTrack, DoctorBasicInputInfoDto basic, Map<String, Object> extra, Map<String,Object> context) {
+    protected void eventCreatePreHandler(Execution execution, DoctorPigEvent doctorPigEvent, DoctorPigTrack doctorPigTrack, DoctorBasicInputInfoDto basicInputInfoDto, Map<String, Object> extra, Map<String, Object> context) {
+        //流产事件时间
+        DateTime abortionDate = new DateTime(Long.valueOf(extra.get("abortionDate").toString()));
+
+        //查找最近一次配种事件
+        DoctorPigEvent lastMate = doctorPigEventDao.queryLastFirstMate(doctorPigTrack.getPigId(), doctorPigTrack.getCurrentParity());
+        DateTime mattingDate = new DateTime(Long.valueOf(lastMate.getExtraMap().get("matingDate").toString()));
+
+        int npd = Days.daysBetween(abortionDate, mattingDate).getDays();
+        doctorPigEvent.setPlNpd(doctorPigEvent.getPlNpd() + npd);
+        doctorPigEvent.setNpd(doctorPigEvent.getNpd() + npd);
+    }
+
+    @Override
+    public DoctorPigTrack updateDoctorPigTrackInfo(Execution execution, DoctorPigTrack doctorPigTrack, DoctorBasicInputInfoDto basic, Map<String, Object> extra, Map<String, Object> context) {
         doctorPigTrack.setStatus(PigStatus.Abortion.getKey());
         doctorPigTrack.addAllExtraMap(extra);
         doctorPigTrack.addPigEvent(basic.getPigType(), (Long) context.get("doctorPigEventId"));

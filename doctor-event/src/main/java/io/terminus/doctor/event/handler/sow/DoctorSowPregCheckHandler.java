@@ -13,6 +13,8 @@ import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigSnapshot;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.workflow.core.Execution;
+import org.joda.time.DateTime;
+import org.joda.time.Days;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -38,6 +40,30 @@ public class DoctorSowPregCheckHandler extends DoctorAbstractEventFlowHandler {
         Integer pregCheckResult = (Integer) extra.get("checkResult");
         //妊娠检查结果，从extra中拆出来
         doctorPigEvent.setPregCheckResult(pregCheckResult);
+
+        //妊娠检查事件时间
+        DateTime checkDate = new DateTime(Long.valueOf(extra.get("checkDate").toString()));
+
+        //查找最近一次配种事件
+        DoctorPigEvent lastMate = doctorPigEventDao.queryLastFirstMate(doctorPigTrack.getPigId(), doctorPigTrack.getCurrentParity());
+        DateTime mattingDate = new DateTime(Long.valueOf(lastMate.getExtraMap().get("matingDate").toString()));
+
+        int npd = Days.daysBetween(checkDate, mattingDate).getDays();
+
+        if (Objects.equals(pregCheckResult, PregCheckResult.FANQING.getKey())) {
+            //返情对应的pfNPD
+            doctorPigEvent.setPfNpd(doctorPigEvent.getPfNpd() + npd);
+            doctorPigEvent.setNpd(doctorPigEvent.getNpd() + npd);
+        } else if (Objects.equals(pregCheckResult, PregCheckResult.YING.getKey())) {
+            //阴性对应的pyNPD
+            doctorPigEvent.setPyNpd(doctorPigEvent.getPyNpd() + npd);
+            doctorPigEvent.setNpd(doctorPigEvent.getNpd() + npd);
+        } else if (Objects.equals(pregCheckResult, PregCheckResult.LIUCHAN.getKey())) {
+            //流产对应的plNPD
+            doctorPigEvent.setPlNpd(doctorPigEvent.getPlNpd() + npd);
+            doctorPigEvent.setNpd(doctorPigEvent.getNpd() + npd);
+        }
+
     }
 
     @Override

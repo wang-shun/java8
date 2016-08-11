@@ -42,7 +42,7 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
 
 
     /**
-     * 查询这头母猪,该胎次下最近一次初配事件
+     * 查询这头母猪,该胎次最近一次初配事件
      *
      * @param pigId
      * @return
@@ -52,13 +52,33 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
     }
 
     /**
-     * 查询这头母猪,该胎次下最近一次分娩时间
+     * 查询这头母猪,该胎次最近一次分娩事件
      *
      * @param pigId
      * @return
      */
     public DoctorPigEvent queryLastFarrowing(Long pigId) {
-        return this.getSqlSession().selectOne(sqlId("queryLastFarrowing"), ImmutableMap.of("pigId", pigId, "type", PigEvent.FARROWING.getKey()));
+        return this.getSqlSession().selectOne(sqlId("queryLastEvent"), ImmutableMap.of("pigId", pigId, "type", PigEvent.FARROWING.getKey()));
+    }
+
+    /**
+     * 查询这头母猪,最近一次断奶事件
+     *
+     * @param pigId
+     * @return
+     */
+    public DoctorPigEvent queryLastWean(Long pigId) {
+        return this.getSqlSession().selectOne(sqlId("queryLastEvent"), ImmutableMap.of("pigId", pigId, "type", PigEvent.WEAN.getKey()));
+    }
+
+    /**
+     * 查询这头母猪最近一次进场事件
+     *
+     * @param pigId
+     * @return
+     */
+    public DoctorPigEvent queryLastEnter(Long pigId) {
+        return this.getSqlSession().selectOne(sqlId("queryLastEvent"), ImmutableMap.of("pigId", pigId, "type", PigEvent.ENTRY.getKey()));
     }
 
     /**

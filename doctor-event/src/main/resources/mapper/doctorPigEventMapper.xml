@@ -393,7 +393,7 @@
         order by event_at desc limit 1;
     </select>
 
-    <select id="queryLastFarrowing" parameterType="map" resultMap="DoctorPigEventMap">
+    <select id="queryLastEvent" parameterType="map" resultMap="DoctorPigEventMap">
         select
         <include refid="cols_all"/>
         from
