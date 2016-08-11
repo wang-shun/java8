@@ -1,7 +1,6 @@
 package io.terminus.doctor.event.dao;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ObjectArrays;
 import io.terminus.common.mysql.dao.MyBatisDao;
 import io.terminus.common.utils.MapBuilder;
 import io.terminus.doctor.event.enums.PigEvent;
@@ -37,7 +36,7 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
      * @return
      */
     public DoctorPigEvent queryLastPigEventInWorkflow(Long pigId, List<Integer> types) {
-        return this.getSqlSession().selectOne(sqlId("queryLastPigEventInWorkflow"), MapBuilder.<String, Object>of().put("pigId", pigId).put( "types", types).map());
+        return this.getSqlSession().selectOne(sqlId("queryLastPigEventInWorkflow"), MapBuilder.<String, Object>of().put("pigId", pigId).put("types", types).map());
     }
 
 
@@ -48,7 +47,7 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
      * @return
      */
     public DoctorPigEvent queryLastFirstMate(Long pigId, Integer parity) {
-        return this.getSqlSession().selectOne(sqlId("queryLastFirstMate"), ImmutableMap.of("pigId", pigId, "type", PigEvent.MATING.getKey(), "parity", parity, "currentMatingCount", 1));
+        return this.getSqlSession().selectOne(sqlId("queryLastFirstMate"), MapBuilder.<String, Object>of().put("pigId", pigId).put("type", PigEvent.MATING.getKey()).put("currentMatingCount", 1).map());
     }
 
     /**
@@ -58,7 +57,7 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
      * @return
      */
     public DoctorPigEvent queryLastFarrowing(Long pigId) {
-        return this.getSqlSession().selectOne(sqlId("queryLastEvent"), ImmutableMap.of("pigId", pigId, "type", PigEvent.FARROWING.getKey()));
+        return this.getSqlSession().selectOne(sqlId("queryLastEvent"), MapBuilder.<String, Object>of().put("pigId", pigId).put("type", PigEvent.FARROWING.getKey()).map());
     }
 
     /**
@@ -68,7 +67,7 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
      * @return
      */
     public DoctorPigEvent queryLastWean(Long pigId) {
-        return this.getSqlSession().selectOne(sqlId("queryLastEvent"), ImmutableMap.of("pigId", pigId, "type", PigEvent.WEAN.getKey()));
+        return this.getSqlSession().selectOne(sqlId("queryLastEvent"), MapBuilder.<String, Object>of().put("pigId", pigId).put("type", PigEvent.WEAN.getKey()).map());
     }
 
     /**
@@ -78,7 +77,7 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
      * @return
      */
     public DoctorPigEvent queryLastEnter(Long pigId) {
-        return this.getSqlSession().selectOne(sqlId("queryLastEvent"), ImmutableMap.of("pigId", pigId, "type", PigEvent.ENTRY.getKey()));
+        return this.getSqlSession().selectOne(sqlId("queryLastEvent"), MapBuilder.<String, Object>of().put("pigId", pigId).put("type", PigEvent.ENTRY.getKey()).map());
     }
 
     /**
