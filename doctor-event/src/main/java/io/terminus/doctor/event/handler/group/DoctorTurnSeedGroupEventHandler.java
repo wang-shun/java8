@@ -79,14 +79,14 @@ public class DoctorTurnSeedGroupEventHandler extends DoctorAbstractGroupEventHan
         switch (groupType) {
             case RESERVE_SOW :
                 if(Objects.equals(barn.getPigType(), PigType.MATE_SOW.getValue())){
-                    // 触发母猪进场事件
+                    // TODO 触发猪进场事件
                 }
                 if(Objects.equals(barn.getPigType(), PigType.PREG_SOW.getValue())){
-                    // 触发去妊娠舍事件
+                    //TODO 触发去妊娠舍事件
                 }
                 break;
             case RESERVE_BOAR :
-                // 触发公猪进场事件
+                //TODO 触发猪进场事件
                 break;
         }
     }

@@ -76,6 +76,16 @@ public class DoctorGroupReadServiceImpl implements DoctorGroupReadService {
     }
 
     @Override
+    public Response<List<DoctorGroup>> findGroupByIds(List<Long> groupIds){
+        try {
+            return Response.ok(doctorGroupDao.findByIds(groupIds));
+        } catch (Exception e) {
+            log.error("find group by id failed, groupIds:{}, cause:{}", groupIds, Throwables.getStackTraceAsString(e));
+            return Response.fail("group.find.fail");
+        }
+    }
+
+    @Override
     public Response<List<DoctorGroup>> findGroupsByFarmId(Long farmId) {
         try {
             return Response.ok(doctorGroupDao.findByFarmId(farmId));
