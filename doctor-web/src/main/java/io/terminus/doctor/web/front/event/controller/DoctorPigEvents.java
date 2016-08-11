@@ -152,7 +152,7 @@ public class DoctorPigEvents {
 
     @RequestMapping(value = "/updateData", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public Boolean updateData(@RequestParam("key") String key, @RequestParam("businessId") Long businessId){
+    public Boolean updateData(@RequestParam("key") String key, @RequestParam(value = "businessId", required = false) Long businessId){
         return RespHelper.or500(workFlowService.updateData(key, businessId));
     }
 }

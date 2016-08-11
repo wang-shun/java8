@@ -34,6 +34,7 @@ public interface Node {
 
     String ATTR_ASSIGNEE = "assignee";
     String ATTR_TIMER = "timer";
+    String ATTR_ITIMER = "itimer";
     String ATTR_POINT_X = "pointx";
     String ATTR_POINT_Y = "pointy";
     String ATTR_TARGET = "target";

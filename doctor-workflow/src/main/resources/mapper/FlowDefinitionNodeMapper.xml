@@ -16,6 +16,7 @@
         <result column="type" property="type"/>
         <result column="assignee" property="assignee"/>
         <result column="timer" property="timer"/>
+        <result column="itimer" property="iTimer"/>
         <result column="point_x" property="pointX"/>
         <result column="point_y" property="pointY"/>
         <result column="created_at" property="createdAt"/>
@@ -32,10 +33,10 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        `flow_definition_id`,`name`,`value`,`node_name`,`type`,`assignee`,`timer`,`point_x`,`point_y`,`created_at`,`updated_at`    </sql>
+        `flow_definition_id`,`name`,`value`,`node_name`,`type`,`assignee`,`timer`, `itimer`, `point_x`,`point_y`,`created_at`,`updated_at`    </sql>
 
     <sql id="vals">
-        #{flowDefinitionId},#{name},#{value},#{nodeName},#{type},#{assignee},#{timer},#{pointX},#{pointY},now(),now()    </sql>
+        #{flowDefinitionId},#{name},#{value},#{nodeName},#{type},#{assignee},#{timer},#{iTimer},#{pointX},#{pointY},now(),now()    </sql>
 
     <insert id="create" parameterType="FlowDefinitionNode" keyProperty="id" useGeneratedKeys="true">
         INSERT INTO
