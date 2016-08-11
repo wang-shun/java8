@@ -17,8 +17,7 @@ public enum DoctorBasicEnums {
     ELIMINATE(111L, "淘汰"),
     LOST(112L, "失踪"),
     OTHER(113L, "其他"),
-    KILL(114L, "自宰"),
-    OUT(115L, "转出");
+    KILL(114L, "自宰");
 
     @Getter
     private final long id;
