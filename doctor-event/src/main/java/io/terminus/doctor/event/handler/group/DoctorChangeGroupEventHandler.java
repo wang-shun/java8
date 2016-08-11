@@ -1,8 +1,10 @@
 package io.terminus.doctor.event.handler.group;
 
 import com.google.common.base.MoreObjects;
+import io.terminus.common.exception.ServiceException;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.doctor.common.event.CoreEventDispatcher;
+import io.terminus.doctor.event.constants.DoctorBasicEnums;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorGroupSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
@@ -62,6 +64,7 @@ public class DoctorChangeGroupEventHandler extends DoctorAbstractGroupEventHandl
         checkQuantity(groupTrack.getSowQty(), change.getSowQty());
         checkQuantityEqual(change.getQuantity(), change.getBoarQty(), change.getSowQty());
         checkTranWeight(groupTrack.getWeight(), change.getWeight());
+        checkSalePrice(change.getChangeTypeId(), change.getPrice(), change.getAmount());
         checkChangeAmount(groupTrack.getAmount(), change.getAmount());
 
         //1.转换猪群变动事件
@@ -73,6 +76,9 @@ public class DoctorChangeGroupEventHandler extends DoctorAbstractGroupEventHandl
         event.setAvgDayAge(groupTrack.getAvgDayAge());  //变动的日龄不需要录入, 直接取猪群的日龄
         event.setWeight(change.getWeight());
         event.setAvgWeight(EventUtil.getAvgWeight(change.getWeight(), change.getQuantity()));
+        event.setChangeTypeId(changeEvent.getChangeTypeId());   //变动类型id
+        event.setPrice(change.getPrice());          //销售单价(分)
+        event.setAmount(change.getAmount());        //销售总额(分)
         event.setExtraMap(changeEvent);
         doctorGroupEventDao.create(event);
 
@@ -146,5 +152,12 @@ public class DoctorChangeGroupEventHandler extends DoctorAbstractGroupEventHandl
 
         //更新猪群镜像
         editGroupSnapShot(group, groupTrack, event);
+    }
+
+    //校验金额不能为空
+    private static void checkSalePrice(Long changeTypeId, Long price, Long amount) {
+        if (changeTypeId == DoctorBasicEnums.SALE.getId() && (price == null || amount == null)) {
+            throw new ServiceException("money.not.null");
+        }
     }
 }
