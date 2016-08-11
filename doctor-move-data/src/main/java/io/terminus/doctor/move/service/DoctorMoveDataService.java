@@ -445,7 +445,11 @@ public class DoctorMoveDataService {
                 sowEvent.setExtra(JSON_MAPPER.toJson(vacc));
                 break;
             case REMOVAL:       //离场
-                sowEvent.setExtra(JSON_MAPPER.toJson(getSowRemovalExtra(event, customerMap, basicMap, barnMap, changeReasonMap)));
+                DoctorRemovalDto removal = getSowRemovalExtra(event, customerMap, basicMap, barnMap, changeReasonMap);
+                sowEvent.setExtra(JSON_MAPPER.toJson(removal));
+                sowEvent.setChangeTypeId(removal.getChgTypeId());
+                sowEvent.setPrice(removal.getPrice());
+                sowEvent.setAmount(removal.getSum());
                 break;
             case ENTRY:         //进场
                 sowEvent.setExtra(JSON_MAPPER.toJson(getSowEntryExtra(event, basicMap, barnMap)));
@@ -958,7 +962,11 @@ public class DoctorMoveDataService {
                 boarEvent.setExtra(JSON_MAPPER.toJson(vacc));
                 break;
             case REMOVAL:   //离场
-                boarEvent.setExtra(JSON_MAPPER.toJson(getBoarRemovalExtra(event, customerMap, basicMap, barnMap, changeReasonMap)));
+                DoctorRemovalDto removal = getBoarRemovalExtra(event, customerMap, basicMap, barnMap, changeReasonMap);
+                boarEvent.setExtra(JSON_MAPPER.toJson(removal));
+                boarEvent.setChangeTypeId(removal.getChgTypeId());
+                boarEvent.setPrice(removal.getPrice());
+                boarEvent.setAmount(removal.getSum());
                 break;
             case ENTRY:     //进场
                 boarEvent.setExtra(JSON_MAPPER.toJson(getBoarEntryExtra(event, basicMap, barnMap)));
