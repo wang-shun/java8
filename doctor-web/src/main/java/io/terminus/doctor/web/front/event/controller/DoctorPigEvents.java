@@ -16,6 +16,7 @@ import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.event.service.DoctorPigEventReadService;
 import io.terminus.doctor.event.service.DoctorPigEventWriteService;
 import io.terminus.doctor.event.service.DoctorPigReadService;
+import io.terminus.doctor.web.util.TransFromUtil;
 import io.terminus.doctor.workflow.core.WorkFlowService;
 import io.terminus.pampas.common.UserUtil;
 import io.terminus.parana.user.model.User;
@@ -55,6 +56,8 @@ public class DoctorPigEvents {
 
     private final WorkFlowService workFlowService;
 
+    private final TransFromUtil transFromUtil;
+
     private static final ObjectMapper OBJECT_MAPPER = JsonMapper.JSON_NON_DEFAULT_MAPPER.getMapper();
 
     private static final DateTimeFormatter DTF = DateTimeFormat.forPattern("yyyy-MM-dd");
@@ -64,12 +67,13 @@ public class DoctorPigEvents {
                            DoctorPigEventReadService doctorPigEventReadService,
                            DoctorPigEventWriteService doctorPigEventWriteService,
                            UserReadService userReadService,
-                           WorkFlowService workFlowService){
+                           WorkFlowService workFlowService, TransFromUtil transFromUtil){
         this.doctorPigReadService = doctorPigReadService;
         this.doctorPigEventReadService = doctorPigEventReadService;
         this.doctorPigEventWriteService = doctorPigEventWriteService;
         this.userReadService = userReadService;
         this.workFlowService = workFlowService;
+        this.transFromUtil = transFromUtil;
     }
 
     /**
@@ -118,7 +122,10 @@ public class DoctorPigEvents {
             Date beginDateTime = Strings.isNullOrEmpty(startDate) ? null : DTF.parseDateTime(startDate).withTimeAtStartOfDay().toDate();
             Date endDateTime = Strings.isNullOrEmpty(endDate) ? null : (DTF).parseDateTime(endDate).plusDays(1).withTimeAtStartOfDay().toDate(); // 添加一天
 
-            return RespHelper.or500(doctorPigEventReadService.queryPigDoctorEvents(farmId,pigId,pageNo, pageSize, beginDateTime, endDateTime));
+            Paging<DoctorPigEvent> doctorPigEventPaging = RespHelper.or500(doctorPigEventReadService.queryPigDoctorEvents(farmId,pigId,pageNo, pageSize, beginDateTime, endDateTime));
+            transFromUtil.transFromExtraMap(doctorPigEventPaging.getData());
+
+            return doctorPigEventPaging;
         }catch (Exception e){
             log.error("pig event paging error, cause:{}", Throwables.getStackTraceAsString(e));
             throw new JsonResponseException(500, "paging.pigEvent.error");

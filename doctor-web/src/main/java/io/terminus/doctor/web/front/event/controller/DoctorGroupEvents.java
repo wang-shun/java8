@@ -8,12 +8,9 @@ import io.terminus.doctor.basic.service.DoctorBasicReadService;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dto.DoctorGroupDetail;
 import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
-import io.terminus.doctor.event.dto.event.group.DoctorAntiepidemicGroupEvent;
 import io.terminus.doctor.event.dto.event.group.input.DoctorNewGroupInput;
-import io.terminus.doctor.event.enums.PigSource;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
-import io.terminus.doctor.event.model.DoctorGroupTrack;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.event.service.DoctorGroupReadService;
 import io.terminus.doctor.event.service.DoctorGroupWriteService;
@@ -21,6 +18,7 @@ import io.terminus.doctor.event.service.DoctorPigReadService;
 import io.terminus.doctor.web.front.auth.DoctorFarmAuthCenter;
 import io.terminus.doctor.web.front.event.dto.DoctorGroupDetailEventsDto;
 import io.terminus.doctor.web.front.event.service.DoctorGroupWebService;
+import io.terminus.doctor.web.util.TransFromUtil;
 import io.terminus.pampas.common.UserUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,7 +30,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -52,6 +49,7 @@ public class DoctorGroupEvents {
     private final DoctorFarmAuthCenter doctorFarmAuthCenter;
     private final DoctorGroupWriteService doctorGroupWriteService;
     private final DoctorBasicReadService doctorBasicReadService;
+    private final TransFromUtil transFromUtil;
 
     @RpcConsumer
     private DoctorPigReadService doctorPigReadService;
@@ -61,12 +59,13 @@ public class DoctorGroupEvents {
                              DoctorGroupReadService doctorGroupReadService,
                              DoctorFarmAuthCenter doctorFarmAuthCenter,
                              DoctorGroupWriteService doctorGroupWriteService,
-                             DoctorBasicReadService doctorBasicReadService) {
+                             DoctorBasicReadService doctorBasicReadService, TransFromUtil transFromUtil) {
         this.doctorGroupWebService = doctorGroupWebService;
         this.doctorGroupReadService = doctorGroupReadService;
         this.doctorFarmAuthCenter = doctorFarmAuthCenter;
         this.doctorGroupWriteService = doctorGroupWriteService;
         this.doctorBasicReadService = doctorBasicReadService;
+        this.transFromUtil = transFromUtil;
     }
 
     /**
@@ -168,7 +167,9 @@ public class DoctorGroupEvents {
         List<DoctorGroupEvent> groupEvents = RespHelper.or500(doctorGroupReadService.pagingGroupEvent(
                 groupDetail.getGroup().getFarmId(), groupId, null, null, 3)).getData();
 
-        return new DoctorGroupDetailEventsDto(groupDetail.getGroup(), groupDetail.getGroupTrack(), transFrom(groupEvents));
+        transFromUtil.transFromGroupEvents(groupEvents);
+
+        return new DoctorGroupDetailEventsDto(groupDetail.getGroup(), groupDetail.getGroupTrack(), groupEvents);
     }
 
     /**
@@ -186,7 +187,10 @@ public class DoctorGroupEvents {
                                                      @RequestParam(value = "type", required = false) Integer type,
                                                      @RequestParam(value = "pageNo", required = false) Integer pageNo,
                                                      @RequestParam(value = "size", required = false) Integer size) {
-        return RespHelper.or500(doctorGroupReadService.pagingGroupEvent(farmId, groupId, type, pageNo, size));
+        Paging<DoctorGroupEvent> doctorGroupEventPaging = RespHelper.or500(doctorGroupReadService.pagingGroupEvent(farmId, groupId, type, pageNo, size));
+
+        transFromUtil.transFromGroupEvents(doctorGroupEventPaging.getData());
+        return doctorGroupEventPaging;
     }
 
     /**
@@ -247,23 +251,5 @@ public class DoctorGroupEvents {
             return RespHelper.or500(doctorBasicReadService.findBasicByTypeAndSrmWithCache(DoctorBasic.Type.BREED.getValue(), null));
         }
         return Lists.newArrayList(RespHelper.or500(doctorBasicReadService.findBasicById(group.getBreedId())));
-    }
-
-    private List<DoctorGroupEvent> transFrom(List<DoctorGroupEvent> doctorGroupEvents) {
-        for (DoctorGroupEvent doctorGroupEvent : doctorGroupEvents) {
-            Map<String,Object> extraMap = doctorGroupEvent.getExtraData();
-            if (extraMap != null) {
-                if (extraMap.get("sex") != null) {
-                    extraMap.put("sex", DoctorGroupTrack.Sex.from((Integer) extraMap.get("sex")).getDesc());
-                }
-                if (extraMap.get("source") != null) {
-                    extraMap.put("source", PigSource.from((Integer) extraMap.get("source")).getDesc());
-                }
-                if (extraMap.get("vaccinResult") != null) {
-                    extraMap.put("vaccinResult", ((Integer) extraMap.get("vaccinResult") == 1) ? DoctorAntiepidemicGroupEvent.VaccinResult.POSITIVE : DoctorAntiepidemicGroupEvent.VaccinResult.NEGATIVE);
-                }
-            }
-        }
-        return doctorGroupEvents;
     }
 }
