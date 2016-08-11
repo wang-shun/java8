@@ -172,6 +172,14 @@ public abstract class DoctorAbstractEventHandler implements DoctorEventCreateHan
                 .kind(basic.getPigType()).name(basic.getEventName()).desc(basic.getEventDesc()).relEventId(basic.getRelEventId())
                 .barnId(basic.getBarnId()).barnName(basic.getBarnName())
                 .creatorId(basic.getStaffId()).creatorName(basic.getStaffName())
+                .npd(0)
+                .dpnpd(0)
+                .pfnpd(0)
+                .plnpd(0)
+                .psnpd(0)
+                .pynpd(0)
+                .ptnpd(0)
+                .jpnpd(0)
                 .build();
         doctorPigEvent.setExtraMap(extra);
         //查询上次的事件

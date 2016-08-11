@@ -91,13 +91,13 @@ public class DoctorRemovalHandler extends DoctorAbstractEventHandler {
             int npd = Days.daysBetween(eventTime, mattingDate).getDays();
             if (Objects.equals(removel.getChgTypeId(), DoctorBasicEnums.DEAD.getId())) {
                 //如果是死亡
-                doctorPigEvent.setPsNpd(doctorPigEvent.getPsNpd() + npd);
+                doctorPigEvent.setPsnpd(doctorPigEvent.getPsnpd() + npd);
                 doctorPigEvent.setNpd(doctorPigEvent.getNpd() + npd);
             }
 
             if (Objects.equals(removel.getChgTypeId(), DoctorBasicEnums.ELIMINATE.getId())) {
                 //如果是淘汰
-                doctorPigEvent.setPtNpd(doctorPigEvent.getPtNpd() + npd);
+                doctorPigEvent.setPtnpd(doctorPigEvent.getPtnpd() + npd);
                 doctorPigEvent.setNpd(doctorPigEvent.getNpd() + npd);
             }
 

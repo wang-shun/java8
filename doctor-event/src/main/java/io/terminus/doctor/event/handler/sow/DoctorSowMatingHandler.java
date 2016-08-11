@@ -124,13 +124,13 @@ public class DoctorSowMatingHandler extends DoctorAbstractEventFlowHandler {
 
         if (notNull(context.get("dpNPD"))) {
             Integer dpNPD = (Integer) context.get("dpNPD");
-            doctorPigEvent.setDpNpd(doctorPigEvent.getDpNpd() + dpNPD);
+            doctorPigEvent.setDpnpd(doctorPigEvent.getDpnpd() + dpNPD);
             doctorPigEvent.setNpd(doctorPigEvent.getNpd() + dpNPD);
         }
 
         if (notNull(context.get("jpNPD"))) {
             Integer jpNPD = (Integer) context.get("jpNPD");
-            doctorPigEvent.setDpNpd(doctorPigEvent.getJpNpd() + jpNPD);
+            doctorPigEvent.setDpnpd(doctorPigEvent.getJpnpd() + jpNPD);
             doctorPigEvent.setNpd(doctorPigEvent.getNpd() + jpNPD);
         }
     }

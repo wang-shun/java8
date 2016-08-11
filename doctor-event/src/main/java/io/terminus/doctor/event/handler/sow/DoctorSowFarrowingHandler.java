@@ -33,6 +33,8 @@ import org.springframework.stereotype.Component;
 import java.util.Map;
 import java.util.Objects;
 
+import static io.terminus.common.utils.Arguments.notNull;
+
 /**
  * Created by yaoqijun.
  * Date:2016-05-27
@@ -67,10 +69,13 @@ public class DoctorSowFarrowingHandler extends DoctorAbstractEventFlowHandler {
         DateTime farrowingDate = new DateTime(Long.valueOf(extra.get("farrowingDate").toString()));
         //查找最近一次初配种事件
         DoctorPigEvent firstMate = doctorPigEventDao.queryLastFirstMate(doctorPigTrack.getPigId(), doctorPigTrack.getCurrentParity());
-        DateTime mattingDate = new DateTime(firstMate.getExtraMap().get("matingDate"));
+        if (notNull(firstMate)) {
+            DateTime mattingDate = new DateTime(firstMate.getExtraMap().get("matingDate"));
 
-        //计算孕期
-        doctorPigEvent.setPregDays(Days.daysBetween(farrowingDate, mattingDate).getDays());
+            //计算孕期
+            doctorPigEvent.setPregDays(Days.daysBetween(farrowingDate, mattingDate).getDays());
+        }
+
 
         //分娩仔猪只数信息
         doctorPigEvent.setLiveCount(Ints.tryParse(Objects.toString(extra.get("farrowingLiveCount"))));
@@ -175,7 +180,10 @@ public class DoctorSowFarrowingHandler extends DoctorAbstractEventFlowHandler {
     protected void afterEventCreateHandle(DoctorPigEvent doctorPigEvent, DoctorPigTrack doctorPigTrack, DoctorPigSnapshot doctorPigSnapshot, Map<String, Object> extra) {
         //对应的最近一次的 周期配种的初陪 的 isDelivery 字段变成true
         DoctorPigEvent firstMate = doctorPigEventDao.queryLastFirstMate(doctorPigTrack.getPigId(), doctorPigTrack.getCurrentParity());
-        firstMate.setIsDelivery(1);
-        doctorPigEventDao.update(firstMate);
+        if (notNull(firstMate)) {
+            firstMate.setIsDelivery(1);
+            doctorPigEventDao.update(firstMate);
+        }
+
     }
 }

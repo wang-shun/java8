@@ -18,6 +18,8 @@ import org.springframework.stereotype.Component;
 
 import java.util.Map;
 
+import static io.terminus.common.utils.Arguments.notNull;
+
 /**
  * Created by yaoqijun.
  * Date:2016-06-01
@@ -41,12 +43,15 @@ public class DoctorSowAbortionHandler extends DoctorAbstractEventFlowHandler {
 
         //查找最近一次配种事件
         DoctorPigEvent lastMate = doctorPigEventDao.queryLastFirstMate(doctorPigTrack.getPigId(), doctorPigTrack.getCurrentParity());
-        DateTime mattingDate = new DateTime(Long.valueOf(lastMate.getExtraMap().get("matingDate").toString()));
+        if (notNull(lastMate)) {
+            DateTime mattingDate = new DateTime(Long.valueOf(lastMate.getExtraMap().get("matingDate").toString()));
 
-        int npd = Days.daysBetween(abortionDate, mattingDate).getDays();
-        doctorPigEvent.setPlNpd(doctorPigEvent.getPlNpd() + npd);
-        doctorPigEvent.setNpd(doctorPigEvent.getNpd() + npd);
+            int npd = Days.daysBetween(abortionDate, mattingDate).getDays();
+            doctorPigEvent.setPlnpd(doctorPigEvent.getPlnpd() + npd);
+            doctorPigEvent.setNpd(doctorPigEvent.getNpd() + npd);
+        }
     }
+
 
     @Override
     public DoctorPigTrack updateDoctorPigTrackInfo(Execution execution, DoctorPigTrack doctorPigTrack, DoctorBasicInputInfoDto basic, Map<String, Object> extra, Map<String, Object> context) {
