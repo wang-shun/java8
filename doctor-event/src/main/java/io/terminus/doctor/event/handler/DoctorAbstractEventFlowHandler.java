@@ -26,6 +26,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.Map;
 import java.util.UUID;
 
+import static io.terminus.common.utils.Arguments.notNull;
+
 /**
  * Created by yaoqijun.
  * Date:2016-05-27
@@ -157,6 +159,11 @@ public abstract class DoctorAbstractEventFlowHandler extends HandlerAware {
                 .creatorId(basic.getStaffId()).creatorName(basic.getStaffName())
                 .build();
         doctorPigEvent.setExtraMap(extra);
+        //查询上次的事件
+        DoctorPigEvent lastEvent = doctorPigEventDao.queryLastPigEventInWorkflow(basic.getPigId(), null);
+        if(notNull(lastEvent)){
+            doctorPigEvent.setRelEventId(lastEvent.getId());
+        }
         return doctorPigEvent;
     }
 }
