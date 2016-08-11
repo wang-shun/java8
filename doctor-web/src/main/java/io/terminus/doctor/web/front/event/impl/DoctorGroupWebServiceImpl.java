@@ -205,11 +205,9 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
                     orServEx(doctorGroupWriteService.groupEventTransGroup(groupDetail, map(putBasicFields(params), DoctorTransGroupInput.class)));
                     break;
                 case TURN_SEED:
-                    //校验来源猪类是否符合
-                    if (PigType.isGroup(groupDetail.getGroup().getPigType()) || groupDetail.getGroup().getPigType() == PigType.RESERVE_SOW.getValue()) {
-                        throw new ServiceException("group.can.not.turn.seed");
-                    }
-                    orServEx(doctorGroupWriteService.groupEventTurnSeed(groupDetail, map(putBasicFields(params), DoctorTurnSeedGroupInput.class)));
+                    DoctorTurnSeedGroupInput input = map(putBasicFields(params), DoctorTurnSeedGroupInput.class);
+                    this.checkTurnSeedData(groupDetail.getGroup().getPigType(), input.getToBarnId());
+                    orServEx(doctorGroupWriteService.groupEventTurnSeed(groupDetail, input));
                     break;
                 case LIVE_STOCK:
                     orServEx(doctorGroupWriteService.groupEventLiveStock(groupDetail, map(putBasicFields(params), DoctorLiveStockGroupInput.class)));
@@ -248,6 +246,31 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
             log.error("create group event failed, groupId:{}, eventType:{}, params:{}, cause:{}",
                     groupId, eventType, data, Throwables.getStackTraceAsString(e));
             return Response.fail("create.group.event.fail");
+        }
+    }
+
+    private void checkTurnSeedData(Integer groupType, Long toBarnId){
+        PigType type = PigType.from(groupType);
+        if(type == null){
+            throw new ServiceException("group.can.not.turn.seed");
+        }
+        DoctorBarn barn = orServEx(doctorBarnReadService.findBarnById(toBarnId));
+        switch (type) {
+            // 当猪的来源是后备群中的种母猪 (PigType.RESERVE_SOW) 时, 转入猪舍只允许为 配种舍(PigType.MATE_SOW) 或 妊娠舍(PigType.PREG_SOW)
+            case RESERVE_SOW :
+                if(!Objects.equals(barn.getPigType(), PigType.MATE_SOW.getValue()) && !Objects.equals(barn.getPigType(), PigType.PREG_SOW.getValue())){
+                    throw new ServiceException("barn.can.not.turn.seed");
+                }
+                break;
+            // 当猪的来源是后备群中的种公猪 (PigType.RESERVE_BOAR) 时, 转入猪舍只允许为 种公猪舍(PigType.BOAR)
+            case RESERVE_BOAR :
+                if(!Objects.equals(barn.getPigType(), PigType.BOAR.getValue())){
+                    throw new ServiceException("barn.can.not.turn.seed");
+                }
+                break;
+            // 当猪的来源不是以上两种时, 抛出异常
+            default:
+                throw new ServiceException("group.can.not.turn.seed");
         }
     }
 
