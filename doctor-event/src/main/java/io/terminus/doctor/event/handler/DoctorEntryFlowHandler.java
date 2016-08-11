@@ -61,7 +61,7 @@ public class DoctorEntryFlowHandler extends HandlerAware {
                                   DoctorPigEventDao doctorPigEventDao,
                                   DoctorPigTrackDao doctorPigTrackDao,
                                   DoctorPigSnapshotDao doctorPigSnapshotDao,
-                                  DoctorRevertLogDao doctorRevertLogDao){
+                                  DoctorRevertLogDao doctorRevertLogDao) {
         this.doctorPigEventDao = doctorPigEventDao;
         this.doctorPigDao = doctorPigDao;
         this.doctorPigTrackDao = doctorPigTrackDao;
@@ -71,9 +71,9 @@ public class DoctorEntryFlowHandler extends HandlerAware {
 
     @Override
     public void handle(Execution execution) {
-        try{
+        try {
             // get data
-            Map<String,String> flowDataMap = OBJECT_MAPPER.readValue(execution.getFlowData(), JacksonType.MAP_OF_STRING);
+            Map<String, String> flowDataMap = OBJECT_MAPPER.readValue(execution.getFlowData(), JacksonType.MAP_OF_STRING);
             DoctorBasicInputInfoDto basic = OBJECT_MAPPER.readValue(flowDataMap.get("basic"), DoctorBasicInputInfoDto.class);
             DoctorFarmEntryDto doctorFarmEntryDto = OBJECT_MAPPER.readValue(flowDataMap.get("dto"), DoctorFarmEntryDto.class);
 
@@ -95,6 +95,12 @@ public class DoctorEntryFlowHandler extends HandlerAware {
             doctorPigTrack.addPigEvent(doctorPig.getPigType(), doctorPigEvent.getId());
             doctorPigTrackDao.create(doctorPigTrack);
 
+            //往事件当中添加事件发生之后猪的状态
+            doctorPigEvent.setPigStatusAfter(doctorPigTrack.getStatus());
+            //添加时间发生之前母猪的胎次
+            doctorPigEvent.setParity(doctorPigTrack.getCurrentParity());
+            doctorPigEventDao.update(doctorPigEvent);
+
             // snapshot create
             DoctorPigSnapshot doctorPigSnapshot = DoctorPigSnapshot.builder()
                     .pigId(doctorPig.getId()).farmId(doctorPig.getFarmId()).orgId(doctorPig.getOrgId()).eventId(doctorPigEvent.getId())
@@ -104,11 +110,11 @@ public class DoctorEntryFlowHandler extends HandlerAware {
 
             flowDataMap.put("entryResult",
                     JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(
-                            ImmutableMap.of("doctorPig", doctorPig.getId(),"eventId",doctorPigEvent.getId(),
-                                    "doctorPigTrack", doctorPigTrack.getId(),"snapshotId", doctorPigSnapshot.getId())
+                            ImmutableMap.of("doctorPig", doctorPig.getId(), "eventId", doctorPigEvent.getId(),
+                                    "doctorPigTrack", doctorPigTrack.getId(), "snapshotId", doctorPigSnapshot.getId())
                     ));
             execution.setFlowData(JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(flowDataMap));
-        }catch (Exception e){
+        } catch (Exception e) {
             log.error("doctor abstract entry flow handle fail, cause:{}", Throwables.getStackTraceAsString(e));
             throw new RuntimeException("sow.entryFarm.error");
         }
@@ -116,22 +122,23 @@ public class DoctorEntryFlowHandler extends HandlerAware {
 
     /**
      * 构建猪进厂 Track 信息表 TODO 获取进厂事件信息
+     *
      * @param dto
      * @param basic
      * @return
      */
-    private DoctorPigTrack buildEntryFarmPigDoctorTrack(DoctorFarmEntryDto dto, DoctorBasicInputInfoDto basic){
+    private DoctorPigTrack buildEntryFarmPigDoctorTrack(DoctorFarmEntryDto dto, DoctorBasicInputInfoDto basic) {
 
         DoctorPigTrack doctorPigTrack = DoctorPigTrack.builder().farmId(basic.getFarmId())
                 .currentBarnId(dto.getBarnId()).currentBarnName(dto.getBarnName())
                 .currentParity(dto.getParity()).status(PigStatus.Entry.getKey())
                 .creatorId(basic.getStaffId()).creatorName(basic.getStaffName())
                 .build();
-        if(Objects.equals(basic.getPigType(), DoctorPig.PIG_TYPE.SOW.getKey())){
+        if (Objects.equals(basic.getPigType(), DoctorPig.PIG_TYPE.SOW.getKey())) {
             doctorPigTrack.setStatus(PigStatus.Entry.getKey());
-        }else if(Objects.equals(basic.getPigType(), DoctorPig.PIG_TYPE.BOAR.getKey())) {
+        } else if (Objects.equals(basic.getPigType(), DoctorPig.PIG_TYPE.BOAR.getKey())) {
             doctorPigTrack.setStatus(PigStatus.BOAR_ENTRY.getKey());
-        }else {
+        } else {
             throw new IllegalStateException("input.pigType.error");
         }
         return doctorPigTrack;
@@ -139,12 +146,12 @@ public class DoctorEntryFlowHandler extends HandlerAware {
 
     /**
      * build pig event 构建进厂事件信息
+     *
      * @param basic
      * @param dto
-     * @param pigType
      * @return
      */
-    private DoctorPigEvent buildDoctorPigEntryEvent(DoctorBasicInputInfoDto basic, DoctorFarmEntryDto dto){
+    private DoctorPigEvent buildDoctorPigEntryEvent(DoctorBasicInputInfoDto basic, DoctorFarmEntryDto dto) {
         DoctorPigEvent doctorPigEvent = DoctorPigEvent.builder()
                 .orgId(basic.getOrgId()).orgName(basic.getOrgName()).farmId(basic.getFarmId()).farmName(basic.getFarmName())
                 .pigCode(dto.getPigCode()).eventAt(DateTime.now().toDate())
@@ -158,13 +165,14 @@ public class DoctorEntryFlowHandler extends HandlerAware {
 
     /**
      * 构建DoctorPig
+     *
      * @param dto
      * @param basic
      * @return
      */
-    private DoctorPig buildDoctorPig(DoctorFarmEntryDto dto, DoctorBasicInputInfoDto basic){
+    private DoctorPig buildDoctorPig(DoctorFarmEntryDto dto, DoctorBasicInputInfoDto basic) {
 
-        if(isNull(basic.getFarmId())||isNull(dto.getPigCode())){
+        if (isNull(basic.getFarmId()) || isNull(dto.getPigCode())) {
             return null;
         }
 
@@ -175,16 +183,16 @@ public class DoctorEntryFlowHandler extends HandlerAware {
                 .initBarnId(dto.getBarnId()).initBarnName(dto.getBarnName()).breedId(dto.getBreed()).breedName(dto.getBreedName()).geneticId(dto.getBreedType()).geneticName(dto.getBreedTypeName())
                 .remark(dto.getEntryMark()).creatorId(basic.getStaffId()).creatorName(basic.getStaffName())
                 .build();
-        if(Objects.equals(basic.getPigType(), DoctorPig.PIG_TYPE.SOW.getKey())){
+        if (Objects.equals(basic.getPigType(), DoctorPig.PIG_TYPE.SOW.getKey())) {
             // add sow pig info
-            Map<String,Object> extraMapInfo = Maps.newHashMap();
+            Map<String, Object> extraMapInfo = Maps.newHashMap();
             extraMapInfo.put(DoctorFarmEntryConstants.EAR_CODE, dto.getEarCode());
             extraMapInfo.put(DoctorFarmEntryConstants.FIRST_PARITY, dto.getParity());
             extraMapInfo.put(DoctorFarmEntryConstants.LEFT_COUNT, dto.getLeft());
             extraMapInfo.put(DoctorFarmEntryConstants.RIGHT_COUNT, dto.getRight());
             doctorPig.setExtraMap(extraMapInfo);
-        }else if(Objects.equals(basic.getPigType(), DoctorPig.PIG_TYPE.BOAR.getKey())) {
-            Map<String,Object> extraMap = Maps.newHashMap();
+        } else if (Objects.equals(basic.getPigType(), DoctorPig.PIG_TYPE.BOAR.getKey())) {
+            Map<String, Object> extraMap = Maps.newHashMap();
             extraMap.put(DoctorFarmEntryConstants.BOAR_TYPE_ID, dto.getBoarTypeId());
             extraMap.put(DoctorFarmEntryConstants.BOAR_TYPE_NAME, dto.getBoarTypeName());
             doctorPig.setExtraMap(extraMap);
