@@ -12,13 +12,13 @@ import org.springframework.beans.factory.annotation.Autowired;
  * Date: 12:17 16/8/11
  */
 
-public class DoctorMonthlyReportDaoTest extends BaseDaoTest{
+public class DoctorKpiDaoTest extends BaseDaoTest{
     @Autowired
-    private DoctorMonthlyReportDao doctorMonthlyReportDao;
+    private DoctorKpiDao doctorKpiDao;
 
     @Test
     public void testGetPreDeliveryCounts(){
-        int result = doctorMonthlyReportDao.getPreDelivery(12355L, DateTime.now().minusDays(100).toDate(), DateTime.now().toDate());
+        int result = doctorKpiDao.getPreDelivery(12355L, DateTime.now().minusDays(100).toDate(), DateTime.now().toDate());
         Assert.assertNotNull(result);
 
 
@@ -26,7 +26,7 @@ public class DoctorMonthlyReportDaoTest extends BaseDaoTest{
 
     @Test
     public void testGetDeliveryCounts(){
-        int result = doctorMonthlyReportDao.getDelivery(12355L, DateTime.now().minusDays(300).toDate(), DateTime.now().toDate());
+        int result = doctorKpiDao.getDelivery(12355L, DateTime.now().minusDays(300).toDate(), DateTime.now().toDate());
         Assert.assertNotNull(result);
     }
 

@@ -17,11 +17,11 @@ import static com.sun.org.apache.xalan.internal.xsltc.compiler.util.Type.Int;
  * Date: 11:44 16/8/11
  */
 @Repository
-public class DoctorMonthlyReportDao{
+public class DoctorKpiDao {
     @Autowired
     protected SqlSessionTemplate sqlSession;
 
-    public final String nameSpace = "DoctorMonthlyReport";
+    public final String nameSpace = "DoctorKpi";
 
     protected String sqlId(String id) {
         return this.nameSpace + "." + id;
