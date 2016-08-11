@@ -124,7 +124,7 @@ public class DoctorBarnReadServiceImpl implements DoctorBarnReadService {
 
     @Override
     public Response<List<DoctorBarn>> findAvailableBarns(@NotNull(message = "input.farm.id.null") Long farmId,
-                                                         @NotNull(message = "input.barn.id.null") Long groupId) {
+                                                         @NotNull(message = "input.group.id.null") Long groupId) {
         try {
             DoctorGroup existed = doctorGroupDao.findById(groupId);
             if (existed == null) {
