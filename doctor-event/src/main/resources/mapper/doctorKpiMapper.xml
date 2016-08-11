@@ -6,4 +6,22 @@
 
 <mapper namespace="DoctorKpi">
 
+    <!-- 预产胎数-->
+    <select id="preDeliveryCounts" parameterType="map" resultType="int">
+        select count(1) from doctor_pig_events
+        where type = 9
+        and current_mating_count = 1
+        <if test="farmId != null"> and farm_id = #{farmId}</if>
+        <if test="startAt != null"> and event_at &gt;= #{startAt}</if>
+        <if test="endAt != null">and event_at &lt;= #{endAt}</if>
+    </select>
+
+    <!-- 分娩窝数-->
+    <select id="deliveryCounts" parameterType="map" resultType="int">
+        select count(1) from doctor_pig_events
+        where type = 9
+        <if test="farmId != null"> and farm_id = #{farmId}</if>
+        <if test="startAt != null"> and event_at &gt;= #{startAt}</if>
+        <if test="endAt != null">and event_at &lt;= #{endAt}</if>
+    </select>
 </mapper>
