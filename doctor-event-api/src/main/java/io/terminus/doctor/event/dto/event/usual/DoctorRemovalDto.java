@@ -6,7 +6,6 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.Builder;
 
 import java.io.Serializable;
-import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Created by yaoqijun.
@@ -34,9 +33,9 @@ public class DoctorRemovalDto implements Serializable{
 
     private Double weight;  // 重量
 
-    private Double price;  // 价格
+    private Long price;  // 价格
 
-    private Double sum; // 总量
+    private Long sum; // 总量
 
     private Long customerId;    // 客户Id
 

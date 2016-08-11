@@ -31,8 +31,8 @@ public class View_EventListBoar implements Serializable {
     private String eventDesc;
     private String remark;          // 采精的remark和event的remark
     private String barnOutId;       // 事件发生猪舍outId
-    private Double price;
-    private Double amount;
+    private Long price;
+    private Long amount;
     private Double dilutionRatio;   // 稀释倍数
     private Double dilutionWeight;  // 稀释后重量
     private Double semenDensity;    // 精液密度
@@ -43,7 +43,7 @@ public class View_EventListBoar implements Serializable {
     private Integer scoreMidu;      // 密度得分
     private Integer scoreXingtai;   // 形态得分
     private Integer scoreShuliang;  // 数量得分
-    private Double semenJxRatio;    // 畸形率  todo: 其他采精事件相关字段需要确认
+    private Double semenJxRatio;    // 畸形率
     private Double eventWeight;
     private String chgType;         // 变动(当是猪群转出事件时才有值)
     private String chgReason;       // 变动原因(当是疾病事件时 为疾病人员名称)

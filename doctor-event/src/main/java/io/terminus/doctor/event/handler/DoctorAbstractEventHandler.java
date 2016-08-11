@@ -1,7 +1,6 @@
 package io.terminus.doctor.event.handler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableMap;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.event.constants.DoctorPigSnapshotConstants;
@@ -19,7 +18,6 @@ import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Map;
-import java.util.UUID;
 
 import static io.terminus.common.utils.Arguments.notNull;
 
@@ -70,27 +68,8 @@ public abstract class DoctorAbstractEventHandler implements DoctorEventCreateHan
         doctorPigEventDao.create(doctorPigEvent);
         context.put("doctorPigEventId", doctorPigEvent.getId());
 
-        // update track info
-        DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(doctorPigEvent.getPigId());
-        String currentPigTrackSnapShot = JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(doctorPigTrack);
-        DoctorPigTrack refreshPigTrack = updateDoctorPigTrackInfo(doctorPigTrack, basic, extra, context);
-        doctorPigTrackDao.update(refreshPigTrack);
-
-        // create snapshot info
-        // snapshot create
-        DoctorPigSnapshot doctorPigSnapshot = DoctorPigSnapshot.builder()
-                .pigId(doctorPigEvent.getPigId()).farmId(doctorPigEvent.getFarmId()).orgId(doctorPigEvent.getOrgId()).eventId(doctorPigEvent.getId())
-                .build();
-        doctorPigSnapshot.setPigInfoMap(ImmutableMap.of(DoctorPigSnapshotConstants.PIG_TRACK, currentPigTrackSnapShot));
-        doctorPigSnapshotDao.create(doctorPigSnapshot);
-
-        afterEventCreateHandle(doctorPigEvent, refreshPigTrack, doctorPigSnapshot, extra);
-
-        // 当前事件影响的Id 方式
-        context.put("createEventResult",
-                JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(
-                        ImmutableMap.of("doctorPigId", basic.getPigId(),
-                                "doctorEventId", doctorPigEvent.getId(), "doctorSnapshotId", doctorPigSnapshot.getId())));
+        // create track snapshot
+        createPigTrackSnapshot(doctorPigEvent, basic, extra, context);
     }
 
     @Override
@@ -115,7 +94,7 @@ public abstract class DoctorAbstractEventHandler implements DoctorEventCreateHan
 
     }
 
-    private DoctorPigEvent buildAllPigDoctorEvent(DoctorBasicInputInfoDto basic, Map<String,Object> extra){
+    protected DoctorPigEvent buildAllPigDoctorEvent(DoctorBasicInputInfoDto basic, Map<String,Object> extra){
         DoctorPigEvent doctorPigEvent = DoctorPigEvent.builder()
                 .orgId(basic.getOrgId()).orgName(basic.getOrgName())
                 .farmId(basic.getFarmId()).farmName(basic.getFarmName())
@@ -123,7 +102,6 @@ public abstract class DoctorAbstractEventHandler implements DoctorEventCreateHan
                 .eventAt(DateTime.now().toDate()).type(basic.getEventType())
                 .kind(basic.getPigType()).name(basic.getEventName()).desc(basic.getEventDesc()).relEventId(basic.getRelEventId())
                 .barnId(basic.getBarnId()).barnName(basic.getBarnName())
-                .outId(UUID.randomUUID().toString()) //TODO uuid generate method
                 .creatorId(basic.getStaffId()).creatorName(basic.getStaffName())
                 .build();
         doctorPigEvent.setExtraMap(extra);
@@ -133,5 +111,30 @@ public abstract class DoctorAbstractEventHandler implements DoctorEventCreateHan
             doctorPigEvent.setRelEventId(lastEvent.getId());
         }
         return doctorPigEvent;
+    }
+
+    //创建猪跟踪和镜像表
+    protected void createPigTrackSnapshot(DoctorPigEvent doctorPigEvent, DoctorBasicInputInfoDto basic, Map<String, Object> extra, Map<String, Object> context) {
+        // update track info
+        DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(doctorPigEvent.getPigId());
+        String currentPigTrackSnapShot = JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(doctorPigTrack);
+        DoctorPigTrack refreshPigTrack = updateDoctorPigTrackInfo(doctorPigTrack, basic, extra, context);
+        doctorPigTrackDao.update(refreshPigTrack);
+
+        // create snapshot info
+        // snapshot create
+        DoctorPigSnapshot doctorPigSnapshot = DoctorPigSnapshot.builder()
+                .pigId(doctorPigEvent.getPigId()).farmId(doctorPigEvent.getFarmId()).orgId(doctorPigEvent.getOrgId()).eventId(doctorPigEvent.getId())
+                .build();
+        doctorPigSnapshot.setPigInfoMap(ImmutableMap.of(DoctorPigSnapshotConstants.PIG_TRACK, currentPigTrackSnapShot));
+        doctorPigSnapshotDao.create(doctorPigSnapshot);
+
+        afterEventCreateHandle(doctorPigEvent, refreshPigTrack, doctorPigSnapshot, extra);
+
+        // 当前事件影响的Id 方式
+        context.put("createEventResult",
+                JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(
+                        ImmutableMap.of("doctorPigId", basic.getPigId(),
+                                "doctorEventId", doctorPigEvent.getId(), "doctorSnapshotId", doctorPigSnapshot.getId())));
     }
 }

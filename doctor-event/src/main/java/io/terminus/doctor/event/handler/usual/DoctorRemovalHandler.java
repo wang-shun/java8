@@ -1,16 +1,19 @@
 package io.terminus.doctor.event.handler.usual;
 
+import io.terminus.common.utils.BeanMapper;
 import io.terminus.doctor.event.dao.DoctorPigDao;
 import io.terminus.doctor.event.dao.DoctorPigEventDao;
 import io.terminus.doctor.event.dao.DoctorPigSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorPigTrackDao;
 import io.terminus.doctor.event.dao.DoctorRevertLogDao;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
+import io.terminus.doctor.event.dto.event.usual.DoctorRemovalDto;
 import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.handler.DoctorAbstractEventHandler;
 import io.terminus.doctor.event.model.DoctorPig;
+import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,6 +46,15 @@ public class DoctorRemovalHandler extends DoctorAbstractEventHandler{
     }
 
     @Override
+    public void handler(DoctorBasicInputInfoDto basic, Map<String, Object> extra, Map<String, Object> context) throws RuntimeException {
+        DoctorPigEvent doctorPigEvent = buildAllPigDoctorEvent(basic, extra);
+        doctorPigEventDao.create(doctorPigEvent);
+        context.put("doctorPigEventId", doctorPigEvent.getId());
+
+        createPigTrackSnapshot(doctorPigEvent, basic, extra, context);
+    }
+
+    @Override
     public DoctorPigTrack updateDoctorPigTrackInfo(DoctorPigTrack doctorPigTrack, DoctorBasicInputInfoDto basic, Map<String, Object> extra, Map<String,Object> context) {
         doctorPigTrack.addAllExtraMap(extra);
         doctorPigTrack.addPigEvent(basic.getPigType(), (Long) context.get("doctorPigEventId"));
@@ -63,5 +75,15 @@ public class DoctorRemovalHandler extends DoctorAbstractEventHandler{
         DoctorPig doctorPig = doctorPigDao.findById(basic.getPigId());
         checkState(!isNull(doctorPig), "input.doctorPigId.error");
         checkState(doctorPigDao.removalPig(doctorPig.getId()), "update.pigRemoval.fail");
+    }
+
+    @Override
+    protected DoctorPigEvent buildAllPigDoctorEvent(DoctorBasicInputInfoDto basic, Map<String, Object> extra) {
+        DoctorPigEvent pigEvent = super.buildAllPigDoctorEvent(basic, extra);
+        DoctorRemovalDto removel = BeanMapper.map(extra, DoctorRemovalDto.class);
+        pigEvent.setChangeTypeId(removel.getChgTypeId());   //变动类型id
+        pigEvent.setPrice(removel.getPrice());      //销售单价(分)
+        pigEvent.setAmount(removel.getSum());       //销售总额(分)
+        return pigEvent;
     }
 }

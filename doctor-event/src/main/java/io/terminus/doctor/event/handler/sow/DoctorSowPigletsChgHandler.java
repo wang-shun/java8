@@ -22,7 +22,6 @@ import org.springframework.stereotype.Component;
 import java.util.Map;
 import java.util.Objects;
 
-import static com.google.common.base.Preconditions.checkElementIndex;
 import static com.google.common.base.Preconditions.checkState;
 
 /**
@@ -104,8 +103,7 @@ public class DoctorSowPigletsChgHandler extends DoctorAbstractEventFlowHandler{
         doctorChangeGroupInput.setSowQty(dto.getSowPigletsCount());
         doctorChangeGroupInput.setBoarQty(dto.getBoarPigletsCount());
         doctorChangeGroupInput.setWeight(dto.getPigletsWeight());
-        double price = dto.getPigletsPrice() * 100;
-        doctorChangeGroupInput.setPrice((long)price);
+        doctorChangeGroupInput.setPrice(dto.getPigletsPrice());
         doctorChangeGroupInput.setCustomerId(dto.getPigletsCustomerId());
         return doctorChangeGroupInput;
     }

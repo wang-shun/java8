@@ -40,9 +40,9 @@ public class DoctorPigletsChgDto implements Serializable{
 
     private Double pigletsWeight;  // 变动重量 (非必填)
 
-    private Double pigletsPrice;   // 变动价格 （非必填）
+    private Long pigletsPrice;   // 变动价格(分) （非必填）
 
-    private Double pigletsSum; //  总价（非必填）
+    private Long pigletsSum; //  总价(分)（非必填）
 
     private Long pigletsCustomerId;    //客户Id （非必填）
 

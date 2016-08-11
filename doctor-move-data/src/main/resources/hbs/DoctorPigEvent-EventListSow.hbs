@@ -39,8 +39,8 @@ FROM
     EventDetail AS eventDesc,   -- 事件描述
     ERemark AS remark,          -- 事件备注
     EventLocation AS barnOutId, -- 事件发生猪舍
-    isnull(Price, 0) as price,   -- 单价
-    isnull(SumJe, 0) as amount,  -- 金额
+    cast(isnull(Price, 0) * 100 AS INT) as price,   -- 单价(分)
+    cast(isnull(SumJe, 0) * 100 AS INT) as amount,  -- 金额(分)
     BoarID AS boarCode,         -- 配种事件的公猪code
     ServiceType AS serviceType, -- 配种/分娩事件复用字段, 意义不同
     Staff AS staffName,

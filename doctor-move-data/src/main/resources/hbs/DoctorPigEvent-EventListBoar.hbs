@@ -25,8 +25,8 @@ FROM (
         EventDetail AS eventDesc,
         ERemark AS remark,            -- 采精的remark和event的remark
         EventLocation AS barnOutId,   -- 事件发生猪舍outId
-        isnull(Price, 0) as price,   -- 单价
-        isnull(SumJe, 0) as amount,  -- 金额
+        cast(isnull(Price, 0) * 100 AS INT) as price,   -- 单价(分)
+        cast(isnull(SumJe, 0) * 100 AS INT) as amount,  -- 金额(分)
         Dilution AS dilutionRatio,         -- 稀释倍数
         DilutionWeight AS dilutionWeight,  -- 稀释后重量
         Density AS semenDensity,           -- 精液密度
