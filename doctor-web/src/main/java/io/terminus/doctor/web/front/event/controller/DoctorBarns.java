@@ -25,11 +25,7 @@ import io.terminus.pampas.common.UserUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -73,6 +69,7 @@ public class DoctorBarns {
 
     /**
      * 根据id查询猪舍里猪的数量
+     *
      * @param barnId 主键id
      * @return 猪存栏数量
      */
@@ -83,6 +80,7 @@ public class DoctorBarns {
 
     /**
      * 根据id查询猪舍表
+     *
      * @param barnId 主键id
      * @return 猪舍表
      */
@@ -93,6 +91,7 @@ public class DoctorBarns {
 
     /**
      * 根据farmId查询猪舍表, 根据pigIds过滤
+     *
      * @param farmId 猪场id
      * @param pigIds 猪id 逗号分隔
      * @return 猪舍表列表
@@ -105,11 +104,12 @@ public class DoctorBarns {
 
     /**
      * 根据farmId和状态查询猪舍表
-     * @param farmId 猪场id
+     *
+     * @param farmId  猪场id
      * @param pigType 猪舍类别
-     * @param pigIds 猪id 逗号分隔
-     * @see PigType
+     * @param pigIds  猪id 逗号分隔
      * @return 猪舍表列表
+     * @see PigType
      */
     @RequestMapping(value = "/pigType", method = RequestMethod.GET)
     public List<DoctorBarn> findBarnsByfarmIdAndType(@RequestParam("farmId") Long farmId,
@@ -132,10 +132,11 @@ public class DoctorBarns {
 
     /**
      * 根据farmId和状态查询猪舍表
-     * @param farmId 猪场id
+     *
+     * @param farmId   猪场id
      * @param pigTypes 猪舍类别 逗号分隔
-     * @see PigType
      * @return 猪舍表列表
+     * @see PigType
      */
     @RequestMapping(value = "/pigTypes", method = RequestMethod.GET)
     public List<DoctorBarn> findBarnsByfarmIdAndType(@RequestParam("farmId") Long farmId,
@@ -149,6 +150,7 @@ public class DoctorBarns {
 
     /**
      * 创建或更新DoctorBarn
+     *
      * @return 是否成功
      */
     @RequestMapping(value = "", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -180,6 +182,7 @@ public class DoctorBarns {
 
     /**
      * 更新猪舍状态
+     *
      * @return 是否成功
      */
     @RequestMapping(value = "/status", method = RequestMethod.GET)
@@ -195,6 +198,7 @@ public class DoctorBarns {
 
     /**
      * 查询猪舍详情
+     *
      * @param barnId 主键id
      * @return 猪舍表
      */
@@ -269,6 +273,21 @@ public class DoctorBarns {
         searchDto.setCurrentBarnId(barn.getId());
         searchDto.setPigType(status);   //这里的状态就是猪群的猪类
         return RespHelper.or500(doctorGroupReadService.pagingGroup(searchDto, pageNo, size));
+    }
+
+
+    /**
+     * 查询可以转入的猪舍
+     *
+     * @param farmId  转入的猪场
+     * @param groupId 当前猪群id
+     * @return 可以转入的猪舍
+     */
+    @RequestMapping(value = "/findAvailableBarns", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public List<DoctorBarn> findAvailableBarns(@RequestParam("farmId") Long farmId,
+                                               @RequestParam("groupId") Long groupId) {
+        return RespHelper.orServEx(doctorBarnReadService.findAvailableBarns(farmId, groupId));
     }
 
 }
