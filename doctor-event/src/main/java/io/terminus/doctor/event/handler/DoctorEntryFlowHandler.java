@@ -5,6 +5,7 @@ import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import io.terminus.common.utils.JsonMapper;
+import io.terminus.common.utils.MapBuilder;
 import io.terminus.doctor.common.constants.JacksonType;
 import io.terminus.doctor.event.constants.DoctorFarmEntryConstants;
 import io.terminus.doctor.event.constants.DoctorPigSnapshotConstants;
@@ -141,6 +142,9 @@ public class DoctorEntryFlowHandler extends HandlerAware {
         } else {
             throw new IllegalStateException("input.pigType.error");
         }
+        //添加进场到配种标志位
+        doctorPigTrack.addAllExtraMap(MapBuilder.<String, Object>of().put("enterToMate", true).map());
+
         return doctorPigTrack;
     }
 

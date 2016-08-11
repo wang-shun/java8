@@ -2,6 +2,7 @@ package io.terminus.doctor.event.dao;
 
 import com.google.common.collect.ImmutableMap;
 import io.terminus.common.mysql.dao.MyBatisDao;
+import io.terminus.common.utils.MapBuilder;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import org.springframework.stereotype.Repository;
@@ -35,28 +36,48 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
      * @return
      */
     public DoctorPigEvent queryLastPigEventInWorkflow(Long pigId, List<Integer> types) {
-        return this.getSqlSession().selectOne(sqlId("queryLastPigEventInWorkflow"), ImmutableMap.of("pigId", pigId, "types", types));
+        return this.getSqlSession().selectOne(sqlId("queryLastPigEventInWorkflow"), MapBuilder.<String, Object>of().put("pigId", pigId).put("types", types).map());
     }
 
 
     /**
-     * 查询这头母猪,该胎次下最近一次初配事件
+     * 查询这头母猪,该胎次最近一次初配事件
      *
      * @param pigId
      * @return
      */
     public DoctorPigEvent queryLastFirstMate(Long pigId, Integer parity) {
-        return this.getSqlSession().selectOne(sqlId("queryLastFirstMate"), ImmutableMap.of("pigId", pigId, "type", PigEvent.MATING.getKey(), "parity", parity, "currentMatingCount", 1));
+        return this.getSqlSession().selectOne(sqlId("queryLastFirstMate"), MapBuilder.<String, Object>of().put("pigId", pigId).put("type", PigEvent.MATING.getKey()).put("currentMatingCount", 1).map());
     }
 
     /**
-     * 查询这头母猪,该胎次下最近一次分娩时间
+     * 查询这头母猪,该胎次最近一次分娩事件
      *
      * @param pigId
      * @return
      */
     public DoctorPigEvent queryLastFarrowing(Long pigId) {
-        return this.getSqlSession().selectOne(sqlId("queryLastFarrowing"), ImmutableMap.of("pigId", pigId, "type", PigEvent.FARROWING.getKey()));
+        return this.getSqlSession().selectOne(sqlId("queryLastEvent"), MapBuilder.<String, Object>of().put("pigId", pigId).put("type", PigEvent.FARROWING.getKey()).map());
+    }
+
+    /**
+     * 查询这头母猪,最近一次断奶事件
+     *
+     * @param pigId
+     * @return
+     */
+    public DoctorPigEvent queryLastWean(Long pigId) {
+        return this.getSqlSession().selectOne(sqlId("queryLastEvent"), MapBuilder.<String, Object>of().put("pigId", pigId).put("type", PigEvent.WEAN.getKey()).map());
+    }
+
+    /**
+     * 查询这头母猪最近一次进场事件
+     *
+     * @param pigId
+     * @return
+     */
+    public DoctorPigEvent queryLastEnter(Long pigId) {
+        return this.getSqlSession().selectOne(sqlId("queryLastEvent"), MapBuilder.<String, Object>of().put("pigId", pigId).put("type", PigEvent.ENTRY.getKey()).map());
     }
 
     /**
