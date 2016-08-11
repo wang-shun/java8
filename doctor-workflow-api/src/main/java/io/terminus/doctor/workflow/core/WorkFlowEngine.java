@@ -94,4 +94,10 @@ public interface WorkFlowEngine {
      * @return
      */
     Scheduler buildScheduler();
+
+    /**
+     * 构造SynchronizedData对象
+     * @return
+     */
+    SynchronizedData buildSynchronizedData();
 }

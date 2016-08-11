@@ -181,3 +181,9 @@ CREATE TABLE IF NOT EXISTS `workflow_history_processes`(
 	PRIMARY KEY(`id`)
 )ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='流程实例的活动节点历史表';
 CREATE INDEX idx_flow_process_his_ins_id ON workflow_history_processes(flow_instance_id);
+
+-- 2016-08-09 工作流历史实例关联实例id
+alter table workflow_history_process_instances add column `external_history_id` BIGINT(20) DEFAULT NULL COMMENT '记录删除的实例id' AFTER `parent_instance_id`;
+
+-- 2016-08-011 流程定时事件处理类
+alter table workflow_definition_nodes add column `itimer` VARCHAR(128) DEFAULT NULL COMMENT '定时事件处理类(一般为类标识)' AFTER `timer`;
