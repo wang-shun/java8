@@ -92,8 +92,7 @@ public abstract class DoctorAbstractEventHandler implements DoctorEventCreateHan
                                     Map<String, Object> extra, Map<String, Object> context) {
         //添加当前事件发生前猪的状态
         doctorPigEvent.setPigStatusBefore(doctorPigTrack.getStatus());
-        //添加时间发生之前母猪的胎次
-        doctorPigEvent.setParity(doctorPigTrack.getCurrentParity());
+
 
         eventCreatePreHandler(doctorPigEvent, doctorPigTrack, basicInputInfoDto, extra, context);
     }
@@ -127,6 +126,8 @@ public abstract class DoctorAbstractEventHandler implements DoctorEventCreateHan
 
         //往事件当中添加事件发生之后猪的状态
         doctorPigEvent.setPigStatusAfter(doctorPigTrack.getStatus());
+        //添加时间发生之后母猪的胎次
+        doctorPigEvent.setParity(doctorPigTrack.getCurrentParity());
         doctorPigEventDao.update(doctorPigEvent);
     }
 

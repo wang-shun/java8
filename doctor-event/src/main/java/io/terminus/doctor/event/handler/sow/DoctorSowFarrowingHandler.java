@@ -17,11 +17,13 @@ import io.terminus.doctor.event.enums.PigSource;
 import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.handler.DoctorAbstractEventFlowHandler;
 import io.terminus.doctor.event.model.DoctorPigEvent;
+import io.terminus.doctor.event.model.DoctorPigSnapshot;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.event.service.DoctorGroupWriteService;
 import io.terminus.doctor.workflow.core.Execution;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
+import org.joda.time.Days;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,7 +35,7 @@ import java.util.Map;
  * Created by yaoqijun.
  * Date:2016-05-27
  * Email:yaoqj@terminus.io
- * Descirbe:
+ * Descirbe: 母猪分娩事件
  */
 @Component
 @Slf4j
@@ -59,7 +61,15 @@ public class DoctorSowFarrowingHandler extends DoctorAbstractEventFlowHandler {
 
         // 校验 是否早产信息
         DateTime pregJudgeDate = new DateTime(Long.valueOf(doctorPigTrack.getExtraMap().get("judgePregDate").toString()));
+        //分娩时间
         DateTime farrowingDate = new DateTime(Long.valueOf(extra.get("farrowingDate").toString()));
+        //查找最近一次初配种事件
+        DoctorPigEvent firstMate = doctorPigEventDao.queryLastFirstMate(doctorPigTrack.getPigId(), doctorPigTrack.getCurrentParity());
+        DateTime mattingDate = new DateTime(firstMate.getExtraMap().get("matingDate").toString());
+
+        //计算孕期
+        doctorPigEvent.setPregDays(Days.daysBetween(farrowingDate, mattingDate).getDays());
+
         if (farrowingDate.isBefore(pregJudgeDate)) {
             extra.put("farrowingType", FarrowingType.EARLY.getKey());
         } else {
@@ -148,5 +158,13 @@ public class DoctorSowFarrowingHandler extends DoctorAbstractEventFlowHandler {
             return PigSex.SOW;
         }
         return PigSex.MIX;
+    }
+
+    @Override
+    protected void afterEventCreateHandle(DoctorPigEvent doctorPigEvent, DoctorPigTrack doctorPigTrack, DoctorPigSnapshot doctorPigSnapshot, Map<String, Object> extra) {
+        //对应的最近一次的 周期配种的初陪 的 isDelivery 字段变成true
+        DoctorPigEvent firstMate = doctorPigEventDao.queryLastFirstMate(doctorPigTrack.getPigId(), doctorPigTrack.getCurrentParity());
+        firstMate.setIsDelivery(1);
+        doctorPigEventDao.update(firstMate);
     }
 }

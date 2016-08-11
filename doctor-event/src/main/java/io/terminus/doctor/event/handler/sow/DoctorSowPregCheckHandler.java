@@ -10,6 +10,7 @@ import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.enums.PregCheckResult;
 import io.terminus.doctor.event.handler.DoctorAbstractEventFlowHandler;
 import io.terminus.doctor.event.model.DoctorPigEvent;
+import io.terminus.doctor.event.model.DoctorPigSnapshot;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.workflow.core.Execution;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,5 +57,16 @@ public class DoctorSowPregCheckHandler extends DoctorAbstractEventFlowHandler {
         express.put("pregCheckResult", pregCheckResult);
         doctorPigTrack.addPigEvent(basic.getPigType(), (Long) context.get("doctorPigEventId"));
         return doctorPigTrack;
+    }
+
+    @Override
+    protected void afterEventCreateHandle(DoctorPigEvent doctorPigEvent, DoctorPigTrack doctorPigTrack, DoctorPigSnapshot doctorPigSnapshot, Map<String, Object> extra) {
+        //如果是阳性
+        if (Objects.equals(PigStatus.Pregnancy.getKey(), doctorPigTrack.getStatus())) {
+            //对应的最近一次的 周期配种的初陪 的 isImpregnation 字段变成true
+            DoctorPigEvent firstMate = doctorPigEventDao.queryLastFirstMate(doctorPigTrack.getPigId(), doctorPigTrack.getCurrentParity());
+            firstMate.setIsImpregnation(1);
+            doctorPigEventDao.update(firstMate);
+        }
     }
 }

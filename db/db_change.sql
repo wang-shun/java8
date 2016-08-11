@@ -222,3 +222,5 @@ ALTER TABLE doctor_daily_reports ADD COLUMN sow_count int(11) DEFAULT 0 COMMENT 
 ALTER TABLE doctor_daily_reports ADD COLUMN farrow_count int(11) DEFAULT 0 COMMENT '产房仔猪存栏' AFTER sow_count;
 ALTER TABLE doctor_daily_reports ADD COLUMN nursery_count int(11) DEFAULT 0 COMMENT '保育猪存栏' AFTER farrow_count;
 ALTER TABLE doctor_daily_reports ADD COLUMN fatten_count int(11) DEFAULT 0 COMMENT '育肥猪存栏' AFTER nursery_count;
+
+ALTER TABLE doctor_pig_events ADD COLUMN current_mating_count DOUBLE DEFAULT NULL COMMENT '当前配种次数' AFTER wean_avg_weight;
