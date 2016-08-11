@@ -224,3 +224,16 @@ ALTER TABLE doctor_daily_reports ADD COLUMN nursery_count int(11) DEFAULT 0 COMM
 ALTER TABLE doctor_daily_reports ADD COLUMN fatten_count int(11) DEFAULT 0 COMMENT '育肥猪存栏' AFTER nursery_count;
 
 ALTER TABLE doctor_pig_events ADD COLUMN current_mating_count DOUBLE DEFAULT NULL COMMENT '当前配种次数' AFTER wean_avg_weight;
+
+-- 月报报表
+CREATE TABLE `doctor_monthly_reports` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '自增主键',
+  `farm_id` bigint(20) DEFAULT NULL COMMENT '猪场id',
+  `data` text COMMENT '月报数据，json存储',
+  `extra` text COMMENT '附加字段',
+  `sum_at` date DEFAULT NULL COMMENT '统计时间',
+  `created_at` datetime DEFAULT NULL COMMENT '创建时间(仅做记录创建时间，不参与查询)',
+  PRIMARY KEY (`id`),
+  KEY `idx_doctor_monthly_reports_farm_id_agg_sumat` (`farm_id`,`sum_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='猪场月报表';
+
