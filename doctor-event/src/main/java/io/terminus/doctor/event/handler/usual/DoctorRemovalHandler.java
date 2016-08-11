@@ -46,22 +46,6 @@ public class DoctorRemovalHandler extends DoctorAbstractEventHandler{
     }
 
     @Override
-    public void handler(DoctorBasicInputInfoDto basic, Map<String, Object> extra, Map<String, Object> context) throws RuntimeException {
-        // create event info
-        DoctorPigEvent doctorPigEvent = buildAllPigDoctorEvent(basic, extra);
-        DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(doctorPigEvent.getPigId());
-
-        //添加当前事件发生前猪的状态
-        doctorPigEvent.setPigStatusBefore(doctorPigTrack.getStatus());
-        //添加时间发生之前母猪的胎次
-        doctorPigEvent.setParity(doctorPigTrack.getCurrentParity());
-        doctorPigEventDao.create(doctorPigEvent);
-        context.put("doctorPigEventId", doctorPigEvent.getId());
-
-        createPigTrackSnapshot(doctorPigEvent, basic, extra, context);
-    }
-
-    @Override
     public DoctorPigTrack updateDoctorPigTrackInfo(DoctorPigTrack doctorPigTrack, DoctorBasicInputInfoDto basic, Map<String, Object> extra, Map<String,Object> context) {
         doctorPigTrack.addAllExtraMap(extra);
         doctorPigTrack.addPigEvent(basic.getPigType(), (Long) context.get("doctorPigEventId"));
@@ -85,12 +69,12 @@ public class DoctorRemovalHandler extends DoctorAbstractEventHandler{
     }
 
     @Override
-    protected DoctorPigEvent buildAllPigDoctorEvent(DoctorBasicInputInfoDto basic, Map<String, Object> extra) {
-        DoctorPigEvent pigEvent = super.buildAllPigDoctorEvent(basic, extra);
+    protected void eventCreatePreHandler(DoctorPigEvent doctorPigEvent, DoctorPigTrack doctorPigTrack, DoctorBasicInputInfoDto basicInputInfoDto, Map<String, Object> extra, Map<String, Object> context) {
         DoctorRemovalDto removel = BeanMapper.map(extra, DoctorRemovalDto.class);
-        pigEvent.setChangeTypeId(removel.getChgTypeId());   //变动类型id
-        pigEvent.setPrice(removel.getPrice());      //销售单价(分)
-        pigEvent.setAmount(removel.getSum());       //销售总额(分)
-        return pigEvent;
+        if (removel != null) {
+            doctorPigEvent.setChangeTypeId(removel.getChgTypeId());   //变动类型id
+            doctorPigEvent.setPrice(removel.getPrice());      //销售单价(分)
+            doctorPigEvent.setAmount(removel.getSum());       //销售总额(分)
+        }
     }
 }
