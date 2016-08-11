@@ -1145,10 +1145,16 @@ public class DoctorMoveDataService {
                 event.setExtraMap(getMoveInEvent(gainEvent, basicMap, groupMap, group));
                 break;
             case CHANGE:
-                event.setExtraMap(getChangeEvent(gainEvent, basicMap, changeReasonMap, customerMap));
+                DoctorChangeGroupEvent changeEvent = getChangeEvent(gainEvent, basicMap, changeReasonMap, customerMap);
+                event.setExtraMap(changeEvent);
+                event.setChangeTypeId(changeEvent.getChangeTypeId());
+                event.setPrice(changeEvent.getPrice());
+                event.setAmount(changeEvent.getAmount());
                 break;
             case TRANS_GROUP:
-                event.setExtraMap(getTranGroupEvent(gainEvent, basicMap, barnMap, groupMap, group));
+                DoctorTransGroupEvent transGroupEvent = getTranGroupEvent(gainEvent, basicMap, barnMap, groupMap, group);
+                event.setExtraMap(transGroupEvent);
+                event.setTransGroupType(getTransType(event.getPigType(), transGroupEvent.getToBarnType()).getValue());  //区分内转还是外转
                 break;
             case TURN_SEED:
                 event.setExtraMap(getTurnSeedEvent(gainEvent, basicMap, barnMap, pigMap));
@@ -1184,7 +1190,9 @@ public class DoctorMoveDataService {
                 event.setExtraMap(anti);
                 break;
             case TRANS_FARM:
-                event.setExtraMap(getTranFarmEvent(gainEvent, basicMap, barnMap, groupMap, group));
+                DoctorTransFarmGroupEvent transFarmEvent = getTranFarmEvent(gainEvent, basicMap, barnMap, groupMap, group);
+                event.setExtraMap(transFarmEvent);
+                event.setTransGroupType(getTransType(event.getPigType(), transFarmEvent.getToBarnType()).getValue());  //区分内转还是外转
                 break;
             case CLOSE:
                 DoctorCloseGroupEvent close = new DoctorCloseGroupEvent();
@@ -1195,6 +1203,12 @@ public class DoctorMoveDataService {
                 break;
         }
         return event;
+    }
+
+    //判断内转还是外转
+    private static DoctorGroupEvent.TransGroupType getTransType(Integer pigType, Integer toBarnType) {
+        return Objects.equals(pigType, toBarnType) ?
+                DoctorGroupEvent.TransGroupType.IN : DoctorGroupEvent.TransGroupType.OUT;
     }
 
     //转入事件详细信息
@@ -1278,6 +1292,7 @@ public class DoctorMoveDataService {
             if (barn != null) {
                 transGroup.setToBarnId(barn.getId());
                 transGroup.setToBarnName(barn.getName());
+                transGroup.setToBarnType(barn.getPigType());
             }
             DoctorGroup toGroup = groupMap.get(gainEvent.getToBarnOutId()); //就是 OutDestination
             if (toGroup != null) {
@@ -1289,6 +1304,7 @@ public class DoctorMoveDataService {
             if (barn != null) {
                 transGroup.setToBarnId(barn.getId());
                 transGroup.setToBarnName(barn.getName());
+                transGroup.setToBarnType(barn.getPigType());
             }
             DoctorGroup toGroup = groupMap.get(gainEvent.getToGroupOutId());
             if (toGroup != null) {
@@ -1327,6 +1343,7 @@ public class DoctorMoveDataService {
         if (barn != null) {
             transFarm.setToBarnId(barn.getId());
             transFarm.setToBarnName(barn.getName());
+            transFarm.setToBarnType(barn.getPigType());
         }
         DoctorGroup toGroup = groupMap.get(gainEvent.getToGroupOutId());
         if (toGroup != null) {

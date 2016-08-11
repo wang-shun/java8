@@ -30,6 +30,8 @@ public class DoctorTransGroupEvent extends BaseGroupEvent implements Serializabl
 
     private String toBarnName;
 
+    private Integer toBarnType;
+
     private Long fromGroupId;
 
     private String fromGroupCode;

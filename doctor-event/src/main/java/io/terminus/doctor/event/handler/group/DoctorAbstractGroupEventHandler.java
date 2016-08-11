@@ -331,7 +331,7 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
     }
 
     //判断内转还是外转
-    protected DoctorGroupEvent.TransGroupType getTransType(Integer pigType, DoctorBarn toBarn) {
+    protected static DoctorGroupEvent.TransGroupType getTransType(Integer pigType, DoctorBarn toBarn) {
         return Objects.equals(pigType, toBarn.getPigType()) ?
                 DoctorGroupEvent.TransGroupType.IN : DoctorGroupEvent.TransGroupType.OUT;
     }
