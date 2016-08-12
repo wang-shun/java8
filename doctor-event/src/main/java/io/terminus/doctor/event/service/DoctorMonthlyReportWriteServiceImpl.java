@@ -69,6 +69,8 @@ public class DoctorMonthlyReportWriteServiceImpl implements DoctorMonthlyReportW
     //月报统计结果
     private DoctorMonthlyReportDto getMonthlyReportDto(Long farmId, Date startAt, Date endAt) {
         DoctorMonthlyReportDto dto = new DoctorMonthlyReportDto();
+        // TODO: 16/8/12
+        //配种情况
         dto.setMateHoubei(0);                //配后备
         dto.setMateWean(0);                  //配断奶
         dto.setMateFanqing(0);               //配返情
@@ -78,39 +80,49 @@ public class DoctorMonthlyReportWriteServiceImpl implements DoctorMonthlyReportW
         dto.setMateRealPregRate(0);          //实际受胎率
         dto.setMateEstimateFarrowingRate(0); //估算配种分娩率
         dto.setMateRealFarrowingRate(0);     //实际配种分娩率
+
+        //妊娠检查情况
         dto.setCheckPositive(0);             //妊娠检查阳性
         dto.setCheckFanqing(0);              //返情
         dto.setCheckAbort(0);                //流产
         dto.setCheckNegtive(0);              //妊娠检查阴性
-        dto.setFarrowEstimateParity(0);      //预产胎数
-        dto.setFarrowNest(0);                //分娩窝数
-        dto.setFarrowAlive(0);               //产活仔数
-        dto.setFarrowHealth(0);              //产键仔数
-        dto.setFarrowWeak(0);                //产弱仔数
-        dto.setFarrowDead(0);                //产死仔数
-        dto.setFarrowMny(0);                 //木乃伊数
-        dto.setFarrowAll(0);                 //总产仔数
-        dto.setFarrowAvgHealth(0);           //窝均健仔数
-        dto.setFarrowAvgAll(0);              //窝均产仔数
-        dto.setFarrowAvgAlive(0);            //窝均活仔数
-        dto.setWeanSow(0);                   //断奶母猪数
-        dto.setWeanPiglet(0);                //断奶仔猪数
-        dto.setWeanAvgWeight(0);             //断奶均重
-        dto.setWeanAvgCount(0);              //窝均断奶数
-        dto.setSaleSow(0);                   //母猪
-        dto.setSaleBoar(0);                  //公猪
-        dto.setSaleNursery(0);               //保育猪（产房+保育）
-        dto.setSaleFatten(0);                //育肥猪
-        dto.setDeadSow(0);                   //母猪
-        dto.setDeadBoar(0);                  //公猪
-        dto.setDeadFarrow(0);                //产房仔猪
-        dto.setDeadNursery(0);               //保育猪
-        dto.setDeadFatten(0);                //育肥猪
-        dto.setDeadFarrowRate(0);            //产房死淘率
-        dto.setDeadNurseryRate(0);           //保育死淘率
-        dto.setDeadFattenRate(0);            //育肥死淘率
         dto.setNpd(0);                       //非生产天数
         dto.setPsy(0);                       //psy
+
+        //分娩情况
+        dto.setFarrowEstimateParity(doctorKpiDao.getPreDelivery(farmId, startAt, endAt));        //预产胎数
+        dto.setFarrowNest(doctorKpiDao.getDelivery(farmId, startAt, endAt));                     //分娩窝数
+        dto.setFarrowAlive(doctorKpiDao.getDeliveryLive(farmId, startAt, endAt));                //产活仔数
+        dto.setFarrowHealth(doctorKpiDao.getDeliveryHealth(farmId, startAt, endAt));             //产键仔数
+        dto.setFarrowWeak(doctorKpiDao.getDeliveryWeak(farmId, startAt, endAt));                 //产弱仔数
+        dto.setFarrowDead(doctorKpiDao.getDeliveryDead(farmId, startAt, endAt));                 //产死仔数
+        dto.setFarrowMny(doctorKpiDao.getDeliveryMny(farmId, startAt, endAt));                   //木乃伊数
+        dto.setFarrowAll(doctorKpiDao.getDeliveryAll(farmId, startAt, endAt));                   //总产仔数
+        dto.setFarrowAvgHealth(doctorKpiDao.getDeliveryHealthAvg(farmId, startAt, endAt));       //窝均健仔数
+        dto.setFarrowAvgAll(doctorKpiDao.getDeliveryAllAvg(farmId, startAt, endAt));             //窝均产仔数
+        dto.setFarrowAvgAlive(doctorKpiDao.getDeliveryLiveAvg(farmId, startAt, endAt));          //窝均活仔数
+
+        //断奶情况
+        dto.setWeanSow(doctorKpiDao.getWeanSow(farmId, startAt, endAt));                         //断奶母猪数
+        dto.setWeanPiglet(doctorKpiDao.getWeanPiglet(farmId, startAt, endAt));                   //断奶仔猪数
+        dto.setWeanAvgWeight(doctorKpiDao.getWeanPigletWeightAvg(farmId, startAt, endAt));       //断奶均重
+        dto.setWeanAvgCount(doctorKpiDao.getWeanPigletCountsAvg(farmId, startAt, endAt));        //窝均断奶数
+
+        //销售情况
+        dto.setSaleSow(doctorKpiDao.getSaleSow(farmId, startAt, endAt));                  //母猪
+        dto.setSaleBoar(doctorKpiDao.getSaleBoar(farmId, startAt, endAt));                //公猪
+        dto.setSaleNursery(doctorKpiDao.getSaleNursery(farmId, startAt, endAt));          //保育猪（产房+保育）
+        dto.setSaleFatten(doctorKpiDao.getSaleFatten(farmId, startAt, endAt));            //育肥猪
+
+        //死淘情况
+        dto.setDeadSow(doctorKpiDao.getDeadSow(farmId, startAt, endAt));                  //母猪
+        dto.setDeadBoar(doctorKpiDao.getDeadBoar(farmId, startAt, endAt));                //公猪
+        dto.setDeadFarrow(doctorKpiDao.getDeadFarrow(farmId, startAt, endAt));            //产房仔猪
+        dto.setDeadNursery(doctorKpiDao.getDeadNursery(farmId, startAt, endAt));          //保育猪
+        dto.setDeadFatten(doctorKpiDao.getDeadFatten(farmId, startAt, endAt));            //育肥猪
+        dto.setDeadFarrowRate(doctorKpiDao.getDeadFarrowRate(farmId, startAt, endAt));    //产房死淘率
+        dto.setDeadNurseryRate(doctorKpiDao.getDeadNurseryRate(farmId, startAt, endAt));  //保育死淘率
+        dto.setDeadFattenRate(doctorKpiDao.getDeadFattenRate(farmId, startAt, endAt));    //育肥死淘率
         return dto;
     }
 }
