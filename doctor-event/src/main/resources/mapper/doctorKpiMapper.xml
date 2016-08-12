@@ -252,13 +252,13 @@
         ON a.farm_id = b.farm_id
         LEFT JOIN
         (
-            SELECT
-              farm_id,
-              farrow_count               -- 当天产房仔猪存栏
-            FROM doctor_daily_reports
-            WHERE
-              farm_id = #{farmId} AND
-              sum_at = date_format(#{endAt}, '%Y-%m-%d')
+        SELECT
+        farm_id,
+        farrow_count -- 当天产房仔猪存栏
+        FROM doctor_daily_reports
+        WHERE
+        farm_id = #{farmId} AND
+        sum_at = date_format(#{endAt}, '%Y-%m-%d')
         ) AS c
         ON a.farm_id = c.farm_id
     </select>
@@ -293,13 +293,13 @@
         ON a.farm_id = b.farm_id
         LEFT JOIN
         (
-            SELECT
-              farm_id,
-              nursery_count              -- 当天保育存栏
-            FROM doctor_daily_reports
-            WHERE
-              farm_id = #{farmId} AND
-              sum_at = date_format(#{endAt}, '%Y-%m-%d')
+        SELECT
+        farm_id,
+        nursery_count -- 当天保育存栏
+        FROM doctor_daily_reports
+        WHERE
+        farm_id = #{farmId} AND
+        sum_at = date_format(#{endAt}, '%Y-%m-%d')
         ) AS c
         ON a.farm_id = c.farm_id
     </select>
@@ -334,13 +334,13 @@
         ON a.farm_id = b.farm_id
         LEFT JOIN
         (
-            SELECT
-              farm_id,
-              fatten_count               -- 当天育肥存栏
-            FROM doctor_daily_reports
-            WHERE
-              farm_id = #{farmId} AND
-              sum_at = date_format(#{endAt}, '%Y-%m-%d')
+        SELECT
+        farm_id,
+        fatten_count -- 当天育肥存栏
+        FROM doctor_daily_reports
+        WHERE
+        farm_id = #{farmId} AND
+        sum_at = date_format(#{endAt}, '%Y-%m-%d')
         ) AS c
         ON a.farm_id = c.farm_id;
     </select>

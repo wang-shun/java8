@@ -485,7 +485,7 @@ public class DoctorPigCreateEventsTest extends BaseFrontWebTest {
         HttpEntity httpEntity = HttpPostRequest.formRequest()
                 .param("pigId", pigId).param("farmId", 12345l).param("doctorRemovalDtoJson", DoctorRemovalDto.builder()
                         .chgTypeId(1l).chgTypeName("chgTypeName").chgReasonId(1l).chgReasonName("chgReasonName").toBarnId(1l)
-                        .weight(100d).sum(100d).price(100d).customerId(1l).remark("remark")
+                        .weight(100d).sum(100L).price(100L).customerId(1l).remark("remark")
                         .build())
                 .httpEntity();
 
