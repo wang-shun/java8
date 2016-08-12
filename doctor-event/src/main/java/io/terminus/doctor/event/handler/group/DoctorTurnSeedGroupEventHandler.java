@@ -70,6 +70,10 @@ public class DoctorTurnSeedGroupEventHandler extends DoctorAbstractGroupEventHan
         //2. 创建转种猪事件
         DoctorGroupEvent<DoctorTurnSeedGroupEvent> event = dozerGroupEvent(group, GroupEventType.TURN_SEED, turnSeed);
         event.setExtraMap(turnSeedEvent);
+        event.setQuantity(1);
+        event.setAvgDayAge(groupTrack.getAvgDayAge());  //转群的日龄不需要录入, 直接取猪群的日龄
+        event.setWeight(turnSeed.getWeight());
+        event.setAvgWeight(turnSeed.getWeight());
         doctorGroupEventDao.create(event);
 
         //3.更新猪群跟踪
