@@ -84,7 +84,7 @@ public class DoctorReportJobs {
      * 猪场月报计算job
      * 每天凌晨1点统计昨天的数据
      */
-    @Scheduled(cron = "0 0 1 * * ?")
+    @Scheduled(cron = "0 0 3 * * ?")
     @RequestMapping(value = "/monthly", method = RequestMethod.GET)
     public void monthlyReport() {
         try {
