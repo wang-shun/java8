@@ -32,7 +32,7 @@ public class DoctorReports {
     /**
      * 根据farmId和日期查询猪场日报表(缓存方式)
      * @param farmId 猪场id
-     * @param date   日期
+     * @param date   日期 yyyy-MM-dd
      * @return 猪场日报表
      */
     @RequestMapping(value = "/daily", method = RequestMethod.GET)
@@ -44,7 +44,7 @@ public class DoctorReports {
     /**
      * 根据farmId和日期查询猪场月报表
      * @param farmId 猪场id
-     * @param date   日期
+     * @param date   日期 yyyy-MM-dd
      * @return 猪场月报表
      */
     @RequestMapping(value = "/monthly", method = RequestMethod.GET)
