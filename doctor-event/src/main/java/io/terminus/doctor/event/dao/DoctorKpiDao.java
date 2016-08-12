@@ -1,11 +1,14 @@
 package io.terminus.doctor.event.dao;
 
 import com.google.common.collect.ImmutableMap;
+import io.terminus.doctor.event.handler.sow.DoctorSowMatingHandler;
+import org.joda.time.DateTime;
 import org.mybatis.spring.SqlSessionTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import java.util.Date;
+import java.util.Objects;
 
 /**
  * Desc: 猪场月报表Dao类
@@ -35,7 +38,13 @@ public class DoctorKpiDao {
      * @return
      */
     public int getPreDelivery(Long farmId, Date startAt, Date endAt){
-        return this.sqlSession.selectOne(sqlId("preDeliveryCounts"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
+        if(!Objects.isNull(startAt)){
+            startAt = new DateTime(startAt).minusDays(DoctorSowMatingHandler.MATING_PREG_DAYS).toDate();
+        }
+        if(!Objects.isNull(endAt)){
+            endAt = new DateTime(endAt).minusDays(DoctorSowMatingHandler.MATING_PREG_DAYS).toDate();
+        }
+        return this.sqlSession.selectOne(sqlId("preDeliveryCounts"), ImmutableMap.of("farmId", farmId, "startAt",  startAt, "endAt", endAt));
     }
 
     /**
