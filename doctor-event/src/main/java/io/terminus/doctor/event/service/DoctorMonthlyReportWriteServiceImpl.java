@@ -69,48 +69,48 @@ public class DoctorMonthlyReportWriteServiceImpl implements DoctorMonthlyReportW
     //月报统计结果
     private DoctorMonthlyReportDto getMonthlyReportDto(Long farmId, Date startAt, Date endAt) {
         DoctorMonthlyReportDto dto = new DoctorMonthlyReportDto();
-        dto.setMateHoubei(0);
-        dto.setMateWean(0);
-        dto.setMateFanqing(0);
-        dto.setMateAbort(0);
-        dto.setMateNegtive(0);
-        dto.setMateEstimatePregRate(0);
-        dto.setMateRealPregRate(0);
-        dto.setMateEstimateFarrowingRate(0);
-        dto.setMateRealFarrowingRate(0);
-        dto.setCheckPositive(0);
-        dto.setCheckFanqing(0);
-        dto.setCheckAbort(0);
-        dto.setCheckNegtive(0);
-        dto.setFarrowEstimateParity(0);
-        dto.setFarrowNest(0);
-        dto.setFarrowAlive(0);
-        dto.setFarrowHealth(0);
-        dto.setFarrowWeak(0);
-        dto.setFarrowDead(0);
-        dto.setFarrowMny(0);
-        dto.setFarrowAll(0);
-        dto.setFarrowAvgHealth(0);
-        dto.setFarrowAvgAll(0);
-        dto.setFarrowAvgAlive(0);
-        dto.setWeanSow(0);
-        dto.setWeanPiglet(0);
-        dto.setWeanAvgWeight(0);
-        dto.setWeanAvgCount(0);
-        dto.setSaleSow(0);
-        dto.setSaleBoar(0);
-        dto.setSaleNursery(0);
-        dto.setSaleFatten(0);
-        dto.setDeadSow(0);
-        dto.setDeadBoar(0);
-        dto.setDeadFarrow(0);
-        dto.setDeadNursery(0);
-        dto.setDeadFatten(0);
-        dto.setDeadFarrowRate(0);
-        dto.setDeadNurseryRate(0);
-        dto.setDeadFattenRate(0);
-        dto.setNpd(0);
-        dto.setPsy(0);
+        dto.setMateHoubei(0);                //配后备
+        dto.setMateWean(0);                  //配断奶
+        dto.setMateFanqing(0);               //配返情
+        dto.setMateAbort(0);                 //配流产
+        dto.setMateNegtive(0);               //配阴性
+        dto.setMateEstimatePregRate(0);      //估算受胎率
+        dto.setMateRealPregRate(0);          //实际受胎率
+        dto.setMateEstimateFarrowingRate(0); //估算配种分娩率
+        dto.setMateRealFarrowingRate(0);     //实际配种分娩率
+        dto.setCheckPositive(0);             //妊娠检查阳性
+        dto.setCheckFanqing(0);              //返情
+        dto.setCheckAbort(0);                //流产
+        dto.setCheckNegtive(0);              //妊娠检查阴性
+        dto.setFarrowEstimateParity(0);      //预产胎数
+        dto.setFarrowNest(0);                //分娩窝数
+        dto.setFarrowAlive(0);               //产活仔数
+        dto.setFarrowHealth(0);              //产键仔数
+        dto.setFarrowWeak(0);                //产弱仔数
+        dto.setFarrowDead(0);                //产死仔数
+        dto.setFarrowMny(0);                 //木乃伊数
+        dto.setFarrowAll(0);                 //总产仔数
+        dto.setFarrowAvgHealth(0);           //窝均健仔数
+        dto.setFarrowAvgAll(0);              //窝均产仔数
+        dto.setFarrowAvgAlive(0);            //窝均活仔数
+        dto.setWeanSow(0);                   //断奶母猪数
+        dto.setWeanPiglet(0);                //断奶仔猪数
+        dto.setWeanAvgWeight(0);             //断奶均重
+        dto.setWeanAvgCount(0);              //窝均断奶数
+        dto.setSaleSow(0);                   //母猪
+        dto.setSaleBoar(0);                  //公猪
+        dto.setSaleNursery(0);               //保育猪（产房+保育）
+        dto.setSaleFatten(0);                //育肥猪
+        dto.setDeadSow(0);                   //母猪
+        dto.setDeadBoar(0);                  //公猪
+        dto.setDeadFarrow(0);                //产房仔猪
+        dto.setDeadNursery(0);               //保育猪
+        dto.setDeadFatten(0);                //育肥猪
+        dto.setDeadFarrowRate(0);            //产房死淘率
+        dto.setDeadNurseryRate(0);           //保育死淘率
+        dto.setDeadFattenRate(0);            //育肥死淘率
+        dto.setNpd(0);                       //非生产天数
+        dto.setPsy(0);                       //psy
         return dto;
     }
 }
