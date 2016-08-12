@@ -237,3 +237,10 @@ CREATE TABLE `doctor_monthly_reports` (
   KEY `idx_doctor_monthly_reports_farm_id_agg_sumat` (`farm_id`,`sum_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='猪场月报表';
 
+
+ALTER TABLE doctor_pig_events ADD COLUMN check_date datetime DEFAULT NULL COMMENT '检查时间' AFTER current_mating_count;
+ALTER TABLE doctor_pig_events ADD COLUMN matting_date datetime DEFAULT NULL COMMENT '配种时间' AFTER check_date;
+ALTER TABLE doctor_pig_events ADD COLUMN farrowing_date datetime DEFAULT NULL COMMENT '分娩时间' AFTER matting_date;
+ALTER TABLE doctor_pig_events ADD COLUMN abortion_date datetime DEFAULT NULL COMMENT '流产时间' AFTER farrowing_date;
+ALTER TABLE doctor_pig_events ADD COLUMN partwean_date datetime DEFAULT NULL COMMENT '断奶时间' AFTER abortion_date;
+ALTER TABLE doctor_pig_events ADD COLUMN doctor_mate_type SMALLINT(6) DEFAULT NULL COMMENT '配种类型' AFTER partwean_date;

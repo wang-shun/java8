@@ -11,7 +11,7 @@ import io.terminus.common.utils.Splitters;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dao.DoctorDailyReportDao;
-import io.terminus.doctor.event.dto.report.DoctorDailyReportDto;
+import io.terminus.doctor.event.dto.report.daily.DoctorDailyReportDto;
 import io.terminus.doctor.event.service.DoctorDailyGroupReportReadService;
 import io.terminus.doctor.event.service.DoctorDailyPigReportReadService;
 import lombok.AllArgsConstructor;

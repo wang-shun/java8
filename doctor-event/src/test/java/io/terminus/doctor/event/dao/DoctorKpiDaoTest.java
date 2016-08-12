@@ -5,13 +5,11 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-
 /**
  * Created by IntelliJ IDEA.
  * Author: luoys
  * Date: 12:17 16/8/11
  */
-
 public class DoctorKpiDaoTest extends BaseDaoTest{
     @Autowired
     private DoctorKpiDao doctorKpiDao;
@@ -99,5 +97,4 @@ public class DoctorKpiDaoTest extends BaseDaoTest{
         double result = doctorKpiDao.getWeanPigletCountsAvg(12355L, DateTime.now().minusDays(300).toDate(), DateTime.now().toDate());
         Assert.assertEquals(13.0, result, 0.01);
     }
-
 }

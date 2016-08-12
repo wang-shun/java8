@@ -1,5 +1,6 @@
 package io.terminus.doctor.event.handler.sow;
 
+import io.terminus.common.utils.MapBuilder;
 import io.terminus.doctor.event.dao.DoctorPigDao;
 import io.terminus.doctor.event.dao.DoctorPigEventDao;
 import io.terminus.doctor.event.dao.DoctorPigSnapshotDao;
@@ -40,6 +41,7 @@ public class DoctorSowAbortionHandler extends DoctorAbstractEventFlowHandler {
     protected void eventCreatePreHandler(Execution execution, DoctorPigEvent doctorPigEvent, DoctorPigTrack doctorPigTrack, DoctorBasicInputInfoDto basicInputInfoDto, Map<String, Object> extra, Map<String, Object> context) {
         //流产事件时间
         DateTime abortionDate = new DateTime(Long.valueOf(extra.get("abortionDate").toString()));
+        doctorPigEvent.setAbortionDate(abortionDate.toDate());
 
         //查找最近一次配种事件
         DoctorPigEvent lastMate = doctorPigEventDao.queryLastFirstMate(doctorPigTrack.getPigId(), doctorPigTrack.getCurrentParity());
@@ -58,6 +60,7 @@ public class DoctorSowAbortionHandler extends DoctorAbstractEventFlowHandler {
         doctorPigTrack.setStatus(PigStatus.Abortion.getKey());
         doctorPigTrack.addAllExtraMap(extra);
         doctorPigTrack.addPigEvent(basic.getPigType(), (Long) context.get("doctorPigEventId"));
+        doctorPigTrack.addAllExtraMap(MapBuilder.<String, Object>of().put("liuchanToMateLiuchan", true).map());
         return doctorPigTrack;
     }
 }
