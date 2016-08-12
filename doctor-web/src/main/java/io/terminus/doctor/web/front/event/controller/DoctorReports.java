@@ -92,6 +92,8 @@ public class DoctorReports {
         report.setDeadFarrowRate(RandomUtil.random(1, 100));
         report.setDeadNurseryRate(RandomUtil.random(1, 100));
         report.setDeadFattenRate(RandomUtil.random(1, 100));
+        report.setNpd(RandomUtil.random(1, 100));
+        report.setPsy(RandomUtil.random(1, 100));
         return report;
         //return RespHelper.or500(doctorMonthlyReportReadService.findMonthlyReportByFarmIdAndSumAt(farmId, date));
     }

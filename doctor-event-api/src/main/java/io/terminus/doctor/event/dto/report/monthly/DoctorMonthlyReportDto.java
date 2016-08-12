@@ -82,4 +82,10 @@ public class DoctorMonthlyReportDto implements Serializable {
     private double deadFarrowRate;            //产房死淘率
     private double deadNurseryRate;           //保育死淘率
     private double deadFattenRate;            //育肥死淘率
+
+    /**
+     * 其他
+     */
+    private double npd;                       //非生产天数
+    private double psy;                       //psy
 }
