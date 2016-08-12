@@ -116,4 +116,9 @@ public class IndexedPig implements Serializable {
     private Integer currentParity;
 
     private Date updatedAt;
+
+    /**
+     * 是否离场
+     */
+    private Integer isRemoval;
 }

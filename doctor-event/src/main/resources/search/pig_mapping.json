@@ -105,6 +105,9 @@
       },
       "updatedAt": {
         "type": "date"
+      },
+      "isRemoval": {
+        "type": "integer"
       }
     }
   }
