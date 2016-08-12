@@ -17,6 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static io.terminus.common.utils.Arguments.notNull;
 
 /**
@@ -53,9 +54,14 @@ public class DoctorBasicWriteServiceImpl implements DoctorBasicWriteService {
     public Response<Long> createBasic(DoctorBasic basic) {
         try {
             basic.setIsValid(1);
+            DoctorBasic.Type type = DoctorBasic.Type.from(basic.getType());
+            checkArgument(notNull(type), "basic.type.fail");
+            basic.setTypeName(type.getDesc());
             doctorBasicDao.create(basic);
             publishBasicEvent(basic);
             return Response.ok(basic.getId());
+        } catch (IllegalArgumentException e) {
+            return Response.fail(e.getMessage());
         } catch (Exception e) {
             log.error("create basic failed, basic:{}, cause:{}", basic, Throwables.getStackTraceAsString(e));
             return Response.fail("basic.create.fail");
