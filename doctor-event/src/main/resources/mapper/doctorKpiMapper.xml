@@ -257,7 +257,7 @@
             FROM doctor_daily_reports
             WHERE
               farm_id = #{farmId} AND
-              sum_at = #{sumAt}
+              sum_at = date_format(#{endAt}, '%Y-%m-%d')
         ) AS c
         ON a.farm_id = c.farm_id
     </select>
@@ -298,7 +298,7 @@
             FROM doctor_daily_reports
             WHERE
               farm_id = #{farmId} AND
-              sum_at = #{sumAt}
+              sum_at = date_format(#{endAt}, '%Y-%m-%d')
         ) AS c
         ON a.farm_id = c.farm_id
     </select>
@@ -339,7 +339,7 @@
             FROM doctor_daily_reports
             WHERE
               farm_id = #{farmId} AND
-              sum_at = #{sumAt}
+              sum_at = date_format(#{endAt}, '%Y-%m-%d')
         ) AS c
         ON a.farm_id = c.farm_id;
     </select>

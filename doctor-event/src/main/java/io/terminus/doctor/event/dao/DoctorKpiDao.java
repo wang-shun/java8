@@ -1,7 +1,6 @@
 package io.terminus.doctor.event.dao;
 
 import com.google.common.collect.ImmutableMap;
-import io.terminus.common.utils.Dates;
 import io.terminus.doctor.event.handler.sow.DoctorSowMatingHandler;
 import org.joda.time.DateTime;
 import org.mybatis.spring.SqlSessionTemplate;
@@ -209,23 +208,20 @@ public class DoctorKpiDao {
      * 死淘情况: 产房死淘率
      */
     public double getDeadFarrowRate(Long farmId, Date startAt, Date endAt) {
-        Date sumAt = Dates.startOfDay(endAt);
-        return sqlSession.selectOne(sqlId("getDeadFarrowRate"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt, "sumAt", sumAt));
+        return sqlSession.selectOne(sqlId("getDeadFarrowRate"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
     }
 
     /**
      * 死淘情况: 保育死淘率
      */
     public double getDeadNurseryRate(Long farmId, Date startAt, Date endAt) {
-        Date sumAt = Dates.startOfDay(endAt);
-        return sqlSession.selectOne(sqlId("getDeadNurseryRate"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt, "sumAt", sumAt));
+        return sqlSession.selectOne(sqlId("getDeadNurseryRate"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
     }
 
     /**
      * 死淘情况: 育肥死淘率
      */
     public double getDeadFattenRate(Long farmId, Date startAt, Date endAt) {
-        Date sumAt = Dates.startOfDay(endAt);
-        return sqlSession.selectOne(sqlId("getDeadFattenRate"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt, "sumAt", sumAt));
+        return sqlSession.selectOne(sqlId("getDeadFattenRate"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
     }
 }
