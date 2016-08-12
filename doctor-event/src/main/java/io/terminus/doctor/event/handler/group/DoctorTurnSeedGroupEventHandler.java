@@ -1,27 +1,37 @@
 package io.terminus.doctor.event.handler.group;
 
+import com.google.common.collect.Maps;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.event.CoreEventDispatcher;
+import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorGroupSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
+import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
 import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
 import io.terminus.doctor.event.dto.event.group.DoctorTurnSeedGroupEvent;
 import io.terminus.doctor.event.dto.event.group.edit.BaseGroupEdit;
 import io.terminus.doctor.event.dto.event.group.input.BaseGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorTurnSeedGroupInput;
+import io.terminus.doctor.event.dto.event.usual.DoctorFarmEntryDto;
+import io.terminus.doctor.event.enums.BoarEntryType;
 import io.terminus.doctor.event.enums.GroupEventType;
+import io.terminus.doctor.event.enums.PigEvent;
+import io.terminus.doctor.event.enums.PigSource;
+import io.terminus.doctor.event.handler.DoctorEntryHandler;
 import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
+import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.service.DoctorBarnReadService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.Map;
 import java.util.Objects;
 
 import static io.terminus.doctor.common.utils.RespHelper.orServEx;
@@ -39,6 +49,7 @@ public class DoctorTurnSeedGroupEventHandler extends DoctorAbstractGroupEventHan
     private final DoctorGroupEventDao doctorGroupEventDao;
     private final DoctorBarnReadService doctorBarnReadService;
     private final DoctorCommonGroupEventHandler doctorCommonGroupEventHandler;
+    private final DoctorEntryHandler doctorEntryHandler;
 
     @Autowired
     public DoctorTurnSeedGroupEventHandler(DoctorGroupSnapshotDao doctorGroupSnapshotDao,
@@ -46,11 +57,13 @@ public class DoctorTurnSeedGroupEventHandler extends DoctorAbstractGroupEventHan
                                            DoctorGroupTrackDao doctorGroupTrackDao,
                                            DoctorBarnReadService doctorBarnReadService,
                                            CoreEventDispatcher coreEventDispatcher,
-                                           DoctorCommonGroupEventHandler doctorCommonGroupEventHandler) {
+                                           DoctorCommonGroupEventHandler doctorCommonGroupEventHandler,
+                                           DoctorEntryHandler doctorEntryHandler) {
         super(doctorGroupSnapshotDao, doctorGroupTrackDao, coreEventDispatcher, doctorGroupEventDao, doctorBarnReadService);
         this.doctorGroupEventDao = doctorGroupEventDao;
         this.doctorBarnReadService = doctorBarnReadService;
         this.doctorCommonGroupEventHandler = doctorCommonGroupEventHandler;
+        this.doctorEntryHandler = doctorEntryHandler;
     }
     
     @Override
@@ -92,23 +105,23 @@ public class DoctorTurnSeedGroupEventHandler extends DoctorAbstractGroupEventHan
             doctorCommonGroupEventHandler.autoGroupEventClose(group, groupTrack, turnSeed);
         }
 
-        //发布统计事件
-        publistGroupAndBarn(group.getOrgId(), group.getFarmId(), group.getId(), group.getCurrentBarnId(), event.getId());
-
         //触发其他事件
         switch (groupType) {
             case RESERVE_SOW :
                 if(Objects.equals(barn.getPigType(), PigType.MATE_SOW.getValue())){
-                    // TODO 触发猪进场事件
+                    this.callEntryHandler(groupType, turnSeed, group, barn, event.getId());
                 }
                 if(Objects.equals(barn.getPigType(), PigType.PREG_SOW.getValue())){
                     //TODO 触发去妊娠舍事件
                 }
                 break;
             case RESERVE_BOAR :
-                //TODO 触发猪进场事件
+                this.callEntryHandler(groupType, turnSeed, group, barn, event.getId());
                 break;
         }
+
+        //发布统计事件
+        publistGroupAndBarn(group.getOrgId(), group.getFarmId(), group.getId(), group.getCurrentBarnId(), event.getId());
     }
 
     @Override
@@ -153,6 +166,52 @@ public class DoctorTurnSeedGroupEventHandler extends DoctorAbstractGroupEventHan
                 groupTrack.setSowQty(groupTrack.getSowQty() - 1);
                 break;
         }
+    }
+
+    private void callEntryHandler(PigType groupType, DoctorTurnSeedGroupInput turnSeedInput, DoctorGroup group, DoctorBarn barn, Long relEventId){
+        DoctorBasicInputInfoDto basicDto = new DoctorBasicInputInfoDto();
+        switch (groupType) {
+            case RESERVE_BOAR:
+                basicDto.setPigType(DoctorPig.PIG_TYPE.BOAR.getKey());
+                break;
+            case RESERVE_SOW:
+                basicDto.setPigType(DoctorPig.PIG_TYPE.SOW.getKey());
+                break;
+        }
+        basicDto.setPigCode(turnSeedInput.getPigCode());
+        basicDto.setBarnId(barn.getId());
+        basicDto.setBarnName(barn.getName());
+        basicDto.setFarmId(group.getFarmId());
+        basicDto.setFarmName(group.getFarmName());
+        basicDto.setOrgId(group.getOrgId());
+        basicDto.setOrgName(group.getOrgName());
+        basicDto.setEventType(PigEvent.ENTRY.getKey());
+        basicDto.setEventName(PigEvent.ENTRY.getName());
+        basicDto.setEventDesc(PigEvent.ENTRY.getDesc());
+        basicDto.setRelEventId(relEventId);
+
+        DoctorFarmEntryDto farmEntryDto = new DoctorFarmEntryDto();
+        farmEntryDto.setPigType(basicDto.getPigType());
+        farmEntryDto.setPigCode(turnSeedInput.getPigCode());
+        farmEntryDto.setBirthday(DateUtil.toDate(turnSeedInput.getBirthDate()));
+        farmEntryDto.setInFarmDate(DateUtil.toDate(turnSeedInput.getTransInAt()));
+        farmEntryDto.setBarnId(barn.getId());
+        farmEntryDto.setBarnName(barn.getName());
+        farmEntryDto.setSource(PigSource.LOCAL.getKey());
+        farmEntryDto.setBreed(turnSeedInput.getBreedId());
+        farmEntryDto.setBreedName(turnSeedInput.getBreedName());
+        farmEntryDto.setBreedType(turnSeedInput.getGeneticId());
+        farmEntryDto.setBreedTypeName(turnSeedInput.getGeneticName());
+        farmEntryDto.setMotherCode(turnSeedInput.getMotherPigCode());
+        if(Objects.equals(groupType, PigType.RESERVE_BOAR)){
+            farmEntryDto.setBoarTypeId(BoarEntryType.HGZ.getKey());
+            farmEntryDto.setBoarTypeName(BoarEntryType.HGZ.getCode());
+        }
+        farmEntryDto.setEarCode(turnSeedInput.getEarCode());
+
+        Map<String,Object> extra = Maps.newHashMap();
+        BeanMapper.copy(farmEntryDto, extra);
+        doctorEntryHandler.handler(basicDto, extra, Maps.newHashMap());
     }
 
 }

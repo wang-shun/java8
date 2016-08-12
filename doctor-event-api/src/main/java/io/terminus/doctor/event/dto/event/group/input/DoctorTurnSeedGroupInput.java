@@ -30,6 +30,11 @@ public class DoctorTurnSeedGroupInput extends BaseGroupInput implements Serializ
     private String motherPigCode;
 
     /**
+     * 耳缺号
+     */
+    private String earCode;
+
+    /**
      * 转入日期
      */
     @NotNull(message = "date.not.null")
