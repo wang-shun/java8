@@ -1,7 +1,7 @@
 package io.terminus.doctor.event.service;
 
 import io.terminus.common.model.Response;
-import io.terminus.doctor.event.dto.report.DoctorDailyReportDto;
+import io.terminus.doctor.event.dto.report.daily.DoctorDailyReportDto;
 
 import javax.validation.constraints.NotNull;
 import java.util.Date;

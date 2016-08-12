@@ -1,6 +1,5 @@
-package io.terminus.doctor.event.dto.report;
+package io.terminus.doctor.event.dto.report.daily;
 
-import io.terminus.doctor.event.daily.DoctorDailyEventCount;
 import lombok.Data;
 
 import java.io.Serializable;

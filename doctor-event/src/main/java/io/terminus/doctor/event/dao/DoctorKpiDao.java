@@ -1,32 +1,31 @@
 package io.terminus.doctor.event.dao;
 
 import com.google.common.collect.ImmutableMap;
-import io.terminus.common.mysql.dao.MyBatisDao;
 import org.mybatis.spring.SqlSessionTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
-import java.lang.reflect.ParameterizedType;
-import java.util.*;
-
-import static com.sun.org.apache.xalan.internal.xsltc.compiler.util.Type.Int;
+import java.util.Date;
 
 /**
- * Created by IntelliJ IDEA.
- * Author: luoys
- * Date: 11:44 16/8/11
+ * Desc: 猪场月报表Dao类
+ * Mail: yangzl@terminus.io
+ * author: DreamYoung
+ * Date: 2016-08-11
  */
 @Repository
 public class DoctorKpiDao {
+
+    private final SqlSessionTemplate sqlSession;
+
     @Autowired
-    protected SqlSessionTemplate sqlSession;
-
-    public final String nameSpace = "DoctorKpi";
-
-    protected String sqlId(String id) {
-        return this.nameSpace + "." + id;
+    public DoctorKpiDao(SqlSessionTemplate sqlSession) {
+        this.sqlSession = sqlSession;
     }
 
+    private static String sqlId(String id) {
+        return "DoctorKpi." + id;
+    }
 
     /**
      * 预产胎数
@@ -36,7 +35,7 @@ public class DoctorKpiDao {
      * @return
      */
     public int getPreDelivery(Long farmId, Date startAt, Date endAt){
-        return this.sqlSession.selectOne(this.sqlId("preDeliveryCounts"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
+        return this.sqlSession.selectOne(sqlId("preDeliveryCounts"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
     }
 
     /**
@@ -46,8 +45,7 @@ public class DoctorKpiDao {
      * @param endAt
      * @return
      */
-    public int getDelivery(Long farmId, Date startAt, Date endAt){
-        return this.sqlSession.selectOne(this.sqlId("deliveryCounts"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
-
+    public int getDelivery(Long farmId, Date startAt, Date endAt) {
+        return this.sqlSession.selectOne(sqlId("deliveryCounts"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
     }
 }
