@@ -214,6 +214,31 @@ public class DoctorPigEvent implements Serializable {
      */
     private Integer currentMatingCount;
 
+    /**
+     * 妊娠检查时间
+     */
+    private Date checkDate;
+
+    /**
+     * 配种时间
+     */
+    private Date mattingDate;
+
+    /**
+     * 分娩时间
+     */
+    private Date farrowingDate;
+
+    /**
+     * 流产时间
+     */
+    private Date abortionDate;
+
+    /**
+     * 断奶时间
+     */
+    private Date partweanDate;
+
     private String outId;
 
     @Setter(AccessLevel.NONE)
