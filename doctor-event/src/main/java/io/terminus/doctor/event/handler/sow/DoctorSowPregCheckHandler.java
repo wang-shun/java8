@@ -45,6 +45,7 @@ public class DoctorSowPregCheckHandler extends DoctorAbstractEventFlowHandler {
 
         //妊娠检查事件时间
         DateTime checkDate = new DateTime(Long.valueOf(extra.get("checkDate").toString()));
+        doctorPigEvent.setCheckDate(checkDate.toDate());
 
         //查找最近一次配种事件
         DoctorPigEvent lastMate = doctorPigEventDao.queryLastFirstMate(doctorPigTrack.getPigId(), doctorPigTrack.getCurrentParity());

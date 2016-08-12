@@ -40,6 +40,7 @@ public class DoctorSowAbortionHandler extends DoctorAbstractEventFlowHandler {
     protected void eventCreatePreHandler(Execution execution, DoctorPigEvent doctorPigEvent, DoctorPigTrack doctorPigTrack, DoctorBasicInputInfoDto basicInputInfoDto, Map<String, Object> extra, Map<String, Object> context) {
         //流产事件时间
         DateTime abortionDate = new DateTime(Long.valueOf(extra.get("abortionDate").toString()));
+        doctorPigEvent.setAbortionDate(abortionDate.toDate());
 
         //查找最近一次配种事件
         DoctorPigEvent lastMate = doctorPigEventDao.queryLastFirstMate(doctorPigTrack.getPigId(), doctorPigTrack.getCurrentParity());

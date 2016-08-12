@@ -52,6 +52,11 @@
         <result column="wean_count" property="weanCount"/>
         <result column="wean_avg_weight" property="weanAvgWeight"/>
         <result column="current_mating_count" property="currentMatingCount"/>
+        <result column="check_date" property="checkDate"/>
+        <result column="matting_date" property="mattingDate"/>
+        <result column="farrowing_date" property="farrowingDate"/>
+        <result column="abortion_date" property="abortionDate"/>
+        <result column="partwean_date" property="partweanDate"/>
         <result column="out_id" property="outId"/>
         <result column="extra" property="extra"/>
         <result column="remark" property="remark"/>
@@ -114,6 +119,11 @@
         wean_count,
         wean_avg_weight,
         current_mating_count,
+        check_date,
+        matting_date,
+        farrowing_date,
+        abortion_date,
+        partwean_date,
         out_id,
         extra,
         remark,
@@ -170,6 +180,11 @@
         #{weanCount},
         #{weanAvgWeight},
         #{currentMatingCount},
+        #{checkDate},
+        #{mattingDate},
+        #{farrowingDate},
+        #{abortionDate},
+        #{partweanDate},
         #{outId},
         #{extra},
         #{remark},
@@ -228,6 +243,11 @@
         <if test="weanCount != null">AND wean_count = #{weanCount}</if>
         <if test="weanAvgWeight != null">AND wean_avg_weight = #{weanAvgWeight}</if>
         <if test="currentMatingCount != null">AND current_mating_count = #{currentMatingCount}</if>
+        <if test="checkDate != null">AND check_date = #{checkDate}</if>
+        <if test="mattingDate != null">AND matting_date = #{mattingDate}</if>
+        <if test="farrowingDate != null">AND farrowing_date = #{farrowingDate}</if>
+        <if test="abortionDate != null">AND abortion_date = #{abortionDate}</if>
+        <if test="partweanDate != null">AND partwean_date = #{partweanDate}</if>
         <if test="outId != null">AND out_id = #{outId}</if>
         <if test="extra != null">AND extra = #{extra}</if>
         <if test="remark != null">AND remark = #{remark}</if>
@@ -294,6 +314,11 @@
             #{item.weanCount},
             #{item.weanAvgWeight},
             #{item.currentMatingCount},
+            #{item.checkDate},
+            #{item.mattingDate},
+            #{item.farrowingDate},
+            #{item.abortionDate},
+            #{item.partweanDate},
             #{item.outId},
             #{item.extra},
             #{item.remark},
@@ -487,6 +512,11 @@
             <if test="weanCount != null">wean_count = #{weanCount},</if>
             <if test="weanAvgWeight != null">wean_avg_weight = #{weanAvgWeight},</if>
             <if test="currentMatingCount != null">current_mating_count = #{currentMatingCount},</if>
+            <if test="checkDate != null">check_date = #{checkDate},</if>
+            <if test="mattingDate != null">matting_date = #{mattingDate},</if>
+            <if test="farrowingDate != null">farrowing_date = #{farrowingDate},</if>
+            <if test="abortionDate != null">abortion_date = #{abortionDate},</if>
+            <if test="partweanDate != null">partwean_date = #{partweanDate},</if>
             <if test="outId != null">out_id = #{outId},</if>
             <if test="extra != null">extra = #{extra},</if>
             <if test="remark != null">remark = #{remark},</if>
