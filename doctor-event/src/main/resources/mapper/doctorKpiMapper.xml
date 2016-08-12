@@ -347,8 +347,6 @@
 
     <!-- 配后备-->
     <select id="firstMatingCounts" parameterType="map" resultType="int">
-        select sum(wean_count)/count(1) from doctor_pig_events
-        where type = 16
         select count(1) from doctor_pig_events t1
         left join doctor_pig_events t2
         on t1.`rel_event_id` = t2.id
@@ -357,7 +355,6 @@
         and t1.current_mating_count = 1
         and t1.parity = 1
         and t1.`pig_status_before` = 1
-        and t1.farm_id = 12399
         and t2.type = 7
         <if test="farmId != null">and t1.farm_id = #{farmId}</if>
         <if test="startAt != null">and t1.`event_at` &gt;= #{startAt}</if>
