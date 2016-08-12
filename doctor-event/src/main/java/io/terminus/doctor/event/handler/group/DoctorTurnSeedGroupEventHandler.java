@@ -172,14 +172,20 @@ public class DoctorTurnSeedGroupEventHandler extends DoctorAbstractGroupEventHan
 
     private void callEntryHandler(PigType groupType, DoctorTurnSeedGroupInput turnSeedInput, DoctorGroup group, DoctorBarn barn, Long relEventId){
         DoctorBasicInputInfoDto basicDto = new DoctorBasicInputInfoDto();
+        DoctorFarmEntryDto farmEntryDto = new DoctorFarmEntryDto();
+
         switch (groupType) {
             case RESERVE_BOAR:
                 basicDto.setPigType(DoctorPig.PIG_TYPE.BOAR.getKey());
+                farmEntryDto.setBoarTypeId(BoarEntryType.HGZ.getKey());
+                farmEntryDto.setBoarTypeName(BoarEntryType.HGZ.getCode());
                 break;
             case RESERVE_SOW:
                 basicDto.setPigType(DoctorPig.PIG_TYPE.SOW.getKey());
+                farmEntryDto.setParity(0);
                 break;
         }
+
         basicDto.setPigCode(turnSeedInput.getPigCode());
         basicDto.setBarnId(barn.getId());
         basicDto.setBarnName(barn.getName());
@@ -191,8 +197,9 @@ public class DoctorTurnSeedGroupEventHandler extends DoctorAbstractGroupEventHan
         basicDto.setEventName(PigEvent.ENTRY.getName());
         basicDto.setEventDesc(PigEvent.ENTRY.getDesc());
         basicDto.setRelEventId(relEventId);
+        basicDto.setStaffId(turnSeedInput.getCreatorId());
+        basicDto.setStaffName(turnSeedInput.getCreatorName());
 
-        DoctorFarmEntryDto farmEntryDto = new DoctorFarmEntryDto();
         farmEntryDto.setPigType(basicDto.getPigType());
         farmEntryDto.setPigCode(turnSeedInput.getPigCode());
         farmEntryDto.setBirthday(DateUtil.toDate(turnSeedInput.getBirthDate()));
@@ -205,10 +212,6 @@ public class DoctorTurnSeedGroupEventHandler extends DoctorAbstractGroupEventHan
         farmEntryDto.setBreedType(turnSeedInput.getGeneticId());
         farmEntryDto.setBreedTypeName(turnSeedInput.getGeneticName());
         farmEntryDto.setMotherCode(turnSeedInput.getMotherEarCode());
-        if(Objects.equals(groupType, PigType.RESERVE_BOAR)){
-            farmEntryDto.setBoarTypeId(BoarEntryType.HGZ.getKey());
-            farmEntryDto.setBoarTypeName(BoarEntryType.HGZ.getCode());
-        }
         farmEntryDto.setEarCode(turnSeedInput.getEarCode());
 
         Map<String,Object> extra = Maps.newHashMap();
