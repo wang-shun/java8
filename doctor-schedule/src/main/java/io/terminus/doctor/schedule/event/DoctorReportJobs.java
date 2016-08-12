@@ -8,6 +8,9 @@ import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dto.report.daily.DoctorDailyReportDto;
 import io.terminus.doctor.event.service.DoctorDailyReportReadService;
 import io.terminus.doctor.event.service.DoctorDailyReportWriteService;
+import io.terminus.doctor.event.service.DoctorMonthlyReportWriteService;
+import io.terminus.doctor.user.model.DoctorFarm;
+import io.terminus.doctor.user.service.DoctorFarmReadService;
 import io.terminus.zookeeper.leader.HostLeader;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
@@ -19,6 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Desc: 猪场日报job
@@ -29,17 +33,21 @@ import java.util.List;
 @Slf4j
 @RestController
 @RequestMapping("/api/job/report")
-public class DoctorDailyReportJobs {
+public class DoctorReportJobs {
 
     @RpcConsumer
     private DoctorDailyReportReadService doctorDailyReportReadService;
     @RpcConsumer
     private DoctorDailyReportWriteService doctorDailyReportWriteService;
+    @RpcConsumer
+    private DoctorMonthlyReportWriteService doctorMonthlyReportWriteService;
+    @RpcConsumer
+    private DoctorFarmReadService doctorFarmReadService;
 
     private final HostLeader hostLeader;
 
     @Autowired
-    public DoctorDailyReportJobs(HostLeader hostLeader) {
+    public DoctorReportJobs(HostLeader hostLeader) {
         this.hostLeader = hostLeader;
     }
 
@@ -63,12 +71,39 @@ public class DoctorDailyReportJobs {
 
             log.info("daily report job end, now is:{}", DateUtil.toDateTimeString(new Date()));
         } catch (Exception e) {
-            log.error("daily report job failed", Throwables.getStackTraceAsString(e));
+            log.error("daily report job failed, cause:{}", Throwables.getStackTraceAsString(e));
         }
     }
 
     private void doReport(Date date) {
         List<DoctorDailyReportDto> reports = RespHelper.or500(doctorDailyReportReadService.initDailyReportByDate(date));
         RespHelper.or500(doctorDailyReportWriteService.createDailyReports(reports, date));
+    }
+
+    /**
+     * 猪场月报计算job
+     * 每天凌晨1点统计昨天的数据
+     */
+    @Scheduled(cron = "0 0 1 * * ?")
+    @RequestMapping(value = "/monthly", method = RequestMethod.GET)
+    public void monthlyReport() {
+        try {
+            if (!hostLeader.isLeader()) {
+                log.info("current leader is:{}, skip", hostLeader.currentLeaderId());
+                return;
+            }
+            log.info("monthly report job start, now is:{}", DateUtil.toDateTimeString(new Date()));
+
+            List<DoctorFarm> farms = RespHelper.orServEx(doctorFarmReadService.findAllFarms());
+
+            //获取昨天的天初
+            Date yesterday = new DateTime(Dates.startOfDay(new Date())).plusDays(-1).toDate();
+            doctorMonthlyReportWriteService.createMonthlyReports(farms.stream()
+                    .map(DoctorFarm::getId).collect(Collectors.toList()), yesterday);
+
+            log.info("monthly report job end, now is:{}", DateUtil.toDateTimeString(new Date()));
+        } catch (Exception e) {
+            log.error("monthly report job failed, cause:{}", Throwables.getStackTraceAsString(e));
+        }
     }
 }

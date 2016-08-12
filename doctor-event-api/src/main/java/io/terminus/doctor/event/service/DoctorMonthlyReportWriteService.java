@@ -1,7 +1,10 @@
 package io.terminus.doctor.event.service;
 
 import io.terminus.common.model.Response;
-import io.terminus.doctor.event.model.DoctorMonthlyReport;
+
+import javax.validation.constraints.NotNull;
+import java.util.Date;
+import java.util.List;
 
 /**
  * Desc: 猪场月报表写服务
@@ -13,23 +16,10 @@ import io.terminus.doctor.event.model.DoctorMonthlyReport;
 public interface DoctorMonthlyReportWriteService {
 
     /**
-     * 创建DoctorMonthlyReport
-     * @param monthlyReport 猪场月报表实例
+     * 批量创建DoctorMonthlyReport
+     * @param farmIds 猪场ids
+     * @param sumAt 结算日期(天初)
      * @return 主键id
      */
-    Response<Long> createMonthlyReport(DoctorMonthlyReport monthlyReport);
-
-    /**
-     * 更新DoctorMonthlyReport
-     * @param monthlyReport 猪场月报表实例
-     * @return 是否成功
-     */
-    Response<Boolean> updateMonthlyReport(DoctorMonthlyReport monthlyReport);
-
-    /**
-     * 根据主键id删除DoctorMonthlyReport
-     * @param monthlyReportId 猪场月报表实例主键id
-     * @return 是否成功
-     */
-    Response<Boolean> deleteMonthlyReportById(Long monthlyReportId);
+    Response<Boolean> createMonthlyReports(@NotNull(message = "farmId.not.null") List<Long> farmIds, @NotNull(message = "date.not.null") Date sumAt);
 }
