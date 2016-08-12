@@ -2,8 +2,8 @@ package io.terminus.doctor.event.manager;
 
 import com.google.common.base.Throwables;
 import io.terminus.doctor.event.dao.DoctorDailyReportDao;
-import io.terminus.doctor.event.dto.report.DoctorDailyReportDto;
-import io.terminus.doctor.event.dto.report.DoctorLiveStockDailyReport;
+import io.terminus.doctor.event.dto.report.daily.DoctorDailyReportDto;
+import io.terminus.doctor.event.dto.report.daily.DoctorLiveStockDailyReport;
 import io.terminus.doctor.event.model.DoctorDailyReport;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;

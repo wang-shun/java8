@@ -1,10 +1,8 @@
 package io.terminus.doctor.event.report.count;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import io.terminus.common.utils.BeanMapper;
 import io.terminus.doctor.event.daily.DoctorDailyEventCount;
-import io.terminus.doctor.event.dto.report.DoctorDailyReportDto;
-import io.terminus.doctor.event.dto.report.DoctorWeanDailyReport;
+import io.terminus.doctor.event.dto.report.daily.DoctorDailyReportDto;
+import io.terminus.doctor.event.dto.report.daily.DoctorWeanDailyReport;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import org.springframework.stereotype.Component;

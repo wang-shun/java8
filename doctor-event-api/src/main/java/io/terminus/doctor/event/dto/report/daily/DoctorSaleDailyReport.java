@@ -1,4 +1,4 @@
-package io.terminus.doctor.event.dto.report;
+package io.terminus.doctor.event.dto.report.daily;
 
 import lombok.Data;
 

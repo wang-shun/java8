@@ -2,7 +2,7 @@ package io.terminus.doctor.web.front.event.controller;
 
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.doctor.common.utils.RespHelper;
-import io.terminus.doctor.event.dto.report.DoctorDailyReportDto;
+import io.terminus.doctor.event.dto.report.daily.DoctorDailyReportDto;
 import io.terminus.doctor.event.service.DoctorDailyReportReadService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.RequestMapping;
