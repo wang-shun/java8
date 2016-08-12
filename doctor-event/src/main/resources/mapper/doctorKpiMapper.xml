@@ -6,139 +6,188 @@
 
 <mapper namespace="DoctorKpi">
 
+    <sql id="criteria">
+        <if test="farmId != null">AND farm_id = #{farmId}</if>
+        <if test="startAt != null">AND event_at &gt;= #{startAt}</if>
+        <if test="endAt != null">AND event_at &lt;= #{endAt}</if>
+    </sql>
+
     <!-- 预产胎数-->
     <select id="preDeliveryCounts" parameterType="map" resultType="int">
         select count(1) from doctor_pig_events
         where type = 9
         and current_mating_count = 1
-        <if test="farmId != null"> and farm_id = #{farmId}</if>
-        <if test="startAt != null"> and event_at &gt;= #{startAt}</if>
-        <if test="endAt != null">and event_at &lt;= #{endAt}</if>
+        <include refid="criteria"/>
     </select>
 
     <!-- 分娩窝数-->
     <select id="deliveryCounts" parameterType="map" resultType="int">
         select count(1) from doctor_pig_events
         where type = 15
-        <if test="farmId != null"> and farm_id = #{farmId}</if>
-        <if test="startAt != null"> and event_at &gt;= #{startAt}</if>
-        <if test="endAt != null">and event_at &lt;= #{endAt}</if>
+        <include refid="criteria"/>
     </select>
 
     <!-- 产活仔数-->
     <select id="deliveryLiveCounts" parameterType="map" resultType="int">
         select sum(live_count) from doctor_pig_events
         where type = 15
-        <if test="farmId != null"> and farm_id = #{farmId}</if>
-        <if test="startAt != null"> and event_at &gt;= #{startAt}</if>
-        <if test="endAt != null">and event_at &lt;= #{endAt}</if>
+        <include refid="criteria"/>
     </select>
 
     <!-- 产健仔数-->
     <select id="deliveryHealthCounts" parameterType="map" resultType="int">
         select sum(health_count) from doctor_pig_events
         where type = 15
-        <if test="farmId != null"> and farm_id = #{farmId}</if>
-        <if test="startAt != null"> and event_at &gt;= #{startAt}</if>
-        <if test="endAt != null">and event_at &lt;= #{endAt}</if>
+        <include refid="criteria"/>
     </select>
 
     <!-- 产弱仔数-->
     <select id="deliveryWeakCounts" parameterType="map" resultType="int">
         select sum(weak_count) from doctor_pig_events
         where type = 15
-        <if test="farmId != null"> and farm_id = #{farmId}</if>
-        <if test="startAt != null"> and event_at &gt;= #{startAt}</if>
-        <if test="endAt != null">and event_at &lt;= #{endAt}</if>
+        <include refid="criteria"/>
     </select>
 
     <!-- 产死仔数-->
     <select id="deliveryDeadCounts" parameterType="map" resultType="int">
         select sum(dead_count) from doctor_pig_events
         where type = 15
-        <if test="farmId != null"> and farm_id = #{farmId}</if>
-        <if test="startAt != null"> and event_at &gt;= #{startAt}</if>
-        <if test="endAt != null">and event_at &lt;= #{endAt}</if>
+        <include refid="criteria"/>
     </select>
 
     <!-- 产木乃伊数-->
     <select id="deliveryMnyCounts" parameterType="map" resultType="int">
         select sum(mny_count) from doctor_pig_events
         where type = 15
-        <if test="farmId != null"> and farm_id = #{farmId}</if>
-        <if test="startAt != null"> and event_at &gt;= #{startAt}</if>
-        <if test="endAt != null">and event_at &lt;= #{endAt}</if>
+        <include refid="criteria"/>
     </select>
 
     <!-- 总产仔数-->
     <select id="deliveryAllCounts" parameterType="map" resultType="int">
         select sum(health_count+ weak_count+ jx_count+ mny_count+ dead_count + black_count) from doctor_pig_events
         where type = 15
-        <if test="farmId != null"> and farm_id = #{farmId}</if>
-        <if test="startAt != null"> and event_at &gt;= #{startAt}</if>
-        <if test="endAt != null">and event_at &lt;= #{endAt}</if>
+        <include refid="criteria"/>
     </select>
 
     <!-- 窝均健仔数-->
     <select id="deliveryHealthCountsAvg" parameterType="map" resultType="double">
         select sum(health_count)/count(1) from doctor_pig_events
         where type = 15
-        <if test="farmId != null"> and farm_id = #{farmId}</if>
-        <if test="startAt != null"> and event_at &gt;= #{startAt}</if>
-        <if test="endAt != null">and event_at &lt;= #{endAt}</if>
+        <include refid="criteria"/>
     </select>
 
     <!-- 窝均产仔数-->
     <select id="deliveryAllCountsAvg" parameterType="map" resultType="double">
         select sum(health_count+ weak_count+ jx_count+ mny_count+ dead_count + black_count)/count(1) from doctor_pig_events
         where type = 15
-        <if test="farmId != null"> and farm_id = #{farmId}</if>
-        <if test="startAt != null"> and event_at &gt;= #{startAt}</if>
-        <if test="endAt != null">and event_at &lt;= #{endAt}</if>
+        <include refid="criteria"/>
     </select>
 
     <!-- 窝均活仔数-->
     <select id="deliveryLiveCountsAvg" parameterType="map" resultType="double">
         select sum(live_count)/count(1) from doctor_pig_events
         where type = 15
-        <if test="farmId != null"> and farm_id = #{farmId}</if>
-        <if test="startAt != null"> and event_at &gt;= #{startAt}</if>
-        <if test="endAt != null">and event_at &lt;= #{endAt}</if>
+        <include refid="criteria"/>
     </select>
 
     <!-- 断奶母猪数-->
     <select id="weanSowCounts" parameterType="map" resultType="int">
         select count(1) from doctor_pig_events
         where type = 16
-        <if test="farmId != null"> and farm_id = #{farmId}</if>
-        <if test="startAt != null"> and event_at &gt;= #{startAt}</if>
-        <if test="endAt != null">and event_at &lt;= #{endAt}</if>
+        <include refid="criteria"/>
     </select>
 
     <!-- 断奶仔猪数-->
     <select id="weanPigletCounts" parameterType="map" resultType="int">
         select sum(wean_count) from doctor_pig_events
         where type = 16
-        <if test="farmId != null"> and farm_id = #{farmId}</if>
-        <if test="startAt != null"> and event_at &gt;= #{startAt}</if>
-        <if test="endAt != null">and event_at &lt;= #{endAt}</if>
+        <include refid="criteria"/>
     </select>
 
     <!-- 断奶仔猪均重-->
     <select id="weanPigletWeightAvg" parameterType="map" resultType="double">
         select sum(wean_count*wean_avg_weight)/sum(wean_count) from doctor_pig_events
         where type = 16
-        <if test="farmId != null"> and farm_id = #{farmId}</if>
-        <if test="startAt != null"> and event_at &gt;= #{startAt}</if>
-        <if test="endAt != null">and event_at &lt;= #{endAt}</if>
+        <include refid="criteria"/>
     </select>
 
     <!-- 窝均断奶数-->
     <select id="weanPigletCountsAvg" parameterType="map" resultType="double">
         select sum(wean_count)/count(1) from doctor_pig_events
         where type = 16
-        <if test="farmId != null"> and farm_id = #{farmId}</if>
-        <if test="startAt != null"> and event_at &gt;= #{startAt}</if>
-        <if test="endAt != null">and event_at &lt;= #{endAt}</if>
+        <include refid="criteria"/>
     </select>
+
+    <!-- 销售情况: 母猪 -->
+    <select id="getSaleSow" parameterType="map" resultType="int">
+
+        <include refid="criteria"/>
+    </select>
+
+    <!-- 销售情况: 公猪 -->
+    <select id="getSaleBoar" parameterType="map" resultType="int">
+
+        <include refid="criteria"/>
+    </select>
+
+    <!-- 销售情况: 保育猪（产房+保育） -->
+    <select id="getSaleNursery" parameterType="map" resultType="int">
+
+        <include refid="criteria"/>
+    </select>
+
+    <!-- 销售情况: 育肥猪 -->
+    <select id="getSaleFatten" parameterType="map" resultType="int">
+
+        <include refid="criteria"/>
+    </select>
+
+    <!-- 死淘情况: 母猪 -->
+    <select id="getDeadSow" parameterType="map" resultType="int">
+
+        <include refid="criteria"/>
+    </select>
+
+    <!-- 死淘情况: 公猪 -->
+    <select id="getDeadBoar" parameterType="map" resultType="int">
+
+        <include refid="criteria"/>
+    </select>
+
+    <!-- 死淘情况: 产房仔猪 -->
+    <select id="getDeadFarrow" parameterType="map" resultType="int">
+
+        <include refid="criteria"/>
+    </select>
+
+    <!-- 死淘情况: 保育猪 -->
+    <select id="getDeadNursery" parameterType="map" resultType="int">
+
+        <include refid="criteria"/>
+    </select>
+
+    <!-- 死淘情况: 育肥猪 -->
+    <select id="getDeadFatten" parameterType="map" resultType="int">
+
+        <include refid="criteria"/>
+    </select>
+
+    <!-- 死淘情况: 产房死淘率 -->
+    <select id="getDeadFarrowRate" parameterType="map" resultType="double">
+
+        <include refid="criteria"/>
+    </select>
+
+    <!-- 死淘情况: 保育死淘率 -->
+    <select id="getDeadNurseryRate" parameterType="map" resultType="double">
+
+        <include refid="criteria"/>
+    </select>
+
+    <!-- 死淘情况: 育肥死淘率 -->
+    <select id="getDeadFattenRate" parameterType="map" resultType="double">
+
+        <include refid="criteria"/>
+    </select>
+
 </mapper>

@@ -141,4 +141,87 @@ public class DoctorKpiDao {
         return this.sqlSession.selectOne(sqlId("weanPigletCountsAvg"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
     }
 
+    /**
+     * 销售情况: 母猪
+     */
+    public int getSaleSow(Long farmId, Date startAt, Date endAt) {
+        return sqlSession.selectOne(sqlId("getSaleSow"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
+    }
+
+    /**
+     * 销售情况: 公猪
+     */
+    public int getSaleBoar(Long farmId, Date startAt, Date endAt) {
+        return sqlSession.selectOne(sqlId("getSaleBoar"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
+    }
+
+    /**
+     * 销售情况: 保育猪（产房+保育）
+     */
+    public int getSaleNursery(Long farmId, Date startAt, Date endAt) {
+        return sqlSession.selectOne(sqlId("getSaleNursery"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
+    }
+
+    /**
+     * 销售情况: 育肥猪
+     */
+    public int getSaleFatten(Long farmId, Date startAt, Date endAt) {
+        return sqlSession.selectOne(sqlId("getSaleFatten"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
+    }
+
+    /**
+     * 死淘情况: 母猪
+     */
+    public int getDeadSow(Long farmId, Date startAt, Date endAt) {
+        return sqlSession.selectOne(sqlId("getDeadSow"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
+    }
+
+    /**
+     * 死淘情况: 公猪
+     */
+    public int getDeadBoar(Long farmId, Date startAt, Date endAt) {
+        return sqlSession.selectOne(sqlId("getDeadBoar"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
+    }
+
+    /**
+     * 死淘情况: 产房仔猪
+     */
+    public int getDeadFarrow(Long farmId, Date startAt, Date endAt) {
+        return sqlSession.selectOne(sqlId("getDeadFarrow"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
+    }
+
+    /**
+     * 死淘情况: 保育猪
+     */
+    public int getDeadNursery(Long farmId, Date startAt, Date endAt) {
+        return sqlSession.selectOne(sqlId("getDeadNursery"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
+    }
+
+    /**
+     * 死淘情况: 育肥猪
+     */
+    public int getDeadFatten(Long farmId, Date startAt, Date endAt) {
+        return sqlSession.selectOne(sqlId("getDeadFatten"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
+    }
+
+    /**
+     * 死淘情况: 产房死淘率
+     */
+    public double getDeadFarrowRate(Long farmId, Date startAt, Date endAt) {
+        return sqlSession.selectOne(sqlId("getDeadFarrowRate"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
+    }
+
+    /**
+     * 死淘情况: 保育死淘率
+     */
+    public double getDeadNurseryRate(Long farmId, Date startAt, Date endAt) {
+        return sqlSession.selectOne(sqlId("getDeadNurseryRate"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
+    }
+
+    /**
+     * 死淘情况: 育肥死淘率
+     */
+    public double getDeadFattenRate(Long farmId, Date startAt, Date endAt) {
+        return sqlSession.selectOne(sqlId("getDeadFattenRate"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
+    }
 }
