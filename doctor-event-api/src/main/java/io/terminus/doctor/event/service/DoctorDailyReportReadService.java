@@ -35,6 +35,15 @@ public interface DoctorDailyReportReadService {
     Response<List<DoctorDailyReportDto>> initDailyReportByDate(@NotNull(message = "date.not.null") Date date);
 
     /**
+     * 根据日期和猪场id获取初始化的日报统计
+     * @param farmId 猪场id
+     * @param date 日期
+     * @return 日报统计
+     */
+    Response<DoctorDailyReport> initDailyReportByFarmIdAndDate(@NotNull(message = "farmId.not.null") Long farmId,
+                                                               @NotNull(message = "date.not.null") Date date);
+
+    /**
      * 清理全部的日报缓存
      * @return 是否成功
      */

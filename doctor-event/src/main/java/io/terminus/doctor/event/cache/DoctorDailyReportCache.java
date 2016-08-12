@@ -128,7 +128,7 @@ public class DoctorDailyReportCache {
     }
 
     //实时查询某猪场的日报统计
-    private DoctorDailyReportDto initDailyReportByFarmIdAndDate(Long farmId, Date date) {
+    public DoctorDailyReportDto initDailyReportByFarmIdAndDate(Long farmId, Date date) {
         DoctorDailyReportDto report = new DoctorDailyReportDto();
         report.setPig(RespHelper.orServEx(doctorDailyPigReportReadService.countByFarmIdDate(farmId, date)));
         report.setGroup(RespHelper.orServEx(doctorDailyGroupReportReadService.getGroupDailyReportByFarmIdAndDate(farmId, date)));

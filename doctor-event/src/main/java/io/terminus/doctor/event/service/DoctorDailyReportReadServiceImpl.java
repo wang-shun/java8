@@ -6,11 +6,13 @@ import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.Response;
 import io.terminus.common.utils.Dates;
+import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.cache.DoctorDailyReportCache;
 import io.terminus.doctor.event.dao.DoctorDailyReportDao;
 import io.terminus.doctor.event.dto.report.daily.DoctorDailyReportDto;
+import io.terminus.doctor.event.dto.report.daily.DoctorLiveStockDailyReport;
 import io.terminus.doctor.event.model.DoctorDailyReport;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -93,6 +95,37 @@ public class DoctorDailyReportReadServiceImpl implements DoctorDailyReportReadSe
     public Response<List<DoctorDailyReportDto>> initDailyReportByDate(Date date) {
         try {
             return Response.ok(doctorDailyReportCache.initDailyReportByDate(date));
+        } catch (Exception e) {
+            log.error("init daily report failed, date:{}, cause:{}", date, Throwables.getStackTraceAsString(e));
+            return Response.fail("init.daily.report.fail");
+        }
+    }
+
+    /**
+     * 根据日期和猪场id获取初始化的日报统计
+     *
+     * @param farmId 猪场id
+     * @param date   日期
+     * @return 日报统计
+     */
+    @Override
+    public Response<DoctorDailyReport> initDailyReportByFarmIdAndDate(Long farmId, Date date) {
+        try {
+            DoctorDailyReportDto dto = doctorDailyReportCache.initDailyReportByFarmIdAndDate(farmId, date);
+            DoctorDailyReport report = new DoctorDailyReport();
+            report.setFarmId(farmId);
+            report.setSumAt(Dates.startOfDay(date));
+            report.setData(JsonMapper.nonEmptyMapper().toJson(dto));
+
+            //母猪存栏
+            report.setSowCount(dto.getSowCount());
+
+            //阶段仔猪存栏
+            DoctorLiveStockDailyReport ls = dto.getLiveStock();
+            report.setFarrowCount(ls.getFarrow());
+            report.setNurseryCount(ls.getNursery());
+            report.setFattenCount(ls.getFatten());
+            return Response.ok(report);
         } catch (Exception e) {
             log.error("init daily report failed, date:{}, cause:{}", date, Throwables.getStackTraceAsString(e));
             return Response.fail("init.daily.report.fail");
