@@ -109,6 +109,7 @@ public class DoctorTurnSeedGroupEventHandler extends DoctorAbstractGroupEventHan
         switch (groupType) {
             case RESERVE_SOW :
                 if(Objects.equals(barn.getPigType(), PigType.MATE_SOW.getValue())){
+                    // 进场事件
                     this.callEntryHandler(groupType, turnSeed, group, barn, event.getId());
                 }
                 if(Objects.equals(barn.getPigType(), PigType.PREG_SOW.getValue())){
@@ -116,6 +117,7 @@ public class DoctorTurnSeedGroupEventHandler extends DoctorAbstractGroupEventHan
                 }
                 break;
             case RESERVE_BOAR :
+                // 进场事件
                 this.callEntryHandler(groupType, turnSeed, group, barn, event.getId());
                 break;
         }
@@ -202,7 +204,7 @@ public class DoctorTurnSeedGroupEventHandler extends DoctorAbstractGroupEventHan
         farmEntryDto.setBreedName(turnSeedInput.getBreedName());
         farmEntryDto.setBreedType(turnSeedInput.getGeneticId());
         farmEntryDto.setBreedTypeName(turnSeedInput.getGeneticName());
-        farmEntryDto.setMotherCode(turnSeedInput.getMotherPigCode());
+        farmEntryDto.setMotherCode(turnSeedInput.getMotherEarCode());
         if(Objects.equals(groupType, PigType.RESERVE_BOAR)){
             farmEntryDto.setBoarTypeId(BoarEntryType.HGZ.getKey());
             farmEntryDto.setBoarTypeName(BoarEntryType.HGZ.getCode());

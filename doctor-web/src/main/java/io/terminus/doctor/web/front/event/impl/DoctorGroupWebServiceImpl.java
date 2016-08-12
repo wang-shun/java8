@@ -205,6 +205,7 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
                     orServEx(doctorGroupWriteService.groupEventTransGroup(groupDetail, map(putBasicFields(params), DoctorTransGroupInput.class)));
                     break;
                 case TURN_SEED:
+                    params.put("eventAt", new Date());
                     orServEx(doctorGroupWriteService.groupEventTurnSeed(groupDetail, map(putBasicFields(params), DoctorTurnSeedGroupInput.class)));
                     break;
                 case LIVE_STOCK:

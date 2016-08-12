@@ -25,9 +25,9 @@ public class DoctorTurnSeedGroupInput extends BaseGroupInput implements Serializ
     private String pigCode;
 
     /**
-     * 母亲猪号
+     * 母亲猪 耳缺号
      */
-    private String motherPigCode;
+    private String motherEarCode;
 
     /**
      * 耳缺号
