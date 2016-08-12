@@ -76,6 +76,8 @@ public class DefaultPigQueryBuilder extends BasePigQueryBuilder {
         term(termList, params, "geneticId","geneticId");
         // 状态
         term(termList, params, "status", "status");
+        //是否离场
+        term(termList, params, "isRemoval", "isRemoval");
         return termList;
     }
     private void term(List<Term> termList, Map<String, String> params, String key, String field) {

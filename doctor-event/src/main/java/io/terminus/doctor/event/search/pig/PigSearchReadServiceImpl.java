@@ -83,7 +83,7 @@ public class PigSearchReadServiceImpl implements PigSearchReadService {
                             .minus(searchedPig.getBirthDate().getTime()).getMillis() / (1000 * 60 * 60 * 24) + 1));
                 }
                 // 如果是待分娩状态, 获取妊娠检查的时间
-                if (Objects.equals(searchedPig.getStatus(), PigStatus.Farrow.getKey())) {
+                ifgit  (Objects.equals(searchedPig.getStatus(), PigStatus.Farrow.getKey())) {
                     DoctorPigTrack pigTrack = RespHelper.orServEx(
                             doctorPigReadService.findPigTrackByPigId(searchedPig.getId()));
                     if (pigTrack != null && StringUtils.isNotBlank(pigTrack.getExtra())) {
