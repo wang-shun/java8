@@ -122,227 +122,227 @@
     <!-- 销售情况: 母猪 -->
     <select id="getSaleSow" parameterType="map" resultType="int">
         SELECT
-        count(1)
+          count(1)
         FROM doctor_pig_events
         WHERE
-        change_type_id = 109 AND -- 变动类型是销售
-        type = 6 AND -- 事件类型是离场
-        kind = 1 -- 猪类母猪
-        <include refid="criteria"/>
+          change_type_id = 109 AND -- 变动类型是销售
+          type = 6 AND -- 事件类型是离场
+          kind = 1 -- 猪类母猪
+          <include refid="criteria"/>
     </select>
 
     <!-- 销售情况: 公猪 -->
     <select id="getSaleBoar" parameterType="map" resultType="int">
         SELECT
-        count(1)
+          count(1)
         FROM doctor_pig_events
         WHERE
-        change_type_id = 109 AND -- 变动类型是销售
-        type = 6 AND -- 事件类型是离场
-        kind = 2 -- 猪类公猪
-        <include refid="criteria"/>
+          change_type_id = 109 AND -- 变动类型是销售
+          type = 6 AND -- 事件类型是离场
+          kind = 2 -- 猪类公猪
+          <include refid="criteria"/>
     </select>
 
     <!-- 销售情况: 保育猪（产房+保育） -->
     <select id="getSaleNursery" parameterType="map" resultType="int">
         SELECT
-        sum(quantity)
+          sum(quantity)
         FROM doctor_group_events
         WHERE
-        change_type_id = 109 AND -- 变动类型是销售
-        pig_type IN (1, 2); -- 产房 + 保育
-        <include refid="criteria"/>
+          change_type_id = 109 AND -- 变动类型是销售
+          pig_type IN (1, 2); -- 产房 + 保育
+          <include refid="criteria"/>
     </select>
 
     <!-- 销售情况: 育肥猪 -->
     <select id="getSaleFatten" parameterType="map" resultType="int">
         SELECT
-        sum(quantity)
+          sum(quantity)
         FROM doctor_group_events
         WHERE
-        change_type_id = 109 AND -- 变动类型是销售
-        pig_type = 3 -- 育肥猪
-        <include refid="criteria"/>
+          change_type_id = 109 AND -- 变动类型是销售
+          pig_type = 3 -- 育肥猪
+          <include refid="criteria"/>
     </select>
 
     <!-- 死淘情况: 母猪 -->
     <select id="getDeadSow" parameterType="map" resultType="int">
         SELECT
-        count(1)
+          count(1)
         FROM doctor_pig_events
         WHERE
-        change_type_id IN (110, 111) AND -- 变动类型是死亡和淘汰
-        type = 6 AND -- 事件类型是离场
-        kind = 1 -- 猪类母猪
-        <include refid="criteria"/>
+          change_type_id IN (110, 111) AND -- 变动类型是死亡和淘汰
+          type = 6 AND -- 事件类型是离场
+          kind = 1 -- 猪类母猪
+          <include refid="criteria"/>
     </select>
 
     <!-- 死淘情况: 公猪 -->
     <select id="getDeadBoar" parameterType="map" resultType="int">
         SELECT
-        count(1)
+          count(1)
         FROM doctor_pig_events
         WHERE
-        change_type_id IN (110, 111) AND -- 变动类型是死亡和淘汰
-        type = 6 AND -- 事件类型是离场
-        kind = 2 -- 猪类公猪
-        <include refid="criteria"/>
+          change_type_id IN (110, 111) AND -- 变动类型是死亡和淘汰
+          type = 6 AND -- 事件类型是离场
+          kind = 2 -- 猪类公猪
+          <include refid="criteria"/>
     </select>
 
     <!-- 死淘情况: 产房仔猪 -->
     <select id="getDeadFarrow" parameterType="map" resultType="int">
         SELECT
-        sum(quantity)
+          sum(quantity)
         FROM doctor_group_events
         WHERE
-        change_type_id IN (110, 111) AND -- 变动类型是死亡和淘汰
-        pig_type = 1 -- 产房仔猪
-        <include refid="criteria"/>
+          change_type_id IN (110, 111) AND -- 变动类型是死亡和淘汰
+          pig_type = 1 -- 产房仔猪
+          <include refid="criteria"/>
     </select>
 
     <!-- 死淘情况: 保育猪 -->
     <select id="getDeadNursery" parameterType="map" resultType="int">
         SELECT
-        sum(quantity)
+          sum(quantity)
         FROM doctor_group_events
         WHERE
-        change_type_id IN (110, 111) AND -- 变动类型是死亡和淘汰
-        pig_type = 2 -- 保育猪
-        <include refid="criteria"/>
+          change_type_id IN (110, 111) AND -- 变动类型是死亡和淘汰
+          pig_type = 2 -- 保育猪
+          <include refid="criteria"/>
     </select>
 
     <!-- 死淘情况: 育肥猪 -->
     <select id="getDeadFatten" parameterType="map" resultType="int">
         SELECT
-        sum(quantity)
+          sum(quantity)
         FROM doctor_group_events
         WHERE
-        change_type_id IN (110, 111) AND -- 变动类型是死亡和淘汰
-        pig_type = 3 -- 育肥猪
-        <include refid="criteria"/>
+          change_type_id IN (110, 111) AND -- 变动类型是死亡和淘汰
+          pig_type = 3 -- 育肥猪
+          <include refid="criteria"/>
     </select>
 
     <!-- 死淘情况: 产房死淘率 -->
     <select id="getDeadFarrowRate" parameterType="map" resultType="double">
         SELECT
-        a.dead_count / (b.trans_in_count + c.farrow_count)
+          a.dead_count / (b.trans_in_count + c.farrow_count)
         FROM
         (
-        SELECT
-        farm_id,
-        sum(quantity) AS dead_count
-        FROM doctor_group_events
-        WHERE
-        change_type_id IN (110, 111) AND -- 变动类型是死亡和淘汰
-        pig_type IN (1, 7) -- 产房仔猪
-        <include refid="criteria"/>
+            SELECT
+              farm_id,
+              sum(quantity) AS dead_count
+            FROM doctor_group_events
+            WHERE
+              change_type_id IN (110, 111) AND -- 变动类型是死亡和淘汰
+              pig_type IN (1, 7) -- 产房仔猪
+              <include refid="criteria"/>
         ) AS a
         LEFT JOIN
         (
-        SELECT
-        farm_id,
-        sum(quantity) AS trans_in_count
-        FROM doctor_group_events
-        WHERE
-        pig_type IN (1, 7) AND -- 产房仔猪
-        type = 2 AND -- 转入猪群事件
-        trans_group_type != 0 -- 排除掉内转
-        <include refid="criteria"/>
+            SELECT
+              farm_id,
+              sum(quantity) AS trans_in_count
+            FROM doctor_group_events
+            WHERE
+              pig_type IN (1, 7) AND -- 产房仔猪
+              type = 2 AND -- 转入猪群事件
+              trans_group_type != 0 -- 排除掉内转
+              <include refid="criteria"/>
         ) AS b
-        ON a.farm_id = b.farm_id
+          ON a.farm_id = b.farm_id
         LEFT JOIN
         (
-        SELECT
-        farm_id,
-        farrow_count -- 当天产房仔猪存栏
-        FROM doctor_daily_reports
-        WHERE
-        farm_id = #{farmId} AND
-        sum_at = date_format(#{endAt}, '%Y-%m-%d')
+            SELECT
+              farm_id,
+              farrow_count -- 当天产房仔猪存栏
+            FROM doctor_daily_reports
+            WHERE
+              farm_id = #{farmId} AND
+              sum_at = date_format(#{endAt}, '%Y-%m-%d')
         ) AS c
-        ON a.farm_id = c.farm_id
+          ON a.farm_id = c.farm_id
     </select>
 
     <!-- 死淘情况: 保育死淘率 -->
     <select id="getDeadNurseryRate" parameterType="map" resultType="double">
         SELECT
-        a.dead_count / (b.trans_in_count + c.farrow_count)
+          a.dead_count / (b.trans_in_count + c.farrow_count)
         FROM
         (
-        SELECT
-        farm_id,
-        sum(quantity) AS dead_count
-        FROM doctor_group_events
-        WHERE
-        change_type_id IN (110, 111) AND -- 变动类型是死亡和淘汰
-        pig_type = 2 -- 保育猪
-        <include refid="criteria"/>
+            SELECT
+              farm_id,
+              sum(quantity) AS dead_count
+            FROM doctor_group_events
+            WHERE
+              change_type_id IN (110, 111) AND -- 变动类型是死亡和淘汰
+              pig_type = 2 -- 保育猪
+              <include refid="criteria"/>
         ) AS a
         LEFT JOIN
         (
-        SELECT
-        farm_id,
-        sum(quantity) AS trans_in_count
-        FROM doctor_group_events
-        WHERE
-        pig_type = 2 AND -- 保育猪
-        type = 2 AND -- 转入猪群事件
-        trans_group_type != 0 -- 排除掉内转
-        <include refid="criteria"/>
+            SELECT
+              farm_id,
+              sum(quantity) AS trans_in_count
+            FROM doctor_group_events
+            WHERE
+              pig_type = 2 AND -- 保育猪
+              type = 2 AND -- 转入猪群事件
+              trans_group_type != 0 -- 排除掉内转
+              <include refid="criteria"/>
         ) AS b
-        ON a.farm_id = b.farm_id
+          ON a.farm_id = b.farm_id
         LEFT JOIN
         (
-        SELECT
-        farm_id,
-        nursery_count -- 当天保育存栏
-        FROM doctor_daily_reports
-        WHERE
-        farm_id = #{farmId} AND
-        sum_at = date_format(#{endAt}, '%Y-%m-%d')
+            SELECT
+              farm_id,
+              nursery_count -- 当天保育存栏
+            FROM doctor_daily_reports
+            WHERE
+              farm_id = #{farmId} AND
+              sum_at = date_format(#{endAt}, '%Y-%m-%d')
         ) AS c
-        ON a.farm_id = c.farm_id
+          ON a.farm_id = c.farm_id
     </select>
 
     <!-- 死淘情况: 育肥死淘率 -->
     <select id="getDeadFattenRate" parameterType="map" resultType="double">
         SELECT
-        a.dead_count / (b.trans_in_count + c.farrow_count)
+          a.dead_count / (b.trans_in_count + c.farrow_count)
         FROM
         (
-        SELECT
-        farm_id,
-        sum(quantity) AS dead_count
-        FROM doctor_group_events
-        WHERE
-        change_type_id IN (110, 111) AND -- 变动类型是死亡和淘汰
-        pig_type = 3 -- 育肥猪
-        <include refid="criteria"/>
+            SELECT
+              farm_id,
+              sum(quantity) AS dead_count
+            FROM doctor_group_events
+            WHERE
+              change_type_id IN (110, 111) AND -- 变动类型是死亡和淘汰
+              pig_type = 3 -- 育肥猪
+              <include refid="criteria"/>
         ) AS a
         LEFT JOIN
         (
-        SELECT
-        farm_id,
-        sum(quantity) AS trans_in_count
-        FROM doctor_group_events
-        WHERE
-        pig_type = 3 AND -- 育肥猪
-        type = 2 AND -- 转入猪群事件
-        trans_group_type != 0 -- 排除掉内转
-        <include refid="criteria"/>
+            SELECT
+              farm_id,
+              sum(quantity) AS trans_in_count
+            FROM doctor_group_events
+            WHERE
+              pig_type = 3 AND -- 育肥猪
+              type = 2 AND -- 转入猪群事件
+              trans_group_type != 0 -- 排除掉内转
+              <include refid="criteria"/>
         ) AS b
-        ON a.farm_id = b.farm_id
+          ON a.farm_id = b.farm_id
         LEFT JOIN
         (
-        SELECT
-        farm_id,
-        fatten_count -- 当天育肥存栏
-        FROM doctor_daily_reports
-        WHERE
-        farm_id = #{farmId} AND
-        sum_at = date_format(#{endAt}, '%Y-%m-%d')
+            SELECT
+              farm_id,
+              fatten_count -- 当天育肥存栏
+            FROM doctor_daily_reports
+            WHERE
+              farm_id = #{farmId} AND
+              sum_at = date_format(#{endAt}, '%Y-%m-%d')
         ) AS c
-        ON a.farm_id = c.farm_id;
+          ON a.farm_id = c.farm_id;
     </select>
 
     <!-- 配后备-->
