@@ -1,10 +1,9 @@
 package io.terminus.doctor.event.service;
 
 import io.terminus.common.model.Response;
-import io.terminus.doctor.event.model.DoctorMonthlyReport;
+import io.terminus.doctor.event.dto.report.monthly.DoctorMonthlyReportDto;
 
 import javax.validation.constraints.NotNull;
-import java.util.List;
 
 /**
  * Desc: 猪场月报表读服务
@@ -16,16 +15,12 @@ import java.util.List;
 public interface DoctorMonthlyReportReadService {
 
     /**
-     * 根据id查询猪场月报表
-     * @param monthlyReportId 主键id
-     * @return 猪场月报表
-     */
-    Response<DoctorMonthlyReport> findMonthlyReportById(@NotNull(message = "monthlyReportId.not.null") Long monthlyReportId);
-
-    /**
-     * 根据farmId查询猪场月报表
+     * 根据farmId和统计日期查询猪场月报表
+     *
      * @param farmId 猪场id
+     * @param sumAt 统计日期 yyyy-MM-dd
      * @return 猪场月报表
      */
-    Response<List<DoctorMonthlyReport>> findMonthlyReportsByFarmId(@NotNull(message = "farmId.not.null") Long farmId);
+    Response<DoctorMonthlyReportDto> findMonthlyReportByFarmIdAndSumAt(@NotNull(message = "farmId.not.null") Long farmId,
+                                                                       @NotNull(message = "date.not.null") String sumAt);
 }

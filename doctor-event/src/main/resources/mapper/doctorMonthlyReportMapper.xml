@@ -120,4 +120,15 @@
         LIMIT #{offset}, #{limit}
     </select>
 
+    <select id="findByFarmIdAndSumAt" parameterType="map" resultMap="DoctorMonthlyReportMap">
+        SELECT <include refid="cols_all"/>
+        FROM <include refid="tb"/>
+        WHERE farm_id = #{farmId} AND sum_at = #{sumAt}
+        limit 1
+    </select>
+
+    <delete id="deleteBySumAt" parameterType="date">
+        DELETE FROM <include refid="tb"/>
+        WHERE sum_at = #{sumAt}
+    </delete>
 </mapper>
