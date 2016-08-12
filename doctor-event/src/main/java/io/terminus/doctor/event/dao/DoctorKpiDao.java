@@ -50,4 +50,148 @@ public class DoctorKpiDao {
         return this.sqlSession.selectOne(this.sqlId("deliveryCounts"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
 
     }
+
+    /**
+     * 产活仔数
+     * @param farmId
+     * @param startAt
+     * @param endAt
+     * @return
+     */
+    public int getDeliveryLive(Long farmId, Date startAt, Date endAt){
+        return this.sqlSession.selectOne(this.sqlId("deliveryLiveCounts"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
+    }
+
+    /**
+     * 产健仔数
+     * @param farmId
+     * @param startAt
+     * @param endAt
+     * @return
+     */
+    public int getDeliveryHealth(Long farmId, Date startAt, Date endAt){
+        return this.sqlSession.selectOne(this.sqlId("deliveryHealthCounts"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
+    }
+
+    /**
+     * 产弱仔数
+     * @param farmId
+     * @param startAt
+     * @param endAt
+     * @return
+     */
+    public int getDeliveryWeak(Long farmId, Date startAt, Date endAt){
+        return this.sqlSession.selectOne(this.sqlId("deliveryWeakCounts"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
+    }
+
+    /**
+     * 产死仔数
+     * @param farmId
+     * @param startAt
+     * @param endAt
+     * @return
+     */
+    public int getDeliveryDead(Long farmId, Date startAt, Date endAt){
+        return this.sqlSession.selectOne(this.sqlId("deliveryDeadCounts"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
+    }
+
+    /**
+     * 产木乃伊数
+     * @param farmId
+     * @param startAt
+     * @param endAt
+     * @return
+     */
+    public int getDeliveryMny(Long farmId, Date startAt, Date endAt){
+        return this.sqlSession.selectOne(this.sqlId("deliveryMnyCounts"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
+    }
+
+    /**
+     * 总产仔数
+     * @param farmId
+     * @param startAt
+     * @param endAt
+     * @return
+     */
+    public int getDeliveryAll(Long farmId, Date startAt, Date endAt){
+        return this.sqlSession.selectOne(this.sqlId("deliveryAllCounts"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
+    }
+
+    /**
+     * 窝均健仔数
+     * @param farmId
+     * @param startAt
+     * @param endAt
+     * @return
+     */
+    public double getDeliveryHealthAvg(Long farmId, Date startAt, Date endAt){
+        return this.sqlSession.selectOne(this.sqlId("deliveryHealthCountsAvg"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
+    }
+
+    /**
+     * 窝均活仔数
+     * @param farmId
+     * @param startAt
+     * @param endAt
+     * @return
+     */
+    public double getDeliveryLiveAvg(Long farmId, Date startAt, Date endAt){
+        return this.sqlSession.selectOne(this.sqlId("deliveryLiveCountsAvg"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
+    }
+
+    /**
+     * 窝均产仔数
+     * @param farmId
+     * @param startAt
+     * @param endAt
+     * @return
+     */
+    public double getDeliveryAllAvg(Long farmId, Date startAt, Date endAt){
+        return this.sqlSession.selectOne(this.sqlId("deliveryAllCountsAvg"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
+    }
+
+    /**
+     * 断奶母猪数
+     * @param farmId
+     * @param startAt
+     * @param endAt
+     * @return
+     */
+    public int getWeanSow(Long farmId, Date startAt, Date endAt){
+        return this.sqlSession.selectOne(this.sqlId("weanSowCounts"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
+    }
+
+    /**
+     * 断奶仔猪数
+     * @param farmId
+     * @param startAt
+     * @param endAt
+     * @return
+     */
+    public int getWeanPiglet(Long farmId, Date startAt, Date endAt){
+        return this.sqlSession.selectOne(this.sqlId("weanPigletCounts"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
+    }
+
+    /**
+     * 断奶仔猪均重
+     * @param farmId
+     * @param startAt
+     * @param endAt
+     * @return
+     */
+    public double getWeanPigletWeightAvg(Long farmId, Date startAt, Date endAt){
+        return this.sqlSession.selectOne(this.sqlId("weanPigletWeightAvg"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
+    }
+
+    /**
+     * 窝均断奶数
+     * @param farmId
+     * @param startAt
+     * @param endAt
+     * @return
+     */
+    public double getWeanPigletCountsAvg(Long farmId, Date startAt, Date endAt){
+        return this.sqlSession.selectOne(this.sqlId("weanPigletCountsAvg"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
+    }
+
 }

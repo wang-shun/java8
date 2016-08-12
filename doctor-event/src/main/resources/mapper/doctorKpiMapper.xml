@@ -19,7 +19,124 @@
     <!-- 分娩窝数-->
     <select id="deliveryCounts" parameterType="map" resultType="int">
         select count(1) from doctor_pig_events
-        where type = 9
+        where type = 15
+        <if test="farmId != null"> and farm_id = #{farmId}</if>
+        <if test="startAt != null"> and event_at &gt;= #{startAt}</if>
+        <if test="endAt != null">and event_at &lt;= #{endAt}</if>
+    </select>
+
+    <!-- 产活仔数-->
+    <select id="deliveryLiveCounts" parameterType="map" resultType="int">
+        select sum(live_count) from doctor_pig_events
+        where type = 15
+        <if test="farmId != null"> and farm_id = #{farmId}</if>
+        <if test="startAt != null"> and event_at &gt;= #{startAt}</if>
+        <if test="endAt != null">and event_at &lt;= #{endAt}</if>
+    </select>
+
+    <!-- 产健仔数-->
+    <select id="deliveryHealthCounts" parameterType="map" resultType="int">
+        select sum(health_count) from doctor_pig_events
+        where type = 15
+        <if test="farmId != null"> and farm_id = #{farmId}</if>
+        <if test="startAt != null"> and event_at &gt;= #{startAt}</if>
+        <if test="endAt != null">and event_at &lt;= #{endAt}</if>
+    </select>
+
+    <!-- 产弱仔数-->
+    <select id="deliveryWeakCounts" parameterType="map" resultType="int">
+        select sum(weak_count) from doctor_pig_events
+        where type = 15
+        <if test="farmId != null"> and farm_id = #{farmId}</if>
+        <if test="startAt != null"> and event_at &gt;= #{startAt}</if>
+        <if test="endAt != null">and event_at &lt;= #{endAt}</if>
+    </select>
+
+    <!-- 产死仔数-->
+    <select id="deliveryDeadCounts" parameterType="map" resultType="int">
+        select sum(dead_count) from doctor_pig_events
+        where type = 15
+        <if test="farmId != null"> and farm_id = #{farmId}</if>
+        <if test="startAt != null"> and event_at &gt;= #{startAt}</if>
+        <if test="endAt != null">and event_at &lt;= #{endAt}</if>
+    </select>
+
+    <!-- 产木乃伊数-->
+    <select id="deliveryMnyCounts" parameterType="map" resultType="int">
+        select sum(mny_count) from doctor_pig_events
+        where type = 15
+        <if test="farmId != null"> and farm_id = #{farmId}</if>
+        <if test="startAt != null"> and event_at &gt;= #{startAt}</if>
+        <if test="endAt != null">and event_at &lt;= #{endAt}</if>
+    </select>
+
+    <!-- 总产仔数-->
+    <select id="deliveryAllCounts" parameterType="map" resultType="int">
+        select sum(health_count+ weak_count+ jx_count+ mny_count+ dead_count + black_count) from doctor_pig_events
+        where type = 15
+        <if test="farmId != null"> and farm_id = #{farmId}</if>
+        <if test="startAt != null"> and event_at &gt;= #{startAt}</if>
+        <if test="endAt != null">and event_at &lt;= #{endAt}</if>
+    </select>
+
+    <!-- 窝均健仔数-->
+    <select id="deliveryHealthCountsAvg" parameterType="map" resultType="double">
+        select sum(health_count)/count(1) from doctor_pig_events
+        where type = 15
+        <if test="farmId != null"> and farm_id = #{farmId}</if>
+        <if test="startAt != null"> and event_at &gt;= #{startAt}</if>
+        <if test="endAt != null">and event_at &lt;= #{endAt}</if>
+    </select>
+
+    <!-- 窝均产仔数-->
+    <select id="deliveryAllCountsAvg" parameterType="map" resultType="double">
+        select sum(health_count+ weak_count+ jx_count+ mny_count+ dead_count + black_count)/count(1) from doctor_pig_events
+        where type = 15
+        <if test="farmId != null"> and farm_id = #{farmId}</if>
+        <if test="startAt != null"> and event_at &gt;= #{startAt}</if>
+        <if test="endAt != null">and event_at &lt;= #{endAt}</if>
+    </select>
+
+    <!-- 窝均活仔数-->
+    <select id="deliveryLiveCountsAvg" parameterType="map" resultType="double">
+        select sum(live_count)/count(1) from doctor_pig_events
+        where type = 15
+        <if test="farmId != null"> and farm_id = #{farmId}</if>
+        <if test="startAt != null"> and event_at &gt;= #{startAt}</if>
+        <if test="endAt != null">and event_at &lt;= #{endAt}</if>
+    </select>
+
+    <!-- 断奶母猪数-->
+    <select id="weanSowCounts" parameterType="map" resultType="int">
+        select count(1) from doctor_pig_events
+        where type = 16
+        <if test="farmId != null"> and farm_id = #{farmId}</if>
+        <if test="startAt != null"> and event_at &gt;= #{startAt}</if>
+        <if test="endAt != null">and event_at &lt;= #{endAt}</if>
+    </select>
+
+    <!-- 断奶仔猪数-->
+    <select id="weanPigletCounts" parameterType="map" resultType="int">
+        select sum(wean_count) from doctor_pig_events
+        where type = 16
+        <if test="farmId != null"> and farm_id = #{farmId}</if>
+        <if test="startAt != null"> and event_at &gt;= #{startAt}</if>
+        <if test="endAt != null">and event_at &lt;= #{endAt}</if>
+    </select>
+
+    <!-- 断奶仔猪均重-->
+    <select id="weanPigletWeightAvg" parameterType="map" resultType="double">
+        select sum(wean_count*wean_avg_weight)/sum(wean_count) from doctor_pig_events
+        where type = 16
+        <if test="farmId != null"> and farm_id = #{farmId}</if>
+        <if test="startAt != null"> and event_at &gt;= #{startAt}</if>
+        <if test="endAt != null">and event_at &lt;= #{endAt}</if>
+    </select>
+
+    <!-- 窝均断奶数-->
+    <select id="weanPigletCountsAvg" parameterType="map" resultType="double">
+        select sum(wean_count)/count(1) from doctor_pig_events
+        where type = 16
         <if test="farmId != null"> and farm_id = #{farmId}</if>
         <if test="startAt != null"> and event_at &gt;= #{startAt}</if>
         <if test="endAt != null">and event_at &lt;= #{endAt}</if>
