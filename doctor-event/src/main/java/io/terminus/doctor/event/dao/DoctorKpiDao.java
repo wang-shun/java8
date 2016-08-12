@@ -33,14 +33,14 @@ public class DoctorKpiDao {
     /**
      * 预产胎数
      */
-    public int getPreDelivery(Long farmId, Date startAt, Date endAt){
-        if(!Objects.isNull(startAt)){
+    public int getPreDelivery(Long farmId, Date startAt, Date endAt) {
+        if (!Objects.isNull(startAt)) {
             startAt = new DateTime(startAt).minusDays(DoctorSowMatingHandler.MATING_PREG_DAYS).toDate();
         }
-        if(!Objects.isNull(endAt)){
+        if (!Objects.isNull(endAt)) {
             endAt = new DateTime(endAt).minusDays(DoctorSowMatingHandler.MATING_PREG_DAYS).toDate();
         }
-        return this.sqlSession.selectOne(sqlId("preDeliveryCounts"), ImmutableMap.of("farmId", farmId, "startAt",  startAt, "endAt", endAt));
+        return this.sqlSession.selectOne(sqlId("preDeliveryCounts"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
     }
 
     /**
@@ -53,91 +53,91 @@ public class DoctorKpiDao {
     /**
      * 产活仔数
      */
-    public int getDeliveryLive(Long farmId, Date startAt, Date endAt){
+    public int getDeliveryLive(Long farmId, Date startAt, Date endAt) {
         return this.sqlSession.selectOne(sqlId("deliveryLiveCounts"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
     }
 
     /**
      * 产健仔数
      */
-    public int getDeliveryHealth(Long farmId, Date startAt, Date endAt){
+    public int getDeliveryHealth(Long farmId, Date startAt, Date endAt) {
         return this.sqlSession.selectOne(sqlId("deliveryHealthCounts"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
     }
 
     /**
      * 产弱仔数
      */
-    public int getDeliveryWeak(Long farmId, Date startAt, Date endAt){
+    public int getDeliveryWeak(Long farmId, Date startAt, Date endAt) {
         return this.sqlSession.selectOne(sqlId("deliveryWeakCounts"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
     }
 
     /**
      * 产死仔数
      */
-    public int getDeliveryDead(Long farmId, Date startAt, Date endAt){
+    public int getDeliveryDead(Long farmId, Date startAt, Date endAt) {
         return this.sqlSession.selectOne(sqlId("deliveryDeadCounts"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
     }
 
     /**
      * 产木乃伊数
      */
-    public int getDeliveryMny(Long farmId, Date startAt, Date endAt){
+    public int getDeliveryMny(Long farmId, Date startAt, Date endAt) {
         return this.sqlSession.selectOne(sqlId("deliveryMnyCounts"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
     }
 
     /**
      * 总产仔数
      */
-    public int getDeliveryAll(Long farmId, Date startAt, Date endAt){
+    public int getDeliveryAll(Long farmId, Date startAt, Date endAt) {
         return this.sqlSession.selectOne(sqlId("deliveryAllCounts"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
     }
 
     /**
      * 窝均健仔数
      */
-    public double getDeliveryHealthAvg(Long farmId, Date startAt, Date endAt){
+    public double getDeliveryHealthAvg(Long farmId, Date startAt, Date endAt) {
         return this.sqlSession.selectOne(sqlId("deliveryHealthCountsAvg"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
     }
 
     /**
      * 窝均活仔数
      */
-    public double getDeliveryLiveAvg(Long farmId, Date startAt, Date endAt){
+    public double getDeliveryLiveAvg(Long farmId, Date startAt, Date endAt) {
         return this.sqlSession.selectOne(sqlId("deliveryLiveCountsAvg"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
     }
 
     /**
      * 窝均产仔数
      */
-    public double getDeliveryAllAvg(Long farmId, Date startAt, Date endAt){
+    public double getDeliveryAllAvg(Long farmId, Date startAt, Date endAt) {
         return this.sqlSession.selectOne(sqlId("deliveryAllCountsAvg"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
     }
 
     /**
      * 断奶母猪数
      */
-    public int getWeanSow(Long farmId, Date startAt, Date endAt){
+    public int getWeanSow(Long farmId, Date startAt, Date endAt) {
         return this.sqlSession.selectOne(sqlId("weanSowCounts"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
     }
 
     /**
      * 断奶仔猪数
      */
-    public int getWeanPiglet(Long farmId, Date startAt, Date endAt){
+    public int getWeanPiglet(Long farmId, Date startAt, Date endAt) {
         return this.sqlSession.selectOne(sqlId("weanPigletCounts"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
     }
 
     /**
      * 断奶仔猪均重
      */
-    public double getWeanPigletWeightAvg(Long farmId, Date startAt, Date endAt){
+    public double getWeanPigletWeightAvg(Long farmId, Date startAt, Date endAt) {
         return this.sqlSession.selectOne(sqlId("weanPigletWeightAvg"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
     }
 
     /**
      * 窝均断奶数
      */
-    public double getWeanPigletCountsAvg(Long farmId, Date startAt, Date endAt){
+    public double getWeanPigletCountsAvg(Long farmId, Date startAt, Date endAt) {
         return this.sqlSession.selectOne(sqlId("weanPigletCountsAvg"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
     }
 
@@ -223,5 +223,110 @@ public class DoctorKpiDao {
      */
     public double getDeadFattenRate(Long farmId, Date startAt, Date endAt) {
         return sqlSession.selectOne(sqlId("getDeadFattenRate"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
+    }
+
+    /**
+     * 配种情况:配后备
+     */
+    public int firstMatingCounts(Long farmId, Date startAt, Date endAt) {
+        return sqlSession.selectOne(sqlId("firstMatingCounts"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
+    }
+
+    /**
+     * 配种情况:配流产
+     */
+    public int abortionMatingCounts(Long farmId, Date startAt, Date endAt) {
+        return sqlSession.selectOne(sqlId("abortionMatingCounts"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
+    }
+
+    /**
+     * 配种情况:配断奶
+     */
+    public int weanMatingCounts(Long farmId, Date startAt, Date endAt) {
+        return sqlSession.selectOne(sqlId("weanMatingCounts"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
+    }
+
+    /**
+     * 配种情况:配阴性
+     */
+    public int yinMatingCounts(Long farmId, Date startAt, Date endAt) {
+        return sqlSession.selectOne(sqlId("yinMatingCounts"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
+    }
+
+    /**
+     * 配种情况:配返情
+     */
+    public int fanQMatingCounts(Long farmId, Date startAt, Date endAt) {
+        return sqlSession.selectOne(sqlId("fanQMatingCounts"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
+    }
+
+    /**
+     * 配种情况:估算受胎率
+     */
+    public double assessPregnancyRate(Long farmId, Date startAt, Date endAt) {
+        return sqlSession.selectOne(sqlId("assessPregnancyRate"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
+    }
+
+    /**
+     * 配种情况:实际受胎率
+     */
+    public double realPregnancyRate(Long farmId, Date startAt, Date endAt) {
+        return sqlSession.selectOne(sqlId("realPregnancyRate"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
+    }
+
+    /**
+     * 配种情况:估算分娩率
+     */
+    public double assessFarrowingRate(Long farmId, Date startAt, Date endAt) {
+        return sqlSession.selectOne(sqlId("assessFarrowingRate"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
+    }
+
+    /**
+     * 配种情况:实际配种分娩率
+     */
+    public double realFarrowingRate(Long farmId, Date startAt, Date endAt) {
+        return sqlSession.selectOne(sqlId("realFarrowingRate"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
+    }
+
+    /**
+     * 妊娠检查情况:妊娠检查阳性
+     */
+    public int checkYangCounts(Long farmId, Date startAt, Date endAt) {
+        return sqlSession.selectOne(sqlId("checkYangCounts"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
+    }
+
+    /**
+     * 妊娠检查情况:返情
+     */
+    public int checkFanQCounts(Long farmId, Date startAt, Date endAt) {
+        return sqlSession.selectOne(sqlId("checkFanQCounts"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
+    }
+
+    /**
+     * 妊娠检查情况:妊娠检查阴性
+     */
+    public int checkYingCounts(Long farmId, Date startAt, Date endAt) {
+        return sqlSession.selectOne(sqlId("checkYingCounts"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
+    }
+
+    /**
+     * 妊娠检查情况:流产
+     */
+    public int checkAbortionCounts(Long farmId, Date startAt, Date endAt) {
+        return sqlSession.selectOne(sqlId("checkAbortionCounts"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
+    }
+
+    /**
+     * NPD
+     */
+    public double npd(Long farmId, Date startAt, Date endAt) {
+        return sqlSession.selectOne(sqlId("npd"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
+    }
+
+    /**
+     * psy
+     */
+    public double psy(Long farmId, Date startAt, Date endAt) {
+        return sqlSession.selectOne(sqlId("psy"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
     }
 }

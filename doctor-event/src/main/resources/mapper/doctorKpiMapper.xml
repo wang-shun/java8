@@ -78,7 +78,8 @@
 
     <!-- 窝均产仔数-->
     <select id="deliveryAllCountsAvg" parameterType="map" resultType="double">
-        select sum(health_count+ weak_count+ jx_count+ mny_count+ dead_count + black_count)/count(1) from doctor_pig_events
+        select sum(health_count+ weak_count+ jx_count+ mny_count+ dead_count + black_count)/count(1) from
+        doctor_pig_events
         where type = 15
         <include refid="criteria"/>
     </select>
@@ -121,134 +122,134 @@
     <!-- 销售情况: 母猪 -->
     <select id="getSaleSow" parameterType="map" resultType="int">
         SELECT
-          count(1)
+        count(1)
         FROM doctor_pig_events
         WHERE
-          change_type_id = 109 AND  -- 变动类型是销售
-          type = 6 AND              -- 事件类型是离场
-          kind = 1                  -- 猪类母猪
+        change_type_id = 109 AND -- 变动类型是销售
+        type = 6 AND -- 事件类型是离场
+        kind = 1 -- 猪类母猪
         <include refid="criteria"/>
     </select>
 
     <!-- 销售情况: 公猪 -->
     <select id="getSaleBoar" parameterType="map" resultType="int">
         SELECT
-         count(1)
+        count(1)
         FROM doctor_pig_events
         WHERE
-          change_type_id = 109 AND  -- 变动类型是销售
-          type = 6 AND              -- 事件类型是离场
-          kind = 2                  -- 猪类公猪
+        change_type_id = 109 AND -- 变动类型是销售
+        type = 6 AND -- 事件类型是离场
+        kind = 2 -- 猪类公猪
         <include refid="criteria"/>
     </select>
 
     <!-- 销售情况: 保育猪（产房+保育） -->
     <select id="getSaleNursery" parameterType="map" resultType="int">
         SELECT
-          sum(quantity)
+        sum(quantity)
         FROM doctor_group_events
         WHERE
-          change_type_id = 109 AND  -- 变动类型是销售
-          pig_type IN (1, 2);       -- 产房 + 保育
+        change_type_id = 109 AND -- 变动类型是销售
+        pig_type IN (1, 2); -- 产房 + 保育
         <include refid="criteria"/>
     </select>
 
     <!-- 销售情况: 育肥猪 -->
     <select id="getSaleFatten" parameterType="map" resultType="int">
         SELECT
-          sum(quantity)
+        sum(quantity)
         FROM doctor_group_events
         WHERE
-          change_type_id = 109 AND  -- 变动类型是销售
-          pig_type = 3              -- 育肥猪
+        change_type_id = 109 AND -- 变动类型是销售
+        pig_type = 3 -- 育肥猪
         <include refid="criteria"/>
     </select>
 
     <!-- 死淘情况: 母猪 -->
     <select id="getDeadSow" parameterType="map" resultType="int">
         SELECT
-          count(1)
+        count(1)
         FROM doctor_pig_events
         WHERE
-          change_type_id IN (110, 111) AND  -- 变动类型是死亡和淘汰
-          type = 6 AND                      -- 事件类型是离场
-          kind = 1                          -- 猪类母猪
+        change_type_id IN (110, 111) AND -- 变动类型是死亡和淘汰
+        type = 6 AND -- 事件类型是离场
+        kind = 1 -- 猪类母猪
         <include refid="criteria"/>
     </select>
 
     <!-- 死淘情况: 公猪 -->
     <select id="getDeadBoar" parameterType="map" resultType="int">
         SELECT
-          count(1)
+        count(1)
         FROM doctor_pig_events
         WHERE
-          change_type_id IN (110, 111) AND  -- 变动类型是死亡和淘汰
-          type = 6 AND                      -- 事件类型是离场
-          kind = 2                          -- 猪类公猪
+        change_type_id IN (110, 111) AND -- 变动类型是死亡和淘汰
+        type = 6 AND -- 事件类型是离场
+        kind = 2 -- 猪类公猪
         <include refid="criteria"/>
     </select>
 
     <!-- 死淘情况: 产房仔猪 -->
     <select id="getDeadFarrow" parameterType="map" resultType="int">
         SELECT
-          sum(quantity)
+        sum(quantity)
         FROM doctor_group_events
         WHERE
-          change_type_id IN (110, 111) AND  -- 变动类型是死亡和淘汰
-          pig_type = 1                      -- 产房仔猪
+        change_type_id IN (110, 111) AND -- 变动类型是死亡和淘汰
+        pig_type = 1 -- 产房仔猪
         <include refid="criteria"/>
     </select>
 
     <!-- 死淘情况: 保育猪 -->
     <select id="getDeadNursery" parameterType="map" resultType="int">
         SELECT
-          sum(quantity)
+        sum(quantity)
         FROM doctor_group_events
         WHERE
-          change_type_id IN (110, 111) AND  -- 变动类型是死亡和淘汰
-          pig_type = 2                      -- 保育猪
+        change_type_id IN (110, 111) AND -- 变动类型是死亡和淘汰
+        pig_type = 2 -- 保育猪
         <include refid="criteria"/>
     </select>
 
     <!-- 死淘情况: 育肥猪 -->
     <select id="getDeadFatten" parameterType="map" resultType="int">
         SELECT
-          sum(quantity)
+        sum(quantity)
         FROM doctor_group_events
         WHERE
-          change_type_id IN (110, 111) AND  -- 变动类型是死亡和淘汰
-          pig_type = 3                      -- 育肥猪
+        change_type_id IN (110, 111) AND -- 变动类型是死亡和淘汰
+        pig_type = 3 -- 育肥猪
         <include refid="criteria"/>
     </select>
 
     <!-- 死淘情况: 产房死淘率 -->
     <select id="getDeadFarrowRate" parameterType="map" resultType="double">
         SELECT
-          a.dead_count / (b.trans_in_count + c.farrow_count)
+        a.dead_count / (b.trans_in_count + c.farrow_count)
         FROM
         (
-            SELECT
-              farm_id,
-              sum(quantity) AS dead_count
-            FROM doctor_group_events
-            WHERE
-              change_type_id IN (110, 111) AND   -- 变动类型是死亡和淘汰
-              pig_type IN (1, 7)                 -- 产房仔猪
-              <include refid="criteria"/>
+        SELECT
+        farm_id,
+        sum(quantity) AS dead_count
+        FROM doctor_group_events
+        WHERE
+        change_type_id IN (110, 111) AND -- 变动类型是死亡和淘汰
+        pig_type IN (1, 7) -- 产房仔猪
+        <include refid="criteria"/>
         ) AS a
         LEFT JOIN
         (
-            SELECT
-              farm_id,
-              sum(quantity) AS trans_in_count
-            FROM doctor_group_events
-            WHERE
-              pig_type IN (1, 7) AND     -- 产房仔猪
-              type = 2 AND               -- 转入猪群事件
-              trans_group_type != 0      -- 排除掉内转
-              <include refid="criteria"/>
+        SELECT
+        farm_id,
+        sum(quantity) AS trans_in_count
+        FROM doctor_group_events
+        WHERE
+        pig_type IN (1, 7) AND -- 产房仔猪
+        type = 2 AND -- 转入猪群事件
+        trans_group_type != 0 -- 排除掉内转
+        <include refid="criteria"/>
         ) AS b
-          ON a.farm_id = b.farm_id
+        ON a.farm_id = b.farm_id
         LEFT JOIN
         (
             SELECT
@@ -265,29 +266,29 @@
     <!-- 死淘情况: 保育死淘率 -->
     <select id="getDeadNurseryRate" parameterType="map" resultType="double">
         SELECT
-          a.dead_count / (b.trans_in_count + c.farrow_count)
+        a.dead_count / (b.trans_in_count + c.farrow_count)
         FROM
         (
-            SELECT
-              farm_id,
-              sum(quantity) AS dead_count
-            FROM doctor_group_events
-            WHERE
-              change_type_id IN (110, 111) AND   -- 变动类型是死亡和淘汰
-              pig_type = 2                       -- 保育猪
-              <include refid="criteria"/>
+        SELECT
+        farm_id,
+        sum(quantity) AS dead_count
+        FROM doctor_group_events
+        WHERE
+        change_type_id IN (110, 111) AND -- 变动类型是死亡和淘汰
+        pig_type = 2 -- 保育猪
+        <include refid="criteria"/>
         ) AS a
         LEFT JOIN
         (
-            SELECT
-              farm_id,
-              sum(quantity) AS trans_in_count
-            FROM doctor_group_events
-            WHERE
-                pig_type = 2 AND           -- 保育猪
-                type = 2 AND               -- 转入猪群事件
-                trans_group_type != 0      -- 排除掉内转
-            <include refid="criteria"/>
+        SELECT
+        farm_id,
+        sum(quantity) AS trans_in_count
+        FROM doctor_group_events
+        WHERE
+        pig_type = 2 AND -- 保育猪
+        type = 2 AND -- 转入猪群事件
+        trans_group_type != 0 -- 排除掉内转
+        <include refid="criteria"/>
         ) AS b
         ON a.farm_id = b.farm_id
         LEFT JOIN
@@ -306,29 +307,29 @@
     <!-- 死淘情况: 育肥死淘率 -->
     <select id="getDeadFattenRate" parameterType="map" resultType="double">
         SELECT
-          a.dead_count / (b.trans_in_count + c.farrow_count)
+        a.dead_count / (b.trans_in_count + c.farrow_count)
         FROM
         (
-            SELECT
-              farm_id,
-              sum(quantity) AS dead_count
-            FROM doctor_group_events
-            WHERE
-              change_type_id IN (110, 111) AND   -- 变动类型是死亡和淘汰
-              pig_type = 3                       -- 育肥猪
-              <include refid="criteria"/>
+        SELECT
+        farm_id,
+        sum(quantity) AS dead_count
+        FROM doctor_group_events
+        WHERE
+        change_type_id IN (110, 111) AND -- 变动类型是死亡和淘汰
+        pig_type = 3 -- 育肥猪
+        <include refid="criteria"/>
         ) AS a
         LEFT JOIN
         (
-            SELECT
-              farm_id,
-              sum(quantity) AS trans_in_count
-            FROM doctor_group_events
-            WHERE
-              pig_type = 3 AND           -- 育肥猪
-              type = 2 AND               -- 转入猪群事件
-              trans_group_type != 0      -- 排除掉内转
-              <include refid="criteria"/>
+        SELECT
+        farm_id,
+        sum(quantity) AS trans_in_count
+        FROM doctor_group_events
+        WHERE
+        pig_type = 3 AND -- 育肥猪
+        type = 2 AND -- 转入猪群事件
+        trans_group_type != 0 -- 排除掉内转
+        <include refid="criteria"/>
         ) AS b
         ON a.farm_id = b.farm_id
         LEFT JOIN
@@ -344,4 +345,327 @@
         ON a.farm_id = c.farm_id;
     </select>
 
+    <!-- 配后备-->
+    <select id="firstMatingCounts" parameterType="map" resultType="int">
+        select sum(wean_count)/count(1) from doctor_pig_events
+        where type = 16
+        select count(1) from doctor_pig_events t1
+        left join doctor_pig_events t2
+        on t1.`rel_event_id` = t2.id
+        where t1.kind = 1
+        and t1.`type` = 9
+        and t1.current_mating_count = 1
+        and t1.parity = 1
+        and t1.`pig_status_before` = 1
+        and t1.farm_id = 12399
+        and t2.type = 7
+        <if test="farmId != null">and t1.farm_id = #{farmId}</if>
+        <if test="startAt != null">and t1.`event_at` &gt;= #{startAt}</if>
+        <if test="endAt != null">and t1.`event_at` &lt;= #{endAt}</if>
+    </select>
+
+    <!-- 配流产-->
+    <select id="abortionMatingCounts" parameterType="map" resultType="int">
+        select count(1) from doctor_pig_events t1
+        where
+        t1.`type` = 9
+        and t1.kind = 1
+        and t1.`doctor_mate_type` in (2, 3)
+        <if test="farmId != null">and t1.farm_id = #{farmId}</if>
+        <if test="startAt != null">and t1.`matting_date` &gt;= #{startAt}</if>
+        <if test="endAt != null">and t1.`matting_date` &lt;= #{endAt}</if>
+    </select>
+
+    <!-- 配断奶-->
+    <select id="weanMatingCounts" parameterType="map" resultType="int">
+        select count(1) from doctor_pig_events t1
+        where
+        t1.`type` = 9
+        and t1.kind = 1
+        and t1.`doctor_mate_type` = 4
+        <if test="farmId != null">and t1.farm_id = #{farmId}</if>
+        <if test="startAt != null">and t1.`matting_date` &gt;= #{startAt}</if>
+        <if test="endAt != null">and t1.`matting_date` &lt;= #{endAt}</if>
+    </select>
+
+    <!-- 配阴性-->
+    <select id="yinMatingCounts" parameterType="map" resultType="int">
+        select count(1) from doctor_pig_events t1
+        where
+        t1.`type` = 9
+        and t1.kind = 1
+        and t1.`doctor_mate_type` = 5
+        <if test="farmId != null">and t1.farm_id = #{farmId}</if>
+        <if test="startAt != null">and t1.`matting_date` &gt;= #{startAt}</if>
+        <if test="endAt != null">and t1.`matting_date` &lt;= #{endAt}</if>
+    </select>
+
+    <!-- 配返情-->
+    <select id="fanQMatingCounts" parameterType="map" resultType="int">
+        select count(1) from doctor_pig_events t1
+        where
+        t1.`type` = 9
+        and t1.kind = 1
+        and t1.`doctor_mate_type` = 6
+        <if test="farmId != null">and t1.farm_id = #{farmId}</if>
+        <if test="startAt != null">and t1.`matting_date` &gt;= #{startAt}</if>
+        <if test="endAt != null">and t1.`matting_date` &lt;= #{endAt}</if>
+    </select>
+
+
+    <!-- 妊娠检查阳性-->
+    <select id="checkYangCounts" parameterType="map" resultType="int">
+        select count(1) from doctor_pig_events t1
+        where
+        t1.`type` = 11
+        and t1.kind = 1
+        and t1.`preg_check_result` = 1
+        <if test="farmId != null">and t1.farm_id = #{farmId}</if>
+        <if test="startAt != null">and t1.`check_date` &gt;= #{startAt}</if>
+        <if test="endAt != null">and t1.`check_date` &lt;= #{endAt}</if>
+    </select>
+
+    <!-- 返情-->
+    <select id="checkFanQCounts" parameterType="map" resultType="int">
+        select count(1) from doctor_pig_events t1
+        where
+        t1.`type` = 11
+        and t1.kind = 1
+        and t1.`preg_check_result` = 4
+        <if test="farmId != null">and t1.farm_id = #{farmId}</if>
+        <if test="startAt != null">and t1.`check_date` &gt;= #{startAt}</if>
+        <if test="endAt != null">and t1.`check_date` &lt;= #{endAt}</if>
+    </select>
+
+    <!-- 妊娠检查阴性-->
+    <select id="checkYingCounts" parameterType="map" resultType="int">
+        select count(1) from doctor_pig_events t1
+        where
+        t1.`type` = 11
+        and t1.kind = 1
+        and t1.`preg_check_result` = 2
+        <if test="farmId != null">and t1.farm_id = #{farmId}</if>
+        <if test="startAt != null">and t1.`check_date` &gt;= #{startAt}</if>
+        <if test="endAt != null">and t1.`check_date` &lt;= #{endAt}</if>
+    </select>
+
+    <!-- 流产-->
+    <select id="checkAbortionCounts" parameterType="map" resultType="int">
+        select
+        (
+        select count(1) from doctor_pig_events t1
+        where
+        t1.`type` = 11
+        and t1.kind = 1
+        <if test="farmId != null">and t1.farm_id = #{farmId}</if>
+        <if test="startAt != null">and t1.`check_date` &gt;= #{startAt}</if>
+        <if test="endAt != null">and t1.`check_date` &lt;= #{endAt}</if>
+        and t1.`preg_check_result` = 3
+        )
+        +
+        (
+        select count(1) from doctor_pig_events t1
+        where
+        t1.`type` = 13
+        and t1.kind = 1
+        <if test="farmId != null">and t1.farm_id = #{farmId}</if>
+        <if test="startAt != null">and t1.`abortion_date` &gt;= #{startAt}</if>
+        <if test="endAt != null">and t1.`abortion_date` &lt;= #{endAt}</if>
+        ) from dual
+    </select>
+
+
+    <!-- 估算受胎率 -->
+    <select id="assessPregnancyRate" parameterType="map" resultType="double">
+        select
+        (
+        select count(1) from doctor_pig_events t1
+        where
+        t1.`type` = 11
+        and t1.kind = 1
+        and t1.`preg_check_result` = 1
+        <if test="farmId != null">and t1.farm_id = #{farmId}</if>
+        <if test="startAt != null">and t1.`check_date` &gt;= #{startAt}</if>
+        <if test="endAt != null">and t1.`check_date` &lt;= #{endAt}</if>
+        )
+        /
+        (
+        select case count(1) when 0 then 1 else count(1) end
+        from doctor_pig_events t1
+        where
+        t1.`type` = 9
+        and t1.kind = 1
+        and t1.current_mating_count = 1
+        <if test="farmId != null">and t1.farm_id = #{farmId}</if>
+        <if test="startAt != null">and t1.`matting_date` &gt;= DATE_SUB(#{startAt}, INTERVAL 28 DAY)</if>
+        <if test="endAt != null">and t1.`matting_date` &lt;= DATE_SUB(#{endAt}, INTERVAL 28 DAY)</if>
+        ) from dual
+    </select>
+
+    <!-- 实际受胎率 -->
+    <select id="realPregnancyRate" parameterType="map" resultType="double">
+        select
+        (
+        select count(1)
+        from doctor_pig_events t1
+        where
+        t1.`type` = 9
+        and t1.kind = 1
+        and t1.current_mating_count = 1
+        and t1.`is_impregnation` = 1
+        <if test="farmId != null">and t1.farm_id = #{farmId}</if>
+        <if test="startAt != null">and t1.`matting_date` &gt;= #{startAt}</if>
+        <if test="endAt != null">and t1.`matting_date` &lt;= #{endAt}</if>
+        ) /
+        (
+        select case count(1) when 0 then 1 else count(1) end
+        from doctor_pig_events t1
+        where
+        t1.`type` = 9
+        and t1.kind = 1
+        and t1.current_mating_count = 1
+        <if test="farmId != null">and t1.farm_id = #{farmId}</if>
+        <if test="startAt != null">and t1.`matting_date` &gt;= #{startAt}</if>
+        <if test="endAt != null">and t1.`matting_date` &lt;= #{endAt}</if>
+        ) from dual
+    </select>
+
+    <!-- 估算分娩率 -->
+    <select id="assessFarrowingRate" parameterType="map" resultType="double">
+        select
+        (
+        select count(1) from doctor_pig_events t1
+        where
+        t1.`type` = 15
+        and t1.kind = 1
+        <if test="farmId != null">and t1.farm_id = #{farmId}</if>
+        <if test="startAt != null">and t1.`farrowing_date` &gt;= #{startAt}</if>
+        <if test="endAt != null">and t1.`farrowing_date` &lt;= #{endAt}</if>
+        ) /
+        (
+        select case count(1) when 0 then 1 else count(1) end from doctor_pig_events t1
+        where
+        t1.`type` = 9
+        and t1.kind = 1
+        <if test="farmId != null">and t1.farm_id = #{farmId}</if>
+        <if test="startAt != null">and t1.`matting_date` &gt;= DATE_SUB(#{startAt}, INTERVAL 114 DAY)</if>
+        <if test="endAt != null">and t1.`matting_date` &lt;= DATE_SUB(#{endAt}, INTERVAL 114 DAY)</if>
+        and t1.current_mating_count = 1
+        ) from dual
+    </select>
+
+
+    <!-- 实际配种分娩率 -->
+    <select id="realFarrowingRate" parameterType="map" resultType="double">
+        select
+        (
+        select count(1) from doctor_pig_events t1
+        where
+        t1.`type` = 9
+        and t1.kind = 1
+        and t1.current_mating_count = 1
+        and t1.`is_delivery` = 1
+        <if test="farmId != null">and t1.farm_id = #{farmId}</if>
+        <if test="startAt != null">and t1.`matting_date` &gt;= #{startAt}</if>
+        <if test="endAt != null">and t1.`matting_date` &lt;= #{endAt}</if>
+        ) /
+        (
+        select case count(1) when 0 then 1 else count(1) end
+        from doctor_pig_events t1
+        where
+        and t1.`type` = 9
+        and t1.kind = 1
+        and t1.current_mating_count = 1
+        <if test="farmId != null">and t1.farm_id = #{farmId}</if>
+        <if test="startAt != null">and t1.`matting_date` &gt;= #{startAt}</if>
+        <if test="endAt != null">and t1.`matting_date` &lt;= #{endAt}</if>
+        ) from dual
+    </select>
+
+    <!-- NPD -->
+    <select id="npd" parameterType="map" resultType="double">
+        select (
+        select sum(npd) from doctor_pig_events t1
+        where
+        t1.kind = 1
+        <if test="farmId != null">and t1.farm_id = #{farmId}</if>
+        <if test="startAt != null">and t1.`event_at` &gt;= #{startAt}</if>
+        <if test="endAt != null">and t1.`event_at` &lt;= #{endAt}</if>
+        ) /
+        (
+        select
+        case sum(sow_count)/(case count(1) when 0 then 1 else count(1) end)
+        when 0 then 1
+        else sum(sow_count)/(case count(1) when 0 then 1 else count(1) end) end
+        from doctor_daily_reports
+        where 1=1
+        <if test="farmId != null">and farm_id = #{farmId}</if>
+        <if test="startAt != null">and sum_at &gt;= #{startAt}</if>
+        <if test="endAt != null">and sum_at &lt;= #{endAt}</if>
+        ) from dual
+    </select>
+
+    <!-- PSY -->
+    <select id="psy" parameterType="map" resultType="double">
+        SELECT (365 -
+        (SELECT
+        (SELECT sum(npd)
+        FROM doctor_pig_events t1
+        WHERE
+        t1.kind = 1
+        <if test="farmId != null">and t1.farm_id = #{farmId}</if>
+        <if test="startAt != null">and t1.event_at &gt;= #{startAt}</if>
+        <if test="endAt != null">and t1.event_at &lt;= #{endAt}</if>
+        ) /
+        (
+        SELECT CASE sum(sow_count)/(CASE count(1) WHEN 0 THEN 1 ELSE count(1) END)
+        WHEN 0 THEN 1 ELSE sum(sow_count)/(CASE count(1) WHEN 0 THEN 1 ELSE count(1) END) END
+        FROM doctor_daily_reports
+        WHERE 1=1
+        <if test="farmId != null">and farm_id = #{farmId}</if>
+        <if test="startAt != null">and sum_at &gt;= #{startAt}</if>
+        <if test="endAt != null">and sum_at &lt;= #{endAt}</if>
+        )
+        FROM dual)) / (CASE (
+        (SELECT ifnull(sum(preg_days), 1)
+        FROM doctor_pig_events t1
+        WHERE
+        t1.`type` = 15
+        AND t1.kind = 1
+        <if test="farmId != null">and t1.farm_id = #{farmId}</if>
+        <if test="startAt != null">and t1.farrowing_date &gt;= #{startAt}</if>
+        <if test="endAt != null">and t1.farrowing_date &lt;= #{endAt}</if>
+        ) +
+        (SELECT ifnull(sum(feed_days), 0)
+        FROM doctor_pig_events t1
+        WHERE
+        t1.`type` = 16
+        AND t1.kind = 1
+        <if test="farmId != null">and t1.farm_id = #{farmId}</if>
+        <if test="startAt != null">and t1.partwean_date &gt;= #{startAt}</if>
+        <if test="endAt != null">and t1.partwean_date &lt;= #{endAt}</if>
+        ))
+        WHEN 0 THEN 1
+        ELSE (
+        (SELECT ifnull(sum(preg_days), 1)
+        FROM doctor_pig_events t1
+        WHERE
+        t1.`type` = 15
+        AND t1.kind = 1
+        <if test="farmId != null">and t1.farm_id = #{farmId}</if>
+        <if test="startAt != null">and t1.farrowing_date &gt;= #{startAt}</if>
+        <if test="endAt != null">and t1.farrowing_date &lt;= #{endAt}</if>
+        ) +
+        (SELECT ifnull(sum(feed_days), 0)
+        FROM doctor_pig_events t1
+        WHERE
+        t1.`type` = 16
+        AND t1.kind = 1
+        <if test="farmId != null">and t1.farm_id = #{farmId}</if>
+        <if test="startAt != null">and t1.partwean_date &gt;= #{startAt}</if>
+        <if test="endAt != null">and t1.partwean_date &lt;= #{endAt}</if>
+        ))
+        END)
+        FROM dual
+    </select>
 </mapper>
