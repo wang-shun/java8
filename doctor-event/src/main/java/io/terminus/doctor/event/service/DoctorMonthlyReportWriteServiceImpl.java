@@ -57,6 +57,20 @@ public class DoctorMonthlyReportWriteServiceImpl implements DoctorMonthlyReportW
         }
     }
 
+    @Override
+    public Response<DoctorMonthlyReport> initMonthlyReportByFarmIdAndDate(Long farmId, Date date) {
+        try {
+            Date startAt = new DateTime(date).withDayOfMonth(1).withTimeAtStartOfDay().toDate(); //月初: 2016-08-01 00:00:00
+            Date endAt = new DateTime(Dates.endOfDay(date)).plusSeconds(-1).toDate();            //天末: 2016-08-12 23:59:59
+            Date sumAt = Dates.startOfDay(date);                                                 //统计日期: 当天天初
+            return Response.ok(getMonthlyReport(farmId, startAt, endAt, sumAt));
+        } catch (Exception e) {
+            log.error("init monthly report by farmId and date failed, farmId:{}, date:{}, cause:{}",
+                    farmId, date, Throwables.getStackTraceAsString(e));
+            return Response.fail("init.monthly.report.fail");
+        }
+    }
+
     //月报
     private DoctorMonthlyReport getMonthlyReport(Long farmId, Date startAt, Date endAt, Date sumAt) {
         DoctorMonthlyReport report = new DoctorMonthlyReport();
@@ -69,25 +83,24 @@ public class DoctorMonthlyReportWriteServiceImpl implements DoctorMonthlyReportW
     //月报统计结果
     private DoctorMonthlyReportDto getMonthlyReportDto(Long farmId, Date startAt, Date endAt) {
         DoctorMonthlyReportDto dto = new DoctorMonthlyReportDto();
-        // TODO: 16/8/12
         //配种情况
-        dto.setMateHoubei(0);                //配后备
-        dto.setMateWean(0);                  //配断奶
-        dto.setMateFanqing(0);               //配返情
-        dto.setMateAbort(0);                 //配流产
-        dto.setMateNegtive(0);               //配阴性
-        dto.setMateEstimatePregRate(0);      //估算受胎率
-        dto.setMateRealPregRate(0);          //实际受胎率
-        dto.setMateEstimateFarrowingRate(0); //估算配种分娩率
-        dto.setMateRealFarrowingRate(0);     //实际配种分娩率
+        dto.setMateHoubei(doctorKpiDao.firstMatingCounts(farmId, startAt, endAt));                   //配后备
+        dto.setMateWean(doctorKpiDao.weanMatingCounts(farmId, startAt, endAt));                      //配断奶
+        dto.setMateFanqing(doctorKpiDao.fanQMatingCounts(farmId, startAt, endAt));                   //配返情
+        dto.setMateAbort(doctorKpiDao.abortionMatingCounts(farmId, startAt, endAt));                 //配流产
+        dto.setMateNegtive(doctorKpiDao.yinMatingCounts(farmId, startAt, endAt));                    //配阴性
+        dto.setMateEstimatePregRate(doctorKpiDao.assessPregnancyRate(farmId, startAt, endAt));       //估算受胎率
+        dto.setMateRealPregRate(doctorKpiDao.realPregnancyRate(farmId, startAt, endAt));             //实际受胎率
+        dto.setMateEstimateFarrowingRate(doctorKpiDao.assessFarrowingRate(farmId, startAt, endAt));  //估算配种分娩率
+        dto.setMateRealFarrowingRate(doctorKpiDao.realFarrowingRate(farmId, startAt, endAt));        //实际配种分娩率
 
         //妊娠检查情况
-        dto.setCheckPositive(0);             //妊娠检查阳性
-        dto.setCheckFanqing(0);              //返情
-        dto.setCheckAbort(0);                //流产
-        dto.setCheckNegtive(0);              //妊娠检查阴性
-        dto.setNpd(0);                       //非生产天数
-        dto.setPsy(0);                       //psy
+        dto.setCheckPositive(doctorKpiDao.checkYangCounts(farmId, startAt, endAt));                  //妊娠检查阳性
+        dto.setCheckFanqing(doctorKpiDao.checkFanQCounts(farmId, startAt, endAt));                   //返情
+        dto.setCheckAbort(doctorKpiDao.checkAbortionCounts(farmId, startAt, endAt));                 //流产
+        dto.setCheckNegtive(doctorKpiDao.checkYingCounts(farmId, startAt, endAt));                   //妊娠检查阴性
+        dto.setNpd(doctorKpiDao.npd(farmId, startAt, endAt));                                        //非生产天数
+        dto.setPsy(doctorKpiDao.psy(farmId, startAt, endAt));                                        //psy
 
         //分娩情况
         dto.setFarrowEstimateParity(doctorKpiDao.getPreDelivery(farmId, startAt, endAt));        //预产胎数
