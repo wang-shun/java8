@@ -55,7 +55,9 @@ public class DoctorTurnSeedGroupEventHandler extends DoctorAbstractGroupEventHan
         DoctorGroupSnapShotInfo oldShot = getOldSnapShotInfo(group, groupTrack);
         DoctorTurnSeedGroupInput turnSeed = (DoctorTurnSeedGroupInput) input;
 
-        PigType groupType = this.checkTurnSeedData(group.getPigType(), turnSeed.getToBarnId());
+        DoctorBarn barn = orServEx(doctorBarnReadService.findBarnById(turnSeed.getToBarnId()));
+        // 检查数据
+        PigType groupType = this.checkTurnSeedData(group.getPigType(), barn.getPigType());
 
         //1. 转换转种猪事件
         DoctorTurnSeedGroupEvent turnSeedEvent = BeanMapper.map(turnSeed, DoctorTurnSeedGroupEvent.class);
@@ -75,7 +77,6 @@ public class DoctorTurnSeedGroupEventHandler extends DoctorAbstractGroupEventHan
         publistGroupAndBarn(group.getOrgId(), group.getFarmId(), group.getId(), group.getCurrentBarnId(), event.getId());
 
         //触发其他事件
-        DoctorBarn barn = orServEx(doctorBarnReadService.findBarnById(turnSeed.getToBarnId()));
         switch (groupType) {
             case RESERVE_SOW :
                 if(Objects.equals(barn.getPigType(), PigType.MATE_SOW.getValue())){
@@ -96,22 +97,22 @@ public class DoctorTurnSeedGroupEventHandler extends DoctorAbstractGroupEventHan
 
     }
 
-    private PigType checkTurnSeedData(Integer groupType, Long toBarnId){
+    private PigType checkTurnSeedData(Integer groupType, Integer barnType){
         PigType type = PigType.from(groupType);
         if(type == null){
             throw new ServiceException("group.can.not.turn.seed");
         }
-        DoctorBarn barn = orServEx(doctorBarnReadService.findBarnById(toBarnId));
+
         switch (type) {
             // 当猪的来源是后备群中的种母猪 (PigType.RESERVE_SOW) 时, 转入猪舍只允许为 配种舍(PigType.MATE_SOW) 或 妊娠舍(PigType.PREG_SOW)
             case RESERVE_SOW :
-                if(!Objects.equals(barn.getPigType(), PigType.MATE_SOW.getValue()) && !Objects.equals(barn.getPigType(), PigType.PREG_SOW.getValue())){
+                if(!Objects.equals(barnType, PigType.MATE_SOW.getValue()) && !Objects.equals(barnType, PigType.PREG_SOW.getValue())){
                     throw new ServiceException("barn.can.not.turn.seed");
                 }
                 break;
             // 当猪的来源是后备群中的种公猪 (PigType.RESERVE_BOAR) 时, 转入猪舍只允许为 种公猪舍(PigType.BOAR)
             case RESERVE_BOAR :
-                if(!Objects.equals(barn.getPigType(), PigType.BOAR.getValue())){
+                if(!Objects.equals(barnType, PigType.BOAR.getValue())){
                     throw new ServiceException("barn.can.not.turn.seed");
                 }
                 break;
