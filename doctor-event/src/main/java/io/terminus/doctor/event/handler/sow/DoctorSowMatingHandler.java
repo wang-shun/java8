@@ -7,6 +7,7 @@ import io.terminus.doctor.event.dao.DoctorPigSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorPigTrackDao;
 import io.terminus.doctor.event.dao.DoctorRevertLogDao;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
+import io.terminus.doctor.event.enums.DoctorMatingType;
 import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.handler.DoctorAbstractEventFlowHandler;
 import io.terminus.doctor.event.model.DoctorPigEvent;
@@ -108,7 +109,57 @@ public class DoctorSowMatingHandler extends DoctorAbstractEventFlowHandler {
 
             context.put("jpNPD", jpNPD);
 
+            context.put("HP", true);
+
         }
+
+        //判断是否 流产到配种(妊娠检查)
+
+        if (!isNull(trackExtraMap) &&
+                trackExtraMap.containsKey("liuchanToMateCheck")
+                && Boolean.valueOf(trackExtraMap.get("liuchanToMateCheck").toString())) {
+            extra.put("liuchanToMateCheck", false);
+
+            context.put("LPC", true);
+        }
+
+        //判断是否 阴性到配种
+
+        if (!isNull(trackExtraMap) &&
+                trackExtraMap.containsKey("yinToMate")
+                && Boolean.valueOf(trackExtraMap.get("yinToMate").toString())) {
+            extra.put("yinToMate", false);
+
+            context.put("YP", true);
+        }
+
+        //判断是否 返情到配种
+        if (!isNull(trackExtraMap) &&
+                trackExtraMap.containsKey("fanqingToMate")
+                && Boolean.valueOf(trackExtraMap.get("fanqingToMate").toString())) {
+            extra.put("fanqingToMate", false);
+
+            context.put("FP", true);
+        }
+
+        //判断是否 流产到配种(流产事件)
+        if (!isNull(trackExtraMap) &&
+                trackExtraMap.containsKey("liuchanToMateLiuchan")
+                && Boolean.valueOf(trackExtraMap.get("liuchanToMateLiuchan").toString())) {
+            extra.put("liuchanToMateLiuchan", false);
+
+            context.put("LPL", true);
+        }
+
+        //判断是否 断奶到配种
+        if (!isNull(trackExtraMap) &&
+                trackExtraMap.containsKey("weanToMate")
+                && Boolean.valueOf(trackExtraMap.get("weanToMate").toString())) {
+            extra.put("weanToMate", false);
+
+            context.put("DP", true);
+        }
+
 
         // 构建母猪配种信息
         doctorPigTrack.addAllExtraMap(extra);
@@ -133,5 +184,25 @@ public class DoctorSowMatingHandler extends DoctorAbstractEventFlowHandler {
             doctorPigEvent.setDpnpd(doctorPigEvent.getJpnpd() + jpNPD);
             doctorPigEvent.setNpd(doctorPigEvent.getNpd() + jpNPD);
         }
+
+        if (notNull(context.get("HP"))) {
+            doctorPigEvent.setDoctorMateType(DoctorMatingType.HP.getKey());
+        }
+        if (notNull(context.get("LPC"))) {
+            doctorPigEvent.setDoctorMateType(DoctorMatingType.LPC.getKey());
+        }
+        if (notNull(context.get("LPL"))) {
+            doctorPigEvent.setDoctorMateType(DoctorMatingType.LPL.getKey());
+        }
+        if (notNull(context.get("DP"))) {
+            doctorPigEvent.setDoctorMateType(DoctorMatingType.DP.getKey());
+        }
+        if (notNull(context.get("YP"))) {
+            doctorPigEvent.setDoctorMateType(DoctorMatingType.YP.getKey());
+        }
+        if (notNull(context.get("FP"))) {
+            doctorPigEvent.setDoctorMateType(DoctorMatingType.FP.getKey());
+        }
+
     }
 }

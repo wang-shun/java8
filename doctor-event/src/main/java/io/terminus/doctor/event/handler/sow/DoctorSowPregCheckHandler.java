@@ -75,8 +75,21 @@ public class DoctorSowPregCheckHandler extends DoctorAbstractEventFlowHandler {
 
     @Override
     public DoctorPigTrack updateDoctorPigTrackInfo(Execution execution, DoctorPigTrack doctorPigTrack, DoctorBasicInputInfoDto basic, Map<String, Object> extra, Map<String, Object> context) {
-        doctorPigTrack.addAllExtraMap(extra);
+
+
         Integer pregCheckResult = (Integer) extra.get("checkResult");
+
+        //往extra增加一些特殊标志位用来表明配种类型
+        if (Objects.equals(pregCheckResult, PregCheckResult.FANQING.getKey())) {
+            extra.put("fanqingToMate", true);
+        } else if (Objects.equals(pregCheckResult, PregCheckResult.YING.getKey())) {
+            extra.put("yinToMate", true);
+        } else if (Objects.equals(pregCheckResult, PregCheckResult.LIUCHAN.getKey())) {
+            extra.put("liuchanToMateCheck", true);
+        }
+
+        doctorPigTrack.addAllExtraMap(extra);
+
         if (Objects.equals(pregCheckResult, PregCheckResult.UNSURE.getKey())) {
             // 不修改状态
         } else if (Objects.equals(pregCheckResult, PregCheckResult.YANG.getKey())) {
