@@ -3,13 +3,16 @@ package io.terminus.doctor.event.service;
 import com.google.common.base.Throwables;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.model.Response;
+import io.terminus.common.utils.JsonMapper;
+import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.dao.DoctorMonthlyReportDao;
+import io.terminus.doctor.event.dto.report.monthly.DoctorMonthlyReportDto;
 import io.terminus.doctor.event.model.DoctorMonthlyReport;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
+import java.util.Date;
 
 /**
  * Desc: 猪场月报表读服务实现类
@@ -22,6 +25,8 @@ import java.util.List;
 @RpcProvider
 public class DoctorMonthlyReportReadServiceImpl implements DoctorMonthlyReportReadService {
 
+    private static final JsonMapper JSON_MAPPER = JsonMapper.nonEmptyMapper();
+
     private final DoctorMonthlyReportDao doctorMonthlyReportDao;
 
     @Autowired
@@ -30,22 +35,31 @@ public class DoctorMonthlyReportReadServiceImpl implements DoctorMonthlyReportRe
     }
 
     @Override
-    public Response<DoctorMonthlyReport> findMonthlyReportById(Long monthlyReportId) {
+    public Response<DoctorMonthlyReportDto> findMonthlyReportByFarmIdAndSumAt(Long farmId, String sumAt) {
         try {
-            return Response.ok(doctorMonthlyReportDao.findById(monthlyReportId));
+            Date date = DateUtil.toDate(sumAt);
+
+            //查询月报结果, 如果没查到, 返回失败的结果
+            DoctorMonthlyReport report = doctorMonthlyReportDao.findByFarmIdAndSumAt(farmId, date);
+            if (report == null) {
+                return Response.ok(failReport());
+            }
+            DoctorMonthlyReportDto reportDto = JSON_MAPPER.fromJson(report.getData(), DoctorMonthlyReportDto.class);
+            if (reportDto == null) {
+                return Response.ok(failReport());
+            }
+            return Response.ok(reportDto);
         } catch (Exception e) {
-            log.error("find monthlyReport by id failed, monthlyReportId:{}, cause:{}", monthlyReportId, Throwables.getStackTraceAsString(e));
-            return Response.fail("monthlyReport.find.fail");
+            log.error("find monthly report by farmId and sumAt failed, farmId:{}, sumAt:{}, cause:{}",
+                    farmId, sumAt, Throwables.getStackTraceAsString(e));
+            return Response.ok(failReport());
         }
     }
 
-    @Override
-    public Response<List<DoctorMonthlyReport>> findMonthlyReportsByFarmId(Long farmId) {
-        try {
-            return Response.ok(doctorMonthlyReportDao.findByFarmId(farmId));
-        } catch (Exception e) {
-            log.error("find monthlyReport by farm id fail, farmId:{}, cause:{}", farmId, Throwables.getStackTraceAsString(e));
-            return Response.fail("monthlyReport.find.fail");
-        }
+    //查询失败的结果
+    private DoctorMonthlyReportDto failReport() {
+        DoctorMonthlyReportDto dto = new DoctorMonthlyReportDto();
+        dto.setFail(true);
+        return dto;
     }
 }

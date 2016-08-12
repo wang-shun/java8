@@ -15,6 +15,11 @@ public class DoctorMonthlyReportDto implements Serializable {
     private static final long serialVersionUID = -2490312543838256507L;
 
     /**
+     * 是否失败, true 失败(作为区分 0 与 未查询到结果)
+     */
+    private boolean fail;
+
+    /**
      * 配种情况
      */
     private int mateHoubei;                   //配后备
@@ -77,4 +82,10 @@ public class DoctorMonthlyReportDto implements Serializable {
     private double deadFarrowRate;            //产房死淘率
     private double deadNurseryRate;           //保育死淘率
     private double deadFattenRate;            //育肥死淘率
+
+    /**
+     * 其他
+     */
+    private double npd;                       //非生产天数
+    private double psy;                       //psy
 }
