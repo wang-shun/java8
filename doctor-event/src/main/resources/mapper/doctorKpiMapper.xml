@@ -349,64 +349,64 @@
     <select id="firstMatingCounts" parameterType="map" resultType="int">
         select count(1) from doctor_pig_events t1
         left join doctor_pig_events t2
-        on t1.`rel_event_id` = t2.id
+          on t1.`rel_event_id` = t2.id
         where t1.kind = 1
-        and t1.`type` = 9
-        and t1.current_mating_count = 1
-        and t1.parity = 1
-        and t1.`pig_status_before` = 1
-        and t2.type = 7
-        <if test="farmId != null">and t1.farm_id = #{farmId}</if>
-        <if test="startAt != null">and t1.`event_at` &gt;= #{startAt}</if>
-        <if test="endAt != null">and t1.`event_at` &lt;= #{endAt}</if>
+          and t1.`type` = 9
+          and t1.current_mating_count = 1
+          and t1.parity = 1
+          and t1.`pig_status_before` = 1
+          and t2.type = 7
+          <if test="farmId != null">and t1.farm_id = #{farmId}</if>
+          <if test="startAt != null">and t1.`event_at` &gt;= #{startAt}</if>
+          <if test="endAt != null">and t1.`event_at` &lt;= #{endAt}</if>
     </select>
 
     <!-- 配流产-->
     <select id="abortionMatingCounts" parameterType="map" resultType="int">
         select count(1) from doctor_pig_events t1
         where
-        t1.`type` = 9
-        and t1.kind = 1
-        and t1.`doctor_mate_type` in (2, 3)
-        <if test="farmId != null">and t1.farm_id = #{farmId}</if>
-        <if test="startAt != null">and t1.`matting_date` &gt;= #{startAt}</if>
-        <if test="endAt != null">and t1.`matting_date` &lt;= #{endAt}</if>
+          t1.`type` = 9
+          and t1.kind = 1
+          and t1.`doctor_mate_type` in (2, 3)
+          <if test="farmId != null">and t1.farm_id = #{farmId}</if>
+          <if test="startAt != null">and t1.`matting_date` &gt;= #{startAt}</if>
+          <if test="endAt != null">and t1.`matting_date` &lt;= #{endAt}</if>
     </select>
 
     <!-- 配断奶-->
     <select id="weanMatingCounts" parameterType="map" resultType="int">
         select count(1) from doctor_pig_events t1
         where
-        t1.`type` = 9
-        and t1.kind = 1
-        and t1.`doctor_mate_type` = 4
-        <if test="farmId != null">and t1.farm_id = #{farmId}</if>
-        <if test="startAt != null">and t1.`matting_date` &gt;= #{startAt}</if>
-        <if test="endAt != null">and t1.`matting_date` &lt;= #{endAt}</if>
+          t1.`type` = 9
+          and t1.kind = 1
+          and t1.`doctor_mate_type` = 4
+          <if test="farmId != null">and t1.farm_id = #{farmId}</if>
+          <if test="startAt != null">and t1.`matting_date` &gt;= #{startAt}</if>
+          <if test="endAt != null">and t1.`matting_date` &lt;= #{endAt}</if>
     </select>
 
     <!-- 配阴性-->
     <select id="yinMatingCounts" parameterType="map" resultType="int">
         select count(1) from doctor_pig_events t1
         where
-        t1.`type` = 9
-        and t1.kind = 1
-        and t1.`doctor_mate_type` = 5
-        <if test="farmId != null">and t1.farm_id = #{farmId}</if>
-        <if test="startAt != null">and t1.`matting_date` &gt;= #{startAt}</if>
-        <if test="endAt != null">and t1.`matting_date` &lt;= #{endAt}</if>
+          t1.`type` = 9
+          and t1.kind = 1
+          and t1.`doctor_mate_type` = 5
+          <if test="farmId != null">and t1.farm_id = #{farmId}</if>
+          <if test="startAt != null">and t1.`matting_date` &gt;= #{startAt}</if>
+          <if test="endAt != null">and t1.`matting_date` &lt;= #{endAt}</if>
     </select>
 
     <!-- 配返情-->
     <select id="fanQMatingCounts" parameterType="map" resultType="int">
         select count(1) from doctor_pig_events t1
         where
-        t1.`type` = 9
-        and t1.kind = 1
-        and t1.`doctor_mate_type` = 6
-        <if test="farmId != null">and t1.farm_id = #{farmId}</if>
-        <if test="startAt != null">and t1.`matting_date` &gt;= #{startAt}</if>
-        <if test="endAt != null">and t1.`matting_date` &lt;= #{endAt}</if>
+          t1.`type` = 9
+          and t1.kind = 1
+          and t1.`doctor_mate_type` = 6
+          <if test="farmId != null">and t1.farm_id = #{farmId}</if>
+          <if test="startAt != null">and t1.`matting_date` &gt;= #{startAt}</if>
+          <if test="endAt != null">and t1.`matting_date` &lt;= #{endAt}</if>
     </select>
 
 
@@ -414,60 +414,60 @@
     <select id="checkYangCounts" parameterType="map" resultType="int">
         select count(1) from doctor_pig_events t1
         where
-        t1.`type` = 11
-        and t1.kind = 1
-        and t1.`preg_check_result` = 1
-        <if test="farmId != null">and t1.farm_id = #{farmId}</if>
-        <if test="startAt != null">and t1.`check_date` &gt;= #{startAt}</if>
-        <if test="endAt != null">and t1.`check_date` &lt;= #{endAt}</if>
+          t1.`type` = 11
+          and t1.kind = 1
+          and t1.`preg_check_result` = 1
+          <if test="farmId != null">and t1.farm_id = #{farmId}</if>
+          <if test="startAt != null">and t1.`check_date` &gt;= #{startAt}</if>
+          <if test="endAt != null">and t1.`check_date` &lt;= #{endAt}</if>
     </select>
 
     <!-- 返情-->
     <select id="checkFanQCounts" parameterType="map" resultType="int">
         select count(1) from doctor_pig_events t1
         where
-        t1.`type` = 11
-        and t1.kind = 1
-        and t1.`preg_check_result` = 4
-        <if test="farmId != null">and t1.farm_id = #{farmId}</if>
-        <if test="startAt != null">and t1.`check_date` &gt;= #{startAt}</if>
-        <if test="endAt != null">and t1.`check_date` &lt;= #{endAt}</if>
+         t1.`type` = 11
+         and t1.kind = 1
+         and t1.`preg_check_result` = 4
+         <if test="farmId != null">and t1.farm_id = #{farmId}</if>
+         <if test="startAt != null">and t1.`check_date` &gt;= #{startAt}</if>
+         <if test="endAt != null">and t1.`check_date` &lt;= #{endAt}</if>
     </select>
 
     <!-- 妊娠检查阴性-->
     <select id="checkYingCounts" parameterType="map" resultType="int">
         select count(1) from doctor_pig_events t1
         where
-        t1.`type` = 11
-        and t1.kind = 1
-        and t1.`preg_check_result` = 2
-        <if test="farmId != null">and t1.farm_id = #{farmId}</if>
-        <if test="startAt != null">and t1.`check_date` &gt;= #{startAt}</if>
-        <if test="endAt != null">and t1.`check_date` &lt;= #{endAt}</if>
+         t1.`type` = 11
+         and t1.kind = 1
+         and t1.`preg_check_result` = 2
+         <if test="farmId != null">and t1.farm_id = #{farmId}</if>
+         <if test="startAt != null">and t1.`check_date` &gt;= #{startAt}</if>
+         <if test="endAt != null">and t1.`check_date` &lt;= #{endAt}</if>
     </select>
 
     <!-- 流产-->
     <select id="checkAbortionCounts" parameterType="map" resultType="int">
         select
         (
-        select count(1) from doctor_pig_events t1
-        where
-        t1.`type` = 11
-        and t1.kind = 1
-        <if test="farmId != null">and t1.farm_id = #{farmId}</if>
-        <if test="startAt != null">and t1.`check_date` &gt;= #{startAt}</if>
-        <if test="endAt != null">and t1.`check_date` &lt;= #{endAt}</if>
-        and t1.`preg_check_result` = 3
+          select count(1) from doctor_pig_events t1
+          where
+            t1.`type` = 11
+            and t1.kind = 1
+            <if test="farmId != null">and t1.farm_id = #{farmId}</if>
+            <if test="startAt != null">and t1.`check_date` &gt;= #{startAt}</if>
+            <if test="endAt != null">and t1.`check_date` &lt;= #{endAt}</if>
+            and t1.`preg_check_result` = 3
         )
         +
         (
-        select count(1) from doctor_pig_events t1
-        where
-        t1.`type` = 13
-        and t1.kind = 1
-        <if test="farmId != null">and t1.farm_id = #{farmId}</if>
-        <if test="startAt != null">and t1.`abortion_date` &gt;= #{startAt}</if>
-        <if test="endAt != null">and t1.`abortion_date` &lt;= #{endAt}</if>
+          select count(1) from doctor_pig_events t1
+          where
+            t1.`type` = 13
+            and t1.kind = 1
+            <if test="farmId != null">and t1.farm_id = #{farmId}</if>
+            <if test="startAt != null">and t1.`abortion_date` &gt;= #{startAt}</if>
+            <if test="endAt != null">and t1.`abortion_date` &lt;= #{endAt}</if>
         ) from dual
     </select>
 
@@ -476,26 +476,26 @@
     <select id="assessPregnancyRate" parameterType="map" resultType="double">
         select
         (
-        select count(1) from doctor_pig_events t1
-        where
-        t1.`type` = 11
-        and t1.kind = 1
-        and t1.`preg_check_result` = 1
-        <if test="farmId != null">and t1.farm_id = #{farmId}</if>
-        <if test="startAt != null">and t1.`check_date` &gt;= #{startAt}</if>
-        <if test="endAt != null">and t1.`check_date` &lt;= #{endAt}</if>
+          select count(1) from doctor_pig_events t1
+          where
+            t1.`type` = 11
+            and t1.kind = 1
+            and t1.`preg_check_result` = 1
+            <if test="farmId != null">and t1.farm_id = #{farmId}</if>
+            <if test="startAt != null">and t1.`check_date` &gt;= #{startAt}</if>
+            <if test="endAt != null">and t1.`check_date` &lt;= #{endAt}</if>
         )
         /
         (
-        select case count(1) when 0 then 1 else count(1) end
-        from doctor_pig_events t1
-        where
-        t1.`type` = 9
-        and t1.kind = 1
-        and t1.current_mating_count = 1
-        <if test="farmId != null">and t1.farm_id = #{farmId}</if>
-        <if test="startAt != null">and t1.`matting_date` &gt;= DATE_SUB(#{startAt}, INTERVAL 28 DAY)</if>
-        <if test="endAt != null">and t1.`matting_date` &lt;= DATE_SUB(#{endAt}, INTERVAL 28 DAY)</if>
+          select case count(1) when 0 then 1 else count(1) end
+          from doctor_pig_events t1
+          where
+            t1.`type` = 9
+            and t1.kind = 1
+            and t1.current_mating_count = 1
+            <if test="farmId != null">and t1.farm_id = #{farmId}</if>
+            <if test="startAt != null">and t1.`matting_date` &gt;= DATE_SUB(#{startAt}, INTERVAL 28 DAY)</if>
+            <if test="endAt != null">and t1.`matting_date` &lt;= DATE_SUB(#{endAt}, INTERVAL 28 DAY)</if>
         ) from dual
     </select>
 
@@ -503,27 +503,27 @@
     <select id="realPregnancyRate" parameterType="map" resultType="double">
         select
         (
-        select count(1)
-        from doctor_pig_events t1
-        where
-        t1.`type` = 9
-        and t1.kind = 1
-        and t1.current_mating_count = 1
-        and t1.`is_impregnation` = 1
-        <if test="farmId != null">and t1.farm_id = #{farmId}</if>
-        <if test="startAt != null">and t1.`matting_date` &gt;= #{startAt}</if>
-        <if test="endAt != null">and t1.`matting_date` &lt;= #{endAt}</if>
+          select count(1)
+          from doctor_pig_events t1
+          where
+            t1.`type` = 9
+            and t1.kind = 1
+            and t1.current_mating_count = 1
+            and t1.`is_impregnation` = 1
+            <if test="farmId != null">and t1.farm_id = #{farmId}</if>
+            <if test="startAt != null">and t1.`matting_date` &gt;= #{startAt}</if>
+            <if test="endAt != null">and t1.`matting_date` &lt;= #{endAt}</if>
         ) /
         (
-        select case count(1) when 0 then 1 else count(1) end
-        from doctor_pig_events t1
-        where
-        t1.`type` = 9
-        and t1.kind = 1
-        and t1.current_mating_count = 1
-        <if test="farmId != null">and t1.farm_id = #{farmId}</if>
-        <if test="startAt != null">and t1.`matting_date` &gt;= #{startAt}</if>
-        <if test="endAt != null">and t1.`matting_date` &lt;= #{endAt}</if>
+          select case count(1) when 0 then 1 else count(1) end
+          from doctor_pig_events t1
+          where
+            t1.`type` = 9
+            and t1.kind = 1
+            and t1.current_mating_count = 1
+            <if test="farmId != null">and t1.farm_id = #{farmId}</if>
+            <if test="startAt != null">and t1.`matting_date` &gt;= #{startAt}</if>
+            <if test="endAt != null">and t1.`matting_date` &lt;= #{endAt}</if>
         ) from dual
     </select>
 
@@ -531,23 +531,23 @@
     <select id="assessFarrowingRate" parameterType="map" resultType="double">
         select
         (
-        select count(1) from doctor_pig_events t1
-        where
-        t1.`type` = 15
-        and t1.kind = 1
-        <if test="farmId != null">and t1.farm_id = #{farmId}</if>
-        <if test="startAt != null">and t1.`farrowing_date` &gt;= #{startAt}</if>
-        <if test="endAt != null">and t1.`farrowing_date` &lt;= #{endAt}</if>
+          select count(1) from doctor_pig_events t1
+          where
+            t1.`type` = 15
+            and t1.kind = 1
+            <if test="farmId != null">and t1.farm_id = #{farmId}</if>
+            <if test="startAt != null">and t1.`farrowing_date` &gt;= #{startAt}</if>
+            <if test="endAt != null">and t1.`farrowing_date` &lt;= #{endAt}</if>
         ) /
         (
-        select case count(1) when 0 then 1 else count(1) end from doctor_pig_events t1
-        where
-        t1.`type` = 9
-        and t1.kind = 1
-        <if test="farmId != null">and t1.farm_id = #{farmId}</if>
-        <if test="startAt != null">and t1.`matting_date` &gt;= DATE_SUB(#{startAt}, INTERVAL 114 DAY)</if>
-        <if test="endAt != null">and t1.`matting_date` &lt;= DATE_SUB(#{endAt}, INTERVAL 114 DAY)</if>
-        and t1.current_mating_count = 1
+          select case count(1) when 0 then 1 else count(1) end from doctor_pig_events t1
+          where
+            t1.`type` = 9
+            and t1.kind = 1
+            <if test="farmId != null">and t1.farm_id = #{farmId}</if>
+            <if test="startAt != null">and t1.`matting_date` &gt;= DATE_SUB(#{startAt}, INTERVAL 114 DAY)</if>
+            <if test="endAt != null">and t1.`matting_date` &lt;= DATE_SUB(#{endAt}, INTERVAL 114 DAY)</if>
+            and t1.current_mating_count = 1
         ) from dual
     </select>
 
@@ -556,49 +556,49 @@
     <select id="realFarrowingRate" parameterType="map" resultType="double">
         select
         (
-        select count(1) from doctor_pig_events t1
-        where
-        t1.`type` = 9
-        and t1.kind = 1
-        and t1.current_mating_count = 1
-        and t1.`is_delivery` = 1
-        <if test="farmId != null">and t1.farm_id = #{farmId}</if>
-        <if test="startAt != null">and t1.`matting_date` &gt;= #{startAt}</if>
-        <if test="endAt != null">and t1.`matting_date` &lt;= #{endAt}</if>
+          select count(1) from doctor_pig_events t1
+          where
+            t1.`type` = 9
+            and t1.kind = 1
+            and t1.current_mating_count = 1
+            and t1.`is_delivery` = 1
+            <if test="farmId != null">and t1.farm_id = #{farmId}</if>
+            <if test="startAt != null">and t1.`matting_date` &gt;= #{startAt}</if>
+            <if test="endAt != null">and t1.`matting_date` &lt;= #{endAt}</if>
         ) /
         (
-        select case count(1) when 0 then 1 else count(1) end
-        from doctor_pig_events t1
-        where
-        and t1.`type` = 9
-        and t1.kind = 1
-        and t1.current_mating_count = 1
-        <if test="farmId != null">and t1.farm_id = #{farmId}</if>
-        <if test="startAt != null">and t1.`matting_date` &gt;= #{startAt}</if>
-        <if test="endAt != null">and t1.`matting_date` &lt;= #{endAt}</if>
+          select case count(1) when 0 then 1 else count(1) end
+          from doctor_pig_events t1
+          where
+            and t1.`type` = 9
+            and t1.kind = 1
+            and t1.current_mating_count = 1
+            <if test="farmId != null">and t1.farm_id = #{farmId}</if>
+            <if test="startAt != null">and t1.`matting_date` &gt;= #{startAt}</if>
+            <if test="endAt != null">and t1.`matting_date` &lt;= #{endAt}</if>
         ) from dual
     </select>
 
     <!-- NPD -->
     <select id="npd" parameterType="map" resultType="double">
         select (
-        select sum(npd) from doctor_pig_events t1
-        where
-        t1.kind = 1
-        <if test="farmId != null">and t1.farm_id = #{farmId}</if>
-        <if test="startAt != null">and t1.`event_at` &gt;= #{startAt}</if>
-        <if test="endAt != null">and t1.`event_at` &lt;= #{endAt}</if>
+          select sum(npd) from doctor_pig_events t1
+          where
+            t1.kind = 1
+            <if test="farmId != null">and t1.farm_id = #{farmId}</if>
+            <if test="startAt != null">and t1.`event_at` &gt;= #{startAt}</if>
+            <if test="endAt != null">and t1.`event_at` &lt;= #{endAt}</if>
         ) /
         (
-        select
-        case sum(sow_count)/(case count(1) when 0 then 1 else count(1) end)
-        when 0 then 1
-        else sum(sow_count)/(case count(1) when 0 then 1 else count(1) end) end
-        from doctor_daily_reports
-        where 1=1
-        <if test="farmId != null">and farm_id = #{farmId}</if>
-        <if test="startAt != null">and sum_at &gt;= #{startAt}</if>
-        <if test="endAt != null">and sum_at &lt;= #{endAt}</if>
+          select
+            case sum(sow_count)/(case count(1) when 0 then 1 else count(1) end)
+            when 0 then 1
+            else sum(sow_count)/(case count(1) when 0 then 1 else count(1) end) end
+            from doctor_daily_reports
+          where 1=1
+            <if test="farmId != null">and farm_id = #{farmId}</if>
+            <if test="startAt != null">and sum_at &gt;= #{startAt}</if>
+            <if test="endAt != null">and sum_at &lt;= #{endAt}</if>
         ) from dual
     </select>
 
