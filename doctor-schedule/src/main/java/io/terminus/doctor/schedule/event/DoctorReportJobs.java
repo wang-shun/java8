@@ -2,10 +2,12 @@ package io.terminus.doctor.schedule.event;
 
 import com.google.common.base.Throwables;
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
+import io.terminus.common.exception.ServiceException;
 import io.terminus.common.utils.Dates;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dto.report.daily.DoctorDailyReportDto;
+import io.terminus.doctor.event.model.DoctorDailyReport;
 import io.terminus.doctor.event.service.DoctorDailyReportReadService;
 import io.terminus.doctor.event.service.DoctorDailyReportWriteService;
 import io.terminus.doctor.event.service.DoctorMonthlyReportWriteService;
@@ -23,6 +25,8 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static io.terminus.common.utils.Arguments.notEmpty;
 
 /**
  * Desc: 猪场日报job
@@ -94,10 +98,15 @@ public class DoctorReportJobs {
             }
             log.info("monthly report job start, now is:{}", DateUtil.toDateTimeString(new Date()));
 
-            List<DoctorFarm> farms = RespHelper.orServEx(doctorFarmReadService.findAllFarms());
-
             //获取昨天的天初
             Date yesterday = new DateTime(Dates.startOfDay(new Date())).plusDays(-1).toDate();
+            List<DoctorDailyReport> dailyReports = RespHelper.orServEx(doctorDailyReportReadService.findDailyReportBySumAt(yesterday));
+            if (!notEmpty(dailyReports)) {
+                log.error("daily report not found, so can not monthly report!");
+                throw new ServiceException("daily.report.find.fail");
+            }
+
+            List<DoctorFarm> farms = RespHelper.orServEx(doctorFarmReadService.findAllFarms());
             doctorMonthlyReportWriteService.createMonthlyReports(farms.stream()
                     .map(DoctorFarm::getId).collect(Collectors.toList()), yesterday);
 

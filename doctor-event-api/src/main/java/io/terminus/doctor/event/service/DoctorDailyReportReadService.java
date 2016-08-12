@@ -2,6 +2,7 @@ package io.terminus.doctor.event.service;
 
 import io.terminus.common.model.Response;
 import io.terminus.doctor.event.dto.report.daily.DoctorDailyReportDto;
+import io.terminus.doctor.event.model.DoctorDailyReport;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.validation.constraints.NotNull;
@@ -38,4 +39,11 @@ public interface DoctorDailyReportReadService {
      * @return 是否成功
      */
     Response<Boolean> clearAllReportCache();
+
+    /**
+     * 根据查询查询日报
+     * @param date 日期
+     * @return 日报list
+     */
+    Response<List<DoctorDailyReport>> findDailyReportBySumAt(@NotNull(message = "date.not.null") Date date);
 }

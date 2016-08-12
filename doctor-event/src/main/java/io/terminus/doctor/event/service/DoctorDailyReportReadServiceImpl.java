@@ -110,6 +110,22 @@ public class DoctorDailyReportReadServiceImpl implements DoctorDailyReportReadSe
         }
     }
 
+    /**
+     * 根据查询查询日报
+     *
+     * @param date 日期
+     * @return 日报list
+     */
+    @Override
+    public Response<List<DoctorDailyReport>> findDailyReportBySumAt(Date date) {
+        try {
+            return Response.ok(doctorDailyReportDao.findBySumAt(Dates.startOfDay(date)));
+        } catch (Exception e) {
+            log.error("find daily report by sumat failed, date:{}, cause:{}", date, Throwables.getStackTraceAsString(e));
+            return Response.fail("daily.report.find.fail");
+        }
+    }
+
     //根据farmId和sumAt从数据库查询, 并转换成日报统计
     private DoctorDailyReportDto getDailyReportWithSql(Long farmId, Date sumAt) {
         DoctorDailyReport report = doctorDailyReportDao.findByFarmIdAndSumAt(farmId, sumAt);
