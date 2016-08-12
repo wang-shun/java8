@@ -50,7 +50,8 @@ public class DoctorReports {
     @RequestMapping(value = "/monthly", method = RequestMethod.GET)
     public DoctorMonthlyReportDto findMonthlyReportByFarmIdAndSumAt(@RequestParam("farmId") Long farmId,
                                                                     @RequestParam("date") String date) {
-        return RespHelper.or500(doctorMonthlyReportReadService.findMonthlyReportByFarmIdAndSumAt(farmId, date));
+        return new DoctorMonthlyReportDto();
+        //return RespHelper.or500(doctorMonthlyReportReadService.findMonthlyReportByFarmIdAndSumAt(farmId, date));
     }
 
     /**
