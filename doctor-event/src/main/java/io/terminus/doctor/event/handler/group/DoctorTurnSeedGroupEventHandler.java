@@ -38,16 +38,19 @@ public class DoctorTurnSeedGroupEventHandler extends DoctorAbstractGroupEventHan
 
     private final DoctorGroupEventDao doctorGroupEventDao;
     private final DoctorBarnReadService doctorBarnReadService;
+    private final DoctorCommonGroupEventHandler doctorCommonGroupEventHandler;
 
     @Autowired
     public DoctorTurnSeedGroupEventHandler(DoctorGroupSnapshotDao doctorGroupSnapshotDao,
                                            DoctorGroupEventDao doctorGroupEventDao,
                                            DoctorGroupTrackDao doctorGroupTrackDao,
                                            DoctorBarnReadService doctorBarnReadService,
-                                           CoreEventDispatcher coreEventDispatcher) {
+                                           CoreEventDispatcher coreEventDispatcher,
+                                           DoctorCommonGroupEventHandler doctorCommonGroupEventHandler) {
         super(doctorGroupSnapshotDao, doctorGroupTrackDao, coreEventDispatcher, doctorGroupEventDao, doctorBarnReadService);
         this.doctorGroupEventDao = doctorGroupEventDao;
         this.doctorBarnReadService = doctorBarnReadService;
+        this.doctorCommonGroupEventHandler = doctorCommonGroupEventHandler;
     }
     
     @Override
@@ -58,6 +61,8 @@ public class DoctorTurnSeedGroupEventHandler extends DoctorAbstractGroupEventHan
         DoctorBarn barn = orServEx(doctorBarnReadService.findBarnById(turnSeed.getToBarnId()));
         // 检查数据
         PigType groupType = this.checkTurnSeedData(group.getPigType(), barn.getPigType());
+        checkQuantity(groupTrack.getQuantity(), 1); // 确保 原数量 >= 1
+        this.checkSex(groupTrack, groupType);
 
         //1. 转换转种猪事件
         DoctorTurnSeedGroupEvent turnSeedEvent = BeanMapper.map(turnSeed, DoctorTurnSeedGroupEvent.class);
@@ -68,10 +73,20 @@ public class DoctorTurnSeedGroupEventHandler extends DoctorAbstractGroupEventHan
         doctorGroupEventDao.create(event);
 
         //3.更新猪群跟踪
+        groupTrack.setQuantity(groupTrack.getQuantity() - 1);
+        if(turnSeed.getWeight() != null && turnSeed.getWeight() > 0 && groupTrack.getWeight() != null && groupTrack.getWeight() >= turnSeed.getWeight()){
+            groupTrack.setWeight(groupTrack.getWeight() - turnSeed.getWeight());
+        }
+        checkQuantityEqual(groupTrack.getQuantity(), groupTrack.getBoarQty(), groupTrack.getSowQty());
         updateGroupTrack(groupTrack, event);
 
         //4.创建镜像
         createGroupSnapShot(oldShot, new DoctorGroupSnapShotInfo(group, event, groupTrack), GroupEventType.TURN_SEED);
+
+        //5.判断猪群剩余数量, 如果剩余0, 则触发关闭猪群事件
+        if (groupTrack.getQuantity() == 0) {
+            doctorCommonGroupEventHandler.autoGroupEventClose(group, groupTrack, turnSeed);
+        }
 
         //发布统计事件
         publistGroupAndBarn(group.getOrgId(), group.getFarmId(), group.getId(), group.getCurrentBarnId(), event.getId());
@@ -121,6 +136,19 @@ public class DoctorTurnSeedGroupEventHandler extends DoctorAbstractGroupEventHan
                 throw new ServiceException("group.can.not.turn.seed");
         }
         return type;
+    }
+
+    private void checkSex(DoctorGroupTrack groupTrack, PigType groupType){
+        switch (groupType) {
+            case RESERVE_BOAR:
+                checkQuantity(groupTrack.getBoarQty(), 1); // 确保 原公猪数量 >= 1
+                groupTrack.setBoarQty(groupTrack.getBoarQty() - 1);
+                break;
+            case RESERVE_SOW:
+                checkQuantity(groupTrack.getSowQty(), 1); // 确保 原母猪数量 >= 1
+                groupTrack.setSowQty(groupTrack.getSowQty() - 1);
+                break;
+        }
     }
 
 }

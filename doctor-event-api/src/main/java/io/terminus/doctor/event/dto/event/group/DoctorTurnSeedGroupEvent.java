@@ -83,5 +83,14 @@ public class DoctorTurnSeedGroupEvent extends BaseGroupEvent implements Serializ
             }
             return null;
         }
+
+        public static Sex from(int value) {
+            for (Sex sex : Sex.values()) {
+                if (Objects.equal(sex.value, value)) {
+                    return sex;
+                }
+            }
+            return null;
+        }
     }
 }
