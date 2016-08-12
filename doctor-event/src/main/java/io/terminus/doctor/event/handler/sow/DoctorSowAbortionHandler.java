@@ -1,5 +1,6 @@
 package io.terminus.doctor.event.handler.sow;
 
+import io.terminus.common.utils.MapBuilder;
 import io.terminus.doctor.event.dao.DoctorPigDao;
 import io.terminus.doctor.event.dao.DoctorPigEventDao;
 import io.terminus.doctor.event.dao.DoctorPigSnapshotDao;
@@ -59,6 +60,7 @@ public class DoctorSowAbortionHandler extends DoctorAbstractEventFlowHandler {
         doctorPigTrack.setStatus(PigStatus.Abortion.getKey());
         doctorPigTrack.addAllExtraMap(extra);
         doctorPigTrack.addPigEvent(basic.getPigType(), (Long) context.get("doctorPigEventId"));
+        doctorPigTrack.addAllExtraMap(MapBuilder.<String, Object>of().put("liuchanToMateLiuchan", true).map());
         return doctorPigTrack;
     }
 }

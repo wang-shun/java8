@@ -76,6 +76,8 @@ public class DoctorSowWeanHandler extends DoctorAbstractEventFlowHandler {
         // update info
         extra.put("partWeanPigletsCount", toWeanCount);
         extra.put("partWeanAvgWeight", weanAvgWeight);
+
+        extra.put("weanToMate", true);
         doctorPigTrack.addAllExtraMap(extra);
 
         if (Objects.equals(toWeanCount, healthCount)) {

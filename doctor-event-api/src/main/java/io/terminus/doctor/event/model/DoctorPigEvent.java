@@ -239,6 +239,11 @@ public class DoctorPigEvent implements Serializable {
      */
     private Date partweanDate;
 
+    /**
+     * 配种类型,这里的配种类型是为了统计增加 1: 后备到配种 2.流产到配种(妊娠检查) 3.流产到配种(流产事件) 4.断奶到配种 5.阴性到配种 6.返情到配种
+     */
+    private Integer doctorMateType;
+
     private String outId;
 
     @Setter(AccessLevel.NONE)
