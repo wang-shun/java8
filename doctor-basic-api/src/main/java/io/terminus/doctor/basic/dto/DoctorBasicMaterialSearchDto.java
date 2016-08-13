@@ -24,4 +24,12 @@ public class DoctorBasicMaterialSearchDto extends DoctorBasicMaterial implements
     private Integer pageNo;
 
     private Integer size;
+
+    public DoctorBasicMaterialSearchDto(Integer pageNo, Integer size, String srm, String name, Integer type) {
+        this.pageNo = pageNo;
+        this.size = size;
+        setSrm(srm);
+        setName(name);
+        setType(type);
+    }
 }
