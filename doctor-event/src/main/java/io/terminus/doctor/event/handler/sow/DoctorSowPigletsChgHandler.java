@@ -1,6 +1,8 @@
 package io.terminus.doctor.event.handler.sow;
 
+import com.google.common.base.MoreObjects;
 import io.terminus.common.utils.BeanMapper;
+import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dao.DoctorPigDao;
 import io.terminus.doctor.event.dao.DoctorPigEventDao;
@@ -10,6 +12,7 @@ import io.terminus.doctor.event.dao.DoctorRevertLogDao;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
 import io.terminus.doctor.event.dto.event.group.input.DoctorChangeGroupInput;
 import io.terminus.doctor.event.dto.event.sow.DoctorPigletsChgDto;
+import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.handler.DoctorAbstractEventFlowHandler;
 import io.terminus.doctor.event.model.DoctorPigTrack;
@@ -22,7 +25,6 @@ import org.springframework.stereotype.Component;
 import java.util.Map;
 import java.util.Objects;
 
-import static com.google.common.base.Preconditions.checkElementIndex;
 import static com.google.common.base.Preconditions.checkState;
 
 /**
@@ -56,16 +58,29 @@ public class DoctorSowPigletsChgHandler extends DoctorAbstractEventFlowHandler{
         // 校验转出的数量信息
         Map<String,Object> extraMap = doctorPigTrack.getExtraMap();
         Integer healthCount = (Integer) extraMap.get("farrowingLiveCount");
-        Integer toWeanCount = (Integer)extra.get("partWeanPigletsCount");
-        Double weanAvgWeight = (Double)extra.get("partWeanAvgWeight");
 
-        // 历史数据修改信息内容
+        //变动信息
+        Integer toWeanCount = (Integer)extra.get("pigletsCount");       //变动数量
+        checkState(toWeanCount != null, "quantity.not.null");
+
+        Integer oldWeanCount = 0;
+        //如果之前存在部分断奶事件, 取出
         if(extraMap.containsKey("partWeanPigletsCount")){
-            // 已经包含断奶信息
-            toWeanCount += (Integer) extraMap.get("partWeanPigletsCount");
-            weanAvgWeight += (Double) extraMap.get("partWeanAvgWeight");
-            weanAvgWeight = weanAvgWeight/2;
+            oldWeanCount = (Integer) extraMap.get("partWeanPigletsCount");
         }
+
+        //取出均重, 如果存在, 重新计算
+        Double weanAvgWeight = (Double)extra.get("pigletsWeight");      //变动重量
+        checkState(weanAvgWeight != null, "weight.not.null");
+        if (extraMap.containsKey("partWeanAvgWeight")) {
+            Double oldWeanAvgWeight = MoreObjects.firstNonNull((Double) extraMap.get("partWeanAvgWeight"), 0D);
+
+            //重新计算均重
+            weanAvgWeight = ((weanAvgWeight * toWeanCount) + (oldWeanAvgWeight * oldWeanCount)) / (toWeanCount + oldWeanCount);
+        }
+
+        //断奶数量需要累加
+        toWeanCount += oldWeanCount;
         checkState(toWeanCount<= healthCount, "wean.countInput.error");
 
         // update info
@@ -82,31 +97,35 @@ public class DoctorSowPigletsChgHandler extends DoctorAbstractEventFlowHandler{
 
         // 调用对应的猪猪群事件,对应的操作方式
         checkState(extraMap.containsKey("farrowingPigletGroupId"), "pigletsChg.groupId.notFound");
-        changePigletsChangeInfo(Long.valueOf(extraMap.get("farrowingPigletGroupId").toString()), extra);
+        changePigletsChangeInfo(Long.valueOf(extraMap.get("farrowingPigletGroupId").toString()), extra, basic);
 
         return doctorPigTrack;
     }
 
 
-    private void changePigletsChangeInfo(Long groupId,  Map<String, Object> extra){
+    private void changePigletsChangeInfo(Long groupId,  Map<String, Object> extra, DoctorBasicInputInfoDto basic){
         doctorGroupWriteService.groupEventChange(RespHelper.orServEx(doctorGroupReadService.findGroupDetailByGroupId(groupId)),
-                buildInputInfo(extra));
+                buildInputInfo(extra, basic));
     }
 
-    private DoctorChangeGroupInput buildInputInfo(Map<String,Object> mapInfo){
-        DoctorPigletsChgDto dto = new DoctorPigletsChgDto();
-        BeanMapper.copy(mapInfo, dto);
-
+    private DoctorChangeGroupInput buildInputInfo(Map<String,Object> mapInfo, DoctorBasicInputInfoDto basic){
+        DoctorPigletsChgDto dto = BeanMapper.map(mapInfo, DoctorPigletsChgDto.class);
         DoctorChangeGroupInput doctorChangeGroupInput = new DoctorChangeGroupInput();
-        doctorChangeGroupInput.setChangeTypeId(dto.getPigletsChangeType());
-        doctorChangeGroupInput.setChangeReasonId(dto.getPigletsChangeReason());
-        doctorChangeGroupInput.setQuantity(dto.getPigletsCount());
+        doctorChangeGroupInput.setEventAt(DateUtil.toDateString(dto.getPigletsChangeDate()));
+        doctorChangeGroupInput.setChangeTypeId(dto.getPigletsChangeType());             //变动类型id
+        doctorChangeGroupInput.setChangeTypeName(dto.getPigletsChangeTypeName());       //变动类型名称
+        doctorChangeGroupInput.setChangeReasonId(dto.getPigletsChangeReason());         //变动原因id
+        doctorChangeGroupInput.setChangeReasonName(dto.getPigletsChangeReasonName());   //变动原因名称
+        doctorChangeGroupInput.setQuantity(dto.getPigletsCount());                      //变动仔猪数量
         doctorChangeGroupInput.setSowQty(dto.getSowPigletsCount());
         doctorChangeGroupInput.setBoarQty(dto.getBoarPigletsCount());
         doctorChangeGroupInput.setWeight(dto.getPigletsWeight());
-        double price = dto.getPigletsPrice() * 100;
-        doctorChangeGroupInput.setPrice((long)price);
+        doctorChangeGroupInput.setPrice(dto.getPigletsPrice());
         doctorChangeGroupInput.setCustomerId(dto.getPigletsCustomerId());
+        doctorChangeGroupInput.setRemark(dto.getPigletsMark());
+        doctorChangeGroupInput.setIsAuto(IsOrNot.YES.getValue());           //自动生成事件标识
+        doctorChangeGroupInput.setCreatorId(basic.getStaffId());
+        doctorChangeGroupInput.setCreatorName(basic.getStaffName());
         return doctorChangeGroupInput;
     }
 }
