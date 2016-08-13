@@ -1,6 +1,7 @@
 package io.terminus.doctor.basic.dto;
 
 import io.terminus.doctor.basic.model.DoctorBasicMaterial;
+import io.terminus.doctor.common.utils.Params;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -28,8 +29,8 @@ public class DoctorBasicMaterialSearchDto extends DoctorBasicMaterial implements
     public DoctorBasicMaterialSearchDto(Integer pageNo, Integer size, String srm, String name, Integer type) {
         this.pageNo = pageNo;
         this.size = size;
-        setSrm(srm);
-        setName(name);
+        setSrm(Params.trimToNull(srm));
+        setName(Params.trimToNull(name));
         setType(type);
     }
 }
