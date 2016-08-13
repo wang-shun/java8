@@ -1,5 +1,7 @@
 package io.terminus.doctor.event.handler.group;
 
+import com.google.common.base.Throwables;
+import com.google.common.collect.Maps;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.doctor.common.enums.PigType;
@@ -19,6 +21,8 @@ import io.terminus.doctor.event.enums.BoarEntryType;
 import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PigSource;
+import io.terminus.doctor.event.event.TurnSeedEvent;
+import io.terminus.doctor.event.manager.DoctorPigEventManager;
 import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
@@ -33,7 +37,9 @@ import org.springframework.stereotype.Component;
 import java.util.Map;
 import java.util.Objects;
 
+import static com.google.common.base.Preconditions.checkState;
 import static io.terminus.doctor.common.utils.RespHelper.orServEx;
+import static java.util.Objects.isNull;
 
 /**
  * Desc:
@@ -49,6 +55,7 @@ public class DoctorTurnSeedGroupEventHandler extends DoctorAbstractGroupEventHan
     private final DoctorBarnReadService doctorBarnReadService;
     private final DoctorCommonGroupEventHandler doctorCommonGroupEventHandler;
     private final DoctorPigEventWriteService doctorPigEventWriteService;
+    private final DoctorPigEventManager doctorPigEventManager;
 
     @Autowired
     public DoctorTurnSeedGroupEventHandler(DoctorGroupSnapshotDao doctorGroupSnapshotDao,
@@ -57,18 +64,21 @@ public class DoctorTurnSeedGroupEventHandler extends DoctorAbstractGroupEventHan
                                            DoctorBarnReadService doctorBarnReadService,
                                            CoreEventDispatcher coreEventDispatcher,
                                            DoctorCommonGroupEventHandler doctorCommonGroupEventHandler,
-                                           DoctorPigEventWriteService doctorPigEventWriteService) {
+                                           DoctorPigEventWriteService doctorPigEventWriteService,
+                                           DoctorPigEventManager doctorPigEventManager) {
         super(doctorGroupSnapshotDao, doctorGroupTrackDao, coreEventDispatcher, doctorGroupEventDao, doctorBarnReadService);
         this.doctorGroupEventDao = doctorGroupEventDao;
         this.doctorBarnReadService = doctorBarnReadService;
         this.doctorCommonGroupEventHandler = doctorCommonGroupEventHandler;
         this.doctorPigEventWriteService = doctorPigEventWriteService;
+        this.doctorPigEventManager = doctorPigEventManager;
     }
     
     @Override
     protected <I extends BaseGroupInput> void handleEvent(DoctorGroup group, DoctorGroupTrack groupTrack, I input) {
         DoctorGroupSnapShotInfo oldShot = getOldSnapShotInfo(group, groupTrack);
         DoctorTurnSeedGroupInput turnSeed = (DoctorTurnSeedGroupInput) input;
+        TurnSeedEvent eventDataToPublish = new TurnSeedEvent();
 
         DoctorBarn barn = orServEx(doctorBarnReadService.findBarnById(turnSeed.getToBarnId()));
         // 检查数据
@@ -101,7 +111,7 @@ public class DoctorTurnSeedGroupEventHandler extends DoctorAbstractGroupEventHan
 
         //5.判断猪群剩余数量, 如果剩余0, 则触发关闭猪群事件
         if (groupTrack.getQuantity() == 0) {
-            doctorCommonGroupEventHandler.autoGroupEventClose(group, groupTrack, turnSeed);
+   //         doctorCommonGroupEventHandler.autoGroupEventClose(group, groupTrack, turnSeed);
         }
 
         //触发其他事件
@@ -109,7 +119,7 @@ public class DoctorTurnSeedGroupEventHandler extends DoctorAbstractGroupEventHan
             case RESERVE_SOW :
                 if(Objects.equals(barn.getPigType(), PigType.MATE_SOW.getValue())){
                     // 进场事件
-                    this.callEntryHandler(groupType, turnSeed, group, barn, event.getId());
+                    this.callEntryHandler(eventDataToPublish, groupType, turnSeed, group, barn, event.getId());
                 }
                 if(Objects.equals(barn.getPigType(), PigType.PREG_SOW.getValue())){
                     //TODO 触发配种事件
@@ -117,7 +127,7 @@ public class DoctorTurnSeedGroupEventHandler extends DoctorAbstractGroupEventHan
                 break;
             case RESERVE_BOAR :
                 // 进场事件
-                this.callEntryHandler(groupType, turnSeed, group, barn, event.getId());
+                this.callEntryHandler(eventDataToPublish, groupType, turnSeed, group, barn, event.getId());
                 break;
         }
 Integer.valueOf("ee");
@@ -172,7 +182,7 @@ Integer.valueOf("ee");
         }
     }
 
-    private void callEntryHandler(PigType groupType, DoctorTurnSeedGroupInput turnSeedInput, DoctorGroup group, DoctorBarn barn, Long relEventId){
+    private void callEntryHandler(TurnSeedEvent eventDataToPublish, PigType groupType, DoctorTurnSeedGroupInput turnSeedInput, DoctorGroup group, DoctorBarn barn, Long relEventId){
         DoctorBasicInputInfoDto basicDto = new DoctorBasicInputInfoDto();
         DoctorFarmEntryDto farmEntryDto = new DoctorFarmEntryDto();
 
@@ -216,7 +226,26 @@ Integer.valueOf("ee");
         farmEntryDto.setMotherCode(turnSeedInput.getMotherEarCode());
         farmEntryDto.setEarCode(turnSeedInput.getEarCode());
 
-        orServEx(doctorPigEventWriteService.pigEntryEvent(basicDto, farmEntryDto));
+        // validate 左右乳头数量大于0
+        if(Objects.equals(farmEntryDto.getPigType(), DoctorPig.PIG_TYPE.SOW.getKey())){
+            checkState(isNull(farmEntryDto.getLeft()) || farmEntryDto.getLeft()>=0, "input.sowLeft.error");
+            checkState(isNull(farmEntryDto.getRight()) || farmEntryDto.getRight()>=0, "input.sowRight.error");
+        }
+
+        Map<String,Object> extra = Maps.newHashMap();
+        BeanMapper.copy(farmEntryDto, extra);
+        try {
+            eventDataToPublish.setCreateCasualPigEventResult(doctorPigEventManager.createCasualPigEvent(basicDto, extra));
+            eventDataToPublish.setBasicInputInfoDto(basicDto);
+
+        }catch(IllegalStateException e){
+            log.error("pig entry event illegal state fail, basicInfo:{}, doctorFarmEntryDto:{}, cause:{}", basicDto, farmEntryDto, Throwables.getStackTraceAsString(e));
+            throw new ServiceException(e.getMessage());
+        }catch (Exception e){
+            log.error("pig entry event create fail,basicInfo:{}, doctorFarmEntryDto:{}, cause:{}", basicDto, farmEntryDto, Throwables.getStackTraceAsString(e));
+            throw new ServiceException("create.entryEvent.fail");
+        }
+
     }
 
 }

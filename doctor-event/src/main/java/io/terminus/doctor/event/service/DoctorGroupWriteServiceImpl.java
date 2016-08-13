@@ -225,8 +225,6 @@ public class DoctorGroupWriteServiceImpl implements DoctorGroupWriteService {
     public Response<Boolean> groupEventTurnSeed(DoctorGroupDetail groupDetail, @Valid DoctorTurnSeedGroupInput turnSeed) {
         try {
             doctorGroupEventManager.handleEvent(groupDetail, turnSeed, DoctorTurnSeedGroupEventHandler.class);
-
-            //TODO
             return Response.ok(Boolean.TRUE);
         } catch (ServiceException e) {
             log.error("groupEventTurnSeed failed, groupDetail:{}, turnSeed:{}, cause:{}", groupDetail, turnSeed, Throwables.getStackTraceAsString(e));
