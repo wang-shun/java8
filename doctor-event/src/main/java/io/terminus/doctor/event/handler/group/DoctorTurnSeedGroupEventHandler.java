@@ -1,6 +1,5 @@
 package io.terminus.doctor.event.handler.group;
 
-import com.google.common.collect.Maps;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.doctor.common.enums.PigType;
@@ -20,13 +19,13 @@ import io.terminus.doctor.event.enums.BoarEntryType;
 import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PigSource;
-import io.terminus.doctor.event.handler.DoctorEntryHandler;
 import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.service.DoctorBarnReadService;
+import io.terminus.doctor.event.service.DoctorPigEventWriteService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -49,7 +48,7 @@ public class DoctorTurnSeedGroupEventHandler extends DoctorAbstractGroupEventHan
     private final DoctorGroupEventDao doctorGroupEventDao;
     private final DoctorBarnReadService doctorBarnReadService;
     private final DoctorCommonGroupEventHandler doctorCommonGroupEventHandler;
-    private final DoctorEntryHandler doctorEntryHandler;
+    private final DoctorPigEventWriteService doctorPigEventWriteService;
 
     @Autowired
     public DoctorTurnSeedGroupEventHandler(DoctorGroupSnapshotDao doctorGroupSnapshotDao,
@@ -58,12 +57,12 @@ public class DoctorTurnSeedGroupEventHandler extends DoctorAbstractGroupEventHan
                                            DoctorBarnReadService doctorBarnReadService,
                                            CoreEventDispatcher coreEventDispatcher,
                                            DoctorCommonGroupEventHandler doctorCommonGroupEventHandler,
-                                           DoctorEntryHandler doctorEntryHandler) {
+                                           DoctorPigEventWriteService doctorPigEventWriteService) {
         super(doctorGroupSnapshotDao, doctorGroupTrackDao, coreEventDispatcher, doctorGroupEventDao, doctorBarnReadService);
         this.doctorGroupEventDao = doctorGroupEventDao;
         this.doctorBarnReadService = doctorBarnReadService;
         this.doctorCommonGroupEventHandler = doctorCommonGroupEventHandler;
-        this.doctorEntryHandler = doctorEntryHandler;
+        this.doctorPigEventWriteService = doctorPigEventWriteService;
     }
     
     @Override
@@ -140,7 +139,10 @@ public class DoctorTurnSeedGroupEventHandler extends DoctorAbstractGroupEventHan
         switch (type) {
             // 当猪的来源是后备群中的种母猪 (PigType.RESERVE_SOW) 时, 转入猪舍只允许为 配种舍(PigType.MATE_SOW) 或 妊娠舍(PigType.PREG_SOW)
             case RESERVE_SOW :
-                if(!Objects.equals(barnType, PigType.MATE_SOW.getValue()) && !Objects.equals(barnType, PigType.PREG_SOW.getValue())){
+//                if(!Objects.equals(barnType, PigType.MATE_SOW.getValue()) && !Objects.equals(barnType, PigType.PREG_SOW.getValue())){
+//                    throw new ServiceException("barn.can.not.turn.seed");
+//                }
+                if(!Objects.equals(barnType, PigType.MATE_SOW.getValue())){
                     throw new ServiceException("barn.can.not.turn.seed");
                 }
                 break;
@@ -182,7 +184,7 @@ public class DoctorTurnSeedGroupEventHandler extends DoctorAbstractGroupEventHan
                 break;
             case RESERVE_SOW:
                 basicDto.setPigType(DoctorPig.PIG_TYPE.SOW.getKey());
-                farmEntryDto.setParity(0);
+                farmEntryDto.setParity(1);
                 break;
         }
 
@@ -214,9 +216,7 @@ public class DoctorTurnSeedGroupEventHandler extends DoctorAbstractGroupEventHan
         farmEntryDto.setMotherCode(turnSeedInput.getMotherEarCode());
         farmEntryDto.setEarCode(turnSeedInput.getEarCode());
 
-        Map<String,Object> extra = Maps.newHashMap();
-        BeanMapper.copy(farmEntryDto, extra);
-        doctorEntryHandler.handler(basicDto, extra, Maps.newHashMap());
+        doctorPigEventWriteService.pigEntryEvent(basicDto, farmEntryDto);
     }
 
 }
