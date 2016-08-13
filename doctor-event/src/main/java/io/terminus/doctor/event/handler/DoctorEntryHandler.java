@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
+import io.terminus.common.exception.ServiceException;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.event.cache.DoctorPigInfoCache;
@@ -120,6 +121,8 @@ public class DoctorEntryHandler implements DoctorEventCreateHandler {
                     ));
 
             doctorPigInfoCache.addPigCodeToFarm(doctorPig.getOrgId(), doctorPig.getPigCode());
+        }catch(RuntimeException e){
+            throw new ServiceException(e.getMessage());
         }catch (Exception e){
             log.error("doctor abstract entry flow handle fail, cause:{}", Throwables.getStackTraceAsString(e));
             throw new IllegalStateException("entry.handler.exception");
