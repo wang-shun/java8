@@ -456,19 +456,38 @@ public class DoctorMoveDataService {
                 sowEvent.setExtra(JSON_MAPPER.toJson(getSowEntryExtra(event, basicMap, barnMap)));
                 break;
             case MATING:        //配种
-                sowEvent.setExtra(JSON_MAPPER.toJson(getSowMatingExtra(event, boarMap)));
+                DoctorMatingDto mating = getSowMatingExtra(event, boarMap);
+                sowEvent.setMattingDate(event.getEventAt());                //配种时间
+                sowEvent.setExtra(JSON_MAPPER.toJson(mating));
                 break;
             case PREG_CHECK:    //妊娠检查
-                sowEvent.setExtra(JSON_MAPPER.toJson(getSowPregCheckExtra(event)));
+                DoctorPregChkResultDto checkResult = getSowPregCheckExtra(event);
+                sowEvent.setPregCheckResult(checkResult.getCheckResult());  //妊娠检查结果
+                sowEvent.setCheckDate(event.getEventAt());                  //检查时间
+                sowEvent.setExtra(JSON_MAPPER.toJson(checkResult));
                 break;
             case ABORTION:      //流产, 只记录事件即可, 旧猪场软件并没有流产原因
+                sowEvent.setAbortionDate(event.getEventAt());             //流产事件
                 sowEvent.setExtra(JSON_MAPPER.toJson(DoctorAbortionDto.builder().abortionDate(event.getEventAt()).build()));
                 break;
             case FARROWING:     //分娩
-                sowEvent.setExtra(JSON_MAPPER.toJson(getSowFarrowExtra(event, barnMap)));
+                DoctorFarrowingDto farrowing = getSowFarrowExtra(event, barnMap);
+                sowEvent.setLiveCount(farrowing.getFarrowingLiveCount()); //活仔数
+                sowEvent.setHealthCount(farrowing.getHealthCount());      //健仔数
+                sowEvent.setWeakCount(farrowing.getWeakCount());          //弱仔数
+                sowEvent.setMnyCount(farrowing.getMnyCount());            //木乃伊数
+                sowEvent.setJxCount(farrowing.getJxCount());              //畸形数
+                sowEvent.setDeadCount(farrowing.getDeadCount());          //死胎数
+                sowEvent.setBlackCount(farrowing.getBlackCount());        //黑胎数
+                sowEvent.setFarrowingDate(event.getEventAt());            //分娩时间
+                sowEvent.setExtra(JSON_MAPPER.toJson(farrowing));
                 break;
             case WEAN:          //断奶
-                sowEvent.setExtra(JSON_MAPPER.toJson(getSowWeanExtra(event)));
+                DoctorPartWeanDto wean = getSowWeanExtra(event);
+                sowEvent.setWeanCount(wean.getPartWeanPigletsCount());  //断奶数
+                sowEvent.setWeanAvgWeight(wean.getPartWeanAvgWeight()); //断奶均重
+                sowEvent.setPartweanDate(event.getEventAt());           //断奶时间
+                sowEvent.setExtra(JSON_MAPPER.toJson(wean));
                 break;
             case FOSTERS:       //拼窝
                 sowEvent.setExtra(JSON_MAPPER.toJson(getSowFosterExtra(event, basicMap)));
