@@ -1153,7 +1153,7 @@ public class DoctorMoveDataService {
             case MOVE_IN:
                 DoctorMoveInGroupEvent moveIn = getMoveInEvent(gainEvent, basicMap, groupMap, group);
                 event.setExtraMap(moveIn);
-                event.setTransGroupType(getTransType(event.getPigType(), moveIn.getFromBarnType()).getValue());
+                event.setTransGroupType(getTransType(event.getPigType(), moveIn.getFromBarnType()).getValue());  //区分内转还是外转
                 break;
             case CHANGE:
                 DoctorChangeGroupEvent changeEvent = getChangeEvent(gainEvent, basicMap, changeReasonMap, customerMap);
@@ -1200,10 +1200,9 @@ public class DoctorMoveDataService {
                 anti.setQuantity(gainEvent.getQuantity());
                 event.setExtraMap(anti);
                 break;
-            case TRANS_FARM:
+            case TRANS_FARM: //转场不区分内转外转, 相当于空降
                 DoctorTransFarmGroupEvent transFarmEvent = getTranFarmEvent(gainEvent, basicMap, barnMap, groupMap, group);
                 event.setExtraMap(transFarmEvent);
-                event.setTransGroupType(getTransType(event.getPigType(), transFarmEvent.getToBarnType()).getValue());  //区分内转还是外转
                 break;
             case CLOSE:
                 DoctorCloseGroupEvent close = new DoctorCloseGroupEvent();
