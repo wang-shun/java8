@@ -31,8 +31,8 @@ public class View_EventListBoar implements Serializable {
     private String eventDesc;
     private String remark;          // 采精的remark和event的remark
     private String barnOutId;       // 事件发生猪舍outId
-    private Double price;
-    private Double amount;
+    private Long price;
+    private Long amount;
     private Double dilutionRatio;   // 稀释倍数
     private Double dilutionWeight;  // 稀释后重量
     private Double semenDensity;    // 精液密度
