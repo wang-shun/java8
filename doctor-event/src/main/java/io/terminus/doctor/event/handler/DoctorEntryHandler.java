@@ -94,7 +94,6 @@ public class DoctorEntryHandler implements DoctorEventCreateHandler {
 
             // pig create
             checkState(doctorPigInfoCache.judgePigCodeNotContain(doctorPig.getOrgId(), doctorPig.getPigCode()), "validate.pigCode.fail");
-            doctorPigInfoCache.addPigCodeToFarm(doctorPig.getOrgId(), doctorPig.getPigCode());
             doctorPigDao.create(doctorPig);
 
             // event create
@@ -119,6 +118,8 @@ public class DoctorEntryHandler implements DoctorEventCreateHandler {
                             ImmutableMap.of("doctorPigId", doctorPig.getId(), "doctorEventId", doctorPigEvent.getId(),
                                     "doctorPigTrackId", doctorPigTrack.getId(), "doctorSnapshotId", doctorPigSnapshot.getId())
                     ));
+
+            doctorPigInfoCache.addPigCodeToFarm(doctorPig.getOrgId(), doctorPig.getPigCode());
         }catch (Exception e){
             log.error("doctor abstract entry flow handle fail, cause:{}", Throwables.getStackTraceAsString(e));
             throw new IllegalStateException("entry.handler.exception");

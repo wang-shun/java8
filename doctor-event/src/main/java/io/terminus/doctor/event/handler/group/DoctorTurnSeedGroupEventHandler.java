@@ -113,7 +113,7 @@ public class DoctorTurnSeedGroupEventHandler extends DoctorAbstractGroupEventHan
                     this.callEntryHandler(groupType, turnSeed, group, barn, event.getId());
                 }
                 if(Objects.equals(barn.getPigType(), PigType.PREG_SOW.getValue())){
-                    //TODO 触发去妊娠舍事件
+                    //TODO 触发配种事件
                 }
                 break;
             case RESERVE_BOAR :
