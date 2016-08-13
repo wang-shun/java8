@@ -120,7 +120,7 @@ public class DoctorTurnSeedGroupEventHandler extends DoctorAbstractGroupEventHan
                 this.callEntryHandler(groupType, turnSeed, group, barn, event.getId());
                 break;
         }
-
+Integer.valueOf("ee");
         //发布统计事件
         publistGroupAndBarn(group.getOrgId(), group.getFarmId(), group.getId(), group.getCurrentBarnId(), event.getId());
     }
@@ -216,7 +216,7 @@ public class DoctorTurnSeedGroupEventHandler extends DoctorAbstractGroupEventHan
         farmEntryDto.setMotherCode(turnSeedInput.getMotherEarCode());
         farmEntryDto.setEarCode(turnSeedInput.getEarCode());
 
-        doctorPigEventWriteService.pigEntryEvent(basicDto, farmEntryDto);
+        orServEx(doctorPigEventWriteService.pigEntryEvent(basicDto, farmEntryDto));
     }
 
 }
