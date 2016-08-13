@@ -91,12 +91,6 @@ public class DoctorBasicMaterials {
                                                                           @RequestParam(required = false) String srm,
                                                                           @RequestParam(required = false) String name,
                                                                           @RequestParam(required = false) Integer type) {
-        if(pageNo == null){
-            pageNo = 1;
-        }
-        if(size == null){
-            size = 20;
-        }
         return RespHelper.or500(doctorBasicMaterialReadService.pagingBasicMaterialByTypeFilterBySrm(new DoctorBasicMaterialSearchDto(pageNo, size, srm, name, type)));
     }
 }

@@ -5,6 +5,8 @@ import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.model.PageInfo;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
+import io.terminus.common.utils.BeanMapper;
+import io.terminus.common.utils.Params;
 import io.terminus.common.utils.Splitters;
 import io.terminus.doctor.basic.dao.DoctorBasicMaterialDao;
 import io.terminus.doctor.basic.dto.DoctorBasicMaterialSearchDto;
@@ -50,7 +52,7 @@ public class DoctorBasicMaterialReadServiceImpl implements DoctorBasicMaterialRe
     public Response<Paging<DoctorBasicMaterial>> pagingBasicMaterialByTypeFilterBySrm(DoctorBasicMaterialSearchDto basicMaterial) {
         try {
             PageInfo page = PageInfo.of(basicMaterial.getPageNo(), basicMaterial.getSize());
-            return Response.ok(doctorBasicMaterialDao.paging(page.getOffset(), page.getLimit(), basicMaterial));
+            return Response.ok(doctorBasicMaterialDao.paging(page.getOffset(), page.getLimit(), Params.filterNullOrEmpty(BeanMapper.convertObjectToMap(basicMaterial))));
         } catch (Exception e) {
             log.error("find basicMaterial filter by srm failed, basicMaterial:{}, cause:{}", basicMaterial, Throwables.getStackTraceAsString(e));
             return Response.fail("basicMaterial.find.fail");
