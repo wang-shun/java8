@@ -19,19 +19,19 @@ public class DoctorTurnSeedGroupEvent extends BaseGroupEvent implements Serializ
     private static final long serialVersionUID = -1375341874551616284L;
 
     /**
-     * 转种猪后的id
-     */
-    private Long pigId;
-
-    /**
      * 转种猪后的猪号
      */
     private String pigCode;
 
     /**
-     * 母亲猪号
+     * 母亲猪 耳缺号
      */
-    private String motherPigCode;
+    private String motherEarCode;
+
+    /**
+     * 耳缺号
+     */
+    private String earCode;
 
     /**
      * 转入日期
@@ -42,12 +42,6 @@ public class DoctorTurnSeedGroupEvent extends BaseGroupEvent implements Serializ
      * 出生日期
      */
     private String birthDate;
-
-    /**
-     * 性别 0:种母猪 1:种公猪(ESex)
-     * @see io.terminus.doctor.event.dto.event.group.DoctorTurnSeedGroupEvent.Sex
-     */
-    private Integer sex;
 
     private Long breedId;
 
@@ -61,27 +55,4 @@ public class DoctorTurnSeedGroupEvent extends BaseGroupEvent implements Serializ
 
     private String toBarnName;
 
-    public enum Sex {
-        SOW(0, "种母猪"),
-        BOAR(1, "种公猪");
-
-        @Getter
-        private final int value;
-        @Getter
-        private final String desc;
-
-        Sex(int value, String desc) {
-            this.value = value;
-            this.desc = desc;
-        }
-
-        public static Sex from(String desc) {
-            for (Sex sex : Sex.values()) {
-                if (Objects.equal(sex.desc, desc)) {
-                    return sex;
-                }
-            }
-            return null;
-        }
-    }
 }

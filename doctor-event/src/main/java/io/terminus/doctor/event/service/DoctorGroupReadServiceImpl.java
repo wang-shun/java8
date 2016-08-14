@@ -199,7 +199,6 @@ public class DoctorGroupReadServiceImpl implements DoctorGroupReadService {
             List<DoctorGroupDetail> nurseries = MoreObjects.firstNonNull(groupMap.get(PigType.NURSERY_PIGLET.getValue()), Lists.newArrayList());
             List<DoctorGroupDetail> fattens = MoreObjects.firstNonNull(groupMap.get(PigType.FATTEN_PIG.getValue()), Lists.newArrayList());
 
-            log.info("groupMap:{}, farrows:{}, nurseries:{}, fattens:{}", groupMap, farrows, nurseries, fattens);
 
             //根据猪类统计
             DoctorGroupCount count = new DoctorGroupCount();

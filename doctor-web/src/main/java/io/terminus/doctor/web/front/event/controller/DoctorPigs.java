@@ -228,7 +228,14 @@ public class DoctorPigs {
     @RequestMapping(value = "/checkGroupReserve", method = RequestMethod.POST)
     @ResponseBody
     public boolean checkGroupReserve(@RequestParam("groupIds") List<Long> groupIds){
-        for(DoctorGroup group : RespHelper.or500(doctorGroupReadService.findGroupByIds(groupIds))){
+        if(groupIds.isEmpty()){
+            return false;
+        }
+        List<DoctorGroup> list = RespHelper.or500(doctorGroupReadService.findGroupByIds(groupIds));
+        if(list.isEmpty()){
+            return false;
+        }
+        for(DoctorGroup group : list){
             if(!Objects.equals(group.getPigType(), PigType.RESERVE_BOAR.getValue()) && !Objects.equals(group.getPigType(), PigType.RESERVE_SOW.getValue())){
                 return false;
             }
