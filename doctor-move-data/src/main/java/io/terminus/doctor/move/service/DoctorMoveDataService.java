@@ -740,12 +740,20 @@ public class DoctorMoveDataService {
             track.setCurrentBarnName(barn.getName());
         }
 
+        //更新胎次 倒叙
+        updateParity(events, track);
 
         //更新母猪事件当中的配种类型
         updateDoctorMateType(events);
 
         //更新事件的非生产天数
         updateNPD(events);
+
+        //更新初配事件的是否已经分娩 和是否已经怀孕 的标志位
+        updateFlag(events);
+
+        //统计孕期 和 哺乳期
+        updateDuring(events);
 
         //更新event
         events.forEach(e -> doctorPigEventDao.update(e));
@@ -779,6 +787,21 @@ public class DoctorMoveDataService {
             return count;
         }
 
+    }
+
+    //更新胎次
+    private static void updateParity(List<DoctorPigEvent> events, DoctorPigTrack track) {
+        List<DoctorPigEvent> revertList = Lists.reverse(events);
+        int currentParity = track.getCurrentParity();
+        for (DoctorPigEvent event : revertList) {
+            //如果是分娩事件
+            if (Objects.equals(event.getType(), PigEvent.FARROWING.getKey())) {
+                int num = currentParity - 1;
+                event.setParity(num);
+                break;
+            }
+            event.setParity(currentParity);
+        }
     }
 
     //更新母猪事件的配种类型
@@ -923,6 +946,67 @@ public class DoctorMoveDataService {
             //如果当前事件是断奶事件, 进行记录
             if (Objects.equals(event.getType(), PigEvent.WEAN.getKey()) && lastMateFlag != null) {
                 lastWeanFlag = event;
+                break;
+            }
+        }
+    }
+
+    //更新初配事件的是否已经分娩 和是否已经怀孕 的标志位
+    private static void updateFlag(List<DoctorPigEvent> events) {
+        //上一个初配事件
+        DoctorPigEvent lastMateFlag = null;
+        for (DoctorPigEvent event : events) {
+            //找到上一个初配事件
+            if (Objects.equals(event.getType(), PigEvent.MATING.getKey()) && event.getCurrentMatingCount() == 1) {
+                lastMateFlag = event;
+                break;
+            }
+            //当前事件是妊娠检查事件 而且检查结果是阳性
+            if (Objects.equals(event.getType(), PigEvent.WEAN.getKey())
+                    && lastMateFlag != null
+                    && Objects.equals(event.getPregCheckResult(), PregCheckResult.YANG.getKey())) {
+                lastMateFlag.setIsImpregnation(1);
+                break;
+            }
+
+            //当前事件是分娩事件
+            if (Objects.equals(event.getType(), PigEvent.FARROWING.getKey())
+                    && lastMateFlag != null) {
+                //更新分娩的标志位
+                lastMateFlag.setIsDelivery(1);
+                break;
+            }
+        }
+    }
+
+    //统计孕期 和 哺乳期
+    private static void updateDuring(List<DoctorPigEvent> events) {
+        //上一个初配事件
+        DoctorPigEvent lastMateFlag = null;
+        //上一个分娩事件
+        DoctorPigEvent lastFarrowingFlag = null;
+        for (DoctorPigEvent event : events) {
+            //找到上一个初配事件
+            if (Objects.equals(event.getType(), PigEvent.MATING.getKey()) && event.getCurrentMatingCount() == 1) {
+                lastMateFlag = event;
+                break;
+            }
+            //当前事件是分娩事件
+            if (Objects.equals(event.getType(), PigEvent.FARROWING.getKey())
+                    && lastMateFlag != null) {
+                lastFarrowingFlag = event;
+                //统计孕期
+                int days = Days.daysBetween(new DateTime(event.getFarrowingDate()), new DateTime(lastMateFlag.getMattingDate())).getDays();
+                event.setPregDays(days);
+                break;
+            }
+
+            //当前事件是断奶事件
+            if (Objects.equals(event.getType(), PigEvent.WEAN.getKey())
+                    && lastFarrowingFlag != null) {
+                //统计哺乳期
+                int days = Days.daysBetween(new DateTime(event.getPartweanDate()), new DateTime(lastFarrowingFlag.getFarrowingDate())).getDays();
+                event.setFeedDays(days);
                 break;
             }
         }
