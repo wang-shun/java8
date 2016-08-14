@@ -70,7 +70,7 @@ public class DoctorDailyEntryEventCount implements DoctorDailyEventCount {
         }
 
         //count result
-        Map<Integer, Integer> statusCount = statusCounts.stream().collect(Collectors.toMap(k->k.getStatus() , v->v.getCount()));
+        Map<Integer, Integer> statusCount = statusCounts.stream().collect(Collectors.toMap(DoctorPigStatusCount::getStatus, DoctorPigStatusCount::getCount));
 
         doctorLiveStockDailyReport.setHoubeiSow(Params.getNullDefault(statusCount, PigStatus.Entry.getKey(), 0));
         doctorLiveStockDailyReport.setPeihuaiSow(Params.getNullDefault(statusCount,PigStatus.Mate.getKey(), 0) +

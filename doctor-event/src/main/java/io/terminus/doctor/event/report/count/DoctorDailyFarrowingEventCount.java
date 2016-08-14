@@ -38,10 +38,10 @@ public class DoctorDailyFarrowingEventCount implements DoctorDailyEventCount{
 
         DoctorDeliverDailyReport doctorDeliverDailyReport = new DoctorDeliverDailyReport();
 
-        t.stream().forEach(e->{
-            Map<String,Object> extraMap = e.getExtraMap();
+        t.forEach(e -> {
+            Map<String, Object> extraMap = e.getExtraMap();
 
-            doctorDeliverDailyReport.setNest(doctorDeliverDailyReport.getNest()+1);
+            doctorDeliverDailyReport.setNest(doctorDeliverDailyReport.getNest() + 1);
             doctorDeliverDailyReport.setLive(doctorDeliverDailyReport.getLive() + Integer.valueOf(extraMap.get("farrowingLiveCount").toString()));
             doctorDeliverDailyReport.setHealth(doctorDeliverDailyReport.getHealth() + Integer.valueOf(extraMap.get("healthCount").toString()));
             doctorDeliverDailyReport.setWeak(doctorDeliverDailyReport.getWeak() + Integer.valueOf(extraMap.get("weakCount").toString()));

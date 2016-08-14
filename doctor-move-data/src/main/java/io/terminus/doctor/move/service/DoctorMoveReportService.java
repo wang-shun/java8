@@ -6,6 +6,7 @@ import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dao.DoctorDailyReportDao;
 import io.terminus.doctor.event.dto.report.daily.DoctorDailyReportDto;
 import io.terminus.doctor.event.model.DoctorDailyReport;
+import io.terminus.doctor.event.service.DoctorDailyReportReadService;
 import io.terminus.doctor.move.handler.DoctorMoveDatasourceHandler;
 import io.terminus.doctor.move.model.ReportGroupLiveStock;
 import io.terminus.doctor.user.dao.DoctorFarmDao;
@@ -35,14 +36,17 @@ public class DoctorMoveReportService {
     private final DoctorDailyReportDao doctorDailyReportDao;
     private final DoctorFarmDao doctorFarmDao;
     private final DoctorMoveDatasourceHandler doctorMoveDatasourceHandler;
+    private final DoctorDailyReportReadService doctorDailyReportReadService;
 
     @Autowired
     public DoctorMoveReportService(DoctorDailyReportDao doctorDailyReportDao,
                                    DoctorFarmDao doctorFarmDao,
-                                   DoctorMoveDatasourceHandler doctorMoveDatasourceHandler) {
+                                   DoctorMoveDatasourceHandler doctorMoveDatasourceHandler,
+                                   DoctorDailyReportReadService doctorDailyReportReadService) {
         this.doctorDailyReportDao = doctorDailyReportDao;
         this.doctorFarmDao = doctorFarmDao;
         this.doctorMoveDatasourceHandler = doctorMoveDatasourceHandler;
+        this.doctorDailyReportReadService = doctorDailyReportReadService;
     }
 
     /**
@@ -56,6 +60,7 @@ public class DoctorMoveReportService {
         if (farm == null || notEmpty(farm.getOutId())) {
             return;
         }
+
         List<ReportGroupLiveStock> gls = RespHelper.orServEx(doctorMoveDatasourceHandler
                 .findByHbsSql(moveId, ReportGroupLiveStock.class, "DoctorDailyReport-GroupLiveStock", ImmutableMap.of("index", INDEX, "farmOutId", farm.getOutId())));
 
@@ -77,14 +82,24 @@ public class DoctorMoveReportService {
         report.setNurseryCount(group.getNurseryCount());    // 当天保育猪存栏
         report.setFattenCount(group.getFattenCount());      // 当天育肥猪存栏
         report.setSowCount(0);     // 当天母猪存栏
-        report.setExtra(JsonMapper.nonEmptyMapper().toJson(getDailyReportDto()));
+        report.setExtra(JsonMapper.nonEmptyMapper().toJson(getDailyReportDto(farmId, group)));
         return report;
     }
 
-    //日报统计Json
-    private DoctorDailyReportDto getDailyReportDto() {
-        DoctorDailyReportDto dto = new DoctorDailyReportDto();
+    //日报统计json字段
+    private DoctorDailyReportDto getDailyReportDto(Long farmId, ReportGroupLiveStock group) {
+        DoctorDailyReportDto dto = RespHelper.orServEx(doctorDailyReportReadService
+                .initDailyReportByFarmIdAndDate(farmId, group.getSumat()));
 
+        //刷新下dto里的统计 // TODO: 16/8/14  
+        dto.getLiveStock().setFarrow(group.getFarrowCount());
+        dto.getLiveStock().setNursery(group.getNurseryCount());
+        dto.getLiveStock().setFatten(group.getFattenCount());
+        dto.getLiveStock().setBoar(0);
+        dto.getLiveStock().setBuruSow(0);
+        dto.getLiveStock().setHoubeiSow(0);
+        dto.getLiveStock().setKonghuaiSow(0);
+        dto.getLiveStock().setPeihuaiSow(0);
         return dto;
     }
 }

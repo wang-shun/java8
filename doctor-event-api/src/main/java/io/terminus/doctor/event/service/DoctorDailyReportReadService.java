@@ -40,8 +40,8 @@ public interface DoctorDailyReportReadService {
      * @param date 日期
      * @return 日报统计
      */
-    Response<DoctorDailyReport> initDailyReportByFarmIdAndDate(@NotNull(message = "farmId.not.null") Long farmId,
-                                                               @NotNull(message = "date.not.null") Date date);
+    Response<DoctorDailyReportDto> initDailyReportByFarmIdAndDate(@NotNull(message = "farmId.not.null") Long farmId,
+                                                                  @NotNull(message = "date.not.null") Date date);
 
     /**
      * 清理全部的日报缓存
