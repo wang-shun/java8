@@ -237,23 +237,53 @@ public class DoctorGroupWriteServiceImpl implements DoctorGroupWriteService {
         }
     }
 
+    private PigType checkTurnSeedData(Integer groupType, Integer barnType){
+        PigType type = PigType.from(groupType);
+        if(type == null){
+            throw new ServiceException("group.can.not.turn.seed");
+        }
+
+        switch (type) {
+            // 当猪的来源是后备群中的种母猪 (PigType.RESERVE_SOW) 时, 转入猪舍只允许为 配种舍(PigType.MATE_SOW) 或 妊娠舍(PigType.PREG_SOW)
+            case RESERVE_SOW :
+//                if(!Objects.equals(barnType, PigType.MATE_SOW.getValue()) && !Objects.equals(barnType, PigType.PREG_SOW.getValue())){
+//                    throw new ServiceException("barn.can.not.turn.seed");
+//                }
+                if(!Objects.equals(barnType, PigType.MATE_SOW.getValue())){
+                    throw new ServiceException("barn.can.not.turn.seed");
+                }
+                break;
+            // 当猪的来源是后备群中的种公猪 (PigType.RESERVE_BOAR) 时, 转入猪舍只允许为 种公猪舍(PigType.BOAR)
+            case RESERVE_BOAR :
+                if(!Objects.equals(barnType, PigType.BOAR.getValue())){
+                    throw new ServiceException("barn.can.not.turn.seed");
+                }
+                break;
+            // 当猪的来源不是以上两种时, 抛出异常
+            default:
+                throw new ServiceException("group.can.not.turn.seed");
+        }
+        return type;
+    }
+
     @Override
     public Response<Boolean> groupEventTurnSeed(DoctorGroupDetail groupDetail, @Valid DoctorTurnSeedGroupInput turnSeed) {
         try {
-            // 1. 猪群本身的变化
+            DoctorBarn barn = orServEx(doctorBarnReadService.findBarnById(turnSeed.getToBarnId()));
+            PigType groupType = this.checkTurnSeedData(groupDetail.getGroup().getPigType(), barn.getPigType());
+
+            // 1. 猪群本身的变化, 内含事务控制
             doctorGroupEventManager.handleEvent(groupDetail, turnSeed, DoctorTurnSeedGroupEventHandler.class);
 
-            // 2. 判断猪群剩余数量, 如果剩余0, 则触发关闭猪群事件
+            // 2. 判断猪群剩余数量, 如果剩余0, 则触发关闭猪群事件. 这个 handler 里面没有事务控制
             DoctorGroupTrack groupTrack = doctorGroupTrackDao.findByGroupId(groupDetail.getGroup().getId());
             if (groupTrack.getQuantity() == 0) {
                 doctorCommonGroupEventHandler.autoGroupEventClose(doctorGroupDao.findById(groupDetail.getGroup().getId()), groupTrack, turnSeed);
             }
 
-            // 3. 触发其他事件
+            // 3. 触发其他事件, 内含事务控制
             //由于不确定 group 会不会被修改, 还是重新从数据库查一遍保险
             DoctorGroup group = doctorGroupDao.findById(groupDetail.getGroup().getId());
-            DoctorBarn barn = orServEx(doctorBarnReadService.findBarnById(turnSeed.getToBarnId()));
-            PigType groupType = PigType.from(group.getPigType());
             switch (groupType) {
                 case RESERVE_SOW :
                     if(Objects.equals(barn.getPigType(), PigType.MATE_SOW.getValue())){

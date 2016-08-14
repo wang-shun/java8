@@ -57,9 +57,8 @@ public class DoctorTurnSeedGroupEventHandler extends DoctorAbstractGroupEventHan
 
         DoctorBarn barn = orServEx(doctorBarnReadService.findBarnById(turnSeed.getToBarnId()));
         // 检查数据
-        PigType groupType = this.checkTurnSeedData(group.getPigType(), barn.getPigType());
         checkQuantity(groupTrack.getQuantity(), 1); // 确保 原数量 >= 1
-        this.checkSex(groupTrack, groupType);
+        this.checkSex(groupTrack, PigType.from(group.getPigType()));
 
         //1. 转换转种猪事件
         DoctorTurnSeedGroupEvent turnSeedEvent = BeanMapper.map(turnSeed, DoctorTurnSeedGroupEvent.class);
@@ -91,35 +90,6 @@ public class DoctorTurnSeedGroupEventHandler extends DoctorAbstractGroupEventHan
     @Override
     protected <E extends BaseGroupEdit> void editEvent(DoctorGroup group, DoctorGroupTrack groupTrack, DoctorGroupEvent event, E edit) {
 
-    }
-
-    private PigType checkTurnSeedData(Integer groupType, Integer barnType){
-        PigType type = PigType.from(groupType);
-        if(type == null){
-            throw new ServiceException("group.can.not.turn.seed");
-        }
-
-        switch (type) {
-            // 当猪的来源是后备群中的种母猪 (PigType.RESERVE_SOW) 时, 转入猪舍只允许为 配种舍(PigType.MATE_SOW) 或 妊娠舍(PigType.PREG_SOW)
-            case RESERVE_SOW :
-//                if(!Objects.equals(barnType, PigType.MATE_SOW.getValue()) && !Objects.equals(barnType, PigType.PREG_SOW.getValue())){
-//                    throw new ServiceException("barn.can.not.turn.seed");
-//                }
-                if(!Objects.equals(barnType, PigType.MATE_SOW.getValue())){
-                    throw new ServiceException("barn.can.not.turn.seed");
-                }
-                break;
-            // 当猪的来源是后备群中的种公猪 (PigType.RESERVE_BOAR) 时, 转入猪舍只允许为 种公猪舍(PigType.BOAR)
-            case RESERVE_BOAR :
-                if(!Objects.equals(barnType, PigType.BOAR.getValue())){
-                    throw new ServiceException("barn.can.not.turn.seed");
-                }
-                break;
-            // 当猪的来源不是以上两种时, 抛出异常
-            default:
-                throw new ServiceException("group.can.not.turn.seed");
-        }
-        return type;
     }
 
     private void checkSex(DoctorGroupTrack groupTrack, PigType groupType){

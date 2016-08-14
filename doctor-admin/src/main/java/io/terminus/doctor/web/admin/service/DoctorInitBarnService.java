@@ -57,10 +57,8 @@ public class DoctorInitBarnService {
                 Long barnId = or500(doctorBarnWriteService.createBarn(barn));
                 doctorBarnWriteService.publistBarnEvent(barnId);
                 log.info("init barn info, barn:{}", barn);
-
-                doctorWareHouseTypeWriteService.initDoctorWareHouseType(farm.getId(), farm.getName(), userId, userName);
             });
-            //发事件
+            doctorWareHouseTypeWriteService.initDoctorWareHouseType(farm.getId(), farm.getName(), userId, userName);
             return Response.ok(Boolean.TRUE);
         } catch (Exception e) {
             log.error("init barns failed, farm:{}, userId:{} cause:{}",
