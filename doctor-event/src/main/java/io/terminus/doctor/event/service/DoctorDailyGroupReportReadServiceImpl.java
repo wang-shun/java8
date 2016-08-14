@@ -2,6 +2,7 @@ package io.terminus.doctor.event.service;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Throwables;
+import com.google.common.collect.Lists;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.Response;
 import io.terminus.common.utils.Dates;
@@ -16,6 +17,7 @@ import io.terminus.doctor.event.dto.report.daily.DoctorDeadDailyReport;
 import io.terminus.doctor.event.dto.report.daily.DoctorLiveStockDailyReport;
 import io.terminus.doctor.event.dto.report.daily.DoctorSaleDailyReport;
 import io.terminus.doctor.event.enums.GroupEventType;
+import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorPigTypeStatistic;
 import lombok.AllArgsConstructor;
@@ -48,13 +50,19 @@ public class DoctorDailyGroupReportReadServiceImpl implements DoctorDailyGroupRe
     private static final JsonMapper JSON_MAPPER = JsonMapper.nonEmptyMapper();
 
     private final DoctorPigTypeStatisticReadService doctorPigTypeStatisticReadService;
+    private final DoctorPigTypeStatisticWriteService doctorPigTypeStatisticWriteService;
     private final DoctorGroupReadService doctorGroupReadService;
+    private final DoctorBarnReadService doctorBarnReadService;
 
     @Autowired
     public DoctorDailyGroupReportReadServiceImpl(DoctorPigTypeStatisticReadService doctorPigTypeStatisticReadService,
-                                                 DoctorGroupReadService doctorGroupReadService) {
+                                                 DoctorPigTypeStatisticWriteService doctorPigTypeStatisticWriteService,
+                                                 DoctorGroupReadService doctorGroupReadService,
+                                                 DoctorBarnReadService doctorBarnReadService) {
         this.doctorPigTypeStatisticReadService = doctorPigTypeStatisticReadService;
+        this.doctorPigTypeStatisticWriteService = doctorPigTypeStatisticWriteService;
         this.doctorGroupReadService = doctorGroupReadService;
+        this.doctorBarnReadService = doctorBarnReadService;
     }
 
     @Override
@@ -147,14 +155,18 @@ public class DoctorDailyGroupReportReadServiceImpl implements DoctorDailyGroupRe
         report.setFarmId(farmId);
         report.setSumAt(Dates.startOfDay(date));
 
+        DoctorLiveStockDailyReport liveStockReport = new DoctorLiveStockDailyReport();
+
         //存栏
         if (statistic != null) {
-            DoctorLiveStockDailyReport liveStockReport = new DoctorLiveStockDailyReport();
             liveStockReport.setFarrow(MoreObjects.firstNonNull(statistic.getFarrow(), 0));
             liveStockReport.setNursery(MoreObjects.firstNonNull(statistic.getNursery(), 0));
             liveStockReport.setFatten(MoreObjects.firstNonNull(statistic.getFatten(), 0));
-            report.setLiveStock(liveStockReport);
         }
+
+        //后备母猪存栏
+        liveStockReport.setHoubeiSow(getHoubeiSow(farmId));
+        report.setLiveStock(liveStockReport);
 
         //取出转换好的事件(按时间区间和事件类型查询的事件, 为保险起见, 查询区间为一天的开始与结束)
         List<ChangeEvent> events = RespHelper.orServEx(
@@ -212,6 +224,17 @@ public class DoctorDailyGroupReportReadServiceImpl implements DoctorDailyGroupRe
     private ChangeEvent getChangeEvent(DoctorGroupEvent event) {
         DoctorChangeGroupEvent changeGroupEvent = JSON_MAPPER.fromJson(event.getExtra(), JSON_MAPPER.createCollectionType(DoctorChangeGroupEvent.class));
         return new ChangeEvent(event.getPigType(), event.getQuantity(), changeGroupEvent);
+    }
+
+    //获取后备母猪存栏
+    private Integer getHoubeiSow(Long farmId) {
+        List<DoctorBarn> houbeiBarns = RespHelper.orServEx(doctorBarnReadService
+                .findBarnsByFarmIdAndPigTypes(farmId, Lists.newArrayList(PigType.RESERVE_SOW.getValue())));
+        Integer houbei = 0;
+        for (DoctorBarn houbeiBarn : houbeiBarns) {
+            houbei += RespHelper.or(doctorBarnReadService.countPigByBarnId(houbeiBarn.getId()), 0);
+        }
+        return houbei;
     }
 
     @Data

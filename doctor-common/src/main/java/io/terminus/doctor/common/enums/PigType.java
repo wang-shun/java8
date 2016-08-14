@@ -73,7 +73,8 @@ public enum PigType {
                 NURSERY_PIGLET.getValue() == value ||
                 FATTEN_PIG.getValue() == value ||
                 DELIVER_SOW.getValue() == value ||
-                RESERVE_SOW.getValue() == value;
+                RESERVE_SOW.getValue() == value ||
+                RESERVE_BOAR.getValue() == value;
     }
 
     //产房仔猪的类型

@@ -100,7 +100,6 @@ public class DoctorDailyReportDto implements Serializable {
 
         //存栏
         this.liveStock.setBoar(report.getLiveStock().getBoar()==0 ? this.liveStock.getBoar() : report.getLiveStock().getBoar());
-        this.liveStock.setHoubeiSow(report.getLiveStock().getHoubeiSow() == 0? this.liveStock.getHoubeiSow() : report.getLiveStock().getHoubeiSow());
         this.liveStock.setPeihuaiSow(report.getLiveStock().getPeihuaiSow() == 0? this.liveStock.getPeihuaiSow() : report.getLiveStock().getPeihuaiSow());
         this.liveStock.setBuruSow(report.getLiveStock().getBuruSow() == 0 ? this.liveStock.getBuruSow(): report.getLiveStock().getBuruSow());
         this.liveStock.setKonghuaiSow(report.getLiveStock().getKonghuaiSow() == 0 ? this.liveStock.getKonghuaiSow() : report.getLiveStock().getKonghuaiSow());
@@ -133,6 +132,7 @@ public class DoctorDailyReportDto implements Serializable {
         this.liveStock.setFarrow(report.getLiveStock().getFarrow());
         this.liveStock.setNursery(report.getLiveStock().getNursery());
         this.liveStock.setFatten(report.getLiveStock().getFatten());
+        this.liveStock.setHoubeiSow(report.getLiveStock().getHoubeiSow() == 0? this.liveStock.getHoubeiSow() : report.getLiveStock().getHoubeiSow());
 
         //销售
         this.sale.setNursery(this.sale.getNursery() + report.getSale().getNursery());

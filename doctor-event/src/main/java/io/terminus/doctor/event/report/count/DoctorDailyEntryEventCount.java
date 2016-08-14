@@ -72,13 +72,18 @@ public class DoctorDailyEntryEventCount implements DoctorDailyEventCount {
         //count result
         Map<Integer, Integer> statusCount = statusCounts.stream().collect(Collectors.toMap(DoctorPigStatusCount::getStatus, DoctorPigStatusCount::getCount));
 
-        doctorLiveStockDailyReport.setHoubeiSow(Params.getNullDefault(statusCount, PigStatus.Entry.getKey(), 0));
         doctorLiveStockDailyReport.setPeihuaiSow(Params.getNullDefault(statusCount,PigStatus.Mate.getKey(), 0) +
                 Params.getNullDefault(statusCount, PigStatus.Pregnancy.getKey(),0) +
                 Params.getNullDefault(statusCount, PigStatus.Farrow.getKey(), 0));
         doctorLiveStockDailyReport.setBuruSow(Params.getNullDefault(statusCount, PigStatus.FEED.getKey(), 0));
-        doctorLiveStockDailyReport.setKonghuaiSow(Params.getNullDefault(statusCount, PigStatus.Abortion.getKey(), 0) +
-                Params.getNullDefault(statusCount, PigStatus.KongHuai.getKey(), 0));
+        doctorLiveStockDailyReport.setKonghuaiSow(
+                Params.getNullDefault(statusCount, PigStatus.Abortion.getKey(), 0) +    //流产
+                Params.getNullDefault(statusCount, PigStatus.Entry.getKey(), 0) +       //进场
+                Params.getNullDefault(statusCount, PigStatus.KongHuai.getKey(), 0) +    //空怀
+                Params.getNullDefault(statusCount, PigStatus.FanQing.getKey(), 0) +     //返情
+                Params.getNullDefault(statusCount, PigStatus.Wean.getKey(), 0)          //断奶
+
+        );
 
         doctorLiveStockDailyReport.setBoar(Params.getNullDefault(statusCount, PigStatus.BOAR_ENTRY.getKey(), 0));
 

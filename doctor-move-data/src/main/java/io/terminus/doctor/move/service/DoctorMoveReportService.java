@@ -95,6 +95,8 @@ public class DoctorMoveReportService {
         dto.getLiveStock().setFarrow(group.getFarrowCount());
         dto.getLiveStock().setNursery(group.getNurseryCount());
         dto.getLiveStock().setFatten(group.getFattenCount());
+
+        //注意下面的存栏都是当天的存栏
         dto.getLiveStock().setBoar(0);
         dto.getLiveStock().setBuruSow(0);
         dto.getLiveStock().setHoubeiSow(0);
