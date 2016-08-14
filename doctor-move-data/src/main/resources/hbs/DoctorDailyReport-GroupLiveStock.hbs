@@ -1,0 +1,154 @@
+-- 获取猪群日存栏统计(阶段仔猪)
+-- 创建仔猪存栏临时表
+CREATE TABLE #tempGroup (
+  farrowCount int,  -- 产房仔猪
+  nurseryCount int, -- 保育猪
+  fattenCount int,  -- 育肥猪
+  sumat DATETIME    -- 统计时间
+)
+DECLARE @i INT
+SET @i = 1
+WHILE @i <= {{index}}   -- 循环index天的数据
+BEGIN
+  DECLARE @sumDate DATETIME
+  SET @sumDate = convert(DATETIME, convert(varchar(100), getdate(), 23) + ' 23:59:59', 120) - @i
+
+  -- 插入临时表
+  INSERT INTO #tempGroup(farrowCount, nurseryCount, fattenCount, sumat)
+  SELECT
+    CASE WHEN q.pigTypeName = '分娩母猪' THEN sum(q.quantity) ELSE 0 END AS farrowCount,  -- 产房仔猪
+    CASE WHEN q.pigTypeName = '保育猪' THEN sum(q.quantity) ELSE 0 END AS nurseryCount,   -- 保育猪
+    CASE WHEN q.pigTypeName = '育肥猪' THEN sum(q.quantity) ELSE 0 END AS fattenCount,    -- 育肥猪
+    convert(DATETIME, convert(varchar(100), getdate(), 23) + ' 00:00:00', 120) - @i as sumat
+  FROM
+    (
+      SELECT
+        p.OID                         AS groupOutId,
+        p.TypeName                    AS pigTypeName,
+        p.Status                      AS status,
+        p.farmoid                     AS farmOutId,
+        ISNULL(b.InventoryOfGroup, 0) AS quantity,
+        CASE WHEN (abs(ISNULL(mvin.Weight, 0)) - abs(ISNULL(mvout.Weight, 0))) > 0 AND InventoryOfGroup > 0
+          THEN CONVERT(DECIMAL(18, 2), (abs(ISNULL(mvin.Weight, 0)) - abs(ISNULL(mvout.Weight, 0))) / InventoryOfGroup)
+        ELSE 0 END                    AS avgWeight,
+        abs(ISNULL(c.age, 0))         AS avgDayAge --平均日龄
+      FROM
+        (
+          SELECT *
+          FROM view_GainCardList
+          WHERE gainopendate <= @sumDate -- 转换下时间到天末
+        ) AS p
+
+        -- 获得存栏数量
+        LEFT JOIN
+        (
+          SELECT
+            iGain.relmainOID              AS relmainOID,
+            InCount - ISNULL(OutCount, 0) AS InventoryOfGroup
+          FROM
+            (
+              SELECT
+                --统计到结束日期为止的转入猪只数
+                relmainOID,
+                SUM(ISNULL(NumberOfPigs, 0)) AS InCount
+              FROM view_EventListGain
+              WHERE
+                EventDate <= @sumDate
+                AND Operator = '+'
+              GROUP BY relmainOID, Operator
+            ) AS iGain
+            LEFT JOIN
+            (
+              SELECT
+                --统计到结束日期为止的转出猪只数
+                relmainOID,
+                SUM(ISNULL(NumberOfPigs, 0)) AS OutCount
+              FROM view_EventListGain
+              WHERE
+                EventDate <= @sumDate
+                AND Operator = '-'
+              GROUP BY relmainOID, Operator
+            ) AS oGain
+              ON iGain.relmainOID = oGain.relmainOID
+        ) AS b
+          ON p.OID = b.relmainOID
+
+        -- 平均日龄
+        LEFT JOIN
+        (
+          SELECT
+            relmainOID,
+            SUM((ISNULL(AverageAge, 0) + DATEDIFF(DAY, @sumDate, EventDate)) * NumberOfPigs) /
+            SUM(NumberOfPigs) AS age
+          FROM view_EventListGain
+          WHERE EventEName = 'MoveIntoGroup'   --转入事件
+                AND EventDate <= @sumDate --日期
+          GROUP BY relmainOID
+          HAVING SUM(NumberOfPigs) > 0
+        ) AS c
+          ON p.OID = c.relmainOID
+
+        -- 转入
+        LEFT JOIN
+        (
+          SELECT
+            g.relmainOID                    AS OID,
+            SUM(g.EWeight * g.NumberOfPigs) AS Weight,
+            --转入总重量
+            SUM(g.NumberOfPigs)             AS InCount --转入数量
+          FROM view_EventListGain AS g --猪群
+            JOIN
+            (
+              SELECT *
+              FROM view_GainCardList
+              WHERE gainopendate <= @sumDate
+            ) AS t
+              ON g.relmainOID = t.OID
+          WHERE g.Operator = '+'               --转入事件
+                AND g.EWeight > 0                   --要有转入重量的事件
+                AND g.EventDate > t.gainopendate
+                AND g.EventDate <= @sumDate
+          GROUP BY g.relmainOID                --按猪群统计
+        ) AS mvin
+          ON p.OID = mvin.OID
+
+        -- 转出
+        LEFT JOIN
+        (
+          SELECT
+            g.relmainOID                    AS OID,
+            SUM(g.EWeight * g.NumberOfPigs) AS Weight,
+            --转出总重量
+            SUM(g.NumberOfPigs)             AS OutCount --转出数量
+          FROM view_EventListGain AS g --猪群
+            JOIN
+            (
+              SELECT *
+              FROM view_GainCardList
+              WHERE gainopendate <= @sumDate
+            ) AS t
+              ON g.relmainOID = t.OID
+          WHERE g.Operator = '-'               --转出事件
+                AND g.EWeight > 0                   --要有转出重量的事件
+                AND g.EventDate > t.gainopendate
+                AND g.EventDate <= @sumDate
+          GROUP BY g.relmainOID                --按猪群统计
+        ) AS mvout
+          ON p.OID = mvout.OID
+    ) AS q
+  WHERE q.pigTypeName IN ('育肥猪', '保育猪', '分娩母猪') AND q.farmOutId = '{{farmOutId}}'
+  GROUP BY q.farmOutId, q.pigTypeName
+
+SET @i = @i + 1
+END
+
+-- 查询统计的结果
+SELECT
+  sumat,
+  sum(farrowCount) AS farrowCount,
+  sum(nurseryCount) AS nurseryCount,
+  sum(fattenCount) AS fattenCount
+FROM #tempGroup
+GROUP BY sumat
+
+DROP TABLE #tempGroup
