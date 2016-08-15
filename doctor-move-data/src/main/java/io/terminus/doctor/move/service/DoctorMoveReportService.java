@@ -4,6 +4,7 @@ import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import io.terminus.common.utils.JsonMapper;
+import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dao.DoctorDailyReportDao;
 import io.terminus.doctor.event.dto.report.daily.DoctorDailyReportDto;
@@ -131,6 +132,6 @@ public class DoctorMoveReportService {
      */
     @Transactional
     public void moveMonthlyReport(Long farmId) {
-        RespHelper.orServEx(doctorMonthlyReportWriteService.createMonthlyReports(Lists.newArrayList(farmId), new Date()));
+        RespHelper.orServEx(doctorMonthlyReportWriteService.createMonthlyReports(Lists.newArrayList(farmId), DateUtil.toDateTime("2016-07-31 16:08:37")));
     }
 }
