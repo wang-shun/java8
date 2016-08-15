@@ -198,7 +198,10 @@ public class DoctorWareHouseEvents {
     @RequestMapping(value = "/provider", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Long createProviderEvent(@RequestBody DoctorConsumeProviderInputDto dto){
-        DoctorMaterialConsumeProviderDto doctorMaterialConsumeProviderDto = null;
+        DoctorMaterialConsumeProviderDto doctorMaterialConsumeProviderDto;
+        if(dto.getUnitPrice() == null || dto.getUnitPrice() < 0){
+            throw new JsonResponseException("price.invalid");
+        }
         try{
 
 //            DoctorMaterialInWareHouse doctorMaterialInWareHouse = RespHelper.orServEx(doctorMaterialInWareHouseReadService.queryByMaterialWareHouseIds(
@@ -221,6 +224,7 @@ public class DoctorWareHouseEvents {
                     .staffId(userId).staffName(userName)
                     .count(dto.getCount()).unitId(doctorBasicMaterial.getUnitId()).unitName(doctorBasicMaterial.getUnitName())
                     .unitGroupId(doctorBasicMaterial.getUnitGroupId()).unitGroupName(doctorBasicMaterial.getUnitGroupName())
+                    .unitPrice(dto.getUnitPrice())
                     .build();
         }catch (Exception e){
             log.error("provider material fail, cause:{}", Throwables.getStackTraceAsString(e));

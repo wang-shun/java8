@@ -62,7 +62,7 @@ public class DoctorMaterialConsumeProvider implements Serializable{
      * 入库单价,由前台传入,直接保存即可
      * 出库单价,需要计算: 先入库的先出库, 然后对涉及到的每一次入库的单价作加权平均
      */
-    private Long unit_price;
+    private Long unitPrice;
 
     private Long staffId;
 
@@ -138,7 +138,7 @@ public class DoctorMaterialConsumeProvider implements Serializable{
                 .farmId(dto.getFarmId()).farmName(dto.getFarmName())
                 .wareHouseId(dto.getWareHouseId()).wareHouseName(dto.getWareHouseName())
                 .materialId(dto.getMaterialTypeId()).materialName(dto.getMaterialName())
-                .eventType(dto.getActionType()).eventTime(DateTime.now().toDate()).eventCount(dto.getCount())
+                .eventType(dto.getActionType()).eventTime(DateTime.now().toDate()).eventCount(dto.getCount()).unitPrice(dto.getUnitPrice())
                 .staffId(dto.getStaffId()).staffName(dto.getStaffName())
                 .creatorId(dto.getStaffId()).creatorName(dto.getStaffName())
                 .build();
