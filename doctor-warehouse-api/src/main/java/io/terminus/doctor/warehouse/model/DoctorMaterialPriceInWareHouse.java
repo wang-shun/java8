@@ -1,6 +1,9 @@
 package io.terminus.doctor.warehouse.model;
 
+import io.terminus.doctor.warehouse.dto.DoctorMaterialConsumeProviderDto;
 import lombok.Data;
+import lombok.experimental.Builder;
+import org.joda.time.DateTime;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -11,6 +14,7 @@ import java.util.Date;
  * Date: 2016-08-15
  */
 @Data
+@Builder
 public class DoctorMaterialPriceInWareHouse implements Serializable {
 
     private static final long serialVersionUID = 6333326277652074639L;
@@ -90,4 +94,15 @@ public class DoctorMaterialPriceInWareHouse implements Serializable {
     private Date createdAt;
     
     private Date updatedAt;
+
+    public static DoctorMaterialPriceInWareHouse buildFromDto(DoctorMaterialConsumeProviderDto dto, Long materialConsumeProviderId) {
+        return DoctorMaterialPriceInWareHouse.builder()
+                .farmId(dto.getFarmId()).farmName(dto.getFarmName())
+                .wareHouseId(dto.getWareHouseId()).wareHouseName(dto.getWareHouseName())
+                .materialId(dto.getMaterialTypeId()).materialName(dto.getMaterialName())
+                .type(dto.getType())
+                .providerId(materialConsumeProviderId).unitPrice(dto.getUnitPrice()).remainder(dto.getCount()).providerTime(DateTime.now().toDate())
+                .creatorId(dto.getStaffId()).updatorId(dto.getStaffId())
+                .build();
+    }
 }
