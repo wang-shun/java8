@@ -55,10 +55,11 @@
         WHERE id = #{id}
     </select>
 
-    <select id="findByWareHouseId" parameterType="long" resultMap="DoctorMaterialPriceInWareHouseMap" >
+    <select id="findByWareHouseAndMaterialId" parameterType="map" resultMap="DoctorMaterialPriceInWareHouseMap" >
         SELECT <include refid="cols_all" />
         FROM <include refid="tb" />
-        WHERE ware_house_id = #{wareHouseId}
+        WHERE ware_house_id = #{wareHouseId} and material_id = #{materialId}
+        order by providerTime asc
     </select>
 
     <update id="update" parameterType="DoctorMaterialPriceInWareHouse">
