@@ -65,6 +65,7 @@ import java.util.List;
 @ComponentScan(value = {
         "io.terminus.doctor.web.core.component",
         "io.terminus.doctor.web.front",
+        "io.terminus.doctor.web.util",
         "io.terminus.doctor.web.component",
         "io.terminus.parana.auth.web"
 }, excludeFilters = {
