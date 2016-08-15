@@ -1,9 +1,11 @@
 package io.terminus.doctor.event.model;
 
+import com.google.common.base.Objects;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.event.dto.event.group.BaseGroupEvent;
 import lombok.AccessLevel;
 import lombok.Data;
+import lombok.Getter;
 import lombok.Setter;
 import lombok.SneakyThrows;
 
@@ -119,6 +121,26 @@ public class DoctorGroupEvent<T extends BaseGroupEvent> implements Serializable 
     private Integer isAuto;
 
     /**
+     * 变动类型id
+     */
+    private Long changeTypeId;
+
+    /**
+     * 销售单价(分)
+     */
+    private Long price;
+
+    /**
+     * 销售总额(分)
+     */
+    private Long amount;
+
+    /**
+     * 转群类型 0 内转(同阶段) 1 外转(不同阶段)
+     */
+    private Integer transGroupType;
+
+    /**
      * 外部id
      */
     private String outId;
@@ -171,6 +193,30 @@ public class DoctorGroupEvent<T extends BaseGroupEvent> implements Serializable 
             this.extra = null;
         }else {
             this.extra = JSON_MAPPER.toJson(extraMap);
+        }
+    }
+
+    public enum TransGroupType {
+        IN(0, "内转"),
+        OUT(1, "外转");
+
+        @Getter
+        private Integer value;
+        @Getter
+        private String desc;
+
+        TransGroupType(Integer value, String desc){
+            this.value = value;
+            this.desc = desc;
+        }
+
+        public static TransGroupType from(String desc) {
+            for (TransGroupType type : TransGroupType.values()) {
+                if (Objects.equal(type.desc, desc)) {
+                    return type;
+                }
+            }
+            return null;
         }
     }
 }

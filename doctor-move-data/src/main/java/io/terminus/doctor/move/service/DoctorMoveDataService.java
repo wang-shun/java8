@@ -16,6 +16,7 @@ import io.terminus.doctor.basic.model.DoctorCustomer;
 import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.RespHelper;
+import io.terminus.doctor.event.constants.DoctorBasicEnums;
 import io.terminus.doctor.event.constants.DoctorFarmEntryConstants;
 import io.terminus.doctor.event.dao.DoctorGroupDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
@@ -50,6 +51,7 @@ import io.terminus.doctor.event.dto.event.usual.DoctorFarmEntryDto;
 import io.terminus.doctor.event.dto.event.usual.DoctorRemovalDto;
 import io.terminus.doctor.event.dto.event.usual.DoctorVaccinationDto;
 import io.terminus.doctor.event.enums.BoarEntryType;
+import io.terminus.doctor.event.enums.DoctorMatingType;
 import io.terminus.doctor.event.enums.FarrowingType;
 import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.enums.IsOrNot;
@@ -79,6 +81,7 @@ import io.terminus.doctor.move.model.View_SowCardList;
 import io.terminus.doctor.user.model.DoctorFarm;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
+import org.joda.time.Days;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -90,6 +93,9 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static io.terminus.common.utils.Arguments.notEmpty;
+import static io.terminus.doctor.common.enums.PigType.FARROW_TYPES;
+import static io.terminus.doctor.event.enums.PregCheckResult.YANG;
+import static io.terminus.doctor.event.enums.PregCheckResult.from;
 
 /**
  * Desc: 迁移数据
@@ -245,7 +251,7 @@ public class DoctorMoveDataService {
 
         //数据量太大, 分成5页获取母猪事件
         List<View_EventListSow> sowEventViews = Lists.newArrayList();
-        List<List<View_SowCardList>> sowLists = Lists.partition(sowCards, sowCards.size()/5 + 1);
+        List<List<View_SowCardList>> sowLists = Lists.partition(sowCards, sowCards.size() / 5 + 1);
 
         sowLists.forEach(ss -> {
             String sowOutIds = Joiners.COMMA.join(ss.stream().map(s -> brace(s.getPigOutId())).collect(Collectors.toList()));
@@ -445,25 +451,48 @@ public class DoctorMoveDataService {
                 sowEvent.setExtra(JSON_MAPPER.toJson(vacc));
                 break;
             case REMOVAL:       //离场
-                sowEvent.setExtra(JSON_MAPPER.toJson(getSowRemovalExtra(event, customerMap, basicMap, barnMap, changeReasonMap)));
+                DoctorRemovalDto removal = getSowRemovalExtra(event, customerMap, basicMap, barnMap, changeReasonMap);
+                sowEvent.setExtra(JSON_MAPPER.toJson(removal));
+                sowEvent.setChangeTypeId(removal.getChgTypeId());
+                sowEvent.setPrice(removal.getPrice());
+                sowEvent.setAmount(removal.getSum());
                 break;
             case ENTRY:         //进场
                 sowEvent.setExtra(JSON_MAPPER.toJson(getSowEntryExtra(event, basicMap, barnMap)));
                 break;
             case MATING:        //配种
-                sowEvent.setExtra(JSON_MAPPER.toJson(getSowMatingExtra(event, boarMap)));
+                DoctorMatingDto mating = getSowMatingExtra(event, boarMap);
+                sowEvent.setMattingDate(event.getEventAt());                //配种时间
+                sowEvent.setExtra(JSON_MAPPER.toJson(mating));
                 break;
             case PREG_CHECK:    //妊娠检查
-                sowEvent.setExtra(JSON_MAPPER.toJson(getSowPregCheckExtra(event)));
+                DoctorPregChkResultDto checkResult = getSowPregCheckExtra(event);
+                sowEvent.setPregCheckResult(checkResult.getCheckResult());  //妊娠检查结果
+                sowEvent.setCheckDate(event.getEventAt());                  //检查时间
+                sowEvent.setExtra(JSON_MAPPER.toJson(checkResult));
                 break;
             case ABORTION:      //流产, 只记录事件即可, 旧猪场软件并没有流产原因
+                sowEvent.setAbortionDate(event.getEventAt());             //流产事件
                 sowEvent.setExtra(JSON_MAPPER.toJson(DoctorAbortionDto.builder().abortionDate(event.getEventAt()).build()));
                 break;
             case FARROWING:     //分娩
-                sowEvent.setExtra(JSON_MAPPER.toJson(getSowFarrowExtra(event, barnMap)));
+                DoctorFarrowingDto farrowing = getSowFarrowExtra(event, barnMap);
+                sowEvent.setLiveCount(farrowing.getFarrowingLiveCount()); //活仔数
+                sowEvent.setHealthCount(farrowing.getHealthCount());      //健仔数
+                sowEvent.setWeakCount(farrowing.getWeakCount());          //弱仔数
+                sowEvent.setMnyCount(farrowing.getMnyCount());            //木乃伊数
+                sowEvent.setJxCount(farrowing.getJxCount());              //畸形数
+                sowEvent.setDeadCount(farrowing.getDeadCount());          //死胎数
+                sowEvent.setBlackCount(farrowing.getBlackCount());        //黑胎数
+                sowEvent.setFarrowingDate(event.getEventAt());            //分娩时间
+                sowEvent.setExtra(JSON_MAPPER.toJson(farrowing));
                 break;
             case WEAN:          //断奶
-                sowEvent.setExtra(JSON_MAPPER.toJson(getSowWeanExtra(event)));
+                DoctorPartWeanDto wean = getSowWeanExtra(event);
+                sowEvent.setWeanCount(wean.getPartWeanPigletsCount());  //断奶数
+                sowEvent.setWeanAvgWeight(wean.getPartWeanAvgWeight()); //断奶均重
+                sowEvent.setPartweanDate(event.getEventAt());           //断奶时间
+                sowEvent.setExtra(JSON_MAPPER.toJson(wean));
                 break;
             case FOSTERS:       //拼窝
                 sowEvent.setExtra(JSON_MAPPER.toJson(getSowFosterExtra(event, basicMap)));
@@ -554,7 +583,7 @@ public class DoctorMoveDataService {
         mating.setMatingType(type == null ? null : type.getKey());
 
         //配种公猪
-        DoctorPig matingPig  = boarMap.get(event.getBoarCode());
+        DoctorPig matingPig = boarMap.get(event.getBoarCode());
         mating.setMatingBoarPigId(matingPig == null ? null : matingPig.getId());
         mating.setMatingBoarPigCode(event.getBoarCode());
         return mating;
@@ -567,7 +596,7 @@ public class DoctorMoveDataService {
         preg.setCheckMark(event.getRemark());
 
         //妊娠检查结果
-        PregCheckResult result = PregCheckResult.from(event.getPregCheckResult());
+        PregCheckResult result = from(event.getPregCheckResult());
         preg.setCheckResult(result == null ? null : result.getKey());
         return preg;
     }
@@ -702,6 +731,24 @@ public class DoctorMoveDataService {
 
             //母猪当前配种次数
             track.setCurrentMatingCount(getSowCurrentMatingCount(events, sow));
+
+            //更新胎次 倒叙
+            updateParity(events, track);
+
+            //更新母猪事件当中的配种类型
+            updateDoctorMateType(events);
+
+            //更新事件的非生产天数
+            updateNPD(events);
+
+            //更新初配事件的是否已经分娩 和是否已经怀孕 的标志位
+            updateFlag(events);
+
+            //统计孕期 和 哺乳期
+            updateDuring(events);
+
+            //更新event
+            events.forEach(doctorPigEventDao::update);
         }
 
         //猪舍
@@ -716,22 +763,254 @@ public class DoctorMoveDataService {
     //母猪的当前配种次数(初配, 复配等等)
     private static int getSowCurrentMatingCount(List<DoctorPigEvent> events, DoctorPig sow) {
         //离场的都置成0
+        Boolean leave = false;
         if (Objects.equals(sow.getIsRemoval(), IsOrNot.YES.getValue())) {
-            return 0;
+            leave = true;
         }
 
         //未离场的重新从头判断下母猪的当前配种次数
         int count = 0;
         for (DoctorPigEvent event : events) {
             if (Objects.equals(event.getType(), PigEvent.MATING.getKey())) {
-                count ++;
-            }
-            else if (Objects.equals(event.getType(), PigEvent.TO_MATING.getKey()) || isNotPreg(event) ||
+                count++;
+                //给event赋值当前配种次数
+                event.setCurrentMatingCount(count);
+            } else if (Objects.equals(event.getType(), PigEvent.TO_MATING.getKey()) || isNotPreg(event) ||
                     Objects.equals(event.getType(), PigEvent.ABORTION.getKey())) {
                 count = 0;
             }
         }
-        return count;
+        if (leave) {
+            return 0;
+        } else {
+            return count;
+        }
+
+    }
+
+    //更新胎次
+    private static void updateParity(List<DoctorPigEvent> events, DoctorPigTrack track) {
+        List<DoctorPigEvent> revertList = Lists.reverse(events);
+        int currentParity = track.getCurrentParity();
+        for (DoctorPigEvent event : revertList) {
+            //如果是分娩事件
+            if (Objects.equals(event.getType(), PigEvent.FARROWING.getKey())) {
+                int num = currentParity - 1;
+                event.setParity(num);
+                break;
+            }
+            event.setParity(currentParity);
+        }
+    }
+
+    //更新母猪事件的配种类型
+    private static void updateDoctorMateType(List<DoctorPigEvent> events) {
+        DoctorPigEvent lastFlag = null;
+        for (DoctorPigEvent event : events) {
+            if (Objects.equals(event.getType(), PigEvent.ENTRY.getKey()) ||
+                    Objects.equals(event.getType(), PigEvent.PREG_CHECK.getKey()) ||
+                    Objects.equals(event.getType(), PigEvent.WEAN.getKey()) ||
+                    Objects.equals(event.getType(), PigEvent.ABORTION.getKey())
+                    ) {
+                lastFlag = event;
+                break;
+            }
+
+            //配种事件而且是初陪
+            if (Objects.equals(event.getType(), PigEvent.MATING.getKey()) && event.getCurrentMatingCount() == 1) {
+                if (lastFlag == null) {
+                    log.warn("sow data wrong...");
+                    log.warn("sow data event:{}", event);
+                    break;
+                }
+                //如果是进场
+                if (Objects.equals(lastFlag.getType(), PigEvent.ENTRY.getKey()) && event.getParity() == 1) {
+                    //第一个胎次
+                    event.setDoctorMateType(DoctorMatingType.HP.getKey());
+                }
+
+                //如果是妊娠检查
+                if (Objects.equals(lastFlag.getType(), PigEvent.PREG_CHECK.getKey())) {
+                    switch (lastFlag.getPregCheckResult()) {
+                        case 2:
+                            event.setDoctorMateType(DoctorMatingType.YP.getKey());
+                            break;
+                        case 3:
+                            event.setDoctorMateType(DoctorMatingType.LPC.getKey());
+                            break;
+                        case 4:
+                            event.setDoctorMateType(DoctorMatingType.FP.getKey());
+                            break;
+                    }
+                }
+
+                //如果是断奶
+                if (Objects.equals(lastFlag.getType(), PigEvent.WEAN.getKey())) {
+                    event.setDoctorMateType(DoctorMatingType.DP.getKey());
+                }
+
+                //如果是断奶
+                if (Objects.equals(lastFlag.getType(), PigEvent.ABORTION.getKey())) {
+                    event.setDoctorMateType(DoctorMatingType.LPL.getKey());
+                }
+            }
+        }
+    }
+
+    //更新事件的非生产天数
+    private static void updateNPD(List<DoctorPigEvent> events) {
+        //上一个初配事件
+        DoctorPigEvent lastMateFlag = null;
+        //上一个断奶事件
+        DoctorPigEvent lastWeanFlag = null;
+        //上一个进场事件
+        DoctorPigEvent lastEnterFlag = null;
+        for (DoctorPigEvent event : events) {
+            //如果当前事件是进场事件, 进行记录
+            if (Objects.equals(event.getType(), PigEvent.ENTRY.getKey()) && lastMateFlag != null) {
+                lastEnterFlag = event;
+                break;
+            }
+
+            //找到上一个初配事件
+            if (Objects.equals(event.getType(), PigEvent.MATING.getKey()) && event.getCurrentMatingCount() == 1) {
+                lastMateFlag = event;
+                if (lastWeanFlag != null && lastMateFlag != null) {
+                    int days = Days.daysBetween(new DateTime(lastMateFlag.getMattingDate()), new DateTime(lastWeanFlag.getPartweanDate())).getDays();
+                    event.setDpnpd(days);
+                    event.setNpd(days);
+                    lastWeanFlag = null;
+                    break;
+                }
+
+                if (lastEnterFlag != null && lastMateFlag != null) {
+                    int days = Days.daysBetween(new DateTime(lastMateFlag.getMattingDate()), new DateTime(lastEnterFlag.getEventAt())).getDays();
+                    event.setJpnpd(days);
+                    event.setNpd(days);
+                    lastEnterFlag = null;
+                    break;
+                }
+                break;
+
+            }
+
+            //当前事件是妊娠检查事件
+            if (Objects.equals(event.getType(), PigEvent.PREG_CHECK.getKey()) && lastMateFlag != null) {
+                int days = Days.daysBetween(new DateTime(lastMateFlag.getMattingDate()), new DateTime(event.getCheckDate())).getDays();
+                switch (event.getPregCheckResult()) {
+                    case 2:
+                        //配种到阴性
+                        event.setPynpd(days);
+                        event.setNpd(days);
+                        break;
+                    case 3:
+                        //配种到流产
+                        event.setPlnpd(days);
+                        event.setNpd(days);
+                        break;
+                    case 4:
+                        //配种到返情
+                        event.setPfnpd(days);
+                        event.setNpd(days);
+                        break;
+                }
+                break;
+            }
+
+            //当前事件是流产事件
+            if (Objects.equals(event.getType(), PigEvent.ABORTION.getKey()) && lastMateFlag != null) {
+                int days = Days.daysBetween(new DateTime(lastMateFlag.getMattingDate()), new DateTime(event.getAbortionDate())).getDays();
+                event.setPlnpd(days);
+                event.setNpd(days);
+                break;
+            }
+
+            // 离场事件
+            if (Objects.equals(event.getType(), PigEvent.REMOVAL.getKey()) && lastMateFlag != null) {
+                //如果是死亡原因
+                if (Objects.equals(event.getChangeTypeId(), DoctorBasicEnums.DEAD.getId())) {
+                    int days = Days.daysBetween(new DateTime(lastMateFlag.getMattingDate()), new DateTime(event.getEventAt())).getDays();
+                    event.setPsnpd(days);
+                    event.setNpd(days);
+                    break;
+                }
+
+                //如果是淘汰原因
+                if (Objects.equals(event.getChangeTypeId(), DoctorBasicEnums.ELIMINATE.getId())) {
+                    int days = Days.daysBetween(new DateTime(lastMateFlag.getMattingDate()), new DateTime(event.getEventAt())).getDays();
+                    event.setPtnpd(days);
+                    event.setNpd(days);
+                    break;
+                }
+            }
+
+            //如果当前事件是断奶事件, 进行记录
+            if (Objects.equals(event.getType(), PigEvent.WEAN.getKey()) && lastMateFlag != null) {
+                lastWeanFlag = event;
+                break;
+            }
+        }
+    }
+
+    //更新初配事件的是否已经分娩 和是否已经怀孕 的标志位
+    private static void updateFlag(List<DoctorPigEvent> events) {
+        //上一个初配事件
+        DoctorPigEvent lastMateFlag = null;
+        for (DoctorPigEvent event : events) {
+            //找到上一个初配事件
+            if (Objects.equals(event.getType(), PigEvent.MATING.getKey()) && event.getCurrentMatingCount() == 1) {
+                lastMateFlag = event;
+                break;
+            }
+            //当前事件是妊娠检查事件 而且检查结果是阳性
+            if (Objects.equals(event.getType(), PigEvent.WEAN.getKey())
+                    && lastMateFlag != null
+                    && Objects.equals(event.getPregCheckResult(), PregCheckResult.YANG.getKey())) {
+                lastMateFlag.setIsImpregnation(1);
+                break;
+            }
+
+            //当前事件是分娩事件
+            if (Objects.equals(event.getType(), PigEvent.FARROWING.getKey())
+                    && lastMateFlag != null) {
+                //更新分娩的标志位
+                lastMateFlag.setIsDelivery(1);
+                break;
+            }
+        }
+    }
+
+    //统计孕期 和 哺乳期
+    private static void updateDuring(List<DoctorPigEvent> events) {
+        //上一个初配事件
+        DoctorPigEvent lastMateFlag = null;
+        //上一个分娩事件
+        DoctorPigEvent lastFarrowingFlag = null;
+        for (DoctorPigEvent event : events) {
+            //找到上一个初配事件
+            if (Objects.equals(event.getType(), PigEvent.MATING.getKey()) && event.getCurrentMatingCount() == 1) {
+                lastMateFlag = event;
+                break;
+            }
+            //当前事件是分娩事件
+            if (Objects.equals(event.getType(), PigEvent.FARROWING.getKey())
+                    && lastMateFlag != null) {
+                lastFarrowingFlag = event;
+                //统计孕期
+                int days = Days.daysBetween(new DateTime(event.getFarrowingDate()), new DateTime(lastMateFlag.getMattingDate())).getDays();
+                event.setPregDays(days);
+                break;
+            }
+
+            //当前事件是断奶事件
+            if (Objects.equals(event.getType(), PigEvent.WEAN.getKey())
+                    && lastFarrowingFlag != null) {
+                //统计哺乳期
+                int days = Days.daysBetween(new DateTime(event.getPartweanDate()), new DateTime(lastFarrowingFlag.getFarrowingDate())).getDays();
+                event.setFeedDays(days);
+                break;
+            }
+        }
     }
 
     //判断妊娠检查结果
@@ -740,7 +1019,7 @@ public class DoctorMoveDataService {
             return false;
         }
         DoctorPregChkResultDto result = JSON_MAPPER.fromJson(event.getExtra(), DoctorPregChkResultDto.class);
-        return result != null && !Objects.equals(result.getCheckResult(), PregCheckResult.YANG.getKey());
+        return result != null && !Objects.equals(result.getCheckResult(), YANG.getKey());
     }
 
     //获取即将离场的母猪状态
@@ -958,7 +1237,11 @@ public class DoctorMoveDataService {
                 boarEvent.setExtra(JSON_MAPPER.toJson(vacc));
                 break;
             case REMOVAL:   //离场
-                boarEvent.setExtra(JSON_MAPPER.toJson(getBoarRemovalExtra(event, customerMap, basicMap, barnMap, changeReasonMap)));
+                DoctorRemovalDto removal = getBoarRemovalExtra(event, customerMap, basicMap, barnMap, changeReasonMap);
+                boarEvent.setExtra(JSON_MAPPER.toJson(removal));
+                boarEvent.setChangeTypeId(removal.getChgTypeId());
+                boarEvent.setPrice(removal.getPrice());
+                boarEvent.setAmount(removal.getSum());
                 break;
             case ENTRY:     //进场
                 boarEvent.setExtra(JSON_MAPPER.toJson(getBoarEntryExtra(event, basicMap, barnMap)));
@@ -1142,13 +1425,21 @@ public class DoctorMoveDataService {
                 event.setExtraMap(newEvent);
                 break;
             case MOVE_IN:
-                event.setExtraMap(getMoveInEvent(gainEvent, basicMap, groupMap, group));
+                DoctorMoveInGroupEvent moveIn = getMoveInEvent(gainEvent, basicMap, groupMap, group);
+                event.setExtraMap(moveIn);
+                event.setTransGroupType(getTransType(event.getPigType(), moveIn.getFromBarnType()).getValue());  //区分内转还是外转
                 break;
             case CHANGE:
-                event.setExtraMap(getChangeEvent(gainEvent, basicMap, changeReasonMap, customerMap));
+                DoctorChangeGroupEvent changeEvent = getChangeEvent(gainEvent, basicMap, changeReasonMap, customerMap);
+                event.setExtraMap(changeEvent);
+                event.setChangeTypeId(changeEvent.getChangeTypeId());
+                event.setPrice(changeEvent.getPrice());
+                event.setAmount(changeEvent.getAmount());
                 break;
             case TRANS_GROUP:
-                event.setExtraMap(getTranGroupEvent(gainEvent, basicMap, barnMap, groupMap, group));
+                DoctorTransGroupEvent transGroupEvent = getTranGroupEvent(gainEvent, basicMap, barnMap, groupMap, group);
+                event.setExtraMap(transGroupEvent);
+                event.setTransGroupType(getTransType(event.getPigType(), transGroupEvent.getToBarnType()).getValue());  //区分内转还是外转
                 break;
             case TURN_SEED:
                 event.setExtraMap(getTurnSeedEvent(gainEvent, basicMap, barnMap, pigMap));
@@ -1183,8 +1474,9 @@ public class DoctorMoveDataService {
                 anti.setQuantity(gainEvent.getQuantity());
                 event.setExtraMap(anti);
                 break;
-            case TRANS_FARM:
-                event.setExtraMap(getTranFarmEvent(gainEvent, basicMap, barnMap, groupMap, group));
+            case TRANS_FARM: //转场不区分内转外转, 相当于空降
+                DoctorTransFarmGroupEvent transFarmEvent = getTranFarmEvent(gainEvent, basicMap, barnMap, groupMap, group);
+                event.setExtraMap(transFarmEvent);
                 break;
             case CLOSE:
                 DoctorCloseGroupEvent close = new DoctorCloseGroupEvent();
@@ -1195,6 +1487,12 @@ public class DoctorMoveDataService {
                 break;
         }
         return event;
+    }
+
+    //判断内转还是外转
+    private static DoctorGroupEvent.TransGroupType getTransType(Integer pigType, Integer toBarnType) {
+        return Objects.equals(pigType, toBarnType) || (FARROW_TYPES.contains(pigType) && FARROW_TYPES.contains(toBarnType)) ?
+                DoctorGroupEvent.TransGroupType.IN : DoctorGroupEvent.TransGroupType.OUT;
     }
 
     //转入事件详细信息
@@ -1218,6 +1516,7 @@ public class DoctorMoveDataService {
         //来源猪舍
         moveIn.setFromBarnId(group.getCurrentBarnId());
         moveIn.setFromBarnName(group.getCurrentBarnName());
+        moveIn.setFromBarnType(group.getPigType());
 
         //再转入猪舍里, 表示的是来源猪群
         DoctorGroup fromGroup = groupMap.get(gainEvent.getToGroupOutId());
@@ -1278,6 +1577,7 @@ public class DoctorMoveDataService {
             if (barn != null) {
                 transGroup.setToBarnId(barn.getId());
                 transGroup.setToBarnName(barn.getName());
+                transGroup.setToBarnType(barn.getPigType());
             }
             DoctorGroup toGroup = groupMap.get(gainEvent.getToBarnOutId()); //就是 OutDestination
             if (toGroup != null) {
@@ -1289,6 +1589,7 @@ public class DoctorMoveDataService {
             if (barn != null) {
                 transGroup.setToBarnId(barn.getId());
                 transGroup.setToBarnName(barn.getName());
+                transGroup.setToBarnType(barn.getPigType());
             }
             DoctorGroup toGroup = groupMap.get(gainEvent.getToGroupOutId());
             if (toGroup != null) {
@@ -1327,6 +1628,7 @@ public class DoctorMoveDataService {
         if (barn != null) {
             transFarm.setToBarnId(barn.getId());
             transFarm.setToBarnName(barn.getName());
+            transFarm.setToBarnType(barn.getPigType());
         }
         DoctorGroup toGroup = groupMap.get(gainEvent.getToGroupOutId());
         if (toGroup != null) {

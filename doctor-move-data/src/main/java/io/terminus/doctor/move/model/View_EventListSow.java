@@ -33,8 +33,8 @@ public class View_EventListSow implements Serializable {
     private String eventDesc;       // 事件描述
     private String remark;          // 事件备注
     private String barnOutId;       // 事件发生猪舍
-    private Long price;
-    private Long amount;
+    private Long price;             // 单价(分)
+    private Long amount;            // 总额(分)
     private String boarCode;        // 配种事件的公猪code
     private String serviceType;     // 配种/分娩事件复用字段, 意义不同
     private String staffName;

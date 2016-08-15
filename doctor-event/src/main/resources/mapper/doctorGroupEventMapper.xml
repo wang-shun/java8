@@ -25,6 +25,10 @@
         <result column="avg_weight" property="avgWeight"/>
         <result column="avg_day_age" property="avgDayAge"/>
         <result column="is_auto" property="isAuto"/>
+        <result column="change_type_id" property="changeTypeId"/>
+        <result column="price" property="price"/>
+        <result column="amount" property="amount"/>
+        <result column="trans_group_type" property="transGroupType"/>
         <result column="out_id" property="outId"/>
         <result column="remark" property="remark"/>
         <result column="extra" property="extra"/>
@@ -45,11 +49,71 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        org_id, org_name, farm_id, farm_name, group_id, group_code, event_at, type, name, `desc`, barn_id, barn_name, pig_type, quantity, weight, avg_weight, avg_day_age, is_auto, out_id, remark, extra, created_at, creator_id, creator_name, updated_at, updator_id, updator_name
+        org_id,
+        org_name,
+        farm_id,
+        farm_name,
+        group_id,
+        group_code,
+        event_at,
+        `type`,
+        `name`,
+        `desc`,
+        barn_id,
+        barn_name,
+        pig_type,
+        quantity,
+        weight,
+        avg_weight,
+        avg_day_age,
+        is_auto,
+        change_type_id,
+        price,
+        amount,
+        trans_group_type,
+        out_id,
+        remark,
+        extra,
+        created_at,
+        creator_id,
+        creator_name,
+        updated_at,
+        updator_id,
+        updator_name
     </sql>
 
     <sql id="vals">
-        #{orgId}, #{orgName}, #{farmId}, #{farmName}, #{groupId}, #{groupCode}, #{eventAt}, #{type}, #{name}, #{desc}, #{barnId}, #{barnName}, #{pigType}, #{quantity}, #{weight}, #{avgWeight}, #{avgDayAge}, #{isAuto}, #{outId}, #{remark}, #{extra}, now(), #{creatorId}, #{creatorName}, now(), #{updatorId}, #{updatorName}
+        #{orgId},
+        #{orgName},
+        #{farmId},
+        #{farmName},
+        #{groupId},
+        #{groupCode},
+        #{eventAt},
+        #{type},
+        #{name},
+        #{desc},
+        #{barnId},
+        #{barnName},
+        #{pigType},
+        #{quantity},
+        #{weight},
+        #{avgWeight},
+        #{avgDayAge},
+        #{isAuto},
+        #{changeTypeId},
+        #{price},
+        #{amount},
+        #{transGroupType},
+        #{outId},
+        #{remark},
+        #{extra},
+        now(),
+        #{creatorId},
+        #{creatorName},
+        now(),
+        #{updatorId},
+        #{updatorName}
     </sql>
 
     <insert id="create" parameterType="DoctorGroupEvent" keyProperty="id" useGeneratedKeys="true">
@@ -67,8 +131,7 @@
     </select>
 
     <update id="update" parameterType="DoctorGroupEvent">
-        UPDATE
-        <include refid="tb"/>
+        UPDATE <include refid="tb"/>
         <set>
             <if test="orgId != null">org_id = #{orgId},</if>
             <if test="orgName != null">org_name = #{orgName},</if>
@@ -77,8 +140,8 @@
             <if test="groupId != null">group_id = #{groupId},</if>
             <if test="groupCode != null">group_code = #{groupCode},</if>
             <if test="eventAt != null">event_at = #{eventAt},</if>
-            <if test="type != null">type = #{type},</if>
-            <if test="name != null">name = #{name},</if>
+            <if test="type != null">`type` = #{type},</if>
+            <if test="name != null">`name` = #{name},</if>
             <if test="desc != null">`desc` = #{desc},</if>
             <if test="barnId != null">barn_id = #{barnId},</if>
             <if test="barnName != null">barn_name = #{barnName},</if>
@@ -88,11 +151,18 @@
             <if test="avgWeight != null">avg_weight = #{avgWeight},</if>
             <if test="avgDayAge != null">avg_day_age = #{avgDayAge},</if>
             <if test="isAuto != null">is_auto = #{isAuto},</if>
+            <if test="changeTypeId != null">change_type_id = #{changeTypeId},</if>
+            <if test="price != null">price = #{price},</if>
+            <if test="amount != null">amount = #{amount},</if>
+            <if test="transGroupType != null">trans_group_type = #{transGroupType},</if>
             <if test="outId != null">out_id = #{outId},</if>
             <if test="remark != null">remark = #{remark},</if>
             <if test="extra != null">extra = #{extra},</if>
+            <if test="creatorId != null">creator_id = #{creatorId},</if>
+            <if test="creatorName != null">creator_name = #{creatorName},</if>
             <if test="updatorId != null">updator_id = #{updatorId},</if>
             <if test="updatorName != null">updator_name = #{updatorName},</if>
+
             updated_at=now()
         </set>
         WHERE id = #{id}
@@ -120,7 +190,7 @@
         <where>
             <if test="farmId != null">AND farm_id = #{farmId}</if>
             <if test="groupId != null">AND group_id = #{groupId}</if>
-            <if test="type != null">AND type = #{type}</if>
+            <if test="type != null">AND `type` = #{type}</if>
         </where>
     </select>
 
@@ -129,7 +199,7 @@
         <where>
             <if test="farmId != null">AND farm_id = #{farmId}</if>
             <if test="groupId != null">AND group_id = #{groupId}</if>
-            <if test="type != null">AND type = #{type}</if>
+            <if test="type != null">AND `type` = #{type}</if>
         </where>
         ORDER BY event_at DESC, created_at DESC
         LIMIT #{offset}, #{limit}
@@ -139,7 +209,7 @@
         SELECT <include refid="cols_all"/> from <include refid="tb"/>
         <where>
             <if test="farmId != null">AND farm_id = #{farmId}</if>
-            <if test="eventType != null">AND type = #{eventType}</if>
+            <if test="eventType != null">AND `type` = #{eventType}</if>
             <if test="startAt != null">AND event_at &gt;= #{startAt}</if>
             <if test="endAt != null">AND event_at &lt;= #{endAt}</if>
         </where>
@@ -169,6 +239,10 @@
             #{item.avgWeight},
             #{item.avgDayAge},
             #{item.isAuto},
+            #{item.changeTypeId},
+            #{item.price},
+            #{item.amount},
+            #{item.transGroupType},
             #{item.outId},
             #{item.remark},
             #{item.extra},

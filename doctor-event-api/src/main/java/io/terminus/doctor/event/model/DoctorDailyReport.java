@@ -1,7 +1,7 @@
 package io.terminus.doctor.event.model;
 
 import io.terminus.common.utils.JsonMapper;
-import io.terminus.doctor.event.dto.report.DoctorDailyReportDto;
+import io.terminus.doctor.event.dto.report.daily.DoctorDailyReportDto;
 import lombok.AccessLevel;
 import lombok.Data;
 import lombok.Getter;
@@ -35,6 +35,26 @@ public class DoctorDailyReport implements Serializable {
      * 猪场名称
      */
     private String farmName;
+
+    /**
+     * 母猪存栏
+     */
+    private int sowCount;
+
+    /**
+     * 产房仔猪存栏
+     */
+    private int farrowCount;
+
+    /**
+     * 保育猪存栏
+     */
+    private int nurseryCount;
+
+    /**
+     * 育肥猪存栏
+     */
+    private int fattenCount;
     
     /**
      * 日报数据，json存储

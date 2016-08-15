@@ -175,3 +175,23 @@ msg:
     ios: #IOS应用配置
       appKey: xxxx
       appSecret: xxxx
+
+esearch:
+  pig:
+    index-name: pigs
+    index-type: pig
+    mapping-path: search/pig_mapping.json
+    full-dump-range: 3
+    batch-size: 100
+  group:
+    index-name: groups
+    index-type: group
+    mapping-path: search/group_mapping.json
+    full-dump-range: 3
+    batch-size: 100
+  barn:
+    index-name: barns
+    index-type: barn
+    mapping-path: search/barn_mapping.json
+    full-dump-range: 3
+    batch-size: 100

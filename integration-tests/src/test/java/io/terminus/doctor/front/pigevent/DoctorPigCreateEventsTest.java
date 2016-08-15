@@ -30,6 +30,8 @@ import io.terminus.doctor.event.enums.PigSource;
 import io.terminus.doctor.event.enums.PregCheckResult;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.front.BaseFrontWebTest;
+import io.terminus.doctor.utils.HttpGetRequest;
+import io.terminus.doctor.utils.HttpPostRequest;
 import io.terminus.doctor.workflow.core.WorkFlowService;
 import org.joda.time.DateTime;
 import org.junit.Before;
@@ -38,8 +40,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.SpringApplicationConfiguration;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.ResponseEntity;
-import io.terminus.doctor.utils.HttpGetRequest;
-import io.terminus.doctor.utils.HttpPostRequest;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -55,7 +55,7 @@ import java.util.UUID;
  * Descirbe: 测试对应的创建事件录入
  */
 @SpringApplicationConfiguration(FrontWebConfiguration.class)
-public class DoctorPigCreateEventsTest extends BaseFrontWebTest{
+public class DoctorPigCreateEventsTest extends BaseFrontWebTest {
 
     private String basicUrl = null;
 
@@ -78,7 +78,7 @@ public class DoctorPigCreateEventsTest extends BaseFrontWebTest{
 //    private Subscriber subscriber;
 
     @Before
-    public void before() throws Exception{
+    public void before() throws Exception {
         basicUrl = "http://localhost:" + this.port + "/api/doctor/events/create";
 
         // init node xml
@@ -90,7 +90,7 @@ public class DoctorPigCreateEventsTest extends BaseFrontWebTest{
      * 测试创建猪信息
      */
     @Test
-    public void testCreateMockData(){
+    public void testCreateMockData() {
         // 公猪信息创建方式
 //        for(int i=0; i<10; i++){
 //            boarEntryEventCreate();
@@ -99,7 +99,7 @@ public class DoctorPigCreateEventsTest extends BaseFrontWebTest{
         Long pigBoarId = boarEntryEventCreate();
 
         // 母猪信息创建方式
-        for (int i = 0; i < 1 ; i++){
+        for (int i = 0; i < 1; i++) {
             Long pigId = sowEntryEventCreate();
             sowMatingEventCreate(pigId, pigBoarId); // 配种事件信息录入
 
@@ -133,27 +133,27 @@ public class DoctorPigCreateEventsTest extends BaseFrontWebTest{
     /**
      * 创建Mock 所有的数据内容
      */
-    public void testCreateSingleMockData(){
+    public void testCreateSingleMockData() {
 
         // 创建公猪 进厂事件信息
-        for (int i=0; i<5; i++){
+        for (int i = 0; i < 5; i++) {
             boarEntryEventCreate();
         }
 
         // 创建母猪进程事件信息
-        for(int i=0; i<2; i++){
+        for (int i = 0; i < 2; i++) {
             sowEntryEventCreate();
         }
 
         // 创建配种事件
-        for(int i=0; i<2; i++){
+        for (int i = 0; i < 2; i++) {
             Long pigId = sowEntryEventCreate();
             Long pigBoarId = boarEntryEventCreate();
             sowMatingEventCreate(pigId, pigBoarId);
         }
 
         // 没有转舍 ， 妊娠检查 阴 性
-        for(int i=0; i<2; i++){
+        for (int i = 0; i < 2; i++) {
             Long pigId = sowEntryEventCreate();
             Long pigBoarId = boarEntryEventCreate();
             sowMatingEventCreate(pigId, pigBoarId);
@@ -161,7 +161,7 @@ public class DoctorPigCreateEventsTest extends BaseFrontWebTest{
         }
 
         // 没有转舍 妊娠检查 不确定
-        for(int i=0; i<2; i++){
+        for (int i = 0; i < 2; i++) {
             Long pigId = sowEntryEventCreate();
             Long pigBoarId = boarEntryEventCreate();
             sowMatingEventCreate(pigId, pigBoarId);
@@ -169,7 +169,7 @@ public class DoctorPigCreateEventsTest extends BaseFrontWebTest{
         }
 
         // 没有转舍 妊娠检查 阳性
-        for(int i=0; i<2; i++){
+        for (int i = 0; i < 2; i++) {
             Long pigId = sowEntryEventCreate();
             Long pigBoarId = boarEntryEventCreate();
             sowMatingEventCreate(pigId, pigBoarId);
@@ -177,7 +177,7 @@ public class DoctorPigCreateEventsTest extends BaseFrontWebTest{
         }
 
         // 配种后 -> 转舍
-        for(int i=0; i<2; i++){
+        for (int i = 0; i < 2; i++) {
             Long pigId = sowEntryEventCreate();
             Long pigBoarId = boarEntryEventCreate();
             sowMatingEventCreate(pigId, pigBoarId);
@@ -185,7 +185,7 @@ public class DoctorPigCreateEventsTest extends BaseFrontWebTest{
         }
 
         // 配种 -> 转舍 -> 妊娠 阴
-        for(int i=0; i<2; i++){
+        for (int i = 0; i < 2; i++) {
             Long pigId = sowEntryEventCreate();
             Long pigBoarId = boarEntryEventCreate();
             sowMatingEventCreate(pigId, pigBoarId);
@@ -194,7 +194,7 @@ public class DoctorPigCreateEventsTest extends BaseFrontWebTest{
         }
 
         // 配种 -> 转舍 -> 妊娠 阳性
-        for(int i=0; i<2; i++){
+        for (int i = 0; i < 2; i++) {
             Long pigId = sowEntryEventCreate();
             Long pigBoarId = boarEntryEventCreate();
             sowMatingEventCreate(pigId, pigBoarId);
@@ -203,7 +203,7 @@ public class DoctorPigCreateEventsTest extends BaseFrontWebTest{
         }
 
         // 配种 -> 转舍 -> 妊娠 不确定
-        for(int i=0; i<2; i++){
+        for (int i = 0; i < 2; i++) {
             Long pigId = sowEntryEventCreate();
             Long pigBoarId = boarEntryEventCreate();
             sowMatingEventCreate(pigId, pigBoarId);
@@ -212,7 +212,7 @@ public class DoctorPigCreateEventsTest extends BaseFrontWebTest{
         }
 
         // 配种 -> 转舍 -> 妊娠 -> 流产
-        for(int i=0; i<2; i++){
+        for (int i = 0; i < 2; i++) {
             Long pigId = sowEntryEventCreate();
             Long pigBoarId = boarEntryEventCreate();
             sowMatingEventCreate(pigId, pigBoarId);
@@ -222,7 +222,7 @@ public class DoctorPigCreateEventsTest extends BaseFrontWebTest{
         }
 
         // 配种 -> 转舍 -> 妊娠 -> 去分娩
-        for(int i=0; i<2; i++){
+        for (int i = 0; i < 2; i++) {
             Long pigId = sowEntryEventCreate();
             Long pigBoarId = boarEntryEventCreate();
             sowMatingEventCreate(pigId, pigBoarId);
@@ -232,7 +232,7 @@ public class DoctorPigCreateEventsTest extends BaseFrontWebTest{
         }
 
         // 配种 -> 转舍 -> 妊娠 -> 去分娩 -> 分娩
-        for(int i=0; i<2; i++){
+        for (int i = 0; i < 2; i++) {
             Long pigId = sowEntryEventCreate();
             Long pigBoarId = boarEntryEventCreate();
             sowMatingEventCreate(pigId, pigBoarId);
@@ -243,7 +243,7 @@ public class DoctorPigCreateEventsTest extends BaseFrontWebTest{
         }
 
         // 配种 -> 转舍 -> 妊娠 -》去分娩 -》分娩 -》 完全断奶
-        for(int i=0; i<4; i++){
+        for (int i = 0; i < 4; i++) {
             Long pigId = sowEntryEventCreate();
             Long pigBoarId = boarEntryEventCreate();
             sowMatingEventCreate(pigId, pigBoarId);
@@ -251,9 +251,9 @@ public class DoctorPigCreateEventsTest extends BaseFrontWebTest{
             testPregCheckResultEventCreate(pigId, PregCheckResult.YANG);
             testToFarrowing(pigId);
             testFarrowingEventCreate(pigId);
-            if(i % 2 == 0){
+            if (i % 2 == 0) {
                 testWeanMethod(pigId, 200);
-            }else {
+            } else {
                 testWeanMethod(pigId, 100);
             }
         }
@@ -264,9 +264,9 @@ public class DoctorPigCreateEventsTest extends BaseFrontWebTest{
      * 测试猪 事件信息
      */
     @Test
-    public void testPigPagingInfo(){
+    public void testPigPagingInfo() {
         // 录入母猪事件信息
-        for (int i = 0; i<30; i++){
+        for (int i = 0; i < 30; i++) {
 //            sowEntryEventCreate();
             boarEntryEventCreate();
         }
@@ -298,7 +298,7 @@ public class DoctorPigCreateEventsTest extends BaseFrontWebTest{
     }
 
     @Test
-    public void testZkClientCondition() throws Exception{
+    public void testZkClientCondition() throws Exception {
 //        subscriber.subscribe(data->{
 //            System.out.println(String.valueOf(data));
 //        });
@@ -310,7 +310,7 @@ public class DoctorPigCreateEventsTest extends BaseFrontWebTest{
      * 测试母猪普通事件信息
      */
     @Test
-    public void casualCasualEventCreateTest(){
+    public void casualCasualEventCreateTest() {
         Long pigId = 1l;
 
         // 录入母猪信息测试内容
@@ -335,9 +335,10 @@ public class DoctorPigCreateEventsTest extends BaseFrontWebTest{
 
     /**
      * 批量猪
+     *
      * @param pigIds
      */
-    public void createRemovalPigEventsContent(List<Long> pigIds){
+    public void createRemovalPigEventsContent(List<Long> pigIds) {
         String url = basicUrl + "/createCasualEvents";
 
         HttpEntity httpEntity = HttpPostRequest.formRequest()
@@ -356,7 +357,7 @@ public class DoctorPigCreateEventsTest extends BaseFrontWebTest{
      * 测试母猪进厂事件信息
      */
     @Test
-    public void sowEntryEventCreateTest(){
+    public void sowEntryEventCreateTest() {
 
         Long pigId = 1l;
         sowEntryEventCreate();
@@ -396,7 +397,7 @@ public class DoctorPigCreateEventsTest extends BaseFrontWebTest{
      * 测试母猪回滚事件信息
      */
     @Test
-    public void testRollBackEventCreateTest(){
+    public void testRollBackEventCreateTest() {
 
         String url = "http://localhost:" + this.port + "/api/doctor/events/pig/rollBackPigEvent";
 
@@ -410,7 +411,7 @@ public class DoctorPigCreateEventsTest extends BaseFrontWebTest{
 
         // test rollback info
         HttpEntity httpEntity = HttpPostRequest.formRequest()
-                .param("pigEventId",5l).param("revertPigType",1)
+                .param("pigEventId", 5l).param("revertPigType", 1)
                 .httpEntity();
 
         Long result = this.restTemplate.postForObject(url, httpEntity, Long.class);
@@ -419,7 +420,7 @@ public class DoctorPigCreateEventsTest extends BaseFrontWebTest{
         printCurrentState();
     }
 
-    private void createSemenEvent(Long pigId){
+    private void createSemenEvent(Long pigId) {
 
         String url = basicUrl + "/createSemen";
 
@@ -434,7 +435,7 @@ public class DoctorPigCreateEventsTest extends BaseFrontWebTest{
         System.out.println(result);
     }
 
-    private void createConditionEvent(Long pigId){
+    private void createConditionEvent(Long pigId) {
         String url = basicUrl + "/createConditionEvent";
 
         HttpEntity httpEntity = HttpPostRequest.formRequest()
@@ -452,7 +453,7 @@ public class DoctorPigCreateEventsTest extends BaseFrontWebTest{
     /**
      * 创建 疾病 免疫事件信息
      */
-    private void createDiseaseVaccinationEvent(Long pigId){
+    private void createDiseaseVaccinationEvent(Long pigId) {
         String url = basicUrl + "/createDiseaseEvent";
 
         HttpEntity httpEntity = HttpPostRequest.formRequest()
@@ -471,14 +472,14 @@ public class DoctorPigCreateEventsTest extends BaseFrontWebTest{
                         .vaccinationStaffId(1l).vaccinationStaffName("vaccinationName").vaccinationRemark("remark")
                         .build())
                 .httpEntity();
-        result = this.restTemplate.postForObject(url,httpEntityVa, Long.class);
+        result = this.restTemplate.postForObject(url, httpEntityVa, Long.class);
         System.out.println(result);
     }
 
     /**
      * 离场母猪创建事件
      */
-    private void createRemovalPigEventContent(Long pigId){
+    private void createRemovalPigEventContent(Long pigId) {
         String url = basicUrl + "/createRemovalEvent";
 
         HttpEntity httpEntity = HttpPostRequest.formRequest()
@@ -495,11 +496,11 @@ public class DoctorPigCreateEventsTest extends BaseFrontWebTest{
     /**
      * 录入转舍事件信息
      */
-    private void chgLocationCasualEventCreate(Long pigId){
-        String url = basicUrl  + "/createChgLocation";
+    private void chgLocationCasualEventCreate(Long pigId) {
+        String url = basicUrl + "/createChgLocation";
 
         HttpEntity httpEntity = HttpPostRequest.formRequest()
-                .param("pigId", pigId).param("farmId", 12345l).param("doctorChgLocationDtoJson",DoctorChgLocationDto.builder()
+                .param("pigId", pigId).param("farmId", 12345l).param("doctorChgLocationDtoJson", DoctorChgLocationDto.builder()
                         .changeLocationDate(new Date()).chgLocationFromBarnId(1l).chgLocationFromBarnName("fromBarnName")
                         .chgLocationToBarnId(2l).chgLocationToBarnName("toBarnName")
                         .build())
@@ -509,7 +510,7 @@ public class DoctorPigCreateEventsTest extends BaseFrontWebTest{
         System.out.println(result);
     }
 
-    private void testFostersEventCreate(Long pigId, Integer fosterCount){
+    private void testFostersEventCreate(Long pigId, Integer fosterCount) {
         // 创建一个可以被拼窝的母猪
         Long pigFosterId = sowEntryEventCreate();
 
@@ -537,7 +538,7 @@ public class DoctorPigCreateEventsTest extends BaseFrontWebTest{
     }
 
 
-    private void testWeanMethod(Long pigId, Integer count){
+    private void testWeanMethod(Long pigId, Integer count) {
         String url = basicUrl + "/createSowEvent";
         HttpEntity httpEntity = HttpPostRequest.formRequest().param("farmId", 12345l)
                 .param("pigId", pigId).param("eventType", PigEvent.WEAN.getKey())
@@ -551,9 +552,10 @@ public class DoctorPigCreateEventsTest extends BaseFrontWebTest{
 
     /**
      * 分娩事件测试
+     *
      * @param pigId
      */
-    private void testFarrowingEventCreate(Long pigId){
+    private void testFarrowingEventCreate(Long pigId) {
         String url = basicUrl + "/createSowEvent";
         HttpEntity httpEntity = (HttpPostRequest.formRequest().param("farmId", 12345l)
                 .param("pigId", pigId).param("eventType", PigEvent.FARROWING.getKey())
@@ -570,9 +572,10 @@ public class DoctorPigCreateEventsTest extends BaseFrontWebTest{
 
     /**
      * 测试母猪转舍事件信息
+     *
      * @param pigId
      */
-    private void testToMating(Long pigId){
+    private void testToMating(Long pigId) {
         String url = basicUrl + "/createSowEvent";
         HttpEntity httpEntity = HttpPostRequest.formRequest()
                 .param("farmId", 12345l).param("pigId", pigId).param("eventType", PigEvent.TO_MATING.getKey())
@@ -588,7 +591,7 @@ public class DoctorPigCreateEventsTest extends BaseFrontWebTest{
     /**
      * 测试对应的去分娩
      */
-    private void testToFarrowing(Long pigId){
+    private void testToFarrowing(Long pigId) {
         String url = basicUrl + "/createSowEvent";
         HttpEntity httpEntity = (HttpPostRequest.formRequest().param("farmId", 12345l)
                 .param("pigId", pigId).param("eventType", PigEvent.TO_FARROWING.getKey())
@@ -603,7 +606,7 @@ public class DoctorPigCreateEventsTest extends BaseFrontWebTest{
     /**
      * 创建对应的流产事件信息
      */
-    private void testAbortionEventCreate(Long pigId){
+    private void testAbortionEventCreate(Long pigId) {
         String url = basicUrl + "/createSowEvent";
         HttpEntity httpEntity = HttpPostRequest.formRequest().param("farmId", 12345l)
                 .param("pigId", pigId).param("eventType", PigEvent.ABORTION.getKey())
@@ -620,7 +623,7 @@ public class DoctorPigCreateEventsTest extends BaseFrontWebTest{
     /**
      * 创建妊娠检查方式
      */
-    private void testPregCheckResultEventCreate(Long pigId,PregCheckResult pregCheckResult){
+    private void testPregCheckResultEventCreate(Long pigId, PregCheckResult pregCheckResult) {
         String url = basicUrl + "/createSowEvent";
         HttpEntity httpEntity = HttpPostRequest.formRequest().param("farmId", 12345l)
                 .param("pigId", pigId).param("eventType", PigEvent.PREG_CHECK.getKey())
@@ -638,7 +641,7 @@ public class DoctorPigCreateEventsTest extends BaseFrontWebTest{
     /**
      * 去妊娠舍
      */
-    private void testToPregEventCreate(Long pigId){
+    private void testToPregEventCreate(Long pigId) {
         String url = basicUrl + "/createSowEvent";
         HttpEntity httpEntity = HttpPostRequest.formRequest().param("farmId", 12345l)
                 .param("pigId", pigId).param("eventType", PigEvent.TO_PREG.getKey())
@@ -654,7 +657,7 @@ public class DoctorPigCreateEventsTest extends BaseFrontWebTest{
     /**
      * 当前 母猪 可录入事件信息
      */
-    private void testCurrentSowInputStatus(Long pigId){
+    private void testCurrentSowInputStatus(Long pigId) {
         String url = "http://localhost:" + this.port + "/api/doctor/events/pig/queryPigEvents";
 
         List<Long> ids = Lists.newArrayList();
@@ -667,9 +670,10 @@ public class DoctorPigCreateEventsTest extends BaseFrontWebTest{
 
     /**
      * 母猪配种事件测试
+     *
      * @param pigId
      */
-    private void sowMatingEventCreate(Long pigId, Long boarId){
+    private void sowMatingEventCreate(Long pigId, Long boarId) {
         String url = basicUrl + "/createSowEvent";
         HttpEntity httpEntity = HttpPostRequest.formRequest().param("farmId", 12345l)
                 .param("pigId", pigId).param("eventType", PigEvent.MATING.getKey())
@@ -683,7 +687,7 @@ public class DoctorPigCreateEventsTest extends BaseFrontWebTest{
 
     }
 
-    private Long boarEntryEventCreate(){
+    private Long boarEntryEventCreate() {
         String url = basicUrl + "/createEntryInfo";
         DoctorFarmEntryDto doctorFarmEntryDto = buildFarmEntryDto();
         doctorFarmEntryDto.setPigType(DoctorPig.PIG_TYPE.BOAR.getKey());
@@ -696,7 +700,7 @@ public class DoctorPigCreateEventsTest extends BaseFrontWebTest{
         return result;
     }
 
-    private Long sowEntryEventCreate(){
+    private Long sowEntryEventCreate() {
         String url = basicUrl + "/createEntryInfo";
         DoctorFarmEntryDto doctorFarmEntryDto = buildFarmEntryDto();
         doctorFarmEntryDto.setPigType(DoctorPig.PIG_TYPE.SOW.getKey());
@@ -712,13 +716,13 @@ public class DoctorPigCreateEventsTest extends BaseFrontWebTest{
     /**
      * 打印当前的信息
      */
-    private void printCurrentState(){
+    private void printCurrentState() {
         System.out.println("doctor pig ******************************************************");
-        System.out.println(JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(doctorPigDao.list(ImmutableMap.of("isRemoval",1))));
-        System.out.println(JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(doctorPigDao.list(ImmutableMap.of("isRemoval",0))));
+        System.out.println(JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(doctorPigDao.list(ImmutableMap.of("isRemoval", 1))));
+        System.out.println(JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(doctorPigDao.list(ImmutableMap.of("isRemoval", 0))));
         System.out.println("doctor pig track******************************************************");
-        System.out.println(JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(doctorPigTrackDao.list(ImmutableMap.of("isRemoval",1))));
-        System.out.println(JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(doctorPigTrackDao.list(ImmutableMap.of("isRemoval",0))));
+        System.out.println(JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(doctorPigTrackDao.list(ImmutableMap.of("isRemoval", 1))));
+        System.out.println(JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(doctorPigTrackDao.list(ImmutableMap.of("isRemoval", 0))));
         System.out.println("doctor pig snap shot content******************************************************");
         System.out.println(JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(doctorPigSnapshotDao.listAll()));
         System.out.println("doctor pig event dao ******************************************************");
@@ -728,9 +732,10 @@ public class DoctorPigCreateEventsTest extends BaseFrontWebTest{
 
     /**
      * 构建Pig 进厂信息 pigType 不构建
+     *
      * @return
      */
-    private DoctorFarmEntryDto buildFarmEntryDto(){
+    private DoctorFarmEntryDto buildFarmEntryDto() {
 
         return DoctorFarmEntryDto.builder()
                 .pigCode(UUID.randomUUID().toString()).birthday(new Date()).inFarmDate(new Date()).barnId(1l).barnName("barnName")

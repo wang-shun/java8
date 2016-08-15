@@ -33,6 +33,11 @@ public class DoctorTransFarmGroupEvent extends BaseGroupEvent implements Seriali
 
     private String toBarnName;
 
+    /**
+     * 转入猪舍的猪类
+     */
+    private Integer toBarnType;
+
     private Long fromGroupId;
 
     private String fromGroupCode;

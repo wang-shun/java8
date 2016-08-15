@@ -4,13 +4,11 @@ import com.google.common.collect.Iterables;
 import io.terminus.doctor.common.utils.Params;
 import io.terminus.doctor.event.daily.DoctorDailyEventCount;
 import io.terminus.doctor.event.dao.DoctorPigTrackDao;
-import io.terminus.doctor.event.dto.report.DoctorDailyReportDto;
-import io.terminus.doctor.event.dto.report.DoctorLiveStockDailyReport;
-import io.terminus.doctor.event.enums.PigEvent;
+import io.terminus.doctor.event.dto.report.daily.DoctorDailyReportDto;
+import io.terminus.doctor.event.dto.report.daily.DoctorLiveStockDailyReport;
 import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigStatusCount;
-import io.terminus.doctor.event.model.DoctorPigTrack;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -72,15 +70,20 @@ public class DoctorDailyEntryEventCount implements DoctorDailyEventCount {
         }
 
         //count result
-        Map<Integer, Integer> statusCount = statusCounts.stream().collect(Collectors.toMap(k->k.getStatus() , v->v.getCount()));
+        Map<Integer, Integer> statusCount = statusCounts.stream().collect(Collectors.toMap(DoctorPigStatusCount::getStatus, DoctorPigStatusCount::getCount));
 
-        doctorLiveStockDailyReport.setHoubeiSow(Params.getNullDefault(statusCount, PigStatus.Entry.getKey(), 0));
         doctorLiveStockDailyReport.setPeihuaiSow(Params.getNullDefault(statusCount,PigStatus.Mate.getKey(), 0) +
                 Params.getNullDefault(statusCount, PigStatus.Pregnancy.getKey(),0) +
                 Params.getNullDefault(statusCount, PigStatus.Farrow.getKey(), 0));
         doctorLiveStockDailyReport.setBuruSow(Params.getNullDefault(statusCount, PigStatus.FEED.getKey(), 0));
-        doctorLiveStockDailyReport.setKonghuaiSow(Params.getNullDefault(statusCount, PigStatus.Abortion.getKey(), 0) +
-                Params.getNullDefault(statusCount, PigStatus.KongHuai.getKey(), 0));
+        doctorLiveStockDailyReport.setKonghuaiSow(
+                Params.getNullDefault(statusCount, PigStatus.Abortion.getKey(), 0) +    //流产
+                Params.getNullDefault(statusCount, PigStatus.Entry.getKey(), 0) +       //进场
+                Params.getNullDefault(statusCount, PigStatus.KongHuai.getKey(), 0) +    //空怀
+                Params.getNullDefault(statusCount, PigStatus.FanQing.getKey(), 0) +     //返情
+                Params.getNullDefault(statusCount, PigStatus.Wean.getKey(), 0)          //断奶
+
+        );
 
         doctorLiveStockDailyReport.setBoar(Params.getNullDefault(statusCount, PigStatus.BOAR_ENTRY.getKey(), 0));
 

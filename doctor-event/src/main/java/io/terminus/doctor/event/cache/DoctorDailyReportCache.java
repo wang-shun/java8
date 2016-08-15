@@ -11,7 +11,7 @@ import io.terminus.common.utils.Splitters;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dao.DoctorDailyReportDao;
-import io.terminus.doctor.event.dto.report.DoctorDailyReportDto;
+import io.terminus.doctor.event.dto.report.daily.DoctorDailyReportDto;
 import io.terminus.doctor.event.service.DoctorDailyGroupReportReadService;
 import io.terminus.doctor.event.service.DoctorDailyPigReportReadService;
 import lombok.AllArgsConstructor;
@@ -128,7 +128,7 @@ public class DoctorDailyReportCache {
     }
 
     //实时查询某猪场的日报统计
-    private DoctorDailyReportDto initDailyReportByFarmIdAndDate(Long farmId, Date date) {
+    public DoctorDailyReportDto initDailyReportByFarmIdAndDate(Long farmId, Date date) {
         DoctorDailyReportDto report = new DoctorDailyReportDto();
         report.setPig(RespHelper.orServEx(doctorDailyPigReportReadService.countByFarmIdDate(farmId, date)));
         report.setGroup(RespHelper.orServEx(doctorDailyGroupReportReadService.getGroupDailyReportByFarmIdAndDate(farmId, date)));

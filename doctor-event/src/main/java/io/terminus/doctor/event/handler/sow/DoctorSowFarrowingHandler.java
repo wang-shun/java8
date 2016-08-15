@@ -1,9 +1,9 @@
 package io.terminus.doctor.event.handler.sow;
 
 import com.google.common.base.MoreObjects;
+import com.google.common.primitives.Ints;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.common.enums.PigType;
-import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dao.DoctorPigDao;
 import io.terminus.doctor.event.dao.DoctorPigEventDao;
 import io.terminus.doctor.event.dao.DoctorPigSnapshotDao;
@@ -17,24 +17,29 @@ import io.terminus.doctor.event.enums.PigSex;
 import io.terminus.doctor.event.enums.PigSource;
 import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.handler.DoctorAbstractEventFlowHandler;
+import io.terminus.doctor.event.model.DoctorPigEvent;
+import io.terminus.doctor.event.model.DoctorPigSnapshot;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.event.service.DoctorGroupWriteService;
 import io.terminus.doctor.workflow.core.Execution;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.ibatis.type.IntegerTypeHandler;
 import org.joda.time.DateTime;
+import org.joda.time.Days;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
+import java.util.Objects;
+
+import static io.terminus.common.utils.Arguments.notNull;
 
 /**
  * Created by yaoqijun.
  * Date:2016-05-27
  * Email:yaoqj@terminus.io
- * Descirbe:
+ * Descirbe: 母猪分娩事件
  */
 @Component
 @Slf4j
@@ -54,17 +59,37 @@ public class DoctorSowFarrowingHandler extends DoctorAbstractEventFlowHandler {
     }
 
     @Override
-    protected void eventCreatePrepare(Execution execution, DoctorPigTrack doctorPigTrack, DoctorBasicInputInfoDto basicInputInfoDto, Map<String, Object> extra, Map<String, Object> context) {
-
+    protected void eventCreatePreHandler(Execution execution, DoctorPigEvent doctorPigEvent, DoctorPigTrack doctorPigTrack, DoctorBasicInputInfoDto basicInputInfoDto, Map<String, Object> extra, Map<String, Object> context) {
         // 助产 信息
         extra.put("isHelp", 1);
 
         // 校验 是否早产信息
         DateTime pregJudgeDate = new DateTime(Long.valueOf(doctorPigTrack.getExtraMap().get("judgePregDate").toString()));
+        //分娩时间
         DateTime farrowingDate = new DateTime(Long.valueOf(extra.get("farrowingDate").toString()));
-        if(farrowingDate.isBefore(pregJudgeDate)){
+        doctorPigEvent.setFarrowingDate(farrowingDate.toDate());
+        //查找最近一次初配种事件
+        DoctorPigEvent firstMate = doctorPigEventDao.queryLastFirstMate(doctorPigTrack.getPigId(), doctorPigTrack.getCurrentParity());
+        if (notNull(firstMate)) {
+            DateTime mattingDate = new DateTime(firstMate.getExtraMap().get("matingDate"));
+
+            //计算孕期
+            doctorPigEvent.setPregDays(Days.daysBetween(farrowingDate, mattingDate).getDays());
+        }
+
+
+        //分娩仔猪只数信息
+        doctorPigEvent.setLiveCount(Ints.tryParse(Objects.toString(extra.get("farrowingLiveCount"))));
+        doctorPigEvent.setHealthCount(Ints.tryParse(Objects.toString(extra.get("healthCount"))));
+        doctorPigEvent.setWeakCount(Ints.tryParse(Objects.toString(extra.get("weakCount"))));
+        doctorPigEvent.setMnyCount(Ints.tryParse(Objects.toString(extra.get("mnyCount"))));
+        doctorPigEvent.setJxCount(Ints.tryParse(Objects.toString(extra.get("jxCount"))));
+        doctorPigEvent.setDeadCount(Ints.tryParse(Objects.toString(extra.get("deadCount"))));
+        doctorPigEvent.setBlackCount(Ints.tryParse(Objects.toString(extra.get("blackCount"))));
+
+        if (farrowingDate.isBefore(pregJudgeDate)) {
             extra.put("farrowingType", FarrowingType.EARLY.getKey());
-        }else {
+        } else {
             extra.put("farrowingType", FarrowingType.USUAL.getKey());
         }
     }
@@ -72,14 +97,14 @@ public class DoctorSowFarrowingHandler extends DoctorAbstractEventFlowHandler {
     @Override
     public DoctorPigTrack updateDoctorPigTrackInfo(Execution execution,
                                                    DoctorPigTrack doctorPigTrack, DoctorBasicInputInfoDto basic,
-                                                   Map<String, Object> extra, Map<String,Object> context) {
+                                                   Map<String, Object> extra, Map<String, Object> context) {
 
         // 对应的 仔猪 猪舍的 信息
         extra.put("toBarnId", doctorPigTrack.getCurrentBarnId());
         extra.put("toBarnName", doctorPigTrack.getCurrentBarnName());
 
         // 对应的 猪群信息
-        extra.put("farrowingPigletGroupId",buildPigGroupCountInfo(basic, extra));
+        extra.put("farrowingPigletGroupId", buildPigGroupCountInfo(basic, extra));
 
         doctorPigTrack.addAllExtraMap(extra);
         doctorPigTrack.setStatus(PigStatus.FEED.getKey());  //母猪进入哺乳的状态
@@ -89,6 +114,7 @@ public class DoctorSowFarrowingHandler extends DoctorAbstractEventFlowHandler {
 
     /**
      * 创建对应的猪群
+     *
      * @param basic
      * @param extra
      */
@@ -112,10 +138,10 @@ public class DoctorSowFarrowingHandler extends DoctorAbstractEventFlowHandler {
         input.setInTypeName(DoctorMoveInGroupEvent.InType.PIGLET.getDesc());
         input.setSource(PigSource.LOCAL.getKey());
 
-        Integer farrowingLiveCount = Integer.valueOf(MoreObjects.firstNonNull(extra.get("farrowingLiveCount"),0).toString());
+        Integer farrowingLiveCount = Integer.valueOf(MoreObjects.firstNonNull(extra.get("farrowingLiveCount"), 0).toString());
         Integer sowCount = Integer.valueOf(MoreObjects.firstNonNull(extra.get("liveSowCount"), 0).toString());
         Integer boarCount = Integer.valueOf(MoreObjects.firstNonNull(extra.get("liveBoarCount"), 0).toString());
-        if(sowCount == 0 && boarCount == 0) sowCount = farrowingLiveCount;
+        if (sowCount == 0 && boarCount == 0) sowCount = farrowingLiveCount;
 
         input.setSex(judgePigSex(sowCount, boarCount).getKey());
         input.setQuantity(farrowingLiveCount);
@@ -128,26 +154,37 @@ public class DoctorSowFarrowingHandler extends DoctorAbstractEventFlowHandler {
         input.setCreatorId(basic.getStaffId());
         input.setCreatorName(basic.getStaffName());
         Response<Long> response = doctorGroupWriteService.sowGroupEventMoveIn(input);
-        if(response.isSuccess()){
+        if (response.isSuccess()) {
             return response.getResult();
-        }else {
+        } else {
             throw new IllegalStateException(response.getError());
         }
     }
 
-    private PigSex judgePigSex(Integer sowCount, Integer boarCount){
-        if(sowCount == 0 && boarCount == 0){
+    private PigSex judgePigSex(Integer sowCount, Integer boarCount) {
+        if (sowCount == 0 && boarCount == 0) {
 //            throw new IllegalStateException("farrow.pigCount.error");
             return PigSex.MIX;
         }
 
-        if(sowCount == 0){
+        if (sowCount == 0) {
             return PigSex.BOAR;
         }
 
-        if(boarCount == 0){
+        if (boarCount == 0) {
             return PigSex.SOW;
         }
         return PigSex.MIX;
+    }
+
+    @Override
+    protected void afterEventCreateHandle(DoctorPigEvent doctorPigEvent, DoctorPigTrack doctorPigTrack, DoctorPigSnapshot doctorPigSnapshot, Map<String, Object> extra) {
+        //对应的最近一次的 周期配种的初陪 的 isDelivery 字段变成true
+        DoctorPigEvent firstMate = doctorPigEventDao.queryLastFirstMate(doctorPigTrack.getPigId(), doctorPigTrack.getCurrentParity());
+        if (notNull(firstMate)) {
+            firstMate.setIsDelivery(1);
+            doctorPigEventDao.update(firstMate);
+        }
+
     }
 }

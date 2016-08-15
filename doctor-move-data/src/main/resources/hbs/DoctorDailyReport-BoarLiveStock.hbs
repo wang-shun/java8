@@ -1,0 +1,3 @@
+-- 获取公猪日存栏统计
+SELECT isnull(count(1), 0) AS quantity
+FROM view_BoarCardList WHERE Status != '已离场'
