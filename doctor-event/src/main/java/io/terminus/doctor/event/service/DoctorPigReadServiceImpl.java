@@ -109,9 +109,14 @@ public class DoctorPigReadServiceImpl implements DoctorPigReadService {
     @Override
     public Response<DoctorPigInfoDetailDto> queryPigDetailInfoByPigId(Long pigId, Integer eventSize) {
         try{
+            Integer dayAge = null;
             DoctorPig doctorPig = doctorPigDao.findById(pigId);
             checkState(!isNull(doctorPig), "query.doctorPigId.fail");
-            
+
+            if (doctorPig.getBirthDate() != null) {
+                dayAge = (int)(DateTime.now()
+                        .minus(doctorPig.getBirthDate().getTime()).getMillis() / (1000 * 60 * 60 * 24) + 1);
+            }
             DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(pigId);
 
             List<DoctorPigEvent> doctorPigEvents = RespHelper.orServEx(
@@ -121,7 +126,7 @@ public class DoctorPigReadServiceImpl implements DoctorPigReadService {
             targetEventSize = targetEventSize > doctorPigEvents.size() ? doctorPigEvents.size() : targetEventSize;
 
             return Response.ok(DoctorPigInfoDetailDto.builder().doctorPig(doctorPig).doctorPigTrack(doctorPigTrack)
-                    .doctorPigEvents(doctorPigEvents.subList(0, targetEventSize)).build());
+                    .doctorPigEvents(doctorPigEvents.subList(0, targetEventSize)).dayAge(dayAge).build());
         }catch (Exception e){
             log.error("query pig detail info fail, cause:{}", Throwables.getStackTraceAsString(e));
             return Response.fail("query.pigDetailInfo.fail");

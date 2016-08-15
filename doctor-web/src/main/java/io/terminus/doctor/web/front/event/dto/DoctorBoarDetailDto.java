@@ -36,6 +36,10 @@ public class DoctorBoarDetailDto implements Serializable{
 
     private Date birthDate; //出生日期
 
+    private Integer dayAge; //日龄
+
+    private Double weight; //重量
+
     private List<DoctorPigEvent> doctorPigEvents;
 
 }
