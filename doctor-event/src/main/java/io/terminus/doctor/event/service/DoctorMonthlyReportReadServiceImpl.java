@@ -38,7 +38,6 @@ public class DoctorMonthlyReportReadServiceImpl implements DoctorMonthlyReportRe
     @Override
     public Response<DoctorMonthlyReportDto> findMonthlyReportByFarmIdAndSumAt(Long farmId, String sumAt) {
         try {
-            log.info("find monthly farmId:{}, sumAt:{}", farmId, sumAt);
             Date date;
 
             //yyyy-MM-dd 格式, 说明是按照天查的, yyyy-MM 格式, 说明是按照月查的
