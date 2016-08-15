@@ -820,6 +820,7 @@ public class DoctorMoveDataService {
             if (Objects.equals(event.getType(), PigEvent.MATING.getKey()) && event.getCurrentMatingCount() == 1) {
                 if (lastFlag == null) {
                     log.warn("sow data wrong...");
+                    log.warn("sow data event:{}", event);
                     break;
                 }
                 //如果是进场
