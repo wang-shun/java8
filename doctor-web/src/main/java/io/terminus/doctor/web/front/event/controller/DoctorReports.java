@@ -50,50 +50,6 @@ public class DoctorReports {
     @RequestMapping(value = "/monthly", method = RequestMethod.GET)
     public DoctorMonthlyReportDto findMonthlyReportByFarmIdAndSumAt(@RequestParam("farmId") Long farmId,
                                                                     @RequestParam("date") String date) {
-//        DoctorMonthlyReportDto report = new DoctorMonthlyReportDto();
-//        report.setMateHoubei(RandomUtil.random(1, 100));
-//        report.setMateWean(RandomUtil.random(1, 100));
-//        report.setMateFanqing(RandomUtil.random(1, 100));
-//        report.setMateAbort(RandomUtil.random(1, 100));
-//        report.setMateNegtive(RandomUtil.random(1, 100));
-//        report.setMateEstimatePregRate(RandomUtil.random(1, 100));
-//        report.setMateRealPregRate(RandomUtil.random(1, 100));
-//        report.setMateEstimateFarrowingRate(RandomUtil.random(1, 100));
-//        report.setMateRealFarrowingRate(RandomUtil.random(1, 100));
-//        report.setCheckPositive(RandomUtil.random(1, 100));
-//        report.setCheckFanqing(RandomUtil.random(1, 100));
-//        report.setCheckAbort(RandomUtil.random(1, 100));
-//        report.setCheckNegtive(RandomUtil.random(1, 100));
-//        report.setFarrowEstimateParity(RandomUtil.random(1, 100));
-//        report.setFarrowNest(RandomUtil.random(1, 100));
-//        report.setFarrowAlive(RandomUtil.random(1, 100));
-//        report.setFarrowHealth(RandomUtil.random(1, 100));
-//        report.setFarrowWeak(RandomUtil.random(1, 100));
-//        report.setFarrowDead(RandomUtil.random(1, 100));
-//        report.setFarrowMny(RandomUtil.random(1, 100));
-//        report.setFarrowAll(RandomUtil.random(1, 100));
-//        report.setFarrowAvgHealth(RandomUtil.random(1, 100));
-//        report.setFarrowAvgAll(RandomUtil.random(1, 100));
-//        report.setFarrowAvgAlive(RandomUtil.random(1, 100));
-//        report.setWeanSow(RandomUtil.random(1, 100));
-//        report.setWeanPiglet(RandomUtil.random(1, 100));
-//        report.setWeanAvgWeight(RandomUtil.random(1, 100));
-//        report.setWeanAvgCount(RandomUtil.random(1, 100));
-//        report.setSaleSow(RandomUtil.random(1, 100));
-//        report.setSaleBoar(RandomUtil.random(1, 100));
-//        report.setSaleNursery(RandomUtil.random(1, 100));
-//        report.setSaleFatten(RandomUtil.random(1, 100));
-//        report.setDeadSow(RandomUtil.random(1, 100));
-//        report.setDeadBoar(RandomUtil.random(1, 100));
-//        report.setDeadFarrow(RandomUtil.random(1, 100));
-//        report.setDeadNursery(RandomUtil.random(1, 100));
-//        report.setDeadFatten(RandomUtil.random(1, 100));
-//        report.setDeadFarrowRate(RandomUtil.random(1, 100));
-//        report.setDeadNurseryRate(RandomUtil.random(1, 100));
-//        report.setDeadFattenRate(RandomUtil.random(1, 100));
-//        report.setNpd(RandomUtil.random(1, 100));
-//        report.setPsy(RandomUtil.random(1, 100));
-//        return report;
         return RespHelper.or500(doctorMonthlyReportReadService.findMonthlyReportByFarmIdAndSumAt(farmId, date));
     }
 
