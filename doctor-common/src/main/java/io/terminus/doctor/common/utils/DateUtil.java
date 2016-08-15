@@ -20,10 +20,11 @@ import java.util.Date;
 public class DateUtil {
 
     private static final DateTimeParser[] parsers = {
-            DateTimeFormat.forPattern("yyyy-MM-dd").getParser(),
-            DateTimeFormat.forPattern("yyyyMMdd").getParser()
+            DateTimeFormat.forPattern("yyyy-MM-dd").getParser()
     };
     private static final DateTimeFormatter dateFormatter = new DateTimeFormatterBuilder().append(null, parsers).toFormatter();
+
+    private static final DateTimeFormatter YYYYMM = DateTimeFormat.forPattern("yyyy-MM");
 
     private static final DateTimeFormatter DATE = DateTimeFormat.forPattern("yyyy-MM-dd");
 
@@ -36,13 +37,18 @@ public class DateUtil {
      * @param value  输入的日期
      * @return  是否有效
      */
-    public static boolean isValidDate(String value) {
+    public static boolean isYYYYMMDD(String value) {
         try {
             dateFormatter.parseDateTime(value);
             return true;
         } catch (Exception e) {
             return false;
         }
+    }
+
+    public static Date toYYYYMM(String date) {
+        if (Strings.isNullOrEmpty(date)) return null;
+        return YYYYMM.parseDateTime(date).toDate();
     }
 
     public static Date toDate(String date) {
@@ -81,5 +87,8 @@ public class DateUtil {
         return new DateTime(date).toString(DATE_TIME);
     }
 
-
+    public static DateTime getDateEnd(DateTime date) {
+        if (date == null) return null;
+        return date.withTimeAtStartOfDay().plusDays(1).plusSeconds(-1);
+    }
 }

@@ -38,17 +38,20 @@ public class DoctorMonthlyReportReadServiceImpl implements DoctorMonthlyReportRe
     @Override
     public Response<DoctorMonthlyReportDto> findMonthlyReportByFarmIdAndSumAt(Long farmId, String sumAt) {
         try {
-            Date date = DateUtil.toDate(sumAt);
-            DateTime datetime = new DateTime(date);
+            Date date;
 
-            //查未来返回没查到
-            if (datetime.isAfterNow()) {
+            //yyyy-MM-dd 格式, 说明是按照天查的, yyyy-MM 格式, 说明是按照月查的
+            if (DateUtil.isYYYYMMDD(sumAt)) {
+                date = DateUtil.toDate(sumAt);
+            } else {
+                date = getLastDay(DateUtil.toYYYYMM(sumAt));
+            }
+
+            //如果查询未来的数据, 返回失败查询
+            if (new DateTime(date).isAfter(DateUtil.getDateEnd(DateTime.now()))) {
                 return Response.ok(failReport());
             }
 
-            if (datetime.getDayOfMonth() < DateTime.now().getDayOfMonth()) {
-                date = new DateTime(date).plusMonths(1).withDayOfMonth(1).plusDays(-1).toDate();
-            }
 
             //查询月报结果, 如果没查到, 返回失败的结果
             DoctorMonthlyReport report = doctorMonthlyReportDao.findByFarmIdAndSumAt(farmId, date);
@@ -72,5 +75,16 @@ public class DoctorMonthlyReportReadServiceImpl implements DoctorMonthlyReportRe
         DoctorMonthlyReportDto dto = new DoctorMonthlyReportDto();
         dto.setFail(true);
         return dto;
+    }
+
+    //获取月末
+    private static Date getLastDay(Date date) {
+        DateTime datetime = new DateTime(date);
+        DateTime now = DateTime.now();
+        //当月返回今天
+        if (datetime.getMonthOfYear() == now.getMonthOfYear()) {
+            return now.toDate();
+        }
+        return datetime.withDayOfMonth(1).plusMonths(1).plusDays(-1).toDate();
     }
 }
