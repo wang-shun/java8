@@ -244,3 +244,6 @@ ALTER TABLE doctor_pig_events ADD COLUMN farrowing_date datetime DEFAULT NULL CO
 ALTER TABLE doctor_pig_events ADD COLUMN abortion_date datetime DEFAULT NULL COMMENT '流产时间' AFTER farrowing_date;
 ALTER TABLE doctor_pig_events ADD COLUMN partwean_date datetime DEFAULT NULL COMMENT '断奶时间' AFTER abortion_date;
 ALTER TABLE doctor_pig_events ADD COLUMN doctor_mate_type SMALLINT(6) DEFAULT NULL COMMENT '配种类型' AFTER partwean_date;
+
+-- 2016-08-15 workflow 新增 itimer 字段
+ALTER TABLE workflow_definition_nodes ADD COLUMN `itimer` VARCHAR(128) DEFAULT NULL COMMENT '定时事件处理类(一般为类标识)' AFTER timer;
