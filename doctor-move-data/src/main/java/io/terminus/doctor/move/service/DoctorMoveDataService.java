@@ -731,6 +731,24 @@ public class DoctorMoveDataService {
 
             //母猪当前配种次数
             track.setCurrentMatingCount(getSowCurrentMatingCount(events, sow));
+
+            //更新胎次 倒叙
+            updateParity(events, track);
+
+            //更新母猪事件当中的配种类型
+            updateDoctorMateType(events);
+
+            //更新事件的非生产天数
+            updateNPD(events);
+
+            //更新初配事件的是否已经分娩 和是否已经怀孕 的标志位
+            updateFlag(events);
+
+            //统计孕期 和 哺乳期
+            updateDuring(events);
+
+            //更新event
+            events.forEach(doctorPigEventDao::update);
         }
 
         //猪舍
@@ -739,25 +757,6 @@ public class DoctorMoveDataService {
             track.setCurrentBarnId(barn.getId());
             track.setCurrentBarnName(barn.getName());
         }
-
-        //更新胎次 倒叙
-        updateParity(events, track);
-
-        //更新母猪事件当中的配种类型
-        updateDoctorMateType(events);
-
-        //更新事件的非生产天数
-        updateNPD(events);
-
-        //更新初配事件的是否已经分娩 和是否已经怀孕 的标志位
-        updateFlag(events);
-
-        //统计孕期 和 哺乳期
-        updateDuring(events);
-
-        //更新event
-        events.forEach(e -> doctorPigEventDao.update(e));
-
         return track;
     }
 
