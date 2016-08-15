@@ -40,6 +40,7 @@ import static io.terminus.common.utils.Arguments.isEmpty;
 public class DoctorMoveReportService {
 
     private static final int INDEX = 365;    //总共导多少天的数据
+    private static final int MONTH_INDEX = 12;    //总共导多少月的数据
 
     private final DoctorDailyReportDao doctorDailyReportDao;
     private final DoctorFarmDao doctorFarmDao;
@@ -127,11 +128,13 @@ public class DoctorMoveReportService {
     }
 
     /**
-     * 迁移猪场日报(放在所有事件迁移之后进行)
+     * 迁移猪场月报(放在日报迁移之后进行)
+     * @
      * @param farmId 猪场id
      */
     @Transactional
-    public void moveMonthlyReport(Long farmId) {
-        RespHelper.orServEx(doctorMonthlyReportWriteService.createMonthlyReports(Lists.newArrayList(farmId), DateUtil.toDateTime("2016-07-31 16:08:37")));
+    public void moveMonthlyReport(Long farmId, Integer index) {
+        DateUtil.getBeforeMonthEnds(new Date(), MoreObjects.firstNonNull(index, MONTH_INDEX))
+                .forEach(date -> doctorMonthlyReportWriteService.createMonthlyReports(Lists.newArrayList(farmId), date));
     }
 }

@@ -1,7 +1,8 @@
 package io.terminus.doctor.event.report.count;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.terminus.common.utils.JsonMapper;
-import io.terminus.common.utils.Splitters;
+import io.terminus.doctor.common.constants.JacksonType;
 import io.terminus.doctor.event.daily.DoctorDailyEventCount;
 import io.terminus.doctor.event.dao.DoctorPigTrackDao;
 import io.terminus.doctor.event.dto.report.daily.DoctorDailyReportDto;
@@ -14,6 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -29,7 +31,7 @@ import java.util.stream.Collectors;
 @Component
 public class DoctorDailyMatingEventCount implements DoctorDailyEventCount {
 
-    private static final JsonMapper JSON_MAPPER = JsonMapper.nonEmptyMapper();
+    private static final ObjectMapper OBJECT_MAPPER = JsonMapper.JSON_NON_DEFAULT_MAPPER.getMapper();
 
     private final DoctorPigTrackDao doctorPigTrackDao;
 
@@ -68,10 +70,13 @@ public class DoctorDailyMatingEventCount implements DoctorDailyEventCount {
                 }
             }else {
                 DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(e.getPigId());
-                //Map<String,String> result = null;
-                log.info("rel event ids :{} ", doctorPigTrack.getRelEventIds());
-                //result = JSON_MAPPER.fromJson(doctorPigTrack.getRelEventIds(), JSON_MAPPER.createCollectionType(Map.class, String.class, String.class));
-                if(Splitters.splitToLong(doctorPigTrack.getRelEventIds(), Splitters.COMMA).size() > 1){
+                Map<String, String> result = null;
+                try {
+                    result = OBJECT_MAPPER.readValue(doctorPigTrack.getRelEventIds(), JacksonType.MAP_OF_STRING);
+                } catch (IOException e1) {
+                    throw new IllegalStateException("dailyMating.event.fail");
+                }
+                if(result.size() > 1){
                     doctorMatingDailyReport.setDuannai(doctorMatingDailyReport.getDuannai()+1);
                 }else {
                     doctorMatingDailyReport.setHoubei(doctorMatingDailyReport.getHoubei() + 1);

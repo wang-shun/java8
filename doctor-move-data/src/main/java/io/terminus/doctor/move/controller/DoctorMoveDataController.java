@@ -272,6 +272,13 @@ public class DoctorMoveDataController {
         }
     }
 
+    /**
+     * 日报
+     * @param moveId
+     * @param farmId
+     * @param index
+     * @return
+     */
     @RequestMapping(value = "/daily", method = RequestMethod.GET)
     public Boolean moveDailyReport(@RequestParam("moveId") Long moveId,
                                    @RequestParam("farmId") Long farmId,
@@ -292,10 +299,11 @@ public class DoctorMoveDataController {
      * 月报
      */
     @RequestMapping(value = "/monthly", method = RequestMethod.GET)
-    public Boolean moveMonthlyReport(@RequestParam("farmId") Long farmId) {
+    public Boolean moveMonthlyReport(@RequestParam("farmId") Long farmId,
+                                     @RequestParam(value = "index", required = false) Integer index) {
         try {
-            log.warn("move monthly report start, farmId:{}", farmId);
-            doctorMoveReportService.moveMonthlyReport(farmId);
+            log.warn("move monthly report start, farmId:{}, index:{}", farmId, index);
+            doctorMoveReportService.moveMonthlyReport(farmId, index);
             log.warn("move monthly report end");
             return true;
         } catch (Exception e) {
