@@ -57,6 +57,13 @@ public class DoctorMaterialConsumeProvider implements Serializable{
 
     private Long eventCount;
 
+    /**
+     * 本次出库/入库的单价
+     * 入库单价,由前台传入,直接保存即可
+     * 出库单价,需要计算: 先入库的先出库, 然后对涉及到的每一次入库的单价作加权平均
+     */
+    private Long unit_price;
+
     private Long staffId;
 
     private String staffName;
