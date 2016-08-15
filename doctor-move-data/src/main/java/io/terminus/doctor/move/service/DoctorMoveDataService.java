@@ -727,6 +727,8 @@ public class DoctorMoveDataService {
             events = events.stream().sorted((a, b) -> a.getEventAt().compareTo(b.getEventAt())).collect(Collectors.toList());
             DoctorPigEvent lastEvent = events.get(events.size() - 1);
             track.setExtra(lastEvent.getExtra());   //extra字段保存最后一次event的extra
+
+            // TODO: 16/8/15  releventIds 存的是 Map<Parity, EventIds>
             track.setRelEventIds(Joiners.COMMA.join(events.stream().map(DoctorPigEvent::getId).collect(Collectors.toList()))); //关联事件ids, 逗号分隔
 
             //母猪当前配种次数
