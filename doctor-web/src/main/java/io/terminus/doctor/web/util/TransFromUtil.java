@@ -52,7 +52,7 @@ public class TransFromUtil {
                     extraMap.put("farrowIsSingleManager", ((Integer)extraMap.get("farrowIsSingleManager") == 1) ? IsOrNot.YES.getDesc() : IsOrNot.NO.getDesc());
                 }
                 if (extraMap.get("fosterReason") != null) {
-                    extraMap.put("fosterReason", RespHelper.or500(doctorBasicReadService.findBasicById(Long.valueOf((String)extraMap.get("fosterReason")))).getName());
+                    extraMap.put("fosterReason", RespHelper.or500(doctorBasicReadService.findBasicById(Long.valueOf((Integer)extraMap.get("fosterReason")))).getName());
                 }
                 if (extraMap.get("vaccinationStaffId") != null) {
                     extraMap.put("vaccinationStaffName", RespHelper.or500(userProfileReadService.findProfileByUserId(Long.valueOf((Integer)extraMap.get("vaccinationStaffId")))).getRealName());
