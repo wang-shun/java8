@@ -86,11 +86,13 @@ public class DoctorMoveDataController {
      * 迁移全部数据
      * @param mobile 注册的手机号
      * @param moveId 数据源id
+     * @param index  日报数据天数(默认365天)
      * @return 是否成功
      */
     @RequestMapping(value = "/all", method = RequestMethod.GET)
     public Boolean moveAll(@RequestParam("mobile") String mobile,
-                           @RequestParam("moveId") Long moveId) {
+                           @RequestParam("moveId") Long moveId,
+                           @RequestParam(value = "index", required = false) Integer index) {
         try {
             //1.迁移猪场信息
             log.warn("move user farm start, mobile:{}, moveId:{}", mobile, moveId);
@@ -98,7 +100,7 @@ public class DoctorMoveDataController {
             log.warn("move user farm end");
 
             //多个猪场遍历插入
-            getFarms(mobile).forEach(farm -> moveAllExclude(moveId, farm, mobile));
+            getFarms(mobile).forEach(farm -> moveAllExclude(moveId, farm, mobile, index));
             return true;
         } catch (Exception e) {
             log.error("move all data failed, mobile:{}, moveId:{}, cause:{}", mobile, moveId, Throwables.getStackTraceAsString(e));
@@ -116,7 +118,7 @@ public class DoctorMoveDataController {
     }
 
     //迁移剩下的数据
-    private void moveAllExclude(Long moveId, DoctorFarm farm, String mobile) {
+    private void moveAllExclude(Long moveId, DoctorFarm farm, String mobile, Integer index) {
         //2.迁移基础数据(Basic, Customer, ChangeReason, Barn)
         log.warn("move basic start, moveId:{}", moveId);
         doctorMoveBasicService.moveAllBasic(moveId, farm);
@@ -148,7 +150,7 @@ public class DoctorMoveDataController {
 
         //6.迁移猪场日报
         log.warn("move daily start, moveId:{}", moveId);
-        doctorMoveReportService.moveDailyReport(moveId, farm.getId());
+        doctorMoveReportService.moveDailyReport(moveId, farm.getId(), index);
         log.warn("move daily end");
     }
 
@@ -271,14 +273,17 @@ public class DoctorMoveDataController {
     }
 
     @RequestMapping(value = "/daily", method = RequestMethod.GET)
-    public Boolean moveDailyReport(@RequestParam("moveId") Long moveId, @RequestParam("farmId") Long farmId) {
+    public Boolean moveDailyReport(@RequestParam("moveId") Long moveId,
+                                   @RequestParam("farmId") Long farmId,
+                                   @RequestParam(value = "index", required = false) Integer index) {
         try {
-            log.warn("move daily report start, moveId:{}, farmId:{}", moveId, farmId);
-            doctorMoveReportService.moveDailyReport(moveId, farmId);
+            log.warn("move daily report start, moveId:{}, farmId:{}, index:{}", moveId, farmId, index);
+            doctorMoveReportService.moveDailyReport(moveId, farmId, index);
             log.warn("move daily report end");
             return true;
         } catch (Exception e) {
-            log.error("move daily report failed, moveId:{}, farmId:{}, cause:{}", moveId, farmId, Throwables.getStackTraceAsString(e));
+            log.error("move daily report failed, moveId:{}, farmId:{}, index:{}, cause:{}",
+                    moveId, farmId, index, Throwables.getStackTraceAsString(e));
             return false;
         }
     }

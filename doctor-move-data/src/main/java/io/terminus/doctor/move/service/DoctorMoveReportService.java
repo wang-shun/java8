@@ -36,7 +36,7 @@ import static io.terminus.common.utils.Arguments.isEmpty;
 @Service
 public class DoctorMoveReportService {
 
-    private static final int INDEX = 10;    //总共导多少天的数据
+    private static final int INDEX = 365;    //总共导多少天的数据
 
     private final DoctorDailyReportDao doctorDailyReportDao;
     private final DoctorFarmDao doctorFarmDao;
@@ -60,18 +60,20 @@ public class DoctorMoveReportService {
      * @param farmId 猪场id
      */
     @Transactional
-    public void moveDailyReport(Long moveId, Long farmId) {
+    public void moveDailyReport(Long moveId, Long farmId, Integer index) {
         DoctorFarm farm = doctorFarmDao.findById(farmId);
         if (farm == null || isEmpty(farm.getOutId())) {
             return;
         }
 
+        //默认导365天的数据
+        index = MoreObjects.firstNonNull(index, INDEX);
         List<ReportGroupLiveStock> gls = RespHelper.orServEx(doctorMoveDatasourceHandler
-                .findByHbsSql(moveId, ReportGroupLiveStock.class, "DoctorDailyReport-GroupLiveStock", ImmutableMap.of("index", INDEX, "farmOutId", farm.getOutId())));
+                .findByHbsSql(moveId, ReportGroupLiveStock.class, "DoctorDailyReport-GroupLiveStock", ImmutableMap.of("index", index, "farmOutId", farm.getOutId())));
 
         //母猪存栏map
         Map<Date, ReportSowLiveStock> sowMap = RespHelper.orServEx(doctorMoveDatasourceHandler
-                .findByHbsSql(moveId, ReportSowLiveStock.class, "DoctorDailyReport-SowLiveStock", ImmutableMap.of("index", INDEX, "farmOutId", farm.getOutId())))
+                .findByHbsSql(moveId, ReportSowLiveStock.class, "DoctorDailyReport-SowLiveStock", ImmutableMap.of("index", index, "farmOutId", farm.getOutId())))
                 .stream().collect(Collectors.toMap(ReportSowLiveStock::getSumat, v -> v));
 
         //公猪存栏
