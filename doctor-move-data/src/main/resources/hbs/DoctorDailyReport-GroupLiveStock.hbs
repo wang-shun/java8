@@ -8,8 +8,8 @@ CREATE TABLE #tempGroup (
   sumat DATETIME    -- 统计时间
 )
 DECLARE @i INT
-SET @i = 1
-WHILE @i <= {{index}}   -- 循环index天的数据
+SET @i = 0
+WHILE @i < {{index}}   -- 循环index天的数据
 BEGIN
   DECLARE @sumDate DATETIME
   SET @sumDate = convert(DATETIME, convert(varchar(100), getdate(), 23) + ' 23:59:59', 120) - @i

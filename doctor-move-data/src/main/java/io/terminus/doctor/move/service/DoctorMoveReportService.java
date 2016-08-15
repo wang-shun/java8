@@ -2,12 +2,14 @@ package io.terminus.doctor.move.service;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dao.DoctorDailyReportDao;
 import io.terminus.doctor.event.dto.report.daily.DoctorDailyReportDto;
 import io.terminus.doctor.event.model.DoctorDailyReport;
 import io.terminus.doctor.event.service.DoctorDailyReportReadService;
+import io.terminus.doctor.event.service.DoctorMonthlyReportWriteService;
 import io.terminus.doctor.move.handler.DoctorMoveDatasourceHandler;
 import io.terminus.doctor.move.model.ReportBoarLiveStock;
 import io.terminus.doctor.move.model.ReportGroupLiveStock;
@@ -42,16 +44,19 @@ public class DoctorMoveReportService {
     private final DoctorFarmDao doctorFarmDao;
     private final DoctorMoveDatasourceHandler doctorMoveDatasourceHandler;
     private final DoctorDailyReportReadService doctorDailyReportReadService;
+    private final DoctorMonthlyReportWriteService doctorMonthlyReportWriteService;
 
     @Autowired
     public DoctorMoveReportService(DoctorDailyReportDao doctorDailyReportDao,
                                    DoctorFarmDao doctorFarmDao,
                                    DoctorMoveDatasourceHandler doctorMoveDatasourceHandler,
-                                   DoctorDailyReportReadService doctorDailyReportReadService) {
+                                   DoctorDailyReportReadService doctorDailyReportReadService,
+                                   DoctorMonthlyReportWriteService doctorMonthlyReportWriteService) {
         this.doctorDailyReportDao = doctorDailyReportDao;
         this.doctorFarmDao = doctorFarmDao;
         this.doctorMoveDatasourceHandler = doctorMoveDatasourceHandler;
         this.doctorDailyReportReadService = doctorDailyReportReadService;
+        this.doctorMonthlyReportWriteService = doctorMonthlyReportWriteService;
     }
 
     /**
@@ -118,5 +123,14 @@ public class DoctorMoveReportService {
         dto.getLiveStock().setKonghuaiSow(sow.getKonghuaiSow());
         dto.getLiveStock().setPeihuaiSow(sow.getPeihuaiSow());
         return dto;
+    }
+
+    /**
+     * 迁移猪场日报(放在所有事件迁移之后进行)
+     * @param farmId 猪场id
+     */
+    @Transactional
+    public void moveMonthlyReport(Long farmId) {
+        RespHelper.orServEx(doctorMonthlyReportWriteService.createMonthlyReports(Lists.newArrayList(farmId), new Date()));
     }
 }

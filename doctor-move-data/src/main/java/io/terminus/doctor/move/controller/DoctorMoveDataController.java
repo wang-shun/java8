@@ -287,4 +287,20 @@ public class DoctorMoveDataController {
             return false;
         }
     }
+
+    /**
+     * 月报
+     */
+    @RequestMapping(value = "/monthly", method = RequestMethod.GET)
+    public Boolean moveMonthlyReport(@RequestParam("farmId") Long farmId) {
+        try {
+            log.warn("move monthly report start, farmId:{}", farmId);
+            doctorMoveReportService.moveMonthlyReport(farmId);
+            log.warn("move monthly report end");
+            return true;
+        } catch (Exception e) {
+            log.error("move monthly report failed, farmId:{}, cause:{}", farmId, Throwables.getStackTraceAsString(e));
+            return false;
+        }
+    }
 }
