@@ -77,11 +77,20 @@ public class DoctorBasicMaterials {
 
     /**
      * 分页查询基础物料
-     * @param basicMaterial 基础物料
-     * @return 基础物料list
+     * @param pageNo
+     * @param size
+     * @param srm 输入码,迷糊匹配
+     * @param name 物料名称,模糊匹配
+     * @param type 物料类型
+     *             @see io.terminus.doctor.common.enums.WareHouseType
+     * @return
      */
     @RequestMapping(value = "/paging", method = RequestMethod.GET)
-    public Paging<DoctorBasicMaterial> finaBasicMaterialByTypeFilterBySrm(@RequestBody DoctorBasicMaterialSearchDto basicMaterial) {
-        return RespHelper.or500(doctorBasicMaterialReadService.pagingBasicMaterialByTypeFilterBySrm(basicMaterial));
+    public Paging<DoctorBasicMaterial> finaBasicMaterialByTypeFilterBySrm(@RequestParam(required = false) Integer pageNo,
+                                                                          @RequestParam(required = false) Integer size,
+                                                                          @RequestParam(required = false) String srm,
+                                                                          @RequestParam(required = false) String name,
+                                                                          @RequestParam(required = false) Integer type) {
+        return RespHelper.or500(doctorBasicMaterialReadService.pagingBasicMaterialByTypeFilterBySrm(new DoctorBasicMaterialSearchDto(pageNo, size, srm, name, type)));
     }
 }

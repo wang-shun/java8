@@ -55,6 +55,12 @@ public class FlowDefinitionNode implements Serializable{
      * 定时表达式
      */
     private String timer;
+
+    /**
+     * 定时事件全类名
+     */
+    private String iTimer;
+
     /**
      * 节点x轴偏移量
      */

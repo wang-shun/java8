@@ -4,20 +4,15 @@ import com.google.common.base.Throwables;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
-import io.terminus.doctor.basic.service.DoctorBasicReadService;
+import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dto.DoctorGroupDetail;
 import io.terminus.doctor.event.dto.DoctorPigInfoDetailDto;
 import io.terminus.doctor.event.dto.DoctorPigInfoDto;
 import io.terminus.doctor.event.dto.DoctorPigMessage;
-import io.terminus.doctor.event.enums.FarrowingType;
-import io.terminus.doctor.event.enums.IsOrNot;
-import io.terminus.doctor.event.enums.MatingType;
-import io.terminus.doctor.event.enums.PregCheckResult;
+import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
-import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
-import io.terminus.doctor.event.service.DoctorBarnReadService;
 import io.terminus.doctor.event.service.DoctorGroupReadService;
 import io.terminus.doctor.event.service.DoctorPigReadService;
 import io.terminus.doctor.event.service.DoctorPigWriteService;
@@ -25,7 +20,7 @@ import io.terminus.doctor.web.front.event.dto.DoctorBoarDetailDto;
 import io.terminus.doctor.web.front.event.dto.DoctorFosterDetail;
 import io.terminus.doctor.web.front.event.dto.DoctorMatingDetail;
 import io.terminus.doctor.web.front.event.dto.DoctorSowDetailDto;
-import io.terminus.parana.user.service.UserProfileReadService;
+import io.terminus.doctor.web.util.TransFromUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
 import org.joda.time.Days;
@@ -40,6 +35,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Created by yaoqijun.
@@ -55,18 +51,13 @@ public class DoctorPigs {
     private final DoctorPigReadService doctorPigReadService;
     private final DoctorPigWriteService doctorPigWriteService;
     private final DoctorGroupReadService doctorGroupReadService;
-    private final DoctorBasicReadService doctorBasicReadService;
-    private final UserProfileReadService userProfileReadService;
-    private final DoctorBarnReadService doctorBarnReadService;
+    private final TransFromUtil transFromUtil;
     @Autowired
-    public DoctorPigs(DoctorPigReadService doctorPigReadService, DoctorPigWriteService doctorPigWriteService, DoctorGroupReadService doctorGroupReadService,
-                      DoctorBasicReadService doctorBasicReadService, UserProfileReadService userProfileReadService, DoctorBarnReadService doctorBarnReadService){
+    public DoctorPigs(DoctorPigReadService doctorPigReadService, DoctorPigWriteService doctorPigWriteService, DoctorGroupReadService doctorGroupReadService, TransFromUtil transFromUtil){
         this.doctorPigReadService = doctorPigReadService;
         this.doctorPigWriteService = doctorPigWriteService;
         this.doctorGroupReadService = doctorGroupReadService;
-        this.doctorBasicReadService = doctorBasicReadService;
-        this.userProfileReadService = userProfileReadService;
-        this.doctorBarnReadService = doctorBarnReadService;
+        this.transFromUtil = transFromUtil;
     }
 
     @RequestMapping(value = "/queryByStatus", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -115,7 +106,8 @@ public class DoctorPigs {
                                                         @RequestParam("pigId") Long pigId,
                                                         @RequestParam(value = "eventSize", required = false) Integer eventSize){
         DoctorPigInfoDetailDto doctorPigInfoDetailDto = RespHelper.or500(doctorPigReadService.queryPigDetailInfoByPigId(pigId, eventSize));
-        return transFromType(doctorPigInfoDetailDto);
+        transFromUtil.transFromExtraMap(doctorPigInfoDetailDto.getDoctorPigEvents());
+        return doctorPigInfoDetailDto;
     }
 
     @RequestMapping(value = "/getSowPigDetail", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -228,33 +220,26 @@ public class DoctorPigs {
         return doctorFosterDetail;
     }
 
-    private DoctorPigInfoDetailDto transFromType (DoctorPigInfoDetailDto doctorPigInfoDetailDto) {
-        for (DoctorPigEvent doctorPigEvent : doctorPigInfoDetailDto.getDoctorPigEvents()) {
-            Map<String,Object> extraMap = doctorPigEvent.getExtraMap();
-            if (extraMap != null) {
-                if (extraMap.get("matingType") != null) {
-                    extraMap.put("matingType", MatingType.from((Integer) extraMap.get("matingType")).getDesc());
-                }
-                if (extraMap.get("checkResult") != null) {
-                    extraMap.put("checkResult", PregCheckResult.from((Integer) extraMap.get("checkResult")).getDesc());
-                }
-                if (extraMap.get("farrowingType") != null) {
-                    extraMap.put("farrowingType", FarrowingType.from((Integer) extraMap.get("farrowingType")).getDesc());
-                }
-                if (extraMap.get("farrowIsSingleManager") != null) {
-                    extraMap.put("farrowIsSingleManager", ((Integer)extraMap.get("farrowIsSingleManager") == 1) ? IsOrNot.YES.getDesc() : IsOrNot.NO.getDesc());
-                }
-                if (extraMap.get("fosterReason") != null) {
-                    extraMap.put("fosterReason", RespHelper.or500(doctorBasicReadService.findBasicById(Long.valueOf((String)extraMap.get("fosterReason")))).getName());
-                }
-                if (extraMap.get("vaccinationStaffId") != null) {
-                    extraMap.put("vaccinationStaffName", RespHelper.or500(userProfileReadService.findProfileByUserId(Long.valueOf((Integer)extraMap.get("vaccinationStaffId")))).getRealName());
-                }
-                if (extraMap.get("toBarnId") != null) {
-                    extraMap.put("toBarnId", RespHelper.or500(doctorBarnReadService.findBarnById(Long.valueOf((Integer) extraMap.get("toBarnId")))).getName());
-                }
+    /**
+     * 帮助前台判断参数中的猪群是否都是后备群
+     * @param groupIds 猪群id
+     * @return
+     */
+    @RequestMapping(value = "/checkGroupReserve", method = RequestMethod.POST)
+    @ResponseBody
+    public boolean checkGroupReserve(@RequestParam("groupIds") List<Long> groupIds){
+        if(groupIds.isEmpty()){
+            return false;
+        }
+        List<DoctorGroup> list = RespHelper.or500(doctorGroupReadService.findGroupByIds(groupIds));
+        if(list.isEmpty()){
+            return false;
+        }
+        for(DoctorGroup group : list){
+            if(!Objects.equals(group.getPigType(), PigType.RESERVE_BOAR.getValue()) && !Objects.equals(group.getPigType(), PigType.RESERVE_SOW.getValue())){
+                return false;
             }
         }
-        return doctorPigInfoDetailDto;
+        return true;
     }
 }

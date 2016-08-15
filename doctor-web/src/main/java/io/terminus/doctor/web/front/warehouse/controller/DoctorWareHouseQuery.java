@@ -51,14 +51,14 @@ public class DoctorWareHouseQuery {
 
     private final DoctorFarmReadService doctorFarmReadService;
 
-    private final UserReadService userReadService;
+    private final UserReadService<User> userReadService;
 
     private final DoctorUserProfileReadService doctorUserProfileReadService;
 
     @Autowired
     public DoctorWareHouseQuery(DoctorWareHouseReadService doctorWareHouseReadService,
                                 DoctorWareHouseWriteService doctorWareHouseWriteService,
-                                DoctorFarmReadService doctorFarmReadService, UserReadService userReadService,
+                                DoctorFarmReadService doctorFarmReadService, UserReadService<User> userReadService,
                                 DoctorUserProfileReadService doctorUserProfileReadService){
         this.doctorWareHouseReadService = doctorWareHouseReadService;
         this.doctorWareHouseWriteService = doctorWareHouseWriteService;

@@ -57,12 +57,11 @@ public class DoctorDailyRemovalEventCount implements DoctorDailyEventCount {
                     doctorDeadDailyReport.setSow(doctorDeadDailyReport.getSow() + 1);
                 }
             }else if(Objects.equals(chageReason, DoctorBasicEnums.SALE.getId())){
-                Double saleCount = Double.valueOf(MoreObjects.firstNonNull(extra.get("price"), 0.0).toString());
-                //添加对应的销售价格信息
+                //添加对应的销售数量
                 if(Objects.equals(doctorPig.getPigType(), DoctorPig.PIG_TYPE.BOAR.getKey())){
-                    doctorSaleDailyReport.setBoar(doctorSaleDailyReport.getBoar() + saleCount);
+                    doctorSaleDailyReport.setBoar(doctorSaleDailyReport.getBoar() + 1);
                 }else if (Objects.equals(doctorPig.getPigType(), DoctorPig.PIG_TYPE.SOW.getKey())){
-                    doctorSaleDailyReport.setSow(doctorSaleDailyReport.getSow() + saleCount);
+                    doctorSaleDailyReport.setSow(doctorSaleDailyReport.getSow() + 1);
                 }
             }
         });

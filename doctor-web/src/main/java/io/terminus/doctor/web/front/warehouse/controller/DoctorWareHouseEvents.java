@@ -59,7 +59,7 @@ public class DoctorWareHouseEvents {
 
     private final DoctorMaterialInWareHouseReadService doctorMaterialInWareHouseReadService;
 
-    private final UserReadService userReadService;
+    private final UserReadService<User> userReadService;
 
     private final DoctorUserProfileReadService doctorUserProfileReadService;
 
@@ -74,7 +74,7 @@ public class DoctorWareHouseEvents {
     @Autowired
     public DoctorWareHouseEvents(DoctorMaterialInWareHouseWriteService doctorMaterialInWareHouseWriteService,
                                  DoctorMaterialInWareHouseReadService doctorMaterialInWareHouseReadService,
-                                 UserReadService userReadService, DoctorBarnReadService doctorBarnReadService,
+                                 UserReadService<User> userReadService, DoctorBarnReadService doctorBarnReadService,
                                  DoctorBasicMaterialReadService doctorBasicMaterialReadService,
                                  DoctorWareHouseReadService doctorWareHouseReadService,
                                  DoctorFarmReadService doctorFarmReadService,

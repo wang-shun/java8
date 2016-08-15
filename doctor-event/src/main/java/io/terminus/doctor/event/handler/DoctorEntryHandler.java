@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
+import io.terminus.common.exception.ServiceException;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.common.utils.MapBuilder;
@@ -95,7 +96,6 @@ public class DoctorEntryHandler implements DoctorEventCreateHandler {
 
             // pig create
             checkState(doctorPigInfoCache.judgePigCodeNotContain(doctorPig.getOrgId(), doctorPig.getPigCode()), "validate.pigCode.fail");
-            doctorPigInfoCache.addPigCodeToFarm(doctorPig.getOrgId(), doctorPig.getPigCode());
             doctorPigDao.create(doctorPig);
 
             // event create
@@ -125,7 +125,10 @@ public class DoctorEntryHandler implements DoctorEventCreateHandler {
                             ImmutableMap.of("doctorPigId", doctorPig.getId(), "doctorEventId", doctorPigEvent.getId(),
                                     "doctorPigTrackId", doctorPigTrack.getId(), "doctorSnapshotId", doctorPigSnapshot.getId())
                     ));
-        } catch (Exception e) {
+            doctorPigInfoCache.addPigCodeToFarm(doctorPig.getOrgId(), doctorPig.getPigCode());
+        }catch(RuntimeException e){
+            throw new ServiceException(e.getMessage());
+        }catch (Exception e){
             log.error("doctor abstract entry flow handle fail, cause:{}", Throwables.getStackTraceAsString(e));
             throw new IllegalStateException("entry.handler.exception");
         }

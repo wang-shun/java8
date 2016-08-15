@@ -17,28 +17,7 @@ import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 
-import static io.terminus.doctor.workflow.node.Node.ATTR_ASSIGNEE;
-import static io.terminus.doctor.workflow.node.Node.ATTR_DESCRIBE;
-import static io.terminus.doctor.workflow.node.Node.ATTR_EXPRESSION;
-import static io.terminus.doctor.workflow.node.Node.ATTR_HANDLER;
-import static io.terminus.doctor.workflow.node.Node.ATTR_KEY;
-import static io.terminus.doctor.workflow.node.Node.ATTR_NAME;
-import static io.terminus.doctor.workflow.node.Node.ATTR_POINT_X;
-import static io.terminus.doctor.workflow.node.Node.ATTR_POINT_Y;
-import static io.terminus.doctor.workflow.node.Node.ATTR_TARGET;
-import static io.terminus.doctor.workflow.node.Node.ATTR_TIMER;
-import static io.terminus.doctor.workflow.node.Node.ATTR_VALUE;
-import static io.terminus.doctor.workflow.node.Node.NODE_DECISION;
-import static io.terminus.doctor.workflow.node.Node.NODE_END;
-import static io.terminus.doctor.workflow.node.Node.NODE_FORK;
-import static io.terminus.doctor.workflow.node.Node.NODE_JOIN;
-import static io.terminus.doctor.workflow.node.Node.NODE_ROOT;
-import static io.terminus.doctor.workflow.node.Node.NODE_START;
-import static io.terminus.doctor.workflow.node.Node.NODE_SUBFLOW;
-import static io.terminus.doctor.workflow.node.Node.NODE_SUB_END;
-import static io.terminus.doctor.workflow.node.Node.NODE_SUB_START;
-import static io.terminus.doctor.workflow.node.Node.NODE_TASK;
-import static io.terminus.doctor.workflow.node.Node.NODE_TRANSITION;
+import static io.terminus.doctor.workflow.node.Node.*;
 
 /**
  * Desc: 流程定义xml文件的解析类
@@ -373,6 +352,7 @@ public class ConfigManager implements Configuration {
                     .type(FlowDefinitionNode.Type.vlaue(node.getNodeName()))
                     .assignee(XmlHelper.getAttrValue(node, ATTR_ASSIGNEE))
                     .timer(XmlHelper.getAttrValue(node, ATTR_TIMER))
+                    .iTimer(XmlHelper.getAttrValue(node, ATTR_ITIMER))
                     .pointX(XmlHelper.getAttrDoubleValue(node, ATTR_POINT_X))
                     .pointY(XmlHelper.getAttrDoubleValue(node, ATTR_POINT_Y))
                     .build();

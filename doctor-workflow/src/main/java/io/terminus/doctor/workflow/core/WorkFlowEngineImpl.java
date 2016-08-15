@@ -46,6 +46,9 @@ public class WorkFlowEngineImpl implements WorkFlowEngine {
     @Autowired
     private Scheduler scheduler;
 
+    @Autowired
+    private SynchronizedData synchronizedData;
+
     @Override
     public JdbcAccess buildJdbcAccess() {
         if (jdbcAccess == null) {
@@ -125,4 +128,8 @@ public class WorkFlowEngineImpl implements WorkFlowEngine {
         return scheduler;
     }
 
+    @Override
+    public SynchronizedData buildSynchronizedData() {
+        return synchronizedData;
+    }
 }

@@ -43,6 +43,8 @@ public class DoctorWareHouseDto implements Serializable{
 
     private Integer restConsumeDate;    // 剩余使用日期
 
+    private Integer type; //仓库类型
+
     public static DoctorWareHouseDto buildWareHouseDto(DoctorWareHouse doctorWareHouse, DoctorWareHouseTrack doctorWareHouseTrack){
         if(isNull(doctorWareHouse)){
             return null;
@@ -51,7 +53,8 @@ public class DoctorWareHouseDto implements Serializable{
         DoctorWareHouseDtoBuilder builder = DoctorWareHouseDto.builder()
                 .warehouseId(doctorWareHouse.getId())
                 .warehouseName(doctorWareHouse.getWareHouseName())
-                .manager(doctorWareHouse.getManagerName());
+                .manager(doctorWareHouse.getManagerName())
+                .type(doctorWareHouse.getType());
 
         Map<String,Object> extraMap = doctorWareHouseTrack.getExtraMap();
 
@@ -71,5 +74,18 @@ public class DoctorWareHouseDto implements Serializable{
             builder.restConsumeDate(Integer.valueOf(extraMap.get(REST_CONSUME_DATE).toString()));
         }
         return builder.build();
+    }
+
+    private String transFormUnit(Integer type){
+        String unit = "kg";
+        switch (type){
+            case 3:
+                unit = "g";
+                break;
+            case 4:
+                unit = "g";
+                break;
+        }
+        return unit;
     }
 }

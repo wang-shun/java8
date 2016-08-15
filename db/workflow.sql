@@ -32,6 +32,7 @@ CREATE TABLE IF NOT EXISTS `workflow_definition_nodes`(
 	`type` SMALLINT(6) DEFAULT NULL COMMENT '节点类型, 1->开始节点, 2->任务节点, 3->选择节点, 4->并行节点, 5->并行汇聚节点, 10->子流程开始节点, -10->子流程结束节点, -1->结束节点',
 	`assignee` VARCHAR(32) DEFAULT NULL COMMENT '处理人(暂时保留)',
 	`timer` VARCHAR(32) DEFAULT NULL COMMENT '定时表达式',
+	`itimer` VARCHAR(128) DEFAULT NULL COMMENT '定时事件处理类(一般为类标识)',
 	`point_x` DOUBLE DEFAULT NULL COMMENT '节点x轴偏移量',
 	`point_y` DOUBLE DEFAULT NULL COMMENT '节点y轴偏移量',
 	`created_at` DATETIME DEFAULT NULL COMMENT '创建时间',
@@ -150,6 +151,7 @@ CREATE TABLE IF NOT EXISTS `workflow_history_process_instances`(
 	`operator_id` BIGINT(20) DEFAULT NULL COMMENT '操作者id',
 	`operator_name` VARCHAR(32) DEFAULT NULL COMMENT '操作者姓名',
 	`parent_instance_id` BIGINT(20) DEFAULT NULL COMMENT '父流程实例id',
+	`external_history_id` BIGINT(20) DEFAULT NULL COMMENT '记录删除的实例id',
 	`created_at` DATETIME DEFAULT NULL COMMENT '创建时间',
 	`updated_at` DATETIME DEFAULT NULL COMMENT '更新时间',
 	PRIMARY KEY(`id`)

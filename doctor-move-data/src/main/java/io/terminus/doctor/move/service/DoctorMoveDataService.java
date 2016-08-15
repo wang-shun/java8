@@ -1653,7 +1653,7 @@ public class DoctorMoveDataService {
                                                       Map<String, DoctorBarn> barnMap, Map<String, DoctorPig> pigMap) {
         DoctorTurnSeedGroupEvent turnSeed = new DoctorTurnSeedGroupEvent();
         DoctorPig pig = pigMap.get(gainEvent.getPigCode());
-        turnSeed.setPigId(pig == null ? null : pig.getId());
+        //turnSeed.setPigId(pig == null ? null : pig.getId());
 
         //转后的猪号
         turnSeed.setPigCode(gainEvent.getPigCode());
@@ -1677,8 +1677,8 @@ public class DoctorMoveDataService {
             turnSeed.setToBarnName(barn.getName());
         }
 
-        DoctorTurnSeedGroupEvent.Sex sex = DoctorTurnSeedGroupEvent.Sex.from(gainEvent.getSexName());
-        turnSeed.setSex(sex == null ? null : sex.getValue());
+//        DoctorTurnSeedGroupEvent.Sex sex = DoctorTurnSeedGroupEvent.Sex.from(gainEvent.getSexName());
+//        turnSeed.setSex(sex == null ? null : sex.getValue());
         return turnSeed;
     }
 

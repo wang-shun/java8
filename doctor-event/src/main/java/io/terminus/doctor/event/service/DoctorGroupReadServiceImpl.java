@@ -76,6 +76,16 @@ public class DoctorGroupReadServiceImpl implements DoctorGroupReadService {
     }
 
     @Override
+    public Response<List<DoctorGroup>> findGroupByIds(List<Long> groupIds){
+        try {
+            return Response.ok(doctorGroupDao.findByIds(groupIds));
+        } catch (Exception e) {
+            log.error("find group by id failed, groupIds:{}, cause:{}", groupIds, Throwables.getStackTraceAsString(e));
+            return Response.fail("group.find.fail");
+        }
+    }
+
+    @Override
     public Response<List<DoctorGroup>> findGroupsByFarmId(Long farmId) {
         try {
             return Response.ok(doctorGroupDao.findByFarmId(farmId));
@@ -157,7 +167,7 @@ public class DoctorGroupReadServiceImpl implements DoctorGroupReadService {
                     GroupEventType.MOVE_IN.getValue(),
                     GroupEventType.CHANGE.getValue(),
                     GroupEventType.TRANS_GROUP.getValue(),
-//                    GroupEventType.TURN_SEED.getValue(),  // TODO: 16/6/2  商品猪转为种猪的规则待定
+                    GroupEventType.TURN_SEED.getValue(),
                     GroupEventType.LIVE_STOCK.getValue(),
                     GroupEventType.DISEASE.getValue(),
                     GroupEventType.ANTIEPIDEMIC.getValue(),
@@ -189,7 +199,6 @@ public class DoctorGroupReadServiceImpl implements DoctorGroupReadService {
             List<DoctorGroupDetail> nurseries = MoreObjects.firstNonNull(groupMap.get(PigType.NURSERY_PIGLET.getValue()), Lists.newArrayList());
             List<DoctorGroupDetail> fattens = MoreObjects.firstNonNull(groupMap.get(PigType.FATTEN_PIG.getValue()), Lists.newArrayList());
 
-            log.info("groupMap:{}, farrows:{}, nurseries:{}, fattens:{}", groupMap, farrows, nurseries, fattens);
 
             //根据猪类统计
             DoctorGroupCount count = new DoctorGroupCount();

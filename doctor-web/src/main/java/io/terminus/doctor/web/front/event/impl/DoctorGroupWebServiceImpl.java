@@ -205,10 +205,7 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
                     orServEx(doctorGroupWriteService.groupEventTransGroup(groupDetail, map(putBasicFields(params), DoctorTransGroupInput.class)));
                     break;
                 case TURN_SEED:
-                    //校验来源猪类是否符合
-                    if (PigType.isGroup(groupDetail.getGroup().getPigType()) || groupDetail.getGroup().getPigType() == PigType.RESERVE_SOW.getValue()) {
-                        throw new ServiceException("group.can.not.turn.seed");
-                    }
+                    params.put("eventAt", DateUtil.toDateString(new Date()));
                     orServEx(doctorGroupWriteService.groupEventTurnSeed(groupDetail, map(putBasicFields(params), DoctorTurnSeedGroupInput.class)));
                     break;
                 case LIVE_STOCK:

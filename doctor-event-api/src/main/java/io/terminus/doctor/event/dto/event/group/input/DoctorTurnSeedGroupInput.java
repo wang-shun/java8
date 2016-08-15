@@ -19,21 +19,20 @@ public class DoctorTurnSeedGroupInput extends BaseGroupInput implements Serializ
     private static final long serialVersionUID = -2955174319148999586L;
 
     /**
-     * 转种猪后的id
-     */
-    @NotNull(message = "pig.id.not.null")
-    private Long pigId;
-
-    /**
      * 转种猪后的猪号
      */
     @NotNull(message = "pig.code.not.null")
     private String pigCode;
 
     /**
-     * 母亲猪号
+     * 母亲猪 耳缺号
      */
-    private String motherPigCode;
+    private String motherEarCode;
+
+    /**
+     * 耳缺号
+     */
+    private String earCode;
 
     /**
      * 转入日期
@@ -47,13 +46,6 @@ public class DoctorTurnSeedGroupInput extends BaseGroupInput implements Serializ
     @NotNull(message = "birthdate.not.null")
     private String birthDate;
 
-    /**
-     * 性别 0:种母猪 1:种公猪(ESex)
-     * @see io.terminus.doctor.event.dto.event.group.DoctorTurnSeedGroupEvent.Sex
-     */
-    @NotNull(message = "sex.not.null")
-    private Integer sex;
-
     private Long breedId;
 
     private String breedName;
@@ -66,6 +58,6 @@ public class DoctorTurnSeedGroupInput extends BaseGroupInput implements Serializ
 
     private String toBarnName;
 
-    @Min(value = 0, message = "weight.gt.0")
+    //@Min(value = 0, message = "weight.gt.0")
     private Double weight;
 }

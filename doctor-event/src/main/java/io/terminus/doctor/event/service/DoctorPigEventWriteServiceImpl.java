@@ -6,6 +6,7 @@ import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
+import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.Response;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.common.utils.JsonMapper;
@@ -37,8 +38,6 @@ import io.terminus.doctor.event.event.PigEventCreateEvent;
 import io.terminus.doctor.event.manager.DoctorPigEventManager;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigEvent;
-import io.terminus.doctor.event.model.DoctorPigTrack;
-import io.terminus.doctor.workflow.core.WorkFlowException;
 import io.terminus.zookeeper.pubsub.Publisher;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -107,6 +106,8 @@ public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteServic
             checkState(!NOT_ALLOW_ROLL_BACK_EVENTS.contains(doctorPigEvent.getType()), "pigRollBack.eventType.notAllow");
 
             return Response.ok(doctorPigEventManager.rollBackPigEvent(pigEventId,revertPigType,staffId,staffName));
+        } catch (ServiceException e) {
+            return Response.fail(e.getMessage());
         }catch (IllegalStateException e){
             log.error("illegal state pig roll back info, doctorEventId:{}, cause:{}", pigEventId, Throwables.getStackTraceAsString(e));
             return Response.fail(e.getMessage());
@@ -139,6 +140,8 @@ public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteServic
                     .pigType(doctorBasicInputInfoDto.getPigType()).build());
 
             return Response.ok(Params.getWithConvert(result,"doctorPigId",a->Long.valueOf(a.toString())));
+        } catch (ServiceException e) {
+            return Response.fail(e.getMessage());
         }catch(IllegalStateException e){
             log.error("pig entry event illegal state fail, basicInfo:{}, doctorFarmEntryDto:{}, cause:{}",
                     doctorBasicInputInfoDto, doctorFarmEntryDto, Throwables.getStackTraceAsString(e));
@@ -311,6 +314,8 @@ public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteServic
             Map<String,Object> result = doctorPigEventManager.createCasualPigEvent(doctorBasicInputInfoDto, dto);
             publishEvent(result);
             return Response.ok(Params.getWithConvert(result,"doctorEventId",a->Long.valueOf(a.toString())));
+        } catch (ServiceException e) {
+            return Response.fail(e.getMessage());
         }catch (Exception e){
             log.error("vaccination event create fail, cause:{}", Throwables.getStackTraceAsString(e));
             return Response.fail("create.vaccination.fail");
@@ -343,6 +348,8 @@ public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteServic
             Map<String,Object> result = doctorPigEventManager.createSowPigEvent(doctorBasicInputInfoDto, dto);
             publishEvent(result);
             return Response.ok(Params.getWithConvert(result,"doctorEventId",a->Long.valueOf(a.toString())));
+        } catch (ServiceException e) {
+            return Response.fail(e.getMessage());
         }catch (Exception e){
             log.error("vaccination event create fail, cause:{}", Throwables.getStackTraceAsString(e));
             return Response.fail("create.vaccination.fail");
@@ -379,6 +386,8 @@ public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteServic
             Map<String,Object> result = doctorPigEventManager.createSowPigEvent(doctorBasicInputInfoDto, dto);
             publishEvent(result);
             return Response.ok(Params.getWithConvert(result,"doctorEventId",a->Long.valueOf(a.toString())));
+        } catch (ServiceException e) {
+            return Response.fail(e.getMessage());
         }catch (Exception e){
             log.error("vaccination event create fail, cause:{}", Throwables.getStackTraceAsString(e));
             return Response.fail("create.vaccination.fail");
@@ -432,18 +441,19 @@ public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteServic
     @Override
     @Deprecated
     public Response<Long> sowPigletsChgEvent(DoctorPigletsChgDto doctorPigletsChgDto, DoctorBasicInputInfoDto doctorBasicInputInfoDto) {
-        try{
-            Map<String,Object> dto = Maps.newHashMap();
+        try {
+            Map<String, Object> dto = Maps.newHashMap();
             BeanMapper.copy(doctorPigletsChgDto, dto);
 
-            Map<String,Object> result = doctorPigEventManager.createSowPigEvent(doctorBasicInputInfoDto, dto);
+            Map<String, Object> result = doctorPigEventManager.createSowPigEvent(doctorBasicInputInfoDto, dto);
             publishEvent(result);
-            return Response.ok(Params.getWithConvert(result,"doctorEventId",a->Long.valueOf(a.toString())));
-
-        }catch (IllegalStateException e){
+            return Response.ok(Params.getWithConvert(result, "doctorEventId", a -> Long.valueOf(a.toString())));
+        } catch (ServiceException e) {
+            return Response.fail(e.getMessage());
+        } catch (IllegalStateException e) {
             log.error("illegal state piglet chg event create, cause:{}", Throwables.getStackTraceAsString(e));
             return Response.fail(e.getMessage());
-        }catch (Exception e){
+        } catch (Exception e) {
             log.error("piglets event create fail, cause:{}", Throwables.getStackTraceAsString(e));
             return Response.fail("create.piglets.fail");
         }
@@ -464,7 +474,7 @@ public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteServic
 
             double avgWeight = doctorPartWeanDto.getPartWeanAvgWeight();
             log.info("断奶事件: 均重" + avgWeight);
-            checkState(avgWeight <= 9000.0 && avgWeight >= 5000.0, "input.weanAvgWeight.error");
+            checkState(avgWeight <= 9.0 && avgWeight >= 5.0, "input.weanAvgWeight.error");
 
             Map<String,Object> result = doctorPigEventManager.createSowPigEvent(doctorBasicInputInfoDto, dto);
             publishEvent(result);
@@ -488,6 +498,8 @@ public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteServic
             publishEvent(result);
 
             return Response.ok(Boolean.TRUE);
+        } catch (ServiceException e) {
+            return Response.fail(e.getMessage());
         }catch (Exception e){
             log.error("sow pigs event creates fail, cause:{}", Throwables.getStackTraceAsString(e));
             return Response.fail("create.pigsEvent.fail");
@@ -504,6 +516,8 @@ public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteServic
             publishEvent(result);
 
             return Response.ok(Boolean.TRUE);
+        } catch (ServiceException e) {
+            return Response.fail(e.getMessage());
         }catch (Exception e){
             log.error("casual events pigs event create fail, basics:{}, extra:{}, cause:{}",basics, extra, Throwables.getStackTraceAsString(e));
             return Response.fail("create.casualPigsEvent.fail");

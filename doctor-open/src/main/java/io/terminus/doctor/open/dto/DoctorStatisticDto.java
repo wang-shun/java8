@@ -33,11 +33,12 @@ public class DoctorStatisticDto implements Serializable {
 
     public enum PigType {
 
-        SOW("母猪存栏量（头）", "母"),
-        FARROW_PIGLET("产房仔猪存栏量（头）", "产房"),
-        NURSERY_PIGLET("保育猪存栏量（头）", "保育"),
-        FATTEN_PIG("育肥猪存栏量（头）", "育肥"),
-        BREEDING_PIG("育种猪存栏量（头）", "育种");
+        SOW("母猪存栏量（头）", "母猪"),
+        BOAR("公猪存栏量（头）", "公猪"),
+        FARROW_PIGLET("产房仔猪存栏量（头）", "产房仔猪"),
+        NURSERY_PIGLET("保育猪存栏量（头）", "保育猪"),
+        FATTEN_PIG("育肥猪存栏量（头）", "育肥猪"),
+        BREEDING_PIG("育种猪存栏量（头）", "育种猪");
 
         @Getter
         private final String desc;

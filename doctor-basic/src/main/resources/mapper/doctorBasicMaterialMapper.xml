@@ -38,9 +38,9 @@
     </sql>
 
     <sql id="criteria">
-        <if test="type != null">AND type = #{type}</if>
-        <if test="name != null">AND name = #{name}</if>
-        <if test="srm != null">AND srm = #{srm}</if>
+        <if test="type != null">AND `type` = #{type}</if>
+        <if test="name != null">AND `name` like concat('%', #{name}, '%')</if>
+        <if test="srm != null">AND srm like concat('%', #{srm}, '%')</if>
         <if test="unitGroupId != null">AND unit_group_id = #{unitGroupId}</if>
         <if test="unitGroupName != null">AND unit_group_name = #{unitGroupName}</if>
         <if test="unitId != null">AND unit_id = #{unitId}</if>
