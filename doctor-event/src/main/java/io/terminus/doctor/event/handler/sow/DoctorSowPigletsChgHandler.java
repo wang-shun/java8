@@ -104,8 +104,8 @@ public class DoctorSowPigletsChgHandler extends DoctorAbstractEventFlowHandler{
 
 
     private void changePigletsChangeInfo(Long groupId,  Map<String, Object> extra, DoctorBasicInputInfoDto basic){
-        doctorGroupWriteService.groupEventChange(RespHelper.orServEx(doctorGroupReadService.findGroupDetailByGroupId(groupId)),
-                buildInputInfo(extra, basic));
+        RespHelper.orServEx(doctorGroupWriteService.groupEventChange(RespHelper.orServEx(doctorGroupReadService.findGroupDetailByGroupId(groupId)),
+                buildInputInfo(extra, basic)));
     }
 
     private DoctorChangeGroupInput buildInputInfo(Map<String,Object> mapInfo, DoctorBasicInputInfoDto basic){
