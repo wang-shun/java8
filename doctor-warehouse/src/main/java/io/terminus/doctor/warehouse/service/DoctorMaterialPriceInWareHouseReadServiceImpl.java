@@ -37,9 +37,9 @@ public class DoctorMaterialPriceInWareHouseReadServiceImpl implements DoctorMate
     }
 
     @Override
-    public Response<List<DoctorMaterialPriceInWareHouse>> findByWareHouseId(Long wareHouseId) {
+    public Response<List<DoctorMaterialPriceInWareHouse>> findByWareHouseAndMaterialId(Long wareHouseId, Long materialId) {
         try {
-            return Response.ok(doctorMaterialPriceInWareHouseDao.findByWareHouseId(wareHouseId));
+            return Response.ok(doctorMaterialPriceInWareHouseDao.findByWareHouseAndMaterialId(wareHouseId, materialId));
         } catch (Exception e) {
             log.error("find materialPriceInWareHouse by id failed, wareHouseId:{}, cause:{}", wareHouseId, Throwables.getStackTraceAsString(e));
             return Response.fail("materialPriceInWareHouse.find.fail");

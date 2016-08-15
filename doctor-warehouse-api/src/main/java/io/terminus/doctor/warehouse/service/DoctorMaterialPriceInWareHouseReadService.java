@@ -21,10 +21,10 @@ public interface DoctorMaterialPriceInWareHouseReadService {
     Response<DoctorMaterialPriceInWareHouse> findById(Long id);
 
     /**
-     * 根据i仓库d查询仓库中各物料每次入库的剩余量
+     * 根据仓库id查询仓库中各物料每次入库的剩余量
      * @param wareHouseId 仓库id
      * @return 仓库中各物料每次入库的剩余量
      */
-    Response<List<DoctorMaterialPriceInWareHouse>> findByWareHouseId(Long wareHouseId);
+    Response<List<DoctorMaterialPriceInWareHouse>> findByWareHouseAndMaterialId(Long wareHouseId, Long materialId);
 
 }

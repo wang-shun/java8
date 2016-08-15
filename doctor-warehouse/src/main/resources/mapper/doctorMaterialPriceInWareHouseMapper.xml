@@ -59,7 +59,7 @@
         SELECT <include refid="cols_all" />
         FROM <include refid="tb" />
         WHERE ware_house_id = #{wareHouseId} and material_id = #{materialId}
-        order by providerTime asc
+        order by provider_time asc
     </select>
 
     <update id="update" parameterType="DoctorMaterialPriceInWareHouse">

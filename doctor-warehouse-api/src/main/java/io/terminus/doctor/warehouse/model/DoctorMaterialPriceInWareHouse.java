@@ -1,7 +1,9 @@
 package io.terminus.doctor.warehouse.model;
 
 import io.terminus.doctor.warehouse.dto.DoctorMaterialConsumeProviderDto;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.experimental.Builder;
 import org.joda.time.DateTime;
 
@@ -15,6 +17,8 @@ import java.util.Date;
  */
 @Data
 @Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class DoctorMaterialPriceInWareHouse implements Serializable {
 
     private static final long serialVersionUID = 6333326277652074639L;
