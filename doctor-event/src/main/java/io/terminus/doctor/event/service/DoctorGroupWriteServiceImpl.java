@@ -246,10 +246,7 @@ public class DoctorGroupWriteServiceImpl implements DoctorGroupWriteService {
         switch (type) {
             // 当猪的来源是后备群中的种母猪 (PigType.RESERVE_SOW) 时, 转入猪舍只允许为 配种舍(PigType.MATE_SOW) 或 妊娠舍(PigType.PREG_SOW)
             case RESERVE_SOW :
-//                if(!Objects.equals(barnType, PigType.MATE_SOW.getValue()) && !Objects.equals(barnType, PigType.PREG_SOW.getValue())){
-//                    throw new ServiceException("barn.can.not.turn.seed");
-//                }
-                if(!Objects.equals(barnType, PigType.MATE_SOW.getValue())){
+                if(!Objects.equals(barnType, PigType.MATE_SOW.getValue()) && !Objects.equals(barnType, PigType.PREG_SOW.getValue())){
                     throw new ServiceException("barn.can.not.turn.seed");
                 }
                 break;
