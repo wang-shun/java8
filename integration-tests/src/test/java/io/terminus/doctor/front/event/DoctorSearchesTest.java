@@ -215,4 +215,11 @@ public class DoctorSearchesTest extends BaseFrontWebTest {
         Object body = getForEntity(url, ImmutableMap.of("farmId", 12399,"templateName","待配种警示"), Object.class).getBody();
         System.out.println(JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(body));
     }
+
+    @Test
+    public void test_BoarDetial() {
+        String url = "/api/doctor/pigs/getBoarPigDetail";
+        Object body = getForEntity(url, ImmutableMap.of("pigId",190,"farmId", 12399), Object.class).getBody();
+        System.out.println(JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(body));
+    }
 }

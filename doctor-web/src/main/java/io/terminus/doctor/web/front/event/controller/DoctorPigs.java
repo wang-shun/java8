@@ -132,6 +132,8 @@ public class DoctorPigs {
                 .barnCode(dto.getDoctorPigTrack().getCurrentBarnName()).pigStatus(dto.getDoctorPigTrack().getStatus())
                 .entryDate(dto.getDoctorPig().getInFarmDate()).birthDate(dto.getDoctorPig().getBirthDate())
                 .doctorPigEvents(dto.getDoctorPigEvents())
+                .dayAge(dto.getDayAge())
+                .weight(dto.getDoctorPigTrack().getWeight())
                 .build();
         return doctorBoarDetailDto;
     }
