@@ -38,6 +38,7 @@ public class DoctorMonthlyReportReadServiceImpl implements DoctorMonthlyReportRe
     @Override
     public Response<DoctorMonthlyReportDto> findMonthlyReportByFarmIdAndSumAt(Long farmId, String sumAt) {
         try {
+            log.info("find monthly farmId:{}, sumAt:{}", farmId, sumAt);
             Date date;
 
             //yyyy-MM-dd 格式, 说明是按照天查的, yyyy-MM 格式, 说明是按照月查的
@@ -51,7 +52,6 @@ public class DoctorMonthlyReportReadServiceImpl implements DoctorMonthlyReportRe
             if (new DateTime(date).isAfter(DateUtil.getDateEnd(DateTime.now()))) {
                 return Response.ok(failReport());
             }
-
 
             //查询月报结果, 如果没查到, 返回失败的结果
             DoctorMonthlyReport report = doctorMonthlyReportDao.findByFarmIdAndSumAt(farmId, date);
