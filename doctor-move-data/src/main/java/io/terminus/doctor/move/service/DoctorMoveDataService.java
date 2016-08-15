@@ -728,8 +728,8 @@ public class DoctorMoveDataService {
             DoctorPigEvent lastEvent = events.get(events.size() - 1);
             track.setExtra(lastEvent.getExtra());   //extra字段保存最后一次event的extra
 
-            // TODO: 16/8/15  releventIds 存的是 Map<Parity, EventIds>
-            track.setRelEventIds(Joiners.COMMA.join(events.stream().map(DoctorPigEvent::getId).collect(Collectors.toList()))); //关联事件ids, 逗号分隔
+            //关联事件ids, Map<Parity, EventIds>, 按照胎次分组
+            track.setRelEventIds(getSowRelEventIds(card.getFirstParity(), events));
 
             //母猪当前配种次数
             track.setCurrentMatingCount(getSowCurrentMatingCount(events, sow));
@@ -760,6 +760,27 @@ public class DoctorMoveDataService {
             track.setCurrentBarnName(barn.getName());
         }
         return track;
+    }
+
+    //母猪按胎次分组关联事件
+    private static String getSowRelEventIds(Integer firstParity, List<DoctorPigEvent> events) {
+        Map<Integer, String> relMap = Maps.newHashMap();
+        List<Long> ids = Lists.newArrayList();
+        int i = 0;
+        for (DoctorPigEvent event : events) {
+            if (Objects.equals(event.getType(), PigEvent.MATING.getKey())) {
+                relMap.put(firstParity + i, Joiners.COMMA.join(ids));  //遇到配种事件, 当做一个胎次
+                ids.clear();                //清空list, 作为下一个胎次
+                ids.add(event.getId());     //加入本次事件
+                i++;                        //游标加1
+
+            } else {
+                ids.add(event.getId());
+            }
+        }
+        //不要忘了最后一次
+        relMap.put(firstParity + i, Joiners.COMMA.join(ids));
+        return JSON_MAPPER.toJson(relMap);
     }
 
     //母猪的当前配种次数(初配, 复配等等)
