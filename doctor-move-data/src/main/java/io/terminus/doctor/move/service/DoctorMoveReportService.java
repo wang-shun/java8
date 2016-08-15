@@ -9,6 +9,7 @@ import io.terminus.doctor.event.dto.report.daily.DoctorDailyReportDto;
 import io.terminus.doctor.event.model.DoctorDailyReport;
 import io.terminus.doctor.event.service.DoctorDailyReportReadService;
 import io.terminus.doctor.move.handler.DoctorMoveDatasourceHandler;
+import io.terminus.doctor.move.model.ReportBoarLiveStock;
 import io.terminus.doctor.move.model.ReportGroupLiveStock;
 import io.terminus.doctor.move.model.ReportSowLiveStock;
 import io.terminus.doctor.user.dao.DoctorFarmDao;
@@ -70,12 +71,15 @@ public class DoctorMoveReportService {
 
         //母猪存栏map
         Map<Date, ReportSowLiveStock> sowMap = RespHelper.orServEx(doctorMoveDatasourceHandler
-                .findByHbsSql(moveId, ReportSowLiveStock.class, "DoctorDailyReport-GroupLiveStock", ImmutableMap.of("index", INDEX, "farmOutId", farm.getOutId())))
+                .findByHbsSql(moveId, ReportSowLiveStock.class, "DoctorDailyReport-SowLiveStock", ImmutableMap.of("index", INDEX, "farmOutId", farm.getOutId())))
                 .stream().collect(Collectors.toMap(ReportSowLiveStock::getSumat, v -> v));
+
+        //公猪存栏
+        ReportBoarLiveStock boar = RespHelper.orServEx(doctorMoveDatasourceHandler.findByHbsSql(moveId, ReportBoarLiveStock.class, "DoctorDailyReport-BoarLiveStock")).get(0);
 
         //取出所有统计数据转换一把
         List<DoctorDailyReport> reports = gls.stream()
-                .map(g -> getDailyReport(farmId, g, MoreObjects.firstNonNull(sowMap.get(g.getSumat()), new ReportSowLiveStock())))
+                .map(g -> getDailyReport(farmId, g, MoreObjects.firstNonNull(sowMap.get(g.getSumat()), new ReportSowLiveStock()), boar))
                 .collect(Collectors.toList());
 
         //批量创建日报
@@ -83,7 +87,7 @@ public class DoctorMoveReportService {
     }
 
     //日报
-    private DoctorDailyReport getDailyReport(Long farmId, ReportGroupLiveStock group, ReportSowLiveStock sow) {
+    private DoctorDailyReport getDailyReport(Long farmId, ReportGroupLiveStock group, ReportSowLiveStock sow, ReportBoarLiveStock boar) {
         DoctorDailyReport report = new DoctorDailyReport();
         report.setFarmId(farmId);
         report.setSumAt(group.getSumat());
@@ -91,22 +95,22 @@ public class DoctorMoveReportService {
         report.setNurseryCount(group.getNurseryCount());    // 当天保育猪存栏
         report.setFattenCount(group.getFattenCount());      // 当天育肥猪存栏
         report.setSowCount(sow.getBuruSow() + sow.getKonghuaiSow() + sow.getPeihuaiSow());     // 当天母猪存栏
-        report.setExtra(JsonMapper.nonEmptyMapper().toJson(getDailyReportDto(farmId, group, sow)));
+        report.setExtra(JsonMapper.nonEmptyMapper().toJson(getDailyReportDto(farmId, group, sow, boar)));
         return report;
     }
 
     //日报统计json字段
-    private DoctorDailyReportDto getDailyReportDto(Long farmId, ReportGroupLiveStock group, ReportSowLiveStock sow) {
+    private DoctorDailyReportDto getDailyReportDto(Long farmId, ReportGroupLiveStock group, ReportSowLiveStock sow, ReportBoarLiveStock boar) {
         DoctorDailyReportDto dto = RespHelper.orServEx(doctorDailyReportReadService
                 .initDailyReportByFarmIdAndDate(farmId, group.getSumat()));
 
-        //刷新下dto里的统计 // TODO: 16/8/14  
+        //刷新下dto里的统计
         dto.getLiveStock().setFarrow(group.getFarrowCount());
         dto.getLiveStock().setNursery(group.getNurseryCount());
         dto.getLiveStock().setFatten(group.getFattenCount());
 
         //注意下面的存栏都是当天的存栏
-        dto.getLiveStock().setBoar(0);
+        dto.getLiveStock().setBoar(boar.getQuantity());
         dto.getLiveStock().setBuruSow(sow.getBuruSow());
         dto.getLiveStock().setHoubeiSow(group.getHoubeiCount());
         dto.getLiveStock().setKonghuaiSow(sow.getKonghuaiSow());
