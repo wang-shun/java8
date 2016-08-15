@@ -24,7 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static io.terminus.common.utils.Arguments.notEmpty;
+import static io.terminus.common.utils.Arguments.isEmpty;
 
 /**
  * Desc: 迁移猪场统计数据
@@ -36,7 +36,7 @@ import static io.terminus.common.utils.Arguments.notEmpty;
 @Service
 public class DoctorMoveReportService {
 
-    private static final int INDEX = 50;    //总共导多少天的数据
+    private static final int INDEX = 10;    //总共导多少天的数据
 
     private final DoctorDailyReportDao doctorDailyReportDao;
     private final DoctorFarmDao doctorFarmDao;
@@ -62,7 +62,7 @@ public class DoctorMoveReportService {
     @Transactional
     public void moveDailyReport(Long moveId, Long farmId) {
         DoctorFarm farm = doctorFarmDao.findById(farmId);
-        if (farm == null || notEmpty(farm.getOutId())) {
+        if (farm == null || isEmpty(farm.getOutId())) {
             return;
         }
 

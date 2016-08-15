@@ -5,6 +5,7 @@ import io.terminus.common.exception.ServiceException;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.move.service.DoctorMoveBasicService;
 import io.terminus.doctor.move.service.DoctorMoveDataService;
+import io.terminus.doctor.move.service.DoctorMoveReportService;
 import io.terminus.doctor.move.service.UserInitService;
 import io.terminus.doctor.move.service.WareHouseInitService;
 import io.terminus.doctor.user.dao.DoctorFarmDao;
@@ -42,6 +43,7 @@ public class DoctorMoveDataController {
     private final WareHouseInitService wareHouseInitService;
     private final DoctorMoveBasicService doctorMoveBasicService;
     private final DoctorMoveDataService doctorMoveDataService;
+    private final DoctorMoveReportService doctorMoveReportService;
     private final DoctorFarmDao doctorFarmDao;
     private final DoctorUserDataPermissionDao doctorUserDataPermissionDao;
     private final DoctorUserReadService doctorUserReadService;
@@ -51,6 +53,7 @@ public class DoctorMoveDataController {
                                     WareHouseInitService wareHouseInitService,
                                     DoctorMoveBasicService doctorMoveBasicService,
                                     DoctorMoveDataService doctorMoveDataService,
+                                    DoctorMoveReportService doctorMoveReportService,
                                     DoctorFarmDao doctorFarmDao,
                                     DoctorUserDataPermissionDao doctorUserDataPermissionDao,
                                     DoctorUserReadService doctorUserReadService) {
@@ -58,6 +61,7 @@ public class DoctorMoveDataController {
         this.wareHouseInitService = wareHouseInitService;
         this.doctorMoveBasicService = doctorMoveBasicService;
         this.doctorMoveDataService = doctorMoveDataService;
+        this.doctorMoveReportService = doctorMoveReportService;
         this.doctorFarmDao = doctorFarmDao;
         this.doctorUserDataPermissionDao = doctorUserDataPermissionDao;
         this.doctorUserReadService = doctorUserReadService;
@@ -141,6 +145,11 @@ public class DoctorMoveDataController {
         log.warn("move group start, moveId:{}", moveId);
         doctorMoveDataService.moveGroup(moveId, farm);
         log.warn("move group end");
+
+        //6.迁移猪场日报
+        log.warn("move daily start, moveId:{}", moveId);
+        doctorMoveReportService.moveDailyReport(moveId, farm.getId());
+        log.warn("move daily end");
     }
 
     /**
@@ -257,6 +266,19 @@ public class DoctorMoveDataController {
             return true;
         } catch (Exception e) {
             log.error("move workflow failed, farmId:{}, cause:{}", farmId, Throwables.getStackTraceAsString(e));
+            return false;
+        }
+    }
+
+    @RequestMapping(value = "/daily", method = RequestMethod.GET)
+    public Boolean moveDailyReport(@RequestParam("moveId") Long moveId, @RequestParam("farmId") Long farmId) {
+        try {
+            log.warn("move daily report start, moveId:{}, farmId:{}", moveId, farmId);
+            doctorMoveReportService.moveDailyReport(moveId, farmId);
+            log.warn("move daily report end");
+            return true;
+        } catch (Exception e) {
+            log.error("move daily report failed, moveId:{}, farmId:{}, cause:{}", moveId, farmId, Throwables.getStackTraceAsString(e));
             return false;
         }
     }
