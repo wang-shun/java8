@@ -37,8 +37,8 @@ public class DateUtil {
     /**
      * 检查输入的日期是否为有效格式
      *
-     * @param value  输入的日期
-     * @return  是否有效
+     * @param value 输入的日期
+     * @return 是否有效
      */
     public static boolean isYYYYMMDD(String value) {
         try {
@@ -97,7 +97,8 @@ public class DateUtil {
 
     /**
      * 获取index之前的所有天
-     * @param date 初始date
+     *
+     * @param date  初始date
      * @param index 前几天
      * @return 天list
      */
@@ -114,7 +115,8 @@ public class DateUtil {
 
     /**
      * 获取index之前的所有月末
-     * @param date 初始date
+     *
+     * @param date  初始date
      * @param index 前几月
      * @return 月末list(本月是当前天)
      */
@@ -130,4 +132,16 @@ public class DateUtil {
         }
         return months;
     }
+
+    /*
+     * 获取当月的最后一天
+     *
+     * @param date
+     * @return
+     */
+    public static DateTime getMonthEnd(DateTime date) {
+        if (date == null) return null;
+        return date.plusMonths(1).withDayOfMonth(1).withHourOfDay(0).withMinuteOfHour(0).withSecondOfMinute(0).withMillisOfSecond(0).minusSeconds(1);
+    }
+
 }
