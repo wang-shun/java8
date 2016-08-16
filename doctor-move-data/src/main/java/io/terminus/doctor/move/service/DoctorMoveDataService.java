@@ -854,17 +854,23 @@ public class DoctorMoveDataService {
 
                 //如果是妊娠检查
                 if (Objects.equals(lastFlag.getType(), PigEvent.PREG_CHECK.getKey())) {
-                    switch (lastFlag.getPregCheckResult()) {
-                        case 2:
-                            event.setDoctorMateType(DoctorMatingType.YP.getKey());
-                            continue;
-                        case 3:
-                            event.setDoctorMateType(DoctorMatingType.LPC.getKey());
-                            continue;
-                        case 4:
-                            event.setDoctorMateType(DoctorMatingType.FP.getKey());
-                            continue;
+                    if(lastFlag.getPregCheckResult() != null){
+                        switch (lastFlag.getPregCheckResult()) {
+                            case 2:
+                                event.setDoctorMateType(DoctorMatingType.YP.getKey());
+                                continue;
+                            case 3:
+                                event.setDoctorMateType(DoctorMatingType.LPC.getKey());
+                                continue;
+                            case 4:
+                                event.setDoctorMateType(DoctorMatingType.FP.getKey());
+                                continue;
+                        }
                     }
+                    else{
+                        log.warn("event sow preg check result is null, event {}", lastFlag);
+                    }
+                    continue;
                 }
 
                 //如果是断奶
