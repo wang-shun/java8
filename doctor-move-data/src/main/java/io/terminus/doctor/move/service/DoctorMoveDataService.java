@@ -920,24 +920,29 @@ public class DoctorMoveDataService {
             //当前事件是妊娠检查事件
             if (Objects.equals(event.getType(), PigEvent.PREG_CHECK.getKey()) && lastMateFlag != null) {
                 int days = Days.daysBetween(new DateTime(lastMateFlag.getMattingDate()), new DateTime(event.getCheckDate())).getDays();
-                switch (event.getPregCheckResult()) {
-                    case 2:
-                        //配种到阴性
-                        event.setPynpd(days);
-                        event.setNpd(days);
-                        continue;
-                    case 3:
-                        //配种到流产
-                        event.setPlnpd(days);
-                        event.setNpd(days);
-                        continue;
-                    case 4:
-                        //配种到返情
-                        event.setPfnpd(days);
-                        event.setNpd(days);
-                        continue;
+                if (event.getPregCheckResult() != null) {
+                    switch (event.getPregCheckResult()) {
+                        case 2:
+                            //配种到阴性
+                            event.setPynpd(days);
+                            event.setNpd(days);
+                            continue;
+                        case 3:
+                            //配种到流产
+                            event.setPlnpd(days);
+                            event.setNpd(days);
+                            continue;
+                        case 4:
+                            //配种到返情
+                            event.setPfnpd(days);
+                            event.setNpd(days);
+                            continue;
+                    }
+                } else {
+                    log.warn("event sow preg check result is null, event {}", event);
                 }
                 continue;
+
             }
 
             //当前事件是流产事件
