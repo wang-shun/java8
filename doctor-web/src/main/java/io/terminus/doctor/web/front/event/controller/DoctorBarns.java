@@ -166,8 +166,6 @@ public class DoctorBarns {
         barn.setOrgId(farm.getOrgId());
         barn.setOrgName(farm.getOrgName());
         barn.setFarmName(farm.getName());
-        barn.setStaffId(UserUtil.getUserId());
-        barn.setStaffName(UserUtil.getCurrentUser().getName());
 
         if (barn.getId() == null) {
             barn.setStatus(DoctorBarn.Status.NOUSE.getValue());     //初始猪舍状态: 未用
