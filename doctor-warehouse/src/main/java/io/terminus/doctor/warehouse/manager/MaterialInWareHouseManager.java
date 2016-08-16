@@ -1,7 +1,9 @@
 package io.terminus.doctor.warehouse.manager;
 
 import com.google.common.collect.Maps;
+import io.terminus.common.utils.NumberUtils;
 import io.terminus.doctor.warehouse.dao.DoctorMaterialConsumeAvgDao;
+import io.terminus.doctor.warehouse.dao.DoctorMaterialConsumeProviderDao;
 import io.terminus.doctor.warehouse.dao.DoctorMaterialInWareHouseDao;
 import io.terminus.doctor.warehouse.dao.DoctorMaterialInfoDao;
 import io.terminus.doctor.warehouse.dto.DoctorMaterialConsumeProviderDto;
@@ -17,6 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -41,15 +44,19 @@ public class MaterialInWareHouseManager {
 
     private final DoctorMaterialConsumeAvgDao doctorMaterialConsumeAvgDao;
 
+    private final DoctorMaterialConsumeProviderDao doctorMaterialConsumeProviderDao;
+
     @Autowired
     public MaterialInWareHouseManager(DoctorMaterialInWareHouseDao doctorMaterialInWareHouseDao,
                                       DoctorMaterialInfoDao doctorMaterialInfoDao,
                                       DoctorWareHouseHandlerInvocation doctorWareHouseHandlerInvocation,
-                                      DoctorMaterialConsumeAvgDao doctorMaterialConsumeAvgDao){
+                                      DoctorMaterialConsumeAvgDao doctorMaterialConsumeAvgDao,
+                                      DoctorMaterialConsumeProviderDao doctorMaterialConsumeProviderDao){
         this.doctorMaterialInWareHouseDao = doctorMaterialInWareHouseDao;
         this.doctorMaterialInfoDao = doctorMaterialInfoDao;
         this.doctorWareHouseHandlerInvocation = doctorWareHouseHandlerInvocation;
         this.doctorMaterialConsumeAvgDao = doctorMaterialConsumeAvgDao;
+        this.doctorMaterialConsumeProviderDao = doctorMaterialConsumeProviderDao;
     }
 
     // 生产对应的物料内容
@@ -57,27 +64,47 @@ public class MaterialInWareHouseManager {
     public Boolean produceMaterialInfo(DoctorWareHouseBasicDto basicDto,
                                        DoctorWareHouse targetHouse, DoctorMaterialInfo targetMaterial,
                                        DoctorMaterialInfo.MaterialProduce materialProduce){
+        List<Long> eventIds = new ArrayList<>();
 
         // consume each source
         materialProduce.getMaterialProduceEntries().forEach(m->
-            produceMaterialConsumeEntry(basicDto, m));
+                eventIds.addAll(produceMaterialConsumeEntry(basicDto, m))
+        );
 
         materialProduce.getMedicalProduceEntries().forEach(m->
-            produceMaterialConsumeEntry(basicDto, m));
+                eventIds.addAll(produceMaterialConsumeEntry(basicDto, m))
+        );
 
+        // 计算本次配方生产的饲料的入库单价
+        Long unitPrice = this.calculateProviderUnitPrice(eventIds, materialProduce.getTotal());
         // provider source
         providerMaterialInWareHouseInner(DoctorMaterialConsumeProviderDto.builder()
                 .type(targetMaterial.getType()).farmId(targetMaterial.getFarmId()).farmName(targetMaterial.getFarmName())
                 .materialTypeId(targetMaterial.getId()).materialName(targetMaterial.getMaterialName())
                 .wareHouseId(targetHouse.getId()).wareHouseName(targetHouse.getWareHouseName())
                 .barnId(basicDto.getBarnId()).barnName(basicDto.getBarnName()).staffId(basicDto.getStaffId()).staffName(basicDto.getStaffName())
-                .count(materialProduce.getTotal()).unitId(targetMaterial.getUnitId()).unitName(targetMaterial.getUnitName())
+                .count(materialProduce.getTotal()).unitId(targetMaterial.getUnitId()).unitName(targetMaterial.getUnitName()).unitPrice(unitPrice)
                 .build());
 
         return Boolean.TRUE;
     }
 
-    private void produceMaterialConsumeEntry(DoctorWareHouseBasicDto basicDto, DoctorMaterialInfo.MaterialProduceEntry materialProduceEntry){
+    private Long calculateProviderUnitPrice(List<Long> eventIds, Long realTotal){
+        long totalPrice = 0L;
+        for (DoctorMaterialConsumeProvider cp : doctorMaterialConsumeProviderDao.findByIds(eventIds)){
+            Map<String, Object> extraMap = cp.getExtraMap();
+            ArrayList<Map<String, Object>> array = (ArrayList) extraMap.get("consumePrice");
+            for(Map<String, Object> obj : array){
+                long count = Long.parseLong(obj.get("count").toString());
+                long unitPrice = Long.parseLong(obj.get("unitPrice").toString());
+                totalPrice += count * unitPrice;
+            }
+        }
+        return Long.valueOf(NumberUtils.divide(totalPrice, realTotal, 0));
+    }
+
+    private List<Long> produceMaterialConsumeEntry(DoctorWareHouseBasicDto basicDto, DoctorMaterialInfo.MaterialProduceEntry materialProduceEntry){
+        List<Long> eventIds = new ArrayList<>();
         List<DoctorMaterialInWareHouse> doctorMaterialInWareHouses = doctorMaterialInWareHouseDao.queryByFarmMaterial(
                 basicDto.getFarmId(),
                 materialProduceEntry.getMaterialId());
@@ -102,7 +129,7 @@ public class MaterialInWareHouseManager {
                 totalConsumeCount = totalConsumeCount - toConsume;
             }
 
-            consumeMaterialInner(DoctorMaterialConsumeProviderDto.builder()
+            Long eventId = consumeMaterialInner(DoctorMaterialConsumeProviderDto.builder()
                     .type(doctorMaterialInWareHouse.getType())
                     .farmId(doctorMaterialInWareHouse.getFarmId()).farmName(doctorMaterialInWareHouse.getFarmName())
                     .materialTypeId(doctorMaterialInWareHouse.getMaterialId()).materialName(doctorMaterialInWareHouse.getMaterialName())
@@ -110,9 +137,9 @@ public class MaterialInWareHouseManager {
                     .barnId(basicDto.getBarnId()).barnName(basicDto.getBarnName()).staffId(basicDto.getStaffId()).staffName(basicDto.getStaffName())
                     .count(toConsume).unitName(doctorMaterialInWareHouse.getUnitName())
                     .build());
+            eventIds.add(eventId);
         }
-
-        return;
+        return eventIds;
     }
 
     /**
