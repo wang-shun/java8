@@ -55,6 +55,8 @@ public class DoctorMaterialConsumeProviderDto implements Serializable{
 
     private Long count;
 
+    private Long unitPrice; // 单价, 单位为"分"
+
     private Long unitId;
 
     private String unitName;    // 单位信息
