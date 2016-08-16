@@ -248,5 +248,5 @@ ALTER TABLE doctor_pig_events ADD COLUMN doctor_mate_type SMALLINT(6) DEFAULT NU
 -- 2016-08-15 workflow 新增 itimer 字段
 ALTER TABLE workflow_definition_nodes ADD COLUMN `itimer` VARCHAR(128) DEFAULT NULL COMMENT '定时事件处理类(一般为类标识)' AFTER timer;
 
-alter table doctor_material_consume_providers add column `unit_price` bigint(20) DEFAULT NULL COMMENT '本次出库/入库的单价。入库单价,由前台传入,直接保存即可；出库单价,需要计算: 先入库的先出库, 然后对涉及到的每一次入库的单价作加权平均。单位为“分”' after eventCount;
+alter table doctor_material_consume_providers add column `unit_price` bigint(20) DEFAULT NULL COMMENT '本次出库/入库的单价。入库单价,由前台传入,直接保存即可；出库单价,需要计算: 先入库的先出库, 然后对涉及到的每一次入库的单价作加权平均。单位为“分”' after event_count;
 
