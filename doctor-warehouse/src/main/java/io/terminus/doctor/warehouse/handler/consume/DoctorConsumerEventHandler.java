@@ -52,7 +52,6 @@ public class DoctorConsumerEventHandler implements IHandler{
         for (DoctorMaterialPriceInWareHouse item : list) {
             Long remainder = item.getRemainder();
             if(plus + remainder <= consumeCount){
-                plus += remainder;
                 doctorMaterialPriceInWareHouseDao.delete(item.getId());
                 ((ArrayList) extraMap.get("consumePrice")).add(ImmutableMap.of(
                         "providerId", item.getProviderId(),
@@ -63,6 +62,7 @@ public class DoctorConsumerEventHandler implements IHandler{
                 if(plus + remainder == consumeCount){
                     break;
                 }
+                plus += remainder;
             }else{
                 item.setRemainder(remainder - (consumeCount - plus));
                 doctorMaterialPriceInWareHouseDao.update(item);
