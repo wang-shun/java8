@@ -87,7 +87,7 @@ public class DoctorSowMatingHandler extends DoctorAbstractEventFlowHandler {
             //断奶时间
             DateTime partWeanDate = new DateTime(Long.valueOf(lastWean.getExtraMap().get("partWeanDate").toString()));
 
-            Integer dpNPD = Days.daysBetween(partWeanDate, matingDate).getDays();
+            Integer dpNPD = Math.abs(Days.daysBetween(partWeanDate, matingDate).getDays());
 
             context.put("dpNPD", dpNPD);
 
@@ -105,7 +105,7 @@ public class DoctorSowMatingHandler extends DoctorAbstractEventFlowHandler {
             //进场时间
             DateTime lastEnterTime = new DateTime(lastEnter.getEventAt());
 
-            Integer jpNPD = Days.daysBetween(lastEnterTime, matingDate).getDays();
+            Integer jpNPD = Math.abs(Days.daysBetween(lastEnterTime, matingDate).getDays());
 
             context.put("jpNPD", jpNPD);
 

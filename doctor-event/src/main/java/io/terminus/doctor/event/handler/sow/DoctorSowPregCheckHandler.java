@@ -52,7 +52,7 @@ public class DoctorSowPregCheckHandler extends DoctorAbstractEventFlowHandler {
         if (notNull(lastMate) && !Objects.equals(pregCheckResult, PregCheckResult.YANG.getKey())) {
             DateTime mattingDate = new DateTime(Long.valueOf(lastMate.getExtraMap().get("matingDate").toString()));
             if (notNull(mattingDate)) {
-                int npd = Days.daysBetween(checkDate, mattingDate).getDays();
+                int npd = Math.abs(Days.daysBetween(checkDate, mattingDate).getDays());
 
                 if (Objects.equals(pregCheckResult, PregCheckResult.FANQING.getKey())) {
                     //返情对应的pfNPD

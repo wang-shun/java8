@@ -48,7 +48,7 @@ public class DoctorSowWeanHandler extends DoctorAbstractEventFlowHandler {
         doctorPigEvent.setPartweanDate(partWeanDate.toDate());
 
         //哺乳天数
-        doctorPigEvent.setFeedDays(Days.daysBetween(farrowingDate, partWeanDate).getDays());
+        doctorPigEvent.setFeedDays(Math.abs(Days.daysBetween(farrowingDate, partWeanDate).getDays()));
 
         //断奶只数和断奶均重
         doctorPigEvent.setWeanCount(Ints.tryParse(Objects.toString(extra.get("partWeanPigletsCount"))));
