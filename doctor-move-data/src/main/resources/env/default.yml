@@ -10,7 +10,9 @@ mybatis:
     io.terminus.parana.msg.model,
     io.terminus.doctor.event.model,io.terminus.doctor.workflow.model,
     io.terminus.parana.config.model,
-    io.terminus.doctor.basic.model
+    io.terminus.doctor.basic.model,
+    io.terminus.parana.msg.model,
+    io.terminus.doctor.msg.model
 
 # Datasource
 datasource:
