@@ -105,7 +105,7 @@ public class DoctorMoveReportService {
         report.setNurseryCount(group.getNurseryCount());    // 当天保育猪存栏
         report.setFattenCount(group.getFattenCount());      // 当天育肥猪存栏
         report.setSowCount(sow.getBuruSow() + sow.getKonghuaiSow() + sow.getPeihuaiSow());     // 当天母猪存栏
-        report.setExtra(JsonMapper.nonEmptyMapper().toJson(getDailyReportDto(farmId, group, sow, boar)));
+        report.setData(JsonMapper.nonEmptyMapper().toJson(getDailyReportDto(farmId, group, sow, boar)));
         return report;
     }
 
