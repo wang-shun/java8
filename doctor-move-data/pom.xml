@@ -73,6 +73,16 @@
                 </exclusion>
             </exclusions>
         </dependency>
+        <dependency>
+            <groupId>io.terminus.doctor</groupId>
+            <artifactId>doctor-msg</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>io.terminus.boot</groupId>
+                    <artifactId>spring-boot-starter-dubbo</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
 
         <!-- spring -->
         <dependency>
