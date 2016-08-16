@@ -74,7 +74,7 @@ public class DoctorSowFarrowingHandler extends DoctorAbstractEventFlowHandler {
             DateTime mattingDate = new DateTime(firstMate.getExtraMap().get("matingDate"));
 
             //计算孕期
-            doctorPigEvent.setPregDays(Days.daysBetween(farrowingDate, mattingDate).getDays());
+            doctorPigEvent.setPregDays(Math.abs(Days.daysBetween(farrowingDate, mattingDate).getDays()));
         }
 
 

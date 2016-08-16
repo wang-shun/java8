@@ -854,7 +854,7 @@ public class DoctorMoveDataService {
 
                 //如果是妊娠检查
                 if (Objects.equals(lastFlag.getType(), PigEvent.PREG_CHECK.getKey())) {
-                    if(lastFlag.getPregCheckResult() != null){
+                    if (lastFlag.getPregCheckResult() != null) {
                         switch (lastFlag.getPregCheckResult()) {
                             case 2:
                                 event.setDoctorMateType(DoctorMatingType.YP.getKey());
@@ -866,8 +866,7 @@ public class DoctorMoveDataService {
                                 event.setDoctorMateType(DoctorMatingType.FP.getKey());
                                 continue;
                         }
-                    }
-                    else{
+                    } else {
                         log.warn("event sow preg check result is null, event {}", lastFlag);
                     }
                     continue;
@@ -906,16 +905,16 @@ public class DoctorMoveDataService {
                 lastMateFlag = event;
                 if (lastWeanFlag != null && lastMateFlag != null) {
                     int days = Days.daysBetween(new DateTime(lastMateFlag.getMattingDate()), new DateTime(lastWeanFlag.getPartweanDate())).getDays();
-                    event.setDpnpd(days);
-                    event.setNpd(days);
+                    event.setDpnpd(Math.abs(days));
+                    event.setNpd(Math.abs(days));
                     lastWeanFlag = null;
                     continue;
                 }
 
                 if (lastEnterFlag != null && lastMateFlag != null) {
                     int days = Days.daysBetween(new DateTime(lastMateFlag.getMattingDate()), new DateTime(lastEnterFlag.getEventAt())).getDays();
-                    event.setJpnpd(days);
-                    event.setNpd(days);
+                    event.setJpnpd(Math.abs(days));
+                    event.setNpd(Math.abs(days));
                     lastEnterFlag = null;
                     continue;
                 }
@@ -930,18 +929,18 @@ public class DoctorMoveDataService {
                     switch (event.getPregCheckResult()) {
                         case 2:
                             //配种到阴性
-                            event.setPynpd(days);
-                            event.setNpd(days);
+                            event.setPynpd(Math.abs(days));
+                            event.setNpd(Math.abs(days));
                             continue;
                         case 3:
                             //配种到流产
-                            event.setPlnpd(days);
-                            event.setNpd(days);
+                            event.setPlnpd(Math.abs(days));
+                            event.setNpd(Math.abs(days));
                             continue;
                         case 4:
                             //配种到返情
-                            event.setPfnpd(days);
-                            event.setNpd(days);
+                            event.setPfnpd(Math.abs(days));
+                            event.setNpd(Math.abs(days));
                             continue;
                     }
                 } else {
@@ -954,8 +953,8 @@ public class DoctorMoveDataService {
             //当前事件是流产事件
             if (Objects.equals(event.getType(), PigEvent.ABORTION.getKey()) && lastMateFlag != null) {
                 int days = Days.daysBetween(new DateTime(lastMateFlag.getMattingDate()), new DateTime(event.getAbortionDate())).getDays();
-                event.setPlnpd(days);
-                event.setNpd(days);
+                event.setPlnpd(Math.abs(days));
+                event.setNpd(Math.abs(days));
                 continue;
             }
 
@@ -964,16 +963,16 @@ public class DoctorMoveDataService {
                 //如果是死亡原因
                 if (Objects.equals(event.getChangeTypeId(), DoctorBasicEnums.DEAD.getId())) {
                     int days = Days.daysBetween(new DateTime(lastMateFlag.getMattingDate()), new DateTime(event.getEventAt())).getDays();
-                    event.setPsnpd(days);
-                    event.setNpd(days);
+                    event.setPsnpd(Math.abs(days));
+                    event.setNpd(Math.abs(days));
                     continue;
                 }
 
                 //如果是淘汰原因
                 if (Objects.equals(event.getChangeTypeId(), DoctorBasicEnums.ELIMINATE.getId())) {
                     int days = Days.daysBetween(new DateTime(lastMateFlag.getMattingDate()), new DateTime(event.getEventAt())).getDays();
-                    event.setPtnpd(days);
-                    event.setNpd(days);
+                    event.setPtnpd(Math.abs(days));
+                    event.setNpd(Math.abs(days));
                     continue;
                 }
             }
@@ -1032,7 +1031,7 @@ public class DoctorMoveDataService {
                 lastFarrowingFlag = event;
                 //统计孕期
                 int days = Days.daysBetween(new DateTime(event.getFarrowingDate()), new DateTime(lastMateFlag.getMattingDate())).getDays();
-                event.setPregDays(days);
+                event.setPregDays(Math.abs(days));
                 continue;
             }
 
@@ -1041,7 +1040,7 @@ public class DoctorMoveDataService {
                     && lastFarrowingFlag != null) {
                 //统计哺乳期
                 int days = Days.daysBetween(new DateTime(event.getPartweanDate()), new DateTime(lastFarrowingFlag.getFarrowingDate())).getDays();
-                event.setFeedDays(days);
+                event.setFeedDays(Math.abs(days));
                 continue;
             }
         }

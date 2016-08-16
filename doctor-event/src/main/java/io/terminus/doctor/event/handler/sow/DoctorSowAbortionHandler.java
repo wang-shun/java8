@@ -48,7 +48,7 @@ public class DoctorSowAbortionHandler extends DoctorAbstractEventFlowHandler {
         if (notNull(lastMate)) {
             DateTime mattingDate = new DateTime(Long.valueOf(lastMate.getExtraMap().get("matingDate").toString()));
 
-            int npd = Days.daysBetween(abortionDate, mattingDate).getDays();
+            int npd = Math.abs(Days.daysBetween(abortionDate, mattingDate).getDays());
             doctorPigEvent.setPlnpd(doctorPigEvent.getPlnpd() + npd);
             doctorPigEvent.setNpd(doctorPigEvent.getNpd() + npd);
         }

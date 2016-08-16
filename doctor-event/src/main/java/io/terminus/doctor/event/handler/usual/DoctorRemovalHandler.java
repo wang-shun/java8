@@ -88,7 +88,7 @@ public class DoctorRemovalHandler extends DoctorAbstractEventHandler {
 
             DateTime eventTime = new DateTime(doctorPigEvent.getEventAt());
 
-            int npd = Days.daysBetween(eventTime, mattingDate).getDays();
+            int npd = Math.abs(Days.daysBetween(eventTime, mattingDate).getDays());
             if (Objects.equals(removel.getChgTypeId(), DoctorBasicEnums.DEAD.getId())) {
                 //如果是死亡
                 doctorPigEvent.setPsnpd(doctorPigEvent.getPsnpd() + npd);
