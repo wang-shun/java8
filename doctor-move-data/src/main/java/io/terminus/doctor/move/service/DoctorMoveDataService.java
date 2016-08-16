@@ -820,7 +820,7 @@ public class DoctorMoveDataService {
             if (Objects.equals(event.getType(), PigEvent.FARROWING.getKey())) {
                 int num = currentParity - 1;
                 event.setParity(num);
-                break;
+                continue;
             }
             event.setParity(currentParity);
         }
@@ -836,7 +836,7 @@ public class DoctorMoveDataService {
                     Objects.equals(event.getType(), PigEvent.ABORTION.getKey())
                     ) {
                 lastFlag = event;
-                break;
+                continue;
             }
 
             //配种事件而且是初陪
@@ -844,7 +844,7 @@ public class DoctorMoveDataService {
                 if (lastFlag == null) {
                     log.warn("sow data wrong...");
                     log.warn("sow data event:{}", event);
-                    break;
+                    continue;
                 }
                 //如果是进场
                 if (Objects.equals(lastFlag.getType(), PigEvent.ENTRY.getKey()) && event.getParity() == 1) {
@@ -857,13 +857,13 @@ public class DoctorMoveDataService {
                     switch (lastFlag.getPregCheckResult()) {
                         case 2:
                             event.setDoctorMateType(DoctorMatingType.YP.getKey());
-                            break;
+                            continue;
                         case 3:
                             event.setDoctorMateType(DoctorMatingType.LPC.getKey());
-                            break;
+                            continue;
                         case 4:
                             event.setDoctorMateType(DoctorMatingType.FP.getKey());
-                            break;
+                            continue;
                     }
                 }
 
@@ -892,7 +892,7 @@ public class DoctorMoveDataService {
             //如果当前事件是进场事件, 进行记录
             if (Objects.equals(event.getType(), PigEvent.ENTRY.getKey()) && lastMateFlag != null) {
                 lastEnterFlag = event;
-                break;
+                continue;
             }
 
             //找到上一个初配事件
@@ -903,7 +903,7 @@ public class DoctorMoveDataService {
                     event.setDpnpd(days);
                     event.setNpd(days);
                     lastWeanFlag = null;
-                    break;
+                    continue;
                 }
 
                 if (lastEnterFlag != null && lastMateFlag != null) {
@@ -911,9 +911,9 @@ public class DoctorMoveDataService {
                     event.setJpnpd(days);
                     event.setNpd(days);
                     lastEnterFlag = null;
-                    break;
+                    continue;
                 }
-                break;
+                continue;
 
             }
 
@@ -925,19 +925,19 @@ public class DoctorMoveDataService {
                         //配种到阴性
                         event.setPynpd(days);
                         event.setNpd(days);
-                        break;
+                        continue;
                     case 3:
                         //配种到流产
                         event.setPlnpd(days);
                         event.setNpd(days);
-                        break;
+                        continue;
                     case 4:
                         //配种到返情
                         event.setPfnpd(days);
                         event.setNpd(days);
-                        break;
+                        continue;
                 }
-                break;
+                continue;
             }
 
             //当前事件是流产事件
@@ -945,7 +945,7 @@ public class DoctorMoveDataService {
                 int days = Days.daysBetween(new DateTime(lastMateFlag.getMattingDate()), new DateTime(event.getAbortionDate())).getDays();
                 event.setPlnpd(days);
                 event.setNpd(days);
-                break;
+                continue;
             }
 
             // 离场事件
@@ -955,7 +955,7 @@ public class DoctorMoveDataService {
                     int days = Days.daysBetween(new DateTime(lastMateFlag.getMattingDate()), new DateTime(event.getEventAt())).getDays();
                     event.setPsnpd(days);
                     event.setNpd(days);
-                    break;
+                    continue;
                 }
 
                 //如果是淘汰原因
@@ -963,14 +963,14 @@ public class DoctorMoveDataService {
                     int days = Days.daysBetween(new DateTime(lastMateFlag.getMattingDate()), new DateTime(event.getEventAt())).getDays();
                     event.setPtnpd(days);
                     event.setNpd(days);
-                    break;
+                    continue;
                 }
             }
 
             //如果当前事件是断奶事件, 进行记录
             if (Objects.equals(event.getType(), PigEvent.WEAN.getKey()) && lastMateFlag != null) {
                 lastWeanFlag = event;
-                break;
+                continue;
             }
         }
     }
@@ -983,14 +983,14 @@ public class DoctorMoveDataService {
             //找到上一个初配事件
             if (Objects.equals(event.getType(), PigEvent.MATING.getKey()) && event.getCurrentMatingCount() == 1) {
                 lastMateFlag = event;
-                break;
+                continue;
             }
             //当前事件是妊娠检查事件 而且检查结果是阳性
             if (Objects.equals(event.getType(), PigEvent.WEAN.getKey())
                     && lastMateFlag != null
                     && Objects.equals(event.getPregCheckResult(), PregCheckResult.YANG.getKey())) {
                 lastMateFlag.setIsImpregnation(1);
-                break;
+                continue;
             }
 
             //当前事件是分娩事件
@@ -998,7 +998,7 @@ public class DoctorMoveDataService {
                     && lastMateFlag != null) {
                 //更新分娩的标志位
                 lastMateFlag.setIsDelivery(1);
-                break;
+                continue;
             }
         }
     }
@@ -1013,7 +1013,7 @@ public class DoctorMoveDataService {
             //找到上一个初配事件
             if (Objects.equals(event.getType(), PigEvent.MATING.getKey()) && event.getCurrentMatingCount() == 1) {
                 lastMateFlag = event;
-                break;
+                continue;
             }
             //当前事件是分娩事件
             if (Objects.equals(event.getType(), PigEvent.FARROWING.getKey())
@@ -1022,7 +1022,7 @@ public class DoctorMoveDataService {
                 //统计孕期
                 int days = Days.daysBetween(new DateTime(event.getFarrowingDate()), new DateTime(lastMateFlag.getMattingDate())).getDays();
                 event.setPregDays(days);
-                break;
+                continue;
             }
 
             //当前事件是断奶事件
@@ -1031,7 +1031,7 @@ public class DoctorMoveDataService {
                 //统计哺乳期
                 int days = Days.daysBetween(new DateTime(event.getPartweanDate()), new DateTime(lastFarrowingFlag.getFarrowingDate())).getDays();
                 event.setFeedDays(days);
-                break;
+                continue;
             }
         }
     }
@@ -1847,5 +1847,10 @@ public class DoctorMoveDataService {
     //判断猪场id是否相同
     private static boolean isFarm(String farmOID, String outId) {
         return Objects.equals(farmOID, outId);
+    }
+
+
+    public static void main(String[] args) {
+        System.out.println(PigEvent.MATING.getKey());
     }
 }
