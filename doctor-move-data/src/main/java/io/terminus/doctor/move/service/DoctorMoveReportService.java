@@ -91,7 +91,8 @@ public class DoctorMoveReportService {
                 .map(g -> getDailyReport(farmId, g, MoreObjects.firstNonNull(sowMap.get(g.getSumat()), new ReportSowLiveStock()), boar))
                 .collect(Collectors.toList());
 
-        //批量创建日报
+        //批量创建日报(先删除, 再创建)
+        reports.forEach(report -> doctorDailyReportDao.deleteBySumAt(report.getSumAt()));
         doctorDailyReportDao.creates(reports);
     }
 
