@@ -197,7 +197,7 @@
         FROM doctor_group_events
         WHERE
         change_type_id IN (110, 111) AND -- 变动类型是死亡和淘汰
-        pig_type = 1 -- 产房仔猪
+        pig_type IN (1, 7) -- 产房仔猪
         <include refid="criteria"/>
     </select>
 
