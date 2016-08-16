@@ -13,6 +13,7 @@ import io.terminus.doctor.move.handler.DoctorMoveTableEnum;
 import io.terminus.doctor.move.model.RoleTemplate;
 import io.terminus.doctor.move.model.View_FarmInfo;
 import io.terminus.doctor.move.model.View_FarmMember;
+import io.terminus.doctor.msg.service.DoctorMessageRuleWriteService;
 import io.terminus.doctor.user.dao.DoctorFarmDao;
 import io.terminus.doctor.user.dao.DoctorOrgDao;
 import io.terminus.doctor.user.dao.DoctorStaffDao;
@@ -72,6 +73,8 @@ public class UserInitService {
     private DoctorUserDataPermissionDao doctorUserDataPermissionDao;
     @Autowired
     private SubRoleDao subRoleDao;
+    @Autowired
+    private DoctorMessageRuleWriteService doctorMessageRuleWriteService;
 
     @Transactional
     public void init(String mobile, Long dataSourceId){
@@ -105,6 +108,7 @@ public class UserInitService {
                     farm.setOrgId(org.getId());
                     farm.setOrgName(org.getName());
                     doctorFarmDao.create(farm);
+                    doctorMessageRuleWriteService.initTemplate(farm.getId());
                     farmIds.add(farm.getId());
                 }
                 //创建数据权限
