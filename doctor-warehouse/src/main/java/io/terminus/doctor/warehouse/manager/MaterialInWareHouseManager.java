@@ -76,7 +76,7 @@ public class MaterialInWareHouseManager {
         );
 
         // 计算本次配方生产的饲料的入库单价
-        Long unitPrice = this.calculateProviderUnitPrice(eventIds);
+        Long unitPrice = this.calculateProviderUnitPrice(eventIds, materialProduce.getTotal());
         // provider source
         providerMaterialInWareHouseInner(DoctorMaterialConsumeProviderDto.builder()
                 .type(targetMaterial.getType()).farmId(targetMaterial.getFarmId()).farmName(targetMaterial.getFarmName())
@@ -89,20 +89,18 @@ public class MaterialInWareHouseManager {
         return Boolean.TRUE;
     }
 
-    private Long calculateProviderUnitPrice(List<Long> eventIds){
+    private Long calculateProviderUnitPrice(List<Long> eventIds, Long realTotal){
         long totalPrice = 0L;
-        long weight = 0L;
         for (DoctorMaterialConsumeProvider cp : doctorMaterialConsumeProviderDao.findByIds(eventIds)){
             Map<String, Object> extraMap = cp.getExtraMap();
             ArrayList<Map<String, Object>> array = (ArrayList) extraMap.get("consumePrice");
             for(Map<String, Object> obj : array){
                 long count = Long.parseLong(obj.get("count").toString());
                 long unitPrice = Long.parseLong(obj.get("unitPrice").toString());
-                weight += count;
                 totalPrice += count * unitPrice;
             }
         }
-        return Long.valueOf(NumberUtils.divide(totalPrice, weight, 0));
+        return Long.valueOf(NumberUtils.divide(totalPrice, realTotal, 0));
     }
 
     private List<Long> produceMaterialConsumeEntry(DoctorWareHouseBasicDto basicDto, DoctorMaterialInfo.MaterialProduceEntry materialProduceEntry){
