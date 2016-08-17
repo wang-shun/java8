@@ -62,6 +62,13 @@
         <include refid="criteria"/>
     </select>
 
+    <!-- 死黑木畸 -->
+    <select id="getDeliveryDeadBlackMuJi" parameterType="map" resultType="int">
+        select ifnull(sum(dead_count),0) + ifnull(sum(black_count),0) + ifnull(sum(mny_count),0) + ifnull(sum(jx_count),0) from doctor_pig_events
+        where type = 15
+        <include refid="criteria"/>
+    </select>
+
     <!-- 总产仔数-->
     <select id="deliveryAllCounts" parameterType="map" resultType="int">
         select ifnull(sum(health_count+ weak_count+ jx_count+ mny_count+ dead_count + black_count),0) from

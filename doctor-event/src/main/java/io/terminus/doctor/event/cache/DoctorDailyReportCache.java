@@ -11,7 +11,14 @@ import io.terminus.common.utils.Splitters;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dao.DoctorDailyReportDao;
+import io.terminus.doctor.event.dao.DoctorKpiDao;
+import io.terminus.doctor.event.dto.report.daily.DoctorCheckPregDailyReport;
 import io.terminus.doctor.event.dto.report.daily.DoctorDailyReportDto;
+import io.terminus.doctor.event.dto.report.daily.DoctorDeadDailyReport;
+import io.terminus.doctor.event.dto.report.daily.DoctorDeliverDailyReport;
+import io.terminus.doctor.event.dto.report.daily.DoctorMatingDailyReport;
+import io.terminus.doctor.event.dto.report.daily.DoctorSaleDailyReport;
+import io.terminus.doctor.event.dto.report.daily.DoctorWeanDailyReport;
 import io.terminus.doctor.event.service.DoctorDailyGroupReportReadService;
 import io.terminus.doctor.event.service.DoctorDailyPigReportReadService;
 import lombok.AllArgsConstructor;
@@ -44,14 +51,17 @@ public class DoctorDailyReportCache {
     private final DoctorDailyPigReportReadService doctorDailyPigReportReadService;
     private final DoctorDailyGroupReportReadService doctorDailyGroupReportReadService;
     private final DoctorDailyReportDao doctorDailyReportDao;
+    private final DoctorKpiDao doctorKpiDao;
 
     @Autowired
     public DoctorDailyReportCache(DoctorDailyPigReportReadService doctorDailyPigReportReadService,
                                   DoctorDailyGroupReportReadService doctorDailyGroupReportReadService,
-                                  DoctorDailyReportDao doctorDailyReportDao) {
+                                  DoctorDailyReportDao doctorDailyReportDao,
+                                  DoctorKpiDao doctorKpiDao) {
         this.doctorDailyPigReportReadService = doctorDailyPigReportReadService;
         this.doctorDailyGroupReportReadService = doctorDailyGroupReportReadService;
         this.doctorDailyReportDao = doctorDailyReportDao;
+        this.doctorKpiDao = doctorKpiDao;
 
         this.reportCache = CacheBuilder.newBuilder().expireAfterAccess(1L, TimeUnit.DAYS).build(new CacheLoader<String, DoctorDailyReportDto>() {
             @Override
@@ -127,8 +137,69 @@ public class DoctorDailyReportCache {
         reportCache.invalidateAll();
     }
 
-    //实时查询某猪场的日报统计
+    //实时Sql查询某猪场的日报统计
     public DoctorDailyReportDto initDailyReportByFarmIdAndDate(Long farmId, Date date) {
+        Date startAt = Dates.startOfDay(date);
+        Date endAt = DateUtil.getDateEnd(new DateTime(date)).toDate();
+
+        DoctorDailyReportDto report = new DoctorDailyReportDto();
+
+        //妊娠检查
+        DoctorCheckPregDailyReport checkPreg = new DoctorCheckPregDailyReport();
+        checkPreg.setPositive(doctorKpiDao.checkYangCounts(farmId, startAt, endAt));
+        checkPreg.setNegative(doctorKpiDao.checkYingCounts(farmId, startAt, endAt));
+        checkPreg.setFanqing(doctorKpiDao.checkFanQCounts(farmId, startAt, endAt));
+        checkPreg.setLiuchan(doctorKpiDao.checkAbortionCounts(farmId, startAt, endAt));
+
+        //死淘
+        DoctorDeadDailyReport dead = new DoctorDeadDailyReport();
+        dead.setBoar(doctorKpiDao.getDeadBoar(farmId, startAt, endAt));
+        dead.setSow(doctorKpiDao.getDeadSow(farmId, startAt, endAt));
+        dead.setFarrow(doctorKpiDao.getDeadFarrow(farmId, startAt, endAt));
+        dead.setNursery(doctorKpiDao.getDeadNursery(farmId, startAt, endAt));
+        dead.setFatten(doctorKpiDao.getDeadFatten(farmId, startAt, endAt));
+
+        //分娩
+        DoctorDeliverDailyReport deliver = new DoctorDeliverDailyReport();
+        deliver.setNest(doctorKpiDao.getDelivery(farmId, startAt, endAt));
+        deliver.setLive(doctorKpiDao.getDeliveryAll(farmId, startAt, endAt));
+        deliver.setHealth(doctorKpiDao.getDeliveryHealth(farmId, startAt, endAt));
+        deliver.setWeak(doctorKpiDao.getDeliveryWeak(farmId, startAt, endAt));
+        deliver.setBlack(doctorKpiDao.getDeliveryDeadBlackMuJi(farmId, startAt, endAt));
+
+        //配种
+        DoctorMatingDailyReport mating = new DoctorMatingDailyReport();
+        mating.setHoubei(doctorKpiDao.firstMatingCounts(farmId, startAt, endAt));
+        mating.setPregCheckResultYing(doctorKpiDao.yinMatingCounts(farmId, startAt, endAt));
+        mating.setDuannai(doctorKpiDao.weanMatingCounts(farmId, startAt, endAt));
+        mating.setFanqing(doctorKpiDao.fanQMatingCounts(farmId, startAt, endAt));
+        mating.setLiuchan(doctorKpiDao.abortionMatingCounts(farmId, startAt, endAt));
+
+        //销售
+        DoctorSaleDailyReport sale = new DoctorSaleDailyReport();
+        sale.setBoar(doctorKpiDao.getSaleBoar(farmId, startAt, endAt));
+        sale.setSow(doctorKpiDao.getSaleSow(farmId, startAt, endAt));
+        sale.setNursery(doctorKpiDao.getSaleNursery(farmId, startAt, endAt));
+        sale.setFatten(doctorKpiDao.getSaleFatten(farmId, startAt, endAt));
+
+        //断奶
+        DoctorWeanDailyReport wean = new DoctorWeanDailyReport();
+        wean.setCount(doctorKpiDao.getWeanPiglet(farmId, startAt, endAt));
+        wean.setWeight(doctorKpiDao.getWeanPigletWeightAvg(farmId, startAt, endAt));
+
+        report.setCheckPreg(checkPreg);
+        report.setDead(dead);
+        report.setDeliver(deliver);
+        report.setMating(mating);
+        report.setSale(sale);
+        report.setWean(wean);
+        return report;
+    }
+
+    //实时查询某猪场的日报统计2
+    //旧的实时查询, 可能会有错误, 直接使用上一个
+    @Deprecated
+    private DoctorDailyReportDto initDailyReportByFarmIdAndDateOld(Long farmId, Date date) {
         DoctorDailyReportDto report = new DoctorDailyReportDto();
         report.setPig(RespHelper.orServEx(doctorDailyPigReportReadService.countByFarmIdDate(farmId, date)));
         report.setGroup(RespHelper.orServEx(doctorDailyGroupReportReadService.getGroupDailyReportByFarmIdAndDate(farmId, date)));

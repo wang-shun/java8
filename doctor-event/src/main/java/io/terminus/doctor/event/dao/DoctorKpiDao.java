@@ -86,6 +86,13 @@ public class DoctorKpiDao {
     }
 
     /**
+     * 死黑木畸
+     */
+    public int getDeliveryDeadBlackMuJi(Long farmId, Date startAt, Date endAt) {
+        return this.sqlSession.selectOne(sqlId("getDeliveryDeadBlackMuJi"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
+    }
+
+    /**
      * 总产仔数
      */
     public int getDeliveryAll(Long farmId, Date startAt, Date endAt) {
