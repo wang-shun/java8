@@ -61,7 +61,7 @@ public class SearchedPig implements Serializable {
      */
     private Integer status;
     private String statusName;
-    private String pregCheckResultName;
+    private Integer pregCheckResult;
 
     /**
      * 品种

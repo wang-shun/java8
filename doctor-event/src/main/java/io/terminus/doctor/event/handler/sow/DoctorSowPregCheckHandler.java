@@ -6,6 +6,7 @@ import io.terminus.doctor.event.dao.DoctorPigSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorPigTrackDao;
 import io.terminus.doctor.event.dao.DoctorRevertLogDao;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
+import io.terminus.doctor.event.enums.KongHuaiPregCheckResult;
 import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.enums.PregCheckResult;
 import io.terminus.doctor.event.handler.DoctorAbstractEventFlowHandler;
@@ -82,13 +83,13 @@ public class DoctorSowPregCheckHandler extends DoctorAbstractEventFlowHandler {
         //往extra增加一些特殊标志位用来表明配种类型
         if (Objects.equals(pregCheckResult, PregCheckResult.FANQING.getKey())) {
             extra.put("fanqingToMate", true);
-            extra.put("pregCheckResultName", PregCheckResult.FANQING);
+            extra.put("pregCheckResult", KongHuaiPregCheckResult.FANQING.getKey());
         } else if (Objects.equals(pregCheckResult, PregCheckResult.YING.getKey())) {
             extra.put("yinToMate", true);
-            extra.put("pregCheckResultName", PregCheckResult.YING);
+            extra.put("pregCheckResult", KongHuaiPregCheckResult.YING);
         } else if (Objects.equals(pregCheckResult, PregCheckResult.LIUCHAN.getKey())) {
             extra.put("liuchanToMateCheck", true);
-            extra.put("pregCheckResultName", PregCheckResult.LIUCHAN);
+            extra.put("pregCheckResult", KongHuaiPregCheckResult.LIUCHAN.getKey());
         }
 
         doctorPigTrack.addAllExtraMap(extra);

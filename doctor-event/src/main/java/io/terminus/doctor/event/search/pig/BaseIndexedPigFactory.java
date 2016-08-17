@@ -10,6 +10,7 @@ import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -65,9 +66,11 @@ public abstract class BaseIndexedPigFactory<T extends IndexedPig> implements Ind
             indexedPig.setIsRemoval(pigTrack.getIsRemoval());
             if (pigTrack.getExtra() != null) {
                 try {
-                    Map extraMap = JsonMapper.JSON_NON_DEFAULT_MAPPER.getMapper().readValue(pigTrack.getExtra(), JacksonType.MAP_OF_OBJECT);
-                    if (extraMap != null)
-                        indexedPig.setPregCheckResultName((String) extraMap.get("pregCheckResultName"));
+                    Map<String, String> extraMap = JsonMapper.JSON_NON_DEFAULT_MAPPER.getMapper().readValue(pigTrack.getExtra(), JacksonType.MAP_OF_OBJECT);
+                    String pregCheckResult = extraMap.get("pregCheckResult");
+                    if (StringUtils.isNotBlank(pregCheckResult)) {
+                        indexedPig.setPregCheckResult(Integer.parseInt(pregCheckResult));
+                    }
                 } catch (Exception e){
                     log.error(" indexedPig create failed cause by {}", Throwables.getStackTraceAsString(e));
                 }
