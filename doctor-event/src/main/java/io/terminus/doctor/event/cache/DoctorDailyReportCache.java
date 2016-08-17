@@ -12,6 +12,7 @@ import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dao.DoctorDailyReportDao;
 import io.terminus.doctor.event.dao.DoctorKpiDao;
+import io.terminus.doctor.event.dao.DoctorPigTypeStatisticDao;
 import io.terminus.doctor.event.dto.report.daily.DoctorCheckPregDailyReport;
 import io.terminus.doctor.event.dto.report.daily.DoctorDailyReportDto;
 import io.terminus.doctor.event.dto.report.daily.DoctorDeadDailyReport;
@@ -52,16 +53,19 @@ public class DoctorDailyReportCache {
     private final DoctorDailyGroupReportReadService doctorDailyGroupReportReadService;
     private final DoctorDailyReportDao doctorDailyReportDao;
     private final DoctorKpiDao doctorKpiDao;
+    private final DoctorPigTypeStatisticDao doctorPigTypeStatisticDao;
 
     @Autowired
     public DoctorDailyReportCache(DoctorDailyPigReportReadService doctorDailyPigReportReadService,
                                   DoctorDailyGroupReportReadService doctorDailyGroupReportReadService,
                                   DoctorDailyReportDao doctorDailyReportDao,
-                                  DoctorKpiDao doctorKpiDao) {
+                                  DoctorKpiDao doctorKpiDao,
+                                  DoctorPigTypeStatisticDao doctorPigTypeStatisticDao) {
         this.doctorDailyPigReportReadService = doctorDailyPigReportReadService;
         this.doctorDailyGroupReportReadService = doctorDailyGroupReportReadService;
         this.doctorDailyReportDao = doctorDailyReportDao;
         this.doctorKpiDao = doctorKpiDao;
+        this.doctorPigTypeStatisticDao = doctorPigTypeStatisticDao;
 
         this.reportCache = CacheBuilder.newBuilder().expireAfterAccess(1L, TimeUnit.DAYS).build(new CacheLoader<String, DoctorDailyReportDto>() {
             @Override
@@ -142,6 +146,7 @@ public class DoctorDailyReportCache {
         Date startAt = Dates.startOfDay(date);
         Date endAt = DateUtil.getDateEnd(new DateTime(date)).toDate();
 
+        log.info("init daily report farmId:{}", farmId);
         DoctorDailyReportDto report = new DoctorDailyReportDto();
 
         //妊娠检查
@@ -208,6 +213,14 @@ public class DoctorDailyReportCache {
 
     //实时查询全部猪场猪和猪群的日报统计
     public List<DoctorDailyReportDto> initDailyReportByDate(Date date) {
+        return doctorPigTypeStatisticDao.findAll().stream()
+                .map(p -> initDailyReportByFarmIdAndDate(p.getFarmId(), date))
+                .collect(Collectors.toList());
+    }
+
+    //实时查询全部猪场猪和猪群的日报统计
+    @Deprecated
+    public List<DoctorDailyReportDto> initDailyReportByDateOld(Date date) {
         Map<Long, DoctorDailyReportDto> pigReportMap = RespHelper.orServEx(doctorDailyPigReportReadService.countByDate(date))
                 .stream().collect(Collectors.toMap(DoctorDailyReportDto::getFarmId, v -> v));
         Map<Long, DoctorDailyReportDto> groupReportMap = RespHelper.orServEx(doctorDailyGroupReportReadService.getGroupDailyReportsByDate(date))
