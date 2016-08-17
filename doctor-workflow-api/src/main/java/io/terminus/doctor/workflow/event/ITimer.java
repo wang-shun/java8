@@ -10,5 +10,5 @@ public interface ITimer {
      *定时器事件执行
      * @param timerExecution
      */
-    void Timer(TimerExecution timerExecution);
+    void timer(TimerExecution timerExecution);
 }

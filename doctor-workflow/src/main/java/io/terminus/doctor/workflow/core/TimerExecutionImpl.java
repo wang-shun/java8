@@ -1,6 +1,7 @@
 package io.terminus.doctor.workflow.core;
 
 import com.google.common.base.Throwables;
+import com.google.common.collect.Maps;
 import io.terminus.doctor.workflow.event.ITimer;
 import io.terminus.doctor.workflow.model.FlowProcess;
 import io.terminus.doctor.workflow.model.FlowTimer;
@@ -34,12 +35,10 @@ public class TimerExecutionImpl implements TimerExecution {
 
     @Override
     public Map getExpression() {
+        if (expression == null) {
+            expression = Maps.newHashMap();
+        }
         return expression;
-    }
-
-    @Override
-    public void setExpression(Map expression) {
-        this.expression = expression;
     }
 
     @Override
@@ -58,22 +57,20 @@ public class TimerExecutionImpl implements TimerExecution {
         if (StringHelper.isNotBlank(iTimerName)) {
             iTimer = workFlowEngine.buildContext().get(iTimerName);
             if (iTimer == null) {
+                // 获取类的简单名称, 从上下文中获取
+                iTimer = workFlowEngine.buildContext().get(
+                        StringHelper.uncapitalize(iTimerName.substring(iTimerName.lastIndexOf(".") + 1)));
                 if (iTimer == null) {
-                    // 获取类的简单名称, 从上下文中获取
-                    iTimer = workFlowEngine.buildContext().get(
-                            StringHelper.uncapitalize(iTimerName.substring(iTimerName.lastIndexOf(".") + 1)));
-                    if (iTimer == null) {
-                        try {
-                            // 实例化, 并存到上下文
-                            iTimer = (ITimer) Class.forName(iTimerName).newInstance();
-                            workFlowEngine.buildContext().put(
-                                    StringHelper.uncapitalize(iTimerName.substring(iTimerName.lastIndexOf(".") + 1)), iTimer);
-                        } catch (Exception e) {
-                            log.error("[Flow ITimerExecution] -> iTimer not found, iTimerName is {}, cause by {}",
-                                    iTimerName, Throwables.getStackTraceAsString(e));
-                            AssertHelper.throwException("[Flow ITimerExecution] -> iTimer not found, iTimerName is {}, cause by {}",
-                                    iTimerName, Throwables.getStackTraceAsString(e));
-                        }
+                    try {
+                        // 实例化, 并存到上下文
+                        iTimer = (ITimer) Class.forName(iTimerName).newInstance();
+                        workFlowEngine.buildContext().put(
+                                StringHelper.uncapitalize(iTimerName.substring(iTimerName.lastIndexOf(".") + 1)), iTimer);
+                    } catch (Exception e) {
+                        log.error("[Flow ITimerExecution] -> iTimer not found, iTimerName is {}, cause by {}",
+                                iTimerName, Throwables.getStackTraceAsString(e));
+                        AssertHelper.throwException("[Flow ITimerExecution] -> iTimer not found, iTimerName is {}, cause by {}",
+                                iTimerName, Throwables.getStackTraceAsString(e));
                     }
                 }
             }
@@ -81,13 +78,12 @@ public class TimerExecutionImpl implements TimerExecution {
         return iTimer;
     }
 
-    @Override
-    public void setFlowTimer(FlowTimer flowTimer) {
-        this.flowTimer = flowTimer;
-    }
 
     @Override
     public FlowTimer getFlowTimer() {
+        if (flowTimer == null) {
+            flowTimer = FlowTimer.builder().build();
+        }
         return flowTimer;
     }
 
