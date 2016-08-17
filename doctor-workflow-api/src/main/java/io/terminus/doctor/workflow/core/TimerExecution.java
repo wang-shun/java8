@@ -17,21 +17,11 @@ public interface TimerExecution {
     FlowTimer getFlowTimer();
 
     /**
-     * 设置FlowTimer
-     */
-    void setFlowTimer(FlowTimer flowTimer);
-    /**
      * 获取表达式
      * @return
      */
 
     Map getExpression();
-
-    /**
-     * 设置表达式
-     * @param expression
-     */
-    void setExpression(Map expression);
 
     /**
      * 获取节点间流转数据
