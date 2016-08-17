@@ -208,7 +208,7 @@ public class DoctorWareHouseEvents {
     @ResponseBody
     public Long createProviderEvent(@RequestBody DoctorConsumeProviderInputDto dto){
         DoctorMaterialConsumeProviderDto doctorMaterialConsumeProviderDto;
-        if(dto.getUnitPrice() == null || dto.getUnitPrice() < 0){
+        if(dto.getUnitPrice() == null || dto.getUnitPrice() <= 0){
             throw new JsonResponseException("price.invalid");
         }
         try{
