@@ -86,7 +86,7 @@ public class DoctorSowPregCheckHandler extends DoctorAbstractEventFlowHandler {
             extra.put("pregCheckResult", KongHuaiPregCheckResult.FANQING.getKey());
         } else if (Objects.equals(pregCheckResult, PregCheckResult.YING.getKey())) {
             extra.put("yinToMate", true);
-            extra.put("pregCheckResult", KongHuaiPregCheckResult.YING);
+            extra.put("pregCheckResult", KongHuaiPregCheckResult.YING.getKey());
         } else if (Objects.equals(pregCheckResult, PregCheckResult.LIUCHAN.getKey())) {
             extra.put("liuchanToMateCheck", true);
             extra.put("pregCheckResult", KongHuaiPregCheckResult.LIUCHAN.getKey());
