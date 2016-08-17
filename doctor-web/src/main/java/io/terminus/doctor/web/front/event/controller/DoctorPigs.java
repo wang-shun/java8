@@ -147,10 +147,10 @@ public class DoctorPigs {
         try{
             String extra = doctorPigTrack.getExtra();
             if (StringUtils.isNotBlank(extra)){
-                Map<String, String> extraMap = JsonMapper.JSON_NON_DEFAULT_MAPPER.getMapper().readValue(extra, JacksonType.MAP_OF_OBJECT);
-                String checkResult = extraMap.get("pregCheckResult");
-                if (StringUtils.isNotBlank(checkResult)) {
-                    pregCheckResult = Integer.parseInt(checkResult);
+                Map<String, Object> extraMap = JsonMapper.JSON_NON_DEFAULT_MAPPER.getMapper().readValue(extra, JacksonType.MAP_OF_OBJECT);
+                Object checkResult = extraMap.get("pregCheckResult");
+                if (checkResult != null) {
+                    pregCheckResult = Integer.parseInt(checkResult.toString());
                 }
             }
         }catch (Exception e){

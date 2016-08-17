@@ -67,8 +67,7 @@ public abstract class BaseIndexedPigFactory<T extends IndexedPig> implements Ind
                     Map<String, Object> extraMap = JsonMapper.JSON_NON_DEFAULT_MAPPER.getMapper().readValue(pigTrack.getExtra(), JacksonType.MAP_OF_OBJECT);
                     Object pregCheckResult = extraMap.get("pregCheckResult");
                     if (pregCheckResult != null) {
-                        String pregCheckResultStr = pregCheckResult.toString();
-                        indexedPig.setPregCheckResult(Integer.parseInt(pregCheckResultStr));
+                        indexedPig.setPregCheckResult(Integer.parseInt(pregCheckResult.toString()));
                     }
                 } catch (Exception e){
                     log.error(" indexedPig create failed cause by {}", Throwables.getStackTraceAsString(e));
