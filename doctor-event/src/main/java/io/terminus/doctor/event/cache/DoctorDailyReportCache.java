@@ -209,6 +209,8 @@ public class DoctorDailyReportCache {
         report.setSale(sale);
         report.setWean(wean);
         report.setLiveStock(liveStock);
+        report.setFarmId(farmId);
+        report.setSumAt(startAt);
         return report;
     }
 
