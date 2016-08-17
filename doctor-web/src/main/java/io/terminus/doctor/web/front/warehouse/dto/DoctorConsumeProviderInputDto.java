@@ -31,6 +31,8 @@ public class DoctorConsumeProviderInputDto implements Serializable{
 
     private Long unitPrice; // 单价, 单位为"分"
 
+    private Long unitId; // 单位
+
     private Integer consumeDays;    // 对应的消耗日期
 
     private Long barnId;    //对应的消耗 猪舍Id
