@@ -1,6 +1,5 @@
 package io.terminus.doctor.event.report.count;
 
-import com.google.common.base.MoreObjects;
 import io.terminus.doctor.event.constants.DoctorBasicEnums;
 import io.terminus.doctor.event.daily.DoctorDailyEventCount;
 import io.terminus.doctor.event.dao.DoctorPigDao;
@@ -45,9 +44,13 @@ public class DoctorDailyRemovalEventCount implements DoctorDailyEventCount {
         DoctorSaleDailyReport doctorSaleDailyReport = new DoctorSaleDailyReport();
         DoctorDeadDailyReport doctorDeadDailyReport = new DoctorDeadDailyReport();
 
-        t.forEach(e->{
+        for (DoctorPigEvent e : t) {
             Map<String, Object> extra = e.getExtraMap();
             DoctorPig doctorPig = doctorPigDao.findById(e.getPigId());
+
+            if (extra == null || extra.get("chgReasonId") == null ) {
+                continue;
+            }
 
             Long chageReason = Long.valueOf(extra.get("chgReasonId").toString());
             if(Objects.equals(chageReason, DoctorBasicEnums.DEAD.getId()) || Objects.equals(chageReason, DoctorBasicEnums.ELIMINATE.getId())){
@@ -64,7 +67,7 @@ public class DoctorDailyRemovalEventCount implements DoctorDailyEventCount {
                     doctorSaleDailyReport.setSow(doctorSaleDailyReport.getSow() + 1);
                 }
             }
-        });
+        }
 
         doctorDailyReportDto.getDead().addSowBoar(doctorDeadDailyReport);
         doctorDailyReportDto.getSale().addBoarSowCount(doctorSaleDailyReport);
