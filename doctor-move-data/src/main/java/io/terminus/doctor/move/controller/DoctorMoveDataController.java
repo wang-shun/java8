@@ -149,6 +149,10 @@ public class DoctorMoveDataController {
         doctorMoveDataService.moveGroup(moveId, farm);
         log.warn("move group end");
 
+        log.warn("move farrow sow start, moveId:{}", moveId);
+        doctorMoveDataService.updateFarrowSow(farm);
+        log.warn("move farrow sow end");
+
         //6.迁移猪场日报
         log.warn("move daily start, moveId:{}", moveId);
         doctorMoveReportService.moveDailyReport(moveId, farm.getId(), index);
@@ -314,6 +318,23 @@ public class DoctorMoveDataController {
             return true;
         } catch (Exception e) {
             log.error("move monthly report failed, farmId:{}, cause:{}", farmId, Throwables.getStackTraceAsString(e));
+            return false;
+        }
+    }
+
+    /**
+     * 分娩母猪
+     */
+    @RequestMapping(value = "/farrow", method = RequestMethod.GET)
+    public Boolean moveFarrowSow(@RequestParam("farmId") Long farmId) {
+        try {
+            DoctorFarm farm = doctorFarmDao.findById(farmId);
+            log.warn("move farrow sow start, farmId:{}", farmId);
+            doctorMoveDataService.updateFarrowSow(farm);
+            log.warn("move farrow sow end");
+            return true;
+        } catch (Exception e) {
+            log.error("move farrow sow failed, farmId:{}, cause:{}", farmId, Throwables.getStackTraceAsString(e));
             return false;
         }
     }
