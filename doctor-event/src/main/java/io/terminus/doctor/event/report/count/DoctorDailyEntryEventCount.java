@@ -50,7 +50,7 @@ public class DoctorDailyEntryEventCount implements DoctorDailyEventCount {
         DoctorLiveStockDailyReport doctorLiveStockDailyReport = new DoctorLiveStockDailyReport();
 
         // validate same farm
-        Long farmId = null;
+        Long farmId;
         if(t.size() == 0){
             farmId = Long.valueOf(context.get("farmId").toString());
         }else {
@@ -76,14 +76,7 @@ public class DoctorDailyEntryEventCount implements DoctorDailyEventCount {
                 Params.getNullDefault(statusCount, PigStatus.Pregnancy.getKey(),0) +
                 Params.getNullDefault(statusCount, PigStatus.Farrow.getKey(), 0));
         doctorLiveStockDailyReport.setBuruSow(Params.getNullDefault(statusCount, PigStatus.FEED.getKey(), 0));
-        doctorLiveStockDailyReport.setKonghuaiSow(
-                Params.getNullDefault(statusCount, PigStatus.Abortion.getKey(), 0) +    //流产
-                Params.getNullDefault(statusCount, PigStatus.Entry.getKey(), 0) +       //进场
-                Params.getNullDefault(statusCount, PigStatus.KongHuai.getKey(), 0) +    //空怀
-                Params.getNullDefault(statusCount, PigStatus.FanQing.getKey(), 0) +     //返情
-                Params.getNullDefault(statusCount, PigStatus.Wean.getKey(), 0)          //断奶
-
-        );
+        doctorLiveStockDailyReport.setKonghuaiSow(0);
 
         doctorLiveStockDailyReport.setBoar(Params.getNullDefault(statusCount, PigStatus.BOAR_ENTRY.getKey(), 0));
 

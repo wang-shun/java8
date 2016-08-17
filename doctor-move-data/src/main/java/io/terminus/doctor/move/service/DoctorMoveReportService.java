@@ -78,10 +78,14 @@ public class DoctorMoveReportService {
         List<ReportGroupLiveStock> gls = RespHelper.orServEx(doctorMoveDatasourceHandler
                 .findByHbsSql(moveId, ReportGroupLiveStock.class, "DoctorDailyReport-GroupLiveStock", ImmutableMap.of("index", index, "farmOutId", farm.getOutId())));
 
+        log.info("report group live stock:{}", gls);
+
         //母猪存栏map
         Map<Date, ReportSowLiveStock> sowMap = RespHelper.orServEx(doctorMoveDatasourceHandler
                 .findByHbsSql(moveId, ReportSowLiveStock.class, "DoctorDailyReport-SowLiveStock", ImmutableMap.of("index", index, "farmOutId", farm.getOutId())))
                 .stream().collect(Collectors.toMap(ReportSowLiveStock::getSumat, v -> v));
+
+        log.info("report sow live stock:{}", sowMap);
 
         //公猪存栏
         ReportBoarLiveStock boar = RespHelper.orServEx(doctorMoveDatasourceHandler.findByHbsSql(moveId, ReportBoarLiveStock.class, "DoctorDailyReport-BoarLiveStock")).get(0);

@@ -191,6 +191,7 @@ public class DoctorDailyReportCache {
         DoctorWeanDailyReport wean = new DoctorWeanDailyReport();
         wean.setCount(doctorKpiDao.getWeanPiglet(farmId, startAt, endAt));
         wean.setWeight(doctorKpiDao.getWeanPigletWeightAvg(farmId, startAt, endAt));
+        wean.setNest(doctorKpiDao.getWeanSow(farmId, startAt, endAt));
 
         report.setCheckPreg(checkPreg);
         report.setDead(dead);
