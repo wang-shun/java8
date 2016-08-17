@@ -90,6 +90,11 @@ public class PigSearchReadServiceImpl implements PigSearchReadService {
                         setCheckDate(searchedPig, pigTrack);
                     }
                 }
+
+                // 处理 KongHuaiPregCheckResult
+                if (searchedPig.getPregCheckResult() != null) {
+                    searchedPig.setStatus(searchedPig.getPregCheckResult());
+                }
             });
             Paging<SearchedPig> paging = new Paging<>(searchedPigs.getTotal(), searchedPigs.getData());
 
