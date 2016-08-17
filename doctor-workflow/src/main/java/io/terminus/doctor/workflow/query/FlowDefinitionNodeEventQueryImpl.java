@@ -215,11 +215,11 @@ public class FlowDefinitionNodeEventQueryImpl implements FlowDefinitionNodeEvent
             if(StringHelper.isNotBlank(nodeEvent.getTacker())){
                 if (flowProcess.getFlowData() != null){
                     try {
-                        Map flowDataMap = JsonMapper.JSON_NON_DEFAULT_MAPPER.getMapper().readValue(flowProcess.getFlowData(), JacksonType.MAP_OF_OBJECT);
-                        String doctorPigEvent = (String) flowDataMap.get("event");
+                        Map<String, String> flowDataMap = JsonMapper.JSON_NON_DEFAULT_MAPPER.getMapper().readValue(flowProcess.getFlowData(), JacksonType.MAP_OF_OBJECT);
+                        String doctorPigEvent = flowDataMap.get("event");
                         if (StringHelper.isNotBlank(doctorPigEvent)){
-                            Map doctorPigEventMap = JsonMapper.JSON_NON_DEFAULT_MAPPER.getMapper().readValue(doctorPigEvent, JacksonType.MAP_OF_OBJECT);
-                            int currentMatingCount = (int)doctorPigEventMap.get("currentMatingCount");
+                            Map<String, String>doctorPigEventMap = JsonMapper.JSON_NON_DEFAULT_MAPPER.getMapper().readValue(doctorPigEvent, JacksonType.MAP_OF_OBJECT);
+                            Integer currentMatingCount = Integer.parseInt(doctorPigEventMap.get("currentMatingCount"));
                             if (!StringHelper.parseExpression(nodeEvent.getTacker(), ImmutableMap.of("currentMatingCount", currentMatingCount))){
                                 return;
                             }
