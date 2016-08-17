@@ -143,7 +143,7 @@ public class DoctorDailyReportCache {
         Date startAt = Dates.startOfDay(date);
         Date endAt = DateUtil.getDateEnd(new DateTime(date)).toDate();
 
-        log.info("init daily report farmId:{}", farmId);
+        log.info("init daily report farmId:{}, date:{}", farmId, date);
         DoctorDailyReportDto report = new DoctorDailyReportDto();
 
         //妊娠检查

@@ -88,11 +88,14 @@ public class DoctorMoveReportService {
         log.info("report sow live stock:{}", sowMap);
 
         //公猪存栏
-        ReportBoarLiveStock boar = RespHelper.orServEx(doctorMoveDatasourceHandler.findByHbsSql(moveId, ReportBoarLiveStock.class, "DoctorDailyReport-BoarLiveStock")).get(0);
+        Map<Date, ReportBoarLiveStock> boarMap = RespHelper.orServEx(doctorMoveDatasourceHandler
+                .findByHbsSql(moveId, ReportBoarLiveStock.class, "DoctorDailyReport-BoarLiveStock", ImmutableMap.of("index", index, "farmOutId", farm.getOutId())))
+                .stream().collect(Collectors.toMap(ReportBoarLiveStock::getSumat, v -> v));
 
         //取出所有统计数据转换一把
         List<DoctorDailyReport> reports = gls.stream()
-                .map(g -> getDailyReport(farmId, g, MoreObjects.firstNonNull(sowMap.get(g.getSumat()), new ReportSowLiveStock()), boar))
+                .map(g -> getDailyReport(farmId, g, MoreObjects.firstNonNull(sowMap.get(g.getSumat()), new ReportSowLiveStock()),
+                        MoreObjects.firstNonNull(boarMap.get(g.getSumat()), new ReportBoarLiveStock())))
                 .collect(Collectors.toList());
 
         //批量创建日报(先删除, 再创建)
