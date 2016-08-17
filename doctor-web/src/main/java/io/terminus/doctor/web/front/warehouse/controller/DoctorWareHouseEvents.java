@@ -3,12 +3,14 @@ package io.terminus.doctor.web.front.warehouse.controller;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
 import io.terminus.common.exception.JsonResponseException;
+import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.basic.model.DoctorBasic;
 import io.terminus.doctor.basic.model.DoctorBasicMaterial;
 import io.terminus.doctor.basic.service.DoctorBasicMaterialReadService;
 import io.terminus.doctor.basic.service.DoctorBasicReadService;
+import io.terminus.doctor.common.enums.WareHouseType;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.service.DoctorBarnReadService;
 import io.terminus.doctor.user.model.DoctorFarm;
@@ -42,6 +44,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.util.List;
+import java.util.Objects;
 
 import static com.google.common.base.Preconditions.checkState;
 import static java.util.Objects.isNull;
@@ -228,10 +231,18 @@ public class DoctorWareHouseEvents {
                     .unitGroupId(doctorBasicMaterial.getUnitGroupId()).unitGroupName(doctorBasicMaterial.getUnitGroupName())
                     .unitPrice(dto.getUnitPrice())
                     .build();
-            if(dto.getUnitId() != null){
-                DoctorBasic doctorBasic = RespHelper.or500(doctorBasicReadService.findBasicById(dto.getUnitId()));
-                doctorMaterialConsumeProviderDto.setUnitName(doctorBasic.getName());
-                doctorMaterialConsumeProviderDto.setUnitId(doctorBasic.getId());
+
+            // 药品.疫苗.易耗品, 前台必须传来单位
+            if(Objects.equals(doctorBasicMaterial.getType(), WareHouseType.CONSUME.getKey())
+                    || Objects.equals(doctorBasicMaterial.getType(), WareHouseType.MEDICINE.getKey())
+                    || Objects.equals(doctorBasicMaterial.getType(), WareHouseType.VACCINATION.getKey())){
+                if(dto.getUnitId() != null){
+                    DoctorBasic doctorBasic = RespHelper.or500(doctorBasicReadService.findBasicById(dto.getUnitId()));
+                    doctorMaterialConsumeProviderDto.setUnitName(doctorBasic.getName());
+                    doctorMaterialConsumeProviderDto.setUnitId(doctorBasic.getId());
+                }else{
+                    throw new ServiceException("unit.miss");
+                }
             }
         }catch (Exception e){
             log.error("provider material fail, cause:{}", Throwables.getStackTraceAsString(e));

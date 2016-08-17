@@ -1,6 +1,5 @@
 package io.terminus.doctor.warehouse.handler.provider;
 
-import io.terminus.common.exception.ServiceException;
 import io.terminus.doctor.warehouse.dao.DoctorMaterialInWareHouseDao;
 import io.terminus.doctor.warehouse.dao.DoctorMaterialInfoDao;
 import io.terminus.doctor.warehouse.dto.DoctorMaterialConsumeProviderDto;
@@ -48,11 +47,6 @@ public class DoctorInWareHouseProviderHandler implements IHandler{
         if(isNull(doctorMaterialInWareHouse)){
             // create material in warehouse
             doctorMaterialInWareHouse = buildDoctorMaterialInWareHouse(dto);
-            if(dto.getUnitName() == null){
-                throw new ServiceException("unit.miss");
-            }else{
-                doctorMaterialInWareHouse.setUnitName(dto.getUnitName());
-            }
             doctorMaterialInWareHouseDao.create(doctorMaterialInWareHouse);
         }else {
             doctorMaterialInWareHouse.setLotNumber(doctorMaterialInWareHouse.getLotNumber() + dto.getCount());
