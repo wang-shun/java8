@@ -117,6 +117,7 @@
             <include refid="criteria"/>
         </where>
         LIMIT #{offset}, #{limit}
+        order by case `lot_number` when 0 then 0 else 1 end desc, updated_at desc
     </select>
 
     <update id="updateMaterialInfoByMaterialId" parameterType="map">
