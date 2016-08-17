@@ -353,6 +353,20 @@
         WHERE id = #{id}
     </select>
 
+    <select id="findFirstPigEvent" parameterType="map" resultMap="DoctorPigEventMap">
+        select <include refid="cols_all"/> from <include refid="tb"/>
+        where pig_id = #{pigId} and event_at = (
+          select min(event_at) from <include refid="tb"/> where pig_id = #{pigId}
+          <if test="fromDate != null">
+              <![CDATA[ and event_at >= #{fromDate} ]]>
+          </if>
+        ) limit 1
+    </select>
+
+    <select id="countByBarnId" parameterType="long" resultType="long">
+        select count(id) from <include refid="tb" /> where `barn_id` = #{barnId}
+    </select>
+
     <select id="list" resultMap="DoctorPigEventMap">
         SELECT
         <include refid="cols_all"/>

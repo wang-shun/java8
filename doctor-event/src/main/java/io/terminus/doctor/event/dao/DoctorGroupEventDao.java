@@ -43,4 +43,13 @@ public class DoctorGroupEventDao extends MyBatisDao<DoctorGroupEvent> {
                 .put("endAt", endAt)
                 .map());
     }
+
+    /**
+     * 查询一个猪舍累计有多少个事件
+     * @param barnId 猪舍id
+     * @return
+     */
+    public Long countByBarnId(Long barnId){
+        return sqlSession.selectOne(sqlId("countByBarnId"), barnId);
+    }
 }
