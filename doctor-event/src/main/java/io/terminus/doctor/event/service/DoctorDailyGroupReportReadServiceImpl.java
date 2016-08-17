@@ -121,6 +121,7 @@ public class DoctorDailyGroupReportReadServiceImpl implements DoctorDailyGroupRe
         liveStockReport.setFarrow(MoreObjects.firstNonNull(statistic.getFarrow(), 0));
         liveStockReport.setNursery(MoreObjects.firstNonNull(statistic.getNursery(), 0));
         liveStockReport.setFatten(MoreObjects.firstNonNull(statistic.getFatten(), 0));
+        liveStockReport.setHoubeiSow(MoreObjects.firstNonNull(getHoubeiSow(event.getFarmId()), 0));
         report.setLiveStock(liveStockReport);
 
         //不是变动事件, 直接返回

@@ -106,6 +106,7 @@ public abstract class DoctorAbstractEventFlowHandler extends HandlerAware {
                     JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(
                             ImmutableMap.of("doctorPigId", doctorBasicInputInfoDto.getPigId(),
                                     "doctorEventId", doctorPigEvent.getId(), "doctorSnapshotId", doctorPigSnapshot.getId())));
+            flowDataMap.put("event", JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(doctorPigEvent));
             execution.setFlowData(JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(flowDataMap));
         } catch (IllegalStateException e) {
             log.error("handle execute fail, cause:{}", Throwables.getStackTraceAsString(e));
