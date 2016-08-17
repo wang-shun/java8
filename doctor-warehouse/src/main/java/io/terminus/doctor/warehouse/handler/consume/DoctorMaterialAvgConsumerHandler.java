@@ -48,7 +48,7 @@ public class DoctorMaterialAvgConsumerHandler implements IHandler{
             doctorMaterialConsumeAvg = DoctorMaterialConsumeAvg.builder()
                     .farmId(dto.getFarmId()).wareHouseId(dto.getWareHouseId()).materialId(dto.getMaterialTypeId())
                     .consumeDate(DateTime.now().withTimeAtStartOfDay().toDate()).consumeCount(dto.getCount())
-                    .consumeAvgCount(0l)
+                    .consumeAvgCount(0D)
                     .build();
 
             if(Objects.equals(dto.getType(), WareHouseType.FEED.getKey())){

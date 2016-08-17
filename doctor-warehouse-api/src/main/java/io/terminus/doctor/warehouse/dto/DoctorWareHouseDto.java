@@ -37,7 +37,7 @@ public class DoctorWareHouseDto implements Serializable{
 
     private String manager;
 
-    private Long remainder;
+    private Double remainder;
 
     private Date recentlyConsume;   //最近领用
 

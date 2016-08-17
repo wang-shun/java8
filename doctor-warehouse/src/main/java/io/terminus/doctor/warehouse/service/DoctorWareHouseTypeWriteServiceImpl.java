@@ -52,7 +52,7 @@ public class DoctorWareHouseTypeWriteServiceImpl implements DoctorWareHouseTypeW
 
     private DoctorFarmWareHouseType buildFarmWareHouseType(Long farmId, String farmName, Long userId, String userName, WareHouseType wareHouseType){
         return DoctorFarmWareHouseType.builder().farmId(farmId).farmName(farmName).type(wareHouseType.getKey())
-                .lotNumber(0l).extraMap(Maps.newHashMap())
+                .lotNumber(0D).extraMap(Maps.newHashMap())
                 .creatorId(userId).creatorName(userName)
                 .build();
     }

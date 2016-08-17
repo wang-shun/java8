@@ -44,7 +44,7 @@ public class DoctorWareHouseTrack implements Serializable{
 
     private String materialLotNumber;
 
-    private Long lotNumber;
+    private Double lotNumber;
 
     private Integer isDefault;
 

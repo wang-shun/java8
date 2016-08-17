@@ -55,7 +55,7 @@ public class DoctorMaterialConsumeProvider implements Serializable{
 
     private Integer eventType;
 
-    private Long eventCount;
+    private Double eventCount;
 
     /**
      * 本次出库/入库的单价

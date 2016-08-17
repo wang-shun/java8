@@ -89,7 +89,7 @@ public class MaterialInWareHouseManager {
         return Boolean.TRUE;
     }
 
-    private Long calculateProviderUnitPrice(List<Long> eventIds, Long realTotal){
+    private Long calculateProviderUnitPrice(List<Long> eventIds, Double realTotal){
         long totalPrice = 0L;
         for (DoctorMaterialConsumeProvider cp : doctorMaterialConsumeProviderDao.findByIds(eventIds)){
             Map<String, Object> extraMap = cp.getExtraMap();
@@ -100,7 +100,7 @@ public class MaterialInWareHouseManager {
                 totalPrice += count * unitPrice;
             }
         }
-        return Long.valueOf(NumberUtils.divide(totalPrice, realTotal, 0));
+        return Long.valueOf(NumberUtils.divide(totalPrice, realTotal.longValue(), 0));
     }
 
     private List<Long> produceMaterialConsumeEntry(DoctorWareHouseBasicDto basicDto, DoctorMaterialInfo.MaterialProduceEntry materialProduceEntry){
@@ -109,18 +109,18 @@ public class MaterialInWareHouseManager {
                 basicDto.getFarmId(),
                 materialProduceEntry.getMaterialId());
 
-        long totalCount = doctorMaterialInWareHouses.stream().map(DoctorMaterialInWareHouse::getLotNumber).reduce(Math::addExact).orElse(0l);
+        double totalCount = doctorMaterialInWareHouses.stream().map(DoctorMaterialInWareHouse::getLotNumber).reduce((d1, d2) -> d1 + d2).orElse(0D);
         checkState(totalCount >= materialProduceEntry.getMaterialCount(), "not.enough.source");
 
 
         // consume
-        long totalConsumeCount= materialProduceEntry.getMaterialCount();
+        double totalConsumeCount= materialProduceEntry.getMaterialCount();
         int index = 0;
 
         while (totalConsumeCount!=0){
             DoctorMaterialInWareHouse doctorMaterialInWareHouse = doctorMaterialInWareHouses.get(index);
             index+=1;
-            long toConsume = doctorMaterialInWareHouse.getLotNumber();
+            double toConsume = doctorMaterialInWareHouse.getLotNumber();
 
             if(toConsume>=totalConsumeCount){
                 toConsume = totalConsumeCount;

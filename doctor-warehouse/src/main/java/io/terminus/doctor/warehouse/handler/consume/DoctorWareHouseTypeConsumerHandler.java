@@ -74,8 +74,8 @@ public class DoctorWareHouseTypeConsumerHandler implements IHandler{
         // 修改预计领用时间
         List<DoctorMaterialConsumeAvg> avgs = doctorMaterialConsumeAvgDao.queryByFarmIdAndType(dto.getFarmId(), dto.getType());
         if(!isNull(avgs) && !Iterables.isEmpty(avgs)){
-            Long avg = avgs.stream().filter(a->!isNull(a.getConsumeAvgCount()))
-                    .map(b -> b.getConsumeAvgCount()).reduce((c,d)->c+d).orElse(0l);
+            Double avg = avgs.stream().filter(a->!isNull(a.getConsumeAvgCount()))
+                    .map(b -> b.getConsumeAvgCount()).reduce((c,d)->c+d).orElse(0D);
             if(avg != 0l)
                 extraMap.put(DoctorFarmWareHouseTypeConstants.TO_CONSUME_DATE, doctorFarmWareHouseType.getLotNumber() * avgs.size()/avg);
         }

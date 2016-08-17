@@ -50,7 +50,7 @@ public class DoctorMaterialConsumeAvgDto implements Serializable {
     private Integer lotConsumeDay;
 
     // 剩余量
-    private Long lotNumber;
+    private Double lotNumber;
 
     // 平均消耗数量
     private Long consumeAvgCount;
