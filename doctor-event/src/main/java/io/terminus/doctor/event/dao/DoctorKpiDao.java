@@ -86,6 +86,13 @@ public class DoctorKpiDao {
     }
 
     /**
+     * 死黑木畸
+     */
+    public int getDeliveryDeadBlackMuJi(Long farmId, Date startAt, Date endAt) {
+        return this.sqlSession.selectOne(sqlId("getDeliveryDeadBlackMuJi"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
+    }
+
+    /**
      * 总产仔数
      */
     public int getDeliveryAll(Long farmId, Date startAt, Date endAt) {
@@ -328,5 +335,61 @@ public class DoctorKpiDao {
      */
     public double psy(Long farmId, Date startAt, Date endAt) {
         return sqlSession.selectOne(sqlId("psy"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
+    }
+
+    /**
+     * 后备母猪(后备母猪舍)存栏
+     */
+    public int liveStockHoubeiSow(Long farmId) {
+        return sqlSession.selectOne(sqlId("liveStockHoubeiSow"), ImmutableMap.of("farmId", farmId));
+    }
+
+    /**
+     * 配怀母猪(配种舍 + 妊娠舍)存栏
+     */
+    public int liveStockPeihuaiSow(Long farmId) {
+        return sqlSession.selectOne(sqlId("liveStockPeihuaiSow"), ImmutableMap.of("farmId", farmId));
+    }
+
+    /**
+     * 产房母猪存栏(分娩舍)
+     */
+    public int liveStockBuruSow(Long farmId) {
+        return sqlSession.selectOne(sqlId("liveStockBuruSow"), ImmutableMap.of("farmId", farmId));
+    }
+
+    /**
+     * 母猪存栏
+     */
+    public int liveStockSow(Long farmId) {
+        return sqlSession.selectOne(sqlId("liveStockSow"), ImmutableMap.of("farmId", farmId));
+    }
+
+    /**
+     * 公猪存栏
+     */
+    public int liveStockBoar(Long farmId) {
+        return sqlSession.selectOne(sqlId("liveStockBoar"), ImmutableMap.of("farmId", farmId));
+    }
+
+    /**
+     * 产房仔猪存栏
+     */
+    public int liveStockFarrow(Long farmId) {
+        return sqlSession.selectOne(sqlId("liveStockFarrow"), ImmutableMap.of("farmId", farmId));
+    }
+
+    /**
+     * 保育猪存栏
+     */
+    public int liveStockNursery(Long farmId) {
+        return sqlSession.selectOne(sqlId("liveStockNursery"), ImmutableMap.of("farmId", farmId));
+    }
+
+    /**
+     * 育肥猪存栏
+     */
+    public int liveStockFatten(Long farmId) {
+        return sqlSession.selectOne(sqlId("liveStockFatten"), ImmutableMap.of("farmId", farmId));
     }
 }
