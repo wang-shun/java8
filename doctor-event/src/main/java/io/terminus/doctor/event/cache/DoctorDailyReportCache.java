@@ -142,8 +142,6 @@ public class DoctorDailyReportCache {
         Map<Long, DoctorDailyReportDto> groupReportMap = RespHelper.orServEx(doctorDailyGroupReportReadService.getGroupDailyReportsByDate(date))
                 .stream().collect(Collectors.toMap(DoctorDailyReportDto::getFarmId, v -> v));
 
-        log.info("daily report info: date:{}, pigReport:{}, groupReport:{}", date, pigReportMap, groupReportMap);
-
         //求下 farmIds 的并集
         Set<Long> farmIds = Sets.newHashSet();
         farmIds.addAll(groupReportMap.keySet());

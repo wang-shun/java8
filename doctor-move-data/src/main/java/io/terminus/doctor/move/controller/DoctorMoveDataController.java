@@ -92,7 +92,8 @@ public class DoctorMoveDataController {
     @RequestMapping(value = "/all", method = RequestMethod.GET)
     public Boolean moveAll(@RequestParam("mobile") String mobile,
                            @RequestParam("moveId") Long moveId,
-                           @RequestParam(value = "index", required = false) Integer index) {
+                           @RequestParam(value = "index", required = false) Integer index,
+                           @RequestParam(value = "monthIndex", required = false) Integer monthIndex) {
         try {
             //1.迁移猪场信息
             log.warn("move user farm start, mobile:{}, moveId:{}", mobile, moveId);
@@ -100,7 +101,7 @@ public class DoctorMoveDataController {
             log.warn("move user farm end");
 
             //多个猪场遍历插入
-            getFarms(mobile).forEach(farm -> moveAllExclude(moveId, farm, mobile, index));
+            getFarms(mobile).forEach(farm -> moveAllExclude(moveId, farm, mobile, index, monthIndex));
             return true;
         } catch (Exception e) {
             log.error("move all data failed, mobile:{}, moveId:{}, cause:{}", mobile, moveId, Throwables.getStackTraceAsString(e));
@@ -118,7 +119,7 @@ public class DoctorMoveDataController {
     }
 
     //迁移剩下的数据
-    private void moveAllExclude(Long moveId, DoctorFarm farm, String mobile, Integer index) {
+    private void moveAllExclude(Long moveId, DoctorFarm farm, String mobile, Integer index, Integer monthIndex) {
         //2.迁移基础数据(Basic, Customer, ChangeReason, Barn)
         log.warn("move basic start, moveId:{}", moveId);
         doctorMoveBasicService.moveAllBasic(moveId, farm);
@@ -152,6 +153,11 @@ public class DoctorMoveDataController {
         log.warn("move daily start, moveId:{}", moveId);
         doctorMoveReportService.moveDailyReport(moveId, farm.getId(), index);
         log.warn("move daily end");
+
+        //7.迁移猪场月报
+        log.warn("move monthly start, moveId:{}", moveId);
+        doctorMoveReportService.moveMonthlyReport(farm.getId(), monthIndex);
+        log.warn("move monthly end");
     }
 
     /**
