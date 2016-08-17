@@ -679,7 +679,7 @@
 
     <!-- 存栏情况: 后备母猪(后备母猪舍)存栏 -->
     <select id="liveStockHoubeiSow" parameterType="map" resultType="int">
-        SELECT sum(quantity)
+        SELECT ifnull(sum(quantity), 0)
         FROM
         (
           SELECT id
@@ -691,7 +691,7 @@
 
     <!-- 存栏情况:产房仔猪存栏 -->
     <select id="liveStockFarrow" parameterType="map" resultType="int">
-        SELECT sum(quantity)
+        SELECT ifnull(sum(quantity), 0)
         FROM
         (
         SELECT id
@@ -703,7 +703,7 @@
 
     <!-- 存栏情况: 保育猪存栏 -->
     <select id="liveStockNursery" parameterType="map" resultType="int">
-        SELECT sum(quantity)
+        SELECT ifnull(sum(quantity), 0)
         FROM
         (
         SELECT id
@@ -715,7 +715,7 @@
 
     <!-- 存栏情况: 育肥猪存栏 -->
     <select id="liveStockFatten" parameterType="map" resultType="int">
-        SELECT sum(quantity)
+        SELECT ifnull(sum(quantity), 0)
         FROM
         (
         SELECT id
@@ -727,7 +727,7 @@
 
     <!-- 存栏情况: 配怀母猪(配种舍 + 妊娠舍)存栏 -->
     <select id="liveStockPeihuaiSow" parameterType="map" resultType="int">
-        SELECT count(1) FROM  (
+        SELECT ifnull(count(1), 0) FROM  (
             SELECT current_barn_id FROM doctor_pig_tracks
             WHERE pig_type = 1 AND is_removal = 0 AND farm_id = #{farmId}
         ) AS a
@@ -737,7 +737,7 @@
 
     <!-- 存栏情况: 产房母猪存栏(分娩舍) -->
     <select id="liveStockBuruSow" parameterType="map" resultType="int">
-        SELECT count(1) FROM  (
+        SELECT ifnull(count(1), 0) FROM  (
             SELECT current_barn_id FROM doctor_pig_tracks
             WHERE pig_type = 1 AND is_removal = 0 AND farm_id = #{farmId}
         ) AS a
@@ -747,13 +747,13 @@
 
     <!-- 存栏情况: 母猪存栏 -->
     <select id="liveStockSow" parameterType="map" resultType="int">
-        SELECT count(1) FROM doctor_pig_tracks
+        SELECT ifnull(count(1), 0) FROM doctor_pig_tracks
         WHERE pig_type = 1 AND is_removal = 0 AND farm_id = #{farmId}
     </select>
 
     <!-- 存栏情况: 公猪存栏 -->
     <select id="liveStockBoar" parameterType="map" resultType="int">
-        SELECT count(1) FROM doctor_pig_tracks
+        SELECT ifnull(count(1), 0) FROM doctor_pig_tracks
         WHERE pig_type = 2 AND is_removal = 0 AND farm_id = #{farmId}
     </select>
 </mapper>
