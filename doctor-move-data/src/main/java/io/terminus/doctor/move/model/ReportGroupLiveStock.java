@@ -19,6 +19,6 @@ public class ReportGroupLiveStock implements Serializable {
     private int nurseryCount; // 保育猪
     private int fattenCount;  // 育肥猪
     private int houbeiCount;  // 后备母猪
-    private Date sumat;           // 统计时间(天初)
+    private Date sumat;
 
 }

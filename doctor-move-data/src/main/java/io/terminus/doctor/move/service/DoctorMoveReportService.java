@@ -3,6 +3,7 @@ package io.terminus.doctor.move.service;
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
+import io.terminus.common.utils.Dates;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.RespHelper;
@@ -74,9 +75,17 @@ public class DoctorMoveReportService {
         }
 
         //默认导365天的数据
-        index = MoreObjects.firstNonNull(index, INDEX);
-        List<ReportGroupLiveStock> gls = RespHelper.orServEx(doctorMoveDatasourceHandler
-                .findByHbsSql(moveId, ReportGroupLiveStock.class, "DoctorDailyReport-GroupLiveStock", ImmutableMap.of("index", index, "farmOutId", farm.getOutId())));
+        List<Date> dates = DateUtil.getBeforeDays(new Date(), MoreObjects.firstNonNull(index, INDEX));
+
+        //猪群存栏map
+        List<ReportGroupLiveStock> gls = dates.stream()
+                .map(date -> {
+                    ReportGroupLiveStock group = RespHelper.orServEx(doctorMoveDatasourceHandler
+                            .findByHbsSql(moveId, ReportGroupLiveStock.class, "DoctorDailyReport-GroupLiveStock", ImmutableMap.of("sumAt", DateUtil.toDateTimeString(Dates.endOfDay(date)), "farmOutId", farm.getOutId()))).get(0);
+                    group.setSumat(Dates.startOfDay(date));
+                    return group;
+                })
+                .collect(Collectors.toList());
 
         log.info("report group live stock:{}", gls);
 
