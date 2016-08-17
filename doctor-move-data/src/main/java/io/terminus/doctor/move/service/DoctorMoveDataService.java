@@ -725,8 +725,9 @@ public class DoctorMoveDataService {
         if (notEmpty(events)) {
             //按照时间 asc 排序
             events = events.stream().sorted((a, b) -> a.getEventAt().compareTo(b.getEventAt())).collect(Collectors.toList());
-            DoctorPigEvent lastEvent = events.get(events.size() - 1);
-            track.setExtra(lastEvent.getExtra());   //extra字段保存最后一次event的extra
+            Map<String, Object> extraMap = Maps.newHashMap();
+            events.forEach(event -> extraMap.putAll(JSON_MAPPER.fromJson(event.getExtra(), JSON_MAPPER.createCollectionType(Map.class, String.class, Object.class))));
+            track.setExtra(JSON_MAPPER.toJson(extraMap));   //extra字段保存所有extra
 
             //关联事件ids, Map<Parity, EventIds>, 按照胎次分组
             track.setRelEventIds(getSowRelEventIds(card.getFirstParity(), events));
@@ -1383,7 +1384,9 @@ public class DoctorMoveDataService {
         if (notEmpty(events)) {
             //按照时间 asc 排序
             events = events.stream().sorted((a, b) -> a.getEventAt().compareTo(b.getEventAt())).collect(Collectors.toList());
-            track.setExtra(events.get(events.size() - 1).getExtra());   //extra字段保存最后一次event的extra
+            Map<String, Object> extraMap = Maps.newHashMap();
+            events.forEach(event -> extraMap.putAll(JSON_MAPPER.fromJson(event.getExtra(), JSON_MAPPER.createCollectionType(Map.class, String.class, Object.class))));
+            track.setExtra(JSON_MAPPER.toJson(extraMap));   //extra字段保存全部extra
             track.setRelEventIds(Joiners.COMMA.join(events.stream().map(DoctorPigEvent::getId).collect(Collectors.toList()))); //关联事件ids, 逗号分隔
         }
 
