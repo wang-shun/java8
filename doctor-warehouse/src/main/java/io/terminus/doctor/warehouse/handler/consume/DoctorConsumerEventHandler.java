@@ -43,14 +43,14 @@ public class DoctorConsumerEventHandler implements IHandler{
 
     @Override
     public void handle(DoctorMaterialConsumeProviderDto dto, Map<String, Object> context) throws RuntimeException {
-        Long consumeCount = dto.getCount(); // 本次领用总数量
+        Double consumeCount = dto.getCount(); // 本次领用总数量
         // 1. 计算本次领用的组成(单价\数量\入库时间)
         long plus = 0L;
         Map<String, Object> extraMap = new HashMap<>();
         extraMap.put("consumePrice", new ArrayList<>());
         List<DoctorMaterialPriceInWareHouse> list = doctorMaterialPriceInWareHouseDao.findByWareHouseAndMaterialId(dto.getWareHouseId(), dto.getMaterialTypeId());
         for (DoctorMaterialPriceInWareHouse item : list) {
-            Long remainder = item.getRemainder();
+            Double remainder = item.getRemainder();
             if(plus + remainder <= consumeCount){
                 doctorMaterialPriceInWareHouseDao.delete(item.getId());
                 ((ArrayList) extraMap.get("consumePrice")).add(ImmutableMap.of(

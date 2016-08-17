@@ -63,7 +63,7 @@ public class DoctorWareHouseTrackConsumeHandler implements IHandler{
         List<DoctorMaterialConsumeAvg> avgList =
                 doctorMaterialConsumeAvgDao.queryByIds(ImmutableMap.of("farmId", dto.getFarmId(), "wareHouseId", dto.getWareHouseId()));
         if(!isNull(avgList) && !Iterables.isEmpty(avgList)){
-            Long total = avgList.stream().filter(a->!isNull(a.getConsumeAvgCount())).map(s->s.getConsumeAvgCount()).reduce((c,d)->c+d).orElse(0l);
+            Double total = avgList.stream().filter(a->!isNull(a.getConsumeAvgCount())).map(s->s.getConsumeAvgCount()).reduce((c,d)->c+d).orElse(0D);
             if(total != 0){
                 consumeMap.put(DoctorWareHouseTrackConstants.REST_CONSUME_DATE, doctorWareHouseTrack.getLotNumber() * avgList.size()/total);
             }

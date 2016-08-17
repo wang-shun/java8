@@ -200,7 +200,7 @@ public class DoctorMaterialInfos {
     @RequestMapping(value = "/preProduceMaterial", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public DoctorMaterialInfo.MaterialProduce preProduceMaterial(@RequestParam("materialId") Long materialId, @RequestParam("produceCount") Long produceCount){
-        return RespHelper.or500(doctorMaterialInfoWriteService.produceMaterial(materialId, produceCount));
+        return RespHelper.or500(doctorMaterialInfoWriteService.produceMaterial(materialId, produceCount.doubleValue()));
     }
 
     /**
