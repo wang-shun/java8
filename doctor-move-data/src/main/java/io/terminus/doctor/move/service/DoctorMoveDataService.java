@@ -1858,9 +1858,4 @@ public class DoctorMoveDataService {
     private static boolean isFarm(String farmOID, String outId) {
         return Objects.equals(farmOID, outId);
     }
-
-
-    public static void main(String[] args) {
-        System.out.println(PigEvent.MATING.getKey());
-    }
 }
