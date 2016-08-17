@@ -148,7 +148,10 @@ public class DoctorPigs {
             String extra = doctorPigTrack.getExtra();
             if (StringUtils.isNotBlank(extra)){
                 Map<String, String> extraMap = JsonMapper.JSON_NON_DEFAULT_MAPPER.getMapper().readValue(extra, JacksonType.MAP_OF_OBJECT);
-                pregCheckResult = Integer.parseInt(extraMap.get("pregCheckResult"));
+                String checkResult = extraMap.get("pregCheckResult");
+                if (StringUtils.isNotBlank(checkResult)) {
+                    pregCheckResult = Integer.parseInt(checkResult);
+                }
             }
         }catch (Exception e){
             log.error("buildSowDetailDto failed cause by {}", Throwables.getStackTraceAsString(e));
