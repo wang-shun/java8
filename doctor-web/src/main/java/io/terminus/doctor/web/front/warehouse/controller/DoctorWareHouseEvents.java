@@ -241,7 +241,12 @@ public class DoctorWareHouseEvents {
                     doctorMaterialConsumeProviderDto.setUnitName(doctorBasic.getName());
                     doctorMaterialConsumeProviderDto.setUnitId(doctorBasic.getId());
                 }else{
-                    throw new ServiceException("unit.miss");
+                    DoctorMaterialInWareHouse materialInWareHouse = RespHelper.orServEx(
+                            doctorMaterialInWareHouseReadService.queryByMaterialWareHouseIds(doctorFarm.getId(), dto.getMaterialId(), dto.getWareHouseId())
+                    );
+                    if(materialInWareHouse == null){
+                        throw new ServiceException("unit.miss");
+                    }
                 }
             }
         }catch (Exception e){
