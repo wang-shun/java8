@@ -17,6 +17,7 @@ import io.terminus.doctor.event.dto.report.daily.DoctorCheckPregDailyReport;
 import io.terminus.doctor.event.dto.report.daily.DoctorDailyReportDto;
 import io.terminus.doctor.event.dto.report.daily.DoctorDeadDailyReport;
 import io.terminus.doctor.event.dto.report.daily.DoctorDeliverDailyReport;
+import io.terminus.doctor.event.dto.report.daily.DoctorLiveStockDailyReport;
 import io.terminus.doctor.event.dto.report.daily.DoctorMatingDailyReport;
 import io.terminus.doctor.event.dto.report.daily.DoctorSaleDailyReport;
 import io.terminus.doctor.event.dto.report.daily.DoctorWeanDailyReport;
@@ -193,12 +194,25 @@ public class DoctorDailyReportCache {
         wean.setWeight(doctorKpiDao.getWeanPigletWeightAvg(farmId, startAt, endAt));
         wean.setNest(doctorKpiDao.getWeanSow(farmId, startAt, endAt));
 
+        //存栏
+        DoctorLiveStockDailyReport liveStock = new DoctorLiveStockDailyReport();
+        liveStock.setHoubeiSow(doctorKpiDao.liveStockHoubeiSow(farmId));
+        liveStock.setPeihuaiSow(doctorKpiDao.liveStockPeihuaiSow(farmId));
+        liveStock.setBuruSow(doctorKpiDao.liveStockBuruSow(farmId));
+        liveStock.setKonghuaiSow(0);
+        liveStock.setBoar(doctorKpiDao.liveStockBoar(farmId));
+        liveStock.setFarrow(doctorKpiDao.liveStockFarrow(farmId));
+        liveStock.setNursery(doctorKpiDao.liveStockNursery(farmId));
+        liveStock.setFatten(doctorKpiDao.liveStockFatten(farmId));
+
+        report.setSowCount(doctorKpiDao.liveStockSow(farmId));
         report.setCheckPreg(checkPreg);
         report.setDead(dead);
         report.setDeliver(deliver);
         report.setMating(mating);
         report.setSale(sale);
         report.setWean(wean);
+        report.setLiveStock(liveStock);
         return report;
     }
 
