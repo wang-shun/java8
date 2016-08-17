@@ -1,14 +1,20 @@
 package io.terminus.doctor.event.search.pig;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.google.common.base.Throwables;
 import io.terminus.common.utils.BeanMapper;
+import io.terminus.common.utils.JsonMapper;
+import io.terminus.doctor.common.constants.JacksonType;
 import io.terminus.doctor.event.dao.DoctorPigDao;
 import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.util.Map;
 
 /**
  * Desc: 猪(索引对象)创建工厂
@@ -58,6 +64,18 @@ public abstract class BaseIndexedPigFactory<T extends IndexedPig> implements Ind
             indexedPig.setCurrentParity(pigTrack.getCurrentParity());
             indexedPig.setUpdatedAt(pigTrack.getUpdatedAt());
             indexedPig.setIsRemoval(pigTrack.getIsRemoval());
+            if (pigTrack.getExtra() != null) {
+                try {
+                    Map<String, String> extraMap = JsonMapper.JSON_NON_DEFAULT_MAPPER.getMapper().readValue(pigTrack.getExtra(), JacksonType.MAP_OF_OBJECT);
+                    String pregCheckResult = extraMap.get("pregCheckResult");
+                    if (StringUtils.isNotBlank(pregCheckResult)) {
+                        indexedPig.setPregCheckResult(Integer.parseInt(pregCheckResult));
+                    }
+                } catch (Exception e){
+                    log.error(" indexedPig create failed cause by {}", Throwables.getStackTraceAsString(e));
+                }
+
+            }
         }
 
         return indexedPig;
