@@ -108,6 +108,9 @@
       },
       "isRemoval": {
         "type": "integer"
+      },
+      "pregCheckResult": {
+        "type": "integer"
       }
     }
   }

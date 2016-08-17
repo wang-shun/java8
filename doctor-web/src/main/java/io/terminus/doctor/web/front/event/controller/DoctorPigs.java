@@ -4,6 +4,8 @@ import com.google.common.base.Throwables;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
+import io.terminus.common.utils.JsonMapper;
+import io.terminus.doctor.common.constants.JacksonType;
 import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dto.DoctorGroupDetail;
@@ -22,6 +24,7 @@ import io.terminus.doctor.web.front.event.dto.DoctorMatingDetail;
 import io.terminus.doctor.web.front.event.dto.DoctorSowDetailDto;
 import io.terminus.doctor.web.util.TransFromUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.joda.time.Days;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -139,6 +142,18 @@ public class DoctorPigs {
     }
 
     private DoctorSowDetailDto buildSowDetailDto(DoctorPigInfoDetailDto dto){
+        DoctorPigTrack doctorPigTrack = dto.getDoctorPigTrack();
+        Integer pregCheckResult =null;
+        try{
+            String extra = doctorPigTrack.getExtra();
+            if (StringUtils.isNotBlank(extra)){
+                Map<String, String> extraMap = JsonMapper.JSON_NON_DEFAULT_MAPPER.getMapper().readValue(extra, JacksonType.MAP_OF_OBJECT);
+                pregCheckResult = Integer.parseInt(extraMap.get("pregCheckResult"));
+            }
+        }catch (Exception e){
+            log.error("buildSowDetailDto failed cause by {}", Throwables.getStackTraceAsString(e));
+        }
+
         DoctorSowDetailDto doctorSowDetailDto = DoctorSowDetailDto.builder()
                 .pigSowCode(dto.getDoctorPig().getPigCode())
                 .warnMessage(dto.getDoctorPigTrack().getExtraMessage())
@@ -148,6 +163,7 @@ public class DoctorPigs {
                 .parity(dto.getDoctorPigTrack().getCurrentParity()).entryDate(dto.getDoctorPig().getInFarmDate())
                 .birthDate(dto.getDoctorPig().getBirthDate())
                 .doctorPigEvents(dto.getDoctorPigEvents())
+                .pregCheckResult(pregCheckResult)
                 .build();
         return doctorSowDetailDto;
     }

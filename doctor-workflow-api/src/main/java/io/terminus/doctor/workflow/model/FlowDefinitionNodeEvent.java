@@ -51,6 +51,7 @@ public class FlowDefinitionNodeEvent implements Serializable{
      * 事件驱动表达式
      */
     private String expression;
+    private String tacker;
     /**
      * 目标节点id
      * @see FlowDefinitionNode

@@ -54,6 +54,7 @@ CREATE TABLE IF NOT EXISTS `workflow_definition_node_events`(
 	`source_node_id` BIGINT(20) DEFAULT NULL COMMENT '流程源节点的id',
 	`handler` VARCHAR(128) DEFAULT NULL COMMENT '事件驱动处理类(一般为类标识)',
 	`expression` text COMMENT '事件驱动表达式',
+	`tacker` text COMMENT '配种次数判断',
 	`target_node_id` BIGINT(20) DEFAULT NULL COMMENT '驱动的目标节点id',
 	`describe` text COMMENT '连线描述',
 	`created_at` DATETIME DEFAULT NULL COMMENT '创建时间',

@@ -34,6 +34,8 @@ public class DoctorSowDetailDto implements Serializable {
 
     private Integer pigStatus; // 猪状态
 
+    private Integer pregCheckResult; // 母猪空怀详细状态
+
     private Integer dayAge; // 日龄
 
     private Integer parity; //胎次
