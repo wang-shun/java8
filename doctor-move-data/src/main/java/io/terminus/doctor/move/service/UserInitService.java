@@ -275,7 +275,11 @@ public class UserInitService {
         subUser.setName(member.getLoginName() + "@" + primaryUserMobile);
         subUser.setPassword("123456");
         subUser.setType(UserType.FARM_SUB.value());
-        subUser.setStatus(UserStatus.NORMAL.value());
+        if(Objects.equals(member.getIsStopUse(), "true")){
+            subUser.setStatus(UserStatus.LOCKED.value());
+        }else{
+            subUser.setStatus(UserStatus.NORMAL.value());
+        }
 
         List<String> roles = Lists.newArrayList("SUB", "SUB(SUB(" + roleIdMap.get(member.getRoleName()) + "))");
         subUser.setRoles(roles);
