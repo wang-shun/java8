@@ -300,6 +300,12 @@ public class DoctorBarns {
         Long pigEvent = RespHelper.or500(doctorPigEventReadService.countByBarnId(barnId));
         if(Objects.equals(groupEvent, 0L) && Objects.equals(pigEvent, 0L)){
             DoctorBarn barn = RespHelper.or500(doctorBarnReadService.findBarnById(barnId));
+            if(barn == null){
+                throw new JsonResponseException("barn.not.found");
+            }
+            if(barnName == null || barnName.trim().isEmpty()){
+                throw new JsonResponseException("barn.name.not.null");
+            }
             barn.setName(barnName);
             return RespHelper.or500(doctorBarnWriteService.updateBarn(barn));
         }else{
