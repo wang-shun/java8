@@ -82,10 +82,13 @@ public class DoctorSowPregCheckHandler extends DoctorAbstractEventFlowHandler {
         //往extra增加一些特殊标志位用来表明配种类型
         if (Objects.equals(pregCheckResult, PregCheckResult.FANQING.getKey())) {
             extra.put("fanqingToMate", true);
+            extra.put("pregCheckResultName", PregCheckResult.FANQING);
         } else if (Objects.equals(pregCheckResult, PregCheckResult.YING.getKey())) {
             extra.put("yinToMate", true);
+            extra.put("pregCheckResultName", PregCheckResult.YING);
         } else if (Objects.equals(pregCheckResult, PregCheckResult.LIUCHAN.getKey())) {
             extra.put("liuchanToMateCheck", true);
+            extra.put("pregCheckResultName", PregCheckResult.LIUCHAN);
         }
 
         doctorPigTrack.addAllExtraMap(extra);

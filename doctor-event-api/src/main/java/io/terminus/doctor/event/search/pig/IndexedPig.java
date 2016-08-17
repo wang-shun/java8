@@ -93,6 +93,7 @@ public class IndexedPig implements Serializable {
      */
     private Integer status;
     private String statusName;
+    private String pregCheckResultName;
 
     /**
      * 当前猪舍

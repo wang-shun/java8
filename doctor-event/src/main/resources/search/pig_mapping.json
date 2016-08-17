@@ -108,6 +108,10 @@
       },
       "isRemoval": {
         "type": "integer"
+      },
+      "pregCheckResultName": {
+        "type": "string",
+        "index": "not_analyzed"
       }
     }
   }

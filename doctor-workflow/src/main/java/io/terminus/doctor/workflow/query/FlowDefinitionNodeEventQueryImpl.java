@@ -1,7 +1,11 @@
 package io.terminus.doctor.workflow.query;
 
+import com.google.common.base.Throwables;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import io.terminus.common.model.Paging;
+import io.terminus.common.utils.JsonMapper;
+import io.terminus.doctor.common.constants.JacksonType;
 import io.terminus.doctor.workflow.access.JdbcAccess;
 import io.terminus.doctor.workflow.core.WorkFlowEngine;
 import io.terminus.doctor.workflow.model.FlowDefinitionNode;
@@ -11,6 +15,8 @@ import io.terminus.doctor.workflow.model.FlowProcess;
 import io.terminus.doctor.workflow.utils.AssertHelper;
 import io.terminus.doctor.workflow.utils.BeanHelper;
 import io.terminus.doctor.workflow.utils.StringHelper;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
 import java.util.Map;
@@ -21,6 +27,7 @@ import java.util.Map;
  * Created by icemimosa
  * Date: 16/5/11
  */
+@Slf4j
 public class FlowDefinitionNodeEventQueryImpl implements FlowDefinitionNodeEventQuery {
 
     private FlowDefinitionNodeEvent flowDefinitionNodeEvent;
@@ -195,16 +202,34 @@ public class FlowDefinitionNodeEventQueryImpl implements FlowDefinitionNodeEvent
             processes.forEach(process -> {
                 List<FlowDefinitionNodeEvent> nodeEvents = getNodeEventsBySourceId(instance.getFlowDefinitionId(), process.getFlowDefinitionNodeId());
                 nodeEvents.forEach(nodeEvent -> {
-                    getTaskEvents(events, instance, nodeEvent);
+                    getTaskEvents(events, instance, nodeEvent, process);
                 });
             });
         });
         return events;
     }
 
-    private void getTaskEvents(List<FlowDefinitionNodeEvent> events, FlowInstance instance, FlowDefinitionNodeEvent nodeEvent) {
+    private void getTaskEvents(List<FlowDefinitionNodeEvent> events, FlowInstance instance, FlowDefinitionNodeEvent nodeEvent, FlowProcess flowProcess) {
         // 如果存在事件, 直接返回
         if (StringHelper.isNotBlank(nodeEvent.getHandler())) {
+            if(StringHelper.isNotBlank(nodeEvent.getTacker())){
+                if (flowProcess.getFlowData() != null){
+                    try {
+                        Map flowDataMap = JsonMapper.JSON_NON_DEFAULT_MAPPER.getMapper().readValue(flowProcess.getFlowData(), JacksonType.MAP_OF_OBJECT);
+                        String doctorPigEvent = (String) flowDataMap.get("event");
+                        if (StringHelper.isNotBlank(doctorPigEvent)){
+                            Map doctorPigEventMap = JsonMapper.JSON_NON_DEFAULT_MAPPER.getMapper().readValue(doctorPigEvent, JacksonType.MAP_OF_OBJECT);
+                            int currentMatingCount = (int)doctorPigEventMap.get("currentMatingCount");
+                            if (!StringHelper.parseExpression(nodeEvent.getTacker(), ImmutableMap.of("currentMatingCount", currentMatingCount))){
+                                return;
+                            }
+                        }
+                    }catch (Exception e){
+                        log.error(" getTaskEvents  failed cause by {}", Throwables.getStackTraceAsString(e));
+                    }
+
+                }
+            }
             events.add(nodeEvent);
             return;
         }
@@ -218,11 +243,11 @@ public class FlowDefinitionNodeEventQueryImpl implements FlowDefinitionNodeEvent
                 break;
             case DECISION:
                 List<FlowDefinitionNodeEvent> eventsDecision = getNodeEventsBySourceId(instance.getFlowDefinitionId(), nextNode.getId());
-                eventsDecision.forEach(nextEvent -> getTaskEvents(events, instance, nextEvent));
+                eventsDecision.forEach(nextEvent -> getTaskEvents(events, instance, nextEvent, flowProcess));
                 break;
             case FORK:
                 List<FlowDefinitionNodeEvent> eventsFork = getNodeEventsBySourceId(instance.getFlowDefinitionId(), nextNode.getId());
-                eventsFork.forEach(nextEvent -> getTaskEvents(events, instance, nextEvent));
+                eventsFork.forEach(nextEvent -> getTaskEvents(events, instance, nextEvent, flowProcess));
                 break;
             case JOIN:
                 events.add(nodeEvent);
