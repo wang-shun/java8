@@ -10,7 +10,6 @@ import io.terminus.common.utils.Dates;
 import io.terminus.common.utils.Splitters;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.RespHelper;
-import io.terminus.doctor.event.dao.DoctorDailyReportDao;
 import io.terminus.doctor.event.dao.DoctorKpiDao;
 import io.terminus.doctor.event.dao.DoctorPigTypeStatisticDao;
 import io.terminus.doctor.event.dto.report.daily.DoctorCheckPregDailyReport;
@@ -52,19 +51,16 @@ public class DoctorDailyReportCache {
     private final LoadingCache<String, DoctorDailyReportDto> reportCache;
     private final DoctorDailyPigReportReadService doctorDailyPigReportReadService;
     private final DoctorDailyGroupReportReadService doctorDailyGroupReportReadService;
-    private final DoctorDailyReportDao doctorDailyReportDao;
     private final DoctorKpiDao doctorKpiDao;
     private final DoctorPigTypeStatisticDao doctorPigTypeStatisticDao;
 
     @Autowired
     public DoctorDailyReportCache(DoctorDailyPigReportReadService doctorDailyPigReportReadService,
                                   DoctorDailyGroupReportReadService doctorDailyGroupReportReadService,
-                                  DoctorDailyReportDao doctorDailyReportDao,
                                   DoctorKpiDao doctorKpiDao,
                                   DoctorPigTypeStatisticDao doctorPigTypeStatisticDao) {
         this.doctorDailyPigReportReadService = doctorDailyPigReportReadService;
         this.doctorDailyGroupReportReadService = doctorDailyGroupReportReadService;
-        this.doctorDailyReportDao = doctorDailyReportDao;
         this.doctorKpiDao = doctorKpiDao;
         this.doctorPigTypeStatisticDao = doctorPigTypeStatisticDao;
 
