@@ -66,6 +66,13 @@ public class DoctorTransGroupInput extends BaseGroupInput implements Serializabl
     private Integer sowQty;
 
     /**
+     * 均重(kg)
+     * 转群以此字段为主, 转场已总重为主
+     */
+    @NotNull(message = "weight.not.null")
+    private Double avgWeight;
+
+    /**
      * 总活体重(kg)
      */
     @NotNull(message = "weight.not.null")

@@ -74,7 +74,8 @@ public class DoctorTransGroupEventHandler extends DoctorAbstractGroupEventHandle
         checkQuantity(groupTrack.getBoarQty(), transGroup.getBoarQty());
         checkQuantity(groupTrack.getSowQty(), transGroup.getSowQty());
         checkQuantityEqual(transGroup.getQuantity(), transGroup.getBoarQty(), transGroup.getSowQty());
-        checkTranWeight(groupTrack.getWeight(), transGroup.getWeight());
+        Double realWeight = transGroup.getAvgWeight() * transGroup.getQuantity();   //后台计算的总重
+        checkTranWeight(groupTrack.getWeight(), realWeight);
         checkDayAge(groupTrack.getAvgDayAge(), transGroup);
 
         //转入猪舍
@@ -88,8 +89,8 @@ public class DoctorTransGroupEventHandler extends DoctorAbstractGroupEventHandle
         DoctorGroupEvent<DoctorTransGroupEvent> event = dozerGroupEvent(group, GroupEventType.TRANS_GROUP, transGroup);
         event.setQuantity(transGroup.getQuantity());
         event.setAvgDayAge(groupTrack.getAvgDayAge());  //转群的日龄不需要录入, 直接取猪群的日龄
-        event.setWeight(transGroup.getWeight());
-        event.setAvgWeight(EventUtil.getAvgWeight(transGroup.getWeight(), transGroup.getQuantity()));
+        event.setAvgWeight(transGroup.getAvgWeight());  //均重
+        event.setWeight(realWeight);                    //总重
         event.setTransGroupType(getTransType(group.getPigType(), toBarn).getValue());   //区别内转还是外转
         event.setExtraMap(transGroupEvent);
         doctorGroupEventDao.create(event);
