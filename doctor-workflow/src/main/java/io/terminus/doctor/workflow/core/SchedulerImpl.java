@@ -63,28 +63,28 @@ public class SchedulerImpl implements Scheduler {
                     .status(FlowInstance.Status.NORMAL.value())
                     .single();
             if (instance != null) {
-                Map expression = null;
-                String flowData = flowProcess.getFlowData();
-                String itimerName = workFlowService.getFlowQueryService().getFlowDefinitionNodeQuery().id(flowProcess.getFlowDefinitionNodeId()).single().getITimer();
-                if (StringUtils.isNotBlank(itimerName)) {
-                    FlowTimer timer = timerMap.get(TIMER_PREFIX + flowProcess.getFlowDefinitionNodeId());
-                    TimerExecution timerExecution = new TimerExecutionImpl(workFlowEngine, flowProcess, flowProcess.getFlowData(), timer, instance.getBusinessId(), instance.getFlowDefinitionKey());
-                    ITimer iTimer = timerExecution.getITimer(itimerName);
-                    if (iTimer != null) {
-                        iTimer.Timer(timerExecution);
-                        expression = timerExecution.getExpression();
-                        flowData = timerExecution.getFlowData();
+                FlowTimer timer = timerMap.get(TIMER_PREFIX + flowProcess.getFlowDefinitionNodeId());
+                TimerExecution timerExecution = new TimerExecutionImpl(workFlowEngine, flowProcess, flowProcess.getFlowData(), timer, instance.getBusinessId(), instance.getFlowDefinitionKey());
+                ITimer iTimer = timerExecution.getITimer(workFlowService.getFlowQueryService().getFlowDefinitionNodeQuery().id(flowProcess.getFlowDefinitionNodeId()).single().getITimer());
+
+                // 如果含有执行器
+                if (iTimer != null) {
+                    iTimer.timer(timerExecution);
+                    // 如果到达执行时间, 则执行任务
+                    if (isBefore(flowProcess)) {
+                        workFlowService.getFlowProcessService()
+                                .getExecutor(instance.getFlowDefinitionKey(), instance.getBusinessId(), flowProcess.getAssignee())
+                                .execute(timerExecution.getExpression(), timerExecution.getFlowData());
                     }
-                    timerMap.put(TIMER_PREFIX + flowProcess.getFlowDefinitionNodeId(), timerExecution.getFlowTimer());
-                }else {
-                    log.error("iTimer create fail, iTimer is not found");
-                    AssertHelper.throwException("iTimer create fail, iTimer is not found");
                 }
-                // 如果到达执行时间, 则执行任务
-                if (isBefore(flowProcess)) {
-                    workFlowService.getFlowProcessService()
-                            .getExecutor(instance.getFlowDefinitionKey(), instance.getBusinessId(), flowProcess.getAssignee())
-                            .execute(expression, flowData);
+                // 否则
+                else {
+                    // 如果到达执行时间, 则执行任务
+                    if (isBefore(flowProcess)) {
+                        workFlowService.getFlowProcessService()
+                                .getExecutor(instance.getFlowDefinitionKey(), instance.getBusinessId(), flowProcess.getAssignee())
+                                .execute();
+                    }
                 }
             }
         }
