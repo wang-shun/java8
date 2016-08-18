@@ -70,6 +70,7 @@
 
     <decision name="哺乳后事件录入">
         <transition name="拼窝" value="17" expression="#{eventType} equals \'17\'" target="哺乳" handler="doctorSowFostersHandler"/>
+        <transition name="被拼窝" value="19" expression="#{eventType} equals \'19\'" target="哺乳" handler="doctorSowFostersByHandler"/>
         <transition name="断奶事件" value="16" expression="#{eventType} equals \'16\'" handler="doctorSowWeanHandler" target="断奶事件判断"/>
         <transition name="仔猪变动事件类型" value="18" expression="#{eventType} equals \'18\'" handler="doctorSowPigletsChgHandler" target="仔猪变动事件判断"/>
     </decision>
@@ -89,7 +90,7 @@
     </task>
 
     <decision name="断奶后事件">
-        <transition name="拼窝" value="17" expression="#{eventType} equals \'17\'" target="哺乳" handler="doctorSowFostersHandler"/>
+        <transition name="被拼窝" value="19" expression="#{eventType} equals \'19\'" target="哺乳" handler="doctorSowFostersByHandler"/>
         <transition name="去配种" value="12" expression="#{eventType} equals \'12\'" target="待配种" handler="doctorSowChgLocationHandler"/>
     </decision>
 
