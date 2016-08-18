@@ -818,7 +818,10 @@ public class DoctorMoveDataService {
                 extraMap = Maps.newHashMap();
                 extraMap.put("hasWeanToMating", false);
             }
-            extraMap.putAll(JSON_MAPPER.fromJson(event.getExtra(), JSON_MAPPER.createCollectionType(Map.class, String.class, Object.class)));
+            if (notEmpty(event.getExtra())) {
+                extraMap.putAll(JSON_MAPPER.fromJson(event.getExtra(), JSON_MAPPER.createCollectionType(Map.class, String.class, Object.class)));
+
+            }
         }
         return extraMap;
     }
