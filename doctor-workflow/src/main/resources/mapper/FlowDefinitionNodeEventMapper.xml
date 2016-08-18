@@ -14,6 +14,7 @@
         <result column="flow_definition_id" property="flowDefinitionId"/>
         <result column="source_node_id" property="sourceNodeId"/>
         <result column="handler" property="handler"/>
+        <result column="tacker" property="tacker"/>
         <result column="expression" property="expression"/>
         <result column="target_node_id" property="targetNodeId"/>
         <result column="describe" property="describe"/>
@@ -31,10 +32,10 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        `name`,`value`,`flow_definition_id`,`source_node_id`,`handler`,`expression`,`target_node_id`,`describe`,`created_at`,`updated_at`    </sql>
+        `name`,`value`,`flow_definition_id`,`source_node_id`,`handler`,`tacker`,``expression`,`target_node_id`,`describe`,`created_at`,`updated_at`    </sql>
 
     <sql id="vals">
-        #{name},#{value},#{flowDefinitionId},#{sourceNodeId},#{handler},#{expression},#{targetNodeId},#{describe},now(),now()   </sql>
+        #{name},#{value},#{flowDefinitionId},#{sourceNodeId},#{handler},#{tacker},#{expression},#{targetNodeId},#{describe},now(),now()   </sql>
 
     <insert id="create" parameterType="FlowDefinitionNodeEvent" keyProperty="id" useGeneratedKeys="true">
         INSERT INTO
@@ -62,6 +63,7 @@
             <if test="flowDefinitionId != null">,`flow_definition_id` = #{flowDefinitionId}</if>
             <if test="sourceNodeId != null">,`source_node_id` = #{sourceNodeId}</if>
             <if test="handler != null">,`handler` = #{handler}</if>
+            <if test="tacker != null">,`tacker` = #{tacker}</if>
             <if test="expression != null">,`expression` = #{expression}</if>
             <if test="targetNodeId != null">,`target_node_id` = #{targetNodeId}</if>
             <if test="describe != null">,`describe` = #{describe}</if>
