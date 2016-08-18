@@ -97,6 +97,7 @@ public class DoctorMoveWorkflowHandler {
 
     /**
      * 对猪只进行导入工作流处理
+     *
      * @param pigInfoDtos
      */
     @Transactional
@@ -132,7 +133,10 @@ public class DoctorMoveWorkflowHandler {
                         if (pig.getStatus() == 4) {
                             createFlowProcess(nodesMapByName.get("妊娠检查阳性").getId(), nodesMapByName.get("妊娠检查A结果").getId(), pigEvent, flowInstance, pig);
                         }
-                        else {
+                        // 断奶
+                        else if (pig.getStatus() == 9) {
+                            createFlowProcess(nodesMapByName.get("断奶").getId(), nodesMapByName.get("妊娠检查A结果").getId(), pigEvent, flowInstance, pig);
+                        } else {
                             createFlowProcess(targetNode.getId(), sourceNode.getId(), pigEvent, flowInstance, pig);
                         }
                     }
@@ -147,7 +151,6 @@ public class DoctorMoveWorkflowHandler {
                             createFlowProcess(nodesMapByName.get("空怀").getId(), nodesMapByName.get("妊娠检查A结果").getId(), pigEvent, flowInstance, pig);
                         }
                     }
-
                     // 3. 如果是断奶事件判断 > 16  或者 仔猪变动 > 18
                     else if (type == 16 || type == 18) {
                         // 哺乳
@@ -158,21 +161,21 @@ public class DoctorMoveWorkflowHandler {
                         else {
                             createFlowProcess(nodesMapByName.get("断奶").getId(), nodesMapByName.get("断奶事件判断").getId(), pigEvent, flowInstance, pig);
                         }
-                    }
-                    else {
+                    } else {
                         createFlowProcess(targetNode.getId(), sourceNode.getId(), pigEvent, flowInstance, pig);
                     }
                 }
             // }
             // 否则处于待配种状态
             // else {
-               // createFlowProcess(nodesMapByName.get("待配种").getId(), nodesMapByName.get("开始节点信息").getId(), pigEvent, flowInstance, pig);
+            // createFlowProcess(nodesMapByName.get("待配种").getId(), nodesMapByName.get("开始节点信息").getId(), pigEvent, flowInstance, pig);
             // }
         });
     }
 
     /**
      * 获取flowData的数据信息
+     *
      * @param pig
      * @return
      */
@@ -231,8 +234,7 @@ public class DoctorMoveWorkflowHandler {
             jdbcAccess.createFlowProcess(flowProcess);
             flowProcess.setCreatedAt(pigEvent.getEventAt());
             jdbcAccess.updateFlowProcess(flowProcess);
-        }
-        else {
+        } else {
             FlowProcess flowProcess = FlowProcess.builder()
                     .flowDefinitionNodeId(definitionId)
                     .preFlowDefinitionNodeId(preNodeId + "")
