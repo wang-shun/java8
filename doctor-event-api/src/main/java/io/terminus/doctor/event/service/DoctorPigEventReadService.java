@@ -39,6 +39,21 @@ public interface DoctorPigEventReadService {
                                                           Date beginDate, Date endDate);
 
     /**
+     * 查找一只猪(在指定时间之后)的第一个事件
+     * @param pigId 猪id, 不可为空
+     * @param fromDate 可为空
+     * @return
+     */
+    Response<DoctorPigEvent> findFirstPigEvent(Long pigId, Date fromDate);
+
+    /**
+     * 查询猪舍的事件数量
+     * @param barnId 猪舍id
+     * @return
+     */
+    Response<Long> countByBarnId(Long barnId);
+
+    /**
      * 通过pigIds 获取操作事件内容
      * @param pigIds
      * @return
