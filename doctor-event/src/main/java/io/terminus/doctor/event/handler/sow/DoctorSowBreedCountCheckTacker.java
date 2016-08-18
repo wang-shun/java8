@@ -3,6 +3,7 @@ package io.terminus.doctor.event.handler.sow;
 import com.google.common.base.Throwables;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.constants.JacksonType;
+import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.workflow.event.ITacker;
 import io.terminus.doctor.workflow.utils.AssertHelper;
 import io.terminus.doctor.workflow.utils.StringHelper;
@@ -20,21 +21,30 @@ import java.util.Map;
 public class DoctorSowBreedCountCheckTacker implements ITacker {
     @Override
     public Boolean tacker(String flowData) {
-        log.info("[DoctorSowBreedCountCheckTacker] -> tacker execute flowdata is {}", flowData);
-        if (StringUtils.isNotBlank(flowData)){
+        if (StringUtils.isNotBlank(flowData)) {
             try {
                 Map<String, Object> flowDataMap = JsonMapper.JSON_NON_DEFAULT_MAPPER.getMapper().readValue(flowData, JacksonType.MAP_OF_OBJECT);
+                String doctorPigTrack = flowDataMap.get("track").toString();
+                if (StringUtils.isNotBlank(doctorPigTrack)) {
+                    Map<String, Object> doctorPigTrackMap = JsonMapper.JSON_NON_DEFAULT_MAPPER.getMapper().readValue(doctorPigTrack, JacksonType.MAP_OF_OBJECT);
+                    Object pigTypeObj = doctorPigTrackMap.get("pigType");
+                    if (pigTypeObj != null) {
+                        Integer pigType = Integer.parseInt(pigTypeObj.toString());
+                        if (pigType == PigType.RESERVE_SOW.getValue()) {
+                            return false;
+                        }
+                    }
+                }
                 String doctorPigEvent = (String) flowDataMap.get("event");
-                if (StringHelper.isNotBlank(doctorPigEvent)){
+                if (StringUtils.isNotBlank(doctorPigEvent)) {
                     Map<String, Object> doctorPigEventMap = JsonMapper.JSON_NON_DEFAULT_MAPPER.getMapper().readValue(doctorPigEvent, JacksonType.MAP_OF_OBJECT);
                     Object currentMatingCountStr = doctorPigEventMap.get("currentMatingCount");
-                    if (currentMatingCountStr != null){
+                    if (currentMatingCountStr != null) {
                         Integer currentMatingCount = Integer.parseInt(currentMatingCountStr.toString());
-                        log.info("[DoctorSowBreedCountCheckTacker] -> currentMatingCount is {}", currentMatingCount);
                         return currentMatingCount < 3;
                     }
                 }
-            }catch (Exception e){
+            } catch (Exception e) {
                 log.error("getTaskEvents  failed cause by {}", Throwables.getStackTraceAsString(e));
                 AssertHelper.throwException("getTaskEvents  failed cause by {}", Throwables.getStackTraceAsString(e));
             }
