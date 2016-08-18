@@ -213,33 +213,31 @@ public class FlowDefinitionNodeEventQueryImpl implements FlowDefinitionNodeEvent
     private void getTaskEvents(List<FlowDefinitionNodeEvent> events, FlowInstance instance, FlowDefinitionNodeEvent nodeEvent, FlowProcess flowProcess) {
         // 如果存在事件, 直接返回
         if (StringHelper.isNotBlank(nodeEvent.getHandler())) {
-            if(StringHelper.isNotBlank(nodeEvent.getTacker())){
+            if (StringHelper.isNotBlank(nodeEvent.getTacker())) {
                 String iTackerName = nodeEvent.getTacker();
-                    ITacker iTacker = workFlowEngine.buildContext().get(iTackerName);
+                ITacker iTacker = workFlowEngine.buildContext().get(iTackerName);
+                if (iTacker == null) {
+                    // 获取类的简单名称, 从上下文中获取
+                    iTacker = workFlowEngine.buildContext().get(
+                            StringHelper.uncapitalize(iTackerName.substring(iTackerName.lastIndexOf(".") + 1)));
                     if (iTacker == null) {
-                        if (iTacker == null) {
-                            // 获取类的简单名称, 从上下文中获取
-                            iTacker = workFlowEngine.buildContext().get(
-                                    StringHelper.uncapitalize(iTackerName.substring(iTackerName.lastIndexOf(".") + 1)));
-                            if (iTacker == null) {
-                                try {
-                                    // 实例化, 并存到上下文
-                                    iTacker = (ITacker) Class.forName(iTackerName).newInstance();
-                                    workFlowEngine.buildContext().put(
-                                            StringHelper.uncapitalize(iTackerName.substring(iTackerName.lastIndexOf(".") + 1)), iTacker);
-                                } catch (Exception e) {
-                                    log.error("iTacker not found, iTackerName is {}, cause by {}",
-                                            iTackerName, Throwables.getStackTraceAsString(e));
-                                    AssertHelper.throwException("iTacker not found, iTackerName is {}, cause by {}",
-                                            iTackerName, Throwables.getStackTraceAsString(e));
-                                }
-                            }
+                        try {
+                            // 实例化, 并存到上下文
+                            iTacker = (ITacker) Class.forName(iTackerName).newInstance();
+                            workFlowEngine.buildContext().put(
+                                    StringHelper.uncapitalize(iTackerName.substring(iTackerName.lastIndexOf(".") + 1)), iTacker);
+                        } catch (Exception e) {
+                            log.error("iTacker not found, iTackerName is {}, cause by {}",
+                                    iTackerName, Throwables.getStackTraceAsString(e));
+                            AssertHelper.throwException("iTacker not found, iTackerName is {}, cause by {}",
+                                    iTackerName, Throwables.getStackTraceAsString(e));
                         }
                     }
-                    if (!iTacker.tacker(flowProcess.getFlowData())){
-                        return;
-                    }
                 }
+                if (!iTacker.tacker(flowProcess.getFlowData())) {
+                    return;
+                }
+            }
             events.add(nodeEvent);
             return;
         }

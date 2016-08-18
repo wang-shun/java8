@@ -4,6 +4,7 @@ import com.google.common.base.Throwables;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.constants.JacksonType;
 import io.terminus.doctor.workflow.event.ITacker;
+import io.terminus.doctor.workflow.utils.AssertHelper;
 import io.terminus.doctor.workflow.utils.StringHelper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -35,6 +36,7 @@ public class DoctorSowBreedCountCheckTacker implements ITacker {
                 }
             }catch (Exception e){
                 log.error("getTaskEvents  failed cause by {}", Throwables.getStackTraceAsString(e));
+                AssertHelper.throwException("getTaskEvents  failed cause by {}", Throwables.getStackTraceAsString(e));
             }
 
         }
