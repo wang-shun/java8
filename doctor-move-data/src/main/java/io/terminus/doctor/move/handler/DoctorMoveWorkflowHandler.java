@@ -1,7 +1,6 @@
 package io.terminus.doctor.move.handler;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Maps;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.event.dao.DoctorPigEventDao;
 import io.terminus.doctor.event.dao.DoctorPigSnapshotDao;
@@ -98,6 +97,7 @@ public class DoctorMoveWorkflowHandler {
 
     /**
      * 对猪只进行导入工作流处理
+     *
      * @param pigInfoDtos
      */
     @Transactional
@@ -118,7 +118,7 @@ public class DoctorMoveWorkflowHandler {
             // 2. 获取猪最新的一次事件类型, 获取下一个节点对象
             // DoctorPigEvent pigEvent = doctorPigEventDao.queryLastPigEventById(pig.getPigId());
             DoctorPigEvent pigEvent = doctorPigEventDao.queryLastPigEventInWorkflow(pig.getPigId(),
-                    ImmutableList.of(9, 11, 12, 13, 14, 15, 16, 17, 18)); //,19));
+                    ImmutableList.of(9, 10, 11, 12, 13, 14, 15, 16, 17, 18)); //,19));
 
             if (pigEvent != null) {
                 Integer type = pigEvent.getType();
@@ -126,48 +126,56 @@ public class DoctorMoveWorkflowHandler {
                 FlowDefinitionNode targetNode = nodesMapById.get(eventsMapByValue.get(type).getTargetNodeId());
 
                 // 2.1 如果 Task 节点
-                if (targetNode.getType() == FlowDefinitionNode.Type.TASK.value()) {
-                    // 生成 Flow Process 对象
-                    FlowProcess flowProcess = FlowProcess.builder()
-                            .flowDefinitionNodeId(targetNode.getId())
-                            .preFlowDefinitionNodeId(sourceNode.getId() + "")
-                            .flowInstanceId(flowInstance.getId())
-                            .flowData(getFlowData(pig, pigEvent))
-                            .status(FlowProcess.Status.NORMAL.value())
-                            .assignee(targetNode.getAssignee())
-                            .forkNodeId(null)
-                            .build();
-
-                    jdbcAccess.createFlowProcess(flowProcess);
-
-                    // 事件发生时间(定时流转需要)
-                    flowProcess.setCreatedAt(pigEvent.getEventAt());
-                    jdbcAccess.updateFlowProcess(flowProcess);
+                // if (targetNode.getType() == FlowDefinitionNode.Type.TASK.value()) {
+                    // 1.  如果类型是转入分娩舍 > 10
+                    if (type == 10) {
+                        // 如果是阳性
+                        if (pig.getStatus() == 4) {
+                            createFlowProcess(nodesMapByName.get("妊娠检查阳性").getId(), nodesMapByName.get("妊娠检查A结果").getId(), pigEvent, flowInstance, pig);
+                        }
+                        // 断奶
+                        else if (pig.getStatus() == 9) {
+                            createFlowProcess(nodesMapByName.get("断奶").getId(), nodesMapByName.get("妊娠检查A结果").getId(), pigEvent, flowInstance, pig);
+                        } else {
+                            createFlowProcess(targetNode.getId(), sourceNode.getId(), pigEvent, flowInstance, pig);
+                        }
+                    }
+                    // 2.  如果是妊娠检查  > 11
+                    else if (type == 11) {
+                        // 如果是阳性
+                        if (pig.getStatus() == 4) {
+                            createFlowProcess(nodesMapByName.get("妊娠检查阳性").getId(), nodesMapByName.get("妊娠检查A结果").getId(), pigEvent, flowInstance, pig);
+                        }
+                        // 否则空怀
+                        else {
+                            createFlowProcess(nodesMapByName.get("空怀").getId(), nodesMapByName.get("妊娠检查A结果").getId(), pigEvent, flowInstance, pig);
+                        }
+                    }
+                    // 3. 如果是断奶事件判断 > 16  或者 仔猪变动 > 18
+                    else if (type == 16 || type == 18) {
+                        // 哺乳
+                        if (pig.getStatus() == 8) {
+                            createFlowProcess(nodesMapByName.get("哺乳").getId(), nodesMapByName.get("待分娩").getId(), pigEvent, flowInstance, pig);
+                        }
+                        // 否则断奶
+                        else {
+                            createFlowProcess(nodesMapByName.get("断奶").getId(), nodesMapByName.get("断奶事件判断").getId(), pigEvent, flowInstance, pig);
+                        }
+                    } else {
+                        createFlowProcess(targetNode.getId(), sourceNode.getId(), pigEvent, flowInstance, pig);
+                    }
                 }
-            }
-
+            // }
             // 否则处于待配种状态
-            else {
-                FlowDefinitionNode sourceNode = nodesMapByName.get("开始节点信息");
-                FlowDefinitionNode targetNode = nodesMapByName.get("待配种");
-                // 生成 Flow Process 对象
-                FlowProcess flowProcess = FlowProcess.builder()
-                        .flowDefinitionNodeId(targetNode.getId())
-                        .preFlowDefinitionNodeId(sourceNode.getId() + "")
-                        .flowInstanceId(flowInstance.getId())
-                        .flowData(JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(Maps.newHashMap())) // 清空数据
-                        .status(FlowProcess.Status.NORMAL.value())
-                        .assignee(targetNode.getAssignee())
-                        .forkNodeId(null)
-                        .build();
-
-                jdbcAccess.createFlowProcess(flowProcess);
-            }
+            // else {
+            // createFlowProcess(nodesMapByName.get("待配种").getId(), nodesMapByName.get("开始节点信息").getId(), pigEvent, flowInstance, pig);
+            // }
         });
     }
 
     /**
      * 获取flowData的数据信息
+     *
      * @param pig
      * @return
      */
@@ -209,5 +217,34 @@ public class DoctorMoveWorkflowHandler {
         flowData.put("createEventResult", JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(eventResult));
 
         return JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(flowData);
+    }
+
+    // 创建flowprocess
+    private void createFlowProcess(Long definitionId, Long preNodeId, DoctorPigEvent pigEvent, FlowInstance instance, DoctorPigInfoDto pig) {
+        if (pigEvent != null) {
+            FlowProcess flowProcess = FlowProcess.builder()
+                    .flowDefinitionNodeId(definitionId)
+                    .preFlowDefinitionNodeId(preNodeId + "")
+                    .flowInstanceId(instance.getId())
+                    .flowData(getFlowData(pig, pigEvent))
+                    .status(FlowProcess.Status.NORMAL.value())
+                    .forkNodeId(null)
+                    .build();
+
+            jdbcAccess.createFlowProcess(flowProcess);
+            flowProcess.setCreatedAt(pigEvent.getEventAt());
+            jdbcAccess.updateFlowProcess(flowProcess);
+        } else {
+            FlowProcess flowProcess = FlowProcess.builder()
+                    .flowDefinitionNodeId(definitionId)
+                    .preFlowDefinitionNodeId(preNodeId + "")
+                    .flowInstanceId(instance.getId())
+                    .flowData("{}")
+                    .status(FlowProcess.Status.NORMAL.value())
+                    .forkNodeId(null)
+                    .build();
+
+            jdbcAccess.createFlowProcess(flowProcess);
+        }
     }
 }

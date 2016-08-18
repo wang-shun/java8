@@ -102,6 +102,7 @@ public class SubService {
             op.setRoleName(sub.getRoleName());
             op.setContact(sub.getContact());
             op.setRealName(userProfile.getRealName());
+            op.setStatus(sub.getStatus());
         }
         return op;
     }
@@ -232,11 +233,11 @@ public class SubService {
     }
 
     public Response<List<Sub>> findByConditions(BaseUser user, Long roleId, String roleName, String userName,
-                                                String realName, Integer limit){
+                                                String realName, Integer status, Integer limit){
         try{
             Long userId = user.getId();
             List<io.terminus.doctor.user.model.Sub> subList = RespHelper.orServEx(
-                    primaryUserReadService.findByConditions(userId, roleId, roleName, userName, realName, null, limit)
+                    primaryUserReadService.findByConditions(userId, roleId, roleName, userName, realName, status, limit)
             );
             return Response.ok(this.setSubInfo(subList));
         } catch (ServiceException e) {
@@ -249,13 +250,13 @@ public class SubService {
 
     @Export(paramNames = {"user", "roleId", "pageNo", "pageSize"})
     public Response<Paging<Sub>> pagingSubs(BaseUser user, Long roleId,String roleName, String userName,
-                                            String realName, Integer pageNo, Integer pageSize) {
+                                            String realName, Integer status, Integer pageNo, Integer pageSize) {
         try {
             Long userId = user.getId();
 
             Paging<io.terminus.doctor.user.model.Sub> paging = RespHelper.orServEx(
                     primaryUserReadService.subPagination(userId, roleId, roleName, userName, realName,
-                            io.terminus.doctor.user.model.Sub.Status.ACTIVE.value(), pageNo, pageSize)
+                            status, pageNo, pageSize)
             );
 
             return Response.ok(new Paging<>(paging.getTotal(), this.setSubInfo(paging.getData())));
