@@ -2,7 +2,10 @@ package io.terminus.doctor.user.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.Objects;
 import com.google.common.base.Strings;
+import com.google.common.collect.Lists;
+import io.terminus.common.exception.ServiceException;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.parana.common.constants.JacksonType;
 import lombok.AccessLevel;
@@ -121,6 +124,36 @@ public class Sub implements Serializable {
             this.extra = Collections.emptyMap();
         } else {
             this.extra = OBJECT_MAPPER.readValue(extraJson, JacksonType.MAP_OF_STRING);
+        }
+    }
+
+    public enum Status {
+        LOCK(0, "锁定(冻结)"),
+        ACTIVE(1, "正常(激活)"),
+        DELETE(-1, "删除");
+
+        private int value;
+        private String desc;
+
+        Status(int value, String desc) {
+            this.value = value;
+            this.desc = desc;
+        }
+
+        public static Status from(int number) {
+            return Lists.newArrayList(Status.values()).stream()
+                    .filter(s -> Objects.equal(s.value, number))
+                    .findFirst()
+                    .<ServiceException>orElseThrow(() -> {
+                        throw new ServiceException("sub.user.status.error");
+                    });
+        }
+
+        public int value(){
+            return this.value;
+        }
+        public String toString(){
+            return this.desc;
         }
     }
 }

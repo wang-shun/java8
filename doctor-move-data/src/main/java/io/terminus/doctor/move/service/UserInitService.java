@@ -18,6 +18,7 @@ import io.terminus.doctor.user.dao.DoctorFarmDao;
 import io.terminus.doctor.user.dao.DoctorOrgDao;
 import io.terminus.doctor.user.dao.DoctorStaffDao;
 import io.terminus.doctor.user.dao.DoctorUserDataPermissionDao;
+import io.terminus.doctor.user.dao.SubDao;
 import io.terminus.doctor.user.dao.SubRoleDao;
 import io.terminus.doctor.user.model.DoctorFarm;
 import io.terminus.doctor.user.model.DoctorOrg;
@@ -25,6 +26,7 @@ import io.terminus.doctor.user.model.DoctorServiceReview;
 import io.terminus.doctor.user.model.DoctorServiceStatus;
 import io.terminus.doctor.user.model.DoctorStaff;
 import io.terminus.doctor.user.model.DoctorUserDataPermission;
+import io.terminus.doctor.user.model.Sub;
 import io.terminus.doctor.user.model.SubRole;
 import io.terminus.doctor.user.service.DoctorServiceReviewWriteService;
 import io.terminus.doctor.user.service.DoctorServiceStatusWriteService;
@@ -73,6 +75,8 @@ public class UserInitService {
     private DoctorUserDataPermissionDao doctorUserDataPermissionDao;
     @Autowired
     private SubRoleDao subRoleDao;
+    @Autowired
+    private SubDao subDao;
     @Autowired
     private DoctorMessageRuleWriteService doctorMessageRuleWriteService;
 
@@ -291,10 +295,20 @@ public class UserInitService {
                 .map());
         Long subUserId = RespHelper.or500(userWriteService.create(subUser));
 
-        // 给staff 设置下outId, fuck...
+        // 给staff 设置下outId, 还要标记下是否在职. fuck...
         DoctorStaff staff = doctorStaffDao.findByUserId(subUserId);
         staff.setOutId(staffoutId);
+        if(Objects.equals(member.getIsStopUse(), "true")){
+            staff.setStatus(DoctorStaff.Status.ABSENT.value());
+        }
         doctorStaffDao.update(staff);
+
+        // 设置下子账号的状态
+        if(Objects.equals(member.getIsStopUse(), "true")){
+            Sub sub = subDao.findByUserId(subUserId);
+            sub.setStatus(Sub.Status.LOCK.value());
+            subDao.update(sub);
+        }
 
         //现在是数据权限
         DoctorUserDataPermission permission = new DoctorUserDataPermission();

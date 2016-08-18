@@ -106,6 +106,9 @@ public class Subs {
         return RespHelper.or500(subService.pagingSubs(UserUtil.getCurrentUser(), roleId, roleName, username, realName, pageNo, pageSize));
     }
 
+    /**
+     * 多条件筛选, 相当于分页查询去掉了分页参数, 所有参数都可以为空
+     */
     @RequestMapping(value = "/all", method = RequestMethod.GET)
     public List<Sub> findByConditions(@RequestParam(required = false) Long roleId,
                                   @RequestParam(required = false) String roleName,
