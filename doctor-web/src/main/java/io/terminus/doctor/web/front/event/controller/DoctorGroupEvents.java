@@ -261,7 +261,7 @@ public class DoctorGroupEvents {
      */
     @RequestMapping(value = "/farmGroupCode", method = RequestMethod.GET)
     public DoctorGroup findGroupByFarmIdAndGroupCode(@RequestParam("farmId") Long farmId,
-                                                 @RequestParam("groupCode") String groupCode) {
+                                                     @RequestParam("groupCode") String groupCode) {
         return RespHelper.or500(doctorGroupReadService.findGroupByFarmIdAndGroupCode(farmId, groupCode));
     }
 }
