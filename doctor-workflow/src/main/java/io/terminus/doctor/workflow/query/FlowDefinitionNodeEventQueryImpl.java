@@ -208,12 +208,10 @@ public class FlowDefinitionNodeEventQueryImpl implements FlowDefinitionNodeEvent
 
     private void getTaskEvents(List<FlowDefinitionNodeEvent> events, FlowInstance instance, FlowDefinitionNodeEvent nodeEvent, FlowProcess flowProcess) {
         // 如果存在事件, 直接返回
-        log.info("######################################nodeEvent is {}", nodeEvent);
         if (StringHelper.isNotBlank(nodeEvent.getHandler())) {
             if (StringHelper.isNotBlank(nodeEvent.getTacker())) {
                 String iTackerName = nodeEvent.getTacker();
                 ITacker iTacker = workFlowEngine.buildContext().get(iTackerName);
-                log.info("######################################iTacker is {}", iTacker);
                 if (iTacker == null) {
                     // 获取类的简单名称, 从上下文中获取
                     iTacker = workFlowEngine.buildContext().get(
@@ -232,7 +230,6 @@ public class FlowDefinitionNodeEventQueryImpl implements FlowDefinitionNodeEvent
                         }
                     }
                 }
-                log.info("######################################iTacker is {}", iTacker);
                 if (!iTacker.tacker(flowProcess.getFlowData())) {
                     return;
                 }

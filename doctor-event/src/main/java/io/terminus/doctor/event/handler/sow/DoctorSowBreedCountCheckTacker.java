@@ -31,9 +31,7 @@ public class DoctorSowBreedCountCheckTacker implements ITacker {
                     if (StringUtils.isNotBlank(currentMatingCountStr)){
                         Integer currentMatingCount = Integer.parseInt(currentMatingCountStr);
                         log.info("[DoctorSowBreedCountCheckTacker] -> currentMatingCount is {}", currentMatingCount);
-                        if (currentMatingCount < 3){
-                            return true;
-                        }
+                        return currentMatingCount < 3;
                     }
                 }
             }catch (Exception e){
@@ -42,6 +40,6 @@ public class DoctorSowBreedCountCheckTacker implements ITacker {
             }
 
         }
-        return false;
+        return true;
     }
 }
