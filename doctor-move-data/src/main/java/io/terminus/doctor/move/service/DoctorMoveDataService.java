@@ -862,8 +862,10 @@ public class DoctorMoveDataService {
                 count++;
                 //给event赋值当前配种次数
                 event.setCurrentMatingCount(count);
-            } else if (Objects.equals(event.getType(), PigEvent.TO_MATING.getKey()) || isNotPreg(event) ||
-                    Objects.equals(event.getType(), PigEvent.ABORTION.getKey())) {
+            } else if (Objects.equals(event.getType(), PigEvent.TO_MATING.getKey()) //转入配种舍
+                    || Objects.equals(event.getType(), PigEvent.WEAN.getKey()) //断奶事件
+                    || isNotPreg(event)
+                    || Objects.equals(event.getType(), PigEvent.ABORTION.getKey())) {
                 count = 0;
             }
         }
