@@ -20,6 +20,7 @@ import java.util.Map;
 public class DoctorSowBreedCountCheckTacker implements ITacker {
     @Override
     public Boolean tacker(String flowData) {
+        log.info("[DoctorSowBreedCountCheckTacker] -> tacker execute flowdata is {}", flowData);
         if (StringUtils.isNotBlank(flowData)){
             try {
                 Map<String, Object> flowDataMap = JsonMapper.JSON_NON_DEFAULT_MAPPER.getMapper().readValue(flowData, JacksonType.MAP_OF_OBJECT);
@@ -29,6 +30,7 @@ public class DoctorSowBreedCountCheckTacker implements ITacker {
                     String currentMatingCountStr = (String) doctorPigEventMap.get("currentMatingCount");
                     if (StringUtils.isNotBlank(currentMatingCountStr)){
                         Integer currentMatingCount = Integer.parseInt(currentMatingCountStr);
+                        log.info("[DoctorSowBreedCountCheckTacker] -> currentMatingCount is {}", currentMatingCount);
                         if (currentMatingCount < 3){
                             return true;
                         }
