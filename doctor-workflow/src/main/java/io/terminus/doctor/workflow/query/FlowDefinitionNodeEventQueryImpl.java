@@ -1,11 +1,8 @@
 package io.terminus.doctor.workflow.query;
 
 import com.google.common.base.Throwables;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import io.terminus.common.model.Paging;
-import io.terminus.common.utils.JsonMapper;
-import io.terminus.doctor.common.constants.JacksonType;
 import io.terminus.doctor.workflow.access.JdbcAccess;
 import io.terminus.doctor.workflow.core.WorkFlowEngine;
 import io.terminus.doctor.workflow.event.ITacker;
@@ -17,7 +14,6 @@ import io.terminus.doctor.workflow.utils.AssertHelper;
 import io.terminus.doctor.workflow.utils.BeanHelper;
 import io.terminus.doctor.workflow.utils.StringHelper;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
 import java.util.Map;
@@ -212,10 +208,12 @@ public class FlowDefinitionNodeEventQueryImpl implements FlowDefinitionNodeEvent
 
     private void getTaskEvents(List<FlowDefinitionNodeEvent> events, FlowInstance instance, FlowDefinitionNodeEvent nodeEvent, FlowProcess flowProcess) {
         // 如果存在事件, 直接返回
+        log.info("######################################nodeEvent is {}", nodeEvent);
         if (StringHelper.isNotBlank(nodeEvent.getHandler())) {
             if (StringHelper.isNotBlank(nodeEvent.getTacker())) {
                 String iTackerName = nodeEvent.getTacker();
                 ITacker iTacker = workFlowEngine.buildContext().get(iTackerName);
+                log.info("######################################iTacker is {}", iTacker);
                 if (iTacker == null) {
                     // 获取类的简单名称, 从上下文中获取
                     iTacker = workFlowEngine.buildContext().get(
@@ -234,6 +232,7 @@ public class FlowDefinitionNodeEventQueryImpl implements FlowDefinitionNodeEvent
                         }
                     }
                 }
+                log.info("######################################iTacker is {}", iTacker);
                 if (!iTacker.tacker(flowProcess.getFlowData())) {
                     return;
                 }
