@@ -32,7 +32,7 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        `name`,`value`,`flow_definition_id`,`source_node_id`,`handler`,`tacker`,``expression`,`target_node_id`,`describe`,`created_at`,`updated_at`    </sql>
+        `name`,`value`,`flow_definition_id`,`source_node_id`,`handler`,`tacker`,`expression`,`target_node_id`,`describe`,`created_at`,`updated_at`    </sql>
 
     <sql id="vals">
         #{name},#{value},#{flowDefinitionId},#{sourceNodeId},#{handler},#{tacker},#{expression},#{targetNodeId},#{describe},now(),now()   </sql>
