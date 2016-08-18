@@ -55,7 +55,7 @@ public class DoctorWareHouseTrackConsumeHandler implements IHandler{
 
         // track中 存放 不同material 数量信息
         Map<String, Object> consumeMap = doctorWareHouseTrack.getExtraMap();
-        Long count = Long.valueOf(consumeMap.get(dto.getMaterialTypeId().toString()).toString());
+        Double count = Double.valueOf(consumeMap.get(dto.getMaterialTypeId().toString()).toString());
         consumeMap.put(dto.getMaterialTypeId().toString(), count - dto.getCount());
         consumeMap.put(DoctorWareHouseTrackConstants.RECENT_CONSUME_DATE, DateTime.now().toDate());
 
@@ -63,7 +63,7 @@ public class DoctorWareHouseTrackConsumeHandler implements IHandler{
         List<DoctorMaterialConsumeAvg> avgList =
                 doctorMaterialConsumeAvgDao.queryByIds(ImmutableMap.of("farmId", dto.getFarmId(), "wareHouseId", dto.getWareHouseId()));
         if(!isNull(avgList) && !Iterables.isEmpty(avgList)){
-            Long total = avgList.stream().filter(a->!isNull(a.getConsumeAvgCount())).map(s->s.getConsumeAvgCount()).reduce((c,d)->c+d).orElse(0l);
+            Double total = avgList.stream().filter(a->!isNull(a.getConsumeAvgCount())).map(s->s.getConsumeAvgCount()).reduce((c,d)->c+d).orElse(0D);
             if(total != 0){
                 consumeMap.put(DoctorWareHouseTrackConstants.REST_CONSUME_DATE, doctorWareHouseTrack.getLotNumber() * avgList.size()/total);
             }

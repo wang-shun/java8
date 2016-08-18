@@ -29,7 +29,7 @@ public class DoctorMaterialInWareHouseDto implements Serializable{
 
     private String materialName;    // 原料名称
 
-    private Long lotNumber;     //数量信息
+    private Double lotNumber;     //数量信息
 
     private String unitName;    // 单位名称
 

@@ -185,7 +185,7 @@ public class DoctorMaterialInWareHouseWriteServiceTest extends BasicServiceTest{
         dto.setWareHouseName("wareHouseName");
         dto.setMaterialTypeId(3l);
         dto.setMaterialName("materialName");
-        dto.setCount(50l);
+        dto.setCount(50D);
         return dto;
 
     }
@@ -203,7 +203,7 @@ public class DoctorMaterialInWareHouseWriteServiceTest extends BasicServiceTest{
         dto.setBarnName("barnName");
         dto.setStaffId(1l);
         dto.setStaffName("staffName");
-        dto.setCount(50l);
+        dto.setCount(50D);
         dto.setConsumeDays(100);
         return dto;
     }

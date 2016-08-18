@@ -76,8 +76,8 @@ public class DoctorMaterialInfoWriteServiceImpl implements DoctorMaterialInfoWri
             // 选择物料信息不校验， 可能物料信息删除等， 等待生产的时候校验对应的物料信息
             // calculate percent
             DoctorMaterialInfo.MaterialProduce materialProduce = doctorMaterialProductRatioDto.getProduce();
-            Long total = materialProduce.calculateTotalPercent();
-            checkState(Objects.equals(total, DoctorMaterialInfo.DEFAULT_COUNT), "input.totalMaterialCount.error");
+            Double total = materialProduce.calculateTotalPercent();
+            checkState(Objects.equals(total.longValue(), DoctorMaterialInfo.DEFAULT_COUNT), "input.totalMaterialCount.error");
 
             doctorMaterialInfo.setExtraMap(ImmutableMap.of(DoctorMaterialInfoConstants.MATERIAL_PRODUCE,
                     JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(doctorMaterialProductRatioDto.getProduce())));
@@ -94,7 +94,7 @@ public class DoctorMaterialInfoWriteServiceImpl implements DoctorMaterialInfoWri
     }
 
     @Override
-    public Response<DoctorMaterialInfo.MaterialProduce> produceMaterial(Long materialId, Long produceCount) {
+    public Response<DoctorMaterialInfo.MaterialProduce> produceMaterial(Long materialId, Double produceCount) {
         try{
             // get material
             DoctorMaterialInfo doctorMaterialInfo = doctorMaterialInfoDao.findById(materialId);
@@ -155,10 +155,10 @@ public class DoctorMaterialInfoWriteServiceImpl implements DoctorMaterialInfoWri
      * @return
      */
     private void validateCountRange(DoctorMaterialInfo.MaterialProduce materialProduce){
-        Long realTotal = materialProduce.getMaterialProduceEntries().stream()
+        Double realTotal = materialProduce.getMaterialProduceEntries().stream()
                 .map(DoctorMaterialInfo.MaterialProduceEntry::getMaterialCount)
-                .reduce((a,b)->a+b).orElse(0l);
-        checkState(!Objects.equals(0l, realTotal), "input.materialProduceTotal.error");
+                .reduce((a,b)->a+b).orElse(0D);
+        checkState(!Objects.equals(0, realTotal.intValue()), "input.materialProduceTotal.error");
         double dis = (realTotal-materialProduce.getTotal()) * 100d / materialProduce.getTotal();
         checkState(Math.abs(dis)<=5, "produce.materialCountChange.error");
     }

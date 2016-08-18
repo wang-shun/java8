@@ -65,7 +65,7 @@ public class DoctorWareHouseTypeConsumerHandler implements IHandler{
         if(extraMap.containsKey(DoctorFarmWareHouseTypeConstants.CONSUME_DATE) &&
                 DateTime.now().withTimeAtStartOfDay().isEqual(Long.valueOf(extraMap.get(DoctorFarmWareHouseTypeConstants.CONSUME_DATE).toString()))){
             extraMap.put(DoctorFarmWareHouseTypeConstants.CONSUME_COUNT,
-                    Long.valueOf(extraMap.get(DoctorFarmWareHouseTypeConstants.CONSUME_COUNT).toString()) + dto.getCount());
+                    Double.valueOf(extraMap.get(DoctorFarmWareHouseTypeConstants.CONSUME_COUNT).toString()) + dto.getCount());
         }else {
             extraMap.put(DoctorFarmWareHouseTypeConstants.CONSUME_DATE, DateTime.now().withTimeAtStartOfDay().getMillis());
             extraMap.put(DoctorFarmWareHouseTypeConstants.CONSUME_COUNT, dto.getCount());
@@ -74,8 +74,8 @@ public class DoctorWareHouseTypeConsumerHandler implements IHandler{
         // 修改预计领用时间
         List<DoctorMaterialConsumeAvg> avgs = doctorMaterialConsumeAvgDao.queryByFarmIdAndType(dto.getFarmId(), dto.getType());
         if(!isNull(avgs) && !Iterables.isEmpty(avgs)){
-            Long avg = avgs.stream().filter(a->!isNull(a.getConsumeAvgCount()))
-                    .map(b -> b.getConsumeAvgCount()).reduce((c,d)->c+d).orElse(0l);
+            Double avg = avgs.stream().filter(a->!isNull(a.getConsumeAvgCount()))
+                    .map(b -> b.getConsumeAvgCount()).reduce((c,d)->c+d).orElse(0D);
             if(avg != 0l)
                 extraMap.put(DoctorFarmWareHouseTypeConstants.TO_CONSUME_DATE, doctorFarmWareHouseType.getLotNumber() * avgs.size()/avg);
         }

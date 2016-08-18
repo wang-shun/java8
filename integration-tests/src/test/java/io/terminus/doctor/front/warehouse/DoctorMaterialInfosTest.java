@@ -124,23 +124,23 @@ public class DoctorMaterialInfosTest extends BaseFrontWebTest{
         // type = 1 饲料生产方式， type =2 (原料) 4 （饲料信息）
         List<DoctorMaterialInfo.MaterialProduceEntry> materialProduceEntryList = Lists.newArrayList();
         materialProduceEntryList.add(DoctorMaterialInfo.MaterialProduceEntry.builder()
-                .materialId(5l).materialName("materialName5").materialCount(500000l)
+                .materialId(5l).materialName("materialName5").materialCount(500000D)
                 .build());
         materialProduceEntryList.add(DoctorMaterialInfo.MaterialProduceEntry.builder()
-                .materialId(6l).materialName("materialName6").materialCount(500000l)
+                .materialId(6l).materialName("materialName6").materialCount(500000D)
                 .build());
 
         List<DoctorMaterialInfo.MaterialProduceEntry> medicalProduceEntryList = Lists.newArrayList();
         medicalProduceEntryList.add(DoctorMaterialInfo.MaterialProduceEntry.builder()
-                .materialId(14l).materialName("materialName14").materialCount(10l)
+                .materialId(14l).materialName("materialName14").materialCount(10D)
                 .build());
         medicalProduceEntryList.add(DoctorMaterialInfo.MaterialProduceEntry.builder()
-                .materialId(15l).materialName("material15").materialCount(10l)
+                .materialId(15l).materialName("material15").materialCount(10D)
                 .build());
 
         DoctorMaterialProductRatioDto ratioDto = DoctorMaterialProductRatioDto.builder()
                 .materialId(1l).produce(DoctorMaterialInfo.MaterialProduce.builder()
-                        .total(1000000l)
+                        .total(1000000D)
                         .materialProduceEntries(materialProduceEntryList)
                         .medicalProduceEntries(medicalProduceEntryList)
                         .build())

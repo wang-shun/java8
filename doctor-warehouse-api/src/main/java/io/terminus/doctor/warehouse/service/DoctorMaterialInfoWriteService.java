@@ -38,7 +38,7 @@ public interface DoctorMaterialInfoWriteService {
      * @return
      */
     Response<DoctorMaterialInfo.MaterialProduce> produceMaterial(@NotNull(message = "input.materialId.empty") Long materialId,
-                                                                 @NotNull(message = "input.produceCount.empty") Long produceCount);
+                                                                 @NotNull(message = "input.produceCount.empty") Double produceCount);
 
     /**
      * 对应的物料生产信息比例

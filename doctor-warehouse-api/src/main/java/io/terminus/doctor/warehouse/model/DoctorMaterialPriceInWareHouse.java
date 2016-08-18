@@ -73,7 +73,7 @@ public class DoctorMaterialPriceInWareHouse implements Serializable {
     /**
      * 本次入库量的剩余量，比如本次入库100个，那么就是这100个的剩余量，减少到0时删除
      */
-    private Long remainder;
+    private Double remainder;
     
     /**
      * 入库时间，冗余字段

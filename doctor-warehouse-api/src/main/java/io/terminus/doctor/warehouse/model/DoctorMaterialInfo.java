@@ -128,17 +128,17 @@ public class DoctorMaterialInfo implements Serializable{
 
         private static final long serialVersionUID = 633401329050233302L;
 
-        private Long total; //生产物料总量信息
+        private Double total; //生产物料总量信息
 
         private List<MaterialProduceEntry> materialProduceEntries ; // 原料占比信息
 
         private List<MaterialProduceEntry> medicalProduceEntries; // 对应的药品比例信息
 
         // 计算合计数量
-        public Long calculateTotalPercent(){
-            this.total = 0l;
+        public Double calculateTotalPercent(){
+            this.total = 0D;
             if(!isNull(materialProduceEntries)){
-                this.total += materialProduceEntries.stream().map(MaterialProduceEntry::getMaterialCount).reduce((a,b)->a+b).orElse(0l);
+                this.total += materialProduceEntries.stream().map(MaterialProduceEntry::getMaterialCount).reduce((a,b)->a+b).orElse(0D);
             }
 
             BigDecimal totalDecimal = BigDecimal.valueOf(total);
@@ -150,13 +150,13 @@ public class DoctorMaterialInfo implements Serializable{
             return this.total;
         }
 
-        public Boolean calculatePercentByTotal(Long baseCount){
+        public Boolean calculatePercentByTotal(Double baseCount){
             if(!isNull(materialProduceEntries)){
                 materialProduceEntries.forEach(m->{
                     m.setMaterialCount(
                             BigDecimal.valueOf(baseCount)
                                     .divide(BigDecimal.valueOf(total), SCALE, BigDecimal.ROUND_UP)
-                                    .multiply(BigDecimal.valueOf(m.getMaterialCount())).longValue());
+                                    .multiply(BigDecimal.valueOf(m.getMaterialCount())).doubleValue());
                 });
             }
 
@@ -164,7 +164,7 @@ public class DoctorMaterialInfo implements Serializable{
                 medicalProduceEntries.forEach(m -> {
                     m.setMaterialCount(BigDecimal.valueOf(baseCount)
                             .divide(BigDecimal.valueOf(total), SCALE, BigDecimal.ROUND_UP)
-                            .multiply(BigDecimal.valueOf(m.getMaterialCount())).longValue());
+                            .multiply(BigDecimal.valueOf(m.getMaterialCount())).doubleValue());
                 });
             }
 
@@ -189,7 +189,7 @@ public class DoctorMaterialInfo implements Serializable{
 
         private String materialName;    //  原料名称
 
-        private Long materialCount; // 原料数量信息
+        private Double materialCount; // 原料数量信息
 
         private Double percent; //原料配比信息
     }
