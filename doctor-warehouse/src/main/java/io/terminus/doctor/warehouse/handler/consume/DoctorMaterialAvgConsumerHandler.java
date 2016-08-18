@@ -41,7 +41,7 @@ public class DoctorMaterialAvgConsumerHandler implements IHandler{
 
     @Override
     public void handle(DoctorMaterialConsumeProviderDto dto, Map<String, Object> context) throws RuntimeException {
-        Long lotNumber = (Long) context.get("lotNumber");
+        Double lotNumber = (Double) context.get("lotNumber");
         DoctorMaterialConsumeAvg doctorMaterialConsumeAvg = doctorMaterialConsumeAvgDao.queryByIds(dto.getFarmId(), dto.getWareHouseId(), dto.getMaterialTypeId());
         if(isNull(doctorMaterialConsumeAvg)){
             // create consume avg

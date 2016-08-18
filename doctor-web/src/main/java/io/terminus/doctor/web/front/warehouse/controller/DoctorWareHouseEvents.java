@@ -228,7 +228,7 @@ public class DoctorWareHouseEvents {
                     .staffId(userId).staffName(userName)
                     .count(dto.getCount())
                     //.unitId(doctorBasicMaterial.getUnitId()).unitName(doctorBasicMaterial.getUnitName())
-                    .unitGroupId(doctorBasicMaterial.getUnitGroupId()).unitGroupName(doctorBasicMaterial.getUnitGroupName())
+                    //.unitGroupId(doctorBasicMaterial.getUnitGroupId()).unitGroupName(doctorBasicMaterial.getUnitGroupName())
                     .unitPrice(dto.getUnitPrice())
                     .build();
 

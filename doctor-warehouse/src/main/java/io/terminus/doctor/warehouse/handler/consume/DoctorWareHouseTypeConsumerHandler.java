@@ -65,7 +65,7 @@ public class DoctorWareHouseTypeConsumerHandler implements IHandler{
         if(extraMap.containsKey(DoctorFarmWareHouseTypeConstants.CONSUME_DATE) &&
                 DateTime.now().withTimeAtStartOfDay().isEqual(Long.valueOf(extraMap.get(DoctorFarmWareHouseTypeConstants.CONSUME_DATE).toString()))){
             extraMap.put(DoctorFarmWareHouseTypeConstants.CONSUME_COUNT,
-                    Long.valueOf(extraMap.get(DoctorFarmWareHouseTypeConstants.CONSUME_COUNT).toString()) + dto.getCount());
+                    Double.valueOf(extraMap.get(DoctorFarmWareHouseTypeConstants.CONSUME_COUNT).toString()) + dto.getCount());
         }else {
             extraMap.put(DoctorFarmWareHouseTypeConstants.CONSUME_DATE, DateTime.now().withTimeAtStartOfDay().getMillis());
             extraMap.put(DoctorFarmWareHouseTypeConstants.CONSUME_COUNT, dto.getCount());

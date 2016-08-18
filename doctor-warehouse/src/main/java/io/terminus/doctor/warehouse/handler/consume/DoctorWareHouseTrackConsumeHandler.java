@@ -55,7 +55,7 @@ public class DoctorWareHouseTrackConsumeHandler implements IHandler{
 
         // track中 存放 不同material 数量信息
         Map<String, Object> consumeMap = doctorWareHouseTrack.getExtraMap();
-        Long count = Long.valueOf(consumeMap.get(dto.getMaterialTypeId().toString()).toString());
+        Double count = Double.valueOf(consumeMap.get(dto.getMaterialTypeId().toString()).toString());
         consumeMap.put(dto.getMaterialTypeId().toString(), count - dto.getCount());
         consumeMap.put(DoctorWareHouseTrackConstants.RECENT_CONSUME_DATE, DateTime.now().toDate());
 
