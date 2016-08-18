@@ -258,3 +258,5 @@ alter table doctor_material_consume_avgs modify `consume_count` double DEFAULT N
 alter table doctor_material_in_ware_houses modify `lot_number` double DEFAULT NULL COMMENT '数量信息';
 alter table doctor_farm_ware_house_types modify `lot_number` double DEFAULT NULL COMMENT '类型原料的数量';
 alter table doctor_ware_house_tracks modify `lot_number` double DEFAULT NULL COMMENT '仓库物品的总数量信息';
+
+alter table workflow_definition_node_events ADD Column `tacker` VARCHAR(128) DEFAULT NULL COMMENT '配种判断';

@@ -8,7 +8,7 @@
 
     <!-- 开始节点 -->
     <task name="待配种" assignee="" pointx="250" pointy="100">
-        <transition name="待配种" value="9" target="已配种" handler="doctorSowMatingHandler" describe="配种事件" />
+        <transition name="待配种" value="9" target="已配种" itacker="doctorSowBreedCountCheckTacker" handler="doctorSowMatingHandler" describe="配种事件" />
     </task>
 
     <task name="已配种" assignee="" pointx="250" pointy="100">
