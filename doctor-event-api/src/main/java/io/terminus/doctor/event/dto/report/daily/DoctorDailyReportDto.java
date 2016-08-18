@@ -117,7 +117,7 @@ public class DoctorDailyReportDto implements Serializable {
         //断奶仔猪
         this.wean.setCount(this.wean.getCount() + report.getWean().getCount());
         this.wean.setWeight(this.wean.getWeight() + report.getWean().getWeight());
-        this.wean.setNest(report.getWean().getNest());
+        this.wean.setNest(this.wean.getNest() + report.getWean().getNest());
     }
 
     /**

@@ -33,8 +33,8 @@ public class DoctorDailyWeanEventCount implements DoctorDailyEventCount{
             Map<String,Object> extraMap = e.getExtraMap();
             doctorWeanDailyReport.setCount(doctorWeanDailyReport.getCount() + Integer.valueOf(extraMap.get("partWeanPigletsCount").toString()));
             doctorWeanDailyReport.setWeight((doctorWeanDailyReport.getWeight() + Double.valueOf(extraMap.get("partWeanAvgWeight").toString()))/2);
+            doctorWeanDailyReport.setNest(doctorWeanDailyReport.getNest() + 1);
         });
-        doctorWeanDailyReport.setNest(t.stream().collect(Collectors.toSet()).size());
         doctorDailyReportDto.getWean().addWeanCount(doctorWeanDailyReport);
     }
 }
