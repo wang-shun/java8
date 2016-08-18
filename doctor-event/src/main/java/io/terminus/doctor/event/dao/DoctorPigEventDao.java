@@ -136,4 +136,29 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
     public DoctorPigEvent getFirstMatingTime(Map<String, Object> criteria) {
         return this.getSqlSession().selectOne(sqlId("getFirstMatingTime"), criteria);
     }
+
+    /**
+     * 查找一只猪(在指定时间之后)的第一个事件
+     * @param pigId 猪id, 不可为空
+     * @param fromDate 可为空
+     * @return
+     */
+    public DoctorPigEvent findFirstPigEvent(Long pigId, Date fromDate){
+        Map<String, Object> param;
+        if(fromDate == null){
+            param = ImmutableMap.of("pigId", pigId);
+        }else{
+            param = ImmutableMap.of("pigId", pigId, "fromDate", fromDate);
+        }
+        return sqlSession.selectOne(sqlId("findFirstPigEvent"), param);
+    }
+
+    /**
+     * 查询一个猪舍累计有多少个事件
+     * @param barnId 猪舍id
+     * @return
+     */
+    public Long countByBarnId(Long barnId){
+        return sqlSession.selectOne(sqlId("countByBarnId"), barnId);
+    }
 }

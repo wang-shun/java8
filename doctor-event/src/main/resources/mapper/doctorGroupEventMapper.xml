@@ -130,6 +130,10 @@
         WHERE id = #{id}
     </select>
 
+    <select id="countByBarnId" parameterType="long" resultType="long">
+        select count(id) from <include refid="tb" /> where `barn_id` = #{barnId}
+    </select>
+
     <update id="update" parameterType="DoctorGroupEvent">
         UPDATE <include refid="tb"/>
         <set>

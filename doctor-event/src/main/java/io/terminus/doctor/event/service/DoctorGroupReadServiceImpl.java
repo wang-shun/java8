@@ -298,4 +298,14 @@ public class DoctorGroupReadServiceImpl implements DoctorGroupReadService {
         }
         return groupTrack;
     }
+
+    @Override
+    public Response<Long> countByBarnId(Long barnId){
+        try{
+            return Response.ok(doctorGroupEventDao.countByBarnId(barnId));
+        }catch (Exception e) {
+            log.error("count group event by barnId fail, barnId={}", barnId, Throwables.getStackTraceAsString(e));
+            return Response.fail("count.group.event.by.barn.id.fail");
+        }
+    }
 }
