@@ -254,7 +254,8 @@ public class SubService {
             Long userId = user.getId();
 
             Paging<io.terminus.doctor.user.model.Sub> paging = RespHelper.orServEx(
-                    primaryUserReadService.subPagination(userId, roleId, roleName, userName, realName, null, pageNo, pageSize)
+                    primaryUserReadService.subPagination(userId, roleId, roleName, userName, realName,
+                            io.terminus.doctor.user.model.Sub.Status.ACTIVE.value(), pageNo, pageSize)
             );
 
             return Response.ok(new Paging<>(paging.getTotal(), this.setSubInfo(paging.getData())));
