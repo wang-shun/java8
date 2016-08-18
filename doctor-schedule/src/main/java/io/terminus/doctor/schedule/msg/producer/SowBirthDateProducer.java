@@ -121,7 +121,7 @@ public class SowBirthDateProducer extends AbstractJobProducer {
                     if (birthDate != null && ruleValueMap.get(1) != null) {
                         if (!isMessage && Objects.equals(ruleTemplate.getType(), DoctorMessageRuleTemplate.Type.WARNING.getValue())) {
                             // 记录每只猪的消息提醒
-                            recordPigMessage(pigDto, PigEvent.FARROWING, ruleValueMap.get(1).getValue().intValue(),
+                            recordPigMessage(pigDto, PigEvent.FARROWING, birthDate, 0,
                                     PigStatus.Pregnancy);
                         }
                         if (isMessage && DateTime.now().isAfter(birthDate.minusDays(ruleValueMap.get(1).getValue().intValue()))) {

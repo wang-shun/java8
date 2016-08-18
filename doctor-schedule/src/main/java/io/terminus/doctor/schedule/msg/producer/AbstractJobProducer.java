@@ -87,7 +87,7 @@ public abstract class AbstractJobProducer extends AbstractProducer {
      * @param ruleValue   配置的的天数
      * @param pigStatuses 母猪当前的状态
      */
-    protected void recordPigMessage(DoctorPigInfoDto pigDto, PigEvent pigEvent, Integer ruleValue, PigStatus... pigStatuses) {
+    protected void recordPigMessage(DoctorPigInfoDto pigDto, PigEvent pigEvent, DateTime warningDate, Integer ruleValue, PigStatus... pigStatuses) {
         List statusList = Lists.newArrayList();
         if (pigStatuses != null && pigStatuses.length > 0) {
             for (PigStatus pigStatus : pigStatuses) {
@@ -102,7 +102,7 @@ public abstract class AbstractJobProducer extends AbstractProducer {
                 .eventType(pigEvent.getKey())
                 .eventTypeName(pigEvent.getName())
                 .status(pigDto.getStatus())
-                .timeDiff(getTimeDiff(pigDto.getUpdatedAt(), ruleValue))
+                .timeDiff(getTimeDiff(warningDate, ruleValue))
                 .build());
 
         // 处理存在的消息和过期的消息
@@ -133,8 +133,8 @@ public abstract class AbstractJobProducer extends AbstractProducer {
     /**
      * 获取剩余的天数
      */
-    private Double getTimeDiff(Date updatedAt, Integer ruleValue) {
-        long millis = new DateTime(updatedAt).plusDays(ruleValue)
+    private Double getTimeDiff(DateTime warningDate, Integer ruleValue) {
+        long millis = warningDate.plusDays(ruleValue)
                 .minus(DateTime.now().getMillis()).getMillis();
         return (double) (millis / 86400000);
     }
