@@ -748,9 +748,7 @@ public class DoctorMoveDataService {
         if (notEmpty(events)) {
             //按照时间 asc 排序
             events = events.stream().sorted((a, b) -> a.getEventAt().compareTo(b.getEventAt())).collect(Collectors.toList());
-            Map<String, Object> extraMap = Maps.newHashMap();
-            events.forEach(event -> extraMap.putAll(JSON_MAPPER.fromJson(event.getExtra(), JSON_MAPPER.createCollectionType(Map.class, String.class, Object.class))));
-            track.setExtra(JSON_MAPPER.toJson(extraMap));   //extra字段保存所有extra
+            track.setExtra(JSON_MAPPER.toJson(getSowExtraMap(events)));   //extra字段保存当前胎次所有所有事件的extra
 
             //关联事件ids, Map<Parity, EventIds>, 按照胎次分组
             track.setRelEventIds(getSowRelEventIds(card.getFirstParity(), events));
@@ -784,6 +782,22 @@ public class DoctorMoveDataService {
             track.setCurrentBarnName(barn.getName());
         }
         return track;
+    }
+
+    //获取最后一个胎次的sowTrackExtraMap
+    private static Map<String, Object> getSowExtraMap(List<DoctorPigEvent> events) {
+        Map<String, Object> extraMap = Maps.newHashMap();
+        for (DoctorPigEvent event : events) {
+            if (Objects.equals(event.getType(), PigEvent.TO_MATING.getKey())) {
+                extraMap = Maps.newHashMap();
+                extraMap.put("hasWeanToMating", true);
+            }
+            if (Objects.equals(event.getType(), PigEvent.MATING.getKey())) {
+                extraMap.put("hasWeanToMating", false);
+            }
+            extraMap.putAll(JSON_MAPPER.fromJson(event.getExtra(), JSON_MAPPER.createCollectionType(Map.class, String.class, Object.class)));
+        }
+        return extraMap;
     }
 
     //母猪按胎次分组关联事件
