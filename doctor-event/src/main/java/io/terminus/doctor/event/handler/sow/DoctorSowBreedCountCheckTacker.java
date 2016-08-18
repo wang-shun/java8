@@ -27,10 +27,10 @@ public class DoctorSowBreedCountCheckTacker implements ITacker {
                 String doctorPigTrack = flowDataMap.get("track").toString();
                 if (StringUtils.isNotBlank(doctorPigTrack)) {
                     Map<String, Object> doctorPigTrackMap = JsonMapper.JSON_NON_DEFAULT_MAPPER.getMapper().readValue(doctorPigTrack, JacksonType.MAP_OF_OBJECT);
-                    Object pigTypeObj = doctorPigTrackMap.get("pigType");
-                    if (pigTypeObj != null) {
-                        Integer pigType = Integer.parseInt(pigTypeObj.toString());
-                        if (pigType == PigType.RESERVE_SOW.getValue()) {
+                    Object currentBarnTypeObj = doctorPigTrackMap.get("currentBarnType");
+                    if (currentBarnTypeObj != null) {
+                        Integer currentBarnType = Integer.parseInt(currentBarnTypeObj.toString());
+                        if (currentBarnType == PigType.RESERVE_SOW.getValue()) {
                             return false;
                         }
                     }
