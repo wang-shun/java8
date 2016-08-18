@@ -8,7 +8,7 @@
 
     <!-- 开始节点 -->
     <task name="待配种" assignee="" pointx="250" pointy="100">
-        <transition name="待配种" value="9" target="已配种" itacker="doctorSowBreedCountCheckTacker" handler="doctorSowMatingHandler" describe="配种事件" />
+        <transition name="待配种" value="9" target="已配种" tacker="doctorSowBreedCountCheckTacker" handler="doctorSowMatingHandler" describe="配种事件" />
     </task>
 
     <task name="已配种" assignee="" pointx="250" pointy="100">
@@ -16,7 +16,7 @@
     </task>
 
     <decision name="配种后操作方式" pointx="" pointy="">
-        <transition name="去配种" value="9" expression="${eventType} equals \'9\'"  itacker="doctorSowBreedCountCheckTacker" target="已配种" handler="doctorSowMatingHandler"/>
+        <transition name="去配种" value="9" expression="${eventType} equals \'9\'"  tacker="doctorSowBreedCountCheckTacker" target="已配种" handler="doctorSowMatingHandler"/>
         <transition name="配种后转舍事件" value="10" expression="${eventType} equals \'10\'" target="转舍A" handler="doctorSowChgLocationHandler"/>
         <transition name="配种后妊娠检查" value="11" expression="${eventType} equals \'11\'" target="妊娠检查B" handler="doctorSowPregCheckHandler"/>
     </decision>

@@ -379,6 +379,7 @@ public class ConfigManager implements Configuration {
                             .sourceNodeId(definitionNodeMap.get(taskNodeAttrName).getId())
                             .targetNodeId(target.getId())
                             .handler(XmlHelper.getAttrValue(node, ATTR_HANDLER))
+                            .tacker(XmlHelper.getAttrValue(node, ATTR_TACKER))
                             .expression(XmlHelper.getAttrValue(node, ATTR_EXPRESSION))
                             .describe(XmlHelper.getAttrValue(node, ATTR_DESCRIBE))
                             .build();
