@@ -31,4 +31,9 @@ public class Sub {
     private Date createdAt; //创建时间
 
     private List<Long> farmIds;
+
+    /**
+     * @see io.terminus.doctor.user.model.Sub.Status
+     */
+    private Integer status;
 }
