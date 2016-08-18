@@ -199,7 +199,11 @@ public class DoctorMoveDataService {
                     List<DoctorPigEvent> events = doctorPigEventDao.queryAllEventsByPigId(track.getPigId()).stream()
                             .sorted((a, b) -> a.getEventAt().compareTo(b.getEventAt()))
                             .collect(Collectors.toList());
-                    track.setExtra(JSON_MAPPER.toJson(getSowExtraMap(events)));
+
+                    DoctorPigTrack updateTrack = new DoctorPigTrack();
+                    updateTrack.setId(track.getId());
+                    updateTrack.setExtra(JSON_MAPPER.toJson(getSowExtraMap(events)));
+                    doctorPigTrackDao.update(updateTrack);
                 });
     }
 
@@ -805,11 +809,13 @@ public class DoctorMoveDataService {
     private static Map<String, Object> getSowExtraMap(List<DoctorPigEvent> events) {
         Map<String, Object> extraMap = Maps.newHashMap();
         for (DoctorPigEvent event : events) {
-            if (Objects.equals(event.getType(), PigEvent.TO_MATING.getKey())) {
-                extraMap = Maps.newHashMap();
+            if (Objects.equals(event.getType(), PigEvent.WEAN.getKey())) {
                 extraMap.put("hasWeanToMating", true);
             }
+
+            //配种事件说明是下一胎次, extra清掉重新搞
             if (Objects.equals(event.getType(), PigEvent.MATING.getKey())) {
+                extraMap = Maps.newHashMap();
                 extraMap.put("hasWeanToMating", false);
             }
             extraMap.putAll(JSON_MAPPER.fromJson(event.getExtra(), JSON_MAPPER.createCollectionType(Map.class, String.class, Object.class)));
