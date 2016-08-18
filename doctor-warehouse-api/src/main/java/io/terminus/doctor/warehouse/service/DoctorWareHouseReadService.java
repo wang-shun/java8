@@ -4,6 +4,7 @@ import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.warehouse.dto.DoctorWareHouseDto;
 import io.terminus.doctor.warehouse.model.DoctorFarmWareHouseType;
+import io.terminus.doctor.warehouse.model.DoctorWareHouse;
 
 import javax.validation.constraints.NotNull;
 import java.util.List;
@@ -42,4 +43,11 @@ public interface DoctorWareHouseReadService {
      * @return
      */
     Response<DoctorWareHouseDto> queryDoctorWareHouseById(@NotNull(message = "input.warehouseId.empty") Long warehouseId);
+
+    /**
+     * 按id查询仓库
+     * @param warehouseId 仓库id
+     * @return
+     */
+    Response<DoctorWareHouse> findById(Long warehouseId);
 }
