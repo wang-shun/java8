@@ -27,9 +27,9 @@ public class DoctorSowBreedCountCheckTacker implements ITacker {
                 String doctorPigEvent = (String) flowDataMap.get("event");
                 if (StringHelper.isNotBlank(doctorPigEvent)){
                     Map<String, Object> doctorPigEventMap = JsonMapper.JSON_NON_DEFAULT_MAPPER.getMapper().readValue(doctorPigEvent, JacksonType.MAP_OF_OBJECT);
-                    String currentMatingCountStr = (String) doctorPigEventMap.get("currentMatingCount");
-                    if (StringUtils.isNotBlank(currentMatingCountStr)){
-                        Integer currentMatingCount = Integer.parseInt(currentMatingCountStr);
+                    Object currentMatingCountStr = doctorPigEventMap.get("currentMatingCount");
+                    if (currentMatingCountStr != null){
+                        Integer currentMatingCount = Integer.parseInt(currentMatingCountStr.toString());
                         log.info("[DoctorSowBreedCountCheckTacker] -> currentMatingCount is {}", currentMatingCount);
                         return currentMatingCount < 3;
                     }
