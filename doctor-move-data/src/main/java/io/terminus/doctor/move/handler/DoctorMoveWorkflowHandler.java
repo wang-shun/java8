@@ -125,7 +125,7 @@ public class DoctorMoveWorkflowHandler {
                 FlowDefinitionNode targetNode = nodesMapById.get(eventsMapByValue.get(type).getTargetNodeId());
 
                 // 2.1 如果 Task 节点
-                if (targetNode.getType() == FlowDefinitionNode.Type.TASK.value()) {
+                // if (targetNode.getType() == FlowDefinitionNode.Type.TASK.value()) {
                     // 1.  如果类型是转入分娩舍 > 10
                     if (type == 10) {
                         // 如果是阳性
@@ -136,12 +136,8 @@ public class DoctorMoveWorkflowHandler {
                             createFlowProcess(targetNode.getId(), sourceNode.getId(), pigEvent, flowInstance, pig);
                         }
                     }
-                    else {
-                        createFlowProcess(targetNode.getId(), sourceNode.getId(), pigEvent, flowInstance, pig);
-                    }
-
                     // 2.  如果是妊娠检查  > 11
-                    if (type == 11) {
+                    else if (type == 11) {
                         // 如果是阳性
                         if (pig.getStatus() == 4) {
                             createFlowProcess(nodesMapByName.get("妊娠检查阳性").getId(), nodesMapByName.get("妊娠检查A结果").getId(), pigEvent, flowInstance, pig);
@@ -153,7 +149,7 @@ public class DoctorMoveWorkflowHandler {
                     }
 
                     // 3. 如果是断奶事件判断 > 16  或者 仔猪变动 > 18
-                    if (type == 16 || type == 18) {
+                    else if (type == 16 || type == 18) {
                         // 哺乳
                         if (pig.getStatus() == 8) {
                             createFlowProcess(nodesMapByName.get("哺乳").getId(), nodesMapByName.get("待分娩").getId(), pigEvent, flowInstance, pig);
@@ -163,12 +159,15 @@ public class DoctorMoveWorkflowHandler {
                             createFlowProcess(nodesMapByName.get("断奶").getId(), nodesMapByName.get("断奶事件判断").getId(), pigEvent, flowInstance, pig);
                         }
                     }
+                    else {
+                        createFlowProcess(targetNode.getId(), sourceNode.getId(), pigEvent, flowInstance, pig);
+                    }
                 }
-            }
+            // }
             // 否则处于待配种状态
-            else {
-                createFlowProcess(nodesMapByName.get("待配种").getId(), nodesMapByName.get("开始节点信息").getId(), pigEvent, flowInstance, pig);
-            }
+            // else {
+               // createFlowProcess(nodesMapByName.get("待配种").getId(), nodesMapByName.get("开始节点信息").getId(), pigEvent, flowInstance, pig);
+            // }
         });
     }
 
