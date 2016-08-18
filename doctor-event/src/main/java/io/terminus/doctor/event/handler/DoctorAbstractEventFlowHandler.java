@@ -7,12 +7,14 @@ import com.google.common.collect.Maps;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.constants.JacksonType;
 import io.terminus.doctor.event.constants.DoctorPigSnapshotConstants;
+import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorPigDao;
 import io.terminus.doctor.event.dao.DoctorPigEventDao;
 import io.terminus.doctor.event.dao.DoctorPigSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorPigTrackDao;
 import io.terminus.doctor.event.dao.DoctorRevertLogDao;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
+import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigSnapshot;
 import io.terminus.doctor.event.model.DoctorPigTrack;
@@ -48,17 +50,21 @@ public abstract class DoctorAbstractEventFlowHandler extends HandlerAware {
 
     protected final DoctorRevertLogDao doctorRevertLogDao;
 
+    protected final DoctorBarnDao doctorBarnDao;
+
     @Autowired
     public DoctorAbstractEventFlowHandler(DoctorPigDao doctorPigDao,
                                           DoctorPigEventDao doctorPigEventDao,
                                           DoctorPigTrackDao doctorPigTrackDao,
                                           DoctorPigSnapshotDao doctorPigSnapshotDao,
-                                          DoctorRevertLogDao doctorRevertLogDao) {
+                                          DoctorRevertLogDao doctorRevertLogDao,
+                                          DoctorBarnDao doctorBarnDao) {
         this.doctorPigEventDao = doctorPigEventDao;
         this.doctorPigDao = doctorPigDao;
         this.doctorPigTrackDao = doctorPigTrackDao;
         this.doctorPigSnapshotDao = doctorPigSnapshotDao;
         this.doctorRevertLogDao = doctorRevertLogDao;
+        this.doctorBarnDao = doctorBarnDao;
     }
 
     @Override
@@ -107,6 +113,7 @@ public abstract class DoctorAbstractEventFlowHandler extends HandlerAware {
                             ImmutableMap.of("doctorPigId", doctorBasicInputInfoDto.getPigId(),
                                     "doctorEventId", doctorPigEvent.getId(), "doctorSnapshotId", doctorPigSnapshot.getId())));
             flowDataMap.put("event", JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(doctorPigEvent));
+            flowDataMap.put("track", JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(doctorPigTrack));
             execution.setFlowData(JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(flowDataMap));
         } catch (IllegalStateException e) {
             log.error("handle execute fail, cause:{}", Throwables.getStackTraceAsString(e));
@@ -169,6 +176,14 @@ public abstract class DoctorAbstractEventFlowHandler extends HandlerAware {
         //添加时间发生之后母猪的胎次
         doctorPigEvent.setParity(doctorPigTrack.getCurrentParity());
         doctorPigEventDao.update(doctorPigEvent);
+
+        //往pigTrack 当中添加猪舍类型
+        if (notNull(doctorPigTrack.getCurrentBarnId())) {
+            DoctorBarn doctorBarn = doctorBarnDao.findById(doctorPigTrack.getCurrentBarnId());
+            if (notNull(doctorBarn)) {
+                doctorPigTrack.setCurrentBarnType(doctorBarn.getPigType());
+            }
+        }
     }
 
     /**
