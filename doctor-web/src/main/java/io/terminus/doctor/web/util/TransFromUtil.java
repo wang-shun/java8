@@ -40,25 +40,25 @@ public class TransFromUtil {
             Map<String,Object> extraMap = doctorPigEvent.getExtraMap();
             if (extraMap != null) {
                 if (extraMap.get("matingType") != null) {
-                    extraMap.put("matingType", MatingType.from((Integer) extraMap.get("matingType")).getDesc());
+                    extraMap.put("matingType", MatingType.from(toInteger(extraMap.get("matingType"))).getDesc());
                 }
                 if (extraMap.get("checkResult") != null) {
-                    extraMap.put("checkResult", PregCheckResult.from((Integer) extraMap.get("checkResult")).getDesc());
+                    extraMap.put("checkResult", PregCheckResult.from(toInteger(extraMap.get("checkResult"))).getDesc());
                 }
                 if (extraMap.get("farrowingType") != null) {
-                    extraMap.put("farrowingType", FarrowingType.from((Integer) extraMap.get("farrowingType")).getDesc());
+                    extraMap.put("farrowingType", FarrowingType.from(toInteger(extraMap.get("farrowingType"))).getDesc());
                 }
                 if (extraMap.get("farrowIsSingleManager") != null) {
-                    extraMap.put("farrowIsSingleManager", ((Integer)extraMap.get("farrowIsSingleManager") == 1) ? IsOrNot.YES.getDesc() : IsOrNot.NO.getDesc());
+                    extraMap.put("farrowIsSingleManager", (toInteger(extraMap.get("farrowIsSingleManager")) == 1) ? IsOrNot.YES.getDesc() : IsOrNot.NO.getDesc());
                 }
                 if (extraMap.get("fosterReason") != null) {
-                    extraMap.put("fosterReason", RespHelper.or500(doctorBasicReadService.findBasicById(Long.valueOf((Integer)extraMap.get("fosterReason")))).getName());
+                    extraMap.put("fosterReason", RespHelper.or500(doctorBasicReadService.findBasicById(toLong(extraMap.get("fosterReason")))).getName());
                 }
                 if (extraMap.get("vaccinationStaffId") != null) {
-                    extraMap.put("vaccinationStaffName", RespHelper.or500(userProfileReadService.findProfileByUserId(Long.valueOf((Integer)extraMap.get("vaccinationStaffId")))).getRealName());
+                    extraMap.put("vaccinationStaffName", RespHelper.or500(userProfileReadService.findProfileByUserId(toLong(extraMap.get("vaccinationStaffId")))).getRealName());
                 }
                 if (extraMap.get("toBarnId") != null) {
-                    extraMap.put("toBarnId", RespHelper.or500(doctorBarnReadService.findBarnById(Long.valueOf((Integer) extraMap.get("toBarnId")))).getName());
+                    extraMap.put("toBarnId", RespHelper.or500(doctorBarnReadService.findBarnById(toLong(extraMap.get("toBarnId")))).getName());
                 }
             }
         }
@@ -69,15 +69,23 @@ public class TransFromUtil {
             Map<String,Object> extraMap = doctorGroupEvent.getExtraData();
             if (extraMap != null) {
                 if (extraMap.get("sex") != null) {
-                    extraMap.put("sex", DoctorGroupTrack.Sex.from((Integer) extraMap.get("sex")).getDesc());
+                    extraMap.put("sex", DoctorGroupTrack.Sex.from(toInteger(extraMap.get("sex"))).getDesc());
                 }
                 if (extraMap.get("source") != null) {
-                    extraMap.put("source", PigSource.from((Integer) extraMap.get("source")).getDesc());
+                    extraMap.put("source", PigSource.from(toInteger(extraMap.get("source"))).getDesc());
                 }
                 if (extraMap.get("vaccinResult") != null) {
-                    extraMap.put("vaccinResult", ((Integer) extraMap.get("vaccinResult") == 1) ? DoctorAntiepidemicGroupEvent.VaccinResult.POSITIVE : DoctorAntiepidemicGroupEvent.VaccinResult.NEGATIVE);
+                    extraMap.put("vaccinResult", (toInteger(extraMap.get("vaccinResult")) == 1) ? DoctorAntiepidemicGroupEvent.VaccinResult.POSITIVE : DoctorAntiepidemicGroupEvent.VaccinResult.NEGATIVE);
                 }
             }
         }
+    }
+
+    private static Integer toInteger(Object o) {
+        return Integer.valueOf(String.valueOf(o));
+    }
+
+    private static Long toLong(Object o) {
+        return Long.valueOf(String.valueOf(o));
     }
 }
