@@ -65,6 +65,9 @@ public class WorkFlowContext implements Context, ApplicationListener<ContextRefr
 
             //3. 初始化定时器事件
             initEventITimers(applicationContext.getBeansOfType(ITimer.class));
+
+            //4. 初始化定时器事件
+            initEventITackers(applicationContext.getBeansOfType(ITimer.class));
         }
     }
 
@@ -132,6 +135,16 @@ public class WorkFlowContext implements Context, ApplicationListener<ContextRefr
     private void initEventITimers(Map<String, ITimer> ITimersMap) {
         if (ITimersMap != null && ITimersMap.size() > 0) {
             ITimersMap.forEach((beanName, i) -> context.put(beanName, i));
+        }
+    }
+
+    /**
+     * 初始化Tacker
+     * @param ITackersMap
+     */
+    private void initEventITackers(Map<String, ITimer> ITackersMap) {
+        if (ITackersMap != null && ITackersMap.size() > 0) {
+            ITackersMap.forEach((beanName, i) -> context.put(beanName, i));
         }
     }
 

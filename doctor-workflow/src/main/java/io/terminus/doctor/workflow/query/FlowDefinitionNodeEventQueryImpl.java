@@ -8,6 +8,7 @@ import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.constants.JacksonType;
 import io.terminus.doctor.workflow.access.JdbcAccess;
 import io.terminus.doctor.workflow.core.WorkFlowEngine;
+import io.terminus.doctor.workflow.event.ITacker;
 import io.terminus.doctor.workflow.model.FlowDefinitionNode;
 import io.terminus.doctor.workflow.model.FlowDefinitionNodeEvent;
 import io.terminus.doctor.workflow.model.FlowInstance;
@@ -213,23 +214,32 @@ public class FlowDefinitionNodeEventQueryImpl implements FlowDefinitionNodeEvent
         // 如果存在事件, 直接返回
         if (StringHelper.isNotBlank(nodeEvent.getHandler())) {
             if(StringHelper.isNotBlank(nodeEvent.getTacker())){
-                if (flowProcess.getFlowData() != null){
-                    try {
-                        Map<String, String> flowDataMap = JsonMapper.JSON_NON_DEFAULT_MAPPER.getMapper().readValue(flowProcess.getFlowData(), JacksonType.MAP_OF_OBJECT);
-                        String doctorPigEvent = flowDataMap.get("event");
-                        if (StringHelper.isNotBlank(doctorPigEvent)){
-                            Map<String, String>doctorPigEventMap = JsonMapper.JSON_NON_DEFAULT_MAPPER.getMapper().readValue(doctorPigEvent, JacksonType.MAP_OF_OBJECT);
-                            Integer currentMatingCount = Integer.parseInt(doctorPigEventMap.get("currentMatingCount"));
-                            if (!StringHelper.parseExpression(nodeEvent.getTacker(), ImmutableMap.of("currentMatingCount", currentMatingCount))){
-                                return;
+                String iTackerName = nodeEvent.getTacker();
+                    ITacker iTacker = workFlowEngine.buildContext().get(iTackerName);
+                    if (iTacker == null) {
+                        if (iTacker == null) {
+                            // 获取类的简单名称, 从上下文中获取
+                            iTacker = workFlowEngine.buildContext().get(
+                                    StringHelper.uncapitalize(iTackerName.substring(iTackerName.lastIndexOf(".") + 1)));
+                            if (iTacker == null) {
+                                try {
+                                    // 实例化, 并存到上下文
+                                    iTacker = (ITacker) Class.forName(iTackerName).newInstance();
+                                    workFlowEngine.buildContext().put(
+                                            StringHelper.uncapitalize(iTackerName.substring(iTackerName.lastIndexOf(".") + 1)), iTacker);
+                                } catch (Exception e) {
+                                    log.error("iTacker not found, iTackerName is {}, cause by {}",
+                                            iTackerName, Throwables.getStackTraceAsString(e));
+                                    AssertHelper.throwException("iTacker not found, iTackerName is {}, cause by {}",
+                                            iTackerName, Throwables.getStackTraceAsString(e));
+                                }
                             }
                         }
-                    }catch (Exception e){
-                        log.error(" getTaskEvents  failed cause by {}", Throwables.getStackTraceAsString(e));
                     }
-
+                    if (!iTacker.tacker(flowProcess.getFlowData())){
+                        return;
+                    }
                 }
-            }
             events.add(nodeEvent);
             return;
         }
