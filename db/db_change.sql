@@ -258,3 +258,6 @@ alter table doctor_material_consume_avgs modify `consume_count` decimal(23,3) DE
 alter table doctor_material_in_ware_houses modify `lot_number` decimal(23,3) DEFAULT NULL COMMENT '数量信息';
 alter table doctor_farm_ware_house_types modify `lot_number` decimal(23,3) DEFAULT NULL COMMENT '类型原料的数量';
 alter table doctor_ware_house_tracks modify `lot_number` decimal(23,3) DEFAULT NULL COMMENT '仓库物品的总数量信息';
+
+-- 2016-08-18 workflow 新增 tracker 字段
+alter table workflow_definition_node_events ADD Column `tacker` VARCHAR(128) DEFAULT NULL COMMENT '配种次数判断';
