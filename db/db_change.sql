@@ -251,13 +251,13 @@ ALTER TABLE workflow_definition_nodes ADD COLUMN `itimer` VARCHAR(128) DEFAULT N
 alter table doctor_material_consume_providers add column `unit_price` bigint(20) DEFAULT NULL COMMENT '本次出库/入库的单价。入库单价,由前台传入,直接保存即可；出库单价,需要计算: 先入库的先出库, 然后对涉及到的每一次入库的单价作加权平均。单位为“分”' after event_count;
 
 -- 仓库物资数量类型有 Long 改为 Double
-alter table doctor_material_consume_providers modify `event_count` double DEFAULT NULL COMMENT '事件数量';
-alter table doctor_material_price_in_ware_houses modify `remainder` double NOT NULL COMMENT '本次入库量的剩余量，比如本次入库100个，那么就是这100个的剩余量，减少到0时删除';
-alter table doctor_material_consume_avgs modify `consume_avg_count` double DEFAULT NULL COMMENT '平均消耗数量';
-alter table doctor_material_consume_avgs modify `consume_count` double DEFAULT NULL COMMENT '最后一次领用数量';
-alter table doctor_material_in_ware_houses modify `lot_number` double DEFAULT NULL COMMENT '数量信息';
-alter table doctor_farm_ware_house_types modify `lot_number` double DEFAULT NULL COMMENT '类型原料的数量';
-alter table doctor_ware_house_tracks modify `lot_number` double DEFAULT NULL COMMENT '仓库物品的总数量信息';
+alter table doctor_material_consume_providers modify `event_count` decimal(23,3) DEFAULT NULL COMMENT '事件数量';
+alter table doctor_material_price_in_ware_houses modify `remainder` decimal(23,3) NOT NULL COMMENT '本次入库量的剩余量，比如本次入库100个，那么就是这100个的剩余量，减少到0时删除';
+alter table doctor_material_consume_avgs modify `consume_avg_count` decimal(23,3) DEFAULT NULL COMMENT '平均消耗数量';
+alter table doctor_material_consume_avgs modify `consume_count` decimal(23,3) DEFAULT NULL COMMENT '最后一次领用数量';
+alter table doctor_material_in_ware_houses modify `lot_number` decimal(23,3) DEFAULT NULL COMMENT '数量信息';
+alter table doctor_farm_ware_house_types modify `lot_number` decimal(23,3) DEFAULT NULL COMMENT '类型原料的数量';
+alter table doctor_ware_house_tracks modify `lot_number` decimal(23,3) DEFAULT NULL COMMENT '仓库物品的总数量信息';
 
 -- 2016-08-18 workflow 新增 tracker 字段
 alter table workflow_definition_node_events ADD Column `tacker` VARCHAR(128) DEFAULT NULL COMMENT '配种次数判断';

@@ -108,4 +108,14 @@ public class DoctorWareHouseReadServiceImpl implements DoctorWareHouseReadServic
             return Response.fail("findBy.warehouseId.fail");
         }
     }
+
+    @Override
+    public Response<DoctorWareHouse> findById(Long warehouseId){
+        try{
+            return Response.ok(doctorWareHouseDao.findById(warehouseId));
+        }catch(Exception e){
+            log.error("warehouse info find by id error, warehouseId:{}, cause:{}", warehouseId, Throwables.getStackTraceAsString(e));
+            return Response.fail("findBy.warehouseId.fail");
+        }
+    }
 }
