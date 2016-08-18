@@ -283,6 +283,23 @@ public class DoctorGroupReadServiceImpl implements DoctorGroupReadService {
         }
     }
 
+    /**
+     * 根据日期区间和事件类型查询事件列表
+     *
+     * @param farmId    猪场id
+     * @param groupCode 猪群号
+     * @return 猪群
+     */
+    @Override
+    public Response<DoctorGroup> findGroupByFarmIdAndGroupCode(Long farmId, String groupCode) {
+        try {
+            return Response.ok(doctorGroupDao.findByFarmIdAndGroupCode(farmId, groupCode));
+        } catch (Exception e) {
+            log.error("find group by farmId and groupCode failed, farmId:{}, groupCode:{}, cause:{}", farmId, groupCode, Throwables.getStackTraceAsString(e));
+            return Response.fail("group.find.fail");
+        }
+    }
+
     private DoctorGroup checkGroupExist(Long groupId) {
         DoctorGroup group = doctorGroupDao.findById(groupId);
         if (group == null) {
