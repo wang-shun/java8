@@ -120,7 +120,7 @@ public class SowNeedWeanProducer extends AbstractJobProducer {
                     if (ruleValueMap.get(1) != null) {
                         if (!isMessage && Objects.equals(ruleTemplate.getType(), DoctorMessageRuleTemplate.Type.WARNING.getValue())) {
                             // 记录每只猪的消息提醒
-                            recordPigMessage(pigDto, PigEvent.WEAN, ruleValueMap.get(1).getValue().intValue(),
+                            recordPigMessage(pigDto, PigEvent.WEAN, getFarrowingDate(pigDto), ruleValueMap.get(1).getValue().intValue(),
                                     PigStatus.FEED);
                         }
 
