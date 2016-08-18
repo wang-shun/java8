@@ -95,7 +95,7 @@ public class MaterialInWareHouseManager {
             Map<String, Object> extraMap = cp.getExtraMap();
             ArrayList<Map<String, Object>> array = (ArrayList) extraMap.get("consumePrice");
             for(Map<String, Object> obj : array){
-                long count = Long.parseLong(obj.get("count").toString());
+                double count = Double.parseDouble(obj.get("count").toString());
                 long unitPrice = Long.parseLong(obj.get("unitPrice").toString());
                 totalPrice += count * unitPrice;
             }
