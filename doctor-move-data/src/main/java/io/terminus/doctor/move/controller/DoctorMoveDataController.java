@@ -3,6 +3,8 @@ package io.terminus.doctor.move.controller;
 import com.google.common.base.Throwables;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.doctor.common.utils.RespHelper;
+import io.terminus.doctor.event.model.DoctorPig;
+import io.terminus.doctor.event.service.DoctorPigTypeStatisticWriteService;
 import io.terminus.doctor.move.service.DoctorMoveBasicService;
 import io.terminus.doctor.move.service.DoctorMoveDataService;
 import io.terminus.doctor.move.service.DoctorMoveReportService;
@@ -47,6 +49,7 @@ public class DoctorMoveDataController {
     private final DoctorFarmDao doctorFarmDao;
     private final DoctorUserDataPermissionDao doctorUserDataPermissionDao;
     private final DoctorUserReadService doctorUserReadService;
+    private final DoctorPigTypeStatisticWriteService doctorPigTypeStatisticWriteService;
 
     @Autowired
     public DoctorMoveDataController(UserInitService userInitService,
@@ -56,7 +59,8 @@ public class DoctorMoveDataController {
                                     DoctorMoveReportService doctorMoveReportService,
                                     DoctorFarmDao doctorFarmDao,
                                     DoctorUserDataPermissionDao doctorUserDataPermissionDao,
-                                    DoctorUserReadService doctorUserReadService) {
+                                    DoctorUserReadService doctorUserReadService,
+                                    DoctorPigTypeStatisticWriteService doctorPigTypeStatisticWriteService) {
         this.userInitService = userInitService;
         this.wareHouseInitService = wareHouseInitService;
         this.doctorMoveBasicService = doctorMoveBasicService;
@@ -65,6 +69,7 @@ public class DoctorMoveDataController {
         this.doctorFarmDao = doctorFarmDao;
         this.doctorUserDataPermissionDao = doctorUserDataPermissionDao;
         this.doctorUserReadService = doctorUserReadService;
+        this.doctorPigTypeStatisticWriteService = doctorPigTypeStatisticWriteService;
     }
 
     /**
@@ -153,6 +158,9 @@ public class DoctorMoveDataController {
         doctorMoveDataService.updateFarrowSow(farm);
         log.warn("move farrow sow end");
 
+        //首页统计
+        movePigTypeStatistic(farm);
+
         //6.迁移猪场日报
         log.warn("move daily start, moveId:{}", moveId);
         doctorMoveReportService.moveDailyReport(moveId, farm.getId(), index);
@@ -162,6 +170,13 @@ public class DoctorMoveDataController {
         log.warn("move monthly start, moveId:{}", moveId);
         doctorMoveReportService.moveMonthlyReport(farm.getId(), monthIndex);
         log.warn("move monthly end");
+    }
+
+    //统计下首页数据
+    private void movePigTypeStatistic(DoctorFarm farm) {
+        doctorPigTypeStatisticWriteService.statisticGroup(farm.getOrgId(), farm.getId());
+        doctorPigTypeStatisticWriteService.statisticPig(farm.getOrgId(), farm.getId(), DoctorPig.PIG_TYPE.BOAR.getKey());
+        doctorPigTypeStatisticWriteService.statisticPig(farm.getOrgId(), farm.getId(), DoctorPig.PIG_TYPE.SOW.getKey());
     }
 
     /**
