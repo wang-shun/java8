@@ -187,6 +187,23 @@ public class DoctorMoveDataService {
     }
 
     /**
+     * 更新母猪的trackExtraMap
+     */
+    public void updateSowTrackExtraMap(DoctorFarm farm) {
+        //只更新未离场的吧
+        doctorPigTrackDao.list(DoctorPigTrack.builder()
+                .farmId(farm.getId())
+                .pigType(DoctorPig.PIG_TYPE.SOW.getKey())
+                .isRemoval(IsOrNot.NO.getValue()).build())
+                .forEach(track -> {
+                    List<DoctorPigEvent> events = doctorPigEventDao.queryAllEventsByPigId(track.getPigId()).stream()
+                            .sorted((a, b) -> a.getEventAt().compareTo(b.getEventAt()))
+                            .collect(Collectors.toList());
+                    track.setExtra(JSON_MAPPER.toJson(getSowExtraMap(events)));
+                });
+    }
+
+    /**
      * 迁移猪群
      */
     @Transactional

@@ -338,4 +338,21 @@ public class DoctorMoveDataController {
             return false;
         }
     }
+
+    /**
+     * 母猪track extra字段更新
+     */
+    @RequestMapping(value = "/sowTrackExtra", method = RequestMethod.GET)
+    public Boolean moveFSowTrackExtra(@RequestParam("farmId") Long farmId) {
+        try {
+            DoctorFarm farm = doctorFarmDao.findById(farmId);
+            log.warn("move sow track extra start, farmId:{}", farmId);
+            doctorMoveDataService.updateSowTrackExtraMap(farm);
+            log.warn("move sow track extra end");
+            return true;
+        } catch (Exception e) {
+            log.error("move sow track extra failed, farmId:{}, cause:{}", farmId, Throwables.getStackTraceAsString(e));
+            return false;
+        }
+    }
 }
