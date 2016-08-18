@@ -1,22 +1,17 @@
 package io.terminus.doctor.event.handler.sow;
 
-import io.terminus.doctor.common.utils.RespHelper;
+import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorPigDao;
 import io.terminus.doctor.event.dao.DoctorPigEventDao;
 import io.terminus.doctor.event.dao.DoctorPigSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorPigTrackDao;
 import io.terminus.doctor.event.dao.DoctorRevertLogDao;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
-import io.terminus.doctor.event.dto.event.group.input.DoctorTransGroupInput;
 import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.handler.DoctorAbstractEventFlowHandler;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.event.service.DoctorGroupReadService;
-import io.terminus.doctor.event.service.DoctorGroupWriteService;
 import io.terminus.doctor.workflow.core.Execution;
-import org.joda.time.DateTime;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -32,7 +27,7 @@ import static com.google.common.base.Preconditions.checkState;
  * Descirbe: 注意拼窝事件关联事件信息的处理方式
  */
 @Component
-public class DoctorSowFostersHandler extends DoctorAbstractEventFlowHandler{
+public class DoctorSowFostersHandler extends DoctorAbstractEventFlowHandler {
 
     private final DoctorGroupReadService doctorGroupReadService;
 
@@ -42,13 +37,14 @@ public class DoctorSowFostersHandler extends DoctorAbstractEventFlowHandler{
     public DoctorSowFostersHandler(DoctorPigDao doctorPigDao, DoctorPigEventDao doctorPigEventDao,
                                    DoctorPigTrackDao doctorPigTrackDao, DoctorPigSnapshotDao doctorPigSnapshotDao,
                                    DoctorRevertLogDao doctorRevertLogDao,
-                                   DoctorGroupReadService doctorGroupReadService) {
-        super(doctorPigDao, doctorPigEventDao, doctorPigTrackDao, doctorPigSnapshotDao, doctorRevertLogDao);
+                                   DoctorGroupReadService doctorGroupReadService,
+                                   DoctorBarnDao doctorBarnDao) {
+        super(doctorPigDao, doctorPigEventDao, doctorPigTrackDao, doctorPigSnapshotDao, doctorRevertLogDao, doctorBarnDao);
         this.doctorGroupReadService = doctorGroupReadService;
     }
 
     @Override
-    public DoctorPigTrack updateDoctorPigTrackInfo(Execution execution, DoctorPigTrack doctorPigTrack, DoctorBasicInputInfoDto basic, Map<String, Object> extra, Map<String,Object> context) {
+    public DoctorPigTrack updateDoctorPigTrackInfo(Execution execution, DoctorPigTrack doctorPigTrack, DoctorBasicInputInfoDto basic, Map<String, Object> extra, Map<String, Object> context) {
 
         // 校验当前的母猪状态 status 的存在方式
         Integer currentStatus = doctorPigTrack.getStatus();
@@ -56,10 +52,10 @@ public class DoctorSowFostersHandler extends DoctorAbstractEventFlowHandler{
                 Objects.equals(currentStatus, PigStatus.FEED.getKey()), "foster.currentSowStatus.error");
 
         //添加当前母猪的健崽猪的数量信息
-        Map<String,Object> extraMap = doctorPigTrack.getExtraMap();
+        Map<String, Object> extraMap = doctorPigTrack.getExtraMap();
         Integer healthCount = (Integer) extraMap.get("farrowingLiveCount");
         Integer partWeanCount = extraMap.containsKey("partWeanPigletsCount") ? (Integer) extraMap.get("partWeanPigletsCount") : 0;
-        Integer fosterCount= (Integer) extra.get("fostersCount");
+        Integer fosterCount = (Integer) extra.get("fostersCount");
 
         Integer afterHealthCount = healthCount - fosterCount;
         checkState(afterHealthCount >= partWeanCount, "create.fostersBy.notEnough");
@@ -67,9 +63,9 @@ public class DoctorSowFostersHandler extends DoctorAbstractEventFlowHandler{
         doctorPigTrack.addAllExtraMap(extra);
 
         // 修改当前的母猪状态信息
-        if(Objects.equals(afterHealthCount, partWeanCount)){
+        if (Objects.equals(afterHealthCount, partWeanCount)) {
             doctorPigTrack.setStatus(PigStatus.Wean.getKey());
-        }else {
+        } else {
             doctorPigTrack.setStatus(PigStatus.FEED.getKey());
         }
         execution.getExpression().put("status", doctorPigTrack.getStatus());

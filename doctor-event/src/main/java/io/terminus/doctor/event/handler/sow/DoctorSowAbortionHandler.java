@@ -1,6 +1,7 @@
 package io.terminus.doctor.event.handler.sow;
 
 import io.terminus.common.utils.MapBuilder;
+import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorPigDao;
 import io.terminus.doctor.event.dao.DoctorPigEventDao;
 import io.terminus.doctor.event.dao.DoctorPigSnapshotDao;
@@ -33,8 +34,8 @@ public class DoctorSowAbortionHandler extends DoctorAbstractEventFlowHandler {
     @Autowired
     public DoctorSowAbortionHandler(DoctorPigDao doctorPigDao, DoctorPigEventDao doctorPigEventDao,
                                     DoctorPigTrackDao doctorPigTrackDao, DoctorPigSnapshotDao doctorPigSnapshotDao,
-                                    DoctorRevertLogDao doctorRevertLogDao) {
-        super(doctorPigDao, doctorPigEventDao, doctorPigTrackDao, doctorPigSnapshotDao, doctorRevertLogDao);
+                                    DoctorRevertLogDao doctorRevertLogDao, DoctorBarnDao doctorBarnDao) {
+        super(doctorPigDao, doctorPigEventDao, doctorPigTrackDao, doctorPigSnapshotDao, doctorRevertLogDao, doctorBarnDao);
     }
 
     @Override

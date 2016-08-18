@@ -1,5 +1,6 @@
 package io.terminus.doctor.event.handler.sow;
 
+import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorPigDao;
 import io.terminus.doctor.event.dao.DoctorPigEventDao;
 import io.terminus.doctor.event.dao.DoctorPigSnapshotDao;
@@ -34,8 +35,13 @@ import static io.terminus.common.utils.Arguments.notNull;
 public class DoctorSowPregCheckHandler extends DoctorAbstractEventFlowHandler {
 
     @Autowired
-    public DoctorSowPregCheckHandler(DoctorPigDao doctorPigDao, DoctorPigEventDao doctorPigEventDao, DoctorPigTrackDao doctorPigTrackDao, DoctorPigSnapshotDao doctorPigSnapshotDao, DoctorRevertLogDao doctorRevertLogDao) {
-        super(doctorPigDao, doctorPigEventDao, doctorPigTrackDao, doctorPigSnapshotDao, doctorRevertLogDao);
+    public DoctorSowPregCheckHandler(DoctorPigDao doctorPigDao,
+                                     DoctorPigEventDao doctorPigEventDao,
+                                     DoctorPigTrackDao doctorPigTrackDao,
+                                     DoctorPigSnapshotDao doctorPigSnapshotDao,
+                                     DoctorRevertLogDao doctorRevertLogDao,
+                                     DoctorBarnDao doctorBarnDao) {
+        super(doctorPigDao, doctorPigEventDao, doctorPigTrackDao, doctorPigSnapshotDao, doctorRevertLogDao, doctorBarnDao);
     }
 
     @Override

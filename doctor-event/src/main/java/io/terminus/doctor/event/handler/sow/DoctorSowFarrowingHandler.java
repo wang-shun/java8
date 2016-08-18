@@ -4,6 +4,7 @@ import com.google.common.base.MoreObjects;
 import com.google.common.primitives.Ints;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.common.enums.PigType;
+import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorPigDao;
 import io.terminus.doctor.event.dao.DoctorPigEventDao;
 import io.terminus.doctor.event.dao.DoctorPigSnapshotDao;
@@ -53,8 +54,8 @@ public class DoctorSowFarrowingHandler extends DoctorAbstractEventFlowHandler {
     public DoctorSowFarrowingHandler(DoctorPigDao doctorPigDao, DoctorPigEventDao doctorPigEventDao,
                                      DoctorPigTrackDao doctorPigTrackDao, DoctorPigSnapshotDao doctorPigSnapshotDao,
                                      DoctorRevertLogDao doctorRevertLogDao,
-                                     DoctorGroupWriteService doctorGroupWriteService) {
-        super(doctorPigDao, doctorPigEventDao, doctorPigTrackDao, doctorPigSnapshotDao, doctorRevertLogDao);
+                                     DoctorGroupWriteService doctorGroupWriteService, DoctorBarnDao doctorBarnDao) {
+        super(doctorPigDao, doctorPigEventDao, doctorPigTrackDao, doctorPigSnapshotDao, doctorRevertLogDao, doctorBarnDao);
         this.doctorGroupWriteService = doctorGroupWriteService;
     }
 

@@ -2,6 +2,7 @@ package io.terminus.doctor.event.handler.sow;
 
 import com.google.common.primitives.Doubles;
 import com.google.common.primitives.Ints;
+import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorPigDao;
 import io.terminus.doctor.event.dao.DoctorPigEventDao;
 import io.terminus.doctor.event.dao.DoctorPigSnapshotDao;
@@ -33,8 +34,13 @@ import static com.google.common.base.Preconditions.checkState;
 public class DoctorSowWeanHandler extends DoctorAbstractEventFlowHandler {
 
     @Autowired
-    public DoctorSowWeanHandler(DoctorPigDao doctorPigDao, DoctorPigEventDao doctorPigEventDao, DoctorPigTrackDao doctorPigTrackDao, DoctorPigSnapshotDao doctorPigSnapshotDao, DoctorRevertLogDao doctorRevertLogDao) {
-        super(doctorPigDao, doctorPigEventDao, doctorPigTrackDao, doctorPigSnapshotDao, doctorRevertLogDao);
+    public DoctorSowWeanHandler(DoctorPigDao doctorPigDao,
+                                DoctorPigEventDao doctorPigEventDao,
+                                DoctorPigTrackDao doctorPigTrackDao,
+                                DoctorPigSnapshotDao doctorPigSnapshotDao,
+                                DoctorRevertLogDao doctorRevertLogDao,
+                                DoctorBarnDao doctorBarnDao) {
+        super(doctorPigDao, doctorPigEventDao, doctorPigTrackDao, doctorPigSnapshotDao, doctorRevertLogDao, doctorBarnDao);
     }
 
     @Override

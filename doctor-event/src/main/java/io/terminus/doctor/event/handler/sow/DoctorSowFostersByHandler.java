@@ -1,6 +1,7 @@
 package io.terminus.doctor.event.handler.sow;
 
 import io.terminus.doctor.common.utils.RespHelper;
+import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorPigDao;
 import io.terminus.doctor.event.dao.DoctorPigEventDao;
 import io.terminus.doctor.event.dao.DoctorPigSnapshotDao;
@@ -10,7 +11,6 @@ import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
 import io.terminus.doctor.event.dto.event.group.input.DoctorTransGroupInput;
 import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.handler.DoctorAbstractEventFlowHandler;
-import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.event.service.DoctorGroupReadService;
 import io.terminus.doctor.event.service.DoctorGroupWriteService;
@@ -35,7 +35,7 @@ import static com.google.common.base.Preconditions.checkState;
  */
 @Component
 @Slf4j
-public class DoctorSowFostersByHandler extends DoctorAbstractEventFlowHandler{
+public class DoctorSowFostersByHandler extends DoctorAbstractEventFlowHandler {
 
     private final DoctorGroupWriteService doctorGroupWriteService;
 
@@ -48,8 +48,9 @@ public class DoctorSowFostersByHandler extends DoctorAbstractEventFlowHandler{
                                      DoctorPigTrackDao doctorPigTrackDao, DoctorPigSnapshotDao doctorPigSnapshotDao,
                                      DoctorRevertLogDao doctorRevertLogDao,
                                      DoctorGroupWriteService doctorGroupWriteService,
-                                     DoctorGroupReadService doctorGroupReadService) {
-        super(doctorPigDao, doctorPigEventDao, doctorPigTrackDao, doctorPigSnapshotDao, doctorRevertLogDao);
+                                     DoctorGroupReadService doctorGroupReadService,
+                                     DoctorBarnDao doctorBarnDao) {
+        super(doctorPigDao, doctorPigEventDao, doctorPigTrackDao, doctorPigSnapshotDao, doctorRevertLogDao, doctorBarnDao);
         this.doctorGroupWriteService = doctorGroupWriteService;
         this.doctorGroupReadService = doctorGroupReadService;
     }
@@ -68,9 +69,9 @@ public class DoctorSowFostersByHandler extends DoctorAbstractEventFlowHandler{
         Long groupId = groupSowEventCreate(doctorPigTrack, basic, extra);
 
         //添加当前母猪的健崽猪的数量信息
-        Map<String,Object> extraMap = doctorPigTrack.getExtraMap();
+        Map<String, Object> extraMap = doctorPigTrack.getExtraMap();
         Integer healthCount = (Integer) extraMap.get("farrowingLiveCount");
-        Integer fosterCount= (Integer) extra.get("fostersCount");
+        Integer fosterCount = (Integer) extra.get("fostersCount");
         extra.put("farrowingLiveCount", healthCount + fosterCount);
         extra.put("farrowingPigletGroupId", groupId);
         doctorPigTrack.addAllExtraMap(extra);
@@ -109,18 +110,19 @@ public class DoctorSowFostersByHandler extends DoctorAbstractEventFlowHandler{
 
     /**
      * 对应的仔猪转群操作
+     *
      * @param basicInputInfoDto
      * @param extra
      */
-    private Long groupSowEventCreate(DoctorPigTrack doctorPigTrack, DoctorBasicInputInfoDto basicInputInfoDto, Map<String,Object> extra){
+    private Long groupSowEventCreate(DoctorPigTrack doctorPigTrack, DoctorBasicInputInfoDto basicInputInfoDto, Map<String, Object> extra) {
 
         Long fosterById = Long.valueOf(extra.get("fosterSowId").toString());
 
         DoctorPigTrack doctorFosterByPigTrack = doctorPigTrackDao.findByPigId(fosterById);
-        Map<String,Object> fosterByPigExtra = doctorFosterByPigTrack.getExtraMap();
+        Map<String, Object> fosterByPigExtra = doctorFosterByPigTrack.getExtraMap();
         Long fosterByGroupId = Long.valueOf(fosterByPigExtra.get("farrowingPigletGroupId").toString());
 
-        Map<String,Object> trackExtra = doctorFosterByPigTrack.getExtraMap();
+        Map<String, Object> trackExtra = doctorFosterByPigTrack.getExtraMap();
 
         // 构建Input 信息
         DoctorTransGroupInput doctorTransGroupInput = new DoctorTransGroupInput();
@@ -129,9 +131,9 @@ public class DoctorSowFostersByHandler extends DoctorAbstractEventFlowHandler{
         doctorTransGroupInput.setToGroupId(Long.valueOf(trackExtra.get("farrowingPigletGroupId").toString()));
         doctorTransGroupInput.setToGroupCode(trackExtra.get("groupCode").toString());
 
-        if (Objects.equals(doctorPigTrack.getStatus(), PigStatus.FEED.getKey())){
+        if (Objects.equals(doctorPigTrack.getStatus(), PigStatus.FEED.getKey())) {
             doctorTransGroupInput.setIsCreateGroup(0);
-        }else {
+        } else {
             doctorTransGroupInput.setIsCreateGroup(1);
         }
 
