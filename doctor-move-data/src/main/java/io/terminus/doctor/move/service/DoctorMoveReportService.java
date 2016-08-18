@@ -3,6 +3,7 @@ package io.terminus.doctor.move.service;
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
+import io.terminus.common.utils.Dates;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.RespHelper;
@@ -74,21 +75,36 @@ public class DoctorMoveReportService {
         }
 
         //默认导365天的数据
-        index = MoreObjects.firstNonNull(index, INDEX);
-        List<ReportGroupLiveStock> gls = RespHelper.orServEx(doctorMoveDatasourceHandler
-                .findByHbsSql(moveId, ReportGroupLiveStock.class, "DoctorDailyReport-GroupLiveStock", ImmutableMap.of("index", index, "farmOutId", farm.getOutId())));
+        List<Date> dates = DateUtil.getBeforeDays(new Date(), MoreObjects.firstNonNull(index, INDEX));
+
+        //猪群存栏map
+        List<ReportGroupLiveStock> gls = dates.stream()
+                .map(date -> {
+                    ReportGroupLiveStock group = RespHelper.orServEx(doctorMoveDatasourceHandler
+                            .findByHbsSql(moveId, ReportGroupLiveStock.class, "DoctorDailyReport-GroupLiveStock", ImmutableMap.of("sumAt", DateUtil.toDateTimeString(Dates.endOfDay(date)), "farmOutId", farm.getOutId()))).get(0);
+                    group.setSumat(Dates.startOfDay(date));
+                    return group;
+                })
+                .collect(Collectors.toList());
+
+        log.info("report group live stock:{}", gls);
 
         //母猪存栏map
         Map<Date, ReportSowLiveStock> sowMap = RespHelper.orServEx(doctorMoveDatasourceHandler
                 .findByHbsSql(moveId, ReportSowLiveStock.class, "DoctorDailyReport-SowLiveStock", ImmutableMap.of("index", index, "farmOutId", farm.getOutId())))
                 .stream().collect(Collectors.toMap(ReportSowLiveStock::getSumat, v -> v));
 
+        log.info("report sow live stock:{}", sowMap);
+
         //公猪存栏
-        ReportBoarLiveStock boar = RespHelper.orServEx(doctorMoveDatasourceHandler.findByHbsSql(moveId, ReportBoarLiveStock.class, "DoctorDailyReport-BoarLiveStock")).get(0);
+        Map<Date, ReportBoarLiveStock> boarMap = RespHelper.orServEx(doctorMoveDatasourceHandler
+                .findByHbsSql(moveId, ReportBoarLiveStock.class, "DoctorDailyReport-BoarLiveStock", ImmutableMap.of("index", index, "farmOutId", farm.getOutId())))
+                .stream().collect(Collectors.toMap(ReportBoarLiveStock::getSumat, v -> v));
 
         //取出所有统计数据转换一把
         List<DoctorDailyReport> reports = gls.stream()
-                .map(g -> getDailyReport(farmId, g, MoreObjects.firstNonNull(sowMap.get(g.getSumat()), new ReportSowLiveStock()), boar))
+                .map(g -> getDailyReport(farmId, g, MoreObjects.firstNonNull(sowMap.get(g.getSumat()), new ReportSowLiveStock()),
+                        MoreObjects.firstNonNull(boarMap.get(g.getSumat()), new ReportBoarLiveStock())))
                 .collect(Collectors.toList());
 
         //批量创建日报(先删除, 再创建)

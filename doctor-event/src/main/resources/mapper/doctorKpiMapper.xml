@@ -62,6 +62,13 @@
         <include refid="criteria"/>
     </select>
 
+    <!-- 死黑木畸 -->
+    <select id="getDeliveryDeadBlackMuJi" parameterType="map" resultType="int">
+        select ifnull(sum(dead_count),0) + ifnull(sum(black_count),0) + ifnull(sum(mny_count),0) + ifnull(sum(jx_count),0) from doctor_pig_events
+        where type = 15
+        <include refid="criteria"/>
+    </select>
+
     <!-- 总产仔数-->
     <select id="deliveryAllCounts" parameterType="map" resultType="int">
         select ifnull(sum(health_count+ weak_count+ jx_count+ mny_count+ dead_count + black_count),0) from
@@ -668,5 +675,85 @@
         <include refid="criteria"/>
         )
         FROM dual
+    </select>
+
+    <!-- 存栏情况: 后备母猪(后备母猪舍)存栏 -->
+    <select id="liveStockHoubeiSow" parameterType="map" resultType="int">
+        SELECT ifnull(sum(quantity), 0)
+        FROM
+        (
+          SELECT id
+          FROM doctor_groups
+          WHERE `status` = 1 AND pig_type = 4 AND farm_id = #{farmId}
+        ) AS a
+        LEFT JOIN doctor_group_tracks b ON a.id = b.group_id
+    </select>
+
+    <!-- 存栏情况:产房仔猪存栏 -->
+    <select id="liveStockFarrow" parameterType="map" resultType="int">
+        SELECT ifnull(sum(quantity), 0)
+        FROM
+        (
+        SELECT id
+        FROM doctor_groups
+        WHERE `status` = 1 AND pig_type IN (1, 7) AND farm_id = #{farmId}
+        ) AS a
+        LEFT JOIN doctor_group_tracks b ON a.id = b.group_id
+    </select>
+
+    <!-- 存栏情况: 保育猪存栏 -->
+    <select id="liveStockNursery" parameterType="map" resultType="int">
+        SELECT ifnull(sum(quantity), 0)
+        FROM
+        (
+        SELECT id
+        FROM doctor_groups
+        WHERE `status` = 1 AND pig_type = 2 AND farm_id = #{farmId}
+        ) AS a
+        LEFT JOIN doctor_group_tracks b ON a.id = b.group_id
+    </select>
+
+    <!-- 存栏情况: 育肥猪存栏 -->
+    <select id="liveStockFatten" parameterType="map" resultType="int">
+        SELECT ifnull(sum(quantity), 0)
+        FROM
+        (
+        SELECT id
+        FROM doctor_groups
+        WHERE `status` = 1 AND pig_type = 3 AND farm_id = #{farmId}
+        ) AS a
+        LEFT JOIN doctor_group_tracks b ON a.id = b.group_id
+    </select>
+
+    <!-- 存栏情况: 配怀母猪(配种舍 + 妊娠舍)存栏 -->
+    <select id="liveStockPeihuaiSow" parameterType="map" resultType="int">
+        SELECT ifnull(count(1), 0) FROM  (
+            SELECT current_barn_id FROM doctor_pig_tracks
+            WHERE pig_type = 1 AND is_removal = 0 AND farm_id = #{farmId}
+        ) AS a
+        LEFT JOIN doctor_barns AS b ON	a.current_barn_id = b.id
+        WHERE b.pig_type IN (5, 6)    -- 配种舍 + 妊娠舍
+    </select>
+
+    <!-- 存栏情况: 产房母猪存栏(分娩舍) -->
+    <select id="liveStockBuruSow" parameterType="map" resultType="int">
+        SELECT ifnull(count(1), 0) FROM  (
+            SELECT current_barn_id FROM doctor_pig_tracks
+            WHERE pig_type = 1 AND is_removal = 0 AND farm_id = #{farmId}
+        ) AS a
+        LEFT JOIN doctor_barns AS b ON	a.current_barn_id = b.id
+        WHERE b.pig_type = 7    -- 分娩舍(产房)
+    </select>
+
+    <!-- 存栏情况: 母猪存栏 -->
+    <select id="liveStockSow" parameterType="map" resultType="int">
+        SELECT ifnull(count(1), 0) FROM doctor_pig_tracks
+        WHERE pig_type = 1 AND is_removal = 0 AND farm_id = #{farmId}
+    </select>
+
+    <!-- 存栏情况: 公猪存栏 -->
+    <select id="liveStockBoar" parameterType="map" resultType="int">
+        SELECT ifnull(count(1), 0) FROM doctor_pig_tracks
+        WHERE pig_type = 2 AND is_removal = 0 AND farm_id = #{farmId}
     </select>
 </mapper>

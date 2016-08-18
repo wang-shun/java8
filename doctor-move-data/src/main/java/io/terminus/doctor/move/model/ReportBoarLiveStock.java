@@ -3,6 +3,7 @@ package io.terminus.doctor.move.model;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.util.Date;
 
 /**
  * Desc: 公猪存栏
@@ -13,6 +14,6 @@ import java.io.Serializable;
 @Data
 public class ReportBoarLiveStock implements Serializable {
     private static final long serialVersionUID = 7860287843347896819L;
-
+    private Date sumat;           // 统计时间(天初)
     private int quantity;
 }

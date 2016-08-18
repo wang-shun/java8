@@ -106,6 +106,26 @@ public class DoctorPigEventReadServiceImpl implements DoctorPigEventReadService 
     }
 
     @Override
+    public Response<DoctorPigEvent> findFirstPigEvent(Long pigId, Date fromDate){
+        try{
+            return Response.ok(doctorPigEventDao.findFirstPigEvent(pigId, fromDate));
+        }catch (Exception e) {
+            log.error("findFirstPigEvent fail, pigId={}, fromDate={}, cause:{}", pigId, fromDate, Throwables.getStackTraceAsString(e));
+            return Response.fail("find.first.pig.event.fail");
+        }
+    }
+
+    @Override
+    public Response<Long> countByBarnId(Long barnId){
+        try{
+            return Response.ok(doctorPigEventDao.countByBarnId(barnId));
+        }catch (Exception e) {
+            log.error("count pig event by barnId fail, barnId={}", barnId, Throwables.getStackTraceAsString(e));
+            return Response.fail("count.pig.event.by.barn.id.fail");
+        }
+    }
+
+    @Override
     public Response<List<Integer>> queryPigEvents(List<Long> pigIds) {
         try{
             checkState(!isNull(pigIds) && !Iterables.isEmpty(pigIds), "input.pigIds.empty");

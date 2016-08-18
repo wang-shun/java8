@@ -164,6 +164,29 @@ public class DoctorMoveDataService {
     }
 
     /**
+     * 更新分娩母猪的猪群号
+     */
+    public void updateFarrowSow(DoctorFarm farm) {
+        //猪场号, 猪群id
+        Map<String, Long> groupMap = Maps.newHashMap();
+        doctorGroupDao.findByFarmId(farm.getId()).forEach(group -> groupMap.put(group.getGroupCode(), group.getId()));
+
+        //只更新未离场的吧
+        doctorPigTrackDao.list(DoctorPigTrack.builder()
+                .farmId(farm.getId())
+                .pigType(DoctorPig.PIG_TYPE.SOW.getKey())
+                .isRemoval(IsOrNot.NO.getValue()).build())
+                .forEach(track -> {
+                    Map<String, Object> extraMap = JSON_MAPPER.fromJson(track.getExtra(), JSON_MAPPER.createCollectionType(Map.class, String.class, Object.class));
+                    if (extraMap.containsKey("groupCode")) {
+                        extraMap.put("farrowingPigletGroupId", groupMap.get(String.valueOf(extraMap.get("groupCode"))));
+                        track.setExtra(JSON_MAPPER.toJson(extraMap));
+                        doctorPigTrackDao.update(track);
+                    }
+                });
+    }
+
+    /**
      * 迁移猪群
      */
     @Transactional

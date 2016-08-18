@@ -65,13 +65,25 @@ public class SchedulerImpl implements Scheduler {
                 FlowTimer timer = timerMap.get(TIMER_PREFIX + flowProcess.getFlowDefinitionNodeId());
                 TimerExecution timerExecution = new TimerExecutionImpl(workFlowEngine, flowProcess, flowProcess.getFlowData(), timer, instance.getBusinessId(), instance.getFlowDefinitionKey());
                 ITimer iTimer = timerExecution.getITimer(workFlowService.getFlowQueryService().getFlowDefinitionNodeQuery().id(flowProcess.getFlowDefinitionNodeId()).single().getITimer());
-                iTimer.Timer(timerExecution);
-                timerMap.put(TIMER_PREFIX + flowProcess.getFlowDefinitionNodeId(), timerExecution.getFlowTimer());
-                // 如果到达执行时间, 则执行任务
-                if (isBefore(flowProcess)) {
-                    workFlowService.getFlowProcessService()
-                            .getExecutor(instance.getFlowDefinitionKey(), instance.getBusinessId(), flowProcess.getAssignee())
-                            .execute(timerExecution.getExpression(), timerExecution.getFlowData());
+
+                // 如果含有执行器
+                if (iTimer != null) {
+                    iTimer.timer(timerExecution);
+                    // 如果到达执行时间, 则执行任务
+                    if (isBefore(flowProcess)) {
+                        workFlowService.getFlowProcessService()
+                                .getExecutor(instance.getFlowDefinitionKey(), instance.getBusinessId(), flowProcess.getAssignee())
+                                .execute(timerExecution.getExpression(), timerExecution.getFlowData());
+                    }
+                }
+                // 否则
+                else {
+                    // 如果到达执行时间, 则执行任务
+                    if (isBefore(flowProcess)) {
+                        workFlowService.getFlowProcessService()
+                                .getExecutor(instance.getFlowDefinitionKey(), instance.getBusinessId(), flowProcess.getAssignee())
+                                .execute();
+                    }
                 }
             }
         }

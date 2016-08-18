@@ -15,23 +15,25 @@ public class DoctorLiveStockDailyReport implements Serializable {
     private static final long serialVersionUID = 2428304354860017632L;
 
     /**
-     * 后备母猪
+     * 后备母猪(后备舍的母猪)
      */
     private int houbeiSow;
 
     /**
-     * 配怀母猪(已配种 + 怀孕)
+     * 配怀母猪(配种舍 + 妊娠舍)
      */
     private int peihuaiSow;
 
     /**
-     * 哺乳母猪
+     * 产房
      */
     private int buruSow;
 
     /**
-     * 空怀母猪(断奶 + 返情 + 流产)
+     * 空怀母猪
+     * 作废掉, 现在是按照猪舍统计
      */
+    @Deprecated
     private int konghuaiSow;
 
     /**
@@ -55,10 +57,10 @@ public class DoctorLiveStockDailyReport implements Serializable {
     private int fatten;
 
     public void addSowBoar(DoctorLiveStockDailyReport dto){
-        this.houbeiSow += dto.getHoubeiSow();
-        this.peihuaiSow += dto.getPeihuaiSow();
-        this.buruSow += dto.getBuruSow();
-        this.konghuaiSow += dto.getKonghuaiSow();
-        this.boar += dto.getBoar();
+        this.houbeiSow = dto.getHoubeiSow();
+        this.peihuaiSow = dto.getPeihuaiSow();
+        this.buruSow = dto.getBuruSow();
+        this.konghuaiSow = dto.getKonghuaiSow();
+        this.boar = dto.getBoar();
     }
 }
