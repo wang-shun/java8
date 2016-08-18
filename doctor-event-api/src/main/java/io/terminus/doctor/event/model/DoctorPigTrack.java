@@ -20,7 +20,6 @@ import lombok.experimental.Builder;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.Serializable;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -34,7 +33,7 @@ import static java.util.Objects.isNull;
 @AllArgsConstructor
 @NoArgsConstructor
 @Slf4j
-public class DoctorPigTrack implements Serializable{
+public class DoctorPigTrack implements Serializable {
 
     private static final long serialVersionUID = 6287905644724949716L;
 
@@ -48,6 +47,7 @@ public class DoctorPigTrack implements Serializable{
 
     /**
      * 猪类型信息表数据
+     *
      * @see io.terminus.doctor.event.model.DoctorPig.PIG_TYPE
      */
     private Integer pigType;
@@ -62,6 +62,8 @@ public class DoctorPigTrack implements Serializable{
     private Long currentBarnId;
 
     private String currentBarnName;
+
+    private Integer currentBarnType;
 
     private Double weight;
 
@@ -111,29 +113,29 @@ public class DoctorPigTrack implements Serializable{
     @SneakyThrows
     public void setExtra(String extra) {
         this.extra = Strings.nullToEmpty(extra);
-        if(Strings.isNullOrEmpty(extra)){
+        if (Strings.isNullOrEmpty(extra)) {
             this.extraMap = Maps.newHashMap();
-        }else {
+        } else {
             this.extraMap = OBJECT_MAPPER.readValue(extra, JacksonType.MAP_OF_OBJECT);
         }
     }
 
     @SneakyThrows
-    public void setExtraMap(Map<String,Object> extraMap){
+    public void setExtraMap(Map<String, Object> extraMap) {
         this.extraMap = extraMap;
-        if(isNull(extraMap) || Iterables.isEmpty(extraMap.entrySet())){
+        if (isNull(extraMap) || Iterables.isEmpty(extraMap.entrySet())) {
             this.extra = "";
-        }else {
+        } else {
             this.extra = OBJECT_MAPPER.writeValueAsString(extraMap);
         }
     }
 
     @SneakyThrows
-    public void addAllExtraMap(Map<String, Object> extra){
-        if(isNull(extra) || Iterables.isEmpty(extra.entrySet())){
+    public void addAllExtraMap(Map<String, Object> extra) {
+        if (isNull(extra) || Iterables.isEmpty(extra.entrySet())) {
             return;
         }
-        if(isNull(this.extraMap)){
+        if (isNull(this.extraMap)) {
             this.extraMap = Maps.newHashMap();
         }
         this.extraMap.putAll(extra);
@@ -146,7 +148,8 @@ public class DoctorPigTrack implements Serializable{
         if (Strings.isNullOrEmpty(extraMessage)) {
             this.extraMessageList = Lists.newArrayList();
         } else {
-            this.extraMessageList = OBJECT_MAPPER.readValue(extraMessage, new TypeReference<List<DoctorPigMessage>>() {});
+            this.extraMessageList = OBJECT_MAPPER.readValue(extraMessage, new TypeReference<List<DoctorPigMessage>>() {
+            });
         }
     }
 
@@ -163,48 +166,50 @@ public class DoctorPigTrack implements Serializable{
 
     /**
      * 通过当前胎次信息添加猪 关联事件信息内容
+     *
      * @param pigType
      * @param relEventId
      */
-    public void addPigEvent(Integer pigType, Long relEventId){
-        if(Objects.equals(pigType, DoctorPig.PIG_TYPE.BOAR.getKey())){
+    public void addPigEvent(Integer pigType, Long relEventId) {
+        if (Objects.equals(pigType, DoctorPig.PIG_TYPE.BOAR.getKey())) {
             addBoarPigRelEvent(relEventId);
-        }else if(Objects.equals(pigType, DoctorPig.PIG_TYPE.SOW.getKey())){
+        } else if (Objects.equals(pigType, DoctorPig.PIG_TYPE.SOW.getKey())) {
             addSowPigRelEvent(relEventId);
-        }else {
+        } else {
             throw new IllegalStateException("input.pigType.notFund");
         }
     }
 
     /**
      * 添加母猪关联胎次信息
+     *
      * @param relEventId
      */
     @SneakyThrows
-    private void addSowPigRelEvent(Long relEventId){
+    private void addSowPigRelEvent(Long relEventId) {
         checkArgument(!isNull(currentParity), "input.parity.empty");
         checkArgument(!isNull(relEventId), "input.relEventId.empty");
 
-        Map<String,String> relEventIdsMap = null;
-        if(Strings.isNullOrEmpty(this.relEventIds)){
+        Map<String, String> relEventIdsMap = null;
+        if (Strings.isNullOrEmpty(this.relEventIds)) {
             relEventIdsMap = Maps.newHashMap();
-        }else {
+        } else {
             relEventIdsMap = OBJECT_MAPPER.readValue(this.relEventIds, JacksonType.MAP_OF_STRING);
         }
 
-        if(relEventIdsMap.containsKey(currentParity.toString())){
-            relEventIdsMap.put(currentParity.toString(), relEventIdsMap.get(currentParity.toString())+","+relEventId.toString());
-        }else {
+        if (relEventIdsMap.containsKey(currentParity.toString())) {
+            relEventIdsMap.put(currentParity.toString(), relEventIdsMap.get(currentParity.toString()) + "," + relEventId.toString());
+        } else {
             relEventIdsMap.put(currentParity.toString(), relEventId.toString());
         }
         this.relEventIds = OBJECT_MAPPER.writeValueAsString(relEventIdsMap);
     }
 
-    private void addBoarPigRelEvent(Long relEventId){
+    private void addBoarPigRelEvent(Long relEventId) {
         checkArgument(!isNull(relEventId), "pigTrack.revEventIdInput.error");
-        if(Strings.isNullOrEmpty(this.relEventIds)){
+        if (Strings.isNullOrEmpty(this.relEventIds)) {
             this.relEventIds = relEventId.toString();
-        }else {
+        } else {
             this.relEventIds = this.relEventIds + "," + relEventId.toString();
         }
     }

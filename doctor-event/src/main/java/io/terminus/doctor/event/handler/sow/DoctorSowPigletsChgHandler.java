@@ -4,6 +4,7 @@ import com.google.common.base.MoreObjects;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.RespHelper;
+import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorPigDao;
 import io.terminus.doctor.event.dao.DoctorPigEventDao;
 import io.terminus.doctor.event.dao.DoctorPigSnapshotDao;
@@ -34,7 +35,7 @@ import static com.google.common.base.Preconditions.checkState;
  * Descirbe: 仔猪变动事件 （仔猪转出信息的录入方式）
  */
 @Component
-public class DoctorSowPigletsChgHandler extends DoctorAbstractEventFlowHandler{
+public class DoctorSowPigletsChgHandler extends DoctorAbstractEventFlowHandler {
 
     private final DoctorGroupWriteService doctorGroupWriteService;
 
@@ -44,33 +45,35 @@ public class DoctorSowPigletsChgHandler extends DoctorAbstractEventFlowHandler{
     public DoctorSowPigletsChgHandler(DoctorPigDao doctorPigDao, DoctorPigEventDao doctorPigEventDao,
                                       DoctorPigTrackDao doctorPigTrackDao, DoctorPigSnapshotDao doctorPigSnapshotDao,
                                       DoctorRevertLogDao doctorRevertLogDao,
-                                      DoctorGroupWriteService doctorGroupWriteService, DoctorGroupReadService doctorGroupReadService) {
-        super(doctorPigDao, doctorPigEventDao, doctorPigTrackDao, doctorPigSnapshotDao, doctorRevertLogDao);
-        this.doctorGroupWriteService= doctorGroupWriteService;
+                                      DoctorGroupWriteService doctorGroupWriteService,
+                                      DoctorGroupReadService doctorGroupReadService,
+                                      DoctorBarnDao doctorBarnDao) {
+        super(doctorPigDao, doctorPigEventDao, doctorPigTrackDao, doctorPigSnapshotDao, doctorRevertLogDao, doctorBarnDao);
+        this.doctorGroupWriteService = doctorGroupWriteService;
         this.doctorGroupReadService = doctorGroupReadService;
     }
 
     @Override
-    public DoctorPigTrack updateDoctorPigTrackInfo(Execution execution, DoctorPigTrack doctorPigTrack, DoctorBasicInputInfoDto basic, Map<String, Object> extra, Map<String,Object> context) {
+    public DoctorPigTrack updateDoctorPigTrackInfo(Execution execution, DoctorPigTrack doctorPigTrack, DoctorBasicInputInfoDto basic, Map<String, Object> extra, Map<String, Object> context) {
         // 校验母猪的状态信息
         checkState(Objects.equals(doctorPigTrack.getStatus(), PigStatus.FEED.getKey()), "piglets.chgSowStatus.error");
 
         // 校验转出的数量信息
-        Map<String,Object> extraMap = doctorPigTrack.getExtraMap();
+        Map<String, Object> extraMap = doctorPigTrack.getExtraMap();
         Integer healthCount = (Integer) extraMap.get("farrowingLiveCount");
 
         //变动信息
-        Integer toWeanCount = (Integer)extra.get("pigletsCount");       //变动数量
+        Integer toWeanCount = (Integer) extra.get("pigletsCount");       //变动数量
         checkState(toWeanCount != null, "quantity.not.null");
 
         Integer oldWeanCount = 0;
         //如果之前存在部分断奶事件, 取出
-        if(extraMap.containsKey("partWeanPigletsCount")){
+        if (extraMap.containsKey("partWeanPigletsCount")) {
             oldWeanCount = (Integer) extraMap.get("partWeanPigletsCount");
         }
 
         //取出均重, 如果存在, 重新计算
-        Double weanAvgWeight = (Double)extra.get("pigletsWeight");      //变动重量
+        Double weanAvgWeight = (Double) extra.get("pigletsWeight");      //变动重量
         checkState(weanAvgWeight != null, "weight.not.null");
         if (extraMap.containsKey("partWeanAvgWeight")) {
             Double oldWeanAvgWeight = MoreObjects.firstNonNull((Double) extraMap.get("partWeanAvgWeight"), 0D);
@@ -81,14 +84,14 @@ public class DoctorSowPigletsChgHandler extends DoctorAbstractEventFlowHandler{
 
         //断奶数量需要累加
         toWeanCount += oldWeanCount;
-        checkState(toWeanCount<= healthCount, "wean.countInput.error");
+        checkState(toWeanCount <= healthCount, "wean.countInput.error");
 
         // update info
         extra.put("partWeanPigletsCount", toWeanCount);
         extra.put("partWeanAvgWeight", weanAvgWeight);
         doctorPigTrack.addAllExtraMap(extra);
 
-        if(Objects.equals(toWeanCount, healthCount)){
+        if (Objects.equals(toWeanCount, healthCount)) {
             doctorPigTrack.setStatus(PigStatus.Wean.getKey());
         }
 
@@ -103,12 +106,12 @@ public class DoctorSowPigletsChgHandler extends DoctorAbstractEventFlowHandler{
     }
 
 
-    private void changePigletsChangeInfo(Long groupId,  Map<String, Object> extra, DoctorBasicInputInfoDto basic){
+    private void changePigletsChangeInfo(Long groupId, Map<String, Object> extra, DoctorBasicInputInfoDto basic) {
         RespHelper.orServEx(doctorGroupWriteService.groupEventChange(RespHelper.orServEx(doctorGroupReadService.findGroupDetailByGroupId(groupId)),
                 buildInputInfo(extra, basic)));
     }
 
-    private DoctorChangeGroupInput buildInputInfo(Map<String,Object> mapInfo, DoctorBasicInputInfoDto basic){
+    private DoctorChangeGroupInput buildInputInfo(Map<String, Object> mapInfo, DoctorBasicInputInfoDto basic) {
         DoctorPigletsChgDto dto = BeanMapper.map(mapInfo, DoctorPigletsChgDto.class);
         DoctorChangeGroupInput doctorChangeGroupInput = new DoctorChangeGroupInput();
         doctorChangeGroupInput.setEventAt(DateUtil.toDateString(dto.getPigletsChangeDate()));

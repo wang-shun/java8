@@ -252,4 +252,16 @@ public class DoctorGroupEvents {
         }
         return Lists.newArrayList(RespHelper.or500(doctorBasicReadService.findBasicById(group.getBreedId())));
     }
+
+    /**
+     * 根据猪场id和猪群号查询猪群
+     * @param farmId      猪场id
+     * @param groupCode   猪群号
+     * @return 猪群
+     */
+    @RequestMapping(value = "/farmGroupCode", method = RequestMethod.GET)
+    public DoctorGroup findGroupByFarmIdAndGroupCode(@RequestParam("farmId") Long farmId,
+                                                 @RequestParam("groupCode") String groupCode) {
+        return RespHelper.or500(doctorGroupReadService.findGroupByFarmIdAndGroupCode(farmId, groupCode));
+    }
 }
