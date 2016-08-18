@@ -73,9 +73,10 @@ public class DoctorMoveReportService {
         if (farm == null || isEmpty(farm.getOutId())) {
             return;
         }
+        index = MoreObjects.firstNonNull(index, INDEX);
 
         //默认导365天的数据
-        List<Date> dates = DateUtil.getBeforeDays(new Date(), MoreObjects.firstNonNull(index, INDEX));
+        List<Date> dates = DateUtil.getBeforeDays(new Date(), index);
 
         //猪群存栏map
         List<ReportGroupLiveStock> gls = dates.stream()
