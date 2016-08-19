@@ -183,12 +183,14 @@ public class DoctorMoveDataService {
                     if (Objects.equals(track.getStatus(), PigStatus.Pregnancy.getKey()) &&
                             barnMap.get(track.getCurrentBarnName()).getPigType() == PigType.DELIVER_SOW.getValue()) {
                         track.setStatus(PigStatus.Farrow.getKey());
+                        doctorPigTrackDao.update(track);
                     }
                     if (extraMap.containsKey("groupCode")) {
                         extraMap.put("farrowingPigletGroupId", groupMap.get(String.valueOf(extraMap.get("groupCode"))));
                         track.setExtra(JSON_MAPPER.toJson(extraMap));
+                        doctorPigTrackDao.update(track);
+
                     }
-                    doctorPigTrackDao.update(track);
                 });
     }
 
