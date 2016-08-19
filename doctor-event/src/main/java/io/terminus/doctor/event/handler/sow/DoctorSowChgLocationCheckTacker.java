@@ -6,6 +6,7 @@ import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.workflow.core.TackerExecution;
 import io.terminus.doctor.workflow.event.ITacker;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Component;
 @Component
 @Slf4j
 public class DoctorSowChgLocationCheckTacker implements ITacker {
+    @Autowired
     private DoctorPigTrackDao doctorPigTrackDao;
     @Override
     public Boolean tacker(TackerExecution tackerExecution) {
