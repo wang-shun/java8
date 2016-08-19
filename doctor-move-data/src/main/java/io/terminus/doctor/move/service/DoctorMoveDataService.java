@@ -164,12 +164,14 @@ public class DoctorMoveDataService {
     }
 
     /**
-     * 更新分娩母猪的猪群号
+     * 更新分娩母猪的猪群号, 更新待配种母猪的状态(status = 4 and barnType = 7) 在产房的阳性猪, 状态应该是 7 待分娩
      */
     public void updateFarrowSow(DoctorFarm farm) {
         //猪场号, 猪群id
         Map<String, Long> groupMap = Maps.newHashMap();
         doctorGroupDao.findByFarmId(farm.getId()).forEach(group -> groupMap.put(group.getGroupCode(), group.getId()));
+
+        Map<String, DoctorBarn> barnMap = doctorMoveBasicService.getBarnMap(farm.getId());
 
         //只更新未离场的吧
         doctorPigTrackDao.list(DoctorPigTrack.builder()
@@ -178,10 +180,16 @@ public class DoctorMoveDataService {
                 .isRemoval(IsOrNot.NO.getValue()).build())
                 .forEach(track -> {
                     Map<String, Object> extraMap = JSON_MAPPER.fromJson(track.getExtra(), JSON_MAPPER.createCollectionType(Map.class, String.class, Object.class));
+                    if (Objects.equals(track.getStatus(), PigStatus.Pregnancy.getKey()) &&
+                            barnMap.get(track.getCurrentBarnName()).getPigType() == PigType.DELIVER_SOW.getValue()) {
+                        track.setStatus(PigStatus.Farrow.getKey());
+                        doctorPigTrackDao.update(track);
+                    }
                     if (extraMap.containsKey("groupCode")) {
                         extraMap.put("farrowingPigletGroupId", groupMap.get(String.valueOf(extraMap.get("groupCode"))));
                         track.setExtra(JSON_MAPPER.toJson(extraMap));
                         doctorPigTrackDao.update(track);
+
                     }
                 });
     }
