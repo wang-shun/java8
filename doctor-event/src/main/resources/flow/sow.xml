@@ -35,8 +35,13 @@
 
     <decision name="妊娠检查B">
         <transition name="妊娠检查不确定" expression="#{checkResult} equals '0'" target="已配种" />
-        <transition name="妊娠检查阳性" expression="#{checkResult} equals '1'" target="转舍B" />
+        <transition name="妊娠检查阳性" expression="#{checkResult} equals '1'" target="妊娠检查阳性后操作" />
         <transition name="妊娠检查阴性/返情/流产" expression="#{checkResult} equals '2' || #{checkResult} equals '3' || #{checkResult} equals '4'" target="空怀"/>
+    </decision>
+
+    <decision name="妊娠检查阳性后操作">
+        <transition name="当前舍为妊娠舍" expression="#{currentBarnType} equals '6'" target="妊娠检查阳性" />
+        <transition name="当前舍不为妊娠舍(否则默认)" expression="" target="转舍B" />
     </decision>
 
     <task name="转舍B">
