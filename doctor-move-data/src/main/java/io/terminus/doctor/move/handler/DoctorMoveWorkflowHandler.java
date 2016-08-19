@@ -174,7 +174,7 @@ public class DoctorMoveWorkflowHandler {
                         }
                     }
                     // 3. 如果是断奶事件判断 > 16  或者 仔猪变动 > 18
-                    else if (type == 16 || type == 18) {
+                    else if (type == 16 || type == 17 || type == 18) {
                         // 哺乳
                         if (pig.getStatus() == 8) {
                             createFlowProcess(nodesMapByName.get("哺乳").getId(), nodesMapByName.get("待分娩").getId(), pigEvent, flowInstance, pig);
@@ -186,6 +186,7 @@ public class DoctorMoveWorkflowHandler {
                     } else {
                         createFlowProcess(targetNode.getId(), sourceNode.getId(), pigEvent, flowInstance, pig);
                     }
+
                 }
             // }
             // 否则处于待配种状态
