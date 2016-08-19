@@ -43,22 +43,23 @@ public class DoctorChgLocationHandler extends DoctorAbstractEventHandler{
 
     @Override
     public DoctorPigTrack updateDoctorPigTrackInfo(DoctorPigTrack doctorPigTrack, DoctorBasicInputInfoDto basic, Map<String, Object> extra, Map<String, Object> context) {
-        Long toBarnId = Params.getWithConvert(extra,"chgLocationFromBarnId",a->Long.valueOf(a.toString()));
+        Long toBarnId = Params.getWithConvert(extra,"chgLocationToBarnId",a->Long.valueOf(a.toString()));
 
         //校验猪舍类型是否相同, 只有同类型才可以普通转舍
-        checkBarnTypeEqual(doctorPigTrack.getCurrentBarnId(), toBarnId);
+        DoctorBarn toBarn = checkBarnTypeEqual(doctorPigTrack.getCurrentBarnId(), toBarnId);
         doctorPigTrack.setCurrentBarnId(toBarnId);
-        doctorPigTrack.setCurrentBarnName(Params.getWithConvert(extra, "chgLocationFromBarnName", String::valueOf));
+        doctorPigTrack.setCurrentBarnName(toBarn.getName());
         doctorPigTrack.addAllExtraMap(extra);
         doctorPigTrack.addPigEvent(basic.getPigType(), (Long) context.get("doctorPigEventId"));
         return doctorPigTrack;
     }
 
-    private void checkBarnTypeEqual(Long fromBarnId, Long toBarnId) {
+    private DoctorBarn checkBarnTypeEqual(Long fromBarnId, Long toBarnId) {
         DoctorBarn fromBarn = doctorBarnDao.findById(fromBarnId);
-        DoctorBarn toBarn = doctorBarnDao.findById(fromBarnId);
+        DoctorBarn toBarn = doctorBarnDao.findById(toBarnId);
         if (fromBarn == null || toBarn == null || !Objects.equals(fromBarn.getPigType(), toBarn.getPigType())) {
             throw new ServiceException("barn.type.not.equal");
         }
+        return toBarn;
     }
 }
