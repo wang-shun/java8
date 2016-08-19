@@ -126,4 +126,9 @@
         DELETE FROM <include refid="tb"/>
         WHERE sum_at = #{sumAt}
     </delete>
+
+    <delete id="deleteByFarmIdAndSumAt" parameterType="map">
+        DELETE FROM <include refid="tb"/>
+        WHERE farm_id = #{farmId} AND sum_at = #{sumAt}
+    </delete>
 </mapper>

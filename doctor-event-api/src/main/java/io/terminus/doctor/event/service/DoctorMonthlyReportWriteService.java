@@ -26,6 +26,15 @@ public interface DoctorMonthlyReportWriteService {
                                            @NotNull(message = "date.not.null") Date sumAt);
 
     /**
+     * 创建DoctorMonthlyReport
+     * @param farmId 猪场id
+     * @param sumAt 结算日期(天初)
+     * @return
+     */
+    Response<Boolean> createMonthlyReport(@NotNull(message = "farmId.not.null") Long farmId,
+                                          @NotNull(message = "date.not.null") Date sumAt);
+
+    /**
      * 根据日期和猪场id获取初始化的月报统计
      *
      * @param farmId 猪场id

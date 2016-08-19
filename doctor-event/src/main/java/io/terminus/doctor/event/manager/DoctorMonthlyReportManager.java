@@ -35,4 +35,10 @@ public class DoctorMonthlyReportManager {
         doctorMonthlyReportDao.deleteBySumAt(sumAt);
         doctorMonthlyReportDao.creates(monthlyReports);
     }
+
+    @Transactional
+    public void createMonthlyReport(Long farmId, DoctorMonthlyReport monthlyReport, Date sumAt) {
+        doctorMonthlyReportDao.deleteByFarmIdAndSumAt(farmId, sumAt);
+        doctorMonthlyReportDao.create(monthlyReport);
+    }
 }

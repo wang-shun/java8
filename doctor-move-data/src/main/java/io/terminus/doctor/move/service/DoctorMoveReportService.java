@@ -2,7 +2,6 @@ package io.terminus.doctor.move.service;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Lists;
 import io.terminus.common.utils.Dates;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.utils.DateUtil;
@@ -109,7 +108,7 @@ public class DoctorMoveReportService {
                 .collect(Collectors.toList());
 
         //批量创建日报(先删除, 再创建)
-        reports.forEach(report -> doctorDailyReportDao.deleteBySumAt(report.getSumAt()));
+        reports.forEach(report -> doctorDailyReportDao.deleteByFarmIdAndSumAt(farmId, report.getSumAt()));
         doctorDailyReportDao.creates(reports);
     }
 
@@ -153,6 +152,6 @@ public class DoctorMoveReportService {
     @Transactional
     public void moveMonthlyReport(Long farmId, Integer index) {
         DateUtil.getBeforeMonthEnds(new Date(), MoreObjects.firstNonNull(index, MONTH_INDEX))
-                .forEach(date -> doctorMonthlyReportWriteService.createMonthlyReports(Lists.newArrayList(farmId), date));
+                .forEach(date -> doctorMonthlyReportWriteService.createMonthlyReport(farmId, date));
     }
 }

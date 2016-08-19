@@ -28,4 +28,8 @@ public class DoctorDailyReportDao extends MyBatisDao<DoctorDailyReport> {
     public void deleteBySumAt(Date sumAt) {
         getSqlSession().delete(sqlId("deleteBySumAt"), sumAt);
     }
+
+    public void deleteByFarmIdAndSumAt(Long farmId, Date sumAt) {
+        getSqlSession().delete(sqlId("deleteByFarmIdAndSumAt"), ImmutableMap.of("farmId", farmId, "sumAt", sumAt));
+    }
 }

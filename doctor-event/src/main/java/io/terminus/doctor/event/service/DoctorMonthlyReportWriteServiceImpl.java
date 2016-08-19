@@ -59,6 +59,19 @@ public class DoctorMonthlyReportWriteServiceImpl implements DoctorMonthlyReportW
     }
 
     @Override
+    public Response<Boolean> createMonthlyReport(Long farmId, Date sumAt) {
+        try {
+            Date startAt = new DateTime(sumAt).withDayOfMonth(1).withTimeAtStartOfDay().toDate(); //月初: 2016-08-01 00:00:00
+            Date endAt = new DateTime(Dates.endOfDay(sumAt)).plusSeconds(-1).toDate();            //天末: 2016-08-12 23:59:59
+            doctorMonthlyReportManager.createMonthlyReport(farmId, getMonthlyReport(farmId, startAt, endAt, sumAt), Dates.startOfDay(sumAt));
+            return Response.ok(Boolean.TRUE);
+        } catch (Exception e) {
+            log.error("create monthly reports failed, sumAt:{}, cause:{}", sumAt, Throwables.getStackTraceAsString(e));
+            return Response.fail("monthlyReport.create.fail");
+        }
+    }
+
+    @Override
     public Response<DoctorMonthlyReport> initMonthlyReportByFarmIdAndDate(Long farmId, Date date) {
         try {
             Date startAt = new DateTime(date).withDayOfMonth(1).withTimeAtStartOfDay().toDate(); //月初: 2016-08-01 00:00:00
