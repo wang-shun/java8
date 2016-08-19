@@ -96,7 +96,8 @@
 
     <decision name="断奶后事件">
         <transition name="被拼窝" value="19" expression="#{eventType} equals '19'" target="哺乳" handler="doctorSowFostersByHandler"/>
-        <transition name="去配种" value="12" expression="#{eventType} equals '12'" target="待配种" handler="doctorSowChgLocationHandler"/>
+        <transition name="去配种" value="12" expression="#{eventType} equals '12'" target="待配种" tacker="DoctorSowMatingCheckTrueTacker" handler="doctorSowChgLocationHandler"/>
+        <transition name="配种" value="9" target="已配种" tacker="DoctorSowMatingCheckFalseTacker" handler="doctorSowMatingHandler" describe="配种事件" />
     </decision>
 
     <!-- 结束节点 -->
