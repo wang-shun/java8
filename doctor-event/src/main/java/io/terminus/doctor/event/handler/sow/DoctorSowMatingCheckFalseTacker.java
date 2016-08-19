@@ -8,10 +8,12 @@ import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.workflow.core.TackerExecution;
 import io.terminus.doctor.workflow.event.ITacker;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /**
  * Created by xiao on 16/8/19.
  */
+@Component
 public class DoctorSowMatingCheckFalseTacker implements ITacker{
     @Autowired
     private DoctorPigTrackDao doctorPigTrackDao;
