@@ -14,7 +14,7 @@ import java.util.List;
 @Data
 public class Sub {
 
-    private Long id;
+    private Long id; // 子账号的 user id
 
     private String username; //用户名
 
