@@ -34,6 +34,7 @@ import java.util.stream.Collectors;
  * Date: 16/7/27
  */
 @Component
+@SuppressWarnings("all")
 public class DoctorMoveWorkflowHandler {
 
     @Autowired
@@ -140,11 +141,29 @@ public class DoctorMoveWorkflowHandler {
                             createFlowProcess(targetNode.getId(), sourceNode.getId(), pigEvent, flowInstance, pig);
                         }
                     }
+                    // 1.1 如果是转配种舍 > 12
+                    else if (type == 12) {
+                        // 如果是阳性
+                        if (pig.getStatus() == 4) {
+                            createFlowProcess(nodesMapByName.get("妊娠检查阳性").getId(), nodesMapByName.get("妊娠检查A结果").getId(), pigEvent, flowInstance, pig);
+                        }
+                        // 断奶
+                        else if (pig.getStatus() == 9) {
+                            createFlowProcess(nodesMapByName.get("断奶").getId(), nodesMapByName.get("妊娠检查A结果").getId(), pigEvent, flowInstance, pig);
+                        }
+                        else {
+                            createFlowProcess(targetNode.getId(), sourceNode.getId(), pigEvent, flowInstance, pig);
+                        }
+                    }
                     // 2.  如果是妊娠检查  > 11
                     else if (type == 11) {
                         // 如果是阳性
                         if (pig.getStatus() == 4) {
                             createFlowProcess(nodesMapByName.get("妊娠检查阳性").getId(), nodesMapByName.get("妊娠检查A结果").getId(), pigEvent, flowInstance, pig);
+                        }
+                        // 断奶
+                        else if (pig.getStatus() == 9) {
+                            createFlowProcess(nodesMapByName.get("断奶").getId(), nodesMapByName.get("妊娠检查A结果").getId(), pigEvent, flowInstance, pig);
                         }
                         // 否则空怀
                         else {
