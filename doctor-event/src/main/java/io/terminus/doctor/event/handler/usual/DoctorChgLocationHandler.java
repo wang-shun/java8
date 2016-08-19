@@ -43,7 +43,7 @@ public class DoctorChgLocationHandler extends DoctorAbstractEventHandler{
 
     @Override
     public DoctorPigTrack updateDoctorPigTrackInfo(DoctorPigTrack doctorPigTrack, DoctorBasicInputInfoDto basic, Map<String, Object> extra, Map<String, Object> context) {
-        Long toBarnId = Params.getWithConvert(extra,"chgLocationToBarnId",a->Long.valueOf(a.toString()));
+        Long toBarnId = Params.getWithConvert(extra,"chgLocationFromBarnId",a->Long.valueOf(a.toString()));
 
         //校验猪舍类型是否相同, 只有同类型才可以普通转舍
         DoctorBarn toBarn = checkBarnTypeEqual(doctorPigTrack.getCurrentBarnId(), toBarnId);
