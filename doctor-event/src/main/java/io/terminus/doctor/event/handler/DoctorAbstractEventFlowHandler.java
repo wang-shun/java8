@@ -179,11 +179,16 @@ public abstract class DoctorAbstractEventFlowHandler extends HandlerAware {
 
         //往pigTrack 当中添加猪舍类型
         if (notNull(doctorPigTrack.getCurrentBarnId())) {
-            DoctorBarn doctorBarn = doctorBarnDao.findById(doctorPigTrack.getCurrentBarnId());
+            DoctorBarn doctorBarn = getBarnById(doctorPigTrack.getCurrentBarnId());
             if (notNull(doctorBarn)) {
                 doctorPigTrack.setCurrentBarnType(doctorBarn.getPigType());
             }
         }
+    }
+
+    //根据id查猪舍
+    protected DoctorBarn getBarnById(Long barnId) {
+        return doctorBarnDao.findById(barnId);
     }
 
     /**
