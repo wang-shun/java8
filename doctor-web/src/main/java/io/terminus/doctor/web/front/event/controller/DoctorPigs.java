@@ -1,6 +1,7 @@
 package io.terminus.doctor.web.front.event.controller;
 
 import com.google.common.base.Throwables;
+import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
@@ -12,9 +13,11 @@ import io.terminus.doctor.event.dto.DoctorGroupDetail;
 import io.terminus.doctor.event.dto.DoctorPigInfoDetailDto;
 import io.terminus.doctor.event.dto.DoctorPigInfoDto;
 import io.terminus.doctor.event.dto.DoctorPigMessage;
+import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
 import io.terminus.doctor.event.model.DoctorPigTrack;
+import io.terminus.doctor.event.service.DoctorBarnReadService;
 import io.terminus.doctor.event.service.DoctorGroupReadService;
 import io.terminus.doctor.event.service.DoctorPigReadService;
 import io.terminus.doctor.event.service.DoctorPigWriteService;
@@ -55,6 +58,10 @@ public class DoctorPigs {
     private final DoctorPigWriteService doctorPigWriteService;
     private final DoctorGroupReadService doctorGroupReadService;
     private final TransFromUtil transFromUtil;
+
+    @RpcConsumer
+    private  DoctorBarnReadService doctorBarnReadService;
+
     @Autowired
     public DoctorPigs(DoctorPigReadService doctorPigReadService, DoctorPigWriteService doctorPigWriteService, DoctorGroupReadService doctorGroupReadService, TransFromUtil transFromUtil){
         this.doctorPigReadService = doctorPigReadService;
@@ -263,4 +270,18 @@ public class DoctorPigs {
         }
         return true;
     }
+
+    /**
+     * 根据猪id查询当前猪舍
+     *
+     * @param pigId 猪id
+     * @return 猪舍
+     */
+    @RequestMapping(value = "/currentBarn", method = RequestMethod.GET)
+    @ResponseBody
+    public DoctorBarn findCurrentBarnByPigId(@RequestParam("pigId") Long pigId){
+        DoctorPigTrack pigTrack = RespHelper.or500(doctorPigReadService.findPigTrackByPigId(pigId));
+        return RespHelper.or500(doctorBarnReadService.findBarnById(pigTrack.getCurrentBarnId()));
+    }
+
 }
