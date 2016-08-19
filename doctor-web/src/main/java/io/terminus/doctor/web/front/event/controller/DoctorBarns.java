@@ -23,11 +23,15 @@ import io.terminus.doctor.user.model.DoctorFarm;
 import io.terminus.doctor.user.service.DoctorFarmReadService;
 import io.terminus.doctor.web.front.auth.DoctorFarmAuthCenter;
 import io.terminus.doctor.web.front.event.dto.DoctorBarnDetail;
-import io.terminus.pampas.common.UserUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 import java.util.Objects;
@@ -141,17 +145,19 @@ public class DoctorBarns {
      *
      * @param farmId   猪场id
      * @param pigTypes 猪舍类别 逗号分隔
+     * @param pigIds   根据猪id过滤
      * @return 猪舍表列表
      * @see PigType
      */
     @RequestMapping(value = "/pigTypes", method = RequestMethod.GET)
     public List<DoctorBarn> findBarnsByfarmIdAndType(@RequestParam("farmId") Long farmId,
-                                                     @RequestParam(value = "pigTypes", required = false) String pigTypes) {
+                                                     @RequestParam(value = "pigTypes", required = false) String pigTypes,
+                                                     @RequestParam(value = "pigIds", required = false) String pigIds) {
         List<Integer> types = Lists.newArrayList();
         if (notEmpty(pigTypes)) {
             types = Splitters.splitToInteger(pigTypes, Splitters.COMMA);
         }
-        return RespHelper.or500(doctorBarnReadService.findBarnsByFarmIdAndPigTypes(farmId, types));
+        return filterBarnByPigIds(RespHelper.or500(doctorBarnReadService.findBarnsByFarmIdAndPigTypes(farmId, types)), pigIds);
     }
 
     /**

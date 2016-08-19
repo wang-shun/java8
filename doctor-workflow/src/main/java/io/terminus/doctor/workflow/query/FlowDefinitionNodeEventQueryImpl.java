@@ -4,6 +4,8 @@ import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
 import io.terminus.common.model.Paging;
 import io.terminus.doctor.workflow.access.JdbcAccess;
+import io.terminus.doctor.workflow.core.TackerExecution;
+import io.terminus.doctor.workflow.core.TackerExecutionImpl;
 import io.terminus.doctor.workflow.core.WorkFlowEngine;
 import io.terminus.doctor.workflow.event.ITacker;
 import io.terminus.doctor.workflow.model.FlowDefinitionNode;
@@ -211,27 +213,12 @@ public class FlowDefinitionNodeEventQueryImpl implements FlowDefinitionNodeEvent
         if (StringHelper.isNotBlank(nodeEvent.getHandler())) {
             if (StringHelper.isNotBlank(nodeEvent.getTacker())) {
                 String iTackerName = nodeEvent.getTacker();
-                ITacker iTacker = workFlowEngine.buildContext().get(iTackerName);
-                if (iTacker == null) {
-                    // 获取类的简单名称, 从上下文中获取
-                    iTacker = workFlowEngine.buildContext().get(
-                            StringHelper.uncapitalize(iTackerName.substring(iTackerName.lastIndexOf(".") + 1)));
-                    if (iTacker == null) {
-                        try {
-                            // 实例化, 并存到上下文
-                            iTacker = (ITacker) Class.forName(iTackerName).newInstance();
-                            workFlowEngine.buildContext().put(
-                                    StringHelper.uncapitalize(iTackerName.substring(iTackerName.lastIndexOf(".") + 1)), iTacker);
-                        } catch (Exception e) {
-                            log.error("iTacker not found, iTackerName is {}, cause by {}",
-                                    iTackerName, Throwables.getStackTraceAsString(e));
-                            AssertHelper.throwException("iTacker not found, iTackerName is {}, cause by {}",
-                                    iTackerName, Throwables.getStackTraceAsString(e));
-                        }
+                TackerExecution tackerExecution = new TackerExecutionImpl(workFlowEngine, instance.getBusinessId(), flowProcess.getFlowData(), instance.getFlowDefinitionKey(), flowProcess);
+                ITacker iTacker = tackerExecution.getITacker(iTackerName);
+                if (iTacker != null) {
+                    if (!iTacker.tacker(tackerExecution)) {
+                        return;
                     }
-                }
-                if (!iTacker.tacker(flowProcess.getFlowData())) {
-                    return;
                 }
             }
             events.add(nodeEvent);
