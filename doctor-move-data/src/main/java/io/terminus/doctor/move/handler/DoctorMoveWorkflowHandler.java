@@ -103,6 +103,9 @@ public class DoctorMoveWorkflowHandler {
      */
     @Transactional
     public void handle(List<DoctorPigInfoDto> pigInfoDtos) {
+        initBasicData();
+
+        // 处理数据
         pigInfoDtos.forEach(pig -> {
             // 1. 生成一个流程实例
             FlowInstance flowInstance = FlowInstance.builder()
