@@ -111,7 +111,7 @@ public class DoctorSowPregCheckHandler extends DoctorAbstractEventFlowHandler {
         }
         Map<String, Object> express = execution.getExpression();
         express.put("pregCheckResult", pregCheckResult);
-        express.put("currentBarnType", getBarnById(doctorPigTrack.getId()).getPigType());
+        express.put("currentBarnType", getBarnById(doctorPigTrack.getCurrentBarnId()).getPigType());
         doctorPigTrack.addPigEvent(basic.getPigType(), (Long) context.get("doctorPigEventId"));
         return doctorPigTrack;
     }
