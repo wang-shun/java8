@@ -11,13 +11,17 @@ import io.terminus.common.model.Response;
 import io.terminus.common.utils.MapBuilder;
 import io.terminus.doctor.common.enums.UserStatus;
 import io.terminus.doctor.common.enums.UserType;
+import io.terminus.doctor.user.model.DoctorStaff;
 import io.terminus.doctor.user.model.DoctorUser;
 import io.terminus.doctor.user.model.DoctorUserDataPermission;
+import io.terminus.doctor.user.service.DoctorStaffReadService;
+import io.terminus.doctor.user.service.DoctorStaffWriteService;
 import io.terminus.doctor.user.service.DoctorUserDataPermissionReadService;
 import io.terminus.doctor.user.service.DoctorUserDataPermissionWriteService;
 import io.terminus.doctor.user.service.DoctorUserProfileReadService;
 import io.terminus.doctor.user.service.DoctorUserReadService;
 import io.terminus.doctor.user.service.PrimaryUserReadService;
+import io.terminus.doctor.user.service.PrimaryUserWriteService;
 import io.terminus.pampas.client.Export;
 import io.terminus.parana.common.utils.EncryptUtil;
 import io.terminus.parana.common.utils.RespHelper;
@@ -51,22 +55,32 @@ public class SubService {
     private final DoctorUserProfileReadService doctorUserProfileReadService;
 
     private final PrimaryUserReadService primaryUserReadService;
+    private final PrimaryUserWriteService primaryUserWriteService;
 
     private final DoctorUserDataPermissionWriteService doctorUserDataPermissionWriteService;
 
     private final DoctorUserDataPermissionReadService doctorUserDataPermissionReadService;
 
+    private final DoctorStaffWriteService doctorStaffWriteService;
+    private final DoctorStaffReadService doctorStaffReadService;
+
     @Autowired
     public SubService(DoctorUserReadService doctorUserReadService, UserWriteService<User> userWriteService,
                       DoctorUserProfileReadService doctorUserProfileReadService, PrimaryUserReadService primaryUserReadService,
                       DoctorUserDataPermissionWriteService doctorUserDataPermissionWriteService,
-                      DoctorUserDataPermissionReadService doctorUserDataPermissionReadService) {
+                      DoctorUserDataPermissionReadService doctorUserDataPermissionReadService,
+                      DoctorStaffWriteService doctorStaffWriteService,
+                      DoctorStaffReadService doctorStaffReadService,
+                      PrimaryUserWriteService primaryUserWriteService) {
         this.doctorUserReadService = doctorUserReadService;
         this.userWriteService = userWriteService;
         this.doctorUserProfileReadService = doctorUserProfileReadService;
         this.primaryUserReadService = primaryUserReadService;
         this.doctorUserDataPermissionWriteService = doctorUserDataPermissionWriteService;
         this.doctorUserDataPermissionReadService = doctorUserDataPermissionReadService;
+        this.doctorStaffWriteService = doctorStaffWriteService;
+        this.doctorStaffReadService = doctorStaffReadService;
+        this.primaryUserWriteService = primaryUserWriteService;
     }
 
     public Response<Sub> findSubByUserId(BaseUser user, Long userId) {
@@ -130,7 +144,18 @@ public class SubService {
             }
 
             subUser.setName(userName);
-            subUser.setStatus(UserStatus.NORMAL.value());
+            if(Objects.equals(sub.getStatus(), io.terminus.doctor.user.model.Sub.Status.ACTIVE.value())){
+                subUser.setStatus(UserStatus.NORMAL.value());
+            }else if(Objects.equals(sub.getStatus(), io.terminus.doctor.user.model.Sub.Status.LOCK.value())){
+                subUser.setStatus(UserStatus.LOCKED.value());
+                // sub, staff
+                io.terminus.doctor.user.model.Sub subModel = RespHelper.orServEx(primaryUserReadService.findSubByUserId(subUser.getId()));
+                subModel.setStatus(io.terminus.doctor.user.model.Sub.Status.LOCK.value());
+                RespHelper.orServEx(primaryUserWriteService.updateSub(subModel));
+                DoctorStaff staff = RespHelper.orServEx(doctorStaffReadService.findStaffByUserId(subUser.getId()));
+                staff.setStatus(DoctorStaff.Status.ABSENT.value());
+                RespHelper.orServEx(doctorStaffWriteService.updateDoctorStaff(staff));
+            }
             // TODO: 自定义角色冗余进 user 表
             List<String> roles = Lists.newArrayList("SUB");
             if (sub.getRoleId() != null) {

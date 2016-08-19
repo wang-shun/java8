@@ -157,9 +157,13 @@ public class SubRoles {
     }
 
     private void checkAuth(){
-        if(!Objects.equals(UserUtil.getCurrentUser().getType(), UserType.FARM_ADMIN_PRIMARY.value())){
-            throw new JsonResponseException(403, "user.no.permission");
+        if (UserUtil.getCurrentUser() == null) {
+            throw new JsonResponseException(401, "user.not.login");
         }
+
+//        if(!Objects.equals(UserUtil.getCurrentUser().getType(), UserType.FARM_ADMIN_PRIMARY.value())){
+//            throw new JsonResponseException(403, "user.no.permission");
+//        }
     }
 
 
