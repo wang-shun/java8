@@ -5,6 +5,7 @@ import io.terminus.common.exception.ServiceException;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.service.DoctorPigTypeStatisticWriteService;
+import io.terminus.doctor.move.handler.DoctorMoveDatasourceHandler;
 import io.terminus.doctor.move.service.DoctorMoveBasicService;
 import io.terminus.doctor.move.service.DoctorMoveDataService;
 import io.terminus.doctor.move.service.DoctorMoveReportService;
@@ -50,6 +51,7 @@ public class DoctorMoveDataController {
     private final DoctorUserDataPermissionDao doctorUserDataPermissionDao;
     private final DoctorUserReadService doctorUserReadService;
     private final DoctorPigTypeStatisticWriteService doctorPigTypeStatisticWriteService;
+    private final DoctorMoveDatasourceHandler doctorMoveDatasourceHandler;
 
     @Autowired
     public DoctorMoveDataController(UserInitService userInitService,
@@ -60,7 +62,8 @@ public class DoctorMoveDataController {
                                     DoctorFarmDao doctorFarmDao,
                                     DoctorUserDataPermissionDao doctorUserDataPermissionDao,
                                     DoctorUserReadService doctorUserReadService,
-                                    DoctorPigTypeStatisticWriteService doctorPigTypeStatisticWriteService) {
+                                    DoctorPigTypeStatisticWriteService doctorPigTypeStatisticWriteService,
+                                    DoctorMoveDatasourceHandler doctorMoveDatasourceHandler) {
         this.userInitService = userInitService;
         this.wareHouseInitService = wareHouseInitService;
         this.doctorMoveBasicService = doctorMoveBasicService;
@@ -70,6 +73,23 @@ public class DoctorMoveDataController {
         this.doctorUserDataPermissionDao = doctorUserDataPermissionDao;
         this.doctorUserReadService = doctorUserReadService;
         this.doctorPigTypeStatisticWriteService = doctorPigTypeStatisticWriteService;
+        this.doctorMoveDatasourceHandler = doctorMoveDatasourceHandler;
+    }
+
+    /**
+     * 更新数据源
+     *
+     * @return 是否成功
+     */
+    @RequestMapping(value = "/reload", method = RequestMethod.GET)
+    public Boolean reloadMoveId() {
+        try {
+            doctorMoveDatasourceHandler.init();
+            return Boolean.TRUE;
+        } catch (Exception e) {
+            log.error("move datasource connect failed, cause:{}", Throwables.getStackTraceAsString(e));
+            return Boolean.FALSE;
+        }
     }
 
     /**
