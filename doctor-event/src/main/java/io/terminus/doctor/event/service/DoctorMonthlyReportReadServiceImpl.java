@@ -82,7 +82,7 @@ public class DoctorMonthlyReportReadServiceImpl implements DoctorMonthlyReportRe
         DateTime now = DateTime.now();
         //当月返回今天
         if (datetime.getMonthOfYear() == now.getMonthOfYear()) {
-            return now.withTimeAtStartOfDay().toDate();
+            return now.withTimeAtStartOfDay().plusDays(-1).toDate();
         }
         return datetime.withDayOfMonth(1).plusMonths(1).plusDays(-1).toDate();
     }
