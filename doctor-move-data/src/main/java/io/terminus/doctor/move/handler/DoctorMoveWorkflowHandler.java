@@ -138,7 +138,7 @@ public class DoctorMoveWorkflowHandler {
                             createFlowProcess(nodesMapByName.get("妊娠检查阳性").getId(), nodesMapByName.get("妊娠检查A结果").getId(), pigEvent, flowInstance, pig);
                         }
                         // 如果是待分娩
-                        if (pig.getStatus() == 7) {
+                        else if (pig.getStatus() == 7) {
                             createFlowProcess(nodesMapByName.get("待分娩").getId(), nodesMapByName.get("妊娠检查A结果").getId(), pigEvent, flowInstance, pig);
                         }
                         // 断奶
