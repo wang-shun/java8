@@ -8,6 +8,7 @@ rpc.dubbo:
     module: doctor-schedule
     registryAddress: 101.201.44.35:2181
     version: 1.0.0
+    timeout: 60000
 
 # zookeeper
 zookeeper:
