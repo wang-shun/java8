@@ -69,6 +69,16 @@ public class DoctorBarnReadServiceImpl implements DoctorBarnReadService {
     }
 
     @Override
+    public Response<List<DoctorBarn>> findBarnsByFarmIds(List<Long> farmIds) {
+        try {
+            return Response.ok(doctorBarnDao.findByFarmIds(farmIds));
+        } catch (Exception e) {
+            log.error("find barn by farm id fail, farmIds:{}, cause:{}", farmIds, Throwables.getStackTraceAsString(e));
+            return Response.fail("barn.find.fail");
+        }
+    }
+
+    @Override
     public Response<List<DoctorBarn>> findBarnsByEnums(Long farmId, Integer pigType, Integer canOpenGroup, Integer status) {
         try {
             return Response.ok(doctorBarnDao.findByEnums(farmId, pigType, canOpenGroup, status));
