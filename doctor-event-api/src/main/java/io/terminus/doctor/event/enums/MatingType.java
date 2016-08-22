@@ -13,7 +13,7 @@ import java.util.Objects;
 public enum MatingType {
 
     NATURAL(1, "自然交配"),
-    MANUAL(2, "人工受精");
+    MANUAL(2, "人工授精");
 
     @Getter
     private Integer key;
