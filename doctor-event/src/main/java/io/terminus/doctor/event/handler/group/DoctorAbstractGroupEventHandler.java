@@ -330,7 +330,7 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
         }
 
         //保育舍 => 保育舍/育肥舍/育种舍/后备舍(公母)
-        if (Objects.equals(pigType, PigType.NURSERY_PIGLET.getValue()) &&
+        else if (Objects.equals(pigType, PigType.NURSERY_PIGLET.getValue()) &&
                 !(Objects.equals(barnType, PigType.FATTEN_PIG.getValue()) ||
                         Objects.equals(barnType, PigType.BREEDING.getValue()) ||
                         Objects.equals(barnType, PigType.NURSERY_PIGLET.getValue()) ||
@@ -342,12 +342,18 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
         }
 
         //育肥舍 => 育肥舍/后备舍(公母)
-        if (Objects.equals(pigType, PigType.FATTEN_PIG.getValue()) &&
+        else if (Objects.equals(pigType, PigType.FATTEN_PIG.getValue()) &&
                 !(Objects.equals(barnType, PigType.FATTEN_PIG.getValue()) ||
                         Objects.equals(barnType, PigType.RESERVE_SOW.getValue()) ||
                         Objects.equals(barnType, PigType.RESERVE_BOAR.getValue()))) {
             log.error("check can trans barn pigType:{}, barnId:{}", pigType, barnId);
             throw new ServiceException("fatten.can.not.trans");
+        }
+
+        //其他 => 同类型
+        else if(!Objects.equals(pigType, barnType)) {
+            log.error("check can trans barn pigType:{}, barnId:{}", pigType, barnId);
+            throw new ServiceException("no.equal.type.can.not.trans");
         }
     }
 
