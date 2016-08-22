@@ -1,9 +1,12 @@
 package io.terminus.doctor.web.component;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.api.client.util.Lists;
 import io.terminus.common.exception.JsonResponseException;
+import io.terminus.common.model.BaseUser;
 import io.terminus.common.model.Paging;
 import io.terminus.common.utils.JsonMapper;
+import io.terminus.common.utils.Splitters;
 import io.terminus.doctor.basic.enums.SearchType;
 import io.terminus.doctor.basic.search.material.MaterialSearchReadService;
 import io.terminus.doctor.basic.search.material.SearchedMaterial;
@@ -22,6 +25,8 @@ import io.terminus.doctor.event.search.group.SearchedGroupDto;
 import io.terminus.doctor.event.search.pig.PigSearchReadService;
 import io.terminus.doctor.event.search.pig.SearchedPig;
 import io.terminus.doctor.event.search.pig.SearchedPigDto;
+import io.terminus.doctor.user.model.DoctorUserDataPermission;
+import io.terminus.doctor.user.service.DoctorUserDataPermissionReadService;
 import io.terminus.pampas.common.UserUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -59,6 +64,8 @@ public class DoctorSearches {
 
     private final MaterialSearchReadService materialSearchReadService;
 
+    private final DoctorUserDataPermissionReadService doctorUserDataPermissionReadService;
+
     private static final ObjectMapper OBJECT_MAPPER = JsonMapper.JSON_NON_DEFAULT_MAPPER.getMapper();
 
 
@@ -67,12 +74,14 @@ public class DoctorSearches {
                           GroupSearchReadService groupSearchReadService,
                           DoctorSearchHistoryService doctorSearchHistoryService,
                           BarnSearchReadService barnSearchReadService,
-                          MaterialSearchReadService materialSearchReadService) {
+                          MaterialSearchReadService materialSearchReadService,
+                          DoctorUserDataPermissionReadService doctorUserDataPermissionReadService) {
         this.pigSearchReadService = pigSearchReadService;
         this.groupSearchReadService = groupSearchReadService;
         this.doctorSearchHistoryService = doctorSearchHistoryService;
         this.barnSearchReadService = barnSearchReadService;
         this.materialSearchReadService = materialSearchReadService;
+        this.doctorUserDataPermissionReadService = doctorUserDataPermissionReadService;
     }
 
     /**
@@ -92,6 +101,11 @@ public class DoctorSearches {
         if (farmIdNotExist(params)) {
             return new Paging<>(0L, Collections.emptyList());
         }
+        List<String> barnIdList = getUserAccessBarnIds(params);
+        if (barnIdList == null){
+            return new Paging<>(0L, Collections.emptyList());
+        }
+        params.put("barnIds", barnIdList.get(0));
         createSearchWord(SearchType.SOW.getValue(), params);
         params.put("pigType", DoctorPig.PIG_TYPE.SOW.getKey().toString());
         return RespHelper.or500(pigSearchReadService.searchWithAggs(pageNo, pageSize, "search/search.mustache", params)).getPigs();
@@ -113,6 +127,11 @@ public class DoctorSearches {
         if (farmIdNotExist(params)) {
             return new SearchedPigDto(new Paging<>(0L, Collections.emptyList()), Collections.emptyList());
         }
+        List<String> barnIdList = getUserAccessBarnIds(params);
+        if (barnIdList == null){
+            return null;
+        }
+        params.put("barnIds", barnIdList.get(0));
         createSearchWord(SearchType.SOW.getValue(), params);
         params.put("pigType", DoctorPig.PIG_TYPE.SOW.getKey().toString());
 
@@ -146,6 +165,11 @@ public class DoctorSearches {
         if (farmIdNotExist(params)) {
             return Collections.emptyList();
         }
+        List<String> barnIdList = getUserAccessBarnIds(params);
+        if (barnIdList == null){
+            return Collections.emptyList();
+        }
+        params.put("barnIds", barnIdList.get(0));
         params.put("pigType", DoctorPig.PIG_TYPE.SOW.getKey().toString());
         if (size == null) {
             size = 8; // 默认获取 8 条
@@ -177,6 +201,12 @@ public class DoctorSearches {
         if (farmIdNotExist(params)) {
             return new Paging<>(0L, Collections.emptyList());
         }
+
+        List<String> barnIdList = getUserAccessBarnIds(params);
+        if (barnIdList == null){
+            return new Paging<>(0L, Collections.emptyList());
+        }
+        params.put("barnIds", barnIdList.get(0));
         createSearchWord(SearchType.BOAR.getValue(), params);
         params.put("pigType", DoctorPig.PIG_TYPE.BOAR.getKey().toString());
         return RespHelper.or500(pigSearchReadService.searchWithAggs(pageNo, pageSize, "search/search.mustache", params)).getPigs();
@@ -195,6 +225,11 @@ public class DoctorSearches {
         if (farmIdNotExist(params)) {
             return Collections.emptyList();
         }
+        List<String> barnIdList = getUserAccessBarnIds(params);
+        if (barnIdList == null){
+            return Collections.emptyList();
+        }
+        params.put("barnIds", barnIdList.get(0));
         params.put("pigType", DoctorPig.PIG_TYPE.BOAR.getKey().toString());
 
         // 游标法获取数据
@@ -231,6 +266,11 @@ public class DoctorSearches {
         if (farmIdNotExist(params)) {
             return new Paging<>(0L, Collections.emptyList());
         }
+        List<String> barnIdList = getUserAccessBarnIds(params);
+        if (barnIdList == null){
+            return new Paging<>(0L, Collections.emptyList());
+        }
+        params.put("barnIds", barnIdList.get(0));
         createSearchWord(SearchType.GROUP.getValue(), params);
         return RespHelper.or500(groupSearchReadService.searchWithAggs(pageNo, pageSize, "search/search.mustache", params)).getGroups();
     }
@@ -251,6 +291,11 @@ public class DoctorSearches {
         if (farmIdNotExist(params)) {
             return new SearchedGroupDto(new Paging<>(0L, Collections.emptyList()), Collections.emptyList());
         }
+        List<String> barnIdList = getUserAccessBarnIds(params);
+        if (barnIdList == null){
+            return null;
+        }
+        params.put("barnIds", barnIdList.get(0));
         createSearchWord(SearchType.GROUP.getValue(), params);
 
         // 获取分页后的猪群数据
@@ -289,6 +334,11 @@ public class DoctorSearches {
         if (farmIdNotExist(params)) {
             return new SearchedBarnDto(new Paging<>(0L, Collections.emptyList()), Collections.emptyList());
         }
+        List<String> barnIdList = getUserAccessBarnIds(params);
+        if (barnIdList == null){
+            return null;
+        }
+        params.put("barnIds", barnIdList.get(0));
         createSearchWord(SearchType.BARN.getValue(), params);
         Paging<SearchedBarn> barns =
                 RespHelper.orServEx(barnSearchReadService.searchWithAggs(pageNo, pageSize, "search/search.mustache", params)).getBarns();
@@ -318,6 +368,11 @@ public class DoctorSearches {
         if (farmIdNotExist(params)) {
             return Collections.emptyList();
         }
+        List<String> barnIdList = getUserAccessBarnIds(params);
+        if (barnIdList == null){
+            return Collections.emptyList();
+        }
+        params.put("barnIds", barnIdList.get(0));
         // 游标法获取数据
         Integer pageNo = 1;
         Integer pageSize = 100;
@@ -435,6 +490,11 @@ public class DoctorSearches {
             if (farmIdNotExist(params)) {
                 return Collections.emptyList();
             }
+            List<String> barnIdList = getUserAccessBarnIds(params);
+            if (barnIdList == null){
+                return Collections.emptyList();
+            }
+            params.put("barnIds", barnIdList.get(0));
             createSearchWord(searchType, params);
 
             // 母猪状态由前台传
@@ -489,4 +549,38 @@ public class DoctorSearches {
             throw new JsonResponseException(500, e.getMessage());
         }
     }
+
+    /**
+     * 获取当前用户所拥有猪舍权限的猪舍IDS
+     * @return 猪舍IDS
+     */
+    public List<String> getUserAccessBarnIds(Map<String, String> params) {
+        List<String> list = Lists.newArrayList();
+        BaseUser user = UserUtil.getCurrentUser();
+        if (user != null) {
+            DoctorUserDataPermission doctorUserDataPermission = RespHelper.orServEx(doctorUserDataPermissionReadService.findDataPermissionByUserId(user.getId()));
+            if (doctorUserDataPermission != null) {
+                //获取猪舍ids
+                String barnIds = doctorUserDataPermission.getBarnIds();
+                if (params.containsKey("barnId")) {
+                    if (StringUtils.isNotBlank(barnIds)) {
+                        List<String> barnIdList = Splitters.COMMA.splitToList(barnIds);
+                        String barnId = params.get("barnId");
+                        if (StringUtils.isNotBlank(barnId)) {
+                            if (barnIdList.contains(barnId)) {
+                                barnIds = barnId;
+                                params.remove("barnId");
+                            } else {
+                                return null;
+                            }
+                        }
+                    }
+                }
+                list.add(barnIds);
+                return list;
+            }
+        }
+        return null;
+    }
+
 }
