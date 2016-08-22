@@ -226,6 +226,21 @@ public class DoctorGroupEvents {
     }
 
     /**
+     * 根据猪舍id查询已建群的猪群
+     * @param barnId 猪舍id
+     * @return 猪群
+     */
+    @RequestMapping(value = "/open/barn", method = RequestMethod.GET)
+    public List<DoctorGroup> findOpenGroupsByBarnId(@RequestParam(value = "barnId", required = false) Long barnId) {
+        if (barnId == null) {
+            return Lists.newArrayList();
+        }
+        return RespHelper.or500(doctorGroupReadService.findGroupByCurrentBarnId(barnId)).stream()
+                .filter(group -> Objects.equals(DoctorGroup.Status.CREATED.getValue(), group.getStatus()))
+                .collect(Collectors.toList());
+    }
+
+    /**
      * 回滚猪群事件
      * @param eventId 回滚事件的id
      * @return 猪群镜像
