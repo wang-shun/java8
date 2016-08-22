@@ -325,6 +325,7 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
                 !(Objects.equals(barnType, PigType.NURSERY_PIGLET.getValue()) ||
                         Objects.equals(barnType, PigType.FARROW_PIGLET.getValue()) ||
                                 Objects.equals(barnType, PigType.DELIVER_SOW.getValue()))) {
+            log.error("check can trans barn pigType:{}, barnId:{}", pigType, barnId);
             throw new ServiceException("group.only.trans.farrow");
         }
 
@@ -333,7 +334,19 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
                 !(Objects.equals(barnType, PigType.FATTEN_PIG.getValue()) ||
                         Objects.equals(barnType, PigType.BREEDING.getValue()) ||
                         Objects.equals(barnType, PigType.NURSERY_PIGLET.getValue()))) {
+            log.error("check can trans barn pigType:{}, barnId:{}", pigType, barnId);
             throw new ServiceException("group.only.trans.fatten");
+        }
+    }
+
+    //校验目标猪群的猪舍id与目标猪舍是否相同
+    protected void checkCanTransGroup(Long toGroupId, Long toBarnId) {
+        if (toGroupId != null) {
+            DoctorGroup toGroup = doctorGroupDao.findById(toGroupId);
+            if (toGroup == null || !Objects.equals(toGroup.getCurrentBarnId(), toBarnId)) {
+                log.error("check can trans group toGroupId:{}, toBarnId:{}", toGroupId, toBarnId);
+                throw new ServiceException("group.toBarn.not.equal");
+            }
         }
     }
 
