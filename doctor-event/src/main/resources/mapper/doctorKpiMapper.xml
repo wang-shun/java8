@@ -756,4 +756,39 @@
         SELECT ifnull(count(1), 0) FROM doctor_pig_tracks
         WHERE pig_type = 2 AND is_removal = 0 AND farm_id = #{farmId}
     </select>
+
+    <!-- 实时存栏: 产房仔猪 -->
+    <select id="realTimeLiveStockFarrow" parameterType="map" resultType="int">
+        SELECT
+        (
+          SELECT
+            ifnull(sum(quantity), 0) AS nowCount    -- 当前存栏
+          FROM
+            (
+              SELECT id
+              FROM doctor_groups
+                WHERE `status` = 1 AND
+                      pig_type IN (1, 7) AND
+                      farm_id = #{farmId}
+            ) AS a
+            LEFT JOIN doctor_group_tracks b ON a.id = b.group_id
+        )
+          -
+        (
+            SELECT
+              sum(inCount) - sum(outCount) - sum(turnCount) AS deltaCount  --算出这段时间的增量
+            FROM (
+                   SELECT
+                     CASE WHEN TYPE = 2 THEN quantity ELSE 0 END AS inCount,
+                     CASE WHEN TYPE IN (3, 4, 9) THEN quantity ELSE 0 END AS outCount,
+                     CASE WHEN TYPE = 5 THEN 1 ELSE 0 END AS turnCount
+                   FROM doctor_group_events
+                   WHERE
+                     farm_id = #{farmId} AND
+                     event_at &gt;= #{date} AND   -- 日期取下一天的天初(因为每天的存栏算的是天末) todo
+                     pig_type IN (1, 7) AND TYPE IN (2, 3, 4, 5, 9)
+                 ) AS EVENT
+          ) AS realCount
+        FROM DUAL;
+    </select>
 </mapper>

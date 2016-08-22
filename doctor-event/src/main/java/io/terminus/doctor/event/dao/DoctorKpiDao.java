@@ -326,7 +326,7 @@ public class DoctorKpiDao {
     /**
      * NPD
      */
-    public double   npd(Long farmId, Date startAt, Date endAt) {
+    public double npd(Long farmId, Date startAt, Date endAt) {
         return sqlSession.selectOne(sqlId("npd"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
     }
 
@@ -391,5 +391,15 @@ public class DoctorKpiDao {
      */
     public int liveStockFatten(Long farmId) {
         return sqlSession.selectOne(sqlId("liveStockFatten"), ImmutableMap.of("farmId", farmId));
+    }
+
+    /**
+     * 获取某天的保育猪存栏
+     * @param farmId 猪场id
+     * @param date   日期
+     * @return 存栏数量
+     */
+    public int realTimeLiveStockFarrow(Long farmId, Date date) {
+        return sqlSession.selectOne(sqlId("realTimeLiveStockFarrow"), ImmutableMap.of("farmId", farmId, "date", date));
     }
 }
