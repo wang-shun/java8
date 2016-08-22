@@ -394,12 +394,32 @@ public class DoctorKpiDao {
     }
 
     /**
-     * 获取某天的保育猪存栏
+     * 获取某天的产房仔猪存栏
      * @param farmId 猪场id
      * @param date   日期
      * @return 存栏数量
      */
     public int realTimeLiveStockFarrow(Long farmId, Date date) {
         return sqlSession.selectOne(sqlId("realTimeLiveStockFarrow"), ImmutableMap.of("farmId", farmId, "date", date));
+    }
+
+    /**
+     * 获取某天的保育猪存栏
+     * @param farmId 猪场id
+     * @param date   日期
+     * @return 存栏数量
+     */
+    public int realTimeLiveStockNursery(Long farmId, Date date) {
+        return sqlSession.selectOne(sqlId("realTimeLiveStockNursery"), ImmutableMap.of("farmId", farmId, "date", date));
+    }
+
+    /**
+     * 获取某天的育肥猪存栏
+     * @param farmId 猪场id
+     * @param date   日期
+     * @return 存栏数量
+     */
+    public int realTimeLiveStockFatten(Long farmId, Date date) {
+        return sqlSession.selectOne(sqlId("realTimeLiveStockFatten"), ImmutableMap.of("farmId", farmId, "date", date));
     }
 }
