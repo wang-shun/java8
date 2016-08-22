@@ -278,24 +278,8 @@ public class DoctorGroupWriteServiceImpl implements DoctorGroupWriteService {
                 doctorCommonGroupEventHandler.autoGroupEventClose(doctorGroupDao.findById(groupDetail.getGroup().getId()), groupTrack, turnSeed);
             }
 
-            // 3. 触发其他事件, 内含事务控制
-            //由于不确定 group 会不会被修改, 还是重新从数据库查一遍保险
-            DoctorGroup group = doctorGroupDao.findById(groupDetail.getGroup().getId());
-            switch (groupType) {
-                case RESERVE_SOW :
-                    if(Objects.equals(barn.getPigType(), PigType.MATE_SOW.getValue())){
-                        // 进场事件
-                        this.callPigEntryEvent(groupType, turnSeed, group, barn, null);
-                    }
-                    if(Objects.equals(barn.getPigType(), PigType.PREG_SOW.getValue())){
-                        //TODO 触发配种事件
-                    }
-                    break;
-                case RESERVE_BOAR :
-                    // 进场事件
-                    this.callPigEntryEvent(groupType, turnSeed, group, barn, null);
-                    break;
-            }
+            // 3. 触发进场事件(转为待配种状态), 内含事务控制
+            this.callPigEntryEvent(groupType, turnSeed, doctorGroupDao.findById(groupDetail.getGroup().getId()), barn, null);
 
             return Response.ok(Boolean.TRUE);
         } catch (ServiceException e) {
