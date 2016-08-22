@@ -287,9 +287,6 @@ public class WareHouseInitService {
     private void addMaterial2Warehouse(DoctorWareHouse wareHouse, List<MaterialPurchasedUsed> list,
                                        Map<String, DoctorBasicMaterial> basicMaterialMap, Map<String, DoctorStaff> staffMap,
                                        Map<String, DoctorBarn> barnMap, UserProfile userProfile){
-        // 主账号的 staff
-        Long primaryStaffId = doctorStaffDao.findByUserId(userProfile.getUserId()).getId();
-
         // 往表 doctor_material_consume_avgs 写数的Map, key = 类型数值 | materialName, value = [eventCount(最后一次领用数量), 时间]
         Map<String, Object[]> lastMaterialConsumeMap = new HashMap<>();
 
@@ -321,13 +318,13 @@ public class WareHouseInitService {
             }
             if("系统管理员".equals(materialCP.getStaffName())){
                 materialCP.setStaffName(userProfile.getRealName());
-                materialCP.setStaffId(primaryStaffId);
+                materialCP.setStaffId(userProfile.getUserId());
             }else{
                 try {
                     materialCP.setStaffId(staffMap.get(materialCP.getStaffName()).getId());
                 }catch(Exception e){
                     materialCP.setStaffName(userProfile.getRealName());
-                    materialCP.setStaffId(primaryStaffId);
+                    materialCP.setStaffId(userProfile.getUserId());
                 }
             }
 
@@ -363,7 +360,7 @@ public class WareHouseInitService {
             if(basicMaterial.getType().equals(wareHouse.getType())){
                 materialInWareHouse.setMaterialId(basicMaterial.getId());
                 materialInWareHouse.setMaterialName(basicMaterial.getName());
-                materialInWareHouse.setLotNumber(0D);
+                materialInWareHouse.setLotNumber(0D); // TODO
                 materialInWareHouse.setUnitGroupName(basicMaterial.getUnitGroupName());
                 materialInWareHouse.setUnitName(basicMaterial.getUnitName());
                 doctorMaterialInWareHouseDao.create(materialInWareHouse);
