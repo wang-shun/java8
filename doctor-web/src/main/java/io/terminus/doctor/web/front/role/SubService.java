@@ -144,18 +144,7 @@ public class SubService {
             }
 
             subUser.setName(userName);
-            if(Objects.equals(sub.getStatus(), io.terminus.doctor.user.model.Sub.Status.ACTIVE.value())){
-                subUser.setStatus(UserStatus.NORMAL.value());
-            }else if(Objects.equals(sub.getStatus(), io.terminus.doctor.user.model.Sub.Status.LOCK.value())){
-                subUser.setStatus(UserStatus.LOCKED.value());
-                // sub, staff
-                io.terminus.doctor.user.model.Sub subModel = RespHelper.orServEx(primaryUserReadService.findSubByUserId(subUser.getId()));
-                subModel.setStatus(io.terminus.doctor.user.model.Sub.Status.LOCK.value());
-                RespHelper.orServEx(primaryUserWriteService.updateSub(subModel));
-                DoctorStaff staff = RespHelper.orServEx(doctorStaffReadService.findStaffByUserId(subUser.getId()));
-                staff.setStatus(DoctorStaff.Status.ABSENT.value());
-                RespHelper.orServEx(doctorStaffWriteService.updateDoctorStaff(staff));
-            }
+            this.updateSubStaffStatus(subUser, io.terminus.doctor.user.model.Sub.Status.from(sub.getStatus()));
             // TODO: 自定义角色冗余进 user 表
             List<String> roles = Lists.newArrayList("SUB");
             if (sub.getRoleId() != null) {
@@ -177,6 +166,24 @@ public class SubService {
                     user, sub, Throwables.getStackTraceAsString(e));
             return Response.fail("sub.update.fail");
         }
+    }
+
+    private void updateSubStaffStatus(User subUser, io.terminus.doctor.user.model.Sub.Status status){
+        DoctorStaff staff = RespHelper.orServEx(doctorStaffReadService.findStaffByUserId(subUser.getId()));
+        io.terminus.doctor.user.model.Sub sub = RespHelper.orServEx(primaryUserReadService.findSubByUserId(subUser.getId()));
+        sub.setStatus(status.value());
+
+        if(Objects.equals(status.value(), io.terminus.doctor.user.model.Sub.Status.ACTIVE.value())){
+            subUser.setStatus(UserStatus.NORMAL.value());
+            staff.setStatus(DoctorStaff.Status.PRESENT.value());
+        }else if(Objects.equals(status.value(), io.terminus.doctor.user.model.Sub.Status.ABSENT.value())){
+            subUser.setStatus(UserStatus.LOCKED.value());
+            staff.setStatus(DoctorStaff.Status.ABSENT.value());
+        }else{
+            throw new ServiceException("sub.user.status.error");
+        }
+        RespHelper.orServEx(primaryUserWriteService.updateSub(sub));
+        RespHelper.orServEx(doctorStaffWriteService.updateDoctorStaff(staff));
     }
 
     private void updateSubPermission(BaseUser primaryUser, Long subUserId, List<Long> farmIds){
