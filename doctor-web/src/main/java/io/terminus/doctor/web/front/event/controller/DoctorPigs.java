@@ -1,18 +1,23 @@
 package io.terminus.doctor.web.front.event.controller;
 
 import com.google.common.base.Throwables;
+import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
+import io.terminus.common.utils.JsonMapper;
+import io.terminus.doctor.common.constants.JacksonType;
 import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dto.DoctorGroupDetail;
 import io.terminus.doctor.event.dto.DoctorPigInfoDetailDto;
 import io.terminus.doctor.event.dto.DoctorPigInfoDto;
 import io.terminus.doctor.event.dto.DoctorPigMessage;
+import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
 import io.terminus.doctor.event.model.DoctorPigTrack;
+import io.terminus.doctor.event.service.DoctorBarnReadService;
 import io.terminus.doctor.event.service.DoctorGroupReadService;
 import io.terminus.doctor.event.service.DoctorPigReadService;
 import io.terminus.doctor.event.service.DoctorPigWriteService;
@@ -22,6 +27,7 @@ import io.terminus.doctor.web.front.event.dto.DoctorMatingDetail;
 import io.terminus.doctor.web.front.event.dto.DoctorSowDetailDto;
 import io.terminus.doctor.web.util.TransFromUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.joda.time.Days;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,6 +58,10 @@ public class DoctorPigs {
     private final DoctorPigWriteService doctorPigWriteService;
     private final DoctorGroupReadService doctorGroupReadService;
     private final TransFromUtil transFromUtil;
+
+    @RpcConsumer
+    private  DoctorBarnReadService doctorBarnReadService;
+
     @Autowired
     public DoctorPigs(DoctorPigReadService doctorPigReadService, DoctorPigWriteService doctorPigWriteService, DoctorGroupReadService doctorGroupReadService, TransFromUtil transFromUtil){
         this.doctorPigReadService = doctorPigReadService;
@@ -139,15 +149,31 @@ public class DoctorPigs {
     }
 
     private DoctorSowDetailDto buildSowDetailDto(DoctorPigInfoDetailDto dto){
+        DoctorPigTrack doctorPigTrack = dto.getDoctorPigTrack();
+        Integer pregCheckResult =null;
+        try{
+            String extra = doctorPigTrack.getExtra();
+            if (StringUtils.isNotBlank(extra)){
+                Map<String, Object> extraMap = JsonMapper.JSON_NON_DEFAULT_MAPPER.getMapper().readValue(extra, JacksonType.MAP_OF_OBJECT);
+                Object checkResult = extraMap.get("pregCheckResult");
+                if (checkResult != null) {
+                    pregCheckResult = Integer.parseInt(checkResult.toString());
+                }
+            }
+        }catch (Exception e){
+            log.error("buildSowDetailDto failed cause by {}", Throwables.getStackTraceAsString(e));
+        }
+
         DoctorSowDetailDto doctorSowDetailDto = DoctorSowDetailDto.builder()
                 .pigSowCode(dto.getDoctorPig().getPigCode())
                 .warnMessage(dto.getDoctorPigTrack().getExtraMessage())
                 .breedName(dto.getDoctorPig().getBreedName()).barnCode(dto.getDoctorPigTrack().getCurrentBarnName())
                 .pigStatus(dto.getDoctorPigTrack().getStatus())
-                .dayAge(Days.daysBetween(new DateTime(dto.getDoctorPig().getBirthDate()), DateTime.now()).getDays())
+                .dayAge(Days.daysBetween(new DateTime(dto.getDoctorPig().getBirthDate()), DateTime.now()).getDays() + 1)
                 .parity(dto.getDoctorPigTrack().getCurrentParity()).entryDate(dto.getDoctorPig().getInFarmDate())
                 .birthDate(dto.getDoctorPig().getBirthDate())
                 .doctorPigEvents(dto.getDoctorPigEvents())
+                .pregCheckResult(pregCheckResult)
                 .build();
         return doctorSowDetailDto;
     }
@@ -244,4 +270,18 @@ public class DoctorPigs {
         }
         return true;
     }
+
+    /**
+     * 根据猪id查询当前猪舍
+     *
+     * @param pigId 猪id
+     * @return 猪舍
+     */
+    @RequestMapping(value = "/currentBarn", method = RequestMethod.GET)
+    @ResponseBody
+    public DoctorBarn findCurrentBarnByPigId(@RequestParam("pigId") Long pigId){
+        DoctorPigTrack pigTrack = RespHelper.or500(doctorPigReadService.findPigTrackByPigId(pigId));
+        return RespHelper.or500(doctorBarnReadService.findBarnById(pigTrack.getCurrentBarnId()));
+    }
+
 }

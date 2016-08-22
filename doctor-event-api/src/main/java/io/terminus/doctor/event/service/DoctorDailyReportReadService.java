@@ -1,7 +1,8 @@
 package io.terminus.doctor.event.service;
 
 import io.terminus.common.model.Response;
-import io.terminus.doctor.event.dto.report.DoctorDailyReportDto;
+import io.terminus.doctor.event.dto.report.daily.DoctorDailyReportDto;
+import io.terminus.doctor.event.model.DoctorDailyReport;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.validation.constraints.NotNull;
@@ -34,8 +35,24 @@ public interface DoctorDailyReportReadService {
     Response<List<DoctorDailyReportDto>> initDailyReportByDate(@NotNull(message = "date.not.null") Date date);
 
     /**
+     * 根据日期和猪场id获取初始化的日报统计
+     * @param farmId 猪场id
+     * @param date 日期
+     * @return 日报统计
+     */
+    Response<DoctorDailyReportDto> initDailyReportByFarmIdAndDate(@NotNull(message = "farmId.not.null") Long farmId,
+                                                                  @NotNull(message = "date.not.null") Date date);
+
+    /**
      * 清理全部的日报缓存
      * @return 是否成功
      */
     Response<Boolean> clearAllReportCache();
+
+    /**
+     * 根据查询查询日报
+     * @param date 日期
+     * @return 日报list
+     */
+    Response<List<DoctorDailyReport>> findDailyReportBySumAt(@NotNull(message = "date.not.null") Date date);
 }

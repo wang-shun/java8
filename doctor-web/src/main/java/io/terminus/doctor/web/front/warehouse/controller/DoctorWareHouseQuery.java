@@ -5,13 +5,17 @@ import com.google.common.collect.Lists;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
+import io.terminus.doctor.basic.model.DoctorBasicMaterial;
+import io.terminus.doctor.basic.service.DoctorBasicMaterialReadService;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.user.model.DoctorFarm;
 import io.terminus.doctor.user.service.DoctorFarmReadService;
 import io.terminus.doctor.user.service.DoctorUserProfileReadService;
 import io.terminus.doctor.warehouse.dto.DoctorWareHouseDto;
 import io.terminus.doctor.warehouse.model.DoctorFarmWareHouseType;
+import io.terminus.doctor.warehouse.model.DoctorMaterialInWareHouse;
 import io.terminus.doctor.warehouse.model.DoctorWareHouse;
+import io.terminus.doctor.warehouse.service.DoctorMaterialInWareHouseReadService;
 import io.terminus.doctor.warehouse.service.DoctorWareHouseReadService;
 import io.terminus.doctor.warehouse.service.DoctorWareHouseWriteService;
 import io.terminus.doctor.web.front.warehouse.dto.DoctorWareHouseCreateDto;
@@ -31,6 +35,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkState;
 
@@ -55,16 +60,24 @@ public class DoctorWareHouseQuery {
 
     private final DoctorUserProfileReadService doctorUserProfileReadService;
 
+    private final DoctorBasicMaterialReadService doctorBasicMaterialReadService;
+
+    private final DoctorMaterialInWareHouseReadService doctorMaterialInWareHouseReadService;
+
     @Autowired
     public DoctorWareHouseQuery(DoctorWareHouseReadService doctorWareHouseReadService,
                                 DoctorWareHouseWriteService doctorWareHouseWriteService,
                                 DoctorFarmReadService doctorFarmReadService, UserReadService<User> userReadService,
-                                DoctorUserProfileReadService doctorUserProfileReadService){
+                                DoctorUserProfileReadService doctorUserProfileReadService,
+                                DoctorBasicMaterialReadService doctorBasicMaterialReadService,
+                                DoctorMaterialInWareHouseReadService doctorMaterialInWareHouseReadService){
         this.doctorWareHouseReadService = doctorWareHouseReadService;
         this.doctorWareHouseWriteService = doctorWareHouseWriteService;
         this.doctorFarmReadService = doctorFarmReadService;
         this.userReadService = userReadService;
         this.doctorUserProfileReadService = doctorUserProfileReadService;
+        this.doctorBasicMaterialReadService = doctorBasicMaterialReadService;
+        this.doctorMaterialInWareHouseReadService = doctorMaterialInWareHouseReadService;
     }
 
     @RequestMapping(value = "/listWareHouseType", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -146,5 +159,32 @@ public class DoctorWareHouseQuery {
             throw new JsonResponseException(e.getMessage());
         }
         return RespHelper.or500(doctorWareHouseWriteService.createWareHouse(doctorWareHouse));
+    }
+
+    /**
+     * 查询指定仓库中不存在的基础物料
+     * @param type 基础物料类型
+     * @see io.terminus.doctor.common.enums.WareHouseType
+     * @param srm 输入码
+     * @param wareHouseId 仓库id
+     * @param exIds 排除掉的ids
+     * @return
+     */
+    @RequestMapping(value = "/findBasicMaterialNotInWareHouse", method = RequestMethod.GET)
+    @ResponseBody
+    public List<DoctorBasicMaterial> findBasicMaterialNotInWareHouse(@RequestParam(value = "type", required = false) Integer type,
+                                                                     @RequestParam(value = "srm", required = false) String srm,
+                                                                     @RequestParam(value = "exIds", required = false) String exIds,
+                                                                     @RequestParam Long wareHouseId){
+        DoctorWareHouse wareHouse = RespHelper.or500(doctorWareHouseReadService.findById(wareHouseId));
+        //已存在的物料id
+        List<Long> exist = RespHelper.or500(doctorMaterialInWareHouseReadService.queryDoctorMaterialInWareHouse(wareHouse.getFarmId(), wareHouseId))
+                .stream()
+                .map(DoctorMaterialInWareHouse::getMaterialId)
+                .collect(Collectors.toList());
+        return RespHelper.or500(doctorBasicMaterialReadService.findBasicMaterialByTypeFilterBySrm(type, srm, exIds))
+                .stream()
+                .filter(basicMaterial -> !exist.contains(basicMaterial.getId()))
+                .collect(Collectors.toList());
     }
 }

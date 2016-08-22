@@ -2,10 +2,9 @@ package io.terminus.doctor.event.report.count;
 
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
-import io.terminus.common.utils.BeanMapper;
 import io.terminus.doctor.event.daily.DoctorDailyEventCount;
-import io.terminus.doctor.event.dto.report.DoctorDailyReportDto;
-import io.terminus.doctor.event.dto.report.DoctorDeliverDailyReport;
+import io.terminus.doctor.event.dto.report.daily.DoctorDailyReportDto;
+import io.terminus.doctor.event.dto.report.daily.DoctorDeliverDailyReport;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import org.springframework.stereotype.Component;
@@ -39,10 +38,10 @@ public class DoctorDailyFarrowingEventCount implements DoctorDailyEventCount{
 
         DoctorDeliverDailyReport doctorDeliverDailyReport = new DoctorDeliverDailyReport();
 
-        t.stream().forEach(e->{
-            Map<String,Object> extraMap = e.getExtraMap();
+        t.forEach(e -> {
+            Map<String, Object> extraMap = e.getExtraMap();
 
-            doctorDeliverDailyReport.setNest(doctorDeliverDailyReport.getNest()+1);
+            doctorDeliverDailyReport.setNest(doctorDeliverDailyReport.getNest() + 1);
             doctorDeliverDailyReport.setLive(doctorDeliverDailyReport.getLive() + Integer.valueOf(extraMap.get("farrowingLiveCount").toString()));
             doctorDeliverDailyReport.setHealth(doctorDeliverDailyReport.getHealth() + Integer.valueOf(extraMap.get("healthCount").toString()));
             doctorDeliverDailyReport.setWeak(doctorDeliverDailyReport.getWeak() + Integer.valueOf(extraMap.get("weakCount").toString()));

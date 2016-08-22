@@ -1,9 +1,11 @@
-package io.terminus.doctor.event.dto.report;
+package io.terminus.doctor.event.dto.report.daily;
 
+import com.google.common.collect.Maps;
 import lombok.Data;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.Map;
 
 /**
  * Desc: 日报统计dto
@@ -51,6 +53,16 @@ public class DoctorDailyReportDto implements Serializable {
     private DoctorWeanDailyReport wean = new DoctorWeanDailyReport();
 
     /**
+     * 每个猪群的存栏
+     */
+    private Map<Long, Integer> groupCountMap = Maps.newHashMap();
+
+    /**
+     * 母猪存栏
+     */
+    private int sowCount;
+
+    /**
      * 猪场id
      */
     private Long farmId;
@@ -88,7 +100,6 @@ public class DoctorDailyReportDto implements Serializable {
 
         //存栏
         this.liveStock.setBoar(report.getLiveStock().getBoar()==0 ? this.liveStock.getBoar() : report.getLiveStock().getBoar());
-        this.liveStock.setHoubeiSow(report.getLiveStock().getHoubeiSow() == 0? this.liveStock.getHoubeiSow() : report.getLiveStock().getHoubeiSow());
         this.liveStock.setPeihuaiSow(report.getLiveStock().getPeihuaiSow() == 0? this.liveStock.getPeihuaiSow() : report.getLiveStock().getPeihuaiSow());
         this.liveStock.setBuruSow(report.getLiveStock().getBuruSow() == 0 ? this.liveStock.getBuruSow(): report.getLiveStock().getBuruSow());
         this.liveStock.setKonghuaiSow(report.getLiveStock().getKonghuaiSow() == 0 ? this.liveStock.getKonghuaiSow() : report.getLiveStock().getKonghuaiSow());
@@ -106,6 +117,7 @@ public class DoctorDailyReportDto implements Serializable {
         //断奶仔猪
         this.wean.setCount(this.wean.getCount() + report.getWean().getCount());
         this.wean.setWeight(this.wean.getWeight() + report.getWean().getWeight());
+        this.wean.setNest(this.wean.getNest() + report.getWean().getNest());
     }
 
     /**
@@ -121,6 +133,7 @@ public class DoctorDailyReportDto implements Serializable {
         this.liveStock.setFarrow(report.getLiveStock().getFarrow());
         this.liveStock.setNursery(report.getLiveStock().getNursery());
         this.liveStock.setFatten(report.getLiveStock().getFatten());
+        this.liveStock.setHoubeiSow(report.getLiveStock().getHoubeiSow() == 0? this.liveStock.getHoubeiSow() : report.getLiveStock().getHoubeiSow());
 
         //销售
         this.sale.setNursery(this.sale.getNursery() + report.getSale().getNursery());

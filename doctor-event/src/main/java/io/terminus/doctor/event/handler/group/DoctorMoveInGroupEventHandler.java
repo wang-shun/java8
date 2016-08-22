@@ -3,6 +3,7 @@ package io.terminus.doctor.event.handler.group;
 import com.google.common.base.MoreObjects;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.doctor.common.event.CoreEventDispatcher;
+import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorGroupSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
@@ -13,6 +14,7 @@ import io.terminus.doctor.event.dto.event.group.edit.DoctorMoveInGroupEdit;
 import io.terminus.doctor.event.dto.event.group.input.BaseGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorMoveInGroupInput;
 import io.terminus.doctor.event.enums.GroupEventType;
+import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
@@ -38,16 +40,19 @@ public class DoctorMoveInGroupEventHandler extends DoctorAbstractGroupEventHandl
 
     private final DoctorGroupEventDao doctorGroupEventDao;
     private final DoctorGroupTrackDao doctorGroupTrackDao;
+    private final DoctorBarnReadService doctorBarnReadService;
 
     @Autowired
     public DoctorMoveInGroupEventHandler(DoctorGroupSnapshotDao doctorGroupSnapshotDao,
                                          DoctorGroupTrackDao doctorGroupTrackDao,
                                          CoreEventDispatcher coreEventDispatcher,
                                          DoctorGroupEventDao doctorGroupEventDao,
-                                         DoctorBarnReadService doctorBarnReadService) {
+                                         DoctorBarnReadService doctorBarnReadService,
+                                         DoctorBarnReadService doctorBarnReadService1) {
         super(doctorGroupSnapshotDao, doctorGroupTrackDao, coreEventDispatcher, doctorGroupEventDao, doctorBarnReadService);
         this.doctorGroupEventDao = doctorGroupEventDao;
         this.doctorGroupTrackDao = doctorGroupTrackDao;
+        this.doctorBarnReadService = doctorBarnReadService1;
     }
 
 
@@ -68,6 +73,11 @@ public class DoctorMoveInGroupEventHandler extends DoctorAbstractGroupEventHandl
         event.setAvgDayAge(moveIn.getAvgDayAge());
         event.setAvgWeight(moveIn.getAvgWeight());
         event.setWeight(EventUtil.getWeight(event.getAvgWeight(), event.getQuantity()));
+
+        if (moveIn.getFromBarnId() != null) {
+            DoctorBarn toBarn = RespHelper.orServEx(doctorBarnReadService.findBarnById(moveIn.getFromBarnId()));
+            event.setTransGroupType(getTransType(group.getPigType(), toBarn).getValue());   //区别内转还是外转
+        }
         event.setExtraMap(moveInEvent);
         doctorGroupEventDao.create(event);
 

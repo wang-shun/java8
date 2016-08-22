@@ -1,13 +1,9 @@
 package io.terminus.doctor.event.report;
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import io.terminus.doctor.event.daily.DoctorDailyEventCount;
-import io.terminus.doctor.event.dto.report.DoctorDailyReportDto;
-import io.terminus.doctor.event.handler.DoctorEventHandlerChain;
-import io.terminus.doctor.event.model.DoctorDailyReport;
+import io.terminus.doctor.event.dto.report.daily.DoctorDailyReportDto;
 import io.terminus.doctor.event.model.DoctorPigEvent;
-import io.terminus.doctor.event.report.count.DoctorDailyRemovalEventCount;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

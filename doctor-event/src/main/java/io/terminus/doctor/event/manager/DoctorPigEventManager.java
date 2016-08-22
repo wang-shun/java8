@@ -34,6 +34,7 @@ import java.util.Map;
 import java.util.Objects;
 
 import static com.google.common.base.Preconditions.checkState;
+import static io.terminus.doctor.event.constants.DoctorPigExtraConstants.EVENT_PIG_ID;
 
 /**
  * Created by yaoqijun.
@@ -175,10 +176,8 @@ public class DoctorPigEventManager {
     @SneakyThrows
     public Map<String,Object> createSowEvents(List<DoctorBasicInputInfoDto> basicInputInfoDtos, Map<String, Object> extra){
         Map<String,Object> results = Maps.newHashMap();
-        basicInputInfoDtos.forEach(dto->{
-            results.put(dto.getPigId().toString(),
-                    createSingleSowEvents(dto, extra));
-        });
+        basicInputInfoDtos.forEach(dto-> results.put(dto.getPigId().toString(),
+                createSingleSowEvents(dto, extra)));
         results.put("contextType", "mult");
         return results;
     }
@@ -187,6 +186,9 @@ public class DoctorPigEventManager {
     private Map<String, Object> createSingleSowEvents(DoctorBasicInputInfoDto basic, Map<String, Object> extra){
 
         checkMatingCount(basic, extra);
+
+        //发送此事件的母猪id
+        extra.put(EVENT_PIG_ID, basic.getPigId());
 
         // build data
         String flowData = JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(ImmutableMap.of(

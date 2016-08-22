@@ -52,7 +52,7 @@ public class DoctorWareHouseEventsTest extends BaseFrontWebTest{
     @Test
     public void testProviderMaterialInWareHouse(){
         DoctorConsumeProviderInputDto dto = DoctorConsumeProviderInputDto.builder()
-                .farmId(12345l).wareHouseId(2l).materialId(5l).barnId(5l).count(1000l).consumeDays(10)
+                .farmId(12345l).wareHouseId(2l).materialId(5l).barnId(5l).count(1000D).consumeDays(10)
                 .build();
         String url = "http://localhost:"+this.port+"/api/doctor/warehouse/event/provider";
         Long result = this.restTemplate.postForObject(url, dto, Long.class);
@@ -71,7 +71,7 @@ public class DoctorWareHouseEventsTest extends BaseFrontWebTest{
     public void testConsumeMaterialInWareHouse(){
 
         DoctorConsumeProviderInputDto dto = DoctorConsumeProviderInputDto.builder()
-                .farmId(12345l).wareHouseId(1l).materialId(5l).barnId(5l).count(500000l).consumeDays(10)
+                .farmId(12345l).wareHouseId(1l).materialId(5l).barnId(5l).count(500000D).consumeDays(10)
                 .build();
 
         String url = "http://localhost:"+this.port+"/api/doctor/warehouse/event/consume";

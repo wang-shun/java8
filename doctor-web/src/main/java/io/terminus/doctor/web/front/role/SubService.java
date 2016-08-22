@@ -11,13 +11,17 @@ import io.terminus.common.model.Response;
 import io.terminus.common.utils.MapBuilder;
 import io.terminus.doctor.common.enums.UserStatus;
 import io.terminus.doctor.common.enums.UserType;
+import io.terminus.doctor.user.model.DoctorStaff;
 import io.terminus.doctor.user.model.DoctorUser;
 import io.terminus.doctor.user.model.DoctorUserDataPermission;
+import io.terminus.doctor.user.service.DoctorStaffReadService;
+import io.terminus.doctor.user.service.DoctorStaffWriteService;
 import io.terminus.doctor.user.service.DoctorUserDataPermissionReadService;
 import io.terminus.doctor.user.service.DoctorUserDataPermissionWriteService;
 import io.terminus.doctor.user.service.DoctorUserProfileReadService;
 import io.terminus.doctor.user.service.DoctorUserReadService;
 import io.terminus.doctor.user.service.PrimaryUserReadService;
+import io.terminus.doctor.user.service.PrimaryUserWriteService;
 import io.terminus.pampas.client.Export;
 import io.terminus.parana.common.utils.EncryptUtil;
 import io.terminus.parana.common.utils.RespHelper;
@@ -51,22 +55,32 @@ public class SubService {
     private final DoctorUserProfileReadService doctorUserProfileReadService;
 
     private final PrimaryUserReadService primaryUserReadService;
+    private final PrimaryUserWriteService primaryUserWriteService;
 
     private final DoctorUserDataPermissionWriteService doctorUserDataPermissionWriteService;
 
     private final DoctorUserDataPermissionReadService doctorUserDataPermissionReadService;
 
+    private final DoctorStaffWriteService doctorStaffWriteService;
+    private final DoctorStaffReadService doctorStaffReadService;
+
     @Autowired
     public SubService(DoctorUserReadService doctorUserReadService, UserWriteService<User> userWriteService,
                       DoctorUserProfileReadService doctorUserProfileReadService, PrimaryUserReadService primaryUserReadService,
                       DoctorUserDataPermissionWriteService doctorUserDataPermissionWriteService,
-                      DoctorUserDataPermissionReadService doctorUserDataPermissionReadService) {
+                      DoctorUserDataPermissionReadService doctorUserDataPermissionReadService,
+                      DoctorStaffWriteService doctorStaffWriteService,
+                      DoctorStaffReadService doctorStaffReadService,
+                      PrimaryUserWriteService primaryUserWriteService) {
         this.doctorUserReadService = doctorUserReadService;
         this.userWriteService = userWriteService;
         this.doctorUserProfileReadService = doctorUserProfileReadService;
         this.primaryUserReadService = primaryUserReadService;
         this.doctorUserDataPermissionWriteService = doctorUserDataPermissionWriteService;
         this.doctorUserDataPermissionReadService = doctorUserDataPermissionReadService;
+        this.doctorStaffWriteService = doctorStaffWriteService;
+        this.doctorStaffReadService = doctorStaffReadService;
+        this.primaryUserWriteService = primaryUserWriteService;
     }
 
     public Response<Sub> findSubByUserId(BaseUser user, Long userId) {
@@ -102,6 +116,7 @@ public class SubService {
             op.setRoleName(sub.getRoleName());
             op.setContact(sub.getContact());
             op.setRealName(userProfile.getRealName());
+            op.setStatus(sub.getStatus());
         }
         return op;
     }
@@ -129,7 +144,18 @@ public class SubService {
             }
 
             subUser.setName(userName);
-            subUser.setStatus(UserStatus.NORMAL.value());
+            if(Objects.equals(sub.getStatus(), io.terminus.doctor.user.model.Sub.Status.ACTIVE.value())){
+                subUser.setStatus(UserStatus.NORMAL.value());
+            }else if(Objects.equals(sub.getStatus(), io.terminus.doctor.user.model.Sub.Status.LOCK.value())){
+                subUser.setStatus(UserStatus.LOCKED.value());
+                // sub, staff
+                io.terminus.doctor.user.model.Sub subModel = RespHelper.orServEx(primaryUserReadService.findSubByUserId(subUser.getId()));
+                subModel.setStatus(io.terminus.doctor.user.model.Sub.Status.LOCK.value());
+                RespHelper.orServEx(primaryUserWriteService.updateSub(subModel));
+                DoctorStaff staff = RespHelper.orServEx(doctorStaffReadService.findStaffByUserId(subUser.getId()));
+                staff.setStatus(DoctorStaff.Status.ABSENT.value());
+                RespHelper.orServEx(doctorStaffWriteService.updateDoctorStaff(staff));
+            }
             // TODO: 自定义角色冗余进 user 表
             List<String> roles = Lists.newArrayList("SUB");
             if (sub.getRoleId() != null) {
@@ -232,11 +258,11 @@ public class SubService {
     }
 
     public Response<List<Sub>> findByConditions(BaseUser user, Long roleId, String roleName, String userName,
-                                                String realName, Integer limit){
+                                                String realName, Integer status, Integer limit){
         try{
             Long userId = user.getId();
             List<io.terminus.doctor.user.model.Sub> subList = RespHelper.orServEx(
-                    primaryUserReadService.findByConditions(userId, roleId, roleName, userName, realName, null, limit)
+                    primaryUserReadService.findByConditions(userId, roleId, roleName, userName, realName, status, limit)
             );
             return Response.ok(this.setSubInfo(subList));
         } catch (ServiceException e) {
@@ -249,12 +275,13 @@ public class SubService {
 
     @Export(paramNames = {"user", "roleId", "pageNo", "pageSize"})
     public Response<Paging<Sub>> pagingSubs(BaseUser user, Long roleId,String roleName, String userName,
-                                            String realName, Integer pageNo, Integer pageSize) {
+                                            String realName, Integer status, Integer pageNo, Integer pageSize) {
         try {
             Long userId = user.getId();
 
             Paging<io.terminus.doctor.user.model.Sub> paging = RespHelper.orServEx(
-                    primaryUserReadService.subPagination(userId, roleId, roleName, userName, realName, null, pageNo, pageSize)
+                    primaryUserReadService.subPagination(userId, roleId, roleName, userName, realName,
+                            status, pageNo, pageSize)
             );
 
             return Response.ok(new Paging<>(paging.getTotal(), this.setSubInfo(paging.getData())));

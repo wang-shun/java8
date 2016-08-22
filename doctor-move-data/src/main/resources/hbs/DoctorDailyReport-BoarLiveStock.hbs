@@ -1,0 +1,40 @@
+-- 获取公猪日存栏统计
+CREATE TABLE #tempBoar (
+    quantity INT,
+    sumat DATETIME   -- 统计时间
+)
+
+DECLARE @i INT
+SET @i = 0
+WHILE @i < {{index}}   -- 循环index天的数据
+BEGIN
+DECLARE @sumDate DATETIME
+SET @sumDate = convert(DATETIME, convert(varchar(100), getdate(), 23) + ' 23:59:59', 120) - @i
+-- 插入临时表
+    INSERT INTO #tempBoar(quantity, sumat)
+    SELECT
+    (
+        SELECT isnull(count(1), 0) AS quantity
+        FROM view_BoarCardList WHERE Status != '已离场' AND FarmOID = '{{farmOutId}}'
+    )
+    +
+    (
+        SELECT isnull(sum(d.delta), 0) FROM
+        (
+            SELECT
+                CASE WHEN EventName = '猪群转出' THEN 1 ELSE -1 END AS delta
+            FROM view_EventListBoar
+            WHERE EventName IN ('猪群转出', '猪群转进') AND EventDate >= @sumDate AND FarmOID = '{{farmOutId}}'
+        ) AS d
+    ),
+    convert(DATETIME, convert(varchar(100), getdate(), 23) + ' 00:00:00', 120) - @i as sumat
+
+SET @i = @i + 1
+END
+
+SELECT
+sumat,
+quantity
+FROM #tempBoar
+
+DROP TABLE #tempBoar

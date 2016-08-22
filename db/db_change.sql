@@ -177,3 +177,87 @@ alter table `doctor_pig_tracks` add COLUMN `current_mating_count` int(11) DEFAUL
 -- 2016-08-03 更新猪跟踪的 当前配种次数
 update `doctor_pig_tracks` set current_mating_count = 1 where pig_type = 1 and status in (3,4,7,8,9);
 
+-- 2016-08-09 工作流历史实例关联实例id
+alter table workflow_history_process_instances add column `external_history_id` BIGINT(20) DEFAULT NULL COMMENT '记录删除的实例id' AFTER `parent_instance_id`;
+
+-- 2016-08-10 生产月报冗余数据
+-- 猪群事件表
+ALTER TABLE doctor_group_events ADD COLUMN change_type_id BIGINT(20) DEFAULT NULL COMMENT '变动类型id' AFTER is_auto;
+ALTER TABLE doctor_group_events ADD COLUMN price BIGINT(20) DEFAULT NULL COMMENT '销售单价(分)' AFTER change_type_id;
+ALTER TABLE doctor_group_events ADD COLUMN amount BIGINT(20) DEFAULT NULL COMMENT '销售总额(分)' AFTER price;
+ALTER TABLE doctor_group_events ADD COLUMN trans_group_type SMALLINT(6) DEFAULT NULL COMMENT '转群类型 0 内转 1 外转' AFTER amount;
+
+-- 猪事件表
+ALTER TABLE doctor_pig_events ADD COLUMN change_type_id BIGINT(20) DEFAULT NULL COMMENT '变动类型id' AFTER rel_event_id;
+ALTER TABLE doctor_pig_events ADD COLUMN price BIGINT(20) DEFAULT NULL COMMENT '销售单价(分)' AFTER change_type_id;
+ALTER TABLE doctor_pig_events ADD COLUMN amount BIGINT(20) DEFAULT NULL COMMENT '销售总额(分)' AFTER price;
+ALTER TABLE doctor_pig_events ADD COLUMN pig_status_before SMALLINT(6) DEFAULT NULL COMMENT '事件发生之前猪的状态' AFTER amount;
+ALTER TABLE doctor_pig_events ADD COLUMN pig_status_after SMALLINT(6) DEFAULT NULL COMMENT '事件发生之后猪的状态' AFTER pig_status_before;
+ALTER TABLE doctor_pig_events ADD COLUMN parity INT(11) DEFAULT NULL COMMENT '事件发生母猪的胎次），记住是前一个事件是妊娠检查事件' AFTER pig_status_after;
+ALTER TABLE doctor_pig_events ADD COLUMN is_impregnation SMALLINT(6) DEFAULT NULL COMMENT '是否可以进行受胎统计，就是妊娠检查阳性之后这个字段为true 0否1是' AFTER parity;
+ALTER TABLE doctor_pig_events ADD COLUMN is_delivery SMALLINT(6) DEFAULT NULL COMMENT '是否可以进行分娩，就是分娩事件之后这个字段为true 0否1是' AFTER is_impregnation;
+ALTER TABLE doctor_pig_events ADD COLUMN preg_days INT(11) DEFAULT NULL COMMENT '孕期，分娩时候统计' AFTER is_delivery;
+ALTER TABLE doctor_pig_events ADD COLUMN feed_days INT(11) DEFAULT NULL COMMENT '哺乳天数，断奶事件发生统计' AFTER preg_days;
+ALTER TABLE doctor_pig_events ADD COLUMN preg_check_result SMALLINT(6) DEFAULT NULL COMMENT '妊娠检查结果，从extra中拆出来' AFTER feed_days;
+ALTER TABLE doctor_pig_events ADD COLUMN dp_npd INT(11) DEFAULT 0 COMMENT '断奶到配种的非生产天数' AFTER preg_check_result;
+ALTER TABLE doctor_pig_events ADD COLUMN pf_npd INT(11) DEFAULT 0 COMMENT '配种到返情非生产天数' AFTER dp_npd;
+ALTER TABLE doctor_pig_events ADD COLUMN pl_npd INT(11) DEFAULT 0 COMMENT '配种到流产非生产天数' AFTER pf_npd;
+ALTER TABLE doctor_pig_events ADD COLUMN ps_npd INT(11) DEFAULT 0 COMMENT '配种到死亡非生产天数' AFTER pl_npd;
+ALTER TABLE doctor_pig_events ADD COLUMN py_npd INT(11) DEFAULT 0 COMMENT '配种到阴性非生产天数' AFTER ps_npd;
+ALTER TABLE doctor_pig_events ADD COLUMN pt_npd INT(11) DEFAULT 0 COMMENT '配种到淘汰非生产天数' AFTER py_npd;
+ALTER TABLE doctor_pig_events ADD COLUMN jp_npd INT(11) DEFAULT 0 COMMENT '配种到配种非生产天数' AFTER pt_npd;
+ALTER TABLE doctor_pig_events ADD COLUMN npd INT(11) DEFAULT 0 COMMENT '非生产天数 前面的总和' AFTER jp_npd;
+ALTER TABLE doctor_pig_events ADD COLUMN live_count INT(11) DEFAULT NULL COMMENT '活仔数' AFTER npd;
+ALTER TABLE doctor_pig_events ADD COLUMN health_count INT(11) DEFAULT NULL COMMENT '键仔数' AFTER live_count;
+ALTER TABLE doctor_pig_events ADD COLUMN weak_count INT(11) DEFAULT NULL COMMENT '弱仔数' AFTER health_count;
+ALTER TABLE doctor_pig_events ADD COLUMN mny_count INT(11) DEFAULT NULL COMMENT '木乃伊数' AFTER weak_count;
+ALTER TABLE doctor_pig_events ADD COLUMN jx_count INT(11) DEFAULT NULL COMMENT '畸形数' AFTER mny_count;
+ALTER TABLE doctor_pig_events ADD COLUMN dead_count INT(11) DEFAULT NULL COMMENT '死胎数' AFTER jx_count;
+ALTER TABLE doctor_pig_events ADD COLUMN black_count INT(11) DEFAULT NULL COMMENT '黑胎数' AFTER dead_count;
+ALTER TABLE doctor_pig_events ADD COLUMN wean_count INT(11) DEFAULT NULL COMMENT '断奶数' AFTER black_count;
+ALTER TABLE doctor_pig_events ADD COLUMN wean_avg_weight DOUBLE DEFAULT NULL COMMENT '断奶均重(kg)' AFTER wean_count;
+
+-- 2016-08-11 生产日报增加
+ALTER TABLE doctor_daily_reports ADD COLUMN sow_count int(11) DEFAULT 0 COMMENT '母猪存栏' AFTER farm_name;
+ALTER TABLE doctor_daily_reports ADD COLUMN farrow_count int(11) DEFAULT 0 COMMENT '产房仔猪存栏' AFTER sow_count;
+ALTER TABLE doctor_daily_reports ADD COLUMN nursery_count int(11) DEFAULT 0 COMMENT '保育猪存栏' AFTER farrow_count;
+ALTER TABLE doctor_daily_reports ADD COLUMN fatten_count int(11) DEFAULT 0 COMMENT '育肥猪存栏' AFTER nursery_count;
+
+ALTER TABLE doctor_pig_events ADD COLUMN current_mating_count DOUBLE DEFAULT NULL COMMENT '当前配种次数' AFTER wean_avg_weight;
+
+-- 月报报表
+CREATE TABLE `doctor_monthly_reports` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '自增主键',
+  `farm_id` bigint(20) DEFAULT NULL COMMENT '猪场id',
+  `data` text COMMENT '月报数据，json存储',
+  `extra` text COMMENT '附加字段',
+  `sum_at` date DEFAULT NULL COMMENT '统计时间',
+  `created_at` datetime DEFAULT NULL COMMENT '创建时间(仅做记录创建时间，不参与查询)',
+  PRIMARY KEY (`id`),
+  KEY `idx_doctor_monthly_reports_farm_id_agg_sumat` (`farm_id`,`sum_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='猪场月报表';
+
+
+ALTER TABLE doctor_pig_events ADD COLUMN check_date datetime DEFAULT NULL COMMENT '检查时间' AFTER current_mating_count;
+ALTER TABLE doctor_pig_events ADD COLUMN matting_date datetime DEFAULT NULL COMMENT '配种时间' AFTER check_date;
+ALTER TABLE doctor_pig_events ADD COLUMN farrowing_date datetime DEFAULT NULL COMMENT '分娩时间' AFTER matting_date;
+ALTER TABLE doctor_pig_events ADD COLUMN abortion_date datetime DEFAULT NULL COMMENT '流产时间' AFTER farrowing_date;
+ALTER TABLE doctor_pig_events ADD COLUMN partwean_date datetime DEFAULT NULL COMMENT '断奶时间' AFTER abortion_date;
+ALTER TABLE doctor_pig_events ADD COLUMN doctor_mate_type SMALLINT(6) DEFAULT NULL COMMENT '配种类型' AFTER partwean_date;
+
+-- 2016-08-15 workflow 新增 itimer 字段
+ALTER TABLE workflow_definition_nodes ADD COLUMN `itimer` VARCHAR(128) DEFAULT NULL COMMENT '定时事件处理类(一般为类标识)' AFTER timer;
+
+alter table doctor_material_consume_providers add column `unit_price` bigint(20) DEFAULT NULL COMMENT '本次出库/入库的单价。入库单价,由前台传入,直接保存即可；出库单价,需要计算: 先入库的先出库, 然后对涉及到的每一次入库的单价作加权平均。单位为“分”' after event_count;
+
+-- 仓库物资数量类型有 Long 改为 Double
+alter table doctor_material_consume_providers modify `event_count` decimal(23,3) DEFAULT NULL COMMENT '事件数量';
+alter table doctor_material_price_in_ware_houses modify `remainder` decimal(23,3) NOT NULL COMMENT '本次入库量的剩余量，比如本次入库100个，那么就是这100个的剩余量，减少到0时删除';
+alter table doctor_material_consume_avgs modify `consume_avg_count` decimal(23,3) DEFAULT NULL COMMENT '平均消耗数量';
+alter table doctor_material_consume_avgs modify `consume_count` decimal(23,3) DEFAULT NULL COMMENT '最后一次领用数量';
+alter table doctor_material_in_ware_houses modify `lot_number` decimal(23,3) DEFAULT NULL COMMENT '数量信息';
+alter table doctor_farm_ware_house_types modify `lot_number` decimal(23,3) DEFAULT NULL COMMENT '类型原料的数量';
+alter table doctor_ware_house_tracks modify `lot_number` decimal(23,3) DEFAULT NULL COMMENT '仓库物品的总数量信息';
+
+-- 2016-08-18 workflow 新增 tracker 字段
+alter table workflow_definition_node_events ADD Column `tacker` VARCHAR(128) DEFAULT NULL COMMENT '配种次数判断';

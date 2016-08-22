@@ -38,6 +38,16 @@
         </dependency>
         <dependency>
             <groupId>io.terminus.doctor</groupId>
+            <artifactId>doctor-warehouse</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>io.terminus.boot</groupId>
+                    <artifactId>spring-boot-starter-dubbo</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>io.terminus.doctor</groupId>
             <artifactId>doctor-config</artifactId>
             <exclusions>
                 <exclusion>

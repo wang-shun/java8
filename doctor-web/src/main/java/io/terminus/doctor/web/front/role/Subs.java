@@ -93,6 +93,8 @@ public class Subs {
      * @param realName 员工真实姓名, 匹配 user_profile 表中的 real_name 字段
      * @param pageNo
      * @param pageSize
+     * @param status 子账号状态
+     * @see io.terminus.doctor.user.model.Sub.Status
      * @return
      */
     @RequestMapping(value = "/pagination", method = RequestMethod.GET)
@@ -100,20 +102,27 @@ public class Subs {
                                   @RequestParam(required = false) String roleName,
                                   @RequestParam(required = false) String username,
                                   @RequestParam(required = false) String realName,
+                                  @RequestParam(required = false) Integer status,
                                   @RequestParam(required = false) Integer pageNo,
                                   @RequestParam(required = false) Integer pageSize) {
         checkAuth();
-        return RespHelper.or500(subService.pagingSubs(UserUtil.getCurrentUser(), roleId, roleName, username, realName, pageNo, pageSize));
+        return RespHelper.or500(subService.pagingSubs(UserUtil.getCurrentUser(), roleId, roleName, username, realName, status, pageNo, pageSize));
     }
 
+    /**
+     * 多条件筛选, 相当于分页查询去掉了分页参数, 所有参数都可以为空
+     * @param status 子账号状态
+     * @see io.terminus.doctor.user.model.Sub.Status
+     */
     @RequestMapping(value = "/all", method = RequestMethod.GET)
     public List<Sub> findByConditions(@RequestParam(required = false) Long roleId,
                                   @RequestParam(required = false) String roleName,
                                   @RequestParam(required = false) String username,
                                   @RequestParam(required = false) String realName,
+                                  @RequestParam(required = false) Integer status,
                                   @RequestParam(required = false) Integer size) {
         checkAuth();
-        return RespHelper.or500(subService.findByConditions(UserUtil.getCurrentUser(), roleId, roleName, username, realName, size));
+        return RespHelper.or500(subService.findByConditions(UserUtil.getCurrentUser(), roleId, roleName, username, realName, status, size));
     }
 
     /**
@@ -137,9 +146,9 @@ public class Subs {
             throw new JsonResponseException(401, "user.not.login");
         }
 
-        if(!Objects.equals(UserUtil.getCurrentUser().getType(), UserType.FARM_ADMIN_PRIMARY.value())){
-            throw new JsonResponseException(403, "user.no.permission");
-        }
+//        if(!Objects.equals(UserUtil.getCurrentUser().getType(), UserType.FARM_ADMIN_PRIMARY.value())){
+//            throw new JsonResponseException(403, "user.no.permission");
+//        }
     }
 
 }

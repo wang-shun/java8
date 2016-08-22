@@ -50,7 +50,7 @@ public class DoctorTrackProviderHandler implements IHandler{
             Map<String,Object> trackExtraMap = doctorWareHouseTrack.getExtraMap();
             if (trackExtraMap == null) trackExtraMap = Maps.newHashMap();
             if(trackExtraMap.containsKey(key)){
-                trackExtraMap.put(key, dto.getCount() + Params.getWithConvert(trackExtraMap, key, a -> Long.valueOf(a.toString())));
+                trackExtraMap.put(key, dto.getCount() + Params.getWithConvert(trackExtraMap, key, a -> Double.valueOf(a.toString())));
             }else {
                 trackExtraMap.put(key, dto.getCount());
             }

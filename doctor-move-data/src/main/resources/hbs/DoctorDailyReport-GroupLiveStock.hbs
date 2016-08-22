@@ -1,0 +1,82 @@
+-- 获取猪群日存栏统计(阶段仔猪)
+
+SELECT
+  sum(farrowCount) AS farrowCount,
+  sum(nurseryCount) AS nurseryCount,
+  sum(fattenCount) AS fattenCount,
+  sum(houbeiCount) AS houbeiCount
+FROM
+  (
+    SELECT
+      CASE WHEN typename = '分娩母猪'
+      THEN sum(CASE WHEN ddd.inventoryofgroup < 0
+          THEN 0
+                 ELSE ddd.inventoryofgroup END)
+      ELSE 0 END AS farrowCount,
+      CASE WHEN typename = '保育猪'
+        THEN sum(CASE WHEN ddd.inventoryofgroup < 0
+          THEN 0
+                 ELSE ddd.inventoryofgroup END)
+      ELSE 0 END AS nurseryCount,
+      CASE WHEN typename = '育肥猪'
+        THEN sum(CASE WHEN ddd.inventoryofgroup < 0
+          THEN 0
+                 ELSE ddd.inventoryofgroup END)
+      ELSE 0 END AS fattenCount,
+      CASE WHEN typename = '后备母猪'
+        THEN sum(CASE WHEN ddd.inventoryofgroup < 0
+          THEN 0
+                 ELSE ddd.inventoryofgroup END)
+      ELSE 0 END AS houbeiCount
+    FROM (
+           SELECT
+             p.OID                         AS oid,
+             p.farmoid                     AS farmoid,
+             isnull(b.InventoryOfGroup, 0) AS inventoryofgroup,
+             p.typename                    AS typename
+           FROM
+             (
+               SELECT *
+               FROM view_GainCardList
+               WHERE GainOpenDate <= '{{sumAt}}' AND FarmOID = '{{farmOutId}}'
+             ) AS p
+
+             -- 获得存栏数量
+             LEFT JOIN
+             (
+               SELECT
+                 iGain.relmainOID              AS relmainOID,
+                 InCount - isnull(OutCount, 0) AS InventoryOfGroup
+               FROM
+                 (
+                   SELECT
+                     --统计到结束日期为止的转入猪只数
+                     relmainOID,
+                     SUM(isnull(NumberOfPigs, 0)) AS InCount
+                   FROM view_EventListGain
+                   WHERE
+                     EventDate <= '{{sumAt}}'
+                     AND Operator = '+'
+                     AND FarmOID = '{{farmOutId}}'
+                   GROUP BY relmainOID, Operator
+                 ) AS iGain
+                 LEFT JOIN
+                 (
+                   SELECT
+                     --统计到结束日期为止的转出猪只数
+                     relmainOID,
+                     SUM(isnull(NumberOfPigs, 0)) AS OutCount
+                   FROM view_EventListGain
+                   WHERE
+                     EventDate <= '{{sumAt}}'
+                     AND Operator = '-'
+                     AND FarmOID = '{{farmOutId}}'
+                   GROUP BY relmainOID, Operator
+                 ) AS oGain
+                   ON iGain.relmainOID = oGain.relmainOID
+             ) AS b
+               ON p.OID = b.relmainOID
+         ) AS ddd
+    WHERE ddd.typename IN ('分娩母猪', '育肥猪', '保育猪', '后备母猪')
+    GROUP BY ddd.typename
+  ) AS eee

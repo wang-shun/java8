@@ -59,7 +59,7 @@ public class DoctorWareHouseManager {
                 .wareHouseId(doctorWareHouse.getId())
                 .farmId(doctorWareHouse.getFarmId()).farmName(doctorWareHouse.getFarmName())
                 .managerId(doctorWareHouse.getManagerId()).managerName(doctorWareHouse.getManagerName())
-                .materialLotNumber(null).lotNumber(0l).isDefault(IsOrNot.NO.getKey())
+                .materialLotNumber(null).lotNumber(0D).isDefault(IsOrNot.NO.getKey())
                 .extraMap(new HashMap<>())
                 .build();
 

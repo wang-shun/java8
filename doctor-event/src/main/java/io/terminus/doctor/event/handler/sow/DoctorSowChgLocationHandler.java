@@ -2,6 +2,7 @@ package io.terminus.doctor.event.handler.sow;
 
 import com.google.common.collect.Maps;
 import io.terminus.doctor.common.utils.RespHelper;
+import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorPigDao;
 import io.terminus.doctor.event.dao.DoctorPigEventDao;
 import io.terminus.doctor.event.dao.DoctorPigSnapshotDao;
@@ -38,13 +39,13 @@ public class DoctorSowChgLocationHandler extends DoctorAbstractEventFlowHandler 
     @Autowired
     public DoctorSowChgLocationHandler(DoctorPigDao doctorPigDao, DoctorPigEventDao doctorPigEventDao,
                                        DoctorPigTrackDao doctorPigTrackDao, DoctorPigSnapshotDao doctorPigSnapshotDao,
-                                       DoctorRevertLogDao doctorRevertLogDao, DoctorBarnReadService doctorBarnReadService) {
-        super(doctorPigDao, doctorPigEventDao, doctorPigTrackDao, doctorPigSnapshotDao, doctorRevertLogDao);
+                                       DoctorRevertLogDao doctorRevertLogDao, DoctorBarnReadService doctorBarnReadService, DoctorBarnDao doctorBarnDao) {
+        super(doctorPigDao, doctorPigEventDao, doctorPigTrackDao, doctorPigSnapshotDao, doctorRevertLogDao, doctorBarnDao);
         this.doctorBarnReadService = doctorBarnReadService;
     }
 
     @Override
-    public DoctorPigTrack updateDoctorPigTrackInfo(Execution execution,DoctorPigTrack doctorPigTrack, DoctorBasicInputInfoDto basic, Map<String, Object> extra, Map<String,Object> context) {
+    public DoctorPigTrack updateDoctorPigTrackInfo(Execution execution, DoctorPigTrack doctorPigTrack, DoctorBasicInputInfoDto basic, Map<String, Object> extra, Map<String, Object> context) {
 
         doctorPigTrack.addAllExtraMap(extra);
 
@@ -58,12 +59,12 @@ public class DoctorSowChgLocationHandler extends DoctorAbstractEventFlowHandler 
         doctorPigTrack.setUpdatorName(basic.getStaffName());
 
         // 修改对应的状态信息
-        if(Objects.equals(basic.getEventType(), PigEvent.TO_MATING.getKey())){
+        if (Objects.equals(basic.getEventType(), PigEvent.TO_MATING.getKey())) {
 
-            Map<String,Object> newExtraMap = Maps.newHashMap();
+            Map<String, Object> newExtraMap = Maps.newHashMap();
 
             // 断奶后添加对应的胎次信息 TODO 流产算作一个胎次信息 等待确认
-            if(Objects.equals(doctorPigTrack.getStatus(), PigStatus.Wean.getKey())){
+            if (Objects.equals(doctorPigTrack.getStatus(), PigStatus.Wean.getKey())) {
                 // 断奶进入配种
 //                doctorPigTrack.setCurrentParity(doctorPigTrack.getCurrentParity() + 1);
                 newExtraMap.put("hasWeanToMating", true);  // 设置断奶到配置舍标志
@@ -72,9 +73,9 @@ public class DoctorSowChgLocationHandler extends DoctorAbstractEventFlowHandler 
             //清空对应的Map 信息内容 （有一次生产过程）
             doctorPigTrack.setExtraMap(newExtraMap);
             doctorPigTrack.setStatus(PigStatus.Entry.getKey());
-        }else if(Objects.equals(basic.getEventType(), PigEvent.TO_PREG.getKey())){
+        } else if (Objects.equals(basic.getEventType(), PigEvent.TO_PREG.getKey())) {
             // 状态妊娠检查相关， 而不是转舍相关
-        }else if(Objects.equals(basic.getEventType(), PigEvent.TO_FARROWING.getKey())){
+        } else if (Objects.equals(basic.getEventType(), PigEvent.TO_FARROWING.getKey())) {
             doctorPigTrack.setStatus(PigStatus.Farrow.getKey());
         }
         doctorPigTrack.addPigEvent(basic.getPigType(), (Long) context.get("doctorPigEventId"));

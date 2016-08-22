@@ -37,7 +37,7 @@ public class DoctorWareHouseDto implements Serializable{
 
     private String manager;
 
-    private Long remainder;
+    private Double remainder;
 
     private Date recentlyConsume;   //最近领用
 
@@ -71,7 +71,7 @@ public class DoctorWareHouseDto implements Serializable{
         }
 
         if(extraMap.containsKey(REST_CONSUME_DATE)){
-            builder.restConsumeDate(Integer.valueOf(extraMap.get(REST_CONSUME_DATE).toString()));
+            builder.restConsumeDate(Double.valueOf(extraMap.get(REST_CONSUME_DATE).toString()).intValue());
         }
         return builder.build();
     }

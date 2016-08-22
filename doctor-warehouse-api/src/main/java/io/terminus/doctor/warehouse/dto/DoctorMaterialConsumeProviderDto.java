@@ -53,7 +53,9 @@ public class DoctorMaterialConsumeProviderDto implements Serializable{
 
     private String staffName;  //饲养员信息
 
-    private Long count;
+    private Double count;
+
+    private Long unitPrice; // 单价, 单位为"分"
 
     private Long unitId;
 

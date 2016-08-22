@@ -20,6 +20,7 @@
         <result column="event_time" property="eventTime"/>
         <result column="event_type" property="eventType"/>
         <result column="event_count" property="eventCount"/>
+        <result column="unit_price" property="unitPrice"/>
         <result column="staff_id" property="staffId"/>
         <result column="staff_name" property="staffName"/>
         <result column="extra" property="extra"/>
@@ -39,11 +40,11 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        `type`,`farm_id`,`farm_name`,`ware_house_id`,`ware_house_name`,`material_id`,`material_name`,`event_time`,`event_type`,`event_count`,`staff_id`,`staff_name`,`extra`,`creator_id`,`creator_name`,`updator_id`,`updator_name`,`created_at`,`updated_at`
+        `type`,`farm_id`,`farm_name`,`ware_house_id`,`ware_house_name`,`material_id`,`material_name`,`event_time`,`event_type`,`event_count`, unit_price,`staff_id`,`staff_name`,`extra`,`creator_id`,`creator_name`,`updator_id`,`updator_name`,`created_at`,`updated_at`
     </sql>
 
     <sql id="vals">
-        #{type},#{farmId},#{farmName},#{wareHouseId},#{wareHouseName},#{materialId},#{materialName},#{eventTime},#{eventType},#{eventCount},#{staffId},#{staffName},#{extra},#{creatorId},#{creatorName},#{updatorId},#{updatorName},now(),now()
+        #{type},#{farmId},#{farmName},#{wareHouseId},#{wareHouseName},#{materialId},#{materialName},#{eventTime},#{eventType},#{eventCount}, #{unitPrice},#{staffId},#{staffName},#{extra},#{creatorId},#{creatorName},#{updatorId},#{updatorName},now(),now()
     </sql>
 
     <sql id="criteria">
@@ -67,7 +68,7 @@
         ( <include refid="cols_exclude_id"/> )
         VALUES
         <foreach collection="list" item="i" separator=",">
-        (#{i.type},#{i.farmId},#{i.farmName},#{i.wareHouseId},#{i.wareHouseName},#{i.materialId},#{i.materialName},#{i.eventTime},#{i.eventType},#{i.eventCount},#{i.staffId},#{i.staffName},#{i.extra},#{i.creatorId},#{i.creatorName},#{i.updatorId},#{i.updatorName},now(),now())
+        (#{i.type},#{i.farmId},#{i.farmName},#{i.wareHouseId},#{i.wareHouseName},#{i.materialId},#{i.materialName},#{i.eventTime},#{i.eventType},#{i.eventCount}, #{i.unitPrice},#{i.staffId},#{i.staffName},#{i.extra},#{i.creatorId},#{i.creatorName},#{i.updatorId},#{i.updatorName},now(),now())
         </foreach>
     </insert>
 
@@ -80,6 +81,15 @@
         SELECT <include refid="cols_all" />
         FROM <include refid="tb" />
         WHERE id = #{id}
+    </select>
+
+    <select id="findByIds" parameterType="long" resultMap="DoctorMaterialConsumeProviderMap" >
+        SELECT <include refid="cols_all" />
+        FROM <include refid="tb" />
+        WHERE id in
+        <foreach collection="list" open="(" separator="," close=")" item="item">
+            #{item}
+        </foreach>
     </select>
 
     <select id="list" resultMap="DoctorMaterialConsumeProviderMap">
@@ -104,6 +114,7 @@
         <if test="eventTime != null" > ,`event_time` = #{eventTime}</if>
         <if test="eventType != null" > ,`event_type` = #{eventType}</if>
         <if test="eventCount != null" > ,`event_count` = #{eventCount}</if>
+        <if test="unitPrice != null" > ,`unit_price` = #{unitPrice}</if>
         <if test="staffId != null" > ,`staff_id` = #{staffId}</if>
         <if test="staffName != null" > ,`staff_name` = #{staffName}</if>
         <if test="extra != null" > ,`extra` = #{extra}</if>

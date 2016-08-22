@@ -2,6 +2,7 @@ package io.terminus.doctor.workflow.core;
 
 import com.google.common.collect.Lists;
 import io.terminus.doctor.workflow.event.IHandler;
+import io.terminus.doctor.workflow.event.ITacker;
 import io.terminus.doctor.workflow.event.ITimer;
 import io.terminus.doctor.workflow.event.Interceptor;
 import io.terminus.doctor.workflow.utils.AssertHelper;
@@ -65,6 +66,9 @@ public class WorkFlowContext implements Context, ApplicationListener<ContextRefr
 
             //3. 初始化定时器事件
             initEventITimers(applicationContext.getBeansOfType(ITimer.class));
+
+            //4. 初始化定时器事件
+            initEventITackers(applicationContext.getBeansOfType(ITacker.class));
         }
     }
 
@@ -132,6 +136,16 @@ public class WorkFlowContext implements Context, ApplicationListener<ContextRefr
     private void initEventITimers(Map<String, ITimer> ITimersMap) {
         if (ITimersMap != null && ITimersMap.size() > 0) {
             ITimersMap.forEach((beanName, i) -> context.put(beanName, i));
+        }
+    }
+
+    /**
+     * 初始化Tacker
+     * @param ITackersMap
+     */
+    private void initEventITackers(Map<String, ITacker> ITackersMap) {
+        if (ITackersMap != null && ITackersMap.size() > 0) {
+            ITackersMap.forEach((beanName, i) -> context.put(beanName, i));
         }
     }
 

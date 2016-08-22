@@ -2,6 +2,7 @@ package io.terminus.doctor.web.front.event.controller;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.Lists;
+import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.Paging;
 import io.terminus.common.utils.Splitters;
 import io.terminus.doctor.common.enums.PigSearchType;
@@ -16,18 +17,24 @@ import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.event.service.DoctorBarnReadService;
 import io.terminus.doctor.event.service.DoctorBarnWriteService;
 import io.terminus.doctor.event.service.DoctorGroupReadService;
+import io.terminus.doctor.event.service.DoctorPigEventReadService;
 import io.terminus.doctor.event.service.DoctorPigReadService;
 import io.terminus.doctor.user.model.DoctorFarm;
 import io.terminus.doctor.user.service.DoctorFarmReadService;
 import io.terminus.doctor.web.front.auth.DoctorFarmAuthCenter;
 import io.terminus.doctor.web.front.event.dto.DoctorBarnDetail;
-import io.terminus.pampas.common.UserUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -49,6 +56,7 @@ public class DoctorBarns {
     private final DoctorBarnWriteService doctorBarnWriteService;
     private final DoctorFarmReadService doctorFarmReadService;
     private final DoctorPigReadService doctorPigReadService;
+    private final DoctorPigEventReadService doctorPigEventReadService;
     private final DoctorGroupReadService doctorGroupReadService;
     private final DoctorFarmAuthCenter doctorFarmAuthCenter;
 
@@ -58,13 +66,15 @@ public class DoctorBarns {
                        DoctorFarmReadService doctorFarmReadService,
                        DoctorPigReadService doctorPigReadService,
                        DoctorGroupReadService doctorGroupReadService,
-                       DoctorFarmAuthCenter doctorFarmAuthCenter) {
+                       DoctorFarmAuthCenter doctorFarmAuthCenter,
+                       DoctorPigEventReadService doctorPigEventReadService) {
         this.doctorBarnReadService = doctorBarnReadService;
         this.doctorBarnWriteService = doctorBarnWriteService;
         this.doctorFarmReadService = doctorFarmReadService;
         this.doctorPigReadService = doctorPigReadService;
         this.doctorGroupReadService = doctorGroupReadService;
         this.doctorFarmAuthCenter = doctorFarmAuthCenter;
+        this.doctorPigEventReadService = doctorPigEventReadService;
     }
 
     /**
@@ -135,17 +145,19 @@ public class DoctorBarns {
      *
      * @param farmId   猪场id
      * @param pigTypes 猪舍类别 逗号分隔
+     * @param pigIds   根据猪id过滤
      * @return 猪舍表列表
      * @see PigType
      */
     @RequestMapping(value = "/pigTypes", method = RequestMethod.GET)
     public List<DoctorBarn> findBarnsByfarmIdAndType(@RequestParam("farmId") Long farmId,
-                                                     @RequestParam(value = "pigTypes", required = false) String pigTypes) {
+                                                     @RequestParam(value = "pigTypes", required = false) String pigTypes,
+                                                     @RequestParam(value = "pigIds", required = false) String pigIds) {
         List<Integer> types = Lists.newArrayList();
         if (notEmpty(pigTypes)) {
             types = Splitters.splitToInteger(pigTypes, Splitters.COMMA);
         }
-        return RespHelper.or500(doctorBarnReadService.findBarnsByFarmIdAndPigTypes(farmId, types));
+        return filterBarnByPigIds(RespHelper.or500(doctorBarnReadService.findBarnsByFarmIdAndPigTypes(farmId, types)), pigIds);
     }
 
     /**
@@ -166,8 +178,6 @@ public class DoctorBarns {
         barn.setOrgId(farm.getOrgId());
         barn.setOrgName(farm.getOrgName());
         barn.setFarmName(farm.getName());
-        barn.setStaffId(UserUtil.getUserId());
-        barn.setStaffName(UserUtil.getCurrentUser().getName());
 
         if (barn.getId() == null) {
             barn.setStatus(DoctorBarn.Status.NOUSE.getValue());     //初始猪舍状态: 未用
@@ -288,6 +298,25 @@ public class DoctorBarns {
     public List<DoctorBarn> findAvailableBarns(@RequestParam("farmId") Long farmId,
                                                @RequestParam("groupId") Long groupId) {
         return RespHelper.orServEx(doctorBarnReadService.findAvailableBarns(farmId, groupId));
+    }
+
+    @RequestMapping(value = "/updateBarnName", method = RequestMethod.POST)
+    public Boolean updateBarnName(@RequestParam Long barnId, @RequestParam String barnName){
+        Long groupEvent = RespHelper.or500(doctorGroupReadService.countByBarnId(barnId));
+        Long pigEvent = RespHelper.or500(doctorPigEventReadService.countByBarnId(barnId));
+        if(Objects.equals(groupEvent, 0L) && Objects.equals(pigEvent, 0L)){
+            DoctorBarn barn = RespHelper.or500(doctorBarnReadService.findBarnById(barnId));
+            if(barn == null){
+                throw new JsonResponseException("barn.not.found");
+            }
+            if(barnName == null || barnName.trim().isEmpty()){
+                throw new JsonResponseException("barn.name.not.null");
+            }
+            barn.setName(barnName);
+            return RespHelper.or500(doctorBarnWriteService.updateBarn(barn));
+        }else{
+            throw new JsonResponseException("barn.has.event.forbid.update.name");
+        }
     }
 
 }

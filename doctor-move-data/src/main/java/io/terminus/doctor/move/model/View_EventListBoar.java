@@ -43,7 +43,7 @@ public class View_EventListBoar implements Serializable {
     private Integer scoreMidu;      // 密度得分
     private Integer scoreXingtai;   // 形态得分
     private Integer scoreShuliang;  // 数量得分
-    private Double semenJxRatio;    // 畸形率  todo: 其他采精事件相关字段需要确认
+    private Double semenJxRatio;    // 畸形率
     private Double eventWeight;
     private String chgType;         // 变动(当是猪群转出事件时才有值)
     private String chgReason;       // 变动原因(当是疾病事件时 为疾病人员名称)

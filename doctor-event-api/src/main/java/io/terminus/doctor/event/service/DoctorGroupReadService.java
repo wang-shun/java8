@@ -142,4 +142,21 @@ public interface DoctorGroupReadService {
      */
     Response<List<DoctorGroupEvent>> findGroupEventsByEventTypeAndDate(@NotNull(message = "farmId.not.null") Long farmId,
                                                                        Integer eventType, Date startAt, Date endAt);
+
+    /**
+     * 根据日期区间和事件类型查询事件列表
+     * @param farmId    猪场id
+     * @param groupCode 猪群号
+     * @return 猪群
+     */
+    Response<DoctorGroup> findGroupByFarmIdAndGroupCode(@NotNull(message = "farmId.not.null") Long farmId,
+                                                        @NotEmpty(message = "groupCode.not.empty") String groupCode);
+
+
+    /**
+     * 查询一个猪舍累计有多少个事件
+     * @param barnId 猪舍id
+     * @return
+     */
+    Response<Long> countByBarnId(Long barnId);
 }

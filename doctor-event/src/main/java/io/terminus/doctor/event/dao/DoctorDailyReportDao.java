@@ -6,6 +6,7 @@ import io.terminus.doctor.event.model.DoctorDailyReport;
 import org.springframework.stereotype.Repository;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * Desc: 猪场日报表Dao类
@@ -20,7 +21,15 @@ public class DoctorDailyReportDao extends MyBatisDao<DoctorDailyReport> {
         return getSqlSession().selectOne(sqlId("findByFarmIdAndSumAt"), ImmutableMap.of("farmId", farmId, "sumAt", sumAt));
     }
 
+    public List<DoctorDailyReport> findBySumAt(Date sumAt) {
+        return getSqlSession().selectList(sqlId("findBySumAt"), ImmutableMap.of("sumAt", sumAt));
+    }
+
     public void deleteBySumAt(Date sumAt) {
         getSqlSession().delete(sqlId("deleteBySumAt"), sumAt);
+    }
+
+    public void deleteByFarmIdAndSumAt(Long farmId, Date sumAt) {
+        getSqlSession().delete(sqlId("deleteByFarmIdAndSumAt"), ImmutableMap.of("farmId", farmId, "sumAt", sumAt));
     }
 }

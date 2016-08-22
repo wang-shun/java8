@@ -8,75 +8,78 @@ SELECT
 FROM
 (
     SELECT
-    CASE
-        WHEN EventName = '猪群转出' THEN '离场'
-        WHEN EventName = '猪群转进' THEN '进场'
-        WHEN EventName = '仔猪代哺' THEN '被拼窝'
-        WHEN EventName = '仔猪拼窝' THEN '拼窝'
-        WHEN EventName = '仔猪代哺' THEN '被拼窝'
-        WHEN EventName = '部分断奶' THEN '断奶'
-        WHEN EventName = '妊娠检查' AND PregChkResult = '流产' THEN '流产'
-        ELSE EventName END AS eventName,     -- 转换事件的名称, 以适应新版的事件
-    OID AS sowOutId,
-    FarmOID AS farmOutId,
-    PigID AS pigCode,
-    PigFatherID AS pigFatherCode,
-    PigMotherID AS pigMotherCode,
-    CASE WHEN Source = '本场' THEN 1 ELSE 2 END AS source,
-    BirthDate AS birthDate,
-    BirthWeight as birthWeight,     -- 进场重量
-    HerdEntryDate AS inFarmDate,    -- 进场日期
-    HerdEntryDays AS inFarmDayAge,  -- 进场日龄
-    InitialParity AS firstParity,   -- 初始胎次
-    CurrentParity AS currentParity, -- 当前胎次(相对于now而言)
-    Parity AS parity,               -- 事件发生时的胎次(相对于事件发生日期)
-    LnippleCount AS leftCount,
-    RnippleCount AS rightCount,
-    Breed AS breed,
-    Genetic AS genetic,
-    EOID AS eventOutId,
-    EventDate AS eventAt,
-    EventDetail AS eventDesc,   -- 事件描述
-    ERemark AS remark,          -- 事件备注
-    EventLocation AS barnOutId, -- 事件发生猪舍
-    isnull(Price, 0) as price,   -- 单价
-    isnull(SumJe, 0) as amount,  -- 金额
-    BoarID AS boarCode,         -- 配种事件的公猪code
-    ServiceType AS serviceType, -- 配种/分娩事件复用字段, 意义不同
-    Staff AS staffName,
-    DueToFarrowDate AS farrowDate,     -- 预产日期
-    PregChkResult AS pregCheckResult,  -- 妊娠检查/断奶复用字段
-    LitterID AS litterId,              -- 分娩事件字段, 其他事件均为0, 需要join
-    FarrowingType AS farrowType,       -- 分娩/断奶复用字段, 分娩类型, 断奶转入猪舍名?
-    CASE WHEN FarrowNeedAssisted = 1 THEN 1 ELSE 0 END AS needHelp,  -- 需要帮助?1:0
-    CASE WHEN ChgType = '否' THEN 0 ELSE 1 END AS isSingleManage,    -- 是否个体管理
-    EWeight AS eventWeight,
-    allCount AS allCount,              -- 分娩总数(活仔数)
-    BornAlive AS healthyCount,         -- 健仔数
-    BornDead AS deadCount,             -- 死胎数
-    BornMummified AS mummyCount,       -- 木乃伊数
-    BornJx AS jxCount,                 -- 畸形数
-    BornRz AS weakCount,               -- 弱仔数
-    BornBlack AS blackCount,           -- 黑胎数
-    ChgCount AS chgCount,
-    ChgType AS chgType,                -- 仔猪变动/断奶/分娩 复用字段
-    ChgReason AS chgReason,            -- 转舍/拼窝/离场/妊娠检查/被拼窝/断奶/仔猪变动/分娩 复用字段, 真他妈屌啊!
-    Customer AS customer,              -- 分娩事件要用到
-    NurseSow AS nurseSow,              -- 拼窝/分娩 复用字段
-    OutDestination AS toBarnOutId,     -- 进场/转舍/分娩/被拼窝/断奶 复用事件 一般是outId或猪舍名称(分娩)
-    Disease AS disease,                -- 防疫(疫苗名称)/仔猪变动/分娩/断奶/疾病(TB_FieldValue的ColID) 复用字段
-    Treament AS treatment,             -- 防疫(防疫结果)/拼窝/被拼窝/转舍 复用字段
-    NetInPiglets AS netInCount,
-    NetOutPiglets AS netOutCount,
-    Score AS score,                    -- 体况得分
-    BackFat AS backFat,                -- 背镖
-    WeanCount AS weanCount,            -- 断奶数量
-    WeanWeight AS weanWeight,          -- 断奶重量
-    LitterID AS nestCode,              -- 窝号
-    CASE WHEN EventName = '疾病' THEN Disease ELSE NULL END AS diseaseColId,
-    CASE WHEN EventName = '猪群转出' OR EventName = '仔猪变动' THEN ChgType ELSE NULL END AS changeTypeColId,
-    CASE WHEN EventName = '仔猪拼窝' THEN ChgReason ELSE NULL END AS fosterReasonColId,
-    CASE WHEN EventName = '分娩' THEN NurseSow ELSE NULL END AS toGroupOutId   -- 分娩事件转入猪群
+        CASE
+            WHEN EventName = '猪群转出' THEN '离场'
+            WHEN EventName = '猪群转进' THEN '进场'
+            WHEN EventName = '仔猪代哺' THEN '被拼窝'
+            WHEN EventName = '仔猪拼窝' THEN '拼窝'
+            WHEN EventName = '仔猪代哺' THEN '被拼窝'
+            WHEN EventName = '部分断奶' THEN '断奶'
+            WHEN EventName = '妊娠检查' AND PregChkResult = '流产' THEN '流产'
+            ELSE EventName END AS eventName,     -- 转换事件的名称, 以适应新版的事件
+        OID AS sowOutId,
+        FarmOID AS farmOutId,
+        PigID AS pigCode,
+        PigFatherID AS pigFatherCode,
+        PigMotherID AS pigMotherCode,
+        CASE WHEN Source = '本场' THEN 1 ELSE 2 END AS source,
+        BirthDate AS birthDate,
+        BirthWeight as birthWeight,     -- 进场重量
+        HerdEntryDate AS inFarmDate,    -- 进场日期
+        HerdEntryDays AS inFarmDayAge,  -- 进场日龄
+        InitialParity AS firstParity,   -- 初始胎次
+        CurrentParity AS currentParity, -- 当前胎次(相对于now而言)
+        Parity AS parity,               -- 事件发生时的胎次(相对于事件发生日期)
+        LnippleCount AS leftCount,
+        RnippleCount AS rightCount,
+        Breed AS breed,
+        Genetic AS genetic,
+        EOID AS eventOutId,
+        EventDate AS eventAt,
+        EventDetail AS eventDesc,   -- 事件描述
+        ERemark AS remark,          -- 事件备注
+        EventLocation AS barnOutId, -- 事件发生猪舍
+        cast(isnull(Price, 0) * 100 AS INT) as price,   -- 单价(分)
+        cast(isnull(SumJe, 0) * 100 AS INT) as amount,  -- 金额(分)
+        BoarID AS boarCode,         -- 配种事件的公猪code
+        ServiceType AS serviceType, -- 配种/分娩事件复用字段, 意义不同
+        Staff AS staffName,
+        DueToFarrowDate AS farrowDate,     -- 预产日期
+        CASE
+            WHEN PregChkResult = '没有怀孕' OR PregChkResult = '空怀' THEN '妊娠检查阴性'
+            ELSE PregChkResult END
+            AS pregCheckResult,  -- 妊娠检查/断奶复用字段
+        LitterID AS litterId,              -- 分娩事件字段, 其他事件均为0, 需要join
+        FarrowingType AS farrowType,       -- 分娩/断奶复用字段, 分娩类型, 断奶转入猪舍名?
+        CASE WHEN FarrowNeedAssisted = 1 THEN 1 ELSE 0 END AS needHelp,  -- 需要帮助?1:0
+        CASE WHEN ChgType = '否' THEN 0 ELSE 1 END AS isSingleManage,    -- 是否个体管理
+        EWeight AS eventWeight,
+        allCount AS allCount,              -- 分娩总数(活仔数)
+        BornAlive AS healthyCount,         -- 健仔数
+        BornDead AS deadCount,             -- 死胎数
+        BornMummified AS mummyCount,       -- 木乃伊数
+        BornJx AS jxCount,                 -- 畸形数
+        BornRz AS weakCount,               -- 弱仔数
+        BornBlack AS blackCount,           -- 黑胎数
+        ChgCount AS chgCount,
+        ChgType AS chgType,                -- 仔猪变动/断奶/分娩 复用字段
+        ChgReason AS chgReason,            -- 转舍/拼窝/离场/妊娠检查/被拼窝/断奶/仔猪变动/分娩 复用字段, 真他妈屌啊!
+        Customer AS customer,              -- 分娩事件要用到
+        NurseSow AS nurseSow,              -- 拼窝/分娩 复用字段
+        OutDestination AS toBarnOutId,     -- 进场/转舍/分娩/被拼窝/断奶 复用事件 一般是outId或猪舍名称(分娩)
+        Disease AS disease,                -- 防疫(疫苗名称)/仔猪变动/分娩/断奶/疾病(TB_FieldValue的ColID) 复用字段
+        Treament AS treatment,             -- 防疫(防疫结果)/拼窝/被拼窝/转舍 复用字段
+        NetInPiglets AS netInCount,
+        NetOutPiglets AS netOutCount,
+        Score AS score,                    -- 体况得分
+        BackFat AS backFat,                -- 背镖
+        WeanCount AS weanCount,            -- 断奶数量
+        WeanWeight AS weanWeight,          -- 断奶重量
+        LitterID AS nestCode,              -- 窝号
+        CASE WHEN EventName = '疾病' THEN Disease ELSE NULL END AS diseaseColId,
+        CASE WHEN EventName = '猪群转出' OR EventName = '仔猪变动' THEN ChgType ELSE NULL END AS changeTypeColId,
+        CASE WHEN EventName = '仔猪拼窝' THEN ChgReason ELSE NULL END AS fosterReasonColId,
+        CASE WHEN EventName = '分娩' THEN NurseSow ELSE NULL END AS toGroupOutId   -- 分娩事件转入猪群
     FROM view_EventListSow
 ) AS a
     LEFT JOIN TB_FieldValue AS dis ON a.diseaseColId = dis.ColID

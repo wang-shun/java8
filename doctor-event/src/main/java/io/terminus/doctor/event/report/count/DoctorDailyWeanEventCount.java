@@ -1,10 +1,8 @@
 package io.terminus.doctor.event.report.count;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import io.terminus.common.utils.BeanMapper;
 import io.terminus.doctor.event.daily.DoctorDailyEventCount;
-import io.terminus.doctor.event.dto.report.DoctorDailyReportDto;
-import io.terminus.doctor.event.dto.report.DoctorWeanDailyReport;
+import io.terminus.doctor.event.dto.report.daily.DoctorDailyReportDto;
+import io.terminus.doctor.event.dto.report.daily.DoctorWeanDailyReport;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import org.springframework.stereotype.Component;
@@ -35,8 +33,8 @@ public class DoctorDailyWeanEventCount implements DoctorDailyEventCount{
             Map<String,Object> extraMap = e.getExtraMap();
             doctorWeanDailyReport.setCount(doctorWeanDailyReport.getCount() + Integer.valueOf(extraMap.get("partWeanPigletsCount").toString()));
             doctorWeanDailyReport.setWeight((doctorWeanDailyReport.getWeight() + Double.valueOf(extraMap.get("partWeanAvgWeight").toString()))/2);
+            doctorWeanDailyReport.setNest(doctorWeanDailyReport.getNest() + 1);
         });
-
         doctorDailyReportDto.getWean().addWeanCount(doctorWeanDailyReport);
     }
 }

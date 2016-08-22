@@ -51,10 +51,12 @@ import io.terminus.doctor.user.model.Sub;
 import io.terminus.doctor.user.service.DoctorFarmReadService;
 import io.terminus.doctor.user.service.DoctorOrgReadService;
 import io.terminus.doctor.user.service.DoctorStaffReadService;
+import io.terminus.doctor.user.service.DoctorUserProfileReadService;
 import io.terminus.doctor.user.service.PrimaryUserReadService;
 import io.terminus.doctor.web.front.event.service.DoctorGroupWebService;
 import io.terminus.pampas.common.UserUtil;
 import io.terminus.parana.user.model.User;
+import io.terminus.parana.user.model.UserProfile;
 import io.terminus.parana.user.service.UserReadService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -93,7 +95,8 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
 
     @RpcConsumer
     private DoctorBasicMaterialReadService doctorBasicMaterialReadService;
-
+    @RpcConsumer
+    private DoctorUserProfileReadService doctorUserProfileReadService;
     @RpcConsumer
     private PrimaryUserReadService primaryUserReadService;
 
@@ -394,7 +397,16 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
             return null;
         }
         Sub sub = RespHelper.or(primaryUserReadService.findSubByUserId(userId), new Sub());
-        return sub.getRealName();
+        if(sub != null){
+            return sub.getRealName();
+        }else{
+            // 没有sub, 那应该就是主账号了
+            UserProfile profile = RespHelper.orServEx(doctorUserProfileReadService.findProfileByUserId(userId));
+            if(profile != null){
+                return profile.getRealName();
+            }
+        }
+        return null;
     }
 
     //获取防疫项目名称

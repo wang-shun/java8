@@ -106,9 +106,9 @@ public class DoctorMaterialInfoWriteServiceTest extends BasicServiceTest {
 
     private DoctorMaterialInfo.MaterialProduce buildProduce(){
         DoctorMaterialInfo.MaterialProduce produce = new DoctorMaterialInfo.MaterialProduce();
-        produce.setTotal(1500l);
-        produce.setMaterialProduceEntries(Lists.newArrayList(new DoctorMaterialInfo.MaterialProduceEntry(2l,"materialName", 1500l, 100d)));
-        produce.setMedicalProduceEntries(Lists.newArrayList(new DoctorMaterialInfo.MaterialProduceEntry(4l, "medicalName", 1500l, 100d)));
+        produce.setTotal(1500D);
+        produce.setMaterialProduceEntries(Lists.newArrayList(new DoctorMaterialInfo.MaterialProduceEntry(2l,"materialName", 1500D, 100d)));
+        produce.setMedicalProduceEntries(Lists.newArrayList(new DoctorMaterialInfo.MaterialProduceEntry(4l, "medicalName", 1500D, 100d)));
         return produce;
     }
 

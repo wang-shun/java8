@@ -74,8 +74,12 @@ public class DoctorTransGroupEventHandler extends DoctorAbstractGroupEventHandle
         checkQuantity(groupTrack.getBoarQty(), transGroup.getBoarQty());
         checkQuantity(groupTrack.getSowQty(), transGroup.getSowQty());
         checkQuantityEqual(transGroup.getQuantity(), transGroup.getBoarQty(), transGroup.getSowQty());
-        checkTranWeight(groupTrack.getWeight(), transGroup.getWeight());
+        Double realWeight = transGroup.getAvgWeight() * transGroup.getQuantity();   //后台计算的总重
+        checkTranWeight(groupTrack.getWeight(), realWeight);
         checkDayAge(groupTrack.getAvgDayAge(), transGroup);
+
+        //转入猪舍
+        DoctorBarn toBarn = getBarn(transGroup.getToBarnId());
 
         //1.转换转群事件
         DoctorTransGroupEvent transGroupEvent = BeanMapper.map(transGroup, DoctorTransGroupEvent.class);
@@ -85,8 +89,9 @@ public class DoctorTransGroupEventHandler extends DoctorAbstractGroupEventHandle
         DoctorGroupEvent<DoctorTransGroupEvent> event = dozerGroupEvent(group, GroupEventType.TRANS_GROUP, transGroup);
         event.setQuantity(transGroup.getQuantity());
         event.setAvgDayAge(groupTrack.getAvgDayAge());  //转群的日龄不需要录入, 直接取猪群的日龄
-        event.setWeight(transGroup.getWeight());
-        event.setAvgWeight(EventUtil.getAvgWeight(transGroup.getWeight(), transGroup.getQuantity()));
+        event.setAvgWeight(transGroup.getAvgWeight());  //均重
+        event.setWeight(realWeight);                    //总重
+        event.setTransGroupType(getTransType(group.getPigType(), toBarn).getValue());   //区别内转还是外转
         event.setExtraMap(transGroupEvent);
         doctorGroupEventDao.create(event);
 
@@ -117,7 +122,7 @@ public class DoctorTransGroupEventHandler extends DoctorAbstractGroupEventHandle
         //6.判断是否新建群,触发目标群的转入仔猪事件
         if (Objects.equals(transGroup.getIsCreateGroup(), IsOrNot.YES.getValue())) {
             //新建猪群
-            Long toGroupId = autoTransGroupEventNew(group, groupTrack, transGroup);
+            Long toGroupId = autoTransGroupEventNew(group, groupTrack, transGroup, toBarn);
             transGroup.setToGroupId(toGroupId);
 
             //转入猪群
@@ -160,14 +165,14 @@ public class DoctorTransGroupEventHandler extends DoctorAbstractGroupEventHandle
     /**
      * 系统触发的自动新建猪群事件(转群触发)
      */
-    private Long autoTransGroupEventNew(DoctorGroup fromGroup, DoctorGroupTrack fromGroupTrack, DoctorTransGroupInput transGroup) {
+    private Long autoTransGroupEventNew(DoctorGroup fromGroup, DoctorGroupTrack fromGroupTrack, DoctorTransGroupInput transGroup, DoctorBarn toBarn) {
         DoctorNewGroupInput newGroupInput = new DoctorNewGroupInput();
         newGroupInput.setFarmId(fromGroup.getFarmId());
         newGroupInput.setGroupCode(transGroup.getToGroupCode());    //录入猪群号
         newGroupInput.setEventAt(transGroup.getEventAt());          //事件发生日期
         newGroupInput.setBarnId(transGroup.getToBarnId());          //转到的猪舍id
         newGroupInput.setBarnName(transGroup.getToBarnName());
-        newGroupInput.setPigType(getBarn(transGroup.getToBarnId()).getPigType());    //猪类取猪舍的猪类
+        newGroupInput.setPigType(toBarn.getPigType());    //猪类取猪舍的猪类
         newGroupInput.setSex(fromGroupTrack.getSex());
         newGroupInput.setBreedId(transGroup.getBreedId());          //品种
         newGroupInput.setBreedName(transGroup.getBreedName());

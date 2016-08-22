@@ -1,0 +1,84 @@
+-- 获取母猪日存栏统计
+-- 创建母猪存栏临时表
+CREATE TABLE #tempSow (
+  buruSow int,     -- 哺乳
+  peihuaiSow int,  -- 配怀
+  konghuaiSow int, -- 空怀
+  sumat DATETIME   -- 统计时间
+)
+
+DECLARE @i INT
+SET @i = 0
+WHILE @i < {{index}}   -- 循环index天的数据
+BEGIN
+  DECLARE @sumDate DATETIME
+  SET @sumDate = convert(DATETIME, convert(varchar(100), getdate(), 23) + ' 23:59:59', 120) - @i
+
+  -- 插入临时表
+  INSERT INTO #tempSow(buruSow, peihuaiSow, konghuaiSow, sumat)
+
+  SELECT
+    sum(sow.buruSow) AS buruSow,
+    sum(sow.peihuaiSow) AS peihuaiSow,
+    sum(sow.konghuaiSow) AS konghuaiSow,
+    convert(DATETIME, convert(varchar(100), getdate(), 23) + ' 00:00:00', 120) - @i as sumat
+  FROM
+    (
+      SELECT
+        CASE WHEN e.QcStatus = '哺乳' THEN count(1) ELSE 0 END AS buruSow,
+        CASE WHEN e.QcStatus = '配怀' THEN count(1) ELSE 0 END AS peihuaiSow,
+        CASE WHEN e.QcStatus = '空怀' THEN count(1) ELSE 0 END AS konghuaiSow
+      FROM (
+             SELECT
+               RelMainOID,
+               Max(EventDate) AS EventDate
+             FROM Y_EventList
+             WHERE
+               RelMainOID IN
+               (
+                 SELECT OID
+                 FROM Y_PigLitterCard
+                 WHERE
+                   HerdEntryDate <= @sumDate AND
+                   FarmOID = '{{farmOutId}}' AND
+                   (Status != '已离场' OR
+                    convert(DATETIME, HerdRemovalDate) > @sumDate OR
+                    ISNULL(HerdRemovalDate, '') = '')
+               )
+               AND EventDate <= @sumDate
+               AND EventEName IN ('Farrowing', 'Wean', 'Mating', 'PregChk', 'SowEntry')
+             GROUP BY RelMainOID
+           ) AS t
+        LEFT JOIN (
+            SELECT
+              RelMainOID,
+              CASE EventEName
+                WHEN 'Farrowing' THEN '哺乳' --哺乳
+                WHEN 'Wean' THEN '空怀' --断奶->空怀
+                WHEN 'SowEntry' THEN '空怀' --进场->空怀
+                WHEN 'Mating' THEN '配怀' --配怀
+                ELSE
+                  CASE
+                    WHEN PATINDEX('%阳性%', PregChkResult) <= 0 THEN '空怀' --说明没有怀孕，空怀
+                    ELSE '配怀' --配怀
+                  END
+              END AS QcStatus,
+              EventDate
+            FROM Y_EventList
+        ) AS e
+          ON t.RelMainOID = e.RelMainOID AND t.EventDate = e.EventDate
+      GROUP BY e.QcStatus
+    ) AS sow
+  SET @i = @i + 1
+END
+
+-- 查询统计的结果
+SELECT
+  sumat,
+  sum(buruSow) AS buruSow,
+  sum(peihuaiSow) AS peihuaiSow,
+  sum(konghuaiSow) AS konghuaiSow
+FROM #tempSow
+GROUP BY sumat
+
+DROP TABLE #tempSow

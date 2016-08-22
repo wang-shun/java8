@@ -8,8 +8,7 @@
 <mapper namespace="DoctorPigEvent">
 
     <resultMap id="DoctorPigEventMap" type="DoctorPigEvent">
-
-        <result column="id" property="id"/>
+        <id column="id" property="id"/>
         <result column="org_id" property="orgId"/>
         <result column="org_name" property="orgName"/>
         <result column="farm_id" property="farmId"/>
@@ -24,6 +23,41 @@
         <result column="barn_id" property="barnId"/>
         <result column="barn_name" property="barnName"/>
         <result column="rel_event_id" property="relEventId"/>
+        <result column="change_type_id" property="changeTypeId"/>
+        <result column="price" property="price"/>
+        <result column="amount" property="amount"/>
+        <result column="pig_status_before" property="pigStatusBefore"/>
+        <result column="pig_status_after" property="pigStatusAfter"/>
+        <result column="parity" property="parity"/>
+        <result column="is_impregnation" property="isImpregnation"/>
+        <result column="is_delivery" property="isDelivery"/>
+        <result column="preg_days" property="pregDays"/>
+        <result column="feed_days" property="feedDays"/>
+        <result column="preg_check_result" property="pregCheckResult"/>
+        <result column="dp_npd" property="dpnpd"/>
+        <result column="pf_npd" property="pfnpd"/>
+        <result column="pl_npd" property="plnpd"/>
+        <result column="ps_npd" property="psnpd"/>
+        <result column="py_npd" property="pynpd"/>
+        <result column="pt_npd" property="ptnpd"/>
+        <result column="jp_npd" property="jpnpd"/>
+        <result column="npd" property="npd"/>
+        <result column="live_count" property="liveCount"/>
+        <result column="health_count" property="healthCount"/>
+        <result column="weak_count" property="weakCount"/>
+        <result column="mny_count" property="mnyCount"/>
+        <result column="jx_count" property="jxCount"/>
+        <result column="dead_count" property="deadCount"/>
+        <result column="black_count" property="blackCount"/>
+        <result column="wean_count" property="weanCount"/>
+        <result column="wean_avg_weight" property="weanAvgWeight"/>
+        <result column="current_mating_count" property="currentMatingCount"/>
+        <result column="check_date" property="checkDate"/>
+        <result column="matting_date" property="mattingDate"/>
+        <result column="farrowing_date" property="farrowingDate"/>
+        <result column="abortion_date" property="abortionDate"/>
+        <result column="partwean_date" property="partweanDate"/>
+        <result column="doctor_mate_type" property="doctorMateType"/>
         <result column="out_id" property="outId"/>
         <result column="extra" property="extra"/>
         <result column="remark" property="remark"/>
@@ -33,47 +67,211 @@
         <result column="updator_name" property="updatorName"/>
         <result column="created_at" property="createdAt"/>
         <result column="updated_at" property="updatedAt"/>
-    
     </resultMap>
 
     <sql id="tb"> doctor_pig_events </sql>
 
     <sql id="cols_all">
-      id, <include refid="cols_exclude_id" />
+        id,
+        <include refid="cols_exclude_id"/>
     </sql>
 
     <sql id="cols_exclude_id">
-        `org_id`,`org_name`,`farm_id`,`farm_name`,`pig_id`,`pig_code`,`event_at`,`type`,`kind`,`name`,`desc`,`barn_id`,`barn_name`,`rel_event_id`,`out_id`,`extra`,`remark`,`creator_id`,`creator_name`,`updator_id`,`updator_name`,`created_at`,`updated_at`
+        org_id,
+        org_name,
+        farm_id,
+        farm_name,
+        pig_id,
+        pig_code,
+        event_at,
+        `type`,
+        kind,
+        `name`,
+        `desc`,
+        barn_id,
+        barn_name,
+        rel_event_id,
+        change_type_id,
+        price,
+        amount,
+        pig_status_before,
+        pig_status_after,
+        parity,
+        is_impregnation,
+        is_delivery,
+        preg_days,
+        feed_days,
+        preg_check_result,
+        dp_npd,
+        pf_npd,
+        pl_npd,
+        ps_npd,
+        py_npd,
+        pt_npd,
+        jp_npd,
+        npd,
+        live_count,
+        health_count,
+        weak_count,
+        mny_count,
+        jx_count,
+        dead_count,
+        black_count,
+        wean_count,
+        wean_avg_weight,
+        current_mating_count,
+        check_date,
+        matting_date,
+        farrowing_date,
+        abortion_date,
+        partwean_date,
+        doctor_mate_type,
+        out_id,
+        extra,
+        remark,
+        creator_id,
+        creator_name,
+        updator_id,
+        updator_name,
+        created_at,
+        updated_at
+
     </sql>
 
     <sql id="vals">
-        #{orgId},#{orgName},#{farmId},#{farmName},#{pigId},#{pigCode},#{eventAt},#{type},#{kind},#{name},#{desc},#{barnId},#{barnName},#{relEventId},#{outId},#{extra},#{remark},#{creatorId},#{creatorName},#{updatorId},#{updatorName},now(),now()
+        #{orgId},
+        #{orgName},
+        #{farmId},
+        #{farmName},
+        #{pigId},
+        #{pigCode},
+        #{eventAt},
+        #{type},
+        #{kind},
+        #{name},
+        #{desc},
+        #{barnId},
+        #{barnName},
+        #{relEventId},
+        #{changeTypeId},
+        #{price},
+        #{amount},
+        #{pigStatusBefore},
+        #{pigStatusAfter},
+        #{parity},
+        #{isImpregnation},
+        #{isDelivery},
+        #{pregDays},
+        #{feedDays},
+        #{pregCheckResult},
+        #{dpnpd},
+        #{pfnpd},
+        #{plnpd},
+        #{psnpd},
+        #{pynpd},
+        #{ptnpd},
+        #{jpnpd},
+        #{npd},
+        #{liveCount},
+        #{healthCount},
+        #{weakCount},
+        #{mnyCount},
+        #{jxCount},
+        #{deadCount},
+        #{blackCount},
+        #{weanCount},
+        #{weanAvgWeight},
+        #{currentMatingCount},
+        #{checkDate},
+        #{mattingDate},
+        #{farrowingDate},
+        #{abortionDate},
+        #{partweanDate},
+        #{doctorMateType},
+        #{outId},
+        #{extra},
+        #{remark},
+        #{creatorId},
+        #{creatorName},
+        #{updatorId},
+        #{updatorName},
+        now(),
+        now()
+
     </sql>
 
     <sql id="criteria">
-        <if test="orgId != null" > AND `org_id` = #{orgId}</if>
-        <if test="farmId != null" > AND `farm_id` = #{farmId}</if>
-        <if test="pigId != null" > AND `pig_id` = #{pigId}</if>
-        <if test="pigCode != null" > AND `pig_code` = #{pigCode}</if>
-        <if test="beginDate != null"> AND <![CDATA[ event_at >= #{beginDate} ]]> </if>
-        <if test="endDate != null"> AND <![CDATA[ event_at <= #{endDate} ]]> </if>
-        <if test="type != null" > AND `type` = #{type}</if>
-        <if test="kind != null" > AND `kind` = #{kind}</if>
-        <if test="barnId != null" > AND `barn_id` = #{barnId}</if>
-        <if test="relEventId != null" > AND `rel_event_id` = #{relEventId}</if>
-        <if test="outId != null" > AND `out_id` = #{outId}</if>
+        <if test="id != null">AND id = #{id}</if>
+        <if test="orgId != null">AND org_id = #{orgId}</if>
+        <if test="orgName != null">AND org_name = #{orgName}</if>
+        <if test="farmId != null">AND farm_id = #{farmId}</if>
+        <if test="farmName != null">AND farm_name = #{farmName}</if>
+        <if test="pigId != null">AND pig_id = #{pigId}</if>
+        <if test="pigCode != null">AND pig_code = #{pigCode}</if>
+        <if test="beginDate != null">AND <![CDATA[ event_at >= #{beginDate} ]]> </if>
+        <if test="endDate != null">AND <![CDATA[ event_at <= #{endDate} ]]> </if>
+        <if test="type != null">AND `type` = #{type}</if>
+        <if test="kind != null">AND kind = #{kind}</if>
+        <if test="name != null">AND `name` = #{name}</if>
+        <if test="desc != null">AND `desc` = #{desc}</if>
+        <if test="barnId != null">AND barn_id = #{barnId}</if>
+        <if test="barnName != null">AND barn_name = #{barnName}</if>
+        <if test="relEventId != null">AND rel_event_id = #{relEventId}</if>
+        <if test="changeTypeId != null">AND change_type_id = #{changeTypeId}</if>
+        <if test="price != null">AND price = #{price}</if>
+        <if test="amount != null">AND amount = #{amount}</if>
+        <if test="pigStatusBefore != null">AND pig_status_before = #{pigStatusBefore}</if>
+        <if test="pigStatusAfter != null">AND pig_status_after = #{pigStatusAfter}</if>
+        <if test="parity != null">AND parity = #{parity}</if>
+        <if test="isImpregnation != null">AND is_impregnation = #{isImpregnation}</if>
+        <if test="isDelivery != null">AND is_delivery = #{isDelivery}</if>
+        <if test="pregDays != null">AND preg_days = #{pregDays}</if>
+        <if test="feedDays != null">AND feed_days = #{feedDays}</if>
+        <if test="pregCheckResult != null">AND preg_check_result = #{pregCheckResult}</if>
+        <if test="dpnpd != null">AND dp_npd = #{dpnpd}</if>
+        <if test="pfnpd != null">AND pf_npd = #{pfnpd}</if>
+        <if test="plnpd != null">AND pl_npd = #{plnpd}</if>
+        <if test="psnpd != null">AND ps_npd = #{psnpd}</if>
+        <if test="pynpd != null">AND py_npd = #{pynpd}</if>
+        <if test="ptnpd != null">AND pt_npd = #{ptnpd}</if>
+        <if test="jpnpd != null">AND jp_npd = #{jpnpd}</if>
+        <if test="npd != null">AND npd = #{npd}</if>
+        <if test="liveCount != null">AND live_count = #{liveCount}</if>
+        <if test="healthCount != null">AND health_count = #{healthCount}</if>
+        <if test="weakCount != null">AND weak_count = #{weakCount}</if>
+        <if test="mnyCount != null">AND mny_count = #{mnyCount}</if>
+        <if test="jxCount != null">AND jx_count = #{jxCount}</if>
+        <if test="deadCount != null">AND dead_count = #{deadCount}</if>
+        <if test="blackCount != null">AND black_count = #{blackCount}</if>
+        <if test="weanCount != null">AND wean_count = #{weanCount}</if>
+        <if test="weanAvgWeight != null">AND wean_avg_weight = #{weanAvgWeight}</if>
+        <if test="currentMatingCount != null">AND current_mating_count = #{currentMatingCount}</if>
+        <if test="checkDate != null">AND check_date = #{checkDate}</if>
+        <if test="mattingDate != null">AND matting_date = #{mattingDate}</if>
+        <if test="farrowingDate != null">AND farrowing_date = #{farrowingDate}</if>
+        <if test="abortionDate != null">AND abortion_date = #{abortionDate}</if>
+        <if test="partweanDate != null">AND partwean_date = #{partweanDate}</if>
+        <if test="doctorMateType != null">AND doctor_mate_type = #{doctorMateType}</if>
+        <if test="outId != null">AND out_id = #{outId}</if>
+        <if test="extra != null">AND extra = #{extra}</if>
+        <if test="remark != null">AND remark = #{remark}</if>
+        <if test="creatorId != null">AND creator_id = #{creatorId}</if>
+        <if test="creatorName != null">AND creator_name = #{creatorName}</if>
+        <if test="updatorId != null">AND updator_id = #{updatorId}</if>
+        <if test="updatorName != null">AND updator_name = #{updatorName}</if>
     </sql>
 
     <insert id="create" parameterType="DoctorPigEvent" keyProperty="id" useGeneratedKeys="true">
-        INSERT INTO <include refid="tb" />
-        (<include refid="cols_exclude_id" />)
-            VALUES (<include refid="vals" />)
+        INSERT INTO
+        <include refid="tb"/>
+        (<include refid="cols_exclude_id"/>)
+        VALUES (<include refid="vals"/>)
     </insert>
 
-
     <insert id="creates" parameterType="list">
-        INSERT INTO <include refid="tb" />
-        (<include refid="cols_exclude_id" />)
+        INSERT INTO
+        <include refid="tb"/>
+        (<include refid="cols_exclude_id"/>)
         VALUES
         <foreach collection="list" separator="," item="item">
             (
@@ -91,6 +289,41 @@
             #{item.barnId},
             #{item.barnName},
             #{item.relEventId},
+            #{item.changeTypeId},
+            #{item.price},
+            #{item.amount},
+            #{item.pigStatusBefore},
+            #{item.pigStatusAfter},
+            #{item.parity},
+            #{item.isImpregnation},
+            #{item.isDelivery},
+            #{item.pregDays},
+            #{item.feedDays},
+            #{item.pregCheckResult},
+            #{item.dpnpd},
+            #{item.pfnpd},
+            #{item.plnpd},
+            #{item.psnpd},
+            #{item.pynpd},
+            #{item.ptnpd},
+            #{item.jpnpd},
+            #{item.npd},
+            #{item.liveCount},
+            #{item.healthCount},
+            #{item.weakCount},
+            #{item.mnyCount},
+            #{item.jxCount},
+            #{item.deadCount},
+            #{item.blackCount},
+            #{item.weanCount},
+            #{item.weanAvgWeight},
+            #{item.currentMatingCount},
+            #{item.checkDate},
+            #{item.mattingDate},
+            #{item.farrowingDate},
+            #{item.abortionDate},
+            #{item.partweanDate},
+            #{item.doctorMateType},
             #{item.outId},
             #{item.extra},
             #{item.remark},
@@ -105,54 +338,83 @@
         </foreach>
     </insert>
 
-
     <delete id="delete" parameterType="Long">
-    DELETE FROM <include refid="tb"/> WHERE
-    id=#{id}
-</delete>
+        DELETE FROM
+        <include refid="tb"/>
+        WHERE
+        id=#{id}
+    </delete>
 
-    <select id="findById" parameterType="long" resultMap="DoctorPigEventMap" >
-        SELECT <include refid="cols_all" />
-        FROM <include refid="tb" />
+    <select id="findById" parameterType="long" resultMap="DoctorPigEventMap">
+        SELECT
+        <include refid="cols_all"/>
+        FROM
+        <include refid="tb"/>
         WHERE id = #{id}
     </select>
 
+    <select id="findFirstPigEvent" parameterType="map" resultMap="DoctorPigEventMap">
+        select <include refid="cols_all"/> from <include refid="tb"/>
+        where pig_id = #{pigId} and event_at = (
+          select min(event_at) from <include refid="tb"/> where pig_id = #{pigId}
+          <if test="fromDate != null">
+              <![CDATA[ and event_at >= #{fromDate} ]]>
+          </if>
+        ) limit 1
+    </select>
+
+    <select id="countByBarnId" parameterType="long" resultType="long">
+        select count(id) from <include refid="tb" /> where `barn_id` = #{barnId}
+    </select>
+
     <select id="list" resultMap="DoctorPigEventMap">
-        SELECT <include refid="cols_all"/> FROM <include refid="tb"/>
+        SELECT
+        <include refid="cols_all"/>
+        FROM
+        <include refid="tb"/>
         <where>
             <include refid="criteria"/>
         </where>
     </select>
 
     <select id="queryAllFarmInEvent" resultType="long">
-        select distinct(farm_id) from <include refid="tb"/>
+        select distinct(farm_id) from
+        <include refid="tb"/>
     </select>
 
     <select id="countPigEventTypeDuration" parameterType="map" resultType="long">
-        SELECT count(1) FROM <include refid="tb"/>
+        SELECT count(1) FROM
+        <include refid="tb"/>
         <where>
-            <if test="farmId != null" > AND `farm_id` = #{farmId}</if>
-            <if test="eventType != null" > AND `type` = #{eventType}</if>
-            <if test="startDate != null">AND created_at &gt;= #{startDate} </if>
-            <if test="endDate != null">AND created_at &lt;= #{endDate} </if>
+            <if test="farmId != null">AND `farm_id` = #{farmId}</if>
+            <if test="eventType != null">AND `type` = #{eventType}</if>
+            <if test="startDate != null">AND created_at &gt;= #{startDate}</if>
+            <if test="endDate != null">AND created_at &lt;= #{endDate}</if>
         </where>
     </select>
 
     <select id="count" parameterType="map" resultType="long">
-        SELECT count(1) from <include refid="tb"/>
+        SELECT count(1) from
+        <include refid="tb"/>
         <where>
             <include refid="criteria"/>
         </where>
     </select>
 
     <select id="queryLastPigEventById" parameterType="long" resultMap="DoctorPigEventMap">
-        select <include refid="cols_all"/> from <include refid="tb"/>
+        select
+        <include refid="cols_all"/>
+        from
+        <include refid="tb"/>
         where pig_id = #{pigId}
         order by event_at desc limit 1;
     </select>
 
     <select id="queryLastPigEventInWorkflow" parameterType="map" resultMap="DoctorPigEventMap">
-        select <include refid="cols_all"/> from <include refid="tb"/>
+        select
+        <include refid="cols_all"/>
+        from
+        <include refid="tb"/>
         where pig_id = #{pigId}
         <if test="types != null &amp;&amp; types.size() > 0">
             AND `type` IN
@@ -163,13 +425,41 @@
         order by event_at desc limit 1;
     </select>
 
+    <select id="queryLastFirstMate" parameterType="map" resultMap="DoctorPigEventMap">
+        select
+        <include refid="cols_all"/>
+        from
+        <include refid="tb"/>
+        where pig_id = #{pigId}
+        and parity = #{parity}
+        and current_mating_count = #{currentMatingCount}
+        and type = ${type}
+        order by event_at desc limit 1;
+    </select>
+
+    <select id="queryLastEvent" parameterType="map" resultMap="DoctorPigEventMap">
+        select
+        <include refid="cols_all"/>
+        from
+        <include refid="tb"/>
+        where pig_id = #{pigId}
+        and type = ${type}
+        order by event_at desc limit 1;
+    </select>
+
     <select id="queryAllEventsByPigId" parameterType="long" resultMap="DoctorPigEventMap">
-        SELECT <include refid="cols_all"/> FROM <include refid="tb"/>
+        SELECT
+        <include refid="cols_all"/>
+        FROM
+        <include refid="tb"/>
         WHERE pig_id = #{pigId}
     </select>
 
     <select id="paging" parameterType="map" resultMap="DoctorPigEventMap">
-        SELECT <include refid="cols_all"/> from <include refid="tb"/>
+        SELECT
+        <include refid="cols_all"/>
+        from
+        <include refid="tb"/>
         <where>
             <include refid="criteria"/>
         </where>
@@ -184,62 +474,104 @@
     </select>
 
     <update id="updatePigEventFarmIdByPigId" parameterType="map">
-        UPDATE <include refid="tb"/>
+        UPDATE
+        <include refid="tb"/>
         <set>
             updated_at = now()
-            <if test="farmId != null" > ,`farm_id` = #{farmId}</if>
-            <if test="farmName != null" > ,`farm_name` = #{farmName}</if>
+            <if test="farmId != null">,`farm_id` = #{farmId}</if>
+            <if test="farmName != null">,`farm_name` = #{farmName}</if>
         </set>
         WHERE `pig_id` = #{pigId}
     </update>
 
     <update id="update" parameterType="DoctorPigEvent">
-        UPDATE <include refid="tb"/>
+        UPDATE
+        <include refid="tb"/>
         <set>
-        updated_at = now()
-            <if test="orgId != null" > ,`org_id` = #{orgId}</if>
-            <if test="orgName != null" > ,`org_name` = #{orgName}</if>
-            <if test="farmId != null" > ,`farm_id` = #{farmId}</if>
-            <if test="farmName != null" > ,`farm_name` = #{farmName}</if>
-            <if test="pigId != null" > ,`pig_id` = #{pigId}</if>
-            <if test="pigCode != null" > ,`pig_code` = #{pigCode}</if>
-            <if test="eventAt != null" > ,`event_at` = #{eventAt}</if>
-            <if test="type != null" > ,`type` = #{type}</if>
-            <if test="kind != null" > ,`kind` = #{kind}</if>
-            <if test="name != null" > ,`name` = #{name}</if>
-            <if test="desc != null" > ,`desc` = #{desc}</if>
-            <if test="barnId != null" > ,`barn_id` = #{barnId}</if>
-            <if test="barnName != null" > ,`barn_name` = #{barnName}</if>
-            <if test="relEventId != null" > ,`rel_event_id` = #{relEventId}</if>
-            <if test="outId != null" > ,`out_id` = #{outId}</if>
-            <if test="extra != null" > ,`extra` = #{extra}</if>
-            <if test="remark != null" > ,`remark` = #{remark}</if>
-            <if test="creatorId != null" > ,`creator_id` = #{creatorId}</if>
-            <if test="creatorName != null" > ,`creator_name` = #{creatorName}</if>
-            <if test="updatorId != null" > ,`updator_id` = #{updatorId}</if>
-            <if test="updatorName != null" > ,`updator_name` = #{updatorName}</if>
-            <if test="createdAt != null" > ,`created_at` = #{createdAt}</if>
+            <if test="orgId != null">org_id = #{orgId},</if>
+            <if test="orgName != null">org_name = #{orgName},</if>
+            <if test="farmId != null">farm_id = #{farmId},</if>
+            <if test="farmName != null">farm_name = #{farmName},</if>
+            <if test="pigId != null">pig_id = #{pigId},</if>
+            <if test="pigCode != null">pig_code = #{pigCode},</if>
+            <if test="eventAt != null">event_at = #{eventAt},</if>
+            <if test="type != null">`type` = #{type},</if>
+            <if test="kind != null">kind = #{kind},</if>
+            <if test="name != null">`name` = #{name},</if>
+            <if test="desc != null">`desc` = #{desc},</if>
+            <if test="barnId != null">barn_id = #{barnId},</if>
+            <if test="barnName != null">barn_name = #{barnName},</if>
+            <if test="relEventId != null">rel_event_id = #{relEventId},</if>
+            <if test="changeTypeId != null">change_type_id = #{changeTypeId},</if>
+            <if test="price != null">price = #{price},</if>
+            <if test="amount != null">amount = #{amount},</if>
+            <if test="pigStatusBefore != null">pig_status_before = #{pigStatusBefore},</if>
+            <if test="pigStatusAfter != null">pig_status_after = #{pigStatusAfter},</if>
+            <if test="parity != null">parity = #{parity},</if>
+            <if test="isImpregnation != null">is_impregnation = #{isImpregnation},</if>
+            <if test="isDelivery != null">is_delivery = #{isDelivery},</if>
+            <if test="pregDays != null">preg_days = #{pregDays},</if>
+            <if test="feedDays != null">feed_days = #{feedDays},</if>
+            <if test="pregCheckResult != null">preg_check_result = #{pregCheckResult},</if>
+            <if test="dpnpd != null">dp_npd = #{dpnpd},</if>
+            <if test="pfnpd != null">pf_npd = #{pfnpd},</if>
+            <if test="plnpd != null">pl_npd = #{plnpd},</if>
+            <if test="psnpd != null">ps_npd = #{psnpd},</if>
+            <if test="pynpd != null">py_npd = #{pynpd},</if>
+            <if test="ptnpd != null">pt_npd = #{ptnpd},</if>
+            <if test="jpnpd != null">jp_npd = #{jpnpd},</if>
+            <if test="npd != null">npd = #{npd},</if>
+            <if test="liveCount != null">live_count = #{liveCount},</if>
+            <if test="healthCount != null">health_count = #{healthCount},</if>
+            <if test="weakCount != null">weak_count = #{weakCount},</if>
+            <if test="mnyCount != null">mny_count = #{mnyCount},</if>
+            <if test="jxCount != null">jx_count = #{jxCount},</if>
+            <if test="deadCount != null">dead_count = #{deadCount},</if>
+            <if test="blackCount != null">black_count = #{blackCount},</if>
+            <if test="weanCount != null">wean_count = #{weanCount},</if>
+            <if test="weanAvgWeight != null">wean_avg_weight = #{weanAvgWeight},</if>
+            <if test="currentMatingCount != null">current_mating_count = #{currentMatingCount},</if>
+            <if test="checkDate != null">check_date = #{checkDate},</if>
+            <if test="mattingDate != null">matting_date = #{mattingDate},</if>
+            <if test="farrowingDate != null">farrowing_date = #{farrowingDate},</if>
+            <if test="abortionDate != null">abortion_date = #{abortionDate},</if>
+            <if test="partweanDate != null">partwean_date = #{partweanDate},</if>
+            <if test="doctorMateType != null">doctor_mate_type = #{doctorMateType},</if>
+            <if test="outId != null">out_id = #{outId},</if>
+            <if test="extra != null">extra = #{extra},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="creatorId != null">creator_id = #{creatorId},</if>
+            <if test="creatorName != null">creator_name = #{creatorName},</if>
+            <if test="updatorId != null">updator_id = #{updatorId},</if>
+            <if test="updatorName != null">updator_name = #{updatorName},</if>
+            updated_at=now()
         </set>
-        WHERE id=#{id}
+        WHERE id = #{id}
     </update>
 
     <select id="findByFarmIdAndKind" parameterType="map" resultMap="DoctorPigEventMap">
-        SELECT <include refid="cols_all"/> FROM <include refid="tb"/>
+        SELECT
+        <include refid="cols_all"/>
+        FROM
+        <include refid="tb"/>
         WHERE farm_id = #{farmId} AND kind = ${kind}
     </select>
 
     <update id="updateRelEventId" parameterType="DoctorPigEvent">
-        UPDATE <include refid="tb"/>
+        UPDATE
+        <include refid="tb"/>
         SET rel_event_id = #{relEventId}, updated_at = now()
         WHERE id=#{id}
     </update>
 
     <select id="getFirstMatingTime" parameterType="map" resultMap="DoctorPigEventMap">
-        SELECT <include refid="cols_all"/>
-        FROM <include refid="tb"/>
+        SELECT
+        <include refid="cols_all"/>
+        FROM
+        <include refid="tb"/>
         <where>
-            <if test="farmId != null" >`farm_id` = #{farmId}</if>
-            <if test="pigId != null" > AND `pig_id` = #{pigId}</if>
+            <if test="farmId != null">`farm_id` = #{farmId}</if>
+            <if test="pigId != null">AND `pig_id` = #{pigId}</if>
             AND type = #{type} AND kind = #{kind}
         </where>
         order by id DESC
@@ -247,7 +579,8 @@
     </select>
 
     <delete id="deleteByFarmId" parameterType="long">
-        DELETE FROM <include refid="tb"/>
+        DELETE FROM
+        <include refid="tb"/>
         WHERE farm_id=#{farmId}
     </delete>
 </mapper>

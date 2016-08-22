@@ -132,6 +132,20 @@ public class DoctorPigEvents {
         }
     }
 
+    /**
+     * 查找一只猪(指定时间点之后)的第一个事件
+     * @param pigId
+     * @param startDate
+     * @return
+     */
+    @RequestMapping(value = "/findFirstPigEvent", method = RequestMethod.GET)
+    @ResponseBody
+    public DoctorPigEvent findFirstPigEvent(@RequestParam("pigId") Long pigId,
+                                            @RequestParam(value = "startDate",required = false) String startDate){
+        Date beginDateTime = Strings.isNullOrEmpty(startDate) ? null : DTF.parseDateTime(startDate).withTimeAtStartOfDay().toDate();
+        return RespHelper.or500(doctorPigEventReadService.findFirstPigEvent(pigId, beginDateTime));
+    }
+
     @RequestMapping(value = "/queryPigEventById", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public DoctorPigEvent queryPigEventById(@RequestParam("eventId") Long eventId){

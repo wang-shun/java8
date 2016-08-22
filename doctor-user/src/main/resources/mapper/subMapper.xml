@@ -114,6 +114,7 @@
         <where>
             <include refid="criteria"/>
         </where>
+        order by status desc
         LIMIT #{offset}, #{limit}
     </select>
 

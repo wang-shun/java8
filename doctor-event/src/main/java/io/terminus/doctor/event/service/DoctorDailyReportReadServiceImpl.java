@@ -10,7 +10,7 @@ import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.cache.DoctorDailyReportCache;
 import io.terminus.doctor.event.dao.DoctorDailyReportDao;
-import io.terminus.doctor.event.dto.report.DoctorDailyReportDto;
+import io.terminus.doctor.event.dto.report.daily.DoctorDailyReportDto;
 import io.terminus.doctor.event.model.DoctorDailyReport;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -99,6 +99,23 @@ public class DoctorDailyReportReadServiceImpl implements DoctorDailyReportReadSe
         }
     }
 
+    /**
+     * 根据日期和猪场id获取初始化的日报统计
+     *
+     * @param farmId 猪场id
+     * @param date   日期
+     * @return 日报统计
+     */
+    @Override
+    public Response<DoctorDailyReportDto> initDailyReportByFarmIdAndDate(Long farmId, Date date) {
+        try {
+            return Response.ok(doctorDailyReportCache.initDailyReportByFarmIdAndDate(farmId, date));
+        } catch (Exception e) {
+            log.error("init daily report failed, date:{}, cause:{}", date, Throwables.getStackTraceAsString(e));
+            return Response.fail("init.daily.report.fail");
+        }
+    }
+
     @Override
     public Response<Boolean> clearAllReportCache() {
         try {
@@ -107,6 +124,22 @@ public class DoctorDailyReportReadServiceImpl implements DoctorDailyReportReadSe
         } catch (Exception e) {
             log.error("clear report cache failed, cause:{}", Throwables.getStackTraceAsString(e));
             return Response.ok(Boolean.FALSE);
+        }
+    }
+
+    /**
+     * 根据查询查询日报
+     *
+     * @param date 日期
+     * @return 日报list
+     */
+    @Override
+    public Response<List<DoctorDailyReport>> findDailyReportBySumAt(Date date) {
+        try {
+            return Response.ok(doctorDailyReportDao.findBySumAt(Dates.startOfDay(date)));
+        } catch (Exception e) {
+            log.error("find daily report by sumat failed, date:{}, cause:{}", date, Throwables.getStackTraceAsString(e));
+            return Response.fail("daily.report.find.fail");
         }
     }
 

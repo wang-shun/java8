@@ -17,6 +17,7 @@ import io.terminus.doctor.warehouse.enums.IsOrNot;
 import io.terminus.doctor.common.enums.WareHouseType;
 import io.terminus.doctor.warehouse.model.DoctorMaterialInWareHouse;
 import io.terminus.doctor.warehouse.model.DoctorMaterialInfo;
+import io.terminus.doctor.warehouse.model.DoctorWareHouse;
 import io.terminus.doctor.warehouse.service.DoctorMaterialInWareHouseReadService;
 import io.terminus.doctor.warehouse.service.DoctorMaterialInfoReadService;
 import io.terminus.doctor.warehouse.service.DoctorMaterialInfoWriteService;
@@ -178,6 +179,13 @@ public class DoctorMaterialInfos {
         return RespHelper.or500(doctorMaterialInWareHouseReadService.queryDoctorMaterialInWareHouse(materialInWareHouseId));
     }
 
+    @RequestMapping(value = "/queryMaterialInWareHouse", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public DoctorMaterialInWareHouse queryMaterialInWareHouse(@RequestParam("wareHouseId") Long wareHouseId, @RequestParam("materialId") Long materialId){
+        DoctorWareHouse wareHouse = RespHelper.or500(doctorWareHouseReadService.findById(wareHouseId));
+        return RespHelper.or500(doctorMaterialInWareHouseReadService.queryByMaterialWareHouseIds(wareHouse.getFarmId(), materialId, wareHouseId));
+    }
+
     /**
      * 录入对应的物料生产规则信息
      * @param doctorMaterialProductRatioDto
@@ -200,7 +208,7 @@ public class DoctorMaterialInfos {
     @RequestMapping(value = "/preProduceMaterial", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public DoctorMaterialInfo.MaterialProduce preProduceMaterial(@RequestParam("materialId") Long materialId, @RequestParam("produceCount") Long produceCount){
-        return RespHelper.or500(doctorMaterialInfoWriteService.produceMaterial(materialId, produceCount));
+        return RespHelper.or500(doctorMaterialInfoWriteService.produceMaterial(materialId, produceCount.doubleValue()));
     }
 
     /**

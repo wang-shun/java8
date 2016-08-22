@@ -1,4 +1,4 @@
-package io.terminus.doctor.event.dto.report;
+package io.terminus.doctor.event.dto.report.daily;
 
 import lombok.Data;
 
@@ -15,7 +15,12 @@ public class DoctorWeanDailyReport implements Serializable {
     private static final long serialVersionUID = 5413097064736038911L;
 
     /**
-     * 断奶数
+     * 断奶窝数(断奶母猪数)
+     */
+    private int nest;
+
+    /**
+     * 断奶数(断奶仔猪数)
      */
     private int count;
 
@@ -27,5 +32,6 @@ public class DoctorWeanDailyReport implements Serializable {
     public void addWeanCount(DoctorWeanDailyReport dto){
         this.count += dto.getCount();
         this.weight += dto.getWeight();
+        this.nest += dto.getNest();
     }
 }

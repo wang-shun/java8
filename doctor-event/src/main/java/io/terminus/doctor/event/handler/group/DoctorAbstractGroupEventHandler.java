@@ -22,6 +22,7 @@ import io.terminus.doctor.event.dto.event.group.input.DoctorTransGroupInput;
 import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.handler.DoctorGroupEventHandler;
+import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorGroupSnapshot;
@@ -37,6 +38,7 @@ import java.util.Objects;
 
 import static io.terminus.common.utils.Arguments.notEmpty;
 import static io.terminus.common.utils.Arguments.notNull;
+import static io.terminus.doctor.common.enums.PigType.FARROW_TYPES;
 
 /**
  * Desc:
@@ -225,13 +227,15 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
     //转群总重不能大于猪群总重
     protected static void checkTranWeight(Double weight, Double transWeight) {
         if (transWeight > weight) {
+            log.error("weight:{}, transWeight:{}", weight, transWeight);
             throw new ServiceException("tranWeight.over.weight");
         }
     }
 
     //变动金额不能大于原来的金额
     protected static void checkChangeAmount(Long amount, Long changeAmount) {
-        if (changeAmount != null && changeAmount >= amount) {
+        if (changeAmount != null && changeAmount > amount) {
+            log.error("amount:{}, changeAmount:{}", amount, changeAmount);
             throw new ServiceException("changeAmount.over.amount");
         }
     }
@@ -239,6 +243,7 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
     //校验数量
     protected static void checkQuantity(Integer max, Integer actual) {
         if (actual > max) {
+            log.error("maxQty:{}, actualQty:{}", max, actual);
             throw new ServiceException("quantity.over.max");
         }
     }
@@ -246,6 +251,7 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
     //校验 公 + 母 = 总和
     protected static void checkQuantityEqual(Integer all, Integer boar, Integer sow) {
         if (all != (boar + sow)) {
+            log.error("allQty:{}, boarQty:{}, sowQty:{}", all, boar, sow);
             throw new ServiceException("quantity.not.equal");
         }
     }
@@ -280,6 +286,7 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
     //品种校验, 如果猪群的品种已经确定, 那么录入的品种必须和猪群的品种一致
     protected static void checkBreed(Long groupBreedId, Long breedId) {
         if (notNull(groupBreedId) && notNull(breedId) && !groupBreedId.equals(breedId)) {
+            log.error("groupBreed:{}, inBreed:{}", groupBreedId, breedId);
             throw new ServiceException("breed.not.equal");
         }
     }
@@ -289,6 +296,7 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
         if (!Objects.equals(input.getIsCreateGroup(), IsOrNot.YES.getValue())) {
             DoctorGroupTrack groupTrack = doctorGroupTrackDao.findByGroupId(input.getToGroupId());
             if (Math.abs(dayAge - groupTrack.getAvgDayAge()) > 100) {
+                log.error("dayAge:{}, inDayAge:{}", dayAge, Math.abs(dayAge - groupTrack.getAvgDayAge()));
                 throw new ServiceException("delta.dayAge.over.100");
             }
         }
@@ -327,5 +335,11 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
                         Objects.equals(barnType, PigType.NURSERY_PIGLET.getValue()))) {
             throw new ServiceException("group.only.trans.fatten");
         }
+    }
+
+    //判断内转还是外转
+    protected static DoctorGroupEvent.TransGroupType getTransType(Integer pigType, DoctorBarn toBarn) {
+        return Objects.equals(pigType, toBarn.getPigType()) || (FARROW_TYPES.contains(pigType) && FARROW_TYPES.contains(toBarn.getPigType())) ?
+                DoctorGroupEvent.TransGroupType.IN : DoctorGroupEvent.TransGroupType.OUT;
     }
 }

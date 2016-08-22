@@ -313,7 +313,7 @@ public class WareHouseInitService {
             }else{
                 materialCP.setEventType(DoctorMaterialConsumeProvider.EVENT_TYPE.CONSUMER.getValue());
             }
-            materialCP.setEventCount(pu.getCount().longValue());
+            materialCP.setEventCount(pu.getCount());
             if(pu.getStaff() == null || pu.getStaff().trim().isEmpty()){
                 materialCP.setStaffName(pu.getZdr());
             }else{
@@ -363,7 +363,7 @@ public class WareHouseInitService {
             if(basicMaterial.getType().equals(wareHouse.getType())){
                 materialInWareHouse.setMaterialId(basicMaterial.getId());
                 materialInWareHouse.setMaterialName(basicMaterial.getName());
-                materialInWareHouse.setLotNumber(0L);
+                materialInWareHouse.setLotNumber(0D);
                 materialInWareHouse.setUnitGroupName(basicMaterial.getUnitGroupName());
                 materialInWareHouse.setUnitName(basicMaterial.getUnitName());
                 doctorMaterialInWareHouseDao.create(materialInWareHouse);
@@ -379,7 +379,7 @@ public class WareHouseInitService {
         avg.setType(wareHouse.getType());
         for(Map.Entry<String, Object[]> entry : lastMaterialConsumeMap.entrySet()){
             avg.setMaterialId(basicMaterialMap.get(entry.getKey()).getId());
-            avg.setConsumeCount((Long) entry.getValue()[0]);
+            avg.setConsumeCount((Double) entry.getValue()[0]);
             avg.setConsumeDate((Date) entry.getValue()[1]);
             doctorMaterialConsumeAvgDao.create(avg);
             if(recentAVG.getConsumeDate() == null || !avg.getConsumeDate().before(recentAVG.getConsumeDate())){
@@ -389,7 +389,7 @@ public class WareHouseInitService {
         }
 
         //仓库所有物料的总数量
-        long total = 0L;
+        double total = 0L;
         Map<String, Object> trackMap = new HashMap<>(); // key = materialId, value = 相应物料在该仓库的数量
         for(DoctorMaterialInWareHouse item : doctorMaterialInWareHouseDao.queryByFarmAndWareHouseId(wareHouse.getFarmId(), wareHouse.getId())){
             if(item.getLotNumber() != null){

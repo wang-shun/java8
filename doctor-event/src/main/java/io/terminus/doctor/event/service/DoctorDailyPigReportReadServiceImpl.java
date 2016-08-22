@@ -1,13 +1,16 @@
 package io.terminus.doctor.event.service;
 
 import com.google.common.base.Throwables;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.common.utils.RespHelper;
+import io.terminus.doctor.event.dao.DoctorPigDao;
 import io.terminus.doctor.event.dao.DoctorPigEventDao;
-import io.terminus.doctor.event.dto.report.DoctorDailyReportDto;
+import io.terminus.doctor.event.dto.report.daily.DoctorDailyReportDto;
+import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.report.DoctorDailyPigCountInvocation;
 import lombok.extern.slf4j.Slf4j;
@@ -29,14 +32,17 @@ import java.util.stream.Collectors;
 @Service
 @Slf4j
 @RpcProvider
-public class DoctorDailyPigReportReadServiceImpl implements DoctorDailyPigReportReadService{
+public class DoctorDailyPigReportReadServiceImpl implements DoctorDailyPigReportReadService {
 
     private final DoctorPigEventDao doctorPigEventDao;
-
+    private final DoctorPigDao doctorPigDao;
     private final DoctorDailyPigCountInvocation doctorDailyPigCountInvocation;
 
     @Autowired
-    public DoctorDailyPigReportReadServiceImpl(DoctorPigEventDao doctorPigEventDao, DoctorDailyPigCountInvocation doctorDailyPigCountInvocation){
+    public DoctorDailyPigReportReadServiceImpl(DoctorPigEventDao doctorPigEventDao,
+                                               DoctorPigDao doctorPigDao,
+                                               DoctorDailyPigCountInvocation doctorDailyPigCountInvocation){
+        this.doctorPigDao = doctorPigDao;
         this.doctorDailyPigCountInvocation = doctorDailyPigCountInvocation;
         this.doctorPigEventDao = doctorPigEventDao;
     }
@@ -55,6 +61,9 @@ public class DoctorDailyPigReportReadServiceImpl implements DoctorDailyPigReport
             context.put("farmId", farmId);
 
             DoctorDailyReportDto doctorDailyReportDto = doctorDailyPigCountInvocation.countPigEvent(doctorPigEvents, context);
+
+            //统计未离场母猪
+            doctorDailyReportDto.setSowCount(doctorPigDao.count(ImmutableMap.of("farmId", farmId, "pigType", DoctorPig.PIG_TYPE.SOW.getKey())).intValue());
             doctorDailyReportDto.setFarmId(farmId);
             doctorDailyReportDto.setSumAt(sumAt);
 
