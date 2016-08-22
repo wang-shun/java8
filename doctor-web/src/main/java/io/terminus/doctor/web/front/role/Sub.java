@@ -36,4 +36,7 @@ public class Sub {
      * @see io.terminus.doctor.user.model.Sub.Status
      */
     private Integer status;
+
+    //员工关联的猪舍, 将存入数据权限表
+    private List<Long> barnIds;
 }
