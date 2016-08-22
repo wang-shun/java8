@@ -31,6 +31,13 @@ public interface DoctorBarnReadService {
     Response<List<DoctorBarn>> findBarnsByFarmId(@NotNull(message = "farmId.not.null") Long farmId);
 
     /**
+     * 根据farmIds查询猪舍表
+     * @param farmIds 猪场id
+     * @return 猪舍表
+     */
+    Response<List<DoctorBarn>> findBarnsByFarmIds(List<Long> farmIds);
+
+    /**
      * 根据一些枚举条件查询猪舍
      * @param farmId  猪场id
      * @param pigType 猪类

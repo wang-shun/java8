@@ -113,6 +113,19 @@ public class DoctorBarns {
     }
 
     /**
+     * 根据farmIds查询猪舍表, 根据pigIds过滤
+     *
+     * @param farmIds 猪场id
+     * @param pigIds 猪id 逗号分隔
+     * @return 猪舍表列表
+     */
+    @RequestMapping(value = "/farmIds", method = RequestMethod.GET)
+    public List<DoctorBarn> findBarnsByfarmIds(@RequestParam("farmIds") List<Long> farmIds,
+                                              @RequestParam(value = "pigIds", required = false) String pigIds) {
+        return filterBarnByPigIds(RespHelper.or500(doctorBarnReadService.findBarnsByFarmIds(farmIds)), pigIds);
+    }
+
+    /**
      * 根据farmId和状态查询猪舍表
      *
      * @param farmId  猪场id
