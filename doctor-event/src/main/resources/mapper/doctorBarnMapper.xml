@@ -116,6 +116,15 @@
         WHERE farm_id = #{farmId}
     </select>
 
+    <select id="findByFarmIds" parameterType="list" resultMap="DoctorBarnMap">
+        SELECT <include refid="cols_all"/>
+        FROM <include refid="tb"/>
+        WHERE farm_id in
+        <foreach collection="list" open="(" separator="," close=")" item="farmId">
+            #{farmId}
+        </foreach>
+    </select>
+
     <select id="findByOutId" parameterType="string" resultMap="DoctorBarnMap">
         SELECT <include refid="cols_all"/>
         FROM <include refid="tb"/>
