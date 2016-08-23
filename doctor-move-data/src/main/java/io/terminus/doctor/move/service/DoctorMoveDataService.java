@@ -443,21 +443,17 @@ public class DoctorMoveDataService {
 
         //switch 母猪事件
         switch (eventType) {
-            case CHG_LOCATION:  //转舍, 根据转入猪舍类型拆成4种: 转舍, 转入妊娠舍, 转入配种舍, 去分娩
-                DoctorChgLocationDto transBarn = new DoctorChgLocationDto();
-                transBarn.setChangeLocationDate(event.getEventAt());
-                DoctorBarn fromBarn = barnMap.get(event.getBarnOutId());    //来源猪舍
-                if (fromBarn != null) {
-                    transBarn.setChgLocationFromBarnId(fromBarn.getId());
-                    transBarn.setChgLocationFromBarnName(fromBarn.getName());
-                }
-                DoctorBarn toBarn = barnMap.get(event.getToBarnOutId());    //去往猪舍
-                if (toBarn != null) {
-                    transBarn.setChgLocationToBarnId(toBarn.getId());
-                    transBarn.setChgLocationToBarnName(toBarn.getName());
-                    sowEvent.setType(getSowTransBarnEventType(toBarn.getPigType()));     //根据转入的猪舍类型, 重新覆盖事件类型, 这一步很重要
-                }
-                sowEvent.setExtra(JSON_MAPPER.toJson(transBarn));
+            case TO_PREG:        //转入妊娠舍
+                sowEvent.setExtra(JSON_MAPPER.toJson(getSowTranBarnExtra(event, barnMap)));
+                break;
+            case TO_MATING:      //转入配种舍
+                sowEvent.setExtra(JSON_MAPPER.toJson(getSowTranBarnExtra(event, barnMap)));
+                break;
+            case TO_FARROWING:   //去分娩
+                sowEvent.setExtra(JSON_MAPPER.toJson(getSowTranBarnExtra(event, barnMap)));
+                break;
+            case CHG_LOCATION:  //转舍
+                sowEvent.setExtra(JSON_MAPPER.toJson(getSowTranBarnExtra(event, barnMap)));
                 break;
             case CHG_FARM:      //转场
                 DoctorChgFarmDto tranFarm = new DoctorChgFarmDto();
@@ -559,6 +555,23 @@ public class DoctorMoveDataService {
                 break;
         }
         return sowEvent;
+    }
+
+    //拼接母猪转舍extra
+    private DoctorChgLocationDto getSowTranBarnExtra(View_EventListSow event, Map<String, DoctorBarn> barnMap) {
+        DoctorChgLocationDto transBarn = new DoctorChgLocationDto();
+        transBarn.setChangeLocationDate(event.getEventAt());
+        DoctorBarn fromBarn = barnMap.get(event.getBarnOutId());    //来源猪舍
+        if (fromBarn != null) {
+            transBarn.setChgLocationFromBarnId(fromBarn.getId());
+            transBarn.setChgLocationFromBarnName(fromBarn.getName());
+        }
+        DoctorBarn toBarn = barnMap.get(event.getToBarnOutId());    //去往猪舍
+        if (toBarn != null) {
+            transBarn.setChgLocationToBarnId(toBarn.getId());
+            transBarn.setChgLocationToBarnName(toBarn.getName());
+        }
+        return transBarn;
     }
 
     //拼接母猪猪离场extra
@@ -734,19 +747,6 @@ public class DoctorMoveDataService {
         DoctorCustomer customer = customerMap.get(event.getCustomer());
         change.setPigletsCustomerId(customer == null ? null : customer.getId());    //客户Id （非必填）
         return change;
-    }
-
-    //根据猪舍类型重新获取事件的类型
-    private Integer getSowTransBarnEventType(Integer barnType) {
-        if (Objects.equals(PigType.MATE_SOW.getValue(), barnType)) {
-            return PigEvent.TO_MATING.getKey();
-        } else if (Objects.equals(PigType.PREG_SOW.getValue(), barnType)) {
-            return PigEvent.TO_PREG.getKey();
-        } else if (Objects.equals(PigType.FARROW_PIGLET.getValue(), barnType)) {
-            return PigEvent.TO_FARROWING.getKey();
-        } else {
-            return PigEvent.CHG_LOCATION.getKey();
-        }
     }
 
     //拼接母猪跟踪

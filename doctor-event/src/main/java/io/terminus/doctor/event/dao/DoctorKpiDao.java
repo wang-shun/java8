@@ -453,5 +453,5 @@ public class DoctorKpiDao {
         return sqlSession.selectOne(sqlId("realTimeLiveStockSow"), ImmutableMap.of("farmId", farmId, "date", date));
     }
 
-    
+
 }
