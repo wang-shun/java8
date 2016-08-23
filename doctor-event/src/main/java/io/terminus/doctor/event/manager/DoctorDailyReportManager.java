@@ -82,24 +82,12 @@ public class DoctorDailyReportManager {
         DoctorDailyReport report = new DoctorDailyReport();
         report.setFarmId(farmId);
         report.setSumAt(sumAt);
-        report.setSowCount(doctorKpiDao.realTimeLiveStockSow(farmId, sumAt));            //母猪总存栏
-        report.setFarrowCount(doctorKpiDao.realTimeLiveStockFarrow(farmId, sumAt));      //产房仔猪
-        report.setNurseryCount(doctorKpiDao.realTimeLiveStockNursery(farmId, sumAt));    //保育猪
-        report.setFattenCount(doctorKpiDao.realTimeLiveStockFatten(farmId, sumAt));      //育肥猪
 
         DoctorDailyReportDto dto = doctorDailyReportCache.initDailyReportByFarmIdAndDate(farmId, sumAt);
-        DoctorLiveStockDailyReport liveStock = new DoctorLiveStockDailyReport();
-        liveStock.setHoubeiSow(doctorKpiDao.realTimeLiveStockHoubeiSow(farmId, sumAt));  //后备母猪
-        liveStock.setBuruSow(doctorKpiDao.realTimeLiveStockFarrowSow(farmId, sumAt));    //产房母猪
-        liveStock.setPeihuaiSow(report.getSowCount() - liveStock.getBuruSow());          //配怀 = 总存栏 - 产房母猪
-        liveStock.setKonghuaiSow(0);                                                     //空怀猪作废, 置成0
-        liveStock.setBoar(doctorKpiDao.realTimeLiveStockBoar(farmId, sumAt));            //公猪
-        liveStock.setFarrow(report.getFarrowCount());
-        liveStock.setNursery(report.getNurseryCount());
-        liveStock.setFatten(report.getFattenCount());
-
-        dto.setLiveStock(liveStock);
-        dto.setSowCount(report.getSowCount());                              //冗余, 母猪总存栏
+        report.setSowCount(dto.getSowCount());                      //母猪总存栏
+        report.setFarrowCount(dto.getLiveStock().getFarrow());      //产房仔猪
+        report.setNurseryCount(dto.getLiveStock().getNursery());    //保育猪
+        report.setFattenCount(dto.getLiveStock().getFatten());      //育肥猪
         report.setReportData(dto);
         doctorDailyReportDao.create(report);
     }

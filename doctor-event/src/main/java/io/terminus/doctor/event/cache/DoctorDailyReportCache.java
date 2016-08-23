@@ -190,18 +190,20 @@ public class DoctorDailyReportCache {
         wean.setWeight(doctorKpiDao.getWeanPigletWeightAvg(farmId, startAt, endAt));
         wean.setNest(doctorKpiDao.getWeanSow(farmId, startAt, endAt));
 
+        //个体管理母猪总存栏
+        report.setSowCount(doctorKpiDao.realTimeLiveStockFarrowSow(farmId, startAt));
+
         //存栏
         DoctorLiveStockDailyReport liveStock = new DoctorLiveStockDailyReport();
-        liveStock.setHoubeiSow(doctorKpiDao.liveStockHoubeiSow(farmId));
-        liveStock.setPeihuaiSow(doctorKpiDao.liveStockPeihuaiSow(farmId));
-        liveStock.setBuruSow(doctorKpiDao.liveStockBuruSow(farmId));
-        liveStock.setKonghuaiSow(0);
-        liveStock.setBoar(doctorKpiDao.liveStockBoar(farmId));
-        liveStock.setFarrow(doctorKpiDao.liveStockFarrow(farmId));
-        liveStock.setNursery(doctorKpiDao.liveStockNursery(farmId));
-        liveStock.setFatten(doctorKpiDao.liveStockFatten(farmId));
+        liveStock.setHoubeiSow(doctorKpiDao.realTimeLiveStockHoubeiSow(farmId, startAt));  //后备母猪
+        liveStock.setBuruSow(doctorKpiDao.realTimeLiveStockFarrowSow(farmId, startAt));    //产房母猪
+        liveStock.setPeihuaiSow(report.getSowCount() - liveStock.getBuruSow());            //配怀 = 总存栏 - 产房母猪
+        liveStock.setKonghuaiSow(0);                                                       //空怀猪作废, 置成0
+        liveStock.setBoar(doctorKpiDao.realTimeLiveStockBoar(farmId, startAt));            //公猪
+        liveStock.setFarrow(doctorKpiDao.realTimeLiveStockFarrow(farmId, startAt));
+        liveStock.setNursery(doctorKpiDao.realTimeLiveStockNursery(farmId, startAt));
+        liveStock.setFatten(doctorKpiDao.realTimeLiveStockFatten(farmId, startAt));
 
-        report.setSowCount(doctorKpiDao.liveStockSow(farmId));
         report.setCheckPreg(checkPreg);
         report.setDead(dead);
         report.setDeliver(deliver);
