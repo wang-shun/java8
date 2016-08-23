@@ -91,6 +91,13 @@ public class DefaultGroupQueryBuilder extends BaseGroupQueryBuilder {
             List<String> typesList = Splitters.UNDERSCORE.splitToList(pigTypes);
             termsList.add(new Terms("pigType", typesList));
         }
+
+        // 3. 当前用户所拥有权限的猪舍
+        String barnIds = params.get("barnIds");
+        if (StringUtils.isNotBlank(barnIds)){
+            List<String> barnIdList = Splitters.COMMA.splitToList(barnIds);
+            termsList.add(new Terms("currentBarnId", barnIdList));
+        }
         return termsList;
     }
 
