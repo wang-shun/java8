@@ -558,25 +558,22 @@ public class DoctorSearches {
         List<String> list = Lists.newArrayList();
         BaseUser user = UserUtil.getCurrentUser();
         DoctorUserDataPermission doctorUserDataPermission = RespHelper.orServEx(doctorUserDataPermissionReadService.findDataPermissionByUserId(user.getId()));
-        if (doctorUserDataPermission != null) {
-            //获取猪舍ids
-            String barnIds = doctorUserDataPermission.getBarnIds();
-            String barnId = params.get("barnId");
-            if (StringUtils.isNotBlank(barnId)) {
-                if (StringUtils.isNotBlank(barnIds)) {
-                    List<String> barnIdList = Splitters.COMMA.splitToList(barnIds);
-                    if (barnIdList.contains(barnId)) {
-                        barnIds = barnId;
-                        params.remove("barnId");
-                    } else {
-                        return null;
-                    }
-                }
-            }
-            list.add(barnIds);
-            return list;
+        if (doctorUserDataPermission == null) {
+            return null;
         }
-        return null;
+        //获取猪舍ids
+        String barnIds = doctorUserDataPermission.getBarnIds();
+        String barnId = params.get("barnId");
+        if (StringUtils.isNotBlank(barnId) && StringUtils.isNotBlank(barnIds)) {
+            List<String> barnIdList = Splitters.COMMA.splitToList(barnIds);
+            if (!barnIdList.contains(barnId)) {
+                return null;
+            }
+            barnIds = barnId;
+            params.remove("barnId");
+        }
+        list.add(barnIds);
+        return list;
     }
 
 }
