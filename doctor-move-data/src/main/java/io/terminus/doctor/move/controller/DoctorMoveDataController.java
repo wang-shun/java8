@@ -2,8 +2,10 @@ package io.terminus.doctor.move.controller;
 
 import com.google.common.base.Throwables;
 import io.terminus.common.exception.ServiceException;
+import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.model.DoctorPig;
+import io.terminus.doctor.event.service.DoctorDailyReportWriteService;
 import io.terminus.doctor.event.service.DoctorPigTypeStatisticWriteService;
 import io.terminus.doctor.move.handler.DoctorMoveDatasourceHandler;
 import io.terminus.doctor.move.service.DoctorMoveBasicService;
@@ -52,6 +54,7 @@ public class DoctorMoveDataController {
     private final DoctorUserReadService doctorUserReadService;
     private final DoctorPigTypeStatisticWriteService doctorPigTypeStatisticWriteService;
     private final DoctorMoveDatasourceHandler doctorMoveDatasourceHandler;
+    private final DoctorDailyReportWriteService doctorDailyReportWriteService;
 
     @Autowired
     public DoctorMoveDataController(UserInitService userInitService,
@@ -63,7 +66,8 @@ public class DoctorMoveDataController {
                                     DoctorUserDataPermissionDao doctorUserDataPermissionDao,
                                     DoctorUserReadService doctorUserReadService,
                                     DoctorPigTypeStatisticWriteService doctorPigTypeStatisticWriteService,
-                                    DoctorMoveDatasourceHandler doctorMoveDatasourceHandler) {
+                                    DoctorMoveDatasourceHandler doctorMoveDatasourceHandler,
+                                    DoctorDailyReportWriteService doctorDailyReportWriteService) {
         this.userInitService = userInitService;
         this.wareHouseInitService = wareHouseInitService;
         this.doctorMoveBasicService = doctorMoveBasicService;
@@ -74,6 +78,7 @@ public class DoctorMoveDataController {
         this.doctorUserReadService = doctorUserReadService;
         this.doctorPigTypeStatisticWriteService = doctorPigTypeStatisticWriteService;
         this.doctorMoveDatasourceHandler = doctorMoveDatasourceHandler;
+        this.doctorDailyReportWriteService = doctorDailyReportWriteService;
     }
 
     /**
@@ -404,6 +409,23 @@ public class DoctorMoveDataController {
             return true;
         } catch (Exception e) {
             log.error("move sow trans barn failed, farmId:{}, cause:{}", farmId, Throwables.getStackTraceAsString(e));
+            return false;
+        }
+    }
+
+    /**
+     * 拆分母猪转舍事件
+     */
+    @RequestMapping(value = "/realtime/daily", method = RequestMethod.GET)
+    public Boolean moveRealtimeDailyReport(@RequestParam("farmId") Long farmId,
+                                           @RequestParam("date") String date) {
+        try {
+            log.warn("move realtime daily report start, farmId:{}", farmId);
+            doctorDailyReportWriteService.realtimeDailyReport(farmId, DateUtil.toDate(date));
+            log.warn("move realtime daily report end");
+            return true;
+        } catch (Exception e) {
+            log.error("move realtime daily report failed, farmId:{}, cause:{}", farmId, Throwables.getStackTraceAsString(e));
             return false;
         }
     }
