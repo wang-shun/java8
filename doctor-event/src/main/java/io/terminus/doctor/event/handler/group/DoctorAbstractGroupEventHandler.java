@@ -342,26 +342,31 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
         Integer barnType = RespHelper.orServEx(doctorBarnReadService.findBarnById(barnId)).getPigType();
 
         //产房 => 产房(分娩母猪舍)/保育舍
-        if ((Objects.equals(pigType, PigType.FARROW_PIGLET.getValue()) ||
-                Objects.equals(pigType, PigType.DELIVER_SOW.getValue())) && !FARROW_ALLOW_TRANS.contains(barnType)) {
-            log.error("check can trans barn pigType:{}, barnType:{}", pigType, barnType);
-            throw new ServiceException("farrow.can.not.trans");
+        if ((Objects.equals(pigType, PigType.FARROW_PIGLET.getValue()) || Objects.equals(pigType, PigType.DELIVER_SOW.getValue()))) {
+            if (!FARROW_ALLOW_TRANS.contains(barnType)) {
+                log.error("check can trans barn pigType:{}, barnType:{}", pigType, barnType);
+                throw new ServiceException("farrow.can.not.trans");
+            }
+            return;
         }
-
         //保育舍 => 保育舍/育肥舍/育种舍/后备舍(公母)
-        else if (Objects.equals(pigType, PigType.NURSERY_PIGLET.getValue()) && !NURSERY_ALLOW_TRANS.contains(barnType)) {
-            log.error("check can trans barn pigType:{}, barnType:{}", pigType, barnType);
-            throw new ServiceException("nursery.can.not.trans");
+        if (Objects.equals(pigType, PigType.NURSERY_PIGLET.getValue())) {
+            if (!NURSERY_ALLOW_TRANS.contains(barnType)) {
+                log.error("check can trans barn pigType:{}, barnType:{}", pigType, barnType);
+                throw new ServiceException("nursery.can.not.trans");
+            }
+            return;
         }
-
         //育肥舍 => 育肥舍/后备舍(公母)
-        else if (Objects.equals(pigType, PigType.FATTEN_PIG.getValue()) && !FATTEN_ALLOW_TRANS.contains(barnType)) {
-            log.error("check can trans barn pigType:{}, barnType:{}", pigType, barnType);
-            throw new ServiceException("fatten.can.not.trans");
+        if (Objects.equals(pigType, PigType.FATTEN_PIG.getValue())) {
+            if (!FATTEN_ALLOW_TRANS.contains(barnType)) {
+                log.error("check can trans barn pigType:{}, barnType:{}", pigType, barnType);
+                throw new ServiceException("fatten.can.not.trans");
+            }
+            return;
         }
-
         //其他 => 同类型
-        else if(!Objects.equals(pigType, barnType)) {
+        if(!Objects.equals(pigType, barnType)) {
             log.error("check can trans barn pigType:{}, barnType:{}", pigType, barnType);
             throw new ServiceException("no.equal.type.can.not.trans");
         }
