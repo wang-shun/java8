@@ -369,6 +369,9 @@ public class WareHouseInitService {
                 materialInWareHouse.setMaterialId(basicMaterial.getId());
                 materialInWareHouse.setMaterialName(basicMaterial.getName());
                 materialInWareHouse.setLotNumber(materialCount.get(wareHouse.getType() + "|" + basicMaterial.getName()));
+                if(materialInWareHouse.getLotNumber() == null || materialInWareHouse.getLotNumber() == 0){
+                    continue;
+                }
                 materialInWareHouse.setUnitGroupName(basicMaterial.getUnitGroupName());
                 materialInWareHouse.setUnitName(basicMaterial.getUnitName());
                 doctorMaterialInWareHouseDao.create(materialInWareHouse);
