@@ -95,7 +95,7 @@ public class SubService {
 
             Sub result = makeSub(sub, u, userProfile);
             result.setFarmIds(permission.getFarmIdsList());
-
+            result.setBarnIds(permission.getBarnIdsList());
             return Response.ok(result);
         } catch (ServiceException e) {
             log.warn("find sub failed, user={}, userId={}, error={}",
