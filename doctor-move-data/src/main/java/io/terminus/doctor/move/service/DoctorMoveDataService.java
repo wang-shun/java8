@@ -178,8 +178,7 @@ public class DoctorMoveDataService {
                 PigEvent.TO_FARROWING.getKey()
         );
 
-        doctorPigEventDao.findByFarmIdAndKind(farm.getId(), DoctorPig.PIG_TYPE.SOW.getKey()).stream()
-                .filter(tarnsBarnTypes::contains)
+        doctorPigEventDao.findByFarmIdAndKindAndEventTypes(farm.getId(), DoctorPig.PIG_TYPE.SOW.getKey(), tarnsBarnTypes)
                 .forEach(event -> {
                     DoctorChgLocationDto dto = JSON_MAPPER.fromJson(event.getExtra(), DoctorChgLocationDto.class);
                     if (dto != null) {
