@@ -557,28 +557,24 @@ public class DoctorSearches {
     public List<String> getUserAccessBarnIds(Map<String, String> params) {
         List<String> list = Lists.newArrayList();
         BaseUser user = UserUtil.getCurrentUser();
-        if (user != null) {
-            DoctorUserDataPermission doctorUserDataPermission = RespHelper.orServEx(doctorUserDataPermissionReadService.findDataPermissionByUserId(user.getId()));
-            if (doctorUserDataPermission != null) {
-                //获取猪舍ids
-                String barnIds = doctorUserDataPermission.getBarnIds();
-                if (params.containsKey("barnId")) {
-                    if (StringUtils.isNotBlank(barnIds)) {
-                        List<String> barnIdList = Splitters.COMMA.splitToList(barnIds);
-                        String barnId = params.get("barnId");
-                        if (StringUtils.isNotBlank(barnId)) {
-                            if (barnIdList.contains(barnId)) {
-                                barnIds = barnId;
-                                params.remove("barnId");
-                            } else {
-                                return null;
-                            }
-                        }
+        DoctorUserDataPermission doctorUserDataPermission = RespHelper.orServEx(doctorUserDataPermissionReadService.findDataPermissionByUserId(user.getId()));
+        if (doctorUserDataPermission != null) {
+            //获取猪舍ids
+            String barnIds = doctorUserDataPermission.getBarnIds();
+            String barnId = params.get("barnId");
+            if (StringUtils.isNotBlank(barnId)) {
+                if (StringUtils.isNotBlank(barnIds)) {
+                    List<String> barnIdList = Splitters.COMMA.splitToList(barnIds);
+                    if (barnIdList.contains(barnId)) {
+                        barnIds = barnId;
+                        params.remove("barnId");
+                    } else {
+                        return null;
                     }
                 }
-                list.add(barnIds);
-                return list;
             }
+            list.add(barnIds);
+            return list;
         }
         return null;
     }
