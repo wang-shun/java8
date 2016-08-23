@@ -948,4 +948,57 @@
           )
         FROM dual
     </select>
+
+    <!-- 实时存栏: 在产房的母猪 -->
+    <select id="realTimeLiveStockFarrowSow" parameterType="map" resultType="int">
+        SELECT
+          (SELECT
+             ifnull(count(1), 0)      -- 当前在产房的母猪数量
+           FROM (
+                  SELECT current_barn_id
+                  FROM doctor_pig_tracks
+                  WHERE
+                    farm_id = #{farmId} AND
+                    pig_type = 1 AND
+                    is_removal = 0
+                ) AS pig
+             LEFT JOIN doctor_barns AS barn ON pig.current_barn_id = barn.id
+           WHERE barn.pig_type = 7
+          )
+          -
+          (
+            SELECT
+              ifnull(sum(ifnull(final.inCount, 0)) - sum(ifnull(final.outCount, 0)), 0)  -- 产房: 转入-转出
+            FROM (
+                   SELECT
+                     CASE WHEN ev.pig_type = 7 AND ev.type NOT IN (7, 14)     -- 转配种舍, 转妊娠舍, 离场 都算转出
+                       THEN ev.quantity
+                     ELSE 0 END AS outCount,
+                     CASE WHEN ev.pig_type != 7 AND ev.type = 14 OR (ev.pig_type = 7 AND ev.type = 7)  -- 去分娩, 进场到分娩(没有这种情况), 算转入
+                       THEN ev.quantity
+                     ELSE 0 END AS inCount
+                   FROM (
+                          SELECT
+                            event.type,
+                            barn.pig_type,
+                            ifnull(count(barn.pig_type), 0) AS quantity
+                          FROM (
+                                 SELECT
+                                   type,
+                                   barn_id
+                                 FROM doctor_pig_events
+                                 WHERE
+                                   farm_id = #{farmId} AND
+                                   event_at &gt;= #{date} AND
+                                   kind = 1 AND
+                                   type IN (2, 6, 7, 10, 12, 14)      -- 限定这几个事件范围
+                               ) AS event
+                            LEFT JOIN doctor_barns AS barn ON event.barn_id = barn.id
+                          WHERE barn.pig_type = 7 OR event.type = 14  -- 限定分娩舍发生的事件
+                          GROUP BY event.type, barn.pig_type
+                        ) AS ev
+                 ) AS final
+          ) AS farrowCount
+        FROM dual
+    </select>
 </mapper>

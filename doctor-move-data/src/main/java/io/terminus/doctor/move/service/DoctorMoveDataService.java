@@ -184,7 +184,6 @@ public class DoctorMoveDataService {
                     if (dto != null) {
                         Integer fromBarnType = barnTypeMap.get(dto.getChgLocationFromBarnId());
                         Integer toBarnType = barnTypeMap.get(dto.getChgLocationToBarnId());
-                        log.info("transBarn event:{}, fromBarnType:{}, toBarnType:{}", event.getId(), fromBarnType, toBarnType);
                         PigEvent type = getTransBarnType(fromBarnType, toBarnType);
 
                         DoctorPigEvent updateEvent = new DoctorPigEvent();

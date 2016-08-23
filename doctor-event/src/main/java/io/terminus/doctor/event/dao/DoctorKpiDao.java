@@ -394,7 +394,7 @@ public class DoctorKpiDao {
     }
 
     /**
-     * 获取某天的产房仔猪存栏
+     * 实时存栏: 获取某天的产房仔猪存栏
      * @param farmId 猪场id
      * @param date   日期
      * @return 存栏数量
@@ -404,7 +404,7 @@ public class DoctorKpiDao {
     }
 
     /**
-     * 获取某天的保育猪存栏
+     * 实时存栏: 获取某天的保育猪存栏
      * @param farmId 猪场id
      * @param date   日期
      * @return 存栏数量
@@ -414,7 +414,7 @@ public class DoctorKpiDao {
     }
 
     /**
-     * 获取某天的育肥猪存栏
+     * 实时存栏: 获取某天的育肥猪存栏
      * @param farmId 猪场id
      * @param date   日期
      * @return 存栏数量
@@ -424,7 +424,7 @@ public class DoctorKpiDao {
     }
 
     /**
-     * 获取某天的后备母猪存栏
+     * 实时存栏: 获取某天的后备母猪存栏
      * @param farmId 猪场id
      * @param date   日期
      * @return 存栏数量
@@ -434,7 +434,7 @@ public class DoctorKpiDao {
     }
 
     /**
-     * 获取某天公猪存栏
+     * 实时存栏: 获取某天公猪存栏
      * @param farmId 猪场id
      * @param date   日期
      * @return 存栏数量
@@ -444,7 +444,7 @@ public class DoctorKpiDao {
     }
 
     /**
-     * 获取某天母猪存栏
+     * 实时存栏: 获取某天母猪存栏
      * @param farmId 猪场id
      * @param date   日期
      * @return 存栏数量
@@ -453,5 +453,13 @@ public class DoctorKpiDao {
         return sqlSession.selectOne(sqlId("realTimeLiveStockSow"), ImmutableMap.of("farmId", farmId, "date", date));
     }
 
-
+    /**
+     * 实时存栏: 获取某天在产房的母猪存栏
+     * @param farmId 猪场id
+     * @param date   日期
+     * @return 存栏数量
+     */
+    public int realTimeLiveStockFarrowSow(Long farmId, Date date) {
+        return sqlSession.selectOne(sqlId("realTimeLiveStockFarrowSow"), ImmutableMap.of("farmId", farmId, "date", date));
+    }
 }
