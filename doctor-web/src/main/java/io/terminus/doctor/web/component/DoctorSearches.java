@@ -526,7 +526,7 @@ public class DoctorSearches {
     public List<String> getUserAccessBarnIds(Map<String, String> params) {
         List<String> list = Lists.newArrayList();
         BaseUser user = UserUtil.getCurrentUser();
-        DoctorUserDataPermission doctorUserDataPermission = RespHelper.orServEx(doctorUserDataPermissionReadService.findDataPermissionByUserId(1l));
+        DoctorUserDataPermission doctorUserDataPermission = RespHelper.orServEx(doctorUserDataPermissionReadService.findDataPermissionByUserId(user.getId()));
         if (doctorUserDataPermission == null) {
             return null;
         }
