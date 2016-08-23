@@ -96,6 +96,13 @@ public class DefaultPigQueryBuilder extends BasePigQueryBuilder {
             List<String> statusList = Splitters.UNDERSCORE.splitToList(statuses);
             termsList.add(new Terms("status", statusList));
         }
+
+        // 2. 当前用户所拥有权限的猪舍
+        String barnIds = params.get("barnIds");
+        if (StringUtils.isNotBlank(barnIds)){
+            List<String> barnIdList = Splitters.COMMA.splitToList(barnIds);
+            termsList.add(new Terms("currentBarnId", barnIdList));
+        }
         return termsList;
     }
 
