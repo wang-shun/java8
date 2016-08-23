@@ -532,8 +532,11 @@ public class DoctorSearches {
         }
         //获取猪舍ids
         String barnIds = doctorUserDataPermission.getBarnIds();
+        if (StringUtils.isBlank(barnIds)){
+            return null;
+        }
         String barnId = params.get("barnId");
-        if (StringUtils.isNotBlank(barnId) && StringUtils.isNotBlank(barnIds)) {
+        if (StringUtils.isNotBlank(barnId)) {
             List<String> barnIdList = Splitters.COMMA.splitToList(barnIds);
             if (!barnIdList.contains(barnId)) {
                 return null;
