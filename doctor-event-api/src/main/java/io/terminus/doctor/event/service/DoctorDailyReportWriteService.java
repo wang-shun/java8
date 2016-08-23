@@ -24,4 +24,14 @@ public interface DoctorDailyReportWriteService {
      */
     Response<Boolean> createDailyReports(List<DoctorDailyReportDto> dailyReportDtos,
                                          @NotNull(message = "date.not.null") Date sumAt);
+
+
+    /**
+     * 实时计算某猪场某天的日报统计
+     * @param farmId 猪场id
+     * @param date 日期
+     * @return 是否成功
+     */
+    Response<Boolean> realtimeDailyReport(@NotNull(message = "farmId.not.null") Long farmId,
+                                          @NotNull(message = "date.not.null") Date date);
 }

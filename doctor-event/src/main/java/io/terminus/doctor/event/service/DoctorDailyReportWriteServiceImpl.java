@@ -41,4 +41,15 @@ public class DoctorDailyReportWriteServiceImpl implements DoctorDailyReportWrite
             return Response.fail("dailyReport.create.fail");
         }
     }
+
+    @Override
+    public Response<Boolean> realtimeDailyReport(Long farmId, Date date) {
+        try {
+            doctorDailyReportManager.realTimeDailyReports(farmId, Dates.startOfDay(date));
+            return Response.ok(Boolean.TRUE);
+        } catch (Exception e) {
+            log.error("realtime dailyReport failed, farmId:{}, date:{}, cause:{}", farmId, date, Throwables.getStackTraceAsString(e));
+            return Response.fail("dailyReport.create.fail");
+        }
+    }
 }
