@@ -1,6 +1,6 @@
 -- 疫苗采购、领用记录
 select main.EventType, main.EventDate, main.Zdr, main.WareHouse,
-detail.Vaccination, detail.Count, detail.Staff, detail.UsedDays,
+detail.Vaccination as materialOID, detail.Count, detail.Staff, detail.UsedDays,
 va.VaccinationName as materialName, fieldtype.Name as UnitGroupText, unit.UnitName
 from Y_VaccinationPUMain main, Y_VaccinationPUDetail detail, B_Vaccination va
 join TB_FieldValueType fieldtype on va.UnitGroup = fieldtype.oid
