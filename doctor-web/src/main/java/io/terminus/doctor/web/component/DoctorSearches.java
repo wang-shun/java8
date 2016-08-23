@@ -98,11 +98,8 @@ public class DoctorSearches {
     public Paging<SearchedPig> searchSowPigs(@RequestParam(required = false) Integer pageNo,
                                              @RequestParam(required = false) Integer pageSize,
                                              @RequestParam Map<String, String> params) {
-        if (farmIdNotExist(params)) {
-            return new Paging<>(0L, Collections.emptyList());
-        }
         List<String> barnIdList = getUserAccessBarnIds(params);
-        if (barnIdList == null){
+        if (farmIdNotExist(params) || barnIdList == null) {
             return new Paging<>(0L, Collections.emptyList());
         }
         params.put("barnIds", barnIdList.get(0));
@@ -124,12 +121,9 @@ public class DoctorSearches {
     public SearchedPigDto  searchSowStatus(@RequestParam(required = false) Integer pageNo,
                                            @RequestParam(required = false) Integer pageSize,
                                            @RequestParam Map<String, String> params) {
-        if (farmIdNotExist(params)) {
-            return new SearchedPigDto(new Paging<>(0L, Collections.emptyList()), Collections.emptyList());
-        }
         List<String> barnIdList = getUserAccessBarnIds(params);
-        if (barnIdList == null){
-            return null;
+        if (farmIdNotExist(params) || barnIdList == null) {
+            return new SearchedPigDto(new Paging<>(0L, Collections.emptyList()), Collections.emptyList());
         }
         params.put("barnIds", barnIdList.get(0));
         createSearchWord(SearchType.SOW.getValue(), params);
@@ -162,11 +156,8 @@ public class DoctorSearches {
     @RequestMapping(value = "/sowpigs/suggest", method = RequestMethod.GET)
     public List<SearchedPig> searchSowsSuggest(@RequestParam(required = false) Integer size,
                                                @RequestParam Map<String, String> params) {
-        if (farmIdNotExist(params)) {
-            return Collections.emptyList();
-        }
         List<String> barnIdList = getUserAccessBarnIds(params);
-        if (barnIdList == null){
+        if (farmIdNotExist(params) || barnIdList == null) {
             return Collections.emptyList();
         }
         params.put("barnIds", barnIdList.get(0));
@@ -198,12 +189,8 @@ public class DoctorSearches {
     public Paging<SearchedPig> searchBoarPigs(@RequestParam(required = false) Integer pageNo,
                                               @RequestParam(required = false) Integer pageSize,
                                               @RequestParam Map<String, String> params) {
-        if (farmIdNotExist(params)) {
-            return new Paging<>(0L, Collections.emptyList());
-        }
-
         List<String> barnIdList = getUserAccessBarnIds(params);
-        if (barnIdList == null){
+        if (farmIdNotExist(params) || barnIdList == null) {
             return new Paging<>(0L, Collections.emptyList());
         }
         params.put("barnIds", barnIdList.get(0));
@@ -222,11 +209,8 @@ public class DoctorSearches {
      */
     @RequestMapping(value = "/boarpigs/all", method = RequestMethod.GET)
     public List<SearchedPig> searchAllBoarPigs(@RequestParam Map<String, String> params) {
-        if (farmIdNotExist(params)) {
-            return Collections.emptyList();
-        }
         List<String> barnIdList = getUserAccessBarnIds(params);
-        if (barnIdList == null){
+        if (farmIdNotExist(params) || barnIdList == null) {
             return Collections.emptyList();
         }
         params.put("barnIds", barnIdList.get(0));
@@ -263,11 +247,8 @@ public class DoctorSearches {
     public Paging<SearchedGroup> searchGroups(@RequestParam(required = false) Integer pageNo,
                                               @RequestParam(required = false) Integer pageSize,
                                               @RequestParam Map<String, String> params) {
-        if (farmIdNotExist(params)) {
-            return new Paging<>(0L, Collections.emptyList());
-        }
         List<String> barnIdList = getUserAccessBarnIds(params);
-        if (barnIdList == null){
+        if (farmIdNotExist(params) || barnIdList == null) {
             return new Paging<>(0L, Collections.emptyList());
         }
         params.put("barnIds", barnIdList.get(0));
@@ -288,12 +269,9 @@ public class DoctorSearches {
     public SearchedGroupDto searchGroupStatus(@RequestParam(required = false) Integer pageNo,
                                               @RequestParam(required = false) Integer pageSize,
                                               @RequestParam Map<String, String> params) {
-        if (farmIdNotExist(params)) {
-            return new SearchedGroupDto(new Paging<>(0L, Collections.emptyList()), Collections.emptyList());
-        }
         List<String> barnIdList = getUserAccessBarnIds(params);
-        if (barnIdList == null){
-            return null;
+        if (farmIdNotExist(params) || barnIdList == null) {
+            return new SearchedGroupDto(new Paging<>(0L, Collections.emptyList()), Collections.emptyList());
         }
         params.put("barnIds", barnIdList.get(0));
         createSearchWord(SearchType.GROUP.getValue(), params);
@@ -330,13 +308,10 @@ public class DoctorSearches {
     public SearchedBarnDto searchBarns(@RequestParam(required = false) Integer pageNo,
                                        @RequestParam(required = false) Integer pageSize,
                                        @RequestParam Map<String, String> params) {
-        // 查询出分页后的猪舍
-        if (farmIdNotExist(params)) {
-            return new SearchedBarnDto(new Paging<>(0L, Collections.emptyList()), Collections.emptyList());
-        }
         List<String> barnIdList = getUserAccessBarnIds(params);
-        if (barnIdList == null){
-            return null;
+        // 查询出分页后的猪舍
+        if (farmIdNotExist(params) || barnIdList == null) {
+            return new SearchedBarnDto(new Paging<>(0L, Collections.emptyList()), Collections.emptyList());
         }
         params.put("barnIds", barnIdList.get(0));
         createSearchWord(SearchType.BARN.getValue(), params);
@@ -365,11 +340,8 @@ public class DoctorSearches {
      */
     @RequestMapping(value = "/barns/all", method = RequestMethod.GET)
     public List<SearchedBarn> searchAllBarns(@RequestParam Map<String, String> params) {
-        if (farmIdNotExist(params)) {
-            return Collections.emptyList();
-        }
         List<String> barnIdList = getUserAccessBarnIds(params);
-        if (barnIdList == null){
+        if (farmIdNotExist(params) || barnIdList == null) {
             return Collections.emptyList();
         }
         params.put("barnIds", barnIdList.get(0));
@@ -487,11 +459,8 @@ public class DoctorSearches {
                                     @RequestParam Map<String, String> params) {
 
         try {
-            if (farmIdNotExist(params)) {
-                return Collections.emptyList();
-            }
             List<String> barnIdList = getUserAccessBarnIds(params);
-            if (barnIdList == null){
+            if (farmIdNotExist(params) || barnIdList == null) {
                 return Collections.emptyList();
             }
             params.put("barnIds", barnIdList.get(0));
@@ -557,7 +526,7 @@ public class DoctorSearches {
     public List<String> getUserAccessBarnIds(Map<String, String> params) {
         List<String> list = Lists.newArrayList();
         BaseUser user = UserUtil.getCurrentUser();
-        DoctorUserDataPermission doctorUserDataPermission = RespHelper.orServEx(doctorUserDataPermissionReadService.findDataPermissionByUserId(user.getId()));
+        DoctorUserDataPermission doctorUserDataPermission = RespHelper.orServEx(doctorUserDataPermissionReadService.findDataPermissionByUserId(1l));
         if (doctorUserDataPermission == null) {
             return null;
         }
