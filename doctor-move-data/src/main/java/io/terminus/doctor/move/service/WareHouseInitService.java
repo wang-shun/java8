@@ -287,14 +287,14 @@ public class WareHouseInitService {
     private void addMaterial2Warehouse(DoctorWareHouse wareHouse, List<MaterialPurchasedUsed> list,
                                        Map<String, DoctorBasicMaterial> basicMaterialMap, Map<String, DoctorStaff> staffMap,
                                        Map<String, DoctorBarn> barnMap, UserProfile userProfile){
-        // 主账号的 staff
-        Long primaryStaffId = doctorStaffDao.findByUserId(userProfile.getUserId()).getId();
-
         // 往表 doctor_material_consume_avgs 写数的Map, key = 类型数值 | materialName, value = [eventCount(最后一次领用数量), 时间]
         Map<String, Object[]> lastMaterialConsumeMap = new HashMap<>();
 
         // 该仓库最近一次领用发生的时间和数量
         Date lastHouseConsumeDate = null;
+
+        //此仓库中各物资的数量, key = typeAndmaterialName, value = 数量
+        Map<String, Double> materialCount = new HashMap<>();
 
         // 领用和添加物料的历史记录
         DoctorMaterialConsumeProvider materialCP = new DoctorMaterialConsumeProvider();
@@ -305,13 +305,18 @@ public class WareHouseInitService {
         materialCP.setWareHouseName(wareHouse.getWareHouseName());
         for(MaterialPurchasedUsed pu : list){
             String typeAndmaterialName = wareHouse.getType() + "|" + pu.getMaterialName();
+            if(!materialCount.containsKey(typeAndmaterialName)){
+                materialCount.put(typeAndmaterialName, 0D);
+            }
             materialCP.setMaterialId(basicMaterialMap.get(typeAndmaterialName).getId());
             materialCP.setMaterialName(pu.getMaterialName());
             materialCP.setEventTime(pu.getEventDate());
             if(isProvide(pu.getEventType(), WareHouseType.from(wareHouse.getType()))){
                 materialCP.setEventType(DoctorMaterialConsumeProvider.EVENT_TYPE.PROVIDER.getValue());
+                materialCount.put(typeAndmaterialName, materialCount.get(typeAndmaterialName) + pu.getCount());
             }else{
                 materialCP.setEventType(DoctorMaterialConsumeProvider.EVENT_TYPE.CONSUMER.getValue());
+                materialCount.put(typeAndmaterialName, materialCount.get(typeAndmaterialName) - pu.getCount());
             }
             materialCP.setEventCount(pu.getCount());
             if(pu.getStaff() == null || pu.getStaff().trim().isEmpty()){
@@ -321,13 +326,13 @@ public class WareHouseInitService {
             }
             if("系统管理员".equals(materialCP.getStaffName())){
                 materialCP.setStaffName(userProfile.getRealName());
-                materialCP.setStaffId(primaryStaffId);
+                materialCP.setStaffId(userProfile.getUserId());
             }else{
                 try {
                     materialCP.setStaffId(staffMap.get(materialCP.getStaffName()).getId());
                 }catch(Exception e){
                     materialCP.setStaffName(userProfile.getRealName());
-                    materialCP.setStaffId(primaryStaffId);
+                    materialCP.setStaffId(userProfile.getUserId());
                 }
             }
 
@@ -363,7 +368,7 @@ public class WareHouseInitService {
             if(basicMaterial.getType().equals(wareHouse.getType())){
                 materialInWareHouse.setMaterialId(basicMaterial.getId());
                 materialInWareHouse.setMaterialName(basicMaterial.getName());
-                materialInWareHouse.setLotNumber(0D);
+                materialInWareHouse.setLotNumber(materialCount.get(wareHouse.getType() + "|" + basicMaterial.getName()));
                 materialInWareHouse.setUnitGroupName(basicMaterial.getUnitGroupName());
                 materialInWareHouse.setUnitName(basicMaterial.getUnitName());
                 doctorMaterialInWareHouseDao.create(materialInWareHouse);
@@ -425,11 +430,18 @@ public class WareHouseInitService {
     }
 
     private static final List<String> event_type_provide = Lists.newArrayList("采购", "调入", "盘盈");
+
+    /**
+     * 增加
+     */
     private boolean isProvide(String eventType, WareHouseType wareHouseType) {
         return event_type_provide.contains(eventType) || (Objects.equals(wareHouseType, WareHouseType.FEED) && "生产".equals(eventType));
     }
 
     private static final List<String> event_type_consume = Lists.newArrayList("领用", "调出", "盘亏");
+    /**
+     * 减少
+     */
     private boolean isConsume(String eventType, WareHouseType wareHouseType) {
         return event_type_consume.contains(eventType) || (Objects.equals(wareHouseType, WareHouseType.MATERIAL) && "生产".equals(eventType));
     }
