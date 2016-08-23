@@ -390,4 +390,21 @@ public class DoctorMoveDataController {
             return false;
         }
     }
+
+    /**
+     * 拆分母猪转舍事件
+     */
+    @RequestMapping(value = "/sowTransBarn", method = RequestMethod.GET)
+    public Boolean moveSowTransBarn(@RequestParam("farmId") Long farmId) {
+        try {
+            DoctorFarm farm = doctorFarmDao.findById(farmId);
+            log.warn("move sow trans barn start, farmId:{}", farmId);
+            doctorMoveDataService.updateSowTransBarn(farm);
+            log.warn("move sow trans barn end");
+            return true;
+        } catch (Exception e) {
+            log.error("move sow trans barn failed, farmId:{}, cause:{}", farmId, Throwables.getStackTraceAsString(e));
+            return false;
+        }
+    }
 }

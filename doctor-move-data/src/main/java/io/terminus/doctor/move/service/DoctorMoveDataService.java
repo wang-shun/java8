@@ -164,6 +164,57 @@ public class DoctorMoveDataService {
     }
 
     /**
+     * 更新母猪转舍, 区分出类型
+     */
+    @Transactional
+    public void updateSowTransBarn(DoctorFarm farm) {
+        Map<Long, Integer> barnTypeMap = doctorMoveBasicService.getBarnIdMap(farm.getId());
+
+        //转舍事件
+        List<Integer> tarnsBarnTypes = Lists.newArrayList(
+                PigEvent.CHG_LOCATION.getKey(),
+                PigEvent.TO_PREG.getKey(),
+                PigEvent.TO_MATING.getKey(),
+                PigEvent.TO_FARROWING.getKey()
+        );
+
+        doctorPigEventDao.findByFarmIdAndKind(farm.getId(), DoctorPig.PIG_TYPE.SOW.getKey()).stream()
+                .filter(tarnsBarnTypes::contains)
+                .forEach(event -> {
+                    DoctorChgLocationDto dto = JSON_MAPPER.fromJson(event.getExtra(), DoctorChgLocationDto.class);
+                    if (dto != null) {
+                        Integer fromBarnType = barnTypeMap.get(dto.getChgLocationFromBarnId());
+                        Integer toBarnType = barnTypeMap.get(dto.getChgLocationToBarnId());
+                        log.info("transBarn event:{}, fromBarnType:{}, toBarnType:{}", event.getId(), fromBarnType, toBarnType);
+                        PigEvent type = getTransBarnType(fromBarnType, toBarnType);
+
+                        DoctorPigEvent updateEvent = new DoctorPigEvent();
+                        updateEvent.setId(event.getId());
+                        updateEvent.setType(type.getKey());
+                        updateEvent.setName(type.getName());
+                        doctorPigEventDao.update(updateEvent);
+                    }
+                });
+    }
+
+    //根据from to的类型, 判断转舍事件类型
+    private static PigEvent getTransBarnType(Integer fromBarnType, Integer toBarnType) {
+        //转入配种舍
+        if (Objects.equals(toBarnType, PigType.MATE_SOW.getValue()) && !Objects.equals(fromBarnType, toBarnType)) {
+            return PigEvent.TO_MATING;
+        }
+        //转入妊娠舍
+        if (Objects.equals(toBarnType, PigType.PREG_SOW.getValue()) && !Objects.equals(fromBarnType, toBarnType)) {
+            return PigEvent.TO_PREG;
+        }
+        //去分娩
+        if (Objects.equals(toBarnType, PigType.DELIVER_SOW.getValue()) && !Objects.equals(fromBarnType, toBarnType)) {
+            return PigEvent.TO_FARROWING;
+        }
+        return PigEvent.CHG_LOCATION;
+    }
+
+    /**
      * 更新分娩母猪的猪群号, 更新待配种母猪的状态(status = 4 and barnType = 7) 在产房的阳性猪, 状态应该是 7 待分娩
      */
     public void updateFarrowSow(DoctorFarm farm) {
