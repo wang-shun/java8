@@ -770,7 +770,7 @@
               WHERE `status` = 1 AND pig_type IN (1, 7) AND farm_id = #{farmId}
             ) AS a
             LEFT JOIN doctor_group_tracks b ON a.id = b.group_id
-        ) AS now
+        )
           -
         (
             SELECT
@@ -787,7 +787,7 @@
                      pig_type IN (1, 7) AND
                      TYPE IN (2, 3, 4, 5, 9)
                  ) AS delta
-          ) AS realCount
+          )
         FROM DUAL
     </select>
 
@@ -804,7 +804,7 @@
                 WHERE `status` = 1 AND pig_type = 2 AND farm_id = #{farmId}
             ) AS a
             LEFT JOIN doctor_group_tracks b ON a.id = b.group_id
-        ) AS now
+        )
         -
         (
             SELECT
@@ -821,7 +821,7 @@
                     pig_type = 2 AND
                     TYPE IN (2, 3, 4, 5, 9)
             ) AS delta
-        ) AS realCount
+        )
         FROM DUAL
     </select>
 
@@ -855,7 +855,7 @@
                     pig_type = 3 AND
                     TYPE IN (2, 3, 4, 5, 9)
             ) AS delta
-        ) AS realCount
+        )
         FROM DUAL
     </select>
 
@@ -889,7 +889,7 @@
                     pig_type = 4 AND
                     TYPE IN (2, 3, 4, 5, 9)
             ) AS delta
-        ) AS realCount
+        )
         FROM DUAL
     </select>
 
@@ -1002,7 +1002,7 @@
                           GROUP BY event.type, barn.pig_type
                         ) AS ev
                  ) AS final
-          ) AS farrowCount
+          )
         FROM dual
     </select>
 </mapper>
