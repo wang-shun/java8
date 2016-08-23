@@ -90,11 +90,13 @@ public class SubService {
             io.terminus.doctor.user.model.Sub sub = checkUserAndSubUser(parentUserId, userId);
 
             User u = RespHelper.orServEx(doctorUserReadService.findById(userId));
-
             UserProfile userProfile = RespHelper.orServEx(doctorUserProfileReadService.findProfileByUserId(userId));
+            DoctorUserDataPermission permission = RespHelper.orServEx(doctorUserDataPermissionReadService.findDataPermissionByUserId(userId));
 
+            Sub result = makeSub(sub, u, userProfile);
+            result.setFarmIds(permission.getFarmIdsList());
 
-            return Response.ok(makeSub(sub, u, userProfile));
+            return Response.ok(result);
         } catch (ServiceException e) {
             log.warn("find sub failed, user={}, userId={}, error={}",
                     user, userId, e.getMessage());
