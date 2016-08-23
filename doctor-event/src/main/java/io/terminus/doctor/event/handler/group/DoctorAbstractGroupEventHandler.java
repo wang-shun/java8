@@ -343,26 +343,26 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
 
         //产房 => 产房(分娩母猪舍)/保育舍
         if ((Objects.equals(pigType, PigType.FARROW_PIGLET.getValue()) ||
-                Objects.equals(pigType, PigType.DELIVER_SOW.getValue())) && !FARROW_ALLOW_TRANS.contains(pigType)) {
-            log.error("check can trans barn pigType:{}, barnId:{}", pigType, barnId);
+                Objects.equals(pigType, PigType.DELIVER_SOW.getValue())) && !FARROW_ALLOW_TRANS.contains(barnType)) {
+            log.error("check can trans barn pigType:{}, barnType:{}", pigType, barnType);
             throw new ServiceException("farrow.can.not.trans");
         }
 
         //保育舍 => 保育舍/育肥舍/育种舍/后备舍(公母)
-        else if (Objects.equals(pigType, PigType.NURSERY_PIGLET.getValue()) && !NURSERY_ALLOW_TRANS.contains(pigType)) {
-            log.error("check can trans barn pigType:{}, barnId:{}", pigType, barnId);
+        else if (Objects.equals(pigType, PigType.NURSERY_PIGLET.getValue()) && !NURSERY_ALLOW_TRANS.contains(barnType)) {
+            log.error("check can trans barn pigType:{}, barnType:{}", pigType, barnType);
             throw new ServiceException("nursery.can.not.trans");
         }
 
         //育肥舍 => 育肥舍/后备舍(公母)
-        else if (Objects.equals(pigType, PigType.FATTEN_PIG.getValue()) && !FATTEN_ALLOW_TRANS.contains(pigType)) {
-            log.error("check can trans barn pigType:{}, barnId:{}", pigType, barnId);
+        else if (Objects.equals(pigType, PigType.FATTEN_PIG.getValue()) && !FATTEN_ALLOW_TRANS.contains(barnType)) {
+            log.error("check can trans barn pigType:{}, barnType:{}", pigType, barnType);
             throw new ServiceException("fatten.can.not.trans");
         }
 
         //其他 => 同类型
         else if(!Objects.equals(pigType, barnType)) {
-            log.error("check can trans barn pigType:{}, barnId:{}", pigType, barnId);
+            log.error("check can trans barn pigType:{}, barnType:{}", pigType, barnType);
             throw new ServiceException("no.equal.type.can.not.trans");
         }
     }
