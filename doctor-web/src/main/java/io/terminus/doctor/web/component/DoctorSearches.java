@@ -10,6 +10,7 @@ import io.terminus.doctor.basic.search.material.SearchedMaterial;
 import io.terminus.doctor.basic.service.DoctorSearchHistoryService;
 import io.terminus.doctor.common.constants.JacksonType;
 import io.terminus.doctor.common.utils.RespHelper;
+import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorPig;
@@ -445,6 +446,8 @@ public class DoctorSearches {
                 params.put("statuses", PigStatus.BOAR_ENTRY.toString());
             } else if (searchType.equals(SearchType.SOW.getValue())) {
                 params.put("pigType", DoctorPig.PIG_TYPE.SOW.getKey().toString());
+                //只查询未离场的猪
+                params.put("isRemoval", IsOrNot.NO.toString());
             }
             params.remove("ids");
             params.remove("searchType");
