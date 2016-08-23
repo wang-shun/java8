@@ -191,7 +191,7 @@ public class DoctorDailyReportCache {
         wean.setNest(doctorKpiDao.getWeanSow(farmId, startAt, endAt));
 
         //个体管理母猪总存栏
-        report.setSowCount(doctorKpiDao.realTimeLiveStockFarrowSow(farmId, startAt));
+        report.setSowCount(doctorKpiDao.realTimeLiveStockSow(farmId, startAt));
 
         //存栏
         DoctorLiveStockDailyReport liveStock = new DoctorLiveStockDailyReport();
