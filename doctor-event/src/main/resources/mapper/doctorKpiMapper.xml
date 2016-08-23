@@ -774,7 +774,7 @@
           -
         (
             SELECT
-              sum(delta.inCount) - sum(delta.outCount) - sum(delta.turnCount) AS deltaCount  --算出这段时间的增量
+              sum(delta.inCount) - sum(delta.outCount) - sum(delta.turnCount) AS deltaCount  -- 算出这段时间的增量
             FROM (
                    SELECT
                      CASE WHEN TYPE = 2 THEN quantity ELSE 0 END AS inCount,
@@ -788,7 +788,7 @@
                      TYPE IN (2, 3, 4, 5, 9)
                  ) AS delta
           ) AS realCount
-        FROM DUAL;
+        FROM DUAL
     </select>
 
     <!-- 实时存栏: 保育猪 -->
@@ -808,7 +808,7 @@
         -
         (
             SELECT
-              sum(delta.inCount) - sum(delta.outCount) - sum(delta.turnCount) AS deltaCount  --算出这段时间的增量
+              sum(delta.inCount) - sum(delta.outCount) - sum(delta.turnCount) AS deltaCount  -- 算出这段时间的增量
             FROM (
                 SELECT
                     CASE WHEN TYPE = 2 THEN quantity ELSE 0 END AS inCount,
@@ -822,7 +822,7 @@
                     TYPE IN (2, 3, 4, 5, 9)
             ) AS delta
         ) AS realCount
-        FROM DUAL;
+        FROM DUAL
     </select>
 
     <!-- 实时存栏: 育肥猪 -->
@@ -842,7 +842,7 @@
         -
         (
             SELECT
-              sum(delta.inCount) - sum(delta.outCount) - sum(delta.turnCount) AS deltaCount  --算出这段时间的增量
+              sum(delta.inCount) - sum(delta.outCount) - sum(delta.turnCount) AS deltaCount  -- 算出这段时间的增量
             FROM (
                 SELECT
                     CASE WHEN TYPE = 2 THEN quantity ELSE 0 END AS inCount,
@@ -856,6 +856,34 @@
                     TYPE IN (2, 3, 4, 5, 9)
             ) AS delta
         ) AS realCount
-        FROM DUAL;
+        FROM DUAL
+    </select>
+
+    <!-- 实时存栏: 公猪 -->
+    <select id="realTimeLiveStockBoar" parameterType="map" resultType="int">
+        SELECT
+          (
+            SELECT count(1)
+            FROM doctor_pigs
+            WHERE is_removal = 0 AND pig_type = 2 AND farm_id = #{farmId}
+          )
+          -
+          (
+            SELECT
+              max(CASE WHEN delta.type = 7 THEN quantity ELSE 0 END) -  -- 进场 - 离场 算出delta数量
+              max(CASE WHEN delta.type = 6 THEN quantity ELSE 0 END)
+            FROM (
+                  SELECT
+                    type,
+                    count(type) AS quantity
+                  FROM doctor_pig_events
+                  WHERE
+                    event_at &gt;= #{date} AND
+                    farm_id = #{farmId} AND
+                    kind = 2 AND type IN (6, 7)
+                  GROUP BY type
+                ) AS delta
+          )
+        FROM dual
     </select>
 </mapper>
