@@ -442,4 +442,16 @@ public class DoctorKpiDao {
     public int realTimeLiveStockBoar(Long farmId, Date date) {
         return sqlSession.selectOne(sqlId("realTimeLiveStockBoar"), ImmutableMap.of("farmId", farmId, "date", date));
     }
+
+    /**
+     * 获取某天母猪存栏
+     * @param farmId 猪场id
+     * @param date   日期
+     * @return 存栏数量
+     */
+    public int realTimeLiveStockSow(Long farmId, Date date) {
+        return sqlSession.selectOne(sqlId("realTimeLiveStockSow"), ImmutableMap.of("farmId", farmId, "date", date));
+    }
+
+    
 }

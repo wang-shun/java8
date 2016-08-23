@@ -920,4 +920,32 @@
           )
         FROM dual
     </select>
+
+    <!-- 实时存栏: 母猪 -->
+    <select id="realTimeLiveStockSow" parameterType="map" resultType="int">
+        SELECT
+          (
+            SELECT count(1)
+            FROM doctor_pigs
+            WHERE is_removal = 0 AND pig_type = 1 AND farm_id = #{farmId}
+          )
+          -
+          (
+            SELECT
+              max(CASE WHEN delta.type = 7 THEN quantity ELSE 0 END) -  -- 进场 - 离场 算出delta数量
+              max(CASE WHEN delta.type = 6 THEN quantity ELSE 0 END)
+            FROM (
+                  SELECT
+                    type,
+                    count(type) AS quantity
+                  FROM doctor_pig_events
+                  WHERE
+                    event_at &gt;= #{date} AND
+                    farm_id = #{farmId} AND
+                    kind = 1 AND type IN (6, 7)
+                  GROUP BY type
+                ) AS delta
+          )
+        FROM dual
+    </select>
 </mapper>
