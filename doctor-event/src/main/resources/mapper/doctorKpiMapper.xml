@@ -774,7 +774,7 @@
           -
         (
             SELECT
-              sum(delta.inCount) - sum(delta.outCount) - sum(delta.turnCount) AS deltaCount  -- 算出这段时间的增量
+              ifnull(sum(ifnull(delta.inCount, 0)) - sum(ifnull(delta.outCount, 0)) - sum(ifnull(delta.turnCount, 0)), 0) AS deltaCount  -- 算出这段时间的增量
             FROM (
                    SELECT
                      CASE WHEN TYPE = 2 THEN quantity ELSE 0 END AS inCount,
@@ -783,7 +783,7 @@
                    FROM doctor_group_events
                    WHERE
                      farm_id = #{farmId} AND
-                     event_at &gt;= #{date} AND   -- 日期取下一天的天初(因为每天的存栏算的是天末) todo
+                     event_at &gt;= date_add(date(#{date}), INTERVAL 1 day) AND   -- 日期取下一天的天初(因为每天的存栏算的是天末)
                      pig_type IN (1, 7) AND
                      TYPE IN (2, 3, 4, 5, 9)
                  ) AS delta
@@ -808,7 +808,7 @@
         -
         (
             SELECT
-              sum(delta.inCount) - sum(delta.outCount) - sum(delta.turnCount) AS deltaCount  -- 算出这段时间的增量
+              ifnull(sum(ifnull(delta.inCount, 0)) - sum(ifnull(delta.outCount, 0)) - sum(ifnull(delta.turnCount, 0)), 0) AS deltaCount  -- 算出这段时间的增量
             FROM (
                 SELECT
                     CASE WHEN TYPE = 2 THEN quantity ELSE 0 END AS inCount,
@@ -817,7 +817,7 @@
                 FROM doctor_group_events
                 WHERE
                     farm_id = #{farmId} AND
-                    event_at &gt;= #{date} AND   -- 日期取下一天的天初(因为每天的存栏算的是天末) todo
+                    event_at &gt;= date_add(date(#{date}), INTERVAL 1 day) AND   -- 日期取下一天的天初(因为每天的存栏算的是天末)
                     pig_type = 2 AND
                     TYPE IN (2, 3, 4, 5, 9)
             ) AS delta
@@ -842,7 +842,7 @@
         -
         (
             SELECT
-              sum(delta.inCount) - sum(delta.outCount) - sum(delta.turnCount) AS deltaCount  -- 算出这段时间的增量
+              ifnull(sum(ifnull(delta.inCount, 0)) - sum(ifnull(delta.outCount, 0)) - sum(ifnull(delta.turnCount, 0)), 0) AS deltaCount  -- 算出这段时间的增量
             FROM (
                 SELECT
                     CASE WHEN TYPE = 2 THEN quantity ELSE 0 END AS inCount,
@@ -851,7 +851,7 @@
                 FROM doctor_group_events
                 WHERE
                     farm_id = #{farmId} AND
-                    event_at &gt;= #{date} AND   -- 日期取下一天的天初(因为每天的存栏算的是天末) todo
+                    event_at &gt;= date_add(date(#{date}), INTERVAL 1 day) AND   -- 日期取下一天的天初(因为每天的存栏算的是天末)
                     pig_type = 3 AND
                     TYPE IN (2, 3, 4, 5, 9)
             ) AS delta
@@ -876,7 +876,7 @@
         -
         (
             SELECT
-              sum(delta.inCount) - sum(delta.outCount) - sum(delta.turnCount) AS deltaCount  -- 算出这段时间的增量
+              ifnull(sum(ifnull(delta.inCount, 0)) - sum(ifnull(delta.outCount, 0)) - sum(ifnull(delta.turnCount, 0)), 0) AS deltaCount  -- 算出这段时间的增量
             FROM (
                 SELECT
                     CASE WHEN TYPE = 2 THEN quantity ELSE 0 END AS inCount,
@@ -885,7 +885,7 @@
                 FROM doctor_group_events
                 WHERE
                     farm_id = #{farmId} AND
-                    event_at &gt;= #{date} AND   -- 日期取下一天的天初(因为每天的存栏算的是天末) todo
+                    event_at &gt;= date_add(date(#{date}), INTERVAL 1 day) AND   -- 日期取下一天的天初(因为每天的存栏算的是天末)
                     pig_type = 4 AND
                     TYPE IN (2, 3, 4, 5, 9)
             ) AS delta
@@ -904,15 +904,17 @@
           -
           (
             SELECT
-              max(CASE WHEN delta.type = 7 THEN quantity ELSE 0 END) -  -- 进场 - 离场 算出delta数量
-              max(CASE WHEN delta.type = 6 THEN quantity ELSE 0 END)
+              ifnull(
+                ifnull(max(CASE WHEN delta.type = 7 THEN quantity ELSE 0 END), 0) -     -- 进场 - 离场 算出delta数量
+                ifnull(max(CASE WHEN delta.type = 6 THEN quantity ELSE 0 END), 0), 0
+              )
             FROM (
                   SELECT
                     type,
                     count(type) AS quantity
                   FROM doctor_pig_events
                   WHERE
-                    event_at &gt;= #{date} AND
+                    event_at &gt;= date_add(date(#{date}), INTERVAL 1 day) AND
                     farm_id = #{farmId} AND
                     kind = 2 AND type IN (6, 7)
                   GROUP BY type
@@ -932,15 +934,17 @@
           -
           (
             SELECT
-              max(CASE WHEN delta.type = 7 THEN quantity ELSE 0 END) -  -- 进场 - 离场 算出delta数量
-              max(CASE WHEN delta.type = 6 THEN quantity ELSE 0 END)
+              ifnull(
+                ifnull(max(CASE WHEN delta.type = 7 THEN quantity ELSE 0 END), 0) -     -- 进场 - 离场 算出delta数量
+                ifnull(max(CASE WHEN delta.type = 6 THEN quantity ELSE 0 END), 0), 0
+              )
             FROM (
                   SELECT
                     type,
                     count(type) AS quantity
                   FROM doctor_pig_events
                   WHERE
-                    event_at &gt;= #{date} AND
+                    event_at &gt;= date_add(date(#{date}), INTERVAL 1 day) AND
                     farm_id = #{farmId} AND
                     kind = 1 AND type IN (6, 7)
                   GROUP BY type
@@ -989,7 +993,7 @@
                                  FROM doctor_pig_events
                                  WHERE
                                    farm_id = #{farmId} AND
-                                   event_at &gt;= #{date} AND
+                                   event_at &gt;= date_add(date(#{date}), INTERVAL 1 day) AND
                                    kind = 1 AND
                                    type IN (2, 6, 7, 10, 12, 14)      -- 限定这几个事件范围
                                ) AS event
