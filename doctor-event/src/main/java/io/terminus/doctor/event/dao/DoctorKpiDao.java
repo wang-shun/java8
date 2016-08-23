@@ -424,6 +424,16 @@ public class DoctorKpiDao {
     }
 
     /**
+     * 获取某天的后备母猪存栏
+     * @param farmId 猪场id
+     * @param date   日期
+     * @return 存栏数量
+     */
+    public int realTimeLiveStockHoubeiSow(Long farmId, Date date) {
+        return sqlSession.selectOne(sqlId("realTimeLiveStockHoubeiSow"), ImmutableMap.of("farmId", farmId, "date", date));
+    }
+
+    /**
      * 获取某天公猪存栏
      * @param farmId 猪场id
      * @param date   日期
