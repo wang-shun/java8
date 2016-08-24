@@ -19,6 +19,8 @@ import org.springframework.stereotype.Component;
 import java.util.Map;
 import java.util.Objects;
 
+import static io.terminus.doctor.common.enums.PigType.MATING_TYPES;
+
 /**
  * Created by yaoqijun.
  * Date:2016-05-27
@@ -57,7 +59,14 @@ public class DoctorChgLocationHandler extends DoctorAbstractEventHandler{
     private DoctorBarn checkBarnTypeEqual(Long fromBarnId, Long toBarnId) {
         DoctorBarn fromBarn = doctorBarnDao.findById(fromBarnId);
         DoctorBarn toBarn = doctorBarnDao.findById(toBarnId);
-        if (fromBarn == null || toBarn == null || !Objects.equals(fromBarn.getPigType(), toBarn.getPigType())) {
+        if (fromBarn == null || toBarn == null) {
+            throw new ServiceException("barn.type.not.equal");
+        }
+        //允许 from 和 to 属于可配种类型的猪舍
+        if (MATING_TYPES.contains(fromBarn.getPigType()) && MATING_TYPES.contains(toBarn.getPigType())) {
+            return toBarn;
+        }
+        if (!Objects.equals(fromBarn.getPigType(), toBarn.getPigType())) {
             throw new ServiceException("barn.type.not.equal");
         }
         return toBarn;
