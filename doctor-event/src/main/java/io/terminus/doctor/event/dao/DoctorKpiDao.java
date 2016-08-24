@@ -338,70 +338,6 @@ public class DoctorKpiDao {
     }
 
     /**
-     * 后备母猪(后备母猪舍)存栏
-     */
-    @Deprecated
-    public int liveStockHoubeiSow(Long farmId) {
-        return sqlSession.selectOne(sqlId("liveStockHoubeiSow"), ImmutableMap.of("farmId", farmId));
-    }
-
-    /**
-     * 配怀母猪(配种舍 + 妊娠舍)存栏
-     */
-    @Deprecated
-    public int liveStockPeihuaiSow(Long farmId) {
-        return sqlSession.selectOne(sqlId("liveStockPeihuaiSow"), ImmutableMap.of("farmId", farmId));
-    }
-
-    /**
-     * 产房母猪存栏(分娩舍)
-     */
-    @Deprecated
-    public int liveStockBuruSow(Long farmId) {
-        return sqlSession.selectOne(sqlId("liveStockBuruSow"), ImmutableMap.of("farmId", farmId));
-    }
-
-    /**
-     * 母猪存栏
-     */
-    @Deprecated
-    public int liveStockSow(Long farmId) {
-        return sqlSession.selectOne(sqlId("liveStockSow"), ImmutableMap.of("farmId", farmId));
-    }
-
-    /**
-     * 公猪存栏
-     */
-    @Deprecated
-    public int liveStockBoar(Long farmId) {
-        return sqlSession.selectOne(sqlId("liveStockBoar"), ImmutableMap.of("farmId", farmId));
-    }
-
-    /**
-     * 产房仔猪存栏
-     */
-    @Deprecated
-    public int liveStockFarrow(Long farmId) {
-        return sqlSession.selectOne(sqlId("liveStockFarrow"), ImmutableMap.of("farmId", farmId));
-    }
-
-    /**
-     * 保育猪存栏
-     */
-    @Deprecated
-    public int liveStockNursery(Long farmId) {
-        return sqlSession.selectOne(sqlId("liveStockNursery"), ImmutableMap.of("farmId", farmId));
-    }
-
-    /**
-     * 育肥猪存栏
-     */
-    @Deprecated
-    public int liveStockFatten(Long farmId) {
-        return sqlSession.selectOne(sqlId("liveStockFatten"), ImmutableMap.of("farmId", farmId));
-    }
-
-    /**
      * 实时存栏: 获取某天的产房仔猪存栏
      * @param farmId 猪场id
      * @param date   日期
@@ -440,6 +376,17 @@ public class DoctorKpiDao {
     public int realTimeLiveStockHoubeiSow(Long farmId, Date date) {
         return sqlSession.selectOne(sqlId("realTimeLiveStockHoubeiSow"), ImmutableMap.of("farmId", farmId, "date", date));
     }
+
+    /**
+     * 实时存栏: 获取某天的后备公猪存栏
+     * @param farmId 猪场id
+     * @param date   日期
+     * @return 存栏数量
+     */
+    public int realTimeLiveStockHoubeiBoar(Long farmId, Date date) {
+        return sqlSession.selectOne(sqlId("realTimeLiveStockHoubeiBoar"), ImmutableMap.of("farmId", farmId, "date", date));
+    }
+
 
     /**
      * 实时存栏: 获取某天公猪存栏

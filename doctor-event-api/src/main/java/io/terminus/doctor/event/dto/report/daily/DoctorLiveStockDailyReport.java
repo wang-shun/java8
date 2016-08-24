@@ -37,6 +37,11 @@ public class DoctorLiveStockDailyReport implements Serializable {
     private int konghuaiSow;
 
     /**
+     * 后备公猪
+     */
+    private int houbeiBoar;
+
+    /**
      * 公猪
      */
     private int boar;
