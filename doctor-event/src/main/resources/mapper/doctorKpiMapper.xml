@@ -27,6 +27,14 @@
         <include refid="criteria"/>
     </select>
 
+    <!-- 分娩初生重-->
+    <select id="farrowWeightAvg" parameterType="map" resultType="double">
+        select ifnull(sum(farrow_weight)/case sum(live_count) when 0 then 1 else sum(live_count) end , 0)
+        from doctor_pig_events
+        where type = 15
+        <include refid="criteria"/>
+    </select>
+
     <!-- 产活仔数-->
     <select id="deliveryLiveCounts" parameterType="map" resultType="int">
         select ifnull(sum(live_count),0) from doctor_pig_events

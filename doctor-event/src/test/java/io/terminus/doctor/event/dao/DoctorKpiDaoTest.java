@@ -99,4 +99,10 @@ public class DoctorKpiDaoTest extends BaseDaoTest{
         double result = doctorKpiDao.getWeanPigletCountsAvg(12355L, DateTime.now().minusDays(300).toDate(), DateTime.now().toDate());
         Assert.assertEquals(13.0, result, 0.01);
     }
+
+    @Test
+    public void testGetFarrowWeightAvg(){
+        double result = doctorKpiDao.getFarrowWeightAvg(1L, DateTime.now().minusDays(300).toDate(), DateTime.now().toDate());
+        Assert.assertEquals(1.519, result, 0.001);
+    }
 }

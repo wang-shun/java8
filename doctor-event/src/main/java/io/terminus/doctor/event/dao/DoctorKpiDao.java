@@ -51,6 +51,13 @@ public class DoctorKpiDao {
     }
 
     /**
+     * 分娩初生重
+     */
+    public double getFarrowWeightAvg(Long farmId, Date startAt, Date endAt) {
+        return this.sqlSession.selectOne(sqlId("farrowWeightAvg"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
+    }
+
+    /**
      * 产活仔数
      */
     public int getDeliveryLive(Long farmId, Date startAt, Date endAt) {
