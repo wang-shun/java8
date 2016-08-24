@@ -63,6 +63,7 @@ public class DoctorMonthlyReportDto implements Serializable {
     private int weanPiglet;                   //断奶仔猪数
     private double weanAvgWeight;             //断奶均重(kg)
     private double weanAvgCount;              //窝均断奶数
+    private double weanAvgDayAge;             //断奶均日龄
 
     /**
      * 销售情况
