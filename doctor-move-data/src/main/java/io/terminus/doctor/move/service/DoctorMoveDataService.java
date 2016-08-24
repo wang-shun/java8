@@ -161,7 +161,8 @@ public class DoctorMoveDataService {
                 .findByHbsSql(moveId, DoctorSowFarrowWeight.class, "DoctorSowFarrowWeight", ImmutableMap.of("farmOutId", farm.getOutId()))).stream()
                 .collect(Collectors.toMap(DoctorSowFarrowWeight::getGroupOutId, DoctorSowFarrowWeight::getFarrowWeight));
 
-        List<DoctorPigEvent> events = doctorPigEventDao.findByFarmIdAndKindAndEventTypes(farm.getId(), DoctorPig.PIG_TYPE.SOW.getKey(), Lists.newArrayList(PigEvent.FARROWING.getKey()));
+        List<DoctorPigEvent> events = doctorPigEventDao.findByFarmIdAndKindAndEventTypes(farm.getId(),
+                DoctorPig.PIG_TYPE.SOW.getKey(), Lists.newArrayList(PigEvent.FARROWING.getKey()));
         if (notEmpty(events)) {
             events.forEach(event -> {
                 DoctorPigEvent updateEvent = new DoctorPigEvent();
