@@ -46,6 +46,8 @@ public abstract class BaseIndexedBarnFactory<T extends IndexedBarn> implements I
         indexedBarn.setPigTypeName(pigType == null ? "" : ( pigType.getDesc() + "[" + pigType.getType() + "]"));
         indexedBarn.setNameSearch(barn.getName().toLowerCase());
         indexedBarn.setStorage(RespHelper.orServEx(doctorBarnReadService.countPigByBarnId(indexedBarn.getId())));
+        indexedBarn.setPigGroupCount(RespHelper.orServEx(doctorBarnReadService.pigGroupCountByBarnId(indexedBarn.getId())));
+        indexedBarn.setPigCount(RespHelper.orServEx(doctorBarnReadService.pigCountByBarnId(indexedBarn.getId())));
         return indexedBarn;
     }
 }
