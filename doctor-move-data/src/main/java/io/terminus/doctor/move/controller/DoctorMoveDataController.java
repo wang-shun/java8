@@ -431,4 +431,22 @@ public class DoctorMoveDataController {
             return false;
         }
     }
+
+    /**
+     * 刷新母猪分娩总重
+     */
+    @RequestMapping(value = "/farrowWeight", method = RequestMethod.GET)
+    public Boolean moveSowFarrowWeight(@RequestParam("farmId") Long farmId,
+                                       @RequestParam("moveId") Long moveId) {
+        try {
+            DoctorFarm farm = doctorFarmDao.findById(farmId);
+            log.warn("move sow farrow weight start, farmId:{}", farmId);
+            doctorMoveDataService.updateSowFarrowWeight(moveId, farm);
+            log.warn("move sow farrow weight end");
+            return true;
+        } catch (Exception e) {
+            log.error("move sow farrow weight failed, farmId:{}, cause:{}", farmId, Throwables.getStackTraceAsString(e));
+            return false;
+        }
+    }
 }

@@ -70,6 +70,7 @@ import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.event.service.DoctorPigReadService;
 import io.terminus.doctor.move.handler.DoctorMoveDatasourceHandler;
 import io.terminus.doctor.move.handler.DoctorMoveWorkflowHandler;
+import io.terminus.doctor.move.model.DoctorSowFarrowWeight;
 import io.terminus.doctor.move.model.Proc_InventoryGain;
 import io.terminus.doctor.move.model.SowOutFarmSoon;
 import io.terminus.doctor.move.model.View_BoarCardList;
@@ -148,6 +149,27 @@ public class DoctorMoveDataService {
         doctorPigDao.deleteByFarmId(farmId);
         doctorPigEventDao.deleteByFarmId(farmId);
         doctorPigTrackDao.deleteByFarmId(farmId);
+    }
+
+    /**
+     * 更新母猪分娩总重
+     */
+    public void updateSowFarrowWeight(Long moveId, DoctorFarm farm) {
+
+        //事件id和重量的map
+        Map<String, Double> fwmap = RespHelper.orServEx(doctorMoveDatasourceHandler
+                .findByHbsSql(moveId, DoctorSowFarrowWeight.class, "DoctorSowFarrowWeight")).stream()
+                .collect(Collectors.toMap(DoctorSowFarrowWeight::getGroupOutId, DoctorSowFarrowWeight::getFarrowWeight));
+
+        List<DoctorPigEvent> events = doctorPigEventDao.findByFarmIdAndKindAndEventTypes(farm.getId(), DoctorPig.PIG_TYPE.SOW.getKey(), Lists.newArrayList(PigEvent.FARROWING.getKey()));
+        if (notEmpty(events)) {
+            events.forEach(event -> {
+                DoctorPigEvent updateEvent = new DoctorPigEvent();
+                updateEvent.setId(event.getId());
+                updateEvent.setFarrowWeight(fwmap.get(event.getOutId()));   //从map里取出重量
+                doctorPigEventDao.update(updateEvent);
+            });
+        }
     }
 
     /**
@@ -581,6 +603,7 @@ public class DoctorMoveDataService {
                 sowEvent.setJxCount(farrowing.getJxCount());              //畸形数
                 sowEvent.setDeadCount(farrowing.getDeadCount());          //死胎数
                 sowEvent.setBlackCount(farrowing.getBlackCount());        //黑胎数
+                sowEvent.setFarrowWeight(event.getEventWeight());         //分娩总重(kg)
                 sowEvent.setFarrowingDate(event.getEventAt());            //分娩时间
                 sowEvent.setExtra(JSON_MAPPER.toJson(farrowing));
                 break;
