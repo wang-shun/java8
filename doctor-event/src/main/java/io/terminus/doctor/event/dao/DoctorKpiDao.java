@@ -156,6 +156,13 @@ public class DoctorKpiDao {
     }
 
     /**
+     * 断奶日龄
+     */
+    public double getWeanDayAgeAvg(Long farmId, Date startAt, Date endAt) {
+        return this.sqlSession.selectOne(sqlId("getWeanDayAgeAvg"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
+    }
+
+    /**
      * 销售情况: 母猪
      */
     public int getSaleSow(Long farmId, Date startAt, Date endAt) {
