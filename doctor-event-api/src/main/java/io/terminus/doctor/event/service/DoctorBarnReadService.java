@@ -61,6 +61,20 @@ public interface DoctorBarnReadService {
     Response<Integer> countPigByBarnId(@NotNull(message = "barnId.not.null") Long barnId);
 
     /**
+     * 查询当前猪舍的猪群猪数量
+     * @param barnId 猪舍id
+     * @return 存栏量
+     */
+    Response<Integer> pigGroupCountByBarnId(@NotNull(message = "barnId.not.null") Long barnId);
+
+    /**
+     * 查询当前猪舍的猪数量
+     * @param barnId 猪舍id
+     * @return 存栏量
+     */
+    Response<Integer> pigCountByBarnId(@NotNull(message = "barnId.not.null") Long barnId);
+
+    /**
      * 根据外部编码查询猪舍
      * @param outId 外部编码
      * @return 猪舍

@@ -113,6 +113,36 @@ public class DoctorBarnReadServiceImpl implements DoctorBarnReadService {
     }
 
     @Override
+    public Response<Integer> pigGroupCountByBarnId(@NotNull(message = "barnId.not.null") Long barnId) {
+        try{
+            DoctorBarn barn = doctorBarnDao.findById(barnId);
+
+            //统计猪群数量
+            DoctorGroupSearchDto searchDto = new DoctorGroupSearchDto();
+            searchDto.setFarmId(barn.getFarmId());
+            searchDto.setCurrentBarnId(barnId);
+            searchDto.setStatus(DoctorGroup.Status.CREATED.getValue());
+            List<DoctorGroupDetail> groupDetails = RespHelper.orServEx(doctorGroupReadService.findGroupDetail(searchDto));
+            Integer groupCount = groupDetails.stream().mapToInt(g -> g.getGroupTrack().getQuantity()).sum();
+            return Response.ok(groupCount);
+        }catch (Exception e){
+            log.error("pig group count by barn id failed, barnId:{}, cause:{}", barnId, Throwables.getStackTraceAsString(e));
+            return Response.fail("pig.group.count.fail");
+        }
+    }
+
+    @Override
+    public Response<Integer> pigCountByBarnId(@NotNull(message = "barnId.not.null") Long barnId) {
+        try{
+            List<DoctorPigTrack> pigTracks = RespHelper.orServEx(doctorPigReadService.findActivePigTrackByCurrentBarnId(barnId));
+            return Response.ok(pigTracks.size());
+        }catch (Exception e){
+            log.error("pig count by barn id failed, barnId:{}, cause:{}", barnId, Throwables.getStackTraceAsString(e));
+            return Response.fail("pig.count.fail");
+        }
+    }
+
+    @Override
     public Response<DoctorBarn> findBarnByOutId(String outId) {
         try {
             return Response.ok(doctorBarnDao.findByOutId(outId));
