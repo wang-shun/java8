@@ -1,6 +1,7 @@
 package io.terminus.doctor.move.controller;
 
 import com.google.common.base.Throwables;
+import com.google.common.collect.Lists;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.RespHelper;
@@ -422,7 +423,7 @@ public class DoctorMoveDataController {
                                            @RequestParam("date") String date) {
         try {
             log.warn("move realtime daily report start, farmId:{}", farmId);
-            doctorDailyReportWriteService.realtimeDailyReport(farmId, DateUtil.toDate(date));
+            doctorDailyReportWriteService.createDailyReports(Lists.newArrayList(farmId), DateUtil.toDate(date));
             log.warn("move realtime daily report end");
             return true;
         } catch (Exception e) {
