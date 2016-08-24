@@ -1,4 +1,4 @@
 SELECT
     EOID AS groupOutId,
     EWeight AS farrowWeight
-FROM view_EventListSow WHERE EventName = '分娩' AND FarmOID = #{farmOutId}
+FROM view_EventListSow WHERE EventName = '分娩' AND FarmOID = {{farmOutId}}
