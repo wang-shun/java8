@@ -4,6 +4,7 @@ import com.google.common.base.Joiner;
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.Lists;
 import io.terminus.common.exception.JsonResponseException;
+import io.terminus.common.model.BaseUser;
 import io.terminus.common.model.Paging;
 import io.terminus.common.utils.Splitters;
 import io.terminus.doctor.common.enums.PigSearchType;
@@ -29,7 +30,6 @@ import io.terminus.doctor.user.service.DoctorUserDataPermissionWriteService;
 import io.terminus.doctor.user.service.PrimaryUserReadService;
 import io.terminus.doctor.web.front.auth.DoctorFarmAuthCenter;
 import io.terminus.doctor.web.front.event.dto.DoctorBarnDetail;
-import io.terminus.parana.user.model.User;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -199,7 +199,7 @@ public class DoctorBarns {
         checkNotNull(barn, "barn.not.null");
 
         //权限中心校验权限
-        User user = doctorFarmAuthCenter.checkFarmAuth(barn.getFarmId());
+        BaseUser user = doctorFarmAuthCenter.checkFarmAuth(barn.getFarmId());
 
         Long barnId;
 
@@ -228,6 +228,9 @@ public class DoctorBarns {
     private void addBarnId2DataPermission(Long barnId, Long userId){
         DoctorUserDataPermission permission = RespHelper.or500(doctorUserDataPermissionReadService.findDataPermissionByUserId(userId));
         List<Long> barnIds = permission.getBarnIdsList();
+        if(barnIds == null){
+            barnIds = Lists.newArrayList();
+        }
         barnIds.add(barnId);
         permission.setBarnIds(Joiner.on(",").join(barnIds));
         RespHelper.or500(doctorUserDataPermissionWriteService.updateDataPermission(permission));
