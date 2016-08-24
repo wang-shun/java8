@@ -54,13 +54,14 @@ public class DoctorMonthlyReportDto implements Serializable {
     private double farrowAvgHealth;           //窝均健仔数
     private double farrowAvgAll;              //窝均产仔数
     private double farrowAvgAlive;            //窝均活仔数
+    private double farrowAvgWeight;           //分娩活仔均重(kg)
 
     /**
      * 断奶情况
      */
     private int weanSow;                      //断奶母猪数
     private int weanPiglet;                   //断奶仔猪数
-    private double weanAvgWeight;             //断奶均重
+    private double weanAvgWeight;             //断奶均重(kg)
     private double weanAvgCount;              //窝均断奶数
 
     /**

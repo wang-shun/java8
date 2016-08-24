@@ -24,6 +24,7 @@ public class DoctorMonthlyReport implements Serializable {
     
     /**
      * 月报数据，json存储
+     * @see io.terminus.doctor.event.dto.report.monthly.DoctorMonthlyReportDto
      */
     private String data;
     
