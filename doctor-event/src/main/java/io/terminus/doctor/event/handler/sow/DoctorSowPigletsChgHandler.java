@@ -123,7 +123,10 @@ public class DoctorSowPigletsChgHandler extends DoctorAbstractEventFlowHandler {
         doctorChangeGroupInput.setSowQty(dto.getSowPigletsCount());
         doctorChangeGroupInput.setBoarQty(dto.getBoarPigletsCount());
         doctorChangeGroupInput.setWeight(dto.getPigletsWeight());
-        doctorChangeGroupInput.setPrice(dto.getPigletsPrice());
+        doctorChangeGroupInput.setPrice(dto.getPigletsPrice());                             //单价
+        if (dto.getPigletsPrice() != null) {
+            doctorChangeGroupInput.setAmount(dto.getPigletsPrice() * dto.getPigletsCount());    //总额
+        }
         doctorChangeGroupInput.setCustomerId(dto.getPigletsCustomerId());
         doctorChangeGroupInput.setRemark(dto.getPigletsMark());
         doctorChangeGroupInput.setIsAuto(IsOrNot.YES.getValue());           //自动生成事件标识
