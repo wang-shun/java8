@@ -158,7 +158,7 @@ public class DoctorMoveDataService {
 
         //事件id和重量的map
         Map<String, Double> fwmap = RespHelper.orServEx(doctorMoveDatasourceHandler
-                .findByHbsSql(moveId, DoctorSowFarrowWeight.class, "DoctorSowFarrowWeight")).stream()
+                .findByHbsSql(moveId, DoctorSowFarrowWeight.class, "DoctorSowFarrowWeight", ImmutableMap.of("farmOutId", farm.getOutId()))).stream()
                 .collect(Collectors.toMap(DoctorSowFarrowWeight::getGroupOutId, DoctorSowFarrowWeight::getFarrowWeight));
 
         List<DoctorPigEvent> events = doctorPigEventDao.findByFarmIdAndKindAndEventTypes(farm.getId(), DoctorPig.PIG_TYPE.SOW.getKey(), Lists.newArrayList(PigEvent.FARROWING.getKey()));
