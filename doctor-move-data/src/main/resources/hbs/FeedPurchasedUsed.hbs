@@ -1,6 +1,6 @@
 -- 饲料采购、领用记录
 select main.EventType, main.EventDate, main.Zdr, main.WareHouse,
-detail.Feed, detail.[Count], detail.Staff, detail.UsedDays,
+detail.Feed as materialOID, detail.[Count], detail.Staff, detail.UsedDays,
 f.FeedName as materialName, fieldtype.Name as UnitGroupText, unit.UnitName,
 barn.Barn, barn.OID as barnOId
 from Y_FeedPurchaseUsedMain main,
