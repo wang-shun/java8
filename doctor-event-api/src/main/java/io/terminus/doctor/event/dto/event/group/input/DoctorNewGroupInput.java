@@ -1,11 +1,15 @@
 package io.terminus.doctor.event.dto.event.group.input;
 
+import io.terminus.doctor.common.enums.PigType;
+import io.terminus.doctor.event.model.DoctorGroupTrack;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Desc: 新建猪群所需字段
@@ -81,4 +85,28 @@ public class DoctorNewGroupInput extends BaseGroupInput implements Serializable 
      */
     @NotNull(message = "source.not.null")
     private Integer source;
+
+    @Override
+    public Map<String, String> descMap() {
+        Map<String, String> descMap = new HashMap<>();
+        if(groupCode != null){
+            descMap.put("猪群号", groupCode);
+        }
+        if(barnName != null){
+            descMap.put("猪舍", barnName);
+        }
+        if(pigType != null && PigType.from(pigType) != null){
+           descMap.put("猪类型", PigType.from(pigType).getDesc());
+        }
+        if(sex != null){
+            descMap.put("性别", DoctorGroupTrack.Sex.from(sex).getDesc());
+        }
+        if(breedName != null){
+            descMap.put("品种", breedName);
+        }
+        if(geneticName != null){
+            descMap.put("品系", geneticName);
+        }
+        return descMap;
+    }
 }

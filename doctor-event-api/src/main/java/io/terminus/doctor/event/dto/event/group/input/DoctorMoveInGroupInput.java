@@ -1,5 +1,7 @@
 package io.terminus.doctor.event.dto.event.group.input;
 
+import io.terminus.doctor.event.enums.PigSource;
+import io.terminus.doctor.event.model.DoctorGroupTrack;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.hibernate.validator.constraints.NotEmpty;
@@ -7,6 +9,8 @@ import org.hibernate.validator.constraints.NotEmpty;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Desc: 转入猪群事件录入信息
@@ -96,4 +100,43 @@ public class DoctorMoveInGroupInput extends BaseGroupInput implements Serializab
      */
     @Min(value = 0L, message = "amount.gt.0")
     private Long amount;
+
+    @Override
+    public Map<String, String> descMap() {
+        Map<String, String> map = new HashMap<>();
+        if(inTypeName != null){
+            map.put("转移类型", inTypeName);
+        }
+        if(source != null){
+            map.put("来源", PigSource.from(source).getDesc());
+        }
+        if(sex != null){
+            map.put("性别", DoctorGroupTrack.Sex.from(sex).getDesc());
+        }
+        if(breedName != null){
+            map.put("品种", breedName);
+        }
+        if(fromBarnName != null){
+            map.put("来源猪舍", fromBarnName);
+        }
+        if(fromGroupCode != null){
+            map.put("来源猪群", fromGroupCode);
+        }
+        if(boarQty != null){
+            map.put("公猪数", boarQty.toString());
+        }
+        if(sowQty != null){
+            map.put("母猪数", sowQty.toString());
+        }
+        if(avgDayAge != null){
+            map.put("平均日龄", avgDayAge.toString());
+        }
+        if(avgWeight != null){
+            map.put("平均体重(Kg)", avgWeight.toString());
+        }
+        if(amount != null){
+            map.put("总价值", Long.valueOf(amount / 100).toString());
+        }
+        return map;
+    }
 }

@@ -144,7 +144,7 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
         event.setIsAuto(baseInput.getIsAuto());
         event.setCreatorId(baseInput.getCreatorId());   //创建人
         event.setCreatorName(baseInput.getCreatorName());
-        event.setDesc(getDesc(eventType, baseInput.getIsAuto()));
+        event.setDesc(this.getDesc(baseInput));
         event.setRemark(baseInput.getRemark());
         return event;
     }
@@ -297,11 +297,12 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
         }
     }
 
-    private String getDesc(GroupEventType eventType, Integer isAuto) {
-        if (Objects.equals(isAuto, IsOrNot.YES.getValue())) {
-            return "系统自动生成的" + eventType.getDesc() + "事件";
+    private String getDesc(BaseGroupInput baseInput) {
+        if (Objects.equals(baseInput.getIsAuto(), IsOrNot.YES.getValue())) {
+            return "【系统自动】" + baseInput.getEventDesc();
+        } else{
+            return "【手工录入】" + baseInput.getEventDesc();
         }
-        return "手工录入的" + eventType.getDesc() + "事件";
     }
 
     //品种校验, 如果猪群的品种已经确定, 那么录入的品种必须和猪群的品种一致

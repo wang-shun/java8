@@ -1,10 +1,12 @@
 package io.terminus.doctor.event.dto.event.group.input;
 
+import com.google.common.base.Joiner;
 import lombok.Data;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
+import java.util.Map;
 
 /**
  * Desc: 猪群时间录入信息基类(公用字段)
@@ -13,7 +15,7 @@ import java.io.Serializable;
  * Date: 16/5/26
  */
 @Data
-public class BaseGroupInput implements Serializable {
+public abstract class BaseGroupInput implements Serializable {
     private static final long serialVersionUID = 3142495945186975856L;
 
     /**
@@ -38,4 +40,10 @@ public class BaseGroupInput implements Serializable {
     private Long creatorId;
 
     private String creatorName;
+
+    public final String getEventDesc(){
+        return Joiner.on("#").withKeyValueSeparator("：").join(this.descMap());
+    }
+
+    public abstract Map<String, String> descMap();
 }
