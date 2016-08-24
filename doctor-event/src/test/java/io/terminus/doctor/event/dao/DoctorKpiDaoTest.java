@@ -105,4 +105,10 @@ public class DoctorKpiDaoTest extends BaseDaoTest{
         double result = doctorKpiDao.getFarrowWeightAvg(1L, DateTime.now().minusDays(300).toDate(), DateTime.now().toDate());
         Assert.assertEquals(1.519, result, 0.001);
     }
+
+    @Test
+    public void testGetWeanDayAgeAvg(){
+        double result = doctorKpiDao.getWeanDayAgeAvg(1L, DateTime.now().minusDays(300).toDate(), DateTime.now().toDate());
+        Assert.assertEquals(27.0, result, 0.01);
+    }
 }

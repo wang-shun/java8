@@ -135,6 +135,14 @@
         <include refid="criteria"/>
     </select>
 
+    <!-- 断奶日龄-->
+    <select id="getWeanDayAgeAvg" parameterType="map" resultType="double">
+        select ifnull(sum(feed_days*wean_count)/case sum(wean_count) when 0 then 1 else sum(wean_count) end , 0)
+        from doctor_pig_events
+        where type = 16
+        <include refid="criteria"/>
+    </select>
+
     <!-- 销售情况: 母猪 -->
     <select id="getSaleSow" parameterType="map" resultType="int">
         SELECT
