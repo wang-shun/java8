@@ -102,6 +102,10 @@ public class DoctorMoveDatasourceHandler {
         }
     }
 
+    public List<Map<String, Object>> findByHbsSql(Long id, String hbsName){
+        return jdbcMap.get(id).queryForList(doctorSqlFactory.getSql(hbsName, null));
+    }
+
     //获取JdbcTemplate
     private JdbcTemplate getJdbcTempalte(DoctorMoveDatasource db){
         BasicDataSource dataSource = new BasicDataSource();

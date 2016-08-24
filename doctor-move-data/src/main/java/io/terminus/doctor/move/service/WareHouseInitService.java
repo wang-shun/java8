@@ -47,6 +47,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -122,8 +123,9 @@ public class WareHouseInitService {
 
         List<B_WareHouse> list = RespHelper.or500(doctorMoveDatasourceHandler.findAllData(dataSourceId, B_WareHouse.class, DoctorMoveTableEnum.B_WareHouse));
         if(list != null && !list.isEmpty()){
+            List<String> stopUseMaterial = this.getStopUseMaterial(dataSourceId);
             // 用户有仓库信息,则添加基础物料
-            Map<String, DoctorBasicMaterial> basicMaterialMap = this.insertBasicMaterial(dataSourceId);// key = 类型数值 | basicMaterialName, value = basicMaterial
+            Map<String, DoctorBasicMaterial> basicMaterialMap = this.insertBasicMaterial(dataSourceId, stopUseMaterial);// key = 类型数值 | basicMaterialName, value = basicMaterial
 
             // 初始化仓库, 每个猪场每种类型的仓库各一个
             String managerName = list.get(0).getManager().split(",")[0];
@@ -145,7 +147,7 @@ public class WareHouseInitService {
                     warehouseMap.put(type, wareHouse);
                 }
                 //往仓库里添加物料
-                this.addMaterial2Warehouse(dataSourceId, warehouseMap, basicMaterialMap, staffMap, barnMap, userProfile);
+                this.addMaterial2Warehouse(dataSourceId, warehouseMap, basicMaterialMap, staffMap, barnMap, userProfile, stopUseMaterial);
 
                 //TODO 配方
             }
@@ -166,13 +168,26 @@ public class WareHouseInitService {
         return barns.stream().collect(Collectors.toMap(DoctorBarn::getOutId, v -> v));
     }
 
+    /**
+     * 查询已停用的物料
+     */
+    public List<String> getStopUseMaterial(Long dataSourceId){
+        List<String> result = new ArrayList<>();
+        List<Map<String, Object>> list = doctorMoveDatasourceHandler.findByHbsSql(dataSourceId, "StopUseMaterial");
+        result.addAll(list.stream().map(map -> map.get("Material").toString()).collect(Collectors.toList()));
+        return result;
+    }
+
     //往基础物料表加数据
-    private Map<String, DoctorBasicMaterial> insertBasicMaterial(Long dataSourceId){
+    private Map<String, DoctorBasicMaterial> insertBasicMaterial(Long dataSourceId, List<String> stopUseMaterial){
         // key = 类型数值 | basicMaterialName, value = basicMaterial
         Map<String, DoctorBasicMaterial> basicMaterialMap = new HashMap<>();
         //药品
         List<View_MedicineList> medicines = RespHelper.or500(doctorMoveDatasourceHandler.findAllData(dataSourceId, View_MedicineList.class, DoctorMoveTableEnum.View_MedicineList));
         for (View_MedicineList medicine : medicines){
+            if(stopUseMaterial.contains(medicine.getOID())){
+                continue;
+            }
             DoctorBasicMaterial basicMaterial = doctorBasicMaterialDao.findByTypeAndName(WareHouseType.MEDICINE, medicine.getMaterialName());
             //不存在则新增
             if(basicMaterial == null){
@@ -191,6 +206,9 @@ public class WareHouseInitService {
         //疫苗
         List<View_VaccinationList> vaccinationLists = RespHelper.or500(doctorMoveDatasourceHandler.findAllData(dataSourceId, View_VaccinationList.class, DoctorMoveTableEnum.View_VaccinationList));
         for(View_VaccinationList vaccination : vaccinationLists){
+            if(stopUseMaterial.contains(vaccination.getOID())){
+                continue;
+            }
             DoctorBasicMaterial basicMaterial = doctorBasicMaterialDao.findByTypeAndName(WareHouseType.VACCINATION, vaccination.getMaterialName());
             if(basicMaterial == null){
                 basicMaterial = new DoctorBasicMaterial();
@@ -208,6 +226,9 @@ public class WareHouseInitService {
         //原料
         List<View_RawMaterialList> rawMaterialLists = RespHelper.or500(doctorMoveDatasourceHandler.findAllData(dataSourceId, View_RawMaterialList.class, DoctorMoveTableEnum.View_RawMaterialList));
         for(View_RawMaterialList material : rawMaterialLists){
+            if(stopUseMaterial.contains(material.getOID())){
+                continue;
+            }
             DoctorBasicMaterial basicMaterial = doctorBasicMaterialDao.findByTypeAndName(WareHouseType.MATERIAL, material.getMaterialName());
             if(basicMaterial == null){
                 basicMaterial = new DoctorBasicMaterial();
@@ -225,6 +246,9 @@ public class WareHouseInitService {
         //饲料
         List<View_FeedList> feedLists = RespHelper.or500(doctorMoveDatasourceHandler.findAllData(dataSourceId, View_FeedList.class, DoctorMoveTableEnum.View_FeedList));
         for(View_FeedList feed : feedLists) {
+            if(stopUseMaterial.contains(feed.getOID())){
+                continue;
+            }
             DoctorBasicMaterial basicMaterial = doctorBasicMaterialDao.findByTypeAndName(WareHouseType.FEED, feed.getMaterialName());
             if(basicMaterial == null){
                 basicMaterial = new DoctorBasicMaterial();
@@ -242,6 +266,9 @@ public class WareHouseInitService {
         // 消耗品
         List<View_AssetList> assetLists = RespHelper.or500(doctorMoveDatasourceHandler.findAllData(dataSourceId, View_AssetList.class, DoctorMoveTableEnum.View_AssetList));
         for(View_AssetList medicine: assetLists){
+            if(stopUseMaterial.contains(medicine.getOID())){
+                continue;
+            }
             DoctorBasicMaterial basicMaterial = doctorBasicMaterialDao.findByTypeAndName(WareHouseType.CONSUME, medicine.getMaterialName());
             if(basicMaterial == null){
                 basicMaterial = new DoctorBasicMaterial();
@@ -262,31 +289,31 @@ public class WareHouseInitService {
     //往仓库里添加物料
     private void addMaterial2Warehouse(Long dataSourceId, Map<WareHouseType, DoctorWareHouse> warehouseType,
                                        Map<String, DoctorBasicMaterial> basicMaterialMap, Map<String, DoctorStaff> staffMap,
-                                       Map<String, DoctorBarn> barnMap, UserProfile userProfile){
+                                       Map<String, DoctorBarn> barnMap, UserProfile userProfile, List<String> stopUseMaterial){
         // 易耗品
         List<MaterialPurchasedUsed> consumes = RespHelper.or500(doctorMoveDatasourceHandler.findByHbsSql(dataSourceId, MaterialPurchasedUsed.class, "AssetPurchasedUsed"));
-        this.addMaterial2Warehouse(warehouseType.get(WareHouseType.CONSUME), consumes, basicMaterialMap, staffMap, barnMap, userProfile);
+        this.addMaterial2Warehouse(warehouseType.get(WareHouseType.CONSUME), consumes, basicMaterialMap, staffMap, barnMap, userProfile, stopUseMaterial);
 
         // 饲料
         List<MaterialPurchasedUsed> feeds = RespHelper.or500(doctorMoveDatasourceHandler.findByHbsSql(dataSourceId, MaterialPurchasedUsed.class, "FeedPurchasedUsed"));
-        this.addMaterial2Warehouse(warehouseType.get(WareHouseType.FEED), feeds, basicMaterialMap, staffMap, barnMap, userProfile);
+        this.addMaterial2Warehouse(warehouseType.get(WareHouseType.FEED), feeds, basicMaterialMap, staffMap, barnMap, userProfile, stopUseMaterial);
 
         // 原料
         List<MaterialPurchasedUsed> raws = RespHelper.or500(doctorMoveDatasourceHandler.findByHbsSql(dataSourceId, MaterialPurchasedUsed.class, "RawMaterialPurchasedUsed"));
-        this.addMaterial2Warehouse(warehouseType.get(WareHouseType.MATERIAL), raws, basicMaterialMap, staffMap, barnMap, userProfile);
+        this.addMaterial2Warehouse(warehouseType.get(WareHouseType.MATERIAL), raws, basicMaterialMap, staffMap, barnMap, userProfile, stopUseMaterial);
 
         // 药品
         List<MaterialPurchasedUsed> med = RespHelper.or500(doctorMoveDatasourceHandler.findByHbsSql(dataSourceId, MaterialPurchasedUsed.class, "MedicinePurchasedUsed"));
-        this.addMaterial2Warehouse(warehouseType.get(WareHouseType.MEDICINE), med, basicMaterialMap, staffMap, barnMap, userProfile);
+        this.addMaterial2Warehouse(warehouseType.get(WareHouseType.MEDICINE), med, basicMaterialMap, staffMap, barnMap, userProfile, stopUseMaterial);
 
         // 疫苗
         List<MaterialPurchasedUsed> vaccinationPurchasedUsed = RespHelper.or500(doctorMoveDatasourceHandler.findByHbsSql(dataSourceId, MaterialPurchasedUsed.class, "VaccinationPurchasedUsed"));
-        this.addMaterial2Warehouse(warehouseType.get(WareHouseType.VACCINATION), vaccinationPurchasedUsed, basicMaterialMap, staffMap, barnMap, userProfile);
+        this.addMaterial2Warehouse(warehouseType.get(WareHouseType.VACCINATION), vaccinationPurchasedUsed, basicMaterialMap, staffMap, barnMap, userProfile, stopUseMaterial);
     }
 
     private void addMaterial2Warehouse(DoctorWareHouse wareHouse, List<MaterialPurchasedUsed> list,
                                        Map<String, DoctorBasicMaterial> basicMaterialMap, Map<String, DoctorStaff> staffMap,
-                                       Map<String, DoctorBarn> barnMap, UserProfile userProfile){
+                                       Map<String, DoctorBarn> barnMap, UserProfile userProfile, List<String> stopUseMaterial){
         // 往表 doctor_material_consume_avgs 写数的Map, key = 类型数值 | materialName, value = [eventCount(最后一次领用数量), 时间]
         Map<String, Object[]> lastMaterialConsumeMap = new HashMap<>();
 
@@ -304,6 +331,9 @@ public class WareHouseInitService {
         materialCP.setWareHouseId(wareHouse.getId());
         materialCP.setWareHouseName(wareHouse.getWareHouseName());
         for(MaterialPurchasedUsed pu : list){
+            if(stopUseMaterial.contains(pu.getMaterialOID())){
+                continue;
+            }
             String typeAndmaterialName = wareHouse.getType() + "|" + pu.getMaterialName();
             if(!materialCount.containsKey(typeAndmaterialName)){
                 materialCount.put(typeAndmaterialName, 0D);
@@ -369,6 +399,9 @@ public class WareHouseInitService {
                 materialInWareHouse.setMaterialId(basicMaterial.getId());
                 materialInWareHouse.setMaterialName(basicMaterial.getName());
                 materialInWareHouse.setLotNumber(materialCount.get(wareHouse.getType() + "|" + basicMaterial.getName()));
+                if(materialInWareHouse.getLotNumber() == null){
+                    continue;
+                }
                 materialInWareHouse.setUnitGroupName(basicMaterial.getUnitGroupName());
                 materialInWareHouse.setUnitName(basicMaterial.getUnitName());
                 doctorMaterialInWareHouseDao.create(materialInWareHouse);
