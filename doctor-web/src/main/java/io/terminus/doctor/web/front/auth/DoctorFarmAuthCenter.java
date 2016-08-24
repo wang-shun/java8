@@ -4,6 +4,7 @@ import io.terminus.common.exception.ServiceException;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.user.service.DoctorFarmReadService;
 import io.terminus.pampas.common.UserUtil;
+import io.terminus.parana.user.model.User;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -31,7 +32,7 @@ public class DoctorFarmAuthCenter {
      * 根据登录用户, 校验是否有操作此猪场的权限
      * @param farmId 猪场id
      */
-    public void checkFarmAuth(Long farmId) {
+    public User checkFarmAuth(Long farmId) {
         Long userId = UserUtil.getUserId();
         if (userId == null) {
             throw new ServiceException("user.not.login");
@@ -40,5 +41,6 @@ public class DoctorFarmAuthCenter {
         if (!farmIds.contains(farmId)) {
             throw new ServiceException("user.not.auth.farm");
         }
+        return UserUtil.getCurrentUser();
     }
 }
