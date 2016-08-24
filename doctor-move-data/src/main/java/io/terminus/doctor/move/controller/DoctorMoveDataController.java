@@ -157,7 +157,7 @@ public class DoctorMoveDataController {
 
         //3.迁移仓库/物料
         log.warn("move warehouse start, mobile:{}, moveId:{}", mobile, moveId);
-        wareHouseInitService.init(mobile, moveId);
+        wareHouseInitService.init(mobile, moveId, farm);
         log.warn("move warehouse end");
 
         //4.迁移公猪 母猪 工作流
@@ -253,10 +253,11 @@ public class DoctorMoveDataController {
      */
     @RequestMapping(value = "/warehouse", method = RequestMethod.GET)
     public Boolean moveWareHouse(@RequestParam("mobile") String mobile, 
-                                 @RequestParam("moveId") Long moveId) {
+                                 @RequestParam("moveId") Long moveId,
+                                 @RequestParam("farmId") Long farmId) {
         try {
             log.warn("move warehouse start, mobile:{}, moveId:{}", mobile, moveId);
-            wareHouseInitService.init(mobile, moveId);
+            wareHouseInitService.init(mobile, moveId, doctorFarmDao.findById(farmId));
             log.warn("move warehouse end");
             return Boolean.TRUE;
         } catch (Exception e) {
