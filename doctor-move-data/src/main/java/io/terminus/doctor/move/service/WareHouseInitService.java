@@ -96,7 +96,7 @@ public class WareHouseInitService {
     private UserProfileDao userProfileDao;
 
     @Transactional
-    public void init(String mobile, Long dataSourceId){
+    public void init(String mobile, Long dataSourceId, DoctorFarm farm){
         User user = RespHelper.or500(doctorUserReadService.findBy(mobile, LoginType.MOBILE));
         Long userId = user.getId();
 
@@ -127,30 +127,27 @@ public class WareHouseInitService {
             // 用户有仓库信息,则添加基础物料
             Map<String, DoctorBasicMaterial> basicMaterialMap = this.insertBasicMaterial(dataSourceId, stopUseMaterial);// key = 类型数值 | basicMaterialName, value = basicMaterial
 
-            // 初始化仓库, 每个猪场每种类型的仓库各一个
             String managerName = list.get(0).getManager().split(",")[0];
-            for(DoctorFarm farm : farmMap.values()){
-                // 查找该猪场下的所有猪舍
-                // key = outId, value = barn
-                Map<String, DoctorBarn> barnMap = this.findBarnMap(dataSourceId, farm);
+            // 查找该猪场下的所有猪舍, key = outId, value = barn
+            Map<String, DoctorBarn> barnMap = this.findBarnMap(dataSourceId, farm);
 
-                Map<WareHouseType, DoctorWareHouse> warehouseMap = new HashMap<>(); // key = WareHouseType, value = DoctorWareHouse
-                for(WareHouseType type : WareHouseType.values()){
-                    DoctorWareHouse wareHouse = new DoctorWareHouse();
-                    wareHouse.setFarmId(farm.getId());
-                    wareHouse.setFarmName(farm.getName());
-                    wareHouse.setManagerId(subMap.get(managerName).getUserId());
-                    wareHouse.setManagerName(managerName);
-                    wareHouse.setType(type.getKey());
-                    wareHouse.setWareHouseName(type.getDesc() + "仓库");
-                    doctorWareHouseDao.create(wareHouse);
-                    warehouseMap.put(type, wareHouse);
-                }
-                //往仓库里添加物料
-                this.addMaterial2Warehouse(dataSourceId, warehouseMap, basicMaterialMap, staffMap, barnMap, userProfile, stopUseMaterial);
-
-                //TODO 配方
+            // 初始化仓库, 每种类型的仓库各一个
+            Map<WareHouseType, DoctorWareHouse> warehouseMap = new HashMap<>(); // key = WareHouseType, value = DoctorWareHouse
+            for(WareHouseType type : WareHouseType.values()){
+                DoctorWareHouse wareHouse = new DoctorWareHouse();
+                wareHouse.setFarmId(farm.getId());
+                wareHouse.setFarmName(farm.getName());
+                wareHouse.setManagerId(subMap.get(managerName).getUserId());
+                wareHouse.setManagerName(managerName);
+                wareHouse.setType(type.getKey());
+                wareHouse.setWareHouseName(type.getDesc() + "仓库");
+                doctorWareHouseDao.create(wareHouse);
+                warehouseMap.put(type, wareHouse);
             }
+            //往仓库里添加物料
+            this.addMaterial2Warehouse(dataSourceId, warehouseMap, basicMaterialMap, staffMap, barnMap, userProfile, stopUseMaterial);
+
+            //TODO 配方
         }
     }
 
