@@ -1,12 +1,14 @@
 package io.terminus.doctor.event.service;
 
 import com.google.common.base.Throwables;
+import com.google.common.collect.Lists;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.model.Response;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.dao.DoctorMonthlyReportDao;
 import io.terminus.doctor.event.dto.report.monthly.DoctorMonthlyReportDto;
+import io.terminus.doctor.event.dto.report.monthly.DoctorMonthlyReportTrendDto;
 import io.terminus.doctor.event.model.DoctorMonthlyReport;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
@@ -36,7 +38,7 @@ public class DoctorMonthlyReportReadServiceImpl implements DoctorMonthlyReportRe
     }
 
     @Override
-    public Response<DoctorMonthlyReportDto> findMonthlyReportByFarmIdAndSumAt(Long farmId, String sumAt) {
+    public Response<DoctorMonthlyReportTrendDto> findMonthlyReportTrendByFarmIdAndSumAt(Long farmId, String sumAt) {
         try {
             Date date;
 
@@ -61,7 +63,9 @@ public class DoctorMonthlyReportReadServiceImpl implements DoctorMonthlyReportRe
             if (reportDto == null) {
                 return Response.ok(failReport());
             }
-            return Response.ok(reportDto);
+
+            // TODO: 16/8/24
+            return Response.ok(new DoctorMonthlyReportTrendDto(reportDto, null));
         } catch (Exception e) {
             log.error("find monthly report by farmId and sumAt failed, farmId:{}, sumAt:{}, cause:{}",
                     farmId, sumAt, Throwables.getStackTraceAsString(e));
@@ -69,11 +73,12 @@ public class DoctorMonthlyReportReadServiceImpl implements DoctorMonthlyReportRe
         }
     }
 
+
     //查询失败的结果
-    private DoctorMonthlyReportDto failReport() {
+    private static DoctorMonthlyReportTrendDto failReport() {
         DoctorMonthlyReportDto dto = new DoctorMonthlyReportDto();
         dto.setFail(true);
-        return dto;
+        return new DoctorMonthlyReportTrendDto(dto, Lists.newArrayList());
     }
 
     //获取月末
