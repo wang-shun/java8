@@ -3,6 +3,13 @@ package io.terminus.doctor.event.dto;
 import com.google.common.base.Joiner;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.doctor.event.dto.event.boar.DoctorSemenDto;
+import io.terminus.doctor.event.dto.event.sow.DoctorAbortionDto;
+import io.terminus.doctor.event.dto.event.sow.DoctorFarrowingDto;
+import io.terminus.doctor.event.dto.event.sow.DoctorFostersDto;
+import io.terminus.doctor.event.dto.event.sow.DoctorMatingDto;
+import io.terminus.doctor.event.dto.event.sow.DoctorPartWeanDto;
+import io.terminus.doctor.event.dto.event.sow.DoctorPigletsChgDto;
+import io.terminus.doctor.event.dto.event.sow.DoctorPregChkResultDto;
 import io.terminus.doctor.event.dto.event.usual.DoctorChgFarmDto;
 import io.terminus.doctor.event.dto.event.usual.DoctorChgLocationDto;
 import io.terminus.doctor.event.dto.event.usual.DoctorConditionDto;
@@ -127,6 +134,32 @@ public class DoctorBasicInputInfoDto implements Serializable{
                 break;
             case VACCINATION:
                 fieldMap = BeanMapper.map(extra, DoctorVaccinationDto.class).descMap();
+                break;
+            case FOSTERS:
+                fieldMap = BeanMapper.map(extra, DoctorFostersDto.class).descMap();
+                break;
+            case FOSTERS_BY:
+                fieldMap = BeanMapper.map(extra, DoctorFostersDto.class).descMap();
+                // 被拼窝的母猪的描述中按理说应当带上"拼窝来源母猪", 但是 dto 中没有这个字段, 那就把"被拼窝母猪"这个字段去掉, 别让客户注意到...嘻嘻~~~
+                fieldMap.remove("被拼窝母猪");
+                break;
+            case MATING:
+                fieldMap = BeanMapper.map(extra, DoctorMatingDto.class).descMap();
+                break;
+            case PREG_CHECK:
+                fieldMap = BeanMapper.map(extra, DoctorPregChkResultDto.class).descMap();
+                break;
+            case ABORTION:
+                fieldMap = BeanMapper.map(extra, DoctorAbortionDto.class).descMap();
+                break;
+            case FARROWING:
+                fieldMap = BeanMapper.map(extra, DoctorFarrowingDto.class).descMap();
+                break;
+            case WEAN:
+                fieldMap = BeanMapper.map(extra, DoctorPartWeanDto.class).descMap();
+                break;
+            case PIGLETS_CHG:
+                fieldMap = BeanMapper.map(extra, DoctorPigletsChgDto.class).descMap();
                 break;
             default:
                 return this.eventDesc;

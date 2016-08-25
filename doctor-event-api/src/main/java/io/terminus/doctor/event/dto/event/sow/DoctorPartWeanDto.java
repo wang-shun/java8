@@ -7,6 +7,8 @@ import lombok.experimental.Builder;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created by yaoqijun.
@@ -34,4 +36,21 @@ public class DoctorPartWeanDto implements Serializable{
     private Integer qualifiedCount; // 合格数量
 
     private Integer notQualifiedCount; //不合格的数量
+
+    public Map<String, String> descMap(){
+        Map<String, String> map = new HashMap<>();
+        if(partWeanPigletsCount != null){
+            map.put("部分断奶数量", partWeanPigletsCount.toString());
+        }
+        if(partWeanAvgWeight != null){
+            map.put("断奶平均重量", partWeanAvgWeight.toString());
+        }
+        if(qualifiedCount != null){
+            map.put("合格数量", qualifiedCount.toString());
+        }
+        if(notQualifiedCount != null){
+            map.put("不合格数量", notQualifiedCount.toString());
+        }
+        return map;
+    }
 }
