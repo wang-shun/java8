@@ -20,6 +20,7 @@ import java.util.Map;
 import java.util.Objects;
 
 import static io.terminus.doctor.common.enums.PigType.MATING_TYPES;
+import static io.terminus.doctor.common.enums.PigType.PREG_SOW;
 
 /**
  * Created by yaoqijun.
@@ -62,8 +63,9 @@ public class DoctorChgLocationHandler extends DoctorAbstractEventHandler{
         if (fromBarn == null || toBarn == null) {
             throw new ServiceException("barn.type.not.equal");
         }
-        //允许 from 和 to 属于可配种类型的猪舍
-        if (MATING_TYPES.contains(fromBarn.getPigType()) && MATING_TYPES.contains(toBarn.getPigType())) {
+
+        //妊娠舍 => 配种舍/妊娠舍
+        if (Objects.equals(PREG_SOW.getValue(), fromBarn.getPigType()) && MATING_TYPES.contains(toBarn.getPigType())) {
             return toBarn;
         }
         if (!Objects.equals(fromBarn.getPigType(), toBarn.getPigType())) {
