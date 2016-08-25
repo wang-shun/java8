@@ -50,6 +50,8 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkState;
+import static io.terminus.doctor.common.enums.PigType.MATING_TYPES;
+import static io.terminus.doctor.common.enums.PigType.PREG_SOW;
 import static java.util.Objects.isNull;
 
 /**
@@ -439,8 +441,11 @@ public class DoctorPigCreateEvents {
         DoctorBarn doctorFromBarn = RespHelper.or500(doctorBarnReadService.findBarnById(doctorChgLocationDto.getChgLocationFromBarnId()));
         DoctorBarn doctorToBarn = RespHelper.or500(doctorBarnReadService.findBarnById(doctorChgLocationDto.getChgLocationToBarnId()));
 
+        //走workflow的流程, 母猪 && (猪类不相等 || !(妊娠舍 => 配种舍/妊娠舍))
         if(Objects.equals(basicInputInfoDto.getPigType(), DoctorPig.PIG_TYPE.SOW.getKey()) &&
-                !Objects.equals(doctorFromBarn.getPigType(), doctorToBarn.getPigType())){
+                (!Objects.equals(doctorFromBarn.getPigType(), doctorToBarn.getPigType()) ||
+                !(Objects.equals(PREG_SOW.getValue(), doctorFromBarn.getPigType()) && MATING_TYPES.contains(doctorToBarn.getPigType())))){
+
             // 录入母猪
             if(Objects.equals(doctorToBarn.getPigType(), PigType.MATE_SOW.getValue())){
                 basicInputInfoDto.setEventType(PigEvent.TO_MATING.getKey());
