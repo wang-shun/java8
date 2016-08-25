@@ -133,7 +133,7 @@ public class DateUtil {
         return months;
     }
 
-    /*
+    /**
      * 获取当月的最后一天
      *
      * @param date
@@ -142,6 +142,22 @@ public class DateUtil {
     public static DateTime getMonthEnd(DateTime date) {
         if (date == null) return null;
         return date.plusMonths(1).withDayOfMonth(1).withHourOfDay(0).withMinuteOfHour(0).withSecondOfMinute(0).withMillisOfSecond(0).minusSeconds(1);
+    }
+
+    /**
+     * 同一年显示 x月, 不同年显示 xxxx年x月
+     * @param date 日期
+     * @return 日期格式化的结果
+     */
+    public static String getDateStr(Date date) {
+        if (date == null) {
+            return "";
+        }
+        DateTime datetime = new DateTime(date);
+        if (datetime.getYear() == DateTime.now().getYear()) {
+            return datetime.getMonthOfYear() + "月";
+        }
+        return datetime.getYear() + "年" + datetime.getMonthOfYear() + "月";
     }
 
 }

@@ -90,4 +90,6 @@ public class DoctorMonthlyReportDto implements Serializable {
      */
     private double npd;                       //非生产天数
     private double psy;                       //psy
+
+    private String date;                      //统计月份 2016年08月, 供前台显示
 }
