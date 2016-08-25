@@ -1,5 +1,6 @@
 package io.terminus.doctor.event.dto.event.group.input;
 
+import io.terminus.doctor.event.dto.event.group.DoctorAntiepidemicGroupEvent;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.hibernate.validator.constraints.NotEmpty;
@@ -7,6 +8,8 @@ import org.hibernate.validator.constraints.NotEmpty;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Desc: 防疫事件录入信息
@@ -63,4 +66,28 @@ public class DoctorAntiepidemicGroupInput extends BaseGroupInput implements Seri
      *  防疫人员名称
      */
     private String vaccinStaffName;
+
+    @Override
+    public Map<String, String> descMap() {
+        Map<String, String> descMap = new HashMap<>();
+        if(quantity != null){
+            descMap.put("猪数量", this.quantity.toString());
+        }
+        if(vaccinName != null){
+            descMap.put("疫苗", this.vaccinName);
+        }
+        if(vaccinResult != null){
+            DoctorAntiepidemicGroupEvent.VaccinResult result = DoctorAntiepidemicGroupEvent.VaccinResult.from(vaccinResult);
+            if(result != null){
+                descMap.put("结果", result.getDesc());
+            }
+        }
+        if(vaccinItemName != null){
+            descMap.put("防疫项目", vaccinItemName);
+        }
+        if(vaccinStaffName != null){
+            descMap.put("防疫人员", vaccinStaffName);
+        }
+        return descMap;
+    }
 }

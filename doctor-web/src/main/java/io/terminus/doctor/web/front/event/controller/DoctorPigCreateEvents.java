@@ -50,6 +50,8 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkState;
+import static io.terminus.doctor.common.enums.PigType.MATING_TYPES;
+import static io.terminus.doctor.common.enums.PigType.PREG_SOW;
 import static java.util.Objects.isNull;
 
 /**
@@ -61,6 +63,7 @@ import static java.util.Objects.isNull;
 @Slf4j
 @Controller
 @RequestMapping("/api/doctor/events/create")
+@SuppressWarnings("all")
 public class DoctorPigCreateEvents {
 
     private static final ObjectMapper OBJECT_MAPPER = JsonMapper.JSON_NON_DEFAULT_MAPPER.getMapper();
@@ -441,6 +444,13 @@ public class DoctorPigCreateEvents {
 
         if(Objects.equals(basicInputInfoDto.getPigType(), DoctorPig.PIG_TYPE.SOW.getKey()) &&
                 !Objects.equals(doctorFromBarn.getPigType(), doctorToBarn.getPigType())){
+
+            //妊娠舍 => 配种舍/妊娠舍 走普通转舍
+            if (Objects.equals(PREG_SOW.getValue(), doctorFromBarn.getPigType()) && MATING_TYPES.contains(doctorToBarn.getPigType())) {
+                basicInputInfoDto.setEventType(PigEvent.CHG_LOCATION.getKey());
+                return RespHelper.or500(doctorPigEventWriteService.chgLocationEvent(doctorChgLocationDto, basicInputInfoDto));
+            }
+
             // 录入母猪
             if(Objects.equals(doctorToBarn.getPigType(), PigType.MATE_SOW.getValue())){
                 basicInputInfoDto.setEventType(PigEvent.TO_MATING.getKey());

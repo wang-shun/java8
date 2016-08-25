@@ -92,7 +92,7 @@ public class PigSearchReadServiceImpl implements PigSearchReadService {
                 }
 
                 // 处理 KongHuaiPregCheckResult
-                if (searchedPig.getPregCheckResult() != null) {
+                if (searchedPig.getStatus() == PigStatus.KongHuai.getKey() && searchedPig.getPregCheckResult() != null) {
                     searchedPig.setStatus(searchedPig.getPregCheckResult());
                 }
             });
