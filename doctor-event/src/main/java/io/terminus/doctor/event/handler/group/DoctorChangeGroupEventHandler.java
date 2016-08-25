@@ -94,8 +94,6 @@ public class DoctorChangeGroupEventHandler extends DoctorAbstractGroupEventHandl
         //重新计算重量
         groupTrack.setWeight(groupTrack.getWeight() - change.getWeight());
         groupTrack.setAvgWeight(EventUtil.getAvgWeight(groupTrack.getWeight(), groupTrack.getQuantity()));
-
-        //重新计算金额
         updateGroupTrack(groupTrack, event);
 
         //4.创建镜像
