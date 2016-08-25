@@ -188,7 +188,7 @@ public class DoctorGroupManager {
         groupEvent.setEventAt(group.getOpenAt());
         groupEvent.setType(GroupEventType.NEW.getValue());
         groupEvent.setName(GroupEventType.NEW.getDesc());
-        groupEvent.setDesc(newGroupInput.getEventDesc());
+        groupEvent.setDesc(newGroupInput.generateEventDesc());
 
         groupEvent.setBarnId(group.getInitBarnId());
         groupEvent.setBarnName(group.getInitBarnName());

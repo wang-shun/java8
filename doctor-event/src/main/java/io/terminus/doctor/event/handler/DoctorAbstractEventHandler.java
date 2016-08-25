@@ -179,7 +179,7 @@ public abstract class DoctorAbstractEventHandler implements DoctorEventCreateHan
                 .farmId(basic.getFarmId()).farmName(basic.getFarmName())
                 .pigId(basic.getPigId()).pigCode(basic.getPigCode())
                 .eventAt(DateTime.now().toDate()).type(basic.getEventType())
-                .kind(basic.getPigType()).name(basic.getEventName()).desc(basic.getEventDescFromExtra(extra)).relEventId(basic.getRelEventId())
+                .kind(basic.getPigType()).name(basic.getEventName()).desc(basic.generateEventDescFromExtra(extra)).relEventId(basic.getRelEventId())
                 .barnId(basic.getBarnId()).barnName(basic.getBarnName())
                 .creatorId(basic.getStaffId()).creatorName(basic.getStaffName())
                 .npd(0)

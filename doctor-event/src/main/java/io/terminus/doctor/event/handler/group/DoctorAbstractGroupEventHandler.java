@@ -144,7 +144,7 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
         event.setIsAuto(baseInput.getIsAuto());
         event.setCreatorId(baseInput.getCreatorId());   //创建人
         event.setCreatorName(baseInput.getCreatorName());
-        event.setDesc(baseInput.getEventDesc());
+        event.setDesc(baseInput.generateEventDesc());
         event.setRemark(baseInput.getRemark());
         return event;
     }

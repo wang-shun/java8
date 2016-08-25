@@ -43,7 +43,7 @@ public abstract class BaseGroupInput implements Serializable {
 
     private String creatorName;
 
-    public final String getEventDesc(){
+    public final String generateEventDesc(){
         String desc = Joiner.on("#").withKeyValueSeparator("：").join(this.descMap());
         if (Objects.equals(isAuto, IsOrNot.YES.getValue())) {
             return "【系统自动】" + desc;
