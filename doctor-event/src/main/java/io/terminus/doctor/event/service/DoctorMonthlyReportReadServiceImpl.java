@@ -91,6 +91,7 @@ public class DoctorMonthlyReportReadServiceImpl implements DoctorMonthlyReportRe
                     if (dto == null) {
                         return failReportDto(month);
                     }
+                    dto.setDate(DateUtil.getDateStr(month));        //填上月份, 供前台显示
                     return dto;
                 })
                 .collect(Collectors.toList());
