@@ -61,6 +61,7 @@ import static java.util.Objects.isNull;
 @Slf4j
 @Controller
 @RequestMapping("/api/doctor/events/create")
+@SuppressWarnings("all")
 public class DoctorPigCreateEvents {
 
     private static final ObjectMapper OBJECT_MAPPER = JsonMapper.JSON_NON_DEFAULT_MAPPER.getMapper();
@@ -503,7 +504,7 @@ public class DoctorPigCreateEvents {
                     .pigType(entryDto.getPigType()).pigCode(entryDto.getPigCode()).barnId(entryDto.getBarnId()).barnName(entryDto.getBarnName())
                     .farmId(doctorFarm.getId()).farmName(doctorFarm.getName()).orgId(doctorFarm.getOrgId()).orgName(doctorFarm.getOrgName())
                     .staffId(userId).staffName(userResponse.getResult().getName())
-                    .eventType(pigEvent.getKey()).eventName(pigEvent.getDesc()).eventDesc(pigEvent.getDesc())
+                    .eventType(pigEvent.getKey()).eventName(pigEvent.getDesc()).eventDesc(entryDto.getEventDesc())
                     .build();
         }catch (IllegalStateException ee){
             log.error("illegal state exception error, cause:{}", Throwables.getStackTraceAsString(ee));

@@ -1,5 +1,8 @@
 package io.terminus.doctor.event.dto.event.usual;
 
+import com.google.common.base.Joiner;
+import io.terminus.doctor.event.enums.PigSource;
+import io.terminus.doctor.event.model.DoctorPig;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -7,6 +10,8 @@ import lombok.experimental.Builder;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created by yaoqijun.
@@ -75,5 +80,43 @@ public class DoctorFarmEntryDto implements Serializable{
     private Integer left;   //左乳头的数量
 
     private Integer right;  //右乳头数量
+
+    public String getEventDesc(){
+        Map<String, String> map = new HashMap<>();
+        if(pigType != null){
+            map.put("猪类型", DoctorPig.PIG_TYPE.from(pigType).getDesc());
+        }
+        if(pigCode != null){
+            map.put("猪编号", pigCode);
+        }
+        if(barnName != null){
+            map.put("进场猪舍", barnName);
+        }
+        if(source != null){
+            map.put("来源", PigSource.from(source).getDesc());
+        }
+        if(breedName != null){
+            map.put("品种", breedName);
+        }
+        if(breedTypeName != null){
+            map.put("品系", breedTypeName);
+        }
+        if(boarTypeName != null){
+            map.put("公猪进场类型", boarTypeName);
+        }
+        if(earCode != null){
+            map.put("耳缺号", earCode);
+        }
+        if(parity != null){
+            map.put("胎次", parity.toString());
+        }
+        if(left != null){
+            map.put("左乳头数", left.toString());
+        }
+        if(right != null){
+            map.put("右乳头数", right.toString());
+        }
+        return Joiner.on("#").withKeyValueSeparator("：").join(map);
+    }
 
 }
