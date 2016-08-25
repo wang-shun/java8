@@ -95,6 +95,9 @@ public class DoctorBasicInputInfoDto implements Serializable{
     }
 
     public String getEventDescFromExtra(Map<String, Object> extra){
+        if(eventType == null){
+            return this.eventDesc;
+        }
         PigEvent pigEvent = PigEvent.from(eventType);
         if(pigEvent == null){
             return this.eventDesc;

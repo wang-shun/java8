@@ -94,7 +94,10 @@ public class DoctorSowMoveInGroupInput extends DoctorMoveInGroupInput implements
             map.put("转入猪舍", toBarnName);
         }
         if(pigType != null){
-            map.put("猪类型", PigType.from(pigType).getDesc());
+            PigType pigType1 = PigType.from(pigType);
+            if(pigType1 != null){
+                map.put("猪类型", pigType1.getDesc());
+            }
         }
         if(geneticName != null){
             map.put("品系", geneticName);

@@ -92,9 +92,11 @@ public class DoctorFarrowingDto implements Serializable{
         if(bedCode != null){
             map.put("床号", bedCode);
         }
-        FarrowingType farrowingType1 = FarrowingType.from(farrowingType);
-        if(farrowingType1 != null){
-            map.put("分娩类型", farrowingType1.getDesc());
+        if(farrowingType != null){
+            FarrowingType farrowingType1 = FarrowingType.from(farrowingType);
+            if(farrowingType1 != null){
+                map.put("分娩类型", farrowingType1.getDesc());
+            }
         }
         if(isHelp != null){
             map.put("是否帮助", isHelp == 1 ? "是" : "否");

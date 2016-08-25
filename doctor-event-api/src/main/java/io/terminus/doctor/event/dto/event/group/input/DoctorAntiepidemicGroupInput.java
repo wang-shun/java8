@@ -76,8 +76,11 @@ public class DoctorAntiepidemicGroupInput extends BaseGroupInput implements Seri
         if(vaccinName != null){
             descMap.put("疫苗", this.vaccinName);
         }
-        if(DoctorAntiepidemicGroupEvent.VaccinResult.from(vaccinResult) != null){
-            descMap.put("结果", DoctorAntiepidemicGroupEvent.VaccinResult.from(vaccinResult).getDesc());
+        if(vaccinResult != null){
+            DoctorAntiepidemicGroupEvent.VaccinResult result = DoctorAntiepidemicGroupEvent.VaccinResult.from(vaccinResult);
+            if(result != null){
+                descMap.put("结果", result.getDesc());
+            }
         }
         if(vaccinItemName != null){
             descMap.put("防疫项目", vaccinItemName);

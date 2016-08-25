@@ -115,7 +115,10 @@ public class DoctorTransGroupInput extends BaseGroupInput implements Serializabl
             map.put("总活体重(Kg)", weight.toString());
         }
         if(source != null){
-            map.put("来源", PigSource.from(source).getDesc());
+            PigSource pigSource = PigSource.from(source);
+            if(pigSource != null){
+                map.put("来源", pigSource.getDesc());
+            }
         }
         return map;
     }

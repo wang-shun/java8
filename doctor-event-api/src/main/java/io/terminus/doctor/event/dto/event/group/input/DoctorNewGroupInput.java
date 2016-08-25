@@ -95,11 +95,17 @@ public class DoctorNewGroupInput extends BaseGroupInput implements Serializable 
         if(barnName != null){
             descMap.put("猪舍", barnName);
         }
-        if(pigType != null && PigType.from(pigType) != null){
-           descMap.put("猪类型", PigType.from(pigType).getDesc());
+        if(pigType != null){
+            PigType pigType1 = PigType.from(pigType);
+            if(pigType1 != null){
+                descMap.put("猪类型", pigType1.getDesc());
+            }
         }
         if(sex != null){
-            descMap.put("性别", DoctorGroupTrack.Sex.from(sex).getDesc());
+            DoctorGroupTrack.Sex sex1 = DoctorGroupTrack.Sex.from(sex);
+            if(sex1 != null){
+                descMap.put("性别", sex1.getDesc());
+            }
         }
         if(breedName != null){
             descMap.put("品种", breedName);

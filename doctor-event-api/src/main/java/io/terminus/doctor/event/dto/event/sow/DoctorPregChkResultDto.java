@@ -36,9 +36,11 @@ public class DoctorPregChkResultDto implements Serializable{
 
     public Map<String, String> descMap(){
         Map<String, String> map = new HashMap<>();
-        PregCheckResult result = PregCheckResult.from(checkResult);
-        if(result != null){
-            map.put("检查结果", result.getDesc());
+        if(checkResult != null){
+            PregCheckResult result = PregCheckResult.from(checkResult);
+            if(result != null){
+                map.put("检查结果", result.getDesc());
+            }
         }
         return map;
     }

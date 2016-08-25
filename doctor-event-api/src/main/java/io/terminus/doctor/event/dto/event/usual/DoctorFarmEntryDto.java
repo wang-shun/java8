@@ -83,7 +83,10 @@ public class DoctorFarmEntryDto implements Serializable{
     public Map<String, String> descMap() {
         Map<String, String> map = new HashMap<>();
         if(pigType != null){
-            map.put("猪类型", DoctorPig.PIG_TYPE.from(pigType).getDesc());
+            DoctorPig.PIG_TYPE pig = DoctorPig.PIG_TYPE.from(pigType);
+            if(pig != null){
+                map.put("猪类型", pig.getDesc());
+            }
         }
         if(pigCode != null){
             map.put("猪编号", pigCode);
@@ -92,7 +95,10 @@ public class DoctorFarmEntryDto implements Serializable{
             map.put("进场猪舍", barnName);
         }
         if(source != null){
-            map.put("来源", PigSource.from(source).getDesc());
+            PigSource pigSource = PigSource.from(source);
+            if(pigSource != null){
+                map.put("来源", pigSource.getDesc());
+            }
         }
         if(breedName != null){
             map.put("品种", breedName);

@@ -108,10 +108,16 @@ public class DoctorMoveInGroupInput extends BaseGroupInput implements Serializab
             map.put("转移类型", inTypeName);
         }
         if(source != null){
-            map.put("来源", PigSource.from(source).getDesc());
+            PigSource source1 = PigSource.from(source);
+            if(source1 != null){
+                map.put("来源", source1.getDesc());
+            }
         }
         if(sex != null){
-            map.put("性别", DoctorGroupTrack.Sex.from(sex).getDesc());
+            DoctorGroupTrack.Sex sex1 = DoctorGroupTrack.Sex.from(sex);
+            if(sex1 != null){
+                map.put("性别", sex1.getDesc());
+            }
         }
         if(breedName != null){
             map.put("品种", breedName);
