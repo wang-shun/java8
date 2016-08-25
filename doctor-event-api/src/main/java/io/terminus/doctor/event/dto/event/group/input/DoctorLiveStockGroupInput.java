@@ -5,6 +5,8 @@ import lombok.EqualsAndHashCode;
 
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Desc: 猪只存栏事件录入信息
@@ -22,4 +24,13 @@ public class DoctorLiveStockGroupInput extends BaseGroupInput implements Seriali
      */
     @NotNull(message = "avgWeight.not.null")
     private Double avgWeight;
+
+    @Override
+    public Map<String, String> descMap() {
+        Map<String, String> map = new HashMap<>();
+        if(avgWeight != null){
+            map.put("平均体重(Kg)", avgWeight.toString());
+        }
+        return map;
+    }
 }

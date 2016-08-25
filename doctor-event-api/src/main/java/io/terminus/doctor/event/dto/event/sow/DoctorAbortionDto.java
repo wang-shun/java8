@@ -7,6 +7,8 @@ import lombok.experimental.Builder;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created by yaoqijun.
@@ -27,4 +29,12 @@ public class DoctorAbortionDto implements Serializable{
     private Long abortionReasonId;  // 流产原因
 
     private String abortionReasonName;  //流产原因
+
+    public Map<String, String> descMap(){
+        Map<String, String> map = new HashMap<>();
+        if(abortionReasonName != null){
+            map.put("流产原因", abortionReasonName);
+        }
+        return map;
+    }
 }

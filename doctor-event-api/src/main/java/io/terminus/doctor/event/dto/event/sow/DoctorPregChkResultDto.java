@@ -1,5 +1,6 @@
 package io.terminus.doctor.event.dto.event.sow;
 
+import io.terminus.doctor.event.enums.PregCheckResult;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -7,6 +8,8 @@ import lombok.experimental.Builder;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created by yaoqijun.
@@ -30,4 +33,15 @@ public class DoctorPregChkResultDto implements Serializable{
     private Integer checkResult;    // 妊娠检查结果
 
     private String checkMark;   // 校验标识
+
+    public Map<String, String> descMap(){
+        Map<String, String> map = new HashMap<>();
+        if(checkResult != null){
+            PregCheckResult result = PregCheckResult.from(checkResult);
+            if(result != null){
+                map.put("检查结果", result.getDesc());
+            }
+        }
+        return map;
+    }
 }

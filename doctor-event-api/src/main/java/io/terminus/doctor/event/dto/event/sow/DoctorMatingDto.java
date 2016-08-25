@@ -1,5 +1,6 @@
 package io.terminus.doctor.event.dto.event.sow;
 
+import io.terminus.doctor.common.utils.DateUtil;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -7,6 +8,8 @@ import lombok.experimental.Builder;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created by yaoqijun.
@@ -38,4 +41,15 @@ public class DoctorMatingDto implements Serializable {
     private String matingStaff; // 配种人员
 
     private String mattingMark; // 配种mark
+
+    public Map<String, String> descMap(){
+        Map<String, String> map = new HashMap<>();
+        if(matingBoarPigCode != null){
+            map.put("公猪号", matingBoarPigCode);
+        }
+        if(judgePregDate != null){
+            map.put("预产日期", DateUtil.toDateString(judgePregDate));
+        }
+        return map;
+    }
 }

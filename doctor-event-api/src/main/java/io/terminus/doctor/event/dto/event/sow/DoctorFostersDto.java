@@ -7,6 +7,8 @@ import lombok.experimental.Builder;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created by yaoqijun.
@@ -43,4 +45,27 @@ public class DoctorFostersDto implements Serializable{
     private String fosterSowOutId; // 拼窝母猪outId(做关联用)
 
     private String fosterRemark;    // 拼窝标识
+
+    public Map<String, String> descMap(){
+        Map<String, String> map = new HashMap<>();
+        if(fostersCount != null){
+            map.put("拼窝数量", fostersCount.toString());
+        }
+        if(sowFostersCount != null){
+            map.put("拼窝母猪数量", sowFostersCount.toString());
+        }
+        if(boarFostersCount != null){
+            map.put("拼窝公猪数量", boarFostersCount.toString());
+        }
+        if(fosterTotalWeight != null){
+            map.put("拼窝总重量", fosterTotalWeight.toString());
+        }
+        if(fosterReasonName != null){
+            map.put("寄养原因", fosterReasonName);
+        }
+        if(fosterSowCode != null){
+            map.put("被拼窝母猪", fosterSowCode);
+        }
+        return map;
+    }
 }

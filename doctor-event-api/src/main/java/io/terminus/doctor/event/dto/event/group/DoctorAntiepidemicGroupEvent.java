@@ -82,5 +82,14 @@ public class DoctorAntiepidemicGroupEvent extends BaseGroupEvent implements Seri
             }
             return null;
         }
+
+        public static VaccinResult from(int value){
+            for(VaccinResult result : VaccinResult.values()){
+                if(Objects.equals(result.value, value)){
+                    return result;
+                }
+            }
+            return null;
+        }
     }
 }
