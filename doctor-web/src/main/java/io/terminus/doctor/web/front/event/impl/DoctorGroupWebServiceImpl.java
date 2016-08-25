@@ -174,6 +174,7 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
             GroupEventType groupEventType = checkNotNull(GroupEventType.from(eventType));
             switch (groupEventType) {
                 case MOVE_IN:
+                    params.put("breedName", getBasicName(getLong(params, "breedId")));
                     params.put("inTypeName", DoctorMoveInGroupEvent.InType.from(getInteger(params, "inType")).getDesc());
                     orServEx(doctorGroupWriteService.groupEventMoveIn(groupDetail, map(putBasicFields(params), DoctorMoveInGroupInput.class)));
                     break;
@@ -194,6 +195,7 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
                     break;
                 case TRANS_GROUP:
                     params.put("toBarnName", getBarnName(getLong(params, "toBarnId")));
+                    params.put("breedName", getBasicName(getLong(params, "breedId")));
 
                     //如果不新建猪群, 拼上转入猪群号
                     if (Integer.valueOf(String.valueOf(params.get("isCreateGroup"))).equals(IsOrNot.NO.getValue())) {
@@ -202,7 +204,9 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
                     orServEx(doctorGroupWriteService.groupEventTransGroup(groupDetail, map(putBasicFields(params), DoctorTransGroupInput.class)));
                     break;
                 case TURN_SEED:
-                    params.put("eventAt", DateUtil.toDateString(new Date()));
+                    params.put("breedName", getBasicName(getLong(params, "breedId")));
+                    params.put("geneticName", getBasicName(getLong(params, "geneticId")));
+                    params.put("toBarnName", getBarnName(getLong(params, "toBarnId")));
                     orServEx(doctorGroupWriteService.groupEventTurnSeed(groupDetail, map(putBasicFields(params), DoctorTurnSeedGroupInput.class)));
                     break;
                 case LIVE_STOCK:
@@ -222,6 +226,7 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
                 case TRANS_FARM:
                     params.put("toFarmName", getFarmName(getLong(params, "toFarmId")));
                     params.put("toBarnName", getBarnName(getLong(params, "toBarnId")));
+                    params.put("breedName", getBasicName(getLong(params, "breedId")));
 
                     //如果不新建猪群, 拼上转入猪群号
                     if (Integer.valueOf(String.valueOf(params.get("isCreateGroup"))).equals(IsOrNot.NO.getValue())) {

@@ -2,6 +2,7 @@ package io.terminus.doctor.event.dto.event.group.input;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
@@ -35,12 +36,6 @@ public class DoctorTurnSeedGroupInput extends BaseGroupInput implements Serializ
     private String earCode;
 
     /**
-     * 转入日期
-     */
-    @NotNull(message = "date.not.null")
-    private String transInAt;
-
-    /**
      * 出生日期
      */
     @NotNull(message = "birthdate.not.null")
@@ -54,10 +49,18 @@ public class DoctorTurnSeedGroupInput extends BaseGroupInput implements Serializ
 
     private String geneticName;
 
+    /**
+     * 转入猪舍
+     */
+    @NotNull(message = "barnId.not.null")
     private Long toBarnId;
 
+    @NotEmpty(message = "barnId.not.null")
     private String toBarnName;
 
-    //@Min(value = 0, message = "weight.gt.0")
+    /**
+     * 重量(kg)
+     */
+    @Min(value = 0, message = "weight.gt.0")
     private Double weight;
 }

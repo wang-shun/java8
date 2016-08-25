@@ -4,14 +4,11 @@ import com.google.common.base.Throwables;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.Response;
-import io.terminus.doctor.common.enums.PigType;
-import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dao.DoctorGroupDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorGroupSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
-import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
 import io.terminus.doctor.event.dto.DoctorGroupDetail;
 import io.terminus.doctor.event.dto.event.group.edit.DoctorAntiepidemicGroupEdit;
 import io.terminus.doctor.event.dto.event.group.edit.DoctorChangeGroupEdit;
@@ -31,11 +28,7 @@ import io.terminus.doctor.event.dto.event.group.input.DoctorSowMoveInGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorTransFarmGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorTransGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorTurnSeedGroupInput;
-import io.terminus.doctor.event.dto.event.usual.DoctorFarmEntryDto;
-import io.terminus.doctor.event.enums.BoarEntryType;
 import io.terminus.doctor.event.enums.IsOrNot;
-import io.terminus.doctor.event.enums.PigEvent;
-import io.terminus.doctor.event.enums.PigSource;
 import io.terminus.doctor.event.handler.group.DoctorAntiepidemicGroupEventHandler;
 import io.terminus.doctor.event.handler.group.DoctorChangeGroupEventHandler;
 import io.terminus.doctor.event.handler.group.DoctorCloseGroupEventHandler;
@@ -48,12 +41,10 @@ import io.terminus.doctor.event.handler.group.DoctorTransGroupEventHandler;
 import io.terminus.doctor.event.handler.group.DoctorTurnSeedGroupEventHandler;
 import io.terminus.doctor.event.manager.DoctorGroupEventManager;
 import io.terminus.doctor.event.manager.DoctorGroupManager;
-import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorGroupSnapshot;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
-import io.terminus.doctor.event.model.DoctorPig;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -64,7 +55,6 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static io.terminus.common.utils.Arguments.notEmpty;
-import static io.terminus.doctor.common.utils.RespHelper.orServEx;
 
 /**
  * Desc: 猪群卡片表写服务实现类
@@ -237,50 +227,10 @@ public class DoctorGroupWriteServiceImpl implements DoctorGroupWriteService {
         }
     }
 
-    private PigType checkTurnSeedData(Integer groupType, Integer barnType){
-        PigType type = PigType.from(groupType);
-        if(type == null){
-            throw new ServiceException("group.can.not.turn.seed");
-        }
-
-        switch (type) {
-            // 当猪的来源是后备群中的种母猪 (PigType.RESERVE_SOW) 时, 转入猪舍只允许为 配种舍(PigType.MATE_SOW) 或 妊娠舍(PigType.PREG_SOW)
-            case RESERVE_SOW :
-                if(!Objects.equals(barnType, PigType.MATE_SOW.getValue()) && !Objects.equals(barnType, PigType.PREG_SOW.getValue())){
-                    throw new ServiceException("barn.can.not.turn.seed");
-                }
-                break;
-            // 当猪的来源是后备群中的种公猪 (PigType.RESERVE_BOAR) 时, 转入猪舍只允许为 种公猪舍(PigType.BOAR)
-            case RESERVE_BOAR :
-                if(!Objects.equals(barnType, PigType.BOAR.getValue())){
-                    throw new ServiceException("barn.can.not.turn.seed");
-                }
-                break;
-            // 当猪的来源不是以上两种时, 抛出异常
-            default:
-                throw new ServiceException("group.can.not.turn.seed");
-        }
-        return type;
-    }
-
     @Override
     public Response<Boolean> groupEventTurnSeed(DoctorGroupDetail groupDetail, @Valid DoctorTurnSeedGroupInput turnSeed) {
         try {
-            DoctorBarn barn = orServEx(doctorBarnReadService.findBarnById(turnSeed.getToBarnId()));
-            PigType groupType = this.checkTurnSeedData(groupDetail.getGroup().getPigType(), barn.getPigType());
-
-            // 1. 猪群本身的变化, 内含事务控制
             doctorGroupEventManager.handleEvent(groupDetail, turnSeed, DoctorTurnSeedGroupEventHandler.class);
-
-            // 2. 判断猪群剩余数量, 如果剩余0, 则触发关闭猪群事件. 这个 handler 里面没有事务控制
-            DoctorGroupTrack groupTrack = doctorGroupTrackDao.findByGroupId(groupDetail.getGroup().getId());
-            if (groupTrack.getQuantity() == 0) {
-                doctorCommonGroupEventHandler.autoGroupEventClose(doctorGroupDao.findById(groupDetail.getGroup().getId()), groupTrack, turnSeed);
-            }
-
-            // 3. 触发进场事件(转为待配种状态), 内含事务控制
-            this.callPigEntryEvent(groupType, turnSeed, doctorGroupDao.findById(groupDetail.getGroup().getId()), barn, null);
-
             return Response.ok(Boolean.TRUE);
         } catch (ServiceException e) {
             log.error("groupEventTurnSeed failed, groupDetail:{}, turnSeed:{}, cause:{}", groupDetail, turnSeed, Throwables.getStackTraceAsString(e));
@@ -289,53 +239,6 @@ public class DoctorGroupWriteServiceImpl implements DoctorGroupWriteService {
             log.error("groupEventTurnSeed failed, groupDetail:{}, turnSeed:{}, cause:{}", groupDetail, turnSeed, Throwables.getStackTraceAsString(e));
             return Response.fail("group.event.turnSeed.fail");
         }
-    }
-
-    private void callPigEntryEvent(PigType groupType, DoctorTurnSeedGroupInput turnSeedInput, DoctorGroup group, DoctorBarn barn, Long relEventId){
-        DoctorBasicInputInfoDto basicDto = new DoctorBasicInputInfoDto();
-        DoctorFarmEntryDto farmEntryDto = new DoctorFarmEntryDto();
-
-        switch (groupType) {
-            case RESERVE_BOAR:
-                basicDto.setPigType(DoctorPig.PIG_TYPE.BOAR.getKey());
-                farmEntryDto.setBoarTypeId(BoarEntryType.HGZ.getKey());
-                farmEntryDto.setBoarTypeName(BoarEntryType.HGZ.getCode());
-                break;
-            case RESERVE_SOW:
-                basicDto.setPigType(DoctorPig.PIG_TYPE.SOW.getKey());
-                farmEntryDto.setParity(1);
-                break;
-        }
-
-        basicDto.setPigCode(turnSeedInput.getPigCode());
-        basicDto.setBarnId(barn.getId());
-        basicDto.setBarnName(barn.getName());
-        basicDto.setFarmId(group.getFarmId());
-        basicDto.setFarmName(group.getFarmName());
-        basicDto.setOrgId(group.getOrgId());
-        basicDto.setOrgName(group.getOrgName());
-        basicDto.setEventType(PigEvent.ENTRY.getKey());
-        basicDto.setEventName(PigEvent.ENTRY.getName());
-        basicDto.setEventDesc(PigEvent.ENTRY.getDesc());
-        basicDto.setRelEventId(relEventId);
-        basicDto.setStaffId(turnSeedInput.getCreatorId());
-        basicDto.setStaffName(turnSeedInput.getCreatorName());
-
-        farmEntryDto.setPigType(basicDto.getPigType());
-        farmEntryDto.setPigCode(turnSeedInput.getPigCode());
-        farmEntryDto.setBirthday(DateUtil.toDate(turnSeedInput.getBirthDate()));
-        farmEntryDto.setInFarmDate(DateUtil.toDate(turnSeedInput.getTransInAt()));
-        farmEntryDto.setBarnId(barn.getId());
-        farmEntryDto.setBarnName(barn.getName());
-        farmEntryDto.setSource(PigSource.LOCAL.getKey());
-        farmEntryDto.setBreed(turnSeedInput.getBreedId());
-        farmEntryDto.setBreedName(turnSeedInput.getBreedName());
-        farmEntryDto.setBreedType(turnSeedInput.getGeneticId());
-        farmEntryDto.setBreedTypeName(turnSeedInput.getGeneticName());
-        farmEntryDto.setMotherCode(turnSeedInput.getMotherEarCode());
-        farmEntryDto.setEarCode(turnSeedInput.getEarCode());
-
-        orServEx(doctorPigEventWriteService.pigEntryEvent(basicDto, farmEntryDto));
     }
 
     @Override

@@ -92,7 +92,7 @@ public class DoctorChangeGroupEventHandler extends DoctorAbstractGroupEventHandl
         groupTrack.setSaleQty(Objects.equals(DoctorBasicEnums.SALE.getId(), change.getChangeTypeId()) ? change.getQuantity() : 0);  //直接判断是否是销售
 
         //重新计算重量
-        groupTrack.setWeight(groupTrack.getWeight() - change.getWeight());
+        groupTrack.setWeight(getDeltaWeight(groupTrack.getWeight() - change.getWeight()));
         groupTrack.setAvgWeight(EventUtil.getAvgWeight(groupTrack.getWeight(), groupTrack.getQuantity()));
         updateGroupTrack(groupTrack, event);
 

@@ -17,14 +17,13 @@ import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
+import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.service.DoctorBarnReadService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Objects;
-
-import static io.terminus.doctor.common.utils.RespHelper.orServEx;
 
 /**
  * Desc:
@@ -38,27 +37,30 @@ public class DoctorTurnSeedGroupEventHandler extends DoctorAbstractGroupEventHan
 
     private final DoctorGroupEventDao doctorGroupEventDao;
     private final DoctorBarnReadService doctorBarnReadService;
+    private final DoctorCommonGroupEventHandler doctorCommonGroupEventHandler;
 
     @Autowired
     public DoctorTurnSeedGroupEventHandler(DoctorGroupSnapshotDao doctorGroupSnapshotDao,
                                            DoctorGroupEventDao doctorGroupEventDao,
                                            DoctorGroupTrackDao doctorGroupTrackDao,
                                            DoctorBarnReadService doctorBarnReadService,
-                                           CoreEventDispatcher coreEventDispatcher) {
+                                           CoreEventDispatcher coreEventDispatcher,
+                                           DoctorCommonGroupEventHandler doctorCommonGroupEventHandler) {
         super(doctorGroupSnapshotDao, doctorGroupTrackDao, coreEventDispatcher, doctorGroupEventDao, doctorBarnReadService);
         this.doctorGroupEventDao = doctorGroupEventDao;
         this.doctorBarnReadService = doctorBarnReadService;
+        this.doctorCommonGroupEventHandler = doctorCommonGroupEventHandler;
     }
     
     @Override
     protected <I extends BaseGroupInput> void handleEvent(DoctorGroup group, DoctorGroupTrack groupTrack, I input) {
         DoctorGroupSnapShotInfo oldShot = getOldSnapShotInfo(group, groupTrack);
         DoctorTurnSeedGroupInput turnSeed = (DoctorTurnSeedGroupInput) input;
+        DoctorBarn toBarn = getBarnById(turnSeed.getToBarnId());
 
-        DoctorBarn barn = orServEx(doctorBarnReadService.findBarnById(turnSeed.getToBarnId()));
-        // 检查数据
+        //0. 校验数据
         checkQuantity(groupTrack.getQuantity(), 1); // 确保 原数量 >= 1
-        this.checkSex(groupTrack, PigType.from(group.getPigType()));
+        checkTurnSeedData(group.getPigType(), toBarn.getPigType());
 
         //1. 转换转种猪事件
         DoctorTurnSeedGroupEvent turnSeedEvent = BeanMapper.map(turnSeed, DoctorTurnSeedGroupEvent.class);
@@ -67,21 +69,31 @@ public class DoctorTurnSeedGroupEventHandler extends DoctorAbstractGroupEventHan
         DoctorGroupEvent<DoctorTurnSeedGroupEvent> event = dozerGroupEvent(group, GroupEventType.TURN_SEED, turnSeed);
         event.setExtraMap(turnSeedEvent);
         event.setQuantity(1);
-        event.setAvgDayAge(groupTrack.getAvgDayAge());  //转群的日龄不需要录入, 直接取猪群的日龄
+        event.setAvgDayAge(groupTrack.getAvgDayAge());  //日龄取猪群的平均日龄
         event.setWeight(turnSeed.getWeight());
         event.setAvgWeight(turnSeed.getWeight());
         doctorGroupEventDao.create(event);
 
+        //获取本次转种猪的性别
+        DoctorPig.PIG_TYPE sex = getSex(toBarn.getPigType());
+
         //3.更新猪群跟踪
+        //数量 - 1
         groupTrack.setQuantity(groupTrack.getQuantity() - 1);
-        if(turnSeed.getWeight() != null && turnSeed.getWeight() > 0 && groupTrack.getWeight() != null && groupTrack.getWeight() >= turnSeed.getWeight()){
-            groupTrack.setWeight(groupTrack.getWeight() - turnSeed.getWeight());
-        }
-        checkQuantityEqual(groupTrack.getQuantity(), groupTrack.getBoarQty(), groupTrack.getSowQty());
+        groupTrack.setBoarQty(getBoarQty(sex, groupTrack.getBoarQty()));
+        groupTrack.setSowQty(groupTrack.getQuantity() - groupTrack.getBoarQty());
         updateGroupTrack(groupTrack, event);
 
         //4.创建镜像
         createGroupSnapShot(oldShot, new DoctorGroupSnapShotInfo(group, event, groupTrack), GroupEventType.TURN_SEED);
+
+        //5.判断公母猪, 触发进场事件
+        doctorCommonGroupEventHandler.autoPigEntryEvent(sex, turnSeed, group, toBarn);
+
+        //6.判断猪群数量, 如果=0 触发关闭猪群事件
+        if (Objects.equals(groupTrack.getQuantity(), 0)) {
+            doctorCommonGroupEventHandler.autoGroupEventClose(group, groupTrack, turnSeed);
+        }
 
         //发布统计事件
         publistGroupAndBarn(group.getOrgId(), group.getFarmId(), group.getId(), group.getCurrentBarnId(), event.getId());
@@ -92,17 +104,50 @@ public class DoctorTurnSeedGroupEventHandler extends DoctorAbstractGroupEventHan
 
     }
 
-    private void checkSex(DoctorGroupTrack groupTrack, PigType groupType){
-        switch (groupType) {
-            case RESERVE_BOAR:
-                checkQuantity(groupTrack.getBoarQty(), 1); // 确保 原公猪数量 >= 1
-                groupTrack.setBoarQty(groupTrack.getBoarQty() - 1);
-                break;
-            case RESERVE_SOW:
-                checkQuantity(groupTrack.getSowQty(), 1); // 确保 原母猪数量 >= 1
-                groupTrack.setSowQty(groupTrack.getSowQty() - 1);
-                break;
+    //校验能否转种公猪
+    //后备母猪 => 配种舍/妊娠舍, 后备公猪 => 种公猪舍
+    private static PigType checkTurnSeedData(Integer groupType, Integer barnType){
+        PigType type = PigType.from(groupType);
+        if(type == null){
+            throw new ServiceException("group.can.not.turn.seed");
         }
+
+        switch (type) {
+            // 当猪的来源是后备群中的种母猪 (PigType.RESERVE_SOW) 时, 转入猪舍只允许为 配种舍(PigType.MATE_SOW) 或 妊娠舍(PigType.PREG_SOW)
+            case RESERVE_SOW :
+                if(!Objects.equals(barnType, PigType.MATE_SOW.getValue()) && !Objects.equals(barnType, PigType.PREG_SOW.getValue())){
+                    throw new ServiceException("barn.can.not.turn.seed");
+                }
+                break;
+            // 当猪的来源是后备群中的种公猪 (PigType.RESERVE_BOAR) 时, 转入猪舍只允许为 种公猪舍(PigType.BOAR)
+            case RESERVE_BOAR :
+                if(!Objects.equals(barnType, PigType.BOAR.getValue())){
+                    throw new ServiceException("barn.can.not.turn.seed");
+                }
+                break;
+            // 当猪的来源不是以上两种时, 抛出异常
+            default:
+                throw new ServiceException("group.can.not.turn.seed");
+        }
+        return type;
     }
 
+    //获取转种猪性别
+    private static DoctorPig.PIG_TYPE getSex(Integer toBarnType) {
+        if (PigType.MATING_TYPES.contains(toBarnType)) {
+            return DoctorPig.PIG_TYPE.SOW;
+        }
+        return DoctorPig.PIG_TYPE.BOAR;
+    }
+
+    //如果是公猪并且数量大于0 就 -1
+    private static int getBoarQty(DoctorPig.PIG_TYPE sex, Integer oldQty) {
+        if (oldQty <= 0) {
+            return 0;
+        }
+        if (sex.equals(DoctorPig.PIG_TYPE.BOAR)) {
+            return oldQty - 1;
+        }
+        return oldQty;
+    }
 }

@@ -393,4 +393,13 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
         return Objects.equals(pigType, toBarn.getPigType()) || (FARROW_TYPES.contains(pigType) && FARROW_TYPES.contains(toBarn.getPigType())) ?
                 DoctorGroupEvent.TransGroupType.IN : DoctorGroupEvent.TransGroupType.OUT;
     }
+
+    //重量如果 < 0  返回0
+    protected static double getDeltaWeight(Double weight) {
+        return weight == null || weight < 0 ? 0 : weight;
+    }
+
+    protected DoctorBarn getBarnById(Long barnId) {
+        return RespHelper.orServEx(doctorBarnReadService.findBarnById(barnId));
+    }
 }
