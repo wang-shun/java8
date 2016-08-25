@@ -45,7 +45,15 @@ public class DoctorVaccinationDto implements Serializable{
 
     public Map<String, String> descMap() {
         Map<String, String> map = new HashMap<>();
-// TODO
+        if(vaccinationName != null){
+            map.put("疫苗", vaccinationName);
+        }
+        if(vaccinationItemName != null){
+            map.put("免疫项目", vaccinationItemName);
+        }
+        if(vaccinationStaffName != null){
+            map.put("防疫人员", vaccinationStaffName);
+        }
         return map;
     }
 }

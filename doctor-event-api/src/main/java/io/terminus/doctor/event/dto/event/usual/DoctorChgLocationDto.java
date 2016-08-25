@@ -36,7 +36,12 @@ public class DoctorChgLocationDto implements Serializable{
 
     public Map<String, String> descMap() {
         Map<String, String> map = new HashMap<>();
-        // TODO
+        if(chgLocationFromBarnName != null){
+            map.put("原猪舍", chgLocationFromBarnName);
+        }
+        if(chgLocationToBarnName != null){
+            map.put("转入猪舍", chgLocationToBarnName);
+        }
         return map;
     }
 }

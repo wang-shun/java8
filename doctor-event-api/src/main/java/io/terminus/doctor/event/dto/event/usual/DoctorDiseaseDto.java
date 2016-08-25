@@ -36,7 +36,12 @@ public class DoctorDiseaseDto implements Serializable{
 
     public Map<String, String> descMap() {
         Map<String, String> map = new HashMap<>();
-// TODO
+        if(diseaseName != null){
+            map.put("疾病", diseaseName);
+        }
+        if(diseaseStaff != null){
+            map.put("操作人", diseaseStaff);
+        }
         return map;
     }
 }

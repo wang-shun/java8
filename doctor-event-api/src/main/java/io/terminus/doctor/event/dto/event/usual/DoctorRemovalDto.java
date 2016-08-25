@@ -45,7 +45,21 @@ public class DoctorRemovalDto implements Serializable{
 
     public Map<String, String> descMap() {
         Map<String, String> map = new HashMap<>();
-// TODO
+        if(chgTypeName != null){
+            map.put("变动类型", chgTypeName);
+        }
+        if(chgReasonName != null){
+            map.put("变动原因", chgReasonName);
+        }
+        if(weight != null){
+            map.put("重量", weight.toString());
+        }
+        if(price != null){
+            map.put("价格", price.toString());
+        }
+        if(sum != null){
+            map.put("总量", sum.toString());
+        }
         return map;
     }
 }

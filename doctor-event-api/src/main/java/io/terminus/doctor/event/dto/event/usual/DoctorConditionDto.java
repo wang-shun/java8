@@ -37,7 +37,15 @@ public class DoctorConditionDto implements Serializable{
 
     public Map<String, String> descMap() {
         Map<String, String> map = new HashMap<>();
-// TODO
+        if(conditionJudgeScore != null){
+            map.put("体况评分", conditionJudgeScore.toString());
+        }
+        if(conditionWeight != null){
+            map.put("重量", conditionWeight.toString());
+        }
+        if(conditionBackWeight != null){
+            map.put("背膘", conditionBackWeight.toString());
+        }
         return map;
     }
 }
