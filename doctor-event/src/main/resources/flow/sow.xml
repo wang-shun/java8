@@ -17,41 +17,14 @@
 
     <decision name="配种后操作方式" pointx="" pointy="">
         <transition name="去配种" value="9" expression="${eventType} equals '9'"  tacker="doctorSowBreedCountCheckTacker" target="已配种" handler="doctorSowMatingHandler"/>
-        <transition name="配种后转舍事件" value="10" expression="${eventType} equals '10'" tacker="doctorSowChgLocationCheckTacker" target="转舍A" handler="doctorSowChgLocationHandler"/>
-        <transition name="配种后妊娠检查" value="11" expression="${eventType} equals '11'" target="妊娠检查B" handler="doctorSowPregCheckHandler"/>
+        <transition name="配种后妊娠检查" value="11" expression="${eventType} equals '11'" target="妊娠检查" handler="doctorSowPregCheckHandler"/>
     </decision>
 
 
-    <task name="转舍A" assignee="" pointx="" pointy="">
-        <transition name="A舍操作" target="转舍A后操作" describe="A舍所能的操作"/>
-    </task>
-
-    <decision name="转舍A后操作" pointx="" pointy="">
-        <transition name="妊娠检查A" value="11" expression="${eventType} equals '11'" target="妊娠检查A结果" handler="doctorSowPregCheckHandler" describe="对应的妊娠检查结果"/>
-        <transition name="去配种" value="9" expression="${eventType} equals '9'"  tacker="doctorSowBreedCountCheckTacker" target="已配种" handler="doctorSowMatingHandler"/>
-    </decision>
-
-    <!-- 选择节点 -->
-    <decision name="妊娠检查A结果" pointx="" pointy="">
-        <transition name="妊娠检查不确定" expression="#{checkResult} equals '0'" target="转舍A" />
+    <decision name="妊娠检查">
         <transition name="妊娠检查阳性" expression="#{checkResult} equals '1'" target="妊娠检查阳性" />
         <transition name="妊娠检查阴性/返情/流产" expression="#{checkResult} equals '2' || #{checkResult} equals '3' || #{checkResult} equals '4'" target="空怀"/>
     </decision>
-
-    <decision name="妊娠检查B">
-        <transition name="妊娠检查不确定" expression="#{checkResult} equals '0'" target="已配种" />
-        <transition name="妊娠检查阳性" expression="#{checkResult} equals '1'" target="妊娠检查阳性后操作" />
-        <transition name="妊娠检查阴性/返情/流产" expression="#{checkResult} equals '2' || #{checkResult} equals '3' || #{checkResult} equals '4'" target="空怀"/>
-    </decision>
-
-    <decision name="妊娠检查阳性后操作">
-        <transition name="当前舍为妊娠舍" expression="#{currentBarnType} equals '6'" target="妊娠检查阳性" />
-        <transition name="当前舍不为妊娠舍(否则默认)" expression="" target="转舍B" />
-    </decision>
-
-    <task name="转舍B">
-        <transition name="等待转舍操作" value="10" handler="doctorSowChgLocationHandler" target="妊娠检查阳性"/>
-    </task>
 
     <task name="妊娠检查阳性" pointx="" pointy="">
         <transition name="妊娠检查阳性连线" target="妊娠检查阳性后事件录入"/>
