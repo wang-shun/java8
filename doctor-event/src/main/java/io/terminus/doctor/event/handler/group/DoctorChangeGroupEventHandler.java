@@ -63,7 +63,6 @@ public class DoctorChangeGroupEventHandler extends DoctorAbstractGroupEventHandl
         checkQuantityEqual(change.getQuantity(), change.getBoarQty(), change.getSowQty());
         checkTranWeight(groupTrack.getWeight(), change.getWeight());
         checkSalePrice(change.getChangeTypeId(), change.getPrice(), change.getAmount());
-        checkChangeAmount(groupTrack.getAmount(), change.getAmount());
 
         //1.转换猪群变动事件
         DoctorChangeGroupEvent changeEvent = BeanMapper.map(change, DoctorChangeGroupEvent.class);
@@ -97,8 +96,6 @@ public class DoctorChangeGroupEventHandler extends DoctorAbstractGroupEventHandl
         groupTrack.setAvgWeight(EventUtil.getAvgWeight(groupTrack.getWeight(), groupTrack.getQuantity()));
 
         //重新计算金额
-        groupTrack.setAmount(groupTrack.getAmount() - MoreObjects.firstNonNull(change.getAmount(), 0L));
-        groupTrack.setPrice(EventUtil.getPrice(groupTrack.getAmount(), groupTrack.getQuantity()));
         updateGroupTrack(groupTrack, event);
 
         //4.创建镜像
