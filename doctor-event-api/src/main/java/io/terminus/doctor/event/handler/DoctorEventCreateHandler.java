@@ -32,7 +32,7 @@ public interface DoctorEventCreateHandler {
      * after handler
      * @param basic
      * @param extra
-     * @param contxt
+     * @param context
      */
     void afterHandler(DoctorBasicInputInfoDto basic, Map<String,Object> extra, Map<String,Object> context) throws RuntimeException;
 }

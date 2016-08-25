@@ -6,6 +6,8 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.Builder;
 
 import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created by yaoqijun.
@@ -40,4 +42,10 @@ public class DoctorRemovalDto implements Serializable{
     private Long customerId;    // 客户Id
 
     private String remark;  //注解
+
+    public Map<String, String> descMap() {
+        Map<String, String> map = new HashMap<>();
+// TODO
+        return map;
+    }
 }

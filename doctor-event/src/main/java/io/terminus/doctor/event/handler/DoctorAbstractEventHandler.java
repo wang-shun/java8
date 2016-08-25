@@ -1,7 +1,9 @@
 package io.terminus.doctor.event.handler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableMap;
+import io.terminus.common.utils.BeanMapper;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.event.constants.DoctorPigSnapshotConstants;
 import io.terminus.doctor.event.dao.DoctorPigDao;
@@ -10,6 +12,14 @@ import io.terminus.doctor.event.dao.DoctorPigSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorPigTrackDao;
 import io.terminus.doctor.event.dao.DoctorRevertLogDao;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
+import io.terminus.doctor.event.dto.event.boar.DoctorSemenDto;
+import io.terminus.doctor.event.dto.event.usual.DoctorChgFarmDto;
+import io.terminus.doctor.event.dto.event.usual.DoctorChgLocationDto;
+import io.terminus.doctor.event.dto.event.usual.DoctorConditionDto;
+import io.terminus.doctor.event.dto.event.usual.DoctorDiseaseDto;
+import io.terminus.doctor.event.dto.event.usual.DoctorRemovalDto;
+import io.terminus.doctor.event.dto.event.usual.DoctorVaccinationDto;
+import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigSnapshot;
 import io.terminus.doctor.event.model.DoctorPigTrack;
@@ -169,7 +179,8 @@ public abstract class DoctorAbstractEventHandler implements DoctorEventCreateHan
                 .farmId(basic.getFarmId()).farmName(basic.getFarmName())
                 .pigId(basic.getPigId()).pigCode(basic.getPigCode())
                 .eventAt(DateTime.now().toDate()).type(basic.getEventType())
-                .kind(basic.getPigType()).name(basic.getEventName()).desc(basic.getEventDesc()).relEventId(basic.getRelEventId())
+                .kind(basic.getPigType()).name(basic.getEventName()).relEventId(basic.getRelEventId())
+                .desc(this.getEventDesc(extra, PigEvent.from(basic.getEventType())))
                 .barnId(basic.getBarnId()).barnName(basic.getBarnName())
                 .creatorId(basic.getStaffId()).creatorName(basic.getStaffName())
                 .npd(0)
@@ -214,5 +225,35 @@ public abstract class DoctorAbstractEventHandler implements DoctorEventCreateHan
                 JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(
                         ImmutableMap.of("doctorPigId", basic.getPigId(),
                                 "doctorEventId", doctorPigEvent.getId(), "doctorSnapshotId", doctorPigSnapshot.getId())));
+    }
+
+    private String getEventDesc(Map<String, Object> extra, PigEvent pigEvent){
+        Map<String, String> fieldMap;
+        switch (pigEvent) {
+            case CHG_FARM:
+                fieldMap = BeanMapper.map(extra, DoctorChgFarmDto.class).descMap();
+                break;
+            case CHG_LOCATION:
+                fieldMap = BeanMapper.map(extra, DoctorChgLocationDto.class).descMap();
+                break;
+            case CONDITION:
+                fieldMap = BeanMapper.map(extra, DoctorConditionDto.class).descMap();
+                break;
+            case DISEASE:
+                fieldMap = BeanMapper.map(extra, DoctorDiseaseDto.class).descMap();
+                break;
+            case REMOVAL:
+                fieldMap = BeanMapper.map(extra, DoctorRemovalDto.class).descMap();
+                break;
+            case SEMEN:
+                fieldMap = BeanMapper.map(extra, DoctorSemenDto.class).descMap();
+                break;
+            case VACCINATION:
+                fieldMap = BeanMapper.map(extra, DoctorVaccinationDto.class).descMap();
+                break;
+            default:
+                return pigEvent.getDesc();
+        }
+        return Joiner.on("#").withKeyValueSeparator("：").join(fieldMap);
     }
 }

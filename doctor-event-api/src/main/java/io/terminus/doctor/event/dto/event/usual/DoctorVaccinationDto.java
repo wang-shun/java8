@@ -7,6 +7,8 @@ import lombok.experimental.Builder;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created by yaoqijun.
@@ -39,4 +41,11 @@ public class DoctorVaccinationDto implements Serializable{
     private String vaccinationStaffName;    //防疫人员名称
 
     private String vaccinationRemark;   // 防疫注解
+
+
+    public Map<String, String> descMap() {
+        Map<String, String> map = new HashMap<>();
+// TODO
+        return map;
+    }
 }

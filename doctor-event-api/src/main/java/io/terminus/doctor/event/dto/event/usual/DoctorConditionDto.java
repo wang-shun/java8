@@ -7,6 +7,8 @@ import lombok.experimental.Builder;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created by yaoqijun.
@@ -31,4 +33,11 @@ public class DoctorConditionDto implements Serializable{
     private Double conditionBackWeight; // 背膘
 
     private String conditionRemark; //体况注解
+
+
+    public Map<String, String> descMap() {
+        Map<String, String> map = new HashMap<>();
+// TODO
+        return map;
+    }
 }

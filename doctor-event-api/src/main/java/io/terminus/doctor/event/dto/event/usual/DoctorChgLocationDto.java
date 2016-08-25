@@ -7,6 +7,8 @@ import lombok.experimental.Builder;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created by yaoqijun.
@@ -31,4 +33,10 @@ public class DoctorChgLocationDto implements Serializable{
     private Long chgLocationToBarnId;   // 转舍Id
 
     private String chgLocationToBarnName;   // 转舍名称
+
+    public Map<String, String> descMap() {
+        Map<String, String> map = new HashMap<>();
+        // TODO
+        return map;
+    }
 }
