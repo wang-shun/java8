@@ -144,7 +144,7 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
         event.setIsAuto(baseInput.getIsAuto());
         event.setCreatorId(baseInput.getCreatorId());   //创建人
         event.setCreatorName(baseInput.getCreatorName());
-        event.setDesc(this.getDesc(baseInput));
+        event.setDesc(baseInput.getEventDesc());
         event.setRemark(baseInput.getRemark());
         return event;
     }
@@ -294,14 +294,6 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
             }
         } else {
             coreEventDispatcher.publish(DataEvent.make(eventType, data));
-        }
-    }
-
-    private String getDesc(BaseGroupInput baseInput) {
-        if (Objects.equals(baseInput.getIsAuto(), IsOrNot.YES.getValue())) {
-            return "【系统自动】" + baseInput.getEventDesc();
-        } else{
-            return "【手工录入】" + baseInput.getEventDesc();
         }
     }
 

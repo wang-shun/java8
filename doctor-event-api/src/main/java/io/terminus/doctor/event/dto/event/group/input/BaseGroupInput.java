@@ -1,12 +1,14 @@
 package io.terminus.doctor.event.dto.event.group.input;
 
 import com.google.common.base.Joiner;
+import io.terminus.doctor.event.enums.IsOrNot;
 import lombok.Data;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Desc: 猪群时间录入信息基类(公用字段)
@@ -42,7 +44,14 @@ public abstract class BaseGroupInput implements Serializable {
     private String creatorName;
 
     public final String getEventDesc(){
-        return Joiner.on("#").withKeyValueSeparator("：").join(this.descMap());
+        String desc = Joiner.on("#").withKeyValueSeparator("：").join(this.descMap());
+        if (Objects.equals(isAuto, IsOrNot.YES.getValue())) {
+            return "【系统自动】" + desc;
+        }else if (Objects.equals(isAuto, IsOrNot.NO.getValue())) {
+            return "【手工录入】" + desc;
+        }else{
+            return desc;
+        }
     }
 
     public abstract Map<String, String> descMap();
