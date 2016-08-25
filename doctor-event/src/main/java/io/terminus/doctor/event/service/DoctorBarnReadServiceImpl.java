@@ -69,6 +69,16 @@ public class DoctorBarnReadServiceImpl implements DoctorBarnReadService {
     }
 
     @Override
+    public Response<List<DoctorBarn>> findBarnsByFarmIds(List<Long> farmIds) {
+        try {
+            return Response.ok(doctorBarnDao.findByFarmIds(farmIds));
+        } catch (Exception e) {
+            log.error("find barn by farm id fail, farmIds:{}, cause:{}", farmIds, Throwables.getStackTraceAsString(e));
+            return Response.fail("barn.find.fail");
+        }
+    }
+
+    @Override
     public Response<List<DoctorBarn>> findBarnsByEnums(Long farmId, Integer pigType, Integer canOpenGroup, Integer status) {
         try {
             return Response.ok(doctorBarnDao.findByEnums(farmId, pigType, canOpenGroup, status));
@@ -109,6 +119,36 @@ public class DoctorBarnReadServiceImpl implements DoctorBarnReadService {
         } catch (Exception e) {
             log.error("count pig by barn id failed, barnId:{}, cause:{}", barnId, Throwables.getStackTraceAsString(e));
             return Response.fail("count.pig.fail");
+        }
+    }
+
+    @Override
+    public Response<Integer> pigGroupCountByBarnId(@NotNull(message = "barnId.not.null") Long barnId) {
+        try{
+            DoctorBarn barn = doctorBarnDao.findById(barnId);
+
+            //统计猪群数量
+            DoctorGroupSearchDto searchDto = new DoctorGroupSearchDto();
+            searchDto.setFarmId(barn.getFarmId());
+            searchDto.setCurrentBarnId(barnId);
+            searchDto.setStatus(DoctorGroup.Status.CREATED.getValue());
+            List<DoctorGroupDetail> groupDetails = RespHelper.orServEx(doctorGroupReadService.findGroupDetail(searchDto));
+            Integer groupCount = groupDetails.stream().mapToInt(g -> g.getGroupTrack().getQuantity()).sum();
+            return Response.ok(groupCount);
+        }catch (Exception e){
+            log.error("pig group count by barn id failed, barnId:{}, cause:{}", barnId, Throwables.getStackTraceAsString(e));
+            return Response.fail("pig.group.count.fail");
+        }
+    }
+
+    @Override
+    public Response<Integer> pigCountByBarnId(@NotNull(message = "barnId.not.null") Long barnId) {
+        try{
+            List<DoctorPigTrack> pigTracks = RespHelper.orServEx(doctorPigReadService.findActivePigTrackByCurrentBarnId(barnId));
+            return Response.ok(pigTracks.size());
+        }catch (Exception e){
+            log.error("pig count by barn id failed, barnId:{}, cause:{}", barnId, Throwables.getStackTraceAsString(e));
+            return Response.fail("pig.count.fail");
         }
     }
 

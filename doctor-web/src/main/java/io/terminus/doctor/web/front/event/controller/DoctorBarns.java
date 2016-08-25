@@ -1,12 +1,15 @@
 package io.terminus.doctor.web.front.event.controller;
 
+import com.google.common.base.Joiner;
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.Lists;
 import io.terminus.common.exception.JsonResponseException;
+import io.terminus.common.model.BaseUser;
 import io.terminus.common.model.Paging;
 import io.terminus.common.utils.Splitters;
 import io.terminus.doctor.common.enums.PigSearchType;
 import io.terminus.doctor.common.enums.PigType;
+import io.terminus.doctor.common.enums.UserType;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dto.DoctorGroupDetail;
 import io.terminus.doctor.event.dto.DoctorGroupSearchDto;
@@ -20,7 +23,11 @@ import io.terminus.doctor.event.service.DoctorGroupReadService;
 import io.terminus.doctor.event.service.DoctorPigEventReadService;
 import io.terminus.doctor.event.service.DoctorPigReadService;
 import io.terminus.doctor.user.model.DoctorFarm;
+import io.terminus.doctor.user.model.DoctorUserDataPermission;
 import io.terminus.doctor.user.service.DoctorFarmReadService;
+import io.terminus.doctor.user.service.DoctorUserDataPermissionReadService;
+import io.terminus.doctor.user.service.DoctorUserDataPermissionWriteService;
+import io.terminus.doctor.user.service.PrimaryUserReadService;
 import io.terminus.doctor.web.front.auth.DoctorFarmAuthCenter;
 import io.terminus.doctor.web.front.event.dto.DoctorBarnDetail;
 import lombok.extern.slf4j.Slf4j;
@@ -59,6 +66,9 @@ public class DoctorBarns {
     private final DoctorPigEventReadService doctorPigEventReadService;
     private final DoctorGroupReadService doctorGroupReadService;
     private final DoctorFarmAuthCenter doctorFarmAuthCenter;
+    private final DoctorUserDataPermissionReadService doctorUserDataPermissionReadService;
+    private final DoctorUserDataPermissionWriteService doctorUserDataPermissionWriteService;
+    private final PrimaryUserReadService primaryUserReadService;
 
     @Autowired
     public DoctorBarns(DoctorBarnReadService doctorBarnReadService,
@@ -67,7 +77,10 @@ public class DoctorBarns {
                        DoctorPigReadService doctorPigReadService,
                        DoctorGroupReadService doctorGroupReadService,
                        DoctorFarmAuthCenter doctorFarmAuthCenter,
-                       DoctorPigEventReadService doctorPigEventReadService) {
+                       DoctorPigEventReadService doctorPigEventReadService,
+                       DoctorUserDataPermissionWriteService doctorUserDataPermissionWriteService,
+                       DoctorUserDataPermissionReadService doctorUserDataPermissionReadService,
+                       PrimaryUserReadService primaryUserReadService) {
         this.doctorBarnReadService = doctorBarnReadService;
         this.doctorBarnWriteService = doctorBarnWriteService;
         this.doctorFarmReadService = doctorFarmReadService;
@@ -75,6 +88,9 @@ public class DoctorBarns {
         this.doctorGroupReadService = doctorGroupReadService;
         this.doctorFarmAuthCenter = doctorFarmAuthCenter;
         this.doctorPigEventReadService = doctorPigEventReadService;
+        this.doctorUserDataPermissionWriteService = doctorUserDataPermissionWriteService;
+        this.doctorUserDataPermissionReadService = doctorUserDataPermissionReadService;
+        this.primaryUserReadService = primaryUserReadService;
     }
 
     /**
@@ -110,6 +126,19 @@ public class DoctorBarns {
     public List<DoctorBarn> findBarnsByfarmId(@RequestParam("farmId") Long farmId,
                                               @RequestParam(value = "pigIds", required = false) String pigIds) {
         return filterBarnByPigIds(RespHelper.or500(doctorBarnReadService.findBarnsByFarmId(farmId)), pigIds);
+    }
+
+    /**
+     * 根据farmIds查询猪舍表, 根据pigIds过滤
+     *
+     * @param farmIds 猪场id
+     * @param pigIds 猪id 逗号分隔
+     * @return 猪舍表列表
+     */
+    @RequestMapping(value = "/farmIds", method = RequestMethod.GET)
+    public List<DoctorBarn> findBarnsByfarmIds(@RequestParam("farmIds") List<Long> farmIds,
+                                              @RequestParam(value = "pigIds", required = false) String pigIds) {
+        return filterBarnByPigIds(RespHelper.or500(doctorBarnReadService.findBarnsByFarmIds(farmIds)), pigIds);
     }
 
     /**
@@ -170,7 +199,7 @@ public class DoctorBarns {
         checkNotNull(barn, "barn.not.null");
 
         //权限中心校验权限
-        doctorFarmAuthCenter.checkFarmAuth(barn.getFarmId());
+        BaseUser user = doctorFarmAuthCenter.checkFarmAuth(barn.getFarmId());
 
         Long barnId;
 
@@ -183,11 +212,28 @@ public class DoctorBarns {
             barn.setStatus(DoctorBarn.Status.NOUSE.getValue());     //初始猪舍状态: 未用
             barn.setCanOpenGroup(DoctorBarn.CanOpenGroup.YES.getValue());  //初始是否可建群: 可建群
             barnId = RespHelper.or500(doctorBarnWriteService.createBarn(barn));
+
+            //更新 数据权限
+            this.addBarnId2DataPermission(barnId, user.getId());
+            if(Objects.equals(user.getType(), UserType.FARM_SUB.value())){
+                this.addBarnId2DataPermission(barnId, RespHelper.or500(primaryUserReadService.findSubByUserId(user.getId())).getParentUserId());
+            }
         } else {
             RespHelper.or500(doctorBarnWriteService.updateBarn(barn));
             barnId = barn.getId();
         }
         return barnId;
+    }
+
+    private void addBarnId2DataPermission(Long barnId, Long userId){
+        DoctorUserDataPermission permission = RespHelper.or500(doctorUserDataPermissionReadService.findDataPermissionByUserId(userId));
+        List<Long> barnIds = permission.getBarnIdsList();
+        if(barnIds == null){
+            barnIds = Lists.newArrayList();
+        }
+        barnIds.add(barnId);
+        permission.setBarnIds(Joiner.on(",").join(barnIds));
+        RespHelper.or500(doctorUserDataPermissionWriteService.updateDataPermission(permission));
     }
 
     /**

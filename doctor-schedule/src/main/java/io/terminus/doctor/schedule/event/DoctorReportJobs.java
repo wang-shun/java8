@@ -6,7 +6,6 @@ import io.terminus.common.exception.ServiceException;
 import io.terminus.common.utils.Dates;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.RespHelper;
-import io.terminus.doctor.event.dto.report.daily.DoctorDailyReportDto;
 import io.terminus.doctor.event.model.DoctorDailyReport;
 import io.terminus.doctor.event.service.DoctorDailyReportReadService;
 import io.terminus.doctor.event.service.DoctorDailyReportWriteService;
@@ -71,7 +70,7 @@ public class DoctorReportJobs {
 
             //获取昨天的最后一秒(必须是昨天, 因为统计日期设置的是此字段)
             Date yesterday = new DateTime(Dates.startOfDay(new Date())).plusSeconds(-1).toDate();
-            doReport(yesterday);
+            RespHelper.or500(doctorDailyReportWriteService.createDailyReports(getAllFarmIds(), yesterday));
 
             log.info("daily report job end, now is:{}", DateUtil.toDateTimeString(new Date()));
         } catch (Exception e) {
@@ -79,14 +78,9 @@ public class DoctorReportJobs {
         }
     }
 
-    private void doReport(Date date) {
-        List<DoctorDailyReportDto> reports = RespHelper.or500(doctorDailyReportReadService.initDailyReportByDate(date));
-        RespHelper.or500(doctorDailyReportWriteService.createDailyReports(reports, date));
-    }
-
     /**
      * 猪场月报计算job
-     * 每天凌晨1点统计昨天的数据
+     * 每天凌晨3点统计昨天的数据
      */
     @Scheduled(cron = "0 0 3 * * ?")
     @RequestMapping(value = "/monthly", method = RequestMethod.GET)
@@ -106,13 +100,15 @@ public class DoctorReportJobs {
                 throw new ServiceException("daily.report.find.fail");
             }
 
-            List<DoctorFarm> farms = RespHelper.orServEx(doctorFarmReadService.findAllFarms());
-            doctorMonthlyReportWriteService.createMonthlyReports(farms.stream()
-                    .map(DoctorFarm::getId).collect(Collectors.toList()), yesterday);
+            RespHelper.or500(doctorMonthlyReportWriteService.createMonthlyReports(getAllFarmIds(), yesterday));
 
             log.info("monthly report job end, now is:{}", DateUtil.toDateTimeString(new Date()));
         } catch (Exception e) {
             log.error("monthly report job failed, cause:{}", Throwables.getStackTraceAsString(e));
         }
+    }
+
+    private List<Long> getAllFarmIds() {
+        return RespHelper.orServEx(doctorFarmReadService.findAllFarms()).stream().map(DoctorFarm::getId).collect(Collectors.toList());
     }
 }

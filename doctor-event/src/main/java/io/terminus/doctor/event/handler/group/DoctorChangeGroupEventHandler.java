@@ -60,12 +60,9 @@ public class DoctorChangeGroupEventHandler extends DoctorAbstractGroupEventHandl
         DoctorChangeGroupInput change = (DoctorChangeGroupInput) input;
 
         checkQuantity(groupTrack.getQuantity(), change.getQuantity());
-        checkQuantity(groupTrack.getBoarQty(), change.getBoarQty());
-        checkQuantity(groupTrack.getSowQty(), change.getSowQty());
         checkQuantityEqual(change.getQuantity(), change.getBoarQty(), change.getSowQty());
         checkTranWeight(groupTrack.getWeight(), change.getWeight());
         checkSalePrice(change.getChangeTypeId(), change.getPrice(), change.getAmount());
-        checkChangeAmount(groupTrack.getAmount(), change.getAmount());
 
         //1.转换猪群变动事件
         DoctorChangeGroupEvent changeEvent = BeanMapper.map(change, DoctorChangeGroupEvent.class);
@@ -86,17 +83,17 @@ public class DoctorChangeGroupEventHandler extends DoctorAbstractGroupEventHandl
 
         //3.更新猪群跟踪
         groupTrack.setQuantity(EventUtil.minusQuantity(groupTrack.getQuantity(), change.getQuantity()));
-        groupTrack.setBoarQty(EventUtil.minusQuantity(groupTrack.getBoarQty(), change.getBoarQty()));
-        groupTrack.setSowQty(EventUtil.minusQuantity(groupTrack.getSowQty(), change.getSowQty()));
+
+        //如果公猪数量 lt 0 按 0 计算
+        Integer boarQty = EventUtil.minusQuantity(groupTrack.getBoarQty(), change.getBoarQty());
+        boarQty = boarQty > groupTrack.getQuantity() ? groupTrack.getQuantity() : boarQty;
+        groupTrack.setBoarQty(boarQty < 0 ? 0 : boarQty);
+        groupTrack.setSowQty(EventUtil.minusQuantity(groupTrack.getQuantity(), groupTrack.getBoarQty()));
         groupTrack.setSaleQty(Objects.equals(DoctorBasicEnums.SALE.getId(), change.getChangeTypeId()) ? change.getQuantity() : 0);  //直接判断是否是销售
 
         //重新计算重量
         groupTrack.setWeight(groupTrack.getWeight() - change.getWeight());
         groupTrack.setAvgWeight(EventUtil.getAvgWeight(groupTrack.getWeight(), groupTrack.getQuantity()));
-
-        //重新计算金额
-        groupTrack.setAmount(groupTrack.getAmount() - MoreObjects.firstNonNull(change.getAmount(), 0L));
-        groupTrack.setPrice(EventUtil.getPrice(groupTrack.getAmount(), groupTrack.getQuantity()));
         updateGroupTrack(groupTrack, event);
 
         //4.创建镜像

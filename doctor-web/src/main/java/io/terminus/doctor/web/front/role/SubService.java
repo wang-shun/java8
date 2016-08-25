@@ -90,11 +90,13 @@ public class SubService {
             io.terminus.doctor.user.model.Sub sub = checkUserAndSubUser(parentUserId, userId);
 
             User u = RespHelper.orServEx(doctorUserReadService.findById(userId));
-
             UserProfile userProfile = RespHelper.orServEx(doctorUserProfileReadService.findProfileByUserId(userId));
+            DoctorUserDataPermission permission = RespHelper.orServEx(doctorUserDataPermissionReadService.findDataPermissionByUserId(userId));
 
-
-            return Response.ok(makeSub(sub, u, userProfile));
+            Sub result = makeSub(sub, u, userProfile);
+            result.setFarmIds(permission.getFarmIdsList());
+            result.setBarnIds(permission.getBarnIdsList());
+            return Response.ok(result);
         } catch (ServiceException e) {
             log.warn("find sub failed, user={}, userId={}, error={}",
                     user, userId, e.getMessage());
@@ -144,18 +146,7 @@ public class SubService {
             }
 
             subUser.setName(userName);
-            if(Objects.equals(sub.getStatus(), io.terminus.doctor.user.model.Sub.Status.ACTIVE.value())){
-                subUser.setStatus(UserStatus.NORMAL.value());
-            }else if(Objects.equals(sub.getStatus(), io.terminus.doctor.user.model.Sub.Status.LOCK.value())){
-                subUser.setStatus(UserStatus.LOCKED.value());
-                // sub, staff
-                io.terminus.doctor.user.model.Sub subModel = RespHelper.orServEx(primaryUserReadService.findSubByUserId(subUser.getId()));
-                subModel.setStatus(io.terminus.doctor.user.model.Sub.Status.LOCK.value());
-                RespHelper.orServEx(primaryUserWriteService.updateSub(subModel));
-                DoctorStaff staff = RespHelper.orServEx(doctorStaffReadService.findStaffByUserId(subUser.getId()));
-                staff.setStatus(DoctorStaff.Status.ABSENT.value());
-                RespHelper.orServEx(doctorStaffWriteService.updateDoctorStaff(staff));
-            }
+            this.updateSubStaffStatus(subUser, io.terminus.doctor.user.model.Sub.Status.from(sub.getStatus()));
             // TODO: 自定义角色冗余进 user 表
             List<String> roles = Lists.newArrayList("SUB");
             if (sub.getRoleId() != null) {
@@ -168,7 +159,7 @@ public class SubService {
                     .put("realName", sub.getRealName())
                     .map());
             RespHelper.orServEx(userWriteService.update(subUser));
-            this.updateSubPermission(user, subUser.getId(), sub.getFarmIds());
+            this.updateSubPermission(user, subUser.getId(), sub.getFarmIds(), sub.getBarnIds());
             return Response.ok(true);
         } catch (ServiceException e) {
             return Response.fail(e.getMessage());
@@ -179,19 +170,40 @@ public class SubService {
         }
     }
 
-    private void updateSubPermission(BaseUser primaryUser, Long subUserId, List<Long> farmIds){
+    private void updateSubStaffStatus(User subUser, io.terminus.doctor.user.model.Sub.Status status){
+        DoctorStaff staff = RespHelper.orServEx(doctorStaffReadService.findStaffByUserId(subUser.getId()));
+        io.terminus.doctor.user.model.Sub sub = RespHelper.orServEx(primaryUserReadService.findSubByUserId(subUser.getId()));
+        sub.setStatus(status.value());
+
+        if(Objects.equals(status.value(), io.terminus.doctor.user.model.Sub.Status.ACTIVE.value())){
+            subUser.setStatus(UserStatus.NORMAL.value());
+            staff.setStatus(DoctorStaff.Status.PRESENT.value());
+        }else if(Objects.equals(status.value(), io.terminus.doctor.user.model.Sub.Status.ABSENT.value())){
+            subUser.setStatus(UserStatus.LOCKED.value());
+            staff.setStatus(DoctorStaff.Status.ABSENT.value());
+        }else{
+            throw new ServiceException("sub.user.status.error");
+        }
+        RespHelper.orServEx(primaryUserWriteService.updateSub(sub));
+        RespHelper.orServEx(doctorStaffWriteService.updateDoctorStaff(staff));
+    }
+
+    private void updateSubPermission(BaseUser currentUser, Long userId, List<Long> farmIds, List<Long> barnIds){
         //先查下主账号的猪场, 以避免子账号的猪场不属于主账号
-        List<Long> primaryFarms = RespHelper.orServEx(doctorUserDataPermissionReadService.findDataPermissionByUserId(primaryUser.getId())).getFarmIdsList();
+        List<Long> primaryFarms = RespHelper.orServEx(doctorUserDataPermissionReadService.findDataPermissionByUserId(currentUser.getId())).getFarmIdsList();
         for(Long farmId : farmIds){
             if(!primaryFarms.contains(farmId)){
                 throw new ServiceException("authorize.fail");
             }
         }
         //先查再改
-        DoctorUserDataPermission permission = RespHelper.orServEx(doctorUserDataPermissionReadService.findDataPermissionByUserId(subUserId));
+        DoctorUserDataPermission permission = RespHelper.orServEx(doctorUserDataPermissionReadService.findDataPermissionByUserId(userId));
         permission.setFarmIds(Joiner.on(",").join(farmIds));
-        permission.setUpdatorId(primaryUser.getId());
-        permission.setUpdatorName(primaryUser.getName());
+        if(barnIds != null && !barnIds.isEmpty()){
+            permission.setBarnIds(Joiner.on(",").join(barnIds));
+        }
+        permission.setUpdatorId(currentUser.getId());
+        permission.setUpdatorName(currentUser.getName());
         RespHelper.orServEx(doctorUserDataPermissionWriteService.updateDataPermission(permission));
     }
 
@@ -235,7 +247,7 @@ public class SubService {
                     .put("realName", sub.getRealName())
                     .map());
             Long subUserId = RespHelper.orServEx(userWriteService.create(subUser));
-            this.createPermission(user, subUserId, sub.getFarmIds());
+            this.createPermission(user, subUserId, sub.getFarmIds(), sub.getBarnIds());
             return Response.ok(subUserId);
         } catch (ServiceException e) {
             return Response.fail(e.getMessage());
@@ -245,24 +257,34 @@ public class SubService {
         }
     }
 
-    private void createPermission(BaseUser primaryUser, Long subUserId, List<Long> farmIds){
+    private void createPermission(BaseUser currentUser, Long userId, List<Long> farmIds, List<Long> barnIds){
         //创建 数据权限
         DoctorUserDataPermission permission = new DoctorUserDataPermission();
-        permission.setUserId(subUserId);
+        permission.setUserId(userId);
         permission.setFarmIds(Joiner.on(",").join(farmIds));
-        permission.setCreatorId(primaryUser.getId());
-        permission.setCreatorName(primaryUser.getName());
-        permission.setUpdatorId(primaryUser.getId());
-        permission.setUpdatorName(primaryUser.getName());
+        if(barnIds != null && !barnIds.isEmpty()){
+            permission.setBarnIds(Joiner.on(",").join(barnIds));
+        }
+        permission.setCreatorId(currentUser.getId());
+        permission.setCreatorName(currentUser.getName());
+        permission.setUpdatorId(currentUser.getId());
+        permission.setUpdatorName(currentUser.getName());
         RespHelper.orServEx(doctorUserDataPermissionWriteService.createDataPermission(permission));
     }
 
     public Response<List<Sub>> findByConditions(BaseUser user, Long roleId, String roleName, String userName,
                                                 String realName, Integer status, Integer limit){
         try{
-            Long userId = user.getId();
+            Long parentUserId;
+            if(Objects.equals(user.getType(), UserType.FARM_ADMIN_PRIMARY.value())){
+                parentUserId = user.getId();
+            }else if(Objects.equals(user.getType(), UserType.FARM_SUB.value())){
+                parentUserId = RespHelper.orServEx(primaryUserReadService.findSubByUserId(user.getId())).getParentUserId();
+            }else{
+                throw new ServiceException("authorize.fail");
+            }
             List<io.terminus.doctor.user.model.Sub> subList = RespHelper.orServEx(
-                    primaryUserReadService.findByConditions(userId, roleId, roleName, userName, realName, status, limit)
+                    primaryUserReadService.findByConditions(parentUserId, roleId, roleName, userName, realName, status, limit)
             );
             return Response.ok(this.setSubInfo(subList));
         } catch (ServiceException e) {
@@ -277,10 +299,17 @@ public class SubService {
     public Response<Paging<Sub>> pagingSubs(BaseUser user, Long roleId,String roleName, String userName,
                                             String realName, Integer status, Integer pageNo, Integer pageSize) {
         try {
-            Long userId = user.getId();
+            Long parentUserId;
+            if(Objects.equals(user.getType(), UserType.FARM_ADMIN_PRIMARY.value())){
+                parentUserId = user.getId();
+            }else if(Objects.equals(user.getType(), UserType.FARM_SUB.value())){
+                parentUserId = RespHelper.orServEx(primaryUserReadService.findSubByUserId(user.getId())).getParentUserId();
+            }else{
+                throw new ServiceException("authorize.fail");
+            }
 
             Paging<io.terminus.doctor.user.model.Sub> paging = RespHelper.orServEx(
-                    primaryUserReadService.subPagination(userId, roleId, roleName, userName, realName,
+                    primaryUserReadService.subPagination(parentUserId, roleId, roleName, userName, realName,
                             status, pageNo, pageSize)
             );
 

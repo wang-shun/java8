@@ -309,7 +309,7 @@ public class UserInitService {
         // 设置下子账号的状态
         if(Objects.equals(member.getIsStopUse(), "true")){
             Sub sub = subDao.findByUserId(subUserId);
-            sub.setStatus(Sub.Status.LOCK.value());
+            sub.setStatus(Sub.Status.ABSENT.value());
             subDao.update(sub);
         }
 

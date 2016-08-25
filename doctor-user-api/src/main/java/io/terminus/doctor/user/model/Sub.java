@@ -128,7 +128,7 @@ public class Sub implements Serializable {
     }
 
     public enum Status {
-        LOCK(0, "锁定(冻结)"),
+        ABSENT(0, "离职"),
         ACTIVE(1, "正常(激活)"),
         DELETE(-1, "删除");
 

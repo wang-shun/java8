@@ -14,7 +14,6 @@ import io.terminus.doctor.basic.model.DoctorCustomer;
 import io.terminus.doctor.basic.service.DoctorBasicMaterialReadService;
 import io.terminus.doctor.basic.service.DoctorBasicReadService;
 import io.terminus.doctor.basic.service.DoctorBasicWriteService;
-import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.Params;
 import io.terminus.doctor.common.utils.RespHelper;
@@ -50,14 +49,11 @@ import io.terminus.doctor.user.model.DoctorOrg;
 import io.terminus.doctor.user.model.Sub;
 import io.terminus.doctor.user.service.DoctorFarmReadService;
 import io.terminus.doctor.user.service.DoctorOrgReadService;
-import io.terminus.doctor.user.service.DoctorStaffReadService;
 import io.terminus.doctor.user.service.DoctorUserProfileReadService;
 import io.terminus.doctor.user.service.PrimaryUserReadService;
 import io.terminus.doctor.web.front.event.service.DoctorGroupWebService;
 import io.terminus.pampas.common.UserUtil;
-import io.terminus.parana.user.model.User;
 import io.terminus.parana.user.model.UserProfile;
-import io.terminus.parana.user.service.UserReadService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -89,8 +85,6 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
     private final DoctorBarnReadService doctorBarnReadService;
     private final DoctorGroupReadService doctorGroupReadService;
     private final DoctorOrgReadService doctorOrgReadService;
-    private final DoctorStaffReadService doctorStaffReadService;
-    private final UserReadService<User> userReadService;
     private final DoctorBasicWriteService doctorBasicWriteService;
 
     @RpcConsumer
@@ -107,8 +101,6 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
                                      DoctorBarnReadService doctorBarnReadService,
                                      DoctorGroupReadService doctorGroupReadService,
                                      DoctorOrgReadService doctorOrgReadService,
-                                     DoctorStaffReadService doctorStaffReadService,
-                                     UserReadService<User> userReadService,
                                      DoctorBasicWriteService doctorBasicWriteService) {
         this.doctorGroupWriteService = doctorGroupWriteService;
         this.doctorFarmReadService = doctorFarmReadService;
@@ -116,8 +108,6 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
         this.doctorBarnReadService = doctorBarnReadService;
         this.doctorGroupReadService = doctorGroupReadService;
         this.doctorOrgReadService = doctorOrgReadService;
-        this.doctorStaffReadService = doctorStaffReadService;
-        this.userReadService = userReadService;
         this.doctorBasicWriteService = doctorBasicWriteService;
     }
 
@@ -194,9 +184,13 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
                     if (params.get("customerName") == null || params.get("customerName") == "") {
                         params.put("customerName", getCustomerName(getLong(params, "customerId")));
                     }
-                    orServEx(doctorGroupWriteService.groupEventChange(groupDetail, map(putBasicFields(params), DoctorChangeGroupInput.class)));
-                    DoctorChangeGroupEdit doctorChangeGroupEdit = map(pubUpdatorFields(params), DoctorChangeGroupEdit.class);
-                    addCustomer(groupDetail, doctorChangeGroupEdit);
+                    DoctorChangeGroupInput changeInput = map(putBasicFields(params), DoctorChangeGroupInput.class);
+                    orServEx(doctorGroupWriteService.groupEventChange(groupDetail, changeInput));
+
+                    //添加客户
+                    orServEx(doctorBasicWriteService.addCustomerWhenInput(groupDetail.getGroup().getFarmId(),
+                            groupDetail.getGroup().getFarmName(), changeInput.getCustomerId(), changeInput.getCustomerName(),
+                            UserUtil.getUserId(), UserUtil.getCurrentUser().getName()));
                     break;
                 case TRANS_GROUP:
                     params.put("toBarnName", getBarnName(getLong(params, "toBarnId")));
@@ -457,29 +451,6 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
     private static void checkEventAuto(DoctorGroupEvent event) {
         if (Objects.equals(event.getIsAuto(), IsOrNot.YES.getValue())) {
             throw new ServiceException("group.event.is.auto");
-        }
-    }
-
-    //录入客户信息
-    private void addCustomer(DoctorGroupDetail doctorGroupDetail, DoctorChangeGroupEdit doctorChangeGroupEdit) {
-        if (doctorChangeGroupEdit.getCustomerId() == null) {
-            String customerName = doctorChangeGroupEdit.getCustomerName();
-            if (customerName != null) {
-                Response<Boolean> respIsExistCustomer = doctorBasicReadService.isExistUserByName(customerName);
-                if (respIsExistCustomer.isSuccess() && respIsExistCustomer.getResult()) {
-                    throw new ServiceException("customer.name.is.duplicate");
-                }
-                DoctorCustomer doctorCustomer = new DoctorCustomer();
-                doctorCustomer.setName(customerName);
-                doctorCustomer.setFarmId(doctorGroupDetail.getGroup().getFarmId());
-                doctorCustomer.setFarmName(doctorGroupDetail.getGroup().getFarmName());
-                doctorCustomer.setCreatorId(UserUtil.getUserId());
-                doctorCustomer.setCreatorName(UserUtil.getCurrentUser().getName());
-                Response<Long> respCreateCustomer = doctorBasicWriteService.createCustomer(doctorCustomer);
-                if (!respCreateCustomer.isSuccess()) {
-                    throw new ServiceException(respCreateCustomer.getError());
-                }
-            }
         }
     }
 

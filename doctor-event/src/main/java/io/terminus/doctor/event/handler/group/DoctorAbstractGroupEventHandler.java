@@ -2,6 +2,7 @@ package io.terminus.doctor.event.handler.group;
 
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.common.utils.JsonMapper;
@@ -50,6 +51,26 @@ import static io.terminus.doctor.common.enums.PigType.FARROW_TYPES;
 public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEventHandler {
 
     protected static final JsonMapper JSON_MAPPER = JsonMapper.nonEmptyMapper();
+
+    //产房仔猪允许转入的猪舍: 产房(分娩母猪舍)/保育舍
+    private static final List<Integer> FARROW_ALLOW_TRANS = Lists.newArrayList(
+            PigType.FARROW_PIGLET.getValue(),
+            PigType.NURSERY_PIGLET.getValue(),
+            PigType.DELIVER_SOW.getValue());
+
+    //保育猪猪允许转入的猪舍: 保育舍/育肥舍/育种舍/后备舍(公母)
+    private static final List<Integer> NURSERY_ALLOW_TRANS = Lists.newArrayList(
+            PigType.NURSERY_PIGLET.getValue(),
+            PigType.FATTEN_PIG.getValue(),
+            PigType.BREEDING.getValue(),
+            PigType.RESERVE_SOW.getValue(),
+            PigType.RESERVE_BOAR.getValue());
+
+    //育肥猪允许转入的猪舍: 育肥舍/后备舍(公母)
+    private static final List<Integer> FATTEN_ALLOW_TRANS = Lists.newArrayList(
+            PigType.FATTEN_PIG.getValue(),
+            PigType.RESERVE_SOW.getValue(),
+            PigType.RESERVE_BOAR.getValue());
 
     private final DoctorGroupSnapshotDao doctorGroupSnapshotDao;
     private final DoctorGroupTrackDao doctorGroupTrackDao;
@@ -321,19 +342,49 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
         Integer barnType = RespHelper.orServEx(doctorBarnReadService.findBarnById(barnId)).getPigType();
 
         //产房 => 产房(分娩母猪舍)/保育舍
-        if (Objects.equals(pigType, PigType.FARROW_PIGLET.getValue()) &&
-                !(Objects.equals(barnType, PigType.NURSERY_PIGLET.getValue()) ||
-                        Objects.equals(barnType, PigType.FARROW_PIGLET.getValue()) ||
-                                Objects.equals(barnType, PigType.DELIVER_SOW.getValue()))) {
-            throw new ServiceException("group.only.trans.farrow");
+        if ((Objects.equals(pigType, PigType.FARROW_PIGLET.getValue()) || Objects.equals(pigType, PigType.DELIVER_SOW.getValue()))) {
+            if (!FARROW_ALLOW_TRANS.contains(barnType)) {
+                log.error("check can trans barn pigType:{}, barnType:{}", pigType, barnType);
+                throw new ServiceException("farrow.can.not.trans");
+            }
+            return;
         }
+        //保育舍 => 保育舍/育肥舍/育种舍/后备舍(公母)
+        if (Objects.equals(pigType, PigType.NURSERY_PIGLET.getValue())) {
+            if (!NURSERY_ALLOW_TRANS.contains(barnType)) {
+                log.error("check can trans barn pigType:{}, barnType:{}", pigType, barnType);
+                throw new ServiceException("nursery.can.not.trans");
+            }
+            return;
+        }
+        //育肥舍 => 育肥舍/后备舍(公母)
+        if (Objects.equals(pigType, PigType.FATTEN_PIG.getValue())) {
+            if (!FATTEN_ALLOW_TRANS.contains(barnType)) {
+                log.error("check can trans barn pigType:{}, barnType:{}", pigType, barnType);
+                throw new ServiceException("fatten.can.not.trans");
+            }
+            return;
+        }
+        //其他 => 同类型
+        if(!Objects.equals(pigType, barnType)) {
+            log.error("check can trans barn pigType:{}, barnType:{}", pigType, barnType);
+            throw new ServiceException("no.equal.type.can.not.trans");
+        }
+    }
 
-        //保育舍 => 保育舍/育肥舍/育种舍
-        if (Objects.equals(pigType, PigType.NURSERY_PIGLET.getValue()) &&
-                !(Objects.equals(barnType, PigType.FATTEN_PIG.getValue()) ||
-                        Objects.equals(barnType, PigType.BREEDING.getValue()) ||
-                        Objects.equals(barnType, PigType.NURSERY_PIGLET.getValue()))) {
-            throw new ServiceException("group.only.trans.fatten");
+    //校验目标猪群的猪舍id与目标猪舍是否相同, 校验是否是同一猪群
+    protected void checkCanTransGroup(Long fromGroupId, Long toGroupId, Long toBarnId) {
+        if (toGroupId != null) {
+            DoctorGroup toGroup = doctorGroupDao.findById(toGroupId);
+            if (toGroup == null || !Objects.equals(toGroup.getCurrentBarnId(), toBarnId)) {
+                log.error("check can trans group toGroupId:{}, toBarnId:{}", toGroupId, toBarnId);
+                throw new ServiceException("group.toBarn.not.equal");
+            }
+
+            if (Objects.equals(fromGroupId, toGroupId)) {
+                log.error("check can trans group equal fromGroupId:{}, toGroupId:{}", fromGroupId, toGroupId);
+                throw new ServiceException("group.equal.cannot.trans");
+            }
         }
     }
 

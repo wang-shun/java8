@@ -54,14 +54,16 @@ public class DoctorMonthlyReportDto implements Serializable {
     private double farrowAvgHealth;           //窝均健仔数
     private double farrowAvgAll;              //窝均产仔数
     private double farrowAvgAlive;            //窝均活仔数
+    private double farrowAvgWeight;           //分娩活仔均重(kg)
 
     /**
      * 断奶情况
      */
     private int weanSow;                      //断奶母猪数
     private int weanPiglet;                   //断奶仔猪数
-    private double weanAvgWeight;             //断奶均重
+    private double weanAvgWeight;             //断奶均重(kg)
     private double weanAvgCount;              //窝均断奶数
+    private double weanAvgDayAge;             //断奶均日龄
 
     /**
      * 销售情况
@@ -88,4 +90,6 @@ public class DoctorMonthlyReportDto implements Serializable {
      */
     private double npd;                       //非生产天数
     private double psy;                       //psy
+
+    private String date;                      //统计月份 2016年08月, 供前台显示
 }

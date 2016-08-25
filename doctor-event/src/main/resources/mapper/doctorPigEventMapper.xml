@@ -42,6 +42,7 @@
         <result column="pt_npd" property="ptnpd"/>
         <result column="jp_npd" property="jpnpd"/>
         <result column="npd" property="npd"/>
+        <result column="farrow_weight" property="farrowWeight"/>
         <result column="live_count" property="liveCount"/>
         <result column="health_count" property="healthCount"/>
         <result column="weak_count" property="weakCount"/>
@@ -110,6 +111,7 @@
         pt_npd,
         jp_npd,
         npd,
+        farrow_weight,
         live_count,
         health_count,
         weak_count,
@@ -172,6 +174,7 @@
         #{ptnpd},
         #{jpnpd},
         #{npd},
+        #{farrowWeight},
         #{liveCount},
         #{healthCount},
         #{weakCount},
@@ -236,6 +239,7 @@
         <if test="ptnpd != null">AND pt_npd = #{ptnpd}</if>
         <if test="jpnpd != null">AND jp_npd = #{jpnpd}</if>
         <if test="npd != null">AND npd = #{npd}</if>
+        <if test="farrowWeight != null">AND farrow_weight = #{farrowWeight}</if>
         <if test="liveCount != null">AND live_count = #{liveCount}</if>
         <if test="healthCount != null">AND health_count = #{healthCount}</if>
         <if test="weakCount != null">AND weak_count = #{weakCount}</if>
@@ -308,6 +312,7 @@
             #{item.ptnpd},
             #{item.jpnpd},
             #{item.npd},
+            #{item.farrowWeight},
             #{item.liveCount},
             #{item.healthCount},
             #{item.weakCount},
@@ -521,6 +526,7 @@
             <if test="ptnpd != null">pt_npd = #{ptnpd},</if>
             <if test="jpnpd != null">jp_npd = #{jpnpd},</if>
             <if test="npd != null">npd = #{npd},</if>
+            <if test="farrowWeight != null">farrow_weight = #{farrowWeight},</if>
             <if test="liveCount != null">live_count = #{liveCount},</if>
             <if test="healthCount != null">health_count = #{healthCount},</if>
             <if test="weakCount != null">weak_count = #{weakCount},</if>
@@ -556,6 +562,24 @@
         <include refid="tb"/>
         WHERE farm_id = #{farmId} AND kind = ${kind}
     </select>
+
+    <select id="findByFarmIdAndKindAndEventTypes" parameterType="map" resultMap="DoctorPigEventMap">
+        SELECT
+        <include refid="cols_all"/>
+        FROM
+        <include refid="tb"/>
+        <where>
+            <if test="farmId != null">AND farm_id = #{farmId}</if>
+            <if test="kind != null">AND kind = #{kind}</if>
+            <if test="eventTypes != null &amp;&amp; eventTypes.size() > 0">
+                AND `type` IN
+                <foreach collection="eventTypes" item="i" open="(" close=")" separator=",">
+                    #{i}
+                </foreach>
+            </if>
+        </where>
+    </select>
+
 
     <update id="updateRelEventId" parameterType="DoctorPigEvent">
         UPDATE

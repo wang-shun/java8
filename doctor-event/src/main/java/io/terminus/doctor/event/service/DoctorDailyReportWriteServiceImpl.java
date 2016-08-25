@@ -4,7 +4,6 @@ import com.google.common.base.Throwables;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.model.Response;
 import io.terminus.common.utils.Dates;
-import io.terminus.doctor.event.dto.report.daily.DoctorDailyReportDto;
 import io.terminus.doctor.event.manager.DoctorDailyReportManager;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,12 +31,13 @@ public class DoctorDailyReportWriteServiceImpl implements DoctorDailyReportWrite
     }
 
     @Override
-    public Response<Boolean> createDailyReports(List<DoctorDailyReportDto> dailyReports, Date sumAt) {
+    public Response<Boolean> createDailyReports(List<Long> farmIds, Date sumAt) {
         try {
-            doctorDailyReportManager.createDailyReports(dailyReports, Dates.startOfDay(sumAt));
+            Date startAt = Dates.startOfDay(sumAt);
+            farmIds.forEach(farmId -> doctorDailyReportManager.realTimeDailyReports(farmId, startAt));
             return Response.ok(Boolean.TRUE);
         } catch (Exception e) {
-            log.error("create dailyReport failed, dailyReports:{}, cause:{}", dailyReports, Throwables.getStackTraceAsString(e));
+            log.error("create dailyReport failed: sumAt:{}, cause:{}", sumAt, Throwables.getStackTraceAsString(e));
             return Response.fail("dailyReport.create.fail");
         }
     }

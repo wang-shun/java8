@@ -3,7 +3,7 @@ package io.terminus.doctor.web.front.event.controller;
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dto.report.daily.DoctorDailyReportDto;
-import io.terminus.doctor.event.dto.report.monthly.DoctorMonthlyReportDto;
+import io.terminus.doctor.event.dto.report.monthly.DoctorMonthlyReportTrendDto;
 import io.terminus.doctor.event.service.DoctorDailyReportReadService;
 import io.terminus.doctor.event.service.DoctorMonthlyReportReadService;
 import lombok.extern.slf4j.Slf4j;
@@ -48,9 +48,10 @@ public class DoctorReports {
      * @return 猪场月报表
      */
     @RequestMapping(value = "/monthly", method = RequestMethod.GET)
-    public DoctorMonthlyReportDto findMonthlyReportByFarmIdAndSumAt(@RequestParam("farmId") Long farmId,
-                                                                    @RequestParam("date") String date) {
-        return RespHelper.or500(doctorMonthlyReportReadService.findMonthlyReportByFarmIdAndSumAt(farmId, date));
+    public DoctorMonthlyReportTrendDto findMonthlyReportTrendByFarmIdAndSumAt(@RequestParam("farmId") Long farmId,
+                                                                              @RequestParam("date") String date,
+                                                                              @RequestParam(value = "index", required = false) Integer index) {
+        return RespHelper.or500(doctorMonthlyReportReadService.findMonthlyReportTrendByFarmIdAndSumAt(farmId, date, index));
     }
 
     /**

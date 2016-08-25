@@ -1,6 +1,7 @@
 package io.terminus.doctor.event.handler.sow;
 
 import com.google.common.base.MoreObjects;
+import com.google.common.primitives.Doubles;
 import com.google.common.primitives.Ints;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.common.enums.PigType;
@@ -79,6 +80,8 @@ public class DoctorSowFarrowingHandler extends DoctorAbstractEventFlowHandler {
         }
 
 
+        //分娩窝重
+        doctorPigEvent.setFarrowWeight(Doubles.tryParse(Objects.toString(extra.get("birthNextAvg"))));
         //分娩仔猪只数信息
         doctorPigEvent.setLiveCount(Ints.tryParse(Objects.toString(extra.get("farrowingLiveCount"))));
         doctorPigEvent.setHealthCount(Ints.tryParse(Objects.toString(extra.get("healthCount"))));

@@ -46,5 +46,7 @@ public class DoctorPigletsChgDto implements Serializable{
 
     private Long pigletsCustomerId;    //客户Id （非必填）
 
+    private String pigletsCustomerName;    //客户姓名 （非必填）
+
     private String pigletsMark;  //标识(非必填)
 }

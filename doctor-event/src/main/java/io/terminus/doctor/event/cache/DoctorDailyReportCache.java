@@ -5,11 +5,9 @@ import com.google.common.base.Throwables;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
-import com.google.common.collect.Sets;
 import io.terminus.common.utils.Dates;
 import io.terminus.common.utils.Splitters;
 import io.terminus.doctor.common.utils.DateUtil;
-import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dao.DoctorKpiDao;
 import io.terminus.doctor.event.dao.DoctorPigTypeStatisticDao;
 import io.terminus.doctor.event.dto.report.daily.DoctorCheckPregDailyReport;
@@ -20,8 +18,6 @@ import io.terminus.doctor.event.dto.report.daily.DoctorLiveStockDailyReport;
 import io.terminus.doctor.event.dto.report.daily.DoctorMatingDailyReport;
 import io.terminus.doctor.event.dto.report.daily.DoctorSaleDailyReport;
 import io.terminus.doctor.event.dto.report.daily.DoctorWeanDailyReport;
-import io.terminus.doctor.event.service.DoctorDailyGroupReportReadService;
-import io.terminus.doctor.event.service.DoctorDailyPigReportReadService;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -31,8 +27,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -49,18 +43,12 @@ import static java.util.Objects.isNull;
 public class DoctorDailyReportCache {
 
     private final LoadingCache<String, DoctorDailyReportDto> reportCache;
-    private final DoctorDailyPigReportReadService doctorDailyPigReportReadService;
-    private final DoctorDailyGroupReportReadService doctorDailyGroupReportReadService;
     private final DoctorKpiDao doctorKpiDao;
     private final DoctorPigTypeStatisticDao doctorPigTypeStatisticDao;
 
     @Autowired
-    public DoctorDailyReportCache(DoctorDailyPigReportReadService doctorDailyPigReportReadService,
-                                  DoctorDailyGroupReportReadService doctorDailyGroupReportReadService,
-                                  DoctorKpiDao doctorKpiDao,
+    public DoctorDailyReportCache(DoctorKpiDao doctorKpiDao,
                                   DoctorPigTypeStatisticDao doctorPigTypeStatisticDao) {
-        this.doctorDailyPigReportReadService = doctorDailyPigReportReadService;
-        this.doctorDailyGroupReportReadService = doctorDailyGroupReportReadService;
         this.doctorKpiDao = doctorKpiDao;
         this.doctorPigTypeStatisticDao = doctorPigTypeStatisticDao;
 
@@ -190,18 +178,21 @@ public class DoctorDailyReportCache {
         wean.setWeight(doctorKpiDao.getWeanPigletWeightAvg(farmId, startAt, endAt));
         wean.setNest(doctorKpiDao.getWeanSow(farmId, startAt, endAt));
 
+        //个体管理母猪总存栏
+        report.setSowCount(doctorKpiDao.realTimeLiveStockSow(farmId, startAt));
+
         //存栏
         DoctorLiveStockDailyReport liveStock = new DoctorLiveStockDailyReport();
-        liveStock.setHoubeiSow(doctorKpiDao.liveStockHoubeiSow(farmId));
-        liveStock.setPeihuaiSow(doctorKpiDao.liveStockPeihuaiSow(farmId));
-        liveStock.setBuruSow(doctorKpiDao.liveStockBuruSow(farmId));
-        liveStock.setKonghuaiSow(0);
-        liveStock.setBoar(doctorKpiDao.liveStockBoar(farmId));
-        liveStock.setFarrow(doctorKpiDao.liveStockFarrow(farmId));
-        liveStock.setNursery(doctorKpiDao.liveStockNursery(farmId));
-        liveStock.setFatten(doctorKpiDao.liveStockFatten(farmId));
+        liveStock.setHoubeiBoar(doctorKpiDao.realTimeLiveStockHoubeiBoar(farmId, startAt));
+        liveStock.setHoubeiSow(doctorKpiDao.realTimeLiveStockHoubeiSow(farmId, startAt));  //后备母猪
+        liveStock.setBuruSow(doctorKpiDao.realTimeLiveStockFarrowSow(farmId, startAt));    //产房母猪
+        liveStock.setPeihuaiSow(report.getSowCount() - liveStock.getBuruSow());            //配怀 = 总存栏 - 产房母猪
+        liveStock.setKonghuaiSow(0);                                                       //空怀猪作废, 置成0
+        liveStock.setBoar(doctorKpiDao.realTimeLiveStockBoar(farmId, startAt));            //公猪
+        liveStock.setFarrow(doctorKpiDao.realTimeLiveStockFarrow(farmId, startAt));
+        liveStock.setNursery(doctorKpiDao.realTimeLiveStockNursery(farmId, startAt));
+        liveStock.setFatten(doctorKpiDao.realTimeLiveStockFatten(farmId, startAt));
 
-        report.setSowCount(doctorKpiDao.liveStockSow(farmId));
         report.setCheckPreg(checkPreg);
         report.setDead(dead);
         report.setDeliver(deliver);
@@ -214,53 +205,10 @@ public class DoctorDailyReportCache {
         return report;
     }
 
-    //实时查询某猪场的日报统计2
-    //旧的实时查询, 可能会有错误, 直接使用上一个
-    @Deprecated
-    private DoctorDailyReportDto initDailyReportByFarmIdAndDateOld(Long farmId, Date date) {
-        DoctorDailyReportDto report = new DoctorDailyReportDto();
-        report.setPig(RespHelper.orServEx(doctorDailyPigReportReadService.countByFarmIdDate(farmId, date)));
-        report.setGroup(RespHelper.orServEx(doctorDailyGroupReportReadService.getGroupDailyReportByFarmIdAndDate(farmId, date)));
-        return report;
-    }
-
     //实时查询全部猪场猪和猪群的日报统计
     public List<DoctorDailyReportDto> initDailyReportByDate(Date date) {
         return doctorPigTypeStatisticDao.findAll().stream()
                 .map(p -> initDailyReportByFarmIdAndDate(p.getFarmId(), date))
-                .collect(Collectors.toList());
-    }
-
-    //实时查询全部猪场猪和猪群的日报统计
-    @Deprecated
-    public List<DoctorDailyReportDto> initDailyReportByDateOld(Date date) {
-        Map<Long, DoctorDailyReportDto> pigReportMap = RespHelper.orServEx(doctorDailyPigReportReadService.countByDate(date))
-                .stream().collect(Collectors.toMap(DoctorDailyReportDto::getFarmId, v -> v));
-        Map<Long, DoctorDailyReportDto> groupReportMap = RespHelper.orServEx(doctorDailyGroupReportReadService.getGroupDailyReportsByDate(date))
-                .stream().collect(Collectors.toMap(DoctorDailyReportDto::getFarmId, v -> v));
-
-        //求下 farmIds 的并集
-        Set<Long> farmIds = Sets.newHashSet();
-        farmIds.addAll(groupReportMap.keySet());
-        farmIds.addAll(pigReportMap.keySet());
-        Date dateStart = Dates.startOfDay(date);
-
-        //拼接数据
-        return farmIds.stream()
-                .map(farmId -> {
-                    DoctorDailyReportDto report = new DoctorDailyReportDto();
-                    report.setFarmId(farmId);
-                    report.setSumAt(dateStart);
-                    DoctorDailyReportDto pigReport = pigReportMap.get(farmId);
-                    if (pigReport != null) {
-                        report.setPig(pigReport);
-                    }
-                    DoctorDailyReportDto groupReport = groupReportMap.get(farmId);
-                    if (groupReport != null) {
-                        report.setGroup(groupReport);
-                    }
-                    return report;
-                })
                 .collect(Collectors.toList());
     }
 
