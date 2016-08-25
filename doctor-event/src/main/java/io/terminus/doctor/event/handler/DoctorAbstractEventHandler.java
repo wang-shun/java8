@@ -179,8 +179,7 @@ public abstract class DoctorAbstractEventHandler implements DoctorEventCreateHan
                 .farmId(basic.getFarmId()).farmName(basic.getFarmName())
                 .pigId(basic.getPigId()).pigCode(basic.getPigCode())
                 .eventAt(DateTime.now().toDate()).type(basic.getEventType())
-                .kind(basic.getPigType()).name(basic.getEventName()).relEventId(basic.getRelEventId())
-                .desc(this.getEventDesc(extra, PigEvent.from(basic.getEventType())))
+                .kind(basic.getPigType()).name(basic.getEventName()).desc(basic.getEventDescFromExtra(extra)).relEventId(basic.getRelEventId())
                 .barnId(basic.getBarnId()).barnName(basic.getBarnName())
                 .creatorId(basic.getStaffId()).creatorName(basic.getStaffName())
                 .npd(0)
@@ -227,33 +226,4 @@ public abstract class DoctorAbstractEventHandler implements DoctorEventCreateHan
                                 "doctorEventId", doctorPigEvent.getId(), "doctorSnapshotId", doctorPigSnapshot.getId())));
     }
 
-    private String getEventDesc(Map<String, Object> extra, PigEvent pigEvent){
-        Map<String, String> fieldMap;
-        switch (pigEvent) {
-            case CHG_FARM:
-                fieldMap = BeanMapper.map(extra, DoctorChgFarmDto.class).descMap();
-                break;
-            case CHG_LOCATION:
-                fieldMap = BeanMapper.map(extra, DoctorChgLocationDto.class).descMap();
-                break;
-            case CONDITION:
-                fieldMap = BeanMapper.map(extra, DoctorConditionDto.class).descMap();
-                break;
-            case DISEASE:
-                fieldMap = BeanMapper.map(extra, DoctorDiseaseDto.class).descMap();
-                break;
-            case REMOVAL:
-                fieldMap = BeanMapper.map(extra, DoctorRemovalDto.class).descMap();
-                break;
-            case SEMEN:
-                fieldMap = BeanMapper.map(extra, DoctorSemenDto.class).descMap();
-                break;
-            case VACCINATION:
-                fieldMap = BeanMapper.map(extra, DoctorVaccinationDto.class).descMap();
-                break;
-            default:
-                return pigEvent.getDesc();
-        }
-        return Joiner.on("#").withKeyValueSeparator("：").join(fieldMap);
-    }
 }

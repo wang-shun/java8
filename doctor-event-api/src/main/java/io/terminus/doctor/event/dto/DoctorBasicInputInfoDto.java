@@ -1,11 +1,23 @@
 package io.terminus.doctor.event.dto;
 
+import com.google.common.base.Joiner;
+import io.terminus.common.utils.BeanMapper;
+import io.terminus.doctor.event.dto.event.boar.DoctorSemenDto;
+import io.terminus.doctor.event.dto.event.usual.DoctorChgFarmDto;
+import io.terminus.doctor.event.dto.event.usual.DoctorChgLocationDto;
+import io.terminus.doctor.event.dto.event.usual.DoctorConditionDto;
+import io.terminus.doctor.event.dto.event.usual.DoctorDiseaseDto;
+import io.terminus.doctor.event.dto.event.usual.DoctorFarmEntryDto;
+import io.terminus.doctor.event.dto.event.usual.DoctorRemovalDto;
+import io.terminus.doctor.event.dto.event.usual.DoctorVaccinationDto;
+import io.terminus.doctor.event.enums.PigEvent;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Builder;
 
 import java.io.Serializable;
+import java.util.Map;
 
 /**
  * Created by yaoqijun.
@@ -73,5 +85,52 @@ public class DoctorBasicInputInfoDto implements Serializable{
                 .farmId(this.farmId).farmName(this.farmName).orgId(this.orgId).orgName(this.orgName).staffId(this.staffId).staffName(this.staffName)
                 .eventType(this.eventType).eventName(this.eventName).eventDesc(this.eventDesc).relEventId(this.relEventId)
                 .build();
+    }
+
+    public String getEventDescFromExtra(Map<String, Object> extra){
+        PigEvent pigEvent = PigEvent.from(eventType);
+        if(pigEvent == null){
+            return this.eventDesc;
+        }
+
+        Map<String, String> fieldMap;
+        switch (pigEvent) {
+            case ENTRY:
+                fieldMap = BeanMapper.map(extra, DoctorFarmEntryDto.class).descMap();
+                break;
+            case CHG_FARM:
+                fieldMap = BeanMapper.map(extra, DoctorChgFarmDto.class).descMap();
+                break;
+            case CHG_LOCATION:
+                fieldMap = BeanMapper.map(extra, DoctorChgLocationDto.class).descMap();
+                break;
+            case TO_MATING:
+                fieldMap = BeanMapper.map(extra, DoctorChgLocationDto.class).descMap();
+                break;
+            case TO_PREG:
+                fieldMap = BeanMapper.map(extra, DoctorChgLocationDto.class).descMap();
+                break;
+            case TO_FARROWING:
+                fieldMap = BeanMapper.map(extra, DoctorChgLocationDto.class).descMap();
+                break;
+            case CONDITION:
+                fieldMap = BeanMapper.map(extra, DoctorConditionDto.class).descMap();
+                break;
+            case DISEASE:
+                fieldMap = BeanMapper.map(extra, DoctorDiseaseDto.class).descMap();
+                break;
+            case REMOVAL:
+                fieldMap = BeanMapper.map(extra, DoctorRemovalDto.class).descMap();
+                break;
+            case SEMEN:
+                fieldMap = BeanMapper.map(extra, DoctorSemenDto.class).descMap();
+                break;
+            case VACCINATION:
+                fieldMap = BeanMapper.map(extra, DoctorVaccinationDto.class).descMap();
+                break;
+            default:
+                return this.eventDesc;
+        }
+        return Joiner.on("#").withKeyValueSeparator("：").join(fieldMap);
     }
 }

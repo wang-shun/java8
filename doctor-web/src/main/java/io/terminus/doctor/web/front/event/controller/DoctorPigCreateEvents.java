@@ -504,7 +504,7 @@ public class DoctorPigCreateEvents {
                     .pigType(entryDto.getPigType()).pigCode(entryDto.getPigCode()).barnId(entryDto.getBarnId()).barnName(entryDto.getBarnName())
                     .farmId(doctorFarm.getId()).farmName(doctorFarm.getName()).orgId(doctorFarm.getOrgId()).orgName(doctorFarm.getOrgName())
                     .staffId(userId).staffName(userResponse.getResult().getName())
-                    .eventType(pigEvent.getKey()).eventName(pigEvent.getDesc()).eventDesc(entryDto.getEventDesc())
+                    .eventType(pigEvent.getKey()).eventName(pigEvent.getDesc()).eventDesc(pigEvent.getDesc())
                     .build();
         }catch (IllegalStateException ee){
             log.error("illegal state exception error, cause:{}", Throwables.getStackTraceAsString(ee));

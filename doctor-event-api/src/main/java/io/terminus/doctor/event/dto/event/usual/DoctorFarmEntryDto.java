@@ -1,6 +1,5 @@
 package io.terminus.doctor.event.dto.event.usual;
 
-import com.google.common.base.Joiner;
 import io.terminus.doctor.event.enums.PigSource;
 import io.terminus.doctor.event.model.DoctorPig;
 import lombok.AllArgsConstructor;
@@ -81,7 +80,7 @@ public class DoctorFarmEntryDto implements Serializable{
 
     private Integer right;  //右乳头数量
 
-    public String getEventDesc(){
+    public Map<String, String> descMap() {
         Map<String, String> map = new HashMap<>();
         if(pigType != null){
             map.put("猪类型", DoctorPig.PIG_TYPE.from(pigType).getDesc());
@@ -116,7 +115,7 @@ public class DoctorFarmEntryDto implements Serializable{
         if(right != null){
             map.put("右乳头数", right.toString());
         }
-        return Joiner.on("#").withKeyValueSeparator("：").join(map);
+        return map;
     }
 
 }
