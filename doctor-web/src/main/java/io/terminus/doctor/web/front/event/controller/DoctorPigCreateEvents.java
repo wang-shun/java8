@@ -441,10 +441,14 @@ public class DoctorPigCreateEvents {
         DoctorBarn doctorFromBarn = RespHelper.or500(doctorBarnReadService.findBarnById(doctorChgLocationDto.getChgLocationFromBarnId()));
         DoctorBarn doctorToBarn = RespHelper.or500(doctorBarnReadService.findBarnById(doctorChgLocationDto.getChgLocationToBarnId()));
 
-        //走workflow的流程, 母猪 && (猪类不相等 || !(妊娠舍 => 配种舍/妊娠舍))
         if(Objects.equals(basicInputInfoDto.getPigType(), DoctorPig.PIG_TYPE.SOW.getKey()) &&
-                (!Objects.equals(doctorFromBarn.getPigType(), doctorToBarn.getPigType()) ||
-                !(Objects.equals(PREG_SOW.getValue(), doctorFromBarn.getPigType()) && MATING_TYPES.contains(doctorToBarn.getPigType())))){
+                !Objects.equals(doctorFromBarn.getPigType(), doctorToBarn.getPigType())){
+
+            //妊娠舍 => 配种舍/妊娠舍 走普通转舍
+            if (Objects.equals(PREG_SOW.getValue(), doctorFromBarn.getPigType()) && MATING_TYPES.contains(doctorToBarn.getPigType())) {
+                basicInputInfoDto.setEventType(PigEvent.CHG_LOCATION.getKey());
+                return RespHelper.or500(doctorPigEventWriteService.chgLocationEvent(doctorChgLocationDto, basicInputInfoDto));
+            }
 
             // 录入母猪
             if(Objects.equals(doctorToBarn.getPigType(), PigType.MATE_SOW.getValue())){
