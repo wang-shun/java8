@@ -94,7 +94,7 @@ public class DoctorBasicInputInfoDto implements Serializable{
                 .build();
     }
 
-    public String getEventDescFromExtra(Map<String, Object> extra){
+    public String generateEventDescFromExtra(Map<String, Object> extra){
         if(eventType == null){
             return this.eventDesc;
         }
