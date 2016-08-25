@@ -1,5 +1,6 @@
 package io.terminus.doctor.event.service;
 
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
@@ -14,8 +15,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.util.Date;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Desc: 猪场月报表读服务实现类
@@ -29,6 +33,7 @@ import java.util.Date;
 public class DoctorMonthlyReportReadServiceImpl implements DoctorMonthlyReportReadService {
 
     private static final JsonMapper JSON_MAPPER = JsonMapper.nonEmptyMapper();
+    private static final int MONTH_INDEX = 12;
 
     private final DoctorMonthlyReportDao doctorMonthlyReportDao;
 
@@ -38,7 +43,7 @@ public class DoctorMonthlyReportReadServiceImpl implements DoctorMonthlyReportRe
     }
 
     @Override
-    public Response<DoctorMonthlyReportTrendDto> findMonthlyReportTrendByFarmIdAndSumAt(Long farmId, String sumAt) {
+    public Response<DoctorMonthlyReportTrendDto> findMonthlyReportTrendByFarmIdAndSumAt(Long farmId, String sumAt, Integer index) {
         try {
             Date date;
 
@@ -51,34 +56,55 @@ public class DoctorMonthlyReportReadServiceImpl implements DoctorMonthlyReportRe
 
             //如果查询未来的数据, 返回失败查询
             if (new DateTime(date).isAfter(DateUtil.getDateEnd(DateTime.now()))) {
-                return Response.ok(failReport());
+                return Response.ok(failReportTrend());
             }
 
             //查询月报结果, 如果没查到, 返回失败的结果
             DoctorMonthlyReport report = doctorMonthlyReportDao.findByFarmIdAndSumAt(farmId, date);
             if (report == null) {
-                return Response.ok(failReport());
+                return Response.ok(failReportTrend());
             }
             DoctorMonthlyReportDto reportDto = JSON_MAPPER.fromJson(report.getData(), DoctorMonthlyReportDto.class);
             if (reportDto == null) {
-                return Response.ok(failReport());
+                return Response.ok(failReportTrend());
             }
 
-            // TODO: 16/8/24
-            return Response.ok(new DoctorMonthlyReportTrendDto(reportDto, null));
+            //拼接趋势图
+            return Response.ok(new DoctorMonthlyReportTrendDto(reportDto, getMonthlyReportByIndex(farmId, date, index)));
         } catch (Exception e) {
             log.error("find monthly report by farmId and sumAt failed, farmId:{}, sumAt:{}, cause:{}",
                     farmId, sumAt, Throwables.getStackTraceAsString(e));
-            return Response.ok(failReport());
+            return Response.ok(failReportTrend());
         }
     }
 
+    //查询趋势图
+    private List<DoctorMonthlyReportDto> getMonthlyReportByIndex(Long farmId, Date date, Integer index) {
+        return DateUtil.getBeforeMonthEnds(date, MoreObjects.firstNonNull(index, MONTH_INDEX)).stream()
+                .map(month -> {
+                    DoctorMonthlyReport report = doctorMonthlyReportDao.findByFarmIdAndSumAt(farmId, month);
+                    if (report == null || !StringUtils.hasText(report.getData())) {
+                        return failReportDto();
+                    }
+                    DoctorMonthlyReportDto dto = JSON_MAPPER.fromJson(report.getData(), DoctorMonthlyReportDto.class);
+                    if (dto == null) {
+                        return failReportDto();
+                    }
+                    return dto;
+                })
+                .collect(Collectors.toList());
+    }
 
-    //查询失败的结果
-    private static DoctorMonthlyReportTrendDto failReport() {
+    //查询失败的月报
+    private static DoctorMonthlyReportDto failReportDto() {
         DoctorMonthlyReportDto dto = new DoctorMonthlyReportDto();
         dto.setFail(true);
-        return new DoctorMonthlyReportTrendDto(dto, Lists.newArrayList());
+        return dto;
+    }
+
+    //查询失败的结果
+    private static DoctorMonthlyReportTrendDto failReportTrend() {
+        return new DoctorMonthlyReportTrendDto(failReportDto(), Lists.newArrayList());
     }
 
     //获取月末
