@@ -134,77 +134,58 @@ public class DoctorMoveWorkflowHandler {
                 FlowDefinitionNode targetNode = nodesMapById.get(eventsMapByValue.get(type).getTargetNodeId());
 
                 // 2.1 如果 Task 节点
-                // if (targetNode.getType() == FlowDefinitionNode.Type.TASK.value()) {
-                    // 1.  如果类型是转入分娩舍 > 10
-                    if (type == 10) {
-                        // 如果是阳性
-                        if (pig.getStatus() == 4) {
-                            createFlowProcess(nodesMapByName.get("妊娠检查阳性").getId(), nodesMapByName.get("妊娠检查").getId(), pigEvent, flowInstance, pig);
-                        }
-                        // 如果是待分娩
-                        else if (pig.getStatus() == 7) {
-                            createFlowProcess(nodesMapByName.get("待分娩").getId(), nodesMapByName.get("妊娠检查").getId(), pigEvent, flowInstance, pig);
-                        }
-                        // 断奶
-                        else if (pig.getStatus() == 9) {
-                            createFlowProcess(nodesMapByName.get("断奶").getId(), nodesMapByName.get("妊娠检查").getId(), pigEvent, flowInstance, pig);
-                        } else {
-                            createFlowProcess(targetNode.getId(), sourceNode.getId(), pigEvent, flowInstance, pig);
-                        }
+                // 1.  如果类型是转入分娩舍 > 10
+                if (type == 10) {
+                    // 如果是阳性
+                    if (pig.getStatus() == 4) {
+                        createFlowProcess(nodesMapByName.get("妊娠检查阳性").getId(), nodesMapByName.get("妊娠检查").getId(), pigEvent, flowInstance, pig);
                     }
-//                    // 1.1 如果是转配种舍 > 12
-//                    else if (type == 12) {
-//                        // 如果是阳性
-//                        if (pig.getStatus() == 4) {
-//                            createFlowProcess(nodesMapByName.get("妊娠检查阳性").getId(), nodesMapByName.get("妊娠检查A结果").getId(), pigEvent, flowInstance, pig);
-//                        }
-//                        // 断奶
-//                        else if (pig.getStatus() == 9) {
-//                            createFlowProcess(nodesMapByName.get("断奶").getId(), nodesMapByName.get("妊娠检查A结果").getId(), pigEvent, flowInstance, pig);
-//                        }
-//                        else {
-//                            createFlowProcess(targetNode.getId(), sourceNode.getId(), pigEvent, flowInstance, pig);
-//                        }
-//                    }
-                    // 2.  如果是妊娠检查  > 11
-                    else if (type == 11) {
-                        // 如果是阳性
-                        if (pig.getStatus() == 4) {
-                            createFlowProcess(nodesMapByName.get("妊娠检查阳性").getId(), nodesMapByName.get("妊娠检查").getId(), pigEvent, flowInstance, pig);
-                        }
-                        // 断奶
-                        else if (pig.getStatus() == 9) {
-                            createFlowProcess(nodesMapByName.get("断奶").getId(), nodesMapByName.get("妊娠检查").getId(), pigEvent, flowInstance, pig);
-                        }
-                        // 如果是待分娩
-                        else if (pig.getStatus() == 7) {
-                            createFlowProcess(nodesMapByName.get("待分娩").getId(), nodesMapByName.get("妊娠检查").getId(), pigEvent, flowInstance, pig);
-                        }
-                        // 否则空怀
-                        else {
-                            createFlowProcess(nodesMapByName.get("空怀").getId(), nodesMapByName.get("妊娠检查").getId(), pigEvent, flowInstance, pig);
-                        }
+                    // 如果是待分娩
+                    else if (pig.getStatus() == 7) {
+                        createFlowProcess(nodesMapByName.get("待分娩").getId(), nodesMapByName.get("妊娠检查").getId(), pigEvent, flowInstance, pig);
                     }
-                    // 3. 如果是断奶事件判断 > 16  或者 仔猪变动 > 18
-                    else if (type == 16 || type == 17 || type == 18) {
-                        // 哺乳
-                        if (pig.getStatus() == 8) {
-                            createFlowProcess(nodesMapByName.get("哺乳").getId(), nodesMapByName.get("待分娩").getId(), pigEvent, flowInstance, pig);
-                        }
-                        // 否则断奶
-                        else {
-                            createFlowProcess(nodesMapByName.get("断奶").getId(), nodesMapByName.get("断奶事件判断").getId(), pigEvent, flowInstance, pig);
-                        }
+                    // 断奶
+                    else if (pig.getStatus() == 9) {
+                        createFlowProcess(nodesMapByName.get("断奶").getId(), nodesMapByName.get("妊娠检查").getId(), pigEvent, flowInstance, pig);
                     } else {
                         createFlowProcess(targetNode.getId(), sourceNode.getId(), pigEvent, flowInstance, pig);
                     }
-
                 }
-            // }
-            // 否则处于待配种状态
-            // else {
-            // createFlowProcess(nodesMapByName.get("待配种").getId(), nodesMapByName.get("开始节点信息").getId(), pigEvent, flowInstance, pig);
-            // }
+
+                // 2.  如果是妊娠检查  > 11
+                else if (type == 11) {
+                    // 如果是阳性
+                    if (pig.getStatus() == 4) {
+                        createFlowProcess(nodesMapByName.get("妊娠检查阳性").getId(), nodesMapByName.get("妊娠检查").getId(), pigEvent, flowInstance, pig);
+                    }
+                    // 断奶
+                    else if (pig.getStatus() == 9) {
+                        createFlowProcess(nodesMapByName.get("断奶").getId(), nodesMapByName.get("妊娠检查").getId(), pigEvent, flowInstance, pig);
+                    }
+                    // 如果是待分娩
+                    else if (pig.getStatus() == 7) {
+                        createFlowProcess(nodesMapByName.get("待分娩").getId(), nodesMapByName.get("妊娠检查").getId(), pigEvent, flowInstance, pig);
+                    }
+                    // 否则空怀
+                    else {
+                        createFlowProcess(nodesMapByName.get("空怀").getId(), nodesMapByName.get("妊娠检查").getId(), pigEvent, flowInstance, pig);
+                    }
+                }
+                // 3. 如果是断奶事件判断 > 16  或者 仔猪变动 > 18
+                else if (type == 16 || type == 17 || type == 18) {
+                    // 哺乳
+                    if (pig.getStatus() == 8) {
+                        createFlowProcess(nodesMapByName.get("哺乳").getId(), nodesMapByName.get("待分娩").getId(), pigEvent, flowInstance, pig);
+                    }
+                    // 否则断奶
+                    else {
+                        createFlowProcess(nodesMapByName.get("断奶").getId(), nodesMapByName.get("断奶事件判断").getId(), pigEvent, flowInstance, pig);
+                    }
+                } else {
+                    createFlowProcess(targetNode.getId(), sourceNode.getId(), pigEvent, flowInstance, pig);
+                }
+
+            }
         });
     }
 

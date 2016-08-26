@@ -84,32 +84,6 @@ public class DoctorSowFostersByHandler extends DoctorAbstractEventFlowHandler {
         doctorPigTrack.setStatus(PigStatus.FEED.getKey());
         doctorPigTrack.addPigEvent(basic.getPigType(), (Long) context.get("doctorPigEventId"));
         return doctorPigTrack;
-
-//        // 校验当前的母猪状态 status 的存在方式
-//        Integer currentStatus = doctorPigTrack.getStatus();
-//        checkState(
-//                Objects.equals(currentStatus, PigStatus.FEED.getKey()), "foster.currentSowStatus.error");
-//
-//        //添加当前母猪的健崽猪的数量信息
-//        Map<String,Object> extraMap = doctorPigTrack.getExtraMap();
-//        Integer healthCount = (Integer) extraMap.get("farrowingLiveCount");
-//        Integer partWeanCount = extraMap.containsKey("partWeanPigletsCount") ? (Integer) extraMap.get("partWeanPigletsCount") : 0;
-//        Integer fosterCount= (Integer) extra.get("fostersCount");
-//
-//        Integer afterHealthCount = healthCount - fosterCount;
-//        checkState(afterHealthCount >= partWeanCount, "create.fostersBy.notEnough");
-//        extra.put("farrowingLiveCount", afterHealthCount);
-//        doctorPigTrack.addAllExtraMap(extra);
-//
-//        // 修改当前的母猪状态信息
-//        if(Objects.equals(afterHealthCount, partWeanCount)){
-//            doctorPigTrack.setStatus(PigStatus.Wean.getKey());
-//        }else {
-//            doctorPigTrack.setStatus(PigStatus.FEED.getKey());
-//        }
-//        execution.getExpression().put("status", doctorPigTrack.getStatus());
-//        doctorPigTrack.addPigEvent(basic.getPigType(), (Long) context.get("doctorPigEventId"));
-//        return doctorPigTrack;
     }
 
     /**
