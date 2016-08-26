@@ -122,7 +122,7 @@ public class DoctorMoveWorkflowHandler {
             // 2. 获取猪最新的一次事件类型, 获取下一个节点对象
             // DoctorPigEvent pigEvent = doctorPigEventDao.queryLastPigEventById(pig.getPigId());
             DoctorPigEvent pigEvent = doctorPigEventDao.queryLastPigEventInWorkflow(pig.getPigId(),
-                    ImmutableList.of(9, 10, 11, 12, 13, 14, 15, 16, 17, 18)); //,19));
+                    ImmutableList.of(9, 11, 12, 13, 14, 15, 16, 17, 18)); //,19));
 
             if (pigEvent != null) {
                 Integer type = pigEvent.getType();
