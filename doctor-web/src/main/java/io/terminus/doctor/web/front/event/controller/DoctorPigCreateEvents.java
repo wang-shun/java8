@@ -23,7 +23,6 @@ import io.terminus.doctor.event.dto.event.usual.DoctorRemovalDto;
 import io.terminus.doctor.event.dto.event.usual.DoctorVaccinationDto;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.model.DoctorBarn;
-import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.event.service.DoctorBarnReadService;
 import io.terminus.doctor.event.service.DoctorPigEventReadService;
@@ -443,17 +442,13 @@ public class DoctorPigCreateEvents {
         DoctorBarn fromBarn = RespHelper.or500(doctorBarnReadService.findBarnById(chg.getChgLocationFromBarnId()));
         DoctorBarn toBarn = RespHelper.or500(doctorBarnReadService.findBarnById(chg.getChgLocationToBarnId()));
 
-        //状态转换转舍事件
-        if (Objects.equals(basic.getPigType(), DoctorPig.PIG_TYPE.SOW.getKey()) &&
-                !(Objects.equals(fromBarn.getPigType(), toBarn.getPigType()) &&
-                        MATING_TYPES.contains(fromBarn.getPigType()) &&
-                        MATING_TYPES.contains(toBarn.getPigType()))) {
-            return createSowChgLocation(chg, basic, fromBarn, toBarn);
-        }
-
         //普通转舍事件
-        basic.setEventType(PigEvent.CHG_LOCATION.getKey());
-        return RespHelper.or500(doctorPigEventWriteService.chgLocationEvent(chg, basic));
+        if (Objects.equals(fromBarn, toBarn) || (MATING_TYPES.contains(fromBarn) && MATING_TYPES.contains(toBarn))) {
+            basic.setEventType(PigEvent.CHG_LOCATION.getKey());
+            return RespHelper.or500(doctorPigEventWriteService.chgLocationEvent(chg, basic));
+        }
+        //状态转换转舍事件
+        return createSowChgLocation(chg, basic, fromBarn, toBarn);
     }
 
     //调用状态转换事件: 母猪转舍
