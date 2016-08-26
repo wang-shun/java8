@@ -23,4 +23,13 @@ public interface DoctorDailyReportWriteService {
      */
     Response<Boolean> createDailyReports(@NotNull(message = "farmId.not.null") List<Long> farmIds,
                                          @NotNull(message = "date.not.null") Date sumAt);
+
+    /**
+     * 更新历史日报
+     * @param beginDate 需要更新的日报的开始范围, 只有日期没有时间, 且包括此日期
+     * @param endDate  需要更新的日报的结束范围, 只有日期没有时间, 且包括此日期
+     * @param farmId 猪场
+     * @return 是否成功
+     */
+    Response<Boolean> updateHistoryDailyReport(Date beginDate, Date endDate, Long farmId);
 }

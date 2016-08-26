@@ -6,6 +6,7 @@ import io.terminus.common.model.Response;
 import io.terminus.common.utils.Dates;
 import io.terminus.doctor.event.manager.DoctorDailyReportManager;
 import lombok.extern.slf4j.Slf4j;
+import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -39,6 +40,21 @@ public class DoctorDailyReportWriteServiceImpl implements DoctorDailyReportWrite
         } catch (Exception e) {
             log.error("create dailyReport failed: sumAt:{}, cause:{}", sumAt, Throwables.getStackTraceAsString(e));
             return Response.fail("dailyReport.create.fail");
+        }
+    }
+    @Override
+    public Response<Boolean> updateHistoryDailyReport(Date beginDate, Date endDate, Long farmId){
+        try{
+            beginDate = Dates.startOfDay(beginDate);
+            endDate = Dates.startOfDay(endDate);
+            while(!beginDate.after(endDate)){
+                doctorDailyReportManager.realTimeDailyReports(farmId, beginDate);
+                beginDate = new DateTime(beginDate).plusDays(1).toDate();
+            }
+            return Response.ok(Boolean.TRUE);
+        }catch(Exception e) {
+            log.error("updateHistoryDailyReport failed, cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("update.history.daily.report.fail");
         }
     }
 }

@@ -79,6 +79,31 @@ public class DoctorReportJobs {
     }
 
     /**
+     * 更新历史日报
+     */
+    @Scheduled(cron = "0 0 1 * * ?")
+    @RequestMapping(value = "/updateHistoryDailyReport", method = RequestMethod.GET)
+    public void updateHistoryDailyReport(){
+        Date beginDate = null;
+        Date endDate = new DateTime(Dates.startOfDay(new Date())).plusDays(-2).toDate();
+        Long farmId = null;
+        try{
+            if(!hostLeader.isLeader()) {
+                log.info("current leader is:{}, skip", hostLeader.currentLeaderId());
+                return;
+            }
+            log.info("update history daily report job start, now is:{}", DateUtil.toDateTimeString(new Date()));
+
+            RespHelper.or500(doctorDailyReportWriteService.updateHistoryDailyReport(beginDate, endDate, farmId));
+
+            log.info("update history daily report job end, now is:{}", DateUtil.toDateTimeString(new Date()));
+        }catch(Exception e) {
+            log.error("update history daily report job failed, cause:{}", Throwables.getStackTraceAsString(e));
+        }
+    }
+
+
+    /**
      * 猪场月报计算job
      * 每天凌晨3点统计昨天的数据
      */
