@@ -6,7 +6,6 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.Builder;
 
 import java.io.Serializable;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -24,7 +23,7 @@ public class DoctorFostersDto implements Serializable{
 
     private static final long serialVersionUID = 2998287596879859648L;
 
-    private Date fostersDate;   // 拼窝日期
+    private String fostersDate;   // 拼窝日期
 
     private Integer fostersCount;   //  拼窝数量
 

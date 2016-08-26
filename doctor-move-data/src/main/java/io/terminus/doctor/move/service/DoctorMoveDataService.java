@@ -785,7 +785,7 @@ public class DoctorMoveDataService {
     //拼接拼窝事件extra
     private DoctorFostersDto getSowFosterExtra(View_EventListSow event, Map<Integer, Map<String, DoctorBasic>> basicMap) {
         DoctorFostersDto foster = new DoctorFostersDto();
-        foster.setFostersDate(event.getEventAt());   // 拼窝日期
+        foster.setFostersDate(DateUtil.toDateString(event.getEventAt()));   // 拼窝日期
         foster.setFostersCount(event.getNetOutCount());   //  拼窝数量
         foster.setFosterTotalWeight(event.getWeanWeight());   //拼窝总重量
         foster.setFosterSowCode(event.getDisease());      //拼窝母猪号
