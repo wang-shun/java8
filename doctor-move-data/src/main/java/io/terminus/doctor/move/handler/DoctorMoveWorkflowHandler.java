@@ -87,14 +87,6 @@ public class DoctorMoveWorkflowHandler {
                 .stream()
                 .filter(event -> StringUtils.isNoneBlank(event.getValue()))
                 .forEach(event -> eventsMapByValue.put(Integer.parseInt(event.getValue()), event));
-        /*eventsMapBySourceId = workFlowService.getFlowQueryService().getFlowDefinitionNodeQuery()
-                .getDefinitionNodes(flowDefinition.getId())
-                .stream()
-                .collect(Collectors.toMap(
-                        FlowDefinitionNode::getId,
-                        v -> workFlowService.getFlowQueryService().getFlowDefinitionNodeEventQuery()
-                                .getNodeEventsBySourceId(flowDefinition.getId(), v.getId())
-                ));*/
     }
 
 
