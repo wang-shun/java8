@@ -443,9 +443,9 @@ public class DoctorPigCreateEvents {
         DoctorBarn toBarn = RespHelper.or500(doctorBarnReadService.findBarnById(chg.getChgLocationToBarnId()));
 
         //普通转舍事件(同类型, 配种妊娠互转, 产房分娩互转)
-        if (Objects.equals(fromBarn, toBarn) ||
-                (MATING_TYPES.contains(fromBarn) && MATING_TYPES.contains(toBarn)) ||
-                (FARROW_TYPES.contains(fromBarn) && FARROW_TYPES.contains(toBarn))) {
+        if (Objects.equals(fromBarn.getPigType(), toBarn.getPigType()) ||
+                (MATING_TYPES.contains(fromBarn.getPigType()) && MATING_TYPES.contains(toBarn.getPigType())) ||
+                (FARROW_TYPES.contains(fromBarn.getPigType()) && FARROW_TYPES.contains(toBarn.getPigType()))) {
             basic.setEventType(PigEvent.CHG_LOCATION.getKey());
             return RespHelper.or500(doctorPigEventWriteService.chgLocationEvent(chg, basic));
         }
