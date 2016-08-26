@@ -8,7 +8,7 @@
 
     <!-- 开始节点 -->
     <task name="待配种" assignee="" pointx="250" pointy="100">
-        <transition name="待配种" value="9" target="已配种" tacker="doctorSowBreedCountCheckTacker" handler="doctorSowMatingHandler" describe="配种事件" />
+        <transition name="配种" value="9" target="已配种" tacker="doctorSowBreedCountCheckTacker" handler="doctorSowMatingHandler" describe="配种事件" />
     </task>
 
     <task name="已配种" assignee="" pointx="250" pointy="100">
@@ -16,7 +16,7 @@
     </task>
 
     <decision name="配种后操作方式" pointx="" pointy="">
-        <transition name="去配种" value="9" expression="${eventType} equals '9'"  tacker="doctorSowBreedCountCheckTacker" target="已配种" handler="doctorSowMatingHandler"/>
+        <transition name="配种" value="9" expression="${eventType} equals '9'"  tacker="doctorSowBreedCountCheckTacker" target="已配种" handler="doctorSowMatingHandler"/>
         <transition name="配种后妊娠检查" value="11" expression="${eventType} equals '11'" target="妊娠检查" handler="doctorSowPregCheckHandler"/>
     </decision>
 
@@ -31,22 +31,17 @@
     </task>
 
     <task name="空怀">
-        <transition name="空怀判断" target="空怀流产后判断" describe="空怀判断"/>
+        <transition name="配种" value="9"  expression="#{eventType} equals '9'" target="已配种"  handler="doctorSowMatingHandler" describe="配种事件" />
     </task>
 
     <decision name="妊娠检查阳性后事件录入">
-        <transition name="去分娩" value="14" expression="#{eventType} equals '14'" target="待分娩" handler="doctorSowChgLocationHandler"/>
+        <transition name="去分娩" value="14" expression="#{eventType} equals '14'" tacker="doctorSowChgLocationCheckTacker" target="待分娩" handler="doctorSowChgLocationHandler"/>
         <transition name="去流产" value="13" expression="#{eventType} equals '13'" target="流产" handler="doctorSowAbortionHandler"/>
     </decision>
 
     <task name="流产">
-        <transition name="流产判断" target="空怀流产后判断" describe="流产判断"/>
+        <transition name="配种" value="9"  expression="#{eventType} equals '9'" target="已配种"  handler="doctorSowMatingHandler" describe="配种事件" />
     </task>
-
-    <decision name="空怀流产后判断">
-        <transition name="去配种" value="12" expression="#{eventType} equals '12'" target="待配种" tacker="doctorSowMatingCheckTrueTacker" handler="doctorSowChgLocationHandler"/>
-        <transition name="配种" value="9"  expression="#{eventType} equals '9'" target="已配种" tacker="doctorSowMatingCheckFalseTacker" handler="doctorSowMatingHandler" describe="配种事件" />
-    </decision>
 
     <task name="待分娩">
         <transition name="分娩" value="15" handler="doctorSowFarrowingHandler" target="哺乳"/>
@@ -58,7 +53,6 @@
 
     <decision name="哺乳后事件录入">
         <transition name="拼窝" value="17" expression="#{eventType} equals '17'" target="断奶事件判断" handler="doctorSowFostersHandler"/>
-        <transition name="被拼窝" value="19" expression="#{eventType} equals '19'" target="哺乳" handler="doctorSowFostersByHandler"/>
         <transition name="断奶事件" value="16" expression="#{eventType} equals '16'" handler="doctorSowWeanHandler" target="断奶事件判断"/>
         <transition name="仔猪变动事件类型" value="18" expression="#{eventType} equals '18'" handler="doctorSowPigletsChgHandler" target="仔猪变动事件判断"/>
     </decision>

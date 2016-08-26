@@ -32,8 +32,8 @@ public class DoctorSowChgLocationCheckTacker implements ITacker {
                 Long barnId = doctorPigTrack.getCurrentBarnId();
                 DoctorBarn barn = doctorBarnDao.findById(barnId);
                 if (barn != null && barn.getPigType() != null){
-                    // 猪类型是妊娠舍
-                    if (barn.getPigType() == PigType.PREG_SOW.getValue()){
+                    // 猪所在猪舍是配种舍
+                    if (barn.getPigType() == PigType.MATE_SOW.getValue()){
                         return false;
                     }
                 }
