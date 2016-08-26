@@ -15,6 +15,7 @@ import io.terminus.doctor.workflow.model.FlowDefinitionNode;
 import io.terminus.doctor.workflow.model.FlowDefinitionNodeEvent;
 import io.terminus.doctor.workflow.model.FlowInstance;
 import io.terminus.doctor.workflow.model.FlowProcess;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -33,6 +34,7 @@ import java.util.stream.Collectors;
  * Created by IceMimosa
  * Date: 16/7/27
  */
+@Slf4j
 @Component
 @SuppressWarnings("all")
 public class DoctorMoveWorkflowHandler {
@@ -104,6 +106,8 @@ public class DoctorMoveWorkflowHandler {
     @Transactional
     public void handle(List<DoctorPigInfoDto> pigInfoDtos) {
         initBasicData();
+
+        log.info("move workflow handle: data:{}", pigInfoDtos.size());
 
         // 处理数据
         pigInfoDtos.forEach(pig -> {
