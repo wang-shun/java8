@@ -36,7 +36,6 @@ import java.util.Objects;
 public class DoctorTurnSeedGroupEventHandler extends DoctorAbstractGroupEventHandler {
 
     private final DoctorGroupEventDao doctorGroupEventDao;
-    private final DoctorBarnReadService doctorBarnReadService;
     private final DoctorCommonGroupEventHandler doctorCommonGroupEventHandler;
 
     @Autowired
@@ -48,7 +47,6 @@ public class DoctorTurnSeedGroupEventHandler extends DoctorAbstractGroupEventHan
                                            DoctorCommonGroupEventHandler doctorCommonGroupEventHandler) {
         super(doctorGroupSnapshotDao, doctorGroupTrackDao, coreEventDispatcher, doctorGroupEventDao, doctorBarnReadService);
         this.doctorGroupEventDao = doctorGroupEventDao;
-        this.doctorBarnReadService = doctorBarnReadService;
         this.doctorCommonGroupEventHandler = doctorCommonGroupEventHandler;
     }
     
