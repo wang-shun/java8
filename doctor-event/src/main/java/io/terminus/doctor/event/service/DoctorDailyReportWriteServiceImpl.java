@@ -75,8 +75,8 @@ public class DoctorDailyReportWriteServiceImpl implements DoctorDailyReportWrite
             });
             return Response.ok();
         }catch(Exception e) {
-            log.error("recordDailyReport2Update failed, cause:{}", Throwables.getStackTraceAsString(e));
-            return Response.fail("record.daily.report.to.update.fail");
+            log.error("saveDailyReport2Update failed, cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("save.daily.report.to.update.fail");
         }
     }
 
@@ -92,8 +92,8 @@ public class DoctorDailyReportWriteServiceImpl implements DoctorDailyReportWrite
 
             return Response.ok(farmAndDate);
         }catch(Exception e) {
-            log.error("recordDailyReport2Update failed, cause:{}", Throwables.getStackTraceAsString(e));
-            return Response.fail("record.daily.report.to.update.fail");
+            log.error("getDailyReport2Update failed, cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("get.daily.report.to.update.fail");
         }
     }
 
