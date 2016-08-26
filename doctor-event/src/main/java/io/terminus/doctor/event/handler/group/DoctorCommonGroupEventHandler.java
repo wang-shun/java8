@@ -23,6 +23,7 @@ import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
 import io.terminus.doctor.event.model.DoctorPig;
+import io.terminus.doctor.event.search.pig.PigSearchWriteService;
 import io.terminus.doctor.event.service.DoctorGroupReadService;
 import io.terminus.doctor.event.service.DoctorPigEventWriteService;
 import io.terminus.doctor.event.util.EventUtil;
@@ -51,18 +52,21 @@ public class DoctorCommonGroupEventHandler {
     private final DoctorGroupReadService doctorGroupReadService;
     private final DoctorGroupManager doctorGroupManager;
     private final DoctorPigEventWriteService doctorPigEventWriteService;
+    private final PigSearchWriteService pigSearchWriteService;
 
     @Autowired
     public DoctorCommonGroupEventHandler(DoctorCloseGroupEventHandler doctorCloseGroupEventHandler,
                                          DoctorMoveInGroupEventHandler doctorMoveInGroupEventHandler,
                                          DoctorGroupReadService doctorGroupReadService,
                                          DoctorGroupManager doctorGroupManager,
-                                         DoctorPigEventWriteService doctorPigEventWriteService) {
+                                         DoctorPigEventWriteService doctorPigEventWriteService,
+                                         PigSearchWriteService pigSearchWriteService) {
         this.doctorCloseGroupEventHandler = doctorCloseGroupEventHandler;
         this.doctorMoveInGroupEventHandler = doctorMoveInGroupEventHandler;
         this.doctorGroupReadService = doctorGroupReadService;
         this.doctorGroupManager = doctorGroupManager;
         this.doctorPigEventWriteService = doctorPigEventWriteService;
+        this.pigSearchWriteService = pigSearchWriteService;
     }
 
     /**
@@ -188,6 +192,9 @@ public class DoctorCommonGroupEventHandler {
         farmEntryDto.setMotherCode(input.getMotherEarCode());
         farmEntryDto.setEarCode(input.getEarCode());
 
-        orServEx(doctorPigEventWriteService.pigEntryEvent(basicDto, farmEntryDto));
+        Long pigId = orServEx(doctorPigEventWriteService.pigEntryEvent(basicDto, farmEntryDto));
+
+        //解决在事务里发事件 异步取不到的问题, 以后绝对不能这么干了
+        pigSearchWriteService.update(pigId);
     }
 }

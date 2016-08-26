@@ -110,9 +110,7 @@ public class DoctorZKListener implements EventListener {
                     pigSearchWriteService.update(pigId);
                 }else {
                     context.remove("contextType");
-                    context.keySet().stream().forEach(s->{
-                        pigSearchWriteService.update(Long.valueOf(s));
-                    });
+                    context.keySet().forEach(s -> pigSearchWriteService.update(Long.valueOf(s)));
                 }
                 // 发送 PigEventCreateEvent 事件
                 coreEventDispatcher.publish(pigEventCreateEvent);
