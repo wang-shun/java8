@@ -7,6 +7,8 @@ import lombok.experimental.Builder;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created by yaoqijun.
@@ -31,4 +33,15 @@ public class DoctorDiseaseDto implements Serializable{
     private String diseaseStaff;    // 疾病操作人员
 
     private String diseaseRemark;   // 疾病注解
+
+    public Map<String, String> descMap() {
+        Map<String, String> map = new HashMap<>();
+        if(diseaseName != null){
+            map.put("疾病", diseaseName);
+        }
+        if(diseaseStaff != null){
+            map.put("操作人", diseaseStaff);
+        }
+        return map;
+    }
 }

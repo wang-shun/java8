@@ -144,7 +144,7 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
         event.setIsAuto(baseInput.getIsAuto());
         event.setCreatorId(baseInput.getCreatorId());   //创建人
         event.setCreatorName(baseInput.getCreatorName());
-        event.setDesc(getDesc(eventType, baseInput.getIsAuto()));
+        event.setDesc(baseInput.generateEventDesc());
         event.setRemark(baseInput.getRemark());
         return event;
     }
@@ -297,13 +297,6 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
         }
     }
 
-    private String getDesc(GroupEventType eventType, Integer isAuto) {
-        if (Objects.equals(isAuto, IsOrNot.YES.getValue())) {
-            return "系统自动生成的" + eventType.getDesc() + "事件";
-        }
-        return "手工录入的" + eventType.getDesc() + "事件";
-    }
-
     //品种校验, 如果猪群的品种已经确定, 那么录入的品种必须和猪群的品种一致
     protected static void checkBreed(Long groupBreedId, Long breedId) {
         if (notNull(groupBreedId) && notNull(breedId) && !groupBreedId.equals(breedId)) {
@@ -392,5 +385,14 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
     protected static DoctorGroupEvent.TransGroupType getTransType(Integer pigType, DoctorBarn toBarn) {
         return Objects.equals(pigType, toBarn.getPigType()) || (FARROW_TYPES.contains(pigType) && FARROW_TYPES.contains(toBarn.getPigType())) ?
                 DoctorGroupEvent.TransGroupType.IN : DoctorGroupEvent.TransGroupType.OUT;
+    }
+
+    //重量如果 < 0  返回0
+    protected static double getDeltaWeight(Double weight) {
+        return weight == null || weight < 0 ? 0 : weight;
+    }
+
+    protected DoctorBarn getBarnById(Long barnId) {
+        return RespHelper.orServEx(doctorBarnReadService.findBarnById(barnId));
     }
 }

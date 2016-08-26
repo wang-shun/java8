@@ -102,7 +102,7 @@ public class DoctorTransFarmGroupEventHandler extends DoctorAbstractGroupEventHa
         groupTrack.setSowQty(EventUtil.minusQuantity(groupTrack.getQuantity(), groupTrack.getBoarQty()));
 
         //重新计算重量
-        groupTrack.setWeight(groupTrack.getWeight() - transFarm.getWeight());
+        groupTrack.setWeight(getDeltaWeight(groupTrack.getWeight() - transFarm.getWeight()));
         groupTrack.setAvgWeight(EventUtil.getAvgWeight(groupTrack.getWeight(), groupTrack.getQuantity()));
 
         updateGroupTrack(groupTrack, event);

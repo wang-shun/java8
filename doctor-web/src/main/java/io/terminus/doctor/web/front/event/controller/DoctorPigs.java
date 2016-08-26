@@ -13,6 +13,7 @@ import io.terminus.doctor.event.dto.DoctorGroupDetail;
 import io.terminus.doctor.event.dto.DoctorPigInfoDetailDto;
 import io.terminus.doctor.event.dto.DoctorPigInfoDto;
 import io.terminus.doctor.event.dto.DoctorPigMessage;
+import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
@@ -153,11 +154,12 @@ public class DoctorPigs {
         Integer pregCheckResult =null;
         try{
             String extra = doctorPigTrack.getExtra();
-            if (StringUtils.isNotBlank(extra)){
+            if (doctorPigTrack.getStatus() == PigStatus.KongHuai.getKey() && StringUtils.isNotBlank(extra)){
                 Map<String, Object> extraMap = JsonMapper.JSON_NON_DEFAULT_MAPPER.getMapper().readValue(extra, JacksonType.MAP_OF_OBJECT);
                 Object checkResult = extraMap.get("pregCheckResult");
                 if (checkResult != null) {
                     pregCheckResult = Integer.parseInt(checkResult.toString());
+                    doctorPigTrack.setStatus(pregCheckResult);
                 }
             }
         }catch (Exception e){

@@ -96,6 +96,8 @@ public class DoctorSowPregCheckHandler extends DoctorAbstractEventFlowHandler {
         } else if (Objects.equals(pregCheckResult, PregCheckResult.LIUCHAN.getKey())) {
             extra.put("liuchanToMateCheck", true);
             extra.put("pregCheckResult", KongHuaiPregCheckResult.LIUCHAN.getKey());
+        }else if (Objects.equals(pregCheckResult, PregCheckResult.YANG.getKey())){
+            extra.put("pregCheckResult", PigStatus.Pregnancy.getKey());
         }
 
         doctorPigTrack.addAllExtraMap(extra);

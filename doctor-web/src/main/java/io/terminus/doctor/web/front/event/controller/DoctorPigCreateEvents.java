@@ -62,6 +62,7 @@ import static java.util.Objects.isNull;
 @Slf4j
 @Controller
 @RequestMapping("/api/doctor/events/create")
+@SuppressWarnings("all")
 public class DoctorPigCreateEvents {
 
     private static final ObjectMapper OBJECT_MAPPER = JsonMapper.JSON_NON_DEFAULT_MAPPER.getMapper();

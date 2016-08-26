@@ -7,6 +7,8 @@ import org.hibernate.validator.constraints.NotEmpty;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Desc: 疾病事件
@@ -47,4 +49,19 @@ public class DoctorDiseaseGroupInput extends BaseGroupInput implements Serializa
      * 诊断人员name
      */
     private String doctorName;
+
+    @Override
+    public Map<String, String> descMap() {
+        Map<String, String> map = new HashMap<>();
+        if(quantity != null){
+            map.put("猪只数", quantity.toString());
+        }
+        if(diseaseName != null){
+            map.put("疾病", diseaseName);
+        }
+        if(doctorName != null){
+           map.put("诊断人", doctorName);
+        }
+        return map;
+    }
 }

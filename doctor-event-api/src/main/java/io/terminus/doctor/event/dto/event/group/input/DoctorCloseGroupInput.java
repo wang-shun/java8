@@ -4,6 +4,8 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Desc: 关闭猪群事件录入信息
@@ -15,4 +17,9 @@ import java.io.Serializable;
 @Data
 public class DoctorCloseGroupInput extends BaseGroupInput implements Serializable {
     private static final long serialVersionUID = 8337863112678158187L;
+
+    @Override
+    public Map<String, String> descMap() {
+        return new HashMap<>();
+    }
 }
