@@ -22,6 +22,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Builder;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.Serializable;
 import java.util.Map;
@@ -32,6 +33,7 @@ import java.util.Map;
  * Email:yaoqj@terminus.io
  * Descirbe: 基本的用户录入信息内容(信息录入基本字段信息)
  */
+@Slf4j
 @Builder
 @Data
 @AllArgsConstructor
@@ -102,7 +104,7 @@ public class DoctorBasicInputInfoDto implements Serializable{
         if(pigEvent == null){
             return this.eventDesc;
         }
-
+        log.info("generateEventDescFromExtra extra:{}", extra);
         Map<String, String> fieldMap;
         switch (pigEvent) {
             case ENTRY:
@@ -139,7 +141,7 @@ public class DoctorBasicInputInfoDto implements Serializable{
                 fieldMap = BeanMapper.map(extra, DoctorVaccinationDto.class).descMap();
                 break;
             case FOSTERS:
-                fieldMap = BeanMapper.map(extra, DoctorFostersDto.class).descMap();
+                fieldMap = BeanMapper.map(extra, DoctorFostersDto.class).descMap(); // TODO: 16/8/26
                 break;
             case FOSTERS_BY:
                 fieldMap = BeanMapper.map(extra, DoctorFostersDto.class).descMap();
