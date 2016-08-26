@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static io.terminus.common.utils.Arguments.notEmpty;
@@ -84,9 +85,7 @@ public class DoctorReportJobs {
     @Scheduled(cron = "0 0 1 * * ?")
     @RequestMapping(value = "/updateHistoryDailyReport", method = RequestMethod.GET)
     public void updateHistoryDailyReport(){
-        Date beginDate = null;
         Date endDate = new DateTime(Dates.startOfDay(new Date())).plusDays(-2).toDate();
-        Long farmId = null;
         try{
             if(!hostLeader.isLeader()) {
                 log.info("current leader is:{}, skip", hostLeader.currentLeaderId());
@@ -94,7 +93,11 @@ public class DoctorReportJobs {
             }
             log.info("update history daily report job start, now is:{}", DateUtil.toDateTimeString(new Date()));
 
-            RespHelper.or500(doctorDailyReportWriteService.updateHistoryDailyReport(beginDate, endDate, farmId));
+            for(Map.Entry<Long, String> entry : RespHelper.or500(doctorDailyReportWriteService.getDailyReport2Update()).entrySet()){
+                Long farmId = entry.getKey();
+                Date beginDate = DateUtil.toDate(entry.getValue());
+                RespHelper.or500(doctorDailyReportWriteService.updateDailyReport(beginDate, endDate, farmId));
+            }
 
             log.info("update history daily report job end, now is:{}", DateUtil.toDateTimeString(new Date()));
         }catch(Exception e) {
