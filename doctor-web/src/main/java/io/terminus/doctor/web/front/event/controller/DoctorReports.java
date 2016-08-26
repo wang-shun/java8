@@ -3,7 +3,6 @@ package io.terminus.doctor.web.front.event.controller;
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dto.report.daily.DoctorDailyReportDto;
-import io.terminus.doctor.event.dto.report.monthly.DoctorMonthlyReportDto;
 import io.terminus.doctor.event.dto.report.monthly.DoctorMonthlyReportTrendDto;
 import io.terminus.doctor.event.service.DoctorDailyReportReadService;
 import io.terminus.doctor.event.service.DoctorMonthlyReportReadService;
@@ -48,24 +47,11 @@ public class DoctorReports {
      * @param date   日期 yyyy-MM-dd
      * @return 猪场月报表
      */
-    @RequestMapping(value = "/monthly/trend", method = RequestMethod.GET)
+    @RequestMapping(value = "/monthly", method = RequestMethod.GET)
     public DoctorMonthlyReportTrendDto findMonthlyReportTrendByFarmIdAndSumAt(@RequestParam("farmId") Long farmId,
                                                                               @RequestParam("date") String date,
                                                                               @RequestParam(value = "index", required = false) Integer index) {
         return RespHelper.or500(doctorMonthlyReportReadService.findMonthlyReportTrendByFarmIdAndSumAt(farmId, date, index));
-    }
-
-    /**
-     * 根据farmId和日期查询猪场月报表 // TODO: 16/8/25 暂时解决下接口变更问题
-     * @param farmId 猪场id
-     * @param date   日期 yyyy-MM-dd
-     * @return 猪场月报表
-     */
-    @RequestMapping(value = "/monthly", method = RequestMethod.GET)
-    public DoctorMonthlyReportDto findMonthlyReportByFarmIdAndSumAt(@RequestParam("farmId") Long farmId,
-                                                                    @RequestParam("date") String date,
-                                                                    @RequestParam(value = "index", required = false) Integer index) {
-        return RespHelper.or500(doctorMonthlyReportReadService.findMonthlyReportTrendByFarmIdAndSumAt(farmId, date, 1)).getReport();
     }
 
     /**
