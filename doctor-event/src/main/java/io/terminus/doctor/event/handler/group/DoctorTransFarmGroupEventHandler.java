@@ -70,7 +70,6 @@ public class DoctorTransFarmGroupEventHandler extends DoctorAbstractGroupEventHa
         checkFarrowGroupUnique(transFarm.getIsCreateGroup(), transFarm.getToBarnId());
         checkQuantity(groupTrack.getQuantity(), transFarm.getQuantity());
         checkQuantityEqual(transFarm.getQuantity(), transFarm.getBoarQty(), transFarm.getSowQty());
-        checkTranWeight(groupTrack.getWeight(), transFarm.getWeight());
         checkDayAge(groupTrack.getAvgDayAge(), transFarm);
 
         //转入猪舍
@@ -100,10 +99,6 @@ public class DoctorTransFarmGroupEventHandler extends DoctorAbstractGroupEventHa
         boarQty = boarQty > groupTrack.getQuantity() ? groupTrack.getQuantity() : boarQty;
         groupTrack.setBoarQty(boarQty < 0 ? 0 : boarQty);
         groupTrack.setSowQty(EventUtil.minusQuantity(groupTrack.getQuantity(), groupTrack.getBoarQty()));
-
-        //重新计算重量
-        groupTrack.setWeight(getDeltaWeight(groupTrack.getWeight() - transFarm.getWeight()));
-        groupTrack.setAvgWeight(EventUtil.getAvgWeight(groupTrack.getWeight(), groupTrack.getQuantity()));
 
         updateGroupTrack(groupTrack, event);
 

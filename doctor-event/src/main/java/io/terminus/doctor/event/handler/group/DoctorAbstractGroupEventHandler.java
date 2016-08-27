@@ -245,22 +245,6 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
         doctorGroupSnapshotDao.update(snapshot);
     }
 
-    //转群总重不能大于猪群总重
-    protected static void checkTranWeight(Double weight, Double transWeight) {
-        if (transWeight > weight) {
-            log.error("weight:{}, transWeight:{}", weight, transWeight);
-            throw new ServiceException("tranWeight.over.weight");
-        }
-    }
-
-    //变动金额不能大于原来的金额
-    protected static void checkChangeAmount(Long amount, Long changeAmount) {
-        if (changeAmount != null && changeAmount > amount) {
-            log.error("amount:{}, changeAmount:{}", amount, changeAmount);
-            throw new ServiceException("changeAmount.over.amount");
-        }
-    }
-
     //校验数量
     protected static void checkQuantity(Integer max, Integer actual) {
         if (actual > max) {
