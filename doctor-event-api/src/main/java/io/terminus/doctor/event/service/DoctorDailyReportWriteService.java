@@ -35,15 +35,6 @@ public interface DoctorDailyReportWriteService {
     Response<Boolean> updateDailyReport(Date beginDate, Date endDate, Long farmId);
 
     /**
-     * 记录需要更新的日报, 这些数据将会存入redis
-     * 如果同一猪场多次存入, 则保留 beginDate 最早的一次
-     * @param beginDate 自此日期之后(包括此日期)的日报将被job更新(重新统计)
-     * @param farmId 猪场
-     * @return 是否成功
-     */
-    Response saveDailyReport2Update(Date beginDate, Long farmId);
-
-    /**
      * 删除存入redis的需要更新的日报
      * @param farmId 猪场
      * @return 是否成功

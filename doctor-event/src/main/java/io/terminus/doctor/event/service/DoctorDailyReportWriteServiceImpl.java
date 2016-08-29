@@ -3,9 +3,8 @@ package io.terminus.doctor.event.service;
 import com.google.common.base.Throwables;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.model.Response;
-import io.terminus.common.redis.utils.JedisTemplate;
 import io.terminus.common.utils.Dates;
-import io.terminus.doctor.common.utils.DateUtil;
+import io.terminus.doctor.event.dao.redis.DailyReport2UpdateDao;
 import io.terminus.doctor.event.manager.DoctorDailyReportManager;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
@@ -13,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -28,16 +26,14 @@ import java.util.Map;
 @RpcProvider
 public class DoctorDailyReportWriteServiceImpl implements DoctorDailyReportWriteService {
 
-    private static final String REDIS_KEY = "dailyReport:update:";
-
     private final DoctorDailyReportManager doctorDailyReportManager;
-    private final JedisTemplate jedisTemplate;
+    private final DailyReport2UpdateDao dailyReport2UpdateDao;
 
     @Autowired
     public DoctorDailyReportWriteServiceImpl(DoctorDailyReportManager doctorDailyReportManager,
-                                             JedisTemplate jedisTemplate) {
+                                             DailyReport2UpdateDao dailyReport2UpdateDao) {
         this.doctorDailyReportManager = doctorDailyReportManager;
-        this.jedisTemplate = jedisTemplate;
+        this.dailyReport2UpdateDao = dailyReport2UpdateDao;
     }
 
     @Override
@@ -68,27 +64,9 @@ public class DoctorDailyReportWriteServiceImpl implements DoctorDailyReportWrite
     }
 
     @Override
-    public Response saveDailyReport2Update(Date beginDate, Long farmId){
-        try{
-            String key = REDIS_KEY + farmId;
-            jedisTemplate.execute(jedis -> {
-                if(!jedis.exists(key) || DateUtil.toDate(jedis.get(key)).after(beginDate)){
-                    jedis.set(key, DateUtil.toDateString(beginDate));
-                }
-            });
-            return Response.ok();
-        }catch(Exception e) {
-            log.error("saveDailyReport2Update failed, cause:{}", Throwables.getStackTraceAsString(e));
-            return Response.fail("save.daily.report.to.update.fail");
-        }
-    }
-
-    @Override
     public Response deleteDailyReport2Update(Long farmId){
         try{
-            jedisTemplate.execute(jedis -> {
-                jedis.del(REDIS_KEY + farmId);
-            });
+            dailyReport2UpdateDao.deleteDailyReport2Update(farmId);
             return Response.ok();
         }catch(Exception e) {
             log.error("saveDailyReport2Update failed, cause:{}", Throwables.getStackTraceAsString(e));
@@ -98,15 +76,8 @@ public class DoctorDailyReportWriteServiceImpl implements DoctorDailyReportWrite
 
     @Override
     public Response<Map<Long, String>> getDailyReport2Update(){
-        Map<Long, String> farmAndDate = new HashMap<>();
         try{
-            jedisTemplate.execute(jedis -> {
-                for(String key : jedis.keys(REDIS_KEY + "*")){
-                    farmAndDate.put(Long.valueOf(key.replace(REDIS_KEY, "")), jedis.get(key));
-                }
-            });
-
-            return Response.ok(farmAndDate);
+            return Response.ok(dailyReport2UpdateDao.getDailyReport2Update());
         }catch(Exception e) {
             log.error("getDailyReport2Update failed, cause:{}", Throwables.getStackTraceAsString(e));
             return Response.fail("get.daily.report.to.update.fail");

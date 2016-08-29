@@ -10,6 +10,8 @@ import io.terminus.common.utils.Splitters;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.dao.DoctorKpiDao;
 import io.terminus.doctor.event.dao.DoctorPigTypeStatisticDao;
+import io.terminus.doctor.event.dao.redis.DailyReport2UpdateDao;
+import io.terminus.doctor.event.dao.redis.DailyReportHistoryDao;
 import io.terminus.doctor.event.dto.report.daily.DoctorCheckPregDailyReport;
 import io.terminus.doctor.event.dto.report.daily.DoctorDailyReportDto;
 import io.terminus.doctor.event.dto.report.daily.DoctorDeadDailyReport;
@@ -45,12 +47,17 @@ public class DoctorDailyReportCache {
     private final LoadingCache<String, DoctorDailyReportDto> reportCache;
     private final DoctorKpiDao doctorKpiDao;
     private final DoctorPigTypeStatisticDao doctorPigTypeStatisticDao;
+    private final DailyReportHistoryDao dailyReportHistoryDao;
+    private final DailyReport2UpdateDao dailyReport2UpdateDao;
 
     @Autowired
-    public DoctorDailyReportCache(DoctorKpiDao doctorKpiDao,
-                                  DoctorPigTypeStatisticDao doctorPigTypeStatisticDao) {
+    public DoctorDailyReportCache(DoctorKpiDao doctorKpiDao, DailyReportHistoryDao dailyReportHistoryDao,
+                                  DoctorPigTypeStatisticDao doctorPigTypeStatisticDao,
+                                  DailyReport2UpdateDao dailyReport2UpdateDao) {
         this.doctorKpiDao = doctorKpiDao;
         this.doctorPigTypeStatisticDao = doctorPigTypeStatisticDao;
+        this.dailyReportHistoryDao = dailyReportHistoryDao;
+        this.dailyReport2UpdateDao = dailyReport2UpdateDao;
 
         this.reportCache = CacheBuilder.newBuilder().expireAfterAccess(1L, TimeUnit.DAYS).build(new CacheLoader<String, DoctorDailyReportDto>() {
             @Override
@@ -92,14 +99,26 @@ public class DoctorDailyReportCache {
     /**
      * 仅put猪日报, 不修改引用
      * @param reportDto 猪日报
+     * @param date 日报的日期
      */
     public void putDailyPigReport(Long farmId, Date date, DoctorDailyReportDto reportDto) {
-        synchronized (reportCache) {
-            DoctorDailyReportDto report = getDailyReport(farmId,  date);
-            if (isNull(report)) {
-                putDailyReport(farmId, date, reportDto);
-            } else {
-                report.setPig(reportDto);
+        // 如果事件日期早于当天, 则从redis取出历史日报并更新在redis里面, 暂不存入数据库
+        if(Dates.startOfDay(date).before(Dates.startOfDay(new Date()))){
+            DoctorDailyReportDto redisDto = dailyReportHistoryDao.getDailyReportWithRedis(farmId, date);
+            if(redisDto != null){
+                redisDto.setPig(reportDto);
+                dailyReportHistoryDao.saveDailyReport(redisDto, farmId, date);
+                dailyReport2UpdateDao.saveDailyReport2Update(date, farmId);
+            }
+        }else{
+            // 如果事件日期晚于或等于当天, 则使用缓存
+            synchronized (reportCache) {
+                DoctorDailyReportDto report = getDailyReport(farmId,  date);
+                if (isNull(report)) {
+                    putDailyReport(farmId, date, reportDto);
+                } else {
+                    report.setPig(reportDto);
+                }
             }
         }
     }
@@ -124,6 +143,15 @@ public class DoctorDailyReportCache {
      */
     public void clearAllReport() {
         reportCache.invalidateAll();
+    }
+
+    /**
+     * 清理指定猪场在指定日期的缓存
+     * @param farmId 猪场
+     * @param date 日期
+     */
+    public void clearFarmReport(Long farmId, Date date) {
+        reportCache.invalidate(getReportKey(farmId, date));
     }
 
     //实时Sql查询某猪场的日报统计

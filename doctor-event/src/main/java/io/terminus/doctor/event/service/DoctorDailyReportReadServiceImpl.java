@@ -10,6 +10,7 @@ import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.cache.DoctorDailyReportCache;
 import io.terminus.doctor.event.dao.DoctorDailyReportDao;
+import io.terminus.doctor.event.dao.redis.DailyReportHistoryDao;
 import io.terminus.doctor.event.dto.report.daily.DoctorDailyReportDto;
 import io.terminus.doctor.event.model.DoctorDailyReport;
 import lombok.extern.slf4j.Slf4j;
@@ -33,12 +34,15 @@ public class DoctorDailyReportReadServiceImpl implements DoctorDailyReportReadSe
 
     private final DoctorDailyReportDao doctorDailyReportDao;
     private final DoctorDailyReportCache doctorDailyReportCache;
+    private final DailyReportHistoryDao dailyReportHistoryDao;
 
     @Autowired
     public DoctorDailyReportReadServiceImpl(DoctorDailyReportDao doctorDailyReportDao,
-                                            DoctorDailyReportCache doctorDailyReportCache) {
+                                            DoctorDailyReportCache doctorDailyReportCache,
+                                            DailyReportHistoryDao dailyReportHistoryDao) {
         this.doctorDailyReportDao = doctorDailyReportDao;
         this.doctorDailyReportCache = doctorDailyReportCache;
+        this.dailyReportHistoryDao = dailyReportHistoryDao;
     }
 
     @PostConstruct
@@ -59,12 +63,12 @@ public class DoctorDailyReportReadServiceImpl implements DoctorDailyReportReadSe
             Date date = DateUtil.toDate(sumAt);
             DoctorDailyReportDto report;
 
-            //如果不查今天, 直接查数据库, 如果查未来, 直接返回failReport
+            //如果不查今天, 则从redis查询, 如果查未来, 直接返回failReport
             if (date != null && !date.equals(Dates.startOfDay(new Date()))) {
                 if (date.after(new Date())) {
                     return Response.ok(failReport());
                 }
-                report = getDailyReportWithSql(farmId, date);
+                report = dailyReportHistoryDao.getDailyReportWithRedis(farmId, date);
                 if (report != null) {
                     return Response.ok(report);
                 }
