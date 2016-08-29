@@ -445,7 +445,7 @@ public class DoctorMoveDataController {
             Date since = DateUtil.toDate(date);
 
             DateUtil.getBeforeDays(new Date(), DateUtil.getDeltaDaysAbs(since, new Date()) + 1).forEach(d ->
-                    doctorDailyReportWriteService.createDailyReports(Lists.newArrayList(farmId), DateUtil.toDate(date)));
+                    doctorDailyReportWriteService.createDailyReports(Lists.newArrayList(farmId), d));
             log.warn("move realtime daily report until now end");
             return true;
         } catch (Exception e) {
