@@ -28,6 +28,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -416,7 +417,7 @@ public class DoctorMoveDataController {
     }
 
     /**
-     * 拆分母猪转舍事件
+     * 实时日报统计
      */
     @RequestMapping(value = "/realtime/daily", method = RequestMethod.GET)
     public Boolean moveRealtimeDailyReport(@RequestParam("farmId") Long farmId,
@@ -428,6 +429,27 @@ public class DoctorMoveDataController {
             return true;
         } catch (Exception e) {
             log.error("move realtime daily report failed, farmId:{}, cause:{}", farmId, Throwables.getStackTraceAsString(e));
+            return false;
+        }
+    }
+
+    /**
+     * 实时日报统计, 从 date 直到今天的
+     */
+    @RequestMapping(value = "/realtime/daily/until", method = RequestMethod.GET)
+    public Boolean moveRealtimeDailyReportUntilNow(@RequestParam("farmId") Long farmId,
+                                                   @RequestParam("date") String date) {
+        try {
+            log.warn("move realtime daily report until now start, farmId:{}", farmId);
+
+            Date since = DateUtil.toDate(date);
+
+            DateUtil.getBeforeDays(new Date(), DateUtil.getDeltaDaysAbs(since, new Date()) + 1).forEach(d ->
+                    doctorDailyReportWriteService.createDailyReports(Lists.newArrayList(farmId), DateUtil.toDate(date)));
+            log.warn("move realtime daily report until now end");
+            return true;
+        } catch (Exception e) {
+            log.error("move realtime daily report until now failed, farmId:{}, cause:{}", farmId, Throwables.getStackTraceAsString(e));
             return false;
         }
     }
