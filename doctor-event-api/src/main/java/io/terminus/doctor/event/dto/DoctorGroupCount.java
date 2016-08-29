@@ -38,4 +38,14 @@ public class DoctorGroupCount implements Serializable {
      * 育肥猪
      */
     private long fattenCount;
+
+    /**
+     * 后备母猪
+     */
+    private long houbeiSowCount;
+
+    /**
+     * 后备公猪
+     */
+    private long houbeiBoarCount;
 }

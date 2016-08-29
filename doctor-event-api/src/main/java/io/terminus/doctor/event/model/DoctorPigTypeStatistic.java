@@ -58,6 +58,11 @@ public class DoctorPigTypeStatistic implements Serializable {
      * 育肥猪数
      */
     private Integer fatten;
+
+    /**
+     * 后备猪数
+     */
+    private Integer houbei;
     
     /**
      * 创建时间

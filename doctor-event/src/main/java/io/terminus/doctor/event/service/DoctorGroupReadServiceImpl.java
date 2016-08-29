@@ -198,6 +198,8 @@ public class DoctorGroupReadServiceImpl implements DoctorGroupReadService {
 
             List<DoctorGroupDetail> nurseries = MoreObjects.firstNonNull(groupMap.get(PigType.NURSERY_PIGLET.getValue()), Lists.newArrayList());
             List<DoctorGroupDetail> fattens = MoreObjects.firstNonNull(groupMap.get(PigType.FATTEN_PIG.getValue()), Lists.newArrayList());
+            List<DoctorGroupDetail> houbeiSows = MoreObjects.firstNonNull(groupMap.get(PigType.RESERVE_SOW.getValue()), Lists.newArrayList());
+            List<DoctorGroupDetail> houbeiBoars = MoreObjects.firstNonNull(groupMap.get(PigType.RESERVE_BOAR.getValue()), Lists.newArrayList());
 
 
             //根据猪类统计
@@ -207,6 +209,8 @@ public class DoctorGroupReadServiceImpl implements DoctorGroupReadService {
             count.setFarrowCount(CountUtil.sumInt(farrows, g -> g.getGroupTrack().getQuantity()));
             count.setNurseryCount(CountUtil.sumInt(nurseries, g -> g.getGroupTrack().getQuantity()));
             count.setFattenCount(CountUtil.sumInt(fattens, g -> g.getGroupTrack().getQuantity()));
+            count.setHoubeiBoarCount(CountUtil.sumInt(houbeiBoars, g -> g.getGroupTrack().getQuantity()));
+            count.setHoubeiSowCount(CountUtil.sumInt(houbeiSows, g -> g.getGroupTrack().getQuantity()));
             return Response.ok(count);
         } catch (Exception e) {
             log.error("count farm group failed, farmId:{}, cause:{}", farmId, Throwables.getStackTraceAsString(e));

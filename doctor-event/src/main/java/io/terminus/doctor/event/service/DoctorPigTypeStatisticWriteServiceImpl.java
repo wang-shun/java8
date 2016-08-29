@@ -129,5 +129,6 @@ public class DoctorPigTypeStatisticWriteServiceImpl implements DoctorPigTypeStat
         statistic.setFarrow((int) groupCount.getFarrowCount());
         statistic.setNursery((int) groupCount.getNurseryCount());
         statistic.setFatten((int) groupCount.getFattenCount());
+        statistic.setHoubei((int) groupCount.getHoubeiSowCount() + (int) groupCount.getHoubeiBoarCount());
     }
 }

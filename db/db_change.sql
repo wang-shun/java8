@@ -264,3 +264,6 @@ alter table workflow_definition_node_events ADD Column `tacker` VARCHAR(128) DEF
 
 -- 2016-08-24 猪事件新增分娩总重
 ALTER TABLE doctor_pig_events ADD COLUMN farrow_weight DOUBLE DEFAULT NULL COMMENT '分娩总重(kg)' AFTER npd;
+
+-- 2016-08-29 增加后备猪统计字段
+ALTER TABLE doctor_pig_type_statistics ADD COLUMN houbei int(11) DEFAULT NULL COMMENT '后备猪数' AFTER fatten;

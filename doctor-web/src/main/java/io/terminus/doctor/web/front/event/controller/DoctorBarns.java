@@ -14,6 +14,7 @@ import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dto.DoctorGroupDetail;
 import io.terminus.doctor.event.dto.DoctorGroupSearchDto;
 import io.terminus.doctor.event.dto.DoctorPigInfoDto;
+import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigTrack;
@@ -40,6 +41,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -187,6 +189,57 @@ public class DoctorBarns {
             types = Splitters.splitToInteger(pigTypes, Splitters.COMMA);
         }
         return filterBarnByPigIds(RespHelper.or500(doctorBarnReadService.findBarnsByFarmIdAndPigTypes(farmId, types)), pigIds);
+    }
+
+
+    /**
+     * 猪舍批量转舍时, 根据猪id, 求一下可转猪舍的交集
+     * @param farmId    猪场id
+     * @param eventType 事件类型
+     * @see io.terminus.doctor.event.enums.PigEvent
+     * @param pigIds    猪ids 逗号分隔
+     * @return 猪舍list
+     */
+    @RequestMapping(value = "/pigTypes/trans", method = RequestMethod.GET)
+    public List<DoctorBarn> findBarnsByfarmIdAndTypeWhenBatchTransBarn(@RequestParam("farmId") Long farmId,
+                                                                       @RequestParam("eventType") Integer eventType,
+                                                                       @RequestParam("pigIds") String pigIds) {
+        List<Integer> barnTypes;
+        if (Objects.equals(eventType, PigEvent.CHG_LOCATION.getKey())) {
+            barnTypes = getTransBarnTypes(pigIds);
+        } else if (Objects.equals(eventType, PigEvent.TO_MATING.getKey())) {
+            barnTypes = PigType.MATING_TYPES;
+        } else if (Objects.equals(eventType, PigEvent.TO_FARROWING.getKey())) {
+            barnTypes = PigType.FARROW_TYPES;
+        } else {
+            //转舍类型: 普通转舍, 去配种, 去分娩, 其他报错
+            throw new JsonResponseException("not.trans.barn.type");
+        }
+
+        return notEmpty(barnTypes) ? RespHelper.or500(doctorBarnReadService.findBarnsByFarmIdAndPigTypes(farmId, barnTypes))
+                : Collections.emptyList();
+    }
+
+    //普通转舍 转入猪舍类型
+    private List<Integer> getTransBarnTypes(String pigIds) {
+        List<Integer> barnTypes = PigType.ALL_TYPES;
+        //遍历求猪舍类型交集
+        for (Long pigId : Splitters.splitToLong(pigIds, Splitters.COMMA)) {
+            DoctorBarn pigBarn = RespHelper.or500(doctorPigReadService.findBarnByPigId(pigId));
+            if (PigType.MATING_TYPES.contains(pigBarn.getPigType())) {
+                barnTypes.retainAll(PigType.MATING_TYPES);
+            }
+            else if (PigType.FARROW_TYPES.contains(pigBarn.getPigType())) {
+                barnTypes.retainAll(PigType.FARROW_TYPES);
+            }
+            else if (PigType.HOUBEI_TYPES.contains(pigBarn.getPigType())) {
+                barnTypes.retainAll(PigType.HOUBEI_TYPES);
+            }
+            else {
+                barnTypes.retainAll(Lists.newArrayList(pigBarn.getPigType()));
+            }
+        }
+        return barnTypes;
     }
 
     /**
