@@ -69,12 +69,11 @@ public class DoctorTransGroupEventHandler extends DoctorAbstractGroupEventHandle
 
         //校验能否转群, 数量, 日龄差, 转群总重
         checkCanTransBarn(group.getPigType(), transGroup.getToBarnId());
-        checkCanTransGroup(group.getId(), transGroup.getToGroupId(), transGroup.getToBarnId());
+        checkCanTransGroup(transGroup.getToGroupId(), transGroup.getToBarnId());
         checkFarrowGroupUnique(transGroup.getIsCreateGroup(), transGroup.getToBarnId());
         checkQuantity(groupTrack.getQuantity(), transGroup.getQuantity());
         checkQuantityEqual(transGroup.getQuantity(), transGroup.getBoarQty(), transGroup.getSowQty());
         Double realWeight = transGroup.getAvgWeight() * transGroup.getQuantity();   //后台计算的总重
-        checkTranWeight(groupTrack.getWeight(), realWeight);
         checkDayAge(groupTrack.getAvgDayAge(), transGroup);
 
         //转入猪舍
@@ -104,10 +103,6 @@ public class DoctorTransGroupEventHandler extends DoctorAbstractGroupEventHandle
         boarQty = boarQty > groupTrack.getQuantity() ? groupTrack.getQuantity() : boarQty;
         groupTrack.setBoarQty(boarQty < 0 ? 0 : boarQty);
         groupTrack.setSowQty(EventUtil.minusQuantity(groupTrack.getQuantity(), groupTrack.getBoarQty()));
-
-        //重新计算重量
-        groupTrack.setWeight(getDeltaWeight(groupTrack.getWeight() - transGroup.getWeight()));
-        groupTrack.setAvgWeight(EventUtil.getAvgWeight(groupTrack.getWeight(), groupTrack.getQuantity()));
 
         updateGroupTrack(groupTrack, event);
 

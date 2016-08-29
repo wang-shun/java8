@@ -39,25 +39,25 @@ public class TransFromUtil {
         for (DoctorPigEvent doctorPigEvent : doctorPigEvents) {
             Map<String,Object> extraMap = doctorPigEvent.getExtraMap();
             if (extraMap != null) {
-                if (extraMap.get("matingType") != null) {
+                if (getInteger(extraMap, "matingType") != null) {
                     extraMap.put("matingType", MatingType.from(toInteger(extraMap.get("matingType"))).getDesc());
                 }
-                if (extraMap.get("checkResult") != null) {
+                if (getInteger(extraMap, "checkResult") != null) {
                     extraMap.put("checkResult", PregCheckResult.from(toInteger(extraMap.get("checkResult"))).getDesc());
                 }
-                if (extraMap.get("farrowingType") != null) {
+                if (getInteger(extraMap, "farrowingType") != null) {
                     extraMap.put("farrowingType", FarrowingType.from(toInteger(extraMap.get("farrowingType"))).getDesc());
                 }
-                if (extraMap.get("farrowIsSingleManager") != null) {
+                if (getInteger(extraMap, "farrowIsSingleManager") != null) {
                     extraMap.put("farrowIsSingleManager", (toInteger(extraMap.get("farrowIsSingleManager")) == 1) ? IsOrNot.YES.getDesc() : IsOrNot.NO.getDesc());
                 }
-                if (extraMap.get("fosterReason") != null) {
+                if (getLong(extraMap, "fosterReason") != null) {
                     extraMap.put("fosterReason", RespHelper.or500(doctorBasicReadService.findBasicById(toLong(extraMap.get("fosterReason")))).getName());
                 }
-                if (extraMap.get("vaccinationStaffId") != null) {
+                if (getLong(extraMap, "vaccinationStaffId") != null) {
                     extraMap.put("vaccinationStaffName", RespHelper.or500(userProfileReadService.findProfileByUserId(toLong(extraMap.get("vaccinationStaffId")))).getRealName());
                 }
-                if (extraMap.get("toBarnId") != null) {
+                if (getLong(extraMap, "toBarnId") != null) {
                     extraMap.put("toBarnId", RespHelper.or500(doctorBarnReadService.findBarnById(toLong(extraMap.get("toBarnId")))).getName());
                 }
             }
@@ -68,13 +68,13 @@ public class TransFromUtil {
         for (DoctorGroupEvent doctorGroupEvent : doctorGroupEvents) {
             Map<String,Object> extraMap = doctorGroupEvent.getExtraData();
             if (extraMap != null) {
-                if (extraMap.get("sex") != null) {
+                if (getInteger(extraMap, "sex") != null) {
                     extraMap.put("sex", DoctorGroupTrack.Sex.from(toInteger(extraMap.get("sex"))).getDesc());
                 }
-                if (extraMap.get("source") != null) {
+                if (getInteger(extraMap, "source") != null) {
                     extraMap.put("source", PigSource.from(toInteger(extraMap.get("source"))).getDesc());
                 }
-                if (extraMap.get("vaccinResult") != null) {
+                if (getInteger(extraMap, "vaccinResult") != null) {
                     extraMap.put("vaccinResult", (toInteger(extraMap.get("vaccinResult")) == 1) ? DoctorAntiepidemicGroupEvent.VaccinResult.POSITIVE : DoctorAntiepidemicGroupEvent.VaccinResult.NEGATIVE);
                 }
             }
@@ -87,5 +87,29 @@ public class TransFromUtil {
 
     private static Long toLong(Object o) {
         return Long.valueOf(String.valueOf(o));
+    }
+
+    private static Integer getInteger(Map<String, Object> params, String key) {
+        Object o = params.get(key);
+        if (o == null) {
+            return null;
+        }
+        try {
+            return Integer.valueOf(String.valueOf(o));
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    private static Long getLong(Map<String, Object> params, String key) {
+        Object o = params.get(key);
+        if (o == null) {
+            return null;
+        }
+        try {
+            return Long.valueOf(String.valueOf(o));
+        } catch (Exception e) {
+            return null;
+        }
     }
 }

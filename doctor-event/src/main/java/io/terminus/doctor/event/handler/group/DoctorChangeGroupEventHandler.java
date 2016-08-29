@@ -61,7 +61,6 @@ public class DoctorChangeGroupEventHandler extends DoctorAbstractGroupEventHandl
 
         checkQuantity(groupTrack.getQuantity(), change.getQuantity());
         checkQuantityEqual(change.getQuantity(), change.getBoarQty(), change.getSowQty());
-        checkTranWeight(groupTrack.getWeight(), change.getWeight());
         checkSalePrice(change.getChangeTypeId(), change.getPrice(), change.getAmount());
 
         //1.转换猪群变动事件
@@ -90,10 +89,6 @@ public class DoctorChangeGroupEventHandler extends DoctorAbstractGroupEventHandl
         groupTrack.setBoarQty(boarQty < 0 ? 0 : boarQty);
         groupTrack.setSowQty(EventUtil.minusQuantity(groupTrack.getQuantity(), groupTrack.getBoarQty()));
         groupTrack.setSaleQty(Objects.equals(DoctorBasicEnums.SALE.getId(), change.getChangeTypeId()) ? change.getQuantity() : 0);  //直接判断是否是销售
-
-        //重新计算重量
-        groupTrack.setWeight(getDeltaWeight(groupTrack.getWeight() - change.getWeight()));
-        groupTrack.setAvgWeight(EventUtil.getAvgWeight(groupTrack.getWeight(), groupTrack.getQuantity()));
         updateGroupTrack(groupTrack, event);
 
         //4.创建镜像

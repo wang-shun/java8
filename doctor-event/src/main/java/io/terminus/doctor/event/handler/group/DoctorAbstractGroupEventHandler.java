@@ -245,22 +245,6 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
         doctorGroupSnapshotDao.update(snapshot);
     }
 
-    //转群总重不能大于猪群总重
-    protected static void checkTranWeight(Double weight, Double transWeight) {
-        if (transWeight > weight) {
-            log.error("weight:{}, transWeight:{}", weight, transWeight);
-            throw new ServiceException("tranWeight.over.weight");
-        }
-    }
-
-    //变动金额不能大于原来的金额
-    protected static void checkChangeAmount(Long amount, Long changeAmount) {
-        if (changeAmount != null && changeAmount > amount) {
-            log.error("amount:{}, changeAmount:{}", amount, changeAmount);
-            throw new ServiceException("changeAmount.over.amount");
-        }
-    }
-
     //校验数量
     protected static void checkQuantity(Integer max, Integer actual) {
         if (actual > max) {
@@ -365,18 +349,13 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
         }
     }
 
-    //校验目标猪群的猪舍id与目标猪舍是否相同, 校验是否是同一猪群
-    protected void checkCanTransGroup(Long fromGroupId, Long toGroupId, Long toBarnId) {
+    //校验目标猪群的猪舍id与目标猪舍是否相同
+    protected void checkCanTransGroup(Long toGroupId, Long toBarnId) {
         if (toGroupId != null) {
             DoctorGroup toGroup = doctorGroupDao.findById(toGroupId);
             if (toGroup == null || !Objects.equals(toGroup.getCurrentBarnId(), toBarnId)) {
                 log.error("check can trans group toGroupId:{}, toBarnId:{}", toGroupId, toBarnId);
                 throw new ServiceException("group.toBarn.not.equal");
-            }
-
-            if (Objects.equals(fromGroupId, toGroupId)) {
-                log.error("check can trans group equal fromGroupId:{}, toGroupId:{}", fromGroupId, toGroupId);
-                throw new ServiceException("group.equal.cannot.trans");
             }
         }
     }

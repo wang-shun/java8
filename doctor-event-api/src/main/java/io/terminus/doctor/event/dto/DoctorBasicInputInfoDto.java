@@ -102,7 +102,6 @@ public class DoctorBasicInputInfoDto implements Serializable{
         if(pigEvent == null){
             return this.eventDesc;
         }
-
         Map<String, String> fieldMap;
         switch (pigEvent) {
             case ENTRY:

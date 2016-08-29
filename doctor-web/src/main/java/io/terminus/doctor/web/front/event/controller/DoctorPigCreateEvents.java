@@ -1,9 +1,9 @@
 package io.terminus.doctor.web.front.event.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.api.client.util.Lists;
 import com.google.common.base.Strings;
 import com.google.common.base.Throwables;
+import com.google.common.collect.Lists;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.Response;
 import io.terminus.common.utils.JsonMapper;
@@ -23,7 +23,6 @@ import io.terminus.doctor.event.dto.event.usual.DoctorRemovalDto;
 import io.terminus.doctor.event.dto.event.usual.DoctorVaccinationDto;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.model.DoctorBarn;
-import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.event.service.DoctorBarnReadService;
 import io.terminus.doctor.event.service.DoctorPigEventReadService;
@@ -50,6 +49,10 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkState;
+import static io.terminus.doctor.common.enums.PigType.DELIVER_SOW;
+import static io.terminus.doctor.common.enums.PigType.FARROW_PIGLET;
+import static io.terminus.doctor.common.enums.PigType.FARROW_TYPES;
+import static io.terminus.doctor.common.enums.PigType.MATE_SOW;
 import static io.terminus.doctor.common.enums.PigType.MATING_TYPES;
 import static io.terminus.doctor.common.enums.PigType.PREG_SOW;
 import static java.util.Objects.isNull;
@@ -68,18 +71,15 @@ public class DoctorPigCreateEvents {
 
     private static final ObjectMapper OBJECT_MAPPER = JsonMapper.JSON_NON_DEFAULT_MAPPER.getMapper();
 
+    //状态转舍允许类型
+    private static final List<Integer> CHG_SOW_ALLOWS = Lists.newArrayList(DELIVER_SOW.getValue(), FARROW_PIGLET.getValue(), MATE_SOW.getValue());
+
     private final DoctorPigEventWriteService doctorPigEventWriteService;
-
     private final DoctorFarmReadService doctorFarmReadService;
-
     private final DoctorPigReadService doctorPigReadService;
-
     private final UserReadService userReadService;
-
     private final DoctorSowEventCreateService doctorSowEventCreateService;
-
     private final DoctorBarnReadService doctorBarnReadService;
-
     private final DoctorPigEventReadService doctorPigEventReadService;
 
     @Autowired
@@ -433,38 +433,35 @@ public class DoctorPigCreateEvents {
     }
 
     // 猪舍变动 信息
-    private Long createCasualChangeLocationInfo(DoctorChgLocationDto doctorChgLocationDto, DoctorBasicInputInfoDto basicInputInfoDto){
+    private Long createCasualChangeLocationInfo(DoctorChgLocationDto chg, DoctorBasicInputInfoDto basic){
         // init pig bran from info
-        DoctorPigTrack doctorPigTrack = RespHelper.or500(doctorPigReadService.findPigTrackByPigId(basicInputInfoDto.getPigId()));
-        doctorChgLocationDto.setChgLocationFromBarnId(doctorPigTrack.getCurrentBarnId());
-        doctorChgLocationDto.setChgLocationFromBarnName(doctorPigTrack.getCurrentBarnName());
+        DoctorPigTrack doctorPigTrack = RespHelper.or500(doctorPigReadService.findPigTrackByPigId(basic.getPigId()));
+        chg.setChgLocationFromBarnId(doctorPigTrack.getCurrentBarnId());
+        chg.setChgLocationFromBarnName(doctorPigTrack.getCurrentBarnName());
 
-        DoctorBarn doctorFromBarn = RespHelper.or500(doctorBarnReadService.findBarnById(doctorChgLocationDto.getChgLocationFromBarnId()));
-        DoctorBarn doctorToBarn = RespHelper.or500(doctorBarnReadService.findBarnById(doctorChgLocationDto.getChgLocationToBarnId()));
+        DoctorBarn fromBarn = RespHelper.or500(doctorBarnReadService.findBarnById(chg.getChgLocationFromBarnId()));
+        DoctorBarn toBarn = RespHelper.or500(doctorBarnReadService.findBarnById(chg.getChgLocationToBarnId()));
 
-        if(Objects.equals(basicInputInfoDto.getPigType(), DoctorPig.PIG_TYPE.SOW.getKey()) &&
-                !Objects.equals(doctorFromBarn.getPigType(), doctorToBarn.getPigType())){
+        //普通转舍事件(同类型, 配种妊娠互转, 产房分娩互转)
+        if (Objects.equals(fromBarn.getPigType(), toBarn.getPigType()) ||
+                (MATING_TYPES.contains(fromBarn.getPigType()) && MATING_TYPES.contains(toBarn.getPigType())) ||
+                (FARROW_TYPES.contains(fromBarn.getPigType()) && FARROW_TYPES.contains(toBarn.getPigType()))) {
+            basic.setEventType(PigEvent.CHG_LOCATION.getKey());
+            return RespHelper.or500(doctorPigEventWriteService.chgLocationEvent(chg, basic));
+        }
+        //状态转换转舍事件
+        return createSowChgLocation(chg, basic, fromBarn, toBarn);
+    }
 
-            //妊娠舍 => 配种舍/妊娠舍 走普通转舍
-            if (Objects.equals(PREG_SOW.getValue(), doctorFromBarn.getPigType()) && MATING_TYPES.contains(doctorToBarn.getPigType())) {
-                basicInputInfoDto.setEventType(PigEvent.CHG_LOCATION.getKey());
-                return RespHelper.or500(doctorPigEventWriteService.chgLocationEvent(doctorChgLocationDto, basicInputInfoDto));
-            }
-
-            // 录入母猪
-            if(Objects.equals(doctorToBarn.getPigType(), PigType.MATE_SOW.getValue())){
-                basicInputInfoDto.setEventType(PigEvent.TO_MATING.getKey());
-            }else if(Objects.equals(doctorToBarn.getPigType(), PigType.PREG_SOW.getValue())){
-                basicInputInfoDto.setEventType(PigEvent.TO_PREG.getKey());
-            }else if(Objects.equals(doctorToBarn.getPigType(), PigType.FARROW_PIGLET.getValue())){
-                basicInputInfoDto.setEventType(PigEvent.TO_FARROWING.getKey());
-            }else {
-                throw new JsonResponseException(500, "input.sowToBarnId.error");
-            }
-            return RespHelper.or500(doctorPigEventWriteService.chgSowLocationEvent(doctorChgLocationDto, basicInputInfoDto));
+    //调用状态转换事件: 母猪转舍
+    private Long createSowChgLocation(DoctorChgLocationDto chg, DoctorBasicInputInfoDto basic, DoctorBarn fromBarn, DoctorBarn toBarn) {
+        if (!CHG_SOW_ALLOWS.contains(toBarn.getPigType()) || !(fromBarn.getPigType() == PREG_SOW.getValue() && FARROW_TYPES.contains(toBarn.getPigType()))) {
+            throw new JsonResponseException(500, "input.sowToBarnId.error");
         }
 
-        return RespHelper.or500(doctorPigEventWriteService.chgLocationEvent(doctorChgLocationDto, basicInputInfoDto));
+        //判断去配种还是去分娩
+        basic.setEventType(Objects.equals(toBarn.getPigType(), PigType.MATE_SOW.getValue()) ?  PigEvent.TO_MATING.getKey() : PigEvent.TO_FARROWING.getKey());
+        return RespHelper.or500(doctorPigEventWriteService.chgSowLocationEvent(chg, basic));
     }
 
     private List<DoctorBasicInputInfoDto> buildBasicInputPigDtoContent(Long farmId, String pigIds, PigEvent pigEvent){
