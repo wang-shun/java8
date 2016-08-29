@@ -290,6 +290,8 @@ public class DoctorSearches {
             return new SearchedBarnDto(new Paging<>(0L, Collections.emptyList()), Collections.emptyList());
         }
         createSearchWord(SearchType.BARN.getValue(), params);
+        //取在用的猪舍
+        params.put("status", "1");
         Paging<SearchedBarn> barns =
                 RespHelper.orServEx(barnSearchReadService.searchWithAggs(pageNo, pageSize, "search/search.mustache", params)).getBarns();
 
@@ -318,6 +320,8 @@ public class DoctorSearches {
         if (farmIdNotExist(params)) {
             return Collections.emptyList();
         }
+        //取在用的猪舍
+        params.put("status", "1");
         // 游标法获取数据
         Integer pageNo = 1;
         Integer pageSize = 100;

@@ -79,4 +79,9 @@ public class IndexedBarn implements Serializable {
      */
     private Date updatedAt;
 
+    /**
+     * 猪舍排序
+     */
+    private Integer order;
+
 }

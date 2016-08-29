@@ -178,6 +178,12 @@ public class DoctorBarns {
             barn.setCanOpenGroup(DoctorBarn.CanOpenGroup.YES.getValue());  //初始是否可建群: 可建群
             barnId = RespHelper.or500(doctorBarnWriteService.createBarn(barn));
         } else {
+            //判断猪舍是否能够停用
+            if (barn.getStatus() == DoctorBarn.Status.NOUSE.getValue()){
+                if (doctorBarnReadService.countPigByBarnId(barn.getId()).getResult() > 0){
+                    return barnId = -1l;
+                }
+            }
             RespHelper.or500(doctorBarnWriteService.updateBarn(barn));
             barnId = barn.getId();
         }
