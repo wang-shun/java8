@@ -12,6 +12,7 @@
         <result column="sow" property="sow"/>
         <result column="farrow" property="farrow"/>
         <result column="nursery" property="nursery"/>
+        <result column="houbei" property="houbei"/>
         <result column="fatten" property="fatten"/>
         <result column="created_at" property="createdAt"/>
         <result column="updated_at" property="updatedAt"/>
@@ -27,11 +28,11 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        org_id, farm_id, boar, sow, farrow, nursery, fatten, created_at, updated_at
+        org_id, farm_id, boar, sow, farrow, nursery, fatten, houbei, created_at, updated_at
     </sql>
 
     <sql id="vals">
-        #{orgId}, #{farmId}, #{boar}, #{sow}, #{farrow}, #{nursery}, #{fatten}, now(), now()
+        #{orgId}, #{farmId}, #{boar}, #{sow}, #{farrow}, #{nursery}, #{fatten}, #{houbei}, now(), now()
     </sql>
 
     <insert id="create" parameterType="DoctorPigTypeStatistic" keyProperty="id" useGeneratedKeys="true">
@@ -57,6 +58,7 @@
             <if test="farrow != null">farrow = #{farrow},</if>
             <if test="nursery != null">nursery = #{nursery},</if>
             <if test="fatten != null">fatten = #{fatten},</if>
+            <if test="houbei != null">houbei = #{houbei},</if>
             updated_at=now()
         </set>
         WHERE id = #{id}
