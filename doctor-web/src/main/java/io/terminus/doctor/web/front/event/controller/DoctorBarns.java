@@ -199,8 +199,8 @@ public class DoctorBarns {
      */
     @RequestMapping(value = "/pigTypes/trans", method = RequestMethod.GET)
     public List<DoctorBarn> findBarnsByfarmIdAndTypeWhenBatchTransBarn(@RequestParam("farmId") Long farmId,
-                                                                       @RequestParam(value = "pigIds", required = false) String pigIds) {
-        List<Integer> barnTypes = Lists.newArrayList();
+                                                                       @RequestParam("pigIds") String pigIds) {
+        List<Integer> barnTypes = PigType.ALL_TYPES;
 
         //遍历求猪舍类型交集
         for (Long pigId : Splitters.splitToLong(pigIds, Splitters.COMMA)) {
