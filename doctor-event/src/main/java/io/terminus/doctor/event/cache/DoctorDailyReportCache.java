@@ -128,12 +128,23 @@ public class DoctorDailyReportCache {
      * @param reportDto 猪群日报
      */
     public void putDailyGroupReport(Long farmId, Date date, DoctorDailyReportDto reportDto) {
-        synchronized (reportCache) {
-            DoctorDailyReportDto report = getDailyReport(farmId,  date);
-            if (isNull(report)) {
-                putDailyReport(farmId, date, reportDto);
-            } else {
-                report.setGroup(reportDto);
+        // 如果事件日期早于当天, 则从redis取出历史日报并更新在redis里面, 暂不存入数据库
+        if(Dates.startOfDay(date).before(Dates.startOfDay(new Date()))){
+            DoctorDailyReportDto redisDto = dailyReportHistoryDao.getDailyReportWithRedis(farmId, date);
+            if(redisDto != null){
+                redisDto.setGroup(reportDto);
+                dailyReportHistoryDao.saveDailyReport(redisDto, farmId, date);
+                dailyReport2UpdateDao.saveDailyReport2Update(date, farmId);
+            }
+        }else{
+            // 如果事件日期晚于或等于当天, 则使用缓存
+            synchronized (reportCache) {
+                DoctorDailyReportDto report = getDailyReport(farmId,  date);
+                if (isNull(report)) {
+                    putDailyReport(farmId, date, reportDto);
+                } else {
+                    report.setGroup(reportDto);
+                }
             }
         }
     }
