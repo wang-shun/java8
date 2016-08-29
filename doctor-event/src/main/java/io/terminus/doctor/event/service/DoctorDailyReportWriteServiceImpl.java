@@ -70,8 +70,24 @@ public class DoctorDailyReportWriteServiceImpl implements DoctorDailyReportWrite
     @Override
     public Response saveDailyReport2Update(Date beginDate, Long farmId){
         try{
+            String key = REDIS_KEY + farmId;
             jedisTemplate.execute(jedis -> {
-                jedis.set(REDIS_KEY + farmId, DateUtil.toDateString(beginDate));
+                if(!jedis.exists(key) || DateUtil.toDate(jedis.get(key)).after(beginDate)){
+                    jedis.set(key, DateUtil.toDateString(beginDate));
+                }
+            });
+            return Response.ok();
+        }catch(Exception e) {
+            log.error("saveDailyReport2Update failed, cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("save.daily.report.to.update.fail");
+        }
+    }
+
+    @Override
+    public Response deleteDailyReport2Update(Long farmId){
+        try{
+            jedisTemplate.execute(jedis -> {
+                jedis.del(REDIS_KEY + farmId);
             });
             return Response.ok();
         }catch(Exception e) {

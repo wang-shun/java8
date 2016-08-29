@@ -97,6 +97,7 @@ public class DoctorReportJobs {
                 Long farmId = entry.getKey();
                 Date beginDate = DateUtil.toDate(entry.getValue());
                 RespHelper.or500(doctorDailyReportWriteService.updateDailyReport(beginDate, endDate, farmId));
+                RespHelper.or500(doctorDailyReportWriteService.deleteDailyReport2Update(farmId));
             }
 
             log.info("update history daily report job end, now is:{}", DateUtil.toDateTimeString(new Date()));
