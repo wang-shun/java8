@@ -1,7 +1,9 @@
 package io.terminus.doctor.event.handler.group;
 
 import io.terminus.common.utils.BeanMapper;
+import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.RespHelper;
+import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
 import io.terminus.doctor.event.dto.DoctorGroupDetail;
 import io.terminus.doctor.event.dto.event.group.DoctorMoveInGroupEvent;
 import io.terminus.doctor.event.dto.event.group.input.BaseGroupInput;
@@ -10,18 +12,30 @@ import io.terminus.doctor.event.dto.event.group.input.DoctorMoveInGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorNewGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorSowMoveInGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorTransGroupInput;
+import io.terminus.doctor.event.dto.event.group.input.DoctorTurnSeedGroupInput;
+import io.terminus.doctor.event.dto.event.usual.DoctorFarmEntryDto;
+import io.terminus.doctor.event.enums.BoarEntryType;
 import io.terminus.doctor.event.enums.IsOrNot;
+import io.terminus.doctor.event.enums.PigEvent;
+import io.terminus.doctor.event.enums.PigSource;
 import io.terminus.doctor.event.manager.DoctorGroupManager;
+import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
+import io.terminus.doctor.event.model.DoctorPig;
+import io.terminus.doctor.event.search.pig.PigSearchWriteService;
 import io.terminus.doctor.event.service.DoctorGroupReadService;
+import io.terminus.doctor.event.service.DoctorPigEventWriteService;
 import io.terminus.doctor.event.util.EventUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Objects;
+
 import static io.terminus.common.utils.Arguments.notEmpty;
+import static io.terminus.doctor.common.utils.RespHelper.orServEx;
 
 /**
  * Desc: 通用事件处理器
@@ -37,16 +51,22 @@ public class DoctorCommonGroupEventHandler {
     private final DoctorMoveInGroupEventHandler doctorMoveInGroupEventHandler;
     private final DoctorGroupReadService doctorGroupReadService;
     private final DoctorGroupManager doctorGroupManager;
+    private final DoctorPigEventWriteService doctorPigEventWriteService;
+    private final PigSearchWriteService pigSearchWriteService;
 
     @Autowired
     public DoctorCommonGroupEventHandler(DoctorCloseGroupEventHandler doctorCloseGroupEventHandler,
-                                          DoctorMoveInGroupEventHandler doctorMoveInGroupEventHandler,
-                                          DoctorGroupReadService doctorGroupReadService,
-                                          DoctorGroupManager doctorGroupManager) {
+                                         DoctorMoveInGroupEventHandler doctorMoveInGroupEventHandler,
+                                         DoctorGroupReadService doctorGroupReadService,
+                                         DoctorGroupManager doctorGroupManager,
+                                         DoctorPigEventWriteService doctorPigEventWriteService,
+                                         PigSearchWriteService pigSearchWriteService) {
         this.doctorCloseGroupEventHandler = doctorCloseGroupEventHandler;
         this.doctorMoveInGroupEventHandler = doctorMoveInGroupEventHandler;
         this.doctorGroupReadService = doctorGroupReadService;
         this.doctorGroupManager = doctorGroupManager;
+        this.doctorPigEventWriteService = doctorPigEventWriteService;
+        this.pigSearchWriteService = pigSearchWriteService;
     }
 
     /**
@@ -119,5 +139,62 @@ public class DoctorCommonGroupEventHandler {
         DoctorGroupDetail groupDetail = RespHelper.orServEx(doctorGroupReadService.findGroupDetailByGroupId(groupId));
         doctorMoveInGroupEventHandler.handleEvent(groupDetail.getGroup(), groupDetail.getGroupTrack(), moveIn);
         return groupId;
+    }
+
+    /**
+     * 商品猪转种猪触发的猪进场事件
+     * @param sex    本次性别
+     * @param input
+     * @param group
+     * @param barn
+     */
+    public void autoPigEntryEvent(DoctorPig.PIG_TYPE sex, DoctorTurnSeedGroupInput input, DoctorGroup group, DoctorBarn barn) {
+        DoctorBasicInputInfoDto basicDto = new DoctorBasicInputInfoDto();
+        DoctorFarmEntryDto farmEntryDto = new DoctorFarmEntryDto();
+
+        ///恭母猪进场字段
+        if (Objects.equals(sex, DoctorPig.PIG_TYPE.BOAR)) {
+            basicDto.setPigType(DoctorPig.PIG_TYPE.BOAR.getKey());
+            farmEntryDto.setBoarTypeId(BoarEntryType.HGZ.getKey());
+            farmEntryDto.setBoarTypeName(BoarEntryType.HGZ.getCode());
+        } else {
+            basicDto.setPigType(DoctorPig.PIG_TYPE.SOW.getKey());
+            farmEntryDto.setParity(1);
+            farmEntryDto.setEarCode(input.getEarCode());
+        }
+
+        //基本信息
+        basicDto.setPigCode(input.getPigCode());
+        basicDto.setBarnId(barn.getId());
+        basicDto.setBarnName(barn.getName());
+        basicDto.setFarmId(group.getFarmId());
+        basicDto.setFarmName(group.getFarmName());
+        basicDto.setOrgId(group.getOrgId());
+        basicDto.setOrgName(group.getOrgName());
+        basicDto.setEventType(PigEvent.ENTRY.getKey());
+        basicDto.setEventName(PigEvent.ENTRY.getName());
+        basicDto.setEventDesc(PigEvent.ENTRY.getDesc());
+        basicDto.setStaffId(input.getCreatorId());
+        basicDto.setStaffName(input.getCreatorName());
+
+        //进场信息
+        farmEntryDto.setPigType(basicDto.getPigType());
+        farmEntryDto.setPigCode(input.getPigCode());
+        farmEntryDto.setBirthday(DateUtil.toDate(input.getBirthDate()));
+        farmEntryDto.setInFarmDate(DateUtil.toDate(input.getEventAt()));
+        farmEntryDto.setBarnId(barn.getId());
+        farmEntryDto.setBarnName(barn.getName());
+        farmEntryDto.setSource(PigSource.LOCAL.getKey());
+        farmEntryDto.setBreed(input.getBreedId());
+        farmEntryDto.setBreedName(input.getBreedName());
+        farmEntryDto.setBreedType(input.getGeneticId());
+        farmEntryDto.setBreedTypeName(input.getGeneticName());
+        farmEntryDto.setMotherCode(input.getMotherEarCode());
+        farmEntryDto.setEarCode(input.getEarCode());
+
+        Long pigId = orServEx(doctorPigEventWriteService.pigEntryEvent(basicDto, farmEntryDto));
+
+        //解决在事务里发事件 异步取不到的问题, 以后绝对不能这么干了
+        pigSearchWriteService.update(pigId);
     }
 }

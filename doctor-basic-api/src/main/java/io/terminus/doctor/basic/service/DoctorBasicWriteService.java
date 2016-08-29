@@ -5,6 +5,8 @@ import io.terminus.doctor.basic.model.DoctorBasic;
 import io.terminus.doctor.basic.model.DoctorChangeReason;
 import io.terminus.doctor.basic.model.DoctorCustomer;
 
+import javax.validation.constraints.NotNull;
+
 /**
  * Desc: 基础数据写服务
  * Mail: yangzl@terminus.io
@@ -70,4 +72,16 @@ public interface DoctorBasicWriteService {
      * @return 是否成功
      */
     Response<Boolean> deleteCustomerById(Long customerId);
+
+    /**
+     * 录入事件时录入客户
+     * @param farmId        猪场id
+     * @param farmName      猪场名称
+     * @param customerId    客户id(根据此字段判断是否create)
+     * @param customerName  客户名称
+     * @return 是否成功
+     */
+    Response<Boolean> addCustomerWhenInput(@NotNull(message = "farmId.not.null") Long farmId,
+                                           String farmName, Long customerId, String customerName,
+                                           Long creatorId, String creatorName);
 }

@@ -128,8 +128,7 @@ public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteServic
 
             Map<String,Object> extra = Maps.newHashMap();
             BeanMapper.copy(doctorFarmEntryDto, extra);
-            Map<String,Object> result = Maps.newHashMap();
-            result = doctorPigEventManager.createCasualPigEvent(doctorBasicInputInfoDto, extra);
+            Map<String,Object> result = doctorPigEventManager.createCasualPigEvent(doctorBasicInputInfoDto, extra);
 
             // publish zk event
             publishEvent(result);

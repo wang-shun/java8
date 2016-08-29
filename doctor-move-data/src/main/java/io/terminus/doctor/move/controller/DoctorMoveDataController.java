@@ -1,8 +1,14 @@
 package io.terminus.doctor.move.controller;
 
 import com.google.common.base.Throwables;
+import com.google.common.collect.Lists;
 import io.terminus.common.exception.ServiceException;
+import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.RespHelper;
+import io.terminus.doctor.event.model.DoctorPig;
+import io.terminus.doctor.event.service.DoctorDailyReportWriteService;
+import io.terminus.doctor.event.service.DoctorPigTypeStatisticWriteService;
+import io.terminus.doctor.move.handler.DoctorMoveDatasourceHandler;
 import io.terminus.doctor.move.service.DoctorMoveBasicService;
 import io.terminus.doctor.move.service.DoctorMoveDataService;
 import io.terminus.doctor.move.service.DoctorMoveReportService;
@@ -22,6 +28,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -47,6 +54,9 @@ public class DoctorMoveDataController {
     private final DoctorFarmDao doctorFarmDao;
     private final DoctorUserDataPermissionDao doctorUserDataPermissionDao;
     private final DoctorUserReadService doctorUserReadService;
+    private final DoctorPigTypeStatisticWriteService doctorPigTypeStatisticWriteService;
+    private final DoctorMoveDatasourceHandler doctorMoveDatasourceHandler;
+    private final DoctorDailyReportWriteService doctorDailyReportWriteService;
 
     @Autowired
     public DoctorMoveDataController(UserInitService userInitService,
@@ -56,7 +66,10 @@ public class DoctorMoveDataController {
                                     DoctorMoveReportService doctorMoveReportService,
                                     DoctorFarmDao doctorFarmDao,
                                     DoctorUserDataPermissionDao doctorUserDataPermissionDao,
-                                    DoctorUserReadService doctorUserReadService) {
+                                    DoctorUserReadService doctorUserReadService,
+                                    DoctorPigTypeStatisticWriteService doctorPigTypeStatisticWriteService,
+                                    DoctorMoveDatasourceHandler doctorMoveDatasourceHandler,
+                                    DoctorDailyReportWriteService doctorDailyReportWriteService) {
         this.userInitService = userInitService;
         this.wareHouseInitService = wareHouseInitService;
         this.doctorMoveBasicService = doctorMoveBasicService;
@@ -65,6 +78,25 @@ public class DoctorMoveDataController {
         this.doctorFarmDao = doctorFarmDao;
         this.doctorUserDataPermissionDao = doctorUserDataPermissionDao;
         this.doctorUserReadService = doctorUserReadService;
+        this.doctorPigTypeStatisticWriteService = doctorPigTypeStatisticWriteService;
+        this.doctorMoveDatasourceHandler = doctorMoveDatasourceHandler;
+        this.doctorDailyReportWriteService = doctorDailyReportWriteService;
+    }
+
+    /**
+     * 更新数据源
+     *
+     * @return 是否成功
+     */
+    @RequestMapping(value = "/reload", method = RequestMethod.GET)
+    public Boolean reloadMoveId() {
+        try {
+            doctorMoveDatasourceHandler.init();
+            return Boolean.TRUE;
+        } catch (Exception e) {
+            log.error("move datasource connect failed, cause:{}", Throwables.getStackTraceAsString(e));
+            return Boolean.FALSE;
+        }
     }
 
     /**
@@ -127,7 +159,7 @@ public class DoctorMoveDataController {
 
         //3.迁移仓库/物料
         log.warn("move warehouse start, mobile:{}, moveId:{}", mobile, moveId);
-        wareHouseInitService.init(mobile, moveId);
+        wareHouseInitService.init(mobile, moveId, farm);
         log.warn("move warehouse end");
 
         //4.迁移公猪 母猪 工作流
@@ -153,6 +185,9 @@ public class DoctorMoveDataController {
         doctorMoveDataService.updateFarrowSow(farm);
         log.warn("move farrow sow end");
 
+        //首页统计
+        movePigTypeStatistic(farm);
+
         //6.迁移猪场日报
         log.warn("move daily start, moveId:{}", moveId);
         doctorMoveReportService.moveDailyReport(moveId, farm.getId(), index);
@@ -162,6 +197,13 @@ public class DoctorMoveDataController {
         log.warn("move monthly start, moveId:{}", moveId);
         doctorMoveReportService.moveMonthlyReport(farm.getId(), monthIndex);
         log.warn("move monthly end");
+    }
+
+    //统计下首页数据
+    private void movePigTypeStatistic(DoctorFarm farm) {
+        doctorPigTypeStatisticWriteService.statisticGroup(farm.getOrgId(), farm.getId());
+        doctorPigTypeStatisticWriteService.statisticPig(farm.getOrgId(), farm.getId(), DoctorPig.PIG_TYPE.BOAR.getKey());
+        doctorPigTypeStatisticWriteService.statisticPig(farm.getOrgId(), farm.getId(), DoctorPig.PIG_TYPE.SOW.getKey());
     }
 
     /**
@@ -213,10 +255,11 @@ public class DoctorMoveDataController {
      */
     @RequestMapping(value = "/warehouse", method = RequestMethod.GET)
     public Boolean moveWareHouse(@RequestParam("mobile") String mobile, 
-                                 @RequestParam("moveId") Long moveId) {
+                                 @RequestParam("moveId") Long moveId,
+                                 @RequestParam("farmId") Long farmId) {
         try {
             log.warn("move warehouse start, mobile:{}, moveId:{}", mobile, moveId);
-            wareHouseInitService.init(mobile, moveId);
+            wareHouseInitService.init(mobile, moveId, doctorFarmDao.findById(farmId));
             log.warn("move warehouse end");
             return Boolean.TRUE;
         } catch (Exception e) {
@@ -352,6 +395,79 @@ public class DoctorMoveDataController {
             return true;
         } catch (Exception e) {
             log.error("move sow track extra failed, farmId:{}, cause:{}", farmId, Throwables.getStackTraceAsString(e));
+            return false;
+        }
+    }
+
+    /**
+     * 拆分母猪转舍事件
+     */
+    @RequestMapping(value = "/sowTransBarn", method = RequestMethod.GET)
+    public Boolean moveSowTransBarn(@RequestParam("farmId") Long farmId) {
+        try {
+            DoctorFarm farm = doctorFarmDao.findById(farmId);
+            log.warn("move sow trans barn start, farmId:{}", farmId);
+            doctorMoveDataService.updateSowTransBarn(farm);
+            log.warn("move sow trans barn end");
+            return true;
+        } catch (Exception e) {
+            log.error("move sow trans barn failed, farmId:{}, cause:{}", farmId, Throwables.getStackTraceAsString(e));
+            return false;
+        }
+    }
+
+    /**
+     * 实时日报统计
+     */
+    @RequestMapping(value = "/realtime/daily", method = RequestMethod.GET)
+    public Boolean moveRealtimeDailyReport(@RequestParam("farmId") Long farmId,
+                                           @RequestParam("date") String date) {
+        try {
+            log.warn("move realtime daily report start, farmId:{}", farmId);
+            doctorDailyReportWriteService.createDailyReports(Lists.newArrayList(farmId), DateUtil.toDate(date));
+            log.warn("move realtime daily report end");
+            return true;
+        } catch (Exception e) {
+            log.error("move realtime daily report failed, farmId:{}, cause:{}", farmId, Throwables.getStackTraceAsString(e));
+            return false;
+        }
+    }
+
+    /**
+     * 实时日报统计, 从 date 直到今天的
+     */
+    @RequestMapping(value = "/realtime/daily/until", method = RequestMethod.GET)
+    public Boolean moveRealtimeDailyReportUntilNow(@RequestParam("farmId") Long farmId,
+                                                   @RequestParam("date") String date) {
+        try {
+            log.warn("move realtime daily report until now start, farmId:{}", farmId);
+
+            Date since = DateUtil.toDate(date);
+
+            DateUtil.getBeforeDays(new Date(), DateUtil.getDeltaDaysAbs(since, new Date()) + 1).forEach(d ->
+                    doctorDailyReportWriteService.createDailyReports(Lists.newArrayList(farmId), d));
+            log.warn("move realtime daily report until now end");
+            return true;
+        } catch (Exception e) {
+            log.error("move realtime daily report until now failed, farmId:{}, cause:{}", farmId, Throwables.getStackTraceAsString(e));
+            return false;
+        }
+    }
+
+    /**
+     * 刷新母猪分娩总重
+     */
+    @RequestMapping(value = "/farrowWeight", method = RequestMethod.GET)
+    public Boolean moveSowFarrowWeight(@RequestParam("farmId") Long farmId,
+                                       @RequestParam("moveId") Long moveId) {
+        try {
+            DoctorFarm farm = doctorFarmDao.findById(farmId);
+            log.warn("move sow farrow weight start, farmId:{}", farmId);
+            doctorMoveDataService.updateSowFarrowWeight(moveId, farm);
+            log.warn("move sow farrow weight end");
+            return true;
+        } catch (Exception e) {
+            log.error("move sow farrow weight failed, farmId:{}, cause:{}", farmId, Throwables.getStackTraceAsString(e));
             return false;
         }
     }

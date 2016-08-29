@@ -261,3 +261,6 @@ alter table doctor_ware_house_tracks modify `lot_number` decimal(23,3) DEFAULT N
 
 -- 2016-08-18 workflow 新增 tracker 字段
 alter table workflow_definition_node_events ADD Column `tacker` VARCHAR(128) DEFAULT NULL COMMENT '配种次数判断';
+
+-- 2016-08-24 猪事件新增分娩总重
+ALTER TABLE doctor_pig_events ADD COLUMN farrow_weight DOUBLE DEFAULT NULL COMMENT '分娩总重(kg)' AFTER npd;

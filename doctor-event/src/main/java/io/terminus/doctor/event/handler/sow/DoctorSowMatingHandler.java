@@ -69,8 +69,6 @@ public class DoctorSowMatingHandler extends DoctorAbstractEventFlowHandler {
         if (doctorPigTrack.getCurrentMatingCount() == 0) {
             extra.put("judgePregDate", matingDate.plusDays(MATING_PREG_DAYS).toDate());
         }
-//        DateTime judgePregDate = new DateTime(Long.valueOf(extra.get("judgePregDate").toString()));
-//        checkState(Objects.equals(Days.daysBetween(matingDate, judgePregDate).getDays(), 114), "input.judgePregDate.error");
 
         //  校验断奶后, 第一次配种, 增加胎次
         Map<String, Object> trackExtraMap = doctorPigTrack.getExtraMap();

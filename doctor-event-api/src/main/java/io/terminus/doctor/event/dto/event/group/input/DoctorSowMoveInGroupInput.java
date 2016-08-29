@@ -1,11 +1,13 @@
 package io.terminus.doctor.event.dto.event.group.input;
 
+import io.terminus.doctor.common.enums.PigType;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
+import java.util.Map;
 
 /**
  * Desc: 母猪事件触发的转入猪群事件
@@ -75,4 +77,31 @@ public class DoctorSowMoveInGroupInput extends DoctorMoveInGroupInput implements
      * 品系name
      */
     private String geneticName;
+
+    @Override
+    public Map<String, String> descMap() {
+        Map<String, String> map = super.descMap();
+        if(orgName != null){
+            map.put("公司", orgName);
+        }
+        if(farmName != null){
+            map.put("猪场", farmName);
+        }
+        if(groupCode != null){
+            map.put("猪群号", groupCode);
+        }
+        if(toBarnName != null){
+            map.put("转入猪舍", toBarnName);
+        }
+        if(pigType != null){
+            PigType pigType1 = PigType.from(pigType);
+            if(pigType1 != null){
+                map.put("猪类型", pigType1.getDesc());
+            }
+        }
+        if(geneticName != null){
+            map.put("品系", geneticName);
+        }
+        return map;
+    }
 }

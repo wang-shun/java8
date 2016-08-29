@@ -42,6 +42,15 @@
       "status": {
         "type": "integer"
       },
+      "storage": {
+        "type": "integer"
+      },
+      "pigGroupCount": {
+        "type": "integer"
+      },
+      "pigCount": {
+        "type": "integer"
+      },
       "capacity": {
         "type": "integer"
       },

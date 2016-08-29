@@ -6,6 +6,7 @@ import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
+import java.util.Map;
 
 /**
  * Desc: 转场事件录入信息
@@ -26,4 +27,13 @@ public class DoctorTransFarmGroupInput extends DoctorTransGroupInput implements 
 
     @NotEmpty(message = "to.farm.not.null")
     private String toFarmName;
+
+    @Override
+    public Map<String, String> descMap() {
+        Map<String, String> map = super.descMap();
+        if(toFarmName != null){
+            map.put("转入猪场", toFarmName);
+        }
+        return map;
+    }
 }

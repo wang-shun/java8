@@ -7,6 +7,7 @@ import io.terminus.common.utils.MapBuilder;
 import io.terminus.doctor.event.model.DoctorBarn;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -24,6 +25,13 @@ public class DoctorBarnDao extends MyBatisDao<DoctorBarn> {
 
     public List<DoctorBarn> findByFarmId(Long farmId) {
         return getSqlSession().selectList(sqlId("findByFarmId"), farmId);
+    }
+
+    public List<DoctorBarn> findByFarmIds(List<Long> farmIds) {
+        if(farmIds == null || farmIds.isEmpty()){
+            return Collections.emptyList();
+        }
+        return getSqlSession().selectList(sqlId("findByFarmIds"), farmIds);
     }
 
     public List<DoctorBarn> findByEnums(Long farmId, Integer pigType, Integer canOpenGroup, Integer status) {

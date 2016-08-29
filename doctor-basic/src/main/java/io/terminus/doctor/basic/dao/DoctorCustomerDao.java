@@ -18,8 +18,4 @@ public class DoctorCustomerDao extends MyBatisDao<DoctorCustomer> {
     public List<DoctorCustomer> findByFarmId(Long farmId) {
         return getSqlSession().selectList(sqlId("findByFarmId"), farmId);
     }
-
-    public Long findByName (String name) {
-        return (Long)getSqlSession().selectOne(sqlId("findByName"), name);
-    }
 }

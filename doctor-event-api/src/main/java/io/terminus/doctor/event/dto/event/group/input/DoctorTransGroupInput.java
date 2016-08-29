@@ -1,12 +1,15 @@
 package io.terminus.doctor.event.dto.event.group.input;
 
 import io.terminus.doctor.event.enums.IsOrNot;
+import io.terminus.doctor.event.enums.PigSource;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Desc: 猪群转群事件录入信息
@@ -66,6 +69,13 @@ public class DoctorTransGroupInput extends BaseGroupInput implements Serializabl
     private Integer sowQty;
 
     /**
+     * 均重(kg)
+     * 转群以此字段为主, 转场已总重为主
+     */
+    @NotNull(message = "weight.not.null")
+    private Double avgWeight;
+
+    /**
      * 总活体重(kg)
      */
     @NotNull(message = "weight.not.null")
@@ -76,4 +86,40 @@ public class DoctorTransGroupInput extends BaseGroupInput implements Serializabl
      * @see io.terminus.doctor.event.enums.PigSource
      */
     private Integer source;
+
+    @Override
+    public Map<String, String> descMap() {
+        Map<String, String> map = new HashMap<>();
+        if(toBarnName != null){
+            map.put("转入猪舍", toBarnName);
+        }
+        if(toGroupCode != null){
+            map.put("转入猪群", toGroupCode);
+        }
+        if(isCreateGroup != null){
+            map.put("是否新建猪群", isCreateGroup == 1 ? "是" : "否");
+        }
+        if(breedName != null){
+            map.put("品种", breedName);
+        }
+        if(boarQty != null){
+            map.put("公猪数", boarQty.toString());
+        }
+        if(sowQty != null){
+            map.put("母猪数", sowQty.toString());
+        }
+        if(avgWeight != null){
+            map.put("均重(Kg)", avgWeight.toString());
+        }
+        if(weight != null){
+            map.put("总活体重(Kg)", weight.toString());
+        }
+        if(source != null){
+            PigSource pigSource = PigSource.from(source);
+            if(pigSource != null){
+                map.put("来源", pigSource.getDesc());
+            }
+        }
+        return map;
+    }
 }

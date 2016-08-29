@@ -3,7 +3,6 @@ package io.terminus.doctor.schedule.msg.producer;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.api.client.util.Maps;
 import com.google.common.base.Throwables;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import io.terminus.common.utils.Splitters;
 import io.terminus.doctor.common.utils.RespHelper;
@@ -110,7 +109,7 @@ public class SowPregHomeProducer extends AbstractJobProducer {
                     // 母猪的updatedAt与当前时间差 (天)
                     Double timeDiff = (double) (DateTime.now().minus(getCheckDate(pigDto).getMillis()).getMillis() / 86400000);
                     // 获取下个执行的事件, 如果含有转舍, 则通知转舍
-                    List<Integer> events = RespHelper.orServEx(doctorPigEventReadService.queryPigEvents(ImmutableList.of(pigDto.getPigId())));
+                    List<Integer> events = RespHelper.orServEx(doctorPigEventReadService.queryPigEvents(Lists.newArrayList((pigDto.getPigId()))));
                     if (events.contains(PigEvent.TO_PREG.getKey())) {
                         // 产生消息
                         messages.addAll(getMessage(pigDto, rule.getChannels(), ruleRole, subUsers, timeDiff, rule.getUrl()));

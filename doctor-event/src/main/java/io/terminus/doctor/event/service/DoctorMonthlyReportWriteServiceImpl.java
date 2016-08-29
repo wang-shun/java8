@@ -59,6 +59,19 @@ public class DoctorMonthlyReportWriteServiceImpl implements DoctorMonthlyReportW
     }
 
     @Override
+    public Response<Boolean> createMonthlyReport(Long farmId, Date sumAt) {
+        try {
+            Date startAt = new DateTime(sumAt).withDayOfMonth(1).withTimeAtStartOfDay().toDate(); //月初: 2016-08-01 00:00:00
+            Date endAt = new DateTime(Dates.endOfDay(sumAt)).plusSeconds(-1).toDate();            //天末: 2016-08-12 23:59:59
+            doctorMonthlyReportManager.createMonthlyReport(farmId, getMonthlyReport(farmId, startAt, endAt, sumAt), Dates.startOfDay(sumAt));
+            return Response.ok(Boolean.TRUE);
+        } catch (Exception e) {
+            log.error("create monthly reports failed, sumAt:{}, cause:{}", sumAt, Throwables.getStackTraceAsString(e));
+            return Response.fail("monthlyReport.create.fail");
+        }
+    }
+
+    @Override
     public Response<DoctorMonthlyReport> initMonthlyReportByFarmIdAndDate(Long farmId, Date date) {
         try {
             Date startAt = new DateTime(date).withDayOfMonth(1).withTimeAtStartOfDay().toDate(); //月初: 2016-08-01 00:00:00
@@ -115,12 +128,14 @@ public class DoctorMonthlyReportWriteServiceImpl implements DoctorMonthlyReportW
         dto.setFarrowAvgHealth(doctorKpiDao.getDeliveryHealthAvg(farmId, startAt, endAt));       //窝均健仔数
         dto.setFarrowAvgAll(doctorKpiDao.getDeliveryAllAvg(farmId, startAt, endAt));             //窝均产仔数
         dto.setFarrowAvgAlive(doctorKpiDao.getDeliveryLiveAvg(farmId, startAt, endAt));          //窝均活仔数
+        dto.setFarrowAvgWeight(doctorKpiDao.getFarrowWeightAvg(farmId, startAt, endAt));         //分娩活仔均重(kg)
 
         //断奶情况
         dto.setWeanSow(doctorKpiDao.getWeanSow(farmId, startAt, endAt));                         //断奶母猪数
         dto.setWeanPiglet(doctorKpiDao.getWeanPiglet(farmId, startAt, endAt));                   //断奶仔猪数
         dto.setWeanAvgWeight(doctorKpiDao.getWeanPigletWeightAvg(farmId, startAt, endAt));       //断奶均重
         dto.setWeanAvgCount(doctorKpiDao.getWeanPigletCountsAvg(farmId, startAt, endAt));        //窝均断奶数
+        dto.setWeanAvgDayAge(doctorKpiDao.getWeanDayAgeAvg(farmId, startAt, endAt));             //断奶均日龄
 
         //销售情况
         dto.setSaleSow(doctorKpiDao.getSaleSow(farmId, startAt, endAt));                  //母猪

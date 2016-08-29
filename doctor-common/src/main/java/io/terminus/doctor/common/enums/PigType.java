@@ -82,4 +82,7 @@ public enum PigType {
 
     //产房仔猪的类型
     public static final List<Integer> FARROW_TYPES = Lists.newArrayList(FARROW_PIGLET.getValue(), DELIVER_SOW.getValue());
+
+    //可配种舍的类型
+    public static final List<Integer> MATING_TYPES = Lists.newArrayList(MATE_SOW.getValue(), PREG_SOW.getValue());
 }

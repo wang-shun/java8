@@ -17,7 +17,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import static com.google.common.base.Preconditions.checkArgument;
+import static io.terminus.common.utils.Arguments.isEmpty;
 import static io.terminus.common.utils.Arguments.notNull;
 
 /**
@@ -156,6 +160,46 @@ public class DoctorBasicWriteServiceImpl implements DoctorBasicWriteService {
             log.error("delete customer failed, customerId:{}, cause:{}", customerId, Throwables.getStackTraceAsString(e));
             return Response.fail("customer.delete.fail");
         }
+    }
+
+    /**
+     * 录入事件时录入客户
+     *
+     * @param farmId       猪场id
+     * @param farmName     猪场名称
+     * @param customerId   客户id(根据此字段判断是否create)
+     * @param customerName 客户名称
+     * @return 是否成功
+     */
+    @Override
+    public Response<Boolean> addCustomerWhenInput(Long farmId, String farmName, Long customerId, String customerName, Long creatorId, String creatorName) {
+        try {
+            if (customerId != null || isEmpty(customerName)) {
+                return Response.ok(true);
+            }
+            if (isExistCustomerName(farmId, customerName)) {
+                return Response.fail("customer.name.is.duplicate");
+            }
+
+            DoctorCustomer customer = new DoctorCustomer();
+            customer.setName(customerName);
+            customer.setFarmId(farmId);
+            customer.setFarmName(farmName);
+            customer.setCreatorId(creatorId);
+            customer.setCreatorName(creatorName);
+            doctorCustomerDao.create(customer);
+            return Response.ok(true);
+        } catch (Exception e) {
+            log.error("add customer when input failed, farmId:{}, customerId:{}, customerName:{}, creatorId:{}, cause:{}",
+                    farmId, customerId, customerName, creatorId, Throwables.getStackTraceAsString(e));
+            return Response.fail("customer.create.fail");
+        }
+    }
+
+    //true 重名
+    private boolean isExistCustomerName(Long farmId, String customerName) {
+        List<String> customerNames = doctorCustomerDao.findByFarmId(farmId).stream().map(DoctorCustomer::getName).collect(Collectors.toList());
+        return customerNames.contains(customerName);
     }
 
     //发布清理基础数据缓存的事件

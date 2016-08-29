@@ -7,6 +7,8 @@ import lombok.experimental.Builder;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created by yaoqijun.
@@ -46,5 +48,39 @@ public class DoctorPigletsChgDto implements Serializable{
 
     private Long pigletsCustomerId;    //客户Id （非必填）
 
+    private String pigletsCustomerName;    //客户姓名 （非必填）
+
     private String pigletsMark;  //标识(非必填)
+
+    public Map<String, String> descMap(){
+        Map<String, String> map = new HashMap<>();
+        if(pigletsCount != null){
+            map.put("仔猪数量", pigletsCount.toString());
+        }
+        if(sowPigletsCount != null){
+            map.put("仔母猪数量", sowPigletsCount.toString());
+        }
+        if(boarPigletsCount != null){
+            map.put("仔公猪数量", boarPigletsCount.toString());
+        }
+        if(pigletsChangeTypeName != null){
+            map.put("变动类型", pigletsChangeTypeName);
+        }
+        if(pigletsChangeReasonName != null){
+            map.put("变动原因", pigletsChangeReasonName);
+        }
+        if(pigletsWeight != null){
+            map.put("变动重量", pigletsWeight.toString());
+        }
+        if(pigletsPrice != null){
+            map.put("变动价格", Long.valueOf(pigletsPrice / 100).toString());
+        }
+        if(pigletsSum != null){
+            map.put("总价", Long.valueOf(pigletsSum / 100).toString());
+        }
+        if(pigletsCustomerName != null){
+            map.put("客户", pigletsCustomerName);
+        }
+        return map;
+    }
 }

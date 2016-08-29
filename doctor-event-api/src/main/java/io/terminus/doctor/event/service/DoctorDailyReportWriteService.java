@@ -1,7 +1,6 @@
 package io.terminus.doctor.event.service;
 
 import io.terminus.common.model.Response;
-import io.terminus.doctor.event.dto.report.daily.DoctorDailyReportDto;
 
 import javax.validation.constraints.NotNull;
 import java.util.Date;
@@ -17,11 +16,11 @@ import java.util.List;
 public interface DoctorDailyReportWriteService {
 
     /**
-     * 批量创建DoctorDailyReport(先删除, 再创建)
-     * @param dailyReportDtos 日报统计list
+     * job批量创建DoctorDailyReport(先删除, 再创建)
+     * @param farmIds 猪场ids
      * @param sumAt 统计时间
      * @return 是否成功
      */
-    Response<Boolean> createDailyReports(List<DoctorDailyReportDto> dailyReportDtos,
+    Response<Boolean> createDailyReports(@NotNull(message = "farmId.not.null") List<Long> farmIds,
                                          @NotNull(message = "date.not.null") Date sumAt);
 }

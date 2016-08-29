@@ -165,6 +165,11 @@ public class DoctorPigEvent implements Serializable {
     private Integer npd = 0;
 
     /**
+     * 分娩总重(kg)
+     */
+    private Double farrowWeight;
+
+    /**
      * 活仔数
      */
     private Integer liveCount;

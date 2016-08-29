@@ -7,6 +7,8 @@ import lombok.experimental.Builder;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created by yaoqijun.
@@ -43,4 +45,24 @@ public class DoctorChgFarmDto implements Serializable{
     private Integer pigletsCount; // 仔猪数量
 
     private String remark;  // 注解
+
+    public Map<String, String> descMap() {
+        Map<String, String> map = new HashMap<>();
+        if(fromFarmName != null){
+            map.put("原场", fromFarmName);
+        }
+        if(fromBarnName != null){
+            map.put("原舍", fromBarnName);
+        }
+        if(toFarmName != null){
+            map.put("转入猪场", toFarmName);
+        }
+        if(toBarnName != null){
+            map.put("转入猪舍", toBarnName);
+        }
+        if(pigletsCount != null){
+            map.put("仔猪数量", pigletsCount.toString());
+        }
+        return map;
+    }
 }

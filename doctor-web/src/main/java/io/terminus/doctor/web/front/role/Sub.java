@@ -14,7 +14,7 @@ import java.util.List;
 @Data
 public class Sub {
 
-    private Long id;
+    private Long id; // 子账号的 user id
 
     private String username; //用户名
 
@@ -31,4 +31,12 @@ public class Sub {
     private Date createdAt; //创建时间
 
     private List<Long> farmIds;
+
+    /**
+     * @see io.terminus.doctor.user.model.Sub.Status
+     */
+    private Integer status;
+
+    //员工关联的猪舍, 将存入数据权限表
+    private List<Long> barnIds;
 }

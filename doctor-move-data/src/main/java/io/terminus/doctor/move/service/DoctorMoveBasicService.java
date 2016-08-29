@@ -221,6 +221,10 @@ public class DoctorMoveBasicService {
         return doctorBarnDao.findByFarmId(farmId).stream().collect(Collectors.toMap(DoctorBarn::getOutId, v -> v));
     }
 
+    public Map<Long, Integer> getBarnIdMap(Long farmId) {
+        return doctorBarnDao.findByFarmId(farmId).stream().collect(Collectors.toMap(DoctorBarn::getId, DoctorBarn::getPigType));
+    }
+
     //分别是 Map<DoctorBasic.TypeEnum, Map<DoctorBasic.name, DoctorBasic>>
     public Map<Integer, Map<String, DoctorBasic>> getBasicMap() {
         Map<Integer, Map<String, DoctorBasic>> basicMap = Maps.newHashMap();

@@ -8,6 +8,7 @@ import com.google.common.base.MoreObjects;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import org.joda.time.DateTime;
+import org.joda.time.Duration;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.DateTimeFormatterBuilder;
@@ -133,7 +134,7 @@ public class DateUtil {
         return months;
     }
 
-    /*
+    /**
      * 获取当月的最后一天
      *
      * @param date
@@ -144,4 +145,41 @@ public class DateUtil {
         return date.plusMonths(1).withDayOfMonth(1).withHourOfDay(0).withMinuteOfHour(0).withSecondOfMinute(0).withMillisOfSecond(0).minusSeconds(1);
     }
 
+    /**
+     * 同一年显示 x月, 不同年显示 xxxx年x月
+     * @param date 日期
+     * @return 日期格式化的结果
+     */
+    public static String getDateStr(Date date) {
+        if (date == null) {
+            return "";
+        }
+        DateTime datetime = new DateTime(date);
+        if (datetime.getYear() == DateTime.now().getYear()) {
+            return datetime.getMonthOfYear() + "月";
+        }
+        return datetime.getYear() + "年" + datetime.getMonthOfYear() + "月";
+    }
+
+
+    /**
+     * 求开始日期与结束日期之间的天数 deltaDays = endAt - startAt
+     * @param startAt 开始时间
+     * @param endAt 结束时间
+     * @return 天数
+     */
+    public static int getDeltaDays(Date startAt, Date endAt) {
+        Duration duration = new Duration(new DateTime(startAt), new DateTime(endAt));
+        return (int) duration.getStandardDays();
+    }
+
+    /**
+     * 求开始日期与结束日期之间的天数的绝对值 deltaDays = abs(endAt - startAt)
+     * @param startAt 开始时间
+     * @param endAt 结束时间
+     * @return 天数
+     */
+    public static int getDeltaDaysAbs(Date startAt, Date endAt) {
+        return Math.abs(getDeltaDays(startAt, endAt));
+    }
 }

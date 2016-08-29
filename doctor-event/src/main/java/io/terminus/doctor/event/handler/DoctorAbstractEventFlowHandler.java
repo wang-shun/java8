@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
+import io.terminus.common.exception.ServiceException;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.constants.JacksonType;
 import io.terminus.doctor.event.constants.DoctorPigSnapshotConstants;
@@ -115,7 +116,7 @@ public abstract class DoctorAbstractEventFlowHandler extends HandlerAware {
             flowDataMap.put("event", JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(doctorPigEvent));
             flowDataMap.put("track", JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(doctorPigTrack));
             execution.setFlowData(JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(flowDataMap));
-        } catch (IllegalStateException e) {
+        } catch (IllegalStateException | ServiceException e) {
             log.error("handle execute fail, cause:{}", Throwables.getStackTraceAsString(e));
             throw e;
         } catch (Exception e) {
@@ -179,11 +180,16 @@ public abstract class DoctorAbstractEventFlowHandler extends HandlerAware {
 
         //往pigTrack 当中添加猪舍类型
         if (notNull(doctorPigTrack.getCurrentBarnId())) {
-            DoctorBarn doctorBarn = doctorBarnDao.findById(doctorPigTrack.getCurrentBarnId());
+            DoctorBarn doctorBarn = getBarnById(doctorPigTrack.getCurrentBarnId());
             if (notNull(doctorBarn)) {
                 doctorPigTrack.setCurrentBarnType(doctorBarn.getPigType());
             }
         }
+    }
+
+    //根据id查猪舍
+    protected DoctorBarn getBarnById(Long barnId) {
+        return doctorBarnDao.findById(barnId);
     }
 
     /**
@@ -236,7 +242,7 @@ public abstract class DoctorAbstractEventFlowHandler extends HandlerAware {
                 .farmId(basic.getFarmId()).farmName(basic.getFarmName())
                 .pigId(basic.getPigId()).pigCode(basic.getPigCode())
                 .eventAt(DateTime.now().toDate()).type(basic.getEventType())
-                .kind(basic.getPigType()).name(basic.getEventName()).desc(basic.getEventDesc()).relEventId(basic.getRelEventId())
+                .kind(basic.getPigType()).name(basic.getEventName()).desc(basic.generateEventDescFromExtra(extra)).relEventId(basic.getRelEventId())
                 .barnId(basic.getBarnId()).barnName(basic.getBarnName())
                 .outId(UUID.randomUUID().toString())
                 .creatorId(basic.getStaffId()).creatorName(basic.getStaffName())

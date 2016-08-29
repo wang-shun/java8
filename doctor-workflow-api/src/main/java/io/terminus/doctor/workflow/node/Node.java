@@ -39,6 +39,7 @@ public interface Node {
     String ATTR_POINT_Y = "pointy";
     String ATTR_TARGET = "target";
     String ATTR_HANDLER = "handler";
+    String ATTR_TACKER = "tacker";
     String ATTR_EXPRESSION = "expression";
     String ATTR_DESCRIBE = "describe";
 

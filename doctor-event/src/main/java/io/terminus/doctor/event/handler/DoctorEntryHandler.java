@@ -31,6 +31,8 @@ import org.joda.time.Years;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.beans.IntrospectionException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
@@ -173,11 +175,11 @@ public class DoctorEntryHandler implements DoctorEventCreateHandler {
      * @param dto
      * @return
      */
-    private DoctorPigEvent buildDoctorPigEntryEvent(DoctorBasicInputInfoDto basic, DoctorFarmEntryDto dto) {
+    private DoctorPigEvent buildDoctorPigEntryEvent(DoctorBasicInputInfoDto basic, DoctorFarmEntryDto dto) throws IllegalAccessException, IntrospectionException, InvocationTargetException {
         DoctorPigEvent doctorPigEvent = DoctorPigEvent.builder()
                 .orgId(basic.getOrgId()).orgName(basic.getOrgName()).farmId(basic.getFarmId()).farmName(basic.getFarmName())
                 .pigCode(dto.getPigCode()).eventAt(DateTime.now().toDate())
-                .type(basic.getEventType()).kind(basic.getPigType()).name(basic.getEventName()).desc(basic.getEventDesc())
+                .type(basic.getEventType()).kind(basic.getPigType()).name(basic.getEventName()).desc(basic.generateEventDescFromExtra(BeanMapper.convertObjectToMap(dto)))
                 .barnId(dto.getBarnId()).barnName(dto.getBarnName()).relEventId(basic.getRelEventId())
                 .outId(UUID.randomUUID().toString()).remark(dto.getEntryMark())
                 .creatorId(basic.getStaffId()).creatorName(basic.getStaffName())

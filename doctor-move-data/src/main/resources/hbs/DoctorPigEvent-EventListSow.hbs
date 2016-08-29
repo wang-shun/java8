@@ -1,5 +1,12 @@
 -- 查询DoctorPigEvent的字段(View_EventListSow)
 SELECT
+    CASE WHEN a.eventNameFirst = '转舍' THEN
+        CASE
+            WHEN barn.TypeName != '配种母猪' AND toBarn.TypeName = '配种母猪' THEN '转入配种舍'
+            WHEN barn.TypeName != '妊娠母猪' AND toBarn.TypeName = '妊娠母猪' THEN '转入妊娠舍'
+            WHEN barn.TypeName != '分娩母猪' AND toBarn.TypeName = '分娩母猪' THEN '去分娩'
+            ELSE a.eventNameFirst END
+    ELSE eventNameFirst END AS eventName,
     a.*,
     dis.FieldText AS diseaseName,
     rm.FieldText AS changeTypeName,
@@ -16,7 +23,7 @@ FROM
             WHEN EventName = '仔猪代哺' THEN '被拼窝'
             WHEN EventName = '部分断奶' THEN '断奶'
             WHEN EventName = '妊娠检查' AND PregChkResult = '流产' THEN '流产'
-            ELSE EventName END AS eventName,     -- 转换事件的名称, 以适应新版的事件
+            ELSE EventName END AS eventNameFirst,     -- 转换事件的名称, 以适应新版的事件
         OID AS sowOutId,
         FarmOID AS farmOutId,
         PigID AS pigCode,
@@ -86,4 +93,6 @@ FROM
     LEFT JOIN TB_FieldValue AS rm ON a.changeTypeColId = rm.ColID
     LEFT JOIN TB_FieldValue AS foster ON a.fosterReasonColId = foster.ColID
     LEFT JOIN view_GainCardList AS gain ON a.toGroupOutId = gain.OID
+    LEFT JOIN view_PigLocationList AS barn on a.barnOutId = barn.OID
+    LEFT JOIN view_PigLocationList AS toBarn on a.toBarnOutId = toBarn.OID
 WHERE a.sowOutId IN ({{{sowOutIds}}})

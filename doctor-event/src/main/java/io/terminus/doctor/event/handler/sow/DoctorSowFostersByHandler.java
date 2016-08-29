@@ -1,5 +1,6 @@
 package io.terminus.doctor.event.handler.sow;
 
+import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorPigDao;
@@ -26,6 +27,7 @@ import java.util.Map;
 import java.util.Objects;
 
 import static com.google.common.base.Preconditions.checkState;
+import static io.terminus.doctor.event.constants.DoctorPigExtraConstants.EVENT_PIG_ID;
 
 /**
  * Created by yaoqijun.
@@ -42,6 +44,8 @@ public class DoctorSowFostersByHandler extends DoctorAbstractEventFlowHandler {
     private final DoctorGroupReadService doctorGroupReadService;
 
     private static final DateTimeFormatter DTF = DateTimeFormat.forPattern("yyyy-MM-dd");
+
+    private static final JsonMapper JSON_MAPPER = JsonMapper.nonEmptyMapper();
 
     @Autowired
     public DoctorSowFostersByHandler(DoctorPigDao doctorPigDao, DoctorPigEventDao doctorPigEventDao,
@@ -80,32 +84,6 @@ public class DoctorSowFostersByHandler extends DoctorAbstractEventFlowHandler {
         doctorPigTrack.setStatus(PigStatus.FEED.getKey());
         doctorPigTrack.addPigEvent(basic.getPigType(), (Long) context.get("doctorPigEventId"));
         return doctorPigTrack;
-
-//        // 校验当前的母猪状态 status 的存在方式
-//        Integer currentStatus = doctorPigTrack.getStatus();
-//        checkState(
-//                Objects.equals(currentStatus, PigStatus.FEED.getKey()), "foster.currentSowStatus.error");
-//
-//        //添加当前母猪的健崽猪的数量信息
-//        Map<String,Object> extraMap = doctorPigTrack.getExtraMap();
-//        Integer healthCount = (Integer) extraMap.get("farrowingLiveCount");
-//        Integer partWeanCount = extraMap.containsKey("partWeanPigletsCount") ? (Integer) extraMap.get("partWeanPigletsCount") : 0;
-//        Integer fosterCount= (Integer) extra.get("fostersCount");
-//
-//        Integer afterHealthCount = healthCount - fosterCount;
-//        checkState(afterHealthCount >= partWeanCount, "create.fostersBy.notEnough");
-//        extra.put("farrowingLiveCount", afterHealthCount);
-//        doctorPigTrack.addAllExtraMap(extra);
-//
-//        // 修改当前的母猪状态信息
-//        if(Objects.equals(afterHealthCount, partWeanCount)){
-//            doctorPigTrack.setStatus(PigStatus.Wean.getKey());
-//        }else {
-//            doctorPigTrack.setStatus(PigStatus.FEED.getKey());
-//        }
-//        execution.getExpression().put("status", doctorPigTrack.getStatus());
-//        doctorPigTrack.addPigEvent(basic.getPigType(), (Long) context.get("doctorPigEventId"));
-//        return doctorPigTrack;
     }
 
     /**
@@ -116,20 +94,23 @@ public class DoctorSowFostersByHandler extends DoctorAbstractEventFlowHandler {
      */
     private Long groupSowEventCreate(DoctorPigTrack doctorPigTrack, DoctorBasicInputInfoDto basicInputInfoDto, Map<String, Object> extra) {
 
-        Long fosterById = Long.valueOf(extra.get("fosterSowId").toString());
+        //拼窝的数据extra
+        Long fromSowId = Long.valueOf(extra.get(EVENT_PIG_ID).toString());
+        DoctorPigTrack fromSowTrack = doctorPigTrackDao.findByPigId(fromSowId);
+        Map<String, Object> fromSowTrackMap = JSON_MAPPER.fromJson(fromSowTrack.getExtra(), JSON_MAPPER.createCollectionType(Map.class, String.class, Object.class));
+        Long fromGroupId = Long.valueOf(fromSowTrackMap.get("farrowingPigletGroupId").toString());
 
-        DoctorPigTrack doctorFosterByPigTrack = doctorPigTrackDao.findByPigId(fosterById);
-        Map<String, Object> fosterByPigExtra = doctorFosterByPigTrack.getExtraMap();
-        Long fosterByGroupId = Long.valueOf(fosterByPigExtra.get("farrowingPigletGroupId").toString());
-
-        Map<String, Object> trackExtra = doctorFosterByPigTrack.getExtraMap();
+        //被拼窝的数据extra
+        Map<String, Object> toSowTrackMap = JSON_MAPPER.fromJson(doctorPigTrack.getExtra(), JSON_MAPPER.createCollectionType(Map.class, String.class, Object.class));
+        Long toGroupId = Long.valueOf(toSowTrackMap.get("farrowingPigletGroupId").toString());
+        String toGroupCode = String.valueOf(toSowTrackMap.get("groupCode"));
 
         // 构建Input 信息
         DoctorTransGroupInput doctorTransGroupInput = new DoctorTransGroupInput();
-        doctorTransGroupInput.setToBarnId(Long.valueOf(trackExtra.get("toBarnId").toString()));
-        doctorTransGroupInput.setToBarnName(trackExtra.get("toBarnName").toString());
-        doctorTransGroupInput.setToGroupId(Long.valueOf(trackExtra.get("farrowingPigletGroupId").toString()));
-        doctorTransGroupInput.setToGroupCode(trackExtra.get("groupCode").toString());
+        doctorTransGroupInput.setToBarnId(doctorPigTrack.getCurrentBarnId());
+        doctorTransGroupInput.setToBarnName(doctorPigTrack.getCurrentBarnName());
+        doctorTransGroupInput.setToGroupId(toGroupId);
+        doctorTransGroupInput.setToGroupCode(toGroupCode);
 
         if (Objects.equals(doctorPigTrack.getStatus(), PigStatus.FEED.getKey())) {
             doctorTransGroupInput.setIsCreateGroup(0);
@@ -139,16 +120,16 @@ public class DoctorSowFostersByHandler extends DoctorAbstractEventFlowHandler {
 
         doctorTransGroupInput.setQuantity(Integer.valueOf(extra.get("fostersCount").toString()));
         doctorTransGroupInput.setBoarQty(Integer.valueOf(extra.get("boarFostersCount").toString()));
-        doctorTransGroupInput.setSowQty(Integer.valueOf(extra.get("sowFostersCount").toString()));
-
+        doctorTransGroupInput.setSowQty(doctorTransGroupInput.getQuantity() - doctorTransGroupInput.getBoarQty());
         doctorTransGroupInput.setWeight(Double.valueOf(extra.get("fosterTotalWeight").toString()));
+        doctorTransGroupInput.setAvgWeight(doctorTransGroupInput.getWeight() / doctorTransGroupInput.getQuantity());    //均重
         doctorTransGroupInput.setEventAt(DateTime.now().toString(DTF));
         doctorTransGroupInput.setIsAuto(1);
         doctorTransGroupInput.setCreatorId(basicInputInfoDto.getStaffId());
         doctorTransGroupInput.setCreatorName(basicInputInfoDto.getStaffName());
 
         return RespHelper.orServEx(doctorGroupWriteService.groupEventTransGroup(
-                RespHelper.orServEx(doctorGroupReadService.findGroupDetailByGroupId(fosterByGroupId)),
+                RespHelper.orServEx(doctorGroupReadService.findGroupDetailByGroupId(fromGroupId)),
                 doctorTransGroupInput));
     }
 }

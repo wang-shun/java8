@@ -28,6 +28,7 @@ import io.terminus.doctor.user.model.DoctorStaff;
 import io.terminus.doctor.user.model.DoctorUserDataPermission;
 import io.terminus.doctor.user.model.Sub;
 import io.terminus.doctor.user.model.SubRole;
+import io.terminus.doctor.user.service.DoctorServiceReviewReadService;
 import io.terminus.doctor.user.service.DoctorServiceReviewWriteService;
 import io.terminus.doctor.user.service.DoctorServiceStatusWriteService;
 import io.terminus.doctor.user.service.DoctorUserReadService;
@@ -61,6 +62,8 @@ public class UserInitService {
     private UserWriteService<User> userWriteService;
     @Autowired
     private DoctorServiceReviewWriteService doctorServiceReviewWriteService;
+    @Autowired
+    private DoctorServiceReviewReadService doctorServiceReviewReadService;
     @Autowired
     private DoctorServiceStatusWriteService doctorServiceStatusWriteService;
     @Autowired
@@ -102,7 +105,7 @@ public class UserInitService {
                 //初始化服务状态
                 this.initDefaultServiceStatus(userId);
                 //初始化服务的申请审批状态
-                RespHelper.or500(doctorServiceReviewWriteService.initServiceReview(userId, mobile));
+                this.initServiceReview(userId, mobile);
                 //创建org
                 DoctorOrg org = this.createOrg(member.getFarmName(), mobile, null, member.getFarmOID());
                 //创建staff
@@ -306,7 +309,7 @@ public class UserInitService {
         // 设置下子账号的状态
         if(Objects.equals(member.getIsStopUse(), "true")){
             Sub sub = subDao.findByUserId(subUserId);
-            sub.setStatus(Sub.Status.LOCK.value());
+            sub.setStatus(Sub.Status.ABSENT.value());
             subDao.update(sub);
         }
 
@@ -315,5 +318,12 @@ public class UserInitService {
         permission.setUserId(subUserId);
         permission.setFarmIds(Joiner.on(",").join(farmIds));
         doctorUserDataPermissionDao.create(permission);
+    }
+
+    private void initServiceReview(Long userId, String mobile){
+        RespHelper.or500(doctorServiceReviewWriteService.initServiceReview(userId, mobile));
+        DoctorServiceReview review = RespHelper.or500(doctorServiceReviewReadService.findServiceReviewByUserIdAndType(userId, DoctorServiceReview.Type.PIG_DOCTOR));
+        review.setStatus(DoctorServiceReview.Status.OK.getValue());
+        RespHelper.or500(doctorServiceReviewWriteService.updateReview(review));
     }
 }

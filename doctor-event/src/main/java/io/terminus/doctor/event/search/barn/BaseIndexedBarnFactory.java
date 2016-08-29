@@ -47,6 +47,8 @@ public abstract class BaseIndexedBarnFactory<T extends IndexedBarn> implements I
         indexedBarn.setNameSearch(barn.getName().toLowerCase());
         indexedBarn.setStorage(RespHelper.orServEx(doctorBarnReadService.countPigByBarnId(indexedBarn.getId())));
         indexedBarn.setOrder(pigType.getOrder());
+        indexedBarn.setPigGroupCount(RespHelper.orServEx(doctorBarnReadService.pigGroupCountByBarnId(indexedBarn.getId())));
+        indexedBarn.setPigCount(RespHelper.orServEx(doctorBarnReadService.pigCountByBarnId(indexedBarn.getId())));
         return indexedBarn;
     }
 }

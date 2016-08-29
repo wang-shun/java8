@@ -59,6 +59,16 @@ public class IndexedBarn implements Serializable {
     private Integer storage;
 
     /**
+     * 猪群数量
+     */
+    private Integer pigGroupCount;
+
+    /**
+     * 猪数量
+     */
+    private Integer pigCount;
+
+    /**
      * 猪舍容量
      */
     private Integer capacity;

@@ -6,6 +6,8 @@ import lombok.EqualsAndHashCode;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Desc: 猪群变动事件录入信息
@@ -83,4 +85,37 @@ public class DoctorChangeGroupInput extends BaseGroupInput implements Serializab
     private Long customerId;
 
     private String customerName;
+
+    @Override
+    public Map<String, String> descMap() {
+        Map<String, String> map = new HashMap<>();
+        if(changeTypeName != null){
+            map.put("变动类型", changeTypeName);
+        }
+        if(changeReasonName != null){
+            map.put("变动原因", changeReasonName);
+        }
+        if(boarQty != null){
+            map.put("公猪数", boarQty.toString());
+        }
+        if(sowQty != null){
+            map.put("母猪数", sowQty.toString());
+        }
+        if(weight != null){
+            map.put("总活体重（Kg）", weight.toString());
+        }
+        if(breedName != null){
+            map.put("品种", breedName);
+        }
+        if(price != null){
+            map.put("单价", Long.valueOf(price / 100).toString());
+        }
+        if(amount != null){
+            map.put("金额", Long.valueOf(amount / 100).toString());
+        }
+        if(customerName != null){
+            map.put("客户", customerName);
+        }
+        return map;
+    }
 }

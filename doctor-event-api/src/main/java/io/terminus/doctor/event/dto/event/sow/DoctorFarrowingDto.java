@@ -1,5 +1,6 @@
 package io.terminus.doctor.event.dto.event.sow;
 
+import io.terminus.doctor.event.enums.FarrowingType;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -7,6 +8,8 @@ import lombok.experimental.Builder;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created by yaoqijun.
@@ -77,4 +80,69 @@ public class DoctorFarrowingDto implements Serializable{
     private String farrowStaff2;  //接生员2
 
     private String farrowRemark;    //标志
+
+    public Map<String, String> descMap(){
+        Map<String, String> map = new HashMap<>();
+        if(nestCode != null){
+            map.put("窝号", nestCode);
+        }
+        if(barnName != null){
+            map.put("分娩猪舍", barnName);
+        }
+        if(bedCode != null){
+            map.put("床号", bedCode);
+        }
+        if(farrowingType != null){
+            FarrowingType farrowingType1 = FarrowingType.from(farrowingType);
+            if(farrowingType1 != null){
+                map.put("分娩类型", farrowingType1.getDesc());
+            }
+        }
+        if(isHelp != null){
+            map.put("是否帮助", isHelp == 1 ? "是" : "否");
+        }
+        if(groupCode != null){
+            map.put("仔猪猪群", groupCode);
+        }
+        if(birthNestAvg > 0){
+            map.put("出生窝重", Double.toString(birthNestAvg));
+        }
+        if(dayAgeAvg != null){
+            map.put("平均日龄", dayAgeAvg.toString());
+        }
+        if(farrowingLiveCount != null){
+            map.put("分娩总数", farrowingLiveCount.toString());
+        }
+        if(liveSowCount != null){
+            map.put("活母猪数", liveSowCount.toString());
+        }
+        if(liveBoarCount != null){
+            map.put("活公猪数", liveBoarCount.toString());
+        }
+        if(healthCount != null){
+            map.put("健仔数", healthCount.toString());
+        }
+        if(weakCount != null){
+            map.put("弱崽数", weakCount.toString());
+        }
+        if(mnyCount != null){
+            map.put("木乃伊数", mnyCount.toString());
+        }
+        if(jxCount != null){
+            map.put("畸形数", jxCount.toString());
+        }
+        if(deadCount != null){
+            map.put("死亡数", deadCount.toString());
+        }
+        if(blackCount != null){
+            map.put("黑胎数", blackCount.toString());
+        }
+        if(farrowStaff1 != null){
+            map.put("接生员1", farrowStaff1);
+        }
+        if(farrowStaff2 != null){
+            map.put("接生员2", farrowStaff2);
+        }
+        return map;
+    }
 }
