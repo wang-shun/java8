@@ -40,6 +40,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -188,6 +189,39 @@ public class DoctorBarns {
         }
         return filterBarnByPigIds(RespHelper.or500(doctorBarnReadService.findBarnsByFarmIdAndPigTypes(farmId, types)), pigIds);
     }
+
+
+    /**
+     * 猪舍批量转舍时, 根据猪id, 求一下可转猪舍的交集
+     * @see io.terminus.doctor.event.enums.PigEvent
+     * @param pigIds    猪ids 逗号分隔
+     * @return 猪舍list
+     */
+    @RequestMapping(value = "/pigTypes/trans", method = RequestMethod.GET)
+    public List<DoctorBarn> findBarnsByfarmIdAndTypeWhenBatchTransBarn(@RequestParam("farmId") Long farmId,
+                                                                       @RequestParam(value = "pigIds", required = false) String pigIds) {
+        List<Integer> barnTypes = Lists.newArrayList();
+
+        //遍历求猪舍类型交集
+        for (Long pigId : Splitters.splitToLong(pigIds, Splitters.COMMA)) {
+            DoctorBarn pigBarn = RespHelper.or500(doctorPigReadService.findBarnByPigId(pigId));
+            if (PigType.MATING_TYPES.contains(pigBarn.getPigType())) {
+                barnTypes.retainAll(PigType.MATING_TYPES);
+            }
+            else if (PigType.FARROW_TYPES.contains(pigBarn.getPigType())) {
+                barnTypes.retainAll(PigType.FARROW_TYPES);
+            }
+            else if (PigType.HOUBEI_TYPES.contains(pigBarn.getPigType())) {
+                barnTypes.retainAll(PigType.HOUBEI_TYPES);
+            }
+            else {
+                barnTypes.retainAll(Lists.newArrayList(pigBarn.getPigType()));
+            }
+        }
+        return notEmpty(barnTypes) ? RespHelper.or500(doctorBarnReadService.findBarnsByFarmIdAndPigTypes(farmId, barnTypes))
+                : Collections.emptyList();
+    }
+
 
     /**
      * 创建或更新DoctorBarn
