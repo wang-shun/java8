@@ -1,5 +1,6 @@
 package io.terminus.doctor.event.handler.sow;
 
+import io.terminus.common.exception.ServiceException;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorPigDao;
 import io.terminus.doctor.event.dao.DoctorPigEventDao;
@@ -49,6 +50,12 @@ public class DoctorSowPregCheckHandler extends DoctorAbstractEventFlowHandler {
         Integer pregCheckResult = (Integer) extra.get("checkResult");
         //妊娠检查结果，从extra中拆出来
         doctorPigEvent.setPregCheckResult(pregCheckResult);
+
+        //校验能否妊娠检查与检查结果是否正确
+        checkCanPregCheckResult(doctorPigTrack.getStatus(), pregCheckResult);
+
+        //根据猪类判断, 如果是逆向: 空怀 => 阳性, 需要删掉以前的空怀事件
+        deleteOldPregCheckEventWhenPositive(doctorPigTrack);
 
         //妊娠检查事件时间
         DateTime checkDate = new DateTime(Long.valueOf(extra.get("checkDate").toString()));
@@ -129,5 +136,40 @@ public class DoctorSowPregCheckHandler extends DoctorAbstractEventFlowHandler {
                 doctorPigEventDao.update(firstMate);
             }
         }
+    }
+
+    //校验能否置成此妊娠检查状态
+    private static void checkCanPregCheckResult(Integer pigStatus, Integer checkResult) {
+        //已配种状态直接返回
+        if (Objects.equals(pigStatus, PigStatus.Mate.getKey())) {
+            return;
+        }
+
+        //阳性只能到空怀状态
+        if (Objects.equals(pigStatus, PigStatus.Pregnancy.getKey())) {
+            if (!PregCheckResult.KONGHUAI_RESULTS.contains(checkResult)) {
+                throw new ServiceException("preg.check.result.not.allow");
+            }
+            return;
+        }
+
+        //空怀或流程只能到阳性状态
+        if (Objects.equals(pigStatus, PigStatus.KongHuai.getKey()) || Objects.equals(pigStatus, PigStatus.Abortion.getKey())) {
+            if (!Objects.equals(checkResult, PregCheckResult.YANG.getKey())) {
+                throw new ServiceException("preg.check.result.not.allow");
+            }
+            return;
+        }
+        //如果不是 已配种, 妊娠检查结果状态, 不允许妊娠检查
+        throw new ServiceException("preg.check.not.allow");
+    }
+
+    //如果是逆向 空怀 => 阳性 需要删除旧的妊娠检查事件
+    private void  deleteOldPregCheckEventWhenPositive(DoctorPigTrack pigTrack) {
+        if (!(Objects.equals(pigTrack.getStatus(), PigStatus.KongHuai.getKey()) || Objects.equals(pigTrack.getStatus(), PigStatus.Abortion.getKey()))) {
+            return;
+        }
+
+        // TODO: 16/8/30 查找最近一次的妊娠检查事件, 删除之
     }
 }
