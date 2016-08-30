@@ -31,12 +31,17 @@
     </task>
 
     <task name="空怀">
-        <transition name="配种" value="9"  expression="#{eventType} equals '9'" target="已配种"  handler="doctorSowMatingHandler" describe="配种事件" />
+        <transition name="空怀后操作连线" target="空怀后操作方式"   describe="空怀后操作方式" />
     </task>
+
+    <decision name="空怀后操作方式">
+        <transition name="配种" value="9"  expression="#{eventType} equals '9'" target="已配种"  handler="doctorSowMatingHandler" describe="配种事件" />
+        <transition name="去妊娠检查" value="11" expression="#{eventType} equals '11'" target="妊娠检查" handler="doctorSowPregCheckHandler"/>
+    </decision>
 
     <decision name="妊娠检查阳性后事件录入">
         <transition name="去分娩" value="14" expression="#{eventType} equals '14'" tacker="doctorSowChgLocationCheckTacker" target="待分娩" handler="doctorSowChgLocationHandler"/>
-        <transition name="去流产" value="13" expression="#{eventType} equals '13'" target="流产" handler="doctorSowAbortionHandler"/>
+        <transition name="去妊娠检查" value="11" expression="#{eventType} equals '11'" target="妊娠检查" handler="doctorSowPregCheckHandler"/>
     </decision>
 
     <task name="流产">

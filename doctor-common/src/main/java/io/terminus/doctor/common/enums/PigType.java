@@ -24,7 +24,7 @@ public enum PigType {
     DELIVER_SOW(7, "分娩母猪", "种母猪", 8),
     RESERVE_BOAR(8, "后备公猪", "种公猪", 6),
     BOAR(9, "种公猪", "种公猪", 7),
-    BREEDING(10, "育种猪", "种猪", 8);
+    BREEDING(10, "育种猪", "种猪", 9);
 
     @Getter
     private final int value;

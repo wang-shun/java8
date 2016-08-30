@@ -316,8 +316,6 @@ public class DoctorSearches {
         }
         params.put("barnIds", barnIdList.get(0));
         createSearchWord(SearchType.BARN.getValue(), params);
-        //取在用的猪舍
-        params.put("status", "1");
         Paging<SearchedBarn> barns =
                 RespHelper.orServEx(barnSearchReadService.searchWithAggs(pageNo, pageSize, "search/search.mustache", params)).getBarns();
 
@@ -347,8 +345,6 @@ public class DoctorSearches {
         if (farmIdNotExist(params) || barnIdList == null) {
             return Collections.emptyList();
         }
-        //取在用的猪舍
-        params.put("status", "1");
         params.put("barnIds", barnIdList.get(0));
         // 游标法获取数据
         Integer pageNo = 1;
