@@ -3,7 +3,6 @@ package io.terminus.doctor.event.dto;
 import com.google.common.base.Joiner;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.doctor.event.dto.event.boar.DoctorSemenDto;
-import io.terminus.doctor.event.dto.event.sow.DoctorAbortionDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorFarrowingDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorFostersDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorMatingDto;
@@ -150,9 +149,6 @@ public class DoctorBasicInputInfoDto implements Serializable{
                 break;
             case PREG_CHECK:
                 fieldMap = BeanMapper.map(extra, DoctorPregChkResultDto.class).descMap();
-                break;
-            case ABORTION:
-                fieldMap = BeanMapper.map(extra, DoctorAbortionDto.class).descMap();
                 break;
             case FARROWING:
                 fieldMap = BeanMapper.map(extra, DoctorFarrowingDto.class).descMap();

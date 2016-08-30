@@ -36,7 +36,6 @@ import io.terminus.doctor.event.dto.event.group.DoctorNewGroupEvent;
 import io.terminus.doctor.event.dto.event.group.DoctorTransFarmGroupEvent;
 import io.terminus.doctor.event.dto.event.group.DoctorTransGroupEvent;
 import io.terminus.doctor.event.dto.event.group.DoctorTurnSeedGroupEvent;
-import io.terminus.doctor.event.dto.event.sow.DoctorAbortionDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorFarrowingDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorFostersDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorMatingDto;
@@ -591,10 +590,6 @@ public class DoctorMoveDataService {
                 sowEvent.setCheckDate(event.getEventAt());                  //检查时间
                 sowEvent.setExtra(JSON_MAPPER.toJson(checkResult));
                 break;
-            case ABORTION:      //流产, 只记录事件即可, 旧猪场软件并没有流产原因
-                sowEvent.setAbortionDate(event.getEventAt());             //流产事件
-                sowEvent.setExtra(JSON_MAPPER.toJson(DoctorAbortionDto.builder().abortionDate(event.getEventAt()).build()));
-                break;
             case FARROWING:     //分娩
                 DoctorFarrowingDto farrowing = getSowFarrowExtra(event, barnMap);
                 sowEvent.setLiveCount(farrowing.getFarrowingLiveCount()); //活仔数
@@ -945,8 +940,7 @@ public class DoctorMoveDataService {
                 event.setCurrentMatingCount(count);
             } else if (Objects.equals(event.getType(), PigEvent.TO_MATING.getKey()) //转入配种舍
                     || Objects.equals(event.getType(), PigEvent.WEAN.getKey()) //断奶事件
-                    || isNotPreg(event)
-                    || Objects.equals(event.getType(), PigEvent.ABORTION.getKey())) {
+                    || isNotPreg(event)) {
                 count = 0;
             }
         }
@@ -979,8 +973,7 @@ public class DoctorMoveDataService {
         for (DoctorPigEvent event : events) {
             if (Objects.equals(event.getType(), PigEvent.ENTRY.getKey()) ||
                     Objects.equals(event.getType(), PigEvent.PREG_CHECK.getKey()) ||
-                    Objects.equals(event.getType(), PigEvent.WEAN.getKey()) ||
-                    Objects.equals(event.getType(), PigEvent.ABORTION.getKey())
+                    Objects.equals(event.getType(), PigEvent.WEAN.getKey())
                     ) {
                 lastFlag = event;
                 continue;
@@ -1022,11 +1015,6 @@ public class DoctorMoveDataService {
                 //如果是断奶
                 if (Objects.equals(lastFlag.getType(), PigEvent.WEAN.getKey())) {
                     event.setDoctorMateType(DoctorMatingType.DP.getKey());
-                }
-
-                //如果是断奶
-                if (Objects.equals(lastFlag.getType(), PigEvent.ABORTION.getKey())) {
-                    event.setDoctorMateType(DoctorMatingType.LPL.getKey());
                 }
             }
         }
@@ -1095,14 +1083,6 @@ public class DoctorMoveDataService {
                 }
                 continue;
 
-            }
-
-            //当前事件是流产事件
-            if (Objects.equals(event.getType(), PigEvent.ABORTION.getKey()) && lastMateFlag != null) {
-                int days = Days.daysBetween(new DateTime(lastMateFlag.getMattingDate()), new DateTime(event.getAbortionDate())).getDays();
-                event.setPlnpd(Math.abs(days));
-                event.setNpd(Math.abs(days));
-                continue;
             }
 
             // 离场事件

@@ -32,7 +32,11 @@ public class DoctorPregChkResultDto implements Serializable{
      */
     private Integer checkResult;    // 妊娠检查结果
 
-    private String checkMark;   // 校验标识
+    private Long abortionReasonId;  // 流产原因
+
+    private String abortionReasonName;  //流产原因
+
+    private String checkMark;
 
     public Map<String, String> descMap(){
         Map<String, String> map = new HashMap<>();
@@ -40,6 +44,9 @@ public class DoctorPregChkResultDto implements Serializable{
             PregCheckResult result = PregCheckResult.from(checkResult);
             if(result != null){
                 map.put("检查结果", result.getDesc());
+            }
+            if(abortionReasonName != null){
+                map.put("流产原因", abortionReasonName);
             }
         }
         return map;

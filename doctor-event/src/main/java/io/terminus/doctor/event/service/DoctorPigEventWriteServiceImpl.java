@@ -1,6 +1,5 @@
 package io.terminus.doctor.event.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
@@ -9,17 +8,14 @@ import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.Response;
 import io.terminus.common.utils.BeanMapper;
-import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.enums.DataEventType;
 import io.terminus.doctor.common.event.CoreEventDispatcher;
 import io.terminus.doctor.common.event.DataEvent;
 import io.terminus.doctor.common.utils.Params;
 import io.terminus.doctor.event.dao.DoctorPigEventDao;
-import io.terminus.doctor.event.dao.DoctorPigTrackDao;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
 import io.terminus.doctor.event.dto.DoctorPigInfoDto;
 import io.terminus.doctor.event.dto.event.boar.DoctorSemenDto;
-import io.terminus.doctor.event.dto.event.sow.DoctorAbortionDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorFarrowingDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorMatingDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorPartWeanDto;
@@ -62,31 +58,26 @@ import static java.util.Objects.isNull;
 @RpcProvider
 public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteService{
 
-    private final ObjectMapper OBJECT_MAPPER = JsonMapper.JSON_NON_DEFAULT_MAPPER.getMapper();
+    private static final List<Integer> NOT_ALLOW_ROLL_BACK_EVENTS =Lists.newArrayList(
+            PigEvent.ENTRY.getKey(),
+            PigEvent.FARROWING.getKey(),
+            PigEvent.FOSTERS.getKey(),
+            PigEvent.FOSTERS_BY.getKey()
+    );
 
     private final DoctorPigEventManager doctorPigEventManager;
-
-    private final DoctorPigTrackDao doctorPigTrackDao;
-
     private final DoctorPigReadService doctorPigReadService;
-
     private final CoreEventDispatcher coreEventDispatcher;
-
     private final DoctorPigEventDao doctorPigEventDao;
-
-    public static final List<Integer> NOT_ALLOW_ROLL_BACK_EVENTS =Lists.newArrayList(
-            PigEvent.ENTRY.getKey(),PigEvent.FARROWING.getKey(),
-            PigEvent.FOSTERS.getKey(),PigEvent.FOSTERS_BY.getKey());
 
     @Autowired(required = false)
     private Publisher publisher;
 
     @Autowired
-    public DoctorPigEventWriteServiceImpl(
-            DoctorPigEventManager doctorPigEventManager, CoreEventDispatcher coreEventDispatcher,
-            DoctorPigTrackDao doctorPigTrackDao, DoctorPigReadService doctorPigReadService,
-            DoctorPigEventDao doctorPigEventDao){
-        this.doctorPigTrackDao = doctorPigTrackDao;
+    public DoctorPigEventWriteServiceImpl(DoctorPigEventManager doctorPigEventManager,
+                                          CoreEventDispatcher coreEventDispatcher,
+                                          DoctorPigReadService doctorPigReadService,
+                                          DoctorPigEventDao doctorPigEventDao){
         this.doctorPigEventManager = doctorPigEventManager;
         this.coreEventDispatcher = coreEventDispatcher;
         this.doctorPigReadService = doctorPigReadService;
@@ -263,20 +254,6 @@ public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteServic
         }catch (Exception e){
             log.error("vaccination event create fail, cause:{}", Throwables.getStackTraceAsString(e));
             return Response.fail("create.vaccination.fail");
-        }
-    }
-
-    @Override
-    public Response<Long> abortionEvent(DoctorAbortionDto doctorAbortionDto, DoctorBasicInputInfoDto doctorBasicInputInfoDto) {
-        try{
-            Map<String,Object> dto = Maps.newHashMap();
-            BeanMapper.copy(doctorAbortionDto, dto);
-            Map<String,Object> result = doctorPigEventManager.createSowPigEvent(doctorBasicInputInfoDto, dto);
-            publishEvent(result);
-            return Response.ok(Params.getWithConvert(result, "doctorEventId", a->Long.valueOf(a.toString())));
-        }catch (Exception e){
-            log.error("abortion create event fail, cause:{}", Throwables.getStackTraceAsString(e));
-            return Response.fail("create.abortionEvent.fail");
         }
     }
 

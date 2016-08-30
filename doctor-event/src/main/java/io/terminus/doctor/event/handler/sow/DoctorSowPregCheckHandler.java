@@ -16,6 +16,7 @@ import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigSnapshot;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.workflow.core.Execution;
+import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
 import org.joda.time.Days;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +33,7 @@ import static io.terminus.common.utils.Arguments.notNull;
  * Email:yaoqj@terminus.io
  * Descirbe:
  */
+@Slf4j
 @Component
 public class DoctorSowPregCheckHandler extends DoctorAbstractEventFlowHandler {
 
@@ -154,7 +156,7 @@ public class DoctorSowPregCheckHandler extends DoctorAbstractEventFlowHandler {
         }
 
         //空怀或流程只能到阳性状态
-        if (Objects.equals(pigStatus, PigStatus.KongHuai.getKey()) || Objects.equals(pigStatus, PigStatus.Abortion.getKey())) {
+        if (Objects.equals(pigStatus, PigStatus.KongHuai.getKey())) {
             if (!Objects.equals(checkResult, PregCheckResult.YANG.getKey())) {
                 throw new ServiceException("preg.check.result.not.allow");
             }
@@ -164,13 +166,15 @@ public class DoctorSowPregCheckHandler extends DoctorAbstractEventFlowHandler {
         throw new ServiceException("preg.check.not.allow");
     }
 
-    //如果是逆向 空怀 => 阳性 需要删除旧的妊娠检查事件
+    //如果是逆向 空怀 => 阳性 需要删除旧的妊娠检查事件(空怀的事件)
     private void  deleteOldPregCheckEventWhenPositive(DoctorPigTrack pigTrack) {
-        if ((Objects.equals(pigTrack.getStatus(), PigStatus.KongHuai.getKey()) || Objects.equals(pigTrack.getStatus(), PigStatus.Abortion.getKey()))) {
+        if ((Objects.equals(pigTrack.getStatus(), PigStatus.KongHuai.getKey()))) {
             DoctorPigEvent lastPregEvent = doctorPigEventDao.queryLastPregCheck(pigTrack.getPigId());
             if (lastPregEvent == null || !PregCheckResult.KONGHUAI_RESULTS.contains(lastPregEvent.getPregCheckResult())) {
-                throw new ServiceException("preg.check.result.not.allow");
+                throw new ServiceException("preg.check.not.allow");
             }
+
+            log.info("remove old preg check event info:{}", lastPregEvent);
             doctorPigEventDao.delete(lastPregEvent.getId());
         }
     }

@@ -22,7 +22,6 @@ public enum PigStatus {
     Mate(3,"已配种","已配种"),
     Pregnancy(4,"阳性","妊娠检查阳性"),
     KongHuai(5,"空怀","空怀"),
-    Abortion(6,"流产","流产"),
     Farrow(7,"待分娩","待分娩"),
     FEED(8,"哺乳","哺乳"),
     Wean(9,"断奶","断奶"),
