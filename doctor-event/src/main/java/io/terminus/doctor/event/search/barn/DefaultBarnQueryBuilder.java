@@ -81,18 +81,18 @@ public class DefaultBarnQueryBuilder extends BaseBarnQueryBuilder {
         if (StringUtils.isNotBlank(sort)) {
             List<String> parts = Splitters.UNDERSCORE.splitToList(sort);
             if (parts.size() < 4) {
-                // 否则默认按 pigType升序 storage升序 createdAt降序
-                sort(sorts, "1", "pigType");
-                sort(sorts, "1", "storage");
+                // 否则默认按 order升序 storage升序 createdAt降序
+                sort(sorts, "1", "order");
+                sort(sorts, "2", "storage");
                 sort(sorts, "2", "createdAt");
                 return sorts;
             }
-            String pigType = Iterables.getFirst(parts, "0");
+            String order = Iterables.getFirst(parts, "0");
             String storage = Iterables.get(parts, 1, "0");
             String createdAt = Iterables.get(parts, 2, "0");
             String capacity = Iterables.get(parts, 3, "0");
             // 新增sort
-            sort(sorts, pigType, "pigType");
+            sort(sorts, order, "order");
             sort(sorts, storage, "storage");
             sort(sorts, createdAt, "createdAt");
             sort(sorts, capacity, "capacity");
