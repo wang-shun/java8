@@ -1,7 +1,9 @@
 package io.terminus.doctor.event.dto.event.usual;
 
+import io.terminus.doctor.event.dto.event.AbstractPigEventInputDto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Builder;
 
@@ -16,11 +18,12 @@ import java.util.Map;
  * Email:yaoqj@terminus.io
  * Descirbe: 体况信息
  */
+@EqualsAndHashCode(callSuper = true)
 @Builder
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class DoctorConditionDto implements Serializable{
+public class DoctorConditionDto extends AbstractPigEventInputDto implements Serializable{
 
     private static final long serialVersionUID = 2731040792952612479L;
 
@@ -34,7 +37,7 @@ public class DoctorConditionDto implements Serializable{
 
     private String conditionRemark; //体况注解
 
-
+    @Override
     public Map<String, String> descMap() {
         Map<String, String> map = new HashMap<>();
         if(conditionJudgeScore != null){
@@ -47,5 +50,10 @@ public class DoctorConditionDto implements Serializable{
             map.put("背膘", conditionBackWeight.toString());
         }
         return map;
+    }
+
+    @Override
+    public Date eventAt() {
+        return this.conditionDate;
     }
 }

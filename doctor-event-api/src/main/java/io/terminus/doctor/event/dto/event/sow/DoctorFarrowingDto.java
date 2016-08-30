@@ -1,8 +1,10 @@
 package io.terminus.doctor.event.dto.event.sow;
 
+import io.terminus.doctor.event.dto.event.AbstractPigEventInputDto;
 import io.terminus.doctor.event.enums.FarrowingType;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Builder;
 
@@ -17,11 +19,12 @@ import java.util.Map;
  * Email:yaoqj@terminus.io
  * Descirbe: 母猪分娩事件Dto
  */
+@EqualsAndHashCode(callSuper = true)
 @Builder
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class DoctorFarrowingDto implements Serializable{
+public class DoctorFarrowingDto extends AbstractPigEventInputDto implements Serializable{
 
     private static final long serialVersionUID = 7823378636552520021L;
 
@@ -81,6 +84,7 @@ public class DoctorFarrowingDto implements Serializable{
 
     private String farrowRemark;    //标志
 
+    @Override
     public Map<String, String> descMap(){
         Map<String, String> map = new HashMap<>();
         if(nestCode != null){
@@ -144,5 +148,10 @@ public class DoctorFarrowingDto implements Serializable{
             map.put("接生员2", farrowStaff2);
         }
         return map;
+    }
+
+    @Override
+    public Date eventAt() {
+        return this.farrowingDate;
     }
 }

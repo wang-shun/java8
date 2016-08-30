@@ -1,8 +1,10 @@
 package io.terminus.doctor.event.dto.event.boar;
 
 import io.terminus.doctor.common.utils.DateUtil;
+import io.terminus.doctor.event.dto.event.AbstractPigEventInputDto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Builder;
 
@@ -17,11 +19,12 @@ import java.util.Map;
  * Email:yaoqj@terminus.io
  * Descirbe:
  */
+@EqualsAndHashCode(callSuper = true)
 @Builder
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class DoctorSemenDto implements Serializable{
+public class DoctorSemenDto extends AbstractPigEventInputDto implements Serializable{
 
     private static final long serialVersionUID = 3227572350710428642L;
 
@@ -45,7 +48,7 @@ public class DoctorSemenDto implements Serializable{
 
     private String semenRemark; //精液备注（非必填）
 
-
+    @Override
     public Map<String, String> descMap() {
         Map<String, String> map = new HashMap<>();
         if(semenDate != null){
@@ -76,5 +79,10 @@ public class DoctorSemenDto implements Serializable{
             map.put("畸形率", semenJxRatio.toString());
         }
         return map;
+    }
+
+    @Override
+    public Date eventAt() {
+        return this.semenDate;
     }
 }

@@ -1,7 +1,9 @@
 package io.terminus.doctor.event.dto.event.usual;
 
+import io.terminus.doctor.event.dto.event.AbstractPigEventInputDto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Builder;
 
@@ -16,11 +18,12 @@ import java.util.Map;
  * Email:yaoqj@terminus.io
  * Descirbe: 疾病事件
  */
+@EqualsAndHashCode(callSuper = true)
 @Builder
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class DoctorDiseaseDto implements Serializable{
+public class DoctorDiseaseDto extends AbstractPigEventInputDto implements Serializable{
 
     private static final long serialVersionUID = 7557956788545103933L;
 
@@ -34,6 +37,7 @@ public class DoctorDiseaseDto implements Serializable{
 
     private String diseaseRemark;   // 疾病注解
 
+    @Override
     public Map<String, String> descMap() {
         Map<String, String> map = new HashMap<>();
         if(diseaseName != null){
@@ -43,5 +47,10 @@ public class DoctorDiseaseDto implements Serializable{
             map.put("操作人", diseaseStaff);
         }
         return map;
+    }
+
+    @Override
+    public Date eventAt() {
+        return this.diseaseDate;
     }
 }

@@ -1,7 +1,9 @@
 package io.terminus.doctor.event.dto.event.usual;
 
+import io.terminus.doctor.event.dto.event.AbstractPigEventInputDto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Builder;
 
@@ -16,11 +18,12 @@ import java.util.Map;
  * Email:yaoqj@terminus.io
  * Descirbe: 转场事件
  */
+@EqualsAndHashCode(callSuper = true)
 @Builder
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class DoctorChgFarmDto implements Serializable{
+public class DoctorChgFarmDto extends AbstractPigEventInputDto implements Serializable{
 
     private static final long serialVersionUID = -6702066337454157425L;
 
@@ -46,6 +49,7 @@ public class DoctorChgFarmDto implements Serializable{
 
     private String remark;  // 注解
 
+    @Override
     public Map<String, String> descMap() {
         Map<String, String> map = new HashMap<>();
         if(fromFarmName != null){
@@ -64,5 +68,10 @@ public class DoctorChgFarmDto implements Serializable{
             map.put("仔猪数量", pigletsCount.toString());
         }
         return map;
+    }
+
+    @Override
+    public Date eventAt() {
+        return this.chgFarmDate;
     }
 }
