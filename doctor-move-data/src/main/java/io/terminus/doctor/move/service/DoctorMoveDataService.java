@@ -153,6 +153,7 @@ public class DoctorMoveDataService {
     /**
      * 更新母猪流产事件
      */
+    @Transactional
     public void updateSowAbortion(DoctorFarm farm) {
         List<DoctorPigEvent> events = doctorPigEventDao.findByFarmIdAndKindAndEventTypes(farm.getId(),
                 DoctorPig.PIG_TYPE.SOW.getKey(), Lists.newArrayList(13));
@@ -170,6 +171,17 @@ public class DoctorMoveDataService {
 
                 updateEvent.setExtra(JSON_MAPPER.toJson(dto));
                 doctorPigEventDao.update(updateEvent);
+            });
+        }
+
+        //更新流产状态为空怀
+        List<DoctorPigTrack> pigTracks = doctorPigTrackDao.findByFarmIdAndStatus(farm.getId(), 6);
+        if (notEmpty(pigTracks)) {
+            pigTracks.forEach(pigTrack -> {
+                DoctorPigTrack updateTrack = new DoctorPigTrack();
+                updateTrack.setId(pigTrack.getId());
+                updateTrack.setStatus(PigStatus.KongHuai.getKey());
+                doctorPigTrackDao.update(updateTrack);
             });
         }
     }
