@@ -7,6 +7,7 @@ package io.terminus.doctor.common.utils;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
+import io.terminus.common.utils.Dates;
 import org.joda.time.DateTime;
 import org.joda.time.Duration;
 import org.joda.time.format.DateTimeFormat;
@@ -181,5 +182,13 @@ public class DateUtil {
      */
     public static int getDeltaDaysAbs(Date startAt, Date endAt) {
         return Math.abs(getDeltaDays(startAt, endAt));
+    }
+
+    /**
+     * 判断参数时间是否处在同一天
+     * @return
+     */
+    public static boolean inSameDate(Date date1, Date date2){
+        return !(date1.after(Dates.endOfDay(date2)) || date1.before(Dates.startOfDay(date2)));
     }
 }

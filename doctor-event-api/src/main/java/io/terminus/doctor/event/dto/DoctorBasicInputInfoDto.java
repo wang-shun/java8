@@ -2,6 +2,8 @@ package io.terminus.doctor.event.dto;
 
 import com.google.common.base.Joiner;
 import io.terminus.common.utils.BeanMapper;
+import io.terminus.common.utils.Dates;
+import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.dto.event.AbstractPigEventInputDto;
 import io.terminus.doctor.event.dto.event.boar.DoctorSemenDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorAbortionDto;
@@ -118,11 +120,24 @@ public class DoctorBasicInputInfoDto implements Serializable{
         if(pigEvent == null){
             return null;
         }
-        AbstractPigEventInputDto dto = this.transFromPigEvent(pigEvent, extra);
-        return dto.eventAt();
+        Date eventAt = this.transFromPigEvent(pigEvent, extra).eventAt();
+        if(eventAt != null){
+            Date now = new Date();
+            if(DateUtil.inSameDate(eventAt, now)){
+                // 如果处在今天, 则使用此刻瞬间
+                return now;
+            } else {
+                // 如果不在今天, 则将时间置为0, 只保留日期
+                return Dates.startOfDay(eventAt);
+            }
+        }
+        return null;
     }
     
     private AbstractPigEventInputDto transFromPigEvent(PigEvent pigEvent, Map<String, Object> extra){
+        if(pigEvent == null){
+            return null;
+        }
         AbstractPigEventInputDto dto;
         switch (pigEvent) {
             case ENTRY:

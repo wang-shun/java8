@@ -111,7 +111,7 @@ public class DoctorDailyReportCache {
                 dailyReport2UpdateDao.saveDailyReport2Update(date, farmId);
             }
         }else{
-            // 如果事件日期晚于或等于当天, 则使用缓存
+            // 如果事件日期晚于或等于当天, 则使用缓存(沿用原来的逻辑)
             synchronized (reportCache) {
                 DoctorDailyReportDto report = getDailyReport(farmId,  date);
                 if (isNull(report)) {
@@ -137,7 +137,7 @@ public class DoctorDailyReportCache {
                 dailyReport2UpdateDao.saveDailyReport2Update(date, farmId);
             }
         }else{
-            // 如果事件日期晚于或等于当天, 则使用缓存
+            // 如果事件日期晚于或等于当天, 则使用缓存(沿用原来的逻辑)
             synchronized (reportCache) {
                 DoctorDailyReportDto report = getDailyReport(farmId,  date);
                 if (isNull(report)) {
