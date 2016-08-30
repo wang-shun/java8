@@ -61,6 +61,16 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
     }
 
     /**
+     * 查询这头母猪,该胎次最近一次妊娠检查事件
+     *
+     * @param pigId
+     * @return
+     */
+    public DoctorPigEvent queryLastPregCheck(Long pigId) {
+        return this.getSqlSession().selectOne(sqlId("queryLastEvent"), MapBuilder.<String, Object>of().put("pigId", pigId).put("type", PigEvent.PREG_CHECK.getKey()).map());
+    }
+
+    /**
      * 查询这头母猪,最近一次断奶事件
      *
      * @param pigId

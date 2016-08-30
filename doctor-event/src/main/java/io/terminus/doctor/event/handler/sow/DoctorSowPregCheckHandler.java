@@ -166,10 +166,12 @@ public class DoctorSowPregCheckHandler extends DoctorAbstractEventFlowHandler {
 
     //如果是逆向 空怀 => 阳性 需要删除旧的妊娠检查事件
     private void  deleteOldPregCheckEventWhenPositive(DoctorPigTrack pigTrack) {
-        if (!(Objects.equals(pigTrack.getStatus(), PigStatus.KongHuai.getKey()) || Objects.equals(pigTrack.getStatus(), PigStatus.Abortion.getKey()))) {
-            return;
+        if ((Objects.equals(pigTrack.getStatus(), PigStatus.KongHuai.getKey()) || Objects.equals(pigTrack.getStatus(), PigStatus.Abortion.getKey()))) {
+            DoctorPigEvent lastPregEvent = doctorPigEventDao.queryLastPregCheck(pigTrack.getPigId());
+            if (lastPregEvent == null || !PregCheckResult.KONGHUAI_RESULTS.contains(lastPregEvent.getPregCheckResult())) {
+                throw new ServiceException("preg.check.result.not.allow");
+            }
+            doctorPigEventDao.delete(lastPregEvent.getId());
         }
-
-        // TODO: 16/8/30 查找最近一次的妊娠检查事件, 删除之
     }
 }
