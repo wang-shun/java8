@@ -163,12 +163,13 @@ public class DoctorMoveDataService {
                 updateEvent.setId(event.getId());
                 updateEvent.setType(PigEvent.PREG_CHECK.getKey());
                 updateEvent.setName(PigEvent.PREG_CHECK.getName());
+                updateEvent.setCheckDate(event.getEventAt());
+                updateEvent.setPregCheckResult(PregCheckResult.LIUCHAN.getKey());
 
                 //流产
                 DoctorPregChkResultDto dto = new DoctorPregChkResultDto();
                 dto.setCheckDate(event.getEventAt());
                 dto.setCheckResult(PregCheckResult.LIUCHAN.getKey());
-
                 updateEvent.setExtra(JSON_MAPPER.toJson(dto));
                 doctorPigEventDao.update(updateEvent);
             });

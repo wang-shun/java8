@@ -2,7 +2,7 @@
 SELECT
     OID AS pigOutId,
     CASE
-        WHEN Status = '没有怀孕' OR Status = '妊娠检查阴性' THEN '空怀'
+        WHEN Status = '没有怀孕' OR Status = '妊娠检查阴性' OR Status = '流产' THEN '空怀'
         WHEN Status = '已进场' THEN '已配种'
         WHEN Status = '等待分娩' THEN '待分娩'
         ELSE Status END AS status,               -- 猪群状态
