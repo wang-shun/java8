@@ -523,7 +523,7 @@ public class DoctorPigCreateEventsTest extends BaseFrontWebTest {
         testFarrowingEventCreate(pigFosterId);
 
         DoctorFostersDto doctorFostersDto = DoctorFostersDto.builder()
-                .fostersDate(new Date()).fostersCount(fosterCount).sowFostersCount(fosterCount / 2).boarFostersCount(fosterCount / 2)
+                .fostersDate("2016-01-01").fostersCount(fosterCount).sowFostersCount(fosterCount / 2).boarFostersCount(fosterCount / 2)
                 .fosterSowId(pigFosterId).fosterReason(1l).fosterRemark("testFostersReMark")
                 .build();
 

@@ -41,7 +41,7 @@ public class DailyReportHistoryDao {
             return jedis.get(getRedisKey(farmId, sumAt));
         });
         if(json != null){
-            return JsonMapper.JSON_NON_DEFAULT_MAPPER.fromJson(json, DoctorDailyReportDto.class);
+            return JsonMapper.JSON_NON_EMPTY_MAPPER.fromJson(json, DoctorDailyReportDto.class);
         }
         DoctorDailyReport report = doctorDailyReportDao.findByFarmIdAndSumAt(farmId, sumAt);
         //如果没有查到, 要返回null, 交给上层判断
@@ -61,7 +61,18 @@ public class DailyReportHistoryDao {
      */
     public void saveDailyReport(DoctorDailyReportDto reportDto, Long farmId, Date sumAt){
         jedisTemplate.execute(jedis -> {
-            jedis.setex(getRedisKey(farmId, sumAt), 86400, JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(reportDto));
+            jedis.setex(getRedisKey(farmId, sumAt), 86400, JsonMapper.JSON_NON_EMPTY_MAPPER.toJson(reportDto));
+        });
+    }
+
+    /**
+     * 删除redis中的日报
+     * @param farmId
+     * @param sumAt
+     */
+    public void deleteDailyReport(Long farmId, Date sumAt){
+        jedisTemplate.execute(jedis -> {
+            jedis.del(getRedisKey(farmId, sumAt));
         });
     }
 

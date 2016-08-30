@@ -93,11 +93,15 @@ public class DoctorReportJobs {
             }
             log.info("update history daily report job start, now is:{}", DateUtil.toDateTimeString(new Date()));
 
-            for(Map.Entry<Long, String> entry : RespHelper.or500(doctorDailyReportWriteService.getDailyReport2Update()).entrySet()){
+            for(Map.Entry<Long, String> entry : RespHelper.or500(doctorDailyReportReadService.getDailyReport2Update()).entrySet()){
                 Long farmId = entry.getKey();
                 Date beginDate = DateUtil.toDate(entry.getValue());
                 RespHelper.or500(doctorDailyReportWriteService.updateDailyReport(beginDate, endDate, farmId));
                 RespHelper.or500(doctorDailyReportWriteService.deleteDailyReport2Update(farmId));
+                while(!beginDate.after(endDate)){
+                    RespHelper.or500(doctorDailyReportWriteService.deleteDailyReportFromRedis(farmId, beginDate));
+                    beginDate = new DateTime(beginDate).plusDays(1).toDate();
+                }
             }
 
             log.info("update history daily report job end, now is:{}", DateUtil.toDateTimeString(new Date()));

@@ -42,8 +42,10 @@ public interface DoctorDailyReportWriteService {
     Response deleteDailyReport2Update(Long farmId);
 
     /**
-     * 从redis查询所有需要更新的日报
-     * @return map 的 key 为 farmId, value 为开始日期
+     * 删除redis中的日报
+     * @param farmId
+     * @param sumAt
+     * @return
      */
-    Response<Map<Long, String>> getDailyReport2Update();
+    Response deleteDailyReportFromRedis(Long farmId, Date sumAt);
 }
