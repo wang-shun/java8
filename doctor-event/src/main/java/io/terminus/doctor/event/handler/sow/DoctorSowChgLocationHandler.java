@@ -63,10 +63,9 @@ public class DoctorSowChgLocationHandler extends DoctorAbstractEventFlowHandler 
 
             Map<String, Object> newExtraMap = Maps.newHashMap();
 
-            // 断奶后添加对应的胎次信息 TODO 流产算作一个胎次信息 等待确认
+            // 断奶后添加对应的胎次信息
             if (Objects.equals(doctorPigTrack.getStatus(), PigStatus.Wean.getKey())) {
                 // 断奶进入配种
-//                doctorPigTrack.setCurrentParity(doctorPigTrack.getCurrentParity() + 1);
                 newExtraMap.put("hasWeanToMating", true);  // 设置断奶到配置舍标志
             }
 

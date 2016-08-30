@@ -9,7 +9,6 @@ import io.terminus.doctor.basic.service.DoctorBasicWriteService;
 import io.terminus.doctor.common.constants.JacksonType;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
-import io.terminus.doctor.event.dto.event.sow.DoctorAbortionDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorFarrowingDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorMatingDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorPartWeanDto;
@@ -68,8 +67,6 @@ public class DoctorSowEventCreateServiceImpl implements DoctorSowEventCreateServ
                     return doctorPigEventWriteService.sowPregCheckEvent(JsonMapper.JSON_NON_DEFAULT_MAPPER.fromJson(sowInfoDtoJson, DoctorPregChkResultDto.class), doctorBasicInputInfoDto);
                 case TO_MATING:
                     return doctorPigEventWriteService.chgSowLocationEvent(JsonMapper.JSON_NON_DEFAULT_MAPPER.fromJson(sowInfoDtoJson, DoctorChgLocationDto.class), doctorBasicInputInfoDto);
-                case ABORTION:
-                    return doctorPigEventWriteService.abortionEvent(JsonMapper.JSON_NON_DEFAULT_MAPPER.fromJson(sowInfoDtoJson, DoctorAbortionDto.class), doctorBasicInputInfoDto);
                 case TO_FARROWING:
                     return doctorPigEventWriteService.chgSowLocationEvent(JsonMapper.JSON_NON_DEFAULT_MAPPER.fromJson(sowInfoDtoJson, DoctorChgLocationDto.class), doctorBasicInputInfoDto);
                 case FARROWING:

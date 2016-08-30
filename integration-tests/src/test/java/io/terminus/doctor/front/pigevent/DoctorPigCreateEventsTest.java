@@ -4,12 +4,12 @@ import com.google.api.client.util.Lists;
 import com.google.common.collect.ImmutableMap;
 import configuration.front.FrontWebConfiguration;
 import io.terminus.common.utils.JsonMapper;
+import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.dao.DoctorPigDao;
 import io.terminus.doctor.event.dao.DoctorPigEventDao;
 import io.terminus.doctor.event.dao.DoctorPigSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorPigTrackDao;
 import io.terminus.doctor.event.dto.event.boar.DoctorSemenDto;
-import io.terminus.doctor.event.dto.event.sow.DoctorAbortionDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorFarrowingDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorFostersDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorMatingDto;
@@ -209,16 +209,6 @@ public class DoctorPigCreateEventsTest extends BaseFrontWebTest {
             sowMatingEventCreate(pigId, pigBoarId);
             testToPregEventCreate(pigId);
             testPregCheckResultEventCreate(pigId, PregCheckResult.UNSURE);
-        }
-
-        // 配种 -> 转舍 -> 妊娠 -> 流产
-        for (int i = 0; i < 2; i++) {
-            Long pigId = sowEntryEventCreate();
-            Long pigBoarId = boarEntryEventCreate();
-            sowMatingEventCreate(pigId, pigBoarId);
-            testToPregEventCreate(pigId);
-            testPregCheckResultEventCreate(pigId, PregCheckResult.YANG);
-            testAbortionEventCreate(pigId);
         }
 
         // 配种 -> 转舍 -> 妊娠 -> 去分娩
@@ -523,7 +513,7 @@ public class DoctorPigCreateEventsTest extends BaseFrontWebTest {
         testFarrowingEventCreate(pigFosterId);
 
         DoctorFostersDto doctorFostersDto = DoctorFostersDto.builder()
-                .fostersDate(new Date()).fostersCount(fosterCount).sowFostersCount(fosterCount / 2).boarFostersCount(fosterCount / 2)
+                .fostersDate(DateUtil.toDateString(new Date())).fostersCount(fosterCount).sowFostersCount(fosterCount / 2).boarFostersCount(fosterCount / 2)
                 .fosterSowId(pigFosterId).fosterReason(1l).fosterRemark("testFostersReMark")
                 .build();
 
@@ -599,23 +589,6 @@ public class DoctorPigCreateEventsTest extends BaseFrontWebTest {
                         .changeLocationDate(new Date()).chgLocationFromBarnId(6l).chgLocationFromBarnName("matingBarnName")
                         .chgLocationToBarnId(7l).chgLocationToBarnName("farrowingBarnName")
                         .build()).httpEntity());
-        Long result = this.restTemplate.postForObject(url, httpEntity, Long.class);
-        System.out.println(result);
-    }
-
-    /**
-     * 创建对应的流产事件信息
-     */
-    private void testAbortionEventCreate(Long pigId) {
-        String url = basicUrl + "/createSowEvent";
-        HttpEntity httpEntity = HttpPostRequest.formRequest().param("farmId", 12345l)
-                .param("pigId", pigId).param("eventType", PigEvent.ABORTION.getKey())
-                .param("sowInfoDtoJson", JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(
-                        DoctorAbortionDto.builder()
-                                .abortionDate(new Date()).abortionReasonName("abortionReason")
-                                .build()
-                ))
-                .httpEntity();
         Long result = this.restTemplate.postForObject(url, httpEntity, Long.class);
         System.out.println(result);
     }
