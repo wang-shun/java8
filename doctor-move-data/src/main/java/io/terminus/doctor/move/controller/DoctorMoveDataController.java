@@ -471,4 +471,21 @@ public class DoctorMoveDataController {
             return false;
         }
     }
+
+    /**
+     * 刷新母猪流产事件
+     */
+    @RequestMapping(value = "/abort", method = RequestMethod.GET)
+    public Boolean moveSowAbortion(@RequestParam("farmId") Long farmId) {
+        try {
+            DoctorFarm farm = doctorFarmDao.findById(farmId);
+            log.warn("move sow farrow abort start, farmId:{}", farmId);
+            doctorMoveDataService.updateSowAbortion(farm);
+            log.warn("move sow farrow abort end");
+            return true;
+        } catch (Exception e) {
+            log.error("move sow farrow abort failed, farmId:{}, cause:{}", farmId, Throwables.getStackTraceAsString(e));
+            return false;
+        }
+    }
 }

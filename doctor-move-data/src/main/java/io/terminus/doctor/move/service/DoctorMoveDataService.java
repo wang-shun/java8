@@ -151,6 +151,30 @@ public class DoctorMoveDataService {
     }
 
     /**
+     * 更新母猪流产事件
+     */
+    public void updateSowAbortion(DoctorFarm farm) {
+        List<DoctorPigEvent> events = doctorPigEventDao.findByFarmIdAndKindAndEventTypes(farm.getId(),
+                DoctorPig.PIG_TYPE.SOW.getKey(), Lists.newArrayList(13));
+        if (notEmpty(events)) {
+            events.forEach(event -> {
+                DoctorPigEvent updateEvent = new DoctorPigEvent();
+                updateEvent.setId(event.getId());
+                updateEvent.setType(PigEvent.PREG_CHECK.getKey());
+                updateEvent.setName(PigEvent.PREG_CHECK.getName());
+
+                //流产
+                DoctorPregChkResultDto dto = new DoctorPregChkResultDto();
+                dto.setCheckDate(event.getEventAt());
+                dto.setCheckResult(PregCheckResult.LIUCHAN.getKey());
+
+                updateEvent.setExtra(JSON_MAPPER.toJson(dto));
+                doctorPigEventDao.update(updateEvent);
+            });
+        }
+    }
+
+    /**
      * 更新母猪分娩总重
      */
     public void updateSowFarrowWeight(Long moveId, DoctorFarm farm) {
