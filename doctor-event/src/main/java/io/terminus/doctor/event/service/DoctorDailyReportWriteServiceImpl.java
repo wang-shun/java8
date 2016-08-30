@@ -52,7 +52,7 @@ public class DoctorDailyReportWriteServiceImpl implements DoctorDailyReportWrite
         }
     }
     @Override
-    public Response<Boolean> updateDailyReport(Date beginDate, Date endDate, Long farmId){
+    public Response<Boolean> createDailyReports(Date beginDate, Date endDate, Long farmId){
         try{
             beginDate = Dates.startOfDay(beginDate);
             endDate = Dates.startOfDay(endDate);

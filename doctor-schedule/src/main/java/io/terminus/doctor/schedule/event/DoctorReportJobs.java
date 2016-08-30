@@ -96,7 +96,7 @@ public class DoctorReportJobs {
             for(Map.Entry<Long, String> entry : RespHelper.or500(doctorDailyReportReadService.getDailyReport2Update()).entrySet()){
                 Long farmId = entry.getKey();
                 Date beginDate = DateUtil.toDate(entry.getValue());
-                RespHelper.or500(doctorDailyReportWriteService.updateDailyReport(beginDate, endDate, farmId));
+                RespHelper.or500(doctorDailyReportWriteService.createDailyReports(beginDate, endDate, farmId));
                 RespHelper.or500(doctorDailyReportWriteService.deleteDailyReport2Update(farmId));
                 RespHelper.or500(doctorDailyReportWriteService.deleteDailyReportFromRedis(farmId));
             }

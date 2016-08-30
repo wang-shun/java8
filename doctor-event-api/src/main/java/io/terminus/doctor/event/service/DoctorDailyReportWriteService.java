@@ -26,13 +26,13 @@ public interface DoctorDailyReportWriteService {
                                          @NotNull(message = "date.not.null") Date sumAt);
 
     /**
-     * 更新(重新统计)日报
+     * (先删除, 再创建)日报
      * @param beginDate 需要更新的日报的开始范围, 只有日期没有时间, 且包括此日期
      * @param endDate  需要更新的日报的结束范围, 只有日期没有时间, 且包括此日期
      * @param farmId 猪场
      * @return 是否成功
      */
-    Response<Boolean> updateDailyReport(Date beginDate, Date endDate, Long farmId);
+    Response<Boolean> createDailyReports(Date beginDate, Date endDate, Long farmId);
 
     /**
      * 删除存入redis的需要更新的日报
