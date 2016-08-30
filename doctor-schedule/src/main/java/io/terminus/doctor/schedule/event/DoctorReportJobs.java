@@ -85,7 +85,7 @@ public class DoctorReportJobs {
     @Scheduled(cron = "0 0 1 * * ?")
     @RequestMapping(value = "/updateHistoryDailyReport", method = RequestMethod.GET)
     public void updateHistoryDailyReport(){
-        Date endDate = new DateTime(Dates.startOfDay(new Date())).plusDays(-2).toDate();
+        Date endDate = new DateTime(Dates.startOfDay(new Date())).plusDays(-1).toDate();
         try{
             if(!hostLeader.isLeader()) {
                 log.info("current leader is:{}, skip", hostLeader.currentLeaderId());
@@ -98,10 +98,7 @@ public class DoctorReportJobs {
                 Date beginDate = DateUtil.toDate(entry.getValue());
                 RespHelper.or500(doctorDailyReportWriteService.updateDailyReport(beginDate, endDate, farmId));
                 RespHelper.or500(doctorDailyReportWriteService.deleteDailyReport2Update(farmId));
-                while(!beginDate.after(endDate)){
-                    RespHelper.or500(doctorDailyReportWriteService.deleteDailyReportFromRedis(farmId, beginDate));
-                    beginDate = new DateTime(beginDate).plusDays(1).toDate();
-                }
+                RespHelper.or500(doctorDailyReportWriteService.deleteDailyReportFromRedis(farmId));
             }
 
             log.info("update history daily report job end, now is:{}", DateUtil.toDateTimeString(new Date()));

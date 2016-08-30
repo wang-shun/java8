@@ -79,9 +79,9 @@ public class DoctorDailyReportWriteServiceImpl implements DoctorDailyReportWrite
     }
 
     @Override
-    public Response deleteDailyReportFromRedis(Long farmId, Date sumAt){
+    public Response deleteDailyReportFromRedis(Long farmId){
         try{
-            dailyReportHistoryDao.deleteDailyReport(farmId, sumAt);
+            dailyReportHistoryDao.deleteDailyReport(farmId);
             return Response.ok();
         }catch(Exception e){
             log.error("deleteDailyReport failed, cause:{}", Throwables.getStackTraceAsString(e));

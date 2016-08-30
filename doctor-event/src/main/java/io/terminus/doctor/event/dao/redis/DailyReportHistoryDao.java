@@ -76,4 +76,14 @@ public class DailyReportHistoryDao {
         });
     }
 
+    /**
+     * 删除redis中的日报
+     * @param farmId
+     */
+    public void deleteDailyReport(Long farmId){
+        jedisTemplate.execute(jedis -> {
+            jedis.keys(REDIS_KEY_DAILY_REPORT_HISTORY + farmId + ":*").forEach(jedis::del);
+        });
+    }
+
 }

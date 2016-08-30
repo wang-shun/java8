@@ -44,8 +44,7 @@ public interface DoctorDailyReportWriteService {
     /**
      * 删除redis中的日报
      * @param farmId
-     * @param sumAt
      * @return
      */
-    Response deleteDailyReportFromRedis(Long farmId, Date sumAt);
+    Response deleteDailyReportFromRedis(Long farmId);
 }
