@@ -83,7 +83,7 @@ public class DoctorDailyReportCache {
             DoctorDailyReportDto everyRedis = dailyReportHistoryDao.getDailyReportWithRedis(farmId, startAt);
 
             //存栏
-            DoctorLiveStockDailyReport liveStock = new DoctorLiveStockDailyReport();
+            DoctorLiveStockDailyReport liveStock = everyRedis.getLiveStock();
             liveStock.setBuruSow(doctorKpiDao.realTimeLiveStockFarrowSow(farmId, startAt));    //产房母猪
             liveStock.setPeihuaiSow(doctorKpiDao.realTimeLiveStockSow(farmId, startAt) - liveStock.getBuruSow());    //配怀 = 总存栏 - 产房母猪
             liveStock.setKonghuaiSow(0);                                                       //空怀猪作废, 置成0
@@ -117,7 +117,7 @@ public class DoctorDailyReportCache {
         while (!startAt.after(endAt)) {
             DoctorDailyReportDto everyRedis = dailyReportHistoryDao.getDailyReportWithRedis(farmId, startAt);
             //存栏
-            DoctorLiveStockDailyReport liveStock = new DoctorLiveStockDailyReport();
+            DoctorLiveStockDailyReport liveStock = everyRedis.getLiveStock();
             liveStock.setHoubeiBoar(doctorKpiDao.realTimeLiveStockHoubeiBoar(farmId, startAt));
             liveStock.setHoubeiSow(doctorKpiDao.realTimeLiveStockHoubeiSow(farmId, startAt));  //后备母猪
             liveStock.setFarrow(doctorKpiDao.realTimeLiveStockFarrow(farmId, startAt));
