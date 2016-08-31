@@ -44,7 +44,6 @@ import static java.util.Objects.isNull;
 @Component
 public class DoctorDailyReportCache {
 
-    private final LoadingCache<String, DoctorDailyReportDto> reportCache;
     private final DoctorKpiDao doctorKpiDao;
     private final DoctorPigTypeStatisticDao doctorPigTypeStatisticDao;
     private final DailyReportHistoryDao dailyReportHistoryDao;
@@ -58,25 +57,17 @@ public class DoctorDailyReportCache {
         this.doctorPigTypeStatisticDao = doctorPigTypeStatisticDao;
         this.dailyReportHistoryDao = dailyReportHistoryDao;
         this.dailyReport2UpdateDao = dailyReport2UpdateDao;
-
-        this.reportCache = CacheBuilder.newBuilder().expireAfterAccess(1L, TimeUnit.DAYS).build(new CacheLoader<String, DoctorDailyReportDto>() {
-            @Override
-            public DoctorDailyReportDto load(String key) throws Exception {
-                FarmDate farmDate = parseReportKey(key);
-                return farmDate == null ? null : initDailyReportByFarmIdAndDate(farmDate.getFarmId(), farmDate.getDate());
-            }
-        });
     }
 
     /**
-     * 取出日报缓存
+     * 取出日报redis
      * @param farmId 猪场id
      * @param date   统计日期
      * @return 日报统计
      */
     public DoctorDailyReportDto getDailyReport(Long farmId, Date date) {
         try {
-            return reportCache.get(getReportKey(farmId, date));
+            return dailyReportHistoryDao.getDailyReportWithRedis(farmId, date);
         } catch (Exception e) {
             log.error("get daily report failed, farmId:{}, date:{}, cause:{}",
                     farmId, date, Throwables.getStackTraceAsString(e));
@@ -85,85 +76,57 @@ public class DoctorDailyReportCache {
     }
 
     /**
-     * report put 到缓存, 覆盖原先的report
+     * report put 到redis, 覆盖原先的report
      * @param farmId 猪场id
      * @param date   统计日期
      * @param report 日报统计
      */
     public void putDailyReport(Long farmId, Date date, DoctorDailyReportDto report) {
-        synchronized(reportCache) {
-            reportCache.put(getReportKey(farmId, date), report);
-        }
+        dailyReportHistoryDao.saveDailyReport(report, farmId, date);
     }
 
     /**
-     * 仅put猪日报, 不修改引用
+     * 更新redis中的日报
      * @param reportDto 猪日报
      * @param date 日报的日期
      */
     public void putDailyPigReport(Long farmId, Date date, DoctorDailyReportDto reportDto) {
-        // 如果事件日期早于当天, 则从redis取出历史日报并更新在redis里面, 暂不存入数据库
-        if (Dates.startOfDay(date).before(Dates.startOfDay(new Date()))) {
-            Date startAt = Dates.startOfDay(date);
-            Date endAt = Dates.startOfDay(DateTime.now().plusDays(-1).toDate());
-            while (!startAt.after(endAt)) {
-                DoctorDailyReportDto redisDto = dailyReportHistoryDao.getDailyReportWithRedis(farmId, startAt);
-                if (redisDto != null) {
-                    redisDto.setPig(reportDto);
-                    dailyReportHistoryDao.saveDailyReport(redisDto, farmId, startAt);
-                    dailyReport2UpdateDao.saveDailyReport2Update(startAt, farmId);
-                }
-                startAt = new DateTime(startAt).plusDays(1).toDate();
+        Date startAt = Dates.startOfDay(date);
+        Date endAt = Dates.startOfDay(new Date());
+        dailyReport2UpdateDao.saveDailyReport2Update(startAt, farmId);
+        while (!startAt.after(endAt)) {
+            DoctorDailyReportDto redisDto = dailyReportHistoryDao.getDailyReportWithRedis(farmId, startAt);
+            if (redisDto != null) {
+                redisDto.setPig(reportDto);
+                dailyReportHistoryDao.saveDailyReport(redisDto, farmId, startAt);
             }
-        }
-
-        // 如果事件日期晚于或等于当天, 则使用缓存(沿用原来的逻辑)
-        synchronized (reportCache) {
-            DoctorDailyReportDto report = getDailyReport(farmId,  date);
-            if (isNull(report)) {
-                putDailyReport(farmId, date, reportDto);
-            } else {
-                report.setPig(reportDto);
-            }
+            startAt = new DateTime(startAt).plusDays(1).toDate();
         }
     }
 
     /**
-     * 仅put猪群日报, 不修改引用
+     * 更新redis中的日报
      * @param reportDto 猪群日报
      */
     public void putDailyGroupReport(Long farmId, Date date, DoctorDailyReportDto reportDto) {
-        // 如果事件日期早于当天, 则从redis取出历史日报并更新在redis里面, 暂不存入数据库
-        if (Dates.startOfDay(date).before(Dates.startOfDay(new Date()))) {
-            Date startAt = Dates.startOfDay(date);
-            Date endAt = Dates.startOfDay(DateTime.now().plusDays(-1).toDate());
-            while (!startAt.after(endAt)) {
-                DoctorDailyReportDto redisDto = dailyReportHistoryDao.getDailyReportWithRedis(farmId, startAt);
-                if(redisDto != null){
-                    redisDto.setGroup(reportDto);
-                    dailyReportHistoryDao.saveDailyReport(redisDto, farmId, startAt);
-                    dailyReport2UpdateDao.saveDailyReport2Update(startAt, farmId);
-                }
-                startAt = new DateTime(startAt).plusDays(1).toDate();
+        Date startAt = Dates.startOfDay(date);
+        Date endAt = Dates.startOfDay(new Date());
+        dailyReport2UpdateDao.saveDailyReport2Update(startAt, farmId);
+        while (!startAt.after(endAt)) {
+            DoctorDailyReportDto redisDto = dailyReportHistoryDao.getDailyReportWithRedis(farmId, startAt);
+            if (redisDto != null) {
+                redisDto.setGroup(reportDto);
+                dailyReportHistoryDao.saveDailyReport(redisDto, farmId, startAt);
             }
-        }
-
-        // 如果事件日期晚于或等于当天, 则使用缓存(沿用原来的逻辑)
-        synchronized (reportCache) {
-            DoctorDailyReportDto report = getDailyReport(farmId,  date);
-            if (isNull(report)) {
-                putDailyReport(farmId, date, reportDto);
-            } else {
-                report.setGroup(reportDto);
-            }
+            startAt = new DateTime(startAt).plusDays(1).toDate();
         }
     }
 
     /**
-     * 清理所有的缓存
+     * 清理所有redis中的日报
      */
     public void clearAllReport() {
-        reportCache.invalidateAll();
+        dailyReportHistoryDao.deleteDailyReport();
     }
 
     /**
@@ -172,7 +135,7 @@ public class DoctorDailyReportCache {
      * @param date 日期
      */
     public void clearFarmReport(Long farmId, Date date) {
-        reportCache.invalidate(getReportKey(farmId, date));
+        dailyReportHistoryDao.deleteDailyReport(farmId, date);
     }
 
     //实时Sql查询某猪场的日报统计

@@ -66,25 +66,22 @@ public class DoctorDailyReportReadServiceImpl implements DoctorDailyReportReadSe
     public Response<DoctorDailyReportDto> findDailyReportByFarmIdAndSumAtWithCache(Long farmId, String sumAt) {
         try {
             Date date = DateUtil.toDate(sumAt);
-            DoctorDailyReportDto report;
-
-            //如果不查今天, 则从redis查询, 如果查未来, 直接返回failReport
-            if (date != null && !date.equals(Dates.startOfDay(new Date()))) {
-                if (date.after(new Date())) {
-                    return Response.ok(failReport());
-                }
-                report = dailyReportHistoryDao.getDailyReportWithRedis(farmId, date);
-                if (report != null) {
-                    return Response.ok(report);
-                }
+            if(date == null){
                 return Response.ok(failReport());
             }
-
-            report = doctorDailyReportCache.getDailyReport(farmId, date);
-            if (report != null) {
+            DoctorDailyReportDto report = dailyReportHistoryDao.getDailyReportWithRedis(farmId, date);
+            if(report == null){
+                // 如果查当天的日报, 查不到就直接计算并存入redis
+                if(date.equals(Dates.startOfDay(new Date()))){
+                    report = doctorDailyReportCache.initDailyReportByFarmIdAndDate(farmId, date);
+                    dailyReportHistoryDao.saveDailyReport(report, farmId, date);
+                    return Response.ok(report);
+                }else{
+                    return Response.ok(failReport());
+                }
+            }else{
                 return Response.ok(report);
             }
-            return Response.ok(failReport());
         } catch (Exception e) {
             log.error("find dailyReport by farm id and sumat fail, farmId:{}, sumat:{}, cause:{}",
                     farmId, sumAt, Throwables.getStackTraceAsString(e));
