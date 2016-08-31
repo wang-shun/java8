@@ -82,10 +82,10 @@ public class DoctorDailyReportDto implements Serializable {
      */
     public void setPig(DoctorDailyReportDto report) {
         //妊娠检查
-        this.checkPreg.setPositive(this.checkPreg.getPositive() + report.getCheckPreg().getPositive());
-        this.checkPreg.setNegative(this.checkPreg.getNegative() + report.getCheckPreg().getNegative());
-        this.checkPreg.setFanqing(this.checkPreg.getFanqing() + report.getCheckPreg().getFanqing());
-        this.checkPreg.setLiuchan(this.checkPreg.getLiuchan() + report.getCheckPreg().getLiuchan());
+        this.checkPreg.setPositive(report.getCheckPreg().getPositive());
+        this.checkPreg.setNegative(report.getCheckPreg().getNegative());
+        this.checkPreg.setFanqing(report.getCheckPreg().getFanqing());
+        this.checkPreg.setLiuchan(report.getCheckPreg().getLiuchan());
 
         //死淘
         this.dead.setBoar(this.dead.getBoar() + report.getDead().getBoar());
