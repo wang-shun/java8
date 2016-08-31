@@ -218,11 +218,6 @@ public abstract class AbstractJobProducer extends AbstractProducer {
                         dateTime = new DateTime(
                                 new Date((Long) MAPPER.readValue(pigDto.getExtraTrack(), Map.class).get("weanDate")));
                         break;
-                    case Abortion:  // 流产
-                        // @see DoctorAbortionDto
-                        dateTime = new DateTime(
-                                new Date((Long) MAPPER.readValue(pigDto.getExtraTrack(), Map.class).get("abortionDate")));
-                        break;
                     case KongHuai:case Pregnancy: case Farrow:  // 空怀, 阳性, 待分娩
                         // @see DoctorPregChkResultDto
                         dateTime = new DateTime(
