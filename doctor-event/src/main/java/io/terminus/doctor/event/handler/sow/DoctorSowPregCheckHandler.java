@@ -95,6 +95,9 @@ public class DoctorSowPregCheckHandler extends DoctorAbstractEventFlowHandler {
             log.info("remove old preg check event info:{}", lastPregEvent);
             doctorPigEvent.setId(lastPregEvent.getId());    //把id放进去, 用于更新数据
             doctorPigEvent.setRelEventId(lastPregEvent.getRelEventId()); //重新覆盖下relEventId
+            doctorPigEvent.setEventAt(lastPregEvent.getEventAt());       //重新覆盖下事件日期, 用于刷新日报
+            doctorPigEvent.setCheckDate(lastPregEvent.getCheckDate());
+
             return IsOrNot.YES;
         }
         return IsOrNot.NO;
