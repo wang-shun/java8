@@ -103,22 +103,27 @@ public class DoctorDailyReportCache {
      */
     public void putDailyPigReport(Long farmId, Date date, DoctorDailyReportDto reportDto) {
         // 如果事件日期早于当天, 则从redis取出历史日报并更新在redis里面, 暂不存入数据库
-        if(Dates.startOfDay(date).before(Dates.startOfDay(new Date()))){
-            DoctorDailyReportDto redisDto = dailyReportHistoryDao.getDailyReportWithRedis(farmId, date);
-            if(redisDto != null){
-                redisDto.setPig(reportDto);
-                dailyReportHistoryDao.saveDailyReport(redisDto, farmId, date);
-                dailyReport2UpdateDao.saveDailyReport2Update(date, farmId);
-            }
-        }else{
-            // 如果事件日期晚于或等于当天, 则使用缓存(沿用原来的逻辑)
-            synchronized (reportCache) {
-                DoctorDailyReportDto report = getDailyReport(farmId,  date);
-                if (isNull(report)) {
-                    putDailyReport(farmId, date, reportDto);
-                } else {
-                    report.setPig(reportDto);
+        if (Dates.startOfDay(date).before(Dates.startOfDay(new Date()))) {
+            Date startAt = Dates.startOfDay(date);
+            Date endAt = Dates.startOfDay(DateTime.now().plusDays(-1).toDate());
+            while (!startAt.after(endAt)) {
+                DoctorDailyReportDto redisDto = dailyReportHistoryDao.getDailyReportWithRedis(farmId, date);
+                if (redisDto != null) {
+                    redisDto.setPig(reportDto);
+                    dailyReportHistoryDao.saveDailyReport(redisDto, farmId, date);
+                    dailyReport2UpdateDao.saveDailyReport2Update(date, farmId);
                 }
+                startAt = new DateTime(startAt).plusDays(1).toDate();
+            }
+        }
+
+        // 如果事件日期晚于或等于当天, 则使用缓存(沿用原来的逻辑)
+        synchronized (reportCache) {
+            DoctorDailyReportDto report = getDailyReport(farmId,  date);
+            if (isNull(report)) {
+                putDailyReport(farmId, date, reportDto);
+            } else {
+                report.setPig(reportDto);
             }
         }
     }
@@ -129,22 +134,27 @@ public class DoctorDailyReportCache {
      */
     public void putDailyGroupReport(Long farmId, Date date, DoctorDailyReportDto reportDto) {
         // 如果事件日期早于当天, 则从redis取出历史日报并更新在redis里面, 暂不存入数据库
-        if(Dates.startOfDay(date).before(Dates.startOfDay(new Date()))){
-            DoctorDailyReportDto redisDto = dailyReportHistoryDao.getDailyReportWithRedis(farmId, date);
-            if(redisDto != null){
-                redisDto.setGroup(reportDto);
-                dailyReportHistoryDao.saveDailyReport(redisDto, farmId, date);
-                dailyReport2UpdateDao.saveDailyReport2Update(date, farmId);
-            }
-        }else{
-            // 如果事件日期晚于或等于当天, 则使用缓存(沿用原来的逻辑)
-            synchronized (reportCache) {
-                DoctorDailyReportDto report = getDailyReport(farmId,  date);
-                if (isNull(report)) {
-                    putDailyReport(farmId, date, reportDto);
-                } else {
-                    report.setGroup(reportDto);
+        if (Dates.startOfDay(date).before(Dates.startOfDay(new Date()))) {
+            Date startAt = Dates.startOfDay(date);
+            Date endAt = Dates.startOfDay(DateTime.now().plusDays(-1).toDate());
+            while (!startAt.after(endAt)) {
+                DoctorDailyReportDto redisDto = dailyReportHistoryDao.getDailyReportWithRedis(farmId, date);
+                if(redisDto != null){
+                    redisDto.setGroup(reportDto);
+                    dailyReportHistoryDao.saveDailyReport(redisDto, farmId, date);
+                    dailyReport2UpdateDao.saveDailyReport2Update(date, farmId);
                 }
+                startAt = new DateTime(startAt).plusDays(1).toDate();
+            }
+        }
+
+        // 如果事件日期晚于或等于当天, 则使用缓存(沿用原来的逻辑)
+        synchronized (reportCache) {
+            DoctorDailyReportDto report = getDailyReport(farmId,  date);
+            if (isNull(report)) {
+                putDailyReport(farmId, date, reportDto);
+            } else {
+                report.setGroup(reportDto);
             }
         }
     }
