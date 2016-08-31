@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static io.terminus.common.utils.Arguments.notEmpty;
@@ -77,6 +78,35 @@ public class DoctorReportJobs {
             log.error("daily report job failed, cause:{}", Throwables.getStackTraceAsString(e));
         }
     }
+
+    /**
+     * 更新历史日报
+     */
+    @Scheduled(cron = "0 0 1 * * ?")
+    @RequestMapping(value = "/updateHistoryDailyReport", method = RequestMethod.GET)
+    public void updateHistoryDailyReport(){
+        Date endDate = new DateTime(Dates.startOfDay(new Date())).plusDays(-1).toDate();
+        try{
+            if(!hostLeader.isLeader()) {
+                log.info("current leader is:{}, skip", hostLeader.currentLeaderId());
+                return;
+            }
+            log.info("update history daily report job start, now is:{}", DateUtil.toDateTimeString(new Date()));
+
+            for(Map.Entry<Long, String> entry : RespHelper.or500(doctorDailyReportReadService.getDailyReport2Update()).entrySet()){
+                Long farmId = entry.getKey();
+                Date beginDate = DateUtil.toDate(entry.getValue());
+                RespHelper.or500(doctorDailyReportWriteService.createDailyReports(beginDate, endDate, farmId));
+                RespHelper.or500(doctorDailyReportWriteService.deleteDailyReport2Update(farmId));
+                RespHelper.or500(doctorDailyReportWriteService.deleteDailyReportFromRedis(farmId));
+            }
+
+            log.info("update history daily report job end, now is:{}", DateUtil.toDateTimeString(new Date()));
+        }catch(Exception e) {
+            log.error("update history daily report job failed, cause:{}", Throwables.getStackTraceAsString(e));
+        }
+    }
+
 
     /**
      * 猪场月报计算job

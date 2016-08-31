@@ -8,6 +8,7 @@ import org.hibernate.validator.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Desc: 猪场日报表读服务
@@ -55,4 +56,10 @@ public interface DoctorDailyReportReadService {
      * @return 日报list
      */
     Response<List<DoctorDailyReport>> findDailyReportBySumAt(@NotNull(message = "date.not.null") Date date);
+
+    /**
+     * 从redis查询所有需要更新的日报
+     * @return map 的 key 为 farmId, value 为开始日期
+     */
+    Response<Map<Long, String>> getDailyReport2Update();
 }

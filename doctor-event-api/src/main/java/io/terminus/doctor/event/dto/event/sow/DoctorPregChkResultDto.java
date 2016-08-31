@@ -1,8 +1,10 @@
 package io.terminus.doctor.event.dto.event.sow;
 
+import io.terminus.doctor.event.dto.event.AbstractPigEventInputDto;
 import io.terminus.doctor.event.enums.PregCheckResult;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Builder;
 
@@ -17,11 +19,12 @@ import java.util.Map;
  * Email:yaoqj@terminus.io
  * Descirbe: 母猪妊娠检查事件
  */
+@EqualsAndHashCode(callSuper = true)
 @Builder
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class DoctorPregChkResultDto implements Serializable{
+public class DoctorPregChkResultDto extends AbstractPigEventInputDto implements Serializable{
 
     private static final long serialVersionUID = 2879901632920960216L;
 
@@ -38,6 +41,7 @@ public class DoctorPregChkResultDto implements Serializable{
 
     private String checkMark;
 
+    @Override
     public Map<String, String> descMap(){
         Map<String, String> map = new HashMap<>();
         if(checkResult != null){
@@ -50,5 +54,10 @@ public class DoctorPregChkResultDto implements Serializable{
             }
         }
         return map;
+    }
+
+    @Override
+    public Date eventAt() {
+        return this.checkDate;
     }
 }

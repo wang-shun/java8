@@ -74,9 +74,6 @@ public class DoctorPigCreateEventsTest extends BaseFrontWebTest {
     @Autowired
     private DoctorPigEventDao doctorPigEventDao;
 
-//    @Autowired
-//    private Subscriber subscriber;
-
     @Before
     public void before() throws Exception {
         basicUrl = "http://localhost:" + this.port + "/api/doctor/events/create";
@@ -91,11 +88,6 @@ public class DoctorPigCreateEventsTest extends BaseFrontWebTest {
      */
     @Test
     public void testCreateMockData() {
-        // 公猪信息创建方式
-//        for(int i=0; i<10; i++){
-//            boarEntryEventCreate();
-//        }
-
         Long pigBoarId = boarEntryEventCreate();
 
         // 母猪信息创建方式
@@ -107,8 +99,6 @@ public class DoctorPigCreateEventsTest extends BaseFrontWebTest {
 
             testToPregEventCreate(pigId);
 
-//            testAbortionEventCreate(pigId);
-
             testToFarrowing(pigId);
 
             // 测试 分娩数量200
@@ -117,15 +107,8 @@ public class DoctorPigCreateEventsTest extends BaseFrontWebTest {
             // 全部断奶
             testWeanMethod(pigId, 200);
 
-            // 部分断奶事件信息
-//            testWeanMethod(pigId, 100);
-
             // 测试 拼窝事件信息
             testFostersEventCreate(pigId, 100);
-
-            // 回 配种 舍
-//            testToMating(pigId);
-
         }
 
     }
@@ -257,30 +240,8 @@ public class DoctorPigCreateEventsTest extends BaseFrontWebTest {
     public void testPigPagingInfo() {
         // 录入母猪事件信息
         for (int i = 0; i < 30; i++) {
-//            sowEntryEventCreate();
             boarEntryEventCreate();
         }
-//        HttpEntity httpEntity = HttpPostRequest.formRequest()
-//                .param("farmId", 12345l).param("status", PigStatus.Entry.getKey()).param("pageNo", 1).param("pageSize", 10)
-//                .httpEntity();
-//
-//        ResponseEntity responseEntity = this.restTemplate.postForEntity("http://localhost:" + this.port + "/api/doctor/pigs/queryByStatus", httpEntity, Object.class);
-//        System.out.println(JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(responseEntity.getBody()));
-
-//        HttpEntity httpEntityDetail = HttpPostRequest.formRequest()
-//                .param("farmId", 12345l).param("pigId", 10l)
-//                .httpEntity();
-//        ResponseEntity responseEntityDetail = this.restTemplate.postForEntity("http://localhost:" + this.port + "/api/doctor/pigs/getPigDetail", httpEntityDetail, Object.class);
-//        System.out.println(JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(responseEntityDetail.getBody()));
-
-//        HttpEntity httpEntityDetail = HttpPostRequest.formRequest()
-//                .param("farmId", 12345l).param("pigId", 10l)
-//                .httpEntity();
-//        ResponseEntity responseEntityDetail = this.restTemplate.postForEntity(
-//                "http://localhost:" + this.port + "/api/doctor/pigs/getSowPigDetail",
-//                httpEntityDetail, Object.class);
-//        System.out.println(JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(responseEntityDetail.getBody()));
-
         String url = HttpGetRequest.url("http://localhost:" + this.port + "/api/doctor/pigs/getBoarPigDetail")
                 .params("farmId", 12345l).params("pigId", 10l).params("eventSize", 3).build();
         ResponseEntity responseEntity = this.restTemplate.getForEntity(url, Object.class);
@@ -289,10 +250,6 @@ public class DoctorPigCreateEventsTest extends BaseFrontWebTest {
 
     @Test
     public void testZkClientCondition() throws Exception {
-//        subscriber.subscribe(data->{
-//            System.out.println(String.valueOf(data));
-//        });
-
         boarEntryEventCreate();
     }
 
@@ -308,19 +265,8 @@ public class DoctorPigCreateEventsTest extends BaseFrontWebTest {
         boarEntryEventCreate();
         boarEntryEventCreate();
         boarEntryEventCreate();
-
-//        chgLocationCasualEventCreate(pigId);
-
-//        createRemovalPigEventContent(pigId);
         createRemovalPigEventsContent(Arrays.asList(1l, 2l, 3l, 4l));
-
-//        createDiseaseVaccinationEvent(pigId);
-
-//        createConditionEvent(pigId);
-//        createSemseEvent(pigId);
-
         printCurrentState();
-//        testCurrentSowInputStatus(pigId);
     }
 
     /**
@@ -354,27 +300,6 @@ public class DoctorPigCreateEventsTest extends BaseFrontWebTest {
 
         Long boarId = 2l;
         sowEntryEventCreate();
-
-//        sowMatingEventCreate(pigId, boarId);
-
-//        testPregCheckResultEventCreate(pigId, PregCheckResult.YANG);
-
-//        testToPregEventCreate(pigId);
-
-        // test
-//        testAbortionEventCreate(pigId);
-
-//        testToFarrowing(pigId);
-
-//        testFarrowingEventCreate(pigId);
-
-//        testWeanMethod(pigId, 200);
-
-        // 测试凭我事件信息test
-//        testFostersEventCreate(pigId, 200);
-
-        //  录入转场事件信息
-//        testToMating(pigId);
 
         // 显示 state
         printCurrentState();
