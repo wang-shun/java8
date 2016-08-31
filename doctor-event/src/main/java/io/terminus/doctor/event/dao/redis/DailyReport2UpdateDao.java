@@ -30,7 +30,7 @@ public class DailyReport2UpdateDao {
      * @param farmId 猪场
      */
     public void saveDailyReport2Update(Date beginDate, Long farmId){
-        String key = this.getKey(farmId);
+        String key = getKey(farmId);
         jedisTemplate.execute(jedis -> {
             if(!jedis.exists(key) || DateUtil.toDate(jedis.get(key)).after(beginDate)){
                 jedis.set(key, DateUtil.toDateString(beginDate));
@@ -40,7 +40,7 @@ public class DailyReport2UpdateDao {
 
     public void deleteDailyReport2Update(Long farmId){
         jedisTemplate.execute(jedis -> {
-            jedis.del(this.getKey(farmId));
+            jedis.del(getKey(farmId));
         });
     }
 
