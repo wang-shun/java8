@@ -1,12 +1,6 @@
 package io.terminus.doctor.event.cache;
 
-import com.google.common.base.Strings;
-import com.google.common.base.Throwables;
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
 import io.terminus.common.utils.Dates;
-import io.terminus.common.utils.Splitters;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.dao.DoctorKpiDao;
 import io.terminus.doctor.event.dao.DoctorPigTypeStatisticDao;
@@ -29,10 +23,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
-
-import static java.util.Objects.isNull;
 
 /**
  * Desc: 日报统计缓存
@@ -60,22 +51,6 @@ public class DoctorDailyReportCache {
     }
 
     /**
-     * 取出日报redis
-     * @param farmId 猪场id
-     * @param date   统计日期
-     * @return 日报统计
-     */
-    public DoctorDailyReportDto getDailyReport(Long farmId, Date date) {
-        try {
-            return dailyReportHistoryDao.getDailyReportWithRedis(farmId, date);
-        } catch (Exception e) {
-            log.error("get daily report failed, farmId:{}, date:{}, cause:{}",
-                    farmId, date, Throwables.getStackTraceAsString(e));
-            return null;
-        }
-    }
-
-    /**
      * report put 到redis, 覆盖原先的report
      * @param farmId 猪场id
      * @param date   统计日期
@@ -93,13 +68,29 @@ public class DoctorDailyReportCache {
     public void putDailyPigReport(Long farmId, Date date, DoctorDailyReportDto reportDto) {
         Date startAt = Dates.startOfDay(date);
         Date endAt = Dates.startOfDay(new Date());
+        DoctorDailyReportDto redisDto = dailyReportHistoryDao.getDailyReportWithRedis(farmId, startAt);
+        if (redisDto != null) {
+            redisDto.setPig(reportDto);
+            dailyReportHistoryDao.saveDailyReport(redisDto, farmId, startAt);
+        }
         dailyReport2UpdateDao.saveDailyReport2Update(startAt, farmId);
+
+        //第一天已经算过了, 不用重新算
+        startAt = new DateTime(startAt).plusDays(1).toDate();
+
+        //更新猪群存栏
         while (!startAt.after(endAt)) {
-            DoctorDailyReportDto redisDto = dailyReportHistoryDao.getDailyReportWithRedis(farmId, startAt);
-            if (redisDto != null) {
-                redisDto.setPig(reportDto);
-                dailyReportHistoryDao.saveDailyReport(redisDto, farmId, startAt);
-            }
+            DoctorDailyReportDto everyRedis = dailyReportHistoryDao.getDailyReportWithRedis(farmId, startAt);
+
+            //存栏
+            DoctorLiveStockDailyReport liveStock = new DoctorLiveStockDailyReport();
+            liveStock.setBuruSow(doctorKpiDao.realTimeLiveStockFarrowSow(farmId, startAt));    //产房母猪
+            liveStock.setPeihuaiSow(doctorKpiDao.realTimeLiveStockSow(farmId, startAt) - liveStock.getBuruSow());    //配怀 = 总存栏 - 产房母猪
+            liveStock.setKonghuaiSow(0);                                                       //空怀猪作废, 置成0
+            liveStock.setBoar(doctorKpiDao.realTimeLiveStockBoar(farmId, startAt));            //公猪
+
+            everyRedis.setLiveStock(liveStock);
+            dailyReportHistoryDao.saveDailyReport(everyRedis, farmId, startAt);
             startAt = new DateTime(startAt).plusDays(1).toDate();
         }
     }
@@ -111,13 +102,30 @@ public class DoctorDailyReportCache {
     public void putDailyGroupReport(Long farmId, Date date, DoctorDailyReportDto reportDto) {
         Date startAt = Dates.startOfDay(date);
         Date endAt = Dates.startOfDay(new Date());
+
+        DoctorDailyReportDto redisDto = dailyReportHistoryDao.getDailyReportWithRedis(farmId, startAt);
+        if (redisDto != null) {
+            redisDto.setGroup(reportDto);
+            dailyReportHistoryDao.saveDailyReport(redisDto, farmId, startAt);
+        }
         dailyReport2UpdateDao.saveDailyReport2Update(startAt, farmId);
+
+        //第一天已经算过了, 不用重新算
+        startAt = new DateTime(startAt).plusDays(1).toDate();
+
+        //更新猪群存栏
         while (!startAt.after(endAt)) {
-            DoctorDailyReportDto redisDto = dailyReportHistoryDao.getDailyReportWithRedis(farmId, startAt);
-            if (redisDto != null) {
-                redisDto.setGroup(reportDto);
-                dailyReportHistoryDao.saveDailyReport(redisDto, farmId, startAt);
-            }
+            DoctorDailyReportDto everyRedis = dailyReportHistoryDao.getDailyReportWithRedis(farmId, startAt);
+            //存栏
+            DoctorLiveStockDailyReport liveStock = new DoctorLiveStockDailyReport();
+            liveStock.setHoubeiBoar(doctorKpiDao.realTimeLiveStockHoubeiBoar(farmId, startAt));
+            liveStock.setHoubeiSow(doctorKpiDao.realTimeLiveStockHoubeiSow(farmId, startAt));  //后备母猪
+            liveStock.setFarrow(doctorKpiDao.realTimeLiveStockFarrow(farmId, startAt));
+            liveStock.setNursery(doctorKpiDao.realTimeLiveStockNursery(farmId, startAt));
+            liveStock.setFatten(doctorKpiDao.realTimeLiveStockFatten(farmId, startAt));
+
+            everyRedis.setLiveStock(liveStock);
+            dailyReportHistoryDao.saveDailyReport(everyRedis, farmId, startAt);
             startAt = new DateTime(startAt).plusDays(1).toDate();
         }
     }
@@ -222,27 +230,6 @@ public class DoctorDailyReportCache {
         return doctorPigTypeStatisticDao.findAll().stream()
                 .map(p -> initDailyReportByFarmIdAndDate(p.getFarmId(), date))
                 .collect(Collectors.toList());
-    }
-
-    private static String getReportKey(Long farmId, Date date) {
-        if (farmId == null || date == null) {
-            return null;
-        }
-        return farmId + ":" + DateUtil.toDateString(date);
-    }
-
-    private static FarmDate parseReportKey(String key) {
-        if (Strings.isNullOrEmpty(key)) {
-            return null;
-        }
-        List<String> strs = Splitters.COLON.splitToList(key);
-        if (strs.size() != 2) {
-            return null;
-        }
-
-        //这里的时间必须是这一天的最后1秒!
-        Date tomorrow = Dates.endOfDay(DateUtil.toDate(strs.get(1)));
-        return new FarmDate(Long.valueOf(strs.get(0)), new DateTime(tomorrow).plusSeconds(-1).toDate());
     }
 
     @Data

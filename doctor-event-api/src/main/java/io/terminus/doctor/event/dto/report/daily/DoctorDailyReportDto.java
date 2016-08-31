@@ -134,6 +134,7 @@ public class DoctorDailyReportDto implements Serializable {
         this.liveStock.setNursery(report.getLiveStock().getNursery());
         this.liveStock.setFatten(report.getLiveStock().getFatten());
         this.liveStock.setHoubeiSow(report.getLiveStock().getHoubeiSow() == 0? this.liveStock.getHoubeiSow() : report.getLiveStock().getHoubeiSow());
+        this.liveStock.setHoubeiBoar(report.getLiveStock().getHoubeiBoar() == 0? this.liveStock.getHoubeiBoar() : report.getLiveStock().getHoubeiBoar());
 
         //销售
         this.sale.setNursery(this.sale.getNursery() + report.getSale().getNursery());

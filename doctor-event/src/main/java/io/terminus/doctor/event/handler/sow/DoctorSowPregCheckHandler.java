@@ -1,12 +1,14 @@
 package io.terminus.doctor.event.handler.sow;
 
 import io.terminus.common.exception.ServiceException;
+import io.terminus.common.utils.Dates;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorPigDao;
 import io.terminus.doctor.event.dao.DoctorPigEventDao;
 import io.terminus.doctor.event.dao.DoctorPigSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorPigTrackDao;
 import io.terminus.doctor.event.dao.DoctorRevertLogDao;
+import io.terminus.doctor.event.dao.redis.DailyReport2UpdateDao;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
 import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.enums.KongHuaiPregCheckResult;
@@ -38,14 +40,18 @@ import static io.terminus.common.utils.Arguments.notNull;
 @Component
 public class DoctorSowPregCheckHandler extends DoctorAbstractEventFlowHandler {
 
+    private final DailyReport2UpdateDao dailyReport2UpdateDao;
+
     @Autowired
     public DoctorSowPregCheckHandler(DoctorPigDao doctorPigDao,
                                      DoctorPigEventDao doctorPigEventDao,
                                      DoctorPigTrackDao doctorPigTrackDao,
                                      DoctorPigSnapshotDao doctorPigSnapshotDao,
                                      DoctorRevertLogDao doctorRevertLogDao,
-                                     DoctorBarnDao doctorBarnDao) {
+                                     DoctorBarnDao doctorBarnDao,
+                                     DailyReport2UpdateDao dailyReport2UpdateDao) {
         super(doctorPigDao, doctorPigEventDao, doctorPigTrackDao, doctorPigSnapshotDao, doctorRevertLogDao, doctorBarnDao);
+        this.dailyReport2UpdateDao = dailyReport2UpdateDao;
     }
 
     @Override
@@ -95,9 +101,9 @@ public class DoctorSowPregCheckHandler extends DoctorAbstractEventFlowHandler {
             log.info("remove old preg check event info:{}", lastPregEvent);
             doctorPigEvent.setId(lastPregEvent.getId());    //把id放进去, 用于更新数据
             doctorPigEvent.setRelEventId(lastPregEvent.getRelEventId()); //重新覆盖下relEventId
-            doctorPigEvent.setEventAt(lastPregEvent.getEventAt());       //重新覆盖下事件日期, 用于刷新日报
-            doctorPigEvent.setCheckDate(lastPregEvent.getCheckDate());
 
+            //存一下覆盖掉的日期
+            dailyReport2UpdateDao.saveDailyReport2Update(Dates.startOfDay(lastPregEvent.getEventAt()), doctorPigTrack.getFarmId());
             return IsOrNot.YES;
         }
         return IsOrNot.NO;
