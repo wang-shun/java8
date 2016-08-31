@@ -29,7 +29,7 @@ public class DailyReportHistoryDao {
         this.doctorDailyReportDao = doctorDailyReportDao;
     }
 
-    private String getRedisKey(Long farmId, Date sumAt){
+    private static String getRedisKey(Long farmId, Date sumAt){
         return REDIS_KEY_DAILY_REPORT_HISTORY + farmId + ":" + DateUtil.toDateString(sumAt);
     }
 

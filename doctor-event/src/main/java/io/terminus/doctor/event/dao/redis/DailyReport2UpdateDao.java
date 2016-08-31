@@ -54,7 +54,7 @@ public class DailyReport2UpdateDao {
         return farmAndDate;
     }
 
-    private String getKey(Long farmId){
+    private static String getKey(Long farmId){
         return REDIS_KEY_DAILY_REPORT_UPDATE + farmId;
     }
 }
