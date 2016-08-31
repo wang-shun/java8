@@ -265,7 +265,7 @@ public abstract class DoctorAbstractEventFlowHandler extends HandlerAware {
                 .build();
         doctorPigEvent.setExtraMap(extra);
         //查询上次的事件
-        DoctorPigEvent lastEvent = doctorPigEventDao.queryLastPigEventInWorkflow(basic.getPigId(), null);
+        DoctorPigEvent lastEvent = doctorPigEventDao.queryLastPigEventById(basic.getPigId());
         if (notNull(lastEvent)) {
             doctorPigEvent.setRelEventId(lastEvent.getId());
         }

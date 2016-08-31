@@ -23,8 +23,10 @@ import org.joda.time.Days;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import static io.terminus.common.utils.Arguments.notNull;
 
@@ -94,6 +96,13 @@ public class DoctorSowPregCheckHandler extends DoctorAbstractEventFlowHandler {
 
             log.info("remove old preg check event info:{}", lastPregEvent);
             doctorPigEvent.setId(lastPregEvent.getId());    //把id放进去, 用于更新数据
+
+            //重新设置下relEventId
+            List<DoctorPigEvent> events = doctorPigEventDao.queryAllEventsByPigId(doctorPigTrack.getPigId())
+                    .stream().sorted((a, b) -> b.getEventAt().compareTo(a.getEventAt())).collect(Collectors.toList());
+            if (events.size() > 1 && events.get(1) != null) {
+                doctorPigEvent.setRelEventId(events.get(1).getId());
+            }
             return IsOrNot.YES;
         }
         return IsOrNot.NO;
