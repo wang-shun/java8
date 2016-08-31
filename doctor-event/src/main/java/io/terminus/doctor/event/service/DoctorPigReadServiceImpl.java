@@ -134,6 +134,16 @@ public class DoctorPigReadServiceImpl implements DoctorPigReadService {
     }
 
     @Override
+    public Response<DoctorPig> findPigById(Long pigId){
+        try{
+            return Response.ok(doctorPigDao.findById(pigId));
+        }catch(Exception e){
+            log.error("query pig fail, cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("query.pig.fail");
+        }
+    }
+
+    @Override
     public Response<Paging<DoctorPigInfoDto>> pagingDoctorInfoDtoByPig(DoctorPig doctorPig, Integer pageNo, Integer pageSize) {
         try{
             if(isNull(doctorPig.getFarmId())){

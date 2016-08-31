@@ -11,6 +11,7 @@ import io.terminus.doctor.common.event.EventListener;
 import io.terminus.doctor.common.utils.Params;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dto.DoctorPigMessage;
+import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.event.search.barn.BarnSearchWriteService;
@@ -197,8 +198,9 @@ public class DoctorZKListener implements EventListener {
      */
     private void updateTrackExtraMessage(Long pigId, Long doctorEventId) {
         DoctorPigTrack pigTrack = RespHelper.orServEx(doctorPigReadService.findPigTrackByPigId(pigId));
+        DoctorPig pig = RespHelper.orServEx(doctorPigReadService.findPigById(pigId));
         DoctorPigEvent doctorPigEvent = RespHelper.orServEx(doctorPigEventReadService.queryPigEventById(doctorEventId));
-        if (pigTrack != null && doctorPigEvent != null) {
+        if (pigTrack != null && doctorPigEvent != null && pig != null) {
             List<DoctorPigMessage> tempMessageList = Lists.newArrayList();
             pigTrack.setExtraMessage(pigTrack.getExtraMessage());
             // 去除当前事件执行后的消息提示
@@ -209,6 +211,9 @@ public class DoctorZKListener implements EventListener {
             });
             pigTrack.setExtraMessageList(tempMessageList);
             doctorPigWriteService.updatePigTrackExtraMessage(pigTrack);
+
+            // 统计数据
+            doctorPigTypeStatisticWriteService.statisticPig(pig.getOrgId(), pig.getFarmId(), pig.getPigType());
         }
     }
 }

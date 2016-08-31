@@ -48,18 +48,18 @@ public class DoctorDailyRemovalEventCount implements DoctorDailyEventCount {
             Map<String, Object> extra = e.getExtraMap();
             DoctorPig doctorPig = doctorPigDao.findById(e.getPigId());
 
-            if (extra == null || extra.get("chgReasonId") == null ) {
+            if (extra == null || extra.get("chgTypeId") == null ) {
                 continue;
             }
 
-            Long chageReason = Long.valueOf(extra.get("chgReasonId").toString());
-            if(Objects.equals(chageReason, DoctorBasicEnums.DEAD.getId()) || Objects.equals(chageReason, DoctorBasicEnums.ELIMINATE.getId())){
+            Long chgTypeId = Long.valueOf(extra.get("chgTypeId").toString());
+            if(Objects.equals(chgTypeId, DoctorBasicEnums.DEAD.getId()) || Objects.equals(chgTypeId, DoctorBasicEnums.ELIMINATE.getId())){
                 if(Objects.equals(doctorPig.getPigType(), DoctorPig.PIG_TYPE.BOAR.getKey())){
                     doctorDeadDailyReport.setBoar(doctorDeadDailyReport.getBoar() + 1);
                 }else if(Objects.equals(doctorPig.getPigType(), DoctorPig.PIG_TYPE.SOW.getKey())){
                     doctorDeadDailyReport.setSow(doctorDeadDailyReport.getSow() + 1);
                 }
-            }else if(Objects.equals(chageReason, DoctorBasicEnums.SALE.getId())){
+            }else if(Objects.equals(chgTypeId, DoctorBasicEnums.SALE.getId())){
                 //添加对应的销售数量
                 if(Objects.equals(doctorPig.getPigType(), DoctorPig.PIG_TYPE.BOAR.getKey())){
                     doctorSaleDailyReport.setBoar(doctorSaleDailyReport.getBoar() + 1);

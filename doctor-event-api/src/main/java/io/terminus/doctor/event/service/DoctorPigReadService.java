@@ -41,6 +41,13 @@ public interface DoctorPigReadService {
     Response<DoctorPigInfoDetailDto> queryPigDetailInfoByPigId(@NotNull(message = "input.pigId.empty") Long pigId, Integer eventSize);
 
     /**
+     * 通过pigId 查询pig
+     * @param pigId
+     * @return
+     */
+    Response<DoctorPig> findPigById(Long pigId);
+
+    /**
      * 通过doctorPig 信息分页查询
      * @param doctorPig
      * @param pageNo
