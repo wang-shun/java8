@@ -69,10 +69,15 @@ public class DoctorTurnSeedGroupInput extends BaseGroupInput implements Serializ
     @Override
     public Map<String, String> descMap() {
         Map<String, String> descMap = new HashMap<>();
-        descMap.put("种猪号", this.pigCode);
-        descMap.put("出生日期", this.birthDate);
-        descMap.put("转入猪舍", this.toBarnName);
-
+        if(pigCode != null){
+            descMap.put("种猪号", this.pigCode);
+        }
+        if(birthDate != null){
+            descMap.put("出生日期", this.birthDate);
+        }
+        if(toBarnName != null){
+            descMap.put("转入猪舍", this.toBarnName);
+        }
         if(this.earCode != null){
             descMap.put("耳缺号", this.earCode);
         }

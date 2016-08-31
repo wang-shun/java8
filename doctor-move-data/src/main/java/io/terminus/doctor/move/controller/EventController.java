@@ -1,6 +1,8 @@
 package io.terminus.doctor.move.controller;
 
 import com.google.common.base.Throwables;
+import io.terminus.common.utils.JsonMapper;
+import io.terminus.doctor.common.constants.JacksonType;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorPigEventDao;
@@ -43,18 +45,22 @@ public class EventController {
         try{
             List<DoctorPigEvent> pigEvents = doctorPigEventDao.findByDateRange(beginDate, new Date());
             pigEvents.forEach(pigEvent -> {
-                basicPigInput.setEventType(pigEvent.getType());
-                pigEvent.setDesc(basicPigInput.generateEventDescFromExtra(pigEvent.getExtraMap()));
-                doctorPigEventDao.update(pigEvent);
+                if(pigEvent.getExtraMap() != null){
+                    basicPigInput.setEventType(pigEvent.getType());
+                    pigEvent.setDesc(basicPigInput.generateEventDescFromExtra(pigEvent.getExtraMap()));
+                    doctorPigEventDao.update(pigEvent);
+                }
             });
 
             List<DoctorGroupEvent> groupEvents= doctorGroupEventDao.findByDateRange(beginDate, new Date());
-            groupEvents.forEach(groupEvent -> {
-                BaseGroupInput baseGroupInput = BaseGroupInput.generateBaseGroupInputFromTypeAndExtra(groupEvent.getExtraData(), GroupEventType.from(groupEvent.getType()));
-                baseGroupInput.setIsAuto(groupEvent.getIsAuto());
-                groupEvent.setDesc(baseGroupInput.generateEventDesc());
-                doctorGroupEventDao.update(groupEvent);
-            });
+            for(DoctorGroupEvent groupEvent : groupEvents) {
+                if(groupEvent.getExtra() != null){
+                    BaseGroupInput baseGroupInput = BaseGroupInput.generateBaseGroupInputFromTypeAndExtra(JsonMapper.JSON_NON_EMPTY_MAPPER.getMapper().readValue(groupEvent.getExtra(), JacksonType.MAP_OF_OBJECT), GroupEventType.from(groupEvent.getType()));
+                    baseGroupInput.setIsAuto(groupEvent.getIsAuto());
+                    groupEvent.setDesc(baseGroupInput.generateEventDesc());
+                    doctorGroupEventDao.update(groupEvent);
+                }
+            }
             return "ok";
         }catch(Exception e) {
             log.error("refreshDesc failed, cause:{}", Throwables.getStackTraceAsString(e));
