@@ -2,10 +2,8 @@ package io.terminus.doctor.event.service;
 
 import io.terminus.common.model.Response;
 import io.terminus.doctor.event.dto.report.daily.DoctorDailyReportDto;
-import io.terminus.doctor.event.model.DoctorPigEvent;
 
 import java.util.Date;
-import java.util.List;
 
 /**
  * Created by yaoqijun.
@@ -22,18 +20,4 @@ public interface DoctorDailyPigReportReadService {
      * @return
      */
     Response<DoctorDailyReportDto> countByFarmIdDate(Long farmId, Date sumAt);
-
-    /**
-     * 统计对应的Date 当前event 下包含的所有猪场信息
-     * @param sumAt
-     * @return
-     */
-    Response<List<DoctorDailyReportDto>> countByDate(Date sumAt);
-
-    /**
-     * 单个事件统计对应的结果信息
-     * @param doctorPigEvent
-     * @return
-     */
-    Response<DoctorDailyReportDto> countSinglePigEvent(DoctorPigEvent doctorPigEvent);
 }

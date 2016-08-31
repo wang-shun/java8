@@ -35,9 +35,9 @@ public class DoctorCheckPregDailyReport implements Serializable {
     private int liuchan;
 
     public void addPregCheckReport(DoctorCheckPregDailyReport dto){
-        this.positive += dto.getPositive();
-        this.negative += dto.getNegative();
-        this.fanqing += dto.getFanqing();
-        this.liuchan += dto.getLiuchan();
+        this.positive = dto.getPositive();
+        this.negative = dto.getNegative();
+        this.fanqing = dto.getFanqing();
+        this.liuchan = dto.getLiuchan();
     }
 }
