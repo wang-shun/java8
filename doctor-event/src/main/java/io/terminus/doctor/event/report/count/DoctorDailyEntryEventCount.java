@@ -2,6 +2,7 @@ package io.terminus.doctor.event.report.count;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
+import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.utils.Params;
 import io.terminus.doctor.event.daily.DoctorDailyEventCount;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
@@ -17,12 +18,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
 import static java.util.Objects.isNull;
 
@@ -70,7 +71,6 @@ public class DoctorDailyEntryEventCount implements DoctorDailyEventCount {
             farmId = currentFarmId;
         }
 
-
         // check result
         List<DoctorPigTrack> listTrack = doctorPigTrackDao.list(ImmutableMap.of("farmId", farmId));
         if(isNull(listTrack) || Iterables.isEmpty(listTrack)){
@@ -79,18 +79,24 @@ public class DoctorDailyEntryEventCount implements DoctorDailyEventCount {
         listTrack.forEach(doctorPigTrack->{
             DoctorBarn doctorBarn = doctorBarnDao.findById(doctorPigTrack.getCurrentBarnId());
             doctorPigTrack.setPigType(doctorBarn.getPigType());
-            switch (doctorBarn.getPigType()){
-                case 4:
-                    doctorLiveStockDailyReport.setHoubeiSow(isNull(doctorLiveStockDailyReport.getHoubeiSow()) ? 1 : (doctorLiveStockDailyReport.getHoubeiSow() + 1));
+            PigType pigType = PigType.from(doctorBarn.getPigType());
+            checkArgument(pigType != null, "pig.type.error");
+
+            switch (pigType){
+                //配怀
+                case MATE_SOW:
+                    doctorLiveStockDailyReport.setPeihuaiSow(doctorLiveStockDailyReport.getPeihuaiSow() + 1);
                     break;
-                case 5:
-                    doctorLiveStockDailyReport.setPeihuaiSow(isNull(doctorLiveStockDailyReport.getPeihuaiSow()) ? 1 : (doctorLiveStockDailyReport.getPeihuaiSow() + 1));
+                case PREG_SOW:
+                    doctorLiveStockDailyReport.setPeihuaiSow(doctorLiveStockDailyReport.getPeihuaiSow() + 1);
                     break;
-                case 6:
-                    doctorLiveStockDailyReport.setPeihuaiSow(isNull(doctorLiveStockDailyReport.getPeihuaiSow()) ? 1 : (doctorLiveStockDailyReport.getPeihuaiSow() + 1));
+
+                //哺乳
+                case FARROW_PIGLET:
+                    doctorLiveStockDailyReport.setBuruSow(doctorLiveStockDailyReport.getBuruSow() + 1);
                     break;
-                case 7:
-                    doctorLiveStockDailyReport.setBuruSow(isNull(doctorLiveStockDailyReport.getBuruSow()) ? 1 : (doctorLiveStockDailyReport.getPeihuaiSow() + 1));
+                case DELIVER_SOW:
+                    doctorLiveStockDailyReport.setBuruSow(doctorLiveStockDailyReport.getBuruSow() + 1);
                     break;
                 default:
                     break;
