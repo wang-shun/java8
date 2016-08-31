@@ -259,4 +259,19 @@
             )
         </foreach>
     </insert>
+
+    <select id="findByDateRange" parameterType="map" resultMap="DoctorGroupEventMap">
+        select
+        <include refid="cols_all"/>
+        FROM
+        <include refid="tb"/>
+        where 1 = 1
+        <if test="beginDate != null">
+            <![CDATA[ and event_at >= #{beginDate} ]]>
+        </if>
+        <if test="endDate != null">
+            <![CDATA[ and event_at < #{endDate} ]]>
+        </if>
+        limit 5000
+    </select>
 </mapper>

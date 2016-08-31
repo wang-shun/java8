@@ -1,6 +1,8 @@
 package io.terminus.doctor.event.dto.event.group.input;
 
 import com.google.common.base.Joiner;
+import io.terminus.common.utils.BeanMapper;
+import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.enums.IsOrNot;
 import lombok.Data;
 import org.hibernate.validator.constraints.NotEmpty;
@@ -44,7 +46,11 @@ public abstract class BaseGroupInput implements Serializable {
     private String creatorName;
 
     public final String generateEventDesc(){
-        String desc = Joiner.on("#").withKeyValueSeparator("：").join(this.descMap());
+        Map<String, String> descMap = this.descMap();
+        if(descMap == null){
+            return null;
+        }
+        String desc = Joiner.on("#").withKeyValueSeparator("：").join(descMap);
         if (Objects.equals(isAuto, IsOrNot.YES.getValue())) {
             return "【系统自动】" + desc;
         }else if (Objects.equals(isAuto, IsOrNot.NO.getValue())) {
@@ -55,4 +61,43 @@ public abstract class BaseGroupInput implements Serializable {
     }
 
     public abstract Map<String, String> descMap();
+
+    public static BaseGroupInput generateBaseGroupInputFromTypeAndExtra(Map<String, Object> extra, GroupEventType eventType){
+        BaseGroupInput res;
+        switch (eventType) {
+            case ANTIEPIDEMIC:
+                res = BeanMapper.map(extra, DoctorAntiepidemicGroupInput.class);
+                break;
+            case CHANGE:
+                res = BeanMapper.map(extra, DoctorChangeGroupInput.class);
+                break;
+            case CLOSE:
+                res = BeanMapper.map(extra, DoctorCloseGroupInput.class);
+                break;
+            case DISEASE:
+                res = BeanMapper.map(extra, DoctorDiseaseGroupInput.class);
+                break;
+            case LIVE_STOCK:
+                res = BeanMapper.map(extra, DoctorLiveStockGroupInput.class);
+                break;
+            case MOVE_IN:
+                res = BeanMapper.map(extra, DoctorMoveInGroupInput.class);
+                break;
+            case NEW:
+                res = BeanMapper.map(extra, DoctorNewGroupInput.class);
+                break;
+            case TRANS_FARM:
+                res = BeanMapper.map(extra, DoctorTransFarmGroupInput.class);
+                break;
+            case TRANS_GROUP:
+                res = BeanMapper.map(extra, DoctorTransGroupInput.class);
+                break;
+            case TURN_SEED:
+                res = BeanMapper.map(extra, DoctorTurnSeedGroupInput.class);
+                break;
+            default:
+                throw new IllegalArgumentException("enum GroupEventType error");
+        }
+        return res;
+    }
 }
