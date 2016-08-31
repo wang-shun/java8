@@ -107,11 +107,11 @@ public class DoctorDailyReportCache {
             Date startAt = Dates.startOfDay(date);
             Date endAt = Dates.startOfDay(DateTime.now().plusDays(-1).toDate());
             while (!startAt.after(endAt)) {
-                DoctorDailyReportDto redisDto = dailyReportHistoryDao.getDailyReportWithRedis(farmId, date);
+                DoctorDailyReportDto redisDto = dailyReportHistoryDao.getDailyReportWithRedis(farmId, startAt);
                 if (redisDto != null) {
                     redisDto.setPig(reportDto);
-                    dailyReportHistoryDao.saveDailyReport(redisDto, farmId, date);
-                    dailyReport2UpdateDao.saveDailyReport2Update(date, farmId);
+                    dailyReportHistoryDao.saveDailyReport(redisDto, farmId, startAt);
+                    dailyReport2UpdateDao.saveDailyReport2Update(startAt, farmId);
                 }
                 startAt = new DateTime(startAt).plusDays(1).toDate();
             }
@@ -138,11 +138,11 @@ public class DoctorDailyReportCache {
             Date startAt = Dates.startOfDay(date);
             Date endAt = Dates.startOfDay(DateTime.now().plusDays(-1).toDate());
             while (!startAt.after(endAt)) {
-                DoctorDailyReportDto redisDto = dailyReportHistoryDao.getDailyReportWithRedis(farmId, date);
+                DoctorDailyReportDto redisDto = dailyReportHistoryDao.getDailyReportWithRedis(farmId, startAt);
                 if(redisDto != null){
                     redisDto.setGroup(reportDto);
-                    dailyReportHistoryDao.saveDailyReport(redisDto, farmId, date);
-                    dailyReport2UpdateDao.saveDailyReport2Update(date, farmId);
+                    dailyReportHistoryDao.saveDailyReport(redisDto, farmId, startAt);
+                    dailyReport2UpdateDao.saveDailyReport2Update(startAt, farmId);
                 }
                 startAt = new DateTime(startAt).plusDays(1).toDate();
             }
