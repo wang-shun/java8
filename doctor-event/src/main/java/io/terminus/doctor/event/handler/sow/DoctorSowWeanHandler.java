@@ -9,6 +9,7 @@ import io.terminus.doctor.event.dao.DoctorPigSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorPigTrackDao;
 import io.terminus.doctor.event.dao.DoctorRevertLogDao;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
+import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.handler.DoctorAbstractEventFlowHandler;
 import io.terminus.doctor.event.model.DoctorPigEvent;
@@ -44,7 +45,7 @@ public class DoctorSowWeanHandler extends DoctorAbstractEventFlowHandler {
     }
 
     @Override
-    protected void eventCreatePreHandler(Execution execution, DoctorPigEvent doctorPigEvent, DoctorPigTrack doctorPigTrack, DoctorBasicInputInfoDto basicInputInfoDto, Map<String, Object> extra, Map<String, Object> context) {
+    protected IsOrNot eventCreatePreHandler(Execution execution, DoctorPigEvent doctorPigEvent, DoctorPigTrack doctorPigTrack, DoctorBasicInputInfoDto basicInputInfoDto, Map<String, Object> extra, Map<String, Object> context) {
         DoctorPigEvent lastFarrow = doctorPigEventDao.queryLastFarrowing(doctorPigTrack.getPigId());
         //分娩时间
         DateTime farrowingDate = new DateTime(Long.valueOf(lastFarrow.getExtraMap().get("farrowingDate").toString()));
@@ -59,7 +60,7 @@ public class DoctorSowWeanHandler extends DoctorAbstractEventFlowHandler {
         //断奶只数和断奶均重
         doctorPigEvent.setWeanCount(Ints.tryParse(Objects.toString(extra.get("partWeanPigletsCount"))));
         doctorPigEvent.setWeanAvgWeight(Doubles.tryParse(Objects.toString(extra.get("partWeanAvgWeight"))));
-
+        return IsOrNot.NO;
     }
 
     @Override

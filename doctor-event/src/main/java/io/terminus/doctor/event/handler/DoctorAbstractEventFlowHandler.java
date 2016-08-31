@@ -15,6 +15,7 @@ import io.terminus.doctor.event.dao.DoctorPigSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorPigTrackDao;
 import io.terminus.doctor.event.dao.DoctorRevertLogDao;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
+import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigSnapshot;
@@ -22,10 +23,10 @@ import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.workflow.core.Execution;
 import io.terminus.doctor.workflow.event.HandlerAware;
 import lombok.extern.slf4j.Slf4j;
-import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 
 import static io.terminus.common.utils.Arguments.notNull;
@@ -82,9 +83,15 @@ public abstract class DoctorAbstractEventFlowHandler extends HandlerAware {
             DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(doctorPigEvent.getPigId());
 
             // 当前 猪 状态 对录入数据影响
-            eventCreatePrepare(execution, doctorPigEvent, doctorPigTrack, doctorBasicInputInfoDto, extraInfo, context);
+            IsOrNot isRePregCheckPositive = eventCreatePrepare(execution, doctorPigEvent, doctorPigTrack, doctorBasicInputInfoDto, extraInfo, context);
 
-            doctorPigEventDao.create(doctorPigEvent);
+            //如果是重复妊娠检查的逆向事件, 需要更新旧的空怀事件
+            if (Objects.equals(isRePregCheckPositive, IsOrNot.NO)) {
+                doctorPigEventDao.create(doctorPigEvent);
+            } else {
+                doctorPigEventDao.update(doctorPigEvent);
+            }
+
             context.put("doctorPigEventId", doctorPigEvent.getId());
 
             // update track info
@@ -133,13 +140,13 @@ public abstract class DoctorAbstractEventFlowHandler extends HandlerAware {
      * @param extra
      * @param context
      */
-    private void eventCreatePrepare(Execution execution, DoctorPigEvent doctorPigEvent, final DoctorPigTrack doctorPigTrack, DoctorBasicInputInfoDto basicInputInfoDto,
+    private IsOrNot eventCreatePrepare(Execution execution, DoctorPigEvent doctorPigEvent, final DoctorPigTrack doctorPigTrack, DoctorBasicInputInfoDto basicInputInfoDto,
                                     Map<String, Object> extra, Map<String, Object> context) {
         // create event info
         //添加当前事件发生前猪的状态
         doctorPigEvent.setPigStatusBefore(doctorPigTrack.getStatus());
 
-        eventCreatePreHandler(execution, doctorPigEvent, doctorPigTrack, basicInputInfoDto, extra, context);
+        return eventCreatePreHandler(execution, doctorPigEvent, doctorPigTrack, basicInputInfoDto, extra, context);
     }
 
     /**
@@ -151,10 +158,11 @@ public abstract class DoctorAbstractEventFlowHandler extends HandlerAware {
      * @param basicInputInfoDto
      * @param extra
      * @param context
+     * @return 是否是重复妊娠检查事件逆向事件(如果是, 要更新原来的空怀事件)
      */
-    protected void eventCreatePreHandler(Execution execution, DoctorPigEvent doctorPigEvent, final DoctorPigTrack doctorPigTrack, DoctorBasicInputInfoDto basicInputInfoDto,
-                                         Map<String, Object> extra, Map<String, Object> context) {
-
+    protected IsOrNot eventCreatePreHandler(Execution execution, DoctorPigEvent doctorPigEvent, final DoctorPigTrack doctorPigTrack, DoctorBasicInputInfoDto basicInputInfoDto,
+                                            Map<String, Object> extra, Map<String, Object> context) {
+        return IsOrNot.NO;
     }
 
 

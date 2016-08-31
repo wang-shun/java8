@@ -8,6 +8,7 @@ import io.terminus.doctor.event.dao.DoctorPigSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorPigTrackDao;
 import io.terminus.doctor.event.dao.DoctorRevertLogDao;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
+import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.enums.KongHuaiPregCheckResult;
 import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.enums.PregCheckResult;
@@ -48,16 +49,13 @@ public class DoctorSowPregCheckHandler extends DoctorAbstractEventFlowHandler {
     }
 
     @Override
-    protected void eventCreatePreHandler(Execution execution, DoctorPigEvent doctorPigEvent, DoctorPigTrack doctorPigTrack, DoctorBasicInputInfoDto basicInputInfoDto, Map<String, Object> extra, Map<String, Object> context) {
+    protected IsOrNot eventCreatePreHandler(Execution execution, DoctorPigEvent doctorPigEvent, DoctorPigTrack doctorPigTrack, DoctorBasicInputInfoDto basicInputInfoDto, Map<String, Object> extra, Map<String, Object> context) {
         Integer pregCheckResult = (Integer) extra.get("checkResult");
         //妊娠检查结果，从extra中拆出来
         doctorPigEvent.setPregCheckResult(pregCheckResult);
 
         //校验能否妊娠检查与检查结果是否正确
         checkCanPregCheckResult(doctorPigTrack.getStatus(), pregCheckResult);
-
-        //根据猪类判断, 如果是逆向: 空怀 => 阳性, 需要删掉以前的空怀事件
-        deleteOldPregCheckEventWhenPositive(doctorPigTrack);
 
         //妊娠检查事件时间
         DateTime checkDate = new DateTime(Long.valueOf(extra.get("checkDate").toString()));
@@ -87,6 +85,18 @@ public class DoctorSowPregCheckHandler extends DoctorAbstractEventFlowHandler {
 
         }
 
+        //根据猪类判断, 如果是逆向: 空怀 => 阳性, 需要删掉以前的空怀事件
+        if ((Objects.equals(doctorPigTrack.getStatus(), PigStatus.KongHuai.getKey()))) {
+            DoctorPigEvent lastPregEvent = doctorPigEventDao.queryLastPregCheck(doctorPigTrack.getPigId());
+            if (lastPregEvent == null || !PregCheckResult.KONGHUAI_RESULTS.contains(lastPregEvent.getPregCheckResult())) {
+                throw new ServiceException("preg.check.not.allow");
+            }
+
+            log.info("remove old preg check event info:{}", lastPregEvent);
+            doctorPigEvent.setId(lastPregEvent.getId());    //把id放进去, 用于更新数据
+            return IsOrNot.YES;
+        }
+        return IsOrNot.NO;
     }
 
     @Override
@@ -164,18 +174,5 @@ public class DoctorSowPregCheckHandler extends DoctorAbstractEventFlowHandler {
         }
         //如果不是 已配种, 妊娠检查结果状态, 不允许妊娠检查
         throw new ServiceException("preg.check.not.allow");
-    }
-
-    //如果是逆向 空怀 => 阳性 需要删除旧的妊娠检查事件(空怀的事件)
-    private void  deleteOldPregCheckEventWhenPositive(DoctorPigTrack pigTrack) {
-        if ((Objects.equals(pigTrack.getStatus(), PigStatus.KongHuai.getKey()))) {
-            DoctorPigEvent lastPregEvent = doctorPigEventDao.queryLastPregCheck(pigTrack.getPigId());
-            if (lastPregEvent == null || !PregCheckResult.KONGHUAI_RESULTS.contains(lastPregEvent.getPregCheckResult())) {
-                throw new ServiceException("preg.check.not.allow");
-            }
-
-            log.info("remove old preg check event info:{}", lastPregEvent);
-            doctorPigEventDao.delete(lastPregEvent.getId());
-        }
     }
 }
