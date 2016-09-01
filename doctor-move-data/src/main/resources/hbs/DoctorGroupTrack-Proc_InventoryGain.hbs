@@ -48,7 +48,7 @@ ON p.OID = b.relmainOID
 LEFT JOIN
 (
     SELECT relmainOID,
-        SUM( (ISNULL(AverageAge,0) + DATEDIFF(DAY, '{{date}}', EventDate)) * NumberOfPigs )/ SUM(NumberOfPigs) as age
+        SUM( (ISNULL(AverageAge,0) + DATEDIFF(DAY, EventDate, '{{date}}')) * NumberOfPigs )/ SUM(NumberOfPigs) as age
     FROM view_EventListGain
     WHERE EventEName = 'MoveIntoGroup'   --转入事件
         AND EventDate <= '{{date}}'       --日期
