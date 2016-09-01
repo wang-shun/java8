@@ -176,10 +176,11 @@ public class DoctorEntryHandler implements DoctorEventCreateHandler {
      * @return
      */
     private DoctorPigEvent buildDoctorPigEntryEvent(DoctorBasicInputInfoDto basic, DoctorFarmEntryDto dto) throws IllegalAccessException, IntrospectionException, InvocationTargetException {
+        Map<String, Object> extra = BeanMapper.convertObjectToMap(dto);
         DoctorPigEvent doctorPigEvent = DoctorPigEvent.builder()
                 .orgId(basic.getOrgId()).orgName(basic.getOrgName()).farmId(basic.getFarmId()).farmName(basic.getFarmName())
-                .pigCode(dto.getPigCode()).eventAt(DateTime.now().toDate())
-                .type(basic.getEventType()).kind(basic.getPigType()).name(basic.getEventName()).desc(basic.generateEventDescFromExtra(BeanMapper.convertObjectToMap(dto)))
+                .pigCode(dto.getPigCode()).eventAt(basic.generateEventAtFromExtra(extra))
+                .type(basic.getEventType()).kind(basic.getPigType()).name(basic.getEventName()).desc(basic.generateEventDescFromExtra(extra))
                 .barnId(dto.getBarnId()).barnName(dto.getBarnName()).relEventId(basic.getRelEventId())
                 .outId(UUID.randomUUID().toString()).remark(dto.getEntryMark())
                 .creatorId(basic.getStaffId()).creatorName(basic.getStaffName())
