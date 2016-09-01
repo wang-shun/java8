@@ -189,6 +189,16 @@ public class DateUtil {
      * @return
      */
     public static boolean inSameDate(Date date1, Date date2){
-        return !(date1.after(Dates.endOfDay(date2)) || date1.before(Dates.startOfDay(date2)));
+        return new DateTime(date1).toString(DATE).equals(new DateTime(date2).toString(DATE));
+    }
+
+    /**
+     * 判断参数事件是否处在同年同月
+     * @param date1
+     * @param date2
+     * @return
+     */
+    public static boolean inSameYearMonth(Date date1, Date date2){
+        return new DateTime(date1).toString(YYYYMM).equals(new DateTime(date2).toString(YYYYMM));
     }
 }

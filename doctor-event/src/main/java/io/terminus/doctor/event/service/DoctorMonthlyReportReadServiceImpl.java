@@ -60,14 +60,21 @@ public class DoctorMonthlyReportReadServiceImpl implements DoctorMonthlyReportRe
                 return Response.ok(failReportTrend(date));
             }
 
-            //查询月报结果, 如果没查到, 返回失败的结果
-            DoctorMonthlyReport report = doctorMonthlyReportDao.findByFarmIdAndSumAt(farmId, date);
-            if (report == null) {
-                return Response.ok(failReportTrend(date));
-            }
-            DoctorMonthlyReportDto reportDto = JSON_MAPPER.fromJson(report.getData(), DoctorMonthlyReportDto.class);
-            if (reportDto == null) {
-                return Response.ok(failReportTrend(date));
+            DoctorMonthlyReportDto reportDto;
+
+            // 如果当前日期是1号, 并且查询的月份是当月, 则返回 0 月报
+            if(DateTime.now().getDayOfMonth() == 1 && DateUtil.inSameYearMonth(date, new Date())){
+                reportDto = new DoctorMonthlyReportDto();
+            }else{
+                //查询月报结果, 如果没查到, 返回失败的结果
+                DoctorMonthlyReport report = doctorMonthlyReportDao.findByFarmIdAndSumAt(farmId, date);
+                if (report == null) {
+                    return Response.ok(failReportTrend(date));
+                }
+                reportDto = JSON_MAPPER.fromJson(report.getData(), DoctorMonthlyReportDto.class);
+                if (reportDto == null) {
+                    return Response.ok(failReportTrend(date));
+                }
             }
 
             //拼接趋势图
@@ -83,6 +90,11 @@ public class DoctorMonthlyReportReadServiceImpl implements DoctorMonthlyReportRe
     private List<DoctorMonthlyReportDto> getMonthlyReportByIndex(Long farmId, Date date, Integer index) {
         return DateUtil.getBeforeMonthEnds(date, MoreObjects.firstNonNull(index, MONTH_INDEX)).stream()
                 .map(month -> {
+                    if (DateTime.now().getDayOfMonth() == 1 && DateUtil.inSameYearMonth(month, new Date())) {
+                        DoctorMonthlyReportDto reportDto = new DoctorMonthlyReportDto();
+                        reportDto.setDate(DateUtil.getDateStr(month));
+                        return reportDto;
+                    }
                     DoctorMonthlyReport report = doctorMonthlyReportDao.findByFarmIdAndSumAt(farmId, Dates.startOfDay(month));
                     if (report == null || !StringUtils.hasText(report.getData())) {
                         return failReportDto(month);
@@ -114,9 +126,13 @@ public class DoctorMonthlyReportReadServiceImpl implements DoctorMonthlyReportRe
     private static Date getLastDay(Date date) {
         DateTime datetime = new DateTime(date);
         DateTime now = DateTime.now();
-        //当月返回今天
-        if (datetime.getMonthOfYear() == now.getMonthOfYear()) {
-            return now.withTimeAtStartOfDay().plusDays(-1).toDate();
+        //当月
+        if (DateUtil.inSameYearMonth(datetime.toDate(), now.toDate())) {
+            if(now.getDayOfMonth() == 1){
+                return now.withTimeAtStartOfDay().toDate();
+            }else{
+                return now.withTimeAtStartOfDay().plusDays(-1).toDate();
+            }
         }
         return datetime.withDayOfMonth(1).plusMonths(1).plusDays(-1).toDate();
     }
