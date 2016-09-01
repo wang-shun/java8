@@ -128,11 +128,8 @@ public class DoctorMoveInGroupInput extends BaseGroupInput implements Serializab
         if(fromGroupCode != null){
             map.put("来源猪群", fromGroupCode);
         }
-        if(boarQty != null){
-            map.put("公猪数", boarQty.toString());
-        }
-        if(sowQty != null){
-            map.put("母猪数", sowQty.toString());
+        if(quantity != null){
+            map.put("猪只数", quantity.toString());
         }
         if(avgDayAge != null){
             map.put("平均日龄", avgDayAge.toString());
