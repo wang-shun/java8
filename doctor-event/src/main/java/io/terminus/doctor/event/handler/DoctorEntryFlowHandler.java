@@ -122,7 +122,7 @@ public class DoctorEntryFlowHandler extends HandlerAware {
     }
 
     /**
-     * 构建猪进厂 Track 信息表 TODO 获取进厂事件信息
+     * 构建猪进厂 Track 信息表
      *
      * @param dto
      * @param basic

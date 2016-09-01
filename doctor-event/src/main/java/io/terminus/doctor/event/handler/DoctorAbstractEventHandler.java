@@ -1,9 +1,6 @@
 package io.terminus.doctor.event.handler;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableMap;
-import io.terminus.common.utils.BeanMapper;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.event.constants.DoctorPigSnapshotConstants;
 import io.terminus.doctor.event.dao.DoctorPigDao;
@@ -12,19 +9,10 @@ import io.terminus.doctor.event.dao.DoctorPigSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorPigTrackDao;
 import io.terminus.doctor.event.dao.DoctorRevertLogDao;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
-import io.terminus.doctor.event.dto.event.boar.DoctorSemenDto;
-import io.terminus.doctor.event.dto.event.usual.DoctorChgFarmDto;
-import io.terminus.doctor.event.dto.event.usual.DoctorChgLocationDto;
-import io.terminus.doctor.event.dto.event.usual.DoctorConditionDto;
-import io.terminus.doctor.event.dto.event.usual.DoctorDiseaseDto;
-import io.terminus.doctor.event.dto.event.usual.DoctorRemovalDto;
-import io.terminus.doctor.event.dto.event.usual.DoctorVaccinationDto;
-import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigSnapshot;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 import lombok.extern.slf4j.Slf4j;
-import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Map;
@@ -40,16 +28,10 @@ import static io.terminus.common.utils.Arguments.notNull;
 @Slf4j
 public abstract class DoctorAbstractEventHandler implements DoctorEventCreateHandler {
 
-    private static final ObjectMapper OBJECT_MAPPER = JsonMapper.JSON_NON_DEFAULT_MAPPER.getMapper();
-
     protected final DoctorPigDao doctorPigDao;
-
     protected final DoctorPigEventDao doctorPigEventDao;
-
     protected final DoctorPigTrackDao doctorPigTrackDao;
-
     protected final DoctorPigSnapshotDao doctorPigSnapshotDao;
-
     protected final DoctorRevertLogDao doctorRevertLogDao;
 
     @Autowired
@@ -102,8 +84,6 @@ public abstract class DoctorAbstractEventHandler implements DoctorEventCreateHan
                                     Map<String, Object> extra, Map<String, Object> context) {
         //添加当前事件发生前猪的状态
         doctorPigEvent.setPigStatusBefore(doctorPigTrack.getStatus());
-
-
         eventCreatePreHandler(doctorPigEvent, doctorPigTrack, basicInputInfoDto, extra, context);
     }
 
@@ -206,6 +186,8 @@ public abstract class DoctorAbstractEventHandler implements DoctorEventCreateHan
         DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(doctorPigEvent.getPigId());
         String currentPigTrackSnapShot = JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(doctorPigTrack);
         DoctorPigTrack refreshPigTrack = updateDoctorPigTrackInfo(doctorPigTrack, basic, extra, context);
+        refreshPigTrack.setUpdatorId(basic.getStaffId());
+        refreshPigTrack.setUpdatorName(basic.getStaffName());
         doctorPigTrackDao.update(refreshPigTrack);
         //二次更新event
         eventCreatedAfter(doctorPigEvent, refreshPigTrack, basic, extra, context);

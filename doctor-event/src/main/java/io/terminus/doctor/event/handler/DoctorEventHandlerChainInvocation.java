@@ -29,11 +29,11 @@ public class DoctorEventHandlerChainInvocation {
      */
     public void invoke(DoctorBasicInputInfoDto basic, Map<String,Object> extra, Map<String,Object> context) throws RuntimeException{
 
-        for (DoctorEventCreateHandler doctorEventCreateHandler : doctorEventHandlerChain.getDoctorEventCreateHandlers()) {
-            if(doctorEventCreateHandler.preHandler(basic,extra,context)){
-                doctorEventCreateHandler.handler(basic, extra, context);
-                doctorEventCreateHandler.afterHandler(basic, extra, context);
-            }
-        }
+        doctorEventHandlerChain.getDoctorEventCreateHandlers().stream()
+                .filter(doctorEventCreateHandler -> doctorEventCreateHandler.preHandler(basic, extra, context))
+                .forEach(doctorEventCreateHandler -> {
+                    doctorEventCreateHandler.handler(basic, extra, context);
+                    doctorEventCreateHandler.afterHandler(basic, extra, context);
+        });
     }
 }
