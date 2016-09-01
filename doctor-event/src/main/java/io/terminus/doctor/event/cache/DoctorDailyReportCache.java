@@ -66,9 +66,11 @@ public class DoctorDailyReportCache {
      * @param date 日报的日期
      */
     public void putDailyPigReport(Long farmId, Date date, DoctorDailyReportDto reportDto) {
+        log.info("put daily report pig dto:{}", reportDto);
         Date startAt = Dates.startOfDay(date);
         Date endAt = Dates.startOfDay(new Date());
         DoctorDailyReportDto redisDto = dailyReportHistoryDao.getDailyReportWithRedis(farmId, startAt);
+        log.info("put daily report redis dto:{}", redisDto);
         if (redisDto != null) {
             redisDto.setPig(reportDto);
             dailyReportHistoryDao.saveDailyReport(redisDto, farmId, startAt);
