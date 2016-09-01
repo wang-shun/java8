@@ -216,7 +216,7 @@ public class DoctorBarns {
             //转舍类型: 普通转舍, 去配种, 去分娩, 其他报错
             throw new JsonResponseException("not.trans.barn.type");
         }
-
+        log.info("barnTypes:{}", barnTypes);
         return notEmpty(barnTypes) ? RespHelper.or500(doctorBarnReadService.findBarnsByFarmIdAndPigTypes(farmId, barnTypes))
                 : Collections.emptyList();
     }
