@@ -187,10 +187,11 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
                     }
                     DoctorChangeGroupInput changeInput = map(putBasicFields(params), DoctorChangeGroupInput.class);
                     //添加客户
-                    orServEx(doctorBasicWriteService.addCustomerWhenInput(groupDetail.getGroup().getFarmId(),
+                    Long customerId = orServEx(doctorBasicWriteService.addCustomerWhenInput(groupDetail.getGroup().getFarmId(),
                             groupDetail.getGroup().getFarmName(), changeInput.getCustomerId(), changeInput.getCustomerName(),
                             UserUtil.getUserId(), UserUtil.getCurrentUser().getName()));
-                    
+
+                    params.put("customerId", customerId);
                     orServEx(doctorGroupWriteService.groupEventChange(groupDetail, changeInput));
                     break;
                 case TRANS_GROUP:

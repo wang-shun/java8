@@ -77,8 +77,10 @@ public class DoctorSowEventCreateServiceImpl implements DoctorSowEventCreateServ
                     DoctorPigletsChgDto pigletsChg = JsonMapper.JSON_NON_DEFAULT_MAPPER.fromJson(sowInfoDtoJson, DoctorPigletsChgDto.class);
 
                     //新录入的客户要创建一把
-                    RespHelper.orServEx(doctorBasicWriteService.addCustomerWhenInput(doctorBasicInputInfoDto.getFarmId(), doctorBasicInputInfoDto.getFarmName(),
-                            pigletsChg.getPigletsCustomerId(), pigletsChg.getPigletsCustomerName(), UserUtil.getUserId(), UserUtil.getCurrentUser().getName()));
+                    Long customerId = RespHelper.orServEx(doctorBasicWriteService.addCustomerWhenInput(doctorBasicInputInfoDto.getFarmId(),
+                            doctorBasicInputInfoDto.getFarmName(), pigletsChg.getPigletsCustomerId(), pigletsChg.getPigletsCustomerName(),
+                            UserUtil.getUserId(), UserUtil.getCurrentUser().getName()));
+                    pigletsChg.setPigletsCustomerId(customerId);
                     return doctorPigEventWriteService.sowPigletsChgEvent(pigletsChg, doctorBasicInputInfoDto);
                 default:
                     return Response.fail("create.sowEvent.fail");

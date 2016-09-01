@@ -172,10 +172,10 @@ public class DoctorBasicWriteServiceImpl implements DoctorBasicWriteService {
      * @return 是否成功
      */
     @Override
-    public Response<Boolean> addCustomerWhenInput(Long farmId, String farmName, Long customerId, String customerName, Long creatorId, String creatorName) {
+    public Response<Long> addCustomerWhenInput(Long farmId, String farmName, Long customerId, String customerName, Long creatorId, String creatorName) {
         try {
             if (customerId != null || isEmpty(customerName)) {
-                return Response.ok(true);
+                return Response.ok(customerId);
             }
             if (isExistCustomerName(farmId, customerName)) {
                 return Response.fail("customer.name.is.duplicate");
@@ -188,7 +188,7 @@ public class DoctorBasicWriteServiceImpl implements DoctorBasicWriteService {
             customer.setCreatorId(creatorId);
             customer.setCreatorName(creatorName);
             doctorCustomerDao.create(customer);
-            return Response.ok(true);
+            return Response.ok(customer.getId());
         } catch (Exception e) {
             log.error("add customer when input failed, farmId:{}, customerId:{}, customerName:{}, creatorId:{}, cause:{}",
                     farmId, customerId, customerName, creatorId, Throwables.getStackTraceAsString(e));
