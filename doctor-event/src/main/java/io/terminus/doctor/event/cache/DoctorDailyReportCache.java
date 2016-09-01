@@ -78,7 +78,7 @@ public class DoctorDailyReportCache {
         //第一天已经算过了, 不用重新算
         startAt = new DateTime(startAt).plusDays(1).toDate();
 
-        //更新猪群存栏
+        //更新猪存栏
         while (!startAt.after(endAt)) {
             DoctorDailyReportDto everyRedis = dailyReportHistoryDao.getDailyReportWithRedis(farmId, startAt);
 
