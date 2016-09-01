@@ -102,11 +102,8 @@ public class DoctorTransGroupInput extends BaseGroupInput implements Serializabl
         if(breedName != null){
             map.put("品种", breedName);
         }
-        if(boarQty != null){
-            map.put("公猪数", boarQty.toString());
-        }
-        if(sowQty != null){
-            map.put("母猪数", sowQty.toString());
+        if(quantity != null){
+            map.put("猪只数", quantity.toString());
         }
         if(avgWeight != null){
             map.put("均重(Kg)", avgWeight.toString());
