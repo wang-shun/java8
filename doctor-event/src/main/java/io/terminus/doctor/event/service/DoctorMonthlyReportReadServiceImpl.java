@@ -65,7 +65,6 @@ public class DoctorMonthlyReportReadServiceImpl implements DoctorMonthlyReportRe
             // 如果当前日期是1号, 并且查询的月份是当月, 则返回 0 月报
             if(DateTime.now().getDayOfMonth() == 1 && DateUtil.inSameYearMonth(date, new Date())){
                 reportDto = new DoctorMonthlyReportDto();
-                reportDto.setDate(DateUtil.getDateStr(date));
             }else{
                 //查询月报结果, 如果没查到, 返回失败的结果
                 DoctorMonthlyReport report = doctorMonthlyReportDao.findByFarmIdAndSumAt(farmId, date);
