@@ -16,10 +16,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 /**
  * Created by yaoqijun.
@@ -41,50 +39,45 @@ public class DoctorDailyMatingEventCount implements DoctorDailyEventCount {
     }
 
     @Override
-    public List<DoctorPigEvent> preDailyEventHandleValidate(List<DoctorPigEvent> t) {
-        return t.stream().filter(e-> Objects.equals(e.getType(), PigEvent.MATING.getKey())).collect(Collectors.toList());
+    public boolean preDailyEventHandleValidate(DoctorPigEvent event) {
+        return Objects.equals(event.getType(), PigEvent.MATING.getKey());
     }
 
     @Override
-    public void dailyEventHandle(List<DoctorPigEvent> t, DoctorDailyReportDto doctorDailyReportDto, Map<String, Object> context) {
-
+    public void dailyEventHandle(DoctorPigEvent event, DoctorDailyReportDto doctorDailyReportDto) {
         DoctorMatingDailyReport doctorMatingDailyReport = new DoctorMatingDailyReport();
 
-        t.forEach(e->{
-
-            Map<String,Object> extraMap = e.getExtraMap();
-            if(extraMap.containsKey("checkResult")){
-                PregCheckResult checkResult = PregCheckResult.from(Integer.valueOf(extraMap.get("checkResult").toString()));
-                switch (checkResult){
-                    case YING:
-                        doctorMatingDailyReport.setPregCheckResultYing(doctorMatingDailyReport.getPregCheckResultYing()+1);
-                        break;
-                    case LIUCHAN:
-                        doctorMatingDailyReport.setLiuchan(doctorMatingDailyReport.getLiuchan() + 1);
-                        break;
-                    case FANQING:
-                        doctorMatingDailyReport.setFanqing(doctorMatingDailyReport.getFanqing() + 1);
-                        break;
-                    default:
-                        break;
-                }
-            }else {
-                DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(e.getPigId());
-                Map<String, String> result = null;
-                try {
-                    result = OBJECT_MAPPER.readValue(doctorPigTrack.getRelEventIds(), JacksonType.MAP_OF_STRING);
-                } catch (IOException e1) {
-                    throw new IllegalStateException("dailyMating.event.fail");
-                }
-                if(result.size() > 1){
-                    doctorMatingDailyReport.setDuannai(doctorMatingDailyReport.getDuannai()+1);
-                }else {
-                    doctorMatingDailyReport.setHoubei(doctorMatingDailyReport.getHoubei() + 1);
-                }
+        Map<String,Object> extraMap = event.getExtraMap();
+        if(extraMap.containsKey("checkResult")){
+            PregCheckResult checkResult = PregCheckResult.from(Integer.valueOf(extraMap.get("checkResult").toString()));
+            switch (checkResult){
+                case YING:
+                    doctorMatingDailyReport.setPregCheckResultYing(doctorMatingDailyReport.getPregCheckResultYing()+1);
+                    break;
+                case LIUCHAN:
+                    doctorMatingDailyReport.setLiuchan(doctorMatingDailyReport.getLiuchan() + 1);
+                    break;
+                case FANQING:
+                    doctorMatingDailyReport.setFanqing(doctorMatingDailyReport.getFanqing() + 1);
+                    break;
+                default:
+                    break;
             }
-        });
+        }else {
+            DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(event.getPigId());
+            Map<String, String> result;
+            try {
+                result = OBJECT_MAPPER.readValue(doctorPigTrack.getRelEventIds(), JacksonType.MAP_OF_STRING);
+            } catch (IOException e1) {
+                throw new IllegalStateException("dailyMating.event.fail");
+            }
+            if(result.size() > 1){
+                doctorMatingDailyReport.setDuannai(doctorMatingDailyReport.getDuannai()+1);
+            }else {
+                doctorMatingDailyReport.setHoubei(doctorMatingDailyReport.getHoubei() + 1);
+            }
+        }
 
         doctorDailyReportDto.getMating().addMatingDaily(doctorMatingDailyReport);
-
     }
 }

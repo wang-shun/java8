@@ -1,6 +1,5 @@
 package io.terminus.doctor.event.handler;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
@@ -15,7 +14,6 @@ import io.terminus.doctor.event.dao.DoctorPigDao;
 import io.terminus.doctor.event.dao.DoctorPigEventDao;
 import io.terminus.doctor.event.dao.DoctorPigSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorPigTrackDao;
-import io.terminus.doctor.event.dao.DoctorRevertLogDao;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
 import io.terminus.doctor.event.dto.event.usual.DoctorFarmEntryDto;
 import io.terminus.doctor.event.enums.IsOrNot;
@@ -50,8 +48,6 @@ import static java.util.Objects.isNull;
 @Slf4j
 public class DoctorEntryHandler implements DoctorEventCreateHandler {
 
-    private static final ObjectMapper OBJECT_MAPPER = JsonMapper.JSON_NON_DEFAULT_MAPPER.getMapper();
-
     private final DoctorPigDao doctorPigDao;
 
     private final DoctorPigEventDao doctorPigEventDao;
@@ -60,8 +56,6 @@ public class DoctorEntryHandler implements DoctorEventCreateHandler {
 
     private final DoctorPigSnapshotDao doctorPigSnapshotDao;
 
-    private final DoctorRevertLogDao doctorRevertLogDao;
-
     private final DoctorPigInfoCache doctorPigInfoCache;
 
     @Autowired
@@ -69,13 +63,11 @@ public class DoctorEntryHandler implements DoctorEventCreateHandler {
                               DoctorPigEventDao doctorPigEventDao,
                               DoctorPigTrackDao doctorPigTrackDao,
                               DoctorPigSnapshotDao doctorPigSnapshotDao,
-                              DoctorRevertLogDao doctorRevertLogDao,
                               DoctorPigInfoCache doctorPigInfoCache) {
         this.doctorPigEventDao = doctorPigEventDao;
         this.doctorPigDao = doctorPigDao;
         this.doctorPigTrackDao = doctorPigTrackDao;
         this.doctorPigSnapshotDao = doctorPigSnapshotDao;
-        this.doctorRevertLogDao = doctorRevertLogDao;
         this.doctorPigInfoCache = doctorPigInfoCache;
     }
 
@@ -176,10 +168,11 @@ public class DoctorEntryHandler implements DoctorEventCreateHandler {
      * @return
      */
     private DoctorPigEvent buildDoctorPigEntryEvent(DoctorBasicInputInfoDto basic, DoctorFarmEntryDto dto) throws IllegalAccessException, IntrospectionException, InvocationTargetException {
-        DoctorPigEvent doctorPigEvent = DoctorPigEvent.builder()
+        Map<String, Object> extra = BeanMapper.convertObjectToMap(dto);
+        return DoctorPigEvent.builder()
                 .orgId(basic.getOrgId()).orgName(basic.getOrgName()).farmId(basic.getFarmId()).farmName(basic.getFarmName())
-                .pigCode(dto.getPigCode()).eventAt(DateTime.now().toDate())
-                .type(basic.getEventType()).kind(basic.getPigType()).name(basic.getEventName()).desc(basic.generateEventDescFromExtra(BeanMapper.convertObjectToMap(dto)))
+                .pigCode(dto.getPigCode()).eventAt(basic.generateEventAtFromExtra(extra))
+                .type(basic.getEventType()).kind(basic.getPigType()).name(basic.getEventName()).desc(basic.generateEventDescFromExtra(extra))
                 .barnId(dto.getBarnId()).barnName(dto.getBarnName()).relEventId(basic.getRelEventId())
                 .outId(UUID.randomUUID().toString()).remark(dto.getEntryMark())
                 .creatorId(basic.getStaffId()).creatorName(basic.getStaffName())
@@ -192,8 +185,6 @@ public class DoctorEntryHandler implements DoctorEventCreateHandler {
                 .ptnpd(0)
                 .jpnpd(0)
                 .build();
-
-        return doctorPigEvent;
     }
 
     /**

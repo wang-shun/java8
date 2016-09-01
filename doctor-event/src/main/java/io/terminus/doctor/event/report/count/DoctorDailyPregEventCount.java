@@ -14,12 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
-import java.util.List;
-import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Collectors;
-
-import static io.terminus.common.utils.Arguments.notEmpty;
 
 /**
  * Created by yaoqijun.
@@ -38,17 +33,16 @@ public class DoctorDailyPregEventCount implements DoctorDailyEventCount {
         this.doctorKpiDao = doctorKpiDao;
     }
 
-
     @Override
-    public List<DoctorPigEvent> preDailyEventHandleValidate(List<DoctorPigEvent> t) {
-        return t.stream().filter(e-> Objects.equals(e.getType(), PigEvent.PREG_CHECK.getKey())).collect(Collectors.toList());
+    public boolean preDailyEventHandleValidate(DoctorPigEvent event) {
+        return Objects.equals(event.getType(), PigEvent.PREG_CHECK.getKey());
     }
 
+
     @Override
-    public void dailyEventHandle(List<DoctorPigEvent> t, DoctorDailyReportDto doctorDailyReportDto, Map<String, Object> context) {
+    public void dailyEventHandle(DoctorPigEvent event, DoctorDailyReportDto doctorDailyReportDto) {
         //如果事件不为空,全部重新计算
-        if (notEmpty(t)) {
-            DoctorPigEvent event = t.get(0);
+        if (event != null) {
             Date startAt = Dates.startOfDay(event.getEventAt());
             Date endAt = DateUtil.getDateEnd(new DateTime(event.getEventAt())).toDate();
 

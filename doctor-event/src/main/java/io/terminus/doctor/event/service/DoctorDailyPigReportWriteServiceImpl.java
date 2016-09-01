@@ -1,8 +1,6 @@
 package io.terminus.doctor.event.service;
 
 import com.google.common.base.Throwables;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.event.cache.DoctorDailyReportCache;
@@ -44,7 +42,7 @@ public class DoctorDailyPigReportWriteServiceImpl implements DoctorDailyPigRepor
         try{
             DoctorPigEvent doctorPigEvent = doctorPigEventDao.findById(pigEventId);
             doctorDailyReportCache.putDailyPigReport(doctorPigEvent.getFarmId(), doctorPigEvent.getEventAt(),
-                    doctorDailyPigCountInvocation.countPigEvent(Lists.newArrayList(doctorPigEvent), Maps.newHashMap()));
+                    doctorDailyPigCountInvocation.countPigEvent(doctorPigEvent));
         	return Response.ok(Boolean.TRUE);
         }catch (IllegalStateException se){
             log.warn("update daily pig illegal state fail, cause:{}", Throwables.getStackTraceAsString(se));

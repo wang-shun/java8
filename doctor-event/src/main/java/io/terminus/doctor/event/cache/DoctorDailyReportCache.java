@@ -66,9 +66,11 @@ public class DoctorDailyReportCache {
      * @param date 日报的日期
      */
     public void putDailyPigReport(Long farmId, Date date, DoctorDailyReportDto reportDto) {
+        log.info("put daily report pig dto:{}", reportDto);
         Date startAt = Dates.startOfDay(date);
         Date endAt = Dates.startOfDay(new Date());
         DoctorDailyReportDto redisDto = dailyReportHistoryDao.getDailyReportWithRedis(farmId, startAt);
+        log.info("put daily report redis dto:{}", redisDto);
         if (redisDto != null) {
             redisDto.setPig(reportDto);
             dailyReportHistoryDao.saveDailyReport(redisDto, farmId, startAt);
@@ -78,7 +80,7 @@ public class DoctorDailyReportCache {
         //第一天已经算过了, 不用重新算
         startAt = new DateTime(startAt).plusDays(1).toDate();
 
-        //更新猪群存栏
+        //更新猪存栏
         while (!startAt.after(endAt)) {
             DoctorDailyReportDto everyRedis = dailyReportHistoryDao.getDailyReportWithRedis(farmId, startAt);
 

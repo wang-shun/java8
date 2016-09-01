@@ -1,31 +1,16 @@
 package io.terminus.doctor.event.report.count;
 
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Iterables;
-import io.terminus.doctor.common.enums.PigType;
-import io.terminus.doctor.common.utils.Params;
 import io.terminus.doctor.event.daily.DoctorDailyEventCount;
-import io.terminus.doctor.event.dao.DoctorBarnDao;
-import io.terminus.doctor.event.dao.DoctorPigTrackDao;
+import io.terminus.doctor.event.dao.DoctorKpiDao;
 import io.terminus.doctor.event.dto.report.daily.DoctorDailyReportDto;
 import io.terminus.doctor.event.dto.report.daily.DoctorLiveStockDailyReport;
-import io.terminus.doctor.event.enums.PigStatus;
-import io.terminus.doctor.event.model.DoctorBarn;
+import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.model.DoctorPigEvent;
-import io.terminus.doctor.event.model.DoctorPigStatusCount;
-import io.terminus.doctor.event.model.DoctorPigTrack;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
-import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Collectors;
-
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkState;
-import static java.util.Objects.isNull;
 
 /**
  * Created by yaoqijun.
@@ -37,85 +22,25 @@ import static java.util.Objects.isNull;
 @Slf4j
 public class DoctorDailyEntryEventCount implements DoctorDailyEventCount {
 
-    private final DoctorPigTrackDao doctorPigTrackDao;
-
-    private final DoctorBarnDao doctorBarnDao;
+    private final DoctorKpiDao doctorKpiDao;
 
     @Autowired
-    public DoctorDailyEntryEventCount(DoctorPigTrackDao doctorPigTrackDao, DoctorBarnDao doctorBarnDao){
-        this.doctorPigTrackDao = doctorPigTrackDao;
-        this.doctorBarnDao = doctorBarnDao;
+    public DoctorDailyEntryEventCount(DoctorKpiDao doctorKpiDao){
+        this.doctorKpiDao = doctorKpiDao;
     }
 
     @Override
-    public List<DoctorPigEvent> preDailyEventHandleValidate(List<DoctorPigEvent> t) {
-//        return t.stream().filter(e -> Objects.equals(e.getType(), PigEvent.ENTRY.getKey())).collect(Collectors.toList());
-        return t;
+    public boolean preDailyEventHandleValidate(DoctorPigEvent event) {
+        return Objects.equals(event.getType(), PigEvent.ENTRY.getKey()) || Objects.equals(event.getType(), PigEvent.REMOVAL.getKey());
     }
 
     @Override
-    public void dailyEventHandle(List<DoctorPigEvent> t, DoctorDailyReportDto doctorDailyReportDto, Map<String, Object> context) {
-
-        DoctorLiveStockDailyReport doctorLiveStockDailyReport = new DoctorLiveStockDailyReport();
-
-        // validate same farm
-        Long farmId;
-        if(t.size() == 0){
-            farmId = Long.valueOf(context.get("farmId").toString());
-        }else {
-            checkState(t.size() > 0, "dailyEntry.eventCount.fail");
-            Long currentFarmId = t.get(0).getFarmId();
-            t.forEach(e->{
-                checkState(Objects.equals(e.getFarmId(), currentFarmId), "dailyEntry.notSameFarm.fail");
-            });
-            farmId = currentFarmId;
-        }
-
-        // check result
-        List<DoctorPigTrack> listTrack = doctorPigTrackDao.list(ImmutableMap.of("farmId", farmId));
-        if(isNull(listTrack) || Iterables.isEmpty(listTrack)){
-            return;
-        }
-        listTrack.forEach(doctorPigTrack->{
-            DoctorBarn doctorBarn = doctorBarnDao.findById(doctorPigTrack.getCurrentBarnId());
-            doctorPigTrack.setPigType(doctorBarn.getPigType());
-            PigType pigType = PigType.from(doctorBarn.getPigType());
-            checkArgument(pigType != null, "pig.type.error");
-
-            switch (pigType){
-                //配怀
-                case MATE_SOW:
-                    doctorLiveStockDailyReport.setPeihuaiSow(doctorLiveStockDailyReport.getPeihuaiSow() + 1);
-                    break;
-                case PREG_SOW:
-                    doctorLiveStockDailyReport.setPeihuaiSow(doctorLiveStockDailyReport.getPeihuaiSow() + 1);
-                    break;
-
-                //哺乳
-                case FARROW_PIGLET:
-                    doctorLiveStockDailyReport.setBuruSow(doctorLiveStockDailyReport.getBuruSow() + 1);
-                    break;
-                case DELIVER_SOW:
-                    doctorLiveStockDailyReport.setBuruSow(doctorLiveStockDailyReport.getBuruSow() + 1);
-                    break;
-                default:
-                    break;
-
-            }
-        });
-        List<DoctorPigStatusCount> statusCounts = doctorPigTrackDao.countPigTrackByStatus(farmId);
-        if(isNull(statusCounts) || Iterables.isEmpty(statusCounts)){
-            return;
-        }
-
-        //count result
-        Map<Integer, Integer> statusCount = statusCounts.stream().collect(Collectors.toMap(DoctorPigStatusCount::getStatus, DoctorPigStatusCount::getCount));
-
-        doctorLiveStockDailyReport.setKonghuaiSow(0);
-
-        doctorLiveStockDailyReport.setBoar(Params.getNullDefault(statusCount, PigStatus.BOAR_ENTRY.getKey(), 0));
-
-        // add to total
-        doctorDailyReportDto.getLiveStock().addSowBoar(doctorLiveStockDailyReport);
+    public void dailyEventHandle(DoctorPigEvent event, DoctorDailyReportDto dailyReportDto) {
+        //存栏
+        DoctorLiveStockDailyReport liveStock = dailyReportDto.getLiveStock();
+        liveStock.setBuruSow(doctorKpiDao.realTimeLiveStockFarrowSow(event.getFarmId(), event.getEventAt()));    //产房母猪
+        liveStock.setPeihuaiSow(doctorKpiDao.realTimeLiveStockSow(event.getFarmId(), event.getEventAt()) - liveStock.getBuruSow());    //配怀 = 总存栏 - 产房母猪
+        liveStock.setKonghuaiSow(0);                                                       //空怀猪作废, 置成0
+        liveStock.setBoar(doctorKpiDao.realTimeLiveStockBoar(event.getFarmId(), event.getEventAt()));            //公猪
     }
 }

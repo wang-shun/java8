@@ -1,6 +1,5 @@
 package io.terminus.doctor.event.report;
 
-import com.google.common.collect.Lists;
 import io.terminus.doctor.event.daily.DoctorDailyEventCount;
 import io.terminus.doctor.event.dto.report.daily.DoctorDailyReportDto;
 import io.terminus.doctor.event.model.DoctorPigEvent;
@@ -9,7 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
-import java.util.Map;
 
 import static java.util.Objects.isNull;
 
@@ -32,29 +30,22 @@ public class DoctorDailyPigCountInvocation {
 
     /**
      * 统计对应的事件信息
-     * @param doctorPigEvents
+     * @param pigEvent
      * @return
      */
-    public DoctorDailyReportDto countPigEvent(List<DoctorPigEvent> doctorPigEvents, Map<String, Object> context){
+    public DoctorDailyReportDto countPigEvent(DoctorPigEvent pigEvent){
 
-        DoctorDailyReportDto doctorDailyReportDto = new DoctorDailyReportDto();
+        DoctorDailyReportDto report = new DoctorDailyReportDto();
 
         List<DoctorDailyEventCount> doctorDailyEventCounts = doctorDailyPigCountChain.getDoctorDailyEventCounts();
 
         if(isNull(doctorDailyEventCounts)){
-            doctorDailyEventCounts = Lists.newArrayList();
+            return report;
         }
-
-        for (DoctorDailyEventCount doctorDailyEventCount : doctorDailyEventCounts) {
-
-            // filter to execute event
-            List<DoctorPigEvent> toExe = doctorDailyEventCount.preDailyEventHandleValidate(doctorPigEvents);
-
-            // execute count result
-            doctorDailyEventCount.dailyEventHandle(toExe, doctorDailyReportDto, context);
-
-        }
-        return doctorDailyReportDto;
+        doctorDailyEventCounts.stream()
+                .filter(count -> count.preDailyEventHandleValidate(pigEvent))
+                .forEach(count -> count.dailyEventHandle(pigEvent, report));
+        return report;
     }
 
 }

@@ -7,10 +7,8 @@ import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 /**
  * Created by yaoqijun.
@@ -20,21 +18,21 @@ import java.util.stream.Collectors;
  */
 @Component
 public class DoctorDailyWeanEventCount implements DoctorDailyEventCount{
+
     @Override
-    public List<DoctorPigEvent> preDailyEventHandleValidate(List<DoctorPigEvent> t) {
-        return t.stream().filter(e-> Objects.equals(e.getType(), PigEvent.WEAN.getKey())).collect(Collectors.toList());
+    public boolean preDailyEventHandleValidate(DoctorPigEvent event) {
+        return Objects.equals(event.getType(), PigEvent.WEAN.getKey());
     }
 
     @Override
-    public void dailyEventHandle(List<DoctorPigEvent> t, DoctorDailyReportDto doctorDailyReportDto, Map<String, Object> context) {
+    public void dailyEventHandle(DoctorPigEvent event, DoctorDailyReportDto doctorDailyReportDto) {
         DoctorWeanDailyReport doctorWeanDailyReport = new DoctorWeanDailyReport();
 
-        t.forEach(e->{
-            Map<String,Object> extraMap = e.getExtraMap();
-            doctorWeanDailyReport.setCount(doctorWeanDailyReport.getCount() + Integer.valueOf(extraMap.get("partWeanPigletsCount").toString()));
-            doctorWeanDailyReport.setWeight((doctorWeanDailyReport.getWeight() + Double.valueOf(extraMap.get("partWeanAvgWeight").toString()))/2);
-            doctorWeanDailyReport.setNest(doctorWeanDailyReport.getNest() + 1);
-        });
+        Map<String,Object> extraMap = event.getExtraMap();
+        doctorWeanDailyReport.setCount(doctorWeanDailyReport.getCount() + Integer.valueOf(extraMap.get("partWeanPigletsCount").toString()));
+        doctorWeanDailyReport.setWeight((doctorWeanDailyReport.getWeight() + Double.valueOf(extraMap.get("partWeanAvgWeight").toString()))/2);
+        doctorWeanDailyReport.setNest(doctorWeanDailyReport.getNest() + 1);
+
         doctorDailyReportDto.getWean().addWeanCount(doctorWeanDailyReport);
     }
 }
