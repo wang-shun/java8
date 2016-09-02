@@ -174,7 +174,7 @@ public class DoctorDailyReportCache {
         //分娩
         DoctorDeliverDailyReport deliver = new DoctorDeliverDailyReport();
         deliver.setNest(doctorKpiDao.getDelivery(farmId, startAt, endAt));
-        deliver.setLive(doctorKpiDao.getDeliveryAll(farmId, startAt, endAt));
+        deliver.setLive(doctorKpiDao.getDeliveryLive(farmId, startAt, endAt));
         deliver.setHealth(doctorKpiDao.getDeliveryHealth(farmId, startAt, endAt));
         deliver.setWeak(doctorKpiDao.getDeliveryWeak(farmId, startAt, endAt));
         deliver.setBlack(doctorKpiDao.getDeliveryDeadBlackMuJi(farmId, startAt, endAt));
