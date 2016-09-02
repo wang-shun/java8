@@ -154,9 +154,9 @@ public class DoctorSowMatingHandler extends DoctorAbstractEventFlowHandler {
 
         //判断是否 断奶到配种
         if (!isNull(trackExtraMap) &&
-                trackExtraMap.containsKey("weanToMate")
-                && Boolean.valueOf(trackExtraMap.get("weanToMate").toString())) {
-            extra.put("weanToMate", false);
+                trackExtraMap.containsKey("hasWeanToMating")
+                && Boolean.valueOf(trackExtraMap.get("hasWeanToMating").toString())) {
+            extra.put("hasWeanToMating", false);
 
             context.put("DP", true);
         }
