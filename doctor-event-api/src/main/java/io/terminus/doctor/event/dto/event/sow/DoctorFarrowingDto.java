@@ -1,5 +1,6 @@
 package io.terminus.doctor.event.dto.event.sow;
 
+import com.google.common.base.MoreObjects;
 import io.terminus.doctor.event.dto.event.AbstractPigEventInputDto;
 import io.terminus.doctor.event.enums.FarrowingType;
 import lombok.AllArgsConstructor;
@@ -114,15 +115,14 @@ public class DoctorFarrowingDto extends AbstractPigEventInputDto implements Seri
         if(dayAgeAvg != null){
             map.put("平均日龄", dayAgeAvg.toString());
         }
-        if(farrowingLiveCount != null){
-            map.put("分娩总数", farrowingLiveCount.toString());
-        }
-        if(liveSowCount != null){
-            map.put("活母猪数", liveSowCount.toString());
-        }
-        if(liveBoarCount != null){
-            map.put("活公猪数", liveBoarCount.toString());
-        }
+
+        Integer total = MoreObjects.firstNonNull(farrowingLiveCount, 0)
+                + MoreObjects.firstNonNull(mnyCount, 0)
+                + MoreObjects.firstNonNull(jxCount, 0)
+                + MoreObjects.firstNonNull(deadCount, 0)
+                + MoreObjects.firstNonNull(blackCount, 0);
+        map.put("分娩总数", total.toString());
+
         if(healthCount != null){
             map.put("健仔数", healthCount.toString());
         }
