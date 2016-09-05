@@ -195,6 +195,15 @@ public class DoctorSowPregCheckHandler extends DoctorAbstractEventFlowHandler {
             }
             return;
         }
+
+        //返情只能到阳性状态(以后全是空怀了)
+        if (Objects.equals(pigStatus, PigStatus.FanQing.getKey())) {
+            if (!Objects.equals(checkResult, PregCheckResult.YANG.getKey())) {
+                throw new ServiceException("preg.check.result.not.allow");
+            }
+            return;
+        }
+
         //如果不是 已配种, 妊娠检查结果状态, 不允许妊娠检查
         throw new ServiceException("preg.check.not.allow");
     }
