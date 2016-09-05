@@ -238,7 +238,7 @@ public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteServic
             return Response.ok(Params.getWithConvert(result,"doctorEventId",a->Long.valueOf(a.toString())));
         }catch (Exception e){
             log.error("condition event create fail, cause:{}", Throwables.getStackTraceAsString(e));
-            return Response.fail("create.condition.fail");
+            return Response.fail("create.condition.event.fail");
         }
     }
 
@@ -253,7 +253,7 @@ public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteServic
             return Response.ok(Params.getWithConvert(result,"doctorEventId",a->Long.valueOf(a.toString())));
         }catch (Exception e){
             log.error("vaccination event create fail, cause:{}", Throwables.getStackTraceAsString(e));
-            return Response.fail("create.vaccination.fail");
+            return Response.fail("create.chgLocationEvent.fail");
         }
     }
 
@@ -277,7 +277,7 @@ public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteServic
             return Response.fail(e.getMessage());
         }catch (Exception e){
             log.error("vaccination event create fail, cause:{}", Throwables.getStackTraceAsString(e));
-            return Response.fail("create.vaccination.fail");
+            return Response.fail("create.chgFarmEvent.fail");
         }
     }
 
@@ -294,7 +294,7 @@ public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteServic
             return Response.fail(e.getMessage());
         }catch (Exception e){
             log.error("vaccination event create fail, cause:{}", Throwables.getStackTraceAsString(e));
-            return Response.fail("create.vaccination.fail");
+            return Response.fail("create.removalEvent.fail");
         }
     }
 
@@ -309,7 +309,7 @@ public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteServic
             return Response.ok(Params.getWithConvert(result,"doctorEventId",a->Long.valueOf(a.toString())));
         }catch (Exception e){
             log.error("vaccination event create fail, cause:{}", Throwables.getStackTraceAsString(e));
-            return Response.fail("create.vaccination.fail");
+            return Response.fail("create.semenEvent.fail");
         }
     }
 
@@ -328,7 +328,7 @@ public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteServic
             return Response.fail(e.getMessage());
         }catch (Exception e){
             log.error("vaccination event create fail, cause:{}", Throwables.getStackTraceAsString(e));
-            return Response.fail("create.vaccination.fail");
+            return Response.fail("create.matingEvent.fail");
         }
     }
 
@@ -366,7 +366,7 @@ public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteServic
             return Response.fail(e.getMessage());
         }catch (Exception e){
             log.error("vaccination event create fail, cause:{}", Throwables.getStackTraceAsString(e));
-            return Response.fail("create.vaccination.fail");
+            return Response.fail("create.sowPregCheckEvent.fail");
         }
     }
 
@@ -478,7 +478,7 @@ public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteServic
             return Response.fail(e.getMessage());
         }catch (Exception e){
             log.error("sow pigs event creates fail, cause:{}", Throwables.getStackTraceAsString(e));
-            return Response.fail("create.pigsEvent.fail");
+            return Response.fail("create.sowPigsEvent.fail");
         }
     }
 
