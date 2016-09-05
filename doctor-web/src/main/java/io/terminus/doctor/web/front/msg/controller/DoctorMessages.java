@@ -235,7 +235,7 @@ public class DoctorMessages {
      * 获取猪场中消息规则与相应猪只数,列表
      * @return
      */
-    @RequestMapping(value = "/warn/rule/list", produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(value = "/warn/rule/list", method = RequestMethod.GET)
     public List<OneLevelMessageDto> getRulePigCountByFarmId(@RequestParam("farmId") Long farmId) {
         List<OneLevelMessageDto> list = Lists.newArrayList();
         List<DoctorMessageRule> doctorMessageRules = RespHelper.or500(doctorMessageRuleReadService.findMessageRulesByCriteria(ImmutableMap.of("farmId", farmId, "types", ImmutableList.of(DoctorMessageRuleTemplate.Type.WARNING, DoctorMessageRuleTemplate.Type.ERROR))));
