@@ -42,8 +42,6 @@ public class DoctorMatingDto extends AbstractPigEventInputDto implements Seriali
      */
     private Integer matingType; // 配种类型
 
-    private String matingStaff; // 配种人员
-
     private String mattingMark; // 配种mark
 
     @Override
