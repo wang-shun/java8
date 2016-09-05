@@ -267,3 +267,7 @@ ALTER TABLE doctor_pig_events ADD COLUMN farrow_weight DOUBLE DEFAULT NULL COMME
 
 -- 2016-08-29 增加后备猪统计字段
 ALTER TABLE doctor_pig_type_statistics ADD COLUMN houbei int(11) DEFAULT NULL COMMENT '后备猪数' AFTER fatten;
+
+-- 2016-08-31
+Alter TABLE doctor_messages ADD COLUMN business_id bigint(20) DEFAULT NULL COMMENT '消息对应的操作id: 猪id、猪群id、物料id' AFTER template_name;
+Alter TABLE doctor_messages ADD COLUMN is_expired SMALLINT (2) DEFAULT NULL COMMENT '消息是否过期: 0 未过期、1 过期' AFTER business_id;

@@ -124,7 +124,7 @@ public class SowNeedWeanProducer extends AbstractJobProducer {
                                     PigStatus.FEED);
                         }
 
-                        if (isMessage && DateTime.now().minusDays(ruleValueMap.get(1).getValue().intValue()).isAfter(getFarrowingDate(pigDto))) {
+                        if (isMessage && checkRuleValue(ruleValueMap.get(1), timeDiff)) {
                             messages.addAll(getMessage(pigDto, rule.getChannels(), ruleRole, subUsers, timeDiff, rule.getUrl()));
                         }
                     }

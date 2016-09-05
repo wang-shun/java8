@@ -3,6 +3,7 @@ package io.terminus.doctor.schedule.msg.producer;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.api.client.util.Lists;
 import com.google.common.base.Throwables;
+import io.terminus.doctor.common.constants.JacksonType;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dto.DoctorPigInfoDto;
 import io.terminus.doctor.event.dto.DoctorPigMessage;
@@ -11,6 +12,7 @@ import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.event.service.DoctorPigReadService;
 import io.terminus.doctor.event.service.DoctorPigWriteService;
+import io.terminus.doctor.msg.dto.RuleValue;
 import io.terminus.doctor.msg.enums.Category;
 import io.terminus.doctor.msg.model.DoctorMessageRule;
 import io.terminus.doctor.msg.producer.AbstractProducer;
@@ -140,15 +142,16 @@ public abstract class AbstractJobProducer extends AbstractProducer {
     }
 
     /**
-     * 获取猪的妊娠检查日期
+     * 获取猪的配种日期
      * @param pigDto
      * @return
      */
-    protected DateTime getCheckDate(DoctorPigInfoDto pigDto) {
+    protected DateTime getMatingDate(DoctorPigInfoDto pigDto) {
         try{
             if(StringUtils.isNotBlank(pigDto.getExtraTrack())) {
                 // @see DoctorPregChkResultDto
-                Date date = new Date((Long) MAPPER.readValue(pigDto.getExtraTrack(), Map.class).get("checkDate"));
+                Map<String, Object> map = MAPPER.readValue(pigDto.getExtraTrack(), JacksonType.MAP_OF_OBJECT);
+                Date date = new Date((Long) map.get("matingDate"));
                 return new DateTime(date);
             }
         } catch (Exception e) {
@@ -161,7 +164,7 @@ public abstract class AbstractJobProducer extends AbstractProducer {
      * 获取预产期
      * @param pigDto
      */
-    protected DateTime getBirthDate(DoctorPigInfoDto pigDto) {
+    protected DateTime getBirthDate(DoctorPigInfoDto pigDto, RuleValue ruleValue) {
         // 获取预产期
         try{
             if(StringUtils.isNotBlank(pigDto.getExtraTrack())) {
@@ -174,7 +177,7 @@ public abstract class AbstractJobProducer extends AbstractProducer {
                     date = new Date((Long) MAPPER.readValue(pigDto.getExtraTrack(), Map.class).get("matingDate"));
                     if (date != null) {
                         // 配种日期 + 3 个月返回
-                        return new DateTime(date).plusMonths(3);
+                        return new DateTime(date).plusDays(ruleValue.getLeftValue().intValue());
                     }
                 }
             }
@@ -196,7 +199,7 @@ public abstract class AbstractJobProducer extends AbstractProducer {
                 return new DateTime(date);
             }
         } catch (Exception e) {
-            log.error("[SowNotLitterProducer] get breeding date failed, pigDto is {}", pigDto);
+            log.error("SowPregCheckProducer get breeding date failed, pigDto is {}", pigDto);
         }
         return new DateTime(pigDto.getUpdatedAt());
     }
@@ -218,11 +221,11 @@ public abstract class AbstractJobProducer extends AbstractProducer {
                         dateTime = new DateTime(
                                 new Date((Long) MAPPER.readValue(pigDto.getExtraTrack(), Map.class).get("weanDate")));
                         break;
-                    case Abortion:  // 流产
-                        // @see DoctorAbortionDto
-                        dateTime = new DateTime(
-                                new Date((Long) MAPPER.readValue(pigDto.getExtraTrack(), Map.class).get("abortionDate")));
-                        break;
+//                    case Abortion:  // 流产
+//                        // @see DoctorAbortionDto
+//                        dateTime = new DateTime(
+//                                new Date((Long) MAPPER.readValue(pigDto.getExtraTrack(), Map.class).get("abortionDate")));
+//                        break;
                     case KongHuai:case Pregnancy: case Farrow:  // 空怀, 阳性, 待分娩
                         // @see DoctorPregChkResultDto
                         dateTime = new DateTime(
@@ -237,7 +240,7 @@ public abstract class AbstractJobProducer extends AbstractProducer {
             }
             return dateTime != null ? dateTime : new DateTime(pigDto.getUpdatedAt());
         } catch (Exception e) {
-            log.error("[SowNotLitterProducer] get breeding date failed, pigDto is {}", pigDto);
+            log.error("SowPregCheckProducer get breeding date failed, pigDto is {}", pigDto);
         }
         return null;
     }
@@ -256,7 +259,7 @@ public abstract class AbstractJobProducer extends AbstractProducer {
                 return new DateTime(date);
             }
         } catch (Exception e) {
-            log.error("[SowNotLitterProducer] get farrowing date failed, pigDto is {}", pigDto);
+            log.error(" get farrowing date failed, pigDto is {}", pigDto);
         }
         return new DateTime(pigDto.getUpdatedAt());
     }

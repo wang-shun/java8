@@ -93,4 +93,11 @@ public interface DoctorMessageReadService {
      * 获取未发送的app推送消息
      */
     Response<List<DoctorMessage>> findAppPushMessage();
+
+    /**
+     * 根据条件获取消息数量
+     * @param criteria
+     * @return
+     */
+    Response<Long> findMessageCountByCriteria(Map criteria);
 }

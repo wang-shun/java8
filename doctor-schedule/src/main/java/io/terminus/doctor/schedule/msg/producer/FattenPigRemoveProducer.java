@@ -5,13 +5,11 @@ import com.google.api.client.util.Maps;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
 import io.terminus.common.utils.Splitters;
+import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dto.DoctorPigInfoDto;
 import io.terminus.doctor.event.enums.DataRange;
-import io.terminus.doctor.event.enums.PigEvent;
-import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.model.DoctorPig;
-import io.terminus.doctor.event.service.DoctorPigEventReadService;
 import io.terminus.doctor.event.service.DoctorPigReadService;
 import io.terminus.doctor.event.service.DoctorPigWriteService;
 import io.terminus.doctor.msg.dto.Rule;
@@ -40,45 +38,20 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
- * Desc: 需转入妊娠舍提示
- * 1. 妊娠检查阳性未转入妊娠舍母猪
- * Mail: chk@terminus.io
- * Created by icemimosa
- * Date: 16/6/4
+ * Created by xiao on 16/8/31.
  */
-@Component
 @Slf4j
-public class SowPregHomeProducer extends AbstractJobProducer {
-
-    private final DoctorPigEventReadService doctorPigEventReadService;
+@Component
+public class FattenPigRemoveProducer extends AbstractJobProducer {
 
     @Autowired
-    public SowPregHomeProducer(DoctorMessageRuleTemplateReadService doctorMessageRuleTemplateReadService,
-                               DoctorMessageRuleReadService doctorMessageRuleReadService,
-                               DoctorMessageRuleRoleReadService doctorMessageRuleRoleReadService,
-                               DoctorMessageReadService doctorMessageReadService,
-                               DoctorMessageWriteService doctorMessageWriteService,
-                               DoctorPigReadService doctorPigReadService,
-                               DoctorPigWriteService doctorPigWriteService,
-                               DoctorPigEventReadService doctorPigEventReadService,
-                               DoctorMessageTemplateReadService doctorMessageTemplateReadService,
-                               DoctorUserDataPermissionReadService doctorUserDataPermissionReadService) {
-        super(doctorMessageTemplateReadService,
-                doctorMessageRuleTemplateReadService,
-                doctorMessageRuleReadService,
-                doctorMessageRuleRoleReadService,
-                doctorMessageReadService,
-                doctorMessageWriteService,
-                doctorPigReadService,
-                doctorPigWriteService,
-                doctorUserDataPermissionReadService,
-                Category.SOW_PREGHOME);
-        this.doctorPigEventReadService = doctorPigEventReadService;
+    public FattenPigRemoveProducer(DoctorMessageTemplateReadService doctorMessageTemplateReadService, DoctorMessageRuleTemplateReadService doctorMessageRuleTemplateReadService, DoctorMessageRuleReadService doctorMessageRuleReadService, DoctorMessageRuleRoleReadService doctorMessageRuleRoleReadService, DoctorMessageReadService doctorMessageReadService, DoctorMessageWriteService doctorMessageWriteService, DoctorPigReadService doctorPigReadService, DoctorPigWriteService doctorPigWriteService, DoctorUserDataPermissionReadService doctorUserDataPermissionReadService) {
+        super(doctorMessageTemplateReadService, doctorMessageRuleTemplateReadService, doctorMessageRuleReadService, doctorMessageRuleRoleReadService, doctorMessageReadService, doctorMessageWriteService, doctorPigReadService, doctorPigWriteService, doctorUserDataPermissionReadService, Category.FATTEN_PIG_REMOVE);
     }
 
     @Override
     protected List<DoctorMessage> message(DoctorMessageRuleRole ruleRole, List<SubUser> subUsers) {
-        log.info("母猪需转入妊娠舍提示消息产生 --- SowPregHomeProducer 开始执行");
+        log.info("育肥猪出栏提示消息产生 --- FattenPigRemoveProducer 开始执行");
         List<DoctorMessage> messages = Lists.newArrayList();
 
         Rule rule = ruleRole.getRule();
@@ -90,7 +63,6 @@ public class SowPregHomeProducer extends AbstractJobProducer {
         }
 
         if (StringUtils.isNotBlank(rule.getChannels())) {
-            // 批量获取猪信息
             Long total = RespHelper.orServEx(doctorPigReadService.queryPigCount(
                     DataRange.FARM.getKey(), ruleRole.getFarmId(), DoctorPig.PIG_TYPE.SOW.getKey()));
             // 计算size, 分批处理
@@ -101,24 +73,20 @@ public class SowPregHomeProducer extends AbstractJobProducer {
                     .build();
             for (int i = 1; i <= page; i++) {
                 List<DoctorPigInfoDto> pigs = RespHelper.orServEx(doctorPigReadService.pagingDoctorInfoDtoByPig(pig, i, 100)).getData();
-                // 选出检查为阳性的母猪
-                pigs = pigs.stream().filter(pigDto -> Objects.equals(PigStatus.Pregnancy.getKey(), pigDto.getStatus())).collect(Collectors.toList());
+                pigs = pigs.stream().filter(doctorPigInfoDto -> Objects.equals(doctorPigInfoDto.getPigType(), PigType.FATTEN_PIG.getValue())).collect(Collectors.toList());
                 // 处理每个猪
                 for (int j = 0; pigs != null && j < pigs.size(); j++) {
                     DoctorPigInfoDto pigDto = pigs.get(j);
-                    // 母猪的updatedAt与当前时间差 (天)
-                    Double timeDiff = (double) (DateTime.now().minus(getCheckDate(pigDto).getMillis()).getMillis() / 86400000);
-                    // 获取下个执行的事件, 如果含有转舍, 则通知转舍
-                    List<Integer> events = RespHelper.orServEx(doctorPigEventReadService.queryPigEvents(Lists.newArrayList((pigDto.getPigId()))));
-                    if (events.contains(PigEvent.TO_PREG.getKey())) {
-                        // 产生消息
-                        messages.addAll(getMessage(pigDto, rule.getChannels(), ruleRole, subUsers, timeDiff, rule.getUrl()));
+                    Double timeDiff = (double) (DateTime.now().minus(pigDto.getUpdatedAt().getTime()).getMillis() / 86400000);
+                    if (ruleValueMap.get(1) != null) {
+                        if (pigDto.getDateAge() != null && pigDto.getDateAge() > ruleValueMap.get(1).getValue() - 1) {
+                            messages.addAll(getMessage(pigDto, rule.getChannels(), ruleRole, subUsers, timeDiff, rule.getUrl()));
+                        }
                     }
                 }
             }
         }
-
-        log.info("母猪需转入妊娠舍提示消息产生 --- SowPregHomeProducer 结束执行, 产生 {} 条消息", messages.size());
+        log.info("育肥猪出栏提示消息产生 --- FattenPigRemoveProducer 结束执行, 产生 {} 条消息", messages.size());
         return messages;
     }
 

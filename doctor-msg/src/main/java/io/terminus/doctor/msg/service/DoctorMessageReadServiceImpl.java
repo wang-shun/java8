@@ -165,4 +165,14 @@ public class DoctorMessageReadServiceImpl implements DoctorMessageReadService {
             return Response.fail("app.message.find.fail");
         }
     }
+
+    @Override
+    public Response<Long> findMessageCountByCriteria(Map criteria) {
+        try {
+            return Response.ok(doctorMessageDao.findMessageCountByCriteria(criteria));
+        } catch (Exception e) {
+            log.error("find.message.count.by.criteria.failed, cause by {}", Throwables.getStackTraceAsString(e));
+            return Response.fail("find.message.count.by.criteria.failed");
+        }
+    }
 }

@@ -1,12 +1,18 @@
 package io.terminus.doctor.web.front.msg.controller;
 
+import com.google.api.client.util.Lists;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import io.terminus.common.model.Paging;
 import io.terminus.doctor.common.utils.RespHelper;
+import io.terminus.doctor.web.core.component.UserResService;
+import io.terminus.doctor.web.front.msg.dto.OneLevelMessageDto;
 import io.terminus.doctor.msg.model.DoctorMessage;
+import io.terminus.doctor.msg.model.DoctorMessageRule;
 import io.terminus.doctor.msg.model.DoctorMessageRuleTemplate;
 import io.terminus.doctor.msg.service.DoctorMessageReadService;
+import io.terminus.doctor.msg.service.DoctorMessageRuleReadService;
 import io.terminus.doctor.msg.service.DoctorMessageRuleTemplateReadService;
 import io.terminus.doctor.msg.service.DoctorMessageRuleTemplateWriteService;
 import io.terminus.doctor.msg.service.DoctorMessageWriteService;
@@ -40,16 +46,22 @@ public class DoctorMessages {
     private final DoctorMessageRuleTemplateWriteService doctorMessageRuleTemplateWriteService;
     private final DoctorMessageReadService doctorMessageReadService;
     private final DoctorMessageWriteService doctorMessageWriteService;
+    private final DoctorMessageRuleReadService doctorMessageRuleReadService;
+    private final UserResService userResService;
 
     @Autowired
     public DoctorMessages(DoctorMessageReadService doctorMessageReadService,
                           DoctorMessageWriteService doctorMessageWriteService,
                           DoctorMessageRuleTemplateReadService doctorMessageRuleTemplateReadService,
-                          DoctorMessageRuleTemplateWriteService doctorMessageRuleTemplateWriteService) {
+                          DoctorMessageRuleTemplateWriteService doctorMessageRuleTemplateWriteService,
+                          DoctorMessageRuleReadService doctorMessageRuleReadService,
+                          UserResService userResService) {
         this.doctorMessageReadService = doctorMessageReadService;
         this.doctorMessageWriteService = doctorMessageWriteService;
         this.doctorMessageRuleTemplateReadService = doctorMessageRuleTemplateReadService;
         this.doctorMessageRuleTemplateWriteService = doctorMessageRuleTemplateWriteService;
+        this.doctorMessageRuleReadService = doctorMessageRuleReadService;
+        this.userResService = userResService;
     }
 
 
@@ -114,11 +126,12 @@ public class DoctorMessages {
         if (message != null) {
             // 如果消息是未读, 将消息设置为已读
             if (Objects.equals(message.getStatus(), DoctorMessage.Status.NORMAL.getValue())) {
+                message.setIsExpired(DoctorMessage.IsExpired.EXPIRED.getValue());
                 message.setStatus(DoctorMessage.Status.READED.getValue());
                 doctorMessageWriteService.updateMessage(message);
             }
             // 查询未读消息的数量
-            message.setNoReadCount(RespHelper.or500(doctorMessageReadService.findNoReadCount(UserUtil.getUserId())));
+            //message.setNoReadCount(RespHelper.or500(doctorMessageReadService.findNoReadCount(UserUtil.getUserId())));
         }
         return message;
     }
@@ -215,6 +228,25 @@ public class DoctorMessages {
     }
 
     /**
+     * 获取猪场中消息规则与相应猪只数,列表
+     * @return
+     */
+    @RequestMapping(value = "/warn/rule/list")
+    public List<OneLevelMessageDto> getRulePigCountByFarmId(@RequestParam("farmId") Long farmId){
+        List<OneLevelMessageDto> list = Lists.newArrayList();
+        List<DoctorMessageRule> doctorMessageRules = RespHelper.or500(doctorMessageRuleReadService.findMessageRulesByCriteria(ImmutableMap.of("farmId", farmId, "types", ImmutableList.of(DoctorMessageRuleTemplate.Type.WARNING, DoctorMessageRuleTemplate.Type.ERROR))));
+        doctorMessageRules.forEach(doctorMessageRule -> {
+            Long pigCount = RespHelper.or500(doctorMessageReadService.findMessageCountByCriteria(ImmutableMap.of("category", doctorMessageRule.getCategory(), "farmId", doctorMessageRule.getFarmId(), "isExpired", DoctorMessage.IsExpired.NOTEXPIRED.getValue(), "userId", UserUtil.getCurrentUser().getId())));
+            list.add(OneLevelMessageDto.builder()
+                    .pigCount(pigCount)
+                    .doctorMessageRule(doctorMessageRule)
+                    .build());
+
+        });
+        return list;
+    }
+
+    /**
      * 判断当前用户是否登录
      * @return
      *  如果登录: true
@@ -223,4 +255,5 @@ public class DoctorMessages {
     private boolean isUserLogin() {
         return UserUtil.getCurrentUser() != null;
     }
+
 }

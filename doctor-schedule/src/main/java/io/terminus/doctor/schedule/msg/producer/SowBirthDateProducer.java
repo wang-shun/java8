@@ -89,7 +89,7 @@ public class SowBirthDateProducer extends AbstractJobProducer {
     }
 
     private void handleMessages(Rule rule, Long tplId, Long farmId, boolean isMessage, List<DoctorMessage> messages, DoctorMessageRuleRole ruleRole, List<SubUser> subUsers) {
-        // ruleValue map
+//        // ruleValue map
         Map<Integer, RuleValue> ruleValueMap = Maps.newHashMap();
         for (int i = 0; rule.getValues() != null && i < rule.getValues().size(); i++) {
             RuleValue ruleValue = rule.getValues().get(i);
@@ -115,18 +115,20 @@ public class SowBirthDateProducer extends AbstractJobProducer {
                 for (int j = 0; pigs != null && j < pigs.size(); j++) {
                     DoctorPigInfoDto pigDto = pigs.get(j);
                     // 母猪的updatedAt与当前时间差 (天)
-                    Double timeDiff = (double) (DateTime.now().minus(getCheckDate(pigDto).getMillis()).getMillis() / 86400000);
-                    // 获取预产期, 并校验日期
-                    DateTime birthDate = getBirthDate(pigDto);
-                    if (birthDate != null && ruleValueMap.get(1) != null) {
+                    Double timeDiff = (double) (DateTime.now().minus(getMatingDate(pigDto).getMillis()).getMillis() / 86400000);
+
+                    if (ruleValueMap.get(1) != null) {
                         if (!isMessage && Objects.equals(ruleTemplate.getType(), DoctorMessageRuleTemplate.Type.WARNING.getValue())) {
+                            // 获取预产期, 并校验日期
+                            DateTime birthDate = getBirthDate(pigDto, ruleValueMap.get(1));
                             // 记录每只猪的消息提醒
                             recordPigMessage(pigDto, PigEvent.FARROWING, birthDate, 0,
                                     PigStatus.Pregnancy);
                         }
-                        if (isMessage && DateTime.now().isAfter(birthDate.minusDays(ruleValueMap.get(1).getValue().intValue()))) {
+                        if (isMessage && checkRuleValue(ruleValueMap.get(1), timeDiff)) {
                             messages.addAll(getMessage(pigDto, rule.getChannels(), ruleRole, subUsers, timeDiff, rule.getUrl()));
                         }
+
                     }
                 }
             }

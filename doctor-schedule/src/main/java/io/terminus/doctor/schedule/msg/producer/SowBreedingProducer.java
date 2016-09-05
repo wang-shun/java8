@@ -113,7 +113,7 @@ public class SowBreedingProducer extends AbstractJobProducer {
                 // 过滤出 断奶/流产/空怀 的母猪
                 pigs = pigs.stream().filter(pigDto ->
                         Objects.equals(PigStatus.Wean.getKey(), pigDto.getStatus())
-                                || Objects.equals(PigStatus.Abortion.getKey(), pigDto.getStatus())
+                               // || Objects.equals(PigStatus.Abortion.getKey(), pigDto.getStatus())
                                 || Objects.equals(PigStatus.KongHuai.getKey(), pigDto.getStatus())
                                 || Objects.equals(PigStatus.Entry.getKey(), pigDto.getStatus())
                 ).collect(Collectors.toList());
@@ -128,10 +128,10 @@ public class SowBreedingProducer extends AbstractJobProducer {
                         // 记录每只猪的消息提醒
                         if (!isMessage && Objects.equals(ruleTemplate.getType(), DoctorMessageRuleTemplate.Type.WARNING.getValue())) {
                             recordPigMessage(pigDto, PigEvent.MATING, getStatusDate(pigDto), ruleValueMap.get(1).getValue().intValue(),
-                                    PigStatus.Wean, PigStatus.Abortion, PigStatus.KongHuai, PigStatus.Entry);
+                                    PigStatus.Wean, PigStatus.KongHuai, PigStatus.Entry);
                         }
 
-                        if (isMessage && getStatusDate(pigDto).isBefore(DateTime.now().minusDays(ruleValueMap.get(1).getValue().intValue()))) {
+                        if (isMessage && checkRuleValue(ruleValueMap.get(1), timeDiff)) {
                             messages.addAll(getMessage(pigDto, rule.getChannels(), ruleRole, subUsers, timeDiff, rule.getUrl()));
                         }
                     }

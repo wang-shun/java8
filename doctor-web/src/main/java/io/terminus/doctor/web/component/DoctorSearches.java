@@ -2,6 +2,7 @@ package io.terminus.doctor.web.component;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.api.client.util.Lists;
+import com.google.common.collect.ImmutableMap;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.BaseUser;
 import io.terminus.common.model.Paging;
@@ -26,6 +27,8 @@ import io.terminus.doctor.event.search.group.SearchedGroupDto;
 import io.terminus.doctor.event.search.pig.PigSearchReadService;
 import io.terminus.doctor.event.search.pig.SearchedPig;
 import io.terminus.doctor.event.search.pig.SearchedPigDto;
+import io.terminus.doctor.msg.model.DoctorMessage;
+import io.terminus.doctor.msg.service.DoctorMessageReadService;
 import io.terminus.doctor.user.model.DoctorUserDataPermission;
 import io.terminus.doctor.user.service.DoctorUserDataPermissionReadService;
 import io.terminus.pampas.common.UserUtil;
@@ -40,6 +43,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static io.terminus.common.utils.Arguments.isEmpty;
@@ -67,6 +71,8 @@ public class DoctorSearches {
 
     private final DoctorUserDataPermissionReadService doctorUserDataPermissionReadService;
 
+    private final DoctorMessageReadService doctorMessageReadService;
+
     private static final ObjectMapper OBJECT_MAPPER = JsonMapper.JSON_NON_DEFAULT_MAPPER.getMapper();
 
 
@@ -76,13 +82,15 @@ public class DoctorSearches {
                           DoctorSearchHistoryService doctorSearchHistoryService,
                           BarnSearchReadService barnSearchReadService,
                           MaterialSearchReadService materialSearchReadService,
-                          DoctorUserDataPermissionReadService doctorUserDataPermissionReadService) {
+                          DoctorUserDataPermissionReadService doctorUserDataPermissionReadService,
+                          DoctorMessageReadService doctorMessageReadService) {
         this.pigSearchReadService = pigSearchReadService;
         this.groupSearchReadService = groupSearchReadService;
         this.doctorSearchHistoryService = doctorSearchHistoryService;
         this.barnSearchReadService = barnSearchReadService;
         this.materialSearchReadService = materialSearchReadService;
         this.doctorUserDataPermissionReadService = doctorUserDataPermissionReadService;
+        this.doctorMessageReadService = doctorMessageReadService;
     }
 
     /**
@@ -549,6 +557,17 @@ public class DoctorSearches {
         }
         list.add(barnIds);
         return list;
+    }
+
+    public void searchFromMessage(Map<String, String> params){
+        if (params.get("searchType") != null){
+            List<DoctorMessage> messages = RespHelper.or500(doctorMessageReadService.findMessageByCriteria(ImmutableMap.of("templateId", params.get("templateId"), "farmId", params.get("farmId"), "userId", UserUtil.getCurrentUser().getId(), "isExpired", DoctorMessage.IsExpired.NOTEXPIRED)));
+            List<Long> ids = messages.stream().map(doctorMessage -> doctorMessage.getBusinessId()).collect(Collectors.toList());
+            if (Objects.equals(params.get("searchType"), SearchType.SOW.getValue()){
+
+            }
+
+        }
     }
 
 }

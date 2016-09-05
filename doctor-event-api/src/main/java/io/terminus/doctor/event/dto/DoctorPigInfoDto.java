@@ -2,16 +2,19 @@ package io.terminus.doctor.event.dto;
 
 import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.model.DoctorPig;
+import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Builder;
+import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.joda.time.Days;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkState;
@@ -68,14 +71,17 @@ public class DoctorPigInfoDto implements Serializable{
 
     private Map<String,Object> extraTrackMap;
 
+    private List<DoctorPigEvent> doctorPigEvents;
+
     private String extraTrackMessage;
 
     private Date updatedAt;
 
     private Long creatorId;
     private String creatorName;
+    private String operatorName;
 
-    public static DoctorPigInfoDto buildDoctorPigInfoDto(DoctorPig doctorPig, DoctorPigTrack doctorPigTrack){
+    public static DoctorPigInfoDto buildDoctorPigInfoDto(DoctorPig doctorPig, DoctorPigTrack doctorPigTrack, List<DoctorPigEvent> doctorPigEvents){
         checkState(!isNull(doctorPig), "build.doctorPig.empty");
         DoctorPigInfoDtoBuilder builder = DoctorPigInfoDto.builder()
                 .id(doctorPig.getId()).pigId(doctorPig.getId()).orgId(doctorPig.getOrgId()).orgName(doctorPig.getOrgName()).farmId(doctorPig.getFarmId()).farmName(doctorPig.getFarmName())
@@ -95,6 +101,11 @@ public class DoctorPigInfoDto implements Serializable{
                     .extraTrackMap(doctorPigTrack.getExtraMap())
                     .extraTrackMessage(doctorPigTrack.getExtraMessage())
                     .updatedAt(doctorPigTrack.getUpdatedAt());
+            if (StringUtils.isNotBlank(doctorPigTrack.getUpdatorName())) {
+                builder.operatorName(doctorPigTrack.getUpdatorName());
+            } else {
+                builder.operatorName(doctorPigTrack.getCreatorName());
+            }
         }
         return builder.build();
     }
