@@ -274,5 +274,5 @@ Alter TABLE doctor_messages ADD COLUMN is_expired SMALLINT (2) DEFAULT NULL COMM
 
 -- 2016-09-05 猪事件表增加操作人字段
 alter table doctor_pig_events
-add column `operator_id` bigint(20) DEFAULT NULL COMMENT '操作人id' after remark,
+add column `operator_id` bigint(20) DEFAULT NULL COMMENT '操作人人id' after remark,
 add column `operator_name` varchar(64) DEFAULT NULL COMMENT '操作人' after operator_id;
