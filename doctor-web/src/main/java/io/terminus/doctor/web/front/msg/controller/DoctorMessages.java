@@ -85,8 +85,24 @@ public class DoctorMessages {
             return new Paging<>(0L, Collections.emptyList());
         }
         criteria.put("userId", UserUtil.getUserId());
-        return RespHelper.or500(doctorMessageReadService.pagingWarnMessages(criteria, pageNo, pageSize));
+        criteria.put("isExpired", DoctorMessage.IsExpired.NOTEXPIRED);
+        Paging<DoctorMessage> paging = RespHelper.or500(doctorMessageReadService.pagingWarnMessages(criteria, pageNo, pageSize));
+        List<DoctorMessage> messages = paging.getData();
 
+        if (messages != null && messages.size() > 0){
+            messages.forEach(doctorMessage -> {
+                String url;
+                if (Objects.equals(doctorMessage.getCategory(), Category.FATTEN_PIG_REMOVE.getKey())){
+                    url = doctorMessage.getUrl().concat("?groupId=" + doctorMessage.getBusinessId() + "&farmId=" + doctorMessage.getFarmId());
+                }else if (Objects.equals(doctorMessage.getCategory(), Category.STORAGE_SHORTAGE.getKey())){
+                    url = doctorMessage.getUrl();
+                }else {
+                    url = doctorMessage.getUrl().concat("?pigId=" + doctorMessage.getBusinessId() + "&farmId=" + doctorMessage.getFarmId());
+                }
+                 doctorMessage.setUrl(url);
+            });
+        }
+        return paging;
     }
 
     /**

@@ -138,7 +138,7 @@ public class SowBackFatProducer extends AbstractJobProducer {
 //                }
 //            }
 //        }
-//        log.info("公猪应淘汰消息产生 --- BoarEliminateProducer 结束执行, 产生 {} 条消息", messages.size());
+//        log.info("背膘提示消息产生 --- SowBackFatProducer  结束执行, 产生 {} 条消息", messages.size());
 //        return messages;
         return null;
     }

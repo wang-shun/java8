@@ -112,7 +112,7 @@ public class SowEliminateProducer extends AbstractJobProducer {
                 for (int j = 0; pigs != null && j < pigs.size(); j++) {
                     DoctorPigInfoDto pigDto = pigs.get(j);
                     //根据用户拥有的猪舍权限过滤拥有user
-                    List<SubUser> sUsers = subUsers.stream().filter(subUser -> subUser.getBarnIds().contains(pigDto.getBarnId())).collect(Collectors.toList());
+                    List<SubUser> sUsers = filterSubUserBarnId(subUsers, pigDto.getBarnId());
                     // 母猪的updatedAt与当前时间差 (天)
                     Double timeDiff = (double) (DateTime.now().minus(pigDto.getUpdatedAt().getTime()).getMillis() / 86400000);
                     ruleValueMap.keySet().forEach(key -> {

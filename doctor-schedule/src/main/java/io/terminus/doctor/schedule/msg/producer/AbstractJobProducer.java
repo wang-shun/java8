@@ -3,6 +3,7 @@ package io.terminus.doctor.schedule.msg.producer;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.api.client.util.Lists;
 import com.google.common.base.Throwables;
+import io.terminus.common.utils.Arguments;
 import io.terminus.doctor.common.constants.JacksonType;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dto.DoctorPigInfoDto;
@@ -14,6 +15,7 @@ import io.terminus.doctor.event.service.DoctorGroupReadService;
 import io.terminus.doctor.event.service.DoctorPigReadService;
 import io.terminus.doctor.event.service.DoctorPigWriteService;
 import io.terminus.doctor.msg.dto.RuleValue;
+import io.terminus.doctor.msg.dto.SubUser;
 import io.terminus.doctor.msg.enums.Category;
 import io.terminus.doctor.msg.model.DoctorMessageRule;
 import io.terminus.doctor.msg.producer.AbstractProducer;
@@ -29,10 +31,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * Desc: Job端抽象Producer
@@ -263,5 +267,32 @@ public abstract class AbstractJobProducer extends AbstractProducer {
             log.error(" get farrowing date failed, pigDto is {}", pigDto);
         }
         return new DateTime(pigDto.getUpdatedAt());
+    }
+
+    /**
+     * 根据猪舍过滤用户
+     * @param subUsers
+     * @param barnId
+     * @return
+     */
+    protected List<SubUser> filterSubUserBarnId(List<SubUser> subUsers, Long barnId){
+        if (Arguments.isNullOrEmpty(subUsers)){
+            return Collections.emptyList();
+        }
+        return subUsers.stream().filter(subUser -> filterCondition(subUser, barnId)).collect(Collectors.toList());
+    }
+
+    /**
+     * 构建过滤条件
+     * @param subUser
+     * @param barnId
+     * @return
+     */
+    protected Boolean filterCondition(SubUser subUser, Long barnId){
+        if (!Arguments.isNullOrEmpty(subUser.getBarnIds()) && subUser.getBarnIds().contains(barnId)){
+            return true;
+        } else {
+            return false;
+        }
     }
 }
