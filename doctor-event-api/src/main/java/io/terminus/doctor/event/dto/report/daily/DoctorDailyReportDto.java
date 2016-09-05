@@ -97,6 +97,7 @@ public class DoctorDailyReportDto implements Serializable {
         this.deliver.setHealth(this.deliver.getHealth() + report.getDeliver().getHealth());
         this.deliver.setWeak(this.deliver.getWeak() + report.getDeliver().getWeak());
         this.deliver.setBlack(this.deliver.getBlack() + report.getDeliver().getBlack());
+        this.deliver.setAvgWeight(report.getDeliver().getAvgWeight() == 0D ? this.deliver.getAvgWeight() : report.getDeliver().getAvgWeight());
 
         //存栏
         this.liveStock.setBoar(report.getLiveStock().getBoar()==0 ? this.liveStock.getBoar() : report.getLiveStock().getBoar());
@@ -118,6 +119,7 @@ public class DoctorDailyReportDto implements Serializable {
         this.wean.setCount(this.wean.getCount() + report.getWean().getCount());
         this.wean.setWeight(this.wean.getWeight() + report.getWean().getWeight());
         this.wean.setNest(this.wean.getNest() + report.getWean().getNest());
+        this.wean.setAvgDayAge(report.getWean().getAvgDayAge() == 0 ? this.wean.getAvgDayAge() : report.getWean().getAvgDayAge());
     }
 
     /**

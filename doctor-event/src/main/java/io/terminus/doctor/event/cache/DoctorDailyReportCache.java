@@ -178,6 +178,7 @@ public class DoctorDailyReportCache {
         deliver.setHealth(doctorKpiDao.getDeliveryHealth(farmId, startAt, endAt));
         deliver.setWeak(doctorKpiDao.getDeliveryWeak(farmId, startAt, endAt));
         deliver.setBlack(doctorKpiDao.getDeliveryDeadBlackMuJi(farmId, startAt, endAt));
+        deliver.setAvgWeight(doctorKpiDao.getFarrowWeightAvg(farmId, startAt, endAt));
 
         //配种
         DoctorMatingDailyReport mating = new DoctorMatingDailyReport();
@@ -199,6 +200,7 @@ public class DoctorDailyReportCache {
         wean.setCount(doctorKpiDao.getWeanPiglet(farmId, startAt, endAt));
         wean.setWeight(doctorKpiDao.getWeanPigletWeightAvg(farmId, startAt, endAt));
         wean.setNest(doctorKpiDao.getWeanSow(farmId, startAt, endAt));
+        wean.setAvgDayAge(doctorKpiDao.getWeanDayAgeAvg(farmId, startAt, endAt));
 
         //个体管理母猪总存栏
         report.setSowCount(doctorKpiDao.realTimeLiveStockSow(farmId, startAt));
