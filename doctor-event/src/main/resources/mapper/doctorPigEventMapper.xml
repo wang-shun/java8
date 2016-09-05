@@ -62,6 +62,8 @@
         <result column="out_id" property="outId"/>
         <result column="extra" property="extra"/>
         <result column="remark" property="remark"/>
+        <result column="operator_id" property="operatorId"/>
+        <result column="operator_name" property="operatorName"/>
         <result column="creator_id" property="creatorId"/>
         <result column="creator_name" property="creatorName"/>
         <result column="updator_id" property="updatorId"/>
@@ -131,6 +133,8 @@
         out_id,
         extra,
         remark,
+        operator_id,
+        operator_name,
         creator_id,
         creator_name,
         updator_id,
@@ -194,6 +198,8 @@
         #{outId},
         #{extra},
         #{remark},
+        #{operatorId},
+        #{operatorName},
         #{creatorId},
         #{creatorName},
         #{updatorId},
@@ -259,6 +265,8 @@
         <if test="outId != null">AND out_id = #{outId}</if>
         <if test="extra != null">AND extra = #{extra}</if>
         <if test="remark != null">AND remark = #{remark}</if>
+        <if test="operatorId != null">AND operator_id = #{operatorId}</if>
+        <if test="operatorName != null">AND operator_name = #{operatorName}</if>
         <if test="creatorId != null">AND creator_id = #{creatorId}</if>
         <if test="creatorName != null">AND creator_name = #{creatorName}</if>
         <if test="updatorId != null">AND updator_id = #{updatorId}</if>
@@ -332,6 +340,8 @@
             #{item.outId},
             #{item.extra},
             #{item.remark},
+            #{item.operatorId},
+            #{item.operatorName},
             #{item.creatorId},
             #{item.creatorName},
             #{item.updatorId},
@@ -546,6 +556,8 @@
             <if test="outId != null">out_id = #{outId},</if>
             <if test="extra != null">extra = #{extra},</if>
             <if test="remark != null">remark = #{remark},</if>
+            <if test="operatorId != null">operator_id = #{operatorId},</if>
+            <if test="operatorName != null">operator_name = #{operatorName},</if>
             <if test="creatorId != null">creator_id = #{creatorId},</if>
             <if test="creatorName != null">creator_name = #{creatorName},</if>
             <if test="updatorId != null">updator_id = #{updatorId},</if>
