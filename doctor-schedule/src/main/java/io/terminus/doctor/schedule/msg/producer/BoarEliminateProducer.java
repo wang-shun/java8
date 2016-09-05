@@ -103,6 +103,8 @@ public class BoarEliminateProducer extends AbstractJobProducer {
                 // 处理每个猪
                 for (int j = 0; boarPigs != null && j < boarPigs.size(); j++) {
                     DoctorPigInfoDto pigDto = boarPigs.get(j);
+                    //根据用户拥有的猪舍权限过滤拥有user
+                    List<SubUser> sUsers = subUsers.stream().filter(subUser -> subUser.getBarnIds().contains(pigDto.getBarnId())).collect(Collectors.toList());
                     // 公猪的updatedAt与当前时间差 (天)
                     Double timeDiff = (double) (DateTime.now().minus(pigDto.getUpdatedAt().getTime()).getMillis() / 86400000);
                     ruleValueMap.keySet().forEach(key -> {
@@ -143,7 +145,7 @@ public class BoarEliminateProducer extends AbstractJobProducer {
                                 }
                             }
                             if (isSend) {
-                                messages.addAll(getMessage(pigDto, rule.getChannels(), ruleRole, subUsers, timeDiff, rule.getUrl(), ruleValue.getDescribe() + ruleValue.getValue().toString()));
+                                messages.addAll(getMessage(pigDto, rule.getChannels(), ruleRole, sUsers, timeDiff, rule.getUrl(), ruleValue.getDescribe() + ruleValue.getValue().toString()));
                             }
                         }
                     });

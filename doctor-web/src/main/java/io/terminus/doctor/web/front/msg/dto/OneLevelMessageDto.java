@@ -13,7 +13,7 @@ public class OneLevelMessageDto {
     /**
      * 猪只数
      */
-    private Long pigCount;
+    private Integer pigCount;
 
     private DoctorMessageRule doctorMessageRule;
 

@@ -114,6 +114,8 @@ public class SowNeedWeanProducer extends AbstractJobProducer {
                 // 处理每个猪
                 for (int j = 0; pigs != null && j < pigs.size(); j++) {
                     DoctorPigInfoDto pigDto = pigs.get(j);
+                    //根据用户拥有的猪舍权限过滤拥有user
+                    List<SubUser> sUsers = subUsers.stream().filter(subUser -> subUser.getBarnIds().contains(pigDto.getBarnId())).collect(Collectors.toList());
                     // 母猪的updatedAt与当前时间差 (天)
                     Double timeDiff = (double) (DateTime.now().minus(getFarrowingDate(pigDto).getMillis()).getMillis() / 86400000);
                     // 1. 哺乳状态日期判断 -> id:1
@@ -125,7 +127,7 @@ public class SowNeedWeanProducer extends AbstractJobProducer {
                         }
 
                         if (isMessage && checkRuleValue(ruleValueMap.get(1), timeDiff)) {
-                            messages.addAll(getMessage(pigDto, rule.getChannels(), ruleRole, subUsers, timeDiff, rule.getUrl()));
+                            messages.addAll(getMessage(pigDto, rule.getChannels(), ruleRole, sUsers, timeDiff, rule.getUrl()));
                         }
                     }
                 }

@@ -39,6 +39,11 @@ public class GroupDetailFactory {
         jsonData.put("avgDayAge", track.getAvgDayAge());
         jsonData.put("avgWeight", track.getAvgWeight());
         jsonData.put("url", url);
+        if (track.getQuantity() != null){
+            jsonData.put("quantity", track.getQuantity());
+        }else {
+            jsonData.put("quantity", 0);
+        }
         return jsonData;
     }
 }

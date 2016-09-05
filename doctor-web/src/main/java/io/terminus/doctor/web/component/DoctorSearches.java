@@ -112,6 +112,7 @@ public class DoctorSearches {
             return new Paging<>(0L, Collections.emptyList());
         }
         params.put("barnIds", barnIdList.get(0));
+        searchFromMessage(params);
         createSearchWord(SearchType.SOW.getValue(), params);
         params.put("pigType", DoctorPig.PIG_TYPE.SOW.getKey().toString());
         return RespHelper.or500(pigSearchReadService.searchWithAggs(pageNo, pageSize, "search/search.mustache", params)).getPigs();
@@ -202,6 +203,7 @@ public class DoctorSearches {
         if (farmIdNotExist(params) || barnIdList == null) {
             return new Paging<>(0L, Collections.emptyList());
         }
+        searchFromMessage(params);
         params.put("barnIds", barnIdList.get(0));
         createSearchWord(SearchType.BOAR.getValue(), params);
         params.put("pigType", DoctorPig.PIG_TYPE.BOAR.getKey().toString());
@@ -261,6 +263,7 @@ public class DoctorSearches {
             return new Paging<>(0L, Collections.emptyList());
         }
         params.put("barnIds", barnIdList.get(0));
+        searchFromMessage(params);
         createSearchWord(SearchType.GROUP.getValue(), params);
         return RespHelper.or500(groupSearchReadService.searchWithAggs(pageNo, pageSize, "search/search.mustache", params)).getGroups();
     }
@@ -560,13 +563,11 @@ public class DoctorSearches {
     }
 
     public void searchFromMessage(Map<String, String> params){
-        if (params.get("searchType") != null){
+        if (Objects.equals(params.get("searchType"), "message")){
             List<DoctorMessage> messages = RespHelper.or500(doctorMessageReadService.findMessageByCriteria(ImmutableMap.of("templateId", params.get("templateId"), "farmId", params.get("farmId"), "userId", UserUtil.getCurrentUser().getId(), "isExpired", DoctorMessage.IsExpired.NOTEXPIRED)));
-            List<Long> ids = messages.stream().map(doctorMessage -> doctorMessage.getBusinessId()).collect(Collectors.toList());
-            if (Objects.equals(params.get("searchType"), SearchType.SOW.getValue()){
-
-            }
-
+            List<Long> idList = messages.stream().map(doctorMessage -> doctorMessage.getBusinessId()).collect(Collectors.toList());
+            String ids = idList.toString().trim().substring(1, idList.toString().toCharArray().length-1);
+            params.put("ids", ids);
         }
     }
 

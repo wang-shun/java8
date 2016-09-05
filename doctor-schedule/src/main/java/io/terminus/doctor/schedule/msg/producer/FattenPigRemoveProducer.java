@@ -7,9 +7,12 @@ import com.google.common.collect.Lists;
 import io.terminus.common.utils.Splitters;
 import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.utils.RespHelper;
+import io.terminus.doctor.event.dto.DoctorGroupDetail;
+import io.terminus.doctor.event.dto.DoctorGroupSearchDto;
 import io.terminus.doctor.event.dto.DoctorPigInfoDto;
 import io.terminus.doctor.event.enums.DataRange;
 import io.terminus.doctor.event.model.DoctorPig;
+import io.terminus.doctor.event.service.DoctorGroupReadService;
 import io.terminus.doctor.event.service.DoctorPigReadService;
 import io.terminus.doctor.event.service.DoctorPigWriteService;
 import io.terminus.doctor.msg.dto.Rule;
@@ -24,6 +27,7 @@ import io.terminus.doctor.msg.service.DoctorMessageRuleRoleReadService;
 import io.terminus.doctor.msg.service.DoctorMessageRuleTemplateReadService;
 import io.terminus.doctor.msg.service.DoctorMessageTemplateReadService;
 import io.terminus.doctor.msg.service.DoctorMessageWriteService;
+import io.terminus.doctor.schedule.msg.producer.factory.GroupDetailFactory;
 import io.terminus.doctor.schedule.msg.producer.factory.PigDtoFactory;
 import io.terminus.doctor.user.service.DoctorUserDataPermissionReadService;
 import lombok.extern.slf4j.Slf4j;
@@ -44,9 +48,11 @@ import java.util.stream.Collectors;
 @Component
 public class FattenPigRemoveProducer extends AbstractJobProducer {
 
+    private DoctorGroupReadService doctorGroupReadService;
     @Autowired
-    public FattenPigRemoveProducer(DoctorMessageTemplateReadService doctorMessageTemplateReadService, DoctorMessageRuleTemplateReadService doctorMessageRuleTemplateReadService, DoctorMessageRuleReadService doctorMessageRuleReadService, DoctorMessageRuleRoleReadService doctorMessageRuleRoleReadService, DoctorMessageReadService doctorMessageReadService, DoctorMessageWriteService doctorMessageWriteService, DoctorPigReadService doctorPigReadService, DoctorPigWriteService doctorPigWriteService, DoctorUserDataPermissionReadService doctorUserDataPermissionReadService) {
+    public FattenPigRemoveProducer(DoctorMessageTemplateReadService doctorMessageTemplateReadService, DoctorMessageRuleTemplateReadService doctorMessageRuleTemplateReadService, DoctorMessageRuleReadService doctorMessageRuleReadService, DoctorMessageRuleRoleReadService doctorMessageRuleRoleReadService, DoctorMessageReadService doctorMessageReadService, DoctorMessageWriteService doctorMessageWriteService, DoctorPigReadService doctorPigReadService, DoctorPigWriteService doctorPigWriteService, DoctorGroupReadService doctorGroupReadService, DoctorUserDataPermissionReadService doctorUserDataPermissionReadService) {
         super(doctorMessageTemplateReadService, doctorMessageRuleTemplateReadService, doctorMessageRuleReadService, doctorMessageRuleRoleReadService, doctorMessageReadService, doctorMessageWriteService, doctorPigReadService, doctorPigWriteService, doctorUserDataPermissionReadService, Category.FATTEN_PIG_REMOVE);
+        this.doctorGroupReadService = doctorGroupReadService;
     }
 
     @Override
@@ -63,28 +69,19 @@ public class FattenPigRemoveProducer extends AbstractJobProducer {
         }
 
         if (StringUtils.isNotBlank(rule.getChannels())) {
-            Long total = RespHelper.orServEx(doctorPigReadService.queryPigCount(
-                    DataRange.FARM.getKey(), ruleRole.getFarmId(), DoctorPig.PIG_TYPE.SOW.getKey()));
-            // 计算size, 分批处理
-            Long page = getPageSize(total, 100L);
-            DoctorPig pig = DoctorPig.builder()
-                    .farmId(ruleRole.getFarmId())
-                    .pigType(DoctorPig.PIG_TYPE.SOW.getKey())
-                    .build();
-            for (int i = 1; i <= page; i++) {
-                List<DoctorPigInfoDto> pigs = RespHelper.orServEx(doctorPigReadService.pagingDoctorInfoDtoByPig(pig, i, 100)).getData();
-                pigs = pigs.stream().filter(doctorPigInfoDto -> Objects.equals(doctorPigInfoDto.getPigType(), PigType.FATTEN_PIG.getValue())).collect(Collectors.toList());
-                // 处理每个猪
-                for (int j = 0; pigs != null && j < pigs.size(); j++) {
-                    DoctorPigInfoDto pigDto = pigs.get(j);
-                    Double timeDiff = (double) (DateTime.now().minus(pigDto.getUpdatedAt().getTime()).getMillis() / 86400000);
-                    if (ruleValueMap.get(1) != null) {
-                        if (pigDto.getDateAge() != null && pigDto.getDateAge() > ruleValueMap.get(1).getValue() - 1) {
-                            messages.addAll(getMessage(pigDto, rule.getChannels(), ruleRole, subUsers, timeDiff, rule.getUrl()));
-                        }
+            DoctorGroupSearchDto doctorGroupSearchDto = new DoctorGroupSearchDto();
+            doctorGroupSearchDto.setPigType(PigType.FATTEN_PIG.getValue());
+            doctorGroupSearchDto.setFarmId(ruleRole.getFarmId());
+            List<DoctorGroupDetail> groupDetails = RespHelper.or500(doctorGroupReadService.findGroupDetail(doctorGroupSearchDto));
+            groupDetails.forEach(doctorGroupDetail -> {
+                //根据用户拥有的猪舍权限过滤拥有user
+                List<SubUser> sUsers = subUsers.stream().filter(subUser -> subUser.getBarnIds().contains(doctorGroupDetail.getGroup().getCurrentBarnId())).collect(Collectors.toList());
+                if (ruleValueMap.get(1) != null) {
+                    if (doctorGroupDetail.getGroupTrack().getAvgDayAge() != null && doctorGroupDetail.getGroupTrack().getAvgDayAge() > ruleValueMap.get(1).getValue() - 1) {
+                        messages.addAll(getMessage(doctorGroupDetail, rule.getChannels(), ruleRole, sUsers, rule.getUrl()));
                     }
                 }
-            }
+            });
         }
         log.info("育肥猪出栏提示消息产生 --- FattenPigRemoveProducer 结束执行, 产生 {} 条消息", messages.size());
         return messages;
@@ -93,10 +90,10 @@ public class FattenPigRemoveProducer extends AbstractJobProducer {
     /**
      * 创建消息
      */
-    private List<DoctorMessage> getMessage(DoctorPigInfoDto pigDto, String channels, DoctorMessageRuleRole ruleRole, List<SubUser> subUsers, Double timeDiff, String url) {
+    private List<DoctorMessage> getMessage(DoctorGroupDetail doctorGroupDetail, String channels, DoctorMessageRuleRole ruleRole, List<SubUser> subUsers, String url) {
         List<DoctorMessage> messages = Lists.newArrayList();
         // 创建消息
-        Map<String, Object> jsonData = PigDtoFactory.getInstance().createPigMessage(pigDto, timeDiff, url);
+        Map<String, Object> jsonData = GroupDetailFactory.getInstance().createGroupMessage(doctorGroupDetail, url);
 
         Splitters.COMMA.splitToList(channels).forEach(channel -> {
             try {

@@ -94,12 +94,14 @@ public class MsgManager {
                         .parentUserId(sub.getParentUserId())
                         .roleId(sub.getRoleId())
                         .farmIds(Lists.newArrayList())
+                        .barnIds(Lists.newArrayList())
                         .build();
                 // 获取猪场权限
                 DoctorUserDataPermission dataPermission = RespHelper.orServEx(
                         doctorUserDataPermissionReadService.findDataPermissionByUserId(sub.getUserId()));
                 if (dataPermission != null) {
                     subUser.getFarmIds().addAll(dataPermission.getFarmIdsList());
+                    subUser.getBarnIds().addAll(dataPermission.getBarnIdsList());
                 }
                 subUsers.add(subUser);
             }

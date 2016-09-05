@@ -5,7 +5,10 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import io.terminus.common.model.Paging;
+import io.terminus.common.utils.JsonMapper;
+import io.terminus.doctor.common.constants.JacksonType;
 import io.terminus.doctor.common.utils.RespHelper;
+import io.terminus.doctor.msg.enums.Category;
 import io.terminus.doctor.web.core.component.UserResService;
 import io.terminus.doctor.web.front.msg.dto.OneLevelMessageDto;
 import io.terminus.doctor.msg.model.DoctorMessage;
@@ -83,6 +86,7 @@ public class DoctorMessages {
         }
         criteria.put("userId", UserUtil.getUserId());
         return RespHelper.or500(doctorMessageReadService.pagingWarnMessages(criteria, pageNo, pageSize));
+
     }
 
     /**
@@ -231,12 +235,26 @@ public class DoctorMessages {
      * 获取猪场中消息规则与相应猪只数,列表
      * @return
      */
-    @RequestMapping(value = "/warn/rule/list")
-    public List<OneLevelMessageDto> getRulePigCountByFarmId(@RequestParam("farmId") Long farmId){
+    @RequestMapping(value = "/warn/rule/list", produces = MediaType.APPLICATION_JSON_VALUE)
+    public List<OneLevelMessageDto> getRulePigCountByFarmId(@RequestParam("farmId") Long farmId) {
         List<OneLevelMessageDto> list = Lists.newArrayList();
         List<DoctorMessageRule> doctorMessageRules = RespHelper.or500(doctorMessageRuleReadService.findMessageRulesByCriteria(ImmutableMap.of("farmId", farmId, "types", ImmutableList.of(DoctorMessageRuleTemplate.Type.WARNING, DoctorMessageRuleTemplate.Type.ERROR))));
+
         doctorMessageRules.forEach(doctorMessageRule -> {
-            Long pigCount = RespHelper.or500(doctorMessageReadService.findMessageCountByCriteria(ImmutableMap.of("category", doctorMessageRule.getCategory(), "farmId", doctorMessageRule.getFarmId(), "isExpired", DoctorMessage.IsExpired.NOTEXPIRED.getValue(), "userId", UserUtil.getCurrentUser().getId())));
+            Integer pigCount = 0;
+            if (Objects.equals(doctorMessageRule.getCategory(), Category.FATTEN_PIG_REMOVE.getKey())) {
+                List<DoctorMessage> messages = RespHelper.or500(doctorMessageReadService.findMessageByCriteria(ImmutableMap.of("templateId", doctorMessageRule.getTemplateId(), "farmId", doctorMessageRule.getFarmId(), "isExpired", DoctorMessage.IsExpired.NOTEXPIRED.getValue(), "userId", UserUtil.getCurrentUser().getId())));
+                for (DoctorMessage doctorMessage : messages) {
+                    try {
+                        Map<String, Object> map = JsonMapper.JSON_NON_DEFAULT_MAPPER.getMapper().readValue(doctorMessage.getData(), JacksonType.MAP_OF_OBJECT);
+                        pigCount += (Integer) map.get("quantity");
+                    } catch (Exception e) {
+                    }
+                }
+
+            } else if (!Objects.equals(doctorMessageRule.getCategory(), Category.STORAGE_SHORTAGE.getKey())) {
+                pigCount = RespHelper.or500(doctorMessageReadService.findMessageCountByCriteria(ImmutableMap.of("templateId", doctorMessageRule.getTemplateId(), "farmId", doctorMessageRule.getFarmId(), "isExpired", DoctorMessage.IsExpired.NOTEXPIRED.getValue(), "userId", UserUtil.getCurrentUser().getId()))).intValue();
+            }
             list.add(OneLevelMessageDto.builder()
                     .pigCount(pigCount)
                     .doctorMessageRule(doctorMessageRule)
