@@ -2,7 +2,7 @@
 SELECT
     CASE WHEN a.eventNameFirst = '转舍' THEN
         CASE
-            WHEN barn.TypeName != '配种母猪' AND toBarn.TypeName = '配种母猪' THEN '转入配种舍'
+            WHEN (barn.TypeName != '配种母猪' AND barn.TypeName != '妊娠母猪') AND toBarn.TypeName = '配种母猪' THEN '转入配种舍'
             WHEN barn.TypeName != '分娩母猪' AND toBarn.TypeName = '分娩母猪' THEN '去分娩'
             ELSE a.eventNameFirst END
     ELSE eventNameFirst END AS eventName,
