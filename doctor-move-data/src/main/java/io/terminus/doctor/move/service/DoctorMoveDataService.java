@@ -617,7 +617,7 @@ public class DoctorMoveDataService {
                 sowEvent.setExtra(JSON_MAPPER.toJson(getSowEntryExtra(event, basicMap, barnMap)));
                 break;
             case MATING:        //配种
-                DoctorMatingDto mating = getSowMatingExtra(event, boarMap);
+                DoctorMatingDto mating = getSowMatingExtra(event, boarMap, subMap);
                 sowEvent.setMattingDate(event.getEventAt());                //配种时间
                 sowEvent.setExtra(JSON_MAPPER.toJson(mating));
                 break;
@@ -741,10 +741,11 @@ public class DoctorMoveDataService {
     }
 
     //拼接母猪配种事件extra
-    private DoctorMatingDto getSowMatingExtra(View_EventListSow event, Map<String, DoctorPig> boarMap) {
+    private DoctorMatingDto getSowMatingExtra(View_EventListSow event, Map<String, DoctorPig> boarMap, Map<String, Long> subMap) {
         DoctorMatingDto mating = new DoctorMatingDto();
         mating.setMatingDate(event.getEventAt()); // 配种日期
-        mating.setMatingStaff(event.getStaffName()); // 配种人员
+        mating.setOperatorName(event.getStaffName()); // 配种人员
+        mating.setOperatorId(subMap.get(event.getStaffName()));
         mating.setMattingMark(event.getRemark()); // 配种mark
         mating.setJudgePregDate(event.getFarrowDate()); //预产日期
 

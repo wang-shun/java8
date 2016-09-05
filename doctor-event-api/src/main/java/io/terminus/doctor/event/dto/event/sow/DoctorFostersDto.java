@@ -56,13 +56,13 @@ public class DoctorFostersDto extends AbstractPigEventInputDto implements Serial
         if(fostersCount != null){
             map.put("拼窝数量", fostersCount.toString());
         }
-        if(sowFostersCount != null){
+        if(sowFostersCount != null && sowFostersCount > 0){
             map.put("拼窝母猪数量", sowFostersCount.toString());
         }
-        if(boarFostersCount != null){
+        if(boarFostersCount != null && boarFostersCount > 0){
             map.put("拼窝公猪数量", boarFostersCount.toString());
         }
-        if(fosterTotalWeight != null){
+        if(fosterTotalWeight != null && fosterTotalWeight > 0){
             map.put("拼窝总重量", fosterTotalWeight.toString());
         }
         if(fosterReasonName != null){
