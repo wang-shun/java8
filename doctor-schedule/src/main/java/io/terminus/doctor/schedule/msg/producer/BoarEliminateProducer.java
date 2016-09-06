@@ -121,13 +121,13 @@ public class BoarEliminateProducer extends AbstractJobProducer {
                                 if (StringUtils.isNotBlank(pigDto.getExtraTrack())) {
                                     try {
                                         Map<String, Object> extraMap = MAPPER.readValue(pigDto.getExtraTrack(), JacksonType.MAP_OF_OBJECT);
-                                        if (StringUtils.isNotBlank((String) extraMap.get("semenWeight"))) {
-                                            Float semenWeight = Float.parseFloat((String) extraMap.get("semenWeight"));
+                                        if (StringUtils.isNotBlank((String) extraMap.get("semenActive"))) {
+                                            Float semenActive = Float.parseFloat((String) extraMap.get("semenActive"));
                                             //精液重量小于预定值
-                                            isSend = semenWeight < ruleValue.getValue().floatValue();
+                                            isSend = semenActive < ruleValue.getValue().floatValue();
                                         }
                                     } catch (Exception e) {
-                                        log.error("[BoarEliminateProducer].get.semenWeight.fail, pigDto", pigDto);
+                                        log.error("[BoarEliminateProducer].get.semenActive.fail, pigDto", pigDto);
                                     }
 
                                 }

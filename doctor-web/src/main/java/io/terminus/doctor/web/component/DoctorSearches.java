@@ -563,7 +563,7 @@ public class DoctorSearches {
     }
 
     public void searchFromMessage(Map<String, String> params){
-        if (Objects.equals(params.get("searchFrom"), "Message")){
+        if (Objects.equals(params.get("searchFrom"), "MESSAGE")){
             List<DoctorMessage> messages = RespHelper.or500(doctorMessageReadService.findMessageByCriteria(ImmutableMap.of("templateId", params.get("templateId"), "farmId", params.get("farmId"), "userId", UserUtil.getCurrentUser().getId(), "isExpired", DoctorMessage.IsExpired.NOTEXPIRED)));
             List<Long> idList = messages.stream().map(doctorMessage -> doctorMessage.getBusinessId()).collect(Collectors.toList());
             String ids = idList.toString().trim().substring(1, idList.toString().toCharArray().length-1);
