@@ -10,6 +10,7 @@ import io.terminus.doctor.event.dto.DoctorPigInfoDto;
 import io.terminus.doctor.event.dto.DoctorPigMessage;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PigStatus;
+import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.event.service.DoctorGroupReadService;
 import io.terminus.doctor.event.service.DoctorPigReadService;
@@ -29,6 +30,7 @@ import io.terminus.doctor.user.model.DoctorUserDataPermission;
 import io.terminus.doctor.user.service.DoctorUserDataPermissionReadService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.eclipse.jetty.websocket.jsr356.encoders.DoubleEncoder;
 import org.joda.time.DateTime;
 
 import java.util.Collections;
@@ -147,22 +149,34 @@ public abstract class AbstractJobProducer extends AbstractProducer {
     }
 
     /**
-     * 获取猪的配种日期
+     * 获取猪的初配日期
      * @param pigDto
      * @return
      */
     protected DateTime getMatingDate(DoctorPigInfoDto pigDto) {
-        try{
-            if(StringUtils.isNotBlank(pigDto.getExtraTrack())) {
-                // @see DoctorPregChkResultDto
-                Map<String, Object> map = MAPPER.readValue(pigDto.getExtraTrack(), JacksonType.MAP_OF_OBJECT);
-                Date date = new Date((Long) map.get("matingDate"));
-                return new DateTime(date);
+        try {
+            DateTime matingDate = null;
+            List<DoctorPigEvent> events = pigDto.getDoctorPigEvents();
+            for (int i = events.size() - 1; i > -1; i--) {
+                if (Objects.equals(events.get(i).getType(), PigEvent.MATING.getKey())) {
+                    matingDate = new DateTime(events.get(i).getEventAt());
+                    if (i - 1 > -1 && Objects.equals(events.get(i).getType(), PigEvent.MATING.getKey())) {
+                        matingDate = new DateTime(events.get(i).getEventAt());
+                        if (i - 2 > -1 && Objects.equals(events.get(i).getType(), PigEvent.MATING.getKey())) {
+                             return matingDate = new DateTime(events.get(i).getEventAt());
+                        } else {
+                            break;
+                        }
+                    } else {
+                        break;
+                    }
+                }
             }
-        } catch (Exception e) {
-            log.error("[SowBirthDateProducer] get check date failed, pigDto is {}", pigDto);
+            return matingDate;
+        }catch (Exception e){
+            log.error("get mating date fail");
         }
-        return new DateTime(pigDto.getUpdatedAt());
+        return null;
     }
 
     /**
@@ -196,17 +210,7 @@ public abstract class AbstractJobProducer extends AbstractProducer {
      * 获取最近一次配种日期
      */
     protected DateTime getBreedingDate(DoctorPigInfoDto pigDto) {
-        // 获取配种日期
-        try {
-            if(StringUtils.isNotBlank(pigDto.getExtraTrack())) {
-                // @see DoctorMatingDto
-                Date date = new Date((Long) MAPPER.readValue(pigDto.getExtraTrack(), Map.class).get("matingDate"));
-                return new DateTime(date);
-            }
-        } catch (Exception e) {
-            log.error("SowPregCheckProducer get breeding date failed, pigDto is {}", pigDto);
-        }
-        return new DateTime(pigDto.getUpdatedAt());
+       return getDateTimeByEventType(pigDto.getDoctorPigEvents(), PigEvent.MATING.getKey());
     }
 
 
@@ -219,28 +223,26 @@ public abstract class AbstractJobProducer extends AbstractProducer {
         try {
             PigStatus STATUS = PigStatus.from(pigDto.getStatus());
             DateTime dateTime = null;
-            if(StringUtils.isNotBlank(pigDto.getExtraTrack()) && STATUS != null) {
+            if(STATUS != null) {
                 switch (STATUS) {
                     case Wean:  // 断奶
                         // @see DoctorWeanDto
-                        dateTime = new DateTime(
-                                new Date((Long) MAPPER.readValue(pigDto.getExtraTrack(), Map.class).get("weanDate")));
+                        dateTime = getDateTimeByEventType(pigDto.getDoctorPigEvents(), PigEvent.WEAN.getKey());
                         break;
 //                    case Abortion:  // 流产
 //                        // @see DoctorAbortionDto
 //                        dateTime = new DateTime(
 //                                new Date((Long) MAPPER.readValue(pigDto.getExtraTrack(), Map.class).get("abortionDate")));
 //                        break;
-                    case KongHuai:case Pregnancy: case Farrow:  // 空怀, 阳性, 待分娩
+                    case KongHuai: // 空怀
                         // @see DoctorPregChkResultDto
-                        dateTime = new DateTime(
-                                new Date((Long) MAPPER.readValue(pigDto.getExtraTrack(), Map.class).get("checkDate")));
+                        dateTime = getDateTimeByEventType(pigDto.getDoctorPigEvents(), PigEvent.PREG_CHECK.getKey());
                         break;
-                    case Entry: // 待配种
-                        // @see DoctorChgLocationDto
-                        dateTime = new DateTime(
-                                new Date((Long) MAPPER.readValue(pigDto.getExtraTrack(), Map.class).get("changeLocationDate")));
-                        break;
+//                    case Entry: // 待配种
+//                        // @see DoctorChgLocationDto
+//                        dateTime = new DateTime(
+//                                new Date((Long) MAPPER.readValue(pigDto.getExtraTrack(), Map.class).get("changeLocationDate")));
+//                        break;
                 }
             }
             return dateTime != null ? dateTime : new DateTime(pigDto.getUpdatedAt());
@@ -256,17 +258,8 @@ public abstract class AbstractJobProducer extends AbstractProducer {
      * @return
      */
     protected DateTime getFarrowingDate(DoctorPigInfoDto pigDto) {
-        // 获取配种日期
-        try {
-            if(StringUtils.isNotBlank(pigDto.getExtraTrack())) {
-                // @see DoctorFarrowingDto
-                Date date = new Date((Long) MAPPER.readValue(pigDto.getExtraTrack(), Map.class).get("farrowingDate"));
-                return new DateTime(date);
-            }
-        } catch (Exception e) {
-            log.error(" get farrowing date failed, pigDto is {}", pigDto);
-        }
-        return new DateTime(pigDto.getUpdatedAt());
+        // 获取分娩时间
+       return getDateTimeByEventType(pigDto.getDoctorPigEvents(), PigEvent.FARROWING.getKey());
     }
 
     /**
@@ -288,11 +281,39 @@ public abstract class AbstractJobProducer extends AbstractProducer {
      * @param barnId
      * @return
      */
-    protected Boolean filterCondition(SubUser subUser, Long barnId){
+    private Boolean filterCondition(SubUser subUser, Long barnId){
         if (!Arguments.isNullOrEmpty(subUser.getBarnIds()) && subUser.getBarnIds().contains(barnId)){
             return true;
         } else {
             return false;
         }
+    }
+
+    /**
+     * 获取某一事件类型的时间
+     * @param events
+     * @param type
+     * @return
+     */
+    private DateTime getDateTimeByEventType(List<DoctorPigEvent> events, Integer type){
+        if (!Arguments.isNullOrEmpty(events)){
+            List<DoctorPigEvent> eventList = events.stream().sorted((a, b) -> a.getEventAt().compareTo(b.getEventAt())).collect(Collectors.toList());
+            for (DoctorPigEvent doctorPigEvent : eventList) {
+                if (Objects.equals(doctorPigEvent.getType(), type)){
+                    return new DateTime(doctorPigEvent.getEventAt());
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * 获取事件发生时间与当前时间差
+     * @param eventTime
+     * @return 天数
+     */
+    protected Double getTimeDiff(DateTime eventTime){
+        Long timeDiff = DateTime.now().getMillis()/86400000 - eventTime.getMillis()/86400000;
+        return (double) timeDiff;
     }
 }

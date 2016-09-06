@@ -121,12 +121,12 @@ public class SowPregCheckProducer extends AbstractJobProducer {
                     //根据用户拥有的猪舍权限过滤拥有user
                     List<SubUser> sUsers = filterSubUserBarnId(subUsers, pigDto.getBarnId());
                     // 母猪的updatedAt与当前时间差 (天)
-                    Double timeDiff = (double) (DateTime.now().minus(getBreedingDate(pigDto).getMillis()).getMillis() / 86400000);
+                    Double timeDiff = getTimeDiff(getMatingDate(pigDto));
                     // 1. 妊娠检查判断 -> id:1
                     if (ruleValueMap.get(1) != null) {
                         if (!isMessage && Objects.equals(ruleTemplate.getType(), DoctorMessageRuleTemplate.Type.WARNING.getValue())) {
                             // 记录每只猪的消息提醒
-                            recordPigMessage(pigDto, PigEvent.PREG_CHECK, getBreedingDate(pigDto), ruleValueMap.get(1).getValue().intValue(),
+                            recordPigMessage(pigDto, PigEvent.PREG_CHECK, getMatingDate(pigDto), ruleValueMap.get(1).getLeftValue().intValue(),
                                     PigStatus.Mate);
                         }
                         if (isMessage && checkRuleValue(ruleValueMap.get(1), timeDiff)) {

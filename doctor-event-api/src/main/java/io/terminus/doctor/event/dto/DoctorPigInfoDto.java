@@ -107,6 +107,7 @@ public class DoctorPigInfoDto implements Serializable{
                 builder.operatorName(doctorPigTrack.getCreatorName());
             }
         }
+        builder.doctorPigEvents(doctorPigEvents);
         return builder.build();
     }
 }

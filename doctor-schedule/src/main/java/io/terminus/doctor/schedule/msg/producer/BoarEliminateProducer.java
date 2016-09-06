@@ -106,7 +106,7 @@ public class BoarEliminateProducer extends AbstractJobProducer {
                     //根据用户拥有的猪舍权限过滤拥有user
                     List<SubUser> sUsers = filterSubUserBarnId(subUsers, pigDto.getBarnId());
                     // 公猪的updatedAt与当前时间差 (天)
-                    Double timeDiff = (double) (DateTime.now().minus(pigDto.getUpdatedAt().getTime()).getMillis() / 86400000);
+                    Double timeDiff = getTimeDiff(new DateTime(pigDto.getUpdatedAt()));
                     ruleValueMap.keySet().forEach(key -> {
                         if (ruleValueMap.get(key) != null) {
 
