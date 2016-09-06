@@ -112,15 +112,15 @@ public class DefaultPigQueryBuilder extends BasePigQueryBuilder {
         return null;
     }
 
+    /**
+     * 按照pigCode的ASC码排序
+     */
     @Override
     protected List<Sort> buildSort(Map<String, String> params) {
-        // 默认按updatedAt进行降序排序
-        List<Sort> sorts = Lists.newArrayList();
-        sort(sorts, "2", "updatedAt");
-
-        return sorts;
+        return Lists.newArrayList(new Sort("pigCode", "asc"));
     }
-    private void sort(List<Sort> sorts, String part, String field) {
+
+    private static void sort(List<Sort> sorts, String part, String field) {
         switch (Integer.parseInt(part)) {
             case 1:
                 sorts.add(new Sort(field, "asc"));
