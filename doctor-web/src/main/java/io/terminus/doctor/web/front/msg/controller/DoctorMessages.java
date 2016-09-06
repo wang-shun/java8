@@ -12,6 +12,7 @@ import io.terminus.doctor.common.constants.JacksonType;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.msg.enums.Category;
 import io.terminus.doctor.web.core.component.UserResService;
+import io.terminus.doctor.web.front.msg.dto.DoctorMessageDto;
 import io.terminus.doctor.web.front.msg.dto.OneLevelMessageDto;
 import io.terminus.doctor.msg.model.DoctorMessage;
 import io.terminus.doctor.msg.model.DoctorMessageRule;
@@ -80,31 +81,39 @@ public class DoctorMessages {
      * @return
      */
     @RequestMapping(value = "/warn/messages", method = RequestMethod.GET)
-    public Paging<DoctorMessage> pagingWarnDoctorMessages(@RequestParam("pageNo") Integer pageNo,
+    public DoctorMessageDto pagingWarnDoctorMessages(@RequestParam("pageNo") Integer pageNo,
                                                       @RequestParam("pageSize") Integer pageSize,
                                                       @RequestParam Map<String, Object> criteria) {
         if (!isUserLogin()) {
-            return new Paging<>(0L, Collections.emptyList());
+            return new DoctorMessageDto(new Paging<>(0L, Collections.emptyList()), null);
         }
         criteria.put("userId", UserUtil.getUserId());
         criteria.put("isExpired", DoctorMessage.IsExpired.NOTEXPIRED);
         Paging<DoctorMessage> paging = RespHelper.or500(doctorMessageReadService.pagingWarnMessages(criteria, pageNo, pageSize));
         List<DoctorMessage> messages = paging.getData();
 
+        DoctorMessageDto msgDto = DoctorMessageDto.builder().build();
         if (messages != null && messages.size() > 0){
             messages.forEach(doctorMessage -> {
                 String urlPart;
                 if (Objects.equals(doctorMessage.getCategory(), Category.FATTEN_PIG_REMOVE.getKey())){
                     urlPart = "?groupId=";
+                    msgDto.setListUrl("/group/list?farmId=" + doctorMessage.getFarmId() + "&searchFrom=MESSAGE");
                 }else if (Objects.equals(doctorMessage.getCategory(), Category.STORAGE_SHORTAGE.getKey())){
                     urlPart = "?materialId=";
                 }else {
                     urlPart = "?pigId=";
+                    if (Objects.equals(doctorMessage.getCategory(), Category.BOAR_ELIMINATE.getKey())) {
+                        msgDto.setListUrl("/boar/list?farmId=" + doctorMessage.getFarmId() + "&searchFrom=MESSAGE");
+                    } else {
+                        msgDto.setListUrl("/sow/list?farmId=" + doctorMessage.getFarmId() + "&searchFrom=MESSAGE");
+                    }
                 }
                  doctorMessage.setUrl(doctorMessage.getUrl().concat(urlPart + doctorMessage.getBusinessId() + "&farmId=" + doctorMessage.getFarmId()));
             });
         }
-        return paging;
+        msgDto.setPaging(paging);
+        return msgDto;
     }
 
     /**
