@@ -167,7 +167,7 @@ public class DoctorMessageReadServiceImpl implements DoctorMessageReadService {
     }
 
     @Override
-    public Response<Long> findMessageCountByCriteria(Map criteria) {
+    public Response<Long> findMessageCountByCriteria(Map<String, Object> criteria) {
         try {
             return Response.ok(doctorMessageDao.findMessageCountByCriteria(criteria));
         } catch (Exception e) {

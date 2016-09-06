@@ -1,6 +1,7 @@
 package io.terminus.doctor.web.front.msg.controller;
 
 import com.google.api.client.util.Lists;
+import com.google.api.client.util.Maps;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
@@ -202,7 +203,7 @@ public class DoctorMessages {
      * @param criteria
      * @return
      */
-    @RequestMapping(value = "/warn/templates", method = RequestMethod.GET)
+        @RequestMapping(value = "/warn/templates", method = RequestMethod.GET)
     public List<DoctorMessageRuleTemplate> listWarnTemplate(Map<String, Object> criteria) {
         criteria.put("types", ImmutableList.of(
                 DoctorMessageRuleTemplate.Type.WARNING.getValue(), DoctorMessageRuleTemplate.Type.ERROR.getValue()));
@@ -269,11 +270,21 @@ public class DoctorMessages {
                 }
 
             } else if (!Objects.equals(doctorMessageRule.getCategory(), Category.STORAGE_SHORTAGE.getKey())) {
-                pigCount = RespHelper.or500(doctorMessageReadService.findMessageCountByCriteria(ImmutableMap.of("templateId", doctorMessageRule.getTemplateId(), "farmId", doctorMessageRule.getFarmId(), "isExpired", DoctorMessage.IsExpired.NOTEXPIRED.getValue(), "userId", UserUtil.getCurrentUser().getId()))).intValue();
+                Map<String, Object> criteriaMap = Maps.newHashMap();
+                criteriaMap.put("templateId", doctorMessageRule.getTemplateId());
+                criteriaMap.put("farmId", doctorMessageRule.getFarmId());
+                criteriaMap.put("isExpired", DoctorMessage.IsExpired.NOTEXPIRED.getValue());
+                criteriaMap.put("userId", UserUtil.getCurrentUser().getId());
+                pigCount = RespHelper.or500(doctorMessageReadService.findMessageCountByCriteria(criteriaMap)).intValue();
             }
+            DoctorMessageRule messageRule = DoctorMessageRule.builder()
+                    .templateId(doctorMessageRule.getTemplateId())
+                    .templateName(doctorMessageRule.getTemplateName())
+                    .farmId(doctorMessageRule.getFarmId())
+                    .build();
             list.add(OneLevelMessageDto.builder()
+                    .doctorMessageRule(messageRule)
                     .pigCount(pigCount)
-                    .doctorMessageRule(doctorMessageRule)
                     .build());
 
         });

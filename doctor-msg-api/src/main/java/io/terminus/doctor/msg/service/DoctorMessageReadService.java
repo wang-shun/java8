@@ -99,5 +99,5 @@ public interface DoctorMessageReadService {
      * @param criteria
      * @return
      */
-    Response<Long> findMessageCountByCriteria(Map criteria);
+    Response<Long> findMessageCountByCriteria(Map<String, Object> criteria);
 }

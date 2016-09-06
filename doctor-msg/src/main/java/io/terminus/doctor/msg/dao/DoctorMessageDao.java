@@ -62,7 +62,7 @@ public class DoctorMessageDao extends MyBatisDao<DoctorMessage> {
      * @param criteria
      * @return
      */
-    public Long findMessageCountByCriteria(Map criteria){
+    public Long findMessageCountByCriteria(Map<String, Object> criteria){
         return getSqlSession().selectOne(sqlId("count"), criteria);
     }
 
