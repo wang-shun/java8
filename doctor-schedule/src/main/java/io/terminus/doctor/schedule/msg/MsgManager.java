@@ -195,8 +195,8 @@ public class MsgManager {
                     message.setStatus(DoctorMessage.Status.SENDED.getValue());
                 }
             } catch (Exception e) {
-                log.error("app push message send error, context is {}, cause by {}", map, Throwables.getStackTraceAsString(e));
-                message.setFailedBy("app push message send error, context is " + map + ", cause by " + e.getMessage());
+                log.error("app push message send error, cause by {}", Throwables.getStackTraceAsString(e));
+                message.setFailedBy("app push message send error, cause by " + e.getMessage());
                 message.setStatus(DoctorMessage.Status.FAILED.getValue());
             }
             doctorMessageWriteService.updateMessage(message);

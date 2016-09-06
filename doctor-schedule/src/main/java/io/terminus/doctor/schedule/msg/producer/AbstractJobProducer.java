@@ -225,24 +225,14 @@ public abstract class AbstractJobProducer extends AbstractProducer {
             DateTime dateTime = null;
             if(STATUS != null) {
                 switch (STATUS) {
-                    case Wean:  // 断奶
+                    case Wean : case Entry :// 断奶
                         // @see DoctorWeanDto
                         dateTime = getDateTimeByEventType(pigDto.getDoctorPigEvents(), PigEvent.WEAN.getKey());
                         break;
-//                    case Abortion:  // 流产
-//                        // @see DoctorAbortionDto
-//                        dateTime = new DateTime(
-//                                new Date((Long) MAPPER.readValue(pigDto.getExtraTrack(), Map.class).get("abortionDate")));
-//                        break;
                     case KongHuai: // 空怀
                         // @see DoctorPregChkResultDto
                         dateTime = getDateTimeByEventType(pigDto.getDoctorPigEvents(), PigEvent.PREG_CHECK.getKey());
                         break;
-//                    case Entry: // 待配种
-//                        // @see DoctorChgLocationDto
-//                        dateTime = new DateTime(
-//                                new Date((Long) MAPPER.readValue(pigDto.getExtraTrack(), Map.class).get("changeLocationDate")));
-//                        break;
                 }
             }
             return dateTime != null ? dateTime : new DateTime(pigDto.getUpdatedAt());
