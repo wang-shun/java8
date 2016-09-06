@@ -270,7 +270,12 @@ public class DoctorMessages {
         doctorMessageRules.forEach(doctorMessageRule -> {
             Integer pigCount = 0;
             if (Objects.equals(doctorMessageRule.getCategory(), Category.FATTEN_PIG_REMOVE.getKey())) {
-                List<DoctorMessage> messages = RespHelper.or500(doctorMessageReadService.findMessageByCriteria(ImmutableMap.of("templateId", doctorMessageRule.getTemplateId(), "farmId", doctorMessageRule.getFarmId(), "isExpired", DoctorMessage.IsExpired.NOTEXPIRED.getValue(), "userId", UserUtil.getCurrentUser().getId())));
+                Map<String, Object> criteriaMap = Maps.newHashMap();
+                criteriaMap.put("templateId", doctorMessageRule.getTemplateId());
+                criteriaMap.put("farmId", doctorMessageRule.getFarmId());
+                criteriaMap.put("isExpired", DoctorMessage.IsExpired.NOTEXPIRED.getValue());
+                criteriaMap.put("userId", UserUtil.getCurrentUser().getId());
+                List<DoctorMessage> messages = RespHelper.or500(doctorMessageReadService.findMessageByCriteria(criteriaMap));
                 for (DoctorMessage doctorMessage : messages) {
                     try {
                         Map<String, Object> map = JsonMapper.JSON_NON_DEFAULT_MAPPER.getMapper().readValue(doctorMessage.getData(), JacksonType.MAP_OF_OBJECT);
