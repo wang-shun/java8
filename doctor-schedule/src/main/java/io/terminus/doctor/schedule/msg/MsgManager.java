@@ -100,7 +100,9 @@ public class MsgManager {
                 DoctorUserDataPermission dataPermission = RespHelper.orServEx(
                         doctorUserDataPermissionReadService.findDataPermissionByUserId(sub.getUserId()));
                 if (dataPermission != null) {
+                    dataPermission.setFarmIds(dataPermission.getFarmIds());
                     subUser.getFarmIds().addAll(dataPermission.getFarmIdsList());
+                    dataPermission.setBarnIds(dataPermission.getBarnIds());
                     subUser.getBarnIds().addAll(dataPermission.getBarnIdsList());
                 }
                 subUsers.add(subUser);
