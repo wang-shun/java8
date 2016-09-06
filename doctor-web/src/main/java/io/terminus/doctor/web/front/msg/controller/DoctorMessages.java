@@ -6,6 +6,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import io.terminus.common.model.Paging;
+import io.terminus.common.utils.BeanMapper;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.constants.JacksonType;
 import io.terminus.doctor.common.utils.RespHelper;
@@ -277,11 +278,8 @@ public class DoctorMessages {
                 criteriaMap.put("userId", UserUtil.getCurrentUser().getId());
                 pigCount = RespHelper.or500(doctorMessageReadService.findMessageCountByCriteria(criteriaMap)).intValue();
             }
-            DoctorMessageRule messageRule = DoctorMessageRule.builder()
-                    .templateId(doctorMessageRule.getTemplateId())
-                    .templateName(doctorMessageRule.getTemplateName())
-                    .farmId(doctorMessageRule.getFarmId())
-                    .build();
+            DoctorMessageRule messageRule = BeanMapper.map(doctorMessageRule, DoctorMessageRule.class);
+            messageRule.setRuleValue("");
             list.add(OneLevelMessageDto.builder()
                     .doctorMessageRule(messageRule)
                     .pigCount(pigCount)
