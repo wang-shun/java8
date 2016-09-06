@@ -2,6 +2,8 @@ package io.terminus.doctor.web.component;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.api.client.util.Lists;
+import com.google.api.client.util.Maps;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.BaseUser;
@@ -27,6 +29,7 @@ import io.terminus.doctor.event.search.group.SearchedGroupDto;
 import io.terminus.doctor.event.search.pig.PigSearchReadService;
 import io.terminus.doctor.event.search.pig.SearchedPig;
 import io.terminus.doctor.event.search.pig.SearchedPigDto;
+import io.terminus.doctor.msg.dto.Rule;
 import io.terminus.doctor.msg.model.DoctorMessage;
 import io.terminus.doctor.msg.service.DoctorMessageReadService;
 import io.terminus.doctor.user.model.DoctorUserDataPermission;
@@ -564,7 +567,14 @@ public class DoctorSearches {
 
     public void searchFromMessage(Map<String, String> params){
         if (Objects.equals(params.get("searchFrom"), "MESSAGE")){
-            List<DoctorMessage> messages = RespHelper.or500(doctorMessageReadService.findMessageByCriteria(ImmutableMap.of("templateId", params.get("templateId"), "farmId", params.get("farmId"), "userId", UserUtil.getCurrentUser().getId(), "isExpired", DoctorMessage.IsExpired.NOTEXPIRED)));
+            Map<String, Object> criteriaMap = Maps.newHashMap();
+            criteriaMap.put("templateId", params.get("templateId"));
+            criteriaMap.put("farmId", params.get("farmId"));
+            criteriaMap.put("isExpired", DoctorMessage.IsExpired.NOTEXPIRED.getValue());
+            criteriaMap.put("userId", UserUtil.getCurrentUser().getId());
+            criteriaMap.put("channel", Rule.Channel.SYSTEM.getValue());
+            criteriaMap.put("statuses", ImmutableList.of(DoctorMessage.Status.NORMAL.getValue(), DoctorMessage.Status.READED.getValue()));
+            List<DoctorMessage> messages = RespHelper.or500(doctorMessageReadService.findMessageByCriteria(criteriaMap));
             List<Long> idList = messages.stream().map(doctorMessage -> doctorMessage.getBusinessId()).collect(Collectors.toList());
             String ids = idList.toString().trim().substring(1, idList.toString().toCharArray().length-1);
             params.put("ids", ids);

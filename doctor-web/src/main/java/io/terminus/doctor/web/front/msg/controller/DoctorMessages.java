@@ -10,6 +10,7 @@ import io.terminus.common.utils.BeanMapper;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.constants.JacksonType;
 import io.terminus.doctor.common.utils.RespHelper;
+import io.terminus.doctor.msg.dto.Rule;
 import io.terminus.doctor.msg.enums.Category;
 import io.terminus.doctor.web.core.component.UserResService;
 import io.terminus.doctor.web.front.msg.dto.DoctorMessageDto;
@@ -275,6 +276,8 @@ public class DoctorMessages {
                 criteriaMap.put("farmId", doctorMessageRule.getFarmId());
                 criteriaMap.put("isExpired", DoctorMessage.IsExpired.NOTEXPIRED.getValue());
                 criteriaMap.put("userId", UserUtil.getCurrentUser().getId());
+                criteriaMap.put("channel", Rule.Channel.SYSTEM.getValue());
+                criteriaMap.put("statuses", ImmutableList.of(DoctorMessage.Status.NORMAL.getValue(), DoctorMessage.Status.READED.getValue()));
                 List<DoctorMessage> messages = RespHelper.or500(doctorMessageReadService.findMessageByCriteria(criteriaMap));
                 for (DoctorMessage doctorMessage : messages) {
                     try {
@@ -290,6 +293,8 @@ public class DoctorMessages {
                 criteriaMap.put("farmId", doctorMessageRule.getFarmId());
                 criteriaMap.put("isExpired", DoctorMessage.IsExpired.NOTEXPIRED.getValue());
                 criteriaMap.put("userId", UserUtil.getCurrentUser().getId());
+                criteriaMap.put("channel", Rule.Channel.SYSTEM.getValue());
+                criteriaMap.put("statuses", ImmutableList.of(DoctorMessage.Status.NORMAL.getValue(), DoctorMessage.Status.READED.getValue()));
                 pigCount = RespHelper.or500(doctorMessageReadService.findMessageCountByCriteria(criteriaMap)).intValue();
             }
             DoctorMessageRule messageRule = BeanMapper.map(doctorMessageRule, DoctorMessageRule.class);
