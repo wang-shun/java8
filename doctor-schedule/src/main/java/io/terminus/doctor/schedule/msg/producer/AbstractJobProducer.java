@@ -286,13 +286,41 @@ public abstract class AbstractJobProducer extends AbstractProducer {
      * @return
      */
     private DateTime getDateTimeByEventType(List<DoctorPigEvent> events, Integer type){
-        if (!Arguments.isNullOrEmpty(events)){
-            List<DoctorPigEvent> eventList = events.stream().sorted((a, b) -> a.getEventAt().compareTo(b.getEventAt())).collect(Collectors.toList());
-            for (DoctorPigEvent doctorPigEvent : eventList) {
-                if (Objects.equals(doctorPigEvent.getType(), type)){
-                    return new DateTime(doctorPigEvent.getEventAt());
+        try {
+            if (!Arguments.isNullOrEmpty(events)){
+                List<DoctorPigEvent> eventList = events.stream().sorted((a, b) -> a.getEventAt().compareTo(b.getEventAt())).collect(Collectors.toList());
+                for (DoctorPigEvent doctorPigEvent : eventList) {
+                    if (Objects.equals(doctorPigEvent.getType(), type)){
+                        return new DateTime(doctorPigEvent.getEventAt());
+                    }
                 }
             }
+        }catch (Exception e){
+            log.error("get.date.Time.by.event.type.fail");
+        }
+
+        return null;
+    }
+
+    /**
+     * 根据事件类型时间列表中取出最近事件
+     * @param events
+     * @param type
+     * @return
+     */
+    protected <T> T getPigEventByEventType(List<DoctorPigEvent> events, Integer type, Class<T> clazz){
+        try {
+
+            if (!Arguments.isNullOrEmpty(events)){
+                List<DoctorPigEvent> eventList = events.stream().sorted((a, b) -> a.getEventAt().compareTo(b.getEventAt())).collect(Collectors.toList());
+                for (DoctorPigEvent doctorPigEvent : eventList) {
+                    if (Objects.equals(doctorPigEvent.getType(), type)){
+                        return (T)doctorPigEvent;
+                    }
+                }
+            }
+        }catch (Exception e){
+            log.error("get.pig.event.by.event.type.fail");
         }
         return null;
     }

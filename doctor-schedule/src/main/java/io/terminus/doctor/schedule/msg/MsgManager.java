@@ -6,6 +6,7 @@ import com.google.common.collect.Maps;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.msg.dto.SubUser;
+import io.terminus.doctor.msg.enums.Category;
 import io.terminus.doctor.msg.model.DoctorMessage;
 import io.terminus.doctor.msg.producer.IProducer;
 import io.terminus.doctor.msg.service.DoctorMessageReadService;
@@ -29,6 +30,7 @@ import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Desc: 消息管理manager
@@ -189,7 +191,7 @@ public class MsgManager {
                 map.put("after_open", "go_url");
                 map.put("title", message.getTemplateName());
                 map.put("ticker", message.getTemplateName());
-                map.put("url", getAppUrl(message.getUrl(), message.getId())); // 设置回调url
+                map.put("url", getAppUrl(message)); // 设置回调url
                 // 推送消息
                 if (message.getUserId() != null) {
                     appPushWebService.send("[" + message.getUserId() + "]", message.getMessageTemplate(), map, null);
@@ -206,16 +208,24 @@ public class MsgManager {
     }
 
     // 获取url
-    private String getAppUrl(String url, Long id) {
+    private String getAppUrl(DoctorMessage doctorMessage) {
         StringBuilder sb = new StringBuilder();
+        String urlPart;
+        if (Objects.equals(doctorMessage.getCategory(), Category.FATTEN_PIG_REMOVE.getKey())){
+            urlPart = "?groupId=";
+        }else if (Objects.equals(doctorMessage.getCategory(), Category.STORAGE_SHORTAGE.getKey())){
+            urlPart = "?materialId=";
+        }else {
+            urlPart = "?pigId=";
+        }
         if (StringUtils.isNotBlank(domain)) {
             sb//.append("http://")
                     .append(domain)
-                    .append(url)
-                    .append("?id=")
-                    .append(id);
+                    .append(doctorMessage.getUrl())
+                    .append(urlPart)
+                    .append(doctorMessage.getBusinessId());
         } else {
-            sb.append(url).append("?id=").append(id);
+            sb.append(doctorMessage.getUrl()).append(urlPart).append(doctorMessage.getBusinessId());
         }
         return sb.toString();
     }

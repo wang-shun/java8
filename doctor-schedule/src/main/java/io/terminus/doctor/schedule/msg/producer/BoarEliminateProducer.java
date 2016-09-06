@@ -9,8 +9,10 @@ import io.terminus.doctor.common.constants.JacksonType;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dto.DoctorPigInfoDto;
 import io.terminus.doctor.event.enums.DataRange;
+import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.model.DoctorPig;
+import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.service.DoctorPigReadService;
 import io.terminus.doctor.event.service.DoctorPigWriteService;
 import io.terminus.doctor.msg.dto.Rule;
@@ -116,19 +118,9 @@ public class BoarEliminateProducer extends AbstractJobProducer {
                                 //日龄大于或等于预定值
                                 isSend = pigDto.getDateAge() > ruleValue.getValue().intValue() - 1;
                             } else if (key == 2) {
-                                if (StringUtils.isNotBlank(pigDto.getExtraTrack())) {
-                                    try {
-                                        Map<String, Object> extraMap = MAPPER.readValue(pigDto.getExtraTrack(), JacksonType.MAP_OF_OBJECT);
-                                        if (StringUtils.isNotBlank((String) extraMap.get("semenActive"))) {
-                                            Float semenActive = Float.parseFloat((String) extraMap.get("semenActive"));
-                                            //精液活性小于预定值
-                                            isSend = semenActive < ruleValue.getValue().floatValue();
-                                        }
-                                    } catch (Exception e) {
-                                        log.error("[BoarEliminateProducer].get.semenActive.fail, pigDto", pigDto);
-                                    }
-
-                                }
+                                DoctorPigEvent doctorPigEvent = getPigEventByEventType(pigDto.getDoctorPigEvents(), PigEvent.SEMEN.getKey());
+                                //精液活性小于预定值
+                                isSend = semenActive < ruleValue.getValue().floatValue();
                             } else if (key == 3) {
                                 if (StringUtils.isNotBlank(pigDto.getExtraTrack())) {
                                     try {

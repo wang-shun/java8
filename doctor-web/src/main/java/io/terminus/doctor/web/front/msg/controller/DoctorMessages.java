@@ -92,15 +92,15 @@ public class DoctorMessages {
 
         if (messages != null && messages.size() > 0){
             messages.forEach(doctorMessage -> {
-                String url;
+                String urlPart;
                 if (Objects.equals(doctorMessage.getCategory(), Category.FATTEN_PIG_REMOVE.getKey())){
-                    url = doctorMessage.getUrl().concat("?groupId=" + doctorMessage.getBusinessId() + "&farmId=" + doctorMessage.getFarmId());
+                    urlPart = "?groupId=";
                 }else if (Objects.equals(doctorMessage.getCategory(), Category.STORAGE_SHORTAGE.getKey())){
-                    url = doctorMessage.getUrl();
+                    urlPart = "?materialId=";
                 }else {
-                    url = doctorMessage.getUrl().concat("?pigId=" + doctorMessage.getBusinessId() + "&farmId=" + doctorMessage.getFarmId());
+                    urlPart = "?pigId=";
                 }
-                 doctorMessage.setUrl(url);
+                 doctorMessage.setUrl(doctorMessage.getUrl().concat(urlPart + doctorMessage.getBusinessId() + "&farmId=" + doctorMessage.getFarmId()));
             });
         }
         return paging;
