@@ -13,6 +13,8 @@
         <result column="user_id" property="userId"/>
         <result column="template_id" property="templateId"/>
         <result column="template_name" property="templateName"/>
+        <result column="business_id" property="businessId"/>
+        <result column="is_expired" property="isExpired"/>
         <result column="message_template" property="messageTemplate"/>
         <result column="type" property="type"/>
         <result column="category" property="category"/>
@@ -37,11 +39,11 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        farm_id, rule_id, role_id, user_id, template_id, template_name, message_template, type, category, data, content , channel, url, status, sended_at, failed_by, created_by, created_at, updated_at
+        farm_id, rule_id, role_id, user_id, template_id, template_name, business_id, is_expired, message_template, type, category, data, content , channel, url, status, sended_at, failed_by, created_by, created_at, updated_at
     </sql>
 
     <sql id="vals">
-        #{farmId}, #{ruleId}, #{roleId}, #{userId}, #{templateId}, #{templateName}, #{messageTemplate}, #{type}, #{category}, #{data}, #{content}, #{channel}, #{url}, #{status}, #{sendedAt}, #{failedBy}, #{createdBy}, now(), now()
+        #{farmId}, #{ruleId}, #{roleId}, #{userId}, #{templateId}, #{templateName}, #{businessId}, #{isExpired}, #{messageTemplate}, #{type}, #{category}, #{data}, #{content}, #{channel}, #{url}, #{status}, #{sendedAt}, #{failedBy}, #{createdBy}, now(), now()
     </sql>
 
     <insert id="create" parameterType="DoctorMessage" keyProperty="id" useGeneratedKeys="true">
@@ -58,7 +60,7 @@
         (<include refid="cols_exclude_id" />)
         VALUES
         <foreach collection="list" item="i" separator=",">
-            (#{i.farmId}, #{i.ruleId}, #{i.roleId}, #{i.userId}, #{i.templateId}, #{i.templateName}, #{i.messageTemplate}, #{i.type}, #{i.category}, #{i.data}, #{i.content}, #{i.channel}, #{i.url} ,#{i.status}, #{i.sendedAt}, #{i.failedBy}, #{i.createdBy}, now(), now())
+            (#{i.farmId}, #{i.ruleId}, #{i.roleId}, #{i.userId}, #{i.templateId}, #{i.templateName}, #{i.businessId}, #{i.isExpired}, #{i.messageTemplate}, #{i.type}, #{i.category}, #{i.data}, #{i.content}, #{i.channel}, #{i.url} ,#{i.status}, #{i.sendedAt}, #{i.failedBy}, #{i.createdBy}, now(), now())
         </foreach>
     </insert>
 
@@ -78,6 +80,8 @@
             <if test="userId != null">user_id = #{userId},</if>
             <if test="templateId != null">template_id = #{templateId},</if>
             <if test="templateName != null">template_name = #{templateName},</if>
+            <if test="businessId != null">business_id = #{businessId},</if>
+            <if test="isExpired != null">is_expired = #{isExpired},</if>
             <if test="messageTemplate != null">message_template = #{messageTemplate},</if>
             <if test="type != null">type = #{type},</if>
             <if test="category != null">category = #{category},</if>
@@ -107,6 +111,8 @@
             <if test="userId != null">AND user_id = #{userId}</if>
             <if test="templateId != null">AND template_id = #{templateId}</if>
             <if test="templateName != null">AND template_name = #{templateName}</if>
+            <if test="businessId != null">AND business_id = #{businessId}</if>
+            <if test="isExpired != null">AND is_expired = #{isExpired}</if>
             <if test="type != null">AND `type` = #{type}</if>
             <if test="category != null">AND category = #{category}</if>
             <if test="channel != null">AND channel = #{channel}</if>

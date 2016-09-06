@@ -98,6 +98,12 @@ public class DefaultGroupQueryBuilder extends BaseGroupQueryBuilder {
             List<String> barnIdList = Splitters.COMMA.splitToList(barnIds);
             termsList.add(new Terms("currentBarnId", barnIdList));
         }
+        //4.多个猪群
+        String ids = params.get("ids");
+        if (StringUtils.isNotBlank(ids)){
+            List<String> idList = Splitters.COMMA.splitToList(ids);
+            termsList.add(new Terms("id", idList));
+        }
         return termsList;
     }
 

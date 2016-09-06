@@ -1,6 +1,7 @@
 package io.terminus.doctor.event.service;
 
 import com.google.common.base.MoreObjects;
+import com.google.common.base.Splitter;
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
@@ -11,6 +12,7 @@ import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.model.PageInfo;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
+import io.terminus.common.utils.Splitters;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.cache.DoctorPigInfoCache;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
@@ -31,10 +33,12 @@ import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jmx.export.annotation.ManagedOperation;
 import org.springframework.stereotype.Service;
 
 import javax.validation.constraints.NotNull;
@@ -158,10 +162,15 @@ public class DoctorPigReadServiceImpl implements DoctorPigReadService {
             List<DoctorPig> doctorPigs = paging.getData();
             List<DoctorPigTrack> doctorPigTracks = doctorPigTrackDao.findByPigIds(doctorPigs.stream().map(s->s.getId()).collect(Collectors.toList()));
 
+            Map<Long, List<DoctorPigEvent>> doctorPigEventMap = Maps.newHashMap();
+            doctorPigTracks.forEach(doctorPigTrack -> {
+                List<DoctorPigEvent> doctorPigEvents = doctorPigEventDao.queryAllEventsByPigId(doctorPigTrack.getPigId());
+                doctorPigEventMap.put(doctorPigTrack.getPigId(), doctorPigEvents);
+            });
             Map<Long, DoctorPigTrack> doctorPigTrackMap = doctorPigTracks.stream().collect(Collectors.toMap(k->k.getPigId(), v->v));
 
             return Response.ok(new Paging<>(paging.getTotal(),
-                        doctorPigs.stream().map(s->DoctorPigInfoDto.buildDoctorPigInfoDto(s, doctorPigTrackMap.get(s.getId()))).collect(Collectors.toList())
+                        doctorPigs.stream().map(s->DoctorPigInfoDto.buildDoctorPigInfoDto(s, doctorPigTrackMap.get(s.getId()), doctorPigEventMap.get(s.getId()))).collect(Collectors.toList())
                     ));
         }catch (Exception e){
             log.error("paging doctor info dto by pig, cause:{}", Throwables.getStackTraceAsString(e));
@@ -182,11 +191,16 @@ public class DoctorPigReadServiceImpl implements DoctorPigReadService {
                 return Response.ok(Paging.empty());
             }
             List<DoctorPigTrack> doctorPigTracks = paging.getData();
+            Map<Long, List<DoctorPigEvent>> doctorPigEventMap = Maps.newHashMap();
+            doctorPigTracks.forEach(track -> {
+                List<DoctorPigEvent> doctorPigEvents = doctorPigEventDao.queryAllEventsByPigId(doctorPigTrack.getPigId());
+                doctorPigEventMap.put(track.getPigId(), doctorPigEvents);
+            });
             List<DoctorPig> doctorPigs = doctorPigDao.findByIds(doctorPigTracks.stream().map(s->s.getPigId()).collect(Collectors.toList()));
             Map<Long, DoctorPigTrack> doctorPigTrackMap = doctorPigTracks.stream().collect(Collectors.toMap(k->k.getPigId(),v->v));
 
             return Response.ok(new Paging<>(paging.getTotal(),
-                    doctorPigs.stream().map(s->DoctorPigInfoDto.buildDoctorPigInfoDto(s, doctorPigTrackMap.get(s.getId()))).collect(Collectors.toList())
+                    doctorPigs.stream().map(s->DoctorPigInfoDto.buildDoctorPigInfoDto(s, doctorPigTrackMap.get(s.getId()), doctorPigEventMap.get(s.getId()))).collect(Collectors.toList())
                     ));
         }catch (Exception e){
             log.error("paging doctor info dto by track pig fail, cause:{}", Throwables.getStackTraceAsString(e));
@@ -201,8 +215,8 @@ public class DoctorPigReadServiceImpl implements DoctorPigReadService {
             checkState(!isNull(doctorPig), "doctorPig.findById.empty");
 
             DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(pigId);
-
-            return Response.ok(DoctorPigInfoDto.buildDoctorPigInfoDto(doctorPig, doctorPigTrack));
+            List<DoctorPigEvent> doctorPigEvents = doctorPigEventDao.queryAllEventsByPigId(pigId);
+            return Response.ok(DoctorPigInfoDto.buildDoctorPigInfoDto(doctorPig, doctorPigTrack, doctorPigEvents));
         }catch (Exception e){
             log.error(" fail, cause:{}", Throwables.getStackTraceAsString(e));
             return Response.fail("query.doctorInfoDto.fail");
@@ -236,10 +250,15 @@ public class DoctorPigReadServiceImpl implements DoctorPigReadService {
             }
 
             List<DoctorPigTrack> tracks = doctorPigTrackDao.findByPigIds(doctorPigs.stream().map(d -> d.getId()).collect(Collectors.toList()));
+            Map<Long, List<DoctorPigEvent>> doctorPigEventMap = Maps.newHashMap();
+            tracks.forEach(track -> {
+                List<DoctorPigEvent> doctorPigEvents = doctorPigEventDao.queryAllEventsByPigId(track.getPigId());
+                doctorPigEventMap.put(track.getPigId(), doctorPigEvents);
+            });
             Map<Long, DoctorPigTrack> trackMap = tracks.stream().collect(Collectors.toMap(k->k.getPigId(), v->v));
 
             List<DoctorPigInfoDto> dtos =  doctorPigs.stream()
-                    .map(doc->DoctorPigInfoDto.buildDoctorPigInfoDto(doc, trackMap.get(doc.getId())))
+                    .map(doc->DoctorPigInfoDto.buildDoctorPigInfoDto(doc, trackMap.get(doc.getId()), doctorPigEventMap.get(doc.getId())))
                     .collect(Collectors.toList());
         	return Response.ok(dtos);
         }catch (IllegalStateException se){

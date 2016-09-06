@@ -70,7 +70,7 @@ public class StorageShortageProducer extends AbstractJobProducer {
 
     @Override
     protected List<DoctorMessage> message(DoctorMessageRuleRole ruleRole, List<SubUser> subUsers) {
-        log.info("仓库库存不足消息产生 --- PigVaccinationProducer 开始执行");
+        log.info("仓库库存不足消息产生 --- StorageShortageProducer 开始执行");
         List<DoctorMessage> messages = Lists.newArrayList();
 
         Rule rule = ruleRole.getRule();
@@ -94,7 +94,7 @@ public class StorageShortageProducer extends AbstractJobProducer {
             }
         }
 
-        log.info("仓库库存不足消息产生 --- PigVaccinationProducer 结束执行, 产生 {} 条消息", messages.size());
+        log.info("仓库库存不足消息产生 --- StorageShortageProducer 结束执行, 产生 {} 条消息", messages.size());
         return messages;
     }
 

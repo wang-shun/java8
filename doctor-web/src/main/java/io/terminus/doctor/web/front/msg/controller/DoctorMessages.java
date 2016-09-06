@@ -1,12 +1,25 @@
 package io.terminus.doctor.web.front.msg.controller;
 
+import com.google.api.client.util.Lists;
+import com.google.api.client.util.Maps;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import io.terminus.common.model.Paging;
+import io.terminus.common.utils.BeanMapper;
+import io.terminus.common.utils.JsonMapper;
+import io.terminus.doctor.common.constants.JacksonType;
 import io.terminus.doctor.common.utils.RespHelper;
+import io.terminus.doctor.msg.dto.Rule;
+import io.terminus.doctor.msg.enums.Category;
+import io.terminus.doctor.web.core.component.UserResService;
+import io.terminus.doctor.web.front.msg.dto.DoctorMessageDto;
+import io.terminus.doctor.web.front.msg.dto.OneLevelMessageDto;
 import io.terminus.doctor.msg.model.DoctorMessage;
+import io.terminus.doctor.msg.model.DoctorMessageRule;
 import io.terminus.doctor.msg.model.DoctorMessageRuleTemplate;
 import io.terminus.doctor.msg.service.DoctorMessageReadService;
+import io.terminus.doctor.msg.service.DoctorMessageRuleReadService;
 import io.terminus.doctor.msg.service.DoctorMessageRuleTemplateReadService;
 import io.terminus.doctor.msg.service.DoctorMessageRuleTemplateWriteService;
 import io.terminus.doctor.msg.service.DoctorMessageWriteService;
@@ -40,16 +53,22 @@ public class DoctorMessages {
     private final DoctorMessageRuleTemplateWriteService doctorMessageRuleTemplateWriteService;
     private final DoctorMessageReadService doctorMessageReadService;
     private final DoctorMessageWriteService doctorMessageWriteService;
+    private final DoctorMessageRuleReadService doctorMessageRuleReadService;
+    private final UserResService userResService;
 
     @Autowired
     public DoctorMessages(DoctorMessageReadService doctorMessageReadService,
                           DoctorMessageWriteService doctorMessageWriteService,
                           DoctorMessageRuleTemplateReadService doctorMessageRuleTemplateReadService,
-                          DoctorMessageRuleTemplateWriteService doctorMessageRuleTemplateWriteService) {
+                          DoctorMessageRuleTemplateWriteService doctorMessageRuleTemplateWriteService,
+                          DoctorMessageRuleReadService doctorMessageRuleReadService,
+                          UserResService userResService) {
         this.doctorMessageReadService = doctorMessageReadService;
         this.doctorMessageWriteService = doctorMessageWriteService;
         this.doctorMessageRuleTemplateReadService = doctorMessageRuleTemplateReadService;
         this.doctorMessageRuleTemplateWriteService = doctorMessageRuleTemplateWriteService;
+        this.doctorMessageRuleReadService = doctorMessageRuleReadService;
+        this.userResService = userResService;
     }
 
 
@@ -63,14 +82,39 @@ public class DoctorMessages {
      * @return
      */
     @RequestMapping(value = "/warn/messages", method = RequestMethod.GET)
-    public Paging<DoctorMessage> pagingWarnDoctorMessages(@RequestParam("pageNo") Integer pageNo,
+    public DoctorMessageDto pagingWarnDoctorMessages(@RequestParam("pageNo") Integer pageNo,
                                                       @RequestParam("pageSize") Integer pageSize,
                                                       @RequestParam Map<String, Object> criteria) {
         if (!isUserLogin()) {
-            return new Paging<>(0L, Collections.emptyList());
+            return new DoctorMessageDto(new Paging<>(0L, Collections.emptyList()), null);
         }
         criteria.put("userId", UserUtil.getUserId());
-        return RespHelper.or500(doctorMessageReadService.pagingWarnMessages(criteria, pageNo, pageSize));
+        criteria.put("isExpired", DoctorMessage.IsExpired.NOTEXPIRED);
+        Paging<DoctorMessage> paging = RespHelper.or500(doctorMessageReadService.pagingWarnMessages(criteria, pageNo, pageSize));
+        List<DoctorMessage> messages = paging.getData();
+
+        DoctorMessageDto msgDto = DoctorMessageDto.builder().build();
+        if (messages != null && messages.size() > 0){
+            messages.forEach(doctorMessage -> {
+                String urlPart;
+                if (Objects.equals(doctorMessage.getCategory(), Category.FATTEN_PIG_REMOVE.getKey())){
+                    urlPart = "?groupId=";
+                    msgDto.setListUrl("/group/list?farmId=" + doctorMessage.getFarmId() + "&searchFrom=MESSAGE");
+                }else if (Objects.equals(doctorMessage.getCategory(), Category.STORAGE_SHORTAGE.getKey())){
+                    urlPart = "?materialId=";
+                }else {
+                    urlPart = "?pigId=";
+                    if (Objects.equals(doctorMessage.getCategory(), Category.BOAR_ELIMINATE.getKey())) {
+                        msgDto.setListUrl("/boar/list?farmId=" + doctorMessage.getFarmId() + "&searchFrom=MESSAGE");
+                    } else {
+                        msgDto.setListUrl("/sow/list?farmId=" + doctorMessage.getFarmId() + "&searchFrom=MESSAGE");
+                    }
+                }
+                 doctorMessage.setUrl(doctorMessage.getUrl().concat(urlPart + doctorMessage.getBusinessId() + "&farmId=" + doctorMessage.getFarmId()));
+            });
+        }
+        msgDto.setPaging(paging);
+        return msgDto;
     }
 
     /**
@@ -114,11 +158,12 @@ public class DoctorMessages {
         if (message != null) {
             // 如果消息是未读, 将消息设置为已读
             if (Objects.equals(message.getStatus(), DoctorMessage.Status.NORMAL.getValue())) {
+                message.setIsExpired(DoctorMessage.IsExpired.EXPIRED.getValue());
                 message.setStatus(DoctorMessage.Status.READED.getValue());
                 doctorMessageWriteService.updateMessage(message);
             }
             // 查询未读消息的数量
-            message.setNoReadCount(RespHelper.or500(doctorMessageReadService.findNoReadCount(UserUtil.getUserId())));
+            //message.setNoReadCount(RespHelper.or500(doctorMessageReadService.findNoReadCount(UserUtil.getUserId())));
         }
         return message;
     }
@@ -169,7 +214,7 @@ public class DoctorMessages {
      * @param criteria
      * @return
      */
-    @RequestMapping(value = "/warn/templates", method = RequestMethod.GET)
+        @RequestMapping(value = "/warn/templates", method = RequestMethod.GET)
     public List<DoctorMessageRuleTemplate> listWarnTemplate(Map<String, Object> criteria) {
         criteria.put("types", ImmutableList.of(
                 DoctorMessageRuleTemplate.Type.WARNING.getValue(), DoctorMessageRuleTemplate.Type.ERROR.getValue()));
@@ -215,6 +260,55 @@ public class DoctorMessages {
     }
 
     /**
+     * 获取猪场中消息规则与相应猪只数,列表
+     * @return
+     */
+    @RequestMapping(value = "/warn/rule/list", method = RequestMethod.GET)
+    public List<OneLevelMessageDto> getRulePigCountByFarmId(@RequestParam("farmId") Long farmId) {
+        List<OneLevelMessageDto> list = Lists.newArrayList();
+        List<DoctorMessageRule> doctorMessageRules = RespHelper.or500(doctorMessageRuleReadService.findMessageRulesByCriteria(ImmutableMap.of("farmId", farmId, "types", ImmutableList.of(DoctorMessageRuleTemplate.Type.WARNING, DoctorMessageRuleTemplate.Type.ERROR))));
+
+        doctorMessageRules.forEach(doctorMessageRule -> {
+            Integer pigCount = 0;
+            if (Objects.equals(doctorMessageRule.getCategory(), Category.FATTEN_PIG_REMOVE.getKey())) {
+                Map<String, Object> criteriaMap = Maps.newHashMap();
+                criteriaMap.put("templateId", doctorMessageRule.getTemplateId());
+                criteriaMap.put("farmId", doctorMessageRule.getFarmId());
+                criteriaMap.put("isExpired", DoctorMessage.IsExpired.NOTEXPIRED.getValue());
+                criteriaMap.put("userId", UserUtil.getCurrentUser().getId());
+                criteriaMap.put("channel", Rule.Channel.SYSTEM.getValue());
+                criteriaMap.put("statuses", ImmutableList.of(DoctorMessage.Status.NORMAL.getValue(), DoctorMessage.Status.READED.getValue()));
+                List<DoctorMessage> messages = RespHelper.or500(doctorMessageReadService.findMessageByCriteria(criteriaMap));
+                for (DoctorMessage doctorMessage : messages) {
+                    try {
+                        Map<String, Object> map = JsonMapper.JSON_NON_DEFAULT_MAPPER.getMapper().readValue(doctorMessage.getData(), JacksonType.MAP_OF_OBJECT);
+                        pigCount += (Integer) map.get("quantity");
+                    } catch (Exception e) {
+                    }
+                }
+
+            } else if (!Objects.equals(doctorMessageRule.getCategory(), Category.STORAGE_SHORTAGE.getKey())) {
+                Map<String, Object> criteriaMap = Maps.newHashMap();
+                criteriaMap.put("templateId", doctorMessageRule.getTemplateId());
+                criteriaMap.put("farmId", doctorMessageRule.getFarmId());
+                criteriaMap.put("isExpired", DoctorMessage.IsExpired.NOTEXPIRED.getValue());
+                criteriaMap.put("userId", UserUtil.getCurrentUser().getId());
+                criteriaMap.put("channel", Rule.Channel.SYSTEM.getValue());
+                criteriaMap.put("statuses", ImmutableList.of(DoctorMessage.Status.NORMAL.getValue(), DoctorMessage.Status.READED.getValue()));
+                pigCount = RespHelper.or500(doctorMessageReadService.findMessageCountByCriteria(criteriaMap)).intValue();
+            }
+            DoctorMessageRule messageRule = BeanMapper.map(doctorMessageRule, DoctorMessageRule.class);
+            messageRule.setRuleValue("");
+            list.add(OneLevelMessageDto.builder()
+                    .doctorMessageRule(messageRule)
+                    .pigCount(pigCount)
+                    .build());
+
+        });
+        return list;
+    }
+
+    /**
      * 判断当前用户是否登录
      * @return
      *  如果登录: true
@@ -223,4 +317,5 @@ public class DoctorMessages {
     private boolean isUserLogin() {
         return UserUtil.getCurrentUser() != null;
     }
+
 }

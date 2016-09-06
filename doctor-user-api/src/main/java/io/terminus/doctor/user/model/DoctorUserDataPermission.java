@@ -1,8 +1,10 @@
 package io.terminus.doctor.user.model;
 
+import com.google.common.collect.Lists;
 import io.terminus.common.utils.Splitters;
 import lombok.Getter;
 import lombok.Setter;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -95,7 +97,11 @@ public class DoctorUserDataPermission implements Serializable {
 
     public void setFarmIds(String farmIds){
         this.farmIds = farmIds;
-        this.farmIdsList = Splitters.COMMA.splitToList(farmIds).stream().map(Long::valueOf).collect(Collectors.toList());
+        if (StringUtils.isNotBlank(farmIds)) {
+            this.farmIdsList = Splitters.COMMA.splitToList(farmIds).stream().map(Long::valueOf).collect(Collectors.toList());
+        } else {
+            this.farmIdsList = Lists.newArrayList();
+        }
 
     }
 
@@ -107,6 +113,10 @@ public class DoctorUserDataPermission implements Serializable {
 
     public void setBarnIds(String barnIds) {
         this.barnIds = barnIds;
-        this.barnIdsList = Splitters.COMMA.splitToList(barnIds).stream().map(Long::valueOf).collect(Collectors.toList());
+        if (StringUtils.isNotBlank(barnIds)) {
+            this.barnIdsList = Splitters.COMMA.splitToList(barnIds).stream().map(Long::valueOf).collect(Collectors.toList());
+        } else {
+            this.barnIdsList = Lists.newArrayList();
+        }
     }
 }
