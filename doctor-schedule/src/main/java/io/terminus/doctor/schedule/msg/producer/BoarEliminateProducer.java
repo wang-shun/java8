@@ -118,9 +118,19 @@ public class BoarEliminateProducer extends AbstractJobProducer {
                                 //日龄大于或等于预定值
                                 isSend = pigDto.getDateAge() > ruleValue.getValue().intValue() - 1;
                             } else if (key == 2) {
-                                DoctorPigEvent doctorPigEvent = getPigEventByEventType(pigDto.getDoctorPigEvents(), PigEvent.SEMEN.getKey());
-                                //精液活性小于预定值
-                                isSend = semenActive < ruleValue.getValue().floatValue();
+                                if (StringUtils.isNotBlank(pigDto.getExtraTrack())) {
+                                    try {
+                                        Map<String, Object> extraMap = MAPPER.readValue(pigDto.getExtraTrack(), JacksonType.MAP_OF_OBJECT);
+                                        if (StringUtils.isNotBlank((String) extraMap.get("semenWeight"))) {
+                                            Float semenWeight = Float.parseFloat((String) extraMap.get("semenWeight"));
+                                            //精液重量小于预定值
+                                            isSend = semenWeight < ruleValue.getValue().floatValue();
+                                        }
+                                    } catch (Exception e) {
+                                        log.error("[BoarEliminateProducer].get.semenWeight.fail, pigDto", pigDto);
+                                    }
+
+                                }
                             } else if (key == 3) {
                                 if (StringUtils.isNotBlank(pigDto.getExtraTrack())) {
                                     try {
