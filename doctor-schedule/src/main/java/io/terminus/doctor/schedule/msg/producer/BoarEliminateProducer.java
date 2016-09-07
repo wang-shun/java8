@@ -5,11 +5,14 @@ import com.google.api.client.util.Maps;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
 import io.terminus.common.utils.Splitters;
+import io.terminus.doctor.common.constants.JacksonType;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dto.DoctorPigInfoDto;
 import io.terminus.doctor.event.enums.DataRange;
+import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.model.DoctorPig;
+import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.service.DoctorPigReadService;
 import io.terminus.doctor.event.service.DoctorPigWriteService;
 import io.terminus.doctor.msg.dto.Rule;
@@ -102,14 +105,53 @@ public class BoarEliminateProducer extends AbstractJobProducer {
                 // 处理每个猪
                 for (int j = 0; boarPigs != null && j < boarPigs.size(); j++) {
                     DoctorPigInfoDto pigDto = boarPigs.get(j);
+                    //根据用户拥有的猪舍权限过滤拥有user
+                    List<SubUser> sUsers = filterSubUserBarnId(subUsers, pigDto.getBarnId());
                     // 公猪的updatedAt与当前时间差 (天)
-                    Double timeDiff = (double) (DateTime.now().minus(pigDto.getUpdatedAt().getTime()).getMillis() / 86400000);
-                    if (pigDto.getParity() != null && ruleValueMap.get(1) != null) {
-                        // 如果当前配种次数 大于 配置的次数
-                        if (pigDto.getParity() > ruleValueMap.get(1).getValue()) {
-                            messages.addAll(getMessage(pigDto, rule.getChannels(), ruleRole, subUsers, timeDiff, rule.getUrl()));
+                    Double timeDiff = getTimeDiff(new DateTime(pigDto.getUpdatedAt()));
+                    ruleValueMap.keySet().forEach(key -> {
+                        if (ruleValueMap.get(key) != null) {
+
+                            Boolean isSend = false;
+                            RuleValue ruleValue = ruleValueMap.get(key);
+                            if (key == 1) {
+                                //日龄大于或等于预定值
+                                isSend = pigDto.getDateAge() > ruleValue.getValue().intValue() - 1;
+                            } else if (key == 2) {
+                                if (StringUtils.isNotBlank(pigDto.getExtraTrack())) {
+                                    try {
+                                        Map<String, Object> extraMap = MAPPER.readValue(pigDto.getExtraTrack(), JacksonType.MAP_OF_OBJECT);
+                                        if (StringUtils.isNotBlank((String) extraMap.get("semenActive"))) {
+                                            Float semenActive = Float.parseFloat((String) extraMap.get("semenActive"));
+                                            //精液重量小于预定值
+                                            isSend = semenActive < ruleValue.getValue().floatValue();
+                                        }
+                                    } catch (Exception e) {
+                                        log.error("[BoarEliminateProducer].get.semenActive.fail, pigDto", pigDto);
+                                    }
+
+                                }
+                            } else if (key == 3) {
+                                if (StringUtils.isNotBlank(pigDto.getExtraTrack())) {
+                                    try {
+                                        Map<String, Object> extraMap = MAPPER.readValue(pigDto.getExtraTrack(), JacksonType.MAP_OF_OBJECT);
+                                        if (StringUtils.isNotBlank((String) extraMap.get("semenWeight"))) {
+                                            Float semenWeight = Float.parseFloat((String) extraMap.get("semenWeight"));
+                                            //精液重量小于预定值
+                                            isSend = semenWeight < ruleValue.getValue().floatValue();
+                                        }
+                                    } catch (Exception e) {
+                                        log.error("[BoarEliminateProducer].get.semenWeight.fail, pigDto", pigDto);
+                                    }
+
+                                }
+                            }
+                            if (isSend) {
+                                messages.addAll(getMessage(pigDto, rule.getChannels(), ruleRole, sUsers, timeDiff, rule.getUrl(), ruleValue.getDescribe() + ruleValue.getValue().toString()));
+                            }
                         }
-                    }
+                    });
+
                 }
             }
         }
@@ -121,11 +163,11 @@ public class BoarEliminateProducer extends AbstractJobProducer {
     /**
      * 创建消息
      */
-    private List<DoctorMessage> getMessage(DoctorPigInfoDto pigDto, String channels, DoctorMessageRuleRole ruleRole, List<SubUser> subUsers, Double timeDiff, String url) {
+    private List<DoctorMessage> getMessage(DoctorPigInfoDto pigDto, String channels, DoctorMessageRuleRole ruleRole, List<SubUser> subUsers, Double timeDiff, String url, String reason) {
         List<DoctorMessage> messages = Lists.newArrayList();
         // 创建消息
         Map<String, Object> jsonData = PigDtoFactory.getInstance().createPigMessage(pigDto, timeDiff, url);
-
+        jsonData.put("reason", reason);
         Splitters.COMMA.splitToList(channels).forEach(channel -> {
             try {
                 messages.addAll(createMessage(subUsers, ruleRole, Integer.parseInt(channel), MAPPER.writeValueAsString(jsonData)));
