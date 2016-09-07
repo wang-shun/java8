@@ -182,21 +182,4 @@ public class SowEliminateProducer extends AbstractJobProducer {
         log.info("母猪应淘汰消息产生 --- SowEliminateProducer 结束执行, 产生 {} 条消息", messages.size());
         return messages;
     }
-
-    /**
-     * 创建消息
-     */
-    private List<DoctorMessage> getMessage(DoctorPigInfoDto pigDto, String channels, DoctorMessageRuleRole ruleRole, List<SubUser> subUsers, Double timeDiff, String url) {
-        List<DoctorMessage> messages = Lists.newArrayList();
-        // 创建消息
-        Map<String, Object> jsonData = PigDtoFactory.getInstance().createPigMessage(pigDto, timeDiff, url);
-        Splitters.COMMA.splitToList(channels).forEach(channel -> {
-            try {
-                messages.addAll(createMessage(subUsers, ruleRole, Integer.parseInt(channel), MAPPER.writeValueAsString(jsonData)));
-            } catch (JsonProcessingException e) {
-                log.error("message produce error, cause by {}", Throwables.getStackTraceAsString(e));
-            }
-        });
-        return messages;
-    }
 }

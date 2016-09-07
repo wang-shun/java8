@@ -140,22 +140,4 @@ public class SowPregCheckProducer extends AbstractJobProducer {
             }
         }
     }
-
-        /**
-         * 创建消息
-         */
-    private List<DoctorMessage> getMessage(DoctorPigInfoDto pigDto, String channels, DoctorMessageRuleRole ruleRole, List<SubUser> subUsers, Double timeDiff, String url) {
-        List<DoctorMessage> messages = Lists.newArrayList();
-        // 创建消息
-        Map<String, Object> jsonData = PigDtoFactory.getInstance().createPigMessage(pigDto, timeDiff, url);
-
-        Splitters.COMMA.splitToList(channels).forEach(channel -> {
-            try {
-                messages.addAll(createMessage(subUsers, ruleRole, Integer.parseInt(channel), MAPPER.writeValueAsString(jsonData)));
-            } catch (JsonProcessingException e) {
-                log.error("message produce error, cause by {}", Throwables.getStackTraceAsString(e));
-            }
-        });
-        return messages;
-    }
 }

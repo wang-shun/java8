@@ -323,12 +323,12 @@ public abstract class AbstractProducer implements IProducer {
                         Map<String, Serializable> jsonContext = MAPPER.readValue(jsonData, JacksonType.MAP_OF_STRING);
                         String content = RespHelper.orServEx(doctorMessageTemplateReadService.getMessageContentWithCache(message.getMessageTemplate(), jsonContext));
                         Long businessId;
-                        if (StringUtils.isNotBlank((String) jsonContext.get("materialId"))) {
-                            businessId = Long.parseLong((String) jsonContext.get("materialId"));
-                        } else if (StringUtils.isNotBlank((String) jsonContext.get("groupId"))) {
-                            businessId = Long.parseLong((String) jsonContext.get("groupId"));
+                        if (jsonContext.get("materialId") != null) {
+                            businessId = (Long) jsonContext.get("materialId");
+                        } else if (jsonContext.get("groupId") != null) {
+                            businessId = (Long) jsonContext.get("groupId");
                         }else {
-                            businessId = Long.parseLong((String) jsonContext.get("pigId"));
+                            businessId = (Long) jsonContext.get("pigId");
                         }
                         message.setBusinessId(businessId);
                         message.setContent(content != null ? content.trim() : "");
@@ -337,8 +337,6 @@ public abstract class AbstractProducer implements IProducer {
                     }
 
                     messages.add(message);
-                    //如果之前已发送消息,则将之前消息置为已过期
-
                 }
             });
         }

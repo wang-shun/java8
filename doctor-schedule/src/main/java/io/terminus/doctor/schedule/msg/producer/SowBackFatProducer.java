@@ -118,7 +118,7 @@ public class SowBackFatProducer extends AbstractJobProducer {
                                 }
                                 if (isSend) {
                                     pigDto.setEventDate(doctorPigEvent.getEventAt());
-                                    messages.addAll(getMessage(pigDto, rule.getChannels(), ruleRole, sUsers, timeDiff, rule.getUrl(), ruleValue.getDescribe() + ruleValue.getValue()));
+                                    messages.addAll(getMessage(pigDto, rule.getChannels(), ruleRole, sUsers, timeDiff, rule.getUrl()));
                                 }
                             }
                         }
@@ -128,24 +128,6 @@ public class SowBackFatProducer extends AbstractJobProducer {
             }
         }
         log.info("背膘提示消息产生 --- SowBackFatProducer  结束执行, 产生 {} 条消息", messages.size());
-        return messages;
-    }
-
-    /**
-     * 创建消息
-     */
-    private List<DoctorMessage> getMessage(DoctorPigInfoDto pigDto, String channels, DoctorMessageRuleRole ruleRole, List<SubUser> subUsers, Double timeDiff, String url, String reason) {
-        List<DoctorMessage> messages = Lists.newArrayList();
-        // 创建消息
-        Map<String, Object> jsonData = PigDtoFactory.getInstance().createPigMessage(pigDto, timeDiff, url);
-        jsonData.put("reason", reason);
-        Splitters.COMMA.splitToList(channels).forEach(channel -> {
-            try {
-                messages.addAll(createMessage(subUsers, ruleRole, Integer.parseInt(channel), MAPPER.writeValueAsString(jsonData)));
-            } catch (JsonProcessingException e) {
-                log.error("message produce error, cause by {}", Throwables.getStackTraceAsString(e));
-            }
-        });
         return messages;
     }
 

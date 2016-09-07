@@ -122,17 +122,19 @@ public class SowBreedingProducer extends AbstractJobProducer {
                     //根据用户拥有的猪舍权限过滤拥有user
                     List<SubUser> sUsers = filterSubUserBarnId(subUsers, pigDto.getBarnId());
                     // 母猪的updatedAt与当前时间差 (天)
-                    Double timeDiff = getTimeDiff(getStatusDate(pigDto));
-                    // 获取配置的天数, 并判断
-                    if (ruleValueMap.get(1) != null) {
-                        // 记录每只猪的消息提醒
-                        if (!isMessage && Objects.equals(ruleTemplate.getType(), DoctorMessageRuleTemplate.Type.WARNING.getValue())) {
-                            recordPigMessage(pigDto, PigEvent.MATING, getStatusDate(pigDto), ruleValueMap.get(1).getLeftValue().intValue(),
-                                    PigStatus.Wean, PigStatus.KongHuai, PigStatus.Entry);
-                        }
+                    if (getStatusDate(pigDto) != null) {
+                        Double timeDiff = getTimeDiff(getStatusDate(pigDto));
+                        // 获取配置的天数, 并判断
+                        if (ruleValueMap.get(1) != null) {
+                            // 记录每只猪的消息提醒
+                            if (!isMessage && Objects.equals(ruleTemplate.getType(), DoctorMessageRuleTemplate.Type.WARNING.getValue())) {
+                                recordPigMessage(pigDto, PigEvent.MATING, getStatusDate(pigDto), ruleValueMap.get(1).getLeftValue().intValue(),
+                                        PigStatus.Wean, PigStatus.KongHuai, PigStatus.Entry);
+                            }
 
-                        if (isMessage && checkRuleValue(ruleValueMap.get(1), timeDiff)) {
-                            messages.addAll(getMessage(pigDto, rule.getChannels(), ruleRole, sUsers, timeDiff, rule.getUrl()));
+                            if (isMessage && checkRuleValue(ruleValueMap.get(1), timeDiff)) {
+                                messages.addAll(getMessage(pigDto, rule.getChannels(), ruleRole, sUsers, timeDiff, rule.getUrl()));
+                            }
                         }
                     }
                 }
@@ -140,21 +142,4 @@ public class SowBreedingProducer extends AbstractJobProducer {
         }
     }
 
-        /**
-         * 创建消息
-         */
-    private List<DoctorMessage> getMessage(DoctorPigInfoDto pigDto, String channels, DoctorMessageRuleRole ruleRole, List<SubUser> subUsers, Double timeDiff, String url) {
-        List<DoctorMessage> messages = Lists.newArrayList();
-        // 创建消息
-        Map<String, Object> jsonData = PigDtoFactory.getInstance().createPigMessage(pigDto, timeDiff, url);
-
-        Splitters.COMMA.splitToList(channels).forEach(channel -> {
-            try {
-                messages.addAll(createMessage(subUsers, ruleRole, Integer.parseInt(channel), MAPPER.writeValueAsString(jsonData)));
-            } catch (JsonProcessingException e) {
-                log.error("message produce error, cause by {}", Throwables.getStackTraceAsString(e));
-            }
-        });
-        return messages;
-    }
 }

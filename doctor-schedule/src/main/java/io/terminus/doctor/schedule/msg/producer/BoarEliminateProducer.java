@@ -122,13 +122,11 @@ public class BoarEliminateProducer extends AbstractJobProducer {
                                 if (doctorPigEvent != null && StringUtils.isNotBlank(doctorPigEvent.getExtra())) {
                                     try {
                                         Map<String, Object> extraMap = MAPPER.readValue(doctorPigEvent.getExtra(), JacksonType.MAP_OF_OBJECT);
-                                        if (StringUtils.isNotBlank((String) extraMap.get("semenActive"))) {
-                                            Float semenActive = Float.parseFloat((String) extraMap.get("semenActive"));
+                                            Double semenActive = (double) extraMap.get("semenActive");
                                             //精液重量小于预定值
-                                            isSend = semenActive < ruleValue.getValue().floatValue();
-                                        }
+                                            isSend = semenActive < ruleValue.getValue().doubleValue();
                                     } catch (Exception e) {
-                                        log.error("[BoarEliminateProducer].get.semenActive.fail, event", doctorPigEvent);
+                                        log.error("[BoarEliminateProducer].get.semenActive.fail, event{}",doctorPigEvent);
                                     }
 
                                 }
@@ -136,13 +134,11 @@ public class BoarEliminateProducer extends AbstractJobProducer {
                                 if (doctorPigEvent != null && StringUtils.isNotBlank(doctorPigEvent.getExtra())) {
                                     try {
                                         Map<String, Object> extraMap = MAPPER.readValue(doctorPigEvent.getExtra(), JacksonType.MAP_OF_OBJECT);
-                                        if (StringUtils.isNotBlank((String) extraMap.get("semenWeight"))) {
-                                            Float semenWeight = Float.parseFloat((String) extraMap.get("semenWeight"));
-                                            //精液重量小于预定值
-                                            isSend = semenWeight < ruleValue.getValue().floatValue();
-                                        }
+                                        Double semenActive = (double) extraMap.get("semenWeight");
+                                        //精液重量小于预定值
+                                        isSend = semenActive < ruleValue.getValue().doubleValue();
                                     } catch (Exception e) {
-                                        log.error("[BoarEliminateProducer].get.semenWeight.fail, event", doctorPigEvent);
+                                        log.error("[BoarEliminateProducer].get.semenWeight.fail, event{}", doctorPigEvent);
                                     }
 
                                 }
@@ -162,20 +158,4 @@ public class BoarEliminateProducer extends AbstractJobProducer {
         return messages;
     }
 
-    /**
-     * 创建消息
-     */
-    private List<DoctorMessage> getMessage(DoctorPigInfoDto pigDto, String channels, DoctorMessageRuleRole ruleRole, List<SubUser> subUsers, Double timeDiff, String url) {
-        List<DoctorMessage> messages = Lists.newArrayList();
-        // 创建消息
-        Map<String, Object> jsonData = PigDtoFactory.getInstance().createPigMessage(pigDto, timeDiff, url);
-        Splitters.COMMA.splitToList(channels).forEach(channel -> {
-            try {
-                messages.addAll(createMessage(subUsers, ruleRole, Integer.parseInt(channel), MAPPER.writeValueAsString(jsonData)));
-            } catch (JsonProcessingException e) {
-                log.error("message produce error, cause by {}", Throwables.getStackTraceAsString(e));
-            }
-        });
-        return messages;
-    }
 }

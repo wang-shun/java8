@@ -1,9 +1,11 @@
 package io.terminus.doctor.schedule.msg.producer;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.google.api.client.util.Lists;
 import com.google.common.base.Throwables;
 import io.terminus.common.utils.Arguments;
+import io.terminus.common.utils.Splitters;
 import io.terminus.doctor.common.constants.JacksonType;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dto.DoctorPigInfoDto;
@@ -19,7 +21,9 @@ import io.terminus.doctor.event.service.DoctorPigWriteService;
 import io.terminus.doctor.msg.dto.RuleValue;
 import io.terminus.doctor.msg.dto.SubUser;
 import io.terminus.doctor.msg.enums.Category;
+import io.terminus.doctor.msg.model.DoctorMessage;
 import io.terminus.doctor.msg.model.DoctorMessageRule;
+import io.terminus.doctor.msg.model.DoctorMessageRuleRole;
 import io.terminus.doctor.msg.producer.AbstractProducer;
 import io.terminus.doctor.msg.service.DoctorMessageReadService;
 import io.terminus.doctor.msg.service.DoctorMessageRuleReadService;
@@ -27,6 +31,7 @@ import io.terminus.doctor.msg.service.DoctorMessageRuleRoleReadService;
 import io.terminus.doctor.msg.service.DoctorMessageRuleTemplateReadService;
 import io.terminus.doctor.msg.service.DoctorMessageTemplateReadService;
 import io.terminus.doctor.msg.service.DoctorMessageWriteService;
+import io.terminus.doctor.schedule.msg.producer.factory.PigDtoFactory;
 import io.terminus.doctor.user.model.DoctorUserDataPermission;
 import io.terminus.doctor.user.service.DoctorUserDataPermissionReadService;
 import lombok.extern.slf4j.Slf4j;
@@ -240,7 +245,7 @@ public abstract class AbstractJobProducer extends AbstractProducer {
             }
             return dateTime != null ? dateTime : new DateTime(pigDto.getUpdatedAt());
         } catch (Exception e) {
-            log.error("SowPregCheckProducer get breeding date failed, pigDto is {}", pigDto);
+            log.error("SowPregCheckProducer get status date failed, pigDto is {}", pigDto);
         }
         return null;
     }
@@ -323,6 +328,24 @@ public abstract class AbstractJobProducer extends AbstractProducer {
             log.error("get.timeDiff.fail, eventTime", eventTime);
         }
         return null;
+    }
+
+    /**
+     * 创建消息
+     */
+    protected List<DoctorMessage> getMessage(DoctorPigInfoDto pigDto, String channels, DoctorMessageRuleRole ruleRole, List<SubUser> subUsers, Double timeDiff, String url) {
+        List<DoctorMessage> messages = com.google.common.collect.Lists.newArrayList();
+        // 创建消息
+        Map<String, Object> jsonData = PigDtoFactory.getInstance().createPigMessage(pigDto, timeDiff, url);
+
+        Splitters.COMMA.splitToList(channels).forEach(channel -> {
+            try {
+                messages.addAll(createMessage(subUsers, ruleRole, Integer.parseInt(channel), MAPPER.writeValueAsString(jsonData)));
+            } catch (JsonProcessingException e) {
+                log.error("message produce error, cause by {}", Throwables.getStackTraceAsString(e));
+            }
+        });
+        return messages;
     }
 
 }
