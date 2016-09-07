@@ -42,7 +42,7 @@ import java.util.stream.Collectors;
 
 /**
  * Desc: 公猪应淘汰提示
- *          1. 配种次数
+ * 1. 配种次数
  * Mail: chk@terminus.io
  * Created by icemimosa
  * Date: 16/6/6
@@ -110,38 +110,39 @@ public class BoarEliminateProducer extends AbstractJobProducer {
                     // 公猪的updatedAt与当前时间差 (天)
                     Double timeDiff = getTimeDiff(new DateTime(pigDto.getBirthDay()));
                     ruleValueMap.keySet().forEach(key -> {
+                        //取出最近一次的采精事件
+                        DoctorPigEvent doctorPigEvent = getPigEventByEventType(pigDto.getDoctorPigEvents(), PigEvent.SEMEN.getKey());
                         if (ruleValueMap.get(key) != null) {
-
                             Boolean isSend = false;
                             RuleValue ruleValue = ruleValueMap.get(key);
                             if (key == 1) {
                                 //日龄大于或等于预定值
                                 isSend = checkRuleValue(ruleValue, timeDiff);
                             } else if (key == 2) {
-                                if (StringUtils.isNotBlank(pigDto.getExtraTrack())) {
+                                if (doctorPigEvent != null && StringUtils.isNotBlank(doctorPigEvent.getExtra())) {
                                     try {
-                                        Map<String, Object> extraMap = MAPPER.readValue(pigDto.getExtraTrack(), JacksonType.MAP_OF_OBJECT);
+                                        Map<String, Object> extraMap = MAPPER.readValue(doctorPigEvent.getExtra(), JacksonType.MAP_OF_OBJECT);
                                         if (StringUtils.isNotBlank((String) extraMap.get("semenActive"))) {
                                             Float semenActive = Float.parseFloat((String) extraMap.get("semenActive"));
                                             //精液重量小于预定值
                                             isSend = semenActive < ruleValue.getValue().floatValue();
                                         }
                                     } catch (Exception e) {
-                                        log.error("[BoarEliminateProducer].get.semenActive.fail, pigDto", pigDto);
+                                        log.error("[BoarEliminateProducer].get.semenActive.fail, event", doctorPigEvent);
                                     }
 
                                 }
                             } else if (key == 3) {
-                                if (StringUtils.isNotBlank(pigDto.getExtraTrack())) {
+                                if (doctorPigEvent != null && StringUtils.isNotBlank(doctorPigEvent.getExtra())) {
                                     try {
-                                        Map<String, Object> extraMap = MAPPER.readValue(pigDto.getExtraTrack(), JacksonType.MAP_OF_OBJECT);
+                                        Map<String, Object> extraMap = MAPPER.readValue(doctorPigEvent.getExtra(), JacksonType.MAP_OF_OBJECT);
                                         if (StringUtils.isNotBlank((String) extraMap.get("semenWeight"))) {
                                             Float semenWeight = Float.parseFloat((String) extraMap.get("semenWeight"));
                                             //精液重量小于预定值
                                             isSend = semenWeight < ruleValue.getValue().floatValue();
                                         }
                                     } catch (Exception e) {
-                                        log.error("[BoarEliminateProducer].get.semenWeight.fail, pigDto", pigDto);
+                                        log.error("[BoarEliminateProducer].get.semenWeight.fail, event", doctorPigEvent);
                                     }
 
                                 }

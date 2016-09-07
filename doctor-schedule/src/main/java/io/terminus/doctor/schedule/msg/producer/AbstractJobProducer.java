@@ -322,7 +322,7 @@ public abstract class AbstractJobProducer extends AbstractProducer {
         } catch (Exception e) {
             log.error("get.timeDiff.fail, eventTime", eventTime);
         }
-        return -1d;
+        return null;
     }
 
 }

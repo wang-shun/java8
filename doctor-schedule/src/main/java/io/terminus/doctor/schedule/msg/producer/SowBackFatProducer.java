@@ -96,26 +96,30 @@ public class SowBackFatProducer extends AbstractJobProducer {
                     List<SubUser> sUsers = filterSubUserBarnId(subUsers, pigDto.getBarnId());
 
                     ruleValueMap.keySet().forEach(key -> {
-                        Double timeDiff ;
+                        Double timeDiff = null;
                         if (ruleValueMap.get(key) != null) {
                             Boolean isSend = false;
                             RuleValue ruleValue = ruleValueMap.get(key);
                             DoctorPigEvent doctorPigEvent = getMatingPigEvent(pigDto);
-                            if (key == 1 || key == 2 || key == 3) {
-                                timeDiff = getTimeDiff(new DateTime(doctorPigEvent.getEventAt()));
-                                if (filterPigCondition(pigDto) && checkRuleValue(ruleValue, timeDiff)) {
-                                    isSend = true;
-                                }
-                            } else {
-                                timeDiff = getTimeDiff(getDateTimeByEventType(pigDto.getDoctorPigEvents(), PigEvent.WEAN.getKey()));
-                                if ( timeDiff == 0.0) {
-                                    isSend = true;
-                                }
+                            if (doctorPigEvent != null) {
+                                if (key == 1 || key == 2 || key == 3) {
+                                    timeDiff = getTimeDiff(new DateTime(doctorPigEvent.getEventAt()));
+                                    if (filterPigCondition(pigDto) && checkRuleValue(ruleValue, timeDiff)) {
+                                        isSend = true;
+                                    }
+                                } else {
+                                    if (getStatusDate(pigDto) != null) {
+                                        timeDiff = getTimeDiff(getStatusDate(pigDto));
+                                        if (Objects.equals(timeDiff, 0d)) {
+                                            isSend = true;
+                                        }
+                                    }
 
-                            }
-                            if (isSend) {
-                                pigDto.setEventDate(doctorPigEvent.getEventAt());
-                                messages.addAll(getMessage(pigDto, rule.getChannels(), ruleRole, sUsers, timeDiff, rule.getUrl(), ruleValue.getDescribe()+ruleValue.getValue()));
+                                }
+                                if (isSend) {
+                                    pigDto.setEventDate(doctorPigEvent.getEventAt());
+                                    messages.addAll(getMessage(pigDto, rule.getChannels(), ruleRole, sUsers, timeDiff, rule.getUrl(), ruleValue.getDescribe() + ruleValue.getValue()));
+                                }
                             }
                         }
                     });

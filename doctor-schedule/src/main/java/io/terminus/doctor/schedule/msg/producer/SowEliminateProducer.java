@@ -140,6 +140,7 @@ public class SowEliminateProducer extends AbstractJobProducer {
                                             && !Objects.equals(doctorPigEvent.getPregCheckResult(), PregCheckResult.YANG.getKey())).count();
                                     //累计返情、流产、阴性大于或等于预定值
                                     isSend = count > ruleValue.getValue().intValue() - 1;
+
                                 }
                             } else if (key == 4) {
                                 if (pigDto.getDoctorPigEvents() != null) {
