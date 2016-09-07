@@ -614,6 +614,17 @@
         limit #{count},1
     </select>
 
+    <select id="findByIds" parameterType="list" resultMap="DoctorPigEventMap">
+        SELECT
+        <include refid="cols_all"/>
+        FROM
+        <include refid="tb"/>
+        WHERE `id` IN
+        <foreach collection="list" item="i" open="(" close=")" separator=",">
+            #{i}
+        </foreach>
+    </select>
+
     <delete id="deleteByFarmId" parameterType="long">
         DELETE FROM
         <include refid="tb"/>

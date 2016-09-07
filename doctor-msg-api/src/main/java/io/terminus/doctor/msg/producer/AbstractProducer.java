@@ -3,9 +3,14 @@ package io.terminus.doctor.msg.producer;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Stopwatch;
+import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import io.terminus.common.model.Paging;
 import io.terminus.common.utils.JsonMapper;
+import io.terminus.doctor.common.constants.JacksonType;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.msg.dto.Rule;
 import io.terminus.doctor.msg.dto.RuleValue;
@@ -130,6 +135,8 @@ public abstract class AbstractProducer implements IProducer {
                     }
                     // 获取信息
                     log.info("[AbstractProducer] {} -> 预警消息产生", ruleTemplate.getName());
+                    //将之前消息置为无效
+                    setMessageIsExpired(messageRule);
                     DoctorMessageRuleRole ruleRole = DoctorMessageRuleRole.builder()
                             .ruleId(messageRule.getId())
                             .templateId(messageRule.getTemplateId())
@@ -216,14 +223,16 @@ public abstract class AbstractProducer implements IProducer {
         }
         // 1. 值类型
         if (Objects.equals(RuleValue.RuleType.VALUE.getValue(), ruleValue.getRuleType())) {
-            return Objects.equals(ruleValue.getValue(), value);
+            if (value > ruleValue.getValue()){
+                return true;
+            }
         }
         // 2. 值范围类型
         if (Objects.equals(RuleValue.RuleType.VALUE_RANGE.getValue(), ruleValue.getRuleType())) {
-            if (ruleValue.getLeftValue() != null && value <= ruleValue.getLeftValue()) {
+            if (ruleValue.getLeftValue() != null && value < ruleValue.getLeftValue()) {
                 return false;
             }
-            if (ruleValue.getRightValue() != null && value >= ruleValue.getRightValue()) {
+            if (ruleValue.getRightValue() != null && value > ruleValue.getRightValue()) {
                 return false;
             }
             return true;
@@ -298,6 +307,7 @@ public abstract class AbstractProducer implements IProducer {
                             .userId(subUser.getUserId())
                             .templateId(ruleRole.getTemplateId())
                             .templateName(template.getName())
+                            .isExpired(DoctorMessage.IsExpired.NOTEXPIRED.getValue())
                             .messageTemplate(getTemplateName(template.getMessageTemplate(), channel))
                             .type(template.getType())
                             .category(template.getCategory())
@@ -310,14 +320,25 @@ public abstract class AbstractProducer implements IProducer {
                             .build();
                     // 模板编译
                     try{
-                        Map<String, Serializable> jsonContext = MAPPER.readValue(jsonData, Map.class);
+                        Map<String, Serializable> jsonContext = MAPPER.readValue(jsonData, JacksonType.MAP_OF_STRING);
                         String content = RespHelper.orServEx(doctorMessageTemplateReadService.getMessageContentWithCache(message.getMessageTemplate(), jsonContext));
+                        Long businessId;
+                        if (StringUtils.isNotBlank((String) jsonContext.get("wareHouseId"))) {
+                            businessId = Long.parseLong((String) jsonContext.get("wareHouseId"));
+                        } else if (StringUtils.isNotBlank((String) jsonContext.get("groupId"))) {
+                            businessId = Long.parseLong((String) jsonContext.get("groupId"));
+                        }else {
+                            businessId = Long.parseLong((String) jsonContext.get("pigId"));
+                        }
+                        message.setBusinessId(businessId);
                         message.setContent(content != null ? content.trim() : "");
                     } catch (Exception e) {
-                        log.error("compile message template failed, template name is {}, json map is {}", message.getMessageTemplate(), jsonData);
+                        log.error("compile message template failed,cause by {}, template name is {}, json map is {}", Throwables.getStackTraceAsString(e), message.getMessageTemplate(), jsonData);
                     }
 
                     messages.add(message);
+                    //如果之前已发送消息,则将之前消息置为已过期
+
                 }
             });
         }
@@ -434,5 +455,29 @@ public abstract class AbstractProducer implements IProducer {
             }
         }
         return page;
+    }
+
+    /**
+     * 将之前的消息置为无效
+     */
+    protected void setMessageIsExpired(DoctorMessageRule messageRule) {
+        for (int i = 0; ; i++) {
+            Map<String, Object> map = Maps.newHashMap();
+            map.put("templateId", messageRule.getTemplateId());
+            map.put("farmId", messageRule.getFarmId());
+            map.put("isExpired", DoctorMessage.IsExpired.NOTEXPIRED.getValue());
+            Paging<DoctorMessage> messagePaging = RespHelper.or500(doctorMessageReadService.pagingWarnMessages(map, i + 1, 100));
+            List<DoctorMessage> messages = messagePaging.getData();
+            if (messages != null && messages.size() > 0) {
+                messages.forEach(doctorMessage -> {
+                    doctorMessage.setIsExpired(DoctorMessage.IsExpired.EXPIRED.getValue());
+                    doctorMessageWriteService.updateMessage(doctorMessage);
+                });
+            }
+            if (messagePaging.getData().size() < 100) {
+                break;
+            }
+        }
+
     }
 }

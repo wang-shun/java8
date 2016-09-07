@@ -131,6 +131,16 @@ public class DoctorMessage implements Serializable {
     private Date updatedAt;
 
     /**
+     * 消息是否过期: 0 未过期、1 过期
+     */
+    private Integer isExpired;
+
+    /**
+     * 消息对应的操作id: 猪id、猪群id、物料id
+     */
+    private Long businessId;
+
+    /**
      * 状态枚举值
      */
     public enum Status {
@@ -147,6 +157,22 @@ public class DoctorMessage implements Serializable {
         private String describe;
 
         Status(Integer value, String describe) {
+            this.value = value;
+            this.describe = describe;
+        }
+    }
+
+    public enum IsExpired {
+        NOTEXPIRED(0, "未过期"),
+        EXPIRED(1, "已过期");
+
+        @Getter
+        private Integer value;
+
+        @Getter
+        private String describe;
+
+        IsExpired(Integer value, String describe) {
             this.value = value;
             this.describe = describe;
         }

@@ -1,7 +1,9 @@
 package io.terminus.doctor.schedule.msg.producer.factory;
 
 import com.google.api.client.util.Maps;
+import com.google.common.base.Throwables;
 import io.terminus.common.utils.JsonMapper;
+import io.terminus.doctor.common.constants.JacksonType;
 import io.terminus.doctor.event.dto.DoctorPigInfoDto;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -48,9 +50,11 @@ public class PigDtoFactory {
         jsonData.put("weight", pigDto.getWeight());
         jsonData.put("parity", pigDto.getParity());
         jsonData.put("matingDate", getBreedingDate(pigDto));
-        jsonData.put("judgePregDate", getBirthDate(pigDto));
         jsonData.put("timeDiff", timeDiff);
         jsonData.put("url", url);
+        if (pigDto.getOperatorName() != null) {
+            jsonData.put("operatorName", pigDto.getOperatorName());
+        }
         return jsonData;
     }
 
@@ -62,41 +66,43 @@ public class PigDtoFactory {
         try {
             // @see DoctorMatingDto
             if (StringUtils.isNotBlank(pigDto.getExtraTrack())) {
-                Long breedingDate = (Long) JsonMapper.JSON_NON_DEFAULT_MAPPER.getMapper()
-                        .readValue(pigDto.getExtraTrack(), Map.class).get("matingDate");
-                return DateTimeFormat.forPattern("yyyy-MM-dd").print(breedingDate);
+                Map<String, Object> map = JsonMapper.JSON_NON_DEFAULT_MAPPER.getMapper().readValue(pigDto.getExtraTrack(), JacksonType.MAP_OF_OBJECT);
+                if (map.get("matingDate") != null){
+                    return DateTimeFormat.forPattern("yyyy-MM-dd").print((Long) map.get("matingDate"));
+                }
+
             }
         } catch (Exception e) {
-            log.error("[PigDtoFactory] get birth date failed, pigDto is {}", pigDto);
+            log.error("[PigDtoFactory] get Breeding date failed, pigDto is {}", pigDto);
         }
         return "";
     }
 
-    /**
-     * 获取预产期
-     */
-    public String getBirthDate(DoctorPigInfoDto pigDto) {
-        // 获取预产期
-        try{
-            DateTimeFormatter formatter = DateTimeFormat.forPattern("yyyy-MM-dd");
-            if (StringUtils.isNotBlank(pigDto.getExtraTrack())) {
-                Map map = JsonMapper.JSON_NON_DEFAULT_MAPPER.getMapper().readValue(pigDto.getExtraTrack(), Map.class);
-                // @see DoctorMatingDto
-                Long dateMillis = (Long) map.get("judgePregDate");
-                if (dateMillis != null) {
-                    return formatter.print(dateMillis);
-                } else {
-                    // 获取配种日期
-                    dateMillis = (Long) map.get("matingDate");
-                    if (dateMillis != null) {
-                        // 配种日期 + 3 个月返回
-                        return formatter.print(new DateTime(dateMillis).plusMonths(3));
-                    }
-                }
-            }
-        } catch (Exception e) {
-            log.error("[PigDtoFactory] get birth date failed, pigDto is {}", pigDto);
-        }
-        return "";
-    }
+//    /**
+//     * 获取预产期
+//     */
+//    public String getBirthDate(DoctorPigInfoDto pigDto) {
+//        // 获取预产期
+//        try{
+//            DateTimeFormatter formatter = DateTimeFormat.forPattern("yyyy-MM-dd");
+//            if (StringUtils.isNotBlank(pigDto.getExtraTrack())) {
+//                Map map = JsonMapper.JSON_NON_DEFAULT_MAPPER.getMapper().readValue(pigDto.getExtraTrack(), Map.class);
+//                // @see DoctorMatingDto
+//                Long dateMillis = (Long) map.get("judgePregDate");
+//                if (dateMillis != null) {
+//                    return formatter.print(dateMillis);
+//                } else {
+//                    // 获取配种日期
+//                    dateMillis = (Long) map.get("matingDate");
+//                    if (dateMillis != null) {
+//                        // 配种日期 + 3 个月返回
+//                        return formatter.print(new DateTime(dateMillis).plusMonths(3));
+//                    }
+//                }
+//            }
+//        } catch (Exception e) {
+//            log.error("[PigDtoFactory] get birth date failed, pigDto is {}", pigDto);
+//        }
+//        return "";
+//    }
 }

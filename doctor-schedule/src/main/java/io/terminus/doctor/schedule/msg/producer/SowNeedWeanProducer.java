@@ -114,18 +114,20 @@ public class SowNeedWeanProducer extends AbstractJobProducer {
                 // 处理每个猪
                 for (int j = 0; pigs != null && j < pigs.size(); j++) {
                     DoctorPigInfoDto pigDto = pigs.get(j);
+                    //根据用户拥有的猪舍权限过滤拥有user
+                    List<SubUser> sUsers = filterSubUserBarnId(subUsers, pigDto.getBarnId());
                     // 母猪的updatedAt与当前时间差 (天)
-                    Double timeDiff = (double) (DateTime.now().minus(getFarrowingDate(pigDto).getMillis()).getMillis() / 86400000);
+                    Double timeDiff = getTimeDiff(getFarrowingDate(pigDto));
                     // 1. 哺乳状态日期判断 -> id:1
                     if (ruleValueMap.get(1) != null) {
                         if (!isMessage && Objects.equals(ruleTemplate.getType(), DoctorMessageRuleTemplate.Type.WARNING.getValue())) {
                             // 记录每只猪的消息提醒
-                            recordPigMessage(pigDto, PigEvent.WEAN, getFarrowingDate(pigDto), ruleValueMap.get(1).getValue().intValue(),
+                            recordPigMessage(pigDto, PigEvent.WEAN, getFarrowingDate(pigDto), ruleValueMap.get(1).getLeftValue().intValue(),
                                     PigStatus.FEED);
                         }
 
-                        if (isMessage && DateTime.now().minusDays(ruleValueMap.get(1).getValue().intValue()).isAfter(getFarrowingDate(pigDto))) {
-                            messages.addAll(getMessage(pigDto, rule.getChannels(), ruleRole, subUsers, timeDiff, rule.getUrl()));
+                        if (isMessage && checkRuleValue(ruleValueMap.get(1), timeDiff)) {
+                            messages.addAll(getMessage(pigDto, rule.getChannels(), ruleRole, sUsers, timeDiff, rule.getUrl()));
                         }
                     }
                 }

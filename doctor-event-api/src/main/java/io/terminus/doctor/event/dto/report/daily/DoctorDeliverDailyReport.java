@@ -39,11 +39,17 @@ public class DoctorDeliverDailyReport implements Serializable {
      */
     private int black;
 
+    /**
+     * 分娩活仔均重(kg)
+     */
+    private double avgWeight;
+
     public void addDeliverCount(DoctorDeliverDailyReport dto){
         this.nest += dto.getNest();
         this.live += dto.getLive();
         this.health += dto.getHealth();
         this.weak += dto.getWeak();
         this.black += dto.getBlack();
+        this.avgWeight = dto.getAvgWeight();
     }
 }

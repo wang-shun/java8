@@ -41,4 +41,9 @@ public class SubUser implements Serializable {
      */
     private List<Long> farmIds;
 
+    /**
+     * 有权限的猪舍
+     */
+    private List<Long> barnIds;
+
 }

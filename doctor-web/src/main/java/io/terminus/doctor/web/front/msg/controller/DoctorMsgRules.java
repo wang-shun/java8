@@ -173,4 +173,9 @@ public class DoctorMsgRules {
         Preconditions.checkNotNull(roleId, "template.roleId.not.null");
         return RespHelper.or500(doctorMessageRuleRoleWriteService.relateRuleRolesByRoleId(roleId, ruleIds));
     }
+
+    @RequestMapping(value = "/relative/farmId")
+    public Boolean relateRuleFarmByFarmId(@RequestParam("farmId") Long farmId){
+        return RespHelper.or500(doctorMessageRuleWriteService.initTemplate(farmId));
+    }
 }
