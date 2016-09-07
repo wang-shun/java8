@@ -260,6 +260,15 @@ public class DoctorPigEvent implements Serializable {
 
     private String remark;
 
+    /**
+     * 事件操作人, 不一定是录入者
+     */
+    private Long operatorId;
+    /**
+     * 事件操作人, 不一定是录入者
+     */
+    private String operatorName;
+
     private Long creatorId;
 
     private String creatorName;

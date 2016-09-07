@@ -2,6 +2,7 @@ package io.terminus.doctor.event.dto.event.sow;
 
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.dto.event.AbstractPigEventInputDto;
+import io.terminus.doctor.event.enums.MatingType;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -41,8 +42,6 @@ public class DoctorMatingDto extends AbstractPigEventInputDto implements Seriali
      */
     private Integer matingType; // 配种类型
 
-    private String matingStaff; // 配种人员
-
     private String mattingMark; // 配种mark
 
     @Override
@@ -53,6 +52,12 @@ public class DoctorMatingDto extends AbstractPigEventInputDto implements Seriali
         }
         if(judgePregDate != null){
             map.put("预产日期", DateUtil.toDateString(judgePregDate));
+        }
+        if(matingType != null){
+            MatingType e = MatingType.from(matingType);
+            if(e != null){
+                map.put("配种类型", e.getDesc());
+            }
         }
         return map;
     }

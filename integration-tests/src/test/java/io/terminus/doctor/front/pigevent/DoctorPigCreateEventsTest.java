@@ -577,7 +577,7 @@ public class DoctorPigCreateEventsTest extends BaseFrontWebTest {
                 .param("pigId", pigId).param("eventType", PigEvent.MATING.getKey())
                 .param("sowInfoDtoJson", JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(DoctorMatingDto.builder()
                         .matingDate(DateTime.now().toDate()).judgePregDate(DateTime.now().plusDays(114).toDate()).matingType(MatingType.MANUAL.getKey())
-                        .matingStaff("staff").mattingMark("matingMark").matingBoarPigId(boarId)
+                        .mattingMark("matingMark").matingBoarPigId(boarId)
                         .build())).httpEntity();
 
         Long result = this.restTemplate.postForObject(url, httpEntity, Long.class);
