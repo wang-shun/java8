@@ -57,7 +57,7 @@ public class MessageJob {
                 return;
             }
             log.info("msg message consume fired");
-            msgManager.consumeMsg();
+            //msgManager.consumeMsg();
             log.info("msg message consume end");
         } catch (Exception e) {
             log.error("msg message consume failed, cause by {}", Throwables.getStackTraceAsString(e));
