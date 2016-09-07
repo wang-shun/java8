@@ -108,7 +108,7 @@ public class BoarEliminateProducer extends AbstractJobProducer {
                     //根据用户拥有的猪舍权限过滤拥有user
                     List<SubUser> sUsers = filterSubUserBarnId(subUsers, pigDto.getBarnId());
                     // 公猪的updatedAt与当前时间差 (天)
-                    Double timeDiff = getTimeDiff(new DateTime(pigDto.getUpdatedAt()));
+                    Double timeDiff = getTimeDiff(new DateTime(pigDto.getBirthDay()));
                     ruleValueMap.keySet().forEach(key -> {
                         if (ruleValueMap.get(key) != null) {
 
@@ -116,7 +116,7 @@ public class BoarEliminateProducer extends AbstractJobProducer {
                             RuleValue ruleValue = ruleValueMap.get(key);
                             if (key == 1) {
                                 //日龄大于或等于预定值
-                                isSend = pigDto.getDateAge() > ruleValue.getValue().intValue() - 1;
+                                isSend = checkRuleValue(ruleValue, timeDiff);
                             } else if (key == 2) {
                                 if (StringUtils.isNotBlank(pigDto.getExtraTrack())) {
                                     try {
@@ -147,7 +147,8 @@ public class BoarEliminateProducer extends AbstractJobProducer {
                                 }
                             }
                             if (isSend) {
-                                messages.addAll(getMessage(pigDto, rule.getChannels(), ruleRole, sUsers, timeDiff, rule.getUrl(), ruleValue.getDescribe() + ruleValue.getValue().toString()));
+                                pigDto.setReason(ruleValue.getDescribe() + ruleValue.getValue().toString());
+                                messages.addAll(getMessage(pigDto, rule.getChannels(), ruleRole, sUsers, timeDiff, rule.getUrl()));
                             }
                         }
                     });
@@ -163,11 +164,10 @@ public class BoarEliminateProducer extends AbstractJobProducer {
     /**
      * 创建消息
      */
-    private List<DoctorMessage> getMessage(DoctorPigInfoDto pigDto, String channels, DoctorMessageRuleRole ruleRole, List<SubUser> subUsers, Double timeDiff, String url, String reason) {
+    private List<DoctorMessage> getMessage(DoctorPigInfoDto pigDto, String channels, DoctorMessageRuleRole ruleRole, List<SubUser> subUsers, Double timeDiff, String url) {
         List<DoctorMessage> messages = Lists.newArrayList();
         // 创建消息
         Map<String, Object> jsonData = PigDtoFactory.getInstance().createPigMessage(pigDto, timeDiff, url);
-        jsonData.put("reason", reason);
         Splitters.COMMA.splitToList(channels).forEach(channel -> {
             try {
                 messages.addAll(createMessage(subUsers, ruleRole, Integer.parseInt(channel), MAPPER.writeValueAsString(jsonData)));

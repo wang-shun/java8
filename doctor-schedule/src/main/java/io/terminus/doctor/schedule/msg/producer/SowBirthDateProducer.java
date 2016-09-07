@@ -11,6 +11,7 @@ import io.terminus.doctor.event.enums.DataRange;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.model.DoctorPig;
+import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.service.DoctorPigReadService;
 import io.terminus.doctor.event.service.DoctorPigWriteService;
 import io.terminus.doctor.msg.dto.Rule;
@@ -117,7 +118,8 @@ public class SowBirthDateProducer extends AbstractJobProducer {
                     //根据用户拥有的猪舍权限过滤拥有user
                     List<SubUser> sUsers = filterSubUserBarnId(subUsers, pigDto.getBarnId());
                     // 母猪的updatedAt与当前时间差 (天)
-                    Double timeDiff = getTimeDiff(getMatingDate(pigDto));
+                    DoctorPigEvent doctorPigEvent = getMatingPigEvent(pigDto);
+                    Double timeDiff = getTimeDiff(new DateTime(doctorPigEvent.getEventAt()));
 
                     if (ruleValueMap.get(1) != null) {
                         if (!isMessage && Objects.equals(ruleTemplate.getType(), DoctorMessageRuleTemplate.Type.WARNING.getValue())) {
@@ -128,6 +130,7 @@ public class SowBirthDateProducer extends AbstractJobProducer {
                                     PigStatus.Pregnancy);
                         }
                         if (isMessage && checkRuleValue(ruleValueMap.get(1), timeDiff)) {
+                            pigDto.setEventDate(doctorPigEvent.getEventAt());
                             messages.addAll(getMessage(pigDto, rule.getChannels(), ruleRole, sUsers, timeDiff, rule.getUrl()));
                         }
 

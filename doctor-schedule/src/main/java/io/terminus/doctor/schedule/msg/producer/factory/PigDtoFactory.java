@@ -55,6 +55,12 @@ public class PigDtoFactory {
         if (pigDto.getOperatorName() != null) {
             jsonData.put("operatorName", pigDto.getOperatorName());
         }
+        if (pigDto.getEventDate() != null){
+            jsonData.put("eventTime", pigDto.getEventDate());
+        }
+        if (pigDto.getReason() != null){
+            jsonData.put("reason", pigDto.getReason());
+        }
         return jsonData;
     }
 

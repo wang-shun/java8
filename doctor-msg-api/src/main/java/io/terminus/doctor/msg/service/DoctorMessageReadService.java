@@ -95,9 +95,9 @@ public interface DoctorMessageReadService {
     Response<List<DoctorMessage>> findAppPushMessage();
 
     /**
-     * 根据条件获取消息数量
+     * 根据条件获取business列表数量
      * @param criteria
      * @return
      */
-    Response<Long> findMessageCountByCriteria(Map<String, Object> criteria);
+    Response<List<Long>> findBusinessListByCriteria(Map<String, Object> criteria);
 }

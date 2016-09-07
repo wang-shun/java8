@@ -40,10 +40,10 @@ public class DoctorMessageReadServiceTest extends BaseServiceTest {
     @Test
     public void test_rulePigCount(){
 
-        List<DoctorMessageRule> doctorMessageRules = RespHelper.or500(doctorMessageRuleReadService.findMessageRulesByCriteria(ImmutableMap.of("farmId", 1, "types", ImmutableList.of(DoctorMessageRuleTemplate.Type.WARNING, DoctorMessageRuleTemplate.Type.ERROR))));
-        doctorMessageRules.forEach(doctorMessageRule -> {
-            Long pigCount = RespHelper.or500(doctorMessageReadService.findMessageCountByCriteria(ImmutableMap.of("templateId", doctorMessageRule.getTemplateId(), "farmId", doctorMessageRule.getFarmId(), "isExpired", DoctorMessage.IsExpired.NOTEXPIRED.getValue())));
-            System.out.println(doctorMessageRule.getTemplateName() + "-" + pigCount);
-        });
+//        List<DoctorMessageRule> doctorMessageRules = RespHelper.or500(doctorMessageRuleReadService.findMessageRulesByCriteria(ImmutableMap.of("farmId", 1, "types", ImmutableList.of(DoctorMessageRuleTemplate.Type.WARNING, DoctorMessageRuleTemplate.Type.ERROR))));
+//        doctorMessageRules.forEach(doctorMessageRule -> {
+            int pigCount = RespHelper.or500(doctorMessageReadService.findBusinessListByCriteria(ImmutableMap.of("templateId", 11, "farmId", 1, "isExpired", DoctorMessage.IsExpired.NOTEXPIRED.getValue()))).size();
+//            System.out.println(doctorMessageRule.getTemplateName() + "-" + pigCount);
+//        });
     }
 }

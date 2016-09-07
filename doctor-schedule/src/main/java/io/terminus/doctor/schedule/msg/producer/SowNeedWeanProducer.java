@@ -127,6 +127,7 @@ public class SowNeedWeanProducer extends AbstractJobProducer {
                         }
 
                         if (isMessage && checkRuleValue(ruleValueMap.get(1), timeDiff)) {
+                            pigDto.setEventDate(getFarrowingDate(pigDto).toDate());
                             messages.addAll(getMessage(pigDto, rule.getChannels(), ruleRole, sUsers, timeDiff, rule.getUrl()));
                         }
                     }

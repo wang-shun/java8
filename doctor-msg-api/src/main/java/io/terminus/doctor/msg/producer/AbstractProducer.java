@@ -323,8 +323,8 @@ public abstract class AbstractProducer implements IProducer {
                         Map<String, Serializable> jsonContext = MAPPER.readValue(jsonData, JacksonType.MAP_OF_STRING);
                         String content = RespHelper.orServEx(doctorMessageTemplateReadService.getMessageContentWithCache(message.getMessageTemplate(), jsonContext));
                         Long businessId;
-                        if (StringUtils.isNotBlank((String) jsonContext.get("wareHouseId"))) {
-                            businessId = Long.parseLong((String) jsonContext.get("wareHouseId"));
+                        if (StringUtils.isNotBlank((String) jsonContext.get("materialId"))) {
+                            businessId = Long.parseLong((String) jsonContext.get("materialId"));
                         } else if (StringUtils.isNotBlank((String) jsonContext.get("groupId"))) {
                             businessId = Long.parseLong((String) jsonContext.get("groupId"));
                         }else {

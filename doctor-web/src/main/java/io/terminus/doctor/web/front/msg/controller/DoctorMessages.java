@@ -295,7 +295,7 @@ public class DoctorMessages {
                 criteriaMap.put("userId", UserUtil.getCurrentUser().getId());
                 criteriaMap.put("channel", Rule.Channel.SYSTEM.getValue());
                 criteriaMap.put("statuses", ImmutableList.of(DoctorMessage.Status.NORMAL.getValue(), DoctorMessage.Status.READED.getValue()));
-                pigCount = RespHelper.or500(doctorMessageReadService.findMessageCountByCriteria(criteriaMap)).intValue();
+                pigCount = RespHelper.or500(doctorMessageReadService.findBusinessListByCriteria(criteriaMap)).size();
             }
             DoctorMessageRule messageRule = BeanMapper.map(doctorMessageRule, DoctorMessageRule.class);
             messageRule.setRuleValue("");

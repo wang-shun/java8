@@ -5,6 +5,7 @@ import io.terminus.common.mysql.dao.MyBatisDao;
 import io.terminus.doctor.msg.model.DoctorMessage;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -58,12 +59,12 @@ public class DoctorMessageDao extends MyBatisDao<DoctorMessage> {
     }
 
     /**
-     * 根据条件获取消息数量
+     * 根据条件获取businessId列表
      * @param criteria
      * @return
      */
-    public Long findMessageCountByCriteria(Map<String, Object> criteria){
-        return getSqlSession().selectOne(sqlId("count"), criteria);
+    public List<Long> findBusinessListByCriteria(Map<String, Object> criteria){
+        return getSqlSession().selectList(sqlId("businessList"), criteria);
     }
 
 }

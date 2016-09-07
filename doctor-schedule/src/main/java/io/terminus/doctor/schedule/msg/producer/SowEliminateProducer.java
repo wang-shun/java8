@@ -169,7 +169,8 @@ public class SowEliminateProducer extends AbstractJobProducer {
 
                             }
                             if (isSend) {
-                                messages.addAll(getMessage(pigDto, rule.getChannels(), ruleRole, sUsers, timeDiff, rule.getUrl(), ruleValue.getDescribe() + ruleValue.getValue().toString()));
+                                pigDto.setReason(ruleValue.getDescribe() + ruleValue.getValue().toString());
+                                messages.addAll(getMessage(pigDto, rule.getChannels(), ruleRole, sUsers, timeDiff, rule.getUrl()));
                             }
                         }
                     });
@@ -184,11 +185,10 @@ public class SowEliminateProducer extends AbstractJobProducer {
     /**
      * 创建消息
      */
-    private List<DoctorMessage> getMessage(DoctorPigInfoDto pigDto, String channels, DoctorMessageRuleRole ruleRole, List<SubUser> subUsers, Double timeDiff, String url, String reason) {
+    private List<DoctorMessage> getMessage(DoctorPigInfoDto pigDto, String channels, DoctorMessageRuleRole ruleRole, List<SubUser> subUsers, Double timeDiff, String url) {
         List<DoctorMessage> messages = Lists.newArrayList();
         // 创建消息
         Map<String, Object> jsonData = PigDtoFactory.getInstance().createPigMessage(pigDto, timeDiff, url);
-        jsonData.put("reason", reason);
         Splitters.COMMA.splitToList(channels).forEach(channel -> {
             try {
                 messages.addAll(createMessage(subUsers, ruleRole, Integer.parseInt(channel), MAPPER.writeValueAsString(jsonData)));
