@@ -1,6 +1,6 @@
 package io.terminus.doctor.event.dto.event.usual;
 
-import io.terminus.doctor.event.dto.event.AbstractPigEventInputDto;
+import io.terminus.doctor.event.dto.event.boar.DoctorBoarConditionDto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -16,14 +16,14 @@ import java.util.Map;
  * Created by yaoqijun.
  * Date:2016-05-16
  * Email:yaoqj@terminus.io
- * Descirbe: 体况信息
+ * Descirbe: 母猪体况信息
  */
 @EqualsAndHashCode(callSuper = true)
 @Builder
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class DoctorConditionDto extends AbstractPigEventInputDto implements Serializable{
+public class DoctorConditionDto extends DoctorBoarConditionDto implements Serializable{
 
     private static final long serialVersionUID = 2731040792952612479L;
 
