@@ -74,8 +74,6 @@ public class DoctorGroupWriteServiceImpl implements DoctorGroupWriteService {
     private final DoctorGroupEventDao doctorGroupEventDao;
     private final DoctorGroupSnapshotDao doctorGroupSnapshotDao;
     private final DoctorCommonGroupEventHandler doctorCommonGroupEventHandler;
-    private final DoctorBarnReadService doctorBarnReadService;
-    private final DoctorPigEventWriteService doctorPigEventWriteService;
 
     @Autowired
     public DoctorGroupWriteServiceImpl(DoctorGroupDao doctorGroupDao,
@@ -84,9 +82,7 @@ public class DoctorGroupWriteServiceImpl implements DoctorGroupWriteService {
                                        DoctorGroupEventManager doctorGroupEventManager,
                                        DoctorGroupEventDao doctorGroupEventDao,
                                        DoctorGroupSnapshotDao doctorGroupSnapshotDao,
-                                       DoctorCommonGroupEventHandler doctorCommonGroupEventHandler,
-                                       DoctorBarnReadService doctorBarnReadService,
-                                       DoctorPigEventWriteService doctorPigEventWriteService) {
+                                       DoctorCommonGroupEventHandler doctorCommonGroupEventHandler) {
         this.doctorGroupDao = doctorGroupDao;
         this.doctorGroupTrackDao = doctorGroupTrackDao;
         this.doctorGroupManager = doctorGroupManager;
@@ -94,8 +90,6 @@ public class DoctorGroupWriteServiceImpl implements DoctorGroupWriteService {
         this.doctorGroupEventDao = doctorGroupEventDao;
         this.doctorGroupSnapshotDao = doctorGroupSnapshotDao;
         this.doctorCommonGroupEventHandler = doctorCommonGroupEventHandler;
-        this.doctorBarnReadService = doctorBarnReadService;
-        this.doctorPigEventWriteService = doctorPigEventWriteService;
     }
 
     @Override

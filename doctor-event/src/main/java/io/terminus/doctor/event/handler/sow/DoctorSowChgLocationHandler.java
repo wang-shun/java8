@@ -15,8 +15,6 @@ import io.terminus.doctor.event.handler.DoctorAbstractEventFlowHandler;
 import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.event.service.DoctorBarnReadService;
-import io.terminus.doctor.event.service.DoctorGroupReadService;
-import io.terminus.doctor.event.service.DoctorGroupWriteService;
 import io.terminus.doctor.workflow.core.Execution;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -37,8 +35,6 @@ import static java.util.Objects.isNull;
 public class DoctorSowChgLocationHandler extends DoctorAbstractEventFlowHandler {
 
     private final DoctorBarnReadService doctorBarnReadService;
-    private final DoctorGroupWriteService doctorGroupWriteService;
-    private final DoctorGroupReadService doctorGroupReadService;
 
     @Autowired
     public DoctorSowChgLocationHandler(DoctorPigDao doctorPigDao,
@@ -47,13 +43,9 @@ public class DoctorSowChgLocationHandler extends DoctorAbstractEventFlowHandler 
                                        DoctorPigSnapshotDao doctorPigSnapshotDao,
                                        DoctorRevertLogDao doctorRevertLogDao,
                                        DoctorBarnReadService doctorBarnReadService,
-                                       DoctorBarnDao doctorBarnDao,
-                                       DoctorGroupWriteService doctorGroupWriteService,
-                                       DoctorGroupReadService doctorGroupReadService) {
+                                       DoctorBarnDao doctorBarnDao) {
         super(doctorPigDao, doctorPigEventDao, doctorPigTrackDao, doctorPigSnapshotDao, doctorRevertLogDao, doctorBarnDao);
         this.doctorBarnReadService = doctorBarnReadService;
-        this.doctorGroupWriteService = doctorGroupWriteService;
-        this.doctorGroupReadService = doctorGroupReadService;
     }
 
     @Override
