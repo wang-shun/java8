@@ -8,6 +8,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import io.terminus.common.model.Paging;
+import io.terminus.common.utils.Arguments;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.constants.JacksonType;
 import io.terminus.doctor.common.utils.RespHelper;
@@ -144,14 +145,9 @@ public abstract class AbstractProducer implements IProducer {
                             .build();
                         List<DoctorMessage> message = message(ruleRole,
                             subUsers.stream().filter(sub -> sub.getFarmIds().contains(messageRule.getFarmId())).collect(Collectors.toList()));
-                    if (message != null && message.size() > 0) {
+                    if (Arguments.notEmpty(message)) {
                         //分批次插入数据
-                        List<List<DoctorMessage>> lists = Lists.partition(message,5000);
-                        lists.forEach(list -> {
-                            doctorMessageWriteService.createMessages(list);
-                        });
-
-
+                        Lists.partition(message,5000).forEach(list -> doctorMessageWriteService.createMessages(list));
                     }
                 }
 
