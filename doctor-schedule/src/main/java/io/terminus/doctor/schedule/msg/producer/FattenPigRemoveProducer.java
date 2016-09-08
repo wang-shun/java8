@@ -77,7 +77,7 @@ public class FattenPigRemoveProducer extends AbstractJobProducer {
                 //根据用户拥有的猪舍权限过滤拥有user
                 List<SubUser> sUsers = filterSubUserBarnId(subUsers, doctorGroupDetail.getGroup().getCurrentBarnId());
                 if (ruleValueMap.get(1) != null) {
-                    if (doctorGroupDetail.getGroupTrack().getAvgDayAge() != null && doctorGroupDetail.getGroupTrack().getAvgDayAge() > ruleValueMap.get(1).getValue() - 1) {
+                    if (checkRuleValue(ruleValueMap.get(1), (double)doctorGroupDetail.getGroupTrack().getAvgDayAge()) ) {
                         messages.addAll(getMessage(doctorGroupDetail, rule.getChannels(), ruleRole, sUsers, rule.getUrl()));
                     }
                 }

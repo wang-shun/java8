@@ -146,7 +146,7 @@ public class MsgManager {
                 message.setFailedBy("msg message send error, context is " + map + ", cause by " + e.getMessage());
                 message.setStatus(DoctorMessage.Status.FAILED.getValue());
             }
-            doctorMessageWriteService.updateMessage(message);
+            //doctorMessageWriteService.updateMessage(message);
         }
     }
 
@@ -163,8 +163,8 @@ public class MsgManager {
                 User user = (User) RespHelper.orServEx(userReadService.findById(message.getUserId()));
                 if (StringUtils.isNotBlank(user.getEmail())) {
                     map = JsonMapper.JSON_NON_DEFAULT_MAPPER.fromJson(message.getData(), Map.class);
-                    // 发送邮件
-                    emailWebService.send(user.getEmail(), message.getMessageTemplate(), map, null);
+                    // 发送邮件 // TODO 临时取消
+                   // emailWebService.send(user.getEmail(), message.getMessageTemplate(), map, null);
                     message.setSendedAt(new Date());
                     message.setStatus(DoctorMessage.Status.SENDED.getValue());
                 }
@@ -173,7 +173,7 @@ public class MsgManager {
                 message.setFailedBy("email message send error, context is " + map + ", cause by " + e.getMessage());
                 message.setStatus(DoctorMessage.Status.FAILED.getValue());
             }
-            doctorMessageWriteService.updateMessage(message);
+           // doctorMessageWriteService.updateMessage(message);
         }
     }
 
@@ -194,7 +194,8 @@ public class MsgManager {
                 map.put("url", getAppUrl(message)); // 设置回调url
                 // 推送消息
                 if (message.getUserId() != null) {
-                    appPushWebService.send("[" + message.getUserId() + "]", message.getMessageTemplate(), map, null);
+                    // TODO 临时取消
+                   // appPushWebService.send("[" + message.getUserId() + "]", message.getMessageTemplate(), map, null);
                     message.setSendedAt(new Date());
                     message.setStatus(DoctorMessage.Status.SENDED.getValue());
                 }
@@ -203,7 +204,7 @@ public class MsgManager {
                 message.setFailedBy("app push message send error, cause by " + e.getMessage());
                 message.setStatus(DoctorMessage.Status.FAILED.getValue());
             }
-            doctorMessageWriteService.updateMessage(message);
+            //doctorMessageWriteService.updateMessage(message);
         }
     }
 

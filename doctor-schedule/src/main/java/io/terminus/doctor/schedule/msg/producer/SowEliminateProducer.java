@@ -140,36 +140,39 @@ public class SowEliminateProducer extends AbstractJobProducer {
                                             && !Objects.equals(doctorPigEvent.getPregCheckResult(), PregCheckResult.YANG.getKey())).count();
                                     //累计返情、流产、阴性大于或等于预定值
                                     isSend = count > ruleValue.getValue().intValue() - 1;
+
                                 }
                             } else if (key == 4) {
                                 if (pigDto.getDoctorPigEvents() != null) {
 
-                                    //返情、阴性、流产的次数
+                                    //连续返情、阴性、流产的次数
                                     Integer count = 0;
-                                    List<DoctorPigEvent> doctorPigEvents = pigDto.getDoctorPigEvents().stream().filter(doctorPigEvent -> Objects.equals(doctorPigEvent.getType(), PigEvent.MATING.getKey())
-                                            || Objects.equals(doctorPigEvent.getType(), PigEvent.PREG_CHECK)).sorted(Comparator.comparing(DoctorPigEvent::getId)).collect(Collectors.toList());
-                                    if (doctorPigEvents.size() * 2 > ruleValue.getValue() - 1)
-                                        for (int k = 0; k < doctorPigEvents.size(); k++) {
-                                            DoctorPigEvent doctorPigEvent = doctorPigEvents.get(k);
-                                            if (Objects.equals(doctorPigEvent.getType(), PigEvent.MATING) && key + 1 < doctorPigEvents.size() && Objects.equals(doctorPigEvents.get(k + 1), PigEvent.PREG_CHECK)) {
-                                                if (Objects.equals(doctorPigEvents.get(k + 1).getPregCheckResult(), PregCheckResult.YANG.getKey())) {
-                                                    if (key + 2 < doctorPigEvents.size() && Objects.equals(doctorPigEvents.get(k + 2).getType(), PigEvent.PREG_CHECK.getKey())) {
-                                                        count++;
-                                                    } else {
-                                                        count = 0;
-                                                    }
-                                                } else {
-                                                    count++;
-                                                }
-                                            }
+                                    List<DoctorPigEvent> events = pigDto.getDoctorPigEvents().stream().filter(doctorPigEvent -> Objects.equals(doctorPigEvent.getType(), PigEvent.MATING.getKey()) || Objects.equals(doctorPigEvent.getType(), PigEvent.PREG_CHECK.getKey())).collect(Collectors.toList());
+                                    List<List<DoctorPigEvent>> lists = getPigList(events, PigEvent.MATING.getKey());
+                                    for (List<DoctorPigEvent> list : lists) {
+                                        DoctorPigEvent doctorPigEvent;
+                                        if (list.isEmpty()){
+                                            break;
                                         }
-                                        //连续返情、流产、阴性数大于或等于预定值
-                                        isSend = count > ruleValue.getValue().intValue() - 1;
+                                        if (list.size() > 1) {
+                                            doctorPigEvent = list.get(list.size() - 1);
+                                        } else {
+                                            doctorPigEvent = list.get(0);
+                                        }
+                                        if (!Objects.equals(doctorPigEvent.getPregCheckResult(), PregCheckResult.YANG.getKey())) {
+                                            count++;
+                                        } else {
+                                            count = 0;
+                                        }
+                                    }
+                                    //连续返情、流产、阴性数大于或等于预定值
+                                    isSend = count > ruleValue.getValue().intValue() - 1;
                                 }
 
                             }
                             if (isSend) {
-                                messages.addAll(getMessage(pigDto, rule.getChannels(), ruleRole, sUsers, timeDiff, rule.getUrl(), ruleValue.getDescribe() + ruleValue.getValue().toString()));
+                                pigDto.setReason(ruleValue.getDescribe() + ruleValue.getValue().intValue());
+                                messages.addAll(getMessage(pigDto, rule.getChannels(), ruleRole, sUsers, timeDiff, rule.getUrl()));
                             }
                         }
                     });
@@ -181,21 +184,18 @@ public class SowEliminateProducer extends AbstractJobProducer {
         return messages;
     }
 
-    /**
-     * 创建消息
-     */
-    private List<DoctorMessage> getMessage(DoctorPigInfoDto pigDto, String channels, DoctorMessageRuleRole ruleRole, List<SubUser> subUsers, Double timeDiff, String url, String reason) {
-        List<DoctorMessage> messages = Lists.newArrayList();
-        // 创建消息
-        Map<String, Object> jsonData = PigDtoFactory.getInstance().createPigMessage(pigDto, timeDiff, url);
-        jsonData.put("reason", reason);
-        Splitters.COMMA.splitToList(channels).forEach(channel -> {
-            try {
-                messages.addAll(createMessage(subUsers, ruleRole, Integer.parseInt(channel), MAPPER.writeValueAsString(jsonData)));
-            } catch (JsonProcessingException e) {
-                log.error("message produce error, cause by {}", Throwables.getStackTraceAsString(e));
+    private List<List<DoctorPigEvent>> getPigList(List<DoctorPigEvent> events, Integer type) {
+        List<List<DoctorPigEvent>> results = Lists.newArrayList();
+        List<DoctorPigEvent> tempList = Lists.newArrayList();
+        events = events.stream().sorted((a, b) -> b.getEventAt().compareTo(a.getEventAt())).collect(Collectors.toList());
+        for (DoctorPigEvent event : events) {
+            if (Objects.equals(event.getType(), type)) {
+                results.add(tempList);
+                tempList = Lists.newArrayList();
+            }else {
+                tempList.add(event);
             }
-        });
-        return messages;
+        }
+        return results;
     }
 }

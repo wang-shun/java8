@@ -167,12 +167,22 @@ public class DoctorMessageReadServiceImpl implements DoctorMessageReadService {
     }
 
     @Override
-    public Response<Long> findMessageCountByCriteria(Map<String, Object> criteria) {
+    public Response<List<Long>> findBusinessListByCriteria(Map<String, Object> criteria) {
         try {
-            return Response.ok(doctorMessageDao.findMessageCountByCriteria(criteria));
+            return Response.ok(doctorMessageDao.findBusinessListByCriteria(criteria));
         } catch (Exception e) {
             log.error("find.message.count.by.criteria.failed, cause by {}", Throwables.getStackTraceAsString(e));
             return Response.fail("find.message.count.by.criteria.failed");
+        }
+    }
+
+    @Override
+    public Response<Paging<DoctorMessage>> pagingDiffBusinessId(Map<String, Object> criteria, Integer pageNo, Integer pageSize) {
+        try {
+            return Response.ok(doctorMessageDao.pagingDiffBusinessId(criteria, pageNo, pageSize));
+        } catch (Exception e){
+            log.error("paging.dif.businessId.failed,cause by{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("aging.dif.businessId.failed");
         }
     }
 }

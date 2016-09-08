@@ -81,6 +81,10 @@ public class DoctorPigInfoDto implements Serializable{
     private String creatorName;
     private String operatorName;
 
+    private Date eventDate;
+    private String reason;
+    private Integer ruleValueId;
+
         public static DoctorPigInfoDto buildDoctorPigInfoDto(DoctorPig doctorPig, DoctorPigTrack doctorPigTrack, List<DoctorPigEvent> doctorPigEvents){
         checkState(!isNull(doctorPig), "build.doctorPig.empty");
         DoctorPigInfoDtoBuilder builder = DoctorPigInfoDto.builder()
@@ -101,11 +105,6 @@ public class DoctorPigInfoDto implements Serializable{
                     .extraTrackMap(doctorPigTrack.getExtraMap())
                     .extraTrackMessage(doctorPigTrack.getExtraMessage())
                     .updatedAt(doctorPigTrack.getUpdatedAt());
-            if (StringUtils.isNotBlank(doctorPigTrack.getUpdatorName())) {
-                builder.operatorName(doctorPigTrack.getUpdatorName());
-            } else {
-                builder.operatorName(doctorPigTrack.getCreatorName());
-            }
         }
         builder.doctorPigEvents(doctorPigEvents);
         return builder.build();
