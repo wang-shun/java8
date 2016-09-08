@@ -46,8 +46,11 @@ import static io.terminus.doctor.common.enums.PigType.MATING_TYPES;
 public class DoctorChgLocationHandler extends DoctorAbstractEventHandler{
 
     private final DoctorBarnDao doctorBarnDao;
-    private final DoctorGroupReadService doctorGroupReadService;
-    private final DoctorGroupWriteService doctorGroupWriteService;
+
+    @Autowired
+    private DoctorGroupReadService doctorGroupReadService;
+    @Autowired
+    private DoctorGroupWriteService doctorGroupWriteService;
 
     @Autowired
     public DoctorChgLocationHandler(DoctorPigDao doctorPigDao,
@@ -55,12 +58,9 @@ public class DoctorChgLocationHandler extends DoctorAbstractEventHandler{
                                     DoctorPigTrackDao doctorPigTrackDao,
                                     DoctorPigSnapshotDao doctorPigSnapshotDao,
                                     DoctorRevertLogDao doctorRevertLogDao,
-                                    DoctorBarnDao doctorBarnDao, DoctorGroupReadService doctorGroupReadService,
-                                    DoctorGroupWriteService doctorGroupWriteService) {
+                                    DoctorBarnDao doctorBarnDao) {
         super(doctorPigDao, doctorPigEventDao, doctorPigTrackDao, doctorPigSnapshotDao, doctorRevertLogDao);
         this.doctorBarnDao = doctorBarnDao;
-        this.doctorGroupReadService = doctorGroupReadService;
-        this.doctorGroupWriteService = doctorGroupWriteService;
     }
 
     @Override
