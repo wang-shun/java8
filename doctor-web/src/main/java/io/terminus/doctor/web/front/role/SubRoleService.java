@@ -28,10 +28,13 @@ import javax.annotation.Nullable;
 public class SubRoleService {
 
     private final SubRoleReadService subRoleReadService;
+    private final SubService subService;
 
     @Autowired
-    public SubRoleService(SubRoleReadService subRoleReadService) {
+    public SubRoleService(SubRoleReadService subRoleReadService,
+                          SubService subService) {
         this.subRoleReadService = subRoleReadService;
+        this.subService = subService;
     }
 
     /**
@@ -58,7 +61,7 @@ public class SubRoleService {
                 }
                 return Response.ok(new Paging<>(1L, Lists.newArrayList(role)));
             }
-            return subRoleReadService.pagination(ThreadVars.getAppKey(), user.getId(), status, roleName, pageNo, pageSize);
+            return subRoleReadService.pagination(ThreadVars.getAppKey(), subService.getPrimaryUserId(user), status, roleName, pageNo, pageSize);
         } catch (ServiceException e) {
             log.warn("paging sub roles failed, user={}, id={}, status={}, pageNo={}, pageSize={}, error={}",
                     user, id, status, pageNo, pageSize, e.getMessage());

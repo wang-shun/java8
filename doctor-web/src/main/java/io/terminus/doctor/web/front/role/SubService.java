@@ -85,7 +85,7 @@ public class SubService {
 
     public Response<Sub> findSubByUserId(BaseUser user, Long userId) {
         try {
-            Long parentUserId = user.getId();
+            Long parentUserId = this.getPrimaryUserId(user);
 
             io.terminus.doctor.user.model.Sub sub = checkUserAndSubUser(parentUserId, userId);
 
@@ -135,7 +135,7 @@ public class SubService {
                 Response.fail("sub.id.miss");
             }
 
-            Long primaryId = user.getId();
+            Long primaryId = this.getPrimaryUserId(user);
 
             User subUser = RespHelper.orServEx(doctorUserReadService.findById(sub.getId()));
 
@@ -215,7 +215,7 @@ public class SubService {
      */
     public Response<Long> createSub(BaseUser user, Sub sub){
         try {
-            Long primaryId = user.getId();
+            Long primaryId = this.getPrimaryUserId(user);
             //先查下主账号的猪场, 以避免子账号的猪场不属于主账号
             List<Long> primaryFarms = RespHelper.orServEx(doctorUserDataPermissionReadService.findDataPermissionByUserId(primaryId)).getFarmIdsList();
             for(Long farmId : sub.getFarmIds()){
@@ -275,14 +275,7 @@ public class SubService {
     public Response<List<Sub>> findByConditions(BaseUser user, Long roleId, String roleName, String userName,
                                                 String realName, Integer status, Integer limit){
         try{
-            Long parentUserId;
-            if(Objects.equals(user.getType(), UserType.FARM_ADMIN_PRIMARY.value())){
-                parentUserId = user.getId();
-            }else if(Objects.equals(user.getType(), UserType.FARM_SUB.value())){
-                parentUserId = RespHelper.orServEx(primaryUserReadService.findSubByUserId(user.getId())).getParentUserId();
-            }else{
-                throw new ServiceException("authorize.fail");
-            }
+            Long parentUserId = this.getPrimaryUserId(user);
             List<io.terminus.doctor.user.model.Sub> subList = RespHelper.orServEx(
                     primaryUserReadService.findByConditions(parentUserId, roleId, roleName, userName, realName, status, limit)
             );
@@ -299,14 +292,7 @@ public class SubService {
     public Response<Paging<Sub>> pagingSubs(BaseUser user, Long roleId,String roleName, String userName,
                                             String realName, Integer status, Integer pageNo, Integer pageSize) {
         try {
-            Long parentUserId;
-            if(Objects.equals(user.getType(), UserType.FARM_ADMIN_PRIMARY.value())){
-                parentUserId = user.getId();
-            }else if(Objects.equals(user.getType(), UserType.FARM_SUB.value())){
-                parentUserId = RespHelper.orServEx(primaryUserReadService.findSubByUserId(user.getId())).getParentUserId();
-            }else{
-                throw new ServiceException("authorize.fail");
-            }
+            Long parentUserId = this.getPrimaryUserId(user);
 
             Paging<io.terminus.doctor.user.model.Sub> paging = RespHelper.orServEx(
                     primaryUserReadService.subPagination(parentUserId, roleId, roleName, userName, realName,
@@ -348,8 +334,6 @@ public class SubService {
     public Response<Boolean> resetPassword(BaseUser user, Long userId, String resetPassword){
 
         try {
-            checkUserAndSubUser(user.getId(), userId);
-
             checkPasswordFormat(resetPassword);
 
             User subUser = RespHelper.orServEx(doctorUserReadService.findById(userId));
@@ -400,5 +384,17 @@ public class SubService {
         if(subUser != null) {
             throw new ServiceException("sub.account.exist");
         }
+    }
+
+    public Long getPrimaryUserId(BaseUser user){
+        Long parentUserId;
+        if(Objects.equals(user.getType(), UserType.FARM_ADMIN_PRIMARY.value())){
+            parentUserId = user.getId();
+        }else if(Objects.equals(user.getType(), UserType.FARM_SUB.value())){
+            parentUserId = RespHelper.orServEx(primaryUserReadService.findSubByUserId(user.getId())).getParentUserId();
+        }else{
+            throw new ServiceException("authorize.fail");
+        }
+        return parentUserId;
     }
 }

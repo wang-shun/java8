@@ -2,7 +2,6 @@ package io.terminus.doctor.web.front.role;
 
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.Paging;
-import io.terminus.doctor.common.enums.UserType;
 import io.terminus.doctor.user.model.SubRole;
 import io.terminus.doctor.user.service.PrimaryUserWriteService;
 import io.terminus.doctor.user.service.SubRoleReadService;
@@ -41,15 +40,19 @@ public class SubRoles {
 
     private final PrimaryUserWriteService primaryUserWriteService;
 
+    private final SubService subService;
+
     @Autowired
     public SubRoles(SubRoleReadService subRoleReadService,
                     SubRoleWriteService subRoleWriteService,
                     SubRoleService subRoleService,
-                    PrimaryUserWriteService primaryUserWriteService) {
+                    PrimaryUserWriteService primaryUserWriteService,
+                    SubService subService) {
         this.subRoleReadService = subRoleReadService;
         this.subRoleWriteService = subRoleWriteService;
         this.subRoleService = subRoleService;
         this.primaryUserWriteService = primaryUserWriteService;
+        this.subService = subService;
     }
 
     /**
@@ -60,7 +63,7 @@ public class SubRoles {
      */
     @RequestMapping(value = "", method = RequestMethod.POST)
     public Long createRole(@RequestBody SubRole role) {
-        role.setUserId(UserUtil.getUserId());
+        role.setUserId(subService.getPrimaryUserId(UserUtil.getCurrentUser()));
         checkRolePermission(role);
         role.setAppKey(ThreadVars.getAppKey());
         role.setStatus(1);
@@ -107,7 +110,7 @@ public class SubRoles {
     @RequestMapping(value = "/all", method = RequestMethod.GET)
     public List<SubRole> findAllRoles() {
         checkAuth();
-        return RespHelper.or500(subRoleReadService.findByUserIdAndStatus(ThreadVars.getAppKey(), UserUtil.getUserId(), 1));
+        return RespHelper.or500(subRoleReadService.findByUserIdAndStatus(ThreadVars.getAppKey(), subService.getPrimaryUserId(UserUtil.getCurrentUser()), 1));
     }
 
     /**
@@ -146,14 +149,14 @@ public class SubRoles {
      */
     private void checkRolePermission(SubRole role){
         checkAuth();
-        if(role.getId()!=null){
-            SubRole dbRole = RespHelper.or500(subRoleReadService.findById(role.getId()));
-            role.setUserId(dbRole.getUserId());
-        }
-
-        if(!Objects.equals(UserUtil.getUserId(), role.getUserId())){
-            throw new JsonResponseException(403, "user.no.permission");
-        }
+//        if(role.getId()!=null){
+//            SubRole dbRole = RespHelper.or500(subRoleReadService.findById(role.getId()));
+//            role.setUserId(dbRole.getUserId());
+//        }
+//
+//        if(!Objects.equals(UserUtil.getUserId(), role.getUserId())){
+//            throw new JsonResponseException(403, "user.no.permission");
+//        }
     }
 
     private void checkAuth(){
