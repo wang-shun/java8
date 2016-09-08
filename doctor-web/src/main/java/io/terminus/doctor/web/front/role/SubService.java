@@ -372,7 +372,15 @@ public class SubService {
      * @return
      */
     private String subAccount(Sub sub, BaseUser user){
-        return AT.join(sub.getUsername(), ((DoctorUser)(user)).getMobile());
+        String mobile;
+        // 子账号特别处理
+        if((Objects.equals(user.getType(), UserType.FARM_SUB.value()))){
+            Long primaryUserId = this.getPrimaryUserId(user);
+            mobile = RespHelper.orServEx(doctorUserReadService.findById(primaryUserId)).getMobile();
+        }else{
+            mobile = ((DoctorUser)(user)).getMobile();
+        }
+        return AT.join(sub.getUsername(), mobile);
     }
 
     /**
