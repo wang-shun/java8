@@ -37,9 +37,13 @@ public class DoctorSowChgLocationHandler extends DoctorAbstractEventFlowHandler 
     private final DoctorBarnReadService doctorBarnReadService;
 
     @Autowired
-    public DoctorSowChgLocationHandler(DoctorPigDao doctorPigDao, DoctorPigEventDao doctorPigEventDao,
-                                       DoctorPigTrackDao doctorPigTrackDao, DoctorPigSnapshotDao doctorPigSnapshotDao,
-                                       DoctorRevertLogDao doctorRevertLogDao, DoctorBarnReadService doctorBarnReadService, DoctorBarnDao doctorBarnDao) {
+    public DoctorSowChgLocationHandler(DoctorPigDao doctorPigDao,
+                                       DoctorPigEventDao doctorPigEventDao,
+                                       DoctorPigTrackDao doctorPigTrackDao,
+                                       DoctorPigSnapshotDao doctorPigSnapshotDao,
+                                       DoctorRevertLogDao doctorRevertLogDao,
+                                       DoctorBarnReadService doctorBarnReadService,
+                                       DoctorBarnDao doctorBarnDao) {
         super(doctorPigDao, doctorPigEventDao, doctorPigTrackDao, doctorPigSnapshotDao, doctorRevertLogDao, doctorBarnDao);
         this.doctorBarnReadService = doctorBarnReadService;
     }
