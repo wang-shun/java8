@@ -6,6 +6,7 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Iterables;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.constants.JacksonType;
+import io.terminus.doctor.common.utils.Params;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -293,11 +294,11 @@ public class DoctorPigEvent implements Serializable {
 
     @SneakyThrows
     public void setExtraMap(Map<String, Object> extraMap) {
-        this.extraMap = extraMap;
-        if (isNull(extraMap) || Iterables.isEmpty(extraMap.entrySet())) {
+        this.extraMap = Params.filterNullOrEmpty(extraMap);
+        if (isNull(this.extraMap) || Iterables.isEmpty(this.extraMap.entrySet())) {
             this.extra = "";
         } else {
-            this.extra = OBJECT_MAPPER.writeValueAsString(extraMap);
+            this.extra = OBJECT_MAPPER.writeValueAsString(this.extraMap);
         }
     }
 }
