@@ -73,6 +73,8 @@ public class DoctorSowChgLocationHandler extends DoctorAbstractEventFlowHandler 
 
     @Override
     public DoctorPigTrack updateDoctorPigTrackInfo(Execution execution, DoctorPigTrack doctorPigTrack, DoctorBasicInputInfoDto basic, Map<String, Object> extra, Map<String, Object> context) {
+        Map<String, Object> extraMap = JsonMapper.nonEmptyMapper().fromJson(doctorPigTrack.getExtra(),
+                JsonMapper.nonEmptyMapper().createCollectionType(Map.class, String.class, Object.class));
 
         doctorPigTrack.addAllExtraMap(extra);
 
@@ -109,8 +111,9 @@ public class DoctorSowChgLocationHandler extends DoctorAbstractEventFlowHandler 
         // 来源和前往都是 1 和 7 时, 仔猪也要跟着转群
         if(PigType.FARROW_TYPES.contains(fromBarn.getPigType()) && PigType.FARROW_TYPES.contains(toBarn.getPigType())
                 && doctorPigTrack.getExtraMap().get(DoctorPigExtraKeys.farrowingPigletGroupId) != null){
-            Long groupId = pigletTrans(doctorPigTrack, basic, extra, toBarn);
-
+            Long groupId = pigletTrans(extraMap, basic, extra, toBarn);
+            extraMap.put(DoctorPigExtraKeys.farrowingPigletGroupId, groupId);
+            doctorPigTrack.setExtraMap(extraMap);
         }
 
         doctorPigTrack.addPigEvent(basic.getPigType(), (Long) context.get("doctorPigEventId"));
@@ -118,9 +121,7 @@ public class DoctorSowChgLocationHandler extends DoctorAbstractEventFlowHandler 
     }
 
     //未断奶仔猪转群
-    private Long pigletTrans(DoctorPigTrack pigTrack, DoctorBasicInputInfoDto basic, Map<String, Object> extra, DoctorBarn doctorToBarn) {
-        Map<String, Object> extraMap = JsonMapper.nonEmptyMapper().fromJson(pigTrack.getExtra(), JsonMapper.nonEmptyMapper().createCollectionType(Map.class, String.class, Object.class));
-
+    private Long pigletTrans(Map<String, Object> extraMap, DoctorBasicInputInfoDto basic, Map<String, Object> extra, DoctorBarn doctorToBarn) {
         //未断奶仔猪id
         Long farrowingPigletGroupId = Long.valueOf(extraMap.get(DoctorPigExtraKeys.farrowingPigletGroupId).toString());
         DoctorTransGroupInput input = new DoctorTransGroupInput();
