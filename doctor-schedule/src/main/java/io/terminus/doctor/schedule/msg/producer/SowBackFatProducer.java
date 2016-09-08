@@ -1,15 +1,13 @@
 package io.terminus.doctor.schedule.msg.producer;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.api.client.util.Maps;
-import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
 import io.terminus.common.utils.Arguments;
-import io.terminus.common.utils.Splitters;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dto.DoctorPigInfoDto;
 import io.terminus.doctor.event.enums.DataRange;
 import io.terminus.doctor.event.enums.PigEvent;
+import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.service.DoctorPigReadService;
@@ -26,7 +24,6 @@ import io.terminus.doctor.msg.service.DoctorMessageRuleRoleReadService;
 import io.terminus.doctor.msg.service.DoctorMessageRuleTemplateReadService;
 import io.terminus.doctor.msg.service.DoctorMessageTemplateReadService;
 import io.terminus.doctor.msg.service.DoctorMessageWriteService;
-import io.terminus.doctor.schedule.msg.producer.factory.PigDtoFactory;
 import io.terminus.doctor.user.service.DoctorUserDataPermissionReadService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -90,6 +87,11 @@ public class SowBackFatProducer extends AbstractJobProducer {
                     .build();
             for (int i = 1; i <= page; i++) {
                 List<DoctorPigInfoDto> pigs = RespHelper.orServEx(doctorPigReadService.pagingDoctorInfoDtoByPig(pig, i, 100)).getData();
+                pigs = pigs.stream().filter(pigDto -> Objects.equals(PigStatus.Mate.getKey(), pigDto.getStatus())
+                        || Objects.equals(PigStatus.Pregnancy.getKey(), pigDto.getStatus())
+                        || Objects.equals(PigStatus.Farrow.getKey(), pigDto.getStatus())
+                        || Objects.equals(PigStatus.FEED.getKey(), pigDto.getStatus())
+                        || Objects.equals(PigStatus.Wean.getKey(), pigDto.getStatus())).collect(Collectors.toList());
                 // 处理每个猪
                 for (int j = 0; pigs != null && j < pigs.size(); j++) {
                     DoctorPigInfoDto pigDto = pigs.get(j);
@@ -101,28 +103,26 @@ public class SowBackFatProducer extends AbstractJobProducer {
                             Boolean isSend = false;
                             RuleValue ruleValue = ruleValueMap.get(key);
                             DoctorPigEvent doctorPigEvent = getMatingPigEvent(pigDto);
-                            if (doctorPigEvent != null) {
                                 if (key == 1 || key == 2 || key == 3) {
                                     timeDiff = getTimeDiff(new DateTime(doctorPigEvent.getEventAt()));
                                     if (filterPigCondition(pigDto) && checkRuleValue(ruleValue, timeDiff)) {
                                         isSend = true;
                                     }
                                 } else {
-                                    if (getStatusDate(pigDto) != null) {
-                                        timeDiff = getTimeDiff(getStatusDate(pigDto));
-                                        if (Objects.equals(timeDiff, 0d)) {
-                                            isSend = true;
+                                        if (Objects.equals(pigDto.getStatus(), PigStatus.Wean.getKey())) {
+                                            timeDiff = getTimeDiff(getStatusDate(pigDto));
+                                            if (Objects.equals(timeDiff, 0d)) {
+                                                isSend = true;
+                                            }
                                         }
-                                    }
-
                                 }
                                 if (isSend) {
                                     pigDto.setEventDate(doctorPigEvent.getEventAt());
                                     pigDto.setOperatorName(doctorPigEvent.getOperatorName());
+                                    pigDto.setRuleValueId(key);
                                     messages.addAll(getMessage(pigDto, rule.getChannels(), ruleRole, sUsers, timeDiff, rule.getUrl()));
                                 }
                             }
-                        }
                     });
 
                 }
@@ -139,7 +139,8 @@ public class SowBackFatProducer extends AbstractJobProducer {
      */
     private Boolean filterPigCondition(DoctorPigInfoDto pigDto) {
         if (!Arguments.isNullOrEmpty(pigDto.getDoctorPigEvents())) {
-            List<DoctorPigEvent> list = pigDto.getDoctorPigEvents().stream().filter(doctorPigEvent -> new DateTime(doctorPigEvent.getEventAt()).isAfter(new DateTime(getPigEventByEventType(pigDto.getDoctorPigEvents(), PigEvent.MATING.getKey()).getEventAt())) && Objects.equals(doctorPigEvent.getType(), PigEvent.CONDITION.getKey())).collect(Collectors.toList());
+            // || (Objects.equals(doctorPigEvent.getType(), PigEvent.PREG_CHECK.getKey()) && !Objects.equals(doctorPigEvent.getPregCheckResult(), PregCheckResult.YANG.getKey()))
+            List<DoctorPigEvent> list = pigDto.getDoctorPigEvents().stream().filter(doctorPigEvent -> new DateTime(doctorPigEvent.getEventAt()).isAfter(new DateTime(getPigEventByEventType(pigDto.getDoctorPigEvents(), PigEvent.MATING.getKey()).getEventAt())) && (Objects.equals(doctorPigEvent.getType(), PigEvent.CONDITION.getKey()))).collect(Collectors.toList());
             if (list.isEmpty()) {
                 return true;
             }

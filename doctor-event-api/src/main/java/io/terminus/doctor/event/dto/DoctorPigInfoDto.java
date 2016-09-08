@@ -83,6 +83,7 @@ public class DoctorPigInfoDto implements Serializable{
 
     private Date eventDate;
     private String reason;
+    private Integer ruleValueId;
 
         public static DoctorPigInfoDto buildDoctorPigInfoDto(DoctorPig doctorPig, DoctorPigTrack doctorPigTrack, List<DoctorPigEvent> doctorPigEvents){
         checkState(!isNull(doctorPig), "build.doctorPig.empty");

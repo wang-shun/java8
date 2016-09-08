@@ -61,6 +61,9 @@ public class PigDtoFactory {
         if (pigDto.getReason() != null){
             jsonData.put("reason", pigDto.getReason());
         }
+        if (pigDto.getRuleValueId() != null){
+            jsonData.put("ruleValueId", pigDto.getRuleValueId());
+        }
         return jsonData;
     }
 

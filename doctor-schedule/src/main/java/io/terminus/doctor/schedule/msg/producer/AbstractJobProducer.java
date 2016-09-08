@@ -146,7 +146,7 @@ public abstract class AbstractJobProducer extends AbstractProducer {
     }
 
     /**
-     * 获取猪的初配事件
+     * 获取猪的最近一次初配事件
      * @param pigDto
      * @return
      */
@@ -292,7 +292,7 @@ public abstract class AbstractJobProducer extends AbstractProducer {
             Long timeDiff = DateTime.now().getMillis() / 86400000 - eventTime.getMillis() / 86400000;
             return (double) timeDiff;
         } catch (Exception e) {
-            log.error("get.timeDiff.fail, eventTime", eventTime);
+            log.error("get.timeDiff.fail, eventTime {}", eventTime);
         }
         return null;
     }

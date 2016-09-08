@@ -270,31 +270,26 @@ public class DoctorMessages {
 
         doctorMessageRules.forEach(doctorMessageRule -> {
             Integer pigCount = 0;
+            Map<String, Object> criteriaMap = Maps.newHashMap();
+            criteriaMap.put("templateId", doctorMessageRule.getTemplateId());
+            criteriaMap.put("farmId", doctorMessageRule.getFarmId());
+            criteriaMap.put("isExpired", DoctorMessage.IsExpired.NOTEXPIRED.getValue());
+            criteriaMap.put("userId", UserUtil.getCurrentUser().getId());
+            criteriaMap.put("channel", Rule.Channel.SYSTEM.getValue());
+            criteriaMap.put("statuses", ImmutableList.of(DoctorMessage.Status.NORMAL.getValue(), DoctorMessage.Status.READED.getValue()));
             if (Objects.equals(doctorMessageRule.getCategory(), Category.FATTEN_PIG_REMOVE.getKey())) {
-                Map<String, Object> criteriaMap = Maps.newHashMap();
-                criteriaMap.put("templateId", doctorMessageRule.getTemplateId());
-                criteriaMap.put("farmId", doctorMessageRule.getFarmId());
-                criteriaMap.put("isExpired", DoctorMessage.IsExpired.NOTEXPIRED.getValue());
-                criteriaMap.put("userId", UserUtil.getCurrentUser().getId());
-                criteriaMap.put("channel", Rule.Channel.SYSTEM.getValue());
-                criteriaMap.put("statuses", ImmutableList.of(DoctorMessage.Status.NORMAL.getValue(), DoctorMessage.Status.READED.getValue()));
                 List<DoctorMessage> messages = RespHelper.or500(doctorMessageReadService.findMessageByCriteria(criteriaMap));
-                for (DoctorMessage doctorMessage : messages) {
+                Map<Long, DoctorMessage> map = Maps.newHashMap();
+                messages.forEach(doctorMessage -> map.put(doctorMessage.getBusinessId(), doctorMessage));
+                for (DoctorMessage doctorMessage : map.values()) {
                     try {
-                        Map<String, Object> map = JsonMapper.JSON_NON_DEFAULT_MAPPER.getMapper().readValue(doctorMessage.getData(), JacksonType.MAP_OF_OBJECT);
-                        pigCount += (Integer) map.get("quantity");
+                        Map<String, Object> dataMap = JsonMapper.JSON_NON_DEFAULT_MAPPER.getMapper().readValue(doctorMessage.getData(), JacksonType.MAP_OF_OBJECT);
+                        pigCount += (Integer) dataMap.get("quantity");
                     } catch (Exception e) {
                     }
                 }
 
             } else if (!Objects.equals(doctorMessageRule.getCategory(), Category.STORAGE_SHORTAGE.getKey())) {
-                Map<String, Object> criteriaMap = Maps.newHashMap();
-                criteriaMap.put("templateId", doctorMessageRule.getTemplateId());
-                criteriaMap.put("farmId", doctorMessageRule.getFarmId());
-                criteriaMap.put("isExpired", DoctorMessage.IsExpired.NOTEXPIRED.getValue());
-                criteriaMap.put("userId", UserUtil.getCurrentUser().getId());
-                criteriaMap.put("channel", Rule.Channel.SYSTEM.getValue());
-                criteriaMap.put("statuses", ImmutableList.of(DoctorMessage.Status.NORMAL.getValue(), DoctorMessage.Status.READED.getValue()));
                 pigCount = RespHelper.or500(doctorMessageReadService.findBusinessListByCriteria(criteriaMap)).size();
             }
             DoctorMessageRule messageRule = BeanMapper.map(doctorMessageRule, DoctorMessageRule.class);

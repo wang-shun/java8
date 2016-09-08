@@ -147,25 +147,26 @@ public class SowEliminateProducer extends AbstractJobProducer {
 
                                     //连续返情、阴性、流产的次数
                                     Integer count = 0;
-                                    List<DoctorPigEvent> doctorPigEvents = pigDto.getDoctorPigEvents().stream().filter(doctorPigEvent -> Objects.equals(doctorPigEvent.getType(), PigEvent.MATING.getKey())
-                                            || Objects.equals(doctorPigEvent.getType(), PigEvent.PREG_CHECK)).sorted(Comparator.comparing(DoctorPigEvent::getId)).collect(Collectors.toList());
-                                    if (doctorPigEvents.size() * 2 > ruleValue.getValue() - 1)
-                                        for (int k = 0; k < doctorPigEvents.size(); k++) {
-                                            DoctorPigEvent doctorPigEvent = doctorPigEvents.get(k);
-                                            if (Objects.equals(doctorPigEvent.getType(), PigEvent.MATING) && key + 1 < doctorPigEvents.size() && Objects.equals(doctorPigEvents.get(k + 1), PigEvent.PREG_CHECK)) {
-                                                if (Objects.equals(doctorPigEvents.get(k + 1).getPregCheckResult(), PregCheckResult.YANG.getKey())) {
-                                                    if (key + 2 < doctorPigEvents.size() && Objects.equals(doctorPigEvents.get(k + 2).getType(), PigEvent.PREG_CHECK.getKey())) {
-                                                        count++;
-                                                    } else {
-                                                        count = 0;
-                                                    }
-                                                } else {
-                                                    count++;
-                                                }
-                                            }
+                                    List<DoctorPigEvent> events = pigDto.getDoctorPigEvents().stream().filter(doctorPigEvent -> Objects.equals(doctorPigEvent.getType(), PigEvent.MATING.getKey()) || Objects.equals(doctorPigEvent.getType(), PigEvent.PREG_CHECK.getKey())).collect(Collectors.toList());
+                                    List<List<DoctorPigEvent>> lists = getPigList(events, PigEvent.MATING.getKey());
+                                    for (List<DoctorPigEvent> list : lists) {
+                                        DoctorPigEvent doctorPigEvent;
+                                        if (list.isEmpty()){
+                                            break;
                                         }
-                                        //连续返情、流产、阴性数大于或等于预定值
-                                        isSend = count > ruleValue.getValue().intValue() - 1;
+                                        if (list.size() > 1) {
+                                            doctorPigEvent = list.get(list.size() - 1);
+                                        } else {
+                                            doctorPigEvent = list.get(0);
+                                        }
+                                        if (!Objects.equals(doctorPigEvent.getPregCheckResult(), PregCheckResult.YANG.getKey())) {
+                                            count++;
+                                        } else {
+                                            count = 0;
+                                        }
+                                    }
+                                    //连续返情、流产、阴性数大于或等于预定值
+                                    isSend = count > ruleValue.getValue().intValue() - 1;
                                 }
 
                             }
@@ -181,5 +182,20 @@ public class SowEliminateProducer extends AbstractJobProducer {
 
         log.info("母猪应淘汰消息产生 --- SowEliminateProducer 结束执行, 产生 {} 条消息", messages.size());
         return messages;
+    }
+
+    private List<List<DoctorPigEvent>> getPigList(List<DoctorPigEvent> events, Integer type) {
+        List<List<DoctorPigEvent>> results = Lists.newArrayList();
+        List<DoctorPigEvent> tempList = Lists.newArrayList();
+        events = events.stream().sorted((a, b) -> b.getEventAt().compareTo(a.getEventAt())).collect(Collectors.toList());
+        for (DoctorPigEvent event : events) {
+            if (Objects.equals(event.getType(), type)) {
+                results.add(tempList);
+                tempList = Lists.newArrayList();
+            }else {
+                tempList.add(event);
+            }
+        }
+        return results;
     }
 }
