@@ -5,6 +5,7 @@ import io.terminus.common.utils.BeanMapper;
 import io.terminus.common.utils.Dates;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.dto.event.AbstractPigEventInputDto;
+import io.terminus.doctor.event.dto.event.boar.DoctorBoarConditionDto;
 import io.terminus.doctor.event.dto.event.boar.DoctorSemenDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorFarrowingDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorFostersDto;
@@ -166,7 +167,13 @@ public class DoctorBasicInputInfoDto implements Serializable{
                 dto = BeanMapper.map(extra, DoctorChgLocationDto.class);
                 break;
             case CONDITION:
-                dto = BeanMapper.map(extra, DoctorConditionDto.class);
+                // 有 conditionBackWeight (背膘) 字段的是母猪体况事件
+                if(extra.containsKey("conditionBackWeight")){
+                    dto = BeanMapper.map(extra, DoctorConditionDto.class);
+                }else{
+                    // 无 conditionBackWeight (背膘) 字段的是公猪体况事件
+                    dto = BeanMapper.map(extra, DoctorBoarConditionDto.class);
+                }
                 break;
             case DISEASE:
                 dto = BeanMapper.map(extra, DoctorDiseaseDto.class);
