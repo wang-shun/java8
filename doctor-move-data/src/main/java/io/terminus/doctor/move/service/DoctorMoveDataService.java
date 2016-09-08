@@ -151,6 +151,21 @@ public class DoctorMoveDataService {
     }
 
     /**
+     * 更新猪群内转外转
+     */
+    @Transactional
+    public void updateTranGroupType(DoctorFarm farm) {
+        doctorGroupEventDao.findGroupEventsByEventTypeAndDate(farm.getId(), GroupEventType.MOVE_IN.getValue(), null, null)
+                .forEach(event -> {
+                    DoctorMoveInGroupEvent moveIn = JSON_MAPPER.fromJson(event.getExtra(), DoctorMoveInGroupEvent.class);
+                    DoctorGroupEvent updateEvent = new DoctorGroupEvent();
+                    updateEvent.setId(event.getId());
+                    updateEvent.setTransGroupType(getTransType(moveIn.getInType(), event.getPigType(), moveIn.getFromBarnType()).getValue());
+                    doctorGroupEventDao.update(updateEvent);
+                });
+    }
+
+    /**
      * 更新母猪流产事件
      */
     @Transactional
