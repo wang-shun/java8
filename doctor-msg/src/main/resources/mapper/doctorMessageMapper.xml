@@ -190,10 +190,9 @@
     </select>
 
     <select id="businessList" parameterType="map" resultType="long">
-        SELECT business_id
+        SELECT DISTINCT business_id
         FROM <include refid="tb"/>
         <include refid="criteria"/>
-        GROUP BY business_id;
     </select>
 
     <select id="pagingDiffBusinessId" parameterType="map" resultMap="DoctorMessageMap">

@@ -5,7 +5,6 @@ import com.google.common.base.MoreObjects;
 import com.google.common.base.Stopwatch;
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import io.terminus.common.model.Paging;
@@ -147,18 +146,11 @@ public abstract class AbstractProducer implements IProducer {
                             subUsers.stream().filter(sub -> sub.getFarmIds().contains(messageRule.getFarmId())).collect(Collectors.toList()));
                     if (message != null && message.size() > 0) {
                         //分批次插入数据
-                        for (int k = 0; k < message.size(); ) {
-                            int delta = 0;
-                            if (k + 5000 > message.size()) {
-                                delta = message.size() % 5000;
-                            } else {
-                                delta = 5000;
-                            }
-                            List<DoctorMessage> subMessages = message.subList(k, k + delta);
-                            doctorMessageWriteService.createMessages(subMessages);
-                            k += 5000;
+                        List<List<DoctorMessage>> lists = Lists.partition(message,5000);
+                        lists.forEach(list -> {
+                            doctorMessageWriteService.createMessages(list);
+                        });
 
-                        }
 
                     }
                 }
