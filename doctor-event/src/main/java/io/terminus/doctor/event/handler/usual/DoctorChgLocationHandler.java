@@ -1,8 +1,6 @@
 package io.terminus.doctor.event.handler.usual;
 
 import com.google.common.base.MoreObjects;
-import com.google.common.primitives.Doubles;
-import com.google.common.primitives.Ints;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.enums.PigType;
@@ -138,19 +136,19 @@ public class DoctorChgLocationHandler extends DoctorAbstractEventHandler{
         input.setSource(PigSource.LOCAL.getKey());
 
         //未断奶的数量 = 总 - 断奶
-        input.setQuantity(checkCount(extraMap) - Integer.valueOf((String) extraMap.get(DoctorPigExtraKeys.partWeanPigletsCount), 0));
+        input.setQuantity(checkCount(extraMap) - Integer.valueOf(String.valueOf(MoreObjects.firstNonNull(extraMap.get(DoctorPigExtraKeys.partWeanPigletsCount), 0))));
         input.setBoarQty(0);
         input.setSowQty(input.getQuantity() - input.getBoarQty());
-        input.setAvgWeight(Doubles.tryParse((String) extraMap.get(DoctorPigExtraKeys.birthNestAvg)));
+        input.setAvgWeight(Double.valueOf(String.valueOf(MoreObjects.firstNonNull(extraMap.get(DoctorPigExtraKeys.birthNestAvg), 0D))));
         input.setWeight(MoreObjects.firstNonNull(input.getAvgWeight(), 0D) * MoreObjects.firstNonNull(input.getQuantity(), 0));
         return RespHelper.orServEx(doctorGroupWriteService.groupEventTransGroup(fromGroup, input));
     }
 
     //校验数量是否存在
     private static Integer checkCount(Map<String, Object> extraMap) {
-        if (!extraMap.containsKey(DoctorPigExtraKeys.farrowingLiveCount) || Ints.tryParse((String) extraMap.get(DoctorPigExtraKeys.farrowingLiveCount)) == null) {
+        if (!extraMap.containsKey(DoctorPigExtraKeys.farrowingLiveCount) || extraMap.get(DoctorPigExtraKeys.farrowingLiveCount) == null) {
             throw new ServiceException("farrow.count.not.found");
         }
-        return Ints.tryParse((String) extraMap.get(DoctorPigExtraKeys.farrowingLiveCount));
+        return Integer.valueOf(String.valueOf(extraMap.get(DoctorPigExtraKeys.farrowingLiveCount)));
     }
 }
