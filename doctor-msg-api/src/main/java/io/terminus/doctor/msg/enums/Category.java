@@ -20,13 +20,13 @@ public enum Category {
     SOW_NEEDWEAN(4,"断奶提示"),
     SOW_ELIMINATE(5,"母猪应淘汰提示"),
     SOW_NOTLITTER(11,"母猪未产仔警报"),
-    SOW_BACK_FAT(10, "背膘提示"),
+    SOW_BACK_FAT(8, "背膘提示"),
 
     BOAR_ELIMINATE(6,"公猪应淘汰提示"),
     FATTEN_PIG_REMOVE(7, "育肥猪出栏提示"),
-    PIG_VACCINATION(8,"猪只免疫提示"),
+    PIG_VACCINATION(9,"猪只免疫提示"),
 
-    STORAGE_SHORTAGE(9,"仓库库存不足提示");
+    STORAGE_SHORTAGE(10,"仓库库存不足提示");
 
     @Getter
     private Integer key;

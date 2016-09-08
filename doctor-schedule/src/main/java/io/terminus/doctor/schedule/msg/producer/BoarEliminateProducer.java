@@ -42,7 +42,7 @@ import java.util.stream.Collectors;
 
 /**
  * Desc: 公猪应淘汰提示
- *          1. 配种次数
+ * 1. 配种次数
  * Mail: chk@terminus.io
  * Created by icemimosa
  * Date: 16/6/6
@@ -108,46 +108,44 @@ public class BoarEliminateProducer extends AbstractJobProducer {
                     //根据用户拥有的猪舍权限过滤拥有user
                     List<SubUser> sUsers = filterSubUserBarnId(subUsers, pigDto.getBarnId());
                     // 公猪的updatedAt与当前时间差 (天)
-                    Double timeDiff = getTimeDiff(new DateTime(pigDto.getUpdatedAt()));
+                    Double timeDiff = getTimeDiff(new DateTime(pigDto.getBirthDay()));
                     ruleValueMap.keySet().forEach(key -> {
+                        //取出最近一次的采精事件
+                        DoctorPigEvent doctorPigEvent = getPigEventByEventType(pigDto.getDoctorPigEvents(), PigEvent.SEMEN.getKey());
                         if (ruleValueMap.get(key) != null) {
-
                             Boolean isSend = false;
                             RuleValue ruleValue = ruleValueMap.get(key);
                             if (key == 1) {
                                 //日龄大于或等于预定值
-                                isSend = pigDto.getDateAge() > ruleValue.getValue().intValue() - 1;
+                                isSend = checkRuleValue(ruleValue, timeDiff);
                             } else if (key == 2) {
-                                if (StringUtils.isNotBlank(pigDto.getExtraTrack())) {
+                                if (doctorPigEvent != null && StringUtils.isNotBlank(doctorPigEvent.getExtra())) {
                                     try {
-                                        Map<String, Object> extraMap = MAPPER.readValue(pigDto.getExtraTrack(), JacksonType.MAP_OF_OBJECT);
-                                        if (StringUtils.isNotBlank((String) extraMap.get("semenActive"))) {
-                                            Float semenActive = Float.parseFloat((String) extraMap.get("semenActive"));
+                                        Map<String, Object> extraMap = MAPPER.readValue(doctorPigEvent.getExtra(), JacksonType.MAP_OF_OBJECT);
+                                            Double semenActive = (double) extraMap.get("semenActive");
                                             //精液重量小于预定值
-                                            isSend = semenActive < ruleValue.getValue().floatValue();
-                                        }
+                                            isSend = semenActive < ruleValue.getValue().doubleValue();
                                     } catch (Exception e) {
-                                        log.error("[BoarEliminateProducer].get.semenActive.fail, pigDto", pigDto);
+                                        log.error("[BoarEliminateProducer].get.semenActive.fail, event{}",doctorPigEvent);
                                     }
 
                                 }
                             } else if (key == 3) {
-                                if (StringUtils.isNotBlank(pigDto.getExtraTrack())) {
+                                if (doctorPigEvent != null && StringUtils.isNotBlank(doctorPigEvent.getExtra())) {
                                     try {
-                                        Map<String, Object> extraMap = MAPPER.readValue(pigDto.getExtraTrack(), JacksonType.MAP_OF_OBJECT);
-                                        if (StringUtils.isNotBlank((String) extraMap.get("semenWeight"))) {
-                                            Float semenWeight = Float.parseFloat((String) extraMap.get("semenWeight"));
-                                            //精液重量小于预定值
-                                            isSend = semenWeight < ruleValue.getValue().floatValue();
-                                        }
+                                        Map<String, Object> extraMap = MAPPER.readValue(doctorPigEvent.getExtra(), JacksonType.MAP_OF_OBJECT);
+                                        Double semenActive = (double) extraMap.get("semenWeight");
+                                        //精液重量小于预定值
+                                        isSend = semenActive < ruleValue.getValue().doubleValue();
                                     } catch (Exception e) {
-                                        log.error("[BoarEliminateProducer].get.semenWeight.fail, pigDto", pigDto);
+                                        log.error("[BoarEliminateProducer].get.semenWeight.fail, event{}", doctorPigEvent);
                                     }
 
                                 }
                             }
                             if (isSend) {
-                                messages.addAll(getMessage(pigDto, rule.getChannels(), ruleRole, sUsers, timeDiff, rule.getUrl(), ruleValue.getDescribe() + ruleValue.getValue().toString()));
+                                pigDto.setReason(ruleValue.getDescribe() + ruleValue.getValue().toString());
+                                messages.addAll(getMessage(pigDto, rule.getChannels(), ruleRole, sUsers, timeDiff, rule.getUrl()));
                             }
                         }
                     });
@@ -160,21 +158,4 @@ public class BoarEliminateProducer extends AbstractJobProducer {
         return messages;
     }
 
-    /**
-     * 创建消息
-     */
-    private List<DoctorMessage> getMessage(DoctorPigInfoDto pigDto, String channels, DoctorMessageRuleRole ruleRole, List<SubUser> subUsers, Double timeDiff, String url, String reason) {
-        List<DoctorMessage> messages = Lists.newArrayList();
-        // 创建消息
-        Map<String, Object> jsonData = PigDtoFactory.getInstance().createPigMessage(pigDto, timeDiff, url);
-        jsonData.put("reason", reason);
-        Splitters.COMMA.splitToList(channels).forEach(channel -> {
-            try {
-                messages.addAll(createMessage(subUsers, ruleRole, Integer.parseInt(channel), MAPPER.writeValueAsString(jsonData)));
-            } catch (JsonProcessingException e) {
-                log.error("message produce error, cause by {}", Throwables.getStackTraceAsString(e));
-            }
-        });
-        return messages;
-    }
 }

@@ -574,8 +574,7 @@ public class DoctorSearches {
             criteriaMap.put("userId", UserUtil.getCurrentUser().getId());
             criteriaMap.put("channel", Rule.Channel.SYSTEM.getValue());
             criteriaMap.put("statuses", ImmutableList.of(DoctorMessage.Status.NORMAL.getValue(), DoctorMessage.Status.READED.getValue()));
-            List<DoctorMessage> messages = RespHelper.or500(doctorMessageReadService.findMessageByCriteria(criteriaMap));
-            List<Long> idList = messages.stream().map(doctorMessage -> doctorMessage.getBusinessId()).collect(Collectors.toList());
+            List<Long> idList =  RespHelper.or500(doctorMessageReadService.findBusinessListByCriteria(criteriaMap));
             String ids = idList.toString().trim().substring(1, idList.toString().toCharArray().length-1);
             params.put("ids", ids);
         }

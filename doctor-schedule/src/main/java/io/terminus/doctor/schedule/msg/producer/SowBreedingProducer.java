@@ -1,10 +1,7 @@
 package io.terminus.doctor.schedule.msg.producer;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.api.client.util.Maps;
-import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
-import io.terminus.common.utils.Splitters;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dto.DoctorPigInfoDto;
 import io.terminus.doctor.event.enums.DataRange;
@@ -27,11 +24,9 @@ import io.terminus.doctor.msg.service.DoctorMessageRuleRoleReadService;
 import io.terminus.doctor.msg.service.DoctorMessageRuleTemplateReadService;
 import io.terminus.doctor.msg.service.DoctorMessageTemplateReadService;
 import io.terminus.doctor.msg.service.DoctorMessageWriteService;
-import io.terminus.doctor.schedule.msg.producer.factory.PigDtoFactory;
 import io.terminus.doctor.user.service.DoctorUserDataPermissionReadService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -122,17 +117,19 @@ public class SowBreedingProducer extends AbstractJobProducer {
                     //根据用户拥有的猪舍权限过滤拥有user
                     List<SubUser> sUsers = filterSubUserBarnId(subUsers, pigDto.getBarnId());
                     // 母猪的updatedAt与当前时间差 (天)
-                    Double timeDiff = getTimeDiff(getStatusDate(pigDto));
-                    // 获取配置的天数, 并判断
-                    if (ruleValueMap.get(1) != null) {
-                        // 记录每只猪的消息提醒
-                        if (!isMessage && Objects.equals(ruleTemplate.getType(), DoctorMessageRuleTemplate.Type.WARNING.getValue())) {
-                            recordPigMessage(pigDto, PigEvent.MATING, getStatusDate(pigDto), ruleValueMap.get(1).getLeftValue().intValue(),
-                                    PigStatus.Wean, PigStatus.KongHuai, PigStatus.Entry);
-                        }
+                    if (getStatusDate(pigDto) != null) {
+                        Double timeDiff = getTimeDiff(getStatusDate(pigDto));
+                        // 获取配置的天数, 并判断
+                        if (ruleValueMap.get(1) != null) {
+                            // 记录每只猪的消息提醒
+                            if (!isMessage && Objects.equals(ruleTemplate.getType(), DoctorMessageRuleTemplate.Type.WARNING.getValue())) {
+                                recordPigMessage(pigDto, PigEvent.MATING, ruleValueMap.get(1).getLeftValue().doubleValue() - timeDiff, ruleValueMap.get(1).getLeftValue().intValue(),
+                                        PigStatus.Wean, PigStatus.KongHuai, PigStatus.Entry);
+                            }
 
-                        if (isMessage && checkRuleValue(ruleValueMap.get(1), timeDiff)) {
-                            messages.addAll(getMessage(pigDto, rule.getChannels(), ruleRole, sUsers, timeDiff, rule.getUrl()));
+                            if (isMessage && checkRuleValue(ruleValueMap.get(1), timeDiff)) {
+                                messages.addAll(getMessage(pigDto, rule.getChannels(), ruleRole, sUsers, timeDiff, rule.getUrl()));
+                            }
                         }
                     }
                 }
@@ -140,21 +137,4 @@ public class SowBreedingProducer extends AbstractJobProducer {
         }
     }
 
-        /**
-         * 创建消息
-         */
-    private List<DoctorMessage> getMessage(DoctorPigInfoDto pigDto, String channels, DoctorMessageRuleRole ruleRole, List<SubUser> subUsers, Double timeDiff, String url) {
-        List<DoctorMessage> messages = Lists.newArrayList();
-        // 创建消息
-        Map<String, Object> jsonData = PigDtoFactory.getInstance().createPigMessage(pigDto, timeDiff, url);
-
-        Splitters.COMMA.splitToList(channels).forEach(channel -> {
-            try {
-                messages.addAll(createMessage(subUsers, ruleRole, Integer.parseInt(channel), MAPPER.writeValueAsString(jsonData)));
-            } catch (JsonProcessingException e) {
-                log.error("message produce error, cause by {}", Throwables.getStackTraceAsString(e));
-            }
-        });
-        return messages;
-    }
 }

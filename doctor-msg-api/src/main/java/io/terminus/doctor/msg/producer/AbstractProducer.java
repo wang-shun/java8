@@ -5,10 +5,10 @@ import com.google.common.base.MoreObjects;
 import com.google.common.base.Stopwatch;
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import io.terminus.common.model.Paging;
+import io.terminus.common.utils.Arguments;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.constants.JacksonType;
 import io.terminus.doctor.common.utils.RespHelper;
@@ -86,7 +86,7 @@ public abstract class AbstractProducer implements IProducer {
         for (int i = 0; ruleTemplates != null && i < ruleTemplates.size(); i++) {
             DoctorMessageRuleTemplate ruleTemplate = ruleTemplates.get(i);
             // 如果不正常, 则不继续执行
-            if(ruleTemplate == null || !Objects.equals(ruleTemplate.getStatus(), DoctorMessageRuleTemplate.Status.NORMAL.getValue())) {
+            if (ruleTemplate == null || !Objects.equals(ruleTemplate.getStatus(), DoctorMessageRuleTemplate.Status.NORMAL.getValue())) {
                 return;
             }
 
@@ -107,7 +107,7 @@ public abstract class AbstractProducer implements IProducer {
                         .build();
                 // 获取信息 (针对所有的角色/user)
                 List<DoctorMessage> message = message(ruleRole, subUsers);
-                if(message != null && message.size() > 0) {
+                if (message != null && message.size() > 0) {
                     doctorMessageWriteService.createMessages(message);
                 }
                 stopwatch.stop();
@@ -115,7 +115,7 @@ public abstract class AbstractProducer implements IProducer {
             }
 
             // 2. 如果是预警或警报消息
-            else{
+            else {
                 Stopwatch stopWatch = Stopwatch.createStarted();
                 log.info("[AbstractProducer] {} -> 预警消息产生, starting......", ruleTemplate.getName());
 
@@ -124,7 +124,7 @@ public abstract class AbstractProducer implements IProducer {
 
                 for (int j = 0; messageRules != null && j < messageRules.size(); j++) {
                     DoctorMessageRule messageRule = messageRules.get(j);
-                    if(!Objects.equals(messageRule.getStatus(), DoctorMessageRule.Status.NORMAL.getValue())) {
+                    if (!Objects.equals(messageRule.getStatus(), DoctorMessageRule.Status.NORMAL.getValue())) {
                         continue;
                     }
                     // 获取最新的发送消息
@@ -143,10 +143,11 @@ public abstract class AbstractProducer implements IProducer {
                             .farmId(messageRule.getFarmId())
                             .ruleValue(messageRule.getRuleValue())
                             .build();
-                    List<DoctorMessage> message = message(ruleRole,
+                        List<DoctorMessage> message = message(ruleRole,
                             subUsers.stream().filter(sub -> sub.getFarmIds().contains(messageRule.getFarmId())).collect(Collectors.toList()));
-                    if(message != null && message.size() > 0) {
-                        doctorMessageWriteService.createMessages(message);
+                    if (Arguments.notEmpty(message)) {
+                        //分批次插入数据
+                        Lists.partition(message,5000).forEach(list -> doctorMessageWriteService.createMessages(list));
                     }
                 }
 
@@ -194,6 +195,7 @@ public abstract class AbstractProducer implements IProducer {
 
     /**
      * 根据规则与角色绑定, 获取发送的消息
+     *
      * @param ruleRole
      * @return
      */
@@ -201,29 +203,32 @@ public abstract class AbstractProducer implements IProducer {
 
     /**
      * 根据规则与猪场的绑定, 获取每只猪的消息
+     *
      * @return
      */
     protected abstract void recordPigMessages(DoctorMessageRule messageRule);
 
     /**
      * 检查用户是否含有数据的权限
+     *
      * @return
      */
     protected abstract boolean hasUserAuth(Long userId, Long farmId);
 
     /**
      * 检查消息符合规则RuleValue
-     * @param ruleValue     规则
-     * @param value         比较值
+     *
+     * @param ruleValue 规则
+     * @param value     比较值
      * @return
      */
-    protected boolean checkRuleValue (RuleValue ruleValue, Double value) {
+    protected boolean checkRuleValue(RuleValue ruleValue, Double value) {
         if (ruleValue == null) {
             return true;
         }
         // 1. 值类型
         if (Objects.equals(RuleValue.RuleType.VALUE.getValue(), ruleValue.getRuleType())) {
-            if (value > ruleValue.getValue()){
+            if (value > ruleValue.getValue()) {
                 return true;
             }
         }
@@ -242,11 +247,12 @@ public abstract class AbstractProducer implements IProducer {
 
     /**
      * 检查消息符合规则RuleValue
-     * @param ruleValue     规则
-     * @param date          比较日期
+     *
+     * @param ruleValue 规则
+     * @param date      比较日期
      * @return
      */
-    protected boolean checkRuleValue (RuleValue ruleValue, Date date) {
+    protected boolean checkRuleValue(RuleValue ruleValue, Date date) {
         // 1. 日期类型
         if (Objects.equals(RuleValue.RuleType.DATE.getValue(), ruleValue.getRuleType())) {
             return new DateTime(ruleValue.getDate()).minus(date.getTime()).getMillis() == 0;
@@ -266,35 +272,56 @@ public abstract class AbstractProducer implements IProducer {
 
     /**
      * 创建DoctorMessage对象
-     * @param subUsers  子账号(已经通过roleId过滤)
-     * @param ruleRole  规则角色
-     * @param channel   发送渠道
-     * @param jsonData  填充数据
+     *
+     * @param subUsers 子账号(已经通过roleId过滤)
+     * @param ruleRole 规则角色
+     * @param channel  发送渠道
+     * @param jsonData 填充数据
      * @return
      */
     protected List<DoctorMessage> createMessage(List<SubUser> subUsers, DoctorMessageRuleRole ruleRole, Integer channel, String jsonData) {
         List<DoctorMessage> messages = Lists.newArrayList();
         DoctorMessageRuleTemplate template = RespHelper.orServEx(doctorMessageRuleTemplateReadService.findMessageRuleTemplateById(ruleRole.getTemplateId()));
         if (subUsers != null && subUsers.size() > 0) {
-            // 主账户 (预警类型会出现重复, 暂时取消) TODO
-            /*subUsers.stream().map(SubUser::getParentUserId).collect(Collectors.toSet())
-                    .forEach(parentId -> messages.add(
-                            DoctorMessage.builder()
-                                    .farmId(ruleRole.getFarmId())
-                                    .ruleId(ruleRole.getRuleId())
-                                    .roleId(ruleRole.getRoleId())
-                                    .userId(parentId)
-                                    .templateId(ruleRole.getTemplateId())
-                                    .messageTemplate(getTemplateName(template.getMessageTemplate(), channel))
-                                    .type(template.getType())
-                                    .category(template.getCategory())
-                                    .data(jsonData)
-                                    .channel(channel)
-                                    .url(getUrl(ruleRole.getRule().getUrl(), channel))
-                                    .status(DoctorMessage.Status.NORMAL.getValue())
-                                    .createdBy(template.getUpdatedBy())
-                                    .build()
-                    ));*/
+            subUsers.stream().map(SubUser::getParentUserId).collect(Collectors.toSet())
+                    .forEach(parentId -> {
+                        DoctorMessage message = DoctorMessage.builder()
+                                .farmId(ruleRole.getFarmId())
+                                .ruleId(ruleRole.getRuleId())
+                                .roleId(ruleRole.getRoleId())
+                                .userId(parentId)
+                                .templateName(template.getName())
+                                .templateId(ruleRole.getTemplateId())
+                                .isExpired(DoctorMessage.IsExpired.NOTEXPIRED.getValue())
+                                .messageTemplate(getTemplateName(template.getMessageTemplate(), channel))
+                                .type(template.getType())
+                                .category(template.getCategory())
+                                .data(jsonData)
+                                .channel(channel)
+                                .url(getUrl(ruleRole.getRule().getUrl(), channel))
+                                .status(DoctorMessage.Status.NORMAL.getValue())
+                                .createdBy(template.getUpdatedBy())
+                                .build();
+                        // 模板编译
+                        try {
+                            Map<String, Serializable> jsonContext = MAPPER.readValue(jsonData, JacksonType.MAP_OF_STRING);
+                            String content = RespHelper.orServEx(doctorMessageTemplateReadService.getMessageContentWithCache(message.getMessageTemplate(), jsonContext));
+                            Long businessId;
+                            if (StringUtils.isNotBlank((String) jsonContext.get("materialId"))) {
+                                businessId = Long.parseLong((String) jsonContext.get("materialId"));
+                            } else if (StringUtils.isNotBlank((String) jsonContext.get("groupId"))) {
+                                businessId = Long.parseLong((String) jsonContext.get("groupId"));
+                            } else {
+                                businessId = Long.parseLong((String) jsonContext.get("pigId"));
+                            }
+                            message.setBusinessId(businessId);
+                            message.setContent(content != null ? content.trim() : "");
+                        } catch (Exception e) {
+                            log.error("compile message template failed,cause by {}, template name is {}, json map is {}", Throwables.getStackTraceAsString(e), message.getMessageTemplate(), jsonData);
+                        }
+                        messages.add(message);
+                    });
+
             // 子账户
             subUsers.stream().forEach(subUser -> {
                 // 检查该用户是否含有farm权限
@@ -319,15 +346,15 @@ public abstract class AbstractProducer implements IProducer {
                             .createdBy(template.getUpdatedBy())
                             .build();
                     // 模板编译
-                    try{
+                    try {
                         Map<String, Serializable> jsonContext = MAPPER.readValue(jsonData, JacksonType.MAP_OF_STRING);
                         String content = RespHelper.orServEx(doctorMessageTemplateReadService.getMessageContentWithCache(message.getMessageTemplate(), jsonContext));
                         Long businessId;
-                        if (StringUtils.isNotBlank((String) jsonContext.get("wareHouseId"))) {
-                            businessId = Long.parseLong((String) jsonContext.get("wareHouseId"));
+                        if (StringUtils.isNotBlank((String) jsonContext.get("materialId"))) {
+                            businessId = Long.parseLong((String) jsonContext.get("materialId"));
                         } else if (StringUtils.isNotBlank((String) jsonContext.get("groupId"))) {
                             businessId = Long.parseLong((String) jsonContext.get("groupId"));
-                        }else {
+                        } else {
                             businessId = Long.parseLong((String) jsonContext.get("pigId"));
                         }
                         message.setBusinessId(businessId);
@@ -337,8 +364,6 @@ public abstract class AbstractProducer implements IProducer {
                     }
 
                     messages.add(message);
-                    //如果之前已发送消息,则将之前消息置为已过期
-
                 }
             });
         }
@@ -347,9 +372,10 @@ public abstract class AbstractProducer implements IProducer {
 
     /**
      * 获取最新发送的预警或警报的消息
-     * @param templateId    规则模板id
-     * @param farmId        猪场id
-     * @param roleId        角色id
+     *
+     * @param templateId 规则模板id
+     * @param farmId     猪场id
+     * @param roleId     角色id
      * @return
      */
     private DoctorMessage getLatestWarnMessage(Long templateId, Long farmId, Long roleId) {
@@ -358,8 +384,9 @@ public abstract class AbstractProducer implements IProducer {
 
     /**
      * 获取最新发送的预警或警报的消息
-     * @param templateId    规则模板id
-     * @param farmId        猪场id
+     *
+     * @param templateId 规则模板id
+     * @param farmId     猪场id
      * @return
      */
     private DoctorMessage getLatestWarnMessage(Long templateId, Long farmId) {
@@ -368,6 +395,7 @@ public abstract class AbstractProducer implements IProducer {
 
     /**
      * 获取最新发送的系统消息(系统消息是对应到模板的)
+     *
      * @param templateId
      * @return
      */
@@ -377,8 +405,9 @@ public abstract class AbstractProducer implements IProducer {
 
     /**
      * 检查消息是否在频率范围之内
-     * @param message   消息
-     * @param rule      规则
+     *
+     * @param message 消息
+     * @param rule    规则
      * @return
      */
     private boolean checkFrequence(DoctorMessage message, Rule rule) {
@@ -401,8 +430,9 @@ public abstract class AbstractProducer implements IProducer {
 
     /**
      * 获取具体的模板名称
-     * @param tplName   模板基名
-     * @param channel   渠道
+     *
+     * @param tplName 模板基名
+     * @param channel 渠道
      * @return
      */
     private String getTemplateName(String tplName, Integer channel) {
@@ -417,8 +447,9 @@ public abstract class AbstractProducer implements IProducer {
 
     /**
      * 获取不同的url
-     * @param url       url
-     * @param channel   发送渠道, app推送需要带 http:// 的全url
+     *
+     * @param url     url
+     * @param channel 发送渠道, app推送需要带 http:// 的全url
      */
     private String getUrl(String url, Integer channel) {
         if (StringUtils.isBlank(url)) {
@@ -433,15 +464,16 @@ public abstract class AbstractProducer implements IProducer {
             String url1 = url.substring(7);
             url1 = url1.substring(url1.indexOf("/"));
             return url1;
-        }else {
+        } else {
             return url.substring(url.indexOf("/"));
         }
     }
 
     /**
      * 获取总页数
-     * @param total     总数量
-     * @param size      批量获取的数量
+     *
+     * @param total 总数量
+     * @param size  批量获取的数量
      * @return
      */
     protected Long getPageSize(Long total, Long size) {
@@ -450,7 +482,7 @@ public abstract class AbstractProducer implements IProducer {
         if (total != null) {
             if (total % size == 0) {
                 page = total / size;
-            }else {
+            } else {
                 page = total / size + 1;
             }
         }
