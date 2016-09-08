@@ -100,4 +100,12 @@ public interface DoctorMessageReadService {
      * @return
      */
     Response<List<Long>> findBusinessListByCriteria(Map<String, Object> criteria);
+
+    /**
+     *分页获取businessId过滤
+     * @param criteria
+     * @return
+     */
+    Response<Paging<DoctorMessage>> pagingDiffBusinessId(Map<String, Object> criteria, Integer pageNo, Integer pageSize);
+
 }

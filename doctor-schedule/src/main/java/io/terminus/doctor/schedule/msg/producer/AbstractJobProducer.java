@@ -6,7 +6,6 @@ import com.google.api.client.util.Lists;
 import com.google.common.base.Throwables;
 import io.terminus.common.utils.Arguments;
 import io.terminus.common.utils.Splitters;
-import io.terminus.doctor.common.constants.JacksonType;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dto.DoctorPigInfoDto;
 import io.terminus.doctor.event.dto.DoctorPigMessage;
@@ -15,7 +14,6 @@ import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.enums.PregCheckResult;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
-import io.terminus.doctor.event.service.DoctorGroupReadService;
 import io.terminus.doctor.event.service.DoctorPigReadService;
 import io.terminus.doctor.event.service.DoctorPigWriteService;
 import io.terminus.doctor.msg.dto.RuleValue;
@@ -36,7 +34,6 @@ import io.terminus.doctor.user.model.DoctorUserDataPermission;
 import io.terminus.doctor.user.service.DoctorUserDataPermissionReadService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.eclipse.jetty.websocket.jsr356.encoders.DoubleEncoder;
 import org.joda.time.DateTime;
 
 import java.util.Collections;
@@ -102,7 +99,7 @@ public abstract class AbstractJobProducer extends AbstractProducer {
      * @param ruleValue   配置的的天数
      * @param pigStatuses 母猪当前的状态
      */
-    protected void recordPigMessage(DoctorPigInfoDto pigDto, PigEvent pigEvent, DateTime warningDate, Integer ruleValue, PigStatus... pigStatuses) {
+    protected void recordPigMessage(DoctorPigInfoDto pigDto, PigEvent pigEvent, Double timeDiff, Integer ruleValue, PigStatus... pigStatuses) {
         List statusList = Lists.newArrayList();
         if (pigStatuses != null && pigStatuses.length > 0) {
             for (PigStatus pigStatus : pigStatuses) {
@@ -117,7 +114,7 @@ public abstract class AbstractJobProducer extends AbstractProducer {
                 .eventType(pigEvent.getKey())
                 .eventTypeName(pigEvent.getName())
                 .status(pigDto.getStatus())
-                .timeDiff(getTimeDiff(warningDate, ruleValue))
+                .timeDiff(timeDiff)
                 .build());
 
         // 处理存在的消息和过期的消息
@@ -300,11 +297,11 @@ public abstract class AbstractJobProducer extends AbstractProducer {
     /**
      * 获取剩余的天数
      */
-        private Double getTimeDiff(DateTime warningDate, Integer ruleValue) {
-        long millis = warningDate.plusDays(ruleValue)
-                .minus(DateTime.now().getMillis()).getMillis();
-        return (double) (millis / 86400000);
-    }
+//        private Double getTimeDiff(DateTime warningDate, Integer ruleValue) {
+//        long millis = warningDate.plusDays(ruleValue)
+//                .minus(DateTime.now().getMillis()).getMillis();
+//        return (double) (millis / 86400000);
+//    }
 
     /**
      * 创建消息

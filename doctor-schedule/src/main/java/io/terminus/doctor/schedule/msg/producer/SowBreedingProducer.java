@@ -1,10 +1,7 @@
 package io.terminus.doctor.schedule.msg.producer;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.api.client.util.Maps;
-import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
-import io.terminus.common.utils.Splitters;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dto.DoctorPigInfoDto;
 import io.terminus.doctor.event.enums.DataRange;
@@ -27,11 +24,9 @@ import io.terminus.doctor.msg.service.DoctorMessageRuleRoleReadService;
 import io.terminus.doctor.msg.service.DoctorMessageRuleTemplateReadService;
 import io.terminus.doctor.msg.service.DoctorMessageTemplateReadService;
 import io.terminus.doctor.msg.service.DoctorMessageWriteService;
-import io.terminus.doctor.schedule.msg.producer.factory.PigDtoFactory;
 import io.terminus.doctor.user.service.DoctorUserDataPermissionReadService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -128,7 +123,7 @@ public class SowBreedingProducer extends AbstractJobProducer {
                         if (ruleValueMap.get(1) != null) {
                             // 记录每只猪的消息提醒
                             if (!isMessage && Objects.equals(ruleTemplate.getType(), DoctorMessageRuleTemplate.Type.WARNING.getValue())) {
-                                recordPigMessage(pigDto, PigEvent.MATING, getStatusDate(pigDto), ruleValueMap.get(1).getLeftValue().intValue(),
+                                recordPigMessage(pigDto, PigEvent.MATING, ruleValueMap.get(1).getLeftValue().doubleValue() - timeDiff, ruleValueMap.get(1).getLeftValue().intValue(),
                                         PigStatus.Wean, PigStatus.KongHuai, PigStatus.Entry);
                             }
 

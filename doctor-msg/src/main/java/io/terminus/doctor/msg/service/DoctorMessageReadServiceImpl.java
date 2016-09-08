@@ -175,4 +175,14 @@ public class DoctorMessageReadServiceImpl implements DoctorMessageReadService {
             return Response.fail("find.message.count.by.criteria.failed");
         }
     }
+
+    @Override
+    public Response<Paging<DoctorMessage>> pagingDiffBusinessId(Map<String, Object> criteria, Integer pageNo, Integer pageSize) {
+        try {
+            return Response.ok(doctorMessageDao.pagingDiffBusinessId(criteria, pageNo, pageSize));
+        } catch (Exception e){
+            log.error("paging.dif.businessId.failed,cause by{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("aging.dif.businessId.failed");
+        }
+    }
 }

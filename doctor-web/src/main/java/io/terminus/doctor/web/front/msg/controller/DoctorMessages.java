@@ -12,9 +12,6 @@ import io.terminus.doctor.common.constants.JacksonType;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.msg.dto.Rule;
 import io.terminus.doctor.msg.enums.Category;
-import io.terminus.doctor.web.core.component.UserResService;
-import io.terminus.doctor.web.front.msg.dto.DoctorMessageDto;
-import io.terminus.doctor.web.front.msg.dto.OneLevelMessageDto;
 import io.terminus.doctor.msg.model.DoctorMessage;
 import io.terminus.doctor.msg.model.DoctorMessageRule;
 import io.terminus.doctor.msg.model.DoctorMessageRuleTemplate;
@@ -23,6 +20,9 @@ import io.terminus.doctor.msg.service.DoctorMessageRuleReadService;
 import io.terminus.doctor.msg.service.DoctorMessageRuleTemplateReadService;
 import io.terminus.doctor.msg.service.DoctorMessageRuleTemplateWriteService;
 import io.terminus.doctor.msg.service.DoctorMessageWriteService;
+import io.terminus.doctor.web.core.component.UserResService;
+import io.terminus.doctor.web.front.msg.dto.DoctorMessageDto;
+import io.terminus.doctor.web.front.msg.dto.OneLevelMessageDto;
 import io.terminus.pampas.common.UserUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -90,14 +90,14 @@ public class DoctorMessages {
         }
         criteria.put("userId", UserUtil.getUserId());
         criteria.put("isExpired", DoctorMessage.IsExpired.NOTEXPIRED);
-        Paging<DoctorMessage> paging = RespHelper.or500(doctorMessageReadService.pagingWarnMessages(criteria, pageNo, pageSize));
+        Paging<DoctorMessage> paging = RespHelper.or500(doctorMessageReadService.pagingDiffBusinessId(criteria, pageNo, pageSize));
         List<DoctorMessage> messages = paging.getData();
 
         DoctorMessageDto msgDto = DoctorMessageDto.builder().build();
         if (messages != null && messages.size() > 0){
             messages.forEach(doctorMessage -> {
                 String urlPart;
-                if (Objects.equals(doctorMessage.getCategory(), Category.FATTEN_PIG_REMOVE.getKey())){
+                if (Objects.equals(doctorMessage.getCategory(), Category.FATTEN_PIG_REMOVE.getKey())) {
                     urlPart = "?groupId=";
                     msgDto.setListUrl("/group/list?farmId=" + doctorMessage.getFarmId() + "&searchFrom=MESSAGE");
                 }else if (Objects.equals(doctorMessage.getCategory(), Category.STORAGE_SHORTAGE.getKey())){
@@ -277,8 +277,10 @@ public class DoctorMessages {
             criteriaMap.put("userId", UserUtil.getCurrentUser().getId());
             criteriaMap.put("channel", Rule.Channel.SYSTEM.getValue());
             criteriaMap.put("statuses", ImmutableList.of(DoctorMessage.Status.NORMAL.getValue(), DoctorMessage.Status.READED.getValue()));
+            //统计育肥猪出栏消息头数
             if (Objects.equals(doctorMessageRule.getCategory(), Category.FATTEN_PIG_REMOVE.getKey())) {
                 List<DoctorMessage> messages = RespHelper.or500(doctorMessageReadService.findMessageByCriteria(criteriaMap));
+                //过滤businessId相同的消息
                 Map<Long, DoctorMessage> map = Maps.newHashMap();
                 messages.forEach(doctorMessage -> map.put(doctorMessage.getBusinessId(), doctorMessage));
                 for (DoctorMessage doctorMessage : map.values()) {

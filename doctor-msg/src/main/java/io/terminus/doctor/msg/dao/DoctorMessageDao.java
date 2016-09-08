@@ -1,10 +1,15 @@
 package io.terminus.doctor.msg.dao;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Maps;
+import io.terminus.common.model.Paging;
 import io.terminus.common.mysql.dao.MyBatisDao;
+import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.msg.model.DoctorMessage;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -65,6 +70,30 @@ public class DoctorMessageDao extends MyBatisDao<DoctorMessage> {
      */
     public List<Long> findBusinessListByCriteria(Map<String, Object> criteria){
         return getSqlSession().selectList(sqlId("businessList"), criteria);
+    }
+
+    /**
+     * 分页过滤消息
+     * @param criteria
+     * @param offset
+     * @param limit
+     * @return
+     */
+    public Paging<DoctorMessage> pagingDiffBusinessId(Map<String, Object> criteria, Integer offset, Integer limit){
+        HashMap params = Maps.newHashMap();
+        if(criteria != null) {
+            Map total = (Map) JsonMapper.nonDefaultMapper().getMapper().convertValue(criteria, Map.class);
+            params.putAll(total);
+        }
+        Long total = (long)getSqlSession().selectList(sqlId("businessList"), criteria).size();
+        if(total.longValue() <= 0L) {
+            return new Paging(Long.valueOf(0L), Collections.emptyList());
+        } else {
+            params.put("offset", offset);
+            params.put("limit", limit);
+            List datas = this.sqlSession.selectList(this.sqlId("pagingDiffBusinessId"), params);
+            return new Paging(total, datas);
+        }
     }
 
 }
