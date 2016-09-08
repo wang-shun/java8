@@ -1,6 +1,11 @@
 package io.terminus.doctor.event.handler.sow;
 
+import com.google.common.base.MoreObjects;
 import com.google.common.collect.Maps;
+import com.google.common.primitives.Doubles;
+import com.google.common.primitives.Ints;
+import io.terminus.common.exception.ServiceException;
+import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.RespHelper;
@@ -14,13 +19,13 @@ import io.terminus.doctor.event.dao.DoctorRevertLogDao;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
 import io.terminus.doctor.event.dto.DoctorGroupDetail;
 import io.terminus.doctor.event.dto.event.group.input.DoctorTransGroupInput;
+import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PigSource;
 import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.handler.DoctorAbstractEventFlowHandler;
 import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorGroup;
-import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.event.service.DoctorBarnReadService;
 import io.terminus.doctor.event.service.DoctorGroupReadService;
@@ -72,12 +77,12 @@ public class DoctorSowChgLocationHandler extends DoctorAbstractEventFlowHandler 
         doctorPigTrack.addAllExtraMap(extra);
 
         Long toBarnId = Long.valueOf(extra.get("chgLocationToBarnId").toString());
-        DoctorBarn doctorToBarn = RespHelper.orServEx(doctorBarnReadService.findBarnById(toBarnId));
-        DoctorBarn doctorFromBarn = RespHelper.orServEx(doctorBarnReadService.findBarnById(doctorPigTrack.getCurrentBarnId()));
+        DoctorBarn toBarn = RespHelper.orServEx(doctorBarnReadService.findBarnById(toBarnId));
+        DoctorBarn fromBarn = RespHelper.orServEx(doctorBarnReadService.findBarnById(doctorPigTrack.getCurrentBarnId()));
         checkState(!isNull(toBarnId), "input.toBarnId.fail");
 
         doctorPigTrack.setCurrentBarnId(toBarnId);
-        doctorPigTrack.setCurrentBarnName(doctorToBarn.getName());
+        doctorPigTrack.setCurrentBarnName(toBarn.getName());
         doctorPigTrack.setUpdatorId(basic.getStaffId());
         doctorPigTrack.setUpdatorName(basic.getStaffName());
 
@@ -102,44 +107,58 @@ public class DoctorSowChgLocationHandler extends DoctorAbstractEventFlowHandler 
         }
 
         // 来源和前往都是 1 和 7 时, 仔猪也要跟着转群
-        if(PigType.FARROW_TYPES.contains(doctorFromBarn.getPigType()) && PigType.FARROW_TYPES.contains(doctorToBarn.getPigType())
+        if(PigType.FARROW_TYPES.contains(fromBarn.getPigType()) && PigType.FARROW_TYPES.contains(toBarn.getPigType())
                 && doctorPigTrack.getExtraMap().get(DoctorPigExtraKeys.farrowingPigletGroupId) != null){
-            this.pigletTrans(doctorPigTrack, basic, extra, doctorToBarn);
+            Long groupId = pigletTrans(doctorPigTrack, basic, extra, toBarn);
+
         }
 
         doctorPigTrack.addPigEvent(basic.getPigType(), (Long) context.get("doctorPigEventId"));
         return doctorPigTrack;
     }
 
-    private void pigletTrans(DoctorPigTrack doctorPigTrack, DoctorBasicInputInfoDto basic, Map<String, Object> extra, DoctorBarn doctorToBarn){
-        Long farrowingPigletGroupId = Long.valueOf(doctorPigTrack.getExtraMap().get(DoctorPigExtraKeys.farrowingPigletGroupId).toString());
+    //未断奶仔猪转群
+    private Long pigletTrans(DoctorPigTrack pigTrack, DoctorBasicInputInfoDto basic, Map<String, Object> extra, DoctorBarn doctorToBarn) {
+        Map<String, Object> extraMap = JsonMapper.nonEmptyMapper().fromJson(pigTrack.getExtra(), JsonMapper.nonEmptyMapper().createCollectionType(Map.class, String.class, Object.class));
+
+        //未断奶仔猪id
+        Long farrowingPigletGroupId = Long.valueOf(extraMap.get(DoctorPigExtraKeys.farrowingPigletGroupId).toString());
         DoctorTransGroupInput input = new DoctorTransGroupInput();
         input.setToBarnId(doctorToBarn.getId());
         input.setToBarnName(doctorToBarn.getName());
         List<DoctorGroup> groupList = RespHelper.orServEx(doctorGroupReadService.findGroupByCurrentBarnId(doctorToBarn.getId()));
-        if(notEmpty(groupList)){
-            input.setIsCreateGroup(1);
+        if (notEmpty(groupList)) {
+            input.setIsCreateGroup(IsOrNot.NO.getValue());
             DoctorGroup toGroup = groupList.get(0);
             input.setToGroupId(toGroup.getId());
             input.setToGroupCode(toGroup.getGroupCode());
-        }else{
-            input.setIsCreateGroup(0);
+        } else {
+            input.setIsCreateGroup(IsOrNot.YES.getValue());
         }
 
         DoctorGroupDetail fromGroup = RespHelper.orServEx(doctorGroupReadService.findGroupDetailByGroupId(farrowingPigletGroupId));
-        DoctorPigEvent doctorPigEvent = buildAllPigDoctorEvent(basic, extra);
         input.setEventAt(DateUtil.toDateString(basic.generateEventAtFromExtra(extra)));
-        input.setIsAuto(1);
-        input.setCreatorId(doctorPigEvent.getCreatorId());
-        input.setCreatorName(doctorPigEvent.getCreatorName());
+        input.setIsAuto(IsOrNot.YES.getValue());
+        input.setCreatorId(basic.getStaffId());
+        input.setCreatorName(basic.getStaffName());
         input.setBreedId(fromGroup.getGroup().getBreedId());
         input.setBreedName(fromGroup.getGroup().getBreedName());
-        input.setQuantity(fromGroup.getGroupTrack().getQuantity());
-        input.setSowQty(fromGroup.getGroupTrack().getSowQty());
-        input.setBoarQty(fromGroup.getGroupTrack().getBoarQty());
-        input.setWeight(fromGroup.getGroupTrack().getWeight());
-        input.setAvgWeight(fromGroup.getGroupTrack().getAvgWeight());
         input.setSource(PigSource.LOCAL.getKey());
-        RespHelper.orServEx(doctorGroupWriteService.groupEventTransGroup(fromGroup, input));
+
+        //未断奶的数量 = 总 - 断奶
+        input.setQuantity(checkCount(extraMap) - Integer.valueOf((String) extraMap.get(DoctorPigExtraKeys.partWeanPigletsCount), 0));
+        input.setBoarQty(0);
+        input.setSowQty(input.getQuantity() - input.getBoarQty());
+        input.setAvgWeight(Doubles.tryParse((String) extraMap.get(DoctorPigExtraKeys.birthNestAvg)));
+        input.setWeight(MoreObjects.firstNonNull(input.getAvgWeight(), 0D) * MoreObjects.firstNonNull(input.getQuantity(), 0));
+        return RespHelper.orServEx(doctorGroupWriteService.groupEventTransGroup(fromGroup, input));
+    }
+
+    //校验数量是否存在
+    private static Integer checkCount(Map<String, Object> extraMap) {
+        if (!extraMap.containsKey(DoctorPigExtraKeys.farrowingLiveCount) || Ints.tryParse((String) extraMap.get(DoctorPigExtraKeys.farrowingLiveCount)) == null) {
+            throw new ServiceException("farrow.count.not.found");
+        }
+        return Ints.tryParse((String) extraMap.get(DoctorPigExtraKeys.farrowingLiveCount));
     }
 }
