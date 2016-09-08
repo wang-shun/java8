@@ -106,10 +106,15 @@ public class DoctorBasicInputInfoDto implements Serializable{
         if(pigEvent == null){
             return this.eventDesc;
         }
-        Map<String, String> fieldMap = this.transFromPigEventAndExtra(pigEvent, extra).descMap();
+
+        AbstractPigEventInputDto baseDto = transFromPigEventAndExtra(pigEvent, extra);
+        Map<String, String> fieldMap = baseDto.descMap();
         if(Objects.equals(pigEvent, PigEvent.FOSTERS_BY)){
             // 被拼窝的母猪的描述中按理说应当带上"拼窝来源母猪", 但是 dto 中没有这个字段, 那就把"被拼窝母猪"这个字段去掉, 别让客户注意到...嘻嘻~~~
             fieldMap.remove("被拼窝母猪");
+        }
+        if(baseDto.getOperatorName() != null){
+            fieldMap.put("操作人", baseDto.getOperatorName());
         }
         return Joiner.on("#").withKeyValueSeparator("：").join(fieldMap);
     }
@@ -122,7 +127,7 @@ public class DoctorBasicInputInfoDto implements Serializable{
         if(pigEvent == null){
             return null;
         }
-        Date eventAt = this.transFromPigEventAndExtra(pigEvent, extra).eventAt();
+        Date eventAt = transFromPigEventAndExtra(pigEvent, extra).eventAt();
         if(eventAt != null){
             Date now = new Date();
             if(DateUtil.inSameDate(eventAt, now)){
@@ -136,7 +141,7 @@ public class DoctorBasicInputInfoDto implements Serializable{
         return null;
     }
     
-    public AbstractPigEventInputDto transFromPigEventAndExtra(PigEvent pigEvent, Map<String, Object> extra){
+    public static AbstractPigEventInputDto transFromPigEventAndExtra(PigEvent pigEvent, Map<String, Object> extra){
         if(pigEvent == null){
             return null;
         }

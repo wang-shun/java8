@@ -9,6 +9,8 @@ import io.terminus.doctor.event.dao.DoctorPigSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorPigTrackDao;
 import io.terminus.doctor.event.dao.DoctorRevertLogDao;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
+import io.terminus.doctor.event.dto.event.AbstractPigEventInputDto;
+import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigSnapshot;
 import io.terminus.doctor.event.model.DoctorPigTrack;
@@ -154,6 +156,7 @@ public abstract class DoctorAbstractEventHandler implements DoctorEventCreateHan
     }
 
     protected DoctorPigEvent buildAllPigDoctorEvent(DoctorBasicInputInfoDto basic, Map<String, Object> extra) {
+        AbstractPigEventInputDto abstractPigEventInputDto = DoctorBasicInputInfoDto.transFromPigEventAndExtra(PigEvent.from(basic.getEventType()), extra);
         DoctorPigEvent doctorPigEvent = DoctorPigEvent.builder()
                 .orgId(basic.getOrgId()).orgName(basic.getOrgName())
                 .farmId(basic.getFarmId()).farmName(basic.getFarmName())
@@ -161,6 +164,7 @@ public abstract class DoctorAbstractEventHandler implements DoctorEventCreateHan
                 .eventAt(basic.generateEventAtFromExtra(extra)).type(basic.getEventType())
                 .kind(basic.getPigType()).name(basic.getEventName()).desc(basic.generateEventDescFromExtra(extra)).relEventId(basic.getRelEventId())
                 .barnId(basic.getBarnId()).barnName(basic.getBarnName())
+                .operatorId(abstractPigEventInputDto.getOperatorId()).operatorName(abstractPigEventInputDto.getOperatorName())
                 .creatorId(basic.getStaffId()).creatorName(basic.getStaffName())
                 .npd(0)
                 .dpnpd(0)

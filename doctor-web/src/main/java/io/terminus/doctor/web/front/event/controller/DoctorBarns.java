@@ -222,7 +222,7 @@ public class DoctorBarns {
 
     //普通转舍 转入猪舍类型
     private List<Integer> getTransBarnTypes(String pigIds) {
-        List<Integer> barnTypes = PigType.ALL_TYPES;
+        List<Integer> barnTypes = Lists.newArrayList(PigType.ALL_TYPES);
         //遍历求猪舍类型交集
         for (Long pigId : Splitters.splitToLong(pigIds, Splitters.COMMA)) {
             DoctorBarn pigBarn = RespHelper.or500(doctorPigReadService.findBarnByPigId(pigId));
