@@ -76,7 +76,7 @@ public class DoctorMoveInGroupEventHandler extends DoctorAbstractGroupEventHandl
 
         if (moveIn.getFromBarnId() != null) {
             DoctorBarn toBarn = RespHelper.orServEx(doctorBarnReadService.findBarnById(moveIn.getFromBarnId()));
-            event.setTransGroupType(getTransType(group.getPigType(), toBarn).getValue());   //区别内转还是外转
+            event.setTransGroupType(getTransType(moveIn.getInType(), group.getPigType(), toBarn).getValue());   //区别内转还是外转
         }
         event.setExtraMap(moveInEvent);
         doctorGroupEventDao.create(event);

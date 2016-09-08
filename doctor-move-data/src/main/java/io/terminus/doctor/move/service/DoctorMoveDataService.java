@@ -1627,7 +1627,7 @@ public class DoctorMoveDataService {
             case MOVE_IN:
                 DoctorMoveInGroupEvent moveIn = getMoveInEvent(gainEvent, basicMap, groupMap, group);
                 event.setExtraMap(moveIn);
-                event.setTransGroupType(getTransType(event.getPigType(), moveIn.getFromBarnType()).getValue());  //区分内转还是外转
+                event.setTransGroupType(getTransType(moveIn.getInType(), event.getPigType(), moveIn.getFromBarnType()).getValue());  //区分内转还是外转
                 break;
             case CHANGE:
                 DoctorChangeGroupEvent changeEvent = getChangeEvent(gainEvent, basicMap, changeReasonMap, customerMap);
@@ -1639,7 +1639,7 @@ public class DoctorMoveDataService {
             case TRANS_GROUP:
                 DoctorTransGroupEvent transGroupEvent = getTranGroupEvent(gainEvent, basicMap, barnMap, groupMap, group);
                 event.setExtraMap(transGroupEvent);
-                event.setTransGroupType(getTransType(event.getPigType(), transGroupEvent.getToBarnType()).getValue());  //区分内转还是外转
+                event.setTransGroupType(getTransType(null, event.getPigType(), transGroupEvent.getToBarnType()).getValue());  //区分内转还是外转
                 break;
             case TURN_SEED:
                 event.setExtraMap(getTurnSeedEvent(gainEvent, basicMap, barnMap, pigMap));
@@ -1674,9 +1674,10 @@ public class DoctorMoveDataService {
                 anti.setQuantity(gainEvent.getQuantity());
                 event.setExtraMap(anti);
                 break;
-            case TRANS_FARM: //转场不区分内转外转, 相当于空降
+            case TRANS_FARM: //转场肯定是外转, 相当于空降
                 DoctorTransFarmGroupEvent transFarmEvent = getTranFarmEvent(gainEvent, basicMap, barnMap, groupMap, group);
                 event.setExtraMap(transFarmEvent);
+                event.setTransGroupType(DoctorGroupEvent.TransGroupType.OUT.getValue());
                 break;
             case CLOSE:
                 DoctorCloseGroupEvent close = new DoctorCloseGroupEvent();
@@ -1690,7 +1691,10 @@ public class DoctorMoveDataService {
     }
 
     //判断内转还是外转
-    private static DoctorGroupEvent.TransGroupType getTransType(Integer pigType, Integer toBarnType) {
+    private static DoctorGroupEvent.TransGroupType getTransType(Integer inType, Integer pigType, Integer toBarnType) {
+        if (!Objects.equals(inType, DoctorMoveInGroupEvent.InType.GROUP.getValue())) {
+            return DoctorGroupEvent.TransGroupType.OUT;
+        }
         return Objects.equals(pigType, toBarnType) || (FARROW_TYPES.contains(pigType) && FARROW_TYPES.contains(toBarnType)) ?
                 DoctorGroupEvent.TransGroupType.IN : DoctorGroupEvent.TransGroupType.OUT;
     }
