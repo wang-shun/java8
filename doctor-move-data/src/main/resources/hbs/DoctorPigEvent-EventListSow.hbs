@@ -2,8 +2,7 @@
 SELECT
     CASE WHEN a.eventNameFirst = '转舍' THEN
         CASE
-            WHEN barn.TypeName != '配种母猪' AND toBarn.TypeName = '配种母猪' THEN '转入配种舍'
-            WHEN barn.TypeName != '妊娠母猪' AND toBarn.TypeName = '妊娠母猪' THEN '转入妊娠舍'
+            WHEN (barn.TypeName != '配种母猪' AND barn.TypeName != '妊娠母猪') AND toBarn.TypeName = '配种母猪' THEN '转入配种舍'
             WHEN barn.TypeName != '分娩母猪' AND toBarn.TypeName = '分娩母猪' THEN '去分娩'
             ELSE a.eventNameFirst END
     ELSE eventNameFirst END AS eventName,
@@ -22,7 +21,6 @@ FROM
             WHEN EventName = '仔猪拼窝' THEN '拼窝'
             WHEN EventName = '仔猪代哺' THEN '被拼窝'
             WHEN EventName = '部分断奶' THEN '断奶'
-            WHEN EventName = '妊娠检查' AND PregChkResult = '流产' THEN '流产'
             ELSE EventName END AS eventNameFirst,     -- 转换事件的名称, 以适应新版的事件
         OID AS sowOutId,
         FarmOID AS farmOutId,

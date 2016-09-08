@@ -218,8 +218,7 @@ public class DoctorPigEventManager {
     private void checkMatingCount(DoctorBasicInputInfoDto basic, Map<String, Object> extra) {
         // 如果妊娠检查非阳性 或 转入配种舍,置当前配种数为0
         if ((extra.containsKey("checkResult") && !Objects.equals(extra.get("checkResult"), PregCheckResult.YANG.getKey())) ||
-                Objects.equals(basic.getEventType(), PigEvent.TO_MATING.getKey()) ||
-                Objects.equals(basic.getEventType(), PigEvent.ABORTION.getKey())) {
+                Objects.equals(basic.getEventType(), PigEvent.TO_MATING.getKey())) {
             DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(basic.getPigId());
             doctorPigTrack.setCurrentMatingCount(0);
             doctorPigTrackDao.update(doctorPigTrack);

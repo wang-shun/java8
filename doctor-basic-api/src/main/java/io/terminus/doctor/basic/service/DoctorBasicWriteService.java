@@ -81,7 +81,7 @@ public interface DoctorBasicWriteService {
      * @param customerName  客户名称
      * @return 是否成功
      */
-    Response<Boolean> addCustomerWhenInput(@NotNull(message = "farmId.not.null") Long farmId,
-                                           String farmName, Long customerId, String customerName,
-                                           Long creatorId, String creatorName);
+    Response<Long> addCustomerWhenInput(@NotNull(message = "farmId.not.null") Long farmId,
+                                        String farmName, Long customerId, String customerName,
+                                        Long creatorId, String creatorName);
 }

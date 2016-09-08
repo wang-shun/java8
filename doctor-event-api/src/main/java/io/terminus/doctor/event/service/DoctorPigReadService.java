@@ -41,6 +41,13 @@ public interface DoctorPigReadService {
     Response<DoctorPigInfoDetailDto> queryPigDetailInfoByPigId(@NotNull(message = "input.pigId.empty") Long pigId, Integer eventSize);
 
     /**
+     * 通过pigId 查询pig
+     * @param pigId
+     * @return
+     */
+    Response<DoctorPig> findPigById(Long pigId);
+
+    /**
      * 通过doctorPig 信息分页查询
      * @param doctorPig
      * @param pageNo
@@ -67,7 +74,7 @@ public interface DoctorPigReadService {
 
     /**
      * 生成对应的窝号 年+月+胎次
-     * @param pigId
+     * @param farmId
      * @return
      */
     Response<String> generateFostersCode(@NotNull(message = "input.farmId.empty") Long farmId);

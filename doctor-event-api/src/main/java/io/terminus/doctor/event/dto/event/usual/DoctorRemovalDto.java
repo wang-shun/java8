@@ -1,11 +1,14 @@
 package io.terminus.doctor.event.dto.event.usual;
 
+import io.terminus.doctor.event.dto.event.AbstractPigEventInputDto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Builder;
 
 import java.io.Serializable;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -15,13 +18,16 @@ import java.util.Map;
  * Email:yaoqj@terminus.io
  * Descirbe: 离场事件信息
  */
+@EqualsAndHashCode(callSuper = true)
 @Builder
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class DoctorRemovalDto implements Serializable{
+public class DoctorRemovalDto extends AbstractPigEventInputDto implements Serializable{
 
     private static final long serialVersionUID = -5166658905616894350L;
+
+    private Date removalDate; // 离场时间
 
     private Long chgTypeId; // 变动类型Id basic 数据信息
 
@@ -61,5 +67,10 @@ public class DoctorRemovalDto implements Serializable{
             map.put("总量", sum.toString());
         }
         return map;
+    }
+
+    @Override
+    public Date eventAt() {
+        return this.removalDate;
     }
 }

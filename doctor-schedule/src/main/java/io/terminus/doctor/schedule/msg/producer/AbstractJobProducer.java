@@ -146,15 +146,6 @@ public abstract class AbstractJobProducer extends AbstractProducer {
     }
 
     /**
-     * 获取剩余的天数
-     */
-    private Double getTimeDiff(DateTime warningDate, Integer ruleValue) {
-        long millis = warningDate.plusDays(ruleValue)
-                .minus(DateTime.now().getMillis()).getMillis();
-        return (double) (millis / 86400000);
-    }
-
-    /**
      * 获取猪的初配事件
      * @param pigDto
      * @return
@@ -213,14 +204,6 @@ public abstract class AbstractJobProducer extends AbstractProducer {
     }
 
     /**
-     * 获取最近一次配种日期
-     */
-    protected DateTime getBreedingDate(DoctorPigInfoDto pigDto) {
-       return getDateTimeByEventType(pigDto.getDoctorPigEvents(), PigEvent.MATING.getKey());
-    }
-
-
-    /**
      * 获取到达当前状态的时间
      * @param pigDto
      * @return
@@ -229,37 +212,31 @@ public abstract class AbstractJobProducer extends AbstractProducer {
         try {
             PigStatus STATUS = PigStatus.from(pigDto.getStatus());
             DateTime dateTime = null;
+            DoctorPigEvent doctorPigEvent;
             if(STATUS != null) {
                 switch (STATUS) {
                     case Wean : case Entry :// 断奶
                         // @see DoctorWeanDto
-                        dateTime = getDateTimeByEventType(pigDto.getDoctorPigEvents(), PigEvent.WEAN.getKey());
+                        doctorPigEvent = getPigEventByEventType(pigDto.getDoctorPigEvents(), PigEvent.WEAN.getKey());
+                        if (doctorPigEvent != null) {
+                            dateTime = new DateTime(doctorPigEvent.getEventAt());
+                            pigDto.setOperatorName(doctorPigEvent.getOperatorName());
+                        }
                         break;
                     case KongHuai: // 空怀
                         // @see DoctorPregChkResultDto
-                        DoctorPigEvent doctorPigEvent = getPigEventByEventType(pigDto.getDoctorPigEvents(), PigEvent.PREG_CHECK.getKey());
+                        doctorPigEvent = getPigEventByEventType(pigDto.getDoctorPigEvents(), PigEvent.PREG_CHECK.getKey());
                         pigDto.setStatusName(PregCheckResult.from(doctorPigEvent.getPregCheckResult()).getDesc());
                         dateTime = new DateTime(doctorPigEvent.getEventAt());
                         break;
                 }
             }
-            return dateTime != null ? dateTime : new DateTime(pigDto.getUpdatedAt());
+            return dateTime;
         } catch (Exception e) {
             log.error("SowPregCheckProducer get status date failed, pigDto is {}", pigDto);
         }
         return null;
     }
-
-    /**
-     * 获取分娩时间
-     * @param pigDto
-     * @return
-     */
-    protected DateTime getFarrowingDate(DoctorPigInfoDto pigDto) {
-        // 获取分娩时间
-       return getDateTimeByEventType(pigDto.getDoctorPigEvents(), PigEvent.FARROWING.getKey());
-    }
-
     /**
      * 根据猪舍过滤用户
      * @param subUsers
@@ -279,18 +256,8 @@ public abstract class AbstractJobProducer extends AbstractProducer {
      * @param barnId
      * @return
      */
-    private Boolean filterCondition(SubUser subUser, Long barnId){
+    private Boolean filterCondition(SubUser subUser, Long barnId) {
         return !Arguments.isNullOrEmpty(subUser.getBarnIds()) && subUser.getBarnIds().contains(barnId);
-    }
-
-    /**
-     * 根据事件类型时间列表中取出最近事件时间
-     * @param events
-     * @param type
-     * @return
-     */
-    protected DateTime getDateTimeByEventType(List<DoctorPigEvent> events, Integer type){
-        return new DateTime(getPigEventByEventType(events, type).getEventAt());
     }
 
     /**
@@ -328,6 +295,15 @@ public abstract class AbstractJobProducer extends AbstractProducer {
             log.error("get.timeDiff.fail, eventTime", eventTime);
         }
         return null;
+    }
+
+    /**
+     * 获取剩余的天数
+     */
+        private Double getTimeDiff(DateTime warningDate, Integer ruleValue) {
+        long millis = warningDate.plusDays(ruleValue)
+                .minus(DateTime.now().getMillis()).getMillis();
+        return (double) (millis / 86400000);
     }
 
     /**

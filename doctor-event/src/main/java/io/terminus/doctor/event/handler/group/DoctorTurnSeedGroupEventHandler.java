@@ -113,7 +113,7 @@ public class DoctorTurnSeedGroupEventHandler extends DoctorAbstractGroupEventHan
         }
 
         //校验转入猪舍类型
-        if (!PigType.MATING_TYPES.contains(barnType) || barnType != PigType.BOAR.getValue()) {
+        if (!PigType.MATING_TYPES.contains(barnType) && barnType != PigType.BOAR.getValue()) {
             throw new ServiceException("barn.can.not.turn.seed");
 
         }

@@ -7,6 +7,7 @@ import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.service.DoctorDailyReportWriteService;
+import io.terminus.doctor.event.service.DoctorMonthlyReportWriteService;
 import io.terminus.doctor.event.service.DoctorPigTypeStatisticWriteService;
 import io.terminus.doctor.move.handler.DoctorMoveDatasourceHandler;
 import io.terminus.doctor.move.service.DoctorMoveBasicService;
@@ -57,6 +58,7 @@ public class DoctorMoveDataController {
     private final DoctorPigTypeStatisticWriteService doctorPigTypeStatisticWriteService;
     private final DoctorMoveDatasourceHandler doctorMoveDatasourceHandler;
     private final DoctorDailyReportWriteService doctorDailyReportWriteService;
+    private final DoctorMonthlyReportWriteService doctorMonthlyReportWriteService;
 
     @Autowired
     public DoctorMoveDataController(UserInitService userInitService,
@@ -69,7 +71,8 @@ public class DoctorMoveDataController {
                                     DoctorUserReadService doctorUserReadService,
                                     DoctorPigTypeStatisticWriteService doctorPigTypeStatisticWriteService,
                                     DoctorMoveDatasourceHandler doctorMoveDatasourceHandler,
-                                    DoctorDailyReportWriteService doctorDailyReportWriteService) {
+                                    DoctorDailyReportWriteService doctorDailyReportWriteService,
+                                    DoctorMonthlyReportWriteService doctorMonthlyReportWriteService) {
         this.userInitService = userInitService;
         this.wareHouseInitService = wareHouseInitService;
         this.doctorMoveBasicService = doctorMoveBasicService;
@@ -81,6 +84,7 @@ public class DoctorMoveDataController {
         this.doctorPigTypeStatisticWriteService = doctorPigTypeStatisticWriteService;
         this.doctorMoveDatasourceHandler = doctorMoveDatasourceHandler;
         this.doctorDailyReportWriteService = doctorDailyReportWriteService;
+        this.doctorMonthlyReportWriteService = doctorMonthlyReportWriteService;
     }
 
     /**
@@ -366,6 +370,24 @@ public class DoctorMoveDataController {
     }
 
     /**
+     * 月报
+     */
+    @RequestMapping(value = "/monthly/date", method = RequestMethod.GET)
+    public Boolean moveMonthlyReport(@RequestParam("farmId") Long farmId,
+                                     @RequestParam("date") String date) {
+        try {
+            log.warn("move monthly report date start, farmId:{}, date:{}", farmId, date);
+            doctorMonthlyReportWriteService.createMonthlyReport(farmId, DateUtil.toDate(date));
+            log.warn("move monthly report date end");
+            
+            return true;
+        } catch (Exception e) {
+            log.error("move monthly report failed, farmId:{}, cause:{}", farmId, Throwables.getStackTraceAsString(e));
+            return false;
+        }
+    }
+
+    /**
      * 分娩母猪
      */
     @RequestMapping(value = "/farrow", method = RequestMethod.GET)
@@ -468,6 +490,23 @@ public class DoctorMoveDataController {
             return true;
         } catch (Exception e) {
             log.error("move sow farrow weight failed, farmId:{}, cause:{}", farmId, Throwables.getStackTraceAsString(e));
+            return false;
+        }
+    }
+
+    /**
+     * 刷新母猪流产事件
+     */
+    @RequestMapping(value = "/abort", method = RequestMethod.GET)
+    public Boolean moveSowAbortion(@RequestParam("farmId") Long farmId) {
+        try {
+            DoctorFarm farm = doctorFarmDao.findById(farmId);
+            log.warn("move sow farrow abort start, farmId:{}", farmId);
+            doctorMoveDataService.updateSowAbortion(farm);
+            log.warn("move sow farrow abort end");
+            return true;
+        } catch (Exception e) {
+            log.error("move sow farrow abort failed, farmId:{}, cause:{}", farmId, Throwables.getStackTraceAsString(e));
             return false;
         }
     }

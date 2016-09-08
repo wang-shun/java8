@@ -186,12 +186,13 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
                         params.put("customerName", getCustomerName(getLong(params, "customerId")));
                     }
                     DoctorChangeGroupInput changeInput = map(putBasicFields(params), DoctorChangeGroupInput.class);
-                    orServEx(doctorGroupWriteService.groupEventChange(groupDetail, changeInput));
-
                     //添加客户
-                    orServEx(doctorBasicWriteService.addCustomerWhenInput(groupDetail.getGroup().getFarmId(),
+                    Long customerId = orServEx(doctorBasicWriteService.addCustomerWhenInput(groupDetail.getGroup().getFarmId(),
                             groupDetail.getGroup().getFarmName(), changeInput.getCustomerId(), changeInput.getCustomerName(),
                             UserUtil.getUserId(), UserUtil.getCurrentUser().getName()));
+
+                    params.put("customerId", customerId);
+                    orServEx(doctorGroupWriteService.groupEventChange(groupDetail, changeInput));
                     break;
                 case TRANS_GROUP:
                     params.put("toBarnName", getBarnName(getLong(params, "toBarnId")));

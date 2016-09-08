@@ -9,7 +9,6 @@ import io.terminus.doctor.basic.service.DoctorBasicWriteService;
 import io.terminus.doctor.common.constants.JacksonType;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
-import io.terminus.doctor.event.dto.event.sow.DoctorAbortionDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorFarrowingDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorMatingDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorPartWeanDto;
@@ -68,8 +67,6 @@ public class DoctorSowEventCreateServiceImpl implements DoctorSowEventCreateServ
                     return doctorPigEventWriteService.sowPregCheckEvent(JsonMapper.JSON_NON_DEFAULT_MAPPER.fromJson(sowInfoDtoJson, DoctorPregChkResultDto.class), doctorBasicInputInfoDto);
                 case TO_MATING:
                     return doctorPigEventWriteService.chgSowLocationEvent(JsonMapper.JSON_NON_DEFAULT_MAPPER.fromJson(sowInfoDtoJson, DoctorChgLocationDto.class), doctorBasicInputInfoDto);
-                case ABORTION:
-                    return doctorPigEventWriteService.abortionEvent(JsonMapper.JSON_NON_DEFAULT_MAPPER.fromJson(sowInfoDtoJson, DoctorAbortionDto.class), doctorBasicInputInfoDto);
                 case TO_FARROWING:
                     return doctorPigEventWriteService.chgSowLocationEvent(JsonMapper.JSON_NON_DEFAULT_MAPPER.fromJson(sowInfoDtoJson, DoctorChgLocationDto.class), doctorBasicInputInfoDto);
                 case FARROWING:
@@ -80,8 +77,10 @@ public class DoctorSowEventCreateServiceImpl implements DoctorSowEventCreateServ
                     DoctorPigletsChgDto pigletsChg = JsonMapper.JSON_NON_DEFAULT_MAPPER.fromJson(sowInfoDtoJson, DoctorPigletsChgDto.class);
 
                     //新录入的客户要创建一把
-                    RespHelper.orServEx(doctorBasicWriteService.addCustomerWhenInput(doctorBasicInputInfoDto.getFarmId(), doctorBasicInputInfoDto.getFarmName(),
-                            pigletsChg.getPigletsCustomerId(), pigletsChg.getPigletsCustomerName(), UserUtil.getUserId(), UserUtil.getCurrentUser().getName()));
+                    Long customerId = RespHelper.orServEx(doctorBasicWriteService.addCustomerWhenInput(doctorBasicInputInfoDto.getFarmId(),
+                            doctorBasicInputInfoDto.getFarmName(), pigletsChg.getPigletsCustomerId(), pigletsChg.getPigletsCustomerName(),
+                            UserUtil.getUserId(), UserUtil.getCurrentUser().getName()));
+                    pigletsChg.setPigletsCustomerId(customerId);
                     return doctorPigEventWriteService.sowPigletsChgEvent(pigletsChg, doctorBasicInputInfoDto);
                 default:
                     return Response.fail("create.sowEvent.fail");

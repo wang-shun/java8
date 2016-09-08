@@ -145,7 +145,7 @@ public class SowEliminateProducer extends AbstractJobProducer {
                             } else if (key == 4) {
                                 if (pigDto.getDoctorPigEvents() != null) {
 
-                                    //返情、阴性、流产的次数
+                                    //连续返情、阴性、流产的次数
                                     Integer count = 0;
                                     List<DoctorPigEvent> doctorPigEvents = pigDto.getDoctorPigEvents().stream().filter(doctorPigEvent -> Objects.equals(doctorPigEvent.getType(), PigEvent.MATING.getKey())
                                             || Objects.equals(doctorPigEvent.getType(), PigEvent.PREG_CHECK)).sorted(Comparator.comparing(DoctorPigEvent::getId)).collect(Collectors.toList());
@@ -170,7 +170,7 @@ public class SowEliminateProducer extends AbstractJobProducer {
 
                             }
                             if (isSend) {
-                                pigDto.setReason(ruleValue.getDescribe() + ruleValue.getValue().toString());
+                                pigDto.setReason(ruleValue.getDescribe() + ruleValue.getValue().intValue());
                                 messages.addAll(getMessage(pigDto, rule.getChannels(), ruleRole, sUsers, timeDiff, rule.getUrl()));
                             }
                         }

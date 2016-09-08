@@ -15,6 +15,7 @@ import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
 import io.terminus.doctor.event.dto.event.group.DoctorMoveInGroupEvent;
 import io.terminus.doctor.event.dto.event.group.input.DoctorSowMoveInGroupInput;
 import io.terminus.doctor.event.enums.FarrowingType;
+import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.enums.PigSex;
 import io.terminus.doctor.event.enums.PigSource;
 import io.terminus.doctor.event.enums.PigStatus;
@@ -61,7 +62,7 @@ public class DoctorSowFarrowingHandler extends DoctorAbstractEventFlowHandler {
     }
 
     @Override
-    protected void eventCreatePreHandler(Execution execution, DoctorPigEvent doctorPigEvent, DoctorPigTrack doctorPigTrack, DoctorBasicInputInfoDto basicInputInfoDto, Map<String, Object> extra, Map<String, Object> context) {
+    protected IsOrNot eventCreatePreHandler(Execution execution, DoctorPigEvent doctorPigEvent, DoctorPigTrack doctorPigTrack, DoctorBasicInputInfoDto basicInputInfoDto, Map<String, Object> extra, Map<String, Object> context) {
         // 助产 信息
         extra.put("isHelp", 1);
 
@@ -96,6 +97,7 @@ public class DoctorSowFarrowingHandler extends DoctorAbstractEventFlowHandler {
         } else {
             extra.put("farrowingType", FarrowingType.USUAL.getKey());
         }
+        return IsOrNot.NO;
     }
 
     @Override

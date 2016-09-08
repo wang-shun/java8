@@ -82,10 +82,10 @@ public class DoctorDailyReportDto implements Serializable {
      */
     public void setPig(DoctorDailyReportDto report) {
         //妊娠检查
-        this.checkPreg.setPositive(this.checkPreg.getPositive() + report.getCheckPreg().getPositive());
-        this.checkPreg.setNegative(this.checkPreg.getNegative() + report.getCheckPreg().getNegative());
-        this.checkPreg.setFanqing(this.checkPreg.getFanqing() + report.getCheckPreg().getFanqing());
-        this.checkPreg.setLiuchan(this.checkPreg.getLiuchan() + report.getCheckPreg().getLiuchan());
+        this.checkPreg.setPositive(report.getCheckPreg().getPositive());
+        this.checkPreg.setNegative(report.getCheckPreg().getNegative());
+        this.checkPreg.setFanqing(report.getCheckPreg().getFanqing());
+        this.checkPreg.setLiuchan(report.getCheckPreg().getLiuchan());
 
         //死淘
         this.dead.setBoar(this.dead.getBoar() + report.getDead().getBoar());
@@ -97,6 +97,7 @@ public class DoctorDailyReportDto implements Serializable {
         this.deliver.setHealth(this.deliver.getHealth() + report.getDeliver().getHealth());
         this.deliver.setWeak(this.deliver.getWeak() + report.getDeliver().getWeak());
         this.deliver.setBlack(this.deliver.getBlack() + report.getDeliver().getBlack());
+        this.deliver.setAvgWeight(report.getDeliver().getAvgWeight() == 0D ? this.deliver.getAvgWeight() : report.getDeliver().getAvgWeight());
 
         //存栏
         this.liveStock.setBoar(report.getLiveStock().getBoar()==0 ? this.liveStock.getBoar() : report.getLiveStock().getBoar());
@@ -118,6 +119,7 @@ public class DoctorDailyReportDto implements Serializable {
         this.wean.setCount(this.wean.getCount() + report.getWean().getCount());
         this.wean.setWeight(this.wean.getWeight() + report.getWean().getWeight());
         this.wean.setNest(this.wean.getNest() + report.getWean().getNest());
+        this.wean.setAvgDayAge(report.getWean().getAvgDayAge() == 0 ? this.wean.getAvgDayAge() : report.getWean().getAvgDayAge());
     }
 
     /**
@@ -134,6 +136,7 @@ public class DoctorDailyReportDto implements Serializable {
         this.liveStock.setNursery(report.getLiveStock().getNursery());
         this.liveStock.setFatten(report.getLiveStock().getFatten());
         this.liveStock.setHoubeiSow(report.getLiveStock().getHoubeiSow() == 0? this.liveStock.getHoubeiSow() : report.getLiveStock().getHoubeiSow());
+        this.liveStock.setHoubeiBoar(report.getLiveStock().getHoubeiBoar() == 0? this.liveStock.getHoubeiBoar() : report.getLiveStock().getHoubeiBoar());
 
         //销售
         this.sale.setNursery(this.sale.getNursery() + report.getSale().getNursery());

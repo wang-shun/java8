@@ -1,8 +1,11 @@
 package io.terminus.doctor.event.dto.event.sow;
 
+import com.google.common.base.MoreObjects;
+import io.terminus.doctor.event.dto.event.AbstractPigEventInputDto;
 import io.terminus.doctor.event.enums.FarrowingType;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Builder;
 
@@ -17,11 +20,12 @@ import java.util.Map;
  * Email:yaoqj@terminus.io
  * Descirbe: 母猪分娩事件Dto
  */
+@EqualsAndHashCode(callSuper = true)
 @Builder
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class DoctorFarrowingDto implements Serializable{
+public class DoctorFarrowingDto extends AbstractPigEventInputDto implements Serializable{
 
     private static final long serialVersionUID = 7823378636552520021L;
 
@@ -81,6 +85,7 @@ public class DoctorFarrowingDto implements Serializable{
 
     private String farrowRemark;    //标志
 
+    @Override
     public Map<String, String> descMap(){
         Map<String, String> map = new HashMap<>();
         if(nestCode != null){
@@ -110,15 +115,14 @@ public class DoctorFarrowingDto implements Serializable{
         if(dayAgeAvg != null){
             map.put("平均日龄", dayAgeAvg.toString());
         }
-        if(farrowingLiveCount != null){
-            map.put("分娩总数", farrowingLiveCount.toString());
-        }
-        if(liveSowCount != null){
-            map.put("活母猪数", liveSowCount.toString());
-        }
-        if(liveBoarCount != null){
-            map.put("活公猪数", liveBoarCount.toString());
-        }
+
+        Integer total = MoreObjects.firstNonNull(farrowingLiveCount, 0)
+                + MoreObjects.firstNonNull(mnyCount, 0)
+                + MoreObjects.firstNonNull(jxCount, 0)
+                + MoreObjects.firstNonNull(deadCount, 0)
+                + MoreObjects.firstNonNull(blackCount, 0);
+        map.put("分娩总数", total.toString());
+
         if(healthCount != null){
             map.put("健仔数", healthCount.toString());
         }
@@ -144,5 +148,10 @@ public class DoctorFarrowingDto implements Serializable{
             map.put("接生员2", farrowStaff2);
         }
         return map;
+    }
+
+    @Override
+    public Date eventAt() {
+        return this.farrowingDate;
     }
 }

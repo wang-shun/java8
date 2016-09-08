@@ -118,6 +118,7 @@ public class SowBackFatProducer extends AbstractJobProducer {
                                 }
                                 if (isSend) {
                                     pigDto.setEventDate(doctorPigEvent.getEventAt());
+                                    pigDto.setOperatorName(doctorPigEvent.getOperatorName());
                                     messages.addAll(getMessage(pigDto, rule.getChannels(), ruleRole, sUsers, timeDiff, rule.getUrl()));
                                 }
                             }
@@ -138,7 +139,7 @@ public class SowBackFatProducer extends AbstractJobProducer {
      */
     private Boolean filterPigCondition(DoctorPigInfoDto pigDto) {
         if (!Arguments.isNullOrEmpty(pigDto.getDoctorPigEvents())) {
-            List<DoctorPigEvent> list = pigDto.getDoctorPigEvents().stream().filter(doctorPigEvent -> new DateTime(doctorPigEvent.getEventAt()).isAfter(getDateTimeByEventType(pigDto.getDoctorPigEvents(), PigEvent.MATING.getKey())) && Objects.equals(doctorPigEvent.getType(), PigEvent.CONDITION.getKey())).collect(Collectors.toList());
+            List<DoctorPigEvent> list = pigDto.getDoctorPigEvents().stream().filter(doctorPigEvent -> new DateTime(doctorPigEvent.getEventAt()).isAfter(new DateTime(getPigEventByEventType(pigDto.getDoctorPigEvents(), PigEvent.MATING.getKey()).getEventAt())) && Objects.equals(doctorPigEvent.getType(), PigEvent.CONDITION.getKey())).collect(Collectors.toList());
             if (list.isEmpty()) {
                 return true;
             }

@@ -1,5 +1,6 @@
 package io.terminus.doctor.event.handler.usual;
 
+import io.terminus.common.exception.ServiceException;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.doctor.event.constants.DoctorBasicEnums;
 import io.terminus.doctor.event.dao.DoctorPigDao;
@@ -74,18 +75,23 @@ public class DoctorRemovalHandler extends DoctorAbstractEventHandler {
     @Override
     protected void eventCreatePreHandler(DoctorPigEvent doctorPigEvent, DoctorPigTrack doctorPigTrack, DoctorBasicInputInfoDto basicInputInfoDto, Map<String, Object> extra, Map<String, Object> context) {
         DoctorRemovalDto removel = BeanMapper.map(extra, DoctorRemovalDto.class);
-        if (removel != null) {
-            doctorPigEvent.setChangeTypeId(removel.getChgTypeId());   //变动类型id
-            doctorPigEvent.setPrice(removel.getPrice());      //销售单价(分)
-            doctorPigEvent.setAmount(removel.getSum());       //销售总额(分)
+        if (removel == null) {
+            throw new ServiceException("removel.not.empty");
         }
+        doctorPigEvent.setChangeTypeId(removel.getChgTypeId());   //变动类型id
+        doctorPigEvent.setPrice(removel.getPrice());      //销售单价(分)
+        doctorPigEvent.setAmount(removel.getSum());       //销售总额(分)
 
         if (Objects.equals(removel.getChgTypeId(), DoctorBasicEnums.DEAD.getId()) || Objects.equals(removel.getChgTypeId(), DoctorBasicEnums.ELIMINATE.getId())) {
             //如果是死亡 或者淘汰
             //查找最近一次配种事件
             DoctorPigEvent lastMate = doctorPigEventDao.queryLastFirstMate(doctorPigTrack.getPigId(), doctorPigTrack.getCurrentParity());
-            DateTime mattingDate = new DateTime(Long.valueOf(lastMate.getExtraMap().get("matingDate").toString()));
 
+            if (lastMate == null || !lastMate.getExtraMap().containsKey("matingDate")) {
+                return;
+            }
+
+            DateTime mattingDate = new DateTime(Long.valueOf(lastMate.getExtraMap().get("matingDate").toString()));
             DateTime eventTime = new DateTime(doctorPigEvent.getEventAt());
 
             int npd = Math.abs(Days.daysBetween(eventTime, mattingDate).getDays());
@@ -100,9 +106,6 @@ public class DoctorRemovalHandler extends DoctorAbstractEventHandler {
                 doctorPigEvent.setPtnpd(doctorPigEvent.getPtnpd() + npd);
                 doctorPigEvent.setNpd(doctorPigEvent.getNpd() + npd);
             }
-
         }
-
-
     }
 }

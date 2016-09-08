@@ -1,11 +1,15 @@
 package io.terminus.doctor.event.dto.event.sow;
 
+import io.terminus.doctor.common.utils.DateUtil;
+import io.terminus.doctor.event.dto.event.AbstractPigEventInputDto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Builder;
 
 import java.io.Serializable;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -15,11 +19,12 @@ import java.util.Map;
  * Email:yaoqj@terminus.io
  * Descirbe: 仔猪拼窝事件(自动生成代哺的事件)
  */
+@EqualsAndHashCode(callSuper = true)
 @Builder
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class DoctorFostersDto implements Serializable{
+public class DoctorFostersDto extends AbstractPigEventInputDto implements Serializable{
 
     private static final long serialVersionUID = 2998287596879859648L;
 
@@ -45,18 +50,19 @@ public class DoctorFostersDto implements Serializable{
 
     private String fosterRemark;    // 拼窝标识
 
+    @Override
     public Map<String, String> descMap(){
         Map<String, String> map = new HashMap<>();
         if(fostersCount != null){
             map.put("拼窝数量", fostersCount.toString());
         }
-        if(sowFostersCount != null){
+        if(sowFostersCount != null && sowFostersCount > 0){
             map.put("拼窝母猪数量", sowFostersCount.toString());
         }
-        if(boarFostersCount != null){
+        if(boarFostersCount != null && boarFostersCount > 0){
             map.put("拼窝公猪数量", boarFostersCount.toString());
         }
-        if(fosterTotalWeight != null){
+        if(fosterTotalWeight != null && fosterTotalWeight > 0){
             map.put("拼窝总重量", fosterTotalWeight.toString());
         }
         if(fosterReasonName != null){
@@ -66,5 +72,10 @@ public class DoctorFostersDto implements Serializable{
             map.put("被拼窝母猪", fosterSowCode);
         }
         return map;
+    }
+
+    @Override
+    public Date eventAt() {
+        return DateUtil.toDate(fostersDate);
     }
 }

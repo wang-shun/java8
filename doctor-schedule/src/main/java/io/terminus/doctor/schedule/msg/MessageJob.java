@@ -48,7 +48,7 @@ public class MessageJob {
     /**
      * 消费短信消息
      */
-    @Scheduled(cron = "0 */15 * * * ?")
+    //@Scheduled(cron = "0 */15 * * * ?")
     @RequestMapping(value = "/consume/sms", method = RequestMethod.GET)
     public void messageConsume() {
         try {

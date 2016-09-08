@@ -188,6 +188,7 @@ public class DoctorGroupReadServiceImpl implements DoctorGroupReadService {
 
             //过滤猪群类型, 然后按照类型分组
             Map<Integer, List<DoctorGroupDetail>> groupMap = RespHelper.orServEx(findGroupDetail(searchDto)).stream()
+                    .filter(pt -> pt.getGroup().getPigType() != null)
                     .collect(Collectors.groupingBy(gd -> gd.getGroup().getPigType()));
 
             List<DoctorGroupDetail> farrows = Lists.newArrayList();

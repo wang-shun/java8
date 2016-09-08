@@ -3,11 +3,14 @@ package io.terminus.doctor.event.dao;
 import com.google.common.collect.ImmutableMap;
 import io.terminus.common.mysql.dao.MyBatisDao;
 import io.terminus.common.utils.MapBuilder;
+import io.terminus.doctor.common.utils.Params;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import org.springframework.stereotype.Repository;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static io.terminus.common.utils.Arguments.notEmpty;
 
@@ -51,5 +54,18 @@ public class DoctorGroupEventDao extends MyBatisDao<DoctorGroupEvent> {
      */
     public Long countByBarnId(Long barnId){
         return sqlSession.selectOne(sqlId("countByBarnId"), barnId);
+    }
+
+    /**
+     * 查询指定时间段内发生的事件, 匹配的是 eventAt
+     * @param beginDate
+     * @param endDate
+     * @return 返回限制数量5000条
+     */
+    public List<DoctorGroupEvent> findByDateRange(Date beginDate, Date endDate){
+        Map<String, Object> param = new HashMap<>();
+        param.put("beginDate", beginDate);
+        param.put("endDate", endDate);
+        return sqlSession.selectList(sqlId("findByDateRange"), ImmutableMap.copyOf(Params.filterNullOrEmpty(param)));
     }
 }

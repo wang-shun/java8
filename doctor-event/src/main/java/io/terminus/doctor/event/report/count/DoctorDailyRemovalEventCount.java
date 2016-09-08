@@ -12,10 +12,8 @@ import io.terminus.doctor.event.model.DoctorPigEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 /**
  * Created by yaoqijun.
@@ -34,38 +32,36 @@ public class DoctorDailyRemovalEventCount implements DoctorDailyEventCount {
     }
 
     @Override
-    public List<DoctorPigEvent> preDailyEventHandleValidate(List<DoctorPigEvent> t) {
-        return t.stream().filter(e-> Objects.equals(e.getType(), PigEvent.REMOVAL.getKey())).collect(Collectors.toList());
+    public boolean preDailyEventHandleValidate(DoctorPigEvent event) {
+        return Objects.equals(event.getType(), PigEvent.REMOVAL.getKey());
     }
 
     @Override
-    public void dailyEventHandle(List<DoctorPigEvent> t, DoctorDailyReportDto doctorDailyReportDto , Map<String, Object> context) {
+    public void dailyEventHandle(DoctorPigEvent event, DoctorDailyReportDto doctorDailyReportDto) {
 
         DoctorSaleDailyReport doctorSaleDailyReport = new DoctorSaleDailyReport();
         DoctorDeadDailyReport doctorDeadDailyReport = new DoctorDeadDailyReport();
 
-        for (DoctorPigEvent e : t) {
-            Map<String, Object> extra = e.getExtraMap();
-            DoctorPig doctorPig = doctorPigDao.findById(e.getPigId());
+        Map<String, Object> extra = event.getExtraMap();
+        DoctorPig doctorPig = doctorPigDao.findById(event.getPigId());
 
-            if (extra == null || extra.get("chgReasonId") == null ) {
-                continue;
+        if (extra == null || extra.get("chgTypeId") == null ) {
+            return;
+        }
+
+        Long chgTypeId = Long.valueOf(extra.get("chgTypeId").toString());
+        if(Objects.equals(chgTypeId, DoctorBasicEnums.DEAD.getId()) || Objects.equals(chgTypeId, DoctorBasicEnums.ELIMINATE.getId())){
+            if(Objects.equals(doctorPig.getPigType(), DoctorPig.PIG_TYPE.BOAR.getKey())){
+                doctorDeadDailyReport.setBoar(doctorDeadDailyReport.getBoar() + 1);
+            }else if(Objects.equals(doctorPig.getPigType(), DoctorPig.PIG_TYPE.SOW.getKey())){
+                doctorDeadDailyReport.setSow(doctorDeadDailyReport.getSow() + 1);
             }
-
-            Long chageReason = Long.valueOf(extra.get("chgReasonId").toString());
-            if(Objects.equals(chageReason, DoctorBasicEnums.DEAD.getId()) || Objects.equals(chageReason, DoctorBasicEnums.ELIMINATE.getId())){
-                if(Objects.equals(doctorPig.getPigType(), DoctorPig.PIG_TYPE.BOAR.getKey())){
-                    doctorDeadDailyReport.setBoar(doctorDeadDailyReport.getBoar() + 1);
-                }else if(Objects.equals(doctorPig.getPigType(), DoctorPig.PIG_TYPE.SOW.getKey())){
-                    doctorDeadDailyReport.setSow(doctorDeadDailyReport.getSow() + 1);
-                }
-            }else if(Objects.equals(chageReason, DoctorBasicEnums.SALE.getId())){
-                //添加对应的销售数量
-                if(Objects.equals(doctorPig.getPigType(), DoctorPig.PIG_TYPE.BOAR.getKey())){
-                    doctorSaleDailyReport.setBoar(doctorSaleDailyReport.getBoar() + 1);
-                }else if (Objects.equals(doctorPig.getPigType(), DoctorPig.PIG_TYPE.SOW.getKey())){
-                    doctorSaleDailyReport.setSow(doctorSaleDailyReport.getSow() + 1);
-                }
+        }else if(Objects.equals(chgTypeId, DoctorBasicEnums.SALE.getId())){
+            //添加对应的销售数量
+            if(Objects.equals(doctorPig.getPigType(), DoctorPig.PIG_TYPE.BOAR.getKey())){
+                doctorSaleDailyReport.setBoar(doctorSaleDailyReport.getBoar() + 1);
+            }else if (Objects.equals(doctorPig.getPigType(), DoctorPig.PIG_TYPE.SOW.getKey())){
+                doctorSaleDailyReport.setSow(doctorSaleDailyReport.getSow() + 1);
             }
         }
 

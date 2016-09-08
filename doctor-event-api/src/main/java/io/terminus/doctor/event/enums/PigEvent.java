@@ -26,7 +26,6 @@ public enum PigEvent {
     TO_PREG(10, "转入妊娠舍", "转入妊娠舍"),
     PREG_CHECK(11, "妊娠检查", "妊娠检查"),
     TO_MATING(12, "转入配种舍", "转入配种舍"),
-    ABORTION(13, "流产", "流产事件信息"),
     TO_FARROWING(14, "去分娩", "去分娩信息"),
     FARROWING(15, "分娩", "分娩"),
     WEAN(16, "断奶", "断奶事件"),

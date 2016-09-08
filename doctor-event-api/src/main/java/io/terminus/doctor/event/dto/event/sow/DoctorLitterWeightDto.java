@@ -1,12 +1,16 @@
 package io.terminus.doctor.event.dto.event.sow;
 
+import io.terminus.doctor.event.dto.event.AbstractPigEventInputDto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Builder;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created by yaoqijun.
@@ -14,11 +18,12 @@ import java.util.Date;
  * Email:yaoqj@terminus.io
  * Descirbe: 窝重测量事件
  */
+@EqualsAndHashCode(callSuper = true)
 @Builder
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class DoctorLitterWeightDto implements Serializable {
+public class DoctorLitterWeightDto extends AbstractPigEventInputDto implements Serializable {
 
     private static final long serialVersionUID = -3360271781401622417L;
 
@@ -31,4 +36,15 @@ public class DoctorLitterWeightDto implements Serializable {
     private Double nestWeight;
 
     private String remark;
+
+    @Override
+    public Map<String, String> descMap() {
+        Map<String, String> map = new HashMap<>();
+        return map;
+    }
+
+    @Override
+    public Date eventAt() {
+        return this.measureDate;
+    }
 }

@@ -1,7 +1,9 @@
 package io.terminus.doctor.event.enums;
 
+import com.google.common.collect.Lists;
 import lombok.Getter;
 
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -49,4 +51,7 @@ public enum PregCheckResult {
         }
         return null;
     }
+
+    //妊娠检查空怀的结果
+    public static final List<Integer> KONGHUAI_RESULTS = Lists.newArrayList(YING.getKey(), LIUCHAN.getKey(), FANQING.getKey());
 }

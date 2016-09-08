@@ -1,7 +1,9 @@
 package io.terminus.doctor.event.dto.event.sow;
 
+import io.terminus.doctor.event.dto.event.AbstractPigEventInputDto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Builder;
 
@@ -17,11 +19,12 @@ import java.util.Map;
  * Descirbe: 部分断奶事件录入
  * (每次断奶都是部分断奶, 旧软件的最后一次断奶会触发转舍事件, 新软件不会触发)
  */
+@EqualsAndHashCode(callSuper = true)
 @Builder
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class DoctorPartWeanDto implements Serializable{
+public class DoctorPartWeanDto extends AbstractPigEventInputDto implements Serializable{
 
     private static final long serialVersionUID = 252972605944533095L;
 
@@ -37,6 +40,7 @@ public class DoctorPartWeanDto implements Serializable{
 
     private Integer notQualifiedCount; //不合格的数量
 
+    @Override
     public Map<String, String> descMap(){
         Map<String, String> map = new HashMap<>();
         if(partWeanPigletsCount != null){
@@ -52,5 +56,10 @@ public class DoctorPartWeanDto implements Serializable{
             map.put("不合格数量", notQualifiedCount.toString());
         }
         return map;
+    }
+
+    @Override
+    public Date eventAt() {
+        return this.partWeanDate;
     }
 }

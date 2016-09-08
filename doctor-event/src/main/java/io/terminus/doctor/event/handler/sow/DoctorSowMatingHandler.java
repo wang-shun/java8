@@ -9,6 +9,7 @@ import io.terminus.doctor.event.dao.DoctorPigTrackDao;
 import io.terminus.doctor.event.dao.DoctorRevertLogDao;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
 import io.terminus.doctor.event.enums.DoctorMatingType;
+import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.handler.DoctorAbstractEventFlowHandler;
 import io.terminus.doctor.event.model.DoctorPigEvent;
@@ -46,10 +47,11 @@ public class DoctorSowMatingHandler extends DoctorAbstractEventFlowHandler {
     }
 
     @Override
-    protected void eventCreatePreHandler(Execution execution, DoctorPigEvent doctorPigEvent, DoctorPigTrack doctorPigTrack, DoctorBasicInputInfoDto basicInputInfoDto, Map<String, Object> extra, Map<String, Object> context) {
+    protected IsOrNot eventCreatePreHandler(Execution execution, DoctorPigEvent doctorPigEvent, DoctorPigTrack doctorPigTrack, DoctorBasicInputInfoDto basicInputInfoDto, Map<String, Object> extra, Map<String, Object> context) {
         DateTime mattingDate = new DateTime(Long.valueOf(extra.get("matingDate").toString()));
 
         doctorPigEvent.setMattingDate(mattingDate.toDate());
+        return IsOrNot.NO;
     }
 
     @Override
@@ -152,9 +154,9 @@ public class DoctorSowMatingHandler extends DoctorAbstractEventFlowHandler {
 
         //判断是否 断奶到配种
         if (!isNull(trackExtraMap) &&
-                trackExtraMap.containsKey("weanToMate")
-                && Boolean.valueOf(trackExtraMap.get("weanToMate").toString())) {
-            extra.put("weanToMate", false);
+                trackExtraMap.containsKey("hasWeanToMating")
+                && Boolean.valueOf(trackExtraMap.get("hasWeanToMating").toString())) {
+            extra.put("hasWeanToMating", false);
 
             context.put("DP", true);
         }

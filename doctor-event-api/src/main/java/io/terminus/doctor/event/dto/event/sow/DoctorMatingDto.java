@@ -1,8 +1,11 @@
 package io.terminus.doctor.event.dto.event.sow;
 
 import io.terminus.doctor.common.utils.DateUtil;
+import io.terminus.doctor.event.dto.event.AbstractPigEventInputDto;
+import io.terminus.doctor.event.enums.MatingType;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Builder;
 
@@ -17,11 +20,12 @@ import java.util.Map;
  * Email:yaoqj@terminus.io
  * Descirbe: 母猪配种信息
  */
+@EqualsAndHashCode(callSuper = true)
 @Builder
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class DoctorMatingDto implements Serializable {
+public class DoctorMatingDto extends AbstractPigEventInputDto implements Serializable {
 
     private static final long serialVersionUID = 2732269011148894160L;
 
@@ -38,10 +42,9 @@ public class DoctorMatingDto implements Serializable {
      */
     private Integer matingType; // 配种类型
 
-    private String matingStaff; // 配种人员
-
     private String mattingMark; // 配种mark
 
+    @Override
     public Map<String, String> descMap(){
         Map<String, String> map = new HashMap<>();
         if(matingBoarPigCode != null){
@@ -50,6 +53,17 @@ public class DoctorMatingDto implements Serializable {
         if(judgePregDate != null){
             map.put("预产日期", DateUtil.toDateString(judgePregDate));
         }
+        if(matingType != null){
+            MatingType e = MatingType.from(matingType);
+            if(e != null){
+                map.put("配种类型", e.getDesc());
+            }
+        }
         return map;
+    }
+
+    @Override
+    public Date eventAt() {
+        return this.matingDate;
     }
 }

@@ -276,8 +276,7 @@ public abstract class AbstractProducer implements IProducer {
         List<DoctorMessage> messages = Lists.newArrayList();
         DoctorMessageRuleTemplate template = RespHelper.orServEx(doctorMessageRuleTemplateReadService.findMessageRuleTemplateById(ruleRole.getTemplateId()));
         if (subUsers != null && subUsers.size() > 0) {
-            // 主账户 (预警类型会出现重复, 暂时取消) TODO
-            /*subUsers.stream().map(SubUser::getParentUserId).collect(Collectors.toSet())
+            subUsers.stream().map(SubUser::getParentUserId).collect(Collectors.toSet())
                     .forEach(parentId -> messages.add(
                             DoctorMessage.builder()
                                     .farmId(ruleRole.getFarmId())
@@ -294,7 +293,7 @@ public abstract class AbstractProducer implements IProducer {
                                     .status(DoctorMessage.Status.NORMAL.getValue())
                                     .createdBy(template.getUpdatedBy())
                                     .build()
-                    ));*/
+                    ));
             // 子账户
             subUsers.stream().forEach(subUser -> {
                 // 检查该用户是否含有farm权限
@@ -323,12 +322,12 @@ public abstract class AbstractProducer implements IProducer {
                         Map<String, Serializable> jsonContext = MAPPER.readValue(jsonData, JacksonType.MAP_OF_STRING);
                         String content = RespHelper.orServEx(doctorMessageTemplateReadService.getMessageContentWithCache(message.getMessageTemplate(), jsonContext));
                         Long businessId;
-                        if (jsonContext.get("materialId") != null) {
-                            businessId = (Long) jsonContext.get("materialId");
-                        } else if (jsonContext.get("groupId") != null) {
-                            businessId = (Long) jsonContext.get("groupId");
-                        }else {
-                            businessId = (Long) jsonContext.get("pigId");
+                        if (StringUtils.isNotBlank((String) jsonContext.get("materialId"))) {
+                            businessId = Long.parseLong((String) jsonContext.get("materialId"));
+                        } else if (StringUtils.isNotBlank((String) jsonContext.get("groupId"))) {
+                            businessId = Long.parseLong((String) jsonContext.get("groupId"));
+                        } else {
+                            businessId = Long.parseLong((String) jsonContext.get("pigId"));
                         }
                         message.setBusinessId(businessId);
                         message.setContent(content != null ? content.trim() : "");

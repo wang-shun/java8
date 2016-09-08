@@ -95,11 +95,8 @@ public class DoctorChangeGroupInput extends BaseGroupInput implements Serializab
         if(changeReasonName != null){
             map.put("变动原因", changeReasonName);
         }
-        if(boarQty != null){
-            map.put("公猪数", boarQty.toString());
-        }
-        if(sowQty != null){
-            map.put("母猪数", sowQty.toString());
+        if(quantity != null){
+            map.put("猪只数", quantity.toString());
         }
         if(weight != null){
             map.put("总活体重（Kg）", weight.toString());

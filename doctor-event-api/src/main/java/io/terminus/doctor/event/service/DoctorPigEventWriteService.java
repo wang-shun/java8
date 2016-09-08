@@ -3,7 +3,6 @@ package io.terminus.doctor.event.service;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
 import io.terminus.doctor.event.dto.event.boar.DoctorSemenDto;
-import io.terminus.doctor.event.dto.event.sow.DoctorAbortionDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorFarrowingDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorMatingDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorPartWeanDto;
@@ -100,15 +99,6 @@ public interface DoctorPigEventWriteService {
      */
     Response<Long> chgLocationEvent(@NotNull(message = "input.dto.empty") DoctorChgLocationDto doctorChgLocationDto,
                                        @NotNull(message = "input.basic.empty") DoctorBasicInputInfoDto doctorBasicInputInfoDto);
-
-    /**
-     * 流产事件录入
-     * @param doctorAbortionDto
-     * @param doctorBasicInputInfoDto
-     * @return
-     */
-    Response<Long> abortionEvent(@NotNull(message = "input.dto.empty") DoctorAbortionDto doctorAbortionDto,
-                                 @NotNull(message = "input.basic.empty") DoctorBasicInputInfoDto doctorBasicInputInfoDto);
 
     /**
      * 转场事件信息

@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static io.terminus.common.utils.Arguments.notEmpty;
@@ -77,6 +78,41 @@ public class DoctorReportJobs {
             log.error("daily report job failed, cause:{}", Throwables.getStackTraceAsString(e));
         }
     }
+
+    /**
+     * 更新历史日报和月报
+     */
+    @Scheduled(cron = "0 0 1 * * ?")
+    @RequestMapping(value = "/updateHistoryReport", method = RequestMethod.GET)
+    public void updateHistoryReport(){
+        Date endDate = new DateTime(Dates.startOfDay(new Date())).plusDays(-1).toDate(); // 昨天的开始时间
+        try{
+            if(!hostLeader.isLeader()) {
+                log.info("current leader is:{}, skip", hostLeader.currentLeaderId());
+                return;
+            }
+            log.info("update history report job start, now is:{}", DateUtil.toDateTimeString(new Date()));
+
+            for(Map.Entry<Long, String> entry : RespHelper.or500(doctorDailyReportReadService.getDailyReport2Update()).entrySet()){
+                Long farmId = entry.getKey();
+                Date beginDate = DateUtil.toDate(entry.getValue()); // 自此日期之后(包括此日期)的日报和月报应当被更新
+                RespHelper.or500(doctorDailyReportWriteService.createDailyReports(beginDate, endDate, farmId));
+                RespHelper.or500(doctorDailyReportWriteService.deleteDailyReport2Update(farmId));
+                RespHelper.or500(doctorDailyReportWriteService.deleteDailyReportFromRedis(farmId));
+
+                //月报更新
+                while(!DateUtil.inSameYearMonth(beginDate, endDate)){
+                    RespHelper.or500(doctorMonthlyReportWriteService.createMonthlyReport(farmId, DateUtil.getMonthEnd(new DateTime(beginDate)).toDate()));
+                    beginDate = new DateTime(beginDate).plusMonths(1).toDate();
+                }
+            }
+
+            log.info("update history report job end, now is:{}", DateUtil.toDateTimeString(new Date()));
+        }catch(Exception e) {
+            log.error("update history report job failed, cause:{}", Throwables.getStackTraceAsString(e));
+        }
+    }
+
 
     /**
      * 猪场月报计算job

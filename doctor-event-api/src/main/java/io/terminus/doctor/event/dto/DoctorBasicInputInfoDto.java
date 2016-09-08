@@ -2,8 +2,10 @@ package io.terminus.doctor.event.dto;
 
 import com.google.common.base.Joiner;
 import io.terminus.common.utils.BeanMapper;
+import io.terminus.common.utils.Dates;
+import io.terminus.doctor.common.utils.DateUtil;
+import io.terminus.doctor.event.dto.event.AbstractPigEventInputDto;
 import io.terminus.doctor.event.dto.event.boar.DoctorSemenDto;
-import io.terminus.doctor.event.dto.event.sow.DoctorAbortionDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorFarrowingDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorFostersDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorMatingDto;
@@ -24,7 +26,9 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.Builder;
 
 import java.io.Serializable;
+import java.util.Date;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Created by yaoqijun.
@@ -102,70 +106,104 @@ public class DoctorBasicInputInfoDto implements Serializable{
         if(pigEvent == null){
             return this.eventDesc;
         }
-        Map<String, String> fieldMap;
-        switch (pigEvent) {
-            case ENTRY:
-                fieldMap = BeanMapper.map(extra, DoctorFarmEntryDto.class).descMap();
-                break;
-            case CHG_FARM:
-                fieldMap = BeanMapper.map(extra, DoctorChgFarmDto.class).descMap();
-                break;
-            case CHG_LOCATION:
-                fieldMap = BeanMapper.map(extra, DoctorChgLocationDto.class).descMap();
-                break;
-            case TO_MATING:
-                fieldMap = BeanMapper.map(extra, DoctorChgLocationDto.class).descMap();
-                break;
-            case TO_PREG:
-                fieldMap = BeanMapper.map(extra, DoctorChgLocationDto.class).descMap();
-                break;
-            case TO_FARROWING:
-                fieldMap = BeanMapper.map(extra, DoctorChgLocationDto.class).descMap();
-                break;
-            case CONDITION:
-                fieldMap = BeanMapper.map(extra, DoctorConditionDto.class).descMap();
-                break;
-            case DISEASE:
-                fieldMap = BeanMapper.map(extra, DoctorDiseaseDto.class).descMap();
-                break;
-            case REMOVAL:
-                fieldMap = BeanMapper.map(extra, DoctorRemovalDto.class).descMap();
-                break;
-            case SEMEN:
-                fieldMap = BeanMapper.map(extra, DoctorSemenDto.class).descMap();
-                break;
-            case VACCINATION:
-                fieldMap = BeanMapper.map(extra, DoctorVaccinationDto.class).descMap();
-                break;
-            case FOSTERS:
-                fieldMap = BeanMapper.map(extra, DoctorFostersDto.class).descMap();
-                break;
-            case FOSTERS_BY:
-                fieldMap = BeanMapper.map(extra, DoctorFostersDto.class).descMap();
-                // 被拼窝的母猪的描述中按理说应当带上"拼窝来源母猪", 但是 dto 中没有这个字段, 那就把"被拼窝母猪"这个字段去掉, 别让客户注意到...嘻嘻~~~
-                fieldMap.remove("被拼窝母猪");
-                break;
-            case MATING:
-                fieldMap = BeanMapper.map(extra, DoctorMatingDto.class).descMap();
-                break;
-            case PREG_CHECK:
-                fieldMap = BeanMapper.map(extra, DoctorPregChkResultDto.class).descMap();
-                break;
-            case ABORTION:
-                fieldMap = BeanMapper.map(extra, DoctorAbortionDto.class).descMap();
-                break;
-            case FARROWING:
-                fieldMap = BeanMapper.map(extra, DoctorFarrowingDto.class).descMap();
-                break;
-            case WEAN:
-                fieldMap = BeanMapper.map(extra, DoctorPartWeanDto.class).descMap();
-                break;
-            case PIGLETS_CHG:
-                fieldMap = BeanMapper.map(extra, DoctorPigletsChgDto.class).descMap();
-                break;
-            default:
-                return this.eventDesc;
+
+        AbstractPigEventInputDto baseDto = transFromPigEventAndExtra(pigEvent, extra);
+        Map<String, String> fieldMap = baseDto.descMap();
+        if(Objects.equals(pigEvent, PigEvent.FOSTERS_BY)){
+            // 被拼窝的母猪的描述中按理说应当带上"拼窝来源母猪", 但是 dto 中没有这个字段, 那就把"被拼窝母猪"这个字段去掉, 别让客户注意到...嘻嘻~~~
+            fieldMap.remove("被拼窝母猪");
+        }
+        if(baseDto.getOperatorName() != null){
+            fieldMap.put("操作人", baseDto.getOperatorName());
         }
         return Joiner.on("#").withKeyValueSeparator("：").join(fieldMap);
+    }
+
+    public Date generateEventAtFromExtra(Map<String, Object> extra){
+        if(eventType == null){
+            return null;
+        }
+        PigEvent pigEvent = PigEvent.from(eventType);
+        if(pigEvent == null){
+            return null;
+        }
+        Date eventAt = transFromPigEventAndExtra(pigEvent, extra).eventAt();
+        if(eventAt != null){
+            Date now = new Date();
+            if(DateUtil.inSameDate(eventAt, now)){
+                // 如果处在今天, 则使用此刻瞬间
+                return now;
+            } else {
+                // 如果不在今天, 则将时间置为0, 只保留日期
+                return Dates.startOfDay(eventAt);
+            }
+        }
+        return null;
+    }
+    
+    public static AbstractPigEventInputDto transFromPigEventAndExtra(PigEvent pigEvent, Map<String, Object> extra){
+        if(pigEvent == null){
+            return null;
+        }
+        AbstractPigEventInputDto dto;
+        switch (pigEvent) {
+            case ENTRY:
+                dto = BeanMapper.map(extra, DoctorFarmEntryDto.class);
+                break;
+            case CHG_FARM:
+                dto = BeanMapper.map(extra, DoctorChgFarmDto.class);
+                break;
+            case CHG_LOCATION:
+                dto = BeanMapper.map(extra, DoctorChgLocationDto.class);
+                break;
+            case TO_MATING:
+                dto = BeanMapper.map(extra, DoctorChgLocationDto.class);
+                break;
+            case TO_PREG:
+                dto = BeanMapper.map(extra, DoctorChgLocationDto.class);
+                break;
+            case TO_FARROWING:
+                dto = BeanMapper.map(extra, DoctorChgLocationDto.class);
+                break;
+            case CONDITION:
+                dto = BeanMapper.map(extra, DoctorConditionDto.class);
+                break;
+            case DISEASE:
+                dto = BeanMapper.map(extra, DoctorDiseaseDto.class);
+                break;
+            case REMOVAL:
+                dto = BeanMapper.map(extra, DoctorRemovalDto.class);
+                break;
+            case SEMEN:
+                dto = BeanMapper.map(extra, DoctorSemenDto.class);
+                break;
+            case VACCINATION:
+                dto = BeanMapper.map(extra, DoctorVaccinationDto.class);
+                break;
+            case FOSTERS:
+                dto = BeanMapper.map(extra, DoctorFostersDto.class);
+                break;
+            case FOSTERS_BY:
+                dto = BeanMapper.map(extra, DoctorFostersDto.class);
+                break;
+            case MATING:
+                dto = BeanMapper.map(extra, DoctorMatingDto.class);
+                break;
+            case PREG_CHECK:
+                dto = BeanMapper.map(extra, DoctorPregChkResultDto.class);
+                break;
+            case FARROWING:
+                dto = BeanMapper.map(extra, DoctorFarrowingDto.class);
+                break;
+            case WEAN:
+                dto = BeanMapper.map(extra, DoctorPartWeanDto.class);
+                break;
+            case PIGLETS_CHG:
+                dto = BeanMapper.map(extra, DoctorPigletsChgDto.class);
+                break;
+            default:
+                throw new IllegalArgumentException("enum PigEvent error");
+        }
+        return dto;
     }
 }
