@@ -96,6 +96,9 @@ public class DoctorMonthlyReportWriteServiceImpl implements DoctorMonthlyReportW
 
     //月报统计结果
     private DoctorMonthlyReportDto getMonthlyReportDto(Long farmId, Date startAt, Date endAt) {
+
+        log.info("get monthly report, farmId:{}, startAr:{}, endAt:{}", farmId, startAt, endAt);
+
         DoctorMonthlyReportDto dto = new DoctorMonthlyReportDto();
         //配种情况
         dto.setMateHoubei(doctorKpiDao.firstMatingCounts(farmId, startAt, endAt));                   //配后备
