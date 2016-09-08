@@ -168,7 +168,7 @@ public class DoctorBasicInputInfoDto implements Serializable{
                 break;
             case CONDITION:
                 // 有 conditionBackWeight (背膘) 字段的是母猪体况事件
-                if(extra.containsKey("conditionBackWeight")){
+                if(extra.get("conditionBackWeight") != null){
                     dto = BeanMapper.map(extra, DoctorConditionDto.class);
                 }else{
                     // 无 conditionBackWeight (背膘) 字段的是公猪体况事件
