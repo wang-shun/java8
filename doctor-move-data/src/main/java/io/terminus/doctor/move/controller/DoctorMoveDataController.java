@@ -510,4 +510,21 @@ public class DoctorMoveDataController {
             return false;
         }
     }
+
+    /**
+     * 更新猪群内转外转
+     */
+    @RequestMapping(value = "/transGroupType", method = RequestMethod.GET)
+    public Boolean updateTranGroupType(@RequestParam("farmId") Long farmId) {
+        try {
+            DoctorFarm farm = doctorFarmDao.findById(farmId);
+            log.warn("updateTranGroupType start, farmId:{}", farmId);
+            doctorMoveDataService.updateTranGroupType(farm);
+            log.warn("updateTranGroupType end");
+            return true;
+        } catch (Exception e) {
+            log.error("updateTranGroupType failed, farmId:{}, cause:{}", farmId, Throwables.getStackTraceAsString(e));
+            return false;
+        }
+    }
 }

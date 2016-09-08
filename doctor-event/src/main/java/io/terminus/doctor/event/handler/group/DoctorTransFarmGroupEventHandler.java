@@ -85,7 +85,7 @@ public class DoctorTransFarmGroupEventHandler extends DoctorAbstractGroupEventHa
         event.setAvgDayAge(groupTrack.getAvgDayAge());  //转群的日龄不需要录入, 直接取猪群的日龄
         event.setWeight(transFarm.getWeight());
         event.setAvgWeight(EventUtil.getAvgWeight(transFarm.getWeight(), transFarm.getQuantity()));
-        event.setTransGroupType(getTransType(group.getPigType(), toBarn).getValue());   //区别内转还是外转
+        event.setTransGroupType(DoctorGroupEvent.TransGroupType.OUT.getValue());   //转场肯定是外转
         event.setExtraMap(transFarmEvent);
         doctorGroupEventDao.create(event);
 
