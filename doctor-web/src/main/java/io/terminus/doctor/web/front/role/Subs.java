@@ -2,10 +2,11 @@ package io.terminus.doctor.web.front.role;
 
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.Paging;
-import io.terminus.doctor.common.enums.UserType;
+import io.terminus.doctor.user.service.DoctorUserReadService;
 import io.terminus.doctor.web.core.component.MobilePattern;
 import io.terminus.pampas.common.UserUtil;
 import io.terminus.parana.common.utils.RespHelper;
+import io.terminus.parana.user.model.User;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -16,7 +17,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
-import java.util.Objects;
 
 /**
  * Desc: 子账号
@@ -30,13 +30,15 @@ import java.util.Objects;
 public class Subs {
 
     private final SubService subService;
-
+    private final DoctorUserReadService doctorUserReadService;
     private final MobilePattern mobilePattern;
 
     @Autowired
     public Subs(SubService subService,
+                DoctorUserReadService doctorUserReadService,
                 MobilePattern mobilePattern) {
         this.subService = subService;
+        this.doctorUserReadService = doctorUserReadService;
         this.mobilePattern = mobilePattern;
     }
 
@@ -149,6 +151,18 @@ public class Subs {
 //        if(!Objects.equals(UserUtil.getCurrentUser().getType(), UserType.FARM_ADMIN_PRIMARY.value())){
 //            throw new JsonResponseException(403, "user.no.permission");
 //        }
+    }
+
+    /**
+     * 子账号查询其主账号的用户信息
+     * @return
+     */
+    @RequestMapping(value = "/getPrimaryUser", method = RequestMethod.GET)
+    public User getPrimaryUser(){
+        Long primaryUserId = subService.getPrimaryUserId(UserUtil.getCurrentUser());
+        User primaryUser = RespHelper.orServEx(doctorUserReadService.findById(primaryUserId));
+        primaryUser.setPassword(null);
+        return primaryUser;
     }
 
 }
