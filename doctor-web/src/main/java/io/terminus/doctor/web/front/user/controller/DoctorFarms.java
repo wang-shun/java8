@@ -121,4 +121,14 @@ public class DoctorFarms {
                 .collect(Collectors.toList());
         return result;
     }
+
+    /**
+     * 查询当前用户有权限的猪场
+     * @return
+     */
+    @RequestMapping(value = "/permissionFarm", method = RequestMethod.GET)
+    public List<DoctorFarm> permissionFarm(){
+        return RespHelper.or500(doctorFarmReadService.findFarmsByUserId(UserUtil.getUserId()));
+    }
+
 }
