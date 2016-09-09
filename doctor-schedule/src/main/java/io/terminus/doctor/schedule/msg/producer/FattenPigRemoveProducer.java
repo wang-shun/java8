@@ -9,9 +9,6 @@ import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dto.DoctorGroupDetail;
 import io.terminus.doctor.event.dto.DoctorGroupSearchDto;
-import io.terminus.doctor.event.dto.DoctorPigInfoDto;
-import io.terminus.doctor.event.enums.DataRange;
-import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.service.DoctorGroupReadService;
 import io.terminus.doctor.event.service.DoctorPigReadService;
 import io.terminus.doctor.event.service.DoctorPigWriteService;
@@ -28,18 +25,14 @@ import io.terminus.doctor.msg.service.DoctorMessageRuleTemplateReadService;
 import io.terminus.doctor.msg.service.DoctorMessageTemplateReadService;
 import io.terminus.doctor.msg.service.DoctorMessageWriteService;
 import io.terminus.doctor.schedule.msg.producer.factory.GroupDetailFactory;
-import io.terminus.doctor.schedule.msg.producer.factory.PigDtoFactory;
 import io.terminus.doctor.user.service.DoctorUserDataPermissionReadService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
-import java.util.stream.Collectors;
 
 /**
  * Created by xiao on 16/8/31.
@@ -49,6 +42,7 @@ import java.util.stream.Collectors;
 public class FattenPigRemoveProducer extends AbstractJobProducer {
 
     private DoctorGroupReadService doctorGroupReadService;
+
     @Autowired
     public FattenPigRemoveProducer(DoctorMessageTemplateReadService doctorMessageTemplateReadService, DoctorMessageRuleTemplateReadService doctorMessageRuleTemplateReadService, DoctorMessageRuleReadService doctorMessageRuleReadService, DoctorMessageRuleRoleReadService doctorMessageRuleRoleReadService, DoctorMessageReadService doctorMessageReadService, DoctorMessageWriteService doctorMessageWriteService, DoctorPigReadService doctorPigReadService, DoctorPigWriteService doctorPigWriteService, DoctorGroupReadService doctorGroupReadService, DoctorUserDataPermissionReadService doctorUserDataPermissionReadService) {
         super(doctorMessageTemplateReadService, doctorMessageRuleTemplateReadService, doctorMessageRuleReadService, doctorMessageRuleRoleReadService, doctorMessageReadService, doctorMessageWriteService, doctorPigReadService, doctorPigWriteService, doctorUserDataPermissionReadService, Category.FATTEN_PIG_REMOVE);
@@ -76,10 +70,8 @@ public class FattenPigRemoveProducer extends AbstractJobProducer {
             groupDetails.forEach(doctorGroupDetail -> {
                 //根据用户拥有的猪舍权限过滤拥有user
                 List<SubUser> sUsers = filterSubUserBarnId(subUsers, doctorGroupDetail.getGroup().getCurrentBarnId());
-                if (ruleValueMap.get(1) != null) {
-                    if (checkRuleValue(ruleValueMap.get(1), (double)doctorGroupDetail.getGroupTrack().getAvgDayAge()) ) {
-                        messages.addAll(getMessage(doctorGroupDetail, rule.getChannels(), ruleRole, sUsers, rule.getUrl()));
-                    }
+                if (checkRuleValue(ruleValueMap.get(1), (double) doctorGroupDetail.getGroupTrack().getAvgDayAge())) {
+                    messages.addAll(getMessage(doctorGroupDetail, rule.getChannels(), ruleRole, sUsers, rule.getUrl()));
                 }
             });
         }

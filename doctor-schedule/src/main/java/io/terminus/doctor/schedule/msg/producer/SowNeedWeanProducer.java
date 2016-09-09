@@ -39,7 +39,7 @@ import java.util.stream.Collectors;
 
 /**
  * Desc: 母猪需断奶提示
- *          1. 默认分娩日起断奶天数21天
+ * 1. 默认分娩日起断奶天数21天
  * Mail: chk@terminus.io
  * Created by icemimosa
  * Date: 16/6/5
@@ -50,13 +50,13 @@ public class SowNeedWeanProducer extends AbstractJobProducer {
 
     @Autowired
     public SowNeedWeanProducer(DoctorMessageRuleTemplateReadService doctorMessageRuleTemplateReadService,
-                                DoctorMessageRuleReadService doctorMessageRuleReadService,
-                                DoctorMessageRuleRoleReadService doctorMessageRuleRoleReadService,
-                                DoctorMessageReadService doctorMessageReadService,
-                                DoctorMessageWriteService doctorMessageWriteService,
-                                DoctorPigReadService doctorPigReadService,
+                               DoctorMessageRuleReadService doctorMessageRuleReadService,
+                               DoctorMessageRuleRoleReadService doctorMessageRuleRoleReadService,
+                               DoctorMessageReadService doctorMessageReadService,
+                               DoctorMessageWriteService doctorMessageWriteService,
+                               DoctorPigReadService doctorPigReadService,
                                DoctorPigWriteService doctorPigWriteService,
-                                DoctorMessageTemplateReadService doctorMessageTemplateReadService,
+                               DoctorMessageTemplateReadService doctorMessageTemplateReadService,
                                DoctorUserDataPermissionReadService doctorUserDataPermissionReadService) {
         super(doctorMessageTemplateReadService,
                 doctorMessageRuleTemplateReadService,
@@ -117,18 +117,16 @@ public class SowNeedWeanProducer extends AbstractJobProducer {
                     DoctorPigEvent doctorPigEvent = getPigEventByEventType(pigDto.getDoctorPigEvents(), PigEvent.FARROWING.getKey());
                     Double timeDiff = getTimeDiff(new DateTime(doctorPigEvent.getEventAt()));
                     // 1. 哺乳状态日期判断 -> id:1
-                    if (ruleValueMap.get(1) != null) {
-                        if (!isMessage && Objects.equals(ruleTemplate.getType(), DoctorMessageRuleTemplate.Type.WARNING.getValue())) {
-                            // 记录每只猪的消息提醒
-                            recordPigMessage(pigDto, PigEvent.WEAN, ruleValueMap.get(1).getLeftValue().doubleValue() - timeDiff, ruleValueMap.get(1).getLeftValue().intValue(),
-                                    PigStatus.FEED);
-                        }
+                    if (!isMessage && Objects.equals(ruleTemplate.getType(), DoctorMessageRuleTemplate.Type.WARNING.getValue())) {
+                        // 记录每只猪的消息提醒
+                        recordPigMessage(pigDto, PigEvent.WEAN, ruleValueMap.get(1).getLeftValue() - timeDiff, ruleValueMap.get(1).getLeftValue().intValue(),
+                                PigStatus.FEED);
+                    }
 
-                        if (isMessage && checkRuleValue(ruleValueMap.get(1), timeDiff)) {
-                            pigDto.setEventDate(doctorPigEvent.getEventAt());
-                            pigDto.setOperatorName(doctorPigEvent.getOperatorName());
-                            messages.addAll(getMessage(pigDto, rule.getChannels(), ruleRole, sUsers, timeDiff, rule.getUrl()));
-                        }
+                    if (isMessage && checkRuleValue(ruleValueMap.get(1), timeDiff)) {
+                        pigDto.setEventDate(doctorPigEvent.getEventAt());
+                        pigDto.setOperatorName(doctorPigEvent.getOperatorName());
+                        messages.addAll(getMessage(pigDto, rule.getChannels(), ruleRole, sUsers, timeDiff, rule.getUrl()));
                     }
                 }
             }

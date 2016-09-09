@@ -121,17 +121,16 @@ public class SowPregCheckProducer extends AbstractJobProducer {
                     DoctorPigEvent doctorPigEvent = getMatingPigEvent(pigDto);
                     Double timeDiff = getTimeDiff(new DateTime(doctorPigEvent.getEventAt()));
                     // 1. 妊娠检查判断 -> id:1
-                    if (ruleValueMap.get(1) != null) {
-                        if (!isMessage && Objects.equals(ruleTemplate.getType(), DoctorMessageRuleTemplate.Type.WARNING.getValue())) {
-                            // 记录每只猪的消息提醒
-                            recordPigMessage(pigDto, PigEvent.PREG_CHECK, ruleValueMap.get(1).getLeftValue().doubleValue() - timeDiff, ruleValueMap.get(1).getLeftValue().intValue(),
-                                    PigStatus.Mate);
-                        }
-                        if (isMessage && checkRuleValue(ruleValueMap.get(1), timeDiff)) {
-                            pigDto.setEventDate(doctorPigEvent.getEventAt());
-                            messages.addAll(getMessage(pigDto, rule.getChannels(), ruleRole, sUsers, timeDiff, rule.getUrl()));
-                        }
+                    if (!isMessage && Objects.equals(ruleTemplate.getType(), DoctorMessageRuleTemplate.Type.WARNING.getValue())) {
+                        // 记录每只猪的消息提醒
+                        recordPigMessage(pigDto, PigEvent.PREG_CHECK, ruleValueMap.get(1).getLeftValue() - timeDiff, ruleValueMap.get(1).getLeftValue().intValue(),
+                                PigStatus.Mate);
                     }
+                    if (isMessage && checkRuleValue(ruleValueMap.get(1), timeDiff)) {
+                        pigDto.setEventDate(doctorPigEvent.getEventAt());
+                        messages.addAll(getMessage(pigDto, rule.getChannels(), ruleRole, sUsers, timeDiff, rule.getUrl()));
+                    }
+
                 }
             }
         }

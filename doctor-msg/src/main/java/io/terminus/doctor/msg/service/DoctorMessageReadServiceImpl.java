@@ -55,7 +55,7 @@ public class DoctorMessageReadServiceImpl implements DoctorMessageReadService {
                     DoctorMessageRuleTemplate.Type.WARNING.getValue(), DoctorMessageRuleTemplate.Type.ERROR.getValue()));
             criteria.put("channel", Rule.Channel.SYSTEM.getValue());
             if (criteria.get("status") == null) {
-                criteria.put("statuses", ImmutableList.of(DoctorMessage.Status.NORMAL.getValue(), DoctorMessage.Status.READED.getValue()));
+                criteria.put("statuses", ImmutableList.of(DoctorMessage.Status.NORMAL.getValue(), DoctorMessage.Status.SENDED.getValue()));
             }
             return Response.ok(doctorMessageDao.paging(pageInfo.getOffset(), pageInfo.getLimit(), criteria));
         } catch (Exception e) {
@@ -169,20 +169,11 @@ public class DoctorMessageReadServiceImpl implements DoctorMessageReadService {
     @Override
     public Response<List<Long>> findBusinessListByCriteria(Map<String, Object> criteria) {
         try {
+
             return Response.ok(doctorMessageDao.findBusinessListByCriteria(criteria));
         } catch (Exception e) {
             log.error("find.message.count.by.criteria.failed, cause by {}", Throwables.getStackTraceAsString(e));
             return Response.fail("find.message.count.by.criteria.failed");
-        }
-    }
-
-    @Override
-    public Response<Paging<DoctorMessage>> pagingDiffBusinessId(Map<String, Object> criteria, Integer pageNo, Integer pageSize) {
-        try {
-            return Response.ok(doctorMessageDao.pagingDiffBusinessId(criteria, pageNo, pageSize));
-        } catch (Exception e){
-            log.error("paging.dif.businessId.failed,cause by{}", Throwables.getStackTraceAsString(e));
-            return Response.fail("aging.dif.businessId.failed");
         }
     }
 }

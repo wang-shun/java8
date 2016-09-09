@@ -37,9 +37,9 @@ import java.util.stream.Collectors;
 
 /**
  * Desc: 待配种母猪提示
- *
- *      1. 断奶/流产/返情日期
- *
+ * <p>
+ * 1. 断奶/流产/返情日期
+ * <p>
  * Mail: chk@terminus.io
  * Created by icemimosa
  * Date: 16/6/1
@@ -99,7 +99,7 @@ public class SowBreedingProducer extends AbstractJobProducer {
                     DataRange.FARM.getKey(), farmId, DoctorPig.PIG_TYPE.SOW.getKey()));
             // 计算size, 分批处理
             Long page = getPageSize(total, 100L);
-            DoctorPig pig =DoctorPig.builder()
+            DoctorPig pig = DoctorPig.builder()
                     .farmId(farmId)
                     .pigType(DoctorPig.PIG_TYPE.SOW.getKey())
                     .build();
@@ -120,17 +120,16 @@ public class SowBreedingProducer extends AbstractJobProducer {
                     if (getStatusDate(pigDto) != null) {
                         Double timeDiff = getTimeDiff(getStatusDate(pigDto));
                         // 获取配置的天数, 并判断
-                        if (ruleValueMap.get(1) != null) {
-                            // 记录每只猪的消息提醒
-                            if (!isMessage && Objects.equals(ruleTemplate.getType(), DoctorMessageRuleTemplate.Type.WARNING.getValue())) {
-                                recordPigMessage(pigDto, PigEvent.MATING, ruleValueMap.get(1).getLeftValue().doubleValue() - timeDiff, ruleValueMap.get(1).getLeftValue().intValue(),
-                                        PigStatus.Wean, PigStatus.KongHuai, PigStatus.Entry);
-                            }
-
-                            if (isMessage && checkRuleValue(ruleValueMap.get(1), timeDiff)) {
-                                messages.addAll(getMessage(pigDto, rule.getChannels(), ruleRole, sUsers, timeDiff, rule.getUrl()));
-                            }
+                        // 记录每只猪的消息提醒
+                        if (!isMessage && Objects.equals(ruleTemplate.getType(), DoctorMessageRuleTemplate.Type.WARNING.getValue())) {
+                            recordPigMessage(pigDto, PigEvent.MATING, ruleValueMap.get(1).getLeftValue() - timeDiff, ruleValueMap.get(1).getLeftValue().intValue(),
+                                    PigStatus.Wean, PigStatus.KongHuai, PigStatus.Entry);
                         }
+
+                        if (isMessage && checkRuleValue(ruleValueMap.get(1), timeDiff)) {
+                            messages.addAll(getMessage(pigDto, rule.getChannels(), ruleRole, sUsers, timeDiff, rule.getUrl()));
+                        }
+
                     }
                 }
             }

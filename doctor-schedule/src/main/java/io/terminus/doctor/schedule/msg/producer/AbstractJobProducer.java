@@ -16,7 +16,6 @@ import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.event.service.DoctorPigReadService;
 import io.terminus.doctor.event.service.DoctorPigWriteService;
-import io.terminus.doctor.msg.dto.RuleValue;
 import io.terminus.doctor.msg.dto.SubUser;
 import io.terminus.doctor.msg.enums.Category;
 import io.terminus.doctor.msg.model.DoctorMessage;
@@ -37,7 +36,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -177,28 +175,28 @@ public abstract class AbstractJobProducer extends AbstractProducer {
      * 获取预产期
      * @param pigDto
      */
-    protected DateTime getBirthDate(DoctorPigInfoDto pigDto, RuleValue ruleValue) {
-        // 获取预产期
-        try{
-            if(StringUtils.isNotBlank(pigDto.getExtraTrack())) {
-                // @see DoctorMatingDto
-                Date date = new Date((Long) MAPPER.readValue(pigDto.getExtraTrack(), Map.class).get("judgePregDate"));
-                if (date != null) {
-                    return new DateTime(date);
-                } else {
-                    // 获取配种日期
-                    date = new Date((Long) MAPPER.readValue(pigDto.getExtraTrack(), Map.class).get("matingDate"));
-                    if (date != null) {
-                        // 配种日期 + 3 个月返回
-                        return new DateTime(date).plusDays(ruleValue.getLeftValue().intValue());
-                    }
-                }
-            }
-        } catch (Exception e) {
-            log.error("[SowBirthDateProducer] get birth date failed, pigDto is {}", pigDto);
-        }
-        return new DateTime(pigDto.getUpdatedAt());
-    }
+//    protected DateTime getBirthDate(DoctorPigInfoDto pigDto, RuleValue ruleValue) {
+//        // 获取预产期
+//        try{
+//            if(StringUtils.isNotBlank(pigDto.getExtraTrack())) {
+//                // @see DoctorMatingDto
+//                Date date = new Date((Long) MAPPER.readValue(pigDto.getExtraTrack(), Map.class).get("judgePregDate"));
+//                if (date != null) {
+//                    return new DateTime(date);
+//                } else {
+//                    // 获取配种日期
+//                    date = new Date((Long) MAPPER.readValue(pigDto.getExtraTrack(), Map.class).get("matingDate"));
+//                    if (date != null) {
+//                        // 配种日期 + 3 个月返回
+//                        return new DateTime(date).plusDays(ruleValue.getLeftValue().intValue());
+//                    }
+//                }
+//            }
+//        } catch (Exception e) {
+//            log.error("[SowBirthDateProducer] get birth date failed, pigDto is {}", pigDto);
+//        }
+//        return new DateTime(pigDto.getUpdatedAt());
+//    }
 
     /**
      * 获取到达当前状态的时间
@@ -234,6 +232,7 @@ public abstract class AbstractJobProducer extends AbstractProducer {
         }
         return null;
     }
+
     /**
      * 根据猪舍过滤用户
      * @param subUsers
@@ -261,7 +260,7 @@ public abstract class AbstractJobProducer extends AbstractProducer {
      * 根据事件类型时间列表中取出最近事件
      * @param events
      * @param type
-     * @return
+     * @return DoctorPigEvent
      */
     protected DoctorPigEvent getPigEventByEventType(List<DoctorPigEvent> events, Integer type){
         try {
@@ -282,7 +281,7 @@ public abstract class AbstractJobProducer extends AbstractProducer {
     /**
      * 获取事件发生时间与当前时间差
      * @param eventTime
-     * @return 天数
+     * @return Double
      */
     protected Double getTimeDiff(DateTime eventTime){
         try {

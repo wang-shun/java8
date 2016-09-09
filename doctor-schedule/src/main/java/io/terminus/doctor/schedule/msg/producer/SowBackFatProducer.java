@@ -95,34 +95,31 @@ public class SowBackFatProducer extends AbstractJobProducer {
                 // 处理每个猪
                 for (int j = 0; pigs != null && j < pigs.size(); j++) {
                     DoctorPigInfoDto pigDto = pigs.get(j);
+                    //根据猪场权限过滤用户
                     List<SubUser> sUsers = filterSubUserBarnId(subUsers, pigDto.getBarnId());
-
                     ruleValueMap.keySet().forEach(key -> {
                         Double timeDiff = null;
-                        if (ruleValueMap.get(key) != null) {
-                            Boolean isSend = false;
-                            RuleValue ruleValue = ruleValueMap.get(key);
-                            DoctorPigEvent doctorPigEvent = getMatingPigEvent(pigDto);
-                                if (key == 1 || key == 2 || key == 3) {
-                                    timeDiff = getTimeDiff(new DateTime(doctorPigEvent.getEventAt()));
-                                    if (filterPigCondition(pigDto) && checkRuleValue(ruleValue, timeDiff)) {
-                                        isSend = true;
-                                    }
-                                } else {
-                                        if (Objects.equals(pigDto.getStatus(), PigStatus.Wean.getKey())) {
-                                            timeDiff = getTimeDiff(getStatusDate(pigDto));
-                                            if (Objects.equals(timeDiff, 0d)) {
-                                                isSend = true;
-                                            }
-                                        }
-                                }
-                                if (isSend) {
-                                    pigDto.setEventDate(doctorPigEvent.getEventAt());
-                                    pigDto.setOperatorName(doctorPigEvent.getOperatorName());
-                                    pigDto.setRuleValueId(key);
-                                    messages.addAll(getMessage(pigDto, rule.getChannels(), ruleRole, sUsers, timeDiff, rule.getUrl()));
-                                }
+                        Boolean isSend = false;
+                        RuleValue ruleValue = ruleValueMap.get(key);
+                        DoctorPigEvent doctorPigEvent = getMatingPigEvent(pigDto);
+                        if (key == 1 || key == 2 || key == 3) {
+                            timeDiff = getTimeDiff(new DateTime(doctorPigEvent.getEventAt()));
+                            if (filterPigCondition(pigDto) && checkRuleValue(ruleValue, timeDiff)) {
+                                isSend = true;
                             }
+                        } else {
+                            if (Objects.equals(pigDto.getStatus(), PigStatus.Wean.getKey())) {
+                                timeDiff = getTimeDiff(getStatusDate(pigDto));
+                                    isSend = Objects.equals(timeDiff, 0d);
+                            }
+                        }
+                        if (isSend) {
+                            pigDto.setEventDate(doctorPigEvent.getEventAt());
+                            pigDto.setOperatorName(doctorPigEvent.getOperatorName());
+                            pigDto.setRuleValueId(key);
+                            messages.addAll(getMessage(pigDto, rule.getChannels(), ruleRole, sUsers, timeDiff, rule.getUrl()));
+                        }
+
                     });
 
                 }
@@ -134,12 +131,12 @@ public class SowBackFatProducer extends AbstractJobProducer {
 
     /**
      * 构建过滤猪的条件
+     *
      * @param pigDto
-     * @return
+     * @return Boolean
      */
     private Boolean filterPigCondition(DoctorPigInfoDto pigDto) {
         if (!Arguments.isNullOrEmpty(pigDto.getDoctorPigEvents())) {
-            // || (Objects.equals(doctorPigEvent.getType(), PigEvent.PREG_CHECK.getKey()) && !Objects.equals(doctorPigEvent.getPregCheckResult(), PregCheckResult.YANG.getKey()))
             List<DoctorPigEvent> list = pigDto.getDoctorPigEvents().stream().filter(doctorPigEvent -> new DateTime(doctorPigEvent.getEventAt()).isAfter(new DateTime(getPigEventByEventType(pigDto.getDoctorPigEvents(), PigEvent.MATING.getKey()).getEventAt())) && (Objects.equals(doctorPigEvent.getType(), PigEvent.CONDITION.getKey()))).collect(Collectors.toList());
             if (list.isEmpty()) {
                 return true;
