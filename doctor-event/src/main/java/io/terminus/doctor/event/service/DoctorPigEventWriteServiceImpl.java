@@ -382,7 +382,7 @@ public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteServic
             checkState(liveCount > 0 && liveCount <= 25, "sowFarrow.liveCount.error");
 
             // 校验健仔的数量
-            checkState(healthCount>0 && healthCount<=25, "sowFarrow.healthCount.error");
+            checkState(healthCount>=0 && healthCount<=25, "sowFarrow.healthCount.error");
 
             // 校验对应的公猪, 母猪的数量信息
             if(!Objects.isNull(doctorFarrowingDto.getLiveBoarCount()) || !Objects.isNull(doctorFarrowingDto.getLiveSowCount())){
