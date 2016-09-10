@@ -92,6 +92,13 @@
         <include refid="criteria"/>
     </select>
 
+    <!-- 窝均弱仔数-->
+    <select id="deliveryWeakCountsAvg" parameterType="map" resultType="double">
+        select ifnull(sum(weak_count)/count(1),0) from doctor_pig_events
+        where type = 15
+        <include refid="criteria"/>
+    </select>
+
     <!-- 窝均产仔数-->
     <select id="deliveryAllCountsAvg" parameterType="map" resultType="double">
         select ifnull(sum(health_count+ weak_count+ jx_count+ mny_count+ dead_count + black_count)/count(1),0) from

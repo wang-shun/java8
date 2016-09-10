@@ -114,6 +114,13 @@ public class DoctorKpiDao {
     }
 
     /**
+     * 窝均弱仔数
+     */
+    public double getDeliveryWeakAvg(Long farmId, Date startAt, Date endAt) {
+        return this.sqlSession.selectOne(sqlId("deliveryWeakCountsAvg"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
+    }
+
+    /**
      * 窝均活仔数
      */
     public double getDeliveryLiveAvg(Long farmId, Date startAt, Date endAt) {
