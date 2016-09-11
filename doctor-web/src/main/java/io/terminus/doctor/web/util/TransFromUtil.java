@@ -12,12 +12,15 @@ import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.service.DoctorBarnReadService;
+import io.terminus.parana.user.model.UserProfile;
 import io.terminus.parana.user.service.UserProfileReadService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Map;
+
+import static io.terminus.common.utils.Arguments.notEmpty;
 
 /**
  * Created by highway on 16/8/11.
@@ -55,7 +58,10 @@ public class TransFromUtil {
                     extraMap.put("fosterReason", RespHelper.or500(doctorBasicReadService.findBasicById(toLong(extraMap.get("fosterReason")))).getName());
                 }
                 if (getLong(extraMap, "vaccinationStaffId") != null) {
-                    extraMap.put("vaccinationStaffName", RespHelper.or500(userProfileReadService.findProfileByUserId(toLong(extraMap.get("vaccinationStaffId")))).getRealName());
+                    UserProfile userProfile = RespHelper.or500(userProfileReadService.findProfileByUserId(toLong(extraMap.get("vaccinationStaffId"))));
+                    if (userProfile != null && notEmpty(userProfile.getRealName())) {
+                        extraMap.put("vaccinationStaffName", userProfile.getRealName());
+                    }
                 }
                 if (getLong(extraMap, "toBarnId") != null) {
                     extraMap.put("toBarnId", RespHelper.or500(doctorBarnReadService.findBarnById(toLong(extraMap.get("toBarnId")))).getName());
