@@ -35,6 +35,7 @@ import io.terminus.zookeeper.pubsub.Publisher;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
@@ -130,7 +131,7 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
     //转换下猪群基本数据
     protected DoctorGroupEvent dozerGroupEvent(DoctorGroup group, GroupEventType eventType, BaseGroupInput baseInput) {
         DoctorGroupEvent event = new DoctorGroupEvent();
-        event.setEventAt(DateUtil.toDate(baseInput.getEventAt()));
+        event.setEventAt(getEventAt(baseInput.getEventAt()));
         event.setOrgId(group.getOrgId());       //公司信息
         event.setOrgName(group.getOrgName());
         event.setFarmId(group.getFarmId());     //猪场信息
@@ -148,6 +149,11 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
         event.setDesc(baseInput.generateEventDesc());
         event.setRemark(baseInput.getRemark());
         return event;
+    }
+
+    //如果当天, 要有时分秒
+    private static Date getEventAt(String eventAt) {
+        return eventAt.equals(DateUtil.toDateString(new Date())) ? new Date() : DateUtil.toDate(eventAt);
     }
 
     //更新猪群跟踪
