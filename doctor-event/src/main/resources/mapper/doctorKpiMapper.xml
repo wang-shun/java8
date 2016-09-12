@@ -1010,7 +1010,7 @@
     </select>
 
     <!-- 猪群销售: 基础价格15kg的均价 -->
-    <select id="getGroupSaleBasePrice10" parameterType="map" resultType="long">
+    <select id="getGroupSaleBasePrice15" parameterType="map" resultType="long">
         SELECT
           ifnull(avg(price),0)
         FROM doctor_group_events
@@ -1022,7 +1022,7 @@
     </select>
 
     <!-- 猪群销售: 育肥猪均价 -->
-    <select id="getGroupSaleBasePrice10" parameterType="map" resultType="long">
+    <select id="getGroupSaleFattenPrice" parameterType="map" resultType="long">
         SELECT
           ifnull(avg(price),0)
         FROM doctor_group_events
