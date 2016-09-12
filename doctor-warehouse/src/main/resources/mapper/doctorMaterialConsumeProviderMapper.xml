@@ -55,6 +55,8 @@
         <if test="eventType != null" > AND `event_type` = #{eventType}</if>
         <if test="eventCount != null" > AND `event_count` = #{eventCount}</if>
         <if test="staffId != null" > AND `staff_id` = #{staffId}</if>
+        <if test="startAt != null" > <![CDATA[ AND `event_time` >= #{startAt} ]]> </if>
+        <if test="endAt != null" > <![CDATA[ AND `event_time` < #{endAt} ]]> </if>
     </sql>
 
     <insert id="create" parameterType="DoctorMaterialConsumeProvider" keyProperty="id" useGeneratedKeys="true">
@@ -94,6 +96,24 @@
 
     <select id="list" resultMap="DoctorMaterialConsumeProviderMap">
         SELECT <include refid="cols_all" />
+        FROM <include refid="tb" />
+        <where>
+            <include refid="criteria"/>
+        </where>
+    </select>
+
+    <select id="paging" resultMap="DoctorMaterialConsumeProviderMap">
+        SELECT <include refid="cols_all" />
+        FROM <include refid="tb" />
+        <where>
+            <include refid="criteria"/>
+        </where>
+        order by event_time desc
+        limit #{offset}, #{limit}
+    </select>
+
+    <select id="count" resultType="long">
+        SELECT count(id)
         FROM <include refid="tb" />
         <where>
             <include refid="criteria"/>

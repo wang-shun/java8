@@ -180,7 +180,7 @@ public class DoctorWareHouseEvents {
                     dto.getFarmId(),dto.getMaterialId(),dto.getWareHouseId()));
             checkState(!isNull(doctorMaterialInWareHouse), "input.materialInfo.error");
 
-            Long currentUserId = UserUtil.getUserId();
+            Long currentUserId = dto.getStaffId() != null ? dto.getStaffId() : UserUtil.getUserId();
             Response<User> userResponse = userReadService.findById(currentUserId);
             String userName = RespHelper.orServEx(userResponse).getName();
 
@@ -220,7 +220,7 @@ public class DoctorWareHouseEvents {
         try{
             DoctorWareHouseDto doctorWareHouseDto = RespHelper.orServEx(doctorWareHouseReadService.queryDoctorWareHouseById(dto.getWareHouseId()));
 
-            Long userId = UserUtil.getUserId();
+            Long userId = dto.getStaffId() != null ? dto.getStaffId() : UserUtil.getUserId();
             String userName = RespHelper.orServEx(doctorUserProfileReadService.findProfileByUserIds(Lists.newArrayList(userId))).get(0).getRealName();
 
             DoctorBasicMaterial doctorBasicMaterial = RespHelper.orServEx(doctorBasicMaterialReadService.findBasicMaterialById(dto.getMaterialId()));

@@ -47,4 +47,9 @@ public class DoctorConsumeProviderInputDto implements Serializable{
      */
     @NotNull(message = "eventType.not.null")
     private Integer eventType;
+
+    /**
+     * 员工
+     */
+    private Long staffId;
 }
