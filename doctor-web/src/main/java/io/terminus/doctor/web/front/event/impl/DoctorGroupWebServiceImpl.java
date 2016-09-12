@@ -192,6 +192,7 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
                             UserUtil.getUserId(), UserUtil.getCurrentUser().getName()));
 
                     params.put("customerId", customerId);
+                    log.info("changeinput:{}", changeInput);
                     orServEx(doctorGroupWriteService.groupEventChange(groupDetail, changeInput));
                     break;
                 case TRANS_GROUP:
