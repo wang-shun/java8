@@ -6,6 +6,7 @@ import io.terminus.common.model.Response;
 import io.terminus.common.utils.Dates;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.enums.PigType;
+import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.constants.DoctorBasicEnums;
 import io.terminus.doctor.event.dao.DoctorKpiDao;
@@ -20,9 +21,11 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.Objects;
 
 /**
@@ -62,17 +65,20 @@ public class DoctorDailyGroupReportReadServiceImpl implements DoctorDailyGroupRe
 
     //根据事件获取report
     private DoctorDailyReportDto doReportByEvent(DoctorGroupEvent event) {
+        Date startAt = Dates.startOfDay(event.getEventAt());
+        Date endAt = DateUtil.getDateEnd(new DateTime(event.getEventAt())).toDate();
+
         DoctorDailyReportDto report = new DoctorDailyReportDto();
         report.setFarmId(event.getFarmId());
-        report.setSumAt(Dates.startOfDay(event.getEventAt()));
+        report.setSumAt(startAt);
 
         //存栏每次一定要更新
         DoctorLiveStockDailyReport liveStockReport = new DoctorLiveStockDailyReport();
-        liveStockReport.setFarrow(doctorKpiDao.realTimeLiveStockFarrow(report.getFarmId(), report.getSumAt()));
-        liveStockReport.setNursery(doctorKpiDao.realTimeLiveStockNursery(report.getFarmId(), report.getSumAt()));
-        liveStockReport.setFatten(doctorKpiDao.realTimeLiveStockFatten(report.getFarmId(), report.getSumAt()));
-        liveStockReport.setHoubeiSow(doctorKpiDao.realTimeLiveStockHoubeiSow(report.getFarmId(), report.getSumAt()));
-        liveStockReport.setHoubeiBoar(doctorKpiDao.realTimeLiveStockHoubeiBoar(report.getFarmId(), report.getSumAt()));
+        liveStockReport.setFarrow(doctorKpiDao.realTimeLiveStockFarrow(report.getFarmId(), startAt));
+        liveStockReport.setNursery(doctorKpiDao.realTimeLiveStockNursery(report.getFarmId(), startAt));
+        liveStockReport.setFatten(doctorKpiDao.realTimeLiveStockFatten(report.getFarmId(), startAt));
+        liveStockReport.setHoubeiSow(doctorKpiDao.realTimeLiveStockHoubeiSow(report.getFarmId(), startAt));
+        liveStockReport.setHoubeiBoar(doctorKpiDao.realTimeLiveStockHoubeiBoar(report.getFarmId(), startAt));
         report.setLiveStock(liveStockReport);
 
         //不是变动事件, 直接返回
@@ -94,6 +100,12 @@ public class DoctorDailyGroupReportReadServiceImpl implements DoctorDailyGroupRe
         saleReport.setNursery(isSaleEvent(changeEvent, PigType.FARROW_PIGLET) || isSaleEvent(changeEvent, PigType.NURSERY_PIGLET)
                 || isSaleEvent(changeEvent, PigType.DELIVER_SOW) ? changeEvent.getChange().getAmount() / 100 : 0);
         saleReport.setFatten(isSaleEvent(changeEvent, PigType.FATTEN_PIG) ? changeEvent.getChange().getAmount() / 100 : 0);
+
+        //销售均价
+        saleReport.setBasePrice10(doctorKpiDao.getGroupSaleBasePrice10(report.getFarmId(), startAt, endAt));
+        saleReport.setBasePrice15(doctorKpiDao.getGroupSaleBasePrice15(report.getFarmId(), startAt, endAt));
+        saleReport.setFattenPrice(doctorKpiDao.getGroupSaleFattenPrice(report.getFarmId(), startAt, endAt));
+
         report.setSale(saleReport);
 
         log.info("daily group report doReportByEvent:{}", report);
