@@ -269,7 +269,39 @@ public class DoctorWareHouseEvents {
      * @param materialId 物料id
      * @param moveQuantity 调拨数量
      */
-    public void moveMaterial(Long fromWareHouseId, Long toWareHouseId, Long materialId, Double moveQuantity){
+    @RequestMapping(value = "/moveMaterial", method = RequestMethod.POST)
+    @ResponseBody
+    public void moveMaterial(@RequestParam Long farmId, @RequestParam Long fromWareHouseId, @RequestParam Long toWareHouseId,
+                             @RequestParam Long materialId, @RequestParam Double moveQuantity){
+        if(moveQuantity == null || moveQuantity <= 0){
+            throw new JsonResponseException("quantity.invalid");
+        }
+        DoctorBasicMaterial material = RespHelper.or500(doctorBasicMaterialReadService.findBasicMaterialById(materialId));
+        DoctorFarm farm = RespHelper.or500(doctorFarmReadService.findFarmById(farmId));
+        DoctorWareHouse consumeWarehouse = RespHelper.or500(doctorWareHouseReadService.findById(fromWareHouseId));
+        DoctorWareHouse toWarehouse = RespHelper.or500(doctorWareHouseReadService.findById(toWareHouseId));
+        DoctorMaterialInWareHouse materialInWareHouse = RespHelper.or500(doctorMaterialInWareHouseReadService.queryByMaterialWareHouseIds(farmId, materialId, fromWareHouseId));
+        Long userId = UserUtil.getUserId();
+        String userName = RespHelper.or500(doctorUserProfileReadService.findProfileByUserIds(Lists.newArrayList(userId))).get(0).getRealName();
 
+        DoctorMaterialConsumeProviderDto diaochu = DoctorMaterialConsumeProviderDto.builder()
+                .actionType(DoctorMaterialConsumeProvider.EVENT_TYPE.DIAOCHU.getValue()).type(material.getType())
+                .farmId(farmId).farmName(farm.getName())
+                .materialTypeId(materialId).materialName(material.getName())
+                .wareHouseId(fromWareHouseId).wareHouseName(consumeWarehouse.getWareHouseName())
+                .staffId(userId).staffName(userName)
+                .count(moveQuantity)
+                .unitName(materialInWareHouse.getUnitName()).unitGroupName(materialInWareHouse.getUnitGroupName())
+                .build();
+        DoctorMaterialConsumeProviderDto diaoru = DoctorMaterialConsumeProviderDto.builder()
+                .actionType(DoctorMaterialConsumeProvider.EVENT_TYPE.DIAORU.getValue()).type(material.getType())
+                .farmId(farmId).farmName(farm.getName())
+                .materialTypeId(materialId).materialName(material.getName())
+                .wareHouseId(toWareHouseId).wareHouseName(toWarehouse.getWareHouseName())
+                .staffId(userId).staffName(userName)
+                .count(moveQuantity)
+                .unitName(materialInWareHouse.getUnitName()).unitGroupName(materialInWareHouse.getUnitGroupName())
+                .build();
+        RespHelper.or500(doctorMaterialInWareHouseWriteService.moveMaterial(diaochu, diaoru));
     }
 }

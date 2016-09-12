@@ -40,8 +40,9 @@ public class DoctorProviderEventHandler implements IHandler{
     @Override
     public void handle(DoctorMaterialConsumeProviderDto dto, Map<String, Object> context) throws RuntimeException {
         DoctorMaterialConsumeProvider.EVENT_TYPE eventType = DoctorMaterialConsumeProvider.EVENT_TYPE.from(dto.getActionType());
-        // 常规添加时, 必须有单价
-        if((dto.getUnitPrice() == null || dto.getUnitPrice() <= 0) && eventType == DoctorMaterialConsumeProvider.EVENT_TYPE.PROVIDER){
+        // 常规添加时, 必须有单价, 单价由用户自行填写; 调入时单价由系统计算
+        if((dto.getUnitPrice() == null || dto.getUnitPrice() <= 0)
+                && (eventType == DoctorMaterialConsumeProvider.EVENT_TYPE.PROVIDER || eventType == DoctorMaterialConsumeProvider.EVENT_TYPE.DIAORU)){
             throw new ServiceException("price.invalid");
         }
         // 盘盈, 查询最近一次入库单价
@@ -52,10 +53,6 @@ public class DoctorProviderEventHandler implements IHandler{
             }else{
                 throw new ServiceException("warehouse.has.no.provider.event"); // 仓库没有入库事件
             }
-        }
-        // 调入单价需要加权平均
-        if(eventType == DoctorMaterialConsumeProvider.EVENT_TYPE.DIAORU){
-            throw new ServiceException("请计算单价");
         }
         DoctorMaterialConsumeProvider materialCP = DoctorMaterialConsumeProvider.buildFromDto(dto);
         doctorMaterialConsumeProviderDao.create(materialCP);

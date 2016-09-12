@@ -74,9 +74,9 @@ public class DoctorMaterialInWareHouseWriteServiceImpl implements DoctorMaterial
     }
 
     @Override
-    public Response moveMaterial(){
+    public Response moveMaterial(DoctorMaterialConsumeProviderDto diaochuDto, DoctorMaterialConsumeProviderDto diaoruDto){
         try{
-
+            materialInWareHouseManager.moveMaterial(diaochuDto, diaoruDto);
             return Response.ok();
         }catch(RuntimeException e){
             return Response.fail(e.getMessage());

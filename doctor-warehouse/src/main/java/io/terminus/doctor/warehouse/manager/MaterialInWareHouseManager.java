@@ -153,13 +153,13 @@ public class MaterialInWareHouseManager {
     }
 
     @Transactional
-    public void moveMaterial(){
+    public void moveMaterial(DoctorMaterialConsumeProviderDto diaochuDto, DoctorMaterialConsumeProviderDto diaoruDto){
         // 先调出
-        DoctorMaterialConsumeProviderDto consumeDto = null;
-        consumeMaterialInner(consumeDto);
+        Long diaochuEventId = consumeMaterialInner(diaochuDto);
+        DoctorMaterialConsumeProvider diaochuEvent = doctorMaterialConsumeProviderDao.findById(diaochuEventId);
         // 然后调入
-        DoctorMaterialConsumeProviderDto provideDto = null;
-        providerMaterialInWareHouseInner(provideDto);
+        diaoruDto.setUnitPrice(diaochuEvent.getUnitPrice());
+        providerMaterialInWareHouseInner(diaoruDto);
     }
 
     /**

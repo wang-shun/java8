@@ -31,7 +31,7 @@ public interface DoctorMaterialInWareHouseWriteService {
      * 仓库间物资转移, 即调拨
      * @return
      */
-    Response moveMaterial();
+    Response moveMaterial(DoctorMaterialConsumeProviderDto diaochuDto, DoctorMaterialConsumeProviderDto diaoruDto);
 
     /**
      * 删除对应的仓库中某种物料信息
