@@ -110,24 +110,29 @@ public class SowNeedWeanProducer extends AbstractJobProducer {
                 pigs = pigs.stream().filter(pigDto -> Objects.equals(PigStatus.FEED.getKey(), pigDto.getStatus())).collect(Collectors.toList());
                 // 处理每个猪
                 for (int j = 0; pigs != null && j < pigs.size(); j++) {
-                    DoctorPigInfoDto pigDto = pigs.get(j);
-                    //根据用户拥有的猪舍权限过滤拥有user
-                    List<SubUser> sUsers = filterSubUserBarnId(subUsers, pigDto.getBarnId());
-                    // 母猪的updatedAt与当前时间差 (天)
-                    DoctorPigEvent doctorPigEvent = getPigEventByEventType(pigDto.getDoctorPigEvents(), PigEvent.FARROWING.getKey());
-                    Double timeDiff = getTimeDiff(new DateTime(doctorPigEvent.getEventAt()));
-                    // 1. 哺乳状态日期判断 -> id:1
-                    if (!isMessage && Objects.equals(ruleTemplate.getType(), DoctorMessageRuleTemplate.Type.WARNING.getValue())) {
-                        // 记录每只猪的消息提醒
-                        recordPigMessage(pigDto, PigEvent.WEAN, getRuleTimeDiff(ruleValueMap.get(1), timeDiff), ruleValueMap.get(1).getValue().intValue(),
-                                PigStatus.FEED);
+                    try {
+                        DoctorPigInfoDto pigDto = pigs.get(j);
+                        //根据用户拥有的猪舍权限过滤拥有user
+                        List<SubUser> sUsers = filterSubUserBarnId(subUsers, pigDto.getBarnId());
+                        // 母猪的updatedAt与当前时间差 (天)
+                        DoctorPigEvent doctorPigEvent = getPigEventByEventType(pigDto.getDoctorPigEvents(), PigEvent.FARROWING.getKey());
+                        Double timeDiff = getTimeDiff(new DateTime(doctorPigEvent.getEventAt()));
+                        // 1. 哺乳状态日期判断 -> id:1
+                        if (!isMessage && Objects.equals(ruleTemplate.getType(), DoctorMessageRuleTemplate.Type.WARNING.getValue())) {
+                            // 记录每只猪的消息提醒
+                            recordPigMessage(pigDto, PigEvent.WEAN, getRuleTimeDiff(ruleValueMap.get(1), timeDiff), ruleValueMap.get(1).getValue().intValue(),
+                                    PigStatus.FEED);
+                        }
+
+                        if (isMessage && checkRuleValue(ruleValueMap.get(1), timeDiff)) {
+                            pigDto.setEventDate(doctorPigEvent.getEventAt());
+                            pigDto.setOperatorName(doctorPigEvent.getOperatorName());
+                            messages.addAll(getMessage(pigDto, rule.getChannels(), ruleRole, sUsers, timeDiff, rule.getUrl()));
+                        }
+                    } catch (Exception e) {
+                        log.error("[sowEliminateProduce]-handle.message.failed");
                     }
 
-                    if (isMessage && checkRuleValue(ruleValueMap.get(1), timeDiff)) {
-                        pigDto.setEventDate(doctorPigEvent.getEventAt());
-                        pigDto.setOperatorName(doctorPigEvent.getOperatorName());
-                        messages.addAll(getMessage(pigDto, rule.getChannels(), ruleRole, sUsers, timeDiff, rule.getUrl()));
-                    }
                 }
             }
         }
