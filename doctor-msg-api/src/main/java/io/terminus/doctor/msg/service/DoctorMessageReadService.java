@@ -95,7 +95,7 @@ public interface DoctorMessageReadService {
     Response<List<DoctorMessage>> findAppPushMessage();
 
     /**
-     * 根据条件获取business列表数量
+     * 根据条件获取businessId列表
      * @param criteria
      * @return
      */

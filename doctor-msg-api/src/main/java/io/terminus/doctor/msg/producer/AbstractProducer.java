@@ -184,7 +184,9 @@ public abstract class AbstractProducer implements IProducer {
                     Category.SOW_NEEDWEAN.getKey(),
                     Category.SOW_BREEDING.getKey(),
                     Category.SOW_BIRTHDATE.getKey(),
-                    Category.SOW_PREGCHECK.getKey());
+                    Category.SOW_PREGCHECK.getKey(),
+                    Category.SOW_BACK_FAT.getKey(),
+                    Category.SOW_ELIMINATE.getKey());
             RespHelper.orServEx(doctorMessageRuleReadService.findMessageRulesByTplId(ruleTemplate.getId())).forEach(doctorMessageRule -> {
                 if (ofCategories.contains(doctorMessageRule.getCategory())) {
                     recordPigMessages(doctorMessageRule);

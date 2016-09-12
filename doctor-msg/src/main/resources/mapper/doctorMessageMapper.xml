@@ -188,8 +188,14 @@
         )
     </select>
 
-    <select id="businessList" parameterType="map" resultType="long">
+    <select id="businessIdList" parameterType="map" resultType="long">
         SELECT DISTINCT business_id
+        FROM <include refid="tb"/>
+        <include refid="criteria"/>
+    </select>
+
+    <select id="sendList" parameterType="map" resultMap="DoctorMessageMap">
+        SELECT <include refid="cols_all"/>
         FROM <include refid="tb"/>
         <include refid="criteria"/>
     </select>

@@ -171,6 +171,12 @@ public class DoctorPigEvents {
         return  RespHelper.or500(doctorPigEventReadService.querySowParityCount(pigId));
     }
 
+    /**
+     * 同步流程数据
+     * @param key
+     * @param businessId
+     * @return
+     */
     @RequestMapping(value = "/updateData", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Boolean updateData(@RequestParam("key") String key, @RequestParam(value = "businessId", required = false) Long businessId){

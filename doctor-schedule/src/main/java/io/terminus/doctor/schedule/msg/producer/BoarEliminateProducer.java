@@ -1,10 +1,7 @@
 package io.terminus.doctor.schedule.msg.producer;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.api.client.util.Maps;
-import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
-import io.terminus.common.utils.Splitters;
 import io.terminus.doctor.common.constants.JacksonType;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dto.DoctorPigInfoDto;
@@ -27,7 +24,6 @@ import io.terminus.doctor.msg.service.DoctorMessageRuleRoleReadService;
 import io.terminus.doctor.msg.service.DoctorMessageRuleTemplateReadService;
 import io.terminus.doctor.msg.service.DoctorMessageTemplateReadService;
 import io.terminus.doctor.msg.service.DoctorMessageWriteService;
-import io.terminus.doctor.schedule.msg.producer.factory.PigDtoFactory;
 import io.terminus.doctor.user.service.DoctorUserDataPermissionReadService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -109,44 +105,44 @@ public class BoarEliminateProducer extends AbstractJobProducer {
                     List<SubUser> sUsers = filterSubUserBarnId(subUsers, pigDto.getBarnId());
                     // 公猪的updatedAt与当前时间差 (天)
                     Double timeDiff = getTimeDiff(new DateTime(pigDto.getBirthDay()));
+                    if (pigDto.getDoctorPigEvents() == null){
+                        break;
+                    }
+                    //取出最近一次的采精事件
+                    DoctorPigEvent doctorPigEvent = getPigEventByEventType(pigDto.getDoctorPigEvents(), PigEvent.SEMEN.getKey());
                     ruleValueMap.keySet().forEach(key -> {
-                        //取出最近一次的采精事件
-                        DoctorPigEvent doctorPigEvent = getPigEventByEventType(pigDto.getDoctorPigEvents(), PigEvent.SEMEN.getKey());
-                        if (ruleValueMap.get(key) != null) {
-                            Boolean isSend = false;
-                            RuleValue ruleValue = ruleValueMap.get(key);
-                            if (key == 1) {
-                                //日龄大于或等于预定值
-                                isSend = checkRuleValue(ruleValue, timeDiff);
-                            } else if (key == 2) {
-                                if (doctorPigEvent != null && StringUtils.isNotBlank(doctorPigEvent.getExtra())) {
-                                    try {
-                                        Map<String, Object> extraMap = MAPPER.readValue(doctorPigEvent.getExtra(), JacksonType.MAP_OF_OBJECT);
-                                            Double semenActive = (double) extraMap.get("semenActive");
-                                            //精液重量小于预定值
-                                            isSend = semenActive < ruleValue.getValue().doubleValue();
-                                    } catch (Exception e) {
-                                        log.error("[BoarEliminateProducer].get.semenActive.fail, event{}",doctorPigEvent);
-                                    }
-
-                                }
-                            } else if (key == 3) {
-                                if (doctorPigEvent != null && StringUtils.isNotBlank(doctorPigEvent.getExtra())) {
-                                    try {
-                                        Map<String, Object> extraMap = MAPPER.readValue(doctorPigEvent.getExtra(), JacksonType.MAP_OF_OBJECT);
-                                        Double semenActive = (double) extraMap.get("semenWeight");
-                                        //精液重量小于预定值
-                                        isSend = semenActive < ruleValue.getValue().doubleValue();
-                                    } catch (Exception e) {
-                                        log.error("[BoarEliminateProducer].get.semenWeight.fail, event{}", doctorPigEvent);
-                                    }
-
+                        Boolean isSend = false;
+                        RuleValue ruleValue = ruleValueMap.get(key);
+                        if (key == 1) {
+                            //日龄大于或等于预定值
+                            isSend = checkRuleValue(ruleValue, timeDiff);
+                        } else if (key == 2) {
+                            if (doctorPigEvent != null && StringUtils.isNotBlank(doctorPigEvent.getExtra())) {
+                                try {
+                                    Map<String, Object> extraMap = MAPPER.readValue(doctorPigEvent.getExtra(), JacksonType.MAP_OF_OBJECT);
+                                    Double semenActive = (double) extraMap.get("semenActive");
+                                    //精液重量小于预定值
+                                    isSend = semenActive < ruleValue.getValue().doubleValue();
+                                } catch (Exception e) {
+                                    log.error("[BoarEliminateProducer].get.semenActive.fail, event{}", doctorPigEvent);
                                 }
                             }
-                            if (isSend) {
-                                pigDto.setReason(ruleValue.getDescribe() + ruleValue.getValue().toString());
-                                messages.addAll(getMessage(pigDto, rule.getChannels(), ruleRole, sUsers, timeDiff, rule.getUrl()));
+                        } else if (key == 3) {
+                            if (doctorPigEvent != null && StringUtils.isNotBlank(doctorPigEvent.getExtra())) {
+                                try {
+                                    Map<String, Object> extraMap = MAPPER.readValue(doctorPigEvent.getExtra(), JacksonType.MAP_OF_OBJECT);
+                                    Double semenActive = (double) extraMap.get("semenWeight");
+                                    //精液重量小于预定值
+                                    isSend = semenActive < ruleValue.getValue().doubleValue();
+                                } catch (Exception e) {
+                                    log.error("[BoarEliminateProducer].get.semenWeight.fail, event{}", doctorPigEvent);
+                                }
+
                             }
+                        }
+                        if (isSend) {
+                            pigDto.setReason(ruleValue.getDescribe() + ruleValue.getValue().toString());
+                            messages.addAll(getMessage(pigDto, rule.getChannels(), ruleRole, sUsers, timeDiff, rule.getUrl()));
                         }
                     });
 

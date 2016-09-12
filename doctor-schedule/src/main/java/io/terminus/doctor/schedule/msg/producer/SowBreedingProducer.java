@@ -8,6 +8,7 @@ import io.terminus.doctor.event.enums.DataRange;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.model.DoctorPig;
+import io.terminus.doctor.event.service.DoctorBarnReadService;
 import io.terminus.doctor.event.service.DoctorPigReadService;
 import io.terminus.doctor.event.service.DoctorPigWriteService;
 import io.terminus.doctor.msg.dto.Rule;
@@ -48,6 +49,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class SowBreedingProducer extends AbstractJobProducer {
 
+    private  DoctorBarnReadService doctorBarnReadService;
     @Autowired
     public SowBreedingProducer(DoctorMessageRuleTemplateReadService doctorMessageRuleTemplateReadService,
                                DoctorMessageRuleReadService doctorMessageRuleReadService,
@@ -57,7 +59,8 @@ public class SowBreedingProducer extends AbstractJobProducer {
                                DoctorPigReadService doctorPigReadService,
                                DoctorPigWriteService doctorPigWriteService,
                                DoctorMessageTemplateReadService doctorMessageTemplateReadService,
-                               DoctorUserDataPermissionReadService doctorUserDataPermissionReadService) {
+                               DoctorUserDataPermissionReadService doctorUserDataPermissionReadService,
+                               DoctorBarnReadService doctorBarnReadService) {
         super(doctorMessageTemplateReadService,
                 doctorMessageRuleTemplateReadService,
                 doctorMessageRuleReadService,
@@ -68,6 +71,7 @@ public class SowBreedingProducer extends AbstractJobProducer {
                 doctorPigWriteService,
                 doctorUserDataPermissionReadService,
                 Category.SOW_BREEDING);
+        this.doctorBarnReadService = doctorBarnReadService;
     }
 
     @Override
@@ -122,11 +126,12 @@ public class SowBreedingProducer extends AbstractJobProducer {
                         // 获取配置的天数, 并判断
                         // 记录每只猪的消息提醒
                         if (!isMessage && Objects.equals(ruleTemplate.getType(), DoctorMessageRuleTemplate.Type.WARNING.getValue())) {
-                            recordPigMessage(pigDto, PigEvent.MATING, ruleValueMap.get(1).getLeftValue() - timeDiff, ruleValueMap.get(1).getLeftValue().intValue(),
+                            recordPigMessage(pigDto, PigEvent.MATING, getRuleTimeDiff(ruleValueMap.get(1), timeDiff), ruleValueMap.get(1).getLeftValue().intValue(),
                                     PigStatus.Wean, PigStatus.KongHuai, PigStatus.Entry);
                         }
 
                         if (isMessage && checkRuleValue(ruleValueMap.get(1), timeDiff)) {
+                            pigDto.setOperatorName(RespHelper.orServEx(doctorBarnReadService.findBarnById(pigDto.getBarnId())).getStaffName());
                             messages.addAll(getMessage(pigDto, rule.getChannels(), ruleRole, sUsers, timeDiff, rule.getUrl()));
                         }
 

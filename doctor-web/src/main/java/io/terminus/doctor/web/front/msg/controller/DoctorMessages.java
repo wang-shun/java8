@@ -6,6 +6,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import io.terminus.common.model.Paging;
+import io.terminus.common.utils.Arguments;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.constants.JacksonType;
@@ -111,8 +112,6 @@ public class DoctorMessages {
                     }
                 }
                 doctorMessage.setUrl(doctorMessage.getUrl().concat(urlPart + doctorMessage.getBusinessId() + "&farmId=" + doctorMessage.getFarmId()));
-                doctorMessage.setStatus(DoctorMessage.Status.READED.getValue());
-                doctorMessageWriteService.updateMessage(doctorMessage);
             });
         }
         msgDto.setPaging(paging);
@@ -151,22 +150,29 @@ public class DoctorMessages {
 
     /**
      * 查询消息详情
-     * @param id    消息id
+     * @param templateId
+     * @param farmId
      * @return
      */
     @RequestMapping(value = "/message/detail", method = RequestMethod.GET)
-    public DoctorMessage findMessageDetail(@RequestParam("id") Long id) {
-        DoctorMessage message = RespHelper.or500(doctorMessageReadService.findMessageById(id));
-        if (message != null) {
+    public Boolean findMessageDetail(@RequestParam("templateId") Long templateId, @RequestParam("farmId") Long farmId, @RequestParam("businessId") Long businessId) {
+        Map<String, Object> criteriaMap = Maps.newHashMap();
+        criteriaMap.put("businessId", businessId);
+        criteriaMap.put("templateId", templateId);
+        criteriaMap.put("farmId", farmId);
+        criteriaMap.put("isExpired", DoctorMessage.IsExpired.NOTEXPIRED.getValue());
+        criteriaMap.put("userId", UserUtil.getCurrentUser().getId());
+        criteriaMap.put("channel", Rule.Channel.SYSTEM.getValue());
+        criteriaMap.put("statuses", ImmutableList.of(DoctorMessage.Status.NORMAL.getValue(), DoctorMessage.Status.SENDED.getValue()));
+        List<DoctorMessage> messages = RespHelper.or500(doctorMessageReadService.findMessageByCriteria(criteriaMap));
+        if (!Arguments.isNullOrEmpty(messages)) {
             // 如果消息是未读, 将消息设置为已读
-            if (Objects.equals(message.getStatus(), DoctorMessage.Status.NORMAL.getValue())) {
-                message.setStatus(DoctorMessage.Status.READED.getValue());
-                doctorMessageWriteService.updateMessage(message);
-            }
-            // 查询未读消息的数量
-            //message.setNoReadCount(RespHelper.or500(doctorMessageReadService.findNoReadCount(UserUtil.getUserId())));
+            messages.forEach(doctorMessage -> {
+                doctorMessage.setStatus(DoctorMessage.Status.READED.getValue());
+                doctorMessageWriteService.updateMessage(doctorMessage);
+            });
         }
-        return message;
+        return true;
     }
 
     /**
@@ -286,6 +292,7 @@ public class DoctorMessages {
                         Map<String, Object> dataMap = JsonMapper.JSON_NON_DEFAULT_MAPPER.getMapper().readValue(doctorMessage.getData(), JacksonType.MAP_OF_OBJECT);
                         pigCount += (Integer) dataMap.get("quantity");
                     } catch (Exception e) {
+                        log.error("get.rule.pig.count.failed");
                     }
                 }
 

@@ -123,7 +123,7 @@ public class SowPregCheckProducer extends AbstractJobProducer {
                     // 1. 妊娠检查判断 -> id:1
                     if (!isMessage && Objects.equals(ruleTemplate.getType(), DoctorMessageRuleTemplate.Type.WARNING.getValue())) {
                         // 记录每只猪的消息提醒
-                        recordPigMessage(pigDto, PigEvent.PREG_CHECK, ruleValueMap.get(1).getLeftValue() - timeDiff, ruleValueMap.get(1).getLeftValue().intValue(),
+                        recordPigMessage(pigDto, PigEvent.PREG_CHECK, getRuleTimeDiff(ruleValueMap.get(1), timeDiff), ruleValueMap.get(1).getValue().intValue(),
                                 PigStatus.Mate);
                     }
                     if (isMessage && checkRuleValue(ruleValueMap.get(1), timeDiff)) {

@@ -64,7 +64,20 @@ public class DoctorMessageDao extends MyBatisDao<DoctorMessage> {
      * @return
      */
     public List<Long> findBusinessListByCriteria(Map<String, Object> criteria){
-        return getSqlSession().selectList(sqlId("businessList"), criteria);
+        return getSqlSession().selectList(sqlId("businessIdList"), criteria);
+    }
+
+    /**
+     * 获取发送消息
+     * @param criteria
+     * @return
+     */
+    public List<DoctorMessage> sendMessageList(Map<String, Object> criteria){
+        return getSqlSession().selectList(sqlId("sendList"), criteria);
+    }
+
+    public List<Long> findUserIdList(DoctorMessage doctorMessage){
+        return getSqlSession().selectList(sqlId("userIdList"), doctorMessage);
     }
 
 }

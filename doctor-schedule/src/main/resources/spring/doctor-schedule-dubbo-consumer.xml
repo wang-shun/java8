@@ -41,6 +41,7 @@
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.event.service.DoctorPigWriteService" id="doctorPigWriteService" check="false"/>
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.event.service.DoctorPigEventReadService" id="doctorPigEventReadService" check="false"/>
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.event.service.DoctorGroupReadService" id="doctorGroupReadService" check="false"/>
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.event.service.DoctorBarnReadService" id="doctorBarnReadService" check="false"/>
 
     <!-- warehouse api -->
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.warehouse.service.DoctorMaterialConsumeAvgReadService" id="doctorMaterialConsumeAvgReadService" check="false"/>
