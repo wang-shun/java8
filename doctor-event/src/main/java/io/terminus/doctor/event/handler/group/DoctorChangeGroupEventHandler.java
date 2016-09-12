@@ -57,9 +57,10 @@ public class DoctorChangeGroupEventHandler extends DoctorAbstractGroupEventHandl
     @Override
     protected <I extends BaseGroupInput> void handleEvent(DoctorGroup group, DoctorGroupTrack groupTrack, I input) {
         DoctorGroupSnapShotInfo oldShot = getOldSnapShotInfo(group, groupTrack);
+        log.info("ddDoctorChangeGroupInput:{}", input);
         DoctorChangeGroupInput change = (DoctorChangeGroupInput) input;
 
-        log.info("DoctorChangeGroupInput:{}", change);
+        log.info("ddDoctorChangeGroupInput:{}", change);
         checkQuantity(groupTrack.getQuantity(), change.getQuantity());
         checkQuantityEqual(change.getQuantity(), change.getBoarQty(), change.getSowQty());
         checkSalePrice(change.getChangeTypeId(), change.getPrice(), change.getBaseWeight(), change.getOverPrice());
@@ -168,7 +169,8 @@ public class DoctorChangeGroupEventHandler extends DoctorAbstractGroupEventHandl
         event.setOverPrice(change.getOverPrice());  //超出价格(分/kg)
         if (change.getChangeTypeId() == DoctorBasicEnums.SALE.getId()) {
             //销售总额(分) = 单价 * 数量 + 超出价格 * 超出重量
-            event.setAmount((long) (change.getPrice() * change.getQuantity() + change.getOverPrice() * (change.getWeight() - change.getBaseWeight())));
+            event.setAmount((long) (change.getPrice() * change.getQuantity() +
+                    MoreObjects.firstNonNull(change.getOverPrice(), 0L) * (change.getWeight() - MoreObjects.firstNonNull(change.getBaseWeight(), 0))));
         }
     }
 }
