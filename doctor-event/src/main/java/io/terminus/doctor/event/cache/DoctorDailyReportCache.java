@@ -194,6 +194,9 @@ public class DoctorDailyReportCache {
         sale.setSow(doctorKpiDao.getSaleSow(farmId, startAt, endAt));
         sale.setNursery(doctorKpiDao.getSaleNursery(farmId, startAt, endAt));
         sale.setFatten(doctorKpiDao.getSaleFatten(farmId, startAt, endAt));
+        sale.setFattenPrice(doctorKpiDao.getGroupSaleFattenPrice(farmId, startAt, endAt));
+        sale.setBasePrice10(doctorKpiDao.getGroupSaleBasePrice10(farmId, startAt, endAt));
+        sale.setBasePrice15(doctorKpiDao.getGroupSaleBasePrice15(farmId, startAt, endAt));
 
         //断奶
         DoctorWeanDailyReport wean = new DoctorWeanDailyReport();

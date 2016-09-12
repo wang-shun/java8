@@ -66,4 +66,15 @@ public class DoctorChangeGroupEvent extends BaseGroupEvent implements Serializab
      * 其中:母猪数
      */
     private Integer sowQty;
+
+    /**
+     * 基础重量
+     * @see io.terminus.doctor.event.enums.SaleBaseWeight
+     */
+    private Integer baseWeight;
+
+    /**
+     * 超出价格(分/kg)
+     */
+    private Long overPrice;
 }

@@ -276,3 +276,7 @@ Alter TABLE doctor_messages ADD COLUMN is_expired SMALLINT (2) DEFAULT NULL COMM
 alter table doctor_pig_events
 add column `operator_id` bigint(20) DEFAULT NULL COMMENT '操作人id' after remark,
 add column `operator_name` varchar(64) DEFAULT NULL COMMENT '操作人' after operator_id;
+
+-- 2016-09-12 增加猪群销售字段
+ALTER TABLE doctor_group_events ADD COLUMN base_weight SMALLINT(6) DEFAULT NULL COMMENT '销售基础重量: 10, 15(kg)' AFTER avg_weight;
+ALTER TABLE doctor_group_events ADD COLUMN over_price DOUBLE DEFAULT NULL COMMENT '超出价格(分/kg)' AFTER amount;

@@ -141,5 +141,8 @@ public class DoctorDailyReportDto implements Serializable {
         //销售
         this.sale.setNursery(this.sale.getNursery() + report.getSale().getNursery());
         this.sale.setFatten(this.sale.getFatten() + report.getSale().getFatten());
+        this.sale.setFattenPrice(report.getSale().getFattenPrice() == 0L? this.sale.getFattenPrice() : report.getSale().getFattenPrice());
+        this.sale.setBasePrice10(report.getSale().getBasePrice10() == 0L? this.sale.getBasePrice10() : report.getSale().getBasePrice10());
+        this.sale.setBasePrice15(report.getSale().getBasePrice15() == 0L? this.sale.getBasePrice15() : report.getSale().getBasePrice15());
     }
 }

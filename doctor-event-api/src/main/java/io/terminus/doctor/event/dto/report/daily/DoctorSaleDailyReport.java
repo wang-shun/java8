@@ -34,6 +34,21 @@ public class DoctorSaleDailyReport implements Serializable {
      */
     private double fatten;
 
+    /**
+     * 10kg基础价格
+     */
+    private long basePrice10;
+
+    /**
+     * 15kg基础价格
+     */
+    private long basePrice15;
+
+    /**
+     * 育肥猪单价
+     */
+    private long fattenPrice;
+
     public void addBoarSowCount(DoctorSaleDailyReport doctorSaleDailyReport){
         this.boar += doctorSaleDailyReport.getBoar();
         this.sow += doctorSaleDailyReport.getSow();

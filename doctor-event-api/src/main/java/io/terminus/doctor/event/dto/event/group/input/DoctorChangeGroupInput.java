@@ -68,7 +68,7 @@ public class DoctorChangeGroupInput extends BaseGroupInput implements Serializab
     private String breedName;
 
     /**
-     * 单价(分)
+     * 单价(分)(基础价)
      */
     @Min(value = 0L, message = "price.gt.0")
     private Long price;
@@ -86,6 +86,21 @@ public class DoctorChangeGroupInput extends BaseGroupInput implements Serializab
 
     private String customerName;
 
+    //////////////////////////////////////
+
+    /**
+     * 基础重量
+     * @see io.terminus.doctor.event.enums.SaleBaseWeight
+     */
+    private Integer baseWeight;
+
+    /**
+     * 超出价格(分/kg)
+     */
+    @Min(value = 0L, message = "price.gt.0")
+    private Long overPrice;
+
+
     @Override
     public Map<String, String> descMap() {
         Map<String, String> map = new HashMap<>();
@@ -99,19 +114,25 @@ public class DoctorChangeGroupInput extends BaseGroupInput implements Serializab
             map.put("猪只数", quantity.toString());
         }
         if(weight != null){
-            map.put("总活体重（Kg）", weight.toString());
+            map.put("重量(kg)", weight.toString());
         }
         if(breedName != null){
             map.put("品种", breedName);
         }
         if(price != null){
-            map.put("单价", Long.valueOf(price / 100).toString());
+            map.put("单价(元/kg)", Long.valueOf(price / 100).toString());
         }
         if(amount != null){
-            map.put("金额", Long.valueOf(amount / 100).toString());
+            map.put("金额(元)", Long.valueOf(amount / 100).toString());
         }
         if(customerName != null){
             map.put("客户", customerName);
+        }
+        if(baseWeight != null){
+            map.put("基础重量", baseWeight.toString() + "KG");
+        }
+        if(overPrice != null){
+            map.put("超出价格(元/kg)", Long.valueOf(overPrice / 100).toString());
         }
         return map;
     }
