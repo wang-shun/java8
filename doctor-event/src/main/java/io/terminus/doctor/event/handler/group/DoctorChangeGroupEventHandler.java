@@ -162,11 +162,10 @@ public class DoctorChangeGroupEventHandler extends DoctorAbstractGroupEventHandl
 
     //如果是销售事件, 记录价格与重量
     private void setSaleEvent(DoctorGroupEvent<DoctorChangeGroupEvent> event, DoctorChangeGroupInput change) {
+        event.setPrice(change.getPrice());          //销售单价(分)(基础价)
+        event.setBaseWeight(change.getBaseWeight());//基础重量
+        event.setOverPrice(change.getOverPrice());  //超出价格(分/kg)
         if (change.getChangeTypeId() == DoctorBasicEnums.SALE.getId()) {
-            event.setPrice(change.getPrice());          //销售单价(分)(基础价)
-            event.setBaseWeight(change.getBaseWeight());//基础重量
-            event.setOverPrice(change.getOverPrice());  //超出价格(分/kg)
-
             //销售总额(分) = 单价 * 数量 + 超出价格 * 超出重量
             event.setAmount((long) (change.getPrice() * change.getQuantity() + change.getOverPrice() * (change.getWeight() - change.getBaseWeight())));
         }
