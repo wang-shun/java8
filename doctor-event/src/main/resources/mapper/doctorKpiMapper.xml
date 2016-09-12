@@ -1028,7 +1028,8 @@
         FROM doctor_group_events
         WHERE
             change_type_id = 109 AND -- 变动类型是销售
-            pig_type = 3             -- 育肥猪
+            pig_type = 3 AND         -- 育肥猪
+            price != 0
             <include refid="criteria"/>
     </select>
 </mapper>
