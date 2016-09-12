@@ -124,8 +124,7 @@ public class SowBackFatProducer extends AbstractJobProducer {
                             }
                         } else {
                             if (getPigEventByEventType(pigDto.getDoctorPigEvents(), PigEvent.WEAN.getKey()) != null && filterPigCondition(pigDto, PigEvent.WEAN)) {
-
-                                timeDiff = getTimeDiff(getStatusDate(pigDto));
+                                timeDiff = getTimeDiff(new DateTime(getPigEventByEventType(pigDto.getDoctorPigEvents(), PigEvent.WEAN.getKey()).getEventAt()));
                                 isSend = true;
                             }
                         }
