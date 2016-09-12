@@ -70,11 +70,13 @@ public class DoctorChangeGroupEventHandler extends DoctorAbstractGroupEventHandl
         DoctorGroupEvent<DoctorChangeGroupEvent> event = dozerGroupEvent(group, GroupEventType.CHANGE, change);
         event.setQuantity(change.getQuantity());
         event.setAvgDayAge(groupTrack.getAvgDayAge());  //变动的日龄不需要录入, 直接取猪群的日龄
-        event.setWeight(change.getWeight());
+        event.setWeight(change.getWeight());            //总重
         event.setAvgWeight(EventUtil.getAvgWeight(change.getWeight(), change.getQuantity()));
         event.setChangeTypeId(changeEvent.getChangeTypeId());   //变动类型id
-        event.setPrice(change.getPrice());          //销售单价(分)
-        event.setAmount(change.getAmount());        //销售总额(分)
+
+        //销售相关
+        setSaleEvent(event, change);
+
         event.setExtraMap(changeEvent);
         doctorGroupEventDao.create(event);
 
@@ -155,6 +157,18 @@ public class DoctorChangeGroupEventHandler extends DoctorAbstractGroupEventHandl
             if (baseWeight == null) {
                 throw new ServiceException("weight.not.null");
             }
+        }
+    }
+
+    //如果是销售事件, 记录价格与重量
+    private void setSaleEvent(DoctorGroupEvent<DoctorChangeGroupEvent> event, DoctorChangeGroupInput change) {
+        if (change.getChangeTypeId() == DoctorBasicEnums.SALE.getId()) {
+            event.setPrice(change.getPrice());          //销售单价(分)(基础价)
+            event.setBaseWeight(change.getBaseWeight());//基础重量
+            event.setOverPrice(change.getOverPrice());  //超出价格(分/kg)
+
+            //销售总额(分) = 单价 * 数量 + 超出价格 * 超出重量
+            event.setAmount((long) (change.getPrice() * change.getQuantity() + change.getOverPrice() * (change.getWeight() - change.getBaseWeight())));
         }
     }
 }
