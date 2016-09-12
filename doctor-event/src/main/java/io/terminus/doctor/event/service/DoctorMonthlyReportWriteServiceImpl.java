@@ -126,11 +126,14 @@ public class DoctorMonthlyReportWriteServiceImpl implements DoctorMonthlyReportW
         dto.setFarrowHealth(doctorKpiDao.getDeliveryHealth(farmId, startAt, endAt));             //产键仔数
         dto.setFarrowWeak(doctorKpiDao.getDeliveryWeak(farmId, startAt, endAt));                 //产弱仔数
         dto.setFarrowDead(doctorKpiDao.getDeliveryDead(farmId, startAt, endAt));                 //产死仔数
+        dto.setFarrowJx(doctorKpiDao.getDeliveryJx(farmId, startAt, endAt));                     //产畸形数
         dto.setFarrowMny(doctorKpiDao.getDeliveryMny(farmId, startAt, endAt));                   //木乃伊数
+        dto.setFarrowBlack(doctorKpiDao.getDeliveryBlack(farmId, startAt, endAt));               //产黑胎数
         dto.setFarrowAll(doctorKpiDao.getDeliveryAll(farmId, startAt, endAt));                   //总产仔数
         dto.setFarrowAvgHealth(doctorKpiDao.getDeliveryHealthAvg(farmId, startAt, endAt));       //窝均健仔数
         dto.setFarrowAvgAll(doctorKpiDao.getDeliveryAllAvg(farmId, startAt, endAt));             //窝均产仔数
         dto.setFarrowAvgAlive(doctorKpiDao.getDeliveryLiveAvg(farmId, startAt, endAt));          //窝均活仔数
+        dto.setFarrowAvgWeak(doctorKpiDao.getDeliveryWeakAvg(farmId, startAt, endAt));           //窝均弱仔数
         dto.setFarrowAvgWeight(doctorKpiDao.getFarrowWeightAvg(farmId, startAt, endAt));         //分娩活仔均重(kg)
 
         //断奶情况

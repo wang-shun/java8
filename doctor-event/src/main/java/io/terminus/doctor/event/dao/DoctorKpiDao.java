@@ -86,10 +86,24 @@ public class DoctorKpiDao {
     }
 
     /**
+     * 产畸形数
+     */
+    public int getDeliveryJx(Long farmId, Date startAt, Date endAt) {
+        return this.sqlSession.selectOne(sqlId("deliveryJxCounts"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
+    }
+
+    /**
      * 产木乃伊数
      */
     public int getDeliveryMny(Long farmId, Date startAt, Date endAt) {
         return this.sqlSession.selectOne(sqlId("deliveryMnyCounts"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
+    }
+
+    /**
+     * 产黑胎数
+     */
+    public int getDeliveryBlack(Long farmId, Date startAt, Date endAt) {
+        return this.sqlSession.selectOne(sqlId("deliveryBlackCounts"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
     }
 
     /**
