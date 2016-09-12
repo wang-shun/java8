@@ -92,6 +92,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import static io.terminus.common.utils.Arguments.isNull;
 import static io.terminus.common.utils.Arguments.notEmpty;
 import static io.terminus.doctor.common.enums.PigType.FARROW_TYPES;
 import static io.terminus.doctor.event.enums.PregCheckResult.YANG;
@@ -148,6 +149,51 @@ public class DoctorMoveDataService {
         doctorPigDao.deleteByFarmId(farmId);
         doctorPigEventDao.deleteByFarmId(farmId);
         doctorPigTrackDao.deleteByFarmId(farmId);
+    }
+
+    /**
+     * 修正配种类型
+     */
+    @Transactional
+    public void updateMateType(DoctorFarm farm) {
+        //找到所有没有设置 mate_type 的配种事件
+        doctorPigEventDao.findByFarmIdAndKindAndEventTypes(farm.getId(), DoctorPig.PIG_TYPE.SOW.getKey(), Lists.newArrayList(PigEvent.MATING.getKey())).stream()
+                .filter(e -> isNull(e.getDoctorMateType()))
+                .forEach(event -> {
+                    List<DoctorPigEvent> pigEvents = doctorPigEventDao.queryAllEventsByPigId(event.getPigId());
+                    DoctorMatingType mateType = getPigMateType(pigEvents, event.getEventAt());
+
+                    DoctorPigEvent updateEvent = new DoctorPigEvent();
+                    updateEvent.setId(event.getId());
+                    updateEvent.setDoctorMateType(mateType.getKey());
+                    doctorPigEventDao.update(updateEvent);
+                });
+    }
+
+    //找出 maxDate(此事件配种日期) 之前的第一个妊娠检查事件, 根据妊检结果判定此次配种类型
+    private static DoctorMatingType getPigMateType(List<DoctorPigEvent> events, Date maxDate) {
+        events = events.stream()
+                .filter(e -> Objects.equals(e.getType(), PigEvent.PREG_CHECK.getKey()) && !e.getEventAt().after(maxDate))
+                .sorted((a, b) -> b.getEventAt().compareTo(a.getEventAt()))
+                .collect(Collectors.toList());
+
+        //如果前面没有妊检, 说明是第一次配种, 配后备
+        if (!notEmpty(events)) {
+            return DoctorMatingType.HP;
+        }
+
+        //阳性或者其他 => 配断奶
+        DoctorPigEvent event = events.get(0);
+        if (Objects.equals(event.getPregCheckResult(), PregCheckResult.FANQING.getKey())) {
+            return DoctorMatingType.FP;
+        }
+        if (Objects.equals(event.getPregCheckResult(), PregCheckResult.YING.getKey())) {
+            return DoctorMatingType.YP;
+        }
+        if (Objects.equals(event.getPregCheckResult(), PregCheckResult.LIUCHAN.getKey())) {
+            return DoctorMatingType.LPC;
+        }
+        return DoctorMatingType.DP;
     }
 
     /**
