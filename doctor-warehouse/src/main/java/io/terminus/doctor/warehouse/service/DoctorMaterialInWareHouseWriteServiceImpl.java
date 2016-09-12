@@ -74,6 +74,19 @@ public class DoctorMaterialInWareHouseWriteServiceImpl implements DoctorMaterial
     }
 
     @Override
+    public Response moveMaterial(){
+        try{
+
+            return Response.ok();
+        }catch(RuntimeException e){
+            return Response.fail(e.getMessage());
+        }catch(Exception e){
+            log.error("move material fail, cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("move.material.fail");
+        }
+    }
+
+    @Override
     public Response<Boolean> deleteMaterialInWareHouseInfo(Long materialInWareHouseId, Long userId, String userName) {
         try{
             return Response.ok(materialInWareHouseManager.deleteMaterialInWareHouse(materialInWareHouseId, userId, userName));

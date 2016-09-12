@@ -261,4 +261,15 @@ public class DoctorWareHouseEvents {
         }
         return RespHelper.or500(doctorMaterialInWareHouseWriteService.providerMaterialInfo(doctorMaterialConsumeProviderDto));
     }
+
+    /**
+     * 仓库间物料转移
+     * @param fromWareHouseId 来源仓库
+     * @param toWareHouseId 前往仓库
+     * @param materialId 物料id
+     * @param moveQuantity 调拨数量
+     */
+    public void moveMaterial(Long fromWareHouseId, Long toWareHouseId, Long materialId, Double moveQuantity){
+
+    }
 }

@@ -152,6 +152,16 @@ public class MaterialInWareHouseManager {
         return consumeMaterialInner(doctorMaterialConsumeProviderDto);
     }
 
+    @Transactional
+    public void moveMaterial(){
+        // 先调出
+        DoctorMaterialConsumeProviderDto consumeDto = null;
+        consumeMaterialInner(consumeDto);
+        // 然后调入
+        DoctorMaterialConsumeProviderDto provideDto = null;
+        providerMaterialInWareHouseInner(provideDto);
+    }
+
     /**
      * 用户信息的提供操作
      * @param doctorMaterialConsumeProviderDto

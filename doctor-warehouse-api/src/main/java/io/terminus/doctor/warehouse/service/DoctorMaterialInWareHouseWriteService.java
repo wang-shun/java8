@@ -28,6 +28,12 @@ public interface DoctorMaterialInWareHouseWriteService {
     Response<Long> providerMaterialInfo(@NotNull(message = "input.dto.empty") DoctorMaterialConsumeProviderDto doctorMaterialConsumeProviderDto);
 
     /**
+     * 仓库间物资转移, 即调拨
+     * @return
+     */
+    Response moveMaterial();
+
+    /**
      * 删除对应的仓库中某种物料信息
      * @param materialInWareHouseId
      * @param userId
