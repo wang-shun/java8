@@ -151,7 +151,7 @@ public abstract class AbstractJobProducer extends AbstractProducer {
      */
     protected DoctorPigEvent getMatingPigEvent(DoctorPigInfoDto pigDto) {
         try {
-            List<DoctorPigEvent> eventList = pigDto.getDoctorPigEvents().stream().sorted(Comparator.comparing(DoctorPigEvent::getEventAt).reversed()).collect(Collectors.toList());
+            List<DoctorPigEvent> eventList = pigDto.getDoctorPigEvents().stream().filter(doctorPigEvent -> doctorPigEvent.getEventAt() != null).sorted(Comparator.comparing(DoctorPigEvent::getEventAt).reversed()).collect(Collectors.toList());
             DoctorPigEvent doctorPigEvent = null;
             Boolean flag = false;
             for (DoctorPigEvent event : eventList) {
@@ -269,7 +269,7 @@ public abstract class AbstractJobProducer extends AbstractProducer {
     protected DoctorPigEvent getPigEventByEventType(List<DoctorPigEvent> events, Integer type) {
         try {
             if (!Arguments.isNullOrEmpty(events)) {
-                List<DoctorPigEvent> eventList = events.stream().sorted(Comparator.comparing(DoctorPigEvent::getEventAt).reversed()).collect(Collectors.toList());
+                List<DoctorPigEvent> eventList = events.stream().filter(doctorPigEvent -> doctorPigEvent.getEventAt() != null).sorted(Comparator.comparing(DoctorPigEvent::getEventAt).reversed()).collect(Collectors.toList());
                 for (DoctorPigEvent doctorPigEvent : eventList) {
                     if (Objects.equals(doctorPigEvent.getType(), type)) {
                         return doctorPigEvent;
