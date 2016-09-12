@@ -57,10 +57,8 @@ public class DoctorChangeGroupEventHandler extends DoctorAbstractGroupEventHandl
     @Override
     protected <I extends BaseGroupInput> void handleEvent(DoctorGroup group, DoctorGroupTrack groupTrack, I input) {
         DoctorGroupSnapShotInfo oldShot = getOldSnapShotInfo(group, groupTrack);
-        log.info("ddDoctorChangeGroupInput:{}", input);
         DoctorChangeGroupInput change = (DoctorChangeGroupInput) input;
 
-        log.info("ddDoctorChangeGroupInput:{}", change);
         checkQuantity(groupTrack.getQuantity(), change.getQuantity());
         checkQuantityEqual(change.getQuantity(), change.getBoarQty(), change.getSowQty());
         checkSalePrice(change.getChangeTypeId(), change.getPrice(), change.getBaseWeight(), change.getOverPrice());
