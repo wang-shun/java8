@@ -452,4 +452,25 @@ public class DoctorKpiDao {
     public int realTimeLiveStockFarrowSow(Long farmId, Date date) {
         return sqlSession.selectOne(sqlId("realTimeLiveStockFarrowSow"), ImmutableMap.of("farmId", farmId, "date", date));
     }
+
+    /**
+     * 猪群销售: 基础价格10kg的均价
+     */
+    public long getGroupSaleBasePrice10(Long farmId, Date startAt, Date endAt) {
+        return sqlSession.selectOne(sqlId("getGroupSaleBasePrice10"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
+    }
+
+    /**
+     * 猪群销售: 基础价格15kg的均价
+     */
+    public long getGroupSaleBasePrice15(Long farmId, Date startAt, Date endAt) {
+        return sqlSession.selectOne(sqlId("getGroupSaleBasePrice15"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
+    }
+
+    /**
+     * 猪群销售: 育肥猪均价
+     */
+    public long getGroupSaleFattenPrice(Long farmId, Date startAt, Date endAt) {
+        return sqlSession.selectOne(sqlId("getGroupSaleFattenPrice"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
+    }
 }
