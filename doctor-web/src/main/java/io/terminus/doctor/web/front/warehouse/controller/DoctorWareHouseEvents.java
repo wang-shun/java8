@@ -43,6 +43,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import javax.validation.Valid;
 import java.util.List;
 import java.util.Objects;
 
@@ -167,8 +168,12 @@ public class DoctorWareHouseEvents {
      */
     @RequestMapping(value = "/consume", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public Long createConsumeEvent(@RequestBody DoctorConsumeProviderInputDto dto){
-        DoctorMaterialConsumeProviderDto doctorMaterialConsumeProviderDto = null;
+    public Long createConsumeEvent(@RequestBody @Valid DoctorConsumeProviderInputDto dto){
+        DoctorMaterialConsumeProviderDto doctorMaterialConsumeProviderDto;
+        DoctorMaterialConsumeProvider.EVENT_TYPE eventType = DoctorMaterialConsumeProvider.EVENT_TYPE.from(dto.getEventType());
+        if(eventType == null || !eventType.isOut()){
+            throw new JsonResponseException("event.type.error");
+        }
         try{
 
             DoctorMaterialInWareHouse doctorMaterialInWareHouse = RespHelper.orServEx(doctorMaterialInWareHouseReadService.queryByMaterialWareHouseIds(
@@ -182,7 +187,7 @@ public class DoctorWareHouseEvents {
             DoctorBasicMaterial doctorBasicMaterial = RespHelper.orServEx(doctorBasicMaterialReadService.findBasicMaterialById(dto.getMaterialId()));
 
             doctorMaterialConsumeProviderDto = DoctorMaterialConsumeProviderDto.builder()
-                    .actionType(DoctorMaterialConsumeProvider.EVENT_TYPE.CONSUMER.getValue()).type(doctorMaterialInWareHouse.getType())
+                    .actionType(eventType.getValue()).type(doctorMaterialInWareHouse.getType())
                     .farmId(doctorMaterialInWareHouse.getFarmId()).farmName(doctorMaterialInWareHouse.getFarmName())
                     .wareHouseId(doctorMaterialInWareHouse.getWareHouseId()).wareHouseName(doctorMaterialInWareHouse.getWareHouseName())
                     .materialTypeId(doctorMaterialInWareHouse.getMaterialId()).materialName(doctorMaterialInWareHouse.getMaterialName())
@@ -206,10 +211,11 @@ public class DoctorWareHouseEvents {
      */
     @RequestMapping(value = "/provider", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public Long createProviderEvent(@RequestBody DoctorConsumeProviderInputDto dto){
+    public Long createProviderEvent(@RequestBody @Valid DoctorConsumeProviderInputDto dto){
         DoctorMaterialConsumeProviderDto doctorMaterialConsumeProviderDto;
-        if(dto.getUnitPrice() == null || dto.getUnitPrice() <= 0){
-            throw new JsonResponseException("price.invalid");
+        DoctorMaterialConsumeProvider.EVENT_TYPE eventType = DoctorMaterialConsumeProvider.EVENT_TYPE.from(dto.getEventType());
+        if(eventType == null || !eventType.isIn()){
+            throw new JsonResponseException("event.type.error");
         }
         try{
             DoctorWareHouseDto doctorWareHouseDto = RespHelper.orServEx(doctorWareHouseReadService.queryDoctorWareHouseById(dto.getWareHouseId()));
@@ -221,7 +227,7 @@ public class DoctorWareHouseEvents {
             DoctorFarm doctorFarm = RespHelper.orServEx(doctorFarmReadService.findFarmById(dto.getFarmId()));
 
             doctorMaterialConsumeProviderDto = DoctorMaterialConsumeProviderDto.builder()
-                    .actionType(DoctorMaterialConsumeProvider.EVENT_TYPE.PROVIDER.getValue()).type(doctorBasicMaterial.getType())
+                    .actionType(eventType.getValue()).type(doctorBasicMaterial.getType())
                     .farmId(doctorFarm.getId()).farmName(doctorFarm.getName())
                     .wareHouseId(doctorWareHouseDto.getWarehouseId()).wareHouseName(doctorWareHouseDto.getWarehouseName())
                     .materialTypeId(doctorBasicMaterial.getId()).materialName(doctorBasicMaterial.getName())

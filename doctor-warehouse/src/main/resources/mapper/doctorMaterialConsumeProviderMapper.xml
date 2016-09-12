@@ -130,12 +130,18 @@
     <select id="findLastEvent" parameterType="map" resultMap="DoctorMaterialConsumeProviderMap">
         select <include refid="cols_all" /> from <include refid="tb"/>
         where `ware_house_id` = #{wareHouseId}
+        <if test="materialId != null">
+            and material_id = #{materialId}
+        </if>
         <if test="eventType != null">
             and `event_type` = #{eventType}
         </if>
         and event_time = (
             select max(`event_time`) from <include refid="tb"/>
             where `ware_house_id` = #{wareHouseId}
+            <if test="materialId != null">
+                and material_id = #{materialId}
+            </if>
             <if test="eventType != null">
                 and `event_type` = #{eventType}
             </if>

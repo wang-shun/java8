@@ -2,6 +2,7 @@ package io.terminus.doctor.warehouse.service;
 
 import com.google.common.base.Throwables;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
+import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.warehouse.dto.DoctorMaterialConsumeProviderDto;
 import io.terminus.doctor.warehouse.manager.MaterialInWareHouseManager;
@@ -63,7 +64,7 @@ public class DoctorMaterialInWareHouseWriteServiceImpl implements DoctorMaterial
     public Response<Long> providerMaterialInfo(DoctorMaterialConsumeProviderDto doctorMaterialConsumeProviderDto){
         try{
             return Response.ok(materialInWareHouseManager.providerMaterialInWareHouse(doctorMaterialConsumeProviderDto));
-        }catch (IllegalStateException se){
+        }catch (IllegalStateException | ServiceException se){
             log.warn("provider illegal state fail, cause:{}", Throwables.getStackTraceAsString(se));
             return Response.fail(se.getMessage());
         }catch (Exception e){

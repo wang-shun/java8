@@ -107,9 +107,15 @@ public class DoctorMaterialConsumeProvider implements Serializable{
         }
     }
 
-    public static enum  EVENT_TYPE{
-        CONSUMER(1, "消耗事件"),
-        PROVIDER(2, "提供事件");
+    public enum  EVENT_TYPE{
+        CONSUMER(1, "领用"), // 出库
+        PROVIDER(2, "添加"), // 入库
+
+        PANKUI(3, "盘亏"), // 出库
+        PANYING(4, "盘盈"), // 入库
+
+        DIAOCHU(5, "调出"), // 出库
+        DIAORU(6, "调入"); // 入库
 
         @Getter
         private Integer value;
@@ -117,7 +123,7 @@ public class DoctorMaterialConsumeProvider implements Serializable{
         @Getter
         private String desc;
 
-        private EVENT_TYPE(Integer value, String desc){
+        EVENT_TYPE(Integer value, String desc){
             this.value = value;
             this.desc = desc;
         }
@@ -130,10 +136,26 @@ public class DoctorMaterialConsumeProvider implements Serializable{
             }
             return null;
         }
+
+        /**
+         * 是否为出库枚举
+         * @return
+         */
+        public boolean isOut(){
+            return CONSUMER == this || PANKUI == this || DIAOCHU == this;
+        }
+
+        /**
+         * 是否为入库枚举
+         * @return
+         */
+        public boolean isIn(){
+            return PROVIDER == this || PANYING == this || DIAORU == this;
+        }
     }
 
     public static DoctorMaterialConsumeProvider buildFromDto(DoctorMaterialConsumeProviderDto dto){
-        DoctorMaterialConsumeProvider result = DoctorMaterialConsumeProvider.builder()
+        return DoctorMaterialConsumeProvider.builder()
                 .type(dto.getType())
                 .farmId(dto.getFarmId()).farmName(dto.getFarmName())
                 .wareHouseId(dto.getWareHouseId()).wareHouseName(dto.getWareHouseName())
@@ -143,6 +165,5 @@ public class DoctorMaterialConsumeProvider implements Serializable{
                 .creatorId(dto.getStaffId()).creatorName(dto.getStaffName())
                 .build();
 
-        return result;
     }
 }

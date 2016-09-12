@@ -1,6 +1,8 @@
-package io.terminus.doctor.warehouse.handler.consume;
+package io.terminus.doctor.warehouse.handler.out;
 
 import com.google.common.collect.ImmutableMap;
+import io.terminus.common.utils.MapBuilder;
+import io.terminus.doctor.common.utils.Params;
 import io.terminus.doctor.warehouse.dao.DoctorMaterialConsumeProviderDao;
 import io.terminus.doctor.warehouse.dao.DoctorMaterialPriceInWareHouseDao;
 import io.terminus.doctor.warehouse.dto.DoctorMaterialConsumeProviderDto;
@@ -21,7 +23,7 @@ import java.util.Objects;
  * Created by yaoqijun.
  * Date:2016-05-30
  * Email:yaoqj@terminus.io
- * Descirbe: 创建消耗事件信息内容
+ * Descirbe: 创建出库事件信息内容
  */
 @Component
 public class DoctorConsumerEventHandler implements IHandler{
@@ -38,7 +40,8 @@ public class DoctorConsumerEventHandler implements IHandler{
 
     @Override
     public Boolean ifHandle(DoctorMaterialConsumeProviderDto dto, Map<String, Object> context) {
-        return dto.getActionType().equals(DoctorMaterialConsumeProvider.EVENT_TYPE.CONSUMER.getValue());
+        DoctorMaterialConsumeProvider.EVENT_TYPE eventType = DoctorMaterialConsumeProvider.EVENT_TYPE.from(dto.getActionType());
+        return eventType != null && eventType.isOut();
     }
 
     @Override
@@ -79,10 +82,10 @@ public class DoctorConsumerEventHandler implements IHandler{
         // 2. 保存数据
         DoctorMaterialConsumeProvider doctorMaterialConsumeProvider = DoctorMaterialConsumeProvider.buildFromDto(dto);
         if(Objects.equals(dto.getType(), WareHouseType.FEED.getKey())){
-            extraMap.putAll(ImmutableMap.of(
+            extraMap.putAll(Params.filterNullOrEmpty(MapBuilder.<String, Object>of().put(
                     "consumeDays", dto.getConsumeDays(),
                     "barnId", dto.getBarnId(),
-                    "barnName", dto.getBarnName()));
+                    "barnName", dto.getBarnName()).map()));
         }
         doctorMaterialConsumeProvider.setExtraMap(extraMap);
         doctorMaterialConsumeProviderDao.create(doctorMaterialConsumeProvider);

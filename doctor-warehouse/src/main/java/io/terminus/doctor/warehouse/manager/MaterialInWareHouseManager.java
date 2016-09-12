@@ -199,14 +199,18 @@ public class MaterialInWareHouseManager {
     }
 
     private Long providerMaterialInWareHouseInner(DoctorMaterialConsumeProviderDto dto){
-        dto.setActionType(DoctorMaterialConsumeProvider.EVENT_TYPE.PROVIDER.getValue());
+        if(dto.getActionType() == null){
+            dto.setActionType(DoctorMaterialConsumeProvider.EVENT_TYPE.PROVIDER.getValue());
+        }
         Map<String,Object> context = Maps.newHashMap();
         doctorWareHouseHandlerInvocation.invoke(dto, context);
         return Long.valueOf(context.get("eventId").toString());
     }
 
     private Long consumeMaterialInner(DoctorMaterialConsumeProviderDto doctorMaterialConsumeProviderDto){
-        doctorMaterialConsumeProviderDto.setActionType(DoctorMaterialConsumeProvider.EVENT_TYPE.CONSUMER.getValue());
+        if(doctorMaterialConsumeProviderDto.getActionType() == null){
+            doctorMaterialConsumeProviderDto.setActionType(DoctorMaterialConsumeProvider.EVENT_TYPE.CONSUMER.getValue());
+        }
         Map<String,Object> context = Maps.newHashMap();
         this.doctorWareHouseHandlerInvocation.invoke(doctorMaterialConsumeProviderDto, context);
         return Long.valueOf(context.get("eventId").toString());
