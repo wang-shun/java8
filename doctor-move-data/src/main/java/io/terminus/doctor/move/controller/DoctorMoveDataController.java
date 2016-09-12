@@ -527,4 +527,21 @@ public class DoctorMoveDataController {
             return false;
         }
     }
+
+    /**
+     * 修正配种类型
+     */
+    @RequestMapping(value = "/mateType", method = RequestMethod.GET)
+    public Boolean updateMateType(@RequestParam("farmId") Long farmId) {
+        try {
+            DoctorFarm farm = doctorFarmDao.findById(farmId);
+            log.warn("updateMateType start, farmId:{}", farmId);
+            doctorMoveDataService.updateMateType(farm);
+            log.warn("updateMateType end");
+            return true;
+        } catch (Exception e) {
+            log.error("updateMateType failed, farmId:{}, cause:{}", farmId, Throwables.getStackTraceAsString(e));
+            return false;
+        }
+    }
 }
