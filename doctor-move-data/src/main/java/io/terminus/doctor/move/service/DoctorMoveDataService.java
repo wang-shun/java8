@@ -158,7 +158,7 @@ public class DoctorMoveDataService {
     public void updateMateType(DoctorFarm farm) {
         //找到所有没有设置 mate_type 的配种事件
         doctorPigEventDao.findByFarmIdAndKindAndEventTypes(farm.getId(), DoctorPig.PIG_TYPE.SOW.getKey(), Lists.newArrayList(PigEvent.MATING.getKey())).stream()
-                .filter(e -> isNull(e.getDoctorMateType()))
+                .filter(e -> isNull(e.getDoctorMateType()) && e.getCurrentMatingCount() == 1)  //只改初配
                 .forEach(event -> {
                     List<DoctorPigEvent> pigEvents = doctorPigEventDao.queryAllEventsByPigId(event.getPigId());
                     DoctorMatingType mateType = getPigMateType(pigEvents, event.getEventAt());
