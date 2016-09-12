@@ -61,7 +61,7 @@ public class DoctorChangeGroupEventHandler extends DoctorAbstractGroupEventHandl
 
         checkQuantity(groupTrack.getQuantity(), change.getQuantity());
         checkQuantityEqual(change.getQuantity(), change.getBoarQty(), change.getSowQty());
-        checkSalePrice(change.getChangeTypeId(), change.getPrice(), change.getAmount());
+        checkSalePrice(change.getChangeTypeId(), change.getPrice(), change.getAmount(), change.getBaseWeight(), change.getOverPrice());
 
         //1.转换猪群变动事件
         DoctorChangeGroupEvent changeEvent = BeanMapper.map(change, DoctorChangeGroupEvent.class);
@@ -146,10 +146,15 @@ public class DoctorChangeGroupEventHandler extends DoctorAbstractGroupEventHandl
         editGroupSnapShot(group, groupTrack, event);
     }
 
-    //校验金额不能为空
-    private static void checkSalePrice(Long changeTypeId, Long price, Long amount) {
-        if (changeTypeId == DoctorBasicEnums.SALE.getId() && (price == null || amount == null)) {
-            throw new ServiceException("money.not.null");
+    //校验金额不能为空, 基础重量不能为空
+    private static void checkSalePrice(Long changeTypeId, Long price, Long amount, Integer baseWeight, Long overPrice) {
+        if (changeTypeId == DoctorBasicEnums.SALE.getId()) {
+            if ((price == null || amount == null || overPrice == null)) {
+                throw new ServiceException("money.not.null");
+            }
+            if (baseWeight == null) {
+                throw new ServiceException("weight.not.null");
+            }
         }
     }
 }

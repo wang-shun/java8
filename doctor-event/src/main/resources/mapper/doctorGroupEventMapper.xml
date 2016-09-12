@@ -23,11 +23,13 @@
         <result column="quantity" property="quantity"/>
         <result column="weight" property="weight"/>
         <result column="avg_weight" property="avgWeight"/>
+        <result column="base_weight" property="baseWeight"/>
         <result column="avg_day_age" property="avgDayAge"/>
         <result column="is_auto" property="isAuto"/>
         <result column="change_type_id" property="changeTypeId"/>
         <result column="price" property="price"/>
         <result column="amount" property="amount"/>
+        <result column="over_price" property="overPrice"/>
         <result column="trans_group_type" property="transGroupType"/>
         <result column="out_id" property="outId"/>
         <result column="remark" property="remark"/>
@@ -65,11 +67,13 @@
         quantity,
         weight,
         avg_weight,
+        base_weight,
         avg_day_age,
         is_auto,
         change_type_id,
         price,
         amount,
+        over_price,
         trans_group_type,
         out_id,
         remark,
@@ -99,11 +103,13 @@
         #{quantity},
         #{weight},
         #{avgWeight},
+        #{baseWeight},
         #{avgDayAge},
         #{isAuto},
         #{changeTypeId},
         #{price},
         #{amount},
+        #{overPrice},
         #{transGroupType},
         #{outId},
         #{remark},
@@ -153,11 +159,13 @@
             <if test="quantity != null">quantity = #{quantity},</if>
             <if test="weight != null">weight = #{weight},</if>
             <if test="avgWeight != null">avg_weight = #{avgWeight},</if>
+            <if test="baseWeight != null">base_weight = #{baseWeight},</if>
             <if test="avgDayAge != null">avg_day_age = #{avgDayAge},</if>
             <if test="isAuto != null">is_auto = #{isAuto},</if>
             <if test="changeTypeId != null">change_type_id = #{changeTypeId},</if>
             <if test="price != null">price = #{price},</if>
             <if test="amount != null">amount = #{amount},</if>
+            <if test="overPrice != null">over_price = #{overPrice},</if>
             <if test="transGroupType != null">trans_group_type = #{transGroupType},</if>
             <if test="outId != null">out_id = #{outId},</if>
             <if test="remark != null">remark = #{remark},</if>
@@ -241,11 +249,13 @@
             #{item.quantity},
             #{item.weight},
             #{item.avgWeight},
+            #{item.baseWeight},
             #{item.avgDayAge},
             #{item.isAuto},
             #{item.changeTypeId},
             #{item.price},
             #{item.amount},
+            #{item.overPrice},
             #{item.transGroupType},
             #{item.outId},
             #{item.remark},
