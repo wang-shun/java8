@@ -91,8 +91,12 @@ public class DoctorSowPigletsChgHandler extends DoctorAbstractEventFlowHandler {
         extra.put("partWeanAvgWeight", weanAvgWeight);
         doctorPigTrack.addAllExtraMap(extra);
 
+        doctorPigTrack.setUnweanQty(healthCount - toWeanCount);  //未断奶数
+
         if (Objects.equals(toWeanCount, healthCount)) {
             doctorPigTrack.setStatus(PigStatus.Wean.getKey());
+            doctorPigTrack.setGroupId(-1L);  //groupId = -1 置成 NULL
+            doctorPigTrack.setFarrowQty(0);  //分娩数 0
         }
 
         doctorPigTrack.addPigEvent(basic.getPigType(), (Long) context.get("doctorPigEventId"));

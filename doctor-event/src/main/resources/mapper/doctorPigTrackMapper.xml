@@ -220,7 +220,8 @@
             <if test="currentBarnId != null">current_barn_id = #{currentBarnId},</if>
             <if test="currentBarnName != null">current_barn_name = #{currentBarnName},</if>
             <if test="weight != null">weight = #{weight},</if>
-            <if test="groupId != null">group_id = #{groupId},</if>
+            <if test="groupId != null &amp;&amp; groupId != -1">group_id = #{groupId},</if>
+            <if test="groupId == -1">group_id = NULL,</if>
             <if test="farrowQty != null">farrow_qty = #{farrowQty},</if>
             <if test="unweanQty != null">unwean_qty = #{unweanQty},</if>
             <if test="outFarmDate != null">out_farm_date = #{outFarmDate},</if>

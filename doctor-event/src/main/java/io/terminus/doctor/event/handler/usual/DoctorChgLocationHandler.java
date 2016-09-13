@@ -83,9 +83,10 @@ public class DoctorChgLocationHandler extends DoctorAbstractEventHandler{
         // 来源和前往都是 1 和 7 时, 仔猪也要跟着转群
         if(PigType.FARROW_TYPES.contains(fromBarn.getPigType()) && PigType.FARROW_TYPES.contains(toBarn.getPigType())
                 && extraMap.get(DoctorPigExtraKeys.farrowingPigletGroupId) != null){
-            Long groupId = pigletTrans(extraMap, basic, extra, toBarn);
+            Long groupId = pigletTrans(doctorPigTrack, extraMap, basic, extra, toBarn);
             extraMap.put(DoctorPigExtraKeys.farrowingPigletGroupId, groupId);
             doctorPigTrack.setExtraMap(extraMap);
+            doctorPigTrack.setGroupId(groupId);  //更新猪群id
         }
 
         doctorPigTrack.setCurrentBarnId(toBarnId);
@@ -110,7 +111,7 @@ public class DoctorChgLocationHandler extends DoctorAbstractEventHandler{
     }
 
     //未断奶仔猪转群
-    private Long pigletTrans(Map<String, Object> extraMap, DoctorBasicInputInfoDto basic, Map<String, Object> extra, DoctorBarn doctorToBarn) {
+    private Long pigletTrans(DoctorPigTrack pigTrack, Map<String, Object> extraMap, DoctorBasicInputInfoDto basic, Map<String, Object> extra, DoctorBarn doctorToBarn) {
         //未断奶仔猪id
         Long farrowingPigletGroupId = Long.valueOf(extraMap.get(DoctorPigExtraKeys.farrowingPigletGroupId).toString());
         DoctorTransGroupInput input = new DoctorTransGroupInput();
@@ -136,19 +137,11 @@ public class DoctorChgLocationHandler extends DoctorAbstractEventHandler{
         input.setSource(PigSource.LOCAL.getKey());
 
         //未断奶的数量 = 总 - 断奶
-        input.setQuantity(checkCount(extraMap) - Integer.valueOf(String.valueOf(MoreObjects.firstNonNull(extraMap.get(DoctorPigExtraKeys.partWeanPigletsCount), 0))));
+        input.setQuantity(pigTrack.getUnweanQty());
         input.setBoarQty(0);
         input.setSowQty(input.getQuantity() - input.getBoarQty());
         input.setAvgWeight(Double.valueOf(String.valueOf(MoreObjects.firstNonNull(extraMap.get(DoctorPigExtraKeys.birthNestAvg), 0D))));
         input.setWeight(MoreObjects.firstNonNull(input.getAvgWeight(), 0D) * MoreObjects.firstNonNull(input.getQuantity(), 0));
         return RespHelper.orServEx(doctorGroupWriteService.groupEventTransGroup(fromGroup, input));
-    }
-
-    //校验数量是否存在
-    private static Integer checkCount(Map<String, Object> extraMap) {
-        if (!extraMap.containsKey(DoctorPigExtraKeys.farrowingLiveCount) || extraMap.get(DoctorPigExtraKeys.farrowingLiveCount) == null) {
-            throw new ServiceException("farrow.count.not.found");
-        }
-        return Integer.valueOf(String.valueOf(extraMap.get(DoctorPigExtraKeys.farrowingLiveCount)));
     }
 }

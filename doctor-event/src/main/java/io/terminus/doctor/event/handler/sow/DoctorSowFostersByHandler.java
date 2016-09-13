@@ -1,5 +1,6 @@
 package io.terminus.doctor.event.handler.sow;
 
+import com.google.common.base.MoreObjects;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
@@ -73,12 +74,15 @@ public class DoctorSowFostersByHandler extends DoctorAbstractEventFlowHandler {
         Long groupId = groupSowEventCreate(doctorPigTrack, basic, extra);
 
         //添加当前母猪的健崽猪的数量信息
-        Map<String, Object> extraMap = doctorPigTrack.getExtraMap();
-        Integer healthCount = (Integer) extraMap.get("farrowingLiveCount");
+        Integer healthCount = MoreObjects.firstNonNull(doctorPigTrack.getFarrowQty(), 0);
         Integer fosterCount = (Integer) extra.get("fostersCount");
         extra.put("farrowingLiveCount", healthCount + fosterCount);
         extra.put("farrowingPigletGroupId", groupId);
         doctorPigTrack.addAllExtraMap(extra);
+
+        doctorPigTrack.setGroupId(groupId);  //groupId = -1 置成 NULL
+        doctorPigTrack.setFarrowQty(MoreObjects.firstNonNull(doctorPigTrack.getFarrowQty(), 0) + fosterCount);  //分娩数
+        doctorPigTrack.setUnweanQty(MoreObjects.firstNonNull(doctorPigTrack.getUnweanQty(), 0) + fosterCount);  //未断奶数
 
         // 修改当前的母猪状态信息
         doctorPigTrack.setStatus(PigStatus.FEED.getKey());
@@ -97,8 +101,7 @@ public class DoctorSowFostersByHandler extends DoctorAbstractEventFlowHandler {
         //拼窝的数据extra
         Long fromSowId = Long.valueOf(extra.get(EVENT_PIG_ID).toString());
         DoctorPigTrack fromSowTrack = doctorPigTrackDao.findByPigId(fromSowId);
-        Map<String, Object> fromSowTrackMap = JSON_MAPPER.fromJson(fromSowTrack.getExtra(), JSON_MAPPER.createCollectionType(Map.class, String.class, Object.class));
-        Long fromGroupId = Long.valueOf(fromSowTrackMap.get("farrowingPigletGroupId").toString());
+        Long fromGroupId = fromSowTrack.getGroupId();
 
         //被拼窝的数据extra
         Map<String, Object> toSowTrackMap = JSON_MAPPER.fromJson(doctorPigTrack.getExtra(), JSON_MAPPER.createCollectionType(Map.class, String.class, Object.class));
