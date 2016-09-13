@@ -152,6 +152,16 @@ public class MaterialInWareHouseManager {
         return consumeMaterialInner(doctorMaterialConsumeProviderDto);
     }
 
+    @Transactional
+    public void moveMaterial(DoctorMaterialConsumeProviderDto diaochuDto, DoctorMaterialConsumeProviderDto diaoruDto){
+        // 先调出
+        Long diaochuEventId = consumeMaterialInner(diaochuDto);
+        DoctorMaterialConsumeProvider diaochuEvent = doctorMaterialConsumeProviderDao.findById(diaochuEventId);
+        // 然后调入
+        diaoruDto.setUnitPrice(diaochuEvent.getUnitPrice());
+        providerMaterialInWareHouseInner(diaoruDto);
+    }
+
     /**
      * 用户信息的提供操作
      * @param doctorMaterialConsumeProviderDto
@@ -199,14 +209,18 @@ public class MaterialInWareHouseManager {
     }
 
     private Long providerMaterialInWareHouseInner(DoctorMaterialConsumeProviderDto dto){
-        dto.setActionType(DoctorMaterialConsumeProvider.EVENT_TYPE.PROVIDER.getValue());
+        if(dto.getActionType() == null){
+            dto.setActionType(DoctorMaterialConsumeProvider.EVENT_TYPE.PROVIDER.getValue());
+        }
         Map<String,Object> context = Maps.newHashMap();
         doctorWareHouseHandlerInvocation.invoke(dto, context);
         return Long.valueOf(context.get("eventId").toString());
     }
 
     private Long consumeMaterialInner(DoctorMaterialConsumeProviderDto doctorMaterialConsumeProviderDto){
-        doctorMaterialConsumeProviderDto.setActionType(DoctorMaterialConsumeProvider.EVENT_TYPE.CONSUMER.getValue());
+        if(doctorMaterialConsumeProviderDto.getActionType() == null){
+            doctorMaterialConsumeProviderDto.setActionType(DoctorMaterialConsumeProvider.EVENT_TYPE.CONSUMER.getValue());
+        }
         Map<String,Object> context = Maps.newHashMap();
         this.doctorWareHouseHandlerInvocation.invoke(doctorMaterialConsumeProviderDto, context);
         return Long.valueOf(context.get("eventId").toString());

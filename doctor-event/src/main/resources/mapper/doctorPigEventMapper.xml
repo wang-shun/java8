@@ -59,6 +59,7 @@
         <result column="abortion_date" property="abortionDate"/>
         <result column="partwean_date" property="partweanDate"/>
         <result column="doctor_mate_type" property="doctorMateType"/>
+        <result column="boar_code" property="boarCode" />
         <result column="out_id" property="outId"/>
         <result column="extra" property="extra"/>
         <result column="remark" property="remark"/>
@@ -130,6 +131,7 @@
         abortion_date,
         partwean_date,
         doctor_mate_type,
+        boar_code,
         out_id,
         extra,
         remark,
@@ -195,6 +197,7 @@
         #{abortionDate},
         #{partweanDate},
         #{doctorMateType},
+        #{boarCode},
         #{outId},
         #{extra},
         #{remark},
@@ -262,6 +265,7 @@
         <if test="abortionDate != null">AND abortion_date = #{abortionDate}</if>
         <if test="partweanDate != null">AND partwean_date = #{partweanDate}</if>
         <if test="doctorMateType != null">AND doctor_mate_type = #{doctorMateType}</if>
+        <if test="boarCode != null">AND boar_code = #{boarCode}</if>
         <if test="outId != null">AND out_id = #{outId}</if>
         <if test="extra != null">AND extra = #{extra}</if>
         <if test="remark != null">AND remark = #{remark}</if>
@@ -337,6 +341,7 @@
             #{item.abortionDate},
             #{item.partweanDate},
             #{item.doctorMateType},
+            #{item.boarCode},
             #{item.outId},
             #{item.extra},
             #{item.remark},
@@ -553,6 +558,7 @@
             <if test="abortionDate != null">abortion_date = #{abortionDate},</if>
             <if test="partweanDate != null">partwean_date = #{partweanDate},</if>
             <if test="doctorMateType != null">doctor_mate_type = #{doctorMateType},</if>
+            <if test="boarCode != null">boar_code = #{boarCode},</if>
             <if test="outId != null">out_id = #{outId},</if>
             <if test="extra != null">extra = #{extra},</if>
             <if test="remark != null">remark = #{remark},</if>

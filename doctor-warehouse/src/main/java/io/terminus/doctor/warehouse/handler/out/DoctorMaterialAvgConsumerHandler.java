@@ -1,4 +1,4 @@
-package io.terminus.doctor.warehouse.handler.consume;
+package io.terminus.doctor.warehouse.handler.out;
 
 import io.terminus.doctor.warehouse.dao.DoctorMaterialConsumeAvgDao;
 import io.terminus.doctor.warehouse.dto.DoctorMaterialConsumeProviderDto;

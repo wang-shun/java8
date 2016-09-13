@@ -31,7 +31,7 @@ public class BarnSearchProperties {
     /**
      * 全量dump, 多少天更新的数据
      */
-    private Integer fullDumpRange = 3;
+    private Integer fullDumpRange = 30;
 
     /**
      * 每次批量处理的数量
