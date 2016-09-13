@@ -1753,7 +1753,7 @@ public class DoctorMoveDataService {
 
     //判断内转还是外转
     private static DoctorGroupEvent.TransGroupType getTransType(Integer inType, Integer pigType, Integer toBarnType) {
-        if (!Objects.equals(inType, DoctorMoveInGroupEvent.InType.GROUP.getValue())) {
+        if (inType != null && !Objects.equals(inType, DoctorMoveInGroupEvent.InType.GROUP.getValue())) {
             return DoctorGroupEvent.TransGroupType.OUT;
         }
         return Objects.equals(pigType, toBarnType) || (FARROW_TYPES.contains(pigType) && FARROW_TYPES.contains(toBarnType)) ?
