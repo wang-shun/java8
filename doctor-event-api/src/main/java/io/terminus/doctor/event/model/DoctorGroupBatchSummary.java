@@ -16,7 +16,12 @@ public class DoctorGroupBatchSummary implements Serializable {
     private static final long serialVersionUID = -2290422361878542260L;
 
     private Long id;
-    
+
+    /**
+     * 猪场id
+     */
+    private Long farmId;
+
     /**
      * 猪群id
      */

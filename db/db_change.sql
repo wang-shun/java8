@@ -284,6 +284,7 @@ ALTER TABLE doctor_group_events ADD COLUMN over_price DOUBLE DEFAULT NULL COMMEN
 -- 2016-09-13 新增猪群批次总结表
 CREATE TABLE `doctor_group_batch_summaries` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '自增主键',
+  `farm_id` bigint(20) DEFAULT NULL COMMENT '猪场id',
   `group_id` bigint(20) DEFAULT NULL COMMENT '猪群id',
   `group_code` varchar(512) DEFAULT NULL COMMENT '猪群号',
   `pig_type` smallint(6) DEFAULT NULL COMMENT '猪类',
@@ -321,5 +322,6 @@ CREATE TABLE `doctor_group_batch_summaries` (
   `updated_at` datetime DEFAULT NULL COMMENT '修改时间',
   PRIMARY KEY (`id`),
   KEY `idx_doctor_group_batch_summaries_group_id` (`group_id`),
-  KEY `idx_doctor_group_batch_summaries_barn_id` (`barn_id`)
+  KEY `idx_doctor_group_batch_summaries_barn_id` (`barn_id`),
+  KEY `idx_doctor_group_batch_summaries_farm_id` (`farm_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='猪群批次总结表';

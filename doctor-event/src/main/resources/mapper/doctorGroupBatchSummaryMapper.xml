@@ -7,6 +7,7 @@
 <mapper namespace="DoctorGroupBatchSummary">
     <resultMap id="DoctorGroupBatchSummaryMap" type="DoctorGroupBatchSummary">
         <id column="id" property="id"/>
+        <result column="farm_id" property="farmId"/>
         <result column="group_id" property="groupId"/>
         <result column="group_code" property="groupCode"/>
         <result column="pig_type" property="pigType"/>
@@ -54,6 +55,7 @@
     </sql>
 
     <sql id="cols_exclude_id">
+        farm_id,
         group_id,
         group_code,
         pig_type,
@@ -93,6 +95,7 @@
     </sql>
 
     <sql id="vals">
+        #{farmId},
         #{groupId},
         #{groupCode},
         #{pigType},
@@ -133,6 +136,7 @@
 
     <sql id="criteria">
         <if test="id != null">AND id = #{id}</if>
+        <if test="farmId != null">AND farm_id = #{farmId}</if>
         <if test="groupId != null">AND group_id = #{groupId}</if>
         <if test="groupCode != null">AND group_code = #{groupCode}</if>
         <if test="pigType != null">AND pig_type = #{pigType}</if>
@@ -184,6 +188,7 @@
         VALUES
         <foreach collection="list" separator="," item="item">
             (
+            #{item.farmId},
             #{item.groupId},
             #{item.groupCode},
             #{item.pigType},
@@ -232,6 +237,7 @@
     <update id="update" parameterType="DoctorGroupBatchSummary">
         UPDATE <include refid="tb"/>
         <set>
+            <if test="farmId != null">farm_id = #{farmId},</if>
             <if test="groupId != null">group_id = #{groupId},</if>
             <if test="groupCode != null">group_code = #{groupCode},</if>
             <if test="pigType != null">pig_type = #{pigType},</if>
