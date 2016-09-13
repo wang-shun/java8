@@ -158,6 +158,17 @@ public class DoctorMonthlyReportWriteServiceImpl implements DoctorMonthlyReportW
         dto.setDeadFarrowRate(doctorKpiDao.getDeadFarrowRate(farmId, startAt, endAt));    //产房死淘率
         dto.setDeadNurseryRate(doctorKpiDao.getDeadNurseryRate(farmId, startAt, endAt));  //保育死淘率
         dto.setDeadFattenRate(doctorKpiDao.getDeadFattenRate(farmId, startAt, endAt));    //育肥死淘率
+
+        //公猪生产成绩
+        dto.setBoarMateCount(doctorKpiDao.getBoarMateCount(farmId, startAt, endAt));      //配种次数
+        dto.setBoarFirstMateCount(doctorKpiDao.getBoarSowFirstMateCount(farmId, startAt, endAt)); //首次配种母猪数
+        dto.setBoarSowPregCount(doctorKpiDao.getBoarSowPregCount(farmId, startAt, endAt)); //受胎头数
+        dto.setBoarSowFarrowCount(doctorKpiDao.getBoarSowFarrowCount(farmId, startAt, endAt)); //产仔母猪数
+        dto.setBoarFarrowAvgCount(doctorKpiDao.getBoarSowFarrowAvgCount(farmId, startAt, endAt)); //平均产仔数
+        dto.setBoarFarrowLiveAvgCount(doctorKpiDao.getBoarSowFarrowLiveAvgCount(farmId, startAt, endAt));  //平均产活仔数
+        dto.setBoarPregRate(doctorKpiDao.getBoarSowPregRate(farmId, startAt, endAt));      //受胎率
+        dto.setBoarFarrowRate(doctorKpiDao.getBoarSowFarrowRate(farmId, startAt, endAt));  //分娩率
+
         return dto;
     }
 }

@@ -473,4 +473,60 @@ public class DoctorKpiDao {
     public long getGroupSaleFattenPrice(Long farmId, Date startAt, Date endAt) {
         return sqlSession.selectOne(sqlId("getGroupSaleFattenPrice"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
     }
+
+    /**
+     * 公猪生产月报: 配种次数
+     */
+    public int getBoarMateCount(Long farmId, Date startAt, Date endAt){
+        return sqlSession.selectOne(sqlId("getBoarMateCount"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
+    }
+
+    /**
+     * 公猪生产月报: 首配母猪头数
+     */
+    public int getBoarSowFirstMateCount(Long farmId, Date startAt, Date endAt){
+        return sqlSession.selectOne(sqlId("getBoarSowFirstMateCount"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
+    }
+
+    /**
+     * 公猪生产月报: 受胎头数
+     */
+    public int getBoarSowPregCount(Long farmId, Date startAt, Date endAt){
+        return sqlSession.selectOne(sqlId("getBoarSowPregCount"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
+    }
+
+    /**
+     * 公猪生产月报: 产仔母猪数
+     */
+    public int getBoarSowFarrowCount(Long farmId, Date startAt, Date endAt){
+        return sqlSession.selectOne(sqlId("getBoarSowFarrowCount"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
+    }
+
+    /**
+     * 公猪生产月报: 平均产仔数
+     */
+    public double getBoarSowFarrowAvgCount(Long farmId, Date startAt, Date endAt){
+        return sqlSession.selectOne(sqlId("getBoarSowFarrowAvgCount"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
+    }
+
+    /**
+     * 公猪生产月报: 平均产活仔数
+     */
+    public double getBoarSowFarrowLiveAvgCount(Long farmId, Date startAt, Date endAt){
+        return sqlSession.selectOne(sqlId("getBoarSowFarrowLiveAvgCount"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
+    }
+
+    /**
+     * 公猪生产月报: 受胎率
+     */
+    public double getBoarSowPregRate(Long farmId, Date startAt, Date endAt){
+        return sqlSession.selectOne(sqlId("getBoarSowPregRate"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
+    }
+
+    /**
+     * 公猪生产月报: 分娩率
+     */
+    public double getBoarSowFarrowRate(Long farmId, Date startAt, Date endAt){
+        return sqlSession.selectOne(sqlId("getBoarSowFarrowRate"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
+    }
 }
