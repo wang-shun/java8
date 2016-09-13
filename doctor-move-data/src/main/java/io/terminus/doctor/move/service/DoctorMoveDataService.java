@@ -222,7 +222,9 @@ public class DoctorMoveDataService {
                     Integer toBarnType = trans.getToBarnType();
                     if (toBarnType == null) {
                         DoctorBarn toBarn = doctorBarnDao.findById(trans.getToBarnId());
-                        toBarnType = toBarn.getPigType();
+                        if (toBarn != null) {
+                            toBarnType = toBarn.getPigType();
+                        }
                     }
                     updateEvent.setTransGroupType(getTransType(null, event.getPigType(), toBarnType).getValue());
                     doctorGroupEventDao.update(updateEvent);
