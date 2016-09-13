@@ -42,7 +42,7 @@
         <result column="out_cost" property="outCost"/>
         <result column="created_at" property="createdAt"/>
         <result column="updated_at" property="updatedAt"/>
-        
+
     </resultMap>
 
     <sql id="tb">
@@ -54,81 +54,81 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        group_id, 
-        group_code, 
-        pig_type, 
-        avg_day_age, 
-        open_at, 
-        close_at, 
-        barn_id, 
-        barn_name, 
-        user_id, 
-        user_name, 
-        nest, 
-        live_count, 
-        health_count, 
-        weak_count, 
-        birth_cost, 
-        birth_avg_weight, 
-        dead_rate, 
-        wean_count, 
-        unq_count, 
-        wean_avg_weight, 
-        sale_count, 
-        sale_amount, 
-        to_nursery_cost, 
-        to_nursery_count, 
-        to_nursery_avg_weight, 
-        to_fatten_cost, 
-        to_fatten_count, 
-        to_fatten_avg_weight, 
-        in_count, 
-        in_avg_weight, 
-        in_cost, 
-        fcr, 
-        out_cost, 
-        created_at, 
+        group_id,
+        group_code,
+        pig_type,
+        avg_day_age,
+        open_at,
+        close_at,
+        barn_id,
+        barn_name,
+        user_id,
+        user_name,
+        nest,
+        live_count,
+        health_count,
+        weak_count,
+        birth_cost,
+        birth_avg_weight,
+        dead_rate,
+        wean_count,
+        unq_count,
+        wean_avg_weight,
+        sale_count,
+        sale_amount,
+        to_nursery_cost,
+        to_nursery_count,
+        to_nursery_avg_weight,
+        to_fatten_cost,
+        to_fatten_count,
+        to_fatten_avg_weight,
+        in_count,
+        in_avg_weight,
+        in_cost,
+        fcr,
+        out_cost,
+        created_at,
         updated_at
-        
+
     </sql>
 
     <sql id="vals">
-        #{groupId}, 
-        #{groupCode}, 
-        #{pigType}, 
-        #{avgDayAge}, 
-        #{openAt}, 
-        #{closeAt}, 
-        #{barnId}, 
-        #{barnName}, 
-        #{userId}, 
-        #{userName}, 
-        #{nest}, 
-        #{liveCount}, 
-        #{healthCount}, 
-        #{weakCount}, 
-        #{birthCost}, 
-        #{birthAvgWeight}, 
-        #{deadRate}, 
-        #{weanCount}, 
-        #{unqCount}, 
-        #{weanAvgWeight}, 
-        #{saleCount}, 
-        #{saleAmount}, 
-        #{toNurseryCost}, 
-        #{toNurseryCount}, 
-        #{toNurseryAvgWeight}, 
-        #{toFattenCost}, 
-        #{toFattenCount}, 
-        #{toFattenAvgWeight}, 
-        #{inCount}, 
-        #{inAvgWeight}, 
-        #{inCost}, 
-        #{fcr}, 
-        #{outCost}, 
-        now(), 
+        #{groupId},
+        #{groupCode},
+        #{pigType},
+        #{avgDayAge},
+        #{openAt},
+        #{closeAt},
+        #{barnId},
+        #{barnName},
+        #{userId},
+        #{userName},
+        #{nest},
+        #{liveCount},
+        #{healthCount},
+        #{weakCount},
+        #{birthCost},
+        #{birthAvgWeight},
+        #{deadRate},
+        #{weanCount},
+        #{unqCount},
+        #{weanAvgWeight},
+        #{saleCount},
+        #{saleAmount},
+        #{toNurseryCost},
+        #{toNurseryCount},
+        #{toNurseryAvgWeight},
+        #{toFattenCost},
+        #{toFattenCount},
+        #{toFattenAvgWeight},
+        #{inCount},
+        #{inAvgWeight},
+        #{inCost},
+        #{fcr},
+        #{outCost},
+        now(),
         now()
-        
+
     </sql>
 
     <sql id="criteria">
@@ -151,7 +151,7 @@
         <if test="birthAvgWeight != null">AND birth_avg_weight = #{birthAvgWeight}</if>
         <if test="deadRate != null">AND dead_rate = #{deadRate}</if>
         <if test="weanCount != null">AND wean_count = #{weanCount}</if>
-        <if test="unqCount != null">AND unq_count = #{unqCount}</if>
+        <if test="unqCount != null">AND unq_count = #{unqCount}</if>
         <if test="weanAvgWeight != null">AND wean_avg_weight = #{weanAvgWeight}</if>
         <if test="saleCount != null">AND sale_count = #{saleCount}</if>
         <if test="saleAmount != null">AND sale_amount = #{saleAmount}</if>
@@ -166,9 +166,9 @@
         <if test="inCost != null">AND in_cost = #{inCost}</if>
         <if test="fcr != null">AND fcr = #{fcr}</if>
         <if test="outCost != null">AND out_cost = #{outCost}</if>
-        
-        
-        
+
+
+
     </sql>
 
     <insert id="create" parameterType="DoctorGroupBatchSummary" keyProperty="id" useGeneratedKeys="true">
@@ -184,42 +184,42 @@
         VALUES
         <foreach collection="list" separator="," item="item">
             (
-                #{item.groupId}, 
-                #{item.groupCode}, 
-                #{item.pigType}, 
-                #{item.avgDayAge}, 
-                #{item.openAt}, 
-                #{item.closeAt}, 
-                #{item.barnId}, 
-                #{item.barnName}, 
-                #{item.userId}, 
-                #{item.userName}, 
-                #{item.nest}, 
-                #{item.liveCount}, 
-                #{item.healthCount}, 
-                #{item.weakCount}, 
-                #{item.birthCost}, 
-                #{item.birthAvgWeight}, 
-                #{item.deadRate}, 
-                #{item.weanCount}, 
-                #{item.unqCount}, 
-                #{item.weanAvgWeight}, 
-                #{item.saleCount}, 
-                #{item.saleAmount}, 
-                #{item.toNurseryCost}, 
-                #{item.toNurseryCount}, 
-                #{item.toNurseryAvgWeight}, 
-                #{item.toFattenCost}, 
-                #{item.toFattenCount}, 
-                #{item.toFattenAvgWeight}, 
-                #{item.inCount}, 
-                #{item.inAvgWeight}, 
-                #{item.inCost}, 
-                #{item.fcr}, 
-                #{item.outCost}, 
-                now(), 
-                now()
-                
+            #{item.groupId},
+            #{item.groupCode},
+            #{item.pigType},
+            #{item.avgDayAge},
+            #{item.openAt},
+            #{item.closeAt},
+            #{item.barnId},
+            #{item.barnName},
+            #{item.userId},
+            #{item.userName},
+            #{item.nest},
+            #{item.liveCount},
+            #{item.healthCount},
+            #{item.weakCount},
+            #{item.birthCost},
+            #{item.birthAvgWeight},
+            #{item.deadRate},
+            #{item.weanCount},
+            #{item.unqCount},
+            #{item.weanAvgWeight},
+            #{item.saleCount},
+            #{item.saleAmount},
+            #{item.toNurseryCost},
+            #{item.toNurseryCount},
+            #{item.toNurseryAvgWeight},
+            #{item.toFattenCost},
+            #{item.toFattenCount},
+            #{item.toFattenAvgWeight},
+            #{item.inCount},
+            #{item.inAvgWeight},
+            #{item.inCost},
+            #{item.fcr},
+            #{item.outCost},
+            now(),
+            now()
+
             )
         </foreach>
     </insert>
@@ -250,7 +250,7 @@
             <if test="birthAvgWeight != null">birth_avg_weight = #{birthAvgWeight},</if>
             <if test="deadRate != null">dead_rate = #{deadRate},</if>
             <if test="weanCount != null">wean_count = #{weanCount},</if>
-            <if test="unqCount != null">unq_count = #{unqCount},</if>
+            <if test="unqCount != null">unq_count = #{unqCount},</if>
             <if test="weanAvgWeight != null">wean_avg_weight = #{weanAvgWeight},</if>
             <if test="saleCount != null">sale_count = #{saleCount},</if>
             <if test="saleAmount != null">sale_amount = #{saleAmount},</if>
@@ -265,9 +265,9 @@
             <if test="inCost != null">in_cost = #{inCost},</if>
             <if test="fcr != null">fcr = #{fcr},</if>
             <if test="outCost != null">out_cost = #{outCost},</if>
-            
-            
-            
+
+
+
             updated_at=now()
         </set>
         WHERE id = #{id}
