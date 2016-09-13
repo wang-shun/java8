@@ -176,6 +176,7 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
                 case MOVE_IN:
                     params.put("breedName", getBasicName(getLong(params, "breedId")));
                     params.put("inTypeName", DoctorMoveInGroupEvent.InType.from(getInteger(params, "inType")).getDesc());
+                    params.put("toBarnName", getBarnName(getLong(params, "toBarnId")));
                     orServEx(doctorGroupWriteService.groupEventMoveIn(groupDetail, map(putBasicFields(params), DoctorMoveInGroupInput.class)));
                     break;
                 case CHANGE:

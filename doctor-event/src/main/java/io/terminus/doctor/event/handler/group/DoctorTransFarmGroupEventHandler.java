@@ -78,6 +78,7 @@ public class DoctorTransFarmGroupEventHandler extends DoctorAbstractGroupEventHa
         //1.转换转场事件
         DoctorTransFarmGroupEvent transFarmEvent = BeanMapper.map(transFarm, DoctorTransFarmGroupEvent.class);
         checkBreed(group.getBreedId(), transFarmEvent.getBreedId());
+        transFarmEvent.setToBarnType(toBarn.getPigType());
 
         //2.创建转场事件
         DoctorGroupEvent<DoctorTransFarmGroupEvent> event = dozerGroupEvent(group, GroupEventType.TRANS_FARM, transFarm);

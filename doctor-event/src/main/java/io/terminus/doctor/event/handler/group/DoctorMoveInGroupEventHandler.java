@@ -67,6 +67,9 @@ public class DoctorMoveInGroupEventHandler extends DoctorAbstractGroupEventHandl
         DoctorMoveInGroupEvent moveInEvent = BeanMapper.map(moveIn, DoctorMoveInGroupEvent.class);
         checkBreed(group.getBreedId(), moveInEvent.getBreedId());
 
+        DoctorBarn fromBarn = getBarnById(moveIn.getFromBarnId());
+        moveInEvent.setFromBarnType(fromBarn.getPigType());
+
         //2.创建转入猪群事件
         DoctorGroupEvent<DoctorMoveInGroupEvent> event = dozerGroupEvent(group, GroupEventType.MOVE_IN, moveIn);
         event.setQuantity(moveIn.getQuantity());
