@@ -128,7 +128,7 @@ public class SowBreedingProducer extends AbstractJobProducer {
                             // 获取配置的天数, 并判断
                             // 记录每只猪的消息提醒
                             if (!isMessage && Objects.equals(ruleTemplate.getType(), DoctorMessageRuleTemplate.Type.WARNING.getValue())) {
-                                recordPigMessage(pigDto, PigEvent.MATING, getRuleTimeDiff(ruleValueMap.get(1), timeDiff), ruleValueMap.get(1).getLeftValue().intValue(),
+                                recordPigMessage(pigDto, PigEvent.MATING, getRuleTimeDiff(ruleValueMap.get(1), timeDiff), ruleValueMap.get(1).getValue().intValue(),
                                         PigStatus.Wean, PigStatus.KongHuai, PigStatus.Entry);
                             }
 
