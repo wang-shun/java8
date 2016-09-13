@@ -107,6 +107,8 @@ public class DoctorReportJobs {
                 }
             }
 
+            doctorDailyReportReadService.clearAllReportCache();
+
             log.info("update history report job end, now is:{}", DateUtil.toDateTimeString(new Date()));
         }catch(Exception e) {
             log.error("update history report job failed, cause:{}", Throwables.getStackTraceAsString(e));
