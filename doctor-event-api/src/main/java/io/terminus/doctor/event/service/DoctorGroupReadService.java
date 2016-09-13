@@ -4,6 +4,7 @@ import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.event.dto.DoctorGroupCount;
 import io.terminus.doctor.event.dto.DoctorGroupDetail;
+import io.terminus.doctor.event.dto.DoctorGroupEventSearchDto;
 import io.terminus.doctor.event.dto.DoctorGroupSearchDto;
 import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
 import io.terminus.doctor.event.model.DoctorGroup;
@@ -159,4 +160,13 @@ public interface DoctorGroupReadService {
      * @return
      */
     Response<Long> countByBarnId(Long barnId);
+
+    /**
+     * 根据条件查询猪群事件
+     * @param doctorGroupEventSearchDto
+     * @param pageNo
+     * @param pageSize
+     * @return
+     */
+    Response<Paging<DoctorGroupEvent>> queryGroupEventsByCriteria(DoctorGroupEventSearchDto doctorGroupEventSearchDto, Integer pageNo, Integer pageSize);
 }

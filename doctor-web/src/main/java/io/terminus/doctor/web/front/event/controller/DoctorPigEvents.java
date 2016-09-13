@@ -6,11 +6,15 @@ import com.google.common.base.Throwables;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
+import io.terminus.common.utils.BeanMapper;
 import io.terminus.common.utils.JsonMapper;
+import io.terminus.common.utils.Splitters;
 import io.terminus.doctor.common.constants.JacksonType;
 import io.terminus.doctor.common.utils.RespHelper;
+import io.terminus.doctor.event.dto.DoctorPigEventSearchDto;
 import io.terminus.doctor.event.dto.DoctorPigInfoDto;
 import io.terminus.doctor.event.dto.DoctorSowParityCount;
+import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.event.service.DoctorPigEventReadService;
@@ -22,6 +26,7 @@ import io.terminus.pampas.common.UserUtil;
 import io.terminus.parana.user.model.User;
 import io.terminus.parana.user.service.UserReadService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,6 +40,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Created by yaoqijun.
@@ -68,7 +74,7 @@ public class DoctorPigEvents {
                            DoctorPigEventReadService doctorPigEventReadService,
                            DoctorPigEventWriteService doctorPigEventWriteService,
                            UserReadService userReadService,
-                           WorkFlowService workFlowService, TransFromUtil transFromUtil){
+                           WorkFlowService workFlowService, TransFromUtil transFromUtil) {
         this.doctorPigReadService = doctorPigReadService;
         this.doctorPigEventReadService = doctorPigEventReadService;
         this.doctorPigEventWriteService = doctorPigEventWriteService;
@@ -79,6 +85,7 @@ public class DoctorPigEvents {
 
     /**
      * 回滚事件信息
+     *
      * @param pigEventId
      * @param revertPigType
      * @return
@@ -86,14 +93,14 @@ public class DoctorPigEvents {
     @RequestMapping(value = "/rollBackPigEvent", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Long rollBackPigEvent(@RequestParam("pigEventId") Long pigEventId,
-                                 @RequestParam("revertPigType") Integer revertPigType){
+                                 @RequestParam("revertPigType") Integer revertPigType) {
         Long userId = null;
         String userName = null;
-        try{
+        try {
             userId = UserUtil.getUserId();
             Response<User> userResponse = userReadService.findById(userId);
             userName = userResponse.getResult().getName();
-        }catch (Exception e){
+        } catch (Exception e) {
             log.error("get user info error, cause:{}", Throwables.getStackTraceAsString(e));
             throw new JsonResponseException("query.userInfo.error");
         }
@@ -105,7 +112,7 @@ public class DoctorPigEvents {
     public Paging<DoctorPigInfoDto> pagingPigDoctorInfoByBarn(@RequestParam("farmId") Long farmId,
                                                               @RequestParam("barnId") Long branId,
                                                               @RequestParam(value = "pageNo", required = false) Integer pageNo,
-                                                              @RequestParam(value = "pageSize", required = false)Integer pageSize){
+                                                              @RequestParam(value = "pageSize", required = false) Integer pageSize) {
 
         return RespHelper.or500(doctorPigReadService.pagingDoctorInfoDtoByPigTrack(DoctorPigTrack.builder()
                 .farmId(farmId).currentBarnId(branId).build(), pageNo, pageSize));
@@ -116,18 +123,18 @@ public class DoctorPigEvents {
     public Paging<DoctorPigEvent> pagingDoctorPigEvent(@RequestParam("farmId") Long farmId,
                                                        @RequestParam("pigId") Long pigId,
                                                        @RequestParam(value = "pageNo", required = false) Integer pageNo,
-                                                       @RequestParam(value = "pageSize", required = false)Integer pageSize,
-                                                       @RequestParam(value = "startDate",required = false) String startDate,
-                                                       @RequestParam(value = "endDate", required = false) String endDate){
-        try{
+                                                       @RequestParam(value = "pageSize", required = false) Integer pageSize,
+                                                       @RequestParam(value = "startDate", required = false) String startDate,
+                                                       @RequestParam(value = "endDate", required = false) String endDate) {
+        try {
             Date beginDateTime = Strings.isNullOrEmpty(startDate) ? null : DTF.parseDateTime(startDate).withTimeAtStartOfDay().toDate();
             Date endDateTime = Strings.isNullOrEmpty(endDate) ? null : (DTF).parseDateTime(endDate).plusDays(1).withTimeAtStartOfDay().toDate(); // 添加一天
 
-            Paging<DoctorPigEvent> doctorPigEventPaging = RespHelper.or500(doctorPigEventReadService.queryPigDoctorEvents(farmId,pigId,pageNo, pageSize, beginDateTime, endDateTime));
+            Paging<DoctorPigEvent> doctorPigEventPaging = RespHelper.or500(doctorPigEventReadService.queryPigDoctorEvents(farmId, pigId, pageNo, pageSize, beginDateTime, endDateTime));
             transFromUtil.transFromExtraMap(doctorPigEventPaging.getData());
 
             return doctorPigEventPaging;
-        }catch (Exception e){
+        } catch (Exception e) {
             log.error("pig event paging error, cause:{}", Throwables.getStackTraceAsString(e));
             throw new JsonResponseException(500, "paging.pigEvent.error");
         }
@@ -135,6 +142,7 @@ public class DoctorPigEvents {
 
     /**
      * 查找一只猪(指定时间点之后)的第一个事件
+     *
      * @param pigId
      * @param startDate
      * @return
@@ -142,24 +150,24 @@ public class DoctorPigEvents {
     @RequestMapping(value = "/findFirstPigEvent", method = RequestMethod.GET)
     @ResponseBody
     public DoctorPigEvent findFirstPigEvent(@RequestParam("pigId") Long pigId,
-                                            @RequestParam(value = "startDate",required = false) String startDate){
+                                            @RequestParam(value = "startDate", required = false) String startDate) {
         Date beginDateTime = Strings.isNullOrEmpty(startDate) ? null : DTF.parseDateTime(startDate).withTimeAtStartOfDay().toDate();
         return RespHelper.or500(doctorPigEventReadService.findFirstPigEvent(pigId, beginDateTime));
     }
 
     @RequestMapping(value = "/queryPigEventById", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public DoctorPigEvent queryPigEventById(@RequestParam("eventId") Long eventId){
+    public DoctorPigEvent queryPigEventById(@RequestParam("eventId") Long eventId) {
         return RespHelper.or500(doctorPigEventReadService.queryPigEventById(eventId));
     }
 
     @RequestMapping(value = "/queryPigEvents", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public List<Integer> queryPigExecuteEvent(@RequestParam("ids") String ids){
+    public List<Integer> queryPigExecuteEvent(@RequestParam("ids") String ids) {
         List<Long> pigIds = null;
-        try{
+        try {
             pigIds = OBJECT_MAPPER.readValue(ids, JacksonType.LIST_OF_LONG);
-        }catch (Exception e){
+        } catch (Exception e) {
             log.error("query pig execute event error, ids:{} cause:{}", ids, Throwables.getStackTraceAsString(e));
             throw new JsonResponseException("query.executeEvent.fail");
         }
@@ -168,22 +176,31 @@ public class DoctorPigEvents {
 
     @RequestMapping(value = "/queryDoctorSowParityCount", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public List<DoctorSowParityCount> queryDoctorSowParityCount(@RequestParam("pigId") Long pigId){
-        return  RespHelper.or500(doctorPigEventReadService.querySowParityCount(pigId));
+    public List<DoctorSowParityCount> queryDoctorSowParityCount(@RequestParam("pigId") Long pigId) {
+        return RespHelper.or500(doctorPigEventReadService.querySowParityCount(pigId));
     }
 
     @RequestMapping(value = "/updateData", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public Boolean updateData(@RequestParam("key") String key, @RequestParam(value = "businessId", required = false) Long businessId){
+    public Boolean updateData(@RequestParam("key") String key, @RequestParam(value = "businessId", required = false) Long businessId) {
         return RespHelper.or500(workFlowService.updateData(key, businessId));
     }
 
-    @RequestMapping(value = "/PagingEvent")
+    @RequestMapping(value = "/pigPaging")
     @ResponseBody
-    public Paging<DoctorPigEvent> queryPigEventsByCriteria(@RequestParam("params") Map<String, Object> params, Integer pageNo, Integer pageSize){
-        if (params == null || params.isEmpty()){
+    public Paging<DoctorPigEvent> queryPigEventsByCriteria(@RequestParam Map<String, String> params, @RequestParam Integer pageNo, @RequestParam Integer pageSize) {
+        if (params == null || params.isEmpty()) {
             return Paging.empty();
         }
-        return RespHelper.or500(doctorPigEventReadService.queryPigEventsByCriteria(params, pageNo, pageSize));
+        DoctorPigEventSearchDto doctorPigEventSearchDto = BeanMapper.map(params, DoctorPigEventSearchDto.class);
+        return RespHelper.or500(doctorPigEventReadService.queryPigEventsByCriteria(doctorPigEventSearchDto, pageNo, pageSize));
     }
+
+    @RequestMapping(value = "/pigEvents")
+    @ResponseBody
+    public List<String> queryPigEvents(@RequestParam String types) {
+        List<PigEvent> events = PigEvent.from(Splitters.UNDERSCORE.splitToList(types).stream().filter(type -> StringUtils.isNotBlank(type)).map(type -> Integer.parseInt(type)).collect(Collectors.toList()));
+        return events.stream().map(pigEvent -> pigEvent.getDesc()).collect(Collectors.toList());
+    }
+
 }
