@@ -36,6 +36,7 @@ public interface DoctorWareHouseReadService {
                                                                  Integer type,
                                                                  Integer pageNo,Integer pageSize);
 
+    Response<List<DoctorWareHouseDto>> listDoctorWareHouseDto(@NotNull Long farmId, Integer type, String warehouseName);
 
     /**
      * 通过WareHouseId 获取仓库信息
