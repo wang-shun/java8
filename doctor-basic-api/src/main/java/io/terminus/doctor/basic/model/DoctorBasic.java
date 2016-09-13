@@ -92,7 +92,14 @@ public class DoctorBasic implements Serializable {
         UNIT(5, "计量单位"),
         FOSTER_REASON(6, "寄养原因"),
         CHANGE_TYPE(7, "变动类型"),
-        ABORTION_REASON(8, "流产原因");
+        ABORTION_REASON(8, "流产原因"),
+
+        // 物料相关
+        FEED_SUB(11, "物料—饲料—子类"),
+        MATERIAL_SUB(12, "物料—原料—子类"),
+        VACCINATION_SUB(13, "物料—疫苗—子类"),
+        MEDICINE_SUB(14, "物料—药品—子类"),
+        CONSUME_SUB(15, "物料—消耗品—子类");
 
         @Getter
         private final int value;

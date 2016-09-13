@@ -32,6 +32,11 @@ public class DoctorBasicMaterial implements Serializable {
      * 输入码
      */
     private String srm;
+
+    /**
+     * 逻辑删除字段, -1 无效数据, 1 有效数据
+     */
+    private Integer isValid;
     
     /**
      * 单位组id

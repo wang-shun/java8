@@ -276,3 +276,7 @@ Alter TABLE doctor_messages ADD COLUMN is_expired SMALLINT (2) DEFAULT NULL COMM
 alter table doctor_pig_events
 add column `operator_id` bigint(20) DEFAULT NULL COMMENT '操作人id' after remark,
 add column `operator_name` varchar(64) DEFAULT NULL COMMENT '操作人' after operator_id;
+
+-- 2016年09月13日 基础物料表增加逻辑删除字段
+alter table doctor_basic_materials
+add column is_valid smallint(6) NOT NULL DEFAULT 1 COMMENT '逻辑删除字段, -1 表示删除, 1 表示可用' after srm;
