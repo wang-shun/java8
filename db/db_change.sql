@@ -280,3 +280,6 @@ add column `operator_name` varchar(64) DEFAULT NULL COMMENT '操作人' after op
 -- 2016-09-12 增加猪群销售字段
 ALTER TABLE doctor_group_events ADD COLUMN base_weight SMALLINT(6) DEFAULT NULL COMMENT '销售基础重量: 10, 15(kg)' AFTER avg_weight;
 ALTER TABLE doctor_group_events ADD COLUMN over_price DOUBLE DEFAULT NULL COMMENT '超出价格(分/kg)' AFTER amount;
+
+alter table doctor_pig_events add column boar_code varchar(64) default null comment '配种的公猪' after doctor_mate_type;
+create index doctor_pig_events_boar_code on doctor_pig_events(boar_code);

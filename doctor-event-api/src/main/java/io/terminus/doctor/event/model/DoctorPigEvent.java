@@ -250,6 +250,11 @@ public class DoctorPigEvent implements Serializable {
      */
     private Integer doctorMateType;
 
+    /**
+     * 配种公猪
+     */
+    private String boarCode;
+
     private String outId;
 
     @Setter(AccessLevel.NONE)

@@ -182,6 +182,11 @@ public abstract class DoctorAbstractEventFlowHandler extends HandlerAware {
 
         eventCreateAfterHandler(execution, doctorPigEvent, doctorPigTrack, basicInputInfoDto, extra, context);
 
+        Map<String, Object> extraMap = JsonMapper.nonEmptyMapper().fromJson(doctorPigTrack.getExtra(),
+                JsonMapper.nonEmptyMapper().createCollectionType(Map.class, String.class, Object.class));
+
+        //往事件中添加公猪code
+        doctorPigEvent.setBoarCode(Objects.isNull(extraMap.get("matingBoarPigCode")) ? null : Objects.toString(extraMap.get("matingBoarPigCode")));
         //往事件当中添加事件发生之后猪的状态
         doctorPigEvent.setPigStatusAfter(doctorPigTrack.getStatus());
         //添加时间发生之后母猪的胎次
