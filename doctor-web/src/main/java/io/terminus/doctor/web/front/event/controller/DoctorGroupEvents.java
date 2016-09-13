@@ -24,6 +24,7 @@ import io.terminus.doctor.web.front.event.service.DoctorGroupWebService;
 import io.terminus.doctor.web.util.TransFromUtil;
 import io.terminus.pampas.common.UserUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -297,6 +298,10 @@ public class DoctorGroupEvents {
     public Paging<DoctorGroupEvent> queryGroupEventsByCriteria(@RequestParam Map<String, String> params, @RequestParam Integer pageNo, @RequestParam Integer pageSize) {
         if (params == null || params.isEmpty()) {
             return Paging.empty();
+        }
+        if (StringUtils.isNotBlank(params.get("eventName"))){
+            params.put("type", String.valueOf(GroupEventType.from(params.get("eventName")).getValue()));
+            params.remove("eventName");
         }
         DoctorGroupEventSearchDto doctorGroupEventSearchDto = BeanMapper.map(params, DoctorGroupEventSearchDto.class);
         return RespHelper.or500(doctorGroupReadService.queryGroupEventsByCriteria(doctorGroupEventSearchDto, pageNo, pageSize));

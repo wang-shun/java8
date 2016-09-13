@@ -192,6 +192,10 @@ public class DoctorPigEvents {
         if (params == null || params.isEmpty()) {
             return Paging.empty();
         }
+        if (StringUtils.isNotBlank(params.get("eventName"))){
+            params.put("type", PigEvent.from(params.get("eventName")).getKey().toString());
+            params.remove("eventName");
+        }
         DoctorPigEventSearchDto doctorPigEventSearchDto = BeanMapper.map(params, DoctorPigEventSearchDto.class);
         return RespHelper.or500(doctorPigEventReadService.queryPigEventsByCriteria(doctorPigEventSearchDto, pageNo, pageSize));
     }
