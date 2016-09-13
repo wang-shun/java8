@@ -39,32 +39,29 @@ public class DoctorSowFostersHandler extends DoctorAbstractEventFlowHandler {
 
     @Override
     public DoctorPigTrack updateDoctorPigTrackInfo(Execution execution, DoctorPigTrack doctorPigTrack, DoctorBasicInputInfoDto basic, Map<String, Object> extra, Map<String, Object> context) {
-
-        // 校验当前的母猪状态 status 的存在方式
-        Integer currentStatus = doctorPigTrack.getStatus();
-        checkState(
-                Objects.equals(currentStatus, PigStatus.FEED.getKey()), "foster.currentSowStatus.error");
+        checkState(Objects.equals(doctorPigTrack.getStatus(), PigStatus.FEED.getKey()), "foster.currentSowStatus.error");
 
         //添加当前母猪的健崽猪的数量信息
-        Integer healthCount = MoreObjects.firstNonNull(doctorPigTrack.getUnweanQty(), 0);
+        Integer unweanCount = MoreObjects.firstNonNull(doctorPigTrack.getUnweanQty(), 0);
         Integer fosterCount = (Integer) extra.get("fostersCount");
+        checkState(unweanCount >= fosterCount, "create.fostersBy.notEnough");
 
-        Integer afterHealthCount = healthCount - fosterCount;
-        checkState(afterHealthCount >= 0, "create.fostersBy.notEnough");
-        extra.put("farrowingLiveCount", afterHealthCount);
+        doctorPigTrack.setUnweanQty(unweanCount - fosterCount);  //未断奶数
+        extra.put("farrowingLiveCount", doctorPigTrack.getUnweanQty());
         doctorPigTrack.addAllExtraMap(extra);
 
-        doctorPigTrack.setUnweanQty(afterHealthCount);  //未断奶数
-
-        // 修改当前的母猪状态信息
-        if (afterHealthCount == 0) {
+        //全部断奶后, 初始化所有本次哺乳的信息
+        if (doctorPigTrack.getUnweanQty() == 0) {
             doctorPigTrack.setStatus(PigStatus.Wean.getKey());
             doctorPigTrack.setGroupId(-1L);  //groupId = -1 置成 NULL
             doctorPigTrack.setFarrowQty(0);  //分娩数 0
+            doctorPigTrack.setFosterQty(MoreObjects.firstNonNull(doctorPigTrack.getFosterQty(), 0) - fosterCount);  //拼出去 数量要减
+            doctorPigTrack.setFarrowAvgWeight(0D); //分娩均重(kg)
+            doctorPigTrack.setWeanAvgWeight(0D);
         } else {
             doctorPigTrack.setStatus(PigStatus.FEED.getKey());
         }
-        execution.getExpression().put("leftCount", afterHealthCount);
+        execution.getExpression().put("leftCount", doctorPigTrack.getUnweanQty());
         doctorPigTrack.addPigEvent(basic.getPigType(), (Long) context.get("doctorPigEventId"));
         return doctorPigTrack;
     }

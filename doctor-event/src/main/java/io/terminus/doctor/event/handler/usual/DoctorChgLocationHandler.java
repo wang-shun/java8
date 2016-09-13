@@ -7,7 +7,6 @@ import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.Params;
 import io.terminus.doctor.common.utils.RespHelper;
-import io.terminus.doctor.event.contants.DoctorPigExtraKeys;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorPigDao;
 import io.terminus.doctor.event.dao.DoctorPigEventDao;
@@ -82,9 +81,9 @@ public class DoctorChgLocationHandler extends DoctorAbstractEventHandler{
 
         // 来源和前往都是 1 和 7 时, 仔猪也要跟着转群
         if(PigType.FARROW_TYPES.contains(fromBarn.getPigType()) && PigType.FARROW_TYPES.contains(toBarn.getPigType())
-                && extraMap.get(DoctorPigExtraKeys.farrowingPigletGroupId) != null){
-            Long groupId = pigletTrans(doctorPigTrack, extraMap, basic, extra, toBarn);
-            extraMap.put(DoctorPigExtraKeys.farrowingPigletGroupId, groupId);
+                && doctorPigTrack.getGroupId() != null){
+            Long groupId = pigletTrans(doctorPigTrack, basic, extra, toBarn);
+            extraMap.put("farrowingPigletGroupId", groupId);
             doctorPigTrack.setExtraMap(extraMap);
             doctorPigTrack.setGroupId(groupId);  //更新猪群id
         }
@@ -111,9 +110,8 @@ public class DoctorChgLocationHandler extends DoctorAbstractEventHandler{
     }
 
     //未断奶仔猪转群
-    private Long pigletTrans(DoctorPigTrack pigTrack, Map<String, Object> extraMap, DoctorBasicInputInfoDto basic, Map<String, Object> extra, DoctorBarn doctorToBarn) {
+    private Long pigletTrans(DoctorPigTrack pigTrack, DoctorBasicInputInfoDto basic, Map<String, Object> extra, DoctorBarn doctorToBarn) {
         //未断奶仔猪id
-        Long farrowingPigletGroupId = Long.valueOf(extraMap.get(DoctorPigExtraKeys.farrowingPigletGroupId).toString());
         DoctorTransGroupInput input = new DoctorTransGroupInput();
         input.setToBarnId(doctorToBarn.getId());
         input.setToBarnName(doctorToBarn.getName());
@@ -127,7 +125,7 @@ public class DoctorChgLocationHandler extends DoctorAbstractEventHandler{
             input.setIsCreateGroup(IsOrNot.YES.getValue());
         }
 
-        DoctorGroupDetail fromGroup = RespHelper.orServEx(doctorGroupReadService.findGroupDetailByGroupId(farrowingPigletGroupId));
+        DoctorGroupDetail fromGroup = RespHelper.orServEx(doctorGroupReadService.findGroupDetailByGroupId(pigTrack.getGroupId()));
         input.setEventAt(DateUtil.toDateString(basic.generateEventAtFromExtra(extra)));
         input.setIsAuto(IsOrNot.YES.getValue());
         input.setCreatorId(basic.getStaffId());
@@ -140,8 +138,8 @@ public class DoctorChgLocationHandler extends DoctorAbstractEventHandler{
         input.setQuantity(pigTrack.getUnweanQty());
         input.setBoarQty(0);
         input.setSowQty(input.getQuantity() - input.getBoarQty());
-        input.setAvgWeight(Double.valueOf(String.valueOf(MoreObjects.firstNonNull(extraMap.get(DoctorPigExtraKeys.birthNestAvg), 0D))));
-        input.setWeight(MoreObjects.firstNonNull(input.getAvgWeight(), 0D) * MoreObjects.firstNonNull(input.getQuantity(), 0));
+        input.setAvgWeight((MoreObjects.firstNonNull(pigTrack.getFarrowAvgWeight(), 0D)));
+        input.setWeight(input.getAvgWeight() * input.getQuantity());
         return RespHelper.orServEx(doctorGroupWriteService.groupEventTransGroup(fromGroup, input));
     }
 }

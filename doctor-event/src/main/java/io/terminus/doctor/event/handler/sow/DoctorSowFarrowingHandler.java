@@ -82,7 +82,7 @@ public class DoctorSowFarrowingHandler extends DoctorAbstractEventFlowHandler {
 
 
         //分娩窝重
-        doctorPigEvent.setFarrowWeight(Doubles.tryParse(Objects.toString(extra.get("birthNextAvg"))));
+        doctorPigEvent.setFarrowWeight(Doubles.tryParse(Objects.toString(extra.get("birthNestAvg"))));
         //分娩仔猪只数信息
         doctorPigEvent.setLiveCount(Ints.tryParse(Objects.toString(extra.get("farrowingLiveCount"))));
         doctorPigEvent.setHealthCount(Ints.tryParse(Objects.toString(extra.get("healthCount"))));
@@ -117,6 +117,9 @@ public class DoctorSowFarrowingHandler extends DoctorAbstractEventFlowHandler {
         doctorPigTrack.setGroupId(groupId);
         doctorPigTrack.setFarrowQty(Integer.valueOf(MoreObjects.firstNonNull(extra.get("farrowingLiveCount"), 0).toString()));
         doctorPigTrack.setUnweanQty(doctorPigTrack.getFarrowQty());
+        doctorPigTrack.setFosterQty(0);  //分娩时 被拼窝为0
+        doctorPigTrack.setFarrowAvgWeight(Double.valueOf(extra.get("birthNestAvg").toString()));
+        doctorPigTrack.setWeanAvgWeight(0D); //分娩时, 断奶均重置成0
 
         doctorPigTrack.addAllExtraMap(extra);
         doctorPigTrack.setStatus(PigStatus.FEED.getKey());  //母猪进入哺乳的状态

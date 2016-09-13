@@ -63,26 +63,22 @@ public class DoctorSowFostersByHandler extends DoctorAbstractEventFlowHandler {
     @Override
     public DoctorPigTrack updateDoctorPigTrackInfo(Execution execution, DoctorPigTrack doctorPigTrack,
                                                    DoctorBasicInputInfoDto basic, Map<String, Object> extra, Map<String, Object> context) {
-
-        // 校验当前的母猪状态 status 的存在方式
-        Integer currentStatus = doctorPigTrack.getStatus();
-        checkState(
-                Objects.equals(currentStatus, PigStatus.FEED.getKey()) ||
-                        Objects.equals(currentStatus, PigStatus.Wean.getKey()), "foster.currentSowStatus.error");
+        checkState(Objects.equals(doctorPigTrack.getStatus(), PigStatus.FEED.getKey()) ||
+                Objects.equals(doctorPigTrack.getStatus(), PigStatus.Wean.getKey()), "foster.currentSowStatus.error");
 
         // 转群操作
         Long groupId = groupSowEventCreate(doctorPigTrack, basic, extra);
 
         //添加当前母猪的健崽猪的数量信息
-        Integer healthCount = MoreObjects.firstNonNull(doctorPigTrack.getFarrowQty(), 0);
         Integer fosterCount = (Integer) extra.get("fostersCount");
-        extra.put("farrowingLiveCount", healthCount + fosterCount);
-        extra.put("farrowingPigletGroupId", groupId);
-        doctorPigTrack.addAllExtraMap(extra);
 
         doctorPigTrack.setGroupId(groupId);  //groupId = -1 置成 NULL
-        doctorPigTrack.setFarrowQty(MoreObjects.firstNonNull(doctorPigTrack.getFarrowQty(), 0) + fosterCount);  //分娩数
         doctorPigTrack.setUnweanQty(MoreObjects.firstNonNull(doctorPigTrack.getUnweanQty(), 0) + fosterCount);  //未断奶数
+        doctorPigTrack.setFosterQty(MoreObjects.firstNonNull(doctorPigTrack.getFosterQty(), 0) + fosterCount);  //被拼窝数累加
+
+        extra.put("farrowingLiveCount", doctorPigTrack.getUnweanQty());
+        extra.put("farrowingPigletGroupId", groupId);
+        doctorPigTrack.addAllExtraMap(extra);
 
         // 修改当前的母猪状态信息
         doctorPigTrack.setStatus(PigStatus.FEED.getKey());

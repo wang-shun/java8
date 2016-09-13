@@ -1,5 +1,6 @@
 package io.terminus.doctor.event.handler.sow;
 
+import com.google.common.base.MoreObjects;
 import com.google.common.primitives.Doubles;
 import com.google.common.primitives.Ints;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
@@ -65,38 +66,39 @@ public class DoctorSowWeanHandler extends DoctorAbstractEventFlowHandler {
 
     @Override
     public DoctorPigTrack updateDoctorPigTrackInfo(Execution execution, DoctorPigTrack doctorPigTrack, DoctorBasicInputInfoDto basic, Map<String, Object> extra, Map<String, Object> context) {
-        // 校验断奶的数量信息
-        Map<String, Object> extraMap = doctorPigTrack.getExtraMap();
-        Integer healthCount = (Integer) extraMap.get("farrowingLiveCount");
+        checkState(Objects.equals(doctorPigTrack.getStatus(), PigStatus.FEED.getKey()), "not.feed.sow");
+
+        //未断奶数
+        Integer unweanCount = doctorPigTrack.getUnweanQty();
         Integer toWeanCount = (Integer) extra.get("partWeanPigletsCount");
-        Double weanAvgWeight = (Double) extra.get("partWeanAvgWeight");
+        Integer weanCount = doctorPigTrack.getFarrowQty() + doctorPigTrack.getFosterQty() - doctorPigTrack.getUnweanQty(); //断奶数量 = 初始 + 变动(拼窝or死亡等) - 未断奶
+        checkState(toWeanCount <= unweanCount, "wean.countInput.error");
+        doctorPigTrack.setUnweanQty(unweanCount - toWeanCount);
 
-        // 历史数据修改信息内容
-        if (extraMap.containsKey("partWeanPigletsCount")) {
-            // 已经包含断奶信息
-            toWeanCount += (Integer) extraMap.get("partWeanPigletsCount");
-            weanAvgWeight += (Double) extraMap.get("partWeanAvgWeight");
-            weanAvgWeight = weanAvgWeight / 2;
-        }
-        checkState(toWeanCount <= healthCount, "wean.countInput.error");
+        //断奶均重
+        Double toWeanAvgWeight = (Double) extra.get("partWeanAvgWeight");
+        checkState(toWeanAvgWeight != null, "weight.not.null");
+        Double weanAvgWeight = ((MoreObjects.firstNonNull(doctorPigTrack.getWeanAvgWeight(), 0D) * weanCount) + toWeanAvgWeight * toWeanCount ) / (weanCount + toWeanCount);
+        doctorPigTrack.setWeanAvgWeight(weanAvgWeight);
 
-        // update info
+        //更新extra字段
         extra.put("partWeanPigletsCount", toWeanCount);
         extra.put("partWeanAvgWeight", weanAvgWeight);
-
+        extra.put("farrowingLiveCount", doctorPigTrack.getUnweanQty());
         extra.put("hasWeanToMating", true);
         doctorPigTrack.addAllExtraMap(extra);
 
-        doctorPigTrack.setUnweanQty(healthCount - toWeanCount);  //未断奶数
-
-        if (Objects.equals(toWeanCount, healthCount)) {
+        //全部断奶后, 初始化所有本次哺乳的信息
+        if (doctorPigTrack.getUnweanQty() == 0) {
             doctorPigTrack.setStatus(PigStatus.Wean.getKey());
             doctorPigTrack.setGroupId(-1L);  //groupId = -1 置成 NULL
+            doctorPigTrack.setFarrowAvgWeight(0D);
             doctorPigTrack.setFarrowQty(0);  //分娩数 0
+            doctorPigTrack.setWeanAvgWeight(0D);
         }
 
         doctorPigTrack.addPigEvent(basic.getPigType(), (Long) context.get("doctorPigEventId"));
-        execution.getExpression().put("leftCount", (healthCount - toWeanCount));
+        execution.getExpression().put("leftCount", doctorPigTrack.getUnweanQty());
         return doctorPigTrack;
     }
 }
