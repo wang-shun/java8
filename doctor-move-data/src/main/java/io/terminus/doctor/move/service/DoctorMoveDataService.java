@@ -202,13 +202,17 @@ public class DoctorMoveDataService {
     @Transactional
     public void updateTranGroupType(DoctorFarm farm) {
         doctorGroupEventDao.findGroupEventsByEventTypeAndDate(farm.getId(), GroupEventType.MOVE_IN.getValue(), null, null)
-                .forEach(event -> {
-                    DoctorMoveInGroupEvent moveIn = JSON_MAPPER.fromJson(event.getExtra(), DoctorMoveInGroupEvent.class);
-                    DoctorGroupEvent updateEvent = new DoctorGroupEvent();
-                    updateEvent.setId(event.getId());
-                    updateEvent.setTransGroupType(getTransType(moveIn.getInType(), event.getPigType(), moveIn.getFromBarnType()).getValue());
-                    doctorGroupEventDao.update(updateEvent);
-                });
+                .forEach(this::updateTransGroupType);
+        doctorGroupEventDao.findGroupEventsByEventTypeAndDate(farm.getId(), GroupEventType.TRANS_GROUP.getValue(), null, null)
+                .forEach(this::updateTransGroupType);
+    }
+
+    private void updateTransGroupType(DoctorGroupEvent event) {
+        DoctorMoveInGroupEvent moveIn = JSON_MAPPER.fromJson(event.getExtra(), DoctorMoveInGroupEvent.class);
+        DoctorGroupEvent updateEvent = new DoctorGroupEvent();
+        updateEvent.setId(event.getId());
+        updateEvent.setTransGroupType(getTransType(moveIn.getInType(), event.getPigType(), moveIn.getFromBarnType()).getValue());
+        doctorGroupEventDao.update(updateEvent);
     }
 
     /**
