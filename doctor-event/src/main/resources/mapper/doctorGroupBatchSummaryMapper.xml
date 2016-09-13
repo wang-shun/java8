@@ -10,6 +10,7 @@
         <result column="farm_id" property="farmId"/>
         <result column="group_id" property="groupId"/>
         <result column="group_code" property="groupCode"/>
+        <result column="status" property="status"/>
         <result column="pig_type" property="pigType"/>
         <result column="avg_day_age" property="avgDayAge"/>
         <result column="open_at" property="openAt"/>
@@ -58,6 +59,7 @@
         farm_id,
         group_id,
         group_code,
+        status,
         pig_type,
         avg_day_age,
         open_at,
@@ -98,6 +100,7 @@
         #{farmId},
         #{groupId},
         #{groupCode},
+        #{status},
         #{pigType},
         #{avgDayAge},
         #{openAt},
@@ -139,6 +142,7 @@
         <if test="farmId != null">AND farm_id = #{farmId}</if>
         <if test="groupId != null">AND group_id = #{groupId}</if>
         <if test="groupCode != null">AND group_code = #{groupCode}</if>
+        <if test="status != null">AND status = #{status}</if>
         <if test="pigType != null">AND pig_type = #{pigType}</if>
         <if test="avgDayAge != null">AND avg_day_age = #{avgDayAge}</if>
         <if test="openAt != null">AND open_at = #{openAt}</if>
@@ -191,6 +195,7 @@
             #{item.farmId},
             #{item.groupId},
             #{item.groupCode},
+            #{item.status},
             #{item.pigType},
             #{item.avgDayAge},
             #{item.openAt},
@@ -240,6 +245,7 @@
             <if test="farmId != null">farm_id = #{farmId},</if>
             <if test="groupId != null">group_id = #{groupId},</if>
             <if test="groupCode != null">group_code = #{groupCode},</if>
+            <if test="status != null">status = #{status},</if>
             <if test="pigType != null">pig_type = #{pigType},</if>
             <if test="avgDayAge != null">avg_day_age = #{avgDayAge},</if>
             <if test="openAt != null">open_at = #{openAt},</if>

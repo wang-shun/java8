@@ -1,6 +1,7 @@
 package io.terminus.doctor.common.utils;
 
 import java.util.List;
+import java.util.function.Predicate;
 import java.util.function.ToDoubleFunction;
 import java.util.function.ToIntFunction;
 import java.util.function.ToLongFunction;
@@ -34,11 +35,23 @@ public class CountUtil {
         return datas.stream().mapToInt(function);
     }
 
+    public static <T> IntStream intStream(List<T> datas, ToIntFunction<T> function, Predicate<T> predicate) {
+        return datas.stream().filter(predicate).mapToInt(function);
+    }
+
     public static <T> LongStream longStream(List<T> datas, ToLongFunction<T> function) {
         return datas.stream().mapToLong(function);
     }
 
+    public static <T> LongStream longStream(List<T> datas, ToLongFunction<T> function, Predicate<T> predicate) {
+        return datas.stream().filter(predicate).mapToLong(function);
+    }
+
     public static <T> DoubleStream doubleStream(List<T> datas, ToDoubleFunction<T> function) {
         return datas.stream().mapToDouble(function);
+    }
+
+    public static <T> DoubleStream doubleStream(List<T> datas, ToDoubleFunction<T> function, Predicate<T> predicate) {
+        return datas.stream().filter(predicate).mapToDouble(function);
     }
 }

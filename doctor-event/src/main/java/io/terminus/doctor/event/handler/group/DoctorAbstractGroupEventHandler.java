@@ -369,7 +369,7 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
 
     //判断内转还是外转(如果转入类型不是群间转移, 那么一定是外转事件)
     protected static DoctorGroupEvent.TransGroupType getTransType(Integer inType, Integer pigType, DoctorBarn toBarn) {
-        if (!Objects.equals(inType, DoctorMoveInGroupEvent.InType.GROUP.getValue())) {
+        if (inType != null && !Objects.equals(inType, DoctorMoveInGroupEvent.InType.GROUP.getValue())) {
             return DoctorGroupEvent.TransGroupType.OUT;
         }
         return Objects.equals(pigType, toBarn.getPigType()) || (FARROW_TYPES.contains(pigType) && FARROW_TYPES.contains(toBarn.getPigType())) ?

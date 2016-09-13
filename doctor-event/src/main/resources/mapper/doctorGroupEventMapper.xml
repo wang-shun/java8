@@ -191,6 +191,12 @@
         WHERE farm_id = #{farmId}
     </select>
 
+    <select id="findByGroupId" parameterType="long" resultMap="DoctorGroupEventMap">
+        SELECT <include refid="cols_all"/>
+        FROM <include refid="tb"/>
+        WHERE group_id = #{groupId}
+    </select>
+
     <select id="updateGroupCodeByGroupId" parameterType="map" resultMap="DoctorGroupEventMap">
         UPDATE <include refid="tb"/>
         SET group_code = #{groupCode}

@@ -1,6 +1,7 @@
 package io.terminus.doctor.event.service;
 
 import io.terminus.common.model.Response;
+import io.terminus.doctor.event.dto.DoctorGroupDetail;
 import io.terminus.doctor.event.model.DoctorGroupBatchSummary;
 
 import javax.validation.constraints.NotNull;
@@ -20,5 +21,12 @@ public interface DoctorGroupBatchSummaryReadService {
      * @return 猪群批次总结表
      */
     Response<DoctorGroupBatchSummary> findGroupBatchSummaryById(@NotNull(message = "groupBatchSummaryId.not.null") Long groupBatchSummaryId);
+
+    /**
+     * 通过猪群明细实时获取批次总结
+     * @param groupDetail 猪群明细
+     * @return 猪群批次总结
+     */
+    Response<DoctorGroupBatchSummary> getSummaryByGroupDetail(DoctorGroupDetail groupDetail);
 
 }

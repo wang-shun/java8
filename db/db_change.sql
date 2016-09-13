@@ -287,6 +287,7 @@ CREATE TABLE `doctor_group_batch_summaries` (
   `farm_id` bigint(20) DEFAULT NULL COMMENT '猪场id',
   `group_id` bigint(20) DEFAULT NULL COMMENT '猪群id',
   `group_code` varchar(512) DEFAULT NULL COMMENT '猪群号',
+  `status` smallint(6) DEFAULT NULL COMMENT '枚举: 1:已建群, -1:已关闭',
   `pig_type` smallint(6) DEFAULT NULL COMMENT '猪类',
   `avg_day_age` int(11) DEFAULT NULL COMMENT '平均日龄',
   `open_at` datetime DEFAULT NULL COMMENT '建群时间',
@@ -325,3 +326,10 @@ CREATE TABLE `doctor_group_batch_summaries` (
   KEY `idx_doctor_group_batch_summaries_barn_id` (`barn_id`),
   KEY `idx_doctor_group_batch_summaries_farm_id` (`farm_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='猪群批次总结表';
+
+-- 2016-09-13 猪群跟踪新增统计字段
+ALTER TABLE doctor_group_tracks ADD COLUMN wean_avg_weight double DEFAULT NULL COMMENT '断奶均重kg' AFTER avg_weight;
+ALTER TABLE doctor_group_tracks ADD COLUMN birth_avg_weight double DEFAULT NULL COMMENT '出生均重kg' AFTER wean_avg_weight;
+ALTER TABLE doctor_group_tracks ADD COLUMN weak_qty int(11) DEFAULT NULL COMMENT '弱仔数' AFTER birth_avg_weight;
+ALTER TABLE doctor_group_tracks ADD COLUMN unwean_qty int(11) DEFAULT NULL COMMENT '未断奶数' AFTER weak_qty;
+ALTER TABLE doctor_group_tracks ADD COLUMN unq_qty int(11) DEFAULT NULL COMMENT '不合格数' AFTER unwean_qty;
