@@ -36,7 +36,7 @@ public class DoctorWeanDailyReport implements Serializable {
 
     public void addWeanCount(DoctorWeanDailyReport dto){
         this.count += dto.getCount();
-        this.weight += dto.getWeight();
+        this.weight = dto.getWeight();
         this.nest += dto.getNest();
         this.avgDayAge = dto.getAvgDayAge();
     }
