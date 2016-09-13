@@ -67,6 +67,9 @@ public class DoctorMoveInGroupEventHandler extends DoctorAbstractGroupEventHandl
         DoctorMoveInGroupEvent moveInEvent = BeanMapper.map(moveIn, DoctorMoveInGroupEvent.class);
         checkBreed(group.getBreedId(), moveInEvent.getBreedId());
 
+        DoctorBarn fromBarn = getBarnById(moveIn.getFromBarnId());
+        moveInEvent.setFromBarnType(fromBarn.getPigType());
+
         //2.创建转入猪群事件
         DoctorGroupEvent<DoctorMoveInGroupEvent> event = dozerGroupEvent(group, GroupEventType.MOVE_IN, moveIn);
         event.setQuantity(moveIn.getQuantity());
@@ -76,7 +79,7 @@ public class DoctorMoveInGroupEventHandler extends DoctorAbstractGroupEventHandl
 
         if (moveIn.getFromBarnId() != null) {
             DoctorBarn toBarn = RespHelper.orServEx(doctorBarnReadService.findBarnById(moveIn.getFromBarnId()));
-            event.setTransGroupType(getTransType(moveIn.getInType(), group.getPigType(), toBarn).getValue());   //区别内转还是外转
+            event.setTransGroupType(getTransType(group.getPigType(), toBarn).getValue());   //区别内转还是外转
         }
         event.setExtraMap(moveInEvent);
         doctorGroupEventDao.create(event);

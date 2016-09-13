@@ -18,6 +18,7 @@ import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.constants.DoctorBasicEnums;
 import io.terminus.doctor.event.constants.DoctorFarmEntryConstants;
+import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorGroupDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
@@ -120,6 +121,7 @@ public class DoctorMoveDataService {
     private final DoctorMoveBasicService doctorMoveBasicService;
     private final DoctorPigReadService doctorPigReadService;
     private final DoctorMoveWorkflowHandler doctorMoveWorkflowHandler;
+    private final DoctorBarnDao doctorBarnDao;
 
     @Autowired
     public DoctorMoveDataService(DoctorMoveDatasourceHandler doctorMoveDatasourceHandler,
@@ -131,7 +133,8 @@ public class DoctorMoveDataService {
                                  DoctorPigEventDao doctorPigEventDao,
                                  DoctorMoveBasicService doctorMoveBasicService,
                                  DoctorPigReadService doctorPigReadService,
-                                 DoctorMoveWorkflowHandler doctorMoveWorkflowHandler) {
+                                 DoctorMoveWorkflowHandler doctorMoveWorkflowHandler,
+                                 DoctorBarnDao doctorBarnDao) {
         this.doctorMoveDatasourceHandler = doctorMoveDatasourceHandler;
         this.doctorGroupDao = doctorGroupDao;
         this.doctorGroupEventDao = doctorGroupEventDao;
@@ -142,6 +145,7 @@ public class DoctorMoveDataService {
         this.doctorMoveBasicService = doctorMoveBasicService;
         this.doctorPigReadService = doctorPigReadService;
         this.doctorMoveWorkflowHandler = doctorMoveWorkflowHandler;
+        this.doctorBarnDao = doctorBarnDao;
     }
 
     //删除猪场所有猪相关的数据
@@ -207,6 +211,22 @@ public class DoctorMoveDataService {
                     DoctorGroupEvent updateEvent = new DoctorGroupEvent();
                     updateEvent.setId(event.getId());
                     updateEvent.setTransGroupType(getTransType(moveIn.getInType(), event.getPigType(), moveIn.getFromBarnType()).getValue());
+                    doctorGroupEventDao.update(updateEvent);
+                });
+
+        doctorGroupEventDao.findGroupEventsByEventTypeAndDate(farm.getId(), GroupEventType.TRANS_GROUP.getValue(), null, null)
+                .forEach(event -> {
+                    DoctorTransGroupEvent trans = JSON_MAPPER.fromJson(event.getExtra(), DoctorTransGroupEvent.class);
+                    DoctorGroupEvent updateEvent = new DoctorGroupEvent();
+                    updateEvent.setId(event.getId());
+                    Integer toBarnType = trans.getToBarnType();
+                    if (toBarnType == null) {
+                        DoctorBarn toBarn = doctorBarnDao.findById(trans.getToBarnId());
+                        if (toBarn != null) {
+                            toBarnType = toBarn.getPigType();
+                        }
+                    }
+                    updateEvent.setTransGroupType(getTransType(null, event.getPigType(), toBarnType).getValue());
                     doctorGroupEventDao.update(updateEvent);
                 });
     }
@@ -1753,7 +1773,7 @@ public class DoctorMoveDataService {
 
     //判断内转还是外转
     private static DoctorGroupEvent.TransGroupType getTransType(Integer inType, Integer pigType, Integer toBarnType) {
-        if (!Objects.equals(inType, DoctorMoveInGroupEvent.InType.GROUP.getValue())) {
+        if (inType != null && !Objects.equals(inType, DoctorMoveInGroupEvent.InType.GROUP.getValue())) {
             return DoctorGroupEvent.TransGroupType.OUT;
         }
         return Objects.equals(pigType, toBarnType) || (FARROW_TYPES.contains(pigType) && FARROW_TYPES.contains(toBarnType)) ?
