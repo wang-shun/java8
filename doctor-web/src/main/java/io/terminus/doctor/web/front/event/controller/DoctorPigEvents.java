@@ -34,6 +34,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by yaoqijun.
@@ -175,5 +176,14 @@ public class DoctorPigEvents {
     @ResponseBody
     public Boolean updateData(@RequestParam("key") String key, @RequestParam(value = "businessId", required = false) Long businessId){
         return RespHelper.or500(workFlowService.updateData(key, businessId));
+    }
+
+    @RequestMapping(value = "/PagingEvent")
+    @ResponseBody
+    public Paging<DoctorPigEvent> queryPigEventsByCriteria(@RequestParam("params") Map<String, Object> params, Integer pageNo, Integer pageSize){
+        if (params == null || params.isEmpty()){
+            return Paging.empty();
+        }
+        return RespHelper.or500(doctorPigEventReadService.queryPigEventsByCriteria(params, pageNo, pageSize));
     }
 }
