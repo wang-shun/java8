@@ -7,6 +7,7 @@
 <mapper namespace="DoctorBasicMaterial">
     <resultMap id="DoctorBasicMaterialMap" type="DoctorBasicMaterial">
         <result column="type" property="type"/>
+        <result column="sub_type" property="subType"/>
         <result column="name" property="name"/>
         <result column="srm" property="srm"/>
         <result column="is_valid" property="isValid"/>
@@ -31,15 +32,16 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        type, name, srm, is_valid, unit_group_id, unit_group_name, unit_id, unit_name, default_consume_count, price, remark, created_at, updated_at
+        type, sub_type, name, srm, is_valid, unit_group_id, unit_group_name, unit_id, unit_name, default_consume_count, price, remark, created_at, updated_at
     </sql>
 
     <sql id="vals">
-        #{type}, #{name}, #{srm}, #{isValid}, #{unitGroupId}, #{unitGroupName}, #{unitId}, #{unitName}, #{defaultConsumeCount}, #{price}, #{remark}, now(), now()
+        #{type}, #{subType}, #{name}, #{srm}, #{isValid}, #{unitGroupId}, #{unitGroupName}, #{unitId}, #{unitName}, #{defaultConsumeCount}, #{price}, #{remark}, now(), now()
     </sql>
 
     <sql id="criteria">
         <if test="type != null">AND `type` = #{type}</if>
+        <if test="subType != null">AND `sub_type` = #{subType}</if>
         <if test="name != null">AND `name` like concat('%', #{name}, '%')</if>
         <if test="srm != null">AND srm like concat('%', #{srm}, '%')</if>
         <if test="unitGroupId != null">AND unit_group_id = #{unitGroupId}</if>
@@ -82,6 +84,7 @@
         <include refid="tb"/>
         <set>
             <if test="type != null">type = #{type},</if>
+            <if test="subType != null">sub_type = #{subType},</if>
             <if test="name != null">name = #{name},</if>
             <if test="srm != null">srm = #{srm},</if>
             <if test="isValid != null">is_valid = #{isValid},</if>
