@@ -283,6 +283,7 @@ ALTER TABLE doctor_group_events ADD COLUMN over_price DOUBLE DEFAULT NULL COMMEN
 
 alter table doctor_pig_events add column boar_code varchar(64) default null comment '配种的公猪' after doctor_mate_type;
 create index doctor_pig_events_boar_code on doctor_pig_events(boar_code);
+
 -- 2016年09月13日 基础物料表增加逻辑删除字段
 alter table doctor_basic_materials
 add column is_valid smallint(6) NOT NULL DEFAULT 1 COMMENT '逻辑删除字段, -1 表示删除, 1 表示可用' after srm;
