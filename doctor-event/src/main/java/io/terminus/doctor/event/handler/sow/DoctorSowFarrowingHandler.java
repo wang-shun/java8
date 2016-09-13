@@ -110,7 +110,13 @@ public class DoctorSowFarrowingHandler extends DoctorAbstractEventFlowHandler {
         extra.put("toBarnName", doctorPigTrack.getCurrentBarnName());
 
         // 对应的 猪群信息
-        extra.put("farrowingPigletGroupId", buildPigGroupCountInfo(basic, extra));
+        Long groupId = buildPigGroupCountInfo(basic, extra);
+        extra.put("farrowingPigletGroupId", groupId);
+
+        //分娩时记录下 哺乳猪群号, 分娩数量
+        doctorPigTrack.setGroupId(groupId);
+        doctorPigTrack.setFarrowQty(Integer.valueOf(MoreObjects.firstNonNull(extra.get("farrowingLiveCount"), 0).toString()));
+        doctorPigTrack.setUnweanQty(doctorPigTrack.getFarrowQty());
 
         doctorPigTrack.addAllExtraMap(extra);
         doctorPigTrack.setStatus(PigStatus.FEED.getKey());  //母猪进入哺乳的状态

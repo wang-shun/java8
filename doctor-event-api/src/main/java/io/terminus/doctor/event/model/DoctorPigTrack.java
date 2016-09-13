@@ -67,6 +67,21 @@ public class DoctorPigTrack implements Serializable {
 
     private Double weight;
 
+    /**
+     * 哺乳猪群id(断奶后此id置为null)
+     */
+    private Long groupId;
+
+    /**
+     * 分娩仔猪数
+     */
+    private Integer farrowQty;
+
+    /**
+     * 未断奶数量
+     */
+    private Integer unweanQty;
+
     private Date outFarmDate;
 
     /**

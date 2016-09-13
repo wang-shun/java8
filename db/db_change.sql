@@ -333,3 +333,8 @@ ALTER TABLE doctor_group_tracks ADD COLUMN birth_avg_weight double DEFAULT NULL 
 ALTER TABLE doctor_group_tracks ADD COLUMN weak_qty int(11) DEFAULT NULL COMMENT '弱仔数' AFTER birth_avg_weight;
 ALTER TABLE doctor_group_tracks ADD COLUMN unwean_qty int(11) DEFAULT NULL COMMENT '未断奶数' AFTER weak_qty;
 ALTER TABLE doctor_group_tracks ADD COLUMN unq_qty int(11) DEFAULT NULL COMMENT '不合格数' AFTER unwean_qty;
+
+ALTER TABLE doctor_pig_tracks ADD COLUMN group_id bigint(20) DEFAULT NULL COMMENT '哺乳猪群id(断奶后此id置为null)' AFTER weight;
+ALTER TABLE doctor_pig_tracks ADD COLUMN farrow_qty int(11) DEFAULT NULL COMMENT '分娩仔猪数' AFTER group_id;
+ALTER TABLE doctor_pig_tracks ADD COLUMN unwean_qty int(11) DEFAULT NULL COMMENT '未断奶数量' AFTER farrow_qty;
+
