@@ -68,6 +68,13 @@ public class DoctorMaterialConsumeProvider implements Serializable{
 
     private String staffName;
 
+    /**
+     * 领用物资的猪舍, 仅事件类型为领用(EVENT_TYPE.CONSUMER)时才会有值
+     * 此字段原本存在于extra中, 但为了按猪舍统计数据, 只好拆出来
+     */
+    private Long barnId;
+    private String barnName;
+
     @Setter(AccessLevel.NONE)
     private Map<String, Object> extraMap;
 

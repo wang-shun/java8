@@ -280,3 +280,8 @@ add column `operator_name` varchar(64) DEFAULT NULL COMMENT '操作人' after op
 -- 2016年09月13日 基础物料表增加逻辑删除字段
 alter table doctor_basic_materials
 add column is_valid smallint(6) NOT NULL DEFAULT 1 COMMENT '逻辑删除字段, -1 表示删除, 1 表示可用' after srm;
+
+-- 2016年09月13日, 把物资变动关联的猪舍从 extra 中拆出来
+alter table doctor_material_consume_providers
+add column `barn_id` bigint(20) unsigned DEFAULT NULL COMMENT '领用物资的猪舍, 仅 event_type=1 时才会有值' after staff_name,
+add column `barn_name` varchar(64) DEFAULT NULL COMMENT '猪舍名称' after barn_id;

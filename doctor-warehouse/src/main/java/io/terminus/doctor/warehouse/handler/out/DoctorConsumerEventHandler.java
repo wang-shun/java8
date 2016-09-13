@@ -89,6 +89,8 @@ public class DoctorConsumerEventHandler implements IHandler{
                     "consumeDays", dto.getConsumeDays(),
                     "barnId", dto.getBarnId(),
                     "barnName", dto.getBarnName()).map()));
+            doctorMaterialConsumeProvider.setBarnId(dto.getBarnId());
+            doctorMaterialConsumeProvider.setBarnName(dto.getBarnName());
         }
         doctorMaterialConsumeProvider.setExtraMap(extraMap);
         doctorMaterialConsumeProvider.setUnitPrice(Double.valueOf(totalPrice / consumeCount).longValue());
