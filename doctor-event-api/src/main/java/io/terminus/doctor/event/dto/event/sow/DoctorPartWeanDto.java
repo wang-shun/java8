@@ -40,6 +40,8 @@ public class DoctorPartWeanDto extends AbstractPigEventInputDto implements Seria
 
     private Integer notQualifiedCount; //不合格的数量
 
+    private Integer farrowingLiveCount; //分娩存活数
+
     @Override
     public Map<String, String> descMap(){
         Map<String, String> map = new HashMap<>();

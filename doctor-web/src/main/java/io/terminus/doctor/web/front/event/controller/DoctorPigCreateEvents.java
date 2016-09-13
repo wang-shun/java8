@@ -14,6 +14,7 @@ import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
 import io.terminus.doctor.event.dto.DoctorPigInfoDto;
 import io.terminus.doctor.event.dto.event.boar.DoctorSemenDto;
+import io.terminus.doctor.event.dto.event.sow.DoctorPartWeanDto;
 import io.terminus.doctor.event.dto.event.usual.DoctorChgFarmDto;
 import io.terminus.doctor.event.dto.event.usual.DoctorChgLocationDto;
 import io.terminus.doctor.event.dto.event.usual.DoctorConditionDto;
@@ -401,10 +402,16 @@ public class DoctorPigCreateEvents {
             List<DoctorBasicInputInfoDto> basics = buildBasicInputPigDtoContent(farmId, pigId, sowInfoDtoJson);
             RespHelper.or500(doctorSowEventCreateService.sowEventsCreate(basics, sowInfoDtoJson));
             // 猪批量事件操作， 返回PigId
-            return pigId;
         } else {
-            return RespHelper.or500(doctorSowEventCreateService.sowEventCreate(buildBasicInputInfoDto(farmId, pigId, PigEvent.from(eventType)), sowInfoDtoJson));
+            pigId = RespHelper.or500(doctorSowEventCreateService.sowEventCreate(buildBasicInputInfoDto(farmId, pigId, PigEvent.from(eventType)), sowInfoDtoJson));
+            if (Objects.equals(eventType, PigEvent.WEAN.getKey())){
+                DoctorPartWeanDto doctorPartWeanDto = JsonMapper.JSON_NON_DEFAULT_MAPPER.fromJson(sowInfoDtoJson, DoctorPartWeanDto.class);
+                if (Objects.equals(doctorPartWeanDto.getPartWeanPigletsCount(), doctorPartWeanDto.getFarrowingLiveCount()) && null){
+                   pigId = createChangeLocationEvent(pigId, farmId, sowInfoDtoJson);
+                }
+            }
         }
+        return pigId;
     }
 
 
