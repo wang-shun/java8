@@ -25,7 +25,7 @@
         <result column="birth_avg_weight" property="birthAvgWeight"/>
         <result column="dead_rate" property="deadRate"/>
         <result column="wean_count" property="weanCount"/>
-        <result column="unq_count" property="unqCount"/>
+        <result column="unq_count" property="unqCount"/>
         <result column="wean_avg_weight" property="weanAvgWeight"/>
         <result column="sale_count" property="saleCount"/>
         <result column="sale_amount" property="saleAmount"/>
