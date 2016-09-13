@@ -210,7 +210,7 @@ public class DoctorWareHouseQuery {
      */
     @RequestMapping(value = "/pageConsumeProvideHistory", method = RequestMethod.GET)
     @ResponseBody
-    public Paging<DoctorMaterialConsumeProvider> pageConsumeProvideHistory(@RequestParam("warehouseId") Long warehouseId,
+    public Paging<DoctorMaterialConsumeProvider> pageConsumeProvideHistory(@RequestParam(name = "warehouseId", required = false) Long warehouseId,
                                                                           @RequestParam(required = false) Long materialId,
                                                                           @RequestParam(required = false) Integer eventType,
                                                                           @RequestParam(required = false) Integer materilaType,
