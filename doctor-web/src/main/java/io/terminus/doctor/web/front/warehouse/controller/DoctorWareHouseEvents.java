@@ -264,6 +264,7 @@ public class DoctorWareHouseEvents {
 
     /**
      * 仓库间物料转移
+     * @param farmId 猪场id
      * @param fromWareHouseId 来源仓库
      * @param toWareHouseId 前往仓库
      * @param materialId 物料id
