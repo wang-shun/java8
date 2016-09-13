@@ -49,11 +49,14 @@ public class DoctorMonthlyReportDto implements Serializable {
     private int farrowHealth;                 //产键仔数
     private int farrowWeak;                   //产弱仔数
     private int farrowDead;                   //产死仔数
+    private int farrowJx;                     //产畸形数
     private int farrowMny;                    //木乃伊数
+    private int farrowBlack;                  //产黑胎数
     private int farrowAll;                    //总产仔数
     private double farrowAvgHealth;           //窝均健仔数
     private double farrowAvgAll;              //窝均产仔数
     private double farrowAvgAlive;            //窝均活仔数
+    private double farrowAvgWeak;             //窝均弱仔数
     private double farrowAvgWeight;           //分娩活仔均重(kg)
 
     /**

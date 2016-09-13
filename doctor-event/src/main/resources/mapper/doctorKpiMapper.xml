@@ -77,6 +77,20 @@
         <include refid="criteria"/>
     </select>
 
+    <!--产黑胎数 -->
+    <select id="deliveryBlackCounts" parameterType="map" resultType="int">
+        select ifnull(sum(black_count),0) from doctor_pig_events
+        where type = 15
+        <include refid="criteria"/>
+    </select>
+
+    <!--产畸形数 -->
+    <select id="getDeliveryJxCounts" parameterType="map" resultType="int">
+        select ifnull(sum(jx_count),0) from doctor_pig_events
+        where type = 15
+        <include refid="criteria"/>
+    </select>
+
     <!-- 总产仔数-->
     <select id="deliveryAllCounts" parameterType="map" resultType="int">
         select ifnull(sum(health_count+ weak_count+ jx_count+ mny_count+ dead_count + black_count),0) from
@@ -981,5 +995,41 @@
                  ) AS final
           )
         FROM dual
+    </select>
+
+    <!-- 猪群销售: 基础价格10kg的均价 -->
+    <select id="getGroupSaleBasePrice10" parameterType="map" resultType="long">
+        SELECT
+          ifnull(avg(price),0)
+        FROM doctor_group_events
+        WHERE
+            change_type_id = 109 AND  -- 变动类型是销售
+            pig_type IN (1, 2, 7) AND -- 产房仔猪和保育猪
+            base_weight = 10
+            <include refid="criteria"/>
+    </select>
+
+    <!-- 猪群销售: 基础价格15kg的均价 -->
+    <select id="getGroupSaleBasePrice15" parameterType="map" resultType="long">
+        SELECT
+          ifnull(avg(price),0)
+        FROM doctor_group_events
+        WHERE
+            change_type_id = 109 AND  -- 变动类型是销售
+            pig_type IN (1, 2, 7) AND -- 产房仔猪和保育猪
+            base_weight = 15
+            <include refid="criteria"/>
+    </select>
+
+    <!-- 猪群销售: 育肥猪均价 -->
+    <select id="getGroupSaleFattenPrice" parameterType="map" resultType="long">
+        SELECT
+          ifnull(avg(price),0)
+        FROM doctor_group_events
+        WHERE
+            change_type_id = 109 AND -- 变动类型是销售
+            pig_type = 3 AND         -- 育肥猪
+            price != 0
+            <include refid="criteria"/>
     </select>
 </mapper>

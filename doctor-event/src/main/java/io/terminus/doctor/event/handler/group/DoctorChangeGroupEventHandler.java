@@ -61,7 +61,7 @@ public class DoctorChangeGroupEventHandler extends DoctorAbstractGroupEventHandl
 
         checkQuantity(groupTrack.getQuantity(), change.getQuantity());
         checkQuantityEqual(change.getQuantity(), change.getBoarQty(), change.getSowQty());
-        checkSalePrice(change.getChangeTypeId(), change.getPrice(), change.getAmount());
+        checkSalePrice(change.getChangeTypeId(), change.getPrice(), change.getBaseWeight(), change.getOverPrice());
 
         //1.转换猪群变动事件
         DoctorChangeGroupEvent changeEvent = BeanMapper.map(change, DoctorChangeGroupEvent.class);
@@ -70,11 +70,13 @@ public class DoctorChangeGroupEventHandler extends DoctorAbstractGroupEventHandl
         DoctorGroupEvent<DoctorChangeGroupEvent> event = dozerGroupEvent(group, GroupEventType.CHANGE, change);
         event.setQuantity(change.getQuantity());
         event.setAvgDayAge(groupTrack.getAvgDayAge());  //变动的日龄不需要录入, 直接取猪群的日龄
-        event.setWeight(change.getWeight());
+        event.setWeight(change.getWeight());            //总重
         event.setAvgWeight(EventUtil.getAvgWeight(change.getWeight(), change.getQuantity()));
         event.setChangeTypeId(changeEvent.getChangeTypeId());   //变动类型id
-        event.setPrice(change.getPrice());          //销售单价(分)
-        event.setAmount(change.getAmount());        //销售总额(分)
+
+        //销售相关
+        setSaleEvent(event, change);
+
         event.setExtraMap(changeEvent);
         doctorGroupEventDao.create(event);
 
@@ -146,10 +148,27 @@ public class DoctorChangeGroupEventHandler extends DoctorAbstractGroupEventHandl
         editGroupSnapShot(group, groupTrack, event);
     }
 
-    //校验金额不能为空
-    private static void checkSalePrice(Long changeTypeId, Long price, Long amount) {
-        if (changeTypeId == DoctorBasicEnums.SALE.getId() && (price == null || amount == null)) {
-            throw new ServiceException("money.not.null");
+    //校验金额不能为空, 基础重量不能为空
+    private static void checkSalePrice(Long changeTypeId, Long price, Integer baseWeight, Long overPrice) {
+        if (changeTypeId == DoctorBasicEnums.SALE.getId()) {
+            if ((price == null || overPrice == null)) {
+                throw new ServiceException("money.not.null");
+            }
+            if (baseWeight == null) {
+                throw new ServiceException("weight.not.null");
+            }
+        }
+    }
+
+    //如果是销售事件, 记录价格与重量
+    private void setSaleEvent(DoctorGroupEvent<DoctorChangeGroupEvent> event, DoctorChangeGroupInput change) {
+        event.setPrice(change.getPrice());          //销售单价(分)(基础价)
+        event.setBaseWeight(change.getBaseWeight());//基础重量
+        event.setOverPrice(change.getOverPrice());  //超出价格(分/kg)
+        if (change.getChangeTypeId() == DoctorBasicEnums.SALE.getId()) {
+            //销售总额(分) = 单价 * 数量 + 超出价格 * 超出重量
+            event.setAmount((long) (change.getPrice() * change.getQuantity() +
+                    MoreObjects.firstNonNull(change.getOverPrice(), 0L) * (change.getWeight() - MoreObjects.firstNonNull(change.getBaseWeight(), 0))));
         }
     }
 }

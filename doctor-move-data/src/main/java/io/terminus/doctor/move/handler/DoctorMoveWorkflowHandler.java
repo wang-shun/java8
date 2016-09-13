@@ -177,6 +177,14 @@ public class DoctorMoveWorkflowHandler {
                 }
 
             }
+
+            // 否则处于待配种状态
+            else {
+                FlowDefinitionNode sourceNode = nodesMapByName.get("开始节点信息");
+                FlowDefinitionNode targetNode = nodesMapByName.get("待配种");
+
+                createFlowProcess(targetNode.getId(), sourceNode.getId(), null, flowInstance, pig);
+            }
         });
     }
 
@@ -235,7 +243,6 @@ public class DoctorMoveWorkflowHandler {
                     .flowInstanceId(instance.getId())
                     .flowData(getFlowData(pig, pigEvent))
                     .status(FlowProcess.Status.NORMAL.value())
-                    .forkNodeId(null)
                     .build();
 
             jdbcAccess.createFlowProcess(flowProcess);
@@ -246,9 +253,8 @@ public class DoctorMoveWorkflowHandler {
                     .flowDefinitionNodeId(definitionId)
                     .preFlowDefinitionNodeId(preNodeId + "")
                     .flowInstanceId(instance.getId())
-                    .flowData("{}")
+                    .flowData(null)
                     .status(FlowProcess.Status.NORMAL.value())
-                    .forkNodeId(null)
                     .build();
 
             jdbcAccess.createFlowProcess(flowProcess);

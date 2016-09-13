@@ -110,6 +110,12 @@ public class DoctorGroupEvent<T extends BaseGroupEvent> implements Serializable 
     private Double avgWeight;
 
     /**
+     * 销售基础重量
+     * @see io.terminus.doctor.event.enums.SaleBaseWeight
+     */
+    private Integer baseWeight;
+
+    /**
      * 平均日龄
      */
     private Integer avgDayAge;
@@ -134,6 +140,11 @@ public class DoctorGroupEvent<T extends BaseGroupEvent> implements Serializable 
      * 销售总额(分)
      */
     private Long amount;
+
+    /**
+     * 超出价格(分/kg)
+     */
+    private Long overPrice;
 
     /**
      * 转群类型 0 内转(同阶段) 1 外转(不同阶段)
