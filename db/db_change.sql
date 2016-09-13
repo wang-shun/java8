@@ -280,3 +280,46 @@ add column `operator_name` varchar(64) DEFAULT NULL COMMENT '操作人' after op
 -- 2016-09-12 增加猪群销售字段
 ALTER TABLE doctor_group_events ADD COLUMN base_weight SMALLINT(6) DEFAULT NULL COMMENT '销售基础重量: 10, 15(kg)' AFTER avg_weight;
 ALTER TABLE doctor_group_events ADD COLUMN over_price DOUBLE DEFAULT NULL COMMENT '超出价格(分/kg)' AFTER amount;
+
+-- 2016-09-13 新增猪群批次总结表
+CREATE TABLE `doctor_group_batch_summaries` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '自增主键',
+  `group_id` bigint(20) DEFAULT NULL COMMENT '猪群id',
+  `group_code` varchar(512) DEFAULT NULL COMMENT '猪群号',
+  `pig_type` smallint(6) DEFAULT NULL COMMENT '猪类',
+  `avg_day_age` int(11) DEFAULT NULL COMMENT '平均日龄',
+  `open_at` datetime DEFAULT NULL COMMENT '建群时间',
+  `close_at` datetime DEFAULT NULL COMMENT '关群时间',
+  `barn_id` bigint(20) DEFAULT NULL COMMENT '猪舍id',
+  `barn_name` varchar(64) DEFAULT NULL COMMENT '猪舍名称',
+  `user_id` bigint(20) DEFAULT NULL COMMENT '工作人员id',
+  `user_name` varchar(64) DEFAULT NULL COMMENT '工作人员name',
+  `nest` smallint(6) DEFAULT NULL COMMENT '窝数',
+  `live_count` int(11) DEFAULT NULL COMMENT '活仔数',
+  `health_count` int(11) DEFAULT NULL COMMENT '健仔数',
+  `weak_count` int(11) DEFAULT NULL COMMENT '弱仔数',
+  `birth_cost` bigint(20) DEFAULT NULL COMMENT '出生成本(分)',
+  `birth_avg_weight` double DEFAULT NULL COMMENT '出生均重(kg)',
+  `dead_rate` double DEFAULT NULL COMMENT '死淘率',
+  `wean_count` int(11) DEFAULT NULL COMMENT '断奶数',
+  `unq_count` int(11) DEFAULT NULL COMMENT '不合格数',
+  `wean_avg_weight` double DEFAULT NULL COMMENT '断奶均重(kg)',
+  `sale_count` int(11) DEFAULT NULL COMMENT '销售头数',
+  `sale_amount` bigint(20) DEFAULT NULL COMMENT '销售金额(分)',
+  `to_nursery_cost` bigint(20) DEFAULT NULL COMMENT '转保育成本(分)',
+  `to_nursery_count` int(11) DEFAULT NULL COMMENT '转保育数量',
+  `to_nursery_avg_weight` double DEFAULT NULL COMMENT '转保育均重(kg)',
+  `to_fatten_cost` bigint(20) DEFAULT NULL COMMENT '转育肥成本(分)',
+  `to_fatten_count` int(11) DEFAULT NULL COMMENT '转育肥数量',
+  `to_fatten_avg_weight` double DEFAULT NULL COMMENT '转育肥均重(kg)',
+  `in_count` int(11) DEFAULT NULL COMMENT '转入数',
+  `in_avg_weight` double DEFAULT NULL COMMENT '转入均重(kg)',
+  `in_cost` bigint(20) DEFAULT NULL COMMENT '转入成本(均)',
+  `fcr` double DEFAULT NULL COMMENT '料肉比',
+  `out_cost` bigint(20) DEFAULT NULL COMMENT '出栏成本(分)',
+  `created_at` datetime DEFAULT NULL COMMENT '创建时间',
+  `updated_at` datetime DEFAULT NULL COMMENT '修改时间',
+  PRIMARY KEY (`id`),
+  KEY `idx_doctor_group_batch_summaries_group_id` (`group_id`),
+  KEY `idx_doctor_group_batch_summaries_barn_id` (`barn_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='猪群批次总结表';
