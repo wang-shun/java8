@@ -9,6 +9,7 @@
         <result column="type" property="type"/>
         <result column="name" property="name"/>
         <result column="srm" property="srm"/>
+        <result column="is_valid" property="isValid"/>
         <result column="unit_group_id" property="unitGroupId"/>
         <result column="unit_group_name" property="unitGroupName"/>
         <result column="unit_id" property="unitId"/>
@@ -30,11 +31,11 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        type, name, srm, unit_group_id, unit_group_name, unit_id, unit_name, default_consume_count, price, remark, created_at, updated_at
+        type, name, srm, is_valid, unit_group_id, unit_group_name, unit_id, unit_name, default_consume_count, price, remark, created_at, updated_at
     </sql>
 
     <sql id="vals">
-        #{type}, #{name}, #{srm}, #{unitGroupId}, #{unitGroupName}, #{unitId}, #{unitName}, #{defaultConsumeCount}, #{price}, #{remark}, now(), now()
+        #{type}, #{name}, #{srm}, #{isValid}, #{unitGroupId}, #{unitGroupName}, #{unitId}, #{unitName}, #{defaultConsumeCount}, #{price}, #{remark}, now(), now()
     </sql>
 
     <sql id="criteria">
@@ -66,9 +67,8 @@
     <select id="findByType" parameterType="int" resultMap="DoctorBasicMaterialMap" >
         SELECT <include refid="cols_all" />
         FROM <include refid="tb" />
-        <where>
-            <if test="type != null">type = #{type}</if>
-        </where>
+        where is_valid = 1
+        <if test="type != null"> and type = #{type}</if>
     </select>
 
     <select id="findByTypeAndName" parameterType="map" resultMap="DoctorBasicMaterialMap" >
@@ -84,6 +84,7 @@
             <if test="type != null">type = #{type},</if>
             <if test="name != null">name = #{name},</if>
             <if test="srm != null">srm = #{srm},</if>
+            <if test="isValid != null">is_valid = #{isValid},</if>
             <if test="unitGroupId != null">unit_group_id = #{unitGroupId},</if>
             <if test="unitGroupName != null">unit_group_name = #{unitGroupName},</if>
             <if test="unitId != null">unit_id = #{unitId},</if>
@@ -102,17 +103,15 @@
     </delete>
 
     <select id="count" parameterType="map" resultType="long">
-        SELECT count(1) from <include refid="tb"/>
-        <where>
-            <include refid="criteria"/>
-        </where>
+        SELECT count(id) from <include refid="tb"/>
+        where is_valid = 1
+        <include refid="criteria"/>
     </select>
 
     <select id="paging" parameterType="map" resultMap="DoctorBasicMaterialMap">
         SELECT <include refid="cols_all"/> from <include refid="tb"/>
-        <where>
-            <include refid="criteria"/>
-        </where>
+        where is_valid = 1
+        <include refid="criteria"/>
         ORDER BY updated_at DESC
         LIMIT #{offset}, #{limit}
     </select>
@@ -131,6 +130,7 @@
         WHERE  <![CDATA[
           id < #{lastId} AND updated_at > #{since}
         ]]>
+        and is_valid = 1
         ORDER BY id DESC LIMIT #{limit}
     </select>
     <!-- search api end -->

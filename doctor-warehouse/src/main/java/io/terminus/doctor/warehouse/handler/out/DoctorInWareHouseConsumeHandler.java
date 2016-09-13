@@ -1,4 +1,4 @@
-package io.terminus.doctor.warehouse.handler.consume;
+package io.terminus.doctor.warehouse.handler.out;
 
 import io.terminus.doctor.warehouse.dao.DoctorMaterialInWareHouseDao;
 import io.terminus.doctor.warehouse.dto.DoctorMaterialConsumeProviderDto;
@@ -33,7 +33,8 @@ public class DoctorInWareHouseConsumeHandler implements IHandler{
 
     @Override
     public Boolean ifHandle(DoctorMaterialConsumeProviderDto dto, Map<String, Object> context) {
-        return dto.getActionType().equals(DoctorMaterialConsumeProvider.EVENT_TYPE.CONSUMER.getValue());
+        DoctorMaterialConsumeProvider.EVENT_TYPE eventType = DoctorMaterialConsumeProvider.EVENT_TYPE.from(dto.getActionType());
+        return eventType != null && eventType.isOut();
     }
 
     @Override

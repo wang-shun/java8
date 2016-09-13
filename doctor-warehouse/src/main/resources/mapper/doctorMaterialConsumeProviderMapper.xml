@@ -23,6 +23,8 @@
         <result column="unit_price" property="unitPrice"/>
         <result column="staff_id" property="staffId"/>
         <result column="staff_name" property="staffName"/>
+        <result column="barn_id" property="barnId"/>
+        <result column="barn_name" property="barnName"/>
         <result column="extra" property="extra"/>
         <result column="creator_id" property="creatorId"/>
         <result column="creator_name" property="creatorName"/>
@@ -40,11 +42,11 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        `type`,`farm_id`,`farm_name`,`ware_house_id`,`ware_house_name`,`material_id`,`material_name`,`event_time`,`event_type`,`event_count`, unit_price,`staff_id`,`staff_name`,`extra`,`creator_id`,`creator_name`,`updator_id`,`updator_name`,`created_at`,`updated_at`
+        `type`,`farm_id`,`farm_name`,`ware_house_id`,`ware_house_name`,`material_id`,`material_name`,`event_time`,`event_type`,`event_count`, unit_price,`staff_id`,`staff_name`,`barn_id`,`barn_name`,`extra`,`creator_id`,`creator_name`,`updator_id`,`updator_name`,`created_at`,`updated_at`
     </sql>
 
     <sql id="vals">
-        #{type},#{farmId},#{farmName},#{wareHouseId},#{wareHouseName},#{materialId},#{materialName},#{eventTime},#{eventType},#{eventCount}, #{unitPrice},#{staffId},#{staffName},#{extra},#{creatorId},#{creatorName},#{updatorId},#{updatorName},now(),now()
+        #{type},#{farmId},#{farmName},#{wareHouseId},#{wareHouseName},#{materialId},#{materialName},#{eventTime},#{eventType},#{eventCount}, #{unitPrice},#{staffId},#{staffName},#{barnId},#{barnName},#{extra},#{creatorId},#{creatorName},#{updatorId},#{updatorName},now(),now()
     </sql>
 
     <sql id="criteria">
@@ -55,6 +57,9 @@
         <if test="eventType != null" > AND `event_type` = #{eventType}</if>
         <if test="eventCount != null" > AND `event_count` = #{eventCount}</if>
         <if test="staffId != null" > AND `staff_id` = #{staffId}</if>
+        <if test="barnId != null" > AND `barn_id` = #{barnId}</if>
+        <if test="startAt != null" > <![CDATA[ AND `event_time` >= #{startAt} ]]> </if>
+        <if test="endAt != null" > <![CDATA[ AND `event_time` < #{endAt} ]]> </if>
     </sql>
 
     <insert id="create" parameterType="DoctorMaterialConsumeProvider" keyProperty="id" useGeneratedKeys="true">
@@ -68,7 +73,7 @@
         ( <include refid="cols_exclude_id"/> )
         VALUES
         <foreach collection="list" item="i" separator=",">
-        (#{i.type},#{i.farmId},#{i.farmName},#{i.wareHouseId},#{i.wareHouseName},#{i.materialId},#{i.materialName},#{i.eventTime},#{i.eventType},#{i.eventCount}, #{i.unitPrice},#{i.staffId},#{i.staffName},#{i.extra},#{i.creatorId},#{i.creatorName},#{i.updatorId},#{i.updatorName},now(),now())
+        (#{i.type},#{i.farmId},#{i.farmName},#{i.wareHouseId},#{i.wareHouseName},#{i.materialId},#{i.materialName},#{i.eventTime},#{i.eventType},#{i.eventCount}, #{i.unitPrice},#{i.staffId},#{i.staffName},#{i.barnId},#{i.barnName},#{i.extra},#{i.creatorId},#{i.creatorName},#{i.updatorId},#{i.updatorName},now(),now())
         </foreach>
     </insert>
 
@@ -100,6 +105,24 @@
         </where>
     </select>
 
+    <select id="paging" resultMap="DoctorMaterialConsumeProviderMap">
+        SELECT <include refid="cols_all" />
+        FROM <include refid="tb" />
+        <where>
+            <include refid="criteria"/>
+        </where>
+        order by event_time desc
+        limit #{offset}, #{limit}
+    </select>
+
+    <select id="count" resultType="long">
+        SELECT count(id)
+        FROM <include refid="tb" />
+        <where>
+            <include refid="criteria"/>
+        </where>
+    </select>
+
     <update id="update" parameterType="DoctorMaterialConsumeProvider">
         UPDATE <include refid="tb"/>
         <set>
@@ -117,6 +140,8 @@
         <if test="unitPrice != null" > ,`unit_price` = #{unitPrice}</if>
         <if test="staffId != null" > ,`staff_id` = #{staffId}</if>
         <if test="staffName != null" > ,`staff_name` = #{staffName}</if>
+        <if test="barnId != null" > ,`barn_id` = #{barnId}</if>
+        <if test="barnName != null" > ,`barn_name` = #{barnName}</if>
         <if test="extra != null" > ,`extra` = #{extra}</if>
         <if test="creatorId != null" > ,`creator_id` = #{creatorId}</if>
         <if test="creatorName != null" > ,`creator_name` = #{creatorName}</if>
@@ -130,12 +155,18 @@
     <select id="findLastEvent" parameterType="map" resultMap="DoctorMaterialConsumeProviderMap">
         select <include refid="cols_all" /> from <include refid="tb"/>
         where `ware_house_id` = #{wareHouseId}
+        <if test="materialId != null">
+            and material_id = #{materialId}
+        </if>
         <if test="eventType != null">
             and `event_type` = #{eventType}
         </if>
         and event_time = (
             select max(`event_time`) from <include refid="tb"/>
             where `ware_house_id` = #{wareHouseId}
+            <if test="materialId != null">
+                and material_id = #{materialId}
+            </if>
             <if test="eventType != null">
                 and `event_type` = #{eventType}
             </if>
