@@ -277,6 +277,9 @@ public class DoctorWareHouseEvents {
         if(moveQuantity == null || moveQuantity <= 0){
             throw new JsonResponseException("quantity.invalid");
         }
+        if(fromWareHouseId.equals(toWareHouseId)){
+            throw new JsonResponseException("fromWareHouseId.equal.toWareHouseId"); // 调出和调入仓库不能是同一个仓库
+        }
         DoctorBasicMaterial material = RespHelper.or500(doctorBasicMaterialReadService.findBasicMaterialById(materialId));
         DoctorFarm farm = RespHelper.or500(doctorFarmReadService.findFarmById(farmId));
         DoctorWareHouse consumeWarehouse = RespHelper.or500(doctorWareHouseReadService.findById(fromWareHouseId));
