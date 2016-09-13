@@ -100,6 +100,14 @@ public class DoctorWareHouseQuery {
         return RespHelper.or500(doctorWareHouseReadService.queryDoctorWarehouseDto(farmId, type, pageNo, pageSize));
     }
 
+    @RequestMapping(value = "/listDoctorWareHouseDto", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public List<DoctorWareHouseDto> listDoctorWareHouseDto(@RequestParam("farmId") Long farmId,
+                                                           @RequestParam(value = "type", required = false) Integer type,
+                                                           @RequestParam(value = "warehouseName", required = false) String warehouseName){
+        return RespHelper.or500(doctorWareHouseReadService.listDoctorWareHouseDto(farmId, type, warehouseName));
+    }
+
     /**
      * 通过WareHouseId 获取仓库详细信息内容
      * @param warehouseId
@@ -210,7 +218,7 @@ public class DoctorWareHouseQuery {
      */
     @RequestMapping(value = "/pageConsumeProvideHistory", method = RequestMethod.GET)
     @ResponseBody
-    public Paging<DoctorMaterialConsumeProvider> pageConsumeProvideHistory(@RequestParam("warehouseId") Long warehouseId,
+    public Paging<DoctorMaterialConsumeProvider> pageConsumeProvideHistory(@RequestParam(name = "warehouseId", required = false) Long warehouseId,
                                                                           @RequestParam(required = false) Long materialId,
                                                                           @RequestParam(required = false) Integer eventType,
                                                                           @RequestParam(required = false) Integer materilaType,

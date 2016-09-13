@@ -22,6 +22,11 @@ public class DoctorBasicMaterial implements Serializable {
      * @see io.terminus.doctor.common.enums.WareHouseType
      */
     private Integer type;
+
+    /**
+     * 物料的子类别，关联 doctor_basics 表的id
+     */
+    private Long subType;
     
     /**
      * 物料名称

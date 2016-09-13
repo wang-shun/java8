@@ -292,3 +292,7 @@ add column is_valid smallint(6) NOT NULL DEFAULT 1 COMMENT '逻辑删除字段, 
 alter table doctor_material_consume_providers
 add column `barn_id` bigint(20) unsigned DEFAULT NULL COMMENT '领用物资的猪舍, 仅 event_type=1 时才会有值' after staff_name,
 add column `barn_name` varchar(64) DEFAULT NULL COMMENT '猪舍名称' after barn_id;
+
+-- 2016年09月13日, 基础物料表新增字段 "子类别"
+alter table doctor_basic_materials
+add column sub_type bigint(20) unsigned DEFAULT NULL COMMENT '物料的子类别，关联 doctor_basics 表的id' after `type`;
