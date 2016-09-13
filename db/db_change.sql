@@ -283,3 +283,26 @@ ALTER TABLE doctor_group_events ADD COLUMN over_price DOUBLE DEFAULT NULL COMMEN
 
 alter table doctor_pig_events add column boar_code varchar(64) default null comment '配种的公猪' after doctor_mate_type;
 create index doctor_pig_events_boar_code on doctor_pig_events(boar_code);
+
+-- 2016-09-12 公猪生产成绩月报
+DROP table if exists `doctor_boar_monthly_reports`;
+create table `doctor_boar_monthly_reports` (
+ `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+ `farm_id` bigint(20) NULL comment '猪场id',
+ `boar_code` varchar(60) NULL comment '公猪号',
+ `pz_count` int(11) NULL comment '配种次数',
+ `spmz_count` int(11) NULL comment '首配母猪头数',
+ `st_count` int(11) NULL comment '受胎头数',
+ `cmz_count` int(11) NULL comment '产仔母猪头数',
+ `pjcz_count` double NULL comment '平均产仔数',
+ `pjchz_count` double NULL comment '平均产活仔数',
+ `st_rate` double NULL comment '受胎率',
+ `fm_rate` double NULL comment '分娩率',
+ `sum_at` varchar(32) NULL comment '汇总时间',
+ `created_at` datetime default null,
+ `updated_at` datetime default null,
+ primary key(id)
+) comment '公猪生产成绩月报';
+create index doctor_boar_monthly_reports_farm_id on doctor_boar_monthly_reports(farm_id);
+create index doctor_boar_monthly_reports_boar_code on doctor_boar_monthly_reports(boar_code);
+create index doctor_boar_monthly_reports_sum_at on doctor_boar_monthly_reports(sum_at);
