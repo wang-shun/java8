@@ -19,17 +19,5 @@ public interface DoctorGroupBatchSummaryWriteService {
      */
     Response<Long> createGroupBatchSummary(DoctorGroupBatchSummary groupBatchSummary);
 
-    /**
-     * 更新DoctorGroupBatchSummary
-     * @param groupBatchSummary 猪群批次总结表实例
-     * @return 是否成功
-     */
-    Response<Boolean> updateGroupBatchSummary(DoctorGroupBatchSummary groupBatchSummary);
 
-    /**
-     * 根据主键id删除DoctorGroupBatchSummary
-     * @param groupBatchSummaryId 猪群批次总结表实例主键id
-     * @return 是否成功
-     */
-    Response<Boolean> deleteGroupBatchSummaryById(Long groupBatchSummaryId);
 }

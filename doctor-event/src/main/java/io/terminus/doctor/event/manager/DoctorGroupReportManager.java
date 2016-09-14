@@ -2,12 +2,15 @@ package io.terminus.doctor.event.manager;
 
 import com.google.common.base.MoreObjects;
 import io.terminus.doctor.common.enums.PigType;
+import io.terminus.doctor.event.dao.DoctorGroupBatchSummaryDao;
 import io.terminus.doctor.event.dao.DoctorPigTrackDao;
+import io.terminus.doctor.event.model.DoctorGroupBatchSummary;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
@@ -23,10 +26,13 @@ import java.util.Map;
 public class DoctorGroupReportManager {
 
     private final DoctorPigTrackDao doctorPigTrackDao;
+    private final DoctorGroupBatchSummaryDao doctorGroupBatchSummaryDao;
 
     @Autowired
-    public DoctorGroupReportManager(DoctorPigTrackDao doctorPigTrackDao) {
+    public DoctorGroupReportManager(DoctorPigTrackDao doctorPigTrackDao,
+                                    DoctorGroupBatchSummaryDao doctorGroupBatchSummaryDao) {
         this.doctorPigTrackDao = doctorPigTrackDao;
+        this.doctorGroupBatchSummaryDao = doctorGroupBatchSummaryDao;
     }
 
     /**
@@ -78,5 +84,14 @@ public class DoctorGroupReportManager {
         } catch (Exception e) {
             return 0;
         }
+    }
+
+    /**
+     * 事务创建批次总结
+     */
+    @Transactional
+    public void createGroupBatchSummary(DoctorGroupBatchSummary summary) {
+        doctorGroupBatchSummaryDao.deleteByGroupId(summary.getGroupId());
+        doctorGroupBatchSummaryDao.create(summary);
     }
 }

@@ -22,5 +22,11 @@ public class DoctorGroupBatchSummaryDao extends MyBatisDao<DoctorGroupBatchSumma
         return getSqlSession().selectOne("findGroupBatchSummaryByGroupId", groupId);
     }
 
-
+    /**
+     * 根据groupId删除
+     * @param groupId 猪群id
+     */
+    public void deleteByGroupId(Long groupId) {
+        getSqlSession().delete("deleteByGroupId", groupId);
+    }
 }
