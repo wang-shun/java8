@@ -98,10 +98,10 @@ public class DoctorDailyReportReadServiceImpl implements DoctorDailyReportReadSe
         try {
             Date end = isEmpty(endAt) ? new Date() : DateUtil.toDate(endAt);
             Date start = isEmpty(startAt) ? new DateTime(end).plusDays(-30).toDate() : DateUtil.toDate(startAt);
-            
+
             List<DoctorDailyReportDto> report = Lists.newArrayList();
             while (!Dates.startOfDay(start).after(Dates.startOfDay(end))) {
-                report.add(findDailyReportByFarmIdAndSumAtWithCache(farmId, startAt).getResult());
+                report.add(findDailyReportByFarmIdAndSumAtWithCache(farmId, DateUtil.toDateString(start)).getResult());
                 start = new DateTime(start).plusDays(1).toDate();
             }
             return Response.ok(report);
