@@ -44,7 +44,7 @@ public class DoctorPartWeanDto extends AbstractPigEventInputDto implements Seria
 
     private Long chgLocationToBarnId;   // 转舍Id
 
-    private Long weanPigletsCount; //已断奶数
+    private Integer weanPigletsCount; //已断奶数
 
     @Override
     public Map<String, String> descMap(){
