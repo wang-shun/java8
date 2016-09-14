@@ -1,5 +1,6 @@
 package io.terminus.doctor.event.handler.group;
 
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
@@ -16,6 +17,7 @@ import io.terminus.doctor.event.dao.DoctorGroupDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorGroupSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
+import io.terminus.doctor.event.dao.DoctorPigTrackDao;
 import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
 import io.terminus.doctor.event.dto.event.group.DoctorMoveInGroupEvent;
 import io.terminus.doctor.event.dto.event.group.edit.BaseGroupEdit;
@@ -29,6 +31,7 @@ import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorGroupSnapshot;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
+import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.event.service.DoctorBarnReadService;
 import io.terminus.doctor.event.util.EventUtil;
 import io.terminus.zookeeper.pubsub.Publisher;
@@ -37,6 +40,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import static io.terminus.common.utils.Arguments.notEmpty;
@@ -82,6 +86,9 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
 
     @Autowired
     private DoctorGroupDao doctorGroupDao;
+
+    @Autowired
+    private DoctorPigTrackDao doctorPigTrackDao;
 
     @Autowired(required = false)
     private Publisher publisher;
@@ -196,7 +203,50 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
                 break;
         }
         groupTrack.setExtraEntity(extra);
+
+        updateFarrowGroupTrack(groupTrack, event.getPigType());
         doctorGroupTrackDao.update(groupTrack);
+    }
+
+    //产房仔猪, 更新下断奶统计数据
+    private void updateFarrowGroupTrack(DoctorGroupTrack groupTrack, Integer pigType) {
+        if (!PigType.FARROW_TYPES.contains(pigType)) {
+            return;
+        }
+
+        double weanWeight = 0D;
+        double birthWeight = 0D;
+        int farrowQty = 0;
+        int weakQty = 0;
+        int unWeanQty = 0;
+        int weanQty = 0;
+        int unqQty = 0;
+
+        List<DoctorPigTrack> pigTracks = doctorPigTrackDao.findWeanSowTrackByGroupId(groupTrack.getGroupId());
+        for (DoctorPigTrack pigTrack : pigTracks) {
+            Map<String, Object> extraMap = pigTrack.getExtraMap();
+            weanWeight += MoreObjects.firstNonNull(pigTrack.getWeanAvgWeight(), 0D) * MoreObjects.firstNonNull(pigTrack.getWeanQty(), 0);
+            birthWeight += MoreObjects.firstNonNull(pigTrack.getFarrowAvgWeight(), 0D) * MoreObjects.firstNonNull(pigTrack.getFarrowQty(), 0);
+            farrowQty += MoreObjects.firstNonNull(pigTrack.getFarrowQty(), 0);
+            weakQty += getIntFromExtra(extraMap, "weakCount");
+            unWeanQty += MoreObjects.firstNonNull(pigTrack.getUnweanQty(), 0);
+            weanQty += MoreObjects.firstNonNull(pigTrack.getWeanQty(), 0);
+            unqQty += getIntFromExtra(extraMap, "notQualifiedCount");
+        }
+
+        groupTrack.setWeanAvgWeight(weanWeight / weanQty <= 0 ? 1D : weanQty);       //断奶均重kg
+        groupTrack.setBirthAvgWeight(birthWeight / farrowQty <= 0 ? 1D :farrowQty);  //出生均重kg
+        groupTrack.setWeakQty(weakQty);      //弱仔数
+        groupTrack.setUnweanQty(unWeanQty);  //未断奶数
+        groupTrack.setUnqQty(unqQty);        //不合格数
+    }
+
+    private static int getIntFromExtra(Map<String, Object> extraMap, String key) {
+        try {
+            return Integer.valueOf(String.valueOf(extraMap.get(key)));
+        } catch (Exception e) {
+            return 0;
+        }
     }
 
     //获取旧镜像

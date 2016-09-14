@@ -87,6 +87,9 @@ public class DoctorSowWeanHandler extends DoctorAbstractEventFlowHandler {
         extra.put("partWeanPigletsCount", doctorPigTrack.getWeanQty());
         extra.put("farrowingLiveCount", doctorPigTrack.getUnweanQty());
         extra.put("hasWeanToMating", true);
+
+        //不合格数 累加
+        extra.put("notQualifiedCount", getIntFromExtra(doctorPigTrack.getExtraMap(), "notQualifiedCount") + getIntFromExtra(extra, "notQualifiedCount"));
         doctorPigTrack.addAllExtraMap(extra);
 
         //全部断奶后, 初始化所有本次哺乳的信息
@@ -101,5 +104,13 @@ public class DoctorSowWeanHandler extends DoctorAbstractEventFlowHandler {
         doctorPigTrack.addPigEvent(basic.getPigType(), (Long) context.get("doctorPigEventId"));
         execution.getExpression().put("leftCount", doctorPigTrack.getUnweanQty());
         return doctorPigTrack;
+    }
+
+    private static int getIntFromExtra(Map<String, Object> extraMap, String key) {
+        try {
+            return Integer.valueOf(String.valueOf(extraMap.get(key)));
+        } catch (Exception e) {
+            return 0;
+        }
     }
 }

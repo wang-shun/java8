@@ -306,4 +306,9 @@
         SET current_parity = #{currentParity}
         WHERE pig_id = #{boarId}
     </update>
+
+    <select id="findWeanSowTrackByGroupId" parameterType="map" resultMap="DoctorPigTrackMap">
+        SELECT <include refid="cols_all"/> FROM <include refid="tb"/>
+        WHERE group_id = #{groupId} AND `status` = #{status}
+    </select>
 </mapper>
