@@ -29,7 +29,7 @@ public class DateUtil {
     };
     private static final DateTimeFormatter dateFormatter = new DateTimeFormatterBuilder().append(null, parsers).toFormatter();
 
-    private static final DateTimeFormatter YYYYMM = DateTimeFormat.forPattern("yyyy-MM");
+    public static final DateTimeFormatter YYYYMM = DateTimeFormat.forPattern("yyyy-MM");
 
     private static final DateTimeFormatter DATE = DateTimeFormat.forPattern("yyyy-MM-dd");
 
