@@ -50,4 +50,8 @@ public class DoctorParityMonthlyReportDao extends MyBatisDao<DoctorParityMonthly
                 .put("parityEnd", parityEnd).put("startAt", startAt).put("endAt", endAt).map());
     }
 
+    public List<DoctorParityMonthlyReport> findDoctorParityMonthlyReports(Long farmId, String sumAt){
+        return getSqlSession().selectList(sqlId("findDoctorParityMonthlyReports"), ImmutableMap.of("farmId", farmId, "sumAt", sumAt));
+    }
+
 }
