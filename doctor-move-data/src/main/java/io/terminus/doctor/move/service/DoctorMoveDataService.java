@@ -60,7 +60,6 @@ import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PigSource;
 import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.enums.PregCheckResult;
-import io.terminus.doctor.event.handler.group.DoctorCommonGroupEventHandler;
 import io.terminus.doctor.event.manager.DoctorGroupReportManager;
 import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorGroup;
@@ -166,8 +165,13 @@ public class DoctorMoveDataService {
         search.setFarmId(farm.getId());
         search.setPigTypes(PigType.FARROW_TYPES);
 
-        doctorGroupDao.findBySearchDto(search).forEach(group -> doctorGroupReportManager
-                .updateFarrowGroupTrack(doctorGroupTrackDao.findByGroupId(group.getId()), group.getPigType()));
+        doctorGroupDao.findBySearchDto(search).forEach(group -> {
+            DoctorGroupTrack groupTrack = doctorGroupTrackDao.findByGroupId(group.getId());
+
+            DoctorGroupTrack updateTrack = new DoctorGroupTrack();
+            updateTrack.setId(groupTrack.getId());
+            doctorGroupTrackDao.update(doctorGroupReportManager.updateFarrowGroupTrack(groupTrack, group.getPigType()));
+        });
     }
 
     /**

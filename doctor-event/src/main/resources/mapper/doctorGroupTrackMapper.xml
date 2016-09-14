@@ -159,7 +159,7 @@
         WHERE id = #{id}
     </delete>
 
-    <select id="findByGroupId" parameterType="long" resultMap="DoctorGroupTrackMap">
+    <select id="findGroupTrackByGroupId" parameterType="long" resultMap="DoctorGroupTrackMap">
         SELECT <include refid="cols_all" />
         FROM <include refid="tb"/>
         WHERE group_id = #{groupId}
