@@ -398,6 +398,7 @@ public class DoctorPigCreateEvents {
     public Long createSowEventInfo(@RequestParam("farmId") Long farmId,
                                    @RequestParam("pigId") Long pigId, @RequestParam("eventType") Integer eventType,
                                    @RequestParam("sowInfoDtoJson") String sowInfoDtoJson) {
+        Long tempPigId = pigId;
         if (Objects.equals(eventType, PigEvent.FOSTERS.getKey())) {
             List<DoctorBasicInputInfoDto> basics = buildBasicInputPigDtoContent(farmId, pigId, sowInfoDtoJson);
             RespHelper.or500(doctorSowEventCreateService.sowEventsCreate(basics, sowInfoDtoJson));
@@ -408,7 +409,7 @@ public class DoctorPigCreateEvents {
                 DoctorPartWeanDto doctorPartWeanDto = JsonMapper.JSON_NON_DEFAULT_MAPPER.fromJson(sowInfoDtoJson, DoctorPartWeanDto.class);
                 Integer count =  doctorPartWeanDto.getFarrowingLiveCount()-doctorPartWeanDto.getWeanPigletsCount();
                 if (Objects.equals(doctorPartWeanDto.getPartWeanPigletsCount(), count) && doctorPartWeanDto.getChgLocationToBarnId() !=null){
-                   pigId = createChangeLocationEvent(pigId, farmId, sowInfoDtoJson);
+                    doctorSowEventCreateService.sowEventCreate(buildBasicInputInfoDto(farmId, tempPigId, PigEvent.TO_MATING), sowInfoDtoJson);
                 }
             }
         }
@@ -463,7 +464,8 @@ public class DoctorPigCreateEvents {
 
     //调用状态转换事件: 母猪转舍
     private Long createSowChgLocation(DoctorChgLocationDto chg, DoctorBasicInputInfoDto basic, DoctorBarn fromBarn, DoctorBarn toBarn) {
-        if (!CHG_SOW_ALLOWS.contains(toBarn.getPigType()) || !(fromBarn.getPigType() == PREG_SOW.getValue() && FARROW_TYPES.contains(toBarn.getPigType()))) {
+        if (!CHG_SOW_ALLOWS.contains(toBarn.getPigType()) ||
+                !(fromBarn.getPigType() == PREG_SOW.getValue() && FARROW_TYPES.contains(toBarn.getPigType()))) {
             throw new JsonResponseException(500, "input.sowToBarnId.error");
         }
 
