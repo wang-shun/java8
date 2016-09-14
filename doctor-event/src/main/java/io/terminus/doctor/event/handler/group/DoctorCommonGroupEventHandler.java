@@ -1,8 +1,11 @@
 package io.terminus.doctor.event.handler.group;
 
+import com.google.common.base.MoreObjects;
 import io.terminus.common.utils.BeanMapper;
+import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.RespHelper;
+import io.terminus.doctor.event.dao.DoctorPigTrackDao;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
 import io.terminus.doctor.event.dto.DoctorGroupDetail;
 import io.terminus.doctor.event.dto.event.group.DoctorMoveInGroupEvent;
@@ -23,6 +26,7 @@ import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
 import io.terminus.doctor.event.model.DoctorPig;
+import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.event.search.pig.PigSearchWriteService;
 import io.terminus.doctor.event.service.DoctorGroupReadService;
 import io.terminus.doctor.event.service.DoctorPigEventWriteService;
@@ -32,6 +36,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import static io.terminus.common.utils.Arguments.notEmpty;
@@ -53,6 +59,7 @@ public class DoctorCommonGroupEventHandler {
     private final DoctorGroupManager doctorGroupManager;
     private final DoctorPigEventWriteService doctorPigEventWriteService;
     private final PigSearchWriteService pigSearchWriteService;
+    private final DoctorPigTrackDao doctorPigTrackDao;
 
     @Autowired
     public DoctorCommonGroupEventHandler(DoctorCloseGroupEventHandler doctorCloseGroupEventHandler,
@@ -60,13 +67,15 @@ public class DoctorCommonGroupEventHandler {
                                          DoctorGroupReadService doctorGroupReadService,
                                          DoctorGroupManager doctorGroupManager,
                                          DoctorPigEventWriteService doctorPigEventWriteService,
-                                         PigSearchWriteService pigSearchWriteService) {
+                                         PigSearchWriteService pigSearchWriteService,
+                                         DoctorPigTrackDao doctorPigTrackDao) {
         this.doctorCloseGroupEventHandler = doctorCloseGroupEventHandler;
         this.doctorMoveInGroupEventHandler = doctorMoveInGroupEventHandler;
         this.doctorGroupReadService = doctorGroupReadService;
         this.doctorGroupManager = doctorGroupManager;
         this.doctorPigEventWriteService = doctorPigEventWriteService;
         this.pigSearchWriteService = pigSearchWriteService;
+        this.doctorPigTrackDao = doctorPigTrackDao;
     }
 
     /**
@@ -196,5 +205,53 @@ public class DoctorCommonGroupEventHandler {
 
         //解决在事务里发事件 异步取不到的问题, 以后绝对不能这么干了
         pigSearchWriteService.update(pigId);
+    }
+
+    /**
+     * 产房仔猪, 更新下断奶统计数据
+     * @param groupTrack 猪群跟踪
+     * @param pigType 猪类
+     * @return 猪群跟踪
+     */
+    public DoctorGroupTrack updateFarrowGroupTrack(DoctorGroupTrack groupTrack, Integer pigType) {
+        if (!PigType.FARROW_TYPES.contains(pigType)) {
+            return groupTrack;
+        }
+
+        double weanWeight = 0D;
+        double birthWeight = 0D;
+        int farrowQty = 0;
+        int weakQty = 0;
+        int unWeanQty = 0;
+        int weanQty = 0;
+        int unqQty = 0;
+
+        List<DoctorPigTrack> pigTracks = doctorPigTrackDao.findWeanSowTrackByGroupId(groupTrack.getGroupId());
+        for (DoctorPigTrack pigTrack : pigTracks) {
+            Map<String, Object> extraMap = pigTrack.getExtraMap();
+            weanWeight += MoreObjects.firstNonNull(pigTrack.getWeanAvgWeight(), 0D) * MoreObjects.firstNonNull(pigTrack.getWeanQty(), 0);
+            birthWeight += MoreObjects.firstNonNull(pigTrack.getFarrowAvgWeight(), 0D) * MoreObjects.firstNonNull(pigTrack.getFarrowQty(), 0);
+            farrowQty += MoreObjects.firstNonNull(pigTrack.getFarrowQty(), 0);
+            weakQty += getIntFromExtra(extraMap, "weakCount");
+            unWeanQty += MoreObjects.firstNonNull(pigTrack.getUnweanQty(), 0);
+            weanQty += MoreObjects.firstNonNull(pigTrack.getWeanQty(), 0);
+            unqQty += getIntFromExtra(extraMap, "notQualifiedCount");
+        }
+
+        groupTrack.setWeanAvgWeight(weanWeight / weanQty <= 0 ? 1D : weanQty);       //断奶均重kg
+        groupTrack.setBirthAvgWeight(birthWeight / farrowQty <= 0 ? 1D :farrowQty);  //出生均重kg
+        groupTrack.setWeakQty(weakQty);      //弱仔数
+        groupTrack.setUnweanQty(unWeanQty);  //未断奶数
+        groupTrack.setUnqQty(unqQty);        //不合格数
+        return groupTrack;
+    }
+
+
+    private static int getIntFromExtra(Map<String, Object> extraMap, String key) {
+        try {
+            return Integer.valueOf(String.valueOf(extraMap.get(key)));
+        } catch (Exception e) {
+            return 0;
+        }
     }
 }

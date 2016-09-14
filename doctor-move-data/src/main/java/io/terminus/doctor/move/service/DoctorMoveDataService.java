@@ -24,6 +24,7 @@ import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
 import io.terminus.doctor.event.dao.DoctorPigDao;
 import io.terminus.doctor.event.dao.DoctorPigEventDao;
 import io.terminus.doctor.event.dao.DoctorPigTrackDao;
+import io.terminus.doctor.event.dto.DoctorGroupSearchDto;
 import io.terminus.doctor.event.dto.event.boar.DoctorBoarConditionDto;
 import io.terminus.doctor.event.dto.event.boar.DoctorSemenDto;
 import io.terminus.doctor.event.dto.event.group.DoctorAntiepidemicGroupEvent;
@@ -59,6 +60,7 @@ import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PigSource;
 import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.enums.PregCheckResult;
+import io.terminus.doctor.event.handler.group.DoctorCommonGroupEventHandler;
 import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
@@ -120,6 +122,7 @@ public class DoctorMoveDataService {
     private final DoctorMoveBasicService doctorMoveBasicService;
     private final DoctorPigReadService doctorPigReadService;
     private final DoctorMoveWorkflowHandler doctorMoveWorkflowHandler;
+    private final DoctorCommonGroupEventHandler doctorCommonGroupEventHandler;
 
     @Autowired
     public DoctorMoveDataService(DoctorMoveDatasourceHandler doctorMoveDatasourceHandler,
@@ -131,7 +134,8 @@ public class DoctorMoveDataService {
                                  DoctorPigEventDao doctorPigEventDao,
                                  DoctorMoveBasicService doctorMoveBasicService,
                                  DoctorPigReadService doctorPigReadService,
-                                 DoctorMoveWorkflowHandler doctorMoveWorkflowHandler) {
+                                 DoctorMoveWorkflowHandler doctorMoveWorkflowHandler,
+                                 DoctorCommonGroupEventHandler doctorCommonGroupEventHandler) {
         this.doctorMoveDatasourceHandler = doctorMoveDatasourceHandler;
         this.doctorGroupDao = doctorGroupDao;
         this.doctorGroupEventDao = doctorGroupEventDao;
@@ -142,6 +146,7 @@ public class DoctorMoveDataService {
         this.doctorMoveBasicService = doctorMoveBasicService;
         this.doctorPigReadService = doctorPigReadService;
         this.doctorMoveWorkflowHandler = doctorMoveWorkflowHandler;
+        this.doctorCommonGroupEventHandler = doctorCommonGroupEventHandler;
     }
 
     //删除猪场所有猪相关的数据
@@ -149,6 +154,20 @@ public class DoctorMoveDataService {
         doctorPigDao.deleteByFarmId(farmId);
         doctorPigEventDao.deleteByFarmId(farmId);
         doctorPigTrackDao.deleteByFarmId(farmId);
+    }
+
+    /**
+     * 修正产房仔猪数据
+     */
+    @Transactional
+    public void updateFarrowGroupTrack(DoctorFarm farm) {
+        DoctorGroupSearchDto search = new DoctorGroupSearchDto();
+        search.setFarmId(farm.getId());
+        search.setPigTypes(PigType.FARROW_TYPES);
+        search.setStatus(DoctorGroup.Status.CREATED.getValue());
+
+        doctorGroupDao.findBySearchDto(search).forEach(group -> doctorCommonGroupEventHandler
+                .updateFarrowGroupTrack(doctorGroupTrackDao.findByGroupId(group.getId()), group.getPigType()));
     }
 
     /**
