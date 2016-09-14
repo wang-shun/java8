@@ -42,6 +42,8 @@ public class DoctorPartWeanDto extends AbstractPigEventInputDto implements Seria
 
     private Integer farrowingLiveCount; //分娩存活数
 
+    private Long chgLocationToBarnId;   // 转舍Id
+
     @Override
     public Map<String, String> descMap(){
         Map<String, String> map = new HashMap<>();

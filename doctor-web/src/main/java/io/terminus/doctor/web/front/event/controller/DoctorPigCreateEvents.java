@@ -406,7 +406,7 @@ public class DoctorPigCreateEvents {
             pigId = RespHelper.or500(doctorSowEventCreateService.sowEventCreate(buildBasicInputInfoDto(farmId, pigId, PigEvent.from(eventType)), sowInfoDtoJson));
             if (Objects.equals(eventType, PigEvent.WEAN.getKey())){
                 DoctorPartWeanDto doctorPartWeanDto = JsonMapper.JSON_NON_DEFAULT_MAPPER.fromJson(sowInfoDtoJson, DoctorPartWeanDto.class);
-                if (Objects.equals(doctorPartWeanDto.getPartWeanPigletsCount(), doctorPartWeanDto.getFarrowingLiveCount()) && null){
+                if (Objects.equals(doctorPartWeanDto.getPartWeanPigletsCount(), doctorPartWeanDto.getFarrowingLiveCount()) && doctorPartWeanDto.getChgLocationToBarnId() !=null){
                    pigId = createChangeLocationEvent(pigId, farmId, sowInfoDtoJson);
                 }
             }
