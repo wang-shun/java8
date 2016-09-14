@@ -337,7 +337,7 @@ ALTER TABLE doctor_group_tracks ADD COLUMN unq_qty int(11) DEFAULT NULL COMMENT 
 ALTER TABLE doctor_pig_tracks ADD COLUMN group_id bigint(20) DEFAULT NULL COMMENT '哺乳猪群id(断奶后此id置为null)' AFTER weight;
 ALTER TABLE doctor_pig_tracks ADD COLUMN farrow_qty int(11) DEFAULT NULL COMMENT '分娩仔猪数' AFTER group_id;
 ALTER TABLE doctor_pig_tracks ADD COLUMN unwean_qty int(11) DEFAULT NULL COMMENT '未断奶数量' AFTER farrow_qty;
-ALTER TABLE doctor_pig_tracks ADD COLUMN foster_qty int(11) DEFAULT NULL COMMENT '被拼窝数量' AFTER unwean_qty;
-ALTER TABLE doctor_pig_tracks ADD COLUMN farrow_avg_weight double DEFAULT NULL COMMENT '分娩均重(kg)' AFTER foster_qty;
+ALTER TABLE doctor_pig_tracks ADD COLUMN wean_qty int(11) DEFAULT NULL COMMENT '断奶数量' AFTER unwean_qty;
+ALTER TABLE doctor_pig_tracks ADD COLUMN farrow_avg_weight double DEFAULT NULL COMMENT '分娩均重(kg)' AFTER wean_qty;
 ALTER TABLE doctor_pig_tracks ADD COLUMN wean_avg_weight double DEFAULT NULL COMMENT '断奶均重(kg)' AFTER farrow_avg_weight;
 

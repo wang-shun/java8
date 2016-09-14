@@ -544,4 +544,21 @@ public class DoctorMoveDataController {
             return false;
         }
     }
+
+    /**
+     * 修正哺乳母猪数据
+     */
+    @RequestMapping(value = "/updateBuruTrack", method = RequestMethod.GET)
+    public Boolean updateBuruTrack(@RequestParam("farmId") Long farmId) {
+        try {
+            DoctorFarm farm = doctorFarmDao.findById(farmId);
+            log.warn("updateBuruSowTrack start, farmId:{}", farmId);
+            doctorMoveDataService.updateBuruTrack(farm);
+            log.warn("updateBuruSowTrack end");
+            return true;
+        } catch (Exception e) {
+            log.error("updateBuruSowTrack failed, farmId:{}, cause:{}", farmId, Throwables.getStackTraceAsString(e));
+            return false;
+        }
+    }
 }

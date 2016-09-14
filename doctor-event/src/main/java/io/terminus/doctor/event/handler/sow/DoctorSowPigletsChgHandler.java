@@ -1,6 +1,5 @@
 package io.terminus.doctor.event.handler.sow;
 
-import com.google.common.base.MoreObjects;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.RespHelper;
@@ -60,27 +59,21 @@ public class DoctorSowPigletsChgHandler extends DoctorAbstractEventFlowHandler {
 
         // 校验转出的数量信息
         Integer unweanCount = doctorPigTrack.getUnweanQty();        //未断奶数量
-        Integer weanCount = doctorPigTrack.getFarrowQty() + doctorPigTrack.getFosterQty() - doctorPigTrack.getUnweanQty(); //断奶数量 = 初始 + 变动(拼窝or死亡等) - 未断奶
+        Integer weanCount = doctorPigTrack.getWeanQty();            //已断奶数量
 
         //变动数量
         Integer changeCount = (Integer) extra.get("pigletsCount");
         checkState(changeCount != null, "quantity.not.null");
         checkState(changeCount <= unweanCount, "wean.countInput.error");
-        doctorPigTrack.setUnweanQty(unweanCount - changeCount);
+        doctorPigTrack.setUnweanQty(unweanCount - changeCount);  //未断奶数量 - 变动数量, 已断奶数量不用变
 
         //变动重量
         Double changeWeight = (Double) extra.get("pigletsWeight");
         checkState(changeWeight != null, "weight.not.null");
         checkState(changeWeight <= unweanCount, "wean.countInput.error");
 
-        //重新计算均重
-        Double weanAvgWeight = ((MoreObjects.firstNonNull(doctorPigTrack.getWeanAvgWeight(), 0D) * weanCount) - changeWeight ) /
-                doctorPigTrack.getUnweanQty() == 0 ? 1.0 : doctorPigTrack.getUnweanQty();
-        doctorPigTrack.setWeanAvgWeight(weanAvgWeight);
-
         //更新extra字段
-        extra.put("partWeanPigletsCount", changeCount);
-        extra.put("partWeanAvgWeight", weanAvgWeight);
+        extra.put("partWeanPigletsCount", weanCount);
         extra.put("farrowingLiveCount", doctorPigTrack.getUnweanQty());
         doctorPigTrack.addAllExtraMap(extra);
 

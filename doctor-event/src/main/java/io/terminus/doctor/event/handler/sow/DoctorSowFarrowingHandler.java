@@ -117,7 +117,7 @@ public class DoctorSowFarrowingHandler extends DoctorAbstractEventFlowHandler {
         doctorPigTrack.setGroupId(groupId);
         doctorPigTrack.setFarrowQty(Integer.valueOf(MoreObjects.firstNonNull(extra.get("farrowingLiveCount"), 0).toString()));
         doctorPigTrack.setUnweanQty(doctorPigTrack.getFarrowQty());
-        doctorPigTrack.setFosterQty(0);  //分娩时 被拼窝为0
+        doctorPigTrack.setWeanQty(0);  //分娩时 断奶数为0
         doctorPigTrack.setFarrowAvgWeight(Double.valueOf(extra.get("birthNestAvg").toString()));
         doctorPigTrack.setWeanAvgWeight(0D); //分娩时, 断奶均重置成0
 

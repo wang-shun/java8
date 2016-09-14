@@ -69,12 +69,12 @@ public class DoctorSowFostersByHandler extends DoctorAbstractEventFlowHandler {
         // 转群操作
         Long groupId = groupSowEventCreate(doctorPigTrack, basic, extra);
 
-        //添加当前母猪的健崽猪的数量信息
+        //被拼窝数量
         Integer fosterCount = (Integer) extra.get("fostersCount");
 
         doctorPigTrack.setGroupId(groupId);  //groupId = -1 置成 NULL
         doctorPigTrack.setUnweanQty(MoreObjects.firstNonNull(doctorPigTrack.getUnweanQty(), 0) + fosterCount);  //未断奶数
-        doctorPigTrack.setFosterQty(MoreObjects.firstNonNull(doctorPigTrack.getFosterQty(), 0) + fosterCount);  //被拼窝数累加
+        doctorPigTrack.setWeanQty(MoreObjects.firstNonNull(doctorPigTrack.getWeanQty(), 0));    //断奶数不变
 
         extra.put("farrowingLiveCount", doctorPigTrack.getUnweanQty());
         extra.put("farrowingPigletGroupId", groupId);

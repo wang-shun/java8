@@ -69,11 +69,12 @@ public class DoctorSowWeanHandler extends DoctorAbstractEventFlowHandler {
         checkState(Objects.equals(doctorPigTrack.getStatus(), PigStatus.FEED.getKey()), "not.feed.sow");
 
         //未断奶数
-        Integer unweanCount = doctorPigTrack.getUnweanQty();
+        Integer unweanCount = doctorPigTrack.getUnweanQty();    //未断奶数量
+        Integer weanCount = doctorPigTrack.getWeanQty();        //断奶数量
         Integer toWeanCount = (Integer) extra.get("partWeanPigletsCount");
-        Integer weanCount = doctorPigTrack.getFarrowQty() + doctorPigTrack.getFosterQty() - doctorPigTrack.getUnweanQty(); //断奶数量 = 初始 + 变动(拼窝or死亡等) - 未断奶
         checkState(toWeanCount <= unweanCount, "wean.countInput.error");
-        doctorPigTrack.setUnweanQty(unweanCount - toWeanCount);
+        doctorPigTrack.setUnweanQty(unweanCount - toWeanCount); //未断奶数减
+        doctorPigTrack.setWeanQty(weanCount + toWeanCount);     //断奶数加
 
         //断奶均重
         Double toWeanAvgWeight = (Double) extra.get("partWeanAvgWeight");
@@ -82,8 +83,8 @@ public class DoctorSowWeanHandler extends DoctorAbstractEventFlowHandler {
         doctorPigTrack.setWeanAvgWeight(weanAvgWeight);
 
         //更新extra字段
-        extra.put("partWeanPigletsCount", toWeanCount);
         extra.put("partWeanAvgWeight", weanAvgWeight);
+        extra.put("partWeanPigletsCount", doctorPigTrack.getWeanQty());
         extra.put("farrowingLiveCount", doctorPigTrack.getUnweanQty());
         extra.put("hasWeanToMating", true);
         doctorPigTrack.addAllExtraMap(extra);

@@ -47,16 +47,17 @@ public class DoctorSowFostersHandler extends DoctorAbstractEventFlowHandler {
         checkState(unweanCount >= fosterCount, "create.fostersBy.notEnough");
 
         doctorPigTrack.setUnweanQty(unweanCount - fosterCount);  //未断奶数
+        doctorPigTrack.setWeanQty(MoreObjects.firstNonNull(doctorPigTrack.getWeanQty(), 0)); //断奶数不变
         extra.put("farrowingLiveCount", doctorPigTrack.getUnweanQty());
         doctorPigTrack.addAllExtraMap(extra);
+
 
         //全部断奶后, 初始化所有本次哺乳的信息
         if (doctorPigTrack.getUnweanQty() == 0) {
             doctorPigTrack.setStatus(PigStatus.Wean.getKey());
             doctorPigTrack.setGroupId(-1L);  //groupId = -1 置成 NULL
-            doctorPigTrack.setFarrowQty(0);  //分娩数 0
-            doctorPigTrack.setFosterQty(MoreObjects.firstNonNull(doctorPigTrack.getFosterQty(), 0) - fosterCount);  //拼出去 数量要减
             doctorPigTrack.setFarrowAvgWeight(0D); //分娩均重(kg)
+            doctorPigTrack.setFarrowQty(0);  //分娩数 0
             doctorPigTrack.setWeanAvgWeight(0D);
         } else {
             doctorPigTrack.setStatus(PigStatus.FEED.getKey());

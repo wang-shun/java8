@@ -152,6 +152,14 @@ public class DoctorMoveDataService {
     }
 
     /**
+     * 修正哺乳母猪数据
+     */
+    @Transactional
+    public void updateBuruTrack(DoctorFarm farm) {
+        updateBuruSowTrack(farm);
+    }
+
+    /**
      * 修正配种类型
      */
     @Transactional
@@ -508,8 +516,43 @@ public class DoctorMoveDataService {
                 .collect(Collectors.toList());
         doctorPigTrackDao.creates(sowTracks);
 
+        //如果是哺乳状态, 设置一下哺乳猪群的信息
+        updateBuruSowTrack(farm);
+
         //4. 更新公猪的全部配种次数
         updateBoarCurrentParity(sowEvents);
+    }
+
+    //如果是哺乳状态, 设置一下哺乳猪群的信息
+    private void updateBuruSowTrack(DoctorFarm farm) {
+        doctorPigTrackDao.findByFarmIdAndStatus(farm.getId(), PigStatus.FEED.getKey()).stream()
+                .filter(t -> Objects.equals(t.getIsRemoval(), IsOrNot.NO.getValue()) && Objects.equals(t.getPigType(), DoctorPig.PIG_TYPE.SOW.getKey()))
+                .forEach(track -> {
+                    track.setExtra(track.getExtra());
+                    Map<String, Object> extraMap = track.getExtraMap();
+
+                    DoctorPigTrack updateTrack = new DoctorPigTrack();
+                    updateTrack.setId(track.getId());
+                    if (extraMap.containsKey("farrowingPigletGroupId")) {
+                        updateTrack.setGroupId(Long.valueOf(String.valueOf(extraMap.get("farrowingPigletGroupId"))));
+                    }
+
+                    //更新哺乳母猪信息
+                    updateTrack.setUnweanQty(getIntegerDefault0(extraMap, "farrowingLiveCount"));
+                    updateTrack.setWeanQty(getIntegerDefault0(extraMap, "partWeanPigletsCount"));
+                    updateTrack.setFarrowQty(updateTrack.getUnweanQty() + updateTrack.getWeanQty());
+                    updateTrack.setFarrowAvgWeight(getDoubleDefault0(extraMap, "birthNestAvg"));
+                    updateTrack.setWeanAvgWeight(getDoubleDefault0(extraMap, "partWeanAvgWeight"));
+                    doctorPigTrackDao.update(updateTrack);
+                });
+    }
+
+    private static Integer getIntegerDefault0(Map<String, Object> extraMap, String key) {
+        return extraMap.containsKey(key) ? Integer.valueOf(String.valueOf(extraMap.get(key))) : 0;
+    }
+
+    private static Double getDoubleDefault0(Map<String, Object> extraMap, String key) {
+        return extraMap.containsKey(key) ? Double.valueOf(String.valueOf(extraMap.get(key))) : 0D;
     }
 
     //更新公猪的配种数(根据配种事件)

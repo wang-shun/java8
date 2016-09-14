@@ -20,7 +20,7 @@
         <result column="group_id" property="groupId"/>
         <result column="farrow_qty" property="farrowQty"/>
         <result column="unwean_qty" property="unweanQty"/>
-        <result column="foster_qty" property="fosterQty"/>
+        <result column="wean_qty" property="weanQty"/>
         <result column="farrow_avg_weight" property="farrowAvgWeight"/>
         <result column="wean_avg_weight" property="weanAvgWeight"/>
         <result column="out_farm_date" property="outFarmDate"/>
@@ -61,7 +61,7 @@
         group_id,
         farrow_qty,
         unwean_qty,
-        foster_qty,
+        wean_qty,
         farrow_avg_weight,
         wean_avg_weight,
         out_farm_date,
@@ -92,7 +92,7 @@
         #{groupId},
         #{farrowQty},
         #{unweanQty},
-        #{fosterQty},
+        #{weanQty},
         #{farrowAvgWeight},
         #{weanAvgWeight},
         #{outFarmDate},
@@ -148,7 +148,7 @@
             #{item.groupId},
             #{item.farrowQty},
             #{item.unweanQty},
-            #{item.fosterQty},
+            #{item.weanQty},
             #{item.farrowAvgWeight},
             #{item.weanAvgWeight},
             #{item.outFarmDate},
@@ -236,7 +236,7 @@
             <if test="groupId == -1">group_id = NULL,</if>
             <if test="farrowQty != null">farrow_qty = #{farrowQty},</if>
             <if test="unweanQty != null">unwean_qty = #{unweanQty},</if>
-            <if test="fosterQty != null">foster_qty = #{fosterQty},</if>
+            <if test="weanQty != null">wean_qty = #{weanQty},</if>
             <if test="farrowAvgWeight != null">farrow_avg_weight = #{farrowAvgWeight},</if>
             <if test="weanAvgWeight != null">wean_avg_weight = #{weanAvgWeight},</if>
             <if test="outFarmDate != null">out_farm_date = #{outFarmDate},</if>

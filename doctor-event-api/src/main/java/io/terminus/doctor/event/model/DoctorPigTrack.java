@@ -83,9 +83,9 @@ public class DoctorPigTrack implements Serializable {
     private Integer unweanQty;
 
     /**
-     * 被拼窝数量
+     * 断奶数量
      */
-    private Integer fosterQty;
+    private Integer weanQty;
 
     /**
      * 分娩均重(kg)
