@@ -197,7 +197,7 @@ public class MsgManager {
                 User user = (User) RespHelper.orServEx(userReadService.findById(message.getUserId()));
                 if (StringUtils.isNotBlank(user.getEmail())) {
                     map = JsonMapper.JSON_NON_DEFAULT_MAPPER.fromJson(message.getData(), Map.class);
-                    // 发送短信 // TODO 临时取消
+                    // app push // TODO 临时取消
                     // appPushWebService.send("[" + userId+ "]", doctorMessageRuleTemplate.getMessageTemplate(), map, null);
                     message.setSendedAt(new Date());
                     message.setStatus(DoctorMessage.Status.SENDED.getValue());
