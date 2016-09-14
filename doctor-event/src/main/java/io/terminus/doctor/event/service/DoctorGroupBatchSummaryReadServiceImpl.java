@@ -8,12 +8,14 @@ import io.terminus.doctor.common.utils.CountUtil;
 import io.terminus.doctor.event.constants.DoctorBasicEnums;
 import io.terminus.doctor.event.dao.DoctorGroupBatchSummaryDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
+import io.terminus.doctor.event.dao.DoctorPigTrackDao;
 import io.terminus.doctor.event.dto.DoctorGroupDetail;
 import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupBatchSummary;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
+import io.terminus.doctor.event.model.DoctorPigTrack;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -32,12 +34,15 @@ import java.util.Objects;
 @RpcProvider
 public class DoctorGroupBatchSummaryReadServiceImpl implements DoctorGroupBatchSummaryReadService {
 
+    private final DoctorPigTrackDao doctorPigTrackDao;
     private final DoctorGroupEventDao doctorGroupEventDao;
     private final DoctorGroupBatchSummaryDao doctorGroupBatchSummaryDao;
 
     @Autowired
-    public DoctorGroupBatchSummaryReadServiceImpl(DoctorGroupEventDao doctorGroupEventDao,
+    public DoctorGroupBatchSummaryReadServiceImpl(DoctorPigTrackDao doctorPigTrackDao,
+                                                  DoctorGroupEventDao doctorGroupEventDao,
                                                   DoctorGroupBatchSummaryDao doctorGroupBatchSummaryDao) {
+        this.doctorPigTrackDao = doctorPigTrackDao;
         this.doctorGroupEventDao = doctorGroupEventDao;
         this.doctorGroupBatchSummaryDao = doctorGroupBatchSummaryDao;
     }
@@ -101,10 +106,13 @@ public class DoctorGroupBatchSummaryReadServiceImpl implements DoctorGroupBatchS
         summary.setInCount(inCount);                                                 //转入数
         summary.setInAvgWeight(inAvgWeight);                                         //转入均重(kg)
         summary.setDeadRate(getDeatRate(events, inCount));                           //死淘率
-        summary.setNest(0);                                                          // TODO: 16/9/13  窝数
-        summary.setFcr(0D);                                                          // TODO: 16/9/13  料肉比
+        summary.setFcr(0D / getFcrDeltaWeight(events, inCount, inAvgWeight));        // TODO: 16/9/13  料肉比
+
+        List<DoctorPigTrack> farrowTracks = doctorPigTrackDao.findWeanSowTrackByGroupId(groupTrack.getGroupId());
+        summary.setNest(farrowTracks.size());                                        //窝数
 
         setToNurseryOrFatten(summary, events);                                       //阶段转
+
         // TODO: 16/9/13 上线后再弄
 //        summary.setToFattenCost();         //转育肥成本(分)
 //        summary.setToNurseryCost();        //转保育成本(分)
@@ -163,5 +171,16 @@ public class DoctorGroupBatchSummaryReadServiceImpl implements DoctorGroupBatchS
             summary.setToFattenCount(toCount);        //转育肥数量
             summary.setToFattenAvgWeight(toAvgWeight);    //转育肥均重(kg)
         }
+    }
+
+    //获取料肉比增重: 增重 = 转出重 - 转入重
+    private static double getFcrDeltaWeight(List<DoctorGroupEvent> events, int inCount, double inAvgWeight) {
+        double outWeight = CountUtil.doubleStream(events, DoctorGroupEvent::getWeight,
+                event -> Objects.equals(event.getType(), GroupEventType.TRANS_GROUP.getValue()) ||  //转群
+                        Objects.equals(event.getType(), GroupEventType.TRANS_FARM.getValue()) ||    //转场
+                        Objects.equals(event.getType(), GroupEventType.TURN_SEED.getValue()) ||     //转种猪
+                        Objects.equals(event.getType(), GroupEventType.CHANGE.getValue()))          //变动
+                .sum();
+        return outWeight - inCount * inAvgWeight;
     }
 }
