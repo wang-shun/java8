@@ -28,11 +28,12 @@ public class DoctorMaterialConsumeProviderReadServiceImpl implements DoctorMater
     }
 
     @Override
-    public Response<Paging<DoctorMaterialConsumeProvider>> page(Long warehouseId, Long materialId, Integer eventType, Integer materilaType,
+    public Response<Paging<DoctorMaterialConsumeProvider>> page(Long farmId, Long warehouseId, Long materialId, Integer eventType, Integer materilaType,
                                                               Long staffId, String startAt, String endAt, Integer pageNo, Integer size) {
         try{
             DoctorMaterialConsumeProvider model = DoctorMaterialConsumeProvider.builder()
                     .wareHouseId(warehouseId).materialId(materialId).eventType(eventType).type(materilaType)
+                    .farmId(farmId)
                     .staffId(staffId).build();
             Map<String, Object> map = BeanMapper.convertObjectToMap(model);
             map.put("startAt", startAt);

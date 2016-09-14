@@ -203,6 +203,7 @@ public class DoctorWareHouseQuery {
 
     /**
      * 分页查询仓库历史出入记录
+     * @param farmId 猪场id , 必传
      * @param warehouseId 仓库id
      * @param materialId 物料id
      * @param eventType 事件类型
@@ -218,15 +219,18 @@ public class DoctorWareHouseQuery {
      */
     @RequestMapping(value = "/pageConsumeProvideHistory", method = RequestMethod.GET)
     @ResponseBody
-    public Paging<DoctorMaterialConsumeProvider> pageConsumeProvideHistory(@RequestParam(name = "warehouseId", required = false) Long warehouseId,
-                                                                          @RequestParam(required = false) Long materialId,
-                                                                          @RequestParam(required = false) Integer eventType,
-                                                                          @RequestParam(required = false) Integer materilaType,
-                                                                          @RequestParam(required = false) Long staffId,
-                                                                          @RequestParam(required = false) String startAt,
-                                                                          @RequestParam(required = false) String endAt,
-                                                                          @RequestParam(required = false) Integer pageNo,
-                                                                          @RequestParam(required = false) Integer size){
-        return RespHelper.or500(doctorMaterialConsumeProviderReadService.page(warehouseId, materialId, eventType, materilaType, staffId, startAt, endAt, pageNo, size));
+    public Paging<DoctorMaterialConsumeProvider> pageConsumeProvideHistory(
+            @RequestParam("farmId") Long farmId, // 此参数必须有
+            @RequestParam(name = "warehouseId", required = false) Long warehouseId,
+            @RequestParam(required = false) Long materialId,
+            @RequestParam(required = false) Integer eventType,
+            @RequestParam(required = false) Integer materilaType,
+            @RequestParam(required = false) Long staffId,
+            @RequestParam(required = false) String startAt,
+            @RequestParam(required = false) String endAt,
+            @RequestParam(required = false) Integer pageNo,
+            @RequestParam(required = false) Integer size){
+        return RespHelper.or500(doctorMaterialConsumeProviderReadService.page(farmId, warehouseId, materialId, eventType,
+                materilaType, staffId, startAt, endAt, pageNo, size));
     }
 }
