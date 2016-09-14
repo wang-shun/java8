@@ -15,7 +15,6 @@ import io.terminus.common.utils.Splitters;
 import io.terminus.doctor.common.constants.JacksonType;
 import io.terminus.doctor.event.dao.DoctorPigEventDao;
 import io.terminus.doctor.event.dao.DoctorPigTrackDao;
-import io.terminus.doctor.event.dto.DoctorPigEventSearchDto;
 import io.terminus.doctor.event.dto.DoctorSowParityCount;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PigStatus;
@@ -231,12 +230,12 @@ public class DoctorPigEventReadServiceImpl implements DoctorPigEventReadService 
     }
 
     @Override
-    public Response<Paging<DoctorPigEvent>> queryPigEventsByCriteria(DoctorPigEventSearchDto doctorPigEventSearchDto, Integer pageNo, Integer pageSize) {
+    public Response<Paging<DoctorPigEvent>> queryPigEventsByCriteria(Map<String, Object> criteria, Integer pageNo, Integer pageSize) {
         try {
-            return Response.ok(doctorPigEventDao.paging(pageNo, pageSize, doctorPigEventSearchDto));
+            return Response.ok(doctorPigEventDao.paging(pageNo, pageSize, criteria));
         } catch (Exception e) {
             log.error("query.pig.event.by.criteria.failed cause by {}", Throwables.getStackTraceAsString(e));
-            return Response.fail("query.pig.event.by.criteria.failed cause by {}");
+            return Response.fail("query.pig.event.by.criteria.failed");
         }
     }
 }

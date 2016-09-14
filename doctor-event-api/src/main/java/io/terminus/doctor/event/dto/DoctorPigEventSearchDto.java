@@ -5,7 +5,6 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 import java.io.Serializable;
-import java.util.Date;
 
 /**
  * Created by xiao on 16/9/13.
@@ -16,6 +15,6 @@ public class DoctorPigEventSearchDto extends DoctorPigEvent implements Serializa
 
     private static final long serialVersionUID = 6338890179869537364L;
 
-    private Date beginDate;
-    private Date endDate;
+    private String beginDate;
+    private String endDate;
 }

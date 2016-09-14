@@ -4,7 +4,6 @@ import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.event.dto.DoctorGroupCount;
 import io.terminus.doctor.event.dto.DoctorGroupDetail;
-import io.terminus.doctor.event.dto.DoctorGroupEventSearchDto;
 import io.terminus.doctor.event.dto.DoctorGroupSearchDto;
 import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
 import io.terminus.doctor.event.model.DoctorGroup;
@@ -16,6 +15,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Desc: 猪群想过读服务
@@ -163,10 +163,10 @@ public interface DoctorGroupReadService {
 
     /**
      * 根据条件查询猪群事件
-     * @param doctorGroupEventSearchDto
+     * @param criteria
      * @param pageNo
      * @param pageSize
      * @return
      */
-    Response<Paging<DoctorGroupEvent>> queryGroupEventsByCriteria(DoctorGroupEventSearchDto doctorGroupEventSearchDto, Integer pageNo, Integer pageSize);
+    Response<Paging<DoctorGroupEvent>> queryGroupEventsByCriteria(Map<String, Object> criteria, Integer pageNo, Integer pageSize);
 }

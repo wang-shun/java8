@@ -74,6 +74,15 @@ public enum PigEvent {
         return null;
     }
 
+    public static PigEvent fromDesc(String desc){
+        for(PigEvent pigEvent : PigEvent.values()){
+            if(Objects.equals(pigEvent.desc, desc)){
+                return pigEvent;
+            }
+        }
+        return null;
+    }
+
     public static List<PigEvent> from(List<Integer> types){
         return Arrays.asList(values()).stream().filter(pigEvent -> types.contains(pigEvent.getType())).collect(Collectors.toList());
     }

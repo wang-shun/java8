@@ -2,7 +2,6 @@ package io.terminus.doctor.event.service;
 
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
-import io.terminus.doctor.event.dto.DoctorPigEventSearchDto;
 import io.terminus.doctor.event.dto.DoctorSowParityCount;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 
@@ -84,8 +83,8 @@ public interface DoctorPigEventReadService {
 
     /**
      * 根据条件查询事件
-     * @param doctorPigEventSearchDto
+     * @param criteria
      * @return
      */
-    Response<Paging<DoctorPigEvent>> queryPigEventsByCriteria(DoctorPigEventSearchDto doctorPigEventSearchDto, Integer pageNo, Integer pageSize);
+    Response<Paging<DoctorPigEvent>> queryPigEventsByCriteria(Map<String, Object> criteria, Integer pageNo, Integer pageSize);
 }

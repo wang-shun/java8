@@ -6,12 +6,10 @@ import com.google.common.base.Throwables;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
-import io.terminus.common.utils.BeanMapper;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.common.utils.Splitters;
 import io.terminus.doctor.common.constants.JacksonType;
 import io.terminus.doctor.common.utils.RespHelper;
-import io.terminus.doctor.event.dto.DoctorPigEventSearchDto;
 import io.terminus.doctor.event.dto.DoctorPigInfoDto;
 import io.terminus.doctor.event.dto.DoctorSowParityCount;
 import io.terminus.doctor.event.enums.PigEvent;
@@ -188,16 +186,15 @@ public class DoctorPigEvents {
 
     @RequestMapping(value = "/pigPaging")
     @ResponseBody
-    public Paging<DoctorPigEvent> queryPigEventsByCriteria(@RequestParam Map<String, String> params, @RequestParam Integer pageNo, @RequestParam Integer pageSize) {
+    public Paging<DoctorPigEvent> queryPigEventsByCriteria(@RequestParam Map<String, Object> params, @RequestParam String eventName, @RequestParam Integer pageNo, @RequestParam Integer pageSize) {
         if (params == null || params.isEmpty()) {
             return Paging.empty();
         }
-        if (StringUtils.isNotBlank(params.get("eventName"))){
-            params.put("type", PigEvent.from(params.get("eventName")).getKey().toString());
+        if (StringUtils.isNotBlank((String)params.get("eventName"))){
+            params.put("type", PigEvent.fromDesc((String) params.get("eventName")).getKey().toString());
             params.remove("eventName");
         }
-        DoctorPigEventSearchDto doctorPigEventSearchDto = BeanMapper.map(params, DoctorPigEventSearchDto.class);
-        return RespHelper.or500(doctorPigEventReadService.queryPigEventsByCriteria(doctorPigEventSearchDto, pageNo, pageSize));
+        return RespHelper.or500(doctorPigEventReadService.queryPigEventsByCriteria(params, pageNo, pageSize));
     }
 
     @RequestMapping(value = "/pigEvents")

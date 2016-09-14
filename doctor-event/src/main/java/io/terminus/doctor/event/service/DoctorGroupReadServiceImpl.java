@@ -19,7 +19,6 @@ import io.terminus.doctor.event.dao.DoctorGroupSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
 import io.terminus.doctor.event.dto.DoctorGroupCount;
 import io.terminus.doctor.event.dto.DoctorGroupDetail;
-import io.terminus.doctor.event.dto.DoctorGroupEventSearchDto;
 import io.terminus.doctor.event.dto.DoctorGroupSearchDto;
 import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
 import io.terminus.doctor.event.enums.GroupEventType;
@@ -331,9 +330,9 @@ public class DoctorGroupReadServiceImpl implements DoctorGroupReadService {
     }
 
     @Override
-    public Response<Paging<DoctorGroupEvent>> queryGroupEventsByCriteria(DoctorGroupEventSearchDto doctorGroupEventSearchDto, Integer pageNo, Integer pageSize) {
+    public Response<Paging<DoctorGroupEvent>> queryGroupEventsByCriteria(Map<String, Object> criteira, Integer pageNo, Integer pageSize) {
         try {
-            return Response.ok(doctorGroupEventDao.paging(pageNo, pageSize, doctorGroupEventSearchDto));
+            return Response.ok(doctorGroupEventDao.paging(pageNo, pageSize, criteira));
         } catch (Exception e) {
             log.error("query.group.events.by.criteria.failed, cause {}", Throwables.getStackTraceAsString(e));
             return Response.fail("query.group.events.by.criteria.failed");

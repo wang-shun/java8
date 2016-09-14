@@ -3,12 +3,10 @@ package io.terminus.doctor.web.front.event.controller;
 import com.google.common.collect.Lists;
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.model.Paging;
-import io.terminus.common.utils.BeanMapper;
 import io.terminus.doctor.basic.model.DoctorBasic;
 import io.terminus.doctor.basic.service.DoctorBasicReadService;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dto.DoctorGroupDetail;
-import io.terminus.doctor.event.dto.DoctorGroupEventSearchDto;
 import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
 import io.terminus.doctor.event.dto.event.group.input.DoctorNewGroupInput;
 import io.terminus.doctor.event.enums.GroupEventType;
@@ -295,15 +293,13 @@ public class DoctorGroupEvents {
 
     @RequestMapping(value = "/groupPaging")
     @ResponseBody
-    public Paging<DoctorGroupEvent> queryGroupEventsByCriteria(@RequestParam Map<String, String> params, @RequestParam Integer pageNo, @RequestParam Integer pageSize) {
+    public Paging<DoctorGroupEvent> queryGroupEventsByCriteria(@RequestParam Map<String, Object> params, @RequestParam Integer pageNo, @RequestParam Integer pageSize) {
         if (params == null || params.isEmpty()) {
             return Paging.empty();
         }
-        if (StringUtils.isNotBlank(params.get("eventName"))){
-            params.put("type", String.valueOf(GroupEventType.from(params.get("eventName")).getValue()));
-            params.remove("eventName");
+        if (StringUtils.isNotBlank((String)params.get("eventName"))){
+            params.put("type", String.valueOf(GroupEventType.from((String)params.get("eventName")).getValue()));
         }
-        DoctorGroupEventSearchDto doctorGroupEventSearchDto = BeanMapper.map(params, DoctorGroupEventSearchDto.class);
-        return RespHelper.or500(doctorGroupReadService.queryGroupEventsByCriteria(doctorGroupEventSearchDto, pageNo, pageSize));
+        return RespHelper.or500(doctorGroupReadService.queryGroupEventsByCriteria(params, pageNo, pageSize));
     }
 }
