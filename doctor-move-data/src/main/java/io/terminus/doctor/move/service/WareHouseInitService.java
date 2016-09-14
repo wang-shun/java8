@@ -19,13 +19,10 @@ import io.terminus.doctor.move.model.View_FeedList;
 import io.terminus.doctor.move.model.View_MedicineList;
 import io.terminus.doctor.move.model.View_RawMaterialList;
 import io.terminus.doctor.move.model.View_VaccinationList;
-import io.terminus.doctor.user.dao.DoctorFarmDao;
 import io.terminus.doctor.user.dao.DoctorStaffDao;
-import io.terminus.doctor.user.dao.DoctorUserDataPermissionDao;
 import io.terminus.doctor.user.dao.SubDao;
 import io.terminus.doctor.user.model.DoctorFarm;
 import io.terminus.doctor.user.model.DoctorStaff;
-import io.terminus.doctor.user.model.DoctorUserDataPermission;
 import io.terminus.doctor.user.model.Sub;
 import io.terminus.doctor.user.service.DoctorUserReadService;
 import io.terminus.doctor.warehouse.dao.DoctorFarmWareHouseTypeDao;
@@ -73,11 +70,7 @@ public class WareHouseInitService {
     @Autowired
     private DoctorWareHouseDao doctorWareHouseDao;
     @Autowired
-    private DoctorUserDataPermissionDao doctorUserDataPermissionDao;
-    @Autowired
     private DoctorMoveDatasourceHandler doctorMoveDatasourceHandler;
-    @Autowired
-    private DoctorFarmDao doctorFarmDao;
     @Autowired
     private SubDao subDao;
     @Autowired
@@ -109,12 +102,6 @@ public class WareHouseInitService {
         Long userId = user.getId();
 
         UserProfile userProfile = userProfileDao.findByUserId(userId);
-
-        DoctorUserDataPermission permission = doctorUserDataPermissionDao.findByUserId(userId);
-        List<Long> farmIds = permission.getFarmIdsList();
-
-        //猪场
-        List<DoctorFarm> farms = doctorFarmDao.findByIds(farmIds);
 
         //子账号
         List<Sub> subs = subDao.findByConditions(ImmutableMap.of("parentUserId", userId), null);
@@ -300,23 +287,23 @@ public class WareHouseInitService {
                                        Map<String, DoctorBarn> barnMap, UserProfile userProfile, List<String> stopUseMaterial){
         // 易耗品
         List<MaterialPurchasedUsed> consumes = RespHelper.or500(doctorMoveDatasourceHandler.findByHbsSql(dataSourceId, MaterialPurchasedUsed.class, "AssetPurchasedUsed"));
-        this.addMaterial2Warehouse2(warehouseType.get(WareHouseType.CONSUME), consumes, basicMaterialMap, staffMap, barnMap, userProfile, stopUseMaterial);
+        this.addMaterial2Warehouse(warehouseType.get(WareHouseType.CONSUME), consumes, basicMaterialMap, staffMap, barnMap, userProfile, stopUseMaterial);
 
         // 饲料
         List<MaterialPurchasedUsed> feeds = RespHelper.or500(doctorMoveDatasourceHandler.findByHbsSql(dataSourceId, MaterialPurchasedUsed.class, "FeedPurchasedUsed"));
-        this.addMaterial2Warehouse2(warehouseType.get(WareHouseType.FEED), feeds, basicMaterialMap, staffMap, barnMap, userProfile, stopUseMaterial);
+        this.addMaterial2Warehouse(warehouseType.get(WareHouseType.FEED), feeds, basicMaterialMap, staffMap, barnMap, userProfile, stopUseMaterial);
 
         // 原料
         List<MaterialPurchasedUsed> raws = RespHelper.or500(doctorMoveDatasourceHandler.findByHbsSql(dataSourceId, MaterialPurchasedUsed.class, "RawMaterialPurchasedUsed"));
-        this.addMaterial2Warehouse2(warehouseType.get(WareHouseType.MATERIAL), raws, basicMaterialMap, staffMap, barnMap, userProfile, stopUseMaterial);
+        this.addMaterial2Warehouse(warehouseType.get(WareHouseType.MATERIAL), raws, basicMaterialMap, staffMap, barnMap, userProfile, stopUseMaterial);
 
         // 药品
         List<MaterialPurchasedUsed> med = RespHelper.or500(doctorMoveDatasourceHandler.findByHbsSql(dataSourceId, MaterialPurchasedUsed.class, "MedicinePurchasedUsed"));
-        this.addMaterial2Warehouse2(warehouseType.get(WareHouseType.MEDICINE), med, basicMaterialMap, staffMap, barnMap, userProfile, stopUseMaterial);
+        this.addMaterial2Warehouse(warehouseType.get(WareHouseType.MEDICINE), med, basicMaterialMap, staffMap, barnMap, userProfile, stopUseMaterial);
 
         // 疫苗
         List<MaterialPurchasedUsed> vaccinationPurchasedUsed = RespHelper.or500(doctorMoveDatasourceHandler.findByHbsSql(dataSourceId, MaterialPurchasedUsed.class, "VaccinationPurchasedUsed"));
-        this.addMaterial2Warehouse2(warehouseType.get(WareHouseType.VACCINATION), vaccinationPurchasedUsed, basicMaterialMap, staffMap, barnMap, userProfile, stopUseMaterial);
+        this.addMaterial2Warehouse(warehouseType.get(WareHouseType.VACCINATION), vaccinationPurchasedUsed, basicMaterialMap, staffMap, barnMap, userProfile, stopUseMaterial);
     }
 
     private void addMaterial2Warehouse(DoctorWareHouse wareHouse, List<MaterialPurchasedUsed> list,

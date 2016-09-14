@@ -300,4 +300,4 @@ add column sub_type bigint(20) unsigned DEFAULT NULL COMMENT '物料的子类别
 -- 2016年09月14日, 物资变动关联猪群
 alter table doctor_material_consume_providers
 add column group_id bigint(20) DEFAULT NULL COMMENT '领用物资的猪群Id, 仅 event_type=1 时才会有值' after barn_name,
-add column group_code varchar(64) DEFAULT NULL COMMENT '猪群名称' after group_id;
+add column group_code varchar(640) DEFAULT NULL COMMENT '猪群名称' after group_id;
