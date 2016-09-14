@@ -85,7 +85,7 @@
     </select>
 
     <!--产畸形数 -->
-    <select id="getDeliveryJxCounts" parameterType="map" resultType="int">
+    <select id="deliveryJxCounts" parameterType="map" resultType="int">
         select ifnull(sum(jx_count),0) from doctor_pig_events
         where type = 15
         <include refid="criteria"/>
@@ -1032,4 +1032,120 @@
             price != 0
             <include refid="criteria"/>
     </select>
+
+    <!-- 公猪生产月报: 配种次数 -->
+    <select id="getBoarMateCount" parameterType="map" resultType="int">
+        select ifnull(count(1), 0)
+        from doctor_pig_events
+        where type = 9
+        <include refid="criteria"/>
+    </select>
+
+    <!-- 公猪生产月报: 首配母猪头数 -->
+    <select id="getBoarSowFirstMateCount" parameterType="map" resultType="int">
+        select ifnull(count(1), 0)
+        from doctor_pig_events
+        where type = 9
+        and current_mating_count = 1
+        <include refid="criteria"/>
+    </select>
+
+    <!-- 公猪生产月报: 受胎头数 -->
+    <select id="getBoarSowPregCount" parameterType="map" resultType="int">
+        select count(1)
+        FROM
+        (select farm_id, boar_code, pig_code, parity
+        from doctor_pig_events
+        where type = 9
+        <include refid="criteria"/>
+        group by farm_id, boar_code, pig_code,parity) as t1
+        left join doctor_pig_events t2 on t1.farm_id =t2.farm_id and t1.boar_code = t2.boar_code and t1.pig_code = t2.pig_code and t1.parity = t2.parity
+        where t2.type = 11
+        and t2.preg_check_result = 1
+    </select>
+
+    <!-- 公猪生产月报: 产仔母猪数 -->
+    <select id="getBoarSowFarrowCount" parameterType="map" resultType="int">
+        select ifnull(count(1),0)
+        FROM
+        (select farm_id, boar_code, pig_code, parity
+        from doctor_pig_events
+        where type = 9
+        <include refid="criteria"/>
+        group by farm_id, boar_code, pig_code,parity) as t1
+        left join doctor_pig_events t2 on t1.farm_id =t2.farm_id and t1.boar_code = t2.boar_code and t1.pig_code = t2.pig_code and t1.parity = t2.parity
+        where t2.type = 15
+    </select>
+
+
+    <!-- 公猪生产月报: 平均产仔数 -->
+    <select id="getBoarSowFarrowAvgCount" parameterType="map" resultType="double">
+        select ifnull(sum(t2.live_count + t2.dead_count + t2.jx_count + t2.mny_count + t2.black_count),0)/case ifnull(count(1),1) when 0 then 1 else ifnull(count(1),1) end
+        FROM
+        (select farm_id, boar_code, pig_code, parity
+        from doctor_pig_events
+        where type = 9
+        <include refid="criteria"/>
+        group by farm_id, boar_code, pig_code,parity) as t1
+        left join doctor_pig_events t2 on t1.farm_id =t2.farm_id and t1.boar_code = t2.boar_code and t1.pig_code = t2.pig_code and t1.parity = t2.parity
+        where t2.type = 15
+    </select>
+
+    <!-- 公猪生产月报: 平均产活仔数 -->
+    <select id="getBoarSowFarrowLiveAvgCount" parameterType="map" resultType="double">
+        select ifnull(sum(live_count),0)/case ifnull(count(1),1) when 0 then 1 else ifnull(count(1),1) end
+        FROM
+        (select farm_id, boar_code, pig_code, parity
+        from doctor_pig_events
+        where type = 9
+        <include refid="criteria"/>
+        group by farm_id, boar_code, pig_code,parity) as t1
+        left join doctor_pig_events t2 on t1.farm_id =t2.farm_id and t1.boar_code = t2.boar_code and t1.pig_code = t2.pig_code and t1.parity = t2.parity
+        where t2.type = 15
+    </select>
+
+    <!-- 公猪生产月报: 受胎率 -->
+    <select id="getBoarSowPregRate" parameterType="map" resultType="double">
+        SELECT
+        (select ifnull(count(1), 0)
+        FROM
+        (select farm_id, boar_code, pig_code, parity
+        from doctor_pig_events
+        where type = 9
+        <include refid="criteria"/>
+        group by farm_id, boar_code, pig_code,parity) as t1
+        left join doctor_pig_events t2 on t1.farm_id =t2.farm_id and t1.boar_code = t2.boar_code and t1.pig_code = t2.pig_code and t1.parity = t2.parity
+        where t2.type = 11
+        and t2.preg_check_result = 1)
+        / (
+        select case ifnull(count(1),1) when 0 then 1 else ifnull(count(1),1) end as pzcs
+        from doctor_pig_events
+        where type = 9
+        <include refid="criteria"/>
+        )
+        from dual
+    </select>
+
+
+    <!-- 公猪生产月报: 分娩 -->
+    <select id="getBoarSowFarrowRate" parameterType="map" resultType="double">
+        SELECT
+        (select ifnull(count(1), 0)
+        FROM
+        (select farm_id, boar_code, pig_code, parity
+        from doctor_pig_events
+        where type = 9
+        <include refid="criteria"/>
+        group by farm_id, boar_code, pig_code,parity) as t1
+        left join doctor_pig_events t2 on t1.farm_id =t2.farm_id and t1.boar_code = t2.boar_code and t1.pig_code = t2.pig_code and t1.parity = t2.parity
+        where t2.type = 15)
+        / (
+        select case ifnull(count(1),1) when 0 then 1 else ifnull(count(1),1) end as pzcs
+        from doctor_pig_events
+        where type = 9
+        <include refid="criteria"/>
+        )
+        from dual
+    </select>
+
 </mapper>
