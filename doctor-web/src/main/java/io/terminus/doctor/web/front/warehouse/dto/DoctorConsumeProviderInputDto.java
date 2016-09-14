@@ -41,6 +41,9 @@ public class DoctorConsumeProviderInputDto implements Serializable{
 
     private String barnName;    //对应的猪舍名称
 
+    private Long groupId; // 消耗物资的猪群
+    private String groupCode;
+
     /**
      * 事件类型
      * @see DoctorMaterialConsumeProvider.EVENT_TYPE

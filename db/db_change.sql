@@ -296,3 +296,8 @@ add column `barn_name` varchar(64) DEFAULT NULL COMMENT '猪舍名称' after bar
 -- 2016年09月13日, 基础物料表新增字段 "子类别"
 alter table doctor_basic_materials
 add column sub_type bigint(20) unsigned DEFAULT NULL COMMENT '物料的子类别，关联 doctor_basics 表的id' after `type`;
+
+-- 2016年09月14日, 物资变动关联猪群
+alter table doctor_material_consume_providers
+add column group_id bigint(20) DEFAULT NULL COMMENT '领用物资的猪群Id, 仅 event_type=1 时才会有值' after barn_name,
+add column group_code varchar(64) DEFAULT NULL COMMENT '猪群名称' after group_id;

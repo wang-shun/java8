@@ -192,6 +192,7 @@ public class DoctorWareHouseEvents {
                     .wareHouseId(doctorMaterialInWareHouse.getWareHouseId()).wareHouseName(doctorMaterialInWareHouse.getWareHouseName())
                     .materialTypeId(doctorMaterialInWareHouse.getMaterialId()).materialName(doctorMaterialInWareHouse.getMaterialName())
                     .barnId(dto.getBarnId()).barnName(dto.getBarnName())
+                    .groupId(dto.getGroupId()).groupCode(dto.getGroupCode())
                     .staffId(currentUserId).staffName(userName)
                     .count(dto.getCount()).consumeDays(dto.getConsumeDays())
                     .unitId(doctorBasicMaterial.getUnitId()).unitName(doctorBasicMaterial.getUnitName())

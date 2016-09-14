@@ -91,6 +91,8 @@ public class DoctorConsumerEventHandler implements IHandler{
                     "barnName", dto.getBarnName()).map()));
             doctorMaterialConsumeProvider.setBarnId(dto.getBarnId());
             doctorMaterialConsumeProvider.setBarnName(dto.getBarnName());
+            doctorMaterialConsumeProvider.setGroupId(dto.getGroupId());
+            doctorMaterialConsumeProvider.setGroupCode(dto.getGroupCode());
         }
         doctorMaterialConsumeProvider.setExtraMap(extraMap);
         doctorMaterialConsumeProvider.setUnitPrice(Double.valueOf(totalPrice / consumeCount).longValue());
