@@ -24,6 +24,7 @@ import io.terminus.pampas.common.UserUtil;
 import io.terminus.parana.user.model.User;
 import io.terminus.parana.user.service.UserReadService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
@@ -186,15 +187,22 @@ public class DoctorPigEvents {
 
     @RequestMapping(value = "/pigPaging" , method = RequestMethod.GET)
     @ResponseBody
-    public Paging<DoctorPigEvent> queryPigEventsByCriteria(@RequestParam Map<String, Object> params, @RequestParam(required = false) Integer pageNo, @RequestParam(required = false) Integer pageSize) {
+    public Paging<DoctorPigEvent> queryPigEventsByCriteria(@RequestParam Map<String, String> params, @RequestParam(required = false) Integer pageNo, @RequestParam(required = false) Integer pageSize) {
         if (params == null || params.isEmpty()) {
             return Paging.empty();
         }
-        if (StringUtils.isNotBlank((String)params.get("eventName"))){
+        params.keySet().forEach(key -> {
+            if (StringUtils.isBlank(params.get(key))){
+                params.put(key, null);
+            }
+        });
+        if (StringUtils.isNotBlank(params.get("eventName"))){
             params.put("type", PigEvent.fromDesc((String) params.get("eventName")).getKey().toString());
             params.remove("eventName");
         }
-        return RespHelper.or500(doctorPigEventReadService.queryPigEventsByCriteria(params, pageNo, pageSize));
+        Map<String, Object> map = new HashedMap();
+        map.putAll(params);
+        return RespHelper.or500(doctorPigEventReadService.queryPigEventsByCriteria(map, pageNo, pageSize));
     }
 
     @RequestMapping(value = "/pigEvents")
