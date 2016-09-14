@@ -2,7 +2,7 @@
 select main.EventType, main.EventDate, main.Zdr, main.WareHouse,
 detail.Feed as materialOID, detail.[Count], detail.Staff, detail.UsedDays,
 f.FeedName as materialName, fieldtype.Name as UnitGroupText, unit.UnitName,
-barn.Barn, barn.OID as barnOId
+barn.Barn, barn.OID as barnOId, detail.GainOID as groupOutId
 from Y_FeedPurchaseUsedMain main,
 Y_FeedPurchaseUsedDetail detail left join B_pigLocation barn on detail.PigLocation = barn.OID,
 B_Feed f

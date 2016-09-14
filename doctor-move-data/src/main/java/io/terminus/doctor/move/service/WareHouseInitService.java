@@ -7,7 +7,9 @@ import io.terminus.doctor.basic.model.DoctorBasicMaterial;
 import io.terminus.doctor.common.enums.WareHouseType;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
+import io.terminus.doctor.event.dao.DoctorGroupDao;
 import io.terminus.doctor.event.model.DoctorBarn;
+import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.move.handler.DoctorMoveDatasourceHandler;
 import io.terminus.doctor.move.handler.DoctorMoveTableEnum;
 import io.terminus.doctor.move.model.B_WareHouse;
@@ -94,6 +96,8 @@ public class WareHouseInitService {
     private DoctorMoveBasicService doctorMoveBasicService;
     @Autowired
     private UserProfileDao userProfileDao;
+    @Autowired
+    private DoctorGroupDao doctorGroupDao;
 
     @Transactional
     public void init(String mobile, Long dataSourceId, DoctorFarm farm){
@@ -320,6 +324,9 @@ public class WareHouseInitService {
         //此仓库中各物资的数量, key = typeAndmaterialName, value = 数量
         Map<String, Double> materialCount = new HashMap<>();
 
+        //猪群Map, key = outId, value = group
+        Map<String, DoctorGroup> groupMap = doctorGroupDao.findByFarmId(wareHouse.getFarmId()).stream().collect(Collectors.toMap(DoctorGroup::getOutId, v->v));
+
         // 领用和添加物料的历史记录
         DoctorMaterialConsumeProvider materialCP = new DoctorMaterialConsumeProvider();
         materialCP.setType(wareHouse.getType());
@@ -370,7 +377,15 @@ public class WareHouseInitService {
                     Map<String, Object> extraMap = new HashMap<>();
                     extraMap.put("barnId", barn.getId());
                     extraMap.put("barnName", barn.getName());
+                    materialCP.setBarnId(barn.getId());
+                    materialCP.setBarnName(barn.getName());
                     materialCP.setExtraMap(extraMap);
+
+                    DoctorGroup group = groupMap.get(pu.getGroupOutId());
+                    if(group != null){
+                        materialCP.setGroupId(group.getId());
+                        materialCP.setGroupCode(group.getGroupCode());
+                    }
                 }
             }
             doctorMaterialConsumeProviderDao.create(materialCP);
