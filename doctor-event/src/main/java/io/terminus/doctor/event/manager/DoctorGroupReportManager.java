@@ -60,14 +60,17 @@ public class DoctorGroupReportManager {
             unqQty += getIntFromExtra(extraMap, "notQualifiedCount");
         }
 
-        groupTrack.setWeanAvgWeight(weanWeight / weanQty <= 0 ? 1D : weanQty);       //断奶均重kg
-        groupTrack.setBirthAvgWeight(birthWeight / farrowQty <= 0 ? 1D :farrowQty);  //出生均重kg
+        groupTrack.setWeanAvgWeight(divide(weanWeight, weanQty));       //断奶均重kg
+        groupTrack.setBirthAvgWeight(divide(birthWeight, farrowQty));  //出生均重kg
         groupTrack.setWeakQty(weakQty);      //弱仔数
-        groupTrack.setUnweanQty(unWeanQty);  //未断奶数
+        groupTrack.setUnweanQty(unWeanQty < groupTrack.getQuantity() ? unWeanQty : groupTrack.getQuantity());  //未断奶数
         groupTrack.setUnqQty(unqQty);        //不合格数
         return groupTrack;
     }
 
+    private static double divide(double a, double b) {
+        return a / (b <= 0D ? 1D : b);
+    }
 
     private static int getIntFromExtra(Map<String, Object> extraMap, String key) {
         try {
