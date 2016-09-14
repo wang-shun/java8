@@ -2,14 +2,18 @@ package io.terminus.doctor.event.service;
 
 import com.google.common.base.Throwables;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
+import io.terminus.common.exception.ServiceException;
+import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.utils.CountUtil;
+import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.constants.DoctorBasicEnums;
 import io.terminus.doctor.event.dao.DoctorGroupBatchSummaryDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorPigTrackDao;
 import io.terminus.doctor.event.dto.DoctorGroupDetail;
+import io.terminus.doctor.event.dto.DoctorGroupSearchDto;
 import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupBatchSummary;
@@ -22,6 +26,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * Desc: 猪群批次总结表读服务实现类
@@ -37,24 +42,17 @@ public class DoctorGroupBatchSummaryReadServiceImpl implements DoctorGroupBatchS
     private final DoctorPigTrackDao doctorPigTrackDao;
     private final DoctorGroupEventDao doctorGroupEventDao;
     private final DoctorGroupBatchSummaryDao doctorGroupBatchSummaryDao;
+    private final DoctorGroupReadService doctorGroupReadService;
 
     @Autowired
     public DoctorGroupBatchSummaryReadServiceImpl(DoctorPigTrackDao doctorPigTrackDao,
                                                   DoctorGroupEventDao doctorGroupEventDao,
-                                                  DoctorGroupBatchSummaryDao doctorGroupBatchSummaryDao) {
+                                                  DoctorGroupBatchSummaryDao doctorGroupBatchSummaryDao,
+                                                  DoctorGroupReadService doctorGroupReadService) {
         this.doctorPigTrackDao = doctorPigTrackDao;
         this.doctorGroupEventDao = doctorGroupEventDao;
         this.doctorGroupBatchSummaryDao = doctorGroupBatchSummaryDao;
-    }
-
-    @Override
-    public Response<DoctorGroupBatchSummary> findGroupBatchSummaryById(Long groupBatchSummaryId) {
-        try {
-            return Response.ok(doctorGroupBatchSummaryDao.findById(groupBatchSummaryId));
-        } catch (Exception e) {
-            log.error("find groupBatchSummary by id failed, groupBatchSummaryId:{}, cause:{}", groupBatchSummaryId, Throwables.getStackTraceAsString(e));
-            return Response.fail("groupBatchSummary.find.fail");
-        }
+        this.doctorGroupReadService = doctorGroupReadService;
     }
 
     /**
@@ -66,11 +64,29 @@ public class DoctorGroupBatchSummaryReadServiceImpl implements DoctorGroupBatchS
     @Override
     public Response<DoctorGroupBatchSummary> getSummaryByGroupDetail(DoctorGroupDetail groupDetail) {
         try {
-
-            return Response.ok();
+            //最后一次转群后, 会把统计结果插入数据库, 如果没查到, 实时计算
+            DoctorGroupBatchSummary summary = doctorGroupBatchSummaryDao.findByGroupId(groupDetail.getGroup().getId());
+            return Response.ok(summary != null ? summary : getSummary(groupDetail.getGroup(), groupDetail.getGroupTrack()));
         } catch (Exception e) {
-            log.error("failed, cause:{}", Throwables.getStackTraceAsString(e));
-            return Response.fail("");
+            log.error("get group batch summary by group detail failed, groupDetail:{}, cause:{}", groupDetail, Throwables.getStackTraceAsString(e));
+            return Response.fail("group.batch.summary.find.fail");
+        }
+    }
+
+    @Override
+    public Response<Paging<DoctorGroupBatchSummary>> pagingGroupBatchSummary(DoctorGroupSearchDto searchDto, Integer pageNo, Integer pageSize) {
+        try {
+            Paging<DoctorGroupDetail> groupPaging = RespHelper.orServEx(doctorGroupReadService.pagingGroup(searchDto, pageNo, pageSize));
+            Paging<DoctorGroupBatchSummary> summaryPaging = new Paging<>();
+            summaryPaging.setTotal(groupPaging.getTotal());
+            summaryPaging.setData(groupPaging.getData().stream().map(g -> RespHelper.orServEx(getSummaryByGroupDetail(g))).collect(Collectors.toList()));
+            return Response.ok(summaryPaging);
+        } catch (ServiceException e) {
+            return Response.fail(e.getMessage());
+        } catch (Exception e) {
+            log.error("paging group batch summary failed, searchDto:{}, pageNo:{}, pageSize:{}, cause:{}",
+                    searchDto, pageNo, pageSize, Throwables.getStackTraceAsString(e));
+            return Response.fail("group.batch.summary.find.fail");
         }
     }
 

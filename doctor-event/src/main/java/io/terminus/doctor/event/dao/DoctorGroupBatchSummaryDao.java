@@ -13,4 +13,14 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class DoctorGroupBatchSummaryDao extends MyBatisDao<DoctorGroupBatchSummary> {
 
+    /**
+     * 根据猪群id查询猪群批次总结信息
+     * @param groupId   猪群id
+     * @return 猪群跟踪
+     */
+    public DoctorGroupBatchSummary findByGroupId(Long groupId) {
+        return getSqlSession().selectOne("findGroupBatchSummaryByGroupId", groupId);
+    }
+
+
 }

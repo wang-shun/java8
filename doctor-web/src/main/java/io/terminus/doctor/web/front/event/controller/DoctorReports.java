@@ -1,17 +1,24 @@
 package io.terminus.doctor.web.front.event.controller;
 
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
+import io.terminus.common.model.Paging;
+import io.terminus.common.utils.BeanMapper;
 import io.terminus.doctor.common.utils.RespHelper;
+import io.terminus.doctor.event.dto.DoctorGroupSearchDto;
 import io.terminus.doctor.event.dto.report.daily.DoctorDailyReportDto;
 import io.terminus.doctor.event.dto.report.monthly.DoctorMonthlyReportTrendDto;
+import io.terminus.doctor.event.model.DoctorGroupBatchSummary;
 import io.terminus.doctor.event.service.DoctorDailyReportReadService;
 import io.terminus.doctor.event.service.DoctorDailyReportWriteService;
+import io.terminus.doctor.event.service.DoctorGroupBatchSummaryReadService;
 import io.terminus.doctor.event.service.DoctorMonthlyReportReadService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.Map;
 
 /**
  * Desc:
@@ -32,6 +39,9 @@ public class DoctorReports {
 
     @RpcConsumer
     private DoctorMonthlyReportReadService doctorMonthlyReportReadService;
+
+    @RpcConsumer
+    private DoctorGroupBatchSummaryReadService doctorGroupBatchSummaryReadService;
 
     /**
      * 根据farmId和日期查询猪场日报表(缓存方式)
@@ -76,5 +86,17 @@ public class DoctorReports {
     public Boolean clearRedis(@RequestParam("farmId") Long farmId) {
         RespHelper.or500(doctorDailyReportWriteService.deleteDailyReportFromRedis(farmId));
         return true;
+    }
+
+
+    /**
+     * 分页查询猪群批次总结
+     * @return 批次总结
+     */
+    @RequestMapping(value = "/group/batch/summary", method = RequestMethod.GET)
+    public Paging<DoctorGroupBatchSummary> pagingGroupBatchSummary(@RequestParam Map<String, String> params,
+                                                                   @RequestParam(required = false) Integer pageNo,
+                                                                   @RequestParam(required = false) Integer pageSize) {
+        return RespHelper.or500(doctorGroupBatchSummaryReadService.pagingGroupBatchSummary(BeanMapper.map(params, DoctorGroupSearchDto.class), pageNo, pageSize));
     }
 }

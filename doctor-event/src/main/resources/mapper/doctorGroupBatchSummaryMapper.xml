@@ -312,4 +312,9 @@
         LIMIT #{offset}, #{limit}
     </select>
 
+    <select id="findGroupBatchSummaryByGroupId" parameterType="long" resultMap="DoctorGroupBatchSummaryMap">
+        SELECT <include refid="cols_all" />
+        FROM <include refid="tb"/>
+        WHERE group_id = #{groupId}
+    </select>
 </mapper>
