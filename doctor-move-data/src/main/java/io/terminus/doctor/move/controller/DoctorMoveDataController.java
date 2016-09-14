@@ -561,4 +561,21 @@ public class DoctorMoveDataController {
             return false;
         }
     }
+
+    /**
+     * 修正产房仔猪数据
+     */
+    @RequestMapping(value = "/updateFarrowGroupTrack", method = RequestMethod.GET)
+    public Boolean updateFarrowGroupTrack(@RequestParam("farmId") Long farmId) {
+        try {
+            DoctorFarm farm = doctorFarmDao.findById(farmId);
+            log.warn("updateFarrowGroupTrack start, farmId:{}", farmId);
+            doctorMoveDataService.updateFarrowGroupTrack(farm);
+            log.warn("updateFarrowGroupTrack end");
+            return true;
+        } catch (Exception e) {
+            log.error("updateFarrowGroupTrack failed, farmId:{}, cause:{}", farmId, Throwables.getStackTraceAsString(e));
+            return false;
+        }
+    }
 }
