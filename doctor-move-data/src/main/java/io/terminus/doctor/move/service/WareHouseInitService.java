@@ -381,10 +381,12 @@ public class WareHouseInitService {
                     materialCP.setBarnName(barn.getName());
                     materialCP.setExtraMap(extraMap);
 
-                    DoctorGroup group = groupMap.get(pu.getGroupOutId());
-                    if(group != null){
-                        materialCP.setGroupId(group.getId());
-                        materialCP.setGroupCode(group.getGroupCode());
+                    if(pu.getGroupOutId() != null){
+                        DoctorGroup group = groupMap.get(pu.getGroupOutId());
+                        if(group != null){
+                            materialCP.setGroupId(group.getId());
+                            materialCP.setGroupCode(group.getGroupCode());
+                        }
                     }
                 }
             }
