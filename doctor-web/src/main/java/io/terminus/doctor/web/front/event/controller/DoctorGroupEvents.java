@@ -291,9 +291,9 @@ public class DoctorGroupEvents {
         return Arrays.asList(GroupEventType.values()).stream().map(groupEventType -> groupEventType.getDesc()).collect(Collectors.toList());
     }
 
-    @RequestMapping(value = "/groupPaging")
+    @RequestMapping(value = "/groupPaging", method = RequestMethod.GET)
     @ResponseBody
-    public Paging<DoctorGroupEvent> queryGroupEventsByCriteria(@RequestParam Map<String, Object> params, @RequestParam Integer pageNo, @RequestParam Integer pageSize) {
+    public Paging<DoctorGroupEvent> queryGroupEventsByCriteria(@RequestParam Map<String, Object> params, @RequestParam(required = false) Integer pageNo, @RequestParam(required = false) Integer pageSize) {
         if (params == null || params.isEmpty()) {
             return Paging.empty();
         }

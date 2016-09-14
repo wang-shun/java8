@@ -184,9 +184,9 @@ public class DoctorPigEvents {
         return RespHelper.or500(workFlowService.updateData(key, businessId));
     }
 
-    @RequestMapping(value = "/pigPaging")
+    @RequestMapping(value = "/pigPaging" , method = RequestMethod.GET)
     @ResponseBody
-    public Paging<DoctorPigEvent> queryPigEventsByCriteria(@RequestParam Map<String, Object> params, @RequestParam String eventName, @RequestParam Integer pageNo, @RequestParam Integer pageSize) {
+    public Paging<DoctorPigEvent> queryPigEventsByCriteria(@RequestParam Map<String, Object> params, @RequestParam(required = false) Integer pageNo, @RequestParam(required = false) Integer pageSize) {
         if (params == null || params.isEmpty()) {
             return Paging.empty();
         }
