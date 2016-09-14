@@ -71,7 +71,7 @@ public class DoctorDailyReportReadServiceImpl implements DoctorDailyReportReadSe
         try {
             Date date = DateUtil.toDate(sumAt);
             if(date == null){
-                return Response.ok(failReport());
+                return Response.ok(failReport(sumAt));
             }
             DoctorDailyReportDto report = dailyReportHistoryDao.getDailyReportWithRedis(farmId, date);
             if(report == null){
@@ -81,7 +81,7 @@ public class DoctorDailyReportReadServiceImpl implements DoctorDailyReportReadSe
                     dailyReportHistoryDao.saveDailyReport(report, farmId, date);
                     return Response.ok(report);
                 }else{
-                    return Response.ok(failReport());
+                    return Response.ok(failReport(sumAt));
                 }
             }else{
                 return Response.ok(report);
@@ -89,7 +89,7 @@ public class DoctorDailyReportReadServiceImpl implements DoctorDailyReportReadSe
         } catch (Exception e) {
             log.error("find dailyReport by farm id and sumat fail, farmId:{}, sumat:{}, cause:{}",
                     farmId, sumAt, Throwables.getStackTraceAsString(e));
-            return Response.ok(failReport());
+            return Response.ok(failReport(sumAt));
         }
     }
 
@@ -112,9 +112,10 @@ public class DoctorDailyReportReadServiceImpl implements DoctorDailyReportReadSe
         }
     }
 
-    private DoctorDailyReportDto failReport() {
+    private DoctorDailyReportDto failReport(String sumat) {
         DoctorDailyReportDto dto = new DoctorDailyReportDto();
         dto.setFail(true);
+        dto.setSumAt(DateUtil.toDate(sumat));
         return dto;
     }
 
