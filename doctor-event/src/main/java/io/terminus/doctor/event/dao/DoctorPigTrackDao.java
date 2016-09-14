@@ -125,7 +125,7 @@ public class DoctorPigTrackDao extends MyBatisDao<DoctorPigTrack>{
      * @param groupId 猪群id
      * @return 母猪跟踪
      */
-    public List<DoctorPigTrack> findWeanSowTrackByGroupId(Long groupId) {
-        return getSqlSession().selectList(sqlId("findWeanSowTrackByGroupId"), ImmutableMap.of("groupId", groupId, "status", PigStatus.Wean.getKey()));
+    public List<DoctorPigTrack> findFeedSowTrackByGroupId(Long groupId) {
+        return getSqlSession().selectList(sqlId("findFeedSowTrackByGroupId"), ImmutableMap.of("groupId", groupId, "status", PigStatus.FEED.getKey()));
     }
 }

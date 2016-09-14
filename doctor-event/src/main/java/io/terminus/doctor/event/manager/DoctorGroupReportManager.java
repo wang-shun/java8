@@ -48,7 +48,7 @@ public class DoctorGroupReportManager {
         int weanQty = 0;
         int unqQty = 0;
 
-        List<DoctorPigTrack> pigTracks = doctorPigTrackDao.findWeanSowTrackByGroupId(groupTrack.getGroupId());
+        List<DoctorPigTrack> pigTracks = doctorPigTrackDao.findFeedSowTrackByGroupId(groupTrack.getGroupId());
         for (DoctorPigTrack pigTrack : pigTracks) {
             Map<String, Object> extraMap = pigTrack.getExtraMap();
             weanWeight += MoreObjects.firstNonNull(pigTrack.getWeanAvgWeight(), 0D) * MoreObjects.firstNonNull(pigTrack.getWeanQty(), 0);

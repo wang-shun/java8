@@ -108,7 +108,7 @@ public class DoctorGroupBatchSummaryReadServiceImpl implements DoctorGroupBatchS
         summary.setDeadRate(getDeatRate(events, inCount));                           //死淘率
         summary.setFcr(0D / getFcrDeltaWeight(events, inCount, inAvgWeight));        // TODO: 16/9/13  料肉比
 
-        List<DoctorPigTrack> farrowTracks = doctorPigTrackDao.findWeanSowTrackByGroupId(groupTrack.getGroupId());
+        List<DoctorPigTrack> farrowTracks = doctorPigTrackDao.findFeedSowTrackByGroupId(groupTrack.getGroupId());
         summary.setNest(farrowTracks.size());                                        //窝数
 
         setToNurseryOrFatten(summary, events);                                       //阶段转
