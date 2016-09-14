@@ -328,4 +328,15 @@ public class DoctorGroupReadServiceImpl implements DoctorGroupReadService {
             return Response.fail("count.group.event.by.barn.id.fail");
         }
     }
+
+    @Override
+    public Response<Paging<DoctorGroupEvent>> queryGroupEventsByCriteria(Map<String, Object> criteira, Integer pageNo, Integer pageSize) {
+        try {
+            PageInfo info = new PageInfo(pageNo, pageSize);
+            return Response.ok(doctorGroupEventDao.paging(info.getOffset(), info.getLimit(), criteira));
+        } catch (Exception e) {
+            log.error("query.group.events.by.criteria.failed, cause {}", Throwables.getStackTraceAsString(e));
+            return Response.fail("query.group.events.by.criteria.failed");
+        }
+    }
 }

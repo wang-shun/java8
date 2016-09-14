@@ -413,14 +413,6 @@
         </where>
     </select>
 
-    <select id="count" parameterType="map" resultType="long">
-        SELECT count(1) from
-        <include refid="tb"/>
-        <where>
-            <include refid="criteria"/>
-        </where>
-    </select>
-
     <select id="queryLastPigEventById" parameterType="long" resultMap="DoctorPigEventMap">
         select
         <include refid="cols_all"/>
@@ -473,6 +465,14 @@
         FROM
         <include refid="tb"/>
         WHERE pig_id = #{pigId}
+    </select>
+
+    <select id="count" parameterType="map" resultType="long">
+        SELECT count(1) from
+        <include refid="tb"/>
+        <where>
+            <include refid="criteria"/>
+        </where>
     </select>
 
     <select id="paging" parameterType="map" resultMap="DoctorPigEventMap">

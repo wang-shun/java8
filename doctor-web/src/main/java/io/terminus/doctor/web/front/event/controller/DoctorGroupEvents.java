@@ -9,6 +9,7 @@ import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dto.DoctorGroupDetail;
 import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
 import io.terminus.doctor.event.dto.event.group.input.DoctorNewGroupInput;
+import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
@@ -21,15 +22,19 @@ import io.terminus.doctor.web.front.event.service.DoctorGroupWebService;
 import io.terminus.doctor.web.util.TransFromUtil;
 import io.terminus.pampas.common.UserUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -278,5 +283,23 @@ public class DoctorGroupEvents {
     public DoctorGroup findGroupByFarmIdAndGroupCode(@RequestParam("farmId") Long farmId,
                                                      @RequestParam("groupCode") String groupCode) {
         return RespHelper.or500(doctorGroupReadService.findGroupByFarmIdAndGroupCode(farmId, groupCode));
+    }
+
+    @RequestMapping(value = "/groupEvents")
+    @ResponseBody
+    public List<String> queryGroupEvents() {
+        return Arrays.asList(GroupEventType.values()).stream().map(groupEventType -> groupEventType.getDesc()).collect(Collectors.toList());
+    }
+
+    @RequestMapping(value = "/groupPaging", method = RequestMethod.GET)
+    @ResponseBody
+    public Paging<DoctorGroupEvent> queryGroupEventsByCriteria(@RequestParam Map<String, Object> params, @RequestParam(required = false) Integer pageNo, @RequestParam(required = false) Integer pageSize) {
+        if (params == null || params.isEmpty()) {
+            return Paging.empty();
+        }
+        if (StringUtils.isNotBlank((String)params.get("eventName"))){
+            params.put("type", String.valueOf(GroupEventType.from((String)params.get("eventName")).getValue()));
+        }
+        return RespHelper.or500(doctorGroupReadService.queryGroupEventsByCriteria(params, pageNo, pageSize));
     }
 }

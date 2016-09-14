@@ -15,6 +15,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Desc: 猪群想过读服务
@@ -159,4 +160,13 @@ public interface DoctorGroupReadService {
      * @return
      */
     Response<Long> countByBarnId(Long barnId);
+
+    /**
+     * 根据条件查询猪群事件
+     * @param criteria
+     * @param pageNo
+     * @param pageSize
+     * @return
+     */
+    Response<Paging<DoctorGroupEvent>> queryGroupEventsByCriteria(Map<String, Object> criteria, Integer pageNo, Integer pageSize);
 }

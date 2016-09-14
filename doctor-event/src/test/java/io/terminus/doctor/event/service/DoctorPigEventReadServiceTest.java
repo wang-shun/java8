@@ -28,5 +28,6 @@ public class DoctorPigEventReadServiceTest extends BaseServiceTest{
         Assert.assertTrue(response.isSuccess());
         List<DoctorPigEvent> doctorPigEvents = response.getResult().getData();
         Assert.assertEquals(doctorPigEvents.size(), 1);
+
     }
 }
