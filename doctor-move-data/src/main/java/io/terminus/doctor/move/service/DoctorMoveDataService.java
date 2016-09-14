@@ -164,7 +164,6 @@ public class DoctorMoveDataService {
         DoctorGroupSearchDto search = new DoctorGroupSearchDto();
         search.setFarmId(farm.getId());
         search.setPigTypes(PigType.FARROW_TYPES);
-        search.setStatus(DoctorGroup.Status.CREATED.getValue());
 
         doctorGroupDao.findBySearchDto(search).forEach(group -> doctorCommonGroupEventHandler
                 .updateFarrowGroupTrack(doctorGroupTrackDao.findByGroupId(group.getId()), group.getPigType()));
@@ -2037,7 +2036,9 @@ public class DoctorMoveDataService {
         }
         DoctorGroupEvent lastEvent = events.stream().sorted((a, b) -> b.getEventAt().compareTo(a.getEventAt())).findFirst().orElse(null);
         groupTrack.setRelEventId(lastEvent == null ? null : lastEvent.getId());
-        return groupTrack;
+
+        //更新产房仔猪
+        return doctorCommonGroupEventHandler.updateFarrowGroupTrack(groupTrack, group.getPigType());
     }
 
     //关闭猪群的猪群跟踪
