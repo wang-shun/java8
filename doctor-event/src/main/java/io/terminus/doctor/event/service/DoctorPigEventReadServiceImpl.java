@@ -232,7 +232,8 @@ public class DoctorPigEventReadServiceImpl implements DoctorPigEventReadService 
     @Override
     public Response<Paging<DoctorPigEvent>> queryPigEventsByCriteria(Map<String, Object> criteria, Integer pageNo, Integer pageSize) {
         try {
-            return Response.ok(doctorPigEventDao.paging(pageNo, pageSize, criteria));
+            PageInfo info = PageInfo.of(pageNo, pageSize);
+            return Response.ok(doctorPigEventDao.paging(info.getOffset(), info.getLimit(), criteria));
         } catch (Exception e) {
             log.error("query.pig.event.by.criteria.failed cause by {}", Throwables.getStackTraceAsString(e));
             return Response.fail("query.pig.event.by.criteria.failed");
