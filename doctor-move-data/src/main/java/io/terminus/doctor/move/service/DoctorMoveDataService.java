@@ -61,6 +61,7 @@ import io.terminus.doctor.event.enums.PigSource;
 import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.enums.PregCheckResult;
 import io.terminus.doctor.event.handler.group.DoctorCommonGroupEventHandler;
+import io.terminus.doctor.event.manager.DoctorGroupReportManager;
 import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
@@ -122,7 +123,7 @@ public class DoctorMoveDataService {
     private final DoctorMoveBasicService doctorMoveBasicService;
     private final DoctorPigReadService doctorPigReadService;
     private final DoctorMoveWorkflowHandler doctorMoveWorkflowHandler;
-    private final DoctorCommonGroupEventHandler doctorCommonGroupEventHandler;
+    private final DoctorGroupReportManager doctorGroupReportManager;
 
     @Autowired
     public DoctorMoveDataService(DoctorMoveDatasourceHandler doctorMoveDatasourceHandler,
@@ -135,7 +136,7 @@ public class DoctorMoveDataService {
                                  DoctorMoveBasicService doctorMoveBasicService,
                                  DoctorPigReadService doctorPigReadService,
                                  DoctorMoveWorkflowHandler doctorMoveWorkflowHandler,
-                                 DoctorCommonGroupEventHandler doctorCommonGroupEventHandler) {
+                                 DoctorGroupReportManager doctorGroupReportManager) {
         this.doctorMoveDatasourceHandler = doctorMoveDatasourceHandler;
         this.doctorGroupDao = doctorGroupDao;
         this.doctorGroupEventDao = doctorGroupEventDao;
@@ -146,7 +147,7 @@ public class DoctorMoveDataService {
         this.doctorMoveBasicService = doctorMoveBasicService;
         this.doctorPigReadService = doctorPigReadService;
         this.doctorMoveWorkflowHandler = doctorMoveWorkflowHandler;
-        this.doctorCommonGroupEventHandler = doctorCommonGroupEventHandler;
+        this.doctorGroupReportManager = doctorGroupReportManager;
     }
 
     //删除猪场所有猪相关的数据
@@ -165,7 +166,7 @@ public class DoctorMoveDataService {
         search.setFarmId(farm.getId());
         search.setPigTypes(PigType.FARROW_TYPES);
 
-        doctorGroupDao.findBySearchDto(search).forEach(group -> doctorCommonGroupEventHandler
+        doctorGroupDao.findBySearchDto(search).forEach(group -> doctorGroupReportManager
                 .updateFarrowGroupTrack(doctorGroupTrackDao.findByGroupId(group.getId()), group.getPigType()));
     }
 
@@ -2038,7 +2039,7 @@ public class DoctorMoveDataService {
         groupTrack.setRelEventId(lastEvent == null ? null : lastEvent.getId());
 
         //更新产房仔猪
-        return doctorCommonGroupEventHandler.updateFarrowGroupTrack(groupTrack, group.getPigType());
+        return doctorGroupReportManager.updateFarrowGroupTrack(groupTrack, group.getPigType());
     }
 
     //关闭猪群的猪群跟踪
