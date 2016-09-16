@@ -106,5 +106,10 @@ public class DoctorMonthlyReportDto implements Serializable {
     private double boarPregRate;                  //受胎率
     private double boarFarrowRate;                //分娩率
 
+    /**
+     * 存栏变动
+     */
+    private DoctorLiveStockChangeMonthlyReport liveStockChange;
+
     private String date;                      //统计月份 2016年08月, 供前台显示
 }
