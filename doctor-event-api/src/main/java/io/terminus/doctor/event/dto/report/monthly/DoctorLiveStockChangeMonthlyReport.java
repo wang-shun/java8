@@ -34,7 +34,7 @@ public class DoctorLiveStockChangeMonthlyReport implements Serializable {
     private int peiHuaiBegin;           //期初
     private int peiHuaiToFarrow;        //转产房
     private int peiHuaiIn;              //进场
-    private int peiHuaiWeanIn;          //断奶转入
+    private int peiHuaiWeanIn;          //断奶转入 = 断奶转出
     private int peiHuaiDead;            //死淘
     private int peiHuaiFeedCount;       //饲料数量
     private int peiHuaiFeedAmount;      //饲料金额
@@ -46,8 +46,8 @@ public class DoctorLiveStockChangeMonthlyReport implements Serializable {
      * 产房母猪
      */
     private int farrowSowBegin;         //期初
-    private int farrowSowIn;            //转入
-    private int farrowSowWeanOut;       //断奶转出
+    private int farrowSowIn;            //转入 = 转产房
+    private int farrowSowWeanOut;       //断奶转出 = 断奶转入
     private int farrowSowDead;          //死淘
     private int farrowSowFeedCount;     //饲料数量
     private int farrowSowFeedAmount;    //饲料金额
