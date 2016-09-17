@@ -1153,40 +1153,119 @@
         <include refid="criteria"/>
     </select>
 
-    <!--存栏变动月报: 进场/断奶转入-->
-    <select id="getMonthlyLiveStockChangeInOrWeanIn" parameterType="map" resultType="map">
-        <include refid="criteria"/>
+    <!--存栏变动月报: 进场-->
+    <select id="getMonthlyLiveStockChangeSowIn" parameterType="map" resultType="int">
+        SELECT count(1)
+        FROM  doctor_pig_events
+        WHERE `type` = 7
+          <include refid="criteria"/>
+
+    </select>
+
+    <!--存栏变动月报: 断奶转入-->
+    <select id="getMonthlyLiveStockChangeWeanIn" parameterType="map" resultType="int">
+        SELECT  count(1)
+        FROM
+        (
+            SELECT barn_id
+            FROM  doctor_pig_events
+            WHERE `type` = 12  -- 转入配种舍事件
+              <include refid="criteria"/>
+        ) a
+        LEFT JOIN doctor_barns b ON a.barn_id = b.id
+        WHERE b.pig_type IN (1, 7)
     </select>
 
     <!--存栏变动月报: 配怀转产房-->
-    <select id="getMonthlyLiveStockChangeToFarrow" parameterType="map" resultType="map">
-        <include refid="criteria"/>
+    <select id="getMonthlyLiveStockChangeToFarrow" parameterType="map" resultType="int">
+        SELECT count(1)
+        FROM doctor_pig_events
+        WHERE `type` = 14
+          <include refid="criteria"/>
     </select>
 
     <!--存栏变动月报: 后备转种猪-->
-    <select id="getMonthlyLiveStockChangeToSeed" parameterType="map" resultType="map">
-        <include refid="criteria"/>
+    <select id="getMonthlyLiveStockChangeToSeed" parameterType="map" resultType="int">
+        SELECT count(1)
+        FROM doctor_group_events
+        WHERE `type` = 5
+          <include refid="criteria"/>
     </select>
 
     <!--存栏变动月报: 产房转保育-->
-    <select id="getMonthlyLiveStockChangeToNursery" parameterType="map" resultType="map">
+    <select id="getMonthlyLiveStockChangeToNursery" parameterType="map" resultType="int">
         <include refid="criteria"/>
     </select>
 
     <!--存栏变动月报: 保育转育肥-->
-    <select id="getMonthlyLiveStockChangeToFatten" parameterType="map" resultType="map">
+    <select id="getMonthlyLiveStockChangeToFatten" parameterType="map" resultType="int">
     </select>
 
     <!--存栏变动月报: 死淘(后备,产房仔猪,保育,育肥)-->
     <select id="getMonthlyLiveStockChangeGroupDead" parameterType="map" resultType="map">
+        SELECT
+            max(CASE WHEN pig_type IN (1, 7) THEN result ELSE 0 END) AS farrowDead,
+            max(CASE WHEN pig_type = 2 THEN result ELSE 0 END) AS nurseryDead,
+            max(CASE WHEN pig_type = 3 THEN result ELSE 0 END) AS farrowDead,
+            max(CASE WHEN pig_type = 4 THEN result ELSE 0 END) AS houbeiDead
+        FROM
+        (
+            SELECT
+              ifnull(sum(quantity), 0) AS result, pig_type
+            FROM  doctor_group_events
+            WHERE
+                `type` = 3 AND
+                change_type_id IN (110, 111)    --死亡, 淘汰
+                <include refid="criteria"/>
+            GROUP BY pig_type
+        ) AS a
     </select>
 
     <!--存栏变动月报: 死淘(配怀,产房母猪)-->
     <select id="getMonthlyLiveStockChangeSowDead" parameterType="map" resultType="map">
+        SELECT
+            max(CASE WHEN pig_type IN (5, 6) THEN result ELSE 0 END) AS peiHuaiDead,
+            max(CASE WHEN pig_type IN (1, 7) THEN result ELSE 0 END) AS farrowSowDead
+        FROM
+        (
+            SELECT
+               ifnull(count(1), 0) AS result,
+               b.pig_type AS pig_type
+            FROM
+            (
+                SELECT
+                     barn_id
+                FROM doctor_pig_events
+                WHERE
+                        change_type_id IN (110, 111) AND -- 变动类型是死亡和淘汰
+                        `type` = 6 AND -- 事件类型是离场
+                        kind = 1 -- 猪类母猪
+                        <include refid="criteria"/>
+            ) AS a
+            LEFT JOIN doctor_barns b ON a.barn_id = b.id
+            WHERE b.pig_type IN (1, 5, 6, 7)
+            GROUP BY b.pig_type
+        ) AS c
     </select>
 
     <!--存栏变动月报: 销售(后备,产房仔猪,保育,育肥)-->
     <select id="getMonthlyLiveStockChangeSale" parameterType="map" resultType="map">
+        SELECT
+            max(CASE WHEN pig_type IN (1, 7) THEN result ELSE 0 END) AS farrowSale,
+            max(CASE WHEN pig_type = 2 THEN result ELSE 0 END) AS nurserySale,
+            max(CASE WHEN pig_type = 3 THEN result ELSE 0 END) AS fattenSale,
+            max(CASE WHEN pig_type = 4 THEN result ELSE 0 END) AS houbeiSale
+        FROM
+        (
+            SELECT
+              ifnull(sum(quantity), 0) AS result, pig_type
+            FROM  doctor_group_events
+            WHERE
+              `type` = 3 AND
+              change_type_id = 109    --销售
+              <include refid="criteria"/>
+            GROUP BY pig_type
+        ) AS a
     </select>
 
     <!--存栏变动月报: 饲料数量-->

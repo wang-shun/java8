@@ -182,7 +182,6 @@ public class DoctorMonthlyReportWriteServiceImpl implements DoctorMonthlyReportW
 
         DoctorLiveStockChangeMonthlyReport begin = doctorKpiDao.getMonthlyLiveStockChangeBegin(farmId, startAt);
         DoctorLiveStockChangeMonthlyReport in = doctorKpiDao.getMonthlyLiveStockChangeIn(farmId, startAt, endAt);
-        DoctorLiveStockChangeMonthlyReport inOreanIn = doctorKpiDao.getMonthlyLiveStockChangeInOrWeanIn(farmId, startAt, endAt);
         DoctorLiveStockChangeMonthlyReport groupDead = doctorKpiDao.getMonthlyLiveStockChangeGroupDead(farmId, startAt, endAt);
         DoctorLiveStockChangeMonthlyReport sowDead = doctorKpiDao.getMonthlyLiveStockChangeSowDead(farmId, startAt, endAt);
         DoctorLiveStockChangeMonthlyReport sale = doctorKpiDao.getMonthlyLiveStockChangeSale(farmId, startAt, endAt);
@@ -207,8 +206,8 @@ public class DoctorMonthlyReportWriteServiceImpl implements DoctorMonthlyReportW
         //配怀舍
         report.setPeiHuaiBegin(begin.getPeiHuaiBegin());                                                    //期初
         report.setPeiHuaiToFarrow(doctorKpiDao.getMonthlyLiveStockChangeToFarrow(farmId, startAt, endAt));  //转产房
-        report.setPeiHuaiIn(inOreanIn.getPeiHuaiIn());                                                      //进场
-        report.setPeiHuaiWeanIn(inOreanIn.getPeiHuaiWeanIn());                                              //断奶转入 = 断奶转出
+        report.setPeiHuaiIn(doctorKpiDao.getMonthlyLiveStockChangeSowIn(farmId, startAt, endAt));           //进场
+        report.setPeiHuaiWeanIn(doctorKpiDao.getMonthlyLiveStockChangeWeanIn(farmId, startAt, endAt));      //断奶转入 = 断奶转出
         report.setPeiHuaiDead(sowDead.getPeiHuaiDead());                                                    //死淘
         report.setPeiHuaiFeedCount(feedCount.getPeiHuaiFeedCount());                                        //饲料数量
         report.setPeiHuaiFeedAmount(feedAmount.getPeiHuaiFeedAmount());                                     //饲料金额

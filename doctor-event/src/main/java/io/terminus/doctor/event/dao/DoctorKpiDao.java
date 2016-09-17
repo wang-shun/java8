@@ -561,10 +561,18 @@ public class DoctorKpiDao {
     }
 
     /**
-     * 存栏变动月报: 进场/断奶转入
+     * 存栏变动月报: 进场
      */
-    public DoctorLiveStockChangeMonthlyReport getMonthlyLiveStockChangeInOrWeanIn(Long farmId, Date startAt, Date endAt) {
-        return sqlSession.selectOne("getMonthlyLiveStockChangeInOrWeanIn", ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
+    public int getMonthlyLiveStockChangeSowIn(Long farmId, Date startAt, Date endAt) {
+        return sqlSession.selectOne("getMonthlyLiveStockChangeSowIn", ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
+    }
+
+
+    /**
+     * 存栏变动月报: 断奶转入
+     */
+    public int getMonthlyLiveStockChangeWeanIn(Long farmId, Date startAt, Date endAt) {
+        return sqlSession.selectOne("getMonthlyLiveStockChangeWeanIn", ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
     }
 
     /**
@@ -609,7 +617,6 @@ public class DoctorKpiDao {
     public DoctorLiveStockChangeMonthlyReport getMonthlyLiveStockChangeSowDead(Long farmId, Date startAt, Date endAt) {
         return sqlSession.selectOne("getMonthlyLiveStockChangeSowDead", ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
     }
-
 
     /**
      * 存栏变动月报: 销售(后备,产房仔猪,保育,育肥)
