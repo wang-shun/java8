@@ -249,21 +249,25 @@ public class DoctorWareHouseQuery {
      * @param endAt 结束日期范围
      * @param barnId 猪舍id
      * @param groupId 猪群id
+     * @param pageNo 第几页
+     * @param size 每页数量
      * @return
      */
     @RequestMapping(value = "/countAmount", method = RequestMethod.GET)
     @ResponseBody
-    public MaterialCountAmount countAmount(@RequestParam Long farmId, // 此参数必须有
-                                           @RequestParam(required = false) Long warehouseId,
-                                           @RequestParam(required = false) Long materialId,
-                                           @RequestParam(required = false) Integer eventType,
-                                           @RequestParam(required = false) Integer materilaType,
-                                           @RequestParam(required = false) Long barnId,
-                                           @RequestParam(required = false) Long groupId,
-                                           @RequestParam(required = false) Long staffId,
-                                           @RequestParam(required = false) String startAt,
-                                           @RequestParam(required = false) String endAt){
+    public Paging<MaterialCountAmount> countAmount(@RequestParam Long farmId,  // 此参数必须有
+                                                 @RequestParam(required = false) Long warehouseId,
+                                                 @RequestParam(required = false) Long materialId,
+                                                 @RequestParam(required = false) Integer eventType,
+                                                 @RequestParam(required = false) Integer materilaType,
+                                                 @RequestParam(required = false) Long barnId,
+                                                 @RequestParam(required = false) Long groupId,
+                                                 @RequestParam(required = false) Long staffId,
+                                                 @RequestParam(required = false) String startAt,
+                                                 @RequestParam(required = false) String endAt,
+                                                 @RequestParam(required = false) Integer pageNo,
+                                                 @RequestParam(required = false) Integer size){
         return RespHelper.or500(doctorMaterialConsumeProviderReadService.countAmount(farmId, warehouseId, materialId, eventType, materilaType,
-                barnId, groupId, staffId, startAt, endAt));
+                barnId, groupId, staffId, startAt, endAt, pageNo, size));
     }
 }

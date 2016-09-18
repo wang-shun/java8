@@ -1,12 +1,17 @@
 package io.terminus.doctor.warehouse.dao;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Maps;
+import io.terminus.common.model.Paging;
 import io.terminus.common.mysql.dao.MyBatisDao;
+import io.terminus.common.utils.Constants;
 import io.terminus.doctor.warehouse.dto.MaterialCountAmount;
 import io.terminus.doctor.warehouse.model.DoctorMaterialConsumeProvider;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Repository
@@ -31,7 +36,19 @@ public class DoctorMaterialConsumeProviderDao extends MyBatisDao<DoctorMaterialC
         return sqlSession.selectOne(sqlId("findLastEvent"), ImmutableMap.copyOf(param));
     }
 
-    public MaterialCountAmount countAmount(Map<String, Object> criteria){
-        return sqlSession.selectOne(sqlId("countAmount"), criteria);
+    public Paging<MaterialCountAmount> countAmount(Integer offset, Integer limit, Map<String, Object> criteria){
+        if (criteria == null) {    //如果查询条件为空
+            criteria = Maps.newHashMap();
+        }
+        // get total count
+        Long total = sqlSession.selectOne(sqlId("countCountAmount"), criteria);
+        if (total <= 0){
+            return new Paging<>(0L, Collections.<MaterialCountAmount>emptyList());
+        }
+        criteria.put(Constants.VAR_OFFSET, offset);
+        criteria.put(Constants.VAR_LIMIT, limit);
+        // get data
+        List<MaterialCountAmount> datas = sqlSession.selectList(sqlId("pageCountAmount"), criteria);
+        return new Paging<>(total, datas);
     }
 }

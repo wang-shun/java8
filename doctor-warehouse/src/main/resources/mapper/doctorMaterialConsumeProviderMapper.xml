@@ -179,7 +179,7 @@
         order by id desc limit 1
     </select>
 
-    <select id="countAmount" resultType="io.terminus.doctor.warehouse.dto.MaterialCountAmount">
+    <select id="pageCountAmount" resultType="io.terminus.doctor.warehouse.dto.MaterialCountAmount">
         select cp.`material_id` as materialId, bm.`name` as materialName, cp.count, cp.amount, bm.`unit_name` as unitName from (
         select material_id, ifnull(sum(`event_count`), 0) as count, ifnull(sum(`event_count` * unit_price), 0) as amount
         from <include refid="tb"/>
@@ -187,5 +187,15 @@
             <include refid="criteria"/>
         </where>
         group by material_id ) cp join `doctor_basic_materials` bm on cp.`material_id` = bm.id
+        order by bm.type, bm.name
+        limit #{offset}, #{limit}
+    </select>
+
+    <select id="countCountAmount" resultType="long">
+        select count(distinct material_id)
+        from <include refid="tb"/>
+        <where>
+            <include refid="criteria"/>
+        </where>
     </select>
 </mapper>
