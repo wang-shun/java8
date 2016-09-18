@@ -1149,7 +1149,7 @@
     </select>
 
     <!--存栏变动月报: 转入(后备,产房仔猪,保育,育肥)-->
-    <select id="getMonthlyLiveStockChangeIn" parameterType="map" resultType="map">
+    <select id="getMonthlyLiveStockChangeIn" parameterType="map" resultType="io.terminus.doctor.event.dto.report.monthly.DoctorLiveStockChangeMonthlyReport">
         SELECT
             max(CASE WHEN pig_type IN (1, 7) THEN result ELSE 0 END) AS farrowIn,
             max(CASE WHEN pig_type = 2 THEN result ELSE 0 END) AS nurseryIn,
@@ -1235,7 +1235,7 @@
     </select>
 
     <!--存栏变动月报: 死淘(后备,产房仔猪,保育,育肥)-->
-    <select id="getMonthlyLiveStockChangeGroupDead" parameterType="map" resultType="map">
+    <select id="getMonthlyLiveStockChangeGroupDead" parameterType="map" resultType="io.terminus.doctor.event.dto.report.monthly.DoctorLiveStockChangeMonthlyReport">
         SELECT
             max(CASE WHEN pig_type IN (1, 7) THEN result ELSE 0 END) AS farrowDead,
             max(CASE WHEN pig_type = 2 THEN result ELSE 0 END) AS nurseryDead,
@@ -1255,7 +1255,7 @@
     </select>
 
     <!--存栏变动月报: 死淘(配怀,产房母猪)-->
-    <select id="getMonthlyLiveStockChangeSowDead" parameterType="map" resultType="map">
+    <select id="getMonthlyLiveStockChangeSowDead" parameterType="map" resultType="io.terminus.doctor.event.dto.report.monthly.DoctorLiveStockChangeMonthlyReport">
         SELECT
             max(CASE WHEN pig_type IN (5, 6) THEN result ELSE 0 END) AS peiHuaiDead,
             max(CASE WHEN pig_type IN (1, 7) THEN result ELSE 0 END) AS farrowSowDead
@@ -1282,7 +1282,7 @@
     </select>
 
     <!--存栏变动月报: 销售(后备,产房仔猪,保育,育肥)-->
-    <select id="getMonthlyLiveStockChangeSale" parameterType="map" resultType="map">
+    <select id="getMonthlyLiveStockChangeSale" parameterType="map" resultType="io.terminus.doctor.event.dto.report.monthly.DoctorLiveStockChangeMonthlyReport">
         SELECT
             max(CASE WHEN pig_type IN (1, 7) THEN result ELSE 0 END) AS farrowSale,
             max(CASE WHEN pig_type = 2 THEN result ELSE 0 END) AS nurserySale,
