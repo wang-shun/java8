@@ -112,8 +112,16 @@ public class DoctorGroupBatchSummaryReadServiceImpl implements DoctorGroupBatchS
         summary.setUserId(group.getStaffId());                                       //工作人员id
         summary.setUserName(group.getStaffName());                                   //工作人员name
         summary.setLiveCount(groupTrack.getQuantity());                              //活仔数
-        summary.setWeakCount(groupTrack.getWeakQty());                               //弱仔数
-        summary.setHealthCount(groupTrack.getQuantity() - summary.getHealthCount()); //健仔数
+
+        //如果小于0, 弱仔数也有置成0
+        int healthCount = groupTrack.getQuantity() - groupTrack.getWeakQty();
+        if (healthCount <= 0) {
+            summary.setWeakCount(0);                                                 //弱仔数
+            summary.setHealthCount(groupTrack.getQuantity());                        //健仔数
+        } else {
+            summary.setWeakCount(groupTrack.getWeakQty());                           //弱仔数
+            summary.setHealthCount(healthCount);                                     //健仔数
+        }
         summary.setBirthAvgWeight(groupTrack.getBirthAvgWeight());                   //出生均重(kg)
         summary.setWeanCount(groupTrack.getQuantity() - groupTrack.getUnweanQty());  //断奶数 = 总 - 未断奶数
         summary.setUnqCount(groupTrack.getUnqQty());                                 //不合格数
@@ -147,7 +155,7 @@ public class DoctorGroupBatchSummaryReadServiceImpl implements DoctorGroupBatchS
                                 Objects.equals(DoctorBasicEnums.ELIMINATE.getId(), event.getChangeTypeId())))
                 .sum();
 
-        return deadCount / inCount == 0 ? 1 : inCount;
+        return deadCount / (inCount == 0 ? 1 : inCount);
     }
 
     //获取销售数量
