@@ -102,6 +102,7 @@ public class DoctorGroupBatchSummaryReadServiceImpl implements DoctorGroupBatchS
         summary.setFarmId(group.getFarmId());                                        //猪场id
         summary.setGroupId(group.getId());                                           //猪群id
         summary.setGroupCode(group.getGroupCode());                                  //猪群号
+        summary.setStatus(group.getStatus());
         summary.setPigType(group.getPigType());                                      //猪类
         summary.setAvgDayAge(groupTrack.getAvgDayAge());                             //平均日龄
         summary.setOpenAt(group.getOpenAt());                                        //建群时间
