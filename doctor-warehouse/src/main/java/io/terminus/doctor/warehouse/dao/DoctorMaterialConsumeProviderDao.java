@@ -2,6 +2,7 @@ package io.terminus.doctor.warehouse.dao;
 
 import com.google.common.collect.ImmutableMap;
 import io.terminus.common.mysql.dao.MyBatisDao;
+import io.terminus.doctor.warehouse.dto.MaterialCountAmount;
 import io.terminus.doctor.warehouse.model.DoctorMaterialConsumeProvider;
 import org.springframework.stereotype.Repository;
 
@@ -28,5 +29,9 @@ public class DoctorMaterialConsumeProviderDao extends MyBatisDao<DoctorMaterialC
             param.put("materialId", materialId);
         }
         return sqlSession.selectOne(sqlId("findLastEvent"), ImmutableMap.copyOf(param));
+    }
+
+    public MaterialCountAmount countAmount(Map<String, Object> criteria){
+        return sqlSession.selectOne(sqlId("countAmount"), criteria);
     }
 }

@@ -43,4 +43,12 @@ public interface DoctorParityMonthlyReportWriteService {
      * @return
      */
     Response<Boolean> createMonthlyReports(List<Long> farmIds, Date sumAt);
+
+    /**
+     * 猪场产仔分析月报
+     * @param farmId
+     * @param sumAt
+     * @return
+     */
+    Response<Boolean> createMonthlyReport(Long farmId, Date sumAt);
 }

@@ -380,3 +380,8 @@ CREATE TABLE `doctor_parity_monthly_reports` (
 ALTER TABLE doctor_group_events ADD COLUMN in_type smallint(6) DEFAULT NULL COMMENT '仔猪转入事件: 转入类型' AFTER trans_group_type;
 ALTER TABLE doctor_group_events ADD COLUMN other_barn_id bigint(20) DEFAULT NULL COMMENT '猪群转入转出事件的来源/目标id' AFTER in_type;
 ALTER TABLE doctor_group_events ADD COLUMN other_barn_type varchar(64) DEFAULT NULL COMMENT '猪群转入转出事件的来源/目标猪舍类型' AFTER other_barn_id;
+
+-- 2016年09月14日, 物资变动关联猪群
+alter table doctor_material_consume_providers
+add column group_id bigint(20) DEFAULT NULL COMMENT '领用物资的猪群Id, 仅 event_type=1 时才会有值' after barn_name,
+add column group_code varchar(640) DEFAULT NULL COMMENT '猪群名称' after group_id;

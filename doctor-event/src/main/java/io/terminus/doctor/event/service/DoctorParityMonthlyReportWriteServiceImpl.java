@@ -82,16 +82,28 @@ public class DoctorParityMonthlyReportWriteServiceImpl implements DoctorParityMo
             return Response.fail("monthlyReport.create.fail");
         }
     }
+    @Override
+    public Response<Boolean> createMonthlyReport(Long farmId, Date sumAt) {
+        try {
+            Date startAt = new DateTime(sumAt).withDayOfMonth(1).withTimeAtStartOfDay().toDate(); //月初: 2016-08-01 00:00:00
+            Date endAt = new DateTime(Dates.endOfDay(sumAt)).plusSeconds(-1).toDate();            //天末: 2016-08-12 23:59:59
+            getMonthlyReport(farmId, startAt, endAt, sumAt);
+            return Response.ok(Boolean.TRUE);
+        } catch (Exception e) {
+            log.error("create monthly reports failed, sumAt:{}, cause:{}", sumAt, Throwables.getStackTraceAsString(e));
+            return Response.fail("monthlyReport.create.fail");
+        }
+    }
 
     //月报
     private void getMonthlyReport(Long farmId, Date startAt, Date endAt, Date sumAt) {
         List<DoctorParityMonthlyReport> doctorParityMonthlyReportList = new ArrayList<>();
         //1,2,3,4,5,6,7,8,9,10胎及以上
-        for(int i =0; i< 10; i++){
+        for(int i =0; i< 9; i++){
             List<DoctorParityMonthlyReport> result = doctorParityMonthlyReportDao.constructDoctorParityMonthlyReports(farmId, i, i, startAt, endAt);
             doctorParityMonthlyReportList.addAll(result);
         }
-        List<DoctorParityMonthlyReport> result = doctorParityMonthlyReportDao.constructDoctorParityMonthlyReports(farmId, 10, null, startAt, endAt);
+        List<DoctorParityMonthlyReport> result = doctorParityMonthlyReportDao.constructDoctorParityMonthlyReports(farmId, 9, null, startAt, endAt);
         doctorParityMonthlyReportList.addAll(result);
         if( doctorParityMonthlyReportList != null && !doctorParityMonthlyReportList.isEmpty()){
             doctorParityMonthlyReportManager.createMonthlyReports(doctorParityMonthlyReportList, sumAt);

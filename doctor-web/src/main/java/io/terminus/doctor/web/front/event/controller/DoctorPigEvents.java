@@ -9,6 +9,7 @@ import io.terminus.common.model.Response;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.common.utils.Splitters;
 import io.terminus.doctor.common.constants.JacksonType;
+import io.terminus.doctor.common.utils.Params;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dto.DoctorPigInfoDto;
 import io.terminus.doctor.event.dto.DoctorSowParityCount;
@@ -178,19 +179,26 @@ public class DoctorPigEvents {
         return RespHelper.or500(doctorPigEventReadService.querySowParityCount(pigId));
     }
 
+    /**
+     * 同步流程数据
+     * @param key
+     * @param businessId
+     * @return
+     */
     @RequestMapping(value = "/updateData", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Boolean updateData(@RequestParam("key") String key, @RequestParam(value = "businessId", required = false) Long businessId) {
         return RespHelper.or500(workFlowService.updateData(key, businessId));
     }
 
-    @RequestMapping(value = "/pigPaging" , method = RequestMethod.GET)
+    @RequestMapping(value = "/pigPaging", method = RequestMethod.GET)
     @ResponseBody
     public Paging<DoctorPigEvent> queryPigEventsByCriteria(@RequestParam Map<String, Object> params, @RequestParam(required = false) Integer pageNo, @RequestParam(required = false) Integer pageSize) {
         if (params == null || params.isEmpty()) {
             return Paging.empty();
         }
-        if (StringUtils.isNotBlank((String)params.get("eventName"))){
+        params = Params.filterNullOrEmpty(params);
+        if (params.containsKey("eventName")) {
             params.put("type", PigEvent.fromDesc((String) params.get("eventName")).getKey().toString());
             params.remove("eventName");
         }

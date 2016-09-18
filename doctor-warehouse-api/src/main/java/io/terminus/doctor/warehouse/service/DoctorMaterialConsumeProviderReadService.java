@@ -2,6 +2,7 @@ package io.terminus.doctor.warehouse.service;
 
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
+import io.terminus.doctor.warehouse.dto.MaterialCountAmount;
 import io.terminus.doctor.warehouse.model.DoctorMaterialConsumeProvider;
 
 /**
@@ -27,7 +28,9 @@ public interface DoctorMaterialConsumeProviderReadService {
      * @param size 每页数量
      * @return
      */
-    Response<Paging<DoctorMaterialConsumeProvider>> page(Long warehouseId, Long materialId, Integer eventType, Integer materilaType,
+    Response<Paging<DoctorMaterialConsumeProvider>> page(Long farmId, Long warehouseId, Long materialId, Integer eventType, Integer materilaType,
                                                        Long staffId, String startAt, String endAt, Integer pageNo, Integer size);
 
+    Response<MaterialCountAmount> countAmount(Long farmId, Long warehouseId, Long materialId, Integer eventType, Integer materilaType,
+                                              Long barnId, Long groupId, Long staffId, String startAt, String endAt);
 }
