@@ -3,7 +3,6 @@ package io.terminus.doctor.event.handler.group;
 import com.google.common.base.MoreObjects;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.doctor.common.event.CoreEventDispatcher;
-import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorGroupSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
@@ -76,7 +75,7 @@ public class DoctorMoveInGroupEventHandler extends DoctorAbstractGroupEventHandl
         event.setInType(moveIn.getInType());
 
         if (moveIn.getFromBarnId() != null) {
-            DoctorBarn fromBarn = RespHelper.orServEx(doctorBarnReadService.findBarnById(moveIn.getFromBarnId()));
+            DoctorBarn fromBarn = getBarnById(moveIn.getFromBarnId());
             moveInEvent.setFromBarnType(fromBarn.getPigType());
             event.setTransGroupType(getTransType(group.getPigType(), fromBarn).getValue());   //区别内转还是外转
             event.setOtherBarnId(moveIn.getFromBarnId());  //来源猪舍id
