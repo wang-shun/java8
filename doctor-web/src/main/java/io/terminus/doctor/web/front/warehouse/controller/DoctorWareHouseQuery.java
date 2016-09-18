@@ -13,6 +13,7 @@ import io.terminus.doctor.user.model.DoctorFarm;
 import io.terminus.doctor.user.service.DoctorFarmReadService;
 import io.terminus.doctor.user.service.DoctorUserProfileReadService;
 import io.terminus.doctor.warehouse.dto.DoctorWareHouseDto;
+import io.terminus.doctor.warehouse.dto.MaterialCountAmount;
 import io.terminus.doctor.warehouse.model.DoctorFarmWareHouseType;
 import io.terminus.doctor.warehouse.model.DoctorMaterialConsumeProvider;
 import io.terminus.doctor.warehouse.model.DoctorMaterialInWareHouse;
@@ -232,5 +233,37 @@ public class DoctorWareHouseQuery {
             @RequestParam(required = false) Integer size){
         return RespHelper.or500(doctorMaterialConsumeProviderReadService.page(farmId, warehouseId, materialId, eventType,
                 materilaType, staffId, startAt, endAt, pageNo, size));
+    }
+
+    /**
+     * 仓库数量和金额的统计
+     * @param farmId 猪场id , 必传
+     * @param warehouseId 仓库id
+     * @param materialId 物料id
+     * @param eventType 事件类型
+     *                  @see DoctorMaterialConsumeProvider.EVENT_TYPE
+     * @param materilaType 物料(仓库)类型
+     *                     @see io.terminus.doctor.common.enums.WareHouseType
+     * @param staffId 事件员工id
+     * @param startAt 开始日期范围
+     * @param endAt 结束日期范围
+     * @param barnId 猪舍id
+     * @param groupId 猪群id
+     * @return
+     */
+    @RequestMapping(value = "/countAmount", method = RequestMethod.GET)
+    @ResponseBody
+    public MaterialCountAmount countAmount(@RequestParam Long farmId, // 此参数必须有
+                                           @RequestParam(required = false) Long warehouseId,
+                                           @RequestParam(required = false) Long materialId,
+                                           @RequestParam(required = false) Integer eventType,
+                                           @RequestParam(required = false) Integer materilaType,
+                                           @RequestParam(required = false) Long barnId,
+                                           @RequestParam(required = false) Long groupId,
+                                           @RequestParam(required = false) Long staffId,
+                                           @RequestParam(required = false) String startAt,
+                                           @RequestParam(required = false) String endAt){
+        return RespHelper.or500(doctorMaterialConsumeProviderReadService.countAmount(farmId, warehouseId, materialId, eventType, materilaType,
+                barnId, groupId, staffId, startAt, endAt));
     }
 }

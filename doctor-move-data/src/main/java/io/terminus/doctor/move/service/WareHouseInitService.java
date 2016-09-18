@@ -364,8 +364,8 @@ public class WareHouseInitService {
                 }
             }
 
-            //如果是饲料领用, 需要设置 extra
-            if(isConsume(pu.getEventType(), WareHouseType.from(wareHouse.getType())) && Objects.equals(wareHouse.getType(), WareHouseType.FEED.getKey())){
+            //如果是领用, 需要设置 extra
+            if(isConsume(pu.getEventType(), WareHouseType.from(wareHouse.getType()))){
                 DoctorBarn barn = barnMap.get(pu.getBarnOId());
                 if(barn != null){
                     Map<String, Object> extraMap = new HashMap<>();
@@ -497,14 +497,13 @@ public class WareHouseInitService {
             if(stopUseMaterial.contains(pu.getMaterialOID())){
                 continue;
             }
-            String eventDirtyType = pu.getEventType();
             DoctorMaterialConsumeProvider.EVENT_TYPE eventType;
             String typeAndmaterialName = wareHouse.getType() + "|" + pu.getMaterialName();
             DoctorBasicMaterial material = basicMaterialMap.get(typeAndmaterialName);
             // 由于 pu.getBarnOId() 可能为null, 所以 barn 也可能为null
             DoctorBarn barn = barnMap.get(pu.getBarnOId());
 
-            switch (eventDirtyType) {
+            switch (pu.getEventType()) {
                 case "采购":
                     eventType = DoctorMaterialConsumeProvider.EVENT_TYPE.PROVIDER;
                     break;
