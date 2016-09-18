@@ -546,7 +546,6 @@ public class DoctorMoveDataController {
     }
 
     /**
-<<<<<<< HEAD
      * 修正哺乳母猪数据
      */
     @RequestMapping(value = "/updateBuruTrack", method = RequestMethod.GET)
