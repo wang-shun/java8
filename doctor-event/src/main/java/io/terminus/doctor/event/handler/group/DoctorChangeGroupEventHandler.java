@@ -96,8 +96,9 @@ public class DoctorChangeGroupEventHandler extends DoctorAbstractGroupEventHandl
         //4.创建镜像
         createGroupSnapShot(oldShot, new DoctorGroupSnapShotInfo(group, event, groupTrack), GroupEventType.CHANGE);
 
-        //5.判断变动数量, 如果 = 猪群数量, 触发关闭猪群事件
+        //5.判断变动数量, 如果 = 猪群数量, 触发关闭猪群事件, 同时生成批次总结
         if (Objects.equals(oldQuantity, change.getQuantity())) {
+            doctorCommonGroupEventHandler.createGroupBatchSummaryWhenClosed(group, groupTrack, event.getEventAt());
             doctorCommonGroupEventHandler.autoGroupEventClose(group, groupTrack, change);
         }
 

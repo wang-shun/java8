@@ -21,9 +21,12 @@ import io.terminus.doctor.event.enums.PigSource;
 import io.terminus.doctor.event.manager.DoctorGroupManager;
 import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorGroup;
+import io.terminus.doctor.event.model.DoctorGroupBatchSummary;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.search.pig.PigSearchWriteService;
+import io.terminus.doctor.event.service.DoctorGroupBatchSummaryReadService;
+import io.terminus.doctor.event.service.DoctorGroupBatchSummaryWriteService;
 import io.terminus.doctor.event.service.DoctorGroupReadService;
 import io.terminus.doctor.event.service.DoctorPigEventWriteService;
 import io.terminus.doctor.event.util.EventUtil;
@@ -32,6 +35,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Date;
 import java.util.Objects;
 
 import static io.terminus.common.utils.Arguments.notEmpty;
@@ -53,6 +57,8 @@ public class DoctorCommonGroupEventHandler {
     private final DoctorGroupManager doctorGroupManager;
     private final DoctorPigEventWriteService doctorPigEventWriteService;
     private final PigSearchWriteService pigSearchWriteService;
+    private final DoctorGroupBatchSummaryReadService doctorGroupBatchSummaryReadService;
+    private final DoctorGroupBatchSummaryWriteService doctorGroupBatchSummaryWriteService;
 
     @Autowired
     public DoctorCommonGroupEventHandler(DoctorCloseGroupEventHandler doctorCloseGroupEventHandler,
@@ -60,13 +66,17 @@ public class DoctorCommonGroupEventHandler {
                                          DoctorGroupReadService doctorGroupReadService,
                                          DoctorGroupManager doctorGroupManager,
                                          DoctorPigEventWriteService doctorPigEventWriteService,
-                                         PigSearchWriteService pigSearchWriteService) {
+                                         PigSearchWriteService pigSearchWriteService,
+                                         DoctorGroupBatchSummaryReadService doctorGroupBatchSummaryReadService,
+                                         DoctorGroupBatchSummaryWriteService doctorGroupBatchSummaryWriteService) {
         this.doctorCloseGroupEventHandler = doctorCloseGroupEventHandler;
         this.doctorMoveInGroupEventHandler = doctorMoveInGroupEventHandler;
         this.doctorGroupReadService = doctorGroupReadService;
         this.doctorGroupManager = doctorGroupManager;
         this.doctorPigEventWriteService = doctorPigEventWriteService;
         this.pigSearchWriteService = pigSearchWriteService;
+        this.doctorGroupBatchSummaryReadService = doctorGroupBatchSummaryReadService;
+        this.doctorGroupBatchSummaryWriteService = doctorGroupBatchSummaryWriteService;
     }
 
     /**
@@ -196,5 +206,19 @@ public class DoctorCommonGroupEventHandler {
 
         //解决在事务里发事件 异步取不到的问题, 以后绝对不能这么干了
         pigSearchWriteService.update(pigId);
+    }
+
+    /**
+     * 当猪群关闭时, 创建猪群批次总结(这个统计放到猪群关闭之前进行)
+     */
+    public void createGroupBatchSummaryWhenClosed(DoctorGroup group, DoctorGroupTrack groupTrack, Date eventAt) {
+        DoctorGroupBatchSummary summary = RespHelper.orServEx(doctorGroupBatchSummaryReadService
+                .getSummaryByGroupDetail(new DoctorGroupDetail(group, groupTrack)));
+
+        //设置下猪群的关闭状态和时间
+        summary.setStatus(DoctorGroup.Status.CLOSED.getValue());
+        summary.setCloseAt(eventAt);
+
+        RespHelper.orServEx(doctorGroupBatchSummaryWriteService.createGroupBatchSummary(summary));
     }
 }

@@ -36,7 +36,7 @@ public class DoctorGroupBatchSummary implements Serializable {
      * 猪群状态
      * @see io.terminus.doctor.event.model.DoctorGroup.Status
      */
-    private String status;
+    private Integer status;
     
     /**
      * 猪类

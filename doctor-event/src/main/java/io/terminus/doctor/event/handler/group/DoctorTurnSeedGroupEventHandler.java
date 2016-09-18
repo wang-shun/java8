@@ -88,8 +88,9 @@ public class DoctorTurnSeedGroupEventHandler extends DoctorAbstractGroupEventHan
         //5.判断公母猪, 触发进场事件
         doctorCommonGroupEventHandler.autoPigEntryEvent(sex, turnSeed, group, toBarn);
 
-        //6.判断猪群数量, 如果=0 触发关闭猪群事件
+        //6.判断猪群数量, 如果=0 触发关闭猪群事件, 同时生成批次总结
         if (Objects.equals(groupTrack.getQuantity(), 0)) {
+            doctorCommonGroupEventHandler.createGroupBatchSummaryWhenClosed(group, groupTrack, event.getEventAt());
             doctorCommonGroupEventHandler.autoGroupEventClose(group, groupTrack, turnSeed);
         }
 

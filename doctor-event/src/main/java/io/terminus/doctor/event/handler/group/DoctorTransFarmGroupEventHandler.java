@@ -105,8 +105,9 @@ public class DoctorTransFarmGroupEventHandler extends DoctorAbstractGroupEventHa
         //4.创建镜像
         createGroupSnapShot(oldShot, new DoctorGroupSnapShotInfo(group, event, groupTrack), GroupEventType.TRANS_FARM);
 
-        //5.判断转场数量, 如果 = 猪群数量, 触发关闭猪群事件
+        //5.判断转场数量, 如果 = 猪群数量, 触发关闭猪群事件, 同时生成批次总结
         if (Objects.equals(oldQuantity, transFarm.getQuantity())) {
+            doctorCommonGroupEventHandler.createGroupBatchSummaryWhenClosed(group, groupTrack, event.getEventAt());
             doctorCommonGroupEventHandler.autoGroupEventClose(group, groupTrack, transFarm);
         }
 
