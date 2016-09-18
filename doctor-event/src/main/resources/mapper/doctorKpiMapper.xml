@@ -1307,7 +1307,32 @@
     </select>
 
     <!--存栏变动月报: 饲料数量-->
-    <select id="getMonthlyLiveStockChangeFeedCount" parameterType="map" resultType="map">
+    <select id="getMonthlyLiveStockChangeFeedCount" parameterType="map" resultType="io.terminus.doctor.event.dto.report.monthly.DoctorLiveStockChangeMonthlyReport">
+        SELECT
+            max(CASE WHEN pig_type = 1 THEN result ELSE 0 END) +
+            max(CASE WHEN pig_type = 7 THEN result ELSE 0 END) AS farrowSowFeedCount,
+            max(CASE WHEN pig_type = 1 THEN result ELSE 0 END) +
+            max(CASE WHEN pig_type = 7 THEN result ELSE 0 END) AS farrowFeedCount,
+            max(CASE WHEN pig_type = 2 THEN result ELSE 0 END) AS nurseryFeedCount,
+            max(CASE WHEN pig_type = 3 THEN result ELSE 0 END) AS fattenFeedCount,
+            max(CASE WHEN pig_type = 4 THEN result ELSE 0 END) +
+            max(CASE WHEN pig_type = 8 THEN result ELSE 0 END) AS houbeiFeedCount,
+            max(CASE WHEN pig_type = 5 THEN result ELSE 0 END) +
+            max(CASE WHEN pig_type = 6 THEN result ELSE 0 END) AS peiHuaiFeedCount
+        FROM
+        (
+            SELECT
+              barns.pig_type AS pig_type,
+              ifnull(sum(cp.event_count), 0) AS result
+            FROM doctor_material_consume_providers AS cp
+            LEFT JOIN doctor_barns AS barns ON cp.barn_id = barns.id
+            WHERE cp.event_type = 1 AND
+              cp.type = 1 AND
+              cp.farm_id = #{farmId} AND
+              cp.event_time &gt;= #{startAt} AND
+              cp.event_time &lt;= #{endAt}
+            GROUP BY barns.pig_type
+        ) AS a
     </select>
 
     <!--存栏变动月报: 饲料金额-->
