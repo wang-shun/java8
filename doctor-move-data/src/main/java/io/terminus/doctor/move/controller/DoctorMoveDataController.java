@@ -642,4 +642,20 @@ public class DoctorMoveDataController {
             return false;
         }
     }
+
+    /**
+     * 已关闭的猪群生成批次总结
+     */
+    @RequestMapping(value = "/createClosedGroupSummary", method = RequestMethod.GET)
+    public Boolean createClosedGroupSummary(@RequestParam("farmId") Long farmId) {
+        try {
+            log.warn("createClosedGroupSummary start, farmId:{}", farmId);
+            doctorMoveDataService.createClosedGroupSummary(farmId);
+            log.warn("createClosedGroupSummary end");
+            return true;
+        } catch (Exception e) {
+            log.error("createClosedGroupSummary failed, farmId:{}, cause:{}", farmId, Throwables.getStackTraceAsString(e));
+            return false;
+        }
+    }
 }

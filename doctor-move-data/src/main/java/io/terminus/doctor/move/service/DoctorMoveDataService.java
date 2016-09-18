@@ -5,6 +5,7 @@ import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import io.terminus.common.model.Response;
 import io.terminus.common.utils.Arguments;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.common.utils.Joiners;
@@ -25,6 +26,7 @@ import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
 import io.terminus.doctor.event.dao.DoctorPigDao;
 import io.terminus.doctor.event.dao.DoctorPigEventDao;
 import io.terminus.doctor.event.dao.DoctorPigTrackDao;
+import io.terminus.doctor.event.dto.DoctorGroupDetail;
 import io.terminus.doctor.event.dto.DoctorGroupSearchDto;
 import io.terminus.doctor.event.dto.event.boar.DoctorBoarConditionDto;
 import io.terminus.doctor.event.dto.event.boar.DoctorSemenDto;
@@ -64,11 +66,14 @@ import io.terminus.doctor.event.enums.PregCheckResult;
 import io.terminus.doctor.event.manager.DoctorGroupReportManager;
 import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorGroup;
+import io.terminus.doctor.event.model.DoctorGroupBatchSummary;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
+import io.terminus.doctor.event.service.DoctorGroupBatchSummaryReadService;
+import io.terminus.doctor.event.service.DoctorGroupBatchSummaryWriteService;
 import io.terminus.doctor.event.service.DoctorPigReadService;
 import io.terminus.doctor.move.handler.DoctorMoveDatasourceHandler;
 import io.terminus.doctor.move.handler.DoctorMoveWorkflowHandler;
@@ -125,6 +130,8 @@ public class DoctorMoveDataService {
     private final DoctorMoveWorkflowHandler doctorMoveWorkflowHandler;
     private final DoctorGroupReportManager doctorGroupReportManager;
     private final DoctorBarnDao doctorBarnDao;
+    private final DoctorGroupBatchSummaryReadService doctorGroupBatchSummaryReadService;
+    private final DoctorGroupBatchSummaryWriteService doctorGroupBatchSummaryWriteService;
 
     @Autowired
     public DoctorMoveDataService(DoctorMoveDatasourceHandler doctorMoveDatasourceHandler,
@@ -138,7 +145,9 @@ public class DoctorMoveDataService {
                                  DoctorPigReadService doctorPigReadService,
                                  DoctorMoveWorkflowHandler doctorMoveWorkflowHandler,
                                  DoctorGroupReportManager doctorGroupReportManager,
-                                 DoctorBarnDao doctorBarnDao) {
+                                 DoctorBarnDao doctorBarnDao,
+                                 DoctorGroupBatchSummaryReadService doctorGroupBatchSummaryReadService,
+                                 DoctorGroupBatchSummaryWriteService doctorGroupBatchSummaryWriteService) {
         this.doctorMoveDatasourceHandler = doctorMoveDatasourceHandler;
         this.doctorGroupDao = doctorGroupDao;
         this.doctorGroupEventDao = doctorGroupEventDao;
@@ -151,6 +160,8 @@ public class DoctorMoveDataService {
         this.doctorMoveWorkflowHandler = doctorMoveWorkflowHandler;
         this.doctorGroupReportManager = doctorGroupReportManager;
         this.doctorBarnDao = doctorBarnDao;
+        this.doctorGroupBatchSummaryReadService = doctorGroupBatchSummaryReadService;
+        this.doctorGroupBatchSummaryWriteService = doctorGroupBatchSummaryWriteService;
     }
 
     //删除猪场所有猪相关的数据
@@ -158,6 +169,24 @@ public class DoctorMoveDataService {
         doctorPigDao.deleteByFarmId(farmId);
         doctorPigEventDao.deleteByFarmId(farmId);
         doctorPigTrackDao.deleteByFarmId(farmId);
+    }
+
+    /**
+     * 已关闭的猪群生成批次总结
+     */
+    @Transactional
+    public void createClosedGroupSummary(Long farmId) {
+        DoctorGroupSearchDto search = new DoctorGroupSearchDto();
+        search.setFarmId(farmId);
+        search.setStatus(DoctorGroup.Status.CLOSED.getValue());
+        List<DoctorGroup> groups = doctorGroupDao.findBySearchDto(search);
+        groups.forEach(group -> {
+            DoctorGroupTrack groupTrack = doctorGroupTrackDao.findByGroupId(group.getId());
+            Response<DoctorGroupBatchSummary> result = doctorGroupBatchSummaryReadService.getSummaryByGroupDetail(new DoctorGroupDetail(group, groupTrack));
+            if (result.isSuccess() && result.getResult() != null) {
+                doctorGroupBatchSummaryWriteService.createGroupBatchSummary(result.getResult());
+            }
+        });
     }
 
     /**
@@ -532,6 +561,9 @@ public class DoctorMoveDataService {
                 .map(group -> getGroupTrack(group, gainMap.get(group.getOutId()), eventMap.get(group.getId())))
                 .collect(Collectors.toList());
         doctorGroupTrackDao.creates(groupTracks);
+
+        //批次总结
+        createClosedGroupSummary(farm.getId());
     }
 
     /**
