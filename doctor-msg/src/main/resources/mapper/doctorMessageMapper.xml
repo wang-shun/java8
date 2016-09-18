@@ -148,7 +148,6 @@
         SELECT <include refid="cols_all"/>
         FROM <include refid="tb"/>
         <include refid="criteria"/>
-        GROUP BY business_id
         order by `status` asc, `id` desc -- 未读排在前面, 其次最新
         LIMIT #{offset}, #{limit}
     </select>
@@ -189,17 +188,16 @@
         )
     </select>
 
-    <select id="businessList" parameterType="map" resultType="long">
+    <select id="businessIdList" parameterType="map" resultType="long">
         SELECT DISTINCT business_id
         FROM <include refid="tb"/>
         <include refid="criteria"/>
     </select>
 
-    <select id="pagingDiffBusinessId" parameterType="map" resultMap="DoctorMessageMap">
+    <select id="sendList" parameterType="map" resultMap="DoctorMessageMap">
         SELECT <include refid="cols_all"/>
         FROM <include refid="tb"/>
         <include refid="criteria"/>
-        order by `status` asc, `id` desc -- 未读排在前面, 其次最新
-        LIMIT #{offset}, #{limit}
     </select>
+
 </mapper>

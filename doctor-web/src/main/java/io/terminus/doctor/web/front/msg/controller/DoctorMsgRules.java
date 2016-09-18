@@ -3,6 +3,7 @@ package io.terminus.doctor.web.front.msg.controller;
 import com.google.api.client.util.Lists;
 import com.google.common.base.Preconditions;
 import io.terminus.common.utils.BeanMapper;
+import io.terminus.common.utils.Splitters;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.msg.model.DoctorMessageRule;
 import io.terminus.doctor.msg.model.DoctorMessageRuleRole;
@@ -11,10 +12,12 @@ import io.terminus.doctor.msg.service.DoctorMessageRuleRoleReadService;
 import io.terminus.doctor.msg.service.DoctorMessageRuleRoleWriteService;
 import io.terminus.doctor.msg.service.DoctorMessageRuleWriteService;
 import io.terminus.doctor.user.model.SubRole;
+import io.terminus.doctor.user.service.DoctorFarmReadService;
 import io.terminus.doctor.user.service.SubRoleReadService;
 import io.terminus.doctor.web.front.msg.dto.MsgRoleDto;
 import io.terminus.doctor.web.front.msg.dto.MsgRuleDto;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -45,18 +48,22 @@ public class DoctorMsgRules {
 
     private final SubRoleReadService subRoleReadService;
 
+    private final DoctorFarmReadService doctorFarmReadService;
+
 
     @Autowired
     public DoctorMsgRules(DoctorMessageRuleReadService doctorMessageRuleReadService,
                           DoctorMessageRuleWriteService doctorMessageRuleWriteService,
                           DoctorMessageRuleRoleReadService doctorMessageRuleRoleReadService,
                           DoctorMessageRuleRoleWriteService doctorMessageRuleRoleWriteService,
-                          SubRoleReadService subRoleReadService) {
+                          SubRoleReadService subRoleReadService,
+                          DoctorFarmReadService doctorFarmReadService) {
         this.doctorMessageRuleReadService = doctorMessageRuleReadService;
         this.doctorMessageRuleWriteService = doctorMessageRuleWriteService;
         this.doctorMessageRuleRoleReadService = doctorMessageRuleRoleReadService;
         this.doctorMessageRuleRoleWriteService = doctorMessageRuleRoleWriteService;
         this.subRoleReadService = subRoleReadService;
+        this.doctorFarmReadService = doctorFarmReadService;
     }
 
     /**
@@ -174,8 +181,19 @@ public class DoctorMsgRules {
         return RespHelper.or500(doctorMessageRuleRoleWriteService.relateRuleRolesByRoleId(roleId, ruleIds));
     }
 
-    @RequestMapping(value = "/relative/farmId")
-    public Boolean relateRuleFarmByFarmId(@RequestParam("farmId") Long farmId){
-        return RespHelper.or500(doctorMessageRuleWriteService.initTemplate(farmId));
+    @RequestMapping(value = "/relative/farmId", method = RequestMethod.GET)
+    public Boolean relateRuleFarmByFarmId(@RequestParam(value = "farmIds", required = false) String farmIds){
+        Boolean result = true;
+        List<Long> farmIdList;
+        if (StringUtils.isNotBlank(farmIds)) {
+            farmIdList = Splitters.UNDERSCORE.splitToList(farmIds).stream().map(farmId -> Long.parseLong(farmId)).collect(Collectors.toList());
+
+        }else {
+            farmIdList = RespHelper.or500(doctorFarmReadService.findAllFarms()).stream().map(doctorFarm -> doctorFarm.getId()).collect(Collectors.toList());
+        }
+        for (Long farmId : farmIdList){
+            result &= RespHelper.or500(doctorMessageRuleWriteService.initTemplate(farmId));
+        }
+        return result;
     }
 }

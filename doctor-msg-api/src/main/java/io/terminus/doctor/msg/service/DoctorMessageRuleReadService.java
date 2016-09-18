@@ -49,6 +49,6 @@ public interface DoctorMessageRuleReadService {
      * @param criteria
      * @return
      */
-    Response<List<DoctorMessageRule>> findMessageRulesByCriteria(Map criteria);
+    Response<List<DoctorMessageRule>> findMessageRulesByCriteria(Map<String, Object> criteria);
 
 }

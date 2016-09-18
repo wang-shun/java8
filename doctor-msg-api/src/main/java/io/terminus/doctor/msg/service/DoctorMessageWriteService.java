@@ -41,4 +41,5 @@ public interface DoctorMessageWriteService {
      * @return 是否成功
      */
     Response<Boolean> deleteMessageById(Long messageId);
+
 }
