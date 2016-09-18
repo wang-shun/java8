@@ -5,6 +5,7 @@ import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.model.Paging;
 import io.terminus.doctor.basic.model.DoctorBasic;
 import io.terminus.doctor.basic.service.DoctorBasicReadService;
+import io.terminus.doctor.common.utils.Params;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dto.DoctorGroupDetail;
 import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
@@ -22,8 +23,6 @@ import io.terminus.doctor.web.front.event.service.DoctorGroupWebService;
 import io.terminus.doctor.web.util.TransFromUtil;
 import io.terminus.pampas.common.UserUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections.map.HashedMap;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -76,7 +75,8 @@ public class DoctorGroupEvents {
 
     /**
      * 校验猪群号是否重复
-     * @param farmId  猪场id
+     *
+     * @param farmId    猪场id
      * @param groupCode 猪群号
      * @return true 重复, false 不重复
      */
@@ -85,9 +85,10 @@ public class DoctorGroupEvents {
                                     @RequestParam("groupCode") String groupCode) {
         return RespHelper.or500(doctorGroupReadService.checkGroupRepeat(farmId, groupCode));
     }
-    
+
     /**
      * 新建猪群
+     *
      * @return 猪群id
      */
     @RequestMapping(value = "/new", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -99,12 +100,13 @@ public class DoctorGroupEvents {
 
     /**
      * 录入猪群事件
-     * @param groupId 猪群id
+     *
+     * @param groupId   猪群id
      * @param eventType 事件类型
-     * @see io.terminus.doctor.event.enums.GroupEventType
-     * @param data 入参
-     * @see io.terminus.doctor.event.dto.event.group.input.BaseGroupInput
+     * @param data      入参
      * @return 是否成功
+     * @see io.terminus.doctor.event.enums.GroupEventType
+     * @see io.terminus.doctor.event.dto.event.group.input.BaseGroupInput
      */
     @RequestMapping(value = "/other", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public Boolean createGroupEvent(@RequestParam("groupId") Long groupId,
@@ -115,10 +117,11 @@ public class DoctorGroupEvents {
 
     /**
      * 编辑猪群事件
+     *
      * @param eventId 猪群事件id
-     * @param data 入参
-     * @see io.terminus.doctor.event.dto.event.group.edit.BaseGroupEdit
+     * @param data    入参
      * @return 是否成功
+     * @see io.terminus.doctor.event.dto.event.group.edit.BaseGroupEdit
      */
     @RequestMapping(value = "/edit", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public Boolean editGroupEvent(@RequestParam("eventId") Long eventId, @RequestParam("data") String data) {
@@ -127,6 +130,7 @@ public class DoctorGroupEvents {
 
     /**
      * 根据猪群id查询可以操作的事件类型
+     *
      * @param groupIds 猪群ids
      * @return 事件类型s
      * @see io.terminus.doctor.event.enums.GroupEventType
@@ -138,8 +142,9 @@ public class DoctorGroupEvents {
 
     /**
      * 生成猪群号 猪舍名(yyyy-MM-dd)
+     *
      * @param barnName 猪舍名称
-     * @return  猪群号
+     * @return 猪群号
      */
     @RequestMapping(value = "/code", method = RequestMethod.GET)
     public String generateGroupCode(@RequestParam(value = "barnName", required = false) String barnName) {
@@ -148,8 +153,9 @@ public class DoctorGroupEvents {
 
     /**
      * 根据id生成猪群号(主要用于分娩舍: 如果当前猪舍存在猪群直接返回此猪群号, 如果不存在, 新生成猪群号
+     *
      * @param pigId 猪id
-     * @return  猪群号
+     * @return 猪群号
      */
     @RequestMapping(value = "/pigCode", method = RequestMethod.GET)
     public String generateGroupCodeByPigId(@RequestParam(value = "pigId", required = false) Long pigId) {
@@ -162,6 +168,7 @@ public class DoctorGroupEvents {
 
     /**
      * 查询猪群详情
+     *
      * @param groupId 猪群id
      * @return 猪群详情
      */
@@ -180,12 +187,13 @@ public class DoctorGroupEvents {
 
     /**
      * 分页查询猪群历史事件
-     * @param farmId    猪场id
-     * @param groupId   猪群id
-     * @param type      事件类型
-     * @param pageNo    分页大小
-     * @param size      当前页码
-     * @return  分页结果
+     *
+     * @param farmId  猪场id
+     * @param groupId 猪群id
+     * @param type    事件类型
+     * @param pageNo  分页大小
+     * @param size    当前页码
+     * @return 分页结果
      */
     @RequestMapping(value = "/paging", method = RequestMethod.GET)
     public Paging<DoctorGroupEvent> pagingGroupEvent(@RequestParam("farmId") Long farmId,
@@ -201,8 +209,9 @@ public class DoctorGroupEvents {
 
     /**
      * 查询猪群事件详情
+     *
      * @param eventId 事件id
-     * @return  猪群事件
+     * @return 猪群事件
      */
     @RequestMapping(value = "/event", method = RequestMethod.GET)
     public DoctorGroupEvent findGroupEventById(@RequestParam("eventId") Long eventId) {
@@ -211,6 +220,7 @@ public class DoctorGroupEvents {
 
     /**
      * 查询猪群镜像信息(猪群, 猪群跟踪, 最新event)
+     *
      * @param groupId 猪群id
      * @return 猪群镜像
      */
@@ -221,6 +231,7 @@ public class DoctorGroupEvents {
 
     /**
      * 查询已建群的猪群
+     *
      * @param farmId 猪场id
      * @return 猪群
      */
@@ -233,6 +244,7 @@ public class DoctorGroupEvents {
 
     /**
      * 根据猪舍id查询已建群的猪群
+     *
      * @param barnId 猪舍id
      * @return 猪群
      */
@@ -248,6 +260,7 @@ public class DoctorGroupEvents {
 
     /**
      * 回滚猪群事件
+     *
      * @param eventId 回滚事件的id
      * @return 猪群镜像
      */
@@ -262,6 +275,7 @@ public class DoctorGroupEvents {
 
     /**
      * 查询可以转入的品种
+     *
      * @param groupId 猪群id
      * @return 可转入品种
      */
@@ -276,8 +290,9 @@ public class DoctorGroupEvents {
 
     /**
      * 根据猪场id和猪群号查询猪群
-     * @param farmId      猪场id
-     * @param groupCode   猪群号
+     *
+     * @param farmId    猪场id
+     * @param groupCode 猪群号
      * @return 猪群
      */
     @RequestMapping(value = "/farmGroupCode", method = RequestMethod.GET)
@@ -294,20 +309,15 @@ public class DoctorGroupEvents {
 
     @RequestMapping(value = "/groupPaging", method = RequestMethod.GET)
     @ResponseBody
-    public Paging<DoctorGroupEvent> queryGroupEventsByCriteria(@RequestParam Map<String, String> params, @RequestParam(required = false) Integer pageNo, @RequestParam(required = false) Integer pageSize) {
+    public Paging<DoctorGroupEvent> queryGroupEventsByCriteria(@RequestParam Map<String, Object> params, @RequestParam(required = false) Integer pageNo, @RequestParam(required = false) Integer pageSize) {
         if (params == null || params.isEmpty()) {
             return Paging.empty();
         }
-        params.keySet().forEach(key -> {
-            if (StringUtils.isBlank(params.get(key))){
-                params.put(key, null);
-            }
-        });
-        if (StringUtils.isNotBlank((String)params.get("eventName"))){
-            params.put("type", String.valueOf(GroupEventType.from((String)params.get("eventName")).getValue()));
+        params = Params.filterNullOrEmpty(params);
+        if (params.containsKey("eventName")) {
+            params.put("type", String.valueOf(GroupEventType.from((String) params.get("eventName")).getValue()));
+            params.remove("eventName");
         }
-        Map<String, Object> map = new HashedMap();
-        map.putAll(params);
-        return RespHelper.or500(doctorGroupReadService.queryGroupEventsByCriteria(map, pageNo, pageSize));
+        return RespHelper.or500(doctorGroupReadService.queryGroupEventsByCriteria(params, pageNo, pageSize));
     }
 }
