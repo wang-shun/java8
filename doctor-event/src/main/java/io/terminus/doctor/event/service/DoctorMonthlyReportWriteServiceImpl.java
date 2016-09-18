@@ -186,10 +186,7 @@ public class DoctorMonthlyReportWriteServiceImpl implements DoctorMonthlyReportW
         DoctorLiveStockChangeMonthlyReport sowDead = doctorKpiDao.getMonthlyLiveStockChangeSowDead(farmId, startAt, endAt);
         DoctorLiveStockChangeMonthlyReport sale = doctorKpiDao.getMonthlyLiveStockChangeSale(farmId, startAt, endAt);
         DoctorLiveStockChangeMonthlyReport feedCount = doctorKpiDao.getMonthlyLiveStockChangeFeedCount(farmId, startAt, endAt);
-        DoctorLiveStockChangeMonthlyReport feedAmount = doctorKpiDao.getMonthlyLiveStockChangeFeedAmount(farmId, startAt, endAt);
-        DoctorLiveStockChangeMonthlyReport drugAmount = doctorKpiDao.getMonthlyLiveStockChangeDrugAmount(farmId, startAt, endAt);
-        DoctorLiveStockChangeMonthlyReport vaccineAmount = doctorKpiDao.getMonthlyLiveStockChangeVaccineAmount(farmId, startAt, endAt);
-        DoctorLiveStockChangeMonthlyReport consumerAmount = doctorKpiDao.getMonthlyLiveStockChangeConsumerAmount(farmId, startAt, endAt);
+        DoctorLiveStockChangeMonthlyReport amount = doctorKpiDao.getMonthlyLiveStockChangeMaterielAmount(farmId, startAt, endAt);
 
         //后备舍
         report.setHoubeiBegin(begin.getHoubeiBegin());                                                      //期初
@@ -198,10 +195,10 @@ public class DoctorMonthlyReportWriteServiceImpl implements DoctorMonthlyReportW
         report.setHoubeiDead(groupDead.getHoubeiDead());                                                    //死淘
         report.setHoubeiSale(sale.getHoubeiSale());                                                         //销售
         report.setHoubeiFeedCount(feedCount.getHoubeiFeedCount());                                          //饲料数量
-        report.setHoubeiFeedAmount(feedAmount.getHoubeiFeedAmount());                                       //饲料金额
-        report.setHoubeiDrugAmount(drugAmount.getHoubeiDrugAmount());                                       //药品金额
-        report.setHoubeiVaccineAmount(vaccineAmount.getHoubeiVaccineAmount());                              //疫苗金额
-        report.setHoubeiConsumerAmount(consumerAmount.getHoubeiConsumerAmount());                           //易耗品金额
+        report.setHoubeiFeedAmount(amount.getHoubeiFeedAmount());                                           //饲料金额
+        report.setHoubeiDrugAmount(amount.getHoubeiDrugAmount());                                           //药品金额
+        report.setHoubeiVaccineAmount(amount.getHoubeiVaccineAmount());                                     //疫苗金额
+        report.setHoubeiConsumerAmount(amount.getHoubeiConsumerAmount());                                   //易耗品金额
 
         //配怀舍
         report.setPeiHuaiBegin(begin.getPeiHuaiBegin());                                                    //期初
@@ -210,10 +207,10 @@ public class DoctorMonthlyReportWriteServiceImpl implements DoctorMonthlyReportW
         report.setPeiHuaiWeanIn(doctorKpiDao.getMonthlyLiveStockChangeWeanIn(farmId, startAt, endAt));      //断奶转入 = 断奶转出
         report.setPeiHuaiDead(sowDead.getPeiHuaiDead());                                                    //死淘
         report.setPeiHuaiFeedCount(feedCount.getPeiHuaiFeedCount());                                        //饲料数量
-        report.setPeiHuaiFeedAmount(feedAmount.getPeiHuaiFeedAmount());                                     //饲料金额
-        report.setPeiHuaiDrugAmount(drugAmount.getPeiHuaiDrugAmount());                                     //药品金额
-        report.setPeiHuaiVaccineAmount(vaccineAmount.getPeiHuaiVaccineAmount());                            //疫苗金额
-        report.setPeiHuaiConsumerAmount(consumerAmount.getPeiHuaiConsumerAmount());                         //易耗品金额
+        report.setPeiHuaiFeedAmount(amount.getPeiHuaiFeedAmount());                                         //饲料金额
+        report.setPeiHuaiDrugAmount(amount.getPeiHuaiDrugAmount());                                         //药品金额
+        report.setPeiHuaiVaccineAmount(amount.getPeiHuaiVaccineAmount());                                   //疫苗金额
+        report.setPeiHuaiConsumerAmount(amount.getPeiHuaiConsumerAmount());                                 //易耗品金额
 
         //产房母猪
         report.setFarrowSowBegin(begin.getFarrowSowBegin());                                                //期初
@@ -221,10 +218,10 @@ public class DoctorMonthlyReportWriteServiceImpl implements DoctorMonthlyReportW
         report.setFarrowSowWeanOut(report.getPeiHuaiWeanIn());                                              //断奶转出 = 断奶转入
         report.setFarrowSowDead(sowDead.getFarrowSowDead());                                                //死淘
         report.setFarrowSowFeedCount(feedCount.getFarrowSowFeedCount());                                    //饲料数量
-        report.setFarrowSowFeedAmount(feedAmount.getFarrowSowFeedAmount());                                 //饲料金额
-        report.setFarrowSowDrugAmount(drugAmount.getFarrowSowDrugAmount());                                 //药品金额
-        report.setFarrowSowVaccineAmount(vaccineAmount.getFarrowSowVaccineAmount());                        //疫苗金额
-        report.setFarrowSowConsumerAmount(consumerAmount.getFarrowSowConsumerAmount());                     //易耗品金额
+        report.setFarrowSowFeedAmount(amount.getFarrowSowFeedAmount());                                     //饲料金额
+        report.setFarrowSowDrugAmount(amount.getFarrowSowDrugAmount());                                     //药品金额
+        report.setFarrowSowVaccineAmount(amount.getFarrowSowVaccineAmount());                               //疫苗金额
+        report.setFarrowSowConsumerAmount(amount.getFarrowSowConsumerAmount());                             //易耗品金额
 
         //产房仔猪
         report.setFarrowBegin(begin.getFarrowBegin());                                                      //期初
@@ -233,10 +230,10 @@ public class DoctorMonthlyReportWriteServiceImpl implements DoctorMonthlyReportW
         report.setFarrowDead(groupDead.getFarrowDead());                                                    //死淘
         report.setFarrowSale(sale.getFarrowSale());                                                         //销售
         report.setFarrowFeedCount(feedCount.getFarrowFeedCount());                                          //饲料数量
-        report.setFarrowFeedAmount(feedAmount.getFarrowFeedAmount());                                       //饲料金额
-        report.setFarrowDrugAmount(drugAmount.getFarrowDrugAmount());                                       //药品金额
-        report.setFarrowVaccineAmount(vaccineAmount.getFarrowVaccineAmount());                              //疫苗金额
-        report.setFarrowConsumerAmount(consumerAmount.getFarrowConsumerAmount());                           //易耗品金额
+        report.setFarrowFeedAmount(amount.getFarrowFeedAmount());                                           //饲料金额
+        report.setFarrowDrugAmount(amount.getFarrowDrugAmount());                                           //药品金额
+        report.setFarrowVaccineAmount(amount.getFarrowVaccineAmount());                                     //疫苗金额
+        report.setFarrowConsumerAmount(amount.getFarrowConsumerAmount());                                   //易耗品金额
 
         //保育猪
         report.setNurseryBegin(begin.getNurseryBegin());                                                    //期初
@@ -245,10 +242,10 @@ public class DoctorMonthlyReportWriteServiceImpl implements DoctorMonthlyReportW
         report.setNurseryDead(groupDead.getNurseryDead());                                                  //死淘
         report.setNurserySale(sale.getNurserySale());                                                       //销售
         report.setNurseryFeedCount(feedCount.getNurseryFeedCount());                                        //饲料数量
-        report.setNurseryFeedAmount(feedAmount.getNurseryFeedAmount());                                     //饲料金额
-        report.setNurseryDrugAmount(drugAmount.getNurseryDrugAmount());                                     //药品金额
-        report.setNurseryVaccineAmount(vaccineAmount.getNurseryVaccineAmount());                            //疫苗金额
-        report.setNurseryConsumerAmount(consumerAmount.getNurseryConsumerAmount());                         //易耗品金额
+        report.setNurseryFeedAmount(amount.getNurseryFeedAmount());                                         //饲料金额
+        report.setNurseryDrugAmount(amount.getNurseryDrugAmount());                                         //药品金额
+        report.setNurseryVaccineAmount(amount.getNurseryVaccineAmount());                                   //疫苗金额
+        report.setNurseryConsumerAmount(amount.getNurseryConsumerAmount());                                 //易耗品金额
 
         //育肥猪
         report.setFattenBegin(begin.getFattenBegin());                                                      //期初
@@ -256,10 +253,10 @@ public class DoctorMonthlyReportWriteServiceImpl implements DoctorMonthlyReportW
         report.setFattenDead(groupDead.getFattenDead());                                                    //死淘
         report.setFattenSale(sale.getFattenSale());                                                         //销售
         report.setFattenFeedCount(feedCount.getFattenFeedCount());                                          //饲料数量
-        report.setFattenFeedAmount(feedAmount.getFattenFeedAmount());                                       //饲料金额
-        report.setFattenDrugAmount(drugAmount.getFattenDrugAmount());                                       //药品金额
-        report.setFattenVaccineAmount(vaccineAmount.getFattenVaccineAmount());                              //疫苗金额
-        report.setFattenConsumerAmount(consumerAmount.getFattenConsumerAmount());                           //易耗品金额
+        report.setFattenFeedAmount(amount.getFattenFeedAmount());                                           //饲料金额
+        report.setFattenDrugAmount(amount.getFattenDrugAmount());                                           //药品金额
+        report.setFattenVaccineAmount(amount.getFattenVaccineAmount());                                     //疫苗金额
+        report.setFattenConsumerAmount(amount.getFattenConsumerAmount());                                   //易耗品金额
         return report;
     }
 }

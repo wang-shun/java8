@@ -633,30 +633,9 @@ public class DoctorKpiDao {
     }
 
     /**
-     * 存栏变动月报: 饲料金额
+     * 存栏变动月报: 物料金额(饲料, 药品, 疫苗, 易耗品
      */
-    public DoctorLiveStockChangeMonthlyReport getMonthlyLiveStockChangeFeedAmount(Long farmId, Date startAt, Date endAt) {
-        return sqlSession.selectOne("getMonthlyLiveStockChangeFeedAmount", ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
-    }
-
-    /**
-     * 存栏变动月报: 药品金额
-     */
-    public DoctorLiveStockChangeMonthlyReport getMonthlyLiveStockChangeDrugAmount(Long farmId, Date startAt, Date endAt) {
-        return sqlSession.selectOne("getMonthlyLiveStockChangeDrugAmount", ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
-    }
-
-    /**
-     * 存栏变动月报: 疫苗金额
-     */
-    public DoctorLiveStockChangeMonthlyReport getMonthlyLiveStockChangeVaccineAmount(Long farmId, Date startAt, Date endAt) {
-        return sqlSession.selectOne("getMonthlyLiveStockChangeVaccineAmount", ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
-    }
-
-    /**
-     * 存栏变动月报: 易耗品金额
-     */
-    public DoctorLiveStockChangeMonthlyReport getMonthlyLiveStockChangeConsumerAmount(Long farmId, Date startAt, Date endAt) {
-        return sqlSession.selectOne("getMonthlyLiveStockChangeConsumerAmount", ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
+    public DoctorLiveStockChangeMonthlyReport getMonthlyLiveStockChangeMaterielAmount(Long farmId, Date startAt, Date endAt) {
+        return sqlSession.selectOne("getMonthlyLiveStockChangeMaterielAmount", ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
     }
 }
