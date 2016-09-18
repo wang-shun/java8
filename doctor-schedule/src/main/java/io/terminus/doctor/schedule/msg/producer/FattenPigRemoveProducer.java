@@ -68,11 +68,16 @@ public class FattenPigRemoveProducer extends AbstractJobProducer {
             doctorGroupSearchDto.setFarmId(ruleRole.getFarmId());
             List<DoctorGroupDetail> groupDetails = RespHelper.or500(doctorGroupReadService.findGroupDetail(doctorGroupSearchDto));
             groupDetails.forEach(doctorGroupDetail -> {
-                //根据用户拥有的猪舍权限过滤拥有user
-                List<SubUser> sUsers = filterSubUserBarnId(subUsers, doctorGroupDetail.getGroup().getCurrentBarnId());
-                if (checkRuleValue(ruleValueMap.get(1), (double) doctorGroupDetail.getGroupTrack().getAvgDayAge())) {
-                    messages.addAll(getMessage(doctorGroupDetail, rule.getChannels(), ruleRole, sUsers, rule.getUrl()));
+                try {
+                    //根据用户拥有的猪舍权限过滤拥有user
+                    List<SubUser> sUsers = filterSubUserBarnId(subUsers, doctorGroupDetail.getGroup().getCurrentBarnId());
+                    if (checkRuleValue(ruleValueMap.get(1), (double) doctorGroupDetail.getGroupTrack().getAvgDayAge())) {
+                        messages.addAll(getMessage(doctorGroupDetail, rule.getChannels(), ruleRole, sUsers, rule.getUrl()));
+                    }
+                } catch (Exception e) {
+                    log.error("[FattenPigRemoveProducer]->message.failed");
                 }
+
             });
         }
         log.info("育肥猪出栏提示消息产生 --- FattenPigRemoveProducer 结束执行, 产生 {} 条消息", messages.size());

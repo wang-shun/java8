@@ -74,7 +74,7 @@ public class DoctorMessageRuleReadServiceImpl implements DoctorMessageRuleReadSe
     }
 
     @Override
-    public Response<List<DoctorMessageRule>> findMessageRulesByCriteria(Map criteria) {
+    public Response<List<DoctorMessageRule>> findMessageRulesByCriteria(Map<String, Object> criteria) {
         try{
             return Response.ok(doctorMessageRuleDao.list(criteria));
         } catch (Exception e){

@@ -115,7 +115,7 @@ public class SowBirthDateProducer extends AbstractJobProducer {
                         //根据用户拥有的猪舍权限过滤拥有user
                         List<SubUser> sUsers = filterSubUserBarnId(subUsers, pigDto.getBarnId());
                         // 母猪的updatedAt与当前时间差 (天)
-                        DoctorPigEvent doctorPigEvent = getPigEventByEventType(pigDto.getDoctorPigEvents(), PigEvent.PREG_CHECK.getKey());
+                        DoctorPigEvent doctorPigEvent = getMatingPigEvent(pigDto);
                         Double timeDiff = getTimeDiff(new DateTime(doctorPigEvent.getEventAt()));
                         ruleValueMap.values().forEach(ruleValue -> {
                             if (!isMessage && Objects.equals(ruleTemplate.getType(), DoctorMessageRuleTemplate.Type.WARNING.getValue())) {

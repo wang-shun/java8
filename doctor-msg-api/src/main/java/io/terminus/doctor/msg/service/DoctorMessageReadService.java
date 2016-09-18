@@ -2,6 +2,7 @@ package io.terminus.doctor.msg.service;
 
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
+import io.terminus.doctor.msg.dto.DoctorMessageSearchDto;
 import io.terminus.doctor.msg.model.DoctorMessage;
 
 import java.util.List;
@@ -25,12 +26,12 @@ public interface DoctorMessageReadService {
 
     /**
      * 分页预警消息列表
-     * @param criteria
+     * @param doctorMessageSearchDto
      * @param pageNo
      * @param pageSize
      * @return
      */
-    Response<Paging<DoctorMessage>> pagingWarnMessages(Map<String, Object> criteria, Integer pageNo, Integer pageSize);
+    Response<Paging<DoctorMessage>> pagingWarnMessages(DoctorMessageSearchDto doctorMessageSearchDto, Integer pageNo, Integer pageSize);
 
     /**
      * 分页系统消息列表
@@ -96,9 +97,9 @@ public interface DoctorMessageReadService {
 
     /**
      * 根据条件获取businessId列表
-     * @param criteria
+     * @param doctorMessageSearchDto
      * @return
      */
-    Response<List<Long>> findBusinessListByCriteria(Map<String, Object> criteria);
+    Response<List<Long>> findBusinessListByCriteria(DoctorMessageSearchDto doctorMessageSearchDto);
 
 }

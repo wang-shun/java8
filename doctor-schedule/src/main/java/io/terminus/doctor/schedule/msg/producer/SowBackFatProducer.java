@@ -117,7 +117,7 @@ public class SowBackFatProducer extends AbstractJobProducer {
                             Double timeDiff = null;
                             Boolean isSend = false;
                             RuleValue ruleValue = ruleValueMap.get(key);
-                            DoctorPigEvent doctorPigEvent = getPigEventByEventType(pigDto.getDoctorPigEvents(), PigEvent.MATING.getKey());
+                            DoctorPigEvent doctorPigEvent = getMatingPigEvent(pigDto);
                             if ((key == 1 || key == 2 || key == 3) && doctorPigEvent != null) {
                                 timeDiff = getTimeDiff(new DateTime(doctorPigEvent.getEventAt()));
                                 if (getPigEventByEventType(pigDto.getDoctorPigEvents(), PigEvent.MATING.getKey()) != null && filterPigCondition(pigDto, PigEvent.MATING)) {

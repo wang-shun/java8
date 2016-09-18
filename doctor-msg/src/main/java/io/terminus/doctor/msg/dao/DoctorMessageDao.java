@@ -2,6 +2,7 @@ package io.terminus.doctor.msg.dao;
 
 import com.google.common.collect.ImmutableMap;
 import io.terminus.common.mysql.dao.MyBatisDao;
+import io.terminus.doctor.msg.dto.DoctorMessageSearchDto;
 import io.terminus.doctor.msg.model.DoctorMessage;
 import org.springframework.stereotype.Repository;
 
@@ -60,11 +61,11 @@ public class DoctorMessageDao extends MyBatisDao<DoctorMessage> {
 
     /**
      * 根据条件获取businessId列表
-     * @param criteria
+     * @param doctorMessageSearchDto
      * @return
      */
-    public List<Long> findBusinessListByCriteria(Map<String, Object> criteria){
-        return getSqlSession().selectList(sqlId("businessIdList"), criteria);
+    public List<Long> findBusinessListByCriteria(DoctorMessageSearchDto doctorMessageSearchDto){
+        return getSqlSession().selectList(sqlId("businessIdList"), doctorMessageSearchDto);
     }
 
     /**
@@ -74,10 +75,6 @@ public class DoctorMessageDao extends MyBatisDao<DoctorMessage> {
      */
     public List<DoctorMessage> sendMessageList(Map<String, Object> criteria){
         return getSqlSession().selectList(sqlId("sendList"), criteria);
-    }
-
-    public List<Long> findUserIdList(DoctorMessage doctorMessage){
-        return getSqlSession().selectList(sqlId("userIdList"), doctorMessage);
     }
 
 }
