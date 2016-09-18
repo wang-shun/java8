@@ -4,6 +4,7 @@ import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.model.Paging;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.common.utils.Splitters;
+import io.terminus.doctor.common.utils.Params;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dto.DoctorGroupSearchDto;
 import io.terminus.doctor.event.dto.report.daily.DoctorDailyReportDto;
@@ -112,10 +113,10 @@ public class DoctorReports {
      * @return 批次总结
      */
     @RequestMapping(value = "/group/batch/summary", method = RequestMethod.GET)
-    public Paging<DoctorGroupBatchSummary> pagingGroupBatchSummary(@RequestParam Map<String, String> params,
+    public Paging<DoctorGroupBatchSummary> pagingGroupBatchSummary(@RequestParam Map<String, Object> params,
                                                                    @RequestParam(required = false) Integer pageNo,
                                                                    @RequestParam(required = false) Integer pageSize) {
-        DoctorGroupSearchDto dto = BeanMapper.map(params, DoctorGroupSearchDto.class);
+        DoctorGroupSearchDto dto = BeanMapper.map(Params.filterNullOrEmpty(params), DoctorGroupSearchDto.class);
         if (notEmpty(dto.getPigTypeCommas())) {
             dto.setPigTypes(Splitters.splitToInteger(dto.getPigTypeCommas(), Splitters.COMMA));
         }
