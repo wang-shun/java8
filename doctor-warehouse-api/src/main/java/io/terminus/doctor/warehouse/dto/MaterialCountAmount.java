@@ -16,4 +16,8 @@ public class MaterialCountAmount implements Serializable{
      * 总计金额
      */
     private Double amount;
+
+    private Long materialId;
+    private String materialName;
+    private String unitName;
 }
