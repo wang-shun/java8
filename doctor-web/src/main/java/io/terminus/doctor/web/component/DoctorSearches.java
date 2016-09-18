@@ -579,7 +579,7 @@ public class DoctorSearches {
             doctorMessageSearchDto.setChannel(Rule.Channel.SYSTEM.getValue());
             List<Integer> statuses = Lists.newArrayList();
             statuses.add(DoctorMessage.Status.NORMAL.getValue());
-            statuses.add(DoctorMessage.Status.SENDED.getValue());
+            statuses.add(DoctorMessage.Status.READED.getValue());
             doctorMessageSearchDto.setStatuses(statuses);
             List<Long> idList = RespHelper.or500(doctorMessageReadService.findBusinessListByCriteria(doctorMessageSearchDto));
             String ids = idList.toString().trim().substring(1, idList.toString().toCharArray().length - 1);

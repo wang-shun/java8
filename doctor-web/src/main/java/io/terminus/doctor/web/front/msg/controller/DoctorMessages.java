@@ -96,7 +96,7 @@ public class DoctorMessages {
         doctorMessageSearchDto.setChannel(Rule.Channel.SYSTEM.getValue());
         List<Integer> list = Lists.newArrayList();
         list.add(DoctorMessage.Status.NORMAL.getValue());
-        list.add(DoctorMessage.Status.SENDED.getValue());
+        list.add(DoctorMessage.Status.READED.getValue());
         doctorMessageSearchDto.setStatuses(list);
         doctorMessageSearchDto.setTemplateId(Long.parseLong(criteria.get("templateId")));
         doctorMessageSearchDto.setFarmId(Long.parseLong(criteria.get("farmId")));
@@ -307,7 +307,7 @@ public class DoctorMessages {
             doctorMessageSearchDto.setChannel(Rule.Channel.SYSTEM.getValue());
             List<Integer> statuses = Lists.newArrayList();
             statuses.add(DoctorMessage.Status.NORMAL.getValue());
-            statuses.add(DoctorMessage.Status.SENDED.getValue());
+            statuses.add(DoctorMessage.Status.READED.getValue());
             doctorMessageSearchDto.setStatuses(statuses);
             //统计育肥猪出栏消息头数
             if (Objects.equals(doctorMessageRule.getCategory(), Category.FATTEN_PIG_REMOVE.getKey())) {
