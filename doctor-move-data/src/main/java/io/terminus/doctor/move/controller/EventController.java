@@ -95,13 +95,13 @@ public class EventController {
             while(true){
                 Paging<DoctorMaterialConsumeProvider> paging = RespHelper.or500(doctorMaterialConsumeProviderReadService.page(
                         farmId, null, null, DoctorMaterialConsumeProvider.EVENT_TYPE.CONSUMER.getValue(),
-                        WareHouseType.FEED.getKey(), null, null, null, pageNo++, 1000));
+                        null, null, null, null, pageNo++, 1000));
                 if(paging.isEmpty()){
                     break;
                 }
                 for(DoctorMaterialConsumeProvider cp : paging.getData()){
                     Map<String, Object> extraMap = cp.getExtraMap();
-                    if(extraMap.get("barnId") != null && extraMap.get("barnName") != null){
+                    if(extraMap != null && extraMap.get("barnId") != null && extraMap.get("barnName") != null){
                         cp.setBarnId(Long.valueOf(extraMap.get("barnId").toString()));
                         cp.setBarnName(extraMap.get("barnName").toString());
                         doctorMaterialConsumeProviderDao.update(cp);
