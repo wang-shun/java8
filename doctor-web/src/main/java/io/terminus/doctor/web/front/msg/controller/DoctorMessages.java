@@ -94,7 +94,10 @@ public class DoctorMessages {
         doctorMessageSearchDto.setUserId(UserUtil.getUserId());
         doctorMessageSearchDto.setIsExpired(DoctorMessage.IsExpired.NOTEXPIRED.getValue());
         doctorMessageSearchDto.setChannel(Rule.Channel.SYSTEM.getValue());
-        doctorMessageSearchDto.setStatus(DoctorMessage.Status.NORMAL.getValue());
+        List<Integer> list = Lists.newArrayList();
+        list.add(DoctorMessage.Status.NORMAL.getValue());
+        list.add(DoctorMessage.Status.READED.getValue());
+        doctorMessageSearchDto.setStatuses(list);
         doctorMessageSearchDto.setTemplateId(Long.parseLong(criteria.get("templateId")));
         doctorMessageSearchDto.setFarmId(Long.parseLong(criteria.get("farmId")));
         Paging<DoctorMessage> paging = RespHelper.or500(doctorMessageReadService.pagingWarnMessages(doctorMessageSearchDto, pageNo, pageSize));
@@ -302,7 +305,10 @@ public class DoctorMessages {
             doctorMessageSearchDto.setIsExpired(DoctorMessage.IsExpired.NOTEXPIRED.getValue());
             doctorMessageSearchDto.setUserId(UserUtil.getUserId());
             doctorMessageSearchDto.setChannel(Rule.Channel.SYSTEM.getValue());
-            doctorMessageSearchDto.setStatus(DoctorMessage.Status.NORMAL.getValue());
+            List<Integer> statuses = Lists.newArrayList();
+            statuses.add(DoctorMessage.Status.NORMAL.getValue());
+            statuses.add(DoctorMessage.Status.READED.getValue());
+            doctorMessageSearchDto.setStatuses(statuses);
             //统计育肥猪出栏消息头数
             if (Objects.equals(doctorMessageRule.getCategory(), Category.FATTEN_PIG_REMOVE.getKey())) {
                 try {
