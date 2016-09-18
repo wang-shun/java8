@@ -192,6 +192,7 @@ public class DoctorWareHouseEvents {
                     .wareHouseId(doctorMaterialInWareHouse.getWareHouseId()).wareHouseName(doctorMaterialInWareHouse.getWareHouseName())
                     .materialTypeId(doctorMaterialInWareHouse.getMaterialId()).materialName(doctorMaterialInWareHouse.getMaterialName())
                     .barnId(dto.getBarnId()).barnName(dto.getBarnName())
+                    .groupId(dto.getGroupId()).groupCode(dto.getGroupCode())
                     .staffId(currentUserId).staffName(userName)
                     .count(dto.getCount()).consumeDays(dto.getConsumeDays())
                     .unitId(doctorBasicMaterial.getUnitId()).unitName(doctorBasicMaterial.getUnitName())
@@ -272,7 +273,7 @@ public class DoctorWareHouseEvents {
      */
     @RequestMapping(value = "/moveMaterial", method = RequestMethod.POST)
     @ResponseBody
-    public void moveMaterial(@RequestParam Long farmId, @RequestParam Long fromWareHouseId, @RequestParam Long toWareHouseId,
+    public boolean moveMaterial(@RequestParam Long farmId, @RequestParam Long fromWareHouseId, @RequestParam Long toWareHouseId,
                              @RequestParam Long materialId, @RequestParam Double moveQuantity){
         if(moveQuantity == null || moveQuantity <= 0){
             throw new JsonResponseException("quantity.invalid");
@@ -307,5 +308,6 @@ public class DoctorWareHouseEvents {
                 .unitName(materialInWareHouse.getUnitName()).unitGroupName(materialInWareHouse.getUnitGroupName())
                 .build();
         RespHelper.or500(doctorMaterialInWareHouseWriteService.moveMaterial(diaochu, diaoru));
+        return true;
     }
 }

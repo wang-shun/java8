@@ -75,6 +75,9 @@ public class DoctorMaterialConsumeProvider implements Serializable{
     private Long barnId;
     private String barnName;
 
+    private Long groupId; // 消耗物资的猪群
+    private String groupCode;
+
     @Setter(AccessLevel.NONE)
     private Map<String, Object> extraMap;
 

@@ -40,12 +40,12 @@ public class DoctorBasicMaterialWriteServiceImpl implements DoctorBasicMaterialW
     @Override
     public Response<Long> createBasicMaterial(DoctorBasicMaterial basicMaterial) {
         try {
+            basicMaterial.setIsValid(1);
             DoctorBasicMaterial exist = doctorBasicMaterialDao.findByTypeAndName(WareHouseType.from(basicMaterial.getType()), basicMaterial.getName());
             if(exist == null){
                 doctorBasicMaterialDao.create(basicMaterial);
             }else{
                 basicMaterial.setId(exist.getId());
-                basicMaterial.setIsValid(1);
                 doctorBasicMaterialDao.update(basicMaterial);
             }
             publishMaterialInfo(DataEventType.MaterialInfoCreateEvent.getKey(), ImmutableMap.of("materialInfoCreatedId", basicMaterial.getId()));

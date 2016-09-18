@@ -17,6 +17,7 @@ public class MaterialPurchasedUsed implements Serializable {
     private String Zdr;
     private String WareHouse;
     private Double Count;
+    private Double unitPrice;
     private String Staff;
     private Integer UsedDays;
     private String materialName;
@@ -25,4 +26,5 @@ public class MaterialPurchasedUsed implements Serializable {
     private String barnOId;
     private String Barn;
     private String materialOID;
+    private String groupOutId;
 }

@@ -161,11 +161,6 @@ public class DoctorMoveDataController {
         doctorMoveBasicService.moveAllBasic(moveId, farm);
         log.warn("move bascic end");
 
-        //3.迁移仓库/物料
-        log.warn("move warehouse start, mobile:{}, moveId:{}", mobile, moveId);
-        wareHouseInitService.init(mobile, moveId, farm);
-        log.warn("move warehouse end");
-
         //4.迁移公猪 母猪 工作流
         try {
             log.warn("move pig start, moveId:{}", moveId);
@@ -201,6 +196,11 @@ public class DoctorMoveDataController {
         log.warn("move monthly start, moveId:{}", moveId);
         doctorMoveReportService.moveMonthlyReport(farm.getId(), monthIndex);
         log.warn("move monthly end");
+
+        //迁移仓库/物料
+        log.warn("move warehouse start, mobile:{}, moveId:{}", mobile, moveId);
+        wareHouseInitService.init(mobile, moveId, farm);
+        log.warn("move warehouse end");
     }
 
     //统计下首页数据

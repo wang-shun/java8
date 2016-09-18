@@ -84,14 +84,13 @@ public class DoctorConsumerEventHandler implements IHandler{
 
         // 2. 保存数据
         DoctorMaterialConsumeProvider doctorMaterialConsumeProvider = DoctorMaterialConsumeProvider.buildFromDto(dto);
-        if(Objects.equals(dto.getType(), WareHouseType.FEED.getKey())){
-            extraMap.putAll(Params.filterNullOrEmpty(MapBuilder.<String, Object>of().put(
-                    "consumeDays", dto.getConsumeDays(),
-                    "barnId", dto.getBarnId(),
-                    "barnName", dto.getBarnName()).map()));
-            doctorMaterialConsumeProvider.setBarnId(dto.getBarnId());
-            doctorMaterialConsumeProvider.setBarnName(dto.getBarnName());
+        if(Objects.equals(dto.getType(), WareHouseType.FEED.getKey()) && dto.getConsumeDays() != null){
+            extraMap.put("consumeDays", dto.getConsumeDays());
         }
+        doctorMaterialConsumeProvider.setBarnId(dto.getBarnId());
+        doctorMaterialConsumeProvider.setBarnName(dto.getBarnName());
+        doctorMaterialConsumeProvider.setGroupId(dto.getGroupId());
+        doctorMaterialConsumeProvider.setGroupCode(dto.getGroupCode());
         doctorMaterialConsumeProvider.setExtraMap(extraMap);
         doctorMaterialConsumeProvider.setUnitPrice(Double.valueOf(totalPrice / consumeCount).longValue());
         doctorMaterialConsumeProviderDao.create(doctorMaterialConsumeProvider);

@@ -7,7 +7,9 @@ import io.terminus.doctor.basic.model.DoctorBasicMaterial;
 import io.terminus.doctor.common.enums.WareHouseType;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
+import io.terminus.doctor.event.dao.DoctorGroupDao;
 import io.terminus.doctor.event.model.DoctorBarn;
+import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.move.handler.DoctorMoveDatasourceHandler;
 import io.terminus.doctor.move.handler.DoctorMoveTableEnum;
 import io.terminus.doctor.move.model.B_WareHouse;
@@ -17,13 +19,10 @@ import io.terminus.doctor.move.model.View_FeedList;
 import io.terminus.doctor.move.model.View_MedicineList;
 import io.terminus.doctor.move.model.View_RawMaterialList;
 import io.terminus.doctor.move.model.View_VaccinationList;
-import io.terminus.doctor.user.dao.DoctorFarmDao;
 import io.terminus.doctor.user.dao.DoctorStaffDao;
-import io.terminus.doctor.user.dao.DoctorUserDataPermissionDao;
 import io.terminus.doctor.user.dao.SubDao;
 import io.terminus.doctor.user.model.DoctorFarm;
 import io.terminus.doctor.user.model.DoctorStaff;
-import io.terminus.doctor.user.model.DoctorUserDataPermission;
 import io.terminus.doctor.user.model.Sub;
 import io.terminus.doctor.user.service.DoctorUserReadService;
 import io.terminus.doctor.warehouse.dao.DoctorFarmWareHouseTypeDao;
@@ -32,6 +31,8 @@ import io.terminus.doctor.warehouse.dao.DoctorMaterialConsumeProviderDao;
 import io.terminus.doctor.warehouse.dao.DoctorMaterialInWareHouseDao;
 import io.terminus.doctor.warehouse.dao.DoctorWareHouseDao;
 import io.terminus.doctor.warehouse.dao.DoctorWareHouseTrackDao;
+import io.terminus.doctor.warehouse.dto.DoctorMaterialConsumeProviderDto;
+import io.terminus.doctor.warehouse.manager.MaterialInWareHouseManager;
 import io.terminus.doctor.warehouse.model.DoctorFarmWareHouseType;
 import io.terminus.doctor.warehouse.model.DoctorMaterialConsumeAvg;
 import io.terminus.doctor.warehouse.model.DoctorMaterialConsumeProvider;
@@ -69,11 +70,7 @@ public class WareHouseInitService {
     @Autowired
     private DoctorWareHouseDao doctorWareHouseDao;
     @Autowired
-    private DoctorUserDataPermissionDao doctorUserDataPermissionDao;
-    @Autowired
     private DoctorMoveDatasourceHandler doctorMoveDatasourceHandler;
-    @Autowired
-    private DoctorFarmDao doctorFarmDao;
     @Autowired
     private SubDao subDao;
     @Autowired
@@ -94,6 +91,10 @@ public class WareHouseInitService {
     private DoctorMoveBasicService doctorMoveBasicService;
     @Autowired
     private UserProfileDao userProfileDao;
+    @Autowired
+    private DoctorGroupDao doctorGroupDao;
+    @Autowired
+    private MaterialInWareHouseManager materialInWareHouseManager;
 
     @Transactional
     public void init(String mobile, Long dataSourceId, DoctorFarm farm){
@@ -101,14 +102,6 @@ public class WareHouseInitService {
         Long userId = user.getId();
 
         UserProfile userProfile = userProfileDao.findByUserId(userId);
-
-        DoctorUserDataPermission permission = doctorUserDataPermissionDao.findByUserId(userId);
-        List<Long> farmIds = permission.getFarmIdsList();
-
-        //猪场
-        List<DoctorFarm> farms = doctorFarmDao.findByIds(farmIds);
-        //猪场Map, key = outId, value = farm
-        Map<String, DoctorFarm> farmMap = farms.stream().collect(Collectors.toMap(DoctorFarm::getOutId, v -> v));
 
         //子账号
         List<Sub> subs = subDao.findByConditions(ImmutableMap.of("parentUserId", userId), null);
@@ -195,6 +188,7 @@ public class WareHouseInitService {
                 basicMaterial.setUnitGroupName(medicine.getUnitGroupText());
                 basicMaterial.setUnitName(medicine.getUnitName());
                 basicMaterial.setRemark(medicine.getRemark());
+                basicMaterial.setIsValid(1);
                 doctorBasicMaterialDao.create(basicMaterial);
             }
             basicMaterialMap.put(basicMaterial.getType() + "|" + basicMaterial.getName(), basicMaterial);
@@ -215,6 +209,7 @@ public class WareHouseInitService {
                 basicMaterial.setUnitGroupName(vaccination.getUnitGroupText());
                 basicMaterial.setUnitName(vaccination.getUnitName());
                 basicMaterial.setRemark(vaccination.getRemark());
+                basicMaterial.setIsValid(1);
                 doctorBasicMaterialDao.create(basicMaterial);
             }
             basicMaterialMap.put(basicMaterial.getType() + "|" + basicMaterial.getName(), basicMaterial);
@@ -235,6 +230,7 @@ public class WareHouseInitService {
                 basicMaterial.setUnitGroupName(material.getUnitGroupText());
                 basicMaterial.setUnitName(material.getUnitName());
                 basicMaterial.setRemark(material.getRemark());
+                basicMaterial.setIsValid(1);
                 doctorBasicMaterialDao.create(basicMaterial);
             }
             basicMaterialMap.put(basicMaterial.getType() + "|" + basicMaterial.getName(), basicMaterial);
@@ -255,6 +251,7 @@ public class WareHouseInitService {
                 basicMaterial.setUnitGroupName(feed.getUnitGroupText());
                 basicMaterial.setUnitName(feed.getUnitName());
                 basicMaterial.setRemark(feed.getRemark());
+                basicMaterial.setIsValid(1);
                 doctorBasicMaterialDao.create(basicMaterial);
             }
             basicMaterialMap.put(basicMaterial.getType() + "|" + basicMaterial.getName(), basicMaterial);
@@ -275,6 +272,7 @@ public class WareHouseInitService {
                 basicMaterial.setUnitGroupName(medicine.getUnitGroupText());
                 basicMaterial.setUnitName(medicine.getUnitName());
                 basicMaterial.setRemark(medicine.getRemark());
+                basicMaterial.setIsValid(1);
                 doctorBasicMaterialDao.create(basicMaterial);
             }
             basicMaterialMap.put(basicMaterial.getType() + "|" + basicMaterial.getName(), basicMaterial);
@@ -320,6 +318,9 @@ public class WareHouseInitService {
         //此仓库中各物资的数量, key = typeAndmaterialName, value = 数量
         Map<String, Double> materialCount = new HashMap<>();
 
+        //猪群Map, key = outId, value = group
+        Map<String, DoctorGroup> groupMap = doctorGroupDao.findByFarmId(wareHouse.getFarmId()).stream().collect(Collectors.toMap(DoctorGroup::getOutId, v->v));
+
         // 领用和添加物料的历史记录
         DoctorMaterialConsumeProvider materialCP = new DoctorMaterialConsumeProvider();
         materialCP.setType(wareHouse.getType());
@@ -363,14 +364,24 @@ public class WareHouseInitService {
                 }
             }
 
-            //如果是饲料领用, 需要设置 extra
-            if(isConsume(pu.getEventType(), WareHouseType.from(wareHouse.getType())) && Objects.equals(wareHouse.getType(), WareHouseType.FEED.getKey())){
+            //如果是领用, 需要设置 extra
+            if(isConsume(pu.getEventType(), WareHouseType.from(wareHouse.getType()))){
                 DoctorBarn barn = barnMap.get(pu.getBarnOId());
                 if(barn != null){
                     Map<String, Object> extraMap = new HashMap<>();
                     extraMap.put("barnId", barn.getId());
                     extraMap.put("barnName", barn.getName());
+                    materialCP.setBarnId(barn.getId());
+                    materialCP.setBarnName(barn.getName());
                     materialCP.setExtraMap(extraMap);
+
+                    if(pu.getGroupOutId() != null){
+                        DoctorGroup group = groupMap.get(pu.getGroupOutId());
+                        if(group != null){
+                            materialCP.setGroupId(group.getId());
+                            materialCP.setGroupCode(group.getGroupCode());
+                        }
+                    }
                 }
             }
             doctorMaterialConsumeProviderDao.create(materialCP);
@@ -384,7 +395,7 @@ public class WareHouseInitService {
             }
         }
 
-        // 仓库中各种物料的最新数量 , 目前只能库存都是0
+        // 仓库中各种物料的最新数量
         DoctorMaterialInWareHouse materialInWareHouse = new DoctorMaterialInWareHouse();
         materialInWareHouse.setFarmId(wareHouse.getFarmId());
         materialInWareHouse.setFarmName(wareHouse.getFarmName());
@@ -474,5 +485,102 @@ public class WareHouseInitService {
      */
     private boolean isConsume(String eventType, WareHouseType wareHouseType) {
         return event_type_consume.contains(eventType) || (Objects.equals(wareHouseType, WareHouseType.MATERIAL) && "生产".equals(eventType));
+    }
+
+    private void addMaterial2Warehouse2(DoctorWareHouse wareHouse, List<MaterialPurchasedUsed> list,
+                                       Map<String, DoctorBasicMaterial> basicMaterialMap, Map<String, DoctorStaff> staffMap,
+                                       Map<String, DoctorBarn> barnMap, UserProfile userProfile, List<String> stopUseMaterial) {
+        //猪群Map, key = outId, value = group
+        Map<String, DoctorGroup> groupMap = doctorGroupDao.findByFarmId(wareHouse.getFarmId()).stream().collect(Collectors.toMap(DoctorGroup::getOutId, v -> v));
+        Integer wareHouseType = wareHouse.getType();
+        for(MaterialPurchasedUsed pu : list){
+            if(stopUseMaterial.contains(pu.getMaterialOID())){
+                continue;
+            }
+            DoctorMaterialConsumeProvider.EVENT_TYPE eventType;
+            String typeAndmaterialName = wareHouse.getType() + "|" + pu.getMaterialName();
+            DoctorBasicMaterial material = basicMaterialMap.get(typeAndmaterialName);
+            // 由于 pu.getBarnOId() 可能为null, 所以 barn 也可能为null
+            DoctorBarn barn = barnMap.get(pu.getBarnOId());
+
+            switch (pu.getEventType()) {
+                case "采购":
+                    eventType = DoctorMaterialConsumeProvider.EVENT_TYPE.PROVIDER;
+                    break;
+                case "领用":
+                    eventType = DoctorMaterialConsumeProvider.EVENT_TYPE.CONSUMER;
+                    break;
+                case "调入":
+                    eventType = DoctorMaterialConsumeProvider.EVENT_TYPE.DIAORU;
+                    break;
+                case "调出":
+                    eventType = DoctorMaterialConsumeProvider.EVENT_TYPE.DIAOCHU;
+                    break;
+                case "盘盈":
+                    eventType = DoctorMaterialConsumeProvider.EVENT_TYPE.PANYING;
+                    break;
+                case "盘亏":
+                    eventType = DoctorMaterialConsumeProvider.EVENT_TYPE.PANKUI;
+                    break;
+                case "生产":
+                    if (Objects.equals(wareHouseType, WareHouseType.FEED.getKey())) {
+                        eventType = DoctorMaterialConsumeProvider.EVENT_TYPE.PROVIDER;
+                    } else if (Objects.equals(wareHouseType, WareHouseType.MATERIAL.getKey())) {
+                        eventType = DoctorMaterialConsumeProvider.EVENT_TYPE.CONSUMER;
+                    } else {
+                        continue;
+                    }
+                    break;
+                default:
+                    continue;
+            }
+
+            DoctorMaterialConsumeProviderDto dto = DoctorMaterialConsumeProviderDto.builder()
+                    .actionType(eventType.getValue()).type(wareHouseType)
+                    .farmId(wareHouse.getFarmId()).farmName(wareHouse.getFarmName())
+                    .wareHouseId(wareHouse.getId()).wareHouseName(wareHouse.getWareHouseName())
+                    .materialTypeId(material.getId()).materialName(material.getName())
+                    .barnId(barn == null ? null : barn.getId()).barnName(barn == null ? null : barn.getName())
+                    .count(pu.getCount())
+                    .build();
+
+            if(pu.getStaff() == null || pu.getStaff().trim().isEmpty()){
+                dto.setStaffName(pu.getZdr());
+            }else{
+                dto.setStaffName(pu.getStaff());
+            }
+            if("系统管理员".equals(dto.getStaffName())){
+                dto.setStaffName(userProfile.getRealName());
+                dto.setStaffId(userProfile.getUserId());
+            }else{
+                try {
+                    dto.setStaffId(staffMap.get(dto.getStaffName()).getId());
+                }catch(Exception e){
+                    dto.setStaffName(userProfile.getRealName());
+                    dto.setStaffId(userProfile.getUserId());
+                }
+            }
+
+            if(eventType.isOut()){
+                if(pu.getGroupOutId() != null){
+                    DoctorGroup group = groupMap.get(pu.getGroupOutId());
+                    if(group != null){
+                        dto.setGroupId(group.getId());
+                        dto.setGroupCode(group.getGroupCode());
+                    }
+                }
+                dto.setConsumeDays(pu.getUsedDays());
+                dto.setUnitId(material.getUnitId());
+                dto.setUnitName(material.getUnitName());
+                dto.setUnitGroupId(material.getUnitGroupId());
+                dto.setUnitGroupName(material.getUnitGroupName());
+                materialInWareHouseManager.consumeMaterial(dto);
+            }
+
+            if(eventType.isIn()){
+                dto.setUnitPrice(Double.valueOf(pu.getUnitPrice() * 100).longValue());
+                materialInWareHouseManager.providerMaterialInWareHouse(dto);
+            }
+        }
     }
 }

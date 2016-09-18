@@ -49,6 +49,9 @@ public class DoctorMaterialConsumeProviderDto implements Serializable{
 
     private String barnName;    //宿舍名称
 
+    private Long groupId; // 消耗物资的猪群
+    private String groupCode;
+
     private Long staffId;
 
     private String staffName;  //饲养员信息

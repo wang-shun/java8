@@ -8,6 +8,7 @@ import io.terminus.common.model.Response;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.doctor.common.utils.Params;
 import io.terminus.doctor.warehouse.dao.DoctorMaterialConsumeProviderDao;
+import io.terminus.doctor.warehouse.dto.MaterialCountAmount;
 import io.terminus.doctor.warehouse.model.DoctorMaterialConsumeProvider;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,11 +29,12 @@ public class DoctorMaterialConsumeProviderReadServiceImpl implements DoctorMater
     }
 
     @Override
-    public Response<Paging<DoctorMaterialConsumeProvider>> page(Long warehouseId, Long materialId, Integer eventType, Integer materilaType,
+    public Response<Paging<DoctorMaterialConsumeProvider>> page(Long farmId, Long warehouseId, Long materialId, Integer eventType, Integer materilaType,
                                                               Long staffId, String startAt, String endAt, Integer pageNo, Integer size) {
         try{
             DoctorMaterialConsumeProvider model = DoctorMaterialConsumeProvider.builder()
                     .wareHouseId(warehouseId).materialId(materialId).eventType(eventType).type(materilaType)
+                    .farmId(farmId)
                     .staffId(staffId).build();
             Map<String, Object> map = BeanMapper.convertObjectToMap(model);
             map.put("startAt", startAt);
@@ -42,6 +44,25 @@ public class DoctorMaterialConsumeProviderReadServiceImpl implements DoctorMater
         }catch(Exception e){
             log.error("page DoctorMaterialConsumeProvider failed, cause :{}", Throwables.getStackTraceAsString(e));
             return Response.fail("page.DoctorMaterialConsumeProvider.fail");
+        }
+    }
+
+    @Override
+    public Response<MaterialCountAmount> countAmount(Long farmId, Long warehouseId, Long materialId, Integer eventType, Integer materilaType,
+                                                     Long barnId, Long groupId, Long staffId, String startAt, String endAt){
+        try{
+            DoctorMaterialConsumeProvider model = DoctorMaterialConsumeProvider.builder()
+                    .wareHouseId(warehouseId).materialId(materialId).eventType(eventType).type(materilaType)
+                    .farmId(farmId).barnId(barnId).groupId(groupId)
+                    .staffId(staffId)
+                    .build();
+            Map<String, Object> map = BeanMapper.convertObjectToMap(model);
+            map.put("startAt", startAt);
+            map.put("endAt", endAt);
+            return Response.ok(doctorMaterialConsumeProviderDao.countAmount(Params.filterNullOrEmpty(map)));
+        }catch(Exception e){
+            log.error("MaterialCountAmount failed, cause :{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("material.count.amount.fail");
         }
     }
 }
