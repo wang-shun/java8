@@ -76,10 +76,13 @@ public class DoctorMoveInGroupEventHandler extends DoctorAbstractGroupEventHandl
         event.setAvgDayAge(moveIn.getAvgDayAge());
         event.setAvgWeight(moveIn.getAvgWeight());
         event.setWeight(EventUtil.getWeight(event.getAvgWeight(), event.getQuantity()));
+        event.setInType(moveIn.getInType());
 
         if (moveIn.getFromBarnId() != null) {
             DoctorBarn toBarn = RespHelper.orServEx(doctorBarnReadService.findBarnById(moveIn.getFromBarnId()));
             event.setTransGroupType(getTransType(group.getPigType(), toBarn).getValue());   //区别内转还是外转
+            event.setOtherBarnId(moveIn.getFromBarnId());  //来源猪舍id
+            event.setOtherBarnType(toBarn.getPigType());   //来源猪舍类型
         }
         event.setExtraMap(moveInEvent);
         doctorGroupEventDao.create(event);

@@ -31,6 +31,9 @@
         <result column="amount" property="amount"/>
         <result column="over_price" property="overPrice"/>
         <result column="trans_group_type" property="transGroupType"/>
+        <result column="in_type" property="inType"/>
+        <result column="other_barn_id" property="otherBarnId"/>
+        <result column="other_barn_type" property="otherBarnType"/>
         <result column="out_id" property="outId"/>
         <result column="remark" property="remark"/>
         <result column="extra" property="extra"/>
@@ -75,6 +78,9 @@
         amount,
         over_price,
         trans_group_type,
+        in_type,
+        other_barn_id,
+        other_barn_type,
         out_id,
         remark,
         extra,
@@ -111,6 +117,9 @@
         #{amount},
         #{overPrice},
         #{transGroupType},
+        #{inType},
+        #{otherBarnId},
+        #{otherBarnType},
         #{outId},
         #{remark},
         #{extra},
@@ -167,6 +176,9 @@
             <if test="amount != null">amount = #{amount},</if>
             <if test="overPrice != null">over_price = #{overPrice},</if>
             <if test="transGroupType != null">trans_group_type = #{transGroupType},</if>
+            <if test="inType != null">in_type = #{inType},</if>
+            <if test="otherBarnId != null">other_barn_id = #{otherBarnId},</if>
+            <if test="otherBarnType != null">other_barn_type = #{otherBarnType},</if>
             <if test="outId != null">out_id = #{outId},</if>
             <if test="remark != null">remark = #{remark},</if>
             <if test="extra != null">extra = #{extra},</if>
@@ -174,7 +186,6 @@
             <if test="creatorName != null">creator_name = #{creatorName},</if>
             <if test="updatorId != null">updator_id = #{updatorId},</if>
             <if test="updatorName != null">updator_name = #{updatorName},</if>
-
             updated_at=now()
         </set>
         WHERE id = #{id}
@@ -257,6 +268,9 @@
             #{item.amount},
             #{item.overPrice},
             #{item.transGroupType},
+            #{item.inType},
+            #{item.otherBarnId},
+            #{item.otherBarnType},
             #{item.outId},
             #{item.remark},
             #{item.extra},

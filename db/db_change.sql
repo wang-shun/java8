@@ -296,3 +296,11 @@ add column `barn_name` varchar(64) DEFAULT NULL COMMENT '猪舍名称' after bar
 -- 2016年09月13日, 基础物料表新增字段 "子类别"
 alter table doctor_basic_materials
 add column sub_type bigint(20) unsigned DEFAULT NULL COMMENT '物料的子类别，关联 doctor_basics 表的id' after `type`;
+
+
+-- 2016-09-18 猪群新增转入类型, 猪舍id字段
+ALTER TABLE doctor_group_events ADD COLUMN in_type smallint(6) DEFAULT NULL COMMENT '仔猪转入事件: 转入类型' AFTER trans_group_type;
+ALTER TABLE doctor_group_events ADD COLUMN other_barn_id bigint(20) DEFAULT NULL COMMENT '猪群转入转出事件的来源/目标id' AFTER in_type;
+ALTER TABLE doctor_group_events ADD COLUMN other_barn_type varchar(64) DEFAULT NULL COMMENT '猪群转入转出事件的来源/目标猪舍类型' AFTER other_barn_id;
+
+
