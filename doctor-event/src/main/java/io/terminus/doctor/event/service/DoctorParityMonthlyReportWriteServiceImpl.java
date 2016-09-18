@@ -99,11 +99,11 @@ public class DoctorParityMonthlyReportWriteServiceImpl implements DoctorParityMo
     private void getMonthlyReport(Long farmId, Date startAt, Date endAt, Date sumAt) {
         List<DoctorParityMonthlyReport> doctorParityMonthlyReportList = new ArrayList<>();
         //1,2,3,4,5,6,7,8,9,10胎及以上
-        for(int i =0; i< 10; i++){
+        for(int i =0; i< 9; i++){
             List<DoctorParityMonthlyReport> result = doctorParityMonthlyReportDao.constructDoctorParityMonthlyReports(farmId, i, i, startAt, endAt);
             doctorParityMonthlyReportList.addAll(result);
         }
-        List<DoctorParityMonthlyReport> result = doctorParityMonthlyReportDao.constructDoctorParityMonthlyReports(farmId, 10, null, startAt, endAt);
+        List<DoctorParityMonthlyReport> result = doctorParityMonthlyReportDao.constructDoctorParityMonthlyReports(farmId, 9, null, startAt, endAt);
         doctorParityMonthlyReportList.addAll(result);
         if( doctorParityMonthlyReportList != null && !doctorParityMonthlyReportList.isEmpty()){
             doctorParityMonthlyReportManager.createMonthlyReports(doctorParityMonthlyReportList, sumAt);
