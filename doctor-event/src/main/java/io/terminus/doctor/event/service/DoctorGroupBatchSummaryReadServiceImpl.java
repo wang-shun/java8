@@ -1,5 +1,6 @@
 package io.terminus.doctor.event.service;
 
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Throwables;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.exception.ServiceException;
@@ -114,16 +115,16 @@ public class DoctorGroupBatchSummaryReadServiceImpl implements DoctorGroupBatchS
         summary.setLiveCount(groupTrack.getQuantity());                              //活仔数
 
         //如果小于0, 弱仔数也有置成0
-        int healthCount = groupTrack.getQuantity() - groupTrack.getWeakQty();
+        int healthCount = groupTrack.getQuantity() - MoreObjects.firstNonNull(groupTrack.getWeakQty(), 0);
         if (healthCount <= 0) {
             summary.setWeakCount(0);                                                 //弱仔数
             summary.setHealthCount(groupTrack.getQuantity());                        //健仔数
         } else {
-            summary.setWeakCount(groupTrack.getWeakQty());                           //弱仔数
+            summary.setWeakCount(MoreObjects.firstNonNull(groupTrack.getWeakQty(), 0));//弱仔数
             summary.setHealthCount(healthCount);                                     //健仔数
         }
         summary.setBirthAvgWeight(groupTrack.getBirthAvgWeight());                   //出生均重(kg)
-        summary.setWeanCount(groupTrack.getQuantity() - groupTrack.getUnweanQty());  //断奶数 = 总 - 未断奶数
+        summary.setWeanCount(groupTrack.getQuantity() - MoreObjects.firstNonNull(groupTrack.getUnweanQty(), 0)); //断奶数 = 总 - 未断奶数
         summary.setUnqCount(groupTrack.getUnqQty());                                 //不合格数
         summary.setWeanAvgWeight(groupTrack.getWeanAvgWeight());                     //断奶均重(kg)
         summary.setSaleCount(getSaleCount(events));                                  //销售头数
