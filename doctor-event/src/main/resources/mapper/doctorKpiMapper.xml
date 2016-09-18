@@ -1327,7 +1327,7 @@
             FROM doctor_material_consume_providers AS cp
             LEFT JOIN doctor_barns AS barns ON cp.barn_id = barns.id
             WHERE cp.event_type = 1 AND
-                  cp.type = 1 AND
+                  cp.type = 1
                 <if test="farmId != null">AND cp.farm_id = #{farmId}</if>
                 <if test="startAt != null">AND cp.event_time &gt;= #{startAt}</if>
                 <if test="endAt != null">AND cp.event_time &lt;= #{endAt}</if>
