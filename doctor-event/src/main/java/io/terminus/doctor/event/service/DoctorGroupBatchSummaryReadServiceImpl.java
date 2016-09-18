@@ -132,7 +132,7 @@ public class DoctorGroupBatchSummaryReadServiceImpl implements DoctorGroupBatchS
         summary.setInCount(inCount);                                                 //转入数
         summary.setInAvgWeight(inAvgWeight);                                         //转入均重(kg)
         summary.setDeadRate(getDeatRate(events, inCount));                           //死淘率
-        summary.setFcr(0D / getFcrDeltaWeight(events, inCount, inAvgWeight));        // TODO: 16/9/13  料肉比
+        summary.setFcr(0D);        // TODO: 16/9/13  料肉比
 
         List<DoctorPigTrack> farrowTracks = doctorPigTrackDao.findFeedSowTrackByGroupId(groupTrack.getGroupId());
         summary.setNest(farrowTracks.size());                                        //窝数
@@ -155,8 +155,7 @@ public class DoctorGroupBatchSummaryReadServiceImpl implements DoctorGroupBatchS
                         (Objects.equals(DoctorBasicEnums.DEAD.getId(), event.getChangeTypeId()) ||
                                 Objects.equals(DoctorBasicEnums.ELIMINATE.getId(), event.getChangeTypeId())))
                 .sum();
-
-        return deadCount / (inCount == 0 ? 1 : inCount);
+        return deadCount / (inCount == 0D ? 1D : inCount);
     }
 
     //获取销售数量
@@ -207,6 +206,7 @@ public class DoctorGroupBatchSummaryReadServiceImpl implements DoctorGroupBatchS
                         Objects.equals(event.getType(), GroupEventType.TURN_SEED.getValue()) ||     //转种猪
                         Objects.equals(event.getType(), GroupEventType.CHANGE.getValue()))          //变动
                 .sum();
-        return outWeight - inCount * inAvgWeight;
+        double delta = outWeight - inCount * inAvgWeight;
+        return delta <= 0D ? 1D : delta;
     }
 }
