@@ -28,4 +28,6 @@ public class DoctorGroupSearchDto extends DoctorGroup implements Serializable {
     private Date endCloseAt;    //关群结束时间
 
     private List<Integer> pigTypes; //猪类list
+
+    private String pigTypeCommas; //逗号分隔类型
 }

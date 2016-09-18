@@ -3,6 +3,7 @@ package io.terminus.doctor.web.front.event.controller;
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.model.Paging;
 import io.terminus.common.utils.BeanMapper;
+import io.terminus.common.utils.Splitters;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dto.DoctorGroupSearchDto;
 import io.terminus.doctor.event.dto.report.daily.DoctorDailyReportDto;
@@ -20,6 +21,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Map;
 import java.util.List;
+
+import static io.terminus.common.utils.Arguments.notEmpty;
 
 /**
  * Desc:
@@ -112,6 +115,10 @@ public class DoctorReports {
     public Paging<DoctorGroupBatchSummary> pagingGroupBatchSummary(@RequestParam Map<String, String> params,
                                                                    @RequestParam(required = false) Integer pageNo,
                                                                    @RequestParam(required = false) Integer pageSize) {
-        return RespHelper.or500(doctorGroupBatchSummaryReadService.pagingGroupBatchSummary(BeanMapper.map(params, DoctorGroupSearchDto.class), pageNo, pageSize));
+        DoctorGroupSearchDto dto = BeanMapper.map(params, DoctorGroupSearchDto.class);
+        if (notEmpty(dto.getPigTypeCommas())) {
+            dto.setPigTypes(Splitters.splitToInteger(dto.getPigTypeCommas(), Splitters.COMMA));
+        }
+        return RespHelper.or500(doctorGroupBatchSummaryReadService.pagingGroupBatchSummary(dto, pageNo, pageSize));
     }
 }
