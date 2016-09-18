@@ -23,10 +23,10 @@ public class DoctorLiveStockChangeMonthlyReport implements Serializable {
     private int houbeiDead;                //死淘
     private int houbeiSale;                //销售
     private double houbeiFeedCount;        //饲料数量(重量)
-    private double houbeiFeedAmount;       //饲料金额
-    private double houbeiDrugAmount;       //药品金额
-    private double houbeiVaccineAmount;    //疫苗金额
-    private double houbeiConsumerAmount;   //易耗品金额
+    private long houbeiFeedAmount;         //饲料金额
+    private long houbeiDrugAmount;         //药品金额
+    private long houbeiVaccineAmount;      //疫苗金额
+    private long houbeiConsumerAmount;     //易耗品金额
 
     /**
      * 配怀舍
@@ -37,10 +37,10 @@ public class DoctorLiveStockChangeMonthlyReport implements Serializable {
     private int peiHuaiWeanIn;             //断奶转入 = 断奶转出
     private int peiHuaiDead;               //死淘
     private double peiHuaiFeedCount;       //饲料数量(重量)
-    private double peiHuaiFeedAmount;      //饲料金额
-    private double peiHuaiDrugAmount;      //药品金额
-    private double peiHuaiVaccineAmount;   //疫苗金额
-    private double peiHuaiConsumerAmount;  //易耗品金额
+    private long peiHuaiFeedAmount;        //饲料金额
+    private long peiHuaiDrugAmount;        //药品金额
+    private long peiHuaiVaccineAmount;     //疫苗金额
+    private long peiHuaiConsumerAmount;    //易耗品金额
 
     /**
      * 产房母猪
@@ -50,10 +50,10 @@ public class DoctorLiveStockChangeMonthlyReport implements Serializable {
     private int farrowSowWeanOut;          //断奶转出 = 断奶转入
     private int farrowSowDead;             //死淘
     private double farrowSowFeedCount;     //饲料数量(重量)
-    private double farrowSowFeedAmount;    //饲料金额
-    private double farrowSowDrugAmount;    //药品金额
-    private double farrowSowVaccineAmount; //疫苗金额
-    private double farrowSowConsumerAmount;//易耗品金额
+    private long farrowSowFeedAmount;      //饲料金额
+    private long farrowSowDrugAmount;      //药品金额
+    private long farrowSowVaccineAmount;   //疫苗金额
+    private long farrowSowConsumerAmount;  //易耗品金额
 
     /**
      * 产房仔猪
@@ -64,10 +64,10 @@ public class DoctorLiveStockChangeMonthlyReport implements Serializable {
     private int farrowDead;                //死淘
     private int farrowSale;                //销售
     private double farrowFeedCount;        //饲料数量(重量)
-    private double farrowFeedAmount;       //饲料金额
-    private double farrowDrugAmount;       //药品金额
-    private double farrowVaccineAmount;    //疫苗金额
-    private double farrowConsumerAmount;   //易耗品金额
+    private long farrowFeedAmount;         //饲料金额
+    private long farrowDrugAmount;         //药品金额
+    private long farrowVaccineAmount;      //疫苗金额
+    private long farrowConsumerAmount;     //易耗品金额
 
     /**
      * 保育猪
@@ -78,10 +78,10 @@ public class DoctorLiveStockChangeMonthlyReport implements Serializable {
     private int nurseryDead;               //死淘
     private int nurserySale;               //销售
     private double nurseryFeedCount;       //饲料数量(重量)
-    private double nurseryFeedAmount;      //饲料金额
-    private double nurseryDrugAmount;      //药品金额
-    private double nurseryVaccineAmount;   //疫苗金额
-    private double nurseryConsumerAmount;  //易耗品金额
+    private long nurseryFeedAmount;        //饲料金额
+    private long nurseryDrugAmount;        //药品金额
+    private long nurseryVaccineAmount;     //疫苗金额
+    private long nurseryConsumerAmount;    //易耗品金额
 
     /**
      * 育肥猪
@@ -91,8 +91,8 @@ public class DoctorLiveStockChangeMonthlyReport implements Serializable {
     private int fattenDead;                //死淘
     private int fattenSale;                //销售
     private double fattenFeedCount;        //饲料数量(重量)
-    private double fattenFeedAmount;       //饲料金额
-    private double fattenDrugAmount;       //药品金额
-    private double fattenVaccineAmount;    //疫苗金额
-    private double fattenConsumerAmount;   //易耗品金额
+    private long fattenFeedAmount;         //饲料金额
+    private long fattenDrugAmount;         //药品金额
+    private long fattenVaccineAmount;      //疫苗金额
+    private long fattenConsumerAmount;     //易耗品金额
 }
