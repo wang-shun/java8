@@ -22,6 +22,7 @@ import io.terminus.doctor.web.front.event.service.DoctorGroupWebService;
 import io.terminus.doctor.web.util.TransFromUtil;
 import io.terminus.pampas.common.UserUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -293,13 +294,20 @@ public class DoctorGroupEvents {
 
     @RequestMapping(value = "/groupPaging", method = RequestMethod.GET)
     @ResponseBody
-    public Paging<DoctorGroupEvent> queryGroupEventsByCriteria(@RequestParam Map<String, Object> params, @RequestParam(required = false) Integer pageNo, @RequestParam(required = false) Integer pageSize) {
+    public Paging<DoctorGroupEvent> queryGroupEventsByCriteria(@RequestParam Map<String, String> params, @RequestParam(required = false) Integer pageNo, @RequestParam(required = false) Integer pageSize) {
         if (params == null || params.isEmpty()) {
             return Paging.empty();
         }
+        params.keySet().forEach(key -> {
+            if (StringUtils.isBlank(params.get(key))){
+                params.put(key, null);
+            }
+        });
         if (StringUtils.isNotBlank((String)params.get("eventName"))){
             params.put("type", String.valueOf(GroupEventType.from((String)params.get("eventName")).getValue()));
         }
-        return RespHelper.or500(doctorGroupReadService.queryGroupEventsByCriteria(params, pageNo, pageSize));
+        Map<String, Object> map = new HashedMap();
+        map.putAll(params);
+        return RespHelper.or500(doctorGroupReadService.queryGroupEventsByCriteria(map, pageNo, pageSize));
     }
 }
