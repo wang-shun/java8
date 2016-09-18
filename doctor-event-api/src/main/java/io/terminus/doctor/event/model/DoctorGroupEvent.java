@@ -152,6 +152,23 @@ public class DoctorGroupEvent<T extends BaseGroupEvent> implements Serializable 
     private Integer transGroupType;
 
     /**
+     * 仔猪转入事件: 转入类型
+     * @see io.terminus.doctor.event.dto.event.group.DoctorMoveInGroupEvent.InType
+     */
+    private Integer inType;
+
+    /**
+     * 猪群转入转出事件的来源/目标id (转群事件: 目标猪舍id, 仔猪转入事件: 来源猪舍id, 转种猪事件: 目标猪舍id)
+     */
+    private Long otherBarnId;
+
+    /**
+     * 猪群转入转出事件的来源/目标猪舍类型
+     * @see io.terminus.doctor.common.enums.PigType
+     */
+    private Integer otherBarnType;
+
+    /**
      * 外部id
      */
     private String outId;

@@ -70,6 +70,8 @@ public class DoctorTurnSeedGroupEventHandler extends DoctorAbstractGroupEventHan
         event.setAvgDayAge(groupTrack.getAvgDayAge());  //日龄取猪群的平均日龄
         event.setWeight(turnSeed.getWeight());
         event.setAvgWeight(turnSeed.getWeight());
+        event.setOtherBarnId(toBarn.getId());          //目标猪舍id
+        event.setOtherBarnType(toBarn.getPigType());   //目标猪舍类型
         doctorGroupEventDao.create(event);
 
         //获取本次转种猪的性别

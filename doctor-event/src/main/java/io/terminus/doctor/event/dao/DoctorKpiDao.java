@@ -1,6 +1,7 @@
 package io.terminus.doctor.event.dao;
 
 import com.google.common.collect.ImmutableMap;
+import io.terminus.doctor.event.dto.report.monthly.DoctorLiveStockChangeMonthlyReport;
 import io.terminus.doctor.event.handler.sow.DoctorSowMatingHandler;
 import org.joda.time.DateTime;
 import org.mybatis.spring.SqlSessionTemplate;
@@ -374,6 +375,7 @@ public class DoctorKpiDao {
 
     /**
      * 实时存栏: 获取某天的产房仔猪存栏
+     *
      * @param farmId 猪场id
      * @param date   日期
      * @return 存栏数量
@@ -384,6 +386,7 @@ public class DoctorKpiDao {
 
     /**
      * 实时存栏: 获取某天的保育猪存栏
+     *
      * @param farmId 猪场id
      * @param date   日期
      * @return 存栏数量
@@ -394,6 +397,7 @@ public class DoctorKpiDao {
 
     /**
      * 实时存栏: 获取某天的育肥猪存栏
+     *
      * @param farmId 猪场id
      * @param date   日期
      * @return 存栏数量
@@ -404,6 +408,7 @@ public class DoctorKpiDao {
 
     /**
      * 实时存栏: 获取某天的后备母猪存栏
+     *
      * @param farmId 猪场id
      * @param date   日期
      * @return 存栏数量
@@ -414,6 +419,7 @@ public class DoctorKpiDao {
 
     /**
      * 实时存栏: 获取某天的后备公猪存栏
+     *
      * @param farmId 猪场id
      * @param date   日期
      * @return 存栏数量
@@ -425,6 +431,7 @@ public class DoctorKpiDao {
 
     /**
      * 实时存栏: 获取某天公猪存栏
+     *
      * @param farmId 猪场id
      * @param date   日期
      * @return 存栏数量
@@ -435,6 +442,7 @@ public class DoctorKpiDao {
 
     /**
      * 实时存栏: 获取某天母猪存栏
+     *
      * @param farmId 猪场id
      * @param date   日期
      * @return 存栏数量
@@ -445,6 +453,7 @@ public class DoctorKpiDao {
 
     /**
      * 实时存栏: 获取某天在产房的母猪存栏
+     *
      * @param farmId 猪场id
      * @param date   日期
      * @return 存栏数量
@@ -472,5 +481,161 @@ public class DoctorKpiDao {
      */
     public long getGroupSaleFattenPrice(Long farmId, Date startAt, Date endAt) {
         return sqlSession.selectOne(sqlId("getGroupSaleFattenPrice"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
+    }
+
+    /**
+     * 公猪生产月报: 配种次数
+     */
+    public int getBoarMateCount(Long farmId, Date startAt, Date endAt) {
+        return sqlSession.selectOne(sqlId("getBoarMateCount"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
+    }
+
+    /**
+     * 公猪生产月报: 首配母猪头数
+     */
+    public int getBoarSowFirstMateCount(Long farmId, Date startAt, Date endAt) {
+        return sqlSession.selectOne(sqlId("getBoarSowFirstMateCount"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
+    }
+
+    /**
+     * 公猪生产月报: 受胎头数
+     */
+    public int getBoarSowPregCount(Long farmId, Date startAt, Date endAt) {
+        return sqlSession.selectOne(sqlId("getBoarSowPregCount"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
+    }
+
+    /**
+     * 公猪生产月报: 产仔母猪数
+     */
+    public int getBoarSowFarrowCount(Long farmId, Date startAt, Date endAt) {
+        return sqlSession.selectOne(sqlId("getBoarSowFarrowCount"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
+    }
+
+    /**
+     * 公猪生产月报: 平均产仔数
+     */
+    public double getBoarSowFarrowAvgCount(Long farmId, Date startAt, Date endAt) {
+        return sqlSession.selectOne(sqlId("getBoarSowFarrowAvgCount"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
+    }
+
+    /**
+     * 公猪生产月报: 平均产活仔数
+     */
+    public double getBoarSowFarrowLiveAvgCount(Long farmId, Date startAt, Date endAt) {
+        return sqlSession.selectOne(sqlId("getBoarSowFarrowLiveAvgCount"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
+    }
+
+    /**
+     * 公猪生产月报: 受胎率
+     */
+    public double getBoarSowPregRate(Long farmId, Date startAt, Date endAt) {
+        return sqlSession.selectOne(sqlId("getBoarSowPregRate"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
+    }
+
+    /**
+     * 公猪生产月报: 分娩率
+     */
+    public double getBoarSowFarrowRate(Long farmId, Date startAt, Date endAt) {
+        return sqlSession.selectOne(sqlId("getBoarSowFarrowRate"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
+    }
+
+    /**
+     * 存栏变动月报: 期初
+     */
+    public DoctorLiveStockChangeMonthlyReport getMonthlyLiveStockChangeBegin(Long farmId, Date startAt) {
+        DoctorLiveStockChangeMonthlyReport report = new DoctorLiveStockChangeMonthlyReport();
+        report.setHoubeiBegin(realTimeLiveStockHoubeiSow(farmId, startAt) + realTimeLiveStockHoubeiBoar(farmId, startAt));
+        report.setFarrowSowBegin(realTimeLiveStockFarrowSow(farmId, startAt));
+        report.setPeiHuaiBegin(realTimeLiveStockSow(farmId, startAt) - report.getFarrowSowBegin());
+        report.setFarrowBegin(realTimeLiveStockFarrow(farmId, startAt));
+        report.setNurseryBegin(realTimeLiveStockNursery(farmId, startAt));
+        report.setFattenBegin(realTimeLiveStockFatten(farmId, startAt));
+        return report;
+    }
+
+    /**
+     * 存栏变动月报: 转入(后备,产房仔猪,保育,育肥)
+     */
+    public DoctorLiveStockChangeMonthlyReport getMonthlyLiveStockChangeIn(Long farmId, Date startAt, Date endAt) {
+        return sqlSession.selectOne("getMonthlyLiveStockChangeIn", ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
+    }
+
+    /**
+     * 存栏变动月报: 进场
+     */
+    public int getMonthlyLiveStockChangeSowIn(Long farmId, Date startAt, Date endAt) {
+        return sqlSession.selectOne("getMonthlyLiveStockChangeSowIn", ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
+    }
+
+
+    /**
+     * 存栏变动月报: 断奶转入
+     */
+    public int getMonthlyLiveStockChangeWeanIn(Long farmId, Date startAt, Date endAt) {
+        return sqlSession.selectOne("getMonthlyLiveStockChangeWeanIn", ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
+    }
+
+    /**
+     * 存栏变动月报: 配怀转产房
+     */
+    public int getMonthlyLiveStockChangeToFarrow(Long farmId, Date startAt, Date endAt) {
+        return sqlSession.selectOne("getMonthlyLiveStockChangeToFarrow", ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
+    }
+
+    /**
+     * 存栏变动月报: 后备转种猪
+     */
+    public int getMonthlyLiveStockChangeToSeed(Long farmId, Date startAt, Date endAt) {
+        return sqlSession.selectOne("getMonthlyLiveStockChangeToSeed", ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
+    }
+
+
+    /**
+     * 存栏变动月报: 产房转保育
+     */
+    public int getMonthlyLiveStockChangeToNursery(Long farmId, Date startAt, Date endAt) {
+        return sqlSession.selectOne("getMonthlyLiveStockChangeToNursery", ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
+    }
+
+    /**
+     * 存栏变动月报: 保育转育肥
+     */
+    public int getMonthlyLiveStockChangeToFatten(Long farmId, Date startAt, Date endAt) {
+        return sqlSession.selectOne("getMonthlyLiveStockChangeToFatten", ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
+    }
+
+    /**
+     * 存栏变动月报: 死淘(后备,产房仔猪,保育,育肥)
+     */
+    public DoctorLiveStockChangeMonthlyReport getMonthlyLiveStockChangeGroupDead(Long farmId, Date startAt, Date endAt) {
+        return sqlSession.selectOne("getMonthlyLiveStockChangeGroupDead", ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
+    }
+
+    /**
+     * 存栏变动月报: 死淘(配怀,产房母猪)
+     */
+    public DoctorLiveStockChangeMonthlyReport getMonthlyLiveStockChangeSowDead(Long farmId, Date startAt, Date endAt) {
+        return sqlSession.selectOne("getMonthlyLiveStockChangeSowDead", ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
+    }
+
+    /**
+     * 存栏变动月报: 销售(后备,产房仔猪,保育,育肥)
+     */
+    public DoctorLiveStockChangeMonthlyReport getMonthlyLiveStockChangeSale(Long farmId, Date startAt, Date endAt) {
+        return sqlSession.selectOne("getMonthlyLiveStockChangeSale", ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
+    }
+
+    /**
+     * 存栏变动月报: 饲料数量
+     */
+    public DoctorLiveStockChangeMonthlyReport getMonthlyLiveStockChangeFeedCount(Long farmId, Date startAt, Date endAt) {
+        return sqlSession.selectOne("getMonthlyLiveStockChangeFeedCount", ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
+    }
+
+    /**
+     * 存栏变动月报: 物料金额(饲料, 药品, 疫苗, 易耗品
+     */
+    public DoctorLiveStockChangeMonthlyReport getMonthlyLiveStockChangeMaterielAmount(Long farmId, Date startAt, Date endAt) {
+        return sqlSession.selectOne("getMonthlyLiveStockChangeMaterielAmount", ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
     }
 }

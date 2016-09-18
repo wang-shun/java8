@@ -94,5 +94,22 @@ public class DoctorMonthlyReportDto implements Serializable {
     private double npd;                       //非生产天数
     private double psy;                       //psy
 
+    /**
+     * 公猪生产成绩
+     */
+    private int boarMateCount;                    //配种次数
+    private int boarFirstMateCount;               //首配母猪数
+    private int boarSowPregCount;                 //受胎头数
+    private int boarSowFarrowCount;               //产仔母猪头数
+    private double boarFarrowAvgCount;            //平均产仔头数
+    private double boarFarrowLiveAvgCount;        //平均产活仔数
+    private double boarPregRate;                  //受胎率
+    private double boarFarrowRate;                //分娩率
+
+    /**
+     * 存栏变动
+     */
+    private DoctorLiveStockChangeMonthlyReport liveStockChange;
+
     private String date;                      //统计月份 2016年08月, 供前台显示
 }

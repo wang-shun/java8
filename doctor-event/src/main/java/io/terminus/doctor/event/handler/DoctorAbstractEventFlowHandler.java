@@ -29,7 +29,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Map;
 import java.util.Objects;
-import java.util.UUID;
 
 import static io.terminus.common.utils.Arguments.notNull;
 
@@ -260,7 +259,6 @@ public abstract class DoctorAbstractEventFlowHandler extends HandlerAware {
                 .eventAt(basic.generateEventAtFromExtra(extra)).type(basic.getEventType())
                 .kind(basic.getPigType()).name(basic.getEventName()).desc(basic.generateEventDescFromExtra(extra)).relEventId(basic.getRelEventId())
                 .barnId(basic.getBarnId()).barnName(basic.getBarnName())
-                .outId(UUID.randomUUID().toString())
                 .operatorId(abstractPigEventInputDto.getOperatorId()).operatorName(abstractPigEventInputDto.getOperatorName())
                 .creatorId(basic.getStaffId()).creatorName(basic.getStaffName())
                 .npd(0)

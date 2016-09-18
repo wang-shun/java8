@@ -2,6 +2,7 @@ package io.terminus.doctor.event.service;
 
 import com.google.common.base.Strings;
 import com.google.common.base.Throwables;
+import com.google.common.collect.Lists;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.Response;
@@ -15,6 +16,7 @@ import io.terminus.doctor.event.dao.redis.DailyReportHistoryDao;
 import io.terminus.doctor.event.dto.report.daily.DoctorDailyReportDto;
 import io.terminus.doctor.event.model.DoctorDailyReport;
 import lombok.extern.slf4j.Slf4j;
+import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -22,6 +24,8 @@ import javax.annotation.PostConstruct;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+
+import static io.terminus.common.utils.Arguments.isEmpty;
 
 /**
  * Desc: 猪场日报表读服务实现类
@@ -67,7 +71,7 @@ public class DoctorDailyReportReadServiceImpl implements DoctorDailyReportReadSe
         try {
             Date date = DateUtil.toDate(sumAt);
             if(date == null){
-                return Response.ok(failReport());
+                return Response.ok(failReport(sumAt));
             }
             DoctorDailyReportDto report = dailyReportHistoryDao.getDailyReportWithRedis(farmId, date);
             if(report == null){
@@ -77,7 +81,7 @@ public class DoctorDailyReportReadServiceImpl implements DoctorDailyReportReadSe
                     dailyReportHistoryDao.saveDailyReport(report, farmId, date);
                     return Response.ok(report);
                 }else{
-                    return Response.ok(failReport());
+                    return Response.ok(failReport(sumAt));
                 }
             }else{
                 return Response.ok(report);
@@ -85,13 +89,33 @@ public class DoctorDailyReportReadServiceImpl implements DoctorDailyReportReadSe
         } catch (Exception e) {
             log.error("find dailyReport by farm id and sumat fail, farmId:{}, sumat:{}, cause:{}",
                     farmId, sumAt, Throwables.getStackTraceAsString(e));
-            return Response.ok(failReport());
+            return Response.ok(failReport(sumAt));
         }
     }
 
-    private DoctorDailyReportDto failReport() {
+    @Override
+    public Response<List<DoctorDailyReportDto>> findDailyReportByFarmIdAndRangeWithCache(Long farmId, String startAt, String endAt) {
+        try {
+            Date end = isEmpty(endAt) ? new Date() : DateUtil.toDate(endAt);
+            Date start = isEmpty(startAt) ? new DateTime(end).plusDays(-30).toDate() : DateUtil.toDate(startAt);
+
+            List<DoctorDailyReportDto> report = Lists.newArrayList();
+            while (!Dates.startOfDay(start).after(Dates.startOfDay(end))) {
+                report.add(findDailyReportByFarmIdAndSumAtWithCache(farmId, DateUtil.toDateString(start)).getResult());
+                start = new DateTime(start).plusDays(1).toDate();
+            }
+            return Response.ok(report);
+        } catch (Exception e) {
+            log.error("find dailyReport by farm id and range fail, farmId:{}, startAt:{}, endAt, cause:{}",
+                    farmId, startAt, endAt, Throwables.getStackTraceAsString(e));
+            return Response.ok(Lists.newArrayList());
+        }
+    }
+
+    private DoctorDailyReportDto failReport(String sumat) {
         DoctorDailyReportDto dto = new DoctorDailyReportDto();
         dto.setFail(true);
+        dto.setSumAt(DateUtil.toDate(sumat));
         return dto;
     }
 

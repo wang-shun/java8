@@ -1,9 +1,7 @@
 package io.terminus.doctor.event.dto.event.group;
 
-import com.google.common.base.Objects;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import lombok.Getter;
 
 import java.io.Serializable;
 
@@ -55,4 +53,5 @@ public class DoctorTurnSeedGroupEvent extends BaseGroupEvent implements Serializ
 
     private String toBarnName;
 
+    private Integer toBarnType;
 }
