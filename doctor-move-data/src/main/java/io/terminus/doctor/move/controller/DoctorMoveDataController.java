@@ -406,12 +406,12 @@ public class DoctorMoveDataController {
     public Boolean moveParityMonthlyReport(@RequestParam("farmId") Long farmId,
                                      @RequestParam(value = "index", required = false) Integer index) {
         try {
-            log.warn("move monthly report start, farmId:{}, index:{}", farmId, index);
-            doctorMoveReportService.moveMonthlyReport(farmId, index);
-            log.warn("move monthly report end");
+            log.warn("move parity monthly report start, farmId:{}, index:{}", farmId, index);
+            doctorMoveReportService.moveParityMonthlyReport(farmId, index);
+            log.warn("move parity monthly report end");
             return true;
         } catch (Exception e) {
-            log.error("move monthly report failed, farmId:{}, cause:{}", farmId, Throwables.getStackTraceAsString(e));
+            log.error("move parity monthly report failed, farmId:{}, cause:{}", farmId, Throwables.getStackTraceAsString(e));
             return false;
         }
     }
@@ -423,13 +423,13 @@ public class DoctorMoveDataController {
     public Boolean moveParityMonthlyReport(@RequestParam("farmId") Long farmId,
                                      @RequestParam("date") String date) {
         try {
-            log.warn("move monthly report date start, farmId:{}, date:{}", farmId, date);
+            log.warn("move parity monthly report date start, farmId:{}, date:{}", farmId, date);
             doctorParityMonthlyReportWriteService.createMonthlyReport(farmId, DateUtil.toDate(date));
-            log.warn("move monthly report date end");
+            log.warn("move parity monthly report date end");
 
             return true;
         } catch (Exception e) {
-            log.error("move monthly report failed, farmId:{}, cause:{}", farmId, Throwables.getStackTraceAsString(e));
+            log.error("move parity monthly report failed, farmId:{}, cause:{}", farmId, Throwables.getStackTraceAsString(e));
             return false;
         }
     }
