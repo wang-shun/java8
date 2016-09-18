@@ -10,6 +10,7 @@ import io.terminus.doctor.event.model.DoctorDailyReport;
 import io.terminus.doctor.event.service.DoctorDailyReportReadService;
 import io.terminus.doctor.event.service.DoctorDailyReportWriteService;
 import io.terminus.doctor.event.service.DoctorMonthlyReportWriteService;
+import io.terminus.doctor.event.service.DoctorParityMonthlyReportWriteService;
 import io.terminus.doctor.user.model.DoctorFarm;
 import io.terminus.doctor.user.service.DoctorFarmReadService;
 import io.terminus.zookeeper.leader.HostLeader;
@@ -47,6 +48,8 @@ public class DoctorReportJobs {
     private DoctorMonthlyReportWriteService doctorMonthlyReportWriteService;
     @RpcConsumer
     private DoctorFarmReadService doctorFarmReadService;
+    @RpcConsumer
+    private DoctorParityMonthlyReportWriteService doctorParityMonthlyReportWriteService;
 
     private final HostLeader hostLeader;
 
@@ -139,6 +142,30 @@ public class DoctorReportJobs {
             }
 
             RespHelper.or500(doctorMonthlyReportWriteService.createMonthlyReports(getAllFarmIds(), yesterday));
+
+            log.info("monthly report job end, now is:{}", DateUtil.toDateTimeString(new Date()));
+        } catch (Exception e) {
+            log.error("monthly report job failed, cause:{}", Throwables.getStackTraceAsString(e));
+        }
+    }
+
+    /**
+     * 猪场胎次产仔月报计算job
+     * 每天凌晨3点统计昨天的数据
+     */
+    @Scheduled(cron = "0 0 3 * * ?")
+    @RequestMapping(value = "/parityMonthly", method = RequestMethod.GET)
+    public void parityMonthlyReport() {
+        try {
+            if (!hostLeader.isLeader()) {
+                log.info("current leader is:{}, skip", hostLeader.currentLeaderId());
+                return;
+            }
+            log.info("monthly report job start, now is:{}", DateUtil.toDateTimeString(new Date()));
+
+            //获取昨天的天初
+            Date yesterday = new DateTime(Dates.startOfDay(new Date())).plusDays(-1).toDate();
+            RespHelper.or500(doctorParityMonthlyReportWriteService.createMonthlyReports(getAllFarmIds(), yesterday));
 
             log.info("monthly report job end, now is:{}", DateUtil.toDateTimeString(new Date()));
         } catch (Exception e) {

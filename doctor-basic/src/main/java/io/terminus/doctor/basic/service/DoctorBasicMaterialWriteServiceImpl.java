@@ -7,6 +7,7 @@ import io.terminus.common.model.Response;
 import io.terminus.doctor.basic.dao.DoctorBasicMaterialDao;
 import io.terminus.doctor.basic.model.DoctorBasicMaterial;
 import io.terminus.doctor.common.enums.DataEventType;
+import io.terminus.doctor.common.enums.WareHouseType;
 import io.terminus.doctor.common.event.DataEvent;
 import io.terminus.zookeeper.pubsub.Publisher;
 import lombok.extern.slf4j.Slf4j;
@@ -39,7 +40,14 @@ public class DoctorBasicMaterialWriteServiceImpl implements DoctorBasicMaterialW
     @Override
     public Response<Long> createBasicMaterial(DoctorBasicMaterial basicMaterial) {
         try {
-            doctorBasicMaterialDao.create(basicMaterial);
+            DoctorBasicMaterial exist = doctorBasicMaterialDao.findByTypeAndName(WareHouseType.from(basicMaterial.getType()), basicMaterial.getName());
+            if(exist == null){
+                doctorBasicMaterialDao.create(basicMaterial);
+            }else{
+                basicMaterial.setId(exist.getId());
+                basicMaterial.setIsValid(1);
+                doctorBasicMaterialDao.update(basicMaterial);
+            }
             publishMaterialInfo(DataEventType.MaterialInfoCreateEvent.getKey(), ImmutableMap.of("materialInfoCreatedId", basicMaterial.getId()));
             return Response.ok(basicMaterial.getId());
         } catch (Exception e) {
@@ -63,7 +71,9 @@ public class DoctorBasicMaterialWriteServiceImpl implements DoctorBasicMaterialW
     @Override
     public Response<Boolean> deleteBasicMaterialById(Long basicMaterialId) {
         try {
-            doctorBasicMaterialDao.delete(basicMaterialId);
+            DoctorBasicMaterial basicMaterial = doctorBasicMaterialDao.findById(basicMaterialId);
+            basicMaterial.setIsValid(-1);
+            doctorBasicMaterialDao.update(basicMaterial);
             publishMaterialInfo(DataEventType.MaterialInfoCreateEvent.getKey(), ImmutableMap.of("materialInfoCreatedId", basicMaterialId));
             return Response.ok(Boolean.TRUE);
         } catch (Exception e) {

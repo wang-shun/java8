@@ -546,6 +546,7 @@ public class DoctorMoveDataController {
     }
 
     /**
+<<<<<<< HEAD
      * 修正哺乳母猪数据
      */
     @RequestMapping(value = "/updateBuruTrack", method = RequestMethod.GET)
@@ -575,6 +576,23 @@ public class DoctorMoveDataController {
             return true;
         } catch (Exception e) {
             log.error("updateFarrowGroupTrack failed, farmId:{}, cause:{}", farmId, Throwables.getStackTraceAsString(e));
+            return false;
+        }
+    }
+
+    /**
+     * 更新猪群事件的目标/来源猪舍
+     */
+    @RequestMapping(value = "/updateGroupEventOtherBarn", method = RequestMethod.GET)
+    public Boolean updateGroupEventOtherBarn(@RequestParam("farmId") Long farmId) {
+        try {
+            DoctorFarm farm = doctorFarmDao.findById(farmId);
+            log.warn("updateGroupEventOtherBarn start, farmId:{}", farmId);
+            doctorMoveDataService.updateGroupEventOtherBarn(farm);
+            log.warn("updateGroupEventOtherBarn end");
+            return true;
+        } catch (Exception e) {
+            log.error("updateGroupEventOtherBarn failed, farmId:{}, cause:{}", farmId, Throwables.getStackTraceAsString(e));
             return false;
         }
     }

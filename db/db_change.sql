@@ -341,3 +341,42 @@ ALTER TABLE doctor_pig_tracks ADD COLUMN wean_qty int(11) DEFAULT NULL COMMENT '
 ALTER TABLE doctor_pig_tracks ADD COLUMN farrow_avg_weight double DEFAULT NULL COMMENT '分娩均重(kg)' AFTER wean_qty;
 ALTER TABLE doctor_pig_tracks ADD COLUMN wean_avg_weight double DEFAULT NULL COMMENT '断奶均重(kg)' AFTER farrow_avg_weight;
 
+alter table doctor_pig_events add column boar_code varchar(64) default null comment '配种的公猪' after doctor_mate_type;
+create index doctor_pig_events_boar_code on doctor_pig_events(boar_code);
+
+-- 2016年09月13日 基础物料表增加逻辑删除字段
+alter table doctor_basic_materials
+add column is_valid smallint(6) NOT NULL DEFAULT 1 COMMENT '逻辑删除字段, -1 表示删除, 1 表示可用' after srm;
+
+-- 2016年09月13日, 把物资变动关联的猪舍从 extra 中拆出来
+alter table doctor_material_consume_providers
+add column `barn_id` bigint(20) unsigned DEFAULT NULL COMMENT '领用物资的猪舍, 仅 event_type=1 时才会有值' after staff_name,
+add column `barn_name` varchar(64) DEFAULT NULL COMMENT '猪舍名称' after barn_id;
+
+-- 2016年09月13日, 基础物料表新增字段 "子类别"
+alter table doctor_basic_materials
+add column sub_type bigint(20) unsigned DEFAULT NULL COMMENT '物料的子类别，关联 doctor_basics 表的id' after `type`;
+
+-- 2016-09-14 胎次产仔分析月报
+CREATE TABLE `doctor_parity_monthly_reports` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `farm_id` bigint(20) DEFAULT NULL COMMENT '猪场id',
+  `parity` int(11) DEFAULT NULL COMMENT '胎次',
+  `nest_count` int(11) DEFAULT NULL COMMENT '总窝数',
+  `percent` double DEFAULT NULL COMMENT '占比',
+  `farrow_all` int(11) DEFAULT NULL COMMENT '总产仔',
+  `farrow_avg` double DEFAULT NULL COMMENT '平均产仔',
+  `sum_at` varchar(32) DEFAULT NULL COMMENT '统计时间',
+  `created_at` datetime DEFAULT NULL COMMENT '创建时间',
+  `updated_at` datetime DEFAULT NULL COMMENT '更新时间',
+  PRIMARY KEY (`id`),
+  KEY `doctor_parity_monthly_reports_id` (`id`),
+  KEY `doctor_parity_monthly_reports_farm_id` (`farm_id`),
+  KEY `doctor_parity_monthly_reports_parity` (`parity`),
+  KEY `doctor_parity_monthly_reports_sum_at` (`sum_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8  COMMENT='胎次产仔分析月报';
+
+-- 2016-09-18 猪群新增转入类型, 猪舍id字段
+ALTER TABLE doctor_group_events ADD COLUMN in_type smallint(6) DEFAULT NULL COMMENT '仔猪转入事件: 转入类型' AFTER trans_group_type;
+ALTER TABLE doctor_group_events ADD COLUMN other_barn_id bigint(20) DEFAULT NULL COMMENT '猪群转入转出事件的来源/目标id' AFTER in_type;
+ALTER TABLE doctor_group_events ADD COLUMN other_barn_type varchar(64) DEFAULT NULL COMMENT '猪群转入转出事件的来源/目标猪舍类型' AFTER other_barn_id;

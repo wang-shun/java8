@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Map;
+import java.util.List;
 
 /**
  * Desc:
@@ -53,6 +54,20 @@ public class DoctorReports {
     public DoctorDailyReportDto findDailyReportByFarmIdAndSumAtWithCache(@RequestParam("farmId") Long farmId,
                                                                          @RequestParam("date") String date) {
         return RespHelper.or500(doctorDailyReportReadService.findDailyReportByFarmIdAndSumAtWithCache(farmId, date));
+    }
+
+    /**
+     * 根据farmId和日期查询猪场日报表(缓存方式)
+     * @param farmId  猪场id
+     * @param startAt 开始时间 yyyy-MM-dd
+     * @param endAt   结束时间 yyyy-MM-dd
+     * @return 猪场日报表
+     */
+    @RequestMapping(value = "/daily/range", method = RequestMethod.GET)
+    public List<DoctorDailyReportDto> findDailyReportByFarmIdAndRangeWithCache(@RequestParam("farmId") Long farmId,
+                                                                               @RequestParam(value = "startAt", required = false) String startAt,
+                                                                               @RequestParam(value = "endAt", required = false) String endAt) {
+        return RespHelper.or500(doctorDailyReportReadService.findDailyReportByFarmIdAndRangeWithCache(farmId, startAt, endAt));
     }
 
     /**

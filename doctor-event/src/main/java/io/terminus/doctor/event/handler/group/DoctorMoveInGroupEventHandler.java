@@ -3,7 +3,6 @@ package io.terminus.doctor.event.handler.group;
 import com.google.common.base.MoreObjects;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.doctor.common.event.CoreEventDispatcher;
-import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorGroupSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
@@ -73,10 +72,14 @@ public class DoctorMoveInGroupEventHandler extends DoctorAbstractGroupEventHandl
         event.setAvgDayAge(moveIn.getAvgDayAge());
         event.setAvgWeight(moveIn.getAvgWeight());
         event.setWeight(EventUtil.getWeight(event.getAvgWeight(), event.getQuantity()));
+        event.setInType(moveIn.getInType());
 
         if (moveIn.getFromBarnId() != null) {
-            DoctorBarn toBarn = RespHelper.orServEx(doctorBarnReadService.findBarnById(moveIn.getFromBarnId()));
-            event.setTransGroupType(getTransType(moveIn.getInType(), group.getPigType(), toBarn).getValue());   //区别内转还是外转
+            DoctorBarn fromBarn = getBarnById(moveIn.getFromBarnId());
+            moveInEvent.setFromBarnType(fromBarn.getPigType());
+            event.setTransGroupType(getTransType(group.getPigType(), fromBarn).getValue());   //区别内转还是外转
+            event.setOtherBarnId(moveIn.getFromBarnId());  //来源猪舍id
+            event.setOtherBarnType(fromBarn.getPigType());   //来源猪舍类型
         }
         event.setExtraMap(moveInEvent);
         doctorGroupEventDao.create(event);

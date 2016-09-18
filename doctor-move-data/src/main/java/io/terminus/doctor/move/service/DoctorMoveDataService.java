@@ -18,6 +18,7 @@ import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.constants.DoctorBasicEnums;
 import io.terminus.doctor.event.constants.DoctorFarmEntryConstants;
+import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorGroupDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
@@ -123,6 +124,7 @@ public class DoctorMoveDataService {
     private final DoctorPigReadService doctorPigReadService;
     private final DoctorMoveWorkflowHandler doctorMoveWorkflowHandler;
     private final DoctorGroupReportManager doctorGroupReportManager;
+    private final DoctorBarnDao doctorBarnDao;
 
     @Autowired
     public DoctorMoveDataService(DoctorMoveDatasourceHandler doctorMoveDatasourceHandler,
@@ -135,7 +137,8 @@ public class DoctorMoveDataService {
                                  DoctorMoveBasicService doctorMoveBasicService,
                                  DoctorPigReadService doctorPigReadService,
                                  DoctorMoveWorkflowHandler doctorMoveWorkflowHandler,
-                                 DoctorGroupReportManager doctorGroupReportManager) {
+                                 DoctorGroupReportManager doctorGroupReportManager,
+                                 DoctorBarnDao doctorBarnDao) {
         this.doctorMoveDatasourceHandler = doctorMoveDatasourceHandler;
         this.doctorGroupDao = doctorGroupDao;
         this.doctorGroupEventDao = doctorGroupEventDao;
@@ -147,6 +150,7 @@ public class DoctorMoveDataService {
         this.doctorPigReadService = doctorPigReadService;
         this.doctorMoveWorkflowHandler = doctorMoveWorkflowHandler;
         this.doctorGroupReportManager = doctorGroupReportManager;
+        this.doctorBarnDao = doctorBarnDao;
     }
 
     //删除猪场所有猪相关的数据
@@ -180,6 +184,57 @@ public class DoctorMoveDataService {
     @Transactional
     public void updateBuruTrack(DoctorFarm farm) {
         updateBuruSowTrack(farm);
+    }
+
+    /**
+     * 更新猪群事件的目标/来源猪舍
+     */
+    @Transactional
+    public void updateGroupEventOtherBarn(DoctorFarm farm) {
+        Map<Long, DoctorBarn> barnMap = doctorBarnDao.findByFarmId(farm.getId()).stream().collect(Collectors.toMap(DoctorBarn::getId, v -> v));
+
+        //仔猪转入
+        doctorGroupEventDao.findGroupEventsByEventTypeAndDate(farm.getId(), GroupEventType.MOVE_IN.getValue(), null, null).forEach(event -> {
+            DoctorMoveInGroupEvent moveIn = JSON_MAPPER.fromJson(event.getExtra(), DoctorMoveInGroupEvent.class);
+            DoctorGroupEvent updateEvent = new DoctorGroupEvent();
+            updateEvent.setId(event.getId());
+            updateEvent.setInType(moveIn.getInType());
+            DoctorBarn barn = barnMap.get(moveIn.getFromBarnId());
+            if (barn != null) {
+                updateEvent.setOtherBarnId(barn.getId());
+                updateEvent.setOtherBarnType(barn.getPigType());
+            }
+            doctorGroupEventDao.update(updateEvent);
+        });
+
+        //转群
+        doctorGroupEventDao.findGroupEventsByEventTypeAndDate(farm.getId(), GroupEventType.TRANS_GROUP.getValue(), null, null).forEach(event -> {
+            DoctorTransGroupEvent transGroup = JSON_MAPPER.fromJson(event.getExtra(), DoctorTransGroupEvent.class);
+            updateGroupOtherBarn(event.getId(), barnMap.get(transGroup.getToBarnId()));
+        });
+
+        //转场
+        doctorGroupEventDao.findGroupEventsByEventTypeAndDate(farm.getId(), GroupEventType.TRANS_FARM.getValue(), null, null).forEach(event -> {
+            DoctorTransFarmGroupEvent transFarm = JSON_MAPPER.fromJson(event.getExtra(), DoctorTransFarmGroupEvent.class);
+            updateGroupOtherBarn(event.getId(), barnMap.get(transFarm.getToBarnId()));
+
+        });
+
+        //转种猪
+        doctorGroupEventDao.findGroupEventsByEventTypeAndDate(farm.getId(), GroupEventType.TURN_SEED.getValue(), null, null).forEach(event -> {
+            DoctorTurnSeedGroupEvent turnSeed = JSON_MAPPER.fromJson(event.getExtra(), DoctorTurnSeedGroupEvent.class);
+            updateGroupOtherBarn(event.getId(), barnMap.get(turnSeed.getToBarnId()));
+        });
+    }
+
+    private void updateGroupOtherBarn(Long eventId, DoctorBarn barn) {
+        if (barn != null) {
+            DoctorGroupEvent updateEvent = new DoctorGroupEvent();
+            updateEvent.setId(eventId);
+            updateEvent.setOtherBarnId(barn.getId());
+            updateEvent.setOtherBarnType(barn.getPigType());
+            doctorGroupEventDao.update(updateEvent);
+        }
     }
 
     /**
@@ -238,6 +293,22 @@ public class DoctorMoveDataService {
                     DoctorGroupEvent updateEvent = new DoctorGroupEvent();
                     updateEvent.setId(event.getId());
                     updateEvent.setTransGroupType(getTransType(moveIn.getInType(), event.getPigType(), moveIn.getFromBarnType()).getValue());
+                    doctorGroupEventDao.update(updateEvent);
+                });
+
+        doctorGroupEventDao.findGroupEventsByEventTypeAndDate(farm.getId(), GroupEventType.TRANS_GROUP.getValue(), null, null)
+                .forEach(event -> {
+                    DoctorTransGroupEvent trans = JSON_MAPPER.fromJson(event.getExtra(), DoctorTransGroupEvent.class);
+                    DoctorGroupEvent updateEvent = new DoctorGroupEvent();
+                    updateEvent.setId(event.getId());
+                    Integer toBarnType = trans.getToBarnType();
+                    if (toBarnType == null) {
+                        DoctorBarn toBarn = doctorBarnDao.findById(trans.getToBarnId());
+                        if (toBarn != null) {
+                            toBarnType = toBarn.getPigType();
+                        }
+                    }
+                    updateEvent.setTransGroupType(getTransType(null, event.getPigType(), toBarnType).getValue());
                     doctorGroupEventDao.update(updateEvent);
                 });
     }
@@ -1753,6 +1824,9 @@ public class DoctorMoveDataService {
                 break;
             case MOVE_IN:
                 DoctorMoveInGroupEvent moveIn = getMoveInEvent(gainEvent, basicMap, groupMap, group);
+                event.setInType(moveIn.getInType());
+                event.setOtherBarnId(moveIn.getFromBarnId());
+                event.setOtherBarnType(moveIn.getFromBarnType());
                 event.setExtraMap(moveIn);
                 event.setTransGroupType(getTransType(moveIn.getInType(), event.getPigType(), moveIn.getFromBarnType()).getValue());  //区分内转还是外转
                 break;
@@ -1765,11 +1839,16 @@ public class DoctorMoveDataService {
                 break;
             case TRANS_GROUP:
                 DoctorTransGroupEvent transGroupEvent = getTranGroupEvent(gainEvent, basicMap, barnMap, groupMap, group);
+                event.setOtherBarnId(transGroupEvent.getToBarnId());
+                event.setOtherBarnType(transGroupEvent.getToBarnType());
                 event.setExtraMap(transGroupEvent);
                 event.setTransGroupType(getTransType(null, event.getPigType(), transGroupEvent.getToBarnType()).getValue());  //区分内转还是外转
                 break;
             case TURN_SEED:
-                event.setExtraMap(getTurnSeedEvent(gainEvent, basicMap, barnMap, pigMap));
+                DoctorTurnSeedGroupEvent turnSeed = getTurnSeedEvent(gainEvent, basicMap, barnMap, pigMap);
+                event.setOtherBarnId(turnSeed.getToBarnId());
+                event.setOtherBarnType(turnSeed.getToBarnType());
+                event.setExtraMap(turnSeed);
                 break;
             case LIVE_STOCK:
                 DoctorLiveStockGroupEvent liveStock = new DoctorLiveStockGroupEvent();
@@ -1803,6 +1882,8 @@ public class DoctorMoveDataService {
                 break;
             case TRANS_FARM: //转场肯定是外转, 相当于空降
                 DoctorTransFarmGroupEvent transFarmEvent = getTranFarmEvent(gainEvent, basicMap, barnMap, groupMap, group);
+                event.setOtherBarnId(transFarmEvent.getToBarnId());
+                event.setOtherBarnType(transFarmEvent.getToBarnType());
                 event.setExtraMap(transFarmEvent);
                 event.setTransGroupType(DoctorGroupEvent.TransGroupType.OUT.getValue());
                 break;
@@ -1819,7 +1900,7 @@ public class DoctorMoveDataService {
 
     //判断内转还是外转
     private static DoctorGroupEvent.TransGroupType getTransType(Integer inType, Integer pigType, Integer toBarnType) {
-        if (!Objects.equals(inType, DoctorMoveInGroupEvent.InType.GROUP.getValue())) {
+        if (inType != null && !Objects.equals(inType, DoctorMoveInGroupEvent.InType.GROUP.getValue())) {
             return DoctorGroupEvent.TransGroupType.OUT;
         }
         return Objects.equals(pigType, toBarnType) || (FARROW_TYPES.contains(pigType) && FARROW_TYPES.contains(toBarnType)) ?
@@ -2007,6 +2088,7 @@ public class DoctorMoveDataService {
         if (barn != null) {
             turnSeed.setToBarnId(barn.getId());
             turnSeed.setToBarnName(barn.getName());
+            turnSeed.setToBarnType(barn.getPigType());
         }
 
 //        DoctorTurnSeedGroupEvent.Sex sex = DoctorTurnSeedGroupEvent.Sex.from(gainEvent.getSexName());

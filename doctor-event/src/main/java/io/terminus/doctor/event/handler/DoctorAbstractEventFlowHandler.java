@@ -29,7 +29,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Map;
 import java.util.Objects;
-import java.util.UUID;
 
 import static io.terminus.common.utils.Arguments.notNull;
 
@@ -182,6 +181,11 @@ public abstract class DoctorAbstractEventFlowHandler extends HandlerAware {
 
         eventCreateAfterHandler(execution, doctorPigEvent, doctorPigTrack, basicInputInfoDto, extra, context);
 
+        Map<String, Object> extraMap = JsonMapper.nonEmptyMapper().fromJson(doctorPigTrack.getExtra(),
+                JsonMapper.nonEmptyMapper().createCollectionType(Map.class, String.class, Object.class));
+
+        //往事件中添加公猪code
+        doctorPigEvent.setBoarCode(Objects.isNull(extraMap.get("matingBoarPigCode")) ? null : Objects.toString(extraMap.get("matingBoarPigCode")));
         //往事件当中添加事件发生之后猪的状态
         doctorPigEvent.setPigStatusAfter(doctorPigTrack.getStatus());
         //添加时间发生之后母猪的胎次
@@ -255,7 +259,6 @@ public abstract class DoctorAbstractEventFlowHandler extends HandlerAware {
                 .eventAt(basic.generateEventAtFromExtra(extra)).type(basic.getEventType())
                 .kind(basic.getPigType()).name(basic.getEventName()).desc(basic.generateEventDescFromExtra(extra)).relEventId(basic.getRelEventId())
                 .barnId(basic.getBarnId()).barnName(basic.getBarnName())
-                .outId(UUID.randomUUID().toString())
                 .operatorId(abstractPigEventInputDto.getOperatorId()).operatorName(abstractPigEventInputDto.getOperatorName())
                 .creatorId(basic.getStaffId()).creatorName(basic.getStaffName())
                 .npd(0)

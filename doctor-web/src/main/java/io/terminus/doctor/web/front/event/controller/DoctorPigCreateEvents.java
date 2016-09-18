@@ -14,6 +14,7 @@ import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
 import io.terminus.doctor.event.dto.DoctorPigInfoDto;
 import io.terminus.doctor.event.dto.event.boar.DoctorSemenDto;
+import io.terminus.doctor.event.dto.event.sow.DoctorPartWeanDto;
 import io.terminus.doctor.event.dto.event.usual.DoctorChgFarmDto;
 import io.terminus.doctor.event.dto.event.usual.DoctorChgLocationDto;
 import io.terminus.doctor.event.dto.event.usual.DoctorConditionDto;
@@ -397,14 +398,22 @@ public class DoctorPigCreateEvents {
     public Long createSowEventInfo(@RequestParam("farmId") Long farmId,
                                    @RequestParam("pigId") Long pigId, @RequestParam("eventType") Integer eventType,
                                    @RequestParam("sowInfoDtoJson") String sowInfoDtoJson) {
+        Long tempPigId = pigId;
         if (Objects.equals(eventType, PigEvent.FOSTERS.getKey())) {
             List<DoctorBasicInputInfoDto> basics = buildBasicInputPigDtoContent(farmId, pigId, sowInfoDtoJson);
             RespHelper.or500(doctorSowEventCreateService.sowEventsCreate(basics, sowInfoDtoJson));
             // 猪批量事件操作， 返回PigId
-            return pigId;
         } else {
-            return RespHelper.or500(doctorSowEventCreateService.sowEventCreate(buildBasicInputInfoDto(farmId, pigId, PigEvent.from(eventType)), sowInfoDtoJson));
+            pigId = RespHelper.or500(doctorSowEventCreateService.sowEventCreate(buildBasicInputInfoDto(farmId, pigId, PigEvent.from(eventType)), sowInfoDtoJson));
+            if (Objects.equals(eventType, PigEvent.WEAN.getKey())){
+                DoctorPartWeanDto doctorPartWeanDto = JsonMapper.JSON_NON_DEFAULT_MAPPER.fromJson(sowInfoDtoJson, DoctorPartWeanDto.class);
+                Integer count =  doctorPartWeanDto.getFarrowingLiveCount()-doctorPartWeanDto.getWeanPigletsCount();
+                if (Objects.equals(doctorPartWeanDto.getPartWeanPigletsCount(), count) && doctorPartWeanDto.getChgLocationToBarnId() !=null){
+                    doctorSowEventCreateService.sowEventCreate(buildBasicInputInfoDto(farmId, tempPigId, PigEvent.TO_MATING), sowInfoDtoJson);
+                }
+            }
         }
+        return pigId;
     }
 
 
@@ -455,7 +464,8 @@ public class DoctorPigCreateEvents {
 
     //调用状态转换事件: 母猪转舍
     private Long createSowChgLocation(DoctorChgLocationDto chg, DoctorBasicInputInfoDto basic, DoctorBarn fromBarn, DoctorBarn toBarn) {
-        if (!CHG_SOW_ALLOWS.contains(toBarn.getPigType()) || !(fromBarn.getPigType() == PREG_SOW.getValue() && FARROW_TYPES.contains(toBarn.getPigType()))) {
+        if (!CHG_SOW_ALLOWS.contains(toBarn.getPigType()) ||
+                !(fromBarn.getPigType() == PREG_SOW.getValue() && FARROW_TYPES.contains(toBarn.getPigType()))) {
             throw new JsonResponseException(500, "input.sowToBarnId.error");
         }
 

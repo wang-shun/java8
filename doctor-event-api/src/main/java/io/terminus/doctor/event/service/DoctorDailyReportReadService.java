@@ -29,6 +29,16 @@ public interface DoctorDailyReportReadService {
                                                                             @NotEmpty(message = "date.not.null") String sumAt);
 
     /**
+     * 根据farmId和日期查询猪场日报表(缓存方式)
+     * @param farmId  猪场id
+     * @param startAt 开始时间 yyyy-MM-dd
+     * @param endAt   结束时间 yyyy-MM-dd
+     * @return 猪场日报表
+     */
+    Response<List<DoctorDailyReportDto>> findDailyReportByFarmIdAndRangeWithCache(@NotNull(message = "farmId.not.null") Long farmId,
+                                                                                  String startAt, String endAt);
+
+    /**
      * 根据日期初始化日报统计(job 和 event模块启动init使用)
      * @param date 日期
      * @return 日报统计list

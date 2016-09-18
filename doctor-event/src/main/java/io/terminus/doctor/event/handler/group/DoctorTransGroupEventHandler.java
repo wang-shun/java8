@@ -82,6 +82,7 @@ public class DoctorTransGroupEventHandler extends DoctorAbstractGroupEventHandle
         //1.转换转群事件
         DoctorTransGroupEvent transGroupEvent = BeanMapper.map(transGroup, DoctorTransGroupEvent.class);
         checkBreed(group.getBreedId(), transGroupEvent.getBreedId());
+        transGroupEvent.setToBarnType(toBarn.getPigType());
 
         //2.创建转群事件
         DoctorGroupEvent<DoctorTransGroupEvent> event = dozerGroupEvent(group, GroupEventType.TRANS_GROUP, transGroup);
@@ -89,7 +90,9 @@ public class DoctorTransGroupEventHandler extends DoctorAbstractGroupEventHandle
         event.setAvgDayAge(groupTrack.getAvgDayAge());  //转群的日龄不需要录入, 直接取猪群的日龄
         event.setAvgWeight(transGroup.getAvgWeight());  //均重
         event.setWeight(realWeight);                    //总重
-        event.setTransGroupType(getTransType(null, group.getPigType(), toBarn).getValue());   //区别内转还是外转(null是因为不用判断转入类型)
+        event.setTransGroupType(getTransType(group.getPigType(), toBarn).getValue());   //区别内转还是外转(null是因为不用判断转入类型)
+        event.setOtherBarnId(toBarn.getId());          //目标猪舍id
+        event.setOtherBarnType(toBarn.getPigType());   //目标猪舍类型
         event.setExtraMap(transGroupEvent);
         doctorGroupEventDao.create(event);
 

@@ -1,10 +1,12 @@
 package io.terminus.doctor.web.front.warehouse.dto;
 
+import io.terminus.doctor.warehouse.model.DoctorMaterialConsumeProvider;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Builder;
 
+import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 
 /**
@@ -38,4 +40,16 @@ public class DoctorConsumeProviderInputDto implements Serializable{
     private Long barnId;    //对应的消耗 猪舍Id
 
     private String barnName;    //对应的猪舍名称
+
+    /**
+     * 事件类型
+     * @see DoctorMaterialConsumeProvider.EVENT_TYPE
+     */
+    @NotNull(message = "eventType.not.null")
+    private Integer eventType;
+
+    /**
+     * 员工
+     */
+    private Long staffId;
 }
