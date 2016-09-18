@@ -123,16 +123,19 @@ public class SowBreedingProducer extends AbstractJobProducer {
                         //根据用户拥有的猪舍权限过滤拥有user
                         List<SubUser> sUsers = filterSubUserBarnId(subUsers, pigDto.getBarnId());
                         // 母猪的updatedAt与当前时间差 (天)
-                        if (getStatusDate(pigDto) != null) {
-                            Double timeDiff = getTimeDiff(getStatusDate(pigDto));
-                            // 获取配置的天数, 并判断
-                            // 记录每只猪的消息提醒
+                        if (getStatusDate(pigDto) == null) {
+                            break;
+                        }
+                        Double timeDiff = getTimeDiff(getStatusDate(pigDto));
+                        // 获取配置的天数, 并判断
+                        // 记录每只猪的消息提醒
+                        if (checkRuleValue(ruleValueMap.get(1), timeDiff)) {
                             if (!isMessage && Objects.equals(ruleTemplate.getType(), DoctorMessageRuleTemplate.Type.WARNING.getValue())) {
                                 recordPigMessage(pigDto, PigEvent.MATING, getRuleTimeDiff(ruleValueMap.get(1), timeDiff), ruleValueMap.get(1).getValue().intValue(),
                                         PigStatus.Wean, PigStatus.KongHuai, PigStatus.Entry);
                             }
 
-                            if (isMessage && checkRuleValue(ruleValueMap.get(1), timeDiff)) {
+                            if (isMessage) {
                                 pigDto.setOperatorName(RespHelper.orServEx(doctorBarnReadService.findBarnById(pigDto.getBarnId())).getStaffName());
                                 messages.addAll(getMessage(pigDto, rule.getChannels(), ruleRole, sUsers, timeDiff, rule.getUrl()));
                             }

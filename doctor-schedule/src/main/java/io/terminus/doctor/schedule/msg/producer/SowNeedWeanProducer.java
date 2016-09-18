@@ -118,16 +118,17 @@ public class SowNeedWeanProducer extends AbstractJobProducer {
                         DoctorPigEvent doctorPigEvent = getPigEventByEventType(pigDto.getDoctorPigEvents(), PigEvent.FARROWING.getKey());
                         Double timeDiff = getTimeDiff(new DateTime(doctorPigEvent.getEventAt()));
                         // 1. 哺乳状态日期判断 -> id:1
-                        if (!isMessage && Objects.equals(ruleTemplate.getType(), DoctorMessageRuleTemplate.Type.WARNING.getValue())) {
-                            // 记录每只猪的消息提醒
-                            recordPigMessage(pigDto, PigEvent.WEAN, getRuleTimeDiff(ruleValueMap.get(1), timeDiff), ruleValueMap.get(1).getValue().intValue(),
-                                    PigStatus.FEED);
-                        }
-
-                        if (isMessage && checkRuleValue(ruleValueMap.get(1), timeDiff)) {
-                            pigDto.setEventDate(doctorPigEvent.getEventAt());
-                            pigDto.setOperatorName(doctorPigEvent.getOperatorName());
-                            messages.addAll(getMessage(pigDto, rule.getChannels(), ruleRole, sUsers, timeDiff, rule.getUrl()));
+                        if (checkRuleValue(ruleValueMap.get(1), timeDiff)) {
+                            if (!isMessage && Objects.equals(ruleTemplate.getType(), DoctorMessageRuleTemplate.Type.WARNING.getValue())) {
+                                // 记录每只猪的消息提醒
+                                recordPigMessage(pigDto, PigEvent.WEAN, getRuleTimeDiff(ruleValueMap.get(1), timeDiff), ruleValueMap.get(1).getValue().intValue(),
+                                        PigStatus.FEED);
+                            }
+                            if (isMessage) {
+                                pigDto.setEventDate(doctorPigEvent.getEventAt());
+                                pigDto.setOperatorName(doctorPigEvent.getOperatorName());
+                                messages.addAll(getMessage(pigDto, rule.getChannels(), ruleRole, sUsers, timeDiff, rule.getUrl()));
+                            }
                         }
                     } catch (Exception e) {
                         log.error("[sowEliminateProduce]-handle.message.failed");

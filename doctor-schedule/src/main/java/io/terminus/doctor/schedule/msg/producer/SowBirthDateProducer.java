@@ -118,17 +118,19 @@ public class SowBirthDateProducer extends AbstractJobProducer {
                         DoctorPigEvent doctorPigEvent = getMatingPigEvent(pigDto);
                         Double timeDiff = getTimeDiff(new DateTime(doctorPigEvent.getEventAt()));
                         ruleValueMap.values().forEach(ruleValue -> {
-                            if (!isMessage && Objects.equals(ruleTemplate.getType(), DoctorMessageRuleTemplate.Type.WARNING.getValue())) {
-                                // 获取预产期, 并校验日期
-                                //DateTime birthDate = getBirthDate(pigDto, ruleValue);
-                                // 记录每只猪的消息提醒
-                                recordPigMessage(pigDto, PigEvent.FARROWING, getRuleTimeDiff(ruleValue, timeDiff), 0,
-                                        PigStatus.Pregnancy);
-                            }
-                            if (isMessage && checkRuleValue(ruleValue, timeDiff)) {
-                                pigDto.setEventDate(doctorPigEvent.getEventAt());
-                                pigDto.setOperatorName(doctorPigEvent.getOperatorName());
-                                messages.addAll(getMessage(pigDto, rule.getChannels(), ruleRole, sUsers, timeDiff, rule.getUrl()));
+                            if (checkRuleValue(ruleValue, timeDiff)) {
+                                if (!isMessage && Objects.equals(ruleTemplate.getType(), DoctorMessageRuleTemplate.Type.WARNING.getValue())) {
+                                    // 获取预产期, 并校验日期
+                                    //DateTime birthDate = getBirthDate(pigDto, ruleValue);
+                                    // 记录每只猪的消息提醒
+                                    recordPigMessage(pigDto, PigEvent.FARROWING, getRuleTimeDiff(ruleValue, timeDiff), 0,
+                                            PigStatus.Pregnancy);
+                                }
+                                if (isMessage) {
+                                    pigDto.setEventDate(doctorPigEvent.getEventAt());
+                                    pigDto.setOperatorName(doctorPigEvent.getOperatorName());
+                                    messages.addAll(getMessage(pigDto, rule.getChannels(), ruleRole, sUsers, timeDiff, rule.getUrl()));
+                                }
                             }
                         });
                     } catch (Exception e) {
