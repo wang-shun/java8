@@ -115,11 +115,11 @@ public abstract class AbstractJobProducer extends AbstractProducer {
                 .status(pigDto.getStatus())
                 .timeDiff(timeDiff)
                 .build();
-        if (Objects.equals(pigEvent.getKey(), PigEvent.CONDITION.getKey())){
+        if (Objects.equals(pigEvent.getKey(), PigEvent.CONDITION.getKey())) {
             pigMessage.setIsCondition(1);
-            if (ruleValue.getId() == 4 ){
+            if (ruleValue.getId() == 4) {
                 pigMessage.setConditionValue("断奶");
-            }else {
+            } else {
                 pigMessage.setConditionValue(ruleValue.getValue().toString());
             }
         }
@@ -133,12 +133,12 @@ public abstract class AbstractJobProducer extends AbstractProducer {
                 List<DoctorPigMessage> pigMessages = MAPPER.readValue(pigDto.getExtraTrackMessage(), new TypeReference<List<DoctorPigMessage>>() {
                 });
                 if (!Objects.isNull(pigMessages)) {
-                    pigMessages.stream().filter(message -> Objects.equals(message.getEventType(), pigEvent.getKey())).collect(Collectors.toList()).
+                    pigMessages.stream().filter(message -> !Objects.equals(message.getEventType(), pigEvent.getKey())).
                             forEach(doctorPigMessage -> {
-                        if ( statusList.contains(doctorPigMessage.getStatus())) {
-                            tmpPigMessages.add(doctorPigMessage);
-                        }
-                    });
+                                if (statusList.contains(doctorPigMessage.getStatus())) {
+                                    tmpPigMessages.add(doctorPigMessage);
+                                }
+                            });
                 }
             } catch (Exception e) {
                 log.error("format pig message error, cause by {}", Throwables.getStackTraceAsString(e));
