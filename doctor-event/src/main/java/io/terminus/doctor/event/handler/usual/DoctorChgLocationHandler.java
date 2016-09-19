@@ -7,12 +7,7 @@ import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.Params;
 import io.terminus.doctor.common.utils.RespHelper;
-import io.terminus.doctor.event.dao.DoctorBarnDao;
-import io.terminus.doctor.event.dao.DoctorPigDao;
-import io.terminus.doctor.event.dao.DoctorPigEventDao;
-import io.terminus.doctor.event.dao.DoctorPigSnapshotDao;
-import io.terminus.doctor.event.dao.DoctorPigTrackDao;
-import io.terminus.doctor.event.dao.DoctorRevertLogDao;
+import io.terminus.doctor.event.dao.*;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
 import io.terminus.doctor.event.dto.DoctorGroupDetail;
 import io.terminus.doctor.event.dto.event.group.input.DoctorTransGroupInput;
@@ -20,6 +15,8 @@ import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PigSource;
 import io.terminus.doctor.event.handler.DoctorAbstractEventHandler;
+import io.terminus.doctor.event.handler.group.DoctorTransGroupEventHandler;
+import io.terminus.doctor.event.manager.DoctorGroupEventManager;
 import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorPigTrack;
@@ -46,10 +43,12 @@ public class DoctorChgLocationHandler extends DoctorAbstractEventHandler{
 
     private final DoctorBarnDao doctorBarnDao;
 
+    private final DoctorGroupDao doctorGroupDao;
+
     @Autowired
     private DoctorGroupReadService doctorGroupReadService;
     @Autowired
-    private DoctorGroupWriteService doctorGroupWriteService;
+    private DoctorGroupEventManager doctorGroupEventManager;
 
     @Autowired
     public DoctorChgLocationHandler(DoctorPigDao doctorPigDao,
@@ -57,9 +56,11 @@ public class DoctorChgLocationHandler extends DoctorAbstractEventHandler{
                                     DoctorPigTrackDao doctorPigTrackDao,
                                     DoctorPigSnapshotDao doctorPigSnapshotDao,
                                     DoctorRevertLogDao doctorRevertLogDao,
-                                    DoctorBarnDao doctorBarnDao) {
+                                    DoctorBarnDao doctorBarnDao,
+                                    DoctorGroupDao doctorGroupDao) {
         super(doctorPigDao, doctorPigEventDao, doctorPigTrackDao, doctorPigSnapshotDao, doctorRevertLogDao);
         this.doctorBarnDao = doctorBarnDao;
+        this.doctorGroupDao = doctorGroupDao;
     }
 
     @Override
@@ -140,6 +141,11 @@ public class DoctorChgLocationHandler extends DoctorAbstractEventHandler{
         input.setSowQty(input.getQuantity() - input.getBoarQty());
         input.setAvgWeight((MoreObjects.firstNonNull(pigTrack.getFarrowAvgWeight(), 0D)));
         input.setWeight(input.getAvgWeight() * input.getQuantity());
-        return RespHelper.orServEx(doctorGroupWriteService.groupEventTransGroup(fromGroup, input));
+        doctorGroupEventManager.handleEvent(fromGroup, input, DoctorTransGroupEventHandler.class);
+        if (Objects.equals(input.getIsCreateGroup(), IsOrNot.YES.getValue())) {
+            DoctorGroup toGroup = doctorGroupDao.findByFarmIdAndGroupCode(fromGroup.getGroup().getFarmId(), input.getToGroupCode());
+            return toGroup.getId();
+        }
+        return input.getToGroupId();
     }
 }
