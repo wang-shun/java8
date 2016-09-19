@@ -287,6 +287,7 @@ public abstract class DoctorAbstractEventFlowHandler extends HandlerAware {
      * 分娩, 断奶 等不涉及到猪群数量变动的, 需要在母猪这边触发一下修改猪群的事件
      */
     protected void updateFarrowGroupTrack(Long groupId, Integer pigType) {
+        log.info("update groupId:{}, pigType:{}", groupId, pigType);
         if (groupId != null && PigType.FARROW_TYPES.contains(pigType)) {
             DoctorGroupTrack groupTrack = doctorGroupTrackDao.findByGroupId(groupId);
             doctorGroupTrackDao.update(doctorGroupReportManager.updateFarrowGroupTrack(groupTrack, pigType));
