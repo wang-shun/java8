@@ -310,4 +310,35 @@ public class DoctorWareHouseEvents {
         RespHelper.or500(doctorMaterialInWareHouseWriteService.moveMaterial(diaochu, diaoru));
         return true;
     }
+
+    /**
+     * 仓库物资盘点
+     * @param farmId 猪场id
+     * @param warehouseId 仓库id
+     * @param materialId 物料id
+     * @param count 新数量
+     * @return
+     */
+    @RequestMapping(value = "/inventory", method = RequestMethod.GET)
+    @ResponseBody
+    public boolean inventory(@RequestParam Long farmId, @RequestParam Long warehouseId, @RequestParam Long materialId, @RequestParam Double count){
+        DoctorMaterialInWareHouse materialInWareHouse = RespHelper.or500(doctorMaterialInWareHouseReadService.queryByMaterialWareHouseIds(farmId, materialId, warehouseId));
+        DoctorConsumeProviderInputDto dto = DoctorConsumeProviderInputDto.builder()
+                .farmId(farmId).wareHouseId(warehouseId).materialId(materialId)
+                .build();
+        if (materialInWareHouse.getLotNumber() > count){
+            // 盘亏 (出库)
+            dto.setCount(materialInWareHouse.getLotNumber() - count);
+            dto.setEventType(DoctorMaterialConsumeProvider.EVENT_TYPE.PANKUI.getValue());
+            this.createConsumeEvent(dto);
+        } else if(materialInWareHouse.getLotNumber() < count){
+            // 盘盈(入库)
+            dto.setCount(count - materialInWareHouse.getLotNumber());
+            dto.setEventType(DoctorMaterialConsumeProvider.EVENT_TYPE.PANYING.getValue());
+            this.createProviderEvent(dto);
+        } else {
+            return true;
+        }
+        return true;
+    }
 }
