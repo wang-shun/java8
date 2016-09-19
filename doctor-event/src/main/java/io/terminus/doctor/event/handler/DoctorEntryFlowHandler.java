@@ -130,7 +130,7 @@ public class DoctorEntryFlowHandler extends HandlerAware {
      */
     private DoctorPigTrack buildEntryFarmPigDoctorTrack(DoctorFarmEntryDto dto, DoctorBasicInputInfoDto basic) {
 
-        DoctorPigTrack doctorPigTrack = DoctorPigTrack.builder().farmId(basic.getFarmId())
+        DoctorPigTrack doctorPigTrack = DoctorPigTrack.builder().farmId(basic.getFarmId()).currentMatingCount(0)
                 .currentBarnId(dto.getBarnId()).currentBarnName(dto.getBarnName())
                 .currentParity(dto.getParity()).status(PigStatus.Entry.getKey())
                 .creatorId(basic.getStaffId()).creatorName(basic.getStaffName())

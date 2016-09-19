@@ -142,7 +142,7 @@ public class DoctorEntryHandler implements DoctorEventCreateHandler {
     private DoctorPigTrack buildEntryFarmPigDoctorTrack(DoctorFarmEntryDto dto, DoctorBasicInputInfoDto basic) {
 
         DoctorPigTrack doctorPigTrack = DoctorPigTrack.builder().farmId(basic.getFarmId()).pigType(basic.getPigType())
-                .isRemoval(IsOrNot.NO.getValue())
+                .isRemoval(IsOrNot.NO.getValue()).currentMatingCount(0)
                 .currentBarnId(dto.getBarnId()).currentBarnName(dto.getBarnName())
                 .currentParity(dto.getParity())
                 .creatorId(basic.getStaffId()).creatorName(basic.getStaffName())
