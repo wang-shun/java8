@@ -201,8 +201,11 @@ public class DoctorSowFarrowingHandler extends DoctorAbstractEventFlowHandler {
             doctorPigEventDao.update(firstMate);
         }
 
+        Long groupId = Long.valueOf(String.valueOf(extra.get("farrowGroupId")));
+        Long barnId = Long.valueOf(String.valueOf(extra.get("farrowBarnId")));
+
         //触发一下修改猪群的事件
-        Integer pigType = doctorBarnDao.findById(doctorPigTrack.getCurrentBarnId()).getPigType();
-        updateFarrowGroupTrack(doctorPigTrack.getGroupId(), pigType);
+        Integer pigType = doctorBarnDao.findById(barnId).getPigType();
+        updateFarrowGroupTrack(groupId, pigType);
     }
 }

@@ -88,6 +88,10 @@ public abstract class DoctorAbstractEventFlowHandler extends HandlerAware {
             DoctorPigEvent doctorPigEvent = buildAllPigDoctorEvent(doctorBasicInputInfoDto, extraInfo);
             DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(doctorPigEvent.getPigId());
 
+            //哺乳母猪所带仔猪的猪群id
+            context.put("farrowGroupId", doctorPigTrack.getGroupId());
+            context.put("farrowBarnId", doctorPigTrack.getCurrentBarnId());
+
             // 当前 猪 状态 对录入数据影响
             IsOrNot isRePregCheckPositive = eventCreatePrepare(execution, doctorPigEvent, doctorPigTrack, doctorBasicInputInfoDto, extraInfo, context);
 
