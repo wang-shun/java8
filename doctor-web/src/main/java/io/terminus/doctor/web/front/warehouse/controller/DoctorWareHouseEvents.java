@@ -319,7 +319,7 @@ public class DoctorWareHouseEvents {
      * @param count 新数量
      * @return
      */
-    @RequestMapping(value = "/inventory", method = RequestMethod.GET)
+    @RequestMapping(value = "/inventory", method = RequestMethod.POST)
     @ResponseBody
     public boolean inventory(@RequestParam Long farmId, @RequestParam Long warehouseId, @RequestParam Long materialId, @RequestParam Double count){
         DoctorMaterialInWareHouse materialInWareHouse = RespHelper.or500(doctorMaterialInWareHouseReadService.queryByMaterialWareHouseIds(farmId, materialId, warehouseId));
