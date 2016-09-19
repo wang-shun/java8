@@ -320,7 +320,10 @@ public class WareHouseInitService {
         Map<String, Double> materialCount = new HashMap<>();
 
         //猪群Map, key = outId, value = group
-        Map<String, DoctorGroup> groupMap = doctorGroupDao.findByFarmId(wareHouse.getFarmId()).stream().collect(Collectors.toMap(DoctorGroup::getOutId, v->v));
+        Map<String, DoctorGroup> groupMap = new HashMap<>();
+        for(DoctorGroup group : doctorGroupDao.findByFarmId(wareHouse.getFarmId())){
+            groupMap.put(group.getOutId(), group);
+        }
 
         // 领用和添加物料的历史记录
         DoctorMaterialConsumeProvider materialCP = new DoctorMaterialConsumeProvider();
