@@ -221,6 +221,11 @@ public class DoctorMoveBasicService {
         return doctorBarnDao.findByFarmId(farmId).stream().collect(Collectors.toMap(DoctorBarn::getOutId, v -> v));
     }
 
+    //拼接猪舍 Map<barnName, DoctorBarn>
+    public Map<String, DoctorBarn> getBarnMap2(Long farmId) {
+        return doctorBarnDao.findByFarmId(farmId).stream().collect(Collectors.toMap(DoctorBarn::getName, v -> v));
+    }
+
     public Map<Long, Integer> getBarnIdMap(Long farmId) {
         return doctorBarnDao.findByFarmId(farmId).stream().collect(Collectors.toMap(DoctorBarn::getId, DoctorBarn::getPigType));
     }
