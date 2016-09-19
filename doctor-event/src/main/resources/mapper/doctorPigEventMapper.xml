@@ -465,6 +465,7 @@
         FROM
         <include refid="tb"/>
         WHERE pig_id = #{pigId}
+        order by event_at asc
     </select>
 
     <select id="count" parameterType="map" resultType="long">
@@ -651,4 +652,76 @@
         </if>
         limit 5000
     </select>
+
+    <update id="updates"  parameterType="java.util.List">
+        <foreach collection="list" item="item" index="index" open="" close="" separator=";">
+            update <include refid="tb"/>
+            <set>
+                org_id = #{item.orgId},
+                org_name = #{item.orgName},
+                farm_id = #{item.farmId},
+                farm_name = #{item.farmName},
+                pig_id = #{item.pigId},
+                pig_code = #{item.pigCode},
+                event_at = #{item.eventAt},
+                `type` = #{item.type},
+                kind = #{item.kind},
+                `name` = #{item.name},
+                `desc` = #{item.desc},
+                barn_id = #{item.barnId},
+                barn_name = #{item.barnName},
+                rel_event_id = #{item.relEventId},
+                change_type_id = #{item.changeTypeId},
+                price = #{item.price},
+                amount = #{item.amount},
+                pig_status_before = #{item.pigStatusBefore},
+                pig_status_after = #{item.pigStatusAfter},
+                parity = #{item.parity},
+                is_impregnation = #{item.isImpregnation},
+                is_delivery = #{item.isDelivery},
+                preg_days = #{item.pregDays},
+                feed_days = #{item.feedDays},
+                preg_check_result = #{item.pregCheckResult},
+                dp_npd = #{item.dpnpd},
+                pf_npd = #{item.pfnpd},
+                pl_npd = #{item.plnpd},
+                ps_npd = #{item.psnpd},
+                py_npd = #{item.pynpd},
+                pt_npd = #{item.ptnpd},
+                jp_npd = #{item.jpnpd},
+                npd = #{item.npd},
+                farrow_weight = #{item.farrowWeight},
+                live_count = #{item.liveCount},
+                health_count = #{item.healthCount},
+                weak_count = #{item.weakCount},
+                mny_count = #{item.mnyCount},
+                jx_count = #{item.jxCount},
+                dead_count = #{item.deadCount},
+                black_count = #{item.blackCount},
+                wean_count = #{item.weanCount},
+                wean_avg_weight = #{item.weanAvgWeight},
+                current_mating_count = #{item.currentMatingCount},
+                check_date = #{item.checkDate},
+                matting_date = #{item.mattingDate},
+                farrowing_date = #{item.farrowingDate},
+                abortion_date = #{item.abortionDate},
+                partwean_date = #{item.partweanDate},
+                doctor_mate_type = #{item.doctorMateType},
+                boar_code = #{item.boarCode},
+                out_id = #{item.outId},
+                extra = #{item.extra},
+                remark = #{item.remark},
+                operator_id = #{item.operatorId},
+                operator_name = #{item.operatorName},
+                creator_id = #{item.creatorId},
+                creator_name = #{item.creatorName},
+                updator_id = #{item.updatorId},
+                updator_name = #{item.updatorName},
+                created_at = #{item.createdAt},
+                updated_at = now()
+            </set>
+            where id = ${item.id}
+        </foreach>
+
+    </update>
 </mapper>

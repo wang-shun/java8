@@ -1,5 +1,6 @@
 package io.terminus.doctor.move.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableMap;
@@ -117,6 +118,8 @@ import static io.terminus.doctor.event.enums.PregCheckResult.from;
 public class DoctorMoveDataService {
 
     private static final JsonMapper JSON_MAPPER = JsonMapper.nonEmptyMapper();
+
+    protected ObjectMapper MAPPER = JsonMapper.JSON_NON_DEFAULT_MAPPER.getMapper();
 
     private final DoctorMoveDatasourceHandler doctorMoveDatasourceHandler;
     private final DoctorGroupDao doctorGroupDao;
@@ -675,6 +678,9 @@ public class DoctorMoveDataService {
 
         //4. 更新公猪的全部配种次数
         updateBoarCurrentParity(sowEvents);
+
+        //更新母猪胎次,配种的公猪号
+        updateParityAndBoarCode(farm);
     }
 
     //如果是哺乳状态, 设置一下哺乳猪群的信息
@@ -2298,5 +2304,38 @@ public class DoctorMoveDataService {
     //判断猪场id是否相同
     private static boolean isFarm(String farmOID, String outId) {
         return Objects.equals(farmOID, outId);
+    }
+
+    private Integer parity = 0;
+    private String boarCode = null;
+
+    public void updateParityAndBoarCode(DoctorFarm farm) {
+        List<DoctorPigEvent> doctorPigEvensList = doctorPigEventDao.list(ImmutableMap.of("farmId", farm.getId(), "type", PigEvent.ENTRY.getKey(), "kind", 1));
+        doctorPigEvensList.stream().forEach( doctorPigEvent -> {
+            List<DoctorPigEvent> lists = doctorPigEventDao.queryAllEventsByPigId(doctorPigEvent.getPigId());
+            lists.stream().forEach(doctorPigEvent1 -> {
+                switch (doctorPigEvent1.getType()){
+                    case 7:
+                        parity = (isNull(doctorPigEvent1.getExtraMap()) || isNull(doctorPigEvent1.getExtraMap().get("parity"))) ? 0 : Integer.valueOf(Objects.toString(doctorPigEvent1.getExtraMap().get("parity")));
+                        break;
+                    case 9:
+                        if(doctorPigEvent1.getCurrentMatingCount() == 1){
+                            parity += 1;
+                        }
+                        boarCode = (isNull(doctorPigEvent1.getExtraMap()) || isNull(doctorPigEvent1.getExtraMap().get("matingBoarPigCode"))) ? null : Objects.toString(doctorPigEvent1.getExtraMap().get("matingBoarPigCode"));
+                        break;
+                    case 16:
+                        boarCode = null;
+                    default:
+                        break;
+                }
+                doctorPigEvent1.setParity(parity);
+                doctorPigEvent1.setBoarCode(boarCode);
+            });
+            Boolean result = doctorPigEventDao.updates(lists);
+            if(!result){
+                log.info("update parity boarCode fail: {}", lists);
+            }
+        });
     }
 }

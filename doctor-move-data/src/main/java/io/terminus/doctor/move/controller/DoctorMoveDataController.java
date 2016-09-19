@@ -338,6 +338,20 @@ public class DoctorMoveDataController {
         }
     }
 
+    @RequestMapping(value = "/updateParityAndBoarCode", method = RequestMethod.GET)
+    public Boolean updateParityAndBoarCode(@RequestParam("farmId") Long farmId){
+        try {
+            DoctorFarm farm = doctorFarmDao.findById(farmId);
+            log.warn("fix pig start, farmId:{}", farmId);
+            doctorMoveDataService.updateParityAndBoarCode(farm);
+            log.warn("fix pig end");
+            return true;
+        } catch (Exception e) {
+            log.error("fix pig failed, farmId:{}, cause:{}", farmId, Throwables.getStackTraceAsString(e));
+            return false;
+        }
+    }
+
     /**
      * 日报
      * @param moveId
