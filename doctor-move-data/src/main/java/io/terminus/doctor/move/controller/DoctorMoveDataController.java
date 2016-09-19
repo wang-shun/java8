@@ -660,7 +660,7 @@ public class DoctorMoveDataController {
     }
 
     /**
-     * 已关闭的猪群生成批次总结
+     * 已关闭的猪群更新日龄
      */
     @RequestMapping(value = "/updateClosedGroupDayAge", method = RequestMethod.GET)
     public Boolean updateClosedGroupDayAge(@RequestParam("farmId") Long farmId, @RequestParam("moveId") Long moveId) {
