@@ -7,11 +7,15 @@ SELECT
     CASE WHEN (abs(ISNULL(mvin.Weight, 0)) - abs(ISNULL(mvout.Weight, 0))) > 0 AND InventoryOfGroup > 0
     THEN CONVERT(DECIMAL(18,2),(abs(ISNULL(mvin.Weight, 0)) - abs(ISNULL(mvout.Weight, 0))) / InventoryOfGroup)
     ELSE 0  END AS avgWeight,
-    abs(ISNULL(c.age, 0))      AS avgDayAge      --平均日龄
+    CASE WHEN p.Status = '已关闭' THEN
+        CASE WHEN
+            abs(ISNULL(c.age, 0)) - DATEDIFF(DAY, p.GainCloseDate, '{{date}}') < 0 THEN 0 ELSE
+            abs(ISNULL(c.age, 0)) - DATEDIFF(DAY, p.GainCloseDate, '{{date}}') END
+        ELSE abs(ISNULL(c.age, 0)) END AS avgDayAge --平均日龄
 FROM
 (
     SELECT * FROM view_GainCardList
-    WHERE gainopendate <= '{{date}}' AND status <> '已关闭'
+    WHERE gainopendate <= '{{date}}'
 ) AS p
 
 -- 获得存栏数量
@@ -66,7 +70,7 @@ LEFT JOIN
     FROM view_EventListGain as g --猪群
     JOIN
     (
-        SELECT * FROM view_GainCardList WHERE gainopendate <= '{{date}}' AND status <> '已关闭'
+        SELECT * FROM view_GainCardList WHERE gainopendate <= '{{date}}'
     ) AS t
     ON g.relmainOID = t.OID
     WHERE g.Operator = '+'               --转入事件
@@ -86,7 +90,7 @@ LEFT JOIN
     FROM view_EventListGain as g --猪群
     JOIN
     (
-        SELECT * FROM view_GainCardList WHERE gainopendate <= '{{date}}' AND status <> '已关闭'
+        SELECT * FROM view_GainCardList WHERE gainopendate <= '{{date}}'
     ) AS t
     ON g.relmainOID = t.OID
     WHERE g.Operator = '-'               --转出事件
