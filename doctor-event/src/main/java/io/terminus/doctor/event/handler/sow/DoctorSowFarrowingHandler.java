@@ -200,6 +200,5 @@ public class DoctorSowFarrowingHandler extends DoctorAbstractEventFlowHandler {
             firstMate.setIsDelivery(1);
             doctorPigEventDao.update(firstMate);
         }
-
     }
 }

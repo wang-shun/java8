@@ -45,10 +45,10 @@ public class DoctorDailyPigReportWriteServiceImpl implements DoctorDailyPigRepor
                     doctorDailyPigCountInvocation.countPigEvent(doctorPigEvent));
         	return Response.ok(Boolean.TRUE);
         }catch (IllegalStateException se){
-            log.warn("update daily pig illegal state fail, cause:{}", Throwables.getStackTraceAsString(se));
+            log.warn("update daily pig illegal state fail, eventId:{}, cause:{}", pigEventId, Throwables.getStackTraceAsString(se));
             return Response.fail(se.getMessage());
         }catch (Exception e){
-            log.error("update daily pig report fail, cause:{}", Throwables.getStackTraceAsString(e));
+            log.error("update daily pig report fail, eventId:{}, cause:{}", pigEventId, Throwables.getStackTraceAsString(e));
             return Response.fail("update.dailyReport.fail");
         }
     }
