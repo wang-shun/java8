@@ -198,4 +198,10 @@
             <include refid="criteria"/>
         </where>
     </select>
+
+    <select id="countConsumeTotal" parameterType="long" resultType="map">
+        select material_id, sum(event_count) consumeTotal from doctor_material_consume_providers
+        where `ware_house_id` = #{wareHouseId} and event_type in (1, 3, 5)
+        group by material_id
+    </select>
 </mapper>

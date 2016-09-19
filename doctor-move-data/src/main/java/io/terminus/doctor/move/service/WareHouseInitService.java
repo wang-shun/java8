@@ -29,6 +29,7 @@ import io.terminus.doctor.warehouse.dao.DoctorFarmWareHouseTypeDao;
 import io.terminus.doctor.warehouse.dao.DoctorMaterialConsumeAvgDao;
 import io.terminus.doctor.warehouse.dao.DoctorMaterialConsumeProviderDao;
 import io.terminus.doctor.warehouse.dao.DoctorMaterialInWareHouseDao;
+import io.terminus.doctor.warehouse.dao.DoctorMaterialPriceInWareHouseDao;
 import io.terminus.doctor.warehouse.dao.DoctorWareHouseDao;
 import io.terminus.doctor.warehouse.dao.DoctorWareHouseTrackDao;
 import io.terminus.doctor.warehouse.dto.DoctorMaterialConsumeProviderDto;
@@ -37,6 +38,7 @@ import io.terminus.doctor.warehouse.model.DoctorFarmWareHouseType;
 import io.terminus.doctor.warehouse.model.DoctorMaterialConsumeAvg;
 import io.terminus.doctor.warehouse.model.DoctorMaterialConsumeProvider;
 import io.terminus.doctor.warehouse.model.DoctorMaterialInWareHouse;
+import io.terminus.doctor.warehouse.model.DoctorMaterialPriceInWareHouse;
 import io.terminus.doctor.warehouse.model.DoctorWareHouse;
 import io.terminus.doctor.warehouse.model.DoctorWareHouseTrack;
 import io.terminus.parana.user.impl.dao.UserProfileDao;
@@ -95,6 +97,8 @@ public class WareHouseInitService {
     private DoctorGroupDao doctorGroupDao;
     @Autowired
     private MaterialInWareHouseManager materialInWareHouseManager;
+    @Autowired
+    private DoctorMaterialPriceInWareHouseDao doctorMaterialPriceInWareHouseDao;
 
     @Transactional
     public void init(String mobile, Long dataSourceId, DoctorFarm farm){
@@ -339,13 +343,18 @@ public class WareHouseInitService {
             materialCP.setMaterialId(basicMaterialMap.get(typeAndmaterialName).getId());
             materialCP.setMaterialName(pu.getMaterialName());
             materialCP.setEventTime(pu.getEventDate());
+            materialCP.setUnitPrice(pu.getUnitPrice().longValue());
             if(isProvide(pu.getEventType(), WareHouseType.from(wareHouse.getType()))){
-                materialCP.setEventType(DoctorMaterialConsumeProvider.EVENT_TYPE.PROVIDER.getValue());
                 materialCount.put(typeAndmaterialName, materialCount.get(typeAndmaterialName) + pu.getCount());
             }else{
-                materialCP.setEventType(DoctorMaterialConsumeProvider.EVENT_TYPE.CONSUMER.getValue());
                 materialCount.put(typeAndmaterialName, materialCount.get(typeAndmaterialName) - pu.getCount());
             }
+            DoctorMaterialConsumeProvider.EVENT_TYPE eventType = this.getEventType(pu, wareHouse.getType());
+            if(eventType == null){
+                continue;
+            }
+            materialCP.setEventType(eventType.getValue());
+
             materialCP.setEventCount(pu.getCount());
             if(pu.getStaff() == null || pu.getStaff().trim().isEmpty()){
                 materialCP.setStaffName(pu.getZdr());
@@ -385,6 +394,10 @@ public class WareHouseInitService {
                 }
             }
             doctorMaterialConsumeProviderDao.create(materialCP);
+            // 入库, 则保存价格组成
+            if(isProvide(pu.getEventType(), WareHouseType.from(wareHouse.getType()))){
+                this.saveMaterialPriceInWarehouse(materialCP);
+            }
 
             if(isConsume(pu.getEventType(), WareHouseType.from(wareHouse.getType()))) {
                 lastMaterialConsumeMap.put(typeAndmaterialName, new Object[]{materialCP.getEventCount(), pu.getEventDate()});
@@ -468,6 +481,9 @@ public class WareHouseInitService {
         extramap.put("consumeDate", recentAVG.getConsumeDate());
         farmWareHouseType.setExtraMap(extramap);
         doctorFarmWareHouseTypeDao.create(farmWareHouseType);
+
+        // 更新最新的价格组成
+        this.updatePriceInWarehouse(wareHouse.getFarmId(), wareHouse.getId());
     }
 
     private static final List<String> event_type_provide = Lists.newArrayList("采购", "调入", "盘盈");
@@ -487,6 +503,9 @@ public class WareHouseInitService {
         return event_type_consume.contains(eventType) || (Objects.equals(wareHouseType, WareHouseType.MATERIAL) && "生产".equals(eventType));
     }
 
+    /**
+     * 由于逻辑中要求库存不可为负数, 所以调用现成的 manager 走不通
+     */
     private void addMaterial2Warehouse2(DoctorWareHouse wareHouse, List<MaterialPurchasedUsed> list,
                                        Map<String, DoctorBasicMaterial> basicMaterialMap, Map<String, DoctorStaff> staffMap,
                                        Map<String, DoctorBarn> barnMap, UserProfile userProfile, List<String> stopUseMaterial) {
@@ -497,42 +516,14 @@ public class WareHouseInitService {
             if(stopUseMaterial.contains(pu.getMaterialOID())){
                 continue;
             }
-            DoctorMaterialConsumeProvider.EVENT_TYPE eventType;
+            DoctorMaterialConsumeProvider.EVENT_TYPE eventType = this.getEventType(pu, wareHouseType);
             String typeAndmaterialName = wareHouse.getType() + "|" + pu.getMaterialName();
             DoctorBasicMaterial material = basicMaterialMap.get(typeAndmaterialName);
             // 由于 pu.getBarnOId() 可能为null, 所以 barn 也可能为null
             DoctorBarn barn = barnMap.get(pu.getBarnOId());
 
-            switch (pu.getEventType()) {
-                case "采购":
-                    eventType = DoctorMaterialConsumeProvider.EVENT_TYPE.PROVIDER;
-                    break;
-                case "领用":
-                    eventType = DoctorMaterialConsumeProvider.EVENT_TYPE.CONSUMER;
-                    break;
-                case "调入":
-                    eventType = DoctorMaterialConsumeProvider.EVENT_TYPE.DIAORU;
-                    break;
-                case "调出":
-                    eventType = DoctorMaterialConsumeProvider.EVENT_TYPE.DIAOCHU;
-                    break;
-                case "盘盈":
-                    eventType = DoctorMaterialConsumeProvider.EVENT_TYPE.PANYING;
-                    break;
-                case "盘亏":
-                    eventType = DoctorMaterialConsumeProvider.EVENT_TYPE.PANKUI;
-                    break;
-                case "生产":
-                    if (Objects.equals(wareHouseType, WareHouseType.FEED.getKey())) {
-                        eventType = DoctorMaterialConsumeProvider.EVENT_TYPE.PROVIDER;
-                    } else if (Objects.equals(wareHouseType, WareHouseType.MATERIAL.getKey())) {
-                        eventType = DoctorMaterialConsumeProvider.EVENT_TYPE.CONSUMER;
-                    } else {
-                        continue;
-                    }
-                    break;
-                default:
-                    continue;
+            if(eventType == null){
+                continue;
             }
 
             DoctorMaterialConsumeProviderDto dto = DoctorMaterialConsumeProviderDto.builder()
@@ -580,6 +571,84 @@ public class WareHouseInitService {
             if(eventType.isIn()){
                 dto.setUnitPrice(Double.valueOf(pu.getUnitPrice() * 100).longValue());
                 materialInWareHouseManager.providerMaterialInWareHouse(dto);
+            }
+        }
+    }
+
+    private DoctorMaterialConsumeProvider.EVENT_TYPE getEventType(MaterialPurchasedUsed pu, Integer wareHouseType){
+        DoctorMaterialConsumeProvider.EVENT_TYPE eventType;
+        switch (pu.getEventType()) {
+            case "采购":
+                eventType = DoctorMaterialConsumeProvider.EVENT_TYPE.PROVIDER;
+                break;
+            case "领用":
+                eventType = DoctorMaterialConsumeProvider.EVENT_TYPE.CONSUMER;
+                break;
+            case "调入":
+                eventType = DoctorMaterialConsumeProvider.EVENT_TYPE.DIAORU;
+                break;
+            case "调出":
+                eventType = DoctorMaterialConsumeProvider.EVENT_TYPE.DIAOCHU;
+                break;
+            case "盘盈":
+                eventType = DoctorMaterialConsumeProvider.EVENT_TYPE.PANYING;
+                break;
+            case "盘亏":
+                eventType = DoctorMaterialConsumeProvider.EVENT_TYPE.PANKUI;
+                break;
+            case "生产":
+                if (Objects.equals(wareHouseType, WareHouseType.FEED.getKey())) {
+                    eventType = DoctorMaterialConsumeProvider.EVENT_TYPE.PROVIDER;
+                } else if (Objects.equals(wareHouseType, WareHouseType.MATERIAL.getKey())) {
+                    eventType = DoctorMaterialConsumeProvider.EVENT_TYPE.CONSUMER;
+                } else {
+                    return null;
+                }
+                break;
+            default:
+                return null;
+        }
+        return eventType;
+    }
+
+    private void saveMaterialPriceInWarehouse(DoctorMaterialConsumeProvider cp){
+        DoctorMaterialPriceInWareHouse model = new DoctorMaterialPriceInWareHouse();
+        model.setFarmId(cp.getFarmId());
+        model.setFarmName(cp.getFarmName());
+        model.setWareHouseId(cp.getWareHouseId());
+        model.setWareHouseName(cp.getWareHouseName());
+        model.setMaterialId(cp.getMaterialId());
+        model.setMaterialName(cp.getMaterialName());
+        model.setType(cp.getType());
+        model.setProviderId(cp.getId());
+        model.setUnitPrice(cp.getUnitPrice());
+        model.setRemainder(cp.getEventCount());
+        model.setProviderTime(cp.getEventTime());
+        model.setCreatorId(cp.getCreatorId());
+        model.setUpdatorId(cp.getUpdatorId());
+        doctorMaterialPriceInWareHouseDao.create(model);
+    }
+
+    private void updatePriceInWarehouse(Long farmId, Long warehouseId){
+        for(Map.Entry<Long, Double> entry : doctorMaterialConsumeProviderDao.countConsumeTotal(warehouseId).entrySet()){
+            Long materialId = entry.getKey();
+            // 累计出库数量
+            Double consumeCount = entry.getValue();
+            // 累加值
+            double plus = 0D;
+            for(DoctorMaterialPriceInWareHouse item : doctorMaterialPriceInWareHouseDao.findByWareHouseAndMaterialId(warehouseId, materialId)){
+                Double remainder = item.getRemainder();
+                if(plus + remainder <= consumeCount){
+                    doctorMaterialPriceInWareHouseDao.delete(item.getId());
+                    if(plus + remainder == consumeCount){
+                        break;
+                    }
+                    plus += remainder;
+                }else{
+                    item.setRemainder(remainder - (consumeCount - plus));
+                    doctorMaterialPriceInWareHouseDao.update(item);
+                    break;
+                }
             }
         }
     }
