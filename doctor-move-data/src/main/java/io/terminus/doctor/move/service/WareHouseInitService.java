@@ -112,11 +112,8 @@ public class WareHouseInitService {
         //子账号map, key = realName, value = Sub
         Map<String, Sub> subMap = subs.stream().collect(Collectors.toMap(Sub::getRealName, v -> v));
 
-        // key = realName, value = staff
-        Map<String, DoctorStaff> staffMap = new HashMap<>();
-        for(Sub sub : subs){
-            staffMap.put(sub.getRealName(), doctorStaffDao.findByUserId(sub.getUserId()));
-        }
+        // key = realName, value = userId
+        Map<String, Long> staffMap = doctorMoveBasicService.getSubMap(farm.getOrgId());
 
         List<B_WareHouse> list = RespHelper.or500(doctorMoveDatasourceHandler.findAllData(dataSourceId, B_WareHouse.class, DoctorMoveTableEnum.B_WareHouse));
         if(list != null && !list.isEmpty()){
@@ -287,7 +284,7 @@ public class WareHouseInitService {
 
     //往仓库里添加物料
     private void addMaterial2Warehouse(Long dataSourceId, Map<WareHouseType, DoctorWareHouse> warehouseType,
-                                       Map<String, DoctorBasicMaterial> basicMaterialMap, Map<String, DoctorStaff> staffMap,
+                                       Map<String, DoctorBasicMaterial> basicMaterialMap, Map<String, Long> staffMap,
                                        Map<String, DoctorBarn> barnMap, UserProfile userProfile, List<String> stopUseMaterial){
         // 易耗品
         List<MaterialPurchasedUsed> consumes = RespHelper.or500(doctorMoveDatasourceHandler.findByHbsSql(dataSourceId, MaterialPurchasedUsed.class, "AssetPurchasedUsed"));
@@ -311,7 +308,7 @@ public class WareHouseInitService {
     }
 
     private void addMaterial2Warehouse(DoctorWareHouse wareHouse, List<MaterialPurchasedUsed> list,
-                                       Map<String, DoctorBasicMaterial> basicMaterialMap, Map<String, DoctorStaff> staffMap,
+                                       Map<String, DoctorBasicMaterial> basicMaterialMap, Map<String, Long> staffMap,
                                        Map<String, DoctorBarn> barnMap, UserProfile userProfile, List<String> stopUseMaterial){
         // 往表 doctor_material_consume_avgs 写数的Map, key = 类型数值 | materialName, value = [eventCount(最后一次领用数量), 时间]
         Map<String, Object[]> lastMaterialConsumeMap = new HashMap<>();
@@ -361,16 +358,11 @@ public class WareHouseInitService {
             }else{
                 materialCP.setStaffName(pu.getStaff());
             }
-            if("系统管理员".equals(materialCP.getStaffName())){
+            if("系统管理员".equals(materialCP.getStaffName()) || staffMap.get(materialCP.getStaffName()) == null){
                 materialCP.setStaffName(userProfile.getRealName());
                 materialCP.setStaffId(userProfile.getUserId());
             }else{
-                try {
-                    materialCP.setStaffId(staffMap.get(materialCP.getStaffName()).getId());
-                }catch(Exception e){
-                    materialCP.setStaffName(userProfile.getRealName());
-                    materialCP.setStaffId(userProfile.getUserId());
-                }
+                materialCP.setStaffId(staffMap.get(materialCP.getStaffName()));
             }
 
             //如果是领用, 需要设置 extra
@@ -507,7 +499,7 @@ public class WareHouseInitService {
      * 由于逻辑中要求库存不可为负数, 所以调用现成的 manager 走不通
      */
     private void addMaterial2Warehouse2(DoctorWareHouse wareHouse, List<MaterialPurchasedUsed> list,
-                                       Map<String, DoctorBasicMaterial> basicMaterialMap, Map<String, DoctorStaff> staffMap,
+                                       Map<String, DoctorBasicMaterial> basicMaterialMap, Map<String, Long> staffMap,
                                        Map<String, DoctorBarn> barnMap, UserProfile userProfile, List<String> stopUseMaterial) {
         //猪群Map, key = outId, value = group
         Map<String, DoctorGroup> groupMap = doctorGroupDao.findByFarmId(wareHouse.getFarmId()).stream().collect(Collectors.toMap(DoctorGroup::getOutId, v -> v));
@@ -540,16 +532,11 @@ public class WareHouseInitService {
             }else{
                 dto.setStaffName(pu.getStaff());
             }
-            if("系统管理员".equals(dto.getStaffName())){
+            if("系统管理员".equals(dto.getStaffName()) || staffMap.get(dto.getStaffName()) == null){
                 dto.setStaffName(userProfile.getRealName());
                 dto.setStaffId(userProfile.getUserId());
             }else{
-                try {
-                    dto.setStaffId(staffMap.get(dto.getStaffName()).getId());
-                }catch(Exception e){
-                    dto.setStaffName(userProfile.getRealName());
-                    dto.setStaffId(userProfile.getUserId());
-                }
+                dto.setStaffId(staffMap.get(dto.getStaffName()));
             }
 
             if(eventType.isOut()){
