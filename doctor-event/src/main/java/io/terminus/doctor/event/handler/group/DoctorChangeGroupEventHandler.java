@@ -177,6 +177,7 @@ public class DoctorChangeGroupEventHandler extends DoctorAbstractGroupEventHandl
             } else {
                 event.setAmount((long) (change.getPrice() * change.getWeight()));
             }
+            change.setAmount(event.getAmount());
         }
     }
 }
