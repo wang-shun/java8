@@ -1896,6 +1896,10 @@ public class DoctorMoveDataService {
                 event.setChangeTypeId(changeEvent.getChangeTypeId());
                 event.setPrice(changeEvent.getPrice());
                 event.setAmount(changeEvent.getAmount());
+
+                //重量 均重重新计算
+                event.setWeight(event.getAmount() / event.getPrice() * 1D);
+                event.setAvgWeight(event.getWeight() / event.getQuantity());
                 break;
             case TRANS_GROUP:
                 DoctorTransGroupEvent transGroupEvent = getTranGroupEvent(gainEvent, basicMap, barnMap, groupMap, group);
