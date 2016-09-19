@@ -156,7 +156,7 @@
     <select id="findNoReadCount" parameterType="long" resultType="long">
         SELECT COUNT(1)
         FROM <include refid="tb"/>
-        WHERE user_id = #{userId} AND status = 1 AND channel = 0
+        WHERE user_id = #{userId} AND status = 1 AND channel = 0 AND is_expired = 0
     </select>
 
     <!-- 获取最新的系统消息 -->
