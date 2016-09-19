@@ -14,6 +14,7 @@ import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.handler.DoctorAbstractEventFlowHandler;
 import io.terminus.doctor.event.model.DoctorPigEvent;
+import io.terminus.doctor.event.model.DoctorPigSnapshot;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.workflow.core.Execution;
 import org.joda.time.DateTime;
@@ -112,5 +113,12 @@ public class DoctorSowWeanHandler extends DoctorAbstractEventFlowHandler {
         } catch (Exception e) {
             return 0;
         }
+    }
+
+    @Override
+    protected void afterEventCreateHandle(DoctorPigEvent doctorPigEvent, DoctorPigTrack doctorPigTrack, DoctorPigSnapshot doctorPigSnapshot, Map<String, Object> extra) {
+        //触发一下修改猪群的事件
+        Integer pigType = doctorBarnDao.findById(doctorPigTrack.getCurrentBarnId()).getPigType();
+        updateFarrowGroupTrack(doctorPigTrack.getGroupId(), pigType);
     }
 }
