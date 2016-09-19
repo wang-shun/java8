@@ -42,6 +42,7 @@ public class DoctorGroupReportManager {
      * @return 猪群跟踪
      */
     public DoctorGroupTrack updateFarrowGroupTrack(DoctorGroupTrack groupTrack, Integer pigType) {
+        log.info("update farrow group track:{}, pigType:{}", groupTrack, pigType);
         if (!PigType.FARROW_TYPES.contains(pigType)) {
             return groupTrack;
         }
