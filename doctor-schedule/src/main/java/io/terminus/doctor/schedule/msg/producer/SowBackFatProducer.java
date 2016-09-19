@@ -106,6 +106,7 @@ public class SowBackFatProducer extends AbstractJobProducer {
                         || Objects.equals(PigStatus.Farrow.getKey(), pigDto.getStatus())
                         || Objects.equals(PigStatus.FEED.getKey(), pigDto.getStatus())
                         || Objects.equals(PigStatus.Wean.getKey(), pigDto.getStatus())
+                        || Objects.equals(PigStatus.KongHuai.getKey(), pigDto.getStatus())
                         || Objects.equals(PigStatus.Entry.getKey(), pigDto.getStatus())).collect(Collectors.toList());
                 // 处理每个猪
                 for (int j = 0; pigs != null && j < pigs.size(); j++) {
@@ -135,14 +136,13 @@ public class SowBackFatProducer extends AbstractJobProducer {
                             }
                             if (isSend) {
                                 if (!isMessage && Objects.equals(ruleTemplate.getType(), DoctorMessageRuleTemplate.Type.WARNING.getValue())) {
-                                    recordPigMessage(pigDto, PigEvent.CONDITION, null, ruleValue.getValue().intValue(), PigStatus.Mate, PigStatus.Pregnancy, PigStatus.Farrow, PigStatus.FEED, PigStatus.Wean, PigStatus.Entry);
+                                    recordPigMessage(pigDto, PigEvent.CONDITION, null, ruleValue, PigStatus.Mate, PigStatus.Pregnancy, PigStatus.Farrow, PigStatus.FEED, PigStatus.Wean, PigStatus.Entry);
                                 } else if (isMessage) {
                                     pigDto.setEventDate(matingPigEvent.getEventAt());
                                     pigDto.setOperatorName(matingPigEvent.getOperatorName());
                                     pigDto.setRuleValueId(key);
                                     messages.addAll(getMessage(pigDto, rule.getChannels(), ruleRole, sUsers, timeDiff, rule.getUrl()));
                                 }
-                                break;
                             }
                         }
                     } catch (Exception e) {

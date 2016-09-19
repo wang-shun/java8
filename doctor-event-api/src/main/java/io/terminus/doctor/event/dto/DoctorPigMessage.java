@@ -20,6 +20,8 @@ import java.io.Serializable;
 public class DoctorPigMessage implements Serializable {
     private static final long serialVersionUID = 2878958119770364775L;
 
+    private Integer ruleValueId;
+
     private Long pigId;
 
     /**

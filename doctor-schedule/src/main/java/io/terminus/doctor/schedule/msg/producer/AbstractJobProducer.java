@@ -99,7 +99,7 @@ public abstract class AbstractJobProducer extends AbstractProducer {
      * @param ruleValue   配置的的天数
      * @param pigStatuses 母猪当前的状态
      */
-    protected void recordPigMessage(DoctorPigInfoDto pigDto, PigEvent pigEvent, Double timeDiff, Integer ruleValue, PigStatus... pigStatuses) {
+    protected void recordPigMessage(DoctorPigInfoDto pigDto, PigEvent pigEvent, Double timeDiff, RuleValue ruleValue, PigStatus... pigStatuses) {
         List statusList = Lists.newArrayList();
         if (pigStatuses != null && pigStatuses.length > 0) {
             for (PigStatus pigStatus : pigStatuses) {
@@ -110,6 +110,7 @@ public abstract class AbstractJobProducer extends AbstractProducer {
         // 处理消息
         List<DoctorPigMessage> tmpPigMessages = Lists.newArrayList();
         tmpPigMessages.add(DoctorPigMessage.builder()
+                .ruleValueId(ruleValue.getId())
                 .pigId(pigDto.getPigId())
                 .eventType(pigEvent.getKey())
                 .eventTypeName(pigEvent.getName())
@@ -123,12 +124,17 @@ public abstract class AbstractJobProducer extends AbstractProducer {
                 List<DoctorPigMessage> pigMessages = MAPPER.readValue(pigDto.getExtraTrackMessage(), new TypeReference<List<DoctorPigMessage>>() {
                 });
                 if (!Objects.isNull(pigMessages)) {
-                    pigMessages.stream().filter(doctorPigMessage -> !Objects.equals(doctorPigMessage.getEventType(), pigEvent.getKey()))
-                            .forEach(doctorPigMessage -> {
-                                if (statusList.contains(doctorPigMessage.getStatus())) {
-                                    tmpPigMessages.add(doctorPigMessage);
-                                }
-                            });
+                    pigMessages.forEach(doctorPigMessage -> {
+                        Boolean flag = false;
+                        if (Objects.equals(pigEvent.getKey(), PigEvent.CONDITION.getKey()) && !Objects.equals(ruleValue.getId(), doctorPigMessage.getRuleValueId())) {
+                            flag = true;
+                        } else if (!Objects.equals(doctorPigMessage.getEventType(), pigEvent.getKey())) {
+                            flag = true;
+                        }
+                        if (flag && statusList.contains(doctorPigMessage.getStatus())) {
+                            tmpPigMessages.add(doctorPigMessage);
+                        }
+                    });
                 }
             } catch (Exception e) {
                 log.error("format pig message error, cause by {}", Throwables.getStackTraceAsString(e));
