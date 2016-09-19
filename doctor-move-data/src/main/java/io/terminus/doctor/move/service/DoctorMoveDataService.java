@@ -471,7 +471,7 @@ public class DoctorMoveDataService {
         Map<String, Long> groupMap = Maps.newHashMap();
         doctorGroupDao.findByFarmId(farm.getId()).forEach(group -> groupMap.put(group.getGroupCode(), group.getId()));
 
-        Map<String, DoctorBarn> barnMap = doctorMoveBasicService.getBarnMap(farm.getId());
+        Map<String, DoctorBarn> barnMap = doctorMoveBasicService.getBarnMap2(farm.getId());
 
         //只更新未离场的吧
         doctorPigTrackDao.list(DoctorPigTrack.builder()

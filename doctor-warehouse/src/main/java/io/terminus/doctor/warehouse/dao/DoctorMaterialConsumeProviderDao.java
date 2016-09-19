@@ -51,4 +51,15 @@ public class DoctorMaterialConsumeProviderDao extends MyBatisDao<DoctorMaterialC
         List<MaterialCountAmount> datas = sqlSession.selectList(sqlId("pageCountAmount"), criteria);
         return new Paging<>(total, datas);
     }
+
+    public Map<Long, Double> countConsumeTotal(Long wareHouseId){
+        Map<Long, Double> result = new HashMap<>();
+        Map<Long, Map<String, Object>> query = sqlSession.selectMap(sqlId("countConsumeTotal"), wareHouseId, "material_id");
+        for(Map.Entry<Long, Map<String, Object>> entry : query.entrySet()){
+            Long materialId = entry.getKey();
+            Double consumeTotal = Double.valueOf(entry.getValue().get("consumeTotal").toString());
+            result.put(materialId, consumeTotal);
+        }
+        return result;
+    }
 }
