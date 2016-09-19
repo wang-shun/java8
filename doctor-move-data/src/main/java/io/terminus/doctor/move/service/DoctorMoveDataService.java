@@ -172,6 +172,34 @@ public class DoctorMoveDataService {
     }
 
     /**
+     * 更新关闭猪群的日龄
+     */
+    @Transactional
+    public void updateClosedGroupDayAge(Long moveId, DoctorFarm farm) {
+        Map<String, Integer> ageMap = RespHelper.orServEx(doctorMoveDatasourceHandler
+                .findByHbsSql(moveId, Proc_InventoryGain.class, "DoctorGroupTrack-Proc_InventoryGain", ImmutableMap.of("date", DateUtil.toDateTimeString(new Date())))).stream()
+                .collect(Collectors.toMap(Proc_InventoryGain::getGroupOutId, Proc_InventoryGain::getAvgDayAge));
+
+        DoctorGroupSearchDto search = new DoctorGroupSearchDto();
+        search.setFarmId(farm.getId());
+        search.setStatus(DoctorGroup.Status.CLOSED.getValue());
+        doctorGroupDao.findBySearchDto(search).forEach(group -> {
+            DoctorGroupTrack groupTrack = doctorGroupTrackDao.findByGroupId(group.getId());
+
+            //日龄<=0 的和 查到日龄的, 重新修改下日龄
+            if (groupTrack.getAvgDayAge() <= 0) {
+                Integer age = ageMap.get(group.getOutId());
+                if (age != null) {
+                    DoctorGroupTrack updateTrack = new DoctorGroupTrack();
+                    updateTrack.setId(groupTrack.getId());
+                    updateTrack.setAvgDayAge(age);
+                    doctorGroupTrackDao.update(updateTrack);
+                }
+            }
+        });
+    }
+
+    /**
      * 已关闭的猪群生成批次总结
      */
     @Transactional
@@ -2123,8 +2151,6 @@ public class DoctorMoveDataService {
             turnSeed.setToBarnType(barn.getPigType());
         }
 
-//        DoctorTurnSeedGroupEvent.Sex sex = DoctorTurnSeedGroupEvent.Sex.from(gainEvent.getSexName());
-//        turnSeed.setSex(sex == null ? null : sex.getValue());
         return turnSeed;
     }
 
@@ -2137,6 +2163,7 @@ public class DoctorMoveDataService {
 
         //如果猪群已经关闭, 大部分的统计值可以置成0
         if (Objects.equals(group.getStatus(), DoctorGroup.Status.CLOSED.getValue())) {
+            groupTrack.setAvgDayAge(gain == null ? 0 : gain.getAvgDayAge());    //关闭猪群的日龄
             return getCloseGroupTrack(groupTrack, group, events);
         }
 
@@ -2145,7 +2172,6 @@ public class DoctorMoveDataService {
             groupTrack.setQuantity(MoreObjects.firstNonNull(gain.getQuantity(), 0));
             groupTrack.setBoarQty(gain.getQuantity() / 2);
             groupTrack.setSowQty(groupTrack.getQuantity() - groupTrack.getBoarQty());
-            groupTrack.setAvgDayAge(gain.getAvgDayAge());
             groupTrack.setBirthDate(DateTime.now().minusDays(groupTrack.getAvgDayAge()).toDate());
             groupTrack.setAvgWeight(MoreObjects.firstNonNull(gain.getAvgWeight(), 0D));
             groupTrack.setWeight(groupTrack.getAvgWeight() * groupTrack.getQuantity());
@@ -2170,8 +2196,6 @@ public class DoctorMoveDataService {
         groupTrack.setQuantity(0);
         groupTrack.setBoarQty(0);
         groupTrack.setSowQty(0);
-        groupTrack.setAvgDayAge(0);
-        groupTrack.setBirthDate(DateTime.now().toDate());
         groupTrack.setAvgWeight(0D);
         groupTrack.setWeight(0D);
         groupTrack.setPrice(0L);

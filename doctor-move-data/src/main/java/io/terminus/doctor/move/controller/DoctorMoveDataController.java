@@ -658,4 +658,21 @@ public class DoctorMoveDataController {
             return false;
         }
     }
+
+    /**
+     * 已关闭的猪群生成批次总结
+     */
+    @RequestMapping(value = "/updateClosedGroupDayAge", method = RequestMethod.GET)
+    public Boolean updateClosedGroupDayAge(@RequestParam("farmId") Long farmId, @RequestParam("moveId") Long moveId) {
+        try {
+            DoctorFarm farm = doctorFarmDao.findById(farmId);
+            log.warn("updateClosedGroupDayAge start, farmId:{}", farmId);
+            doctorMoveDataService.updateClosedGroupDayAge(moveId, farm);
+            log.warn("updateClosedGroupDayAge end");
+            return true;
+        } catch (Exception e) {
+            log.error("updateClosedGroupDayAge failed, farmId:{}, cause:{}", farmId, Throwables.getStackTraceAsString(e));
+            return false;
+        }
+    }
 }
