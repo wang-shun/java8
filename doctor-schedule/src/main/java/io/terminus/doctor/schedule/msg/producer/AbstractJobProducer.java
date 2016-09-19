@@ -108,15 +108,24 @@ public abstract class AbstractJobProducer extends AbstractProducer {
         }
 
         // 处理消息
-        List<DoctorPigMessage> tmpPigMessages = Lists.newArrayList();
-        tmpPigMessages.add(DoctorPigMessage.builder()
-                .ruleValueId(ruleValue.getId())
+        DoctorPigMessage pigMessage = DoctorPigMessage.builder()
                 .pigId(pigDto.getPigId())
                 .eventType(pigEvent.getKey())
                 .eventTypeName(pigEvent.getName())
                 .status(pigDto.getStatus())
                 .timeDiff(timeDiff)
-                .build());
+                .build();
+        if (Objects.equals(pigEvent.getKey(), PigEvent.CONDITION.getKey())){
+            pigMessage.setIsCondition(1);
+            if (ruleValue.getId() == 4 ){
+                pigMessage.setConditionValue("断奶");
+            }else {
+                pigMessage.setConditionValue(ruleValue.getValue().toString());
+            }
+        }
+        List<DoctorPigMessage> tmpPigMessages = Lists.newArrayList();
+        tmpPigMessages.add(pigMessage);
+
 
         // 处理存在的消息和过期的消息
         if (StringUtils.isNotBlank(pigDto.getExtraTrackMessage())) {
@@ -124,14 +133,9 @@ public abstract class AbstractJobProducer extends AbstractProducer {
                 List<DoctorPigMessage> pigMessages = MAPPER.readValue(pigDto.getExtraTrackMessage(), new TypeReference<List<DoctorPigMessage>>() {
                 });
                 if (!Objects.isNull(pigMessages)) {
-                    pigMessages.forEach(doctorPigMessage -> {
-                        Boolean flag = false;
-                        if (Objects.equals(pigEvent.getKey(), PigEvent.CONDITION.getKey()) && !Objects.equals(ruleValue.getId(), doctorPigMessage.getRuleValueId())) {
-                            flag = true;
-                        } else if (!Objects.equals(doctorPigMessage.getEventType(), pigEvent.getKey())) {
-                            flag = true;
-                        }
-                        if (flag && statusList.contains(doctorPigMessage.getStatus())) {
+                    pigMessages.stream().filter(message -> Objects.equals(message.getEventType(), pigEvent.getKey())).collect(Collectors.toList()).
+                            forEach(doctorPigMessage -> {
+                        if ( statusList.contains(doctorPigMessage.getStatus())) {
                             tmpPigMessages.add(doctorPigMessage);
                         }
                     });
