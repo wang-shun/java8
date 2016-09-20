@@ -1,6 +1,7 @@
 package io.terminus.doctor.schedule.msg.producer;
 
 import com.google.api.client.util.Maps;
+import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
 import io.terminus.common.utils.Arguments;
 import io.terminus.doctor.common.utils.RespHelper;
@@ -114,14 +115,15 @@ public class SowBackFatProducer extends AbstractJobProducer {
                         DoctorPigInfoDto pigDto = pigs.get(j);
                         //根据猪场权限过滤用户
                         List<SubUser> sUsers = filterSubUserBarnId(subUsers, pigDto.getBarnId());
-                        for (Integer key : ruleValueMap.keySet().stream().sorted(Comparator.reverseOrder()).collect(Collectors.toSet())) {
-                            Boolean isSend = false;
+                        Boolean isSend = false;
+                        DoctorPigEvent matingPigEvent = getMatingPigEvent(pigDto);
+                        Double timeDiff = null;
+                        if (matingPigEvent == null) {
+                            break;
+                        }
+                        List<Integer> keyList = ruleValueMap.keySet().stream().sorted(Comparator.reverseOrder()).collect(Collectors.toList());
+                        for (Integer key : keyList) {
                             RuleValue ruleValue = ruleValueMap.get(key);
-                            DoctorPigEvent matingPigEvent = getMatingPigEvent(pigDto);
-                            Double timeDiff = null;
-                            if (matingPigEvent == null) {
-                                break;
-                            }
 
                             if (key == 1 || key == 2 || key == 3) {
                                 timeDiff = getTimeDiff(new DateTime(matingPigEvent.getEventAt()));
@@ -130,8 +132,8 @@ public class SowBackFatProducer extends AbstractJobProducer {
                                 }
                             } else {
                                 DoctorPigEvent pigEvent = getLeadToWeanEvent(pigDto.getDoctorPigEvents());
-                                timeDiff = getTimeDiff(new DateTime(pigEvent.getEventAt()));
                                 if (pigEvent != null && filterPigCondition(pigDto, new DateTime(pigEvent.getEventAt()))) {
+                                    timeDiff = getTimeDiff(new DateTime(pigEvent.getEventAt()));
                                     isSend = true;
                                 }
                             }
@@ -148,7 +150,7 @@ public class SowBackFatProducer extends AbstractJobProducer {
                             }
                         }
                     } catch (Exception e) {
-                        log.error("[SowBackFatProduce]-handle.message.failed" );
+                        log.error("[SowBackFatProduce]-handle.message.failed {}", Throwables.getStackTraceAsString(e));
                     }
                 }
             }

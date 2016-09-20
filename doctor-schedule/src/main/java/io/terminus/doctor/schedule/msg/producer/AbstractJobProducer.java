@@ -251,10 +251,12 @@ public abstract class AbstractJobProducer extends AbstractProducer {
      */
     protected DoctorPigEvent getLeadToWeanEvent(List<DoctorPigEvent> events){
         try {
-            return events.stream().filter(doctorPigEvent -> Objects.equals(doctorPigEvent.getPigStatusAfter(), PigStatus.Wean.getKey())).max(Comparator.comparing(DoctorPigEvent::getEventAt)).get();
-
+            List<DoctorPigEvent> tempList =  events.stream().filter(doctorPigEvent -> Objects.equals(doctorPigEvent.getPigStatusAfter(), PigStatus.Wean.getKey())).collect(Collectors.toList());
+            if (!Arguments.isNullOrEmpty(tempList)){
+                return tempList.stream().max(Comparator.comparing(DoctorPigEvent::getEventAt)).get();
+            }
         } catch (Exception e){
-            log.error(" get wean  failed, pigDto is {}", events);
+            log.error(" get.lead.to.wean.event.failed ");
         }
         return null;
     }
