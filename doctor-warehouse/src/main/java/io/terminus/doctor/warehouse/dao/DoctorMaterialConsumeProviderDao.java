@@ -5,6 +5,7 @@ import com.google.common.collect.Maps;
 import io.terminus.common.model.Paging;
 import io.terminus.common.mysql.dao.MyBatisDao;
 import io.terminus.common.utils.Constants;
+import io.terminus.doctor.common.enums.WareHouseType;
 import io.terminus.doctor.warehouse.dto.MaterialCountAmount;
 import io.terminus.doctor.warehouse.model.DoctorMaterialConsumeProvider;
 import org.springframework.stereotype.Repository;
@@ -61,5 +62,16 @@ public class DoctorMaterialConsumeProviderDao extends MyBatisDao<DoctorMaterialC
             result.put(materialId, consumeTotal);
         }
         return result;
+    }
+
+    /**
+     * 对饲料消耗数量进行求和, 只计算事件类型为 DoctorMaterialConsumeProvider.EVENT_TYPE.CONSUMER 的数据
+     * @param criteria 过滤字段
+     * @return
+     */
+    public Double sumConsumeFeed(Map<String, Object> criteria){
+        criteria.put("eventType", DoctorMaterialConsumeProvider.EVENT_TYPE.CONSUMER.getValue());
+        criteria.put("type", WareHouseType.FEED.getKey());
+        return sqlSession.selectOne(sqlId("sumConsumeFeed"), criteria);
     }
 }

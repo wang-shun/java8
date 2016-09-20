@@ -33,4 +33,20 @@ public interface DoctorMaterialConsumeProviderReadService {
 
     Response<Paging<MaterialCountAmount>> countAmount(Long farmId, Long warehouseId, Long materialId, Integer eventType, Integer materilaType,
                                               Long barnId, Long groupId, Long staffId, String startAt, String endAt, Integer pageNo, Integer size);
+
+    /**
+     * 对饲料消耗数量进行求和, 只计算事件类型为 DoctorMaterialConsumeProvider.EVENT_TYPE.CONSUMER 的数据
+     * 所有参数都可以为空
+     * @param farmId
+     * @param wareHouseId
+     * @param materialId
+     * @param staffId
+     * @param barnId
+     * @param groupId
+     * @param startAt
+     * @param endAt
+     * @return
+     */
+    Response<Double> sumConsumeFeed(Long farmId, Long wareHouseId, Long materialId, Long staffId, Long barnId, Long groupId,
+                                String startAt, String endAt);
 }
