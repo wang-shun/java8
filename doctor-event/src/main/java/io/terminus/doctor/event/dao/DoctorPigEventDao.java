@@ -206,4 +206,13 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
     public Boolean updates(List<DoctorPigEvent> lists){
         return  Boolean.valueOf(sqlSession.update(sqlId("updates"), lists) == 1);
     }
+
+    /**
+     *
+     * @param criteria
+     * @return
+     */
+    public List<DoctorPigEvent> findOperatorsByType(Map<String, Object> criteria){
+        return getSqlSession().selectList(sqlId("findOperator"), criteria);
+    }
 }

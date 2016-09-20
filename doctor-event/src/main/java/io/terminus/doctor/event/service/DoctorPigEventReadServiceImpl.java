@@ -239,4 +239,14 @@ public class DoctorPigEventReadServiceImpl implements DoctorPigEventReadService 
             return Response.fail("query.pig.event.by.criteria.failed");
         }
     }
+
+    @Override
+    public Response<List<DoctorPigEvent>> queryOperators(Map<String, Object> criteria) {
+        try {
+            return Response.ok(doctorPigEventDao.findOperatorsByType(criteria));
+        } catch (Exception e){
+            log.error("query.Operator.failed, cause by {}", Throwables.getStackTraceAsString(e));
+            return Response.fail("query.Operator.failed");
+        }
+    }
 }
