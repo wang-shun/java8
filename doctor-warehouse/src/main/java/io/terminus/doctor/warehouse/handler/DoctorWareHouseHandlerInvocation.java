@@ -29,4 +29,12 @@ public class DoctorWareHouseHandlerInvocation {
             }
         });
     }
+
+    public void rollback(Long eventId){
+        doctorWareHouseHandlerChain.getHandlerList().forEach(iHandler -> {
+            if(iHandler.canRollback(eventId)){
+                iHandler.rollback(eventId);
+            }
+        });
+    }
 }

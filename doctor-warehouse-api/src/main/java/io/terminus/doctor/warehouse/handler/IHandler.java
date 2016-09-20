@@ -27,4 +27,8 @@ public interface IHandler {
      * @throws RuntimeException
      */
     void handle(DoctorMaterialConsumeProviderDto dto, Map<String,Object> context) throws RuntimeException;
+
+    boolean canRollback(Long eventId);
+
+    void rollback(Long eventId);
 }

@@ -1,8 +1,7 @@
 package io.terminus.doctor.warehouse.handler.out;
 
 import com.google.common.collect.ImmutableMap;
-import io.terminus.common.utils.MapBuilder;
-import io.terminus.doctor.common.utils.Params;
+import io.terminus.common.exception.ServiceException;
 import io.terminus.doctor.warehouse.dao.DoctorMaterialConsumeProviderDao;
 import io.terminus.doctor.warehouse.dao.DoctorMaterialPriceInWareHouseDao;
 import io.terminus.doctor.warehouse.dto.DoctorMaterialConsumeProviderDto;
@@ -14,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -95,5 +95,44 @@ public class DoctorConsumerEventHandler implements IHandler{
         doctorMaterialConsumeProvider.setUnitPrice(Double.valueOf(totalPrice / consumeCount).longValue());
         doctorMaterialConsumeProviderDao.create(doctorMaterialConsumeProvider);
         context.put("eventId",doctorMaterialConsumeProvider.getId());
+    }
+
+    @Override
+    public boolean canRollback(Long eventId) {
+        DoctorMaterialConsumeProvider cp = doctorMaterialConsumeProviderDao.findById(eventId);
+        DoctorMaterialConsumeProvider.EVENT_TYPE eventType = DoctorMaterialConsumeProvider.EVENT_TYPE.from(cp.getEventType());
+        return eventType != null && eventType.isOut();
+    }
+
+    @Override
+    public void rollback(Long eventId) {
+        DoctorMaterialConsumeProvider cp = doctorMaterialConsumeProviderDao.findById(eventId);
+        // 本次出库事件的价格组成
+        List<Map<String, Object>> priceCompose = (ArrayList) cp.getExtraMap().get("consumePrice");
+        if(priceCompose == null || priceCompose.isEmpty()){
+            throw new ServiceException("price.compose.not.found"); // 没有找到本次出库的价格组成
+        }
+        for(Map<String, Object> eachPrice : priceCompose){
+            Long providerId = Long.valueOf(eachPrice.get("providerId").toString());
+            Date providerTime = new Date(Long.valueOf(eachPrice.get("providerTime").toString()));
+            Long unitPrice = Long.valueOf(eachPrice.get("unitPrice").toString());
+            Double count = Double.valueOf(eachPrice.get("count").toString());
+            DoctorMaterialPriceInWareHouse priceInWareHouse = doctorMaterialPriceInWareHouseDao.findByProviderId(providerId);
+            if(priceInWareHouse == null){
+                doctorMaterialPriceInWareHouseDao.create(
+                        DoctorMaterialPriceInWareHouse.builder()
+                                .farmId(cp.getFarmId()).farmName(cp.getFarmName())
+                                .wareHouseId(cp.getWareHouseId()).wareHouseName(cp.getWareHouseName())
+                                .materialId(cp.getMaterialId()).materialName(cp.getMaterialName())
+                                .type(cp.getType()).providerId(providerId).providerTime(providerTime)
+                                .unitPrice(unitPrice).remainder(count)
+                                .build()
+                );
+            }else{
+                priceInWareHouse.setRemainder(priceInWareHouse.getRemainder() + count);
+                doctorMaterialPriceInWareHouseDao.update(priceInWareHouse);
+            }
+        }
+        doctorMaterialConsumeProviderDao.delete(eventId);
     }
 }

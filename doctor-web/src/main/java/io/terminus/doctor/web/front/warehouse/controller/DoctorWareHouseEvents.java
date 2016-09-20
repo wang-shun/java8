@@ -344,21 +344,14 @@ public class DoctorWareHouseEvents {
         return true;
     }
 
+    /**
+     * 仓库事件回滚
+     * @param eventId DoctorMaterialConsumeProvider的id
+     * @return
+     */
     @RequestMapping(value = "/rollback", method = RequestMethod.GET)
     @ResponseBody
-    public boolean rollback(Long eventId){
-        DoctorMaterialConsumeProvider cp = RespHelper.or500(materialConsumeProviderReadService.findById(eventId));
-        DoctorMaterialConsumeProvider.EVENT_TYPE eventType = DoctorMaterialConsumeProvider.EVENT_TYPE.from(cp.getEventType());
-        if(eventType != null){
-            // 回滚入库事件
-            if(eventType.isIn()){
-
-            }
-            // 回滚出库事件
-            if(eventType.isOut()){
-
-            }
-        }
-        return true;
+    public boolean rollback(@RequestParam Long eventId){
+        return RespHelper.or500(doctorMaterialInWareHouseWriteService.rollback(eventId));
     }
 }

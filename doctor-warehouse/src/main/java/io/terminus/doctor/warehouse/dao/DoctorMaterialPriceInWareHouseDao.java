@@ -24,4 +24,13 @@ public class DoctorMaterialPriceInWareHouseDao extends MyBatisDao<DoctorMaterial
     public List<DoctorMaterialPriceInWareHouse> findByWareHouseAndMaterialId(Long wareHouseId, Long materialId){
         return sqlSession.selectList(sqlId("findByWareHouseAndMaterialId"), ImmutableMap.of("wareHouseId", wareHouseId, "materialId", materialId));
     }
+
+    /**
+     * 查找某次入库的剩余量
+     * @param providerId
+     * @return
+     */
+    public DoctorMaterialPriceInWareHouse findByProviderId(Long providerId){
+        return sqlSession.selectOne(sqlId("findByProviderId"), providerId);
+    }
 }

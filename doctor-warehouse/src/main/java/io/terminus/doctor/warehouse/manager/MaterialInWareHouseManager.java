@@ -226,4 +226,8 @@ public class MaterialInWareHouseManager {
         return Long.valueOf(context.get("eventId").toString());
     }
 
+    @Transactional
+    public void rollback(Long eventId){
+        doctorWareHouseHandlerInvocation.rollback(eventId);
+    }
 }
