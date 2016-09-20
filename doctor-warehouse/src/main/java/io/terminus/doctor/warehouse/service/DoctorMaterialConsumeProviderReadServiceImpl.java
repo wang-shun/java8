@@ -80,7 +80,8 @@ public class DoctorMaterialConsumeProviderReadServiceImpl implements DoctorMater
             map.put("endAt", endAt);
             return Response.ok(doctorMaterialConsumeProviderDao.sumConsumeFeed(Params.filterNullOrEmpty(map)));
         }catch (Exception e){
-            log.error("sumConsume failed, cause :{}", Throwables.getStackTraceAsString(e));
+            log.error("sumConsume failed, farmId={}, wareHouseId={}, materialId={}, staffId={}, barnId={}, groupId={}, startAt={}, endAt={}, cause :{}",
+                    farmId, wareHouseId, materialId, staffId, barnId, groupId, startAt, endAt, Throwables.getStackTraceAsString(e));
             return Response.fail("sum.consume.fail");
         }
     }

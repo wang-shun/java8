@@ -206,7 +206,7 @@
     </select>
 
     <select id="sumConsumeFeed" parameterType="map" resultType="double">
-        select sum(event_count) from <include refid="tb"/>
+        select ifnull(sum(event_count),0) from <include refid="tb"/>
         <where>
             <include refid="criteria"/>
         </where>
