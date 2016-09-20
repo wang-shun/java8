@@ -223,7 +223,7 @@ public abstract class AbstractJobProducer extends AbstractProducer {
                     case Wean:
                     case Entry:// 断奶
                         // @see DoctorWeanDto
-                        doctorPigEvent = getPigEventByEventType(pigDto.getDoctorPigEvents(), PigEvent.WEAN.getKey());
+                        doctorPigEvent = getLeadToWeanEvent(pigDto.getDoctorPigEvents());
                         if (doctorPigEvent != null) {
                             dateTime = new DateTime(doctorPigEvent.getEventAt());
                             pigDto.setOperatorName(doctorPigEvent.getOperatorName());
@@ -244,6 +244,20 @@ public abstract class AbstractJobProducer extends AbstractProducer {
         return null;
     }
 
+    /**
+     * 获取导致断奶的事件
+     * @param events
+     * @return
+     */
+    protected DoctorPigEvent getLeadToWeanEvent(List<DoctorPigEvent> events){
+        try {
+            return events.stream().filter(doctorPigEvent -> Objects.equals(doctorPigEvent.getPigStatusAfter(), PigStatus.Wean.getKey())).max(Comparator.comparing(DoctorPigEvent::getEventAt)).get();
+
+        } catch (Exception e){
+            log.error(" get wean  failed, pigDto is {}", events);
+        }
+        return null;
+    }
     /**
      * 根据猪舍过滤用户
      *

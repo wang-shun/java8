@@ -118,23 +118,26 @@ public class SowBackFatProducer extends AbstractJobProducer {
                             Boolean isSend = false;
                             RuleValue ruleValue = ruleValueMap.get(key);
                             DoctorPigEvent matingPigEvent = getMatingPigEvent(pigDto);
-                            Double timeDiff = getTimeDiff(new DateTime(ruleValue.getValue()));
+                            Double timeDiff = null;
                             if (matingPigEvent == null) {
                                 break;
                             }
+
                             if (key == 1 || key == 2 || key == 3) {
-                                if (checkRuleValue(ruleValue, timeDiff) && filterPigCondition(pigDto, new DateTime(ruleValue.getValue()))) {
+                                timeDiff = getTimeDiff(new DateTime(matingPigEvent.getEventAt()));
+                                if (checkRuleValue(ruleValue, timeDiff) && filterPigCondition(pigDto, new DateTime(ruleValue.getValue().longValue()))) {
                                     isSend = true;
                                 }
                             } else {
-                                DoctorPigEvent weanPigEvent = getPigEventByEventType(pigDto.getDoctorPigEvents(), PigEvent.WEAN.getKey());
-                                if (weanPigEvent != null && filterPigCondition(pigDto, new DateTime(weanPigEvent.getEventAt()))) {
+                                DoctorPigEvent pigEvent = getLeadToWeanEvent(pigDto.getDoctorPigEvents());
+                                timeDiff = getTimeDiff(new DateTime(pigEvent.getEventAt()));
+                                if (pigEvent != null && filterPigCondition(pigDto, new DateTime(pigEvent.getEventAt()))) {
                                     isSend = true;
                                 }
                             }
                             if (isSend) {
                                 if (!isMessage && Objects.equals(ruleTemplate.getType(), DoctorMessageRuleTemplate.Type.WARNING.getValue())) {
-                                    recordPigMessage(pigDto, PigEvent.CONDITION, timeDiff, ruleValue, PigStatus.Mate, PigStatus.Pregnancy, PigStatus.Farrow, PigStatus.FEED, PigStatus.Wean, PigStatus.Entry);
+                                    recordPigMessage(pigDto, PigEvent.CONDITION, getRuleTimeDiff(ruleValue, timeDiff), ruleValue, PigStatus.Mate, PigStatus.Pregnancy, PigStatus.Farrow, PigStatus.FEED, PigStatus.Wean, PigStatus.Entry);
                                 } else if (isMessage) {
                                     pigDto.setEventDate(matingPigEvent.getEventAt());
                                     pigDto.setOperatorName(matingPigEvent.getOperatorName());
@@ -145,7 +148,7 @@ public class SowBackFatProducer extends AbstractJobProducer {
                             }
                         }
                     } catch (Exception e) {
-                        log.error("[SowBackFatProduce]-handle.message.failed");
+                        log.error("[SowBackFatProduce]-handle.message.failed" );
                     }
                 }
             }
