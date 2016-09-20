@@ -204,4 +204,11 @@
         where `ware_house_id` = #{wareHouseId} and event_type in (1, 3, 5)
         group by material_id
     </select>
+
+    <select id="sumConsumeFeed" parameterType="map" resultType="double">
+        select ifnull(sum(event_count),0) from <include refid="tb"/>
+        <where>
+            <include refid="criteria"/>
+        </where>
+    </select>
 </mapper>

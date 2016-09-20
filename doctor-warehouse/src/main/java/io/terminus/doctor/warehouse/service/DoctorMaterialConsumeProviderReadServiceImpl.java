@@ -66,4 +66,23 @@ public class DoctorMaterialConsumeProviderReadServiceImpl implements DoctorMater
             return Response.fail("material.count.amount.fail");
         }
     }
+
+    @Override
+    public Response<Double> sumConsumeFeed(Long farmId, Long wareHouseId, Long materialId, Long staffId, Long barnId, Long groupId,
+                                           String startAt, String endAt){
+        try{
+            DoctorMaterialConsumeProvider model = DoctorMaterialConsumeProvider.builder()
+                    .materialId(materialId).wareHouseId(wareHouseId).barnId(barnId).groupId(groupId)
+                    .staffId(staffId).farmId(farmId)
+                    .build();
+            Map<String, Object> map = BeanMapper.convertObjectToMap(model);
+            map.put("startAt", startAt);
+            map.put("endAt", endAt);
+            return Response.ok(doctorMaterialConsumeProviderDao.sumConsumeFeed(Params.filterNullOrEmpty(map)));
+        }catch (Exception e){
+            log.error("sumConsume failed, farmId={}, wareHouseId={}, materialId={}, staffId={}, barnId={}, groupId={}, startAt={}, endAt={}, cause :{}",
+                    farmId, wareHouseId, materialId, staffId, barnId, groupId, startAt, endAt, Throwables.getStackTraceAsString(e));
+            return Response.fail("sum.consume.fail");
+        }
+    }
 }
