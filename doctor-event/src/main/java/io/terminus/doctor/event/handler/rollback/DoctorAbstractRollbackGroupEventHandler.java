@@ -1,8 +1,18 @@
 package io.terminus.doctor.event.handler.rollback;
 
+import io.terminus.doctor.common.utils.RespHelper;
+import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.handler.DoctorRollbackGroupEventHandler;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
+import io.terminus.doctor.event.model.DoctorRevertLog;
+import io.terminus.doctor.event.service.DoctorGroupReadService;
+import io.terminus.doctor.event.service.DoctorRevertLogWriteService;
 import lombok.extern.slf4j.Slf4j;
+import org.joda.time.DateTime;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Objects;
 
 /**
  * Desc: 猪群事件回滚处理器
@@ -13,18 +23,39 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public abstract class DoctorAbstractRollbackGroupEventHandler implements DoctorRollbackGroupEventHandler {
 
+    @Autowired
+    protected DoctorGroupReadService doctorGroupReadService;
+
+    @Autowired
+    private DoctorRevertLogWriteService doctorRevertLogWriteService;
+
+    /**
+     * 判断能否回滚(1.手动事件 2.三个月内的事件 3.最新事件 4.子类根据事件类型特殊处理)
+     */
     @Override
-    public boolean canRollback(DoctorGroupEvent groupEvent) {
-        return false;
+    public final boolean canRollback(DoctorGroupEvent groupEvent) {
+        return Objects.equals(groupEvent.getIsAuto(), IsOrNot.YES.getValue()) &&
+                groupEvent.getEventAt().after(DateTime.now().plusMonths(-3).toDate()) &&
+                RespHelper.orFalse(doctorGroupReadService.isLastEvent(groupEvent.getGroupId(), groupEvent.getId())) &&
+                handleCheck(groupEvent);
     }
 
-    @Override
-    public boolean rollback(DoctorGroupEvent groupEvent) {
-        return false;
+    /**
+     * 带事务的回滚操作
+     */
+    @Override @Transactional
+    public final void rollback(DoctorGroupEvent groupEvent) {
+        DoctorRevertLog revertLog = handleRollback(groupEvent);
+        RespHelper.orServEx(doctorRevertLogWriteService.createRevertLog(revertLog));
     }
 
-    @Override
-    public void updateReport(DoctorGroupEvent groupEvent) {
+    /**
+     * 每个子类根据事件类型 判断是否应该由此handler执行回滚
+     */
+    protected abstract boolean handleCheck(DoctorGroupEvent groupEvent);
 
-    }
+    /**
+     * 处理回滚操作
+     */
+    protected abstract DoctorRevertLog handleRollback(DoctorGroupEvent groupEvent);
 }

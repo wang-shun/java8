@@ -87,4 +87,11 @@ public interface DoctorPigEventReadService {
      * @return
      */
     Response<Paging<DoctorPigEvent>> queryPigEventsByCriteria(Map<String, Object> criteria, Integer pageNo, Integer pageSize);
+
+    /**
+     * 判断是否是最新事件
+     * @param pigId 猪id
+     * @return true 是最新事件, false 不是
+     */
+    Response<Boolean> isLastEvent(@NotNull(message = "input.pigId.empty") Long pigId, @NotNull(message = "eventId.not.null") Long eventId);
 }

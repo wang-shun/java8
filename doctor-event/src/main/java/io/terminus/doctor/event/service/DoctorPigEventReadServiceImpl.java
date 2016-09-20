@@ -239,4 +239,18 @@ public class DoctorPigEventReadServiceImpl implements DoctorPigEventReadService 
             return Response.fail("query.pig.event.by.criteria.failed");
         }
     }
+
+    @Override
+    public Response<Boolean> isLastEvent(Long pigId, Long eventId) {
+        try {
+            DoctorPigEvent lastEvent = doctorPigEventDao.queryLastPigEventById(pigId);
+            if (!Objects.equals(eventId, lastEvent.getId())) {
+                return Response.ok(Boolean.FALSE);
+            }
+            return Response.ok(Boolean.TRUE);
+        } catch (Exception e) {
+            log.error("find pig event is last event failed, pigId:{}, eventId:{}, cause:{}", pigId, eventId, Throwables.getStackTraceAsString(e));
+            return Response.ok(Boolean.FALSE);
+        }
+    }
 }

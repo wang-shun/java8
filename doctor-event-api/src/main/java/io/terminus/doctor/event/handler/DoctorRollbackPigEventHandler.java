@@ -20,9 +20,8 @@ public interface DoctorRollbackPigEventHandler {
 
     /**
      * 回滚操作
-     * @return true 需要更新report, false 不需要
      */
-    boolean rollback(DoctorPigEvent pigEvent);
+    void rollback(DoctorPigEvent pigEvent);
 
     /**
      * 更新报表

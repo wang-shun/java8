@@ -20,9 +20,8 @@ public interface DoctorRollbackGroupEventHandler {
 
     /**
      * 回滚操作
-     * @return true 需要更新report, false 不需要
      */
-    boolean rollback(DoctorGroupEvent groupEvent);
+    void rollback(DoctorGroupEvent groupEvent);
 
     /**
      * 更新报表

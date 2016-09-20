@@ -42,11 +42,13 @@ public class DoctorRollbackServiceImpl implements DoctorRollbackService {
         try {
             DoctorGroupEvent groupEvent = doctorGroupEventDao.findById(eventId);
             if (groupEvent != null) {
-                //获取拦截器链, 执行回滚操作, 如果成功, 更新报表
+                //获取拦截器链, 判断能否回滚,执行回滚操作, 更新报表
                 doctorRollbackHandlerChain.getRollbackGroupEventHandlers().stream()
                         .filter(handler -> handler.canRollback(groupEvent))
-                        .filter(handler -> handler.rollback(groupEvent))
-                        .forEach(handler -> handler.updateReport(groupEvent));
+                        .forEach(handler -> {
+                            handler.rollback(groupEvent);
+                            handler.updateReport(groupEvent);
+                        });
             }
             return Response.ok(Boolean.TRUE);
         } catch (ServiceException e) {
@@ -62,11 +64,13 @@ public class DoctorRollbackServiceImpl implements DoctorRollbackService {
         try {
             DoctorPigEvent pigEvent = doctorPigEventDao.findById(eventId);
             if (pigEvent != null) {
-                //获取拦截器链, 执行回滚操作, 如果成功, 更新报表
+                //获取拦截器链, 判断能否回滚, 执行回滚操作, 如果成功, 更新报表
                 doctorRollbackHandlerChain.getRollbackPigEventHandlers().stream()
                         .filter(handler -> handler.canRollback(pigEvent))
-                        .filter(handler -> handler.rollback(pigEvent))
-                        .forEach(handler -> handler.updateReport(pigEvent));
+                        .forEach(handler -> {
+                            handler.rollback(pigEvent);
+                            handler.updateReport(pigEvent);
+                        });
             }
             return Response.ok(Boolean.TRUE);
         } catch (ServiceException e) {

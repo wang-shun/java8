@@ -72,4 +72,12 @@ public class DoctorGroupEventDao extends MyBatisDao<DoctorGroupEvent> {
         param.put("endDate", endDate);
         return sqlSession.selectList(sqlId("findByDateRange"), ImmutableMap.copyOf(Params.filterNullOrEmpty(param)));
     }
+
+    /**
+     * 查询最新猪群事件
+     */
+    public DoctorGroupEvent findLastEventByGroupId(Long groupId) {
+        return getSqlSession().selectOne(sqlId("findLastEventByGroupId"), groupId);
+
+    }
 }

@@ -169,4 +169,12 @@ public interface DoctorGroupReadService {
      * @return
      */
     Response<Paging<DoctorGroupEvent>> queryGroupEventsByCriteria(Map<String, Object> criteria, Integer pageNo, Integer pageSize);
+
+    /**
+     * 判断是否是最新事件
+     * @param groupId 猪群id
+     * @param eventId 事件id
+     * @return true 是最新事件, false 不是
+     */
+    Response<Boolean> isLastEvent(@NotNull(message = "groupId.not.null") Long groupId, @NotNull(message = "eventId.not.null") Long eventId);
 }

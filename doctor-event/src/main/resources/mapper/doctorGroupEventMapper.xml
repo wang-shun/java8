@@ -304,4 +304,11 @@
         </if>
         limit 5000
     </select>
+
+    <select id="findLastEventByGroupId" parameterType="long" resultMap="DoctorGroupEventMap" >
+        SELECT <include refid="cols_all" />
+        FROM <include refid="tb" />
+        WHERE group_id = #{groupId}
+        ORDER BY event_at DESC limit 1
+    </select>
 </mapper>

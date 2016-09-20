@@ -34,6 +34,7 @@ import javax.validation.constraints.NotNull;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -337,6 +338,20 @@ public class DoctorGroupReadServiceImpl implements DoctorGroupReadService {
         } catch (Exception e) {
             log.error("query.group.events.by.criteria.failed, cause {}", Throwables.getStackTraceAsString(e));
             return Response.fail("query.group.events.by.criteria.failed");
+        }
+    }
+
+    @Override
+    public Response<Boolean> isLastEvent(Long groupId, Long eventId) {
+        try {
+            DoctorGroupEvent lastEvent = doctorGroupEventDao.findLastEventByGroupId(groupId);
+            if (!Objects.equals(eventId, lastEvent.getId())) {
+                return Response.ok(Boolean.FALSE);
+            }
+            return Response.ok(Boolean.TRUE);
+        } catch (Exception e) {
+            log.error("find group event is last event failed, groupId:{}, eventId:{}, cause:{}", groupId, eventId, Throwables.getStackTraceAsString(e));
+            return Response.ok(Boolean.FALSE);
         }
     }
 }
