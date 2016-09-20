@@ -89,8 +89,8 @@ public abstract class DoctorAbstractEventFlowHandler extends HandlerAware {
             DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(doctorPigEvent.getPigId());
 
             //哺乳母猪所带仔猪的猪群id
-            context.put("farrowGroupId", doctorPigTrack.getGroupId());
-            context.put("farrowBarnId", doctorPigTrack.getCurrentBarnId());
+            Long farrowGroupId = doctorPigTrack.getGroupId();
+            Long farrowBarId = doctorPigTrack.getCurrentBarnId();
 
             // 当前 猪 状态 对录入数据影响
             IsOrNot isRePregCheckPositive = eventCreatePrepare(execution, doctorPigEvent, doctorPigTrack, doctorBasicInputInfoDto, extraInfo, context);
@@ -122,7 +122,7 @@ public abstract class DoctorAbstractEventFlowHandler extends HandlerAware {
             // 特殊 事件信息处理
             specialFlowHandler(execution, doctorBasicInputInfoDto, extraInfo, context);
 
-            afterEventCreateHandle(doctorPigEvent, doctorPigTrack, doctorPigSnapshot, context);
+            afterEventCreateHandle(doctorPigEvent, doctorPigTrack, farrowGroupId, farrowBarId);
 
             // 当前事件影响的Id 方式
             flowDataMap.put("createEventResult",
@@ -229,8 +229,7 @@ public abstract class DoctorAbstractEventFlowHandler extends HandlerAware {
 
     }
 
-    protected void afterEventCreateHandle(DoctorPigEvent doctorPigEvent, DoctorPigTrack doctorPigTrack,
-                                          DoctorPigSnapshot doctorPigSnapshot, Map<String, Object> extra) {
+    protected void afterEventCreateHandle(DoctorPigEvent pigEvent, DoctorPigTrack pigTrack, Long farrowGroupId, Long farrowBarnId) {
 
     }
 

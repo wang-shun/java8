@@ -21,7 +21,6 @@ import io.terminus.doctor.event.enums.PigSource;
 import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.handler.DoctorAbstractEventFlowHandler;
 import io.terminus.doctor.event.model.DoctorPigEvent;
-import io.terminus.doctor.event.model.DoctorPigSnapshot;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.event.service.DoctorGroupWriteService;
 import io.terminus.doctor.workflow.core.Execution;
@@ -193,7 +192,7 @@ public class DoctorSowFarrowingHandler extends DoctorAbstractEventFlowHandler {
     }
 
     @Override
-    protected void afterEventCreateHandle(DoctorPigEvent doctorPigEvent, DoctorPigTrack doctorPigTrack, DoctorPigSnapshot doctorPigSnapshot, Map<String, Object> extra) {
+    protected void afterEventCreateHandle(DoctorPigEvent doctorPigEvent, DoctorPigTrack doctorPigTrack, Long farrowGroupId, Long farrowBarnId) {
         //对应的最近一次的 周期配种的初陪 的 isDelivery 字段变成true
         DoctorPigEvent firstMate = doctorPigEventDao.queryLastFirstMate(doctorPigTrack.getPigId(), doctorPigTrack.getCurrentParity());
         if (notNull(firstMate)) {
@@ -201,11 +200,8 @@ public class DoctorSowFarrowingHandler extends DoctorAbstractEventFlowHandler {
             doctorPigEventDao.update(firstMate);
         }
 
-        Long groupId = Long.valueOf(String.valueOf(extra.get("farrowGroupId")));
-        Long barnId = Long.valueOf(String.valueOf(extra.get("farrowBarnId")));
-
         //触发一下修改猪群的事件
-        Integer pigType = doctorBarnDao.findById(barnId).getPigType();
-        updateFarrowGroupTrack(groupId, pigType);
+        Integer pigType = doctorBarnDao.findById(farrowBarnId).getPigType();
+        updateFarrowGroupTrack(doctorPigTrack.getGroupId(), pigType);  //分娩之后才会有groupId, 所以取track里的groupId
     }
 }
