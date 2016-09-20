@@ -21,13 +21,11 @@ import io.terminus.doctor.warehouse.dto.DoctorMaterialInWareHouseDto;
 import io.terminus.doctor.warehouse.dto.DoctorWareHouseDto;
 import io.terminus.doctor.warehouse.model.DoctorMaterialConsumeProvider;
 import io.terminus.doctor.warehouse.model.DoctorMaterialInWareHouse;
-import io.terminus.doctor.warehouse.model.DoctorMaterialInfo;
 import io.terminus.doctor.warehouse.model.DoctorWareHouse;
+import io.terminus.doctor.warehouse.service.DoctorMaterialConsumeProviderReadService;
 import io.terminus.doctor.warehouse.service.DoctorMaterialInWareHouseReadService;
 import io.terminus.doctor.warehouse.service.DoctorMaterialInWareHouseWriteService;
-import io.terminus.doctor.warehouse.service.DoctorMaterialInfoReadService;
 import io.terminus.doctor.warehouse.service.DoctorWareHouseReadService;
-import io.terminus.doctor.web.front.controller.UserProfiles;
 import io.terminus.doctor.web.front.warehouse.dto.DoctorConsumeProviderInputDto;
 import io.terminus.pampas.common.UserUtil;
 import io.terminus.parana.user.model.User;
@@ -79,6 +77,8 @@ public class DoctorWareHouseEvents {
 
     private final DoctorFarmReadService doctorFarmReadService;
 
+    private final DoctorMaterialConsumeProviderReadService materialConsumeProviderReadService;
+
     @Autowired
     public DoctorWareHouseEvents(DoctorMaterialInWareHouseWriteService doctorMaterialInWareHouseWriteService,
                                  DoctorMaterialInWareHouseReadService doctorMaterialInWareHouseReadService,
@@ -87,7 +87,8 @@ public class DoctorWareHouseEvents {
                                  DoctorWareHouseReadService doctorWareHouseReadService,
                                  DoctorFarmReadService doctorFarmReadService,
                                  DoctorBasicReadService doctorBasicReadService,
-                                 DoctorUserProfileReadService doctorUserProfileReadService){
+                                 DoctorUserProfileReadService doctorUserProfileReadService,
+                                 DoctorMaterialConsumeProviderReadService materialConsumeProviderReadService){
         this.doctorMaterialInWareHouseWriteService = doctorMaterialInWareHouseWriteService;
         this.doctorMaterialInWareHouseReadService = doctorMaterialInWareHouseReadService;
         this.userReadService = userReadService;
@@ -97,6 +98,7 @@ public class DoctorWareHouseEvents {
         this.doctorFarmReadService = doctorFarmReadService;
         this.doctorUserProfileReadService = doctorUserProfileReadService;
         this.doctorBasicReadService = doctorBasicReadService;
+        this.materialConsumeProviderReadService = materialConsumeProviderReadService;
     }
 
     /**
@@ -338,6 +340,24 @@ public class DoctorWareHouseEvents {
             this.createProviderEvent(dto);
         } else {
             return true;
+        }
+        return true;
+    }
+
+    @RequestMapping(value = "/rollback", method = RequestMethod.GET)
+    @ResponseBody
+    public boolean rollback(Long eventId){
+        DoctorMaterialConsumeProvider cp = RespHelper.or500(materialConsumeProviderReadService.findById(eventId));
+        DoctorMaterialConsumeProvider.EVENT_TYPE eventType = DoctorMaterialConsumeProvider.EVENT_TYPE.from(cp.getEventType());
+        if(eventType != null){
+            // 回滚入库事件
+            if(eventType.isIn()){
+
+            }
+            // 回滚出库事件
+            if(eventType.isOut()){
+
+            }
         }
         return true;
     }

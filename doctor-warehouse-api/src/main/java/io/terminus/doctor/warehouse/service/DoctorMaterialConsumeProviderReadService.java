@@ -49,4 +49,6 @@ public interface DoctorMaterialConsumeProviderReadService {
      */
     Response<Double> sumConsumeFeed(Long farmId, Long wareHouseId, Long materialId, Long staffId, Long barnId, Long groupId,
                                 String startAt, String endAt);
+
+    Response<DoctorMaterialConsumeProvider> findById(Long id);
 }
