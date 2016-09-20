@@ -9,6 +9,7 @@ import io.terminus.doctor.event.handler.DoctorEntryHandler;
 import io.terminus.doctor.event.handler.DoctorEventCreateHandler;
 import io.terminus.doctor.event.handler.DoctorEventHandlerChain;
 import io.terminus.doctor.event.handler.boar.DoctorSemenHandler;
+import io.terminus.doctor.event.handler.rollback.DoctorRollbackHandlerChain;
 import io.terminus.doctor.event.handler.usual.DoctorChgFarmHandler;
 import io.terminus.doctor.event.handler.usual.DoctorChgLocationHandler;
 import io.terminus.doctor.event.handler.usual.DoctorConditionHandler;
@@ -69,8 +70,24 @@ import java.util.List;
 public class  DoctorEventConfiguration {
 
     /**
+     * 事件回滚拦截器链
+     */
+    @Bean
+    public DoctorRollbackHandlerChain doctorRollbackHandlerChain() {
+        DoctorRollbackHandlerChain chain = new DoctorRollbackHandlerChain();
+        chain.setRollbackGroupEventHandlers(Lists.newArrayList(
+
+        ));
+
+        chain.setRollbackPigEventHandlers(Lists.newArrayList(
+
+        ));
+        return chain;
+    }
+
+
+    /**
      * 对应handler chain
-     * @return
      */
     @Bean
     public DoctorEventHandlerChain doctorEventHandlerChain(
