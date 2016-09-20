@@ -385,3 +385,6 @@ ALTER TABLE doctor_group_events ADD COLUMN other_barn_type varchar(64) DEFAULT N
 alter table doctor_material_consume_providers
 add column group_id bigint(20) DEFAULT NULL COMMENT '领用物资的猪群Id, 仅 event_type=1 时才会有值' after barn_name,
 add column group_code varchar(640) DEFAULT NULL COMMENT '猪群名称' after group_id;
+
+-- 2016-09-20 猪事件增加是否是自动生成标识
+ALTER TABLE doctor_pig_events ADD COLUMN is_auto smallint(6) DEFAULT NULL COMMENT '是否是自动生成事件, 0 不是, 1 是' AFTER pig_code;

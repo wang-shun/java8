@@ -15,6 +15,7 @@
         <result column="farm_name" property="farmName"/>
         <result column="pig_id" property="pigId"/>
         <result column="pig_code" property="pigCode"/>
+        <result column="is_auto" property="isAuto"/>
         <result column="event_at" property="eventAt"/>
         <result column="type" property="type"/>
         <result column="kind" property="kind"/>
@@ -87,6 +88,7 @@
         farm_name,
         pig_id,
         pig_code,
+        is_auto,
         event_at,
         `type`,
         kind,
@@ -153,6 +155,7 @@
         #{farmName},
         #{pigId},
         #{pigCode},
+        #{isAuto},
         #{eventAt},
         #{type},
         #{kind},
@@ -220,6 +223,7 @@
         <if test="farmName != null">AND farm_name = #{farmName}</if>
         <if test="pigId != null">AND pig_id = #{pigId}</if>
         <if test="pigCode != null">AND pig_code = #{pigCode}</if>
+        <if test="isAuto != null">AND is_auto = #{isAuto}</if>
         <if test="beginDate != null">AND <![CDATA[ event_at >= #{beginDate} ]]> </if>
         <if test="endDate != null">AND <![CDATA[ event_at <= #{endDate} ]]> </if>
         <if test="type != null">AND `type` = #{type}</if>
@@ -297,6 +301,7 @@
             #{item.farmName},
             #{item.pigId},
             #{item.pigCode},
+            #{item.isAuto},
             #{item.eventAt},
             #{item.type},
             #{item.kind},
@@ -515,6 +520,7 @@
             <if test="farmName != null">farm_name = #{farmName},</if>
             <if test="pigId != null">pig_id = #{pigId},</if>
             <if test="pigCode != null">pig_code = #{pigCode},</if>
+            <if test="isAuto != null">is_auto = #{isAuto},</if>
             <if test="eventAt != null">event_at = #{eventAt},</if>
             <if test="type != null">`type` = #{type},</if>
             <if test="kind != null">kind = #{kind},</if>
@@ -663,6 +669,7 @@
                 farm_name = #{item.farmName},
                 pig_id = #{item.pigId},
                 pig_code = #{item.pigCode},
+                is_auto = #{item.isAuto},
                 event_at = #{item.eventAt},
                 `type` = #{item.type},
                 kind = #{item.kind},

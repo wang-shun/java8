@@ -5,7 +5,7 @@ import io.terminus.doctor.event.model.DoctorPigEvent;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * Desc:
+ * Desc: 猪事件回滚handler
  * Mail: yangzl@terminus.io
  * author: DreamYoung
  * Date: 16/9/20
