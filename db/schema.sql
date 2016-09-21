@@ -1371,7 +1371,7 @@ CREATE TABLE `doctor_material_price_in_ware_houses` (
 -- 仓库物资每次出库和入库事件之前的快照
 CREATE TABLE `doctor_warehouse_snapshots` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT 'id',
-  `event_id` bigint(20) unsigned DEFAULT NULL COMMENT '表doctor_material_consume_providers的id',
+  `event_id` bigint(20) unsigned NOT NULL COMMENT '表doctor_material_consume_providers的id',
   `before_event` text COMMENT '事件之前的状态',
   `created_at` datetime DEFAULT NULL,
   `updated_at` datetime DEFAULT NULL,
