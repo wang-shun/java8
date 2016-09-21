@@ -1,6 +1,7 @@
 package io.terminus.doctor.warehouse.handler;
 
 import io.terminus.doctor.warehouse.dto.DoctorMaterialConsumeProviderDto;
+import io.terminus.doctor.warehouse.dto.EventHandlerContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -22,9 +23,9 @@ public class DoctorWareHouseHandlerInvocation {
         this.doctorWareHouseHandlerChain = chain;
     }
 
-    public void invoke(DoctorMaterialConsumeProviderDto dto, Map<String,Object> context){
+    public void invoke(DoctorMaterialConsumeProviderDto dto, EventHandlerContext context){
         doctorWareHouseHandlerChain.getHandlerList().forEach(iHandler -> {
-            if(iHandler.ifHandle(dto, context)){
+            if(iHandler.ifHandle(dto)){
                 iHandler.handle(dto, context);
             }
         });

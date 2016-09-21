@@ -5,6 +5,7 @@ import com.google.common.collect.Maps;
 import io.terminus.doctor.common.utils.Params;
 import io.terminus.doctor.warehouse.dao.DoctorWareHouseTrackDao;
 import io.terminus.doctor.warehouse.dto.DoctorMaterialConsumeProviderDto;
+import io.terminus.doctor.warehouse.dto.EventHandlerContext;
 import io.terminus.doctor.warehouse.handler.IHandler;
 import io.terminus.doctor.warehouse.model.DoctorMaterialConsumeProvider;
 import io.terminus.doctor.warehouse.model.DoctorWareHouseTrack;
@@ -34,12 +35,12 @@ public class DoctorTrackProviderHandler implements IHandler{
     }
 
     @Override
-    public Boolean ifHandle(DoctorMaterialConsumeProviderDto dto, Map<String, Object> context) {
+    public boolean ifHandle(DoctorMaterialConsumeProviderDto dto) {
         DoctorMaterialConsumeProvider.EVENT_TYPE eventType = DoctorMaterialConsumeProvider.EVENT_TYPE.from(dto.getActionType());
         return eventType != null && eventType.isIn();    }
 
     @Override
-    public void handle(DoctorMaterialConsumeProviderDto dto, Map<String, Object> context) throws RuntimeException {
+    public void handle(DoctorMaterialConsumeProviderDto dto, EventHandlerContext context) throws RuntimeException {
         // 修改仓库数量信息
         DoctorWareHouseTrack doctorWareHouseTrack = doctorWareHouseTrackDao.findById(dto.getWareHouseId());
         if(isNull(doctorWareHouseTrack)){
@@ -57,6 +58,16 @@ public class DoctorTrackProviderHandler implements IHandler{
             doctorWareHouseTrack.setExtraMap(trackExtraMap);
             doctorWareHouseTrackDao.update(doctorWareHouseTrack);
         }
+    }
+
+    @Override
+    public boolean canRollback(Long eventId) {
+        return false;
+    }
+
+    @Override
+    public void rollback(Long eventId) {
+
     }
 
     /**

@@ -6,6 +6,7 @@ import io.terminus.doctor.warehouse.dao.DoctorMaterialConsumeProviderDao;
 import io.terminus.doctor.warehouse.dao.DoctorMaterialPriceInWareHouseDao;
 import io.terminus.doctor.warehouse.dto.DoctorMaterialConsumeProviderDto;
 import io.terminus.doctor.common.enums.WareHouseType;
+import io.terminus.doctor.warehouse.dto.EventHandlerContext;
 import io.terminus.doctor.warehouse.handler.IHandler;
 import io.terminus.doctor.warehouse.model.DoctorMaterialConsumeProvider;
 import io.terminus.doctor.warehouse.model.DoctorMaterialPriceInWareHouse;
@@ -39,13 +40,13 @@ public class DoctorConsumerEventHandler implements IHandler{
     }
 
     @Override
-    public Boolean ifHandle(DoctorMaterialConsumeProviderDto dto, Map<String, Object> context) {
+    public boolean ifHandle(DoctorMaterialConsumeProviderDto dto) {
         DoctorMaterialConsumeProvider.EVENT_TYPE eventType = DoctorMaterialConsumeProvider.EVENT_TYPE.from(dto.getActionType());
         return eventType != null && eventType.isOut();
     }
 
     @Override
-    public void handle(DoctorMaterialConsumeProviderDto dto, Map<String, Object> context) throws RuntimeException {
+    public void handle(DoctorMaterialConsumeProviderDto dto, EventHandlerContext context) throws RuntimeException {
         Double consumeCount = dto.getCount(); // 本次领用总数量
         long totalPrice = 0L; // 本次领用总价格
         // 1. 计算本次领用的组成(单价\数量\入库时间)
@@ -94,7 +95,7 @@ public class DoctorConsumerEventHandler implements IHandler{
         doctorMaterialConsumeProvider.setExtraMap(extraMap);
         doctorMaterialConsumeProvider.setUnitPrice(Double.valueOf(totalPrice / consumeCount).longValue());
         doctorMaterialConsumeProviderDao.create(doctorMaterialConsumeProvider);
-        context.put("eventId",doctorMaterialConsumeProvider.getId());
+        context.setEventId(doctorMaterialConsumeProvider.getId());
     }
 
     @Override

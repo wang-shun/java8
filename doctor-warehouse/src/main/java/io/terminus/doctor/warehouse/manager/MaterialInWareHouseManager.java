@@ -8,6 +8,7 @@ import io.terminus.doctor.warehouse.dao.DoctorMaterialInWareHouseDao;
 import io.terminus.doctor.warehouse.dao.DoctorMaterialInfoDao;
 import io.terminus.doctor.warehouse.dto.DoctorMaterialConsumeProviderDto;
 import io.terminus.doctor.warehouse.dto.DoctorWareHouseBasicDto;
+import io.terminus.doctor.warehouse.dto.EventHandlerContext;
 import io.terminus.doctor.warehouse.handler.DoctorWareHouseHandlerInvocation;
 import io.terminus.doctor.warehouse.model.DoctorMaterialConsumeAvg;
 import io.terminus.doctor.warehouse.model.DoctorMaterialConsumeProvider;
@@ -212,18 +213,18 @@ public class MaterialInWareHouseManager {
         if(dto.getActionType() == null){
             dto.setActionType(DoctorMaterialConsumeProvider.EVENT_TYPE.PROVIDER.getValue());
         }
-        Map<String,Object> context = Maps.newHashMap();
+        EventHandlerContext context = new EventHandlerContext();
         doctorWareHouseHandlerInvocation.invoke(dto, context);
-        return Long.valueOf(context.get("eventId").toString());
+        return context.getEventId();
     }
 
     private Long consumeMaterialInner(DoctorMaterialConsumeProviderDto doctorMaterialConsumeProviderDto){
         if(doctorMaterialConsumeProviderDto.getActionType() == null){
             doctorMaterialConsumeProviderDto.setActionType(DoctorMaterialConsumeProvider.EVENT_TYPE.CONSUMER.getValue());
         }
-        Map<String,Object> context = Maps.newHashMap();
+        EventHandlerContext context = new EventHandlerContext();
         this.doctorWareHouseHandlerInvocation.invoke(doctorMaterialConsumeProviderDto, context);
-        return Long.valueOf(context.get("eventId").toString());
+        return context.getEventId();
     }
 
     @Transactional

@@ -1,6 +1,7 @@
 package io.terminus.doctor.warehouse.handler;
 
 import io.terminus.doctor.warehouse.dto.DoctorMaterialConsumeProviderDto;
+import io.terminus.doctor.warehouse.dto.EventHandlerContext;
 
 import java.util.Map;
 
@@ -15,10 +16,9 @@ public interface IHandler {
     /**
      * 校验处理
      * @param dto
-     * @param context
      * @return
      */
-    Boolean ifHandle(DoctorMaterialConsumeProviderDto dto, Map<String,Object> context);
+    boolean ifHandle(DoctorMaterialConsumeProviderDto dto);
 
     /**
      * 修改对应的数据表信息
@@ -26,7 +26,7 @@ public interface IHandler {
      * @param context
      * @throws RuntimeException
      */
-    void handle(DoctorMaterialConsumeProviderDto dto, Map<String,Object> context) throws RuntimeException;
+    void handle(DoctorMaterialConsumeProviderDto dto, EventHandlerContext context) throws RuntimeException;
 
     boolean canRollback(Long eventId);
 

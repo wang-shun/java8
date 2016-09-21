@@ -6,6 +6,7 @@ import io.terminus.doctor.warehouse.constants.DoctorWareHouseTrackConstants;
 import io.terminus.doctor.warehouse.dao.DoctorMaterialConsumeAvgDao;
 import io.terminus.doctor.warehouse.dao.DoctorWareHouseTrackDao;
 import io.terminus.doctor.warehouse.dto.DoctorMaterialConsumeProviderDto;
+import io.terminus.doctor.warehouse.dto.EventHandlerContext;
 import io.terminus.doctor.warehouse.handler.IHandler;
 import io.terminus.doctor.warehouse.model.DoctorMaterialConsumeAvg;
 import io.terminus.doctor.warehouse.model.DoctorMaterialConsumeProvider;
@@ -42,13 +43,13 @@ public class DoctorWareHouseTrackConsumeHandler implements IHandler{
     }
 
     @Override
-    public Boolean ifHandle(DoctorMaterialConsumeProviderDto dto, Map<String, Object> context) {
+    public boolean ifHandle(DoctorMaterialConsumeProviderDto dto) {
         DoctorMaterialConsumeProvider.EVENT_TYPE eventType = DoctorMaterialConsumeProvider.EVENT_TYPE.from(dto.getActionType());
         return eventType != null && eventType.isOut();
     }
 
     @Override
-    public void handle(DoctorMaterialConsumeProviderDto dto, Map<String, Object> context) throws RuntimeException {
+    public void handle(DoctorMaterialConsumeProviderDto dto, EventHandlerContext context) throws RuntimeException {
         // update warehouse track
         DoctorWareHouseTrack doctorWareHouseTrack = this.doctorWareHouseTrackDao.findById(dto.getWareHouseId());
         checkState(!isNull(doctorWareHouseTrack), "not.find.doctorWareHouse");
@@ -71,5 +72,15 @@ public class DoctorWareHouseTrackConsumeHandler implements IHandler{
         }
         doctorWareHouseTrack.setExtraMap(consumeMap);
         doctorWareHouseTrackDao.update(doctorWareHouseTrack);
+    }
+
+    @Override
+    public boolean canRollback(Long eventId) {
+        return false;
+    }
+
+    @Override
+    public void rollback(Long eventId) {
+
     }
 }

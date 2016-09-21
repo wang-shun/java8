@@ -4,6 +4,7 @@ import io.terminus.doctor.warehouse.dao.DoctorMaterialConsumeAvgDao;
 import io.terminus.doctor.warehouse.dao.DoctorMaterialConsumeProviderDao;
 import io.terminus.doctor.warehouse.dto.DoctorMaterialConsumeProviderDto;
 import io.terminus.doctor.common.enums.WareHouseType;
+import io.terminus.doctor.warehouse.dto.EventHandlerContext;
 import io.terminus.doctor.warehouse.handler.IHandler;
 import io.terminus.doctor.warehouse.model.DoctorMaterialConsumeAvg;
 import io.terminus.doctor.warehouse.model.DoctorMaterialConsumeProvider;
@@ -39,13 +40,13 @@ public class DoctorMaterialAvgConsumerHandler implements IHandler{
     }
 
     @Override
-    public Boolean ifHandle(DoctorMaterialConsumeProviderDto dto, Map<String, Object> context) {
+    public boolean ifHandle(DoctorMaterialConsumeProviderDto dto) {
         return Objects.equals(dto.getActionType(), DoctorMaterialConsumeProvider.EVENT_TYPE.CONSUMER.getValue());
     }
 
     @Override
-    public void handle(DoctorMaterialConsumeProviderDto dto, Map<String, Object> context) throws RuntimeException {
-        Double lotNumber = (Double) context.get("lotNumber");
+    public void handle(DoctorMaterialConsumeProviderDto dto, EventHandlerContext context) throws RuntimeException {
+        Double lotNumber = context.getLotNumber();
         DoctorMaterialConsumeAvg doctorMaterialConsumeAvg = doctorMaterialConsumeAvgDao.queryByIds(dto.getFarmId(), dto.getWareHouseId(), dto.getMaterialTypeId());
         if(isNull(doctorMaterialConsumeAvg)){
             // create consume avg
@@ -88,7 +89,7 @@ public class DoctorMaterialAvgConsumerHandler implements IHandler{
             doctorMaterialConsumeAvg.setConsumeDate(DateTime.now().withTimeAtStartOfDay().toDate());
             doctorMaterialConsumeAvgDao.update(doctorMaterialConsumeAvg);
         }
-        context.put("consumeAvgId",doctorMaterialConsumeAvg.getId());
+        context.setConsumeAvgId(doctorMaterialConsumeAvg.getId());
     }
 
     @Override
