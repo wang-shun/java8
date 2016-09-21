@@ -343,7 +343,7 @@ public class WareHouseInitService {
             materialCP.setMaterialId(basicMaterialMap.get(typeAndmaterialName).getId());
             materialCP.setMaterialName(pu.getMaterialName());
             materialCP.setEventTime(pu.getEventDate());
-            materialCP.setUnitPrice(pu.getUnitPrice().longValue());
+            materialCP.setUnitPrice(Double.valueOf(pu.getUnitPrice() * 100).longValue());
             if(isProvide(pu.getEventType(), WareHouseType.from(wareHouse.getType()))){
                 materialCount.put(typeAndmaterialName, materialCount.get(typeAndmaterialName) + pu.getCount());
             }else{
