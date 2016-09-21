@@ -127,7 +127,7 @@ public class SowNeedWeanProducer extends AbstractJobProducer {
                             if (isMessage) {
                                 pigDto.setEventDate(doctorPigEvent.getEventAt());
                                 pigDto.setOperatorName(doctorPigEvent.getOperatorName());
-                                messages.addAll(getMessage(pigDto, rule.getChannels(), ruleRole, sUsers, timeDiff, rule.getUrl()));
+                                messages.addAll(getMessage(pigDto, rule.getChannels(), ruleRole, sUsers, timeDiff, rule.getUrl(), PigEvent.WEAN.getKey()));
                             }
                         }
                     } catch (Exception e) {

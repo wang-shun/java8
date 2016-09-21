@@ -171,7 +171,7 @@ public class SowEliminateProducer extends AbstractJobProducer {
                                     recordPigMessage(pigDto, PigEvent.REMOVAL, null, ruleValue.getValue().intValue(), null);
                                 } else if (isMessage) {
                                     pigDto.setReason(ruleValue.getDescribe() + ruleValue.getValue().intValue());
-                                    messages.addAll(getMessage(pigDto, rule.getChannels(), ruleRole, sUsers, timeDiff, rule.getUrl()));
+                                    messages.addAll(getMessage(pigDto, rule.getChannels(), ruleRole, sUsers, timeDiff, rule.getUrl(), PigEvent.REMOVAL.getKey()));
                                 }
                             }
                         });
