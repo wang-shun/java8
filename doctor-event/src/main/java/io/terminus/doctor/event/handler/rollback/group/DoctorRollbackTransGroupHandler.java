@@ -28,7 +28,7 @@ public class DoctorRollbackTransGroupHandler extends DoctorAbstractRollbackGroup
     }
 
     @Override
-    protected DoctorRollbackDto handleReport() {
+    protected DoctorRollbackDto handleReport(DoctorGroupEvent groupEvent) {
         return null;
     }
 }

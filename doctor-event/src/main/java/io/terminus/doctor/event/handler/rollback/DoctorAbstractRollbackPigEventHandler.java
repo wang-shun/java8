@@ -1,10 +1,6 @@
 package io.terminus.doctor.event.handler.rollback;
 
-import com.google.common.base.Throwables;
-import com.google.common.collect.ImmutableMap;
-import io.terminus.doctor.common.enums.DataEventType;
 import io.terminus.doctor.common.event.CoreEventDispatcher;
-import io.terminus.doctor.common.event.DataEvent;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dto.DoctorRollbackDto;
 import io.terminus.doctor.event.enums.IsOrNot;
@@ -20,10 +16,7 @@ import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Map;
 import java.util.Objects;
-
-import static io.terminus.common.utils.Arguments.notNull;
 
 /**
  * Desc: 猪事件回滚handler
@@ -32,7 +25,7 @@ import static io.terminus.common.utils.Arguments.notNull;
  * Date: 16/9/20
  */
 @Slf4j
-public abstract class DoctorAbstractRollbackPigEventHandler implements DoctorRollbackPigEventHandler {
+public abstract class DoctorAbstractRollbackPigEventHandler extends DoctorAbstrackRollbackReportHandler implements DoctorRollbackPigEventHandler {
 
     @Autowired protected DoctorPigEventReadService doctorPigEventReadService;
     @Autowired private DoctorRevertLogWriteService doctorRevertLogWriteService;
@@ -64,10 +57,7 @@ public abstract class DoctorAbstractRollbackPigEventHandler implements DoctorRol
      */
     @Override
     public final void updateReport(DoctorPigEvent pigEvent) {
-        DoctorRollbackDto dto = handleReport();
-        if (dto != null) {
-            publishRollbackEvent(dto);
-        }
+        checkAndPublishRollback(handleReport(pigEvent));
     }
 
     /**
@@ -84,19 +74,5 @@ public abstract class DoctorAbstractRollbackPigEventHandler implements DoctorRol
      * 需要更新的统计
      * @see RollbackType
      */
-    protected abstract DoctorRollbackDto handleReport();
-
-    //发布zk事件, 用于更新回滚后操作
-    private void publishRollbackEvent(DoctorRollbackDto dto) {
-        Map<String, DoctorRollbackDto> rbMap = ImmutableMap.of("DoctorRollbackDto", dto);
-        if (notNull(publisher)) {
-            try {
-                publisher.publish(DataEvent.toBytes(DataEventType.RollBackReport.getKey(), rbMap));
-            } catch (Exception e) {
-                log.error("publish rollback pig zk event, DoctorRollbackDto:{}, cause:{}", dto, Throwables.getStackTraceAsString(e));
-            }
-        } else {
-            coreEventDispatcher.publish(DataEvent.make(DataEventType.RollBackReport.getKey(), rbMap));
-        }
-    }
+    protected abstract DoctorRollbackDto handleReport(DoctorPigEvent pigEvent);
 }

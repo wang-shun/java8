@@ -25,6 +25,8 @@ public enum RollbackType {
     //记录回滚时间，晚上job更新
     MONTHLY_REPORT(7, "生产月报(包括存栏月报)"),
     MONTHLY_PARITY(8, "胎次产仔分析月报"),
+
+    //直接删除
     GROUP_BATCH(9, "猪群批次总结"),
 
     //搜索实时更新

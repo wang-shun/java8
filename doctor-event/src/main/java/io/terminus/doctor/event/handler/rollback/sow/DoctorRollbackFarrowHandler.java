@@ -28,7 +28,7 @@ public class DoctorRollbackFarrowHandler extends DoctorAbstractRollbackPigEventH
     }
 
     @Override
-    protected DoctorRollbackDto handleReport() {
+    protected DoctorRollbackDto handleReport(DoctorPigEvent pigEvent) {
         return null;
     }
 

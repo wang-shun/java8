@@ -4,6 +4,7 @@ import io.terminus.doctor.event.enums.RollbackType;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -17,6 +18,10 @@ public class DoctorRollbackDto implements Serializable {
     private static final long serialVersionUID = -22978774710787544L;
 
     private List<RollbackType> rollbackTypes;  //回滚类型
+
+    private Long farmId;        //猪场id
+
+    private Date eventAt;       //回滚事件的日期
 
     private Long esBarnId;      //es搜索猪舍id
 
