@@ -22,7 +22,6 @@ import io.terminus.doctor.warehouse.dto.DoctorWareHouseDto;
 import io.terminus.doctor.warehouse.model.DoctorMaterialConsumeProvider;
 import io.terminus.doctor.warehouse.model.DoctorMaterialInWareHouse;
 import io.terminus.doctor.warehouse.model.DoctorWareHouse;
-import io.terminus.doctor.warehouse.service.DoctorMaterialConsumeProviderReadService;
 import io.terminus.doctor.warehouse.service.DoctorMaterialInWareHouseReadService;
 import io.terminus.doctor.warehouse.service.DoctorMaterialInWareHouseWriteService;
 import io.terminus.doctor.warehouse.service.DoctorWareHouseReadService;
@@ -77,8 +76,6 @@ public class DoctorWareHouseEvents {
 
     private final DoctorFarmReadService doctorFarmReadService;
 
-    private final DoctorMaterialConsumeProviderReadService materialConsumeProviderReadService;
-
     @Autowired
     public DoctorWareHouseEvents(DoctorMaterialInWareHouseWriteService doctorMaterialInWareHouseWriteService,
                                  DoctorMaterialInWareHouseReadService doctorMaterialInWareHouseReadService,
@@ -87,8 +84,7 @@ public class DoctorWareHouseEvents {
                                  DoctorWareHouseReadService doctorWareHouseReadService,
                                  DoctorFarmReadService doctorFarmReadService,
                                  DoctorBasicReadService doctorBasicReadService,
-                                 DoctorUserProfileReadService doctorUserProfileReadService,
-                                 DoctorMaterialConsumeProviderReadService materialConsumeProviderReadService){
+                                 DoctorUserProfileReadService doctorUserProfileReadService){
         this.doctorMaterialInWareHouseWriteService = doctorMaterialInWareHouseWriteService;
         this.doctorMaterialInWareHouseReadService = doctorMaterialInWareHouseReadService;
         this.userReadService = userReadService;
@@ -98,7 +94,6 @@ public class DoctorWareHouseEvents {
         this.doctorFarmReadService = doctorFarmReadService;
         this.doctorUserProfileReadService = doctorUserProfileReadService;
         this.doctorBasicReadService = doctorBasicReadService;
-        this.materialConsumeProviderReadService = materialConsumeProviderReadService;
     }
 
     /**

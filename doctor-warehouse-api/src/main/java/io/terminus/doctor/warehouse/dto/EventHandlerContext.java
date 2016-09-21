@@ -1,10 +1,9 @@
 package io.terminus.doctor.warehouse.dto;
 
+import io.terminus.doctor.warehouse.model.DoctorMaterialConsumeAvg;
 import lombok.Data;
 
 import java.io.Serializable;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Created by chenzenghui on 16/9/21.
@@ -24,5 +23,11 @@ public class EventHandlerContext implements Serializable{
     /**
      * 用于事件回滚
      */
-    private Map<String, Serializable> snapshotMap = new HashMap<>();
+    private Snapshot snapshot = new Snapshot();
+
+    @Data
+    public class Snapshot implements Serializable{
+        private static final long serialVersionUID = -1895187392688297850L;
+        private DoctorMaterialConsumeAvg materialConsumeAvg;
+    }
 }

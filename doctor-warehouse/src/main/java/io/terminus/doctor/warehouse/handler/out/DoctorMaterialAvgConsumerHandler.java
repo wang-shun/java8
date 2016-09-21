@@ -1,20 +1,22 @@
 package io.terminus.doctor.warehouse.handler.out;
 
+import io.terminus.common.exception.ServiceException;
 import io.terminus.doctor.warehouse.dao.DoctorMaterialConsumeAvgDao;
 import io.terminus.doctor.warehouse.dao.DoctorMaterialConsumeProviderDao;
+import io.terminus.doctor.warehouse.dao.DoctorWarehouseSnapshotDao;
 import io.terminus.doctor.warehouse.dto.DoctorMaterialConsumeProviderDto;
 import io.terminus.doctor.common.enums.WareHouseType;
 import io.terminus.doctor.warehouse.dto.EventHandlerContext;
 import io.terminus.doctor.warehouse.handler.IHandler;
 import io.terminus.doctor.warehouse.model.DoctorMaterialConsumeAvg;
 import io.terminus.doctor.warehouse.model.DoctorMaterialConsumeProvider;
+import io.terminus.doctor.warehouse.model.DoctorWarehouseSnapshot;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
 import org.joda.time.Days;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.Map;
 import java.util.Objects;
 
 import static java.util.Objects.isNull;
@@ -31,12 +33,15 @@ public class DoctorMaterialAvgConsumerHandler implements IHandler{
 
     private final DoctorMaterialConsumeAvgDao doctorMaterialConsumeAvgDao;
     private final DoctorMaterialConsumeProviderDao doctorMaterialConsumeProviderDao;
+    private final DoctorWarehouseSnapshotDao doctorWarehouseSnapshotDao;
 
     @Autowired
     public DoctorMaterialAvgConsumerHandler(DoctorMaterialConsumeAvgDao doctorMaterialConsumeAvgDao,
-                                            DoctorMaterialConsumeProviderDao doctorMaterialConsumeProviderDao){
+                                            DoctorMaterialConsumeProviderDao doctorMaterialConsumeProviderDao,
+                                            DoctorWarehouseSnapshotDao doctorWarehouseSnapshotDao){
         this.doctorMaterialConsumeAvgDao = doctorMaterialConsumeAvgDao;
         this.doctorMaterialConsumeProviderDao = doctorMaterialConsumeProviderDao;
+        this.doctorWarehouseSnapshotDao = doctorWarehouseSnapshotDao;
     }
 
     @Override
@@ -48,6 +53,7 @@ public class DoctorMaterialAvgConsumerHandler implements IHandler{
     public void handle(DoctorMaterialConsumeProviderDto dto, EventHandlerContext context) throws RuntimeException {
         Double lotNumber = context.getLotNumber();
         DoctorMaterialConsumeAvg doctorMaterialConsumeAvg = doctorMaterialConsumeAvgDao.queryByIds(dto.getFarmId(), dto.getWareHouseId(), dto.getMaterialTypeId());
+        context.getSnapshot().setMaterialConsumeAvg(doctorMaterialConsumeAvg);
         if(isNull(doctorMaterialConsumeAvg)){
             // create consume avg
             doctorMaterialConsumeAvg = DoctorMaterialConsumeAvg.builder()
@@ -101,6 +107,21 @@ public class DoctorMaterialAvgConsumerHandler implements IHandler{
 
     @Override
     public void rollback(Long eventId) {
-        // TODO
+        DoctorMaterialConsumeProvider cp = doctorMaterialConsumeProviderDao.findById(eventId);
+        DoctorMaterialConsumeAvg consumeAvg = doctorMaterialConsumeAvgDao.queryByIds(cp.getFarmId(), cp.getWareHouseId(), cp.getMaterialId());
+        // 消耗事件发生后, 一定有这个数据
+        if(consumeAvg == null){
+            throw new ServiceException("MaterialConsumeAvg.find.fail");
+        }
+        DoctorWarehouseSnapshot snapshot = doctorWarehouseSnapshotDao.findByEventId(eventId);
+        if(snapshot == null){
+            throw new ServiceException("snapshot.not.found");
+        }
+        DoctorMaterialConsumeAvg oldAvg = snapshot.json2Snapshot().getMaterialConsumeAvg();
+        if(oldAvg == null){
+            doctorMaterialConsumeAvgDao.delete(consumeAvg.getId());
+        }else{
+            doctorMaterialConsumeAvgDao.update(oldAvg);
+        }
     }
 }

@@ -1,6 +1,9 @@
 package io.terminus.doctor.warehouse.model;
 
+import io.terminus.common.utils.JsonMapper;
+import io.terminus.doctor.warehouse.dto.EventHandlerContext;
 import lombok.Data;
+import lombok.experimental.Builder;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -11,6 +14,7 @@ import java.util.Date;
  * Date: 2016-09-21
  */
 @Data
+@Builder
 public class DoctorWarehouseSnapshot implements Serializable {
 
     private static final long serialVersionUID = 5934588860923527558L;
@@ -29,4 +33,8 @@ public class DoctorWarehouseSnapshot implements Serializable {
     private Date createdAt;
     
     private Date updatedAt;
+
+    public EventHandlerContext.Snapshot json2Snapshot(){
+        return JsonMapper.nonEmptyMapper().fromJson(this.beforeEvent, EventHandlerContext.Snapshot.class);
+    }
 }
