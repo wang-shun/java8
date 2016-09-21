@@ -1368,3 +1368,13 @@ CREATE TABLE `doctor_material_price_in_ware_houses` (
   KEY `ware_house_id_index` (`ware_house_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='仓库中各物料每次入库的剩余量';
 
+-- 仓库物资每次出库和入库事件之前的快照
+CREATE TABLE `doctor_warehouse_snapshots` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT 'id',
+  `event_id` bigint(20) unsigned DEFAULT NULL COMMENT '表doctor_material_consume_providers的id',
+  `before_event` text COMMENT '事件之前的状态',
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `doctor_pig_snapshots_event_id` (`event_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='仓库物资每次出库和入库事件之前的快照';
