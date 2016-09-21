@@ -1,5 +1,6 @@
 package io.terminus.doctor.event.handler.rollback.group;
 
+import io.terminus.doctor.event.dto.DoctorRollbackDto;
 import io.terminus.doctor.event.handler.rollback.DoctorAbstractRollbackGroupEventHandler;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorRevertLog;
@@ -27,7 +28,7 @@ public class DoctorRollbackTransGroupHandler extends DoctorAbstractRollbackGroup
     }
 
     @Override
-    public void updateReport(DoctorGroupEvent groupEvent) {
-
+    protected DoctorRollbackDto handleReport() {
+        return null;
     }
 }

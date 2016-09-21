@@ -1,5 +1,6 @@
 package io.terminus.doctor.event.handler.rollback.sow;
 
+import io.terminus.doctor.event.dto.DoctorRollbackDto;
 import io.terminus.doctor.event.handler.rollback.DoctorAbstractRollbackPigEventHandler;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorRevertLog;
@@ -27,8 +28,8 @@ public class DoctorRollbackFarrowHandler extends DoctorAbstractRollbackPigEventH
     }
 
     @Override
-    public void updateReport(DoctorPigEvent pigEvent) {
-
+    protected DoctorRollbackDto handleReport() {
+        return null;
     }
 
 }

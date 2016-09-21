@@ -6,12 +6,15 @@ import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorPigEventDao;
+import io.terminus.doctor.event.dto.DoctorRollbackDto;
 import io.terminus.doctor.event.handler.rollback.DoctorRollbackHandlerChain;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import static io.terminus.common.utils.Arguments.notEmpty;
 
 /**
  * Desc:
@@ -79,5 +82,23 @@ public class DoctorRollbackServiceImpl implements DoctorRollbackService {
             log.error("rollack pig event failed, eventId:{}, cause:{}", eventId, Throwables.getStackTraceAsString(e));
             return Response.fail("rollback.event.failed");
         }
+    }
+
+    @Override
+    public Response<Boolean> rollbackReportAndES(DoctorRollbackDto rollbackDto) {
+        try {
+            if (rollbackDto == null || !notEmpty(rollbackDto.getRollbackTypes())) {
+                return Response.ok(Boolean.TRUE);
+            }
+            reportAndES(rollbackDto);
+            return Response.ok(Boolean.TRUE);
+        } catch (Exception e) {
+            log.error("rollback report and es failed, rollbackDto:{}, cause:{}", rollbackDto, Throwables.getStackTraceAsString(e));
+            return Response.fail("rollback.report.fail");
+        }
+    }
+
+    private void reportAndES(DoctorRollbackDto dto) {
+
     }
 }

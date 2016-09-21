@@ -1,6 +1,7 @@
 package io.terminus.doctor.event.service;
 
 import io.terminus.common.model.Response;
+import io.terminus.doctor.event.dto.DoctorRollbackDto;
 
 import javax.validation.constraints.NotNull;
 
@@ -26,4 +27,11 @@ public interface DoctorRollbackService {
      * @return 是否成功
      */
     Response<Boolean> rollbackPigEvent(@NotNull(message = "eventId.not.null") Long eventId);
+
+    /**
+     * 更新日报和es
+     * @param rollbackDto 回滚携带信息
+     * @return 是否成功
+     */
+    Response<Boolean> rollbackReportAndES(DoctorRollbackDto rollbackDto);
 }

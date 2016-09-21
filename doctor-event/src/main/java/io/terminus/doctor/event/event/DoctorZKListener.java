@@ -11,6 +11,7 @@ import io.terminus.doctor.common.event.EventListener;
 import io.terminus.doctor.common.utils.Params;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dto.DoctorPigMessage;
+import io.terminus.doctor.event.dto.DoctorRollbackDto;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
@@ -23,6 +24,7 @@ import io.terminus.doctor.event.service.DoctorPigEventReadService;
 import io.terminus.doctor.event.service.DoctorPigReadService;
 import io.terminus.doctor.event.service.DoctorPigTypeStatisticWriteService;
 import io.terminus.doctor.event.service.DoctorPigWriteService;
+import io.terminus.doctor.event.service.DoctorRollbackService;
 import io.terminus.zookeeper.pubsub.Subscriber;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -77,6 +79,9 @@ public class DoctorZKListener implements EventListener {
     @Autowired
     private DoctorDailyGroupReportWriteService doctorDailyGroupReportWriteService;
 
+    @Autowired
+    private DoctorRollbackService doctorRollbackService;
+
     @PostConstruct
     public void subs() {
         try{
@@ -116,6 +121,7 @@ public class DoctorZKListener implements EventListener {
                 // 发送 PigEventCreateEvent 事件
                 coreEventDispatcher.publish(pigEventCreateEvent);
             }
+            return;
         }
 
         // 2. 如果是猪群信息修改
@@ -128,6 +134,7 @@ public class DoctorZKListener implements EventListener {
 
             //更新猪群统计信息
             groupDailyReportUpdate(context);
+            return;
         }
 
         // 3. 如果是猪舍信息修改
@@ -136,6 +143,12 @@ public class DoctorZKListener implements EventListener {
             Long barnId = Params.getWithConvert(context, "doctorBarnId", d -> Long.valueOf(d.toString()));
             // update es index
             barnSearchWriteService.update(barnId);
+            return;
+        }
+
+        // 4. 如果是事件回滚
+        if (DataEventType.RollBackReport.getKey() == dataEvent.getEventType()) {
+            doctorRollbackService.rollbackReportAndES(DataEvent.analyseContent(dataEvent, DoctorRollbackDto.class));
         }
     }
 

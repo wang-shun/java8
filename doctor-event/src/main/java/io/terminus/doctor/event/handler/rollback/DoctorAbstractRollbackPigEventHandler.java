@@ -1,18 +1,29 @@
 package io.terminus.doctor.event.handler.rollback;
 
+import com.google.common.base.Throwables;
+import com.google.common.collect.ImmutableMap;
+import io.terminus.doctor.common.enums.DataEventType;
+import io.terminus.doctor.common.event.CoreEventDispatcher;
+import io.terminus.doctor.common.event.DataEvent;
 import io.terminus.doctor.common.utils.RespHelper;
+import io.terminus.doctor.event.dto.DoctorRollbackDto;
 import io.terminus.doctor.event.enums.IsOrNot;
+import io.terminus.doctor.event.enums.RollbackType;
 import io.terminus.doctor.event.handler.DoctorRollbackPigEventHandler;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorRevertLog;
 import io.terminus.doctor.event.service.DoctorPigEventReadService;
 import io.terminus.doctor.event.service.DoctorRevertLogWriteService;
+import io.terminus.zookeeper.pubsub.Publisher;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Map;
 import java.util.Objects;
+
+import static io.terminus.common.utils.Arguments.notNull;
 
 /**
  * Desc: 猪事件回滚handler
@@ -23,11 +34,10 @@ import java.util.Objects;
 @Slf4j
 public abstract class DoctorAbstractRollbackPigEventHandler implements DoctorRollbackPigEventHandler {
 
-    @Autowired
-    protected DoctorPigEventReadService doctorPigEventReadService;
-
-    @Autowired
-    private DoctorRevertLogWriteService doctorRevertLogWriteService;
+    @Autowired protected DoctorPigEventReadService doctorPigEventReadService;
+    @Autowired private DoctorRevertLogWriteService doctorRevertLogWriteService;
+    @Autowired private CoreEventDispatcher coreEventDispatcher;
+    @Autowired(required = false) private Publisher publisher;
 
     /**
      * 判断能否回滚(1.手动事件 2.三个月内的事件 3.最新事件 4.子类根据事件类型特殊处理)
@@ -50,6 +60,17 @@ public abstract class DoctorAbstractRollbackPigEventHandler implements DoctorRol
     }
 
     /**
+     * 更新统计报表(发zk事件)
+     */
+    @Override
+    public final void updateReport(DoctorPigEvent pigEvent) {
+        DoctorRollbackDto dto = handleReport();
+        if (dto != null) {
+            publishRollbackEvent(dto);
+        }
+    }
+
+    /**
      * 每个子类根据事件类型 判断是否应该由此handler执行回滚
      */
     protected abstract boolean handleCheck(DoctorPigEvent pigEvent);
@@ -58,4 +79,24 @@ public abstract class DoctorAbstractRollbackPigEventHandler implements DoctorRol
      * 处理回滚操作
      */
     protected abstract DoctorRevertLog handleRollback(DoctorPigEvent pigEvent);
+
+    /**
+     * 需要更新的统计
+     * @see RollbackType
+     */
+    protected abstract DoctorRollbackDto handleReport();
+
+    //发布zk事件, 用于更新回滚后操作
+    private void publishRollbackEvent(DoctorRollbackDto dto) {
+        Map<String, DoctorRollbackDto> rbMap = ImmutableMap.of("DoctorRollbackDto", dto);
+        if (notNull(publisher)) {
+            try {
+                publisher.publish(DataEvent.toBytes(DataEventType.RollBackReport.getKey(), rbMap));
+            } catch (Exception e) {
+                log.error("publish rollback pig zk event, DoctorRollbackDto:{}, cause:{}", dto, Throwables.getStackTraceAsString(e));
+            }
+        } else {
+            coreEventDispatcher.publish(DataEvent.make(DataEventType.RollBackReport.getKey(), rbMap));
+        }
+    }
 }
