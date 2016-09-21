@@ -1,6 +1,7 @@
 package io.terminus.doctor.warehouse.handler.out;
 
 import io.terminus.common.exception.ServiceException;
+import io.terminus.common.utils.BeanMapper;
 import io.terminus.doctor.warehouse.dao.DoctorMaterialConsumeAvgDao;
 import io.terminus.doctor.warehouse.dao.DoctorMaterialConsumeProviderDao;
 import io.terminus.doctor.warehouse.dao.DoctorWarehouseSnapshotDao;
@@ -53,7 +54,7 @@ public class DoctorMaterialAvgConsumerHandler implements IHandler{
     public void handle(DoctorMaterialConsumeProviderDto dto, EventHandlerContext context) throws RuntimeException {
         Double lotNumber = context.getLotNumber();
         DoctorMaterialConsumeAvg doctorMaterialConsumeAvg = doctorMaterialConsumeAvgDao.queryByIds(dto.getFarmId(), dto.getWareHouseId(), dto.getMaterialTypeId());
-        context.getSnapshot().setMaterialConsumeAvg(doctorMaterialConsumeAvg);
+        context.getSnapshot().setMaterialConsumeAvg(BeanMapper.map(doctorMaterialConsumeAvg, DoctorMaterialConsumeAvg.class));
         if(isNull(doctorMaterialConsumeAvg)){
             // create consume avg
             doctorMaterialConsumeAvg = DoctorMaterialConsumeAvg.builder()
