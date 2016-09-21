@@ -140,7 +140,7 @@ public class SowBackFatProducer extends AbstractJobProducer {
                                     pigDto.setEventDate(matingPigEvent.getEventAt());
                                     pigDto.setOperatorName(matingPigEvent.getOperatorName());
                                     pigDto.setRuleValueId(key);
-                                    messages.addAll(getMessage(pigDto, rule.getChannels(), ruleRole, sUsers, timeDiff, rule.getUrl()));
+                                    messages.addAll(getMessage(pigDto, rule.getChannels(), ruleRole, sUsers, timeDiff, rule.getUrl(), PigEvent.CONDITION.getKey()));
                                 }
                                 break;
                             }

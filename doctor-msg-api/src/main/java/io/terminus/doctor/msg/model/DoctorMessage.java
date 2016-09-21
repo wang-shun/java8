@@ -70,6 +70,12 @@ public class DoctorMessage implements Serializable {
     private Integer type;
 
     /**
+     * 需要操作的事件类型
+     * @SeePigEvent
+     */
+    private Integer eventType;
+
+    /**
      * 消息种类
      */
     private Integer category;

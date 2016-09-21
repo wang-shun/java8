@@ -385,3 +385,6 @@ ALTER TABLE doctor_group_events ADD COLUMN other_barn_type varchar(64) DEFAULT N
 alter table doctor_material_consume_providers
 add column group_id bigint(20) DEFAULT NULL COMMENT '领用物资的猪群Id, 仅 event_type=1 时才会有值' after barn_name,
 add column group_code varchar(640) DEFAULT NULL COMMENT '猪群名称' after group_id;
+
+-- 2016-9-21
+ALTER TABLE doctor_messages ADD COLUMN event_type INT (11) DEFAULT NULL comment '需要操作的事件类型' after   `type`;

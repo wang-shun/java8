@@ -92,7 +92,7 @@ public class SysMessageProducer extends AbstractJobProducer {
             }
             // 根据不同渠道存储消息
             Splitters.COMMA.splitToList(rule.getChannels()).forEach(channel ->
-                    messages.addAll(createMessage(subUsers, ruleRole, Integer.parseInt(channel), template.getContent())));
+                    messages.addAll(createMessage(subUsers, ruleRole, Integer.parseInt(channel), template.getContent(), null)));
         }
         log.info("系统消息产生 --- SysMessageProducer 结束执行执行, 产生 {} 条消息", messages.size());
         return messages;

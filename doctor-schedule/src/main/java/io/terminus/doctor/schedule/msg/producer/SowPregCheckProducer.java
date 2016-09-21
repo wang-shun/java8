@@ -130,7 +130,7 @@ public class SowPregCheckProducer extends AbstractJobProducer {
                             }
                             if (isMessage) {
                                 pigDto.setEventDate(doctorPigEvent.getEventAt());
-                                messages.addAll(getMessage(pigDto, rule.getChannels(), ruleRole, sUsers, timeDiff, rule.getUrl()));
+                                messages.addAll(getMessage(pigDto, rule.getChannels(), ruleRole, sUsers, timeDiff, rule.getUrl(), PigEvent.PREG_CHECK.getKey()));
                             }
                         }
                     } catch (Exception e) {

@@ -281,7 +281,7 @@ public abstract class AbstractProducer implements IProducer {
      * @param jsonData 填充数据
      * @return
      */
-    protected List<DoctorMessage> createMessage(List<SubUser> subUsers, DoctorMessageRuleRole ruleRole, Integer channel, String jsonData) {
+    protected List<DoctorMessage> createMessage(List<SubUser> subUsers, DoctorMessageRuleRole ruleRole, Integer channel, String jsonData, Integer eventType) {
         List<DoctorMessage> messages = Lists.newArrayList();
         DoctorMessageRuleTemplate template = RespHelper.orServEx(doctorMessageRuleTemplateReadService.findMessageRuleTemplateById(ruleRole.getTemplateId()));
         if (subUsers != null && subUsers.size() > 0) {
@@ -297,6 +297,7 @@ public abstract class AbstractProducer implements IProducer {
                                 .isExpired(DoctorMessage.IsExpired.NOTEXPIRED.getValue())
                                 .messageTemplate(getTemplateName(template.getMessageTemplate(), channel))
                                 .type(template.getType())
+                                .eventType(eventType)
                                 .category(template.getCategory())
                                 .data(jsonData)
                                 .channel(channel)
@@ -339,6 +340,7 @@ public abstract class AbstractProducer implements IProducer {
                             .isExpired(DoctorMessage.IsExpired.NOTEXPIRED.getValue())
                             .messageTemplate(getTemplateName(template.getMessageTemplate(), channel))
                             .type(template.getType())
+                            .eventType(eventType)
                             .category(template.getCategory())
                             .data(jsonData)
                             .channel(channel)
