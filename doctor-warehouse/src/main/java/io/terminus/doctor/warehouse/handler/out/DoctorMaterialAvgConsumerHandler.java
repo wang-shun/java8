@@ -1,6 +1,7 @@
 package io.terminus.doctor.warehouse.handler.out;
 
 import io.terminus.doctor.warehouse.dao.DoctorMaterialConsumeAvgDao;
+import io.terminus.doctor.warehouse.dao.DoctorMaterialConsumeProviderDao;
 import io.terminus.doctor.warehouse.dto.DoctorMaterialConsumeProviderDto;
 import io.terminus.doctor.common.enums.WareHouseType;
 import io.terminus.doctor.warehouse.handler.IHandler;
@@ -21,17 +22,20 @@ import static java.util.Objects.isNull;
  * Created by yaoqijun.
  * Date:2016-05-30
  * Email:yaoqj@terminus.io
- * Descirbe: 计算平均消耗信息 TODO
+ * Descirbe: 计算平均消耗信息
  */
 @Component
 @Slf4j
 public class DoctorMaterialAvgConsumerHandler implements IHandler{
 
     private final DoctorMaterialConsumeAvgDao doctorMaterialConsumeAvgDao;
+    private final DoctorMaterialConsumeProviderDao doctorMaterialConsumeProviderDao;
 
     @Autowired
-    public DoctorMaterialAvgConsumerHandler(DoctorMaterialConsumeAvgDao doctorMaterialConsumeAvgDao){
+    public DoctorMaterialAvgConsumerHandler(DoctorMaterialConsumeAvgDao doctorMaterialConsumeAvgDao,
+                                            DoctorMaterialConsumeProviderDao doctorMaterialConsumeProviderDao){
         this.doctorMaterialConsumeAvgDao = doctorMaterialConsumeAvgDao;
+        this.doctorMaterialConsumeProviderDao = doctorMaterialConsumeProviderDao;
     }
 
     @Override
@@ -85,5 +89,17 @@ public class DoctorMaterialAvgConsumerHandler implements IHandler{
             doctorMaterialConsumeAvgDao.update(doctorMaterialConsumeAvg);
         }
         context.put("consumeAvgId",doctorMaterialConsumeAvg.getId());
+    }
+
+    @Override
+    public boolean canRollback(Long eventId) {
+        DoctorMaterialConsumeProvider cp = doctorMaterialConsumeProviderDao.findById(eventId);
+        DoctorMaterialConsumeProvider.EVENT_TYPE eventType = DoctorMaterialConsumeProvider.EVENT_TYPE.from(cp.getEventType());
+        return eventType != null && eventType.isOut();
+    }
+
+    @Override
+    public void rollback(Long eventId) {
+        // TODO
     }
 }

@@ -1,5 +1,6 @@
 package io.terminus.doctor.warehouse.handler.out;
 
+import io.terminus.doctor.warehouse.dao.DoctorMaterialConsumeProviderDao;
 import io.terminus.doctor.warehouse.dao.DoctorMaterialInWareHouseDao;
 import io.terminus.doctor.warehouse.dto.DoctorMaterialConsumeProviderDto;
 import io.terminus.doctor.warehouse.handler.IHandler;
@@ -25,10 +26,13 @@ import static java.util.Objects.isNull;
 public class DoctorInWareHouseConsumeHandler implements IHandler{
 
     private final DoctorMaterialInWareHouseDao doctorMaterialInWareHouseDao;
+    private final DoctorMaterialConsumeProviderDao doctorMaterialConsumeProviderDao;
 
     @Autowired
-    public DoctorInWareHouseConsumeHandler(DoctorMaterialInWareHouseDao doctorMaterialInWareHouseDao){
+    public DoctorInWareHouseConsumeHandler(DoctorMaterialInWareHouseDao doctorMaterialInWareHouseDao,
+                                           DoctorMaterialConsumeProviderDao doctorMaterialConsumeProviderDao){
         this.doctorMaterialInWareHouseDao = doctorMaterialInWareHouseDao;
+        this.doctorMaterialConsumeProviderDao = doctorMaterialConsumeProviderDao;
     }
 
     @Override
@@ -48,5 +52,22 @@ public class DoctorInWareHouseConsumeHandler implements IHandler{
         doctorMaterialInWareHouse.setLotNumber(doctorMaterialInWareHouse.getLotNumber() - dto.getCount());
         doctorMaterialInWareHouseDao.update(doctorMaterialInWareHouse);
         context.put("lotNumber", doctorMaterialInWareHouse.getLotNumber());
+    }
+
+    @Override
+    public boolean canRollback(Long eventId) {
+        DoctorMaterialConsumeProvider cp = doctorMaterialConsumeProviderDao.findById(eventId);
+        DoctorMaterialConsumeProvider.EVENT_TYPE eventType = DoctorMaterialConsumeProvider.EVENT_TYPE.from(cp.getEventType());
+        return eventType != null && eventType.isOut();
+    }
+
+    @Override
+    public void rollback(Long eventId) {
+        DoctorMaterialConsumeProvider cp = doctorMaterialConsumeProviderDao.findById(eventId);
+        DoctorMaterialInWareHouse materialInWareHouse = doctorMaterialInWareHouseDao.queryByFarmHouseMaterial(
+                cp.getFarmId(), cp.getWareHouseId(), cp.getMaterialId());
+        checkState(!isNull(materialInWareHouse), "no.material.consume");
+        materialInWareHouse.setLotNumber(materialInWareHouse.getLotNumber() + cp.getEventCount());
+        doctorMaterialInWareHouseDao.update(materialInWareHouse);
     }
 }
