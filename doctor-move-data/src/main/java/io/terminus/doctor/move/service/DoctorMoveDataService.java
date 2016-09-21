@@ -2310,23 +2310,28 @@ public class DoctorMoveDataService {
         return Objects.equals(farmOID, outId);
     }
 
-    private Integer parity = 0;
-    private String boarCode = null;
+    private Integer parity;
+    private String boarCode;
+    private Boolean isFirst;
 
     public void updateParityAndBoarCode(DoctorFarm farm) {
         List<DoctorPigEvent> doctorPigEvensList = doctorPigEventDao.list(ImmutableMap.of("farmId", farm.getId(), "type", PigEvent.ENTRY.getKey(), "kind", 1));
         doctorPigEvensList.stream().forEach( doctorPigEvent -> {
             List<DoctorPigEvent> lists = doctorPigEventDao.queryAllEventsByPigId(doctorPigEvent.getPigId());
+            parity = 1;
+            boarCode = null;
+            isFirst = true;  //判断是否是进场之后第一次配种,第一次配种,胎次不加1
             lists.stream().forEach(doctorPigEvent1 -> {
                 switch (doctorPigEvent1.getType()){
                     case 7:
-                        parity = (isNull(doctorPigEvent1.getExtraMap()) || isNull(doctorPigEvent1.getExtraMap().get("parity"))) ? 0 : Integer.valueOf(Objects.toString(doctorPigEvent1.getExtraMap().get("parity")));
+                        parity = (isNull(doctorPigEvent1.getExtraMap()) || isNull(doctorPigEvent1.getExtraMap().get("parity"))) ? parity : Integer.valueOf(Objects.toString(doctorPigEvent1.getExtraMap().get("parity")));
                         break;
                     case 9:
-                        if(doctorPigEvent1.getCurrentMatingCount() == 1){
+                        if(!isFirst && doctorPigEvent1.getCurrentMatingCount() == 1){
                             parity += 1;
                         }
                         boarCode = (isNull(doctorPigEvent1.getExtraMap()) || isNull(doctorPigEvent1.getExtraMap().get("matingBoarPigCode"))) ? null : Objects.toString(doctorPigEvent1.getExtraMap().get("matingBoarPigCode"));
+                        isFirst = false;
                         break;
                     case 16:
                         boarCode = null;
