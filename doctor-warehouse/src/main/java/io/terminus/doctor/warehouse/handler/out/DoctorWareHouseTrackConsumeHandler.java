@@ -85,22 +85,20 @@ public class DoctorWareHouseTrackConsumeHandler implements IHandler{
     }
 
     @Override
-    public boolean canRollback(Long eventId) {
-        DoctorMaterialConsumeProvider cp = doctorMaterialConsumeProviderDao.findById(eventId);
+    public boolean canRollback(DoctorMaterialConsumeProvider cp) {
         DoctorMaterialConsumeProvider.EVENT_TYPE eventType = DoctorMaterialConsumeProvider.EVENT_TYPE.from(cp.getEventType());
         return eventType != null && eventType.isOut();
     }
 
     @Override
-    public void rollback(Long eventId) {
-        DoctorMaterialConsumeProvider cp = doctorMaterialConsumeProviderDao.findById(eventId);
+    public void rollback(DoctorMaterialConsumeProvider cp) {
         DoctorWareHouseTrack doctorWareHouseTrack = this.doctorWareHouseTrackDao.findById(cp.getWareHouseId());
         checkState(!isNull(doctorWareHouseTrack), "not.find.doctorWareHouse");
-        DoctorWarehouseSnapshot snapshot = doctorWarehouseSnapshotDao.findByEventId(eventId);
+        DoctorWarehouseSnapshot snapshot = doctorWarehouseSnapshotDao.findByEventId(cp.getId());
         if(snapshot == null){
             throw new ServiceException("snapshot.not.found");
         }
         DoctorWareHouseTrack oldTrack = snapshot.json2Snapshot().getWareHouseTrack();
-        doctorWareHouseTrackDao.update(oldTrack);
+        doctorWareHouseTrackDao.updateAll(oldTrack);
     }
 }

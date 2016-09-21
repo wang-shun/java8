@@ -100,21 +100,19 @@ public class DoctorMaterialAvgConsumerHandler implements IHandler{
     }
 
     @Override
-    public boolean canRollback(Long eventId) {
-        DoctorMaterialConsumeProvider cp = doctorMaterialConsumeProviderDao.findById(eventId);
+    public boolean canRollback(DoctorMaterialConsumeProvider cp) {
         DoctorMaterialConsumeProvider.EVENT_TYPE eventType = DoctorMaterialConsumeProvider.EVENT_TYPE.from(cp.getEventType());
         return eventType != null && eventType.isOut();
     }
 
     @Override
-    public void rollback(Long eventId) {
-        DoctorMaterialConsumeProvider cp = doctorMaterialConsumeProviderDao.findById(eventId);
+    public void rollback(DoctorMaterialConsumeProvider cp) {
         DoctorMaterialConsumeAvg consumeAvg = doctorMaterialConsumeAvgDao.queryByIds(cp.getFarmId(), cp.getWareHouseId(), cp.getMaterialId());
         // 消耗事件发生后, 一定有这个数据
         if(consumeAvg == null){
             throw new ServiceException("MaterialConsumeAvg.find.fail");
         }
-        DoctorWarehouseSnapshot snapshot = doctorWarehouseSnapshotDao.findByEventId(eventId);
+        DoctorWarehouseSnapshot snapshot = doctorWarehouseSnapshotDao.findByEventId(cp.getId());
         if(snapshot == null){
             throw new ServiceException("snapshot.not.found");
         }
@@ -122,7 +120,7 @@ public class DoctorMaterialAvgConsumerHandler implements IHandler{
         if(oldAvg == null){
             doctorMaterialConsumeAvgDao.delete(consumeAvg.getId());
         }else{
-            doctorMaterialConsumeAvgDao.update(oldAvg);
+            doctorMaterialConsumeAvgDao.updateAll(oldAvg);
         }
     }
 }

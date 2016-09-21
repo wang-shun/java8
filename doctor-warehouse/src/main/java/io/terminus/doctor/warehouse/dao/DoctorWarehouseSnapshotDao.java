@@ -15,4 +15,8 @@ public class DoctorWarehouseSnapshotDao extends MyBatisDao<DoctorWarehouseSnapsh
     public DoctorWarehouseSnapshot findByEventId(Long eventId){
         return sqlSession.selectOne(sqlId("findByEventId"), eventId);
     }
+
+    public void deleteByEventId(Long eventId){
+        sqlSession.delete(sqlId("deleteByEventId"), eventId);
+    }
 }

@@ -53,12 +53,12 @@ public class DoctorTypeProviderHandler implements IHandler{
     }
 
     @Override
-    public boolean canRollback(Long eventId) {
+    public boolean canRollback(DoctorMaterialConsumeProvider cp) {
         return false;
     }
 
     @Override
-    public void rollback(Long eventId) {
+    public void rollback(DoctorMaterialConsumeProvider cp) {
 
     }
 

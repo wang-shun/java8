@@ -47,4 +47,9 @@
         DELETE FROM <include refid="tb"/>
         WHERE id = #{id}
     </delete>
+
+    <delete id="deleteByEventId" parameterType="long">
+        DELETE FROM <include refid="tb"/>
+        WHERE event_id = #{eventId}
+    </delete>
 </mapper>

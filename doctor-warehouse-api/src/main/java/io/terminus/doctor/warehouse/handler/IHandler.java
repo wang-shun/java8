@@ -2,8 +2,7 @@ package io.terminus.doctor.warehouse.handler;
 
 import io.terminus.doctor.warehouse.dto.DoctorMaterialConsumeProviderDto;
 import io.terminus.doctor.warehouse.dto.EventHandlerContext;
-
-import java.util.Map;
+import io.terminus.doctor.warehouse.model.DoctorMaterialConsumeProvider;
 
 /**
  * Created by yaoqijun.
@@ -28,7 +27,7 @@ public interface IHandler {
      */
     void handle(DoctorMaterialConsumeProviderDto dto, EventHandlerContext context) throws RuntimeException;
 
-    boolean canRollback(Long eventId);
+    boolean canRollback(DoctorMaterialConsumeProvider cp);
 
-    void rollback(Long eventId);
+    void rollback(DoctorMaterialConsumeProvider cp);
 }

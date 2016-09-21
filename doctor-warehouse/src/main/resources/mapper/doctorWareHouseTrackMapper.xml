@@ -104,4 +104,21 @@
         </set>
         WHERE ware_house_id=#{wareHouseId}
     </update>
+
+    <update id="updateAll" parameterType="DoctorWareHouseTrack">
+        UPDATE <include refid="tb"/>
+        <set>
+            updated_at = now()
+            ,`ware_house_id` = #{wareHouseId}
+            ,`farm_id` = #{farmId}
+            ,`farm_name` = #{farmName}
+            ,`manager_id` = #{managerId}
+            ,`manager_name` = #{managerName}
+            ,`material_lot_number` = #{materialLotNumber}
+            ,`lot_number` = #{lotNumber}
+            ,`is_default` = #{isDefault}
+            ,`extra` = #{extra}
+        </set>
+        WHERE ware_house_id=#{wareHouseId}
+    </update>
 </mapper>

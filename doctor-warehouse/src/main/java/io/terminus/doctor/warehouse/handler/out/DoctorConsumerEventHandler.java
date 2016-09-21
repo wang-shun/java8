@@ -99,15 +99,13 @@ public class DoctorConsumerEventHandler implements IHandler{
     }
 
     @Override
-    public boolean canRollback(Long eventId) {
-        DoctorMaterialConsumeProvider cp = doctorMaterialConsumeProviderDao.findById(eventId);
+    public boolean canRollback(DoctorMaterialConsumeProvider cp) {
         DoctorMaterialConsumeProvider.EVENT_TYPE eventType = DoctorMaterialConsumeProvider.EVENT_TYPE.from(cp.getEventType());
         return eventType != null && eventType.isOut();
     }
 
     @Override
-    public void rollback(Long eventId) {
-        DoctorMaterialConsumeProvider cp = doctorMaterialConsumeProviderDao.findById(eventId);
+    public void rollback(DoctorMaterialConsumeProvider cp) {
         // 本次出库事件的价格组成
         List<Map<String, Object>> priceCompose = (ArrayList) cp.getExtraMap().get("consumePrice");
         if(priceCompose == null || priceCompose.isEmpty()){
@@ -134,6 +132,6 @@ public class DoctorConsumerEventHandler implements IHandler{
                 doctorMaterialPriceInWareHouseDao.update(priceInWareHouse);
             }
         }
-        doctorMaterialConsumeProviderDao.delete(eventId);
+        doctorMaterialConsumeProviderDao.delete(cp.getId());
     }
 }

@@ -27,4 +27,8 @@ public class DoctorFarmWareHouseTypeDao extends MyBatisDao<DoctorFarmWareHouseTy
         params.put("type", type);
         return this.getSqlSession().selectOne(sqlId("findByFarmIdAndType"), params);
     }
+
+    public void updateAll(DoctorFarmWareHouseType model){
+        sqlSession.update(sqlId("updateAll"), model);
+    }
 }

@@ -1,6 +1,5 @@
 package io.terminus.doctor.warehouse.handler.out;
 
-import io.terminus.doctor.warehouse.dao.DoctorMaterialConsumeProviderDao;
 import io.terminus.doctor.warehouse.dao.DoctorMaterialInWareHouseDao;
 import io.terminus.doctor.warehouse.dto.DoctorMaterialConsumeProviderDto;
 import io.terminus.doctor.warehouse.dto.EventHandlerContext;
@@ -10,8 +9,6 @@ import io.terminus.doctor.warehouse.model.DoctorMaterialInWareHouse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkState;
 import static java.util.Objects.isNull;
@@ -27,13 +24,10 @@ import static java.util.Objects.isNull;
 public class DoctorInWareHouseConsumeHandler implements IHandler{
 
     private final DoctorMaterialInWareHouseDao doctorMaterialInWareHouseDao;
-    private final DoctorMaterialConsumeProviderDao doctorMaterialConsumeProviderDao;
 
     @Autowired
-    public DoctorInWareHouseConsumeHandler(DoctorMaterialInWareHouseDao doctorMaterialInWareHouseDao,
-                                           DoctorMaterialConsumeProviderDao doctorMaterialConsumeProviderDao){
+    public DoctorInWareHouseConsumeHandler(DoctorMaterialInWareHouseDao doctorMaterialInWareHouseDao){
         this.doctorMaterialInWareHouseDao = doctorMaterialInWareHouseDao;
-        this.doctorMaterialConsumeProviderDao = doctorMaterialConsumeProviderDao;
     }
 
     @Override
@@ -56,15 +50,13 @@ public class DoctorInWareHouseConsumeHandler implements IHandler{
     }
 
     @Override
-    public boolean canRollback(Long eventId) {
-        DoctorMaterialConsumeProvider cp = doctorMaterialConsumeProviderDao.findById(eventId);
+    public boolean canRollback(DoctorMaterialConsumeProvider cp) {
         DoctorMaterialConsumeProvider.EVENT_TYPE eventType = DoctorMaterialConsumeProvider.EVENT_TYPE.from(cp.getEventType());
         return eventType != null && eventType.isOut();
     }
 
     @Override
-    public void rollback(Long eventId) {
-        DoctorMaterialConsumeProvider cp = doctorMaterialConsumeProviderDao.findById(eventId);
+    public void rollback(DoctorMaterialConsumeProvider cp) {
         DoctorMaterialInWareHouse materialInWareHouse = doctorMaterialInWareHouseDao.queryByFarmHouseMaterial(
                 cp.getFarmId(), cp.getWareHouseId(), cp.getMaterialId());
         checkState(!isNull(materialInWareHouse), "no.material.consume");

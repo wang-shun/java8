@@ -1,8 +1,5 @@
 package io.terminus.doctor.warehouse.dto;
 
-import io.terminus.doctor.warehouse.model.DoctorFarmWareHouseType;
-import io.terminus.doctor.warehouse.model.DoctorMaterialConsumeAvg;
-import io.terminus.doctor.warehouse.model.DoctorWareHouseTrack;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -25,13 +22,6 @@ public class EventHandlerContext implements Serializable{
     /**
      * 用于事件回滚
      */
-    private Snapshot snapshot = new Snapshot();
+    private DoctorWarehouseSnapshotDto snapshot = new DoctorWarehouseSnapshotDto();
 
-    @Data
-    public class Snapshot implements Serializable{
-        private static final long serialVersionUID = -1895187392688297850L;
-        private DoctorMaterialConsumeAvg materialConsumeAvg;
-        private DoctorWareHouseTrack wareHouseTrack;
-        private DoctorFarmWareHouseType farmWareHouseType;
-    }
 }
