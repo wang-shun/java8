@@ -248,6 +248,13 @@ public class DoctorKpiDao {
     }
 
     /**
+     * 死淘情况: 后备猪
+     */
+    public int getDeadHoubei(Long farmId, Date startAt, Date endAt) {
+        return sqlSession.selectOne(sqlId("getDeadHoubei"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
+    }
+
+    /**
      * 死淘情况: 产房死淘率
      */
     public double getDeadFarrowRate(Long farmId, Date startAt, Date endAt) {

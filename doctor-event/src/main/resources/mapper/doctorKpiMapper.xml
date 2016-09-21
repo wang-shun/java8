@@ -267,6 +267,17 @@
         <include refid="criteria"/>
     </select>
 
+    <!-- 死淘情况: 后备猪 -->
+    <select id="getDeadHoubei" parameterType="map" resultType="int">
+        SELECT
+        ifnull(sum(quantity),0)
+        FROM doctor_group_events
+        WHERE
+        change_type_id IN (110, 111) AND -- 变动类型是死亡和淘汰
+        pig_type IN (4, 8) -- 后备猪
+        <include refid="criteria"/>
+    </select>
+
     <!-- 死淘情况: 产房死淘率 -->
     <select id="getDeadFarrowRate" parameterType="map" resultType="double">
         SELECT

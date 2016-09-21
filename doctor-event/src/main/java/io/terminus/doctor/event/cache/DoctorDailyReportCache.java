@@ -170,6 +170,7 @@ public class DoctorDailyReportCache {
         dead.setFarrow(doctorKpiDao.getDeadFarrow(farmId, startAt, endAt));
         dead.setNursery(doctorKpiDao.getDeadNursery(farmId, startAt, endAt));
         dead.setFatten(doctorKpiDao.getDeadFatten(farmId, startAt, endAt));
+        dead.setHoubei(doctorKpiDao.getDeadHoubei(farmId, startAt, endAt));
 
         //分娩
         DoctorDeliverDailyReport deliver = new DoctorDeliverDailyReport();

@@ -342,12 +342,12 @@ public class DoctorMoveDataController {
     public Boolean updateParityAndBoarCode(@RequestParam("farmId") Long farmId){
         try {
             DoctorFarm farm = doctorFarmDao.findById(farmId);
-            log.warn("fix pig start, farmId:{}", farmId);
+            log.warn("update parity and boarCode start, farmId:{}", farmId);
             doctorMoveDataService.updateParityAndBoarCode(farm);
-            log.warn("fix pig end");
+            log.warn("update parity and boarCode start");
             return true;
         } catch (Exception e) {
-            log.error("fix pig failed, farmId:{}, cause:{}", farmId, Throwables.getStackTraceAsString(e));
+            log.error("update parity and boarCode failed, farmId:{}, cause:{}", farmId, Throwables.getStackTraceAsString(e));
             return false;
         }
     }

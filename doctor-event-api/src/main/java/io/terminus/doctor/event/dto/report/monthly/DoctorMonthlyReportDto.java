@@ -84,6 +84,7 @@ public class DoctorMonthlyReportDto implements Serializable {
     private int deadFarrow;                   //产房仔猪
     private int deadNursery;                  //保育猪
     private int deadFatten;                   //育肥猪
+    private int deadHoubei;                   //后备猪
     private double deadFarrowRate;            //产房死淘率
     private double deadNurseryRate;           //保育死淘率
     private double deadFattenRate;            //育肥死淘率
