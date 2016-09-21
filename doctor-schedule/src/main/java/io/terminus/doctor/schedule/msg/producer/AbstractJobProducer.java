@@ -99,7 +99,7 @@ public abstract class AbstractJobProducer extends AbstractProducer {
      * @param ruleValue   配置的的天数
      * @param pigStatuses 母猪当前的状态
      */
-    protected void recordPigMessage(DoctorPigInfoDto pigDto, PigEvent pigEvent, Double timeDiff, Integer ruleValue, PigStatus... pigStatuses) {
+    protected void recordPigMessage(DoctorPigInfoDto pigDto, PigEvent pigEvent, Double timeDiff, RuleValue ruleValue, PigStatus... pigStatuses) {
         List statusList = Lists.newArrayList();
         if (pigStatuses != null && pigStatuses.length > 0) {
             for (PigStatus pigStatus : pigStatuses) {
@@ -108,14 +108,24 @@ public abstract class AbstractJobProducer extends AbstractProducer {
         }
 
         // 处理消息
-        List<DoctorPigMessage> tmpPigMessages = Lists.newArrayList();
-        tmpPigMessages.add(DoctorPigMessage.builder()
+        DoctorPigMessage pigMessage = DoctorPigMessage.builder()
                 .pigId(pigDto.getPigId())
                 .eventType(pigEvent.getKey())
                 .eventTypeName(pigEvent.getName())
                 .status(pigDto.getStatus())
                 .timeDiff(timeDiff)
-                .build());
+                .build();
+        if (Objects.equals(pigEvent.getKey(), PigEvent.CONDITION.getKey())) {
+            pigMessage.setIsCondition(1);
+            if (ruleValue.getId() == 4) {
+                pigMessage.setConditionValue("断奶");
+            } else {
+                pigMessage.setConditionValue(String.valueOf(ruleValue.getValue().intValue()));
+            }
+        }
+        List<DoctorPigMessage> tmpPigMessages = Lists.newArrayList();
+        tmpPigMessages.add(pigMessage);
+
 
         // 处理存在的消息和过期的消息
         if (StringUtils.isNotBlank(pigDto.getExtraTrackMessage())) {
@@ -123,8 +133,8 @@ public abstract class AbstractJobProducer extends AbstractProducer {
                 List<DoctorPigMessage> pigMessages = MAPPER.readValue(pigDto.getExtraTrackMessage(), new TypeReference<List<DoctorPigMessage>>() {
                 });
                 if (!Objects.isNull(pigMessages)) {
-                    pigMessages.stream().filter(doctorPigMessage -> !Objects.equals(doctorPigMessage.getEventType(), pigEvent.getKey()))
-                            .forEach(doctorPigMessage -> {
+                    pigMessages.stream().filter(message -> !Objects.equals(message.getEventType(), pigEvent.getKey())).
+                            forEach(doctorPigMessage -> {
                                 if (statusList.contains(doctorPigMessage.getStatus())) {
                                     tmpPigMessages.add(doctorPigMessage);
                                 }
@@ -213,7 +223,7 @@ public abstract class AbstractJobProducer extends AbstractProducer {
                     case Wean:
                     case Entry:// 断奶
                         // @see DoctorWeanDto
-                        doctorPigEvent = getPigEventByEventType(pigDto.getDoctorPigEvents(), PigEvent.WEAN.getKey());
+                        doctorPigEvent = getLeadToWeanEvent(pigDto.getDoctorPigEvents());
                         if (doctorPigEvent != null) {
                             dateTime = new DateTime(doctorPigEvent.getEventAt());
                             pigDto.setOperatorName(doctorPigEvent.getOperatorName());
@@ -234,6 +244,22 @@ public abstract class AbstractJobProducer extends AbstractProducer {
         return null;
     }
 
+    /**
+     * 获取导致断奶的事件
+     * @param events
+     * @return
+     */
+    protected DoctorPigEvent getLeadToWeanEvent(List<DoctorPigEvent> events){
+        try {
+            List<DoctorPigEvent> tempList =  events.stream().filter(doctorPigEvent -> Objects.equals(doctorPigEvent.getPigStatusAfter(), PigStatus.Wean.getKey()) || Objects.equals(doctorPigEvent.getType(), PigEvent.WEAN.getKey())).collect(Collectors.toList());
+            if (!Arguments.isNullOrEmpty(tempList)){
+                return tempList.stream().max(Comparator.comparing(DoctorPigEvent::getEventAt)).get();
+            }
+        } catch (Exception e){
+            log.error(" get.lead.to.wean.event.failed ");
+        }
+        return null;
+    }
     /**
      * 根据猪舍过滤用户
      *

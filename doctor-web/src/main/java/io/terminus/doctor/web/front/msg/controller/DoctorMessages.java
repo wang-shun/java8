@@ -5,7 +5,6 @@ import com.google.api.client.util.Maps;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import io.terminus.common.model.Paging;
-import io.terminus.common.utils.Arguments;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.constants.JacksonType;
@@ -161,30 +160,28 @@ public class DoctorMessages {
 
     /**
      * 查询消息详情
-     *
-     * @param templateId
-     * @param farmId
+     * @param id
      * @return
      */
     @RequestMapping(value = "/message/detail", method = RequestMethod.GET)
-    public Boolean findMessageDetail(@RequestParam("templateId") Long templateId, @RequestParam("farmId") Long farmId, @RequestParam("businessId") Long businessId) {
-        Map<String, Object> criteriaMap = Maps.newHashMap();
-        criteriaMap.put("businessId", businessId);
-        criteriaMap.put("templateId", templateId);
-        criteriaMap.put("farmId", farmId);
-        criteriaMap.put("isExpired", DoctorMessage.IsExpired.NOTEXPIRED.getValue());
-        criteriaMap.put("userId", UserUtil.getCurrentUser().getId());
-        criteriaMap.put("channel", Rule.Channel.SYSTEM.getValue());
-        criteriaMap.put("statuses", ImmutableList.of(DoctorMessage.Status.NORMAL.getValue(), DoctorMessage.Status.SENDED.getValue()));
-        List<DoctorMessage> messages = RespHelper.or500(doctorMessageReadService.findMessageByCriteria(criteriaMap));
-        if (!Arguments.isNullOrEmpty(messages)) {
+    public Boolean findMessageDetail(@RequestParam("id") Long id) {
+//        Map<String, Object> criteriaMap = Maps.newHashMap();
+//        criteriaMap.put("businessId", businessId);
+//        criteriaMap.put("templateId", templateId);
+//        criteriaMap.put("farmId", farmId);
+//        criteriaMap.put("isExpired", DoctorMessage.IsExpired.NOTEXPIRED.getValue());
+//        criteriaMap.put("userId", UserUtil.getCurrentUser().getId());
+//        criteriaMap.put("channel", Rule.Channel.SYSTEM.getValue());
+//        criteriaMap.put("statuses", ImmutableList.of(DoctorMessage.Status.NORMAL.getValue(), DoctorMessage.Status.SENDED.getValue()));
+//        List<DoctorMessage> messages = RespHelper.or500(doctorMessageReadService.findMessageByCriteria(criteriaMap));
+        DoctorMessage doctorMessage = RespHelper.or500(doctorMessageReadService.findMessageById(id));
+        if (doctorMessage != null) {
             // 如果消息是未读, 将消息设置为已读
-            messages.forEach(doctorMessage -> {
                 doctorMessage.setStatus(DoctorMessage.Status.READED.getValue());
                 doctorMessageWriteService.updateMessage(doctorMessage);
-            });
+            return true;
         }
-        return true;
+       return false;
     }
 
     /**
