@@ -52,17 +52,13 @@ public class DoctorWareHouseHandlerInvocation {
         }
     }
 
-    public void rollback(Long eventId){
-        DoctorMaterialConsumeProvider cp = doctorMaterialConsumeProviderDao.findById(eventId);
-        if(cp == null){
-            throw new ServiceException("event.not.found");
-        }
+    public void rollback(DoctorMaterialConsumeProvider cp){
         doctorWareHouseHandlerChain.getHandlerList().forEach(iHandler -> {
             if(iHandler.ifHandle(DoctorMaterialConsumeProvider.EVENT_TYPE.from(cp.getEventType()))) {
                 iHandler.rollback(cp);
             }
         });
         // 删除快照
-        doctorWarehouseSnapshotDao.deleteByEventId(eventId);
+        doctorWarehouseSnapshotDao.deleteByEventId(cp.getId());
     }
 }

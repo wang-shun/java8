@@ -1,6 +1,6 @@
 package io.terminus.doctor.warehouse.manager;
 
-import com.google.common.collect.Maps;
+import io.terminus.common.exception.ServiceException;
 import io.terminus.common.utils.NumberUtils;
 import io.terminus.doctor.warehouse.dao.DoctorMaterialConsumeAvgDao;
 import io.terminus.doctor.warehouse.dao.DoctorMaterialConsumeProviderDao;
@@ -21,8 +21,10 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import static com.google.common.base.Preconditions.checkState;
 import static java.util.Objects.isNull;
@@ -158,9 +160,28 @@ public class MaterialInWareHouseManager {
         // 先调出
         Long diaochuEventId = consumeMaterialInner(diaochuDto);
         DoctorMaterialConsumeProvider diaochuEvent = doctorMaterialConsumeProviderDao.findById(diaochuEventId);
+
         // 然后调入
         diaoruDto.setUnitPrice(diaochuEvent.getUnitPrice());
-        providerMaterialInWareHouseInner(diaoruDto);
+        Long diaoruEventId = providerMaterialInWareHouseInner(diaoruDto);
+
+        // 把两个事件的 id 在对方的 extra 中记录一下
+        Map<String, Object> diaochuMap = diaochuEvent.getExtraMap();
+        if(diaochuMap == null){
+            diaochuMap = new HashMap<>();
+        }
+        diaochuMap.put("relEventId", diaoruEventId);
+        diaochuEvent.setExtraMap(diaochuMap);
+        doctorMaterialConsumeProviderDao.update(diaochuEvent);
+
+        DoctorMaterialConsumeProvider diaoruEvent = doctorMaterialConsumeProviderDao.findById(diaoruEventId);
+        Map<String, Object> diaoruMap = diaoruEvent.getExtraMap();
+        if(diaoruMap == null){
+            diaoruMap = new HashMap<>();
+        }
+        diaoruMap.put("relEventId", diaochuEventId);
+        diaoruEvent.setExtraMap(diaoruMap);
+        doctorMaterialConsumeProviderDao.update(diaoruEvent);
     }
 
     /**
@@ -229,6 +250,26 @@ public class MaterialInWareHouseManager {
 
     @Transactional
     public void rollback(Long eventId){
-        doctorWareHouseHandlerInvocation.rollback(eventId);
+        DoctorMaterialConsumeProvider cp = doctorMaterialConsumeProviderDao.findById(eventId);
+        if(cp == null){
+            throw new ServiceException("event.not.found");
+        }
+
+        // 对调拨事件要特别对待, 因为有一个关联事件也要一起回滚
+        if(Objects.equals(cp.getEventType(), DoctorMaterialConsumeProvider.EVENT_TYPE.DIAORU.getValue())
+                || Objects.equals(cp.getEventType(), DoctorMaterialConsumeProvider.EVENT_TYPE.DIAOCHU.getValue())){
+            Long relEventId;
+            try {
+                relEventId = Long.valueOf(cp.getExtraMap().get("relEventId").toString());
+            } catch (RuntimeException e) {
+                throw new ServiceException("related.event.not.fount"); // 没有找到关联事件, 无法回滚
+            }
+            DoctorMaterialConsumeProvider relEvent = doctorMaterialConsumeProviderDao.findById(relEventId);
+            if(relEvent == null){
+                throw new ServiceException("related.event.not.fount");
+            }
+            doctorWareHouseHandlerInvocation.rollback(relEvent);
+        }
+        doctorWareHouseHandlerInvocation.rollback(cp);
     }
 }
