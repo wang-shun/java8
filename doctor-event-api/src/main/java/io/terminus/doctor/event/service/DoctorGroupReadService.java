@@ -119,6 +119,13 @@ public interface DoctorGroupReadService {
     Response<DoctorGroupEvent> findGroupEventById(@NotNull(message = "evenId.not.null") Long eventId);
 
     /**
+     * 根据猪群id查最新询猪群事件
+     * @param groupId    猪群id
+     * @return 猪群事件
+     */
+    Response<DoctorGroupEvent> findLastEventByGroupId(@NotNull(message = "groupId.not.null") Long groupId);
+
+    /**
      * 校验猪群号是否重复
      * @param farmId  猪场id
      * @param groupCode 猪群号

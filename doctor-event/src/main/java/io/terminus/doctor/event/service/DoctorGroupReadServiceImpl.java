@@ -252,6 +252,16 @@ public class DoctorGroupReadServiceImpl implements DoctorGroupReadService {
     }
 
     @Override
+    public Response<DoctorGroupEvent> findLastEventByGroupId(Long groupId) {
+        try {
+            return Response.ok(doctorGroupEventDao.findLastEventByGroupId(groupId));
+        } catch (Exception e) {
+            log.error("find last group event failed, groupId:{}, cause:{}", groupId, Throwables.getStackTraceAsString(e));
+            return Response.fail("group.event.find.fail");
+        }
+    }
+
+    @Override
     public Response<Boolean> checkGroupRepeat(Long farmId, String groupCode) {
         try {
             List<DoctorGroup> groups = RespHelper.orServEx(findGroupsByFarmId(farmId));

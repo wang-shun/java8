@@ -143,13 +143,14 @@ public class DoctorCommonGroupEventHandler {
         DoctorNewGroupInput newGroupInput = BeanMapper.map(input, DoctorNewGroupInput.class);
         newGroupInput.setBarnId(input.getToBarnId());
         newGroupInput.setBarnName(input.getToBarnName());
-        DoctorMoveInGroupInput moveIn = BeanMapper.map(input, DoctorMoveInGroupInput.class);
 
         //3. 新建猪群事件
         Long groupId = doctorGroupManager.createNewGroup(group, newGroupInput);
 
         //4. 转入猪群事件
         DoctorGroupDetail groupDetail = RespHelper.orServEx(doctorGroupReadService.findGroupDetailByGroupId(groupId));
+        DoctorMoveInGroupInput moveIn = BeanMapper.map(input, DoctorMoveInGroupInput.class);
+        moveIn.setRelGroupEventId(groupDetail.getGroupTrack().getRelEventId());      //记录新建猪群事件的id(新建猪群时，track.relEventId = 新建猪群事件id)
         doctorMoveInGroupEventHandler.handleEvent(groupDetail.getGroup(), groupDetail.getGroupTrack(), moveIn);
         return groupId;
     }
