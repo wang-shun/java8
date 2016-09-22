@@ -7,6 +7,8 @@ import io.terminus.doctor.event.model.DoctorRevertLog;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 /**
  * Desc: 猪群转群回滚
  * Mail: yangzl@terminus.io
@@ -28,7 +30,7 @@ public class DoctorRollbackTransGroupHandler extends DoctorAbstractRollbackGroup
     }
 
     @Override
-    protected DoctorRollbackDto handleReport(DoctorGroupEvent groupEvent) {
+    protected List<DoctorRollbackDto> handleReport(DoctorGroupEvent groupEvent) {
         return null;
     }
 }

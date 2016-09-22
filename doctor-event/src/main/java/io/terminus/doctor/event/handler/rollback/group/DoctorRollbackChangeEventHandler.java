@@ -50,7 +50,7 @@ public class DoctorRollbackChangeEventHandler extends DoctorAbstractRollbackGrou
     }
 
     @Override
-    protected DoctorRollbackDto handleReport(DoctorGroupEvent groupEvent) {
+    protected List<DoctorRollbackDto> handleReport(DoctorGroupEvent groupEvent) {
         DoctorRollbackDto dto = new DoctorRollbackDto();
         dto.setFarmId(groupEvent.getFarmId());
         dto.setEsBarnId(groupEvent.getBarnId());
@@ -68,6 +68,6 @@ public class DoctorRollbackChangeEventHandler extends DoctorAbstractRollbackGrou
             rollbackTypes.add(RollbackType.DAILY_DEAD);
         }
         dto.setRollbackTypes(rollbackTypes);
-        return dto;
+        return Lists.newArrayList(dto);
     }
 }

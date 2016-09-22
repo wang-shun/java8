@@ -11,7 +11,6 @@ import io.terminus.doctor.common.event.EventListener;
 import io.terminus.doctor.common.utils.Params;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dto.DoctorPigMessage;
-import io.terminus.doctor.event.dto.DoctorRollbackDto;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
@@ -148,7 +147,7 @@ public class DoctorZKListener implements EventListener {
 
         // 4. 如果是事件回滚
         if (DataEventType.RollBackReport.getKey() == dataEvent.getEventType()) {
-            doctorRollbackService.rollbackReportAndES(DataEvent.analyseContent(dataEvent, DoctorRollbackDto.class));
+            doctorRollbackService.rollbackReportAndES(DataEvent.analyseContent(dataEvent, List.class));
         }
     }
 

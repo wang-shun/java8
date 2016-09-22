@@ -19,6 +19,7 @@ import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -84,5 +85,5 @@ public abstract class DoctorAbstractRollbackGroupEventHandler extends DoctorAbst
      * 需要更新的统计
      * @see RollbackType
      */
-    protected abstract DoctorRollbackDto handleReport(DoctorGroupEvent groupEvent);
+    protected abstract List<DoctorRollbackDto> handleReport(DoctorGroupEvent groupEvent);
 }

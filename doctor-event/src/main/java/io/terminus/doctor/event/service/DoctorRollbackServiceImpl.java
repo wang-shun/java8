@@ -33,8 +33,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
-
-import static io.terminus.common.utils.Arguments.notEmpty;
+import java.util.List;
 
 /**
  * Desc:
@@ -126,22 +125,30 @@ public class DoctorRollbackServiceImpl implements DoctorRollbackService {
     }
 
     @Override
-    public Response<Boolean> rollbackReportAndES(DoctorRollbackDto rollbackDto) {
+    public Response<Boolean> rollbackReportAndES(List<DoctorRollbackDto> rollbackDtos) {
         try {
-            if (rollbackDto == null || !notEmpty(rollbackDto.getRollbackTypes()) ||
-                    rollbackDto.getFarmId() == null || rollbackDto.getEventAt() == null) {
-                return Response.ok(Boolean.TRUE);
-            }
-            reportAndES(rollbackDto);
+            rollbackDtos.forEach(dto -> {
+                if (dto.getFarmId() == null || dto.getEventAt() == null) {
+                    throw new ServiceException("publish.rollback.not.null");
+                }
+            });
+            reportWithDaily(rollbackDtos);
             return Response.ok(Boolean.TRUE);
+        } catch (ServiceException e) {
+            return Response.fail(e.getMessage());
         } catch (Exception e) {
-            log.error("rollback report and es failed, rollbackDto:{}, cause:{}", rollbackDto, Throwables.getStackTraceAsString(e));
+            log.error("rollback report and es failed, rollbackDtos:{}, cause:{}", rollbackDtos, Throwables.getStackTraceAsString(e));
             return Response.fail("rollback.report.fail");
         }
     }
 
-    //遍历回滚类型，执行相应操作
-    private synchronized void reportAndES(DoctorRollbackDto dto) {
+    //遍历回滚类型，执行相应操作(存栏和其他日报要分开遍历)
+    private synchronized void reportWithDaily(List<DoctorRollbackDto> dtos) {
+        dtos.forEach(this::reportAndES);
+        dtos.forEach(this::updateLiveStockUntilNow);
+    }
+
+    private void reportAndES(DoctorRollbackDto dto) {
         Date startAt = Dates.startOfDay(dto.getEventAt());
         Date endAt = DateUtil.getDateEnd(new DateTime(dto.getEventAt())).toDate();
         Long farmId = dto.getFarmId();
@@ -196,8 +203,6 @@ public class DoctorRollbackServiceImpl implements DoctorRollbackService {
         }
         dailyReportHistoryDao.saveDailyReport(report, farmId, startAt);
         dailyReport2UpdateDao.saveDailyReport2Update(startAt, farmId);  //记录事件，// TODO: 16/9/21 晚上job更新月报
-
-        updateLiveStockUntilNow(dto);   //更新从回滚日期到今天的存栏
     }
 
     //更新从回滚日期到今天的存栏

@@ -4,6 +4,7 @@ import io.terminus.common.model.Response;
 import io.terminus.doctor.event.dto.DoctorRollbackDto;
 
 import javax.validation.constraints.NotNull;
+import java.util.List;
 
 /**
  * Desc: 回滚接口
@@ -38,8 +39,8 @@ public interface DoctorRollbackService {
 
     /**
      * 更新日报和es
-     * @param rollbackDto 回滚携带信息
+     * @param rollbackDtos 回滚携带信息
      * @return 是否成功
      */
-    Response<Boolean> rollbackReportAndES(DoctorRollbackDto rollbackDto);
+    Response<Boolean> rollbackReportAndES(List<DoctorRollbackDto> rollbackDtos);
 }

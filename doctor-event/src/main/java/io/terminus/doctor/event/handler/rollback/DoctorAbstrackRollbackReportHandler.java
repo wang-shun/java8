@@ -10,6 +10,9 @@ import io.terminus.zookeeper.pubsub.Publisher;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.List;
+
+import static io.terminus.common.utils.Arguments.notEmpty;
 import static io.terminus.common.utils.Arguments.notNull;
 
 /**
@@ -27,25 +30,31 @@ public class DoctorAbstrackRollbackReportHandler {
     /**
      * 校验携带数据正确性，发布事件
      */
-    protected void checkAndPublishRollback(DoctorRollbackDto dto) {
-        if (dto != null) {
-            if (dto.getFarmId() == null || dto.getEventAt() == null) {
-                throw new ServiceException("publish.rollback.not.null");
-            }
-            publishRollbackEvent(dto);
+    protected void checkAndPublishRollback(List<DoctorRollbackDto> dtos) {
+        if (notEmpty(dtos)) {
+            checkFarmIdAndEventAt(dtos);
+            publishRollbackEvent(dtos);
         }
     }
 
     //发布zk事件, 用于更新回滚后操作
-    private void publishRollbackEvent(DoctorRollbackDto dto) {
+    private void publishRollbackEvent(List<DoctorRollbackDto> dtos) {
         if (notNull(publisher)) {
             try {
-                publisher.publish(DataEvent.toBytes(DataEventType.RollBackReport.getKey(), dto));
+                publisher.publish(DataEvent.toBytes(DataEventType.RollBackReport.getKey(), dtos));
             } catch (Exception e) {
-                log.error("publish rollback group zk event, DoctorRollbackDto:{}, cause:{}", dto, Throwables.getStackTraceAsString(e));
+                log.error("publish rollback group zk event, DoctorRollbackDtos:{}, cause:{}", dtos, Throwables.getStackTraceAsString(e));
             }
         } else {
-            coreEventDispatcher.publish(DataEvent.make(DataEventType.RollBackReport.getKey(), dto));
+            coreEventDispatcher.publish(DataEvent.make(DataEventType.RollBackReport.getKey(), dtos));
         }
+    }
+
+    private void checkFarmIdAndEventAt(List<DoctorRollbackDto> dtos) {
+        dtos.forEach(dto -> {
+            if (dto.getFarmId() == null || dto.getEventAt() == null) {
+                throw new ServiceException("publish.rollback.not.null");
+            }
+        });
     }
 }

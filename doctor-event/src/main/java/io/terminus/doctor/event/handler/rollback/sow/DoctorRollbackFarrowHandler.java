@@ -7,6 +7,8 @@ import io.terminus.doctor.event.model.DoctorRevertLog;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 /**
  * Desc: 母猪分娩回滚
  * Mail: yangzl@terminus.io
@@ -28,7 +30,7 @@ public class DoctorRollbackFarrowHandler extends DoctorAbstractRollbackPigEventH
     }
 
     @Override
-    protected DoctorRollbackDto handleReport(DoctorPigEvent pigEvent) {
+    protected List<DoctorRollbackDto> handleReport(DoctorPigEvent pigEvent) {
         return null;
     }
 
