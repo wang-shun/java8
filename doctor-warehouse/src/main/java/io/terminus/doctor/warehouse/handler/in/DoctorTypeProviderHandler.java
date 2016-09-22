@@ -9,8 +9,7 @@ import io.terminus.doctor.warehouse.model.DoctorMaterialConsumeProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.Map;
-
+import static com.google.common.base.Preconditions.checkState;
 import static java.util.Objects.isNull;
 
 /**
@@ -54,12 +53,16 @@ public class DoctorTypeProviderHandler implements IHandler{
 
     @Override
     public boolean canRollback(DoctorMaterialConsumeProvider cp) {
-        return false;
+        DoctorMaterialConsumeProvider.EVENT_TYPE eventType = DoctorMaterialConsumeProvider.EVENT_TYPE.from(cp.getEventType());
+        return eventType != null && eventType.isIn();
     }
 
     @Override
     public void rollback(DoctorMaterialConsumeProvider cp) {
-
+        DoctorFarmWareHouseType farmWareHouseType = doctorFarmWareHouseTypeDao.findByFarmIdAndType(cp.getFarmId(), cp.getType());
+        checkState(!isNull(farmWareHouseType), "doctorFarm.wareHouseType.empty");
+        farmWareHouseType.setLotNumber(farmWareHouseType.getLotNumber() - cp.getEventCount());
+        doctorFarmWareHouseTypeDao.update(farmWareHouseType);
     }
 
     /**

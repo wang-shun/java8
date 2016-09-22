@@ -101,7 +101,7 @@ public class DoctorMaterialInWareHouseWriteServiceImpl implements DoctorMaterial
         try{
             materialInWareHouseManager.rollback(eventId);
             return Response.ok(true);
-        }catch (ServiceException e){
+        }catch (RuntimeException e){
             return Response.fail(e.getMessage());
         }catch (Exception e){
             log.error("rollback warehouse event fail, cause:{}", Throwables.getStackTraceAsString(e));

@@ -54,8 +54,8 @@ public class DoctorMaterialAvgConsumerHandler implements IHandler{
     public void handle(DoctorMaterialConsumeProviderDto dto, EventHandlerContext context) throws RuntimeException {
         Double lotNumber = context.getLotNumber();
         DoctorMaterialConsumeAvg doctorMaterialConsumeAvg = doctorMaterialConsumeAvgDao.queryByIds(dto.getFarmId(), dto.getWareHouseId(), dto.getMaterialTypeId());
-        context.getSnapshot().setMaterialConsumeAvg(BeanMapper.map(doctorMaterialConsumeAvg, DoctorMaterialConsumeAvg.class));
         if(isNull(doctorMaterialConsumeAvg)){
+            context.getSnapshot().setMaterialConsumeAvg(null);
             // create consume avg
             doctorMaterialConsumeAvg = DoctorMaterialConsumeAvg.builder()
                     .farmId(dto.getFarmId()).wareHouseId(dto.getWareHouseId()).materialId(dto.getMaterialTypeId())
@@ -71,6 +71,7 @@ public class DoctorMaterialAvgConsumerHandler implements IHandler{
             }
             doctorMaterialConsumeAvgDao.create(doctorMaterialConsumeAvg);
         }else{
+            context.getSnapshot().setMaterialConsumeAvg(BeanMapper.map(doctorMaterialConsumeAvg, DoctorMaterialConsumeAvg.class));
             if(Objects.equals(dto.getType(), WareHouseType.FEED.getKey())){
                 // calculate current avg rate
                 doctorMaterialConsumeAvg.setConsumeAvgCount(dto.getCount() * 100 / dto.getConsumeDays());

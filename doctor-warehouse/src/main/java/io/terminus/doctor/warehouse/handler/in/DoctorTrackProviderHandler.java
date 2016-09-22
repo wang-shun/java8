@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.Map;
 
+import static com.google.common.base.Preconditions.checkState;
 import static java.util.Objects.isNull;
 
 /**
@@ -62,12 +63,26 @@ public class DoctorTrackProviderHandler implements IHandler{
 
     @Override
     public boolean canRollback(DoctorMaterialConsumeProvider cp) {
-        return false;
+        DoctorMaterialConsumeProvider.EVENT_TYPE eventType = DoctorMaterialConsumeProvider.EVENT_TYPE.from(cp.getEventType());
+        return eventType != null && eventType.isIn();
     }
 
     @Override
     public void rollback(DoctorMaterialConsumeProvider cp) {
+        // 入库事件之后的数据
+        DoctorWareHouseTrack track = doctorWareHouseTrackDao.findById(cp.getWareHouseId());
+        checkState(!isNull(track), "not.find.doctorWareHouse");
+        // 把数量减回去
+        track.setLotNumber(track.getLotNumber() - cp.getEventCount());
 
+        // 下面搞一下extra里面的数据
+        String key = cp.getMaterialId().toString();
+        Map<String,Object> trackExtraMap = track.getExtraMap();
+        trackExtraMap.put(key, Params.getWithConvert(trackExtraMap, key, a -> Double.valueOf(a.toString())) - cp.getEventCount());
+        track.setExtraMap(trackExtraMap);
+
+        // 把数据更新到事件之前的状态
+        doctorWareHouseTrackDao.update(track);
     }
 
     /**

@@ -63,11 +63,17 @@ public class DoctorProviderEventHandler implements IHandler{
 
     @Override
     public boolean canRollback(DoctorMaterialConsumeProvider cp) {
-        return false;
+        DoctorMaterialConsumeProvider.EVENT_TYPE eventType = DoctorMaterialConsumeProvider.EVENT_TYPE.from(cp.getEventType());
+        return eventType != null && eventType.isIn();
     }
 
     @Override
     public void rollback(DoctorMaterialConsumeProvider cp) {
-
+        DoctorMaterialPriceInWareHouse priceInWareHouse = doctorMaterialPriceInWareHouseDao.findByProviderId(cp.getId());
+        if(priceInWareHouse == null || priceInWareHouse.getRemainder() < cp.getEventCount()){
+            throw new ServiceException("provided.material.consumed"); // 本次入库物资已经出库, 无法回滚
+        }
+        doctorMaterialConsumeProviderDao.delete(cp.getId());
+        doctorMaterialPriceInWareHouseDao.delete(priceInWareHouse.getId());
     }
 }
