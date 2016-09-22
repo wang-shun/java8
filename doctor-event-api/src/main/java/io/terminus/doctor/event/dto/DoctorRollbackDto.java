@@ -1,7 +1,10 @@
 package io.terminus.doctor.event.dto;
 
 import io.terminus.doctor.event.enums.RollbackType;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.Builder;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -13,6 +16,9 @@ import java.util.List;
  * author: DreamYoung
  * Date: 16/9/21
  */
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @Data
 public class DoctorRollbackDto implements Serializable {
     private static final long serialVersionUID = -22978774710787544L;

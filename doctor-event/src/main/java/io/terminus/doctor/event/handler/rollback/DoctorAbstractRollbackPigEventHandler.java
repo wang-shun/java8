@@ -1,12 +1,18 @@
 package io.terminus.doctor.event.handler.rollback;
 
+import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.event.CoreEventDispatcher;
 import io.terminus.doctor.common.utils.RespHelper;
+import io.terminus.doctor.event.dao.DoctorPigEventDao;
+import io.terminus.doctor.event.dao.DoctorPigSnapshotDao;
+import io.terminus.doctor.event.dao.DoctorPigTrackDao;
 import io.terminus.doctor.event.dto.DoctorRollbackDto;
 import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.enums.RollbackType;
 import io.terminus.doctor.event.handler.DoctorRollbackPigEventHandler;
 import io.terminus.doctor.event.model.DoctorPigEvent;
+import io.terminus.doctor.event.model.DoctorPigSnapshot;
+import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.event.model.DoctorRevertLog;
 import io.terminus.doctor.event.service.DoctorPigEventReadService;
 import io.terminus.doctor.event.service.DoctorRevertLogWriteService;
@@ -29,10 +35,14 @@ import java.util.Objects;
 public abstract class DoctorAbstractRollbackPigEventHandler extends DoctorAbstrackRollbackReportHandler implements DoctorRollbackPigEventHandler {
 
     @Autowired protected DoctorPigEventReadService doctorPigEventReadService;
+    @Autowired protected DoctorPigSnapshotDao doctorPigSnapshotDao;
+    @Autowired protected DoctorPigEventDao doctorPigEventDao;
+    @Autowired protected DoctorPigTrackDao doctorPigTrackDao;
     @Autowired private DoctorRevertLogWriteService doctorRevertLogWriteService;
     @Autowired private CoreEventDispatcher coreEventDispatcher;
     @Autowired(required = false) private Publisher publisher;
 
+    protected final JsonMapper MAPPER = JsonMapper.JSON_NON_DEFAULT_MAPPER;
     /**
      * 判断能否回滚(1.手动事件 2.三个月内的事件 3.最新事件 4.子类根据事件类型特殊处理)
      */
@@ -78,4 +88,45 @@ public abstract class DoctorAbstractRollbackPigEventHandler extends DoctorAbstra
      * @see RollbackType
      */
     protected abstract List<DoctorRollbackDto> handleReport(DoctorPigEvent pigEvent);
+
+    /**
+     * 不涉及状态的事件回滚处理
+     * @param pigEvent
+     * @param type
+     * @return
+     */
+    protected DoctorRevertLog handleRollbackWithoutStatus(DoctorPigEvent pigEvent, Integer type){
+        DoctorPigTrack doctorPigTrack= doctorPigTrackDao.findByPigId(pigEvent.getPigId());
+        DoctorPigSnapshot doctorPigSnapshot = doctorPigSnapshotDao.queryLastByPigId(pigEvent.getPigId());
+        String fromInfo = MAPPER.toJson(doctorPigTrack) + MAPPER.toJson(doctorPigSnapshot) + MAPPER.toJson(pigEvent);
+
+        doctorPigEventDao.delete(pigEvent.getId());
+        return DoctorRevertLog.builder()
+                .type(type)
+                .reverterId(pigEvent.getUpdatorId())
+                .reverterName(pigEvent.getUpdatorName())
+                .fromInfo(fromInfo)
+                .toInfo("")
+                .build();
+    }
+
+    /**
+     * 涉及状态的事件回滚处理
+     * @param pigEvent
+     * @param type
+     * @return
+     */
+    protected DoctorRevertLog handleRollbackWithStatus(DoctorPigEvent pigEvent, Integer type){
+        DoctorRevertLog doctorRevertLog = handleRollbackWithoutStatus(pigEvent, type);
+        DoctorPigSnapshot doctorPigSnapshot = doctorPigSnapshotDao.queryLastByPigId(pigEvent.getPigId());
+        doctorPigSnapshot.setPigInfo(doctorPigSnapshot.getPigInfo());
+        if (doctorPigSnapshot != null) {
+            doctorPigTrackDao.update((DoctorPigTrack) doctorPigSnapshot.getPigInfoMap().get("doctorPigTrack"));
+        }else {
+            doctorPigTrackDao.delete(doctorPigTrackDao.findByPigId(pigEvent.getPigId()).getId());
+        }
+        doctorPigSnapshotDao.delete(doctorPigSnapshot.getId());
+        return doctorRevertLog;
+
+    }
 }

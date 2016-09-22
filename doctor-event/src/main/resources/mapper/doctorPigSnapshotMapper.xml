@@ -97,4 +97,16 @@
         </set>
         WHERE id=#{id}
     </update>
+
+    <select id="queryLastByPigId" parameterType="long" resultMap="DoctorPigSnapshotMap">
+        SELECT
+        <include refid="cols_all"/>
+        FROM
+        <include refid="tb"/>
+        WHERE pig_id = #{pigId} AND id = (
+        select max(id) from
+        <include refid="tb"/>
+        where pig_id = #{pigId}
+        )
+    </select>
 </mapper>
