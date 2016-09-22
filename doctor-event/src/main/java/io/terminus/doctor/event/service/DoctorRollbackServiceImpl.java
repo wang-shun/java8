@@ -16,6 +16,7 @@ import io.terminus.doctor.event.dto.DoctorRollbackDto;
 import io.terminus.doctor.event.dto.report.daily.DoctorDailyReportDto;
 import io.terminus.doctor.event.dto.report.daily.DoctorDeadDailyReport;
 import io.terminus.doctor.event.dto.report.daily.DoctorDeliverDailyReport;
+import io.terminus.doctor.event.dto.report.daily.DoctorLiveStockDailyReport;
 import io.terminus.doctor.event.dto.report.daily.DoctorMatingDailyReport;
 import io.terminus.doctor.event.dto.report.daily.DoctorSaleDailyReport;
 import io.terminus.doctor.event.dto.report.daily.DoctorWeanDailyReport;
@@ -145,7 +146,7 @@ public class DoctorRollbackServiceImpl implements DoctorRollbackService {
         Date endAt = DateUtil.getDateEnd(new DateTime(dto.getEventAt())).toDate();
         Long farmId = dto.getFarmId();
 
-        DoctorDailyReportDto report =  dailyReportHistoryDao.getDailyReportWithRedis(farmId, startAt);
+        DoctorDailyReportDto report = dailyReportHistoryDao.getDailyReportWithRedis(farmId, startAt);
 
         for (RollbackType type : dto.getRollbackTypes()) {
             switch (type) {
@@ -167,9 +168,6 @@ public class DoctorRollbackServiceImpl implements DoctorRollbackService {
                     break;
 
                 //日报实时更新
-                case DAILY_LIVESTOCK:
-                    // TODO: 16/9/21
-                    break;
                 case DAILY_DEAD:
                     report.setDead(getDeadDailyReport(farmId, startAt, endAt));
                     break;
@@ -198,6 +196,39 @@ public class DoctorRollbackServiceImpl implements DoctorRollbackService {
         }
         dailyReportHistoryDao.saveDailyReport(report, farmId, startAt);
         dailyReport2UpdateDao.saveDailyReport2Update(startAt, farmId);  //记录事件，// TODO: 16/9/21 晚上job更新月报
+
+        updateLiveStockUntilNow(dto);   //更新从回滚日期到今天的存栏
+    }
+
+    //更新从回滚日期到今天的存栏
+    private void updateLiveStockUntilNow(DoctorRollbackDto dto) {
+        if (!dto.getRollbackTypes().contains(RollbackType.DAILY_LIVESTOCK)) {
+            return;
+        }
+        Date startAt = Dates.startOfDay(dto.getEventAt());
+        Date endAt = Dates.startOfDay(new Date());
+        Long farmId = dto.getFarmId();
+
+        while (!startAt.after(endAt)) {
+            //猪群存栏
+            DoctorLiveStockDailyReport liveStock = new DoctorLiveStockDailyReport();
+            liveStock.setHoubeiBoar(doctorKpiDao.realTimeLiveStockHoubeiBoar(farmId, startAt));
+            liveStock.setHoubeiSow(doctorKpiDao.realTimeLiveStockHoubeiSow(farmId, startAt));  //后备母猪
+            liveStock.setFarrow(doctorKpiDao.realTimeLiveStockFarrow(farmId, startAt));
+            liveStock.setNursery(doctorKpiDao.realTimeLiveStockNursery(farmId, startAt));
+            liveStock.setFatten(doctorKpiDao.realTimeLiveStockFatten(farmId, startAt));
+
+            //猪存栏
+            liveStock.setBuruSow(doctorKpiDao.realTimeLiveStockFarrowSow(farmId, startAt));    //产房母猪
+            liveStock.setPeihuaiSow(doctorKpiDao.realTimeLiveStockSow(farmId, startAt) - liveStock.getBuruSow());    //配怀 = 总存栏 - 产房母猪
+            liveStock.setKonghuaiSow(0);                                                       //空怀猪作废, 置成0
+            liveStock.setBoar(doctorKpiDao.realTimeLiveStockBoar(farmId, startAt));            //公猪
+
+            DoctorDailyReportDto everyRedis = dailyReportHistoryDao.getDailyReportWithRedis(farmId, startAt);
+            everyRedis.setLiveStock(liveStock);
+            dailyReportHistoryDao.saveDailyReport(everyRedis, farmId, startAt);
+            startAt = new DateTime(startAt).plusDays(1).toDate();
+        }
     }
 
     private DoctorDeadDailyReport getDeadDailyReport(Long farmId, Date startAt, Date endAt) {
