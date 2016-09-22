@@ -7,13 +7,15 @@
 <mapper namespace="DoctorRevertLog">
     <resultMap id="DoctorRevertLogMap" type="DoctorRevertLog">
         <id column="id" property="id"/>
+        <result column="farm_id" property="farmId"/>
+        <result column="group_id" property="groupId"/>
+        <result column="pig_id" property="pigId"/>
         <result column="type" property="type"/>
         <result column="from_info" property="fromInfo"/>
         <result column="to_info" property="toInfo"/>
         <result column="reverter_id" property="reverterId"/>
         <result column="reverter_name" property="reverterName"/>
         <result column="created_at" property="createdAt"/>
-        
     </resultMap>
 
     <sql id="tb">
@@ -25,11 +27,27 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        type, from_info, to_info, reverter_id, reverter_name, created_at
+        farm_id,
+        group_id,
+        pig_id,
+        type,
+        from_info,
+        to_info,
+        reverter_id,
+        reverter_name,
+        created_at
     </sql>
 
     <sql id="vals">
-        #{type}, #{fromInfo}, #{toInfo}, #{reverterId}, #{reverterName}, now()
+        #{farmId},
+        #{groupId},
+        #{pigId},
+        #{type},
+        #{fromInfo},
+        #{toInfo},
+        #{reverterId},
+        #{reverterName},
+        now()
     </sql>
 
     <insert id="create" parameterType="DoctorRevertLog" keyProperty="id" useGeneratedKeys="true">
@@ -47,16 +65,16 @@
     </select>
 
     <update id="update" parameterType="DoctorRevertLog">
-        UPDATE
-        <include refid="tb"/>
+        UPDATE <include refid="tb"/>
         <set>
+            <if test="farmId != null">farm_id = #{farmId},</if>
+            <if test="groupId != null">group_id = #{groupId},</if>
+            <if test="pigId != null">pig_id = #{pigId},</if>
             <if test="type != null">type = #{type},</if>
             <if test="fromInfo != null">from_info = #{fromInfo},</if>
             <if test="toInfo != null">to_info = #{toInfo},</if>
             <if test="reverterId != null">reverter_id = #{reverterId},</if>
             <if test="reverterName != null">reverter_name = #{reverterName},</if>
-            
-            
             updated_at=now()
         </set>
         WHERE id = #{id}

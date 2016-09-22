@@ -55,4 +55,8 @@ public class DoctorGroupTrackDao extends MyBatisDao<DoctorGroupTrack> {
         return getSqlSession().selectList(sqlId("listSince"),
                 ImmutableMap.of("lastId", lastId, "limit", limit, "since", since));
     }
+
+    public void deleteByGroupId(Long groupId) {
+        getSqlSession().delete("deleteByGroupId", groupId);
+    }
 }

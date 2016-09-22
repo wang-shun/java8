@@ -388,3 +388,9 @@ add column group_code varchar(640) DEFAULT NULL COMMENT '猪群名称' after gro
 
 -- 2016-09-20 猪事件增加是否是自动生成标识
 ALTER TABLE doctor_pig_events ADD COLUMN is_auto smallint(6) DEFAULT NULL COMMENT '是否是自动生成事件, 0 不是, 1 是' AFTER pig_code;
+
+-- 2016-09-22 回滚日志表增加
+ALTER TABLE doctor_revert_logs ADD COLUMN farm_id bigint(20) DEFAULT NULL COMMENT '猪场id' AFTER id;
+ALTER TABLE doctor_revert_logs ADD COLUMN group_id bigint(20) DEFAULT NULL COMMENT '猪群id' AFTER farm_id;
+ALTER TABLE doctor_revert_logs ADD COLUMN pig_id bigint(20) DEFAULT NULL COMMENT '猪id' AFTER group_id;
+
