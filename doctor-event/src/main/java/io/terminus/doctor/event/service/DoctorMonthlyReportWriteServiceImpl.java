@@ -174,6 +174,9 @@ public class DoctorMonthlyReportWriteServiceImpl implements DoctorMonthlyReportW
         //存栏变动月报
         dto.setLiveStockChange(getLiveStockChangeReport(farmId, startAt, endAt));
 
+        //存栏结构月报
+        dto.setParityStockList(doctorKpiDao.getMonthlyParityStock(farmId, startAt, endAt));
+        dto.setBreedStockList(doctorKpiDao.getMonthlyBreedStock(farmId, startAt, endAt));
         return dto;
     }
 
