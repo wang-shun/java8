@@ -82,7 +82,7 @@ public class DoctorRollbackServiceImpl implements DoctorRollbackService {
     }
 
     @Override
-    public Response<Boolean> rollbackGroupEvent(Long eventId) {
+    public Response<Boolean> rollbackGroupEvent(Long eventId, Long operatorId, String operatorName) {
         try {
             DoctorGroupEvent groupEvent = doctorGroupEventDao.findById(eventId);
             if (groupEvent != null) {
@@ -90,7 +90,7 @@ public class DoctorRollbackServiceImpl implements DoctorRollbackService {
                 doctorRollbackHandlerChain.getRollbackGroupEventHandlers().stream()
                         .filter(handler -> handler.canRollback(groupEvent))
                         .forEach(handler -> {
-                            handler.rollback(groupEvent);
+                            handler.rollback(groupEvent, operatorId, operatorName);
                             handler.updateReport(groupEvent);
                         });
             }
@@ -104,7 +104,7 @@ public class DoctorRollbackServiceImpl implements DoctorRollbackService {
     }
 
     @Override
-    public Response<Boolean> rollbackPigEvent(Long eventId) {
+    public Response<Boolean> rollbackPigEvent(Long eventId, Long operatorId, String operatorName) {
         try {
             DoctorPigEvent pigEvent = doctorPigEventDao.findById(eventId);
             if (pigEvent != null) {
@@ -112,7 +112,7 @@ public class DoctorRollbackServiceImpl implements DoctorRollbackService {
                 doctorRollbackHandlerChain.getRollbackPigEventHandlers().stream()
                         .filter(handler -> handler.canRollback(pigEvent))
                         .forEach(handler -> {
-                            handler.rollback(pigEvent);
+                            handler.rollback(pigEvent, operatorId, operatorName);
                             handler.updateReport(pigEvent);
                         });
             }

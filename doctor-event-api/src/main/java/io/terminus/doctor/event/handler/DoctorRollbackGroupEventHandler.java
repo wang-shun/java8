@@ -2,6 +2,8 @@ package io.terminus.doctor.event.handler;
 
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 
+import javax.validation.constraints.NotNull;
+
 /**
  * Desc: 猪群回滚handler
  * Mail: yangzl@terminus.io
@@ -21,7 +23,7 @@ public interface DoctorRollbackGroupEventHandler {
     /**
      * 回滚操作
      */
-    void rollback(DoctorGroupEvent groupEvent);
+    void rollback(DoctorGroupEvent groupEvent, @NotNull(message = "usrId.not.null") Long operatorId, String operatorName);
 
     /**
      * 更新报表

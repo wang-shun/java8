@@ -47,8 +47,10 @@ public abstract class DoctorAbstractRollbackPigEventHandler extends DoctorAbstra
      * 带事务的回滚操作
      */
     @Override @Transactional
-    public final void rollback(DoctorPigEvent pigEvent) {
+    public final void rollback(DoctorPigEvent pigEvent, Long operatorId, String operatorName) {
         DoctorRevertLog revertLog = handleRollback(pigEvent);
+        revertLog.setReverterId(operatorId);
+        revertLog.setReverterName(operatorName);
         RespHelper.orServEx(doctorRevertLogWriteService.createRevertLog(revertLog));
     }
 

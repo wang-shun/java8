@@ -2,6 +2,8 @@ package io.terminus.doctor.event.handler;
 
 import io.terminus.doctor.event.model.DoctorPigEvent;
 
+import javax.validation.constraints.NotNull;
+
 /**
  * Desc: 猪事件回滚操作
  * Mail: yangzl@terminus.io
@@ -21,7 +23,7 @@ public interface DoctorRollbackPigEventHandler {
     /**
      * 回滚操作
      */
-    void rollback(DoctorPigEvent pigEvent);
+    void rollback(DoctorPigEvent pigEvent, @NotNull(message = "usrId.not.null") Long operatorId, String operatorName);
 
     /**
      * 更新报表
