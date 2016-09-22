@@ -6,11 +6,13 @@ import io.terminus.doctor.event.dao.DoctorGroupDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorGroupSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
+import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
 import io.terminus.doctor.event.dto.DoctorRollbackDto;
 import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.enums.RollbackType;
 import io.terminus.doctor.event.handler.DoctorRollbackGroupEventHandler;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
+import io.terminus.doctor.event.model.DoctorGroupSnapshot;
 import io.terminus.doctor.event.model.DoctorRevertLog;
 import io.terminus.doctor.event.service.DoctorGroupReadService;
 import io.terminus.doctor.event.service.DoctorRevertLogWriteService;
@@ -86,4 +88,25 @@ public abstract class DoctorAbstractRollbackGroupEventHandler extends DoctorAbst
      * @see RollbackType
      */
     protected abstract List<DoctorRollbackDto> handleReport(DoctorGroupEvent groupEvent);
+
+    /**
+     * 单个猪群事件的回滚，可以抽象出来，自取自用
+     * @param groupEvent 事件
+     * @return 回滚日志
+     */
+    protected DoctorRevertLog sampleRollback(DoctorGroupEvent groupEvent) {
+        DoctorGroupSnapshot snapshot = doctorGroupSnapshotDao.findGroupSnapshotByToEventId(groupEvent.getId());
+
+        DoctorGroupSnapShotInfo info = JSON_MAPPER.fromJson(snapshot.getFromInfo(), DoctorGroupSnapShotInfo.class);
+
+        //删除此事件 -> 回滚猪群跟踪 -> 回滚猪群 -> 删除镜像
+        doctorGroupEventDao.delete(groupEvent.getId());
+        doctorGroupTrackDao.update(info.getGroupTrack());
+        doctorGroupDao.update(info.getGroup());
+        doctorGroupSnapshotDao.delete(snapshot.getId());
+        return DoctorRevertLog.builder()
+                .fromInfo(snapshot.getToInfo())
+                .toInfo(snapshot.getFromInfo())
+                .build();
+    }
 }

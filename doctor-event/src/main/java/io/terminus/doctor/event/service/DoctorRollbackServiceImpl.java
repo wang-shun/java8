@@ -234,6 +234,8 @@ public class DoctorRollbackServiceImpl implements DoctorRollbackService {
             dailyReportHistoryDao.saveDailyReport(everyRedis, farmId, startAt);
             startAt = new DateTime(startAt).plusDays(1).toDate();
         }
+
+        // TODO: 2016/9/22 更新 PigTypeStatistic
     }
 
     private DoctorDeadDailyReport getDeadDailyReport(Long farmId, Date startAt, Date endAt) {

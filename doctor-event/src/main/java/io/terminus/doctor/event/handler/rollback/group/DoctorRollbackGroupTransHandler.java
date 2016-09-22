@@ -17,7 +17,7 @@ import java.util.List;
  */
 @Slf4j
 @Component
-public class DoctorRollbackTransGroupHandler extends DoctorAbstractRollbackGroupEventHandler {
+public class DoctorRollbackGroupTransHandler extends DoctorAbstractRollbackGroupEventHandler {
 
     @Override
     protected boolean handleCheck(DoctorGroupEvent groupEvent) {
