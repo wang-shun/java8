@@ -66,8 +66,10 @@ public class DoctorSowFostersByHandler extends DoctorAbstractEventFlowHandler {
         checkState(Objects.equals(doctorPigTrack.getStatus(), PigStatus.FEED.getKey()) ||
                 Objects.equals(doctorPigTrack.getStatus(), PigStatus.Wean.getKey()), "foster.currentSowStatus.error");
 
+        Long pigEventId = (Long) context.get("doctorPigEventId");
+
         // 转群操作
-        Long groupId = groupSowEventCreate(doctorPigTrack, basic, extra);
+        Long groupId = groupSowEventCreate(doctorPigTrack, basic, extra, pigEventId);
 
         //被拼窝数量
         Integer fosterCount = (Integer) extra.get("fostersCount");
@@ -82,7 +84,7 @@ public class DoctorSowFostersByHandler extends DoctorAbstractEventFlowHandler {
 
         // 修改当前的母猪状态信息
         doctorPigTrack.setStatus(PigStatus.FEED.getKey());
-        doctorPigTrack.addPigEvent(basic.getPigType(), (Long) context.get("doctorPigEventId"));
+        doctorPigTrack.addPigEvent(basic.getPigType(), pigEventId);
         return doctorPigTrack;
     }
 
@@ -92,7 +94,7 @@ public class DoctorSowFostersByHandler extends DoctorAbstractEventFlowHandler {
      * @param basicInputInfoDto
      * @param extra
      */
-    private Long groupSowEventCreate(DoctorPigTrack doctorPigTrack, DoctorBasicInputInfoDto basicInputInfoDto, Map<String, Object> extra) {
+    private Long groupSowEventCreate(DoctorPigTrack doctorPigTrack, DoctorBasicInputInfoDto basicInputInfoDto, Map<String, Object> extra, Long pigEventId) {
 
         //拼窝的数据extra
         Long fromSowId = Long.valueOf(extra.get(EVENT_PIG_ID).toString());
@@ -126,6 +128,7 @@ public class DoctorSowFostersByHandler extends DoctorAbstractEventFlowHandler {
         doctorTransGroupInput.setIsAuto(1);
         doctorTransGroupInput.setCreatorId(basicInputInfoDto.getStaffId());
         doctorTransGroupInput.setCreatorName(basicInputInfoDto.getStaffName());
+        doctorTransGroupInput.setRelPigEventId(pigEventId);
 
         return RespHelper.orServEx(doctorGroupWriteService.groupEventTransGroup(
                 RespHelper.orServEx(doctorGroupReadService.findGroupDetailByGroupId(fromGroupId)),

@@ -85,24 +85,24 @@ public class DoctorSowPigletsChgHandler extends DoctorAbstractEventFlowHandler {
             doctorPigTrack.setFarrowAvgWeight(0D);
             doctorPigTrack.setWeanAvgWeight(0D);
         }
-
-        doctorPigTrack.addPigEvent(basic.getPigType(), (Long) context.get("doctorPigEventId"));
+        Long pigEventId = (Long) context.get("doctorPigEventId");
+        doctorPigTrack.addPigEvent(basic.getPigType(), pigEventId);
         execution.getExpression().put("leftCount", (doctorPigTrack.getUnweanQty()));
 
         // 调用对应的猪猪群事件,对应的操作方式
         checkState(notNull(doctorPigTrack.getGroupId()), "pigletsChg.groupId.notFound");
-        changePigletsChangeInfo(doctorPigTrack.getGroupId(), extra, basic);
+        changePigletsChangeInfo(doctorPigTrack.getGroupId(), extra, basic, pigEventId);
 
         return doctorPigTrack;
     }
 
 
-    private void changePigletsChangeInfo(Long groupId, Map<String, Object> extra, DoctorBasicInputInfoDto basic) {
+    private void changePigletsChangeInfo(Long groupId, Map<String, Object> extra, DoctorBasicInputInfoDto basic, Long pigEventId) {
         RespHelper.orServEx(doctorGroupWriteService.groupEventChange(RespHelper.orServEx(doctorGroupReadService.findGroupDetailByGroupId(groupId)),
-                buildInputInfo(extra, basic)));
+                buildInputInfo(extra, basic, pigEventId)));
     }
 
-    private DoctorChangeGroupInput buildInputInfo(Map<String, Object> mapInfo, DoctorBasicInputInfoDto basic) {
+    private DoctorChangeGroupInput buildInputInfo(Map<String, Object> mapInfo, DoctorBasicInputInfoDto basic, Long pigEventId) {
         DoctorPigletsChgDto dto = BeanMapper.map(mapInfo, DoctorPigletsChgDto.class);
         DoctorChangeGroupInput doctorChangeGroupInput = new DoctorChangeGroupInput();
         doctorChangeGroupInput.setEventAt(DateUtil.toDateString(dto.getPigletsChangeDate()));
@@ -123,6 +123,7 @@ public class DoctorSowPigletsChgHandler extends DoctorAbstractEventFlowHandler {
         doctorChangeGroupInput.setIsAuto(IsOrNot.YES.getValue());           //自动生成事件标识
         doctorChangeGroupInput.setCreatorId(basic.getStaffId());
         doctorChangeGroupInput.setCreatorName(basic.getStaffName());
+        doctorChangeGroupInput.setRelPigEventId(pigEventId);        //猪事件id
         return doctorChangeGroupInput;
     }
 }

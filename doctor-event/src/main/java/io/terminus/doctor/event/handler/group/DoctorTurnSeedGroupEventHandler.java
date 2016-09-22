@@ -93,6 +93,8 @@ public class DoctorTurnSeedGroupEventHandler extends DoctorAbstractGroupEventHan
         //6.判断猪群数量, 如果=0 触发关闭猪群事件, 同时生成批次总结
         if (Objects.equals(groupTrack.getQuantity(), 0)) {
             doctorCommonGroupEventHandler.createGroupBatchSummaryWhenClosed(group, groupTrack, event.getEventAt());
+
+            turnSeed.setRelGroupEventId(event.getId());
             doctorCommonGroupEventHandler.autoGroupEventClose(group, groupTrack, turnSeed);
         }
 

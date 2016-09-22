@@ -86,6 +86,7 @@ public class DoctorCommonGroupEventHandler {
         DoctorCloseGroupInput closeInput = new DoctorCloseGroupInput();
         closeInput.setIsAuto(IsOrNot.YES.getValue());   //系统触发事件, 属于自动生成
         closeInput.setEventAt(baseInput.getEventAt());
+        closeInput.setRelGroupEventId(baseInput.getRelGroupEventId());
         doctorCloseGroupEventHandler.handle(group, groupTrack, closeInput);
     }
 
@@ -98,6 +99,8 @@ public class DoctorCommonGroupEventHandler {
         moveIn.setIsAuto(IsOrNot.YES.getValue());
         moveIn.setCreatorId(transGroup.getCreatorId());
         moveIn.setCreatorName(transGroup.getCreatorName());
+        moveIn.setRelGroupEventId(transGroup.getRelGroupEventId());
+        moveIn.setRelPigEventId(transGroup.getRelPigEventId());
 
         moveIn.setInType(DoctorMoveInGroupEvent.InType.GROUP.getValue());       //转入类型
         moveIn.setInTypeName(DoctorMoveInGroupEvent.InType.GROUP.getDesc());

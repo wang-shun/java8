@@ -24,7 +24,7 @@ import java.util.Objects;
 @Component
 public class DoctorRollbackGroupTransHandler extends DoctorAbstractRollbackGroupEventHandler {
 
-    @Autowired
+    @Autowired DoctorRollbackGroupMoveInEventHandler doctorRollbackGroupMoveInEventHandler;
 
     @Override
     protected boolean handleCheck(DoctorGroupEvent groupEvent) {
