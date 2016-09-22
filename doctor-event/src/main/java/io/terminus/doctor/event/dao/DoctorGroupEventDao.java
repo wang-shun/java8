@@ -78,6 +78,23 @@ public class DoctorGroupEventDao extends MyBatisDao<DoctorGroupEvent> {
      */
     public DoctorGroupEvent findLastEventByGroupId(Long groupId) {
         return getSqlSession().selectOne(sqlId("findLastEventByGroupId"), groupId);
+    }
 
+    /**
+     * 根据关联猪群事件id查询（只有自动生成的事件才有关联id！）
+     * @param relGroupEventId 关联事件id
+     * @return 关联的事件
+     */
+    public DoctorGroupEvent findByRelGroupEventId(Long relGroupEventId) {
+        return getSqlSession().selectOne(sqlId("findByRelGroupEventId"), relGroupEventId);
+    }
+
+    /**
+     * 根据关联猪事件id查询（只有自动生成的事件才有关联id！）
+     * @param relPigEventId 关联事件id
+     * @return 关联的事件
+     */
+    public DoctorGroupEvent findByRelPigEventId(Long relPigEventId) {
+        return getSqlSession().selectOne(sqlId("findByRelPigEventId"), relPigEventId);
     }
 }

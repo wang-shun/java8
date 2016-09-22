@@ -394,3 +394,6 @@ ALTER TABLE doctor_revert_logs ADD COLUMN farm_id bigint(20) DEFAULT NULL COMMEN
 ALTER TABLE doctor_revert_logs ADD COLUMN group_id bigint(20) DEFAULT NULL COMMENT '猪群id' AFTER farm_id;
 ALTER TABLE doctor_revert_logs ADD COLUMN pig_id bigint(20) DEFAULT NULL COMMENT '猪id' AFTER group_id;
 
+ALTER TABLE doctor_group_events ADD COLUMN rel_group_event_id bigint(20) DEFAULT NULL COMMENT '关联猪群事件id' AFTER other_barn_type;
+ALTER TABLE doctor_group_events ADD COLUMN rel_pig_event_id bigint(20) DEFAULT NULL COMMENT '关联猪事件id' AFTER rel_group_event_id;
+

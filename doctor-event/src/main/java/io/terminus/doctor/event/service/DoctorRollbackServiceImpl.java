@@ -86,12 +86,13 @@ public class DoctorRollbackServiceImpl implements DoctorRollbackService {
             DoctorGroupEvent groupEvent = doctorGroupEventDao.findById(eventId);
             if (groupEvent != null) {
                 //获取拦截器链, 判断能否回滚,执行回滚操作, 更新报表
-                doctorRollbackHandlerChain.getRollbackGroupEventHandlers().stream()
-                        .filter(handler -> handler.canRollback(groupEvent))
-                        .forEach(handler -> {
-                            handler.rollback(groupEvent, operatorId, operatorName);
-                            handler.updateReport(groupEvent);
-                        });
+                doctorRollbackHandlerChain.getRollbackGroupEventHandlers().forEach(handler -> {
+                    if (handler.canRollback(groupEvent)) {
+                        throw new ServiceException("rollback.group.not.allow");
+                    }
+                    handler.rollback(groupEvent, operatorId, operatorName);
+                    handler.updateReport(groupEvent);
+                });
             }
             return Response.ok(Boolean.TRUE);
         } catch (ServiceException e) {
@@ -108,12 +109,13 @@ public class DoctorRollbackServiceImpl implements DoctorRollbackService {
             DoctorPigEvent pigEvent = doctorPigEventDao.findById(eventId);
             if (pigEvent != null) {
                 //获取拦截器链, 判断能否回滚, 执行回滚操作, 如果成功, 更新报表
-                doctorRollbackHandlerChain.getRollbackPigEventHandlers().stream()
-                        .filter(handler -> handler.canRollback(pigEvent))
-                        .forEach(handler -> {
-                            handler.rollback(pigEvent, operatorId, operatorName);
-                            handler.updateReport(pigEvent);
-                        });
+                doctorRollbackHandlerChain.getRollbackPigEventHandlers().forEach(handler -> {
+                    if (handler.canRollback(pigEvent)) {
+                        throw new ServiceException("rollback.pig.not.allow");
+                    }
+                    handler.rollback(pigEvent, operatorId, operatorName);
+                    handler.updateReport(pigEvent);
+                });
             }
             return Response.ok(Boolean.TRUE);
         } catch (ServiceException e) {
