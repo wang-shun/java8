@@ -36,9 +36,9 @@ public class DoctorTrackProviderHandler implements IHandler{
     }
 
     @Override
-    public boolean ifHandle(DoctorMaterialConsumeProviderDto dto) {
-        DoctorMaterialConsumeProvider.EVENT_TYPE eventType = DoctorMaterialConsumeProvider.EVENT_TYPE.from(dto.getActionType());
-        return eventType != null && eventType.isIn();    }
+    public boolean ifHandle(DoctorMaterialConsumeProvider.EVENT_TYPE eventType) {
+        return eventType != null && eventType.isIn();
+    }
 
     @Override
     public void handle(DoctorMaterialConsumeProviderDto dto, EventHandlerContext context) throws RuntimeException {
@@ -59,12 +59,6 @@ public class DoctorTrackProviderHandler implements IHandler{
             doctorWareHouseTrack.setExtraMap(trackExtraMap);
             doctorWareHouseTrackDao.update(doctorWareHouseTrack);
         }
-    }
-
-    @Override
-    public boolean canRollback(DoctorMaterialConsumeProvider cp) {
-        DoctorMaterialConsumeProvider.EVENT_TYPE eventType = DoctorMaterialConsumeProvider.EVENT_TYPE.from(cp.getEventType());
-        return eventType != null && eventType.isIn();
     }
 
     @Override

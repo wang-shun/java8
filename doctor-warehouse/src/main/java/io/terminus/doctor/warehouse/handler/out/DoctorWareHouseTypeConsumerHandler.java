@@ -7,7 +7,6 @@ import io.terminus.common.utils.BeanMapper;
 import io.terminus.doctor.warehouse.constants.DoctorFarmWareHouseTypeConstants;
 import io.terminus.doctor.warehouse.dao.DoctorFarmWareHouseTypeDao;
 import io.terminus.doctor.warehouse.dao.DoctorMaterialConsumeAvgDao;
-import io.terminus.doctor.warehouse.dao.DoctorMaterialConsumeProviderDao;
 import io.terminus.doctor.warehouse.dao.DoctorWarehouseSnapshotDao;
 import io.terminus.doctor.warehouse.dto.DoctorMaterialConsumeProviderDto;
 import io.terminus.doctor.warehouse.dto.EventHandlerContext;
@@ -36,24 +35,20 @@ import static java.util.Objects.isNull;
 public class DoctorWareHouseTypeConsumerHandler implements IHandler{
 
     private final DoctorFarmWareHouseTypeDao doctorFarmWareHouseTypeDao;
-    private final DoctorMaterialConsumeProviderDao doctorMaterialConsumeProviderDao;
     private final DoctorMaterialConsumeAvgDao doctorMaterialConsumeAvgDao;
     private final DoctorWarehouseSnapshotDao doctorWarehouseSnapshotDao;
 
     @Autowired
     public DoctorWareHouseTypeConsumerHandler(DoctorFarmWareHouseTypeDao doctorFarmWareHouseTypeDao,
-                                              DoctorMaterialConsumeProviderDao doctorMaterialConsumeProviderDao,
                                               DoctorMaterialConsumeAvgDao doctorMaterialConsumeAvgDao,
                                               DoctorWarehouseSnapshotDao doctorWarehouseSnapshotDao){
         this.doctorFarmWareHouseTypeDao = doctorFarmWareHouseTypeDao;
-        this.doctorMaterialConsumeProviderDao = doctorMaterialConsumeProviderDao;
         this.doctorMaterialConsumeAvgDao = doctorMaterialConsumeAvgDao;
         this.doctorWarehouseSnapshotDao = doctorWarehouseSnapshotDao;
     }
 
     @Override
-    public boolean ifHandle(DoctorMaterialConsumeProviderDto dto) {
-        DoctorMaterialConsumeProvider.EVENT_TYPE eventType = DoctorMaterialConsumeProvider.EVENT_TYPE.from(dto.getActionType());
+    public boolean ifHandle(DoctorMaterialConsumeProvider.EVENT_TYPE eventType) {
         return eventType != null && eventType.isOut();
     }
 
@@ -89,12 +84,6 @@ public class DoctorWareHouseTypeConsumerHandler implements IHandler{
         doctorFarmWareHouseType.setExtraMap(extraMap);
         doctorFarmWareHouseTypeDao.update(doctorFarmWareHouseType);
         context.setDoctorFarmWareHouseTypeId(doctorFarmWareHouseType.getId());
-    }
-
-    @Override
-    public boolean canRollback(DoctorMaterialConsumeProvider cp) {
-        DoctorMaterialConsumeProvider.EVENT_TYPE eventType = DoctorMaterialConsumeProvider.EVENT_TYPE.from(cp.getEventType());
-        return eventType != null && eventType.isOut();
     }
 
     @Override

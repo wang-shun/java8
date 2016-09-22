@@ -2,11 +2,10 @@ package io.terminus.doctor.warehouse.handler.out;
 
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.utils.BeanMapper;
+import io.terminus.doctor.common.enums.WareHouseType;
 import io.terminus.doctor.warehouse.dao.DoctorMaterialConsumeAvgDao;
-import io.terminus.doctor.warehouse.dao.DoctorMaterialConsumeProviderDao;
 import io.terminus.doctor.warehouse.dao.DoctorWarehouseSnapshotDao;
 import io.terminus.doctor.warehouse.dto.DoctorMaterialConsumeProviderDto;
-import io.terminus.doctor.common.enums.WareHouseType;
 import io.terminus.doctor.warehouse.dto.EventHandlerContext;
 import io.terminus.doctor.warehouse.handler.IHandler;
 import io.terminus.doctor.warehouse.model.DoctorMaterialConsumeAvg;
@@ -33,21 +32,18 @@ import static java.util.Objects.isNull;
 public class DoctorMaterialAvgConsumerHandler implements IHandler{
 
     private final DoctorMaterialConsumeAvgDao doctorMaterialConsumeAvgDao;
-    private final DoctorMaterialConsumeProviderDao doctorMaterialConsumeProviderDao;
     private final DoctorWarehouseSnapshotDao doctorWarehouseSnapshotDao;
 
     @Autowired
     public DoctorMaterialAvgConsumerHandler(DoctorMaterialConsumeAvgDao doctorMaterialConsumeAvgDao,
-                                            DoctorMaterialConsumeProviderDao doctorMaterialConsumeProviderDao,
                                             DoctorWarehouseSnapshotDao doctorWarehouseSnapshotDao){
         this.doctorMaterialConsumeAvgDao = doctorMaterialConsumeAvgDao;
-        this.doctorMaterialConsumeProviderDao = doctorMaterialConsumeProviderDao;
         this.doctorWarehouseSnapshotDao = doctorWarehouseSnapshotDao;
     }
 
     @Override
-    public boolean ifHandle(DoctorMaterialConsumeProviderDto dto) {
-        return Objects.equals(dto.getActionType(), DoctorMaterialConsumeProvider.EVENT_TYPE.CONSUMER.getValue());
+    public boolean ifHandle(DoctorMaterialConsumeProvider.EVENT_TYPE eventType) {
+        return Objects.equals(eventType, DoctorMaterialConsumeProvider.EVENT_TYPE.CONSUMER);
     }
 
     @Override
@@ -98,12 +94,6 @@ public class DoctorMaterialAvgConsumerHandler implements IHandler{
             doctorMaterialConsumeAvgDao.update(doctorMaterialConsumeAvg);
         }
         context.setConsumeAvgId(doctorMaterialConsumeAvg.getId());
-    }
-
-    @Override
-    public boolean canRollback(DoctorMaterialConsumeProvider cp) {
-        DoctorMaterialConsumeProvider.EVENT_TYPE eventType = DoctorMaterialConsumeProvider.EVENT_TYPE.from(cp.getEventType());
-        return eventType != null && eventType.isOut();
     }
 
     @Override

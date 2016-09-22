@@ -31,8 +31,7 @@ public class DoctorInWareHouseConsumeHandler implements IHandler{
     }
 
     @Override
-    public boolean ifHandle(DoctorMaterialConsumeProviderDto dto) {
-        DoctorMaterialConsumeProvider.EVENT_TYPE eventType = DoctorMaterialConsumeProvider.EVENT_TYPE.from(dto.getActionType());
+    public boolean ifHandle(DoctorMaterialConsumeProvider.EVENT_TYPE eventType) {
         return eventType != null && eventType.isOut();
     }
 
@@ -47,12 +46,6 @@ public class DoctorInWareHouseConsumeHandler implements IHandler{
         doctorMaterialInWareHouse.setLotNumber(doctorMaterialInWareHouse.getLotNumber() - dto.getCount());
         doctorMaterialInWareHouseDao.update(doctorMaterialInWareHouse);
         context.setLotNumber(doctorMaterialInWareHouse.getLotNumber());
-    }
-
-    @Override
-    public boolean canRollback(DoctorMaterialConsumeProvider cp) {
-        DoctorMaterialConsumeProvider.EVENT_TYPE eventType = DoctorMaterialConsumeProvider.EVENT_TYPE.from(cp.getEventType());
-        return eventType != null && eventType.isOut();
     }
 
     @Override

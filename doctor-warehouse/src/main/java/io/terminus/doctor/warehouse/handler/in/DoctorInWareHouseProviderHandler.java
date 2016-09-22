@@ -1,7 +1,6 @@
 package io.terminus.doctor.warehouse.handler.in;
 
 import io.terminus.doctor.warehouse.dao.DoctorMaterialInWareHouseDao;
-import io.terminus.doctor.warehouse.dao.DoctorMaterialInfoDao;
 import io.terminus.doctor.warehouse.dto.DoctorMaterialConsumeProviderDto;
 import io.terminus.doctor.warehouse.dto.EventHandlerContext;
 import io.terminus.doctor.warehouse.handler.IHandler;
@@ -24,18 +23,13 @@ public class DoctorInWareHouseProviderHandler implements IHandler{
 
     private final DoctorMaterialInWareHouseDao doctorMaterialInWareHouseDao;
 
-    private final DoctorMaterialInfoDao doctorMaterialInfoDao;
-
     @Autowired
-    public DoctorInWareHouseProviderHandler(DoctorMaterialInWareHouseDao doctorMaterialInWareHouseDao,
-                                            DoctorMaterialInfoDao doctorMaterialInfoDao){
+    public DoctorInWareHouseProviderHandler(DoctorMaterialInWareHouseDao doctorMaterialInWareHouseDao){
         this.doctorMaterialInWareHouseDao = doctorMaterialInWareHouseDao;
-        this.doctorMaterialInfoDao = doctorMaterialInfoDao;
     }
 
     @Override
-    public boolean ifHandle(DoctorMaterialConsumeProviderDto dto) {
-        DoctorMaterialConsumeProvider.EVENT_TYPE eventType = DoctorMaterialConsumeProvider.EVENT_TYPE.from(dto.getActionType());
+    public boolean ifHandle(DoctorMaterialConsumeProvider.EVENT_TYPE eventType) {
         return eventType != null && eventType.isIn();
     }
 
@@ -55,12 +49,6 @@ public class DoctorInWareHouseProviderHandler implements IHandler{
             doctorMaterialInWareHouseDao.update(doctorMaterialInWareHouse);
         }
         context.setMaterialInWareHouseId(doctorMaterialInWareHouse.getId());
-    }
-
-    @Override
-    public boolean canRollback(DoctorMaterialConsumeProvider cp) {
-        DoctorMaterialConsumeProvider.EVENT_TYPE eventType = DoctorMaterialConsumeProvider.EVENT_TYPE.from(cp.getEventType());
-        return eventType != null && eventType.isIn();
     }
 
     @Override

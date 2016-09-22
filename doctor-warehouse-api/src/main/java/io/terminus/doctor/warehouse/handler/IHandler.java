@@ -14,10 +14,10 @@ public interface IHandler {
 
     /**
      * 校验处理
-     * @param dto
+     * @param eventType
      * @return
      */
-    boolean ifHandle(DoctorMaterialConsumeProviderDto dto);
+    boolean ifHandle(DoctorMaterialConsumeProvider.EVENT_TYPE eventType);
 
     /**
      * 修改对应的数据表信息
@@ -27,7 +27,9 @@ public interface IHandler {
      */
     void handle(DoctorMaterialConsumeProviderDto dto, EventHandlerContext context) throws RuntimeException;
 
-    boolean canRollback(DoctorMaterialConsumeProvider cp);
-
+    /**
+     * 回滚事件
+     * @param cp
+     */
     void rollback(DoctorMaterialConsumeProvider cp);
 }

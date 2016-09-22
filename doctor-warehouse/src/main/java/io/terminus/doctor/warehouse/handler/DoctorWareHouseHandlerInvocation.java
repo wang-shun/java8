@@ -35,7 +35,7 @@ public class DoctorWareHouseHandlerInvocation {
 
     public void invoke(DoctorMaterialConsumeProviderDto dto, EventHandlerContext context){
         doctorWareHouseHandlerChain.getHandlerList().forEach(iHandler -> {
-            if(iHandler.ifHandle(dto)){
+            if(iHandler.ifHandle(DoctorMaterialConsumeProvider.EVENT_TYPE.from(dto.getActionType()))){
                 iHandler.handle(dto, context);
             }
         });
@@ -53,7 +53,7 @@ public class DoctorWareHouseHandlerInvocation {
             throw new ServiceException("event.not.found");
         }
         doctorWareHouseHandlerChain.getHandlerList().forEach(iHandler -> {
-            if(iHandler.canRollback(cp)){
+            if(iHandler.ifHandle(DoctorMaterialConsumeProvider.EVENT_TYPE.from(cp.getEventType()))) {
                 iHandler.rollback(cp);
             }
         });
