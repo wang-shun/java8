@@ -8,7 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 /**
- * Desc: 猪群转群转群回滚
+ * Desc: 猪群转群回滚
  * Mail: yangzl@terminus.io
  * author: DreamYoung
  * Date: 16/9/20

@@ -1,6 +1,11 @@
 package io.terminus.doctor.event.handler.rollback;
 
+import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.utils.RespHelper;
+import io.terminus.doctor.event.dao.DoctorGroupDao;
+import io.terminus.doctor.event.dao.DoctorGroupEventDao;
+import io.terminus.doctor.event.dao.DoctorGroupSnapshotDao;
+import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
 import io.terminus.doctor.event.dto.DoctorRollbackDto;
 import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.enums.RollbackType;
@@ -25,8 +30,14 @@ import java.util.Objects;
 @Slf4j
 public abstract class DoctorAbstractRollbackGroupEventHandler extends DoctorAbstrackRollbackReportHandler implements DoctorRollbackGroupEventHandler {
 
-    @Autowired protected DoctorGroupReadService doctorGroupReadService;
+    protected static final JsonMapper JSON_MAPPER = JsonMapper.nonEmptyMapper();
+
     @Autowired private DoctorRevertLogWriteService doctorRevertLogWriteService;
+    @Autowired protected DoctorGroupReadService doctorGroupReadService;
+    @Autowired protected DoctorGroupDao doctorGroupDao;
+    @Autowired protected DoctorGroupEventDao doctorGroupEventDao;
+    @Autowired protected DoctorGroupTrackDao doctorGroupTrackDao;
+    @Autowired protected DoctorGroupSnapshotDao doctorGroupSnapshotDao;
 
     /**
      * 判断能否回滚(1.手动事件 2.三个月内的事件 3.最新事件 4.子类根据事件类型特殊处理)
