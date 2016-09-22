@@ -1376,5 +1376,5 @@ CREATE TABLE `doctor_warehouse_snapshots` (
   `created_at` datetime DEFAULT NULL,
   `updated_at` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),
-  KEY `doctor_pig_snapshots_event_id` (`event_id`)
+  UNIQUE KEY `doctor_pig_snapshots_event_id` (`event_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='仓库物资每次出库和入库事件之前的快照';

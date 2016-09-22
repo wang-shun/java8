@@ -34,17 +34,22 @@ public class DoctorWareHouseHandlerInvocation {
     }
 
     public void invoke(DoctorMaterialConsumeProviderDto dto, EventHandlerContext context){
+        DoctorMaterialConsumeProvider.EVENT_TYPE eventType = DoctorMaterialConsumeProvider.EVENT_TYPE.from(dto.getActionType());
         doctorWareHouseHandlerChain.getHandlerList().forEach(iHandler -> {
-            if(iHandler.ifHandle(DoctorMaterialConsumeProvider.EVENT_TYPE.from(dto.getActionType()))){
+            if(iHandler.ifHandle(eventType)){
                 iHandler.handle(dto, context);
             }
         });
-        doctorWarehouseSnapshotDao.create(
-                DoctorWarehouseSnapshot.builder()
-                        .eventId(context.getEventId())
-                        .beforeEvent(JsonMapper.JSON_NON_EMPTY_MAPPER.toJson(context.getSnapshot()))
-                        .build()
-        );
+
+        // 出库时记录快照, 因为入库的回滚没有用到快照
+        if(eventType != null && eventType.isOut()){
+            doctorWarehouseSnapshotDao.create(
+                    DoctorWarehouseSnapshot.builder()
+                            .eventId(context.getEventId())
+                            .beforeEvent(JsonMapper.JSON_NON_EMPTY_MAPPER.toJson(context.getSnapshot()))
+                            .build()
+            );
+        }
     }
 
     public void rollback(Long eventId){
