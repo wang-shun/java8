@@ -10,6 +10,15 @@ import io.terminus.doctor.event.handler.DoctorEventCreateHandler;
 import io.terminus.doctor.event.handler.DoctorEventHandlerChain;
 import io.terminus.doctor.event.handler.boar.DoctorSemenHandler;
 import io.terminus.doctor.event.handler.rollback.DoctorRollbackHandlerChain;
+import io.terminus.doctor.event.handler.rollback.group.DoctorRollbackGroupChangeEventHandler;
+import io.terminus.doctor.event.handler.rollback.group.DoctorRollbackGroupDiseaseHandler;
+import io.terminus.doctor.event.handler.rollback.group.DoctorRollbackGroupLiveStockHandler;
+import io.terminus.doctor.event.handler.rollback.group.DoctorRollbackGroupMoveInEventHandler;
+import io.terminus.doctor.event.handler.rollback.group.DoctorRollbackGroupNewEventHandler;
+import io.terminus.doctor.event.handler.rollback.group.DoctorRollbackGroupTransFarmHandler;
+import io.terminus.doctor.event.handler.rollback.group.DoctorRollbackGroupTransHandler;
+import io.terminus.doctor.event.handler.rollback.group.DoctorRollbackGroupTurnSeedHandler;
+import io.terminus.doctor.event.handler.rollback.group.DoctorRollbackGroupVaccinHandler;
 import io.terminus.doctor.event.handler.usual.DoctorChgFarmHandler;
 import io.terminus.doctor.event.handler.usual.DoctorChgLocationHandler;
 import io.terminus.doctor.event.handler.usual.DoctorConditionHandler;
@@ -17,7 +26,12 @@ import io.terminus.doctor.event.handler.usual.DoctorDiseaseHandler;
 import io.terminus.doctor.event.handler.usual.DoctorRemovalHandler;
 import io.terminus.doctor.event.handler.usual.DoctorVaccinationHandler;
 import io.terminus.doctor.event.report.DoctorDailyPigCountChain;
-import io.terminus.doctor.event.report.count.*;
+import io.terminus.doctor.event.report.count.DoctorDailyEntryEventCount;
+import io.terminus.doctor.event.report.count.DoctorDailyFarrowingEventCount;
+import io.terminus.doctor.event.report.count.DoctorDailyMatingEventCount;
+import io.terminus.doctor.event.report.count.DoctorDailyPregEventCount;
+import io.terminus.doctor.event.report.count.DoctorDailyRemovalEventCount;
+import io.terminus.doctor.event.report.count.DoctorDailyWeanEventCount;
 import io.terminus.doctor.event.search.barn.BarnSearchProperties;
 import io.terminus.doctor.event.search.barn.BaseBarnQueryBuilder;
 import io.terminus.doctor.event.search.barn.DefaultBarnQueryBuilder;
@@ -73,10 +87,28 @@ public class  DoctorEventConfiguration {
      * 事件回滚拦截器链
      */
     @Bean
-    public DoctorRollbackHandlerChain doctorRollbackHandlerChain() {
+    public DoctorRollbackHandlerChain doctorRollbackHandlerChain(
+            DoctorRollbackGroupChangeEventHandler rollbackGroupChangeEventHandler,
+            DoctorRollbackGroupDiseaseHandler rollbackGroupDiseaseHandler,
+            DoctorRollbackGroupLiveStockHandler rollbackGroupLiveStockHandler,
+            DoctorRollbackGroupMoveInEventHandler rollbackGroupMoveInEventHandler,
+            DoctorRollbackGroupNewEventHandler rollbackGroupNewEventHandler,
+            DoctorRollbackGroupTransFarmHandler rollbackGroupTransFarmHandler,
+            DoctorRollbackGroupTransHandler rollbackGroupTransHandler,
+            DoctorRollbackGroupTurnSeedHandler rollbackGroupTurnSeedHandler,
+            DoctorRollbackGroupVaccinHandler rollbackGroupVaccinHandler
+    ) {
         DoctorRollbackHandlerChain chain = new DoctorRollbackHandlerChain();
         chain.setRollbackGroupEventHandlers(Lists.newArrayList(
-
+                rollbackGroupChangeEventHandler,
+                rollbackGroupDiseaseHandler,
+                rollbackGroupLiveStockHandler,
+                rollbackGroupMoveInEventHandler,
+                rollbackGroupNewEventHandler,
+                rollbackGroupTransFarmHandler,
+                rollbackGroupTransHandler,
+                rollbackGroupTurnSeedHandler,
+                rollbackGroupVaccinHandler
         ));
 
         chain.setRollbackPigEventHandlers(Lists.newArrayList(
