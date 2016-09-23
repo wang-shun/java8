@@ -58,7 +58,7 @@ public abstract class DoctorAbstractRollbackGroupEventHandler extends DoctorAbst
      */
     @Override @Transactional
     public final void rollback(DoctorGroupEvent groupEvent, Long operatorId, String operatorName) {
-        DoctorRevertLog revertLog = handleRollback(groupEvent);
+        DoctorRevertLog revertLog = handleRollback(groupEvent, operatorId, operatorName);
         revertLog.setType(DoctorRevertLog.Type.GROUP.getValue());
         revertLog.setReverterId(operatorId);
         revertLog.setReverterName(operatorName);
@@ -81,7 +81,7 @@ public abstract class DoctorAbstractRollbackGroupEventHandler extends DoctorAbst
     /**
      * 处理回滚操作
      */
-    protected abstract DoctorRevertLog handleRollback(DoctorGroupEvent groupEvent);
+    protected abstract DoctorRevertLog handleRollback(DoctorGroupEvent groupEvent, Long operatorId, String operatorName);
 
     /**
      * 需要更新的统计
