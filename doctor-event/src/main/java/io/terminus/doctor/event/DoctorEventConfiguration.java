@@ -6,7 +6,6 @@ import io.terminus.doctor.common.DoctorCommonConfiguration;
 import io.terminus.doctor.event.daily.DoctorDailyEventCount;
 import io.terminus.doctor.event.dao.DoctorPigDao;
 import io.terminus.doctor.event.handler.DoctorEntryHandler;
-import io.terminus.doctor.event.handler.DoctorEventCreateHandler;
 import io.terminus.doctor.event.handler.DoctorEventHandlerChain;
 import io.terminus.doctor.event.handler.boar.DoctorSemenHandler;
 import io.terminus.doctor.event.handler.rollback.DoctorRollbackHandlerChain;

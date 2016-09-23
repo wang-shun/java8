@@ -1,16 +1,21 @@
 package io.terminus.doctor.event.handler.rollback;
 
-import io.terminus.doctor.common.event.CoreEventDispatcher;
+import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.utils.RespHelper;
+import io.terminus.doctor.event.dao.DoctorGroupDao;
+import io.terminus.doctor.event.dao.DoctorGroupEventDao;
+import io.terminus.doctor.event.dao.DoctorGroupSnapshotDao;
+import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
+import io.terminus.doctor.event.dao.DoctorPigEventDao;
 import io.terminus.doctor.event.dto.DoctorRollbackDto;
 import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.enums.RollbackType;
 import io.terminus.doctor.event.handler.DoctorRollbackPigEventHandler;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorRevertLog;
+import io.terminus.doctor.event.service.DoctorGroupReadService;
 import io.terminus.doctor.event.service.DoctorPigEventReadService;
 import io.terminus.doctor.event.service.DoctorRevertLogWriteService;
-import io.terminus.zookeeper.pubsub.Publisher;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,10 +33,16 @@ import java.util.Objects;
 @Slf4j
 public abstract class DoctorAbstractRollbackPigEventHandler extends DoctorAbstrackRollbackReportHandler implements DoctorRollbackPigEventHandler {
 
-    @Autowired protected DoctorPigEventReadService doctorPigEventReadService;
+    protected static final JsonMapper JSON_MAPPER = JsonMapper.nonEmptyMapper();
+
     @Autowired private DoctorRevertLogWriteService doctorRevertLogWriteService;
-    @Autowired private CoreEventDispatcher coreEventDispatcher;
-    @Autowired(required = false) private Publisher publisher;
+    @Autowired protected DoctorGroupReadService doctorGroupReadService;
+    @Autowired protected DoctorGroupDao doctorGroupDao;
+    @Autowired protected DoctorGroupEventDao doctorGroupEventDao;
+    @Autowired protected DoctorGroupTrackDao doctorGroupTrackDao;
+    @Autowired protected DoctorGroupSnapshotDao doctorGroupSnapshotDao;
+    @Autowired protected DoctorPigEventDao doctorPigEventDao;
+    @Autowired protected DoctorPigEventReadService doctorPigEventReadService;
 
     /**
      * 判断能否回滚(1.手动事件 2.三个月内的事件 3.最新事件 4.子类根据事件类型特殊处理)
@@ -49,7 +60,7 @@ public abstract class DoctorAbstractRollbackPigEventHandler extends DoctorAbstra
      */
     @Override @Transactional
     public final void rollback(DoctorPigEvent pigEvent, Long operatorId, String operatorName) {
-        DoctorRevertLog revertLog = handleRollback(pigEvent);
+        DoctorRevertLog revertLog = handleRollback(pigEvent, operatorId, operatorName);
         revertLog.setReverterId(operatorId);
         revertLog.setReverterName(operatorName);
         RespHelper.orServEx(doctorRevertLogWriteService.createRevertLog(revertLog));
@@ -71,7 +82,7 @@ public abstract class DoctorAbstractRollbackPigEventHandler extends DoctorAbstra
     /**
      * 处理回滚操作
      */
-    protected abstract DoctorRevertLog handleRollback(DoctorPigEvent pigEvent);
+    protected abstract DoctorRevertLog handleRollback(DoctorPigEvent pigEvent, Long operatorId, String operatorName);
 
     /**
      * 需要更新的统计

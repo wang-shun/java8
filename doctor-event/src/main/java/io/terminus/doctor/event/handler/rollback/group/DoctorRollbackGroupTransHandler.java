@@ -35,9 +35,15 @@ public class DoctorRollbackGroupTransHandler extends DoctorAbstractRollbackGroup
             return false;
         }
         DoctorTransGroupEvent event = JSON_MAPPER.fromJson(groupEvent.getExtra(), DoctorTransGroupEvent.class);
-        DoctorGroupEvent toGroupEvent = doctorGroupEventDao.findByRelGroupEventId(groupEvent.getId());
-        return RespHelper.orFalse(doctorGroupReadService.isLastEvent(event.getToGroupId(), toGroupEvent.getId()));
 
+        //如果新建猪群，还要校验新建猪群之后的事件
+        DoctorGroupEvent toGroupEvent = doctorGroupEventDao.findByRelGroupEventId(groupEvent.getId());
+        Long groupEventId = toGroupEvent.getId();
+        if (Objects.equals(toGroupEvent.getType(), GroupEventType.NEW.getValue())) {
+            DoctorGroupEvent totoGroupEvent = doctorGroupEventDao.findByRelGroupEventId(toGroupEvent.getId());
+            groupEventId = totoGroupEvent.getId();
+        }
+        return RespHelper.orFalse(doctorGroupReadService.isLastEvent(event.getToGroupId(), groupEventId));
     }
 
     @Override
