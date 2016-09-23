@@ -215,7 +215,7 @@ public class DoctorMaterialInfos {
      * 生产对应的物料信息
      * @param farmId 对应的猪场Id
      * @param wareHouseId 对应的仓库Id
-     * @param materialId 对应的原料MaterialId
+     * @param materialId 表 doctor_material_infos 的 id
      * @return
      */
     @RequestMapping(value = "/realProduceMaterial", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)

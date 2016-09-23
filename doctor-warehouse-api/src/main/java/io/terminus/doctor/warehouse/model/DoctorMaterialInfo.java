@@ -32,7 +32,7 @@ public class DoctorMaterialInfo implements Serializable{
 
     private static final long serialVersionUID = -6818633941387063734L;
 
-    public static final Long DEFAULT_COUNT = 1000000l;
+    public static final Long DEFAULT_COUNT = 1000L;
 
     public static final Integer SCALE = 10; // 默认精度大小
 
