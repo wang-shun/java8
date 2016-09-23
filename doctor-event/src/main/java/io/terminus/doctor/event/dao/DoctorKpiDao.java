@@ -2,6 +2,7 @@ package io.terminus.doctor.event.dao;
 
 import com.google.common.collect.ImmutableMap;
 import io.terminus.doctor.event.dto.report.monthly.DoctorLiveStockChangeMonthlyReport;
+import io.terminus.doctor.event.dto.report.monthly.DoctorStockStructureMonthlyReport;
 import io.terminus.doctor.event.handler.sow.DoctorSowMatingHandler;
 import org.joda.time.DateTime;
 import org.mybatis.spring.SqlSessionTemplate;
@@ -9,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -644,5 +646,34 @@ public class DoctorKpiDao {
      */
     public DoctorLiveStockChangeMonthlyReport getMonthlyLiveStockChangeMaterielAmount(Long farmId, Date startAt, Date endAt) {
         return sqlSession.selectOne("getMonthlyLiveStockChangeMaterielAmount", ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
+    }
+
+    /**
+     * 胎次分布月报
+     * @param farmId
+     * @param startAt
+     * @param endAt
+     * @return
+     */
+    public List<DoctorStockStructureMonthlyReport> getMonthlyParityStock(Long farmId, Date startAt, Date endAt){
+        return sqlSession.selectList(sqlId("getParityStockMonthly"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
+    }
+
+    /**
+     * 品类分布月报
+     * @param farmId
+     * @param startAt
+     * @param endAt
+     * @return
+     */
+    public List<DoctorStockStructureMonthlyReport> getMonthlyBreedStock(Long farmId, Date startAt, Date endAt){
+        return sqlSession.selectList(sqlId("getBreedStockMonthly"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
+    }
+
+    /**
+     * 断奶七天配种率
+     */
+    public double getMateInSeven(Long farmId, Date startAt, Date endAt) {
+        return sqlSession.selectOne(sqlId("getMateInSeven"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
     }
 }

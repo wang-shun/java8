@@ -3,6 +3,7 @@ package io.terminus.doctor.event.dto.report.monthly;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * Desc: 猪场月报json字段
@@ -94,6 +95,7 @@ public class DoctorMonthlyReportDto implements Serializable {
      */
     private double npd;                       //非生产天数
     private double psy;                       //psy
+    private double mateInSeven;               //断奶7天配种率
 
     /**
      * 公猪生产成绩
@@ -113,4 +115,14 @@ public class DoctorMonthlyReportDto implements Serializable {
     private DoctorLiveStockChangeMonthlyReport liveStockChange;
 
     private String date;                      //统计月份 2016年08月, 供前台显示
+
+    /**
+     * 胎次分布
+     */
+    private List<DoctorStockStructureMonthlyReport> parityStockList;
+
+    /**
+     * 品类分布
+     */
+    private List<DoctorStockStructureMonthlyReport> breedStockList;
 }

@@ -388,3 +388,9 @@ add column group_code varchar(640) DEFAULT NULL COMMENT '猪群名称' after gro
 
 -- 2016-9-21
 ALTER TABLE doctor_messages ADD COLUMN event_type INT (11) DEFAULT NULL comment '需要操作的事件类型' after   `type`;
+
+-- 2016-09-22 增加索引
+create index doctor_pig_events_type on doctor_pig_events(type);
+create index doctor_pig_events_parity on doctor_pig_events(parity);
+create index doctor_pigs_is_removal on doctor_pigs(is_removal);
+create index doctor_pig_tracks_current_parity on doctor_pig_tracks(current_parity);

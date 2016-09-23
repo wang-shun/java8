@@ -19,6 +19,7 @@ import io.terminus.doctor.move.model.ReportSowLiveStock;
 import io.terminus.doctor.user.dao.DoctorFarmDao;
 import io.terminus.doctor.user.model.DoctorFarm;
 import lombok.extern.slf4j.Slf4j;
+import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -155,7 +156,7 @@ public class DoctorMoveReportService {
      */
     @Transactional
     public void moveMonthlyReport(Long farmId, Integer index) {
-        DateUtil.getBeforeMonthEnds(new Date(), MoreObjects.firstNonNull(index, MONTH_INDEX))
+        DateUtil.getBeforeMonthEnds(DateTime.now().plusDays(-1).toDate(), MoreObjects.firstNonNull(index, MONTH_INDEX))
                 .forEach(date -> doctorMonthlyReportWriteService.createMonthlyReport(farmId, date));
     }
 
