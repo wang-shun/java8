@@ -128,12 +128,11 @@ public class  DoctorEventConfiguration {
             DoctorConditionHandler doctorConditionHandler, DoctorDiseaseHandler doctorDiseaseHandler,
             DoctorRemovalHandler doctorRemovalHandler, DoctorVaccinationHandler doctorVaccinationHandler){
         DoctorEventHandlerChain chain = new DoctorEventHandlerChain();
-        List<DoctorEventCreateHandler> list = Lists.newArrayList(
+        chain.setDoctorEventCreateHandlers(Lists.newArrayList(
                 doctorSemenHandler,doctorEntryHandler,
                 doctorChgFarmHandler, doctorChgLocationHandler,
                 doctorConditionHandler, doctorDiseaseHandler,
-                doctorRemovalHandler, doctorVaccinationHandler);
-        chain.setDoctorEventCreateHandlers(Lists.newArrayList(list));
+                doctorRemovalHandler, doctorVaccinationHandler));
         return chain;
     }
 
