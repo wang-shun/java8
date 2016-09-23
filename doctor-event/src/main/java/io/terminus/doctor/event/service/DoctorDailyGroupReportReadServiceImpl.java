@@ -98,8 +98,8 @@ public class DoctorDailyGroupReportReadServiceImpl implements DoctorDailyGroupRe
         //销售 (保育 = 产房 + 保育)
         DoctorSaleDailyReport saleReport = new DoctorSaleDailyReport();
         saleReport.setNursery(isSaleEvent(changeEvent, PigType.FARROW_PIGLET) || isSaleEvent(changeEvent, PigType.NURSERY_PIGLET)
-                || isSaleEvent(changeEvent, PigType.DELIVER_SOW) ? changeEvent.getChange().getAmount() / 100 : 0);
-        saleReport.setFatten(isSaleEvent(changeEvent, PigType.FATTEN_PIG) ? changeEvent.getChange().getAmount() / 100 : 0);
+                || isSaleEvent(changeEvent, PigType.DELIVER_SOW) ? changeEvent.getQuantity() : 0);
+        saleReport.setFatten(isSaleEvent(changeEvent, PigType.FATTEN_PIG) ? changeEvent.getQuantity() : 0);
 
         //销售均价
         saleReport.setBasePrice10(doctorKpiDao.getGroupSaleBasePrice10(report.getFarmId(), startAt, endAt));
