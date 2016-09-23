@@ -19,6 +19,8 @@ public class DoctorRollbackDto implements Serializable {
 
     private List<RollbackType> rollbackTypes;  //回滚类型
 
+    private Long orgId;         //公司id
+
     private Long farmId;        //猪场id
 
     private Date eventAt;       //回滚事件的日期

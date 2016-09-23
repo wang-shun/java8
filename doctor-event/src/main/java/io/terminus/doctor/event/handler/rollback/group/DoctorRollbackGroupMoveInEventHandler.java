@@ -37,6 +37,7 @@ public class DoctorRollbackGroupMoveInEventHandler extends DoctorAbstractRollbac
     @Override
     protected List<DoctorRollbackDto> handleReport(DoctorGroupEvent groupEvent) {
         DoctorRollbackDto dto = new DoctorRollbackDto();
+        dto.setOrgId(groupEvent.getOrgId());
         dto.setFarmId(groupEvent.getFarmId());
         dto.setEsBarnId(groupEvent.getBarnId());
         dto.setEsGroupId(groupEvent.getGroupId());

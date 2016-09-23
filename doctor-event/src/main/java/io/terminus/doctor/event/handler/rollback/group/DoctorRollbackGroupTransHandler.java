@@ -52,6 +52,7 @@ public class DoctorRollbackGroupTransHandler extends DoctorAbstractRollbackGroup
     @Override
     protected List<DoctorRollbackDto> handleReport(DoctorGroupEvent groupEvent) {
         DoctorRollbackDto fromDto = new DoctorRollbackDto();
+        fromDto.setOrgId(groupEvent.getOrgId());
         fromDto.setFarmId(groupEvent.getFarmId());
         fromDto.setEsBarnId(groupEvent.getBarnId());
         fromDto.setEsGroupId(groupEvent.getGroupId());
@@ -62,6 +63,7 @@ public class DoctorRollbackGroupTransHandler extends DoctorAbstractRollbackGroup
 
         DoctorTransGroupEvent trans = JSON_MAPPER.fromJson(groupEvent.getExtra(), DoctorTransGroupEvent.class);
         DoctorRollbackDto toDto = new DoctorRollbackDto();
+        toDto.setOrgId(groupEvent.getOrgId());
         toDto.setFarmId(groupEvent.getFarmId());
         toDto.setEsBarnId(trans.getToBarnId());
         toDto.setEsGroupId(trans.getToGroupId());

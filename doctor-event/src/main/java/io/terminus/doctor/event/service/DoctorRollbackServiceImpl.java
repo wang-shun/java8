@@ -23,6 +23,7 @@ import io.terminus.doctor.event.dto.report.daily.DoctorWeanDailyReport;
 import io.terminus.doctor.event.enums.RollbackType;
 import io.terminus.doctor.event.handler.rollback.DoctorRollbackHandlerChain;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
+import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.search.barn.BarnSearchWriteService;
 import io.terminus.doctor.event.search.group.GroupSearchWriteService;
@@ -56,6 +57,7 @@ public class DoctorRollbackServiceImpl implements DoctorRollbackService {
     private final DailyReport2UpdateDao dailyReport2UpdateDao;
     private final DailyReportHistoryDao dailyReportHistoryDao;
     private final DoctorKpiDao doctorKpiDao;
+    private final DoctorPigTypeStatisticWriteService doctorPigTypeStatisticWriteService;
 
     @Autowired
     public DoctorRollbackServiceImpl(DoctorRollbackHandlerChain doctorRollbackHandlerChain,
@@ -67,7 +69,8 @@ public class DoctorRollbackServiceImpl implements DoctorRollbackService {
                                      DoctorGroupBatchSummaryDao doctorGroupBatchSummaryDao,
                                      DailyReport2UpdateDao dailyReport2UpdateDao,
                                      DailyReportHistoryDao dailyReportHistoryDao,
-                                     DoctorKpiDao doctorKpiDao) {
+                                     DoctorKpiDao doctorKpiDao,
+                                     DoctorPigTypeStatisticWriteService doctorPigTypeStatisticWriteService) {
         this.doctorRollbackHandlerChain = doctorRollbackHandlerChain;
         this.doctorGroupEventDao = doctorGroupEventDao;
         this.doctorPigEventDao = doctorPigEventDao;
@@ -78,6 +81,7 @@ public class DoctorRollbackServiceImpl implements DoctorRollbackService {
         this.dailyReport2UpdateDao = dailyReport2UpdateDao;
         this.dailyReportHistoryDao = dailyReportHistoryDao;
         this.doctorKpiDao = doctorKpiDao;
+        this.doctorPigTypeStatisticWriteService = doctorPigTypeStatisticWriteService;
     }
 
     @Override
@@ -237,7 +241,10 @@ public class DoctorRollbackServiceImpl implements DoctorRollbackService {
             startAt = new DateTime(startAt).plusDays(1).toDate();
         }
 
-        // TODO: 2016/9/22 更新 PigTypeStatistic
+        //更新 PigTypeStatistic
+        doctorPigTypeStatisticWriteService.statisticGroup(dto.getOrgId(), dto.getFarmId());
+        doctorPigTypeStatisticWriteService.statisticPig(dto.getOrgId(), dto.getFarmId(), DoctorPig.PIG_TYPE.BOAR.getKey());
+        doctorPigTypeStatisticWriteService.statisticPig(dto.getOrgId(), dto.getFarmId(), DoctorPig.PIG_TYPE.SOW.getKey());
     }
 
     private DoctorDeadDailyReport getDeadDailyReport(Long farmId, Date startAt, Date endAt) {
