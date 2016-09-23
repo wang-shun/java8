@@ -10,6 +10,7 @@ import io.terminus.doctor.common.utils.Params;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.SneakyThrows;
@@ -307,5 +308,23 @@ public class DoctorPigEvent implements Serializable {
         } else {
             this.extra = OBJECT_MAPPER.writeValueAsString(this.extraMap);
         }
+    }
+
+    public enum kind{
+        Sow(1,"母猪"),
+        Boar(2,"公猪"),
+        PIGLET(3,"仔猪");
+
+         kind(Integer value, String desc){
+            this.value = value;
+            this.desc = desc;
+        }
+
+        @Getter
+        private Integer value;
+
+        @Getter
+        private String desc;
+
     }
 }

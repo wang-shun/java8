@@ -103,8 +103,6 @@ public abstract class DoctorAbstractRollbackPigEventHandler extends DoctorAbstra
         doctorPigEventDao.delete(pigEvent.getId());
         return DoctorRevertLog.builder()
                 .type(type)
-                .reverterId(pigEvent.getUpdatorId())
-                .reverterName(pigEvent.getUpdatorName())
                 .fromInfo(fromInfo)
                 .toInfo("")
                 .build();
