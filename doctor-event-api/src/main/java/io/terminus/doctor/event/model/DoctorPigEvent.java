@@ -65,6 +65,16 @@ public class DoctorPigEvent implements Serializable {
     private Long relEventId;
 
     /**
+     * 关联猪群事件id(比如转种猪事件)
+     */
+    private Long relGroupEventId;
+
+    /**
+     * 关联猪事件id(比如拼窝事件)
+     */
+    private Long relPigEventId;
+
+    /**
      * 变动类型的id
      */
     private Long changeTypeId;

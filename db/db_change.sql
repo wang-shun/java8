@@ -397,3 +397,6 @@ ALTER TABLE doctor_revert_logs ADD COLUMN pig_id bigint(20) DEFAULT NULL COMMENT
 ALTER TABLE doctor_group_events ADD COLUMN rel_group_event_id bigint(20) DEFAULT NULL COMMENT '关联猪群事件id' AFTER other_barn_type;
 ALTER TABLE doctor_group_events ADD COLUMN rel_pig_event_id bigint(20) DEFAULT NULL COMMENT '关联猪事件id' AFTER rel_group_event_id;
 
+-- 2016-09-23 猪增加字段，关联猪群事件
+ALTER TABLE doctor_pig_events ADD COLUMN rel_group_event_id BIGINT(20) DEFAULT NULL COMMENT '关联猪群事件id(比如转种猪事件)' AFTER rel_event_id;
+ALTER TABLE doctor_pig_events ADD COLUMN rel_pig_event_id BIGINT(20) DEFAULT NULL COMMENT '关联猪事件id(比如拼窝事件)' AFTER rel_group_event_id;

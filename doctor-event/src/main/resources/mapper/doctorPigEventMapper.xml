@@ -24,6 +24,8 @@
         <result column="barn_id" property="barnId"/>
         <result column="barn_name" property="barnName"/>
         <result column="rel_event_id" property="relEventId"/>
+        <result column="rel_group_event_id" property="relGroupEventId"/>
+        <result column="rel_pig_event_id" property="relPigEventId"/>
         <result column="change_type_id" property="changeTypeId"/>
         <result column="price" property="price"/>
         <result column="amount" property="amount"/>
@@ -97,6 +99,8 @@
         barn_id,
         barn_name,
         rel_event_id,
+        rel_group_event_id,
+        rel_pig_event_id,
         change_type_id,
         price,
         amount,
@@ -164,6 +168,8 @@
         #{barnId},
         #{barnName},
         #{relEventId},
+        #{relGroupEventId},
+        #{relPigEventId},
         #{changeTypeId},
         #{price},
         #{amount},
@@ -233,6 +239,8 @@
         <if test="barnId != null">AND barn_id = #{barnId}</if>
         <if test="barnName != null">AND barn_name = #{barnName}</if>
         <if test="relEventId != null">AND rel_event_id = #{relEventId}</if>
+        <if test="relGroupEventId != null">AND rel_group_event_id = #{relGroupEventId}</if>
+        <if test="relPigEventId != null">AND rel_pig_event_id = #{relPigEventId}</if>
         <if test="changeTypeId != null">AND change_type_id = #{changeTypeId}</if>
         <if test="price != null">AND price = #{price}</if>
         <if test="amount != null">AND amount = #{amount}</if>
@@ -310,6 +318,8 @@
             #{item.barnId},
             #{item.barnName},
             #{item.relEventId},
+            #{item.relGroupEventId},
+            #{item.relPigEventId},
             #{item.changeTypeId},
             #{item.price},
             #{item.amount},
@@ -529,6 +539,8 @@
             <if test="barnId != null">barn_id = #{barnId},</if>
             <if test="barnName != null">barn_name = #{barnName},</if>
             <if test="relEventId != null">rel_event_id = #{relEventId},</if>
+            <if test="relGroupEventId != null">rel_group_event_id = #{relGroupEventId},</if>
+            <if test="relPigEventId != null">rel_pig_event_id = #{relPigEventId},</if>
             <if test="changeTypeId != null">change_type_id = #{changeTypeId},</if>
             <if test="price != null">price = #{price},</if>
             <if test="amount != null">amount = #{amount},</if>
@@ -678,6 +690,8 @@
                 barn_id = #{item.barnId},
                 barn_name = #{item.barnName},
                 rel_event_id = #{item.relEventId},
+                rel_group_event_id = #{item.relGroupEventId},
+                rel_pig_event_id = #{item.relPigEventId},
                 change_type_id = #{item.changeTypeId},
                 price = #{item.price},
                 amount = #{item.amount},
@@ -729,6 +743,17 @@
             </set>
             where id = ${item.id}
         </foreach>
-
     </update>
+
+    <select id="findByRelGroupEventId" parameterType="long" resultMap="DoctorPigEventMap" >
+        SELECT <include refid="cols_all" />
+        FROM <include refid="tb" />
+        WHERE rel_group_event_id = #{relGroupEventId}
+    </select>
+
+    <select id="findByRelPigEventId" parameterType="long" resultMap="DoctorPigEventMap" >
+        SELECT <include refid="cols_all" />
+        FROM <include refid="tb" />
+        WHERE rel_pig_event_id = #{relPigEventId}
+    </select>
 </mapper>

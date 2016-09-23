@@ -28,7 +28,7 @@ public class DoctorRollbackGroupDiseaseHandler extends DoctorAbstractRollbackGro
 
     @Override
     protected DoctorRevertLog handleRollback(DoctorGroupEvent groupEvent, Long operatorId, String operatorName) {
-        return super.sampleRollback(groupEvent);
+        return sampleRollback(groupEvent);
     }
 
     @Override
