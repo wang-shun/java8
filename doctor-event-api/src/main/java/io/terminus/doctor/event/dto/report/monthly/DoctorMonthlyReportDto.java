@@ -95,6 +95,7 @@ public class DoctorMonthlyReportDto implements Serializable {
      */
     private double npd;                       //非生产天数
     private double psy;                       //psy
+    private double mateInSeven;               //断奶7天配种率
 
     /**
      * 公猪生产成绩

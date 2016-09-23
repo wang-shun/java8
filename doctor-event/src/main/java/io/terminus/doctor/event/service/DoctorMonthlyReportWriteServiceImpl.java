@@ -119,6 +119,7 @@ public class DoctorMonthlyReportWriteServiceImpl implements DoctorMonthlyReportW
         dto.setCheckNegtive(doctorKpiDao.checkYingCounts(farmId, startAt, endAt));                   //妊娠检查阴性
         dto.setNpd(doctorKpiDao.npd(farmId, startAt, endAt));                                        //非生产天数
         dto.setPsy(doctorKpiDao.psy(farmId, startAt, endAt));                                        //psy
+        dto.setMateInSeven(doctorKpiDao.getMateInSeven(farmId, startAt, endAt));                     //断奶7天配种率
 
         //分娩情况
         dto.setFarrowEstimateParity(doctorKpiDao.getPreDelivery(farmId, startAt, endAt));        //预产胎数

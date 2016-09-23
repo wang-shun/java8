@@ -669,4 +669,11 @@ public class DoctorKpiDao {
     public List<DoctorStockStructureMonthlyReport> getMonthlyBreedStock(Long farmId, Date startAt, Date endAt){
         return sqlSession.selectList(sqlId("getBreedStockMonthly"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
     }
+
+    /**
+     * 断奶七天配种率
+     */
+    public double getMateInSeven(Long farmId, Date startAt, Date endAt) {
+        return sqlSession.selectOne(sqlId("getMateInSeven"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
+    }
 }

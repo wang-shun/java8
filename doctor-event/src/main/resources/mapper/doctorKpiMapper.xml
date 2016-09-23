@@ -1505,4 +1505,90 @@
         GROUP BY t2.breed_id, t2.breed_name
         ) t12 on t11.breed_id = t12.breed_id and t11.breed_name = t12.breed_name;
     </select>
+
+    <!-- 断奶七天配种率-->
+    <select id="getMateInSeven" parameterType="map" resultType="double">
+        select
+        case (
+        -- 断奶母猪数
+        select  count(1)
+        from doctor_pig_events
+        where
+        pig_status_after = 9
+        and type in (16,17,18)
+        <include refid="criteria"/>
+        ) when 0 then 0 else
+        (
+        -- 本月7天内断奶配种数
+        select count(1)
+        from
+        (
+        select  pig_code, event_at, parity
+        from doctor_pig_events
+        where
+        pig_status_after = 9
+        and type in (16,17,18)
+        <include refid="criteria"/>
+        ) t1 left join
+        (
+        select  pig_code, event_at, parity
+        from doctor_pig_events
+        where type = 9
+        and farm_id = 1
+        <include refid="criteria"/>
+        and current_mating_count = 1
+        and pig_code in(
+        select  pig_code
+        from doctor_pig_events
+        where
+        pig_status_after = 9
+        and type in (16,17,18)
+        <include refid="criteria"/>
+        )
+        ) t2 on t1.pig_code = t2.pig_code and t1.parity + 1 = t2.parity
+        where t1.event_at > date_add(t2.event_at, interval -7 day)
+        )/
+        (
+        (
+        -- 断奶母猪数
+        select  count(1)
+        from doctor_pig_events
+        where
+        pig_status_after = 9
+        and type in (16,17,18)
+        <include refid="criteria"/>
+        ) -
+        (
+        -- 7天内断奶的
+        select count(1)
+        from  doctor_pig_events
+        where
+        pig_status_after = 9
+        and type in (16,17,18)
+        and farm_id = 1
+        and event_at &gt;= date_add(date(#{endAt}), interval -7 day)
+        and event_at &lt;= #{endAt}
+        ) +
+        (
+        -- 断奶七天内配种
+        select count(1)
+        from doctor_pig_events
+        where
+        type = 9
+        and farm_id = 1
+        and event_at &gt;= date_add(date(#{endAt}), interval -7 day)
+        and event_at &lt;= #{endAt}
+        and pig_code in(
+        select pig_code
+        from  doctor_pig_events
+        where
+        pig_status_after = 9
+        and type in (16,17,18)
+        and farm_id = 1
+        and event_at &gt;= date_add(date(#{endAt}), interval -7 day)
+        and event_at &lt;= #{endAt}
+        )
+        )
+        ) end from dual
+    </select>
 </mapper>
