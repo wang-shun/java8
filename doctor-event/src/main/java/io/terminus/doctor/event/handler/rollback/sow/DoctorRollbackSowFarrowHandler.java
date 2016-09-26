@@ -3,7 +3,6 @@ package io.terminus.doctor.event.handler.rollback.sow;
 import com.google.common.collect.Lists;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dto.DoctorRollbackDto;
-import io.terminus.doctor.event.dto.event.sow.DoctorFarrowingDto;
 import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.RollbackType;
@@ -25,7 +24,7 @@ import java.util.Objects;
  */
 @Slf4j
 @Component
-public class DoctorRollbackFarrowHandler extends DoctorAbstractRollbackPigEventHandler {
+public class DoctorRollbackSowFarrowHandler extends DoctorAbstractRollbackPigEventHandler {
 
     @Override
     protected boolean handleCheck(DoctorPigEvent pigEvent) {
@@ -59,7 +58,6 @@ public class DoctorRollbackFarrowHandler extends DoctorAbstractRollbackPigEventH
         fromDto.setRollbackTypes(Lists.newArrayList(RollbackType.DAILY_LIVESTOCK, RollbackType.MONTHLY_REPORT,
                 RollbackType.SEARCH_BARN, RollbackType.SEARCH_GROUP, RollbackType.DAILY_FARROW));
 
-        DoctorFarrowingDto farrow = JSON_MAPPER.fromJson(pigEvent.getExtra(), DoctorFarrowingDto.class);
         DoctorGroupEvent toGroupEvent = doctorGroupEventDao.findByRelPigEventId(pigEvent.getRelPigEventId());
         DoctorRollbackDto toDto = new DoctorRollbackDto();
         toDto.setOrgId(pigEvent.getOrgId());
@@ -69,7 +67,6 @@ public class DoctorRollbackFarrowHandler extends DoctorAbstractRollbackPigEventH
 
         //更新统计：猪舍统计，猪群统计
         toDto.setRollbackTypes(Lists.newArrayList(RollbackType.SEARCH_BARN, RollbackType.SEARCH_GROUP));
-
         return Lists.newArrayList(fromDto, toDto);
     }
 

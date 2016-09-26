@@ -59,7 +59,6 @@ public abstract class DoctorAbstractRollbackPigEventHandler extends DoctorAbstra
     @Value("${flow.definition.key.sow:sow}")
     protected String sowFlowKey;
 
-    protected final JsonMapper MAPPER = JsonMapper.JSON_NON_DEFAULT_MAPPER;
     /**
      * 判断能否回滚(1.手动事件 2.三个月内的事件 3.最新事件 4.子类根据事件类型特殊处理)
      */
@@ -165,15 +164,6 @@ public abstract class DoctorAbstractRollbackPigEventHandler extends DoctorAbstra
                 .fromInfo(JSON_MAPPER.toJson(doctorPigSnapShotInfo))
                 .toInfo("")
                 .build();
-    }
-
-     /* 通用猪事件回滚
-     * @param pigEvent 猪事件
-     * @return 回滚日志
-     */
-    protected DoctorRevertLog sampleRollback(DoctorPigEvent pigEvent) {
-        DoctorPigSnapshot snapshot = doctorPigSnapshotDao.queryByEventId(pigEvent.getId());
-        return new DoctorRevertLog();
     }
 
     protected void workFlowRollback(DoctorPigEvent pigEvent){

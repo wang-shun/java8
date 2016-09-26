@@ -26,10 +26,10 @@ import java.util.Objects;
 @Component
 public class DoctorRollbackGroupTransHandler extends DoctorAbstractRollbackGroupEventHandler {
 
-    @Autowired private DoctorRollbackGroupMoveInEventHandler doctorRollbackGroupMoveInEventHandler;
+    @Autowired private DoctorRollbackGroupMoveInHandler doctorRollbackGroupMoveInHandler;
 
     @Override
-    protected boolean handleCheck(DoctorGroupEvent groupEvent) {
+    public boolean handleCheck(DoctorGroupEvent groupEvent) {
         //猪群转群会触发目标猪群的转入猪群事件，所以需要校验目标猪群的转入猪群是否是最新事件
         if (!Objects.equals(groupEvent.getType(), GroupEventType.TRANS_GROUP.getValue())) {
             return false;
@@ -51,7 +51,7 @@ public class DoctorRollbackGroupTransHandler extends DoctorAbstractRollbackGroup
         DoctorGroupEvent toGroupEvent = doctorGroupEventDao.findByRelGroupEventId(groupEvent.getId());
 
         //先回滚转入猪群事件， 再回滚转群事件
-        doctorRollbackGroupMoveInEventHandler.rollback(toGroupEvent, operatorId, operatorName);
+        doctorRollbackGroupMoveInHandler.rollback(toGroupEvent, operatorId, operatorName);
         return sampleRollback(groupEvent);
     }
 

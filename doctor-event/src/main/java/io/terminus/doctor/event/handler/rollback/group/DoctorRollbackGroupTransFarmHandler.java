@@ -27,7 +27,7 @@ import java.util.Objects;
 @Component
 public class DoctorRollbackGroupTransFarmHandler extends DoctorAbstractRollbackGroupEventHandler {
 
-    @Autowired private DoctorRollbackGroupMoveInEventHandler doctorRollbackGroupMoveInEventHandler;
+    @Autowired private DoctorRollbackGroupMoveInHandler doctorRollbackGroupMoveInHandler;
 
     @Override
     protected boolean handleCheck(DoctorGroupEvent groupEvent) {
@@ -53,7 +53,7 @@ public class DoctorRollbackGroupTransFarmHandler extends DoctorAbstractRollbackG
         DoctorGroupEvent toGroupEvent = doctorGroupEventDao.findByRelGroupEventId(groupEvent.getId());
 
         //先回滚转入猪群事件， 再回滚转群事件
-        doctorRollbackGroupMoveInEventHandler.rollback(toGroupEvent, operatorId, operatorName);
+        doctorRollbackGroupMoveInHandler.rollback(toGroupEvent, operatorId, operatorName);
         return sampleRollback(groupEvent);
     }
 

@@ -9,11 +9,11 @@ import io.terminus.doctor.event.handler.DoctorEntryHandler;
 import io.terminus.doctor.event.handler.DoctorEventHandlerChain;
 import io.terminus.doctor.event.handler.boar.DoctorSemenHandler;
 import io.terminus.doctor.event.handler.rollback.DoctorRollbackHandlerChain;
-import io.terminus.doctor.event.handler.rollback.group.DoctorRollbackGroupChangeEventHandler;
+import io.terminus.doctor.event.handler.rollback.group.DoctorRollbackGroupChangeHandler;
 import io.terminus.doctor.event.handler.rollback.group.DoctorRollbackGroupDiseaseHandler;
 import io.terminus.doctor.event.handler.rollback.group.DoctorRollbackGroupLiveStockHandler;
-import io.terminus.doctor.event.handler.rollback.group.DoctorRollbackGroupMoveInEventHandler;
-import io.terminus.doctor.event.handler.rollback.group.DoctorRollbackGroupNewEventHandler;
+import io.terminus.doctor.event.handler.rollback.group.DoctorRollbackGroupMoveInHandler;
+import io.terminus.doctor.event.handler.rollback.group.DoctorRollbackGroupNewHandler;
 import io.terminus.doctor.event.handler.rollback.group.DoctorRollbackGroupTransFarmHandler;
 import io.terminus.doctor.event.handler.rollback.group.DoctorRollbackGroupTransHandler;
 import io.terminus.doctor.event.handler.rollback.group.DoctorRollbackGroupTurnSeedHandler;
@@ -87,11 +87,11 @@ public class  DoctorEventConfiguration {
      */
     @Bean
     public DoctorRollbackHandlerChain doctorRollbackHandlerChain(
-            DoctorRollbackGroupChangeEventHandler rollbackGroupChangeEventHandler,
+            DoctorRollbackGroupChangeHandler rollbackGroupChangeEventHandler,
             DoctorRollbackGroupDiseaseHandler rollbackGroupDiseaseHandler,
             DoctorRollbackGroupLiveStockHandler rollbackGroupLiveStockHandler,
-            DoctorRollbackGroupMoveInEventHandler rollbackGroupMoveInEventHandler,
-            DoctorRollbackGroupNewEventHandler rollbackGroupNewEventHandler,
+            DoctorRollbackGroupMoveInHandler rollbackGroupMoveInEventHandler,
+            DoctorRollbackGroupNewHandler rollbackGroupNewEventHandler,
             DoctorRollbackGroupTransFarmHandler rollbackGroupTransFarmHandler,
             DoctorRollbackGroupTransHandler rollbackGroupTransHandler,
             DoctorRollbackGroupTurnSeedHandler rollbackGroupTurnSeedHandler,
