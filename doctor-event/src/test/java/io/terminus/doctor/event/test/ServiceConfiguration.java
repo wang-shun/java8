@@ -13,6 +13,17 @@ import io.terminus.doctor.event.handler.DoctorEntryHandler;
 import io.terminus.doctor.event.handler.DoctorEventCreateHandler;
 import io.terminus.doctor.event.handler.DoctorEventHandlerChain;
 import io.terminus.doctor.event.handler.boar.DoctorSemenHandler;
+import io.terminus.doctor.event.handler.rollback.DoctorRollbackHandlerChain;
+import io.terminus.doctor.event.handler.rollback.boar.DoctorRollbackBoarVaccinationEventHandler;
+import io.terminus.doctor.event.handler.rollback.group.DoctorRollbackGroupChangeHandler;
+import io.terminus.doctor.event.handler.rollback.group.DoctorRollbackGroupDiseaseHandler;
+import io.terminus.doctor.event.handler.rollback.group.DoctorRollbackGroupLiveStockHandler;
+import io.terminus.doctor.event.handler.rollback.group.DoctorRollbackGroupMoveInHandler;
+import io.terminus.doctor.event.handler.rollback.group.DoctorRollbackGroupNewHandler;
+import io.terminus.doctor.event.handler.rollback.group.DoctorRollbackGroupTransFarmHandler;
+import io.terminus.doctor.event.handler.rollback.group.DoctorRollbackGroupTransHandler;
+import io.terminus.doctor.event.handler.rollback.group.DoctorRollbackGroupTurnSeedHandler;
+import io.terminus.doctor.event.handler.rollback.group.DoctorRollbackGroupVaccinHandler;
 import io.terminus.doctor.event.handler.usual.DoctorChgFarmHandler;
 import io.terminus.doctor.event.handler.usual.DoctorChgLocationHandler;
 import io.terminus.doctor.event.handler.usual.DoctorConditionHandler;
@@ -60,6 +71,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Profile;
 
@@ -77,8 +89,43 @@ import java.util.concurrent.Executors;
 @Import({DoctorCommonConfiguration.class})
 @ComponentScan({"io.terminus.doctor.event.*","io.terminus.doctor.workflow.*"})
 @AutoConfigureAfter(MybatisAutoConfiguration.class)
+@EnableAspectJAutoProxy(proxyTargetClass = true)
 public class ServiceConfiguration {
 
+    /**
+     * 事件回滚拦截器链
+     */
+    @Bean
+    public DoctorRollbackHandlerChain doctorRollbackHandlerChain(
+            DoctorRollbackGroupChangeHandler rollbackGroupChangeEventHandler,
+            DoctorRollbackGroupDiseaseHandler rollbackGroupDiseaseHandler,
+            DoctorRollbackGroupLiveStockHandler rollbackGroupLiveStockHandler,
+            DoctorRollbackGroupMoveInHandler rollbackGroupMoveInEventHandler,
+            DoctorRollbackGroupNewHandler rollbackGroupNewEventHandler,
+            DoctorRollbackGroupTransFarmHandler rollbackGroupTransFarmHandler,
+            DoctorRollbackGroupTransHandler rollbackGroupTransHandler,
+            DoctorRollbackGroupTurnSeedHandler rollbackGroupTurnSeedHandler,
+            DoctorRollbackGroupVaccinHandler rollbackGroupVaccinHandler,
+            DoctorRollbackBoarVaccinationEventHandler doctorRollbackBoarVaccinationEventHandler
+    ) {
+        DoctorRollbackHandlerChain chain = new DoctorRollbackHandlerChain();
+        chain.setRollbackGroupEventHandlers(Lists.newArrayList(
+                rollbackGroupChangeEventHandler,
+                rollbackGroupDiseaseHandler,
+                rollbackGroupLiveStockHandler,
+                rollbackGroupMoveInEventHandler,
+                rollbackGroupNewEventHandler,
+                rollbackGroupTransFarmHandler,
+                rollbackGroupTransHandler,
+                rollbackGroupTurnSeedHandler,
+                rollbackGroupVaccinHandler
+        ));
+
+        chain.setRollbackPigEventHandlers(Lists.newArrayList(
+                doctorRollbackBoarVaccinationEventHandler
+        ));
+        return chain;
+    }
 
     /**
      * 对应handler chain

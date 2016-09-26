@@ -119,6 +119,7 @@ public abstract class DoctorAbstractRollbackPigEventHandler extends DoctorAbstra
             doctorPigTrackDao.update(JSON_MAPPER.fromJson(doctorPigSnapshot.getPigInfo(), DoctorPigSnapShotInfo.class).getPigTrack());
         } else {
             doctorPigTrackDao.delete(doctorPigTrackDao.findByPigId(pigEvent.getPigId()).getId());
+            doctorPigDao.delete(pigEvent.getPigId());
         }
         doctorPigSnapshotDao.delete(doctorPigSnapshot.getId());
         return doctorRevertLog;
