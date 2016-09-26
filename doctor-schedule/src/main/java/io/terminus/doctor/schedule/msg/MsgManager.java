@@ -130,37 +130,42 @@ public class MsgManager {
      * 发出短信消息
      */
     public void consumeMsg() {
-
-        List<DoctorMessage> msgMessages = RespHelper.orServEx(doctorMessageReadService.findMsgMessage());
-      //  User user = (User) RespHelper.orServEx(userReadService.findById(message.getUserId()));
-        for (int i = 0; msgMessages != null && i < msgMessages.size(); i++) {
-            DoctorMessage message = msgMessages.get(i);
-            Map<String, Serializable> map = null;
-            try{
-                // 获取用户信息
-                User user = (User) RespHelper.orServEx(userReadService.findById(message.getUserId()));
-                if (StringUtils.isNotBlank(user.getMobile())) {
-                    map = JsonMapper.JSON_NON_DEFAULT_MAPPER.fromJson(message.getData(), Map.class);
-                    // 发送短信 // TODO: 临时取消短信发送
-                    // smsWebService.send(user.getMobile(), message.getMessageTemplate(), map, null);
-                    message.setSendedAt(new Date());
-                    message.setStatus(DoctorMessage.Status.SENDED.getValue());
+        for (int j = 0;; j++) {
+            List<DoctorMessage> msgMessages = RespHelper.orServEx(doctorMessageReadService.findMsgMessage(j+1, 200)).getData();
+            //  User user = (User) RespHelper.orServEx(userReadService.findById(message.getUserId()));
+            for (int i = 0; msgMessages != null && i < msgMessages.size(); i++) {
+                DoctorMessage message = msgMessages.get(i);
+                Map<String, Serializable> map = null;
+                try {
+                    // 获取用户信息
+                    User user = (User) RespHelper.orServEx(userReadService.findById(message.getUserId()));
+                    if (StringUtils.isNotBlank(user.getMobile())) {
+                        map = JsonMapper.JSON_NON_DEFAULT_MAPPER.fromJson(message.getData(), Map.class);
+                        // 发送短信 // TODO: 临时取消短信发送
+                        // smsWebService.send(user.getMobile(), message.getMessageTemplate(), map, null);
+                        message.setSendedAt(new Date());
+                        message.setStatus(DoctorMessage.Status.SENDED.getValue());
+                    }
+                } catch (Exception e) {
+                    log.error("msg message send error, cause by {}", Throwables.getStackTraceAsString(e));
+                    message.setFailedBy("msg message send error, context is " + map + ", cause by " + e.getMessage());
+                    message.setStatus(DoctorMessage.Status.FAILED.getValue());
                 }
-            } catch (Exception e) {
-                log.error("msg message send error, cause by {}", Throwables.getStackTraceAsString(e));
-                message.setFailedBy("msg message send error, context is " + map + ", cause by " + e.getMessage());
-                message.setStatus(DoctorMessage.Status.FAILED.getValue());
+                //doctorMessageWriteService.updateMessage(message);
             }
-            //doctorMessageWriteService.updateMessage(message);
+            //  smsWebService.send(user.getMobile(), message.getMessageTemplate(), map, null);
+            if (msgMessages.size() < 200){
+                break;
+            }
         }
-      //  smsWebService.send(user.getMobile(), message.getMessageTemplate(), map, null);
     }
 
     /**
      * 发出邮件消息
      */
     public void consumeEmail() {
-        List<DoctorMessage> emailMessages = RespHelper.orServEx(doctorMessageReadService.findEmailMessage());
+        for (int j = 0;; j++) {
+            List<DoctorMessage> emailMessages = RespHelper.orServEx(doctorMessageReadService.findEmailMessage(j+1, 200)).getData();
         for (int i = 0; emailMessages != null && i < emailMessages.size(); i++) {
             DoctorMessage message = emailMessages.get(i);
             Map<String, Serializable> map = null;
@@ -181,15 +186,20 @@ public class MsgManager {
             }
            // doctorMessageWriteService.updateMessage(message);
         }
+            if (emailMessages.size() < 200){
+                break;
+            }
+        }
     }
 
     /**
      * app push 消息消费
      */
     public void consumeAppPush() {
-        List<DoctorMessage> emailMessages = RespHelper.orServEx(doctorMessageReadService.findAppPushMessage());
-        for (int i = 0; emailMessages != null && i < emailMessages.size(); i++) {
-            DoctorMessage message = emailMessages.get(i);
+        for (int j = 0;; j++) {
+            List<DoctorMessage> appMessages = RespHelper.orServEx(doctorMessageReadService.findAppPushMessage(j+1, 200)).getData();
+        for (int i = 0; appMessages != null && i < appMessages.size(); i++) {
+            DoctorMessage message = appMessages.get(i);
             Map<String, Serializable> map = null;
             try{
                 // 获取用户信息
@@ -208,6 +218,10 @@ public class MsgManager {
             }
             // doctorMessageWriteService.updateMessage(message);
         }
+        if (appMessages.size() < 200){
+            break;
+        }
+    }
     }
 //    public void consumeAppPush() {
 //        List<DoctorMessage> updateMessages = Lists.newArrayList();
