@@ -5,12 +5,15 @@ import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dto.DoctorRollbackDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorPartWeanDto;
 import io.terminus.doctor.event.enums.PigEvent;
+import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.enums.RollbackType;
 import io.terminus.doctor.event.handler.rollback.DoctorAbstractRollbackPigEventHandler;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorPigEvent;
+import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.event.model.DoctorRevertLog;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -25,6 +28,10 @@ import java.util.Objects;
 @Slf4j
 @Component
 public class DoctorRollbackSowWeanHandler extends DoctorAbstractRollbackPigEventHandler {
+
+    @Autowired
+    private DoctorRollbackSowChgLocationEventHandler doctorRollbackSowChgLocationEventHandler;
+
     @Override
     protected boolean handleCheck(DoctorPigEvent pigEvent) {
         if (!Objects.equals(pigEvent.getType(), PigEvent.WEAN.getKey())) {
@@ -45,7 +52,19 @@ public class DoctorRollbackSowWeanHandler extends DoctorAbstractRollbackPigEvent
 
     @Override
     protected DoctorRevertLog handleRollback(DoctorPigEvent pigEvent, Long operatorId, String operatorName) {
-        return null;
+        //如果断奶后转舍， 先回滚转舍
+        DoctorPartWeanDto weanDto = JSON_MAPPER.fromJson(pigEvent.getExtra(), DoctorPartWeanDto.class);
+        if (weanDto.getChgLocationToBarnId() != null) {
+            DoctorPigEvent toPigEvent = doctorPigEventDao.findByRelPigEventId(pigEvent.getId());
+            doctorRollbackSowChgLocationEventHandler.rollback(toPigEvent, operatorId, operatorName);
+        }
+        DoctorPigTrack pigTrack = doctorPigTrackDao.findByPigId(pigEvent.getPigId());
+
+        //如果成功断奶，需要回滚状态
+        if (!Objects.equals(pigTrack.getStatus(), PigStatus.FEED.getKey())) {
+            handleRollbackWithStatus(pigEvent);
+        }
+        return handleRollbackWithoutStatus(pigEvent);
     }
 
     @Override
