@@ -39,6 +39,7 @@ public class DoctorRollbackGroupMoveInHandler extends DoctorAbstractRollbackGrou
         DoctorRollbackDto dto = new DoctorRollbackDto();
         dto.setOrgId(groupEvent.getOrgId());
         dto.setFarmId(groupEvent.getFarmId());
+        dto.setEventAt(groupEvent.getEventAt());
         dto.setEsBarnId(groupEvent.getBarnId());
         dto.setEsGroupId(groupEvent.getGroupId());
 

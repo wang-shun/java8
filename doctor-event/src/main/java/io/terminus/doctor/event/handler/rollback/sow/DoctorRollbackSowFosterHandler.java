@@ -1,12 +1,16 @@
 package io.terminus.doctor.event.handler.rollback.sow;
 
+import com.google.common.collect.Lists;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dto.DoctorRollbackDto;
+import io.terminus.doctor.event.dto.event.sow.DoctorFostersDto;
 import io.terminus.doctor.event.enums.PigEvent;
+import io.terminus.doctor.event.enums.RollbackType;
 import io.terminus.doctor.event.handler.rollback.DoctorAbstractRollbackPigEventHandler;
 import io.terminus.doctor.event.handler.rollback.group.DoctorRollbackGroupTransHandler;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorPigEvent;
+import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.event.model.DoctorRevertLog;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,6 +57,29 @@ public class DoctorRollbackSowFosterHandler extends DoctorAbstractRollbackPigEve
 
     @Override
     protected List<DoctorRollbackDto> handleReport(DoctorPigEvent pigEvent) {
-        return null;
+        //拼窝：猪舍，猪，猪群搜索
+        DoctorPigTrack fosterTrack = doctorPigTrackDao.findByPigId(pigEvent.getPigId());
+        DoctorRollbackDto foster = new DoctorRollbackDto();
+        foster.setOrgId(pigEvent.getOrgId());
+        foster.setFarmId(pigEvent.getFarmId());
+        foster.setEventAt(pigEvent.getEventAt());
+        foster.setEsBarnId(pigEvent.getBarnId());
+        foster.setEsPigId(pigEvent.getPigId());
+        foster.setEsGroupId(fosterTrack.getGroupId());
+        foster.setRollbackTypes(Lists.newArrayList(RollbackType.SEARCH_BARN, RollbackType.SEARCH_PIG, RollbackType.SEARCH_GROUP));
+
+        //被拼窝：猪舍，猪，猪群搜索，存栏日报，存栏月报
+        DoctorFostersDto fostersDto = JSON_MAPPER.fromJson(pigEvent.getExtra(), DoctorFostersDto.class);
+        DoctorPigTrack fosterByTrack = doctorPigTrackDao.findByPigId(fostersDto.getFosterSowId());
+        DoctorRollbackDto fosterBy = new DoctorRollbackDto();
+        fosterBy.setOrgId(pigEvent.getOrgId());
+        fosterBy.setFarmId(pigEvent.getFarmId());
+        fosterBy.setEventAt(pigEvent.getEventAt());
+        fosterBy.setEsBarnId(fosterByTrack.getCurrentBarnId());
+        fosterBy.setEsPigId(fostersDto.getFosterSowId());
+        fosterBy.setEsGroupId(fosterByTrack.getGroupId());
+        fosterBy.setRollbackTypes(Lists.newArrayList(RollbackType.SEARCH_BARN, RollbackType.SEARCH_PIG,
+                RollbackType.SEARCH_GROUP, RollbackType.DAILY_LIVESTOCK, RollbackType.MONTHLY_REPORT));
+        return Lists.newArrayList(foster, fosterBy);
     }
 }

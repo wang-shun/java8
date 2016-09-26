@@ -51,6 +51,7 @@ public class DoctorRollbackSowFarrowHandler extends DoctorAbstractRollbackPigEve
         DoctorRollbackDto fromDto = new DoctorRollbackDto();
         fromDto.setOrgId(pigEvent.getOrgId());
         fromDto.setFarmId(pigEvent.getFarmId());
+        fromDto.setEventAt(pigEvent.getEventAt());
         fromDto.setEsBarnId(pigEvent.getBarnId());
         fromDto.setEsPigId(pigEvent.getPigId());
 
@@ -62,6 +63,7 @@ public class DoctorRollbackSowFarrowHandler extends DoctorAbstractRollbackPigEve
         DoctorRollbackDto toDto = new DoctorRollbackDto();
         toDto.setOrgId(pigEvent.getOrgId());
         toDto.setFarmId(pigEvent.getFarmId());
+        toDto.setEventAt(pigEvent.getEventAt());
         toDto.setEsBarnId(toGroupEvent.getBarnId());
         toDto.setEsGroupId(toGroupEvent.getGroupId());
 

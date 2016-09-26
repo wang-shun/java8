@@ -66,6 +66,7 @@ public class DoctorRollbackGroupTransFarmHandler extends DoctorAbstractRollbackG
         DoctorRollbackDto fromDto = new DoctorRollbackDto();
         fromDto.setOrgId(groupEvent.getOrgId());
         fromDto.setFarmId(groupEvent.getFarmId());
+        fromDto.setEventAt(groupEvent.getEventAt());
         fromDto.setEsBarnId(groupEvent.getBarnId());
         fromDto.setEsGroupId(groupEvent.getGroupId());
         fromDto.setRollbackTypes(rollbackTypes);
@@ -74,6 +75,7 @@ public class DoctorRollbackGroupTransFarmHandler extends DoctorAbstractRollbackG
         DoctorRollbackDto toDto = new DoctorRollbackDto();
         toDto.setOrgId(groupEvent.getOrgId());
         toDto.setFarmId(trans.getToFarmId());   //转场事件的目标猪场
+        toDto.setEventAt(groupEvent.getEventAt());
         toDto.setEsBarnId(trans.getToBarnId());
         toDto.setEsGroupId(trans.getToGroupId());
         toDto.setRollbackTypes(rollbackTypes);

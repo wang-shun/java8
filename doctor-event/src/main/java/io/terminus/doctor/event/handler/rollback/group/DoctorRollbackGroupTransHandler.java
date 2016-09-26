@@ -47,7 +47,7 @@ public class DoctorRollbackGroupTransHandler extends DoctorAbstractRollbackGroup
     }
 
     @Override
-    protected DoctorRevertLog handleRollback(DoctorGroupEvent groupEvent, Long operatorId, String operatorName) {
+    public DoctorRevertLog handleRollback(DoctorGroupEvent groupEvent, Long operatorId, String operatorName) {
         DoctorGroupEvent toGroupEvent = doctorGroupEventDao.findByRelGroupEventId(groupEvent.getId());
 
         //先回滚转入猪群事件， 再回滚转群事件
@@ -56,10 +56,11 @@ public class DoctorRollbackGroupTransHandler extends DoctorAbstractRollbackGroup
     }
 
     @Override
-    protected List<DoctorRollbackDto> handleReport(DoctorGroupEvent groupEvent) {
+    public List<DoctorRollbackDto> handleReport(DoctorGroupEvent groupEvent) {
         DoctorRollbackDto fromDto = new DoctorRollbackDto();
         fromDto.setOrgId(groupEvent.getOrgId());
         fromDto.setFarmId(groupEvent.getFarmId());
+        fromDto.setEventAt(groupEvent.getEventAt());
         fromDto.setEsBarnId(groupEvent.getBarnId());
         fromDto.setEsGroupId(groupEvent.getGroupId());
 
@@ -71,6 +72,7 @@ public class DoctorRollbackGroupTransHandler extends DoctorAbstractRollbackGroup
         DoctorRollbackDto toDto = new DoctorRollbackDto();
         toDto.setOrgId(groupEvent.getOrgId());
         toDto.setFarmId(groupEvent.getFarmId());
+        toDto.setEventAt(groupEvent.getEventAt());
         toDto.setEsBarnId(trans.getToBarnId());
         toDto.setEsGroupId(trans.getToGroupId());
 
