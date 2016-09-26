@@ -45,6 +45,16 @@ public abstract class BaseGroupInput implements Serializable {
 
     private String creatorName;
 
+    /**
+     * 自动生成的事件，记录下关联的猪群事件id
+     */
+    private Long relGroupEventId;
+
+    /**
+     * 母猪触发的事件，记录下关联的猪事件id
+     */
+    private Long relPigEventId;
+
     public final String generateEventDesc(){
         Map<String, String> descMap = this.descMap();
         if(descMap == null){

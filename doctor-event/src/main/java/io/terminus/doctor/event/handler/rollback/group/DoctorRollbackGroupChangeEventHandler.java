@@ -2,13 +2,11 @@ package io.terminus.doctor.event.handler.rollback.group;
 
 import com.google.common.collect.Lists;
 import io.terminus.doctor.event.constants.DoctorBasicEnums;
-import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
 import io.terminus.doctor.event.dto.DoctorRollbackDto;
 import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.enums.RollbackType;
 import io.terminus.doctor.event.handler.rollback.DoctorAbstractRollbackGroupEventHandler;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
-import io.terminus.doctor.event.model.DoctorGroupSnapshot;
 import io.terminus.doctor.event.model.DoctorRevertLog;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -24,7 +22,7 @@ import java.util.Objects;
  */
 @Slf4j
 @Component
-public class DoctorRollbackChangeEventHandler extends DoctorAbstractRollbackGroupEventHandler {
+public class DoctorRollbackGroupChangeEventHandler extends DoctorAbstractRollbackGroupEventHandler {
 
     @Override
     protected boolean handleCheck(DoctorGroupEvent groupEvent) {
@@ -33,25 +31,14 @@ public class DoctorRollbackChangeEventHandler extends DoctorAbstractRollbackGrou
     }
 
     @Override
-    protected DoctorRevertLog handleRollback(DoctorGroupEvent groupEvent) {
-        DoctorGroupSnapshot snapshot = doctorGroupSnapshotDao.findGroupSnapshotByToEventId(groupEvent.getId());
-
-        DoctorGroupSnapShotInfo info = JSON_MAPPER.fromJson(snapshot.getFromInfo(), DoctorGroupSnapShotInfo.class);
-
-        //删除此事件 -> 回滚猪群跟踪 -> 回滚猪群 -> 删除镜像
-        doctorGroupEventDao.delete(groupEvent.getId());
-        doctorGroupTrackDao.update(info.getGroupTrack());
-        doctorGroupDao.update(info.getGroup());
-        doctorGroupSnapshotDao.delete(snapshot.getId());
-        return DoctorRevertLog.builder()
-                .fromInfo(snapshot.getToInfo())
-                .toInfo(snapshot.getFromInfo())
-                .build();
+    protected DoctorRevertLog handleRollback(DoctorGroupEvent groupEvent, Long operatorId, String operatorName) {
+        return sampleRollback(groupEvent);
     }
 
     @Override
     protected List<DoctorRollbackDto> handleReport(DoctorGroupEvent groupEvent) {
         DoctorRollbackDto dto = new DoctorRollbackDto();
+        dto.setOrgId(groupEvent.getOrgId());
         dto.setFarmId(groupEvent.getFarmId());
         dto.setEsBarnId(groupEvent.getBarnId());
         dto.setEsGroupId(groupEvent.getGroupId());

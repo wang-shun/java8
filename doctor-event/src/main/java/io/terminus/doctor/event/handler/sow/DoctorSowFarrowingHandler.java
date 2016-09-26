@@ -108,8 +108,10 @@ public class DoctorSowFarrowingHandler extends DoctorAbstractEventFlowHandler {
         extra.put("toBarnId", doctorPigTrack.getCurrentBarnId());
         extra.put("toBarnName", doctorPigTrack.getCurrentBarnName());
 
+        Long pigEventId = (Long) context.get("doctorPigEventId");
+
         // 对应的 猪群信息
-        Long groupId = buildPigGroupCountInfo(basic, extra);
+        Long groupId = buildPigGroupCountInfo(basic, extra, pigEventId);
         extra.put("farrowingPigletGroupId", groupId);
 
         //分娩时记录下 哺乳猪群号, 分娩数量
@@ -122,7 +124,7 @@ public class DoctorSowFarrowingHandler extends DoctorAbstractEventFlowHandler {
 
         doctorPigTrack.addAllExtraMap(extra);
         doctorPigTrack.setStatus(PigStatus.FEED.getKey());  //母猪进入哺乳的状态
-        doctorPigTrack.addPigEvent(basic.getPigType(), (Long) context.get("doctorPigEventId"));
+        doctorPigTrack.addPigEvent(basic.getPigType(), pigEventId);
         return doctorPigTrack;
     }
 
@@ -132,7 +134,7 @@ public class DoctorSowFarrowingHandler extends DoctorAbstractEventFlowHandler {
      * @param basic
      * @param extra
      */
-    protected Long buildPigGroupCountInfo(DoctorBasicInputInfoDto basic, Map<String, Object> extra) {
+    protected Long buildPigGroupCountInfo(DoctorBasicInputInfoDto basic, Map<String, Object> extra, Long pigEventId) {
         DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(basic.getPigId());
 
         // Build 新建猪群操作方式
@@ -167,6 +169,8 @@ public class DoctorSowFarrowingHandler extends DoctorAbstractEventFlowHandler {
         input.setIsAuto(1);
         input.setCreatorId(basic.getStaffId());
         input.setCreatorName(basic.getStaffName());
+
+        input.setRelPigEventId(pigEventId);
         Response<Long> response = doctorGroupWriteService.sowGroupEventMoveIn(input);
         if (response.isSuccess()) {
             return response.getResult();

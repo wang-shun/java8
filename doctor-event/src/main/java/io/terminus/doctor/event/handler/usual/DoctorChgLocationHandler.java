@@ -85,10 +85,12 @@ public class DoctorChgLocationHandler extends DoctorAbstractEventHandler{
         DoctorBarn toBarn = doctorBarnDao.findById(toBarnId);
         checkBarnTypeEqual(fromBarn, toBarn);
 
+        Long pigEventId = (Long) context.get("doctorPigEventId");
+
         // 来源和前往都是 1 和 7 时, 仔猪也要跟着转群
         if(PigType.FARROW_TYPES.contains(fromBarn.getPigType()) && PigType.FARROW_TYPES.contains(toBarn.getPigType())
                 && doctorPigTrack.getGroupId() != null){
-            Long groupId = pigletTrans(doctorPigTrack, basic, extra, toBarn);
+            Long groupId = pigletTrans(doctorPigTrack, basic, extra, toBarn, pigEventId);
             extraMap.put("farrowingPigletGroupId", groupId);
             doctorPigTrack.setExtraMap(extraMap);
             doctorPigTrack.setGroupId(groupId);  //更新猪群id
@@ -97,7 +99,7 @@ public class DoctorChgLocationHandler extends DoctorAbstractEventHandler{
         doctorPigTrack.setCurrentBarnId(toBarnId);
         doctorPigTrack.setCurrentBarnName(toBarn.getName());
         doctorPigTrack.addAllExtraMap(extra);
-        doctorPigTrack.addPigEvent(basic.getPigType(), (Long) context.get("doctorPigEventId"));
+        doctorPigTrack.addPigEvent(basic.getPigType(), pigEventId);
         return doctorPigTrack;
     }
 
@@ -116,7 +118,7 @@ public class DoctorChgLocationHandler extends DoctorAbstractEventHandler{
     }
 
     //未断奶仔猪转群
-    private Long pigletTrans(DoctorPigTrack pigTrack, DoctorBasicInputInfoDto basic, Map<String, Object> extra, DoctorBarn doctorToBarn) {
+    private Long pigletTrans(DoctorPigTrack pigTrack, DoctorBasicInputInfoDto basic, Map<String, Object> extra, DoctorBarn doctorToBarn, Long pigEventId) {
         //未断奶仔猪id
         DoctorTransGroupInput input = new DoctorTransGroupInput();
         input.setToBarnId(doctorToBarn.getId());
@@ -146,6 +148,7 @@ public class DoctorChgLocationHandler extends DoctorAbstractEventHandler{
         input.setSowQty(input.getQuantity() - input.getBoarQty());
         input.setAvgWeight((MoreObjects.firstNonNull(pigTrack.getFarrowAvgWeight(), 0D)));
         input.setWeight(input.getAvgWeight() * input.getQuantity());
+        input.setRelPigEventId(pigEventId);
         doctorGroupEventManager.handleEvent(fromGroup, input, DoctorTransGroupEventHandler.class);
         if (Objects.equals(input.getIsCreateGroup(), IsOrNot.YES.getValue())) {
             DoctorGroup toGroup = doctorGroupDao.findByFarmIdAndGroupCode(fromGroup.getGroup().getFarmId(), input.getToGroupCode());
