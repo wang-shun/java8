@@ -86,30 +86,6 @@ public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteServic
     }
 
     @Override
-    public Response<Long> rollBackPigEvent(Long pigEventId,Integer revertPigType,Long staffId, String staffName) {
-        try{
-            // validate lastest event
-            DoctorPigEvent doctorPigEvent = doctorPigEventDao.findById(pigEventId);
-            checkState(!isNull(doctorPigEvent), "input.pigEventId.error");
-
-            DoctorPigEvent doctorPigEventLast = doctorPigEventDao.queryLastPigEventById(doctorPigEvent.getPigId());
-            checkState(Objects.equals(doctorPigEventLast.getId(), pigEventId), "pigRollBack.error.notLastly");
-
-            checkState(!NOT_ALLOW_ROLL_BACK_EVENTS.contains(doctorPigEvent.getType()), "pigRollBack.eventType.notAllow");
-
-            return Response.ok(doctorPigEventManager.rollBackPigEvent(pigEventId,revertPigType,staffId,staffName));
-        } catch (ServiceException e) {
-            return Response.fail(e.getMessage());
-        }catch (IllegalStateException e){
-            log.error("illegal state pig roll back info, doctorEventId:{}, cause:{}", pigEventId, Throwables.getStackTraceAsString(e));
-            return Response.fail(e.getMessage());
-        }catch (Exception e){
-            log.error("pig roll back fail, doctorEventId:{}, cause:{}",pigEventId, Throwables.getStackTraceAsString(e));
-            return Response.fail("pig.rollBack.fail");
-        }
-    }
-
-    @Override
     public Response<Long> pigEntryEvent(DoctorBasicInputInfoDto doctorBasicInputInfoDto, DoctorFarmEntryDto doctorFarmEntryDto) {
         try{
             // validate 左右乳头数量大于0

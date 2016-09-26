@@ -5,7 +5,6 @@ import com.google.api.client.repackaged.com.google.common.base.Strings;
 import com.google.common.base.Throwables;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.Paging;
-import io.terminus.common.model.Response;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.common.utils.Splitters;
 import io.terminus.doctor.common.constants.JacksonType;
@@ -21,8 +20,6 @@ import io.terminus.doctor.event.service.DoctorPigEventWriteService;
 import io.terminus.doctor.event.service.DoctorPigReadService;
 import io.terminus.doctor.web.util.TransFromUtil;
 import io.terminus.doctor.workflow.core.WorkFlowService;
-import io.terminus.pampas.common.UserUtil;
-import io.terminus.parana.user.model.User;
 import io.terminus.parana.user.service.UserReadService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -80,30 +77,6 @@ public class DoctorPigEvents {
         this.userReadService = userReadService;
         this.workFlowService = workFlowService;
         this.transFromUtil = transFromUtil;
-    }
-
-    /**
-     * 回滚事件信息
-     *
-     * @param pigEventId
-     * @param revertPigType
-     * @return
-     */
-    @RequestMapping(value = "/rollBackPigEvent", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    @ResponseBody
-    public Long rollBackPigEvent(@RequestParam("pigEventId") Long pigEventId,
-                                 @RequestParam("revertPigType") Integer revertPigType) {
-        Long userId = null;
-        String userName = null;
-        try {
-            userId = UserUtil.getUserId();
-            Response<User> userResponse = userReadService.findById(userId);
-            userName = userResponse.getResult().getName();
-        } catch (Exception e) {
-            log.error("get user info error, cause:{}", Throwables.getStackTraceAsString(e));
-            throw new JsonResponseException("query.userInfo.error");
-        }
-        return RespHelper.or500(doctorPigEventWriteService.rollBackPigEvent(pigEventId, revertPigType, userId, userName));
     }
 
     @RequestMapping(value = "/pagingDoctorInfo", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)

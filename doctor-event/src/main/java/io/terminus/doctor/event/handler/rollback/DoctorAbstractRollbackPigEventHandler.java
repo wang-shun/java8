@@ -4,14 +4,15 @@ import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dao.DoctorGroupDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
-import io.terminus.doctor.event.dao.DoctorGroupSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
 import io.terminus.doctor.event.dao.DoctorPigEventDao;
+import io.terminus.doctor.event.dao.DoctorPigSnapshotDao;
 import io.terminus.doctor.event.dto.DoctorRollbackDto;
 import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.enums.RollbackType;
 import io.terminus.doctor.event.handler.DoctorRollbackPigEventHandler;
 import io.terminus.doctor.event.model.DoctorPigEvent;
+import io.terminus.doctor.event.model.DoctorPigSnapshot;
 import io.terminus.doctor.event.model.DoctorRevertLog;
 import io.terminus.doctor.event.service.DoctorGroupReadService;
 import io.terminus.doctor.event.service.DoctorPigEventReadService;
@@ -40,7 +41,7 @@ public abstract class DoctorAbstractRollbackPigEventHandler extends DoctorAbstra
     @Autowired protected DoctorGroupDao doctorGroupDao;
     @Autowired protected DoctorGroupEventDao doctorGroupEventDao;
     @Autowired protected DoctorGroupTrackDao doctorGroupTrackDao;
-    @Autowired protected DoctorGroupSnapshotDao doctorGroupSnapshotDao;
+    @Autowired protected DoctorPigSnapshotDao doctorPigSnapshotDao;
     @Autowired protected DoctorPigEventDao doctorPigEventDao;
     @Autowired protected DoctorPigEventReadService doctorPigEventReadService;
 
@@ -89,4 +90,14 @@ public abstract class DoctorAbstractRollbackPigEventHandler extends DoctorAbstra
      * @see RollbackType
      */
     protected abstract List<DoctorRollbackDto> handleReport(DoctorPigEvent pigEvent);
+
+    /**
+     * 通用猪事件回滚
+     * @param pigEvent 猪事件
+     * @return 回滚日志
+     */
+    protected DoctorRevertLog sampleRollback(DoctorPigEvent pigEvent) {
+        DoctorPigSnapshot snapshot = doctorPigSnapshotDao.queryByEventId(pigEvent.getId());
+        return new DoctorRevertLog();
+    }
 }

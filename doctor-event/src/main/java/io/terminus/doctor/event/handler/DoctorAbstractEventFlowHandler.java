@@ -5,10 +5,10 @@ import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import io.terminus.common.exception.ServiceException;
+import io.terminus.common.utils.BeanMapper;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.constants.JacksonType;
 import io.terminus.doctor.common.enums.PigType;
-import io.terminus.doctor.event.constants.DoctorPigSnapshotConstants;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
 import io.terminus.doctor.event.dao.DoctorPigDao;
@@ -17,12 +17,14 @@ import io.terminus.doctor.event.dao.DoctorPigSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorPigTrackDao;
 import io.terminus.doctor.event.dao.DoctorRevertLogDao;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
+import io.terminus.doctor.event.dto.DoctorPigSnapShotInfo;
 import io.terminus.doctor.event.dto.event.AbstractPigEventInputDto;
 import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.manager.DoctorGroupReportManager;
 import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
+import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigSnapshot;
 import io.terminus.doctor.event.model.DoctorPigTrack;
@@ -84,9 +86,18 @@ public abstract class DoctorAbstractEventFlowHandler extends HandlerAware {
             Map<String, Object> extraInfo = OBJECT_MAPPER.readValue(flowDataMap.get("extra"), JacksonType.MAP_OF_OBJECT);
             Map<String, Object> context = Maps.newHashMap();
 
+            DoctorPigTrack snapshotTrack = doctorPigTrackDao.findByPigId(doctorBasicInputInfoDto.getPigId());
+            DoctorPig snapshotPig = doctorPigDao.findById(doctorBasicInputInfoDto.getPigId());
+
             // bean date
             DoctorPigEvent doctorPigEvent = buildAllPigDoctorEvent(doctorBasicInputInfoDto, extraInfo);
-            DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(doctorPigEvent.getPigId());
+            DoctorPigTrack doctorPigTrack = BeanMapper.map(snapshotTrack, DoctorPigTrack.class);
+
+            DoctorPigSnapshot snapshot = DoctorPigSnapshot.builder()
+                    .pigId(snapshotPig.getId())
+                    .farmId(snapshotPig.getFarmId())
+                    .orgId(snapshotPig.getOrgId())
+                    .build();
 
             //哺乳母猪所带仔猪的猪群id
             Long farrowGroupId = doctorPigTrack.getGroupId();
@@ -102,6 +113,12 @@ public abstract class DoctorAbstractEventFlowHandler extends HandlerAware {
                 doctorPigEventDao.update(doctorPigEvent);
             }
 
+            //创建猪镜像
+            snapshot.setEventId(doctorPigEvent.getId());
+            snapshot.setPigInfo(JsonMapper.nonEmptyMapper().toJson(
+                    DoctorPigSnapShotInfo.builder().pig(snapshotPig).pigTrack(snapshotTrack).pigEvent(doctorPigEvent).build()));
+            doctorPigSnapshotDao.create(snapshot);
+
             context.put("doctorPigEventId", doctorPigEvent.getId());
 
             // update track info
@@ -110,14 +127,6 @@ public abstract class DoctorAbstractEventFlowHandler extends HandlerAware {
             doctorPigTrackDao.update(refreshPigTrack);
 
             eventCreatedAfter(execution, doctorPigEvent, doctorPigTrack, doctorBasicInputInfoDto, extraInfo, context);
-
-            // create snapshot info
-            // snapshot create
-            DoctorPigSnapshot doctorPigSnapshot = DoctorPigSnapshot.builder()
-                    .pigId(doctorPigEvent.getPigId()).farmId(doctorPigEvent.getFarmId()).orgId(doctorPigEvent.getOrgId()).eventId(doctorPigEvent.getId())
-                    .build();
-            doctorPigSnapshot.setPigInfoMap(ImmutableMap.of(DoctorPigSnapshotConstants.PIG_TRACK, currentPigTrackSnapShot));
-            doctorPigSnapshotDao.create(doctorPigSnapshot);
 
             // 特殊 事件信息处理
             specialFlowHandler(execution, doctorBasicInputInfoDto, extraInfo, context);
@@ -128,7 +137,7 @@ public abstract class DoctorAbstractEventFlowHandler extends HandlerAware {
             flowDataMap.put("createEventResult",
                     JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(
                             ImmutableMap.of("doctorPigId", doctorBasicInputInfoDto.getPigId(),
-                                    "doctorEventId", doctorPigEvent.getId(), "doctorSnapshotId", doctorPigSnapshot.getId())));
+                                    "doctorEventId", doctorPigEvent.getId(), "doctorSnapshotId", snapshot.getId())));
             flowDataMap.put("event", JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(doctorPigEvent));
             flowDataMap.put("track", JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(doctorPigTrack));
             execution.setFlowData(JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(flowDataMap));
