@@ -124,9 +124,13 @@ public class DoctorWareHouseEvents {
     @ResponseBody
     public Paging<DoctorMaterialInWareHouseDto> pagingDoctorMaterialInWareHouse(@RequestParam("farmId") Long farmId,
                                                                                 @RequestParam("wareHouseId") Long wareHouseId,
+                                                                                @RequestParam(name = "materialId", required = false) Long materialId,
+                                                                                @RequestParam(name = "materialName", required = false) String materialName,
                                                                                 @RequestParam("pageNo") Integer pageNo,
                                                                                 @RequestParam("pageSize") Integer pageSize){
-        Paging<DoctorMaterialInWareHouseDto> result = RespHelper.or500(doctorMaterialInWareHouseReadService.pagingDoctorMaterialInWareHouse(farmId, wareHouseId, pageNo, pageSize));
+        Paging<DoctorMaterialInWareHouseDto> result = RespHelper.or500(
+                doctorMaterialInWareHouseReadService.pagingDoctorMaterialInWareHouse(farmId, wareHouseId, materialId, materialName, pageNo, pageSize)
+        );
 
         try{
             result.getData().forEach(s->{
