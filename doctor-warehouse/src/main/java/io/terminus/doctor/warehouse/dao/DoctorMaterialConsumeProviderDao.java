@@ -5,12 +5,16 @@ import com.google.common.collect.Maps;
 import io.terminus.common.model.Paging;
 import io.terminus.common.mysql.dao.MyBatisDao;
 import io.terminus.common.utils.Constants;
+import io.terminus.common.utils.MapBuilder;
 import io.terminus.doctor.common.enums.WareHouseType;
+import io.terminus.doctor.common.utils.Params;
 import io.terminus.doctor.warehouse.dto.MaterialCountAmount;
+import io.terminus.doctor.warehouse.dto.WarehouseEventReport;
 import io.terminus.doctor.warehouse.model.DoctorMaterialConsumeProvider;
 import org.springframework.stereotype.Repository;
 
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -73,5 +77,27 @@ public class DoctorMaterialConsumeProviderDao extends MyBatisDao<DoctorMaterialC
         criteria.put("eventType", DoctorMaterialConsumeProvider.EVENT_TYPE.CONSUMER.getValue());
         criteria.put("type", WareHouseType.FEED.getKey());
         return sqlSession.selectOne(sqlId("sumConsumeFeed"), criteria);
+    }
+
+    /**
+     * 查询仓库内各种物资在指定时间段内的出入库总量和金额
+     * @param farmId
+     * @param warehouseId
+     * @param type
+     * @param startAt
+     * @param endAt
+     * @return
+     */
+    public List<WarehouseEventReport> warehouseEventReport(Long farmId, Long warehouseId, WareHouseType type, Date startAt, Date endAt){
+        Map<String, Object> param = MapBuilder.<String, Object>of()
+                .put("farmId", farmId)
+                .put("warehouseId", warehouseId)
+                .put("startAt", startAt)
+                .put("endAt", endAt)
+                .map();
+        if(type != null){
+            param.put("type", type.getKey());
+        }
+        return sqlSession.selectList(sqlId("warehouseEventReport"), ImmutableMap.copyOf(Params.filterNullOrEmpty(param)));
     }
 }

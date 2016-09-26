@@ -211,4 +211,13 @@
             <include refid="criteria"/>
         </where>
     </select>
+
+    <select id="warehouseEventReport" parameterType="map" resultType="io.terminus.doctor.warehouse.dto.WarehouseEventReport">
+        select ware_house_id as warehouseId, event_type as eventType, ifnull(sum(event_count), 0) count, ifnull(sum(event_count * unit_price), 0) amount
+        from <include refid="tb"/>
+        <where>
+            <include refid="criteria"/>
+        </where>
+        group by ware_house_id, `event_type`
+    </select>
 </mapper>
