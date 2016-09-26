@@ -10,7 +10,6 @@ import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorRevertLog;
 import org.springframework.stereotype.Component;
 
-import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
@@ -38,13 +37,13 @@ public class DoctorRollbackSowChgLocationEventHandler extends DoctorAbstractRoll
                 .esPigId(pigEvent.getPigId())
                 .farmId(pigEvent.getFarmId())
                 .rollbackTypes(Lists.newArrayList(RollbackType.SEARCH_BARN, RollbackType.SEARCH_PIG, RollbackType.DAILY_LIVESTOCK, RollbackType.MONTHLY_REPORT))
-                .eventAt(new Date())
+                .eventAt(pigEvent.getEventAt())
                 .build();
         DoctorRollbackDto doctorRollbackDto1 = DoctorRollbackDto.builder()
                 .esBarnId(dto.getChgLocationToBarnId())
                 .farmId(pigEvent.getFarmId())
                 .rollbackTypes(Lists.newArrayList(RollbackType.SEARCH_BARN))
-                .eventAt(new Date())
+                .eventAt(pigEvent.getEventAt())
                 .build();
         return Lists.newArrayList(doctorRollbackDto, doctorRollbackDto1);
     }

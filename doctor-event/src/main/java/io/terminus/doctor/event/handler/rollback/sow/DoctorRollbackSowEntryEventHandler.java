@@ -9,7 +9,6 @@ import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorRevertLog;
 import org.springframework.stereotype.Component;
 
-import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
@@ -37,7 +36,7 @@ public class DoctorRollbackSowEntryEventHandler extends DoctorAbstractRollbackPi
                 .esPigId(pigEvent.getPigId())
                 .rollbackTypes(Lists.newArrayList(RollbackType.SEARCH_BARN, RollbackType.SEARCH_PIG, RollbackType.DAILY_LIVESTOCK, RollbackType.MONTHLY_REPORT))
                 .farmId(pigEvent.getFarmId())
-                .eventAt(new Date())
+                .eventAt(pigEvent.getEventAt())
                 .build();
         return Lists.newArrayList(doctorRollbackDto);
     }
