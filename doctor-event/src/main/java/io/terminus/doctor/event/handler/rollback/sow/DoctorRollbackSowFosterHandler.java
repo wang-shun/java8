@@ -45,14 +45,23 @@ public class DoctorRollbackSowFosterHandler extends DoctorAbstractRollbackPigEve
             DoctorGroupEvent toGroupEvent = doctorGroupEventDao.findByRelPigEventId(toPigEvent.getId());
             return RespHelper.orFalse(doctorPigEventReadService.isLastEvent(toPigEvent.getPigId(), toPigEvent.getId())) &&
                     doctorRollbackGroupTransHandler.handleCheck(toGroupEvent);
-
         }
         return false;
     }
 
     @Override
     protected DoctorRevertLog handleRollback(DoctorPigEvent pigEvent, Long operatorId, String operatorName) {
-        return null;
+        DoctorPigEvent toPigEvent = doctorPigEventDao.findByRelGroupEventId(pigEvent.getId());
+        DoctorGroupEvent toGroupEvent = doctorGroupEventDao.findByRelPigEventId(toPigEvent.getId());
+
+        //1. 仔猪转群
+        doctorRollbackGroupTransHandler.rollback(toGroupEvent, operatorId, operatorName);
+
+        //2. todo 被拼窝
+        //handleRollbackWithoutStatus(toPigEvent, operatorId, operatorId);
+
+        //3. 拼窝
+        return handleRollbackWithoutStatus(toPigEvent);
     }
 
     @Override

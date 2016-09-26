@@ -6,10 +6,12 @@ import io.terminus.doctor.event.dto.DoctorRollbackDto;
 import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.enums.RollbackType;
 import io.terminus.doctor.event.handler.rollback.DoctorAbstractRollbackGroupEventHandler;
+import io.terminus.doctor.event.handler.rollback.sow.DoctorRollbackSowEntryEventHandler;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorRevertLog;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -25,6 +27,9 @@ import java.util.Objects;
 @Component
 public class DoctorRollbackGroupTurnSeedHandler extends DoctorAbstractRollbackGroupEventHandler {
 
+    @Autowired
+    private DoctorRollbackSowEntryEventHandler doctorRollbackSowEntryEventHandler;
+
     @Override
     protected boolean handleCheck(DoctorGroupEvent groupEvent) {
         //商品猪转种猪会触发猪的进场事件，所以需要校验猪的进场事件是否是最新事件
@@ -38,7 +43,9 @@ public class DoctorRollbackGroupTurnSeedHandler extends DoctorAbstractRollbackGr
 
     @Override
     protected DoctorRevertLog handleRollback(DoctorGroupEvent groupEvent, Long operatorId, String operatorName) {
-        // TODO: 2016/9/23 调用猪进场事件的回滚
+        //先回滚猪的进场事件
+        DoctorPigEvent toPigEvent = doctorPigEventDao.findByRelGroupEventId(groupEvent.getId());
+        doctorRollbackSowEntryEventHandler.rollback(toPigEvent, operatorId, operatorName);
         return sampleRollback(groupEvent);
     }
 
