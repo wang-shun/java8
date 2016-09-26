@@ -2,13 +2,13 @@ package io.terminus.doctor.event.handler.rollback;
 
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.utils.RespHelper;
+import io.terminus.doctor.event.dao.DoctorGroupDao;
+import io.terminus.doctor.event.dao.DoctorGroupEventDao;
+import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
 import io.terminus.doctor.event.dao.DoctorPigDao;
 import io.terminus.doctor.event.dao.DoctorPigEventDao;
 import io.terminus.doctor.event.dao.DoctorPigSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorPigTrackDao;
-import io.terminus.doctor.event.dao.DoctorGroupDao;
-import io.terminus.doctor.event.dao.DoctorGroupEventDao;
-import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
 import io.terminus.doctor.event.dto.DoctorPigSnapShotInfo;
 import io.terminus.doctor.event.dto.DoctorRollbackDto;
 import io.terminus.doctor.event.enums.IsOrNot;
@@ -59,7 +59,6 @@ public abstract class DoctorAbstractRollbackPigEventHandler extends DoctorAbstra
     @Value("${flow.definition.key.sow:sow}")
     protected String sowFlowKey;
 
-    protected final JsonMapper MAPPER = JsonMapper.JSON_NON_DEFAULT_MAPPER;
     /**
      * 判断能否回滚(1.手动事件 2.三个月内的事件 3.最新事件 4.子类根据事件类型特殊处理)
      */
@@ -113,28 +112,16 @@ public abstract class DoctorAbstractRollbackPigEventHandler extends DoctorAbstra
      * @return
      */
     protected DoctorRevertLog handleRollbackWithoutStatus(DoctorPigEvent pigEvent, Integer type){
-        DoctorPigTrack doctorPigTrack= doctorPigTrackDao.findByPigId(pigEvent.getPigId());
-        DoctorPig doctorPig= doctorPigDao.findById(pigEvent.getPigId());
+        DoctorRevertLog doctorRevertLog = createDoctorRevertLog(pigEvent, type);
         DoctorPigSnapshot doctorPigSnapshot = doctorPigSnapshotDao.queryByEventId(pigEvent.getId());
-        DoctorPigSnapShotInfo fromInfo  = DoctorPigSnapShotInfo.builder()
-                .pigEvent(pigEvent)
-                .pigTrack(doctorPigTrack)
-                .pig(doctorPig)
-                .build();
-
-        DoctorPigSnapShotInfo toInfo  = DoctorPigSnapShotInfo.builder()
-                .pigEvent(pigEvent)
-                .pigTrack(doctorPigTrack)
-                .pig(doctorPig)
-                .build();
-
         doctorPigEventDao.delete(pigEvent.getId());
+        if (!Objects.equals(pigEvent.getType(), PigEvent.ENTRY.getKey())) {
+            doctorPigTrackDao.update(JSON_MAPPER.fromJson(doctorPigSnapshot.getPigInfo(), DoctorPigSnapShotInfo.class).getPigTrack());
+        } else {
+            doctorPigTrackDao.delete(doctorPigTrackDao.findByPigId(pigEvent.getPigId()).getId());
+        }
         doctorPigSnapshotDao.delete(doctorPigSnapshot.getId());
-        return DoctorRevertLog.builder()
-                .type(type)
-                .fromInfo(JSON_MAPPER.toJson(fromInfo))
-                .toInfo("")
-                .build();
+        return doctorRevertLog;
     }
 
     /**
@@ -144,27 +131,9 @@ public abstract class DoctorAbstractRollbackPigEventHandler extends DoctorAbstra
      * @return
      */
     protected DoctorRevertLog handleRollbackWithStatus(DoctorPigEvent pigEvent, Integer type) {
-        DoctorPigTrack doctorPigTrack= doctorPigTrackDao.findByPigId(pigEvent.getPigId());
-        DoctorPig doctorPig= doctorPigDao.findById(pigEvent.getPigId());
-        DoctorPigSnapshot doctorPigSnapshot = doctorPigSnapshotDao.queryByEventId(pigEvent.getId());
-        DoctorPigSnapShotInfo doctorPigSnapShotInfo  = DoctorPigSnapShotInfo.builder()
-                .pigEvent(pigEvent)
-                .pigTrack(doctorPigTrack)
-                .pig(doctorPig)
-                .build();
-        doctorPigEventDao.delete(pigEvent.getId());
-        if (!Objects.equals(pigEvent.getType(), PigEvent.ENTRY.getKey())) {
-            doctorPigTrackDao.update(JSON_MAPPER.fromJson(doctorPigSnapshot.getPigInfo(), DoctorPigSnapShotInfo.class).getPigTrack());
-        } else {
-            doctorPigTrackDao.delete(doctorPigTrackDao.findByPigId(pigEvent.getPigId()).getId());
-        }
-        doctorPigSnapshotDao.delete(doctorPigSnapshot.getId());
+        DoctorRevertLog doctorRevertLog = handleRollbackWithStatus(pigEvent, type);
         workFlowRollback(pigEvent);
-        return DoctorRevertLog.builder()
-                .type(type)
-                .fromInfo(JSON_MAPPER.toJson(doctorPigSnapShotInfo))
-                .toInfo("")
-                .build();
+        return doctorRevertLog;
     }
 
      /* 通用猪事件回滚
@@ -176,13 +145,43 @@ public abstract class DoctorAbstractRollbackPigEventHandler extends DoctorAbstra
         return new DoctorRevertLog();
     }
 
+    /**
+     * 回滚工作流
+     * @param pigEvent
+     */
     protected void workFlowRollback(DoctorPigEvent pigEvent){
         if (Objects.equals(pigEvent.getKind(), DoctorPigEvent.kind.Sow.getValue())){
             flowProcessService.rollBack(sowFlowKey, pigEvent.getPigId());
         }
     }
 
-    protected DoctorRevertLog createDoctorRevertLog(DoctorPigEvent pigEvent){
-        return null;
+    /**
+     * 创建回滚日志
+     * @param pigEvent
+     * @param type
+     * @return
+     */
+    protected DoctorRevertLog createDoctorRevertLog(DoctorPigEvent pigEvent, Integer type){
+        DoctorPigTrack doctorPigTrack= doctorPigTrackDao.findByPigId(pigEvent.getPigId());
+        DoctorPig doctorPig= doctorPigDao.findById(pigEvent.getPigId());
+        DoctorPigSnapShotInfo fromInfo  = DoctorPigSnapShotInfo.builder()
+                .pigEvent(pigEvent)
+                .pigTrack(doctorPigTrack)
+                .pig(doctorPig)
+                .build();
+
+        DoctorPigEvent toPigEvent = doctorPigEventDao.queryLastPigEventById(pigEvent.getPigId());
+        DoctorPigTrack toPigTrack = doctorPigTrackDao.findByPigId(toPigEvent.getPigId());
+        DoctorPigSnapShotInfo toInfo  = DoctorPigSnapShotInfo.builder()
+                .pigEvent(toPigEvent)
+                .pigTrack(toPigTrack)
+                .pig(doctorPig)
+                .build();
+        return DoctorRevertLog.builder()
+                .type(type)
+                .fromInfo(JSON_MAPPER.toJson(fromInfo))
+                .toInfo(JSON_MAPPER.toJson(toInfo))
+                .build();
     }
+
 }

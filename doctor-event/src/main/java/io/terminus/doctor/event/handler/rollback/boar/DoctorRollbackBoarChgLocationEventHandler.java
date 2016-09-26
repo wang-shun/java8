@@ -2,6 +2,7 @@ package io.terminus.doctor.event.handler.rollback.boar;
 
 import com.google.common.collect.Lists;
 import io.terminus.doctor.event.dto.DoctorRollbackDto;
+import io.terminus.doctor.event.dto.event.usual.DoctorChgLocationDto;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.RollbackType;
 import io.terminus.doctor.event.handler.rollback.DoctorAbstractRollbackPigEventHandler;
@@ -30,15 +31,15 @@ public class DoctorRollbackBoarChgLocationEventHandler extends DoctorAbstractRol
 
     @Override
     protected List<DoctorRollbackDto> handleReport(DoctorPigEvent pigEvent) {
-        pigEvent.setExtra(pigEvent.getExtra());
+        DoctorChgLocationDto dto = JSON_MAPPER.fromJson(pigEvent.getExtra(), DoctorChgLocationDto.class);
         DoctorRollbackDto doctorRollbackDto = DoctorRollbackDto.builder()
-                .esBarnId((Long) pigEvent.getExtraMap().get("chgLocationFromBarnId"))
+                .esBarnId(dto.getChgLocationFromBarnId())
                 .farmId(pigEvent.getFarmId())
                 .rollbackTypes(Lists.newArrayList(RollbackType.SEARCH_BARN))
                 .eventAt(new Date())
                 .build();
         DoctorRollbackDto doctorRollbackDto1 = DoctorRollbackDto.builder()
-                .esBarnId((Long) pigEvent.getExtraMap().get("chgLocationToBarnId"))
+                .esBarnId(dto.getChgLocationToBarnId())
                 .farmId(pigEvent.getFarmId())
                 .rollbackTypes(Lists.newArrayList(RollbackType.SEARCH_BARN))
                 .eventAt(new Date())
