@@ -131,17 +131,9 @@ public abstract class DoctorAbstractRollbackPigEventHandler extends DoctorAbstra
      * @return
      */
     protected DoctorRevertLog handleRollbackWithStatus(DoctorPigEvent pigEvent, Integer type) {
-        DoctorRevertLog doctorRevertLog = handleRollbackWithStatus(pigEvent, type);
+        DoctorRevertLog doctorRevertLog = handleRollbackWithoutStatus(pigEvent, type);
         workFlowRollback(pigEvent);
         return doctorRevertLog;
-    }
-     /* 通用猪事件回滚
-     * @param pigEvent 猪事件
-     * @return 回滚日志
-     */
-    protected DoctorRevertLog sampleRollback(DoctorPigEvent pigEvent) {
-        DoctorPigSnapshot snapshot = doctorPigSnapshotDao.queryByEventId(pigEvent.getId());
-        return new DoctorRevertLog();
     }
 
     /**
