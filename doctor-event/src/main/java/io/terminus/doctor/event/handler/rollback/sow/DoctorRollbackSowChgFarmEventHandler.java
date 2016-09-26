@@ -25,7 +25,7 @@ public class DoctorRollbackSowChgFarmEventHandler extends DoctorAbstractRollback
 
     @Override
     protected DoctorRevertLog handleRollback(DoctorPigEvent pigEvent, Long operatorId, String operatorName) {
-        return handleRollbackWithStatus(pigEvent, DoctorRevertLog.Type.SOW.getValue());
+        return handleRollbackWithStatus(pigEvent);
     }
 
     @Override

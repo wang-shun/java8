@@ -25,7 +25,7 @@ public class DoctorRollbackBoarEntryEventHandler extends DoctorAbstractRollbackP
 
     @Override
     protected DoctorRevertLog handleRollback(DoctorPigEvent pigEvent, Long operatorId, String operatorName) {
-       return handleRollbackWithStatus(pigEvent, DoctorRevertLog.Type.BOAR.getValue());
+       return handleRollbackWithStatus(pigEvent);
     }
 
     @Override
