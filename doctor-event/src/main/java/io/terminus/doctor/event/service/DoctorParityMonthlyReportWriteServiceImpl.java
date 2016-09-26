@@ -1,6 +1,7 @@
 package io.terminus.doctor.event.service;
 
 import com.google.common.base.Throwables;
+import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.model.Response;
 import io.terminus.common.utils.Dates;
 import io.terminus.doctor.event.dao.DoctorParityMonthlyReportDao;
@@ -26,6 +27,7 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 @Service
+@RpcProvider
 public class DoctorParityMonthlyReportWriteServiceImpl implements DoctorParityMonthlyReportWriteService {
 
     private final DoctorParityMonthlyReportDao doctorParityMonthlyReportDao;
