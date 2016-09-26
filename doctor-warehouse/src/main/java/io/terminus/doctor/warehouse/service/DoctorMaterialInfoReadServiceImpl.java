@@ -35,15 +35,6 @@ public class DoctorMaterialInfoReadServiceImpl implements DoctorMaterialInfoRead
         this.doctorMaterialInfoDao = doctorMaterialInfoDao;
     }
 
-    @Override
-    public Response<List<DoctorMaterialInfo>> queryMaterialInfos(Long farmId) {
-        try{
-            return Response.ok(doctorMaterialInfoDao.findByFarmId(farmId));
-        }catch (Exception e){
-            log.error("query material infos error , cause:{}", Throwables.getStackTraceAsString(e));
-            return Response.fail("query.materialInfos.fail");
-        }
-    }
 
     @Override
     @Deprecated

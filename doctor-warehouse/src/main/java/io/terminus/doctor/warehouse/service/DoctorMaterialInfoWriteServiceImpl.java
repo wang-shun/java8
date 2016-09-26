@@ -43,9 +43,6 @@ public class DoctorMaterialInfoWriteServiceImpl implements DoctorMaterialInfoWri
 
     private final MaterialInWareHouseManager materialInWareHouseManager;
 
-    @Autowired(required = false)
-    private Publisher publisher;
-
     @Autowired
     private DoctorMaterialInfoWriteServiceImpl(DoctorMaterialInfoDao doctorMaterialInfoDao,
                                                DoctorWareHouseDao doctorWareHouseDao,
@@ -53,20 +50,6 @@ public class DoctorMaterialInfoWriteServiceImpl implements DoctorMaterialInfoWri
         this.doctorMaterialInfoDao = doctorMaterialInfoDao;
         this.doctorWareHouseDao = doctorWareHouseDao;
         this.materialInWareHouseManager = materialInWareHouseManager;
-    }
-
-
-    @Override
-    @Deprecated
-    public Response<Long> createMaterialInfo(DoctorMaterialInfo doctorMaterialInfo) {
-        try{
-            checkState(doctorMaterialInfoDao.create(doctorMaterialInfo), "create.materialInfo.fail");
-            publishMaterialInfo(DataEventType.MaterialInfoCreateEvent.getKey(), ImmutableMap.of("materialInfoCreatedId", doctorMaterialInfo.getId()));
-            return Response.ok(doctorMaterialInfo.getId());
-        }catch (Exception e){
-            log.error("create material info fail, cause:{}", Throwables.getStackTraceAsString(e));
-            return Response.fail("create.materialInfo.fail");
-        }
     }
 
     @Override
@@ -163,13 +146,4 @@ public class DoctorMaterialInfoWriteServiceImpl implements DoctorMaterialInfoWri
         checkState(Math.abs(dis)<=5, "produce.materialCountChange.error");
     }
 
-    private <T> void publishMaterialInfo(Integer eventType, T data){
-        if(!Objects.isNull(publisher)){
-           try{
-               publisher.publish(DataEvent.toBytes(eventType, data));
-           }catch (Exception e){
-               log.error("material info publisher error, eventType:{} data:{} cause:{}", eventType, data, Throwables.getStackTraceAsString(e));
-           }
-        }
-    }
 }

@@ -43,20 +43,16 @@ public class MaterialInWareHouseManager {
 
     private final DoctorMaterialInWareHouseDao doctorMaterialInWareHouseDao;
 
-    private final DoctorMaterialInfoDao doctorMaterialInfoDao;
-
     private final DoctorMaterialConsumeAvgDao doctorMaterialConsumeAvgDao;
 
     private final DoctorMaterialConsumeProviderDao doctorMaterialConsumeProviderDao;
 
     @Autowired
     public MaterialInWareHouseManager(DoctorMaterialInWareHouseDao doctorMaterialInWareHouseDao,
-                                      DoctorMaterialInfoDao doctorMaterialInfoDao,
                                       DoctorWareHouseHandlerInvocation doctorWareHouseHandlerInvocation,
                                       DoctorMaterialConsumeAvgDao doctorMaterialConsumeAvgDao,
                                       DoctorMaterialConsumeProviderDao doctorMaterialConsumeProviderDao){
         this.doctorMaterialInWareHouseDao = doctorMaterialInWareHouseDao;
-        this.doctorMaterialInfoDao = doctorMaterialInfoDao;
         this.doctorWareHouseHandlerInvocation = doctorWareHouseHandlerInvocation;
         this.doctorMaterialConsumeAvgDao = doctorMaterialConsumeAvgDao;
         this.doctorMaterialConsumeProviderDao = doctorMaterialConsumeProviderDao;
@@ -204,19 +200,13 @@ public class MaterialInWareHouseManager {
         DoctorMaterialInWareHouse doctorMaterialInWareHouse = doctorMaterialInWareHouseDao.findById(materialInWareHouseId);
         checkState(!isNull(doctorMaterialInWareHouse), "input.materialInWareHouseId.empty");
 
-        DoctorMaterialInfo doctorMaterialInfo = doctorMaterialInfoDao.findById(doctorMaterialInWareHouse.getMaterialId());
-        checkState(!isNull(doctorMaterialInfo), "query.materialInfo.fail");
-        Integer consumeDays = (int)(doctorMaterialInWareHouse.getLotNumber() / doctorMaterialInfo.getDefaultConsumeCount());
-        if (consumeDays == 0 ) consumeDays = 1; // 修改1
-
         // 消耗对应的物资信息
         consumeMaterialInner(DoctorMaterialConsumeProviderDto.builder().type(doctorMaterialInWareHouse.getType())
                 .farmId(doctorMaterialInWareHouse.getFarmId()).farmName(doctorMaterialInWareHouse.getFarmName())
                 .materialTypeId(doctorMaterialInWareHouse.getMaterialId()).materialName(doctorMaterialInWareHouse.getMaterialName())
                 .wareHouseId(doctorMaterialInWareHouse.getWareHouseId()).wareHouseName(doctorMaterialInWareHouse.getWareHouseName())
-                .barnId(0l).barnName("")   //默认消耗仓库信息
                 .staffId(userId).staffName(userName).count(doctorMaterialInWareHouse.getLotNumber())
-                .unitId(doctorMaterialInfo.getUnitId()).unitName(userName).consumeDays(consumeDays)
+                .unitName(doctorMaterialInWareHouse.getUnitName()).consumeDays(1)
                 .build());
 
         // delete in warehouse

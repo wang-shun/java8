@@ -91,7 +91,7 @@ public class DoctorMaterialInfosTest extends BaseFrontWebTest{
     }
 
     /**
-     * 对应的生产方式（Material pre produce） TODO 测试Consumer Count
+     * 对应的生产方式（Material pre produce）
      */
     @Test
     public void testPreRealProduceMaterial(){
