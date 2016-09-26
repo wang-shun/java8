@@ -2,10 +2,10 @@ package io.terminus.doctor.warehouse.manager;
 
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.utils.NumberUtils;
+import io.terminus.doctor.common.enums.WareHouseType;
 import io.terminus.doctor.warehouse.dao.DoctorMaterialConsumeAvgDao;
 import io.terminus.doctor.warehouse.dao.DoctorMaterialConsumeProviderDao;
 import io.terminus.doctor.warehouse.dao.DoctorMaterialInWareHouseDao;
-import io.terminus.doctor.warehouse.dao.DoctorMaterialInfoDao;
 import io.terminus.doctor.warehouse.dto.DoctorMaterialConsumeProviderDto;
 import io.terminus.doctor.warehouse.dto.DoctorWareHouseBasicDto;
 import io.terminus.doctor.warehouse.dto.EventHandlerContext;
@@ -13,8 +13,8 @@ import io.terminus.doctor.warehouse.handler.DoctorWareHouseHandlerInvocation;
 import io.terminus.doctor.warehouse.model.DoctorMaterialConsumeAvg;
 import io.terminus.doctor.warehouse.model.DoctorMaterialConsumeProvider;
 import io.terminus.doctor.warehouse.model.DoctorMaterialInWareHouse;
-import io.terminus.doctor.warehouse.model.DoctorMaterialInfo;
 import io.terminus.doctor.warehouse.model.DoctorWareHouse;
+import io.terminus.doctor.warehouse.model.FeedFormula;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -60,9 +60,8 @@ public class MaterialInWareHouseManager {
 
     // 生产对应的物料内容
     @Transactional
-    public Boolean produceMaterialInfo(DoctorWareHouseBasicDto basicDto,
-                                       DoctorWareHouse targetHouse, DoctorMaterialInfo targetMaterial,
-                                       DoctorMaterialInfo.MaterialProduce materialProduce){
+    public Boolean produceMaterialInfo(DoctorWareHouseBasicDto basicDto, DoctorWareHouse targetHouse, FeedFormula feedFormula,
+                                       Long feedUnitId, String feedUnitName, FeedFormula.FeedProduce materialProduce){
         List<Long> eventIds = new ArrayList<>();
 
         // consume each source
@@ -78,11 +77,11 @@ public class MaterialInWareHouseManager {
         Long unitPrice = this.calculateProviderUnitPrice(eventIds, materialProduce.getTotal());
         // provider source
         providerMaterialInWareHouseInner(DoctorMaterialConsumeProviderDto.builder()
-                .type(targetMaterial.getType()).farmId(targetMaterial.getFarmId()).farmName(targetMaterial.getFarmName())
-                .materialTypeId(targetMaterial.getId()).materialName(targetMaterial.getMaterialName())
+                .type(WareHouseType.FEED.getKey()).farmId(feedFormula.getFarmId()).farmName(feedFormula.getFarmName())
+                .materialTypeId(feedFormula.getFeedId()).materialName(feedFormula.getFeedName())
                 .wareHouseId(targetHouse.getId()).wareHouseName(targetHouse.getWareHouseName())
                 .barnId(basicDto.getBarnId()).barnName(basicDto.getBarnName()).staffId(basicDto.getStaffId()).staffName(basicDto.getStaffName())
-                .count(materialProduce.getTotal()).unitId(targetMaterial.getUnitId()).unitName(targetMaterial.getUnitName()).unitPrice(unitPrice)
+                .count(materialProduce.getTotal()).unitId(feedUnitId).unitName(feedUnitName).unitPrice(unitPrice)
                 .build());
 
         return Boolean.TRUE;
@@ -102,7 +101,7 @@ public class MaterialInWareHouseManager {
         return Long.valueOf(NumberUtils.divide(totalPrice, realTotal.longValue(), 0));
     }
 
-    private List<Long> produceMaterialConsumeEntry(DoctorWareHouseBasicDto basicDto, DoctorMaterialInfo.MaterialProduceEntry materialProduceEntry){
+    private List<Long> produceMaterialConsumeEntry(DoctorWareHouseBasicDto basicDto, FeedFormula.MaterialProduceEntry materialProduceEntry){
         List<Long> eventIds = new ArrayList<>();
         List<DoctorMaterialInWareHouse> doctorMaterialInWareHouses = doctorMaterialInWareHouseDao.queryByFarmMaterial(
                 basicDto.getFarmId(),

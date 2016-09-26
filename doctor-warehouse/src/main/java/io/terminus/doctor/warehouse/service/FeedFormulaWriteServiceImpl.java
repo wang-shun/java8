@@ -1,8 +1,13 @@
 package io.terminus.doctor.warehouse.service;
 
 import com.google.common.base.Throwables;
+import io.terminus.boot.rpc.common.annotation.RpcProvider;
+import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.warehouse.dao.FeedFormulaDao;
+import io.terminus.doctor.warehouse.dto.DoctorWareHouseBasicDto;
+import io.terminus.doctor.warehouse.manager.MaterialInWareHouseManager;
+import io.terminus.doctor.warehouse.model.DoctorWareHouse;
 import io.terminus.doctor.warehouse.model.FeedFormula;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,13 +20,17 @@ import org.springframework.stereotype.Service;
  */
 @Slf4j
 @Service
+@RpcProvider
 public class FeedFormulaWriteServiceImpl implements FeedFormulaWriteService {
 
     private final FeedFormulaDao feedFormulaDao;
+    private final MaterialInWareHouseManager materialInWareHouseManager;
 
     @Autowired
-    public FeedFormulaWriteServiceImpl(FeedFormulaDao feedFormulaDao) {
+    public FeedFormulaWriteServiceImpl(FeedFormulaDao feedFormulaDao,
+                                       MaterialInWareHouseManager materialInWareHouseManager) {
         this.feedFormulaDao = feedFormulaDao;
+        this.materialInWareHouseManager = materialInWareHouseManager;
     }
 
     @Override
@@ -52,6 +61,19 @@ public class FeedFormulaWriteServiceImpl implements FeedFormulaWriteService {
         } catch (Exception e) {
             log.error("delete feedFormula failed, feedFormulaId:{}, cause:{}", feedFormulaId, Throwables.getStackTraceAsString(e));
             return Response.fail("feedFormula.delete.fail");
+        }
+    }
+
+    @Override
+    public Response<Boolean> produceFeedByFormula(DoctorWareHouseBasicDto basicDto, DoctorWareHouse targetHouse, FeedFormula feedFormula,
+                                                  Long feedUnitId, String feedUnitName, FeedFormula.FeedProduce materialProduce){
+        try{
+            return Response.ok(materialInWareHouseManager.produceMaterialInfo(basicDto, targetHouse, feedFormula, feedUnitId, feedUnitName, materialProduce));
+        }catch(ServiceException e){
+            return Response.fail(e.getMessage());
+        }catch(Exception e){
+            log.error("real material produce fail, cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("produce.realMaterial.fail");
         }
     }
 }

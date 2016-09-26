@@ -1,5 +1,6 @@
 package io.terminus.doctor.warehouse.service;
 
+import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.warehouse.model.FeedFormula;
 
@@ -27,4 +28,15 @@ public interface FeedFormulaReadService {
      * @return
      */
     Response<FeedFormula> findFeedFormulaById(Long feedId, Long farmId);
+
+    /**
+     * 分页查询配方
+     * @param feedId
+     * @param farmId
+     * @param feedName
+     * @param pageNo
+     * @param size
+     * @return
+     */
+    Response<Paging<FeedFormula>> paging(Long feedId, Long farmId, String feedName, Integer pageNo, Integer size);
 }

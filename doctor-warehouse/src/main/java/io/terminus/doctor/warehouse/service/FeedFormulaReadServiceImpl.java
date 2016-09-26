@@ -1,6 +1,10 @@
 package io.terminus.doctor.warehouse.service;
 
+import com.google.common.base.Strings;
 import com.google.common.base.Throwables;
+import io.terminus.boot.rpc.common.annotation.RpcProvider;
+import io.terminus.common.model.PageInfo;
+import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.warehouse.dao.FeedFormulaDao;
 import io.terminus.doctor.warehouse.model.FeedFormula;
@@ -17,6 +21,7 @@ import java.util.List;
  */
 @Slf4j
 @Service
+@RpcProvider
 public class FeedFormulaReadServiceImpl implements FeedFormulaReadService {
 
     private final FeedFormulaDao feedFormulaDao;
@@ -41,7 +46,21 @@ public class FeedFormulaReadServiceImpl implements FeedFormulaReadService {
         try {
             return Response.ok(feedFormulaDao.findByFeedIdAndFarmId(feedId, farmId));
         } catch (Exception e) {
-            log.error("find feedFormula by id failed, feedId:{}, farmId:{}, cause:{}", feedId, farmId, Throwables.getStackTraceAsString(e));
+            log.error("find feedFormula failed, feedId:{}, farmId:{}, cause:{}", feedId, farmId, Throwables.getStackTraceAsString(e));
+            return Response.fail("feedFormula.find.fail");
+        }
+    }
+
+    public Response<Paging<FeedFormula>> paging(Long feedId, Long farmId, String feedName, Integer pageNo, Integer size){
+        try {
+            FeedFormula criteria = FeedFormula.builder()
+                    .feedId(feedId).feedName(Strings.emptyToNull(feedName)).farmId(farmId)
+                    .build();
+            PageInfo pageInfo = new PageInfo(pageNo, size);
+            return Response.ok(feedFormulaDao.paging(pageInfo.getOffset(), pageInfo.getLimit(), criteria));
+        } catch (Exception e) {
+            log.error("paging feedFormula failed, feedId:{}, farmId:{}, feedName:{}, cause:{}",
+                    feedId, farmId, feedName, Throwables.getStackTraceAsString(e));
             return Response.fail("feedFormula.find.fail");
         }
     }

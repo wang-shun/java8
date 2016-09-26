@@ -1369,6 +1369,7 @@ CREATE TABLE `doctor_material_price_in_ware_houses` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='仓库中各物料每次入库的剩余量';
 
 -- 仓库物资每次出库和入库事件之前的快照
+drop table doctor_material_infos;
 CREATE TABLE `doctor_warehouse_snapshots` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT 'id',
   `event_id` bigint(20) unsigned NOT NULL COMMENT '表doctor_material_consume_providers的id',

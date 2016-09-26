@@ -60,7 +60,6 @@
             <if test="feedName != null">feed_name = #{feedName},</if>
             <if test="farmId != null">farm_id = #{farmId},</if>
             <if test="farmName != null">farm_name = #{farmName},</if>
-            <if test="formula != null">formula = #{formula},</if>
             updated_at=now()
         </set>
         WHERE id = #{id}
@@ -70,4 +69,30 @@
         DELETE FROM <include refid="tb"/>
         WHERE id = #{id}
     </delete>
+
+    <select id="count" parameterType="map" resultType="long">
+        SELECT count(id)
+        FROM
+        <include refid="tb"/>
+        <where>
+            <include refid="criteria"/>
+        </where>
+    </select>
+
+    <select id="paging" parameterType="map" resultMap="FeedFormulaMap">
+        SELECT id,
+        <include refid="cols_exclude_id"/>
+        FROM
+        <include refid="tb"/>
+        <where>
+            <include refid="criteria"/>
+        </where>
+        LIMIT #{offset}, #{limit}
+    </select>
+
+    <sql id="criteria">
+        <if test="feedId != null"> and feed_id = #{feedId} </if>
+        <if test="feedName != null"> and feed_name like concat('%', #{feedName}, '%') </if>
+        <if test="farmId != null"> and farm_id = #{farmId} </if>
+    </sql>
 </mapper>

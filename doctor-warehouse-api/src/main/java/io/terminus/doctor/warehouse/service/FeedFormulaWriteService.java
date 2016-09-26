@@ -1,6 +1,8 @@
 package io.terminus.doctor.warehouse.service;
 
 import io.terminus.common.model.Response;
+import io.terminus.doctor.warehouse.dto.DoctorWareHouseBasicDto;
+import io.terminus.doctor.warehouse.model.DoctorWareHouse;
 import io.terminus.doctor.warehouse.model.FeedFormula;
 
 /**
@@ -31,4 +33,7 @@ public interface FeedFormulaWriteService {
      * @return 是否成功
      */
     Response<Boolean> deleteFeedFormulaById(Long feedFormulaId);
+
+    Response<Boolean> produceFeedByFormula(DoctorWareHouseBasicDto basicDto, DoctorWareHouse targetHouse, FeedFormula feedFormula,
+                                           Long feedUnitId, String feedUnitName, FeedFormula.FeedProduce materialProduce);
 }
