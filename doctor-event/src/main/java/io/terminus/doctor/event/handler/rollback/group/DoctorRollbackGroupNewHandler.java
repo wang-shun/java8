@@ -20,7 +20,7 @@ import java.util.Objects;
  */
 @Slf4j
 @Component
-public class DoctorRollbackGroupNewEventHandler extends DoctorAbstractRollbackGroupEventHandler {
+public class DoctorRollbackGroupNewHandler extends DoctorAbstractRollbackGroupEventHandler {
     @Override
     protected boolean handleCheck(DoctorGroupEvent groupEvent) {
         //允许新建猪群事件回滚

@@ -21,7 +21,7 @@ import java.util.Objects;
  */
 @Slf4j
 @Component
-public class DoctorRollbackGroupMoveInEventHandler extends DoctorAbstractRollbackGroupEventHandler {
+public class DoctorRollbackGroupMoveInHandler extends DoctorAbstractRollbackGroupEventHandler {
 
     @Override
     protected boolean handleCheck(DoctorGroupEvent groupEvent) {
@@ -39,6 +39,7 @@ public class DoctorRollbackGroupMoveInEventHandler extends DoctorAbstractRollbac
         DoctorRollbackDto dto = new DoctorRollbackDto();
         dto.setOrgId(groupEvent.getOrgId());
         dto.setFarmId(groupEvent.getFarmId());
+        dto.setEventAt(groupEvent.getEventAt());
         dto.setEsBarnId(groupEvent.getBarnId());
         dto.setEsGroupId(groupEvent.getGroupId());
 

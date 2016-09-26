@@ -47,6 +47,7 @@ public class DoctorRollbackGroupTurnSeedHandler extends DoctorAbstractRollbackGr
         DoctorRollbackDto fromDto = new DoctorRollbackDto();
         fromDto.setOrgId(groupEvent.getOrgId());
         fromDto.setFarmId(groupEvent.getFarmId());
+        fromDto.setEventAt(groupEvent.getEventAt());
         fromDto.setEsBarnId(groupEvent.getBarnId());
         fromDto.setEsGroupId(groupEvent.getGroupId());
 
@@ -58,6 +59,7 @@ public class DoctorRollbackGroupTurnSeedHandler extends DoctorAbstractRollbackGr
         DoctorRollbackDto toDto = new DoctorRollbackDto();
         toDto.setOrgId(toPigEvent.getOrgId());
         toDto.setFarmId(toPigEvent.getFarmId());
+        toDto.setEventAt(groupEvent.getEventAt());
         toDto.setEsBarnId(toPigEvent.getBarnId());
         toDto.setEsPigId(toPigEvent.getPigId());
 

@@ -27,7 +27,7 @@ import java.util.Objects;
 @Component
 public class DoctorRollbackGroupTransFarmHandler extends DoctorAbstractRollbackGroupEventHandler {
 
-    @Autowired private DoctorRollbackGroupMoveInEventHandler doctorRollbackGroupMoveInEventHandler;
+    @Autowired private DoctorRollbackGroupMoveInHandler doctorRollbackGroupMoveInHandler;
 
     @Override
     protected boolean handleCheck(DoctorGroupEvent groupEvent) {
@@ -53,7 +53,7 @@ public class DoctorRollbackGroupTransFarmHandler extends DoctorAbstractRollbackG
         DoctorGroupEvent toGroupEvent = doctorGroupEventDao.findByRelGroupEventId(groupEvent.getId());
 
         //先回滚转入猪群事件， 再回滚转群事件
-        doctorRollbackGroupMoveInEventHandler.rollback(toGroupEvent, operatorId, operatorName);
+        doctorRollbackGroupMoveInHandler.rollback(toGroupEvent, operatorId, operatorName);
         return sampleRollback(groupEvent);
     }
 
@@ -66,6 +66,7 @@ public class DoctorRollbackGroupTransFarmHandler extends DoctorAbstractRollbackG
         DoctorRollbackDto fromDto = new DoctorRollbackDto();
         fromDto.setOrgId(groupEvent.getOrgId());
         fromDto.setFarmId(groupEvent.getFarmId());
+        fromDto.setEventAt(groupEvent.getEventAt());
         fromDto.setEsBarnId(groupEvent.getBarnId());
         fromDto.setEsGroupId(groupEvent.getGroupId());
         fromDto.setRollbackTypes(rollbackTypes);
@@ -74,6 +75,7 @@ public class DoctorRollbackGroupTransFarmHandler extends DoctorAbstractRollbackG
         DoctorRollbackDto toDto = new DoctorRollbackDto();
         toDto.setOrgId(groupEvent.getOrgId());
         toDto.setFarmId(trans.getToFarmId());   //转场事件的目标猪场
+        toDto.setEventAt(groupEvent.getEventAt());
         toDto.setEsBarnId(trans.getToBarnId());
         toDto.setEsGroupId(trans.getToGroupId());
         toDto.setRollbackTypes(rollbackTypes);

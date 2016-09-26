@@ -135,7 +135,6 @@ public abstract class DoctorAbstractRollbackPigEventHandler extends DoctorAbstra
         workFlowRollback(pigEvent);
         return doctorRevertLog;
     }
-
      /* 通用猪事件回滚
      * @param pigEvent 猪事件
      * @return 回滚日志
