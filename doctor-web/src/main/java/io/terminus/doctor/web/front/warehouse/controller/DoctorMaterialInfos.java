@@ -35,10 +35,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 /**
- * Created by yaoqijun.
- * Date:2016-05-25
- * Email:yaoqj@terminus.io
- * Descirbe: 物料信息的管理方式
+ * 陈增辉
+ * 通过配方来生产饲料的接口
  */
 @Slf4j
 @Controller
