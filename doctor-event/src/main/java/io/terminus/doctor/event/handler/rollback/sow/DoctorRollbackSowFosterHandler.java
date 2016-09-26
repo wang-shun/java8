@@ -32,6 +32,9 @@ public class DoctorRollbackSowFosterHandler extends DoctorAbstractRollbackPigEve
     @Autowired
     private DoctorRollbackGroupTransHandler doctorRollbackGroupTransHandler;
 
+    @Autowired
+    private DoctorRollbackSowFosterByHandler doctorRollbackSowFosterByHandler;
+
     @Override
     protected boolean handleCheck(DoctorPigEvent pigEvent) {
         if (!Objects.equals(pigEvent.getType(), PigEvent.FOSTERS.getKey())) {
@@ -57,8 +60,8 @@ public class DoctorRollbackSowFosterHandler extends DoctorAbstractRollbackPigEve
         //1. 仔猪转群
         doctorRollbackGroupTransHandler.rollback(toGroupEvent, operatorId, operatorName);
 
-        //2. todo 被拼窝
-        //handleRollbackWithoutStatus(toPigEvent, operatorId, operatorId);
+        //2. 被拼窝
+        doctorRollbackSowFosterByHandler.rollback(toPigEvent, operatorId, operatorName);
 
         //3. 拼窝
         return handleRollbackWithoutStatus(toPigEvent);
