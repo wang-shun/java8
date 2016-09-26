@@ -2,6 +2,7 @@ package io.terminus.doctor.event.handler.rollback;
 
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.utils.RespHelper;
+import io.terminus.doctor.event.dao.DoctorPigDao;
 import io.terminus.doctor.event.dao.DoctorPigEventDao;
 import io.terminus.doctor.event.dao.DoctorPigSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorPigTrackDao;
@@ -14,6 +15,7 @@ import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.RollbackType;
 import io.terminus.doctor.event.handler.DoctorRollbackPigEventHandler;
+import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigSnapshot;
 import io.terminus.doctor.event.model.DoctorPigTrack;
@@ -52,6 +54,7 @@ public abstract class DoctorAbstractRollbackPigEventHandler extends DoctorAbstra
     @Autowired protected DoctorPigSnapshotDao doctorPigSnapshotDao;
     @Autowired protected DoctorPigEventDao doctorPigEventDao;
     @Autowired protected DoctorPigTrackDao doctorPigTrackDao;
+    @Autowired protected DoctorPigDao doctorPigDao;
     @Autowired protected DoctorPigEventReadService doctorPigEventReadService;
     @Value("${flow.definition.key.sow:sow}")
     protected String sowFlowKey;
@@ -111,14 +114,25 @@ public abstract class DoctorAbstractRollbackPigEventHandler extends DoctorAbstra
      */
     protected DoctorRevertLog handleRollbackWithoutStatus(DoctorPigEvent pigEvent, Integer type){
         DoctorPigTrack doctorPigTrack= doctorPigTrackDao.findByPigId(pigEvent.getPigId());
-        DoctorPigSnapshot doctorPigSnapshot = doctorPigSnapshotDao.queryLastByPigId(pigEvent.getPigId());
-        String fromInfo = MAPPER.toJson(doctorPigTrack) + MAPPER.toJson(doctorPigSnapshot) + MAPPER.toJson(pigEvent);
+        DoctorPig doctorPig= doctorPigDao.findById(pigEvent.getPigId());
+        DoctorPigSnapshot doctorPigSnapshot = doctorPigSnapshotDao.queryByEventId(pigEvent.getId());
+        DoctorPigSnapShotInfo fromInfo  = DoctorPigSnapShotInfo.builder()
+                .pigEvent(pigEvent)
+                .pigTrack(doctorPigTrack)
+                .pig(doctorPig)
+                .build();
+
+        DoctorPigSnapShotInfo toInfo  = DoctorPigSnapShotInfo.builder()
+                .pigEvent(pigEvent)
+                .pigTrack(doctorPigTrack)
+                .pig(doctorPig)
+                .build();
 
         doctorPigEventDao.delete(pigEvent.getId());
         doctorPigSnapshotDao.delete(doctorPigSnapshot.getId());
         return DoctorRevertLog.builder()
                 .type(type)
-                .fromInfo(fromInfo)
+                .fromInfo(JSON_MAPPER.toJson(fromInfo))
                 .toInfo("")
                 .build();
     }
@@ -131,9 +145,13 @@ public abstract class DoctorAbstractRollbackPigEventHandler extends DoctorAbstra
      */
     protected DoctorRevertLog handleRollbackWithStatus(DoctorPigEvent pigEvent, Integer type) {
         DoctorPigTrack doctorPigTrack= doctorPigTrackDao.findByPigId(pigEvent.getPigId());
-        DoctorPigSnapshot doctorPigSnapshot = doctorPigSnapshotDao.queryLastByPigId(pigEvent.getPigId());
-        String fromInfo = MAPPER.toJson(doctorPigTrack) + MAPPER.toJson(doctorPigSnapshot) + MAPPER.toJson(pigEvent);
-
+        DoctorPig doctorPig= doctorPigDao.findById(pigEvent.getPigId());
+        DoctorPigSnapshot doctorPigSnapshot = doctorPigSnapshotDao.queryByEventId(pigEvent.getId());
+        DoctorPigSnapShotInfo doctorPigSnapShotInfo  = DoctorPigSnapShotInfo.builder()
+                .pigEvent(pigEvent)
+                .pigTrack(doctorPigTrack)
+                .pig(doctorPig)
+                .build();
         doctorPigEventDao.delete(pigEvent.getId());
         if (!Objects.equals(pigEvent.getType(), PigEvent.ENTRY.getKey())) {
             doctorPigTrackDao.update(JSON_MAPPER.fromJson(doctorPigSnapshot.getPigInfo(), DoctorPigSnapShotInfo.class).getPigTrack());
@@ -141,13 +159,10 @@ public abstract class DoctorAbstractRollbackPigEventHandler extends DoctorAbstra
             doctorPigTrackDao.delete(doctorPigTrackDao.findByPigId(pigEvent.getPigId()).getId());
         }
         doctorPigSnapshotDao.delete(doctorPigSnapshot.getId());
-        if (Objects.equals(pigEvent.getKind(), DoctorPigEvent.kind.Sow.getValue())){
-            flowProcessService.rollBack(sowFlowKey, pigEvent.getPigId());
-        }
-
+        workFlowRollback(pigEvent);
         return DoctorRevertLog.builder()
                 .type(type)
-                .fromInfo(fromInfo)
+                .fromInfo(JSON_MAPPER.toJson(doctorPigSnapShotInfo))
                 .toInfo("")
                 .build();
     }
@@ -159,5 +174,15 @@ public abstract class DoctorAbstractRollbackPigEventHandler extends DoctorAbstra
     protected DoctorRevertLog sampleRollback(DoctorPigEvent pigEvent) {
         DoctorPigSnapshot snapshot = doctorPigSnapshotDao.queryByEventId(pigEvent.getId());
         return new DoctorRevertLog();
+    }
+
+    protected void workFlowRollback(DoctorPigEvent pigEvent){
+        if (Objects.equals(pigEvent.getKind(), DoctorPigEvent.kind.Sow.getValue())){
+            flowProcessService.rollBack(sowFlowKey, pigEvent.getPigId());
+        }
+    }
+
+    protected DoctorRevertLog createDoctorRevertLog(DoctorPigEvent pigEvent){
+        return null;
     }
 }
