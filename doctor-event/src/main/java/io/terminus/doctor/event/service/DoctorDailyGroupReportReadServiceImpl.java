@@ -93,6 +93,8 @@ public class DoctorDailyGroupReportReadServiceImpl implements DoctorDailyGroupRe
                 (isDeadEvent(changeEvent, PigType.DELIVER_SOW) ? changeEvent.getQuantity() : 0));
         deadReport.setNursery(isDeadEvent(changeEvent, PigType.NURSERY_PIGLET) ? changeEvent.getQuantity() : 0);
         deadReport.setFatten(isDeadEvent(changeEvent, PigType.FATTEN_PIG) ? changeEvent.getQuantity() : 0);
+        deadReport.setHoubei((isDeadEvent(changeEvent, PigType.RESERVE_BOAR) ? changeEvent.getQuantity() : 0) + (isDeadEvent(changeEvent, PigType.RESERVE_SOW) ? changeEvent.getQuantity() : 0) );
+
         report.setDead(deadReport);
 
         //销售 (保育 = 产房 + 保育)
