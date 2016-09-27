@@ -11,7 +11,6 @@ import io.terminus.doctor.event.handler.rollback.group.DoctorRollbackGroupMoveIn
 import io.terminus.doctor.event.handler.rollback.group.DoctorRollbackGroupNewHandler;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorPigEvent;
-import io.terminus.doctor.event.model.DoctorRevertLog;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -51,7 +50,7 @@ public class DoctorRollbackSowFarrowHandler extends DoctorAbstractRollbackPigEve
     }
 
     @Override
-    protected DoctorRevertLog handleRollback(DoctorPigEvent pigEvent, Long operatorId, String operatorName) {
+    protected void handleRollback(DoctorPigEvent pigEvent, Long operatorId, String operatorName) {
         //1.转入猪群
         DoctorGroupEvent toGroupEvent = doctorGroupEventDao.findByRelPigEventId(pigEvent.getRelPigEventId());
         doctorRollbackGroupMoveInHandler.rollback(toGroupEvent, operatorId, operatorName);
@@ -62,7 +61,7 @@ public class DoctorRollbackSowFarrowHandler extends DoctorAbstractRollbackPigEve
             doctorRollbackGroupNewHandler.rollback(totoGroupEvent, operatorId, operatorName);
         }
         //3. 母猪分娩
-        return handleRollbackWithStatus(pigEvent);
+        handleRollbackWithStatus(pigEvent, operatorId, operatorName);
     }
 
     @Override

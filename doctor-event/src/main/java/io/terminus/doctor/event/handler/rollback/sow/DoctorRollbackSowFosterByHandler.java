@@ -11,7 +11,6 @@ import io.terminus.doctor.event.handler.rollback.DoctorAbstractRollbackPigEventH
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigSnapshot;
 import io.terminus.doctor.event.model.DoctorPigTrack;
-import io.terminus.doctor.event.model.DoctorRevertLog;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -34,15 +33,15 @@ public class DoctorRollbackSowFosterByHandler extends DoctorAbstractRollbackPigE
     }
 
     @Override
-    protected DoctorRevertLog handleRollback(DoctorPigEvent pigEvent, Long operatorId, String operatorName) {
+    protected void handleRollback(DoctorPigEvent pigEvent, Long operatorId, String operatorName) {
         DoctorPigSnapshot snapshot = doctorPigSnapshotDao.queryByEventId(pigEvent.getId());
         DoctorPigTrack oldTrack = JSON_MAPPER.fromJson(snapshot.getPigInfo(), DoctorPigSnapShotInfo.class).getPigTrack();
 
         //如果状态不是不如，说明状态有变化，调用状态回滚
         if (!Objects.equals(oldTrack.getStatus(), PigStatus.FEED.getKey())) {
-            handleRollbackWithStatus(pigEvent);
+            handleRollbackWithStatus(pigEvent, operatorId, operatorName);
         }
-        return handleRollbackWithoutStatus(pigEvent);
+        handleRollbackWithoutStatus(pigEvent, operatorId, operatorName);
     }
 
     @Override

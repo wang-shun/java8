@@ -11,7 +11,6 @@ import io.terminus.doctor.event.handler.rollback.DoctorAbstractRollbackPigEventH
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
-import io.terminus.doctor.event.model.DoctorRevertLog;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -51,7 +50,7 @@ public class DoctorRollbackSowWeanHandler extends DoctorAbstractRollbackPigEvent
     }
 
     @Override
-    protected DoctorRevertLog handleRollback(DoctorPigEvent pigEvent, Long operatorId, String operatorName) {
+    protected void handleRollback(DoctorPigEvent pigEvent, Long operatorId, String operatorName) {
         //如果断奶后转舍， 先回滚转舍
         DoctorPartWeanDto weanDto = JSON_MAPPER.fromJson(pigEvent.getExtra(), DoctorPartWeanDto.class);
         if (weanDto.getChgLocationToBarnId() != null) {
@@ -62,9 +61,9 @@ public class DoctorRollbackSowWeanHandler extends DoctorAbstractRollbackPigEvent
 
         //如果成功断奶，需要回滚状态
         if (!Objects.equals(pigTrack.getStatus(), PigStatus.FEED.getKey())) {
-            handleRollbackWithStatus(pigEvent);
+            handleRollbackWithStatus(pigEvent, operatorId, operatorName);
         }
-        return handleRollbackWithoutStatus(pigEvent);
+        handleRollbackWithoutStatus(pigEvent, operatorId, operatorName);
     }
 
     @Override

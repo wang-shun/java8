@@ -7,7 +7,6 @@ import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.RollbackType;
 import io.terminus.doctor.event.handler.rollback.DoctorAbstractRollbackPigEventHandler;
 import io.terminus.doctor.event.model.DoctorPigEvent;
-import io.terminus.doctor.event.model.DoctorRevertLog;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -24,8 +23,8 @@ public class DoctorRollbackBoarChgLocationEventHandler extends DoctorAbstractRol
     }
 
     @Override
-    protected DoctorRevertLog handleRollback(DoctorPigEvent pigEvent, Long operatorId, String operatorName) {
-        return handleRollbackWithoutStatus(pigEvent);
+    protected void handleRollback(DoctorPigEvent pigEvent, Long operatorId, String operatorName) {
+        handleRollbackWithoutStatus(pigEvent, operatorId, operatorName);
     }
 
     @Override

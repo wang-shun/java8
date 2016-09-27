@@ -25,8 +25,8 @@ public class DoctorRollbackSowChgLocationEventHandler extends DoctorAbstractRoll
     }
 
     @Override
-    protected DoctorRevertLog handleRollback(DoctorPigEvent pigEvent, Long operatorId, String operatorName) {
-        return handleRollbackWithoutStatus(pigEvent);
+    protected void handleRollback(DoctorPigEvent pigEvent, Long operatorId, String operatorName) {
+        handleRollbackWithoutStatus(pigEvent, operatorId, operatorName);
     }
 
     @Override
