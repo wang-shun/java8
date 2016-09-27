@@ -28,7 +28,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Objects;
@@ -73,7 +72,7 @@ public abstract class DoctorAbstractRollbackPigEventHandler extends DoctorAbstra
     /**
      * 带事务的回滚操作
      */
-    @Override @Transactional
+    @Override
     public final void rollback(DoctorPigEvent pigEvent, Long operatorId, String operatorName) {
         DoctorRevertLog revertLog = handleRollback(pigEvent, operatorId, operatorName);
         revertLog.setReverterId(operatorId);

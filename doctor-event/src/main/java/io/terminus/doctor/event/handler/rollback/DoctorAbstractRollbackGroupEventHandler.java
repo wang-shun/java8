@@ -21,7 +21,6 @@ import io.terminus.doctor.event.service.DoctorRevertLogWriteService;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Objects;
@@ -60,7 +59,7 @@ public abstract class DoctorAbstractRollbackGroupEventHandler extends DoctorAbst
     /**
      * 带事务的回滚操作
      */
-    @Override @Transactional
+    @Override
     public final void rollback(DoctorGroupEvent groupEvent, Long operatorId, String operatorName) {
         DoctorRevertLog revertLog = handleRollback(groupEvent, operatorId, operatorName);
         revertLog.setType(DoctorRevertLog.Type.GROUP.getValue());
