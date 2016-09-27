@@ -1,16 +1,13 @@
 package io.terminus.doctor.event.service;
 
 import com.google.common.base.Throwables;
-import com.google.common.collect.Maps;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
-import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.event.cache.DoctorPigInfoCache;
 import io.terminus.doctor.event.dao.DoctorPigDao;
 import io.terminus.doctor.event.dao.DoctorPigEventDao;
 import io.terminus.doctor.event.dao.DoctorPigSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorPigTrackDao;
-import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigSnapshot;
@@ -20,9 +17,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
-
-import java.util.Date;
-import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkState;
 
@@ -126,31 +120,6 @@ public class DoctorPigWriteServiceImpl implements DoctorPigWriteService {
         } catch (Exception e) {
             log.error("deploy() failed, cause:{}", Throwables.getStackTraceAsString(e));
             return Response.fail("deploy() fail");
-        }
-    }
-
-    @Override
-    public Response<Boolean> refreshPigStatus() {
-        try {
-            for (int i = 0;; i++) {
-                Map<String, Object> map = Maps.newHashMap();
-                map.put("status", PigStatus.Entry.getKey());
-                Paging<DoctorPigTrack> trackPage = doctorPigTrackDao.paging(i, 1000, map);
-                trackPage.getData().forEach(doctorPigTrack -> {
-                    if (doctorPigEventDao.queryAllEventsByPigId(doctorPigTrack.getPigId()).size() > 1){
-                        doctorPigTrack.setStatus(PigStatus.Wean.getKey());
-                        doctorPigTrack.setUpdatedAt(new Date());
-                        doctorPigTrackDao.update(doctorPigTrack);
-                    }
-                });
-                if (trackPage.getData().size() < 1000){
-                    break;
-                }
-            }
-            return Response.ok(Boolean.TRUE);
-        } catch (Exception e){
-            log.error("refresh.pig.status.failed, cause{}", Throwables.getStackTraceAsString(e));
-            return Response.fail("refresh.pig.status.failed");
         }
     }
 }

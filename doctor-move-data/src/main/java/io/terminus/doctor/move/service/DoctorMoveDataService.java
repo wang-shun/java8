@@ -6,6 +6,7 @@ import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
 import io.terminus.common.utils.Arguments;
 import io.terminus.common.utils.BeanMapper;
@@ -102,7 +103,6 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static io.terminus.common.utils.Arguments.isNull;
-import static io.terminus.common.utils.Arguments.isNullOrEmpty;
 import static io.terminus.common.utils.Arguments.notEmpty;
 import static io.terminus.doctor.common.enums.PigType.FARROW_TYPES;
 import static io.terminus.doctor.event.enums.PregCheckResult.YANG;
@@ -2425,5 +2425,29 @@ public class DoctorMoveDataService {
                 log.info("update parity boarCode fail: {}", lists);
             }
         });
+    }
+
+    public Response<Boolean> refreshPigStatus() {
+        try {
+            for (int i = 0;; i++) {
+                Map<String, Object> map = Maps.newHashMap();
+                map.put("status", PigStatus.Entry.getKey());
+                Paging<DoctorPigTrack> trackPage = doctorPigTrackDao.paging(i, 1000, map);
+                trackPage.getData().forEach(doctorPigTrack -> {
+                    if (!doctorPigEventDao.list(DoctorPigEvent.builder().type(PigEvent.TO_MATING.getKey()).build()).isEmpty()){
+                        doctorPigTrack.setStatus(PigStatus.Wean.getKey());
+                        doctorPigTrack.setUpdatedAt(new Date());
+                        doctorPigTrackDao.update(doctorPigTrack);
+                    }
+                });
+                if (trackPage.getData().size() < 1000){
+                    break;
+                }
+            }
+            return Response.ok(Boolean.TRUE);
+        } catch (Exception e){
+            log.error("refresh.pig.status.failed, cause{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("refresh.pig.status.failed");
+        }
     }
 }

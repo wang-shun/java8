@@ -28,6 +28,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Date;
@@ -689,4 +690,15 @@ public class DoctorMoveDataController {
             return false;
         }
     }
+
+    /**
+     * 刷新猪状态
+     * @return
+     */
+    @RequestMapping(value = "/refresh", method = RequestMethod.GET)
+    @ResponseBody
+    public Boolean refreshPigStatus(){
+        return RespHelper.or500(doctorMoveDataService.refreshPigStatus());
+    }
+
 }
