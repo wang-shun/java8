@@ -28,6 +28,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Objects;
@@ -40,7 +41,6 @@ import java.util.Objects;
  */
 @Slf4j
 public abstract class DoctorAbstractRollbackPigEventHandler extends DoctorAbstrackRollbackReportHandler implements DoctorRollbackPigEventHandler {
-
 
     protected static final JsonMapper JSON_MAPPER = JsonMapper.nonEmptyMapper();
 
@@ -96,6 +96,7 @@ public abstract class DoctorAbstractRollbackPigEventHandler extends DoctorAbstra
     /**
      * 处理回滚操作
      */
+    @Transactional
     protected abstract DoctorRevertLog handleRollback(DoctorPigEvent pigEvent, Long operatorId, String operatorName);
 
     /**

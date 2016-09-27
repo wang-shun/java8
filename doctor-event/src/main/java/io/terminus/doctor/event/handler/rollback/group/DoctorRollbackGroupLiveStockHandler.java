@@ -4,7 +4,6 @@ import io.terminus.doctor.event.dto.DoctorRollbackDto;
 import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.handler.rollback.DoctorAbstractRollbackGroupEventHandler;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
-import io.terminus.doctor.event.model.DoctorRevertLog;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -27,8 +26,8 @@ public class DoctorRollbackGroupLiveStockHandler extends DoctorAbstractRollbackG
     }
 
     @Override
-    protected DoctorRevertLog handleRollback(DoctorGroupEvent groupEvent, Long operatorId, String operatorName) {
-        return sampleRollback(groupEvent);
+    protected void handleRollback(DoctorGroupEvent groupEvent, Long operatorId, String operatorName) {
+        sampleRollback(groupEvent, operatorId, operatorName);
     }
 
     @Override

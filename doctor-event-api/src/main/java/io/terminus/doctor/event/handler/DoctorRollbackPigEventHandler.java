@@ -23,7 +23,7 @@ public interface DoctorRollbackPigEventHandler {
     /**
      * 回滚操作
      */
-    void rollback(DoctorPigEvent pigEvent, @NotNull(message = "usrId.not.null") Long operatorId, String operatorName);
+    void rollback(DoctorPigEvent pigEvent, @NotNull(message = "userId.not.null") Long operatorId, String operatorName);
 
     /**
      * 更新报表

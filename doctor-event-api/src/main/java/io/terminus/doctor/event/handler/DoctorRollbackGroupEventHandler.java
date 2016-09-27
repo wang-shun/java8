@@ -23,7 +23,7 @@ public interface DoctorRollbackGroupEventHandler {
     /**
      * 回滚操作
      */
-    void rollback(DoctorGroupEvent groupEvent, @NotNull(message = "usrId.not.null") Long operatorId, String operatorName);
+    void rollback(DoctorGroupEvent groupEvent, @NotNull(message = "userId.not.null") Long operatorId, String operatorName);
 
     /**
      * 更新报表

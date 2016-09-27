@@ -5,7 +5,6 @@ import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.handler.rollback.DoctorAbstractRollbackGroupEventHandler;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorGroupSnapshot;
-import io.terminus.doctor.event.model.DoctorRevertLog;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -28,18 +27,15 @@ public class DoctorRollbackGroupNewHandler extends DoctorAbstractRollbackGroupEv
     }
 
     @Override
-    protected DoctorRevertLog handleRollback(DoctorGroupEvent groupEvent, Long operatorId, String operatorName) {
+    protected void handleRollback(DoctorGroupEvent groupEvent, Long operatorId, String operatorName) {
         DoctorGroupSnapshot snapshot = doctorGroupSnapshotDao.findGroupSnapshotByToEventId(groupEvent.getId());
 
-        //删除此事件 -> 删除猪群跟踪 -> 删除猪群 -> 删除镜像
+        //删除此事件 -> 删除猪群跟踪 -> 删除猪群 -> 删除镜像 -> 创建回滚日志
         doctorGroupEventDao.delete(groupEvent.getId());
         doctorGroupTrackDao.deleteByGroupId(groupEvent.getGroupId());
         doctorGroupDao.delete(groupEvent.getGroupId());
         doctorGroupSnapshotDao.delete(snapshot.getId());
-        return DoctorRevertLog.builder()
-                .fromInfo(snapshot.getToInfo())
-                .toInfo(snapshot.getFromInfo())
-                .build();
+        createRevertLog(groupEvent, snapshot, operatorId, operatorName);
     }
 
     @Override
