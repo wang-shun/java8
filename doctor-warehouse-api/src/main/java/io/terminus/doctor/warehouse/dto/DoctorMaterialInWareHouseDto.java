@@ -33,18 +33,22 @@ public class DoctorMaterialInWareHouseDto implements Serializable{
 
     private String unitName;    // 单位名称
 
-    private Long staffId;   // 人员Id
+    private double currentAmount; // 当前金额
 
-    private String staffName;   //人员姓名
+    private double inCount; // 入库数量
 
-    private String realName;    // 人员真实姓名
+    private double inAmount; // 入库金额
 
-    public static DoctorMaterialInWareHouseDto buildDoctorMaterialInWareHouseInfo(DoctorMaterialInWareHouse inWareHouse,
-                                                                                  DoctorWareHouse doctorWareHouse){
-        return DoctorMaterialInWareHouseDto.builder().materialInWareHouseId(inWareHouse.getId())
+    private double outCount; // 出库数量
+
+    private double outAmount; // 出库金额
+
+    public static DoctorMaterialInWareHouseDto buildDoctorMaterialInWareHouseInfo(DoctorMaterialInWareHouse inWareHouse){
+        return DoctorMaterialInWareHouseDto.builder()
+                .materialInWareHouseId(inWareHouse.getId())
                 .materialId(inWareHouse.getMaterialId()).materialName(inWareHouse.getMaterialName())
-                .lotNumber(inWareHouse.getLotNumber()).unitName(inWareHouse.getUnitName())
-                .staffId(doctorWareHouse.getManagerId()).staffName(doctorWareHouse.getManagerName())
+                .lotNumber(inWareHouse.getLotNumber())
+                .unitName(inWareHouse.getUnitName())
                 .build();
     }
 }

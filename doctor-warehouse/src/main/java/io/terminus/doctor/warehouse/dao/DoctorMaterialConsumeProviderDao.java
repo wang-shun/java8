@@ -89,10 +89,11 @@ public class DoctorMaterialConsumeProviderDao extends MyBatisDao<DoctorMaterialC
      * @param endAt
      * @return
      */
-    public List<WarehouseEventReport> warehouseEventReport(Long farmId, Long warehouseId, WareHouseType type, Date startAt, Date endAt){
+    public List<WarehouseEventReport> warehouseEventReport(Long farmId, Long warehouseId, WareHouseType type, Long materialId, Date startAt, Date endAt){
         Map<String, Object> param = MapBuilder.<String, Object>of()
                 .put("farmId", farmId)
                 .put("wareHouseId", warehouseId)
+                .put("materialId", materialId)
                 .put("startAt", startAt)
                 .put("endAt", endAt)
                 .map();

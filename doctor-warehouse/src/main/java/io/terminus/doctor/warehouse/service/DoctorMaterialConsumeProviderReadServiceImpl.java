@@ -110,9 +110,9 @@ public class DoctorMaterialConsumeProviderReadServiceImpl implements DoctorMater
     }
 
     @Override
-    public Response<List<WarehouseEventReport>> warehouseEventReport(Long farmId, Long warehouseId, WareHouseType type, Date startAt, Date endAt) {
+    public Response<List<WarehouseEventReport>> warehouseEventReport(Long farmId, Long warehouseId, WareHouseType type, Long materialId, Date startAt, Date endAt) {
         try{
-            return Response.ok(doctorMaterialConsumeProviderDao.warehouseEventReport(farmId, warehouseId, type, startAt, endAt));
+            return Response.ok(doctorMaterialConsumeProviderDao.warehouseEventReport(farmId, warehouseId, type, materialId, startAt, endAt));
         }catch(Exception e){
             log.error("warehouseEventReport failed, cause:{}", Throwables.getStackTraceAsString(e));
             return Response.fail("warehouseEventReport.fail");

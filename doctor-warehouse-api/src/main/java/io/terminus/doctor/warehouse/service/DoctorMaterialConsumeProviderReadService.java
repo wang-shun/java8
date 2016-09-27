@@ -67,7 +67,7 @@ public interface DoctorMaterialConsumeProviderReadService {
      * @param endAt
      * @return
      */
-    Response<List<WarehouseEventReport>> warehouseEventReport(Long farmId, Long warehouseId, WareHouseType type, Date startAt, Date endAt);
+    Response<List<WarehouseEventReport>> warehouseEventReport(Long farmId, Long warehouseId, WareHouseType type, Long materialId, Date startAt, Date endAt);
 
     /**
      * 指定仓库在指定时间段内各种物料每天发生的各种事件的数量和金额

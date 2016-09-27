@@ -33,7 +33,7 @@ public interface DoctorMaterialInWareHouseReadService {
      * @param pageSize
      * @return
      */
-    Response<Paging<DoctorMaterialInWareHouseDto>> pagingDoctorMaterialInWareHouse(@NotNull(message = "input.farmId.empty") Long farmId,
+    Response<Paging<DoctorMaterialInWareHouse>> pagingDoctorMaterialInWareHouse(@NotNull(message = "input.farmId.empty") Long farmId,
                                                                                    @NotNull(message = "input.wareHouseId.empty") Long wareHouseId,
                                                                                    Long materialId, String materialName,
                                                                                    Integer pageNo, Integer pageSize);

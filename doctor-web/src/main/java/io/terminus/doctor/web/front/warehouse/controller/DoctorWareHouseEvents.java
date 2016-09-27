@@ -2,6 +2,7 @@ package io.terminus.doctor.web.front.warehouse.controller;
 
 import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
+import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.Paging;
@@ -12,7 +13,6 @@ import io.terminus.doctor.basic.service.DoctorBasicMaterialReadService;
 import io.terminus.doctor.basic.service.DoctorBasicReadService;
 import io.terminus.doctor.common.enums.WareHouseType;
 import io.terminus.doctor.common.utils.RespHelper;
-import io.terminus.doctor.event.service.DoctorBarnReadService;
 import io.terminus.doctor.user.model.DoctorFarm;
 import io.terminus.doctor.user.service.DoctorFarmReadService;
 import io.terminus.doctor.user.service.DoctorUserProfileReadService;
@@ -21,19 +21,18 @@ import io.terminus.doctor.warehouse.dto.DoctorMaterialInWareHouseDto;
 import io.terminus.doctor.warehouse.dto.DoctorWareHouseDto;
 import io.terminus.doctor.warehouse.model.DoctorMaterialConsumeProvider;
 import io.terminus.doctor.warehouse.model.DoctorMaterialInWareHouse;
-import io.terminus.doctor.warehouse.model.DoctorMaterialInfo;
 import io.terminus.doctor.warehouse.model.DoctorWareHouse;
+import io.terminus.doctor.warehouse.service.DoctorMaterialConsumeProviderReadService;
 import io.terminus.doctor.warehouse.service.DoctorMaterialInWareHouseReadService;
 import io.terminus.doctor.warehouse.service.DoctorMaterialInWareHouseWriteService;
-import io.terminus.doctor.warehouse.service.DoctorMaterialInfoReadService;
+import io.terminus.doctor.warehouse.service.DoctorMaterialPriceInWareHouseReadService;
 import io.terminus.doctor.warehouse.service.DoctorWareHouseReadService;
-import io.terminus.doctor.web.front.controller.UserProfiles;
 import io.terminus.doctor.web.front.warehouse.dto.DoctorConsumeProviderInputDto;
 import io.terminus.pampas.common.UserUtil;
 import io.terminus.parana.user.model.User;
-import io.terminus.parana.user.model.UserProfile;
 import io.terminus.parana.user.service.UserReadService;
 import lombok.extern.slf4j.Slf4j;
+import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
@@ -44,8 +43,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.validation.Valid;
+import java.util.Date;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkState;
 import static java.util.Objects.isNull;
@@ -69,8 +70,6 @@ public class DoctorWareHouseEvents {
 
     private final DoctorUserProfileReadService doctorUserProfileReadService;
 
-    private final DoctorBarnReadService doctorBarnReadService;
-
     private final DoctorWareHouseReadService doctorWareHouseReadService;
 
     private final DoctorBasicMaterialReadService doctorBasicMaterialReadService;
@@ -79,10 +78,15 @@ public class DoctorWareHouseEvents {
 
     private final DoctorFarmReadService doctorFarmReadService;
 
+    @RpcConsumer
+    private DoctorMaterialPriceInWareHouseReadService materialPriceInWareHouseReadService;
+    @RpcConsumer
+    private DoctorMaterialConsumeProviderReadService materialConsumeProviderReadService;
+
     @Autowired
     public DoctorWareHouseEvents(DoctorMaterialInWareHouseWriteService doctorMaterialInWareHouseWriteService,
                                  DoctorMaterialInWareHouseReadService doctorMaterialInWareHouseReadService,
-                                 UserReadService<User> userReadService, DoctorBarnReadService doctorBarnReadService,
+                                 UserReadService<User> userReadService,
                                  DoctorBasicMaterialReadService doctorBasicMaterialReadService,
                                  DoctorWareHouseReadService doctorWareHouseReadService,
                                  DoctorFarmReadService doctorFarmReadService,
@@ -91,7 +95,6 @@ public class DoctorWareHouseEvents {
         this.doctorMaterialInWareHouseWriteService = doctorMaterialInWareHouseWriteService;
         this.doctorMaterialInWareHouseReadService = doctorMaterialInWareHouseReadService;
         this.userReadService = userReadService;
-        this.doctorBarnReadService = doctorBarnReadService;
         this.doctorBasicMaterialReadService = doctorBasicMaterialReadService;
         this.doctorWareHouseReadService = doctorWareHouseReadService;
         this.doctorFarmReadService = doctorFarmReadService;
@@ -128,22 +131,36 @@ public class DoctorWareHouseEvents {
                                                                                 @RequestParam(name = "materialName", required = false) String materialName,
                                                                                 @RequestParam("pageNo") Integer pageNo,
                                                                                 @RequestParam("pageSize") Integer pageSize){
-        Paging<DoctorMaterialInWareHouseDto> result = RespHelper.or500(
+        DateTime monthStart = DateTime.now().withTimeAtStartOfDay().withDayOfMonth(1);
+        DateTime nextMonthStart = monthStart.plusMonths(1);
+
+        Paging<DoctorMaterialInWareHouse> result = RespHelper.or500(
                 doctorMaterialInWareHouseReadService.pagingDoctorMaterialInWareHouse(farmId, wareHouseId, materialId, materialName, pageNo, pageSize)
         );
+        List<DoctorMaterialInWareHouseDto> list = result.getData().stream()
+                .map(in -> {
+                    DoctorMaterialInWareHouseDto dto = DoctorMaterialInWareHouseDto.buildDoctorMaterialInWareHouseInfo(in);
+                    Double amount = RespHelper.or500(materialPriceInWareHouseReadService.findByWareHouseAndMaterialId(wareHouseId, dto.getMaterialId())).stream()
+                            .map(price -> price.getRemainder() * price.getUnitPrice())
+                            .reduce((o1, o2) -> o1 + o2).orElse(0D);
+                    dto.setCurrentAmount(amount);
+                    RespHelper.or500(materialConsumeProviderReadService.warehouseEventReport(
+                            farmId, wareHouseId, null, dto.getMaterialId(), monthStart.toDate(), nextMonthStart.toDate())
+                    ).forEach(report -> {
+                        if(Objects.equals(report.getEventType(), DoctorMaterialConsumeProvider.EVENT_TYPE.CONSUMER.getValue())){
+                            dto.setOutAmount(report.getAmount());
+                            dto.setOutCount(report.getCount());
+                        }
+                        if(Objects.equals(report.getEventType(), DoctorMaterialConsumeProvider.EVENT_TYPE.PROVIDER.getValue())){
+                            dto.setInAmount(report.getAmount());
+                            dto.setInCount(report.getCount());
+                        }
+                    });
+                    return dto;
+                })
+                .collect(Collectors.toList());
 
-        try{
-            result.getData().forEach(s->{
-                Response<UserProfile> response = doctorUserProfileReadService.findProfileByUserId(s.getStaffId());
-                s.setRealName(RespHelper.orServEx(response).getRealName());
-            });
-
-        }catch (Exception e){
-            log.error("get user data info fail, cause:{}", Throwables.getStackTraceAsString(e));
-            throw new JsonResponseException(e.getMessage());
-        }
-
-        return result;
+        return new Paging<>(result.getTotal(), list);
     }
 
     @RequestMapping(value = "/materialInWareHouse/delete", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE)

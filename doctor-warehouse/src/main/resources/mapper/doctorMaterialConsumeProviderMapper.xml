@@ -100,14 +100,6 @@
         </foreach>
     </select>
 
-    <select id="list" resultMap="DoctorMaterialConsumeProviderMap">
-        SELECT <include refid="cols_all" />
-        FROM <include refid="tb" />
-        <where>
-            <include refid="criteria"/>
-        </where>
-    </select>
-
     <select id="paging" resultMap="DoctorMaterialConsumeProviderMap">
         SELECT <include refid="cols_all" />
         FROM <include refid="tb" />

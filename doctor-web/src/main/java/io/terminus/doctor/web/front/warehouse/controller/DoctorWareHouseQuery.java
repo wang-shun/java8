@@ -300,7 +300,7 @@ public class DoctorWareHouseQuery {
                                            @RequestParam(required = false) String startAt,
                                            @RequestParam(required = false) String endAt){
         List<WarehouseEventReport> warehouseEventReports = RespHelper.or500(doctorMaterialConsumeProviderReadService.warehouseEventReport(
-                farmId, null, WareHouseType.from(wareHouseType), startAt == null ? null : DateTime.parse(startAt).toDate(),
+                farmId, null, WareHouseType.from(wareHouseType), null, startAt == null ? null : DateTime.parse(startAt).toDate(),
                 endAt == null ? null : DateTime.parse(endAt).plusDays(1).toDate()
         ));
         Map<Long, WarehouseReport.Report> reportmap = new HashMap<>();
@@ -369,7 +369,7 @@ public class DoctorWareHouseQuery {
 
         // 该仓库各事件的数量和金额
         List<WarehouseEventReport> warehouseEventReports = RespHelper.or500(
-                doctorMaterialConsumeProviderReadService.warehouseEventReport(farmId, warehouseId, null, start, end
+                doctorMaterialConsumeProviderReadService.warehouseEventReport(farmId, warehouseId, null, null, start, end
         ));
         // 仓库基本信息及 track 信息
         DoctorWareHouseDto wareHouseDto = RespHelper.or500(doctorWareHouseReadService.queryDoctorWareHouseById(warehouseId));
