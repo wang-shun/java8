@@ -4,6 +4,7 @@ import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.common.enums.WareHouseType;
 import io.terminus.doctor.warehouse.dto.MaterialCountAmount;
+import io.terminus.doctor.warehouse.dto.MaterialEventReport;
 import io.terminus.doctor.warehouse.dto.WarehouseEventReport;
 import io.terminus.doctor.warehouse.model.DoctorMaterialConsumeProvider;
 
@@ -64,4 +65,15 @@ public interface DoctorMaterialConsumeProviderReadService {
      * @return
      */
     Response<List<WarehouseEventReport>> warehouseEventReport(Long farmId, Long warehouseId, WareHouseType type, Date startAt, Date endAt);
+
+    /**
+     * 指定仓库在指定时间段内各种物料每天发生的各种事件的数量和金额
+     * @param farmId
+     * @param warehouseId
+     * @param type
+     * @param startAt
+     * @param endAt
+     * @return
+     */
+    Response<List<MaterialEventReport>> materialEventReport(Long farmId, Long warehouseId, WareHouseType type, Date startAt, Date endAt);
 }

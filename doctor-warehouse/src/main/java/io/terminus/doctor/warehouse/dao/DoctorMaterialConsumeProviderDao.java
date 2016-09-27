@@ -9,6 +9,7 @@ import io.terminus.common.utils.MapBuilder;
 import io.terminus.doctor.common.enums.WareHouseType;
 import io.terminus.doctor.common.utils.Params;
 import io.terminus.doctor.warehouse.dto.MaterialCountAmount;
+import io.terminus.doctor.warehouse.dto.MaterialEventReport;
 import io.terminus.doctor.warehouse.dto.WarehouseEventReport;
 import io.terminus.doctor.warehouse.model.DoctorMaterialConsumeProvider;
 import org.springframework.stereotype.Repository;
@@ -91,7 +92,7 @@ public class DoctorMaterialConsumeProviderDao extends MyBatisDao<DoctorMaterialC
     public List<WarehouseEventReport> warehouseEventReport(Long farmId, Long warehouseId, WareHouseType type, Date startAt, Date endAt){
         Map<String, Object> param = MapBuilder.<String, Object>of()
                 .put("farmId", farmId)
-                .put("warehouseId", warehouseId)
+                .put("wareHouseId", warehouseId)
                 .put("startAt", startAt)
                 .put("endAt", endAt)
                 .map();
@@ -99,5 +100,26 @@ public class DoctorMaterialConsumeProviderDao extends MyBatisDao<DoctorMaterialC
             param.put("type", type.getKey());
         }
         return sqlSession.selectList(sqlId("warehouseEventReport"), ImmutableMap.copyOf(Params.filterNullOrEmpty(param)));
+    }
+
+    /**
+     * 指定仓库在指定时间段内各种物料每天发生的各种事件的数量和金额
+     * @param farmId 猪场id
+     * @param warehouseId 仓库id
+     * @param startAt
+     * @param endAt
+     * @return
+     */
+    public List<MaterialEventReport> materialEventReport(Long farmId, Long warehouseId, WareHouseType type, Date startAt, Date endAt){
+        Map<String, Object> param = MapBuilder.<String, Object>of()
+                .put("farmId", farmId)
+                .put("wareHouseId", warehouseId)
+                .put("startAt", startAt)
+                .put("endAt", endAt)
+                .map();
+        if(type != null){
+            param.put("type", type.getKey());
+        }
+        return sqlSession.selectList(sqlId("materialEventReport"), ImmutableMap.copyOf(Params.filterNullOrEmpty(param)));
     }
 }

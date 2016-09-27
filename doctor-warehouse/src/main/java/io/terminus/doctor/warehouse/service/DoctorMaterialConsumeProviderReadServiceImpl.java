@@ -10,6 +10,7 @@ import io.terminus.doctor.common.enums.WareHouseType;
 import io.terminus.doctor.common.utils.Params;
 import io.terminus.doctor.warehouse.dao.DoctorMaterialConsumeProviderDao;
 import io.terminus.doctor.warehouse.dto.MaterialCountAmount;
+import io.terminus.doctor.warehouse.dto.MaterialEventReport;
 import io.terminus.doctor.warehouse.dto.WarehouseEventReport;
 import io.terminus.doctor.warehouse.model.DoctorMaterialConsumeProvider;
 import lombok.extern.slf4j.Slf4j;
@@ -94,6 +95,16 @@ public class DoctorMaterialConsumeProviderReadServiceImpl implements DoctorMater
     public Response<List<WarehouseEventReport>> warehouseEventReport(Long farmId, Long warehouseId, WareHouseType type, Date startAt, Date endAt) {
         try{
             return Response.ok(doctorMaterialConsumeProviderDao.warehouseEventReport(farmId, warehouseId, type, startAt, endAt));
+        }catch(Exception e){
+            log.error("warehouseEventReport failed, cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("warehouseEventReport.fail");
+        }
+    }
+
+    @Override
+    public Response<List<MaterialEventReport>> materialEventReport(Long farmId, Long warehouseId, WareHouseType type, Date startAt, Date endAt) {
+        try{
+            return Response.ok(doctorMaterialConsumeProviderDao.materialEventReport(farmId, warehouseId, type, startAt, endAt));
         }catch(Exception e){
             log.error("warehouseEventReport failed, cause:{}", Throwables.getStackTraceAsString(e));
             return Response.fail("warehouseEventReport.fail");

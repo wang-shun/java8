@@ -220,4 +220,15 @@
         </where>
         group by ware_house_id, `event_type`
     </select>
+
+    <select id="materialEventReport" parameterType="map" resultType="io.terminus.doctor.warehouse.dto.MaterialEventReport">
+        select material_id as materialId, material_name as materialName, DATE_FORMAT(event_time, '%Y-%m-%d') as eventTime, event_type as eventType,
+        ifnull(sum(event_count), 0) as eventCount, ifnull(sum(unit_price * event_count), 0) as amount
+        from <include refid="tb"/>
+        <where>
+            <include refid="criteria"/>
+        </where>
+        group by material_id, DATE_FORMAT(event_time, '%Y-%m-%d'), event_type, material_name
+        order by eventTime, eventType, materialId
+    </select>
 </mapper>
