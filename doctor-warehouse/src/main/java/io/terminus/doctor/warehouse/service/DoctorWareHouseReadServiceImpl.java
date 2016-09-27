@@ -18,8 +18,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.validation.constraints.NotNull;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkState;
@@ -88,6 +90,25 @@ public class DoctorWareHouseReadServiceImpl implements DoctorWareHouseReadServic
         }catch (Exception e){
             log.error("query warehouse dto error, cause:{}", Throwables.getStackTraceAsString(e));
             return Response.fail("query.wwarehouse.error");
+        }
+    }
+
+    @Override
+    public Response<List<DoctorWareHouseDto>> listDoctorWareHouseDto(Long farmId, Integer type, String warehouseName){
+        try{
+            List<DoctorWareHouse> wareHouses = doctorWareHouseDao.findByFarmId(farmId).stream()
+                    .filter(wareHouse -> type == null || Objects.equals(type, wareHouse.getType()))
+                    .filter(wareHouse -> warehouseName == null || wareHouse.getWareHouseName().contains(warehouseName))
+                    .collect(Collectors.toList());
+            if(wareHouses.isEmpty()){
+                return Response.ok(Collections.emptyList());
+            }
+            List<DoctorWareHouseTrack> doctorWareHouseTracks = doctorWareHouseTrackDao.queryByWareHouseId(wareHouses.stream().map(DoctorWareHouse::getId).collect(Collectors.toList()));
+            Map<Long,DoctorWareHouseTrack> trackMap = doctorWareHouseTracks.stream().collect(Collectors.toMap(DoctorWareHouseTrack::getWareHouseId, v->v));
+            return Response.ok(wareHouses.stream().map(s->DoctorWareHouseDto.buildWareHouseDto(s, trackMap.get(s.getId()))).collect(Collectors.toList()));
+        }catch(Exception e){
+            log.error("list DoctorWareHouseDto fail, cause : {}", Throwables.getStackTraceAsString(e));
+            return Response.fail("list.wwarehouse.error");
         }
     }
 

@@ -4,6 +4,7 @@ import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import io.terminus.common.mysql.dao.MyBatisDao;
+import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.model.DoctorPigStatusCount;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 import org.springframework.stereotype.Repository;
@@ -117,5 +118,14 @@ public class DoctorPigTrackDao extends MyBatisDao<DoctorPigTrack>{
      */
     public List<DoctorPigStatusCount> countPigTrackByStatus(Long farmId){
         return getSqlSession().selectList(sqlId("countPigTrackByStatus"), farmId);
+    }
+
+    /**
+     * 根据猪群id查询哺乳母猪的跟踪
+     * @param groupId 猪群id
+     * @return 母猪跟踪
+     */
+    public List<DoctorPigTrack> findFeedSowTrackByGroupId(Long groupId) {
+        return getSqlSession().selectList(sqlId("findFeedSowTrackByGroupId"), ImmutableMap.of("groupId", groupId, "status", PigStatus.FEED.getKey()));
     }
 }

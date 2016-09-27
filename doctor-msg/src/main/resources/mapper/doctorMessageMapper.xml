@@ -17,6 +17,7 @@
         <result column="is_expired" property="isExpired"/>
         <result column="message_template" property="messageTemplate"/>
         <result column="type" property="type"/>
+        <result column="event_type" property="eventType"/>
         <result column="category" property="category"/>
         <result column="data" property="data"/>
         <result column="content" property="content"/>
@@ -39,11 +40,11 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        farm_id, rule_id, role_id, user_id, template_id, template_name, business_id, is_expired, message_template, type, category, data, content , channel, url, status, sended_at, failed_by, created_by, created_at, updated_at
+        farm_id, rule_id, role_id, user_id, template_id, template_name, business_id, is_expired, message_template, type, event_type, category, data, content , channel, url, status, sended_at, failed_by, created_by, created_at, updated_at
     </sql>
 
     <sql id="vals">
-        #{farmId}, #{ruleId}, #{roleId}, #{userId}, #{templateId}, #{templateName}, #{businessId}, #{isExpired}, #{messageTemplate}, #{type}, #{category}, #{data}, #{content}, #{channel}, #{url}, #{status}, #{sendedAt}, #{failedBy}, #{createdBy}, now(), now()
+        #{farmId}, #{ruleId}, #{roleId}, #{userId}, #{templateId}, #{templateName}, #{businessId}, #{isExpired}, #{messageTemplate}, #{type}, #{eventType},  #{category}, #{data}, #{content}, #{channel}, #{url}, #{status}, #{sendedAt}, #{failedBy}, #{createdBy}, now(), now()
     </sql>
 
     <insert id="create" parameterType="DoctorMessage" keyProperty="id" useGeneratedKeys="true">
@@ -60,7 +61,7 @@
         (<include refid="cols_exclude_id" />)
         VALUES
         <foreach collection="list" item="i" separator=",">
-            (#{i.farmId}, #{i.ruleId}, #{i.roleId}, #{i.userId}, #{i.templateId}, #{i.templateName}, #{i.businessId}, #{i.isExpired}, #{i.messageTemplate}, #{i.type}, #{i.category}, #{i.data}, #{i.content}, #{i.channel}, #{i.url} ,#{i.status}, #{i.sendedAt}, #{i.failedBy}, #{i.createdBy}, now(), now())
+            (#{i.farmId}, #{i.ruleId}, #{i.roleId}, #{i.userId}, #{i.templateId}, #{i.templateName}, #{i.businessId}, #{i.isExpired}, #{i.messageTemplate}, #{i.type}, #{i.eventType},#{i.category}, #{i.data}, #{i.content}, #{i.channel}, #{i.url} ,#{i.status}, #{i.sendedAt}, #{i.failedBy}, #{i.createdBy}, now(), now())
         </foreach>
     </insert>
 
@@ -84,6 +85,7 @@
             <if test="isExpired != null">is_expired = #{isExpired},</if>
             <if test="messageTemplate != null">message_template = #{messageTemplate},</if>
             <if test="type != null">type = #{type},</if>
+            <if test="eventType != null">event_type = #{eventType},</if>
             <if test="category != null">category = #{category},</if>
             <if test="data != null">data = #{data},</if>
             <if test="content != null">content = #{content},</if>
@@ -114,6 +116,7 @@
             <if test="businessId != null">AND business_id = #{businessId}</if>
             <if test="isExpired != null">AND is_expired = #{isExpired}</if>
             <if test="type != null">AND `type` = #{type}</if>
+            <if test="eventType != null">AND `event_type` = #{eventType}</if>
             <if test="category != null">AND category = #{category}</if>
             <if test="channel != null">AND channel = #{channel}</if>
             <if test="status != null">AND status = #{status}</if>
@@ -148,7 +151,6 @@
         SELECT <include refid="cols_all"/>
         FROM <include refid="tb"/>
         <include refid="criteria"/>
-        GROUP BY business_id
         order by `status` asc, `id` desc -- 未读排在前面, 其次最新
         LIMIT #{offset}, #{limit}
     </select>
@@ -157,7 +159,7 @@
     <select id="findNoReadCount" parameterType="long" resultType="long">
         SELECT COUNT(1)
         FROM <include refid="tb"/>
-        WHERE user_id = #{userId} AND status = 1 AND channel = 0
+        WHERE user_id = #{userId} AND status = 1 AND channel = 0 AND is_expired = 0
     </select>
 
     <!-- 获取最新的系统消息 -->
@@ -189,17 +191,16 @@
         )
     </select>
 
-    <select id="businessList" parameterType="map" resultType="long">
+    <select id="businessIdList" parameterType="map" resultType="long">
         SELECT DISTINCT business_id
         FROM <include refid="tb"/>
         <include refid="criteria"/>
     </select>
 
-    <select id="pagingDiffBusinessId" parameterType="map" resultMap="DoctorMessageMap">
+    <select id="sendList" parameterType="map" resultMap="DoctorMessageMap">
         SELECT <include refid="cols_all"/>
         FROM <include refid="tb"/>
         <include refid="criteria"/>
-        order by `status` asc, `id` desc -- 未读排在前面, 其次最新
-        LIMIT #{offset}, #{limit}
     </select>
+
 </mapper>

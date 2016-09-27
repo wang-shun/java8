@@ -1,4 +1,4 @@
-package io.terminus.doctor.warehouse.handler.provider;
+package io.terminus.doctor.warehouse.handler.in;
 
 import io.terminus.doctor.warehouse.dao.DoctorMaterialInWareHouseDao;
 import io.terminus.doctor.warehouse.dao.DoctorMaterialInfoDao;
@@ -6,7 +6,6 @@ import io.terminus.doctor.warehouse.dto.DoctorMaterialConsumeProviderDto;
 import io.terminus.doctor.warehouse.handler.IHandler;
 import io.terminus.doctor.warehouse.model.DoctorMaterialConsumeProvider;
 import io.terminus.doctor.warehouse.model.DoctorMaterialInWareHouse;
-import io.terminus.doctor.warehouse.model.DoctorMaterialInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -36,7 +35,8 @@ public class DoctorInWareHouseProviderHandler implements IHandler{
 
     @Override
     public Boolean ifHandle(DoctorMaterialConsumeProviderDto dto, Map<String, Object> context) {
-        return dto.getActionType().equals(DoctorMaterialConsumeProvider.EVENT_TYPE.PROVIDER.getValue());
+        DoctorMaterialConsumeProvider.EVENT_TYPE eventType = DoctorMaterialConsumeProvider.EVENT_TYPE.from(dto.getActionType());
+        return eventType != null && eventType.isIn();
     }
 
     @Override

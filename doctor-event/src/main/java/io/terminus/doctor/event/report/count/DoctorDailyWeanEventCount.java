@@ -40,14 +40,12 @@ public class DoctorDailyWeanEventCount implements DoctorDailyEventCount{
     @Override
     public void dailyEventHandle(DoctorPigEvent event, DoctorDailyReportDto doctorDailyReportDto) {
         DoctorWeanDailyReport doctorWeanDailyReport = new DoctorWeanDailyReport();
-
-        Map<String,Object> extraMap = event.getExtraMap();
-        doctorWeanDailyReport.setCount(doctorWeanDailyReport.getCount() + Integer.valueOf(extraMap.get("partWeanPigletsCount").toString()));
-        doctorWeanDailyReport.setWeight((doctorWeanDailyReport.getWeight() + Double.valueOf(extraMap.get("partWeanAvgWeight").toString()))/2);
-        doctorWeanDailyReport.setNest(doctorWeanDailyReport.getNest() + 1);
-
         Date startAt = Dates.startOfDay(event.getEventAt());
         Date endAt = DateUtil.getDateEnd(new DateTime(event.getEventAt())).toDate();
+
+        doctorWeanDailyReport.setCount(Integer.valueOf(event.getExtraMap().get("partWeanPigletsCount").toString()));
+        doctorWeanDailyReport.setWeight(doctorKpiDao.getWeanPigletWeightAvg(event.getFarmId(), startAt, endAt));
+        doctorWeanDailyReport.setNest(1);
         doctorWeanDailyReport.setAvgDayAge(doctorKpiDao.getWeanDayAgeAvg(event.getFarmId(), startAt, endAt));   //断奶日领
 
         doctorDailyReportDto.getWean().addWeanCount(doctorWeanDailyReport);

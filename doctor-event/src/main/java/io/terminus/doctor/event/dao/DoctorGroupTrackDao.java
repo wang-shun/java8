@@ -23,7 +23,7 @@ public class DoctorGroupTrackDao extends MyBatisDao<DoctorGroupTrack> {
      * @return
      */
     public DoctorGroupTrack findByGroupId(Long groupId) {
-        return getSqlSession().selectOne("findByGroupId", groupId);
+        return getSqlSession().selectOne("findGroupTrackByGroupId", groupId);
     }
 
     /**

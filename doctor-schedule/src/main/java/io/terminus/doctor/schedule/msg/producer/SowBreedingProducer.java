@@ -8,6 +8,7 @@ import io.terminus.doctor.event.enums.DataRange;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.model.DoctorPig;
+import io.terminus.doctor.event.service.DoctorBarnReadService;
 import io.terminus.doctor.event.service.DoctorPigReadService;
 import io.terminus.doctor.event.service.DoctorPigWriteService;
 import io.terminus.doctor.msg.dto.Rule;
@@ -37,9 +38,9 @@ import java.util.stream.Collectors;
 
 /**
  * Desc: 待配种母猪提示
- *
- *      1. 断奶/流产/返情日期
- *
+ * <p>
+ * 1. 断奶/流产/返情日期
+ * <p>
  * Mail: chk@terminus.io
  * Created by icemimosa
  * Date: 16/6/1
@@ -47,6 +48,8 @@ import java.util.stream.Collectors;
 @Component
 @Slf4j
 public class SowBreedingProducer extends AbstractJobProducer {
+
+    private DoctorBarnReadService doctorBarnReadService;
 
     @Autowired
     public SowBreedingProducer(DoctorMessageRuleTemplateReadService doctorMessageRuleTemplateReadService,
@@ -57,7 +60,8 @@ public class SowBreedingProducer extends AbstractJobProducer {
                                DoctorPigReadService doctorPigReadService,
                                DoctorPigWriteService doctorPigWriteService,
                                DoctorMessageTemplateReadService doctorMessageTemplateReadService,
-                               DoctorUserDataPermissionReadService doctorUserDataPermissionReadService) {
+                               DoctorUserDataPermissionReadService doctorUserDataPermissionReadService,
+                               DoctorBarnReadService doctorBarnReadService) {
         super(doctorMessageTemplateReadService,
                 doctorMessageRuleTemplateReadService,
                 doctorMessageRuleReadService,
@@ -68,6 +72,7 @@ public class SowBreedingProducer extends AbstractJobProducer {
                 doctorPigWriteService,
                 doctorUserDataPermissionReadService,
                 Category.SOW_BREEDING);
+        this.doctorBarnReadService = doctorBarnReadService;
     }
 
     @Override
@@ -99,7 +104,7 @@ public class SowBreedingProducer extends AbstractJobProducer {
                     DataRange.FARM.getKey(), farmId, DoctorPig.PIG_TYPE.SOW.getKey()));
             // 计算size, 分批处理
             Long page = getPageSize(total, 100L);
-            DoctorPig pig =DoctorPig.builder()
+            DoctorPig pig = DoctorPig.builder()
                     .farmId(farmId)
                     .pigType(DoctorPig.PIG_TYPE.SOW.getKey())
                     .build();
@@ -113,25 +118,33 @@ public class SowBreedingProducer extends AbstractJobProducer {
                 ).collect(Collectors.toList());
                 // 处理每个猪
                 for (int j = 0; pigs != null && j < pigs.size(); j++) {
-                    DoctorPigInfoDto pigDto = pigs.get(j);
-                    //根据用户拥有的猪舍权限过滤拥有user
-                    List<SubUser> sUsers = filterSubUserBarnId(subUsers, pigDto.getBarnId());
-                    // 母猪的updatedAt与当前时间差 (天)
-                    if (getStatusDate(pigDto) != null) {
+                    try {
+                        DoctorPigInfoDto pigDto = pigs.get(j);
+                        //根据用户拥有的猪舍权限过滤拥有user
+                        List<SubUser> sUsers = filterSubUserBarnId(subUsers, pigDto.getBarnId());
+                        // 母猪的updatedAt与当前时间差 (天)
+                        if (getStatusDate(pigDto) == null) {
+                            break;
+                        }
                         Double timeDiff = getTimeDiff(getStatusDate(pigDto));
                         // 获取配置的天数, 并判断
-                        if (ruleValueMap.get(1) != null) {
-                            // 记录每只猪的消息提醒
+                        // 记录每只猪的消息提醒
+                        if (checkRuleValue(ruleValueMap.get(1), timeDiff)) {
                             if (!isMessage && Objects.equals(ruleTemplate.getType(), DoctorMessageRuleTemplate.Type.WARNING.getValue())) {
-                                recordPigMessage(pigDto, PigEvent.MATING, ruleValueMap.get(1).getLeftValue().doubleValue() - timeDiff, ruleValueMap.get(1).getLeftValue().intValue(),
+                                recordPigMessage(pigDto, PigEvent.MATING, getRuleTimeDiff(ruleValueMap.get(1), timeDiff), ruleValueMap.get(1),
                                         PigStatus.Wean, PigStatus.KongHuai, PigStatus.Entry);
                             }
 
-                            if (isMessage && checkRuleValue(ruleValueMap.get(1), timeDiff)) {
-                                messages.addAll(getMessage(pigDto, rule.getChannels(), ruleRole, sUsers, timeDiff, rule.getUrl()));
+                            if (isMessage) {
+                                pigDto.setOperatorName(RespHelper.orServEx(doctorBarnReadService.findBarnById(pigDto.getBarnId())).getStaffName());
+                                messages.addAll(getMessage(pigDto, rule.getChannels(), ruleRole, sUsers, timeDiff, rule.getUrl(), PigEvent.MATING.getKey()));
                             }
+
                         }
+                    } catch (Exception e) {
+                        log.error("[SowBreedingProduce]-handle.message.failed");
                     }
+
                 }
             }
         }

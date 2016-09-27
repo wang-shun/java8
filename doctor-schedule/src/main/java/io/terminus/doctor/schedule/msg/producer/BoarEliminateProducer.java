@@ -1,10 +1,7 @@
 package io.terminus.doctor.schedule.msg.producer;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.api.client.util.Maps;
-import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
-import io.terminus.common.utils.Splitters;
 import io.terminus.doctor.common.constants.JacksonType;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dto.DoctorPigInfoDto;
@@ -27,7 +24,6 @@ import io.terminus.doctor.msg.service.DoctorMessageRuleRoleReadService;
 import io.terminus.doctor.msg.service.DoctorMessageRuleTemplateReadService;
 import io.terminus.doctor.msg.service.DoctorMessageTemplateReadService;
 import io.terminus.doctor.msg.service.DoctorMessageWriteService;
-import io.terminus.doctor.schedule.msg.producer.factory.PigDtoFactory;
 import io.terminus.doctor.user.service.DoctorUserDataPermissionReadService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -104,15 +100,18 @@ public class BoarEliminateProducer extends AbstractJobProducer {
                 ).collect(Collectors.toList());
                 // 处理每个猪
                 for (int j = 0; boarPigs != null && j < boarPigs.size(); j++) {
-                    DoctorPigInfoDto pigDto = boarPigs.get(j);
-                    //根据用户拥有的猪舍权限过滤拥有user
-                    List<SubUser> sUsers = filterSubUserBarnId(subUsers, pigDto.getBarnId());
-                    // 公猪的updatedAt与当前时间差 (天)
-                    Double timeDiff = getTimeDiff(new DateTime(pigDto.getBirthDay()));
-                    ruleValueMap.keySet().forEach(key -> {
+                    try {
+                        DoctorPigInfoDto pigDto = boarPigs.get(j);
+                        //根据用户拥有的猪舍权限过滤拥有user
+                        List<SubUser> sUsers = filterSubUserBarnId(subUsers, pigDto.getBarnId());
+                        // 公猪的updatedAt与当前时间差 (天)
+                        Double timeDiff = getTimeDiff(new DateTime(pigDto.getBirthDay()));
+                        if (pigDto.getDoctorPigEvents() == null) {
+                            break;
+                        }
                         //取出最近一次的采精事件
                         DoctorPigEvent doctorPigEvent = getPigEventByEventType(pigDto.getDoctorPigEvents(), PigEvent.SEMEN.getKey());
-                        if (ruleValueMap.get(key) != null) {
+                        ruleValueMap.keySet().forEach(key -> {
                             Boolean isSend = false;
                             RuleValue ruleValue = ruleValueMap.get(key);
                             if (key == 1) {
@@ -122,13 +121,12 @@ public class BoarEliminateProducer extends AbstractJobProducer {
                                 if (doctorPigEvent != null && StringUtils.isNotBlank(doctorPigEvent.getExtra())) {
                                     try {
                                         Map<String, Object> extraMap = MAPPER.readValue(doctorPigEvent.getExtra(), JacksonType.MAP_OF_OBJECT);
-                                            Double semenActive = (double) extraMap.get("semenActive");
-                                            //精液重量小于预定值
-                                            isSend = semenActive < ruleValue.getValue().doubleValue();
+                                        Double semenActive = (double) extraMap.get("semenActive");
+                                        //精液重量小于预定值
+                                        isSend = semenActive < ruleValue.getValue().doubleValue();
                                     } catch (Exception e) {
-                                        log.error("[BoarEliminateProducer].get.semenActive.fail, event{}",doctorPigEvent);
+                                        log.error("[BoarEliminateProducer].get.semenActive.fail, event{}", doctorPigEvent);
                                     }
-
                                 }
                             } else if (key == 3) {
                                 if (doctorPigEvent != null && StringUtils.isNotBlank(doctorPigEvent.getExtra())) {
@@ -145,12 +143,15 @@ public class BoarEliminateProducer extends AbstractJobProducer {
                             }
                             if (isSend) {
                                 pigDto.setReason(ruleValue.getDescribe() + ruleValue.getValue().toString());
-                                messages.addAll(getMessage(pigDto, rule.getChannels(), ruleRole, sUsers, timeDiff, rule.getUrl()));
+                                messages.addAll(getMessage(pigDto, rule.getChannels(), ruleRole, sUsers, timeDiff, rule.getUrl(), PigEvent.REMOVAL.getKey()));
                             }
-                        }
-                    });
-
+                        });
+                    } catch (Exception e) {
+                        log.error("[BoarEliminateProduce]-message.failed");
+                    }
                 }
+
+
             }
         }
 

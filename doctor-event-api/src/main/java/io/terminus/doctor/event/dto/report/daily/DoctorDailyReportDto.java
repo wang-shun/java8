@@ -117,7 +117,7 @@ public class DoctorDailyReportDto implements Serializable {
 
         //断奶仔猪
         this.wean.setCount(this.wean.getCount() + report.getWean().getCount());
-        this.wean.setWeight(this.wean.getWeight() + report.getWean().getWeight());
+        this.wean.setWeight(report.getWean().getWeight() == 0 ? this.wean.getWeight() : report.getWean().getWeight());
         this.wean.setNest(this.wean.getNest() + report.getWean().getNest());
         this.wean.setAvgDayAge(report.getWean().getAvgDayAge() == 0 ? this.wean.getAvgDayAge() : report.getWean().getAvgDayAge());
     }
@@ -130,6 +130,7 @@ public class DoctorDailyReportDto implements Serializable {
         this.dead.setFarrow(this.dead.getFarrow() + report.getDead().getFarrow());
         this.dead.setNursery(this.dead.getNursery() + report.getDead().getNursery());
         this.dead.setFatten(this.dead.getFatten() + report.getDead().getFatten());
+        this.dead.setHoubei(this.dead.getHoubei() + report.getDead().getHoubei());
 
         //存栏
         this.liveStock.setFarrow(report.getLiveStock().getFarrow());

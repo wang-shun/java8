@@ -2,6 +2,7 @@ package io.terminus.doctor.web.front.warehouse.controller;
 
 import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
+import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
@@ -12,9 +13,12 @@ import io.terminus.doctor.user.model.DoctorFarm;
 import io.terminus.doctor.user.service.DoctorFarmReadService;
 import io.terminus.doctor.user.service.DoctorUserProfileReadService;
 import io.terminus.doctor.warehouse.dto.DoctorWareHouseDto;
+import io.terminus.doctor.warehouse.dto.MaterialCountAmount;
 import io.terminus.doctor.warehouse.model.DoctorFarmWareHouseType;
+import io.terminus.doctor.warehouse.model.DoctorMaterialConsumeProvider;
 import io.terminus.doctor.warehouse.model.DoctorMaterialInWareHouse;
 import io.terminus.doctor.warehouse.model.DoctorWareHouse;
+import io.terminus.doctor.warehouse.service.DoctorMaterialConsumeProviderReadService;
 import io.terminus.doctor.warehouse.service.DoctorMaterialInWareHouseReadService;
 import io.terminus.doctor.warehouse.service.DoctorWareHouseReadService;
 import io.terminus.doctor.warehouse.service.DoctorWareHouseWriteService;
@@ -43,7 +47,7 @@ import static com.google.common.base.Preconditions.checkState;
  * Created by yaoqijun.
  * Date:2016-05-25
  * Email:yaoqj@terminus.io
- * Descirbe: 猪场信息获取查询
+ * Descirbe: 仓库信息获取查询
  */
 @Slf4j
 @Controller
@@ -63,6 +67,8 @@ public class DoctorWareHouseQuery {
     private final DoctorBasicMaterialReadService doctorBasicMaterialReadService;
 
     private final DoctorMaterialInWareHouseReadService doctorMaterialInWareHouseReadService;
+    @RpcConsumer
+    private DoctorMaterialConsumeProviderReadService doctorMaterialConsumeProviderReadService;
 
     @Autowired
     public DoctorWareHouseQuery(DoctorWareHouseReadService doctorWareHouseReadService,
@@ -93,6 +99,14 @@ public class DoctorWareHouseQuery {
                                                                @RequestParam(value = "pageNo", required = false) Integer pageNo,
                                                                @RequestParam(value = "pageSize", required = false) Integer pageSize){
         return RespHelper.or500(doctorWareHouseReadService.queryDoctorWarehouseDto(farmId, type, pageNo, pageSize));
+    }
+
+    @RequestMapping(value = "/listDoctorWareHouseDto", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public List<DoctorWareHouseDto> listDoctorWareHouseDto(@RequestParam("farmId") Long farmId,
+                                                           @RequestParam(value = "type", required = false) Integer type,
+                                                           @RequestParam(value = "warehouseName", required = false) String warehouseName){
+        return RespHelper.or500(doctorWareHouseReadService.listDoctorWareHouseDto(farmId, type, warehouseName));
     }
 
     /**
@@ -186,5 +200,74 @@ public class DoctorWareHouseQuery {
                 .stream()
                 .filter(basicMaterial -> !exist.contains(basicMaterial.getId()))
                 .collect(Collectors.toList());
+    }
+
+    /**
+     * 分页查询仓库历史出入记录
+     * @param farmId 猪场id , 必传
+     * @param warehouseId 仓库id
+     * @param materialId 物料id
+     * @param eventType 事件类型
+     *                  @see DoctorMaterialConsumeProvider.EVENT_TYPE
+     * @param materilaType 物料(仓库)类型
+     *                     @see io.terminus.doctor.common.enums.WareHouseType
+     * @param staffId 事件员工id
+     * @param startAt 开始日期范围
+     * @param endAt 结束日期范围
+     * @param pageNo 第几页
+     * @param size 每页数量
+     * @return
+     */
+    @RequestMapping(value = "/pageConsumeProvideHistory", method = RequestMethod.GET)
+    @ResponseBody
+    public Paging<DoctorMaterialConsumeProvider> pageConsumeProvideHistory(
+            @RequestParam("farmId") Long farmId, // 此参数必须有
+            @RequestParam(name = "warehouseId", required = false) Long warehouseId,
+            @RequestParam(required = false) Long materialId,
+            @RequestParam(required = false) Integer eventType,
+            @RequestParam(required = false) Integer materilaType,
+            @RequestParam(required = false) Long staffId,
+            @RequestParam(required = false) String startAt,
+            @RequestParam(required = false) String endAt,
+            @RequestParam(required = false) Integer pageNo,
+            @RequestParam(required = false) Integer size){
+        return RespHelper.or500(doctorMaterialConsumeProviderReadService.page(farmId, warehouseId, materialId, eventType,
+                materilaType, staffId, startAt, endAt, pageNo, size));
+    }
+
+    /**
+     * 仓库数量和金额的统计
+     * @param farmId 猪场id , 必传
+     * @param warehouseId 仓库id
+     * @param materialId 物料id
+     * @param eventType 事件类型
+     *                  @see DoctorMaterialConsumeProvider.EVENT_TYPE
+     * @param materilaType 物料(仓库)类型
+     *                     @see io.terminus.doctor.common.enums.WareHouseType
+     * @param staffId 事件员工id
+     * @param startAt 开始日期范围
+     * @param endAt 结束日期范围
+     * @param barnId 猪舍id
+     * @param groupId 猪群id
+     * @param pageNo 第几页
+     * @param size 每页数量
+     * @return
+     */
+    @RequestMapping(value = "/countAmount", method = RequestMethod.GET)
+    @ResponseBody
+    public Paging<MaterialCountAmount> countAmount(@RequestParam Long farmId,  // 此参数必须有
+                                                 @RequestParam(required = false) Long warehouseId,
+                                                 @RequestParam(required = false) Long materialId,
+                                                 @RequestParam(required = false) Integer eventType,
+                                                 @RequestParam(required = false) Integer materilaType,
+                                                 @RequestParam(required = false) Long barnId,
+                                                 @RequestParam(required = false) Long groupId,
+                                                 @RequestParam(required = false) Long staffId,
+                                                 @RequestParam(required = false) String startAt,
+                                                 @RequestParam(required = false) String endAt,
+                                                 @RequestParam(required = false) Integer pageNo,
+                                                 @RequestParam(required = false) Integer size){
+        return RespHelper.or500(doctorMaterialConsumeProviderReadService.countAmount(farmId, warehouseId, materialId, eventType, materilaType,
+                barnId, groupId, staffId, startAt, endAt, pageNo, size));
     }
 }

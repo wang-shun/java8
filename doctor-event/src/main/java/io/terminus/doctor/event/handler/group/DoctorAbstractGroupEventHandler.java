@@ -24,6 +24,7 @@ import io.terminus.doctor.event.dto.event.group.input.DoctorTransGroupInput;
 import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.handler.DoctorGroupEventHandler;
+import io.terminus.doctor.event.manager.DoctorGroupReportManager;
 import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
@@ -82,6 +83,9 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
 
     @Autowired
     private DoctorGroupDao doctorGroupDao;
+
+    @Autowired
+    private DoctorGroupReportManager doctorGroupReportManager;
 
     @Autowired(required = false)
     private Publisher publisher;
@@ -196,6 +200,8 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
                 break;
         }
         groupTrack.setExtraEntity(extra);
+
+        groupTrack =  doctorGroupReportManager.updateFarrowGroupTrack(groupTrack, event.getPigType());
         doctorGroupTrackDao.update(groupTrack);
     }
 
@@ -367,9 +373,9 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
         }
     }
 
-    //判断内转还是外转(如果转入类型不是群间转移, 那么一定是外转事件)
+    //判断内转还是外转
     protected static DoctorGroupEvent.TransGroupType getTransType(Integer inType, Integer pigType, DoctorBarn toBarn) {
-        if (!Objects.equals(inType, DoctorMoveInGroupEvent.InType.GROUP.getValue())) {
+        if (inType != null && !Objects.equals(inType, DoctorMoveInGroupEvent.InType.GROUP.getValue())) {
             return DoctorGroupEvent.TransGroupType.OUT;
         }
         return Objects.equals(pigType, toBarn.getPigType()) || (FARROW_TYPES.contains(pigType) && FARROW_TYPES.contains(toBarn.getPigType())) ?

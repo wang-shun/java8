@@ -80,6 +80,31 @@ public class DoctorGroupTrack implements Serializable {
      * 平均体重(公斤)
      */
     private Double avgWeight;
+
+    /**
+     * 断奶均重kg
+     */
+    private Double weanAvgWeight;
+
+    /**
+     * 出生均重kg
+     */
+    private Double birthAvgWeight;
+
+    /**
+     * 弱仔数
+     */
+    private Integer weakQty;
+
+    /**
+     * 未断奶数
+     */
+    private Integer unweanQty;
+
+    /**
+     * 不合格数
+     */
+    private Integer unqQty;
     
     /**
      * 单价(分)

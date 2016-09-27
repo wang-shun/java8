@@ -6,12 +6,12 @@ import com.google.common.base.Stopwatch;
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import io.terminus.common.model.Paging;
 import io.terminus.common.utils.Arguments;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.constants.JacksonType;
 import io.terminus.doctor.common.utils.RespHelper;
+import io.terminus.doctor.msg.dto.DoctorMessageSearchDto;
 import io.terminus.doctor.msg.dto.Rule;
 import io.terminus.doctor.msg.dto.RuleValue;
 import io.terminus.doctor.msg.dto.SubUser;
@@ -143,11 +143,11 @@ public abstract class AbstractProducer implements IProducer {
                             .farmId(messageRule.getFarmId())
                             .ruleValue(messageRule.getRuleValue())
                             .build();
-                        List<DoctorMessage> message = message(ruleRole,
+                    List<DoctorMessage> message = message(ruleRole,
                             subUsers.stream().filter(sub -> sub.getFarmIds().contains(messageRule.getFarmId())).collect(Collectors.toList()));
                     if (Arguments.notEmpty(message)) {
                         //分批次插入数据
-                        Lists.partition(message,5000).forEach(list -> doctorMessageWriteService.createMessages(list));
+                        Lists.partition(message, 5000).forEach(list -> doctorMessageWriteService.createMessages(list));
                     }
                 }
 
@@ -184,7 +184,9 @@ public abstract class AbstractProducer implements IProducer {
                     Category.SOW_NEEDWEAN.getKey(),
                     Category.SOW_BREEDING.getKey(),
                     Category.SOW_BIRTHDATE.getKey(),
-                    Category.SOW_PREGCHECK.getKey());
+                    Category.SOW_PREGCHECK.getKey(),
+                    Category.SOW_BACK_FAT.getKey(),
+                    Category.SOW_ELIMINATE.getKey());
             RespHelper.orServEx(doctorMessageRuleReadService.findMessageRulesByTplId(ruleTemplate.getId())).forEach(doctorMessageRule -> {
                 if (ofCategories.contains(doctorMessageRule.getCategory())) {
                     recordPigMessages(doctorMessageRule);
@@ -279,7 +281,7 @@ public abstract class AbstractProducer implements IProducer {
      * @param jsonData 填充数据
      * @return
      */
-    protected List<DoctorMessage> createMessage(List<SubUser> subUsers, DoctorMessageRuleRole ruleRole, Integer channel, String jsonData) {
+    protected List<DoctorMessage> createMessage(List<SubUser> subUsers, DoctorMessageRuleRole ruleRole, Integer channel, String jsonData, Integer eventType) {
         List<DoctorMessage> messages = Lists.newArrayList();
         DoctorMessageRuleTemplate template = RespHelper.orServEx(doctorMessageRuleTemplateReadService.findMessageRuleTemplateById(ruleRole.getTemplateId()));
         if (subUsers != null && subUsers.size() > 0) {
@@ -295,6 +297,7 @@ public abstract class AbstractProducer implements IProducer {
                                 .isExpired(DoctorMessage.IsExpired.NOTEXPIRED.getValue())
                                 .messageTemplate(getTemplateName(template.getMessageTemplate(), channel))
                                 .type(template.getType())
+                                .eventType(eventType)
                                 .category(template.getCategory())
                                 .data(jsonData)
                                 .channel(channel)
@@ -337,6 +340,7 @@ public abstract class AbstractProducer implements IProducer {
                             .isExpired(DoctorMessage.IsExpired.NOTEXPIRED.getValue())
                             .messageTemplate(getTemplateName(template.getMessageTemplate(), channel))
                             .type(template.getType())
+                            .eventType(eventType)
                             .category(template.getCategory())
                             .data(jsonData)
                             .channel(channel)
@@ -494,11 +498,11 @@ public abstract class AbstractProducer implements IProducer {
      */
     protected void setMessageIsExpired(DoctorMessageRule messageRule) {
         for (int i = 0; ; i++) {
-            Map<String, Object> map = Maps.newHashMap();
-            map.put("templateId", messageRule.getTemplateId());
-            map.put("farmId", messageRule.getFarmId());
-            map.put("isExpired", DoctorMessage.IsExpired.NOTEXPIRED.getValue());
-            Paging<DoctorMessage> messagePaging = RespHelper.or500(doctorMessageReadService.pagingWarnMessages(map, i + 1, 100));
+            DoctorMessageSearchDto doctorMessageSearchDto = new DoctorMessageSearchDto();
+            doctorMessageSearchDto.setTemplateId(messageRule.getTemplateId());
+            doctorMessageSearchDto.setFarmId(messageRule.getFarmId());
+            doctorMessageSearchDto.setIsExpired(DoctorMessage.IsExpired.NOTEXPIRED.getValue());
+            Paging<DoctorMessage> messagePaging = RespHelper.or500(doctorMessageReadService.pagingWarnMessages(doctorMessageSearchDto, i + 1, 100));
             List<DoctorMessage> messages = messagePaging.getData();
             if (messages != null && messages.size() > 0) {
                 messages.forEach(doctorMessage -> {

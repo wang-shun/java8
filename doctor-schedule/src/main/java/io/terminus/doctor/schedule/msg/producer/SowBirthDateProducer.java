@@ -39,7 +39,7 @@ import java.util.stream.Collectors;
 
 /**
  * Desc: 母猪预产期提示
- *          1. 妊娠检查阳性 (预产期: 最近一次配种时间 + 3月, 当前是页面输入项)
+ * 1. 妊娠检查阳性 (预产期: 最近一次配种时间 + 3月, 当前是页面输入项)
  * Mail: chk@terminus.io
  * Created by icemimosa
  * Date: 16/6/5
@@ -110,27 +110,31 @@ public class SowBirthDateProducer extends AbstractJobProducer {
                 pigs = pigs.stream().filter(pigDto -> Objects.equals(PigStatus.Pregnancy.getKey(), pigDto.getStatus())).collect(Collectors.toList());
                 // 处理每个猪
                 for (int j = 0; pigs != null && j < pigs.size(); j++) {
-                    DoctorPigInfoDto pigDto = pigs.get(j);
-                    //根据用户拥有的猪舍权限过滤拥有user
-                    List<SubUser> sUsers = filterSubUserBarnId(subUsers, pigDto.getBarnId());
-                    // 母猪的updatedAt与当前时间差 (天)
-                    DoctorPigEvent doctorPigEvent = getMatingPigEvent(pigDto);
-                    Double timeDiff = getTimeDiff(new DateTime(doctorPigEvent.getEventAt()));
-
-                    if (ruleValueMap.get(1) != null) {
-                        if (!isMessage && Objects.equals(ruleTemplate.getType(), DoctorMessageRuleTemplate.Type.WARNING.getValue())) {
-                            // 获取预产期, 并校验日期
-                            DateTime birthDate = getBirthDate(pigDto, ruleValueMap.get(1));
-                            // 记录每只猪的消息提醒
-                            recordPigMessage(pigDto, PigEvent.FARROWING, ruleValueMap.get(1).getLeftValue().doubleValue() - timeDiff, 0,
-                                    PigStatus.Pregnancy);
-                        }
-                        if (isMessage && checkRuleValue(ruleValueMap.get(1), timeDiff)) {
-                            pigDto.setEventDate(doctorPigEvent.getEventAt());
-                            pigDto.setOperatorName(doctorPigEvent.getOperatorName());
-                            messages.addAll(getMessage(pigDto, rule.getChannels(), ruleRole, sUsers, timeDiff, rule.getUrl()));
-                        }
-
+                    try {
+                        DoctorPigInfoDto pigDto = pigs.get(j);
+                        //根据用户拥有的猪舍权限过滤拥有user
+                        List<SubUser> sUsers = filterSubUserBarnId(subUsers, pigDto.getBarnId());
+                        // 母猪的updatedAt与当前时间差 (天)
+                        DoctorPigEvent doctorPigEvent = getMatingPigEvent(pigDto);
+                        Double timeDiff = getTimeDiff(new DateTime(doctorPigEvent.getEventAt()));
+                        ruleValueMap.values().forEach(ruleValue -> {
+                            if (checkRuleValue(ruleValue, timeDiff)) {
+                                if (!isMessage && Objects.equals(ruleTemplate.getType(), DoctorMessageRuleTemplate.Type.WARNING.getValue())) {
+                                    // 获取预产期, 并校验日期
+                                    //DateTime birthDate = getBirthDate(pigDto, ruleValue);
+                                    // 记录每只猪的消息提醒
+                                    recordPigMessage(pigDto, PigEvent.FARROWING, getRuleTimeDiff(ruleValue, timeDiff), ruleValue,
+                                            PigStatus.Pregnancy);
+                                }
+                                if (isMessage) {
+                                    pigDto.setEventDate(doctorPigEvent.getEventAt());
+                                    pigDto.setOperatorName(doctorPigEvent.getOperatorName());
+                                    messages.addAll(getMessage(pigDto, rule.getChannels(), ruleRole, sUsers, timeDiff, rule.getUrl(), PigEvent.FARROWING.getKey()));
+                                }
+                            }
+                        });
+                    } catch (Exception e) {
+                        log.error("[SowBirthDateProduce]-handle.message.failed");
                     }
                 }
             }

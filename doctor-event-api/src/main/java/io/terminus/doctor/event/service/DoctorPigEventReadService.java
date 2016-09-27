@@ -80,4 +80,16 @@ public interface DoctorPigEventReadService {
      * @return
      */
     Response<Boolean> validatePigNotInFeed(@NotNull(message = "input.pigIds.empty") String pigIds);
+
+    /**
+     * 根据条件查询事件
+     * @param criteria
+     * @return
+     */
+    Response<Paging<DoctorPigEvent>> queryPigEventsByCriteria(Map<String, Object> criteria, Integer pageNo, Integer pageSize);
+
+    /**
+     * 获取事件操作人列表
+     */
+    Response<List<DoctorPigEvent>> queryOperators(Map<String, Object> criteria);
 }

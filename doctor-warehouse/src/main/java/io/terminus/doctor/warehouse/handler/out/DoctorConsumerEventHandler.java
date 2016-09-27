@@ -1,6 +1,8 @@
-package io.terminus.doctor.warehouse.handler.consume;
+package io.terminus.doctor.warehouse.handler.out;
 
 import com.google.common.collect.ImmutableMap;
+import io.terminus.common.utils.MapBuilder;
+import io.terminus.doctor.common.utils.Params;
 import io.terminus.doctor.warehouse.dao.DoctorMaterialConsumeProviderDao;
 import io.terminus.doctor.warehouse.dao.DoctorMaterialPriceInWareHouseDao;
 import io.terminus.doctor.warehouse.dto.DoctorMaterialConsumeProviderDto;
@@ -21,7 +23,7 @@ import java.util.Objects;
  * Created by yaoqijun.
  * Date:2016-05-30
  * Email:yaoqj@terminus.io
- * Descirbe: 创建消耗事件信息内容
+ * Descirbe: 创建出库事件信息内容
  */
 @Component
 public class DoctorConsumerEventHandler implements IHandler{
@@ -38,12 +40,14 @@ public class DoctorConsumerEventHandler implements IHandler{
 
     @Override
     public Boolean ifHandle(DoctorMaterialConsumeProviderDto dto, Map<String, Object> context) {
-        return dto.getActionType().equals(DoctorMaterialConsumeProvider.EVENT_TYPE.CONSUMER.getValue());
+        DoctorMaterialConsumeProvider.EVENT_TYPE eventType = DoctorMaterialConsumeProvider.EVENT_TYPE.from(dto.getActionType());
+        return eventType != null && eventType.isOut();
     }
 
     @Override
     public void handle(DoctorMaterialConsumeProviderDto dto, Map<String, Object> context) throws RuntimeException {
         Double consumeCount = dto.getCount(); // 本次领用总数量
+        long totalPrice = 0L; // 本次领用总价格
         // 1. 计算本次领用的组成(单价\数量\入库时间)
         long plus = 0L;
         Map<String, Object> extraMap = new HashMap<>();
@@ -59,6 +63,7 @@ public class DoctorConsumerEventHandler implements IHandler{
                         "unitPrice", item.getUnitPrice(), // 这次入库的物料的单价
                         "count", remainder // 从这次入库的物料当中领了多少
                 ));
+                totalPrice += item.getUnitPrice() * remainder;
                 if(plus + remainder == consumeCount){
                     break;
                 }
@@ -72,19 +77,22 @@ public class DoctorConsumerEventHandler implements IHandler{
                         "unitPrice", item.getUnitPrice(),
                         "count", consumeCount - plus
                 ));
+                totalPrice += (consumeCount - plus) * item.getUnitPrice();
                 break;
             }
         }
 
         // 2. 保存数据
         DoctorMaterialConsumeProvider doctorMaterialConsumeProvider = DoctorMaterialConsumeProvider.buildFromDto(dto);
-        if(Objects.equals(dto.getType(), WareHouseType.FEED.getKey())){
-            extraMap.putAll(ImmutableMap.of(
-                    "consumeDays", dto.getConsumeDays(),
-                    "barnId", dto.getBarnId(),
-                    "barnName", dto.getBarnName()));
+        if(Objects.equals(dto.getType(), WareHouseType.FEED.getKey()) && dto.getConsumeDays() != null){
+            extraMap.put("consumeDays", dto.getConsumeDays());
         }
+        doctorMaterialConsumeProvider.setBarnId(dto.getBarnId());
+        doctorMaterialConsumeProvider.setBarnName(dto.getBarnName());
+        doctorMaterialConsumeProvider.setGroupId(dto.getGroupId());
+        doctorMaterialConsumeProvider.setGroupCode(dto.getGroupCode());
         doctorMaterialConsumeProvider.setExtraMap(extraMap);
+        doctorMaterialConsumeProvider.setUnitPrice(Double.valueOf(totalPrice / consumeCount).longValue());
         doctorMaterialConsumeProviderDao.create(doctorMaterialConsumeProvider);
         context.put("eventId",doctorMaterialConsumeProvider.getId());
     }

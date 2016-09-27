@@ -202,4 +202,17 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
         param.put("endDate", endDate);
         return sqlSession.selectList(sqlId("findByDateRange"), ImmutableMap.copyOf(Params.filterNullOrEmpty(param)));
     }
+
+    public Boolean updates(List<DoctorPigEvent> lists){
+        return  Boolean.valueOf(sqlSession.update(sqlId("updates"), lists) == 1);
+    }
+
+    /**
+     *根据条件查询操作人列表
+     * @param criteria
+     * @return
+     */
+    public List<DoctorPigEvent> findOperators(Map<String, Object> criteria){
+        return getSqlSession().selectList(sqlId("findOperator"), criteria);
+    }
 }

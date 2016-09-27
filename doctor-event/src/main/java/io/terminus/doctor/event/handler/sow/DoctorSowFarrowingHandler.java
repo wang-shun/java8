@@ -21,7 +21,6 @@ import io.terminus.doctor.event.enums.PigSource;
 import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.handler.DoctorAbstractEventFlowHandler;
 import io.terminus.doctor.event.model.DoctorPigEvent;
-import io.terminus.doctor.event.model.DoctorPigSnapshot;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.event.service.DoctorGroupWriteService;
 import io.terminus.doctor.workflow.core.Execution;
@@ -82,7 +81,7 @@ public class DoctorSowFarrowingHandler extends DoctorAbstractEventFlowHandler {
 
 
         //分娩窝重
-        doctorPigEvent.setFarrowWeight(Doubles.tryParse(Objects.toString(extra.get("birthNextAvg"))));
+        doctorPigEvent.setFarrowWeight(Doubles.tryParse(Objects.toString(extra.get("birthNestAvg"))));
         //分娩仔猪只数信息
         doctorPigEvent.setLiveCount(Ints.tryParse(Objects.toString(extra.get("farrowingLiveCount"))));
         doctorPigEvent.setHealthCount(Ints.tryParse(Objects.toString(extra.get("healthCount"))));
@@ -110,7 +109,16 @@ public class DoctorSowFarrowingHandler extends DoctorAbstractEventFlowHandler {
         extra.put("toBarnName", doctorPigTrack.getCurrentBarnName());
 
         // 对应的 猪群信息
-        extra.put("farrowingPigletGroupId", buildPigGroupCountInfo(basic, extra));
+        Long groupId = buildPigGroupCountInfo(basic, extra);
+        extra.put("farrowingPigletGroupId", groupId);
+
+        //分娩时记录下 哺乳猪群号, 分娩数量
+        doctorPigTrack.setGroupId(groupId);
+        doctorPigTrack.setFarrowQty(Integer.valueOf(MoreObjects.firstNonNull(extra.get("farrowingLiveCount"), 0).toString()));
+        doctorPigTrack.setUnweanQty(doctorPigTrack.getFarrowQty());
+        doctorPigTrack.setWeanQty(0);  //分娩时 断奶数为0
+        doctorPigTrack.setFarrowAvgWeight(Double.valueOf(extra.get("birthNestAvg").toString()));
+        doctorPigTrack.setWeanAvgWeight(0D); //分娩时, 断奶均重置成0
 
         doctorPigTrack.addAllExtraMap(extra);
         doctorPigTrack.setStatus(PigStatus.FEED.getKey());  //母猪进入哺乳的状态
@@ -184,7 +192,7 @@ public class DoctorSowFarrowingHandler extends DoctorAbstractEventFlowHandler {
     }
 
     @Override
-    protected void afterEventCreateHandle(DoctorPigEvent doctorPigEvent, DoctorPigTrack doctorPigTrack, DoctorPigSnapshot doctorPigSnapshot, Map<String, Object> extra) {
+    protected void afterEventCreateHandle(DoctorPigEvent doctorPigEvent, DoctorPigTrack doctorPigTrack, Long farrowGroupId, Long farrowBarnId) {
         //对应的最近一次的 周期配种的初陪 的 isDelivery 字段变成true
         DoctorPigEvent firstMate = doctorPigEventDao.queryLastFirstMate(doctorPigTrack.getPigId(), doctorPigTrack.getCurrentParity());
         if (notNull(firstMate)) {
@@ -192,5 +200,8 @@ public class DoctorSowFarrowingHandler extends DoctorAbstractEventFlowHandler {
             doctorPigEventDao.update(firstMate);
         }
 
+        //触发一下修改猪群的事件
+        Integer pigType = doctorBarnDao.findById(farrowBarnId).getPigType();
+        updateFarrowGroupTrack(doctorPigTrack.getGroupId(), pigType);  //分娩之后才会有groupId, 所以取track里的groupId
     }
 }

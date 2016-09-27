@@ -1,6 +1,5 @@
 package io.terminus.doctor.event.handler.sow;
 
-import com.google.common.base.MoreObjects;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.RespHelper;
@@ -27,6 +26,7 @@ import java.util.Map;
 import java.util.Objects;
 
 import static com.google.common.base.Preconditions.checkState;
+import static io.terminus.common.utils.Arguments.notNull;
 
 /**
  * Created by yaoqijun.
@@ -55,52 +55,43 @@ public class DoctorSowPigletsChgHandler extends DoctorAbstractEventFlowHandler {
 
     @Override
     public DoctorPigTrack updateDoctorPigTrackInfo(Execution execution, DoctorPigTrack doctorPigTrack, DoctorBasicInputInfoDto basic, Map<String, Object> extra, Map<String, Object> context) {
-        // 校验母猪的状态信息
         checkState(Objects.equals(doctorPigTrack.getStatus(), PigStatus.FEED.getKey()), "piglets.chgSowStatus.error");
 
         // 校验转出的数量信息
-        Map<String, Object> extraMap = doctorPigTrack.getExtraMap();
-        Integer healthCount = (Integer) extraMap.get("farrowingLiveCount");
+        Integer unweanCount = doctorPigTrack.getUnweanQty();        //未断奶数量
+        Integer weanCount = doctorPigTrack.getWeanQty();            //已断奶数量
 
-        //变动信息
-        Integer toWeanCount = (Integer) extra.get("pigletsCount");       //变动数量
-        checkState(toWeanCount != null, "quantity.not.null");
+        //变动数量
+        Integer changeCount = (Integer) extra.get("pigletsCount");
+        checkState(changeCount != null, "quantity.not.null");
+        checkState(changeCount <= unweanCount, "wean.countInput.error");
+        doctorPigTrack.setUnweanQty(unweanCount - changeCount);  //未断奶数量 - 变动数量, 已断奶数量不用变
 
-        Integer oldWeanCount = 0;
-        //如果之前存在部分断奶事件, 取出
-        if (extraMap.containsKey("partWeanPigletsCount")) {
-            oldWeanCount = (Integer) extraMap.get("partWeanPigletsCount");
-        }
+        //变动重量
+        Double changeWeight = (Double) extra.get("pigletsWeight");
+        checkState(changeWeight != null, "weight.not.null");
+        checkState(changeWeight <= unweanCount, "wean.countInput.error");
 
-        //取出均重, 如果存在, 重新计算
-        Double weanAvgWeight = (Double) extra.get("pigletsWeight");      //变动重量
-        checkState(weanAvgWeight != null, "weight.not.null");
-        if (extraMap.containsKey("partWeanAvgWeight")) {
-            Double oldWeanAvgWeight = MoreObjects.firstNonNull((Double) extraMap.get("partWeanAvgWeight"), 0D);
-
-            //重新计算均重
-            weanAvgWeight = ((weanAvgWeight * toWeanCount) + (oldWeanAvgWeight * oldWeanCount)) / (toWeanCount + oldWeanCount);
-        }
-
-        //断奶数量需要累加
-        toWeanCount += oldWeanCount;
-        checkState(toWeanCount <= healthCount, "wean.countInput.error");
-
-        // update info
-        extra.put("partWeanPigletsCount", toWeanCount);
-        extra.put("partWeanAvgWeight", weanAvgWeight);
+        //更新extra字段
+        extra.put("partWeanPigletsCount", weanCount);
+        extra.put("farrowingLiveCount", doctorPigTrack.getUnweanQty());
         doctorPigTrack.addAllExtraMap(extra);
 
-        if (Objects.equals(toWeanCount, healthCount)) {
+        //全部断奶后, 初始化所有本次哺乳的信息
+        if (doctorPigTrack.getUnweanQty() == 0) {
             doctorPigTrack.setStatus(PigStatus.Wean.getKey());
+            doctorPigTrack.setGroupId(-1L);  //groupId = -1 置成 NULL
+            doctorPigTrack.setFarrowQty(0);  //分娩数 0
+            doctorPigTrack.setFarrowAvgWeight(0D);
+            doctorPigTrack.setWeanAvgWeight(0D);
         }
 
         doctorPigTrack.addPigEvent(basic.getPigType(), (Long) context.get("doctorPigEventId"));
-        execution.getExpression().put("leftCount", (healthCount - toWeanCount));
+        execution.getExpression().put("leftCount", (doctorPigTrack.getUnweanQty()));
 
         // 调用对应的猪猪群事件,对应的操作方式
-        checkState(extraMap.containsKey("farrowingPigletGroupId"), "pigletsChg.groupId.notFound");
-        changePigletsChangeInfo(Long.valueOf(extraMap.get("farrowingPigletGroupId").toString()), extra, basic);
+        checkState(notNull(doctorPigTrack.getGroupId()), "pigletsChg.groupId.notFound");
+        changePigletsChangeInfo(doctorPigTrack.getGroupId(), extra, basic);
 
         return doctorPigTrack;
     }

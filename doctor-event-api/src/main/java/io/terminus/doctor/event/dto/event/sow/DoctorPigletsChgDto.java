@@ -43,7 +43,7 @@ public class DoctorPigletsChgDto extends AbstractPigEventInputDto implements Ser
 
     private String pigletsChangeReasonName;   // 仔猪变动原因内容
 
-    private Double pigletsWeight;  // 变动重量 (非必填)
+    private Double pigletsWeight;  // 变动重量 (必填)
 
     private Long pigletsPrice;   // 变动价格(分) （非必填）
 

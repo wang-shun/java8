@@ -33,7 +33,6 @@ import java.beans.IntrospectionException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
 import java.util.Objects;
-import java.util.UUID;
 
 import static com.google.common.base.Preconditions.checkState;
 import static java.util.Objects.isNull;
@@ -143,7 +142,7 @@ public class DoctorEntryHandler implements DoctorEventCreateHandler {
     private DoctorPigTrack buildEntryFarmPigDoctorTrack(DoctorFarmEntryDto dto, DoctorBasicInputInfoDto basic) {
 
         DoctorPigTrack doctorPigTrack = DoctorPigTrack.builder().farmId(basic.getFarmId()).pigType(basic.getPigType())
-                .isRemoval(IsOrNot.NO.getValue())
+                .isRemoval(IsOrNot.NO.getValue()).currentMatingCount(0)
                 .currentBarnId(dto.getBarnId()).currentBarnName(dto.getBarnName())
                 .currentParity(dto.getParity())
                 .creatorId(basic.getStaffId()).creatorName(basic.getStaffName())
@@ -174,8 +173,7 @@ public class DoctorEntryHandler implements DoctorEventCreateHandler {
                 .pigCode(dto.getPigCode()).eventAt(basic.generateEventAtFromExtra(extra))
                 .type(basic.getEventType()).kind(basic.getPigType()).name(basic.getEventName()).desc(basic.generateEventDescFromExtra(extra))
                 .barnId(dto.getBarnId()).barnName(dto.getBarnName()).relEventId(basic.getRelEventId())
-                .outId(UUID.randomUUID().toString()).remark(dto.getEntryMark())
-                .creatorId(basic.getStaffId()).creatorName(basic.getStaffName())
+                .remark(dto.getEntryMark()).creatorId(basic.getStaffId()).creatorName(basic.getStaffName())
                 .npd(0)
                 .dpnpd(0)
                 .pfnpd(0)
@@ -202,7 +200,7 @@ public class DoctorEntryHandler implements DoctorEventCreateHandler {
 
         DoctorPig doctorPig = DoctorPig.builder()
                 .farmId(basic.getFarmId()).farmName(basic.getFarmName()).orgId(basic.getOrgId()).orgName(basic.getOrgName())
-                .outId(UUID.randomUUID().toString()).pigCode(dto.getPigCode()).pigType(basic.getPigType())
+                .pigCode(dto.getPigCode()).pigType(basic.getPigType())
                 .isRemoval(IsOrNot.NO.getValue())
                 .pigFatherCode(dto.getFatherCode()).pigMotherCode(dto.getMotherCode())
                 .source(dto.getSource()).birthDate(dto.getBirthday()).inFarmDate(dto.getInFarmDate()).inFarmDayAge(Years.yearsBetween(new DateTime(dto.getBirthday()), DateTime.now()).getYears())

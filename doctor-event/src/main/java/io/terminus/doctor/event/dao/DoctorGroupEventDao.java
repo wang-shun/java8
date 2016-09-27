@@ -27,6 +27,10 @@ public class DoctorGroupEventDao extends MyBatisDao<DoctorGroupEvent> {
         return getSqlSession().selectList(sqlId("findByFarmId"), farmId);
     }
 
+    public List<DoctorGroupEvent> findByGroupId(Long groupId) {
+        return getSqlSession().selectList(sqlId("findByGroupId"), groupId);
+    }
+
     /**
      * 根据猪群id更新猪群号
      * @param groupId 猪群id

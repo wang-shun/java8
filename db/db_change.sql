@@ -281,10 +281,121 @@ add column `operator_name` varchar(64) DEFAULT NULL COMMENT '操作人' after op
 ALTER TABLE doctor_group_events ADD COLUMN base_weight SMALLINT(6) DEFAULT NULL COMMENT '销售基础重量: 10, 15(kg)' AFTER avg_weight;
 ALTER TABLE doctor_group_events ADD COLUMN over_price DOUBLE DEFAULT NULL COMMENT '超出价格(分/kg)' AFTER amount;
 
+-- 2016-09-13 新增猪群批次总结表
+CREATE TABLE `doctor_group_batch_summaries` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '自增主键',
+  `farm_id` bigint(20) DEFAULT NULL COMMENT '猪场id',
+  `group_id` bigint(20) DEFAULT NULL COMMENT '猪群id',
+  `group_code` varchar(512) DEFAULT NULL COMMENT '猪群号',
+  `status` smallint(6) DEFAULT NULL COMMENT '枚举: 1:已建群, -1:已关闭',
+  `pig_type` smallint(6) DEFAULT NULL COMMENT '猪类',
+  `avg_day_age` int(11) DEFAULT NULL COMMENT '平均日龄',
+  `open_at` datetime DEFAULT NULL COMMENT '建群时间',
+  `close_at` datetime DEFAULT NULL COMMENT '关群时间',
+  `barn_id` bigint(20) DEFAULT NULL COMMENT '猪舍id',
+  `barn_name` varchar(64) DEFAULT NULL COMMENT '猪舍名称',
+  `user_id` bigint(20) DEFAULT NULL COMMENT '工作人员id',
+  `user_name` varchar(64) DEFAULT NULL COMMENT '工作人员name',
+  `nest` smallint(6) DEFAULT NULL COMMENT '窝数',
+  `live_count` int(11) DEFAULT NULL COMMENT '活仔数',
+  `health_count` int(11) DEFAULT NULL COMMENT '健仔数',
+  `weak_count` int(11) DEFAULT NULL COMMENT '弱仔数',
+  `birth_cost` bigint(20) DEFAULT NULL COMMENT '出生成本(分)',
+  `birth_avg_weight` double DEFAULT NULL COMMENT '出生均重(kg)',
+  `dead_rate` double DEFAULT NULL COMMENT '死淘率',
+  `wean_count` int(11) DEFAULT NULL COMMENT '断奶数',
+  `unq_count` int(11) DEFAULT NULL COMMENT '不合格数',
+  `wean_avg_weight` double DEFAULT NULL COMMENT '断奶均重(kg)',
+  `sale_count` int(11) DEFAULT NULL COMMENT '销售头数',
+  `sale_amount` bigint(20) DEFAULT NULL COMMENT '销售金额(分)',
+  `to_nursery_cost` bigint(20) DEFAULT NULL COMMENT '转保育成本(分)',
+  `to_nursery_count` int(11) DEFAULT NULL COMMENT '转保育数量',
+  `to_nursery_avg_weight` double DEFAULT NULL COMMENT '转保育均重(kg)',
+  `to_fatten_cost` bigint(20) DEFAULT NULL COMMENT '转育肥成本(分)',
+  `to_fatten_count` int(11) DEFAULT NULL COMMENT '转育肥数量',
+  `to_fatten_avg_weight` double DEFAULT NULL COMMENT '转育肥均重(kg)',
+  `in_count` int(11) DEFAULT NULL COMMENT '转入数',
+  `in_avg_weight` double DEFAULT NULL COMMENT '转入均重(kg)',
+  `in_cost` bigint(20) DEFAULT NULL COMMENT '转入成本(均)',
+  `fcr` double DEFAULT NULL COMMENT '料肉比',
+  `out_cost` bigint(20) DEFAULT NULL COMMENT '出栏成本(分)',
+  `created_at` datetime DEFAULT NULL COMMENT '创建时间',
+  `updated_at` datetime DEFAULT NULL COMMENT '修改时间',
+  PRIMARY KEY (`id`),
+  KEY `idx_doctor_group_batch_summaries_group_id` (`group_id`),
+  KEY `idx_doctor_group_batch_summaries_barn_id` (`barn_id`),
+  KEY `idx_doctor_group_batch_summaries_farm_id` (`farm_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='猪群批次总结表';
+
+-- 2016-09-13 猪群跟踪新增统计字段
+ALTER TABLE doctor_group_tracks ADD COLUMN wean_avg_weight double DEFAULT NULL COMMENT '断奶均重kg' AFTER avg_weight;
+ALTER TABLE doctor_group_tracks ADD COLUMN birth_avg_weight double DEFAULT NULL COMMENT '出生均重kg' AFTER wean_avg_weight;
+ALTER TABLE doctor_group_tracks ADD COLUMN weak_qty int(11) DEFAULT NULL COMMENT '弱仔数' AFTER birth_avg_weight;
+ALTER TABLE doctor_group_tracks ADD COLUMN unwean_qty int(11) DEFAULT NULL COMMENT '未断奶数' AFTER weak_qty;
+ALTER TABLE doctor_group_tracks ADD COLUMN unq_qty int(11) DEFAULT NULL COMMENT '不合格数' AFTER unwean_qty;
+
+ALTER TABLE doctor_pig_tracks ADD COLUMN group_id bigint(20) DEFAULT NULL COMMENT '哺乳猪群id(断奶后此id置为null)' AFTER weight;
+ALTER TABLE doctor_pig_tracks ADD COLUMN farrow_qty int(11) DEFAULT NULL COMMENT '分娩仔猪数' AFTER group_id;
+ALTER TABLE doctor_pig_tracks ADD COLUMN unwean_qty int(11) DEFAULT NULL COMMENT '未断奶数量' AFTER farrow_qty;
+ALTER TABLE doctor_pig_tracks ADD COLUMN wean_qty int(11) DEFAULT NULL COMMENT '断奶数量' AFTER unwean_qty;
+ALTER TABLE doctor_pig_tracks ADD COLUMN farrow_avg_weight double DEFAULT NULL COMMENT '分娩均重(kg)' AFTER wean_qty;
+ALTER TABLE doctor_pig_tracks ADD COLUMN wean_avg_weight double DEFAULT NULL COMMENT '断奶均重(kg)' AFTER farrow_avg_weight;
+
 alter table doctor_pig_events add column boar_code varchar(64) default null comment '配种的公猪' after doctor_mate_type;
 create index doctor_pig_events_boar_code on doctor_pig_events(boar_code);
 
--- 2016-09-12 公猪生产成绩月报
+-- 2016年09月13日 基础物料表增加逻辑删除字段
+alter table doctor_basic_materials
+add column is_valid smallint(6) NOT NULL DEFAULT 1 COMMENT '逻辑删除字段, -1 表示删除, 1 表示可用' after srm;
+
+-- 2016年09月13日, 把物资变动关联的猪舍从 extra 中拆出来
+alter table doctor_material_consume_providers
+add column `barn_id` bigint(20) unsigned DEFAULT NULL COMMENT '领用物资的猪舍, 仅 event_type=1 时才会有值' after staff_name,
+add column `barn_name` varchar(64) DEFAULT NULL COMMENT '猪舍名称' after barn_id;
+
+-- 2016年09月13日, 基础物料表新增字段 "子类别"
+alter table doctor_basic_materials
+add column sub_type bigint(20) unsigned DEFAULT NULL COMMENT '物料的子类别，关联 doctor_basics 表的id' after `type`;
+
+-- 2016-09-14 胎次产仔分析月报
+CREATE TABLE `doctor_parity_monthly_reports` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `farm_id` bigint(20) DEFAULT NULL COMMENT '猪场id',
+  `parity` int(11) DEFAULT NULL COMMENT '胎次',
+  `nest_count` int(11) DEFAULT NULL COMMENT '总窝数',
+  `percent` double DEFAULT NULL COMMENT '占比',
+  `farrow_all` int(11) DEFAULT NULL COMMENT '总产仔',
+  `farrow_avg` double DEFAULT NULL COMMENT '平均产仔',
+  `sum_at` varchar(32) DEFAULT NULL COMMENT '统计时间',
+  `created_at` datetime DEFAULT NULL COMMENT '创建时间',
+  `updated_at` datetime DEFAULT NULL COMMENT '更新时间',
+  PRIMARY KEY (`id`),
+  KEY `doctor_parity_monthly_reports_id` (`id`),
+  KEY `doctor_parity_monthly_reports_farm_id` (`farm_id`),
+  KEY `doctor_parity_monthly_reports_parity` (`parity`),
+  KEY `doctor_parity_monthly_reports_sum_at` (`sum_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8  COMMENT='胎次产仔分析月报';
+
+-- 2016-09-18 猪群新增转入类型, 猪舍id字段
+ALTER TABLE doctor_group_events ADD COLUMN in_type smallint(6) DEFAULT NULL COMMENT '仔猪转入事件: 转入类型' AFTER trans_group_type;
+ALTER TABLE doctor_group_events ADD COLUMN other_barn_id bigint(20) DEFAULT NULL COMMENT '猪群转入转出事件的来源/目标id' AFTER in_type;
+ALTER TABLE doctor_group_events ADD COLUMN other_barn_type varchar(64) DEFAULT NULL COMMENT '猪群转入转出事件的来源/目标猪舍类型' AFTER other_barn_id;
+
+-- 2016年09月14日, 物资变动关联猪群
+alter table doctor_material_consume_providers
+add column group_id bigint(20) DEFAULT NULL COMMENT '领用物资的猪群Id, 仅 event_type=1 时才会有值' after barn_name,
+add column group_code varchar(640) DEFAULT NULL COMMENT '猪群名称' after group_id;
+
+-- 2016-9-21
+ALTER TABLE doctor_messages ADD COLUMN event_type INT (11) DEFAULT NULL comment '需要操作的事件类型' after   `type`;
+
+-- 2016-09-22 增加索引
+create index doctor_pig_events_type on doctor_pig_events(type);
+create index doctor_pig_events_parity on doctor_pig_events(parity);
+create index doctor_pigs_is_removal on doctor_pigs(is_removal);
+create index doctor_pig_tracks_current_parity on doctor_pig_tracks(current_parity);
+
+-- 2016-09-27 公猪生产成绩月报
 DROP table if exists `doctor_boar_monthly_reports`;
 create table `doctor_boar_monthly_reports` (
  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,

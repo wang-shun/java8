@@ -82,6 +82,7 @@ public class DoctorTransGroupEventHandler extends DoctorAbstractGroupEventHandle
         //1.转换转群事件
         DoctorTransGroupEvent transGroupEvent = BeanMapper.map(transGroup, DoctorTransGroupEvent.class);
         checkBreed(group.getBreedId(), transGroupEvent.getBreedId());
+        transGroupEvent.setToBarnType(toBarn.getPigType());
 
         //2.创建转群事件
         DoctorGroupEvent<DoctorTransGroupEvent> event = dozerGroupEvent(group, GroupEventType.TRANS_GROUP, transGroup);
@@ -90,6 +91,8 @@ public class DoctorTransGroupEventHandler extends DoctorAbstractGroupEventHandle
         event.setAvgWeight(transGroup.getAvgWeight());  //均重
         event.setWeight(realWeight);                    //总重
         event.setTransGroupType(getTransType(null, group.getPigType(), toBarn).getValue());   //区别内转还是外转(null是因为不用判断转入类型)
+        event.setOtherBarnId(toBarn.getId());          //目标猪舍id
+        event.setOtherBarnType(toBarn.getPigType());   //目标猪舍类型
         event.setExtraMap(transGroupEvent);
         doctorGroupEventDao.create(event);
 
@@ -109,8 +112,9 @@ public class DoctorTransGroupEventHandler extends DoctorAbstractGroupEventHandle
         //4.创建镜像
         createGroupSnapShot(oldShot, new DoctorGroupSnapShotInfo(group, event, groupTrack), GroupEventType.TRANS_GROUP);
 
-        //5.判断转群数量, 如果 = 猪群数量, 触发关闭猪群事件
+        //5.判断转群数量, 如果 = 猪群数量, 触发关闭猪群事件, 同时生成批次总结
         if (Objects.equals(oldQuantity, transGroup.getQuantity())) {
+            doctorCommonGroupEventHandler.createGroupBatchSummaryWhenClosed(group, groupTrack, event.getEventAt());
             doctorCommonGroupEventHandler.autoGroupEventClose(group, groupTrack, transGroup);
         }
 

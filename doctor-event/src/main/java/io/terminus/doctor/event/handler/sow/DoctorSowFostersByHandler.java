@@ -1,5 +1,6 @@
 package io.terminus.doctor.event.handler.sow;
 
+import com.google.common.base.MoreObjects;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
@@ -62,21 +63,20 @@ public class DoctorSowFostersByHandler extends DoctorAbstractEventFlowHandler {
     @Override
     public DoctorPigTrack updateDoctorPigTrackInfo(Execution execution, DoctorPigTrack doctorPigTrack,
                                                    DoctorBasicInputInfoDto basic, Map<String, Object> extra, Map<String, Object> context) {
-
-        // 校验当前的母猪状态 status 的存在方式
-        Integer currentStatus = doctorPigTrack.getStatus();
-        checkState(
-                Objects.equals(currentStatus, PigStatus.FEED.getKey()) ||
-                        Objects.equals(currentStatus, PigStatus.Wean.getKey()), "foster.currentSowStatus.error");
+        checkState(Objects.equals(doctorPigTrack.getStatus(), PigStatus.FEED.getKey()) ||
+                Objects.equals(doctorPigTrack.getStatus(), PigStatus.Wean.getKey()), "foster.currentSowStatus.error");
 
         // 转群操作
         Long groupId = groupSowEventCreate(doctorPigTrack, basic, extra);
 
-        //添加当前母猪的健崽猪的数量信息
-        Map<String, Object> extraMap = doctorPigTrack.getExtraMap();
-        Integer healthCount = (Integer) extraMap.get("farrowingLiveCount");
+        //被拼窝数量
         Integer fosterCount = (Integer) extra.get("fostersCount");
-        extra.put("farrowingLiveCount", healthCount + fosterCount);
+
+        doctorPigTrack.setGroupId(groupId);  //groupId = -1 置成 NULL
+        doctorPigTrack.setUnweanQty(MoreObjects.firstNonNull(doctorPigTrack.getUnweanQty(), 0) + fosterCount);  //未断奶数
+        doctorPigTrack.setWeanQty(MoreObjects.firstNonNull(doctorPigTrack.getWeanQty(), 0));    //断奶数不变
+
+        extra.put("farrowingLiveCount", doctorPigTrack.getUnweanQty());
         extra.put("farrowingPigletGroupId", groupId);
         doctorPigTrack.addAllExtraMap(extra);
 
@@ -97,8 +97,7 @@ public class DoctorSowFostersByHandler extends DoctorAbstractEventFlowHandler {
         //拼窝的数据extra
         Long fromSowId = Long.valueOf(extra.get(EVENT_PIG_ID).toString());
         DoctorPigTrack fromSowTrack = doctorPigTrackDao.findByPigId(fromSowId);
-        Map<String, Object> fromSowTrackMap = JSON_MAPPER.fromJson(fromSowTrack.getExtra(), JSON_MAPPER.createCollectionType(Map.class, String.class, Object.class));
-        Long fromGroupId = Long.valueOf(fromSowTrackMap.get("farrowingPigletGroupId").toString());
+        Long fromGroupId = fromSowTrack.getGroupId();
 
         //被拼窝的数据extra
         Map<String, Object> toSowTrackMap = JSON_MAPPER.fromJson(doctorPigTrack.getExtra(), JSON_MAPPER.createCollectionType(Map.class, String.class, Object.class));

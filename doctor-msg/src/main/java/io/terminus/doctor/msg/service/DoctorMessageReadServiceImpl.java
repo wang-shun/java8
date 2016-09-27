@@ -8,6 +8,7 @@ import io.terminus.common.model.PageInfo;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.msg.dao.DoctorMessageDao;
+import io.terminus.doctor.msg.dto.DoctorMessageSearchDto;
 import io.terminus.doctor.msg.dto.Rule;
 import io.terminus.doctor.msg.model.DoctorMessage;
 import io.terminus.doctor.msg.model.DoctorMessageRuleTemplate;
@@ -47,19 +48,19 @@ public class DoctorMessageReadServiceImpl implements DoctorMessageReadService {
     }
 
     @Override
-    public Response<Paging<DoctorMessage>> pagingWarnMessages(Map<String, Object> criteria, Integer pageNo, Integer pageSize) {
+    public Response<Paging<DoctorMessage>> pagingWarnMessages(DoctorMessageSearchDto doctorMessageSearchDto, Integer pageNo, Integer pageSize) {
         try{
             PageInfo pageInfo = new PageInfo(pageNo, pageSize);
             // 获取预警消息
-            criteria.put("types", ImmutableList.of(
-                    DoctorMessageRuleTemplate.Type.WARNING.getValue(), DoctorMessageRuleTemplate.Type.ERROR.getValue()));
-            criteria.put("channel", Rule.Channel.SYSTEM.getValue());
-            if (criteria.get("status") == null) {
-                criteria.put("statuses", ImmutableList.of(DoctorMessage.Status.NORMAL.getValue(), DoctorMessage.Status.READED.getValue()));
-            }
-            return Response.ok(doctorMessageDao.paging(pageInfo.getOffset(), pageInfo.getLimit(), criteria));
+//            criteria.put("types", ImmutableList.of(
+//                    DoctorMessageRuleTemplate.Type.WARNING.getValue(), DoctorMessageRuleTemplate.Type.ERROR.getValue()));
+//            criteria.put("channel", Rule.Channel.SYSTEM.getValue());
+//            if (criteria.get("status") == null) {
+//                criteria.put("statuses", ImmutableList.of(DoctorMessage.Status.NORMAL.getValue(), DoctorMessage.Status.SENDED.getValue()));
+//            }
+            return Response.ok(doctorMessageDao.paging(pageInfo.getOffset(), pageInfo.getLimit(), doctorMessageSearchDto));
         } catch (Exception e) {
-            log.error("paging message by criteria failed, criteria is {}, cause by {}", criteria, Throwables.getStackTraceAsString(e));
+            log.error("paging message by criteria failed, criteria is {}, cause by {}", doctorMessageSearchDto, Throwables.getStackTraceAsString(e));
             return Response.fail("message.find.fail");
         }
     }
@@ -134,10 +135,11 @@ public class DoctorMessageReadServiceImpl implements DoctorMessageReadService {
     }
 
     @Override
-    public Response<List<DoctorMessage>> findMsgMessage() {
+    public Response<Paging<DoctorMessage>> findMsgMessage(Integer pageNo, Integer pageSize) {
         try{
-            return Response.ok(doctorMessageDao.list(
-                    ImmutableMap.of("channel", Rule.Channel.MESSAGE.getValue(), "status", DoctorMessage.Status.NORMAL.getValue())));
+            PageInfo pageInfo = PageInfo.of(pageNo, pageSize);
+            return Response.ok(doctorMessageDao.paging(pageInfo.getOffset(), pageInfo.getLimit(),
+                    ImmutableMap.of("channel", Rule.Channel.MESSAGE.getValue(), "status", DoctorMessage.Status.NORMAL.getValue(), "isExpired", DoctorMessage.IsExpired.NOTEXPIRED.getValue())));
         } catch (Exception e) {
             log.error("", Throwables.getStackTraceAsString(e));
             return Response.fail("msg.message.find.fail");
@@ -145,10 +147,11 @@ public class DoctorMessageReadServiceImpl implements DoctorMessageReadService {
     }
 
     @Override
-    public Response<List<DoctorMessage>> findEmailMessage() {
+    public Response<Paging<DoctorMessage>> findEmailMessage(Integer pageNo, Integer pageSize) {
         try{
-            return Response.ok(doctorMessageDao.list(
-                    ImmutableMap.of("channel", Rule.Channel.EMAIL.getValue(), "status", DoctorMessage.Status.NORMAL.getValue())));
+            PageInfo pageInfo = PageInfo.of(pageNo, pageSize);
+            return Response.ok(doctorMessageDao.paging(pageInfo.getOffset(), pageInfo.getLimit(),
+                    ImmutableMap.of("channel", Rule.Channel.EMAIL.getValue(), "status", DoctorMessage.Status.NORMAL.getValue(), "isExpired", DoctorMessage.IsExpired.NOTEXPIRED.getValue())));
         } catch (Exception e) {
             log.error("", Throwables.getStackTraceAsString(e));
             return Response.fail("email.message.find.fail");
@@ -156,10 +159,11 @@ public class DoctorMessageReadServiceImpl implements DoctorMessageReadService {
     }
 
     @Override
-    public Response<List<DoctorMessage>> findAppPushMessage() {
+    public Response<Paging<DoctorMessage>> findAppPushMessage(Integer pageNo, Integer pageSize) {
         try{
-            return Response.ok(doctorMessageDao.list(
-                    ImmutableMap.of("channel", Rule.Channel.APPPUSH.getValue(), "status", DoctorMessage.Status.NORMAL.getValue())));
+            PageInfo pageInfo = PageInfo.of(pageNo, pageSize);
+            return Response.ok(doctorMessageDao.paging(pageInfo.getOffset(), pageInfo.getLimit(),
+                    ImmutableMap.of("channel", Rule.Channel.APPPUSH.getValue(), "status", DoctorMessage.Status.NORMAL.getValue(), "isExpired", DoctorMessage.IsExpired.NOTEXPIRED.getValue())));
         } catch (Exception e) {
             log.error("", Throwables.getStackTraceAsString(e));
             return Response.fail("app.message.find.fail");
@@ -167,22 +171,12 @@ public class DoctorMessageReadServiceImpl implements DoctorMessageReadService {
     }
 
     @Override
-    public Response<List<Long>> findBusinessListByCriteria(Map<String, Object> criteria) {
+    public Response<List<Long>> findBusinessListByCriteria(DoctorMessageSearchDto doctorMessageSearchDto) {
         try {
-            return Response.ok(doctorMessageDao.findBusinessListByCriteria(criteria));
+            return Response.ok(doctorMessageDao.findBusinessListByCriteria(doctorMessageSearchDto));
         } catch (Exception e) {
             log.error("find.message.count.by.criteria.failed, cause by {}", Throwables.getStackTraceAsString(e));
             return Response.fail("find.message.count.by.criteria.failed");
-        }
-    }
-
-    @Override
-    public Response<Paging<DoctorMessage>> pagingDiffBusinessId(Map<String, Object> criteria, Integer pageNo, Integer pageSize) {
-        try {
-            return Response.ok(doctorMessageDao.pagingDiffBusinessId(criteria, pageNo, pageSize));
-        } catch (Exception e){
-            log.error("paging.dif.businessId.failed,cause by{}", Throwables.getStackTraceAsString(e));
-            return Response.fail("aging.dif.businessId.failed");
         }
     }
 }

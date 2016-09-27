@@ -8,8 +8,7 @@
 <mapper namespace="DoctorPigTrack">
 
     <resultMap id="DoctorPigTrackMap" type="DoctorPigTrack">
-
-        <result column="id" property="id"/>
+        <id column="id" property="id"/>
         <result column="farm_id" property="farmId"/>
         <result column="pig_id" property="pigId"/>
         <result column="pig_type" property="pigType"/>
@@ -18,6 +17,12 @@
         <result column="current_barn_id" property="currentBarnId"/>
         <result column="current_barn_name" property="currentBarnName"/>
         <result column="weight" property="weight"/>
+        <result column="group_id" property="groupId"/>
+        <result column="farrow_qty" property="farrowQty"/>
+        <result column="unwean_qty" property="unweanQty"/>
+        <result column="wean_qty" property="weanQty"/>
+        <result column="farrow_avg_weight" property="farrowAvgWeight"/>
+        <result column="wean_avg_weight" property="weanAvgWeight"/>
         <result column="out_farm_date" property="outFarmDate"/>
         <result column="rel_event_ids" property="relEventIds"/>
         <result column="extra" property="extra"/>
@@ -31,7 +36,6 @@
         <result column="updator_name" property="updatorName"/>
         <result column="created_at" property="createdAt"/>
         <result column="updated_at" property="updatedAt"/>
-    
     </resultMap>
     
     <resultMap id="DoctorPigStatusCountMap" type="DoctorPigStatusCount">
@@ -46,11 +50,65 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        `farm_id`,`pig_id`, `pig_type`, `status`,`is_removal`,`current_barn_id`,`current_barn_name`,`weight`,`out_farm_date`,`rel_event_ids`,`extra`,`extra_message`,`current_parity`,`current_mating_count`,`remark`,`creator_id`,`creator_name`,`updator_id`,`updator_name`,`created_at`,`updated_at`
+        farm_id,
+        pig_id,
+        pig_type,
+        status,
+        is_removal,
+        current_barn_id,
+        current_barn_name,
+        weight,
+        group_id,
+        farrow_qty,
+        unwean_qty,
+        wean_qty,
+        farrow_avg_weight,
+        wean_avg_weight,
+        out_farm_date,
+        rel_event_ids,
+        extra,
+        extra_message,
+        current_parity,
+        current_mating_count,
+        remark,
+        creator_id,
+        creator_name,
+        updator_id,
+        updator_name,
+        created_at,
+        updated_at
+
     </sql>
 
     <sql id="vals">
-        #{farmId},#{pigId},#{pigType},#{status},#{isRemoval},#{currentBarnId},#{currentBarnName},#{weight},#{outFarmDate},#{relEventIds},#{extra},#{extraMessage},#{currentParity},0,#{remark},#{creatorId},#{creatorName},#{updatorId},#{updatorName},now(),now()
+        #{farmId},
+        #{pigId},
+        #{pigType},
+        #{status},
+        #{isRemoval},
+        #{currentBarnId},
+        #{currentBarnName},
+        #{weight},
+        #{groupId},
+        #{farrowQty},
+        #{unweanQty},
+        #{weanQty},
+        #{farrowAvgWeight},
+        #{weanAvgWeight},
+        #{outFarmDate},
+        #{relEventIds},
+        #{extra},
+        #{extraMessage},
+        #{currentParity},
+        #{currentMatingCount},
+        #{remark},
+        #{creatorId},
+        #{creatorName},
+        #{updatorId},
+        #{updatorName},
+        now(),
+        now()
+
     </sql>
 
     <sql id="criteria">
@@ -79,27 +137,33 @@
         VALUES
         <foreach collection="list" separator="," item="item">
             (
-                #{item.farmId},
-                #{item.pigId},
-                #{item.pigType},
-                #{item.status},
-                #{item.isRemoval},
-                #{item.currentBarnId},
-                #{item.currentBarnName},
-                #{item.weight},
-                #{item.outFarmDate},
-                #{item.relEventIds},
-                #{item.extra},
-                #{item.extraMessage},
-                #{item.currentParity},
-                #{item.currentMatingCount},
-                #{item.remark},
-                #{item.creatorId},
-                #{item.creatorName},
-                #{item.updatorId},
-                #{item.updatorName},
-                now(),
-                now()
+            #{item.farmId},
+            #{item.pigId},
+            #{item.pigType},
+            #{item.status},
+            #{item.isRemoval},
+            #{item.currentBarnId},
+            #{item.currentBarnName},
+            #{item.weight},
+            #{item.groupId},
+            #{item.farrowQty},
+            #{item.unweanQty},
+            #{item.weanQty},
+            #{item.farrowAvgWeight},
+            #{item.weanAvgWeight},
+            #{item.outFarmDate},
+            #{item.relEventIds},
+            #{item.extra},
+            #{item.extraMessage},
+            #{item.currentParity},
+            #{item.currentMatingCount},
+            #{item.remark},
+            #{item.creatorId},
+            #{item.creatorName},
+            #{item.updatorId},
+            #{item.updatorName},
+            now(),
+            now()
             )
         </foreach>
     </insert>
@@ -160,29 +224,35 @@
     <update id="update" parameterType="DoctorPigTrack">
         UPDATE <include refid="tb"/>
         <set>
-        updated_at = now()
-            <if test="farmId!=null">, `farm_id`=#{farmId}</if>
-            <if test="pigId != null" > ,`pig_id` = #{pigId}</if>
-            <if test="pigType != null" > ,`pig_type` = #{pigType}</if>
-            <if test="status != null" > ,`status` = #{status}</if>
-            <if test="isRemoval != null">, `is_removal` = #{isRemoval} </if>
-            <if test="currentBarnId != null" > ,`current_barn_id` = #{currentBarnId}</if>
-            <if test="currentBarnName != null" > ,`current_barn_name` = #{currentBarnName}</if>
-            <if test="weight != null" > ,`weight` = #{weight}</if>
-            <if test="outFarmDate != null" > ,`out_farm_date` = #{outFarmDate}</if>
-            <if test="relEventIds != null" > ,`rel_event_ids` = #{relEventIds}</if>
-            <if test="extra != null" > ,`extra` = #{extra}</if>
-            <if test="extraMessage != null" > ,`extra_message` = #{extraMessage}</if>
-            <if test="currentParity != null" > ,`current_parity` = #{currentParity}</if>
-            <if test="currentMatingCount != null"> ,`current_mating_count` = #{currentMatingCount}</if>
-            <if test="remark != null" > ,`remark` = #{remark}</if>
-            <if test="creatorId != null" > ,`creator_id` = #{creatorId}</if>
-            <if test="creatorName != null" > ,`creator_name` = #{creatorName}</if>
-            <if test="updatorId != null" > ,`updator_id` = #{updatorId}</if>
-            <if test="updatorName != null" > ,`updator_name` = #{updatorName}</if>
-            <if test="createdAt != null" > ,`created_at` = #{createdAt}</if>
+            <if test="farmId != null">farm_id = #{farmId},</if>
+            <if test="pigId != null">pig_id = #{pigId},</if>
+            <if test="pigType != null">pig_type = #{pigType},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="isRemoval != null">is_removal = #{isRemoval},</if>
+            <if test="currentBarnId != null">current_barn_id = #{currentBarnId},</if>
+            <if test="currentBarnName != null">current_barn_name = #{currentBarnName},</if>
+            <if test="weight != null">weight = #{weight},</if>
+            <if test="groupId != null &amp;&amp; groupId != -1">group_id = #{groupId},</if>
+            <if test="groupId == -1">group_id = NULL,</if>
+            <if test="farrowQty != null">farrow_qty = #{farrowQty},</if>
+            <if test="unweanQty != null">unwean_qty = #{unweanQty},</if>
+            <if test="weanQty != null">wean_qty = #{weanQty},</if>
+            <if test="farrowAvgWeight != null">farrow_avg_weight = #{farrowAvgWeight},</if>
+            <if test="weanAvgWeight != null">wean_avg_weight = #{weanAvgWeight},</if>
+            <if test="outFarmDate != null">out_farm_date = #{outFarmDate},</if>
+            <if test="relEventIds != null">rel_event_ids = #{relEventIds},</if>
+            <if test="extra != null">extra = #{extra},</if>
+            <if test="extraMessage != null">extra_message = #{extraMessage},</if>
+            <if test="currentParity != null">current_parity = #{currentParity},</if>
+            <if test="currentMatingCount != null">current_mating_count = #{currentMatingCount},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="creatorId != null">creator_id = #{creatorId},</if>
+            <if test="creatorName != null">creator_name = #{creatorName},</if>
+            <if test="updatorId != null">updator_id = #{updatorId},</if>
+            <if test="updatorName != null">updator_name = #{updatorName},</if>
+            updated_at=now()
         </set>
-        WHERE id=#{id}
+        WHERE id = #{id}
     </update>
 
     <update id="updateExtraMessage" parameterType="DoctorPigTrack">
@@ -236,4 +306,9 @@
         SET current_parity = #{currentParity}
         WHERE pig_id = #{boarId}
     </update>
+
+    <select id="findFeedSowTrackByGroupId" parameterType="map" resultMap="DoctorPigTrackMap">
+        SELECT <include refid="cols_all"/> FROM <include refid="tb"/>
+        WHERE group_id = #{groupId} AND `status` = #{status}
+    </select>
 </mapper>

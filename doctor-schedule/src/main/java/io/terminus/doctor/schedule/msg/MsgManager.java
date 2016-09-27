@@ -10,6 +10,7 @@ import io.terminus.doctor.msg.enums.Category;
 import io.terminus.doctor.msg.model.DoctorMessage;
 import io.terminus.doctor.msg.producer.IProducer;
 import io.terminus.doctor.msg.service.DoctorMessageReadService;
+import io.terminus.doctor.msg.service.DoctorMessageRuleTemplateReadService;
 import io.terminus.doctor.msg.service.DoctorMessageWriteService;
 import io.terminus.doctor.user.model.DoctorUserDataPermission;
 import io.terminus.doctor.user.model.Sub;
@@ -21,7 +22,6 @@ import io.terminus.parana.web.msg.MsgWebService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
@@ -52,6 +52,9 @@ public class MsgManager {
     private DoctorMessageWriteService doctorMessageWriteService;
 
     @Autowired
+    private DoctorMessageRuleTemplateReadService doctorMessageRuleTemplateReadService;
+
+    @Autowired
     private DoctorUserDataPermissionReadService doctorUserDataPermissionReadService;
 
     @Autowired
@@ -71,7 +74,7 @@ public class MsgManager {
 
     private Map<String, IProducer> producerMap;
 
-    @Value("${message.app.domain}")
+  //  @Value("${message.app.domain}")
     private String domain;
 
     @PostConstruct
@@ -127,26 +130,33 @@ public class MsgManager {
      * 发出短信消息
      */
     public void consumeMsg() {
-        List<DoctorMessage> msgMessages = RespHelper.orServEx(doctorMessageReadService.findMsgMessage());
-        for (int i = 0; msgMessages != null && i < msgMessages.size(); i++) {
-            DoctorMessage message = msgMessages.get(i);
-            Map<String, Serializable> map = null;
-            try{
-                // 获取用户信息
-                User user = (User) RespHelper.orServEx(userReadService.findById(message.getUserId()));
-                if (StringUtils.isNotBlank(user.getMobile())) {
-                    map = JsonMapper.JSON_NON_DEFAULT_MAPPER.fromJson(message.getData(), Map.class);
-                    // 发送短信 // TODO: 临时取消短信发送
-                    // smsWebService.send(user.getMobile(), message.getMessageTemplate(), map, null);
-                    message.setSendedAt(new Date());
-                    message.setStatus(DoctorMessage.Status.SENDED.getValue());
+        for (int j = 0;; j++) {
+            List<DoctorMessage> msgMessages = RespHelper.orServEx(doctorMessageReadService.findMsgMessage(j+1, 200)).getData();
+            //  User user = (User) RespHelper.orServEx(userReadService.findById(message.getUserId()));
+            for (int i = 0; msgMessages != null && i < msgMessages.size(); i++) {
+                DoctorMessage message = msgMessages.get(i);
+                Map<String, Serializable> map = null;
+                try {
+                    // 获取用户信息
+                    User user = (User) RespHelper.orServEx(userReadService.findById(message.getUserId()));
+                    if (StringUtils.isNotBlank(user.getMobile())) {
+                        map = JsonMapper.JSON_NON_DEFAULT_MAPPER.fromJson(message.getData(), Map.class);
+                        // 发送短信 // TODO: 临时取消短信发送
+                        // smsWebService.send(user.getMobile(), message.getMessageTemplate(), map, null);
+                        message.setSendedAt(new Date());
+                        message.setStatus(DoctorMessage.Status.SENDED.getValue());
+                    }
+                } catch (Exception e) {
+                    log.error("msg message send error, cause by {}", Throwables.getStackTraceAsString(e));
+                    message.setFailedBy("msg message send error, context is " + map + ", cause by " + e.getMessage());
+                    message.setStatus(DoctorMessage.Status.FAILED.getValue());
                 }
-            } catch (Exception e) {
-                log.error("msg message send error, cause by {}", Throwables.getStackTraceAsString(e));
-                message.setFailedBy("msg message send error, context is " + map + ", cause by " + e.getMessage());
-                message.setStatus(DoctorMessage.Status.FAILED.getValue());
+                //doctorMessageWriteService.updateMessage(message);
             }
-            //doctorMessageWriteService.updateMessage(message);
+            //  smsWebService.send(user.getMobile(), message.getMessageTemplate(), map, null);
+            if (msgMessages.size() < 200){
+                break;
+            }
         }
     }
 
@@ -154,7 +164,8 @@ public class MsgManager {
      * 发出邮件消息
      */
     public void consumeEmail() {
-        List<DoctorMessage> emailMessages = RespHelper.orServEx(doctorMessageReadService.findEmailMessage());
+        for (int j = 0;; j++) {
+            List<DoctorMessage> emailMessages = RespHelper.orServEx(doctorMessageReadService.findEmailMessage(j+1, 200)).getData();
         for (int i = 0; emailMessages != null && i < emailMessages.size(); i++) {
             DoctorMessage message = emailMessages.get(i);
             Map<String, Serializable> map = null;
@@ -175,38 +186,86 @@ public class MsgManager {
             }
            // doctorMessageWriteService.updateMessage(message);
         }
+            if (emailMessages.size() < 200){
+                break;
+            }
+        }
     }
 
     /**
      * app push 消息消费
      */
     public void consumeAppPush() {
-        List<DoctorMessage> appMessages = RespHelper.orServEx(doctorMessageReadService.findAppPushMessage());
+        for (int j = 0;; j++) {
+            List<DoctorMessage> appMessages = RespHelper.orServEx(doctorMessageReadService.findAppPushMessage(j+1, 200)).getData();
         for (int i = 0; appMessages != null && i < appMessages.size(); i++) {
             DoctorMessage message = appMessages.get(i);
             Map<String, Serializable> map = null;
             try{
                 // 获取用户信息
-                map = JsonMapper.JSON_NON_DEFAULT_MAPPER.fromJson(message.getData(), Map.class);
-                map.put("after_open", "go_url");
-                map.put("title", message.getTemplateName());
-                map.put("ticker", message.getTemplateName());
-                map.put("url", getAppUrl(message)); // 设置回调url
-                // 推送消息
-                if (message.getUserId() != null) {
-                    // TODO 临时取消
-                   // appPushWebService.send("[" + message.getUserId() + "]", message.getMessageTemplate(), map, null);
+                User user = (User) RespHelper.orServEx(userReadService.findById(message.getUserId()));
+                if (StringUtils.isNotBlank(user.getEmail())) {
+                    map = JsonMapper.JSON_NON_DEFAULT_MAPPER.fromJson(message.getData(), Map.class);
+                    // app push // TODO 临时取消
+                    // appPushWebService.send("[" + userId+ "]", doctorMessageRuleTemplate.getMessageTemplate(), map, null);
                     message.setSendedAt(new Date());
                     message.setStatus(DoctorMessage.Status.SENDED.getValue());
                 }
             } catch (Exception e) {
                 log.error("app push message send error, cause by {}", Throwables.getStackTraceAsString(e));
-                message.setFailedBy("app push message send error, cause by " + e.getMessage());
+                message.setFailedBy("app push message send error, context is " + map + ", cause by " + e.getMessage());
                 message.setStatus(DoctorMessage.Status.FAILED.getValue());
             }
-            //doctorMessageWriteService.updateMessage(message);
+            // doctorMessageWriteService.updateMessage(message);
+        }
+        if (appMessages.size() < 200){
+            break;
         }
     }
+    }
+//    public void consumeAppPush() {
+//        List<DoctorMessage> updateMessages = Lists.newArrayList();
+//        try {
+//            List<DoctorMessageRuleTemplate> templates = RespHelper.orServEx(doctorMessageRuleTemplateReadService.findAllWarnMessageTpl());
+//            templates.forEach(doctorMessageRuleTemplate -> {
+//                List<Long> userIdList = RespHelper.orServEx(doctorMessageReadService.findUserIdList(DoctorMessage.builder().templateId(doctorMessageRuleTemplate.getId()).build()));
+//                userIdList.forEach(userId -> {
+//                    StringBuilder sb = new StringBuilder();
+//                    List<DoctorMessage> appMessages = RespHelper.orServEx(doctorMessageReadService.findAppPushMessage(doctorMessageRuleTemplate.getId(), userId));
+//                    appMessages.forEach(doctorMessage -> {
+//                        Map<String, Serializable> dataMap = JsonMapper.JSON_NON_DEFAULT_MAPPER.fromJson(doctorMessage.getData(), Map.class);
+//                        if (Objects.equals(doctorMessageRuleTemplate.getCategory(), Category.FATTEN_PIG_REMOVE.getKey())){
+//                            sb.append(dataMap.get("groupCode")+",");
+//                        }else if (Objects.equals(doctorMessageRuleTemplate.getCategory(), Category.FATTEN_PIG_REMOVE.getKey())){
+//
+//                        }else {
+//                            sb.append(dataMap.get("pigCode")+",");
+//                        }
+//                        doctorMessage.setSendedAt(new Date());
+//                        doctorMessage.setStatus(DoctorMessage.Status.SENDED.getValue());
+//                        updateMessages.add(doctorMessage);
+//                    });
+//                    Map<String, Serializable> map = Maps.newHashMap();
+//                    map.put("code", sb);
+//                    map.put("after_open", "go_url");
+//                    map.put("title", doctorMessageRuleTemplate.getName());
+//                    map.put("ticker", doctorMessageRuleTemplate.getName());
+//                   // appPushWebService.send("[" + userId+ "]", doctorMessageRuleTemplate.getMessageTemplate(), map, null);
+//                });
+//            });
+//
+//        }  catch (Exception e) {
+//            log.error("app push message send error, cause by {}", Throwables.getStackTraceAsString(e));
+//            updateMessages.forEach(doctorMessage -> {
+//                doctorMessageWriteService.updateMessage(doctorMessage);
+//                doctorMessage.setFailedBy("app push message send error, cause by " + e.getMessage());
+//                doctorMessage.setStatus(DoctorMessage.Status.FAILED.getValue());
+//            });
+//        }
+////        updateMessages.forEach(doctorMessage -> {
+////            doctorMessageWriteService.updateMessage(doctorMessage);
+////        });
+//    }
 
     // 获取url
     private String getAppUrl(DoctorMessage doctorMessage) {

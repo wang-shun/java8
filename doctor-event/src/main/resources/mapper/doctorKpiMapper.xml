@@ -85,7 +85,7 @@
     </select>
 
     <!--产畸形数 -->
-    <select id="getDeliveryJxCounts" parameterType="map" resultType="int">
+    <select id="deliveryJxCounts" parameterType="map" resultType="int">
         select ifnull(sum(jx_count),0) from doctor_pig_events
         where type = 15
         <include refid="criteria"/>
@@ -264,6 +264,17 @@
         WHERE
         change_type_id IN (110, 111) AND -- 变动类型是死亡和淘汰
         pig_type = 3 -- 育肥猪
+        <include refid="criteria"/>
+    </select>
+
+    <!-- 死淘情况: 后备猪 -->
+    <select id="getDeadHoubei" parameterType="map" resultType="int">
+        SELECT
+        ifnull(sum(quantity),0)
+        FROM doctor_group_events
+        WHERE
+        change_type_id IN (110, 111) AND -- 变动类型是死亡和淘汰
+        pig_type IN (4, 8) -- 后备猪
         <include refid="criteria"/>
     </select>
 
@@ -1031,5 +1042,553 @@
             pig_type = 3 AND         -- 育肥猪
             price != 0
             <include refid="criteria"/>
+    </select>
+
+    <!-- 公猪生产月报: 配种次数 -->
+    <select id="getBoarMateCount" parameterType="map" resultType="int">
+        select ifnull(count(1), 0)
+        from doctor_pig_events
+        where type = 9
+        <include refid="criteria"/>
+    </select>
+
+    <!-- 公猪生产月报: 首配母猪头数 -->
+    <select id="getBoarSowFirstMateCount" parameterType="map" resultType="int">
+        select ifnull(count(1), 0)
+        from doctor_pig_events
+        where type = 9
+        and current_mating_count = 1
+        <include refid="criteria"/>
+    </select>
+
+    <!-- 公猪生产月报: 受胎头数 -->
+    <select id="getBoarSowPregCount" parameterType="map" resultType="int">
+        select count(1)
+        FROM
+        (select farm_id, boar_code, pig_code, parity
+        from doctor_pig_events
+        where type = 9
+        <include refid="criteria"/>
+        group by farm_id, boar_code, pig_code,parity) as t1
+        left join doctor_pig_events t2 on t1.farm_id =t2.farm_id and t1.boar_code = t2.boar_code and t1.pig_code = t2.pig_code and t1.parity = t2.parity
+        where t2.type = 11
+        and t2.preg_check_result = 1
+    </select>
+
+    <!-- 公猪生产月报: 产仔母猪数 -->
+    <select id="getBoarSowFarrowCount" parameterType="map" resultType="int">
+        select ifnull(count(1),0)
+        FROM
+        (select farm_id, boar_code, pig_code, parity
+        from doctor_pig_events
+        where type = 9
+        <include refid="criteria"/>
+        group by farm_id, boar_code, pig_code,parity) as t1
+        left join doctor_pig_events t2 on t1.farm_id =t2.farm_id and t1.boar_code = t2.boar_code and t1.pig_code = t2.pig_code and t1.parity = t2.parity
+        where t2.type = 15
+    </select>
+
+
+    <!-- 公猪生产月报: 平均产仔数 -->
+    <select id="getBoarSowFarrowAvgCount" parameterType="map" resultType="double">
+        select ifnull(sum(t2.live_count + t2.dead_count + t2.jx_count + t2.mny_count + t2.black_count),0)/case ifnull(count(1),1) when 0 then 1 else ifnull(count(1),1) end
+        FROM
+        (select farm_id, boar_code, pig_code, parity
+        from doctor_pig_events
+        where type = 9
+        <include refid="criteria"/>
+        group by farm_id, boar_code, pig_code,parity) as t1
+        left join doctor_pig_events t2 on t1.farm_id =t2.farm_id and t1.boar_code = t2.boar_code and t1.pig_code = t2.pig_code and t1.parity = t2.parity
+        where t2.type = 15
+    </select>
+
+    <!-- 公猪生产月报: 平均产活仔数 -->
+    <select id="getBoarSowFarrowLiveAvgCount" parameterType="map" resultType="double">
+        select ifnull(sum(live_count),0)/case ifnull(count(1),1) when 0 then 1 else ifnull(count(1),1) end
+        FROM
+        (select farm_id, boar_code, pig_code, parity
+        from doctor_pig_events
+        where type = 9
+        <include refid="criteria"/>
+        group by farm_id, boar_code, pig_code,parity) as t1
+        left join doctor_pig_events t2 on t1.farm_id =t2.farm_id and t1.boar_code = t2.boar_code and t1.pig_code = t2.pig_code and t1.parity = t2.parity
+        where t2.type = 15
+    </select>
+
+    <!-- 公猪生产月报: 受胎率 -->
+    <select id="getBoarSowPregRate" parameterType="map" resultType="double">
+        SELECT
+        (select ifnull(count(1), 0)
+        FROM
+        (select farm_id, boar_code, pig_code, parity
+        from doctor_pig_events
+        where type = 9
+        <include refid="criteria"/>
+        group by farm_id, boar_code, pig_code,parity) as t1
+        left join doctor_pig_events t2 on t1.farm_id =t2.farm_id and t1.boar_code = t2.boar_code and t1.pig_code = t2.pig_code and t1.parity = t2.parity
+        where t2.type = 11
+        and t2.preg_check_result = 1)
+        / (
+        select case ifnull(count(1),1) when 0 then 1 else ifnull(count(1),1) end as pzcs
+        from doctor_pig_events
+        where type = 9
+        <include refid="criteria"/>
+        )
+        from dual
+    </select>
+
+
+    <!-- 公猪生产月报: 分娩 -->
+    <select id="getBoarSowFarrowRate" parameterType="map" resultType="double">
+        SELECT
+        (select ifnull(count(1), 0)
+        FROM
+        (select farm_id, boar_code, pig_code, parity
+        from doctor_pig_events
+        where type = 9
+        <include refid="criteria"/>
+        group by farm_id, boar_code, pig_code,parity) as t1
+        left join doctor_pig_events t2 on t1.farm_id =t2.farm_id and t1.boar_code = t2.boar_code and t1.pig_code = t2.pig_code and t1.parity = t2.parity
+        where t2.type = 15)
+        / (
+        select case ifnull(count(1),1) when 0 then 1 else ifnull(count(1),1) end as pzcs
+        from doctor_pig_events
+        where type = 9
+        <include refid="criteria"/>
+        )
+        from dual
+    </select>
+
+    <!--存栏变动月报: 转入(后备,产房仔猪,保育,育肥)-->
+    <select id="getMonthlyLiveStockChangeIn" parameterType="map" resultType="io.terminus.doctor.event.dto.report.monthly.DoctorLiveStockChangeMonthlyReport">
+        SELECT
+            ifnull(max(CASE WHEN pig_type = 1 THEN result ELSE 0 END), 0) +
+            ifnull(max(CASE WHEN pig_type = 7 THEN result ELSE 0 END), 0) AS farrowIn,
+            ifnull(max(CASE WHEN pig_type = 2 THEN result ELSE 0 END), 0) AS nurseryIn,
+            ifnull(max(CASE WHEN pig_type = 3 THEN result ELSE 0 END), 0) AS fattenIn,
+            ifnull(max(CASE WHEN pig_type = 4 THEN result ELSE 0 END), 0) AS houbeiIn
+        FROM
+        (
+            SELECT ifnull(sum(quantity), 0) AS result, pig_type
+            FROM  doctor_group_events
+            WHERE  `type` = 2 AND -- include
+              in_type != 3
+              <include refid="criteria"/>
+            GROUP BY pig_type
+        ) AS a
+    </select>
+
+    <!--存栏变动月报: 进场-->
+    <select id="getMonthlyLiveStockChangeSowIn" parameterType="map" resultType="int">
+        SELECT ifnull(count(1), 0)
+        FROM  doctor_pig_events
+        WHERE `type` = 7
+          <include refid="criteria"/>
+    </select>
+
+    <!--存栏变动月报: 断奶转入-->
+    <select id="getMonthlyLiveStockChangeWeanIn" parameterType="map" resultType="int">
+        SELECT ifnull(count(1), 0)
+        FROM
+        (
+            SELECT barn_id
+            FROM  doctor_pig_events
+            WHERE `type` = 12  -- 转入配种舍事件
+              <include refid="criteria"/>
+        ) a
+        LEFT JOIN doctor_barns b ON a.barn_id = b.id
+        WHERE b.pig_type IN (1, 7)
+    </select>
+
+    <!--存栏变动月报: 配怀转产房-->
+    <select id="getMonthlyLiveStockChangeToFarrow" parameterType="map" resultType="int">
+        SELECT ifnull(count(1), 0)
+        FROM doctor_pig_events
+        WHERE `type` = 14
+          <include refid="criteria"/>
+    </select>
+
+    <!--存栏变动月报: 后备转种猪-->
+    <select id="getMonthlyLiveStockChangeToSeed" parameterType="map" resultType="int">
+        SELECT ifnull(count(1), 0)
+        FROM doctor_group_events
+        WHERE `type` = 5
+          <include refid="criteria"/>
+    </select>
+
+    <!--存栏变动月报: 产房转保育-->
+    <select id="getMonthlyLiveStockChangeToNursery" parameterType="map" resultType="int">
+        SELECT ifnull(sum(a.quantity), 0)
+        FROM
+        (
+            SELECT other_barn_id, quantity
+            FROM doctor_group_events
+            WHERE `type` = 4 AND  -- 转群事件
+              pig_type IN (1, 7)
+              <include refid="criteria"/>
+        ) AS a
+        LEFT JOIN doctor_barns b ON a.other_barn_id = b.id
+        WHERE b.pig_type = 2
+    </select>
+
+    <!--存栏变动月报: 保育转育肥-->
+    <select id="getMonthlyLiveStockChangeToFatten" parameterType="map" resultType="int">
+        SELECT ifnull(sum(a.quantity), 0)
+        FROM
+        (
+            SELECT other_barn_id, quantity
+            FROM doctor_group_events
+            WHERE `type` = 4 AND  -- 转群事件
+              pig_type = 2
+              <include refid="criteria"/>
+        ) AS a
+        LEFT JOIN doctor_barns b ON a.other_barn_id = b.id
+        WHERE b.pig_type = 3
+    </select>
+
+    <!--存栏变动月报: 死淘(后备,产房仔猪,保育,育肥)-->
+    <select id="getMonthlyLiveStockChangeGroupDead" parameterType="map" resultType="io.terminus.doctor.event.dto.report.monthly.DoctorLiveStockChangeMonthlyReport">
+        SELECT
+            ifnull(max(CASE WHEN pig_type = 1 THEN result ELSE 0 END), 0) +
+            ifnull(max(CASE WHEN pig_type = 7 THEN result ELSE 0 END), 0) AS farrowDead,
+            ifnull(max(CASE WHEN pig_type = 2 THEN result ELSE 0 END), 0) AS nurseryDead,
+            ifnull(max(CASE WHEN pig_type = 3 THEN result ELSE 0 END), 0) AS fattenDead,
+            ifnull(max(CASE WHEN pig_type = 4 THEN result ELSE 0 END), 0) AS houbeiDead
+        FROM
+        (
+            SELECT
+              ifnull(sum(quantity), 0) AS result, pig_type
+            FROM  doctor_group_events
+            WHERE
+                `type` = 3 AND
+                change_type_id IN (110, 111)    -- 死亡, 淘汰
+                <include refid="criteria"/>
+            GROUP BY pig_type
+        ) AS a
+    </select>
+
+    <!--存栏变动月报: 死淘(配怀,产房母猪)-->
+    <select id="getMonthlyLiveStockChangeSowDead" parameterType="map" resultType="io.terminus.doctor.event.dto.report.monthly.DoctorLiveStockChangeMonthlyReport">
+        SELECT
+            ifnull(max(CASE WHEN pig_type = 5 THEN result ELSE 0 END), 0) +
+            ifnull(max(CASE WHEN pig_type = 6 THEN result ELSE 0 END), 0) AS peiHuaiDead,
+            ifnull(max(CASE WHEN pig_type = 1 THEN result ELSE 0 END), 0) +
+            ifnull(max(CASE WHEN pig_type = 7 THEN result ELSE 0 END), 0) AS farrowSowDead
+        FROM
+        (
+            SELECT
+               ifnull(count(1), 0) AS result,
+               b.pig_type AS pig_type
+            FROM
+            (
+                SELECT
+                     barn_id
+                FROM doctor_pig_events
+                WHERE
+                        change_type_id IN (110, 111) AND -- 变动类型是死亡和淘汰
+                        `type` = 6 AND -- 事件类型是离场
+                        kind = 1 -- 猪类母猪
+                        <include refid="criteria"/>
+            ) AS a
+            LEFT JOIN doctor_barns b ON a.barn_id = b.id
+            WHERE b.pig_type IN (1, 5, 6, 7)
+            GROUP BY b.pig_type
+        ) AS c
+    </select>
+
+    <!--存栏变动月报: 销售(后备,产房仔猪,保育,育肥)-->
+    <select id="getMonthlyLiveStockChangeSale" parameterType="map" resultType="io.terminus.doctor.event.dto.report.monthly.DoctorLiveStockChangeMonthlyReport">
+        SELECT
+            ifnull(max(CASE WHEN pig_type = 1 THEN result ELSE 0 END), 0) +
+            ifnull(max(CASE WHEN pig_type = 7 THEN result ELSE 0 END), 0) AS farrowSale,
+            ifnull(max(CASE WHEN pig_type = 2 THEN result ELSE 0 END), 0) AS nurserySale,
+            ifnull(max(CASE WHEN pig_type = 3 THEN result ELSE 0 END), 0) AS fattenSale,
+            ifnull(max(CASE WHEN pig_type = 4 THEN result ELSE 0 END), 0) AS houbeiSale
+        FROM
+        (
+            SELECT
+              ifnull(sum(quantity), 0) AS result, pig_type
+            FROM  doctor_group_events
+            WHERE
+              `type` = 3 AND
+              change_type_id = 109    -- 销售
+              <include refid="criteria"/>
+            GROUP BY pig_type
+        ) AS a
+    </select>
+
+    <!--存栏变动月报: 饲料数量-->
+    <select id="getMonthlyLiveStockChangeFeedCount" parameterType="map" resultType="io.terminus.doctor.event.dto.report.monthly.DoctorLiveStockChangeMonthlyReport">
+        SELECT
+            ifnull(max(CASE WHEN pig_type = 1 THEN result ELSE 0 END), 0) +
+            ifnull(max(CASE WHEN pig_type = 7 THEN result ELSE 0 END), 0) AS farrowSowFeedCount,
+            ifnull(max(CASE WHEN pig_type = 1 THEN result ELSE 0 END), 0) +
+            ifnull(max(CASE WHEN pig_type = 7 THEN result ELSE 0 END), 0) AS farrowFeedCount,
+            ifnull(max(CASE WHEN pig_type = 2 THEN result ELSE 0 END), 0) AS nurseryFeedCount,
+            ifnull(max(CASE WHEN pig_type = 3 THEN result ELSE 0 END), 0) AS fattenFeedCount,
+            ifnull(max(CASE WHEN pig_type = 4 THEN result ELSE 0 END), 0) +
+            ifnull(max(CASE WHEN pig_type = 8 THEN result ELSE 0 END), 0) AS houbeiFeedCount,
+            ifnull(max(CASE WHEN pig_type = 5 THEN result ELSE 0 END), 0) +
+            ifnull(max(CASE WHEN pig_type = 6 THEN result ELSE 0 END), 0) AS peiHuaiFeedCount
+        FROM
+        (
+            SELECT
+              barns.pig_type AS pig_type,
+              ifnull(sum(cp.event_count), 0) AS result
+            FROM doctor_material_consume_providers AS cp
+            LEFT JOIN doctor_barns AS barns ON cp.barn_id = barns.id
+            WHERE cp.event_type = 1 AND
+                  cp.type = 1
+                <if test="farmId != null">AND cp.farm_id = #{farmId}</if>
+                <if test="startAt != null">AND cp.event_time &gt;= #{startAt}</if>
+                <if test="endAt != null">AND cp.event_time &lt;= #{endAt}</if>
+        GROUP BY barns.pig_type
+        ) AS a
+    </select>
+
+    <!--存栏变动月报: 饲料金额-->
+    <select id="getMonthlyLiveStockChangeMaterielAmount" parameterType="map" resultType="io.terminus.doctor.event.dto.report.monthly.DoctorLiveStockChangeMonthlyReport">
+        SELECT
+            -- 饲料
+            ifnull(max(CASE WHEN pig_type = 4 AND material_type = 1 THEN amount ELSE 0 END), 0) +
+            ifnull(max(CASE WHEN pig_type = 8 AND material_type = 1 THEN amount ELSE 0 END), 0) AS houbeiFeedAmount,
+            ifnull(max(CASE WHEN pig_type = 1 AND material_type = 1 THEN amount ELSE 0 END), 0) +
+            ifnull(max(CASE WHEN pig_type = 7 AND material_type = 1 THEN amount ELSE 0 END), 0) AS farrowSowFeedAmount,
+            ifnull(max(CASE WHEN pig_type = 1 AND material_type = 1 THEN amount ELSE 0 END), 0) +
+            ifnull(max(CASE WHEN pig_type = 7 AND material_type = 1 THEN amount ELSE 0 END), 0) AS farrowFeedAmount,
+            ifnull(max(CASE WHEN pig_type = 2 AND material_type = 1 THEN amount ELSE 0 END), 0) AS nurseryFeedAmount,
+            ifnull(max(CASE WHEN pig_type = 3 AND material_type = 1 THEN amount ELSE 0 END), 0) AS fattenFeedAmount,
+            ifnull(max(CASE WHEN pig_type = 5 AND material_type = 1 THEN amount ELSE 0 END), 0) +
+            ifnull(max(CASE WHEN pig_type = 6 AND material_type = 1 THEN amount ELSE 0 END), 0) AS peiHuaiFeedAmount,
+            -- 疫苗
+            ifnull(max(CASE WHEN pig_type = 4 AND material_type = 3 THEN amount ELSE 0 END), 0) +
+            ifnull(max(CASE WHEN pig_type = 8 AND material_type = 3 THEN amount ELSE 0 END), 0) AS houbeiVaccineAmount,
+            ifnull(max(CASE WHEN pig_type = 1 AND material_type = 3 THEN amount ELSE 0 END), 0) +
+            ifnull(max(CASE WHEN pig_type = 7 AND material_type = 3 THEN amount ELSE 0 END), 0) AS farrowSowVaccineAmount,
+            ifnull(max(CASE WHEN pig_type = 1 AND material_type = 3 THEN amount ELSE 0 END), 0) +
+            ifnull(max(CASE WHEN pig_type = 7 AND material_type = 3 THEN amount ELSE 0 END), 0) AS farrowVaccineAmount,
+            ifnull(max(CASE WHEN pig_type = 2 AND material_type = 3 THEN amount ELSE 0 END), 0) AS nurseryVaccineAmount,
+            ifnull(max(CASE WHEN pig_type = 3 AND material_type = 3 THEN amount ELSE 0 END), 0) AS fattenVaccineAmount,
+            ifnull(max(CASE WHEN pig_type = 5 AND material_type = 3 THEN amount ELSE 0 END), 0) +
+            ifnull(max(CASE WHEN pig_type = 6 AND material_type = 3 THEN amount ELSE 0 END), 0) AS peiHuaiVaccineAmount,
+            -- 药品
+            ifnull(max(CASE WHEN pig_type = 4 AND material_type = 4 THEN amount ELSE 0 END), 0) +
+            ifnull(max(CASE WHEN pig_type = 8 AND material_type = 4 THEN amount ELSE 0 END), 0) AS houbeiDrugAmount,
+            ifnull(max(CASE WHEN pig_type = 1 AND material_type = 4 THEN amount ELSE 0 END), 0) +
+            ifnull(max(CASE WHEN pig_type = 7 AND material_type = 4 THEN amount ELSE 0 END), 0) AS farrowSowDrugAmount,
+            ifnull(max(CASE WHEN pig_type = 1 AND material_type = 4 THEN amount ELSE 0 END), 0) +
+            ifnull(max(CASE WHEN pig_type = 7 AND material_type = 4 THEN amount ELSE 0 END), 0) AS farrowDrugAmount,
+            ifnull(max(CASE WHEN pig_type = 2 AND material_type = 4 THEN amount ELSE 0 END), 0) AS nurseryDrugAmount,
+            ifnull(max(CASE WHEN pig_type = 3 AND material_type = 4 THEN amount ELSE 0 END), 0) AS fattenDrugAmount,
+            ifnull(max(CASE WHEN pig_type = 5 AND material_type = 4 THEN amount ELSE 0 END), 0) +
+            ifnull(max(CASE WHEN pig_type = 6 AND material_type = 4 THEN amount ELSE 0 END), 0) AS peiHuaiDrugAmount,
+            -- 消耗品
+            ifnull(max(CASE WHEN pig_type = 4 AND material_type = 5 THEN amount ELSE 0 END), 0) +
+            ifnull(max(CASE WHEN pig_type = 8 AND material_type = 5 THEN amount ELSE 0 END), 0) AS houbeiConsumerAmount,
+            ifnull(max(CASE WHEN pig_type = 1 AND material_type = 5 THEN amount ELSE 0 END), 0) +
+            ifnull(max(CASE WHEN pig_type = 7 AND material_type = 5 THEN amount ELSE 0 END), 0) AS farrowSowConsumerAmount,
+            ifnull(max(CASE WHEN pig_type = 1 AND material_type = 5 THEN amount ELSE 0 END), 0) +
+            ifnull(max(CASE WHEN pig_type = 7 AND material_type = 5 THEN amount ELSE 0 END), 0) AS farrowConsumerAmount,
+            ifnull(max(CASE WHEN pig_type = 2 AND material_type = 5 THEN amount ELSE 0 END), 0) AS nurseryConsumerAmount,
+            ifnull(max(CASE WHEN pig_type = 3 AND material_type = 5 THEN amount ELSE 0 END), 0) AS fattenConsumerAmount,
+            ifnull(max(CASE WHEN pig_type = 5 AND material_type = 5 THEN amount ELSE 0 END), 0) +
+            ifnull(max(CASE WHEN pig_type = 6 AND material_type = 5 THEN amount ELSE 0 END), 0) AS peiHuaiConsumerAmount
+        FROM
+        (
+            SELECT
+              barns.`pig_type`,
+              cp.`type` AS material_type,
+              ifnull(sum(cp.`event_count` * cp.`unit_price`), 0) AS amount
+            FROM doctor_material_consume_providers cp
+            LEFT JOIN doctor_barns barns ON cp.`barn_id` = barns.id
+            WHERE cp.`event_type` = 1 AND
+                  cp.`unit_price` IS NOT NULL
+                <if test="farmId != null">AND cp.farm_id = #{farmId}</if>
+                <if test="startAt != null">AND cp.event_time &gt;= #{startAt}</if>
+                <if test="endAt != null">AND cp.event_time &lt;= #{endAt}</if>
+            GROUP BY barns.`pig_type`, cp.`type`
+        ) AS res
+    </select>
+
+    <select id="getParityStockMonthly" parameterType="map" resultType="io.terminus.doctor.event.dto.report.monthly.DoctorStockStructureMonthlyReport">
+        select  date_format(#{endAt}, '%Y-%m-%d') as sumAt,
+                1 as type,
+                null as businessId,
+                t11.parity as businessName,
+                ifnull(t12.counts, 0) + ifnull(t13.counts, 0) + ifnull(t14.counts, 0) - ifnull(t15.counts, 0) as count
+        from
+        (
+        select name as parity
+        from doctor_basics
+        where type = 9
+        ) t11 left join
+        (
+        -- 当前
+        select case when t2.current_parity &lt; 10 then t2.current_parity else 10 end as parity,
+        count(1) as counts
+        from doctor_pigs t1
+        left join doctor_pig_tracks t2 on t1.id = t2.pig_id
+        where t1.is_removal = 0
+        and t1.pig_type = 1
+        and t1.farm_id = #{farmId}
+        group by case when t2.current_parity &lt; 10 then t2.current_parity else 10 end
+        ) t12 on t11.parity = t12.parity
+        left join
+        (
+        -- 离场-进场
+        select case when parity &lt; 10 then parity else 10 end as parity,
+        sum(case type when 6 then 1 else 0 end) - sum(case type when 7 then 1 else 0 end ) as counts
+        from doctor_pig_events
+        where kind = 1
+        and type in (6, 7)
+        and farm_id = #{farmId}
+        and event_at &gt;= #{startAt}
+        group by case when parity &lt; 10 then parity else '10' end
+        ) t13 on t11.parity = t13.parity
+        left join
+        (
+        -- 配种影响下一胎次
+        select case when parity-1 &lt; 9 then parity-1 else '10' end as parity ,
+        count(1) as counts
+        from doctor_pig_events
+        where kind = 1
+        and type = 9
+        and farm_id = #{farmId}
+        and event_at &gt;= #{startAt}
+        group by case when parity-1 &lt; 9 then parity-1 else '10' end
+        ) t14 on t11.parity = t14.parity
+        left join (
+        -- 配种影响当前胎次
+        select case when parity &lt; 10 then parity else '10' end as parity ,
+        count(1) as counts
+        from doctor_pig_events
+        where kind = 1
+        and type = 9
+        and parity > 1
+        and farm_id = #{farmId}
+        and event_at &gt;= #{startAt}
+        group by case when parity &lt; 10 then parity else '10' end
+        ) t15 on t11.parity = t15.parity
+    </select>
+
+    <select id="getBreedStockMonthly" parameterType="map" resultType="io.terminus.doctor.event.dto.report.monthly.DoctorStockStructureMonthlyReport">
+        select
+              date_format(#{endAt}, '%Y-%m-%d') as sumAt,
+              2 as type,
+              t11.breed_id as businessId,
+              t11.breed_name as businessName,
+              t11.counts - ifnull(t12.inCounts, 0) + ifnull(t12.outCounts, 0) as count
+        from(
+        SELECT t1.id as breed_id, t1.name as breed_name, ifnull(t2.counts, 0) as counts
+          FROM doctor_basics t1
+          left join  (
+          select breed_id,breed_name, count(1) as counts
+          from doctor_pigs
+         WHERE is_removal = 0
+           AND pig_type = 1
+           AND farm_id = #{farmId}
+        group by breed_id, breed_name) t2 on t1.id = t2.breed_id and t1.name = t2.breed_name
+        where t1.type = 1
+        ) t11
+        left join (
+        SELECT    t2.breed_id,
+                t2.breed_name,
+                 count(1) AS quantity,
+               sum(case type when 6 then 1 else 0 end) as outCounts,
+                sum(case type when 7 then 1 else 0 end) as inCounts
+           FROM doctor_pig_events t1
+           join doctor_pigs t2 on t1.pig_code = t2.pig_code
+          WHERE t1.kind = 1
+            AND t1.type IN (6, 7)
+            and t1.event_at &gt;= #{startAt}
+            AND t1.farm_id = #{farmId}
+        GROUP BY t2.breed_id, t2.breed_name
+        ) t12 on t11.breed_id = t12.breed_id and t11.breed_name = t12.breed_name;
+    </select>
+
+    <!-- 断奶七天配种率-->
+    <select id="getMateInSeven" parameterType="map" resultType="double">
+        select
+        case (
+        -- 断奶母猪数
+        select  count(1)
+        from doctor_pig_events
+        where
+        pig_status_after = 9
+        and type in (16,17,18)
+        <include refid="criteria"/>
+        ) when 0 then 0 else
+        (
+        -- 本月7天内断奶配种数
+        select count(1)
+        from
+        (
+        select  pig_code, event_at, parity
+        from doctor_pig_events
+        where
+        pig_status_after = 9
+        and type in (16,17,18)
+        <include refid="criteria"/>
+        ) t1 left join
+        (
+        select  pig_code, event_at, parity
+        from doctor_pig_events
+        where type = 9
+        and farm_id = 1
+        <include refid="criteria"/>
+        and current_mating_count = 1
+        and pig_code in(
+        select  pig_code
+        from doctor_pig_events
+        where
+        pig_status_after = 9
+        and type in (16,17,18)
+        <include refid="criteria"/>
+        )
+        ) t2 on t1.pig_code = t2.pig_code and t1.parity + 1 = t2.parity
+        where t1.event_at > date_add(t2.event_at, interval -7 day)
+        )/
+        (
+        (
+        -- 断奶母猪数
+        select  count(1)
+        from doctor_pig_events
+        where
+        pig_status_after = 9
+        and type in (16,17,18)
+        <include refid="criteria"/>
+        ) -
+        (
+        -- 7天内断奶的
+        select count(1)
+        from  doctor_pig_events
+        where
+        pig_status_after = 9
+        and type in (16,17,18)
+        and farm_id = 1
+        and event_at &gt;= date_add(date(#{endAt}), interval -7 day)
+        and event_at &lt;= #{endAt}
+        ) +
+        (
+        -- 断奶七天内配种
+        select count(1)
+        from doctor_pig_events
+        where
+        type = 9
+        and farm_id = 1
+        and event_at &gt;= date_add(date(#{endAt}), interval -7 day)
+        and event_at &lt;= #{endAt}
+        and pig_code in(
+        select pig_code
+        from  doctor_pig_events
+        where
+        pig_status_after = 9
+        and type in (16,17,18)
+        and farm_id = 1
+        and event_at &gt;= date_add(date(#{endAt}), interval -7 day)
+        and event_at &lt;= #{endAt}
+        )
+        )
+        ) end from dual
     </select>
 </mapper>

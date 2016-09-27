@@ -2,6 +2,7 @@ package io.terminus.doctor.msg.service;
 
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
+import io.terminus.doctor.msg.dto.DoctorMessageSearchDto;
 import io.terminus.doctor.msg.model.DoctorMessage;
 
 import java.util.List;
@@ -25,12 +26,12 @@ public interface DoctorMessageReadService {
 
     /**
      * 分页预警消息列表
-     * @param criteria
+     * @param doctorMessageSearchDto
      * @param pageNo
      * @param pageSize
      * @return
      */
-    Response<Paging<DoctorMessage>> pagingWarnMessages(Map<String, Object> criteria, Integer pageNo, Integer pageSize);
+    Response<Paging<DoctorMessage>> pagingWarnMessages(DoctorMessageSearchDto doctorMessageSearchDto, Integer pageNo, Integer pageSize);
 
     /**
      * 分页系统消息列表
@@ -82,30 +83,23 @@ public interface DoctorMessageReadService {
     /**
      * 获取未发送的短信消息
      */
-    Response<List<DoctorMessage>> findMsgMessage();
+    Response<Paging<DoctorMessage>> findMsgMessage(Integer pageNo, Integer pageSize);
 
     /**
      * 获取未发送的email消息
      */
-    Response<List<DoctorMessage>> findEmailMessage();
+    Response<Paging<DoctorMessage>> findEmailMessage(Integer pageNo, Integer pageSize);
 
     /**
      * 获取未发送的app推送消息
      */
-    Response<List<DoctorMessage>> findAppPushMessage();
+    Response<Paging<DoctorMessage>> findAppPushMessage(Integer pageNo, Integer pageSize);
 
     /**
-     * 根据条件获取business列表数量
-     * @param criteria
+     * 根据条件获取businessId列表
+     * @param doctorMessageSearchDto
      * @return
      */
-    Response<List<Long>> findBusinessListByCriteria(Map<String, Object> criteria);
-
-    /**
-     *分页获取businessId过滤
-     * @param criteria
-     * @return
-     */
-    Response<Paging<DoctorMessage>> pagingDiffBusinessId(Map<String, Object> criteria, Integer pageNo, Integer pageSize);
+    Response<List<Long>> findBusinessListByCriteria(DoctorMessageSearchDto doctorMessageSearchDto);
 
 }

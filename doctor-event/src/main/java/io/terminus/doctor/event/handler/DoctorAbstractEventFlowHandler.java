@@ -7,8 +7,10 @@ import com.google.common.collect.Maps;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.constants.JacksonType;
+import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.event.constants.DoctorPigSnapshotConstants;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
+import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
 import io.terminus.doctor.event.dao.DoctorPigDao;
 import io.terminus.doctor.event.dao.DoctorPigEventDao;
 import io.terminus.doctor.event.dao.DoctorPigSnapshotDao;
@@ -18,7 +20,9 @@ import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
 import io.terminus.doctor.event.dto.event.AbstractPigEventInputDto;
 import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.enums.PigEvent;
+import io.terminus.doctor.event.manager.DoctorGroupReportManager;
 import io.terminus.doctor.event.model.DoctorBarn;
+import io.terminus.doctor.event.model.DoctorGroupTrack;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigSnapshot;
 import io.terminus.doctor.event.model.DoctorPigTrack;
@@ -29,7 +33,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Map;
 import java.util.Objects;
-import java.util.UUID;
 
 import static io.terminus.common.utils.Arguments.notNull;
 
@@ -44,16 +47,17 @@ public abstract class DoctorAbstractEventFlowHandler extends HandlerAware {
 
     private static final ObjectMapper OBJECT_MAPPER = JsonMapper.JSON_NON_DEFAULT_MAPPER.getMapper();
 
+    @Autowired
+    private DoctorGroupReportManager doctorGroupReportManager;
+
+    @Autowired
+    private DoctorGroupTrackDao doctorGroupTrackDao;
+
     protected final DoctorPigDao doctorPigDao;
-
     protected final DoctorPigEventDao doctorPigEventDao;
-
     protected final DoctorPigTrackDao doctorPigTrackDao;
-
     protected final DoctorPigSnapshotDao doctorPigSnapshotDao;
-
     protected final DoctorRevertLogDao doctorRevertLogDao;
-
     protected final DoctorBarnDao doctorBarnDao;
 
     @Autowired
@@ -84,6 +88,10 @@ public abstract class DoctorAbstractEventFlowHandler extends HandlerAware {
             DoctorPigEvent doctorPigEvent = buildAllPigDoctorEvent(doctorBasicInputInfoDto, extraInfo);
             DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(doctorPigEvent.getPigId());
 
+            //哺乳母猪所带仔猪的猪群id
+            Long farrowGroupId = doctorPigTrack.getGroupId();
+            Long farrowBarId = doctorPigTrack.getCurrentBarnId();
+
             // 当前 猪 状态 对录入数据影响
             IsOrNot isRePregCheckPositive = eventCreatePrepare(execution, doctorPigEvent, doctorPigTrack, doctorBasicInputInfoDto, extraInfo, context);
 
@@ -101,7 +109,6 @@ public abstract class DoctorAbstractEventFlowHandler extends HandlerAware {
             DoctorPigTrack refreshPigTrack = updateDoctorPigTrackInfo(execution, doctorPigTrack, doctorBasicInputInfoDto, extraInfo, context);
             doctorPigTrackDao.update(refreshPigTrack);
 
-
             eventCreatedAfter(execution, doctorPigEvent, doctorPigTrack, doctorBasicInputInfoDto, extraInfo, context);
 
             // create snapshot info
@@ -115,7 +122,7 @@ public abstract class DoctorAbstractEventFlowHandler extends HandlerAware {
             // 特殊 事件信息处理
             specialFlowHandler(execution, doctorBasicInputInfoDto, extraInfo, context);
 
-            afterEventCreateHandle(doctorPigEvent, doctorPigTrack, doctorPigSnapshot, context);
+            afterEventCreateHandle(doctorPigEvent, doctorPigTrack, farrowGroupId, farrowBarId);
 
             // 当前事件影响的Id 方式
             flowDataMap.put("createEventResult",
@@ -222,8 +229,7 @@ public abstract class DoctorAbstractEventFlowHandler extends HandlerAware {
 
     }
 
-    protected void afterEventCreateHandle(DoctorPigEvent doctorPigEvent, DoctorPigTrack doctorPigTrack,
-                                          DoctorPigSnapshot doctorPigSnapshot, Map<String, Object> extra) {
+    protected void afterEventCreateHandle(DoctorPigEvent pigEvent, DoctorPigTrack pigTrack, Long farrowGroupId, Long farrowBarnId) {
 
     }
 
@@ -260,7 +266,6 @@ public abstract class DoctorAbstractEventFlowHandler extends HandlerAware {
                 .eventAt(basic.generateEventAtFromExtra(extra)).type(basic.getEventType())
                 .kind(basic.getPigType()).name(basic.getEventName()).desc(basic.generateEventDescFromExtra(extra)).relEventId(basic.getRelEventId())
                 .barnId(basic.getBarnId()).barnName(basic.getBarnName())
-                .outId(UUID.randomUUID().toString())
                 .operatorId(abstractPigEventInputDto.getOperatorId()).operatorName(abstractPigEventInputDto.getOperatorName())
                 .creatorId(basic.getStaffId()).creatorName(basic.getStaffName())
                 .npd(0)
@@ -279,5 +284,16 @@ public abstract class DoctorAbstractEventFlowHandler extends HandlerAware {
             doctorPigEvent.setRelEventId(lastEvent.getId());
         }
         return doctorPigEvent;
+    }
+
+    /**
+     * 分娩, 断奶 等不涉及到猪群数量变动的, 需要在母猪这边触发一下修改猪群的事件
+     */
+    protected void updateFarrowGroupTrack(Long groupId, Integer pigType) {
+        log.info("update groupId:{}, pigType:{}", groupId, pigType);
+        if (groupId != null && PigType.FARROW_TYPES.contains(pigType)) {
+            DoctorGroupTrack groupTrack = doctorGroupTrackDao.findByGroupId(groupId);
+            doctorGroupTrackDao.update(doctorGroupReportManager.updateFarrowGroupTrack(groupTrack, pigType));
+        }
     }
 }

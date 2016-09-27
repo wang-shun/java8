@@ -130,7 +130,7 @@ public class DoctorEntryFlowHandler extends HandlerAware {
      */
     private DoctorPigTrack buildEntryFarmPigDoctorTrack(DoctorFarmEntryDto dto, DoctorBasicInputInfoDto basic) {
 
-        DoctorPigTrack doctorPigTrack = DoctorPigTrack.builder().farmId(basic.getFarmId())
+        DoctorPigTrack doctorPigTrack = DoctorPigTrack.builder().farmId(basic.getFarmId()).currentMatingCount(0)
                 .currentBarnId(dto.getBarnId()).currentBarnName(dto.getBarnName())
                 .currentParity(dto.getParity()).status(PigStatus.Entry.getKey())
                 .creatorId(basic.getStaffId()).creatorName(basic.getStaffName())
@@ -161,8 +161,7 @@ public class DoctorEntryFlowHandler extends HandlerAware {
                 .pigCode(dto.getPigCode()).eventAt(DateTime.now().toDate())
                 .type(basic.getEventType()).kind(basic.getPigType()).name(basic.getEventName()).desc(basic.getEventDesc())
                 .barnId(dto.getBarnId()).barnName(dto.getBarnName()).relEventId(basic.getRelEventId())
-                .outId(UUID.randomUUID().toString()).remark(dto.getEntryMark())
-                .creatorId(basic.getStaffId()).creatorName(basic.getStaffName())
+                .remark(dto.getEntryMark()).creatorId(basic.getStaffId()).creatorName(basic.getStaffName())
                 .npd(0)
                 .dpnpd(0)
                 .pfnpd(0)

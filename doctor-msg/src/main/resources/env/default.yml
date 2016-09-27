@@ -1,3 +1,7 @@
+spring:
+  profiles:
+    include: zookeeper
+
 # MyBatis
 mybatis:
   mapperLocations: classpath*:mapper/*Mapper.xml
@@ -25,6 +29,7 @@ logging:
 zookeeper:
   host: 101.201.44.35
   port: 2181
+  zkTopic: pig.doctor.topic
 
 # Redis
 redis:

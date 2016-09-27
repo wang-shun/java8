@@ -2,9 +2,6 @@ package io.terminus.doctor.web.component;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.api.client.util.Lists;
-import com.google.api.client.util.Maps;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.BaseUser;
 import io.terminus.common.model.Paging;
@@ -29,6 +26,7 @@ import io.terminus.doctor.event.search.group.SearchedGroupDto;
 import io.terminus.doctor.event.search.pig.PigSearchReadService;
 import io.terminus.doctor.event.search.pig.SearchedPig;
 import io.terminus.doctor.event.search.pig.SearchedPigDto;
+import io.terminus.doctor.msg.dto.DoctorMessageSearchDto;
 import io.terminus.doctor.msg.dto.Rule;
 import io.terminus.doctor.msg.model.DoctorMessage;
 import io.terminus.doctor.msg.service.DoctorMessageReadService;
@@ -103,8 +101,8 @@ public class DoctorSearches {
      * @param pageSize 页大小
      * @param params   搜索参数
      *                 搜索参数可以参照:
-     *                 @see `DefaultPigQueryBuilder#buildTerm`
      * @return
+     * @see `DefaultPigQueryBuilder#buildTerm`
      */
     @RequestMapping(value = "/sowpigs", method = RequestMethod.GET)
     public Paging<SearchedPig> searchSowPigs(@RequestParam(required = false) Integer pageNo,
@@ -123,17 +121,18 @@ public class DoctorSearches {
 
     /**
      * 获取母猪聚合后的状态 数据
-     * @param pageNo    起始页
-     * @param pageSize  页大小
-     * @param params    搜索参数
-     *                  搜索参数可以参照:
-     *                  @see `DefaultPigQueryBuilder#buildTerm`
+     *
+     * @param pageNo   起始页
+     * @param pageSize 页大小
+     * @param params   搜索参数
+     *                 搜索参数可以参照:
      * @return
+     * @see `DefaultPigQueryBuilder#buildTerm`
      */
     @RequestMapping(value = "/sowpigs/status", method = RequestMethod.GET)
-    public SearchedPigDto  searchSowStatus(@RequestParam(required = false) Integer pageNo,
-                                           @RequestParam(required = false) Integer pageSize,
-                                           @RequestParam Map<String, String> params) {
+    public SearchedPigDto searchSowStatus(@RequestParam(required = false) Integer pageNo,
+                                          @RequestParam(required = false) Integer pageSize,
+                                          @RequestParam Map<String, String> params) {
         List<String> barnIdList = getUserAccessBarnIds(params);
         if (farmIdNotExist(params) || barnIdList == null) {
             return new SearchedPigDto(new Paging<>(0L, Collections.emptyList()), Collections.emptyList());
@@ -162,8 +161,9 @@ public class DoctorSearches {
 
     /**
      * 搜索母猪的suggest
-     * @param size      数量
-     * @param params    查询参数
+     *
+     * @param size   数量
+     * @param params 查询参数
      * @return
      */
     @RequestMapping(value = "/sowpigs/suggest", method = RequestMethod.GET)
@@ -195,8 +195,8 @@ public class DoctorSearches {
      * @param pageSize 页大小
      * @param params   搜索参数
      *                 搜索参数可以参照:
-     *                 @see `DefaultPigQueryBuilder#buildTerm`
      * @return
+     * @see `DefaultPigQueryBuilder#buildTerm`
      */
     @RequestMapping(value = "/boarpigs", method = RequestMethod.GET)
     public Paging<SearchedPig> searchBoarPigs(@RequestParam(required = false) Integer pageNo,
@@ -216,10 +216,10 @@ public class DoctorSearches {
     /**
      * 所有公猪搜索方法
      *
-     * @param params   搜索参数
-     *                 搜索参数可以参照:
-     *                 @see `DefaultPigQueryBuilder#buildTerm`
+     * @param params 搜索参数
+     *               搜索参数可以参照:
      * @return
+     * @see `DefaultPigQueryBuilder#buildTerm`
      */
     @RequestMapping(value = "/boarpigs/all", method = RequestMethod.GET)
     public List<SearchedPig> searchAllBoarPigs(@RequestParam Map<String, String> params) {
@@ -236,7 +236,7 @@ public class DoctorSearches {
         Paging<SearchedPig> searchBoars =
                 RespHelper.or500(pigSearchReadService.searchWithAggs(pageNo, pageSize, "search/search.mustache", params)).getPigs();
         while (!searchBoars.isEmpty()) {
-            pageNo ++;
+            pageNo++;
             Paging<SearchedPig> tempSearchBoars =
                     RespHelper.or500(pigSearchReadService.searchWithAggs(pageNo, pageSize, "search/search.mustache", params)).getPigs();
             if (tempSearchBoars.isEmpty()) {
@@ -254,8 +254,8 @@ public class DoctorSearches {
      * @param pageSize 页大小
      * @param params   搜索参数
      *                 搜索参数可以参照:
-     *                 @see `DefaultGroupQueryBuilder#buildTerm`
      * @return
+     * @see `DefaultGroupQueryBuilder#buildTerm`
      */
     @RequestMapping(value = "/groups", method = RequestMethod.GET)
     public Paging<SearchedGroup> searchGroups(@RequestParam(required = false) Integer pageNo,
@@ -273,12 +273,13 @@ public class DoctorSearches {
 
     /**
      * 获取猪群聚合后的状态 数据
+     *
      * @param pageNo   起始页
      * @param pageSize 页大小
      * @param params   搜索参数
      *                 搜索参数可以参照:
-     *                 @see `DefaultGroupQueryBuilder#buildTerm`
      * @return
+     * @see `DefaultGroupQueryBuilder#buildTerm`
      */
     @RequestMapping(value = "/groups/status", method = RequestMethod.GET)
     public SearchedGroupDto searchGroupStatus(@RequestParam(required = false) Integer pageNo,
@@ -316,8 +317,8 @@ public class DoctorSearches {
      * @param pageSize 页大小
      * @param params   搜索参数
      *                 搜索参数可以参照:
-     *                 @see `DefaultBarnQueryBuilder#buildTerm`
      * @return
+     * @see `DefaultBarnQueryBuilder#buildTerm`
      */
     @RequestMapping(value = "/barns", method = RequestMethod.GET)
     public SearchedBarnDto searchBarns(@RequestParam(required = false) Integer pageNo,
@@ -348,10 +349,11 @@ public class DoctorSearches {
 
     /**
      * 获取所有的猪舍信息
+     *
      * @param params 搜索参数
      *               搜索参数可以参照:
-     *               @see `DefaultBarnQueryBuilder#buildTerm`
      * @return
+     * @see `DefaultBarnQueryBuilder#buildTerm`
      */
     @RequestMapping(value = "/barns/all", method = RequestMethod.GET)
     public List<SearchedBarn> searchAllBarns(@RequestParam Map<String, String> params) {
@@ -366,7 +368,7 @@ public class DoctorSearches {
         Paging<SearchedBarn> searchBarns =
                 RespHelper.or500(barnSearchReadService.searchWithAggs(pageNo, pageSize, "search/search.mustache", params)).getBarns();
         while (!searchBarns.isEmpty()) {
-            pageNo ++;
+            pageNo++;
             Paging<SearchedBarn> tempSearchBarns =
                     RespHelper.or500(barnSearchReadService.searchWithAggs(pageNo, pageSize, "search/search.mustache", params)).getBarns();
             if (tempSearchBarns.isEmpty()) {
@@ -384,8 +386,8 @@ public class DoctorSearches {
      * @param pageSize 页大小
      * @param params   搜索参数
      *                 搜索参数可以参照:
-     *                 @see `DefaultMaterialQueryBuilder#buildTerm`
      * @return
+     * @see `DefaultMaterialQueryBuilder#buildTerm`
      */
     @RequestMapping(value = "/materials", method = RequestMethod.GET)
     public Paging<SearchedMaterial> searchMaterials(@RequestParam(required = false) Integer pageNo,
@@ -401,10 +403,10 @@ public class DoctorSearches {
     /**
      * 获取所有的物料
      *
-     * @param params   搜索参数
-     *                 搜索参数可以参照:
-     *                 @see `DefaultMaterialQueryBuilder#buildTerm`
+     * @param params 搜索参数
+     *               搜索参数可以参照:
      * @return
+     * @see `DefaultMaterialQueryBuilder#buildTerm`
      */
     @RequestMapping(value = "/materials/all", method = RequestMethod.GET)
     public List<SearchedMaterial> searchAllMaterials(@RequestParam Map<String, String> params) {
@@ -417,7 +419,7 @@ public class DoctorSearches {
         Paging<SearchedMaterial> searchMaterials =
                 RespHelper.or500(materialSearchReadService.searchWithAggs(pageNo, pageSize, "search/masearch.mustache", params));
         while (!searchMaterials.isEmpty()) {
-            pageNo ++;
+            pageNo++;
             Paging<SearchedMaterial> tempSearchMaterials =
                     RespHelper.or500(materialSearchReadService.searchWithAggs(pageNo, pageSize, "search/masearch.mustache", params));
             if (tempSearchMaterials.isEmpty()) {
@@ -430,10 +432,11 @@ public class DoctorSearches {
 
     /**
      * 获取所有的物料
-     * @param params   搜索参数
-     *                 搜索参数可以参照:
-     *                 @see `DefaultMaterialQueryBuilder#buildTerm`
+     *
+     * @param params 搜索参数
+     *               搜索参数可以参照:
      * @return
+     * @see `DefaultMaterialQueryBuilder#buildTerm`
      */
     @RequestMapping(value = "/materials/suggest", method = RequestMethod.GET)
     public List<SearchedMaterial> searchSuggestMaterials(@RequestParam(required = false) Integer size,
@@ -469,9 +472,9 @@ public class DoctorSearches {
     }
 
     @RequestMapping(value = "/all", method = RequestMethod.GET)
-    public List<Long> getAllPigIds (@RequestParam(required = false) String ids,
-                                    @RequestParam Integer searchType,
-                                    @RequestParam Map<String, String> params) {
+    public List<Long> getAllPigIds(@RequestParam(required = false) String ids,
+                                   @RequestParam Integer searchType,
+                                   @RequestParam Map<String, String> params) {
 
         try {
             List<String> barnIdList = getUserAccessBarnIds(params);
@@ -501,7 +504,7 @@ public class DoctorSearches {
             if (searchType.equals(SearchType.GROUP.getValue())) {
                 Paging<SearchedGroup> searchGroupPaging = RespHelper.or500(groupSearchReadService.searchWithAggs(pageNo, pageSize, "search/search.mustache", params)).getGroups();
                 while (!searchGroupPaging.isEmpty()) {
-                    pageNo ++;
+                    pageNo++;
                     Paging<SearchedGroup> tempSearchGroups =
                             RespHelper.or500(groupSearchReadService.searchWithAggs(pageNo, pageSize, "search/search.mustache", params)).getGroups();
                     if (tempSearchGroups.isEmpty()) {
@@ -514,7 +517,7 @@ public class DoctorSearches {
                 Paging<SearchedPig> searchPigPaging =
                         RespHelper.or500(pigSearchReadService.searchWithAggs(pageNo, pageSize, "search/search.mustache", params)).getPigs();
                 while (!searchPigPaging.isEmpty()) {
-                    pageNo ++;
+                    pageNo++;
                     Paging<SearchedPig> tempSearchPigs =
                             RespHelper.or500(pigSearchReadService.searchWithAggs(pageNo, pageSize, "search/search.mustache", params)).getPigs();
                     if (tempSearchPigs.isEmpty()) {
@@ -538,6 +541,7 @@ public class DoctorSearches {
 
     /**
      * 获取当前用户所拥有猪舍权限的猪舍IDS
+     *
      * @return 猪舍IDS
      */
     public List<String> getUserAccessBarnIds(Map<String, String> params) {
@@ -549,7 +553,7 @@ public class DoctorSearches {
         }
         //获取猪舍ids
         String barnIds = doctorUserDataPermission.getBarnIds();
-        if (StringUtils.isBlank(barnIds)){
+        if (StringUtils.isBlank(barnIds)) {
             return null;
         }
         String barnId = params.get("barnId");
@@ -565,17 +569,20 @@ public class DoctorSearches {
         return list;
     }
 
-    public void searchFromMessage(Map<String, String> params){
-        if (Objects.equals(params.get("searchFrom"), "MESSAGE")){
-            Map<String, Object> criteriaMap = Maps.newHashMap();
-            criteriaMap.put("templateId", params.get("templateId"));
-            criteriaMap.put("farmId", params.get("farmId"));
-            criteriaMap.put("isExpired", DoctorMessage.IsExpired.NOTEXPIRED.getValue());
-            criteriaMap.put("userId", UserUtil.getCurrentUser().getId());
-            criteriaMap.put("channel", Rule.Channel.SYSTEM.getValue());
-            criteriaMap.put("statuses", ImmutableList.of(DoctorMessage.Status.NORMAL.getValue(), DoctorMessage.Status.READED.getValue()));
-            List<Long> idList =  RespHelper.or500(doctorMessageReadService.findBusinessListByCriteria(criteriaMap));
-            String ids = idList.toString().trim().substring(1, idList.toString().toCharArray().length-1);
+    public void searchFromMessage(Map<String, String> params) {
+        if (Objects.equals(params.get("searchFrom"), "MESSAGE")) {
+            DoctorMessageSearchDto doctorMessageSearchDto = new DoctorMessageSearchDto();
+            doctorMessageSearchDto.setTemplateId(Long.parseLong(params.get("templateId")));
+            doctorMessageSearchDto.setFarmId(Long.parseLong(params.get("farmId")));
+            doctorMessageSearchDto.setIsExpired(DoctorMessage.IsExpired.NOTEXPIRED.getValue());
+            doctorMessageSearchDto.setUserId(UserUtil.getCurrentUser().getId());
+            doctorMessageSearchDto.setChannel(Rule.Channel.SYSTEM.getValue());
+            List<Integer> statuses = Lists.newArrayList();
+            statuses.add(DoctorMessage.Status.NORMAL.getValue());
+            statuses.add(DoctorMessage.Status.READED.getValue());
+            doctorMessageSearchDto.setStatuses(statuses);
+            List<Long> idList = RespHelper.or500(doctorMessageReadService.findBusinessListByCriteria(doctorMessageSearchDto));
+            String ids = idList.toString().trim().substring(1, idList.toString().toCharArray().length - 1);
             params.put("ids", ids);
         }
     }
