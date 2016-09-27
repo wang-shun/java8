@@ -38,4 +38,8 @@ public class DoctorBoarMonthlyReportDao extends MyBatisDao<DoctorBoarMonthlyRepo
     public List<DoctorBoarMonthlyReport> constructorDoctorBoarMonthlyReports(Long farmId, Date startAt, Date endAt){
         return getSqlSession().selectList(sqlId("constructorDoctorBoarMonthlyReports"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
     }
+
+    public List<DoctorBoarMonthlyReport> findDoctorBoarMonthlyReports(Long farmId, String sumAt){
+        return getSqlSession().selectList(sqlId("findDoctorBoarMonthlyReports"), ImmutableMap.of("farmId", farmId, "sumAt", sumAt));
+    }
 }

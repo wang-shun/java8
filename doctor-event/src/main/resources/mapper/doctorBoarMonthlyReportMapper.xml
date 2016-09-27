@@ -177,6 +177,13 @@
         </foreach>
     </insert>
 
+    <select id="findDoctorBoarMonthlyReports" parameterType="map" resultMap="DoctorBoarMonthlyReportMap">
+        select <include refid="cols_all"/>
+        FROM <include refid="tb"/>
+        where farm_id = #{farmId}
+        and sum_at = #{sumAt}
+    </select>
+
     <sql id="reportCriteria">
         <if test="farmId != null">AND farm_id = #{farmId}</if>
         <if test="startAt != null">AND event_at &gt;= #{startAt}</if>
@@ -185,7 +192,18 @@
 
     <!-- 公猪生产成绩月报-->
     <select id="constructorDoctorBoarMonthlyReports" parameterType="map" resultMap="DoctorBoarMonthlyReportMap">
-        select t11.farm_id as farmId, t11.boar_code as boarCode, t11.pzCount, t12.spmzCount, t13.stCount, t14.cmzCount, t14.pjczCount, t14.pjchzCount, t13.stCount/t11.pzCount as stRate, t15.fmCount/t11.pzCount as fmRate, date_format(#{startAt}, '%Y-%m') as sumAt
+        select
+        t11.farm_id as farmId,
+        t11.boar_code as boarCode,
+        ifnull(t11.pzCount, 0) as pzCount,
+        ifnull(t12.spmzCount, 0) as spmzCount,
+        ifnull(t13.stCount, 0) as stCount,
+        ifnull(t14.cmzCount, 0) as cmzCount,
+        ifnull(t14.pjczCount, 0) as pjczCount,
+        ifnull(t14.pjchzCount, 0) as pjchzCount,
+        ifnull(t13.stCount/t11.pzCount,0) as stRate,
+        ifnull(t15.fmCount/t11.pzCount,0) as fmRate,
+        date_format(#{startAt}, '%Y-%m') as sumAt
         from (select farm_id, boar_code, count(1) as pzCount
         from doctor_pig_events
         where type = 9

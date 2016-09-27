@@ -42,4 +42,6 @@ public interface DoctorBoarMonthlyReportWriteService {
      * @return
      */
     Response<Boolean> createMonthlyReports(List<Long> farmIds, Date sumAt);
+
+    Response<Boolean> createMonthlyReport(Long farmId, Date sumAt);
 }

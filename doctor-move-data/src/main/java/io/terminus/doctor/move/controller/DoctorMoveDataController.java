@@ -6,10 +6,7 @@ import io.terminus.common.exception.ServiceException;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.model.DoctorPig;
-import io.terminus.doctor.event.service.DoctorDailyReportWriteService;
-import io.terminus.doctor.event.service.DoctorMonthlyReportWriteService;
-import io.terminus.doctor.event.service.DoctorParityMonthlyReportWriteService;
-import io.terminus.doctor.event.service.DoctorPigTypeStatisticWriteService;
+import io.terminus.doctor.event.service.*;
 import io.terminus.doctor.move.handler.DoctorMoveDatasourceHandler;
 import io.terminus.doctor.move.service.DoctorMoveBasicService;
 import io.terminus.doctor.move.service.DoctorMoveDataService;
@@ -61,6 +58,7 @@ public class DoctorMoveDataController {
     private final DoctorDailyReportWriteService doctorDailyReportWriteService;
     private final DoctorMonthlyReportWriteService doctorMonthlyReportWriteService;
     private final DoctorParityMonthlyReportWriteService doctorParityMonthlyReportWriteService;
+    private final DoctorBoarMonthlyReportWriteService doctorBoarMonthlyReportWriteService;
 
     @Autowired
     public DoctorMoveDataController(UserInitService userInitService,
@@ -75,7 +73,8 @@ public class DoctorMoveDataController {
                                     DoctorMoveDatasourceHandler doctorMoveDatasourceHandler,
                                     DoctorDailyReportWriteService doctorDailyReportWriteService,
                                     DoctorMonthlyReportWriteService doctorMonthlyReportWriteService,
-                                    DoctorParityMonthlyReportWriteService doctorParityMonthlyReportWriteService) {
+                                    DoctorParityMonthlyReportWriteService doctorParityMonthlyReportWriteService,
+                                    DoctorBoarMonthlyReportWriteService doctorBoarMonthlyReportWriteService) {
         this.userInitService = userInitService;
         this.wareHouseInitService = wareHouseInitService;
         this.doctorMoveBasicService = doctorMoveBasicService;
@@ -89,6 +88,7 @@ public class DoctorMoveDataController {
         this.doctorDailyReportWriteService = doctorDailyReportWriteService;
         this.doctorMonthlyReportWriteService = doctorMonthlyReportWriteService;
         this.doctorParityMonthlyReportWriteService = doctorParityMonthlyReportWriteService;
+        this.doctorBoarMonthlyReportWriteService = doctorBoarMonthlyReportWriteService;
     }
 
     /**
@@ -447,6 +447,45 @@ public class DoctorMoveDataController {
             return false;
         }
     }
+
+    /**
+     * 公猪生产成绩月报
+     * @param farmId
+     * @param index  往前几个月
+     * @return
+     */
+    @RequestMapping(value = "/boarMonthly", method = RequestMethod.GET)
+    public Boolean moveBoarMonthlyReport(@RequestParam("farmId") Long farmId,
+                                           @RequestParam(value = "index", required = false) Integer index) {
+        try {
+            log.warn("move boar monthly report start, farmId:{}, index:{}", farmId, index);
+            doctorMoveReportService.moveBoarMonthlyReport(farmId, index);
+            log.warn("move boar monthly report end");
+            return true;
+        } catch (Exception e) {
+            log.error("move boar monthly report failed, farmId:{}, cause:{}", farmId, Throwables.getStackTraceAsString(e));
+            return false;
+        }
+    }
+
+    /**
+     * 公猪生产成绩月报
+     */
+    @RequestMapping(value = "/boarMonthly/date", method = RequestMethod.GET)
+    public Boolean moveBoarMonthlyReport(@RequestParam("farmId") Long farmId,
+                                           @RequestParam("date") String date) {
+        try {
+            log.warn("move parity monthly report date start, farmId:{}, date:{}", farmId, date);
+            doctorBoarMonthlyReportWriteService.createMonthlyReport(farmId, DateUtil.toDate(date));
+            log.warn("move parity monthly report date end");
+
+            return true;
+        } catch (Exception e) {
+            log.error("move parity monthly report failed, farmId:{}, cause:{}", farmId, Throwables.getStackTraceAsString(e));
+            return false;
+        }
+    }
+
 
     /**
      * 分娩母猪

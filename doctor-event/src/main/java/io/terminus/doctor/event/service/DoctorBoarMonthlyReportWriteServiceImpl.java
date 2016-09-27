@@ -76,12 +76,27 @@ public class DoctorBoarMonthlyReportWriteServiceImpl implements DoctorBoarMonthl
     @Override
     public Response<Boolean> createMonthlyReports(List<Long> farmIds, Date sumAt) {
         try {
+            log.info("create boar monthly report start: {}", sumAt);
             Date startAt = new DateTime(sumAt).withDayOfMonth(1).withTimeAtStartOfDay().toDate(); //月初: 2016-08-01 00:00:00
             Date endAt = new DateTime(Dates.endOfDay(sumAt)).plusSeconds(-1).toDate();            //天末: 2016-08-12 23:59:59
             farmIds.stream().forEach(farmId -> getBoarMonthlyReport(farmId, startAt, endAt, sumAt));
             return Response.ok(Boolean.TRUE);
         } catch (Exception e) {
             log.error("create monthly reports failed, sumAt:{}, cause:{}", sumAt, Throwables.getStackTraceAsString(e));
+            return Response.fail("monthlyReport.create.fail");
+        }
+    }
+
+    @Override
+    public Response<Boolean> createMonthlyReport(Long farmId, Date sumAt) {
+        try {
+            log.info("create boar monthly report start: {}", sumAt);
+            Date startAt = new DateTime(sumAt).withDayOfMonth(1).withTimeAtStartOfDay().toDate(); //月初: 2016-08-01 00:00:00
+            Date endAt = new DateTime(Dates.endOfDay(sumAt)).plusSeconds(-1).toDate();            //天末: 2016-08-12 23:59:59
+            getBoarMonthlyReport(farmId, startAt, endAt, sumAt);
+            return Response.ok(Boolean.TRUE);
+        } catch (Exception e) {
+            log.error("create monthly report failed, sumAt:{}, cause:{}", sumAt, Throwables.getStackTraceAsString(e));
             return Response.fail("monthlyReport.create.fail");
         }
     }

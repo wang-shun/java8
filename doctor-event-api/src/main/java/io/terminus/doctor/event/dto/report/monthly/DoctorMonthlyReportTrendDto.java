@@ -1,5 +1,6 @@
 package io.terminus.doctor.event.dto.report.monthly;
 
+import io.terminus.doctor.event.model.DoctorBoarMonthlyReport;
 import io.terminus.doctor.event.model.DoctorParityMonthlyReport;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -23,4 +24,6 @@ public class DoctorMonthlyReportTrendDto implements Serializable {
     private List<DoctorMonthlyReportDto> reports;   //当月开始往前推的统计
 
     private List<DoctorParityMonthlyReport> parityReports; //当月胎次产仔分析
+
+    private List<DoctorBoarMonthlyReport> boarReports;//公猪生产成绩月报
 }

@@ -1,5 +1,6 @@
 package io.terminus.doctor.schedule.event;
 
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Throwables;
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.exception.ServiceException;
@@ -164,9 +165,11 @@ public class DoctorReportJobs {
             }
             log.info("boar monthly report job start, now is:{}", DateUtil.toDateTimeString(new Date()));
 
-            //获取昨天的天初
-            Date yesterday = new DateTime(Dates.startOfDay(new Date())).plusDays(-1).toDate();
-            RespHelper.or500(doctorBoarMonthlyReportWriteService.createMonthlyReports(getAllFarmIds(), yesterday));
+            DateUtil.getBeforeMonthEnds(DateTime.now().plusDays(-1).toDate(), MoreObjects.firstNonNull(4, 12))
+                    .forEach(date -> doctorBoarMonthlyReportWriteService.createMonthlyReports(getAllFarmIds(), date));
+//            //获取昨天的天初
+//            Date yesterday = new DateTime(Dates.startOfDay(new Date())).plusDays(-1).toDate();
+//            RespHelper.or500(doctorBoarMonthlyReportWriteService.createMonthlyReports(getAllFarmIds(), yesterday));
 
             log.info("boar monthly report job end, now is:{}", DateUtil.toDateTimeString(new Date()));
         } catch (Exception e) {
