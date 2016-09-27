@@ -22,7 +22,7 @@ public class DoctorRollbackGroupLiveStockHandler extends DoctorAbstractRollbackG
     @Override
     protected boolean handleCheck(DoctorGroupEvent groupEvent) {
         //允许猪只存栏事件回滚
-        return Objects.equals(groupEvent.getType(), GroupEventType.LIVE_STOCK.getValue());
+        return Objects.equals(groupEvent.getType(), GroupEventType.LIVE_STOCK.getValue()) && isLastEvent(groupEvent);
     }
 
     @Override

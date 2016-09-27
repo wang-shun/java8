@@ -23,7 +23,7 @@ public class DoctorRollbackGroupNewHandler extends DoctorAbstractRollbackGroupEv
     @Override
     protected boolean handleCheck(DoctorGroupEvent groupEvent) {
         //允许新建猪群事件回滚
-        return Objects.equals(groupEvent.getType(), GroupEventType.NEW.getValue());
+        return Objects.equals(groupEvent.getType(), GroupEventType.NEW.getValue()) && isLastEvent(groupEvent);
     }
 
     @Override

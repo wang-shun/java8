@@ -26,7 +26,7 @@ public class DoctorRollbackGroupChangeHandler extends DoctorAbstractRollbackGrou
     @Override
     protected boolean handleCheck(DoctorGroupEvent groupEvent) {
         //允许猪群变动事件
-        return Objects.equals(groupEvent.getType(), GroupEventType.CHANGE.getValue());
+        return Objects.equals(groupEvent.getType(), GroupEventType.CHANGE.getValue()) && isLastEvent(groupEvent);
     }
 
     @Override

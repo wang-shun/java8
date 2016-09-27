@@ -5,6 +5,7 @@ import io.terminus.doctor.event.dto.DoctorRollbackDto;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.RollbackType;
 import io.terminus.doctor.event.handler.rollback.DoctorAbstractRollbackPigEventHandler;
+import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import org.springframework.stereotype.Component;
 
@@ -19,7 +20,9 @@ import java.util.Objects;
 public class DoctorRollbackSowRemovalEventHandler extends DoctorAbstractRollbackPigEventHandler {
     @Override
     protected boolean handleCheck(DoctorPigEvent pigEvent) {
-        return Objects.equals(pigEvent.getType(), PigEvent.REMOVAL.getKey()) && Objects.equals(pigEvent.getKind(), DoctorPigEvent.kind.Sow.getValue());
+        return Objects.equals(pigEvent.getType(), PigEvent.REMOVAL.getKey()) &&
+                Objects.equals(pigEvent.getKind(), DoctorPig.PIG_TYPE.SOW.getKey()) &&
+                isLastEvent(pigEvent);
     }
 
     @Override

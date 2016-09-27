@@ -25,7 +25,7 @@ public class DoctorRollbackGroupMoveInHandler extends DoctorAbstractRollbackGrou
     @Override
     protected boolean handleCheck(DoctorGroupEvent groupEvent) {
         //允许转入猪群事件回滚
-        return Objects.equals(groupEvent.getType(), GroupEventType.MOVE_IN.getValue());
+        return Objects.equals(groupEvent.getType(), GroupEventType.MOVE_IN.getValue()) && isLastEvent(groupEvent);
     }
 
     @Override

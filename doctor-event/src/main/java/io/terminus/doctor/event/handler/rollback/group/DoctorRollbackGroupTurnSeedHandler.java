@@ -31,10 +31,14 @@ public class DoctorRollbackGroupTurnSeedHandler extends DoctorAbstractRollbackGr
 
     @Override
     protected boolean handleCheck(DoctorGroupEvent groupEvent) {
-        //商品猪转种猪会触发猪的进场事件，所以需要校验猪的进场事件是否是最新事件
         if (!Objects.equals(groupEvent.getType(), GroupEventType.TRANS_GROUP.getValue())) {
             return false;
         }
+        if (!isLastEvent(groupEvent)) {
+            return false;
+        }
+
+        //商品猪转种猪会触发猪的进场事件，所以需要校验猪的进场事件是否是最新事件
         DoctorPigEvent toPigEvent = doctorPigEventDao.findByRelGroupEventId(groupEvent.getId());
         return RespHelper.orFalse(doctorPigEventReadService.isLastEvent(toPigEvent.getPigId(), toPigEvent.getId()));
 

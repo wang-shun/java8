@@ -29,7 +29,7 @@ public class DoctorRollbackSowFosterByHandler extends DoctorAbstractRollbackPigE
 
     @Override
     protected boolean handleCheck(DoctorPigEvent pigEvent) {
-        return Objects.equals(pigEvent.getType(), PigEvent.FOSTERS_BY.getKey());
+        return Objects.equals(pigEvent.getType(), PigEvent.FOSTERS_BY.getKey()) && isLastEvent(pigEvent);
     }
 
     @Override

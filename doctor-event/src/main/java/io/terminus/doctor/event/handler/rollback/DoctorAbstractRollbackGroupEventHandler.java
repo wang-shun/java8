@@ -53,7 +53,6 @@ public abstract class DoctorAbstractRollbackGroupEventHandler extends DoctorAbst
     public final boolean canRollback(DoctorGroupEvent groupEvent) {
         return Objects.equals(groupEvent.getIsAuto(), IsOrNot.YES.getValue()) &&
                 groupEvent.getEventAt().after(DateTime.now().plusMonths(-3).toDate()) &&
-                RespHelper.orFalse(doctorGroupReadService.isLastEvent(groupEvent.getGroupId(), groupEvent.getId())) &&
                 handleCheck(groupEvent);
     }
 
@@ -89,6 +88,13 @@ public abstract class DoctorAbstractRollbackGroupEventHandler extends DoctorAbst
      * @see RollbackType
      */
     protected abstract List<DoctorRollbackDto> handleReport(DoctorGroupEvent groupEvent);
+
+    /**
+     * 是否是最新事件
+     */
+    protected boolean isLastEvent(DoctorGroupEvent groupEvent) {
+        return RespHelper.orFalse(doctorGroupReadService.isLastEvent(groupEvent.getGroupId(), groupEvent.getId()));
+    }
 
     /**
      * 单个猪群事件的回滚，可以抽象出来，自取自用

@@ -36,7 +36,9 @@ public class DoctorRollbackSowWeanHandler extends DoctorAbstractRollbackPigEvent
         if (!Objects.equals(pigEvent.getType(), PigEvent.WEAN.getKey())) {
             return false;
         }
-
+        if (!isLastEvent(pigEvent)) {
+            return false;
+        }
         //断奶后如果转舍，判断转舍是否是最新事件
         DoctorPartWeanDto weanDto = JSON_MAPPER.fromJson(pigEvent.getExtra(), DoctorPartWeanDto.class);
         if (weanDto.getChgLocationToBarnId() != null) {

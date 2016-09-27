@@ -18,8 +18,7 @@ import java.util.Objects;
 public class DoctorRollbackSowMatingEventHandler extends DoctorAbstractRollbackPigEventHandler {
     @Override
     protected boolean handleCheck(DoctorPigEvent pigEvent) {
-
-        return Objects.equals(pigEvent.getType(), PigEvent.MATING.getKey());
+        return Objects.equals(pigEvent.getType(), PigEvent.MATING.getKey()) && isLastEvent(pigEvent);
     }
 
     @Override

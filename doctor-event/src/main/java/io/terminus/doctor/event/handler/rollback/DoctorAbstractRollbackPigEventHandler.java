@@ -85,6 +85,13 @@ public abstract class DoctorAbstractRollbackPigEventHandler extends DoctorAbstra
     }
 
     /**
+     * 是否是最新事件
+     */
+    protected boolean isLastEvent(DoctorPigEvent pigEvent) {
+        return RespHelper.orFalse(doctorPigEventReadService.isLastEvent(pigEvent.getPigId(), pigEvent.getId()));
+    }
+
+    /**
      * 每个子类根据事件类型 判断是否应该由此handler执行回滚
      */
     protected abstract boolean handleCheck(DoctorPigEvent pigEvent);
@@ -129,7 +136,7 @@ public abstract class DoctorAbstractRollbackPigEventHandler extends DoctorAbstra
      * @param pigEvent 事件
      */
     protected void workFlowRollback(DoctorPigEvent pigEvent){
-        if (Objects.equals(pigEvent.getKind(), DoctorPigEvent.kind.Sow.getValue())){
+        if (Objects.equals(pigEvent.getKind(), DoctorPig.PIG_TYPE.SOW.getKey())){
             flowProcessService.rollBack(sowFlowKey, pigEvent.getPigId());
         }
     }

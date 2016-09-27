@@ -22,7 +22,7 @@ public class DoctorRollbackGroupDiseaseHandler extends DoctorAbstractRollbackGro
     @Override
     protected boolean handleCheck(DoctorGroupEvent groupEvent) {
         //允许猪群疾病事件回滚
-        return Objects.equals(groupEvent.getType(), GroupEventType.DISEASE.getValue());
+        return Objects.equals(groupEvent.getType(), GroupEventType.DISEASE.getValue()) && isLastEvent(groupEvent);
     }
 
     @Override
