@@ -9,6 +9,7 @@ import io.terminus.common.model.Response;
 import io.terminus.doctor.basic.model.DoctorBasicMaterial;
 import io.terminus.doctor.basic.service.DoctorBasicMaterialReadService;
 import io.terminus.doctor.common.enums.WareHouseType;
+import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.user.model.DoctorFarm;
 import io.terminus.doctor.user.service.DoctorFarmReadService;
@@ -397,7 +398,7 @@ public class DoctorWareHouseQuery {
 
         MaterialReport result = new MaterialReport();
         result.setTotalReport(total);
-        result.setMaterialReports(RespHelper.or500(doctorMaterialConsumeProviderReadService.materialEventReport(farmId, warehouseId, null, start, end)));
+        result.setEvents(RespHelper.or500(doctorMaterialConsumeProviderReadService.list(farmId, warehouseId, null, null, null, null, startAt, DateUtil.toDateString(end))));
         return result;
     }
 }

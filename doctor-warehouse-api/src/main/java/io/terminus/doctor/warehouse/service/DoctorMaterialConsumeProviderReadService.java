@@ -37,6 +37,9 @@ public interface DoctorMaterialConsumeProviderReadService {
     Response<Paging<DoctorMaterialConsumeProvider>> page(Long farmId, Long warehouseId, Long materialId, Integer eventType, Integer materilaType,
                                                        Long staffId, String startAt, String endAt, Integer pageNo, Integer size);
 
+    Response<List<DoctorMaterialConsumeProvider>> list(Long farmId, Long warehouseId, Long materialId, Integer eventType, Integer materilaType,
+                                                       Long staffId, String startAt, String endAt);
+
     Response<Paging<MaterialCountAmount>> countAmount(Long farmId, Long warehouseId, Long materialId, Integer eventType, Integer materilaType,
                                               Long barnId, Long groupId, Long staffId, String startAt, String endAt, Integer pageNo, Integer size);
 

@@ -1,6 +1,6 @@
 package io.terminus.doctor.web.front.warehouse.dto;
 
-import io.terminus.doctor.warehouse.dto.MaterialEventReport;
+import io.terminus.doctor.warehouse.model.DoctorMaterialConsumeProvider;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -13,7 +13,7 @@ import java.util.List;
 public class MaterialReport implements Serializable {
     private static final long serialVersionUID = -4312015092552964456L;
 
-    private List<MaterialEventReport> materialReports;
+    private List<DoctorMaterialConsumeProvider> events;
     /**
      * 合计报表
      */

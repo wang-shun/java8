@@ -118,6 +118,15 @@
         limit #{offset}, #{limit}
     </select>
 
+    <select id="list" resultMap="DoctorMaterialConsumeProviderMap">
+        SELECT <include refid="cols_all" />
+        FROM <include refid="tb" />
+        <where>
+            <include refid="criteria"/>
+        </where>
+        order by event_time desc, event_type, material_id
+    </select>
+
     <select id="count" resultType="long">
         SELECT count(id)
         FROM <include refid="tb" />
