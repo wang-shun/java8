@@ -8,27 +8,34 @@ import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.basic.model.DoctorBasicMaterial;
 import io.terminus.doctor.basic.service.DoctorBasicMaterialReadService;
+import io.terminus.doctor.common.enums.WareHouseType;
+import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.user.model.DoctorFarm;
 import io.terminus.doctor.user.service.DoctorFarmReadService;
 import io.terminus.doctor.user.service.DoctorUserProfileReadService;
 import io.terminus.doctor.warehouse.dto.DoctorWareHouseDto;
 import io.terminus.doctor.warehouse.dto.MaterialCountAmount;
+import io.terminus.doctor.warehouse.dto.WarehouseEventReport;
 import io.terminus.doctor.warehouse.model.DoctorFarmWareHouseType;
 import io.terminus.doctor.warehouse.model.DoctorMaterialConsumeProvider;
 import io.terminus.doctor.warehouse.model.DoctorMaterialInWareHouse;
 import io.terminus.doctor.warehouse.model.DoctorWareHouse;
 import io.terminus.doctor.warehouse.service.DoctorMaterialConsumeProviderReadService;
 import io.terminus.doctor.warehouse.service.DoctorMaterialInWareHouseReadService;
+import io.terminus.doctor.warehouse.service.DoctorMaterialPriceInWareHouseReadService;
 import io.terminus.doctor.warehouse.service.DoctorWareHouseReadService;
 import io.terminus.doctor.warehouse.service.DoctorWareHouseWriteService;
 import io.terminus.doctor.web.front.warehouse.dto.DoctorWareHouseCreateDto;
 import io.terminus.doctor.web.front.warehouse.dto.DoctorWareHouseUpdateDto;
+import io.terminus.doctor.web.front.warehouse.dto.MaterialReport;
+import io.terminus.doctor.web.front.warehouse.dto.WarehouseReport;
 import io.terminus.pampas.common.UserUtil;
 import io.terminus.parana.user.model.User;
 import io.terminus.parana.user.model.UserProfile;
 import io.terminus.parana.user.service.UserReadService;
 import lombok.extern.slf4j.Slf4j;
+import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
@@ -38,7 +45,10 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkState;
@@ -67,6 +77,9 @@ public class DoctorWareHouseQuery {
     private final DoctorBasicMaterialReadService doctorBasicMaterialReadService;
 
     private final DoctorMaterialInWareHouseReadService doctorMaterialInWareHouseReadService;
+
+    @RpcConsumer
+    private DoctorMaterialPriceInWareHouseReadService doctorMaterialPriceInWareHouseReadService;
     @RpcConsumer
     private DoctorMaterialConsumeProviderReadService doctorMaterialConsumeProviderReadService;
 
@@ -123,7 +136,7 @@ public class DoctorWareHouseQuery {
     @RequestMapping(value = "/updateWareHouse", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Boolean updateWareHouse(@RequestBody DoctorWareHouseUpdateDto doctorWareHouseUpdateDto){
-        DoctorWareHouse doctorWareHouse = null;
+        DoctorWareHouse doctorWareHouse;
         try{
             // get user reader info
             Response<User> userResponse = userReadService.findById(UserUtil.getUserId());
@@ -146,7 +159,7 @@ public class DoctorWareHouseQuery {
     @RequestMapping(value = "/createWareHouse", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Long createWareHouseInfo(@RequestBody DoctorWareHouseCreateDto doctorWareHouseCreateDto){
-        DoctorWareHouse doctorWareHouse = null;
+        DoctorWareHouse doctorWareHouse;
         try{
             // get farm info
             Response<DoctorFarm> farmResponse = doctorFarmReadService.findFarmById(doctorWareHouseCreateDto.getFarmId());
@@ -269,5 +282,123 @@ public class DoctorWareHouseQuery {
                                                  @RequestParam(required = false) Integer size){
         return RespHelper.or500(doctorMaterialConsumeProviderReadService.countAmount(farmId, warehouseId, materialId, eventType, materilaType,
                 barnId, groupId, staffId, startAt, endAt, pageNo, size));
+    }
+
+    /**
+     * 仓库报表
+     * @param farmId 猪场id
+     * @param wareHouseType 仓库类型
+     *                      @see io.terminus.doctor.common.enums.WareHouseType
+     * @param startAt
+     * @param endAt
+     * @return
+     */
+    @RequestMapping(value = "/warehouseReport", method = RequestMethod.GET)
+    @ResponseBody
+    public WarehouseReport warehouseReport(@RequestParam Long farmId,
+                                           @RequestParam Integer wareHouseType,
+                                           @RequestParam(required = false) String startAt,
+                                           @RequestParam(required = false) String endAt){
+        List<WarehouseEventReport> warehouseEventReports = RespHelper.or500(doctorMaterialConsumeProviderReadService.warehouseEventReport(
+                farmId, null, WareHouseType.from(wareHouseType), null, startAt == null ? null : DateTime.parse(startAt).toDate(),
+                endAt == null ? null : DateTime.parse(endAt).plusDays(1).toDate()
+        ));
+        Map<Long, WarehouseReport.Report> reportmap = new HashMap<>();
+        for(WarehouseEventReport report : warehouseEventReports){
+            Long houseId = report.getWarehouseId();
+            DoctorMaterialConsumeProvider.EVENT_TYPE eventType = DoctorMaterialConsumeProvider.EVENT_TYPE.from(report.getEventType());
+            if(eventType == null){
+                continue;
+            }
+            if(!reportmap.containsKey(houseId)){
+                reportmap.put(houseId, new WarehouseReport.Report());
+            }
+            WarehouseReport.Report inner = reportmap.get(houseId);
+            if(eventType.equals(DoctorMaterialConsumeProvider.EVENT_TYPE.PROVIDER)){
+                inner.setInAmount(inner.getInAmount() + report.getAmount());
+                inner.setInCount(inner.getInCount() + report.getCount());
+            }
+            if(eventType.equals(DoctorMaterialConsumeProvider.EVENT_TYPE.CONSUMER)){
+                inner.setOutAmount(inner.getOutAmount() + report.getAmount());
+                inner.setOutCount(inner.getOutCount() + report.getCount());
+            }
+        }
+
+        // 各仓库当前库存的金额
+        Map<Long, Double> stockAmount = RespHelper.or500(doctorMaterialPriceInWareHouseReadService.stockAmount(farmId, null, WareHouseType.from(wareHouseType)));
+        // 各仓库基本信息及 track 信息
+        List<DoctorWareHouseDto> warehouses = RespHelper.or500(doctorWareHouseReadService.listDoctorWareHouseDto(farmId, wareHouseType, null));
+
+        WarehouseReport result = new WarehouseReport();
+        //每个仓库的报表
+        for(DoctorWareHouseDto warehouseDto : warehouses){
+            Long houseId = warehouseDto.getWarehouseId();
+            WarehouseReport.Report inner = new WarehouseReport.Report();
+            inner.setWarehouseId(warehouseDto.getWarehouseId());
+            inner.setWarehouseName(warehouseDto.getWarehouseName());
+            inner.setOutCount(reportmap.get(houseId).getOutCount());
+            inner.setOutAmount(reportmap.get(houseId).getOutAmount());
+            inner.setInCount(reportmap.get(houseId).getInCount());
+            inner.setInAmount(reportmap.get(houseId).getInAmount());
+            inner.setCurrentStock(warehouseDto.getRemainder());
+            inner.setCurrentStockAmount(stockAmount.get(houseId));
+            result.getWarehouseReports().add(inner);
+        }
+        // 所有仓库合计的报表
+        result.setTotalReport(result.getWarehouseReports().stream().reduce((report1, report2) -> {
+            WarehouseReport.Report inner = new WarehouseReport.Report();
+            inner.setInAmount(report1.getInAmount() + report2.getInAmount());
+            inner.setInCount(report1.getInCount() + report2.getInCount());
+            inner.setOutAmount(report1.getOutAmount() + report2.getOutAmount());
+            inner.setOutCount(report1.getOutCount() + report2.getOutCount());
+            inner.setCurrentStock(report1.getCurrentStock() + report2.getCurrentStock());
+            inner.setCurrentStockAmount(report1.getCurrentStockAmount() + report2.getCurrentStockAmount());
+            return inner;
+        }).orElse(new WarehouseReport.Report()));
+        return result;
+    }
+
+    @RequestMapping(value = "/materialReport", method = RequestMethod.GET)
+    @ResponseBody
+    public MaterialReport materialReport(@RequestParam Long farmId,
+                                         @RequestParam Long warehouseId,
+                                         @RequestParam(required = false) String startAt,
+                                         @RequestParam(required = false) String endAt){
+        Date start = startAt == null ? null : DateTime.parse(startAt).toDate();
+        Date end = endAt == null ? null : DateTime.parse(endAt).plusDays(1).toDate();
+
+        // 该仓库各事件的数量和金额
+        List<WarehouseEventReport> warehouseEventReports = RespHelper.or500(
+                doctorMaterialConsumeProviderReadService.warehouseEventReport(farmId, warehouseId, null, null, start, end
+        ));
+        // 仓库基本信息及 track 信息
+        DoctorWareHouseDto wareHouseDto = RespHelper.or500(doctorWareHouseReadService.queryDoctorWareHouseById(warehouseId));
+
+        WarehouseReport.Report total = new WarehouseReport.Report();
+        total.setWarehouseId(warehouseId);
+        total.setWarehouseName(wareHouseDto.getWarehouseName());
+        total.setCurrentStock(wareHouseDto.getRemainder());
+        for(WarehouseEventReport report : warehouseEventReports){
+            DoctorMaterialConsumeProvider.EVENT_TYPE eventType = DoctorMaterialConsumeProvider.EVENT_TYPE.from(report.getEventType());
+            if(eventType == null){
+                continue;
+            }
+            if(eventType.equals(DoctorMaterialConsumeProvider.EVENT_TYPE.PROVIDER)){
+                total.setInAmount(report.getAmount());
+                total.setInCount(report.getCount());
+            }
+            if(eventType.equals(DoctorMaterialConsumeProvider.EVENT_TYPE.CONSUMER)){
+                total.setOutAmount(report.getAmount());
+                total.setOutCount(report.getCount());
+            }
+        }
+        // 该仓库当前库存的价值
+        Double amount = RespHelper.or500(doctorMaterialPriceInWareHouseReadService.stockAmount(farmId, warehouseId, null)).get(warehouseId);
+        total.setCurrentStockAmount(amount);
+
+        MaterialReport result = new MaterialReport();
+        result.setTotalReport(total);
+        result.setEvents(RespHelper.or500(doctorMaterialConsumeProviderReadService.list(farmId, warehouseId, null, null, null, null, startAt, DateUtil.toDateString(end))));
+        return result;
     }
 }

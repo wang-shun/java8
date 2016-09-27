@@ -48,6 +48,7 @@
         <if test="farmId != null" > AND `farm_id` = #{farmId}</if>
         <if test="wareHouseId != null" > AND `ware_house_id` = #{wareHouseId}</if>
         <if test="materialId != null" > AND `material_id` = #{materialId}</if>
+        <if test="materialName != null" > AND `material_name` = #{materialName}</if>
         <if test="type!=null">AND  `type`=#{type}</if>
     </sql>
 

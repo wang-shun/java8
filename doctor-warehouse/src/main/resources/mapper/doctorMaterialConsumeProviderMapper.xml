@@ -100,14 +100,6 @@
         </foreach>
     </select>
 
-    <select id="list" resultMap="DoctorMaterialConsumeProviderMap">
-        SELECT <include refid="cols_all" />
-        FROM <include refid="tb" />
-        <where>
-            <include refid="criteria"/>
-        </where>
-    </select>
-
     <select id="paging" resultMap="DoctorMaterialConsumeProviderMap">
         SELECT <include refid="cols_all" />
         FROM <include refid="tb" />
@@ -116,6 +108,15 @@
         </where>
         order by event_time desc
         limit #{offset}, #{limit}
+    </select>
+
+    <select id="list" resultMap="DoctorMaterialConsumeProviderMap">
+        SELECT <include refid="cols_all" />
+        FROM <include refid="tb" />
+        <where>
+            <include refid="criteria"/>
+        </where>
+        order by event_time desc, event_type, material_id
     </select>
 
     <select id="count" resultType="long">
@@ -210,5 +211,25 @@
         <where>
             <include refid="criteria"/>
         </where>
+    </select>
+
+    <select id="warehouseEventReport" parameterType="map" resultType="io.terminus.doctor.warehouse.dto.WarehouseEventReport">
+        select ware_house_id as warehouseId, event_type as eventType, ifnull(sum(event_count), 0) count, ifnull(sum(event_count * unit_price), 0) amount
+        from <include refid="tb"/>
+        <where>
+            <include refid="criteria"/>
+        </where>
+        group by ware_house_id, `event_type`
+    </select>
+
+    <select id="materialEventReport" parameterType="map" resultType="io.terminus.doctor.warehouse.dto.MaterialEventReport">
+        select material_id as materialId, material_name as materialName, DATE_FORMAT(event_time, '%Y-%m-%d') as eventTime, event_type as eventType,
+        ifnull(sum(event_count), 0) as eventCount, ifnull(sum(unit_price * event_count), 0) as amount
+        from <include refid="tb"/>
+        <where>
+            <include refid="criteria"/>
+        </where>
+        group by material_id, DATE_FORMAT(event_time, '%Y-%m-%d'), event_type, material_name
+        order by eventTime, eventType, materialId
     </select>
 </mapper>

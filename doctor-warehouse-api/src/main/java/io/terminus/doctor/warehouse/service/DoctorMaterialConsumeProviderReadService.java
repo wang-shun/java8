@@ -2,8 +2,14 @@ package io.terminus.doctor.warehouse.service;
 
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
+import io.terminus.doctor.common.enums.WareHouseType;
 import io.terminus.doctor.warehouse.dto.MaterialCountAmount;
+import io.terminus.doctor.warehouse.dto.MaterialEventReport;
+import io.terminus.doctor.warehouse.dto.WarehouseEventReport;
 import io.terminus.doctor.warehouse.model.DoctorMaterialConsumeProvider;
+
+import java.util.Date;
+import java.util.List;
 
 /**
  * Created by yaoqijun.
@@ -31,6 +37,9 @@ public interface DoctorMaterialConsumeProviderReadService {
     Response<Paging<DoctorMaterialConsumeProvider>> page(Long farmId, Long warehouseId, Long materialId, Integer eventType, Integer materilaType,
                                                        Long staffId, String startAt, String endAt, Integer pageNo, Integer size);
 
+    Response<List<DoctorMaterialConsumeProvider>> list(Long farmId, Long warehouseId, Long materialId, Integer eventType, Integer materilaType,
+                                                       Long staffId, String startAt, String endAt);
+
     Response<Paging<MaterialCountAmount>> countAmount(Long farmId, Long warehouseId, Long materialId, Integer eventType, Integer materilaType,
                                               Long barnId, Long groupId, Long staffId, String startAt, String endAt, Integer pageNo, Integer size);
 
@@ -47,6 +56,27 @@ public interface DoctorMaterialConsumeProviderReadService {
      * @param endAt
      * @return
      */
-    Response<Double> sumConsumeFeed(Long farmId, Long wareHouseId, Long materialId, Long staffId, Long barnId, Long groupId,
-                                String startAt, String endAt);
+    Response<Double> sumConsumeFeed(Long farmId, Long wareHouseId, Long materialId, Long staffId, Long barnId, Long groupId, String startAt, String endAt);
+
+    /**
+     * 查询仓库内各种物资在指定时间段内的出入库总量和金额
+     * @param farmId
+     * @param warehouseId
+     * @param type
+     * @param startAt
+     * @param endAt
+     * @return
+     */
+    Response<List<WarehouseEventReport>> warehouseEventReport(Long farmId, Long warehouseId, WareHouseType type, Long materialId, Date startAt, Date endAt);
+
+    /**
+     * 指定仓库在指定时间段内各种物料每天发生的各种事件的数量和金额
+     * @param farmId
+     * @param warehouseId
+     * @param type
+     * @param startAt
+     * @param endAt
+     * @return
+     */
+    Response<List<MaterialEventReport>> materialEventReport(Long farmId, Long warehouseId, WareHouseType type, Date startAt, Date endAt);
 }

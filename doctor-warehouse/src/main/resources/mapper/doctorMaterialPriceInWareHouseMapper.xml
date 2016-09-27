@@ -89,4 +89,22 @@
         DELETE FROM <include refid="tb"/>
         WHERE id = #{id}
     </delete>
+
+    <sql id="criteria">
+        <if test="farmId != null"> and farm_id = #{farmId} </if>
+        <if test="warehouseId != null"> and ware_house_id = #{warehouseId} </if>
+        <if test="type != null"> and `type` = #{type} </if>
+        <if test="startAt != null"> and event_time &gt;= #{startAt} </if>
+        <if test="endAt != null"> and event_time &lt; endAt </if>
+    </sql>
+
+    <select id="stockAmount" parameterType="map" resultType="map">
+        select ware_house_id, ifnull(sum(unit_price * remainder), 0) as amount
+        from <include refid="tb"/>
+        <where>
+            <include refid="criteria"/>
+        </where>
+        group by ware_house_id
+    </select>
+
 </mapper>
