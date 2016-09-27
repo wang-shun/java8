@@ -25,4 +25,10 @@ public interface DoctorPigWriteService {
      * @return
      */
     Response<Boolean> deploy();
+
+    /**
+     * 刷新猪的状态
+     * @return
+     */
+    Response<Boolean> refreshPigStatus();
 }

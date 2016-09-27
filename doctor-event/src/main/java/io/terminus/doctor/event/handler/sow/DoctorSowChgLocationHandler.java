@@ -74,9 +74,7 @@ public class DoctorSowChgLocationHandler extends DoctorAbstractEventFlowHandler 
 
             //清空对应的Map 信息内容 （有一次生产过程）
             doctorPigTrack.setExtraMap(newExtraMap);
-            doctorPigTrack.setStatus(PigStatus.Entry.getKey());
-        } else if (Objects.equals(basic.getEventType(), PigEvent.TO_PREG.getKey())) {
-            // 状态妊娠检查相关， 而不是转舍相关
+            //doctorPigTrack.setStatus(PigStatus.Entry.getKey());
         } else if (Objects.equals(basic.getEventType(), PigEvent.TO_FARROWING.getKey())) {
             doctorPigTrack.setStatus(PigStatus.Farrow.getKey());
         }

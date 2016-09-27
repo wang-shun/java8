@@ -286,4 +286,15 @@ public class DoctorPigs {
         return RespHelper.or500(doctorBarnReadService.findBarnById(pigTrack.getCurrentBarnId()));
     }
 
+
+    /**
+     * 刷新猪状态
+     * @return
+     */
+    @RequestMapping(value = "/refresh", method = RequestMethod.GET)
+    @ResponseBody
+    public Boolean refreshPigStatus(){
+        return RespHelper.or500(doctorPigWriteService.refreshPigStatus());
+    }
+
 }
