@@ -231,6 +231,11 @@ public class DoctorRollbackServiceImpl implements DoctorRollbackService {
         Long farmId = dto.getFarmId();
 
         while (!startAt.after(endAt)) {
+            DoctorDailyReportDto everyRedis = dailyReportHistoryDao.getDailyReportWithRedis(farmId, startAt);
+            if (everyRedis == null) {
+                continue;
+            }
+
             //猪群存栏
             DoctorLiveStockDailyReport liveStock = new DoctorLiveStockDailyReport();
             liveStock.setHoubeiBoar(doctorKpiDao.realTimeLiveStockHoubeiBoar(farmId, startAt));
@@ -245,10 +250,6 @@ public class DoctorRollbackServiceImpl implements DoctorRollbackService {
             liveStock.setKonghuaiSow(0);                                                       //空怀猪作废, 置成0
             liveStock.setBoar(doctorKpiDao.realTimeLiveStockBoar(farmId, startAt));            //公猪
 
-            DoctorDailyReportDto everyRedis = dailyReportHistoryDao.getDailyReportWithRedis(farmId, startAt);
-            if (everyRedis == null) {
-                continue;
-            }
             everyRedis.setLiveStock(liveStock);
             dailyReportHistoryDao.saveDailyReport(everyRedis, farmId, startAt);
             startAt = new DateTime(startAt).plusDays(1).toDate();
