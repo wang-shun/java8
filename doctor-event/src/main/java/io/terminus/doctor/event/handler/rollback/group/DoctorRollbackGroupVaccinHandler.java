@@ -6,6 +6,7 @@ import io.terminus.doctor.event.handler.rollback.DoctorAbstractRollbackGroupEven
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Objects;
@@ -25,7 +26,7 @@ public class DoctorRollbackGroupVaccinHandler extends DoctorAbstractRollbackGrou
         return Objects.equals(groupEvent.getType(), GroupEventType.ANTIEPIDEMIC.getValue()) && isLastEvent(groupEvent);
     }
 
-    @Override
+    @Override @Transactional
     protected void handleRollback(DoctorGroupEvent groupEvent, Long operatorId, String operatorName) {
         log.info("this is a vacc event:{}", groupEvent);
         sampleRollback(groupEvent, operatorId, operatorName);

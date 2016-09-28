@@ -13,6 +13,7 @@ import io.terminus.doctor.event.model.DoctorPigSnapshot;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Objects;
@@ -44,7 +45,7 @@ public class DoctorRollbackSowFosterByHandler extends DoctorAbstractRollbackPigE
         handleRollbackWithoutStatus(pigEvent, operatorId, operatorName);
     }
 
-    @Override
+    @Override @Transactional
     protected List<DoctorRollbackDto> handleReport(DoctorPigEvent pigEvent) {
         //被拼窝：猪舍，猪，猪群搜索，存栏日报，存栏月报
         DoctorFostersDto fostersDto = JSON_MAPPER.fromJson(pigEvent.getExtra(), DoctorFostersDto.class);

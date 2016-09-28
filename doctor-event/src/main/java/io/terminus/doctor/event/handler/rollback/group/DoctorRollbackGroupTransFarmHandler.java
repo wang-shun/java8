@@ -12,6 +12,7 @@ import io.terminus.doctor.event.model.DoctorGroupEvent;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Objects;
@@ -47,7 +48,7 @@ public class DoctorRollbackGroupTransFarmHandler extends DoctorAbstractRollbackG
 
     }
 
-    @Override
+    @Override @Transactional
     protected void handleRollback(DoctorGroupEvent groupEvent, Long operatorId, String operatorName) {
         log.info("this is a trans farm event:{}", groupEvent);
         DoctorGroupEvent toGroupEvent = doctorGroupEventDao.findByRelGroupEventId(groupEvent.getId());

@@ -9,6 +9,7 @@ import io.terminus.doctor.event.handler.rollback.DoctorAbstractRollbackPigEventH
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Objects;
@@ -29,7 +30,7 @@ public class DoctorRollbackSowChgLocationEventHandler extends DoctorAbstractRoll
         handleRollbackWithoutStatus(pigEvent, operatorId, operatorName);
     }
 
-    @Override
+    @Override @Transactional
     protected List<DoctorRollbackDto> handleReport(DoctorPigEvent pigEvent) {
         DoctorChgLocationDto dto = JSON_MAPPER.fromJson(pigEvent.getExtra(), DoctorChgLocationDto.class);
         DoctorRollbackDto doctorRollbackDto = DoctorRollbackDto.builder()
