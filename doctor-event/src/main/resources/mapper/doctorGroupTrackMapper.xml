@@ -230,7 +230,7 @@
         </foreach>
     </insert>
 
-    <delete id="deleteByGroupId" parameterType="long">
+    <delete id="deleteGroupTrackByGroupId" parameterType="long">
         DELETE FROM <include refid="tb"/>
         WHERE group_id = #{groupId}
     </delete>
