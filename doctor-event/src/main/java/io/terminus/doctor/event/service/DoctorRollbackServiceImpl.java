@@ -88,16 +88,18 @@ public class DoctorRollbackServiceImpl implements DoctorRollbackService {
     public Response<Boolean> rollbackGroupEvent(Long eventId, Long operatorId, String operatorName) {
         try {
             DoctorGroupEvent groupEvent = doctorGroupEventDao.findById(eventId);
-            if (groupEvent != null) {
-                //获取拦截器链, 判断能否回滚,执行回滚操作, 更新报表
-                doctorRollbackHandlerChain.getRollbackGroupEventHandlers().forEach(handler -> {
-                    if (handler.canRollback(groupEvent)) {
-                        throw new ServiceException("rollback.group.not.allow");
-                    }
-                    handler.rollback(groupEvent, operatorId, operatorName);
-                    handler.updateReport(groupEvent);
-                });
+            if (groupEvent == null) {
+                throw new ServiceException("group.event.not.found");
             }
+
+            //获取拦截器链, 判断能否回滚,执行回滚操作, 更新报表
+            doctorRollbackHandlerChain.getRollbackGroupEventHandlers().forEach(handler -> {
+                if (handler.canRollback(groupEvent)) {
+                    throw new ServiceException("rollback.group.not.allow");
+                }
+                handler.rollback(groupEvent, operatorId, operatorName);
+                handler.updateReport(groupEvent);
+            });
             return Response.ok(Boolean.TRUE);
         } catch (ServiceException e) {
             return Response.fail(e.getMessage());
@@ -111,16 +113,18 @@ public class DoctorRollbackServiceImpl implements DoctorRollbackService {
     public Response<Boolean> rollbackPigEvent(Long eventId, Long operatorId, String operatorName) {
         try {
             DoctorPigEvent pigEvent = doctorPigEventDao.findById(eventId);
-            if (pigEvent != null) {
-                //获取拦截器链, 判断能否回滚, 执行回滚操作, 如果成功, 更新报表
-                doctorRollbackHandlerChain.getRollbackPigEventHandlers().forEach(handler -> {
-                    if (handler.canRollback(pigEvent)) {
-                        throw new ServiceException("rollback.pig.not.allow");
-                    }
-                    handler.rollback(pigEvent, operatorId, operatorName);
-                    handler.updateReport(pigEvent);
-                });
+            if (pigEvent == null) {
+                throw new ServiceException("pig.event.not.found");
             }
+
+            //获取拦截器链, 判断能否回滚, 执行回滚操作, 如果成功, 更新报表
+            doctorRollbackHandlerChain.getRollbackPigEventHandlers().forEach(handler -> {
+                if (handler.canRollback(pigEvent)) {
+                    throw new ServiceException("rollback.pig.not.allow");
+                }
+                handler.rollback(pigEvent, operatorId, operatorName);
+                handler.updateReport(pigEvent);
+            });
             return Response.ok(Boolean.TRUE);
         } catch (ServiceException e) {
             return Response.fail(e.getMessage());

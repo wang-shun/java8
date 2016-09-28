@@ -31,7 +31,8 @@ public class DoctorRollbacks {
      */
     @RequestMapping(value = "/group", method = RequestMethod.GET)
     public Boolean rollbackGroupEvent(@RequestParam("eventId") Long eventId) {
-        return RespHelper.or500(doctorRollbackService.rollbackGroupEvent(eventId, UserUtil.getUserId(), UserUtil.getCurrentUser().getName()));
+        //return RespHelper.or500(doctorRollbackService.rollbackGroupEvent(eventId, UserUtil.getUserId(), UserUtil.getCurrentUser().getName()));
+        return RespHelper.or500(doctorRollbackService.rollbackGroupEvent(eventId, 1L, "adminnn"));
     }
 
     /**
