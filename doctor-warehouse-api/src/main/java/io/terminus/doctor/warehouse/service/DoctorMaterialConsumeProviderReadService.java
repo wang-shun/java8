@@ -19,6 +19,8 @@ import java.util.List;
  */
 public interface DoctorMaterialConsumeProviderReadService {
 
+    Response<DoctorMaterialConsumeProvider> findById(Long id);
+
     /**
      * 分页查询仓库历史出入记录
      * @param warehouseId 仓库id
@@ -37,7 +39,8 @@ public interface DoctorMaterialConsumeProviderReadService {
     Response<Paging<DoctorMaterialConsumeProvider>> page(Long farmId, Long warehouseId, Long materialId, Integer eventType, Integer materilaType,
                                                        Long staffId, String startAt, String endAt, Integer pageNo, Integer size);
 
-    Response<List<DoctorMaterialConsumeProvider>> list(Long farmId, Long warehouseId, Long materialId, Integer eventType, Integer materilaType,
+    Response<List<DoctorMaterialConsumeProvider>> list(Long farmId, Long warehouseId, Long materialId, String materialName,
+                                                       Integer eventType, List<Integer> eventTypes, Integer materilaType,
                                                        Long staffId, String startAt, String endAt);
 
     Response<Paging<MaterialCountAmount>> countAmount(Long farmId, Long warehouseId, Long materialId, Integer eventType, Integer materilaType,

@@ -390,7 +390,8 @@ public class WareHouseInitService {
             }
             doctorMaterialConsumeProviderDao.create(materialCP);
             // 入库, 则保存价格组成
-            if(isProvide(pu.getEventType(), WareHouseType.from(wareHouse.getType()))){
+            if(isProvide(pu.getEventType(), WareHouseType.from(wareHouse.getType()))
+                    && !Objects.equals(eventType, DoctorMaterialConsumeProvider.EVENT_TYPE.DIAORU)){
                 this.saveMaterialPriceInWarehouse(materialCP);
             }
 
@@ -620,7 +621,7 @@ public class WareHouseInitService {
     }
 
     private void updatePriceInWarehouse(Long farmId, Long warehouseId){
-        for(Map.Entry<Long, Double> entry : doctorMaterialConsumeProviderDao.countConsumeTotal(warehouseId).entrySet()){
+        for(Map.Entry<Long, Double> entry : doctorMaterialConsumeProviderDao.sumEventCount(warehouseId, Lists.newArrayList(1, 3)).entrySet()){
             Long materialId = entry.getKey();
             // 累计出库数量
             Double consumeCount = entry.getValue();

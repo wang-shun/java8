@@ -5,6 +5,7 @@ import com.google.common.collect.Lists;
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.exception.ServiceException;
+import io.terminus.common.model.BaseUser;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.basic.model.DoctorBasic;
@@ -126,7 +127,7 @@ public class DoctorWareHouseEvents {
     @RequestMapping(value = "/paging", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Paging<DoctorMaterialInWareHouseDto> pagingDoctorMaterialInWareHouse(@RequestParam("farmId") Long farmId,
-                                                                                @RequestParam("wareHouseId") Long wareHouseId,
+                                                                                @RequestParam(name = "wareHouseId", required = false) Long wareHouseId,
                                                                                 @RequestParam(name = "materialId", required = false) Long materialId,
                                                                                 @RequestParam(name = "materialName", required = false) String materialName,
                                                                                 @RequestParam("pageNo") Integer pageNo,
@@ -140,12 +141,12 @@ public class DoctorWareHouseEvents {
         List<DoctorMaterialInWareHouseDto> list = result.getData().stream()
                 .map(in -> {
                     DoctorMaterialInWareHouseDto dto = DoctorMaterialInWareHouseDto.buildDoctorMaterialInWareHouseInfo(in);
-                    Double amount = RespHelper.or500(materialPriceInWareHouseReadService.findByWareHouseAndMaterialId(wareHouseId, dto.getMaterialId())).stream()
+                    Double amount = RespHelper.or500(materialPriceInWareHouseReadService.findByWareHouseAndMaterialId(dto.getWarehouseId(), dto.getMaterialId())).stream()
                             .map(price -> price.getRemainder() * price.getUnitPrice())
                             .reduce((o1, o2) -> o1 + o2).orElse(0D);
                     dto.setCurrentAmount(amount);
                     RespHelper.or500(materialConsumeProviderReadService.warehouseEventReport(
-                            farmId, wareHouseId, null, dto.getMaterialId(), monthStart.toDate(), nextMonthStart.toDate())
+                            farmId, dto.getWarehouseId(), null, dto.getMaterialId(), monthStart.toDate(), nextMonthStart.toDate())
                     ).forEach(report -> {
                         if(Objects.equals(report.getEventType(), DoctorMaterialConsumeProvider.EVENT_TYPE.CONSUMER.getValue())){
                             dto.setOutAmount(report.getAmount());
@@ -224,6 +225,68 @@ public class DoctorWareHouseEvents {
             throw new JsonResponseException(e.getMessage());
         }
         return RespHelper.or500(doctorMaterialInWareHouseWriteService.consumeMaterialInfo(doctorMaterialConsumeProviderDto));
+    }
+
+    /**
+     * 初始化库存数据
+     * @param materialId
+     * @param warehouseId
+     * @param unitId
+     * @return
+     */
+    @RequestMapping(value = "/initMaterialInWarehouse", method = {RequestMethod.GET, RequestMethod.POST})
+    @ResponseBody
+    public boolean initMaterialInWarehouse(@RequestParam Long materialId, @RequestParam Long warehouseId, Long unitId){
+        DoctorBasicMaterial material = RespHelper.or500(doctorBasicMaterialReadService.findBasicMaterialById(materialId));
+        if(material == null){
+            throw new JsonResponseException("basicMaterial.not.found");
+        }
+
+        DoctorWareHouse wareHouse = RespHelper.or500(doctorWareHouseReadService.findById(warehouseId));
+        if(wareHouse == null){
+            throw new JsonResponseException("warehosue.not.found");
+        }
+
+        if(!wareHouse.getType().equals(material.getType())){
+            throw new JsonResponseException("warehouse.material.type.not.match"); // 仓库与物料类型不一致
+        }
+
+        DoctorMaterialInWareHouse in = RespHelper.or500(doctorMaterialInWareHouseReadService.queryByMaterialWareHouseIds(wareHouse.getFarmId(), materialId, warehouseId));
+        if(in != null){
+            throw new JsonResponseException("materialInWarehouse.exist");
+        }
+
+        in = new DoctorMaterialInWareHouse();
+        // 药品.疫苗.易耗品, 前台必须传来单位
+        if(Objects.equals(material.getType(), WareHouseType.CONSUME.getKey())
+                || Objects.equals(material.getType(), WareHouseType.MEDICINE.getKey())
+                || Objects.equals(material.getType(), WareHouseType.VACCINATION.getKey())){
+            if(unitId != null){
+                DoctorBasic doctorBasic = RespHelper.or500(doctorBasicReadService.findBasicById(unitId));
+                if(doctorBasic == null || !Objects.equals(doctorBasic.getType(), DoctorBasic.Type.UNIT.getValue())){
+                    throw new JsonResponseException("unit.miss");
+                }
+                in.setUnitName(doctorBasic.getName());
+            }else{
+                throw new JsonResponseException("unit.miss");
+            }
+        }else{
+            in.setUnitName("千克");
+        }
+        in.setFarmId(wareHouse.getFarmId());
+        in.setFarmName(wareHouse.getFarmName());
+        in.setWareHouseId(warehouseId);
+        in.setWareHouseName(wareHouse.getWareHouseName());
+        in.setMaterialId(materialId);
+        in.setMaterialName(material.getName());
+        in.setType(material.getType());
+        in.setLotNumber(0D);
+        BaseUser user = UserUtil.getCurrentUser();
+        in.setCreatorId(user.getId());
+        in.setCreatorName(user.getName());
+        in.setUpdatorId(user.getId());
+        in.setUpdatorName(user.getName());
+        return RespHelper.or500(doctorMaterialInWareHouseWriteService.create(in));
     }
 
     /**

@@ -45,6 +45,9 @@ public class DoctorMaterialInWareHouse implements Serializable{
 
     private String materialName;
 
+    /**
+     * @see io.terminus.doctor.common.enums.WareHouseType
+     */
     private Integer type;
 
     private Double lotNumber;

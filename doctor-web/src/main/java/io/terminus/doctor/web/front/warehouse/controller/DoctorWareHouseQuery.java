@@ -6,6 +6,7 @@ import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
+import io.terminus.common.utils.BeanMapper;
 import io.terminus.doctor.basic.model.DoctorBasicMaterial;
 import io.terminus.doctor.basic.service.DoctorBasicMaterialReadService;
 import io.terminus.doctor.common.enums.WareHouseType;
@@ -49,6 +50,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkState;
@@ -303,6 +305,7 @@ public class DoctorWareHouseQuery {
                 farmId, null, WareHouseType.from(wareHouseType), null, startAt == null ? null : DateTime.parse(startAt).toDate(),
                 endAt == null ? null : DateTime.parse(endAt).plusDays(1).toDate()
         ));
+
         Map<Long, WarehouseReport.Report> reportmap = new HashMap<>();
         for(WarehouseEventReport report : warehouseEventReports){
             Long houseId = report.getWarehouseId();
@@ -336,12 +339,16 @@ public class DoctorWareHouseQuery {
             WarehouseReport.Report inner = new WarehouseReport.Report();
             inner.setWarehouseId(warehouseDto.getWarehouseId());
             inner.setWarehouseName(warehouseDto.getWarehouseName());
-            inner.setOutCount(reportmap.get(houseId).getOutCount());
-            inner.setOutAmount(reportmap.get(houseId).getOutAmount());
-            inner.setInCount(reportmap.get(houseId).getInCount());
-            inner.setInAmount(reportmap.get(houseId).getInAmount());
+            if(reportmap.containsKey(houseId)){
+                inner.setOutCount(reportmap.get(houseId).getOutCount());
+                inner.setOutAmount(reportmap.get(houseId).getOutAmount());
+                inner.setInCount(reportmap.get(houseId).getInCount());
+                inner.setInAmount(reportmap.get(houseId).getInAmount());
+            }
             inner.setCurrentStock(warehouseDto.getRemainder());
-            inner.setCurrentStockAmount(stockAmount.get(houseId));
+            if(stockAmount.get(houseId) != null){
+                inner.setCurrentStockAmount(stockAmount.get(houseId));
+            }
             result.getWarehouseReports().add(inner);
         }
         // 所有仓库合计的报表
@@ -362,6 +369,10 @@ public class DoctorWareHouseQuery {
     @ResponseBody
     public MaterialReport materialReport(@RequestParam Long farmId,
                                          @RequestParam Long warehouseId,
+                                         @RequestParam(required = false) Long materialId,
+                                         @RequestParam(required = false) String materialName,
+                                         @RequestParam(required = false) Integer eventType,
+                                         @RequestParam(required = false) List<Integer> eventTypes,
                                          @RequestParam(required = false) String startAt,
                                          @RequestParam(required = false) String endAt){
         Date start = startAt == null ? null : DateTime.parse(startAt).toDate();
@@ -379,15 +390,15 @@ public class DoctorWareHouseQuery {
         total.setWarehouseName(wareHouseDto.getWarehouseName());
         total.setCurrentStock(wareHouseDto.getRemainder());
         for(WarehouseEventReport report : warehouseEventReports){
-            DoctorMaterialConsumeProvider.EVENT_TYPE eventType = DoctorMaterialConsumeProvider.EVENT_TYPE.from(report.getEventType());
-            if(eventType == null){
+            DoctorMaterialConsumeProvider.EVENT_TYPE event_type = DoctorMaterialConsumeProvider.EVENT_TYPE.from(report.getEventType());
+            if(event_type == null){
                 continue;
             }
-            if(eventType.equals(DoctorMaterialConsumeProvider.EVENT_TYPE.PROVIDER)){
+            if(event_type.equals(DoctorMaterialConsumeProvider.EVENT_TYPE.PROVIDER)){
                 total.setInAmount(report.getAmount());
                 total.setInCount(report.getCount());
             }
-            if(eventType.equals(DoctorMaterialConsumeProvider.EVENT_TYPE.CONSUMER)){
+            if(event_type.equals(DoctorMaterialConsumeProvider.EVENT_TYPE.CONSUMER)){
                 total.setOutAmount(report.getAmount());
                 total.setOutCount(report.getCount());
             }
@@ -398,7 +409,28 @@ public class DoctorWareHouseQuery {
 
         MaterialReport result = new MaterialReport();
         result.setTotalReport(total);
-        result.setEvents(RespHelper.or500(doctorMaterialConsumeProviderReadService.list(farmId, warehouseId, null, null, null, null, startAt, DateUtil.toDateString(end))));
+        List<MaterialReport.MaterialConsumeProviderDto> events = RespHelper.or500(doctorMaterialConsumeProviderReadService.list(
+                farmId, warehouseId, materialId, materialName, eventType, eventTypes, null, null, startAt, DateUtil.toDateString(end)
+        )).stream()
+                .map(cp -> {
+                    MaterialReport.MaterialConsumeProviderDto dto = BeanMapper.map(cp, MaterialReport.MaterialConsumeProviderDto.class);
+                    if (Objects.equals(cp.getEventType(), DoctorMaterialConsumeProvider.EVENT_TYPE.DIAORU.getValue())
+                            || Objects.equals(cp.getEventType(), DoctorMaterialConsumeProvider.EVENT_TYPE.DIAOCHU.getValue())) {
+                        Long relEventId = null;
+                        try {
+                            relEventId = Long.valueOf(cp.getExtraMap().get("relEventId").toString());
+                        } catch (RuntimeException e) {
+                        }
+                        if (relEventId != null) {
+                            DoctorMaterialConsumeProvider relCP = RespHelper.or500(doctorMaterialConsumeProviderReadService.findById(relEventId));
+                            dto.setDiaoboWarehouseId(relCP.getWareHouseId());
+                            dto.setDiaoboWarehouseName(relCP.getWareHouseName());
+                        }
+                    }
+                    return dto;
+                })
+                .collect(Collectors.toList());
+        result.setEvents(events);
         return result;
     }
 }

@@ -29,6 +29,14 @@ public class DoctorMaterialInWareHouseDto implements Serializable{
 
     private String materialName;    // 原料名称
 
+    private Long warehouseId;
+    private String warehouseName;
+
+    /**
+     * @see io.terminus.doctor.common.enums.WareHouseType
+     */
+    private Integer type;
+
     private Double lotNumber;     //数量信息
 
     private String unitName;    // 单位名称
@@ -47,6 +55,8 @@ public class DoctorMaterialInWareHouseDto implements Serializable{
         return DoctorMaterialInWareHouseDto.builder()
                 .materialInWareHouseId(inWareHouse.getId())
                 .materialId(inWareHouse.getMaterialId()).materialName(inWareHouse.getMaterialName())
+                .warehouseId(inWareHouse.getWareHouseId()).warehouseName(inWareHouse.getWareHouseName())
+                .type(inWareHouse.getType())
                 .lotNumber(inWareHouse.getLotNumber())
                 .unitName(inWareHouse.getUnitName())
                 .build();
