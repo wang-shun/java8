@@ -127,7 +127,7 @@ public class DoctorWareHouseEvents {
     @RequestMapping(value = "/paging", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Paging<DoctorMaterialInWareHouseDto> pagingDoctorMaterialInWareHouse(@RequestParam("farmId") Long farmId,
-                                                                                @RequestParam("wareHouseId") Long wareHouseId,
+                                                                                @RequestParam(name = "wareHouseId", required = false) Long wareHouseId,
                                                                                 @RequestParam(name = "materialId", required = false) Long materialId,
                                                                                 @RequestParam(name = "materialName", required = false) String materialName,
                                                                                 @RequestParam("pageNo") Integer pageNo,
@@ -141,12 +141,12 @@ public class DoctorWareHouseEvents {
         List<DoctorMaterialInWareHouseDto> list = result.getData().stream()
                 .map(in -> {
                     DoctorMaterialInWareHouseDto dto = DoctorMaterialInWareHouseDto.buildDoctorMaterialInWareHouseInfo(in);
-                    Double amount = RespHelper.or500(materialPriceInWareHouseReadService.findByWareHouseAndMaterialId(wareHouseId, dto.getMaterialId())).stream()
+                    Double amount = RespHelper.or500(materialPriceInWareHouseReadService.findByWareHouseAndMaterialId(dto.getWarehouseId(), dto.getMaterialId())).stream()
                             .map(price -> price.getRemainder() * price.getUnitPrice())
                             .reduce((o1, o2) -> o1 + o2).orElse(0D);
                     dto.setCurrentAmount(amount);
                     RespHelper.or500(materialConsumeProviderReadService.warehouseEventReport(
-                            farmId, wareHouseId, null, dto.getMaterialId(), monthStart.toDate(), nextMonthStart.toDate())
+                            farmId, dto.getWarehouseId(), null, dto.getMaterialId(), monthStart.toDate(), nextMonthStart.toDate())
                     ).forEach(report -> {
                         if(Objects.equals(report.getEventType(), DoctorMaterialConsumeProvider.EVENT_TYPE.CONSUMER.getValue())){
                             dto.setOutAmount(report.getAmount());
