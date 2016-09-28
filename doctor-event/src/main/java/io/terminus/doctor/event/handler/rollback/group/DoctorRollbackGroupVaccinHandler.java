@@ -4,7 +4,6 @@ import io.terminus.doctor.event.dto.DoctorRollbackDto;
 import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.handler.rollback.DoctorAbstractRollbackGroupEventHandler;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
-import io.terminus.doctor.event.model.DoctorRevertLog;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -23,12 +22,12 @@ public class DoctorRollbackGroupVaccinHandler extends DoctorAbstractRollbackGrou
     @Override
     protected boolean handleCheck(DoctorGroupEvent groupEvent) {
         //允许猪群防疫事件回滚
-        return Objects.equals(groupEvent.getType(), GroupEventType.ANTIEPIDEMIC.getValue());
+        return Objects.equals(groupEvent.getType(), GroupEventType.ANTIEPIDEMIC.getValue()) && isLastEvent(groupEvent);
     }
 
     @Override
-    protected DoctorRevertLog handleRollback(DoctorGroupEvent groupEvent, Long operatorId, String operatorName) {
-        return sampleRollback(groupEvent);
+    protected void handleRollback(DoctorGroupEvent groupEvent, Long operatorId, String operatorName) {
+        sampleRollback(groupEvent, operatorId, operatorName);
     }
 
     @Override

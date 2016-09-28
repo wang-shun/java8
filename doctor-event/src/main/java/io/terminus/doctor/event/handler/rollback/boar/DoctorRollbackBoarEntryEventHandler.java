@@ -1,12 +1,15 @@
 package io.terminus.doctor.event.handler.rollback.boar;
 
 import com.google.common.collect.Lists;
+import io.terminus.doctor.event.dto.DoctorPigSnapShotInfo;
 import io.terminus.doctor.event.dto.DoctorRollbackDto;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.RollbackType;
 import io.terminus.doctor.event.handler.rollback.DoctorAbstractRollbackPigEventHandler;
+import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigEvent;
-import io.terminus.doctor.event.model.DoctorRevertLog;
+import io.terminus.doctor.event.model.DoctorPigSnapshot;
+import io.terminus.doctor.event.model.DoctorPigTrack;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -20,12 +23,22 @@ public class DoctorRollbackBoarEntryEventHandler extends DoctorAbstractRollbackP
 
     @Override
     protected boolean handleCheck(DoctorPigEvent pigEvent) {
-        return Objects.equals(pigEvent.getType(), PigEvent.ENTRY.getKey())&& Objects.equals(pigEvent.getKind(), DoctorPigEvent.kind.Boar.getValue());
+        return Objects.equals(pigEvent.getType(), PigEvent.ENTRY.getKey()) &&
+                Objects.equals(pigEvent.getKind(), DoctorPig.PIG_TYPE.BOAR.getKey()) &&
+                isLastEvent(pigEvent);
     }
 
     @Override
-    protected DoctorRevertLog handleRollback(DoctorPigEvent pigEvent, Long operatorId, String operatorName) {
-       return handleRollbackWithStatus(pigEvent, DoctorRevertLog.Type.BOAR.getValue());
+    protected void handleRollback(DoctorPigEvent pigEvent, Long operatorId, String operatorName) {
+        DoctorPigSnapshot snapshot = doctorPigSnapshotDao.queryByEventId(pigEvent.getId());
+        DoctorPigSnapShotInfo info = JSON_MAPPER.fromJson(snapshot.getPigInfo(), DoctorPigSnapShotInfo.class);
+        DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(pigEvent.getPigId());
+        DoctorPig doctorPig = doctorPigDao.findById(pigEvent.getPigId());
+        doctorPigEventDao.delete(pigEvent.getId());
+        doctorPigTrackDao.delete(info.getPigTrack().getId());
+        doctorPigDao.delete(info.getPig().getId());
+        doctorPigSnapshotDao.delete(snapshot.getId());
+        createDoctorRevertLog(pigEvent, doctorPigTrack, doctorPig, operatorId, operatorName);
     }
 
     @Override

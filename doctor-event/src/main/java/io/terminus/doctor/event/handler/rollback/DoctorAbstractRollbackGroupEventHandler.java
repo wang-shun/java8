@@ -53,20 +53,15 @@ public abstract class DoctorAbstractRollbackGroupEventHandler extends DoctorAbst
     public final boolean canRollback(DoctorGroupEvent groupEvent) {
         return Objects.equals(groupEvent.getIsAuto(), IsOrNot.YES.getValue()) &&
                 groupEvent.getEventAt().after(DateTime.now().plusMonths(-3).toDate()) &&
-                RespHelper.orFalse(doctorGroupReadService.isLastEvent(groupEvent.getGroupId(), groupEvent.getId())) &&
                 handleCheck(groupEvent);
     }
 
     /**
-     * 带事务的回滚操作
+     * 回滚实现
      */
-    @Override @Transactional
+    @Override
     public final void rollback(DoctorGroupEvent groupEvent, Long operatorId, String operatorName) {
-        DoctorRevertLog revertLog = handleRollback(groupEvent, operatorId, operatorName);
-        revertLog.setType(DoctorRevertLog.Type.GROUP.getValue());
-        revertLog.setReverterId(operatorId);
-        revertLog.setReverterName(operatorName);
-        RespHelper.orServEx(doctorRevertLogWriteService.createRevertLog(revertLog));
+        handleRollback(groupEvent, operatorId, operatorName);
     }
 
     /**
@@ -83,9 +78,10 @@ public abstract class DoctorAbstractRollbackGroupEventHandler extends DoctorAbst
     protected abstract boolean handleCheck(DoctorGroupEvent groupEvent);
 
     /**
-     * 处理回滚操作
+     * 处理回滚操作(事务处理)
      */
-    protected abstract DoctorRevertLog handleRollback(DoctorGroupEvent groupEvent, Long operatorId, String operatorName);
+    @Transactional
+    protected abstract void handleRollback(DoctorGroupEvent groupEvent, Long operatorId, String operatorName);
 
     /**
      * 需要更新的统计
@@ -94,11 +90,18 @@ public abstract class DoctorAbstractRollbackGroupEventHandler extends DoctorAbst
     protected abstract List<DoctorRollbackDto> handleReport(DoctorGroupEvent groupEvent);
 
     /**
+     * 是否是最新事件
+     */
+    protected boolean isLastEvent(DoctorGroupEvent groupEvent) {
+        return RespHelper.orFalse(doctorGroupReadService.isLastEvent(groupEvent.getGroupId(), groupEvent.getId()));
+    }
+
+    /**
      * 单个猪群事件的回滚，可以抽象出来，自取自用
      * @param groupEvent 事件
      * @return 回滚日志
      */
-    protected DoctorRevertLog sampleRollback(DoctorGroupEvent groupEvent) {
+    protected void sampleRollback(DoctorGroupEvent groupEvent, Long operatorId, String operatorName) {
         DoctorGroupSnapshot snapshot = doctorGroupSnapshotDao.findGroupSnapshotByToEventId(groupEvent.getId());
 
         DoctorGroupSnapShotInfo info = JSON_MAPPER.fromJson(snapshot.getFromInfo(), DoctorGroupSnapShotInfo.class);
@@ -108,9 +111,20 @@ public abstract class DoctorAbstractRollbackGroupEventHandler extends DoctorAbst
         doctorGroupTrackDao.update(info.getGroupTrack());
         doctorGroupDao.update(info.getGroup());
         doctorGroupSnapshotDao.delete(snapshot.getId());
-        return DoctorRevertLog.builder()
-                .fromInfo(snapshot.getToInfo())
-                .toInfo(snapshot.getFromInfo())
-                .build();
+
+        //创建回滚日志
+        createRevertLog(groupEvent, snapshot, operatorId, operatorName);
+    }
+
+    protected void createRevertLog(DoctorGroupEvent groupEvent, DoctorGroupSnapshot snapshot, Long operatorId, String operatorName) {
+        DoctorRevertLog revertLog = new  DoctorRevertLog();
+        revertLog.setFarmId(groupEvent.getFarmId());
+        revertLog.setGroupId(groupEvent.getGroupId());
+        revertLog.setFromInfo(snapshot.getToInfo());
+        revertLog.setToInfo(snapshot.getFromInfo());
+        revertLog.setType(DoctorRevertLog.Type.GROUP.getValue());
+        revertLog.setReverterId(operatorId);
+        revertLog.setReverterName(operatorName);
+        RespHelper.orServEx(doctorRevertLogWriteService.createRevertLog(revertLog));
     }
 }

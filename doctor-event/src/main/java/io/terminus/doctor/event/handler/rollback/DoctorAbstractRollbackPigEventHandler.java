@@ -42,20 +42,30 @@ import java.util.Objects;
 @Slf4j
 public abstract class DoctorAbstractRollbackPigEventHandler extends DoctorAbstrackRollbackReportHandler implements DoctorRollbackPigEventHandler {
 
-
     protected static final JsonMapper JSON_MAPPER = JsonMapper.nonEmptyMapper();
 
-    @Autowired private DoctorRevertLogWriteService doctorRevertLogWriteService;
-    @Autowired protected FlowProcessService flowProcessService;
-    @Autowired protected DoctorGroupReadService doctorGroupReadService;
-    @Autowired protected DoctorGroupDao doctorGroupDao;
-    @Autowired protected DoctorGroupEventDao doctorGroupEventDao;
-    @Autowired protected DoctorGroupTrackDao doctorGroupTrackDao;
-    @Autowired protected DoctorPigSnapshotDao doctorPigSnapshotDao;
-    @Autowired protected DoctorPigEventDao doctorPigEventDao;
-    @Autowired protected DoctorPigTrackDao doctorPigTrackDao;
-    @Autowired protected DoctorPigDao doctorPigDao;
-    @Autowired protected DoctorPigEventReadService doctorPigEventReadService;
+    @Autowired
+    private DoctorRevertLogWriteService doctorRevertLogWriteService;
+    @Autowired
+    protected FlowProcessService flowProcessService;
+    @Autowired
+    protected DoctorGroupReadService doctorGroupReadService;
+    @Autowired
+    protected DoctorGroupDao doctorGroupDao;
+    @Autowired
+    protected DoctorGroupEventDao doctorGroupEventDao;
+    @Autowired
+    protected DoctorGroupTrackDao doctorGroupTrackDao;
+    @Autowired
+    protected DoctorPigSnapshotDao doctorPigSnapshotDao;
+    @Autowired
+    protected DoctorPigEventDao doctorPigEventDao;
+    @Autowired
+    protected DoctorPigTrackDao doctorPigTrackDao;
+    @Autowired
+    protected DoctorPigDao doctorPigDao;
+    @Autowired
+    protected DoctorPigEventReadService doctorPigEventReadService;
     @Value("${flow.definition.key.sow:sow}")
     protected String sowFlowKey;
 
@@ -73,12 +83,9 @@ public abstract class DoctorAbstractRollbackPigEventHandler extends DoctorAbstra
     /**
      * 带事务的回滚操作
      */
-    @Override @Transactional
+    @Override
     public final void rollback(DoctorPigEvent pigEvent, Long operatorId, String operatorName) {
-        DoctorRevertLog revertLog = handleRollback(pigEvent, operatorId, operatorName);
-        revertLog.setReverterId(operatorId);
-        revertLog.setReverterName(operatorName);
-        RespHelper.orServEx(doctorRevertLogWriteService.createRevertLog(revertLog));
+        handleRollback(pigEvent, operatorId, operatorName);
     }
 
     /**
@@ -90,6 +97,13 @@ public abstract class DoctorAbstractRollbackPigEventHandler extends DoctorAbstra
     }
 
     /**
+     * 是否是最新事件
+     */
+    protected boolean isLastEvent(DoctorPigEvent pigEvent) {
+        return RespHelper.orFalse(doctorPigEventReadService.isLastEvent(pigEvent.getPigId(), pigEvent.getId()));
+    }
+
+    /**
      * 每个子类根据事件类型 判断是否应该由此handler执行回滚
      */
     protected abstract boolean handleCheck(DoctorPigEvent pigEvent);
@@ -97,91 +111,85 @@ public abstract class DoctorAbstractRollbackPigEventHandler extends DoctorAbstra
     /**
      * 处理回滚操作
      */
-    protected abstract DoctorRevertLog handleRollback(DoctorPigEvent pigEvent, Long operatorId, String operatorName);
+    @Transactional
+    protected abstract void handleRollback(DoctorPigEvent pigEvent, Long operatorId, String operatorName);
 
     /**
      * 需要更新的统计
+     *
      * @see RollbackType
      */
     protected abstract List<DoctorRollbackDto> handleReport(DoctorPigEvent pigEvent);
 
     /**
      * 不涉及状态的事件回滚处理
+     *
      * @param pigEvent 猪事件
-     * @param type 拦截的事件类型
-     * @return
      */
-    protected DoctorRevertLog handleRollbackWithoutStatus(DoctorPigEvent pigEvent, Integer type){
-        DoctorRevertLog doctorRevertLog = createDoctorRevertLog(pigEvent, type);
-        DoctorPigSnapshot doctorPigSnapshot = doctorPigSnapshotDao.queryByEventId(pigEvent.getId());
+    protected void handleRollbackWithoutStatus(DoctorPigEvent pigEvent, Long operatorId, String operatorName) {
+        DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(pigEvent.getPigId());
+        DoctorPig doctorPig = doctorPigDao.findById(pigEvent.getPigId());
+        DoctorPigSnapshot snapshot = doctorPigSnapshotDao.queryByEventId(pigEvent.getId());
+        DoctorPigSnapShotInfo info = JSON_MAPPER.fromJson(snapshot.getPigInfo(), DoctorPigSnapShotInfo.class);
         doctorPigEventDao.delete(pigEvent.getId());
-        if (!Objects.equals(pigEvent.getType(), PigEvent.ENTRY.getKey())) {
-            doctorPigTrackDao.update(JSON_MAPPER.fromJson(doctorPigSnapshot.getPigInfo(), DoctorPigSnapShotInfo.class).getPigTrack());
-        } else {
-            doctorPigTrackDao.delete(doctorPigTrackDao.findByPigId(pigEvent.getPigId()).getId());
-            doctorPigDao.delete(pigEvent.getPigId());
-        }
-        doctorPigSnapshotDao.delete(doctorPigSnapshot.getId());
-        return doctorRevertLog;
+        doctorPigTrackDao.update(info.getPigTrack());
+        doctorPigDao.update(info.getPig());
+        doctorPigSnapshotDao.delete(snapshot.getId());
+        createDoctorRevertLog(pigEvent, doctorPigTrack, doctorPig, operatorId, operatorName);
     }
 
     /**
      * 涉及状态的事件回滚处理
+     *
      * @param pigEvent 猪事件
-     * @param type 拦截的事件类型
-     * @return
      */
-    protected DoctorRevertLog handleRollbackWithStatus(DoctorPigEvent pigEvent, Integer type) {
-        DoctorRevertLog doctorRevertLog = handleRollbackWithStatus(pigEvent, type);
+    protected void handleRollbackWithStatus(DoctorPigEvent pigEvent, Long operatorId, String operatorName) {
+        handleRollbackWithoutStatus(pigEvent, operatorId, operatorName);
         workFlowRollback(pigEvent);
-        return doctorRevertLog;
-    }
-     /* 通用猪事件回滚
-     * @param pigEvent 猪事件
-     * @return 回滚日志
-     */
-    protected DoctorRevertLog sampleRollback(DoctorPigEvent pigEvent) {
-        DoctorPigSnapshot snapshot = doctorPigSnapshotDao.queryByEventId(pigEvent.getId());
-        return new DoctorRevertLog();
     }
 
     /**
      * 回滚工作流
-     * @param pigEvent
+     *
+     * @param pigEvent 事件
      */
-    protected void workFlowRollback(DoctorPigEvent pigEvent){
-        if (Objects.equals(pigEvent.getKind(), DoctorPigEvent.kind.Sow.getValue())){
+    protected void workFlowRollback(DoctorPigEvent pigEvent) {
+        if (Objects.equals(pigEvent.getKind(), DoctorPig.PIG_TYPE.SOW.getKey())) {
             flowProcessService.rollBack(sowFlowKey, pigEvent.getPigId());
         }
     }
 
     /**
      * 创建回滚日志
-     * @param pigEvent
-     * @param type
-     * @return
+     *
+     * @param fromPigEvent 事件
+     * @return 回滚日志
      */
-    protected DoctorRevertLog createDoctorRevertLog(DoctorPigEvent pigEvent, Integer type){
-        DoctorPigTrack doctorPigTrack= doctorPigTrackDao.findByPigId(pigEvent.getPigId());
-        DoctorPig doctorPig= doctorPigDao.findById(pigEvent.getPigId());
-        DoctorPigSnapShotInfo fromInfo  = DoctorPigSnapShotInfo.builder()
-                .pigEvent(pigEvent)
-                .pigTrack(doctorPigTrack)
-                .pig(doctorPig)
+    protected void createDoctorRevertLog(DoctorPigEvent fromPigEvent, DoctorPigTrack fromPigTrack, DoctorPig fromPig, Long operatorId, String operatorName) {
+        DoctorPigSnapShotInfo fromInfo = DoctorPigSnapShotInfo.builder()
+                .pigEvent(fromPigEvent)
+                .pigTrack(fromPigTrack)
+                .pig(fromPig)
                 .build();
 
-        DoctorPigEvent toPigEvent = doctorPigEventDao.queryLastPigEventById(pigEvent.getPigId());
-        DoctorPigTrack toPigTrack = doctorPigTrackDao.findByPigId(toPigEvent.getPigId());
-        DoctorPigSnapShotInfo toInfo  = DoctorPigSnapShotInfo.builder()
+        DoctorPigEvent toPigEvent = doctorPigEventDao.queryLastPigEventById(fromPigEvent.getPigId());
+        DoctorPigTrack toPigTrack = doctorPigTrackDao.findByPigId(fromPigEvent.getPigId());
+        DoctorPig toPig = doctorPigDao.findById(fromPigEvent.getPigId());
+        DoctorPigSnapShotInfo toInfo = DoctorPigSnapShotInfo.builder()
                 .pigEvent(toPigEvent)
                 .pigTrack(toPigTrack)
-                .pig(doctorPig)
+                .pig(toPig)
                 .build();
-        return DoctorRevertLog.builder()
-                .type(type)
-                .fromInfo(JSON_MAPPER.toJson(fromInfo))
-                .toInfo(JSON_MAPPER.toJson(toInfo))
-                .build();
+
+        DoctorRevertLog revertLog = new DoctorRevertLog();
+        revertLog.setFarmId(fromPigEvent.getFarmId());
+        revertLog.setPigId(fromPigEvent.getPigId());
+        revertLog.setType(fromPigEvent.getKind());
+        revertLog.setFromInfo(JSON_MAPPER.toJson(fromInfo));
+        revertLog.setToInfo(JSON_MAPPER.toJson(toInfo));
+        revertLog.setReverterId(operatorId);
+        revertLog.setReverterName(operatorName);
+        RespHelper.orServEx(doctorRevertLogWriteService.createRevertLog(revertLog));
     }
 
 }

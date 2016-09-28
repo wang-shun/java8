@@ -7,10 +7,12 @@ import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.RollbackType;
 import io.terminus.doctor.event.handler.rollback.DoctorAbstractRollbackPigEventHandler;
+import io.terminus.doctor.event.handler.rollback.group.DoctorRollbackGroupMoveInHandler;
+import io.terminus.doctor.event.handler.rollback.group.DoctorRollbackGroupNewHandler;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorPigEvent;
-import io.terminus.doctor.event.model.DoctorRevertLog;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -26,11 +28,21 @@ import java.util.Objects;
 @Component
 public class DoctorRollbackSowFarrowHandler extends DoctorAbstractRollbackPigEventHandler {
 
+    @Autowired
+    private DoctorRollbackGroupMoveInHandler doctorRollbackGroupMoveInHandler;
+
+    @Autowired
+    private DoctorRollbackGroupNewHandler doctorRollbackGroupNewHandler;
+
     @Override
     protected boolean handleCheck(DoctorPigEvent pigEvent) {
         if (!Objects.equals(pigEvent.getType(), PigEvent.FARROWING.getKey())) {
             return false;
         }
+        if (!isLastEvent(pigEvent)) {
+            return false;
+        }
+
         //母猪分娩会触发转入猪群事件，如果有新建猪群，还要校验最新事件
         DoctorGroupEvent toGroupEvent = doctorGroupEventDao.findByRelPigEventId(pigEvent.getRelPigEventId());
         Long groupEventId = toGroupEvent.getId();
@@ -42,8 +54,18 @@ public class DoctorRollbackSowFarrowHandler extends DoctorAbstractRollbackPigEve
     }
 
     @Override
-    protected DoctorRevertLog handleRollback(DoctorPigEvent pigEvent, Long operatorId, String operatorName) {
-        return null;
+    protected void handleRollback(DoctorPigEvent pigEvent, Long operatorId, String operatorName) {
+        //1.转入猪群
+        DoctorGroupEvent toGroupEvent = doctorGroupEventDao.findByRelPigEventId(pigEvent.getRelPigEventId());
+        doctorRollbackGroupMoveInHandler.rollback(toGroupEvent, operatorId, operatorName);
+
+        //2.新建猪群 if exist
+        if (Objects.equals(toGroupEvent.getType(), GroupEventType.NEW.getValue())) {
+            DoctorGroupEvent totoGroupEvent = doctorGroupEventDao.findByRelGroupEventId(toGroupEvent.getId());
+            doctorRollbackGroupNewHandler.rollback(totoGroupEvent, operatorId, operatorName);
+        }
+        //3. 母猪分娩
+        handleRollbackWithStatus(pigEvent, operatorId, operatorName);
     }
 
     @Override

@@ -11,7 +11,6 @@ import io.terminus.doctor.event.handler.rollback.group.DoctorRollbackGroupTransH
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
-import io.terminus.doctor.event.model.DoctorRevertLog;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -32,6 +31,9 @@ public class DoctorRollbackSowFosterHandler extends DoctorAbstractRollbackPigEve
     @Autowired
     private DoctorRollbackGroupTransHandler doctorRollbackGroupTransHandler;
 
+    @Autowired
+    private DoctorRollbackSowFosterByHandler doctorRollbackSowFosterByHandler;
+
     @Override
     protected boolean handleCheck(DoctorPigEvent pigEvent) {
         if (!Objects.equals(pigEvent.getType(), PigEvent.FOSTERS.getKey())) {
@@ -45,14 +47,23 @@ public class DoctorRollbackSowFosterHandler extends DoctorAbstractRollbackPigEve
             DoctorGroupEvent toGroupEvent = doctorGroupEventDao.findByRelPigEventId(toPigEvent.getId());
             return RespHelper.orFalse(doctorPigEventReadService.isLastEvent(toPigEvent.getPigId(), toPigEvent.getId())) &&
                     doctorRollbackGroupTransHandler.handleCheck(toGroupEvent);
-
         }
         return false;
     }
 
     @Override
-    protected DoctorRevertLog handleRollback(DoctorPigEvent pigEvent, Long operatorId, String operatorName) {
-        return null;
+    protected void handleRollback(DoctorPigEvent pigEvent, Long operatorId, String operatorName) {
+        DoctorPigEvent toPigEvent = doctorPigEventDao.findByRelGroupEventId(pigEvent.getId());
+        DoctorGroupEvent toGroupEvent = doctorGroupEventDao.findByRelPigEventId(toPigEvent.getId());
+
+        //1. 仔猪转群
+        doctorRollbackGroupTransHandler.rollback(toGroupEvent, operatorId, operatorName);
+
+        //2. 被拼窝
+        doctorRollbackSowFosterByHandler.rollback(toPigEvent, operatorId, operatorName);
+
+        //3. 拼窝
+        handleRollbackWithoutStatus(toPigEvent, operatorId, operatorName);
     }
 
     @Override

@@ -8,7 +8,6 @@ import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.enums.RollbackType;
 import io.terminus.doctor.event.handler.rollback.DoctorAbstractRollbackGroupEventHandler;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
-import io.terminus.doctor.event.model.DoctorRevertLog;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -47,12 +46,12 @@ public class DoctorRollbackGroupTransHandler extends DoctorAbstractRollbackGroup
     }
 
     @Override
-    public DoctorRevertLog handleRollback(DoctorGroupEvent groupEvent, Long operatorId, String operatorName) {
+    public void handleRollback(DoctorGroupEvent groupEvent, Long operatorId, String operatorName) {
         DoctorGroupEvent toGroupEvent = doctorGroupEventDao.findByRelGroupEventId(groupEvent.getId());
 
         //先回滚转入猪群事件， 再回滚转群事件
         doctorRollbackGroupMoveInHandler.rollback(toGroupEvent, operatorId, operatorName);
-        return sampleRollback(groupEvent);
+        sampleRollback(groupEvent, operatorId, operatorName);
     }
 
     @Override
