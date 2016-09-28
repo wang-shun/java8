@@ -4,6 +4,7 @@ import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
 import com.google.common.eventbus.Subscribe;
 import io.terminus.common.model.Response;
+import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.enums.DataEventType;
 import io.terminus.doctor.common.event.CoreEventDispatcher;
 import io.terminus.doctor.common.event.DataEvent;
@@ -11,6 +12,7 @@ import io.terminus.doctor.common.event.EventListener;
 import io.terminus.doctor.common.utils.Params;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dto.DoctorPigMessage;
+import io.terminus.doctor.event.dto.DoctorRollbackDto;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
@@ -147,7 +149,9 @@ public class DoctorZKListener implements EventListener {
 
         // 4. 如果是事件回滚
         if (DataEventType.RollBackReport.getKey() == dataEvent.getEventType()) {
-            doctorRollbackService.rollbackReportAndES(DataEvent.analyseContent(dataEvent, List.class));
+            String data = DataEvent.analyseContent(dataEvent, String.class);
+            doctorRollbackService.rollbackReportAndES(JsonMapper.nonEmptyMapper().fromJson(data,
+                    JsonMapper.nonEmptyMapper().createCollectionType(List.class, DoctorRollbackDto.class)));
         }
     }
 

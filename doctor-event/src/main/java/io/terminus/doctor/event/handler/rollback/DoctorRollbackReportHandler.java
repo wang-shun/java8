@@ -2,6 +2,7 @@ package io.terminus.doctor.event.handler.rollback;
 
 import com.google.common.base.Throwables;
 import io.terminus.common.exception.ServiceException;
+import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.enums.DataEventType;
 import io.terminus.doctor.common.event.CoreEventDispatcher;
 import io.terminus.doctor.common.event.DataEvent;
@@ -22,7 +23,7 @@ import static io.terminus.common.utils.Arguments.notNull;
  * Date: 16/9/21
  */
 @Slf4j
-public class DoctorAbstrackRollbackReportHandler {
+public class DoctorRollbackReportHandler {
 
     @Autowired private CoreEventDispatcher coreEventDispatcher;
     @Autowired(required = false) private Publisher publisher;
@@ -39,14 +40,15 @@ public class DoctorAbstrackRollbackReportHandler {
 
     //发布zk事件, 用于更新回滚后操作
     private void publishRollbackEvent(List<DoctorRollbackDto> dtos) {
+        String rollbackJson = JsonMapper.nonEmptyMapper().toJson(dtos);
         if (notNull(publisher)) {
             try {
-                publisher.publish(DataEvent.toBytes(DataEventType.RollBackReport.getKey(), dtos));
+                publisher.publish(DataEvent.toBytes(DataEventType.RollBackReport.getKey(), rollbackJson));
             } catch (Exception e) {
                 log.error("publish rollback group zk event, DoctorRollbackDtos:{}, cause:{}", dtos, Throwables.getStackTraceAsString(e));
             }
         } else {
-            coreEventDispatcher.publish(DataEvent.make(DataEventType.RollBackReport.getKey(), dtos));
+            coreEventDispatcher.publish(DataEvent.make(DataEventType.RollBackReport.getKey(), rollbackJson));
         }
     }
 

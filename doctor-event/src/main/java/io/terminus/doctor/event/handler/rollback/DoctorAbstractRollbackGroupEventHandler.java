@@ -33,7 +33,7 @@ import java.util.Objects;
  * Date: 16/9/20
  */
 @Slf4j
-public abstract class DoctorAbstractRollbackGroupEventHandler extends DoctorAbstrackRollbackReportHandler implements DoctorRollbackGroupEventHandler {
+public abstract class DoctorAbstractRollbackGroupEventHandler extends DoctorRollbackReportHandler implements DoctorRollbackGroupEventHandler {
 
     protected static final JsonMapper JSON_MAPPER = JsonMapper.nonEmptyMapper();
 

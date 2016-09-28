@@ -165,8 +165,13 @@ public class DoctorRollbackServiceImpl implements DoctorRollbackService {
         Date endAt = DateUtil.getDateEnd(new DateTime(dto.getEventAt())).toDate();
         Long farmId = dto.getFarmId();
 
-        DoctorDailyReportDto report = dailyReportHistoryDao.getDailyReportWithRedis(farmId, startAt);
+        //记录事件，// TODO: 16/9/21 晚上job更新月报
+        dailyReport2UpdateDao.saveDailyReport2Update(startAt, farmId);
 
+        DoctorDailyReportDto report = dailyReportHistoryDao.getDailyReportWithRedis(farmId, startAt);
+        if (report == null) {
+            return;
+        }
         for (RollbackType type : dto.getRollbackTypes()) {
             switch (type) {
                 //搜索实时更新
@@ -214,7 +219,6 @@ public class DoctorRollbackServiceImpl implements DoctorRollbackService {
             }
         }
         dailyReportHistoryDao.saveDailyReport(report, farmId, startAt);
-        dailyReport2UpdateDao.saveDailyReport2Update(startAt, farmId);  //记录事件，// TODO: 16/9/21 晚上job更新月报
     }
 
     //更新从回滚日期到今天的存栏
@@ -242,6 +246,9 @@ public class DoctorRollbackServiceImpl implements DoctorRollbackService {
             liveStock.setBoar(doctorKpiDao.realTimeLiveStockBoar(farmId, startAt));            //公猪
 
             DoctorDailyReportDto everyRedis = dailyReportHistoryDao.getDailyReportWithRedis(farmId, startAt);
+            if (everyRedis == null) {
+                continue;
+            }
             everyRedis.setLiveStock(liveStock);
             dailyReportHistoryDao.saveDailyReport(everyRedis, farmId, startAt);
             startAt = new DateTime(startAt).plusDays(1).toDate();
