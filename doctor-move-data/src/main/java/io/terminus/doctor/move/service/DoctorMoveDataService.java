@@ -2430,11 +2430,9 @@ public class DoctorMoveDataService {
     public Response<Boolean> refreshPigStatus() {
         try {
             for (int i = 0;; i++) {
-                Map<String, Object> map = Maps.newHashMap();
-                map.put("status", PigStatus.Entry.getKey());
-                Paging<DoctorPigTrack> trackPage = doctorPigTrackDao.paging(i, 1000, map);
+                Paging<DoctorPigTrack> trackPage = doctorPigTrackDao.paging(i, 1000, ImmutableMap.of("status", PigStatus.Entry.getKey()));
                 trackPage.getData().forEach(doctorPigTrack -> {
-                    if (!doctorPigEventDao.list(DoctorPigEvent.builder().type(PigEvent.TO_MATING.getKey()).build()).isEmpty()){
+                    if (!doctorPigEventDao.list(ImmutableMap.of("type", PigEvent.TO_MATING.getKey())).isEmpty()){
                         doctorPigTrack.setStatus(PigStatus.Wean.getKey());
                         doctorPigTrack.setUpdatedAt(new Date());
                         doctorPigTrackDao.update(doctorPigTrack);
