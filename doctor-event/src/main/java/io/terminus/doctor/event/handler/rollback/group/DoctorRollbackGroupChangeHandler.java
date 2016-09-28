@@ -36,7 +36,7 @@ public class DoctorRollbackGroupChangeHandler extends DoctorAbstractRollbackGrou
     }
 
     @Override
-    protected List<DoctorRollbackDto> handleReport(DoctorGroupEvent groupEvent) {
+    public List<DoctorRollbackDto> updateReport(DoctorGroupEvent groupEvent) {
         DoctorRollbackDto dto = new DoctorRollbackDto();
         dto.setOrgId(groupEvent.getOrgId());
         dto.setFarmId(groupEvent.getFarmId());

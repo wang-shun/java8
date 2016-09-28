@@ -67,7 +67,7 @@ public class DoctorRollbackSowFosterHandler extends DoctorAbstractRollbackPigEve
     }
 
     @Override
-    protected List<DoctorRollbackDto> handleReport(DoctorPigEvent pigEvent) {
+        public List<DoctorRollbackDto> updateReport(DoctorPigEvent pigEvent) {
         //拼窝：猪舍，猪，猪群搜索
         DoctorPigTrack fosterTrack = doctorPigTrackDao.findByPigId(pigEvent.getPigId());
         DoctorRollbackDto foster = new DoctorRollbackDto();

@@ -3,6 +3,7 @@ package io.terminus.doctor.web.front.event.controller;
 import com.google.common.collect.Lists;
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.model.Paging;
+import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.basic.model.DoctorBasic;
 import io.terminus.doctor.basic.service.DoctorBasicReadService;
 import io.terminus.doctor.common.utils.Params;
@@ -17,6 +18,7 @@ import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.event.service.DoctorGroupReadService;
 import io.terminus.doctor.event.service.DoctorGroupWriteService;
 import io.terminus.doctor.event.service.DoctorPigReadService;
+import io.terminus.doctor.user.model.DoctorUser;
 import io.terminus.doctor.web.front.auth.DoctorFarmAuthCenter;
 import io.terminus.doctor.web.front.event.dto.DoctorGroupDetailEventsDto;
 import io.terminus.doctor.web.front.event.service.DoctorGroupWebService;
@@ -25,7 +27,6 @@ import io.terminus.pampas.common.UserUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -92,7 +93,12 @@ public class DoctorGroupEvents {
      * @return 猪群id
      */
     @RequestMapping(value = "/new", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
-    public Long createNewGroup(@RequestBody DoctorNewGroupInput newGroupDto) {
+    public Long createNewGroup(@RequestParam String info) {
+        DoctorNewGroupInput newGroupDto = JsonMapper.nonEmptyMapper().fromJson(info, DoctorNewGroupInput.class);
+        DoctorUser user = new DoctorUser();
+        user.setId(592L);
+        user.setName("wwww");
+        UserUtil.putCurrentUser(user);
         //权限中心校验权限
         doctorFarmAuthCenter.checkFarmAuth(newGroupDto.getFarmId());
         return RespHelper.or500(doctorGroupWebService.createNewGroup(newGroupDto));
@@ -112,6 +118,10 @@ public class DoctorGroupEvents {
     public Boolean createGroupEvent(@RequestParam("groupId") Long groupId,
                                     @RequestParam("eventType") Integer eventType,
                                     @RequestParam("data") String data) {
+        DoctorUser user = new DoctorUser();
+        user.setId(592L);
+        user.setName("wwww");
+        UserUtil.putCurrentUser(user);
         return RespHelper.or500(doctorGroupWebService.createGroupEvent(groupId, eventType, data));
     }
 

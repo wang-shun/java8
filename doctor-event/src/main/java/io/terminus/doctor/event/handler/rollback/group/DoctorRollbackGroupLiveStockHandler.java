@@ -32,7 +32,7 @@ public class DoctorRollbackGroupLiveStockHandler extends DoctorAbstractRollbackG
     }
 
     @Override
-    protected List<DoctorRollbackDto> handleReport(DoctorGroupEvent groupEvent) {
+    public List<DoctorRollbackDto> updateReport(DoctorGroupEvent groupEvent) {
         return null;    //不需要更新统计
     }
 }

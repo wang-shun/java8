@@ -58,7 +58,7 @@ public class DoctorRollbackGroupTransFarmHandler extends DoctorAbstractRollbackG
     }
 
     @Override
-    protected List<DoctorRollbackDto> handleReport(DoctorGroupEvent groupEvent) {
+    public List<DoctorRollbackDto> updateReport(DoctorGroupEvent groupEvent) {
         //更新统计：存栏日报，存栏月报，猪舍统计，猪群统计
         List<RollbackType> rollbackTypes = Lists.newArrayList(RollbackType.DAILY_LIVESTOCK, RollbackType.MONTHLY_REPORT,
                 RollbackType.SEARCH_BARN, RollbackType.SEARCH_GROUP);

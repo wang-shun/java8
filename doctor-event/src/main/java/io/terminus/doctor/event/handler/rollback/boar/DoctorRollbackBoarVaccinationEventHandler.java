@@ -28,7 +28,7 @@ public class DoctorRollbackBoarVaccinationEventHandler extends DoctorAbstractRol
     }
 
     @Override
-    protected List<DoctorRollbackDto> handleReport(DoctorPigEvent pigEvent) {
+    public List<DoctorRollbackDto> updateReport(DoctorPigEvent pigEvent) {
         return null;
     }
 }

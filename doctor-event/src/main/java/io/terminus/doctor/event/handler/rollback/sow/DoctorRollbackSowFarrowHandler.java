@@ -69,7 +69,7 @@ public class DoctorRollbackSowFarrowHandler extends DoctorAbstractRollbackPigEve
     }
 
     @Override
-    protected List<DoctorRollbackDto> handleReport(DoctorPigEvent pigEvent) {
+        public List<DoctorRollbackDto> updateReport(DoctorPigEvent pigEvent) {
         DoctorRollbackDto fromDto = new DoctorRollbackDto();
         fromDto.setOrgId(pigEvent.getOrgId());
         fromDto.setFarmId(pigEvent.getFarmId());

@@ -30,7 +30,7 @@ public class DoctorRollbackBoarChgFarmEventHandler extends DoctorAbstractRollbac
     }
 
     @Override
-    protected List<DoctorRollbackDto> handleReport(DoctorPigEvent pigEvent) {
+    public List<DoctorRollbackDto> updateReport(DoctorPigEvent pigEvent) {
         pigEvent.setExtra(pigEvent.getExtra());
         DoctorRollbackDto doctorRollbackDto = DoctorRollbackDto.builder()
                 .esBarnId((Long) pigEvent.getExtraMap().get("chgLocationFromBarnId"))

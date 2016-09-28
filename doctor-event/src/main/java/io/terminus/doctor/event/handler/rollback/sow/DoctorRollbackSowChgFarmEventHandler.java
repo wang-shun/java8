@@ -31,7 +31,7 @@ public class DoctorRollbackSowChgFarmEventHandler extends DoctorAbstractRollback
     }
 
     @Override
-    protected List<DoctorRollbackDto> handleReport(DoctorPigEvent pigEvent) {
+        public List<DoctorRollbackDto> updateReport(DoctorPigEvent pigEvent) {
         DoctorChgFarmDto dto = JSON_MAPPER.fromJson(pigEvent.getExtra(), DoctorChgFarmDto.class);
         DoctorRollbackDto doctorRollbackDto = DoctorRollbackDto.builder()
                 .esBarnId(dto.getFromBarnId())

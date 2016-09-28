@@ -45,7 +45,7 @@ public class DoctorRollbackSowFosterByHandler extends DoctorAbstractRollbackPigE
     }
 
     @Override
-    protected List<DoctorRollbackDto> handleReport(DoctorPigEvent pigEvent) {
+        public List<DoctorRollbackDto> updateReport(DoctorPigEvent pigEvent) {
         //被拼窝：猪舍，猪，猪群搜索，存栏日报，存栏月报
         DoctorFostersDto fostersDto = JSON_MAPPER.fromJson(pigEvent.getExtra(), DoctorFostersDto.class);
         DoctorPigTrack fosterByTrack = doctorPigTrackDao.findByPigId(fostersDto.getFosterSowId());

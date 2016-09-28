@@ -1,8 +1,10 @@
 package io.terminus.doctor.event.handler;
 
+import io.terminus.doctor.event.dto.DoctorRollbackDto;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 
 import javax.validation.constraints.NotNull;
+import java.util.List;
 
 /**
  * Desc: 猪事件回滚操作
@@ -28,5 +30,5 @@ public interface DoctorRollbackPigEventHandler {
     /**
      * 更新报表
      */
-    void updateReport(DoctorPigEvent pigEvent);
+    List<DoctorRollbackDto> updateReport(DoctorPigEvent pigEvent);
 }

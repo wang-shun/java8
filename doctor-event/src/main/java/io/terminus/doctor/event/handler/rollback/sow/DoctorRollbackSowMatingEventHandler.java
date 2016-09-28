@@ -27,7 +27,7 @@ public class DoctorRollbackSowMatingEventHandler extends DoctorAbstractRollbackP
     }
 
     @Override
-    protected List<DoctorRollbackDto> handleReport(DoctorPigEvent pigEvent) {
+        public List<DoctorRollbackDto> updateReport(DoctorPigEvent pigEvent) {
         DoctorRollbackDto doctorRollbackDto = DoctorRollbackDto.builder()
                 .esPigId(pigEvent.getPigId())
                 .rollbackTypes(Lists.newArrayList(RollbackType.SEARCH_PIG, RollbackType.DAILY_MATE, RollbackType.MONTHLY_REPORT))

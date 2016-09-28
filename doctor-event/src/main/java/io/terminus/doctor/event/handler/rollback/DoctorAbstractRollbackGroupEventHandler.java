@@ -8,9 +8,7 @@ import io.terminus.doctor.event.dao.DoctorGroupSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
 import io.terminus.doctor.event.dao.DoctorPigEventDao;
 import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
-import io.terminus.doctor.event.dto.DoctorRollbackDto;
 import io.terminus.doctor.event.enums.IsOrNot;
-import io.terminus.doctor.event.enums.RollbackType;
 import io.terminus.doctor.event.handler.DoctorRollbackGroupEventHandler;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorGroupSnapshot;
@@ -21,9 +19,7 @@ import io.terminus.doctor.event.service.DoctorRevertLogWriteService;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 import java.util.Objects;
 
 /**
@@ -33,7 +29,7 @@ import java.util.Objects;
  * Date: 16/9/20
  */
 @Slf4j
-public abstract class DoctorAbstractRollbackGroupEventHandler extends DoctorRollbackReportHandler implements DoctorRollbackGroupEventHandler {
+public abstract class DoctorAbstractRollbackGroupEventHandler implements DoctorRollbackGroupEventHandler {
 
     protected static final JsonMapper JSON_MAPPER = JsonMapper.nonEmptyMapper();
 
@@ -60,16 +56,8 @@ public abstract class DoctorAbstractRollbackGroupEventHandler extends DoctorRoll
      * 回滚实现
      */
     @Override
-    public final void rollback(DoctorGroupEvent groupEvent, Long operatorId, String operatorName) {
+    public void rollback(DoctorGroupEvent groupEvent, Long operatorId, String operatorName) {
         handleRollback(groupEvent, operatorId, operatorName);
-    }
-
-    /**
-     * 更新统计报表, es搜索(发zk事件)
-     */
-    @Override
-    public final void updateReport(DoctorGroupEvent groupEvent) {
-        checkAndPublishRollback(handleReport(groupEvent));
     }
 
     /**
@@ -80,14 +68,7 @@ public abstract class DoctorAbstractRollbackGroupEventHandler extends DoctorRoll
     /**
      * 处理回滚操作(事务处理)
      */
-    @Transactional
     protected abstract void handleRollback(DoctorGroupEvent groupEvent, Long operatorId, String operatorName);
-
-    /**
-     * 需要更新的统计
-     * @see RollbackType
-     */
-    protected abstract List<DoctorRollbackDto> handleReport(DoctorGroupEvent groupEvent);
 
     /**
      * 是否是最新事件

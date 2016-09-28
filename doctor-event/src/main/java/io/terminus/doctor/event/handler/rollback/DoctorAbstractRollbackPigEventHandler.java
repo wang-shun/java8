@@ -10,10 +10,7 @@ import io.terminus.doctor.event.dao.DoctorPigEventDao;
 import io.terminus.doctor.event.dao.DoctorPigSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorPigTrackDao;
 import io.terminus.doctor.event.dto.DoctorPigSnapShotInfo;
-import io.terminus.doctor.event.dto.DoctorRollbackDto;
 import io.terminus.doctor.event.enums.IsOrNot;
-import io.terminus.doctor.event.enums.PigEvent;
-import io.terminus.doctor.event.enums.RollbackType;
 import io.terminus.doctor.event.handler.DoctorRollbackPigEventHandler;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigEvent;
@@ -28,9 +25,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 import java.util.Objects;
 
 /**
@@ -40,7 +35,7 @@ import java.util.Objects;
  * Date: 16/9/20
  */
 @Slf4j
-public abstract class DoctorAbstractRollbackPigEventHandler extends DoctorRollbackReportHandler implements DoctorRollbackPigEventHandler {
+public abstract class DoctorAbstractRollbackPigEventHandler implements DoctorRollbackPigEventHandler {
 
     protected static final JsonMapper JSON_MAPPER = JsonMapper.nonEmptyMapper();
 
@@ -89,14 +84,6 @@ public abstract class DoctorAbstractRollbackPigEventHandler extends DoctorRollba
     }
 
     /**
-     * 更新统计报表(发zk事件)
-     */
-    @Override
-    public final void updateReport(DoctorPigEvent pigEvent) {
-        checkAndPublishRollback(handleReport(pigEvent));
-    }
-
-    /**
      * 是否是最新事件
      */
     protected boolean isLastEvent(DoctorPigEvent pigEvent) {
@@ -111,15 +98,7 @@ public abstract class DoctorAbstractRollbackPigEventHandler extends DoctorRollba
     /**
      * 处理回滚操作
      */
-    @Transactional
     protected abstract void handleRollback(DoctorPigEvent pigEvent, Long operatorId, String operatorName);
-
-    /**
-     * 需要更新的统计
-     *
-     * @see RollbackType
-     */
-    protected abstract List<DoctorRollbackDto> handleReport(DoctorPigEvent pigEvent);
 
     /**
      * 不涉及状态的事件回滚处理

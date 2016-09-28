@@ -69,7 +69,7 @@ public class DoctorRollbackSowWeanHandler extends DoctorAbstractRollbackPigEvent
     }
 
     @Override
-    protected List<DoctorRollbackDto> handleReport(DoctorPigEvent pigEvent) {
+        public List<DoctorRollbackDto> updateReport(DoctorPigEvent pigEvent) {
         DoctorGroup group = doctorGroupDao.findByCurrentBarnId(pigEvent.getBarnId()).stream()
                 .filter(g -> Objects.equals(g.getStatus(), DoctorGroup.Status.CREATED.getValue()))
                 .findFirst()

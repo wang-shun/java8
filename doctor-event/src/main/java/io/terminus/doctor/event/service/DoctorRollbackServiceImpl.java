@@ -21,9 +21,7 @@ import io.terminus.doctor.event.dto.report.daily.DoctorMatingDailyReport;
 import io.terminus.doctor.event.dto.report.daily.DoctorSaleDailyReport;
 import io.terminus.doctor.event.dto.report.daily.DoctorWeanDailyReport;
 import io.terminus.doctor.event.enums.RollbackType;
-import io.terminus.doctor.event.handler.DoctorRollbackGroupEventHandler;
-import io.terminus.doctor.event.handler.DoctorRollbackPigEventHandler;
-import io.terminus.doctor.event.handler.rollback.DoctorRollbackHandlerChain;
+import io.terminus.doctor.event.manager.DoctorRollbackManager;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigEvent;
@@ -34,7 +32,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.List;
@@ -50,7 +47,6 @@ import java.util.List;
 @RpcProvider
 public class DoctorRollbackServiceImpl implements DoctorRollbackService {
 
-    private final DoctorRollbackHandlerChain doctorRollbackHandlerChain;
     private final DoctorGroupEventDao doctorGroupEventDao;
     private final DoctorPigEventDao doctorPigEventDao;
     private final PigSearchWriteService pigSearchWriteService;
@@ -61,10 +57,10 @@ public class DoctorRollbackServiceImpl implements DoctorRollbackService {
     private final DailyReportHistoryDao dailyReportHistoryDao;
     private final DoctorKpiDao doctorKpiDao;
     private final DoctorPigTypeStatisticWriteService doctorPigTypeStatisticWriteService;
+    private final DoctorRollbackManager doctorRollbackManager;
 
     @Autowired
-    public DoctorRollbackServiceImpl(DoctorRollbackHandlerChain doctorRollbackHandlerChain,
-                                     DoctorGroupEventDao doctorGroupEventDao,
+    public DoctorRollbackServiceImpl(DoctorGroupEventDao doctorGroupEventDao,
                                      DoctorPigEventDao doctorPigEventDao,
                                      PigSearchWriteService pigSearchWriteService,
                                      GroupSearchWriteService groupSearchWriteService,
@@ -73,8 +69,8 @@ public class DoctorRollbackServiceImpl implements DoctorRollbackService {
                                      DailyReport2UpdateDao dailyReport2UpdateDao,
                                      DailyReportHistoryDao dailyReportHistoryDao,
                                      DoctorKpiDao doctorKpiDao,
-                                     DoctorPigTypeStatisticWriteService doctorPigTypeStatisticWriteService) {
-        this.doctorRollbackHandlerChain = doctorRollbackHandlerChain;
+                                     DoctorPigTypeStatisticWriteService doctorPigTypeStatisticWriteService,
+                                     DoctorRollbackManager doctorRollbackManager) {
         this.doctorGroupEventDao = doctorGroupEventDao;
         this.doctorPigEventDao = doctorPigEventDao;
         this.pigSearchWriteService = pigSearchWriteService;
@@ -85,6 +81,7 @@ public class DoctorRollbackServiceImpl implements DoctorRollbackService {
         this.dailyReportHistoryDao = dailyReportHistoryDao;
         this.doctorKpiDao = doctorKpiDao;
         this.doctorPigTypeStatisticWriteService = doctorPigTypeStatisticWriteService;
+        this.doctorRollbackManager = doctorRollbackManager;
     }
 
     @Override
@@ -92,18 +89,11 @@ public class DoctorRollbackServiceImpl implements DoctorRollbackService {
         try {
             DoctorGroupEvent groupEvent = doctorGroupEventDao.findById(eventId);
             if (groupEvent == null) {
-                throw new ServiceException("group.event.not.found");
+                return Response.fail("group.event.not.found");
             }
-
-            //获取拦截器链, 判断能否回滚,执行回滚操作, 更新报表
-            for (DoctorRollbackGroupEventHandler handler : doctorRollbackHandlerChain.getRollbackGroupEventHandlers()) {
-                if (handler.canRollback(groupEvent)) {
-                    rollbackGroupTracsactional(handler, groupEvent, operatorId, operatorName);
-                    handler.updateReport(groupEvent);
-                    return Response.ok(Boolean.TRUE);
-                }
-            }
-            throw new ServiceException("rollback.group.not.allow");
+            List<DoctorRollbackDto> dtos = doctorRollbackManager.rollbackGroup(groupEvent, operatorId, operatorName);
+            doctorRollbackManager.checkAndPublishRollback(dtos);
+            return Response.ok(Boolean.TRUE);
         } catch (ServiceException e) {
             return Response.fail(e.getMessage());
         } catch (Exception e) {
@@ -119,32 +109,14 @@ public class DoctorRollbackServiceImpl implements DoctorRollbackService {
             if (pigEvent == null) {
                 throw new ServiceException("pig.event.not.found");
             }
-
-            //获取拦截器链, 判断能否回滚, 执行回滚操作, 如果成功, 更新报表
-            for (DoctorRollbackPigEventHandler handler : doctorRollbackHandlerChain.getRollbackPigEventHandlers()) {
-                if (handler.canRollback(pigEvent)) {
-                    rollbackPigTracsactional(handler, pigEvent, operatorId, operatorName);
-                    handler.updateReport(pigEvent);
-                    return Response.ok(Boolean.TRUE);
-                }
-            }
-            throw new ServiceException("rollback.pig.not.allow");
+            List<DoctorRollbackDto> dtos = doctorRollbackManager.rollbackPig(pigEvent, operatorId, operatorName);
+            return Response.ok(Boolean.TRUE);
         } catch (ServiceException e) {
             return Response.fail(e.getMessage());
         } catch (Exception e) {
             log.error("rollack pig event failed, eventId:{}, cause:{}", eventId, Throwables.getStackTraceAsString(e));
             return Response.fail("rollback.event.failed");
         }
-    }
-
-    @Transactional
-    private void rollbackGroupTracsactional(DoctorRollbackGroupEventHandler handler, DoctorGroupEvent groupEvent, Long operatorId, String operatorName) {
-        handler.rollback(groupEvent, operatorId, operatorName);
-    }
-
-    @Transactional
-    private void rollbackPigTracsactional(DoctorRollbackPigEventHandler handler, DoctorPigEvent pigEvent, Long operatorId, String operatorName) {
-        handler.rollback(pigEvent, operatorId, operatorName);
     }
 
     @Override

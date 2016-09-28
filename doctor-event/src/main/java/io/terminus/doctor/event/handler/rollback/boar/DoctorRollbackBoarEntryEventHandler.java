@@ -42,7 +42,7 @@ public class DoctorRollbackBoarEntryEventHandler extends DoctorAbstractRollbackP
     }
 
     @Override
-    protected List<DoctorRollbackDto> handleReport(DoctorPigEvent pigEvent) {
+    public List<DoctorRollbackDto> updateReport(DoctorPigEvent pigEvent) {
         DoctorRollbackDto doctorRollbackDto = DoctorRollbackDto.builder()
                 .esBarnId(pigEvent.getBarnId())
                 .esPigId(pigEvent.getPigId())
