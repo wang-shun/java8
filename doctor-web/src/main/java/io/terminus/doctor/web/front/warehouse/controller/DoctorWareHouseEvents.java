@@ -234,7 +234,7 @@ public class DoctorWareHouseEvents {
      * @param unitId
      * @return
      */
-    @RequestMapping(value = "/initMaterialInWarehouse", method = RequestMethod.POST)
+    @RequestMapping(value = "/initMaterialInWarehouse", method = RequestMethod.GET)
     @ResponseBody
     public boolean initMaterialInWarehouse(@RequestParam Long materialId, @RequestParam Long warehouseId, Long unitId){
         DoctorBasicMaterial material = RespHelper.or500(doctorBasicMaterialReadService.findBasicMaterialById(materialId));
@@ -245,6 +245,10 @@ public class DoctorWareHouseEvents {
         DoctorWareHouse wareHouse = RespHelper.or500(doctorWareHouseReadService.findById(warehouseId));
         if(wareHouse == null){
             throw new JsonResponseException("warehosue.not.found");
+        }
+
+        if(!wareHouse.getType().equals(material.getType())){
+            throw new JsonResponseException("warehouse.material.type.not.match"); // 仓库与物料类型不一致
         }
 
         DoctorMaterialInWareHouse in = RespHelper.or500(doctorMaterialInWareHouseReadService.queryByMaterialWareHouseIds(wareHouse.getFarmId(), materialId, warehouseId));
