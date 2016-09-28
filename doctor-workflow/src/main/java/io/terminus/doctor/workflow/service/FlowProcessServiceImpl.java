@@ -187,11 +187,11 @@ public class FlowProcessServiceImpl implements FlowProcessService {
             flowHistoryProcess.setStatus(FlowProcess.Status.END.value());
             access().createFlowHistoryProcess(flowHistoryProcess);
             // 记录track
-            FlowProcessTrack flowProcessTrack = FlowProcessTrack.builder().build();
-            BeanHelper.copy(flowProcessTrack, currentProcess);
-            flowProcessTrack.setOperatorId(operatorId);
-            flowProcessTrack.setOperatorName(operatorName);
-            access().createFlowProcessTrack(flowProcessTrack);
+//            FlowProcessTrack flowProcessTrack = FlowProcessTrack.builder().build();
+//            BeanHelper.copy(flowProcessTrack, currentProcess);
+//            flowProcessTrack.setOperatorId(operatorId);
+//            flowProcessTrack.setOperatorName(operatorName);
+//            access().createFlowProcessTrack(flowProcessTrack);
             // 记录历史流程实例
             FlowHistoryInstance flowHistoryInstance = FlowHistoryInstance.builder()
                     .describe(describe)
@@ -252,11 +252,11 @@ public class FlowProcessServiceImpl implements FlowProcessService {
                     flowHistoryProcess.setStatus(FlowProcess.Status.DELETE.value());
                     access().createFlowHistoryProcess(flowHistoryProcess);
                     // 记录track
-                    FlowProcessTrack flowProcessTrack = FlowProcessTrack.builder().build();
-                    BeanHelper.copy(flowProcessTrack, flowProcess);
-                    flowProcessTrack.setOperatorId(operatorId);
-                    flowProcessTrack.setOperatorName(operatorName);
-                    access().createFlowProcessTrack(flowProcessTrack);
+//                    FlowProcessTrack flowProcessTrack = FlowProcessTrack.builder().build();
+//                    BeanHelper.copy(flowProcessTrack, flowProcess);
+//                    flowProcessTrack.setOperatorId(operatorId);
+//                    flowProcessTrack.setOperatorName(operatorName);
+//                    access().createFlowProcessTrack(flowProcessTrack);
                 }
                 access().deleteFlowInstance(flowInstance.getId());
                 // 记录历史流程实例
@@ -309,8 +309,36 @@ public class FlowProcessServiceImpl implements FlowProcessService {
         // 获取主流程实例
         FlowInstance mainFlowInstance = workFlowEngine.buildFlowQueryService().getFlowInstanceQuery()
                 .getExistFlowInstance(flowDefinitionKey, businessId);
-        AssertHelper.isNull(mainFlowInstance,
-                "主流程实例不存在, 无法回滚, 流程定义key为: {}, 业务id为: {}", flowDefinitionKey, businessId);
+        //回滚离场
+        if (mainFlowInstance == null){
+            if (depth != 1){
+                AssertHelper.throwException(
+                        "离场回滚操作深度只能为1, 流程定义key为: {}, 业务id为: {}", flowDefinitionKey, businessId);
+            }
+            FlowHistoryInstance flowHistoryInstance = workFlowEngine.buildFlowQueryService().getFlowHistoryInstanceQuery().businessId(businessId).flowDefinitionKey(flowDefinitionKey).single();
+            FlowInstance flowInstance = FlowInstance.builder().build();
+            BeanHelper.copy(flowInstance, flowHistoryInstance);
+            FlowHistoryProcess flowHistoryProcess = workFlowEngine.buildFlowQueryService().getFlowHistoryProcessQuery().flowInstanceId(flowHistoryInstance.getExternalHistoryId()).single();
+            access().deleteFlowHistoryInstance(flowHistoryInstance.getId());
+            access().deleteFlowHistoryProcess(flowHistoryProcess.getId());
+
+            FlowProcess rollBackProcess = FlowProcess.builder().build();
+            BeanHelper.copy(rollBackProcess, flowHistoryProcess);
+            Long flowInstanceId = access().createFlowInstance(flowInstance);
+            rollBackProcess.setFlowInstanceId(flowInstanceId);
+            access().createFlowProcess(rollBackProcess);
+            List<FlowProcessTrack> flowTracks = workFlowEngine.buildFlowQueryService().getFlowProcessTrackQuery()
+                    .flowInstanceId(flowHistoryInstance.getExternalHistoryId())
+                    .desc()
+                    .list();
+            flowTracks.stream().forEach(flowProcessTrack -> {
+                flowProcessTrack.setFlowInstanceId(flowInstanceId);
+                access().updateFlowProcessTrack(flowProcessTrack);
+            });
+            return;
+        }
+//        AssertHelper.isNull(mainFlowInstance,
+//                "主流程实例不存在, 无法回滚, 流程定义key为: {}, 业务id为: {}", flowDefinitionKey, businessId);
         List<FlowProcess> currentProcesses = workFlowEngine.buildFlowQueryService().getFlowProcessQuery()
                 .getCurrentProcesses(mainFlowInstance.getId());
         // 1. 如果当前只存在一个执行任务
@@ -322,6 +350,7 @@ public class FlowProcessServiceImpl implements FlowProcessService {
                     .flowInstanceId(mainFlowInstance.getId())
                     .desc()
                     .list();
+            //回滚进场
             Long nodeId = Long.parseLong(Splitters.COMMA.splitToList(currentProcesses.get(0).getPreFlowDefinitionNodeId()).get(0));
             if (Objects.equals(workFlowEngine.buildFlowQueryService().getFlowDefinitionNodeQuery().id(nodeId).single().getType(), FlowDefinitionNode.Type.START.value())) {
                 if (depth != 1){
@@ -368,7 +397,7 @@ public class FlowProcessServiceImpl implements FlowProcessService {
             access().createFlowProcess(rollBackProcess);
             // 记录历史
             FlowHistoryProcess hisProcess = FlowHistoryProcess.builder().build();
-            BeanHelper.copy(hisProcess, rollBackProcess);
+            BeanHelper.copy(hisProcess, currentProcesses.get(0));
             hisProcess.setOperatorId(operatorId);
             hisProcess.setOperatorName(operatorName);
             hisProcess.setStatus(FlowProcess.Status.END.value());
