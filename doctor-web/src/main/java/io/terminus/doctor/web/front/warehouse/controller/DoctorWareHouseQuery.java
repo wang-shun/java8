@@ -293,7 +293,7 @@ public class DoctorWareHouseQuery {
      * @param endAt
      * @return
      */
-    @RequestMapping(value = "/warehouseReport", method = RequestMethod.GET)
+    @RequestMapping(value = "/warehouseReport", method = {RequestMethod.GET, RequestMethod.POST})
     @ResponseBody
     public WarehouseReport warehouseReport(@RequestParam Long farmId,
                                            @RequestParam Integer wareHouseType,
