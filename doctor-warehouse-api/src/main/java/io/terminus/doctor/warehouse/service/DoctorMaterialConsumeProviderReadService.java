@@ -19,6 +19,8 @@ import java.util.List;
  */
 public interface DoctorMaterialConsumeProviderReadService {
 
+    Response<DoctorMaterialConsumeProvider> findById(Long id);
+
     /**
      * 分页查询仓库历史出入记录
      * @param warehouseId 仓库id

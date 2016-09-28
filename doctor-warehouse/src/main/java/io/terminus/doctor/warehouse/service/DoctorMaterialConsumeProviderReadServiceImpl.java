@@ -34,6 +34,16 @@ public class DoctorMaterialConsumeProviderReadServiceImpl implements DoctorMater
     }
 
     @Override
+    public Response<DoctorMaterialConsumeProvider> findById(Long id){
+        try{
+            return Response.ok(doctorMaterialConsumeProviderDao.findById(id));
+        }catch(Exception e){
+            log.error("find DoctorMaterialConsumeProvider fail, id:{}, cause:{}", id, Throwables.getStackTraceAsString(e));
+            return Response.fail("find.DoctorMaterialConsumeProvider.fail");
+        }
+    }
+
+    @Override
     public Response<Paging<DoctorMaterialConsumeProvider>> page(Long farmId, Long warehouseId, Long materialId, Integer eventType, Integer materilaType,
                                                               Long staffId, String startAt, String endAt, Integer pageNo, Integer size) {
         try{

@@ -6,6 +6,7 @@ import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
+import io.terminus.common.utils.BeanMapper;
 import io.terminus.doctor.basic.model.DoctorBasicMaterial;
 import io.terminus.doctor.basic.service.DoctorBasicMaterialReadService;
 import io.terminus.doctor.common.enums.WareHouseType;
@@ -49,6 +50,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkState;
@@ -407,9 +409,28 @@ public class DoctorWareHouseQuery {
 
         MaterialReport result = new MaterialReport();
         result.setTotalReport(total);
-        result.setEvents(RespHelper.or500(doctorMaterialConsumeProviderReadService.list(
-                farmId, warehouseId, materialId, materialName, eventType, eventTypes, null, null, startAt, DateUtil.toDateString(end))
-        ));
+        List<MaterialReport.MaterialConsumeProviderDto> events = RespHelper.or500(doctorMaterialConsumeProviderReadService.list(
+                farmId, warehouseId, materialId, materialName, eventType, eventTypes, null, null, startAt, DateUtil.toDateString(end)
+        )).stream()
+                .map(cp -> {
+                    MaterialReport.MaterialConsumeProviderDto dto = BeanMapper.map(cp, MaterialReport.MaterialConsumeProviderDto.class);
+                    if (Objects.equals(cp.getEventType(), DoctorMaterialConsumeProvider.EVENT_TYPE.DIAORU.getValue())
+                            || Objects.equals(cp.getEventType(), DoctorMaterialConsumeProvider.EVENT_TYPE.DIAOCHU.getValue())) {
+                        Long relEventId = null;
+                        try {
+                            relEventId = Long.valueOf(cp.getExtraMap().get("relEventId").toString());
+                        } catch (RuntimeException e) {
+                        }
+                        if (relEventId != null) {
+                            DoctorMaterialConsumeProvider relCP = RespHelper.or500(doctorMaterialConsumeProviderReadService.findById(relEventId));
+                            dto.setDiaoboWarehouseId(relCP.getWareHouseId());
+                            dto.setDiaoboWarehouseName(relCP.getWareHouseName());
+                        }
+                    }
+                    return dto;
+                })
+                .collect(Collectors.toList());
+        result.setEvents(events);
         return result;
     }
 }
