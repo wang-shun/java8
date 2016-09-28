@@ -57,6 +57,6 @@ public class DoctorGroupTrackDao extends MyBatisDao<DoctorGroupTrack> {
     }
 
     public void deleteByGroupId(Long groupId) {
-        getSqlSession().delete("deleteByGroupId", groupId);
+        getSqlSession().delete("deleteGroupTrackByGroupId", groupId);
     }
 }

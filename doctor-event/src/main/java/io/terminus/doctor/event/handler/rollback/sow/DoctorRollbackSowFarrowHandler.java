@@ -14,6 +14,7 @@ import io.terminus.doctor.event.model.DoctorPigEvent;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Objects;
@@ -53,7 +54,7 @@ public class DoctorRollbackSowFarrowHandler extends DoctorAbstractRollbackPigEve
         return RespHelper.orFalse(doctorGroupReadService.isLastEvent(toGroupEvent.getGroupId(), groupEventId));
     }
 
-    @Override
+    @Override @Transactional
     protected void handleRollback(DoctorPigEvent pigEvent, Long operatorId, String operatorName) {
         //1.转入猪群
         DoctorGroupEvent toGroupEvent = doctorGroupEventDao.findByRelPigEventId(pigEvent.getRelPigEventId());

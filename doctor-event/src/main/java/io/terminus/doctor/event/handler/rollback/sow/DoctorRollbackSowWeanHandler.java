@@ -14,6 +14,7 @@ import io.terminus.doctor.event.model.DoctorPigTrack;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Objects;
@@ -51,7 +52,7 @@ public class DoctorRollbackSowWeanHandler extends DoctorAbstractRollbackPigEvent
         return true;
     }
 
-    @Override
+    @Override @Transactional
     protected void handleRollback(DoctorPigEvent pigEvent, Long operatorId, String operatorName) {
         //如果断奶后转舍， 先回滚转舍
         DoctorPartWeanDto weanDto = JSON_MAPPER.fromJson(pigEvent.getExtra(), DoctorPartWeanDto.class);
