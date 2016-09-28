@@ -344,7 +344,9 @@ public class DoctorWareHouseQuery {
                 inner.setInAmount(reportmap.get(houseId).getInAmount());
             }
             inner.setCurrentStock(warehouseDto.getRemainder());
-            inner.setCurrentStockAmount(stockAmount.get(houseId));
+            if(stockAmount.get(houseId) != null){
+                inner.setCurrentStockAmount(stockAmount.get(houseId));
+            }
             result.getWarehouseReports().add(inner);
         }
         // 所有仓库合计的报表
