@@ -367,6 +367,10 @@ public class DoctorWareHouseQuery {
     @ResponseBody
     public MaterialReport materialReport(@RequestParam Long farmId,
                                          @RequestParam Long warehouseId,
+                                         @RequestParam(required = false) Long materialId,
+                                         @RequestParam(required = false) String materialName,
+                                         @RequestParam(required = false) Integer eventType,
+                                         @RequestParam(required = false) List<Integer> eventTypes,
                                          @RequestParam(required = false) String startAt,
                                          @RequestParam(required = false) String endAt){
         Date start = startAt == null ? null : DateTime.parse(startAt).toDate();
@@ -384,15 +388,15 @@ public class DoctorWareHouseQuery {
         total.setWarehouseName(wareHouseDto.getWarehouseName());
         total.setCurrentStock(wareHouseDto.getRemainder());
         for(WarehouseEventReport report : warehouseEventReports){
-            DoctorMaterialConsumeProvider.EVENT_TYPE eventType = DoctorMaterialConsumeProvider.EVENT_TYPE.from(report.getEventType());
-            if(eventType == null){
+            DoctorMaterialConsumeProvider.EVENT_TYPE event_type = DoctorMaterialConsumeProvider.EVENT_TYPE.from(report.getEventType());
+            if(event_type == null){
                 continue;
             }
-            if(eventType.equals(DoctorMaterialConsumeProvider.EVENT_TYPE.PROVIDER)){
+            if(event_type.equals(DoctorMaterialConsumeProvider.EVENT_TYPE.PROVIDER)){
                 total.setInAmount(report.getAmount());
                 total.setInCount(report.getCount());
             }
-            if(eventType.equals(DoctorMaterialConsumeProvider.EVENT_TYPE.CONSUMER)){
+            if(event_type.equals(DoctorMaterialConsumeProvider.EVENT_TYPE.CONSUMER)){
                 total.setOutAmount(report.getAmount());
                 total.setOutCount(report.getCount());
             }
@@ -403,7 +407,9 @@ public class DoctorWareHouseQuery {
 
         MaterialReport result = new MaterialReport();
         result.setTotalReport(total);
-        result.setEvents(RespHelper.or500(doctorMaterialConsumeProviderReadService.list(farmId, warehouseId, null, null, null, null, startAt, DateUtil.toDateString(end))));
+        result.setEvents(RespHelper.or500(doctorMaterialConsumeProviderReadService.list(
+                farmId, warehouseId, materialId, materialName, eventType, eventTypes, null, null, startAt, DateUtil.toDateString(end))
+        ));
         return result;
     }
 }

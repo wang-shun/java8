@@ -53,16 +53,20 @@ public class DoctorMaterialConsumeProviderReadServiceImpl implements DoctorMater
     }
 
     @Override
-    public Response<List<DoctorMaterialConsumeProvider>> list(Long farmId, Long warehouseId, Long materialId, Integer eventType, Integer materilaType,
+    public Response<List<DoctorMaterialConsumeProvider>> list(Long farmId, Long warehouseId, Long materialId, String materialName,
+                                                              Integer eventType, List<Integer> eventTypes, Integer materilaType,
                                                               Long staffId, String startAt, String endAt) {
         try{
             DoctorMaterialConsumeProvider model = DoctorMaterialConsumeProvider.builder()
                     .wareHouseId(warehouseId).materialId(materialId).eventType(eventType).type(materilaType)
-                    .farmId(farmId)
+                    .farmId(farmId).materialName(materialName)
                     .staffId(staffId).build();
             Map<String, Object> map = BeanMapper.convertObjectToMap(model);
             map.put("startAt", startAt);
             map.put("endAt", endAt);
+            if(eventTypes != null && !eventTypes.isEmpty()){
+                map.put("eventTypes", eventTypes);
+            }
             return Response.ok(doctorMaterialConsumeProviderDao.list(Params.filterNullOrEmpty(map)));
         }catch(Exception e){
             log.error("page DoctorMaterialConsumeProvider failed, cause :{}", Throwables.getStackTraceAsString(e));
