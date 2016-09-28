@@ -7,7 +7,6 @@ import io.terminus.doctor.event.enums.RollbackType;
 import io.terminus.doctor.event.handler.rollback.DoctorAbstractRollbackPigEventHandler;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Objects;
@@ -22,7 +21,7 @@ public class DoctorRollbackSowMatingEventHandler extends DoctorAbstractRollbackP
         return Objects.equals(pigEvent.getType(), PigEvent.MATING.getKey()) && isLastEvent(pigEvent);
     }
 
-    @Override @Transactional
+    @Override
     protected void handleRollback(DoctorPigEvent pigEvent, Long operatorId, String operatorName) {
         handleRollbackWithStatus(pigEvent, operatorId, operatorName);
     }

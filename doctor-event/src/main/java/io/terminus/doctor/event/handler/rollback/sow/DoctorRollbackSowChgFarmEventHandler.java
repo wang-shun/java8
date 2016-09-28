@@ -9,7 +9,6 @@ import io.terminus.doctor.event.handler.rollback.DoctorAbstractRollbackPigEventH
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Objects;
@@ -26,7 +25,7 @@ public class DoctorRollbackSowChgFarmEventHandler extends DoctorAbstractRollback
                 isLastEvent(pigEvent);
     }
 
-    @Override @Transactional
+    @Override
     protected void handleRollback(DoctorPigEvent pigEvent, Long operatorId, String operatorName) {
         handleRollbackWithStatus(pigEvent, operatorId, operatorName);
     }

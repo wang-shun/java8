@@ -9,7 +9,6 @@ import io.terminus.doctor.event.handler.rollback.DoctorAbstractRollbackGroupEven
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Objects;
@@ -36,7 +35,7 @@ public class DoctorRollbackGroupChangeHandler extends DoctorAbstractRollbackGrou
         sampleRollback(groupEvent, operatorId, operatorName);
     }
 
-    @Override @Transactional
+    @Override
     protected List<DoctorRollbackDto> handleReport(DoctorGroupEvent groupEvent) {
         DoctorRollbackDto dto = new DoctorRollbackDto();
         dto.setOrgId(groupEvent.getOrgId());

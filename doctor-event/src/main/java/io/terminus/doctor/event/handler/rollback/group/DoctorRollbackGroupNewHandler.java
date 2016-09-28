@@ -7,7 +7,6 @@ import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorGroupSnapshot;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Objects;
@@ -27,7 +26,7 @@ public class DoctorRollbackGroupNewHandler extends DoctorAbstractRollbackGroupEv
         return Objects.equals(groupEvent.getType(), GroupEventType.NEW.getValue()) && isLastEvent(groupEvent);
     }
 
-    @Override @Transactional
+    @Override
     protected void handleRollback(DoctorGroupEvent groupEvent, Long operatorId, String operatorName) {
         log.info("this is a new event:{}", groupEvent);
         DoctorGroupSnapshot snapshot = doctorGroupSnapshotDao.findGroupSnapshotByToEventId(groupEvent.getId());
