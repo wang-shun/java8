@@ -34,6 +34,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.List;
@@ -97,7 +98,7 @@ public class DoctorRollbackServiceImpl implements DoctorRollbackService {
             //获取拦截器链, 判断能否回滚,执行回滚操作, 更新报表
             for (DoctorRollbackGroupEventHandler handler : doctorRollbackHandlerChain.getRollbackGroupEventHandlers()) {
                 if (handler.canRollback(groupEvent)) {
-                    handler.rollback(groupEvent, operatorId, operatorName);
+                    rollbackGroupTracsactional(handler, groupEvent, operatorId, operatorName);
                     handler.updateReport(groupEvent);
                     return Response.ok(Boolean.TRUE);
                 }
@@ -122,7 +123,7 @@ public class DoctorRollbackServiceImpl implements DoctorRollbackService {
             //获取拦截器链, 判断能否回滚, 执行回滚操作, 如果成功, 更新报表
             for (DoctorRollbackPigEventHandler handler : doctorRollbackHandlerChain.getRollbackPigEventHandlers()) {
                 if (handler.canRollback(pigEvent)) {
-                    handler.rollback(pigEvent, operatorId, operatorName);
+                    rollbackPigTracsactional(handler, pigEvent, operatorId, operatorName);
                     handler.updateReport(pigEvent);
                     return Response.ok(Boolean.TRUE);
                 }
@@ -134,6 +135,16 @@ public class DoctorRollbackServiceImpl implements DoctorRollbackService {
             log.error("rollack pig event failed, eventId:{}, cause:{}", eventId, Throwables.getStackTraceAsString(e));
             return Response.fail("rollback.event.failed");
         }
+    }
+
+    @Transactional
+    private void rollbackGroupTracsactional(DoctorRollbackGroupEventHandler handler, DoctorGroupEvent groupEvent, Long operatorId, String operatorName) {
+        handler.rollback(groupEvent, operatorId, operatorName);
+    }
+
+    @Transactional
+    private void rollbackPigTracsactional(DoctorRollbackPigEventHandler handler, DoctorPigEvent pigEvent, Long operatorId, String operatorName) {
+        handler.rollback(pigEvent, operatorId, operatorName);
     }
 
     @Override
