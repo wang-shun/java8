@@ -28,6 +28,7 @@ public class DoctorRollbackGroupNewHandler extends DoctorAbstractRollbackGroupEv
 
     @Override
     protected void handleRollback(DoctorGroupEvent groupEvent, Long operatorId, String operatorName) {
+        log.info("this is a new event:{}", groupEvent);
         DoctorGroupSnapshot snapshot = doctorGroupSnapshotDao.findGroupSnapshotByToEventId(groupEvent.getId());
 
         //删除此事件 -> 删除猪群跟踪 -> 删除猪群 -> 删除镜像 -> 创建回滚日志

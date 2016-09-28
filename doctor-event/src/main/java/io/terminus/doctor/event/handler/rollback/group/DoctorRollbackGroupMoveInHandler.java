@@ -30,6 +30,7 @@ public class DoctorRollbackGroupMoveInHandler extends DoctorAbstractRollbackGrou
 
     @Override
     protected void handleRollback(DoctorGroupEvent groupEvent, Long operatorId, String operatorName) {
+        log.info("this is a movein event:{}", groupEvent);
         sampleRollback(groupEvent, operatorId, operatorName);
     }
 

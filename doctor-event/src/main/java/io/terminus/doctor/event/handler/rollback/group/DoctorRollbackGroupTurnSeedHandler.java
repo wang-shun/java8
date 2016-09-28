@@ -46,6 +46,7 @@ public class DoctorRollbackGroupTurnSeedHandler extends DoctorAbstractRollbackGr
 
     @Override
     protected void handleRollback(DoctorGroupEvent groupEvent, Long operatorId, String operatorName) {
+        log.info("this is a turn seed event:{}", groupEvent);
         //先回滚猪的进场事件
         DoctorPigEvent toPigEvent = doctorPigEventDao.findByRelGroupEventId(groupEvent.getId());
         doctorRollbackSowEntryEventHandler.rollback(toPigEvent, operatorId, operatorName);

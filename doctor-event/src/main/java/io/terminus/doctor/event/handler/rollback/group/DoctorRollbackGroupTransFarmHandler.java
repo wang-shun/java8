@@ -49,6 +49,7 @@ public class DoctorRollbackGroupTransFarmHandler extends DoctorAbstractRollbackG
 
     @Override
     protected void handleRollback(DoctorGroupEvent groupEvent, Long operatorId, String operatorName) {
+        log.info("this is a trans farm event:{}", groupEvent);
         DoctorGroupEvent toGroupEvent = doctorGroupEventDao.findByRelGroupEventId(groupEvent.getId());
 
         //先回滚转入猪群事件， 再回滚转群事件

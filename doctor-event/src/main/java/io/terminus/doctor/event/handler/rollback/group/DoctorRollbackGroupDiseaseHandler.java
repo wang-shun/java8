@@ -27,6 +27,7 @@ public class DoctorRollbackGroupDiseaseHandler extends DoctorAbstractRollbackGro
 
     @Override
     protected void handleRollback(DoctorGroupEvent groupEvent, Long operatorId, String operatorName) {
+        log.info("this is a disease event:{}", groupEvent);
         sampleRollback(groupEvent, operatorId, operatorName);
     }
 

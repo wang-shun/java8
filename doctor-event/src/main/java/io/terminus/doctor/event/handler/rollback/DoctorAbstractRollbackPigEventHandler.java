@@ -62,7 +62,7 @@ public abstract class DoctorAbstractRollbackPigEventHandler extends DoctorAbstra
      */
     @Override
     public final boolean canRollback(DoctorPigEvent pigEvent) {
-        return Objects.equals(pigEvent.getIsAuto(), IsOrNot.YES.getValue()) &&
+        return Objects.equals(pigEvent.getIsAuto(), IsOrNot.NO.getValue()) &&
                 pigEvent.getEventAt().after(DateTime.now().plusMonths(-3).toDate()) &&
                 RespHelper.orFalse(doctorPigEventReadService.isLastEvent(pigEvent.getPigId(), pigEvent.getId())) &&
                 handleCheck(pigEvent);

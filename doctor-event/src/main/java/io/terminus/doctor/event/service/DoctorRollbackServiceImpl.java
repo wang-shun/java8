@@ -21,6 +21,8 @@ import io.terminus.doctor.event.dto.report.daily.DoctorMatingDailyReport;
 import io.terminus.doctor.event.dto.report.daily.DoctorSaleDailyReport;
 import io.terminus.doctor.event.dto.report.daily.DoctorWeanDailyReport;
 import io.terminus.doctor.event.enums.RollbackType;
+import io.terminus.doctor.event.handler.DoctorRollbackGroupEventHandler;
+import io.terminus.doctor.event.handler.DoctorRollbackPigEventHandler;
 import io.terminus.doctor.event.handler.rollback.DoctorRollbackHandlerChain;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorPig;
@@ -93,14 +95,14 @@ public class DoctorRollbackServiceImpl implements DoctorRollbackService {
             }
 
             //获取拦截器链, 判断能否回滚,执行回滚操作, 更新报表
-            doctorRollbackHandlerChain.getRollbackGroupEventHandlers().forEach(handler -> {
+            for (DoctorRollbackGroupEventHandler handler : doctorRollbackHandlerChain.getRollbackGroupEventHandlers()) {
                 if (handler.canRollback(groupEvent)) {
-                    throw new ServiceException("rollback.group.not.allow");
+                    handler.rollback(groupEvent, operatorId, operatorName);
+                    handler.updateReport(groupEvent);
+                    return Response.ok(Boolean.TRUE);
                 }
-                handler.rollback(groupEvent, operatorId, operatorName);
-                handler.updateReport(groupEvent);
-            });
-            return Response.ok(Boolean.TRUE);
+            }
+            throw new ServiceException("rollback.group.not.allow");
         } catch (ServiceException e) {
             return Response.fail(e.getMessage());
         } catch (Exception e) {
@@ -118,14 +120,14 @@ public class DoctorRollbackServiceImpl implements DoctorRollbackService {
             }
 
             //获取拦截器链, 判断能否回滚, 执行回滚操作, 如果成功, 更新报表
-            doctorRollbackHandlerChain.getRollbackPigEventHandlers().forEach(handler -> {
+            for (DoctorRollbackPigEventHandler handler : doctorRollbackHandlerChain.getRollbackPigEventHandlers()) {
                 if (handler.canRollback(pigEvent)) {
-                    throw new ServiceException("rollback.pig.not.allow");
+                    handler.rollback(pigEvent, operatorId, operatorName);
+                    handler.updateReport(pigEvent);
+                    return Response.ok(Boolean.TRUE);
                 }
-                handler.rollback(pigEvent, operatorId, operatorName);
-                handler.updateReport(pigEvent);
-            });
-            return Response.ok(Boolean.TRUE);
+            }
+            throw new ServiceException("rollback.pig.not.allow");
         } catch (ServiceException e) {
             return Response.fail(e.getMessage());
         } catch (Exception e) {

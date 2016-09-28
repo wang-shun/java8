@@ -434,7 +434,7 @@
         from
         <include refid="tb"/>
         where pig_id = #{pigId}
-        order by event_at desc limit 1;
+        order by event_at desc, id desc limit 1;
     </select>
 
     <select id="queryLastPigEventInWorkflow" parameterType="map" resultMap="DoctorPigEventMap">

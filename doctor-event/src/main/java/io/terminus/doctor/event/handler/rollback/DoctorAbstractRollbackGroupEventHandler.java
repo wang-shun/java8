@@ -51,7 +51,7 @@ public abstract class DoctorAbstractRollbackGroupEventHandler extends DoctorAbst
      */
     @Override
     public final boolean canRollback(DoctorGroupEvent groupEvent) {
-        return Objects.equals(groupEvent.getIsAuto(), IsOrNot.YES.getValue()) &&
+        return Objects.equals(groupEvent.getIsAuto(), IsOrNot.NO.getValue()) &&
                 groupEvent.getEventAt().after(DateTime.now().plusMonths(-3).toDate()) &&
                 handleCheck(groupEvent);
     }

@@ -27,6 +27,7 @@ public class DoctorRollbackGroupLiveStockHandler extends DoctorAbstractRollbackG
 
     @Override
     protected void handleRollback(DoctorGroupEvent groupEvent, Long operatorId, String operatorName) {
+        log.info("this is a livestock event:{}", groupEvent);
         sampleRollback(groupEvent, operatorId, operatorName);
     }
 
