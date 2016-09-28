@@ -12,6 +12,7 @@ import io.terminus.doctor.event.dao.DoctorPigTrackDao;
 import io.terminus.doctor.event.dto.DoctorPigSnapShotInfo;
 import io.terminus.doctor.event.dto.DoctorRollbackDto;
 import io.terminus.doctor.event.enums.IsOrNot;
+import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.RollbackType;
 import io.terminus.doctor.event.handler.DoctorRollbackPigEventHandler;
 import io.terminus.doctor.event.model.DoctorPig;
@@ -43,17 +44,28 @@ public abstract class DoctorAbstractRollbackPigEventHandler extends DoctorRollba
 
     protected static final JsonMapper JSON_MAPPER = JsonMapper.nonEmptyMapper();
 
-    @Autowired private DoctorRevertLogWriteService doctorRevertLogWriteService;
-    @Autowired protected FlowProcessService flowProcessService;
-    @Autowired protected DoctorGroupReadService doctorGroupReadService;
-    @Autowired protected DoctorGroupDao doctorGroupDao;
-    @Autowired protected DoctorGroupEventDao doctorGroupEventDao;
-    @Autowired protected DoctorGroupTrackDao doctorGroupTrackDao;
-    @Autowired protected DoctorPigSnapshotDao doctorPigSnapshotDao;
-    @Autowired protected DoctorPigEventDao doctorPigEventDao;
-    @Autowired protected DoctorPigTrackDao doctorPigTrackDao;
-    @Autowired protected DoctorPigDao doctorPigDao;
-    @Autowired protected DoctorPigEventReadService doctorPigEventReadService;
+    @Autowired
+    private DoctorRevertLogWriteService doctorRevertLogWriteService;
+    @Autowired
+    protected FlowProcessService flowProcessService;
+    @Autowired
+    protected DoctorGroupReadService doctorGroupReadService;
+    @Autowired
+    protected DoctorGroupDao doctorGroupDao;
+    @Autowired
+    protected DoctorGroupEventDao doctorGroupEventDao;
+    @Autowired
+    protected DoctorGroupTrackDao doctorGroupTrackDao;
+    @Autowired
+    protected DoctorPigSnapshotDao doctorPigSnapshotDao;
+    @Autowired
+    protected DoctorPigEventDao doctorPigEventDao;
+    @Autowired
+    protected DoctorPigTrackDao doctorPigTrackDao;
+    @Autowired
+    protected DoctorPigDao doctorPigDao;
+    @Autowired
+    protected DoctorPigEventReadService doctorPigEventReadService;
     @Value("${flow.definition.key.sow:sow}")
     protected String sowFlowKey;
 
@@ -104,26 +116,31 @@ public abstract class DoctorAbstractRollbackPigEventHandler extends DoctorRollba
 
     /**
      * 需要更新的统计
+     *
      * @see RollbackType
      */
     protected abstract List<DoctorRollbackDto> handleReport(DoctorPigEvent pigEvent);
 
     /**
      * 不涉及状态的事件回滚处理
+     *
      * @param pigEvent 猪事件
      */
-    protected void handleRollbackWithoutStatus(DoctorPigEvent pigEvent, Long operatorId, String operatorName){
+    protected void handleRollbackWithoutStatus(DoctorPigEvent pigEvent, Long operatorId, String operatorName) {
+        DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(pigEvent.getPigId());
+        DoctorPig doctorPig = doctorPigDao.findById(pigEvent.getPigId());
         DoctorPigSnapshot snapshot = doctorPigSnapshotDao.queryByEventId(pigEvent.getId());
         DoctorPigSnapShotInfo info = JSON_MAPPER.fromJson(snapshot.getPigInfo(), DoctorPigSnapShotInfo.class);
         doctorPigEventDao.delete(pigEvent.getId());
         doctorPigTrackDao.update(info.getPigTrack());
         doctorPigDao.update(info.getPig());
         doctorPigSnapshotDao.delete(snapshot.getId());
-        createDoctorRevertLog(pigEvent, operatorId, operatorName);
+        createDoctorRevertLog(pigEvent, doctorPigTrack, doctorPig, operatorId, operatorName);
     }
 
     /**
      * 涉及状态的事件回滚处理
+     *
      * @param pigEvent 猪事件
      */
     protected void handleRollbackWithStatus(DoctorPigEvent pigEvent, Long operatorId, String operatorName) {
@@ -133,40 +150,41 @@ public abstract class DoctorAbstractRollbackPigEventHandler extends DoctorRollba
 
     /**
      * 回滚工作流
+     *
      * @param pigEvent 事件
      */
-    protected void workFlowRollback(DoctorPigEvent pigEvent){
-        if (Objects.equals(pigEvent.getKind(), DoctorPig.PIG_TYPE.SOW.getKey())){
+    protected void workFlowRollback(DoctorPigEvent pigEvent) {
+        if (Objects.equals(pigEvent.getKind(), DoctorPig.PIG_TYPE.SOW.getKey())) {
             flowProcessService.rollBack(sowFlowKey, pigEvent.getPigId());
         }
     }
 
     /**
      * 创建回滚日志
-     * @param pigEvent 事件
+     *
+     * @param fromPigEvent 事件
      * @return 回滚日志
      */
-    protected void createDoctorRevertLog(DoctorPigEvent pigEvent, Long operatorId, String operatorName) {
-        DoctorPigTrack doctorPigTrack= doctorPigTrackDao.findByPigId(pigEvent.getPigId());
-        DoctorPig doctorPig= doctorPigDao.findById(pigEvent.getPigId());
-        DoctorPigSnapShotInfo fromInfo  = DoctorPigSnapShotInfo.builder()
-                .pigEvent(pigEvent)
-                .pigTrack(doctorPigTrack)
-                .pig(doctorPig)
+    protected void createDoctorRevertLog(DoctorPigEvent fromPigEvent, DoctorPigTrack fromPigTrack, DoctorPig fromPig, Long operatorId, String operatorName) {
+        DoctorPigSnapShotInfo fromInfo = DoctorPigSnapShotInfo.builder()
+                .pigEvent(fromPigEvent)
+                .pigTrack(fromPigTrack)
+                .pig(fromPig)
                 .build();
 
-        DoctorPigEvent toPigEvent = doctorPigEventDao.queryLastPigEventById(pigEvent.getPigId());
-        DoctorPigTrack toPigTrack = doctorPigTrackDao.findByPigId(toPigEvent.getPigId());
-        DoctorPigSnapShotInfo toInfo  = DoctorPigSnapShotInfo.builder()
+        DoctorPigEvent toPigEvent = doctorPigEventDao.queryLastPigEventById(fromPigEvent.getPigId());
+        DoctorPigTrack toPigTrack = doctorPigTrackDao.findByPigId(fromPigEvent.getPigId());
+        DoctorPig toPig = doctorPigDao.findById(fromPigEvent.getPigId());
+        DoctorPigSnapShotInfo toInfo = DoctorPigSnapShotInfo.builder()
                 .pigEvent(toPigEvent)
                 .pigTrack(toPigTrack)
-                .pig(doctorPig)
+                .pig(toPig)
                 .build();
 
         DoctorRevertLog revertLog = new DoctorRevertLog();
-        revertLog.setFarmId(pigEvent.getFarmId());
-        revertLog.setPigId(pigEvent.getPigId());
-        revertLog.setType(pigEvent.getKind());
+        revertLog.setFarmId(fromPigEvent.getFarmId());
+        revertLog.setPigId(fromPigEvent.getPigId());
+        revertLog.setType(fromPigEvent.getKind());
         revertLog.setFromInfo(JSON_MAPPER.toJson(fromInfo));
         revertLog.setToInfo(JSON_MAPPER.toJson(toInfo));
         revertLog.setReverterId(operatorId);

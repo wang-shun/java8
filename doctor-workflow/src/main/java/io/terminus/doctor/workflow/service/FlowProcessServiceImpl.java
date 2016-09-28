@@ -2,6 +2,7 @@ package io.terminus.doctor.workflow.service;
 
 import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
+import io.terminus.common.utils.Splitters;
 import io.terminus.doctor.workflow.access.JdbcAccess;
 import io.terminus.doctor.workflow.core.Execution;
 import io.terminus.doctor.workflow.core.Executor;
@@ -24,6 +25,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Desc: 流程流程相关的实现类
@@ -320,6 +322,25 @@ public class FlowProcessServiceImpl implements FlowProcessService {
                     .flowInstanceId(mainFlowInstance.getId())
                     .desc()
                     .list();
+            Long nodeId = Long.parseLong(Splitters.COMMA.splitToList(currentProcesses.get(0).getPreFlowDefinitionNodeId()).get(0));
+            if (Objects.equals(workFlowEngine.buildFlowQueryService().getFlowDefinitionNodeQuery().id(nodeId).single().getType(), FlowDefinitionNode.Type.START.value())) {
+                if (depth != 1){
+                    AssertHelper.throwException(
+                            "当前流程处于进场时回滚操作深度只能为1, 流程定义key为: {}, 业务id为: {}", flowDefinitionKey, businessId);
+                }
+                FlowProcessTrack rollbackTrack = workFlowEngine.buildFlowQueryService().getFlowProcessTrackQuery().flowInstanceId(currentProcesses.get(0).getFlowInstanceId()).single();
+                FlowHistoryProcess hisProcess = FlowHistoryProcess.builder().build();
+                BeanHelper.copy(hisProcess, rollbackTrack);
+                hisProcess.setOperatorId(operatorId);
+                hisProcess.setOperatorName(operatorName);
+                hisProcess.setStatus(FlowProcess.Status.END.value());
+                hisProcess.setDescribe("任务节点[" + currNode.getName() + "], 回滚成功");
+                access().createFlowHistoryProcess(hisProcess);
+                access().deleteFlowProcess(currentProcesses.get(0).getId());
+                access().deleteFlowProcessTrack(rollbackTrack.getId());
+                access().deleteFlowInstance(currentProcesses.get(0).getFlowInstanceId());
+                return;
+            }
             int count = 0;
             FlowProcessTrack currTrack = null;
             List<Long> deleteTrackIds = Lists.newArrayList();

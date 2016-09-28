@@ -9,6 +9,7 @@ import io.terminus.doctor.event.handler.rollback.DoctorAbstractRollbackPigEventH
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigSnapshot;
+import io.terminus.doctor.event.model.DoctorPigTrack;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -31,11 +32,13 @@ public class DoctorRollbackBoarEntryEventHandler extends DoctorAbstractRollbackP
     protected void handleRollback(DoctorPigEvent pigEvent, Long operatorId, String operatorName) {
         DoctorPigSnapshot snapshot = doctorPigSnapshotDao.queryByEventId(pigEvent.getId());
         DoctorPigSnapShotInfo info = JSON_MAPPER.fromJson(snapshot.getPigInfo(), DoctorPigSnapShotInfo.class);
+        DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(pigEvent.getPigId());
+        DoctorPig doctorPig = doctorPigDao.findById(pigEvent.getPigId());
         doctorPigEventDao.delete(pigEvent.getId());
         doctorPigTrackDao.delete(info.getPigTrack().getId());
         doctorPigDao.delete(info.getPig().getId());
         doctorPigSnapshotDao.delete(snapshot.getId());
-        createDoctorRevertLog(pigEvent, operatorId, operatorName);
+        createDoctorRevertLog(pigEvent, doctorPigTrack, doctorPig, operatorId, operatorName);
     }
 
     @Override
