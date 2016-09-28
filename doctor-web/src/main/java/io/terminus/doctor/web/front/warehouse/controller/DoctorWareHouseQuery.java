@@ -339,10 +339,12 @@ public class DoctorWareHouseQuery {
             WarehouseReport.Report inner = new WarehouseReport.Report();
             inner.setWarehouseId(warehouseDto.getWarehouseId());
             inner.setWarehouseName(warehouseDto.getWarehouseName());
-            inner.setOutCount(reportmap.get(houseId).getOutCount());
-            inner.setOutAmount(reportmap.get(houseId).getOutAmount());
-            inner.setInCount(reportmap.get(houseId).getInCount());
-            inner.setInAmount(reportmap.get(houseId).getInAmount());
+            if(reportmap.containsKey(houseId)){
+                inner.setOutCount(reportmap.get(houseId).getOutCount());
+                inner.setOutAmount(reportmap.get(houseId).getOutAmount());
+                inner.setInCount(reportmap.get(houseId).getInCount());
+                inner.setInAmount(reportmap.get(houseId).getInAmount());
+            }
             inner.setCurrentStock(warehouseDto.getRemainder());
             inner.setCurrentStockAmount(stockAmount.get(houseId));
             result.getWarehouseReports().add(inner);
