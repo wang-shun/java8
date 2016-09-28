@@ -303,9 +303,7 @@ public class DoctorWareHouseQuery {
                 farmId, null, WareHouseType.from(wareHouseType), null, startAt == null ? null : DateTime.parse(startAt).toDate(),
                 endAt == null ? null : DateTime.parse(endAt).plusDays(1).toDate()
         ));
-        if(warehouseEventReports.isEmpty()){
-            return new WarehouseReport();
-        }
+
         Map<Long, WarehouseReport.Report> reportmap = new HashMap<>();
         for(WarehouseEventReport report : warehouseEventReports){
             Long houseId = report.getWarehouseId();
