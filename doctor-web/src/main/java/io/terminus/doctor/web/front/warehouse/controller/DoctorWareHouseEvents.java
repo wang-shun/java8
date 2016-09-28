@@ -234,7 +234,7 @@ public class DoctorWareHouseEvents {
      * @param unitId
      * @return
      */
-    @RequestMapping(value = "/initMaterialInWarehouse", method = RequestMethod.GET)
+    @RequestMapping(value = "/initMaterialInWarehouse", method = {RequestMethod.GET, RequestMethod.POST})
     @ResponseBody
     public boolean initMaterialInWarehouse(@RequestParam Long materialId, @RequestParam Long warehouseId, Long unitId){
         DoctorBasicMaterial material = RespHelper.or500(doctorBasicMaterialReadService.findBasicMaterialById(materialId));
