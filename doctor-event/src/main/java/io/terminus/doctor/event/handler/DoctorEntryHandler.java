@@ -1,5 +1,6 @@
 package io.terminus.doctor.event.handler;
 
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
@@ -180,6 +181,7 @@ public class DoctorEntryHandler implements DoctorEventCreateHandler {
                 .type(basic.getEventType()).kind(basic.getPigType()).name(basic.getEventName()).desc(basic.generateEventDescFromExtra(extra))
                 .barnId(dto.getBarnId()).barnName(dto.getBarnName()).relEventId(basic.getRelEventId())
                 .remark(dto.getEntryMark()).creatorId(basic.getStaffId()).creatorName(basic.getStaffName())
+                .isAuto(MoreObjects.firstNonNull(basic.getIsAuto(), IsOrNot.NO.getValue()))
                 .npd(0)
                 .dpnpd(0)
                 .pfnpd(0)

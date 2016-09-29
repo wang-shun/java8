@@ -1,6 +1,7 @@
 package io.terminus.doctor.event.handler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
@@ -16,6 +17,7 @@ import io.terminus.doctor.event.dao.DoctorRevertLogDao;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
 import io.terminus.doctor.event.dto.DoctorPigSnapShotInfo;
 import io.terminus.doctor.event.dto.event.usual.DoctorFarmEntryDto;
+import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigEvent;
@@ -166,7 +168,8 @@ public class DoctorEntryFlowHandler extends HandlerAware {
                 .pigCode(dto.getPigCode()).eventAt(DateTime.now().toDate())
                 .type(basic.getEventType()).kind(basic.getPigType()).name(basic.getEventName()).desc(basic.getEventDesc())
                 .barnId(dto.getBarnId()).barnName(dto.getBarnName()).relEventId(basic.getRelEventId())
-                .remark(dto.getEntryMark()).creatorId(basic.getStaffId()).creatorName(basic.getStaffName()).isAuto(basic.getIsAuto())
+                .remark(dto.getEntryMark()).creatorId(basic.getStaffId()).creatorName(basic.getStaffName())
+                .isAuto(MoreObjects.firstNonNull(basic.getIsAuto(), IsOrNot.NO.getValue()))
                 .npd(0)
                 .dpnpd(0)
                 .pfnpd(0)

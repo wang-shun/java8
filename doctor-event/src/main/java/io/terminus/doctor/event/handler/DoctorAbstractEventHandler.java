@@ -1,5 +1,6 @@
 package io.terminus.doctor.event.handler;
 
+import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableMap;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.common.utils.JsonMapper;
@@ -167,7 +168,7 @@ public abstract class DoctorAbstractEventHandler implements DoctorEventCreateHan
                 .kind(basic.getPigType()).name(basic.getEventName()).desc(basic.generateEventDescFromExtra(extra)).relEventId(basic.getRelEventId())
                 .barnId(basic.getBarnId()).barnName(basic.getBarnName())
                 .operatorId(abstractPigEventInputDto.getOperatorId()).operatorName(abstractPigEventInputDto.getOperatorName())
-                .creatorId(basic.getStaffId()).creatorName(basic.getStaffName()).isAuto(IsOrNot.NO.getValue())
+                .creatorId(basic.getStaffId()).creatorName(basic.getStaffName()).isAuto(MoreObjects.firstNonNull(basic.getIsAuto(), IsOrNot.NO.getValue()))
                 .npd(0)
                 .dpnpd(0)
                 .pfnpd(0)

@@ -1,6 +1,7 @@
 package io.terminus.doctor.event.handler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
@@ -276,7 +277,7 @@ public abstract class DoctorAbstractEventFlowHandler extends HandlerAware {
                 .kind(basic.getPigType()).name(basic.getEventName()).desc(basic.generateEventDescFromExtra(extra)).relEventId(basic.getRelEventId())
                 .barnId(basic.getBarnId()).barnName(basic.getBarnName())
                 .operatorId(abstractPigEventInputDto.getOperatorId()).operatorName(abstractPigEventInputDto.getOperatorName())
-                .creatorId(basic.getStaffId()).creatorName(basic.getStaffName()).isAuto(IsOrNot.NO.getValue())
+                .creatorId(basic.getStaffId()).creatorName(basic.getStaffName()).isAuto(MoreObjects.firstNonNull(basic.getIsAuto(), IsOrNot.NO.getValue()))
                 .npd(0)
                 .dpnpd(0)
                 .pfnpd(0)
