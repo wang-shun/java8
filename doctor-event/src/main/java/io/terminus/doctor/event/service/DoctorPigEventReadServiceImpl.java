@@ -2,6 +2,7 @@ package io.terminus.doctor.event.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Throwables;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -10,12 +11,14 @@ import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.model.PageInfo;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
+import io.terminus.common.utils.Arguments;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.common.utils.Splitters;
 import io.terminus.doctor.common.constants.JacksonType;
 import io.terminus.doctor.event.dao.DoctorPigEventDao;
 import io.terminus.doctor.event.dao.DoctorPigTrackDao;
 import io.terminus.doctor.event.dto.DoctorSowParityCount;
+import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.model.DoctorPig;
@@ -25,11 +28,13 @@ import io.terminus.doctor.workflow.query.FlowDefinitionNodeEventQuery;
 import io.terminus.doctor.workflow.service.FlowQueryService;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.validation.constraints.NotNull;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -251,6 +256,20 @@ public class DoctorPigEventReadServiceImpl implements DoctorPigEventReadService 
         } catch (Exception e) {
             log.error("find pig event is last event failed, pigId:{}, eventId:{}, cause:{}", pigId, eventId, Throwables.getStackTraceAsString(e));
             return Response.ok(Boolean.FALSE);
+        }
+    }
+
+    @Override
+    public Response<DoctorPigEvent> canRollbackEvent(@NotNull(message = "input.pigId.empty") Long pigId) {
+        try {
+            List<DoctorPigEvent> doctorPigEvents = doctorPigEventDao.list(ImmutableMap.of("pigId", pigId, "isAuto", IsOrNot.NO.getValue(), "beginDate", DateTime.now().minusMonths(3).toDate()));
+            if (Arguments.isNullOrEmpty(doctorPigEvents)){
+                return Response.ok();
+            }
+            return Response.ok(doctorPigEvents.stream().max(Comparator.comparing(DoctorPigEvent::getEventAt)).get());
+        } catch (Exception e) {
+            log.error("can.rollback.event.failed, cause {}", Throwables.getStackTraceAsString(e));
+            return Response.fail("can.rollback.event.failed");
         }
     }
 }

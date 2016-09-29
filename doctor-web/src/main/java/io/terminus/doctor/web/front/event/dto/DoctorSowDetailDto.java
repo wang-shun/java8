@@ -46,5 +46,7 @@ public class DoctorSowDetailDto implements Serializable {
 
     private Date birthDate; //出生日期
 
+    private Long canRollback;
+
     private List<DoctorPigEvent> doctorPigEvents;
 }
