@@ -6,8 +6,10 @@ import io.terminus.doctor.event.dto.DoctorRollbackDto;
 import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.enums.RollbackType;
 import io.terminus.doctor.event.handler.rollback.DoctorAbstractRollbackGroupEventHandler;
+import io.terminus.doctor.event.handler.rollback.boar.DoctorRollbackBoarEntryEventHandler;
 import io.terminus.doctor.event.handler.rollback.sow.DoctorRollbackSowEntryEventHandler;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
+import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,9 +31,12 @@ public class DoctorRollbackGroupTurnSeedHandler extends DoctorAbstractRollbackGr
     @Autowired
     private DoctorRollbackSowEntryEventHandler doctorRollbackSowEntryEventHandler;
 
+    @Autowired
+    private DoctorRollbackBoarEntryEventHandler doctorRollbackBoarEntryEventHandler;
+
     @Override
     protected boolean handleCheck(DoctorGroupEvent groupEvent) {
-        if (!Objects.equals(groupEvent.getType(), GroupEventType.TRANS_GROUP.getValue())) {
+        if (!Objects.equals(groupEvent.getType(), GroupEventType.TURN_SEED.getValue())) {
             return false;
         }
         if (!isLastEvent(groupEvent)) {
@@ -47,9 +52,13 @@ public class DoctorRollbackGroupTurnSeedHandler extends DoctorAbstractRollbackGr
     @Override
     protected void handleRollback(DoctorGroupEvent groupEvent, Long operatorId, String operatorName) {
         log.info("this is a turn seed event:{}", groupEvent);
-        //先回滚猪的进场事件
+        //先回滚猪的进场事件(判断公猪还是母猪进场)
         DoctorPigEvent toPigEvent = doctorPigEventDao.findByRelGroupEventId(groupEvent.getId());
-        doctorRollbackSowEntryEventHandler.rollback(toPigEvent, operatorId, operatorName);
+        if (Objects.equals(toPigEvent.getKind(), DoctorPig.PIG_TYPE.SOW.getKey())) {
+            doctorRollbackSowEntryEventHandler.rollback(toPigEvent, operatorId, operatorName);
+        } else {
+            doctorRollbackBoarEntryEventHandler.rollback(toPigEvent, operatorId, operatorName);
+        }
         sampleRollback(groupEvent, operatorId, operatorName);
     }
 
