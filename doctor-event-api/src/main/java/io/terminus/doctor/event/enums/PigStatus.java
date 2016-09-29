@@ -17,7 +17,7 @@ public enum PigStatus {
     BOAR_LEAVE(12,"公猪已离场", "公猪已离场"),
 
     // 母猪状态
-    Entry (1,"待配种","待配种"),
+    Entry (1,"进场","进场"),
     Removal(2,"已离场","已离场"),
     Mate(3,"已配种","已配种"),
     Pregnancy(4,"阳性","妊娠检查阳性"),

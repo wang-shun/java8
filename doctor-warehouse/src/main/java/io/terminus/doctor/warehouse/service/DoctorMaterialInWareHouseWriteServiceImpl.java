@@ -4,8 +4,10 @@ import com.google.common.base.Throwables;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.Response;
+import io.terminus.doctor.warehouse.dao.DoctorMaterialInWareHouseDao;
 import io.terminus.doctor.warehouse.dto.DoctorMaterialConsumeProviderDto;
 import io.terminus.doctor.warehouse.manager.MaterialInWareHouseManager;
+import io.terminus.doctor.warehouse.model.DoctorMaterialInWareHouse;
 import io.terminus.zookeeper.pubsub.Publisher;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,13 +25,26 @@ import org.springframework.stereotype.Service;
 public class DoctorMaterialInWareHouseWriteServiceImpl implements DoctorMaterialInWareHouseWriteService{
 
     private final MaterialInWareHouseManager materialInWareHouseManager;
+    private final DoctorMaterialInWareHouseDao materialInWareHouseDao;
 
     @Autowired(required = false)
     private Publisher publisher;
 
     @Autowired
-    public DoctorMaterialInWareHouseWriteServiceImpl(MaterialInWareHouseManager materialInWareHouseManager){
+    public DoctorMaterialInWareHouseWriteServiceImpl(MaterialInWareHouseManager materialInWareHouseManager,
+                                                     DoctorMaterialInWareHouseDao materialInWareHouseDao){
         this.materialInWareHouseManager = materialInWareHouseManager;
+        this.materialInWareHouseDao = materialInWareHouseDao;
+    }
+
+    @Override
+    public Response<Boolean> create(DoctorMaterialInWareHouse materialInWareHouse){
+        try{
+            return Response.ok(materialInWareHouseDao.create(materialInWareHouse));
+        }catch(Exception e){
+            log.error("create DoctorMaterialInWareHouse failed, cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("create.DoctorMaterialInWareHouse.fail");
+        }
     }
 
     /**

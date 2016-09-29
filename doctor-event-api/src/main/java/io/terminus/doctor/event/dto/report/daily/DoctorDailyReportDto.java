@@ -130,6 +130,7 @@ public class DoctorDailyReportDto implements Serializable {
         this.dead.setFarrow(this.dead.getFarrow() + report.getDead().getFarrow());
         this.dead.setNursery(this.dead.getNursery() + report.getDead().getNursery());
         this.dead.setFatten(this.dead.getFatten() + report.getDead().getFatten());
+        this.dead.setHoubei(this.dead.getHoubei() + report.getDead().getHoubei());
 
         //存栏
         this.liveStock.setFarrow(report.getLiveStock().getFarrow());

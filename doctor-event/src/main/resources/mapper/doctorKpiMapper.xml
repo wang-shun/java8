@@ -267,6 +267,17 @@
         <include refid="criteria"/>
     </select>
 
+    <!-- 死淘情况: 后备猪 -->
+    <select id="getDeadHoubei" parameterType="map" resultType="int">
+        SELECT
+        ifnull(sum(quantity),0)
+        FROM doctor_group_events
+        WHERE
+        change_type_id IN (110, 111) AND -- 变动类型是死亡和淘汰
+        pig_type IN (4, 8) -- 后备猪
+        <include refid="criteria"/>
+    </select>
+
     <!-- 死淘情况: 产房死淘率 -->
     <select id="getDeadFarrowRate" parameterType="map" resultType="double">
         SELECT
@@ -1397,5 +1408,187 @@
                 <if test="endAt != null">AND cp.event_time &lt;= #{endAt}</if>
             GROUP BY barns.`pig_type`, cp.`type`
         ) AS res
+    </select>
+
+    <select id="getParityStockMonthly" parameterType="map" resultType="io.terminus.doctor.event.dto.report.monthly.DoctorStockStructureMonthlyReport">
+        select  date_format(#{endAt}, '%Y-%m-%d') as sumAt,
+                1 as type,
+                null as businessId,
+                t11.parity as businessName,
+                ifnull(t12.counts, 0) + ifnull(t13.counts, 0) + ifnull(t14.counts, 0) - ifnull(t15.counts, 0) as count
+        from
+        (
+        select name as parity
+        from doctor_basics
+        where type = 9
+        ) t11 left join
+        (
+        -- 当前
+        select case when t2.current_parity &lt; 10 then t2.current_parity else 10 end as parity,
+        count(1) as counts
+        from doctor_pigs t1
+        left join doctor_pig_tracks t2 on t1.id = t2.pig_id
+        where t1.is_removal = 0
+        and t1.pig_type = 1
+        and t1.farm_id = #{farmId}
+        group by case when t2.current_parity &lt; 10 then t2.current_parity else 10 end
+        ) t12 on t11.parity = t12.parity
+        left join
+        (
+        -- 离场-进场
+        select case when parity &lt; 10 then parity else 10 end as parity,
+        sum(case type when 6 then 1 else 0 end) - sum(case type when 7 then 1 else 0 end ) as counts
+        from doctor_pig_events
+        where kind = 1
+        and type in (6, 7)
+        and farm_id = #{farmId}
+        and event_at &gt;= #{startAt}
+        group by case when parity &lt; 10 then parity else '10' end
+        ) t13 on t11.parity = t13.parity
+        left join
+        (
+        -- 配种影响下一胎次
+        select case when parity-1 &lt; 9 then parity-1 else '10' end as parity ,
+        count(1) as counts
+        from doctor_pig_events
+        where kind = 1
+        and type = 9
+        and farm_id = #{farmId}
+        and event_at &gt;= #{startAt}
+        group by case when parity-1 &lt; 9 then parity-1 else '10' end
+        ) t14 on t11.parity = t14.parity
+        left join (
+        -- 配种影响当前胎次
+        select case when parity &lt; 10 then parity else '10' end as parity ,
+        count(1) as counts
+        from doctor_pig_events
+        where kind = 1
+        and type = 9
+        and parity > 1
+        and farm_id = #{farmId}
+        and event_at &gt;= #{startAt}
+        group by case when parity &lt; 10 then parity else '10' end
+        ) t15 on t11.parity = t15.parity
+    </select>
+
+    <select id="getBreedStockMonthly" parameterType="map" resultType="io.terminus.doctor.event.dto.report.monthly.DoctorStockStructureMonthlyReport">
+        select
+              date_format(#{endAt}, '%Y-%m-%d') as sumAt,
+              2 as type,
+              t11.breed_id as businessId,
+              t11.breed_name as businessName,
+              t11.counts - ifnull(t12.inCounts, 0) + ifnull(t12.outCounts, 0) as count
+        from(
+        SELECT t1.id as breed_id, t1.name as breed_name, ifnull(t2.counts, 0) as counts
+          FROM doctor_basics t1
+          left join  (
+          select breed_id,breed_name, count(1) as counts
+          from doctor_pigs
+         WHERE is_removal = 0
+           AND pig_type = 1
+           AND farm_id = #{farmId}
+        group by breed_id, breed_name) t2 on t1.id = t2.breed_id and t1.name = t2.breed_name
+        where t1.type = 1
+        ) t11
+        left join (
+        SELECT    t2.breed_id,
+                t2.breed_name,
+                 count(1) AS quantity,
+               sum(case type when 6 then 1 else 0 end) as outCounts,
+                sum(case type when 7 then 1 else 0 end) as inCounts
+           FROM doctor_pig_events t1
+           join doctor_pigs t2 on t1.pig_code = t2.pig_code
+          WHERE t1.kind = 1
+            AND t1.type IN (6, 7)
+            and t1.event_at &gt;= #{startAt}
+            AND t1.farm_id = #{farmId}
+        GROUP BY t2.breed_id, t2.breed_name
+        ) t12 on t11.breed_id = t12.breed_id and t11.breed_name = t12.breed_name;
+    </select>
+
+    <!-- 断奶七天配种率-->
+    <select id="getMateInSeven" parameterType="map" resultType="double">
+        select
+        case (
+        -- 断奶母猪数
+        select  count(1)
+        from doctor_pig_events
+        where
+        pig_status_after = 9
+        and type in (16,17,18)
+        <include refid="criteria"/>
+        ) when 0 then 0 else
+        (
+        -- 本月7天内断奶配种数
+        select count(1)
+        from
+        (
+        select  pig_code, event_at, parity
+        from doctor_pig_events
+        where
+        pig_status_after = 9
+        and type in (16,17,18)
+        <include refid="criteria"/>
+        ) t1 left join
+        (
+        select  pig_code, event_at, parity
+        from doctor_pig_events
+        where type = 9
+        and farm_id = 1
+        <include refid="criteria"/>
+        and current_mating_count = 1
+        and pig_code in(
+        select  pig_code
+        from doctor_pig_events
+        where
+        pig_status_after = 9
+        and type in (16,17,18)
+        <include refid="criteria"/>
+        )
+        ) t2 on t1.pig_code = t2.pig_code and t1.parity + 1 = t2.parity
+        where t1.event_at > date_add(t2.event_at, interval -7 day)
+        )/
+        (
+        (
+        -- 断奶母猪数
+        select  count(1)
+        from doctor_pig_events
+        where
+        pig_status_after = 9
+        and type in (16,17,18)
+        <include refid="criteria"/>
+        ) -
+        (
+        -- 7天内断奶的
+        select count(1)
+        from  doctor_pig_events
+        where
+        pig_status_after = 9
+        and type in (16,17,18)
+        and farm_id = 1
+        and event_at &gt;= date_add(date(#{endAt}), interval -7 day)
+        and event_at &lt;= #{endAt}
+        ) +
+        (
+        -- 断奶七天内配种
+        select count(1)
+        from doctor_pig_events
+        where
+        type = 9
+        and farm_id = 1
+        and event_at &gt;= date_add(date(#{endAt}), interval -7 day)
+        and event_at &lt;= #{endAt}
+        and pig_code in(
+        select pig_code
+        from  doctor_pig_events
+        where
+        pig_status_after = 9
+        and type in (16,17,18)
+        and farm_id = 1
+        and event_at &gt;= date_add(date(#{endAt}), interval -7 day)
+        and event_at &lt;= #{endAt}
+        )
+        )
+        ) end from dual
     </select>
 </mapper>

@@ -8,10 +8,12 @@ import io.terminus.common.model.Response;
 import io.terminus.common.utils.Dates;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.utils.DateUtil;
+import io.terminus.doctor.event.dao.DoctorBoarMonthlyReportDao;
 import io.terminus.doctor.event.dao.DoctorMonthlyReportDao;
 import io.terminus.doctor.event.dao.DoctorParityMonthlyReportDao;
 import io.terminus.doctor.event.dto.report.monthly.DoctorMonthlyReportDto;
 import io.terminus.doctor.event.dto.report.monthly.DoctorMonthlyReportTrendDto;
+import io.terminus.doctor.event.model.DoctorBoarMonthlyReport;
 import io.terminus.doctor.event.model.DoctorMonthlyReport;
 import io.terminus.doctor.event.model.DoctorParityMonthlyReport;
 import lombok.extern.slf4j.Slf4j;
@@ -40,12 +42,15 @@ public class DoctorMonthlyReportReadServiceImpl implements DoctorMonthlyReportRe
 
     private final DoctorMonthlyReportDao doctorMonthlyReportDao;
     private final DoctorParityMonthlyReportDao doctorParityMonthlyReportDao;
+    private final DoctorBoarMonthlyReportDao doctorBoarMonthlyReportDao;
 
     @Autowired
     public DoctorMonthlyReportReadServiceImpl(DoctorMonthlyReportDao doctorMonthlyReportDao,
-                                              DoctorParityMonthlyReportDao doctorParityMonthlyReportDao) {
+                                              DoctorParityMonthlyReportDao doctorParityMonthlyReportDao,
+                                              DoctorBoarMonthlyReportDao doctorBoarMonthlyReportDao) {
         this.doctorMonthlyReportDao = doctorMonthlyReportDao;
         this.doctorParityMonthlyReportDao = doctorParityMonthlyReportDao;
+        this.doctorBoarMonthlyReportDao = doctorBoarMonthlyReportDao;
     }
 
     @Override
@@ -83,7 +88,7 @@ public class DoctorMonthlyReportReadServiceImpl implements DoctorMonthlyReportRe
             }
 
             //拼接趋势图
-            return Response.ok(new DoctorMonthlyReportTrendDto(reportDto, getMonthlyReportByIndex(farmId, date, index), getParityMonthlyReportByIndex(farmId, date)));
+            return Response.ok(new DoctorMonthlyReportTrendDto(reportDto, getMonthlyReportByIndex(farmId, date, index), getParityMonthlyReportByIndex(farmId, date), getBoarMonthlyReportByIndex(farmId, date)));
         } catch (Exception e) {
             log.error("find monthly report by farmId and sumAt failed, farmId:{}, sumAt:{}, cause:{}",
                     farmId, sumAt, Throwables.getStackTraceAsString(e));
@@ -118,6 +123,10 @@ public class DoctorMonthlyReportReadServiceImpl implements DoctorMonthlyReportRe
         return doctorParityMonthlyReportDao.findDoctorParityMonthlyReports(farmId, new DateTime(date).toString(DateUtil.YYYYMM));
     }
 
+    private List<DoctorBoarMonthlyReport> getBoarMonthlyReportByIndex(Long farmId, Date date){
+        return doctorBoarMonthlyReportDao.findDoctorBoarMonthlyReports(farmId, new DateTime(date).toString(DateUtil.YYYYMM));
+    }
+
     //查询失败的月报
     private static DoctorMonthlyReportDto failReportDto(Date date) {
         DoctorMonthlyReportDto dto = new DoctorMonthlyReportDto();
@@ -128,7 +137,7 @@ public class DoctorMonthlyReportReadServiceImpl implements DoctorMonthlyReportRe
 
     //查询失败的结果
     private static DoctorMonthlyReportTrendDto failReportTrend(Date date) {
-        return new DoctorMonthlyReportTrendDto(failReportDto(date), Lists.newArrayList(), Lists.newArrayList());
+        return new DoctorMonthlyReportTrendDto(failReportDto(date), Lists.newArrayList(), Lists.newArrayList(), Lists.newArrayList());
     }
 
     //获取月末
