@@ -2,6 +2,7 @@ package io.terminus.doctor.warehouse.manager;
 
 import com.google.common.collect.Lists;
 import io.terminus.common.exception.ServiceException;
+import io.terminus.common.utils.JsonMapper;
 import io.terminus.common.utils.NumberUtils;
 import io.terminus.doctor.common.enums.WareHouseType;
 import io.terminus.doctor.warehouse.dao.DoctorMaterialConsumeAvgDao;
@@ -272,7 +273,8 @@ public class MaterialInWareHouseManager {
                 || Objects.equals(cp.getEventType(), DoctorMaterialConsumeProvider.EVENT_TYPE.FORMULA_RAW_MATERIAL.getValue())){
             List<Long> relEventIds;
             try {
-                relEventIds = (List<Long>) (cp.getExtraMap().get("relEventIds"));
+                relEventIds = JsonMapper.nonDefaultMapper().fromJson(cp.getExtraMap().get("relEventIds").toString(),
+                        JsonMapper.nonDefaultMapper().createCollectionType(ArrayList.class, Long.class));
             } catch (RuntimeException e) {
                 throw new ServiceException("related.event.not.fount"); // 没有找到关联事件, 无法回滚
             }
