@@ -7,6 +7,7 @@ import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.RollbackType;
 import io.terminus.doctor.event.handler.rollback.DoctorAbstractRollbackPigEventHandler;
 import io.terminus.doctor.event.model.DoctorPigEvent;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Objects;
@@ -14,6 +15,7 @@ import java.util.Objects;
 /**
  * Created by xiao on 16/9/28.
  */
+@Component
 public class DoctorRollbackSowToChgLocationEventHandler extends DoctorAbstractRollbackPigEventHandler{
     @Override
     protected boolean handleCheck(DoctorPigEvent pigEvent) {
