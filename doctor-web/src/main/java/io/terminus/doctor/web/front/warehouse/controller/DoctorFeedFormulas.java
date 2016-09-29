@@ -124,10 +124,10 @@ public class DoctorFeedFormulas {
 
         FeedFormula exist = RespHelper.or500(feedFormulaReadService.findFeedFormulaById(feed.getId(), dto.getFarmId()));
         if(exist == null){
-            feedFormulaWriteService.createFeedFormula(feedFormula);
+            RespHelper.or500(feedFormulaWriteService.createFeedFormula(feedFormula));
         }else{
             feedFormula.setId(exist.getId());
-            feedFormulaWriteService.updateFeedFormula(feedFormula);
+            RespHelper.or500(feedFormulaWriteService.updateFeedFormula(feedFormula));
         }
         return true;
     }

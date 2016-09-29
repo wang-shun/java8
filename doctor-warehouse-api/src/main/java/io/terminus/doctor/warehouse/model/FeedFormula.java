@@ -99,6 +99,17 @@ public class FeedFormula implements Serializable {
         }
     }
 
+    public String getMaterialName(){
+        return this.feedName;
+    }
+    public Map<String,String> getExtraMap(){
+        return this.formulaMap;
+    }
+
+    public Integer getCanProduce(){
+        return 1;
+    }
+
     /**
      * 对应的物料生产信息( 原料, 药品 配比信息 )
      */
