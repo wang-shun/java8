@@ -615,7 +615,7 @@ public class PigVaccinationProducer extends AbstractJobProducer {
 
         Splitters.COMMA.splitToList(channels).forEach(channel -> {
             try {
-                messages.addAll(createMessage(subUsers, ruleRole, Integer.parseInt(channel), MAPPER.writeValueAsString(jsonData)));
+                messages.addAll(createMessage(subUsers, ruleRole, Integer.parseInt(channel), MAPPER.writeValueAsString(jsonData), null));
             } catch (JsonProcessingException e) {
                 log.error("message produce error, cause by {}", Throwables.getStackTraceAsString(e));
             }
@@ -642,7 +642,7 @@ public class PigVaccinationProducer extends AbstractJobProducer {
 
         Splitters.COMMA.splitToList(channels).forEach(channel -> {
             try {
-                messages.addAll(createMessage(subUsers, ruleRole, Integer.parseInt(channel), MAPPER.writeValueAsString(jsonData)));
+                messages.addAll(createMessage(subUsers, ruleRole, Integer.parseInt(channel), MAPPER.writeValueAsString(jsonData), null));
             } catch (JsonProcessingException e) {
                 log.error("message produce error, cause by {}", Throwables.getStackTraceAsString(e));
             }

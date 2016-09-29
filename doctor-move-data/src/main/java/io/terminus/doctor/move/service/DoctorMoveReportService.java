@@ -9,6 +9,7 @@ import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dao.DoctorDailyReportDao;
 import io.terminus.doctor.event.dto.report.daily.DoctorDailyReportDto;
 import io.terminus.doctor.event.model.DoctorDailyReport;
+import io.terminus.doctor.event.service.DoctorBoarMonthlyReportWriteService;
 import io.terminus.doctor.event.service.DoctorDailyReportReadService;
 import io.terminus.doctor.event.service.DoctorMonthlyReportWriteService;
 import io.terminus.doctor.event.service.DoctorParityMonthlyReportWriteService;
@@ -19,6 +20,7 @@ import io.terminus.doctor.move.model.ReportSowLiveStock;
 import io.terminus.doctor.user.dao.DoctorFarmDao;
 import io.terminus.doctor.user.model.DoctorFarm;
 import lombok.extern.slf4j.Slf4j;
+import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -49,6 +51,7 @@ public class DoctorMoveReportService {
     private final DoctorDailyReportReadService doctorDailyReportReadService;
     private final DoctorMonthlyReportWriteService doctorMonthlyReportWriteService;
     private final DoctorParityMonthlyReportWriteService doctorParityMonthlyReportWriteService;
+    private final DoctorBoarMonthlyReportWriteService doctorBoarMonthlyReportWriteService;
 
     @Autowired
     public DoctorMoveReportService(DoctorDailyReportDao doctorDailyReportDao,
@@ -56,13 +59,15 @@ public class DoctorMoveReportService {
                                    DoctorMoveDatasourceHandler doctorMoveDatasourceHandler,
                                    DoctorDailyReportReadService doctorDailyReportReadService,
                                    DoctorMonthlyReportWriteService doctorMonthlyReportWriteService,
-                                   DoctorParityMonthlyReportWriteService doctorParityMonthlyReportWriteService) {
+                                   DoctorParityMonthlyReportWriteService doctorParityMonthlyReportWriteService,
+                                   DoctorBoarMonthlyReportWriteService doctorBoarMonthlyReportWriteService) {
         this.doctorDailyReportDao = doctorDailyReportDao;
         this.doctorFarmDao = doctorFarmDao;
         this.doctorMoveDatasourceHandler = doctorMoveDatasourceHandler;
         this.doctorDailyReportReadService = doctorDailyReportReadService;
         this.doctorMonthlyReportWriteService = doctorMonthlyReportWriteService;
         this.doctorParityMonthlyReportWriteService = doctorParityMonthlyReportWriteService;
+        this.doctorBoarMonthlyReportWriteService = doctorBoarMonthlyReportWriteService;
     }
 
     /**
@@ -155,7 +160,7 @@ public class DoctorMoveReportService {
      */
     @Transactional
     public void moveMonthlyReport(Long farmId, Integer index) {
-        DateUtil.getBeforeMonthEnds(new Date(), MoreObjects.firstNonNull(index, MONTH_INDEX))
+        DateUtil.getBeforeMonthEnds(DateTime.now().plusDays(-1).toDate(), MoreObjects.firstNonNull(index, MONTH_INDEX))
                 .forEach(date -> doctorMonthlyReportWriteService.createMonthlyReport(farmId, date));
     }
 
@@ -163,5 +168,11 @@ public class DoctorMoveReportService {
     public void moveParityMonthlyReport(Long farmId, Integer index){
         DateUtil.getBeforeMonthEnds(new Date(), MoreObjects.firstNonNull(index, MONTH_INDEX))
                 .forEach(date -> doctorParityMonthlyReportWriteService.createMonthlyReport(farmId, date));
+    }
+
+    @Transactional
+    public void moveBoarMonthlyReport(Long farmId, Integer index) {
+        DateUtil.getBeforeMonthEnds(new Date(), MoreObjects.firstNonNull(index, MONTH_INDEX))
+                .forEach(date -> doctorBoarMonthlyReportWriteService.createMonthlyReport(farmId, date));
     }
 }

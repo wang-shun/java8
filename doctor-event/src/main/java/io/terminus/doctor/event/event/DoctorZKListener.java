@@ -11,6 +11,7 @@ import io.terminus.doctor.common.event.EventListener;
 import io.terminus.doctor.common.utils.Params;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dto.DoctorPigMessage;
+import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
@@ -76,6 +77,7 @@ public class DoctorZKListener implements EventListener {
 
     @Autowired
     private DoctorDailyGroupReportWriteService doctorDailyGroupReportWriteService;
+
 
     @PostConstruct
     public void subs() {
@@ -204,11 +206,13 @@ public class DoctorZKListener implements EventListener {
             List<DoctorPigMessage> tempMessageList = Lists.newArrayList();
             pigTrack.setExtraMessage(pigTrack.getExtraMessage());
             // 去除当前事件执行后的消息提示
-            pigTrack.getExtraMessageList().forEach(doctorPigMessage -> {
-                if (!Objects.equals(doctorPigMessage.getEventType(), doctorPigEvent.getType())) {
-                    tempMessageList.add(doctorPigMessage);
+            if (!Objects.equals(doctorPigEvent.getType(), PigEvent.REMOVAL.getKey())){
+                    pigTrack.getExtraMessageList().forEach(doctorPigMessage -> {
+                        if (!Objects.equals(doctorPigMessage.getEventType(), doctorPigEvent.getType())) {
+                            tempMessageList.add(doctorPigMessage);
+                        }
+                    });
                 }
-            });
             pigTrack.setExtraMessageList(tempMessageList);
             doctorPigWriteService.updatePigTrackExtraMessage(pigTrack);
 

@@ -83,17 +83,17 @@ public interface DoctorMessageReadService {
     /**
      * 获取未发送的短信消息
      */
-    Response<List<DoctorMessage>> findMsgMessage();
+    Response<Paging<DoctorMessage>> findMsgMessage(Integer pageNo, Integer pageSize);
 
     /**
      * 获取未发送的email消息
      */
-    Response<List<DoctorMessage>> findEmailMessage();
+    Response<Paging<DoctorMessage>> findEmailMessage(Integer pageNo, Integer pageSize);
 
     /**
      * 获取未发送的app推送消息
      */
-    Response<List<DoctorMessage>> findAppPushMessage();
+    Response<Paging<DoctorMessage>> findAppPushMessage(Integer pageNo, Integer pageSize);
 
     /**
      * 根据条件获取businessId列表

@@ -123,13 +123,13 @@ public class SowBirthDateProducer extends AbstractJobProducer {
                                     // 获取预产期, 并校验日期
                                     //DateTime birthDate = getBirthDate(pigDto, ruleValue);
                                     // 记录每只猪的消息提醒
-                                    recordPigMessage(pigDto, PigEvent.FARROWING, getRuleTimeDiff(ruleValue, timeDiff), 0,
+                                    recordPigMessage(pigDto, PigEvent.FARROWING, getRuleTimeDiff(ruleValue, timeDiff), ruleValue,
                                             PigStatus.Pregnancy);
                                 }
                                 if (isMessage) {
                                     pigDto.setEventDate(doctorPigEvent.getEventAt());
                                     pigDto.setOperatorName(doctorPigEvent.getOperatorName());
-                                    messages.addAll(getMessage(pigDto, rule.getChannels(), ruleRole, sUsers, timeDiff, rule.getUrl()));
+                                    messages.addAll(getMessage(pigDto, rule.getChannels(), ruleRole, sUsers, timeDiff, rule.getUrl(), PigEvent.FARROWING.getKey()));
                                 }
                             }
                         });

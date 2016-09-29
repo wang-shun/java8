@@ -125,12 +125,12 @@ public class SowPregCheckProducer extends AbstractJobProducer {
                         if (checkRuleValue(ruleValueMap.get(1), timeDiff)) {
                             if (!isMessage && Objects.equals(ruleTemplate.getType(), DoctorMessageRuleTemplate.Type.WARNING.getValue())) {
                                 // 记录每只猪的消息提醒
-                                recordPigMessage(pigDto, PigEvent.PREG_CHECK, getRuleTimeDiff(ruleValueMap.get(1), timeDiff), ruleValueMap.get(1).getValue().intValue(),
+                                recordPigMessage(pigDto, PigEvent.PREG_CHECK, getRuleTimeDiff(ruleValueMap.get(1), timeDiff), ruleValueMap.get(1),
                                         PigStatus.Mate);
                             }
                             if (isMessage) {
                                 pigDto.setEventDate(doctorPigEvent.getEventAt());
-                                messages.addAll(getMessage(pigDto, rule.getChannels(), ruleRole, sUsers, timeDiff, rule.getUrl()));
+                                messages.addAll(getMessage(pigDto, rule.getChannels(), ruleRole, sUsers, timeDiff, rule.getUrl(), PigEvent.PREG_CHECK.getKey()));
                             }
                         }
                     } catch (Exception e) {
