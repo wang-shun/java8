@@ -40,10 +40,10 @@ public class DoctorRollbackGroupTransHandler extends DoctorAbstractRollbackGroup
             return false;
         }
 
-        //如果触发关闭猪群事件
+        //如果触发关闭猪群事件，说明此事件肯定不是最新事件
         DoctorGroupEvent close = doctorGroupEventDao.findByRelGroupEventId(groupEvent.getId());
-        if (isCloseEvent(close) && !doctorRollbackGroupCloseHandler.handleCheck(close)) {
-            return false;
+        if (isCloseEvent(close)) {
+            return !doctorRollbackGroupCloseHandler.handleCheck(close);
         }
         return isLastEvent(groupEvent);
     }

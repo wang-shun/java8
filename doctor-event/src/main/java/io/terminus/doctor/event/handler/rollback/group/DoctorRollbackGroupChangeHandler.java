@@ -36,8 +36,8 @@ public class DoctorRollbackGroupChangeHandler extends DoctorAbstractRollbackGrou
 
         //如果变动后关闭猪群
         DoctorGroupEvent close = doctorGroupEventDao.findByRelGroupEventId(groupEvent.getId());
-        if (isCloseEvent(close) && !doctorRollbackGroupCloseHandler.handleCheck(close)) {
-            return false;
+        if (isCloseEvent(close)) {
+            return !doctorRollbackGroupCloseHandler.handleCheck(close);
         }
         return isLastEvent(groupEvent);
     }
