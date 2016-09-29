@@ -1369,7 +1369,6 @@ CREATE TABLE `doctor_material_price_in_ware_houses` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='仓库中各物料每次入库的剩余量';
 
 -- 仓库物资每次出库和入库事件之前的快照
-drop table doctor_material_infos;
 CREATE TABLE `doctor_warehouse_snapshots` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT 'id',
   `event_id` bigint(20) unsigned NOT NULL COMMENT '表doctor_material_consume_providers的id',
@@ -1379,3 +1378,18 @@ CREATE TABLE `doctor_warehouse_snapshots` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `doctor_pig_snapshots_event_id` (`event_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='仓库物资每次出库和入库事件之前的快照';
+
+-- 删除原来的配方表, 创建新的配方表
+drop table doctor_material_infos;
+CREATE TABLE `doctor_feed_formulas` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `feed_id` bigint(20) unsigned NOT NULL COMMENT '饲料id',
+  `feed_name` varchar(64) DEFAULT NULL COMMENT '饲料名称',
+  `farm_id` bigint(20) unsigned NOT NULL COMMENT '猪场id',
+  `farm_name` varchar(64) DEFAULT NULL COMMENT '猪场名称',
+  `formula` text NOT NULL COMMENT '配方json',
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `feed_id` (`feed_id`,`farm_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8 COMMENT='饲料配方表';
