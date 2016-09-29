@@ -123,5 +123,4 @@ public abstract class DoctorAbstractRollbackGroupEventHandler implements DoctorR
         }
         return isLastEvent(tmpEvent);
     }
-    
 }
