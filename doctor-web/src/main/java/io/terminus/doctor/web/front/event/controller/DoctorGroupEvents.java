@@ -95,6 +95,8 @@ public class DoctorGroupEvents {
     @RequestMapping(value = "/new", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public Long createNewGroup(@RequestParam String info) {
         DoctorNewGroupInput newGroupDto = JsonMapper.nonEmptyMapper().fromJson(info, DoctorNewGroupInput.class);
+
+
         DoctorUser user = new DoctorUser();
         user.setId(592L);
         user.setName("wwww");

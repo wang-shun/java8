@@ -113,6 +113,9 @@ public class DoctorTransFarmGroupEventHandler extends DoctorAbstractGroupEventHa
         if (Objects.equals(oldQuantity, transFarm.getQuantity())) {
             doctorCommonGroupEventHandler.createGroupBatchSummaryWhenClosed(group, groupTrack, event.getEventAt());
             doctorCommonGroupEventHandler.autoGroupEventClose(group, groupTrack, transFarm);
+
+            DoctorGroupEvent closeEvent = doctorGroupEventDao.findByRelGroupEventId(event.getId());
+            transFarm.setRelGroupEventId(closeEvent.getId());    //如果发生关闭猪群事件，关联事件id要换下
         }
 
         //设置来源为外场

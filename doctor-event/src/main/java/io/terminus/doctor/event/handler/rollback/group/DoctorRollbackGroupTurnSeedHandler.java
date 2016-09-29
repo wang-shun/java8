@@ -28,18 +28,19 @@ import java.util.Objects;
 @Component
 public class DoctorRollbackGroupTurnSeedHandler extends DoctorAbstractRollbackGroupEventHandler {
 
-    @Autowired
-    private DoctorRollbackSowEntryEventHandler doctorRollbackSowEntryEventHandler;
-
-    @Autowired
-    private DoctorRollbackBoarEntryEventHandler doctorRollbackBoarEntryEventHandler;
+    @Autowired private DoctorRollbackSowEntryEventHandler doctorRollbackSowEntryEventHandler;
+    @Autowired private DoctorRollbackBoarEntryEventHandler doctorRollbackBoarEntryEventHandler;
+    @Autowired private DoctorRollbackGroupCloseHandler doctorRollbackGroupCloseHandler;
 
     @Override
     protected boolean handleCheck(DoctorGroupEvent groupEvent) {
         if (!Objects.equals(groupEvent.getType(), GroupEventType.TURN_SEED.getValue())) {
             return false;
         }
-        if (!isLastEvent(groupEvent)) {
+
+        //如果触发关闭猪群事件
+        DoctorGroupEvent close = doctorGroupEventDao.findByRelGroupEventId(groupEvent.getId());
+        if (isCloseEvent(close) && !doctorRollbackGroupCloseHandler.handleCheck(close)) {
             return false;
         }
 
@@ -52,6 +53,19 @@ public class DoctorRollbackGroupTurnSeedHandler extends DoctorAbstractRollbackGr
     @Override
     protected void handleRollback(DoctorGroupEvent groupEvent, Long operatorId, String operatorName) {
         log.info("this is a turn seed event:{}", groupEvent);
+        DoctorGroupEvent close = doctorGroupEventDao.findByRelGroupEventId(groupEvent.getId());
+
+        //如果触发关闭猪群事件
+        if (close != null && Objects.equals(groupEvent.getType(), GroupEventType.CLOSE.getValue())) {
+            rollbackEntry(close, operatorId, operatorName);
+            doctorRollbackGroupCloseHandler.rollback(close, operatorId, operatorName);
+        } else {
+            rollbackEntry(groupEvent, operatorId, operatorName);
+        }
+        sampleRollback(groupEvent, operatorId, operatorName);
+    }
+
+    private void rollbackEntry(DoctorGroupEvent groupEvent, Long operatorId, String operatorName) {
         //先回滚猪的进场事件(判断公猪还是母猪进场)
         DoctorPigEvent toPigEvent = doctorPigEventDao.findByRelGroupEventId(groupEvent.getId());
         if (Objects.equals(toPigEvent.getKind(), DoctorPig.PIG_TYPE.SOW.getKey())) {
@@ -59,7 +73,6 @@ public class DoctorRollbackGroupTurnSeedHandler extends DoctorAbstractRollbackGr
         } else {
             doctorRollbackBoarEntryEventHandler.rollback(toPigEvent, operatorId, operatorName);
         }
-        sampleRollback(groupEvent, operatorId, operatorName);
     }
 
     @Override

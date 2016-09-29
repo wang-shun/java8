@@ -8,6 +8,7 @@ import io.terminus.doctor.event.enums.RollbackType;
 import io.terminus.doctor.event.handler.rollback.DoctorAbstractRollbackGroupEventHandler;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -23,15 +24,31 @@ import java.util.Objects;
 @Component
 public class DoctorRollbackGroupChangeHandler extends DoctorAbstractRollbackGroupEventHandler {
 
+    @Autowired
+    private DoctorRollbackGroupCloseHandler doctorRollbackGroupCloseHandler;
+
     @Override
     protected boolean handleCheck(DoctorGroupEvent groupEvent) {
         //允许猪群变动事件
-        return Objects.equals(groupEvent.getType(), GroupEventType.CHANGE.getValue()) && isLastEvent(groupEvent);
+        if (!Objects.equals(groupEvent.getType(), GroupEventType.CHANGE.getValue())) {
+            return false;
+        }
+
+        //如果变动后关闭猪群
+        DoctorGroupEvent close = doctorGroupEventDao.findByRelGroupEventId(groupEvent.getId());
+        if (isCloseEvent(close) && !doctorRollbackGroupCloseHandler.handleCheck(close)) {
+            return false;
+        }
+        return isLastEvent(groupEvent);
     }
 
     @Override
     protected void handleRollback(DoctorGroupEvent groupEvent, Long operatorId, String operatorName) {
         log.info("this is a change event:{}", groupEvent);
+        DoctorGroupEvent close = doctorGroupEventDao.findByRelGroupEventId(groupEvent.getId());
+        if (isCloseEvent(close)) {
+            doctorRollbackGroupCloseHandler.rollback(close, operatorId, operatorName);
+        }
         sampleRollback(groupEvent, operatorId, operatorName);
     }
 

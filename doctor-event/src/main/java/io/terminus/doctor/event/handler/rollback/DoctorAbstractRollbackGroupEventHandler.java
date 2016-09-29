@@ -8,6 +8,7 @@ import io.terminus.doctor.event.dao.DoctorGroupSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
 import io.terminus.doctor.event.dao.DoctorPigEventDao;
 import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
+import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.handler.DoctorRollbackGroupEventHandler;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
@@ -108,4 +109,19 @@ public abstract class DoctorAbstractRollbackGroupEventHandler implements DoctorR
         revertLog.setReverterName(operatorName);
         RespHelper.orServEx(doctorRevertLogWriteService.createRevertLog(revertLog));
     }
+
+    protected static boolean isCloseEvent(DoctorGroupEvent close) {
+        return close != null && Objects.equals(close.getType(), GroupEventType.CLOSE.getValue());
+    }
+
+    //判断事件链的最后一个事件，是否是最新事件
+    protected boolean isRelLastEvent(DoctorGroupEvent event) {
+        DoctorGroupEvent tmpEvent = event;
+        while (event != null) {
+            tmpEvent = event;
+            event = doctorGroupEventDao.findByRelGroupEventId(event.getId());
+        }
+        return isLastEvent(tmpEvent);
+    }
+    
 }

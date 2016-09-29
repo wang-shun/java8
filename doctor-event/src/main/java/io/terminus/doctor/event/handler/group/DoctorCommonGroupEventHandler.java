@@ -178,6 +178,7 @@ public class DoctorCommonGroupEventHandler {
         }
 
         //基本信息
+        basicDto.setRelGroupEventId(input.getRelGroupEventId());
         basicDto.setPigCode(input.getPigCode());
         basicDto.setBarnId(barn.getId());
         basicDto.setBarnName(barn.getName());
