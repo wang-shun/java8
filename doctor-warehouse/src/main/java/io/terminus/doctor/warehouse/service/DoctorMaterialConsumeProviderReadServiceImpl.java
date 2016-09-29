@@ -69,7 +69,7 @@ public class DoctorMaterialConsumeProviderReadServiceImpl implements DoctorMater
         try{
             DoctorMaterialConsumeProvider model = DoctorMaterialConsumeProvider.builder()
                     .wareHouseId(warehouseId).materialId(materialId).eventType(eventType).type(materilaType)
-                    .farmId(farmId).materialName(materialName)
+                    .farmId(farmId).materialName(Params.trimToNull(materialName))
                     .staffId(staffId).build();
             Map<String, Object> map = BeanMapper.convertObjectToMap(model);
             map.put("startAt", startAt);
@@ -124,9 +124,21 @@ public class DoctorMaterialConsumeProviderReadServiceImpl implements DoctorMater
     }
 
     @Override
-    public Response<List<WarehouseEventReport>> warehouseEventReport(Long farmId, Long warehouseId, WareHouseType type, Long materialId, Date startAt, Date endAt) {
+    public Response<List<WarehouseEventReport>> warehouseEventReport(Long farmId, Long warehouseId, Long materialId, String materialName,
+                                                                     Integer eventType, List<Integer> eventTypes, Integer materilaType,
+                                                                     Long staffId, String startAt, String endAt) {
         try{
-            return Response.ok(doctorMaterialConsumeProviderDao.warehouseEventReport(farmId, warehouseId, type, materialId, startAt, endAt));
+            DoctorMaterialConsumeProvider model = DoctorMaterialConsumeProvider.builder()
+                    .wareHouseId(warehouseId).materialId(materialId).eventType(eventType).type(materilaType)
+                    .farmId(farmId).materialName(Params.trimToNull(materialName))
+                    .staffId(staffId).build();
+            Map<String, Object> map = BeanMapper.convertObjectToMap(model);
+            map.put("startAt", startAt);
+            map.put("endAt", endAt);
+            if(eventTypes != null && !eventTypes.isEmpty()){
+                map.put("eventTypes", eventTypes);
+            }
+            return Response.ok(doctorMaterialConsumeProviderDao.warehouseEventReport(Params.filterNullOrEmpty(map)));
         }catch(Exception e){
             log.error("warehouseEventReport failed, cause:{}", Throwables.getStackTraceAsString(e));
             return Response.fail("warehouseEventReport.fail");
