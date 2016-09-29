@@ -1,10 +1,10 @@
 package io.terminus.doctor.event.handler.rollback.sow;
 
 import com.google.common.collect.Lists;
-import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dto.DoctorRollbackDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorFostersDto;
 import io.terminus.doctor.event.enums.PigEvent;
+import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.enums.RollbackType;
 import io.terminus.doctor.event.handler.rollback.DoctorAbstractRollbackPigEventHandler;
 import io.terminus.doctor.event.handler.rollback.group.DoctorRollbackGroupTransHandler;
@@ -43,10 +43,9 @@ public class DoctorRollbackSowFosterHandler extends DoctorAbstractRollbackPigEve
         DoctorPigEvent toPigEvent = doctorPigEventDao.findByRelGroupEventId(pigEvent.getId());
         if (toPigEvent != null && Objects.equals(toPigEvent.getType(), PigEvent.FOSTERS_BY.getKey())) {
 
-            //查找由被拼窝触发的转群事件
+            //查找由被拼窝触发的转群事件及其关联事件
             DoctorGroupEvent toGroupEvent = doctorGroupEventDao.findByRelPigEventId(toPigEvent.getId());
-            return RespHelper.orFalse(doctorPigEventReadService.isLastEvent(toPigEvent.getPigId(), toPigEvent.getId())) &&
-                    doctorRollbackGroupTransHandler.handleCheck(toGroupEvent);
+            return isRelLastGroupEvent(toGroupEvent);
         }
         return false;
     }
@@ -63,7 +62,14 @@ public class DoctorRollbackSowFosterHandler extends DoctorAbstractRollbackPigEve
         doctorRollbackSowFosterByHandler.rollback(toPigEvent, operatorId, operatorName);
 
         //3. 拼窝
-        handleRollbackWithoutStatus(toPigEvent, operatorId, operatorName);
+        DoctorPigTrack pigTrack = doctorPigTrackDao.findByPigId(pigEvent.getPigId());
+
+        //如果不是哺乳状态，说明已经断奶，要触发状态回滚
+        if (!Objects.equals(pigTrack.getStatus(), PigStatus.FEED.getKey())) {
+            handleRollbackWithoutStatus(toPigEvent, operatorId, operatorName);
+        } else {
+            handleRollbackWithStatus(toPigEvent, operatorId, operatorName);
+        }
     }
 
     @Override

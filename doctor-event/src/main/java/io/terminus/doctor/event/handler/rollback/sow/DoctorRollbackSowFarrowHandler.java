@@ -1,7 +1,6 @@
 package io.terminus.doctor.event.handler.rollback.sow;
 
 import com.google.common.collect.Lists;
-import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dto.DoctorRollbackDto;
 import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.enums.PigEvent;
@@ -45,12 +44,7 @@ public class DoctorRollbackSowFarrowHandler extends DoctorAbstractRollbackPigEve
 
         //母猪分娩会触发转入猪群事件，如果有新建猪群，还要校验最新事件
         DoctorGroupEvent toGroupEvent = doctorGroupEventDao.findByRelPigEventId(pigEvent.getRelPigEventId());
-        Long groupEventId = toGroupEvent.getId();
-        if (Objects.equals(toGroupEvent.getType(), GroupEventType.NEW.getValue())) {
-            DoctorGroupEvent totoGroupEvent = doctorGroupEventDao.findByRelGroupEventId(toGroupEvent.getId());
-            groupEventId = totoGroupEvent.getId();
-        }
-        return RespHelper.orFalse(doctorGroupReadService.isLastEvent(toGroupEvent.getGroupId(), groupEventId));
+        return isRelLastGroupEvent(toGroupEvent);
     }
 
     @Override

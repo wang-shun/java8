@@ -64,8 +64,9 @@ public class DoctorRollbackSowWeanHandler extends DoctorAbstractRollbackPigEvent
         //如果成功断奶，需要回滚状态
         if (!Objects.equals(pigTrack.getStatus(), PigStatus.FEED.getKey())) {
             handleRollbackWithStatus(pigEvent, operatorId, operatorName);
+        } else {
+            handleRollbackWithoutStatus(pigEvent, operatorId, operatorName);
         }
-        handleRollbackWithoutStatus(pigEvent, operatorId, operatorName);
     }
 
     @Override
