@@ -4,7 +4,6 @@ import com.google.common.collect.Lists;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dto.DoctorRollbackDto;
 import io.terminus.doctor.event.dto.event.group.DoctorTransFarmGroupEvent;
-import io.terminus.doctor.event.dto.event.group.DoctorTransGroupEvent;
 import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.enums.RollbackType;
 import io.terminus.doctor.event.handler.rollback.DoctorAbstractRollbackGroupEventHandler;
@@ -27,6 +26,7 @@ import java.util.Objects;
 public class DoctorRollbackGroupTransFarmHandler extends DoctorAbstractRollbackGroupEventHandler {
 
     @Autowired private DoctorRollbackGroupMoveInHandler doctorRollbackGroupMoveInHandler;
+    @Autowired private DoctorRollbackGroupNewHandler doctorRollbackGroupNewHandler;
 
     @Override
     protected boolean handleCheck(DoctorGroupEvent groupEvent) {
@@ -34,7 +34,6 @@ public class DoctorRollbackGroupTransFarmHandler extends DoctorAbstractRollbackG
         if (!Objects.equals(groupEvent.getType(), GroupEventType.TRANS_FARM.getValue())) {
             return false;
         }
-        DoctorTransGroupEvent event = JSON_MAPPER.fromJson(groupEvent.getExtra(), DoctorTransGroupEvent.class);
 
         //如果新建猪群，还要校验新建猪群之后的事件
         DoctorGroupEvent toGroupEvent = doctorGroupEventDao.findByRelGroupEventId(groupEvent.getId());
@@ -43,7 +42,7 @@ public class DoctorRollbackGroupTransFarmHandler extends DoctorAbstractRollbackG
             DoctorGroupEvent totoGroupEvent = doctorGroupEventDao.findByRelGroupEventId(toGroupEvent.getId());
             groupEventId = totoGroupEvent.getId();
         }
-        return RespHelper.orFalse(doctorGroupReadService.isLastEvent(event.getToGroupId(), groupEventId));
+        return RespHelper.orFalse(doctorGroupReadService.isLastEvent(toGroupEvent.getId(), groupEventId));
 
     }
 
@@ -52,8 +51,14 @@ public class DoctorRollbackGroupTransFarmHandler extends DoctorAbstractRollbackG
         log.info("this is a trans farm event:{}", groupEvent);
         DoctorGroupEvent toGroupEvent = doctorGroupEventDao.findByRelGroupEventId(groupEvent.getId());
 
-        //先回滚转入猪群事件， 再回滚转群事件
-        doctorRollbackGroupMoveInHandler.rollback(toGroupEvent, operatorId, operatorName);
+        //先回滚转入猪群事件， 再回滚转场事件
+        if (Objects.equals(toGroupEvent.getType(), GroupEventType.NEW.getValue())) {
+            DoctorGroupEvent totoGroupEvent = doctorGroupEventDao.findByRelGroupEventId(toGroupEvent.getId());
+            doctorRollbackGroupMoveInHandler.rollback(totoGroupEvent, operatorId, operatorName);
+            doctorRollbackGroupNewHandler.rollback(toGroupEvent, operatorId, operatorName);
+        } else {
+            doctorRollbackGroupMoveInHandler.rollback(toGroupEvent, operatorId, operatorName);
+        }
         sampleRollback(groupEvent, operatorId, operatorName);
     }
 

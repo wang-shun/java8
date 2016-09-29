@@ -26,6 +26,7 @@ import java.util.Objects;
 public class DoctorRollbackGroupTransHandler extends DoctorAbstractRollbackGroupEventHandler {
 
     @Autowired private DoctorRollbackGroupMoveInHandler doctorRollbackGroupMoveInHandler;
+    @Autowired private DoctorRollbackGroupNewHandler doctorRollbackGroupNewHandler;
 
     @Override
     public boolean handleCheck(DoctorGroupEvent groupEvent) {
@@ -33,7 +34,6 @@ public class DoctorRollbackGroupTransHandler extends DoctorAbstractRollbackGroup
         if (!Objects.equals(groupEvent.getType(), GroupEventType.TRANS_GROUP.getValue())) {
             return false;
         }
-        DoctorTransGroupEvent event = JSON_MAPPER.fromJson(groupEvent.getExtra(), DoctorTransGroupEvent.class);
 
         //如果新建猪群，还要校验新建猪群之后的事件
         DoctorGroupEvent toGroupEvent = doctorGroupEventDao.findByRelGroupEventId(groupEvent.getId());
@@ -42,7 +42,7 @@ public class DoctorRollbackGroupTransHandler extends DoctorAbstractRollbackGroup
             DoctorGroupEvent totoGroupEvent = doctorGroupEventDao.findByRelGroupEventId(toGroupEvent.getId());
             groupEventId = totoGroupEvent.getId();
         }
-        return RespHelper.orFalse(doctorGroupReadService.isLastEvent(event.getToGroupId(), groupEventId));
+        return RespHelper.orFalse(doctorGroupReadService.isLastEvent(toGroupEvent.getGroupId(), groupEventId));
     }
 
     @Override
@@ -50,8 +50,14 @@ public class DoctorRollbackGroupTransHandler extends DoctorAbstractRollbackGroup
         log.info("this is a trans event:{}", groupEvent);
         DoctorGroupEvent toGroupEvent = doctorGroupEventDao.findByRelGroupEventId(groupEvent.getId());
 
-        //先回滚转入猪群事件， 再回滚转群事件
-        doctorRollbackGroupMoveInHandler.rollback(toGroupEvent, operatorId, operatorName);
+        //如果新建猪群，先回滚转入，再回滚新建
+        if (Objects.equals(toGroupEvent.getType(), GroupEventType.NEW.getValue())) {
+            DoctorGroupEvent totoGroupEvent = doctorGroupEventDao.findByRelGroupEventId(toGroupEvent.getId());
+            doctorRollbackGroupMoveInHandler.rollback(totoGroupEvent, operatorId, operatorName);
+            doctorRollbackGroupNewHandler.rollback(toGroupEvent, operatorId, operatorName);
+        } else {
+            doctorRollbackGroupMoveInHandler.rollback(toGroupEvent, operatorId, operatorName);
+        }
         sampleRollback(groupEvent, operatorId, operatorName);
     }
 
