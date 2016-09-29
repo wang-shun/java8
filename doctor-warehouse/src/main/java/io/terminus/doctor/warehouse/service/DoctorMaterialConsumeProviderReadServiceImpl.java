@@ -143,13 +143,4 @@ public class DoctorMaterialConsumeProviderReadServiceImpl implements DoctorMater
         }
     }
 
-    @Override
-    public Response<DoctorMaterialConsumeProvider> findById(Long id){
-        try{
-            return Response.ok(doctorMaterialConsumeProviderDao.findById(id));
-        }catch(Exception e){
-            log.error("find DoctorMaterialConsumeProvider by id fail, id={}, cause:{}", id, Throwables.getStackTraceAsString(e));
-            return Response.fail("find.DoctorMaterialConsumeProvider.fail");
-        }
-    }
 }
