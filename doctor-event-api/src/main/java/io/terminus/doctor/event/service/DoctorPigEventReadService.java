@@ -94,4 +94,11 @@ public interface DoctorPigEventReadService {
      * @return true 是最新事件, false 不是
      */
     Response<Boolean> isLastEvent(@NotNull(message = "input.pigId.empty") Long pigId, @NotNull(message = "eventId.not.null") Long eventId);
+
+    /**
+     * 查询猪回滚事件
+     * @param pigId
+     * @return
+     */
+    Response<DoctorPigEvent> canRollbackEvent(@NotNull(message = "input.pigId.empty") Long pigId);
 }

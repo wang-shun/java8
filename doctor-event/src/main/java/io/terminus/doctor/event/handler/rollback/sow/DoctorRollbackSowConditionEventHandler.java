@@ -28,7 +28,7 @@ public class DoctorRollbackSowConditionEventHandler extends DoctorAbstractRollba
     }
 
     @Override
-        public List<DoctorRollbackDto> updateReport(DoctorPigEvent pigEvent) {
+    public List<DoctorRollbackDto> updateReport(DoctorPigEvent pigEvent) {
         return null;
     }
 }

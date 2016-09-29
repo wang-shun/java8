@@ -184,4 +184,11 @@ public interface DoctorGroupReadService {
      * @return true 是最新事件, false 不是
      */
     Response<Boolean> isLastEvent(@NotNull(message = "groupId.not.null") Long groupId, @NotNull(message = "eventId.not.null") Long eventId);
+
+    /**
+     * 查询猪群回滚事件
+     * @param groupId
+     * @return
+     */
+    Response<DoctorGroupEvent> canRollbackEvent(@NotNull(message = "input.groupId.empty") Long groupId);
 }

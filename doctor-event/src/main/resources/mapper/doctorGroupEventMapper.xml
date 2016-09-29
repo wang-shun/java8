@@ -137,6 +137,48 @@
         #{updatorName}
     </sql>
 
+    <sql id="criteria">
+        1=1
+        <if test="id != null">AND id = #{id}</if>
+        <if test="orgId != null">AND org_id = #{orgId}</if>
+        <if test="orgName != null">AND org_name = #{orgName}</if>
+        <if test="farmId != null">AND farm_id = #{farmId}</if>
+        <if test="farmName != null">AND farm_name = #{farmName}</if>
+        <if test="groupId != null">AND group_id = #{groupId}</if>
+        <if test="groupCode != null">AND group_code = #{groupCode}</if>
+        <if test="eventAt != null">AND event_at = #{eventAt}</if>
+        <if test="beginDate != null">AND <![CDATA[ event_at >= #{beginDate} ]]> </if>
+        <if test="endDate != null">AND <![CDATA[ event_at <= #{endDate} ]]> </if>
+        <if test="type != null">AND `type` = #{type}</if>
+        <if test="name != null">AND `name` = #{name}</if>
+        <if test="desc != null"> AND`desc` = #{desc}</if>
+        <if test="barnId != null">AND barn_id = #{barnId}</if>
+        <if test="barnName != null">AND barn_name = #{barnName}</if>
+        <if test="pigType != null">AND pig_type = #{pigType}</if>
+        <if test="quantity != null">AND quantity = #{quantity}</if>
+        <if test="weight != null">AND weight = #{weight}</if>
+        <if test="avgWeight != null">AND avg_weight = #{avgWeight}</if>
+        <if test="baseWeight != null">AND base_weight = #{baseWeight}</if>
+        <if test="avgDayAge != null">AND avg_day_age = #{avgDayAge}</if>
+        <if test="isAuto != null">AND is_auto = #{isAuto}</if>
+        <if test="changeTypeId != null">AND change_type_id = #{changeTypeId}</if>
+        <if test="price != null">AND price = #{price}</if>
+        <if test="amount != null">AND amount = #{amount}</if>
+        <if test="overPrice != null">AND over_price = #{overPrice}</if>
+        <if test="transGroupType != null">AND trans_group_type = #{transGroupType}</if>
+        <if test="inType != null">AND in_type = #{inType}</if>
+        <if test="otherBarnId != null">AND other_barn_id = #{otherBarnId}</if>
+        <if test="otherBarnType != null">AND other_barn_type = #{otherBarnType},</if>
+        <if test="relGroupEventId != null">AND rel_group_event_id = #{relGroupEventId}</if>
+        <if test="relPigEventId != null">AND rel_pig_event_id = #{relPigEventId}</if>
+        <if test="outId != null">AND out_id = #{outId}</if>
+        <if test="remark != null">AND remark = #{remark}</if>
+        <if test="extra != null">AND extra = #{extra}</if>
+        <if test="creatorId != null">AND creator_id = #{creatorId}</if>
+        <if test="creatorName != null">AND creator_name = #{creatorName}</if>
+        <if test="updatorId != null">AND updator_id = #{updatorId}</if>
+        <if test="updatorName != null">AND updator_name = #{updatorName}</if>
+    </sql>
     <insert id="create" parameterType="DoctorGroupEvent" keyProperty="id" useGeneratedKeys="true">
         INSERT INTO
         <include refid="tb" />
@@ -240,6 +282,16 @@
         </where>
         ORDER BY event_at DESC, created_at DESC
         LIMIT #{offset}, #{limit}
+    </select>
+
+    <select id="list" parameterType="map" resultMap="DoctorGroupEventMap">
+        SELECT
+        <include refid="cols_all"/>
+        FROM
+        <include refid="tb"/>
+        <where>
+            <include refid="criteria"/>
+        </where>
     </select>
 
     <select id="findGroupEventsByEventTypeAndDate" parameterType="map" resultMap="DoctorGroupEventMap">

@@ -104,7 +104,7 @@ public class DoctorPigEvents {
 
             Paging<DoctorPigEvent> doctorPigEventPaging = RespHelper.or500(doctorPigEventReadService.queryPigDoctorEvents(farmId, pigId, pageNo, pageSize, beginDateTime, endDateTime));
             transFromUtil.transFromExtraMap(doctorPigEventPaging.getData());
-
+            DoctorPigEvent doctorPigEvent = RespHelper.or500(doctorPigEventReadService.canRollbackEvent(pigId));
             return doctorPigEventPaging;
         } catch (Exception e) {
             log.error("pig event paging error, cause:{}", Throwables.getStackTraceAsString(e));

@@ -145,6 +145,7 @@ public class DoctorPigs {
                 .doctorPigEvents(dto.getDoctorPigEvents())
                 .dayAge(dto.getDayAge())
                 .weight(dto.getDoctorPigTrack().getWeight())
+                .canRollback(dto.getCanRollback())
                 .build();
         return doctorBoarDetailDto;
     }
@@ -176,6 +177,7 @@ public class DoctorPigs {
                 .birthDate(dto.getDoctorPig().getBirthDate())
                 .doctorPigEvents(dto.getDoctorPigEvents())
                 .pregCheckResult(pregCheckResult)
+                .canRollback(dto.getCanRollback())
                 .build();
         return doctorSowDetailDto;
     }

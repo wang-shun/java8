@@ -179,8 +179,12 @@ public class DoctorGroupEvents {
                 groupDetail.getGroup().getFarmId(), groupId, null, null, 3)).getData();
 
         transFromUtil.transFromGroupEvents(groupEvents);
-
-        return new DoctorGroupDetailEventsDto(groupDetail.getGroup(), groupDetail.getGroupTrack(), groupEvents);
+        DoctorGroupEvent rollbackEvent = RespHelper.or500(doctorGroupReadService.canRollbackEvent(groupId));
+        Long canRollback = null;
+        if (rollbackEvent != null){
+            canRollback = rollbackEvent.getId();
+        }
+        return new DoctorGroupDetailEventsDto(groupDetail.getGroup(), groupDetail.getGroupTrack(), groupEvents, canRollback);
     }
 
     /**
