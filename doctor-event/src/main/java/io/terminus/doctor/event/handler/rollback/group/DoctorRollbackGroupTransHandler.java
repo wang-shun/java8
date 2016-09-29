@@ -56,18 +56,19 @@ public class DoctorRollbackGroupTransHandler extends DoctorAbstractRollbackGroup
         //如果关闭猪群
         if (Objects.equals(to1.getType(), GroupEventType.CLOSE.getValue())) {
             DoctorGroupEvent to2 = doctorGroupEventDao.findByRelGroupEventId(to1.getId());
-            rollbackMoveIn(to1, to2, operatorId, operatorName);
+            rollbackMoveIn(to2, operatorId, operatorName);
+            doctorRollbackGroupCloseHandler.rollback(to1, operatorId, operatorName);    //回滚关闭猪群
         }
         else {
-            rollbackMoveIn(groupEvent, to1, operatorId, operatorName);
+            rollbackMoveIn(to1, operatorId, operatorName);
         }
         sampleRollback(groupEvent, operatorId, operatorName);
     }
 
-    //如果新建猪群
-    private void rollbackMoveIn(DoctorGroupEvent to1, DoctorGroupEvent to2, Long operatorId, String operatorName) {
+    //如果有新建猪群, 就需要先回滚新建猪群事件
+    private void rollbackMoveIn(DoctorGroupEvent to2, Long operatorId, String operatorName) {
         if (Objects.equals(to2.getType(), GroupEventType.NEW.getValue())) {
-            DoctorGroupEvent moveIn = doctorGroupEventDao.findByRelGroupEventId(to1.getId());
+            DoctorGroupEvent moveIn = doctorGroupEventDao.findByRelGroupEventId(to2.getId());
             doctorRollbackGroupMoveInHandler.rollback(moveIn, operatorId, operatorName);
             doctorRollbackGroupNewHandler.rollback(to2, operatorId, operatorName);
         } else {
