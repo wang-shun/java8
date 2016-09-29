@@ -36,4 +36,6 @@ public interface FeedFormulaWriteService {
 
     Response<Boolean> produceFeedByFormula(DoctorWareHouseBasicDto basicDto, DoctorWareHouse targetHouse, FeedFormula feedFormula,
                                            Long feedUnitId, String feedUnitName, FeedFormula.FeedProduce materialProduce);
+
+    Response<FeedFormula.FeedProduce> produceMaterial(Long materialId, Double produceCount);
 }

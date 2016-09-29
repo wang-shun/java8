@@ -1,5 +1,6 @@
 package io.terminus.doctor.warehouse.manager;
 
+import com.google.common.collect.Lists;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.utils.NumberUtils;
 import io.terminus.doctor.common.enums.WareHouseType;
@@ -76,13 +77,26 @@ public class MaterialInWareHouseManager {
         // 计算本次配方生产的饲料的入库单价
         Long unitPrice = this.calculateProviderUnitPrice(eventIds, materialProduce.getTotal());
         // provider source
-        providerMaterialInWareHouseInner(DoctorMaterialConsumeProviderDto.builder()
+        Long providerEventId = providerMaterialInWareHouseInner(DoctorMaterialConsumeProviderDto.builder()
                 .type(WareHouseType.FEED.getKey()).farmId(feedFormula.getFarmId()).farmName(feedFormula.getFarmName())
                 .materialTypeId(feedFormula.getFeedId()).materialName(feedFormula.getFeedName())
                 .wareHouseId(targetHouse.getId()).wareHouseName(targetHouse.getWareHouseName())
                 .barnId(basicDto.getBarnId()).barnName(basicDto.getBarnName()).staffId(basicDto.getStaffId()).staffName(basicDto.getStaffName())
                 .count(materialProduce.getTotal()).unitId(feedUnitId).unitName(feedUnitName).unitPrice(unitPrice)
+                .actionType(DoctorMaterialConsumeProvider.EVENT_TYPE.FORMULA_FEED.getValue())
                 .build());
+
+        // 记录关联id, 为了以后的回滚使用
+        eventIds.add(providerEventId);
+        for(Long id : eventIds){
+            DoctorMaterialConsumeProvider cp = doctorMaterialConsumeProviderDao.findById(id);
+            Map<String, Object> extraMap = cp.getExtraMap() == null ? new HashMap<>() : cp.getExtraMap();
+            List<Long> copy = Lists.newArrayList(eventIds);
+            copy.remove(id);
+            extraMap.put("relEventIds", copy);
+            cp.setExtraMap(extraMap);
+            doctorMaterialConsumeProviderDao.update(cp);
+        }
 
         return Boolean.TRUE;
     }
@@ -128,7 +142,7 @@ public class MaterialInWareHouseManager {
             }
 
             Long eventId = consumeMaterialInner(DoctorMaterialConsumeProviderDto.builder()
-                    .type(doctorMaterialInWareHouse.getType())
+                    .type(doctorMaterialInWareHouse.getType()).actionType(DoctorMaterialConsumeProvider.EVENT_TYPE.FORMULA_RAW_MATERIAL.getValue())
                     .farmId(doctorMaterialInWareHouse.getFarmId()).farmName(doctorMaterialInWareHouse.getFarmName())
                     .materialTypeId(doctorMaterialInWareHouse.getMaterialId()).materialName(doctorMaterialInWareHouse.getMaterialName())
                     .wareHouseId(doctorMaterialInWareHouse.getWareHouseId()).wareHouseName(doctorMaterialInWareHouse.getWareHouseName())
@@ -220,18 +234,12 @@ public class MaterialInWareHouseManager {
     }
 
     private Long providerMaterialInWareHouseInner(DoctorMaterialConsumeProviderDto dto){
-        if(dto.getActionType() == null){
-            dto.setActionType(DoctorMaterialConsumeProvider.EVENT_TYPE.PROVIDER.getValue());
-        }
         EventHandlerContext context = new EventHandlerContext();
         doctorWareHouseHandlerInvocation.invoke(dto, context);
         return context.getEventId();
     }
 
     private Long consumeMaterialInner(DoctorMaterialConsumeProviderDto doctorMaterialConsumeProviderDto){
-        if(doctorMaterialConsumeProviderDto.getActionType() == null){
-            doctorMaterialConsumeProviderDto.setActionType(DoctorMaterialConsumeProvider.EVENT_TYPE.CONSUMER.getValue());
-        }
         EventHandlerContext context = new EventHandlerContext();
         this.doctorWareHouseHandlerInvocation.invoke(doctorMaterialConsumeProviderDto, context);
         return context.getEventId();
@@ -258,6 +266,23 @@ public class MaterialInWareHouseManager {
                 throw new ServiceException("related.event.not.fount");
             }
             doctorWareHouseHandlerInvocation.rollback(relEvent);
+        }
+        // 配方生产事件有更多的关联事件, 他妈的要找出来一起回滚
+        if(Objects.equals(cp.getEventType(), DoctorMaterialConsumeProvider.EVENT_TYPE.FORMULA_FEED.getValue())
+                || Objects.equals(cp.getEventType(), DoctorMaterialConsumeProvider.EVENT_TYPE.FORMULA_RAW_MATERIAL.getValue())){
+            List<Long> relEventIds;
+            try {
+                relEventIds = (List<Long>) (cp.getExtraMap().get("relEventIds"));
+            } catch (RuntimeException e) {
+                throw new ServiceException("related.event.not.fount"); // 没有找到关联事件, 无法回滚
+            }
+            relEventIds.forEach(id -> {
+                DoctorMaterialConsumeProvider relEvent = doctorMaterialConsumeProviderDao.findById(id);
+                if(relEvent == null){
+                    throw new ServiceException("related.event.not.fount");
+                }
+                doctorWareHouseHandlerInvocation.rollback(relEvent);
+            });
         }
         doctorWareHouseHandlerInvocation.rollback(cp);
     }

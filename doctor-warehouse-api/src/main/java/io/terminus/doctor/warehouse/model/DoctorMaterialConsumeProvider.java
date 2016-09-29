@@ -155,7 +155,7 @@ public class DoctorMaterialConsumeProvider implements Serializable{
          * @return
          */
         public boolean isOut(){
-            return CONSUMER == this || PANKUI == this || DIAOCHU == this;
+            return CONSUMER == this || PANKUI == this || DIAOCHU == this || FORMULA_RAW_MATERIAL == this;
         }
 
         /**
@@ -163,7 +163,7 @@ public class DoctorMaterialConsumeProvider implements Serializable{
          * @return
          */
         public boolean isIn(){
-            return PROVIDER == this || PANYING == this || DIAORU == this;
+            return PROVIDER == this || PANYING == this || DIAORU == this || FORMULA_FEED == this;
         }
     }
 

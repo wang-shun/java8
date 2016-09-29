@@ -143,7 +143,7 @@ public class FeedFormula implements Serializable {
             return this.total;
         }
 
-        public Boolean calculatePercentByTotal(Double baseCount){
+        public void calculatePercentByTotal(Double baseCount){
             if(!isNull(materialProduceEntries)){
                 materialProduceEntries.forEach(m->{
                     m.setMaterialCount(
@@ -162,7 +162,6 @@ public class FeedFormula implements Serializable {
             }
 
             this.total = baseCount;
-            return Boolean.TRUE;
         }
     }
 

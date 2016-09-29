@@ -134,26 +134,36 @@ public class DoctorFeedFormulas {
     }
 
     /**
+     * 预生产数量信息 （通过默认规则设定，原料配比的数量）
+     * @param produceCount 生产的数量
+     * @return
+     */
+    @RequestMapping(value = "/preProduceMaterial", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    public FeedFormula.FeedProduce preProduceMaterial(@RequestParam("materialId") Long materialId, @RequestParam("produceCount") Long produceCount){
+        return RespHelper.or500(feedFormulaWriteService.produceMaterial(materialId, produceCount.doubleValue()));
+    }
+
+    /**
      * 生产对应的物料信息
      * @param farmId 对应的猪场Id
      * @param wareHouseId 对应的仓库Id
-     * @param feedId 要生产的饲料的id
+     * @param feedFormulaId 配方id
      * @return
      */
     @RequestMapping(value = "/realProduceMaterial", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public Boolean realProduceMaterial(@RequestParam("farmId") Long farmId,
                                        @RequestParam("wareHouseId") Long wareHouseId,
-                                       @RequestParam("materialId") Long feedId,
+                                       @RequestParam("materialId") Long feedFormulaId,
                                        @RequestParam("materialProduce") String materialProduceJson){
         try{
-            FeedFormula feedFormula = RespHelper.or500(feedFormulaReadService.findFeedFormulaById(feedId, farmId));
+            FeedFormula feedFormula = RespHelper.or500(feedFormulaReadService.findFeedFormulaById(feedFormulaId));
 
             FeedFormula.FeedProduce feedProduce = JsonMapper.JSON_NON_DEFAULT_MAPPER.fromJson(materialProduceJson, FeedFormula.FeedProduce.class);
             // 校验用户修改数量信息
             validateCountRange(feedProduce);
 
             // 查询对应的饲料
-            DoctorBasicMaterial feed = RespHelper.orServEx(doctorBasicMaterialReadService.findBasicMaterialById(feedId));
+            DoctorBasicMaterial feed = RespHelper.orServEx(doctorBasicMaterialReadService.findBasicMaterialById(feedFormula.getFeedId()));
 
             // 校验仓库
             DoctorWareHouse wareHouse = RespHelper.orServEx(doctorWareHouseReadService.findById(wareHouseId));
@@ -166,7 +176,7 @@ public class DoctorFeedFormulas {
             DoctorWareHouseBasicDto doctorWareHouseBasicDto = DoctorWareHouseBasicDto.builder()
                     .farmId(farmId).farmName(RespHelper.orServEx(doctorFarmReadService.findFarmById(farmId)).getName())
                     .wareHouseId(wareHouseId).wareHouseName(wareHouse.getWareHouseName())
-                    .materialId(feedId).materialName(feed.getName())
+                    .materialId(feed.getId()).materialName(feed.getName())
                     .staffId(userId).staffName(userName)
                     .build();
             return RespHelper.or500(feedFormulaWriteService.produceFeedByFormula(doctorWareHouseBasicDto, wareHouse, feedFormula,

@@ -4,6 +4,7 @@ import com.google.common.base.Throwables;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.Response;
+import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.warehouse.dao.FeedFormulaDao;
 import io.terminus.doctor.warehouse.dto.DoctorWareHouseBasicDto;
 import io.terminus.doctor.warehouse.manager.MaterialInWareHouseManager;
@@ -69,11 +70,37 @@ public class FeedFormulaWriteServiceImpl implements FeedFormulaWriteService {
                                                   Long feedUnitId, String feedUnitName, FeedFormula.FeedProduce materialProduce){
         try{
             return Response.ok(materialInWareHouseManager.produceMaterialInfo(basicDto, targetHouse, feedFormula, feedUnitId, feedUnitName, materialProduce));
-        }catch(ServiceException e){
+        }catch(ServiceException | IllegalStateException e){
             return Response.fail(e.getMessage());
         }catch(Exception e){
             log.error("real material produce fail, cause:{}", Throwables.getStackTraceAsString(e));
             return Response.fail("produce.realMaterial.fail");
+        }
+    }
+
+    @Override
+    public Response<FeedFormula.FeedProduce> produceMaterial(Long materialId, Double produceCount) {
+        try{
+            // get material
+            FeedFormula doctorMaterialInfo = feedFormulaDao.findById(materialId);
+            if(doctorMaterialInfo == null){
+                return Response.fail("input.materialId.error");
+            }
+
+            // 校验对应的原料生产信息
+            if(!doctorMaterialInfo.getExtraMap().containsKey("materialProduce")){
+                return Response.fail("material.percentRatio.error");
+            }
+
+            FeedFormula.FeedProduce materialProduce = JsonMapper.JSON_NON_DEFAULT_MAPPER.fromJson(
+                    doctorMaterialInfo.getExtraMap().get("materialProduce"), FeedFormula.FeedProduce.class);
+
+            // count ration
+            materialProduce.calculatePercentByTotal(produceCount);
+            return Response.ok(materialProduce);
+        }catch (Exception e){
+            log.error("material produce error, cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("produce.material.fail");
         }
     }
 }
