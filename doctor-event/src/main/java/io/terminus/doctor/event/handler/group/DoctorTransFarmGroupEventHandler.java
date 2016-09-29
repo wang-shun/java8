@@ -124,6 +124,10 @@ public class DoctorTransFarmGroupEventHandler extends DoctorAbstractGroupEventHa
             Long toGroupId = autoTransFarmEventNew(group, groupTrack, transFarm, toBarn);
             transFarm.setToGroupId(toGroupId);
 
+            //刷新最新事件id
+            DoctorGroupEvent newGroupEvent = doctorGroupEventDao.findLastEventByGroupId(toGroupId);
+            transFarm.setRelGroupEventId(newGroupEvent.getId());
+
             //转入猪群
             doctorCommonGroupEventHandler.autoTransEventMoveIn(group, groupTrack, transFarm);
         } else {

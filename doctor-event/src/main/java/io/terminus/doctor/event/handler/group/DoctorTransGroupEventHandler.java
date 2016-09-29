@@ -128,6 +128,10 @@ public class DoctorTransGroupEventHandler extends DoctorAbstractGroupEventHandle
             Long toGroupId = autoTransGroupEventNew(group, groupTrack, transGroup, toBarn);
             transGroup.setToGroupId(toGroupId);
 
+            //刷新最新事件id
+            DoctorGroupEvent newGroupEvent = doctorGroupEventDao.findLastEventByGroupId(toGroupId);
+            transGroup.setRelGroupEventId(newGroupEvent.getId());
+
             //转入猪群
             doctorCommonGroupEventHandler.autoTransEventMoveIn(group, groupTrack, transGroup);
         } else {
@@ -184,6 +188,7 @@ public class DoctorTransGroupEventHandler extends DoctorAbstractGroupEventHandle
         newGroupInput.setSource(PigSource.LOCAL.getKey());          //来源:本场
         newGroupInput.setIsAuto(IsOrNot.YES.getValue());
         newGroupInput.setRemark(transGroup.getRemark());
+        newGroupInput.setRelGroupEventId(transGroup.getRelGroupEventId()); //由什么事件触发的新建猪群事件
 
         DoctorGroup toGroup = BeanMapper.map(newGroupInput, DoctorGroup.class);
         toGroup.setFarmName(fromGroup.getFarmName());
