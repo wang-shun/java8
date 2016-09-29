@@ -27,4 +27,11 @@ public interface MaterialFactoryReadService {
      * @return
      */
     Response<MaterialFactory> findByFarmAndName(Long farmId, String factoryName);
+
+    /**
+     * 查询猪场所有的供货厂家
+     * @param farmId
+     * @return
+     */
+    Response<List<MaterialFactory>> findByFarmId(Long farmId);
 }

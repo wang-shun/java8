@@ -22,11 +22,13 @@ import io.terminus.doctor.warehouse.model.DoctorFarmWareHouseType;
 import io.terminus.doctor.warehouse.model.DoctorMaterialConsumeProvider;
 import io.terminus.doctor.warehouse.model.DoctorMaterialInWareHouse;
 import io.terminus.doctor.warehouse.model.DoctorWareHouse;
+import io.terminus.doctor.warehouse.model.MaterialFactory;
 import io.terminus.doctor.warehouse.service.DoctorMaterialConsumeProviderReadService;
 import io.terminus.doctor.warehouse.service.DoctorMaterialInWareHouseReadService;
 import io.terminus.doctor.warehouse.service.DoctorMaterialPriceInWareHouseReadService;
 import io.terminus.doctor.warehouse.service.DoctorWareHouseReadService;
 import io.terminus.doctor.warehouse.service.DoctorWareHouseWriteService;
+import io.terminus.doctor.warehouse.service.MaterialFactoryReadService;
 import io.terminus.doctor.web.front.warehouse.dto.DoctorWareHouseCreateDto;
 import io.terminus.doctor.web.front.warehouse.dto.DoctorWareHouseUpdateDto;
 import io.terminus.doctor.web.front.warehouse.dto.MaterialReport;
@@ -84,6 +86,8 @@ public class DoctorWareHouseQuery {
     private DoctorMaterialPriceInWareHouseReadService doctorMaterialPriceInWareHouseReadService;
     @RpcConsumer
     private DoctorMaterialConsumeProviderReadService doctorMaterialConsumeProviderReadService;
+    @RpcConsumer
+    private MaterialFactoryReadService materialFactoryReadService;
 
     @Autowired
     public DoctorWareHouseQuery(DoctorWareHouseReadService doctorWareHouseReadService,
@@ -122,6 +126,12 @@ public class DoctorWareHouseQuery {
                                                            @RequestParam(value = "type", required = false) Integer type,
                                                            @RequestParam(value = "warehouseName", required = false) String warehouseName){
         return RespHelper.or500(doctorWareHouseReadService.listDoctorWareHouseDto(farmId, type, warehouseName));
+    }
+
+    @RequestMapping(value = "/findMaterialFactory", method = RequestMethod.GET)
+    @ResponseBody
+    public List<MaterialFactory> findMaterialFactory(@RequestParam("farmId") Long farmId){
+        return RespHelper.or500(materialFactoryReadService.findByFarmId(farmId));
     }
 
     /**

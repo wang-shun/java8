@@ -47,4 +47,14 @@ public class MaterialFactoryReadServiceImpl implements MaterialFactoryReadServic
             return Response.fail("materialFactory.find.fail");
         }
     }
+
+    @Override
+    public Response<List<MaterialFactory>> findByFarmId(Long farmId) {
+        try {
+            return Response.ok(materialFactoryDao.findByFarmId(farmId));
+        } catch (Exception e) {
+            log.error("find materialFactory by farmId failed, farmId:{}, cause:{}", farmId, Throwables.getStackTraceAsString(e));
+            return Response.fail("materialFactory.find.fail");
+        }
+    }
 }
