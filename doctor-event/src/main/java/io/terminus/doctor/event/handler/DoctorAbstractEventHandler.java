@@ -11,6 +11,7 @@ import io.terminus.doctor.event.dao.DoctorRevertLogDao;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
 import io.terminus.doctor.event.dto.DoctorPigSnapShotInfo;
 import io.terminus.doctor.event.dto.event.AbstractPigEventInputDto;
+import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigEvent;
@@ -166,7 +167,7 @@ public abstract class DoctorAbstractEventHandler implements DoctorEventCreateHan
                 .kind(basic.getPigType()).name(basic.getEventName()).desc(basic.generateEventDescFromExtra(extra)).relEventId(basic.getRelEventId())
                 .barnId(basic.getBarnId()).barnName(basic.getBarnName())
                 .operatorId(abstractPigEventInputDto.getOperatorId()).operatorName(abstractPigEventInputDto.getOperatorName())
-                .creatorId(basic.getStaffId()).creatorName(basic.getStaffName())
+                .creatorId(basic.getStaffId()).creatorName(basic.getStaffName()).isAuto(IsOrNot.NO.getValue())
                 .npd(0)
                 .dpnpd(0)
                 .pfnpd(0)

@@ -191,6 +191,7 @@ public class DoctorCommonGroupEventHandler {
         basicDto.setEventDesc(PigEvent.ENTRY.getDesc());
         basicDto.setStaffId(input.getCreatorId());
         basicDto.setStaffName(input.getCreatorName());
+        basicDto.setIsAuto(IsOrNot.YES.getValue());
 
         //进场信息
         farmEntryDto.setPigType(basicDto.getPigType());

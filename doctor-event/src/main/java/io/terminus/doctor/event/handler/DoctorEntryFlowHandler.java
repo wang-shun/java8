@@ -166,7 +166,7 @@ public class DoctorEntryFlowHandler extends HandlerAware {
                 .pigCode(dto.getPigCode()).eventAt(DateTime.now().toDate())
                 .type(basic.getEventType()).kind(basic.getPigType()).name(basic.getEventName()).desc(basic.getEventDesc())
                 .barnId(dto.getBarnId()).barnName(dto.getBarnName()).relEventId(basic.getRelEventId())
-                .remark(dto.getEntryMark()).creatorId(basic.getStaffId()).creatorName(basic.getStaffName())
+                .remark(dto.getEntryMark()).creatorId(basic.getStaffId()).creatorName(basic.getStaffName()).isAuto(basic.getIsAuto())
                 .npd(0)
                 .dpnpd(0)
                 .pfnpd(0)

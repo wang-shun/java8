@@ -276,7 +276,7 @@ public abstract class DoctorAbstractEventFlowHandler extends HandlerAware {
                 .kind(basic.getPigType()).name(basic.getEventName()).desc(basic.generateEventDescFromExtra(extra)).relEventId(basic.getRelEventId())
                 .barnId(basic.getBarnId()).barnName(basic.getBarnName())
                 .operatorId(abstractPigEventInputDto.getOperatorId()).operatorName(abstractPigEventInputDto.getOperatorName())
-                .creatorId(basic.getStaffId()).creatorName(basic.getStaffName())
+                .creatorId(basic.getStaffId()).creatorName(basic.getStaffName()).isAuto(IsOrNot.NO.getValue())
                 .npd(0)
                 .dpnpd(0)
                 .pfnpd(0)
