@@ -13,6 +13,7 @@ import io.terminus.doctor.basic.model.DoctorBasicMaterial;
 import io.terminus.doctor.basic.service.DoctorBasicMaterialReadService;
 import io.terminus.doctor.basic.service.DoctorBasicReadService;
 import io.terminus.doctor.common.enums.WareHouseType;
+import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.user.model.DoctorFarm;
 import io.terminus.doctor.user.service.DoctorFarmReadService;
@@ -145,7 +146,7 @@ public class DoctorWareHouseEvents {
                             .reduce((o1, o2) -> o1 + o2).orElse(0D);
                     dto.setCurrentAmount(amount);
                     RespHelper.or500(materialConsumeProviderReadService.warehouseEventReport(
-                            farmId, dto.getWarehouseId(), null, dto.getMaterialId(), monthStart.toDate(), nextMonthStart.toDate())
+                            farmId, dto.getWarehouseId(), dto.getMaterialId(), null, null, null, null, null, DateUtil.toDateString(monthStart.toDate()), DateUtil.toDateString(nextMonthStart.toDate()))
                     ).forEach(report -> {
                         if(Objects.equals(report.getEventType(), DoctorMaterialConsumeProvider.EVENT_TYPE.CONSUMER.getValue())){
                             dto.setOutAmount(report.getAmount());
