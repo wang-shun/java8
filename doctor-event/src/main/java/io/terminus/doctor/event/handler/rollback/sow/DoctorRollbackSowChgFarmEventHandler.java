@@ -17,7 +17,7 @@ import java.util.Objects;
  * Created by xiao on 16/9/22.
  */
 @Component
-public class DoctorRollbackSowChgFarmEventHandler extends DoctorAbstractRollbackPigEventHandler{
+public class DoctorRollbackSowChgFarmEventHandler extends DoctorAbstractRollbackPigEventHandler {
     @Override
     protected boolean handleCheck(DoctorPigEvent pigEvent) {
         return Objects.equals(pigEvent.getType(), PigEvent.CHG_FARM.getKey()) &&
@@ -31,7 +31,7 @@ public class DoctorRollbackSowChgFarmEventHandler extends DoctorAbstractRollback
     }
 
     @Override
-        public List<DoctorRollbackDto> updateReport(DoctorPigEvent pigEvent) {
+    public List<DoctorRollbackDto> updateReport(DoctorPigEvent pigEvent) {
         DoctorChgFarmDto dto = JSON_MAPPER.fromJson(pigEvent.getExtra(), DoctorChgFarmDto.class);
         DoctorRollbackDto doctorRollbackDto = DoctorRollbackDto.builder()
                 .esBarnId(dto.getFromBarnId())
