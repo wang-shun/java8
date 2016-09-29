@@ -162,6 +162,7 @@ public class DoctorTransFarmGroupEventHandler extends DoctorAbstractGroupEventHa
         newGroupInput.setSource(PigSource.OUTER.getKey());          //来源:外购
         newGroupInput.setIsAuto(IsOrNot.YES.getValue());
         newGroupInput.setRemark(transFarm.getRemark());
+        newGroupInput.setRelGroupEventId(transFarm.getRelGroupEventId());
 
         DoctorGroup toGroup = BeanMapper.map(newGroupInput, DoctorGroup.class);
         toGroup.setFarmName(transFarm.getToFarmName());
