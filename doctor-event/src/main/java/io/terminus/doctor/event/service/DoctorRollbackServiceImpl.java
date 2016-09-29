@@ -110,6 +110,7 @@ public class DoctorRollbackServiceImpl implements DoctorRollbackService {
                 throw new ServiceException("pig.event.not.found");
             }
             List<DoctorRollbackDto> dtos = doctorRollbackManager.rollbackPig(pigEvent, operatorId, operatorName);
+            doctorRollbackManager.checkAndPublishRollback(dtos);
             return Response.ok(Boolean.TRUE);
         } catch (ServiceException e) {
             return Response.fail(e.getMessage());
