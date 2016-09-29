@@ -3,10 +3,13 @@ package io.terminus.doctor.warehouse.handler.in;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.doctor.warehouse.dao.DoctorMaterialConsumeProviderDao;
 import io.terminus.doctor.warehouse.dao.DoctorMaterialPriceInWareHouseDao;
+import io.terminus.doctor.warehouse.dao.MaterialFactoryDao;
 import io.terminus.doctor.warehouse.dto.DoctorMaterialConsumeProviderDto;
 import io.terminus.doctor.warehouse.handler.IHandler;
 import io.terminus.doctor.warehouse.model.DoctorMaterialConsumeProvider;
 import io.terminus.doctor.warehouse.model.DoctorMaterialPriceInWareHouse;
+import io.terminus.doctor.warehouse.model.MaterialFactory;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -23,12 +26,15 @@ public class DoctorProviderEventHandler implements IHandler{
 
     private final DoctorMaterialConsumeProviderDao doctorMaterialConsumeProviderDao;
     private final DoctorMaterialPriceInWareHouseDao doctorMaterialPriceInWareHouseDao;
+    private final MaterialFactoryDao materialFactoryDao;
 
     @Autowired
     public DoctorProviderEventHandler(DoctorMaterialConsumeProviderDao doctorMaterialConsumeProviderDao,
-                                      DoctorMaterialPriceInWareHouseDao doctorMaterialPriceInWareHouseDao){
+                                      DoctorMaterialPriceInWareHouseDao doctorMaterialPriceInWareHouseDao,
+                                      MaterialFactoryDao materialFactoryDao){
         this.doctorMaterialConsumeProviderDao = doctorMaterialConsumeProviderDao;
         this.doctorMaterialPriceInWareHouseDao = doctorMaterialPriceInWareHouseDao;
+        this.materialFactoryDao = materialFactoryDao;
     }
 
     @Override
@@ -54,7 +60,27 @@ public class DoctorProviderEventHandler implements IHandler{
                 throw new ServiceException("warehouse.has.no.provider.event"); // 仓库没有入库事件
             }
         }
+
+        MaterialFactory materialFactory = null;
+        if(dto.getProviderFactoryId() != null){
+            materialFactory = materialFactoryDao.findById(dto.getProviderFactoryId());
+            if(materialFactory == null){
+                throw new ServiceException("MaterialFactory.not.found");
+            }
+        }else if(StringUtils.isNotBlank(dto.getProviderFactoryName())){
+            materialFactory = materialFactoryDao.findByFarmAndName(dto.getFarmId(), dto.getProviderFactoryName());
+            if(materialFactory == null){
+                materialFactory = new MaterialFactory();
+                materialFactory.setFarmId(dto.getFarmId());
+                materialFactory.setFarmName(dto.getFarmName());
+                materialFactory.setFactoryName(dto.getProviderFactoryName());
+                materialFactoryDao.create(materialFactory);
+            }
+        }
+
         DoctorMaterialConsumeProvider materialCP = DoctorMaterialConsumeProvider.buildFromDto(dto);
+        materialCP.setProviderFactoryId(materialFactory == null ? null : materialFactory.getId());
+        materialCP.setProviderFactoryName(materialFactory == null ? null : materialFactory.getFactoryName());
         doctorMaterialConsumeProviderDao.create(materialCP);
         doctorMaterialPriceInWareHouseDao.create(DoctorMaterialPriceInWareHouse.buildFromDto(dto, materialCP.getId()));
         context.put("eventId",materialCP.getId());

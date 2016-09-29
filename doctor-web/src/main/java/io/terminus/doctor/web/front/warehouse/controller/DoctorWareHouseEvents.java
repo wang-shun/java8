@@ -44,7 +44,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.validation.Valid;
-import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -318,8 +317,7 @@ public class DoctorWareHouseEvents {
                     .materialTypeId(doctorBasicMaterial.getId()).materialName(doctorBasicMaterial.getName())
                     .staffId(userId).staffName(userName)
                     .count(dto.getCount())
-                    //.unitId(doctorBasicMaterial.getUnitId()).unitName(doctorBasicMaterial.getUnitName())
-                    //.unitGroupId(doctorBasicMaterial.getUnitGroupId()).unitGroupName(doctorBasicMaterial.getUnitGroupName())
+                    .providerFactoryId(dto.getFactoryId()).providerFactoryName(dto.getFactoryName())
                     .unitPrice(dto.getUnitPrice())
                     .build();
 

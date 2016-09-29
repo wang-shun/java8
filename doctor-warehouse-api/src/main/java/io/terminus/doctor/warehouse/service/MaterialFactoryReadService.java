@@ -19,4 +19,12 @@ public interface MaterialFactoryReadService {
      * @return 物资入库时可选择的厂家
      */
     Response<MaterialFactory> findMaterialFactoryById(Long materialFactoryId);
+
+    /**
+     * 查询唯一供货厂家
+     * @param farmId
+     * @param factoryName
+     * @return
+     */
+    Response<MaterialFactory> findByFarmAndName(Long farmId, String factoryName);
 }
