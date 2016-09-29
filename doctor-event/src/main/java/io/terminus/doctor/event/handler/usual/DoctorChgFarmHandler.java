@@ -1,6 +1,5 @@
 package io.terminus.doctor.event.handler.usual;
 
-import com.google.common.base.Preconditions;
 import com.google.common.collect.Maps;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dao.DoctorPigDao;
@@ -15,7 +14,6 @@ import io.terminus.doctor.event.handler.DoctorAbstractEventHandler;
 import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigEvent;
-import io.terminus.doctor.event.model.DoctorPigSnapshot;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.event.service.DoctorBarnReadService;
 import lombok.extern.slf4j.Slf4j;
@@ -75,8 +73,7 @@ public class DoctorChgFarmHandler extends DoctorAbstractEventHandler{
     }
 
     @Override
-    protected void afterEventCreateHandle(DoctorPigEvent doctorPigEvent, DoctorPigTrack doctorPigTrack,
-                                          DoctorPigSnapshot doctorPigSnapshot, Map<String, Object> extra) {
+    protected void afterEventCreateHandle(DoctorPigEvent doctorPigEvent, DoctorPigTrack doctorPigTrack, Map<String, Object> extra) {
 
         // doctor pig update farm info
         DoctorPig doctorPig = doctorPigDao.findById(doctorPigTrack.getPigId());

@@ -6,7 +6,6 @@ import com.google.common.collect.Maps;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.constants.JacksonType;
 import io.terminus.doctor.common.utils.Params;
-import io.terminus.doctor.event.constants.DoctorPigSnapshotConstants;
 import io.terminus.doctor.event.dao.DoctorPigEventDao;
 import io.terminus.doctor.event.dao.DoctorPigSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorPigTrackDao;
@@ -16,9 +15,7 @@ import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PregCheckResult;
 import io.terminus.doctor.event.handler.DoctorEventHandlerChainInvocation;
 import io.terminus.doctor.event.model.DoctorPig;
-import io.terminus.doctor.event.model.DoctorPigSnapshot;
 import io.terminus.doctor.event.model.DoctorPigTrack;
-import io.terminus.doctor.event.model.DoctorRevertLog;
 import io.terminus.doctor.workflow.core.Executor;
 import io.terminus.doctor.workflow.service.FlowProcessService;
 import io.terminus.doctor.workflow.service.FlowQueryService;
@@ -33,7 +30,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import static com.google.common.base.Preconditions.checkState;
 import static io.terminus.doctor.event.constants.DoctorPigExtraConstants.EVENT_PIG_ID;
 
 /**
@@ -79,32 +75,6 @@ public class DoctorPigEventManager {
         this.doctorRevertLogDao = doctorRevertLogDao;
         this.doctorPigTrackDao = doctorPigTrackDao;
         this.flowQueryService = flowQueryService;
-    }
-
-    @Transactional
-    public Long rollBackPigEvent(Long pigEventId, Integer revertPigType, Long staffId, String staffName){
-
-        // delete event
-        checkState(doctorPigEventDao.delete(pigEventId), "delete.pigEventById.fail");
-
-        // roll back track info
-        DoctorPigSnapshot doctorPigSnapshot = doctorPigSnapshotDao.queryByEventId(pigEventId);
-        DoctorPigTrack doctorPigTrack =
-                JsonMapper.JSON_NON_DEFAULT_MAPPER.fromJson(
-                        String.valueOf(doctorPigSnapshot.getPigInfoMap().get(DoctorPigSnapshotConstants.PIG_TRACK)),
-                        DoctorPigTrack.class);
-        checkState(doctorPigTrackDao.update(doctorPigTrack), "update.snapshot.fail");
-
-        //delete snapshot
-        checkState(doctorPigSnapshotDao.deleteByEventId(pigEventId), "delete.snapshot.error");
-
-        // create roll back log
-        DoctorRevertLog doctorRevertLog = DoctorRevertLog.builder()
-                .type(revertPigType).fromInfo(pigEventId.toString()).toInfo(pigEventId.toString())
-                .reverterId(staffId).reverterName(staffName)
-                .build();
-        doctorRevertLogDao.create(doctorRevertLog);
-        return doctorRevertLog.getId();
     }
 
     /**

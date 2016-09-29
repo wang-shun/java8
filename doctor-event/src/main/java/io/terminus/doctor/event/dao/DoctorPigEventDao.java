@@ -22,6 +22,14 @@ import java.util.Map;
 @Repository
 public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
 
+    public DoctorPigEvent findByRelGroupEventId(Long relGroupEventId) {
+        return getSqlSession().selectOne(sqlId("findByRelGroupEventId"), relGroupEventId);
+    }
+
+    public DoctorPigEvent findByRelPigEventId(Long relPigEventId) {
+        return getSqlSession().selectOne(sqlId("findByRelPigEventId"), relPigEventId);
+    }
+
     public void deleteByFarmId(Long farmId) {
         getSqlSession().delete(sqlId("deleteByFarmId"), farmId);
     }

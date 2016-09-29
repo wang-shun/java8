@@ -1,16 +1,18 @@
 package io.terminus.doctor.event.handler;
 
 import com.google.common.collect.ImmutableMap;
+import io.terminus.common.utils.BeanMapper;
 import io.terminus.common.utils.JsonMapper;
-import io.terminus.doctor.event.constants.DoctorPigSnapshotConstants;
 import io.terminus.doctor.event.dao.DoctorPigDao;
 import io.terminus.doctor.event.dao.DoctorPigEventDao;
 import io.terminus.doctor.event.dao.DoctorPigSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorPigTrackDao;
 import io.terminus.doctor.event.dao.DoctorRevertLogDao;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
+import io.terminus.doctor.event.dto.DoctorPigSnapShotInfo;
 import io.terminus.doctor.event.dto.event.AbstractPigEventInputDto;
 import io.terminus.doctor.event.enums.PigEvent;
+import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigSnapshot;
 import io.terminus.doctor.event.model.DoctorPigTrack;
@@ -150,8 +152,7 @@ public abstract class DoctorAbstractEventHandler implements DoctorEventCreateHan
                                                                DoctorBasicInputInfoDto basic,
                                                                Map<String, Object> extra, Map<String, Object> content);
 
-    protected void afterEventCreateHandle(DoctorPigEvent doctorPigEvent, DoctorPigTrack doctorPigTrack,
-                                          DoctorPigSnapshot doctorPigSnapshot, Map<String, Object> extra) {
+    protected void afterEventCreateHandle(DoctorPigEvent doctorPigEvent, DoctorPigTrack doctorPigTrack, Map<String, Object> extra) {
 
     }
 
@@ -187,29 +188,33 @@ public abstract class DoctorAbstractEventHandler implements DoctorEventCreateHan
     //创建猪跟踪和镜像表
     protected void createPigTrackSnapshot(DoctorPigEvent doctorPigEvent, DoctorBasicInputInfoDto basic, Map<String, Object> extra, Map<String, Object> context) {
         // update track info
-        DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(doctorPigEvent.getPigId());
-        String currentPigTrackSnapShot = JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(doctorPigTrack);
+        DoctorPig snapshotPig = doctorPigDao.findById(doctorPigEvent.getPigId());
+        DoctorPigTrack snapshotTrack = doctorPigTrackDao.findByPigId(doctorPigEvent.getPigId());
+        DoctorPigTrack doctorPigTrack = BeanMapper.map(snapshotTrack, DoctorPigTrack.class);
+
         DoctorPigTrack refreshPigTrack = updateDoctorPigTrackInfo(doctorPigTrack, basic, extra, context);
         refreshPigTrack.setUpdatorId(basic.getStaffId());
         refreshPigTrack.setUpdatorName(basic.getStaffName());
         doctorPigTrackDao.update(refreshPigTrack);
         //二次更新event
         eventCreatedAfter(doctorPigEvent, refreshPigTrack, basic, extra, context);
-        // create snapshot info
-        // snapshot create
-        DoctorPigSnapshot doctorPigSnapshot = DoctorPigSnapshot.builder()
-                .pigId(doctorPigEvent.getPigId()).farmId(doctorPigEvent.getFarmId()).orgId(doctorPigEvent.getOrgId()).eventId(doctorPigEvent.getId())
+        afterEventCreateHandle(doctorPigEvent, refreshPigTrack, extra);
+
+        //创建猪镜像
+        DoctorPigSnapshot snapshot = DoctorPigSnapshot.builder()
+                .pigId(snapshotPig.getId())
+                .farmId(snapshotPig.getFarmId())
+                .orgId(snapshotPig.getOrgId())
+                .eventId(doctorPigEvent.getId())
+                .pigInfo(JsonMapper.nonEmptyMapper().toJson(
+                        DoctorPigSnapShotInfo.builder().pig(snapshotPig).pigTrack(snapshotTrack).pigEvent(doctorPigEvent).build()))
                 .build();
-        doctorPigSnapshot.setPigInfoMap(ImmutableMap.of(DoctorPigSnapshotConstants.PIG_TRACK, currentPigTrackSnapShot));
-        doctorPigSnapshotDao.create(doctorPigSnapshot);
+        doctorPigSnapshotDao.create(snapshot);
 
-        afterEventCreateHandle(doctorPigEvent, refreshPigTrack, doctorPigSnapshot, extra);
-
-        // 当前事件影响的Id 方式
         context.put("createEventResult",
                 JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(
                         ImmutableMap.of("doctorPigId", basic.getPigId(),
-                                "doctorEventId", doctorPigEvent.getId(), "doctorSnapshotId", doctorPigSnapshot.getId())));
+                                "doctorEventId", doctorPigEvent.getId(), "doctorSnapshotId", snapshot.getId())));
     }
 
 }

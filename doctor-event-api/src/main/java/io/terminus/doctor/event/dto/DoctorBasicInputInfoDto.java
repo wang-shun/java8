@@ -84,6 +84,8 @@ public class DoctorBasicInputInfoDto implements Serializable{
 
     private Long relEventId;
 
+    private Long relGroupEventId;
+
     /**
      * 相同宿舍, 不同pig构建
      * @param pigId

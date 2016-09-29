@@ -119,6 +119,13 @@ public interface DoctorGroupReadService {
     Response<DoctorGroupEvent> findGroupEventById(@NotNull(message = "evenId.not.null") Long eventId);
 
     /**
+     * 根据猪群id查最新询猪群事件
+     * @param groupId    猪群id
+     * @return 猪群事件
+     */
+    Response<DoctorGroupEvent> findLastEventByGroupId(@NotNull(message = "groupId.not.null") Long groupId);
+
+    /**
      * 校验猪群号是否重复
      * @param farmId  猪场id
      * @param groupCode 猪群号
@@ -169,4 +176,19 @@ public interface DoctorGroupReadService {
      * @return
      */
     Response<Paging<DoctorGroupEvent>> queryGroupEventsByCriteria(Map<String, Object> criteria, Integer pageNo, Integer pageSize);
+
+    /**
+     * 判断是否是最新事件
+     * @param groupId 猪群id
+     * @param eventId 事件id
+     * @return true 是最新事件, false 不是
+     */
+    Response<Boolean> isLastEvent(@NotNull(message = "groupId.not.null") Long groupId, @NotNull(message = "eventId.not.null") Long eventId);
+
+    /**
+     * 查询猪群回滚事件
+     * @param groupId
+     * @return
+     */
+    Response<DoctorGroupEvent> canRollbackEvent(@NotNull(message = "input.groupId.empty") Long groupId);
 }

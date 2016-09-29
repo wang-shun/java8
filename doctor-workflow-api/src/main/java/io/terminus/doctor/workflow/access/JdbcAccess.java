@@ -225,6 +225,7 @@ public interface JdbcAccess {
      * @param flowHistoryInstance
      */
     void createFlowHistoryInstance(FlowHistoryInstance flowHistoryInstance);
+    void deleteFlowHistoryInstance(Long flowHistoryInstanceId);
     /** 历史实例公共查新接口 */
     List<FlowHistoryInstance> findFlowHistoryInstances(FlowHistoryInstance flowHistoryInstance);
     List<FlowHistoryInstance> findFlowHistoryInstances(Map criteria);
@@ -241,6 +242,7 @@ public interface JdbcAccess {
      * @param flowHistoryProcess
      */
     Long createFlowHistoryProcess(FlowHistoryProcess flowHistoryProcess);
+    void deleteFlowHistoryProcess(Long flowHistoryProcessId);
     /** 历史活动节点公共查询接口 */
     List<FlowHistoryProcess> findFlowHistoryProcesses(FlowHistoryProcess flowHistoryProcess);
     List<FlowHistoryProcess> findFlowHistoryProcesses(Map criteria);

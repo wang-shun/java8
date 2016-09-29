@@ -9,12 +9,12 @@ import io.terminus.common.utils.JsonMapper;
 import io.terminus.common.utils.MapBuilder;
 import io.terminus.doctor.event.cache.DoctorPigInfoCache;
 import io.terminus.doctor.event.constants.DoctorFarmEntryConstants;
-import io.terminus.doctor.event.constants.DoctorPigSnapshotConstants;
 import io.terminus.doctor.event.dao.DoctorPigDao;
 import io.terminus.doctor.event.dao.DoctorPigEventDao;
 import io.terminus.doctor.event.dao.DoctorPigSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorPigTrackDao;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
+import io.terminus.doctor.event.dto.DoctorPigSnapShotInfo;
 import io.terminus.doctor.event.dto.event.usual.DoctorFarmEntryDto;
 import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.enums.PigEvent;
@@ -47,14 +47,12 @@ import static java.util.Objects.isNull;
 @Slf4j
 public class DoctorEntryHandler implements DoctorEventCreateHandler {
 
+    private static final JsonMapper JSON_MAPPER = JsonMapper.nonEmptyMapper();
+
     private final DoctorPigDao doctorPigDao;
-
     private final DoctorPigEventDao doctorPigEventDao;
-
     private final DoctorPigTrackDao doctorPigTrackDao;
-
     private final DoctorPigSnapshotDao doctorPigSnapshotDao;
-
     private final DoctorPigInfoCache doctorPigInfoCache;
 
     @Autowired
@@ -92,6 +90,7 @@ public class DoctorEntryHandler implements DoctorEventCreateHandler {
             doctorPigDao.create(doctorPig);
 
             // event create
+            doctorPigEvent.setRelGroupEventId(basic.getRelGroupEventId());
             doctorPigEvent.setPigId(doctorPig.getId());
             doctorPigEventDao.create(doctorPigEvent);
 
@@ -110,7 +109,14 @@ public class DoctorEntryHandler implements DoctorEventCreateHandler {
             DoctorPigSnapshot doctorPigSnapshot = DoctorPigSnapshot.builder()
                     .pigId(doctorPig.getId()).farmId(doctorPig.getFarmId()).orgId(doctorPig.getOrgId()).eventId(doctorPigEvent.getId())
                     .build();
-            doctorPigSnapshot.setPigInfoMap(ImmutableMap.of(DoctorPigSnapshotConstants.PIG_TRACK, JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(doctorPigTrack)));
+
+            DoctorPigSnapShotInfo snapShotInfo = DoctorPigSnapShotInfo.builder()
+                    .pig(doctorPig)
+                    .pigTrack(doctorPigTrack)
+                    .pigEvent(doctorPigEvent)
+                    .build();
+
+            doctorPigSnapshot.setPigInfo(JSON_MAPPER.toJson(snapShotInfo));
             doctorPigSnapshotDao.create(doctorPigSnapshot);
 
             context.put("createEventResult",

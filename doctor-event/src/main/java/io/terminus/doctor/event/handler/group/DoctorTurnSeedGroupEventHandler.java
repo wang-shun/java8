@@ -73,6 +73,7 @@ public class DoctorTurnSeedGroupEventHandler extends DoctorAbstractGroupEventHan
         event.setOtherBarnId(toBarn.getId());          //目标猪舍id
         event.setOtherBarnType(toBarn.getPigType());   //目标猪舍类型
         doctorGroupEventDao.create(event);
+        turnSeed.setRelGroupEventId(event.getId());
 
         //获取本次转种猪的性别
         DoctorPig.PIG_TYPE sex = getSex(toBarn.getPigType());
@@ -87,14 +88,18 @@ public class DoctorTurnSeedGroupEventHandler extends DoctorAbstractGroupEventHan
         //4.创建镜像
         createGroupSnapShot(oldShot, new DoctorGroupSnapShotInfo(group, event, groupTrack), GroupEventType.TURN_SEED);
 
-        //5.判断公母猪, 触发进场事件
-        doctorCommonGroupEventHandler.autoPigEntryEvent(sex, turnSeed, group, toBarn);
-
-        //6.判断猪群数量, 如果=0 触发关闭猪群事件, 同时生成批次总结
+        //5.判断猪群数量, 如果=0 触发关闭猪群事件, 同时生成批次总结
         if (Objects.equals(groupTrack.getQuantity(), 0)) {
             doctorCommonGroupEventHandler.createGroupBatchSummaryWhenClosed(group, groupTrack, event.getEventAt());
             doctorCommonGroupEventHandler.autoGroupEventClose(group, groupTrack, turnSeed);
+
+            DoctorGroupEvent closeEvent = doctorGroupEventDao.findByRelGroupEventId(event.getId());
+            turnSeed.setRelGroupEventId(closeEvent.getId());    //如果发生关闭猪群事件，关联事件id要换下
         }
+
+        //6.判断公母猪, 触发进场事件
+        doctorCommonGroupEventHandler.autoPigEntryEvent(sex, turnSeed, group, toBarn);
+
 
         //发布统计事件
         publistGroupAndBarn(group.getOrgId(), group.getFarmId(), group.getId(), group.getCurrentBarnId(), event.getId());

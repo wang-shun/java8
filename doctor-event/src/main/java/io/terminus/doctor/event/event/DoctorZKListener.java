@@ -4,6 +4,7 @@ import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
 import com.google.common.eventbus.Subscribe;
 import io.terminus.common.model.Response;
+import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.enums.DataEventType;
 import io.terminus.doctor.common.event.CoreEventDispatcher;
 import io.terminus.doctor.common.event.DataEvent;
@@ -12,6 +13,7 @@ import io.terminus.doctor.common.utils.Params;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dto.DoctorPigMessage;
 import io.terminus.doctor.event.enums.PigEvent;
+import io.terminus.doctor.event.dto.DoctorRollbackDto;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
@@ -24,6 +26,7 @@ import io.terminus.doctor.event.service.DoctorPigEventReadService;
 import io.terminus.doctor.event.service.DoctorPigReadService;
 import io.terminus.doctor.event.service.DoctorPigTypeStatisticWriteService;
 import io.terminus.doctor.event.service.DoctorPigWriteService;
+import io.terminus.doctor.event.service.DoctorRollbackService;
 import io.terminus.zookeeper.pubsub.Subscriber;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -78,6 +81,8 @@ public class DoctorZKListener implements EventListener {
     @Autowired
     private DoctorDailyGroupReportWriteService doctorDailyGroupReportWriteService;
 
+    @Autowired
+    private DoctorRollbackService doctorRollbackService;
 
     @PostConstruct
     public void subs() {
@@ -118,6 +123,7 @@ public class DoctorZKListener implements EventListener {
                 // 发送 PigEventCreateEvent 事件
                 coreEventDispatcher.publish(pigEventCreateEvent);
             }
+            return;
         }
 
         // 2. 如果是猪群信息修改
@@ -130,6 +136,7 @@ public class DoctorZKListener implements EventListener {
 
             //更新猪群统计信息
             groupDailyReportUpdate(context);
+            return;
         }
 
         // 3. 如果是猪舍信息修改
@@ -138,6 +145,14 @@ public class DoctorZKListener implements EventListener {
             Long barnId = Params.getWithConvert(context, "doctorBarnId", d -> Long.valueOf(d.toString()));
             // update es index
             barnSearchWriteService.update(barnId);
+            return;
+        }
+
+        // 4. 如果是事件回滚
+        if (DataEventType.RollBackReport.getKey() == dataEvent.getEventType()) {
+            String data = DataEvent.analyseContent(dataEvent, String.class);
+            doctorRollbackService.rollbackReportAndES(JsonMapper.nonEmptyMapper().fromJson(data,
+                    JsonMapper.nonEmptyMapper().createCollectionType(List.class, DoctorRollbackDto.class)));
         }
     }
 

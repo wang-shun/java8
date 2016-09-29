@@ -8,13 +8,13 @@ import io.terminus.common.utils.JsonMapper;
 import io.terminus.common.utils.MapBuilder;
 import io.terminus.doctor.common.constants.JacksonType;
 import io.terminus.doctor.event.constants.DoctorFarmEntryConstants;
-import io.terminus.doctor.event.constants.DoctorPigSnapshotConstants;
 import io.terminus.doctor.event.dao.DoctorPigDao;
 import io.terminus.doctor.event.dao.DoctorPigEventDao;
 import io.terminus.doctor.event.dao.DoctorPigSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorPigTrackDao;
 import io.terminus.doctor.event.dao.DoctorRevertLogDao;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
+import io.terminus.doctor.event.dto.DoctorPigSnapShotInfo;
 import io.terminus.doctor.event.dto.event.usual.DoctorFarmEntryDto;
 import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.model.DoctorPig;
@@ -87,6 +87,7 @@ public class DoctorEntryFlowHandler extends HandlerAware {
             doctorPigDao.create(doctorPig);
 
             // event create
+            doctorPigEvent.setRelGroupEventId(basic.getRelGroupEventId());
             doctorPigEvent.setPigId(doctorPig.getId());
             doctorPigEventDao.create(doctorPigEvent);
 
@@ -104,9 +105,13 @@ public class DoctorEntryFlowHandler extends HandlerAware {
 
             // snapshot create
             DoctorPigSnapshot doctorPigSnapshot = DoctorPigSnapshot.builder()
-                    .pigId(doctorPig.getId()).farmId(doctorPig.getFarmId()).orgId(doctorPig.getOrgId()).eventId(doctorPigEvent.getId())
+                    .pigId(doctorPig.getId())
+                    .farmId(doctorPig.getFarmId())
+                    .orgId(doctorPig.getOrgId())
+                    .eventId(doctorPigEvent.getId())
+                    .pigInfo(JsonMapper.nonEmptyMapper().toJson(
+                            DoctorPigSnapShotInfo.builder().pig(doctorPig).pigTrack(doctorPigTrack).pigEvent(doctorPigEvent).build()))
                     .build();
-            doctorPigSnapshot.setPigInfoMap(ImmutableMap.of(DoctorPigSnapshotConstants.PIG_TRACK, JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(doctorPigTrack)));
             doctorPigSnapshotDao.create(doctorPigSnapshot);
 
             flowDataMap.put("entryResult",

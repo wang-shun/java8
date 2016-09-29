@@ -93,8 +93,6 @@ public class DoctorGroupEvents {
      */
     @RequestMapping(value = "/new", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public Long createNewGroup(@RequestBody DoctorNewGroupInput newGroupDto) {
-        //权限中心校验权限
-        doctorFarmAuthCenter.checkFarmAuth(newGroupDto.getFarmId());
         return RespHelper.or500(doctorGroupWebService.createNewGroup(newGroupDto));
     }
 
@@ -181,8 +179,12 @@ public class DoctorGroupEvents {
                 groupDetail.getGroup().getFarmId(), groupId, null, null, 3)).getData();
 
         transFromUtil.transFromGroupEvents(groupEvents);
-
-        return new DoctorGroupDetailEventsDto(groupDetail.getGroup(), groupDetail.getGroupTrack(), groupEvents);
+        DoctorGroupEvent rollbackEvent = RespHelper.or500(doctorGroupReadService.canRollbackEvent(groupId));
+        Long canRollback = null;
+        if (rollbackEvent != null){
+            canRollback = rollbackEvent.getId();
+        }
+        return new DoctorGroupDetailEventsDto(groupDetail.getGroup(), groupDetail.getGroupTrack(), groupEvents, canRollback);
     }
 
     /**

@@ -29,15 +29,6 @@ import java.util.Map;
 public interface DoctorPigEventWriteService {
 
     /**
-     * 回滚 pig event 事件信息
-     * @param pigEventId
-     * @return
-     */
-    Response<Long> rollBackPigEvent(@NotNull(message = "input.pigEventId.empty") Long pigEventId,
-                                    @NotNull(message = "input.reverterPigType") Integer revertPigType,
-                                    Long staffId, String staffName);
-
-    /**
      * 公猪， 母猪 进仓事件信息
      * @param doctorBasicInputInfoDto
      * @param doctorFarmEntryDto
