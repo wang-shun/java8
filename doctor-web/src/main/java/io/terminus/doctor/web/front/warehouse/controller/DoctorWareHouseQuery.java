@@ -404,13 +404,13 @@ public class DoctorWareHouseQuery {
             if(event_type == null){
                 continue;
             }
-            if(event_type.equals(DoctorMaterialConsumeProvider.EVENT_TYPE.PROVIDER)){
-                total.setInAmount(report.getAmount());
-                total.setInCount(report.getCount());
+            if(event_type.isIn()){
+                total.setInAmount(total.getInAmount() + report.getAmount());
+                total.setInCount(total.getInCount() + report.getCount());
             }
-            if(event_type.equals(DoctorMaterialConsumeProvider.EVENT_TYPE.CONSUMER)){
-                total.setOutAmount(report.getAmount());
-                total.setOutCount(report.getCount());
+            if(event_type.isOut()){
+                total.setOutAmount(total.getOutAmount() + report.getAmount());
+                total.setOutCount(total.getOutCount() + report.getCount());
             }
         }
         // 该仓库当前库存的价值
