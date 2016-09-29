@@ -54,7 +54,7 @@ public class DoctorRollbackGroupTransHandler extends DoctorAbstractRollbackGroup
         DoctorGroupEvent to1 = doctorGroupEventDao.findByRelGroupEventId(groupEvent.getId());
 
         //如果关闭猪群
-        if (Objects.equals(to1.getType(), GroupEventType.CLOSE.getValue())) {
+        if (isCloseEvent(to1)) {
             DoctorGroupEvent to2 = doctorGroupEventDao.findByRelGroupEventId(to1.getId());
             rollbackMoveIn(to2, operatorId, operatorName);
             doctorRollbackGroupCloseHandler.rollback(to1, operatorId, operatorName);    //回滚关闭猪群
