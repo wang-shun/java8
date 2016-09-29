@@ -192,7 +192,7 @@ public class DoctorTransGroupEventHandler extends DoctorAbstractGroupEventHandle
 
         DoctorGroup toGroup = BeanMapper.map(newGroupInput, DoctorGroup.class);
         toGroup.setFarmName(fromGroup.getFarmName());
-        toGroup.setOrgId(fromGroup.getId());
+        toGroup.setOrgId(fromGroup.getOrgId());
         toGroup.setOrgName(fromGroup.getOrgName());
         toGroup.setCreatorId(transGroup.getCreatorId());    //创建人取录入转群事件的人
         toGroup.setCreatorName(transGroup.getCreatorName());
