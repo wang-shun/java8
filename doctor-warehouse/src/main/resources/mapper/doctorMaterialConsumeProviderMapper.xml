@@ -27,6 +27,8 @@
         <result column="barn_name" property="barnName"/>
         <result column="group_id" property="groupId"/>
         <result column="group_code" property="groupCode"/>
+        <result column="provider_factory_id" property="providerFactoryId"/>
+        <result column="provider_factory_name" property="providerFactoryName"/>
         <result column="extra" property="extra"/>
         <result column="creator_id" property="creatorId"/>
         <result column="creator_name" property="creatorName"/>
@@ -44,11 +46,17 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        `type`,`farm_id`,`farm_name`,`ware_house_id`,`ware_house_name`,`material_id`,`material_name`,`event_time`,`event_type`,`event_count`, unit_price,`staff_id`,`staff_name`,`barn_id`,`barn_name`,`group_id`,`group_code`,`extra`,`creator_id`,`creator_name`,`updator_id`,`updator_name`,`created_at`,`updated_at`
+        `type`,`farm_id`,`farm_name`,`ware_house_id`,`ware_house_name`,`material_id`,`material_name`,`event_time`,
+        `event_type`,`event_count`, unit_price,`staff_id`,`staff_name`,`barn_id`,`barn_name`,`group_id`,`group_code`,
+        provider_factory_id, provider_factory_name,
+        `extra`,`creator_id`,`creator_name`,`updator_id`,`updator_name`,`created_at`,`updated_at`
     </sql>
 
     <sql id="vals">
-        #{type},#{farmId},#{farmName},#{wareHouseId},#{wareHouseName},#{materialId},#{materialName},#{eventTime},#{eventType},#{eventCount}, #{unitPrice},#{staffId},#{staffName},#{barnId},#{barnName},#{groupId},#{groupCode},#{extra},#{creatorId},#{creatorName},#{updatorId},#{updatorName},now(),now()
+        #{type},#{farmId},#{farmName},#{wareHouseId},#{wareHouseName},#{materialId},#{materialName},#{eventTime},
+        #{eventType},#{eventCount}, #{unitPrice},#{staffId},#{staffName},#{barnId},#{barnName},#{groupId},#{groupCode},
+        #{providerFactoryId}, #{providerFactoryName}
+        #{extra},#{creatorId},#{creatorName},#{updatorId},#{updatorName},now(),now()
     </sql>
 
     <sql id="criteria">
@@ -68,6 +76,7 @@
         <if test="staffId != null" > AND `staff_id` = #{staffId}</if>
         <if test="barnId != null" > AND `barn_id` = #{barnId}</if>
         <if test="groupId != null" > AND `group_id` = #{groupId}</if>
+        <if test="providerFactoryId != null" > AND `provider_factory_id` = #{providerFactoryId}</if>
         <if test="startAt != null" > <![CDATA[ AND `event_time` >= #{startAt} ]]> </if>
         <if test="endAt != null" > <![CDATA[ AND `event_time` < #{endAt} ]]> </if>
     </sql>
@@ -83,7 +92,10 @@
         ( <include refid="cols_exclude_id"/> )
         VALUES
         <foreach collection="list" item="i" separator=",">
-        (#{i.type},#{i.farmId},#{i.farmName},#{i.wareHouseId},#{i.wareHouseName},#{i.materialId},#{i.materialName},#{i.eventTime},#{i.eventType},#{i.eventCount}, #{i.unitPrice},#{i.staffId},#{i.staffName},#{i.barnId},#{i.barnName},#{i.groupId},#{i.groupCode},#{i.extra},#{i.creatorId},#{i.creatorName},#{i.updatorId},#{i.updatorName},now(),now())
+        (#{i.type},#{i.farmId},#{i.farmName},#{i.wareHouseId},#{i.wareHouseName},#{i.materialId},#{i.materialName},
+            #{i.eventTime},#{i.eventType},#{i.eventCount}, #{i.unitPrice},#{i.staffId},#{i.staffName},#{i.barnId},
+            #{i.barnName},#{i.groupId},#{i.groupCode},#{i.providerFactoryId},#{i.providerFactoryName}
+            #{i.extra},#{i.creatorId},#{i.creatorName},#{i.updatorId},#{i.updatorName},now(),now())
         </foreach>
     </insert>
 
@@ -155,6 +167,8 @@
         <if test="barnName != null" > ,`barn_name` = #{barnName}</if>
         <if test="groupId != null" > ,`group_id` = #{groupId}</if>
         <if test="groupCode != null" > ,`group_code` = #{groupCode}</if>
+        <if test="providerFactoryId != null" > ,`provider_factory_id` = #{providerFactoryId}</if>
+        <if test="providerFactoryName != null" > ,`provider_factory_name` = #{providerFactoryName}</if>
         <if test="extra != null" > ,`extra` = #{extra}</if>
         <if test="creatorId != null" > ,`creator_id` = #{creatorId}</if>
         <if test="creatorName != null" > ,`creator_name` = #{creatorName}</if>

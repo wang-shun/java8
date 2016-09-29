@@ -417,3 +417,20 @@ create table `doctor_boar_monthly_reports` (
 create index doctor_boar_monthly_reports_farm_id on doctor_boar_monthly_reports(farm_id);
 create index doctor_boar_monthly_reports_boar_code on doctor_boar_monthly_reports(boar_code);
 create index doctor_boar_monthly_reports_sum_at on doctor_boar_monthly_reports(sum_at);
+
+-- 2016-09-29 物资入库时可选择的厂家
+CREATE TABLE `doctor_material_factorys` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `farm_id` bigint(20) unsigned NOT NULL,
+  `farm_name` varchar(64) DEFAULT NULL,
+  `factory_name` varchar(64) NOT NULL DEFAULT '',
+  `extra` text,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `farm_id` (`farm_id`,`factory_name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='物资入库时可选择的厂家';
+
+alter table doctor_material_consume_providers
+add column `provider_factory_id` bigint(20) unsigned DEFAULT NULL COMMENT '供货厂家id' after group_code,
+add column `provider_factory_name` varchar(64) DEFAULT NULL COMMENT '供货厂家' after provider_factory_id;
