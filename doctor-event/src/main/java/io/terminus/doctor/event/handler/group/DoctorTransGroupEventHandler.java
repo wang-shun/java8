@@ -117,6 +117,9 @@ public class DoctorTransGroupEventHandler extends DoctorAbstractGroupEventHandle
         if (Objects.equals(oldQuantity, transGroup.getQuantity())) {
             doctorCommonGroupEventHandler.createGroupBatchSummaryWhenClosed(group, groupTrack, event.getEventAt());
             doctorCommonGroupEventHandler.autoGroupEventClose(group, groupTrack, transGroup);
+
+            DoctorGroupEvent closeEvent = doctorGroupEventDao.findByRelGroupEventId(event.getId());
+            transGroup.setRelGroupEventId(closeEvent.getId());    //如果发生关闭猪群事件，关联事件id要换下
         }
 
         //设置来源为本场
@@ -127,6 +130,10 @@ public class DoctorTransGroupEventHandler extends DoctorAbstractGroupEventHandle
             //新建猪群
             Long toGroupId = autoTransGroupEventNew(group, groupTrack, transGroup, toBarn);
             transGroup.setToGroupId(toGroupId);
+
+            //刷新最新事件id
+            DoctorGroupEvent newGroupEvent = doctorGroupEventDao.findLastEventByGroupId(toGroupId);
+            transGroup.setRelGroupEventId(newGroupEvent.getId());
 
             //转入猪群
             doctorCommonGroupEventHandler.autoTransEventMoveIn(group, groupTrack, transGroup);
@@ -184,10 +191,11 @@ public class DoctorTransGroupEventHandler extends DoctorAbstractGroupEventHandle
         newGroupInput.setSource(PigSource.LOCAL.getKey());          //来源:本场
         newGroupInput.setIsAuto(IsOrNot.YES.getValue());
         newGroupInput.setRemark(transGroup.getRemark());
+        newGroupInput.setRelGroupEventId(transGroup.getRelGroupEventId()); //由什么事件触发的新建猪群事件
 
         DoctorGroup toGroup = BeanMapper.map(newGroupInput, DoctorGroup.class);
         toGroup.setFarmName(fromGroup.getFarmName());
-        toGroup.setOrgId(fromGroup.getId());
+        toGroup.setOrgId(fromGroup.getOrgId());
         toGroup.setOrgName(fromGroup.getOrgName());
         toGroup.setCreatorId(transGroup.getCreatorId());    //创建人取录入转群事件的人
         toGroup.setCreatorName(transGroup.getCreatorName());

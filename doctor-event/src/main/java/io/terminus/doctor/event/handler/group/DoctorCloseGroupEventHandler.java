@@ -69,6 +69,7 @@ public class DoctorCloseGroupEventHandler extends DoctorAbstractGroupEventHandle
 
         //4.猪群状态改为关闭
         group.setStatus(DoctorGroup.Status.CLOSED.getValue());
+        group.setCloseAt(event.getEventAt());
         doctorGroupDao.update(group);
 
         //5.创建镜像

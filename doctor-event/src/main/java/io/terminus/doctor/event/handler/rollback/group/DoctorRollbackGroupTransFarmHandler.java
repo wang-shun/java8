@@ -1,10 +1,8 @@
 package io.terminus.doctor.event.handler.rollback.group;
 
 import com.google.common.collect.Lists;
-import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dto.DoctorRollbackDto;
 import io.terminus.doctor.event.dto.event.group.DoctorTransFarmGroupEvent;
-import io.terminus.doctor.event.dto.event.group.DoctorTransGroupEvent;
 import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.enums.RollbackType;
 import io.terminus.doctor.event.handler.rollback.DoctorAbstractRollbackGroupEventHandler;
@@ -26,7 +24,8 @@ import java.util.Objects;
 @Component
 public class DoctorRollbackGroupTransFarmHandler extends DoctorAbstractRollbackGroupEventHandler {
 
-    @Autowired private DoctorRollbackGroupMoveInHandler doctorRollbackGroupMoveInHandler;
+    @Autowired private DoctorRollbackGroupCloseHandler doctorRollbackGroupCloseHandler;
+    @Autowired private DoctorRollbackGroupTransHandler doctorRollbackGroupTransHandler;
 
     @Override
     protected boolean handleCheck(DoctorGroupEvent groupEvent) {
@@ -34,27 +33,24 @@ public class DoctorRollbackGroupTransFarmHandler extends DoctorAbstractRollbackG
         if (!Objects.equals(groupEvent.getType(), GroupEventType.TRANS_FARM.getValue())) {
             return false;
         }
-        DoctorTransGroupEvent event = JSON_MAPPER.fromJson(groupEvent.getExtra(), DoctorTransGroupEvent.class);
 
-        //如果新建猪群，还要校验新建猪群之后的事件
-        DoctorGroupEvent toGroupEvent = doctorGroupEventDao.findByRelGroupEventId(groupEvent.getId());
-        Long groupEventId = toGroupEvent.getId();
-        if (Objects.equals(toGroupEvent.getType(), GroupEventType.NEW.getValue())) {
-            DoctorGroupEvent totoGroupEvent = doctorGroupEventDao.findByRelGroupEventId(toGroupEvent.getId());
-            groupEventId = totoGroupEvent.getId();
+        //判断事件链的最后一个事件，是否是最新事件
+        if (!isRelLastEvent(groupEvent)) {
+            return false;
         }
-        return RespHelper.orFalse(doctorGroupReadService.isLastEvent(event.getToGroupId(), groupEventId));
 
+        //如果触发关闭猪群事件，说明此事件肯定不是最新事件
+        DoctorGroupEvent close = doctorGroupEventDao.findByRelGroupEventId(groupEvent.getId());
+        if (isCloseEvent(close)) {
+            return doctorRollbackGroupCloseHandler.handleCheck(close);
+        }
+        return isLastEvent(groupEvent);
     }
 
     @Override
     protected void handleRollback(DoctorGroupEvent groupEvent, Long operatorId, String operatorName) {
         log.info("this is a trans farm event:{}", groupEvent);
-        DoctorGroupEvent toGroupEvent = doctorGroupEventDao.findByRelGroupEventId(groupEvent.getId());
-
-        //先回滚转入猪群事件， 再回滚转群事件
-        doctorRollbackGroupMoveInHandler.rollback(toGroupEvent, operatorId, operatorName);
-        sampleRollback(groupEvent, operatorId, operatorName);
+        doctorRollbackGroupTransHandler.rollback(groupEvent, operatorId, operatorName);  //转场回滚和转群代码一致
     }
 
     @Override

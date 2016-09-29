@@ -90,6 +90,7 @@ public class DoctorEntryHandler implements DoctorEventCreateHandler {
             doctorPigDao.create(doctorPig);
 
             // event create
+            doctorPigEvent.setRelGroupEventId(basic.getRelGroupEventId());
             doctorPigEvent.setPigId(doctorPig.getId());
             doctorPigEventDao.create(doctorPigEvent);
 
