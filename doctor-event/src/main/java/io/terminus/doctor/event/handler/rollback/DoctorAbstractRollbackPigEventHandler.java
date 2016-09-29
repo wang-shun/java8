@@ -72,7 +72,6 @@ public abstract class DoctorAbstractRollbackPigEventHandler implements DoctorRol
     public final boolean canRollback(DoctorPigEvent pigEvent) {
         return Objects.equals(pigEvent.getIsAuto(), IsOrNot.NO.getValue()) &&
                 pigEvent.getEventAt().after(DateTime.now().plusMonths(-3).toDate()) &&
-                RespHelper.orFalse(doctorPigEventReadService.isLastEvent(pigEvent.getPigId(), pigEvent.getId())) &&
                 handleCheck(pigEvent);
     }
 
