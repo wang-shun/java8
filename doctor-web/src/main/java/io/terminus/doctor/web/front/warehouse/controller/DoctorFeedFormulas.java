@@ -112,6 +112,7 @@ public class DoctorFeedFormulas {
         if(!Objects.equals(dto.getProduce().calculateTotalPercent().longValue(), FeedFormula.DEFAULT_COUNT)){
             throw new JsonResponseException("input.totalMaterialCount.error");
         }
+        buildProduceInfo(dto.getProduce());
         // 此配方要生产的饲料
         DoctorBasicMaterial feed = RespHelper.or500(doctorBasicMaterialReadService.findBasicMaterialById(dto.getMaterialId()));
 
@@ -182,5 +183,15 @@ public class DoctorFeedFormulas {
         checkState(!Objects.equals(0, realTotal.intValue()), "input.materialProduceTotal.error");
         double dis = (realTotal-materialProduce.getTotal()) * 100d / materialProduce.getTotal();
         checkState(Math.abs(dis)<=5, "produce.materialCountChange.error");
+    }
+
+    public void buildProduceInfo(FeedFormula.FeedProduce materialProduce){
+        materialProduce.getMaterialProduceEntries().forEach(s->{
+            s.setMaterialName(RespHelper.or500(doctorBasicMaterialReadService.findBasicMaterialById(s.getMaterialId())).getName());
+        });
+
+        materialProduce.getMedicalProduceEntries().forEach(s->{
+            s.setMaterialName(RespHelper.or500(doctorBasicMaterialReadService.findBasicMaterialById(s.getMaterialId())).getName());
+        });
     }
 }
