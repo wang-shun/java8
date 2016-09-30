@@ -32,6 +32,15 @@ public class DoctorMaterialPriceInWareHouseDao extends MyBatisDao<DoctorMaterial
     }
 
     /**
+     * 查找某次入库的剩余量
+     * @param providerId
+     * @return
+     */
+    public DoctorMaterialPriceInWareHouse findByProviderId(Long providerId){
+        return sqlSession.selectOne(sqlId("findByProviderId"), providerId);
+    }
+
+    /**
      * 查询各仓库当前库存的价值, 单位是“分”
      * 所有参数都可为空
      * @param farmId

@@ -370,6 +370,9 @@ public class DoctorWareHouseEvents {
         DoctorWareHouse consumeWarehouse = RespHelper.or500(doctorWareHouseReadService.findById(fromWareHouseId));
         DoctorWareHouse toWarehouse = RespHelper.or500(doctorWareHouseReadService.findById(toWareHouseId));
         DoctorMaterialInWareHouse materialInWareHouse = RespHelper.or500(doctorMaterialInWareHouseReadService.queryByMaterialWareHouseIds(farmId, materialId, fromWareHouseId));
+        if(materialInWareHouse == null){
+            throw new JsonResponseException("no.material.consume");
+        }
         Long userId = UserUtil.getUserId();
         String userName = RespHelper.or500(doctorUserProfileReadService.findProfileByUserIds(Lists.newArrayList(userId))).get(0).getRealName();
 
@@ -424,5 +427,16 @@ public class DoctorWareHouseEvents {
             return true;
         }
         return true;
+    }
+
+    /**
+     * 仓库事件回滚
+     * @param eventId DoctorMaterialConsumeProvider的id
+     * @return
+     */
+    @RequestMapping(value = "/rollback", method = RequestMethod.GET)
+    @ResponseBody
+    public boolean rollback(@RequestParam Long eventId){
+        return RespHelper.or500(doctorMaterialInWareHouseWriteService.rollback(eventId));
     }
 }

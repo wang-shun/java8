@@ -1,8 +1,8 @@
 package io.terminus.doctor.warehouse.handler;
 
 import io.terminus.doctor.warehouse.dto.DoctorMaterialConsumeProviderDto;
-
-import java.util.Map;
+import io.terminus.doctor.warehouse.dto.EventHandlerContext;
+import io.terminus.doctor.warehouse.model.DoctorMaterialConsumeProvider;
 
 /**
  * Created by yaoqijun.
@@ -14,11 +14,10 @@ public interface IHandler {
 
     /**
      * 校验处理
-     * @param dto
-     * @param context
+     * @param eventType
      * @return
      */
-    Boolean ifHandle(DoctorMaterialConsumeProviderDto dto, Map<String,Object> context);
+    boolean ifHandle(DoctorMaterialConsumeProvider.EVENT_TYPE eventType);
 
     /**
      * 修改对应的数据表信息
@@ -26,5 +25,11 @@ public interface IHandler {
      * @param context
      * @throws RuntimeException
      */
-    void handle(DoctorMaterialConsumeProviderDto dto, Map<String,Object> context) throws RuntimeException;
+    void handle(DoctorMaterialConsumeProviderDto dto, EventHandlerContext context) throws RuntimeException;
+
+    /**
+     * 回滚事件
+     * @param cp
+     */
+    void rollback(DoctorMaterialConsumeProvider cp);
 }

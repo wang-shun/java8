@@ -1,16 +1,15 @@
 package io.terminus.doctor.warehouse.handler.in;
 
 import io.terminus.doctor.warehouse.dao.DoctorMaterialInWareHouseDao;
-import io.terminus.doctor.warehouse.dao.DoctorMaterialInfoDao;
 import io.terminus.doctor.warehouse.dto.DoctorMaterialConsumeProviderDto;
+import io.terminus.doctor.warehouse.dto.EventHandlerContext;
 import io.terminus.doctor.warehouse.handler.IHandler;
 import io.terminus.doctor.warehouse.model.DoctorMaterialConsumeProvider;
 import io.terminus.doctor.warehouse.model.DoctorMaterialInWareHouse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.Map;
-
+import static com.google.common.base.Preconditions.checkState;
 import static java.util.Objects.isNull;
 
 /**
@@ -24,23 +23,18 @@ public class DoctorInWareHouseProviderHandler implements IHandler{
 
     private final DoctorMaterialInWareHouseDao doctorMaterialInWareHouseDao;
 
-    private final DoctorMaterialInfoDao doctorMaterialInfoDao;
-
     @Autowired
-    public DoctorInWareHouseProviderHandler(DoctorMaterialInWareHouseDao doctorMaterialInWareHouseDao,
-                                            DoctorMaterialInfoDao doctorMaterialInfoDao){
+    public DoctorInWareHouseProviderHandler(DoctorMaterialInWareHouseDao doctorMaterialInWareHouseDao){
         this.doctorMaterialInWareHouseDao = doctorMaterialInWareHouseDao;
-        this.doctorMaterialInfoDao = doctorMaterialInfoDao;
     }
 
     @Override
-    public Boolean ifHandle(DoctorMaterialConsumeProviderDto dto, Map<String, Object> context) {
-        DoctorMaterialConsumeProvider.EVENT_TYPE eventType = DoctorMaterialConsumeProvider.EVENT_TYPE.from(dto.getActionType());
+    public boolean ifHandle(DoctorMaterialConsumeProvider.EVENT_TYPE eventType) {
         return eventType != null && eventType.isIn();
     }
 
     @Override
-    public void handle(DoctorMaterialConsumeProviderDto dto, Map<String, Object> context) throws RuntimeException {
+    public void handle(DoctorMaterialConsumeProviderDto dto, EventHandlerContext context) throws RuntimeException {
         // 修改数量信息
         DoctorMaterialInWareHouse doctorMaterialInWareHouse = doctorMaterialInWareHouseDao.queryByFarmHouseMaterial(
                 dto.getFarmId(), dto.getWareHouseId(), dto.getMaterialTypeId());
@@ -54,7 +48,17 @@ public class DoctorInWareHouseProviderHandler implements IHandler{
             doctorMaterialInWareHouse.setUpdatorName(dto.getStaffName());
             doctorMaterialInWareHouseDao.update(doctorMaterialInWareHouse);
         }
-        context.put("materialInWareHouseId", doctorMaterialInWareHouse.getId());
+        context.setMaterialInWareHouseId(doctorMaterialInWareHouse.getId());
+    }
+
+    @Override
+    public void rollback(DoctorMaterialConsumeProvider cp) {
+        // 事件之后的库存数据
+        DoctorMaterialInWareHouse materialInWareHouse = doctorMaterialInWareHouseDao.queryByFarmHouseMaterial(cp.getFarmId(), cp.getWareHouseId(), cp.getMaterialId());
+        checkState(!isNull(materialInWareHouse), "no.material.consume");
+        // 把数量减回去
+        materialInWareHouse.setLotNumber(materialInWareHouse.getLotNumber() - cp.getEventCount());
+        doctorMaterialInWareHouseDao.update(materialInWareHouse);
     }
 
     /**
@@ -62,13 +66,11 @@ public class DoctorInWareHouseProviderHandler implements IHandler{
      * @param dto
      */
     private DoctorMaterialInWareHouse buildDoctorMaterialInWareHouse(DoctorMaterialConsumeProviderDto dto){
-        DoctorMaterialInWareHouse doctorMaterialInWareHouse = DoctorMaterialInWareHouse.builder()
+        return DoctorMaterialInWareHouse.builder()
                 .farmId(dto.getFarmId()).farmName(dto.getFarmName()).wareHouseId(dto.getWareHouseId()).wareHouseName(dto.getWareHouseName())
                 .materialId(dto.getMaterialTypeId()).materialName(dto.getMaterialName()).lotNumber(dto.getCount()).type(dto.getType())
                 .unitName(dto.getUnitName()).unitGroupName(dto.getUnitGroupName())
                 .creatorId(dto.getStaffId()).creatorName(dto.getStaffName())
                 .build();
-
-        return doctorMaterialInWareHouse;
     }
 }

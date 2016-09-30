@@ -1,27 +1,32 @@
 package io.terminus.doctor.warehouse.manager;
 
-import com.google.common.collect.Maps;
+import com.google.common.collect.Lists;
+import io.terminus.common.exception.ServiceException;
+import io.terminus.common.utils.JsonMapper;
 import io.terminus.common.utils.NumberUtils;
+import io.terminus.doctor.common.enums.WareHouseType;
 import io.terminus.doctor.warehouse.dao.DoctorMaterialConsumeAvgDao;
 import io.terminus.doctor.warehouse.dao.DoctorMaterialConsumeProviderDao;
 import io.terminus.doctor.warehouse.dao.DoctorMaterialInWareHouseDao;
-import io.terminus.doctor.warehouse.dao.DoctorMaterialInfoDao;
 import io.terminus.doctor.warehouse.dto.DoctorMaterialConsumeProviderDto;
 import io.terminus.doctor.warehouse.dto.DoctorWareHouseBasicDto;
+import io.terminus.doctor.warehouse.dto.EventHandlerContext;
 import io.terminus.doctor.warehouse.handler.DoctorWareHouseHandlerInvocation;
 import io.terminus.doctor.warehouse.model.DoctorMaterialConsumeAvg;
 import io.terminus.doctor.warehouse.model.DoctorMaterialConsumeProvider;
 import io.terminus.doctor.warehouse.model.DoctorMaterialInWareHouse;
-import io.terminus.doctor.warehouse.model.DoctorMaterialInfo;
 import io.terminus.doctor.warehouse.model.DoctorWareHouse;
+import io.terminus.doctor.warehouse.model.FeedFormula;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import static com.google.common.base.Preconditions.checkState;
 import static java.util.Objects.isNull;
@@ -40,20 +45,16 @@ public class MaterialInWareHouseManager {
 
     private final DoctorMaterialInWareHouseDao doctorMaterialInWareHouseDao;
 
-    private final DoctorMaterialInfoDao doctorMaterialInfoDao;
-
     private final DoctorMaterialConsumeAvgDao doctorMaterialConsumeAvgDao;
 
     private final DoctorMaterialConsumeProviderDao doctorMaterialConsumeProviderDao;
 
     @Autowired
     public MaterialInWareHouseManager(DoctorMaterialInWareHouseDao doctorMaterialInWareHouseDao,
-                                      DoctorMaterialInfoDao doctorMaterialInfoDao,
                                       DoctorWareHouseHandlerInvocation doctorWareHouseHandlerInvocation,
                                       DoctorMaterialConsumeAvgDao doctorMaterialConsumeAvgDao,
                                       DoctorMaterialConsumeProviderDao doctorMaterialConsumeProviderDao){
         this.doctorMaterialInWareHouseDao = doctorMaterialInWareHouseDao;
-        this.doctorMaterialInfoDao = doctorMaterialInfoDao;
         this.doctorWareHouseHandlerInvocation = doctorWareHouseHandlerInvocation;
         this.doctorMaterialConsumeAvgDao = doctorMaterialConsumeAvgDao;
         this.doctorMaterialConsumeProviderDao = doctorMaterialConsumeProviderDao;
@@ -61,9 +62,8 @@ public class MaterialInWareHouseManager {
 
     // 生产对应的物料内容
     @Transactional
-    public Boolean produceMaterialInfo(DoctorWareHouseBasicDto basicDto,
-                                       DoctorWareHouse targetHouse, DoctorMaterialInfo targetMaterial,
-                                       DoctorMaterialInfo.MaterialProduce materialProduce){
+    public Boolean produceMaterialInfo(DoctorWareHouseBasicDto basicDto, DoctorWareHouse targetHouse, FeedFormula feedFormula,
+                                       Long feedUnitId, String feedUnitName, FeedFormula.FeedProduce materialProduce){
         List<Long> eventIds = new ArrayList<>();
 
         // consume each source
@@ -78,13 +78,26 @@ public class MaterialInWareHouseManager {
         // 计算本次配方生产的饲料的入库单价
         Long unitPrice = this.calculateProviderUnitPrice(eventIds, materialProduce.getTotal());
         // provider source
-        providerMaterialInWareHouseInner(DoctorMaterialConsumeProviderDto.builder()
-                .type(targetMaterial.getType()).farmId(targetMaterial.getFarmId()).farmName(targetMaterial.getFarmName())
-                .materialTypeId(targetMaterial.getId()).materialName(targetMaterial.getMaterialName())
+        Long providerEventId = providerMaterialInWareHouseInner(DoctorMaterialConsumeProviderDto.builder()
+                .type(WareHouseType.FEED.getKey()).farmId(feedFormula.getFarmId()).farmName(feedFormula.getFarmName())
+                .materialTypeId(feedFormula.getFeedId()).materialName(feedFormula.getFeedName())
                 .wareHouseId(targetHouse.getId()).wareHouseName(targetHouse.getWareHouseName())
                 .barnId(basicDto.getBarnId()).barnName(basicDto.getBarnName()).staffId(basicDto.getStaffId()).staffName(basicDto.getStaffName())
-                .count(materialProduce.getTotal()).unitId(targetMaterial.getUnitId()).unitName(targetMaterial.getUnitName()).unitPrice(unitPrice)
+                .count(materialProduce.getTotal()).unitId(feedUnitId).unitName(feedUnitName).unitPrice(unitPrice)
+                .actionType(DoctorMaterialConsumeProvider.EVENT_TYPE.FORMULA_FEED.getValue())
                 .build());
+
+        // 记录关联id, 为了以后的回滚使用
+        eventIds.add(providerEventId);
+        for(Long id : eventIds){
+            DoctorMaterialConsumeProvider cp = doctorMaterialConsumeProviderDao.findById(id);
+            Map<String, Object> extraMap = cp.getExtraMap() == null ? new HashMap<>() : cp.getExtraMap();
+            List<Long> copy = Lists.newArrayList(eventIds);
+            copy.remove(id);
+            extraMap.put("relEventIds", copy);
+            cp.setExtraMap(extraMap);
+            doctorMaterialConsumeProviderDao.update(cp);
+        }
 
         return Boolean.TRUE;
     }
@@ -103,7 +116,7 @@ public class MaterialInWareHouseManager {
         return Long.valueOf(NumberUtils.divide(totalPrice, realTotal.longValue(), 0));
     }
 
-    private List<Long> produceMaterialConsumeEntry(DoctorWareHouseBasicDto basicDto, DoctorMaterialInfo.MaterialProduceEntry materialProduceEntry){
+    private List<Long> produceMaterialConsumeEntry(DoctorWareHouseBasicDto basicDto, FeedFormula.MaterialProduceEntry materialProduceEntry){
         List<Long> eventIds = new ArrayList<>();
         List<DoctorMaterialInWareHouse> doctorMaterialInWareHouses = doctorMaterialInWareHouseDao.queryByFarmMaterial(
                 basicDto.getFarmId(),
@@ -130,7 +143,7 @@ public class MaterialInWareHouseManager {
             }
 
             Long eventId = consumeMaterialInner(DoctorMaterialConsumeProviderDto.builder()
-                    .type(doctorMaterialInWareHouse.getType())
+                    .type(doctorMaterialInWareHouse.getType()).actionType(DoctorMaterialConsumeProvider.EVENT_TYPE.FORMULA_RAW_MATERIAL.getValue())
                     .farmId(doctorMaterialInWareHouse.getFarmId()).farmName(doctorMaterialInWareHouse.getFarmName())
                     .materialTypeId(doctorMaterialInWareHouse.getMaterialId()).materialName(doctorMaterialInWareHouse.getMaterialName())
                     .wareHouseId(doctorMaterialInWareHouse.getWareHouseId()).wareHouseName(doctorMaterialInWareHouse.getWareHouseName())
@@ -157,9 +170,28 @@ public class MaterialInWareHouseManager {
         // 先调出
         Long diaochuEventId = consumeMaterialInner(diaochuDto);
         DoctorMaterialConsumeProvider diaochuEvent = doctorMaterialConsumeProviderDao.findById(diaochuEventId);
+
         // 然后调入
         diaoruDto.setUnitPrice(diaochuEvent.getUnitPrice());
-        providerMaterialInWareHouseInner(diaoruDto);
+        Long diaoruEventId = providerMaterialInWareHouseInner(diaoruDto);
+
+        // 把两个事件的 id 在对方的 extra 中记录一下
+        Map<String, Object> diaochuMap = diaochuEvent.getExtraMap();
+        if(diaochuMap == null){
+            diaochuMap = new HashMap<>();
+        }
+        diaochuMap.put("relEventId", diaoruEventId);
+        diaochuEvent.setExtraMap(diaochuMap);
+        doctorMaterialConsumeProviderDao.update(diaochuEvent);
+
+        DoctorMaterialConsumeProvider diaoruEvent = doctorMaterialConsumeProviderDao.findById(diaoruEventId);
+        Map<String, Object> diaoruMap = diaoruEvent.getExtraMap();
+        if(diaoruMap == null){
+            diaoruMap = new HashMap<>();
+        }
+        diaoruMap.put("relEventId", diaochuEventId);
+        diaoruEvent.setExtraMap(diaoruMap);
+        doctorMaterialConsumeProviderDao.update(diaoruEvent);
     }
 
     /**
@@ -182,19 +214,13 @@ public class MaterialInWareHouseManager {
         DoctorMaterialInWareHouse doctorMaterialInWareHouse = doctorMaterialInWareHouseDao.findById(materialInWareHouseId);
         checkState(!isNull(doctorMaterialInWareHouse), "input.materialInWareHouseId.empty");
 
-        DoctorMaterialInfo doctorMaterialInfo = doctorMaterialInfoDao.findById(doctorMaterialInWareHouse.getMaterialId());
-        checkState(!isNull(doctorMaterialInfo), "query.materialInfo.fail");
-        Integer consumeDays = (int)(doctorMaterialInWareHouse.getLotNumber() / doctorMaterialInfo.getDefaultConsumeCount());
-        if (consumeDays == 0 ) consumeDays = 1; // 修改1
-
         // 消耗对应的物资信息
         consumeMaterialInner(DoctorMaterialConsumeProviderDto.builder().type(doctorMaterialInWareHouse.getType())
                 .farmId(doctorMaterialInWareHouse.getFarmId()).farmName(doctorMaterialInWareHouse.getFarmName())
                 .materialTypeId(doctorMaterialInWareHouse.getMaterialId()).materialName(doctorMaterialInWareHouse.getMaterialName())
                 .wareHouseId(doctorMaterialInWareHouse.getWareHouseId()).wareHouseName(doctorMaterialInWareHouse.getWareHouseName())
-                .barnId(0l).barnName("")   //默认消耗仓库信息
                 .staffId(userId).staffName(userName).count(doctorMaterialInWareHouse.getLotNumber())
-                .unitId(doctorMaterialInfo.getUnitId()).unitName(userName).consumeDays(consumeDays)
+                .unitName(doctorMaterialInWareHouse.getUnitName()).consumeDays(1)
                 .build());
 
         // delete in warehouse
@@ -209,21 +235,57 @@ public class MaterialInWareHouseManager {
     }
 
     private Long providerMaterialInWareHouseInner(DoctorMaterialConsumeProviderDto dto){
-        if(dto.getActionType() == null){
-            dto.setActionType(DoctorMaterialConsumeProvider.EVENT_TYPE.PROVIDER.getValue());
-        }
-        Map<String,Object> context = Maps.newHashMap();
+        EventHandlerContext context = new EventHandlerContext();
         doctorWareHouseHandlerInvocation.invoke(dto, context);
-        return Long.valueOf(context.get("eventId").toString());
+        return context.getEventId();
     }
 
     private Long consumeMaterialInner(DoctorMaterialConsumeProviderDto doctorMaterialConsumeProviderDto){
-        if(doctorMaterialConsumeProviderDto.getActionType() == null){
-            doctorMaterialConsumeProviderDto.setActionType(DoctorMaterialConsumeProvider.EVENT_TYPE.CONSUMER.getValue());
-        }
-        Map<String,Object> context = Maps.newHashMap();
+        EventHandlerContext context = new EventHandlerContext();
         this.doctorWareHouseHandlerInvocation.invoke(doctorMaterialConsumeProviderDto, context);
-        return Long.valueOf(context.get("eventId").toString());
+        return context.getEventId();
     }
 
+    @Transactional
+    public void rollback(Long eventId){
+        DoctorMaterialConsumeProvider cp = doctorMaterialConsumeProviderDao.findById(eventId);
+        if(cp == null){
+            throw new ServiceException("event.not.found");
+        }
+
+        // 对调拨事件要特别对待, 因为有一个关联事件也要一起回滚
+        if(Objects.equals(cp.getEventType(), DoctorMaterialConsumeProvider.EVENT_TYPE.DIAORU.getValue())
+                || Objects.equals(cp.getEventType(), DoctorMaterialConsumeProvider.EVENT_TYPE.DIAOCHU.getValue())){
+            Long relEventId;
+            try {
+                relEventId = Long.valueOf(cp.getExtraMap().get("relEventId").toString());
+            } catch (RuntimeException e) {
+                throw new ServiceException("related.event.not.fount"); // 没有找到关联事件, 无法回滚
+            }
+            DoctorMaterialConsumeProvider relEvent = doctorMaterialConsumeProviderDao.findById(relEventId);
+            if(relEvent == null){
+                throw new ServiceException("related.event.not.fount");
+            }
+            doctorWareHouseHandlerInvocation.rollback(relEvent);
+        }
+        // 配方生产事件有更多的关联事件, 他妈的要找出来一起回滚
+        if(Objects.equals(cp.getEventType(), DoctorMaterialConsumeProvider.EVENT_TYPE.FORMULA_FEED.getValue())
+                || Objects.equals(cp.getEventType(), DoctorMaterialConsumeProvider.EVENT_TYPE.FORMULA_RAW_MATERIAL.getValue())){
+            List<Long> relEventIds;
+            try {
+                relEventIds = JsonMapper.nonDefaultMapper().fromJson(cp.getExtraMap().get("relEventIds").toString(),
+                        JsonMapper.nonDefaultMapper().createCollectionType(ArrayList.class, Long.class));
+            } catch (RuntimeException e) {
+                throw new ServiceException("related.event.not.fount"); // 没有找到关联事件, 无法回滚
+            }
+            relEventIds.forEach(id -> {
+                DoctorMaterialConsumeProvider relEvent = doctorMaterialConsumeProviderDao.findById(id);
+                if(relEvent == null){
+                    throw new ServiceException("related.event.not.fount");
+                }
+                doctorWareHouseHandlerInvocation.rollback(relEvent);
+            });
+        }
+        doctorWareHouseHandlerInvocation.rollback(cp);
+    }
 }

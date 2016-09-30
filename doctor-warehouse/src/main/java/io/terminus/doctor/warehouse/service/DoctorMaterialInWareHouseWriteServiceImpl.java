@@ -110,4 +110,17 @@ public class DoctorMaterialInWareHouseWriteServiceImpl implements DoctorMaterial
             return Response.fail("delete.materialInWareHouse.fail");
         }
     }
+
+    @Override
+    public Response<Boolean> rollback(Long eventId){
+        try{
+            materialInWareHouseManager.rollback(eventId);
+            return Response.ok(true);
+        }catch (RuntimeException e){
+            return Response.fail(e.getMessage());
+        }catch (Exception e){
+            log.error("rollback warehouse event fail, cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("rollback.warehouse.event.fail");
+        }
+    }
 }

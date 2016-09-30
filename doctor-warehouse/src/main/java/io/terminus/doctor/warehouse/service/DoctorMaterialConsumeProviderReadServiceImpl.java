@@ -142,4 +142,5 @@ public class DoctorMaterialConsumeProviderReadServiceImpl implements DoctorMater
             return Response.fail("warehouseEventReport.fail");
         }
     }
+
 }
