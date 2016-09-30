@@ -21,7 +21,7 @@ public enum RollbackType {
     DAILY_MATE(4, "配种日报"),
     DAILY_SALE(5, "销售日报"),
     DAILY_WEAN(6, "断奶日报"),
-    DAILY_PREG_CHECK(13, "妊娠检查日报"),
+    DAILY_PREG_CHECK(15, "妊娠检查日报"),
 
     //记录回滚时间，晚上job更新
     MONTHLY_REPORT(7, "生产月报(包括存栏月报)"),

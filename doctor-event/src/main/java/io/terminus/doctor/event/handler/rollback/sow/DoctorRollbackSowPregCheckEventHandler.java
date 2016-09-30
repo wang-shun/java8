@@ -20,7 +20,7 @@ public class DoctorRollbackSowPregCheckEventHandler extends DoctorAbstractRollba
     public List<DoctorRollbackDto> updateReport(DoctorPigEvent pigEvent) {
         DoctorRollbackDto doctorRollbackDto = DoctorRollbackDto.builder()
                 .esPigId(pigEvent.getPigId())
-                .rollbackTypes(Lists.newArrayList(RollbackType.SEARCH_PIG, RollbackType.DAILY_MATE, RollbackType.MONTHLY_REPORT))
+                .rollbackTypes(Lists.newArrayList(RollbackType.SEARCH_PIG, RollbackType.DAILY_PREG_CHECK))
                 .farmId(pigEvent.getFarmId())
                 .eventAt(pigEvent.getEventAt())
                 .build();
