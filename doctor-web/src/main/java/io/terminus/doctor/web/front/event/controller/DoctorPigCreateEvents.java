@@ -406,11 +406,19 @@ public class DoctorPigCreateEvents {
             // 猪批量事件操作， 返回PigId
         } else {
             pigId = RespHelper.or500(doctorSowEventCreateService.sowEventCreate(buildBasicInputInfoDto(farmId, pigId, PigEvent.from(eventType), null), sowInfoDtoJson));
-            if (Objects.equals(eventType, PigEvent.WEAN.getKey())){
+            if (Objects.equals(eventType, PigEvent.WEAN.getKey())) {
                 DoctorPartWeanDto doctorPartWeanDto = JsonMapper.JSON_NON_DEFAULT_MAPPER.fromJson(sowInfoDtoJson, DoctorPartWeanDto.class);
-                Integer count =  doctorPartWeanDto.getFarrowingLiveCount()-doctorPartWeanDto.getWeanPigletsCount();
-                if (Objects.equals(doctorPartWeanDto.getPartWeanPigletsCount(), count) && doctorPartWeanDto.getChgLocationToBarnId() !=null){
-                    doctorSowEventCreateService.sowEventCreate(buildBasicInputInfoDto(farmId, tempPigId, PigEvent.TO_MATING, IsOrNot.YES.getValue()), sowInfoDtoJson);
+                Integer count = doctorPartWeanDto.getFarrowingLiveCount() - doctorPartWeanDto.getWeanPigletsCount();
+                if (Objects.equals(doctorPartWeanDto.getPartWeanPigletsCount(), count) && doctorPartWeanDto.getChgLocationToBarnId() != null) {
+                    try {
+                        Map<String, Object> temp = JsonMapper.JSON_NON_DEFAULT_MAPPER.getMapper().readValue(sowInfoDtoJson, JacksonType.MAP_OF_OBJECT);
+                        temp.put("changeLocationDate", doctorPartWeanDto.getPartWeanDate());
+                        String sowInfoDto = JsonMapper.JSON_NON_DEFAULT_MAPPER.getMapper().writeValueAsString(temp);
+                        doctorSowEventCreateService.sowEventCreate(buildBasicInputInfoDto(farmId, tempPigId, PigEvent.TO_MATING, IsOrNot.YES.getValue()), sowInfoDto);
+                    } catch (Exception e) {
+                        log.error("to.chglocation.failed");
+                        throw new JsonResponseException("to.chglocation.fail");
+                    }
                 }
             }
         }
