@@ -87,7 +87,6 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
     private final DoctorGroupReadService doctorGroupReadService;
     private final DoctorOrgReadService doctorOrgReadService;
     private final DoctorBasicWriteService doctorBasicWriteService;
-    private final DoctorMaterialConsumeProviderReadService doctorMaterialConsumeProviderReadService;
 
     @RpcConsumer
     private DoctorBasicMaterialReadService doctorBasicMaterialReadService;
@@ -95,6 +94,8 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
     private DoctorUserProfileReadService doctorUserProfileReadService;
     @RpcConsumer
     private PrimaryUserReadService primaryUserReadService;
+    @RpcConsumer
+    private DoctorMaterialConsumeProviderReadService doctorMaterialConsumeProviderReadService;
 
     @Autowired
     public DoctorGroupWebServiceImpl(DoctorGroupWriteService doctorGroupWriteService,
@@ -103,8 +104,7 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
                                      DoctorBarnReadService doctorBarnReadService,
                                      DoctorGroupReadService doctorGroupReadService,
                                      DoctorOrgReadService doctorOrgReadService,
-                                     DoctorBasicWriteService doctorBasicWriteService,
-                                     DoctorMaterialConsumeProviderReadService doctorMaterialConsumeProviderReadService) {
+                                     DoctorBasicWriteService doctorBasicWriteService) {
         this.doctorGroupWriteService = doctorGroupWriteService;
         this.doctorFarmReadService = doctorFarmReadService;
         this.doctorBasicReadService = doctorBasicReadService;
@@ -112,7 +112,6 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
         this.doctorGroupReadService = doctorGroupReadService;
         this.doctorOrgReadService = doctorOrgReadService;
         this.doctorBasicWriteService = doctorBasicWriteService;
-        this.doctorMaterialConsumeProviderReadService = doctorMaterialConsumeProviderReadService;
     }
 
     private static final JsonMapper JSON_MAPPER = JsonMapper.nonEmptyMapper();
