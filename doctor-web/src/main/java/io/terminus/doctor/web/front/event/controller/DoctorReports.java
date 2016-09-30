@@ -9,19 +9,23 @@ import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dto.DoctorGroupSearchDto;
 import io.terminus.doctor.event.dto.report.daily.DoctorDailyReportDto;
 import io.terminus.doctor.event.dto.report.monthly.DoctorMonthlyReportTrendDto;
+import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupBatchSummary;
 import io.terminus.doctor.event.service.DoctorDailyReportReadService;
 import io.terminus.doctor.event.service.DoctorDailyReportWriteService;
 import io.terminus.doctor.event.service.DoctorGroupBatchSummaryReadService;
 import io.terminus.doctor.event.service.DoctorMonthlyReportReadService;
+import io.terminus.doctor.warehouse.service.DoctorMaterialConsumeProviderReadService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Map;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 import static io.terminus.common.utils.Arguments.notEmpty;
 
@@ -47,6 +51,9 @@ public class DoctorReports {
 
     @RpcConsumer
     private DoctorGroupBatchSummaryReadService doctorGroupBatchSummaryReadService;
+
+    @RpcConsumer
+    private DoctorMaterialConsumeProviderReadService doctorMaterialConsumeProviderReadService;
 
     /**
      * 根据farmId和日期查询猪场日报表(缓存方式)
@@ -120,6 +127,18 @@ public class DoctorReports {
         if (notEmpty(dto.getPigTypeCommas())) {
             dto.setPigTypes(Splitters.splitToInteger(dto.getPigTypeCommas(), Splitters.COMMA));
         }
-        return RespHelper.or500(doctorGroupBatchSummaryReadService.pagingGroupBatchSummary(dto, pageNo, pageSize));
+        Paging<DoctorGroupBatchSummary> paging = RespHelper.or500(doctorGroupBatchSummaryReadService.pagingGroupBatchSummary(dto, pageNo, pageSize));
+
+        //如果猪群没有关闭，刷新下料肉比
+        List<DoctorGroupBatchSummary> summaries = paging.getData().stream()
+                .map(s -> {
+                    if (Objects.equals(s.getStatus(), DoctorGroup.Status.CREATED.getValue())) {
+                        Double material = RespHelper.or(doctorMaterialConsumeProviderReadService.sumConsumeFeed(null, null, null, null, null, s.getGroupId(), null, null), 0D);
+                        s.setFcr(material / s.getFcr());
+                    }
+                    return s;
+                })
+                .collect(Collectors.toList());
+        return new Paging<>(paging.getTotal(), summaries);
     }
 }

@@ -100,7 +100,7 @@ public class DoctorChangeGroupEventHandler extends DoctorAbstractGroupEventHandl
 
         //5.判断变动数量, 如果 = 猪群数量, 触发关闭猪群事件, 同时生成批次总结
         if (Objects.equals(oldQuantity, change.getQuantity())) {
-            doctorCommonGroupEventHandler.createGroupBatchSummaryWhenClosed(group, groupTrack, event.getEventAt());
+            doctorCommonGroupEventHandler.createGroupBatchSummaryWhenClosed(group, groupTrack, event.getEventAt(), change.getFcrFeed());
             doctorCommonGroupEventHandler.autoGroupEventClose(group, groupTrack, change);
         }
 

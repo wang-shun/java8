@@ -1,6 +1,5 @@
 package io.terminus.doctor.move.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableMap;
@@ -89,6 +88,7 @@ import io.terminus.doctor.move.model.View_EventListSow;
 import io.terminus.doctor.move.model.View_GainCardList;
 import io.terminus.doctor.move.model.View_SowCardList;
 import io.terminus.doctor.user.model.DoctorFarm;
+import io.terminus.doctor.warehouse.service.DoctorMaterialConsumeProviderReadService;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
 import org.joda.time.Days;
@@ -120,8 +120,6 @@ public class DoctorMoveDataService {
 
     private static final JsonMapper JSON_MAPPER = JsonMapper.nonEmptyMapper();
 
-    protected ObjectMapper MAPPER = JsonMapper.JSON_NON_DEFAULT_MAPPER.getMapper();
-
     private final DoctorMoveDatasourceHandler doctorMoveDatasourceHandler;
     private final DoctorGroupDao doctorGroupDao;
     private final DoctorGroupEventDao doctorGroupEventDao;
@@ -136,6 +134,7 @@ public class DoctorMoveDataService {
     private final DoctorBarnDao doctorBarnDao;
     private final DoctorGroupBatchSummaryReadService doctorGroupBatchSummaryReadService;
     private final DoctorGroupBatchSummaryWriteService doctorGroupBatchSummaryWriteService;
+    private final DoctorMaterialConsumeProviderReadService doctorMaterialConsumeProviderReadService;
 
     @Autowired
     public DoctorMoveDataService(DoctorMoveDatasourceHandler doctorMoveDatasourceHandler,
@@ -151,7 +150,8 @@ public class DoctorMoveDataService {
                                  DoctorGroupReportManager doctorGroupReportManager,
                                  DoctorBarnDao doctorBarnDao,
                                  DoctorGroupBatchSummaryReadService doctorGroupBatchSummaryReadService,
-                                 DoctorGroupBatchSummaryWriteService doctorGroupBatchSummaryWriteService) {
+                                 DoctorGroupBatchSummaryWriteService doctorGroupBatchSummaryWriteService,
+                                 DoctorMaterialConsumeProviderReadService doctorMaterialConsumeProviderReadService) {
         this.doctorMoveDatasourceHandler = doctorMoveDatasourceHandler;
         this.doctorGroupDao = doctorGroupDao;
         this.doctorGroupEventDao = doctorGroupEventDao;
@@ -166,6 +166,7 @@ public class DoctorMoveDataService {
         this.doctorBarnDao = doctorBarnDao;
         this.doctorGroupBatchSummaryReadService = doctorGroupBatchSummaryReadService;
         this.doctorGroupBatchSummaryWriteService = doctorGroupBatchSummaryWriteService;
+        this.doctorMaterialConsumeProviderReadService = doctorMaterialConsumeProviderReadService;
     }
 
     //删除猪场所有猪相关的数据
@@ -214,7 +215,8 @@ public class DoctorMoveDataService {
         List<DoctorGroup> groups = doctorGroupDao.findBySearchDto(search);
         groups.forEach(group -> {
             DoctorGroupTrack groupTrack = doctorGroupTrackDao.findByGroupId(group.getId());
-            Response<DoctorGroupBatchSummary> result = doctorGroupBatchSummaryReadService.getSummaryByGroupDetail(new DoctorGroupDetail(group, groupTrack));
+            Double frcFeed = RespHelper.or(doctorMaterialConsumeProviderReadService.sumConsumeFeed(null, null, null, null, null, group.getId(), null, null), 0D);
+            Response<DoctorGroupBatchSummary> result = doctorGroupBatchSummaryReadService.getSummaryByGroupDetail(new DoctorGroupDetail(group, groupTrack), frcFeed);
             if (result.isSuccess() && result.getResult() != null) {
                 doctorGroupBatchSummaryWriteService.createGroupBatchSummary(result.getResult());
             }
