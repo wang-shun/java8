@@ -13,6 +13,7 @@ import io.terminus.doctor.event.dao.DoctorPigEventDao;
 import io.terminus.doctor.event.dao.redis.DailyReport2UpdateDao;
 import io.terminus.doctor.event.dao.redis.DailyReportHistoryDao;
 import io.terminus.doctor.event.dto.DoctorRollbackDto;
+import io.terminus.doctor.event.dto.report.daily.DoctorCheckPregDailyReport;
 import io.terminus.doctor.event.dto.report.daily.DoctorDailyReportDto;
 import io.terminus.doctor.event.dto.report.daily.DoctorDeadDailyReport;
 import io.terminus.doctor.event.dto.report.daily.DoctorDeliverDailyReport;
@@ -191,6 +192,9 @@ public class DoctorRollbackServiceImpl implements DoctorRollbackService {
                 case DAILY_WEAN:
                     report.setWean(getWeanDailyReport(farmId, startAt, endAt));
                     break;
+                case DAILY_PREG_CHECK:
+                    report.setCheckPreg(getCheckPregDailyReport(farmId, startAt, endAt));
+                    break;
 
                 //直接删除
                 case GROUP_BATCH:
@@ -242,6 +246,15 @@ public class DoctorRollbackServiceImpl implements DoctorRollbackService {
         doctorPigTypeStatisticWriteService.statisticGroup(dto.getOrgId(), dto.getFarmId());
         doctorPigTypeStatisticWriteService.statisticPig(dto.getOrgId(), dto.getFarmId(), DoctorPig.PIG_TYPE.BOAR.getKey());
         doctorPigTypeStatisticWriteService.statisticPig(dto.getOrgId(), dto.getFarmId(), DoctorPig.PIG_TYPE.SOW.getKey());
+    }
+
+    private DoctorCheckPregDailyReport getCheckPregDailyReport(Long farmId, Date startAt, Date endAt) {
+        DoctorCheckPregDailyReport checkPreg = new DoctorCheckPregDailyReport();
+        checkPreg.setPositive(doctorKpiDao.checkYangCounts(farmId, startAt, endAt));
+        checkPreg.setNegative(doctorKpiDao.checkYingCounts(farmId, startAt, endAt));
+        checkPreg.setFanqing(doctorKpiDao.checkFanQCounts(farmId, startAt, endAt));
+        checkPreg.setLiuchan(doctorKpiDao.checkAbortionCounts(farmId, startAt, endAt));
+        return checkPreg;
     }
 
     private DoctorDeadDailyReport getDeadDailyReport(Long farmId, Date startAt, Date endAt) {
