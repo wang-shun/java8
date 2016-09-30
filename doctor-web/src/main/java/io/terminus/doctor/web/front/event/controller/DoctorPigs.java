@@ -287,5 +287,4 @@ public class DoctorPigs {
         DoctorPigTrack pigTrack = RespHelper.or500(doctorPigReadService.findPigTrackByPigId(pigId));
         return RespHelper.or500(doctorBarnReadService.findBarnById(pigTrack.getCurrentBarnId()));
     }
-
 }

@@ -62,7 +62,7 @@
         <result column="abortion_date" property="abortionDate"/>
         <result column="partwean_date" property="partweanDate"/>
         <result column="doctor_mate_type" property="doctorMateType"/>
-        <result column="boar_code" property="boarCode" />
+        <result column="boar_code" property="boarCode"/>
         <result column="out_id" property="outId"/>
         <result column="extra" property="extra"/>
         <result column="remark" property="remark"/>
@@ -389,17 +389,24 @@
     </select>
 
     <select id="findFirstPigEvent" parameterType="map" resultMap="DoctorPigEventMap">
-        select <include refid="cols_all"/> from <include refid="tb"/>
+        select
+        <include refid="cols_all"/>
+        from
+        <include refid="tb"/>
         where pig_id = #{pigId} and event_at = (
-          select min(event_at) from <include refid="tb"/> where pig_id = #{pigId}
-          <if test="fromDate != null">
-              <![CDATA[ and event_at >= #{fromDate} ]]>
-          </if>
+        select min(event_at) from
+        <include refid="tb"/>
+        where pig_id = #{pigId}
+        <if test="fromDate != null">
+            <![CDATA[ and event_at >= #{fromDate} ]]>
+        </if>
         ) limit 1
     </select>
 
     <select id="countByBarnId" parameterType="long" resultType="long">
-        select count(id) from <include refid="tb" /> where `barn_id` = #{barnId}
+        select count(id) from
+        <include refid="tb"/>
+        where `barn_id` = #{barnId}
     </select>
 
     <select id="list" resultMap="DoctorPigEventMap">
@@ -671,9 +678,10 @@
         limit 5000
     </select>
 
-    <update id="updates"  parameterType="java.util.List">
+    <update id="updates" parameterType="java.util.List">
         <foreach collection="list" item="item" index="index" open="" close="" separator=";">
-            update <include refid="tb"/>
+            update
+            <include refid="tb"/>
             <set>
                 org_id = #{item.orgId},
                 org_name = #{item.orgName},
@@ -744,6 +752,16 @@
             where id = ${item.id}
         </foreach>
     </update>
+
+    <select id="findOperator" parameterType="map" resultMap="DoctorPigEventMap">
+        SELECT distinct operator_name, operator_id
+        FROM
+        <include refid="tb"/>
+        WHERE operator_name IS NOT NULL
+        <if test="type != null">AND `type` = #{type}</if>
+        <if test="farmId != null">AND `farm_id` = #{farmId}</if>
+        <if test="kind != null">AND `kind` = #{kind}</if>
+    </select>
 
     <select id="findByRelGroupEventId" parameterType="long" resultMap="DoctorPigEventMap" >
         SELECT <include refid="cols_all" />

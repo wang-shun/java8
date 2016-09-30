@@ -63,11 +63,11 @@ public class DoctorGroupBatchSummaryReadServiceImpl implements DoctorGroupBatchS
      * @return 猪群批次总结
      */
     @Override
-    public Response<DoctorGroupBatchSummary> getSummaryByGroupDetail(DoctorGroupDetail groupDetail) {
+    public Response<DoctorGroupBatchSummary> getSummaryByGroupDetail(DoctorGroupDetail groupDetail, Double fcrFeed) {
         try {
             //最后一次转群后, 会把统计结果插入数据库, 如果没查到, 实时计算
             DoctorGroupBatchSummary summary = doctorGroupBatchSummaryDao.findByGroupId(groupDetail.getGroup().getId());
-            return Response.ok(summary != null ? summary : getSummary(groupDetail.getGroup(), groupDetail.getGroupTrack()));
+            return Response.ok(summary != null ? summary : getSummary(groupDetail.getGroup(), groupDetail.getGroupTrack(), fcrFeed));
         } catch (Exception e) {
             log.error("get group batch summary by group detail failed, groupDetail:{}, cause:{}", groupDetail, Throwables.getStackTraceAsString(e));
             return Response.fail("group.batch.summary.find.fail");
@@ -80,7 +80,7 @@ public class DoctorGroupBatchSummaryReadServiceImpl implements DoctorGroupBatchS
             Paging<DoctorGroupDetail> groupPaging = RespHelper.orServEx(doctorGroupReadService.pagingGroup(searchDto, pageNo, pageSize));
             Paging<DoctorGroupBatchSummary> summaryPaging = new Paging<>();
             summaryPaging.setTotal(groupPaging.getTotal());
-            summaryPaging.setData(groupPaging.getData().stream().map(g -> RespHelper.orServEx(getSummaryByGroupDetail(g))).collect(Collectors.toList()));
+            summaryPaging.setData(groupPaging.getData().stream().map(g -> RespHelper.orServEx(getSummaryByGroupDetail(g, null))).collect(Collectors.toList()));
             return Response.ok(summaryPaging);
         } catch (ServiceException e) {
             return Response.fail(e.getMessage());
@@ -92,7 +92,7 @@ public class DoctorGroupBatchSummaryReadServiceImpl implements DoctorGroupBatchS
     }
 
     //根据猪群与猪群跟踪实时计算批次总结
-    private DoctorGroupBatchSummary getSummary(DoctorGroup group, DoctorGroupTrack groupTrack) {
+    private DoctorGroupBatchSummary getSummary(DoctorGroup group, DoctorGroupTrack groupTrack, Double fcrFeed) {
         List<DoctorGroupEvent> events = doctorGroupEventDao.findByGroupId(group.getId());
 
         //转入
@@ -132,7 +132,13 @@ public class DoctorGroupBatchSummaryReadServiceImpl implements DoctorGroupBatchS
         summary.setInCount(inCount);                                                 //转入数
         summary.setInAvgWeight(inAvgWeight);                                         //转入均重(kg)
         summary.setDeadRate(getDeatRate(events, inCount));                           //死淘率
-        summary.setFcr(0D);        // TODO: 16/9/13  料肉比
+
+        Double fcrWeight = getFcrDeltaWeight(events, inCount, inAvgWeight);
+        if (fcrFeed == null) {
+            summary.setFcr(fcrWeight);            //料肉比(这里只放分母，由上层算出物料的分子，出一下)
+        } else {
+            summary.setFcr(fcrFeed / fcrWeight);
+        }
 
         List<DoctorPigTrack> farrowTracks = doctorPigTrackDao.findFeedSowTrackByGroupId(groupTrack.getGroupId());
         summary.setNest(farrowTracks.size());                                        //窝数

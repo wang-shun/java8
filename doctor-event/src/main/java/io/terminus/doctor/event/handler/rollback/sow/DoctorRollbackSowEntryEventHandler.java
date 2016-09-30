@@ -48,7 +48,8 @@ public class DoctorRollbackSowEntryEventHandler extends DoctorAbstractRollbackPi
         DoctorRollbackDto doctorRollbackDto = DoctorRollbackDto.builder()
                 .esBarnId(pigEvent.getBarnId())
                 .esPigId(pigEvent.getPigId())
-                .rollbackTypes(Lists.newArrayList(RollbackType.SEARCH_BARN, RollbackType.SEARCH_PIG, RollbackType.DAILY_LIVESTOCK, RollbackType.MONTHLY_REPORT))
+                .rollbackTypes(Lists.newArrayList(RollbackType.SEARCH_BARN, RollbackType.SEARCH_PIG, RollbackType.SEARCH_PIG_DELETE,
+                        RollbackType.DAILY_LIVESTOCK, RollbackType.MONTHLY_REPORT))
                 .farmId(pigEvent.getFarmId())
                 .eventAt(pigEvent.getEventAt())
                 .build();

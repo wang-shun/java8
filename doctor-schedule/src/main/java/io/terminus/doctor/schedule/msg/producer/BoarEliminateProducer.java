@@ -143,7 +143,7 @@ public class BoarEliminateProducer extends AbstractJobProducer {
                             }
                             if (isSend) {
                                 pigDto.setReason(ruleValue.getDescribe() + ruleValue.getValue().toString());
-                                messages.addAll(getMessage(pigDto, rule.getChannels(), ruleRole, sUsers, timeDiff, rule.getUrl()));
+                                messages.addAll(getMessage(pigDto, rule.getChannels(), ruleRole, sUsers, timeDiff, rule.getUrl(), PigEvent.REMOVAL.getKey()));
                             }
                         });
                     } catch (Exception e) {

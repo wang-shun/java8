@@ -55,6 +55,11 @@ public abstract class BaseGroupInput implements Serializable {
      */
     private Long relPigEventId;
 
+    /**
+     * 料肉比的饲料用量
+     */
+    private Double fcrFeed;
+
     public final String generateEventDesc(){
         Map<String, String> descMap = this.descMap();
         if(descMap == null){

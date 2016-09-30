@@ -39,6 +39,11 @@ public class DoctorDeadDailyReport implements Serializable {
      */
     private int fatten;
 
+    /**
+     * 后备猪
+     */
+    private int houbei;
+
     public void addSowBoar(DoctorDeadDailyReport doctorDeadDailyReport){
         this.boar += doctorDeadDailyReport.getBoar();
         this.sow += doctorDeadDailyReport.getSow();

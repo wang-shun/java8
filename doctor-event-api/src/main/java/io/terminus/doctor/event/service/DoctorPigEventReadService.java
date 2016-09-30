@@ -89,6 +89,11 @@ public interface DoctorPigEventReadService {
     Response<Paging<DoctorPigEvent>> queryPigEventsByCriteria(Map<String, Object> criteria, Integer pageNo, Integer pageSize);
 
     /**
+     * 获取事件操作人列表
+     */
+    Response<List<DoctorPigEvent>> queryOperators(Map<String, Object> criteria);
+
+    /**
      * 判断是否是最新事件
      * @param pigId 猪id
      * @return true 是最新事件, false 不是

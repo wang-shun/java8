@@ -1,6 +1,7 @@
 package io.terminus.doctor.event.service;
 
 import com.google.common.base.Throwables;
+import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.model.Response;
 import io.terminus.common.utils.Dates;
 import io.terminus.doctor.event.dao.DoctorParityMonthlyReportDao;
@@ -26,6 +27,7 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 @Service
+@RpcProvider
 public class DoctorParityMonthlyReportWriteServiceImpl implements DoctorParityMonthlyReportWriteService {
 
     private final DoctorParityMonthlyReportDao doctorParityMonthlyReportDao;
@@ -97,17 +99,10 @@ public class DoctorParityMonthlyReportWriteServiceImpl implements DoctorParityMo
 
     //月报
     private void getMonthlyReport(Long farmId, Date startAt, Date endAt, Date sumAt) {
-        List<DoctorParityMonthlyReport> doctorParityMonthlyReportList = new ArrayList<>();
-        //1,2,3,4,5,6,7,8,9,10胎及以上
-        for(int i =0; i< 9; i++){
-            List<DoctorParityMonthlyReport> result = doctorParityMonthlyReportDao.constructDoctorParityMonthlyReports(farmId, i, i, startAt, endAt);
-            doctorParityMonthlyReportList.addAll(result);
-        }
-        List<DoctorParityMonthlyReport> result = doctorParityMonthlyReportDao.constructDoctorParityMonthlyReports(farmId, 9, null, startAt, endAt);
-        doctorParityMonthlyReportList.addAll(result);
+        log.info("create parity monthly report start, farmId: {}, startAt: {}, endAt: {}", farmId, startAt, endAt);
+        List<DoctorParityMonthlyReport> doctorParityMonthlyReportList = doctorParityMonthlyReportDao.constructDoctorParityMonthlyReports(farmId, startAt, endAt);
         if( doctorParityMonthlyReportList != null && !doctorParityMonthlyReportList.isEmpty()){
             doctorParityMonthlyReportManager.createMonthlyReports(doctorParityMonthlyReportList, sumAt);
         }
-
     }
 }

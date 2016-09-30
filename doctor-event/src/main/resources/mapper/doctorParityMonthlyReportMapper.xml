@@ -170,21 +170,36 @@
 
     <!-- 生成产仔胎次分析月报 -->
     <select id="constructDoctorParityMonthlyReports" parameterType="map" resultMap="DoctorParityMonthlyReportMap">
+        select t1.farm_id,
+               t1.parity,
+               ifnull(t2.nest_count, 0) as nest_count,
+               ifnull(t2.percent, 0) as percent,
+               ifnull(t2.farrow_all, 0) as farrow_all,
+               ifnull(t2.farrow_avg, 0) as farrow_avg,
+               t1.sum_at
+        from (
         select
-        farm_id,
-        parity,
+        #{farmId} as farm_id,
+        name as parity,
+        date_format(#{endAt}, '%Y-%m') as sum_at
+        from doctor_basics
+        where type = 9
+        ) t1 left join
+        (
+        select
+        case when parity &lt; 10 then parity else 10 end as parity,
         ifnull(count(1),0) as nest_count,
         count(1)/(select count(1)
         from doctor_pig_events
         where type = 15
-        <include refid="reportCriteria"/> ) as percent,
+        <include refid="reportCriteria" /> ) as percent,
         ifnull(sum(live_count+dead_count+jx_count+mny_count+black_count),0) as farrow_all,
-        ifnull(sum(live_count+dead_count+jx_count+mny_count+black_count),0)/ifnull(count(1),1) as farrow_avg,
-        date_format(#{startAt}, '%Y-%m') as sum_at
-         from doctor_pig_events
+        ifnull(sum(live_count+dead_count+jx_count+mny_count+black_count),0)/ifnull(count(1),1) as farrow_avg
+        from  doctor_pig_events
         where type = 15
-          <include refid="reportCriteria" />
-        group by farm_id, parity
+        <include refid="reportCriteria" />
+        group by farm_id, case when parity &lt; 10 then parity else 10 end
+        ) t2 on t1.parity = t2.parity
     </select>
 
 

@@ -5,6 +5,7 @@ import com.google.common.collect.Maps;
 import io.terminus.doctor.common.utils.Params;
 import io.terminus.doctor.warehouse.dao.DoctorWareHouseTrackDao;
 import io.terminus.doctor.warehouse.dto.DoctorMaterialConsumeProviderDto;
+import io.terminus.doctor.warehouse.dto.EventHandlerContext;
 import io.terminus.doctor.warehouse.handler.IHandler;
 import io.terminus.doctor.warehouse.model.DoctorMaterialConsumeProvider;
 import io.terminus.doctor.warehouse.model.DoctorWareHouseTrack;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.Map;
 
+import static com.google.common.base.Preconditions.checkState;
 import static java.util.Objects.isNull;
 
 /**
@@ -34,12 +36,12 @@ public class DoctorTrackProviderHandler implements IHandler{
     }
 
     @Override
-    public Boolean ifHandle(DoctorMaterialConsumeProviderDto dto, Map<String, Object> context) {
-        DoctorMaterialConsumeProvider.EVENT_TYPE eventType = DoctorMaterialConsumeProvider.EVENT_TYPE.from(dto.getActionType());
-        return eventType != null && eventType.isIn();    }
+    public boolean ifHandle(DoctorMaterialConsumeProvider.EVENT_TYPE eventType) {
+        return eventType != null && eventType.isIn();
+    }
 
     @Override
-    public void handle(DoctorMaterialConsumeProviderDto dto, Map<String, Object> context) throws RuntimeException {
+    public void handle(DoctorMaterialConsumeProviderDto dto, EventHandlerContext context) throws RuntimeException {
         // 修改仓库数量信息
         DoctorWareHouseTrack doctorWareHouseTrack = doctorWareHouseTrackDao.findById(dto.getWareHouseId());
         if(isNull(doctorWareHouseTrack)){
@@ -57,6 +59,24 @@ public class DoctorTrackProviderHandler implements IHandler{
             doctorWareHouseTrack.setExtraMap(trackExtraMap);
             doctorWareHouseTrackDao.update(doctorWareHouseTrack);
         }
+    }
+
+    @Override
+    public void rollback(DoctorMaterialConsumeProvider cp) {
+        // 入库事件之后的数据
+        DoctorWareHouseTrack track = doctorWareHouseTrackDao.findById(cp.getWareHouseId());
+        checkState(!isNull(track), "not.find.doctorWareHouse");
+        // 把数量减回去
+        track.setLotNumber(track.getLotNumber() - cp.getEventCount());
+
+        // 下面搞一下extra里面的数据
+        String key = cp.getMaterialId().toString();
+        Map<String,Object> trackExtraMap = track.getExtraMap();
+        trackExtraMap.put(key, Params.getWithConvert(trackExtraMap, key, a -> Double.valueOf(a.toString())) - cp.getEventCount());
+        track.setExtraMap(trackExtraMap);
+
+        // 把数据更新到事件之前的状态
+        doctorWareHouseTrackDao.update(track);
     }
 
     /**

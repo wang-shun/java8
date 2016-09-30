@@ -150,7 +150,7 @@ public class DoctorRollbackServiceImpl implements DoctorRollbackService {
         Date endAt = DateUtil.getDateEnd(new DateTime(dto.getEventAt())).toDate();
         Long farmId = dto.getFarmId();
 
-        //记录事件，// TODO: 16/9/21 晚上job更新月报
+        //记录事件, 晚上job更新月报
         dailyReport2UpdateDao.saveDailyReport2Update(startAt, farmId);
 
         DoctorDailyReportDto report = dailyReportHistoryDao.getDailyReportWithRedis(farmId, startAt);
@@ -173,6 +173,16 @@ public class DoctorRollbackServiceImpl implements DoctorRollbackService {
                 case SEARCH_PIG:
                     if (dto.getEsPigId() != null) {
                         pigSearchWriteService.update(dto.getEsPigId());
+                    }
+                    break;
+                case SEARCH_GROUP_DELETE:
+                    if (dto.getEsGroupId() != null) {
+                        groupSearchWriteService.delete(dto.getEsGroupId());
+                    }
+                    break;
+                case SEARCH_PIG_DELETE:
+                    if (dto.getEsPigId() != null) {
+                        groupSearchWriteService.delete(dto.getEsPigId());
                     }
                     break;
 

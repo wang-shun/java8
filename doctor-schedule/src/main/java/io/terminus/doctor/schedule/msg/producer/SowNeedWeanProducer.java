@@ -121,13 +121,13 @@ public class SowNeedWeanProducer extends AbstractJobProducer {
                         if (checkRuleValue(ruleValueMap.get(1), timeDiff)) {
                             if (!isMessage && Objects.equals(ruleTemplate.getType(), DoctorMessageRuleTemplate.Type.WARNING.getValue())) {
                                 // 记录每只猪的消息提醒
-                                recordPigMessage(pigDto, PigEvent.WEAN, getRuleTimeDiff(ruleValueMap.get(1), timeDiff), ruleValueMap.get(1).getValue().intValue(),
+                                recordPigMessage(pigDto, PigEvent.WEAN, getRuleTimeDiff(ruleValueMap.get(1), timeDiff), ruleValueMap.get(1),
                                         PigStatus.FEED);
                             }
                             if (isMessage) {
                                 pigDto.setEventDate(doctorPigEvent.getEventAt());
                                 pigDto.setOperatorName(doctorPigEvent.getOperatorName());
-                                messages.addAll(getMessage(pigDto, rule.getChannels(), ruleRole, sUsers, timeDiff, rule.getUrl()));
+                                messages.addAll(getMessage(pigDto, rule.getChannels(), ruleRole, sUsers, timeDiff, rule.getUrl(), PigEvent.WEAN.getKey()));
                             }
                         }
                     } catch (Exception e) {

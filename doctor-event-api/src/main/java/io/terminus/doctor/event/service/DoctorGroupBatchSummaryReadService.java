@@ -20,9 +20,10 @@ public interface DoctorGroupBatchSummaryReadService {
     /**
      * 通过猪群明细实时获取批次总结
      * @param groupDetail 猪群明细
+     * @param fcrFeed     料肉比的饲料用量
      * @return 猪群批次总结
      */
-    Response<DoctorGroupBatchSummary> getSummaryByGroupDetail(DoctorGroupDetail groupDetail);
+    Response<DoctorGroupBatchSummary> getSummaryByGroupDetail(DoctorGroupDetail groupDetail, Double fcrFeed);
 
     /**
      * 分页查询猪群批次总结

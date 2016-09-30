@@ -185,4 +185,14 @@ public class DoctorPigEvents {
         return events.stream().map(pigEvent -> pigEvent.getDesc()).collect(Collectors.toList());
     }
 
+    @RequestMapping(value = "/event/operators")
+    @ResponseBody
+    public List<DoctorPigEvent> queryOperatorForEvent(@RequestParam  Map<String, Object> params){
+        params = Params.filterNullOrEmpty(params);
+        if (params.containsKey("eventName")) {
+            params.put("type", PigEvent.fromDesc((String) params.get("eventName")).getKey().toString());
+            params.remove("eventName");
+        }
+        return RespHelper.or500(doctorPigEventReadService.queryOperators(params));
+    }
 }

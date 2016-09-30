@@ -2,14 +2,14 @@ package io.terminus.doctor.warehouse.handler.in;
 
 import io.terminus.doctor.warehouse.dao.DoctorFarmWareHouseTypeDao;
 import io.terminus.doctor.warehouse.dto.DoctorMaterialConsumeProviderDto;
+import io.terminus.doctor.warehouse.dto.EventHandlerContext;
 import io.terminus.doctor.warehouse.handler.IHandler;
 import io.terminus.doctor.warehouse.model.DoctorFarmWareHouseType;
 import io.terminus.doctor.warehouse.model.DoctorMaterialConsumeProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.Map;
-
+import static com.google.common.base.Preconditions.checkState;
 import static java.util.Objects.isNull;
 
 /**
@@ -29,13 +29,12 @@ public class DoctorTypeProviderHandler implements IHandler{
     }
 
     @Override
-    public Boolean ifHandle(DoctorMaterialConsumeProviderDto dto, Map<String, Object> context) {
-        DoctorMaterialConsumeProvider.EVENT_TYPE eventType = DoctorMaterialConsumeProvider.EVENT_TYPE.from(dto.getActionType());
+    public boolean ifHandle(DoctorMaterialConsumeProvider.EVENT_TYPE eventType) {
         return eventType != null && eventType.isIn();
     }
 
     @Override
-    public void handle(DoctorMaterialConsumeProviderDto dto, Map<String, Object> context) throws RuntimeException {
+    public void handle(DoctorMaterialConsumeProviderDto dto, EventHandlerContext context) throws RuntimeException {
         // 修改猪场仓库类型的数量信息
         DoctorFarmWareHouseType doctorFarmWareHouseType = doctorFarmWareHouseTypeDao.findByFarmIdAndType(
                 dto.getFarmId(), dto.getType());
@@ -48,7 +47,15 @@ public class DoctorTypeProviderHandler implements IHandler{
             doctorFarmWareHouseType.setUpdatorName(dto.getStaffName());
             doctorFarmWareHouseTypeDao.update(doctorFarmWareHouseType);
         }
-        context.put("wareHouseTypeId",doctorFarmWareHouseType.getId());
+        context.setWareHouseTypeId(doctorFarmWareHouseType.getId());
+    }
+
+    @Override
+    public void rollback(DoctorMaterialConsumeProvider cp) {
+        DoctorFarmWareHouseType farmWareHouseType = doctorFarmWareHouseTypeDao.findByFarmIdAndType(cp.getFarmId(), cp.getType());
+        checkState(!isNull(farmWareHouseType), "doctorFarm.wareHouseType.empty");
+        farmWareHouseType.setLotNumber(farmWareHouseType.getLotNumber() - cp.getEventCount());
+        doctorFarmWareHouseTypeDao.update(farmWareHouseType);
     }
 
     /**

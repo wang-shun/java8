@@ -386,6 +386,38 @@ alter table doctor_material_consume_providers
 add column group_id bigint(20) DEFAULT NULL COMMENT '领用物资的猪群Id, 仅 event_type=1 时才会有值' after barn_name,
 add column group_code varchar(640) DEFAULT NULL COMMENT '猪群名称' after group_id;
 
+-- 2016-9-21
+ALTER TABLE doctor_messages ADD COLUMN event_type INT (11) DEFAULT NULL comment '需要操作的事件类型' after   `type`;
+
+-- 2016-09-22 增加索引
+create index doctor_pig_events_type on doctor_pig_events(type);
+create index doctor_pig_events_parity on doctor_pig_events(parity);
+create index doctor_pigs_is_removal on doctor_pigs(is_removal);
+create index doctor_pig_tracks_current_parity on doctor_pig_tracks(current_parity);
+
+-- 2016-09-27 公猪生产成绩月报
+DROP table if exists `doctor_boar_monthly_reports`;
+create table `doctor_boar_monthly_reports` (
+ `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+ `farm_id` bigint(20) NULL comment '猪场id',
+ `boar_code` varchar(60) NULL comment '公猪号',
+ `pz_count` int(11) NULL comment '配种次数',
+ `spmz_count` int(11) NULL comment '首配母猪头数',
+ `st_count` int(11) NULL comment '受胎头数',
+ `cmz_count` int(11) NULL comment '产仔母猪头数',
+ `pjcz_count` double NULL comment '平均产仔数',
+ `pjchz_count` double NULL comment '平均产活仔数',
+ `st_rate` double NULL comment '受胎率',
+ `fm_rate` double NULL comment '分娩率',
+ `sum_at` varchar(32) NULL comment '汇总时间',
+ `created_at` datetime default null,
+ `updated_at` datetime default null,
+ primary key(id)
+) comment '公猪生产成绩月报';
+create index doctor_boar_monthly_reports_farm_id on doctor_boar_monthly_reports(farm_id);
+create index doctor_boar_monthly_reports_boar_code on doctor_boar_monthly_reports(boar_code);
+create index doctor_boar_monthly_reports_sum_at on doctor_boar_monthly_reports(sum_at);
+
 -- 2016-09-20 猪事件增加是否是自动生成标识
 ALTER TABLE doctor_pig_events ADD COLUMN is_auto smallint(6) DEFAULT NULL COMMENT '是否是自动生成事件, 0 不是, 1 是' AFTER pig_code;
 
@@ -400,3 +432,9 @@ ALTER TABLE doctor_group_events ADD COLUMN rel_pig_event_id bigint(20) DEFAULT N
 -- 2016-09-23 猪增加字段，关联猪群事件
 ALTER TABLE doctor_pig_events ADD COLUMN rel_group_event_id BIGINT(20) DEFAULT NULL COMMENT '关联猪群事件id(比如转种猪事件)' AFTER rel_event_id;
 ALTER TABLE doctor_pig_events ADD COLUMN rel_pig_event_id BIGINT(20) DEFAULT NULL COMMENT '关联猪事件id(比如拼窝事件)' AFTER rel_group_event_id;
+
+CREATE INDEX idx_doctor_group_events_rel_group_event_id ON doctor_group_events(rel_group_event_id);
+CREATE INDEX idx_doctor_group_events_rel_pig_event_id ON doctor_group_events(rel_pig_event_id);
+CREATE INDEX idx_doctor_pig_events_rel_group_event_id ON doctor_pig_events(rel_group_event_id);
+CREATE INDEX idx_doctor_pig_events_rel_pig_event_id ON doctor_pig_events(rel_pig_event_id);
+CREATE INDEX idx_doctor_group_events_other_barn_id ON doctor_group_events(other_barn_id);

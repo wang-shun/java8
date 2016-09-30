@@ -1,5 +1,6 @@
 package io.terminus.doctor.schedule.event;
 
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Throwables;
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.exception.ServiceException;
@@ -7,6 +8,7 @@ import io.terminus.common.utils.Dates;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.model.DoctorDailyReport;
+import io.terminus.doctor.event.service.DoctorBoarMonthlyReportWriteService;
 import io.terminus.doctor.event.service.DoctorDailyReportReadService;
 import io.terminus.doctor.event.service.DoctorDailyReportWriteService;
 import io.terminus.doctor.event.service.DoctorMonthlyReportWriteService;
@@ -50,6 +52,9 @@ public class DoctorReportJobs {
     private DoctorFarmReadService doctorFarmReadService;
     @RpcConsumer
     private DoctorParityMonthlyReportWriteService doctorParityMonthlyReportWriteService;
+
+    @RpcConsumer
+    private DoctorBoarMonthlyReportWriteService doctorBoarMonthlyReportWriteService;
 
     private final HostLeader hostLeader;
 
@@ -110,14 +115,11 @@ public class DoctorReportJobs {
                 }
             }
 
-            doctorDailyReportReadService.clearAllReportCache();
-
             log.info("update history report job end, now is:{}", DateUtil.toDateTimeString(new Date()));
         }catch(Exception e) {
             log.error("update history report job failed, cause:{}", Throwables.getStackTraceAsString(e));
         }
     }
-
 
     /**
      * 猪场月报计算job
@@ -150,6 +152,32 @@ public class DoctorReportJobs {
     }
 
     /**
+     * 公猪生产成绩月报计算job
+     * 每天凌晨3点统计昨天的数据
+     */
+    @Scheduled(cron = "0 0 3 * * ?")
+    @RequestMapping(value = "/boarMonthly", method = RequestMethod.GET)
+    public void boarMonthlyReport() {
+        try {
+            if (!hostLeader.isLeader()) {
+                log.info("current leader is:{}, skip", hostLeader.currentLeaderId());
+                return;
+            }
+            log.info("boar monthly report job start, now is:{}", DateUtil.toDateTimeString(new Date()));
+
+            DateUtil.getBeforeMonthEnds(DateTime.now().plusDays(-1).toDate(), MoreObjects.firstNonNull(4, 12))
+                    .forEach(date -> doctorBoarMonthlyReportWriteService.createMonthlyReports(getAllFarmIds(), date));
+//            //获取昨天的天初
+//            Date yesterday = new DateTime(Dates.startOfDay(new Date())).plusDays(-1).toDate();
+//            RespHelper.or500(doctorBoarMonthlyReportWriteService.createMonthlyReports(getAllFarmIds(), yesterday));
+
+            log.info("boar monthly report job end, now is:{}", DateUtil.toDateTimeString(new Date()));
+        } catch (Exception e) {
+            log.error("boar monthly report job failed, cause:{}", Throwables.getStackTraceAsString(e));
+        }
+    }
+
+    /**
      * 猪场胎次产仔月报计算job
      * 每天凌晨3点统计昨天的数据
      */
@@ -161,15 +189,15 @@ public class DoctorReportJobs {
                 log.info("current leader is:{}, skip", hostLeader.currentLeaderId());
                 return;
             }
-            log.info("monthly report job start, now is:{}", DateUtil.toDateTimeString(new Date()));
+            log.info("parity monthly report job start, now is:{}", DateUtil.toDateTimeString(new Date()));
 
             //获取昨天的天初
             Date yesterday = new DateTime(Dates.startOfDay(new Date())).plusDays(-1).toDate();
             RespHelper.or500(doctorParityMonthlyReportWriteService.createMonthlyReports(getAllFarmIds(), yesterday));
 
-            log.info("monthly report job end, now is:{}", DateUtil.toDateTimeString(new Date()));
+            log.info("parity monthly report job end, now is:{}", DateUtil.toDateTimeString(new Date()));
         } catch (Exception e) {
-            log.error("monthly report job failed, cause:{}", Throwables.getStackTraceAsString(e));
+            log.error("parity monthly report job failed, cause:{}", Throwables.getStackTraceAsString(e));
         }
     }
 

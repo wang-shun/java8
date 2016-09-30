@@ -36,6 +36,7 @@ import io.terminus.doctor.event.handler.rollback.sow.DoctorRollbackSowFosterByHa
 import io.terminus.doctor.event.handler.rollback.sow.DoctorRollbackSowFosterHandler;
 import io.terminus.doctor.event.handler.rollback.sow.DoctorRollbackSowMatingEventHandler;
 import io.terminus.doctor.event.handler.rollback.sow.DoctorRollbackSowRemovalEventHandler;
+import io.terminus.doctor.event.handler.rollback.sow.DoctorRollbackSowToChgLocationEventHandler;
 import io.terminus.doctor.event.handler.rollback.sow.DoctorRollbackSowVaccinationEventHandler;
 import io.terminus.doctor.event.handler.rollback.sow.DoctorRollbackSowWeanHandler;
 import io.terminus.doctor.event.handler.usual.DoctorChgFarmHandler;
@@ -107,6 +108,7 @@ public class  DoctorEventConfiguration {
      */
     @Bean
     public DoctorRollbackHandlerChain doctorRollbackHandlerChain(
+            DoctorRollbackSowToChgLocationEventHandler rollbackSowToChgLocationEventHandler,
             DoctorRollbackGroupChangeHandler rollbackGroupChangeEventHandler,
             DoctorRollbackGroupDiseaseHandler rollbackGroupDiseaseHandler,
             DoctorRollbackGroupLiveStockHandler rollbackGroupLiveStockHandler,
@@ -169,7 +171,8 @@ public class  DoctorEventConfiguration {
                 rollbackSowMatingEventHandler,
                 rollbackSowRemovalEventHandler,
                 rollbackSowVaccinationEventHandler,
-                rollbackSowWeanHandler
+                rollbackSowWeanHandler,
+                rollbackSowToChgLocationEventHandler
         ));
         return chain;
     }

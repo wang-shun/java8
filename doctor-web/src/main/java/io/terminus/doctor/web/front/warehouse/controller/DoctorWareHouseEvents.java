@@ -2,8 +2,10 @@ package io.terminus.doctor.web.front.warehouse.controller;
 
 import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
+import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.exception.ServiceException;
+import io.terminus.common.model.BaseUser;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.basic.model.DoctorBasic;
@@ -12,7 +14,6 @@ import io.terminus.doctor.basic.service.DoctorBasicMaterialReadService;
 import io.terminus.doctor.basic.service.DoctorBasicReadService;
 import io.terminus.doctor.common.enums.WareHouseType;
 import io.terminus.doctor.common.utils.RespHelper;
-import io.terminus.doctor.event.service.DoctorBarnReadService;
 import io.terminus.doctor.user.model.DoctorFarm;
 import io.terminus.doctor.user.service.DoctorFarmReadService;
 import io.terminus.doctor.user.service.DoctorUserProfileReadService;
@@ -21,19 +22,18 @@ import io.terminus.doctor.warehouse.dto.DoctorMaterialInWareHouseDto;
 import io.terminus.doctor.warehouse.dto.DoctorWareHouseDto;
 import io.terminus.doctor.warehouse.model.DoctorMaterialConsumeProvider;
 import io.terminus.doctor.warehouse.model.DoctorMaterialInWareHouse;
-import io.terminus.doctor.warehouse.model.DoctorMaterialInfo;
 import io.terminus.doctor.warehouse.model.DoctorWareHouse;
+import io.terminus.doctor.warehouse.service.DoctorMaterialConsumeProviderReadService;
 import io.terminus.doctor.warehouse.service.DoctorMaterialInWareHouseReadService;
 import io.terminus.doctor.warehouse.service.DoctorMaterialInWareHouseWriteService;
-import io.terminus.doctor.warehouse.service.DoctorMaterialInfoReadService;
+import io.terminus.doctor.warehouse.service.DoctorMaterialPriceInWareHouseReadService;
 import io.terminus.doctor.warehouse.service.DoctorWareHouseReadService;
-import io.terminus.doctor.web.front.controller.UserProfiles;
 import io.terminus.doctor.web.front.warehouse.dto.DoctorConsumeProviderInputDto;
 import io.terminus.pampas.common.UserUtil;
 import io.terminus.parana.user.model.User;
-import io.terminus.parana.user.model.UserProfile;
 import io.terminus.parana.user.service.UserReadService;
 import lombok.extern.slf4j.Slf4j;
+import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
@@ -44,8 +44,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.validation.Valid;
+import java.util.Date;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkState;
 import static java.util.Objects.isNull;
@@ -69,8 +71,6 @@ public class DoctorWareHouseEvents {
 
     private final DoctorUserProfileReadService doctorUserProfileReadService;
 
-    private final DoctorBarnReadService doctorBarnReadService;
-
     private final DoctorWareHouseReadService doctorWareHouseReadService;
 
     private final DoctorBasicMaterialReadService doctorBasicMaterialReadService;
@@ -79,10 +79,15 @@ public class DoctorWareHouseEvents {
 
     private final DoctorFarmReadService doctorFarmReadService;
 
+    @RpcConsumer
+    private DoctorMaterialPriceInWareHouseReadService materialPriceInWareHouseReadService;
+    @RpcConsumer
+    private DoctorMaterialConsumeProviderReadService materialConsumeProviderReadService;
+
     @Autowired
     public DoctorWareHouseEvents(DoctorMaterialInWareHouseWriteService doctorMaterialInWareHouseWriteService,
                                  DoctorMaterialInWareHouseReadService doctorMaterialInWareHouseReadService,
-                                 UserReadService<User> userReadService, DoctorBarnReadService doctorBarnReadService,
+                                 UserReadService<User> userReadService,
                                  DoctorBasicMaterialReadService doctorBasicMaterialReadService,
                                  DoctorWareHouseReadService doctorWareHouseReadService,
                                  DoctorFarmReadService doctorFarmReadService,
@@ -91,7 +96,6 @@ public class DoctorWareHouseEvents {
         this.doctorMaterialInWareHouseWriteService = doctorMaterialInWareHouseWriteService;
         this.doctorMaterialInWareHouseReadService = doctorMaterialInWareHouseReadService;
         this.userReadService = userReadService;
-        this.doctorBarnReadService = doctorBarnReadService;
         this.doctorBasicMaterialReadService = doctorBasicMaterialReadService;
         this.doctorWareHouseReadService = doctorWareHouseReadService;
         this.doctorFarmReadService = doctorFarmReadService;
@@ -123,23 +127,41 @@ public class DoctorWareHouseEvents {
     @RequestMapping(value = "/paging", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Paging<DoctorMaterialInWareHouseDto> pagingDoctorMaterialInWareHouse(@RequestParam("farmId") Long farmId,
-                                                                                @RequestParam("wareHouseId") Long wareHouseId,
+                                                                                @RequestParam(name = "wareHouseId", required = false) Long wareHouseId,
+                                                                                @RequestParam(name = "materialId", required = false) Long materialId,
+                                                                                @RequestParam(name = "materialName", required = false) String materialName,
                                                                                 @RequestParam("pageNo") Integer pageNo,
                                                                                 @RequestParam("pageSize") Integer pageSize){
-        Paging<DoctorMaterialInWareHouseDto> result = RespHelper.or500(doctorMaterialInWareHouseReadService.pagingDoctorMaterialInWareHouse(farmId, wareHouseId, pageNo, pageSize));
+        DateTime monthStart = DateTime.now().withTimeAtStartOfDay().withDayOfMonth(1);
+        DateTime nextMonthStart = monthStart.plusMonths(1);
 
-        try{
-            result.getData().forEach(s->{
-                Response<UserProfile> response = doctorUserProfileReadService.findProfileByUserId(s.getStaffId());
-                s.setRealName(RespHelper.orServEx(response).getRealName());
-            });
+        Paging<DoctorMaterialInWareHouse> result = RespHelper.or500(
+                doctorMaterialInWareHouseReadService.pagingDoctorMaterialInWareHouse(farmId, wareHouseId, materialId, materialName, pageNo, pageSize)
+        );
+        List<DoctorMaterialInWareHouseDto> list = result.getData().stream()
+                .map(in -> {
+                    DoctorMaterialInWareHouseDto dto = DoctorMaterialInWareHouseDto.buildDoctorMaterialInWareHouseInfo(in);
+                    Double amount = RespHelper.or500(materialPriceInWareHouseReadService.findByWareHouseAndMaterialId(dto.getWarehouseId(), dto.getMaterialId())).stream()
+                            .map(price -> price.getRemainder() * price.getUnitPrice())
+                            .reduce((o1, o2) -> o1 + o2).orElse(0D);
+                    dto.setCurrentAmount(amount);
+                    RespHelper.or500(materialConsumeProviderReadService.warehouseEventReport(
+                            farmId, dto.getWarehouseId(), null, dto.getMaterialId(), monthStart.toDate(), nextMonthStart.toDate())
+                    ).forEach(report -> {
+                        if(Objects.equals(report.getEventType(), DoctorMaterialConsumeProvider.EVENT_TYPE.CONSUMER.getValue())){
+                            dto.setOutAmount(report.getAmount());
+                            dto.setOutCount(report.getCount());
+                        }
+                        if(Objects.equals(report.getEventType(), DoctorMaterialConsumeProvider.EVENT_TYPE.PROVIDER.getValue())){
+                            dto.setInAmount(report.getAmount());
+                            dto.setInCount(report.getCount());
+                        }
+                    });
+                    return dto;
+                })
+                .collect(Collectors.toList());
 
-        }catch (Exception e){
-            log.error("get user data info fail, cause:{}", Throwables.getStackTraceAsString(e));
-            throw new JsonResponseException(e.getMessage());
-        }
-
-        return result;
+        return new Paging<>(result.getTotal(), list);
     }
 
     @RequestMapping(value = "/materialInWareHouse/delete", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -203,6 +225,68 @@ public class DoctorWareHouseEvents {
             throw new JsonResponseException(e.getMessage());
         }
         return RespHelper.or500(doctorMaterialInWareHouseWriteService.consumeMaterialInfo(doctorMaterialConsumeProviderDto));
+    }
+
+    /**
+     * 初始化库存数据
+     * @param materialId
+     * @param warehouseId
+     * @param unitId
+     * @return
+     */
+    @RequestMapping(value = "/initMaterialInWarehouse", method = {RequestMethod.GET, RequestMethod.POST})
+    @ResponseBody
+    public boolean initMaterialInWarehouse(@RequestParam Long materialId, @RequestParam Long warehouseId, Long unitId){
+        DoctorBasicMaterial material = RespHelper.or500(doctorBasicMaterialReadService.findBasicMaterialById(materialId));
+        if(material == null){
+            throw new JsonResponseException("basicMaterial.not.found");
+        }
+
+        DoctorWareHouse wareHouse = RespHelper.or500(doctorWareHouseReadService.findById(warehouseId));
+        if(wareHouse == null){
+            throw new JsonResponseException("warehosue.not.found");
+        }
+
+        if(!wareHouse.getType().equals(material.getType())){
+            throw new JsonResponseException("warehouse.material.type.not.match"); // 仓库与物料类型不一致
+        }
+
+        DoctorMaterialInWareHouse in = RespHelper.or500(doctorMaterialInWareHouseReadService.queryByMaterialWareHouseIds(wareHouse.getFarmId(), materialId, warehouseId));
+        if(in != null){
+            throw new JsonResponseException("materialInWarehouse.exist");
+        }
+
+        in = new DoctorMaterialInWareHouse();
+        // 药品.疫苗.易耗品, 前台必须传来单位
+        if(Objects.equals(material.getType(), WareHouseType.CONSUME.getKey())
+                || Objects.equals(material.getType(), WareHouseType.MEDICINE.getKey())
+                || Objects.equals(material.getType(), WareHouseType.VACCINATION.getKey())){
+            if(unitId != null){
+                DoctorBasic doctorBasic = RespHelper.or500(doctorBasicReadService.findBasicById(unitId));
+                if(doctorBasic == null || !Objects.equals(doctorBasic.getType(), DoctorBasic.Type.UNIT.getValue())){
+                    throw new JsonResponseException("unit.miss");
+                }
+                in.setUnitName(doctorBasic.getName());
+            }else{
+                throw new JsonResponseException("unit.miss");
+            }
+        }else{
+            in.setUnitName("千克");
+        }
+        in.setFarmId(wareHouse.getFarmId());
+        in.setFarmName(wareHouse.getFarmName());
+        in.setWareHouseId(warehouseId);
+        in.setWareHouseName(wareHouse.getWareHouseName());
+        in.setMaterialId(materialId);
+        in.setMaterialName(material.getName());
+        in.setType(material.getType());
+        in.setLotNumber(0D);
+        BaseUser user = UserUtil.getCurrentUser();
+        in.setCreatorId(user.getId());
+        in.setCreatorName(user.getName());
+        in.setUpdatorId(user.getId());
+        in.setUpdatorName(user.getName());
+        return RespHelper.or500(doctorMaterialInWareHouseWriteService.create(in));
     }
 
     /**
@@ -286,6 +370,9 @@ public class DoctorWareHouseEvents {
         DoctorWareHouse consumeWarehouse = RespHelper.or500(doctorWareHouseReadService.findById(fromWareHouseId));
         DoctorWareHouse toWarehouse = RespHelper.or500(doctorWareHouseReadService.findById(toWareHouseId));
         DoctorMaterialInWareHouse materialInWareHouse = RespHelper.or500(doctorMaterialInWareHouseReadService.queryByMaterialWareHouseIds(farmId, materialId, fromWareHouseId));
+        if(materialInWareHouse == null){
+            throw new JsonResponseException("no.material.consume");
+        }
         Long userId = UserUtil.getUserId();
         String userName = RespHelper.or500(doctorUserProfileReadService.findProfileByUserIds(Lists.newArrayList(userId))).get(0).getRealName();
 
@@ -340,5 +427,16 @@ public class DoctorWareHouseEvents {
             return true;
         }
         return true;
+    }
+
+    /**
+     * 仓库事件回滚
+     * @param eventId DoctorMaterialConsumeProvider的id
+     * @return
+     */
+    @RequestMapping(value = "/rollback", method = RequestMethod.GET)
+    @ResponseBody
+    public boolean rollback(@RequestParam Long eventId){
+        return RespHelper.or500(doctorMaterialInWareHouseWriteService.rollback(eventId));
     }
 }

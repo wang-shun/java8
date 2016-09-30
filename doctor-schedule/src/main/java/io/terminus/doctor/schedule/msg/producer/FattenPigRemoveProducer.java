@@ -72,7 +72,7 @@ public class FattenPigRemoveProducer extends AbstractJobProducer {
                     //根据用户拥有的猪舍权限过滤拥有user
                     List<SubUser> sUsers = filterSubUserBarnId(subUsers, doctorGroupDetail.getGroup().getCurrentBarnId());
                     if (checkRuleValue(ruleValueMap.get(1), (double) doctorGroupDetail.getGroupTrack().getAvgDayAge())) {
-                        messages.addAll(getMessage(doctorGroupDetail, rule.getChannels(), ruleRole, sUsers, rule.getUrl()));
+                        messages.addAll(getMessage(doctorGroupDetail, rule.getChannels(), ruleRole, sUsers, rule.getUrl(), null));
                     }
                 } catch (Exception e) {
                     log.error("[FattenPigRemoveProducer]->message.failed");
@@ -87,14 +87,14 @@ public class FattenPigRemoveProducer extends AbstractJobProducer {
     /**
      * 创建消息
      */
-    private List<DoctorMessage> getMessage(DoctorGroupDetail doctorGroupDetail, String channels, DoctorMessageRuleRole ruleRole, List<SubUser> subUsers, String url) {
+    private List<DoctorMessage> getMessage(DoctorGroupDetail doctorGroupDetail, String channels, DoctorMessageRuleRole ruleRole, List<SubUser> subUsers, String url, Integer eventType) {
         List<DoctorMessage> messages = Lists.newArrayList();
         // 创建消息
         Map<String, Object> jsonData = GroupDetailFactory.getInstance().createGroupMessage(doctorGroupDetail, url);
 
         Splitters.COMMA.splitToList(channels).forEach(channel -> {
             try {
-                messages.addAll(createMessage(subUsers, ruleRole, Integer.parseInt(channel), MAPPER.writeValueAsString(jsonData)));
+                messages.addAll(createMessage(subUsers, ruleRole, Integer.parseInt(channel), MAPPER.writeValueAsString(jsonData), eventType));
             } catch (JsonProcessingException e) {
                 log.error("message produce error, cause by {}", Throwables.getStackTraceAsString(e));
             }

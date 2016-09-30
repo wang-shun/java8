@@ -2,6 +2,7 @@ package io.terminus.doctor.warehouse.service;
 
 import io.terminus.common.model.Response;
 import io.terminus.doctor.warehouse.dto.DoctorMaterialConsumeProviderDto;
+import io.terminus.doctor.warehouse.model.DoctorMaterialInWareHouse;
 
 import javax.validation.constraints.NotNull;
 
@@ -13,6 +14,7 @@ import javax.validation.constraints.NotNull;
  */
 public interface DoctorMaterialInWareHouseWriteService {
 
+    Response<Boolean> create(DoctorMaterialInWareHouse materialInWareHouse);
     /**
      * 录入用户消耗信息
      * @param doctorMaterialConsumeProviderDto
@@ -42,4 +44,11 @@ public interface DoctorMaterialInWareHouseWriteService {
      */
     Response<Boolean> deleteMaterialInWareHouseInfo(@NotNull(message = "input.materialInWareHouseId.empty") Long materialInWareHouseId,
                                                     @NotNull(message = "input.userId.empty") Long userId, String userName);
+
+    /**
+     * 仓库事件回滚
+     * @param eventId
+     * @return
+     */
+    Response<Boolean> rollback(Long eventId);
 }

@@ -5,11 +5,17 @@ import com.google.common.collect.Maps;
 import io.terminus.common.model.Paging;
 import io.terminus.common.mysql.dao.MyBatisDao;
 import io.terminus.common.utils.Constants;
+import io.terminus.common.utils.MapBuilder;
+import io.terminus.doctor.common.enums.WareHouseType;
+import io.terminus.doctor.common.utils.Params;
 import io.terminus.doctor.warehouse.dto.MaterialCountAmount;
+import io.terminus.doctor.warehouse.dto.MaterialEventReport;
+import io.terminus.doctor.warehouse.dto.WarehouseEventReport;
 import io.terminus.doctor.warehouse.model.DoctorMaterialConsumeProvider;
 import org.springframework.stereotype.Repository;
 
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -52,14 +58,74 @@ public class DoctorMaterialConsumeProviderDao extends MyBatisDao<DoctorMaterialC
         return new Paging<>(total, datas);
     }
 
-    public Map<Long, Double> countConsumeTotal(Long wareHouseId){
+    public Map<Long, Double> sumEventCount(Long wareHouseId, List<Integer> eventTypes){
+        Map<String ,Object> param = new HashMap<>();
+        param.put("wareHouseId", wareHouseId);
+        if(eventTypes != null && !eventTypes.isEmpty()){
+            param.put("eventTypes", eventTypes);
+        }
         Map<Long, Double> result = new HashMap<>();
-        Map<Long, Map<String, Object>> query = sqlSession.selectMap(sqlId("countConsumeTotal"), wareHouseId, "material_id");
+        Map<Long, Map<String, Object>> query = sqlSession.selectMap(sqlId("sumEventCount"), param, "material_id");
         for(Map.Entry<Long, Map<String, Object>> entry : query.entrySet()){
             Long materialId = entry.getKey();
             Double consumeTotal = Double.valueOf(entry.getValue().get("consumeTotal").toString());
             result.put(materialId, consumeTotal);
         }
         return result;
+    }
+
+    /**
+     * 对饲料消耗数量进行求和, 只计算事件类型为 DoctorMaterialConsumeProvider.EVENT_TYPE.CONSUMER 的数据
+     * @param criteria 过滤字段
+     * @return
+     */
+    public Double sumConsumeFeed(Map<String, Object> criteria){
+        criteria.put("eventType", DoctorMaterialConsumeProvider.EVENT_TYPE.CONSUMER.getValue());
+        criteria.put("type", WareHouseType.FEED.getKey());
+        return sqlSession.selectOne(sqlId("sumConsumeFeed"), criteria);
+    }
+
+    /**
+     * 查询仓库内各种物资在指定时间段内的出入库总量和金额
+     * @param farmId
+     * @param warehouseId
+     * @param type
+     * @param startAt
+     * @param endAt
+     * @return
+     */
+    public List<WarehouseEventReport> warehouseEventReport(Long farmId, Long warehouseId, WareHouseType type, Long materialId, Date startAt, Date endAt){
+        Map<String, Object> param = MapBuilder.<String, Object>of()
+                .put("farmId", farmId)
+                .put("wareHouseId", warehouseId)
+                .put("materialId", materialId)
+                .put("startAt", startAt)
+                .put("endAt", endAt)
+                .map();
+        if(type != null){
+            param.put("type", type.getKey());
+        }
+        return sqlSession.selectList(sqlId("warehouseEventReport"), ImmutableMap.copyOf(Params.filterNullOrEmpty(param)));
+    }
+
+    /**
+     * 指定仓库在指定时间段内各种物料每天发生的各种事件的数量和金额
+     * @param farmId 猪场id
+     * @param warehouseId 仓库id
+     * @param startAt
+     * @param endAt
+     * @return
+     */
+    public List<MaterialEventReport> materialEventReport(Long farmId, Long warehouseId, WareHouseType type, Date startAt, Date endAt){
+        Map<String, Object> param = MapBuilder.<String, Object>of()
+                .put("farmId", farmId)
+                .put("wareHouseId", warehouseId)
+                .put("startAt", startAt)
+                .put("endAt", endAt)
+                .map();
+        if(type != null){
+            param.put("type", type.getKey());
+        }
+        return sqlSession.selectList(sqlId("materialEventReport"), ImmutableMap.copyOf(Params.filterNullOrEmpty(param)));
     }
 }

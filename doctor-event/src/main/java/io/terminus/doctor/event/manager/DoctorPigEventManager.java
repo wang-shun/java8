@@ -94,6 +94,7 @@ public class DoctorPigEventManager {
          */
         Map<String, Object> ids = OBJECT_MAPPER.readValue(context.get("createEventResult").toString(), JacksonType.MAP_OF_OBJECT);
         ids.put("contextType","single");
+        ids.put("type", doctorBasicInputInfoDto.getEventType());
         if(Objects.equals(doctorBasicInputInfoDto.getPigType(), DoctorPig.PIG_TYPE.SOW.getKey())){
             Long pigId = Params.getWithConvert(ids, "doctorPigId", a->Long.valueOf(a.toString()));
 
@@ -181,6 +182,7 @@ public class DoctorPigEventManager {
         Map<String,String> flowDataMap = OBJECT_MAPPER.readValue(flowDataContent, JacksonType.MAP_OF_STRING);
         Map<String, Object> results = OBJECT_MAPPER.readValue(flowDataMap.get("createEventResult"), JacksonType.MAP_OF_OBJECT);
         results.put("contextType", "single");
+        results.put("type", basic.getEventType());
         return results;
     }
 

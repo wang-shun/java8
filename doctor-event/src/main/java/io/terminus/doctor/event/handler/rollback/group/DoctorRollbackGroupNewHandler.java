@@ -1,7 +1,9 @@
 package io.terminus.doctor.event.handler.rollback.group;
 
+import com.google.common.collect.Lists;
 import io.terminus.doctor.event.dto.DoctorRollbackDto;
 import io.terminus.doctor.event.enums.GroupEventType;
+import io.terminus.doctor.event.enums.RollbackType;
 import io.terminus.doctor.event.handler.rollback.DoctorAbstractRollbackGroupEventHandler;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorGroupSnapshot;
@@ -41,6 +43,14 @@ public class DoctorRollbackGroupNewHandler extends DoctorAbstractRollbackGroupEv
 
     @Override
     public List<DoctorRollbackDto> updateReport(DoctorGroupEvent groupEvent) {
-        return null;    //不需要更新统计
+        DoctorRollbackDto dto = new DoctorRollbackDto();
+        dto.setOrgId(groupEvent.getOrgId());
+        dto.setFarmId(groupEvent.getFarmId());
+        dto.setEventAt(groupEvent.getEventAt());
+        dto.setEsGroupId(groupEvent.getGroupId());
+
+        //更新统计: 删除猪群
+        dto.setRollbackTypes(Lists.newArrayList(RollbackType.SEARCH_GROUP_DELETE));
+        return Lists.newArrayList(dto);
     }
 }

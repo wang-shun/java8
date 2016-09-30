@@ -1,11 +1,11 @@
 package io.terminus.doctor.move.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
 import io.terminus.common.utils.Arguments;
 import io.terminus.common.utils.BeanMapper;
@@ -88,6 +88,7 @@ import io.terminus.doctor.move.model.View_EventListSow;
 import io.terminus.doctor.move.model.View_GainCardList;
 import io.terminus.doctor.move.model.View_SowCardList;
 import io.terminus.doctor.user.model.DoctorFarm;
+import io.terminus.doctor.warehouse.service.DoctorMaterialConsumeProviderReadService;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
 import org.joda.time.Days;
@@ -119,8 +120,6 @@ public class DoctorMoveDataService {
 
     private static final JsonMapper JSON_MAPPER = JsonMapper.nonEmptyMapper();
 
-    protected ObjectMapper MAPPER = JsonMapper.JSON_NON_DEFAULT_MAPPER.getMapper();
-
     private final DoctorMoveDatasourceHandler doctorMoveDatasourceHandler;
     private final DoctorGroupDao doctorGroupDao;
     private final DoctorGroupEventDao doctorGroupEventDao;
@@ -135,6 +134,7 @@ public class DoctorMoveDataService {
     private final DoctorBarnDao doctorBarnDao;
     private final DoctorGroupBatchSummaryReadService doctorGroupBatchSummaryReadService;
     private final DoctorGroupBatchSummaryWriteService doctorGroupBatchSummaryWriteService;
+    private final DoctorMaterialConsumeProviderReadService doctorMaterialConsumeProviderReadService;
 
     @Autowired
     public DoctorMoveDataService(DoctorMoveDatasourceHandler doctorMoveDatasourceHandler,
@@ -150,7 +150,8 @@ public class DoctorMoveDataService {
                                  DoctorGroupReportManager doctorGroupReportManager,
                                  DoctorBarnDao doctorBarnDao,
                                  DoctorGroupBatchSummaryReadService doctorGroupBatchSummaryReadService,
-                                 DoctorGroupBatchSummaryWriteService doctorGroupBatchSummaryWriteService) {
+                                 DoctorGroupBatchSummaryWriteService doctorGroupBatchSummaryWriteService,
+                                 DoctorMaterialConsumeProviderReadService doctorMaterialConsumeProviderReadService) {
         this.doctorMoveDatasourceHandler = doctorMoveDatasourceHandler;
         this.doctorGroupDao = doctorGroupDao;
         this.doctorGroupEventDao = doctorGroupEventDao;
@@ -165,6 +166,7 @@ public class DoctorMoveDataService {
         this.doctorBarnDao = doctorBarnDao;
         this.doctorGroupBatchSummaryReadService = doctorGroupBatchSummaryReadService;
         this.doctorGroupBatchSummaryWriteService = doctorGroupBatchSummaryWriteService;
+        this.doctorMaterialConsumeProviderReadService = doctorMaterialConsumeProviderReadService;
     }
 
     //删除猪场所有猪相关的数据
@@ -213,7 +215,8 @@ public class DoctorMoveDataService {
         List<DoctorGroup> groups = doctorGroupDao.findBySearchDto(search);
         groups.forEach(group -> {
             DoctorGroupTrack groupTrack = doctorGroupTrackDao.findByGroupId(group.getId());
-            Response<DoctorGroupBatchSummary> result = doctorGroupBatchSummaryReadService.getSummaryByGroupDetail(new DoctorGroupDetail(group, groupTrack));
+            Double frcFeed = RespHelper.or(doctorMaterialConsumeProviderReadService.sumConsumeFeed(null, null, null, null, null, group.getId(), null, null), 0D);
+            Response<DoctorGroupBatchSummary> result = doctorGroupBatchSummaryReadService.getSummaryByGroupDetail(new DoctorGroupDetail(group, groupTrack), frcFeed);
             if (result.isSuccess() && result.getResult() != null) {
                 doctorGroupBatchSummaryWriteService.createGroupBatchSummary(result.getResult());
             }
@@ -2310,36 +2313,141 @@ public class DoctorMoveDataService {
         return Objects.equals(farmOID, outId);
     }
 
-    private Integer parity = 0;
-    private String boarCode = null;
-
+    private Integer parity;
+    private String boarCode;
+    private Boolean isFirst;
+    private Integer statusBefore;
+    private Integer statusAfter;
+    private Integer quantity;
+    private Integer quantityChange;
     public void updateParityAndBoarCode(DoctorFarm farm) {
         List<DoctorPigEvent> doctorPigEvensList = doctorPigEventDao.list(ImmutableMap.of("farmId", farm.getId(), "type", PigEvent.ENTRY.getKey(), "kind", 1));
         doctorPigEvensList.stream().forEach( doctorPigEvent -> {
+            log.info("update doctor_pig_events start: {}", doctorPigEvent);
             List<DoctorPigEvent> lists = doctorPigEventDao.queryAllEventsByPigId(doctorPigEvent.getPigId());
+            parity = 1;
+            boarCode = null;
+            isFirst = true;  //判断是否是进场之后第一次配种,第一次配种,胎次不加1
+            statusBefore = null;
+            statusAfter = PigStatus.Entry.getKey();
+            quantity = 1000; //一个胎次中分娩的活仔数, 默认1000,为了与quantityChange 不相等
+            quantityChange = 0; //在一个胎次中仔猪变化的数量
             lists.stream().forEach(doctorPigEvent1 -> {
+                statusAfter = statusBefore;
                 switch (doctorPigEvent1.getType()){
+                    case 6:
+                        statusAfter = PigStatus.Removal.getKey();
+                        break;
                     case 7:
-                        parity = (isNull(doctorPigEvent1.getExtraMap()) || isNull(doctorPigEvent1.getExtraMap().get("parity"))) ? 0 : Integer.valueOf(Objects.toString(doctorPigEvent1.getExtraMap().get("parity")));
+                        parity = (isNull(doctorPigEvent1.getExtraMap()) || isNull(doctorPigEvent1.getExtraMap().get("parity"))) ? parity : Integer.valueOf(Objects.toString(doctorPigEvent1.getExtraMap().get("parity")));
+                        statusAfter = PigStatus.Entry.getKey();
                         break;
                     case 9:
-                        if(doctorPigEvent1.getCurrentMatingCount() == 1){
+                        if(!isFirst && doctorPigEvent1.getCurrentMatingCount() == 1){
                             parity += 1;
                         }
                         boarCode = (isNull(doctorPigEvent1.getExtraMap()) || isNull(doctorPigEvent1.getExtraMap().get("matingBoarPigCode"))) ? null : Objects.toString(doctorPigEvent1.getExtraMap().get("matingBoarPigCode"));
+                        isFirst = false;
+                        statusAfter = PigStatus.Mate.getKey();
+                        break;
+                    case 10:
+                        if(statusBefore.equals(PigStatus.Wean.getKey())){
+                            statusAfter = PigStatus.Mate.getKey();
+                        }else if(statusBefore.equals(PigStatus.KongHuai.getKey())){
+                            statusAfter = PigStatus.Entry.getKey();
+                        }else if(statusBefore.equals(PigStatus.Pregnancy.getKey())){
+                            statusAfter = PigStatus.Pregnancy.getKey();
+                        }else if(statusBefore.equals(PigStatus.Mate.getKey())){
+                            statusAfter = PigStatus.Mate.getKey();
+                        }
+                        break;
+                    case 11:
+                        if(!isNull(doctorPigEvent1.getExtraMap()) && !isNull(doctorPigEvent1.getExtraMap().get("checkResult"))){
+                            String checkResult = Objects.toString(doctorPigEvent1.getExtraMap().get("checkResult"));
+                            switch(checkResult){
+                                case "1":
+                                    statusAfter = PigStatus.Pregnancy.getKey();
+                                    break;
+                                case "2":
+                                    statusAfter = PigStatus.KongHuai.getKey();
+                                    break;
+                                case "3":
+                                    statusAfter = PigStatus.KongHuai.getKey();
+                                    break;
+                                case "4":
+                                    statusAfter = PigStatus.KongHuai.getKey();
+                                    break;
+                            }
+                        }
+                        break;
+                    case 12:
+                        statusAfter = PigStatus.Mate.getKey();
+                        break;
+                    case 14:
+                        statusAfter = PigStatus.Farrow.getKey();
+                        break;
+                    case 15:
+                        statusAfter = PigStatus.FEED.getKey();
+                        quantity = doctorPigEvent1.getLiveCount();
+                        quantityChange = 0;
                         break;
                     case 16:
                         boarCode = null;
+                        quantityChange += Integer.parseInt(Objects.toString(doctorPigEvent1.getExtraMap().get("partWeanPigletsCount")));
+                        if(quantity == quantityChange){
+                            statusAfter = PigStatus.Wean.getKey();
+                        }
+                        break;
+                    case 17:
+                        quantityChange += Integer.parseInt(Objects.toString(doctorPigEvent1.getExtraMap().get("fostersCount")));
+                        if(quantity == quantityChange){
+                            statusAfter = PigStatus.Wean.getKey();
+                        }
+                        break;
+                    case 18:
+                        quantityChange += Integer.parseInt(Objects.toString(doctorPigEvent1.getExtraMap().get("pigletsCount")));
+                        if(quantity == quantityChange){
+                            statusAfter = PigStatus.Wean.getKey();
+                        }
+                        break;
+                    case 19:
+                        quantity += Integer.parseInt(Objects.toString(doctorPigEvent1.getExtraMap().get("fostersCount")));
+                        break;
                     default:
                         break;
                 }
+                doctorPigEvent1.setPigStatusBefore(statusBefore);
+                doctorPigEvent1.setPigStatusAfter(statusAfter);
                 doctorPigEvent1.setParity(parity);
                 doctorPigEvent1.setBoarCode(boarCode);
+                statusBefore = statusAfter;
             });
             Boolean result = doctorPigEventDao.updates(lists);
             if(!result){
                 log.info("update parity boarCode fail: {}", lists);
             }
         });
+    }
+
+    public Response<Boolean> refreshPigStatus() {
+        try {
+            for (int i = 0;; i++) {
+                Paging<DoctorPigTrack> trackPage = doctorPigTrackDao.paging(i, 1000, ImmutableMap.of("status", PigStatus.Entry.getKey()));
+                trackPage.getData().forEach(doctorPigTrack -> {
+                    if (!doctorPigEventDao.list(ImmutableMap.of("type", PigEvent.TO_MATING.getKey())).isEmpty()){
+                        doctorPigTrack.setStatus(PigStatus.Wean.getKey());
+                        doctorPigTrack.setUpdatedAt(new Date());
+                        doctorPigTrackDao.update(doctorPigTrack);
+                    }
+                });
+                if (trackPage.getData().size() < 1000){
+                    break;
+                }
+            }
+            return Response.ok(Boolean.TRUE);
+        } catch (Exception e){
+            log.error("refresh.pig.status.failed, cause{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("refresh.pig.status.failed");
+        }
     }
 }

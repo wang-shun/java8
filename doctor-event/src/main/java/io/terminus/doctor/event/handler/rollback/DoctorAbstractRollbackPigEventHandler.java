@@ -12,6 +12,7 @@ import io.terminus.doctor.event.dao.DoctorPigTrackDao;
 import io.terminus.doctor.event.dto.DoctorPigSnapShotInfo;
 import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.handler.DoctorRollbackPigEventHandler;
+import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigSnapshot;
@@ -71,7 +72,6 @@ public abstract class DoctorAbstractRollbackPigEventHandler implements DoctorRol
     public final boolean canRollback(DoctorPigEvent pigEvent) {
         return Objects.equals(pigEvent.getIsAuto(), IsOrNot.NO.getValue()) &&
                 pigEvent.getEventAt().after(DateTime.now().plusMonths(-3).toDate()) &&
-                RespHelper.orFalse(doctorPigEventReadService.isLastEvent(pigEvent.getPigId(), pigEvent.getId())) &&
                 handleCheck(pigEvent);
     }
 
@@ -171,4 +171,13 @@ public abstract class DoctorAbstractRollbackPigEventHandler implements DoctorRol
         RespHelper.orServEx(doctorRevertLogWriteService.createRevertLog(revertLog));
     }
 
+    //判断事件链的最后一个事件，是否是最新事件
+    protected boolean isRelLastGroupEvent(DoctorGroupEvent event) {
+        DoctorGroupEvent tmpEvent = event;
+        while (event != null) {
+            tmpEvent = event;
+            event = doctorGroupEventDao.findByRelGroupEventId(event.getId());
+        }
+        return RespHelper.orFalse(doctorGroupReadService.isLastEvent(tmpEvent.getGroupId(), tmpEvent.getId()));
+    }
 }

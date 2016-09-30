@@ -191,6 +191,7 @@ public class DoctorCommonGroupEventHandler {
         basicDto.setEventDesc(PigEvent.ENTRY.getDesc());
         basicDto.setStaffId(input.getCreatorId());
         basicDto.setStaffName(input.getCreatorName());
+        basicDto.setIsAuto(IsOrNot.YES.getValue());
 
         //进场信息
         farmEntryDto.setPigType(basicDto.getPigType());
@@ -216,9 +217,9 @@ public class DoctorCommonGroupEventHandler {
     /**
      * 当猪群关闭时, 创建猪群批次总结(这个统计放到猪群关闭之前进行)
      */
-    public void createGroupBatchSummaryWhenClosed(DoctorGroup group, DoctorGroupTrack groupTrack, Date eventAt) {
+    public void createGroupBatchSummaryWhenClosed(DoctorGroup group, DoctorGroupTrack groupTrack, Date eventAt, Double fcrFeed) {
         DoctorGroupBatchSummary summary = RespHelper.orServEx(doctorGroupBatchSummaryReadService
-                .getSummaryByGroupDetail(new DoctorGroupDetail(group, groupTrack)));
+                .getSummaryByGroupDetail(new DoctorGroupDetail(group, groupTrack), fcrFeed));
 
         //设置下猪群的关闭状态和时间
         summary.setStatus(DoctorGroup.Status.CLOSED.getValue());

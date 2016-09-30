@@ -111,6 +111,23 @@
         WHERE id=#{id}
     </update>
 
+    <update id="updateAll" parameterType="DoctorMaterialConsumeAvg">
+        UPDATE <include refid="tb"/>
+        <set>
+            updated_at = now()
+            ,`farm_id` = #{farmId}
+            ,`ware_house_id` = #{wareHouseId}
+            ,`material_id` = #{materialId}
+            ,`type` = #{type} 
+            ,`lot_consume_day`=#{lotConsumeDay}
+            ,`consume_avg_count` = #{consumeAvgCount}
+            ,`consume_count` = #{consumeCount}
+            ,`consume_date` = #{consumeDate}
+            ,`extra` = #{extra}
+        </set>
+        WHERE id=#{id}
+    </update>
+
     <select id="findLastByFarmId" parameterType="long" resultMap="DoctorMaterialConsumeAvgMap">
         select <include refid="cols_all"/> from <include refid="tb"/> where farm_id = #{farmId} and `updated_at` = (
             select max(updated_at) from <include refid="tb"/> where farm_id = #{farmId}

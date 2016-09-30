@@ -1,6 +1,6 @@
 package io.terminus.doctor.warehouse.dto;
 
-import io.terminus.doctor.warehouse.model.DoctorMaterialInfo;
+import io.terminus.doctor.warehouse.model.FeedFormula;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -26,5 +26,5 @@ public class DoctorMaterialProductRatioDto implements Serializable{
 
     private Long farmId;    // 对应的猪场Id
 
-    private DoctorMaterialInfo.MaterialProduce produce; // 原料配比信息
+    private FeedFormula.FeedProduce produce; // 原料配比信息
 }
