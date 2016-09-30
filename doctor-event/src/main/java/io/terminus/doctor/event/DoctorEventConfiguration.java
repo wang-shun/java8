@@ -35,6 +35,7 @@ import io.terminus.doctor.event.handler.rollback.sow.DoctorRollbackSowFarrowHand
 import io.terminus.doctor.event.handler.rollback.sow.DoctorRollbackSowFosterByHandler;
 import io.terminus.doctor.event.handler.rollback.sow.DoctorRollbackSowFosterHandler;
 import io.terminus.doctor.event.handler.rollback.sow.DoctorRollbackSowMatingEventHandler;
+import io.terminus.doctor.event.handler.rollback.sow.DoctorRollbackSowPregCheckEventHandler;
 import io.terminus.doctor.event.handler.rollback.sow.DoctorRollbackSowRemovalEventHandler;
 import io.terminus.doctor.event.handler.rollback.sow.DoctorRollbackSowToChgLocationEventHandler;
 import io.terminus.doctor.event.handler.rollback.sow.DoctorRollbackSowVaccinationEventHandler;
@@ -137,7 +138,8 @@ public class  DoctorEventConfiguration {
             DoctorRollbackSowMatingEventHandler rollbackSowMatingEventHandler,
             DoctorRollbackSowRemovalEventHandler rollbackSowRemovalEventHandler,
             DoctorRollbackSowVaccinationEventHandler rollbackSowVaccinationEventHandler,
-            DoctorRollbackSowWeanHandler rollbackSowWeanHandler
+            DoctorRollbackSowWeanHandler rollbackSowWeanHandler,
+            DoctorRollbackSowPregCheckEventHandler rollbackSowPregCheckEventHandler
     ) {
         DoctorRollbackHandlerChain chain = new DoctorRollbackHandlerChain();
         chain.setRollbackGroupEventHandlers(Lists.newArrayList(rollbackGroupChangeEventHandler,
@@ -172,7 +174,8 @@ public class  DoctorEventConfiguration {
                 rollbackSowRemovalEventHandler,
                 rollbackSowVaccinationEventHandler,
                 rollbackSowWeanHandler,
-                rollbackSowToChgLocationEventHandler
+                rollbackSowToChgLocationEventHandler,
+                rollbackSowPregCheckEventHandler
         ));
         return chain;
     }
