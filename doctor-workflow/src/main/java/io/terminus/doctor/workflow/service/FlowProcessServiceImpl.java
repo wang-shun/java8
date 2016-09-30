@@ -331,8 +331,10 @@ public class FlowProcessServiceImpl implements FlowProcessService {
 
             FlowProcess rollBackProcess = FlowProcess.builder().build();
             BeanHelper.copy(rollBackProcess, flowHistoryProcess);
+            flowInstance.setStatus(FlowInstance.Status.NORMAL.value());
             Long flowInstanceId = access().createFlowInstance(flowInstance);
             rollBackProcess.setFlowInstanceId(flowInstanceId);
+            rollBackProcess.setStatus(FlowProcess.Status.NORMAL.value());
             access().createFlowProcess(rollBackProcess);
             List<FlowProcessTrack> flowTracks = workFlowEngine.buildFlowQueryService().getFlowProcessTrackQuery()
                     .flowInstanceId(flowHistoryInstance.getExternalHistoryId())
