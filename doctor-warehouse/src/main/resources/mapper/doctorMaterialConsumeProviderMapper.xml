@@ -55,7 +55,7 @@
     <sql id="vals">
         #{type},#{farmId},#{farmName},#{wareHouseId},#{wareHouseName},#{materialId},#{materialName},#{eventTime},
         #{eventType},#{eventCount}, #{unitPrice},#{staffId},#{staffName},#{barnId},#{barnName},#{groupId},#{groupCode},
-        #{providerFactoryId}, #{providerFactoryName}
+        #{providerFactoryId}, #{providerFactoryName},
         #{extra},#{creatorId},#{creatorName},#{updatorId},#{updatorName},now(),now()
     </sql>
 
