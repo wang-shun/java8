@@ -412,7 +412,7 @@ public class DoctorPigCreateEvents {
                 if (Objects.equals(doctorPartWeanDto.getPartWeanPigletsCount(), count) && doctorPartWeanDto.getChgLocationToBarnId() != null) {
                     try {
                         Map<String, Object> temp = JsonMapper.JSON_NON_DEFAULT_MAPPER.getMapper().readValue(sowInfoDtoJson, JacksonType.MAP_OF_OBJECT);
-                        temp.put("changeLocationDate", doctorPartWeanDto.getPartWeanDate());
+                        temp.put("changeLocationDate", temp.get("partWeanDate"));
                         String sowInfoDto = JsonMapper.JSON_NON_DEFAULT_MAPPER.getMapper().writeValueAsString(temp);
                         doctorSowEventCreateService.sowEventCreate(buildBasicInputInfoDto(farmId, tempPigId, PigEvent.TO_MATING, IsOrNot.YES.getValue()), sowInfoDto);
                     } catch (Exception e) {
