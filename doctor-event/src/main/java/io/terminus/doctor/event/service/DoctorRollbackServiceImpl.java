@@ -149,7 +149,7 @@ public class DoctorRollbackServiceImpl implements DoctorRollbackService {
         Date endAt = DateUtil.getDateEnd(new DateTime(dto.getEventAt())).toDate();
         Long farmId = dto.getFarmId();
 
-        //记录事件，// TODO: 16/9/21 晚上job更新月报
+        //记录事件, 晚上job更新月报
         dailyReport2UpdateDao.saveDailyReport2Update(startAt, farmId);
 
         DoctorDailyReportDto report = dailyReportHistoryDao.getDailyReportWithRedis(farmId, startAt);
