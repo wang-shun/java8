@@ -174,6 +174,16 @@ public class DoctorRollbackServiceImpl implements DoctorRollbackService {
                         pigSearchWriteService.update(dto.getEsPigId());
                     }
                     break;
+                case SEARCH_GROUP_DELETE:
+                    if (dto.getEsGroupId() != null) {
+                        groupSearchWriteService.delete(dto.getEsGroupId());
+                    }
+                    break;
+                case SEARCH_PIG_DELETE:
+                    if (dto.getEsPigId() != null) {
+                        groupSearchWriteService.delete(dto.getEsPigId());
+                    }
+                    break;
 
                 //日报实时更新
                 case DAILY_DEAD:

@@ -32,7 +32,10 @@ public enum RollbackType {
     //搜索实时更新
     SEARCH_BARN(10, "猪舍es搜索"),
     SEARCH_PIG(11, "猪es搜索"),
-    SEARCH_GROUP(12, "猪群es搜索");
+    SEARCH_GROUP(12, "猪群es搜索"),
+    SEARCH_GROUP_DELETE(13, "猪群es删除索引"),
+    SEARCH_PIG_DELETE(14, "猪es删除索引");
+
 
     @Getter
     private final int value;
