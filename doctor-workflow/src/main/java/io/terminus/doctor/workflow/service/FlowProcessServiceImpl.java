@@ -2,6 +2,7 @@ package io.terminus.doctor.workflow.service;
 
 import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
+import io.terminus.common.utils.Arguments;
 import io.terminus.common.utils.Splitters;
 import io.terminus.doctor.workflow.access.JdbcAccess;
 import io.terminus.doctor.workflow.core.Execution;
@@ -23,6 +24,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -318,7 +320,12 @@ public class FlowProcessServiceImpl implements FlowProcessService {
             FlowHistoryInstance flowHistoryInstance = workFlowEngine.buildFlowQueryService().getFlowHistoryInstanceQuery().businessId(businessId).flowDefinitionKey(flowDefinitionKey).single();
             FlowInstance flowInstance = FlowInstance.builder().build();
             BeanHelper.copy(flowInstance, flowHistoryInstance);
-            FlowHistoryProcess flowHistoryProcess = workFlowEngine.buildFlowQueryService().getFlowHistoryProcessQuery().flowInstanceId(flowHistoryInstance.getExternalHistoryId()).single();
+            List<FlowHistoryProcess> flowHistoryProcesses = workFlowEngine.buildFlowQueryService().getFlowHistoryProcessQuery().flowInstanceId(flowHistoryInstance.getExternalHistoryId()).list();
+            if (Arguments.isNullOrEmpty(flowHistoryProcesses)){
+                AssertHelper.throwException(
+                        "离场回滚操作查询历史流程活动节点为空, 流程定义key为: {}, 业务id为: {}", flowDefinitionKey, businessId);
+            }
+            FlowHistoryProcess flowHistoryProcess = flowHistoryProcesses.stream().max(Comparator.comparing(FlowHistoryProcess::getUpdatedAt)).get();
             access().deleteFlowHistoryInstance(flowHistoryInstance.getId());
             access().deleteFlowHistoryProcess(flowHistoryProcess.getId());
 
