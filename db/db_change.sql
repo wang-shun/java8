@@ -418,6 +418,27 @@ create index doctor_boar_monthly_reports_farm_id on doctor_boar_monthly_reports(
 create index doctor_boar_monthly_reports_boar_code on doctor_boar_monthly_reports(boar_code);
 create index doctor_boar_monthly_reports_sum_at on doctor_boar_monthly_reports(sum_at);
 
+-- 2016-09-20 猪事件增加是否是自动生成标识
+ALTER TABLE doctor_pig_events ADD COLUMN is_auto smallint(6) DEFAULT NULL COMMENT '是否是自动生成事件, 0 不是, 1 是' AFTER pig_code;
+
+-- 2016-09-22 回滚日志表增加
+ALTER TABLE doctor_revert_logs ADD COLUMN farm_id bigint(20) DEFAULT NULL COMMENT '猪场id' AFTER id;
+ALTER TABLE doctor_revert_logs ADD COLUMN group_id bigint(20) DEFAULT NULL COMMENT '猪群id' AFTER farm_id;
+ALTER TABLE doctor_revert_logs ADD COLUMN pig_id bigint(20) DEFAULT NULL COMMENT '猪id' AFTER group_id;
+
+ALTER TABLE doctor_group_events ADD COLUMN rel_group_event_id bigint(20) DEFAULT NULL COMMENT '关联猪群事件id' AFTER other_barn_type;
+ALTER TABLE doctor_group_events ADD COLUMN rel_pig_event_id bigint(20) DEFAULT NULL COMMENT '关联猪事件id' AFTER rel_group_event_id;
+
+-- 2016-09-23 猪增加字段，关联猪群事件
+ALTER TABLE doctor_pig_events ADD COLUMN rel_group_event_id BIGINT(20) DEFAULT NULL COMMENT '关联猪群事件id(比如转种猪事件)' AFTER rel_event_id;
+ALTER TABLE doctor_pig_events ADD COLUMN rel_pig_event_id BIGINT(20) DEFAULT NULL COMMENT '关联猪事件id(比如拼窝事件)' AFTER rel_group_event_id;
+
+CREATE INDEX idx_doctor_group_events_rel_group_event_id ON doctor_group_events(rel_group_event_id);
+CREATE INDEX idx_doctor_group_events_rel_pig_event_id ON doctor_group_events(rel_pig_event_id);
+CREATE INDEX idx_doctor_pig_events_rel_group_event_id ON doctor_pig_events(rel_group_event_id);
+CREATE INDEX idx_doctor_pig_events_rel_pig_event_id ON doctor_pig_events(rel_pig_event_id);
+CREATE INDEX idx_doctor_group_events_other_barn_id ON doctor_group_events(other_barn_id);
+
 -- 2016-09-29 物资入库时可选择的厂家
 CREATE TABLE `doctor_material_factorys` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,

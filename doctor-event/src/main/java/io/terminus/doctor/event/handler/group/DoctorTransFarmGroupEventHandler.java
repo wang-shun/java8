@@ -91,6 +91,7 @@ public class DoctorTransFarmGroupEventHandler extends DoctorAbstractGroupEventHa
         event.setOtherBarnType(toBarn.getPigType());   //目标猪舍类型
         event.setExtraMap(transFarmEvent);
         doctorGroupEventDao.create(event);
+        transFarm.setRelGroupEventId(event.getRelGroupEventId());
 
         Integer oldQuantity = groupTrack.getQuantity();
 
@@ -112,6 +113,9 @@ public class DoctorTransFarmGroupEventHandler extends DoctorAbstractGroupEventHa
         if (Objects.equals(oldQuantity, transFarm.getQuantity())) {
             doctorCommonGroupEventHandler.createGroupBatchSummaryWhenClosed(group, groupTrack, event.getEventAt());
             doctorCommonGroupEventHandler.autoGroupEventClose(group, groupTrack, transFarm);
+
+            DoctorGroupEvent closeEvent = doctorGroupEventDao.findByRelGroupEventId(event.getId());
+            transFarm.setRelGroupEventId(closeEvent.getId());    //如果发生关闭猪群事件，关联事件id要换下
         }
 
         //设置来源为外场
@@ -122,6 +126,10 @@ public class DoctorTransFarmGroupEventHandler extends DoctorAbstractGroupEventHa
             //新建猪群
             Long toGroupId = autoTransFarmEventNew(group, groupTrack, transFarm, toBarn);
             transFarm.setToGroupId(toGroupId);
+
+            //刷新最新事件id
+            DoctorGroupEvent newGroupEvent = doctorGroupEventDao.findLastEventByGroupId(toGroupId);
+            transFarm.setRelGroupEventId(newGroupEvent.getId());
 
             //转入猪群
             doctorCommonGroupEventHandler.autoTransEventMoveIn(group, groupTrack, transFarm);
@@ -157,6 +165,7 @@ public class DoctorTransFarmGroupEventHandler extends DoctorAbstractGroupEventHa
         newGroupInput.setSource(PigSource.OUTER.getKey());          //来源:外购
         newGroupInput.setIsAuto(IsOrNot.YES.getValue());
         newGroupInput.setRemark(transFarm.getRemark());
+        newGroupInput.setRelGroupEventId(transFarm.getRelGroupEventId());
 
         DoctorGroup toGroup = BeanMapper.map(newGroupInput, DoctorGroup.class);
         toGroup.setFarmName(transFarm.getToFarmName());

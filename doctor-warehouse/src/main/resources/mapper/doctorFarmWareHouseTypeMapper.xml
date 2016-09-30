@@ -92,4 +92,21 @@
         </set>
         WHERE id=#{id}
     </update>
+
+    <update id="updateAll" parameterType="DoctorFarmWareHouseType">
+        UPDATE <include refid="tb"/>
+        <set>
+            updated_at = now()
+            ,`farm_id` = #{farmId}
+            ,`farm_name` = #{farmName}
+            ,`type` = #{type}
+            ,`lot_number` = #{lotNumber}
+            ,`extra` = #{extra}
+            ,`creator_id` = #{creatorId}
+            ,`creator_name` = #{creatorName}
+            ,`updator_id` = #{updatorId}
+            ,`updator_name` = #{updatorName}
+        </set>
+        WHERE id=#{id}
+    </update>
 </mapper>

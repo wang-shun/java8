@@ -5,6 +5,7 @@ import io.terminus.doctor.warehouse.dao.DoctorMaterialConsumeProviderDao;
 import io.terminus.doctor.warehouse.dao.DoctorMaterialPriceInWareHouseDao;
 import io.terminus.doctor.warehouse.dao.MaterialFactoryDao;
 import io.terminus.doctor.warehouse.dto.DoctorMaterialConsumeProviderDto;
+import io.terminus.doctor.warehouse.dto.EventHandlerContext;
 import io.terminus.doctor.warehouse.handler.IHandler;
 import io.terminus.doctor.warehouse.model.DoctorMaterialConsumeProvider;
 import io.terminus.doctor.warehouse.model.DoctorMaterialPriceInWareHouse;
@@ -38,13 +39,12 @@ public class DoctorProviderEventHandler implements IHandler{
     }
 
     @Override
-    public Boolean ifHandle(DoctorMaterialConsumeProviderDto dto, Map<String, Object> context) {
-        DoctorMaterialConsumeProvider.EVENT_TYPE eventType = DoctorMaterialConsumeProvider.EVENT_TYPE.from(dto.getActionType());
+    public boolean ifHandle(DoctorMaterialConsumeProvider.EVENT_TYPE eventType) {
         return eventType != null && eventType.isIn();
     }
 
     @Override
-    public void handle(DoctorMaterialConsumeProviderDto dto, Map<String, Object> context) throws RuntimeException {
+    public void handle(DoctorMaterialConsumeProviderDto dto, EventHandlerContext context) throws RuntimeException {
         DoctorMaterialConsumeProvider.EVENT_TYPE eventType = DoctorMaterialConsumeProvider.EVENT_TYPE.from(dto.getActionType());
         // 常规添加时, 必须有单价, 单价由用户自行填写; 调入时单价由系统计算
         if((dto.getUnitPrice() == null || dto.getUnitPrice() <= 0)
@@ -83,6 +83,16 @@ public class DoctorProviderEventHandler implements IHandler{
         materialCP.setProviderFactoryName(materialFactory == null ? null : materialFactory.getFactoryName());
         doctorMaterialConsumeProviderDao.create(materialCP);
         doctorMaterialPriceInWareHouseDao.create(DoctorMaterialPriceInWareHouse.buildFromDto(dto, materialCP.getId()));
-        context.put("eventId",materialCP.getId());
+        context.setEventId(materialCP.getId());
+    }
+
+    @Override
+    public void rollback(DoctorMaterialConsumeProvider cp) {
+        DoctorMaterialPriceInWareHouse priceInWareHouse = doctorMaterialPriceInWareHouseDao.findByProviderId(cp.getId());
+        if(priceInWareHouse == null || priceInWareHouse.getRemainder() < cp.getEventCount()){
+            throw new ServiceException("provided.material.consumed"); // 本次入库物资已经出库, 无法回滚
+        }
+        doctorMaterialConsumeProviderDao.delete(cp.getId());
+        doctorMaterialPriceInWareHouseDao.delete(priceInWareHouse.getId());
     }
 }

@@ -86,6 +86,7 @@ public class DoctorCommonGroupEventHandler {
         DoctorCloseGroupInput closeInput = new DoctorCloseGroupInput();
         closeInput.setIsAuto(IsOrNot.YES.getValue());   //系统触发事件, 属于自动生成
         closeInput.setEventAt(baseInput.getEventAt());
+        closeInput.setRelGroupEventId(baseInput.getRelGroupEventId());
         doctorCloseGroupEventHandler.handle(group, groupTrack, closeInput);
     }
 
@@ -98,6 +99,8 @@ public class DoctorCommonGroupEventHandler {
         moveIn.setIsAuto(IsOrNot.YES.getValue());
         moveIn.setCreatorId(transGroup.getCreatorId());
         moveIn.setCreatorName(transGroup.getCreatorName());
+        moveIn.setRelGroupEventId(transGroup.getRelGroupEventId());
+        moveIn.setRelPigEventId(transGroup.getRelPigEventId());
 
         moveIn.setInType(DoctorMoveInGroupEvent.InType.GROUP.getValue());       //转入类型
         moveIn.setInTypeName(DoctorMoveInGroupEvent.InType.GROUP.getDesc());
@@ -140,13 +143,14 @@ public class DoctorCommonGroupEventHandler {
         DoctorNewGroupInput newGroupInput = BeanMapper.map(input, DoctorNewGroupInput.class);
         newGroupInput.setBarnId(input.getToBarnId());
         newGroupInput.setBarnName(input.getToBarnName());
-        DoctorMoveInGroupInput moveIn = BeanMapper.map(input, DoctorMoveInGroupInput.class);
 
         //3. 新建猪群事件
         Long groupId = doctorGroupManager.createNewGroup(group, newGroupInput);
 
         //4. 转入猪群事件
         DoctorGroupDetail groupDetail = RespHelper.orServEx(doctorGroupReadService.findGroupDetailByGroupId(groupId));
+        DoctorMoveInGroupInput moveIn = BeanMapper.map(input, DoctorMoveInGroupInput.class);
+        moveIn.setRelGroupEventId(groupDetail.getGroupTrack().getRelEventId());      //记录新建猪群事件的id(新建猪群时，track.relEventId = 新建猪群事件id)
         doctorMoveInGroupEventHandler.handleEvent(groupDetail.getGroup(), groupDetail.getGroupTrack(), moveIn);
         return groupId;
     }
@@ -174,6 +178,7 @@ public class DoctorCommonGroupEventHandler {
         }
 
         //基本信息
+        basicDto.setRelGroupEventId(input.getRelGroupEventId());
         basicDto.setPigCode(input.getPigCode());
         basicDto.setBarnId(barn.getId());
         basicDto.setBarnName(barn.getName());
@@ -186,6 +191,7 @@ public class DoctorCommonGroupEventHandler {
         basicDto.setEventDesc(PigEvent.ENTRY.getDesc());
         basicDto.setStaffId(input.getCreatorId());
         basicDto.setStaffName(input.getCreatorName());
+        basicDto.setIsAuto(IsOrNot.YES.getValue());
 
         //进场信息
         farmEntryDto.setPigType(basicDto.getPigType());

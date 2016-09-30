@@ -18,4 +18,8 @@ public class DoctorWareHouseTrackDao extends MyBatisDao<DoctorWareHouseTrack>{
     public List<DoctorWareHouseTrack> queryByWareHouseId(List<Long> ids){
         return this.getSqlSession().selectList(sqlId("queryByWareHouseIds"),ids);
     }
+
+    public void updateAll(DoctorWareHouseTrack track){
+        sqlSession.update(sqlId("updateAll"), track);
+    }
 }

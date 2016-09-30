@@ -6,9 +6,39 @@ import io.terminus.doctor.common.DoctorCommonConfiguration;
 import io.terminus.doctor.event.daily.DoctorDailyEventCount;
 import io.terminus.doctor.event.dao.DoctorPigDao;
 import io.terminus.doctor.event.handler.DoctorEntryHandler;
-import io.terminus.doctor.event.handler.DoctorEventCreateHandler;
 import io.terminus.doctor.event.handler.DoctorEventHandlerChain;
 import io.terminus.doctor.event.handler.boar.DoctorSemenHandler;
+import io.terminus.doctor.event.handler.rollback.DoctorRollbackHandlerChain;
+import io.terminus.doctor.event.handler.rollback.boar.DoctorRollbackBoarChgFarmEventHandler;
+import io.terminus.doctor.event.handler.rollback.boar.DoctorRollbackBoarChgLocationEventHandler;
+import io.terminus.doctor.event.handler.rollback.boar.DoctorRollbackBoarConditionEventHandler;
+import io.terminus.doctor.event.handler.rollback.boar.DoctorRollbackBoarDiseaseEventHandler;
+import io.terminus.doctor.event.handler.rollback.boar.DoctorRollbackBoarEntryEventHandler;
+import io.terminus.doctor.event.handler.rollback.boar.DoctorRollbackBoarRemovalEventHandler;
+import io.terminus.doctor.event.handler.rollback.boar.DoctorRollbackBoarSemenEventHandler;
+import io.terminus.doctor.event.handler.rollback.boar.DoctorRollbackBoarVaccinationEventHandler;
+import io.terminus.doctor.event.handler.rollback.group.DoctorRollbackGroupChangeHandler;
+import io.terminus.doctor.event.handler.rollback.group.DoctorRollbackGroupDiseaseHandler;
+import io.terminus.doctor.event.handler.rollback.group.DoctorRollbackGroupLiveStockHandler;
+import io.terminus.doctor.event.handler.rollback.group.DoctorRollbackGroupMoveInHandler;
+import io.terminus.doctor.event.handler.rollback.group.DoctorRollbackGroupNewHandler;
+import io.terminus.doctor.event.handler.rollback.group.DoctorRollbackGroupTransFarmHandler;
+import io.terminus.doctor.event.handler.rollback.group.DoctorRollbackGroupTransHandler;
+import io.terminus.doctor.event.handler.rollback.group.DoctorRollbackGroupTurnSeedHandler;
+import io.terminus.doctor.event.handler.rollback.group.DoctorRollbackGroupVaccinHandler;
+import io.terminus.doctor.event.handler.rollback.sow.DoctorRollbackSowChgFarmEventHandler;
+import io.terminus.doctor.event.handler.rollback.sow.DoctorRollbackSowChgLocationEventHandler;
+import io.terminus.doctor.event.handler.rollback.sow.DoctorRollbackSowConditionEventHandler;
+import io.terminus.doctor.event.handler.rollback.sow.DoctorRollbackSowDiseaseEventHandler;
+import io.terminus.doctor.event.handler.rollback.sow.DoctorRollbackSowEntryEventHandler;
+import io.terminus.doctor.event.handler.rollback.sow.DoctorRollbackSowFarrowHandler;
+import io.terminus.doctor.event.handler.rollback.sow.DoctorRollbackSowFosterByHandler;
+import io.terminus.doctor.event.handler.rollback.sow.DoctorRollbackSowFosterHandler;
+import io.terminus.doctor.event.handler.rollback.sow.DoctorRollbackSowMatingEventHandler;
+import io.terminus.doctor.event.handler.rollback.sow.DoctorRollbackSowRemovalEventHandler;
+import io.terminus.doctor.event.handler.rollback.sow.DoctorRollbackSowToChgLocationEventHandler;
+import io.terminus.doctor.event.handler.rollback.sow.DoctorRollbackSowVaccinationEventHandler;
+import io.terminus.doctor.event.handler.rollback.sow.DoctorRollbackSowWeanHandler;
 import io.terminus.doctor.event.handler.usual.DoctorChgFarmHandler;
 import io.terminus.doctor.event.handler.usual.DoctorChgLocationHandler;
 import io.terminus.doctor.event.handler.usual.DoctorConditionHandler;
@@ -16,7 +46,12 @@ import io.terminus.doctor.event.handler.usual.DoctorDiseaseHandler;
 import io.terminus.doctor.event.handler.usual.DoctorRemovalHandler;
 import io.terminus.doctor.event.handler.usual.DoctorVaccinationHandler;
 import io.terminus.doctor.event.report.DoctorDailyPigCountChain;
-import io.terminus.doctor.event.report.count.*;
+import io.terminus.doctor.event.report.count.DoctorDailyEntryEventCount;
+import io.terminus.doctor.event.report.count.DoctorDailyFarrowingEventCount;
+import io.terminus.doctor.event.report.count.DoctorDailyMatingEventCount;
+import io.terminus.doctor.event.report.count.DoctorDailyPregEventCount;
+import io.terminus.doctor.event.report.count.DoctorDailyRemovalEventCount;
+import io.terminus.doctor.event.report.count.DoctorDailyWeanEventCount;
 import io.terminus.doctor.event.search.barn.BarnSearchProperties;
 import io.terminus.doctor.event.search.barn.BaseBarnQueryBuilder;
 import io.terminus.doctor.event.search.barn.DefaultBarnQueryBuilder;
@@ -69,8 +104,82 @@ import java.util.List;
 public class  DoctorEventConfiguration {
 
     /**
+     * 事件回滚拦截器链
+     */
+    @Bean
+    public DoctorRollbackHandlerChain doctorRollbackHandlerChain(
+            DoctorRollbackSowToChgLocationEventHandler rollbackSowToChgLocationEventHandler,
+            DoctorRollbackGroupChangeHandler rollbackGroupChangeEventHandler,
+            DoctorRollbackGroupDiseaseHandler rollbackGroupDiseaseHandler,
+            DoctorRollbackGroupLiveStockHandler rollbackGroupLiveStockHandler,
+            DoctorRollbackGroupMoveInHandler rollbackGroupMoveInEventHandler,
+            DoctorRollbackGroupNewHandler rollbackGroupNewEventHandler,
+            DoctorRollbackGroupTransFarmHandler rollbackGroupTransFarmHandler,
+            DoctorRollbackGroupTransHandler rollbackGroupTransHandler,
+            DoctorRollbackGroupTurnSeedHandler rollbackGroupTurnSeedHandler,
+            DoctorRollbackGroupVaccinHandler rollbackGroupVaccinHandler,
+            DoctorRollbackBoarChgFarmEventHandler rollbackBoarChgFarmEventHandler,
+            DoctorRollbackBoarChgLocationEventHandler rollbackBoarChgLocationEventHandler,
+            DoctorRollbackBoarConditionEventHandler rollbackBoarConditionEventHandler,
+            DoctorRollbackBoarDiseaseEventHandler rollbackBoarDiseaseEventHandler,
+            DoctorRollbackBoarEntryEventHandler rollbackBoarEntryEventHandler,
+            DoctorRollbackBoarRemovalEventHandler rollbackBoarRemovalEventHandler,
+            DoctorRollbackBoarSemenEventHandler rollbackBoarSemenEventHandler,
+            DoctorRollbackBoarVaccinationEventHandler rollbackBoarVaccinationEventHandler,
+            DoctorRollbackSowChgFarmEventHandler rollbackSowChgFarmEventHandler,
+            DoctorRollbackSowChgLocationEventHandler rollbackSowChgLocationEventHandler,
+            DoctorRollbackSowConditionEventHandler rollbackSowConditionEventHandler,
+            DoctorRollbackSowDiseaseEventHandler rollbackSowDiseaseEventHandler,
+            DoctorRollbackSowEntryEventHandler rollbackSowEntryEventHandler,
+            DoctorRollbackSowFarrowHandler rollbackSowFarrowHandler,
+            DoctorRollbackSowFosterByHandler rollbackSowFosterByHandler,
+            DoctorRollbackSowFosterHandler rollbackSowFosterHandler,
+            DoctorRollbackSowMatingEventHandler rollbackSowMatingEventHandler,
+            DoctorRollbackSowRemovalEventHandler rollbackSowRemovalEventHandler,
+            DoctorRollbackSowVaccinationEventHandler rollbackSowVaccinationEventHandler,
+            DoctorRollbackSowWeanHandler rollbackSowWeanHandler
+    ) {
+        DoctorRollbackHandlerChain chain = new DoctorRollbackHandlerChain();
+        chain.setRollbackGroupEventHandlers(Lists.newArrayList(rollbackGroupChangeEventHandler,
+                rollbackGroupDiseaseHandler,
+                rollbackGroupLiveStockHandler,
+                rollbackGroupMoveInEventHandler,
+                rollbackGroupNewEventHandler,
+                rollbackGroupTransFarmHandler,
+                rollbackGroupTransHandler,
+                rollbackGroupTurnSeedHandler,
+                rollbackGroupVaccinHandler
+        ));
+
+        chain.setRollbackPigEventHandlers(Lists.newArrayList(
+                rollbackBoarChgFarmEventHandler,
+                rollbackBoarChgLocationEventHandler,
+                rollbackBoarConditionEventHandler,
+                rollbackBoarDiseaseEventHandler,
+                rollbackBoarEntryEventHandler,
+                rollbackBoarRemovalEventHandler,
+                rollbackBoarSemenEventHandler,
+                rollbackBoarVaccinationEventHandler,
+                rollbackSowChgFarmEventHandler,
+                rollbackSowChgLocationEventHandler,
+                rollbackSowConditionEventHandler,
+                rollbackSowDiseaseEventHandler,
+                rollbackSowEntryEventHandler,
+                rollbackSowFarrowHandler,
+                rollbackSowFosterByHandler,
+                rollbackSowFosterHandler,
+                rollbackSowMatingEventHandler,
+                rollbackSowRemovalEventHandler,
+                rollbackSowVaccinationEventHandler,
+                rollbackSowWeanHandler,
+                rollbackSowToChgLocationEventHandler
+        ));
+        return chain;
+    }
+
+
+    /**
      * 对应handler chain
-     * @return
      */
     @Bean
     public DoctorEventHandlerChain doctorEventHandlerChain(
@@ -79,12 +188,11 @@ public class  DoctorEventConfiguration {
             DoctorConditionHandler doctorConditionHandler, DoctorDiseaseHandler doctorDiseaseHandler,
             DoctorRemovalHandler doctorRemovalHandler, DoctorVaccinationHandler doctorVaccinationHandler){
         DoctorEventHandlerChain chain = new DoctorEventHandlerChain();
-        List<DoctorEventCreateHandler> list = Lists.newArrayList(
+        chain.setDoctorEventCreateHandlers(Lists.newArrayList(
                 doctorSemenHandler,doctorEntryHandler,
                 doctorChgFarmHandler, doctorChgLocationHandler,
                 doctorConditionHandler, doctorDiseaseHandler,
-                doctorRemovalHandler, doctorVaccinationHandler);
-        chain.setDoctorEventCreateHandlers(Lists.newArrayList(list));
+                doctorRemovalHandler, doctorVaccinationHandler));
         return chain;
     }
 

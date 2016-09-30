@@ -169,6 +169,16 @@ public class DoctorGroupEvent<T extends BaseGroupEvent> implements Serializable 
     private Integer otherBarnType;
 
     /**
+     * 关联猪群事件id
+     */
+    private Long relGroupEventId;
+
+    /**
+     * 关联猪事件id
+     */
+    private Long relPigEventId;
+
+    /**
      * 外部id
      */
     private String outId;

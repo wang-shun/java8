@@ -24,6 +24,21 @@ public class DoctorRevertLog implements Serializable {
     private static final long serialVersionUID = 1861449639048681648L;
 
     private Long id;
+
+    /**
+     * 猪场id
+     */
+    private Long farmId;
+
+    /**
+     * 猪群id
+     */
+    private Long groupId;
+
+    /**
+     * 猪id
+     */
+    private Long pigId;
     
     /**
      * 回滚类型 1 母猪，2 公猪，3 猪群

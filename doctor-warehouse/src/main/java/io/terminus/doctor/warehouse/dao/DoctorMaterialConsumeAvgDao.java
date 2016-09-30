@@ -44,4 +44,8 @@ public class DoctorMaterialConsumeAvgDao extends MyBatisDao<DoctorMaterialConsum
     public DoctorMaterialConsumeAvg findLastByFarmId(Long farmId){
         return sqlSession.selectOne(sqlId("findLastByFarmId"), farmId);
     }
+
+    public void updateAll(DoctorMaterialConsumeAvg model){
+        sqlSession.update(sqlId("updateAll"), model);
+    }
 }

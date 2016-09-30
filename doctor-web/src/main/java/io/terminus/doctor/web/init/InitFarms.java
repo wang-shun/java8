@@ -397,7 +397,6 @@ public class InitFarms {
             //猪镜像
             DoctorPigSnapshot pigSnapshot = DoctorPigSnapshot.builder()
                     .pigId(pig.getId()).farmId(pig.getFarmId()).orgId(pig.getOrgId()).eventId(Lists.reverse(eventIds).get(0)).build();
-            pigSnapshot.setPigInfoMap(ImmutableMap.of("doctorPigTrack", JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(pigTrack)));
             or500(doctorPigWriteService.createPigSnapShot(pigSnapshot));
 
             initWorkFlow(oldPigId, pig);

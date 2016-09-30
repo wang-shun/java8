@@ -44,4 +44,11 @@ public interface DoctorMaterialInWareHouseWriteService {
      */
     Response<Boolean> deleteMaterialInWareHouseInfo(@NotNull(message = "input.materialInWareHouseId.empty") Long materialInWareHouseId,
                                                     @NotNull(message = "input.userId.empty") Long userId, String userName);
+
+    /**
+     * 仓库事件回滚
+     * @param eventId
+     * @return
+     */
+    Response<Boolean> rollback(Long eventId);
 }

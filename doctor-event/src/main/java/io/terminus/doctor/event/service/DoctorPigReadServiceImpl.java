@@ -1,7 +1,6 @@
 package io.terminus.doctor.event.service;
 
 import com.google.common.base.MoreObjects;
-import com.google.common.base.Splitter;
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
@@ -12,7 +11,6 @@ import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.model.PageInfo;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
-import io.terminus.common.utils.Splitters;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.cache.DoctorPigInfoCache;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
@@ -23,22 +21,17 @@ import io.terminus.doctor.event.dto.DoctorPigInfoDetailDto;
 import io.terminus.doctor.event.dto.DoctorPigInfoDto;
 import io.terminus.doctor.event.dto.DoctorPigMessage;
 import io.terminus.doctor.event.enums.DataRange;
-import io.terminus.doctor.event.enums.FarrowingType;
-import io.terminus.doctor.event.enums.MatingType;
-import io.terminus.doctor.event.enums.PigStatus;
-import io.terminus.doctor.event.enums.PregCheckResult;
-import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.enums.PigEvent;
+import io.terminus.doctor.event.enums.PigStatus;
+import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jmx.export.annotation.ManagedOperation;
 import org.springframework.stereotype.Service;
 
 import javax.validation.constraints.NotNull;
@@ -125,12 +118,16 @@ public class DoctorPigReadServiceImpl implements DoctorPigReadService {
 
             List<DoctorPigEvent> doctorPigEvents = RespHelper.orServEx(
                     doctorPigEventReadService.queryPigDoctorEvents(doctorPig.getFarmId(), doctorPig.getId(), null, null, null, null)).getData();
-
+            Long canRollback = null;
+            DoctorPigEvent rollbackEvent = RespHelper.orServEx(doctorPigEventReadService.canRollbackEvent(doctorPig.getId()));
+            if (rollbackEvent != null){
+                canRollback = rollbackEvent.getId();
+            }
             Integer targetEventSize = MoreObjects.firstNonNull(eventSize, 3);
             targetEventSize = targetEventSize > doctorPigEvents.size() ? doctorPigEvents.size() : targetEventSize;
 
             return Response.ok(DoctorPigInfoDetailDto.builder().doctorPig(doctorPig).doctorPigTrack(doctorPigTrack)
-                    .doctorPigEvents(doctorPigEvents.subList(0, targetEventSize)).dayAge(dayAge).build());
+                    .doctorPigEvents(doctorPigEvents.subList(0, targetEventSize)).dayAge(dayAge).canRollback(canRollback).build());
         }catch (Exception e){
             log.error("query pig detail info fail, cause:{}", Throwables.getStackTraceAsString(e));
             return Response.fail("query.pigDetailInfo.fail");

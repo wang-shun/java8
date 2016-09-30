@@ -1,6 +1,7 @@
 package io.terminus.doctor.event.handler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
@@ -8,14 +9,15 @@ import io.terminus.common.utils.JsonMapper;
 import io.terminus.common.utils.MapBuilder;
 import io.terminus.doctor.common.constants.JacksonType;
 import io.terminus.doctor.event.constants.DoctorFarmEntryConstants;
-import io.terminus.doctor.event.constants.DoctorPigSnapshotConstants;
 import io.terminus.doctor.event.dao.DoctorPigDao;
 import io.terminus.doctor.event.dao.DoctorPigEventDao;
 import io.terminus.doctor.event.dao.DoctorPigSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorPigTrackDao;
 import io.terminus.doctor.event.dao.DoctorRevertLogDao;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
+import io.terminus.doctor.event.dto.DoctorPigSnapShotInfo;
 import io.terminus.doctor.event.dto.event.usual.DoctorFarmEntryDto;
+import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigEvent;
@@ -87,6 +89,7 @@ public class DoctorEntryFlowHandler extends HandlerAware {
             doctorPigDao.create(doctorPig);
 
             // event create
+            doctorPigEvent.setRelGroupEventId(basic.getRelGroupEventId());
             doctorPigEvent.setPigId(doctorPig.getId());
             doctorPigEventDao.create(doctorPigEvent);
 
@@ -104,9 +107,13 @@ public class DoctorEntryFlowHandler extends HandlerAware {
 
             // snapshot create
             DoctorPigSnapshot doctorPigSnapshot = DoctorPigSnapshot.builder()
-                    .pigId(doctorPig.getId()).farmId(doctorPig.getFarmId()).orgId(doctorPig.getOrgId()).eventId(doctorPigEvent.getId())
+                    .pigId(doctorPig.getId())
+                    .farmId(doctorPig.getFarmId())
+                    .orgId(doctorPig.getOrgId())
+                    .eventId(doctorPigEvent.getId())
+                    .pigInfo(JsonMapper.nonEmptyMapper().toJson(
+                            DoctorPigSnapShotInfo.builder().pig(doctorPig).pigTrack(doctorPigTrack).pigEvent(doctorPigEvent).build()))
                     .build();
-            doctorPigSnapshot.setPigInfoMap(ImmutableMap.of(DoctorPigSnapshotConstants.PIG_TRACK, JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(doctorPigTrack)));
             doctorPigSnapshotDao.create(doctorPigSnapshot);
 
             flowDataMap.put("entryResult",
@@ -162,6 +169,7 @@ public class DoctorEntryFlowHandler extends HandlerAware {
                 .type(basic.getEventType()).kind(basic.getPigType()).name(basic.getEventName()).desc(basic.getEventDesc())
                 .barnId(dto.getBarnId()).barnName(dto.getBarnName()).relEventId(basic.getRelEventId())
                 .remark(dto.getEntryMark()).creatorId(basic.getStaffId()).creatorName(basic.getStaffName())
+                .isAuto(MoreObjects.firstNonNull(basic.getIsAuto(), IsOrNot.NO.getValue()))
                 .npd(0)
                 .dpnpd(0)
                 .pfnpd(0)

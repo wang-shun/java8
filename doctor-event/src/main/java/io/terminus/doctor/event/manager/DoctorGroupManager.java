@@ -177,6 +177,7 @@ public class DoctorGroupManager {
         DoctorGroupEvent<DoctorNewGroupEvent> groupEvent = new DoctorGroupEvent<>();
 
         groupEvent.setGroupId(group.getId());   //关联猪群id
+        groupEvent.setRelGroupEventId(newGroupInput.getRelGroupEventId()); //关联事件id
 
         groupEvent.setOrgId(group.getOrgId());
         groupEvent.setOrgName(group.getOrgName());

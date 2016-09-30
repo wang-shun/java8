@@ -40,6 +40,8 @@ public class DoctorBoarDetailDto implements Serializable{
 
     private Double weight; //重量
 
+    private Long canRollback;
+
     private List<DoctorPigEvent> doctorPigEvents;
 
 }

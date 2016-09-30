@@ -2,15 +2,19 @@ package io.terminus.doctor.warehouse.handler.out;
 
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
+import io.terminus.common.exception.ServiceException;
+import io.terminus.common.utils.BeanMapper;
 import io.terminus.doctor.warehouse.constants.DoctorFarmWareHouseTypeConstants;
 import io.terminus.doctor.warehouse.dao.DoctorFarmWareHouseTypeDao;
 import io.terminus.doctor.warehouse.dao.DoctorMaterialConsumeAvgDao;
-import io.terminus.doctor.warehouse.dao.DoctorMaterialInfoDao;
+import io.terminus.doctor.warehouse.dao.DoctorWarehouseSnapshotDao;
 import io.terminus.doctor.warehouse.dto.DoctorMaterialConsumeProviderDto;
+import io.terminus.doctor.warehouse.dto.EventHandlerContext;
 import io.terminus.doctor.warehouse.handler.IHandler;
 import io.terminus.doctor.warehouse.model.DoctorFarmWareHouseType;
 import io.terminus.doctor.warehouse.model.DoctorMaterialConsumeAvg;
 import io.terminus.doctor.warehouse.model.DoctorMaterialConsumeProvider;
+import io.terminus.doctor.warehouse.model.DoctorWarehouseSnapshot;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -31,33 +35,30 @@ import static java.util.Objects.isNull;
 public class DoctorWareHouseTypeConsumerHandler implements IHandler{
 
     private final DoctorFarmWareHouseTypeDao doctorFarmWareHouseTypeDao;
-
     private final DoctorMaterialConsumeAvgDao doctorMaterialConsumeAvgDao;
-
-    private final DoctorMaterialInfoDao doctorMaterialInfoDao;
+    private final DoctorWarehouseSnapshotDao doctorWarehouseSnapshotDao;
 
     @Autowired
     public DoctorWareHouseTypeConsumerHandler(DoctorFarmWareHouseTypeDao doctorFarmWareHouseTypeDao,
                                               DoctorMaterialConsumeAvgDao doctorMaterialConsumeAvgDao,
-                                              DoctorMaterialInfoDao doctorMaterialInfoDao){
+                                              DoctorWarehouseSnapshotDao doctorWarehouseSnapshotDao){
         this.doctorFarmWareHouseTypeDao = doctorFarmWareHouseTypeDao;
         this.doctorMaterialConsumeAvgDao = doctorMaterialConsumeAvgDao;
-        this.doctorMaterialInfoDao = doctorMaterialInfoDao;
+        this.doctorWarehouseSnapshotDao = doctorWarehouseSnapshotDao;
     }
 
     @Override
-    public Boolean ifHandle(DoctorMaterialConsumeProviderDto dto, Map<String, Object> context) {
-        DoctorMaterialConsumeProvider.EVENT_TYPE eventType = DoctorMaterialConsumeProvider.EVENT_TYPE.from(dto.getActionType());
+    public boolean ifHandle(DoctorMaterialConsumeProvider.EVENT_TYPE eventType) {
         return eventType != null && eventType.isOut();
     }
 
     @Override
-    public void handle(DoctorMaterialConsumeProviderDto dto, Map<String, Object> context) throws RuntimeException {
+    public void handle(DoctorMaterialConsumeProviderDto dto, EventHandlerContext context) throws RuntimeException {
         // update ware house type count
         DoctorFarmWareHouseType doctorFarmWareHouseType = doctorFarmWareHouseTypeDao.findByFarmIdAndType(
                 dto.getFarmId(), dto.getType());
         checkState(!isNull(doctorFarmWareHouseType), "doctorFarm.wareHouseType.empty");
-
+        context.getSnapshot().setFarmWareHouseType(BeanMapper.map(doctorFarmWareHouseType, DoctorFarmWareHouseType.class));
         // 修改当前消耗的数量
         doctorFarmWareHouseType.setLotNumber(doctorFarmWareHouseType.getLotNumber() - dto.getCount());
 
@@ -76,12 +77,24 @@ public class DoctorWareHouseTypeConsumerHandler implements IHandler{
         List<DoctorMaterialConsumeAvg> avgs = doctorMaterialConsumeAvgDao.queryByFarmIdAndType(dto.getFarmId(), dto.getType());
         if(!isNull(avgs) && !Iterables.isEmpty(avgs)){
             Double avg = avgs.stream().filter(a->!isNull(a.getConsumeAvgCount()))
-                    .map(b -> b.getConsumeAvgCount()).reduce((c,d)->c+d).orElse(0D);
+                    .map(DoctorMaterialConsumeAvg::getConsumeAvgCount).reduce((c,d)->c+d).orElse(0D);
             if(avg != 0l)
                 extraMap.put(DoctorFarmWareHouseTypeConstants.TO_CONSUME_DATE, doctorFarmWareHouseType.getLotNumber() * avgs.size()/avg);
         }
         doctorFarmWareHouseType.setExtraMap(extraMap);
         doctorFarmWareHouseTypeDao.update(doctorFarmWareHouseType);
-        context.put("doctorFarmWareHouseTypeId", doctorFarmWareHouseType.getId());
+        context.setDoctorFarmWareHouseTypeId(doctorFarmWareHouseType.getId());
+    }
+
+    @Override
+    public void rollback(DoctorMaterialConsumeProvider cp) {
+        DoctorFarmWareHouseType doctorFarmWareHouseType = doctorFarmWareHouseTypeDao.findByFarmIdAndType(cp.getFarmId(), cp.getType());
+        checkState(!isNull(doctorFarmWareHouseType), "doctorFarm.wareHouseType.empty");
+        DoctorWarehouseSnapshot snapshot = doctorWarehouseSnapshotDao.findByEventId(cp.getId());
+        if(snapshot == null){
+            throw new ServiceException("snapshot.not.found");
+        }
+        DoctorFarmWareHouseType old = snapshot.json2Snapshot().getFarmWareHouseType();
+        doctorFarmWareHouseTypeDao.updateAll(old);
     }
 }

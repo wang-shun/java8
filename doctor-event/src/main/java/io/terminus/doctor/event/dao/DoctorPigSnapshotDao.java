@@ -25,4 +25,13 @@ public class DoctorPigSnapshotDao extends MyBatisDao<DoctorPigSnapshot>{
     public DoctorPigSnapshot queryByEventId(Long eventId){
         return this.getSqlSession().selectOne(sqlId("queryByEventId"), eventId);
     }
+
+    /**
+     * 获取猪最新的snapshot
+     * @param pigId
+     * @return
+     */
+    public DoctorPigSnapshot queryLastByPigId(Long pigId){
+        return getSqlSession().selectOne(sqlId("queryLastByPigId"), pigId);
+    }
 }

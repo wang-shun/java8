@@ -152,6 +152,8 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
         event.setCreatorName(baseInput.getCreatorName());
         event.setDesc(baseInput.generateEventDesc());
         event.setRemark(baseInput.getRemark());
+        event.setRelGroupEventId(baseInput.getRelGroupEventId());
+        event.setRelPigEventId(baseInput.getRelPigEventId());
         return event;
     }
 

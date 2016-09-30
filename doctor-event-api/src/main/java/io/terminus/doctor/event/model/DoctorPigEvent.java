@@ -10,6 +10,7 @@ import io.terminus.doctor.common.utils.Params;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.SneakyThrows;
@@ -46,6 +47,8 @@ public class DoctorPigEvent implements Serializable {
 
     private String pigCode; // 猪Code
 
+    private Integer isAuto; //是否是自动生成的事件 0 否 1 是
+
     private Date eventAt;   // 创建时间
 
     private Integer type;   // 事件类型
@@ -61,6 +64,16 @@ public class DoctorPigEvent implements Serializable {
     private String barnName;
 
     private Long relEventId;
+
+    /**
+     * 关联猪群事件id(比如转种猪事件)
+     */
+    private Long relGroupEventId;
+
+    /**
+     * 关联猪事件id(比如拼窝事件)
+     */
+    private Long relPigEventId;
 
     /**
      * 变动类型的id

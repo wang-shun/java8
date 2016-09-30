@@ -2,12 +2,14 @@ package io.terminus.doctor.event.service;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Throwables;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.PageInfo;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
+import io.terminus.common.utils.Arguments;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.common.utils.MapBuilder;
 import io.terminus.doctor.common.enums.PigType;
@@ -22,18 +24,22 @@ import io.terminus.doctor.event.dto.DoctorGroupDetail;
 import io.terminus.doctor.event.dto.DoctorGroupSearchDto;
 import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
 import io.terminus.doctor.event.enums.GroupEventType;
+import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorGroupSnapshot;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
 import lombok.extern.slf4j.Slf4j;
+import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.validation.constraints.NotNull;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -251,6 +257,16 @@ public class DoctorGroupReadServiceImpl implements DoctorGroupReadService {
     }
 
     @Override
+    public Response<DoctorGroupEvent> findLastEventByGroupId(Long groupId) {
+        try {
+            return Response.ok(doctorGroupEventDao.findLastEventByGroupId(groupId));
+        } catch (Exception e) {
+            log.error("find last group event failed, groupId:{}, cause:{}", groupId, Throwables.getStackTraceAsString(e));
+            return Response.fail("group.event.find.fail");
+        }
+    }
+
+    @Override
     public Response<Boolean> checkGroupRepeat(Long farmId, String groupCode) {
         try {
             List<DoctorGroup> groups = RespHelper.orServEx(findGroupsByFarmId(farmId));
@@ -337,6 +353,34 @@ public class DoctorGroupReadServiceImpl implements DoctorGroupReadService {
         } catch (Exception e) {
             log.error("query.group.events.by.criteria.failed, cause {}", Throwables.getStackTraceAsString(e));
             return Response.fail("query.group.events.by.criteria.failed");
+        }
+    }
+
+    @Override
+    public Response<Boolean> isLastEvent(Long groupId, Long eventId) {
+        try {
+            DoctorGroupEvent lastEvent = doctorGroupEventDao.findLastEventByGroupId(groupId);
+            if (!Objects.equals(eventId, lastEvent.getId())) {
+                return Response.ok(Boolean.FALSE);
+            }
+            return Response.ok(Boolean.TRUE);
+        } catch (Exception e) {
+            log.error("find group event is last event failed, groupId:{}, eventId:{}, cause:{}", groupId, eventId, Throwables.getStackTraceAsString(e));
+            return Response.ok(Boolean.FALSE);
+        }
+    }
+
+    @Override
+    public Response<DoctorGroupEvent> canRollbackEvent(@NotNull(message = "input.groupId.empty") Long groupId) {
+        try {
+            List<DoctorGroupEvent> doctorGroupEvents = doctorGroupEventDao.list(ImmutableMap.of("groupId", groupId, "isAuto", IsOrNot.NO.getValue(), "beginDate", DateTime.now().minusMonths(3).toDate()));
+            if (Arguments.isNullOrEmpty(doctorGroupEvents)){
+                return Response.ok();
+            }
+            return Response.ok(doctorGroupEvents.stream().max(Comparator.comparing(DoctorGroupEvent::getEventAt)).get());
+        } catch (Exception e) {
+            log.error("can.rollback.event.failed, cause {}", Throwables.getStackTraceAsString(e));
+            return Response.fail("can.rollback.event.failed");
         }
     }
 }

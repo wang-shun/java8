@@ -128,7 +128,10 @@ public class DoctorMaterialConsumeProvider implements Serializable{
         PANYING(4, "盘盈"), // 入库
 
         DIAOCHU(5, "调出"), // 出库
-        DIAORU(6, "调入"); // 入库
+        DIAORU(6, "调入"), // 入库
+
+        FORMULA_RAW_MATERIAL(7, "配方生产——原料消耗"), // 出库
+        FORMULA_FEED(8, "配方生产——饲料产出"); // 入库
 
         @Getter
         private Integer value;
@@ -155,7 +158,7 @@ public class DoctorMaterialConsumeProvider implements Serializable{
          * @return
          */
         public boolean isOut(){
-            return CONSUMER == this || PANKUI == this || DIAOCHU == this;
+            return CONSUMER == this || PANKUI == this || DIAOCHU == this || FORMULA_RAW_MATERIAL == this;
         }
 
         /**
@@ -163,7 +166,7 @@ public class DoctorMaterialConsumeProvider implements Serializable{
          * @return
          */
         public boolean isIn(){
-            return PROVIDER == this || PANYING == this || DIAORU == this;
+            return PROVIDER == this || PANYING == this || DIAORU == this || FORMULA_FEED == this;
         }
     }
 

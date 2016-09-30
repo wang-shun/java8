@@ -230,4 +230,8 @@
         </foreach>
     </insert>
 
+    <delete id="deleteGroupTrackByGroupId" parameterType="long">
+        DELETE FROM <include refid="tb"/>
+        WHERE group_id = #{groupId}
+    </delete>
 </mapper>
