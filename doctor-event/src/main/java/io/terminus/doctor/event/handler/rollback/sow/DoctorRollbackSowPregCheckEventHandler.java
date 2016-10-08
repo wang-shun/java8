@@ -12,28 +12,28 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * Created by xiao on 16/9/22.
+ * Created by xiao on 16/9/30.
  */
 @Component
-public class DoctorRollbackSowMatingEventHandler extends DoctorAbstractRollbackPigEventHandler {
+public class DoctorRollbackSowPregCheckEventHandler extends DoctorAbstractRollbackPigEventHandler {
+    @Override
+    public List<DoctorRollbackDto> updateReport(DoctorPigEvent pigEvent) {
+        DoctorRollbackDto doctorRollbackDto = DoctorRollbackDto.builder()
+                .esPigId(pigEvent.getPigId())
+                .rollbackTypes(Lists.newArrayList(RollbackType.SEARCH_PIG, RollbackType.DAILY_PREG_CHECK))
+                .farmId(pigEvent.getFarmId())
+                .eventAt(pigEvent.getEventAt())
+                .build();
+        return Lists.newArrayList(doctorRollbackDto);
+    }
+
     @Override
     protected boolean handleCheck(DoctorPigEvent pigEvent) {
-        return Objects.equals(pigEvent.getType(), PigEvent.MATING.getKey()) && isLastEvent(pigEvent);
+        return Objects.equals(pigEvent.getType(), PigEvent.PREG_CHECK.getKey()) && isLastEvent(pigEvent);
     }
 
     @Override
     protected void handleRollback(DoctorPigEvent pigEvent, Long operatorId, String operatorName) {
         handleRollbackWithStatus(pigEvent, operatorId, operatorName);
-    }
-
-    @Override
-        public List<DoctorRollbackDto> updateReport(DoctorPigEvent pigEvent) {
-        DoctorRollbackDto doctorRollbackDto = DoctorRollbackDto.builder()
-                .esPigId(pigEvent.getPigId())
-                .rollbackTypes(Lists.newArrayList(RollbackType.SEARCH_PIG, RollbackType.DAILY_MATE))
-                .farmId(pigEvent.getFarmId())
-                .eventAt(pigEvent.getEventAt())
-                .build();
-        return Lists.newArrayList(doctorRollbackDto);
     }
 }

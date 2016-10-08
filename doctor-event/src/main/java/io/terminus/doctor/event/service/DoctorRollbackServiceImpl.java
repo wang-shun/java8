@@ -13,6 +13,7 @@ import io.terminus.doctor.event.dao.DoctorPigEventDao;
 import io.terminus.doctor.event.dao.redis.DailyReport2UpdateDao;
 import io.terminus.doctor.event.dao.redis.DailyReportHistoryDao;
 import io.terminus.doctor.event.dto.DoctorRollbackDto;
+import io.terminus.doctor.event.dto.report.daily.DoctorCheckPregDailyReport;
 import io.terminus.doctor.event.dto.report.daily.DoctorDailyReportDto;
 import io.terminus.doctor.event.dto.report.daily.DoctorDeadDailyReport;
 import io.terminus.doctor.event.dto.report.daily.DoctorDeliverDailyReport;
@@ -149,7 +150,7 @@ public class DoctorRollbackServiceImpl implements DoctorRollbackService {
         Date endAt = DateUtil.getDateEnd(new DateTime(dto.getEventAt())).toDate();
         Long farmId = dto.getFarmId();
 
-        //记录事件，// TODO: 16/9/21 晚上job更新月报
+        //记录事件, 晚上job更新月报
         dailyReport2UpdateDao.saveDailyReport2Update(startAt, farmId);
 
         DoctorDailyReportDto report = dailyReportHistoryDao.getDailyReportWithRedis(farmId, startAt);
@@ -174,6 +175,16 @@ public class DoctorRollbackServiceImpl implements DoctorRollbackService {
                         pigSearchWriteService.update(dto.getEsPigId());
                     }
                     break;
+                case SEARCH_GROUP_DELETE:
+                    if (dto.getEsGroupId() != null) {
+                        groupSearchWriteService.delete(dto.getEsGroupId());
+                    }
+                    break;
+                case SEARCH_PIG_DELETE:
+                    if (dto.getEsPigId() != null) {
+                        groupSearchWriteService.delete(dto.getEsPigId());
+                    }
+                    break;
 
                 //日报实时更新
                 case DAILY_DEAD:
@@ -190,6 +201,9 @@ public class DoctorRollbackServiceImpl implements DoctorRollbackService {
                     break;
                 case DAILY_WEAN:
                     report.setWean(getWeanDailyReport(farmId, startAt, endAt));
+                    break;
+                case DAILY_PREG_CHECK:
+                    report.setCheckPreg(getCheckPregDailyReport(farmId, startAt, endAt));
                     break;
 
                 //直接删除
@@ -242,6 +256,15 @@ public class DoctorRollbackServiceImpl implements DoctorRollbackService {
         doctorPigTypeStatisticWriteService.statisticGroup(dto.getOrgId(), dto.getFarmId());
         doctorPigTypeStatisticWriteService.statisticPig(dto.getOrgId(), dto.getFarmId(), DoctorPig.PIG_TYPE.BOAR.getKey());
         doctorPigTypeStatisticWriteService.statisticPig(dto.getOrgId(), dto.getFarmId(), DoctorPig.PIG_TYPE.SOW.getKey());
+    }
+
+    private DoctorCheckPregDailyReport getCheckPregDailyReport(Long farmId, Date startAt, Date endAt) {
+        DoctorCheckPregDailyReport checkPreg = new DoctorCheckPregDailyReport();
+        checkPreg.setPositive(doctorKpiDao.checkYangCounts(farmId, startAt, endAt));
+        checkPreg.setNegative(doctorKpiDao.checkYingCounts(farmId, startAt, endAt));
+        checkPreg.setFanqing(doctorKpiDao.checkFanQCounts(farmId, startAt, endAt));
+        checkPreg.setLiuchan(doctorKpiDao.checkAbortionCounts(farmId, startAt, endAt));
+        return checkPreg;
     }
 
     private DoctorDeadDailyReport getDeadDailyReport(Long farmId, Date startAt, Date endAt) {

@@ -73,6 +73,9 @@ public class DoctorSowMatingHandler extends DoctorAbstractEventFlowHandler {
 
     @Override
     public DoctorPigTrack updateDoctorPigTrackInfo(Execution execution, DoctorPigTrack doctorPigTrack, DoctorBasicInputInfoDto basic, Map<String, Object> extra, Map<String, Object> context) {
+        //重复配种就加次数
+        doctorPigTrack.setCurrentMatingCount(doctorPigTrack.getCurrentMatingCount() + 1);
+
         // validate extra 配种日期信息
         DateTime matingDate = new DateTime(Long.valueOf(extra.get("matingDate").toString()));
         if (doctorPigTrack.getCurrentMatingCount() == 0) {

@@ -51,6 +51,7 @@ import io.terminus.doctor.user.service.DoctorFarmReadService;
 import io.terminus.doctor.user.service.DoctorOrgReadService;
 import io.terminus.doctor.user.service.DoctorUserProfileReadService;
 import io.terminus.doctor.user.service.PrimaryUserReadService;
+import io.terminus.doctor.warehouse.service.DoctorMaterialConsumeProviderReadService;
 import io.terminus.doctor.web.front.event.service.DoctorGroupWebService;
 import io.terminus.pampas.common.UserUtil;
 import io.terminus.parana.user.model.UserProfile;
@@ -93,6 +94,8 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
     private DoctorUserProfileReadService doctorUserProfileReadService;
     @RpcConsumer
     private PrimaryUserReadService primaryUserReadService;
+    @RpcConsumer
+    private DoctorMaterialConsumeProviderReadService doctorMaterialConsumeProviderReadService;
 
     @Autowired
     public DoctorGroupWebServiceImpl(DoctorGroupWriteService doctorGroupWriteService,
@@ -193,6 +196,7 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
                             UserUtil.getUserId(), UserUtil.getCurrentUser().getName()));
 
                     params.put("customerId", customerId);
+                    params.put("fcrFeed", RespHelper.or(doctorMaterialConsumeProviderReadService.sumConsumeFeed(null, null, null, null, null, groupId, null, null), 0D));
                     orServEx(doctorGroupWriteService.groupEventChange(groupDetail, changeInput));
                     break;
                 case TRANS_GROUP:
@@ -203,12 +207,14 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
                     if (Integer.valueOf(String.valueOf(params.get("isCreateGroup"))).equals(IsOrNot.NO.getValue())) {
                         params.put("toGroupCode", getGroupCode(getLong(params, "toGroupId")));
                     }
+                    params.put("fcrFeed", RespHelper.or(doctorMaterialConsumeProviderReadService.sumConsumeFeed(null, null, null, null, null, groupId, null, null), 0D));
                     orServEx(doctorGroupWriteService.groupEventTransGroup(groupDetail, map(putBasicFields(params), DoctorTransGroupInput.class)));
                     break;
                 case TURN_SEED:
                     params.put("breedName", getBasicName(getLong(params, "breedId")));
                     params.put("geneticName", getBasicName(getLong(params, "geneticId")));
                     params.put("toBarnName", getBarnName(getLong(params, "toBarnId")));
+                    params.put("fcrFeed", RespHelper.or(doctorMaterialConsumeProviderReadService.sumConsumeFeed(null, null, null, null, null, groupId, null, null), 0D));
                     orServEx(doctorGroupWriteService.groupEventTurnSeed(groupDetail, map(putBasicFields(params), DoctorTurnSeedGroupInput.class)));
                     break;
                 case LIVE_STOCK:
@@ -234,6 +240,7 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
                     if (Integer.valueOf(String.valueOf(params.get("isCreateGroup"))).equals(IsOrNot.NO.getValue())) {
                         params.put("toGroupCode", getGroupCode(getLong(params, "toGroupId")));
                     }
+                    params.put("fcrFeed", RespHelper.or(doctorMaterialConsumeProviderReadService.sumConsumeFeed(null, null, null, null, null, groupId, null, null), 0D));
                     orServEx(doctorGroupWriteService.groupEventTransFarm(groupDetail, map(putBasicFields(params), DoctorTransFarmGroupInput.class)));
                     break;
                 case CLOSE:

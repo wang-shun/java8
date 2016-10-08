@@ -123,7 +123,6 @@ public abstract class DoctorAbstractEventFlowHandler extends HandlerAware {
             context.put("doctorPigEventId", doctorPigEvent.getId());
 
             // update track info
-            String currentPigTrackSnapShot = JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(doctorPigTrack);
             DoctorPigTrack refreshPigTrack = updateDoctorPigTrackInfo(execution, doctorPigTrack, doctorBasicInputInfoDto, extraInfo, context);
             doctorPigTrackDao.update(refreshPigTrack);
 
