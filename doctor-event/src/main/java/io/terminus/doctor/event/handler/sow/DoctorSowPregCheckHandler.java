@@ -127,9 +127,12 @@ public class DoctorSowPregCheckHandler extends DoctorAbstractEventFlowHandler {
 
     @Override
     public DoctorPigTrack updateDoctorPigTrackInfo(Execution execution, DoctorPigTrack doctorPigTrack, DoctorBasicInputInfoDto basic, Map<String, Object> extra, Map<String, Object> context) {
-
-
         Integer pregCheckResult = (Integer) extra.get("checkResult");
+
+        //如果妊娠检查非阳性, 置当前配种数为0
+        if (!Objects.equals(pregCheckResult, PregCheckResult.YANG.getKey())) {
+            doctorPigTrack.setCurrentMatingCount(0);
+        }
 
         //往extra增加一些特殊标志位用来表明配种类型
         if (Objects.equals(pregCheckResult, PregCheckResult.FANQING.getKey())) {
