@@ -196,6 +196,10 @@ public class DoctorSowFarrowingHandler extends DoctorAbstractEventFlowHandler {
 
     @Override
     protected void afterEventCreateHandle(DoctorPigEvent doctorPigEvent, DoctorPigTrack doctorPigTrack, Long farrowGroupId, Long farrowBarnId) {
+        Map<String, Object> extraMap = doctorPigEvent.getExtraMap();
+        extraMap.put("farrowGroupId", doctorPigTrack.getGroupId());
+        doctorPigEvent.setExtraMap(extraMap);
+
         //对应的最近一次的 周期配种的初陪 的 isDelivery 字段变成true
         DoctorPigEvent firstMate = doctorPigEventDao.queryLastFirstMate(doctorPigTrack.getPigId(), doctorPigTrack.getCurrentParity());
         if (notNull(firstMate)) {
