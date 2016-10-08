@@ -30,7 +30,7 @@ public class DoctorRollbackSowMatingEventHandler extends DoctorAbstractRollbackP
         public List<DoctorRollbackDto> updateReport(DoctorPigEvent pigEvent) {
         DoctorRollbackDto doctorRollbackDto = DoctorRollbackDto.builder()
                 .esPigId(pigEvent.getPigId())
-                .rollbackTypes(Lists.newArrayList(RollbackType.SEARCH_PIG, RollbackType.DAILY_MATE, RollbackType.MONTHLY_REPORT))
+                .rollbackTypes(Lists.newArrayList(RollbackType.SEARCH_PIG, RollbackType.DAILY_MATE))
                 .farmId(pigEvent.getFarmId())
                 .eventAt(pigEvent.getEventAt())
                 .build();

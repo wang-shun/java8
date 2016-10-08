@@ -100,7 +100,6 @@ public class DoctorCommonGroupEventHandler {
         moveIn.setCreatorId(transGroup.getCreatorId());
         moveIn.setCreatorName(transGroup.getCreatorName());
         moveIn.setRelGroupEventId(transGroup.getRelGroupEventId());
-        moveIn.setRelPigEventId(transGroup.getRelPigEventId());
 
         moveIn.setInType(DoctorMoveInGroupEvent.InType.GROUP.getValue());       //转入类型
         moveIn.setInTypeName(DoctorMoveInGroupEvent.InType.GROUP.getDesc());
@@ -150,6 +149,7 @@ public class DoctorCommonGroupEventHandler {
         //4. 转入猪群事件
         DoctorGroupDetail groupDetail = RespHelper.orServEx(doctorGroupReadService.findGroupDetailByGroupId(groupId));
         DoctorMoveInGroupInput moveIn = BeanMapper.map(input, DoctorMoveInGroupInput.class);
+        moveIn.setRelPigEventId(null); //转入猪群事件 relPigEventId 置成空
         moveIn.setRelGroupEventId(groupDetail.getGroupTrack().getRelEventId());      //记录新建猪群事件的id(新建猪群时，track.relEventId = 新建猪群事件id)
         doctorMoveInGroupEventHandler.handleEvent(groupDetail.getGroup(), groupDetail.getGroupTrack(), moveIn);
         return groupId;

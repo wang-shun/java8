@@ -43,7 +43,7 @@ public class DoctorRollbackSowFarrowHandler extends DoctorAbstractRollbackPigEve
         }
 
         //母猪分娩会触发转入猪群事件，如果有新建猪群，还要校验最新事件
-        DoctorGroupEvent toGroupEvent = doctorGroupEventDao.findByRelPigEventId(pigEvent.getRelPigEventId());
+        DoctorGroupEvent toGroupEvent = doctorGroupEventDao.findByRelPigEventId(pigEvent.getId());
         return isRelLastGroupEvent(toGroupEvent);
     }
 

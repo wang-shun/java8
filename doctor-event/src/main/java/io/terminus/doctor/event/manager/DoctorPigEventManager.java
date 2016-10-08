@@ -6,16 +6,10 @@ import com.google.common.collect.Maps;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.constants.JacksonType;
 import io.terminus.doctor.common.utils.Params;
-import io.terminus.doctor.event.dao.DoctorPigEventDao;
-import io.terminus.doctor.event.dao.DoctorPigSnapshotDao;
-import io.terminus.doctor.event.dao.DoctorPigTrackDao;
-import io.terminus.doctor.event.dao.DoctorRevertLogDao;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
 import io.terminus.doctor.event.enums.PigEvent;
-import io.terminus.doctor.event.enums.PregCheckResult;
 import io.terminus.doctor.event.handler.DoctorEventHandlerChainInvocation;
 import io.terminus.doctor.event.model.DoctorPig;
-import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.workflow.core.Executor;
 import io.terminus.doctor.workflow.service.FlowProcessService;
 import io.terminus.doctor.workflow.service.FlowQueryService;
@@ -50,30 +44,16 @@ public class DoctorPigEventManager {
 
     private final String sowFlowDefinitionKey;
 
-    private final DoctorPigEventDao doctorPigEventDao;
-
-    private final DoctorPigSnapshotDao doctorPigSnapshotDao;
-
-    private final DoctorRevertLogDao doctorRevertLogDao;
-
-    private final DoctorPigTrackDao doctorPigTrackDao;
-
     private final FlowQueryService flowQueryService;
 
     @Autowired
     public DoctorPigEventManager(DoctorEventHandlerChainInvocation doctorEventHandlerChainInvocation,
-                                 FlowProcessService flowProcessService,DoctorPigEventDao doctorPigEventDao,
-                                 DoctorPigSnapshotDao doctorPigSnapshotDao,DoctorRevertLogDao doctorRevertLogDao,
-                                 DoctorPigTrackDao doctorPigTrackDao,
+                                 FlowProcessService flowProcessService,
                                  @Value("${flow.definition.key.sow:sow}") String sowFlowDefinitionKey,
                                  FlowQueryService flowQueryService){
         this.doctorEventHandlerChainInvocation = doctorEventHandlerChainInvocation;
         this.flowProcessService = flowProcessService;
         this.sowFlowDefinitionKey = sowFlowDefinitionKey;
-        this.doctorPigEventDao = doctorPigEventDao;
-        this.doctorPigSnapshotDao = doctorPigSnapshotDao;
-        this.doctorRevertLogDao = doctorRevertLogDao;
-        this.doctorPigTrackDao = doctorPigTrackDao;
         this.flowQueryService = flowQueryService;
     }
 
@@ -155,9 +135,6 @@ public class DoctorPigEventManager {
 
     @SneakyThrows
     private Map<String, Object> createSingleSowEvents(DoctorBasicInputInfoDto basic, Map<String, Object> extra){
-
-        checkMatingCount(basic, extra);
-
         //发送此事件的母猪id
         extra.put(EVENT_PIG_ID, basic.getPigId());
 
@@ -184,22 +161,5 @@ public class DoctorPigEventManager {
         results.put("contextType", "single");
         results.put("type", basic.getEventType());
         return results;
-    }
-
-    @SneakyThrows
-    private void checkMatingCount(DoctorBasicInputInfoDto basic, Map<String, Object> extra) {
-        // 如果妊娠检查非阳性 或 转入配种舍,置当前配种数为0
-        if ((extra.containsKey("checkResult") && !Objects.equals(extra.get("checkResult"), PregCheckResult.YANG.getKey())) ||
-                Objects.equals(basic.getEventType(), PigEvent.TO_MATING.getKey())) {
-            DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(basic.getPigId());
-            doctorPigTrack.setCurrentMatingCount(0);
-            doctorPigTrackDao.update(doctorPigTrack);
-        }
-        // 重复配种就加次数
-        if (Objects.equals(basic.getEventType(), PigEvent.MATING.getKey())) {
-            DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(basic.getPigId());
-            doctorPigTrack.setCurrentMatingCount(doctorPigTrack.getCurrentMatingCount() + 1);
-            doctorPigTrackDao.update(doctorPigTrack);
-        }
     }
 }
