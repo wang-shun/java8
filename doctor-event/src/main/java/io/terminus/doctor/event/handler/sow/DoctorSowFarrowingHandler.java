@@ -21,7 +21,6 @@ import io.terminus.doctor.event.enums.PigSex;
 import io.terminus.doctor.event.enums.PigSource;
 import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.handler.DoctorAbstractEventFlowHandler;
-import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.event.service.DoctorGroupWriteService;
@@ -37,7 +36,6 @@ import org.springframework.stereotype.Component;
 import java.util.Map;
 import java.util.Objects;
 
-import static io.terminus.common.utils.Arguments.notEmpty;
 import static io.terminus.common.utils.Arguments.notNull;
 
 /**
@@ -140,6 +138,7 @@ public class DoctorSowFarrowingHandler extends DoctorAbstractEventFlowHandler {
      * @param extra
      */
     protected Long buildPigGroupCountInfo(DoctorBasicInputInfoDto basic, Map<String, Object> extra, Long pigEventId) {
+        log.info("extra info :{}", extra);
         DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(basic.getPigId());
 
         // Build 新建猪群操作方式
@@ -152,15 +151,16 @@ public class DoctorSowFarrowingHandler extends DoctorAbstractEventFlowHandler {
 
         input.setFromBarnId(doctorPigTrack.getCurrentBarnId());
         input.setFromBarnName(doctorPigTrack.getCurrentBarnName());
-
-        //设置下转入猪群的猪舍
-        if (notEmpty(input.getGroupCode())) {
-            DoctorGroup group = doctorGroupDao.findByFarmIdAndGroupCode(basic.getFarmId(), input.getGroupCode());
-            if (group != null) {
-                input.setToBarnId(group.getCurrentBarnId());
-                input.setToBarnName(group.getCurrentBarnName());
-            }
-        }
+        input.setToBarnId(Long.valueOf(String.valueOf(extra.get("toBarnId"))));
+        input.setToBarnName(String.valueOf(extra.get("toBarnName")));
+//        //设置下转入猪群的猪舍
+//        if (notEmpty(input.getGroupCode())) {
+//            DoctorGroup group = doctorGroupDao.findByFarmIdAndGroupCode(basic.getFarmId(), input.getGroupCode());
+//            if (group != null) {
+//                input.setToBarnId(group.getCurrentBarnId());
+//                input.setToBarnName(group.getCurrentBarnName());
+//            }
+//        }
         input.setPigType(PigType.FARROW_PIGLET.getValue());
         input.setInType(DoctorMoveInGroupEvent.InType.PIGLET.getValue());
         input.setInTypeName(DoctorMoveInGroupEvent.InType.PIGLET.getDesc());
