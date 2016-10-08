@@ -39,19 +39,16 @@ public class DoctorMoveInGroupEventHandler extends DoctorAbstractGroupEventHandl
 
     private final DoctorGroupEventDao doctorGroupEventDao;
     private final DoctorGroupTrackDao doctorGroupTrackDao;
-    private final DoctorBarnReadService doctorBarnReadService;
 
     @Autowired
     public DoctorMoveInGroupEventHandler(DoctorGroupSnapshotDao doctorGroupSnapshotDao,
                                          DoctorGroupTrackDao doctorGroupTrackDao,
                                          CoreEventDispatcher coreEventDispatcher,
                                          DoctorGroupEventDao doctorGroupEventDao,
-                                         DoctorBarnReadService doctorBarnReadService,
-                                         DoctorBarnReadService doctorBarnReadService1) {
+                                         DoctorBarnReadService doctorBarnReadService) {
         super(doctorGroupSnapshotDao, doctorGroupTrackDao, coreEventDispatcher, doctorGroupEventDao, doctorBarnReadService);
         this.doctorGroupEventDao = doctorGroupEventDao;
         this.doctorGroupTrackDao = doctorGroupTrackDao;
-        this.doctorBarnReadService = doctorBarnReadService1;
     }
 
 
