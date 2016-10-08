@@ -81,7 +81,6 @@ public abstract class DoctorAbstractRollbackGroupEventHandler implements DoctorR
     /**
      * 单个猪群事件的回滚，可以抽象出来，自取自用
      * @param groupEvent 事件
-     * @return 回滚日志
      */
     protected void sampleRollback(DoctorGroupEvent groupEvent, Long operatorId, String operatorName) {
         DoctorGroupSnapshot snapshot = doctorGroupSnapshotDao.findGroupSnapshotByToEventId(groupEvent.getId());

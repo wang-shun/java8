@@ -164,7 +164,7 @@ public abstract class DoctorAbstractEventFlowHandler extends HandlerAware {
         //添加当前事件发生前猪的状态
         doctorPigEvent.setPigStatusBefore(doctorPigTrack.getStatus());
 
-        return eventCreatePreHandler(execution, doctorPigEvent, doctorPigTrack, basicInputInfoDto, extra, context);
+        return  eventCreatePreHandler(execution, doctorPigEvent, doctorPigTrack, basicInputInfoDto, extra, context);
     }
 
     /**

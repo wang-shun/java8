@@ -6,7 +6,6 @@ import com.google.common.primitives.Ints;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
-import io.terminus.doctor.event.dao.DoctorGroupDao;
 import io.terminus.doctor.event.dao.DoctorPigDao;
 import io.terminus.doctor.event.dao.DoctorPigEventDao;
 import io.terminus.doctor.event.dao.DoctorPigSnapshotDao;
@@ -21,7 +20,6 @@ import io.terminus.doctor.event.enums.PigSex;
 import io.terminus.doctor.event.enums.PigSource;
 import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.handler.DoctorAbstractEventFlowHandler;
-import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.event.service.DoctorGroupWriteService;
@@ -37,7 +35,6 @@ import org.springframework.stereotype.Component;
 import java.util.Map;
 import java.util.Objects;
 
-import static io.terminus.common.utils.Arguments.notEmpty;
 import static io.terminus.common.utils.Arguments.notNull;
 
 /**
@@ -53,16 +50,14 @@ public class DoctorSowFarrowingHandler extends DoctorAbstractEventFlowHandler {
     private static final DateTimeFormatter DTF = DateTimeFormat.forPattern("yyyy-MM-dd");
 
     private final DoctorGroupWriteService doctorGroupWriteService;
-    private final DoctorGroupDao doctorGroupDao;
 
     @Autowired
     public DoctorSowFarrowingHandler(DoctorPigDao doctorPigDao, DoctorPigEventDao doctorPigEventDao,
                                      DoctorPigTrackDao doctorPigTrackDao, DoctorPigSnapshotDao doctorPigSnapshotDao,
                                      DoctorRevertLogDao doctorRevertLogDao, DoctorGroupWriteService doctorGroupWriteService,
-                                     DoctorBarnDao doctorBarnDao, DoctorGroupDao doctorGroupDao) {
+                                     DoctorBarnDao doctorBarnDao) {
         super(doctorPigDao, doctorPigEventDao, doctorPigTrackDao, doctorPigSnapshotDao, doctorRevertLogDao, doctorBarnDao);
         this.doctorGroupWriteService = doctorGroupWriteService;
-        this.doctorGroupDao = doctorGroupDao;
     }
 
     @Override
@@ -152,15 +147,8 @@ public class DoctorSowFarrowingHandler extends DoctorAbstractEventFlowHandler {
 
         input.setFromBarnId(doctorPigTrack.getCurrentBarnId());
         input.setFromBarnName(doctorPigTrack.getCurrentBarnName());
-
-        //设置下转入猪群的猪舍
-        if (notEmpty(input.getGroupCode())) {
-            DoctorGroup group = doctorGroupDao.findByFarmIdAndGroupCode(basic.getFarmId(), input.getGroupCode());
-            if (group != null) {
-                input.setToBarnId(group.getCurrentBarnId());
-                input.setToBarnName(group.getCurrentBarnName());
-            }
-        }
+        input.setToBarnId(Long.valueOf(String.valueOf(extra.get("toBarnId"))));
+        input.setToBarnName(String.valueOf(extra.get("toBarnName")));
         input.setPigType(PigType.FARROW_PIGLET.getValue());
         input.setInType(DoctorMoveInGroupEvent.InType.PIGLET.getValue());
         input.setInTypeName(DoctorMoveInGroupEvent.InType.PIGLET.getDesc());
@@ -208,6 +196,10 @@ public class DoctorSowFarrowingHandler extends DoctorAbstractEventFlowHandler {
 
     @Override
     protected void afterEventCreateHandle(DoctorPigEvent doctorPigEvent, DoctorPigTrack doctorPigTrack, Long farrowGroupId, Long farrowBarnId) {
+        Map<String, Object> extraMap = doctorPigEvent.getExtraMap();
+        extraMap.put("farrowGroupId", doctorPigTrack.getGroupId());
+        doctorPigEvent.setExtraMap(extraMap);
+
         //对应的最近一次的 周期配种的初陪 的 isDelivery 字段变成true
         DoctorPigEvent firstMate = doctorPigEventDao.queryLastFirstMate(doctorPigTrack.getPigId(), doctorPigTrack.getCurrentParity());
         if (notNull(firstMate)) {
