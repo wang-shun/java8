@@ -6,7 +6,6 @@ import com.google.common.primitives.Ints;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
-import io.terminus.doctor.event.dao.DoctorGroupDao;
 import io.terminus.doctor.event.dao.DoctorPigDao;
 import io.terminus.doctor.event.dao.DoctorPigEventDao;
 import io.terminus.doctor.event.dao.DoctorPigSnapshotDao;
@@ -51,16 +50,14 @@ public class DoctorSowFarrowingHandler extends DoctorAbstractEventFlowHandler {
     private static final DateTimeFormatter DTF = DateTimeFormat.forPattern("yyyy-MM-dd");
 
     private final DoctorGroupWriteService doctorGroupWriteService;
-    private final DoctorGroupDao doctorGroupDao;
 
     @Autowired
     public DoctorSowFarrowingHandler(DoctorPigDao doctorPigDao, DoctorPigEventDao doctorPigEventDao,
                                      DoctorPigTrackDao doctorPigTrackDao, DoctorPigSnapshotDao doctorPigSnapshotDao,
                                      DoctorRevertLogDao doctorRevertLogDao, DoctorGroupWriteService doctorGroupWriteService,
-                                     DoctorBarnDao doctorBarnDao, DoctorGroupDao doctorGroupDao) {
+                                     DoctorBarnDao doctorBarnDao) {
         super(doctorPigDao, doctorPigEventDao, doctorPigTrackDao, doctorPigSnapshotDao, doctorRevertLogDao, doctorBarnDao);
         this.doctorGroupWriteService = doctorGroupWriteService;
-        this.doctorGroupDao = doctorGroupDao;
     }
 
     @Override
@@ -138,7 +135,6 @@ public class DoctorSowFarrowingHandler extends DoctorAbstractEventFlowHandler {
      * @param extra
      */
     protected Long buildPigGroupCountInfo(DoctorBasicInputInfoDto basic, Map<String, Object> extra, Long pigEventId) {
-        log.info("extra info :{}", extra);
         DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(basic.getPigId());
 
         // Build 新建猪群操作方式
@@ -153,14 +149,6 @@ public class DoctorSowFarrowingHandler extends DoctorAbstractEventFlowHandler {
         input.setFromBarnName(doctorPigTrack.getCurrentBarnName());
         input.setToBarnId(Long.valueOf(String.valueOf(extra.get("toBarnId"))));
         input.setToBarnName(String.valueOf(extra.get("toBarnName")));
-//        //设置下转入猪群的猪舍
-//        if (notEmpty(input.getGroupCode())) {
-//            DoctorGroup group = doctorGroupDao.findByFarmIdAndGroupCode(basic.getFarmId(), input.getGroupCode());
-//            if (group != null) {
-//                input.setToBarnId(group.getCurrentBarnId());
-//                input.setToBarnName(group.getCurrentBarnName());
-//            }
-//        }
         input.setPigType(PigType.FARROW_PIGLET.getValue());
         input.setInType(DoctorMoveInGroupEvent.InType.PIGLET.getValue());
         input.setInTypeName(DoctorMoveInGroupEvent.InType.PIGLET.getDesc());
