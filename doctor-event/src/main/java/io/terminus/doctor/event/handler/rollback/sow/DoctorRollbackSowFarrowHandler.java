@@ -76,6 +76,7 @@ public class DoctorRollbackSowFarrowHandler extends DoctorAbstractRollbackPigEve
                 RollbackType.SEARCH_BARN, RollbackType.SEARCH_GROUP, RollbackType.DAILY_FARROW));
 
         DoctorGroupEvent toGroupEvent = doctorGroupEventDao.findByRelPigEventId(pigEvent.getId());
+        log.info("rollbakk pigEvent:{}, toGroupEvent:{}", pigEvent, toGroupEvent);
         DoctorRollbackDto toDto = new DoctorRollbackDto();
         toDto.setOrgId(pigEvent.getOrgId());
         toDto.setFarmId(pigEvent.getFarmId());
