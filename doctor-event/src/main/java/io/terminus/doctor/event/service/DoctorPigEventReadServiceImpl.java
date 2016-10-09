@@ -281,4 +281,14 @@ public class DoctorPigEventReadServiceImpl implements DoctorPigEventReadService 
             return Response.fail("can.rollback.event.failed");
         }
     }
+
+    @Override
+    public Response<DoctorPigEvent> lastEvent(@NotNull(message = "input.pigId.empty") Long pigId) {
+        try {
+            return Response.ok(doctorPigEventDao.queryLastPigEventById(pigId));
+        } catch (Exception e) {
+            log.error("last.event.failed, cause {}", Throwables.getStackTraceAsString(e));
+            return Response.fail("last.event.failed");
+        }
+    }
 }
