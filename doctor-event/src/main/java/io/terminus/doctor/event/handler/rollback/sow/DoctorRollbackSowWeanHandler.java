@@ -1,6 +1,7 @@
 package io.terminus.doctor.event.handler.rollback.sow;
 
 import com.google.common.collect.Lists;
+import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dto.DoctorRollbackDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorPartWeanDto;
@@ -8,6 +9,7 @@ import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.enums.RollbackType;
 import io.terminus.doctor.event.handler.rollback.DoctorAbstractRollbackPigEventHandler;
+import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
@@ -30,6 +32,8 @@ public class DoctorRollbackSowWeanHandler extends DoctorAbstractRollbackPigEvent
 
     @Autowired
     private DoctorRollbackSowChgLocationEventHandler doctorRollbackSowChgLocationEventHandler;
+    @Autowired
+    private DoctorRollbackSowToChgLocationEventHandler doctorRollbackSowToChgLocationEventHandler;
 
     @Override
     protected boolean handleCheck(DoctorPigEvent pigEvent) {
@@ -55,7 +59,12 @@ public class DoctorRollbackSowWeanHandler extends DoctorAbstractRollbackPigEvent
         DoctorPartWeanDto weanDto = JSON_MAPPER.fromJson(pigEvent.getExtra(), DoctorPartWeanDto.class);
         if (weanDto.getChgLocationToBarnId() != null) {
             DoctorPigEvent toPigEvent = doctorPigEventDao.findByRelPigEventId(pigEvent.getId());
-            doctorRollbackSowChgLocationEventHandler.rollback(toPigEvent, operatorId, operatorName);
+            DoctorBarn doctorBarn = doctorBarnDao.findById(weanDto.getChgLocationToBarnId());
+            if (Objects.equals(doctorBarn.getPigType(), PigType.MATE_SOW.getValue()) || Objects.equals(doctorBarn.getPigType(), PigType.PREG_SOW.getValue())){
+                doctorRollbackSowToChgLocationEventHandler.rollback(toPigEvent, operatorId, operatorName);
+            }else {
+                doctorRollbackSowChgLocationEventHandler.rollback(toPigEvent, operatorId, operatorName);
+            }
         }
         DoctorPigTrack pigTrack = doctorPigTrackDao.findByPigId(pigEvent.getPigId());
 
