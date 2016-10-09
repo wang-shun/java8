@@ -73,6 +73,7 @@
             </foreach>
         </if>
         <if test="eventCount != null" > AND `event_count` = #{eventCount}</if>
+        <if test="eventTime != null" > AND `event_time` = #{eventTime}</if>
         <if test="staffId != null" > AND `staff_id` = #{staffId}</if>
         <if test="barnId != null" > AND `barn_id` = #{barnId}</if>
         <if test="groupId != null" > AND `group_id` = #{groupId}</if>
