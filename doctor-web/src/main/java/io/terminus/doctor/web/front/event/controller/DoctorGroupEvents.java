@@ -19,6 +19,7 @@ import io.terminus.doctor.event.service.DoctorGroupWriteService;
 import io.terminus.doctor.event.service.DoctorPigReadService;
 import io.terminus.doctor.web.front.auth.DoctorFarmAuthCenter;
 import io.terminus.doctor.web.front.event.dto.DoctorGroupDetailEventsDto;
+import io.terminus.doctor.web.front.event.dto.DoctorGroupEventPagingDto;
 import io.terminus.doctor.web.front.event.service.DoctorGroupWebService;
 import io.terminus.doctor.web.util.TransFromUtil;
 import io.terminus.pampas.common.UserUtil;
@@ -207,6 +208,21 @@ public class DoctorGroupEvents {
 
         transFromUtil.transFromGroupEvents(doctorGroupEventPaging.getData());
         return doctorGroupEventPaging;
+    }
+
+    @RequestMapping(value = "/pagingRollbackGroupEvent", method = RequestMethod.GET)
+    public DoctorGroupEventPagingDto pagingGroupEventWithCanRollback(@RequestParam("farmId") Long farmId,
+                                                      @RequestParam(value = "groupId", required = false) Long groupId,
+                                                      @RequestParam(value = "type", required = false) Integer type,
+                                                      @RequestParam(value = "pageNo", required = false) Integer pageNo,
+                                                      @RequestParam(value = "size", required = false) Integer size) {
+        Paging<DoctorGroupEvent> doctorGroupEventPaging = pagingGroupEvent(farmId, groupId, type, pageNo, size);
+        DoctorGroupEvent doctorGroupEvent = RespHelper.or500(doctorGroupReadService.canRollbackEvent(groupId));
+        Long canRollback = null;
+        if (doctorGroupEvent != null){
+            canRollback = doctorGroupEvent.getId();
+        }
+        return DoctorGroupEventPagingDto.builder().paging(doctorGroupEventPaging).canRollback(canRollback).build();
     }
 
     /**
