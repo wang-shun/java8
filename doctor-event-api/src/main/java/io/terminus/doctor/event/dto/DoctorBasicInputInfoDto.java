@@ -85,6 +85,7 @@ public class DoctorBasicInputInfoDto implements Serializable{
     private Long relEventId;
 
     private Long relGroupEventId;
+    private Long relPigEventId;
 
     /**
      * @see io.terminus.doctor.event.enums.IsOrNot

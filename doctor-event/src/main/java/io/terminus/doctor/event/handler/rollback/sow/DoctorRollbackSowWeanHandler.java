@@ -48,7 +48,11 @@ public class DoctorRollbackSowWeanHandler extends DoctorAbstractRollbackPigEvent
             if (toPigEvent == null) {
                 return false;
             }
-            return RespHelper.orFalse(doctorPigEventReadService.isLastEvent(pigEvent.getPigId(), pigEvent.getId()));
+            DoctorPigEvent doctorPigEvent = RespHelper.orServEx(doctorPigEventReadService.canRollbackEvent(pigEvent.getPigId()));
+            if (doctorPigEvent == null){
+                return false;
+            }
+            return Objects.equals(pigEvent.getId(), doctorPigEvent.getId());
         }
         return isLastEvent(pigEvent);
     }
