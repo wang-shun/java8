@@ -438,3 +438,20 @@ CREATE INDEX idx_doctor_group_events_rel_pig_event_id ON doctor_group_events(rel
 CREATE INDEX idx_doctor_pig_events_rel_group_event_id ON doctor_pig_events(rel_group_event_id);
 CREATE INDEX idx_doctor_pig_events_rel_pig_event_id ON doctor_pig_events(rel_pig_event_id);
 CREATE INDEX idx_doctor_group_events_other_barn_id ON doctor_group_events(other_barn_id);
+
+-- 2016-09-29 物资入库时可选择的厂家
+CREATE TABLE `doctor_material_factorys` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `farm_id` bigint(20) unsigned NOT NULL,
+  `farm_name` varchar(64) DEFAULT NULL,
+  `factory_name` varchar(64) NOT NULL DEFAULT '',
+  `extra` text,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `farm_id` (`farm_id`,`factory_name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='物资入库时可选择的厂家';
+
+alter table doctor_material_consume_providers
+add column `provider_factory_id` bigint(20) unsigned DEFAULT NULL COMMENT '供货厂家id' after group_code,
+add column `provider_factory_name` varchar(64) DEFAULT NULL COMMENT '供货厂家' after provider_factory_id;

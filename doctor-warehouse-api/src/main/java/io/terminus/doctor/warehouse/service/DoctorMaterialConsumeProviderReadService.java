@@ -65,12 +65,13 @@ public interface DoctorMaterialConsumeProviderReadService {
      * 查询仓库内各种物资在指定时间段内的出入库总量和金额
      * @param farmId
      * @param warehouseId
-     * @param type
      * @param startAt
      * @param endAt
      * @return
      */
-    Response<List<WarehouseEventReport>> warehouseEventReport(Long farmId, Long warehouseId, WareHouseType type, Long materialId, Date startAt, Date endAt);
+    Response<List<WarehouseEventReport>> warehouseEventReport(Long farmId, Long warehouseId, Long materialId, String materialName,
+                                                              Integer eventType, List<Integer> eventTypes, Integer materilaType,
+                                                              Long staffId, String startAt, String endAt);
 
     /**
      * 指定仓库在指定时间段内各种物料每天发生的各种事件的数量和金额

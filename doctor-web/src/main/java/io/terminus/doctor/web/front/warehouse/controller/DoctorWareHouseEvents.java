@@ -13,6 +13,7 @@ import io.terminus.doctor.basic.model.DoctorBasicMaterial;
 import io.terminus.doctor.basic.service.DoctorBasicMaterialReadService;
 import io.terminus.doctor.basic.service.DoctorBasicReadService;
 import io.terminus.doctor.common.enums.WareHouseType;
+import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.user.model.DoctorFarm;
 import io.terminus.doctor.user.service.DoctorFarmReadService;
@@ -44,7 +45,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.validation.Valid;
-import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -146,7 +146,7 @@ public class DoctorWareHouseEvents {
                             .reduce((o1, o2) -> o1 + o2).orElse(0D);
                     dto.setCurrentAmount(amount);
                     RespHelper.or500(materialConsumeProviderReadService.warehouseEventReport(
-                            farmId, dto.getWarehouseId(), null, dto.getMaterialId(), monthStart.toDate(), nextMonthStart.toDate())
+                            farmId, dto.getWarehouseId(), dto.getMaterialId(), null, null, null, null, null, DateUtil.toDateString(monthStart.toDate()), DateUtil.toDateString(nextMonthStart.toDate()))
                     ).forEach(report -> {
                         if(Objects.equals(report.getEventType(), DoctorMaterialConsumeProvider.EVENT_TYPE.CONSUMER.getValue())){
                             dto.setOutAmount(report.getAmount());
@@ -318,8 +318,7 @@ public class DoctorWareHouseEvents {
                     .materialTypeId(doctorBasicMaterial.getId()).materialName(doctorBasicMaterial.getName())
                     .staffId(userId).staffName(userName)
                     .count(dto.getCount())
-                    //.unitId(doctorBasicMaterial.getUnitId()).unitName(doctorBasicMaterial.getUnitName())
-                    //.unitGroupId(doctorBasicMaterial.getUnitGroupId()).unitGroupName(doctorBasicMaterial.getUnitGroupName())
+                    .providerFactoryId(dto.getFactoryId()).providerFactoryName(dto.getFactoryName())
                     .unitPrice(dto.getUnitPrice())
                     .build();
 

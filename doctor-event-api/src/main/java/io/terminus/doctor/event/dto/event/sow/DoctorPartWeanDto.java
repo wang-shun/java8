@@ -50,7 +50,7 @@ public class DoctorPartWeanDto extends AbstractPigEventInputDto implements Seria
     public Map<String, String> descMap(){
         Map<String, String> map = new HashMap<>();
         if(partWeanPigletsCount != null){
-            map.put("部分断奶数量", partWeanPigletsCount.toString());
+            map.put("断奶数量", partWeanPigletsCount.toString());
         }
         if(partWeanAvgWeight != null){
             map.put("断奶平均重量", partWeanAvgWeight.toString());
