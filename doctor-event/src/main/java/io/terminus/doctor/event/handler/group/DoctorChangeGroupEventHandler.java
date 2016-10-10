@@ -174,7 +174,8 @@ public class DoctorChangeGroupEventHandler extends DoctorAbstractGroupEventHandl
             if (Objects.equals(PigType.NURSERY_PIGLET.getValue(), pigType)) {
                 //销售总额(分) = 单价 * 数量 + 超出价格 * 超出重量
                 event.setAmount((long) (change.getPrice() * change.getQuantity() +
-                        MoreObjects.firstNonNull(change.getOverPrice(), 0L) * (change.getWeight() - MoreObjects.firstNonNull(change.getBaseWeight(), 0))));
+                        MoreObjects.firstNonNull(change.getOverPrice(), 0L) *
+                                (change.getWeight() - change.getQuantity() * MoreObjects.firstNonNull(change.getBaseWeight(), 0))));
             } else {
                 event.setAmount((long) (change.getPrice() * change.getWeight()));
             }

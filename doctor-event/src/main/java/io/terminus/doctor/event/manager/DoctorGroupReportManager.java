@@ -63,14 +63,14 @@ public class DoctorGroupReportManager {
             weakQty += getIntFromExtra(extraMap, "weakCount");
             unWeanQty += MoreObjects.firstNonNull(pigTrack.getUnweanQty(), 0);
             weanQty += MoreObjects.firstNonNull(pigTrack.getWeanQty(), 0);
-            unqQty += getIntFromExtra(extraMap, "notQualifiedCount");
+            unqQty += getIntFromExtra(extraMap, "qualifiedCount");
         }
 
         groupTrack.setWeanAvgWeight(divide(weanWeight, weanQty));       //断奶均重kg
         groupTrack.setBirthAvgWeight(divide(birthWeight, farrowQty));  //出生均重kg
         groupTrack.setWeakQty(weakQty);      //弱仔数
         groupTrack.setUnweanQty(unWeanQty < groupTrack.getQuantity() ? unWeanQty : groupTrack.getQuantity());  //未断奶数
-        groupTrack.setUnqQty(unqQty);        //不合格数
+        groupTrack.setUnqQty(unqQty);        //合格数
         return groupTrack;
     }
 

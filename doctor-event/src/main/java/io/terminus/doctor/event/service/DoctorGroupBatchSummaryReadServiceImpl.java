@@ -125,7 +125,7 @@ public class DoctorGroupBatchSummaryReadServiceImpl implements DoctorGroupBatchS
         }
         summary.setBirthAvgWeight(groupTrack.getBirthAvgWeight());                   //出生均重(kg)
         summary.setWeanCount(groupTrack.getQuantity() - MoreObjects.firstNonNull(groupTrack.getUnweanQty(), 0)); //断奶数 = 总 - 未断奶数
-        summary.setUnqCount(groupTrack.getUnqQty());                                 //不合格数
+        summary.setUnqCount(groupTrack.getUnqQty());                                 //合格数
         summary.setWeanAvgWeight(groupTrack.getWeanAvgWeight());                     //断奶均重(kg)
         summary.setSaleCount(getSaleCount(events));                                  //销售头数
         summary.setSaleAmount(getSaleAmount(events));                                //销售金额(分)

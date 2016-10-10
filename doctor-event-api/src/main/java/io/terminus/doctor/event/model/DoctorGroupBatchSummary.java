@@ -119,7 +119,7 @@ public class DoctorGroupBatchSummary implements Serializable {
     private Integer weanCount;
     
     /**
-     * 不合格数
+     * 合格数(需求变更，只需要合格数了，这里翻一下)
      */
     private Integer unqCount;
     
