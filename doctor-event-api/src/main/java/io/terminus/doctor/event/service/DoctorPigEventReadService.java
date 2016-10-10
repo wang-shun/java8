@@ -106,4 +106,11 @@ public interface DoctorPigEventReadService {
      * @return
      */
     Response<DoctorPigEvent> canRollbackEvent(@NotNull(message = "input.pigId.empty") Long pigId);
+
+    /**
+     * 获取猪的最新事件
+     * @param pigId
+     * @return
+     */
+    Response<DoctorPigEvent> lastEvent(@NotNull(message = "input.pigId.empty") Long pigId);
 }

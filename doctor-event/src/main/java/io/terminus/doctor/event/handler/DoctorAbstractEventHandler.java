@@ -169,6 +169,7 @@ public abstract class DoctorAbstractEventHandler implements DoctorEventCreateHan
                 .barnId(basic.getBarnId()).barnName(basic.getBarnName())
                 .operatorId(abstractPigEventInputDto.getOperatorId()).operatorName(abstractPigEventInputDto.getOperatorName())
                 .creatorId(basic.getStaffId()).creatorName(basic.getStaffName()).isAuto(MoreObjects.firstNonNull(basic.getIsAuto(), IsOrNot.NO.getValue()))
+                .relPigEventId(basic.getRelPigEventId())
                 .npd(0)
                 .dpnpd(0)
                 .pfnpd(0)

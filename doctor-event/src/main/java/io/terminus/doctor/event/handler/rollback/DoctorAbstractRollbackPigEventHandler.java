@@ -2,6 +2,7 @@ package io.terminus.doctor.event.handler.rollback;
 
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.utils.RespHelper;
+import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorGroupDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
@@ -60,6 +61,8 @@ public abstract class DoctorAbstractRollbackPigEventHandler implements DoctorRol
     protected DoctorPigTrackDao doctorPigTrackDao;
     @Autowired
     protected DoctorPigDao doctorPigDao;
+    @Autowired
+    protected DoctorBarnDao doctorBarnDao;
     @Autowired
     protected DoctorPigEventReadService doctorPigEventReadService;
     @Value("${flow.definition.key.sow:sow}")

@@ -25,6 +25,7 @@ import io.terminus.doctor.event.dto.event.usual.DoctorVaccinationDto;
 import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.model.DoctorBarn;
+import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.event.service.DoctorBarnReadService;
 import io.terminus.doctor.event.service.DoctorPigEventReadService;
@@ -555,13 +556,20 @@ public class DoctorPigCreateEvents {
             checkState(!isNull(pigEvent), "input.eventType.error");
             Long userId = UserUtil.getUserId();
             Response<User> userResponse = userReadService.findById(userId);
-
+            Long relPigEventId = null;
+            if (Objects.equals(isAuto, IsOrNot.YES.getValue())){
+                DoctorPigEvent doctorPigEvent = RespHelper.or500(doctorPigEventReadService.lastEvent(pigId));
+                if (!isNull(doctorPigEvent)){
+                    relPigEventId = doctorPigEvent.getId();
+                }
+            }
             return DoctorBasicInputInfoDto.builder()
                     .pigId(pigDto.getId()).pigCode(pigDto.getPigCode()).pigType(pigDto.getPigType()).barnId(pigDto.getBarnId()).barnName(pigDto.getBarnName())
                     .farmId(doctorFarm.getId()).farmName(doctorFarm.getName()).orgId(doctorFarm.getOrgId()).orgName(doctorFarm.getOrgName())
                     .staffId(userId).staffName(userResponse.getResult().getName())
                     .eventType(pigEvent.getKey()).eventName(pigEvent.getDesc()).eventDesc(pigEvent.getDesc())
                     .isAuto(isAuto)
+                    .relPigEventId(relPigEventId)
                     .build();
         }catch (Exception e){
             log.error("build basic input info dto fail, cause:{}", Throwables.getStackTraceAsString(e));
