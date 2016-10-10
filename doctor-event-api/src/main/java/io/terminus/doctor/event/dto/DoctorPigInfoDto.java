@@ -8,7 +8,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Builder;
-import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.joda.time.Days;
 
@@ -84,6 +83,7 @@ public class DoctorPigInfoDto implements Serializable{
     private Date eventDate;
     private String reason;
     private Integer ruleValueId;
+    private Integer unweanQty;
 
         public static DoctorPigInfoDto buildDoctorPigInfoDto(DoctorPig doctorPig, DoctorPigTrack doctorPigTrack, List<DoctorPigEvent> doctorPigEvents){
         checkState(!isNull(doctorPig), "build.doctorPig.empty");
@@ -104,7 +104,8 @@ public class DoctorPigInfoDto implements Serializable{
                     .extraTrack(doctorPigTrack.getExtra())
                     .extraTrackMap(doctorPigTrack.getExtraMap())
                     .extraTrackMessage(doctorPigTrack.getExtraMessage())
-                    .updatedAt(doctorPigTrack.getUpdatedAt());
+                    .updatedAt(doctorPigTrack.getUpdatedAt())
+                    .unweanQty(doctorPigTrack.getUnweanQty());
         }
         builder.doctorPigEvents(doctorPigEvents);
         return builder.build();
