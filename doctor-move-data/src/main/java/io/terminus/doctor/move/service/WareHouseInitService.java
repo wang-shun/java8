@@ -1,7 +1,9 @@
 package io.terminus.doctor.move.service;
 
+import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
+import io.terminus.common.utils.BeanMapper;
 import io.terminus.doctor.basic.dao.DoctorBasicMaterialDao;
 import io.terminus.doctor.basic.model.DoctorBasicMaterial;
 import io.terminus.doctor.common.enums.WareHouseType;
@@ -344,16 +346,16 @@ public class WareHouseInitService {
             materialCP.setMaterialName(pu.getMaterialName());
             materialCP.setEventTime(pu.getEventDate());
             materialCP.setUnitPrice(Double.valueOf(pu.getUnitPrice() * 100).longValue());
-            if(isProvide(pu.getEventType(), WareHouseType.from(wareHouse.getType()))){
-                materialCount.put(typeAndmaterialName, materialCount.get(typeAndmaterialName) + pu.getCount());
-            }else{
-                materialCount.put(typeAndmaterialName, materialCount.get(typeAndmaterialName) - pu.getCount());
-            }
             DoctorMaterialConsumeProvider.EVENT_TYPE eventType = this.getEventType(pu, wareHouse.getType());
             if(eventType == null){
                 continue;
             }
             materialCP.setEventType(eventType.getValue());
+            if(eventType.isIn()){
+                materialCount.put(typeAndmaterialName, materialCount.get(typeAndmaterialName) + pu.getCount());
+            }else{
+                materialCount.put(typeAndmaterialName, materialCount.get(typeAndmaterialName) - pu.getCount());
+            }
 
             materialCP.setEventCount(pu.getCount());
             if(pu.getStaff() == null || pu.getStaff().trim().isEmpty()){
@@ -369,7 +371,7 @@ public class WareHouseInitService {
             }
 
             //如果是领用, 需要设置 extra
-            if(isConsume(pu.getEventType(), WareHouseType.from(wareHouse.getType()))){
+            if(eventType == DoctorMaterialConsumeProvider.EVENT_TYPE.CONSUMER){
                 DoctorBarn barn = barnMap.get(pu.getBarnOId());
                 if(barn != null){
                     Map<String, Object> extraMap = new HashMap<>();
@@ -390,12 +392,11 @@ public class WareHouseInitService {
             }
             doctorMaterialConsumeProviderDao.create(materialCP);
             // 入库, 则保存价格组成
-            if(isProvide(pu.getEventType(), WareHouseType.from(wareHouse.getType()))
-                    && !Objects.equals(eventType, DoctorMaterialConsumeProvider.EVENT_TYPE.DIAORU)){
+            if(eventType.isIn()){
                 this.saveMaterialPriceInWarehouse(materialCP);
             }
 
-            if(isConsume(pu.getEventType(), WareHouseType.from(wareHouse.getType()))) {
+            if(eventType == DoctorMaterialConsumeProvider.EVENT_TYPE.CONSUMER) {
                 lastMaterialConsumeMap.put(typeAndmaterialName, new Object[]{materialCP.getEventCount(), pu.getEventDate()});
 
                 if(lastHouseConsumeDate == null || !pu.getEventDate().before(lastHouseConsumeDate)){
@@ -589,9 +590,9 @@ public class WareHouseInitService {
                 break;
             case "生产":
                 if (Objects.equals(wareHouseType, WareHouseType.FEED.getKey())) {
-                    eventType = DoctorMaterialConsumeProvider.EVENT_TYPE.PROVIDER;
+                    eventType = DoctorMaterialConsumeProvider.EVENT_TYPE.FORMULA_FEED;
                 } else if (Objects.equals(wareHouseType, WareHouseType.MATERIAL.getKey())) {
-                    eventType = DoctorMaterialConsumeProvider.EVENT_TYPE.CONSUMER;
+                    eventType = DoctorMaterialConsumeProvider.EVENT_TYPE.FORMULA_RAW_MATERIAL;
                 } else {
                     return null;
                 }
@@ -621,7 +622,12 @@ public class WareHouseInitService {
     }
 
     private void updatePriceInWarehouse(Long farmId, Long warehouseId){
-        for(Map.Entry<Long, Double> entry : doctorMaterialConsumeProviderDao.sumEventCount(warehouseId, Lists.newArrayList(1, 3)).entrySet()){
+        try {
+            this.updatePriceInWarehouse2(farmId, warehouseId);
+        } catch (Exception e) {
+            log.error(Throwables.getStackTraceAsString(e));
+        }
+        for(Map.Entry<Long, Double> entry : doctorMaterialConsumeProviderDao.sumEventCount(warehouseId, Lists.newArrayList(1, 3, 5, 7)).entrySet()){
             Long materialId = entry.getKey();
             // 累计出库数量
             Double consumeCount = entry.getValue();
@@ -639,6 +645,30 @@ public class WareHouseInitService {
                     item.setRemainder(remainder - (consumeCount - plus));
                     doctorMaterialPriceInWareHouseDao.update(item);
                     break;
+                }
+            }
+        }
+    }
+
+    private void updatePriceInWarehouse2(Long farmId, Long warehouseId) throws Exception{
+        List<DoctorMaterialInWareHouse> list = doctorMaterialInWareHouseDao.queryByFarmAndWareHouseId(farmId, warehouseId);
+        for(DoctorMaterialInWareHouse materialInWareHouse : list){
+            List<DoctorMaterialConsumeProvider> diaoru = doctorMaterialConsumeProviderDao.list(BeanMapper.convertObjectToMap(DoctorMaterialConsumeProvider.builder()
+                    .farmId(farmId).wareHouseId(warehouseId).materialId(materialInWareHouse.getMaterialId())
+                    .eventType(DoctorMaterialConsumeProvider.EVENT_TYPE.DIAORU.getValue())
+                    .build()));
+            for(DoctorMaterialConsumeProvider cp : diaoru){
+                List<DoctorMaterialConsumeProvider> diaochu = doctorMaterialConsumeProviderDao.list(BeanMapper.convertObjectToMap(DoctorMaterialConsumeProvider.builder()
+                        .farmId(farmId).wareHouseId(warehouseId).materialId(materialInWareHouse.getMaterialId())
+                        .eventType(DoctorMaterialConsumeProvider.EVENT_TYPE.DIAOCHU.getValue())
+                        .eventTime(cp.getEventTime())
+                        .build()));
+                // 如果找到成对的调入调出事件，则删除调入价格
+                if(diaochu.size() == 1){
+                    DoctorMaterialPriceInWareHouse price = doctorMaterialPriceInWareHouseDao.findByProviderId(cp.getId());
+                    doctorMaterialPriceInWareHouseDao.delete(price.getId());
+                    doctorMaterialConsumeProviderDao.delete(cp.getId());
+                    doctorMaterialConsumeProviderDao.delete(diaochu.get(0).getId());
                 }
             }
         }

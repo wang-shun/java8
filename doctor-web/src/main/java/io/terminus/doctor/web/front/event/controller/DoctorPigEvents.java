@@ -18,6 +18,7 @@ import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.event.service.DoctorPigEventReadService;
 import io.terminus.doctor.event.service.DoctorPigEventWriteService;
 import io.terminus.doctor.event.service.DoctorPigReadService;
+import io.terminus.doctor.web.front.event.dto.DoctorPigEventPagingDto;
 import io.terminus.doctor.web.util.TransFromUtil;
 import io.terminus.doctor.workflow.core.WorkFlowService;
 import io.terminus.parana.user.service.UserReadService;
@@ -110,6 +111,23 @@ public class DoctorPigEvents {
             log.error("pig event paging error, cause:{}", Throwables.getStackTraceAsString(e));
             throw new JsonResponseException(500, "paging.pigEvent.error");
         }
+    }
+
+    @RequestMapping(value = "/pagingRollbackPigEvent", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public DoctorPigEventPagingDto pagingPigEventWithRollback(@RequestParam("farmId") Long farmId,
+                                                              @RequestParam("pigId") Long pigId,
+                                                              @RequestParam(value = "pageNo", required = false) Integer pageNo,
+                                                              @RequestParam(value = "pageSize", required = false) Integer pageSize,
+                                                              @RequestParam(value = "startDate", required = false) String startDate,
+                                                              @RequestParam(value = "endDate", required = false) String endDate) {
+        Paging<DoctorPigEvent> doctorPigEventPaging = pagingDoctorPigEvent(farmId, pigId, pageNo, pageSize, startDate, endDate);
+        DoctorPigEvent doctorPigEvent = RespHelper.or500(doctorPigEventReadService.canRollbackEvent(pigId));
+        Long canRollback = null;
+        if (doctorPigEvent != null){
+            canRollback = doctorPigEvent.getId();
+        }
+        return DoctorPigEventPagingDto.builder().paging(doctorPigEventPaging).canRollback(canRollback).build();
     }
 
     /**

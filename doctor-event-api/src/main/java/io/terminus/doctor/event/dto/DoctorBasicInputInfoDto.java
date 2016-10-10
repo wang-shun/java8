@@ -85,6 +85,7 @@ public class DoctorBasicInputInfoDto implements Serializable{
     private Long relEventId;
 
     private Long relGroupEventId;
+    private Long relPigEventId;
 
     /**
      * @see io.terminus.doctor.event.enums.IsOrNot
@@ -120,6 +121,9 @@ public class DoctorBasicInputInfoDto implements Serializable{
         if(Objects.equals(pigEvent, PigEvent.FOSTERS_BY)){
             // 被拼窝的母猪的描述中按理说应当带上"拼窝来源母猪", 但是 dto 中没有这个字段, 那就把"被拼窝母猪"这个字段去掉, 别让客户注意到...嘻嘻~~~
             fieldMap.remove("被拼窝母猪");
+        }
+        if(Objects.equals(pigEvent, PigEvent.FARROWING)){
+            return "分娩";
         }
         if(baseDto.getOperatorName() != null){
             fieldMap.put("操作人", baseDto.getOperatorName());

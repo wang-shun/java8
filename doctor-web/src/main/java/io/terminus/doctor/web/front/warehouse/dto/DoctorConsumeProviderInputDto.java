@@ -45,6 +45,12 @@ public class DoctorConsumeProviderInputDto implements Serializable{
     private String groupCode;
 
     /**
+     * 物资入库时可能会填写的供货厂家
+     */
+    private Long factoryId;
+    private String factoryName;
+
+    /**
      * 事件类型
      * @see DoctorMaterialConsumeProvider.EVENT_TYPE
      */

@@ -87,25 +87,10 @@ public class DoctorMaterialConsumeProviderDao extends MyBatisDao<DoctorMaterialC
 
     /**
      * 查询仓库内各种物资在指定时间段内的出入库总量和金额
-     * @param farmId
-     * @param warehouseId
-     * @param type
-     * @param startAt
-     * @param endAt
      * @return
      */
-    public List<WarehouseEventReport> warehouseEventReport(Long farmId, Long warehouseId, WareHouseType type, Long materialId, Date startAt, Date endAt){
-        Map<String, Object> param = MapBuilder.<String, Object>of()
-                .put("farmId", farmId)
-                .put("wareHouseId", warehouseId)
-                .put("materialId", materialId)
-                .put("startAt", startAt)
-                .put("endAt", endAt)
-                .map();
-        if(type != null){
-            param.put("type", type.getKey());
-        }
-        return sqlSession.selectList(sqlId("warehouseEventReport"), ImmutableMap.copyOf(Params.filterNullOrEmpty(param)));
+    public List<WarehouseEventReport> warehouseEventReport(Map<String, Object> criteria){
+        return sqlSession.selectList(sqlId("warehouseEventReport"), criteria);
     }
 
     /**

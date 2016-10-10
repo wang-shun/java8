@@ -235,12 +235,11 @@ public class DoctorPigs {
 
         DoctorPigInfoDto doctorPigInfoDto = RespHelper.or500(doctorPigReadService.queryDoctorInfoDtoById(pigId));
 
-        Map<String,Object> extraMap = doctorPigInfoDto.getExtraTrackMap();
-        if (!extraMap.containsKey("farrowingPigletGroupId")) {
+        DoctorPigTrack pigTrack = RespHelper.or500(doctorPigReadService.findPigTrackByPigId(pigId));
+        if (pigTrack.getGroupId() == null) {
             throw new JsonResponseException(500, "not.exist.farrowing.pig.let.group.Id");
         }
-        Long groupId = Long.valueOf(extraMap.get("farrowingPigletGroupId").toString());
-        Response<DoctorGroupDetail> doctorGroupDetailResponse = doctorGroupReadService.findGroupDetailByGroupId(groupId);
+        Response<DoctorGroupDetail> doctorGroupDetailResponse = doctorGroupReadService.findGroupDetailByGroupId(pigTrack.getGroupId());
         if (!doctorGroupDetailResponse.isSuccess()) {
             throw new JsonResponseException(500, doctorGroupDetailResponse.getError());
         }

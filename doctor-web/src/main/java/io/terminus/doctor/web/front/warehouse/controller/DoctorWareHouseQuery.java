@@ -22,11 +22,13 @@ import io.terminus.doctor.warehouse.model.DoctorFarmWareHouseType;
 import io.terminus.doctor.warehouse.model.DoctorMaterialConsumeProvider;
 import io.terminus.doctor.warehouse.model.DoctorMaterialInWareHouse;
 import io.terminus.doctor.warehouse.model.DoctorWareHouse;
+import io.terminus.doctor.warehouse.model.MaterialFactory;
 import io.terminus.doctor.warehouse.service.DoctorMaterialConsumeProviderReadService;
 import io.terminus.doctor.warehouse.service.DoctorMaterialInWareHouseReadService;
 import io.terminus.doctor.warehouse.service.DoctorMaterialPriceInWareHouseReadService;
 import io.terminus.doctor.warehouse.service.DoctorWareHouseReadService;
 import io.terminus.doctor.warehouse.service.DoctorWareHouseWriteService;
+import io.terminus.doctor.warehouse.service.MaterialFactoryReadService;
 import io.terminus.doctor.web.front.warehouse.dto.DoctorWareHouseCreateDto;
 import io.terminus.doctor.web.front.warehouse.dto.DoctorWareHouseUpdateDto;
 import io.terminus.doctor.web.front.warehouse.dto.MaterialReport;
@@ -84,6 +86,8 @@ public class DoctorWareHouseQuery {
     private DoctorMaterialPriceInWareHouseReadService doctorMaterialPriceInWareHouseReadService;
     @RpcConsumer
     private DoctorMaterialConsumeProviderReadService doctorMaterialConsumeProviderReadService;
+    @RpcConsumer
+    private MaterialFactoryReadService materialFactoryReadService;
 
     @Autowired
     public DoctorWareHouseQuery(DoctorWareHouseReadService doctorWareHouseReadService,
@@ -122,6 +126,12 @@ public class DoctorWareHouseQuery {
                                                            @RequestParam(value = "type", required = false) Integer type,
                                                            @RequestParam(value = "warehouseName", required = false) String warehouseName){
         return RespHelper.or500(doctorWareHouseReadService.listDoctorWareHouseDto(farmId, type, warehouseName));
+    }
+
+    @RequestMapping(value = "/findMaterialFactory", method = RequestMethod.GET)
+    @ResponseBody
+    public List<MaterialFactory> findMaterialFactory(@RequestParam("farmId") Long farmId){
+        return RespHelper.or500(materialFactoryReadService.findByFarmId(farmId));
     }
 
     /**
@@ -301,9 +311,9 @@ public class DoctorWareHouseQuery {
                                            @RequestParam Integer wareHouseType,
                                            @RequestParam(required = false) String startAt,
                                            @RequestParam(required = false) String endAt){
+        Date end = endAt == null ? null : DateTime.parse(endAt).plusDays(1).toDate();
         List<WarehouseEventReport> warehouseEventReports = RespHelper.or500(doctorMaterialConsumeProviderReadService.warehouseEventReport(
-                farmId, null, WareHouseType.from(wareHouseType), null, startAt == null ? null : DateTime.parse(startAt).toDate(),
-                endAt == null ? null : DateTime.parse(endAt).plusDays(1).toDate()
+                farmId, null, null, null, null, null, wareHouseType, null, startAt, DateUtil.toDateString(end)
         ));
 
         Map<Long, WarehouseReport.Report> reportmap = new HashMap<>();
@@ -375,12 +385,12 @@ public class DoctorWareHouseQuery {
                                          @RequestParam(required = false) List<Integer> eventTypes,
                                          @RequestParam(required = false) String startAt,
                                          @RequestParam(required = false) String endAt){
-        Date start = startAt == null ? null : DateTime.parse(startAt).toDate();
         Date end = endAt == null ? null : DateTime.parse(endAt).plusDays(1).toDate();
 
         // 该仓库各事件的数量和金额
         List<WarehouseEventReport> warehouseEventReports = RespHelper.or500(
-                doctorMaterialConsumeProviderReadService.warehouseEventReport(farmId, warehouseId, null, null, start, end
+                doctorMaterialConsumeProviderReadService.warehouseEventReport(
+                        farmId, warehouseId, materialId, materialName, eventType, eventTypes, null, null, startAt, DateUtil.toDateString(end)
         ));
         // 仓库基本信息及 track 信息
         DoctorWareHouseDto wareHouseDto = RespHelper.or500(doctorWareHouseReadService.queryDoctorWareHouseById(warehouseId));
@@ -394,13 +404,13 @@ public class DoctorWareHouseQuery {
             if(event_type == null){
                 continue;
             }
-            if(event_type.equals(DoctorMaterialConsumeProvider.EVENT_TYPE.PROVIDER)){
-                total.setInAmount(report.getAmount());
-                total.setInCount(report.getCount());
+            if(event_type.isIn()){
+                total.setInAmount(total.getInAmount() + report.getAmount());
+                total.setInCount(total.getInCount() + report.getCount());
             }
-            if(event_type.equals(DoctorMaterialConsumeProvider.EVENT_TYPE.CONSUMER)){
-                total.setOutAmount(report.getAmount());
-                total.setOutCount(report.getCount());
+            if(event_type.isOut()){
+                total.setOutAmount(total.getOutAmount() + report.getAmount());
+                total.setOutCount(total.getOutCount() + report.getCount());
             }
         }
         // 该仓库当前库存的价值

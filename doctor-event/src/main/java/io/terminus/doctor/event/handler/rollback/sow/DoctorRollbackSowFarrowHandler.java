@@ -37,10 +37,7 @@ public class DoctorRollbackSowFarrowHandler extends DoctorAbstractRollbackPigEve
 
     @Override
     protected boolean handleCheck(DoctorPigEvent pigEvent) {
-        if (!Objects.equals(pigEvent.getType(), PigEvent.FARROWING.getKey())) {
-            return false;
-        }
-        if (!isLastEvent(pigEvent)) {
+        if (!Objects.equals(pigEvent.getType(), PigEvent.FARROWING.getKey()) || !isLastEvent(pigEvent)) {
             return false;
         }
 

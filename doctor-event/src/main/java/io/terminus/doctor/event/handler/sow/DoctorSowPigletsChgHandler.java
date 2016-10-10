@@ -70,7 +70,7 @@ public class DoctorSowPigletsChgHandler extends DoctorAbstractEventFlowHandler {
         //变动重量
         Double changeWeight = (Double) extra.get("pigletsWeight");
         checkState(changeWeight != null, "weight.not.null");
-        checkState(changeWeight <= unweanCount, "wean.countInput.error");
+        //checkState(changeWeight <= unweanCount, "wean.countInput.error");
 
         //更新extra字段
         extra.put("partWeanPigletsCount", weanCount);

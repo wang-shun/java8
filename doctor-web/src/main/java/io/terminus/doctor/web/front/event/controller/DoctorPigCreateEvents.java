@@ -25,6 +25,7 @@ import io.terminus.doctor.event.dto.event.usual.DoctorVaccinationDto;
 import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.model.DoctorBarn;
+import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.event.service.DoctorBarnReadService;
 import io.terminus.doctor.event.service.DoctorPigEventReadService;
@@ -51,12 +52,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkState;
-import static io.terminus.doctor.common.enums.PigType.DELIVER_SOW;
-import static io.terminus.doctor.common.enums.PigType.FARROW_PIGLET;
-import static io.terminus.doctor.common.enums.PigType.FARROW_TYPES;
-import static io.terminus.doctor.common.enums.PigType.MATE_SOW;
-import static io.terminus.doctor.common.enums.PigType.MATING_TYPES;
-import static io.terminus.doctor.common.enums.PigType.PREG_SOW;
+import static io.terminus.doctor.common.enums.PigType.*;
 import static java.util.Objects.isNull;
 
 /**
@@ -408,17 +404,22 @@ public class DoctorPigCreateEvents {
             pigId = RespHelper.or500(doctorSowEventCreateService.sowEventCreate(buildBasicInputInfoDto(farmId, pigId, PigEvent.from(eventType), null), sowInfoDtoJson));
             if (Objects.equals(eventType, PigEvent.WEAN.getKey())) {
                 DoctorPartWeanDto doctorPartWeanDto = JsonMapper.JSON_NON_DEFAULT_MAPPER.fromJson(sowInfoDtoJson, DoctorPartWeanDto.class);
-                Integer count = doctorPartWeanDto.getFarrowingLiveCount() - doctorPartWeanDto.getWeanPigletsCount();
-                if (Objects.equals(doctorPartWeanDto.getPartWeanPigletsCount(), count) && doctorPartWeanDto.getChgLocationToBarnId() != null) {
-                    try {
-                        Map<String, Object> temp = JsonMapper.JSON_NON_DEFAULT_MAPPER.getMapper().readValue(sowInfoDtoJson, JacksonType.MAP_OF_OBJECT);
-                        temp.put("changeLocationDate", temp.get("partWeanDate"));
-                        String sowInfoDto = JsonMapper.JSON_NON_DEFAULT_MAPPER.getMapper().writeValueAsString(temp);
-                        doctorSowEventCreateService.sowEventCreate(buildBasicInputInfoDto(farmId, tempPigId, PigEvent.TO_MATING, IsOrNot.YES.getValue()), sowInfoDto);
-                    } catch (Exception e) {
-                        log.error("to.chglocation.failed");
-                        throw new JsonResponseException("to.chglocation.fail");
+                try {
+                    Map<String, Object> temp = JsonMapper.JSON_NON_DEFAULT_MAPPER.getMapper().readValue(sowInfoDtoJson, JacksonType.MAP_OF_OBJECT);
+                    temp.put("changeLocationDate", temp.get("partWeanDate"));
+                    String sowInfoDto = JsonMapper.JSON_NON_DEFAULT_MAPPER.getMapper().writeValueAsString(temp);
+                    DoctorChgLocationDto doctorChgLocationDto = JsonMapper.JSON_NON_DEFAULT_MAPPER.fromJson(sowInfoDto, DoctorChgLocationDto.class);
+                    if (Objects.equals(doctorPartWeanDto.getPartWeanPigletsCount(), doctorPartWeanDto.getFarrowingLiveCount()) && doctorPartWeanDto.getChgLocationToBarnId() != null) {
+                        DoctorBarn doctorBarn = RespHelper.or500(doctorBarnReadService.findBarnById(doctorChgLocationDto.getChgLocationToBarnId()));
+                        if (Objects.equals(doctorBarn.getPigType(), PigType.MATE_SOW.getValue()) || Objects.equals(doctorBarn.getPigType(), PigType.PREG_SOW.getValue())) {
+                            doctorSowEventCreateService.sowEventCreate(buildBasicInputInfoDto(farmId, tempPigId, PigEvent.TO_MATING, IsOrNot.YES.getValue()), sowInfoDto);
+                        } else {
+                            createCasualChangeLocationInfo(doctorChgLocationDto, buildBasicInputInfoDto(farmId, tempPigId, PigEvent.CHG_LOCATION, IsOrNot.YES.getValue()));
+                        }
                     }
+                } catch (Exception e) {
+                    log.error("to.chglocation.failed");
+                    throw new JsonResponseException("to.chglocation.fail");
                 }
             }
         }
@@ -554,13 +555,20 @@ public class DoctorPigCreateEvents {
             checkState(!isNull(pigEvent), "input.eventType.error");
             Long userId = UserUtil.getUserId();
             Response<User> userResponse = userReadService.findById(userId);
-
+            Long relPigEventId = null;
+            if (Objects.equals(isAuto, IsOrNot.YES.getValue())){
+                DoctorPigEvent doctorPigEvent = RespHelper.or500(doctorPigEventReadService.lastEvent(pigId));
+                if (!isNull(doctorPigEvent)){
+                    relPigEventId = doctorPigEvent.getId();
+                }
+            }
             return DoctorBasicInputInfoDto.builder()
                     .pigId(pigDto.getId()).pigCode(pigDto.getPigCode()).pigType(pigDto.getPigType()).barnId(pigDto.getBarnId()).barnName(pigDto.getBarnName())
                     .farmId(doctorFarm.getId()).farmName(doctorFarm.getName()).orgId(doctorFarm.getOrgId()).orgName(doctorFarm.getOrgName())
                     .staffId(userId).staffName(userResponse.getResult().getName())
                     .eventType(pigEvent.getKey()).eventName(pigEvent.getDesc()).eventDesc(pigEvent.getDesc())
                     .isAuto(isAuto)
+                    .relPigEventId(relPigEventId)
                     .build();
         }catch (Exception e){
             log.error("build basic input info dto fail, cause:{}", Throwables.getStackTraceAsString(e));
