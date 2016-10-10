@@ -122,6 +122,11 @@ public class DoctorGroupBatchSummary implements Serializable {
      * 合格数(需求变更，只需要合格数了，这里翻一下)
      */
     private Integer unqCount;
+
+    /**
+     * 日增重(kg)
+     */
+    private Double dailyWeightGain;
     
     /**
      * 断奶均重(kg)

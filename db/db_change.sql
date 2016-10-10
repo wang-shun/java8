@@ -455,3 +455,7 @@ CREATE TABLE `doctor_material_factorys` (
 alter table doctor_material_consume_providers
 add column `provider_factory_id` bigint(20) unsigned DEFAULT NULL COMMENT '供货厂家id' after group_code,
 add column `provider_factory_name` varchar(64) DEFAULT NULL COMMENT '供货厂家' after provider_factory_id;
+
+-- 2016-10-10 猪群批次总结增加日增重
+ALTER TABLE doctor_group_batch_summaries ADD COLUMN daily_weight_gain DOUBLE DEFAULT NULL COMMENT '日增重(kg)' AFTER unq_count;
+
