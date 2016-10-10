@@ -110,12 +110,7 @@ public class DoctorSowFarrowingHandler extends DoctorAbstractEventFlowHandler {
 
         Long pigEventId = (Long) context.get("doctorPigEventId");
 
-        // 对应的 猪群信息
-        Long groupId = buildPigGroupCountInfo(basic, extra, pigEventId);
-        extra.put("farrowingPigletGroupId", groupId);
-
-        //分娩时记录下 哺乳猪群号, 分娩数量
-        doctorPigTrack.setGroupId(groupId);
+        //分娩时记录下 分娩数量
         doctorPigTrack.setFarrowQty(Integer.valueOf(MoreObjects.firstNonNull(extra.get("farrowingLiveCount"), 0).toString()));
         doctorPigTrack.setUnweanQty(doctorPigTrack.getFarrowQty());
         doctorPigTrack.setWeanQty(0);  //分娩时 断奶数为0
@@ -123,7 +118,17 @@ public class DoctorSowFarrowingHandler extends DoctorAbstractEventFlowHandler {
         doctorPigTrack.setWeanAvgWeight(0D); //分娩时, 断奶均重置成0
 
         doctorPigTrack.addAllExtraMap(extra);
-        doctorPigTrack.setStatus(PigStatus.FEED.getKey());  //母猪进入哺乳的状态
+        if(Objects.equals(Ints.tryParse(Objects.toString(extra.get("farrowingLiveCount"))), 0)){
+            doctorPigTrack.setStatus(PigStatus.Wean.getKey());  //母猪进入断奶的状态
+        }else{
+            doctorPigTrack.setStatus(PigStatus.FEED.getKey());  //母猪进入哺乳的状态
+
+            // 对应的 猪群信息
+            Long groupId = buildPigGroupCountInfo(basic, extra, pigEventId);
+            extra.put("farrowingPigletGroupId", groupId);
+            //分娩时记录下 哺乳猪群号
+            doctorPigTrack.setGroupId(groupId);
+        }
         doctorPigTrack.addPigEvent(basic.getPigType(), pigEventId);
         return doctorPigTrack;
     }
