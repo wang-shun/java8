@@ -409,8 +409,7 @@ public class DoctorPigCreateEvents {
                     temp.put("changeLocationDate", temp.get("partWeanDate"));
                     String sowInfoDto = JsonMapper.JSON_NON_DEFAULT_MAPPER.getMapper().writeValueAsString(temp);
                     DoctorChgLocationDto doctorChgLocationDto = JsonMapper.JSON_NON_DEFAULT_MAPPER.fromJson(sowInfoDto, DoctorChgLocationDto.class);
-                    Integer count = doctorPartWeanDto.getFarrowingLiveCount() - doctorPartWeanDto.getWeanPigletsCount();
-                    if (Objects.equals(doctorPartWeanDto.getPartWeanPigletsCount(), count) && doctorPartWeanDto.getChgLocationToBarnId() != null) {
+                    if (Objects.equals(doctorPartWeanDto.getPartWeanPigletsCount(), doctorPartWeanDto.getFarrowingLiveCount()) && doctorPartWeanDto.getChgLocationToBarnId() != null) {
                         DoctorBarn doctorBarn = RespHelper.or500(doctorBarnReadService.findBarnById(doctorChgLocationDto.getChgLocationToBarnId()));
                         if (Objects.equals(doctorBarn.getPigType(), PigType.MATE_SOW.getValue()) || Objects.equals(doctorBarn.getPigType(), PigType.PREG_SOW.getValue())) {
                             doctorSowEventCreateService.sowEventCreate(buildBasicInputInfoDto(farmId, tempPigId, PigEvent.TO_MATING, IsOrNot.YES.getValue()), sowInfoDto);
