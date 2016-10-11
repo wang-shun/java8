@@ -88,8 +88,9 @@ public class DoctorSowWeanHandler extends DoctorAbstractEventFlowHandler {
         extra.put("farrowingLiveCount", doctorPigTrack.getUnweanQty());
         extra.put("hasWeanToMating", true);
 
-        //不合格数 累加
+        //不合格数 合格数 累加
         extra.put("notQualifiedCount", getIntFromExtra(doctorPigTrack.getExtraMap(), "notQualifiedCount") + getIntFromExtra(extra, "notQualifiedCount"));
+        extra.put("qualifiedCount", getIntFromExtra(doctorPigTrack.getExtraMap(), "qualifiedCount") + getIntFromExtra(extra, "qualifiedCount"));
         doctorPigTrack.addAllExtraMap(extra);
 
         //全部断奶后, 初始化所有本次哺乳的信息
