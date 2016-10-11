@@ -182,7 +182,7 @@ public class DoctorRollbackServiceImpl implements DoctorRollbackService {
                     break;
                 case SEARCH_PIG_DELETE:
                     if (dto.getEsPigId() != null) {
-                        groupSearchWriteService.delete(dto.getEsPigId());
+                        pigSearchWriteService.delete(dto.getEsPigId());
                     }
                     break;
 
