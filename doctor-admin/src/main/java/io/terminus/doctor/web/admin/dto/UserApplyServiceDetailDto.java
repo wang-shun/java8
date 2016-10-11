@@ -14,6 +14,9 @@ public class UserApplyServiceDetailDto implements Serializable{
     @Setter @Getter
     private Long userId;
 
+    @Setter @Getter
+    private String loginName;
+
     /**
      * 用户提交的公司信息
      * 运营人员审核时从后台查询得到, 提交审核结果时再传回给后台

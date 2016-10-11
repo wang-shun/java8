@@ -146,6 +146,7 @@ public class SubService {
             }
 
             subUser.setName(userName);
+            subUser.setMobile(sub.getContact());
             this.updateSubStaffStatus(subUser, io.terminus.doctor.user.model.Sub.Status.from(sub.getStatus()));
             // TODO: 自定义角色冗余进 user 表
             List<String> roles = Lists.newArrayList("SUB");
@@ -232,6 +233,7 @@ public class SubService {
             checkSubUserAccount(userName);
 
             subUser.setName(userName);
+            subUser.setMobile(sub.getContact());
             subUser.setPassword(sub.getPassword());
             subUser.setType(UserType.FARM_SUB.value());
             subUser.setStatus(UserStatus.NORMAL.value());
@@ -372,15 +374,15 @@ public class SubService {
      * @return
      */
     private String subAccount(Sub sub, BaseUser user){
-        String mobile;
+        User primaryUser;
         // 子账号特别处理
         if((Objects.equals(user.getType(), UserType.FARM_SUB.value()))){
             Long primaryUserId = this.getPrimaryUserId(user);
-            mobile = RespHelper.orServEx(doctorUserReadService.findById(primaryUserId)).getMobile();
+            primaryUser = RespHelper.orServEx(doctorUserReadService.findById(primaryUserId));
         }else{
-            mobile = ((DoctorUser)(user)).getMobile();
+            primaryUser = RespHelper.orServEx(doctorUserReadService.findById(user.getId()));
         }
-        return AT.join(sub.getUsername(), mobile);
+        return AT.join(sub.getUsername(), primaryUser.getName() == null ? primaryUser.getMobile() : primaryUser.getName());
     }
 
     /**
