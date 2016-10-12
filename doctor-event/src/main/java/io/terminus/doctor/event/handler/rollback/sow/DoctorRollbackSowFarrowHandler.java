@@ -78,7 +78,7 @@ public class DoctorRollbackSowFarrowHandler extends DoctorAbstractRollbackPigEve
 
         //更新统计：存栏日报，存栏月报，猪舍统计，猪统计, 分娩统计
         fromDto.setRollbackTypes(Lists.newArrayList(RollbackType.DAILY_LIVESTOCK, RollbackType.MONTHLY_REPORT,
-                RollbackType.SEARCH_BARN, RollbackType.SEARCH_GROUP, RollbackType.DAILY_FARROW));
+                RollbackType.SEARCH_BARN, RollbackType.SEARCH_GROUP, RollbackType.DAILY_FARROW, RollbackType.SEARCH_PIG));
 
         DoctorRollbackDto toDto = new DoctorRollbackDto();
         toDto.setOrgId(pigEvent.getOrgId());

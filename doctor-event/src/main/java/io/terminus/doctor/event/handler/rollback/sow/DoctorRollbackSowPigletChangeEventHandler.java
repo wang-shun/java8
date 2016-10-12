@@ -55,6 +55,7 @@ public class DoctorRollbackSowPigletChangeEventHandler extends DoctorAbstractRol
         dto.setFarmId(pigEvent.getFarmId());
         dto.setEventAt(pigEvent.getEventAt());
         dto.setEsBarnId(pigEvent.getBarnId());
+        dto.setEsPigId(pigEvent.getPigId());
 
         DoctorPigTrack pigTrack = doctorPigTrackDao.findByPigId(pigEvent.getPigId());
         dto.setEsGroupId(pigTrack.getGroupId());
@@ -65,7 +66,8 @@ public class DoctorRollbackSowPigletChangeEventHandler extends DoctorAbstractRol
                 RollbackType.MONTHLY_REPORT,
                 RollbackType.GROUP_BATCH,
                 RollbackType.SEARCH_BARN,
-                RollbackType.SEARCH_GROUP
+                RollbackType.SEARCH_GROUP,
+                RollbackType.SEARCH_PIG
         ));
         return Lists.newArrayList(dto);
     }
