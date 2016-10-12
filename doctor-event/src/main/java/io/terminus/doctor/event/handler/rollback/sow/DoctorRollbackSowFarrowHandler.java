@@ -53,14 +53,14 @@ public class DoctorRollbackSowFarrowHandler extends DoctorAbstractRollbackPigEve
     @Override
     protected void handleRollback(DoctorPigEvent pigEvent, Long operatorId, String operatorName) {
         if (pigEvent.getLiveCount() > 0) {
-            //1.转入猪群
+            //1.判断是否新建猪群
             DoctorGroupEvent toGroupEvent = doctorGroupEventDao.findByRelPigEventId(pigEvent.getId());
-            doctorRollbackGroupMoveInHandler.rollback(toGroupEvent, operatorId, operatorName);
-
-            //2.新建猪群 if exist
             if (Objects.equals(toGroupEvent.getType(), GroupEventType.NEW.getValue())) {
-                DoctorGroupEvent totoGroupEvent = doctorGroupEventDao.findByRelGroupEventId(toGroupEvent.getId());
-                doctorRollbackGroupNewHandler.rollback(totoGroupEvent, operatorId, operatorName);
+                DoctorGroupEvent moveInEvent = doctorGroupEventDao.findByRelGroupEventId(toGroupEvent.getId());
+                doctorRollbackGroupMoveInHandler.rollback(moveInEvent, operatorId, operatorName);
+                doctorRollbackGroupNewHandler.rollback(toGroupEvent, operatorId, operatorName);
+            } else {
+                doctorRollbackGroupMoveInHandler.rollback(toGroupEvent, operatorId, operatorName);
             }
         }
         //3. 母猪分娩
