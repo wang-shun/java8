@@ -171,6 +171,7 @@ public class DoctorRollbackServiceImpl implements DoctorRollbackService {
                     }
                     break;
                 case SEARCH_PIG:
+                    log.info("test es pig update:{}", dto);
                     if (dto.getEsPigId() != null) {
                         pigSearchWriteService.update(dto.getEsPigId());
                     }
