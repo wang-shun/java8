@@ -23,6 +23,8 @@ import io.terminus.doctor.user.model.ServiceReviewTrack;
 import io.terminus.doctor.user.service.DoctorStaffWriteService;
 import io.terminus.doctor.user.service.DoctorUserDataPermissionWriteService;
 import io.terminus.parana.user.address.service.AddressReadService;
+import io.terminus.parana.user.impl.dao.UserDao;
+import io.terminus.parana.user.model.User;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -50,6 +52,7 @@ public class DoctorServiceReviewManager {
     private final ServiceReviewTrackDao serviceReviewTrackDao;
     private final DoctorServiceStatusDao doctorServiceStatusDao;
     private final AddressReadService addressReadService;
+    private final UserDao userDao;
 
     @Autowired
     public DoctorServiceReviewManager(DoctorOrgDao doctorOrgDao, DoctorStaffDao doctorStaffDao,
@@ -59,7 +62,8 @@ public class DoctorServiceReviewManager {
                                       ServiceReviewTrackDao serviceReviewTrackDao,
                                       AddressReadService addressReadService,
                                       DoctorStaffWriteService doctorStaffWriteService,
-                                      DoctorUserDataPermissionWriteService doctorUserDataPermissionWriteService) {
+                                      DoctorUserDataPermissionWriteService doctorUserDataPermissionWriteService,
+                                      UserDao userDao) {
         this.doctorOrgDao = doctorOrgDao;
         this.doctorStaffDao = doctorStaffDao;
         this.doctorServiceReviewDao = doctorServiceReviewDao;
@@ -70,6 +74,7 @@ public class DoctorServiceReviewManager {
         this.addressReadService = addressReadService;
         this.doctorStaffWriteService = doctorStaffWriteService;
         this.doctorUserDataPermissionWriteService = doctorUserDataPermissionWriteService;
+        this.userDao = userDao;
     }
 
     @Transactional
@@ -173,7 +178,14 @@ public class DoctorServiceReviewManager {
     }
 
     @Transactional
-    public List<DoctorFarm> openDoctorService(BaseUser user, Long userId, List<DoctorFarm> farms){
+    public List<DoctorFarm> openDoctorService(BaseUser user, Long userId, String loginName, List<DoctorFarm> farms){
+        if(userDao.findByName(loginName) != null){
+            throw new ServiceException("duplicated.name"); // 用户名已存在
+        }
+        User primaryUser = userDao.findById(userId); // 被审核的主账号
+        primaryUser.setName(loginName);
+        userDao.update(primaryUser);
+
         DoctorOrg org = doctorOrgDao.findById(doctorStaffDao.findByUserId(userId).getOrgId());
         List<DoctorFarm> newFarms = Lists.newArrayList(); //将被保存下来的猪场
         //保存猪场信息

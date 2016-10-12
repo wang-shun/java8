@@ -30,7 +30,7 @@ public interface DoctorServiceReviewService {
      * @param farms 猪场名称
      * @return
      */
-    Response<List<DoctorFarm>> openDoctorService(BaseUser user, Long userId, List<DoctorFarm> farms);
+    Response<List<DoctorFarm>> openDoctorService(BaseUser user, Long userId, String loginName, List<DoctorFarm> farms);
 
     /**
      * 开通服务, 更新服务状态并保存状态变更历史记录

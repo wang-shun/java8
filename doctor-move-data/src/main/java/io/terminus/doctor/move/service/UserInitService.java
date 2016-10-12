@@ -84,7 +84,7 @@ public class UserInitService {
     private DoctorMessageRuleWriteService doctorMessageRuleWriteService;
 
     @Transactional
-    public void init(String mobile, Long dataSourceId){
+    public void init(String loginName, String mobile, Long dataSourceId){
         List<View_FarmMember> list = getFarmMember(dataSourceId);
         checkFarmNameRepeat(list);
 
@@ -132,7 +132,7 @@ public class UserInitService {
         //现在轮到子账号了
         for(View_FarmMember member : list) {
             if(member.getLevels() == 1){
-                this.createSubUser(member, roleId, primaryUser.getId(), mobile, farmIds, member.getOID());
+                this.createSubUser(member, roleId, primaryUser.getId(), loginName, farmIds, member.getOID());
             }
         }
     }

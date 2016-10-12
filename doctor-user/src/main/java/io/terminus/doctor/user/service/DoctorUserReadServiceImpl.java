@@ -106,7 +106,7 @@ public class DoctorUserReadServiceImpl extends UserReadServiceImpl implements Do
                 throw new ServiceException("sub.account.not.avalid");
             }
             //检查主账号是否存在
-            User parentUser = userDao.findByMobile(strings.get(1));
+            User parentUser = userDao.findByName(strings.get(1));
             if (parentUser == null) {
                 log.error("user(loginId={}, loginType=subaccount check puser) not found", loginId);
                 throw new ServiceException("puser.not.found");

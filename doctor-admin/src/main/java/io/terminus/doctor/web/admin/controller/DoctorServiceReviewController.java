@@ -21,9 +21,11 @@ import io.terminus.doctor.user.service.DoctorServiceReviewReadService;
 import io.terminus.doctor.user.service.business.DoctorServiceReviewService;
 import io.terminus.doctor.web.admin.dto.UserApplyServiceDetailDto;
 import io.terminus.doctor.web.admin.service.DoctorInitBarnService;
+import io.terminus.doctor.web.core.component.MobilePattern;
 import io.terminus.pampas.common.UserUtil;
 import io.terminus.parana.common.utils.RespHelper;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -50,6 +52,7 @@ public class DoctorServiceReviewController {
     private final DoctorFarmReadService doctorFarmReadService;
     private final CoreEventDispatcher coreEventDispatcher;
     private final DoctorInitBarnService doctorInitBarnService;
+    private final MobilePattern mobilePattern;
 
     @RpcConsumer
     private DoctorBarnWriteService doctorBarnWriteService;
@@ -63,13 +66,15 @@ public class DoctorServiceReviewController {
                                          DoctorOrgReadService doctorOrgReadService,
                                          DoctorFarmReadService doctorFarmReadService,
                                          CoreEventDispatcher coreEventDispatcher,
-                                         DoctorInitBarnService doctorInitBarnService){
+                                         DoctorInitBarnService doctorInitBarnService,
+                                         MobilePattern mobilePattern){
         this.doctorServiceReviewService = doctorServiceReviewService;
         this.doctorServiceReviewReadService = doctorServiceReviewReadService;
         this.doctorOrgReadService = doctorOrgReadService;
         this.doctorFarmReadService = doctorFarmReadService;
         this.coreEventDispatcher = coreEventDispatcher;
         this.doctorInitBarnService = doctorInitBarnService;
+        this.mobilePattern = mobilePattern;
     }
 
     /**
@@ -86,7 +91,13 @@ public class DoctorServiceReviewController {
         if(dto.getFarms() == null || dto.getFarms().isEmpty()){
             throw new JsonResponseException(500, "need.at.least.one.farm"); //需要至少一个猪场信息
         }
-        List<DoctorFarm> newFarms = RespHelper.or500(doctorServiceReviewService.openDoctorService(baseUser, dto.getUserId(), dto.getFarms()));
+        if(StringUtils.isBlank(dto.getLoginName()) || StringUtils.containsWhitespace(dto.getLoginName())
+                || dto.getLoginName().contains("@") || mobilePattern.getPattern().matcher(dto.getLoginName()).matches()){
+            throw new JsonResponseException("login.name.invalid");
+        }
+        List<DoctorFarm> newFarms = RespHelper.or500(
+                doctorServiceReviewService.openDoctorService(baseUser, dto.getUserId(), dto.getLoginName(), dto.getFarms())
+        );
 
         //分发猪场软件已开通的事件
         Response<List<Long>> farmResp = doctorFarmReadService.findFarmIdsByUserId(dto.getUserId());
