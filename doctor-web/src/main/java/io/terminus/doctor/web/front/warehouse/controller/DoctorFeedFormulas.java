@@ -4,7 +4,6 @@ import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableMap;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.Paging;
-import io.terminus.common.model.Response;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.basic.model.DoctorBasicMaterial;
 import io.terminus.doctor.basic.service.DoctorBasicMaterialReadService;
@@ -19,6 +18,7 @@ import io.terminus.doctor.warehouse.service.DoctorMaterialInWareHouseReadService
 import io.terminus.doctor.warehouse.service.DoctorWareHouseReadService;
 import io.terminus.doctor.warehouse.service.FeedFormulaReadService;
 import io.terminus.doctor.warehouse.service.FeedFormulaWriteService;
+import io.terminus.doctor.web.front.event.service.DoctorGroupWebService;
 import io.terminus.pampas.common.UserUtil;
 import io.terminus.parana.user.model.User;
 import io.terminus.parana.user.service.UserReadService;
@@ -45,12 +45,10 @@ import static com.google.common.base.Preconditions.checkState;
 public class DoctorFeedFormulas {
 
     private final DoctorMaterialInWareHouseReadService doctorMaterialInWareHouseReadService;
-
+    private final DoctorGroupWebService doctorGroupWebService;
     private final DoctorWareHouseReadService doctorWareHouseReadService;
 
     private final DoctorFarmReadService doctorFarmReadService;
-
-    private final UserReadService<User> userReadService;
 
     private final DoctorBasicMaterialReadService doctorBasicMaterialReadService;
 
@@ -59,15 +57,15 @@ public class DoctorFeedFormulas {
     private final FeedFormulaWriteService feedFormulaWriteService;
 
     @Autowired
-    public DoctorFeedFormulas(DoctorFarmReadService doctorFarmReadService,
-                              UserReadService<User> userReadService,
+    public DoctorFeedFormulas(DoctorGroupWebService doctorGroupWebService,
+                              DoctorFarmReadService doctorFarmReadService,
                               DoctorMaterialInWareHouseReadService doctorMaterialInWareHouseReadService,
                               DoctorWareHouseReadService doctorWareHouseReadService,
                               DoctorBasicMaterialReadService doctorBasicMaterialReadService,
                               FeedFormulaReadService feedFormulaReadService,
                               FeedFormulaWriteService feedFormulaWriteService){
+        this.doctorGroupWebService = doctorGroupWebService;
         this.doctorFarmReadService = doctorFarmReadService;
-        this.userReadService = userReadService;
         this.doctorMaterialInWareHouseReadService = doctorMaterialInWareHouseReadService;
         this.doctorWareHouseReadService = doctorWareHouseReadService;
         this.doctorBasicMaterialReadService = doctorBasicMaterialReadService;
@@ -170,14 +168,12 @@ public class DoctorFeedFormulas {
             checkState(Objects.equals(wareHouse.getType(), feed.getType()), "produce.targetWarehouseType.fail");
 
             Long userId = UserUtil.getUserId();
-            Response<User> response =  userReadService.findById(userId);
-            String userName = RespHelper.orServEx(response).getName();
 
             DoctorWareHouseBasicDto doctorWareHouseBasicDto = DoctorWareHouseBasicDto.builder()
                     .farmId(farmId).farmName(RespHelper.orServEx(doctorFarmReadService.findFarmById(farmId)).getName())
                     .wareHouseId(wareHouseId).wareHouseName(wareHouse.getWareHouseName())
                     .materialId(feed.getId()).materialName(feed.getName())
-                    .staffId(userId).staffName(userName)
+                    .staffId(userId).staffName(RespHelper.orServEx(doctorGroupWebService.findRealName(userId)))
                     .build();
             return RespHelper.or500(feedFormulaWriteService.produceFeedByFormula(doctorWareHouseBasicDto, wareHouse, feedFormula,
                     feed.getUnitId(), feed.getUnitName(), feedProduce));
@@ -195,7 +191,7 @@ public class DoctorFeedFormulas {
         checkState(Math.abs(dis)<=5, "produce.materialCountChange.error");
     }
 
-    public void buildProduceInfo(FeedFormula.FeedProduce materialProduce){
+    private void buildProduceInfo(FeedFormula.FeedProduce materialProduce){
         materialProduce.getMaterialProduceEntries().forEach(s->{
             s.setMaterialName(RespHelper.or500(doctorBasicMaterialReadService.findBasicMaterialById(s.getMaterialId())).getName());
         });

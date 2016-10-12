@@ -5,7 +5,6 @@ import com.google.common.base.Strings;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
 import io.terminus.common.exception.JsonResponseException;
-import io.terminus.common.model.Response;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.common.utils.Splitters;
 import io.terminus.doctor.common.constants.JacksonType;
@@ -33,9 +32,9 @@ import io.terminus.doctor.event.service.DoctorPigEventWriteService;
 import io.terminus.doctor.event.service.DoctorPigReadService;
 import io.terminus.doctor.user.model.DoctorFarm;
 import io.terminus.doctor.user.service.DoctorFarmReadService;
+import io.terminus.doctor.web.front.event.service.DoctorGroupWebService;
 import io.terminus.doctor.web.front.event.service.DoctorSowEventCreateService;
 import io.terminus.pampas.common.UserUtil;
-import io.terminus.parana.user.model.User;
 import io.terminus.parana.user.service.UserReadService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -79,6 +78,7 @@ public class DoctorPigCreateEvents {
     private final DoctorSowEventCreateService doctorSowEventCreateService;
     private final DoctorBarnReadService doctorBarnReadService;
     private final DoctorPigEventReadService doctorPigEventReadService;
+    private final DoctorGroupWebService doctorGroupWebService;
 
     @Autowired
     public DoctorPigCreateEvents(DoctorPigEventWriteService doctorPigEventWriteService,
@@ -87,7 +87,8 @@ public class DoctorPigCreateEvents {
                                  UserReadService userReadService,
                                  DoctorSowEventCreateService doctorSowEventCreateService,
                                  DoctorBarnReadService doctorBarnReadService,
-                                 DoctorPigEventReadService doctorPigEventReadService){
+                                 DoctorPigEventReadService doctorPigEventReadService,
+                                 DoctorGroupWebService doctorGroupWebService){
         this.doctorPigEventWriteService = doctorPigEventWriteService;
         this.doctorFarmReadService = doctorFarmReadService;
         this.doctorPigReadService = doctorPigReadService;
@@ -95,6 +96,7 @@ public class DoctorPigCreateEvents {
         this.doctorSowEventCreateService = doctorSowEventCreateService;
         this.doctorBarnReadService = doctorBarnReadService;
         this.doctorPigEventReadService = doctorPigEventReadService;
+        this.doctorGroupWebService = doctorGroupWebService;
     }
 
     /**
@@ -523,13 +525,11 @@ public class DoctorPigCreateEvents {
             DoctorFarm doctorFarm = RespHelper.orServEx(this.doctorFarmReadService.findFarmById(farmId));
             checkState(!isNull(pigEvent), "input.eventType.error");
             Long userId = UserUtil.getUserId();
-            Response<User> userResponse = userReadService.findById(userId);
-            checkState(userResponse.isSuccess(), "loginUser.check.error");
 
             return DoctorBasicInputInfoDto.builder()
                     .pigType(entryDto.getPigType()).pigCode(entryDto.getPigCode()).barnId(entryDto.getBarnId()).barnName(entryDto.getBarnName())
                     .farmId(doctorFarm.getId()).farmName(doctorFarm.getName()).orgId(doctorFarm.getOrgId()).orgName(doctorFarm.getOrgName())
-                    .staffId(userId).staffName(userResponse.getResult().getName())
+                    .staffId(userId).staffName(RespHelper.orServEx(doctorGroupWebService.findRealName(userId)))
                     .eventType(pigEvent.getKey()).eventName(pigEvent.getDesc()).eventDesc(pigEvent.getDesc())
                     .build();
         }catch (IllegalStateException ee){
@@ -554,7 +554,6 @@ public class DoctorPigCreateEvents {
             DoctorPigInfoDto pigDto = RespHelper.orServEx(this.doctorPigReadService.queryDoctorInfoDtoById(pigId));
             checkState(!isNull(pigEvent), "input.eventType.error");
             Long userId = UserUtil.getUserId();
-            Response<User> userResponse = userReadService.findById(userId);
             Long relPigEventId = null;
             if (Objects.equals(isAuto, IsOrNot.YES.getValue())){
                 DoctorPigEvent doctorPigEvent = RespHelper.or500(doctorPigEventReadService.lastEvent(pigId));
@@ -565,7 +564,7 @@ public class DoctorPigCreateEvents {
             return DoctorBasicInputInfoDto.builder()
                     .pigId(pigDto.getId()).pigCode(pigDto.getPigCode()).pigType(pigDto.getPigType()).barnId(pigDto.getBarnId()).barnName(pigDto.getBarnName())
                     .farmId(doctorFarm.getId()).farmName(doctorFarm.getName()).orgId(doctorFarm.getOrgId()).orgName(doctorFarm.getOrgName())
-                    .staffId(userId).staffName(userResponse.getResult().getName())
+                    .staffId(userId).staffName(RespHelper.orServEx(doctorGroupWebService.findRealName(userId)))
                     .eventType(pigEvent.getKey()).eventName(pigEvent.getDesc()).eventDesc(pigEvent.getDesc())
                     .isAuto(isAuto)
                     .relPigEventId(relPigEventId)
