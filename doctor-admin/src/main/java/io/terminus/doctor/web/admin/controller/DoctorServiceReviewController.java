@@ -88,7 +88,7 @@ public class DoctorServiceReviewController {
             throw new JsonResponseException(500, "need.at.least.one.farm"); //需要至少一个猪场信息
         }
         if(StringUtils.isBlank(dto.getLoginName()) || StringUtils.containsWhitespace(dto.getLoginName())){
-            throw new JsonResponseException("login.name.invalid"); //
+            throw new JsonResponseException("login.name.invalid");
         }
         List<DoctorFarm> newFarms = RespHelper.or500(
                 doctorServiceReviewService.openDoctorService(baseUser, dto.getUserId(), dto.getLoginName(), dto.getFarms())
