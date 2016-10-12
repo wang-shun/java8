@@ -1,7 +1,6 @@
 package io.terminus.doctor.web.front.warehouse.controller;
 
 import com.google.common.base.Throwables;
-import com.google.common.collect.Lists;
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.exception.ServiceException;
@@ -17,18 +16,14 @@ import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.user.model.DoctorFarm;
 import io.terminus.doctor.user.service.DoctorFarmReadService;
-import io.terminus.doctor.user.service.DoctorUserProfileReadService;
 import io.terminus.doctor.warehouse.dto.DoctorMaterialConsumeProviderDto;
 import io.terminus.doctor.warehouse.dto.DoctorMaterialInWareHouseDto;
 import io.terminus.doctor.warehouse.dto.DoctorWareHouseDto;
 import io.terminus.doctor.warehouse.model.DoctorMaterialConsumeProvider;
 import io.terminus.doctor.warehouse.model.DoctorMaterialInWareHouse;
 import io.terminus.doctor.warehouse.model.DoctorWareHouse;
-import io.terminus.doctor.warehouse.service.DoctorMaterialConsumeProviderReadService;
-import io.terminus.doctor.warehouse.service.DoctorMaterialInWareHouseReadService;
-import io.terminus.doctor.warehouse.service.DoctorMaterialInWareHouseWriteService;
-import io.terminus.doctor.warehouse.service.DoctorMaterialPriceInWareHouseReadService;
-import io.terminus.doctor.warehouse.service.DoctorWareHouseReadService;
+import io.terminus.doctor.warehouse.service.*;
+import io.terminus.doctor.web.front.event.service.DoctorGroupWebService;
 import io.terminus.doctor.web.front.warehouse.dto.DoctorConsumeProviderInputDto;
 import io.terminus.pampas.common.UserUtil;
 import io.terminus.parana.user.model.User;
@@ -38,11 +33,7 @@ import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.List;
@@ -69,8 +60,6 @@ public class DoctorWareHouseEvents {
 
     private final UserReadService<User> userReadService;
 
-    private final DoctorUserProfileReadService doctorUserProfileReadService;
-
     private final DoctorWareHouseReadService doctorWareHouseReadService;
 
     private final DoctorBasicMaterialReadService doctorBasicMaterialReadService;
@@ -78,6 +67,8 @@ public class DoctorWareHouseEvents {
     private final DoctorBasicReadService doctorBasicReadService;
 
     private final DoctorFarmReadService doctorFarmReadService;
+
+    private final DoctorGroupWebService doctorGroupWebService;
 
     @RpcConsumer
     private DoctorMaterialPriceInWareHouseReadService materialPriceInWareHouseReadService;
@@ -92,15 +83,15 @@ public class DoctorWareHouseEvents {
                                  DoctorWareHouseReadService doctorWareHouseReadService,
                                  DoctorFarmReadService doctorFarmReadService,
                                  DoctorBasicReadService doctorBasicReadService,
-                                 DoctorUserProfileReadService doctorUserProfileReadService){
+                                 DoctorGroupWebService doctorGroupWebService){
         this.doctorMaterialInWareHouseWriteService = doctorMaterialInWareHouseWriteService;
         this.doctorMaterialInWareHouseReadService = doctorMaterialInWareHouseReadService;
         this.userReadService = userReadService;
         this.doctorBasicMaterialReadService = doctorBasicMaterialReadService;
         this.doctorWareHouseReadService = doctorWareHouseReadService;
         this.doctorFarmReadService = doctorFarmReadService;
-        this.doctorUserProfileReadService = doctorUserProfileReadService;
         this.doctorBasicReadService = doctorBasicReadService;
+        this.doctorGroupWebService = doctorGroupWebService;
     }
 
     /**
@@ -203,8 +194,6 @@ public class DoctorWareHouseEvents {
             checkState(!isNull(doctorMaterialInWareHouse), "input.materialInfo.error");
 
             Long currentUserId = dto.getStaffId() != null ? dto.getStaffId() : UserUtil.getUserId();
-            Response<User> userResponse = userReadService.findById(currentUserId);
-            String userName = RespHelper.orServEx(userResponse).getName();
 
             DoctorBasicMaterial doctorBasicMaterial = RespHelper.orServEx(doctorBasicMaterialReadService.findBasicMaterialById(dto.getMaterialId()));
 
@@ -215,7 +204,7 @@ public class DoctorWareHouseEvents {
                     .materialTypeId(doctorMaterialInWareHouse.getMaterialId()).materialName(doctorMaterialInWareHouse.getMaterialName())
                     .barnId(dto.getBarnId()).barnName(dto.getBarnName())
                     .groupId(dto.getGroupId()).groupCode(dto.getGroupCode())
-                    .staffId(currentUserId).staffName(userName)
+                    .staffId(currentUserId).staffName(RespHelper.orServEx(doctorGroupWebService.findRealName(currentUserId)))
                     .count(dto.getCount()).consumeDays(dto.getConsumeDays())
                     .unitId(doctorBasicMaterial.getUnitId()).unitName(doctorBasicMaterial.getUnitName())
                     .unitGroupId(doctorBasicMaterial.getUnitGroupId()).unitGroupName(doctorBasicMaterial.getUnitGroupName())
@@ -306,7 +295,6 @@ public class DoctorWareHouseEvents {
             DoctorWareHouseDto doctorWareHouseDto = RespHelper.orServEx(doctorWareHouseReadService.queryDoctorWareHouseById(dto.getWareHouseId()));
 
             Long userId = dto.getStaffId() != null ? dto.getStaffId() : UserUtil.getUserId();
-            String userName = RespHelper.orServEx(doctorUserProfileReadService.findProfileByUserIds(Lists.newArrayList(userId))).get(0).getRealName();
 
             DoctorBasicMaterial doctorBasicMaterial = RespHelper.orServEx(doctorBasicMaterialReadService.findBasicMaterialById(dto.getMaterialId()));
             DoctorFarm doctorFarm = RespHelper.orServEx(doctorFarmReadService.findFarmById(dto.getFarmId()));
@@ -316,7 +304,7 @@ public class DoctorWareHouseEvents {
                     .farmId(doctorFarm.getId()).farmName(doctorFarm.getName())
                     .wareHouseId(doctorWareHouseDto.getWarehouseId()).wareHouseName(doctorWareHouseDto.getWarehouseName())
                     .materialTypeId(doctorBasicMaterial.getId()).materialName(doctorBasicMaterial.getName())
-                    .staffId(userId).staffName(userName)
+                    .staffId(userId).staffName(RespHelper.orServEx(doctorGroupWebService.findRealName(userId)))
                     .count(dto.getCount())
                     .providerFactoryId(dto.getFactoryId()).providerFactoryName(dto.getFactoryName())
                     .unitPrice(dto.getUnitPrice())
@@ -373,14 +361,14 @@ public class DoctorWareHouseEvents {
             throw new JsonResponseException("no.material.consume");
         }
         Long userId = UserUtil.getUserId();
-        String userName = RespHelper.or500(doctorUserProfileReadService.findProfileByUserIds(Lists.newArrayList(userId))).get(0).getRealName();
+        String realName = RespHelper.or500(doctorGroupWebService.findRealName(userId));
 
         DoctorMaterialConsumeProviderDto diaochu = DoctorMaterialConsumeProviderDto.builder()
                 .actionType(DoctorMaterialConsumeProvider.EVENT_TYPE.DIAOCHU.getValue()).type(material.getType())
                 .farmId(farmId).farmName(farm.getName())
                 .materialTypeId(materialId).materialName(material.getName())
                 .wareHouseId(fromWareHouseId).wareHouseName(consumeWarehouse.getWareHouseName())
-                .staffId(userId).staffName(userName)
+                .staffId(userId).staffName(realName)
                 .count(moveQuantity)
                 .unitName(materialInWareHouse.getUnitName()).unitGroupName(materialInWareHouse.getUnitGroupName())
                 .build();
@@ -389,7 +377,7 @@ public class DoctorWareHouseEvents {
                 .farmId(farmId).farmName(farm.getName())
                 .materialTypeId(materialId).materialName(material.getName())
                 .wareHouseId(toWareHouseId).wareHouseName(toWarehouse.getWareHouseName())
-                .staffId(userId).staffName(userName)
+                .staffId(userId).staffName(realName)
                 .count(moveQuantity)
                 .unitName(materialInWareHouse.getUnitName()).unitGroupName(materialInWareHouse.getUnitGroupName())
                 .build();
