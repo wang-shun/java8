@@ -1,7 +1,6 @@
 package io.terminus.doctor.schedule.msg.producer;
 
 import com.google.common.collect.Lists;
-import io.terminus.common.utils.Splitters;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.service.DoctorPigReadService;
 import io.terminus.doctor.event.service.DoctorPigWriteService;
@@ -62,7 +61,7 @@ public class SysMessageProducer extends AbstractJobProducer {
     }
 
     @Override
-    protected List<DoctorMessage> message(DoctorMessageRuleRole ruleRole, List<SubUser> subUsers) {
+    protected void message(DoctorMessageRuleRole ruleRole, List<SubUser> subUsers) {
         log.info("系统消息产生 --- SysMessageProducer 开始执行");
         List<DoctorMessage> messages = Lists.newArrayList();
 
@@ -80,21 +79,18 @@ public class SysMessageProducer extends AbstractJobProducer {
                             ruleValue,
                             (double) (DateTime.now().minus(template.getCreatedAt().getTime()).getMillis() / 3600000)
                     )) {
-                        return messages;
+                        return;
                     }
                 }
                 // 如果是日期对比
                 else if (3 == ruleValue.getRuleType() || 4 == ruleValue.getRuleType()) {
                     if (!checkRuleValue(ruleValue, new Date())) {
-                        return messages;
+                        return;
                     }
                 }
             }
-            // 根据不同渠道存储消息
-            Splitters.COMMA.splitToList(rule.getChannels()).forEach(channel ->
-                    messages.addAll(createMessage(subUsers, ruleRole, Integer.parseInt(channel), template.getContent(), null)));
+                    createMessage(subUsers, ruleRole, template.getContent(), null, null);
         }
         log.info("系统消息产生 --- SysMessageProducer 结束执行执行, 产生 {} 条消息", messages.size());
-        return messages;
     }
 }

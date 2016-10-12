@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.api.client.util.Maps;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
-import io.terminus.common.utils.Splitters;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.service.DoctorPigReadService;
 import io.terminus.doctor.event.service.DoctorPigWriteService;
@@ -69,7 +68,7 @@ public class StorageShortageProducer extends AbstractJobProducer {
     }
 
     @Override
-    protected List<DoctorMessage> message(DoctorMessageRuleRole ruleRole, List<SubUser> subUsers) {
+    protected void message(DoctorMessageRuleRole ruleRole, List<SubUser> subUsers) {
         log.info("仓库库存不足消息产生 --- StorageShortageProducer 开始执行");
         List<DoctorMessage> messages = Lists.newArrayList();
 
@@ -93,9 +92,7 @@ public class StorageShortageProducer extends AbstractJobProducer {
                 }
             }
         }
-
         log.info("仓库库存不足消息产生 --- StorageShortageProducer 结束执行, 产生 {} 条消息", messages.size());
-        return messages;
     }
 
     /**
@@ -105,14 +102,11 @@ public class StorageShortageProducer extends AbstractJobProducer {
         List<DoctorMessage> messages = Lists.newArrayList();
         // 创建消息
         Map<String, Object> jsonData = MaterialDtoFactory.getInstance().createMaterialMessage(materialConsumeAvg, url);
-
-        Splitters.COMMA.splitToList(channels).forEach(channel -> {
             try {
-                messages.addAll(createMessage(subUsers, ruleRole, Integer.parseInt(channel), MAPPER.writeValueAsString(jsonData), null));
+                createMessage(subUsers, ruleRole, MAPPER.writeValueAsString(jsonData), null, materialConsumeAvg.getMaterialId());
             } catch (JsonProcessingException e) {
                 log.error("message produce error, cause by {}", Throwables.getStackTraceAsString(e));
             }
-        });
         return messages;
     }
 }

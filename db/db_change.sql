@@ -388,7 +388,6 @@ add column group_code varchar(640) DEFAULT NULL COMMENT '猪群名称' after gro
 
 -- 2016-9-21
 ALTER TABLE doctor_messages ADD COLUMN event_type INT (11) DEFAULT NULL comment '需要操作的事件类型' after   `type`;
-
 -- 2016-09-22 增加索引
 create index doctor_pig_events_type on doctor_pig_events(type);
 create index doctor_pig_events_parity on doctor_pig_events(parity);
@@ -455,3 +454,52 @@ CREATE TABLE `doctor_material_factorys` (
 alter table doctor_material_consume_providers
 add column `provider_factory_id` bigint(20) unsigned DEFAULT NULL COMMENT '供货厂家id' after group_code,
 add column `provider_factory_name` varchar(64) DEFAULT NULL COMMENT '供货厂家' after provider_factory_id;
+
+
+-- 消息历史表
+DROP TABLE IF EXISTS `doctor_history_messages`;
+CREATE TABLE IF NOT EXISTS `doctor_history_messages` (
+	`id`	BIGINT(20) NOT NULL AUTO_INCREMENT COMMENT '自增主键',
+	`farm_id`	BIGINT(20) DEFAULT NULL COMMENT '猪场id',
+	`rule_id`	BIGINT(20) DEFAULT NULL COMMENT '消息规则id',
+	`role_id`	BIGINT(20) DEFAULT NULL COMMENT '子账号的角色id',
+	`template_id` 	BIGINT(20) DEFAULT NULL COMMENT '消息规则模板id',
+	`template_name` 	VARCHAR(128) DEFAULT NULL COMMENT '消息规则模板名称',
+	`message_template`	VARCHAR(128) DEFAULT NULL COMMENT '规则数据模板名称, 对应parana_message_templates表name字段',
+	`business_id` BIGINT(20) DEFAULT NULL COMMENT '关联的操作对象id',
+	`type` 	SMALLINT(6) DEFAULT NULL COMMENT '消息类型: 0->系统消息, 1->预警消息, 2->警报消息',
+	`category`	SMALLINT(6) DEFAULT NULL COMMENT '消息种类',
+	`data`	TEXT DEFAULT NULL COMMENT '发送的内容填充数据, json(map). 或系统消息',
+	`content`	TEXT DEFAULT NULL COMMENT '发送的内容(模板编译之后)',
+	`url`		VARCHAR(4096)	DEFAULT NULL COMMENT 'app回调url',
+	`created_by` BIGINT(20) DEFAULT NULL COMMENT '操作人id',
+	`created_at`	DATETIME DEFAULT NULL COMMENT '创建时间',
+	`updated_at`	DATETIME DEFAULT NULL COMMENT '更新时间',
+	`rel_message_id`	BIGINT(20) DEFAULT NULL COMMENT '关联的消息id',
+	PRIMARY KEY(`id`)
+)ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='猪场软件消息历史表';
+
+-- 用户消息权限表
+DROP TABLE IF EXISTS `doctor_message_user`;
+CREATE TABLE IF NOT EXISTS `doctor_message_user` (
+	`id`	BIGINT(20) NOT NULL AUTO_INCREMENT COMMENT '自增主键',
+	`farm_id`	BIGINT(20) DEFAULT NULL COMMENT '猪场id',
+	`template_id` 	BIGINT(20) DEFAULT NULL COMMENT '消息规则模板id',
+	`user_id` BIGINT(20) DEFAULT NULL COMMENT '用户id',
+	`message_id` BIGINT(20) DEFAULT NULL COMMENT '消息id',
+	`business_id` BIGINT(20) DEFAULT NULL COMMENT '关联的操作对象id',
+	`status` SMALLINT(6) DEFAULT NULL COMMENT '状态 1:未发送, 2:已发送, 3:已读,  -1:删除, -2:发送失败',
+	`sended_at`	DATETIME DEFAULT NULL COMMENT '发送时间',
+	`failed_by`	VARCHAR(4096) DEFAULT NULL COMMENT '失败原因',
+	`created_at`	DATETIME DEFAULT NULL COMMENT '创建时间',
+	`updated_at`	DATETIME DEFAULT NULL COMMENT '更新时间',
+	PRIMARY KEY (`id`)
+	)ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='用户消息关联表';
+
+	ALTER TABLE `doctor_messages`
+	DROP COLUMN `user_id`,
+	DROP COLUMN `status`,
+	DROP COLUMN `channel`,
+	DROP COLUMN `is_expired`,
+	DROP COLUMN `sended_at`,
+	DROP COLUMN `failed_by`;

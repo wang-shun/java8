@@ -25,6 +25,13 @@ public interface DoctorMessageReadService {
     Response<DoctorMessage> findMessageById(Long messageId);
 
     /**
+     * 根据ids查询猪场软件消息表列表
+     * @param messageIds 主键ids
+     * @return 猪场软件消息表
+     */
+    Response<List<DoctorMessage>> findMessagesByIds(List<Long> messageIds);
+
+    /**
      * 分页预警消息列表
      * @param doctorMessageSearchDto
      * @param pageNo
@@ -73,12 +80,6 @@ public interface DoctorMessageReadService {
      */
     Response<DoctorMessage> findLatestWarnMessage(Long templateId, Long farmId);
 
-    /**
-     * 获取未读站内信的数量
-     * @param userId    用户id
-     * @return
-     */
-    Response<Long> findNoReadCount(Long userId);
 
     /**
      * 获取未发送的短信消息
@@ -96,10 +97,10 @@ public interface DoctorMessageReadService {
     Response<Paging<DoctorMessage>> findAppPushMessage(Integer pageNo, Integer pageSize);
 
     /**
-     * 根据条件获取businessId列表
+     * 根据查询条件查询
      * @param doctorMessageSearchDto
      * @return
      */
-    Response<List<Long>> findBusinessListByCriteria(DoctorMessageSearchDto doctorMessageSearchDto);
+    Response<List<DoctorMessage>> findMessageListByCriteria(DoctorMessageSearchDto doctorMessageSearchDto);
 
 }

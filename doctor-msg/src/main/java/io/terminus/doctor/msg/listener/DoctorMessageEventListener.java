@@ -2,7 +2,7 @@ package io.terminus.doctor.msg.listener;
 
 import com.google.common.base.Throwables;
 import com.google.common.eventbus.Subscribe;
-import io.terminus.common.model.Paging;
+import io.terminus.common.utils.BeanMapper;
 import io.terminus.doctor.common.enums.DataEventType;
 import io.terminus.doctor.common.event.CoreEventDispatcher;
 import io.terminus.doctor.common.event.DataEvent;
@@ -10,8 +10,12 @@ import io.terminus.doctor.common.event.EventListener;
 import io.terminus.doctor.common.utils.Params;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.msg.dto.DoctorMessageSearchDto;
+import io.terminus.doctor.msg.model.DoctorHistoryMessage;
 import io.terminus.doctor.msg.model.DoctorMessage;
+import io.terminus.doctor.msg.service.DoctorHistoryMessageWriteService;
 import io.terminus.doctor.msg.service.DoctorMessageReadService;
+import io.terminus.doctor.msg.service.DoctorMessageUserReadService;
+import io.terminus.doctor.msg.service.DoctorMessageUserWriteService;
 import io.terminus.doctor.msg.service.DoctorMessageWriteService;
 import io.terminus.zookeeper.pubsub.Subscriber;
 import lombok.extern.slf4j.Slf4j;
@@ -39,6 +43,15 @@ public class DoctorMessageEventListener implements EventListener{
 
     @Autowired
     private DoctorMessageReadService doctorMessageReadService;
+
+    @Autowired
+    private DoctorHistoryMessageWriteService doctorHistoryMessageWriteService;
+
+    @Autowired
+    private DoctorMessageUserReadService doctorMessageUserReadService;
+
+    @Autowired
+    private DoctorMessageUserWriteService doctorMessageUserWriteService;
 
     @PostConstruct
     public void subs() {
@@ -105,17 +118,16 @@ public class DoctorMessageEventListener implements EventListener{
             DoctorMessageSearchDto doctorMessageSearchDto = new DoctorMessageSearchDto();
             doctorMessageSearchDto.setBusinessId(businessId);
             doctorMessageSearchDto.setEventType(eventType);
-            doctorMessageSearchDto.setIsExpired(DoctorMessage.IsExpired.NOTEXPIRED.getValue());
-            Paging<DoctorMessage> messagePaging = RespHelper.or500(doctorMessageReadService.pagingWarnMessages(doctorMessageSearchDto, i + 1, 100));
-            List<DoctorMessage> messages = messagePaging.getData();
+            List<DoctorMessage> messages = RespHelper.or500(doctorMessageReadService.findMessageListByCriteria(doctorMessageSearchDto));
             if (messages != null && messages.size() > 0) {
                 messages.forEach(doctorMessage -> {
-                    doctorMessage.setIsExpired(DoctorMessage.IsExpired.EXPIRED.getValue());
-                    doctorMessageWriteService.updateMessage(doctorMessage);
+                    DoctorHistoryMessage doctorHistoryMessage = DoctorHistoryMessage.builder().build();
+                    BeanMapper.copy(doctorMessage, doctorHistoryMessage);
+                    doctorHistoryMessage.setRelMessageId(doctorMessage.getId());
+                    doctorHistoryMessageWriteService.createHistoryMessage(doctorHistoryMessage);
+                    doctorMessageWriteService.deleteMessageById(doctorMessage.getId());
+                    doctorMessageUserWriteService.deleteByMessageId(doctorMessage.getId());
                 });
-            }
-            if (messagePaging.getData().size() < 100) {
-                break;
             }
         }
 

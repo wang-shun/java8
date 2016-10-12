@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.api.client.util.Maps;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
-import io.terminus.common.utils.Splitters;
 import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.RespHelper;
@@ -90,7 +89,7 @@ public class PigVaccinationProducer extends AbstractJobProducer {
     }
 
     @Override
-    protected List<DoctorMessage> message(DoctorMessageRuleRole ruleRole, List<SubUser> subUsers) {
+    protected void message(DoctorMessageRuleRole ruleRole, List<SubUser> subUsers) {
         log.info("猪只免疫消息产生 --- PigVaccinationProducer 开始执行");
         List<DoctorMessage> messages = Lists.newArrayList();
 
@@ -107,7 +106,7 @@ public class PigVaccinationProducer extends AbstractJobProducer {
             List<DoctorVaccinationPigWarn> vaccinationWarns = RespHelper.orServEx(
                     doctorVaccinationPigWarnReadService.findVaccinationPigWarnsByFarmId(ruleRole.getFarmId()));
             if (vaccinationWarns == null || vaccinationWarns.isEmpty()) {
-                return messages;
+                return ;
             }
             for (DoctorVaccinationPigWarn warn : vaccinationWarns) {
                 // 判断规则是否在有效期内
@@ -162,7 +161,6 @@ public class PigVaccinationProducer extends AbstractJobProducer {
         }
 
         log.info("猪只免疫消息产生 --- PigVaccinationProducer 结束执行, 产生 {} 条消息", messages.size());
-        return messages;
     }
 
     /**
@@ -613,13 +611,11 @@ public class PigVaccinationProducer extends AbstractJobProducer {
         jsonData.put("vaccinationDateType", warn.getVaccinationDateType());
         jsonData.put("vaccDate", DateTimeFormat.forPattern("yyyy-MM-dd").print(vaccDate));
 
-        Splitters.COMMA.splitToList(channels).forEach(channel -> {
             try {
-                messages.addAll(createMessage(subUsers, ruleRole, Integer.parseInt(channel), MAPPER.writeValueAsString(jsonData), null));
+                createMessage(subUsers, ruleRole, MAPPER.writeValueAsString(jsonData), null, pigDto.getPigId());
             } catch (JsonProcessingException e) {
                 log.error("message produce error, cause by {}", Throwables.getStackTraceAsString(e));
             }
-        });
         return messages;
     }
 
@@ -639,14 +635,11 @@ public class PigVaccinationProducer extends AbstractJobProducer {
         jsonData.put("dose", warn.getDose());
         jsonData.put("vaccinationDateType", warn.getVaccinationDateType());
         jsonData.put("vaccDate", DateTimeFormat.forPattern("yyyy-MM-dd").print(vaccDate));
-
-        Splitters.COMMA.splitToList(channels).forEach(channel -> {
             try {
-                messages.addAll(createMessage(subUsers, ruleRole, Integer.parseInt(channel), MAPPER.writeValueAsString(jsonData), null));
+                createMessage(subUsers, ruleRole, MAPPER.writeValueAsString(jsonData), null, detail.getGroup().getId());
             } catch (JsonProcessingException e) {
                 log.error("message produce error, cause by {}", Throwables.getStackTraceAsString(e));
             }
-        });
         return messages;
     }
 }

@@ -1,8 +1,6 @@
 package io.terminus.doctor.msg.service;
 
 import com.google.common.base.Throwables;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.model.PageInfo;
 import io.terminus.common.model.Paging;
@@ -48,6 +46,17 @@ public class DoctorMessageReadServiceImpl implements DoctorMessageReadService {
     }
 
     @Override
+    public Response<List<DoctorMessage>> findMessagesByIds(List<Long> messageIds) {
+        try {
+            return Response.ok(doctorMessageDao.findByIds(messageIds));
+        } catch (Exception e) {
+            log.error("find messages by ids failed, messageId:{}, cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("messages.find.fail");
+        }
+    }
+
+
+    @Override
     public Response<Paging<DoctorMessage>> pagingWarnMessages(DoctorMessageSearchDto doctorMessageSearchDto, Integer pageNo, Integer pageSize) {
         try{
             PageInfo pageInfo = new PageInfo(pageNo, pageSize);
@@ -72,9 +81,6 @@ public class DoctorMessageReadServiceImpl implements DoctorMessageReadService {
             // 获取系统消息
             criteria.put("type", DoctorMessageRuleTemplate.Type.SYSTEM.getValue());
             criteria.put("channel", Rule.Channel.SYSTEM.getValue());
-            if (criteria.get("status") == null) {
-                criteria.put("statuses", ImmutableList.of(DoctorMessage.Status.NORMAL.getValue(), DoctorMessage.Status.READED.getValue()));
-            }
             return Response.ok(doctorMessageDao.paging(pageInfo.getOffset(), pageInfo.getLimit(), criteria));
         } catch (Exception e) {
             log.error("paging message by criteria failed, criteria is {}, cause by {}", criteria, Throwables.getStackTraceAsString(e));
@@ -125,21 +131,12 @@ public class DoctorMessageReadServiceImpl implements DoctorMessageReadService {
     }
 
     @Override
-    public Response<Long> findNoReadCount(Long userId) {
-        try{
-            return Response.ok(doctorMessageDao.findNoReadCount(userId));
-        } catch (Exception e) {
-            log.error("find no read message count failed, user id is {}, cause by {}", userId, Throwables.getStackTraceAsString(e));
-            return Response.fail("message.find.fail");
-        }
-    }
-
-    @Override
     public Response<Paging<DoctorMessage>> findMsgMessage(Integer pageNo, Integer pageSize) {
         try{
             PageInfo pageInfo = PageInfo.of(pageNo, pageSize);
-            return Response.ok(doctorMessageDao.paging(pageInfo.getOffset(), pageInfo.getLimit(),
-                    ImmutableMap.of("channel", Rule.Channel.MESSAGE.getValue(), "status", DoctorMessage.Status.NORMAL.getValue(), "isExpired", DoctorMessage.IsExpired.NOTEXPIRED.getValue())));
+//            return Response.ok(doctorMessageDao.paging(pageInfo.getOffset(), pageInfo.getLimit(),
+//                    ImmutableMap.of("channel", Rule.Channel.MESSAGE.getValue(), "status", DoctorMessage.Status.NORMAL.getValue(), "isExpired", DoctorMessage.IsExpired.NOTEXPIRED.getValue())));
+            return null;
         } catch (Exception e) {
             log.error("", Throwables.getStackTraceAsString(e));
             return Response.fail("msg.message.find.fail");
@@ -150,8 +147,9 @@ public class DoctorMessageReadServiceImpl implements DoctorMessageReadService {
     public Response<Paging<DoctorMessage>> findEmailMessage(Integer pageNo, Integer pageSize) {
         try{
             PageInfo pageInfo = PageInfo.of(pageNo, pageSize);
-            return Response.ok(doctorMessageDao.paging(pageInfo.getOffset(), pageInfo.getLimit(),
-                    ImmutableMap.of("channel", Rule.Channel.EMAIL.getValue(), "status", DoctorMessage.Status.NORMAL.getValue(), "isExpired", DoctorMessage.IsExpired.NOTEXPIRED.getValue())));
+//            return Response.ok(doctorMessageDao.paging(pageInfo.getOffset(), pageInfo.getLimit(),
+//                    ImmutableMap.of("channel", Rule.Channel.EMAIL.getValue(), "status", DoctorMessage.Status.NORMAL.getValue(), "isExpired", DoctorMessage.IsExpired.NOTEXPIRED.getValue())));
+            return null;
         } catch (Exception e) {
             log.error("", Throwables.getStackTraceAsString(e));
             return Response.fail("email.message.find.fail");
@@ -162,21 +160,23 @@ public class DoctorMessageReadServiceImpl implements DoctorMessageReadService {
     public Response<Paging<DoctorMessage>> findAppPushMessage(Integer pageNo, Integer pageSize) {
         try{
             PageInfo pageInfo = PageInfo.of(pageNo, pageSize);
-            return Response.ok(doctorMessageDao.paging(pageInfo.getOffset(), pageInfo.getLimit(),
-                    ImmutableMap.of("channel", Rule.Channel.APPPUSH.getValue(), "status", DoctorMessage.Status.NORMAL.getValue(), "isExpired", DoctorMessage.IsExpired.NOTEXPIRED.getValue())));
+//            return Response.ok(doctorMessageDao.paging(pageInfo.getOffset(), pageInfo.getLimit(),
+//                    ImmutableMap.of("channel", Rule.Channel.APPPUSH.getValue(), "status", DoctorMessage.Status.NORMAL.getValue(), "isExpired", DoctorMessage.IsExpired.NOTEXPIRED.getValue())));
+            return null;
         } catch (Exception e) {
             log.error("", Throwables.getStackTraceAsString(e));
             return Response.fail("app.message.find.fail");
         }
     }
 
+
     @Override
-    public Response<List<Long>> findBusinessListByCriteria(DoctorMessageSearchDto doctorMessageSearchDto) {
-        try {
-            return Response.ok(doctorMessageDao.findBusinessListByCriteria(doctorMessageSearchDto));
+    public Response<List<DoctorMessage>> findMessageListByCriteria(DoctorMessageSearchDto doctorMessageSearchDto) {
+        try{
+            return Response.ok(doctorMessageDao.list(doctorMessageSearchDto));
         } catch (Exception e) {
-            log.error("find.message.count.by.criteria.failed, cause by {}", Throwables.getStackTraceAsString(e));
-            return Response.fail("find.message.count.by.criteria.failed");
+            log.error("find message list by criteria failed, criteria:{}, cause:{}", doctorMessageSearchDto, Throwables.getStackTraceAsString(e));
+            return Response.fail("message.list.find.fail");
         }
     }
 }

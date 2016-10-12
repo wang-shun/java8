@@ -66,7 +66,7 @@ public class DoctorMessageWriteServiceImpl implements DoctorMessageWriteService 
             DoctorMessage message = doctorMessageDao.findById(messageId);
             if (message != null) {
                 // 逻辑删除
-                message.setStatus(DoctorMessage.Status.DELETE.getValue());
+                //message.setStatus(DoctorMessage.Status.DELETE.getValue());
                 return Response.ok(doctorMessageDao.update(message));
             }
             return Response.ok(Boolean.TRUE);

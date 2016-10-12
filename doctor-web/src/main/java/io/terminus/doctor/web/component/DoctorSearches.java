@@ -26,10 +26,9 @@ import io.terminus.doctor.event.search.group.SearchedGroupDto;
 import io.terminus.doctor.event.search.pig.PigSearchReadService;
 import io.terminus.doctor.event.search.pig.SearchedPig;
 import io.terminus.doctor.event.search.pig.SearchedPigDto;
-import io.terminus.doctor.msg.dto.DoctorMessageSearchDto;
-import io.terminus.doctor.msg.dto.Rule;
-import io.terminus.doctor.msg.model.DoctorMessage;
+import io.terminus.doctor.msg.dto.DoctorMessageUserDto;
 import io.terminus.doctor.msg.service.DoctorMessageReadService;
+import io.terminus.doctor.msg.service.DoctorMessageUserReadService;
 import io.terminus.doctor.user.model.DoctorUserDataPermission;
 import io.terminus.doctor.user.service.DoctorUserDataPermissionReadService;
 import io.terminus.pampas.common.UserUtil;
@@ -74,6 +73,8 @@ public class DoctorSearches {
 
     private final DoctorMessageReadService doctorMessageReadService;
 
+    private final DoctorMessageUserReadService doctorMessageUserReadService;
+
     private static final ObjectMapper OBJECT_MAPPER = JsonMapper.JSON_NON_DEFAULT_MAPPER.getMapper();
 
 
@@ -84,7 +85,8 @@ public class DoctorSearches {
                           BarnSearchReadService barnSearchReadService,
                           MaterialSearchReadService materialSearchReadService,
                           DoctorUserDataPermissionReadService doctorUserDataPermissionReadService,
-                          DoctorMessageReadService doctorMessageReadService) {
+                          DoctorMessageReadService doctorMessageReadService,
+                          DoctorMessageUserReadService doctorMessageUserReadService) {
         this.pigSearchReadService = pigSearchReadService;
         this.groupSearchReadService = groupSearchReadService;
         this.doctorSearchHistoryService = doctorSearchHistoryService;
@@ -92,6 +94,7 @@ public class DoctorSearches {
         this.materialSearchReadService = materialSearchReadService;
         this.doctorUserDataPermissionReadService = doctorUserDataPermissionReadService;
         this.doctorMessageReadService = doctorMessageReadService;
+        this.doctorMessageUserReadService = doctorMessageUserReadService;
     }
 
     /**
@@ -571,17 +574,11 @@ public class DoctorSearches {
 
     public void searchFromMessage(Map<String, String> params) {
         if (Objects.equals(params.get("searchFrom"), "MESSAGE")) {
-            DoctorMessageSearchDto doctorMessageSearchDto = new DoctorMessageSearchDto();
-            doctorMessageSearchDto.setTemplateId(Long.parseLong(params.get("templateId")));
-            doctorMessageSearchDto.setFarmId(Long.parseLong(params.get("farmId")));
-            doctorMessageSearchDto.setIsExpired(DoctorMessage.IsExpired.NOTEXPIRED.getValue());
-            doctorMessageSearchDto.setUserId(UserUtil.getCurrentUser().getId());
-            doctorMessageSearchDto.setChannel(Rule.Channel.SYSTEM.getValue());
-            List<Integer> statuses = Lists.newArrayList();
-            statuses.add(DoctorMessage.Status.NORMAL.getValue());
-            statuses.add(DoctorMessage.Status.READED.getValue());
-            doctorMessageSearchDto.setStatuses(statuses);
-            List<Long> idList = RespHelper.or500(doctorMessageReadService.findBusinessListByCriteria(doctorMessageSearchDto));
+            DoctorMessageUserDto doctorMessageUserDto = new DoctorMessageUserDto();
+            doctorMessageUserDto.setTemplateId(Long.parseLong(params.get("templateId")));
+            doctorMessageUserDto.setFarmId(Long.parseLong(params.get("farmId")));
+            doctorMessageUserDto.setUserId(UserUtil.getCurrentUser().getId());
+            List<Long> idList = RespHelper.or500(doctorMessageUserReadService.findBusinessListByCriteria(doctorMessageUserDto));
             String ids = idList.toString().trim().substring(1, idList.toString().toCharArray().length - 1);
             params.put("ids", ids);
         }

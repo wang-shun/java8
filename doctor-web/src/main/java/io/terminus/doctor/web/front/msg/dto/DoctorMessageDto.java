@@ -1,7 +1,6 @@
 package io.terminus.doctor.web.front.msg.dto;
 
 import io.terminus.common.model.Paging;
-import io.terminus.doctor.msg.model.DoctorMessage;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -26,7 +25,7 @@ public class DoctorMessageDto implements Serializable {
     /**
      * 分页数据
      */
-    private Paging<DoctorMessage> paging;
+    private Paging<DoctorMessageWithUserDto> paging;
 
     /**
      * 跳转到list的url

@@ -3,13 +3,8 @@ package io.terminus.doctor.msg.producer;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Stopwatch;
-import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
-import io.terminus.common.model.Paging;
-import io.terminus.common.utils.Arguments;
 import io.terminus.common.utils.JsonMapper;
-import io.terminus.doctor.common.constants.JacksonType;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.msg.dto.DoctorMessageSearchDto;
 import io.terminus.doctor.msg.dto.Rule;
@@ -20,20 +15,22 @@ import io.terminus.doctor.msg.model.DoctorMessage;
 import io.terminus.doctor.msg.model.DoctorMessageRule;
 import io.terminus.doctor.msg.model.DoctorMessageRuleRole;
 import io.terminus.doctor.msg.model.DoctorMessageRuleTemplate;
+import io.terminus.doctor.msg.model.DoctorMessageUser;
+import io.terminus.doctor.msg.service.DoctorHistoryMessageWriteService;
 import io.terminus.doctor.msg.service.DoctorMessageReadService;
 import io.terminus.doctor.msg.service.DoctorMessageRuleReadService;
 import io.terminus.doctor.msg.service.DoctorMessageRuleRoleReadService;
 import io.terminus.doctor.msg.service.DoctorMessageRuleTemplateReadService;
 import io.terminus.doctor.msg.service.DoctorMessageTemplateReadService;
+import io.terminus.doctor.msg.service.DoctorMessageUserWriteService;
 import io.terminus.doctor.msg.service.DoctorMessageWriteService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
+import org.springframework.beans.factory.annotation.Autowired;
 
-import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -62,6 +59,12 @@ public abstract class AbstractProducer implements IProducer {
     protected DoctorMessageWriteService doctorMessageWriteService;
 
     protected Category category;
+
+    @Autowired
+    protected DoctorHistoryMessageWriteService doctorHistoryMessageWriteService;
+
+    @Autowired
+    protected DoctorMessageUserWriteService doctorMessageUserWriteService;
 
     public AbstractProducer(DoctorMessageTemplateReadService doctorMessageTemplateReadService,
                             DoctorMessageRuleTemplateReadService doctorMessageRuleTemplateReadService,
@@ -106,10 +109,7 @@ public abstract class AbstractProducer implements IProducer {
                         .ruleValue(ruleTemplate.getRuleValue())
                         .build();
                 // 获取信息 (针对所有的角色/user)
-                List<DoctorMessage> message = message(ruleRole, subUsers);
-                if (message != null && message.size() > 0) {
-                    doctorMessageWriteService.createMessages(message);
-                }
+                message(ruleRole, subUsers);
                 stopwatch.stop();
                 log.info("[AbstractProducer] {} -> 系统消息产生正常结束, 耗时 {}ms end......", ruleTemplate.getName(), stopwatch.elapsed(TimeUnit.MILLISECONDS));
             }
@@ -136,19 +136,19 @@ public abstract class AbstractProducer implements IProducer {
                     // 获取信息
                     log.info("[AbstractProducer] {} -> 预警消息产生", ruleTemplate.getName());
                     //将之前消息置为无效
-                    setMessageIsExpired(messageRule);
+//                    setMessageIsExpired(messageRule);
                     DoctorMessageRuleRole ruleRole = DoctorMessageRuleRole.builder()
                             .ruleId(messageRule.getId())
                             .templateId(messageRule.getTemplateId())
                             .farmId(messageRule.getFarmId())
                             .ruleValue(messageRule.getRuleValue())
                             .build();
-                    List<DoctorMessage> message = message(ruleRole,
+                    message(ruleRole,
                             subUsers.stream().filter(sub -> sub.getFarmIds().contains(messageRule.getFarmId())).collect(Collectors.toList()));
-                    if (Arguments.notEmpty(message)) {
-                        //分批次插入数据
-                        Lists.partition(message, 5000).forEach(list -> doctorMessageWriteService.createMessages(list));
-                    }
+//                    if (Arguments.notEmpty(message)) {
+//                        //分批次插入数据
+//                        Lists.partition(message, 5000).forEach(list -> doctorMessageWriteService.createMessages(list));
+//                    }
                 }
 
                 // List<DoctorMessageRuleRole> ruleRoles = RespHelper.orServEx(doctorMessageRuleRoleReadService.findByTplId(ruleTemplate.getId()));
@@ -201,7 +201,7 @@ public abstract class AbstractProducer implements IProducer {
      * @param ruleRole
      * @return
      */
-    protected abstract List<DoctorMessage> message(DoctorMessageRuleRole ruleRole, List<SubUser> subUsers);
+    protected abstract void message(DoctorMessageRuleRole ruleRole, List<SubUser> subUsers);
 
     /**
      * 根据规则与猪场的绑定, 获取每只猪的消息
@@ -277,101 +277,76 @@ public abstract class AbstractProducer implements IProducer {
      *
      * @param subUsers 子账号(已经通过roleId过滤)
      * @param ruleRole 规则角色
-     * @param channel  发送渠道
      * @param jsonData 填充数据
      * @return
      */
-    protected List<DoctorMessage> createMessage(List<SubUser> subUsers, DoctorMessageRuleRole ruleRole, Integer channel, String jsonData, Integer eventType) {
-        List<DoctorMessage> messages = Lists.newArrayList();
+    protected void createMessage(List<SubUser> subUsers, DoctorMessageRuleRole ruleRole, String jsonData, Integer eventType, Long businessId) {
+        DoctorMessageSearchDto doctorMessageSearchDto = new DoctorMessageSearchDto();
+        doctorMessageSearchDto.setFarmId(ruleRole.getFarmId());
+        doctorMessageSearchDto.setTemplateId(ruleRole.getTemplateId());
+        doctorMessageSearchDto.setBusinessId(businessId);
+        List<DoctorMessage> messageList = RespHelper.orServEx(doctorMessageReadService.findMessageListByCriteria(doctorMessageSearchDto));
+        if (!messageList.isEmpty()){
+            messageList.forEach(doctorMessage -> {
+                doctorMessageWriteService.updateMessage(doctorMessage);
+            });
+            return;
+        }
         DoctorMessageRuleTemplate template = RespHelper.orServEx(doctorMessageRuleTemplateReadService.findMessageRuleTemplateById(ruleRole.getTemplateId()));
+        DoctorMessage message = DoctorMessage.builder()
+                .farmId(ruleRole.getFarmId())
+                .ruleId(ruleRole.getRuleId())
+                .roleId(ruleRole.getRoleId())
+                .templateName(template.getName())
+                .templateId(ruleRole.getTemplateId())
+                .businessId(businessId)
+                .messageTemplate(template.getMessageTemplate())
+                .type(template.getType())
+                .eventType(eventType)
+                .category(template.getCategory())
+                .data(jsonData)
+                .url(ruleRole.getRule().getUrl())
+                .createdBy(template.getUpdatedBy())
+                .build();
+        // 模板编译
+//        try {
+//            Map<String, Serializable> jsonContext = MAPPER.readValue(jsonData, JacksonType.MAP_OF_STRING);
+//            String content = RespHelper.orServEx(doctorMessageTemplateReadService.getMessageContentWithCache(message.getMessageTemplate(), jsonContext));
+//            message.setContent(content != null ? content.trim() : "");
+//        } catch (Exception e) {
+//            log.error("compile message template failed,cause by {}, template name is {}, json map is {}", Throwables.getStackTraceAsString(e), message.getMessageTemplate(), jsonData);
+//        }
+        Long messageId = RespHelper.orServEx(doctorMessageWriteService.createMessage(message));
         if (subUsers != null && subUsers.size() > 0) {
             subUsers.stream().map(SubUser::getParentUserId).collect(Collectors.toSet())
                     .forEach(parentId -> {
-                        DoctorMessage message = DoctorMessage.builder()
-                                .farmId(ruleRole.getFarmId())
-                                .ruleId(ruleRole.getRuleId())
-                                .roleId(ruleRole.getRoleId())
+                        DoctorMessageUser doctorMessageUser = DoctorMessageUser.builder()
                                 .userId(parentId)
-                                .templateName(template.getName())
+                                .messageId(messageId)
+                                .businessId(businessId)
+                                .farmId(ruleRole.getFarmId())
                                 .templateId(ruleRole.getTemplateId())
-                                .isExpired(DoctorMessage.IsExpired.NOTEXPIRED.getValue())
-                                .messageTemplate(getTemplateName(template.getMessageTemplate(), channel))
-                                .type(template.getType())
-                                .eventType(eventType)
-                                .category(template.getCategory())
-                                .data(jsonData)
-                                .channel(channel)
-                                .url(getUrl(ruleRole.getRule().getUrl(), channel))
-                                .status(DoctorMessage.Status.NORMAL.getValue())
-                                .createdBy(template.getUpdatedBy())
+                                .status(DoctorMessageUser.Status.NORMAL.getValue())
                                 .build();
-                        // 模板编译
-                        try {
-                            Map<String, Serializable> jsonContext = MAPPER.readValue(jsonData, JacksonType.MAP_OF_STRING);
-                            String content = RespHelper.orServEx(doctorMessageTemplateReadService.getMessageContentWithCache(message.getMessageTemplate(), jsonContext));
-                            Long businessId;
-                            if (StringUtils.isNotBlank((String) jsonContext.get("materialId"))) {
-                                businessId = Long.parseLong((String) jsonContext.get("materialId"));
-                            } else if (StringUtils.isNotBlank((String) jsonContext.get("groupId"))) {
-                                businessId = Long.parseLong((String) jsonContext.get("groupId"));
-                            } else {
-                                businessId = Long.parseLong((String) jsonContext.get("pigId"));
-                            }
-                            message.setBusinessId(businessId);
-                            message.setContent(content != null ? content.trim() : "");
-                        } catch (Exception e) {
-                            log.error("compile message template failed,cause by {}, template name is {}, json map is {}", Throwables.getStackTraceAsString(e), message.getMessageTemplate(), jsonData);
-                        }
-                        messages.add(message);
+                        doctorMessageUserWriteService.createDoctorMessageUser(doctorMessageUser);
                     });
 
             // 子账户
             subUsers.stream().forEach(subUser -> {
                 // 检查该用户是否含有farm权限
                 if (hasUserAuth(subUser.getUserId(), ruleRole.getFarmId())) {
-                    DoctorMessage message = DoctorMessage.builder()
-                            .farmId(ruleRole.getFarmId())
-                            .ruleId(ruleRole.getRuleId())
-                            // .roleId(ruleRole.getRoleId())
-                            .roleId(subUser.getRoleId())
+                    DoctorMessageUser doctorMessageUser = DoctorMessageUser.builder()
                             .userId(subUser.getUserId())
+                            .messageId(messageId)
+                            .businessId(businessId)
+                            .farmId(ruleRole.getFarmId())
                             .templateId(ruleRole.getTemplateId())
-                            .templateName(template.getName())
-                            .isExpired(DoctorMessage.IsExpired.NOTEXPIRED.getValue())
-                            .messageTemplate(getTemplateName(template.getMessageTemplate(), channel))
-                            .type(template.getType())
-                            .eventType(eventType)
-                            .category(template.getCategory())
-                            .data(jsonData)
-                            .channel(channel)
-                            //.url(getUrl(ruleRole.getRule().getUrl(), channel))
-                            .url(ruleRole.getRule().getUrl())
-                            .status(DoctorMessage.Status.NORMAL.getValue())
-                            .createdBy(template.getUpdatedBy())
+                            .status(DoctorMessageUser.Status.NORMAL.getValue())
                             .build();
-                    // 模板编译
-                    try {
-                        Map<String, Serializable> jsonContext = MAPPER.readValue(jsonData, JacksonType.MAP_OF_STRING);
-                        String content = RespHelper.orServEx(doctorMessageTemplateReadService.getMessageContentWithCache(message.getMessageTemplate(), jsonContext));
-                        Long businessId;
-                        if (StringUtils.isNotBlank((String) jsonContext.get("materialId"))) {
-                            businessId = Long.parseLong((String) jsonContext.get("materialId"));
-                        } else if (StringUtils.isNotBlank((String) jsonContext.get("groupId"))) {
-                            businessId = Long.parseLong((String) jsonContext.get("groupId"));
-                        } else {
-                            businessId = Long.parseLong((String) jsonContext.get("pigId"));
-                        }
-                        message.setBusinessId(businessId);
-                        message.setContent(content != null ? content.trim() : "");
-                    } catch (Exception e) {
-                        log.error("compile message template failed,cause by {}, template name is {}, json map is {}", Throwables.getStackTraceAsString(e), message.getMessageTemplate(), jsonData);
-                    }
-
-                    messages.add(message);
+                    doctorMessageUserWriteService.createDoctorMessageUser(doctorMessageUser);
                 }
             });
         }
-        return messages;
     }
 
     /**
@@ -423,7 +398,7 @@ public abstract class AbstractProducer implements IProducer {
                     return false;
                 }
                 // 未到频率时间
-                if (new DateTime(message.getCreatedAt())
+                if (new DateTime(message.getUpdatedAt())
                         .isAfter(DateTime.now().minusHours(rule.getFrequence()))) {
                     return false;
                 }
@@ -493,27 +468,32 @@ public abstract class AbstractProducer implements IProducer {
         return page;
     }
 
-    /**
-     * 将之前的消息置为无效
-     */
-    protected void setMessageIsExpired(DoctorMessageRule messageRule) {
-        for (int i = 0; ; i++) {
-            DoctorMessageSearchDto doctorMessageSearchDto = new DoctorMessageSearchDto();
-            doctorMessageSearchDto.setTemplateId(messageRule.getTemplateId());
-            doctorMessageSearchDto.setFarmId(messageRule.getFarmId());
-            doctorMessageSearchDto.setIsExpired(DoctorMessage.IsExpired.NOTEXPIRED.getValue());
-            Paging<DoctorMessage> messagePaging = RespHelper.or500(doctorMessageReadService.pagingWarnMessages(doctorMessageSearchDto, i + 1, 100));
-            List<DoctorMessage> messages = messagePaging.getData();
-            if (messages != null && messages.size() > 0) {
-                messages.forEach(doctorMessage -> {
-                    doctorMessage.setIsExpired(DoctorMessage.IsExpired.EXPIRED.getValue());
-                    doctorMessageWriteService.updateMessage(doctorMessage);
-                });
-            }
-            if (messagePaging.getData().size() < 100) {
-                break;
-            }
-        }
-
-    }
+//    /**
+//     * 将之前的消息置为无效
+//     */
+//    protected void setMessageIsExpired(DoctorMessageRule messageRule) {
+//        for (int i = 0; ; i++) {
+//            DoctorMessageSearchDto doctorMessageSearchDto = new DoctorMessageSearchDto();
+//            doctorMessageSearchDto.setTemplateId(messageRule.getTemplateId());
+//            doctorMessageSearchDto.setFarmId(messageRule.getFarmId());
+//            doctorMessageSearchDto.setIsExpired(DoctorMessage.IsExpired.NOTEXPIRED.getValue());
+//            Paging<DoctorMessage> messagePaging = RespHelper.or500(doctorMessageReadService.pagingWarnMessages(doctorMessageSearchDto, i + 1, 100));
+//            List<DoctorMessage> messages = messagePaging.getData();
+//            if (messages != null && messages.size() > 0) {
+//                messages.forEach(doctorMessage -> {
+//                    //doctorMessage.setIsExpired(DoctorMessage.IsExpired.EXPIRED.getValue());
+//                    //doctorMessageWriteService.updateMessage(doctorMessage);
+//                    DoctorHistoryMessage doctorHistoryMessage  = DoctorHistoryMessage.builder().build();
+//                    BeanMapper.copy(doctorMessage, doctorHistoryMessage);
+//                    doctorHistoryMessage.setRelMessageId(doctorMessage.getId());
+//                    doctorHistoryMessageWriteService.createHistoryMessage(doctorHistoryMessage);
+//                    doctorMessageWriteService.deleteMessageById(doctorMessage.getId());
+//                });
+//            }
+//            if (messagePaging.getData().size() < 100) {
+//                break;
+//            }
+//        }
+//
+//    }
 }
