@@ -145,6 +145,8 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
 
         DoctorGroup group = map(newGroupInput, DoctorGroup.class);
         group.setRemark(null);  //dozer不需要转换remark
+        group.setStaffId(UserUtil.getUserId());
+        group.setStaffName(getSubUserName(UserUtil.getUserId()));
 
         //设置猪场公司信息
         DoctorFarm farm = orServEx(doctorFarmReadService.findFarmById(group.getFarmId()));
