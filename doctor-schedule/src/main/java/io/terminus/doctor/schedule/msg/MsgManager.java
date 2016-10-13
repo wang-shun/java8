@@ -3,8 +3,8 @@ package io.terminus.doctor.schedule.msg;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.utils.RespHelper;
+import io.terminus.doctor.msg.dto.Rule;
 import io.terminus.doctor.msg.dto.SubUser;
 import io.terminus.doctor.msg.enums.Category;
 import io.terminus.doctor.msg.model.DoctorMessage;
@@ -16,18 +16,15 @@ import io.terminus.doctor.user.model.DoctorUserDataPermission;
 import io.terminus.doctor.user.model.Sub;
 import io.terminus.doctor.user.service.DoctorUserDataPermissionReadService;
 import io.terminus.doctor.user.service.PrimaryUserReadService;
-import io.terminus.parana.user.model.User;
 import io.terminus.parana.user.service.UserReadService;
 import io.terminus.parana.web.msg.MsgWebService;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
-import java.io.Serializable;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -126,147 +123,147 @@ public class MsgManager {
         }
     }
 
-    /**
-     * 发出短信消息
-     */
-    public void consumeMsg() {
-        for (int j = 0;; j++) {
-            List<DoctorMessage> msgMessages = RespHelper.orServEx(doctorMessageReadService.findMsgMessage(j+1, 200)).getData();
-            //  User user = (User) RespHelper.orServEx(userReadService.findById(message.getUserId()));
-            for (int i = 0; msgMessages != null && i < msgMessages.size(); i++) {
-                DoctorMessage message = msgMessages.get(i);
-                Map<String, Serializable> map = null;
-                try {
-                    // 获取用户信息
-                    User user = (User) RespHelper.orServEx(userReadService.findById(message.getUserId()));
-                    if (StringUtils.isNotBlank(user.getMobile())) {
-                        map = JsonMapper.JSON_NON_DEFAULT_MAPPER.fromJson(message.getData(), Map.class);
-                        // 发送短信 // TODO: 临时取消短信发送
-                        // smsWebService.send(user.getMobile(), message.getMessageTemplate(), map, null);
-                        message.setSendedAt(new Date());
-                        message.setStatus(DoctorMessage.Status.SENDED.getValue());
-                    }
-                } catch (Exception e) {
-                    log.error("msg message send error, cause by {}", Throwables.getStackTraceAsString(e));
-                    message.setFailedBy("msg message send error, context is " + map + ", cause by " + e.getMessage());
-                    message.setStatus(DoctorMessage.Status.FAILED.getValue());
-                }
-                //doctorMessageWriteService.updateMessage(message);
-            }
-            //  smsWebService.send(user.getMobile(), message.getMessageTemplate(), map, null);
-            if (msgMessages.size() < 200){
-                break;
-            }
-        }
-    }
-
-    /**
-     * 发出邮件消息
-     */
-    public void consumeEmail() {
-        for (int j = 0;; j++) {
-            List<DoctorMessage> emailMessages = RespHelper.orServEx(doctorMessageReadService.findEmailMessage(j+1, 200)).getData();
-        for (int i = 0; emailMessages != null && i < emailMessages.size(); i++) {
-            DoctorMessage message = emailMessages.get(i);
-            Map<String, Serializable> map = null;
-            try{
-                // 获取用户信息
-                User user = (User) RespHelper.orServEx(userReadService.findById(message.getUserId()));
-                if (StringUtils.isNotBlank(user.getEmail())) {
-                    map = JsonMapper.JSON_NON_DEFAULT_MAPPER.fromJson(message.getData(), Map.class);
-                    // 发送邮件 // TODO 临时取消
-                   // emailWebService.send(user.getEmail(), message.getMessageTemplate(), map, null);
-                    message.setSendedAt(new Date());
-                    message.setStatus(DoctorMessage.Status.SENDED.getValue());
-                }
-            } catch (Exception e) {
-                log.error("email message send error, cause by {}", Throwables.getStackTraceAsString(e));
-                message.setFailedBy("email message send error, context is " + map + ", cause by " + e.getMessage());
-                message.setStatus(DoctorMessage.Status.FAILED.getValue());
-            }
-           // doctorMessageWriteService.updateMessage(message);
-        }
-            if (emailMessages.size() < 200){
-                break;
-            }
-        }
-    }
-
-    /**
-     * app push 消息消费
-     */
-    public void consumeAppPush() {
-        for (int j = 0;; j++) {
-            List<DoctorMessage> appMessages = RespHelper.orServEx(doctorMessageReadService.findAppPushMessage(j+1, 200)).getData();
-        for (int i = 0; appMessages != null && i < appMessages.size(); i++) {
-            DoctorMessage message = appMessages.get(i);
-            Map<String, Serializable> map = null;
-            try{
-                // 获取用户信息
-                User user = (User) RespHelper.orServEx(userReadService.findById(message.getUserId()));
-                if (StringUtils.isNotBlank(user.getEmail())) {
-                    map = JsonMapper.JSON_NON_DEFAULT_MAPPER.fromJson(message.getData(), Map.class);
-                    // app push // TODO 临时取消
-                    // appPushWebService.send("[" + userId+ "]", doctorMessageRuleTemplate.getMessageTemplate(), map, null);
-                    message.setSendedAt(new Date());
-                    message.setStatus(DoctorMessage.Status.SENDED.getValue());
-                }
-            } catch (Exception e) {
-                log.error("app push message send error, cause by {}", Throwables.getStackTraceAsString(e));
-                message.setFailedBy("app push message send error, context is " + map + ", cause by " + e.getMessage());
-                message.setStatus(DoctorMessage.Status.FAILED.getValue());
-            }
-            // doctorMessageWriteService.updateMessage(message);
-        }
-        if (appMessages.size() < 200){
-            break;
-        }
-    }
-    }
-//    public void consumeAppPush() {
-//        List<DoctorMessage> updateMessages = Lists.newArrayList();
-//        try {
-//            List<DoctorMessageRuleTemplate> templates = RespHelper.orServEx(doctorMessageRuleTemplateReadService.findAllWarnMessageTpl());
-//            templates.forEach(doctorMessageRuleTemplate -> {
-//                List<Long> userIdList = RespHelper.orServEx(doctorMessageReadService.findUserIdList(DoctorMessage.builder().templateId(doctorMessageRuleTemplate.getId()).build()));
-//                userIdList.forEach(userId -> {
-//                    StringBuilder sb = new StringBuilder();
-//                    List<DoctorMessage> appMessages = RespHelper.orServEx(doctorMessageReadService.findAppPushMessage(doctorMessageRuleTemplate.getId(), userId));
-//                    appMessages.forEach(doctorMessage -> {
-//                        Map<String, Serializable> dataMap = JsonMapper.JSON_NON_DEFAULT_MAPPER.fromJson(doctorMessage.getData(), Map.class);
-//                        if (Objects.equals(doctorMessageRuleTemplate.getCategory(), Category.FATTEN_PIG_REMOVE.getKey())){
-//                            sb.append(dataMap.get("groupCode")+",");
-//                        }else if (Objects.equals(doctorMessageRuleTemplate.getCategory(), Category.FATTEN_PIG_REMOVE.getKey())){
-//
-//                        }else {
-//                            sb.append(dataMap.get("pigCode")+",");
-//                        }
-//                        doctorMessage.setSendedAt(new Date());
-//                        doctorMessage.setStatus(DoctorMessage.Status.SENDED.getValue());
-//                        updateMessages.add(doctorMessage);
-//                    });
-//                    Map<String, Serializable> map = Maps.newHashMap();
-//                    map.put("code", sb);
-//                    map.put("after_open", "go_url");
-//                    map.put("title", doctorMessageRuleTemplate.getName());
-//                    map.put("ticker", doctorMessageRuleTemplate.getName());
-//                   // appPushWebService.send("[" + userId+ "]", doctorMessageRuleTemplate.getMessageTemplate(), map, null);
-//                });
-//            });
-//
-//        }  catch (Exception e) {
-//            log.error("app push message send error, cause by {}", Throwables.getStackTraceAsString(e));
-//            updateMessages.forEach(doctorMessage -> {
-//                doctorMessageWriteService.updateMessage(doctorMessage);
-//                doctorMessage.setFailedBy("app push message send error, cause by " + e.getMessage());
-//                doctorMessage.setStatus(DoctorMessage.Status.FAILED.getValue());
-//            });
+//    /**
+//     * 发出短信消息
+//     */
+//    public void consumeMsg() {
+//        for (int j = 0;; j++) {
+//            List<DoctorMessage> msgMessages = RespHelper.orServEx(doctorMessageReadService.findMsgMessage(j+1, 200)).getData();
+//            //  User user = (User) RespHelper.orServEx(userReadService.findById(message.getUserId()));
+//            for (int i = 0; msgMessages != null && i < msgMessages.size(); i++) {
+//                DoctorMessage message = msgMessages.get(i);
+//                Map<String, Serializable> map = null;
+//                try {
+//                    // 获取用户信息
+//                    User user = (User) RespHelper.orServEx(userReadService.findById(message.getUserId()));
+//                    if (StringUtils.isNotBlank(user.getMobile())) {
+//                        map = JsonMapper.JSON_NON_DEFAULT_MAPPER.fromJson(message.getData(), Map.class);
+//                        // 发送短信 // TODO: 临时取消短信发送
+//                        // smsWebService.send(user.getMobile(), message.getMessageTemplate(), map, null);
+//                        message.setSendedAt(new Date());
+//                        message.setStatus(DoctorMessage.Status.SENDED.getValue());
+//                    }
+//                } catch (Exception e) {
+//                    log.error("msg message send error, cause by {}", Throwables.getStackTraceAsString(e));
+//                    message.setFailedBy("msg message send error, context is " + map + ", cause by " + e.getMessage());
+//                    message.setStatus(DoctorMessage.Status.FAILED.getValue());
+//                }
+//                //doctorMessageWriteService.updateMessage(message);
+//            }
+//            //  smsWebService.send(user.getMobile(), message.getMessageTemplate(), map, null);
+//            if (msgMessages.size() < 200){
+//                break;
+//            }
 //        }
-////        updateMessages.forEach(doctorMessage -> {
-////            doctorMessageWriteService.updateMessage(doctorMessage);
-////        });
 //    }
-
+//
+//    /**
+//     * 发出邮件消息
+//     */
+//    public void consumeEmail() {
+//        for (int j = 0;; j++) {
+//            List<DoctorMessage> emailMessages = RespHelper.orServEx(doctorMessageReadService.findEmailMessage(j+1, 200)).getData();
+//        for (int i = 0; emailMessages != null && i < emailMessages.size(); i++) {
+//            DoctorMessage message = emailMessages.get(i);
+//            Map<String, Serializable> map = null;
+//            try{
+//                // 获取用户信息
+//                User user = (User) RespHelper.orServEx(userReadService.findById(message.getUserId()));
+//                if (StringUtils.isNotBlank(user.getEmail())) {
+//                    map = JsonMapper.JSON_NON_DEFAULT_MAPPER.fromJson(message.getData(), Map.class);
+//                    // 发送邮件 // TODO 临时取消
+//                   // emailWebService.send(user.getEmail(), message.getMessageTemplate(), map, null);
+//                    message.setSendedAt(new Date());
+//                    message.setStatus(DoctorMessage.Status.SENDED.getValue());
+//                }
+//            } catch (Exception e) {
+//                log.error("email message send error, cause by {}", Throwables.getStackTraceAsString(e));
+//                message.setFailedBy("email message send error, context is " + map + ", cause by " + e.getMessage());
+//                message.setStatus(DoctorMessage.Status.FAILED.getValue());
+//            }
+//           // doctorMessageWriteService.updateMessage(message);
+//        }
+//            if (emailMessages.size() < 200){
+//                break;
+//            }
+//        }
+//    }
+//
+//    /**
+//     * app push 消息消费
+//     */
+//    public void consumeAppPush() {
+//        for (int j = 0;; j++) {
+//            List<DoctorMessage> appMessages = RespHelper.orServEx(doctorMessageReadService.findAppPushMessage(j+1, 200)).getData();
+//        for (int i = 0; appMessages != null && i < appMessages.size(); i++) {
+//            DoctorMessage message = appMessages.get(i);
+//            Map<String, Serializable> map = null;
+//            try{
+//                // 获取用户信息
+//                User user = (User) RespHelper.orServEx(userReadService.findById(message.getUserId()));
+//                if (StringUtils.isNotBlank(user.getEmail())) {
+//                    map = JsonMapper.JSON_NON_DEFAULT_MAPPER.fromJson(message.getData(), Map.class);
+//                    // app push // TODO 临时取消
+//                    // appPushWebService.send("[" + userId+ "]", doctorMessageRuleTemplate.getMessageTemplate(), map, null);
+//                    message.setSendedAt(new Date());
+//                    message.setStatus(DoctorMessage.Status.SENDED.getValue());
+//                }
+//            } catch (Exception e) {
+//                log.error("app push message send error, cause by {}", Throwables.getStackTraceAsString(e));
+//                message.setFailedBy("app push message send error, context is " + map + ", cause by " + e.getMessage());
+//                message.setStatus(DoctorMessage.Status.FAILED.getValue());
+//            }
+//            // doctorMessageWriteService.updateMessage(message);
+//        }
+//        if (appMessages.size() < 200){
+//            break;
+//        }
+//    }
+//    }
+////    public void consumeAppPush() {
+////        List<DoctorMessage> updateMessages = Lists.newArrayList();
+////        try {
+////            List<DoctorMessageRuleTemplate> templates = RespHelper.orServEx(doctorMessageRuleTemplateReadService.findAllWarnMessageTpl());
+////            templates.forEach(doctorMessageRuleTemplate -> {
+////                List<Long> userIdList = RespHelper.orServEx(doctorMessageReadService.findUserIdList(DoctorMessage.builder().templateId(doctorMessageRuleTemplate.getId()).build()));
+////                userIdList.forEach(userId -> {
+////                    StringBuilder sb = new StringBuilder();
+////                    List<DoctorMessage> appMessages = RespHelper.orServEx(doctorMessageReadService.findAppPushMessage(doctorMessageRuleTemplate.getId(), userId));
+////                    appMessages.forEach(doctorMessage -> {
+////                        Map<String, Serializable> dataMap = JsonMapper.JSON_NON_DEFAULT_MAPPER.fromJson(doctorMessage.getData(), Map.class);
+////                        if (Objects.equals(doctorMessageRuleTemplate.getCategory(), Category.FATTEN_PIG_REMOVE.getKey())){
+////                            sb.append(dataMap.get("groupCode")+",");
+////                        }else if (Objects.equals(doctorMessageRuleTemplate.getCategory(), Category.FATTEN_PIG_REMOVE.getKey())){
+////
+////                        }else {
+////                            sb.append(dataMap.get("pigCode")+",");
+////                        }
+////                        doctorMessage.setSendedAt(new Date());
+////                        doctorMessage.setStatus(DoctorMessage.Status.SENDED.getValue());
+////                        updateMessages.add(doctorMessage);
+////                    });
+////                    Map<String, Serializable> map = Maps.newHashMap();
+////                    map.put("code", sb);
+////                    map.put("after_open", "go_url");
+////                    map.put("title", doctorMessageRuleTemplate.getName());
+////                    map.put("ticker", doctorMessageRuleTemplate.getName());
+////                   // appPushWebService.send("[" + userId+ "]", doctorMessageRuleTemplate.getMessageTemplate(), map, null);
+////                });
+////            });
+////
+////        }  catch (Exception e) {
+////            log.error("app push message send error, cause by {}", Throwables.getStackTraceAsString(e));
+////            updateMessages.forEach(doctorMessage -> {
+////                doctorMessageWriteService.updateMessage(doctorMessage);
+////                doctorMessage.setFailedBy("app push message send error, cause by " + e.getMessage());
+////                doctorMessage.setStatus(DoctorMessage.Status.FAILED.getValue());
+////            });
+////        }
+//////        updateMessages.forEach(doctorMessage -> {
+//////            doctorMessageWriteService.updateMessage(doctorMessage);
+//////        });
+////    }
+//
     // 获取url
     private String getAppUrl(DoctorMessage doctorMessage) {
         StringBuilder sb = new StringBuilder();
@@ -288,5 +285,46 @@ public class MsgManager {
             sb.append(doctorMessage.getUrl()).append(urlPart).append(doctorMessage.getBusinessId());
         }
         return sb.toString();
+    }
+
+    /**
+     * 获取不同的url
+     *
+     * @param url     url
+     * @param channel 发送渠道, app推送需要带 http:// 的全url
+     */
+    private String getUrl(String url, Integer channel) {
+        if (org.apache.commons.lang3.StringUtils.isBlank(url)) {
+            return url;
+        }
+        // 如果是 app 推送
+        if (Objects.equals(channel, Rule.Channel.APPPUSH.getValue())) {
+            return url;
+        }
+        // 否则去除前缀
+        if (url.contains("http://")) {
+            String url1 = url.substring(7);
+            url1 = url1.substring(url1.indexOf("/"));
+            return url1;
+        } else {
+            return url.substring(url.indexOf("/"));
+        }
+    }
+
+    /**
+     * 获取具体的模板名称
+     *
+     * @param tplName 模板基名
+     * @param channel 渠道
+     * @return
+     */
+    private String getTemplateName(String tplName, Integer channel) {
+        if (org.apache.commons.lang3.StringUtils.isNotBlank(tplName)) {
+            Rule.Channel type = Rule.Channel.from(channel);
+            if (type != null) {
+                return tplName + "." + type.getSuffix();
+            }
+        }
+        return tplName;
     }
 }

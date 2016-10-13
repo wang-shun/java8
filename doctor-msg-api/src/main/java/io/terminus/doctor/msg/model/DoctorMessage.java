@@ -2,7 +2,6 @@ package io.terminus.doctor.msg.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Builder;
 
@@ -44,11 +43,6 @@ public class DoctorMessage implements Serializable {
     private Long roleId;
 
     /**
-     * 用户id
-     */
-    private Long userId;
-
-    /**
      * 消息规则模板id
      */
     private Long templateId;
@@ -86,40 +80,16 @@ public class DoctorMessage implements Serializable {
     private String data;
 
     /**
-     * 发送的内容(模板编译之后)
-     */
-    private String content;
-
-    /**
-     * 消息发送渠道. 0->站内信, 1->短信, 2->邮箱, 3->app推送
-     */
-    private Integer channel;
-
-    /**
      * app回调url
      */
     private String url;
 
-    /**
-     * 状态 1:未发送, 2:已发送, 3:已读,  -1:删除, -2:发送失败
-     */
-    private Integer status;
 
     /**
      * 未读消息的数量
      * (数据库没有对应字段)
      */
     private Long noReadCount;
-
-    /**
-     * 发送时间
-     */
-    private Date sendedAt;
-
-    /**
-     * 失败原因
-     */
-    private String failedBy;
 
     /**
      * 操作人id
@@ -137,50 +107,8 @@ public class DoctorMessage implements Serializable {
     private Date updatedAt;
 
     /**
-     * 消息是否过期: 0 未过期、1 过期
-     */
-    private Integer isExpired;
-
-    /**
      * 消息对应的操作id: 猪id、猪群id、物料id
      */
     private Long businessId;
 
-    /**
-     * 状态枚举值
-     */
-    public enum Status {
-        NORMAL(1, "未发送"),
-        SENDED(2, "已发送"),
-        READED(3, "已读"),
-        DELETE(-1, "删除"),
-        FAILED(-2, "发送失败");
-
-        @Getter
-        private Integer value;
-
-        @Getter
-        private String describe;
-
-        Status(Integer value, String describe) {
-            this.value = value;
-            this.describe = describe;
-        }
-    }
-
-    public enum IsExpired {
-        NOTEXPIRED(0, "未过期"),
-        EXPIRED(1, "已过期");
-
-        @Getter
-        private Integer value;
-
-        @Getter
-        private String describe;
-
-        IsExpired(Integer value, String describe) {
-            this.value = value;
-            this.describe = describe;
-        }
-    }
 }

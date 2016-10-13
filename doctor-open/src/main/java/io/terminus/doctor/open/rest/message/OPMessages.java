@@ -1,6 +1,6 @@
 package io.terminus.doctor.open.rest.message;
 
-import io.terminus.doctor.msg.service.DoctorMessageReadService;
+import io.terminus.doctor.msg.service.DoctorMessageUserReadService;
 import io.terminus.doctor.open.util.OPRespHelper;
 import io.terminus.pampas.common.UserUtil;
 import io.terminus.pampas.openplatform.annotations.OpenBean;
@@ -17,11 +17,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 @SuppressWarnings("unused")
 public class OPMessages {
 
-    private final DoctorMessageReadService doctorMessageReadService;
+    private final DoctorMessageUserReadService doctorMessageUserReadService;
 
     @Autowired
-    public OPMessages(DoctorMessageReadService doctorMessageReadService) {
-        this.doctorMessageReadService = doctorMessageReadService;
+    public OPMessages(DoctorMessageUserReadService doctorMessageUserReadService) {
+        this.doctorMessageUserReadService = doctorMessageUserReadService;
     }
 
     /**
@@ -30,6 +30,6 @@ public class OPMessages {
      */
     @OpenMethod(key = "get.unread.message")
     public Integer getUnReadMessages() {
-        return OPRespHelper.orOPEx(doctorMessageReadService.findNoReadCount(UserUtil.getUserId())).intValue();
+        return OPRespHelper.orOPEx(doctorMessageUserReadService.findNoReadCount(UserUtil.getUserId())).intValue();
     }
 }

@@ -58,6 +58,9 @@
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.msg.service.DoctorMessageTemplateReadService" id="doctorMessageTemplateReadService" check="false"/>
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.event.service.DoctorVaccinationPigWarnReadService" id="doctorVaccinationPigWarnReadService" check="false"/>
     <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.event.service.DoctorVaccinationPigWarnWriteService" id="doctorVaccinationPigWarnWriteService" check="false"/>
+    <dubbo:reference version="1.0.0" retries="0" interface="io.terminus.doctor.msg.service.DoctorMessageUserWriteService" id="doctorMessageUserWriteService" check="false"/>
+
+
 
 
     <!-- message service -->

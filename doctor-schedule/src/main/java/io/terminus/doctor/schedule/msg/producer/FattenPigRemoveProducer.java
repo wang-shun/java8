@@ -3,8 +3,6 @@ package io.terminus.doctor.schedule.msg.producer;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.api.client.util.Maps;
 import com.google.common.base.Throwables;
-import com.google.common.collect.Lists;
-import io.terminus.common.utils.Splitters;
 import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dto.DoctorGroupDetail;
@@ -16,7 +14,6 @@ import io.terminus.doctor.msg.dto.Rule;
 import io.terminus.doctor.msg.dto.RuleValue;
 import io.terminus.doctor.msg.dto.SubUser;
 import io.terminus.doctor.msg.enums.Category;
-import io.terminus.doctor.msg.model.DoctorMessage;
 import io.terminus.doctor.msg.model.DoctorMessageRuleRole;
 import io.terminus.doctor.msg.service.DoctorMessageReadService;
 import io.terminus.doctor.msg.service.DoctorMessageRuleReadService;
@@ -50,9 +47,8 @@ public class FattenPigRemoveProducer extends AbstractJobProducer {
     }
 
     @Override
-    protected List<DoctorMessage> message(DoctorMessageRuleRole ruleRole, List<SubUser> subUsers) {
+    protected void message(DoctorMessageRuleRole ruleRole, List<SubUser> subUsers) {
         log.info("育肥猪出栏提示消息产生 --- FattenPigRemoveProducer 开始执行");
-        List<DoctorMessage> messages = Lists.newArrayList();
 
         Rule rule = ruleRole.getRule();
         // ruleValue map
@@ -72,7 +68,7 @@ public class FattenPigRemoveProducer extends AbstractJobProducer {
                     //根据用户拥有的猪舍权限过滤拥有user
                     List<SubUser> sUsers = filterSubUserBarnId(subUsers, doctorGroupDetail.getGroup().getCurrentBarnId());
                     if (checkRuleValue(ruleValueMap.get(1), (double) doctorGroupDetail.getGroupTrack().getAvgDayAge())) {
-                        messages.addAll(getMessage(doctorGroupDetail, rule.getChannels(), ruleRole, sUsers, rule.getUrl(), null));
+                        getMessage(doctorGroupDetail, ruleRole, sUsers, rule.getUrl(), null);
                     }
                 } catch (Exception e) {
                     log.error("[FattenPigRemoveProducer]->message.failed");
@@ -80,25 +76,19 @@ public class FattenPigRemoveProducer extends AbstractJobProducer {
 
             });
         }
-        log.info("育肥猪出栏提示消息产生 --- FattenPigRemoveProducer 结束执行, 产生 {} 条消息", messages.size());
-        return messages;
+        log.info("育肥猪出栏提示消息产生 --- FattenPigRemoveProducer 结束执行");
     }
 
     /**
      * 创建消息
      */
-    private List<DoctorMessage> getMessage(DoctorGroupDetail doctorGroupDetail, String channels, DoctorMessageRuleRole ruleRole, List<SubUser> subUsers, String url, Integer eventType) {
-        List<DoctorMessage> messages = Lists.newArrayList();
+    private void getMessage(DoctorGroupDetail doctorGroupDetail, DoctorMessageRuleRole ruleRole, List<SubUser> subUsers, String url, Integer eventType) {
         // 创建消息
         Map<String, Object> jsonData = GroupDetailFactory.getInstance().createGroupMessage(doctorGroupDetail, url);
-
-        Splitters.COMMA.splitToList(channels).forEach(channel -> {
             try {
-                messages.addAll(createMessage(subUsers, ruleRole, Integer.parseInt(channel), MAPPER.writeValueAsString(jsonData), eventType));
+                createMessage(subUsers, ruleRole, MAPPER.writeValueAsString(jsonData), eventType, doctorGroupDetail.getGroup().getId());
             } catch (JsonProcessingException e) {
                 log.error("message produce error, cause by {}", Throwables.getStackTraceAsString(e));
             }
-        });
-        return messages;
     }
 }

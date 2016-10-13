@@ -51,6 +51,16 @@ public class DoctorMessageRuleReadServiceImpl implements DoctorMessageRuleReadSe
     }
 
     @Override
+    public Response<List<DoctorMessageRule>> findNormalMessageRulesByTplId(Long templateId) {
+        try{
+            return Response.ok(doctorMessageRuleDao.findByTpl(templateId));
+        } catch (Exception e) {
+            log.error("find normal messageRule by tplId failed, tplId is {}, cause by {}", templateId, Throwables.getStackTraceAsString(e));
+            return Response.fail("normal.messageRule.find.fail");
+        }
+    }
+
+    @Override
     public Response<List<DoctorMessageRule>> findMessageRulesByFarmId(Long farmId) {
         try{
             return Response.ok(doctorMessageRuleDao.findByFarmId(farmId));

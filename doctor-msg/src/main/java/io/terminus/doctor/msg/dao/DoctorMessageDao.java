@@ -2,7 +2,6 @@ package io.terminus.doctor.msg.dao;
 
 import com.google.common.collect.ImmutableMap;
 import io.terminus.common.mysql.dao.MyBatisDao;
-import io.terminus.doctor.msg.dto.DoctorMessageSearchDto;
 import io.terminus.doctor.msg.model.DoctorMessage;
 import org.springframework.stereotype.Repository;
 
@@ -17,15 +16,6 @@ import java.util.Map;
  */
 @Repository
 public class DoctorMessageDao extends MyBatisDao<DoctorMessage> {
-
-    /**
-     * 获取未读站内信的数量
-     * @param userId    用户id
-     * @return
-     */
-    public Long findNoReadCount(Long userId) {
-        return getSqlSession().selectOne(sqlId("findNoReadCount"), userId);
-    }
 
     /**
      * 获取系统消息(最新)
@@ -57,15 +47,6 @@ public class DoctorMessageDao extends MyBatisDao<DoctorMessage> {
     public DoctorMessage findLatestWarnMessage(Long templateId, Long farmId) {
         return getSqlSession().selectOne(sqlId("findLatestWarnMessage2"),
                 ImmutableMap.of("templateId", templateId, "farmId", farmId));
-    }
-
-    /**
-     * 根据条件获取businessId列表
-     * @param doctorMessageSearchDto
-     * @return
-     */
-    public List<Long> findBusinessListByCriteria(DoctorMessageSearchDto doctorMessageSearchDto){
-        return getSqlSession().selectList(sqlId("businessIdList"), doctorMessageSearchDto);
     }
 
     /**

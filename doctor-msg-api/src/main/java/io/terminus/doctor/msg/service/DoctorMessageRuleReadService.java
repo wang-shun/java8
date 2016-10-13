@@ -30,6 +30,13 @@ public interface DoctorMessageRuleReadService {
     Response<List<DoctorMessageRule>> findMessageRulesByTplId(Long tplId);
 
     /**
+     * 根据模板id获取与猪场绑定的正常状态规则列表
+     * @param tplId 模板id
+     * @return
+     */
+    Response<List<DoctorMessageRule>> findNormalMessageRulesByTplId(Long tplId);
+
+    /**
      * 根据猪场id查询
      * @param farmId    猪场id
      * @return

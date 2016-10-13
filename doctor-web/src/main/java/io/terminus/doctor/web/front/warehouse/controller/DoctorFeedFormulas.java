@@ -20,8 +20,6 @@ import io.terminus.doctor.warehouse.service.FeedFormulaReadService;
 import io.terminus.doctor.warehouse.service.FeedFormulaWriteService;
 import io.terminus.doctor.web.front.event.service.DoctorGroupWebService;
 import io.terminus.pampas.common.UserUtil;
-import io.terminus.parana.user.model.User;
-import io.terminus.parana.user.service.UserReadService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;

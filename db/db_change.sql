@@ -388,7 +388,6 @@ add column group_code varchar(640) DEFAULT NULL COMMENT '猪群名称' after gro
 
 -- 2016-9-21
 ALTER TABLE doctor_messages ADD COLUMN event_type INT (11) DEFAULT NULL comment '需要操作的事件类型' after   `type`;
-
 -- 2016-09-22 增加索引
 create index doctor_pig_events_type on doctor_pig_events(type);
 create index doctor_pig_events_parity on doctor_pig_events(parity);
@@ -456,6 +455,34 @@ alter table doctor_material_consume_providers
 add column `provider_factory_id` bigint(20) unsigned DEFAULT NULL COMMENT '供货厂家id' after group_code,
 add column `provider_factory_name` varchar(64) DEFAULT NULL COMMENT '供货厂家' after provider_factory_id;
 
+-- 2016-10-12 优化消息
+-- 用户消息权限表
+DROP TABLE IF EXISTS `doctor_message_user`;
+CREATE TABLE IF NOT EXISTS `doctor_message_user` (
+	`id`	BIGINT(20) NOT NULL AUTO_INCREMENT COMMENT '自增主键',
+	`farm_id`	BIGINT(20) DEFAULT NULL COMMENT '猪场id',
+	`template_id` 	BIGINT(20) DEFAULT NULL COMMENT '消息规则模板id',
+	`user_id` BIGINT(20) DEFAULT NULL COMMENT '用户id',
+	`message_id` BIGINT(20) DEFAULT NULL COMMENT '消息id',
+	`business_id` BIGINT(20) DEFAULT NULL COMMENT '关联的操作对象id',
+	`status_sys` SMALLINT(6) DEFAULT NULL COMMENT '状态 1:未发送, 2:已发送, 3:已读,  -1:删除, -2:发送失败',
+	`status_sms` SMALLINT(6) DEFAULT NULL COMMENT '状态 1:未发送, 2:已发送, 3:已读,  -1:删除, -2:发送失败',
+	`status_email` SMALLINT(6) DEFAULT NULL COMMENT '状态 1:未发送, 2:已发送, 3:已读,  -1:删除, -2:发送失败',
+	`status_app` SMALLINT(6) DEFAULT NULL COMMENT '状态 1:未发送, 2:已发送, 3:已读,  -1:删除, -2:发送失败',
+	`created_at`	DATETIME DEFAULT NULL COMMENT '创建时间',
+	`updated_at`	DATETIME DEFAULT NULL COMMENT '更新时间',
+	PRIMARY KEY (`id`)
+	)ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='用户消息关联表';
+	CREATE INDEX idx_message_user_id ON doctor_message_user(`user_id`);
+
+	ALTER TABLE `doctor_messages`
+	DROP COLUMN `user_id`,
+	DROP COLUMN `status`,
+	DROP COLUMN `channel`,
+	DROP COLUMN `is_expired`,
+	DROP COLUMN `content`,
+	DROP COLUMN `sended_at`,
+	DROP COLUMN `failed_by`;
+
 -- 2016-10-10 猪群批次总结增加日增重
 ALTER TABLE doctor_group_batch_summaries ADD COLUMN daily_weight_gain DOUBLE DEFAULT NULL COMMENT '日增重(kg)' AFTER unq_count;
-

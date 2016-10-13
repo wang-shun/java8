@@ -8,8 +8,6 @@ import io.terminus.doctor.msg.model.DoctorMessage;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.List;
-
 /**
  * Created by xiao on 16/9/4.
  */
@@ -24,7 +22,7 @@ public class DoctorMessageReadServiceTest extends BaseServiceTest {
     @Test
     public void test_pagingWarnMessage(){
         DoctorMessageSearchDto doctorMessage = (DoctorMessageSearchDto) DoctorMessage.builder()
-                .isExpired(DoctorMessage.IsExpired.NOTEXPIRED.getValue())
+              //  .isExpired(DoctorMessage.IsExpired.NOTEXPIRED.getValue())
                 .farmId(1l)
                 .templateId(9l)
                 .build();
@@ -44,11 +42,11 @@ public class DoctorMessageReadServiceTest extends BaseServiceTest {
 
     @Test
     public void test_queryBusinessId(){
-        DoctorMessageSearchDto doctorMessage = new DoctorMessageSearchDto();
-                doctorMessage.setFarmId(1l);
-                doctorMessage.setStatus(DoctorMessage.Status.NORMAL.getValue());
-                doctorMessage.setIsExpired(DoctorMessage.IsExpired.NOTEXPIRED.getValue());
-        Response<List<Long>> listResponse = doctorMessageReadService.findBusinessListByCriteria(doctorMessage);
-        System.out.println(listResponse.getResult().size());
+//        DoctorMessageSearchDto doctorMessage = new DoctorMessageSearchDto();
+//                doctorMessage.setFarmId(1l);
+//                doctorMessage.setStatus(DoctorMessage.Status.NORMAL.getValue());
+//                doctorMessage.setIsExpired(DoctorMessage.IsExpired.NOTEXPIRED.getValue());
+//        Response<List<Long>> listResponse = doctorMessageReadService.findBusinessListByCriteria(doctorMessage);
+//        System.out.println(listResponse.getResult().size());
     }
 }

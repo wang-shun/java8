@@ -16,7 +16,6 @@ import io.terminus.doctor.msg.dto.Rule;
 import io.terminus.doctor.msg.dto.RuleValue;
 import io.terminus.doctor.msg.dto.SubUser;
 import io.terminus.doctor.msg.enums.Category;
-import io.terminus.doctor.msg.model.DoctorMessage;
 import io.terminus.doctor.msg.model.DoctorMessageRule;
 import io.terminus.doctor.msg.model.DoctorMessageRuleRole;
 import io.terminus.doctor.msg.model.DoctorMessageRuleTemplate;
@@ -75,21 +74,19 @@ public class SowEliminateProducer extends AbstractJobProducer {
     }
 
     @Override
-    protected List<DoctorMessage> message(DoctorMessageRuleRole ruleRole, List<SubUser> subUsers) {
+    protected void message(DoctorMessageRuleRole ruleRole, List<SubUser> subUsers) {
 
         log.info("母猪应淘汰消息产生 --- SowEliminateProducer 开始执行");
-        List<DoctorMessage> messages = Lists.newArrayList();
-        handleMessages(ruleRole.getRule(), ruleRole.getTemplateId(), ruleRole.getFarmId(), true, messages, ruleRole, subUsers);
-        log.info("母猪应淘汰消息产生 --- SowEliminateProducer 结束执行, 产生 {} 条消息", messages.size());
-        return messages;
+        handleMessages(ruleRole.getRule(), ruleRole.getTemplateId(), ruleRole.getFarmId(), true, ruleRole, subUsers);
+        log.info("母猪应淘汰消息产生 --- SowEliminateProducer 结束执行");
     }
 
     @Override
     protected void recordPigMessages(DoctorMessageRule messageRule) {
-        handleMessages(messageRule.getRule(), messageRule.getTemplateId(), messageRule.getFarmId(), false, null, null, null);
+        handleMessages(messageRule.getRule(), messageRule.getTemplateId(), messageRule.getFarmId(), false, null, null);
     }
 
-    private void handleMessages(Rule rule, Long tplId, Long farmId, boolean isMessage, List<DoctorMessage> messages, DoctorMessageRuleRole ruleRole, List<SubUser> subUsers) {
+    private void handleMessages(Rule rule, Long tplId, Long farmId, boolean isMessage, DoctorMessageRuleRole ruleRole, List<SubUser> subUsers) {
         // ruleValue map
         Map<Integer, RuleValue> ruleValueMap = Maps.newHashMap();
         for (int i = 0; rule.getValues() != null && i < rule.getValues().size(); i++) {
@@ -171,7 +168,7 @@ public class SowEliminateProducer extends AbstractJobProducer {
                                     recordPigMessage(pigDto, PigEvent.REMOVAL, null, ruleValue, null);
                                 } else if (isMessage) {
                                     pigDto.setReason(ruleValue.getDescribe() + ruleValue.getValue().intValue());
-                                    messages.addAll(getMessage(pigDto, rule.getChannels(), ruleRole, sUsers, timeDiff, rule.getUrl(), PigEvent.REMOVAL.getKey()));
+                                   getMessage(pigDto, ruleRole, sUsers, timeDiff, rule.getUrl(), PigEvent.REMOVAL.getKey());
                                 }
                             }
                         });

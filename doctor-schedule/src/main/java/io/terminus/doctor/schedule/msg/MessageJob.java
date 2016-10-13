@@ -76,7 +76,7 @@ public class MessageJob {
                 return;
             }
             log.info("msg message consume fired");
-            msgManager.consumeEmail();
+           // msgManager.consumeEmail();
             log.info("msg message consume end");
         } catch (Exception e) {
             log.error("msg message consume failed, cause by {}", Throwables.getStackTraceAsString(e));
@@ -95,7 +95,7 @@ public class MessageJob {
                 return;
             }
             log.info("app push message consume fired");
-            msgManager.consumeAppPush();
+          //  msgManager.consumeAppPush();
             log.info("app push message consume end");
         } catch (Exception e) {
             log.error("app push message consume failed, cause by {}", Throwables.getStackTraceAsString(e));
