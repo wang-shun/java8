@@ -262,7 +262,7 @@ public class DoctorBarns {
         barn.setFarmName(farm.getName());
 
         if (barn.getId() == null) {
-            barn.setStatus(DoctorBarn.Status.NOUSE.getValue());     //初始猪舍状态: 未用
+            barn.setStatus(DoctorBarn.Status.USING.getValue());     //初始猪舍状态: 在用
             barn.setCanOpenGroup(DoctorBarn.CanOpenGroup.YES.getValue());  //初始是否可建群: 可建群
             barnId = RespHelper.or500(doctorBarnWriteService.createBarn(barn));
 
