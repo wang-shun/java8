@@ -483,3 +483,6 @@ CREATE TABLE IF NOT EXISTS `doctor_message_user` (
 	DROP COLUMN `content`,
 	DROP COLUMN `sended_at`,
 	DROP COLUMN `failed_by`;
+
+-- 2016-10-10 猪群批次总结增加日增重
+ALTER TABLE doctor_group_batch_summaries ADD COLUMN daily_weight_gain DOUBLE DEFAULT NULL COMMENT '日增重(kg)' AFTER unq_count;
