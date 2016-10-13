@@ -567,7 +567,9 @@ public class DoctorMoveDataService {
                 .findByHbsSql(moveId, View_GainCardList.class, "DoctorGroup-GainCardList")).stream()
                 .filter(loc -> isFarm(loc.getFarmOutId(), farm.getOutId()))
                 .map(gain -> getGroup(farm, gain, barnMap, basicMap, subMap)).collect(Collectors.toList());
-        doctorGroupDao.creates(groups);
+        if(!groups.isEmpty()){
+            doctorGroupDao.creates(groups);
+        }
 
         //查出刚插入的group, key = outId, 查询猪, 为转种猪事件做准备
         Map<String, DoctorGroup> groupMap = doctorGroupDao.findByFarmId(farm.getId()).stream().collect(Collectors.toMap(DoctorGroup::getOutId, v -> v));
@@ -579,7 +581,9 @@ public class DoctorMoveDataService {
                 .findByHbsSql(moveId, View_EventListGain.class, "DoctorGroupEvent-EventListGain")).stream()
                 .map(gainEvent -> getGroupEvent(groupMap, gainEvent, subMap, barnMap, basicMap, changeReasonMap, customerMap, vaccMap, pigMap))
                 .collect(Collectors.toList());
-        doctorGroupEventDao.creates(events);
+        if(!events.isEmpty()){
+            doctorGroupEventDao.creates(events);
+        }
 
         //查出刚才插入的groupEvent, 按照猪群id groupBy
         Map<Long, List<DoctorGroupEvent>> eventMap = doctorGroupEventDao.findByFarmId(farm.getId()).stream().collect(Collectors.groupingBy(DoctorGroupEvent::getGroupId));
@@ -594,7 +598,9 @@ public class DoctorMoveDataService {
         List<DoctorGroupTrack> groupTracks = groupMap.values().stream()
                 .map(group -> getGroupTrack(group, gainMap.get(group.getOutId()), eventMap.get(group.getId())))
                 .collect(Collectors.toList());
-        doctorGroupTrackDao.creates(groupTracks);
+        if(!groupTracks.isEmpty()){
+            doctorGroupTrackDao.creates(groupTracks);
+        }
 
         //批次总结
         createClosedGroupSummary(farm.getId());
@@ -632,7 +638,10 @@ public class DoctorMoveDataService {
                 .findByHbsSql(moveId, View_SowCardList.class, "DoctorPig-SowCardList")).stream()
                 .filter(loc -> isFarm(loc.getFarmOutId(), farm.getOutId()))
                 .collect(Collectors.toList());
-        doctorPigDao.creates(sowCards.stream().map(card -> getSow(card, farm, basicMap)).collect(Collectors.toList()));
+        List<DoctorPig> pigs = sowCards.stream().map(card -> getSow(card, farm, basicMap)).collect(Collectors.toList());
+        if(!pigs.isEmpty()){
+            doctorPigDao.creates(pigs);
+        }
 
         //查出母猪, 转换成map
         Map<String, DoctorPig> sowMap = doctorPigDao.findPigsByFarmIdAndPigType(farm.getId(), DoctorPig.PIG_TYPE.SOW.getKey()).stream()
@@ -657,7 +666,9 @@ public class DoctorMoveDataService {
                 .collect(Collectors.toList());
 
         //数据量略大, 分成5份插入吧
-        Lists.partition(sowEvents, 5).forEach(doctorPigEventDao::creates);
+        if(!sowEvents.isEmpty()){
+            Lists.partition(sowEvents, 5).forEach(doctorPigEventDao::creates);
+        }
 
         //查出母猪事件, 按照母猪分组
         Map<Long, List<DoctorPigEvent>> sowEventMap = doctorPigEventDao.findByFarmIdAndKind(farm.getId(), DoctorPig.PIG_TYPE.SOW.getKey())
@@ -674,7 +685,9 @@ public class DoctorMoveDataService {
                 })
                 .filter(Arguments::notNull)
                 .collect(Collectors.toList());
-        doctorPigTrackDao.creates(sowTracks);
+        if(!sowTracks.isEmpty()){
+            doctorPigTrackDao.creates(sowTracks);
+        }
 
         //如果是哺乳状态, 设置一下哺乳猪群的信息
         updateBuruSowTrack(farm);
@@ -1507,7 +1520,10 @@ public class DoctorMoveDataService {
                 .findByHbsSql(moveId, View_BoarCardList.class, "DoctorPig-BoarCardList")).stream()
                 .filter(loc -> isFarm(loc.getFarmOutId(), farm.getOutId()))
                 .collect(Collectors.toList());
-        doctorPigDao.creates(boarCards.stream().map(card -> getBoar(card, farm, basicMap)).collect(Collectors.toList()));
+        List<DoctorPig> pigs = boarCards.stream().map(card -> getBoar(card, farm, basicMap)).collect(Collectors.toList());
+        if(!pigs.isEmpty()){
+            doctorPigDao.creates(pigs);
+        }
 
         //查出公猪, 转换成map
         Map<String, DoctorPig> boarMap = doctorPigDao.findPigsByFarmIdAndPigType(farm.getId(), DoctorPig.PIG_TYPE.BOAR.getKey()).stream()
@@ -1518,7 +1534,9 @@ public class DoctorMoveDataService {
                 .findByHbsSql(moveId, View_EventListBoar.class, "DoctorPigEvent-EventListBoar")).stream()
                 .filter(loc -> isFarm(loc.getFarmOutId(), farm.getOutId()))
                 .map(event -> getBoarEvent(event, boarMap, barnMap, basicMap, subMap, customerMap, changeReasonMap, vaccMap)).collect(Collectors.toList());
-        doctorPigEventDao.creates(boarEvents);
+        if(!boarEvents.isEmpty()){
+            doctorPigEventDao.creates(boarEvents);
+        }
 
         //查出公猪事件, 按照公猪分组
         Map<Long, List<DoctorPigEvent>> boarEventMap = doctorPigEventDao.findByFarmIdAndKind(farm.getId(), DoctorPig.PIG_TYPE.BOAR.getKey())
@@ -1535,7 +1553,9 @@ public class DoctorMoveDataService {
                 })
                 .filter(Arguments::notNull)
                 .collect(Collectors.toList());
-        doctorPigTrackDao.creates(boarTracks);
+        if(!boarTracks.isEmpty()){
+            doctorPigTrackDao.creates(boarTracks);
+        }
     }
 
     //更新猪的relEventId, 后面的事件存一下前面事件的id
