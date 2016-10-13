@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.ImmutableList;
+import io.terminus.common.utils.Arguments;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.msg.dto.DoctorMessageSearchDto;
@@ -285,6 +286,9 @@ public abstract class AbstractProducer implements IProducer {
             messageList.forEach(doctorMessage -> {
                 doctorMessageWriteService.updateMessage(doctorMessage);
             });
+            return;
+        }
+        if (Arguments.isNullOrEmpty(subUsers)){
             return;
         }
         DoctorMessageRuleTemplate template = RespHelper.orServEx(doctorMessageRuleTemplateReadService.findMessageRuleTemplateById(ruleRole.getTemplateId()));
