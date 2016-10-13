@@ -46,6 +46,7 @@ public class DoctorMessageEventListener implements EventListener{
     @PostConstruct
     public void subs() {
         try{
+            log.info("subscriber--{}", subscriber);
             if (subscriber == null) {
                 return;
             }
