@@ -28,6 +28,7 @@
         <result column="dead_rate" property="deadRate"/>
         <result column="wean_count" property="weanCount"/>
         <result column="unq_count" property="unqCount"/>
+        <result column="daily_weight_gain" property="dailyWeightGain"/>
         <result column="wean_avg_weight" property="weanAvgWeight"/>
         <result column="sale_count" property="saleCount"/>
         <result column="sale_amount" property="saleAmount"/>
@@ -77,6 +78,7 @@
         dead_rate,
         wean_count,
         unq_count,
+        daily_weight_gain,
         wean_avg_weight,
         sale_count,
         sale_amount,
@@ -118,6 +120,7 @@
         #{deadRate},
         #{weanCount},
         #{unqCount},
+        #{dailyWeightGain},
         #{weanAvgWeight},
         #{saleCount},
         #{saleAmount},
@@ -160,6 +163,7 @@
         <if test="deadRate != null">AND dead_rate = #{deadRate}</if>
         <if test="weanCount != null">AND wean_count = #{weanCount}</if>
         <if test="unqCount != null">AND unq_count = #{unqCount}</if>
+        <if test="dailyWeightGain != null">AND daily_weight_gain = #{dailyWeightGain}</if>
         <if test="weanAvgWeight != null">AND wean_avg_weight = #{weanAvgWeight}</if>
         <if test="saleCount != null">AND sale_count = #{saleCount}</if>
         <if test="saleAmount != null">AND sale_amount = #{saleAmount}</if>
@@ -174,9 +178,6 @@
         <if test="inCost != null">AND in_cost = #{inCost}</if>
         <if test="fcr != null">AND fcr = #{fcr}</if>
         <if test="outCost != null">AND out_cost = #{outCost}</if>
-
-
-
     </sql>
 
     <insert id="create" parameterType="DoctorGroupBatchSummary" keyProperty="id" useGeneratedKeys="true">
@@ -213,6 +214,7 @@
             #{item.deadRate},
             #{item.weanCount},
             #{item.unqCount},
+            #{item.dailyWeightGain},
             #{item.weanAvgWeight},
             #{item.saleCount},
             #{item.saleAmount},
@@ -229,7 +231,6 @@
             #{item.outCost},
             now(),
             now()
-
             )
         </foreach>
     </insert>
@@ -263,6 +264,7 @@
             <if test="deadRate != null">dead_rate = #{deadRate},</if>
             <if test="weanCount != null">wean_count = #{weanCount},</if>
             <if test="unqCount != null">unq_count = #{unqCount},</if>
+            <if test="dailyWeightGain != null">daily_weight_gain = #{dailyWeightGain},</if>
             <if test="weanAvgWeight != null">wean_avg_weight = #{weanAvgWeight},</if>
             <if test="saleCount != null">sale_count = #{saleCount},</if>
             <if test="saleAmount != null">sale_amount = #{saleAmount},</if>

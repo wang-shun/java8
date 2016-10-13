@@ -102,7 +102,7 @@ public class DoctorGroupTrack implements Serializable {
     private Integer unweanQty;
 
     /**
-     * 不合格数
+     * 合格数(需求变更，只需要合格数了，这里翻一下)
      */
     private Integer unqQty;
     

@@ -41,21 +41,27 @@ public class DoctorRollbackSowFarrowHandler extends DoctorAbstractRollbackPigEve
             return false;
         }
 
-        //母猪分娩会触发转入猪群事件，如果有新建猪群，还要校验最新事件
-        DoctorGroupEvent toGroupEvent = doctorGroupEventDao.findByRelPigEventId(pigEvent.getId());
-        return isRelLastGroupEvent(toGroupEvent);
+        //注意分娩全是死胎的情况，此时没有猪群事件
+        if (pigEvent.getLiveCount() > 0) {
+            //母猪分娩会触发转入猪群事件，如果有新建猪群，还要校验最新事件(分娩)
+            DoctorGroupEvent toGroupEvent = doctorGroupEventDao.findByRelPigEventId(pigEvent.getId());
+            return isRelLastGroupEvent(toGroupEvent);
+        }
+        return true;
     }
 
     @Override
     protected void handleRollback(DoctorPigEvent pigEvent, Long operatorId, String operatorName) {
-        //1.转入猪群
-        DoctorGroupEvent toGroupEvent = doctorGroupEventDao.findByRelPigEventId(pigEvent.getId());
-        doctorRollbackGroupMoveInHandler.rollback(toGroupEvent, operatorId, operatorName);
-
-        //2.新建猪群 if exist
-        if (Objects.equals(toGroupEvent.getType(), GroupEventType.NEW.getValue())) {
-            DoctorGroupEvent totoGroupEvent = doctorGroupEventDao.findByRelGroupEventId(toGroupEvent.getId());
-            doctorRollbackGroupNewHandler.rollback(totoGroupEvent, operatorId, operatorName);
+        if (pigEvent.getLiveCount() > 0) {
+            //1.判断是否新建猪群
+            DoctorGroupEvent toGroupEvent = doctorGroupEventDao.findByRelPigEventId(pigEvent.getId());
+            if (Objects.equals(toGroupEvent.getType(), GroupEventType.NEW.getValue())) {
+                DoctorGroupEvent moveInEvent = doctorGroupEventDao.findByRelGroupEventId(toGroupEvent.getId());
+                doctorRollbackGroupMoveInHandler.rollback(moveInEvent, operatorId, operatorName);
+                doctorRollbackGroupNewHandler.rollback(toGroupEvent, operatorId, operatorName);
+            } else {
+                doctorRollbackGroupMoveInHandler.rollback(toGroupEvent, operatorId, operatorName);
+            }
         }
         //3. 母猪分娩
         handleRollbackWithStatus(pigEvent, operatorId, operatorName);
@@ -72,7 +78,7 @@ public class DoctorRollbackSowFarrowHandler extends DoctorAbstractRollbackPigEve
 
         //更新统计：存栏日报，存栏月报，猪舍统计，猪统计, 分娩统计
         fromDto.setRollbackTypes(Lists.newArrayList(RollbackType.DAILY_LIVESTOCK, RollbackType.MONTHLY_REPORT,
-                RollbackType.SEARCH_BARN, RollbackType.SEARCH_GROUP, RollbackType.DAILY_FARROW));
+                RollbackType.SEARCH_BARN, RollbackType.SEARCH_GROUP, RollbackType.DAILY_FARROW, RollbackType.SEARCH_PIG));
 
         DoctorRollbackDto toDto = new DoctorRollbackDto();
         toDto.setOrgId(pigEvent.getOrgId());

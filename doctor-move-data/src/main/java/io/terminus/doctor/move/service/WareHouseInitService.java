@@ -43,6 +43,7 @@ import io.terminus.doctor.warehouse.model.DoctorMaterialInWareHouse;
 import io.terminus.doctor.warehouse.model.DoctorMaterialPriceInWareHouse;
 import io.terminus.doctor.warehouse.model.DoctorWareHouse;
 import io.terminus.doctor.warehouse.model.DoctorWareHouseTrack;
+import io.terminus.doctor.warehouse.service.DoctorWareHouseTypeWriteService;
 import io.terminus.parana.user.impl.dao.UserProfileDao;
 import io.terminus.parana.user.model.LoginType;
 import io.terminus.parana.user.model.User;
@@ -101,6 +102,8 @@ public class WareHouseInitService {
     private MaterialInWareHouseManager materialInWareHouseManager;
     @Autowired
     private DoctorMaterialPriceInWareHouseDao doctorMaterialPriceInWareHouseDao;
+    @Autowired
+    private DoctorWareHouseTypeWriteService doctorWareHouseTypeWriteService;
 
     @Transactional
     public void init(String mobile, Long dataSourceId, DoctorFarm farm){
@@ -144,6 +147,9 @@ public class WareHouseInitService {
             this.addMaterial2Warehouse(dataSourceId, warehouseMap, basicMaterialMap, staffMap, barnMap, userProfile, stopUseMaterial);
 
             //TODO 配方
+        }else{
+            // 没有仓库数据，也要初始化仓库大类
+            RespHelper.or500(doctorWareHouseTypeWriteService.initDoctorWareHouseType(farm.getId(), farm.getName(), null, null));
         }
     }
 

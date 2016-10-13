@@ -145,6 +145,8 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
 
         DoctorGroup group = map(newGroupInput, DoctorGroup.class);
         group.setRemark(null);  //dozer不需要转换remark
+        group.setStaffId(UserUtil.getUserId());
+        group.setStaffName(orServEx(this.findRealName(UserUtil.getUserId())));
 
         //设置猪场公司信息
         DoctorFarm farm = orServEx(doctorFarmReadService.findFarmById(group.getFarmId()));
@@ -222,12 +224,12 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
                     break;
                 case DISEASE:
                     params.put("diseaseName", getBasicName(getLong(params, "diseaseId")));
-                    params.put("doctorName", getSubUserName(getLong(params, "doctorId")));
+                    params.put("doctorName", orServEx(this.findRealName(getLong(params, "doctorId"))));
                     orServEx(doctorGroupWriteService.groupEventDisease(groupDetail, map(putBasicFields(params), DoctorDiseaseGroupInput.class)));
                     break;
                 case ANTIEPIDEMIC:
                     params.put("vaccinName", getVaccinName(getLong(params, "vaccinId")));
-                    params.put("vaccinStaffName", getSubUserName(getLong(params, "vaccinStaffId")));
+                    params.put("vaccinStaffName", orServEx(this.findRealName(getLong(params, "vaccinStaffId"))));
                     params.put("vaccinItemName", getVaccinItemName(getLong(params, "vaccinItemId")));
                     orServEx(doctorGroupWriteService.groupEventAntiepidemic(groupDetail, map(putBasicFields(params), DoctorAntiepidemicGroupInput.class)));
                     break;
@@ -302,11 +304,11 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
                     break;
                 case DISEASE:
                     params.put("diseaseName", getBasicName(getLong(params, "diseaseId")));
-                    params.put("doctorName", getSubUserName(getLong(params, "doctorId")));
+                    params.put("doctorName", orServEx(this.findRealName(getLong(params, "doctorId"))));
                     orServEx(doctorGroupWriteService.editEventDisease(groupDetail, event, map(pubUpdatorFields(params), DoctorDiseaseGroupEdit.class)));
                     break;
                 case ANTIEPIDEMIC:
-                    params.put("vaccinStaffName", getSubUserName(getLong(params, "vaccinStaffId")));
+                    params.put("vaccinStaffName", orServEx(this.findRealName(getLong(params, "vaccinStaffId"))));
                     params.put("vaccinItemName", getVaccinItemName(getLong(params, "vaccinItemId")));
                     orServEx(doctorGroupWriteService.editEventAntiepidemic(groupDetail, event, map(pubUpdatorFields(params), DoctorAntiepidemicGroupEdit.class)));
                     break;
@@ -399,22 +401,15 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
         return changeReasonId == null ? null : RespHelper.or(doctorBasicReadService.findChangeReasonById(changeReasonId), new DoctorChangeReason()).getReason();
     }
 
-    //获取职工用户的名称
-    private String getSubUserName(Long userId) {
-        if (userId == null) {
-            return null;
-        }
-        Sub sub = RespHelper.or(primaryUserReadService.findSubByUserId(userId), new Sub());
-        if(sub != null){
-            return sub.getRealName();
-        }else{
-            // 没有sub, 那应该就是主账号了
+    @Override
+    public Response<String> findRealName(Long userId) {
+        if (userId != null) {
             UserProfile profile = RespHelper.orServEx(doctorUserProfileReadService.findProfileByUserId(userId));
             if(profile != null){
-                return profile.getRealName();
+                return Response.ok(profile.getRealName());
             }
         }
-        return null;
+        return Response.ok();
     }
 
     //获取防疫项目名称

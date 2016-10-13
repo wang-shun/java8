@@ -57,4 +57,11 @@ public interface DoctorGroupWebService {
      * @return 猪群号
      */
     Response<String> generateGroupCode(@NotNull(message = "barnId.not.null") Long barnId);
+
+    /**
+     * 获取用户的真实姓名
+     * @param userId
+     * @return
+     */
+    Response<String> findRealName(Long userId);
 }

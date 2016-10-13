@@ -68,12 +68,12 @@ public class DoctorServiceReviewServiceImpl implements DoctorServiceReviewServic
         return response;
     }
     @Override
-    public Response<List<DoctorFarm>> openDoctorService(BaseUser user, Long userId, List<DoctorFarm> farms){
+    public Response<List<DoctorFarm>> openDoctorService(BaseUser user, Long userId, String loginName, List<DoctorFarm> farms){
         Response<List<DoctorFarm>> response = new Response<>();
         try{
             DoctorServiceReview review = doctorServiceReviewDao.findByUserIdAndType(userId, DoctorServiceReview.Type.PIG_DOCTOR);
             Preconditions.checkState(Objects.equals(DoctorServiceReview.Status.REVIEW.getValue(), review.getStatus()), "user.service.not.applied");
-            response.setResult(doctorServiceReviewManager.openDoctorService(user, userId, farms));
+            response.setResult(doctorServiceReviewManager.openDoctorService(user, userId, loginName, farms));
         }catch (ServiceException | IllegalStateException e){
             response.setError(e.getMessage());
         } catch(Exception e){

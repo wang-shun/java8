@@ -171,6 +171,7 @@ public class DoctorRollbackServiceImpl implements DoctorRollbackService {
                     }
                     break;
                 case SEARCH_PIG:
+                    log.info("test es pig update:{}", dto);
                     if (dto.getEsPigId() != null) {
                         pigSearchWriteService.update(dto.getEsPigId());
                     }
@@ -182,7 +183,7 @@ public class DoctorRollbackServiceImpl implements DoctorRollbackService {
                     break;
                 case SEARCH_PIG_DELETE:
                     if (dto.getEsPigId() != null) {
-                        groupSearchWriteService.delete(dto.getEsPigId());
+                        pigSearchWriteService.delete(dto.getEsPigId());
                     }
                     break;
 

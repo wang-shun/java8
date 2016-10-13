@@ -131,13 +131,14 @@ public class DoctorMoveDataController {
      */
     @RequestMapping(value = "/all", method = RequestMethod.GET)
     public Boolean moveAll(@RequestParam("mobile") String mobile,
+                           @RequestParam("loginName") String loginName,
                            @RequestParam("moveId") Long moveId,
                            @RequestParam(value = "index", required = false) Integer index,
                            @RequestParam(value = "monthIndex", required = false) Integer monthIndex) {
         try {
             //1.迁移猪场信息
             log.warn("move user farm start, mobile:{}, moveId:{}", mobile, moveId);
-            userInitService.init(mobile, moveId);
+            userInitService.init(loginName, mobile, moveId);
             log.warn("move user farm end");
 
             //多个猪场遍历插入
@@ -227,10 +228,11 @@ public class DoctorMoveDataController {
      */
     @RequestMapping(value = "/farm", method = RequestMethod.GET)
     public Boolean moveUserFarm(@RequestParam("mobile") String mobile,
+                                @RequestParam("loginName") String loginName,
                                 @RequestParam("moveId") Long moveId) {
         try {
             log.warn("move user farm start, mobile:{}, moveId:{}", mobile, moveId);
-            userInitService.init(mobile, moveId);
+            userInitService.init(loginName, mobile, moveId);
             log.warn("move user farm end");
             return Boolean.TRUE;
         } catch (Exception e) {
