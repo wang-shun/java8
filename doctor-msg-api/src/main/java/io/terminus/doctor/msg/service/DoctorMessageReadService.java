@@ -82,21 +82,6 @@ public interface DoctorMessageReadService {
 
 
     /**
-     * 获取未发送的短信消息
-     */
-    Response<Paging<DoctorMessage>> findMsgMessage(Integer pageNo, Integer pageSize);
-
-    /**
-     * 获取未发送的email消息
-     */
-    Response<Paging<DoctorMessage>> findEmailMessage(Integer pageNo, Integer pageSize);
-
-    /**
-     * 获取未发送的app推送消息
-     */
-    Response<Paging<DoctorMessage>> findAppPushMessage(Integer pageNo, Integer pageSize);
-
-    /**
      * 根据查询条件查询
      * @param doctorMessageSearchDto
      * @return

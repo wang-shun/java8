@@ -45,4 +45,19 @@ public interface DoctorMessageUserReadService {
      * @return
      */
     Response<List<Long>> findBusinessListByCriteria(DoctorMessageUserDto doctorMessageUserDto);
+
+    /**
+     * 获取未发送的短信消息
+     */
+    Response<Paging<DoctorMessageUser>> findMsgMessage(Integer pageNo, Integer pageSize);
+
+    /**
+     * 获取未发送的email消息
+     */
+    Response<Paging<DoctorMessageUser>> findEmailMessage(Integer pageNo, Integer pageSize);
+
+    /**
+     * 获取未发送的app推送消息
+     */
+    Response<Paging<DoctorMessageUser>> findAppPushMessage(Integer pageNo, Integer pageSize);
 }

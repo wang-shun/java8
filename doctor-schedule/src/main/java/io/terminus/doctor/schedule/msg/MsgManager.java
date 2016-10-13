@@ -4,7 +4,10 @@ import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import io.terminus.doctor.common.utils.RespHelper;
+import io.terminus.doctor.msg.dto.Rule;
 import io.terminus.doctor.msg.dto.SubUser;
+import io.terminus.doctor.msg.enums.Category;
+import io.terminus.doctor.msg.model.DoctorMessage;
 import io.terminus.doctor.msg.producer.IProducer;
 import io.terminus.doctor.msg.service.DoctorMessageReadService;
 import io.terminus.doctor.msg.service.DoctorMessageRuleTemplateReadService;
@@ -16,6 +19,7 @@ import io.terminus.doctor.user.service.PrimaryUserReadService;
 import io.terminus.parana.user.service.UserReadService;
 import io.terminus.parana.web.msg.MsgWebService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
@@ -23,6 +27,7 @@ import org.springframework.stereotype.Component;
 import javax.annotation.PostConstruct;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Desc: 消息管理manager
@@ -259,26 +264,67 @@ public class MsgManager {
 //////        });
 ////    }
 //
-//    // 获取url
-//    private String getAppUrl(DoctorMessage doctorMessage) {
-//        StringBuilder sb = new StringBuilder();
-//        String urlPart;
-//        if (Objects.equals(doctorMessage.getCategory(), Category.FATTEN_PIG_REMOVE.getKey())){
-//            urlPart = "?groupId=";
-//        }else if (Objects.equals(doctorMessage.getCategory(), Category.STORAGE_SHORTAGE.getKey())){
-//            urlPart = "?materialId=";
-//        }else {
-//            urlPart = "?pigId=";
-//        }
-//        if (StringUtils.isNotBlank(domain)) {
-//            sb//.append("http://")
-//                    .append(domain)
-//                    .append(doctorMessage.getUrl())
-//                    .append(urlPart)
-//                    .append(doctorMessage.getBusinessId());
-//        } else {
-//            sb.append(doctorMessage.getUrl()).append(urlPart).append(doctorMessage.getBusinessId());
-//        }
-//        return sb.toString();
-//    }
+    // 获取url
+    private String getAppUrl(DoctorMessage doctorMessage) {
+        StringBuilder sb = new StringBuilder();
+        String urlPart;
+        if (Objects.equals(doctorMessage.getCategory(), Category.FATTEN_PIG_REMOVE.getKey())){
+            urlPart = "?groupId=";
+        }else if (Objects.equals(doctorMessage.getCategory(), Category.STORAGE_SHORTAGE.getKey())){
+            urlPart = "?materialId=";
+        }else {
+            urlPart = "?pigId=";
+        }
+        if (StringUtils.isNotBlank(domain)) {
+            sb//.append("http://")
+                    .append(domain)
+                    .append(doctorMessage.getUrl())
+                    .append(urlPart)
+                    .append(doctorMessage.getBusinessId());
+        } else {
+            sb.append(doctorMessage.getUrl()).append(urlPart).append(doctorMessage.getBusinessId());
+        }
+        return sb.toString();
+    }
+
+    /**
+     * 获取不同的url
+     *
+     * @param url     url
+     * @param channel 发送渠道, app推送需要带 http:// 的全url
+     */
+    private String getUrl(String url, Integer channel) {
+        if (org.apache.commons.lang3.StringUtils.isBlank(url)) {
+            return url;
+        }
+        // 如果是 app 推送
+        if (Objects.equals(channel, Rule.Channel.APPPUSH.getValue())) {
+            return url;
+        }
+        // 否则去除前缀
+        if (url.contains("http://")) {
+            String url1 = url.substring(7);
+            url1 = url1.substring(url1.indexOf("/"));
+            return url1;
+        } else {
+            return url.substring(url.indexOf("/"));
+        }
+    }
+
+    /**
+     * 获取具体的模板名称
+     *
+     * @param tplName 模板基名
+     * @param channel 渠道
+     * @return
+     */
+    private String getTemplateName(String tplName, Integer channel) {
+        if (org.apache.commons.lang3.StringUtils.isNotBlank(tplName)) {
+            Rule.Channel type = Rule.Channel.from(channel);
+            if (type != null) {
+                return tplName + "." + type.getSuffix();
+            }
+        }
+        return tplName;
+    }
 }

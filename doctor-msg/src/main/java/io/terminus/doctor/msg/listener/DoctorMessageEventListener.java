@@ -2,7 +2,6 @@ package io.terminus.doctor.msg.listener;
 
 import com.google.common.base.Throwables;
 import com.google.common.eventbus.Subscribe;
-import io.terminus.common.utils.BeanMapper;
 import io.terminus.doctor.common.enums.DataEventType;
 import io.terminus.doctor.common.event.CoreEventDispatcher;
 import io.terminus.doctor.common.event.DataEvent;
@@ -10,11 +9,8 @@ import io.terminus.doctor.common.event.EventListener;
 import io.terminus.doctor.common.utils.Params;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.msg.dto.DoctorMessageSearchDto;
-import io.terminus.doctor.msg.model.DoctorHistoryMessage;
 import io.terminus.doctor.msg.model.DoctorMessage;
-import io.terminus.doctor.msg.service.DoctorHistoryMessageWriteService;
 import io.terminus.doctor.msg.service.DoctorMessageReadService;
-import io.terminus.doctor.msg.service.DoctorMessageUserReadService;
 import io.terminus.doctor.msg.service.DoctorMessageUserWriteService;
 import io.terminus.doctor.msg.service.DoctorMessageWriteService;
 import io.terminus.zookeeper.pubsub.Subscriber;
@@ -43,12 +39,6 @@ public class DoctorMessageEventListener implements EventListener{
 
     @Autowired
     private DoctorMessageReadService doctorMessageReadService;
-
-    @Autowired
-    private DoctorHistoryMessageWriteService doctorHistoryMessageWriteService;
-
-    @Autowired
-    private DoctorMessageUserReadService doctorMessageUserReadService;
 
     @Autowired
     private DoctorMessageUserWriteService doctorMessageUserWriteService;
@@ -108,7 +98,7 @@ public class DoctorMessageEventListener implements EventListener{
     }
 
     /**
-     * 当猪触发事件之后, 清除 extra_message 中对应的 event 类型的数据.
+     * 当猪触发事件之后, 清除event类型的消息数据.
      * @param businessId
      * @param eventType
      */
@@ -121,10 +111,6 @@ public class DoctorMessageEventListener implements EventListener{
             List<DoctorMessage> messages = RespHelper.or500(doctorMessageReadService.findMessageListByCriteria(doctorMessageSearchDto));
             if (messages != null && messages.size() > 0) {
                 messages.forEach(doctorMessage -> {
-                    DoctorHistoryMessage doctorHistoryMessage = DoctorHistoryMessage.builder().build();
-                    BeanMapper.copy(doctorMessage, doctorHistoryMessage);
-                    doctorHistoryMessage.setRelMessageId(doctorMessage.getId());
-                    doctorHistoryMessageWriteService.createHistoryMessage(doctorHistoryMessage);
                     doctorMessageWriteService.deleteMessageById(doctorMessage.getId());
                     doctorMessageUserWriteService.deleteByMessageId(doctorMessage.getId());
                 });

@@ -72,7 +72,7 @@ public class SowNeedWeanProducer extends AbstractJobProducer {
     protected void message(DoctorMessageRuleRole ruleRole, List<SubUser> subUsers) {
         log.info("母猪需断奶提示消息产生 --- SowNeedWeanProducer 开始执行");
         handleMessages(ruleRole.getRule(), ruleRole.getTemplateId(), ruleRole.getFarmId(), true, ruleRole, subUsers);
-        log.info("母猪需断奶提示消息产生 --- SowNeedWeanProducer 结束执行, 产生 {} 条消息");
+        log.info("母猪需断奶提示消息产生 --- SowNeedWeanProducer 结束执行");
     }
 
     @Override

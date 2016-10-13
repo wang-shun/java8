@@ -16,7 +16,6 @@ import io.terminus.doctor.msg.model.DoctorMessageRule;
 import io.terminus.doctor.msg.model.DoctorMessageRuleRole;
 import io.terminus.doctor.msg.model.DoctorMessageRuleTemplate;
 import io.terminus.doctor.msg.model.DoctorMessageUser;
-import io.terminus.doctor.msg.service.DoctorHistoryMessageWriteService;
 import io.terminus.doctor.msg.service.DoctorMessageReadService;
 import io.terminus.doctor.msg.service.DoctorMessageRuleReadService;
 import io.terminus.doctor.msg.service.DoctorMessageRuleRoleReadService;
@@ -25,7 +24,6 @@ import io.terminus.doctor.msg.service.DoctorMessageTemplateReadService;
 import io.terminus.doctor.msg.service.DoctorMessageUserWriteService;
 import io.terminus.doctor.msg.service.DoctorMessageWriteService;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -59,9 +57,6 @@ public abstract class AbstractProducer implements IProducer {
     protected DoctorMessageWriteService doctorMessageWriteService;
 
     protected Category category;
-
-    @Autowired
-    protected DoctorHistoryMessageWriteService doctorHistoryMessageWriteService;
 
     @Autowired
     protected DoctorMessageUserWriteService doctorMessageUserWriteService;
@@ -120,7 +115,7 @@ public abstract class AbstractProducer implements IProducer {
                 log.info("[AbstractProducer] {} -> 预警消息产生, starting......", ruleTemplate.getName());
 
                 // > 记录对应每个用户的消息
-                List<DoctorMessageRule> messageRules = RespHelper.orServEx(doctorMessageRuleReadService.findMessageRulesByTplId(ruleTemplate.getId()));
+                List<DoctorMessageRule> messageRules = RespHelper.orServEx(doctorMessageRuleReadService.findNormalMessageRulesByTplId(ruleTemplate.getId()));
 
                 for (int j = 0; messageRules != null && j < messageRules.size(); j++) {
                     DoctorMessageRule messageRule = messageRules.get(j);
@@ -326,7 +321,10 @@ public abstract class AbstractProducer implements IProducer {
                                 .businessId(businessId)
                                 .farmId(ruleRole.getFarmId())
                                 .templateId(ruleRole.getTemplateId())
-                                .status(DoctorMessageUser.Status.NORMAL.getValue())
+                                .statusSys(DoctorMessageUser.Status.NORMAL.getValue())
+                                .statusSms(DoctorMessageUser.Status.NORMAL.getValue())
+                                .statusEmail(DoctorMessageUser.Status.NORMAL.getValue())
+                                .statusApp(DoctorMessageUser.Status.NORMAL.getValue())
                                 .build();
                         doctorMessageUserWriteService.createDoctorMessageUser(doctorMessageUser);
                     });
@@ -341,7 +339,10 @@ public abstract class AbstractProducer implements IProducer {
                             .businessId(businessId)
                             .farmId(ruleRole.getFarmId())
                             .templateId(ruleRole.getTemplateId())
-                            .status(DoctorMessageUser.Status.NORMAL.getValue())
+                            .statusSys(DoctorMessageUser.Status.NORMAL.getValue())
+                            .statusSms(DoctorMessageUser.Status.NORMAL.getValue())
+                            .statusEmail(DoctorMessageUser.Status.NORMAL.getValue())
+                            .statusApp(DoctorMessageUser.Status.NORMAL.getValue())
                             .build();
                     doctorMessageUserWriteService.createDoctorMessageUser(doctorMessageUser);
                 }
@@ -408,47 +409,6 @@ public abstract class AbstractProducer implements IProducer {
     }
 
     /**
-     * 获取具体的模板名称
-     *
-     * @param tplName 模板基名
-     * @param channel 渠道
-     * @return
-     */
-    private String getTemplateName(String tplName, Integer channel) {
-        if (StringUtils.isNotBlank(tplName)) {
-            Rule.Channel type = Rule.Channel.from(channel);
-            if (type != null) {
-                return tplName + "." + type.getSuffix();
-            }
-        }
-        return tplName;
-    }
-
-    /**
-     * 获取不同的url
-     *
-     * @param url     url
-     * @param channel 发送渠道, app推送需要带 http:// 的全url
-     */
-    private String getUrl(String url, Integer channel) {
-        if (StringUtils.isBlank(url)) {
-            return url;
-        }
-        // 如果是 app 推送
-        if (Objects.equals(channel, Rule.Channel.APPPUSH.getValue())) {
-            return url;
-        }
-        // 否则去除前缀
-        if (url.contains("http://")) {
-            String url1 = url.substring(7);
-            url1 = url1.substring(url1.indexOf("/"));
-            return url1;
-        } else {
-            return url.substring(url.indexOf("/"));
-        }
-    }
-
-    /**
      * 获取总页数
      *
      * @param total 总数量
@@ -467,33 +427,4 @@ public abstract class AbstractProducer implements IProducer {
         }
         return page;
     }
-
-//    /**
-//     * 将之前的消息置为无效
-//     */
-//    protected void setMessageIsExpired(DoctorMessageRule messageRule) {
-//        for (int i = 0; ; i++) {
-//            DoctorMessageSearchDto doctorMessageSearchDto = new DoctorMessageSearchDto();
-//            doctorMessageSearchDto.setTemplateId(messageRule.getTemplateId());
-//            doctorMessageSearchDto.setFarmId(messageRule.getFarmId());
-//            doctorMessageSearchDto.setIsExpired(DoctorMessage.IsExpired.NOTEXPIRED.getValue());
-//            Paging<DoctorMessage> messagePaging = RespHelper.or500(doctorMessageReadService.pagingWarnMessages(doctorMessageSearchDto, i + 1, 100));
-//            List<DoctorMessage> messages = messagePaging.getData();
-//            if (messages != null && messages.size() > 0) {
-//                messages.forEach(doctorMessage -> {
-//                    //doctorMessage.setIsExpired(DoctorMessage.IsExpired.EXPIRED.getValue());
-//                    //doctorMessageWriteService.updateMessage(doctorMessage);
-//                    DoctorHistoryMessage doctorHistoryMessage  = DoctorHistoryMessage.builder().build();
-//                    BeanMapper.copy(doctorMessage, doctorHistoryMessage);
-//                    doctorHistoryMessage.setRelMessageId(doctorMessage.getId());
-//                    doctorHistoryMessageWriteService.createHistoryMessage(doctorHistoryMessage);
-//                    doctorMessageWriteService.deleteMessageById(doctorMessage.getId());
-//                });
-//            }
-//            if (messagePaging.getData().size() < 100) {
-//                break;
-//            }
-//        }
-//
-//    }
 }

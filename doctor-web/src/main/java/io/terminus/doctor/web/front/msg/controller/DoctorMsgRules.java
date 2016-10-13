@@ -196,4 +196,24 @@ public class DoctorMsgRules {
         }
         return result;
     }
+
+    @RequestMapping(value = "/rule/chgStatus", method = RequestMethod.GET)
+    public Boolean changeStatus(@RequestParam(value = "farmId") Long farmId,
+                                @RequestParam(value = "templateId") Long templateId,
+                                @RequestParam(value = "status") Integer status) {
+        DoctorMessageRule rule = DoctorMessageRule.builder()
+                .farmId(farmId)
+                .templateId(templateId)
+                .build();
+        try {
+            DoctorMessageRule doctorMessageRule = RespHelper.or500(doctorMessageRuleReadService.findMessageRulesByCriteria(BeanMapper.convertObjectToMap(rule))).get(0);
+            doctorMessageRule.setStatus(status);
+            doctorMessageRuleWriteService.updateMessageRule(doctorMessageRule);
+            return Boolean.TRUE;
+        } catch (Exception e) {
+            log.error("change status faild");
+        }
+        return Boolean.FALSE;
+    }
+
 }

@@ -1,12 +1,12 @@
 package io.terminus.doctor.msg.service;
 
 import com.google.common.base.Throwables;
+import com.google.common.collect.ImmutableMap;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.model.PageInfo;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.msg.dao.DoctorMessageUserDao;
-import io.terminus.doctor.msg.dto.DoctorMessageSearchDto;
 import io.terminus.doctor.msg.dto.DoctorMessageUserDto;
 import io.terminus.doctor.msg.model.DoctorMessageUser;
 import lombok.extern.slf4j.Slf4j;
@@ -74,4 +74,41 @@ public class DoctorMessageUserReadServiceImpl implements DoctorMessageUserReadSe
             return Response.fail("find.message.count.by.criteria.failed");
         }
     }
+
+    @Override
+    public Response<Paging<DoctorMessageUser>> findMsgMessage(Integer pageNo, Integer pageSize) {
+        try{
+            PageInfo pageInfo = PageInfo.of(pageNo, pageSize);
+            return Response.ok(doctorMessageUserDao.paging(pageInfo.getOffset(), pageInfo.getLimit(),
+                    ImmutableMap.of( "statusSms", DoctorMessageUser.Status.NORMAL.getValue())));
+        } catch (Exception e) {
+            log.error("", Throwables.getStackTraceAsString(e));
+            return Response.fail("msg.message.find.fail");
+        }
+    }
+
+    @Override
+    public Response<Paging<DoctorMessageUser>> findEmailMessage(Integer pageNo, Integer pageSize) {
+        try{
+            PageInfo pageInfo = PageInfo.of(pageNo, pageSize);
+            return Response.ok(doctorMessageUserDao.paging(pageInfo.getOffset(), pageInfo.getLimit(),
+                    ImmutableMap.of( "statusEmail", DoctorMessageUser.Status.NORMAL.getValue())));
+        } catch (Exception e) {
+            log.error("", Throwables.getStackTraceAsString(e));
+            return Response.fail("email.message.find.fail");
+        }
+    }
+
+    @Override
+    public Response<Paging<DoctorMessageUser>> findAppPushMessage(Integer pageNo, Integer pageSize) {
+        try{
+            PageInfo pageInfo = PageInfo.of(pageNo, pageSize);
+            return Response.ok(doctorMessageUserDao.paging(pageInfo.getOffset(), pageInfo.getLimit(),
+                    ImmutableMap.of( "statusApp", DoctorMessageUser.Status.NORMAL.getValue())));
+        } catch (Exception e) {
+            log.error("", Throwables.getStackTraceAsString(e));
+            return Response.fail("app.message.find.fail");
+        }
+    }
+
 }

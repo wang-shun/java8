@@ -12,9 +12,10 @@
         <result column="user_id" property="userId"/>
         <result column="message_id" property="messageId"/>
         <result column="business_id" property="businessId"/>
-        <result column="status" property="status"/>
-        <result column="sended_at" property="sendedAt"/>
-        <result column="failed_by" property="failedBy"/>
+        <result column="status_sys" property="statusSys"/>
+        <result column="status_sms" property="statusSms"/>
+        <result column="status_email" property="statusEmail"/>
+        <result column="status_app" property="statusApp"/>
         <result column="created_at" property="createdAt"/>
         <result column="updated_at" property="updatedAt"/>
     </resultMap>
@@ -28,11 +29,11 @@
     </sql>
 
     <sql id="cols_exclude_id">
-       farm_id, template_id, user_id, message_id, business_id, status, sended_at, failed_by, created_at, updated_at
+       farm_id, template_id, user_id, message_id, business_id, status_sys, status_sms, status_email, status_app, created_at, updated_at
     </sql>
 
     <sql id="vals">
-        #{farmId}, #{templateId}, #{userId}, #{messageId}, #{businessId},  #{status}, #{sendedAt}, #{failedBy}, now(), now()
+        #{farmId}, #{templateId}, #{userId}, #{messageId}, #{businessId},  #{statusSys}, #{statusSms}, #{statusEmail}, #{statusApp}, now(), now()
     </sql>
 
     <insert id="create" parameterType="DoctorMessageUser" keyProperty="id" useGeneratedKeys="true">
@@ -49,7 +50,7 @@
         (<include refid="cols_exclude_id" />)
         VALUES
         <foreach collection="list" item="i" separator=",">
-            #{i.farmId}, #{i.templateId}, #{i.userId}, #{i.messageId}, #{i.businessId}, #{i.status}, #{i.sendedAt}, #{i.failedBy}, now(), now())
+            #{i.farmId}, #{i.templateId}, #{i.userId}, #{i.messageId}, #{i.businessId}, #{i.statusSys}, #{i.statusSms}, #{i.statusEmail}, #{i.statusApp}, now(), now())
         </foreach>
     </insert>
 
@@ -68,9 +69,10 @@
             <if test="userId != null">user_id = #{userId},</if>
             <if test="messageId != null">message_id = #{messageId},</if>
             <if test="businessId != null">business_id = #{businessId},</if>
-            <if test="status != null">status = #{status},</if>
-            <if test="sendedAt != null">sended_at = #{sendedAt},</if>
-            <if test="failedBy != null">failed_by = #{failedBy},</if>
+            <if test="statusSys != null">status_sys = #{statusSys},</if>
+            <if test="statusSms != null">status_sms = #{statusSms},</if>
+            <if test="statusEmail != null">status_email = #{statusEmail},</if>
+            <if test="statusApp != null">status_app = #{statusApp},</if>
             updated_at=now()
         </set>
         WHERE id = #{id}
@@ -89,13 +91,10 @@
             <if test="userId != null">AND user_id = #{userId}</if>
             <if test="messageId != null">AND message_id = #{messageId}</if>
             <if test="businessId != null">AND business_id = #{businessId}</if>
-            <if test="status != null">AND status = #{status}</if>
-            <if test="statuses != null &amp;&amp; statuses.size() > 0">
-                AND `status` IN
-                <foreach collection="statuses" item="i" open="(" separator="," close=")">
-                    #{i}
-                </foreach>
-            </if>
+            <if test="statusSys != null">AND status_sys = #{statusSys}</if>
+            <if test="statusSms != null">AND status_sms = #{statusSms}</if>
+            <if test="statusEmail != null">AND status_email = #{statusEmail}</if>
+            <if test="statusApp != null">AND status_app = #{statusApp}</if>
         </where>
     </sql>
 
@@ -115,7 +114,7 @@
         SELECT <include refid="cols_all"/>
         FROM <include refid="tb"/>
         <include refid="criteria"/>
-        order by `status` asc, `id` desc -- 未读排在前面, 其次最新
+        order by status_sys ASC,`id` desc -- 未读排在前面, 其次最新
         LIMIT #{offset}, #{limit}
     </select>
 
@@ -123,7 +122,7 @@
         SELECT message_id
         FROM <include refid="tb"/>
         <include refid="criteria"/>
-        order by `status` asc, `id` desc -- 未读排在前面, 其次最新
+        order by status_sys ASC,`id` desc -- 未读排在前面, 其次最新
         LIMIT #{offset}, #{limit}
     </select>
 
@@ -131,7 +130,7 @@
     <select id="findNoReadCount" parameterType="long" resultType="long">
         SELECT COUNT(1)
         FROM <include refid="tb"/>
-        WHERE user_id = #{userId} AND status = 1
+        WHERE user_id = #{userId} AND status_sys != 3
     </select>
 
     <select id="businessIdList" parameterType="map" resultType="long">

@@ -172,7 +172,7 @@ public class DoctorMessages {
         DoctorMessageUser doctorMessageUser = RespHelper.or500(doctorMessageUserReadService.findDoctorMessageUsersByCriteria(doctorMessageUserDto)).get(0);
         if (doctorMessageUser != null) {
             // 如果消息是未读, 将消息设置为已读
-            doctorMessageUser.setStatus(DoctorMessageUser.Status.READED.getValue());
+            doctorMessageUser.setStatusSys(DoctorMessageUser.Status.READED.getValue());
             doctorMessageUserWriteService.updateDoctorMessageUser(doctorMessageUser);
             return true;
         }

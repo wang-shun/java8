@@ -36,6 +36,15 @@ public class DoctorMessageRuleDao extends MyBatisDao<DoctorMessageRule> {
     }
 
     /**
+     * 根据模板id获取与猪场绑定的信息列表
+     * @param tplId 模板id
+     * @return
+     */
+    public List<DoctorMessageRule> findNormalByTpl(Long tplId) {
+        return getSqlSession().selectList(sqlId("findNormalByTpl"), tplId);
+    }
+
+    /**
      * 根据猪场id查询
      * @param farmId    猪场id
      * @return

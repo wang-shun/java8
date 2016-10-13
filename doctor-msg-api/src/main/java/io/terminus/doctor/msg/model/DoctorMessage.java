@@ -80,11 +80,6 @@ public class DoctorMessage implements Serializable {
     private String data;
 
     /**
-     * 发送的内容(模板编译之后)
-     */
-    private String content;
-
-    /**
      * app回调url
      */
     private String url;

@@ -77,7 +77,7 @@ public class SowBreedingProducer extends AbstractJobProducer {
     protected void message(DoctorMessageRuleRole ruleRole, List<SubUser> subUsers) {
         log.info("待配种母猪提示消息产生 --- SowBreedingProducer 开始执行");
         handleMessages(ruleRole.getRule(), ruleRole.getTemplateId(), ruleRole.getFarmId(), true, ruleRole, subUsers);
-        log.info("待配种母猪提示消息产生 --- SowBreedingProducer 结束执行, 产生 {} 条消息");
+        log.info("待配种母猪提示消息产生 --- SowBreedingProducer 结束执行");
     }
 
     @Override

@@ -130,45 +130,6 @@ public class DoctorMessageReadServiceImpl implements DoctorMessageReadService {
         }
     }
 
-    @Override
-    public Response<Paging<DoctorMessage>> findMsgMessage(Integer pageNo, Integer pageSize) {
-        try{
-            PageInfo pageInfo = PageInfo.of(pageNo, pageSize);
-//            return Response.ok(doctorMessageDao.paging(pageInfo.getOffset(), pageInfo.getLimit(),
-//                    ImmutableMap.of("channel", Rule.Channel.MESSAGE.getValue(), "status", DoctorMessage.Status.NORMAL.getValue(), "isExpired", DoctorMessage.IsExpired.NOTEXPIRED.getValue())));
-            return null;
-        } catch (Exception e) {
-            log.error("", Throwables.getStackTraceAsString(e));
-            return Response.fail("msg.message.find.fail");
-        }
-    }
-
-    @Override
-    public Response<Paging<DoctorMessage>> findEmailMessage(Integer pageNo, Integer pageSize) {
-        try{
-            PageInfo pageInfo = PageInfo.of(pageNo, pageSize);
-//            return Response.ok(doctorMessageDao.paging(pageInfo.getOffset(), pageInfo.getLimit(),
-//                    ImmutableMap.of("channel", Rule.Channel.EMAIL.getValue(), "status", DoctorMessage.Status.NORMAL.getValue(), "isExpired", DoctorMessage.IsExpired.NOTEXPIRED.getValue())));
-            return null;
-        } catch (Exception e) {
-            log.error("", Throwables.getStackTraceAsString(e));
-            return Response.fail("email.message.find.fail");
-        }
-    }
-
-    @Override
-    public Response<Paging<DoctorMessage>> findAppPushMessage(Integer pageNo, Integer pageSize) {
-        try{
-            PageInfo pageInfo = PageInfo.of(pageNo, pageSize);
-//            return Response.ok(doctorMessageDao.paging(pageInfo.getOffset(), pageInfo.getLimit(),
-//                    ImmutableMap.of("channel", Rule.Channel.APPPUSH.getValue(), "status", DoctorMessage.Status.NORMAL.getValue(), "isExpired", DoctorMessage.IsExpired.NOTEXPIRED.getValue())));
-            return null;
-        } catch (Exception e) {
-            log.error("", Throwables.getStackTraceAsString(e));
-            return Response.fail("app.message.find.fail");
-        }
-    }
-
 
     @Override
     public Response<List<DoctorMessage>> findMessageListByCriteria(DoctorMessageSearchDto doctorMessageSearchDto) {

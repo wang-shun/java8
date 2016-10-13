@@ -18,7 +18,6 @@
         <result column="event_type" property="eventType"/>
         <result column="category" property="category"/>
         <result column="data" property="data"/>
-        <result column="content" property="content"/>
         <result column="url" property="url"/>
         <result column="created_by" property="createdBy"/>
         <result column="created_at" property="createdAt"/>
@@ -34,11 +33,11 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        farm_id, rule_id, role_id, template_id, template_name, business_id, message_template, type, event_type, category, data, content , url, created_by, created_at, updated_at
+        farm_id, rule_id, role_id, template_id, template_name, business_id, message_template, type, event_type, category, data , url, created_by, created_at, updated_at
     </sql>
 
     <sql id="vals">
-        #{farmId}, #{ruleId}, #{roleId}, #{templateId}, #{templateName}, #{businessId}, #{messageTemplate}, #{type}, #{eventType},  #{category}, #{data}, #{content}, #{url}, #{createdBy}, now(), now()
+        #{farmId}, #{ruleId}, #{roleId}, #{templateId}, #{templateName}, #{businessId}, #{messageTemplate}, #{type}, #{eventType},  #{category}, #{data}, #{url}, #{createdBy}, now(), now()
     </sql>
 
     <insert id="create" parameterType="DoctorMessage" keyProperty="id" useGeneratedKeys="true">
@@ -55,7 +54,7 @@
         (<include refid="cols_exclude_id" />)
         VALUES
         <foreach collection="list" item="i" separator=",">
-            (#{i.farmId}, #{i.ruleId}, #{i.roleId}, #{i.templateId}, #{i.templateName}, #{i.businessId}, #{i.messageTemplate}, #{i.type}, #{i.eventType},#{i.category}, #{i.data}, #{i.content}, #{i.url} ,#{i.createdBy}, now(), now())
+            (#{i.farmId}, #{i.ruleId}, #{i.roleId}, #{i.templateId}, #{i.templateName}, #{i.businessId}, #{i.messageTemplate}, #{i.type}, #{i.eventType},#{i.category}, #{i.data}, #{i.url} ,#{i.createdBy}, now(), now())
         </foreach>
     </insert>
 
@@ -89,7 +88,6 @@
             <if test="eventType != null">event_type = #{eventType},</if>
             <if test="category != null">category = #{category},</if>
             <if test="data != null">data = #{data},</if>
-            <if test="content != null">content = #{content},</if>
             <if test="url != null">url = #{url},</if>
             <if test="createdBy != null">created_by = #{createdBy},</if>
             updated_at=now()
@@ -138,7 +136,7 @@
         SELECT <include refid="cols_all"/>
         FROM <include refid="tb"/>
         <include refid="criteria"/>
-        order by `status` asc, `id` desc -- 未读排在前面, 其次最新
+        order by `id` desc -- 最新
         LIMIT #{offset}, #{limit}
     </select>
 

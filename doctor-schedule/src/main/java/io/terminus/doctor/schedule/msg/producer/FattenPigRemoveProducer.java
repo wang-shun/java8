@@ -3,7 +3,6 @@ package io.terminus.doctor.schedule.msg.producer;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.api.client.util.Maps;
 import com.google.common.base.Throwables;
-import com.google.common.collect.Lists;
 import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dto.DoctorGroupDetail;
@@ -15,7 +14,6 @@ import io.terminus.doctor.msg.dto.Rule;
 import io.terminus.doctor.msg.dto.RuleValue;
 import io.terminus.doctor.msg.dto.SubUser;
 import io.terminus.doctor.msg.enums.Category;
-import io.terminus.doctor.msg.model.DoctorMessage;
 import io.terminus.doctor.msg.model.DoctorMessageRuleRole;
 import io.terminus.doctor.msg.service.DoctorMessageReadService;
 import io.terminus.doctor.msg.service.DoctorMessageRuleReadService;
@@ -51,7 +49,6 @@ public class FattenPigRemoveProducer extends AbstractJobProducer {
     @Override
     protected void message(DoctorMessageRuleRole ruleRole, List<SubUser> subUsers) {
         log.info("育肥猪出栏提示消息产生 --- FattenPigRemoveProducer 开始执行");
-        List<DoctorMessage> messages = Lists.newArrayList();
 
         Rule rule = ruleRole.getRule();
         // ruleValue map
@@ -79,7 +76,7 @@ public class FattenPigRemoveProducer extends AbstractJobProducer {
 
             });
         }
-        log.info("育肥猪出栏提示消息产生 --- FattenPigRemoveProducer 结束执行, 产生 {} 条消息", messages.size());
+        log.info("育肥猪出栏提示消息产生 --- FattenPigRemoveProducer 结束执行");
     }
 
     /**

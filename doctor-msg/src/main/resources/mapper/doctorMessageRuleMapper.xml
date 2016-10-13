@@ -106,6 +106,12 @@
         WHERE template_id = #{templateId} AND status != -1
     </select>
 
+    <select id="findNormalByTpl" parameterType="long" resultMap="DoctorMessageRuleMap">
+        SELECT <include refid="cols_all"/>
+        FROM <include refid="tb"/>
+        WHERE template_id = #{templateId} AND status = 1
+    </select>
+
     <select id="findByFarmId" parameterType="long" resultMap="DoctorMessageRuleMap">
         SELECT <include refid="cols_all"/>
         FROM <include refid="tb"/>

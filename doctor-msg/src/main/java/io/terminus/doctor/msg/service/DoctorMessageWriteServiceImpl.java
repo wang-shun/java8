@@ -63,13 +63,13 @@ public class DoctorMessageWriteServiceImpl implements DoctorMessageWriteService 
     @Override
     public Response<Boolean> deleteMessageById(Long messageId) {
         try {
-            DoctorMessage message = doctorMessageDao.findById(messageId);
-            if (message != null) {
-                // 逻辑删除
-                //message.setStatus(DoctorMessage.Status.DELETE.getValue());
-                return Response.ok(doctorMessageDao.update(message));
-            }
-            return Response.ok(Boolean.TRUE);
+//            DoctorMessage message = doctorMessageDao.findById(messageId);
+//            if (message != null) {
+//                // 逻辑删除
+//                //message.setStatus(DoctorMessage.Status.DELETE.getValue());
+                return Response.ok(doctorMessageDao.delete(messageId));
+//            }
+//            return Response.ok(Boolean.TRUE);
         } catch (Exception e) {
             log.error("delete message failed, messageId:{}, cause:{}", messageId, Throwables.getStackTraceAsString(e));
             return Response.fail("message.delete.fail");

@@ -1,7 +1,6 @@
 package io.terminus.doctor.schedule.msg.producer;
 
 import com.google.api.client.util.Maps;
-import com.google.common.collect.Lists;
 import io.terminus.doctor.common.constants.JacksonType;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dto.DoctorPigInfoDto;
@@ -16,7 +15,6 @@ import io.terminus.doctor.msg.dto.Rule;
 import io.terminus.doctor.msg.dto.RuleValue;
 import io.terminus.doctor.msg.dto.SubUser;
 import io.terminus.doctor.msg.enums.Category;
-import io.terminus.doctor.msg.model.DoctorMessage;
 import io.terminus.doctor.msg.model.DoctorMessageRuleRole;
 import io.terminus.doctor.msg.service.DoctorMessageReadService;
 import io.terminus.doctor.msg.service.DoctorMessageRuleReadService;
@@ -72,7 +70,6 @@ public class BoarEliminateProducer extends AbstractJobProducer {
     @Override
     protected void message(DoctorMessageRuleRole ruleRole, List<SubUser> subUsers) {
         log.info("公猪应淘汰消息产生 --- BoarEliminateProducer 开始执行");
-        List<DoctorMessage> messages = Lists.newArrayList();
 
         Rule rule = ruleRole.getRule();
         // ruleValue map
@@ -155,7 +152,7 @@ public class BoarEliminateProducer extends AbstractJobProducer {
             }
         }
 
-        log.info("公猪应淘汰消息产生 --- BoarEliminateProducer 结束执行, 产生 {} 条消息", messages.size());
+        log.info("公猪应淘汰消息产生 --- BoarEliminateProducer 结束执行");
     }
 
 }

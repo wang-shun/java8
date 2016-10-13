@@ -53,12 +53,22 @@ public class DoctorMessageUser implements Serializable{
     /**
      * 状态 1:未发送, 2:已发送, 3:已读,  -1:删除, -2:发送失败
      */
-    private Integer status;
+    private Integer statusSys;
 
     /**
-     * 发送时间
+     * 状态 1:未发送, 2:已发送, 3:已读,  -1:删除, -2:发送失败
      */
-    private Date sendedAt;
+        private Integer statusSms;
+
+    /**
+     * 状态 1:未发送, 2:已发送, 3:已读,  -1:删除, -2:发送失败
+     */
+    private Integer statusEmail;
+
+    /**
+     * 状态 1:未发送, 2:已发送, 3:已读,  -1:删除, -2:发送失败
+     */
+    private Integer statusApp;
 
     /**
      * 创建时间
@@ -70,16 +80,11 @@ public class DoctorMessageUser implements Serializable{
      */
     private Date updatedAt;
 
-    /**
-     * 失败原因
-     */
-    private String failedBy;
-
     public enum Status {
         NORMAL(1, "未发送"),
         SENDED(2, "已发送"),
         READED(3, "已读"),
-        DELETE(-1, "删除"),
+       // DELETE(-1, "删除"),
         FAILED(-2, "发送失败");
 
         @Getter

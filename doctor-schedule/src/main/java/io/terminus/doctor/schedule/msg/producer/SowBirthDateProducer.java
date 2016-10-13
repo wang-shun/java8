@@ -73,7 +73,7 @@ public class SowBirthDateProducer extends AbstractJobProducer {
 
         log.info("母猪预产期提示消息产生 --- SowBirthDateProducer 开始执行");
         handleMessages(ruleRole.getRule(), ruleRole.getTemplateId(), ruleRole.getFarmId(), true, ruleRole, subUsers);
-        log.info("母猪预产期提示消息产生 --- SowBirthDateProducer 结束执行, 产生 {} 条消息");
+        log.info("母猪预产期提示消息产生 --- SowBirthDateProducer 结束执行");
     }
 
     @Override

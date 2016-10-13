@@ -78,7 +78,7 @@ public class SowEliminateProducer extends AbstractJobProducer {
 
         log.info("母猪应淘汰消息产生 --- SowEliminateProducer 开始执行");
         handleMessages(ruleRole.getRule(), ruleRole.getTemplateId(), ruleRole.getFarmId(), true, ruleRole, subUsers);
-        log.info("母猪应淘汰消息产生 --- SowEliminateProducer 结束执行, 产生 {} 条消息");
+        log.info("母猪应淘汰消息产生 --- SowEliminateProducer 结束执行");
     }
 
     @Override

@@ -3,7 +3,6 @@ package io.terminus.doctor.schedule.msg.producer;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.api.client.util.Maps;
 import com.google.common.base.Throwables;
-import com.google.common.collect.Lists;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.service.DoctorPigReadService;
 import io.terminus.doctor.event.service.DoctorPigWriteService;
@@ -11,7 +10,6 @@ import io.terminus.doctor.msg.dto.Rule;
 import io.terminus.doctor.msg.dto.RuleValue;
 import io.terminus.doctor.msg.dto.SubUser;
 import io.terminus.doctor.msg.enums.Category;
-import io.terminus.doctor.msg.model.DoctorMessage;
 import io.terminus.doctor.msg.model.DoctorMessageRuleRole;
 import io.terminus.doctor.msg.service.DoctorMessageReadService;
 import io.terminus.doctor.msg.service.DoctorMessageRuleReadService;
@@ -70,7 +68,6 @@ public class StorageShortageProducer extends AbstractJobProducer {
     @Override
     protected void message(DoctorMessageRuleRole ruleRole, List<SubUser> subUsers) {
         log.info("仓库库存不足消息产生 --- StorageShortageProducer 开始执行");
-        List<DoctorMessage> messages = Lists.newArrayList();
 
         Rule rule = ruleRole.getRule();
         // ruleValue map
@@ -88,18 +85,17 @@ public class StorageShortageProducer extends AbstractJobProducer {
             if (ruleValueMap.get(1) != null && lotConsumeDay != null) {
                 // 如果剩余使用天数 小于 配置的天数
                 if (lotConsumeDay < ruleValueMap.get(1).getValue()) {
-                    messages.addAll(getMessage(materialConsumeAvg, rule.getChannels(), ruleRole, subUsers, rule.getUrl()));
+                    getMessage(materialConsumeAvg, ruleRole, subUsers, rule.getUrl());
                 }
             }
         }
-        log.info("仓库库存不足消息产生 --- StorageShortageProducer 结束执行, 产生 {} 条消息", messages.size());
+        log.info("仓库库存不足消息产生 --- StorageShortageProducer 结束执行");
     }
 
     /**
      * 创建消息
      */
-    private List<DoctorMessage> getMessage(DoctorMaterialConsumeAvgDto materialConsumeAvg, String channels, DoctorMessageRuleRole ruleRole, List<SubUser> subUsers, String url) {
-        List<DoctorMessage> messages = Lists.newArrayList();
+    private void getMessage(DoctorMaterialConsumeAvgDto materialConsumeAvg, DoctorMessageRuleRole ruleRole, List<SubUser> subUsers, String url) {
         // 创建消息
         Map<String, Object> jsonData = MaterialDtoFactory.getInstance().createMaterialMessage(materialConsumeAvg, url);
             try {
@@ -107,6 +103,5 @@ public class StorageShortageProducer extends AbstractJobProducer {
             } catch (JsonProcessingException e) {
                 log.error("message produce error, cause by {}", Throwables.getStackTraceAsString(e));
             }
-        return messages;
     }
 }
