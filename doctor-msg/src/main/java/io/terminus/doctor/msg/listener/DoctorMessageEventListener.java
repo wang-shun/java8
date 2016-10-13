@@ -13,10 +13,10 @@ import io.terminus.doctor.msg.model.DoctorMessage;
 import io.terminus.doctor.msg.service.DoctorMessageReadService;
 import io.terminus.doctor.msg.service.DoctorMessageUserWriteService;
 import io.terminus.doctor.msg.service.DoctorMessageWriteService;
+import io.terminus.zookeeper.pubsub.Publisher;
 import io.terminus.zookeeper.pubsub.Subscriber;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -32,8 +32,8 @@ public class DoctorMessageEventListener implements EventListener{
     @Autowired(required = false)
     private Subscriber subscriber;
 
-    @Value("${zookeeper.zkTopic}")
-    private String zkTopic;
+    @Autowired
+    private Publisher publisher;
 
     @Autowired
     private CoreEventDispatcher coreEventDispatcher;
@@ -50,7 +50,7 @@ public class DoctorMessageEventListener implements EventListener{
     @PostConstruct
     public void subs() {
         try{
-            log.info("subscriber--{} zkTopic{}", subscriber, zkTopic);
+            log.info("subscriber--{}--publisher{}", subscriber,publisher);
             if (subscriber == null) {
                 return;
             }
