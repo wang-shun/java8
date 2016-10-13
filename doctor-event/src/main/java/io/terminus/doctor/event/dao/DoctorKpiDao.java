@@ -674,6 +674,7 @@ public class DoctorKpiDao {
      * 断奶七天配种率
      */
     public double getMateInSeven(Long farmId, Date startAt, Date endAt) {
-        return sqlSession.selectOne(sqlId("getMateInSeven"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
+        Double d = sqlSession.selectOne(sqlId("getMateInSeven"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
+        return d == null ? 0D : d;
     }
 }

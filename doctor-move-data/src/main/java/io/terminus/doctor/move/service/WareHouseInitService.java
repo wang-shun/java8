@@ -136,7 +136,9 @@ public class WareHouseInitService {
                 DoctorWareHouse wareHouse = new DoctorWareHouse();
                 wareHouse.setFarmId(farm.getId());
                 wareHouse.setFarmName(farm.getName());
-                wareHouse.setManagerId(subMap.get(managerName).getUserId());
+                if(subMap.get(managerName) != null){
+                    wareHouse.setManagerId(subMap.get(managerName).getUserId());
+                }
                 wareHouse.setManagerName(managerName);
                 wareHouse.setType(type.getKey());
                 wareHouse.setWareHouseName(type.getDesc() + "仓库");

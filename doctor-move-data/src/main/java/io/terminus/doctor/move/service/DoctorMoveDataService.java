@@ -1907,7 +1907,11 @@ public class DoctorMoveDataService {
                 event.setAmount(changeEvent.getAmount());
 
                 //重量 均重重新计算
-                event.setWeight(event.getAmount() / event.getPrice() * 1D);
+                if(event.getPrice() == 0L){
+                    event.setWeight(0D);
+                }else{
+                    event.setWeight(event.getAmount() / event.getPrice() * 1D);
+                }
                 event.setAvgWeight(event.getWeight() / event.getQuantity());
                 break;
             case TRANS_GROUP:
@@ -2185,7 +2189,7 @@ public class DoctorMoveDataService {
             groupTrack.setQuantity(MoreObjects.firstNonNull(gain.getQuantity(), 0));
             groupTrack.setBoarQty(gain.getQuantity() / 2);
             groupTrack.setSowQty(groupTrack.getQuantity() - groupTrack.getBoarQty());
-            groupTrack.setBirthDate(DateTime.now().minusDays(groupTrack.getAvgDayAge()).toDate());
+            groupTrack.setBirthDate(DateTime.now().minusDays(groupTrack.getAvgDayAge() == null ? 1 : groupTrack.getAvgDayAge()).toDate());
             groupTrack.setAvgWeight(MoreObjects.firstNonNull(gain.getAvgWeight(), 0D));
             groupTrack.setWeight(groupTrack.getAvgWeight() * groupTrack.getQuantity());
             groupTrack.setPrice(MoreObjects.firstNonNull(groupTrack.getPrice(), 0L));
