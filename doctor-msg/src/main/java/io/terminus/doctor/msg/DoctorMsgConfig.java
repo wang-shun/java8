@@ -10,7 +10,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.context.annotation.Profile;
 
 /**
  * Created by zhanghecheng on 16/3/8.
@@ -20,22 +19,15 @@ import org.springframework.context.annotation.Profile;
 @Import({MessageAutoConfig.class, DoctorCommonConfiguration.class})
 public class DoctorMsgConfig {
 
-
-    @Configuration
-    @Profile("zookeeper")
-    public static class ZookeeperConfiguration{
-
-        @Bean
-        public Subscriber cacheListenerBean(ZKClientFactory zkClientFactory,
-                                            @Value("${zookeeper.zkTopic}") String zkTopic) throws Exception{
-            return new Subscriber(zkClientFactory,zkTopic);
-        }
-
-        @Bean
-        public Publisher cachePublisherBean(ZKClientFactory zkClientFactory,
-                                            @Value("${zookeeper.zkTopic}") String zkTopic) throws Exception{
-            return new Publisher(zkClientFactory, zkTopic);
-        }
+    @Bean
+    public Subscriber cacheListenerBean(ZKClientFactory zkClientFactory,
+                                        @Value("${zookeeper.zkTopic}") String zkTopic) throws Exception{
+        return new Subscriber(zkClientFactory,zkTopic);
     }
 
+    @Bean
+    public Publisher cachePublisherBean(ZKClientFactory zkClientFactory,
+                                        @Value("${zookeeper.zkTopic}") String zkTopic) throws Exception{
+        return new Publisher(zkClientFactory, zkTopic);
+    }
 }
