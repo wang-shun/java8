@@ -1,11 +1,13 @@
 package io.terminus.doctor.move.handler;
 
+import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableList;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.event.dao.DoctorPigEventDao;
 import io.terminus.doctor.event.dao.DoctorPigSnapshotDao;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
 import io.terminus.doctor.event.dto.DoctorPigInfoDto;
+import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigSnapshot;
 import io.terminus.doctor.workflow.access.JdbcAccess;
@@ -119,7 +121,7 @@ public class DoctorMoveWorkflowHandler {
             DoctorPigEvent pigEvent = doctorPigEventDao.queryLastPigEventInWorkflow(pig.getPigId(),
                     ImmutableList.of(7, 9, 11, 12, 14, 15, 16, 17, 18));
 
-            if (pigEvent != null) {
+            if (pigEvent != null && !Objects.equal(pigEvent.getType(), PigEvent.ENTRY.getKey())) {
                 Integer type = pigEvent.getType();
                 FlowDefinitionNode sourceNode = nodesMapById.get(eventsMapByValue.get(type).getSourceNodeId()); // 可能存在多个, 随机一个(无所谓)
                 FlowDefinitionNode targetNode = nodesMapById.get(eventsMapByValue.get(type).getTargetNodeId());
