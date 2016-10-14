@@ -102,7 +102,7 @@ public class DoctorParityMonthlyReportWriteServiceImpl implements DoctorParityMo
         log.info("create parity monthly report start, farmId: {}, startAt: {}, endAt: {}", farmId, startAt, endAt);
         List<DoctorParityMonthlyReport> doctorParityMonthlyReportList = doctorParityMonthlyReportDao.constructDoctorParityMonthlyReports(farmId, startAt, endAt);
         if( doctorParityMonthlyReportList != null && !doctorParityMonthlyReportList.isEmpty()){
-            doctorParityMonthlyReportManager.createMonthlyReports(doctorParityMonthlyReportList, sumAt);
+            doctorParityMonthlyReportManager.createMonthlyReports(doctorParityMonthlyReportList, sumAt, farmId);
         }
     }
 }
