@@ -76,7 +76,7 @@ public class DoctorSowPigletsChgHandler extends DoctorAbstractEventFlowHandler {
         extra.put("partWeanPigletsCount", weanCount);
         extra.put("farrowingLiveCount", doctorPigTrack.getUnweanQty());
         doctorPigTrack.addAllExtraMap(extra);
-
+        Long groupId = doctorPigTrack.getGroupId();
         //全部断奶后, 初始化所有本次哺乳的信息
         if (doctorPigTrack.getUnweanQty() == 0) {
             doctorPigTrack.setStatus(PigStatus.Wean.getKey());
@@ -91,7 +91,7 @@ public class DoctorSowPigletsChgHandler extends DoctorAbstractEventFlowHandler {
 
         // 调用对应的猪猪群事件,对应的操作方式
         checkState(notNull(doctorPigTrack.getGroupId()), "pigletsChg.groupId.notFound");
-        changePigletsChangeInfo(doctorPigTrack.getGroupId(), extra, basic, pigEventId);
+        changePigletsChangeInfo(groupId, extra, basic, pigEventId);
 
         return doctorPigTrack;
     }
