@@ -51,7 +51,6 @@ public class DoctorMessageEventListener implements EventListener{
             }
             subscriber.subscribe(data -> {
                 DataEvent dataEvent = DataEvent.fromBytes(data);
-                log.info("dataEvent--{}", dataEvent);
                 if (dataEvent != null && dataEvent.getEventType() != null) {
                     coreEventDispatcher.publish(dataEvent);
                 }
