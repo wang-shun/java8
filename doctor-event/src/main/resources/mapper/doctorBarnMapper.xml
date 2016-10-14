@@ -172,4 +172,12 @@
         ORDER BY id DESC LIMIT #{limit}
     </select>
     <!-- search api end -->
+
+    <select id="findByOrgId" parameterType="long" resultMap="DoctorBarnMap">
+        select
+        <include refid="cols_all"/>
+        FROM
+        <include refid="tb"/>
+        where org_id = #{orgId}
+    </select>
 </mapper>
