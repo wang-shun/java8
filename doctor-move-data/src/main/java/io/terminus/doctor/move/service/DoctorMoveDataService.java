@@ -2207,6 +2207,7 @@ public class DoctorMoveDataService {
 
         //未关闭的猪群, 拼接
         if (gain != null) {
+            groupTrack.setAvgDayAge(gain.getAvgDayAge());
             groupTrack.setQuantity(MoreObjects.firstNonNull(gain.getQuantity(), 0));
             groupTrack.setBoarQty(gain.getQuantity() / 2);
             groupTrack.setSowQty(groupTrack.getQuantity() - groupTrack.getBoarQty());
