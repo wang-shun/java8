@@ -580,6 +580,7 @@ public class DoctorMoveDataService {
         List<DoctorGroupEvent> events = RespHelper.orServEx(doctorMoveDatasourceHandler
                 .findByHbsSql(moveId, View_EventListGain.class, "DoctorGroupEvent-EventListGain")).stream()
                 .map(gainEvent -> getGroupEvent(groupMap, gainEvent, subMap, barnMap, basicMap, changeReasonMap, customerMap, vaccMap, pigMap))
+                .filter(event -> event != null)
                 .collect(Collectors.toList());
         if(!events.isEmpty()){
             doctorGroupEventDao.creates(events);
