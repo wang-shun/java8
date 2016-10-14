@@ -30,8 +30,8 @@ public class DoctorParityMonthlyReportManager {
      * @param sumAt 统计日期
      */
     @Transactional
-    public void createMonthlyReports(List<DoctorParityMonthlyReport> monthlyReports, Date sumAt) {
-        doctorParityMonthlyReportDao.deleteBySumAt(sumAt);
+    public void createMonthlyReports(List<DoctorParityMonthlyReport> monthlyReports, Date sumAt, Long farmId) {
+        doctorParityMonthlyReportDao.deleteByFarmIdAndSumAt(farmId, sumAt);
         doctorParityMonthlyReportDao.creates(monthlyReports);
     }
 }

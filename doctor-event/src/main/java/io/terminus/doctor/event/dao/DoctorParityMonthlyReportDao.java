@@ -17,11 +17,6 @@ import java.util.List;
 @Repository
 public class DoctorParityMonthlyReportDao extends MyBatisDao<DoctorParityMonthlyReport> {
 
-
-    public void deleteBySumAt(Date sumAt){
-        getSqlSession().delete(sqlId("deleteBySumAt"), sumAt);
-    }
-
     public void deleteByFarmIdAndSumAt(Long farmId, Date sumAt) {
         getSqlSession().delete(sqlId("deleteByFarmIdAndSumAt"), ImmutableMap.of("farmId", farmId, "sumAt", sumAt));
     }
