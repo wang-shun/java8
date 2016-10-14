@@ -50,6 +50,7 @@ public class DoctorMessageEventListener implements EventListener{
     @PostConstruct
     public void subs() {
         try{
+            log.info("zk{}", zkClientFactory);
             if (subscriber == null) {
                 return;
             }
