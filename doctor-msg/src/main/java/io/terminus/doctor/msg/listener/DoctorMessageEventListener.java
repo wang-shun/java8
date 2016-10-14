@@ -13,7 +13,6 @@ import io.terminus.doctor.msg.model.DoctorMessage;
 import io.terminus.doctor.msg.service.DoctorMessageReadService;
 import io.terminus.doctor.msg.service.DoctorMessageUserWriteService;
 import io.terminus.doctor.msg.service.DoctorMessageWriteService;
-import io.terminus.zookeeper.ZKClientFactory;
 import io.terminus.zookeeper.pubsub.Subscriber;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,9 +32,6 @@ public class DoctorMessageEventListener implements EventListener{
     private Subscriber subscriber;
 
     @Autowired
-    private ZKClientFactory zkClientFactory;
-
-    @Autowired
     private CoreEventDispatcher coreEventDispatcher;
 
     @Autowired
@@ -50,12 +46,12 @@ public class DoctorMessageEventListener implements EventListener{
     @PostConstruct
     public void subs() {
         try{
-            log.info("zk{}--subscriber--{}", zkClientFactory, subscriber);
             if (subscriber == null) {
                 return;
             }
             subscriber.subscribe(data -> {
                 DataEvent dataEvent = DataEvent.fromBytes(data);
+                log.info("dataEvent--{}", dataEvent);
                 if (dataEvent != null && dataEvent.getEventType() != null) {
                     coreEventDispatcher.publish(dataEvent);
                 }
