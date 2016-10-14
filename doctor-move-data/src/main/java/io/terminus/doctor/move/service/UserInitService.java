@@ -98,7 +98,7 @@ public class UserInitService {
         User primaryUser = null;
         List<Long> farmIds = Lists.newArrayList();
         for(View_FarmMember member : list){
-            if(member.getLevels() == 0){
+            if(member.getLevels() == 0 && "admin".equals(member.getLoginName())){
                 // 主账号注册,内含事务
                 primaryUser= this.registerByMobile(mobile, "123456", null);
                 Long userId = primaryUser.getId();
