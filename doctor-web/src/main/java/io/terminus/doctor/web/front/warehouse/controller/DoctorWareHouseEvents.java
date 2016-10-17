@@ -227,7 +227,8 @@ public class DoctorWareHouseEvents {
      */
     @RequestMapping(value = "/initMaterialInWarehouse", method = {RequestMethod.GET, RequestMethod.POST})
     @ResponseBody
-    public boolean initMaterialInWarehouse(@RequestParam Long materialId, @RequestParam Long warehouseId, Long unitId){
+    public boolean initMaterialInWarehouse(@RequestParam Long materialId, @RequestParam Long warehouseId,
+                                           @RequestParam(required = false) Long unitId){
         DoctorBasicMaterial material = RespHelper.or500(doctorBasicMaterialReadService.findBasicMaterialById(materialId));
         if(material == null){
             throw new JsonResponseException("basicMaterial.not.found");
