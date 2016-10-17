@@ -690,9 +690,6 @@ public class DoctorMoveDataService {
             doctorPigTrackDao.creates(sowTracks);
         }
 
-        //如果是哺乳状态, 设置一下哺乳猪群的信息
-        updateBuruSowTrack(farm);
-
         //4. 更新公猪的全部配种次数
         updateBoarCurrentParity(sowEvents);
 

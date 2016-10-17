@@ -194,6 +194,10 @@ public class DoctorMoveDataController {
         doctorMoveDataService.updateFarrowSow(farm);
         log.warn("move farrow sow end");
 
+        log.warn("updateBuruSowTrack start, farmId:{}", farm.getId());
+        doctorMoveDataService.updateBuruTrack(farm);
+        log.warn("updateBuruSowTrack end");
+
         //首页统计
         movePigTypeStatistic(farm);
 
