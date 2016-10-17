@@ -481,10 +481,16 @@ public class WareHouseInitService {
         farmWareHouseType.setFarmName(wareHouse.getFarmName());
         farmWareHouseType.setType(wareHouse.getType());
         farmWareHouseType.setLotNumber(track.getLotNumber());
+
         Map<String, Object> extramap = new HashMap<>();
-        extramap.put("consumeCount", recentAVG.getConsumeCount());
-        extramap.put("consumeDate", recentAVG.getConsumeDate());
+        if(recentAVG.getConsumeCount() != null){
+            extramap.put("consumeCount", recentAVG.getConsumeCount());
+        }
+        if(recentAVG.getConsumeDate() != null){
+            extramap.put("consumeDate", recentAVG.getConsumeDate());
+        }
         farmWareHouseType.setExtraMap(extramap);
+
         doctorFarmWareHouseTypeDao.create(farmWareHouseType);
 
         // 更新最新的价格组成

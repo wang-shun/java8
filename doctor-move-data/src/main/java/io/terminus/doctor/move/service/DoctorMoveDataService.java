@@ -690,9 +690,6 @@ public class DoctorMoveDataService {
             doctorPigTrackDao.creates(sowTracks);
         }
 
-        //如果是哺乳状态, 设置一下哺乳猪群的信息
-        updateBuruSowTrack(farm);
-
         //4. 更新公猪的全部配种次数
         updateBoarCurrentParity(sowEvents);
 
@@ -2349,7 +2346,7 @@ public class DoctorMoveDataService {
     public void updateParityAndBoarCode(DoctorFarm farm) {
         List<DoctorPigEvent> doctorPigEvensList = doctorPigEventDao.list(ImmutableMap.of("farmId", farm.getId(), "type", PigEvent.ENTRY.getKey(), "kind", 1));
         doctorPigEvensList.stream().forEach( doctorPigEvent -> {
-            log.info("update doctor_pig_events start: {}", doctorPigEvent);
+            //log.info("update doctor_pig_events start: {}", doctorPigEvent);
             List<DoctorPigEvent> lists = doctorPigEventDao.queryAllEventsByPigId(doctorPigEvent.getPigId());
             parity = 1;
             boarCode = null;

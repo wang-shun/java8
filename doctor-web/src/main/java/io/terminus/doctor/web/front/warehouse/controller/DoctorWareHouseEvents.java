@@ -36,6 +36,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -206,6 +207,7 @@ public class DoctorWareHouseEvents {
                     .groupId(dto.getGroupId()).groupCode(dto.getGroupCode())
                     .staffId(currentUserId).staffName(RespHelper.orServEx(doctorGroupWebService.findRealName(currentUserId)))
                     .count(dto.getCount()).consumeDays(dto.getConsumeDays())
+                    .eventTime(dto.getEventAt() == null ? new Date() : dto.getEventAt())
                     .unitId(doctorBasicMaterial.getUnitId()).unitName(doctorBasicMaterial.getUnitName())
                     .unitGroupId(doctorBasicMaterial.getUnitGroupId()).unitGroupName(doctorBasicMaterial.getUnitGroupName())
                     .build();
@@ -225,7 +227,8 @@ public class DoctorWareHouseEvents {
      */
     @RequestMapping(value = "/initMaterialInWarehouse", method = {RequestMethod.GET, RequestMethod.POST})
     @ResponseBody
-    public boolean initMaterialInWarehouse(@RequestParam Long materialId, @RequestParam Long warehouseId, Long unitId){
+    public boolean initMaterialInWarehouse(@RequestParam Long materialId, @RequestParam Long warehouseId,
+                                           @RequestParam(required = false) Long unitId){
         DoctorBasicMaterial material = RespHelper.or500(doctorBasicMaterialReadService.findBasicMaterialById(materialId));
         if(material == null){
             throw new JsonResponseException("basicMaterial.not.found");
@@ -306,6 +309,7 @@ public class DoctorWareHouseEvents {
                     .materialTypeId(doctorBasicMaterial.getId()).materialName(doctorBasicMaterial.getName())
                     .staffId(userId).staffName(RespHelper.orServEx(doctorGroupWebService.findRealName(userId)))
                     .count(dto.getCount())
+                    .eventTime(dto.getEventAt() == null ? new Date() : dto.getEventAt())
                     .providerFactoryId(dto.getFactoryId()).providerFactoryName(dto.getFactoryName())
                     .unitPrice(dto.getUnitPrice())
                     .build();
@@ -335,7 +339,7 @@ public class DoctorWareHouseEvents {
     }
 
     /**
-     * 仓库间物料转移
+     * 仓库间物料转移（调拨）
      * @param farmId 猪场id
      * @param fromWareHouseId 来源仓库
      * @param toWareHouseId 前往仓库
@@ -345,7 +349,7 @@ public class DoctorWareHouseEvents {
     @RequestMapping(value = "/moveMaterial", method = RequestMethod.POST)
     @ResponseBody
     public boolean moveMaterial(@RequestParam Long farmId, @RequestParam Long fromWareHouseId, @RequestParam Long toWareHouseId,
-                             @RequestParam Long materialId, @RequestParam Double moveQuantity){
+                                @RequestParam Long materialId, @RequestParam Double moveQuantity, @RequestParam(required = false) String eventAt){
         if(moveQuantity == null || moveQuantity <= 0){
             throw new JsonResponseException("quantity.invalid");
         }
@@ -370,6 +374,7 @@ public class DoctorWareHouseEvents {
                 .wareHouseId(fromWareHouseId).wareHouseName(consumeWarehouse.getWareHouseName())
                 .staffId(userId).staffName(realName)
                 .count(moveQuantity)
+                .eventTime(eventAt == null ? new Date() : DateUtil.toDate(eventAt))
                 .unitName(materialInWareHouse.getUnitName()).unitGroupName(materialInWareHouse.getUnitGroupName())
                 .build();
         DoctorMaterialConsumeProviderDto diaoru = DoctorMaterialConsumeProviderDto.builder()
@@ -379,6 +384,7 @@ public class DoctorWareHouseEvents {
                 .wareHouseId(toWareHouseId).wareHouseName(toWarehouse.getWareHouseName())
                 .staffId(userId).staffName(realName)
                 .count(moveQuantity)
+                .eventTime(eventAt == null ? new Date() : DateUtil.toDate(eventAt))
                 .unitName(materialInWareHouse.getUnitName()).unitGroupName(materialInWareHouse.getUnitGroupName())
                 .build();
         RespHelper.or500(doctorMaterialInWareHouseWriteService.moveMaterial(diaochu, diaoru));
@@ -395,10 +401,12 @@ public class DoctorWareHouseEvents {
      */
     @RequestMapping(value = "/inventory", method = RequestMethod.POST)
     @ResponseBody
-    public boolean inventory(@RequestParam Long farmId, @RequestParam Long warehouseId, @RequestParam Long materialId, @RequestParam Double count){
+    public boolean inventory(@RequestParam Long farmId, @RequestParam Long warehouseId, @RequestParam Long materialId,
+                             @RequestParam Double count, @RequestParam(required = false) String eventAt){
         DoctorMaterialInWareHouse materialInWareHouse = RespHelper.or500(doctorMaterialInWareHouseReadService.queryByMaterialWareHouseIds(farmId, materialId, warehouseId));
         DoctorConsumeProviderInputDto dto = DoctorConsumeProviderInputDto.builder()
                 .farmId(farmId).wareHouseId(warehouseId).materialId(materialId)
+                .eventAt(eventAt == null ? new Date() : DateUtil.toDate(eventAt))
                 .build();
         if (materialInWareHouse.getLotNumber() > count){
             // 盘亏 (出库)

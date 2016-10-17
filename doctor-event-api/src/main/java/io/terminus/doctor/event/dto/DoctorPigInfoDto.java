@@ -84,6 +84,7 @@ public class DoctorPigInfoDto implements Serializable{
     private String reason;
     private Integer ruleValueId;
     private Integer unweanQty;
+    private Integer weanQty;
 
         public static DoctorPigInfoDto buildDoctorPigInfoDto(DoctorPig doctorPig, DoctorPigTrack doctorPigTrack, List<DoctorPigEvent> doctorPigEvents){
         checkState(!isNull(doctorPig), "build.doctorPig.empty");
@@ -105,6 +106,7 @@ public class DoctorPigInfoDto implements Serializable{
                     .extraTrackMap(doctorPigTrack.getExtraMap())
                     .extraTrackMessage(doctorPigTrack.getExtraMessage())
                     .updatedAt(doctorPigTrack.getUpdatedAt())
+                    .weanQty(doctorPigTrack.getWeanQty())
                     .unweanQty(doctorPigTrack.getUnweanQty());
         }
         builder.doctorPigEvents(doctorPigEvents);
