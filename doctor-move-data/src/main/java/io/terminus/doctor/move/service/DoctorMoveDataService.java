@@ -2349,7 +2349,7 @@ public class DoctorMoveDataService {
     public void updateParityAndBoarCode(DoctorFarm farm) {
         List<DoctorPigEvent> doctorPigEvensList = doctorPigEventDao.list(ImmutableMap.of("farmId", farm.getId(), "type", PigEvent.ENTRY.getKey(), "kind", 1));
         doctorPigEvensList.stream().forEach( doctorPigEvent -> {
-            log.info("update doctor_pig_events start: {}", doctorPigEvent);
+            //log.info("update doctor_pig_events start: {}", doctorPigEvent);
             List<DoctorPigEvent> lists = doctorPigEventDao.queryAllEventsByPigId(doctorPigEvent.getPigId());
             parity = 1;
             boarCode = null;

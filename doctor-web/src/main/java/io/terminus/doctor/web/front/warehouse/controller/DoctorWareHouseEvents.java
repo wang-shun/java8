@@ -335,7 +335,7 @@ public class DoctorWareHouseEvents {
     }
 
     /**
-     * 仓库间物料转移
+     * 仓库间物料转移（调拨）
      * @param farmId 猪场id
      * @param fromWareHouseId 来源仓库
      * @param toWareHouseId 前往仓库
@@ -345,7 +345,7 @@ public class DoctorWareHouseEvents {
     @RequestMapping(value = "/moveMaterial", method = RequestMethod.POST)
     @ResponseBody
     public boolean moveMaterial(@RequestParam Long farmId, @RequestParam Long fromWareHouseId, @RequestParam Long toWareHouseId,
-                             @RequestParam Long materialId, @RequestParam Double moveQuantity){
+                                @RequestParam Long materialId, @RequestParam Double moveQuantity){
         if(moveQuantity == null || moveQuantity <= 0){
             throw new JsonResponseException("quantity.invalid");
         }
@@ -395,7 +395,8 @@ public class DoctorWareHouseEvents {
      */
     @RequestMapping(value = "/inventory", method = RequestMethod.POST)
     @ResponseBody
-    public boolean inventory(@RequestParam Long farmId, @RequestParam Long warehouseId, @RequestParam Long materialId, @RequestParam Double count){
+    public boolean inventory(@RequestParam Long farmId, @RequestParam Long warehouseId, @RequestParam Long materialId,
+                             @RequestParam Double count){
         DoctorMaterialInWareHouse materialInWareHouse = RespHelper.or500(doctorMaterialInWareHouseReadService.queryByMaterialWareHouseIds(farmId, materialId, warehouseId));
         DoctorConsumeProviderInputDto dto = DoctorConsumeProviderInputDto.builder()
                 .farmId(farmId).wareHouseId(warehouseId).materialId(materialId)
