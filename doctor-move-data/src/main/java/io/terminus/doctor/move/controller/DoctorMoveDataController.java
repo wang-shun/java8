@@ -143,6 +143,11 @@ public class DoctorMoveDataController {
 
             //多个猪场遍历插入
             getFarms(mobile).forEach(farm -> moveAllExclude(moveId, farm, mobile, index, monthIndex));
+
+            //把所有猪舍添加到所有用户的权限里去
+            userInitService.updatePermissionBarn(mobile);
+            log.warn("all data moved successfully, CONGRATULATIONS!!!");
+
             return true;
         } catch (Exception e) {
             log.error("move all data failed, mobile:{}, moveId:{}, cause:{}", mobile, moveId, Throwables.getStackTraceAsString(e));

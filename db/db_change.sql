@@ -486,3 +486,6 @@ CREATE TABLE IF NOT EXISTS `doctor_message_user` (
 
 -- 2016-10-10 猪群批次总结增加日增重
 ALTER TABLE doctor_group_batch_summaries ADD COLUMN daily_weight_gain DOUBLE DEFAULT NULL COMMENT '日增重(kg)' AFTER unq_count;
+
+alter table doctor_user_data_permissions modify column  `barn_ids` text COMMENT '猪舍ids, 逗号分隔';
+

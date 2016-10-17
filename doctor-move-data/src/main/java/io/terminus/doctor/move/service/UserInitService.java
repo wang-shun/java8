@@ -8,6 +8,8 @@ import io.terminus.common.model.Response;
 import io.terminus.common.utils.MapBuilder;
 import io.terminus.doctor.common.enums.UserStatus;
 import io.terminus.doctor.common.enums.UserType;
+import io.terminus.doctor.event.dao.DoctorBarnDao;
+import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.move.handler.DoctorMoveDatasourceHandler;
 import io.terminus.doctor.move.handler.DoctorMoveTableEnum;
 import io.terminus.doctor.move.model.RoleTemplate;
@@ -82,6 +84,8 @@ public class UserInitService {
     private SubDao subDao;
     @Autowired
     private DoctorMessageRuleWriteService doctorMessageRuleWriteService;
+    @Autowired
+    private DoctorBarnDao doctorBarnDao;
 
     @Transactional
     public void init(String loginName, String mobile, Long dataSourceId){
@@ -325,5 +329,27 @@ public class UserInitService {
         DoctorServiceReview review = RespHelper.or500(doctorServiceReviewReadService.findServiceReviewByUserIdAndType(userId, DoctorServiceReview.Type.PIG_DOCTOR));
         review.setStatus(DoctorServiceReview.Status.OK.getValue());
         RespHelper.or500(doctorServiceReviewWriteService.updateReview(review));
+    }
+
+    /**
+     * 把所有猪舍添加到所有用户的权限里去
+     * @param mobile 主账号的登录手机号
+     */
+    @Transactional
+    public void updatePermissionBarn(String mobile){
+        User user = RespHelper.or500(doctorUserReadService.findBy(mobile, LoginType.MOBILE));
+        // 主账号的id
+        Long userId = user.getId();
+
+        Long orgId = doctorStaffDao.findByUserId(userId).getOrgId();
+        List<Long> barns = doctorBarnDao.findByOrgId(orgId).stream().map(DoctorBarn::getId).collect(Collectors.toList());
+        String barnIds = Joiner.on(",").join(barns);
+
+        //所有员工，包括主账号
+        for(DoctorStaff staff : doctorStaffDao.findByOrgId(orgId)){
+            DoctorUserDataPermission permission = doctorUserDataPermissionDao.findByUserId(staff.getUserId());
+            permission.setBarnIds(barnIds);
+            doctorUserDataPermissionDao.update(permission);
+        }
     }
 }
