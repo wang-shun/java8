@@ -176,7 +176,8 @@ public class DoctorMaterialConsumeProvider implements Serializable{
                 .farmId(dto.getFarmId()).farmName(dto.getFarmName())
                 .wareHouseId(dto.getWareHouseId()).wareHouseName(dto.getWareHouseName())
                 .materialId(dto.getMaterialTypeId()).materialName(dto.getMaterialName())
-                .eventType(dto.getActionType()).eventTime(DateTime.now().toDate()).eventCount(dto.getCount()).unitPrice(dto.getUnitPrice())
+                .eventType(dto.getActionType()).eventCount(dto.getCount()).unitPrice(dto.getUnitPrice())
+                .eventTime(dto.getEventTime() == null ? new Date() : dto.getEventTime())
                 .staffId(dto.getStaffId()).staffName(dto.getStaffName())
                 .creatorId(dto.getStaffId()).creatorName(dto.getStaffName())
                 .build();

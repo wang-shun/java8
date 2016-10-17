@@ -8,6 +8,7 @@ import lombok.experimental.Builder;
 
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
+import java.util.Date;
 
 /**
  * Created by yaoqijun.
@@ -61,4 +62,6 @@ public class DoctorConsumeProviderInputDto implements Serializable{
      * 员工
      */
     private Long staffId;
+
+    private Date eventAt;
 }

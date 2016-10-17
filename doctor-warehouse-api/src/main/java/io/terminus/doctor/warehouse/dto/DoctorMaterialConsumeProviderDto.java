@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.Builder;
 
 import java.io.Serializable;
+import java.util.Date;
 
 /**
  * Created by yaoqijun.
@@ -72,4 +73,6 @@ public class DoctorMaterialConsumeProviderDto implements Serializable{
     private String unitGroupName;   //组民称
 
     private Integer consumeDays; // 耗用天数
+
+    private Date eventTime;
 }
