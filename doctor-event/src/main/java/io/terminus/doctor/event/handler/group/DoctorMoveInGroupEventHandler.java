@@ -82,12 +82,13 @@ public class DoctorMoveInGroupEventHandler extends DoctorAbstractGroupEventHandl
         doctorGroupEventDao.create(event);
 
         //3.更新猪群跟踪
+        Integer oldQty = groupTrack.getQuantity();
         groupTrack.setQuantity(EventUtil.plusQuantity(groupTrack.getQuantity(), moveIn.getQuantity()));
         groupTrack.setBoarQty(EventUtil.plusQuantity(groupTrack.getBoarQty(), moveIn.getBoarQty()));
         groupTrack.setSowQty(EventUtil.plusQuantity(groupTrack.getSowQty(), moveIn.getSowQty()));
 
         //重新计算日龄
-        groupTrack.setAvgDayAge(EventUtil.getAvgDayAge(groupTrack.getAvgDayAge(), groupTrack.getQuantity(), moveIn.getAvgDayAge(), moveIn.getQuantity()));
+        groupTrack.setAvgDayAge(EventUtil.getAvgDayAge(groupTrack.getAvgDayAge(), oldQty, moveIn.getAvgDayAge(), moveIn.getQuantity()));
         groupTrack.setBirthDate(EventUtil.getBirthDate(new Date(), groupTrack.getAvgDayAge()));
 
         //重新计算重量
