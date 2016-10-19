@@ -538,7 +538,6 @@ public class Users {
      * @param request
      * @return
      */
-    @RequestMapping(value = "changeMobile", method = RequestMethod.POST)
     public Boolean changeMobile(@RequestParam("mobile") String mobile, @RequestParam("captcha") String code,
                                 HttpServletRequest request){
         BaseUser baseUser = UserUtil.getCurrentUser();
@@ -561,6 +560,25 @@ public class Users {
             throw new JsonResponseException(500, "验证码不匹配");
         }
         request.getSession().removeAttribute("code");
+
+        //更新user
+        User user = RespHelper.or500(doctorUserReadService.findById(baseUser.getId()));
+        user.setMobile(mobile);
+        Map<String, String> extraMap = user.getExtra() == null ? new HashMap<>() : user.getExtra();
+        extraMap.put("contact", mobile);
+        user.setExtra(extraMap);
+        return RespHelper.or500(userWriteService.update(user));
+    }
+
+    @RequestMapping(value = "changeMobile", method = RequestMethod.POST)
+    public Boolean changeMobile(@RequestParam("mobile") String mobile){
+        BaseUser baseUser = UserUtil.getCurrentUser();
+        if(baseUser == null){
+            throw new JsonResponseException("user.not.login");
+        }
+        if (!mobilePattern.getPattern().matcher(mobile).matches()) {
+            throw new JsonResponseException("mobile.format.error");
+        }
 
         //更新user
         User user = RespHelper.or500(doctorUserReadService.findById(baseUser.getId()));
