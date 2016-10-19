@@ -1,10 +1,17 @@
 package io.terminus.doctor.move.service;
 
+import com.google.common.collect.Lists;
+import io.terminus.doctor.event.dao.DoctorBarnDao;
+import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.move.dto.DoctorImportSheet;
+import io.terminus.doctor.move.util.ImportExcelUtils;
 import io.terminus.doctor.user.model.DoctorFarm;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Sheet;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 /**
  * Desc:
@@ -15,6 +22,9 @@ import org.springframework.stereotype.Service;
 @Slf4j
 @Service
 public class DoctorImportDataService {
+
+    @Autowired
+    private DoctorBarnDao doctorBarnDao;
 
     /**
      * 根据shit导入所有的猪场数据
@@ -28,7 +38,28 @@ public class DoctorImportDataService {
     }
 
     public void importBarn(DoctorFarm farm, Sheet shit) {
-        
+        List<DoctorBarn> barns = Lists.newArrayList();
+
+        shit.forEach(row -> {
+            //第一行是表头，跳过
+            if (row.getRowNum() > 0) {
+                DoctorBarn barn = new DoctorBarn();
+                barn.setName(ImportExcelUtils.getString(row, 0));
+                barn.setOrgId(farm.getOrgId());
+                barn.setOrgName(farm.getOrgName());
+                barn.setFarmId(farm.getId());
+                barn.setFarmName(farm.getName());
+                //barn.setPigType();
+                barn.setCanOpenGroup(DoctorBarn.CanOpenGroup.YES.getValue());
+                barn.setStatus(DoctorBarn.Status.USING.getValue());
+                barn.setCapacity(1000);
+                //barn.setStaffId();
+                barn.setStaffName(ImportExcelUtils.getString(row, 3));
+                barn.setExtra(ImportExcelUtils.getString(row, 4));
+                barns.add(barn);
+            }
+        });
+        doctorBarnDao.creates(barns);
     }
 
     public void importBreed(DoctorFarm farm, Sheet shit) {
