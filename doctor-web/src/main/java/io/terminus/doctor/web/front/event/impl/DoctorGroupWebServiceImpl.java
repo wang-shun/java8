@@ -46,7 +46,6 @@ import io.terminus.doctor.event.service.DoctorGroupReadService;
 import io.terminus.doctor.event.service.DoctorGroupWriteService;
 import io.terminus.doctor.user.model.DoctorFarm;
 import io.terminus.doctor.user.model.DoctorOrg;
-import io.terminus.doctor.user.model.Sub;
 import io.terminus.doctor.user.service.DoctorFarmReadService;
 import io.terminus.doctor.user.service.DoctorOrgReadService;
 import io.terminus.doctor.user.service.DoctorUserProfileReadService;
@@ -56,6 +55,7 @@ import io.terminus.doctor.web.front.event.service.DoctorGroupWebService;
 import io.terminus.pampas.common.UserUtil;
 import io.terminus.parana.user.model.UserProfile;
 import lombok.extern.slf4j.Slf4j;
+import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -175,7 +175,11 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
 
             Map<String, Object> params = JSON_MAPPER.fromJson(data, JSON_MAPPER.createCollectionType(Map.class, String.class, Object.class));
 
-            //3.根据不同的事件类型调用不同的录入接口
+            //3.校验事件的时间
+            Date eventAt = DateUtil.toDate((String) params.get("eventAt"));
+            checkEventAt(groupId, eventType, eventAt);
+
+            //4.根据不同的事件类型调用不同的录入接口
             GroupEventType groupEventType = checkNotNull(GroupEventType.from(eventType));
             switch (groupEventType) {
                 case MOVE_IN:
@@ -473,6 +477,25 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
         Boolean canGetCustomer = getLong(params, "customerId") != null || params.get("customerName") != null;
         if (isSaleType && (!canGetCustomer || getLong(params, "price") == null)) {
             throw new ServiceException("price.or.customer.info.is.null.when.sale");
+        }
+    }
+
+    /**
+     * 猪群事件时间限制
+     * @param groupId
+     * @param eventType
+     * @param eventAt
+     * @return
+     */
+    private void checkEventAt(Long groupId, Integer eventType, Date eventAt){
+        if (Objects.equals(eventType, GroupEventType.NEW.getValue())){
+            return;
+        }
+        DoctorGroupEvent lastEvent = RespHelper.or500(doctorGroupReadService.findLastEventByGroupId(groupId));
+        if (lastEvent != null && new DateTime(eventAt).isBefore(DateTime.now().plusDays(1).getMillis()/86400000) && new DateTime(eventAt).plusDays(1).isAfter(lastEvent.getEventAt().getTime())){
+            return;
+        }else {
+            throw new ServiceException("event.at.illegal");
         }
     }
 }

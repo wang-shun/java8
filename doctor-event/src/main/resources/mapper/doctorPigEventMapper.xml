@@ -774,4 +774,14 @@
         FROM <include refid="tb" />
         WHERE rel_pig_event_id = #{relPigEventId}
     </select>
+
+    <select id="queryLastPigEventByPigIds" parameterType="list" resultMap="DoctorPigEventMap" >
+        SELECT <include refid="cols_all" />
+        FROM <include refid="tb" />
+        WHERE pig_id IN
+        <foreach collection="list" item="i" open="(" close=")" separator=",">
+            #{i}
+        </foreach>
+        ORDER BY event_at DESC limit 1
+    </select>
 </mapper>

@@ -113,4 +113,13 @@ public interface DoctorPigEventReadService {
      * @return
      */
     Response<DoctorPigEvent> lastEvent(@NotNull(message = "input.pigId.empty") Long pigId);
+
+    /**
+     * 获取多个猪时的最新事件
+     * @param pigIds
+     * @return
+     */
+    Response<DoctorPigEvent> lastEvent(@NotNull(message = "input.pigIds.empty") List<Long> pigIds);
+
+
 }

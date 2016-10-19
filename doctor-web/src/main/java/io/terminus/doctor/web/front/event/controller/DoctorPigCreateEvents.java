@@ -9,6 +9,7 @@ import io.terminus.common.utils.JsonMapper;
 import io.terminus.common.utils.Splitters;
 import io.terminus.doctor.common.constants.JacksonType;
 import io.terminus.doctor.common.enums.PigType;
+import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
 import io.terminus.doctor.event.dto.DoctorPigInfoDto;
@@ -37,6 +38,7 @@ import io.terminus.doctor.web.front.event.service.DoctorSowEventCreateService;
 import io.terminus.pampas.common.UserUtil;
 import io.terminus.parana.user.service.UserReadService;
 import lombok.extern.slf4j.Slf4j;
+import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
@@ -45,6 +47,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -111,6 +114,7 @@ public class DoctorPigCreateEvents {
     public Long createChangeLocationEvent(@RequestParam("pigId") Long pigId,
                                           @RequestParam("farmId") Long farmId,
                                           @RequestParam("doctorChgLocationDtoJson") String doctorChgLocationDtoJson){
+        checkEventAt(pigId, PigEvent.CHG_LOCATION, doctorChgLocationDtoJson);
         DoctorChgLocationDto doctorChgLocationDto = JsonMapper.JSON_NON_DEFAULT_MAPPER.fromJson(
                 doctorChgLocationDtoJson, DoctorChgLocationDto.class);
 
@@ -133,6 +137,7 @@ public class DoctorPigCreateEvents {
     public Boolean createChangeLocationEvent(@RequestParam("pigIds") String pigIds,
                                           @RequestParam("farmId") Long farmId,
                                           @RequestParam("doctorChgLocationDtoJson") String doctorChgLocationDtoJson){
+        checkEventAt(pigIds, PigEvent.CHG_LOCATION, doctorChgLocationDtoJson);
         DoctorChgLocationDto doctorChgLocationDto = JsonMapper.JSON_NON_DEFAULT_MAPPER.fromJson(
                 doctorChgLocationDtoJson, DoctorChgLocationDto.class);
 
@@ -162,7 +167,7 @@ public class DoctorPigCreateEvents {
     public Long createChangeFarmEvent(@RequestParam("doctorChgFarmDtoJson") String doctorChgFarmDtoJson,
                                       @RequestParam("pigId") Long pigId, @RequestParam("farmId") Long farmId){
 
-
+        checkEventAt(pigId, PigEvent.CHG_FARM, doctorChgFarmDtoJson);
         DoctorChgFarmDto doctorChgFarmDto = JsonMapper.JSON_NON_DEFAULT_MAPPER.fromJson(doctorChgFarmDtoJson, DoctorChgFarmDto.class);
         if (isNull(doctorChgFarmDto))
             throw new JsonResponseException("create.chgFarm.error");
@@ -179,7 +184,7 @@ public class DoctorPigCreateEvents {
     @ResponseBody
     public Boolean createChangeFarmEvents(@RequestParam("doctorChgFarmDtoJson") String doctorChgFarmDtoJson,
                                       @RequestParam("pigIds") String pigIds, @RequestParam("farmId") Long farmId){
-
+        checkEventAt(pigIds, PigEvent.CHG_FARM, doctorChgFarmDtoJson);
         DoctorChgFarmDto doctorChgFarmDto = JsonMapper.JSON_NON_DEFAULT_MAPPER.fromJson(doctorChgFarmDtoJson, DoctorChgFarmDto.class);
         if (isNull(doctorChgFarmDto))
             throw new JsonResponseException("create.chgFarm.error");
@@ -210,7 +215,7 @@ public class DoctorPigCreateEvents {
     @ResponseBody
     public Long createRemovalEvent(@RequestParam("doctorRemovalDtoJson") String doctorRemovalDtoJson,
                                    @RequestParam("pigId") Long pigId, @RequestParam("farmId") Long farmId){
-
+        checkEventAt(pigId, PigEvent.REMOVAL, doctorRemovalDtoJson);
         DoctorRemovalDto doctorRemovalDto = JsonMapper.JSON_NON_DEFAULT_MAPPER.fromJson(doctorRemovalDtoJson, DoctorRemovalDto.class);
         if(isNull(doctorRemovalDto))
             throw new JsonResponseException("create.removalEvent.fail");
@@ -229,7 +234,7 @@ public class DoctorPigCreateEvents {
     @ResponseBody
     public Boolean createRemovalEvent(@RequestParam("doctorRemovalDtoJson") String doctorRemovalDtoJson,
                                    @RequestParam("pigIds") String pigIds, @RequestParam("farmId") Long farmId){
-
+        checkEventAt(pigIds, PigEvent.REMOVAL, doctorRemovalDtoJson);
         DoctorRemovalDto doctorRemovalDto = JsonMapper.JSON_NON_DEFAULT_MAPPER.fromJson(doctorRemovalDtoJson, DoctorRemovalDto.class);
         if(isNull(doctorRemovalDto))
             throw new JsonResponseException("create.removalEvent.fail");
@@ -255,6 +260,7 @@ public class DoctorPigCreateEvents {
     @ResponseBody
     public Long createDiseaseEvent(@RequestParam("doctorDiseaseDtoJson") String doctorDiseaseDtoJson,
                                    @RequestParam("pigId") Long pigId, @RequestParam("farmId") Long farmId){
+        checkEventAt(pigId, PigEvent.DISEASE, doctorDiseaseDtoJson);
 
         DoctorDiseaseDto doctorDiseaseDto = JsonMapper.JSON_NON_DEFAULT_MAPPER.fromJson(doctorDiseaseDtoJson, DoctorDiseaseDto.class);
         if(isNull(doctorDiseaseDto))
@@ -274,7 +280,7 @@ public class DoctorPigCreateEvents {
     @ResponseBody
     public Boolean createDiseaseEvent(@RequestParam("doctorDiseaseDtoJson") String doctorDiseaseDtoJson,
                                    @RequestParam("pigIds") String pigIds, @RequestParam("farmId") Long farmId){
-
+        checkEventAt(pigIds, PigEvent.DISEASE, doctorDiseaseDtoJson);
         DoctorDiseaseDto doctorDiseaseDto = JsonMapper.JSON_NON_DEFAULT_MAPPER.fromJson(doctorDiseaseDtoJson, DoctorDiseaseDto.class);
         if(isNull(doctorDiseaseDto))
             throw new JsonResponseException("create.diseaseEvent.fail");
@@ -298,6 +304,7 @@ public class DoctorPigCreateEvents {
     @ResponseBody
     public Long createVaccinationEvent(@RequestParam("doctorVaccinationDtoJson") String doctorVaccinationDtoJson,
                                        @RequestParam("pigId") Long pigId, @RequestParam("farmId") Long farmId){
+        checkEventAt(pigId, PigEvent.VACCINATION, doctorVaccinationDtoJson);
         DoctorVaccinationDto doctorVaccinationDto = JsonMapper.JSON_NON_DEFAULT_MAPPER.fromJson(doctorVaccinationDtoJson, DoctorVaccinationDto.class);
         if(isNull(doctorVaccinationDto))
             throw new JsonResponseException("create.diseaseEvent.fail");
@@ -315,6 +322,7 @@ public class DoctorPigCreateEvents {
     @ResponseBody
     public Boolean createVaccinationEvent(@RequestParam("doctorVaccinationDtoJson") String doctorVaccinationDtoJson,
                                        @RequestParam("pigIds") String pigIds, @RequestParam("farmId") Long farmId){
+        checkEventAt(pigIds, PigEvent.VACCINATION, doctorVaccinationDtoJson);
         DoctorVaccinationDto doctorVaccinationDto = JsonMapper.JSON_NON_DEFAULT_MAPPER.fromJson(doctorVaccinationDtoJson, DoctorVaccinationDto.class);
         if(isNull(doctorVaccinationDto))
             throw new JsonResponseException("create.diseaseEvent.fail");
@@ -337,6 +345,7 @@ public class DoctorPigCreateEvents {
     @ResponseBody
     public Long createConditionEvent(@RequestParam("doctorConditionDtoJson") String doctorConditionDtoJson,
                                      @RequestParam("pigId") Long pigId, @RequestParam("farmId") Long farmId){
+        checkEventAt(pigId, PigEvent.CONDITION, doctorConditionDtoJson);
         DoctorConditionDto doctorConditionDto = JsonMapper.JSON_NON_DEFAULT_MAPPER.fromJson(doctorConditionDtoJson, DoctorConditionDto.class);
         if(isNull(doctorConditionDto))
             throw new JsonResponseException("create.conditionEvent.fail");
@@ -354,6 +363,7 @@ public class DoctorPigCreateEvents {
     @ResponseBody
     public Boolean createConditionEvent(@RequestParam("doctorConditionDtoJson") String doctorConditionDtoJson,
                                      @RequestParam("pigIds") String pigIds, @RequestParam("farmId") Long farmId){
+        checkEventAt(pigIds, PigEvent.CONDITION, doctorConditionDtoJson);
         DoctorConditionDto doctorConditionDto = JsonMapper.JSON_NON_DEFAULT_MAPPER.fromJson(doctorConditionDtoJson, DoctorConditionDto.class);
         if(isNull(doctorConditionDto))
             throw new JsonResponseException("create.conditionEvent.fail");
@@ -371,6 +381,7 @@ public class DoctorPigCreateEvents {
     public Long createSemenEvent(@RequestParam("farmId") Long farmId,
                                  @RequestParam("pigId") Long pigId,
                                  @RequestParam("doctorSemenDtoJson") String doctorSemenDtoJson){
+        checkEventAt(pigId, PigEvent.SEMEN, doctorSemenDtoJson);
 
         DoctorSemenDto doctorSemenDto = JsonMapper.JSON_NON_DEFAULT_MAPPER.fromJson(doctorSemenDtoJson, DoctorSemenDto.class);
         if(isNull(doctorSemenDto))
@@ -382,7 +393,6 @@ public class DoctorPigCreateEvents {
     @ResponseBody
     public Long createEntryEvent(@RequestParam("farmId") Long farmId,
                                  @RequestParam("doctorFarmEntryJson") String doctorFarmEntryDtoJson){
-
         DoctorFarmEntryDto doctorFarmEntryDto = JsonMapper.JSON_NON_DEFAULT_MAPPER.fromJson(doctorFarmEntryDtoJson, DoctorFarmEntryDto.class);
 
         if(isNull(doctorFarmEntryDto)){
@@ -397,6 +407,7 @@ public class DoctorPigCreateEvents {
     public Long createSowEventInfo(@RequestParam("farmId") Long farmId,
                                    @RequestParam("pigId") Long pigId, @RequestParam("eventType") Integer eventType,
                                    @RequestParam("sowInfoDtoJson") String sowInfoDtoJson) {
+        checkEventAt(pigId, PigEvent.from(eventType), sowInfoDtoJson);
         Long tempPigId = pigId;
         if (Objects.equals(eventType, PigEvent.FOSTERS.getKey())) {
             List<DoctorBasicInputInfoDto> basics = buildBasicInputPigDtoContent(farmId, pigId, sowInfoDtoJson);
@@ -434,6 +445,7 @@ public class DoctorPigCreateEvents {
     public Boolean createSowEventInfo(@RequestParam("farmId") Long farmId,
                                    @RequestParam("pigIds") String pigIds, @RequestParam("eventType") Integer eventType,
                                    @RequestParam("sowInfoDtoJson") String sowInfoDtoJson) {
+        checkEventAt(pigIds, PigEvent.from(eventType), sowInfoDtoJson);
         checkPigIds(pigIds);
         Splitters.COMMA.splitToList(pigIds).forEach(pigId -> {
             RespHelper.or500(doctorSowEventCreateService.sowEventCreate(buildBasicInputInfoDto(farmId, Long.valueOf(pigId), PigEvent.from(eventType), null), sowInfoDtoJson));
@@ -447,6 +459,7 @@ public class DoctorPigCreateEvents {
                                       @RequestParam("pigIds") String pigIds,
                                       @RequestParam("pigEvent") Integer pigEvent,
                                       @RequestParam("doctorRemovalDtoJson") String doctorCasualDtoJson){
+        checkEventAt(pigIds, PigEvent.from(pigEvent), doctorCasualDtoJson);
         return RespHelper.or500(doctorSowEventCreateService.casualEventsCreate(
                 buildBasicInputPigDtoContent(farmId, pigIds, PigEvent.from(pigEvent)),
                 doctorCasualDtoJson
@@ -572,6 +585,84 @@ public class DoctorPigCreateEvents {
         }catch (Exception e){
             log.error("build basic input info dto fail, cause:{}", Throwables.getStackTraceAsString(e));
             throw new JsonResponseException("build.basicInputInfo.error");
+        }
+    }
+
+    /**
+     * 猪事件时间限制
+     * @param pigid
+     * @param eventType
+     * @param json
+     */
+   private void checkEventAt(Long pigid, PigEvent eventType, String json) {
+       checkEventAt(pigid.toString(), eventType, json);
+   }
+    /**
+     * 批量猪事件时间限制
+     * @param pigIds
+     * @param eventType
+     * @return
+     */
+    private void checkEventAt(String ids, PigEvent eventType, String json) {
+        if (Objects.equals(eventType, PigEvent.ENTRY.getKey())) {
+            return;
+        }
+        List<Long> pigIds = Splitters.COMMA.splitToList(ids).stream().map(id -> Long.parseLong(id)).collect(Collectors.toList());
+        String key = null;
+        switch (eventType) {
+            case PIGLETS_CHG:
+                key = "pigletsChangeDate";
+                break;
+            case PREG_CHECK:
+                key = "checkDate";
+                break;
+            case TO_FARROWING:
+                key = "changeLocationDate";
+                break;
+            case CHG_FARM:
+                key = "chgFarmDate";
+            case CHG_LOCATION:
+                key = "changeLocationDate";
+                break;
+            case VACCINATION:
+                key = "vaccinationDate";
+                break;
+            case WEAN:
+                key = "partWeanDate";
+                break;
+            case SEMEN:
+                key = "semenDate";
+                break;
+            case MATING:
+                key = "matingDate";
+                break;
+            case CONDITION:
+                key = "conditionDate";
+                break;
+            case DISEASE:
+                key = "diseaseDate";
+                break;
+            case REMOVAL:
+                key = "removalDate";
+                break;
+            case FOSTERS:
+                key = "fostersDate";
+                break;
+            case FARROWING:
+                key = "farrowingDate";
+                break;
+        }
+        try {
+            Map<String, Object> map = OBJECT_MAPPER.readValue(json, JacksonType.MAP_OF_OBJECT);
+            Date eventAt = DateUtil.toDate((String) map.get(key));
+            DoctorPigEvent lastEvent = RespHelper.or500(doctorPigEventReadService.lastEvent(pigIds));
+            if (lastEvent != null && new DateTime(eventAt).isBefore(DateTime.now().plusDays(1).getMillis()/86400000) && new DateTime(eventAt).plusDays(1).isAfter(lastEvent.getEventAt().getTime())) {
+                return;
+            } else {
+                throw new JsonResponseException("event.at.illegal");
+            }
+        } catch (Exception e) {
+            throw new JsonResponseException("event.at.illegal");
         }
     }
 }
