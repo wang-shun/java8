@@ -12,6 +12,12 @@
     <artifactId>doctor-msg</artifactId>
 
     <dependencies>
+        <!-- xls related -->
+        <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi-excelant</artifactId>
+            <version>3.10-FINAL</version>
+        </dependency>
         <dependency>
             <groupId>io.terminus.parana</groupId>
             <artifactId>parana-msg</artifactId>
