@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Desc:
@@ -26,20 +27,26 @@ public class DoctorImportDataService {
     @Autowired
     private DoctorBarnDao doctorBarnDao;
 
+    @Autowired
+    private DoctorMoveBasicService doctorMoveBasicService;
+
     /**
      * 根据shit导入所有的猪场数据
      */
     public void importAll(DoctorImportSheet shit) {
-
+        DoctorFarm farm = new DoctorFarm();
+        Map<String, Long> userMap = doctorMoveBasicService.getSubMap(farm.getOrgId());
     }
 
     public DoctorFarm importOrgFarmUser(Sheet shit) {
         return new DoctorFarm();
     }
 
-    public void importBarn(DoctorFarm farm, Sheet shit) {
+    /**
+     * 导入猪舍
+     */
+    public void importBarn(DoctorFarm farm, Map<String, Long> userMap, Sheet shit) {
         List<DoctorBarn> barns = Lists.newArrayList();
-
         shit.forEach(row -> {
             //第一行是表头，跳过
             if (row.getRowNum() > 0) {
@@ -53,8 +60,8 @@ public class DoctorImportDataService {
                 barn.setCanOpenGroup(DoctorBarn.CanOpenGroup.YES.getValue());
                 barn.setStatus(DoctorBarn.Status.USING.getValue());
                 barn.setCapacity(1000);
-                //barn.setStaffId();
                 barn.setStaffName(ImportExcelUtils.getString(row, 3));
+                barn.setStaffId(userMap.get(barn.getStaffName()));
                 barn.setExtra(ImportExcelUtils.getString(row, 4));
                 barns.add(barn);
             }
