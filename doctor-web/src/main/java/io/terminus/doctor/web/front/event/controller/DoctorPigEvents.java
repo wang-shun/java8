@@ -182,6 +182,13 @@ public class DoctorPigEvents {
         return RespHelper.or500(workFlowService.updateData(key, businessId));
     }
 
+    /**
+     * 分页查询某一类型的猪事件
+     * @param params
+     * @param pageNo
+     * @param pageSize
+     * @return
+     */
     @RequestMapping(value = "/pigPaging", method = RequestMethod.GET)
     @ResponseBody
     public Paging<DoctorPigEvent> queryPigEventsByCriteria(@RequestParam Map<String, Object> params, @RequestParam(required = false) Integer pageNo, @RequestParam(required = false) Integer pageSize) {
@@ -196,6 +203,12 @@ public class DoctorPigEvents {
         return RespHelper.or500(doctorPigEventReadService.queryPigEventsByCriteria(params, pageNo, pageSize));
     }
 
+    /**
+     * 获取相应的猪类型事件列表
+     * @param types
+     * @return
+     * @see PigEvent
+     */
     @RequestMapping(value = "/pigEvents")
     @ResponseBody
     public List<String> queryPigEvents(@RequestParam String types) {
@@ -203,6 +216,11 @@ public class DoctorPigEvents {
         return events.stream().map(pigEvent -> pigEvent.getDesc()).collect(Collectors.toList());
     }
 
+    /**
+     * 获取拥有猪事件的操作人列表
+     * @param params
+     * @return
+     */
     @RequestMapping(value = "/event/operators")
     @ResponseBody
     public List<DoctorPigEvent> queryOperatorForEvent(@RequestParam  Map<String, Object> params){

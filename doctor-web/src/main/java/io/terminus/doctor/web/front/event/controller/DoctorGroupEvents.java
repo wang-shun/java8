@@ -319,12 +319,24 @@ public class DoctorGroupEvents {
         return RespHelper.or500(doctorGroupReadService.findGroupByFarmIdAndGroupCode(farmId, groupCode));
     }
 
+    /**
+     * 获取猪群事件类型列表
+     * @return
+     * @see GroupEventType
+     */
     @RequestMapping(value = "/groupEvents")
     @ResponseBody
     public List<String> queryGroupEvents() {
         return Arrays.asList(GroupEventType.values()).stream().map(groupEventType -> groupEventType.getDesc()).collect(Collectors.toList());
     }
 
+    /**
+     * 分页查询某一类型的猪群事件
+     * @param params
+     * @param pageNo
+     * @param pageSize
+     * @return
+     */
     @RequestMapping(value = "/groupPaging", method = RequestMethod.GET)
     @ResponseBody
     public Paging<DoctorGroupEvent> queryGroupEventsByCriteria(@RequestParam Map<String, Object> params, @RequestParam(required = false) Integer pageNo, @RequestParam(required = false) Integer pageSize) {

@@ -38,6 +38,10 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
         return this.getSqlSession().selectOne(sqlId("queryLastPigEventById"), pigId);
     }
 
+    public DoctorPigEvent queryLastPigEventByPigIds(List<Long> pigIds) {
+        return this.getSqlSession().selectOne(sqlId("queryLastPigEventByPigIds"), pigIds);
+    }
+
     /**
      * 获取母猪流转中最新的事件
      *

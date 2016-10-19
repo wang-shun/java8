@@ -291,4 +291,14 @@ public class DoctorPigEventReadServiceImpl implements DoctorPigEventReadService 
             return Response.fail("last.event.failed");
         }
     }
+
+    @Override
+    public Response<DoctorPigEvent> lastEvent(@NotNull(message = "input.pigIds.empty") List<Long> pigIds) {
+        try {
+            return Response.ok(doctorPigEventDao.queryLastPigEventByPigIds(pigIds));
+        } catch (Exception e) {
+            log.error("last.event.failed, cause {}", Throwables.getStackTraceAsString(e));
+            return Response.fail("last.event.failed");
+        }
+    }
 }
