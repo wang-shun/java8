@@ -1,6 +1,9 @@
 package io.terminus.doctor.move.service;
 
 import com.google.common.collect.Lists;
+import io.terminus.doctor.basic.dao.DoctorBasicDao;
+import io.terminus.doctor.basic.model.DoctorBasic;
+import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.move.dto.DoctorImportSheet;
@@ -13,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Desc:
@@ -26,7 +30,8 @@ public class DoctorImportDataService {
 
     @Autowired
     private DoctorBarnDao doctorBarnDao;
-
+    @Autowired
+    private DoctorBasicDao doctorBasicDao;
     @Autowired
     private DoctorMoveBasicService doctorMoveBasicService;
 
@@ -36,6 +41,8 @@ public class DoctorImportDataService {
     public void importAll(DoctorImportSheet shit) {
         DoctorFarm farm = new DoctorFarm();
         Map<String, Long> userMap = doctorMoveBasicService.getSubMap(farm.getOrgId());
+
+        importBarn(farm, userMap, shit.getBarn());
     }
 
     public DoctorFarm importOrgFarmUser(Sheet shit) {
@@ -56,7 +63,14 @@ public class DoctorImportDataService {
                 barn.setOrgName(farm.getOrgName());
                 barn.setFarmId(farm.getId());
                 barn.setFarmName(farm.getName());
-                //barn.setPigType();
+
+                PigType pigType = PigType.from(ImportExcelUtils.getString(row, 1));
+                if (pigType != null) {
+                    barn.setPigType(pigType.getValue());
+                } else {
+                    log.error("farm:{}, barn:{} type is null, please check!", farm, barn.getName());
+                }
+
                 barn.setCanOpenGroup(DoctorBarn.CanOpenGroup.YES.getValue());
                 barn.setStatus(DoctorBarn.Status.USING.getValue());
                 barn.setCapacity(1000);
@@ -70,7 +84,22 @@ public class DoctorImportDataService {
     }
 
     public void importBreed(DoctorFarm farm, Sheet shit) {
-
+        List<String> breeds = doctorBasicDao.findByType(DoctorBasic.Type.BREED.getValue()).stream()
+                .map(DoctorBasic::getName).collect(Collectors.toList());
+        shit.forEach(row -> {
+            if (row.getRowNum() > 0) {
+                String breedName = ImportExcelUtils.getString(row, 0);
+                if (!breeds.contains(breedName)) {
+                    DoctorBasic basic = new DoctorBasic();
+                    basic.setName(breedName);
+                    basic.setType(DoctorBasic.Type.BREED.getValue());
+                    basic.setTypeName(DoctorBasic.Type.BREED.getDesc());
+                    basic.setIsValid(1);
+                    basic.setSrm(ImportExcelUtils.getString(row, 1));
+                    doctorBasicDao.create(basic);
+                }
+            }
+        });
     }
 
     public void importBoar(DoctorFarm farm, Sheet shit) {
