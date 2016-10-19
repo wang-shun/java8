@@ -3571,3 +3571,21 @@ VALUES
 	(1, 1, 1, 'http://img.xrnm.com/20160616-ad115c7ce911aaa925327ecee812fbfc.png', 'https://www.baidu.com/', now(), now()),
 	(2, 2, 1, 'http://img.xrnm.com/20160616-85900d92c238fe79afa3e1b45a865f9f.png', 'https://www.baidu.com/', now(), now()),
 	(3, 3, 1, 'http://img.xrnm.com/20160616-f9c07f1b71f08a3e85ccea3188f15a54.png', 'https://www.baidu.com/', now(), now());
+
+-- 2016年10月19日， 由于猪的类别枚举发生变化，需要刷新已有的字段
+update doctor_pigs set pig_type = 7 where pig_type = 1;
+update doctor_pigs set pig_type = 3 where pig_type = 10;
+update doctor_pigs set pig_type = 4 where pig_type = 8;
+
+update doctor_groups set pig_type = 7 where pig_type = 1;
+update doctor_groups set pig_type = 3 where pig_type = 10;
+update doctor_groups set pig_type = 4 where pig_type = 8;
+
+update doctor_barns set pig_type = 7 where pig_type = 1;
+update doctor_barns set pig_type = 3 where pig_type = 10;
+update doctor_barns set pig_type = 4 where pig_type = 8;
+
+update doctor_vaccination_pig_warns set pig_type = 7 where pig_type = 1;
+update doctor_vaccination_pig_warns set pig_type = 3 where pig_type = 10;
+update doctor_vaccination_pig_warns set pig_type = 4 where pig_type = 8;
+
