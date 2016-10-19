@@ -273,8 +273,9 @@ public class DoctorBarns {
             }
         } else {
             barnId = barn.getId();
+            DoctorBarn oldBarn = RespHelper.or500(doctorBarnReadService.findBarnById(barnId));
             //是否容许修改猪舍名字
-            if (StringUtils.isNotBlank(barn.getName()) && !barn.getName().equals(RespHelper.or500(doctorBarnReadService.findBarnById(barnId)).getName())) {
+            if (StringUtils.isNotBlank(barn.getName()) && !barn.getName().equals(oldBarn.getName())) {
                 Long groupEvent = RespHelper.or500(doctorGroupReadService.countByBarnId(barnId));
                 Long pigEvent = RespHelper.or500(doctorPigEventReadService.countByBarnId(barnId));
                 if (groupEvent + pigEvent > 0L) {
@@ -287,8 +288,13 @@ public class DoctorBarns {
                     throw new JsonResponseException("barn.forbid.fail");
                 }
             }
+            //判断猪舍是否允许修改类型
+            if(barn.getPigType() != null && !Objects.equals(barn.getPigType(), oldBarn.getPigType())){
+                if(!RespHelper.or500(doctorPigReadService.findActivePigTrackByCurrentBarnId(barnId)).isEmpty()){
+                    throw new JsonResponseException("barn.type.forbid.update");
+                }
+            }
             RespHelper.or500(doctorBarnWriteService.updateBarn(barn));
-            barnId = barn.getId();
         }
         return barnId;
     }
