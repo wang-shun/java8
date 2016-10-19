@@ -134,12 +134,12 @@ public class PigVaccinationProducer extends AbstractJobProducer {
                     case DELIVER_SOW:
                         checkDeliverSow(warn, ruleRole, rule, subUsers);
                         break;
-                    // 后备母猪
-                    case RESERVE_SOW:
-                        checkReservePig(warn, ruleRole, rule, subUsers, DoctorPig.PIG_TYPE.SOW.getKey());
+                    // 后备猪
+                    case RESERVE:
+                        checkReservePig(warn, ruleRole, rule, subUsers, null);
                         break;
-                    // 后备公猪/种公猪
-                    case RESERVE_BOAR:case BOAR:
+                    // 种公猪
+                    case BOAR:
                         checkReservePig(warn, ruleRole, rule, subUsers, DoctorPig.PIG_TYPE.BOAR.getKey());
                         break;
                     // 保育猪
@@ -149,10 +149,6 @@ public class PigVaccinationProducer extends AbstractJobProducer {
                     // 育肥猪
                     case FATTEN_PIG:
                         checkPigGroup(warn, ruleRole, rule, subUsers, PigType.FATTEN_PIG.getValue());
-                        break;
-                    // 产房仔猪
-                    case FARROW_PIGLET:
-                        checkPigGroup(warn, ruleRole, rule, subUsers, PigType.FARROW_PIGLET.getValue());
                         break;
                     default:
                         break;

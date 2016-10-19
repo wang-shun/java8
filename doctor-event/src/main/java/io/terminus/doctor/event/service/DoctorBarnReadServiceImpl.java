@@ -182,17 +182,13 @@ public class DoctorBarnReadServiceImpl implements DoctorBarnReadService {
             List<DoctorBarn> availableBarns = Lists.newArrayList();
 
             for (DoctorBarn doctorBarn : doctorBarns) {
-                if (Objects.equal(doctorBarn.getPigType(), PigType.FARROW_PIGLET.getValue()) &&
-                        !(Objects.equal(barnType, PigType.NURSERY_PIGLET.getValue()) ||
-                                Objects.equal(barnType, PigType.FARROW_PIGLET.getValue()) ||
-                                Objects.equal(barnType, PigType.DELIVER_SOW.getValue()))) {
+                if (Objects.equal(doctorBarn.getPigType(), PigType.DELIVER_SOW.getValue()) &&
+                        !(Objects.equal(barnType, PigType.NURSERY_PIGLET.getValue()) || Objects.equal(barnType, PigType.DELIVER_SOW.getValue()))) {
                     continue;
                 }
 
                 if (Objects.equal(doctorBarn.getPigType(), PigType.NURSERY_PIGLET.getValue()) &&
-                        !(Objects.equal(barnType, PigType.FATTEN_PIG.getValue()) ||
-                                Objects.equal(barnType, PigType.BREEDING.getValue()) ||
-                                Objects.equal(barnType, PigType.NURSERY_PIGLET.getValue()))) {
+                        !(Objects.equal(barnType, PigType.FATTEN_PIG.getValue()) || Objects.equal(barnType, PigType.NURSERY_PIGLET.getValue()))) {
                     continue;
                 }
                 availableBarns.add(doctorBarn);

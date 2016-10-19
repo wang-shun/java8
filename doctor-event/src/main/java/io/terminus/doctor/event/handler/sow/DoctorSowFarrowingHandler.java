@@ -154,7 +154,7 @@ public class DoctorSowFarrowingHandler extends DoctorAbstractEventFlowHandler {
         input.setFromBarnName(doctorPigTrack.getCurrentBarnName());
         input.setToBarnId(Long.valueOf(String.valueOf(extra.get("toBarnId"))));
         input.setToBarnName(String.valueOf(extra.get("toBarnName")));
-        input.setPigType(PigType.FARROW_PIGLET.getValue());
+        input.setPigType(PigType.DELIVER_SOW.getValue());
         input.setInType(DoctorMoveInGroupEvent.InType.PIGLET.getValue());
         input.setInTypeName(DoctorMoveInGroupEvent.InType.PIGLET.getDesc());
         input.setSource(PigSource.LOCAL.getKey());

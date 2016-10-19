@@ -32,7 +32,7 @@ public class DoctorSowBreedCountCheckTacker implements ITacker {
                         Object currentBarnTypeObj = doctorPigTrackMap.get("currentBarnType");
                         if (currentBarnTypeObj != null) {
                             Integer currentBarnType = Integer.parseInt(currentBarnTypeObj.toString());
-                            if (currentBarnType == PigType.RESERVE_SOW.getValue()) {
+                            if (currentBarnType == PigType.RESERVE.getValue()) {
                                 return false;
                             }
                         }

@@ -197,14 +197,11 @@ public class DoctorGroupReadServiceImpl implements DoctorGroupReadService {
                     .filter(pt -> pt.getGroup().getPigType() != null)
                     .collect(Collectors.groupingBy(gd -> gd.getGroup().getPigType()));
 
-            List<DoctorGroupDetail> farrows = Lists.newArrayList();
-            farrows.addAll(MoreObjects.firstNonNull(groupMap.get(PigType.FARROW_PIGLET.getValue()), Lists.newArrayList()));
-            farrows.addAll(MoreObjects.firstNonNull(groupMap.get(PigType.DELIVER_SOW.getValue()), Lists.newArrayList()));   //实际情况,分娩母猪舍也有产房仔猪!!
+            List<DoctorGroupDetail> farrows = MoreObjects.firstNonNull(groupMap.get(PigType.DELIVER_SOW.getValue()), Lists.newArrayList());
 
             List<DoctorGroupDetail> nurseries = MoreObjects.firstNonNull(groupMap.get(PigType.NURSERY_PIGLET.getValue()), Lists.newArrayList());
             List<DoctorGroupDetail> fattens = MoreObjects.firstNonNull(groupMap.get(PigType.FATTEN_PIG.getValue()), Lists.newArrayList());
-            List<DoctorGroupDetail> houbeiSows = MoreObjects.firstNonNull(groupMap.get(PigType.RESERVE_SOW.getValue()), Lists.newArrayList());
-            List<DoctorGroupDetail> houbeiBoars = MoreObjects.firstNonNull(groupMap.get(PigType.RESERVE_BOAR.getValue()), Lists.newArrayList());
+            List<DoctorGroupDetail> houbei = MoreObjects.firstNonNull(groupMap.get(PigType.RESERVE.getValue()), Lists.newArrayList());
 
 
             //根据猪类统计
@@ -214,8 +211,7 @@ public class DoctorGroupReadServiceImpl implements DoctorGroupReadService {
             count.setFarrowCount(CountUtil.sumInt(farrows, g -> g.getGroupTrack().getQuantity()));
             count.setNurseryCount(CountUtil.sumInt(nurseries, g -> g.getGroupTrack().getQuantity()));
             count.setFattenCount(CountUtil.sumInt(fattens, g -> g.getGroupTrack().getQuantity()));
-            count.setHoubeiBoarCount(CountUtil.sumInt(houbeiBoars, g -> g.getGroupTrack().getQuantity()));
-            count.setHoubeiSowCount(CountUtil.sumInt(houbeiSows, g -> g.getGroupTrack().getQuantity()));
+            count.setHoubeiCount(CountUtil.sumInt(houbei, g -> g.getGroupTrack().getQuantity()));
             return Response.ok(count);
         } catch (Exception e) {
             log.error("count farm group failed, farmId:{}, cause:{}", farmId, Throwables.getStackTraceAsString(e));

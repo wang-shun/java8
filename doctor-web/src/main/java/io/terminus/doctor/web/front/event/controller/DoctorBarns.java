@@ -359,12 +359,7 @@ public class DoctorBarns {
         if (PigType.isGroup(barn.getPigType())) {
             barnDetail.setType(PigSearchType.GROUP.getValue());
 
-            //根据实际情况, 如果是猪舍类型是分娩母猪, 需要指定猪舍类型产房
-            if (barn.getPigType().equals(PigType.DELIVER_SOW.getValue())) {
-                barnDetail.setGroupType(PigType.FARROW_PIGLET.getValue());
-            } else {
-                barnDetail.setGroupType(barn.getPigType()); //一类猪舍只能放一类猪群
-            }
+            barnDetail.setGroupType(barn.getPigType());
             barnDetail.setGroupPaging(groupPaging);
             return barnDetail;
         }
