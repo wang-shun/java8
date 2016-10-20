@@ -29,6 +29,7 @@ import io.terminus.doctor.user.service.DoctorFarmReadService;
 import io.terminus.doctor.user.service.DoctorUserDataPermissionReadService;
 import io.terminus.doctor.user.service.DoctorUserDataPermissionWriteService;
 import io.terminus.doctor.user.service.PrimaryUserReadService;
+import io.terminus.doctor.user.service.SubRoleReadService;
 import io.terminus.doctor.web.front.auth.DoctorFarmAuthCenter;
 import io.terminus.doctor.web.front.event.dto.DoctorBarnDetail;
 import lombok.extern.slf4j.Slf4j;
@@ -44,6 +45,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -72,6 +74,7 @@ public class DoctorBarns {
     private final DoctorUserDataPermissionReadService doctorUserDataPermissionReadService;
     private final DoctorUserDataPermissionWriteService doctorUserDataPermissionWriteService;
     private final PrimaryUserReadService primaryUserReadService;
+    private final SubRoleReadService subRoleReadService;
 
     @Autowired
     public DoctorBarns(DoctorBarnReadService doctorBarnReadService,
@@ -83,7 +86,8 @@ public class DoctorBarns {
                        DoctorPigEventReadService doctorPigEventReadService,
                        DoctorUserDataPermissionWriteService doctorUserDataPermissionWriteService,
                        DoctorUserDataPermissionReadService doctorUserDataPermissionReadService,
-                       PrimaryUserReadService primaryUserReadService) {
+                       PrimaryUserReadService primaryUserReadService,
+                       SubRoleReadService subRoleReadService) {
         this.doctorBarnReadService = doctorBarnReadService;
         this.doctorBarnWriteService = doctorBarnWriteService;
         this.doctorFarmReadService = doctorFarmReadService;
@@ -94,6 +98,7 @@ public class DoctorBarns {
         this.doctorUserDataPermissionWriteService = doctorUserDataPermissionWriteService;
         this.doctorUserDataPermissionReadService = doctorUserDataPermissionReadService;
         this.primaryUserReadService = primaryUserReadService;
+        this.subRoleReadService = subRoleReadService;
     }
 
     /**
@@ -140,8 +145,19 @@ public class DoctorBarns {
      */
     @RequestMapping(value = "/farmIds", method = RequestMethod.GET)
     public List<DoctorBarn> findBarnsByfarmIds(@RequestParam("farmIds") List<Long> farmIds,
-                                              @RequestParam(value = "pigIds", required = false) String pigIds) {
-        return filterBarnByPigIds(RespHelper.or500(doctorBarnReadService.findBarnsByFarmIds(farmIds)), pigIds);
+                                               @RequestParam(value = "pigIds", required = false) String pigIds,
+                                               @RequestParam(required = false) Long roleId) {
+        List<DoctorBarn> barns = filterBarnByPigIds(RespHelper.or500(doctorBarnReadService.findBarnsByFarmIds(farmIds)), pigIds);
+
+        if(roleId != null){
+            Map<String, Object> extra = RespHelper.or500(subRoleReadService.findById(roleId)).getExtra();
+            if(extra != null && extra.get("defaultBarnType") != null){
+                List<Integer> barnType = (List<Integer>) extra.get("defaultBarnType");
+                barns = barns.stream().filter(barn -> barnType.contains(barn.getPigType())).collect(Collectors.toList());
+            }
+        }
+
+        return barns;
     }
 
     /**
