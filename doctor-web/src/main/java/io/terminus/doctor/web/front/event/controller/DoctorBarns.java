@@ -6,6 +6,7 @@ import com.google.common.collect.Lists;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.BaseUser;
 import io.terminus.common.model.Paging;
+import io.terminus.common.utils.BeanMapper;
 import io.terminus.common.utils.Splitters;
 import io.terminus.doctor.common.enums.PigSearchType;
 import io.terminus.doctor.common.enums.PigType;
@@ -32,6 +33,7 @@ import io.terminus.doctor.user.service.PrimaryUserReadService;
 import io.terminus.doctor.user.service.SubRoleReadService;
 import io.terminus.doctor.web.front.auth.DoctorFarmAuthCenter;
 import io.terminus.doctor.web.front.event.dto.DoctorBarnDetail;
+import io.terminus.doctor.web.front.event.dto.DoctorBarnSelect;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -144,20 +146,27 @@ public class DoctorBarns {
      * @return 猪舍表列表
      */
     @RequestMapping(value = "/farmIds", method = RequestMethod.GET)
-    public List<DoctorBarn> findBarnsByfarmIds(@RequestParam("farmIds") List<Long> farmIds,
-                                               @RequestParam(value = "pigIds", required = false) String pigIds,
-                                               @RequestParam(required = false) Long roleId) {
+    public List<DoctorBarnSelect> findBarnsByfarmIds(@RequestParam("farmIds") List<Long> farmIds,
+                                                     @RequestParam(value = "pigIds", required = false) String pigIds,
+                                                     @RequestParam(required = false) Long roleId) {
         List<DoctorBarn> barns = filterBarnByPigIds(RespHelper.or500(doctorBarnReadService.findBarnsByFarmIds(farmIds)), pigIds);
+        List<DoctorBarnSelect> barnSelects = BeanMapper.mapList(barns, DoctorBarnSelect.class);
 
         if(roleId != null){
             Map<String, Object> extra = RespHelper.or500(subRoleReadService.findById(roleId)).getExtra();
             if(extra != null && extra.get("defaultBarnType") != null){
                 List<Integer> barnType = (List<Integer>) extra.get("defaultBarnType");
-                barns = barns.stream().filter(barn -> barnType.contains(barn.getPigType())).collect(Collectors.toList());
+                barnSelects.forEach(select -> {
+                    if(barnType.contains(select.getPigType())){
+                        select.setSelect(true);
+                    }else{
+                        select.setSelect(false);
+                    }
+                });
             }
         }
 
-        return barns;
+        return barnSelects;
     }
 
     /**
