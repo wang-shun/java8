@@ -108,7 +108,7 @@ public class BoarEliminateProducer extends AbstractJobProducer {
                         }
                         //取出最近一次的采精事件
                         DoctorPigEvent doctorPigEvent = getPigEventByEventType(pigDto.getDoctorPigEvents(), PigEvent.SEMEN.getKey());
-                        ruleValueMap.keySet().forEach(key -> {
+                        for (Integer key : ruleValueMap.keySet()) {
                             Boolean isSend = false;
                             RuleValue ruleValue = ruleValueMap.get(key);
                             if (key == 1) {
@@ -140,9 +140,10 @@ public class BoarEliminateProducer extends AbstractJobProducer {
                             }
                             if (isSend) {
                                 pigDto.setReason(ruleValue.getDescribe() + ruleValue.getValue().toString());
-                                getMessage(pigDto, ruleRole, sUsers, timeDiff, rule.getUrl(), PigEvent.REMOVAL.getKey());
+                                getMessage(pigDto, ruleRole, sUsers, timeDiff, rule.getUrl(), PigEvent.REMOVAL.getKey(), ruleValue.getId());
+                                break;
                             }
-                        });
+                        }
                     } catch (Exception e) {
                         log.error("[BoarEliminateProduce]-message.failed");
                     }

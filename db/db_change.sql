@@ -489,3 +489,7 @@ ALTER TABLE doctor_group_batch_summaries ADD COLUMN daily_weight_gain DOUBLE DEF
 
 alter table doctor_user_data_permissions modify column  `barn_ids` text COMMENT '猪舍ids, 逗号分隔';
 
+-- 2016-10-19
+ALTER TABLE doctor_message_user ADD COLUMN rule_value_id BIGINT(20) DEFAULT NULL COMMENT '规则值id' AFTER business_id;
+
+

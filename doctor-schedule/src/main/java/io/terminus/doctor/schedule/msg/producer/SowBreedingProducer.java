@@ -133,7 +133,7 @@ public class SowBreedingProducer extends AbstractJobProducer {
 
                             if (isMessage) {
                                 pigDto.setOperatorName(RespHelper.orServEx(doctorBarnReadService.findBarnById(pigDto.getBarnId())).getStaffName());
-                                getMessage(pigDto, ruleRole, sUsers, timeDiff, rule.getUrl(), PigEvent.MATING.getKey());
+                                getMessage(pigDto, ruleRole, sUsers, timeDiff, rule.getUrl(), PigEvent.MATING.getKey(), ruleValueMap.get(1).getId());
                             }
 
                         }

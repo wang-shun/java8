@@ -612,7 +612,7 @@ public class PigVaccinationProducer extends AbstractJobProducer {
         jsonData.put("vaccDate", DateTimeFormat.forPattern("yyyy-MM-dd").print(vaccDate));
 
             try {
-                createMessage(subUsers, ruleRole, MAPPER.writeValueAsString(jsonData), null, pigDto.getPigId());
+                createMessage(subUsers, ruleRole, MAPPER.writeValueAsString(jsonData), null, pigDto.getPigId(), null);
             } catch (JsonProcessingException e) {
                 log.error("message produce error, cause by {}", Throwables.getStackTraceAsString(e));
             }
@@ -636,7 +636,7 @@ public class PigVaccinationProducer extends AbstractJobProducer {
         jsonData.put("vaccinationDateType", warn.getVaccinationDateType());
         jsonData.put("vaccDate", DateTimeFormat.forPattern("yyyy-MM-dd").print(vaccDate));
             try {
-                createMessage(subUsers, ruleRole, MAPPER.writeValueAsString(jsonData), null, detail.getGroup().getId());
+                createMessage(subUsers, ruleRole, MAPPER.writeValueAsString(jsonData), null, detail.getGroup().getId(), null);
             } catch (JsonProcessingException e) {
                 log.error("message produce error, cause by {}", Throwables.getStackTraceAsString(e));
             }

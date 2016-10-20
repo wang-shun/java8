@@ -45,6 +45,8 @@ public class DoctorMessageUser implements Serializable{
      */
     private Long businessId;
 
+    private Integer ruleValueId;
+
     /**
      * 消息规则模板id
      */
