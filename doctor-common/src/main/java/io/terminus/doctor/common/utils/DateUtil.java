@@ -7,7 +7,6 @@ package io.terminus.doctor.common.utils;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
-import io.terminus.common.utils.Dates;
 import org.joda.time.DateTime;
 import org.joda.time.Duration;
 import org.joda.time.format.DateTimeFormat;
@@ -34,6 +33,17 @@ public class DateUtil {
     private static final DateTimeFormatter DATE = DateTimeFormat.forPattern("yyyy-MM-dd");
 
     private static final DateTimeFormatter DATE_TIME = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss");
+
+    public static Date formatToDate(DateTimeFormatter formatter, String date) {
+        try {
+            if (formatter == null || Strings.isNullOrEmpty(date)) {
+                return null;
+            }
+            return formatter.parseDateTime(date).toDate();
+        } catch (Exception e) {
+            return null;
+        }
+    }
 
 
     /**
