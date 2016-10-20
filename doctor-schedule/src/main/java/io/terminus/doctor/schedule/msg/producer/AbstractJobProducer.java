@@ -334,11 +334,11 @@ public abstract class AbstractJobProducer extends AbstractProducer {
     /**
      * 创建消息
      */
-    protected void getMessage(DoctorPigInfoDto pigDto, DoctorMessageRuleRole ruleRole, List<SubUser> subUsers, Double timeDiff, String url, Integer eventType) {
+    protected void getMessage(DoctorPigInfoDto pigDto, DoctorMessageRuleRole ruleRole, List<SubUser> subUsers, Double timeDiff, String url, Integer eventType, Integer ruleValueId) {
         // 创建消息
         Map<String, Object> jsonData = PigDtoFactory.getInstance().createPigMessage(pigDto, timeDiff, url);
             try {
-                createMessage(subUsers, ruleRole, MAPPER.writeValueAsString(jsonData), eventType, pigDto.getPigId());
+                createMessage(subUsers, ruleRole, MAPPER.writeValueAsString(jsonData), eventType, pigDto.getPigId(), ruleValueId);
             } catch (JsonProcessingException e) {
                 log.error("message produce error, cause by {}", Throwables.getStackTraceAsString(e));
             }

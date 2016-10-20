@@ -89,7 +89,7 @@ public class SysMessageProducer extends AbstractJobProducer {
                     }
                 }
             }
-                    createMessage(subUsers, ruleRole, template.getContent(), null, null);
+                    createMessage(subUsers, ruleRole, template.getContent(), null, null, null);
         }
         log.info("系统消息产生 --- SysMessageProducer 结束执行执行, 产生 {} 条消息", messages.size());
     }

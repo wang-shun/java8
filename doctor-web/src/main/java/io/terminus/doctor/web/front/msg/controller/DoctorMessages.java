@@ -8,8 +8,10 @@ import io.terminus.common.model.Paging;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.constants.JacksonType;
+import io.terminus.doctor.common.utils.Params;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.msg.dto.DoctorMessageUserDto;
+import io.terminus.doctor.msg.dto.RuleValue;
 import io.terminus.doctor.msg.enums.Category;
 import io.terminus.doctor.msg.model.DoctorMessage;
 import io.terminus.doctor.msg.model.DoctorMessageRule;
@@ -22,6 +24,7 @@ import io.terminus.doctor.msg.service.DoctorMessageRuleTemplateWriteService;
 import io.terminus.doctor.msg.service.DoctorMessageUserReadService;
 import io.terminus.doctor.msg.service.DoctorMessageUserWriteService;
 import io.terminus.doctor.msg.service.DoctorMessageWriteService;
+import io.terminus.doctor.web.front.msg.dto.BackFatMessageDto;
 import io.terminus.doctor.web.front.msg.dto.DoctorMessageDto;
 import io.terminus.doctor.web.front.msg.dto.DoctorMessageWithUserDto;
 import io.terminus.doctor.web.front.msg.dto.OneLevelMessageDto;
@@ -91,14 +94,17 @@ public class DoctorMessages {
     @RequestMapping(value = "/warn/messages", method = RequestMethod.GET)
     public DoctorMessageDto pagingWarnDoctorMessages(@RequestParam("pageNo") Integer pageNo,
                                                                      @RequestParam("pageSize") Integer pageSize,
-                                                                     @RequestParam Map<String, String> criteria) {
+                                                                     @RequestParam Map<String, Object> criteria) {
+        Params.filterNullOrEmpty(criteria);
         if (!isUserLogin()) {
             return new DoctorMessageDto(new Paging<>(0L, Collections.emptyList()),null);
         }
-        DoctorMessageUserDto doctorMessageUserDto = new DoctorMessageUserDto();
-        doctorMessageUserDto.setUserId(UserUtil.getUserId());
-        doctorMessageUserDto.setTemplateId(Long.parseLong(criteria.get("templateId")));
-        doctorMessageUserDto.setFarmId(Long.parseLong(criteria.get("farmId")));
+
+       // DoctorMessageUserDto doctorMessageUserDto = new DoctorMessageUserDto();
+        DoctorMessageUserDto doctorMessageUserDto = BeanMapper.map(criteria, DoctorMessageUserDto.class);
+//        doctorMessageUserDto.setUserId(UserUtil.getUserId());
+//        doctorMessageUserDto.setTemplateId(Long.parseLong((String) criteria.get("templateId")));
+//        doctorMessageUserDto.setFarmId(Long.parseLong((String) criteria.get("farmId")));
         Paging<DoctorMessageUser> doctorMessageUserPaging = RespHelper.or500(doctorMessageUserReadService.paging(doctorMessageUserDto, pageNo, pageSize));
         DoctorMessageDto msgDto = DoctorMessageDto.builder().build();
         List<DoctorMessageWithUserDto> list = Lists.newArrayList();
@@ -323,6 +329,27 @@ public class DoctorMessages {
         return list;
     }
 
+    /**
+     * 四种背膘提示猪数量
+     * @param farmId
+     * @return
+     */
+    @RequestMapping(value = "/warn/rule/backfat", method = RequestMethod.GET)
+    public List<BackFatMessageDto> getBackFatRulePigCount(@RequestParam("farmId") Long farmId){
+        DoctorMessageRuleTemplate template = RespHelper.or500(doctorMessageRuleTemplateReadService.findByCategory(Category.SOW_BACK_FAT.getKey())).get(0);
+        DoctorMessageUserDto doctorMessageUserDto = new DoctorMessageUserDto();
+        doctorMessageUserDto.setFarmId(farmId);
+        doctorMessageUserDto.setTemplateId(template.getId());
+        doctorMessageUserDto.setUserId(UserUtil.getUserId());
+        List<RuleValue> ruleValues = template.getRule().getValues();
+        List<BackFatMessageDto> list = Lists.newArrayList();
+        ruleValues.forEach(ruleValue -> {
+            doctorMessageUserDto.setRuleValueId(ruleValue.getId());
+            Integer pigCount = RespHelper.or500(doctorMessageUserReadService.findBusinessListByCriteria(doctorMessageUserDto)).size();
+            list.add(BackFatMessageDto.builder().ruleValueId(ruleValue.getId()).pigCount(pigCount).build());
+        });
+        return list;
+    }
     /**
      * 判断当前用户是否登录
      *

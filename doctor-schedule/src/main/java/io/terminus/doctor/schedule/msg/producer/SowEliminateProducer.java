@@ -118,7 +118,7 @@ public class SowEliminateProducer extends AbstractJobProducer {
                         List<SubUser> sUsers = filterSubUserBarnId(subUsers, pigDto.getBarnId());
                         // 母猪的updatedAt与当前时间差 (天)
                         Double timeDiff = (double) (DateTime.now().minus(pigDto.getUpdatedAt().getTime()).getMillis() / 86400000);
-                        ruleValueMap.keySet().forEach(key -> {
+                        for (Integer key : ruleValueMap.keySet()) {
                             //是否需要发送消息
                             Boolean isSend = false;
                             RuleValue ruleValue = ruleValueMap.get(key);
@@ -168,10 +168,11 @@ public class SowEliminateProducer extends AbstractJobProducer {
                                     recordPigMessage(pigDto, PigEvent.REMOVAL, null, ruleValue, null);
                                 } else if (isMessage) {
                                     pigDto.setReason(ruleValue.getDescribe() + ruleValue.getValue().intValue());
-                                   getMessage(pigDto, ruleRole, sUsers, timeDiff, rule.getUrl(), PigEvent.REMOVAL.getKey());
+                                    getMessage(pigDto, ruleRole, sUsers, timeDiff, rule.getUrl(), PigEvent.REMOVAL.getKey(), ruleValue.getId());
                                 }
+                                break;
                             }
-                        });
+                        }
                     } catch (Exception e) {
                         log.error("[sowEliminateProduce]-handle.message.failed");
                     }

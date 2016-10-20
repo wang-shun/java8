@@ -125,7 +125,7 @@ public class SowBirthDateProducer extends AbstractJobProducer {
                                 if (isMessage) {
                                     pigDto.setEventDate(doctorPigEvent.getEventAt());
                                     pigDto.setOperatorName(doctorPigEvent.getOperatorName());
-                                    getMessage(pigDto, ruleRole, sUsers, timeDiff, rule.getUrl(), PigEvent.FARROWING.getKey());
+                                    getMessage(pigDto, ruleRole, sUsers, timeDiff, rule.getUrl(), PigEvent.FARROWING.getKey(), ruleValue.getId());
                                 }
                             }
                         });

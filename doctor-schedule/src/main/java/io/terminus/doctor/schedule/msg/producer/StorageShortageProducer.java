@@ -85,7 +85,7 @@ public class StorageShortageProducer extends AbstractJobProducer {
             if (ruleValueMap.get(1) != null && lotConsumeDay != null) {
                 // 如果剩余使用天数 小于 配置的天数
                 if (lotConsumeDay < ruleValueMap.get(1).getValue()) {
-                    getMessage(materialConsumeAvg, ruleRole, subUsers, rule.getUrl());
+                    getMessage(materialConsumeAvg, ruleRole, subUsers, rule.getUrl(), ruleValueMap.get(1));
                 }
             }
         }
@@ -95,11 +95,11 @@ public class StorageShortageProducer extends AbstractJobProducer {
     /**
      * 创建消息
      */
-    private void getMessage(DoctorMaterialConsumeAvgDto materialConsumeAvg, DoctorMessageRuleRole ruleRole, List<SubUser> subUsers, String url) {
+    private void getMessage(DoctorMaterialConsumeAvgDto materialConsumeAvg, DoctorMessageRuleRole ruleRole, List<SubUser> subUsers, String url, RuleValue ruleValue) {
         // 创建消息
         Map<String, Object> jsonData = MaterialDtoFactory.getInstance().createMaterialMessage(materialConsumeAvg, url);
             try {
-                createMessage(subUsers, ruleRole, MAPPER.writeValueAsString(jsonData), null, materialConsumeAvg.getMaterialId());
+                createMessage(subUsers, ruleRole, MAPPER.writeValueAsString(jsonData), null, materialConsumeAvg.getMaterialId(), ruleValue.getId());
             } catch (JsonProcessingException e) {
                 log.error("message produce error, cause by {}", Throwables.getStackTraceAsString(e));
             }
