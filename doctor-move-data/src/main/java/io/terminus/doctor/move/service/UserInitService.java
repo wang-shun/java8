@@ -34,6 +34,7 @@ import io.terminus.doctor.user.service.DoctorServiceReviewReadService;
 import io.terminus.doctor.user.service.DoctorServiceReviewWriteService;
 import io.terminus.doctor.user.service.DoctorServiceStatusWriteService;
 import io.terminus.doctor.user.service.DoctorUserReadService;
+import io.terminus.doctor.user.service.SubRoleWriteService;
 import io.terminus.parana.common.utils.RespHelper;
 import io.terminus.parana.user.model.LoginType;
 import io.terminus.parana.user.model.User;
@@ -86,6 +87,8 @@ public class UserInitService {
     private DoctorMessageRuleWriteService doctorMessageRuleWriteService;
     @Autowired
     private DoctorBarnDao doctorBarnDao;
+    @Autowired
+    private SubRoleWriteService subRoleWriteService;
 
     @Transactional
     public void init(String loginName, String mobile, Long dataSourceId){
@@ -264,21 +267,27 @@ public class UserInitService {
     }
 
     private Map<String, Long> createSubRole(Long primaryUserId, Long dataSourceId){
-        Map<String, Long> roleId = new HashMap<>(); // key = roleName, value = roleId
+        final String appKey = "MOBILE";
+        RespHelper.or500(subRoleWriteService.initDefaultRoles(appKey, primaryUserId));
+        // key = roleName, value = roleId
+        Map<String, Long> existRole = subRoleDao.findByUserIdAndStatus(appKey, primaryUserId, 1).stream().collect(Collectors.toMap(SubRole::getName, SubRole::getId));
+
         List<RoleTemplate> roleTemplates = RespHelper.or500(doctorMoveDatasourceHandler.findAllData(dataSourceId, RoleTemplate.class, DoctorMoveTableEnum.RoleTemplate));
 
         SubRole role = new SubRole();
-        role.setAppKey("MOBILE");
+        role.setAppKey(appKey);
         role.setStatus(1);
         role.setUserId(primaryUserId);
         role.setAllowJson("[\"message_user_center\",\"manage_user_info\",\"manage_user_changepwd\"]");
         for(RoleTemplate roleTemplate : roleTemplates){
-            role.setName(roleTemplate.getRoleName());
-            subRoleDao.create(role);
-            roleId.put(roleTemplate.getRoleName(), role.getId());
+            if(!existRole.containsKey(roleTemplate.getRoleName())){
+                role.setName(roleTemplate.getRoleName());
+                subRoleDao.create(role);
+                existRole.put(roleTemplate.getRoleName(), role.getId());
+            }
         }
 
-        return roleId;
+        return existRole;
     }
 
     private void createSubUser(View_FarmMember member, Map<String, Long> roleIdMap, Long primaryUserId, String primaryUserMobile, List<Long> farmIds, String staffoutId){
