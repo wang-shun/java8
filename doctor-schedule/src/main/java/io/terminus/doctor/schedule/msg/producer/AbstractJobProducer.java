@@ -11,6 +11,7 @@ import io.terminus.doctor.event.dto.DoctorPigMessage;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.enums.PregCheckResult;
+import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.event.service.DoctorPigReadService;
@@ -302,6 +303,17 @@ public abstract class AbstractJobProducer extends AbstractProducer {
             }
         } catch (Exception e) {
             log.error("get.pig.event.by.event.type.failed events{}", events.size());
+        }
+        return null;
+    }
+
+    protected DoctorGroupEvent getLastGroupEventByEventType(List<DoctorGroupEvent> events, Integer type) {
+        try {
+            if (!Arguments.isNullOrEmpty(events)) {
+                return events.stream().filter(doctorGroupEvent -> (doctorGroupEvent.getEventAt() != null) && Objects.equals(doctorGroupEvent.getType(), type)).max(Comparator.comparing(DoctorGroupEvent::getEventAt)).get();
+            }
+        } catch (Exception e) {
+            log.error("get.last.group.event.by.event.type.failed events{}", events.size());
         }
         return null;
     }

@@ -521,12 +521,9 @@ public class PigVaccinationProducer extends AbstractJobProducer {
      * 获取猪的最新的免疫时间
      */
     private DateTime getVaccinationDate(DoctorPigInfoDto pigDto) {
-        try{
-            if(StringUtils.isNotBlank(pigDto.getExtraTrack())) {
-                // @see DoctorMatingDto
-                Date date = new Date((Long) MAPPER.readValue(pigDto.getExtraTrack(), Map.class).get("vaccinationDate"));
-                return new DateTime(date);
-            }
+        try {
+            Date date = getPigEventByEventType(pigDto.getDoctorPigEvents(), PigEvent.VACCINATION.getKey()).getEventAt();
+            return new DateTime(date);
         } catch (Exception e) {
             log.error("[PigVaccinationProducer] get vaccination date failed, pigDto is {}", pigDto);
         }
@@ -568,11 +565,8 @@ public class PigVaccinationProducer extends AbstractJobProducer {
      */
     private DateTime getCheckWeightDate(DoctorPigInfoDto pigDto) {
         try{
-            if(StringUtils.isNotBlank(pigDto.getExtraTrack())) {
-                // @see DoctorMatingDto
-                Date date = new Date((Long) MAPPER.readValue(pigDto.getExtraTrack(), Map.class).get("conditionDate"));
-                return new DateTime(date);
-            }
+            Date date = getPigEventByEventType(pigDto.getDoctorPigEvents(), PigEvent.CONDITION.getKey()).getEventAt();
+            return new DateTime(date);
         } catch (Exception e) {
             log.error("[PigVaccinationProducer] get check weight date failed, pigDto is {}", pigDto);
         }
@@ -584,11 +578,8 @@ public class PigVaccinationProducer extends AbstractJobProducer {
      */
     private DateTime getChangeLocationDate(DoctorPigInfoDto pigDto) {
         try{
-            if(StringUtils.isNotBlank(pigDto.getExtraTrack())) {
-                // @see DoctorMatingDto
-                Date date = new Date((Long) MAPPER.readValue(pigDto.getExtraTrack(), Map.class).get("changeLocationDate"));
-                return new DateTime(date);
-            }
+            Date date = getPigEventByEventType(pigDto.getDoctorPigEvents(), PigEvent.CHG_LOCATION.getKey()).getEventAt();
+            return new DateTime(date);
         } catch (Exception e) {
             log.error("[PigVaccinationProducer] get change location date failed, pigDto is {}", pigDto);
         }
