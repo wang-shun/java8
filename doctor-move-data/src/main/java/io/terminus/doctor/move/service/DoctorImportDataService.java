@@ -18,6 +18,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static io.terminus.common.utils.Arguments.notEmpty;
+
 /**
  * Desc:
  * Mail: yangzl@terminus.io
@@ -56,7 +58,7 @@ public class DoctorImportDataService {
         List<DoctorBarn> barns = Lists.newArrayList();
         shit.forEach(row -> {
             //第一行是表头，跳过
-            if (row.getRowNum() > 0) {
+            if (row.getRowNum() > 0 && notEmpty(ImportExcelUtils.getString(row, 0))) {
                 DoctorBarn barn = new DoctorBarn();
                 barn.setName(ImportExcelUtils.getString(row, 0));
                 barn.setOrgId(farm.getOrgId());

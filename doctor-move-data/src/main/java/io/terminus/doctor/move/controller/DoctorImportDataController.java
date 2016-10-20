@@ -6,6 +6,7 @@ import io.terminus.common.exception.ServiceException;
 import io.terminus.doctor.move.dto.DoctorImportSheet;
 import io.terminus.doctor.move.service.DoctorImportDataService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -37,7 +38,16 @@ public class DoctorImportDataController {
     @RequestMapping(value = "/all", method = RequestMethod.GET)
     public boolean importAll(MultipartFile file) {
         try {
-            Workbook workbook = new XSSFWorkbook(file.getInputStream());
+            Workbook workbook;
+
+            if (file.getName().endsWith(".xlsx")){
+                workbook = new XSSFWorkbook(file.getInputStream());  //2007
+            }else if (file.getName().endsWith(".xls")){
+                workbook = new HSSFWorkbook(file.getInputStream());  //2003
+            } else {
+                throw new ServiceException("file.type.error");
+            }
+
             DoctorImportSheet sheet = new DoctorImportSheet();
             sheet.setFarm(getSheet(workbook, ""));
             sheet.setStaff(getSheet(workbook, ""));
@@ -55,10 +65,10 @@ public class DoctorImportDataController {
             doctorImportDataService.importAll(sheet);
             return true;
         } catch (ServiceException e) {
-            log.error("import all excel failed, file:{}", file.getName(), Throwables.getStackTraceAsString(e));
+            log.error("import all excel failed, file:{}, cause:{}", file.getName(), Throwables.getStackTraceAsString(e));
             return false;
         } catch (Exception e) {
-            log.error("import all excel failed, file:{}", file.getName(), Throwables.getStackTraceAsString(e));
+            log.error("import all excel failed, file:{}, cause:{}", file.getName(), Throwables.getStackTraceAsString(e));
             return false;
         }
     }
