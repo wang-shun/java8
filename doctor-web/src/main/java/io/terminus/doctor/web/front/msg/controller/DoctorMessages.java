@@ -100,11 +100,8 @@ public class DoctorMessages {
             return new DoctorMessageDto(new Paging<>(0L, Collections.emptyList()),null);
         }
 
-       // DoctorMessageUserDto doctorMessageUserDto = new DoctorMessageUserDto();
         DoctorMessageUserDto doctorMessageUserDto = BeanMapper.map(criteria, DoctorMessageUserDto.class);
-//        doctorMessageUserDto.setUserId(UserUtil.getUserId());
-//        doctorMessageUserDto.setTemplateId(Long.parseLong((String) criteria.get("templateId")));
-//        doctorMessageUserDto.setFarmId(Long.parseLong((String) criteria.get("farmId")));
+        doctorMessageUserDto.setUserId(UserUtil.getUserId());
         Paging<DoctorMessageUser> doctorMessageUserPaging = RespHelper.or500(doctorMessageUserReadService.paging(doctorMessageUserDto, pageNo, pageSize));
         DoctorMessageDto msgDto = DoctorMessageDto.builder().build();
         List<DoctorMessageWithUserDto> list = Lists.newArrayList();
