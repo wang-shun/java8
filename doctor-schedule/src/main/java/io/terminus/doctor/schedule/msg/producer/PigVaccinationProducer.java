@@ -11,6 +11,7 @@ import io.terminus.doctor.event.dto.DoctorGroupDetail;
 import io.terminus.doctor.event.dto.DoctorGroupSearchDto;
 import io.terminus.doctor.event.dto.DoctorPigInfoDto;
 import io.terminus.doctor.event.enums.DataRange;
+import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.enums.VaccinationDateType;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
@@ -601,6 +602,7 @@ public class PigVaccinationProducer extends AbstractJobProducer {
     private List<DoctorMessage> getMessage(DoctorPigInfoDto pigDto, String channels, DoctorMessageRuleRole ruleRole, List<SubUser> subUsers, Double timeDiff, String url, DoctorVaccinationPigWarn warn, DateTime vaccDate) {
         List<DoctorMessage> messages = Lists.newArrayList();
         // 创建消息
+        String jumpUrl = pigDetailUrl.concat("?pigId=" + pigDto.getPigId() + "&farmId=" + ruleRole.getFarmId());
         Map<String, Object> jsonData = PigDtoFactory.getInstance().createPigMessage(pigDto, timeDiff, url);
         jsonData.put("pigType", warn.getPigType());
         jsonData.put("materialId", warn.getMaterialId());
@@ -612,7 +614,7 @@ public class PigVaccinationProducer extends AbstractJobProducer {
         jsonData.put("vaccDate", DateTimeFormat.forPattern("yyyy-MM-dd").print(vaccDate));
 
             try {
-                createMessage(subUsers, ruleRole, MAPPER.writeValueAsString(jsonData), null, pigDto.getPigId(), null);
+                createMessage(subUsers, ruleRole, MAPPER.writeValueAsString(jsonData), PigEvent.VACCINATION.getKey(), pigDto.getPigId(), null, jumpUrl);
             } catch (JsonProcessingException e) {
                 log.error("message produce error, cause by {}", Throwables.getStackTraceAsString(e));
             }
@@ -625,6 +627,7 @@ public class PigVaccinationProducer extends AbstractJobProducer {
     private List<DoctorMessage> getGroupMessage(DoctorGroupDetail detail, String channels, DoctorMessageRuleRole ruleRole, List<SubUser> subUsers, String url, DoctorVaccinationPigWarn warn, DateTime vaccDate) {
         List<DoctorMessage> messages = Lists.newArrayList();
         // 创建消息
+        String jumpUrl = groupDetailUrl.concat("?groupId=" + detail.getGroup().getId() + "&farmId=" + ruleRole.getFarmId());
         Map<String, Object> jsonData = GroupDetailFactory.getInstance().createGroupMessage(detail, url);
         jsonData.put("pigType", warn.getPigType());
         jsonData.put("materialId", warn.getMaterialId());
@@ -636,7 +639,7 @@ public class PigVaccinationProducer extends AbstractJobProducer {
         jsonData.put("vaccinationDateType", warn.getVaccinationDateType());
         jsonData.put("vaccDate", DateTimeFormat.forPattern("yyyy-MM-dd").print(vaccDate));
             try {
-                createMessage(subUsers, ruleRole, MAPPER.writeValueAsString(jsonData), null, detail.getGroup().getId(), null);
+                createMessage(subUsers, ruleRole, MAPPER.writeValueAsString(jsonData), PigEvent.VACCINATION.getKey(), detail.getGroup().getId(), null, jumpUrl);
             } catch (JsonProcessingException e) {
                 log.error("message produce error, cause by {}", Throwables.getStackTraceAsString(e));
             }

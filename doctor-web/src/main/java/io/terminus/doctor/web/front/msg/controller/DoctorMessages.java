@@ -100,32 +100,28 @@ public class DoctorMessages {
             return new DoctorMessageDto(new Paging<>(0L, Collections.emptyList()),null);
         }
 
-       // DoctorMessageUserDto doctorMessageUserDto = new DoctorMessageUserDto();
         DoctorMessageUserDto doctorMessageUserDto = BeanMapper.map(criteria, DoctorMessageUserDto.class);
-//        doctorMessageUserDto.setUserId(UserUtil.getUserId());
-//        doctorMessageUserDto.setTemplateId(Long.parseLong((String) criteria.get("templateId")));
-//        doctorMessageUserDto.setFarmId(Long.parseLong((String) criteria.get("farmId")));
+        doctorMessageUserDto.setUserId(UserUtil.getUserId());
+        DoctorMessageRuleTemplate template = RespHelper.or500(doctorMessageRuleTemplateReadService.findMessageRuleTemplateById(doctorMessageUserDto.getTemplateId()));
         Paging<DoctorMessageUser> doctorMessageUserPaging = RespHelper.or500(doctorMessageUserReadService.paging(doctorMessageUserDto, pageNo, pageSize));
         DoctorMessageDto msgDto = DoctorMessageDto.builder().build();
         List<DoctorMessageWithUserDto> list = Lists.newArrayList();
         if (doctorMessageUserPaging.getData() != null && doctorMessageUserPaging.getData().size() > 0) {
+            if (Objects.equals(template.getCategory(), Category.FATTEN_PIG_REMOVE.getKey())) {
+                msgDto.setListUrl("/group/list?farmId=" + doctorMessageUserDto.getFarmId() + "&searchFrom=MESSAGE");
+            } else if (Objects.equals(template.getCategory(), Category.STORAGE_SHORTAGE.getKey())) {
+                msgDto.setListUrl("");
+            } else if (Objects.equals(template.getCategory(), Category.PIG_VACCINATION.getKey())) {
+                msgDto.setListUrl("");
+            } else {
+                if (Objects.equals(template.getCategory(), Category.BOAR_ELIMINATE.getKey())) {
+                    msgDto.setListUrl("/boar/list?farmId=" + doctorMessageUserDto.getFarmId() + "&searchFrom=MESSAGE");
+                } else {
+                    msgDto.setListUrl("/sow/list?farmId=" + doctorMessageUserDto.getFarmId() + "&searchFrom=MESSAGE");
+                }
+            }
             doctorMessageUserPaging.getData().forEach(doctorMessageUser -> {
                 DoctorMessage doctorMessage = RespHelper.or500(doctorMessageReadService.findMessageById(doctorMessageUser.getMessageId()));
-                String urlPart;
-                if (Objects.equals(doctorMessage.getCategory(), Category.FATTEN_PIG_REMOVE.getKey())) {
-                    urlPart = "?groupId=";
-                    msgDto.setListUrl("/group/list?farmId=" + doctorMessage.getFarmId() + "&searchFrom=MESSAGE");
-                } else if (Objects.equals(doctorMessage.getCategory(), Category.STORAGE_SHORTAGE.getKey())) {
-                    urlPart = "?materialId=";
-                } else {
-                    urlPart = "?pigId=";
-                    if (Objects.equals(doctorMessage.getCategory(), Category.BOAR_ELIMINATE.getKey())) {
-                        msgDto.setListUrl("/boar/list?farmId=" + doctorMessage.getFarmId() + "&searchFrom=MESSAGE");
-                    } else {
-                        msgDto.setListUrl("/sow/list?farmId=" + doctorMessage.getFarmId() + "&searchFrom=MESSAGE");
-                    }
-                }
-                doctorMessage.setUrl(doctorMessage.getUrl().concat(urlPart + doctorMessage.getBusinessId() + "&farmId=" + doctorMessage.getFarmId()));
                 list.add(new DoctorMessageWithUserDto(doctorMessage, doctorMessageUser));
             });
         }
