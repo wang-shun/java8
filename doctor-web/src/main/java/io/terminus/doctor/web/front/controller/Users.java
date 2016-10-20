@@ -538,11 +538,17 @@ public class Users {
      * @param request
      * @return
      */
-    public String changeMobile(@RequestParam("mobile") String mobile,
-                               @RequestParam("captcha") String code,
-                               HttpServletRequest request){
-        User user = UserUtil.getCurrentUser();
-        Long userId = user.getId();
+    public Boolean changeMobile(@RequestParam("mobile") String mobile, @RequestParam("captcha") String code,
+                                HttpServletRequest request){
+        BaseUser baseUser = UserUtil.getCurrentUser();
+        if(baseUser == null){
+            throw new JsonResponseException("user.not.login");
+        }
+        if (!mobilePattern.getPattern().matcher(mobile).matches()) {
+            throw new JsonResponseException("mobile.format.error");
+        }
+
+        //校验验证码
         String tmp = (String)request.getSession().getAttribute("code");
         if (Strings.isNullOrEmpty(tmp)) {
             throw new JsonResponseException(500, "验证码不匹配");
@@ -555,13 +561,32 @@ public class Users {
         }
         request.getSession().removeAttribute("code");
 
-        user.setId(userId);
+        //更新user
+        User user = RespHelper.or500(doctorUserReadService.findById(baseUser.getId()));
         user.setMobile(mobile);
-        Response<Boolean> resp = userWriteService.update(user);
-        if (!resp.isSuccess()) {
+        Map<String, String> extraMap = user.getExtra() == null ? new HashMap<>() : user.getExtra();
+        extraMap.put("contact", mobile);
+        user.setExtra(extraMap);
+        return RespHelper.or500(userWriteService.update(user));
+    }
 
+    @RequestMapping(value = "changeMobile", method = RequestMethod.POST)
+    public Boolean changeMobile(@RequestParam("mobile") String mobile){
+        BaseUser baseUser = UserUtil.getCurrentUser();
+        if(baseUser == null){
+            throw new JsonResponseException("user.not.login");
         }
-        return "ok";
+        if (!mobilePattern.getPattern().matcher(mobile).matches()) {
+            throw new JsonResponseException("mobile.format.error");
+        }
+
+        //更新user
+        User user = RespHelper.or500(doctorUserReadService.findById(baseUser.getId()));
+        user.setMobile(mobile);
+        Map<String, String> extraMap = user.getExtra() == null ? new HashMap<>() : user.getExtra();
+        extraMap.put("contact", mobile);
+        user.setExtra(extraMap);
+        return RespHelper.or500(userWriteService.update(user));
     }
 
     /**
