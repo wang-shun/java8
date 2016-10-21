@@ -126,8 +126,9 @@ public class DoctorImportDataService {
      */
     public void importAll(DoctorImportSheet shit) {
         // 猪场和员工
-        User primaryUser = this.importOrgFarmUser(shit.getFarm(), shit.getStaff());
-        DoctorFarm farm = new DoctorFarm();
+        Object[] result = this.importOrgFarmUser(shit.getFarm(), shit.getStaff());
+        User primaryUser = (User) result[0];
+        DoctorFarm farm = (DoctorFarm) result[1];
         Map<String, Long> userMap = doctorMoveBasicService.getSubMap(farm.getOrgId());
 
         importBarn(farm, userMap, shit.getBarn());
@@ -141,10 +142,11 @@ public class DoctorImportDataService {
 
     }
 
-    public User importOrgFarmUser(Sheet farmShit, Sheet staffShit) {
-        User primaryUser = this.importOrgFarm(farmShit);
+    public Object[] importOrgFarmUser(Sheet farmShit, Sheet staffShit) {
+        Object[] result = this.importOrgFarm(farmShit);
+        User primaryUser = (User) result[0];
         this.importStaff(staffShit, primaryUser);
-        return primaryUser;
+        return result;
     }
 
     private void importStaff(Sheet staffShit, User primaryUser){
@@ -204,7 +206,7 @@ public class DoctorImportDataService {
      * @param farmShit
      * @return 主账号的 user
      */
-    private User importOrgFarm(Sheet farmShit){
+    private Object[] importOrgFarm(Sheet farmShit){
         Row row1 = farmShit.getRow(1);
         String orgName = ImportExcelUtils.getStringOrThrow(row1, 0);
         String farmName = ImportExcelUtils.getStringOrThrow(row1, 1);
@@ -246,7 +248,7 @@ public class DoctorImportDataService {
                 permission.setFarmIds(permission.getFarmIds() + "," + farm.getId());
                 doctorUserDataPermissionDao.update(permission);
             }
-            return result.getResult();
+            return new Object[]{result.getResult(), farm};
         }else{
             User user = new User();
             user.setMobile(mobile);
@@ -276,7 +278,7 @@ public class DoctorImportDataService {
             permission.setUserId(userId);
             permission.setFarmIds(farm.getId().toString());
             doctorUserDataPermissionDao.create(permission);
-            return user;
+            return new Object[]{user, farm};
         }
     }
 
