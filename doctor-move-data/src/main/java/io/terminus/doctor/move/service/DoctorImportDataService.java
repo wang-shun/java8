@@ -3,9 +3,9 @@ package io.terminus.doctor.move.service;
 import com.google.common.base.Joiner;
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.Lists;
-import io.terminus.common.utils.JsonMapper;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.Response;
+import io.terminus.common.utils.JsonMapper;
 import io.terminus.common.utils.MapBuilder;
 import io.terminus.doctor.basic.dao.DoctorBasicDao;
 import io.terminus.doctor.basic.model.DoctorBasic;
@@ -20,10 +20,12 @@ import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
 import io.terminus.doctor.event.dao.DoctorPigDao;
 import io.terminus.doctor.event.dao.DoctorPigEventDao;
 import io.terminus.doctor.event.dao.DoctorPigTrackDao;
+import io.terminus.doctor.event.dto.event.sow.DoctorFarrowingDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorMatingDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorPregChkResultDto;
 import io.terminus.doctor.event.dto.event.usual.DoctorFarmEntryDto;
 import io.terminus.doctor.event.enums.DoctorMatingType;
+import io.terminus.doctor.event.enums.FarrowingType;
 import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PigSource;
@@ -66,12 +68,10 @@ import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static io.terminus.common.utils.Arguments.notEmpty;
@@ -536,8 +536,7 @@ public class DoctorImportDataService {
         return sowTrack;
     }
 
-    //创建进场事件
-    private DoctorPigEvent createEntryEvent(DoctorImportSow info, DoctorPig sow) {
+    private DoctorPigEvent createSowEvent(DoctorImportSow info, DoctorPig sow) {
         DoctorPigEvent event = new DoctorPigEvent();
         event.setOrgId(sow.getOrgId());
         event.setOrgName(sow.getOrgName());
@@ -546,15 +545,21 @@ public class DoctorImportDataService {
         event.setPigId(sow.getId());
         event.setPigCode(sow.getPigCode());
         event.setIsAuto(IsOrNot.NO.getValue());
-        event.setEventAt(new DateTime(info.getMateDate()).plusDays(-1).toDate());
-        event.setType(PigEvent.ENTRY.getKey());
         event.setKind(DoctorPig.PIG_TYPE.SOW.getKey());
-        event.setName(PigEvent.ENTRY.getDesc());
         event.setBarnId(sow.getInitBarnId());
         event.setBarnName(sow.getInitBarnName());
+        event.setRemark(info.getRemark());
+        return event;
+    }
+
+    //创建进场事件
+    private DoctorPigEvent createEntryEvent(DoctorImportSow info, DoctorPig sow) {
+        DoctorPigEvent event = createSowEvent(info, sow);
+        event.setEventAt(new DateTime(info.getMateDate()).plusDays(-1).toDate());
+        event.setType(PigEvent.ENTRY.getKey());
+        event.setName(PigEvent.ENTRY.getDesc());
         event.setPigStatusAfter(PigStatus.Entry.getKey());
         event.setParity(info.getParity() - 1 <= 0 ? 0 : info.getParity() - 1);
-        event.setRemark(info.getRemark());
 
         //进场extra
         DoctorFarmEntryDto entry = new DoctorFarmEntryDto();
@@ -581,21 +586,10 @@ public class DoctorImportDataService {
 
     //创建配种事件
     private DoctorPigEvent createMateEvent(DoctorImportSow info, DoctorPig sow, DoctorPigEvent beforeEvent, DoctorMatingType mateType) {
-        DoctorPigEvent event = new DoctorPigEvent();
-        event.setOrgId(sow.getOrgId());
-        event.setOrgName(sow.getOrgName());
-        event.setFarmId(sow.getFarmId());
-        event.setFarmName(sow.getFarmName());
-        event.setPigId(sow.getId());
-        event.setPigCode(sow.getPigCode());
-        event.setIsAuto(IsOrNot.NO.getValue());
+        DoctorPigEvent event = createSowEvent(info, sow);
         event.setEventAt(info.getMateDate());
         event.setType(PigEvent.MATING.getKey());
-        event.setKind(DoctorPig.PIG_TYPE.SOW.getKey());
         event.setName(PigEvent.MATING.getName());
-        event.setBarnId(null); // TODO: 2016/10/21
-        event.setBarnName(null);
-
         event.setRelEventId(beforeEvent.getId());
         event.setPigStatusBefore(PigStatus.Entry.getKey());
         event.setPigStatusAfter(PigStatus.Mate.getKey());
@@ -604,7 +598,6 @@ public class DoctorImportDataService {
         event.setMattingDate(event.getEventAt());
         event.setDoctorMateType(mateType.getKey());
         event.setBoarCode(info.getBoarCode());
-        event.setRemark(info.getRemark());
 
         DoctorMatingDto mate = new DoctorMatingDto();
         event.setDesc(getEventDesc(mate.descMap()));
@@ -613,22 +606,12 @@ public class DoctorImportDataService {
         return event;
     }
 
-    //创建妊检事件
+    //创建妊检事件 // TODO: 2016/10/21 非阳性的情况
     private DoctorPigEvent createPregCheckEvent(DoctorImportSow info, DoctorPig sow, DoctorPigEvent beforeEvent, PregCheckResult checkResult) {
-        DoctorPigEvent event = new DoctorPigEvent();
-        event.setOrgId(sow.getOrgId());
-        event.setOrgName(sow.getOrgName());
-        event.setFarmId(sow.getFarmId());
-        event.setFarmName(sow.getFarmName());
-        event.setPigId(sow.getId());
-        event.setPigCode(sow.getPigCode());
-        event.setIsAuto(IsOrNot.NO.getValue());
+        DoctorPigEvent event = createSowEvent(info, sow);
         event.setEventAt(new DateTime(beforeEvent.getEventAt()).plusWeeks(3).toDate());  //妊检事件事件 = 配种时间 + 3周
         event.setType(PigEvent.PREG_CHECK.getKey());
-        event.setKind(DoctorPig.PIG_TYPE.SOW.getKey());
         event.setName(PigEvent.PREG_CHECK.getName());
-        event.setBarnId(sow.getInitBarnId());
-        event.setBarnName(sow.getInitBarnName());
         event.setRelEventId(beforeEvent.getId());
         event.setPigStatusBefore(PigStatus.Mate.getKey());
 
@@ -657,24 +640,60 @@ public class DoctorImportDataService {
 
     //创建分娩事件
     private DoctorPigEvent createFarrowEvent(DoctorImportSow info, DoctorPig sow, DoctorPigEvent beforeEvent) {
-        DoctorPigEvent event = new DoctorPigEvent();
-        event.setOrgId(sow.getOrgId());
-        event.setOrgName(sow.getOrgName());
-        event.setFarmId(sow.getFarmId());
-        event.setFarmName(sow.getFarmName());
-        event.setPigId(sow.getId());
-        event.setPigCode(sow.getPigCode());
-        event.setIsAuto(IsOrNot.NO.getValue());
+        DoctorPigEvent event = createSowEvent(info, sow);
+        event.setEventAt(info.getPregDate());
+        event.setType(PigEvent.FARROWING.getKey());
+        event.setName(PigEvent.FARROWING.getName());
+        event.setRelEventId(beforeEvent.getId());
+        event.setPigStatusBefore(PigStatus.Farrow.getKey());
+        event.setPigStatusAfter(PigStatus.FEED.getKey());
+        event.setParity(info.getParity());
+        event.setPregDays(DateUtil.getDeltaDaysAbs(info.getPrePregDate(), info.getPregDate())); //日期差
+        event.setFarrowWeight(info.getNestWeight());
+        event.setLiveCount(info.getLiveCount());
+        event.setHealthCount(info.getLiveCount() + info.getWeakCount());
+        event.setWeakCount(info.getWeakCount());
+        event.setMnyCount(info.getMummyCount());
+        event.setJxCount(info.getJixingCount());
+        event.setDeadCount(info.getDeadCount());
+        event.setBlackCount(info.getBlackCount());
+        event.setFarrowingDate(event.getEventAt());
 
+        //分娩extra
+        DoctorFarrowingDto farrow = new DoctorFarrowingDto();
+        farrow.setFarrowingDate(event.getEventAt());
+        farrow.setBarnId(sow.getInitBarnId());
+        farrow.setBarnName(sow.getInitBarnName());
+        farrow.setBedCode(info.getBed());
+        farrow.setFarrowingType(FarrowingType.USUAL.getKey());
+        farrow.setIsHelp(IsOrNot.NO.getValue());
+        farrow.setGroupCode(null); // TODO: 2016/10/21 猪群号
+        farrow.setBirthNestAvg(info.getNestWeight());
+        farrow.setFarrowingLiveCount(event.getLiveCount());
+        farrow.setHealthCount(event.getHealthCount());
+        farrow.setWeakCount(event.getWeakCount());
+        farrow.setMnyCount(event.getMnyCount());
+        farrow.setJxCount(event.getJxCount());
+        farrow.setDeadCount(event.getDeadCount());
+        farrow.setBlackCount(event.getDeadCount());
+        farrow.setToBarnId(event.getBarnId());
+        farrow.setToBarnName(event.getBarnName());
+        farrow.setFarrowIsSingleManager(IsOrNot.NO.getValue());
+        farrow.setFarrowStaff1(info.getStaff1());
+        farrow.setFarrowStaff2(info.getStaff2());
+        farrow.setFarrowRemark(info.getRemark());
 
-
+        event.setDesc(getEventDesc(farrow.descMap()));
+        event.setExtra(MAPPER.toJson(farrow));
         doctorPigEventDao.create(event);
         return event;
     }
 
     //创建断奶事件
     private DoctorPigEvent createWeanEvent(DoctorImportSow info, DoctorPig sow, DoctorPigEvent beforeEvent) {
-        return new DoctorPigEvent();
+        DoctorPigEvent event = createSowEvent(info, sow);
+
+        return event;
     }
 
     private static String getEventDesc(Map<String, String> map) {
