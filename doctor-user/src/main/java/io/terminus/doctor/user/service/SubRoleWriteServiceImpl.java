@@ -46,4 +46,18 @@ public class SubRoleWriteServiceImpl implements SubRoleWriteService {
             return Response.fail("sub.role.update.fail");
         }
     }
+
+    @Override
+    public Response<Boolean> initDefaultRoles(String appKey, Long userId){
+        try {
+            subRoleDao.findByUserIdAndStatus(appKey, 0L, 1).forEach(subRole -> {
+                subRole.setUserId(userId);
+                subRoleDao.create(subRole);
+            });
+            return Response.ok(true);
+        } catch (Exception e) {
+            log.error("init default roles fail, userId={}, cause : {}", userId, Throwables.getStackTraceAsString(e));
+            return Response.fail("init.default.roles.fail");
+        }
+    }
 }

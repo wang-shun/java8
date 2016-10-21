@@ -26,4 +26,11 @@ public interface SubRoleWriteService {
      * @return 是否更新成功
      */
     Response<Boolean> updateRole(SubRole subRole);
+
+    /**
+     * 初始化内置子账号角色权限
+     * @param userId 主账号id
+     * @return
+     */
+    Response<Boolean> initDefaultRoles(String appKey, Long userId);
 }

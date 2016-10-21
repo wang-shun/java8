@@ -1047,7 +1047,7 @@ CREATE TABLE `doctor_sub_roles` (
   `app_key` varchar(16) DEFAULT NULL COMMENT '角色所属',
   `status` smallint(6) DEFAULT NULL COMMENT '0. 未生效(冻结), 1. 生效, -1. 删除',
   `extra_json` varchar(1024) DEFAULT NULL COMMENT '用户额外信息,建议json字符串',
-  `allow_json` varchar(1024) DEFAULT NULL,
+  `allow_json` text DEFAULT NULL,
   `created_at` datetime NOT NULL,
   `updated_at` datetime NOT NULL,
   PRIMARY KEY (`id`),
