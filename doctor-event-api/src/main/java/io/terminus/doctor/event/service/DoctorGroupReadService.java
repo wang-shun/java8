@@ -191,4 +191,11 @@ public interface DoctorGroupReadService {
      * @return
      */
     Response<DoctorGroupEvent> canRollbackEvent(@NotNull(message = "input.groupId.empty") Long groupId);
+
+    /**
+     * 查询猪群的所有事件
+     * @param groupId
+     * @return
+     */
+    Response<List<DoctorGroupEvent>> queryAllGroupEventByGroupId(@NotNull(message = "input.groupId.empty") Long groupId);
 }

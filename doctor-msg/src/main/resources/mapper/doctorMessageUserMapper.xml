@@ -12,6 +12,7 @@
         <result column="user_id" property="userId"/>
         <result column="message_id" property="messageId"/>
         <result column="business_id" property="businessId"/>
+        <result column="rule_value_id" property="ruleValueId"/>
         <result column="status_sys" property="statusSys"/>
         <result column="status_sms" property="statusSms"/>
         <result column="status_email" property="statusEmail"/>
@@ -29,11 +30,11 @@
     </sql>
 
     <sql id="cols_exclude_id">
-       farm_id, template_id, user_id, message_id, business_id, status_sys, status_sms, status_email, status_app, created_at, updated_at
+       farm_id, template_id, user_id, message_id, business_id, rule_value_id, status_sys, status_sms, status_email, status_app, created_at, updated_at
     </sql>
 
     <sql id="vals">
-        #{farmId}, #{templateId}, #{userId}, #{messageId}, #{businessId},  #{statusSys}, #{statusSms}, #{statusEmail}, #{statusApp}, now(), now()
+        #{farmId}, #{templateId}, #{userId}, #{messageId}, #{businessId},  #{ruleValueId}, #{statusSys}, #{statusSms}, #{statusEmail}, #{statusApp}, now(), now()
     </sql>
 
     <insert id="create" parameterType="DoctorMessageUser" keyProperty="id" useGeneratedKeys="true">
@@ -69,6 +70,7 @@
             <if test="userId != null">user_id = #{userId},</if>
             <if test="messageId != null">message_id = #{messageId},</if>
             <if test="businessId != null">business_id = #{businessId},</if>
+            <if test="businessId != null">rule_value_id = #{ruleValueId},</if>
             <if test="statusSys != null">status_sys = #{statusSys},</if>
             <if test="statusSms != null">status_sms = #{statusSms},</if>
             <if test="statusEmail != null">status_email = #{statusEmail},</if>
@@ -91,6 +93,7 @@
             <if test="userId != null">AND user_id = #{userId}</if>
             <if test="messageId != null">AND message_id = #{messageId}</if>
             <if test="businessId != null">AND business_id = #{businessId}</if>
+            <if test="ruleValueId != null">AND rule_value_id = #{ruleValueId}</if>
             <if test="statusSys != null">AND status_sys = #{statusSys}</if>
             <if test="statusSms != null">AND status_sms = #{statusSms}</if>
             <if test="statusEmail != null">AND status_email = #{statusEmail}</if>

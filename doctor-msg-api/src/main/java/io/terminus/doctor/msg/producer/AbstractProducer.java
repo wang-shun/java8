@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Stopwatch;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Maps;
 import io.terminus.common.utils.Arguments;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.utils.RespHelper;
@@ -27,9 +28,11 @@ import io.terminus.doctor.msg.service.DoctorMessageWriteService;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -61,6 +64,12 @@ public abstract class AbstractProducer implements IProducer {
 
     @Autowired
     protected DoctorMessageUserWriteService doctorMessageUserWriteService;
+
+    @Value("${msg.jumpUrl.pig}")
+    protected String pigDetailUrl;
+
+    @Value("${msg.jumpUrl.group}")
+    protected String groupDetailUrl;
 
     public AbstractProducer(DoctorMessageTemplateReadService doctorMessageTemplateReadService,
                             DoctorMessageRuleTemplateReadService doctorMessageRuleTemplateReadService,
@@ -116,11 +125,14 @@ public abstract class AbstractProducer implements IProducer {
                 log.info("[AbstractProducer] {} -> 预警消息产生, starting......", ruleTemplate.getName());
 
                 // > 记录对应每个用户的消息
-                List<DoctorMessageRule> messageRules = RespHelper.orServEx(doctorMessageRuleReadService.findNormalMessageRulesByTplId(ruleTemplate.getId()));
+                List<DoctorMessageRule> messageRules = RespHelper.orServEx(doctorMessageRuleReadService.findMessageRulesByTplId(ruleTemplate.getId()));
 
                 for (int j = 0; messageRules != null && j < messageRules.size(); j++) {
                     DoctorMessageRule messageRule = messageRules.get(j);
                     if (!Objects.equals(messageRule.getStatus(), DoctorMessageRule.Status.NORMAL.getValue())) {
+                        DoctorMessageSearchDto doctorMessageSearchDto = new DoctorMessageSearchDto();
+                        doctorMessageSearchDto.setRuleId(messageRule.getId());
+                        deleteMessages(doctorMessageSearchDto);
                         continue;
                     }
                     // 获取最新的发送消息
@@ -131,8 +143,11 @@ public abstract class AbstractProducer implements IProducer {
                     }
                     // 获取信息
                     log.info("[AbstractProducer] {} -> 预警消息产生", ruleTemplate.getName());
-                    //将之前消息置为无效
-//                    setMessageIsExpired(messageRule);
+                    //将之前消息删除
+                    DoctorMessageSearchDto dto = new DoctorMessageSearchDto();
+                    dto.setRuleId(messageRule.getId());
+                    deleteMessages(dto);
+
                     DoctorMessageRuleRole ruleRole = DoctorMessageRuleRole.builder()
                             .ruleId(messageRule.getId())
                             .templateId(messageRule.getTemplateId())
@@ -226,7 +241,7 @@ public abstract class AbstractProducer implements IProducer {
         }
         // 1. 值类型
         if (Objects.equals(RuleValue.RuleType.VALUE.getValue(), ruleValue.getRuleType())) {
-            if (value > ruleValue.getValue()) {
+            if (value >= ruleValue.getValue()) {
                 return true;
             }
         }
@@ -276,22 +291,30 @@ public abstract class AbstractProducer implements IProducer {
      * @param jsonData 填充数据
      * @return
      */
-    protected void createMessage(List<SubUser> subUsers, DoctorMessageRuleRole ruleRole, String jsonData, Integer eventType, Long businessId) {
-        DoctorMessageSearchDto doctorMessageSearchDto = new DoctorMessageSearchDto();
-        doctorMessageSearchDto.setFarmId(ruleRole.getFarmId());
-        doctorMessageSearchDto.setTemplateId(ruleRole.getTemplateId());
-        doctorMessageSearchDto.setBusinessId(businessId);
-        List<DoctorMessage> messageList = RespHelper.orServEx(doctorMessageReadService.findMessageListByCriteria(doctorMessageSearchDto));
-        if (!messageList.isEmpty()){
-            messageList.forEach(doctorMessage -> {
-                doctorMessageWriteService.updateMessage(doctorMessage);
-            });
-            return;
+    protected void createMessage(List<SubUser> subUsers, DoctorMessageRuleRole ruleRole, String jsonData, Integer eventType, Long businessId, Integer ruleValueId, String url) {
+        DoctorMessageRuleTemplate template = RespHelper.orServEx(doctorMessageRuleTemplateReadService.findMessageRuleTemplateById(ruleRole.getTemplateId()));
+        if (Objects.equals(template.getType(), DoctorMessageRuleTemplate.Type.ERROR.getValue())){
+            deleteWarningMessages(template.getCategory(), businessId);
         }
+        //1.当消息无人有权限时直接返回
         if (Arguments.isNullOrEmpty(subUsers)){
             return;
         }
-        DoctorMessageRuleTemplate template = RespHelper.orServEx(doctorMessageRuleTemplateReadService.findMessageRuleTemplateById(ruleRole.getTemplateId()));
+
+//        DoctorMessageSearchDto doctorMessageSearchDto = new DoctorMessageSearchDto();
+//        doctorMessageSearchDto.setFarmId(ruleRole.getFarmId());
+//        doctorMessageSearchDto.setTemplateId(ruleRole.getTemplateId());
+//        doctorMessageSearchDto.setBusinessId(businessId);
+//        List<DoctorMessage> messageList = RespHelper.orServEx(doctorMessageReadService.findMessageListByCriteria(doctorMessageSearchDto));
+//        //2.消息存在时,只更新
+//        if (!messageList.isEmpty()){
+//            messageList.forEach(doctorMessage -> {
+//                doctorMessageWriteService.updateMessage(doctorMessage);
+//            });
+//            return;
+//        }
+
+        //3.消息不存在,产生新消息
         DoctorMessage message = DoctorMessage.builder()
                 .farmId(ruleRole.getFarmId())
                 .ruleId(ruleRole.getRuleId())
@@ -304,7 +327,7 @@ public abstract class AbstractProducer implements IProducer {
                 .eventType(eventType)
                 .category(template.getCategory())
                 .data(jsonData)
-                .url(ruleRole.getRule().getUrl())
+                .url(url)
                 .createdBy(template.getUpdatedBy())
                 .build();
         // 模板编译
@@ -323,6 +346,7 @@ public abstract class AbstractProducer implements IProducer {
                                 .userId(parentId)
                                 .messageId(messageId)
                                 .businessId(businessId)
+                                .ruleValueId(ruleValueId)
                                 .farmId(ruleRole.getFarmId())
                                 .templateId(ruleRole.getTemplateId())
                                 .statusSys(DoctorMessageUser.Status.NORMAL.getValue())
@@ -341,6 +365,7 @@ public abstract class AbstractProducer implements IProducer {
                             .userId(subUser.getUserId())
                             .messageId(messageId)
                             .businessId(businessId)
+                            .ruleValueId(ruleValueId)
                             .farmId(ruleRole.getFarmId())
                             .templateId(ruleRole.getTemplateId())
                             .statusSys(DoctorMessageUser.Status.NORMAL.getValue())
@@ -431,4 +456,50 @@ public abstract class AbstractProducer implements IProducer {
         }
         return page;
     }
+
+    /**
+     * 删除预警消息当警报消息存在时
+     * @param category
+     * @param businessId
+     */
+    private void deleteWarningMessages(Integer category, Long businessId){
+        Map<String, Object> map = Maps.newHashMap();
+        map.put("category", category);
+        map.put("type", DoctorMessageRuleTemplate.Type.WARNING.getValue());
+        DoctorMessageRuleTemplate template = RespHelper.orServEx(doctorMessageRuleTemplateReadService.findTemplatesByCriteria(map)).get(0);
+        DoctorMessageSearchDto doctorMessageSearchDto = new DoctorMessageSearchDto();
+        doctorMessageSearchDto.setTemplateId(template.getId());
+        doctorMessageSearchDto.setBusinessId(businessId);
+        List<DoctorMessage> messages = RespHelper.orServEx(doctorMessageReadService.findMessageListByCriteria(doctorMessageSearchDto));
+        messages.forEach(doctorMessage -> {
+            doctorMessageWriteService.deleteMessageById(doctorMessage.getId());
+            doctorMessageUserWriteService.deleteByMessageId(doctorMessage.getId());
+        });
+    }
+
+    /**
+     * 根据条件删除消息
+     *
+     * @param doctorMessageSearchDto
+     */
+    private void deleteMessages(DoctorMessageSearchDto doctorMessageSearchDto) {
+        while (true) {
+            List<DoctorMessage> messages = RespHelper.orServEx(doctorMessageReadService.pagingWarnMessages(doctorMessageSearchDto, 1, 100)).getData();
+            messages.forEach(doctorMessage -> {
+                doctorMessageWriteService.deleteMessageById(doctorMessage.getId());
+                doctorMessageUserWriteService.deleteByMessageId(doctorMessage.getId());
+            });
+            if (messages.size() < 100) {
+                break;
+            }
+        }
+//        List<DoctorMessage> messages = RespHelper.orServEx(doctorMessageReadService.findMessageListByCriteria(doctorMessageSearchDto));
+//        messages.forEach(doctorMessage -> {
+//            doctorMessageWriteService.deleteMessageById(doctorMessage.getId());
+//            doctorMessageUserWriteService.deleteByMessageId(doctorMessage.getId());
+//        });
+
+
+    }
+
 }

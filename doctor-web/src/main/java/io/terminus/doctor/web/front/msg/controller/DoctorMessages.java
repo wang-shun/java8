@@ -8,8 +8,10 @@ import io.terminus.common.model.Paging;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.constants.JacksonType;
+import io.terminus.doctor.common.utils.Params;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.msg.dto.DoctorMessageUserDto;
+import io.terminus.doctor.msg.dto.RuleValue;
 import io.terminus.doctor.msg.enums.Category;
 import io.terminus.doctor.msg.model.DoctorMessage;
 import io.terminus.doctor.msg.model.DoctorMessageRule;
@@ -22,6 +24,7 @@ import io.terminus.doctor.msg.service.DoctorMessageRuleTemplateWriteService;
 import io.terminus.doctor.msg.service.DoctorMessageUserReadService;
 import io.terminus.doctor.msg.service.DoctorMessageUserWriteService;
 import io.terminus.doctor.msg.service.DoctorMessageWriteService;
+import io.terminus.doctor.web.front.msg.dto.BackFatMessageDto;
 import io.terminus.doctor.web.front.msg.dto.DoctorMessageDto;
 import io.terminus.doctor.web.front.msg.dto.DoctorMessageWithUserDto;
 import io.terminus.doctor.web.front.msg.dto.OneLevelMessageDto;
@@ -91,35 +94,34 @@ public class DoctorMessages {
     @RequestMapping(value = "/warn/messages", method = RequestMethod.GET)
     public DoctorMessageDto pagingWarnDoctorMessages(@RequestParam("pageNo") Integer pageNo,
                                                                      @RequestParam("pageSize") Integer pageSize,
-                                                                     @RequestParam Map<String, String> criteria) {
+                                                                     @RequestParam Map<String, Object> criteria) {
+        Params.filterNullOrEmpty(criteria);
         if (!isUserLogin()) {
             return new DoctorMessageDto(new Paging<>(0L, Collections.emptyList()),null);
         }
-        DoctorMessageUserDto doctorMessageUserDto = new DoctorMessageUserDto();
+
+        DoctorMessageUserDto doctorMessageUserDto = BeanMapper.map(criteria, DoctorMessageUserDto.class);
         doctorMessageUserDto.setUserId(UserUtil.getUserId());
-        doctorMessageUserDto.setTemplateId(Long.parseLong(criteria.get("templateId")));
-        doctorMessageUserDto.setFarmId(Long.parseLong(criteria.get("farmId")));
+        DoctorMessageRuleTemplate template = RespHelper.or500(doctorMessageRuleTemplateReadService.findMessageRuleTemplateById(doctorMessageUserDto.getTemplateId()));
         Paging<DoctorMessageUser> doctorMessageUserPaging = RespHelper.or500(doctorMessageUserReadService.paging(doctorMessageUserDto, pageNo, pageSize));
         DoctorMessageDto msgDto = DoctorMessageDto.builder().build();
         List<DoctorMessageWithUserDto> list = Lists.newArrayList();
         if (doctorMessageUserPaging.getData() != null && doctorMessageUserPaging.getData().size() > 0) {
+            if (Objects.equals(template.getCategory(), Category.FATTEN_PIG_REMOVE.getKey())) {
+                msgDto.setListUrl("/group/list?farmId=" + doctorMessageUserDto.getFarmId() + "&searchFrom=MESSAGE");
+            } else if (Objects.equals(template.getCategory(), Category.STORAGE_SHORTAGE.getKey())) {
+                msgDto.setListUrl("");
+            } else if (Objects.equals(template.getCategory(), Category.PIG_VACCINATION.getKey())) {
+                msgDto.setListUrl("");
+            } else {
+                if (Objects.equals(template.getCategory(), Category.BOAR_ELIMINATE.getKey())) {
+                    msgDto.setListUrl("/boar/list?farmId=" + doctorMessageUserDto.getFarmId() + "&searchFrom=MESSAGE");
+                } else {
+                    msgDto.setListUrl("/sow/list?farmId=" + doctorMessageUserDto.getFarmId() + "&searchFrom=MESSAGE");
+                }
+            }
             doctorMessageUserPaging.getData().forEach(doctorMessageUser -> {
                 DoctorMessage doctorMessage = RespHelper.or500(doctorMessageReadService.findMessageById(doctorMessageUser.getMessageId()));
-                String urlPart;
-                if (Objects.equals(doctorMessage.getCategory(), Category.FATTEN_PIG_REMOVE.getKey())) {
-                    urlPart = "?groupId=";
-                    msgDto.setListUrl("/group/list?farmId=" + doctorMessage.getFarmId() + "&searchFrom=MESSAGE");
-                } else if (Objects.equals(doctorMessage.getCategory(), Category.STORAGE_SHORTAGE.getKey())) {
-                    urlPart = "?materialId=";
-                } else {
-                    urlPart = "?pigId=";
-                    if (Objects.equals(doctorMessage.getCategory(), Category.BOAR_ELIMINATE.getKey())) {
-                        msgDto.setListUrl("/boar/list?farmId=" + doctorMessage.getFarmId() + "&searchFrom=MESSAGE");
-                    } else {
-                        msgDto.setListUrl("/sow/list?farmId=" + doctorMessage.getFarmId() + "&searchFrom=MESSAGE");
-                    }
-                }
-                doctorMessage.setUrl(doctorMessage.getUrl().concat(urlPart + doctorMessage.getBusinessId() + "&farmId=" + doctorMessage.getFarmId()));
                 list.add(new DoctorMessageWithUserDto(doctorMessage, doctorMessageUser));
             });
         }
@@ -323,6 +325,27 @@ public class DoctorMessages {
         return list;
     }
 
+    /**
+     * 四种背膘提示猪数量
+     * @param farmId
+     * @return
+     */
+    @RequestMapping(value = "/warn/rule/backfat", method = RequestMethod.GET)
+    public List<BackFatMessageDto> getBackFatRulePigCount(@RequestParam("farmId") Long farmId){
+        DoctorMessageRuleTemplate template = RespHelper.or500(doctorMessageRuleTemplateReadService.findByCategory(Category.SOW_BACK_FAT.getKey())).get(0);
+        DoctorMessageUserDto doctorMessageUserDto = new DoctorMessageUserDto();
+        doctorMessageUserDto.setFarmId(farmId);
+        doctorMessageUserDto.setTemplateId(template.getId());
+        doctorMessageUserDto.setUserId(UserUtil.getUserId());
+        List<RuleValue> ruleValues = template.getRule().getValues();
+        List<BackFatMessageDto> list = Lists.newArrayList();
+        ruleValues.forEach(ruleValue -> {
+            doctorMessageUserDto.setRuleValueId(ruleValue.getId());
+            Integer pigCount = RespHelper.or500(doctorMessageUserReadService.findBusinessListByCriteria(doctorMessageUserDto)).size();
+            list.add(BackFatMessageDto.builder().ruleValueId(ruleValue.getId()).pigCount(pigCount).build());
+        });
+        return list;
+    }
     /**
      * 判断当前用户是否登录
      *

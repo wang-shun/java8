@@ -6,8 +6,12 @@ datasource:
 #  url: jdbc:mysql://127.0.0.1:3306/pig_doctor?useUnicode=true&characterEncoding=UTF8
 #  username: root
 #  password: anywhere
-
-# MyBatis
 mybatis:
   mapperLocations: classpath*:mapper/*Mapper.xml
   typeAliasesPackage: io.terminus.parana.msg.model,io.terminus.doctor.msg.model
+
+# zookeeper
+zookeeper:
+  host: 127.0.0.1
+  port: 2181
+  zkTopic: pig.doctor.topic

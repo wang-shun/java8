@@ -1,15 +1,12 @@
 package io.terminus.doctor.schedule.msg.producer.factory;
 
 import com.google.api.client.util.Maps;
-import com.google.common.base.Throwables;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.constants.JacksonType;
 import io.terminus.doctor.event.dto.DoctorPigInfoDto;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
 
 import java.util.Map;
 
@@ -56,7 +53,7 @@ public class PigDtoFactory {
             jsonData.put("operatorName", pigDto.getOperatorName());
         }
         if (pigDto.getEventDate() != null){
-            jsonData.put("eventTime", pigDto.getEventDate());
+            jsonData.put("eventDate", pigDto.getEventDate());
         }
         if (pigDto.getReason() != null){
             jsonData.put("reason", pigDto.getReason());

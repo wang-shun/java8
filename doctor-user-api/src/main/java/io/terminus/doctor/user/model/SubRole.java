@@ -5,7 +5,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Strings;
 import io.terminus.common.utils.JsonMapper;
-import io.terminus.parana.common.constants.JacksonType;
+import io.terminus.doctor.common.constants.JacksonType;
 import io.terminus.parana.user.auth.CustomRole;
 import lombok.AccessLevel;
 import lombok.Data;
@@ -29,7 +29,7 @@ import java.util.Objects;
  */
 @Data
 @EqualsAndHashCode(of = {"id"})
-@ToString(of = {"id", "name", "desc", "userId", "roleId", "status"})
+@ToString(of = {"id", "name", "desc", "userId", "status"})
 public class SubRole implements Serializable, CustomRole {
 
     private static final long serialVersionUID = 1L;
@@ -86,7 +86,7 @@ public class SubRole implements Serializable, CustomRole {
      * 扩展信息, 不存数据库
      */
     @Setter(AccessLevel.NONE)
-    private Map<String, String> extra;
+    private Map<String, Object> extra;
 
     /**
      * 扩展信息 JSON, 存数据库
@@ -129,7 +129,7 @@ public class SubRole implements Serializable, CustomRole {
     }
 
     @SneakyThrows
-    public void setExtra(Map<String, String> extra) {
+    public void setExtra(Map<String, Object> extra) {
         this.extra = extra;
         if (extra == null || extra.isEmpty()) {
             this.extraJson = null;
@@ -144,7 +144,7 @@ public class SubRole implements Serializable, CustomRole {
         if (Strings.isNullOrEmpty(extraJson)) {
             this.extra = Collections.emptyMap();
         } else {
-            this.extra = OBJECT_MAPPER.readValue(extraJson, JacksonType.MAP_OF_STRING);
+            this.extra = OBJECT_MAPPER.readValue(extraJson, JacksonType.MAP_OF_OBJECT);
         }
     }
 

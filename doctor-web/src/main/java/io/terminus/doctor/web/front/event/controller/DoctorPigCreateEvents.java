@@ -651,12 +651,14 @@ public class DoctorPigCreateEvents {
             case FARROWING:
                 key = "farrowingDate";
                 break;
+            default:
+                break;
         }
         try {
             Map<String, Object> map = OBJECT_MAPPER.readValue(json, JacksonType.MAP_OF_OBJECT);
             Date eventAt = DateUtil.toDate((String) map.get(key));
             DoctorPigEvent lastEvent = RespHelper.or500(doctorPigEventReadService.lastEvent(pigIds));
-            if (lastEvent != null && new DateTime(eventAt).isBefore(DateTime.now().plusDays(1).getMillis()/86400000) && new DateTime(eventAt).plusDays(1).isAfter(lastEvent.getEventAt().getTime())) {
+            if (lastEvent != null && new DateTime(eventAt).plusDays(1).isAfter(lastEvent.getEventAt().getTime())) {
                 return;
             } else {
                 throw new JsonResponseException("event.at.illegal");

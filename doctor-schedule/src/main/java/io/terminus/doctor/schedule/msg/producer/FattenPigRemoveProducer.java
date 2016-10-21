@@ -68,7 +68,7 @@ public class FattenPigRemoveProducer extends AbstractJobProducer {
                     //根据用户拥有的猪舍权限过滤拥有user
                     List<SubUser> sUsers = filterSubUserBarnId(subUsers, doctorGroupDetail.getGroup().getCurrentBarnId());
                     if (checkRuleValue(ruleValueMap.get(1), (double) doctorGroupDetail.getGroupTrack().getAvgDayAge())) {
-                        getMessage(doctorGroupDetail, ruleRole, sUsers, rule.getUrl(), null);
+                        getMessage(doctorGroupDetail, ruleRole, sUsers, rule.getUrl(), null, ruleValueMap.get(1).getId());
                     }
                 } catch (Exception e) {
                     log.error("[FattenPigRemoveProducer]->message.failed");
@@ -82,11 +82,12 @@ public class FattenPigRemoveProducer extends AbstractJobProducer {
     /**
      * 创建消息
      */
-    private void getMessage(DoctorGroupDetail doctorGroupDetail, DoctorMessageRuleRole ruleRole, List<SubUser> subUsers, String url, Integer eventType) {
+    private void getMessage(DoctorGroupDetail doctorGroupDetail, DoctorMessageRuleRole ruleRole, List<SubUser> subUsers, String url, Integer eventType, Integer ruleValueId) {
         // 创建消息
+        String jumpUrl = groupDetailUrl.concat("?groupId=" + doctorGroupDetail.getGroup().getId() + "&farmId=" + ruleRole.getFarmId());
         Map<String, Object> jsonData = GroupDetailFactory.getInstance().createGroupMessage(doctorGroupDetail, url);
             try {
-                createMessage(subUsers, ruleRole, MAPPER.writeValueAsString(jsonData), eventType, doctorGroupDetail.getGroup().getId());
+                createMessage(subUsers, ruleRole, MAPPER.writeValueAsString(jsonData), eventType, doctorGroupDetail.getGroup().getId(), ruleValueId, jumpUrl);
             } catch (JsonProcessingException e) {
                 log.error("message produce error, cause by {}", Throwables.getStackTraceAsString(e));
             }

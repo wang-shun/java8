@@ -29,7 +29,7 @@ public class MessageJob {
     /**
      * 产生消息
      */
-    @Scheduled(cron = "0 */15 * * * ?")
+    @Scheduled(cron = "0 */30 * * * ?")
     @RequestMapping(value = "/produce", method = RequestMethod.GET)
     public void messageProduce() {
         try {

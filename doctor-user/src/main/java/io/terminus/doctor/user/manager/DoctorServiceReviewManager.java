@@ -22,6 +22,7 @@ import io.terminus.doctor.user.model.DoctorUserDataPermission;
 import io.terminus.doctor.user.model.ServiceReviewTrack;
 import io.terminus.doctor.user.service.DoctorStaffWriteService;
 import io.terminus.doctor.user.service.DoctorUserDataPermissionWriteService;
+import io.terminus.doctor.user.service.SubRoleWriteService;
 import io.terminus.parana.user.address.service.AddressReadService;
 import io.terminus.parana.user.impl.dao.UserDao;
 import io.terminus.parana.user.model.User;
@@ -53,6 +54,7 @@ public class DoctorServiceReviewManager {
     private final DoctorServiceStatusDao doctorServiceStatusDao;
     private final AddressReadService addressReadService;
     private final UserDao userDao;
+    private final SubRoleWriteService subRoleWriteService;
 
     @Autowired
     public DoctorServiceReviewManager(DoctorOrgDao doctorOrgDao, DoctorStaffDao doctorStaffDao,
@@ -63,7 +65,7 @@ public class DoctorServiceReviewManager {
                                       AddressReadService addressReadService,
                                       DoctorStaffWriteService doctorStaffWriteService,
                                       DoctorUserDataPermissionWriteService doctorUserDataPermissionWriteService,
-                                      UserDao userDao) {
+                                      UserDao userDao, SubRoleWriteService subRoleWriteService) {
         this.doctorOrgDao = doctorOrgDao;
         this.doctorStaffDao = doctorStaffDao;
         this.doctorServiceReviewDao = doctorServiceReviewDao;
@@ -75,6 +77,7 @@ public class DoctorServiceReviewManager {
         this.doctorStaffWriteService = doctorStaffWriteService;
         this.doctorUserDataPermissionWriteService = doctorUserDataPermissionWriteService;
         this.userDao = userDao;
+        this.subRoleWriteService = subRoleWriteService;
     }
 
     @Transactional
@@ -241,6 +244,9 @@ public class DoctorServiceReviewManager {
         //更新审批状态, 记录track, 更新服务状态
         this.updateServiceReviewStatus(user, userId, DoctorServiceReview.Type.PIG_DOCTOR, DoctorServiceReview.Status.REVIEW,
                 DoctorServiceReview.Status.OK, null);
+
+        // 初始化内置子账号角色权限
+        RespHelper.orServEx(subRoleWriteService.initDefaultRoles("MOBILE", userId));
 
         return newFarms;
     }
