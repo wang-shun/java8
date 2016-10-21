@@ -383,4 +383,14 @@ public class DoctorGroupReadServiceImpl implements DoctorGroupReadService {
             return Response.fail("can.rollback.event.failed");
         }
     }
+
+    @Override
+    public Response<List<DoctorGroupEvent>> queryAllGroupEventByGroupId(@NotNull(message = "input.groupId.empty") Long groupId) {
+        try {
+            return Response.ok(doctorGroupEventDao.findByGroupId(groupId));
+        } catch (Exception e) {
+            log.error("query.all.group.event.by.group.id.failed, cause {}", Throwables.getStackTraceAsString(e));
+            return Response.fail("query all group event by group id failed");
+        }
+    }
 }
