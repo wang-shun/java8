@@ -4,6 +4,8 @@ import com.google.common.base.Strings;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 
+import static io.terminus.common.utils.Arguments.notEmpty;
+
 /**
  * Desc:
  * Mail: yangzl@terminus.io
@@ -36,12 +38,22 @@ public class ImportExcelUtils {
         return Integer.parseInt(value);
     }
 
+    public static Integer getIntOrDefault(Row row, int col, int defaultValue) {
+        String value = getString(row, col);
+        return notEmpty(value) ? Integer.parseInt(value) : defaultValue;
+    }
+
     public static Double getDouble(Row row, int col) {
         String value = getString(row, col);
         if (Strings.isNullOrEmpty(value)) {
             return null;
         }
         return Double.parseDouble(value);
+    }
+
+    public static Double getDoubleOrDefault(Row row, int col, double defaultValue) {
+        String value = getString(row, col);
+        return notEmpty(value) ? Double.parseDouble(value) : defaultValue;
     }
 
     public static Integer getPrice(Row row, int col) {
