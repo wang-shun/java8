@@ -126,11 +126,13 @@ public class DoctorImportDataService {
      */
     public void importAll(DoctorImportSheet shit) {
         // 猪场和员工
-        this.importOrgFarmUser(shit.getFarm(), shit.getStaff());
+        User primaryUser = this.importOrgFarmUser(shit.getFarm(), shit.getStaff());
         DoctorFarm farm = new DoctorFarm();
         Map<String, Long> userMap = doctorMoveBasicService.getSubMap(farm.getOrgId());
 
         importBarn(farm, userMap, shit.getBarn());
+        //把所有猪舍添加到所有用户的权限里去
+        userInitService.updatePermissionBarn(primaryUser.getMobile());
 
         Map<String, DoctorBarn> barnMap = doctorMoveBasicService.getBarnMap2(farm.getId());
         Map<String, Long> breedMap = doctorMoveBasicService.getBreedMap();
@@ -139,9 +141,10 @@ public class DoctorImportDataService {
 
     }
 
-    public void importOrgFarmUser(Sheet farmShit, Sheet staffShit) {
+    public User importOrgFarmUser(Sheet farmShit, Sheet staffShit) {
         User primaryUser = this.importOrgFarm(farmShit);
         this.importStaff(staffShit, primaryUser);
+        return primaryUser;
     }
 
     private void importStaff(Sheet staffShit, User primaryUser){
