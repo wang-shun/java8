@@ -123,12 +123,12 @@ public class SowBackFatProducer extends AbstractJobProducer {
 
                             if (key == 1 || key == 2 || key == 3) {
                                 timeDiff = getTimeDiff(new DateTime(matingPigEvent.getEventAt()));
-                                if (checkRuleValue(ruleValue, timeDiff) && filterPigCondition(pigDto, new DateTime(matingPigEvent.getEventAt()).plusDays(ruleValue.getValue().intValue()))) {
+                                if (checkRuleValue(ruleValue, timeDiff) && filterPigCondition(pigDto, new DateTime(matingPigEvent.getEventAt()).plusDays(ruleValue.getValue().intValue()), PigEvent.CONDITION)) {
                                     isSend = true;
                                 }
                             } else {
                                 DoctorPigEvent pigEvent = getLeadToWeanEvent(pigDto.getDoctorPigEvents());
-                                if (pigEvent != null && filterPigCondition(pigDto, new DateTime(pigEvent.getEventAt()))) {
+                                if (pigEvent != null && filterPigCondition(pigDto, new DateTime(pigEvent.getEventAt()), PigEvent.CONDITION) && filterPigCondition(pigDto, new DateTime(pigEvent.getEventAt()), PigEvent.MATING)) {
                                     timeDiff = getTimeDiff(new DateTime(pigEvent.getEventAt()));
                                     isSend = true;
                                 }
@@ -159,9 +159,9 @@ public class SowBackFatProducer extends AbstractJobProducer {
      * @param pigDto
      * @return Boolean
      */
-    private Boolean filterPigCondition(DoctorPigInfoDto pigDto, DateTime time) {
+    private Boolean filterPigCondition(DoctorPigInfoDto pigDto, DateTime time, PigEvent pigEvent) {
         if (!Arguments.isNullOrEmpty(pigDto.getDoctorPigEvents())) {
-            List<DoctorPigEvent> list = pigDto.getDoctorPigEvents().stream().filter(doctorPigEvent -> new DateTime(doctorPigEvent.getEventAt()).isAfter(time) && (Objects.equals(doctorPigEvent.getType(), PigEvent.CONDITION.getKey()))).collect(Collectors.toList());
+            List<DoctorPigEvent> list = pigDto.getDoctorPigEvents().stream().filter(doctorPigEvent -> new DateTime(doctorPigEvent.getEventAt()).isAfter(time) && (Objects.equals(doctorPigEvent.getType(), pigEvent.getKey()))).collect(Collectors.toList());
             if (list.isEmpty()) {
                 return true;
             }
