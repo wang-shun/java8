@@ -72,3 +72,6 @@ msg:
     ios: #IOS应用配置
       appKey: 574cecdce0f55a85f00028fe
       appSecret: ws685rsevimn8fgx6mmxzzgx7bs1y9pn
+  jumpUrl:
+    pig: /sow/detail
+    group: /group/detail

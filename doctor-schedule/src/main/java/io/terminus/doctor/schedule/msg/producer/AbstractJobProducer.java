@@ -11,6 +11,7 @@ import io.terminus.doctor.event.dto.DoctorPigMessage;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.enums.PregCheckResult;
+import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.event.service.DoctorPigReadService;
@@ -306,6 +307,17 @@ public abstract class AbstractJobProducer extends AbstractProducer {
         return null;
     }
 
+    protected DoctorGroupEvent getLastGroupEventByEventType(List<DoctorGroupEvent> events, Integer type) {
+        try {
+            if (!Arguments.isNullOrEmpty(events)) {
+                return events.stream().filter(doctorGroupEvent -> (doctorGroupEvent.getEventAt() != null) && Objects.equals(doctorGroupEvent.getType(), type)).max(Comparator.comparing(DoctorGroupEvent::getEventAt)).get();
+            }
+        } catch (Exception e) {
+            log.error("get.last.group.event.by.event.type.failed events{}", events.size());
+        }
+        return null;
+    }
+
     /**
      * 获取事件发生时间与当前时间差
      *
@@ -336,9 +348,10 @@ public abstract class AbstractJobProducer extends AbstractProducer {
      */
     protected void getMessage(DoctorPigInfoDto pigDto, DoctorMessageRuleRole ruleRole, List<SubUser> subUsers, Double timeDiff, String url, Integer eventType, Integer ruleValueId) {
         // 创建消息
+        String jumpUrl = pigDetailUrl.concat("?pigId=" + pigDto.getPigId() + "&farmId=" + ruleRole.getFarmId());
         Map<String, Object> jsonData = PigDtoFactory.getInstance().createPigMessage(pigDto, timeDiff, url);
             try {
-                createMessage(subUsers, ruleRole, MAPPER.writeValueAsString(jsonData), eventType, pigDto.getPigId(), ruleValueId);
+                createMessage(subUsers, ruleRole, MAPPER.writeValueAsString(jsonData), eventType, pigDto.getPigId(), ruleValueId, jumpUrl);
             } catch (JsonProcessingException e) {
                 log.error("message produce error, cause by {}", Throwables.getStackTraceAsString(e));
             }

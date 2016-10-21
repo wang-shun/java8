@@ -28,6 +28,7 @@ import io.terminus.doctor.msg.service.DoctorMessageWriteService;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.util.Date;
 import java.util.List;
@@ -63,6 +64,12 @@ public abstract class AbstractProducer implements IProducer {
 
     @Autowired
     protected DoctorMessageUserWriteService doctorMessageUserWriteService;
+
+    @Value("${msg.jumpUrl.pig}")
+    protected String pigDetailUrl;
+
+    @Value("${msg.jumpUrl.group}")
+    protected String groupDetailUrl;
 
     public AbstractProducer(DoctorMessageTemplateReadService doctorMessageTemplateReadService,
                             DoctorMessageRuleTemplateReadService doctorMessageRuleTemplateReadService,
@@ -284,7 +291,7 @@ public abstract class AbstractProducer implements IProducer {
      * @param jsonData 填充数据
      * @return
      */
-    protected void createMessage(List<SubUser> subUsers, DoctorMessageRuleRole ruleRole, String jsonData, Integer eventType, Long businessId, Integer ruleValueId) {
+    protected void createMessage(List<SubUser> subUsers, DoctorMessageRuleRole ruleRole, String jsonData, Integer eventType, Long businessId, Integer ruleValueId, String url) {
         DoctorMessageRuleTemplate template = RespHelper.orServEx(doctorMessageRuleTemplateReadService.findMessageRuleTemplateById(ruleRole.getTemplateId()));
         if (Objects.equals(template.getType(), DoctorMessageRuleTemplate.Type.ERROR.getValue())){
             deleteWarningMessages(template.getCategory(), businessId);
@@ -320,7 +327,7 @@ public abstract class AbstractProducer implements IProducer {
                 .eventType(eventType)
                 .category(template.getCategory())
                 .data(jsonData)
-                .url(ruleRole.getRule().getUrl())
+                .url(url)
                 .createdBy(template.getUpdatedBy())
                 .build();
         // 模板编译
