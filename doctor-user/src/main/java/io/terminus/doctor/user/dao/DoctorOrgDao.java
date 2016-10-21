@@ -13,4 +13,8 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class DoctorOrgDao extends MyBatisDao<DoctorOrg> {
 
+    public DoctorOrg findByName(String orgName){
+        return sqlSession.selectOne(sqlId("findByName"), orgName);
+    }
+
 }

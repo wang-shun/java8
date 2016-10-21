@@ -4,10 +4,16 @@ import com.google.common.base.Joiner;
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.Lists;
 import io.terminus.common.utils.JsonMapper;
+import io.terminus.common.exception.JsonResponseException;
+import io.terminus.common.model.Response;
+import io.terminus.common.utils.MapBuilder;
 import io.terminus.doctor.basic.dao.DoctorBasicDao;
 import io.terminus.doctor.basic.model.DoctorBasic;
 import io.terminus.doctor.common.enums.PigType;
+import io.terminus.doctor.common.enums.UserStatus;
+import io.terminus.doctor.common.enums.UserType;
 import io.terminus.doctor.common.utils.DateUtil;
+import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
 import io.terminus.doctor.event.dao.DoctorGroupDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
@@ -32,7 +38,26 @@ import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.move.dto.DoctorImportSheet;
 import io.terminus.doctor.move.dto.DoctorImportSow;
 import io.terminus.doctor.move.util.ImportExcelUtils;
+import io.terminus.doctor.msg.service.DoctorMessageRuleWriteService;
+import io.terminus.doctor.user.dao.DoctorFarmDao;
+import io.terminus.doctor.user.dao.DoctorOrgDao;
+import io.terminus.doctor.user.dao.DoctorStaffDao;
+import io.terminus.doctor.user.dao.DoctorUserDataPermissionDao;
+import io.terminus.doctor.user.dao.SubDao;
+import io.terminus.doctor.user.dao.SubRoleDao;
 import io.terminus.doctor.user.model.DoctorFarm;
+import io.terminus.doctor.user.model.DoctorOrg;
+import io.terminus.doctor.user.model.DoctorStaff;
+import io.terminus.doctor.user.model.DoctorUserDataPermission;
+import io.terminus.doctor.user.model.Sub;
+import io.terminus.doctor.user.model.SubRole;
+import io.terminus.doctor.user.service.DoctorUserReadService;
+import io.terminus.doctor.user.service.SubRoleWriteService;
+import io.terminus.parana.user.impl.dao.UserProfileDao;
+import io.terminus.parana.user.model.LoginType;
+import io.terminus.parana.user.model.User;
+import io.terminus.parana.user.model.UserProfile;
+import io.terminus.parana.user.service.UserWriteService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -41,10 +66,12 @@ import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static io.terminus.common.utils.Arguments.notEmpty;
@@ -79,15 +106,44 @@ public class DoctorImportDataService {
     private DoctorGroupTrackDao doctorGroupTrackDao;
     @Autowired
     private DoctorMoveBasicService doctorMoveBasicService;
+    @Autowired
+    private DoctorOrgDao doctorOrgDao;
+    @Autowired
+    private DoctorFarmDao doctorFarmDao;
+    @Autowired
+    private DoctorUserReadService doctorUserReadService;
+    @Autowired
+    private UserWriteService<User> userWriteService;
+    @Autowired
+    private UserProfileDao userProfileDao;
+    @Autowired
+    private UserInitService userInitService;
+    @Autowired
+    private DoctorStaffDao doctorStaffDao;
+    @Autowired
+    private DoctorUserDataPermissionDao doctorUserDataPermissionDao;
+    @Autowired
+    private DoctorMessageRuleWriteService doctorMessageRuleWriteService;
+    @Autowired
+    private SubRoleWriteService subRoleWriteService;
+    @Autowired
+    private SubRoleDao subRoleDao;
+    @Autowired
+    private SubDao subDao;
 
     /**
      * 根据shit导入所有的猪场数据
      */
     public void importAll(DoctorImportSheet shit) {
-        DoctorFarm farm = new DoctorFarm();
+        // 猪场和员工
+        Object[] result = this.importOrgFarmUser(shit.getFarm(), shit.getStaff());
+        User primaryUser = (User) result[0];
+        DoctorFarm farm = (DoctorFarm) result[1];
         Map<String, Long> userMap = doctorMoveBasicService.getSubMap(farm.getOrgId());
 
         importBarn(farm, userMap, shit.getBarn());
+        //把所有猪舍添加到所有用户的权限里去
+        userInitService.updatePermissionBarn(primaryUser.getMobile());
 
         Map<String, DoctorBarn> barnMap = doctorMoveBasicService.getBarnMap2(farm.getId());
         Map<String, Long> breedMap = doctorMoveBasicService.getBreedMap();
@@ -96,8 +152,158 @@ public class DoctorImportDataService {
 
     }
 
-    public DoctorFarm importOrgFarmUser(Sheet shit) {
-        return new DoctorFarm();
+    public Object[] importOrgFarmUser(Sheet farmShit, Sheet staffShit) {
+        Object[] result = this.importOrgFarm(farmShit);
+        User primaryUser = (User) result[0];
+        this.importStaff(staffShit, primaryUser);
+        return result;
+    }
+
+    private void importStaff(Sheet staffShit, User primaryUser){
+        final String appKey = "MOBILE";
+        RespHelper.or500(subRoleWriteService.initDefaultRoles(appKey, primaryUser.getId()));
+        // key = roleName, value = roleId
+        Map<String, Long> existRole = subRoleDao.findByUserIdAndStatus(appKey, primaryUser.getId(), 1).stream().collect(Collectors.toMap(SubRole::getName, SubRole::getId));
+
+        List<String> existSubName = subDao.findByParentUserId(primaryUser.getId()).stream().map(Sub::getRealName).collect(Collectors.toList());
+        String farmIds = Joiner.on(",").join(doctorFarmDao.findByOrgId(doctorStaffDao.findByUserId(primaryUser.getId()).getOrgId()).stream().map(DoctorFarm::getId).collect(Collectors.toList()));
+
+        for(Row row : staffShit){
+            if(canImport(row)){
+                String realName = ImportExcelUtils.getStringOrThrow(row, 0);
+                String loginName = ImportExcelUtils.getStringOrThrow(row, 1);
+                String contact = ImportExcelUtils.getStringOrThrow(row, 2);
+                String roleName = ImportExcelUtils.getStringOrThrow(row, 3);
+
+                // 用 realName 判断下这个员工是否已存在
+                if(existSubName.contains(realName)){
+                    log.warn("staff {} has existed", realName);
+                    continue;
+                }
+
+                User subUser = new User();
+                subUser.setName(loginName + "@" + primaryUser.getName());
+                subUser.setMobile(contact);
+                subUser.setPassword("123456");
+                subUser.setType(UserType.FARM_SUB.value());
+                subUser.setStatus(UserStatus.NORMAL.value());
+
+                if(existRole.get(roleName) == null){
+                    log.error("role not exist, row {} column {}, sheet : staff", row.getRowNum(), 3);
+                    throw new JsonResponseException("role not exist, row " + row.getRowNum() + " column 3, sheet : staff");
+                }
+                List<String> roles = Lists.newArrayList("SUB", "SUB(SUB(" + existRole.get(roleName) + "))");
+                subUser.setRoles(roles);
+
+                subUser.setExtra(MapBuilder.<String, String>of()
+                        .put("pid", primaryUser.getId().toString())
+                        .put("contact", contact)
+                        .put("realName", realName)
+                        .map());
+                Long subUserId = RespHelper.or500(userWriteService.create(subUser));
+
+                //现在是数据权限
+                DoctorUserDataPermission permission = new DoctorUserDataPermission();
+                permission.setUserId(subUserId);
+                permission.setFarmIds(farmIds);
+                doctorUserDataPermissionDao.create(permission);
+            }
+        }
+    }
+
+    /**
+     * 公司、猪场、主账号
+     * @param farmShit
+     * @return 主账号的 user
+     */
+    private Object[] importOrgFarm(Sheet farmShit){
+        Row row1 = farmShit.getRow(1);
+        String orgName = ImportExcelUtils.getStringOrThrow(row1, 0);
+        String farmName = ImportExcelUtils.getStringOrThrow(row1, 1);
+        String loginName = ImportExcelUtils.getStringOrThrow(row1, 2);
+        String mobile = ImportExcelUtils.getStringOrThrow(row1, 3);
+        String realName = ImportExcelUtils.getStringOrThrow(row1, 4);
+
+        // 公司
+        DoctorOrg org = doctorOrgDao.findByName(orgName);
+        if(org == null){
+            org = new DoctorOrg();
+            org.setName(orgName);
+            org.setMobile(mobile);
+            doctorOrgDao.create(org);
+        }else{
+            log.warn("org {} has existed, id = {}", orgName, org.getId());
+        }
+
+        // 猪场
+        DoctorFarm farm = doctorFarmDao.findByOrgId(org.getId()).stream().filter(f -> farmName.equals(f.getName())).findFirst().orElse(null);
+        if(farm == null){
+            farm = new DoctorFarm();
+            farm.setOrgId(org.getId());
+            farm.setOrgName(org.getName());
+            farm.setName(farmName);
+            doctorFarmDao.create(farm);
+            RespHelper.or500(doctorMessageRuleWriteService.initTemplate(farm.getId()));
+        }else{
+            log.warn("farm {} has existed, id = {}", farmName, farm.getId());
+        }
+
+        // 主账号
+        Response<User> result = doctorUserReadService.findBy(mobile, LoginType.MOBILE);
+        if(result.isSuccess() && result.getResult() != null){
+            log.warn("primary user has existed, mobile={}", mobile);
+            Long userId = result.getResult().getId();
+            DoctorUserDataPermission permission = doctorUserDataPermissionDao.findByUserId(userId);
+            if(!permission.getFarmIdsList().contains(farm.getId())){
+                permission.setFarmIds(permission.getFarmIds() + "," + farm.getId());
+                doctorUserDataPermissionDao.update(permission);
+            }
+            return new Object[]{result.getResult(), farm};
+        }else{
+            User user = new User();
+            user.setMobile(mobile);
+            user.setPassword("123456");
+            user.setName(loginName);
+            user.setStatus(UserStatus.NORMAL.value());
+            user.setType(UserType.FARM_ADMIN_PRIMARY.value());
+            user.setRoles(Lists.newArrayList("PRIMARY", "PRIMARY(OWNER)"));
+            Long userId = RespHelper.or500(userWriteService.create(user));
+            user.setId(userId);
+
+            // 把真实姓名存进 user profile
+            UserProfile userProfile = userProfileDao.findByUserId(userId);
+            userProfile.setRealName(realName);
+            userProfileDao.update(userProfile);
+
+            //初始化服务状态
+            userInitService.initDefaultServiceStatus(userId);
+            //初始化服务的申请审批状态
+            userInitService.initServiceReview(userId, mobile);
+
+            // 主账号的staff
+            this.createStaff(user, org, DoctorStaff.Sex.MALE);
+
+            //创建数据权限
+            DoctorUserDataPermission permission = new DoctorUserDataPermission();
+            permission.setUserId(userId);
+            permission.setFarmIds(farm.getId().toString());
+            doctorUserDataPermissionDao.create(permission);
+            return new Object[]{user, farm};
+        }
+    }
+
+    private void createStaff(User user, DoctorOrg org, DoctorStaff.Sex sex){
+        DoctorStaff staff = new DoctorStaff();
+        staff.setOrgName(org.getName());
+        staff.setOrgId(org.getId());
+        staff.setUserId(user.getId());
+        staff.setCreatorId(user.getId());
+        staff.setCreatorName(user.getName());
+        staff.setUpdatorId(user.getId());
+        staff.setUpdatorName(user.getName());
+        staff.setSex(sex != null ? sex.value() : null);
+        staff.setStatus(DoctorStaff.Status.PRESENT.value());
+        doctorStaffDao.create(staff);
     }
 
     /**

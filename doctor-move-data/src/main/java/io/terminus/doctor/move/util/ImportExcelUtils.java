@@ -1,6 +1,7 @@
 package io.terminus.doctor.move.util;
 
 import com.google.common.base.Strings;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 
@@ -20,6 +21,19 @@ public class ImportExcelUtils {
         if (cell == null) return null;
         cell.setCellType(Cell.CELL_TYPE_STRING);
         return cell.getStringCellValue();
+    }
+
+    public static String getStringOrThrow(Row row, int col) {
+        Cell cell = row.getCell(col);
+        if (cell == null) {
+            throw new IllegalStateException("row " + row.getRowNum() + "column " + col + " is null");
+        }
+        cell.setCellType(Cell.CELL_TYPE_STRING);
+        String value = cell.getStringCellValue();
+        if(StringUtils.isBlank(value)){
+            throw new IllegalStateException("row " + row.getRowNum() + "column " + col + " is blank");
+        }
+        return value;
     }
 
     public static Long getLong(Row row, int col) {
