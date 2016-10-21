@@ -26,8 +26,10 @@ import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
 import io.terminus.doctor.event.model.DoctorPig;
+import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.move.dto.DoctorImportSheet;
+import io.terminus.doctor.move.dto.DoctorImportSow;
 import io.terminus.doctor.move.util.ImportExcelUtils;
 import io.terminus.doctor.msg.service.DoctorMessageRuleWriteService;
 import io.terminus.doctor.user.dao.DoctorFarmDao;
@@ -449,8 +451,116 @@ public class DoctorImportDataService {
     /**
      * 导入母猪
      */
-    public void importSow(DoctorFarm farm, Sheet shit) {
+    public void importSow(DoctorFarm farm, Map<String, DoctorBarn> barnMap, Map<String, Long> breedMap, Sheet shit) {
+        Map<String, List<DoctorImportSow>> sowMap = getImportSows(shit).stream().collect(Collectors.groupingBy(DoctorImportSow::getSowCode));
+        sowMap.entrySet().forEach(map -> {
+            List<DoctorImportSow> importSows = map.getValue();
+            DoctorPig sow = getSow(farm, barnMap, breedMap, importSows.get(0), importSows.get(importSows.size() - 1));
 
+
+
+
+        });
+    }
+
+    //导入母猪
+    private DoctorPig getSow(DoctorFarm farm, Map<String, DoctorBarn> barnMap, Map<String, Long> breedMap, DoctorImportSow first, DoctorImportSow last) {
+        DoctorPig sow = new DoctorPig();
+        sow.setOrgId(farm.getOrgId());
+        sow.setOrgName(farm.getOrgName());
+        sow.setFarmId(farm.getId());
+        sow.setFarmName(farm.getName());
+        sow.setPigCode(last.getSowCode());
+        sow.setIsRemoval(IsOrNot.NO.getValue());
+        sow.setPigFatherCode(last.getFatherCode());
+        sow.setPigMotherCode(last.getMotherCode());
+        sow.setSource(PigSource.LOCAL.getKey());
+        sow.setBirthDate(last.getBirthDate());
+        sow.setBirthWeight(0D);
+        sow.setInFarmDate(new DateTime(first.getMateDate()).plusDays(-1).toDate()); //进场时间取第一次配种时间减一天
+        sow.setInFarmDayAge(null); // TODO: 2016/10/21 进场日龄
+        sow.setInitBarnName(last.getBarnName());
+
+        DoctorBarn barn = barnMap.get(last.getBarnName());
+        if (barn != null) {
+            sow.setPigType(barn.getPigType());   //猪类
+            sow.setInitBarnId(barn.getId());
+        }
+        sow.setBreedName(last.getBreed());
+        sow.setBreedId(breedMap.get(last.getBreed()));
+        doctorPigDao.create(sow);
+        return sow;
+    }
+
+    //导入母猪跟踪
+    private DoctorPigTrack getSowTrack(DoctorPig sow, DoctorImportSow last, DoctorPigEvent lastEvent) {
+        DoctorPigTrack sowTrack = new DoctorPigTrack();
+        sowTrack.setFarmId(sow.getFarmId());
+        sowTrack.setPigId(sow.getId());
+        sowTrack.setPigType(sow.getPigType());
+        sowTrack.setStatus(last.getStatus());
+        sowTrack.setIsRemoval(sow.getIsRemoval());
+        sowTrack.setCurrentBarnId(sow.getInitBarnId());
+        sowTrack.setCurrentBarnName(sow.getInitBarnName());
+        sowTrack.setWeight(sow.getBirthWeight());
+        sowTrack.setCurrentParity(last.getParity());
+        sowTrack.setGroupId(null); // TODO: 2016/10/21 哺乳母猪所在猪群
+//        sowTrack.setFarrowQty();
+//        sowTrack.setUnweanQty();
+//        sowTrack.setWeanQty();
+//        sowTrack.setFarrowAvgWeight();
+//        sowTrack.setWeanAvgWeight();
+//        sowTrack.setRelEventIds();
+//        sowTrack.setCurrentMatingCount();       //当前配种次数
+        doctorPigTrackDao.create(sowTrack);
+        return sowTrack;
+    }
+
+    //把excel的每一个cell转换成bean
+    private List<DoctorImportSow> getImportSows(Sheet shit) {
+        List<DoctorImportSow> sows = Lists.newArrayList();
+        for (Row row : shit) {
+            if (canImport(row)) {
+                DoctorImportSow sow = new DoctorImportSow();
+                sow.setBarnName(ImportExcelUtils.getString(row, 0));       //猪舍
+                sow.setSowCode(ImportExcelUtils.getString(row, 1));        //母猪耳号
+
+                PigStatus status = PigStatus.from(ImportExcelUtils.getString(row, 2));
+                if (status == null) {
+                    log.error("WTF! The pig status is null! row:{}, pigCode:{}", row.getRowNum(), sow.getSowCode());
+                } else {
+                    sow.setStatus(status.getKey());         //当前状态
+                }
+                sow.setParity(MoreObjects.firstNonNull(ImportExcelUtils.getInt(row, 3), 1));            //胎次
+                sow.setMateDate(DateUtil.formatToDate(DTF, ImportExcelUtils.getString(row, 4)));        //配种日期
+                sow.setBoarCode(ImportExcelUtils.getString(row, 5));                                    //公猪耳号
+                sow.setMateStaffName(ImportExcelUtils.getString(row, 6));                               //配种员
+                sow.setPrePregDate(DateUtil.formatToDate(DTF, ImportExcelUtils.getString(row, 7)));     //预产日期
+                sow.setPregDate(DateUtil.formatToDate(DTF, ImportExcelUtils.getString(row, 8)));        //实产日期
+                sow.setFarrowBarnName(ImportExcelUtils.getString(row, 9));                              //分娩猪舍
+                sow.setBed(ImportExcelUtils.getString(row, 10));                                        //床号
+                sow.setWeanDate(DateUtil.formatToDate(DTF, ImportExcelUtils.getString(row, 11)));       //断奶日期
+                sow.setLiveCount(ImportExcelUtils.getIntOrDefault(row, 12, 0));                         //活仔数
+                sow.setJixingCount(ImportExcelUtils.getIntOrDefault(row, 13, 0));                       //畸形
+                sow.setWeakCount(ImportExcelUtils.getIntOrDefault(row, 14, 0));                         //弱仔数
+                sow.setDeadCount(ImportExcelUtils.getIntOrDefault(row, 15, 0));                         //死仔
+                sow.setMummyCount(ImportExcelUtils.getIntOrDefault(row, 16, 0));                        //木乃伊
+                sow.setBlackCount(ImportExcelUtils.getIntOrDefault(row, 17, 0));                        //黑胎
+                sow.setNestWeight(ImportExcelUtils.getDoubleOrDefault(row, 18, 0D));                    //窝重
+                sow.setStaff1(ImportExcelUtils.getString(row, 19));                                     //接生员1
+                sow.setStaff2(ImportExcelUtils.getString(row, 20));                                     //接生员2
+                sow.setSowEarCode(ImportExcelUtils.getString(row, 21));                                 //母猪耳号
+                sow.setBirthDate(DateUtil.formatToDate(DTF, ImportExcelUtils.getString(row, 22)));      //出生日期
+                sow.setRemark(ImportExcelUtils.getString(row, 23));                                     //备注
+                sow.setBreed(ImportExcelUtils.getString(row, 24));                                      //品种
+                sow.setWeanWeight(ImportExcelUtils.getDoubleOrDefault(row, 25, 0D));                    //断奶重
+                sow.setWeanCount(ImportExcelUtils.getIntOrDefault(row, 26, 0));                         //断奶数
+                sow.setFatherCode(ImportExcelUtils.getString(row, 27));                                 //父号
+                sow.setMotherCode(ImportExcelUtils.getString(row, 28));                                 //母号
+                sows.add(sow);
+            }
+        }
+        return sows;
     }
 
     public void importWarehouse(DoctorFarm farm, Sheet shit) {
