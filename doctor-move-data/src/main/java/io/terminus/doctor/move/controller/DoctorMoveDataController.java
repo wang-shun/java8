@@ -6,7 +6,14 @@ import io.terminus.common.exception.ServiceException;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.model.DoctorPig;
-import io.terminus.doctor.event.service.*;
+import io.terminus.doctor.event.search.barn.BarnSearchDumpService;
+import io.terminus.doctor.event.search.group.GroupDumpService;
+import io.terminus.doctor.event.search.pig.PigDumpService;
+import io.terminus.doctor.event.service.DoctorBoarMonthlyReportWriteService;
+import io.terminus.doctor.event.service.DoctorDailyReportWriteService;
+import io.terminus.doctor.event.service.DoctorMonthlyReportWriteService;
+import io.terminus.doctor.event.service.DoctorParityMonthlyReportWriteService;
+import io.terminus.doctor.event.service.DoctorPigTypeStatisticWriteService;
 import io.terminus.doctor.move.handler.DoctorMoveDatasourceHandler;
 import io.terminus.doctor.move.service.DoctorMoveBasicService;
 import io.terminus.doctor.move.service.DoctorMoveDataService;
@@ -59,6 +66,9 @@ public class DoctorMoveDataController {
     private final DoctorMonthlyReportWriteService doctorMonthlyReportWriteService;
     private final DoctorParityMonthlyReportWriteService doctorParityMonthlyReportWriteService;
     private final DoctorBoarMonthlyReportWriteService doctorBoarMonthlyReportWriteService;
+    private final BarnSearchDumpService barnSearchDumpService;
+    private final GroupDumpService groupDumpService;
+    private final PigDumpService pigDumpService;
 
     @Autowired
     public DoctorMoveDataController(UserInitService userInitService,
@@ -74,7 +84,7 @@ public class DoctorMoveDataController {
                                     DoctorDailyReportWriteService doctorDailyReportWriteService,
                                     DoctorMonthlyReportWriteService doctorMonthlyReportWriteService,
                                     DoctorParityMonthlyReportWriteService doctorParityMonthlyReportWriteService,
-                                    DoctorBoarMonthlyReportWriteService doctorBoarMonthlyReportWriteService) {
+                                    DoctorBoarMonthlyReportWriteService doctorBoarMonthlyReportWriteService, BarnSearchDumpService barnSearchDumpService, GroupDumpService groupDumpService, PigDumpService pigDumpService) {
         this.userInitService = userInitService;
         this.wareHouseInitService = wareHouseInitService;
         this.doctorMoveBasicService = doctorMoveBasicService;
@@ -89,6 +99,9 @@ public class DoctorMoveDataController {
         this.doctorMonthlyReportWriteService = doctorMonthlyReportWriteService;
         this.doctorParityMonthlyReportWriteService = doctorParityMonthlyReportWriteService;
         this.doctorBoarMonthlyReportWriteService = doctorBoarMonthlyReportWriteService;
+        this.barnSearchDumpService = barnSearchDumpService;
+        this.groupDumpService = groupDumpService;
+        this.pigDumpService = pigDumpService;
     }
 
     /**
@@ -146,6 +159,11 @@ public class DoctorMoveDataController {
 
             //把所有猪舍添加到所有用户的权限里去
             userInitService.updatePermissionBarn(mobile);
+
+            log.warn("ElasticSearch dump start !");
+            barnSearchDumpService.fullDump(null);
+            groupDumpService.fullDump(null);
+            pigDumpService.fullDump(null);
             log.warn("all data moved successfully, CONGRATULATIONS!!!");
 
             return true;
