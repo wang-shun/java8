@@ -2,8 +2,10 @@ package io.terminus.doctor.move.service;
 
 import com.google.common.base.Joiner;
 import com.google.common.base.MoreObjects;
+import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import io.terminus.common.exception.JsonResponseException;
+import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.Response;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.common.utils.MapBuilder;
@@ -22,6 +24,7 @@ import io.terminus.doctor.event.dao.DoctorPigEventDao;
 import io.terminus.doctor.event.dao.DoctorPigTrackDao;
 import io.terminus.doctor.event.dto.event.sow.DoctorFarrowingDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorMatingDto;
+import io.terminus.doctor.event.dto.event.sow.DoctorPartWeanDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorPregChkResultDto;
 import io.terminus.doctor.event.dto.event.usual.DoctorFarmEntryDto;
 import io.terminus.doctor.event.enums.DoctorMatingType;
@@ -68,10 +71,11 @@ import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static io.terminus.common.utils.Arguments.notEmpty;
@@ -145,14 +149,17 @@ public class DoctorImportDataService {
         //把所有猪舍添加到所有用户的权限里去
         userInitService.updatePermissionBarn(primaryUser.getMobile());
 
+        importBreed(shit.getBreed());
+
         Map<String, DoctorBarn> barnMap = doctorMoveBasicService.getBarnMap2(farm.getId());
         Map<String, Long> breedMap = doctorMoveBasicService.getBreedMap();
 
         importBoar(farm, barnMap, breedMap, shit.getBoar());
-
+        importGroup(farm, barnMap, shit.getGroup());
+        importSow(farm, barnMap, breedMap, shit.getSow());
     }
 
-    public Object[] importOrgFarmUser(Sheet farmShit, Sheet staffShit) {
+    private Object[] importOrgFarmUser(Sheet farmShit, Sheet staffShit) {
         Object[] result = this.importOrgFarm(farmShit);
         User primaryUser = (User) result[0];
         this.importStaff(staffShit, primaryUser);
@@ -213,7 +220,6 @@ public class DoctorImportDataService {
 
     /**
      * 公司、猪场、主账号
-     * @param farmShit
      * @return 主账号的 user
      */
     private Object[] importOrgFarm(Sheet farmShit){
@@ -309,7 +315,7 @@ public class DoctorImportDataService {
     /**
      * 导入猪舍
      */
-    public void importBarn(DoctorFarm farm, Map<String, Long> userMap, Sheet shit) {
+    private void importBarn(DoctorFarm farm, Map<String, Long> userMap, Sheet shit) {
         List<DoctorBarn> barns = Lists.newArrayList();
         shit.forEach(row -> {
             //第一行是表头，跳过
@@ -340,7 +346,7 @@ public class DoctorImportDataService {
         doctorBarnDao.creates(barns);
     }
 
-    public void importBreed(Sheet shit) {
+    private void importBreed(Sheet shit) {
         List<String> breeds = doctorBasicDao.findByType(DoctorBasic.Type.BREED.getValue()).stream()
                 .map(DoctorBasic::getName).collect(Collectors.toList());
         shit.forEach(row -> {
@@ -362,7 +368,7 @@ public class DoctorImportDataService {
     /**
      * 导入公猪
      */
-    public void importBoar(DoctorFarm farm, Map<String, DoctorBarn> barnMap, Map<String, Long> breedMap, Sheet shit) {
+    private void importBoar(DoctorFarm farm, Map<String, DoctorBarn> barnMap, Map<String, Long> breedMap, Sheet shit) {
         for (Row row : shit) {
             if (!canImport(row)) {
                 continue;
@@ -411,7 +417,7 @@ public class DoctorImportDataService {
     /**
      * 导入猪群
      */
-    public void importGroup(DoctorFarm farm, Map<String, DoctorBarn> barnMap, Sheet shit) {
+    private void importGroup(DoctorFarm farm, Map<String, DoctorBarn> barnMap, Sheet shit) {
         for (Row row : shit) {
             if (!canImport(row)) {
                 continue;
@@ -468,19 +474,99 @@ public class DoctorImportDataService {
     /**
      * 导入母猪
      */
-    public void importSow(DoctorFarm farm, Map<String, DoctorBarn> barnMap, Map<String, Long> breedMap, Sheet shit) {
+    @Transactional
+    private void importSow(DoctorFarm farm, Map<String, DoctorBarn> barnMap, Map<String, Long> breedMap, Sheet shit) {
         Map<String, List<DoctorImportSow>> sowMap = getImportSows(shit).stream().collect(Collectors.groupingBy(DoctorImportSow::getSowCode));
         sowMap.entrySet().forEach(map -> {
-            List<DoctorImportSow> importSows = map.getValue();
-            DoctorImportSow last = importSows.get(importSows.size() - 1);
-            DoctorPig sow = getSow(farm, barnMap, breedMap, importSows.get(0), last);
+            List<DoctorImportSow> importSows = map.getValue().stream().sorted((a, b) -> a.getParity().compareTo(b.getParity())).collect(Collectors.toList());
+            int size = importSows.size();
 
-            importSows.forEach(is -> {
+            DoctorImportSow first = importSows.get(0);
+            DoctorImportSow last = importSows.get(size - 1);
+            checkStatus(last);
+            DoctorPig sow = getSow(farm, barnMap, breedMap, first, last);
 
-            });
+            //先创建进场事件
+            DoctorPigEvent entryEvent = createEntryEvent(first, sow);
+            Map<Integer, List<Long>> parityMap = MapBuilder.<Integer, List<Long>>of()
+                    .put(first.getParity(), Lists.newArrayList(entryEvent.getId())).map();
 
-            //getSowTrack(sow, last);
+            for (int i = 0; i < size; i++) {
+                DoctorImportSow is = importSows.get(i);
+
+                //如果是最后一个元素，要根据当前状态生成事件
+                if (i == size - 1) {
+                    if (Objects.equals(is.getStatus(), PigStatus.Entry.getKey())) {
+                        continue;
+                    }
+                    if (Objects.equals(is.getStatus(), PigStatus.Mate.getKey())) {
+                        DoctorPigEvent mateEvent = createMateEvent(is, sow, entryEvent, DoctorMatingType.DP);
+                        putParityMap(parityMap, is.getParity(), Lists.newArrayList(mateEvent.getId()));
+                        continue;
+                    }
+                    if (Objects.equals(is.getStatus(), PigStatus.Pregnancy.getKey())) {
+                        DoctorPigEvent mateEvent = createMateEvent(is, sow, entryEvent, DoctorMatingType.DP);
+                        DoctorPigEvent pregYang = createPregCheckEvent(is, sow, mateEvent, PregCheckResult.YANG);
+                        putParityMap(parityMap, is.getParity(), Lists.newArrayList(mateEvent.getId(), pregYang.getId()));
+                        continue;
+                    }
+                    if (Objects.equals(is.getStatus(), PigStatus.KongHuai.getKey())) {
+                        DoctorPigEvent mateEvent = createMateEvent(is, sow, entryEvent, DoctorMatingType.DP);
+                        DoctorPigEvent pregYang = createPregCheckEvent(is, sow, mateEvent, getCheckResultByRemark(is.getRemark()));
+                        putParityMap(parityMap, is.getParity(), Lists.newArrayList(mateEvent.getId(), pregYang.getId()));
+                        continue;
+                    }
+                    if (Objects.equals(is.getStatus(), PigStatus.FEED.getKey())) {
+                        DoctorPigEvent mateEvent = createMateEvent(is, sow, entryEvent, DoctorMatingType.DP);
+                        DoctorPigEvent pregYang = createPregCheckEvent(is, sow, mateEvent, PregCheckResult.YANG);
+                        DoctorPigEvent farrowEvent = createFarrowEvent(is, sow, pregYang);
+                        putParityMap(parityMap, is.getParity(), Lists.newArrayList(mateEvent.getId(), pregYang.getId(), farrowEvent.getId()));
+                        continue;
+                    }
+                    //断奶的情况走下面的方法
+                }
+
+                //上一胎次生成：配种 -> 妊检 -> 分娩 -> 断奶
+                DoctorPigEvent mateEvent = createMateEvent(is, sow, entryEvent, DoctorMatingType.DP);
+                putParityMap(parityMap, is.getParity(), Lists.newArrayList(mateEvent.getId()));
+
+                //如果妊检是不是阳性，只生成到妊检事件
+                if (notEmpty(is.getRemark()) && is.getRemark().contains("结果：")) {
+                    DoctorPigEvent pregNotYang = createPregCheckEvent(is, sow, mateEvent, getCheckResultByRemark(is.getRemark()));
+                    putParityMap(parityMap, is.getParity(), Lists.newArrayList(pregNotYang.getId()));
+                } else {
+                    DoctorPigEvent pregYang = createPregCheckEvent(is, sow, mateEvent, PregCheckResult.YANG);
+                    DoctorPigEvent farrowEvent = createFarrowEvent(is, sow, pregYang);
+                    DoctorPigEvent weanEvent = createWeanEvent(is, sow, farrowEvent);
+                    putParityMap(parityMap, is.getParity(), Lists.newArrayList(pregYang.getId(), farrowEvent.getId(), weanEvent.getId()));
+                }
+            }
+
+            getSowTrack(sow, last, parityMap);
         });
+    }
+
+    private static PregCheckResult getCheckResultByRemark(String remark) {
+        if (notEmpty(remark) && remark.contains("返情")) {
+            return PregCheckResult.FANQING;
+        }
+        if (notEmpty(remark) && remark.contains("流产")) {
+            return PregCheckResult.LIUCHAN;
+        }
+        return PregCheckResult.YING;
+    }
+
+    //同一胎次的事件id，放到同一个list里
+    private void putParityMap(Map<Integer, List<Long>> parityMap, Integer parity, List<Long> eventIds) {
+        List<Long> ids = MoreObjects.firstNonNull(parityMap.get(parity), Lists.newArrayList());
+        ids.addAll(eventIds);
+        parityMap.put(parity, ids);
+    }
+
+    private void checkStatus(DoctorImportSow is) {
+        if (is == null || is.getStatus() == null) {
+            throw new ServiceException("sow.status.error");
+        }
     }
 
     //导入母猪
@@ -498,7 +584,8 @@ public class DoctorImportDataService {
         sow.setBirthDate(last.getBirthDate());
         sow.setBirthWeight(0D);
         sow.setInFarmDate(new DateTime(first.getMateDate()).plusDays(-1).toDate()); //进场时间取第一次配种时间减一天
-        sow.setInFarmDayAge(DateUtil.getDeltaDaysAbs(MoreObjects.firstNonNull(sow.getInFarmDate(), new Date(2009, 8, 1, 0, 0)), sow.getBirthDate()));
+        sow.setInFarmDayAge(DateUtil.getDeltaDaysAbs(MoreObjects.firstNonNull(sow.getInFarmDate(),
+                new DateTime(2009, 8, 1, 0, 0).toDate()), sow.getBirthDate()));
         sow.setInitBarnName(last.getBarnName());
 
         DoctorBarn barn = barnMap.get(last.getBarnName());
@@ -513,7 +600,7 @@ public class DoctorImportDataService {
     }
 
     //导入母猪跟踪
-    private DoctorPigTrack getSowTrack(DoctorPig sow, DoctorImportSow last, DoctorPigEvent lastEvent) {
+    private DoctorPigTrack getSowTrack(DoctorPig sow, DoctorImportSow last, Map<Integer, List<Long>> parityMap) {
         DoctorPigTrack sowTrack = new DoctorPigTrack();
         sowTrack.setFarmId(sow.getFarmId());
         sowTrack.setPigId(sow.getId());
@@ -524,16 +611,30 @@ public class DoctorImportDataService {
         sowTrack.setCurrentBarnName(sow.getInitBarnName());
         sowTrack.setWeight(sow.getBirthWeight());
         sowTrack.setCurrentParity(last.getParity());
-        sowTrack.setGroupId(null); // TODO: 2016/10/21 哺乳母猪所在猪群 = 当前猪舍的猪群
-//        sowTrack.setFarrowQty();
-//        sowTrack.setUnweanQty();
-//        sowTrack.setWeanQty();
-//        sowTrack.setFarrowAvgWeight();
-//        sowTrack.setWeanAvgWeight();
-//        sowTrack.setRelEventIds();
-//        sowTrack.setCurrentMatingCount();       //当前配种次数
+        sowTrack.setRelEventIds(MAPPER.toJson(parityMap));
+        sowTrack.setCurrentMatingCount(1);       //当前配种次数
+        sowTrack.setFarrowQty(0);
+        sowTrack.setUnweanQty(0);
+        sowTrack.setWeanQty(0);
+        sowTrack.setFarrowAvgWeight(0D);
+        sowTrack.setWeanAvgWeight(0D);
+
+        if (Objects.equals(sowTrack.getStatus(), PigStatus.FEED.getKey())) {
+            sowTrack.setGroupId(getGroup(sowTrack.getCurrentBarnId()).getId());
+            sowTrack.setFarrowQty(last.getLiveCount());
+            sowTrack.setUnweanQty(last.getLiveCount());
+            sowTrack.setFarrowAvgWeight(MoreObjects.firstNonNull(last.getNestWeight(), 0D)
+                    / (last.getLiveCount() == 0 ? 1 : last.getLiveCount()));
+        }
         doctorPigTrackDao.create(sowTrack);
         return sowTrack;
+    }
+
+    private DoctorGroup getGroup(Long barnId) {
+        return doctorGroupDao.findByCurrentBarnId(barnId).stream()
+                .filter(group -> group.getStatus() == DoctorGroup.Status.CREATED.getValue())
+                .findFirst()
+                .orElse(new DoctorGroup());
     }
 
     private DoctorPigEvent createSowEvent(DoctorImportSow info, DoctorPig sow) {
@@ -606,7 +707,7 @@ public class DoctorImportDataService {
         return event;
     }
 
-    //创建妊检事件 // TODO: 2016/10/21 非阳性的情况
+    //创建妊检事件
     private DoctorPigEvent createPregCheckEvent(DoctorImportSow info, DoctorPig sow, DoctorPigEvent beforeEvent, PregCheckResult checkResult) {
         DoctorPigEvent event = createSowEvent(info, sow);
         event.setEventAt(new DateTime(beforeEvent.getEventAt()).plusWeeks(3).toDate());  //妊检事件事件 = 配种时间 + 3周
@@ -667,7 +768,7 @@ public class DoctorImportDataService {
         farrow.setBedCode(info.getBed());
         farrow.setFarrowingType(FarrowingType.USUAL.getKey());
         farrow.setIsHelp(IsOrNot.NO.getValue());
-        farrow.setGroupCode(null); // TODO: 2016/10/21 猪群号
+        farrow.setGroupCode(getGroup(event.getBarnId()).getGroupCode());
         farrow.setBirthNestAvg(info.getNestWeight());
         farrow.setFarrowingLiveCount(event.getLiveCount());
         farrow.setHealthCount(event.getHealthCount());
@@ -692,7 +793,33 @@ public class DoctorImportDataService {
     //创建断奶事件
     private DoctorPigEvent createWeanEvent(DoctorImportSow info, DoctorPig sow, DoctorPigEvent beforeEvent) {
         DoctorPigEvent event = createSowEvent(info, sow);
+        event.setEventAt(info.getWeanDate());
+        event.setType(PigEvent.WEAN.getKey());
+        event.setName(PigEvent.WEAN.getName());
+        event.setRelEventId(beforeEvent.getId());
+        event.setPigStatusBefore(PigStatus.FEED.getKey());
+        event.setPigStatusAfter(PigStatus.Wean.getKey());
+        event.setParity(info.getParity());
+        event.setFeedDays(DateUtil.getDeltaDaysAbs(beforeEvent.getEventAt(), event.getEventAt()));
+        event.setWeanCount(info.getLiveCount());
+        event.setWeanAvgWeight(info.getWeanWeight() / event.getWeakCount());
+        event.setPartweanDate(event.getEventAt());
+        event.setBoarCode(info.getBoarCode());
 
+        //断奶extra
+        DoctorPartWeanDto wean = new DoctorPartWeanDto();
+        wean.setPartWeanDate(event.getEventAt());
+        wean.setPartWeanPigletsCount(event.getWeanCount());
+        wean.setPartWeanAvgWeight(event.getWeanAvgWeight());
+        wean.setPartWeanRemark(info.getRemark());
+        wean.setQualifiedCount(event.getWeanCount());
+        wean.setNotQualifiedCount(0);
+        wean.setFarrowingLiveCount(event.getWeakCount());
+        wean.setWeanPigletsCount(0);
+
+        event.setDesc(getEventDesc(wean.descMap()));
+        event.setExtra(MAPPER.toJson(wean));
+        doctorPigEventDao.create(event);
         return event;
     }
 
@@ -709,7 +836,8 @@ public class DoctorImportDataService {
                 sow.setBarnName(ImportExcelUtils.getString(row, 0));       //猪舍
                 sow.setSowCode(ImportExcelUtils.getString(row, 1));        //母猪耳号
 
-                PigStatus status = PigStatus.from(ImportExcelUtils.getString(row, 2));
+                //获取母猪状态
+                PigStatus status = getPigStatus(ImportExcelUtils.getString(row, 2));
                 if (status == null) {
                     log.error("WTF! The pig status is null! row:{}, pigCode:{}", row.getRowNum(), sow.getSowCode());
                 } else {
@@ -745,6 +873,32 @@ public class DoctorImportDataService {
             }
         }
         return sows;
+    }
+    
+    private static PigStatus getPigStatus(String status) {
+        if (Strings.isNullOrEmpty(status)) {
+            log.error("what the fuck!!! the status is fucking null!");
+            return PigStatus.Wean;
+        }
+        if (status.contains("进场")) {
+            return PigStatus.Entry;
+        }
+        if (status.contains("已配种")) {
+            return PigStatus.Mate;
+        }
+        if (status.contains("妊娠检查阳性")) {
+            return PigStatus.Pregnancy;
+        }
+        if (status.contains("哺乳")) {
+            return PigStatus.FEED;
+        }
+        if (status.contains("断奶")) {
+            return PigStatus.Wean;
+        }
+        if (status.contains("返情") || status.contains("流产") || status.contains("阴性")) {
+            return PigStatus.KongHuai;
+        }
+        return null;
     }
 
     public void importWarehouse(DoctorFarm farm, Sheet shit) {
