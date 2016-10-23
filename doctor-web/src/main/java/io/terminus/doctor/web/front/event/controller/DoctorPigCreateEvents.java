@@ -72,7 +72,7 @@ public class DoctorPigCreateEvents {
     private static final ObjectMapper OBJECT_MAPPER = JsonMapper.JSON_NON_DEFAULT_MAPPER.getMapper();
 
     //状态转舍允许类型
-    private static final List<Integer> CHG_SOW_ALLOWS = Lists.newArrayList(DELIVER_SOW.getValue(), FARROW_PIGLET.getValue(), MATE_SOW.getValue());
+    private static final List<Integer> CHG_SOW_ALLOWS = Lists.newArrayList(DELIVER_SOW.getValue(), MATE_SOW.getValue());
 
     private final DoctorPigEventWriteService doctorPigEventWriteService;
     private final DoctorFarmReadService doctorFarmReadService;

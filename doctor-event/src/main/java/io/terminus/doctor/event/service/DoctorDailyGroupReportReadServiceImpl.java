@@ -89,18 +89,16 @@ public class DoctorDailyGroupReportReadServiceImpl implements DoctorDailyGroupRe
         ChangeEvent changeEvent = getChangeEvent(event);
         //死淘
         DoctorDeadDailyReport deadReport = new DoctorDeadDailyReport();
-        deadReport.setFarrow((isDeadEvent(changeEvent, PigType.FARROW_PIGLET) ? changeEvent.getQuantity() : 0) +
-                (isDeadEvent(changeEvent, PigType.DELIVER_SOW) ? changeEvent.getQuantity() : 0));
+        deadReport.setFarrow((isDeadEvent(changeEvent, PigType.DELIVER_SOW) ? changeEvent.getQuantity() : 0));
         deadReport.setNursery(isDeadEvent(changeEvent, PigType.NURSERY_PIGLET) ? changeEvent.getQuantity() : 0);
         deadReport.setFatten(isDeadEvent(changeEvent, PigType.FATTEN_PIG) ? changeEvent.getQuantity() : 0);
-        deadReport.setHoubei((isDeadEvent(changeEvent, PigType.RESERVE_BOAR) ? changeEvent.getQuantity() : 0) + (isDeadEvent(changeEvent, PigType.RESERVE_SOW) ? changeEvent.getQuantity() : 0) );
+        deadReport.setHoubei((isDeadEvent(changeEvent, PigType.RESERVE) ? changeEvent.getQuantity() : 0));
 
         report.setDead(deadReport);
 
         //销售 (保育 = 产房 + 保育)
         DoctorSaleDailyReport saleReport = new DoctorSaleDailyReport();
-        saleReport.setNursery(isSaleEvent(changeEvent, PigType.FARROW_PIGLET) || isSaleEvent(changeEvent, PigType.NURSERY_PIGLET)
-                || isSaleEvent(changeEvent, PigType.DELIVER_SOW) ? changeEvent.getQuantity() : 0);
+        saleReport.setNursery(isSaleEvent(changeEvent, PigType.DELIVER_SOW) || isSaleEvent(changeEvent, PigType.NURSERY_PIGLET) ? changeEvent.getQuantity() : 0);
         saleReport.setFatten(isSaleEvent(changeEvent, PigType.FATTEN_PIG) ? changeEvent.getQuantity() : 0);
 
         //销售均价

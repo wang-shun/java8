@@ -57,7 +57,6 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
 
     //产房仔猪允许转入的猪舍: 产房(分娩母猪舍)/保育舍
     private static final List<Integer> FARROW_ALLOW_TRANS = Lists.newArrayList(
-            PigType.FARROW_PIGLET.getValue(),
             PigType.NURSERY_PIGLET.getValue(),
             PigType.DELIVER_SOW.getValue());
 
@@ -65,15 +64,12 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
     private static final List<Integer> NURSERY_ALLOW_TRANS = Lists.newArrayList(
             PigType.NURSERY_PIGLET.getValue(),
             PigType.FATTEN_PIG.getValue(),
-            PigType.BREEDING.getValue(),
-            PigType.RESERVE_SOW.getValue(),
-            PigType.RESERVE_BOAR.getValue());
+            PigType.RESERVE.getValue());
 
     //育肥猪允许转入的猪舍: 育肥舍/后备舍(公母)
     private static final List<Integer> FATTEN_ALLOW_TRANS = Lists.newArrayList(
             PigType.FATTEN_PIG.getValue(),
-            PigType.RESERVE_SOW.getValue(),
-            PigType.RESERVE_BOAR.getValue());
+            PigType.RESERVE.getValue());
 
     private final DoctorGroupSnapshotDao doctorGroupSnapshotDao;
     private final DoctorGroupTrackDao doctorGroupTrackDao;
@@ -320,7 +316,7 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
         if (isCreateGroup.equals(IsOrNot.YES.getValue())) {
             Integer barnType = RespHelper.orServEx(doctorBarnReadService.findBarnById(barnId)).getPigType();
             //如果是分娩舍或者产房
-            if (barnType.equals(PigType.DELIVER_SOW.getValue()) || barnType.equals(PigType.FARROW_PIGLET.getValue())) {
+            if (barnType.equals(PigType.DELIVER_SOW.getValue())) {
                 List<DoctorGroup> groups = doctorGroupDao.findByCurrentBarnId(barnId);
                 if (notEmpty(groups)) {
                     throw new ServiceException("group.count.over.1");
@@ -334,7 +330,7 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
         Integer barnType = RespHelper.orServEx(doctorBarnReadService.findBarnById(barnId)).getPigType();
 
         //产房 => 产房(分娩母猪舍)/保育舍
-        if ((Objects.equals(pigType, PigType.FARROW_PIGLET.getValue()) || Objects.equals(pigType, PigType.DELIVER_SOW.getValue()))) {
+        if (Objects.equals(pigType, PigType.DELIVER_SOW.getValue())) {
             if (!FARROW_ALLOW_TRANS.contains(barnType)) {
                 log.error("check can trans barn pigType:{}, barnType:{}", pigType, barnType);
                 throw new ServiceException("farrow.can.not.trans");

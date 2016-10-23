@@ -99,13 +99,60 @@ public class PigVaccinationProducer extends AbstractJobProducer {
                 RuleValue ruleValue = rule.getValues().get(i);
                 ruleValueMap.put(ruleValue.getId(), ruleValue);
             }
-
             if (StringUtils.isNotBlank(rule.getChannels())) {
                 // 获取所有的预设免疫规则
                 List<DoctorVaccinationPigWarn> vaccinationWarns = RespHelper.orServEx(
                         doctorVaccinationPigWarnReadService.findVaccinationPigWarnsByFarmId(ruleRole.getFarmId()));
                 if (vaccinationWarns == null || vaccinationWarns.isEmpty()) {
-                    return ;
+                    return;
+                }
+                for (DoctorVaccinationPigWarn warn : vaccinationWarns) {
+                    // 判断规则是否在有效期内
+                    if (warn.getStartDate() != null && DateTime.now().isBefore(new DateTime(warn.getStartDate()))) {
+                        continue;
+                    }
+                    if (warn.getEndDate() != null && DateTime.now().isAfter(new DateTime(warn.getEndDate()))) {
+                        continue;
+                    }
+                    PigType pigType = PigType.from(warn.getPigType());
+                    if (pigType == null) {
+                        continue;
+                    }
+                    // 一次处理每种类型
+                    switch (pigType) {
+                        // 配种母猪
+                        case MATE_SOW:
+                            checkMateSow(warn, ruleRole, rule, subUsers);
+                            break;
+                        // 妊娠母猪
+                        case PREG_SOW:
+                            checkPregSow(warn, ruleRole, rule, subUsers);
+                            break;
+                        // 分娩母猪
+                        case DELIVER_SOW:
+                            checkDeliverSow(warn, ruleRole, rule, subUsers);
+                            checkPigGroup(warn, ruleRole, rule, subUsers, PigType.DELIVER_SOW.getValue());
+                            break;
+                        // 后备母猪
+                        case RESERVE:
+                            checkReservePig(warn, ruleRole, rule, subUsers, DoctorPig.PIG_TYPE.SOW.getKey());
+                            checkReservePig(warn, ruleRole, rule, subUsers, DoctorPig.PIG_TYPE.BOAR.getKey());
+                            break;
+                        // 种公猪
+                        case BOAR:
+                            checkReservePig(warn, ruleRole, rule, subUsers, DoctorPig.PIG_TYPE.BOAR.getKey());
+                            break;
+                        // 保育猪
+                        case NURSERY_PIGLET:
+                            checkPigGroup(warn, ruleRole, rule, subUsers, PigType.NURSERY_PIGLET.getValue());
+                            break;
+                        // 育肥猪
+                        case FATTEN_PIG:
+                            checkPigGroup(warn, ruleRole, rule, subUsers, PigType.FATTEN_PIG.getValue());
+                            break;
+                        default:
+                            break;
+                    }
                 }
                 for (DoctorVaccinationPigWarn warn : vaccinationWarns) {
                     // 判断规则是否在有效期内
@@ -133,12 +180,12 @@ public class PigVaccinationProducer extends AbstractJobProducer {
                         case DELIVER_SOW:
                             checkDeliverSow(warn, ruleRole, rule, subUsers);
                             break;
-                        // 后备母猪
-                        case RESERVE_SOW:
-                            checkReservePig(warn, ruleRole, rule, subUsers, DoctorPig.PIG_TYPE.SOW.getKey());
+                        // 后备猪
+                        case RESERVE:
+                            checkReservePig(warn, ruleRole, rule, subUsers, null);
                             break;
-                        // 后备公猪/种公猪
-                        case RESERVE_BOAR:case BOAR:
+                        // 种公猪
+                        case BOAR:
                             checkReservePig(warn, ruleRole, rule, subUsers, DoctorPig.PIG_TYPE.BOAR.getKey());
                             break;
                         // 保育猪
@@ -149,18 +196,11 @@ public class PigVaccinationProducer extends AbstractJobProducer {
                         case FATTEN_PIG:
                             checkPigGroup(warn, ruleRole, rule, subUsers, PigType.FATTEN_PIG.getValue());
                             break;
-                        // 产房仔猪
-                        case FARROW_PIGLET:
-                            checkPigGroup(warn, ruleRole, rule, subUsers, PigType.FARROW_PIGLET.getValue());
-                            break;
                         default:
                             break;
                     }
                 }
             }
-
-
-
         log.info("猪只免疫消息产生 --- PigVaccinationProducer 结束执行");
     }
 
