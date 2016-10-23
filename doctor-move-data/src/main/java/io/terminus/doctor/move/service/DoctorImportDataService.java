@@ -159,6 +159,7 @@ public class DoctorImportDataService {
         importSow(farm, barnMap, breedMap, shit.getSow());
     }
 
+    @Transactional
     private Object[] importOrgFarmUser(Sheet farmShit, Sheet staffShit) {
         Object[] result = this.importOrgFarm(farmShit);
         User primaryUser = (User) result[0];
@@ -222,6 +223,7 @@ public class DoctorImportDataService {
      * 公司、猪场、主账号
      * @return 主账号的 user
      */
+    @Transactional
     private Object[] importOrgFarm(Sheet farmShit){
         Row row1 = farmShit.getRow(1);
         String orgName = ImportExcelUtils.getStringOrThrow(row1, 0);
@@ -315,6 +317,7 @@ public class DoctorImportDataService {
     /**
      * 导入猪舍
      */
+    @Transactional
     private void importBarn(DoctorFarm farm, Map<String, Long> userMap, Sheet shit) {
         List<DoctorBarn> barns = Lists.newArrayList();
         shit.forEach(row -> {
@@ -346,6 +349,7 @@ public class DoctorImportDataService {
         doctorBarnDao.creates(barns);
     }
 
+    @Transactional
     private void importBreed(Sheet shit) {
         List<String> breeds = doctorBasicDao.findByType(DoctorBasic.Type.BREED.getValue()).stream()
                 .map(DoctorBasic::getName).collect(Collectors.toList());
@@ -368,6 +372,7 @@ public class DoctorImportDataService {
     /**
      * 导入公猪
      */
+    @Transactional
     private void importBoar(DoctorFarm farm, Map<String, DoctorBarn> barnMap, Map<String, Long> breedMap, Sheet shit) {
         for (Row row : shit) {
             if (!canImport(row)) {
@@ -417,6 +422,7 @@ public class DoctorImportDataService {
     /**
      * 导入猪群
      */
+    @Transactional
     private void importGroup(DoctorFarm farm, Map<String, DoctorBarn> barnMap, Sheet shit) {
         for (Row row : shit) {
             if (!canImport(row)) {
@@ -802,7 +808,7 @@ public class DoctorImportDataService {
         event.setParity(info.getParity());
         event.setFeedDays(DateUtil.getDeltaDaysAbs(beforeEvent.getEventAt(), event.getEventAt()));
         event.setWeanCount(info.getLiveCount());
-        event.setWeanAvgWeight(info.getWeanWeight() / event.getWeakCount());
+        event.setWeanAvgWeight(MoreObjects.firstNonNull(info.getWeanWeight(), 0D) / event.getWeanCount());
         event.setPartweanDate(event.getEventAt());
         event.setBoarCode(info.getBoarCode());
 
