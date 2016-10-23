@@ -886,7 +886,7 @@ public class DoctorImportDataService {
         if (status.contains("已配种")) {
             return PigStatus.Mate;
         }
-        if (status.contains("妊娠检查阳性")) {
+        if (status.contains("阳性")) {
             return PigStatus.Pregnancy;
         }
         if (status.contains("哺乳")) {
