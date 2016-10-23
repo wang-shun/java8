@@ -3,6 +3,9 @@ package io.terminus.doctor.move.controller;
 import com.google.common.base.Throwables;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.exception.ServiceException;
+import io.terminus.doctor.event.search.barn.BarnSearchDumpService;
+import io.terminus.doctor.event.search.group.GroupDumpService;
+import io.terminus.doctor.event.search.pig.PigDumpService;
 import io.terminus.doctor.move.dto.DoctorImportSheet;
 import io.terminus.doctor.move.service.DoctorImportDataService;
 import lombok.extern.slf4j.Slf4j;
@@ -29,6 +32,12 @@ public class DoctorImportDataController {
 
     @Autowired
     private DoctorImportDataService doctorImportDataService;
+    @Autowired
+    private BarnSearchDumpService barnSearchDumpService;
+    @Autowired
+    private GroupDumpService groupDumpService;
+    @Autowired
+    private PigDumpService pigDumpService;
 
     /**
      * 导入所有的猪场数据
@@ -63,6 +72,13 @@ public class DoctorImportDataController {
             sheet.setFeed(getSheet(workbook, ""));
             sheet.setConsume(getSheet(workbook, ""));
             doctorImportDataService.importAll(sheet);
+
+            log.warn("ElasticSearch dump start !");
+            barnSearchDumpService.fullDump(null);
+            groupDumpService.fullDump(null);
+            pigDumpService.fullDump(null);
+            log.warn("all data moved successfully, CONGRATULATIONS!!!");
+
             return true;
         } catch (ServiceException e) {
             log.error("import all excel failed, file:{}, cause:{}", file.getName(), Throwables.getStackTraceAsString(e));
