@@ -706,6 +706,8 @@ public class DoctorImportDataService {
         event.setBoarCode(info.getBoarCode());
 
         DoctorMatingDto mate = new DoctorMatingDto();
+        mate.setMatingBoarPigCode(info.getBoarCode());
+        mate.setJudgePregDate(info.getPrePregDate());
         event.setDesc(getEventDesc(mate.descMap()));
         event.setExtra(MAPPER.toJson(mate));
         doctorPigEventDao.create(event);
@@ -789,7 +791,7 @@ public class DoctorImportDataService {
         farrow.setFarrowStaff2(info.getStaff2());
         farrow.setFarrowRemark(info.getRemark());
 
-        event.setDesc(getEventDesc(farrow.descMap()));
+        event.setDesc("分娩");
         event.setExtra(MAPPER.toJson(farrow));
         doctorPigEventDao.create(event);
         return event;
