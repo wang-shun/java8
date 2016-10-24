@@ -267,18 +267,14 @@
     <select id="count" parameterType="map" resultType="long">
         SELECT count(1) from <include refid="tb"/>
         <where>
-            <if test="farmId != null">AND farm_id = #{farmId}</if>
-            <if test="groupId != null">AND group_id = #{groupId}</if>
-            <if test="type != null">AND `type` = #{type}</if>
+            <include refid="criteria"/>
         </where>
     </select>
 
     <select id="paging" parameterType="map" resultMap="DoctorGroupEventMap">
         SELECT <include refid="cols_all"/> from <include refid="tb"/>
         <where>
-            <if test="farmId != null">AND farm_id = #{farmId}</if>
-            <if test="groupId != null">AND group_id = #{groupId}</if>
-            <if test="type != null">AND `type` = #{type}</if>
+            <include refid="criteria"/>
         </where>
         ORDER BY event_at DESC, created_at DESC
         LIMIT #{offset}, #{limit}
