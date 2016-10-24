@@ -59,7 +59,7 @@ public class DoctorMaterialAvgConsumerHandler implements IHandler{
                     .consumeAvgCount(0D)
                     .build();
 
-            if(Objects.equals(dto.getType(), WareHouseType.FEED.getKey())){
+            if(Objects.equals(dto.getType(), WareHouseType.FEED.getKey()) && dto.getConsumeDays() != null){
                 doctorMaterialConsumeAvg.setConsumeAvgCount(dto.getCount() * 100 / dto.getConsumeDays());   // * 100 默认精度 0.001
                 if(doctorMaterialConsumeAvg.getConsumeAvgCount() != 0) {
                     doctorMaterialConsumeAvg.setLotConsumeDay((int) (lotNumber * 100 / doctorMaterialConsumeAvg.getConsumeAvgCount()));
@@ -70,10 +70,12 @@ public class DoctorMaterialAvgConsumerHandler implements IHandler{
             context.getSnapshot().setMaterialConsumeAvg(BeanMapper.map(doctorMaterialConsumeAvg, DoctorMaterialConsumeAvg.class));
             if(Objects.equals(dto.getType(), WareHouseType.FEED.getKey())){
                 // calculate current avg rate
-                doctorMaterialConsumeAvg.setConsumeAvgCount(dto.getCount() * 100 / dto.getConsumeDays());
-                doctorMaterialConsumeAvg.setConsumeCount(dto.getCount());
-                if(doctorMaterialConsumeAvg.getConsumeAvgCount() != 0) {
-                    doctorMaterialConsumeAvg.setLotConsumeDay((int) (lotNumber * 100 / doctorMaterialConsumeAvg.getConsumeAvgCount()));
+                if(dto.getConsumeDays() != null){
+                    doctorMaterialConsumeAvg.setConsumeAvgCount(dto.getCount() * 100 / dto.getConsumeDays());
+                    doctorMaterialConsumeAvg.setConsumeCount(dto.getCount());
+                    if(doctorMaterialConsumeAvg.getConsumeAvgCount() != 0) {
+                        doctorMaterialConsumeAvg.setLotConsumeDay((int) (lotNumber * 100 / doctorMaterialConsumeAvg.getConsumeAvgCount()));
+                    }
                 }
             }else {
                 Integer dayRange = Days.daysBetween(new DateTime(doctorMaterialConsumeAvg.getConsumeDate()), DateTime.now()).getDays();

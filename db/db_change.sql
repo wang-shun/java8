@@ -492,4 +492,16 @@ alter table doctor_user_data_permissions modify column  `barn_ids` text COMMENT 
 -- 2016-10-19
 ALTER TABLE doctor_message_user ADD COLUMN rule_value_id BIGINT(20) DEFAULT NULL COMMENT '规则值id' AFTER business_id;
 
+-- 2016年10月19日， 由于猪的类别枚举发生变化，需要刷新已有的字段
+update doctor_groups set pig_type = 7 where pig_type = 1;
+update doctor_groups set pig_type = 3 where pig_type = 10;
+update doctor_groups set pig_type = 4 where pig_type = 8;
+
+update doctor_barns set pig_type = 7 where pig_type = 1;
+update doctor_barns set pig_type = 3 where pig_type = 10;
+update doctor_barns set pig_type = 4 where pig_type = 8;
+
+update doctor_vaccination_pig_warns set pig_type = 7 where pig_type = 1;
+update doctor_vaccination_pig_warns set pig_type = 3 where pig_type = 10;
+update doctor_vaccination_pig_warns set pig_type = 4 where pig_type = 8;
 
