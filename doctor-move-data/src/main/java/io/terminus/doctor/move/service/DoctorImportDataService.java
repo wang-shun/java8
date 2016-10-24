@@ -330,9 +330,12 @@ public class DoctorImportDataService {
                 barn.setFarmId(farm.getId());
                 barn.setFarmName(farm.getName());
 
-                PigType pigType = PigType.from(ImportExcelUtils.getString(row, 1)); // TODO: 2016/10/24 枚举
+                String barnTypeXls = ImportExcelUtils.getString(row, 1);
+                PigType pigType = PigType.from(barnTypeXls);
                 if (pigType != null) {
                     barn.setPigType(pigType.getValue());
+                } else if ("后备母猪".equals(barnTypeXls) || "后备公猪".equals(barnTypeXls)) {
+                    barn.setPigType(PigType.RESERVE.getValue());
                 } else {
                     log.error("farm:{}, barn:{} type is null, please check!", farm, barn.getName());
                 }
