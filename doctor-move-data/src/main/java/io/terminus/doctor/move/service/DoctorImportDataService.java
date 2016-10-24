@@ -330,7 +330,7 @@ public class DoctorImportDataService {
                 barn.setFarmId(farm.getId());
                 barn.setFarmName(farm.getName());
 
-                PigType pigType = PigType.from(ImportExcelUtils.getString(row, 1));
+                PigType pigType = PigType.from(ImportExcelUtils.getString(row, 1)); // TODO: 2016/10/24 枚举
                 if (pigType != null) {
                     barn.setPigType(pigType.getValue());
                 } else {
@@ -825,6 +825,7 @@ public class DoctorImportDataService {
 
         event.setDesc(getEventDesc(wean.descMap()));
         event.setExtra(MAPPER.toJson(wean));
+        log.info("event info :{}", event);
         doctorPigEventDao.create(event);
         return event;
     }
