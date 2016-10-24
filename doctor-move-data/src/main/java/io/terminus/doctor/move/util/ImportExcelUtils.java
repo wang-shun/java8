@@ -1,9 +1,12 @@
 package io.terminus.doctor.move.util;
 
 import com.google.common.base.Strings;
+import io.terminus.doctor.common.utils.DateUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
+
+import java.util.Date;
 
 import static io.terminus.common.utils.Arguments.notEmpty;
 
@@ -19,7 +22,6 @@ public class ImportExcelUtils {
     public static String getString(Row row, int col) {
         Cell cell = row.getCell(col);
         if (cell == null) return null;
-        cell.setCellType(Cell.CELL_TYPE_STRING);
         return cell.getStringCellValue();
     }
 
@@ -28,7 +30,6 @@ public class ImportExcelUtils {
         if (cell == null) {
             throw new IllegalStateException("row " + row.getRowNum() + "column " + col + " is null");
         }
-        cell.setCellType(Cell.CELL_TYPE_STRING);
         String value = cell.getStringCellValue();
         if(StringUtils.isBlank(value)){
             throw new IllegalStateException("row " + row.getRowNum() + "column " + col + " is blank");
@@ -76,6 +77,20 @@ public class ImportExcelUtils {
             return null;
         }
         return (int)((value + Double.MIN_VALUE) * 100);
+    }
+
+    public static Date getDate(Row row, int col){
+        Cell cell = row.getCell(col);
+        if (cell == null) return null;
+
+        Date date = DateUtil.formatToDate(DateUtil.DATE_SLASH, cell.getStringCellValue());
+        if(date == null){
+            try{
+                date = cell.getDateCellValue();
+            }catch(Exception e){
+            }
+        }
+        return date;
     }
 
 }

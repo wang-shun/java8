@@ -67,8 +67,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.joda.time.DateTime;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -89,9 +87,6 @@ import static io.terminus.common.utils.Arguments.notEmpty;
 @Slf4j
 @Service
 public class DoctorImportDataService {
-
-    private static final DateTimeFormatter DTF = DateTimeFormat.forPattern("yyyy/MM/dd");
-
     private static final JsonMapper MAPPER = JsonMapper.nonEmptyMapper();
 
     @Autowired
@@ -397,8 +392,8 @@ public class DoctorImportDataService {
             if (source != null) {
                 boar.setSource(source.getKey());
             }
-            boar.setBirthDate(DateUtil.formatToDate(DTF, ImportExcelUtils.getString(row, 3)));
-            boar.setInFarmDate(DateUtil.formatToDate(DTF, ImportExcelUtils.getString(row, 2)));
+            boar.setBirthDate(ImportExcelUtils.getDate(row, 3));
+            boar.setInFarmDate(ImportExcelUtils.getDate(row, 2));
             boar.setInitBarnName(ImportExcelUtils.getString(row, 0));
             DoctorBarn barn = barnMap.get(boar.getInitBarnName());
             if (barn != null) {
@@ -854,14 +849,14 @@ public class DoctorImportDataService {
                     sow.setStatus(status.getKey());         //当前状态
                 }
                 sow.setParity(MoreObjects.firstNonNull(ImportExcelUtils.getInt(row, 3), 1));            //胎次
-                sow.setMateDate(DateUtil.formatToDate(DTF, ImportExcelUtils.getString(row, 4)));        //配种日期
+                sow.setMateDate(ImportExcelUtils.getDate(row, 4));        //配种日期
                 sow.setBoarCode(ImportExcelUtils.getString(row, 5));                                    //公猪耳号
                 sow.setMateStaffName(ImportExcelUtils.getString(row, 6));                               //配种员
-                sow.setPrePregDate(DateUtil.formatToDate(DTF, ImportExcelUtils.getString(row, 7)));     //预产日期
-                sow.setPregDate(DateUtil.formatToDate(DTF, ImportExcelUtils.getString(row, 8)));        //实产日期
+                sow.setPrePregDate(ImportExcelUtils.getDate(row, 7));     //预产日期
+                sow.setPregDate(ImportExcelUtils.getDate(row, 8));        //实产日期
                 sow.setFarrowBarnName(ImportExcelUtils.getString(row, 9));                              //分娩猪舍
                 sow.setBed(ImportExcelUtils.getString(row, 10));                                        //床号
-                sow.setWeanDate(DateUtil.formatToDate(DTF, ImportExcelUtils.getString(row, 11)));       //断奶日期
+                sow.setWeanDate(ImportExcelUtils.getDate(row, 11));       //断奶日期
                 sow.setLiveCount(ImportExcelUtils.getIntOrDefault(row, 12, 0));                         //活仔数
                 sow.setJixingCount(ImportExcelUtils.getIntOrDefault(row, 13, 0));                       //畸形
                 sow.setWeakCount(ImportExcelUtils.getIntOrDefault(row, 14, 0));                         //弱仔数
@@ -872,7 +867,7 @@ public class DoctorImportDataService {
                 sow.setStaff1(ImportExcelUtils.getString(row, 19));                                     //接生员1
                 sow.setStaff2(ImportExcelUtils.getString(row, 20));                                     //接生员2
                 sow.setSowEarCode(ImportExcelUtils.getString(row, 21));                                 //母猪耳号
-                sow.setBirthDate(DateUtil.formatToDate(DTF, ImportExcelUtils.getString(row, 22)));      //出生日期
+                sow.setBirthDate(ImportExcelUtils.getDate(row, 22));      //出生日期
                 sow.setRemark(ImportExcelUtils.getString(row, 23));                                     //备注
                 sow.setBreed(ImportExcelUtils.getString(row, 24));                                      //品种
                 sow.setWeanWeight(ImportExcelUtils.getDoubleOrDefault(row, 25, 0D));                    //断奶重
