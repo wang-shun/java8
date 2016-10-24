@@ -22,6 +22,7 @@ public class ImportExcelUtils {
     public static String getString(Row row, int col) {
         Cell cell = row.getCell(col);
         if (cell == null) return null;
+        cell.setCellType(Cell.CELL_TYPE_STRING);
         return cell.getStringCellValue();
     }
 
@@ -30,6 +31,7 @@ public class ImportExcelUtils {
         if (cell == null) {
             throw new IllegalStateException("row " + row.getRowNum() + "column " + col + " is null");
         }
+        cell.setCellType(Cell.CELL_TYPE_STRING);
         String value = cell.getStringCellValue();
         if(StringUtils.isBlank(value)){
             throw new IllegalStateException("row " + row.getRowNum() + "column " + col + " is blank");
@@ -82,15 +84,13 @@ public class ImportExcelUtils {
     public static Date getDate(Row row, int col){
         Cell cell = row.getCell(col);
         if (cell == null) return null;
-
-        Date date = DateUtil.formatToDate(DateUtil.DATE_SLASH, cell.getStringCellValue());
-        if(date == null){
-            try{
-                date = cell.getDateCellValue();
-            }catch(Exception e){
-            }
+        if(cell.getCellType() == Cell.CELL_TYPE_STRING){
+            return DateUtil.formatToDate(DateUtil.DATE_SLASH, cell.getStringCellValue());
+        }else if(cell.getCellType() == Cell.CELL_TYPE_NUMERIC){
+            return cell.getDateCellValue();
+        }else{
+            return null;
         }
-        return date;
     }
 
 }

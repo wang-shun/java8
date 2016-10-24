@@ -133,6 +133,7 @@ public class DoctorImportDataService {
     /**
      * 根据shit导入所有的猪场数据
      */
+    @Transactional
     public void importAll(DoctorImportSheet shit) {
         // 猪场和员工
         Object[] result = this.importOrgFarmUser(shit.getFarm(), shit.getStaff());
@@ -806,7 +807,7 @@ public class DoctorImportDataService {
         event.setParity(info.getParity());
         event.setFeedDays(DateUtil.getDeltaDaysAbs(beforeEvent.getEventAt(), event.getEventAt()));
         event.setWeanCount(info.getLiveCount());
-        event.setWeanAvgWeight(MoreObjects.firstNonNull(info.getWeanWeight(), 0D) / event.getWeanCount());
+        event.setWeanAvgWeight(MoreObjects.firstNonNull(info.getWeanWeight(), 0D) / (event.getWeanCount() == 0 ? 1 : event.getWeanCount()));
         event.setPartweanDate(event.getEventAt());
         event.setBoarCode(info.getBoarCode());
 
@@ -823,7 +824,6 @@ public class DoctorImportDataService {
 
         event.setDesc(getEventDesc(wean.descMap()));
         event.setExtra(MAPPER.toJson(wean));
-        log.info("event info :{}", event);
         doctorPigEventDao.create(event);
         return event;
     }
