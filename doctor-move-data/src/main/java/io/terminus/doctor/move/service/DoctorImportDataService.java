@@ -537,7 +537,7 @@ public class DoctorImportDataService {
                 putParityMap(parityMap, is.getParity(), Lists.newArrayList(mateEvent.getId()));
 
                 //如果妊检是不是阳性，只生成到妊检事件
-                if (notEmpty(is.getRemark()) && is.getRemark().contains("结果：")) {
+                if (notEmpty(is.getRemark()) && is.getRemark().contains("检查：")) {
                     DoctorPigEvent pregNotYang = createPregCheckEvent(is, sow, mateEvent, getCheckResultByRemark(is.getRemark()));
                     putParityMap(parityMap, is.getParity(), Lists.newArrayList(pregNotYang.getId()));
                 } else {
