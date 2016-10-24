@@ -386,7 +386,7 @@ public class DoctorImportDataService {
             boar.setFarmId(farm.getId());
             boar.setFarmName(farm.getName());
             boar.setPigCode(ImportExcelUtils.getString(row, 1));
-            boar.setPigType(PigType.BOAR.getValue());
+            boar.setPigType(DoctorPig.PIG_TYPE.BOAR.getKey());
             boar.setIsRemoval(IsOrNot.NO.getValue());
             boar.setPigFatherCode(ImportExcelUtils.getString(row, 4));
             boar.setPigMotherCode(ImportExcelUtils.getString(row, 5));
@@ -593,10 +593,10 @@ public class DoctorImportDataService {
         sow.setInFarmDayAge(DateUtil.getDeltaDaysAbs(MoreObjects.firstNonNull(sow.getInFarmDate(),
                 new DateTime(2009, 8, 1, 0, 0).toDate()), sow.getBirthDate()));
         sow.setInitBarnName(last.getBarnName());
+        sow.setPigType(DoctorPig.PIG_TYPE.SOW.getKey());   //猪类
 
         DoctorBarn barn = barnMap.get(last.getBarnName());
         if (barn != null) {
-            sow.setPigType(barn.getPigType());   //猪类
             sow.setInitBarnId(barn.getId());
         }
         sow.setBreedName(last.getBreed());
