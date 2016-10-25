@@ -104,17 +104,15 @@ public class DoctorMessageEventListener implements EventListener{
      */
     private void updateMessage(Long businessId, Integer eventType) {
 
-        for (int i = 0; ; i++) {
-            DoctorMessageSearchDto doctorMessageSearchDto = new DoctorMessageSearchDto();
-            doctorMessageSearchDto.setBusinessId(businessId);
-            doctorMessageSearchDto.setEventType(eventType);
-            List<DoctorMessage> messages = RespHelper.or500(doctorMessageReadService.findMessageListByCriteria(doctorMessageSearchDto));
-            if (messages != null && messages.size() > 0) {
-                messages.forEach(doctorMessage -> {
-                    doctorMessageWriteService.deleteMessageById(doctorMessage.getId());
-                    doctorMessageUserWriteService.deleteByMessageId(doctorMessage.getId());
-                });
-            }
+        DoctorMessageSearchDto doctorMessageSearchDto = new DoctorMessageSearchDto();
+        doctorMessageSearchDto.setBusinessId(businessId);
+        doctorMessageSearchDto.setEventType(eventType);
+        List<DoctorMessage> messages = RespHelper.or500(doctorMessageReadService.findMessageListByCriteria(doctorMessageSearchDto));
+        if (messages != null && messages.size() > 0) {
+            messages.forEach(doctorMessage -> {
+                doctorMessageWriteService.deleteMessageById(doctorMessage.getId());
+                doctorMessageUserWriteService.deleteByMessageId(doctorMessage.getId());
+            });
         }
 
     }
