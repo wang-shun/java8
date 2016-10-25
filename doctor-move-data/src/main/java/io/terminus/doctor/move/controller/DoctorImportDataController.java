@@ -69,7 +69,7 @@ public class DoctorImportDataController {
                 try {
                     InputStream inputStream = new URL(fileURL).openConnection().getInputStream();
                     importByInputStream(inputStream, fileType);
-                } catch (IOException e) {
+                } catch (Exception e) {
                     log.error(Throwables.getStackTraceAsString(e));
                 }
             }
