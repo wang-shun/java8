@@ -658,10 +658,12 @@ public class DoctorPigCreateEvents {
             Map<String, Object> map = OBJECT_MAPPER.readValue(json, JacksonType.MAP_OF_OBJECT);
             Date eventAt = DateUtil.toDate((String) map.get(key));
             DoctorPigEvent lastEvent = RespHelper.or500(doctorPigEventReadService.lastEvent(pigIds));
-            if (lastEvent != null && new DateTime(eventAt).plusDays(1).isAfter(lastEvent.getEventAt().getTime())) {
-                return;
-            } else {
-                throw new JsonResponseException("event.at.illegal");
+            if(lastEvent != null){
+                if (new DateTime(eventAt).plusDays(1).isAfter(lastEvent.getEventAt().getTime())) {
+                    return;
+                } else {
+                    throw new JsonResponseException("event.at.illegal");
+                }
             }
         } catch (Exception e) {
             throw new JsonResponseException("event.at.illegal");

@@ -48,6 +48,7 @@ rpc.dubbo:
 zookeeper:
   host: 101.201.44.35
   port: 2181
+  zkTopic: pig.doctor.topic
 
 logging:
   file: /var/log/doctor/admin.log

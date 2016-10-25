@@ -216,7 +216,6 @@ public class  DoctorEventConfiguration {
     }
 
     @Configuration
-    @Profile("zookeeper")
     public static class ZookeeperConfiguration{
 
         @Bean

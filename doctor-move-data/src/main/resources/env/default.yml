@@ -55,3 +55,23 @@ flow:
     key:
       sow: sow
       boar: boar
+
+esearch:
+  pig:
+    index-name: pigs
+    index-type: pig
+    mapping-path: search/pig_mapping.json
+    full-dump-range: 3
+    batch-size: 100
+  group:
+    index-name: groups
+    index-type: group
+    mapping-path: search/group_mapping.json
+    full-dump-range: 3
+    batch-size: 100
+  barn:
+    index-name: barns
+    index-type: barn
+    mapping-path: search/barn_mapping.json
+    full-dump-range: 3
+    batch-size: 100
