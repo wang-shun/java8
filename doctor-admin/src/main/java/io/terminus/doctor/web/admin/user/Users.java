@@ -179,9 +179,9 @@ public class Users {
     }
 
     @RequestMapping(value = "/importExcel", method = RequestMethod.GET)
-    public boolean importExcel(){
+    public boolean importExcel(String fileUrl){
         try {
-            publisher.publish(DataEvent.toBytes(DataEventType.ImportExcel.getKey(), null));
+            publisher.publish(DataEvent.toBytes(DataEventType.ImportExcel.getKey(), fileUrl));
 
             return true;
         } catch (Exception e) {
