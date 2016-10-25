@@ -3583,20 +3583,5 @@ VALUES
   ('育肥主管', NULL, 0, 'MOBILE', 1, '{\"defaultBarnType\":[3,4]}', '[\"entry_company\",\"entry_mall\",\"entry_mall_add\",\"home_add\",\"home_list\",\"home_edit\",\"group_list\",\"group_add\",\"group_transfer_farm\",\"group_transfer_group\",\"group_transfer_pig\",\"group_close\",\"group_livestock\",\"group_into_group\",\"group_change\",\"group_disease\",\"group_prevent\",\"group_detail\",\"group_history\",\"message_center\",\"message_detail\",\"message_list\",\"message_add\",\"message_edit\",\"message_user_center\",\"manage_user_info\",\"manage_user_changepwd\",\"manage_report_list\",\"manage_report_produce_daily\",\"manage_report_produce_month\",\"manage_report_list\"]', now(), now()),
   ('饲养员', NULL, 0, 'MOBILE', 1, '{\"defaultBarnType\":[]}', '[]', now(), now());
 
--- 2016年10月19日， 由于猪的类别枚举发生变化，需要刷新已有的字段
-update doctor_pigs set pig_type = 7 where pig_type = 1;
-update doctor_pigs set pig_type = 3 where pig_type = 10;
-update doctor_pigs set pig_type = 4 where pig_type = 8;
 
-update doctor_groups set pig_type = 7 where pig_type = 1;
-update doctor_groups set pig_type = 3 where pig_type = 10;
-update doctor_groups set pig_type = 4 where pig_type = 8;
-
-update doctor_barns set pig_type = 7 where pig_type = 1;
-update doctor_barns set pig_type = 3 where pig_type = 10;
-update doctor_barns set pig_type = 4 where pig_type = 8;
-
-update doctor_vaccination_pig_warns set pig_type = 7 where pig_type = 1;
-update doctor_vaccination_pig_warns set pig_type = 3 where pig_type = 10;
-update doctor_vaccination_pig_warns set pig_type = 4 where pig_type = 8;
 

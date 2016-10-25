@@ -67,8 +67,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.joda.time.DateTime;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -89,9 +87,6 @@ import static io.terminus.common.utils.Arguments.notEmpty;
 @Slf4j
 @Service
 public class DoctorImportDataService {
-
-    private static final DateTimeFormatter DTF = DateTimeFormat.forPattern("yyyy/MM/dd");
-
     private static final JsonMapper MAPPER = JsonMapper.nonEmptyMapper();
 
     @Autowired
@@ -134,10 +129,13 @@ public class DoctorImportDataService {
     private SubRoleDao subRoleDao;
     @Autowired
     private SubDao subDao;
+    @Autowired
+    private DoctorMoveDataService doctorMoveDataService;
 
     /**
      * 根据shit导入所有的猪场数据
      */
+    @Transactional
     public void importAll(DoctorImportSheet shit) {
         // 猪场和员工
         Object[] result = this.importOrgFarmUser(shit.getFarm(), shit.getStaff());
@@ -157,6 +155,8 @@ public class DoctorImportDataService {
         importBoar(farm, barnMap, breedMap, shit.getBoar());
         importGroup(farm, barnMap, shit.getGroup());
         importSow(farm, barnMap, breedMap, shit.getSow());
+
+        doctorMoveDataService.moveWorkflow(farm);
     }
 
     @Transactional
@@ -330,9 +330,12 @@ public class DoctorImportDataService {
                 barn.setFarmId(farm.getId());
                 barn.setFarmName(farm.getName());
 
-                PigType pigType = PigType.from(ImportExcelUtils.getString(row, 1));
+                String barnTypeXls = ImportExcelUtils.getString(row, 1);
+                PigType pigType = PigType.from(barnTypeXls);
                 if (pigType != null) {
                     barn.setPigType(pigType.getValue());
+                } else if ("后备母猪".equals(barnTypeXls) || "后备公猪".equals(barnTypeXls)) {
+                    barn.setPigType(PigType.RESERVE.getValue());
                 } else {
                     log.error("farm:{}, barn:{} type is null, please check!", farm, barn.getName());
                 }
@@ -386,7 +389,7 @@ public class DoctorImportDataService {
             boar.setFarmId(farm.getId());
             boar.setFarmName(farm.getName());
             boar.setPigCode(ImportExcelUtils.getString(row, 1));
-            boar.setPigType(PigType.BOAR.getValue());
+            boar.setPigType(DoctorPig.PIG_TYPE.BOAR.getKey());
             boar.setIsRemoval(IsOrNot.NO.getValue());
             boar.setPigFatherCode(ImportExcelUtils.getString(row, 4));
             boar.setPigMotherCode(ImportExcelUtils.getString(row, 5));
@@ -394,8 +397,8 @@ public class DoctorImportDataService {
             if (source != null) {
                 boar.setSource(source.getKey());
             }
-            boar.setBirthDate(DateUtil.formatToDate(DTF, ImportExcelUtils.getString(row, 3)));
-            boar.setInFarmDate(DateUtil.formatToDate(DTF, ImportExcelUtils.getString(row, 2)));
+            boar.setBirthDate(ImportExcelUtils.getDate(row, 3));
+            boar.setInFarmDate(ImportExcelUtils.getDate(row, 2));
             boar.setInitBarnName(ImportExcelUtils.getString(row, 0));
             DoctorBarn barn = barnMap.get(boar.getInitBarnName());
             if (barn != null) {
@@ -537,7 +540,7 @@ public class DoctorImportDataService {
                 putParityMap(parityMap, is.getParity(), Lists.newArrayList(mateEvent.getId()));
 
                 //如果妊检是不是阳性，只生成到妊检事件
-                if (notEmpty(is.getRemark()) && is.getRemark().contains("结果：")) {
+                if (notEmpty(is.getRemark()) && is.getRemark().contains("检查：")) {
                     DoctorPigEvent pregNotYang = createPregCheckEvent(is, sow, mateEvent, getCheckResultByRemark(is.getRemark()));
                     putParityMap(parityMap, is.getParity(), Lists.newArrayList(pregNotYang.getId()));
                 } else {
@@ -593,10 +596,10 @@ public class DoctorImportDataService {
         sow.setInFarmDayAge(DateUtil.getDeltaDaysAbs(MoreObjects.firstNonNull(sow.getInFarmDate(),
                 new DateTime(2009, 8, 1, 0, 0).toDate()), sow.getBirthDate()));
         sow.setInitBarnName(last.getBarnName());
+        sow.setPigType(DoctorPig.PIG_TYPE.SOW.getKey());   //猪类
 
         DoctorBarn barn = barnMap.get(last.getBarnName());
         if (barn != null) {
-            sow.setPigType(barn.getPigType());   //猪类
             sow.setInitBarnId(barn.getId());
         }
         sow.setBreedName(last.getBreed());
@@ -707,6 +710,8 @@ public class DoctorImportDataService {
         event.setBoarCode(info.getBoarCode());
 
         DoctorMatingDto mate = new DoctorMatingDto();
+        mate.setMatingBoarPigCode(info.getBoarCode());
+        mate.setJudgePregDate(info.getPrePregDate());
         event.setDesc(getEventDesc(mate.descMap()));
         event.setExtra(MAPPER.toJson(mate));
         doctorPigEventDao.create(event);
@@ -790,7 +795,7 @@ public class DoctorImportDataService {
         farrow.setFarrowStaff2(info.getStaff2());
         farrow.setFarrowRemark(info.getRemark());
 
-        event.setDesc(getEventDesc(farrow.descMap()));
+        event.setDesc("分娩");
         event.setExtra(MAPPER.toJson(farrow));
         doctorPigEventDao.create(event);
         return event;
@@ -808,7 +813,7 @@ public class DoctorImportDataService {
         event.setParity(info.getParity());
         event.setFeedDays(DateUtil.getDeltaDaysAbs(beforeEvent.getEventAt(), event.getEventAt()));
         event.setWeanCount(info.getLiveCount());
-        event.setWeanAvgWeight(MoreObjects.firstNonNull(info.getWeanWeight(), 0D) / event.getWeanCount());
+        event.setWeanAvgWeight(MoreObjects.firstNonNull(info.getWeanWeight(), 0D) / (event.getWeanCount() == 0 ? 1 : event.getWeanCount()));
         event.setPartweanDate(event.getEventAt());
         event.setBoarCode(info.getBoarCode());
 
@@ -850,14 +855,14 @@ public class DoctorImportDataService {
                     sow.setStatus(status.getKey());         //当前状态
                 }
                 sow.setParity(MoreObjects.firstNonNull(ImportExcelUtils.getInt(row, 3), 1));            //胎次
-                sow.setMateDate(DateUtil.formatToDate(DTF, ImportExcelUtils.getString(row, 4)));        //配种日期
+                sow.setMateDate(ImportExcelUtils.getDate(row, 4));        //配种日期
                 sow.setBoarCode(ImportExcelUtils.getString(row, 5));                                    //公猪耳号
                 sow.setMateStaffName(ImportExcelUtils.getString(row, 6));                               //配种员
-                sow.setPrePregDate(DateUtil.formatToDate(DTF, ImportExcelUtils.getString(row, 7)));     //预产日期
-                sow.setPregDate(DateUtil.formatToDate(DTF, ImportExcelUtils.getString(row, 8)));        //实产日期
+                sow.setPrePregDate(ImportExcelUtils.getDate(row, 7));     //预产日期
+                sow.setPregDate(ImportExcelUtils.getDate(row, 8));        //实产日期
                 sow.setFarrowBarnName(ImportExcelUtils.getString(row, 9));                              //分娩猪舍
                 sow.setBed(ImportExcelUtils.getString(row, 10));                                        //床号
-                sow.setWeanDate(DateUtil.formatToDate(DTF, ImportExcelUtils.getString(row, 11)));       //断奶日期
+                sow.setWeanDate(ImportExcelUtils.getDate(row, 11));       //断奶日期
                 sow.setLiveCount(ImportExcelUtils.getIntOrDefault(row, 12, 0));                         //活仔数
                 sow.setJixingCount(ImportExcelUtils.getIntOrDefault(row, 13, 0));                       //畸形
                 sow.setWeakCount(ImportExcelUtils.getIntOrDefault(row, 14, 0));                         //弱仔数
@@ -868,7 +873,7 @@ public class DoctorImportDataService {
                 sow.setStaff1(ImportExcelUtils.getString(row, 19));                                     //接生员1
                 sow.setStaff2(ImportExcelUtils.getString(row, 20));                                     //接生员2
                 sow.setSowEarCode(ImportExcelUtils.getString(row, 21));                                 //母猪耳号
-                sow.setBirthDate(DateUtil.formatToDate(DTF, ImportExcelUtils.getString(row, 22)));      //出生日期
+                sow.setBirthDate(ImportExcelUtils.getDate(row, 22));      //出生日期
                 sow.setRemark(ImportExcelUtils.getString(row, 23));                                     //备注
                 sow.setBreed(ImportExcelUtils.getString(row, 24));                                      //品种
                 sow.setWeanWeight(ImportExcelUtils.getDoubleOrDefault(row, 25, 0D));                    //断奶重
