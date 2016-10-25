@@ -3,11 +3,15 @@ package io.terminus.doctor.move.controller;
 import com.google.common.base.Throwables;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.exception.ServiceException;
+import io.terminus.doctor.common.enums.DataEventType;
+import io.terminus.doctor.common.event.CacheEvent;
+import io.terminus.doctor.common.event.DataEvent;
 import io.terminus.doctor.event.search.barn.BarnSearchDumpService;
 import io.terminus.doctor.event.search.group.GroupDumpService;
 import io.terminus.doctor.event.search.pig.PigDumpService;
 import io.terminus.doctor.move.dto.DoctorImportSheet;
 import io.terminus.doctor.move.service.DoctorImportDataService;
+import io.terminus.zookeeper.pubsub.Subscriber;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -19,6 +23,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.annotation.PostConstruct;
 import java.io.File;
 import java.io.FileInputStream;
 
@@ -41,14 +46,26 @@ public class DoctorImportDataController {
     private GroupDumpService groupDumpService;
     @Autowired
     private PigDumpService pigDumpService;
+    @Autowired
+    private Subscriber subscriber;
 
+    @PostConstruct
+    public void init () throws Exception{
+        subscriber.subscribe(data -> {
+            DataEvent dataEvent = DataEvent.fromBytes(data);
+            if(dataEvent != null && dataEvent.getEventType().equals(DataEventType.ImportExcel.getKey())){
+
+                log.warn("成功监听到导数事件");
+            }
+        });
+    }
     /**
      * 导入所有的猪场数据
      * @param path excel文件路径
      * @return 是否成功
      */
     @RequestMapping(value = "/all", method = RequestMethod.GET)
-    public boolean importAll(@RequestParam("path") String path) {
+    public String importAll(@RequestParam("path") String path) {
         try {
             Workbook workbook;
             File file = new File(path);
@@ -82,13 +99,13 @@ public class DoctorImportDataController {
             pigDumpService.fullDump(null);
             log.warn("all data moved successfully, CONGRATULATIONS!!!");
 
-            return true;
-        } catch (ServiceException e) {
+            return "true";
+        } catch (ServiceException | JsonResponseException e) {
             log.error("import all excel failed, path:{}, cause:{}", path, Throwables.getStackTraceAsString(e));
-            return false;
+            return e.getMessage();
         } catch (Exception e) {
             log.error("import all excel failed, path:{}, cause:{}", path, Throwables.getStackTraceAsString(e));
-            return false;
+            return "false";
         }
     }
 

@@ -18,7 +18,8 @@ public enum DataEventType {
     GroupEventCreate(4, "猪群创建事件信息"),
     BarnUpdate(5, "猪舍变动信息"),
     BasicUpdate(6, "基础数据变动信息"),
-    RollBackReport(7, "统计报表回滚");
+    RollBackReport(7, "统计报表回滚"),
+    ImportExcel(8, "excel导数");
 
     @Getter
     private int key;

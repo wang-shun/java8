@@ -15,11 +15,12 @@ import io.terminus.parana.auth.role.CustomRoleLoaderConfigurer;
 import io.terminus.parana.auth.role.CustomRoleLoaderRegistry;
 import io.terminus.parana.auth.web.WebAuthenticationConfiguration;
 import io.terminus.parana.config.ConfigCenter;
-import io.terminus.parana.web.msg.config.MsgAdminWebConfig;
 import io.terminus.parana.web.msg.config.MsgWebConfig;
-import io.terminus.parana.web.msg.config.db.DbNotifyConfig;
-import io.terminus.parana.web.msg.config.gatewaybuilder.SimpleMsgGatewayBuilderConfig;
+import io.terminus.zookeeper.ZKClientFactory;
+import io.terminus.zookeeper.pubsub.Publisher;
+import io.terminus.zookeeper.pubsub.Subscriber;
 import org.springframework.beans.factory.annotation.Autowire;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -68,5 +69,21 @@ public class DoctorAdminConfiguration extends WebMvcConfigurerAdapter {
         CustomRoleLoaderConfigurer configurer = new DoctorCustomRoleLoaderConfigurer(operatorRoleReadService);
         configurer.configureCustomRoleLoader(customRoleLoaderRegistry);
         return configurer;
+    }
+
+    @Configuration
+    public static class ZookeeperConfiguration{
+
+        @Bean
+        public Subscriber cacheListenerBean(ZKClientFactory zkClientFactory,
+                                            @Value("${zookeeper.zkTopic}") String cacheTopic) throws Exception{
+            return new Subscriber(zkClientFactory,cacheTopic);
+        }
+
+        @Bean
+        public Publisher cachePublisherBean(ZKClientFactory zkClientFactory,
+                                            @Value("${zookeeper.zkTopic}") String cacheTopic) throws Exception{
+            return new Publisher(zkClientFactory, cacheTopic);
+        }
     }
 }
