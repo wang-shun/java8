@@ -92,6 +92,10 @@
             <groupId>io.terminus.boot</groupId>
             <artifactId>spring-boot-starter-session</artifactId>
         </dependency>
+        <dependency>
+            <groupId>io.terminus.boot</groupId>
+            <artifactId>spring-boot-starter-zookeeper</artifactId>
+        </dependency>
 
         <!-- search -->
         <dependency>
