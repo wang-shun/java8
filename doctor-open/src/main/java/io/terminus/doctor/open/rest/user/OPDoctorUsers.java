@@ -31,6 +31,7 @@ import io.terminus.parana.auth.model.Acl;
 import io.terminus.parana.auth.model.ParanaThreadVars;
 import io.terminus.parana.auth.model.PermissionData;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.validation.Valid;
@@ -155,6 +156,18 @@ public class OPDoctorUsers {
         ServiceBetaStatusToken token = serviceBetaStatusHandler.getServiceBetaStatusToken();
         if(token.inBeta(DoctorServiceReview.Type.from(serviceApplyDto.getType()))){
             throw new OPClientException("service.in.beta");
+        }
+        if(serviceApplyDto.getOrg() == null){
+            throw new OPClientException("required.org.info.missing");
+        }
+        if(StringUtils.isBlank(serviceApplyDto.getOrg().getName())){
+            throw new OPClientException("org.name.not.null");
+        }
+        if(StringUtils.isBlank(serviceApplyDto.getOrg().getLicense())){
+            throw new OPClientException("org.license.not.null");
+        }
+        if(StringUtils.isBlank(serviceApplyDto.getOrg().getMobile())){
+            throw new OPClientException("org.mobile.not.null");
         }
         return OPRespHelper.orOPEx(doctorServiceReviewService.applyOpenService(baseUser, serviceApplyDto));
     }
