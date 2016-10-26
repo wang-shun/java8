@@ -618,7 +618,7 @@ public class DoctorImportDataService {
         sowTrack.setWeight(sow.getBirthWeight());
         sowTrack.setCurrentParity(last.getParity());
         sowTrack.setRelEventIds(MAPPER.toJson(parityMap));
-        sowTrack.setCurrentMatingCount(1);       //当前配种次数
+        sowTrack.setCurrentMatingCount(0);       //当前配种次数0 查询的时候自动加1
         sowTrack.setFarrowQty(0);
         sowTrack.setUnweanQty(0);
         sowTrack.setWeanQty(0);
