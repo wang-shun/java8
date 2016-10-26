@@ -29,19 +29,12 @@ public class DoctorMoveDatasourceHandler {
 
     private final DoctorMoveDatasourceDao doctorMoveDatasourceDao;
     private final DoctorSqlFactory doctorSqlFactory;
-    private final Map<Long, JdbcTemplate> jdbcMap = Maps.newHashMap();
 
     @Autowired
     public DoctorMoveDatasourceHandler(DoctorMoveDatasourceDao doctorMoveDatasourceDao,
                                        DoctorSqlFactory doctorSqlFactory) {
         this.doctorMoveDatasourceDao = doctorMoveDatasourceDao;
         this.doctorSqlFactory = doctorSqlFactory;
-    }
-
-    @PostConstruct
-    public void init() {
-        List<DoctorMoveDatasource> moves = doctorMoveDatasourceDao.listAll();
-        moves.forEach(move -> jdbcMap.put(move.getId(), getJdbcTempalte(move)));
     }
 
     /**
@@ -55,7 +48,7 @@ public class DoctorMoveDatasourceHandler {
                 return Response.fail("class.not.equal");
             }
 
-            JdbcTemplate jdbcTemplate = jdbcMap.get(id);
+            JdbcTemplate jdbcTemplate = getJdbcTempalte(doctorMoveDatasourceDao.findById(id));
             if (jdbcTemplate == null) {
                 return Response.fail("jdbc.not.found");
             }
@@ -89,7 +82,7 @@ public class DoctorMoveDatasourceHandler {
      */
     public <T> Response<List<T>> findByHbsSql(Long id, Class<T> clazz, String hbsName, Map<String, Object> params) {
         try {
-            JdbcTemplate jdbcTemplate = jdbcMap.get(id);
+            JdbcTemplate jdbcTemplate = getJdbcTempalte(doctorMoveDatasourceDao.findById(id));
             if (jdbcTemplate == null) {
                 return Response.fail("jdbc.not.found");
             }
@@ -103,7 +96,7 @@ public class DoctorMoveDatasourceHandler {
     }
 
     public List<Map<String, Object>> findByHbsSql(Long id, String hbsName){
-        return jdbcMap.get(id).queryForList(doctorSqlFactory.getSql(hbsName, null));
+        return getJdbcTempalte(doctorMoveDatasourceDao.findById(id)).queryForList(doctorSqlFactory.getSql(hbsName, null));
     }
 
     //获取JdbcTemplate
