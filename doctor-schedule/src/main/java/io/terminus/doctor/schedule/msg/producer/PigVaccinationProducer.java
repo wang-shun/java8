@@ -141,13 +141,13 @@ public class PigVaccinationProducer extends AbstractJobProducer {
                     // 分娩母猪
                     case DELIVER_SOW:
                         checkDeliverSow(warn, ruleRole, rule, subUsers, barnTypeMap);
+                        checkPigGroup(warn, ruleRole, rule, subUsers, PigType.DELIVER_SOW.getValue());
                         break;
-                    // 后备母猪
-                    case RESERVE_SOW:
-                        checkReservePig(warn, ruleRole, rule, subUsers, DoctorPig.PIG_TYPE.SOW.getKey(), barnTypeMap);
+                    // 后备猪
+                    case RESERVE:
+                        checkReservePig(warn, ruleRole, rule, subUsers, null, barnTypeMap);
                         break;
-                    // 后备公猪/种公猪
-                    case RESERVE_BOAR:
+                    // 种公猪
                     case BOAR:
                         checkReservePig(warn, ruleRole, rule, subUsers, DoctorPig.PIG_TYPE.BOAR.getKey(), barnTypeMap);
                         break;
@@ -158,10 +158,6 @@ public class PigVaccinationProducer extends AbstractJobProducer {
                     // 育肥猪
                     case FATTEN_PIG:
                         checkPigGroup(warn, ruleRole, rule, subUsers, PigType.FATTEN_PIG.getValue());
-                        break;
-                    // 产房仔猪
-                    case FARROW_PIGLET:
-                        checkPigGroup(warn, ruleRole, rule, subUsers, PigType.FARROW_PIGLET.getValue());
                         break;
                     default:
                         break;
@@ -306,7 +302,7 @@ public class PigVaccinationProducer extends AbstractJobProducer {
      */
     private void checkReservePig(DoctorVaccinationPigWarn warn, DoctorMessageRuleRole ruleRole, Rule rule, List<SubUser> subUsers, Integer pigType, Map<Long, Integer> barnTypeMap) {
         // 获取猪
-        Map<Integer, List<DoctorPigInfoDto>> sowPigInfoDtos = getPigInfoDtos(ruleRole, pigType, Lists.newArrayList(PigType.RESERVE_BOAR.getValue(), PigType.RESERVE_SOW.getValue(), PigType.BOAR.getValue()), barnTypeMap);
+        Map<Integer, List<DoctorPigInfoDto>> sowPigInfoDtos = getPigInfoDtos(ruleRole, pigType, Lists.newArrayList(PigType.RESERVE.getValue(), PigType.BOAR.getValue()), barnTypeMap);
         Iterator<List<DoctorPigInfoDto>> iterator = sowPigInfoDtos.values().iterator();
         while (iterator.hasNext()) {
             iterator.next().forEach(sowPig -> {
