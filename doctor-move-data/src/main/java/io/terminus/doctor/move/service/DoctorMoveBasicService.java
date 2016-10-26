@@ -230,14 +230,23 @@ public class DoctorMoveBasicService {
         return doctorBarnDao.findByFarmId(farmId).stream().collect(Collectors.toMap(DoctorBarn::getId, DoctorBarn::getPigType));
     }
 
+    public Map<String, Long> getBarnNameMap(Long farmId) {
+        return doctorBarnDao.findByFarmId(farmId).stream().collect(Collectors.toMap(DoctorBarn::getName, DoctorBarn::getId));
+    }
+
     //分别是 Map<DoctorBasic.TypeEnum, Map<DoctorBasic.name, DoctorBasic>>
     public Map<Integer, Map<String, DoctorBasic>> getBasicMap() {
         Map<Integer, Map<String, DoctorBasic>> basicMap = Maps.newHashMap();
         doctorBasicDao.listAll().stream()
+                .filter(basic -> !Objects.equals(basic.getIsValid(), -1))
                 .collect(Collectors.groupingBy(DoctorBasic::getType)).entrySet()
                 .forEach(basic -> basicMap.put(basic.getKey(),
                         basic.getValue().stream().collect(Collectors.toMap(DoctorBasic::getName, v -> v))));
         return basicMap;
+    }
+
+    public Map<String, Long> getBreedMap() {
+        return doctorBasicDao.findByType(DoctorBasic.Type.BREED.getValue()).stream().collect(Collectors.toMap(DoctorBasic::getName, DoctorBasic::getId));
     }
 
     //拼接疫苗, Map<疫苗名称, 疫苗id>

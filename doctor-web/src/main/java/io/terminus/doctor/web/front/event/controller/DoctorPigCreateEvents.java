@@ -72,7 +72,7 @@ public class DoctorPigCreateEvents {
     private static final ObjectMapper OBJECT_MAPPER = JsonMapper.JSON_NON_DEFAULT_MAPPER.getMapper();
 
     //状态转舍允许类型
-    private static final List<Integer> CHG_SOW_ALLOWS = Lists.newArrayList(DELIVER_SOW.getValue(), FARROW_PIGLET.getValue(), MATE_SOW.getValue());
+    private static final List<Integer> CHG_SOW_ALLOWS = Lists.newArrayList(DELIVER_SOW.getValue(), MATE_SOW.getValue());
 
     private final DoctorPigEventWriteService doctorPigEventWriteService;
     private final DoctorFarmReadService doctorFarmReadService;
@@ -658,10 +658,12 @@ public class DoctorPigCreateEvents {
             Map<String, Object> map = OBJECT_MAPPER.readValue(json, JacksonType.MAP_OF_OBJECT);
             Date eventAt = DateUtil.toDate((String) map.get(key));
             DoctorPigEvent lastEvent = RespHelper.or500(doctorPigEventReadService.lastEvent(pigIds));
-            if (lastEvent != null && new DateTime(eventAt).plusDays(1).isAfter(lastEvent.getEventAt().getTime())) {
-                return;
-            } else {
-                throw new JsonResponseException("event.at.illegal");
+            if(lastEvent != null){
+                if (new DateTime(eventAt).plusDays(1).isAfter(lastEvent.getEventAt().getTime())) {
+                    return;
+                } else {
+                    throw new JsonResponseException("event.at.illegal");
+                }
             }
         } catch (Exception e) {
             throw new JsonResponseException("event.at.illegal");

@@ -86,6 +86,14 @@
         WHERE id = #{id}
     </select>
 
+    <select id="findByParentUserId" parameterType="long" resultMap="SubMap">
+        SELECT
+        <include refid="cols_all"/>
+        FROM
+        <include refid="tb"/>
+        WHERE parent_user_id = #{parentUserId}
+    </select>
+
     <select id="findByIds" parameterType="list" resultMap="SubMap">
         SELECT
         <include refid="cols_all"/>

@@ -325,7 +325,7 @@ public class DoctorPigs {
             return false;
         }
         for(DoctorGroup group : list){
-            if(!Objects.equals(group.getPigType(), PigType.RESERVE_BOAR.getValue()) && !Objects.equals(group.getPigType(), PigType.RESERVE_SOW.getValue())){
+            if(!Objects.equals(group.getPigType(), PigType.RESERVE.getValue())){
                 return false;
             }
         }

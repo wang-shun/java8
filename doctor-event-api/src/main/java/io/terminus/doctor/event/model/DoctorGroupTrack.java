@@ -195,6 +195,15 @@ public class DoctorGroupTrack implements Serializable {
             }
             return null;
         }
+
+        public static Sex from(String desc) {
+            for (Sex sex : Sex.values()) {
+                if (Objects.equal(sex.desc, desc)) {
+                    return sex;
+                }
+            }
+            return null;
+        }
     }
 
     @SneakyThrows

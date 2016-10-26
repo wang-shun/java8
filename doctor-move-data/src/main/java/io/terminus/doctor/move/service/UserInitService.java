@@ -107,7 +107,7 @@ public class UserInitService {
         for(View_FarmMember member : list){
             if(member.getLevels() == 0 && "admin".equals(member.getLoginName())){
                 // 主账号注册,内含事务
-                primaryUser= this.registerByMobile(mobile, "123456", null);
+                primaryUser= this.registerByMobile(mobile, "123456", loginName);
                 Long userId = primaryUser.getId();
                 //初始化服务状态
                 this.initDefaultServiceStatus(userId);
@@ -122,7 +122,7 @@ public class UserInitService {
                     farm.setOrgId(org.getId());
                     farm.setOrgName(org.getName());
                     doctorFarmDao.create(farm);
-                    doctorMessageRuleWriteService.initTemplate(farm.getId());
+                    RespHelper.or500(doctorMessageRuleWriteService.initTemplate(farm.getId()));
                     farmIds.add(farm.getId());
                 }
                 //创建数据权限
@@ -333,7 +333,7 @@ public class UserInitService {
         doctorUserDataPermissionDao.create(permission);
     }
 
-    private void initServiceReview(Long userId, String mobile){
+    public void initServiceReview(Long userId, String mobile){
         RespHelper.or500(doctorServiceReviewWriteService.initServiceReview(userId, mobile));
         DoctorServiceReview review = RespHelper.or500(doctorServiceReviewReadService.findServiceReviewByUserIdAndType(userId, DoctorServiceReview.Type.PIG_DOCTOR));
         review.setStatus(DoctorServiceReview.Status.OK.getValue());
