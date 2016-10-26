@@ -492,4 +492,12 @@ alter table doctor_user_data_permissions modify column  `barn_ids` text COMMENT 
 -- 2016-10-19
 ALTER TABLE doctor_message_user ADD COLUMN rule_value_id BIGINT(20) DEFAULT NULL COMMENT '规则值id' AFTER business_id;
 
+-- 2016-10-25
+ALTER TABLE doctor_messages ADD COLUMN rule_value_id BIGINT(20) DEFAULT NULL COMMENT '规则值id' AFTER business_id;
+
+-- 2016-10-26 修改消息用户关联表索引
+DROP INDEX idx_message_user_id ON doctor_message_user;
+CREATE INDEX   idx_userid_farmid_templateid ON doctor_message_user(user_id, farm_id, template_id);
+
+
 

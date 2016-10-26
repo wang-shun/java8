@@ -1,25 +1,20 @@
 package io.terminus.doctor.schedule.msg.producer;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.google.api.client.util.Lists;
 import com.google.common.base.Throwables;
 import io.terminus.common.utils.Arguments;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dto.DoctorPigInfoDto;
-import io.terminus.doctor.event.dto.DoctorPigMessage;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.enums.PregCheckResult;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorPigEvent;
-import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.event.service.DoctorPigReadService;
 import io.terminus.doctor.event.service.DoctorPigWriteService;
 import io.terminus.doctor.msg.dto.RuleValue;
 import io.terminus.doctor.msg.dto.SubUser;
 import io.terminus.doctor.msg.enums.Category;
-import io.terminus.doctor.msg.model.DoctorMessageRule;
 import io.terminus.doctor.msg.model.DoctorMessageRuleRole;
 import io.terminus.doctor.msg.producer.AbstractProducer;
 import io.terminus.doctor.msg.service.DoctorMessageReadService;
@@ -32,7 +27,6 @@ import io.terminus.doctor.schedule.msg.producer.factory.PigDtoFactory;
 import io.terminus.doctor.user.model.DoctorUserDataPermission;
 import io.terminus.doctor.user.service.DoctorUserDataPermissionReadService;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 
 import java.util.Collections;
@@ -85,73 +79,6 @@ public abstract class AbstractJobProducer extends AbstractProducer {
         return true;
     }
 
-    @Override
-    protected void recordPigMessages(DoctorMessageRule messageRule) {
-        // 子类实现
-    }
-
-    /**
-     * 记录每只猪的消息提醒
-     *
-     * @param pigDto      猪只详情
-     * @param pigEvent    即将需要执行的事件
-     * @param ruleValue   配置的的天数
-     * @param pigStatuses 母猪当前的状态
-     */
-    protected void recordPigMessage(DoctorPigInfoDto pigDto, PigEvent pigEvent, Double timeDiff, RuleValue ruleValue, PigStatus... pigStatuses) {
-        List statusList = Lists.newArrayList();
-        if (pigStatuses != null && pigStatuses.length > 0) {
-            for (PigStatus pigStatus : pigStatuses) {
-                statusList.add(pigStatus.getKey());
-            }
-        }
-
-        // 处理消息
-        DoctorPigMessage pigMessage = DoctorPigMessage.builder()
-                .pigId(pigDto.getPigId())
-                .eventType(pigEvent.getKey())
-                .eventTypeName(pigEvent.getName())
-                .status(pigDto.getStatus())
-                .timeDiff(timeDiff)
-                .build();
-        if (Objects.equals(pigEvent.getKey(), PigEvent.CONDITION.getKey())) {
-            pigMessage.setIsCondition(1);
-            if (ruleValue.getId() == 4) {
-                pigMessage.setConditionValue("断奶");
-            } else {
-                pigMessage.setConditionValue(String.valueOf(ruleValue.getValue().intValue()));
-            }
-        }
-        List<DoctorPigMessage> tmpPigMessages = Lists.newArrayList();
-        tmpPigMessages.add(pigMessage);
-
-
-        // 处理存在的消息和过期的消息
-        if (StringUtils.isNotBlank(pigDto.getExtraTrackMessage())) {
-            try {
-                List<DoctorPigMessage> pigMessages = MAPPER.readValue(pigDto.getExtraTrackMessage(), new TypeReference<List<DoctorPigMessage>>() {
-                });
-                if (!Objects.isNull(pigMessages)) {
-                    pigMessages.stream().filter(message -> !Objects.equals(message.getEventType(), pigEvent.getKey())).
-                            forEach(doctorPigMessage -> {
-                                if (statusList.contains(doctorPigMessage.getStatus())) {
-                                    tmpPigMessages.add(doctorPigMessage);
-                                }
-                            });
-                }
-            } catch (Exception e) {
-                log.error("format pig message error, cause by {}", Throwables.getStackTraceAsString(e));
-            }
-        }
-
-        // 保存到数据库
-        DoctorPigTrack doctorPigTrack = RespHelper.orServEx(doctorPigReadService.findPigTrackByPigId(pigDto.getPigId()));
-        if (doctorPigTrack != null) {
-            doctorPigTrack.setExtraMessageList(tmpPigMessages);
-            doctorPigWriteService.updatePigTrackExtraMessage(doctorPigTrack);
-        }
-    }
-
     /**
      * 获取猪的最近一次初配事件
      *
@@ -180,33 +107,6 @@ public abstract class AbstractJobProducer extends AbstractProducer {
     }
 
     /**
-     * 获取预产期
-     * @param pigDto
-     */
-//    protected DateTime getBirthDate(DoctorPigInfoDto pigDto, RuleValue ruleValue) {
-//        // 获取预产期
-//        try{
-//            if(StringUtils.isNotBlank(pigDto.getExtraTrack())) {
-//                // @see DoctorMatingDto
-//                Date date = new Date((Long) MAPPER.readValue(pigDto.getExtraTrack(), Map.class).get("judgePregDate"));
-//                if (date != null) {
-//                    return new DateTime(date);
-//                } else {
-//                    // 获取配种日期
-//                    date = new Date((Long) MAPPER.readValue(pigDto.getExtraTrack(), Map.class).get("matingDate"));
-//                    if (date != null) {
-//                        // 配种日期 + 3 个月返回
-//                        return new DateTime(date).plusDays(ruleValue.getLeftValue().intValue());
-//                    }
-//                }
-//            }
-//        } catch (Exception e) {
-//            log.error("[SowBirthDateProducer] get birth date failed, pigDto is {}", pigDto);
-//        }
-//        return new DateTime(pigDto.getUpdatedAt());
-//    }
-
-    /**
      * 获取到达当前状态的时间
      *
      * @param pigDto
@@ -216,26 +116,25 @@ public abstract class AbstractJobProducer extends AbstractProducer {
         try {
             PigStatus STATUS = PigStatus.from(pigDto.getStatus());
             DateTime dateTime = null;
-            DoctorPigEvent doctorPigEvent;
+            DoctorPigEvent doctorPigEvent = null;
             if (STATUS != null) {
                 switch (STATUS) {
-                    case Wean:
-                    case Entry:// 断奶
-                        // @see DoctorWeanDto
+                    case Entry:// 进场
+                        doctorPigEvent = getPigEventByEventType(pigDto.getDoctorPigEvents(), PigEvent.ENTRY.getKey());
+                        dateTime = new DateTime(doctorPigEvent.getEventAt());
+                        break;
+                    case Wean: //断奶
                         doctorPigEvent = getLeadToWeanEvent(pigDto.getDoctorPigEvents());
-                        if (doctorPigEvent != null) {
-                            dateTime = new DateTime(doctorPigEvent.getEventAt());
-                            pigDto.setOperatorName(doctorPigEvent.getOperatorName());
-                        }
+                        dateTime = new DateTime(doctorPigEvent.getEventAt());
                         break;
                     case KongHuai: // 空怀
-                        // @see DoctorPregChkResultDto
                         doctorPigEvent = getPigEventByEventType(pigDto.getDoctorPigEvents(), PigEvent.PREG_CHECK.getKey());
                         pigDto.setStatusName(PregCheckResult.from(doctorPigEvent.getPregCheckResult()).getDesc());
                         dateTime = new DateTime(doctorPigEvent.getEventAt());
                         break;
                 }
             }
+            pigDto.setOperatorName(doctorPigEvent.getOperatorName());
             return dateTime;
         } catch (Exception e) {
             log.error("SowPregCheckProducer get status date failed, pigDto is {}", pigDto);
@@ -250,7 +149,7 @@ public abstract class AbstractJobProducer extends AbstractProducer {
      */
     protected DoctorPigEvent getLeadToWeanEvent(List<DoctorPigEvent> events){
         try {
-            List<DoctorPigEvent> tempList =  events.stream().filter(doctorPigEvent -> !Objects.equals(doctorPigEvent.getPigStatusBefore(), PigStatus.Wean.getKey()) && Objects.equals(doctorPigEvent.getPigStatusAfter(), PigStatus.Wean.getKey()) || Objects.equals(doctorPigEvent.getType(), PigEvent.WEAN.getKey())).collect(Collectors.toList());
+            List<DoctorPigEvent> tempList =  events.stream().filter(doctorPigEvent -> (!Objects.equals(doctorPigEvent.getPigStatusBefore(), PigStatus.Wean.getKey()) && Objects.equals(doctorPigEvent.getPigStatusAfter(), PigStatus.Wean.getKey())) || Objects.equals(doctorPigEvent.getType(), PigEvent.WEAN.getKey())).collect(Collectors.toList());
             if (!Arguments.isNullOrEmpty(tempList)){
                 return tempList.stream().max(Comparator.comparing(DoctorPigEvent::getEventAt)).get();
             }
@@ -293,27 +192,36 @@ public abstract class AbstractJobProducer extends AbstractProducer {
      */
     protected DoctorPigEvent getPigEventByEventType(List<DoctorPigEvent> events, Integer type) {
         try {
-            if (!Arguments.isNullOrEmpty(events)) {
-                List<DoctorPigEvent> eventList = events.stream().filter(doctorPigEvent -> doctorPigEvent.getEventAt() != null).sorted(Comparator.comparing(DoctorPigEvent::getEventAt).reversed()).collect(Collectors.toList());
-                for (DoctorPigEvent doctorPigEvent : eventList) {
-                    if (Objects.equals(doctorPigEvent.getType(), type)) {
-                        return doctorPigEvent;
-                    }
-                }
+//                List<DoctorPigEvent> eventList = events.stream().filter(doctorPigEvent -> doctorPigEvent.getEventAt() != null).sorted(Comparator.comparing(DoctorPigEvent::getEventAt).reversed()).collect(Collectors.toList());
+//                for (DoctorPigEvent doctorPigEvent : eventList) {
+//                    if (Objects.equals(doctorPigEvent.getType(), type)) {
+//                        return doctorPigEvent;
+//                    }
+//                }
+            if (Arguments.isNullOrEmpty(events)){
+                return null;
+            }
+            List<DoctorPigEvent> eventList = events.stream().filter(doctorPigEvent -> (doctorPigEvent.getEventAt() != null) && Objects.equals(doctorPigEvent.getType(), type)).collect(Collectors.toList());
+            if (!Arguments.isNullOrEmpty(eventList)) {
+                return eventList.stream().max(Comparator.comparing(DoctorPigEvent::getEventAt)).get();
             }
         } catch (Exception e) {
-            log.error("get.pig.event.by.event.type.failed events{}", events.size());
+            log.error("get.pig.event.by.event.type.failed");
         }
         return null;
     }
 
     protected DoctorGroupEvent getLastGroupEventByEventType(List<DoctorGroupEvent> events, Integer type) {
         try {
+            if (Arguments.isNullOrEmpty(events)){
+                return null;
+            }
+            List<DoctorGroupEvent> eventList = events.stream().filter(doctorGroupEvent -> (doctorGroupEvent.getEventAt() != null) && Objects.equals(doctorGroupEvent.getType(), type)).collect(Collectors.toList());
             if (!Arguments.isNullOrEmpty(events)) {
-                return events.stream().filter(doctorGroupEvent -> (doctorGroupEvent.getEventAt() != null) && Objects.equals(doctorGroupEvent.getType(), type)).max(Comparator.comparing(DoctorGroupEvent::getEventAt)).get();
+                return eventList.stream().max(Comparator.comparing(DoctorGroupEvent::getEventAt)).get();
             }
         } catch (Exception e) {
-            log.error("get.last.group.event.by.event.type.failed events{}", events.size());
+            log.error("get.last.group.event.by.event.type.failed");
         }
         return null;
     }
@@ -326,7 +234,7 @@ public abstract class AbstractJobProducer extends AbstractProducer {
      */
     protected Double getTimeDiff(DateTime eventTime) {
         try {
-            Long timeDiff = DateTime.now().getMillis() / 86400000 - eventTime.getMillis() / 86400000;
+            Long timeDiff = (DateTime.now().getMillis() + 28800000) / 86400000 - (eventTime.getMillis() + 28800000) / 86400000;
             return (double) timeDiff;
         } catch (Exception e) {
             log.error("get.timeDiff.failed, eventTime {}", eventTime);
@@ -346,10 +254,10 @@ public abstract class AbstractJobProducer extends AbstractProducer {
     /**
      * 创建消息
      */
-    protected void getMessage(DoctorPigInfoDto pigDto, DoctorMessageRuleRole ruleRole, List<SubUser> subUsers, Double timeDiff, String url, Integer eventType, Integer ruleValueId) {
+    protected void getMessage(DoctorPigInfoDto pigDto, DoctorMessageRuleRole ruleRole, List<SubUser> subUsers, Double timeDiff, Double ruleTimeDiff, String url, Integer eventType, Integer ruleValueId) {
         // 创建消息
-        String jumpUrl = pigDetailUrl.concat("?pigId=" + pigDto.getPigId() + "&farmId=" + ruleRole.getFarmId());
-        Map<String, Object> jsonData = PigDtoFactory.getInstance().createPigMessage(pigDto, timeDiff, url);
+        String jumpUrl = url.concat("?pigId=" + pigDto.getPigId() + "&farmId=" + ruleRole.getFarmId());
+        Map<String, Object> jsonData = PigDtoFactory.getInstance().createPigMessage(pigDto, timeDiff, ruleTimeDiff, url);
             try {
                 createMessage(subUsers, ruleRole, MAPPER.writeValueAsString(jsonData), eventType, pigDto.getPigId(), ruleValueId, jumpUrl);
             } catch (JsonProcessingException e) {
@@ -372,5 +280,4 @@ public abstract class AbstractJobProducer extends AbstractProducer {
         }
         return null;
     }
-
 }

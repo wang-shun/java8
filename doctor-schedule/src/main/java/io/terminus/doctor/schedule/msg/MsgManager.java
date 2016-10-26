@@ -110,7 +110,7 @@ public class MsgManager {
                 subUsers.add(subUser);
             }
             // 执行
-            producerMap.forEach((beanName, producer) -> {
+            producerMap.values().parallelStream().forEach((producer) -> {
                 try{
                     producer.produce(subUsers);
                 } catch (Exception e) {

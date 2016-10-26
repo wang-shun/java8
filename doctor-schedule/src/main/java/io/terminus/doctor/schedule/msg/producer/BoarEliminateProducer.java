@@ -1,6 +1,6 @@
 package io.terminus.doctor.schedule.msg.producer;
 
-import com.google.api.client.util.Maps;
+import com.google.common.collect.Maps;
 import io.terminus.doctor.common.constants.JacksonType;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dto.DoctorPigInfoDto;
@@ -69,8 +69,6 @@ public class BoarEliminateProducer extends AbstractJobProducer {
 
     @Override
     protected void message(DoctorMessageRuleRole ruleRole, List<SubUser> subUsers) {
-        log.info("公猪应淘汰消息产生 --- BoarEliminateProducer 开始执行");
-
         Rule rule = ruleRole.getRule();
         // ruleValue map
         Map<Integer, RuleValue> ruleValueMap = Maps.newHashMap();
@@ -78,82 +76,75 @@ public class BoarEliminateProducer extends AbstractJobProducer {
             RuleValue ruleValue = rule.getValues().get(i);
             ruleValueMap.put(ruleValue.getId(), ruleValue);
         }
+        DoctorPig pig = DoctorPig.builder()
+                .farmId(ruleRole.getFarmId())
+                .pigType(DoctorPig.PIG_TYPE.BOAR.getKey())
+                .build();
+        // 批量获取公猪信息
+        Long total = RespHelper.orServEx(doctorPigReadService.queryPigCount(
+                DataRange.FARM.getKey(), ruleRole.getFarmId(), DoctorPig.PIG_TYPE.BOAR.getKey()));
+        // 计算size, 分批处理
+        Long page = getPageSize(total, 100L);
+        for (int i = 1; i <= page; i++) {
+            List<DoctorPigInfoDto> boarPigs = RespHelper.orServEx(doctorPigReadService.pagingDoctorInfoDtoByPig(pig, i, 100)).getData();
+            // 过滤出未离场的公猪
+            boarPigs = boarPigs.stream().filter(pigDto ->
+                    !Objects.equals(PigStatus.Removal.getKey(), pigDto.getStatus())
+            ).collect(Collectors.toList());
+            // 处理每个猪
+            for (int j = 0; boarPigs != null && j < boarPigs.size(); j++) {
+                try {
+                    DoctorPigInfoDto pigDto = boarPigs.get(j);
+                    //根据用户拥有的猪舍权限过滤拥有user
+                    List<SubUser> sUsers = filterSubUserBarnId(subUsers, pigDto.getBarnId());
+                    // 公猪的updatedAt与当前时间差 (天)
+                    Double timeDiff = getTimeDiff(new DateTime(pigDto.getBirthDay()));
+                    if (pigDto.getDoctorPigEvents() == null) {
+                        break;
+                    }
+                    //取出最近一次的采精事件
+                    DoctorPigEvent doctorPigEvent = getPigEventByEventType(pigDto.getDoctorPigEvents(), PigEvent.SEMEN.getKey());
+                    for (Integer key : ruleValueMap.keySet()) {
+                        Boolean isSend = false;
+                        RuleValue ruleValue = ruleValueMap.get(key);
+                        if (key == 1) {
+                            //日龄大于或等于预定值
+                            isSend = checkRuleValue(ruleValue, timeDiff);
+                        } else if (key == 2) {
+                            if (doctorPigEvent != null && StringUtils.isNotBlank(doctorPigEvent.getExtra())) {
+                                try {
+                                    Map<String, Object> extraMap = MAPPER.readValue(doctorPigEvent.getExtra(), JacksonType.MAP_OF_OBJECT);
+                                    Double semenActive = (double) extraMap.get("semenActive");
+                                    //精液重量小于预定值
+                                    isSend = semenActive < ruleValue.getValue().doubleValue();
+                                } catch (Exception e) {
+                                    log.error("[BoarEliminateProducer].get.semenActive.fail, event{}", doctorPigEvent);
+                                }
+                            }
+                        } else if (key == 3) {
+                            if (doctorPigEvent != null && StringUtils.isNotBlank(doctorPigEvent.getExtra())) {
+                                try {
+                                    Map<String, Object> extraMap = MAPPER.readValue(doctorPigEvent.getExtra(), JacksonType.MAP_OF_OBJECT);
+                                    Double semenActive = (double) extraMap.get("semenWeight");
+                                    //精液重量小于预定值
+                                    isSend = semenActive < ruleValue.getValue().doubleValue();
+                                } catch (Exception e) {
+                                    log.error("[BoarEliminateProducer].get.semenWeight.fail, event{}", doctorPigEvent);
+                                }
 
-        if (StringUtils.isNotBlank(rule.getChannels())) {
-            // 批量获取公猪信息
-            Long total = RespHelper.orServEx(doctorPigReadService.queryPigCount(
-                    DataRange.FARM.getKey(), ruleRole.getFarmId(), DoctorPig.PIG_TYPE.BOAR.getKey()));
-            // 计算size, 分批处理
-            Long page = getPageSize(total, 100L);
-            DoctorPig pig = DoctorPig.builder()
-                    .farmId(ruleRole.getFarmId())
-                    .pigType(DoctorPig.PIG_TYPE.BOAR.getKey())
-                    .build();
-            for (int i = 1; i <= page; i++) {
-                List<DoctorPigInfoDto> boarPigs = RespHelper.orServEx(doctorPigReadService.pagingDoctorInfoDtoByPig(pig, i, 100)).getData();
-                // 过滤出未离场的公猪
-                boarPigs = boarPigs.stream().filter(pigDto ->
-                        !Objects.equals(PigStatus.Removal.getKey(), pigDto.getStatus())
-                ).collect(Collectors.toList());
-                // 处理每个猪
-                for (int j = 0; boarPigs != null && j < boarPigs.size(); j++) {
-                    try {
-                        DoctorPigInfoDto pigDto = boarPigs.get(j);
-                        //根据用户拥有的猪舍权限过滤拥有user
-                        List<SubUser> sUsers = filterSubUserBarnId(subUsers, pigDto.getBarnId());
-                        // 公猪的updatedAt与当前时间差 (天)
-                        Double timeDiff = getTimeDiff(new DateTime(pigDto.getBirthDay()));
-                        if (pigDto.getDoctorPigEvents() == null) {
+                            }
+                        }
+                        if (isSend) {
+                            pigDto.setReason(ruleValue.getDescribe() + ruleValue.getValue().toString());
+                            getMessage(pigDto, ruleRole, sUsers, timeDiff, null, rule.getUrl(), PigEvent.REMOVAL.getKey(), ruleValue.getId());
                             break;
                         }
-                        //取出最近一次的采精事件
-                        DoctorPigEvent doctorPigEvent = getPigEventByEventType(pigDto.getDoctorPigEvents(), PigEvent.SEMEN.getKey());
-                        for (Integer key : ruleValueMap.keySet()) {
-                            Boolean isSend = false;
-                            RuleValue ruleValue = ruleValueMap.get(key);
-                            if (key == 1) {
-                                //日龄大于或等于预定值
-                                isSend = checkRuleValue(ruleValue, timeDiff);
-                            } else if (key == 2) {
-                                if (doctorPigEvent != null && StringUtils.isNotBlank(doctorPigEvent.getExtra())) {
-                                    try {
-                                        Map<String, Object> extraMap = MAPPER.readValue(doctorPigEvent.getExtra(), JacksonType.MAP_OF_OBJECT);
-                                        Double semenActive = (double) extraMap.get("semenActive");
-                                        //精液重量小于预定值
-                                        isSend = semenActive < ruleValue.getValue().doubleValue();
-                                    } catch (Exception e) {
-                                        log.error("[BoarEliminateProducer].get.semenActive.fail, event{}", doctorPigEvent);
-                                    }
-                                }
-                            } else if (key == 3) {
-                                if (doctorPigEvent != null && StringUtils.isNotBlank(doctorPigEvent.getExtra())) {
-                                    try {
-                                        Map<String, Object> extraMap = MAPPER.readValue(doctorPigEvent.getExtra(), JacksonType.MAP_OF_OBJECT);
-                                        Double semenActive = (double) extraMap.get("semenWeight");
-                                        //精液重量小于预定值
-                                        isSend = semenActive < ruleValue.getValue().doubleValue();
-                                    } catch (Exception e) {
-                                        log.error("[BoarEliminateProducer].get.semenWeight.fail, event{}", doctorPigEvent);
-                                    }
-
-                                }
-                            }
-                            if (isSend) {
-                                pigDto.setReason(ruleValue.getDescribe() + ruleValue.getValue().toString());
-                                getMessage(pigDto, ruleRole, sUsers, timeDiff, rule.getUrl(), PigEvent.REMOVAL.getKey(), ruleValue.getId());
-                                break;
-                            }
-                        }
-                    } catch (Exception e) {
-                        log.error("[BoarEliminateProduce]-message.failed");
                     }
+                } catch (Exception e) {
+                    log.error("[BoarEliminateProduce]-message.failed");
                 }
-
-
             }
         }
-
-        log.info("公猪应淘汰消息产生 --- BoarEliminateProducer 结束执行");
     }
 
 }

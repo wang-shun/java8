@@ -87,10 +87,9 @@
 
     <sql id="criteria">
         <where>
-            1=1
+            <if test="userId != null">AND user_id = #{userId}</if>
             <if test="farmId != null">AND farm_id = #{farmId}</if>
             <if test="templateId != null">AND template_id = #{templateId}</if>
-            <if test="userId != null">AND user_id = #{userId}</if>
             <if test="messageId != null">AND message_id = #{messageId}</if>
             <if test="businessId != null">AND business_id = #{businessId}</if>
             <if test="ruleValueId != null">AND rule_value_id = #{ruleValueId}</if>
@@ -146,6 +145,15 @@
         DELETE
         FROM <include refid="tb"/>
         WHERE message_id = #{messageId}
+    </delete>
+
+    <delete id="deletesByMessageIds" parameterType="list" >
+        DELETE
+        FROM <include refid="tb"/>
+        WHERE message_id IN
+        <foreach collection="list" item="i" open="(" separator="," close=")">
+            #{i}
+        </foreach>
     </delete>
 
 </mapper>

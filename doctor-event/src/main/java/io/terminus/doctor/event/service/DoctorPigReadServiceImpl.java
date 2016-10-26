@@ -4,7 +4,6 @@ import com.google.common.base.MoreObjects;
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
@@ -19,7 +18,6 @@ import io.terminus.doctor.event.dao.DoctorPigEventDao;
 import io.terminus.doctor.event.dao.DoctorPigTrackDao;
 import io.terminus.doctor.event.dto.DoctorPigInfoDetailDto;
 import io.terminus.doctor.event.dto.DoctorPigInfoDto;
-import io.terminus.doctor.event.dto.DoctorPigMessage;
 import io.terminus.doctor.event.enums.DataRange;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PigStatus;
@@ -303,21 +301,6 @@ public class DoctorPigReadServiceImpl implements DoctorPigReadService {
         } catch (Exception e) {
             log.error("find pig track by pig id failed, pig id is {}, cause by {}", pigId, Throwables.getStackTraceAsString(e));
             return Response.fail("pig.track.find.fail");
-        }
-    }
-
-    @Override
-    public Response<List<DoctorPigMessage>> findPigMessageByPigId(@NotNull(message = "input.pigId.empty") Long pigId) {
-        try{
-            DoctorPigTrack pigTrack = doctorPigTrackDao.findByPigId(pigId);
-            if (pigTrack != null) {
-                pigTrack.setExtraMessage(pigTrack.getExtraMessage());
-                return Response.ok(pigTrack.getExtraMessageList());
-            }
-            return Response.ok(Lists.newArrayList());
-        } catch (Exception e) {
-            log.error("find pig message by pidId, pigId:{}, cause by {}", pigId, Throwables.getStackTraceAsString(e));
-            return Response.fail("message.find.fail");
         }
     }
 

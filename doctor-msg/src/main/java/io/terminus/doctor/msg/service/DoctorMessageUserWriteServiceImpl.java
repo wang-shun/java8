@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.validation.constraints.NotNull;
+import java.util.List;
 
 /**
  * Created by xiao on 16/10/11.
@@ -49,6 +50,17 @@ public class DoctorMessageUserWriteServiceImpl implements DoctorMessageUserWrite
         } catch (Exception e) {
             log.error("delete by message id failed, cause by {}", Throwables.getStackTraceAsString(e));
             return Response.fail("delete.by.messageid.failed");
+        }
+    }
+
+    @Override
+    public Response<Boolean> deletesByMessageIds(List<Long> messageIds) {
+        try {
+            doctorMessageUserDao.deletesByMessageIds(messageIds);
+            return Response.ok(Boolean.TRUE);
+        } catch (Exception e) {
+            log.error("deletes by message ids failed, cause by {}", Throwables.getStackTraceAsString(e));
+            return Response.fail("deletes.by.ids.failed");
         }
     }
 }
