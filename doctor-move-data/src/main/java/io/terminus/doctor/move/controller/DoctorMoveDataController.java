@@ -104,21 +104,7 @@ public class DoctorMoveDataController {
         this.pigDumpService = pigDumpService;
     }
 
-    /**
-     * 更新数据源
-     *
-     * @return 是否成功
-     */
-    @RequestMapping(value = "/reload", method = RequestMethod.GET)
-    public Boolean reloadMoveId() {
-        try {
-            doctorMoveDatasourceHandler.init();
-            return Boolean.TRUE;
-        } catch (Exception e) {
-            log.error("move datasource connect failed, cause:{}", Throwables.getStackTraceAsString(e));
-            return Boolean.FALSE;
-        }
-    }
+
 
     /**
      * 测试数据源连接是否正常

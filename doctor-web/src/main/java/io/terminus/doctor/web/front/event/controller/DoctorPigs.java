@@ -1,5 +1,7 @@
 package io.terminus.doctor.web.front.event.controller;
 
+import com.google.api.client.util.Lists;
+import com.google.api.client.util.Maps;
 import com.google.common.base.Throwables;
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.exception.JsonResponseException;
@@ -12,7 +14,7 @@ import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dto.DoctorGroupDetail;
 import io.terminus.doctor.event.dto.DoctorPigInfoDetailDto;
 import io.terminus.doctor.event.dto.DoctorPigInfoDto;
-import io.terminus.doctor.event.dto.DoctorPigMessage;
+import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorGroup;
@@ -22,6 +24,14 @@ import io.terminus.doctor.event.service.DoctorBarnReadService;
 import io.terminus.doctor.event.service.DoctorGroupReadService;
 import io.terminus.doctor.event.service.DoctorPigReadService;
 import io.terminus.doctor.event.service.DoctorPigWriteService;
+import io.terminus.doctor.msg.dto.DoctorMessageSearchDto;
+import io.terminus.doctor.msg.dto.DoctorPigMessage;
+import io.terminus.doctor.msg.dto.RuleValue;
+import io.terminus.doctor.msg.enums.Category;
+import io.terminus.doctor.msg.model.DoctorMessage;
+import io.terminus.doctor.msg.model.DoctorMessageRuleTemplate;
+import io.terminus.doctor.msg.service.DoctorMessageReadService;
+import io.terminus.doctor.msg.service.DoctorMessageRuleTemplateReadService;
 import io.terminus.doctor.web.front.event.dto.DoctorBoarDetailDto;
 import io.terminus.doctor.web.front.event.dto.DoctorFosterDetail;
 import io.terminus.doctor.web.front.event.dto.DoctorMatingDetail;
@@ -43,6 +53,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * Created by yaoqijun.
@@ -59,6 +70,12 @@ public class DoctorPigs {
     private final DoctorPigWriteService doctorPigWriteService;
     private final DoctorGroupReadService doctorGroupReadService;
     private final TransFromUtil transFromUtil;
+
+    @RpcConsumer
+    private DoctorMessageReadService doctorMessageReadService;
+
+    @RpcConsumer
+    private DoctorMessageRuleTemplateReadService doctorMessageRuleTemplateReadService;
 
     @RpcConsumer
     private  DoctorBarnReadService doctorBarnReadService;
@@ -163,23 +180,24 @@ public class DoctorPigs {
                     doctorPigTrack.setStatus(pregCheckResult);
                 }
             }
-        }catch (Exception e){
+            String warnMessage = JsonMapper.JSON_NON_DEFAULT_MAPPER.getMapper().writeValueAsString(queryPigNotifyMessages(dto.getDoctorPig().getId()));
+            DoctorSowDetailDto doctorSowDetailDto = DoctorSowDetailDto.builder()
+                    .pigSowCode(dto.getDoctorPig().getPigCode())
+                    .warnMessage(warnMessage)
+                    .breedName(dto.getDoctorPig().getBreedName()).barnCode(dto.getDoctorPigTrack().getCurrentBarnName())
+                    .pigStatus(dto.getDoctorPigTrack().getStatus())
+                    .dayAge(Days.daysBetween(new DateTime(dto.getDoctorPig().getBirthDate()), DateTime.now()).getDays() + 1)
+                    .parity(dto.getDoctorPigTrack().getCurrentParity()).entryDate(dto.getDoctorPig().getInFarmDate())
+                    .birthDate(dto.getDoctorPig().getBirthDate())
+                    .doctorPigEvents(dto.getDoctorPigEvents())
+                    .pregCheckResult(pregCheckResult)
+                    .canRollback(dto.getCanRollback())
+                    .build();
+            return doctorSowDetailDto;
+        } catch (Exception e) {
             log.error("buildSowDetailDto failed cause by {}", Throwables.getStackTraceAsString(e));
         }
-
-        DoctorSowDetailDto doctorSowDetailDto = DoctorSowDetailDto.builder()
-                .pigSowCode(dto.getDoctorPig().getPigCode())
-                .warnMessage(dto.getDoctorPigTrack().getExtraMessage())
-                .breedName(dto.getDoctorPig().getBreedName()).barnCode(dto.getDoctorPigTrack().getCurrentBarnName())
-                .pigStatus(dto.getDoctorPigTrack().getStatus())
-                .dayAge(Days.daysBetween(new DateTime(dto.getDoctorPig().getBirthDate()), DateTime.now()).getDays() + 1)
-                .parity(dto.getDoctorPigTrack().getCurrentParity()).entryDate(dto.getDoctorPig().getInFarmDate())
-                .birthDate(dto.getDoctorPig().getBirthDate())
-                .doctorPigEvents(dto.getDoctorPigEvents())
-                .pregCheckResult(pregCheckResult)
-                .canRollback(dto.getCanRollback())
-                .build();
-        return doctorSowDetailDto;
+        return null;
     }
 
     /**
@@ -190,7 +208,47 @@ public class DoctorPigs {
     @RequestMapping(value = "/notify/message", method = RequestMethod.GET)
     @ResponseBody
     public List<DoctorPigMessage> queryPigNotifyMessages(Long pigId) {
-        return RespHelper.or500(doctorPigReadService.findPigMessageByPigId(pigId));
+        DoctorMessageSearchDto doctorMessageSearchDto = new DoctorMessageSearchDto();
+        doctorMessageSearchDto.setBusinessId(pigId);
+        List<DoctorMessage> messages =  RespHelper.or500(doctorMessageReadService.findMessageListByCriteria(doctorMessageSearchDto));
+        List<DoctorPigMessage> doctorPigMessageList = Lists.newArrayList();
+        Map<Integer, DoctorMessage> map = Maps.newHashMap();
+        messages.forEach(doctorMessage -> {
+            map.put(doctorMessage.getCategory(), doctorMessage);
+        });
+        map.values().forEach(doctorMessage -> {
+            try {
+                Map<String, Object> data = JsonMapper.JSON_NON_DEFAULT_MAPPER.getMapper().readValue(doctorMessage.getData(), JacksonType.MAP_OF_OBJECT);
+                Double timeDiff = null;
+                if (data.get("ruleTimeDiff") != null) {
+                    timeDiff = (double) data.get("ruleTimeDiff");
+                }
+                DoctorPigMessage pigMessage = DoctorPigMessage.builder()
+                        .pigId(pigId)
+                        .eventType(doctorMessage.getEventType())
+                        .eventTypeName(PigEvent.from(doctorMessage.getEventType()).getName())
+                        .timeDiff(timeDiff)
+                        .build();
+                if (Objects.equals(doctorMessage.getCategory(), Category.SOW_BACK_FAT.getKey())) {
+                    DoctorMessageRuleTemplate doctorMessageRuleTemplate = RespHelper.or500(doctorMessageRuleTemplateReadService.findMessageRuleTemplateById(doctorMessage.getTemplateId()));
+                    List<RuleValue> ruleValues = doctorMessageRuleTemplate.getRule().getValues().stream().filter(value -> Objects.equals(value.getId(), doctorMessage.getRuleValueId())).collect(Collectors.toList());
+                    RuleValue ruleValue = ruleValues.get(0);
+                    pigMessage.setMessageCategory(Category.SOW_BACK_FAT.getKey());
+                    if (doctorMessage.getRuleValueId() == 4) {
+                        pigMessage.setMessageDescribe("断奶");
+                    } else {
+                        pigMessage.setMessageDescribe(String.valueOf(ruleValue.getValue().intValue()));
+                    }
+                } else if (Objects.equals(doctorMessage.getCategory(), Category.SOW_BIRTHDATE.getKey())) {
+                    pigMessage.setMessageCategory(Category.SOW_BIRTHDATE.getKey());
+                    pigMessage.setMessageDescribe("怀孕天数");
+                }
+                doctorPigMessageList.add(pigMessage);
+            } catch (Exception e) {
+                log.error("json.analyze.failed");
+            }
+        });
+        return doctorPigMessageList;
     }
 
     /**

@@ -11,8 +11,10 @@ import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.BaseUser;
 import io.terminus.common.model.Response;
 import io.terminus.common.utils.JsonMapper;
+import io.terminus.doctor.common.enums.DataEventType;
 import io.terminus.doctor.common.enums.UserStatus;
 import io.terminus.doctor.common.enums.UserType;
+import io.terminus.doctor.common.event.DataEvent;
 import io.terminus.doctor.user.model.DoctorUser;
 import io.terminus.doctor.user.service.DoctorUserReadService;
 import io.terminus.doctor.user.util.DoctorUserMaker;
@@ -29,6 +31,7 @@ import io.terminus.parana.auth.model.PermissionData;
 import io.terminus.parana.common.model.ParanaUser;
 import io.terminus.parana.user.model.LoginType;
 import io.terminus.parana.user.model.User;
+import io.terminus.zookeeper.pubsub.Publisher;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -38,6 +41,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -67,17 +71,21 @@ public class Users {
 
     private final PermissionHelper permissionHelper;
 
+    private final Publisher publisher;
+
     @Autowired
     public Users(DoctorUserReadService doctorUserReadService,
                  EventBus eventBus,
                  AclLoader aclLoader,
                  PermissionHelper permissionHelper,
-                 MobilePattern mobilePattern) {
+                 MobilePattern mobilePattern,
+                 Publisher publisher) {
         this.doctorUserReadService = doctorUserReadService;
         this.eventBus = eventBus;
         this.aclLoader = aclLoader;
         this.permissionHelper = permissionHelper;
         this.mobilePattern = mobilePattern;
+        this.publisher = publisher;
     }
 
     @RequestMapping("")
@@ -167,6 +175,18 @@ public class Users {
         } catch (Exception e) {
             log.error("failed to logout user,cause:", e);
             throw new JsonResponseException(500, "user.logout.fail");
+        }
+    }
+
+    @RequestMapping(value = "/importExcel", method = RequestMethod.GET)
+    public boolean importExcel(String fileUrl){
+        try {
+            publisher.publish(DataEvent.toBytes(DataEventType.ImportExcel.getKey(), fileUrl));
+
+            return true;
+        } catch (Exception e) {
+            log.error(Throwables.getStackTraceAsString(e));
+            return false;
         }
     }
 

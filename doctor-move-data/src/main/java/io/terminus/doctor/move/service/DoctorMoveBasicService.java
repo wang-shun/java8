@@ -238,6 +238,7 @@ public class DoctorMoveBasicService {
     public Map<Integer, Map<String, DoctorBasic>> getBasicMap() {
         Map<Integer, Map<String, DoctorBasic>> basicMap = Maps.newHashMap();
         doctorBasicDao.listAll().stream()
+                .filter(basic -> !Objects.equals(basic.getIsValid(), -1))
                 .collect(Collectors.groupingBy(DoctorBasic::getType)).entrySet()
                 .forEach(basic -> basicMap.put(basic.getKey(),
                         basic.getValue().stream().collect(Collectors.toMap(DoctorBasic::getName, v -> v))));

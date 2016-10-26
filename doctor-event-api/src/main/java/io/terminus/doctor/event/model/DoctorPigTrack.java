@@ -1,15 +1,12 @@
 package io.terminus.doctor.event.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Strings;
 import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.constants.JacksonType;
-import io.terminus.doctor.event.dto.DoctorPigMessage;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -21,7 +18,6 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.io.Serializable;
 import java.util.Date;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -116,8 +112,8 @@ public class DoctorPigTrack implements Serializable {
     @Setter(AccessLevel.NONE)
     @JsonIgnore
     private String extraMessage;
-    @Setter(AccessLevel.NONE)
-    private List<DoctorPigMessage> extraMessageList;
+//    @Setter(AccessLevel.NONE)
+//    private List<DoctorPigMessage> extraMessageList;
 
     private Integer currentParity;
 
@@ -172,26 +168,26 @@ public class DoctorPigTrack implements Serializable {
         this.extra = OBJECT_MAPPER.writeValueAsString(this.extraMap);
     }
 
-    @SneakyThrows
-    public void setExtraMessage(String extraMessage) {
-        this.extraMessage = extraMessage;
-        if (Strings.isNullOrEmpty(extraMessage)) {
-            this.extraMessageList = Lists.newArrayList();
-        } else {
-            this.extraMessageList = OBJECT_MAPPER.readValue(extraMessage, new TypeReference<List<DoctorPigMessage>>() {
-            });
-        }
-    }
-
-    @SneakyThrows
-    public void setExtraMessageList(List<DoctorPigMessage> extraMessageList) {
-        this.extraMessageList = extraMessageList;
-        if (isNull(extraMessageList) || Iterables.isEmpty(extraMessageList)) {
-            this.extraMessage = "";
-        } else {
-            this.extraMessage = OBJECT_MAPPER.writeValueAsString(extraMessageList);
-        }
-    }
+//    @SneakyThrows
+//    public void setExtraMessage(String extraMessage) {
+//        this.extraMessage = extraMessage;
+//        if (Strings.isNullOrEmpty(extraMessage)) {
+//            this.extraMessageList = Lists.newArrayList();
+//        } else {
+//            this.extraMessageList = OBJECT_MAPPER.readValue(extraMessage, new TypeReference<List<DoctorPigMessage>>() {
+//            });
+//        }
+//    }
+//
+//    @SneakyThrows
+//    public void setExtraMessageList(List<DoctorPigMessage> extraMessageList) {
+//        this.extraMessageList = extraMessageList;
+//        if (isNull(extraMessageList) || Iterables.isEmpty(extraMessageList)) {
+//            this.extraMessage = "";
+//        } else {
+//            this.extraMessage = OBJECT_MAPPER.writeValueAsString(extraMessageList);
+//        }
+//    }
 
 
     /**

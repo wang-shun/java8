@@ -6,6 +6,10 @@ import io.terminus.doctor.move.sql.DoctorSqlFactory;
 import io.terminus.doctor.msg.DoctorMsgConfig;
 import io.terminus.doctor.user.DoctorUserConfiguration;
 import io.terminus.doctor.warehouse.DoctorWarehouseConfiguration;
+import io.terminus.zookeeper.ZKClientFactory;
+import io.terminus.zookeeper.pubsub.Publisher;
+import io.terminus.zookeeper.pubsub.Subscriber;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -44,6 +48,21 @@ public class DoctorMoveDataConfiguation extends WebMvcConfigurerAdapter {
             return new DoctorSqlFactory(resources);
         } catch (Exception e) {
             return new DoctorSqlFactory(null);
+        }
+    }
+    @Configuration
+    public static class ZookeeperConfiguration{
+
+        @Bean
+        public Subscriber cacheListenerBean(ZKClientFactory zkClientFactory,
+                                            @Value("${zookeeper.zkTopic}") String cacheTopic) throws Exception{
+            return new Subscriber(zkClientFactory,cacheTopic);
+        }
+
+        @Bean
+        public Publisher cachePublisherBean(ZKClientFactory zkClientFactory,
+                                            @Value("${zookeeper.zkTopic}") String cacheTopic) throws Exception{
+            return new Publisher(zkClientFactory, cacheTopic);
         }
     }
 }

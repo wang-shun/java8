@@ -1,4 +1,4 @@
-package io.terminus.doctor.event.dto;
+package io.terminus.doctor.msg.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -20,15 +20,20 @@ import java.io.Serializable;
 public class DoctorPigMessage implements Serializable {
     private static final long serialVersionUID = 2878958119770364775L;
 
-    private Integer isCondition;
+    /**
+     *
+     */
+    private Integer messageCategory;
 
-    private String conditionValue;
+    /**
+     * 消息描述
+     */
+    private String messageDescribe;
 
     private Long pigId;
 
     /**
      * 提醒动作类型
-     * @see io.terminus.doctor.event.enums.PigEvent
      */
     private Integer eventType;
     private String eventTypeName;

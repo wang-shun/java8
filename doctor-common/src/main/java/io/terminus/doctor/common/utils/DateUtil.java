@@ -34,6 +34,8 @@ public class DateUtil {
 
     private static final DateTimeFormatter DATE_TIME = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss");
 
+    public static final DateTimeFormatter DATE_SLASH = DateTimeFormat.forPattern("yyyy/MM/dd");
+
     public static Date formatToDate(DateTimeFormatter formatter, String date) {
         try {
             if (formatter == null || Strings.isNullOrEmpty(date)) {

@@ -42,4 +42,11 @@ public interface DoctorMessageWriteService {
      */
     Response<Boolean> deleteMessageById(Long messageId);
 
+    /**
+     * 根据主键id批量删除DoctorMessage
+     * @param messageIds
+     * @return 是否成功
+     */
+    Response<Boolean> deleteMessagesByIds(List<Long> messageIds);
+
 }
