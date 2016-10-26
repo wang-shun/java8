@@ -75,4 +75,15 @@ public class DoctorMessageWriteServiceImpl implements DoctorMessageWriteService 
             return Response.fail("message.delete.fail");
         }
     }
+
+    @Override
+    public Response<Boolean> deleteMessagesByIds(List<Long> messageIds) {
+        try {
+            doctorMessageDao.deletes(messageIds);
+            return Response.ok(Boolean.TRUE);
+        } catch (Exception e) {
+            log.error("delete messages failed, cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("message.deletes.failed");
+        }
+    }
 }

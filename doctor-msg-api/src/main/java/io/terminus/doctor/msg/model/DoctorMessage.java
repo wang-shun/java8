@@ -111,4 +111,6 @@ public class DoctorMessage implements Serializable {
      */
     private Long businessId;
 
+    private Integer ruleValueId;
+
 }

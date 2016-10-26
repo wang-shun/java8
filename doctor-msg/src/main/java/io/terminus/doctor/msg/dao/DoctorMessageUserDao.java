@@ -38,4 +38,12 @@ public class DoctorMessageUserDao extends MyBatisDao<DoctorMessageUser> {
     public void deleteByMessageId(Long messageId) {
         getSqlSession().delete(sqlId("deleteByMessageId"), messageId);
     }
+
+    /**
+     * 根据消息id批量删除关联messageuser
+     * @param messageIds
+     */
+    public void deletesByMessageIds(List<Long> messageIds) {
+        getSqlSession().delete(sqlId("deletesByMessageIds"), messageIds);
+    }
 }

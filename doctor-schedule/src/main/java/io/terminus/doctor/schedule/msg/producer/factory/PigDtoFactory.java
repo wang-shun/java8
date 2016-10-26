@@ -31,7 +31,7 @@ public class PigDtoFactory {
     /**
      * 创建猪类的消息
      */
-    public Map<String, Object> createPigMessage(DoctorPigInfoDto pigDto, Double timeDiff, String url) {
+    public Map<String, Object> createPigMessage(DoctorPigInfoDto pigDto, Double timeDiff, Double ruleTimeDiff, String url) {
         // 创建消息
         Map<String, Object> jsonData = Maps.newHashMap();
         jsonData.put("pigId", pigDto.getPigId());
@@ -47,7 +47,9 @@ public class PigDtoFactory {
         jsonData.put("weight", pigDto.getWeight());
         jsonData.put("parity", pigDto.getParity());
         jsonData.put("matingDate", getBreedingDate(pigDto));
+        //事件发生多少天
         jsonData.put("timeDiff", timeDiff);
+        jsonData.put("ruleTimeDiff", ruleTimeDiff);
         jsonData.put("url", url);
         if (pigDto.getOperatorName() != null) {
             jsonData.put("operatorName", pigDto.getOperatorName());

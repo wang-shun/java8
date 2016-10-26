@@ -1,7 +1,6 @@
 package io.terminus.doctor.schedule.msg.producer;
 
-import com.google.api.client.util.Maps;
-import com.google.common.base.Throwables;
+import com.google.common.collect.Maps;
 import io.terminus.common.utils.Arguments;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dto.DoctorPigInfoDto;
@@ -16,9 +15,7 @@ import io.terminus.doctor.msg.dto.Rule;
 import io.terminus.doctor.msg.dto.RuleValue;
 import io.terminus.doctor.msg.dto.SubUser;
 import io.terminus.doctor.msg.enums.Category;
-import io.terminus.doctor.msg.model.DoctorMessageRule;
 import io.terminus.doctor.msg.model.DoctorMessageRuleRole;
-import io.terminus.doctor.msg.model.DoctorMessageRuleTemplate;
 import io.terminus.doctor.msg.service.DoctorMessageReadService;
 import io.terminus.doctor.msg.service.DoctorMessageRuleReadService;
 import io.terminus.doctor.msg.service.DoctorMessageRuleRoleReadService;
@@ -27,7 +24,6 @@ import io.terminus.doctor.msg.service.DoctorMessageTemplateReadService;
 import io.terminus.doctor.msg.service.DoctorMessageWriteService;
 import io.terminus.doctor.user.service.DoctorUserDataPermissionReadService;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -67,87 +63,72 @@ public class SowBackFatProducer extends AbstractJobProducer {
 
     @Override
     protected void message(DoctorMessageRuleRole ruleRole, List<SubUser> subUsers) {
-
-        log.info("背膘提示消息产生 --- SowBackFatProducer 开始执行");
-        handleMessages(ruleRole.getRule(), ruleRole.getTemplateId(), ruleRole.getFarmId(), true, ruleRole, subUsers);
-        log.info("背膘提示消息产生 --- SowBackFatProducer  结束执行");
-    }
-
-    @Override
-    protected void recordPigMessages(DoctorMessageRule messageRule) {
-        handleMessages(messageRule.getRule(), messageRule.getTemplateId(), messageRule.getFarmId(), false, null, null);
-    }
-
-    private void handleMessages(Rule rule, Long tplId, Long farmId, boolean isMessage, DoctorMessageRuleRole ruleRole, List<SubUser> subUsers) {
+        Rule rule = ruleRole.getRule();
         // ruleValue map
         Map<Integer, RuleValue> ruleValueMap = Maps.newHashMap();
         for (int i = 0; rule.getValues() != null && i < rule.getValues().size(); i++) {
             RuleValue ruleValue = rule.getValues().get(i);
             ruleValueMap.put(ruleValue.getId(), ruleValue);
         }
-        DoctorMessageRuleTemplate ruleTemplate = RespHelper.orServEx(doctorMessageRuleTemplateReadService.findMessageRuleTemplateById(tplId));
-
-        if (StringUtils.isNotBlank(rule.getChannels())) {
-            Long total = RespHelper.orServEx(doctorPigReadService.queryPigCount(
-                    DataRange.FARM.getKey(), farmId, DoctorPig.PIG_TYPE.SOW.getKey()));
-            // 计算size, 分批处理
-            Long page = getPageSize(total, 100L);
-            DoctorPig pig = DoctorPig.builder()
-                    .farmId(farmId)
-                    .pigType(DoctorPig.PIG_TYPE.SOW.getKey())
-                    .build();
-            for (int i = 1; i <= page; i++) {
-                List<DoctorPigInfoDto> pigs = RespHelper.orServEx(doctorPigReadService.pagingDoctorInfoDtoByPig(pig, i, 100)).getData();
-                pigs = pigs.stream().filter(pigDto -> Objects.equals(PigStatus.Mate.getKey(), pigDto.getStatus())
-                        || Objects.equals(PigStatus.Pregnancy.getKey(), pigDto.getStatus())
-                        || Objects.equals(PigStatus.Farrow.getKey(), pigDto.getStatus())
-                        || Objects.equals(PigStatus.FEED.getKey(), pigDto.getStatus())
-                        || Objects.equals(PigStatus.Wean.getKey(), pigDto.getStatus())
-                        || Objects.equals(PigStatus.KongHuai.getKey(), pigDto.getStatus())
-                        || Objects.equals(PigStatus.Entry.getKey(), pigDto.getStatus())).collect(Collectors.toList());
-                // 处理每个猪
-                for (int j = 0; pigs != null && j < pigs.size(); j++) {
-                    try {
-                        DoctorPigInfoDto pigDto = pigs.get(j);
-                        //根据猪场权限过滤用户
-                        List<SubUser> sUsers = filterSubUserBarnId(subUsers, pigDto.getBarnId());
-                        Boolean isSend = false;
-                        DoctorPigEvent matingPigEvent = getMatingPigEvent(pigDto);
-                        Double timeDiff = null;
-                        if (matingPigEvent == null) {
-                            break;
-                        }
-                        List<Integer> keyList = ruleValueMap.keySet().stream().sorted(Comparator.reverseOrder()).collect(Collectors.toList());
-                        for (Integer key : keyList) {
-                            RuleValue ruleValue = ruleValueMap.get(key);
-
-                            if (key == 1 || key == 2 || key == 3) {
-                                timeDiff = getTimeDiff(new DateTime(matingPigEvent.getEventAt()));
-                                if (checkRuleValue(ruleValue, timeDiff) && filterPigCondition(pigDto, new DateTime(matingPigEvent.getEventAt()).plusDays(ruleValue.getValue().intValue()), PigEvent.CONDITION)) {
-                                    isSend = true;
-                                }
-                            } else {
-                                DoctorPigEvent pigEvent = getLeadToWeanEvent(pigDto.getDoctorPigEvents());
-                                if (pigEvent != null && filterPigCondition(pigDto, new DateTime(pigEvent.getEventAt()), PigEvent.CONDITION) && filterPigCondition(pigDto, new DateTime(pigEvent.getEventAt()), PigEvent.MATING)) {
+        DoctorPig pig = DoctorPig.builder()
+                .farmId(ruleRole.getFarmId())
+                .pigType(DoctorPig.PIG_TYPE.SOW.getKey())
+                .build();
+        // 批量获取母猪信息
+        Long total = RespHelper.orServEx(doctorPigReadService.queryPigCount(
+                DataRange.FARM.getKey(), ruleRole.getFarmId(), DoctorPig.PIG_TYPE.SOW.getKey()));
+        // 计算size, 分批处理
+        Long page = getPageSize(total, 100L);
+        for (int i = 1; i <= page; i++) {
+            List<DoctorPigInfoDto> pigs = RespHelper.orServEx(doctorPigReadService.pagingDoctorInfoDtoByPig(pig, i, 100)).getData();
+            pigs = pigs.stream().filter(pigDto -> Objects.equals(PigStatus.Mate.getKey(), pigDto.getStatus())
+                    || Objects.equals(PigStatus.Pregnancy.getKey(), pigDto.getStatus())
+                    || Objects.equals(PigStatus.Farrow.getKey(), pigDto.getStatus())
+                    || Objects.equals(PigStatus.FEED.getKey(), pigDto.getStatus())
+                    || Objects.equals(PigStatus.Wean.getKey(), pigDto.getStatus())
+                    || Objects.equals(PigStatus.KongHuai.getKey(), pigDto.getStatus())).collect(Collectors.toList());
+            // 处理每个猪
+            for (int j = 0; pigs != null && j < pigs.size(); j++) {
+                try {
+                    DoctorPigInfoDto pigDto = pigs.get(j);
+                    //根据猪场权限过滤用户
+                    List<SubUser> sUsers = filterSubUserBarnId(subUsers, pigDto.getBarnId());
+                    Boolean isSend = false;
+                    DoctorPigEvent matingPigEvent = getMatingPigEvent(pigDto);
+                    Double timeDiff;
+                    if (matingPigEvent == null) {
+                        break;
+                    }
+                    List<Integer> keyList = ruleValueMap.keySet().stream().sorted(Comparator.reverseOrder()).collect(Collectors.toList());
+                    for (Integer key : keyList) {
+                        RuleValue ruleValue = ruleValueMap.get(key);
+                        timeDiff = getTimeDiff(new DateTime(matingPigEvent.getEventAt()));
+                        if (key == 1 || key == 2 || key == 3) {
+                            if (checkRuleValue(ruleValue, timeDiff) && filterPigCondition(pigDto, new DateTime(matingPigEvent.getEventAt()).plusDays(ruleValue.getValue().intValue()), PigEvent.CONDITION)) {
+                                isSend = true;
+                            }
+                        } else {
+                            DoctorPigEvent pigEvent = getLeadToWeanEvent(pigDto.getDoctorPigEvents());
+                            if (pigEvent != null && filterPigCondition(pigDto, new DateTime(pigEvent.getEventAt()), PigEvent.CONDITION)){
+                                if (!filterPigCondition(pigDto, new DateTime(pigEvent.getEventAt()), PigEvent.MATING) && checkRuleValue(ruleValueMap.get(1), timeDiff)){
+                                    continue;
+                                } else{
                                     timeDiff = getTimeDiff(new DateTime(pigEvent.getEventAt()));
                                     isSend = true;
                                 }
-                            }
-                            if (isSend) {
-                                if (!isMessage && Objects.equals(ruleTemplate.getType(), DoctorMessageRuleTemplate.Type.WARNING.getValue())) {
-                                    recordPigMessage(pigDto, PigEvent.CONDITION, getRuleTimeDiff(ruleValue, timeDiff), ruleValue, PigStatus.Mate, PigStatus.Pregnancy, PigStatus.Farrow, PigStatus.FEED, PigStatus.Wean, PigStatus.Entry);
-                                } else if (isMessage) {
-                                    pigDto.setEventDate(matingPigEvent.getEventAt());
-                                    pigDto.setOperatorName(matingPigEvent.getOperatorName());
-                                    pigDto.setRuleValueId(key);
-                                    getMessage(pigDto, ruleRole, sUsers, timeDiff, rule.getUrl(), PigEvent.CONDITION.getKey(), ruleValue.getId());
-                                }
-                                break;
+
                             }
                         }
-                    } catch (Exception e) {
-                        log.error("[SowBackFatProduce]-handle.message.failed {}", Throwables.getStackTraceAsString(e));
+                        if (isSend) {
+                            pigDto.setEventDate(matingPigEvent.getEventAt());
+                            pigDto.setOperatorName(matingPigEvent.getOperatorName());
+                            pigDto.setRuleValueId(key);
+                            getMessage(pigDto, ruleRole, sUsers, timeDiff, getRuleTimeDiff(ruleValue, timeDiff), rule.getUrl(), PigEvent.CONDITION.getKey(), ruleValue.getId());
+                            break;
+                        }
                     }
+                } catch (Exception e) {
+                    log.error("[SowBackFatProduce]-handle.message.failed");
                 }
             }
         }

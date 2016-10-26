@@ -13,6 +13,7 @@
         <result column="template_id" property="templateId"/>
         <result column="template_name" property="templateName"/>
         <result column="business_id" property="businessId"/>
+        <result column="rule_value_id" property="ruleValueId"/>
         <result column="message_template" property="messageTemplate"/>
         <result column="type" property="type"/>
         <result column="event_type" property="eventType"/>
@@ -33,11 +34,11 @@
     </sql>
 
     <sql id="cols_exclude_id">
-        farm_id, rule_id, role_id, template_id, template_name, business_id, message_template, type, event_type, category, data , url, created_by, created_at, updated_at
+        farm_id, rule_id, role_id, template_id, template_name, business_id, rule_value_id, message_template, type, event_type, category, data , url, created_by, created_at, updated_at
     </sql>
 
     <sql id="vals">
-        #{farmId}, #{ruleId}, #{roleId}, #{templateId}, #{templateName}, #{businessId}, #{messageTemplate}, #{type}, #{eventType},  #{category}, #{data}, #{url}, #{createdBy}, now(), now()
+        #{farmId}, #{ruleId}, #{roleId}, #{templateId}, #{templateName}, #{businessId}, #{ruleValueId}, #{messageTemplate}, #{type}, #{eventType},  #{category}, #{data}, #{url}, #{createdBy}, now(), now()
     </sql>
 
     <insert id="create" parameterType="DoctorMessage" keyProperty="id" useGeneratedKeys="true">
@@ -83,6 +84,7 @@
             <if test="templateId != null">template_id = #{templateId},</if>
             <if test="templateName != null">template_name = #{templateName},</if>
             <if test="businessId != null">business_id = #{businessId},</if>
+            <if test="businessId != null">rule_value_id = #{ruleValueId},</if>
             <if test="messageTemplate != null">message_template = #{messageTemplate},</if>
             <if test="type != null">type = #{type},</if>
             <if test="eventType != null">event_type = #{eventType},</if>
@@ -100,6 +102,14 @@
         WHERE id = #{id}
     </delete>
 
+    <delete id="deletes" parameterType="list">
+        DELETE FROM <include refid="tb"/>
+        WHERE id IN
+        <foreach collection="list" item="i" open="(" separator="," close=")">
+            #{i}
+        </foreach>
+    </delete>
+
     <sql id="criteria">
         <where>
             <if test="farmId != null">AND farm_id = #{farmId}</if>
@@ -108,6 +118,7 @@
             <if test="templateId != null">AND template_id = #{templateId}</if>
             <if test="templateName != null">AND template_name = #{templateName}</if>
             <if test="businessId != null">AND business_id = #{businessId}</if>
+            <if test="ruleValueId != null">AND rule_value_id = #{ruleValueId}</if>
             <if test="type != null">AND `type` = #{type}</if>
             <if test="eventType != null">AND `event_type` = #{eventType}</if>
             <if test="category != null">AND category = #{category}</if>
