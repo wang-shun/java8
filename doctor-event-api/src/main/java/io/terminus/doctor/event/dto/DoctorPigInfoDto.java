@@ -86,7 +86,7 @@ public class DoctorPigInfoDto implements Serializable{
     private Integer unweanQty;
     private Integer weanQty;
 
-        public static DoctorPigInfoDto buildDoctorPigInfoDto(DoctorPig doctorPig, DoctorPigTrack doctorPigTrack, List<DoctorPigEvent> doctorPigEvents){
+    public static DoctorPigInfoDto buildDoctorPigInfoDto(DoctorPig doctorPig, DoctorPigTrack doctorPigTrack, List<DoctorPigEvent> doctorPigEvents) {
         checkState(!isNull(doctorPig), "build.doctorPig.empty");
         DoctorPigInfoDtoBuilder builder = DoctorPigInfoDto.builder()
                 .id(doctorPig.getId()).pigId(doctorPig.getId()).orgId(doctorPig.getOrgId()).orgName(doctorPig.getOrgName()).farmId(doctorPig.getFarmId()).farmName(doctorPig.getFarmName())
@@ -94,7 +94,7 @@ public class DoctorPigInfoDto implements Serializable{
                 .inFarmDate(doctorPig.getInFarmDate()).dateAge(Days.daysBetween(new DateTime(doctorPig.getBirthDate()), DateTime.now()).getDays())
                 .creatorId(doctorPig.getCreatorId()).creatorName(doctorPig.getCreatorName());
 
-        if(!isNull(doctorPigTrack)){
+        if (!isNull(doctorPigTrack)) {
             PigStatus pigStatus = PigStatus.from(doctorPigTrack.getStatus());
             builder.status(doctorPigTrack.getStatus())
                     .statusName(pigStatus == null ? null : pigStatus.getDesc())
@@ -110,6 +110,7 @@ public class DoctorPigInfoDto implements Serializable{
                     .unweanQty(doctorPigTrack.getUnweanQty());
         }
         builder.doctorPigEvents(doctorPigEvents);
+
         return builder.build();
     }
 }

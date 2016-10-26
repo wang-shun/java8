@@ -67,8 +67,6 @@ public class StorageShortageProducer extends AbstractJobProducer {
 
     @Override
     protected void message(DoctorMessageRuleRole ruleRole, List<SubUser> subUsers) {
-        log.info("仓库库存不足消息产生 --- StorageShortageProducer 开始执行");
-
         Rule rule = ruleRole.getRule();
         // ruleValue map
         Map<Integer, RuleValue> ruleValueMap = Maps.newHashMap();
@@ -89,7 +87,6 @@ public class StorageShortageProducer extends AbstractJobProducer {
                 }
             }
         }
-        log.info("仓库库存不足消息产生 --- StorageShortageProducer 结束执行");
     }
 
     /**

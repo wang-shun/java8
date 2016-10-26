@@ -48,7 +48,6 @@ public class FattenPigRemoveProducer extends AbstractJobProducer {
 
     @Override
     protected void message(DoctorMessageRuleRole ruleRole, List<SubUser> subUsers) {
-        log.info("育肥猪出栏提示消息产生 --- FattenPigRemoveProducer 开始执行");
 
         Rule rule = ruleRole.getRule();
         // ruleValue map
@@ -76,7 +75,6 @@ public class FattenPigRemoveProducer extends AbstractJobProducer {
 
             });
         }
-        log.info("育肥猪出栏提示消息产生 --- FattenPigRemoveProducer 结束执行");
     }
 
     /**

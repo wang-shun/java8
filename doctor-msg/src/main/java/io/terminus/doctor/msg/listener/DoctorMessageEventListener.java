@@ -2,6 +2,7 @@ package io.terminus.doctor.msg.listener;
 
 import com.google.common.base.Throwables;
 import com.google.common.eventbus.Subscribe;
+import io.terminus.common.utils.Arguments;
 import io.terminus.doctor.common.enums.DataEventType;
 import io.terminus.doctor.common.event.CoreEventDispatcher;
 import io.terminus.doctor.common.event.DataEvent;
@@ -21,6 +22,7 @@ import org.springframework.stereotype.Component;
 import javax.annotation.PostConstruct;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Created by xiao on 16/9/21.
@@ -103,16 +105,15 @@ public class DoctorMessageEventListener implements EventListener{
      * @param eventType
      */
     private void updateMessage(Long businessId, Integer eventType) {
-
         DoctorMessageSearchDto doctorMessageSearchDto = new DoctorMessageSearchDto();
         doctorMessageSearchDto.setBusinessId(businessId);
-        doctorMessageSearchDto.setEventType(eventType);
-        List<DoctorMessage> messages = RespHelper.or500(doctorMessageReadService.findMessageListByCriteria(doctorMessageSearchDto));
-        if (messages != null && messages.size() > 0) {
-            messages.forEach(doctorMessage -> {
-                doctorMessageWriteService.deleteMessageById(doctorMessage.getId());
-                doctorMessageUserWriteService.deleteByMessageId(doctorMessage.getId());
-            });
+        if (eventType != 6){
+            doctorMessageSearchDto.setEventType(eventType);
+        }
+        List<Long> messageIds = RespHelper.orServEx(doctorMessageReadService.findMessageListByCriteria(doctorMessageSearchDto)).stream().map(DoctorMessage::getId).collect(Collectors.toList());;
+        if (!Arguments.isNullOrEmpty(messageIds)){
+            doctorMessageWriteService.deleteMessagesByIds(messageIds);
+            doctorMessageUserWriteService.deletesByMessageIds(messageIds);
         }
 
     }

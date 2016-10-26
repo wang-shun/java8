@@ -504,4 +504,12 @@ update doctor_barns set pig_type = 4 where pig_type = 8;
 update doctor_vaccination_pig_warns set pig_type = 7 where pig_type = 1;
 update doctor_vaccination_pig_warns set pig_type = 3 where pig_type = 10;
 update doctor_vaccination_pig_warns set pig_type = 4 where pig_type = 8;
+-- 2016-10-25
+ALTER TABLE doctor_messages ADD COLUMN rule_value_id BIGINT(20) DEFAULT NULL COMMENT '规则值id' AFTER business_id;
+
+-- 2016-10-26 修改消息用户关联表索引
+DROP INDEX idx_message_user_id ON doctor_message_user;
+CREATE INDEX   idx_userid_farmid_templateid ON doctor_message_user(user_id, farm_id, template_id);
+
+
 

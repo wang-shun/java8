@@ -326,13 +326,14 @@ public class DoctorMessages {
     }
 
     /**
-     * 四种背膘提示猪数量
+     * 消息模板下每个规则提示猪数量
      * @param farmId
+     * @param templateId
      * @return
      */
     @RequestMapping(value = "/warn/rule/backfat", method = RequestMethod.GET)
-    public List<BackFatMessageDto> getBackFatRulePigCount(@RequestParam("farmId") Long farmId){
-        DoctorMessageRuleTemplate template = RespHelper.or500(doctorMessageRuleTemplateReadService.findByCategory(Category.SOW_BACK_FAT.getKey())).get(0);
+    public List<BackFatMessageDto> getBackFatRulePigCount(@RequestParam("farmId") Long farmId, @RequestParam("templateId") Long templateId){
+        DoctorMessageRuleTemplate template = RespHelper.or500(doctorMessageRuleTemplateReadService.findMessageRuleTemplateById(templateId));
         DoctorMessageUserDto doctorMessageUserDto = new DoctorMessageUserDto();
         doctorMessageUserDto.setFarmId(farmId);
         doctorMessageUserDto.setTemplateId(template.getId());

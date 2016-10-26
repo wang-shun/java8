@@ -40,6 +40,7 @@ import io.terminus.doctor.event.model.DoctorGroupTrack;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
+import io.terminus.doctor.event.service.DoctorPigTypeStatisticWriteService;
 import io.terminus.doctor.move.dto.DoctorImportSheet;
 import io.terminus.doctor.move.dto.DoctorImportSow;
 import io.terminus.doctor.move.util.ImportExcelUtils;
@@ -131,6 +132,8 @@ public class DoctorImportDataService {
     private SubDao subDao;
     @Autowired
     private DoctorMoveDataService doctorMoveDataService;
+    @Autowired
+    private DoctorPigTypeStatisticWriteService doctorPigTypeStatisticWriteService;
 
     /**
      * 根据shit导入所有的猪场数据
@@ -157,6 +160,15 @@ public class DoctorImportDataService {
         importSow(farm, barnMap, breedMap, shit.getSow());
 
         doctorMoveDataService.moveWorkflow(farm);
+
+        movePigTypeStatistic(farm);
+    }
+
+    //统计下首页数据
+    private void movePigTypeStatistic(DoctorFarm farm) {
+        doctorPigTypeStatisticWriteService.statisticGroup(farm.getOrgId(), farm.getId());
+        doctorPigTypeStatisticWriteService.statisticPig(farm.getOrgId(), farm.getId(), DoctorPig.PIG_TYPE.BOAR.getKey());
+        doctorPigTypeStatisticWriteService.statisticPig(farm.getOrgId(), farm.getId(), DoctorPig.PIG_TYPE.SOW.getKey());
     }
 
     @Transactional
