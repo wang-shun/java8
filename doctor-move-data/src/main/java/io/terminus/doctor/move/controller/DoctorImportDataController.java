@@ -62,7 +62,7 @@ public class DoctorImportDataController {
             }
         });
     }
-    /** https://img.xrnm.com/2016102617483237814993.xls
+    /**
      * 导入所有的猪场数据
      * @param path excel文件路径
      * @return 是否成功
@@ -145,7 +145,7 @@ public class DoctorImportDataController {
     }
 
     @RequestMapping(value = "/importByHttpUrl", method = RequestMethod.GET)
-    public String importByHttpUrl(String fileURL){
+    public String importByHttpUrl(@RequestParam String fileURL){
         String fileType;
         if(fileURL.endsWith(".xlsx")){
             fileType = "xlsx";
@@ -156,7 +156,7 @@ public class DoctorImportDataController {
         }
         InputStream inputStream = null;
         try {
-            inputStream = new URL(fileURL).openConnection().getInputStream();
+            inputStream = new URL(fileURL.replace("https", "http")).openConnection().getInputStream();
             importByInputStream(inputStream, fileType);
             return "true";
         } catch (Exception e) {
