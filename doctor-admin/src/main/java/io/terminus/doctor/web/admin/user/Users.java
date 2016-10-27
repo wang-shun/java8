@@ -196,6 +196,7 @@ public class Users {
                 if (RespHelper.orServEx(doctorFarmReadService.findAllFarms()).size() > farms.size()) {
                     return true;
                 }
+                log.info("Oops! Import excel not ok, please wait! Try times:{}", i + 1);
             }
             return false;
         } catch (Exception e) {
