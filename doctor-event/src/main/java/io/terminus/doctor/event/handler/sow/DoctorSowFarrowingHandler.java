@@ -1,10 +1,8 @@
 package io.terminus.doctor.event.handler.sow;
 
 import com.google.common.base.MoreObjects;
-import com.google.common.base.Throwables;
 import com.google.common.primitives.Doubles;
 import com.google.common.primitives.Ints;
-import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
@@ -66,42 +64,37 @@ public class DoctorSowFarrowingHandler extends DoctorAbstractEventFlowHandler {
     protected IsOrNot eventCreatePreHandler(Execution execution, DoctorPigEvent doctorPigEvent, DoctorPigTrack doctorPigTrack, DoctorBasicInputInfoDto basicInputInfoDto, Map<String, Object> extra, Map<String, Object> context) {
         // 助产 信息
         extra.put("isHelp", 1);
-        log.info("sow farrow info execution:{}, event:{}, track:{}, input:{}, extra:{}, context:{}", execution, doctorPigEvent, doctorPigEvent, basicInputInfoDto, extra, context);
-        try {
-            // 校验 是否早产信息
-            DateTime pregJudgeDate = new DateTime(Long.valueOf(doctorPigTrack.getExtraMap().get("judgePregDate").toString()));
-            //分娩时间
-            DateTime farrowingDate = new DateTime(Long.valueOf(extra.get("farrowingDate").toString()));
-            doctorPigEvent.setFarrowingDate(farrowingDate.toDate());
-            //查找最近一次初配种事件
-            DoctorPigEvent firstMate = doctorPigEventDao.queryLastFirstMate(doctorPigTrack.getPigId(), doctorPigTrack.getCurrentParity());
-            if (notNull(firstMate)) {
-                DateTime mattingDate = new DateTime(firstMate.getEventAt());
 
-                //计算孕期
-                doctorPigEvent.setPregDays(Math.abs(Days.daysBetween(farrowingDate, mattingDate).getDays()));
-            }
+        // 校验 是否早产信息
+        DateTime pregJudgeDate = new DateTime(Long.valueOf(doctorPigTrack.getExtraMap().get("judgePregDate").toString()));
+        //分娩时间
+        DateTime farrowingDate = new DateTime(Long.valueOf(extra.get("farrowingDate").toString()));
+        doctorPigEvent.setFarrowingDate(farrowingDate.toDate());
+        //查找最近一次初配种事件
+        DoctorPigEvent firstMate = doctorPigEventDao.queryLastFirstMate(doctorPigTrack.getPigId(), doctorPigTrack.getCurrentParity());
+        if (notNull(firstMate)) {
+            DateTime mattingDate = new DateTime(firstMate.getEventAt());
+
+            //计算孕期
+            doctorPigEvent.setPregDays(Math.abs(Days.daysBetween(farrowingDate, mattingDate).getDays()));
+        }
 
 
-            //分娩窝重
-            doctorPigEvent.setFarrowWeight(Doubles.tryParse(Objects.toString(extra.get("birthNestAvg"))));
-            //分娩仔猪只数信息
-            doctorPigEvent.setLiveCount(Ints.tryParse(Objects.toString(extra.get("farrowingLiveCount"))));
-            doctorPigEvent.setHealthCount(Ints.tryParse(Objects.toString(extra.get("healthCount"))));
-            doctorPigEvent.setWeakCount(Ints.tryParse(Objects.toString(extra.get("weakCount"))));
-            doctorPigEvent.setMnyCount(Ints.tryParse(Objects.toString(extra.get("mnyCount"))));
-            doctorPigEvent.setJxCount(Ints.tryParse(Objects.toString(extra.get("jxCount"))));
-            doctorPigEvent.setDeadCount(Ints.tryParse(Objects.toString(extra.get("deadCount"))));
-            doctorPigEvent.setBlackCount(Ints.tryParse(Objects.toString(extra.get("blackCount"))));
+        //分娩窝重
+        doctorPigEvent.setFarrowWeight(Doubles.tryParse(Objects.toString(extra.get("birthNestAvg"))));
+        //分娩仔猪只数信息
+        doctorPigEvent.setLiveCount(Ints.tryParse(Objects.toString(extra.get("farrowingLiveCount"))));
+        doctorPigEvent.setHealthCount(Ints.tryParse(Objects.toString(extra.get("healthCount"))));
+        doctorPigEvent.setWeakCount(Ints.tryParse(Objects.toString(extra.get("weakCount"))));
+        doctorPigEvent.setMnyCount(Ints.tryParse(Objects.toString(extra.get("mnyCount"))));
+        doctorPigEvent.setJxCount(Ints.tryParse(Objects.toString(extra.get("jxCount"))));
+        doctorPigEvent.setDeadCount(Ints.tryParse(Objects.toString(extra.get("deadCount"))));
+        doctorPigEvent.setBlackCount(Ints.tryParse(Objects.toString(extra.get("blackCount"))));
 
-            if (farrowingDate.isBefore(pregJudgeDate)) {
-                extra.put("farrowingType", FarrowingType.EARLY.getKey());
-            } else {
-                extra.put("farrowingType", FarrowingType.USUAL.getKey());
-            }
-        } catch (Exception e) {
-            log.error("failed, cause:{}", Throwables.getStackTraceAsString(e));
-            throw new ServiceException("error");
+        if (farrowingDate.isBefore(pregJudgeDate)) {
+            extra.put("farrowingType", FarrowingType.EARLY.getKey());
+        } else {
+            extra.put("farrowingType", FarrowingType.USUAL.getKey());
         }
         return IsOrNot.NO;
     }
