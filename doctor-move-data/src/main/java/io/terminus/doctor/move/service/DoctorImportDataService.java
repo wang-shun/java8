@@ -62,6 +62,7 @@ import io.terminus.doctor.user.model.Sub;
 import io.terminus.doctor.user.model.SubRole;
 import io.terminus.doctor.user.service.DoctorUserReadService;
 import io.terminus.doctor.user.service.SubRoleWriteService;
+import io.terminus.doctor.warehouse.service.DoctorWareHouseTypeWriteService;
 import io.terminus.parana.user.impl.dao.UserProfileDao;
 import io.terminus.parana.user.model.LoginType;
 import io.terminus.parana.user.model.User;
@@ -137,6 +138,8 @@ public class DoctorImportDataService {
     private DoctorMoveDataService doctorMoveDataService;
     @Autowired
     private DoctorPigTypeStatisticWriteService doctorPigTypeStatisticWriteService;
+    @Autowired
+    private DoctorWareHouseTypeWriteService doctorWareHouseTypeWriteService;
 
     /**
      * 根据shit导入所有的猪场数据
@@ -165,6 +168,9 @@ public class DoctorImportDataService {
         doctorMoveDataService.moveWorkflow(farm);
 
         movePigTypeStatistic(farm);
+
+        //最后仓库数据
+        importWarehouse(farm, shit.getFarm());
     }
 
     //统计下首页数据
@@ -965,7 +971,8 @@ public class DoctorImportDataService {
     }
 
     public void importWarehouse(DoctorFarm farm, Sheet shit) {
-
+        //仓库大类，数据都是0
+        RespHelper.or500(doctorWareHouseTypeWriteService.initDoctorWareHouseType(farm.getId(), farm.getName(), null, null));
     }
 
     public void importMedicine(DoctorFarm farm, Sheet shit) {
