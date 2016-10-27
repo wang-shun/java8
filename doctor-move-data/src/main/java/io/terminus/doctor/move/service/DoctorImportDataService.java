@@ -529,6 +529,10 @@ public class DoctorImportDataService {
             group.setOpenAt(openAt);  //建群时间
             group.setStatus(DoctorGroup.Status.CREATED.getValue());
             group.setInitBarnName(barn.getName());
+            group.setInitBarnId(barn.getId());
+            group.setPigType(barn.getPigType());
+            group.setStaffId(barn.getStaffId());
+            group.setStaffName(barn.getStaffName());
             group.setCurrentBarnId(group.getInitBarnId());
             group.setCurrentBarnName(group.getInitBarnName());
             doctorGroupDao.create(group);
