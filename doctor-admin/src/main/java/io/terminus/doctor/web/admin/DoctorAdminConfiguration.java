@@ -71,19 +71,15 @@ public class DoctorAdminConfiguration extends WebMvcConfigurerAdapter {
         return configurer;
     }
 
-    @Configuration
-    public static class ZookeeperConfiguration{
+    @Bean
+    public Subscriber cacheListenerBean(ZKClientFactory zkClientFactory,
+                                        @Value("${zookeeper.zkTopic}") String cacheTopic) throws Exception{
+        return new Subscriber(zkClientFactory,cacheTopic);
+    }
 
-        @Bean
-        public Subscriber cacheListenerBean(ZKClientFactory zkClientFactory,
-                                            @Value("${zookeeper.zkTopic}") String cacheTopic) throws Exception{
-            return new Subscriber(zkClientFactory,cacheTopic);
-        }
-
-        @Bean
-        public Publisher cachePublisherBean(ZKClientFactory zkClientFactory,
-                                            @Value("${zookeeper.zkTopic}") String cacheTopic) throws Exception{
-            return new Publisher(zkClientFactory, cacheTopic);
-        }
+    @Bean
+    public Publisher cachePublisherBean(ZKClientFactory zkClientFactory,
+                                        @Value("${zookeeper.zkTopic}") String cacheTopic) throws Exception{
+        return new Publisher(zkClientFactory, cacheTopic);
     }
 }

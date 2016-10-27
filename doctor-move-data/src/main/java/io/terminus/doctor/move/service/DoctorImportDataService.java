@@ -76,6 +76,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -505,10 +507,71 @@ public class DoctorImportDataService {
     }
 
     /**
+     * 导入产房仔猪群
+     * @param feedSowLast 所有哺乳母猪各自的最后一条数据
+     */
+    private void importFarrowPiglet(List<DoctorPigTrack> feedSowTrack, List<DoctorImportSow> feedSowLast, Map<String, DoctorBarn> barnMap, DoctorFarm farm){
+        // 先按所在猪舍分组
+        Map<String, List<DoctorImportSow>> sowMap = feedSowLast.stream().collect(Collectors.groupingBy(DoctorImportSow::getBarnName));
+        sowMap.entrySet().forEach(entry -> {
+            DoctorBarn barn = barnMap.get(entry.getKey());
+            List<DoctorImportSow> sows = entry.getValue();
+            Date openAt = sows.stream().map(sow -> sow.getPregDate() == null ? new Date() : sow.getPregDate()).min(Date::compareTo).orElse(new Date()); // 分娩日期的最小值，作为建群日期
+            Integer pigletCount = sows.stream().map(DoctorImportSow::getLiveCount).reduce((a, b) -> a + b).orElse(0); // 活仔数
+            Integer weak = sows.stream().map(DoctorImportSow::getWeakCount).reduce((a, b) -> a + b).orElse(0); // 弱仔数
+
+            DoctorGroup group = new DoctorGroup();
+            group.setOrgId(farm.getOrgId());
+            group.setOrgName(farm.getOrgName());
+            group.setFarmId(farm.getId());
+            group.setFarmName(farm.getName());
+            group.setGroupCode(barn.getName() + "(" + DateUtil.toDateString(openAt) + ")");
+            group.setOpenAt(openAt);  //建群时间
+            group.setStatus(DoctorGroup.Status.CREATED.getValue());
+            group.setInitBarnName(barn.getName());
+            group.setInitBarnId(barn.getId());
+            group.setPigType(barn.getPigType());
+            group.setStaffId(barn.getStaffId());
+            group.setStaffName(barn.getStaffName());
+            group.setCurrentBarnId(group.getInitBarnId());
+            group.setCurrentBarnName(group.getInitBarnName());
+            doctorGroupDao.create(group);
+
+            final double baseWeight = 1.5D;
+            DoctorGroupTrack groupTrack = new DoctorGroupTrack();
+            groupTrack.setGroupId(group.getId());
+            groupTrack.setSex(DoctorGroupTrack.Sex.MIX.getValue());
+            groupTrack.setQuantity(pigletCount);
+            groupTrack.setBoarQty(0);
+            groupTrack.setSowQty(groupTrack.getQuantity() - groupTrack.getBoarQty());
+            groupTrack.setAvgDayAge(DateUtil.getDeltaDaysAbs(new DateTime(openAt).withTimeAtStartOfDay().toDate(), DateTime.now().withTimeAtStartOfDay().toDate()));
+            groupTrack.setBirthDate(openAt);
+            groupTrack.setWeight(baseWeight * pigletCount);
+            groupTrack.setAvgWeight(baseWeight);
+            groupTrack.setWeanAvgWeight(0D);
+            groupTrack.setBirthAvgWeight(baseWeight);
+            groupTrack.setWeakQty(weak);
+            groupTrack.setUnweanQty(pigletCount);
+            groupTrack.setUnqQty(pigletCount);
+            doctorGroupTrackDao.create(groupTrack);
+
+            // 把 产房仔猪群 的groupId 存入相应猪舍的所有母猪
+            feedSowTrack.forEach(track -> {
+                DoctorPigTrack newTrack = new DoctorPigTrack();
+                newTrack.setId(track.getId());
+                newTrack.setGroupId(group.getId());
+                doctorPigTrackDao.update(newTrack);
+            });
+        });
+    }
+
+    /**
      * 导入母猪
      */
     @Transactional
     private void importSow(DoctorFarm farm, Map<String, DoctorBarn> barnMap, Map<String, Long> breedMap, Sheet shit) {
+        List<DoctorImportSow> feedSowLast = new ArrayList<>(); // 所有哺乳母猪各自的最后一条数据
+        List<DoctorPigTrack> feedSowTrack = new ArrayList<>();
         Map<String, List<DoctorImportSow>> sowMap = getImportSows(shit).stream().collect(Collectors.groupingBy(DoctorImportSow::getSowCode));
         sowMap.entrySet().forEach(map -> {
             List<DoctorImportSow> importSows = map.getValue().stream().sorted((a, b) -> a.getParity().compareTo(b.getParity())).collect(Collectors.toList());
@@ -554,6 +617,7 @@ public class DoctorImportDataService {
                         DoctorPigEvent pregYang = createPregCheckEvent(is, sow, mateEvent, PregCheckResult.YANG);
                         DoctorPigEvent farrowEvent = createFarrowEvent(is, sow, pregYang);
                         putParityMap(parityMap, is.getParity(), Lists.newArrayList(mateEvent.getId(), pregYang.getId(), farrowEvent.getId()));
+                        feedSowLast.add(last);
                         continue;
                     }
                     //断奶的情况走下面的方法
@@ -582,8 +646,14 @@ public class DoctorImportDataService {
                 }
             }
 
-            getSowTrack(sow, last, parityMap, barnMap.get(last.getBarnName()));
+            DoctorPigTrack track = getSowTrack(sow, last, parityMap, barnMap.get(last.getBarnName()));
+            if (Objects.equals(track.getStatus(), PigStatus.FEED.getKey())) {
+                feedSowTrack.add(track);
+            }
         });
+
+        // 智能生成产房仔猪群，holy shit
+        this.importFarrowPiglet(feedSowTrack, feedSowLast, barnMap, farm);
     }
 
     private static PregCheckResult getCheckResultByRemark(String remark) {
@@ -933,7 +1003,7 @@ public class DoctorImportDataService {
                 sow.setFarrowBarnName(ImportExcelUtils.getString(row, 9));                              //分娩猪舍
                 sow.setBed(ImportExcelUtils.getString(row, 10));                                        //床号
                 sow.setWeanDate(ImportExcelUtils.getDate(row, 11));       //断奶日期
-                sow.setLiveCount(ImportExcelUtils.getIntOrDefault(row, 12, 0));                         //活仔数
+                sow.setLiveCount(ImportExcelUtils.getIntOrDefault(row, 12, 0) + ImportExcelUtils.getIntOrDefault(row, 14, 0)); //活仔数
                 sow.setJixingCount(ImportExcelUtils.getIntOrDefault(row, 13, 0));                       //畸形
                 sow.setWeakCount(ImportExcelUtils.getIntOrDefault(row, 14, 0));                         //弱仔数
                 sow.setDeadCount(ImportExcelUtils.getIntOrDefault(row, 15, 0));                         //死仔
