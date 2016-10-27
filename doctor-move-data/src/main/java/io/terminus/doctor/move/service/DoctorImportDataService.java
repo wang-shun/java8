@@ -998,7 +998,7 @@ public class DoctorImportDataService {
                 sow.setMateDate(ImportExcelUtils.getDate(row, 4));        //配种日期
                 sow.setBoarCode(ImportExcelUtils.getString(row, 5));                                    //公猪耳号
                 sow.setMateStaffName(ImportExcelUtils.getString(row, 6));                               //配种员
-                sow.setPrePregDate(ImportExcelUtils.getDate(row, 7));     //预产日期
+                sow.setPrePregDate(new DateTime(sow.getMateDate()).plusDays(114).toDate());     //预产日期
                 sow.setPregDate(ImportExcelUtils.getDate(row, 8));        //实产日期
                 sow.setFarrowBarnName(ImportExcelUtils.getString(row, 9));                              //分娩猪舍
                 sow.setBed(ImportExcelUtils.getString(row, 10));                                        //床号
