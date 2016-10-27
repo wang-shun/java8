@@ -58,32 +58,11 @@ public class DoctorImportDataController {
             if(dataEvent != null && dataEvent.getEventType().equals(DataEventType.ImportExcel.getKey())){
                 log.warn("成功监听到导数事件, content={}", dataEvent.getContent());
                 String fileURL = DataEvent.analyseContent(dataEvent, String.class);
-                String fileType;
-                if(fileURL.endsWith(".xlsx")){
-                    fileType = "xlsx";
-                }else if(fileURL.endsWith(".xls")){
-                    fileType = "xls";
-                }else{
-                    throw new ServiceException("file.type.error");
-                }
-                InputStream inputStream = null;
-                try {
-                    inputStream = new URL(fileURL).openConnection().getInputStream();
-                    importByInputStream(inputStream, fileType);
-                } catch (Exception e) {
-                    log.error(Throwables.getStackTraceAsString(e));
-                } finally {
-                    if(inputStream != null){
-                        try {
-                            inputStream.close();
-                        } catch (IOException e) {
-                        }
-                    }
-                }
+                importByHttpUrl(fileURL);
             }
         });
     }
-    /**
+    /** https://img.xrnm.com/2016102617483237814993.xls
      * 导入所有的猪场数据
      * @param path excel文件路径
      * @return 是否成功
@@ -163,5 +142,33 @@ public class DoctorImportDataController {
         groupDumpService.fullDump(null);
         pigDumpService.fullDump(null);
         log.warn("all data moved successfully, CONGRATULATIONS!!!");
+    }
+
+    @RequestMapping(value = "/importByHttpUrl", method = RequestMethod.GET)
+    public String importByHttpUrl(String fileURL){
+        String fileType;
+        if(fileURL.endsWith(".xlsx")){
+            fileType = "xlsx";
+        }else if(fileURL.endsWith(".xls")){
+            fileType = "xls";
+        }else{
+            throw new ServiceException("file.type.error");
+        }
+        InputStream inputStream = null;
+        try {
+            inputStream = new URL(fileURL).openConnection().getInputStream();
+            importByInputStream(inputStream, fileType);
+            return "true";
+        } catch (Exception e) {
+            log.error(Throwables.getStackTraceAsString(e));
+            return "false";
+        } finally {
+            if(inputStream != null){
+                try {
+                    inputStream.close();
+                } catch (IOException e) {
+                }
+            }
+        }
     }
 }
