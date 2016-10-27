@@ -3,6 +3,7 @@ package io.terminus.doctor.move.util;
 import com.google.common.base.Strings;
 import io.terminus.doctor.common.utils.DateUtil;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.poi.hssf.usermodel.HSSFDateUtil;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 
@@ -86,7 +87,9 @@ public class ImportExcelUtils {
         if (cell == null) return null;
         if(cell.getCellType() == Cell.CELL_TYPE_STRING){
             return DateUtil.formatToDate(DateUtil.DATE_SLASH, cell.getStringCellValue());
-        }else if(cell.getCellType() == Cell.CELL_TYPE_NUMERIC){
+        }else if(cell.getCellType() == Cell.CELL_TYPE_NUMERIC) {
+            return cell.getDateCellValue();
+        }else if(HSSFDateUtil.isCellDateFormatted(cell)){
             return cell.getDateCellValue();
         }else{
             return null;
