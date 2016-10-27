@@ -1,5 +1,6 @@
 package io.terminus.doctor.move.controller;
 
+import com.google.common.base.Stopwatch;
 import com.google.common.base.Throwables;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.exception.ServiceException;
@@ -28,6 +29,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Desc:
@@ -135,12 +137,15 @@ public class DoctorImportDataController {
         sheet.setMaterial(getSheet(workbook, "9.原料"));
         sheet.setFeed(getSheet(workbook, "10.饲料"));
         sheet.setConsume(getSheet(workbook, "11.易耗品"));
+        Stopwatch watch = Stopwatch.createStarted();
         doctorImportDataService.importAll(sheet);
+        watch.stop();
+        int minute = Long.valueOf(watch.elapsed(TimeUnit.MINUTES) + 1).intValue();
+        log.warn("database data inserted successfully, elapsed {} minutes, now dumping ElasticSearch", minute);
 
-        log.warn("ElasticSearch dump start !");
-        barnSearchDumpService.fullDump(null);
-        groupDumpService.fullDump(null);
-        pigDumpService.fullDump(null);
+        barnSearchDumpService.deltaDump(minute);
+        groupDumpService.deltaDump(minute);
+        pigDumpService.deltaDump(minute);
         log.warn("all data moved successfully, CONGRATULATIONS!!!");
     }
 

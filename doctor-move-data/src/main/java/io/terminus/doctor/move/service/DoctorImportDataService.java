@@ -74,6 +74,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -163,8 +164,10 @@ public class DoctorImportDataService {
         importGroup(farm, barnMap, shit.getGroup());
         importSow(farm, barnMap, breedMap, shit.getSow());
 
+        // 工作流
         doctorMoveDataService.moveWorkflow(farm);
 
+        //首页统计数据
         movePigTypeStatistic(farm);
 
         //最后仓库数据
@@ -664,6 +667,15 @@ public class DoctorImportDataService {
             sowTrack.setFarrowAvgWeight(MoreObjects.firstNonNull(last.getNestWeight(), 0D)
                     / (last.getLiveCount() == 0 ? 1 : last.getLiveCount()));
         }
+
+        Map<String, Object> extra = new HashMap<>();
+        if(last.getPrePregDate() != null){
+            extra.put("judgePregDate", last.getPrePregDate());
+        }
+        if(!extra.isEmpty()){
+            sowTrack.setExtraMap(extra);
+        }
+
         doctorPigTrackDao.create(sowTrack);
         return sowTrack;
     }
