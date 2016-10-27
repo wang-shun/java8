@@ -492,9 +492,7 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
             return;
         }
         DoctorGroupEvent lastEvent = RespHelper.or500(doctorGroupReadService.findLastEventByGroupId(groupId));
-        if (lastEvent != null  && new DateTime(eventAt).plusDays(1).isAfter(lastEvent.getEventAt().getTime())){
-            return;
-        }else {
+        if (lastEvent != null && !new DateTime(eventAt).plusDays(1).isAfter(lastEvent.getEventAt().getTime())) {
             throw new ServiceException("event.at.illegal");
         }
     }
