@@ -49,7 +49,7 @@ public class DoctorSowWeanHandler extends DoctorAbstractEventFlowHandler {
     protected IsOrNot eventCreatePreHandler(Execution execution, DoctorPigEvent doctorPigEvent, DoctorPigTrack doctorPigTrack, DoctorBasicInputInfoDto basicInputInfoDto, Map<String, Object> extra, Map<String, Object> context) {
         DoctorPigEvent lastFarrow = doctorPigEventDao.queryLastFarrowing(doctorPigTrack.getPigId());
         //分娩时间
-        DateTime farrowingDate = new DateTime(Long.valueOf(lastFarrow.getExtraMap().get("farrowingDate").toString()));
+        DateTime farrowingDate = new DateTime(lastFarrow.getEventAt());
 
         //断奶时间
         DateTime partWeanDate = new DateTime(Long.valueOf(extra.get("partWeanDate").toString()));

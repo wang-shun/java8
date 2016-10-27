@@ -73,7 +73,7 @@ public class DoctorSowFarrowingHandler extends DoctorAbstractEventFlowHandler {
         //查找最近一次初配种事件
         DoctorPigEvent firstMate = doctorPigEventDao.queryLastFirstMate(doctorPigTrack.getPigId(), doctorPigTrack.getCurrentParity());
         if (notNull(firstMate)) {
-            DateTime mattingDate = new DateTime(firstMate.getExtraMap().get("matingDate"));
+            DateTime mattingDate = new DateTime(firstMate.getEventAt());
 
             //计算孕期
             doctorPigEvent.setPregDays(Math.abs(Days.daysBetween(farrowingDate, mattingDate).getDays()));
