@@ -14,7 +14,6 @@ import io.terminus.doctor.msg.dto.Rule;
 import io.terminus.doctor.msg.dto.RuleValue;
 import io.terminus.doctor.msg.dto.SubUser;
 import io.terminus.doctor.msg.enums.Category;
-import io.terminus.doctor.msg.model.DoctorMessageRule;
 import io.terminus.doctor.msg.model.DoctorMessageRuleRole;
 import io.terminus.doctor.msg.model.DoctorMessageRuleTemplate;
 import io.terminus.doctor.msg.service.DoctorMessageReadService;
@@ -84,10 +83,6 @@ public class SowBirthDateProducer extends AbstractJobProducer {
         Map<String, Object> criMap = Maps.newHashMap();
         criMap.put("farmId", ruleRole.getFarmId());
         criMap.put("category", category.getKey());
-        List<DoctorMessageRule> doctorMessageRules = RespHelper.orServEx(doctorMessageRuleReadService.findMessageRulesByCriteria(criMap));
-        Map<Integer, DoctorMessageRule> doctorMessageRuleMap = doctorMessageRules.stream().collect(Collectors.toMap(k-> k.getType(), v->v));
-        DoctorMessageRule warnRule = doctorMessageRuleMap.get(DoctorMessageRuleTemplate.Type.WARNING.getValue());
-        DoctorMessageRule errorRule = doctorMessageRuleMap.get(DoctorMessageRuleTemplate.Type.ERROR.getValue());
         // 批量获取母猪信息
         Long total = RespHelper.orServEx(doctorPigReadService.queryPigCount(
                 DataRange.FARM.getKey(), ruleRole.getFarmId(), DoctorPig.PIG_TYPE.SOW.getKey()));
@@ -108,11 +103,7 @@ public class SowBirthDateProducer extends AbstractJobProducer {
                     Double timeDiff = getTimeDiff(new DateTime(doctorPigEvent.getEventAt()));
 
                     ruleValueMap.values().forEach(ruleValue -> {
-                        Boolean isSend = checkRuleValue(ruleValue, timeDiff);
-                        if (Objects.equals(ruleTemplate.getType(), DoctorMessageRuleTemplate.Type.WARNING.getValue())) {
-                            isSend = isSend && !checkRuleValue(errorRule.getRule().getValues().get(0), timeDiff);
-                        }
-                        if (isSend) {
+                        if (checkRuleValue(ruleValue, timeDiff)) {
                             pigDto.setEventDate(doctorPigEvent.getEventAt());
                             pigDto.setOperatorName(doctorPigEvent.getOperatorName());
                             getMessage(pigDto, ruleRole, sUsers, timeDiff, timeDiff, rule.getUrl(), PigEvent.TO_FARROWING.getKey(), ruleValue.getId());
