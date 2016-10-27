@@ -4,9 +4,11 @@ import com.google.common.base.Joiner;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.Response;
+import io.terminus.common.utils.Joiners;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.common.utils.MapBuilder;
 import io.terminus.doctor.basic.dao.DoctorBasicDao;
@@ -567,13 +569,16 @@ public class DoctorImportDataService {
                     putParityMap(parityMap, is.getParity(), Lists.newArrayList(pregNotYang.getId()));
                 } else {
                     DoctorPigEvent pregYang = createPregCheckEvent(is, sow, mateEvent, PregCheckResult.YANG);
+
+                    // 如果妊娠检查为阳性并且猪舍为产房， 则转入分娩舍
+                    DoctorPigEvent toFarrowEvent = new DoctorPigEvent();
+                    if(last.getStatus().equals(PigStatus.Pregnancy.getKey()) && barnMap.get(last.getBarnName()).getPigType().equals(PigType.DELIVER_SOW.getValue())){
+                        toFarrowEvent = createToFarrowEvent(is, sow, pregYang);
+                    }
+
                     DoctorPigEvent farrowEvent = createFarrowEvent(is, sow, pregYang);
                     DoctorPigEvent weanEvent = createWeanEvent(is, sow, farrowEvent);
-                    // 如果妊娠检查为阳性并且猪舍为产房， 则转入分娩舍
-                    if(last.getStatus().equals(PigStatus.Pregnancy.getKey()) && barnMap.get(last.getBarnName()).getPigType().equals(PigType.DELIVER_SOW.getValue())){
-                        this.createToFarrowEvent(is, sow, pregYang);
-                    }
-                    putParityMap(parityMap, is.getParity(), Lists.newArrayList(pregYang.getId(), farrowEvent.getId(), weanEvent.getId()));
+                    putParityMap(parityMap, is.getParity(), Lists.newArrayList(pregYang.getId(), toFarrowEvent.getId(), farrowEvent.getId(), weanEvent.getId()));
                 }
             }
 
@@ -652,7 +657,11 @@ public class DoctorImportDataService {
         sowTrack.setCurrentBarnName(sow.getInitBarnName());
         sowTrack.setWeight(sow.getBirthWeight());
         sowTrack.setCurrentParity(last.getParity());
-        sowTrack.setRelEventIds(MAPPER.toJson(parityMap));
+
+        Map<Integer, String> relMap = Maps.newHashMap();
+        parityMap.entrySet().forEach(map -> relMap.put(map.getKey(), Joiners.COMMA.join(map.getValue())));
+
+        sowTrack.setRelEventIds(MAPPER.toJson(relMap));
         sowTrack.setCurrentMatingCount(0);       //当前配种次数0 查询的时候自动加1
         sowTrack.setFarrowQty(0);
         sowTrack.setUnweanQty(0);
@@ -736,7 +745,7 @@ public class DoctorImportDataService {
     }
 
     // 转入分娩舍事件
-    private void createToFarrowEvent(DoctorImportSow info, DoctorPig sow, DoctorPigEvent beforeEvent){
+    private DoctorPigEvent createToFarrowEvent(DoctorImportSow info, DoctorPig sow, DoctorPigEvent beforeEvent){
         DoctorPigEvent event = createSowEvent(info, sow);
         event.setEventAt(new DateTime(info.getPrePregDate()).minusDays(7).toDate());
         event.setType(PigEvent.TO_FARROWING.getKey());
@@ -752,6 +761,7 @@ public class DoctorImportDataService {
         event.setExtra(MAPPER.toJson(extra));
         event.setDesc(getEventDesc(extra.descMap()));
         doctorPigEventDao.create(event);
+        return event;
     }
 
     //创建配种事件
