@@ -66,11 +66,19 @@ public class DoctorImportDataController {
                 }else{
                     throw new ServiceException("file.type.error");
                 }
+                InputStream inputStream = null;
                 try {
-                    InputStream inputStream = new URL(fileURL).openConnection().getInputStream();
+                    inputStream = new URL(fileURL).openConnection().getInputStream();
                     importByInputStream(inputStream, fileType);
                 } catch (Exception e) {
                     log.error(Throwables.getStackTraceAsString(e));
+                } finally {
+                    if(inputStream != null){
+                        try {
+                            inputStream.close();
+                        } catch (IOException e) {
+                        }
+                    }
                 }
             }
         });
@@ -82,6 +90,7 @@ public class DoctorImportDataController {
      */
     @RequestMapping(value = "/all", method = RequestMethod.GET)
     public String importAll(@RequestParam("path") String path) {
+        InputStream inputStream = null;
         try {
             File file = new File(path);
             String fileType;
@@ -92,7 +101,8 @@ public class DoctorImportDataController {
             }else{
                 throw new ServiceException("file.type.error");
             }
-            this.importByInputStream(new FileInputStream(file), fileType);
+            inputStream = new FileInputStream(file);
+            this.importByInputStream(inputStream, fileType);
 
             return "true";
         } catch (ServiceException | JsonResponseException e) {
@@ -101,6 +111,13 @@ public class DoctorImportDataController {
         } catch (Exception e) {
             log.error("import all excel failed, path:{}, cause:{}", path, Throwables.getStackTraceAsString(e));
             return "false";
+        } finally {
+            if(inputStream != null){
+                try {
+                    inputStream.close();
+                } catch (IOException e) {
+                }
+            }
         }
     }
 
