@@ -83,7 +83,7 @@ public class DoctorSowPregCheckHandler extends DoctorAbstractEventFlowHandler {
         //查找最近一次配种事件
         DoctorPigEvent lastMate = doctorPigEventDao.queryLastFirstMate(doctorPigTrack.getPigId(), doctorPigTrack.getCurrentParity());
         if (notNull(lastMate) && !Objects.equals(pregCheckResult, PregCheckResult.YANG.getKey())) {
-            DateTime mattingDate = new DateTime(Long.valueOf(lastMate.getExtraMap().get("matingDate").toString()));
+            DateTime mattingDate = new DateTime(lastMate.getEventAt());
             if (notNull(mattingDate)) {
                 int npd = Math.abs(Days.daysBetween(checkDate, mattingDate).getDays());
 
