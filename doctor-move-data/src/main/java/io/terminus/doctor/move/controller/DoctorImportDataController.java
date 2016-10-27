@@ -58,20 +58,7 @@ public class DoctorImportDataController {
             if(dataEvent != null && dataEvent.getEventType().equals(DataEventType.ImportExcel.getKey())){
                 log.warn("成功监听到导数事件, content={}", dataEvent.getContent());
                 String fileURL = DataEvent.analyseContent(dataEvent, String.class);
-                String fileType;
-                if(fileURL.endsWith(".xlsx")){
-                    fileType = "xlsx";
-                }else if(fileURL.endsWith(".xls")){
-                    fileType = "xls";
-                }else{
-                    throw new ServiceException("file.type.error");
-                }
-                try {
-                    InputStream inputStream = new URL(fileURL).openConnection().getInputStream();
-                    importByInputStream(inputStream, fileType);
-                } catch (Exception e) {
-                    log.error(Throwables.getStackTraceAsString(e));
-                }
+                importByHttpUrl(fileURL);
             }
         });
     }
@@ -82,6 +69,7 @@ public class DoctorImportDataController {
      */
     @RequestMapping(value = "/all", method = RequestMethod.GET)
     public String importAll(@RequestParam("path") String path) {
+        InputStream inputStream = null;
         try {
             File file = new File(path);
             String fileType;
@@ -92,7 +80,8 @@ public class DoctorImportDataController {
             }else{
                 throw new ServiceException("file.type.error");
             }
-            this.importByInputStream(new FileInputStream(file), fileType);
+            inputStream = new FileInputStream(file);
+            this.importByInputStream(inputStream, fileType);
 
             return "true";
         } catch (ServiceException | JsonResponseException e) {
@@ -101,6 +90,13 @@ public class DoctorImportDataController {
         } catch (Exception e) {
             log.error("import all excel failed, path:{}, cause:{}", path, Throwables.getStackTraceAsString(e));
             return "false";
+        } finally {
+            if(inputStream != null){
+                try {
+                    inputStream.close();
+                } catch (IOException e) {
+                }
+            }
         }
     }
 
@@ -146,5 +142,33 @@ public class DoctorImportDataController {
         groupDumpService.fullDump(null);
         pigDumpService.fullDump(null);
         log.warn("all data moved successfully, CONGRATULATIONS!!!");
+    }
+
+    @RequestMapping(value = "/importByHttpUrl", method = RequestMethod.GET)
+    public String importByHttpUrl(@RequestParam String fileURL){
+        String fileType;
+        if(fileURL.endsWith(".xlsx")){
+            fileType = "xlsx";
+        }else if(fileURL.endsWith(".xls")){
+            fileType = "xls";
+        }else{
+            throw new ServiceException("file.type.error");
+        }
+        InputStream inputStream = null;
+        try {
+            inputStream = new URL(fileURL.replace("https", "http")).openConnection().getInputStream();
+            importByInputStream(inputStream, fileType);
+            return "true";
+        } catch (Exception e) {
+            log.error(Throwables.getStackTraceAsString(e));
+            return "false";
+        } finally {
+            if(inputStream != null){
+                try {
+                    inputStream.close();
+                } catch (IOException e) {
+                }
+            }
+        }
     }
 }
