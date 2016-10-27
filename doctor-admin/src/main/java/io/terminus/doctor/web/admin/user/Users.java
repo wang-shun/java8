@@ -15,7 +15,10 @@ import io.terminus.doctor.common.enums.DataEventType;
 import io.terminus.doctor.common.enums.UserStatus;
 import io.terminus.doctor.common.enums.UserType;
 import io.terminus.doctor.common.event.DataEvent;
+import io.terminus.doctor.common.utils.RespHelper;
+import io.terminus.doctor.user.model.DoctorFarm;
 import io.terminus.doctor.user.model.DoctorUser;
+import io.terminus.doctor.user.service.DoctorFarmReadService;
 import io.terminus.doctor.user.service.DoctorUserReadService;
 import io.terminus.doctor.user.util.DoctorUserMaker;
 import io.terminus.doctor.web.core.Constants;
@@ -41,12 +44,12 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static io.terminus.common.utils.Arguments.isNull;
@@ -63,6 +66,8 @@ public class Users {
 
     private final DoctorUserReadService doctorUserReadService;
 
+    private final DoctorFarmReadService doctorFarmReadService;
+
     private final MobilePattern mobilePattern;
 
     private final EventBus eventBus;
@@ -75,12 +80,13 @@ public class Users {
 
     @Autowired
     public Users(DoctorUserReadService doctorUserReadService,
-                 EventBus eventBus,
+                 DoctorFarmReadService doctorFarmReadService, EventBus eventBus,
                  AclLoader aclLoader,
                  PermissionHelper permissionHelper,
                  MobilePattern mobilePattern,
                  Publisher publisher) {
         this.doctorUserReadService = doctorUserReadService;
+        this.doctorFarmReadService = doctorFarmReadService;
         this.eventBus = eventBus;
         this.aclLoader = aclLoader;
         this.permissionHelper = permissionHelper;
@@ -90,7 +96,7 @@ public class Users {
 
     @RequestMapping("")
     public BaseUser getLoginUser() {
-        DoctorUser doctorUser = (DoctorUser) UserUtil.getCurrentUser();
+        DoctorUser doctorUser = UserUtil.getCurrentUser();
         try {
             Acl acl = aclLoader.getAcl(ParanaThreadVars.getApp());
             BaseUser user = UserUtil.getCurrentUser();
@@ -181,9 +187,17 @@ public class Users {
     @RequestMapping(value = "/importExcel", method = RequestMethod.GET)
     public boolean importExcel(String fileUrl){
         try {
+            List<DoctorFarm> farms = RespHelper.orServEx(doctorFarmReadService.findAllFarms());
             publisher.publish(DataEvent.toBytes(DataEventType.ImportExcel.getKey(), fileUrl));
 
-            return true;
+            //每10s查一发数据看看是否导入成功，超过200s后返回失败
+            for (int i = 0; i < 20; i++) {
+                Thread.sleep(10000);
+                if (RespHelper.orServEx(doctorFarmReadService.findAllFarms()).size() > farms.size()) {
+                    return true;
+                }
+            }
+            return false;
         } catch (Exception e) {
             log.error(Throwables.getStackTraceAsString(e));
             return false;
