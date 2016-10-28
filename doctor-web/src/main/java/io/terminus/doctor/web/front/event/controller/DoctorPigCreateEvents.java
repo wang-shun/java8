@@ -14,6 +14,7 @@ import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
 import io.terminus.doctor.event.dto.DoctorPigInfoDto;
 import io.terminus.doctor.event.dto.event.boar.DoctorSemenDto;
+import io.terminus.doctor.event.dto.event.sow.DoctorFarrowingDto;
 import io.terminus.doctor.event.dto.event.sow.DoctorPartWeanDto;
 import io.terminus.doctor.event.dto.event.usual.DoctorChgFarmDto;
 import io.terminus.doctor.event.dto.event.usual.DoctorChgLocationDto;
@@ -433,6 +434,25 @@ public class DoctorPigCreateEvents {
                 } catch (Exception e) {
                     log.error("to.chglocation.failed");
                     throw new JsonResponseException("to.chglocation.fail");
+                }
+            }
+            if (Objects.equals(eventType, PigEvent.FARROWING.getKey())) {
+                try {
+                    DoctorFarrowingDto farrowingDto = JsonMapper.JSON_NON_DEFAULT_MAPPER.fromJson(sowInfoDtoJson, DoctorFarrowingDto.class);
+                    if (Objects.equals(farrowingDto.getFarrowingLiveCount(), Integer.valueOf(0))){
+                       // Integer chgCount = farrowingDto.getDeadCount()+farrowingDto.getBlackCount()+farrowingDto.getMnyCount()+farrowingDto.getJxCount();
+                        DoctorPartWeanDto doctorPartWeanDto = DoctorPartWeanDto.builder()
+                                .partWeanDate(farrowingDto.getFarrowingDate())
+                                .partWeanPigletsCount(0)
+                                .partWeanAvgWeight(0d)
+                                .build();
+                        String partWeanJson = JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(doctorPartWeanDto);
+                        doctorSowEventCreateService.sowEventCreate(buildBasicInputInfoDto(farmId, tempPigId, PigEvent.WEAN, IsOrNot.YES.getValue()), partWeanJson);
+                    }
+
+                } catch (Exception e) {
+                    log.error("to.wean.failed");
+                    throw new JsonResponseException(e.getMessage());
                 }
             }
         }
