@@ -444,7 +444,7 @@ public class DoctorPigCreateEvents {
                         DoctorPartWeanDto doctorPartWeanDto = DoctorPartWeanDto.builder()
                                 .partWeanDate(farrowingDto.getFarrowingDate())
                                 .partWeanPigletsCount(0)
-                                .partWeanAvgWeight(5d)
+                                .partWeanAvgWeight(0d)
                                 .build();
                         String partWeanJson = JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(doctorPartWeanDto);
                         doctorSowEventCreateService.sowEventCreate(buildBasicInputInfoDto(farmId, tempPigId, PigEvent.WEAN, IsOrNot.YES.getValue()), partWeanJson);
