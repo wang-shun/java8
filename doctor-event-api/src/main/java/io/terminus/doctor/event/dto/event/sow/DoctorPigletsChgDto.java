@@ -77,10 +77,10 @@ public class DoctorPigletsChgDto extends AbstractPigEventInputDto implements Ser
             map.put("变动重量", pigletsWeight.toString());
         }
         if(pigletsPrice != null){
-            map.put("变动价格", Long.valueOf(pigletsPrice / 100).toString());
+            map.put("变动价格", Double.valueOf(pigletsPrice / 100.0).toString());
         }
         if(pigletsSum != null){
-            map.put("总价", Long.valueOf(pigletsSum / 100).toString());
+            map.put("总价", Double.valueOf(pigletsSum / 100.0).toString());
         }
         if(pigletsCustomerName != null){
             map.put("客户", pigletsCustomerName);

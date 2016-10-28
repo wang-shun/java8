@@ -138,7 +138,7 @@ public class DoctorMoveInGroupInput extends BaseGroupInput implements Serializab
             map.put("平均体重(Kg)", avgWeight.toString());
         }
         if(amount != null){
-            map.put("总价值", Long.valueOf(amount / 100).toString());
+            map.put("总价值", Double.valueOf(amount / 100.0).toString());
         }
         return map;
     }

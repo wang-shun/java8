@@ -120,10 +120,10 @@ public class DoctorChangeGroupInput extends BaseGroupInput implements Serializab
             map.put("品种", breedName);
         }
         if(price != null){
-            map.put("单价(元/kg)", Long.valueOf(price / 100).toString());
+            map.put("单价(元/kg)", Double.valueOf(price / 100.0).toString());
         }
         if(amount != null){
-            map.put("金额(元)", Long.valueOf(amount / 100).toString());
+            map.put("金额(元)", Double.valueOf(amount / 100.0).toString());
         }
         if(customerName != null){
             map.put("客户", customerName);
