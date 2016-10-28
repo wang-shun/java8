@@ -132,7 +132,7 @@ public class DoctorChangeGroupInput extends BaseGroupInput implements Serializab
             map.put("基础重量", baseWeight.toString() + "KG");
         }
         if(overPrice != null){
-            map.put("超出价格(元/kg)", Long.valueOf(overPrice / 100).toString());
+            map.put("超出价格(元/kg)", Double.valueOf(overPrice / 100.0).toString());
         }
         return map;
     }
