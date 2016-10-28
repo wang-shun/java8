@@ -97,7 +97,7 @@ public class DoctorChangeGroupInput extends BaseGroupInput implements Serializab
     /**
      * 超出价格(分/kg)
      */
-    @Min(value = 0L, message = "price.gt.0")
+   // @Min(value = 0L, message = "price.gt.0")
     private Long overPrice;
 
 
@@ -120,10 +120,10 @@ public class DoctorChangeGroupInput extends BaseGroupInput implements Serializab
             map.put("品种", breedName);
         }
         if(price != null){
-            map.put("单价(元/kg)", Long.valueOf(price / 100).toString());
+            map.put("单价(元/kg)", Double.valueOf(price / 100.0).toString());
         }
         if(amount != null){
-            map.put("金额(元)", Long.valueOf(amount / 100).toString());
+            map.put("金额(元)", Double.valueOf(amount / 100.0).toString());
         }
         if(customerName != null){
             map.put("客户", customerName);
@@ -132,7 +132,7 @@ public class DoctorChangeGroupInput extends BaseGroupInput implements Serializab
             map.put("基础重量", baseWeight.toString() + "KG");
         }
         if(overPrice != null){
-            map.put("超出价格(元/kg)", Long.valueOf(overPrice / 100).toString());
+            map.put("超出价格(元/kg)", Double.valueOf(overPrice / 100.0).toString());
         }
         return map;
     }
