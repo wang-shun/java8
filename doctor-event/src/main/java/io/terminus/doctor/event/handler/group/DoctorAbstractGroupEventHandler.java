@@ -353,6 +353,14 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
             }
             return;
         }
+        // 后备群 => 育肥舍/后备舍
+        if (Objects.equals(pigType, PigType.RESERVE.getValue())) {
+            if(barnType != PigType.RESERVE.getValue() && barnType != PigType.FATTEN_PIG.getValue()){
+                throw new ServiceException("reserve.can.not.trans");
+            }
+            return;
+        }
+
         //其他 => 同类型
         if(!Objects.equals(pigType, barnType)) {
             log.error("check can trans barn pigType:{}, barnType:{}", pigType, barnType);
