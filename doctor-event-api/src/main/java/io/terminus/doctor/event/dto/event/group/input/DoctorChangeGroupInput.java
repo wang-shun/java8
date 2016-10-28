@@ -97,7 +97,7 @@ public class DoctorChangeGroupInput extends BaseGroupInput implements Serializab
     /**
      * 超出价格(分/kg)
      */
-    @Min(value = 0L, message = "price.gt.0")
+   // @Min(value = 0L, message = "price.gt.0")
     private Long overPrice;
 
 
