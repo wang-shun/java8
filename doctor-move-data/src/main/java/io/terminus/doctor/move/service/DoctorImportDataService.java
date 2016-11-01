@@ -195,9 +195,13 @@ public class DoctorImportDataService {
 
     private void importStaff(Sheet staffShit, User primaryUser){
         final String appKey = "MOBILE";
-        RespHelper.or500(subRoleWriteService.initDefaultRoles(appKey, primaryUser.getId()));
+        List<SubRole> existRoles = subRoleDao.findByUserIdAndStatus(appKey, primaryUser.getId(), 1);
+        if(existRoles.isEmpty()){
+            RespHelper.or500(subRoleWriteService.initDefaultRoles(appKey, primaryUser.getId()));
+            existRoles = subRoleDao.findByUserIdAndStatus(appKey, primaryUser.getId(), 1);
+        }
         // key = roleName, value = roleId
-        Map<String, Long> existRole = subRoleDao.findByUserIdAndStatus(appKey, primaryUser.getId(), 1).stream().collect(Collectors.toMap(SubRole::getName, SubRole::getId));
+        Map<String, Long> existRole = existRoles.stream().collect(Collectors.toMap(SubRole::getName, SubRole::getId));
 
         List<String> existSubName = subDao.findByParentUserId(primaryUser.getId()).stream().map(Sub::getRealName).collect(Collectors.toList());
         String farmIds = Joiner.on(",").join(doctorFarmDao.findByOrgId(doctorStaffDao.findByUserId(primaryUser.getId()).getOrgId()).stream().map(DoctorFarm::getId).collect(Collectors.toList()));
@@ -280,6 +284,7 @@ public class DoctorImportDataService {
             RespHelper.or500(doctorMessageRuleWriteService.initTemplate(farm.getId()));
         }else{
             log.warn("farm {} has existed, id = {}", farmName, farm.getId());
+            throw new JsonResponseException("farm.has.been.existed");
         }
 
         // 主账号
