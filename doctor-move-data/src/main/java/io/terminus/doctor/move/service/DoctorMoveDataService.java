@@ -1883,7 +1883,11 @@ public class DoctorMoveDataService {
         event.setPigType(group.getPigType());
         event.setQuantity(gainEvent.getQuantity());
         event.setWeight(gainEvent.getWeight());
-        event.setAvgWeight(gainEvent.getAvgWeight());
+        if(gainEvent.getWeight() == null || gainEvent.getQuantity() == null || gainEvent.getQuantity() == 0){
+            event.setAvgWeight(0D);
+        }else{
+            event.setAvgWeight(gainEvent.getWeight() / gainEvent.getQuantity());
+        }
         event.setAvgDayAge(gainEvent.getAvgDayAge());
         event.setIsAuto(gainEvent.getIsAuto());
         event.setOutId(gainEvent.getGroupEventOutId());
@@ -1930,7 +1934,11 @@ public class DoctorMoveDataService {
                 }else{
                     event.setWeight(event.getAmount() / event.getPrice() * 1D);
                 }
-                event.setAvgWeight(event.getWeight() / event.getQuantity());
+                if(event.getWeight() == null || event.getQuantity() == null || event.getQuantity() == 0){
+                    event.setAvgWeight(0D);
+                }else{
+                    event.setAvgWeight(event.getWeight() / event.getQuantity());
+                }
                 break;
             case TRANS_GROUP:
                 DoctorTransGroupEvent transGroupEvent = getTranGroupEvent(gainEvent, basicMap, barnMap, groupMap, group);
