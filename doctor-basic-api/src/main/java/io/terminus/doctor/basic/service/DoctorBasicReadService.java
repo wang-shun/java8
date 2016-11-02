@@ -1,5 +1,6 @@
 package io.terminus.doctor.basic.service;
 
+import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.basic.model.DoctorBasic;
 import io.terminus.doctor.basic.model.DoctorChangeReason;
@@ -8,6 +9,7 @@ import io.terminus.doctor.basic.model.DoctorCustomer;
 import javax.annotation.Nullable;
 import javax.validation.constraints.NotNull;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Desc: 基础数据读服务
@@ -77,4 +79,13 @@ public interface DoctorBasicReadService {
      * @return 客户表
      */
     Response<List<DoctorCustomer>> findCustomersByFarmId(@NotNull(message = "farmId.not.null") Long farmId);
+
+    /**
+     * 分页查询变动原因
+     * @param pageNo
+     * @param pageSize
+     * @param criteria
+     * @return
+     */
+    Response<Paging<DoctorChangeReason>> pagingChangeReason(Integer pageNo, Integer pageSize, Map<String, Object> criteria);
 }

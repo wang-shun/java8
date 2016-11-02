@@ -1,11 +1,13 @@
 package io.terminus.doctor.web.admin.basic.controller;
 
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
+import io.terminus.common.model.Paging;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.basic.model.DoctorBasic;
 import io.terminus.doctor.basic.model.DoctorChangeReason;
 import io.terminus.doctor.basic.service.DoctorBasicReadService;
 import io.terminus.doctor.basic.service.DoctorBasicWriteService;
+import io.terminus.doctor.common.utils.Params;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.user.service.DoctorAddressReadService;
 import io.terminus.pampas.common.UserUtil;
@@ -19,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -116,8 +119,36 @@ public class DoctorBasics {
         return RespHelper.or500(doctorBasicWriteService.updateChangeReason(doctorChangeReason));
     }
 
+    /**
+     * 删除变动原因
+     * @param changeReasonId
+     * @return
+     */
     @RequestMapping(value = "/delete/changeReason", method = RequestMethod.GET)
     public Boolean deleteChangeReason(@RequestParam("changeReasonId") Long changeReasonId){
         return RespHelper.or500(doctorBasicWriteService.deleteChangeReasonById(changeReasonId));
+    }
+
+    /**
+     * 获取变动原因
+     * @param changeReasonId
+     * @return
+     */
+    @RequestMapping(value = "/find/changeReason", method = RequestMethod.GET)
+    public DoctorChangeReason findChangeReason(@RequestParam("changeReasonId")Long changeReasonId){
+        return RespHelper.or500(doctorBasicReadService.findChangeReasonById(changeReasonId));
+    }
+
+    /**
+     * 分页查询变动类型
+     * @param pageNo
+     * @param pageSize
+     * @param params
+     * @return
+     */
+    @RequestMapping(value = "/paging/changeReason", method = RequestMethod.GET)
+    public Paging<DoctorChangeReason> pagingChangeReason(@RequestParam(value = "pageNo", required = false) Integer pageNo, @RequestParam(value = "pageSize", required = false) Integer pageSize, @RequestParam Map<String, Object>params){
+        params = Params.filterNullOrEmpty(params);
+        return RespHelper.or500(doctorBasicReadService.pagingChangeReason(pageNo,pageSize,params));
     }
 }
