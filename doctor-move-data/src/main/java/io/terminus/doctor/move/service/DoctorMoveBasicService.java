@@ -1,6 +1,7 @@
 package io.terminus.doctor.move.service;
 
 import com.google.common.collect.Maps;
+import io.terminus.common.exception.JsonResponseException;
 import io.terminus.doctor.basic.dao.DoctorBasicDao;
 import io.terminus.doctor.basic.dao.DoctorBasicMaterialDao;
 import io.terminus.doctor.basic.dao.DoctorChangeReasonDao;
@@ -186,6 +187,13 @@ public class DoctorMoveBasicService {
     private DoctorBarn getBarn(DoctorFarm farm, Map<String, Long> subMap, View_PigLocationList location) {
         //转换pigtype
         PigType pigType = PigType.from(location.getTypeName());
+        if(pigType == null && location.getTypeName() != null && location.getTypeName().contains("后备")){
+            pigType = PigType.RESERVE;
+        }
+        if(pigType == null){
+            log.error("barn type is null, because source type name is {}", location.getTypeName());
+            throw new JsonResponseException("barn.type.null");
+        }
 
         DoctorBarn barn = new DoctorBarn();
         barn.setName(location.getBarn());
@@ -193,7 +201,7 @@ public class DoctorMoveBasicService {
         barn.setOrgName(farm.getOrgName());
         barn.setFarmId(farm.getId());
         barn.setFarmName(farm.getName());
-        barn.setPigType(pigType == null ? 0: pigType.getValue());
+        barn.setPigType(pigType.getValue());
         barn.setCanOpenGroup("可以".equals(location.getCanOpenGroupText()) ? 1 : -1);
         barn.setStatus("在用".equals(location.getIsStopUseText()) ? 1 : 0);
         barn.setStaffId(subMap.get(location.getStaffName()));
