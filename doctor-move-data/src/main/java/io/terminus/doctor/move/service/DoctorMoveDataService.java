@@ -1151,7 +1151,7 @@ public class DoctorMoveDataService {
         track.setFarmId(sow.getFarmId());
         track.setPigId(sow.getId());
         track.setPigType(sow.getPigType());
-        track.setStatus(status == null ? null : status.getKey());
+        track.setStatus(status == null ? PigStatus.Entry.getKey() : status.getKey());
         track.setIsRemoval(sow.getIsRemoval());
         track.setWeight(card.getWeight());
         track.setOutFarmDate(DateUtil.toDate(card.getOutFarmDate()));
