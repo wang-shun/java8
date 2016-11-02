@@ -3,6 +3,7 @@ package io.terminus.doctor.web.admin.basic.controller;
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.basic.model.DoctorBasic;
+import io.terminus.doctor.basic.model.DoctorChangeReason;
 import io.terminus.doctor.basic.service.DoctorBasicReadService;
 import io.terminus.doctor.basic.service.DoctorBasicWriteService;
 import io.terminus.doctor.common.utils.RespHelper;
@@ -93,5 +94,30 @@ public class DoctorBasics {
     @RequestMapping(value = "/addressTree", method = RequestMethod.GET)
     public String findAddressTree() {
         return JsonMapper.nonEmptyMapper().toJson(RespHelper.or500(doctorAddressReadService.findAllAddress()));
+    }
+
+    /**
+     * 根据变动类型获取变动原因列表
+     * @param changeTypeId
+     * @return
+     */
+    @RequestMapping(value = "/queryChangeReasons", method = RequestMethod.GET)
+    public List<DoctorChangeReason> queryChangeReasons(@RequestParam("changeTypeId") Long changeTypeId){
+        return RespHelper.or500(doctorBasicReadService.findChangeReasonByChangeTypeIdAndSrm(changeTypeId, null));
+    }
+
+    /**
+     * 修改变动原因
+     * @param doctorChangeReason
+     * @return
+     */
+    @RequestMapping(value = "/update/changeReason", method = RequestMethod.POST)
+    public Boolean updateChangeReason(DoctorChangeReason doctorChangeReason){
+        return RespHelper.or500(doctorBasicWriteService.updateChangeReason(doctorChangeReason));
+    }
+
+    @RequestMapping(value = "/delete/changeReason", method = RequestMethod.GET)
+    public Boolean deleteChangeReason(@RequestParam("changeReasonId") Long changeReasonId){
+        return RespHelper.or500(doctorBasicWriteService.deleteChangeReasonById(changeReasonId));
     }
 }
