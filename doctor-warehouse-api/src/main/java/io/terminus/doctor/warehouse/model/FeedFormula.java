@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Strings;
 import com.google.common.collect.Iterables;
+import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.constants.JacksonType;
 import lombok.AccessLevel;
@@ -132,6 +133,11 @@ public class FeedFormula implements Serializable {
             this.total = 0D;
             if(!isNull(materialProduceEntries)){
                 this.total += materialProduceEntries.stream().map(MaterialProduceEntry::getMaterialCount).reduce((a,b)->a+b).orElse(0D);
+            }
+            if(total.longValue() < FeedFormula.DEFAULT_COUNT){
+                throw new JsonResponseException("input.totalMaterialCount.error");
+            }else{
+                total = FeedFormula.DEFAULT_COUNT.doubleValue();
             }
 
             BigDecimal totalDecimal = BigDecimal.valueOf(total);
