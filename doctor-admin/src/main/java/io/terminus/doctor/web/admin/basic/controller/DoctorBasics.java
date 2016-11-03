@@ -110,12 +110,16 @@ public class DoctorBasics {
     }
 
     /**
-     * 修改变动原因
+     * 修改和添加变动原因
      * @param doctorChangeReason
      * @return
      */
     @RequestMapping(value = "/update/changeReason", method = RequestMethod.POST)
-    public Boolean updateChangeReason(DoctorChangeReason doctorChangeReason){
+    public Boolean updateAndCreateChangeReason(DoctorChangeReason doctorChangeReason){
+        if (doctorChangeReason.getId() == null || RespHelper.or500(doctorBasicReadService.findChangeReasonById(doctorChangeReason.getId())) == null){
+            RespHelper.or500(doctorBasicWriteService.createChangeReason(doctorChangeReason));
+            return Boolean.TRUE;
+        }
         return RespHelper.or500(doctorBasicWriteService.updateChangeReason(doctorChangeReason));
     }
 
