@@ -183,8 +183,8 @@ public class DoctorFeedFormulas {
                 .map(FeedFormula.MaterialProduceEntry::getMaterialCount)
                 .reduce((a,b)->a+b).orElse(0D);
         checkState(!Objects.equals(0, realTotal.intValue()), "input.materialProduceTotal.error");
-        double dis = (realTotal-materialProduce.getTotal()) * 100d / materialProduce.getTotal();
-        checkState(Math.abs(dis)<=5, "produce.materialCountChange.error");
+//        double dis = (realTotal-materialProduce.getTotal()) * 100d / materialProduce.getTotal();
+//        checkState(Math.abs(dis)<=5, "produce.materialCountChange.error");
     }
 
     private void buildProduceInfo(FeedFormula.FeedProduce materialProduce){
