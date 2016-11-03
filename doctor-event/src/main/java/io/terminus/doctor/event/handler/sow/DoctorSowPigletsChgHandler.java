@@ -108,6 +108,16 @@ public class DoctorSowPigletsChgHandler extends DoctorAbstractEventFlowHandler {
                     .weanAvgWeight(0D)
                     .farmName(basic.getFarmName())
                     .eventAt(basic.generateEventAtFromExtra(extra))
+                    .kind(DoctorPig.PIG_TYPE.SOW.getKey())
+                    .orgId(basic.getOrgId()).orgName(basic.getOrgName())
+                    .npd(0)
+                    .dpnpd(0)
+                    .pfnpd(0)
+                    .plnpd(0)
+                    .psnpd(0)
+                    .pynpd(0)
+                    .ptnpd(0)
+                    .jpnpd(0)
                     .build();
             doctorPigEventDao.create(doctorPigEvent);
 
