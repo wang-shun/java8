@@ -151,7 +151,7 @@ public class DoctorBasics {
      * @param changeReasonId
      * @return
      */
-    @RequestMapping(value = "/delete/changeReason", method = RequestMethod.GET)
+    @RequestMapping(value = "/delete/changeReason", method = RequestMethod.DELETE)
     public Boolean deleteChangeReason(@RequestParam("changeReasonId") Long changeReasonId){
         return RespHelper.or500(doctorBasicWriteService.deleteChangeReasonById(changeReasonId));
     }
