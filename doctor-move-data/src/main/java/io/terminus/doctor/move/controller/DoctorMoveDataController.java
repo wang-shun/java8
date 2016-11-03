@@ -1,5 +1,6 @@
 package io.terminus.doctor.move.controller;
 
+import com.google.common.base.Stopwatch;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
 import io.terminus.common.exception.ServiceException;
@@ -36,6 +37,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static io.terminus.common.utils.Arguments.notEmpty;
@@ -146,10 +148,8 @@ public class DoctorMoveDataController {
             //把所有猪舍添加到所有用户的权限里去
             userInitService.updatePermissionBarn(mobile);
 
-            log.warn("ElasticSearch dump start !");
+            log.warn("ElasticSearch full dump barn start !");
             barnSearchDumpService.fullDump(null);
-            groupDumpService.fullDump(null);
-            pigDumpService.fullDump(null);
             log.warn("all data moved successfully, CONGRATULATIONS!!!");
 
             return true;
@@ -175,24 +175,34 @@ public class DoctorMoveDataController {
         doctorMoveBasicService.moveAllBasic(moveId, farm);
         log.warn("move bascic end");
 
-        //4.迁移公猪 母猪 工作流
+        //4.迁移公猪 母猪
         try {
+            Stopwatch watch = Stopwatch.createStarted();
             log.warn("move pig start, moveId:{}", moveId);
             doctorMoveDataService.movePig(moveId, farm);
-            log.warn("move pig end");
+            watch.stop();
+            int minute = Long.valueOf(watch.elapsed(TimeUnit.MINUTES) + 1).intValue();
+            log.warn("move pig end, cost {} minutes, now dump ES", minute);
+            pigDumpService.deltaDump(minute);
         } catch (Exception e) {
             doctorMoveDataService.deleteAllPigs(farm.getId());
             log.error("move pig failed, moveId:{}, cause:{}", moveId, Throwables.getStackTraceAsString(e));
             throw new ServiceException("move.pig.error");
         }
+
+        // 工作流
         log.warn("move workflow start");
         doctorMoveDataService.moveWorkflow(farm);
         log.warn("move workflow end");
 
         //5.迁移猪群
+        Stopwatch watch = Stopwatch.createStarted();
         log.warn("move group start, moveId:{}", moveId);
         doctorMoveDataService.moveGroup(moveId, farm);
-        log.warn("move group end");
+        watch.stop();
+        int minute = Long.valueOf(watch.elapsed(TimeUnit.MINUTES) + 1).intValue();
+        log.warn("move group end, cost {} minutes, now dump ES", minute);
+        groupDumpService.deltaDump(minute);
 
         log.warn("move farrow sow start, moveId:{}", moveId);
         doctorMoveDataService.updateFarrowSow(farm);
