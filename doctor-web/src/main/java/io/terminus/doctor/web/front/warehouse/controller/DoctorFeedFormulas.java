@@ -105,9 +105,7 @@ public class DoctorFeedFormulas {
      */
     @RequestMapping(value = "/rules", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public boolean createMaterialRules(@RequestBody DoctorMaterialProductRatioDto dto){
-        if(!Objects.equals(dto.getProduce().calculateTotalPercent().longValue(), FeedFormula.DEFAULT_COUNT)){
-            throw new JsonResponseException("input.totalMaterialCount.error");
-        }
+        dto.getProduce().calculateTotalPercent();
         buildProduceInfo(dto.getProduce());
         // 此配方要生产的饲料
         DoctorBasicMaterial feed = RespHelper.or500(doctorBasicMaterialReadService.findBasicMaterialById(dto.getMaterialId()));

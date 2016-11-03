@@ -176,4 +176,39 @@ public class DoctorImportDataController {
             }
         }
     }
+
+    @RequestMapping(value = "/fixJudgePregDate", method = RequestMethod.GET)
+    public String fixJudgePregDate(@RequestParam("farmId") Long farmId, @RequestParam("path") String path) {
+        InputStream inputStream = null;
+        try {
+            File file = new File(path);
+            String fileType;
+            if(file.getName().endsWith(".xlsx")){
+                fileType = "xlsx";
+            }else if(file.getName().endsWith(".xls")){
+                fileType = "xls";
+            }else{
+                throw new ServiceException("file.type.error");
+            }
+
+            inputStream = new FileInputStream(file);
+            HSSFWorkbook workbook = new HSSFWorkbook(inputStream);  //2003
+            doctorImportDataService.fixJudgePregDate(farmId, getSheet(workbook, "3.母猪信息"));
+            return "true";
+        } catch (ServiceException | JsonResponseException e) {
+            log.error("import all excel failed, path:{}, cause:{}", path, Throwables.getStackTraceAsString(e));
+            return e.getMessage();
+        } catch (Exception e) {
+            log.error("import all excel failed, path:{}, cause:{}", path, Throwables.getStackTraceAsString(e));
+            return "false";
+        } finally {
+            if(inputStream != null){
+                try {
+                    inputStream.close();
+                } catch (IOException e) {
+                }
+            }
+        }
+    }
+
 }

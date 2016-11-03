@@ -195,9 +195,13 @@ public class DoctorImportDataService {
 
     private void importStaff(Sheet staffShit, User primaryUser){
         final String appKey = "MOBILE";
-        RespHelper.or500(subRoleWriteService.initDefaultRoles(appKey, primaryUser.getId()));
+        List<SubRole> existRoles = subRoleDao.findByUserIdAndStatus(appKey, primaryUser.getId(), 1);
+        if(existRoles.isEmpty()){
+            RespHelper.or500(subRoleWriteService.initDefaultRoles(appKey, primaryUser.getId()));
+            existRoles = subRoleDao.findByUserIdAndStatus(appKey, primaryUser.getId(), 1);
+        }
         // key = roleName, value = roleId
-        Map<String, Long> existRole = subRoleDao.findByUserIdAndStatus(appKey, primaryUser.getId(), 1).stream().collect(Collectors.toMap(SubRole::getName, SubRole::getId));
+        Map<String, Long> existRole = existRoles.stream().collect(Collectors.toMap(SubRole::getName, SubRole::getId));
 
         List<String> existSubName = subDao.findByParentUserId(primaryUser.getId()).stream().map(Sub::getRealName).collect(Collectors.toList());
         String farmIds = Joiner.on(",").join(doctorFarmDao.findByOrgId(doctorStaffDao.findByUserId(primaryUser.getId()).getOrgId()).stream().map(DoctorFarm::getId).collect(Collectors.toList()));
@@ -280,6 +284,7 @@ public class DoctorImportDataService {
             RespHelper.or500(doctorMessageRuleWriteService.initTemplate(farm.getId()));
         }else{
             log.warn("farm {} has existed, id = {}", farmName, farm.getId());
+            throw new JsonResponseException("farm.has.been.existed");
         }
 
         // 主账号
@@ -691,13 +696,14 @@ public class DoctorImportDataService {
         sow.setPigFatherCode(last.getFatherCode());
         sow.setPigMotherCode(last.getMotherCode());
         sow.setSource(PigSource.LOCAL.getKey());
-        sow.setBirthDate(last.getBirthDate());
         sow.setBirthWeight(0D);
         sow.setInFarmDate(new DateTime(first.getMateDate()).plusDays(-1).toDate()); //进场时间取第一次配种时间减一天
-        sow.setInFarmDayAge(DateUtil.getDeltaDaysAbs(MoreObjects.firstNonNull(sow.getInFarmDate(),
-                new DateTime(2009, 8, 1, 0, 0).toDate()), sow.getBirthDate()));
         sow.setInitBarnName(last.getBarnName());
         sow.setPigType(DoctorPig.PIG_TYPE.SOW.getKey());   //猪类
+        if(last.getBirthDate() != null){
+            sow.setBirthDate(last.getBirthDate());
+            sow.setInFarmDayAge(DateUtil.getDeltaDaysAbs(sow.getInFarmDate(), sow.getBirthDate()));
+        }
 
         DoctorBarn barn = barnMap.get(last.getBarnName());
         if (barn != null) {
@@ -1083,5 +1089,32 @@ public class DoctorImportDataService {
     //第一行是表头，跳过  第一列不能为空
     private static boolean canImport(Row row) {
         return row.getRowNum() > 0 && notEmpty(ImportExcelUtils.getString(row, 0));
+    }
+
+    /**
+     * 修改judgedate
+     * @param sheet
+     * @return
+     */
+    public Boolean fixJudgePregDate(Long farmId, Sheet sheet){
+        Map<String, List<DoctorImportSow>> sowMap = getImportSows(sheet).stream().collect(Collectors.groupingBy(DoctorImportSow::getSowCode));
+        sowMap.entrySet().forEach(map -> {
+            List<DoctorImportSow> importSows = map.getValue().stream().sorted((a, b) -> a.getParity().compareTo(b.getParity())).collect(Collectors.toList());
+            DoctorImportSow doctorImportSow = importSows.get(importSows.size()-1);
+            DoctorPig pig = doctorPigDao.findPigByFarmIdAndPigCode(farmId, doctorImportSow.getSowCode());
+            if (pig != null){
+                DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(pig.getId());
+                Map<String, Object> extra = doctorPigTrack.getExtraMap();
+                if (extra == null){
+                    extra = Maps.newHashMap();
+                }
+                if(doctorImportSow.getPrePregDate() != null && extra.get("judgePregDate") == null){
+                    extra.put("judgePregDate", doctorImportSow.getPrePregDate());
+                    doctorPigTrack.setExtraMap(extra);
+                    doctorPigTrackDao.update(doctorPigTrack);
+                }
+            }
+        });
+        return Boolean.TRUE;
     }
 }

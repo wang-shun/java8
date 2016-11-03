@@ -88,7 +88,12 @@ public class DoctorMoveInGroupEventHandler extends DoctorAbstractGroupEventHandl
         groupTrack.setSowQty(EventUtil.plusQuantity(groupTrack.getSowQty(), moveIn.getSowQty()));
 
         //重新计算日龄
-        groupTrack.setAvgDayAge(EventUtil.getAvgDayAge(groupTrack.getAvgDayAge(), oldQty, moveIn.getAvgDayAge(), moveIn.getQuantity()));
+        if (oldQty + moveIn.getQuantity() == 0){
+            groupTrack.setAvgDayAge(0);
+        }else {
+            groupTrack.setAvgDayAge(EventUtil.getAvgDayAge(groupTrack.getAvgDayAge(), oldQty, moveIn.getAvgDayAge(), moveIn.getQuantity()));
+        }
+
         groupTrack.setBirthDate(EventUtil.getBirthDate(new Date(), groupTrack.getAvgDayAge()));
 
         //重新计算重量

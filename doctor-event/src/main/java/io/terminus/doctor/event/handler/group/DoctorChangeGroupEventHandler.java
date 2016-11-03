@@ -62,7 +62,9 @@ public class DoctorChangeGroupEventHandler extends DoctorAbstractGroupEventHandl
 
         checkQuantity(groupTrack.getQuantity(), change.getQuantity());
         checkQuantityEqual(change.getQuantity(), change.getBoarQty(), change.getSowQty());
-        checkSalePrice(change.getChangeTypeId(), change.getPrice(), change.getBaseWeight(), change.getOverPrice());
+        if(Objects.equals(group.getPigType(), PigType.NURSERY_PIGLET.getValue())){
+            checkSalePrice(change.getChangeTypeId(), change.getPrice(), change.getBaseWeight(), change.getOverPrice());
+        }
 
         //1.转换猪群变动事件
         DoctorChangeGroupEvent changeEvent = BeanMapper.map(change, DoctorChangeGroupEvent.class);
