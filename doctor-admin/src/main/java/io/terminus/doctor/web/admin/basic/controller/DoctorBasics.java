@@ -1,12 +1,16 @@
 package io.terminus.doctor.web.admin.basic.controller;
 
+import com.google.api.client.util.Lists;
+import com.google.common.collect.Maps;
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.model.Paging;
+import io.terminus.common.utils.Arguments;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.basic.model.DoctorBasic;
 import io.terminus.doctor.basic.model.DoctorChangeReason;
 import io.terminus.doctor.basic.service.DoctorBasicReadService;
 import io.terminus.doctor.basic.service.DoctorBasicWriteService;
+import io.terminus.doctor.common.constants.JacksonType;
 import io.terminus.doctor.common.utils.Params;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.user.service.DoctorAddressReadService;
@@ -105,8 +109,27 @@ public class DoctorBasics {
      * @return
      */
     @RequestMapping(value = "/queryChangeReasons", method = RequestMethod.GET)
-    public List<DoctorChangeReason> queryChangeReasons(@RequestParam("changeTypeId") Long changeTypeId){
-        return RespHelper.or500(doctorBasicReadService.findChangeReasonByChangeTypeIdAndSrm(changeTypeId, null));
+    public List<DoctorChangeReason> queryChangeReasons(@RequestParam("changeTypeId") Long changeTypeId, @RequestParam(value = "srm", required = false) String srm){
+        List<DoctorChangeReason> reasons =  RespHelper.or500(doctorBasicReadService.findChangeReasonByChangeTypeIdAndSrm(changeTypeId, srm));
+        if (Arguments.isNullOrEmpty(reasons)){
+            return Lists.newArrayList();
+        }
+        String changeTypeName = RespHelper.or500(doctorBasicReadService.findBasicById(changeTypeId)).getName();
+        reasons.forEach(doctorChangeReason -> {
+            try {
+                Map<String, Object> extra;
+                if (doctorChangeReason.getExtra() == null){
+                    extra = Maps.newHashMap();
+                }else {
+                    extra = JsonMapper.JSON_NON_DEFAULT_MAPPER.getMapper().readValue(doctorChangeReason.getExtra(), JacksonType.MAP_OF_OBJECT);
+                }
+                extra.put("changeTypeName", changeTypeName);
+                doctorChangeReason.setExtra(JsonMapper.JSON_NON_DEFAULT_MAPPER.getMapper().writeValueAsString(extra));
+            } catch (Exception e){
+
+            }
+        });
+        return reasons;
     }
 
     /**
