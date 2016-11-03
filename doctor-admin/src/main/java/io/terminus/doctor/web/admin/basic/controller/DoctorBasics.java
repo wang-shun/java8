@@ -138,7 +138,7 @@ public class DoctorBasics {
      * @return
      */
     @RequestMapping(value = "/update/changeReason", method = RequestMethod.POST)
-    public Boolean updateAndCreateChangeReason(DoctorChangeReason doctorChangeReason){
+    public Boolean updateAndCreateChangeReason(@RequestBody DoctorChangeReason doctorChangeReason){
         if (doctorChangeReason.getId() == null || RespHelper.or500(doctorBasicReadService.findChangeReasonById(doctorChangeReason.getId())) == null){
             RespHelper.or500(doctorBasicWriteService.createChangeReason(doctorChangeReason));
             return Boolean.TRUE;
@@ -151,7 +151,7 @@ public class DoctorBasics {
      * @param changeReasonId
      * @return
      */
-    @RequestMapping(value = "/delete/changeReason", method = RequestMethod.GET)
+    @RequestMapping(value = "/delete/changeReason", method = RequestMethod.DELETE)
     public Boolean deleteChangeReason(@RequestParam("changeReasonId") Long changeReasonId){
         return RespHelper.or500(doctorBasicWriteService.deleteChangeReasonById(changeReasonId));
     }
