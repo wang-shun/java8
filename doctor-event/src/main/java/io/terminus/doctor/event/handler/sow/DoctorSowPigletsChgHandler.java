@@ -16,6 +16,7 @@ import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.handler.DoctorAbstractEventFlowHandler;
+import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.event.service.DoctorGroupReadService;
@@ -89,6 +90,7 @@ public class DoctorSowPigletsChgHandler extends DoctorAbstractEventFlowHandler {
             doctorPigTrack.setFarrowQty(0);  //分娩数 0
             doctorPigTrack.setFarrowAvgWeight(0D);
             doctorPigTrack.setWeanAvgWeight(0D);
+            DoctorPig doctorPig = doctorPigDao.findById(doctorPigTrack.getPigId());
             DoctorPigEvent doctorPigEvent = DoctorPigEvent.builder()
                     .type(PigEvent.WEAN.getKey())
                     .pigId(doctorPigTrack.getPigId())
@@ -101,7 +103,11 @@ public class DoctorSowPigletsChgHandler extends DoctorAbstractEventFlowHandler {
                     .partweanDate(new Date())
                     .farmId(doctorPigTrack.getFarmId())
                     .weanCount(changeCount)
+                    .pigCode(doctorPig.getPigCode())
+                    .name(PigEvent.WEAN.getName())
                     .weanAvgWeight(0D)
+                    .farmName(basic.getFarmName())
+                    .eventAt(basic.generateEventAtFromExtra(extra))
                     .build();
             doctorPigEventDao.create(doctorPigEvent);
 

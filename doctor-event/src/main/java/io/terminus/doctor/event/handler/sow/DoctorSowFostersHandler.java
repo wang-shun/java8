@@ -8,13 +8,18 @@ import io.terminus.doctor.event.dao.DoctorPigSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorPigTrackDao;
 import io.terminus.doctor.event.dao.DoctorRevertLogDao;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
+import io.terminus.doctor.event.enums.IsOrNot;
+import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.handler.DoctorAbstractEventFlowHandler;
+import io.terminus.doctor.event.model.DoctorPig;
+import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
 import io.terminus.doctor.workflow.core.Execution;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.Date;
 import java.util.Map;
 import java.util.Objects;
 
@@ -53,12 +58,34 @@ public class DoctorSowFostersHandler extends DoctorAbstractEventFlowHandler {
 
 
         //全部断奶后, 初始化所有本次哺乳的信息
+        Long pigEventId = (Long) context.get("doctorPigEventId");
+
         if (doctorPigTrack.getUnweanQty() == 0) {
             doctorPigTrack.setStatus(PigStatus.Wean.getKey());
             doctorPigTrack.setGroupId(-1L);  //groupId = -1 置成 NULL
             doctorPigTrack.setFarrowAvgWeight(0D); //分娩均重(kg)
             doctorPigTrack.setFarrowQty(0);  //分娩数 0
             doctorPigTrack.setWeanAvgWeight(0D);
+            DoctorPig doctorPig = doctorPigDao.findById(doctorPigTrack.getPigId());
+            DoctorPigEvent doctorPigEvent = DoctorPigEvent.builder()
+                    .type(PigEvent.WEAN.getKey())
+                    .pigId(doctorPigTrack.getPigId())
+                    .pigStatusBefore(PigStatus.FEED.getKey())
+                    .pigStatusAfter(PigStatus.Wean.getKey())
+                    .isAuto(IsOrNot.YES.getValue())
+                    .barnId(doctorPigTrack.getCurrentBarnId())
+                    .barnName(doctorPigTrack.getCurrentBarnName())
+                    .relPigEventId(pigEventId)
+                    .partweanDate(new Date())
+                    .farmId(doctorPigTrack.getFarmId())
+                    .weanCount(fosterCount)
+                    .weanAvgWeight(0D)
+                    .pigCode(doctorPig.getPigCode())
+                    .name(PigEvent.WEAN.getName())
+                    .eventAt(basic.generateEventAtFromExtra(extra))
+                    .farmName(basic.getFarmName())
+                    .build();
+            doctorPigEventDao.create(doctorPigEvent);
         } else {
             doctorPigTrack.setStatus(PigStatus.FEED.getKey());
         }
