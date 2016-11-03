@@ -105,4 +105,19 @@
             <include refid="criteria"/>
         </where>
     </select>
+
+    <select id="count" parameterType="map" resultType="long">
+        SELECT count(1) FROM <include refid="tb"/>
+        <where>
+            <include refid="criteria"/>
+        </where>
+    </select>
+
+    <select id="paging" parameterType="map" resultMap="DoctorChangeReasonMap">
+        SELECT <include refid="cols_all"/> FROM <include refid="tb"/>
+        <where>
+            <include refid="criteria"/>
+        </where>
+        LIMIT #{offset}, #{limit}
+    </select>
 </mapper>

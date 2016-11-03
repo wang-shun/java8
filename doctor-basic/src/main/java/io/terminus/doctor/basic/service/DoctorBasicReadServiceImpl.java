@@ -2,6 +2,8 @@ package io.terminus.doctor.basic.service;
 
 import com.google.common.base.Throwables;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
+import io.terminus.common.model.PageInfo;
+import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.basic.cache.DoctorBasicCacher;
 import io.terminus.doctor.basic.dao.DoctorBasicDao;
@@ -15,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static io.terminus.common.utils.Arguments.isEmpty;
@@ -128,6 +131,17 @@ public class DoctorBasicReadServiceImpl implements DoctorBasicReadService {
         } catch (Exception e) {
             log.error("find customer by farm id fail, farmId:{}, cause:{}", farmId, Throwables.getStackTraceAsString(e));
             return Response.fail("customer.find.fail");
+        }
+    }
+
+    @Override
+    public Response<Paging<DoctorChangeReason>> pagingChangeReason(Integer pageNo, Integer pageSize, Map<String, Object> criteria) {
+        try {
+            PageInfo pageInfo = PageInfo.of(pageNo, pageSize);
+            return Response.ok(doctorChangeReasonDao.paging(pageInfo.getOffset(), pageInfo.getLimit(), criteria));
+        } catch (Exception e) {
+            log.error("paging.change.reason.failed, cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("paging.change.reason.failed");
         }
     }
 }
