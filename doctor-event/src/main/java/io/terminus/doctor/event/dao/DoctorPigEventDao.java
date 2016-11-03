@@ -88,8 +88,10 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
      * 查询这头母猪,最近一次断奶事件
      *
      * @param pigId
+     * @deprecated 建议查询最近一次导致其断奶的事件，而不是单纯查询断奶事件
      * @return
      */
+    @Deprecated
     public DoctorPigEvent queryLastWean(Long pigId) {
         return this.getSqlSession().selectOne(sqlId("queryLastEvent"), MapBuilder.<String, Object>of().put("pigId", pigId).put("type", PigEvent.WEAN.getKey()).map());
     }
