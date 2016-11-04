@@ -3,6 +3,7 @@ package io.terminus.doctor.schedule.msg;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import io.terminus.common.utils.Arguments;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.msg.dto.Rule;
 import io.terminus.doctor.msg.dto.SubUser;
@@ -13,6 +14,7 @@ import io.terminus.doctor.msg.service.DoctorMessageReadService;
 import io.terminus.doctor.msg.service.DoctorMessageRuleTemplateReadService;
 import io.terminus.doctor.msg.service.DoctorMessageWriteService;
 import io.terminus.doctor.user.model.DoctorUserDataPermission;
+import io.terminus.doctor.user.model.PrimaryUser;
 import io.terminus.doctor.user.model.Sub;
 import io.terminus.doctor.user.service.DoctorUserDataPermissionReadService;
 import io.terminus.doctor.user.service.PrimaryUserReadService;
@@ -28,6 +30,7 @@ import javax.annotation.PostConstruct;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * Desc: 消息管理manager
@@ -88,19 +91,24 @@ public class MsgManager {
     public void produce() {
         try{
             List<SubUser> subUsers = Lists.newArrayList();
+            List<Long> userIds = Lists.newArrayList();
             List<Sub> subs = RespHelper.orServEx(primaryUserReadService.findAllActiveSubs());
-            for (int i = 0; subs!= null && i < subs.size(); i++) {
-                Sub sub = subs.get(i);
+            if (!Arguments.isNullOrEmpty(subs)){
+                userIds.addAll(subUsers.stream().map(sub -> sub.getUserId()).collect(Collectors.toList()));
+            }
+            List<PrimaryUser> primaryUsers = RespHelper.orServEx(primaryUserReadService.findAllPrimaryUser());
+            if (!Arguments.isNullOrEmpty(primaryUsers)){
+                userIds.addAll(primaryUsers.stream().map(sub -> sub.getUserId()).collect(Collectors.toList()));
+            }
+            userIds.forEach(userId -> {
                 SubUser subUser = SubUser.builder()
-                        .userId(sub.getUserId())
-                        .parentUserId(sub.getParentUserId())
-                        .roleId(sub.getRoleId())
+                        .userId(userId)
                         .farmIds(Lists.newArrayList())
                         .barnIds(Lists.newArrayList())
                         .build();
                 // 获取猪场权限
                 DoctorUserDataPermission dataPermission = RespHelper.orServEx(
-                        doctorUserDataPermissionReadService.findDataPermissionByUserId(sub.getUserId()));
+                        doctorUserDataPermissionReadService.findDataPermissionByUserId(userId));
                 if (dataPermission != null) {
                     dataPermission.setFarmIds(dataPermission.getFarmIds());
                     subUser.getFarmIds().addAll(dataPermission.getFarmIdsList());
@@ -108,7 +116,7 @@ public class MsgManager {
                     subUser.getBarnIds().addAll(dataPermission.getBarnIdsList());
                 }
                 subUsers.add(subUser);
-            }
+            });
             // 执行
             producerMap.values().parallelStream().forEach((producer) -> {
                 try{

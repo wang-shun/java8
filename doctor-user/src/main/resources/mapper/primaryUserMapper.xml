@@ -105,4 +105,14 @@
         <include refid="tb"/>
         WHERE `user_id` = #{userId}
     </select>
+
+    <select id="list" parameterType="map" resultMap="PrimaryUserMap">
+        SELECT id,
+        <include refid="cols_exclude_id"/>
+        FROM
+        <include refid="tb"/>
+        <where>
+            <include refid="criteria"/>
+        </where>
+    </select>
 </mapper>
