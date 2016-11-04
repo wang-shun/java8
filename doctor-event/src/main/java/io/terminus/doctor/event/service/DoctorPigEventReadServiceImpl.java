@@ -301,4 +301,14 @@ public class DoctorPigEventReadServiceImpl implements DoctorPigEventReadService 
             return Response.fail("last.event.failed");
         }
     }
+
+    @Override
+    public Response<List<DoctorPigEvent>> addWeanEventAfterFosAndPigLets() {
+        try {
+            return Response.ok(doctorPigEventDao.addWeanEventAfterFosAndPigLets());
+        } catch (Exception e) {
+            log.error("add.wean.event.after.failed, cause{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("add.wean.event.after.failed");
+        }
+    }
 }

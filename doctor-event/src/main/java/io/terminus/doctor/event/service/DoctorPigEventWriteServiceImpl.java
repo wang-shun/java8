@@ -34,6 +34,7 @@ import io.terminus.doctor.event.event.DoctorPigCountEvent;
 import io.terminus.doctor.event.event.PigEventCreateEvent;
 import io.terminus.doctor.event.manager.DoctorPigEventManager;
 import io.terminus.doctor.event.model.DoctorPig;
+import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.zookeeper.pubsub.Publisher;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -471,6 +472,17 @@ public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteServic
         }catch (Exception e){
             log.error("casual events pigs event create fail, basics:{}, extra:{}, cause:{}",basics, extra, Throwables.getStackTraceAsString(e));
             return Response.fail("create.casualPigsEvent.fail");
+        }
+    }
+
+    @Override
+    public Response<Boolean> createPigEvent(DoctorPigEvent doctorPigEvent) {
+        try {
+            doctorPigEventDao.create(doctorPigEvent);
+            return Response.ok(Boolean.TRUE);
+        } catch (Exception e) {
+            log.error("create.pig.event.failed, cause{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("create.pig.event.failed");
         }
     }
 
