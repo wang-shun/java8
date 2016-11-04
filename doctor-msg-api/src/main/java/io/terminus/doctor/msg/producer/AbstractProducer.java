@@ -321,22 +321,22 @@ public abstract class AbstractProducer implements IProducer {
 //        }
         Long messageId = RespHelper.orServEx(doctorMessageWriteService.createMessage(message));
         if (subUsers != null && subUsers.size() > 0) {
-            subUsers.stream().map(SubUser::getParentUserId).collect(Collectors.toSet())
-                    .forEach(parentId -> {
-                        DoctorMessageUser doctorMessageUser = DoctorMessageUser.builder()
-                                .userId(parentId)
-                                .messageId(messageId)
-                                .businessId(businessId)
-                                .ruleValueId(ruleValueId)
-                                .farmId(ruleRole.getFarmId())
-                                .templateId(ruleRole.getTemplateId())
-                                .statusSys(DoctorMessageUser.Status.NORMAL.getValue())
-                                .statusSms(DoctorMessageUser.Status.NORMAL.getValue())
-                                .statusEmail(DoctorMessageUser.Status.NORMAL.getValue())
-                                .statusApp(DoctorMessageUser.Status.NORMAL.getValue())
-                                .build();
-                        doctorMessageUserWriteService.createDoctorMessageUser(doctorMessageUser);
-                    });
+//            subUsers.stream().map(SubUser::getParentUserId).collect(Collectors.toSet())
+//                    .forEach(parentId -> {
+//                        DoctorMessageUser doctorMessageUser = DoctorMessageUser.builder()
+//                                .userId(parentId)
+//                                .messageId(messageId)
+//                                .businessId(businessId)
+//                                .ruleValueId(ruleValueId)
+//                                .farmId(ruleRole.getFarmId())
+//                                .templateId(ruleRole.getTemplateId())
+//                                .statusSys(DoctorMessageUser.Status.NORMAL.getValue())
+//                                .statusSms(DoctorMessageUser.Status.NORMAL.getValue())
+//                                .statusEmail(DoctorMessageUser.Status.NORMAL.getValue())
+//                                .statusApp(DoctorMessageUser.Status.NORMAL.getValue())
+//                                .build();
+//                        doctorMessageUserWriteService.createDoctorMessageUser(doctorMessageUser);
+//                    });
 
             // 子账户
             subUsers.stream().forEach(subUser -> {

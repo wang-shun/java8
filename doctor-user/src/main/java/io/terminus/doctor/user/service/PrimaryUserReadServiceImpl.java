@@ -163,4 +163,15 @@ public class PrimaryUserReadServiceImpl implements PrimaryUserReadService {
             return Response.fail("sub.find.fail");
         }
     }
+
+    @Override
+    public Response<List<PrimaryUser>> findAllPrimaryUser() {
+        try {
+            return Response.ok(primaryUserDao.listAll());
+        } catch (Exception e) {
+            log.error("find.all.primary.user.failed, cause{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("find.all.primary.user.failed");
+        }
+
+    }
 }
