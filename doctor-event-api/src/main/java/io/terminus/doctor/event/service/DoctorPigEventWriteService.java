@@ -15,6 +15,7 @@ import io.terminus.doctor.event.dto.event.usual.DoctorDiseaseDto;
 import io.terminus.doctor.event.dto.event.usual.DoctorFarmEntryDto;
 import io.terminus.doctor.event.dto.event.usual.DoctorRemovalDto;
 import io.terminus.doctor.event.dto.event.usual.DoctorVaccinationDto;
+import io.terminus.doctor.event.model.DoctorPigEvent;
 
 import javax.validation.constraints.NotNull;
 import java.util.List;
@@ -178,4 +179,11 @@ public interface DoctorPigEventWriteService {
      * @return
      */
     Response<Boolean> casualPigsEventCreate(List<DoctorBasicInputInfoDto> basics, Map<String,Object> extra);
+
+    /**
+     * 创建事件
+     * @param doctorPigEvent
+     * @return
+     */
+    Response<Boolean> createPigEvent(DoctorPigEvent doctorPigEvent);
 }

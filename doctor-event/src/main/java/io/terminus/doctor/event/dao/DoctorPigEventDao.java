@@ -233,4 +233,12 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
     public List<DoctorPigEvent> findByPigId(Long pigId) {
         return sqlSession.selectList(sqlId("findByPigId"), pigId);
     }
+
+    /**
+     * 事件列表(修复断奶事件暂时)
+     * @return
+     */
+    public List<DoctorPigEvent> addWeanEventAfterFosAndPigLets(){
+        return sqlSession.selectList(sqlId("addWeanEventAfterFosAndPigLets"));
+    }
 }

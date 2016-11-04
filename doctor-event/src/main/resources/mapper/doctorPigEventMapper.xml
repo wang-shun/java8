@@ -790,4 +790,10 @@
         FROM <include refid="tb" />
         WHERE pig_id = #{pigId}
     </select>
+
+    <select id="addWeanEventAfterFosAndPigLets"  resultMap="DoctorPigEventMap">
+        SELECT <include refid="cols_all" />
+        FROM <include refid="tb" />
+        WHERE `type` != 16 AND pig_status_before != 9 AND pig_status_after = 9 AND <![CDATA[ created_at < '2016-11-03 20:00:00' ]]>
+    </select>
 </mapper>
