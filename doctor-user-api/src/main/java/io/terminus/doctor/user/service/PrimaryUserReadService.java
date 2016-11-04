@@ -99,4 +99,10 @@ public interface PrimaryUserReadService {
      */
     Response<Sub> findSubByUserId(Long subUserId);
 
+    /**
+     * 获取所有主账号
+     * @return
+     */
+    Response<List<PrimaryUser>> findAllPrimaryUser();
+
 }
