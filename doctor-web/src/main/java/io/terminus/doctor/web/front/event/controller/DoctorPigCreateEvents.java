@@ -42,6 +42,7 @@ import io.terminus.pampas.common.UserUtil;
 import io.terminus.parana.user.service.UserReadService;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
@@ -681,7 +682,7 @@ public class DoctorPigCreateEvents {
             Date eventAt = DateUtil.toDate((String) map.get(key));
             DoctorPigEvent lastEvent = RespHelper.or500(doctorPigEventReadService.lastEvent(pigIds));
             if(lastEvent != null){
-                if (new DateTime(eventAt).plusDays(1).isAfter(lastEvent.getEventAt().getTime())) {
+                if (new DateTime(eventAt).plusDays(1).isAfter(lastEvent.getEventAt().getTime()) && eventAt.before(DateUtil.toDate(DateTime.now().plusDays(1).toString(DateTimeFormat.forPattern("yyyy-MM-dd"))))) {
                     return;
                 } else {
                     throw new JsonResponseException("event.at.illegal");
