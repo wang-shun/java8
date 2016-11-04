@@ -1,6 +1,7 @@
 package io.terminus.doctor.web.front.event.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.api.client.util.Maps;
 import com.google.common.base.Strings;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
@@ -698,18 +699,26 @@ public class DoctorPigCreateEvents {
     @RequestMapping(value = "/addWeanEvent", method = RequestMethod.GET)
     @ResponseBody
     public Boolean addWeanEventAfterFosAndPigLets(){
-        List<DoctorPigEvent> events = RespHelper.or500(doctorPigEventReadService.addWeanEventAfterFosAndPigLets());
-        events.forEach(doctorPigEvent -> {
-            DoctorPigEvent weanEvent = new DoctorPigEvent();
-            BeanMapper.copy(doctorPigEvent, weanEvent);
-            weanEvent.setType(PigEvent.WEAN.getKey());
-            weanEvent.setName(PigEvent.WEAN.getName());
-            weanEvent.setRelPigEventId(doctorPigEvent.getId());
-            weanEvent.setPartweanDate(doctorPigEvent.getEventAt());
-            weanEvent.setExtra("");
-            weanEvent.setIsAuto(IsOrNot.YES.getValue());
-            doctorPigEventWriteService.createPigEvent(weanEvent);
-        });
-        return Boolean.TRUE;
+        try {
+            Map<String, String> map = Maps.newHashMap();
+            map.put("#", "#");
+            String extra = OBJECT_MAPPER.writeValueAsString(map);
+            List<DoctorPigEvent> events = RespHelper.or500(doctorPigEventReadService.addWeanEventAfterFosAndPigLets());
+            events.forEach(doctorPigEvent -> {
+                DoctorPigEvent weanEvent = new DoctorPigEvent();
+                BeanMapper.copy(doctorPigEvent, weanEvent);
+                weanEvent.setType(PigEvent.WEAN.getKey());
+                weanEvent.setName(PigEvent.WEAN.getName());
+                weanEvent.setRelPigEventId(doctorPigEvent.getId());
+                weanEvent.setPartweanDate(doctorPigEvent.getEventAt());
+                weanEvent.setExtra(extra);
+                weanEvent.setIsAuto(IsOrNot.YES.getValue());
+                doctorPigEventWriteService.createPigEvent(weanEvent);
+            });
+            return Boolean.TRUE;
+        } catch (Exception e) {
+            log.error("add.failed, cause{}", Throwables.getStackTraceAsString(e));
+            return Boolean.FALSE;
+        }
     }
 }
