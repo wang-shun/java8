@@ -456,7 +456,7 @@
                 #{i}
             </foreach>
         </if>
-        order by event_at desc limit 1;
+        order by event_at desc ,id DESC limit 1;
     </select>
 
     <select id="queryLastFirstMate" parameterType="map" resultMap="DoctorPigEventMap">
@@ -468,7 +468,7 @@
         and parity = #{parity}
         and current_mating_count = #{currentMatingCount}
         and type = ${type}
-        order by event_at desc limit 1;
+        order by event_at desc ,id DESC limit 1;
     </select>
 
     <select id="queryLastEvent" parameterType="map" resultMap="DoctorPigEventMap">
@@ -478,7 +478,7 @@
         <include refid="tb"/>
         where pig_id = #{pigId}
         and type = ${type}
-        order by event_at desc limit 1;
+        order by event_at desc ,id DESC limit 1;
     </select>
 
     <select id="queryAllEventsByPigId" parameterType="long" resultMap="DoctorPigEventMap">
@@ -487,7 +487,7 @@
         FROM
         <include refid="tb"/>
         WHERE pig_id = #{pigId}
-        order by event_at asc
+        order by event_at asc, id ASC
     </select>
 
     <select id="count" parameterType="map" resultType="long">
@@ -508,6 +508,10 @@
         </where>
         <if test="ordered!=null">
             ORDER BY event_at
+            <if test="ordered == 0">
+                DESC
+            </if>
+            , id
             <if test="ordered == 0">
                 DESC
             </if>
@@ -782,9 +786,8 @@
         <foreach collection="list" item="i" open="(" close=")" separator=",">
             #{i}
         </foreach>
-        ORDER BY event_at DESC limit 1
+        ORDER BY event_at DESC ,id DESC limit 1
     </select>
-
     <select id="findByPigId" parameterType="long" resultMap="DoctorPigEventMap">
         SELECT <include refid="cols_all" />
         FROM <include refid="tb" />
