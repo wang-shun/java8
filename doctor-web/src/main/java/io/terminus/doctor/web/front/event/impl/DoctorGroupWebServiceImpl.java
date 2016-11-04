@@ -56,6 +56,7 @@ import io.terminus.pampas.common.UserUtil;
 import io.terminus.parana.user.model.UserProfile;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -492,8 +493,12 @@ public class DoctorGroupWebServiceImpl implements DoctorGroupWebService {
             return;
         }
         DoctorGroupEvent lastEvent = RespHelper.or500(doctorGroupReadService.findLastEventByGroupId(groupId));
-        if (lastEvent != null && !new DateTime(eventAt).plusDays(1).isAfter(lastEvent.getEventAt().getTime())) {
-            throw new ServiceException("event.at.illegal");
+        if (lastEvent != null ) {
+            if (new DateTime(eventAt).plusDays(1).isAfter(lastEvent.getEventAt().getTime()) && eventAt.before(DateUtil.toDate(DateTime.now().plusDays(1).toString(DateTimeFormat.forPattern("yyyy-MM-dd"))))) {
+                return;
+            } else {
+                throw new ServiceException("event.at.illegal");
+            }
         }
     }
 }
