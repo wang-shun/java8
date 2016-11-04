@@ -122,4 +122,11 @@ public interface DoctorPigEventReadService {
     Response<DoctorPigEvent> lastEvent(@NotNull(message = "input.pigIds.empty") List<Long> pigIds);
 
 
+    /**
+     * 事件列表(修复断奶事件暂时)
+     * @return
+     */
+    Response<List<DoctorPigEvent>> addWeanEventAfterFosAndPigLets();
+
+
 }
