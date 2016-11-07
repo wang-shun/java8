@@ -9,7 +9,6 @@ import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.PageInfo;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
-import io.terminus.common.utils.Arguments;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.common.utils.MapBuilder;
 import io.terminus.doctor.common.enums.PigType;
@@ -35,7 +34,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.validation.constraints.NotNull;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -369,11 +367,7 @@ public class DoctorGroupReadServiceImpl implements DoctorGroupReadService {
     @Override
     public Response<DoctorGroupEvent> canRollbackEvent(@NotNull(message = "input.groupId.empty") Long groupId) {
         try {
-            List<DoctorGroupEvent> doctorGroupEvents = doctorGroupEventDao.list(ImmutableMap.of("groupId", groupId, "isAuto", IsOrNot.NO.getValue(), "beginDate", DateTime.now().minusMonths(3).toDate()));
-            if (Arguments.isNullOrEmpty(doctorGroupEvents)){
-                return Response.ok();
-            }
-            return Response.ok(doctorGroupEvents.stream().max(Comparator.comparing(DoctorGroupEvent::getEventAt)).get());
+           return Response.ok(doctorGroupEventDao.canRollbackEvent(ImmutableMap.of("groupId", groupId, "isAuto", IsOrNot.NO.getValue(), "beginDate", DateTime.now().minusMonths(3).toDate())));
         } catch (Exception e) {
             log.error("can.rollback.event.failed, cause {}", Throwables.getStackTraceAsString(e));
             return Response.fail("can.rollback.event.failed");

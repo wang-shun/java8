@@ -241,4 +241,13 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
     public List<DoctorPigEvent> addWeanEventAfterFosAndPigLets(){
         return sqlSession.selectList(sqlId("addWeanEventAfterFosAndPigLets"));
     }
+
+    /**
+     * 能够回滚的事件
+     * @param criteria
+     * @return
+     */
+    public DoctorPigEvent canRollbackEvent(Map<String, Object> criteria){
+        return getSqlSession().selectOne(sqlId("canRollbackEvent"), criteria);
+    }
 }

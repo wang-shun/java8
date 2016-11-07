@@ -97,4 +97,13 @@ public class DoctorGroupEventDao extends MyBatisDao<DoctorGroupEvent> {
     public DoctorGroupEvent findByRelPigEventId(Long relPigEventId) {
         return getSqlSession().selectOne(sqlId("findByRelPigEventId"), relPigEventId);
     }
+
+    /**
+     * 能够回滚的事件
+     * @param criteria
+     * @return
+     */
+    public DoctorGroupEvent canRollbackEvent(Map<String, Object> criteria){
+        return getSqlSession().selectOne(sqlId("canRollbackEvent"), criteria);
+    }
 }
