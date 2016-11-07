@@ -382,7 +382,7 @@
         WHERE rel_pig_event_id = #{relPigEventId}
     </select>
 
-    <select id="canRollbackEvent" parameterMap="map" resultMap="DoctorPigEventMap">
+    <select id="canRollbackEvent" parameterType="map" resultMap="DoctorPigEventMap">
         SELECT
         <include refid="cols_all"/>
         FROM

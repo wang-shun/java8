@@ -800,7 +800,7 @@
         WHERE `type` != 16 AND pig_status_before != 9 AND pig_status_after = 9 AND <![CDATA[ created_at < '2016-11-03 20:00:00' ]]>
     </select>
 
-    <select id="canRollbackEvent" parameterMap="map" resultMap="DoctorPigEventMap">
+    <select id="canRollbackEvent" parameterType="map" resultMap="DoctorPigEventMap">
         SELECT
         <include refid="cols_all"/>
         FROM
