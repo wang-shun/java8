@@ -381,4 +381,15 @@
         FROM <include refid="tb" />
         WHERE rel_pig_event_id = #{relPigEventId}
     </select>
+
+    <select id="canRollbackEvent" parameterMap="map" resultMap="DoctorPigEventMap">
+        SELECT
+        <include refid="cols_all"/>
+        FROM
+        <include refid="tb"/>
+        <where>
+            <include refid="criteria"/>
+        </where>
+        order by event_at desc ,id DESC limit 1;
+    </select>
 </mapper>
