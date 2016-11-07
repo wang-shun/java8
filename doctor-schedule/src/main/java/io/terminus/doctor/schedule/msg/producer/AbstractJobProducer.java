@@ -149,7 +149,8 @@ public abstract class AbstractJobProducer extends AbstractProducer {
      */
     protected DoctorPigEvent getLeadToWeanEvent(List<DoctorPigEvent> events){
         try {
-            List<DoctorPigEvent> tempList =  events.stream().filter(doctorPigEvent -> (!Objects.equals(doctorPigEvent.getPigStatusBefore(), PigStatus.Wean.getKey()) && Objects.equals(doctorPigEvent.getPigStatusAfter(), PigStatus.Wean.getKey())) || Objects.equals(doctorPigEvent.getType(), PigEvent.WEAN.getKey())).collect(Collectors.toList());
+            List<DoctorPigEvent> tempList =  events.stream().filter(doctorPigEvent -> doctorPigEvent.getEventAt() !=null &&
+                    ((!Objects.equals(doctorPigEvent.getPigStatusBefore(), PigStatus.Wean.getKey()) && Objects.equals(doctorPigEvent.getPigStatusAfter(), PigStatus.Wean.getKey())) || Objects.equals(doctorPigEvent.getType(), PigEvent.WEAN.getKey()))).collect(Collectors.toList());
             if (!Arguments.isNullOrEmpty(tempList)){
                 return tempList.stream().max(Comparator.comparing(DoctorPigEvent::getEventAt)).get();
             }

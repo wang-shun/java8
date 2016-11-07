@@ -187,9 +187,9 @@ public class DoctorSowMatingHandler extends DoctorAbstractEventFlowHandler {
      */
     private DoctorPigEvent getLeadToWeanEvent(Long pigId){
         List<DoctorPigEvent> tempList = doctorPigEventDao.findByPigId(pigId).stream().
-                filter(doctorPigEvent ->
+                filter(doctorPigEvent -> (doctorPigEvent.getEventAt() !=null) &&(
                         (!Objects.equals(doctorPigEvent.getPigStatusBefore(), PigStatus.Wean.getKey()) && Objects.equals(doctorPigEvent.getPigStatusAfter(), PigStatus.Wean.getKey()))
-                                || Objects.equals(doctorPigEvent.getType(), PigEvent.WEAN.getKey())
+                                || Objects.equals(doctorPigEvent.getType(), PigEvent.WEAN.getKey()))
                 )
                 .collect(Collectors.toList());
         if (!Arguments.isNullOrEmpty(tempList)){
