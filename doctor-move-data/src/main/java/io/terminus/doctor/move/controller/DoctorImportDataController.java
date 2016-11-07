@@ -9,14 +9,17 @@ import io.terminus.doctor.common.event.DataEvent;
 import io.terminus.doctor.event.search.barn.BarnSearchDumpService;
 import io.terminus.doctor.event.search.group.GroupDumpService;
 import io.terminus.doctor.event.search.pig.PigDumpService;
+import io.terminus.doctor.event.service.DoctorDailyReportWriteService;
 import io.terminus.doctor.move.dto.DoctorImportSheet;
 import io.terminus.doctor.move.service.DoctorImportDataService;
+import io.terminus.doctor.move.service.DoctorMoveReportService;
 import io.terminus.zookeeper.pubsub.Subscriber;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -52,6 +55,10 @@ public class DoctorImportDataController {
     private PigDumpService pigDumpService;
     @Autowired
     private Subscriber subscriber;
+    @Autowired
+    private DoctorDailyReportWriteService doctorDailyReportWriteService;
+    @Autowired
+    private DoctorMoveReportService doctorMoveReportService;
 
     @PostConstruct
     public void init () throws Exception{
@@ -138,7 +145,7 @@ public class DoctorImportDataController {
         sheet.setFeed(getSheet(workbook, "10.饲料"));
         sheet.setConsume(getSheet(workbook, "11.易耗品"));
         Stopwatch watch = Stopwatch.createStarted();
-        doctorImportDataService.importAll(sheet);
+        this.generateReport(doctorImportDataService.importAll(sheet).getId());
         watch.stop();
         int minute = Long.valueOf(watch.elapsed(TimeUnit.MINUTES) + 1).intValue();
         log.warn("database data inserted successfully, elapsed {} minutes, now dumping ElasticSearch", minute);
@@ -147,6 +154,18 @@ public class DoctorImportDataController {
         groupDumpService.deltaDump(minute);
         pigDumpService.deltaDump(minute);
         log.warn("all data moved successfully, CONGRATULATIONS!!!");
+    }
+
+    //生成一年的报表
+    private void generateReport(Long farmId){
+        DateTime end = DateTime.now().withTimeAtStartOfDay().minusDays(1); //昨天开始时间
+        DateTime begin = end.minusYears(1);
+        new Thread(() -> {
+            doctorDailyReportWriteService.createDailyReports(begin.toDate(), end.toDate(), farmId);
+            doctorMoveReportService.moveMonthlyReport(farmId, 12);
+            doctorMoveReportService.moveParityMonthlyReport(farmId, 12);
+            doctorMoveReportService.moveBoarMonthlyReport(farmId, 12);
+        }).start();
     }
 
     @RequestMapping(value = "/importByHttpUrl", method = RequestMethod.GET)

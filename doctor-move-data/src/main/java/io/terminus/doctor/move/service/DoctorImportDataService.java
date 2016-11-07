@@ -148,7 +148,7 @@ public class DoctorImportDataService {
      * 根据shit导入所有的猪场数据
      */
     @Transactional
-    public void importAll(DoctorImportSheet shit) {
+    public DoctorFarm importAll(DoctorImportSheet shit) {
         // 猪场和员工
         Object[] result = this.importOrgFarmUser(shit.getFarm(), shit.getStaff());
         User primaryUser = (User) result[0];
@@ -176,6 +176,7 @@ public class DoctorImportDataService {
 
         //最后仓库数据
         importWarehouse(farm, shit.getFarm());
+        return farm;
     }
 
     //统计下首页数据

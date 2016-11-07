@@ -799,4 +799,15 @@
         FROM <include refid="tb" />
         WHERE `type` != 16 AND pig_status_before != 9 AND pig_status_after = 9 AND <![CDATA[ created_at < '2016-11-03 20:00:00' ]]>
     </select>
+
+    <select id="canRollbackEvent" parameterType="map" resultMap="DoctorPigEventMap">
+        SELECT
+        <include refid="cols_all"/>
+        FROM
+        <include refid="tb"/>
+        <where>
+            <include refid="criteria"/>
+        </where>
+        order by event_at desc ,id DESC limit 1;
+    </select>
 </mapper>
