@@ -2,6 +2,7 @@ package io.terminus.doctor.schedule.event;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Throwables;
+import com.google.common.collect.Lists;
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.utils.Dates;
@@ -104,7 +105,13 @@ public class DoctorReportJobs {
             for(Map.Entry<Long, String> entry : RespHelper.or500(doctorDailyReportReadService.getDailyReport2Update()).entrySet()){
                 Long farmId = entry.getKey();
                 Date beginDate = DateUtil.toDate(entry.getValue()); // 自此日期之后(包括此日期)的日报和月报应当被更新
-                RespHelper.or500(doctorDailyReportWriteService.createDailyReports(beginDate, endDate, farmId));
+                if(beginDate == null) continue;
+
+                Date sumAt = new Date(beginDate.getTime());
+                while(!sumAt.after(endDate)){
+                    RespHelper.or500(doctorDailyReportWriteService.createDailyReports(Lists.newArrayList(farmId), sumAt));
+                    sumAt = new DateTime(sumAt).plusDays(1).toDate();
+                }
                 RespHelper.or500(doctorDailyReportWriteService.deleteDailyReport2Update(farmId));
                 RespHelper.or500(doctorDailyReportWriteService.deleteDailyReportFromRedis(farmId));
 
