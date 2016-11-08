@@ -229,11 +229,7 @@
                 <artifactId>pampas-design</artifactId>
                 <version>${pampas.version}</version>
             </dependency>
-            <dependency>
-                <groupId>io.terminus.pampas</groupId>
-                <artifactId>pampas-client</artifactId>
-                <version>${pampas.version}</version>
-            </dependency>
+
             <dependency>
                 <groupId>io.terminus.pampas</groupId>
                 <artifactId>pampas-engine</artifactId>
