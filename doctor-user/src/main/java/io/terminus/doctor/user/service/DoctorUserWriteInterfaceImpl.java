@@ -86,7 +86,7 @@ public class DoctorUserWriteInterfaceImpl implements DoctorUserWriteInterface {
         try {
             User paranaUser = BeanMapper.map(user, User.class);
             userDaoExt.update(paranaUser);
-            if(paranaUser.getRoles().size() > 0){
+            if(paranaUser.getRoles() != null && paranaUser.getRoles().size() > 0){
                 String typeName = paranaUser.getRoles().get(0);
                 this.updateType(paranaUser.getId(), typeName);
             }
@@ -116,7 +116,7 @@ public class DoctorUserWriteInterfaceImpl implements DoctorUserWriteInterface {
             BeanMapper.copy(paranaUser, user);
             response.setResult(user);
         } catch (Exception e) {
-            log.error("update user failed, cause:{}", Throwables.getStackTraceAsString(e));
+            log.error("create user failed, cause:{}", Throwables.getStackTraceAsString(e));
             response.setError("create.user.failed");
         }
         return response;
@@ -166,18 +166,35 @@ public class DoctorUserWriteInterfaceImpl implements DoctorUserWriteInterface {
                 return RespDto.fail("user.not.found");
             }
             List<String> roles = user.getRoles();
-            if (roles == null) {
-                return RespDto.ok(true);
-            }else{
-                roles = Lists.newArrayList(roles);
-            }
-            if(roles.contains(userTypeName)){
+            if (roles != null && roles.contains(userTypeName)) {
                 roles.remove(userTypeName);
+                userDaoExt.updateRoles(userId, roles);
             }
-            userDaoExt.updateRoles(userId, roles);
             return RespDto.ok(true);
         }catch(Exception e){
             log.error("remove user role failed, userId={}, role={}, cause:{}", userId, userTypeName, Throwables.getStackTraceAsString(e));
+            return RespDto.fail("update.user.failed");
+        }
+    }
+
+    @Override
+    public RespDto<Boolean> removeAndAddRole(Long userId, String oldRole, String newRole){
+        try {
+            User user = userDaoExt.findById(userId);
+            if (user == null) {
+                return RespDto.fail("user.not.found");
+            }
+            List<String> roles = user.getRoles() == null ? new ArrayList<>() : user.getRoles();
+            if(oldRole != null && roles.contains(oldRole)){
+                roles.remove(oldRole);
+            }
+            if(newRole != null && !roles.contains(newRole)){
+                roles.add(newRole);
+            }
+            userDaoExt.updateRoles(userId, roles);
+            return RespDto.ok(true);
+        } catch(Exception e) {
+            log.error("remove and add user role failed, userId={}, oldRole={}, newRole={}, cause : {}", userId, oldRole, newRole, Throwables.getStackTraceAsString(e));
             return RespDto.fail("update.user.failed");
         }
     }
