@@ -639,12 +639,11 @@ public class DoctorPigCreateEvents {
             case PREG_CHECK:
                 key = "checkDate";
                 break;
-            case TO_FARROWING:
-                key = "changeLocationDate";
-                break;
             case CHG_FARM:
                 key = "chgFarmDate";
-            case CHG_LOCATION:
+            case CHG_LOCATION :
+            case TO_MATING:
+            case TO_FARROWING:
                 key = "changeLocationDate";
                 break;
             case VACCINATION:
@@ -669,6 +668,7 @@ public class DoctorPigCreateEvents {
                 key = "removalDate";
                 break;
             case FOSTERS:
+            case FOSTERS_BY:
                 key = "fostersDate";
                 break;
             case FARROWING:
