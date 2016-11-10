@@ -1,12 +1,9 @@
 package io.terminus.doctor.event.manager;
 
-import com.google.common.base.Throwables;
 import io.terminus.common.exception.ServiceException;
-import io.terminus.common.utils.JsonMapper;
-import io.terminus.doctor.common.enums.DataEventType;
 import io.terminus.doctor.common.event.CoreEventDispatcher;
-import io.terminus.doctor.common.event.DataEvent;
 import io.terminus.doctor.event.dto.DoctorRollbackDto;
+import io.terminus.doctor.event.event.ListenedRollbackEvent;
 import io.terminus.doctor.event.handler.DoctorRollbackGroupEventHandler;
 import io.terminus.doctor.event.handler.DoctorRollbackPigEventHandler;
 import io.terminus.doctor.event.handler.rollback.DoctorRollbackHandlerChain;
@@ -21,7 +18,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 import static io.terminus.common.utils.Arguments.notEmpty;
-import static io.terminus.common.utils.Arguments.notNull;
 
 /**
  * Desc:
@@ -84,16 +80,16 @@ public class DoctorRollbackManager {
 
     //发布zk事件, 用于更新回滚后操作
     private void publishRollbackEvent(List<DoctorRollbackDto> dtos) {
-        String rollbackJson = JsonMapper.nonEmptyMapper().toJson(dtos);
-        if (notNull(publisher)) {
-            try {
-                publisher.publish(DataEvent.toBytes(DataEventType.RollBackReport.getKey(), rollbackJson));
-            } catch (Exception e) {
-                log.error("publish rollback group zk event, DoctorRollbackDtos:{}, cause:{}", dtos, Throwables.getStackTraceAsString(e));
-            }
-        } else {
-            coreEventDispatcher.publish(DataEvent.make(DataEventType.RollBackReport.getKey(), rollbackJson));
-        }
+//        String rollbackJson = JsonMapper.nonEmptyMapper().toJson(dtos);
+//        if (notNull(publisher)) {
+//            try {
+//                publisher.publish(DataEvent.toBytes(DataEventType.RollBackReport.getKey(), rollbackJson));
+//            } catch (Exception e) {
+//                log.error("publish rollback group zk event, DoctorRollbackDtos:{}, cause:{}", dtos, Throwables.getStackTraceAsString(e));
+//            }
+//        } else {
+            coreEventDispatcher.publish(ListenedRollbackEvent.builder().doctorRollbackDtos(dtos).build());
+        //}
     }
 
     private void checkFarmIdAndEventAt(List<DoctorRollbackDto> dtos) {

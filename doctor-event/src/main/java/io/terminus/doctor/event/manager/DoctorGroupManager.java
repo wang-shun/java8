@@ -1,13 +1,9 @@
 package io.terminus.doctor.event.manager;
 
-import com.google.common.base.Throwables;
-import com.google.common.collect.ImmutableMap;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.common.utils.JsonMapper;
-import io.terminus.doctor.common.enums.DataEventType;
 import io.terminus.doctor.common.event.CoreEventDispatcher;
-import io.terminus.doctor.common.event.DataEvent;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dao.DoctorGroupDao;
@@ -19,6 +15,8 @@ import io.terminus.doctor.event.dto.event.group.DoctorNewGroupEvent;
 import io.terminus.doctor.event.dto.event.group.edit.DoctorNewGroupEdit;
 import io.terminus.doctor.event.dto.event.group.input.DoctorNewGroupInput;
 import io.terminus.doctor.event.enums.GroupEventType;
+import io.terminus.doctor.event.event.ListenedBarnEvent;
+import io.terminus.doctor.event.event.ListenedGroupEvent;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorGroupSnapshot;
@@ -35,8 +33,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
-
-import static io.terminus.common.utils.Arguments.notNull;
 
 /**
  * Desc:
@@ -217,21 +213,20 @@ public class DoctorGroupManager {
 
     //发布猪群猪舍事件
     private void publistGroupAndBarn(Long orgId, Long farmId, Long groupId, Long barnId, Long eventId) {
-        publishZookeeperEvent(DataEventType.GroupEventCreate.getKey(), ImmutableMap.of(
-                "doctorOrgId", orgId, "doctorFarmId", farmId, "doctorGroupId", groupId, "doctorGroupEventId", eventId));
-        publishZookeeperEvent(DataEventType.BarnUpdate.getKey(), ImmutableMap.of("doctorBarnId", barnId));
+        publishZookeeperEvent(ListenedGroupEvent.builder().doctorGroupEventId(eventId).farmId(farmId).orgId(orgId).groupId(groupId).build());
+        publishZookeeperEvent(ListenedBarnEvent.builder().barnId(barnId).build());
     }
 
     //发布zk事件, 用于更新es索引
-    private <T> void publishZookeeperEvent(Integer eventType, T data){
-        if(notNull(publisher)) {
-            try {
-                publisher.publish(DataEvent.toBytes(eventType, data));
-            } catch (Exception e) {
-                log.error("publish zk event, eventType:{}, data:{} cause:{}", eventType, data, Throwables.getStackTraceAsString(e));
-            }
-        } else {
-            coreEventDispatcher.publish(DataEvent.make(eventType, data));
-        }
+    private <T> void publishZookeeperEvent(T data){
+//        if(notNull(publisher)) {
+//            try {
+//                publisher.publish(DataEvent.toBytes(eventType, data));
+//            } catch (Exception e) {
+//                log.error("publish zk event, eventType:{}, data:{} cause:{}", eventType, data, Throwables.getStackTraceAsString(e));
+//            }
+//        } else {
+            coreEventDispatcher.publish(data);
+        //}
     }
 }

@@ -31,6 +31,9 @@ import io.terminus.doctor.event.dto.event.usual.DoctorRemovalDto;
 import io.terminus.doctor.event.dto.event.usual.DoctorVaccinationDto;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.event.DoctorPigCountEvent;
+import io.terminus.doctor.event.event.ListenedBarnEvent;
+import io.terminus.doctor.event.event.ListenedPigEvent;
+import io.terminus.doctor.event.event.ListenedPigEvents;
 import io.terminus.doctor.event.event.PigEventCreateEvent;
 import io.terminus.doctor.event.manager.DoctorPigEventManager;
 import io.terminus.doctor.event.model.DoctorPig;
@@ -491,32 +494,46 @@ public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteServic
      * @param results
      */
     private void publishEvent (Map<String,Object> results){
-        if(publisher == null){
-            // 发送 DataEvent 事件
-            coreEventDispatcher.publish(DataEvent.make(DataEventType.PigEventCreate.getKey(), new PigEventCreateEvent(results)));
-        }else{
-            try {
-                publisher.publish(DataEvent.toBytes(DataEventType.PigEventCreate.getKey(), new PigEventCreateEvent(results)));
-            }catch (Exception e){
-                log.error("failed to publish event, cause:{}", e);
+        try {
+            publisher.publish(DataEvent.toBytes(DataEventType.PigEventCreate.getKey(), new PigEventCreateEvent(results)));
+
+
+
+            if ("single".equals(results.get("contextType"))) {
+                ListenedPigEvent listenedPigEvent = new ListenedPigEvent();
+                listenedPigEvent.setPigId(Long.parseLong(results.get("doctorPigId").toString()));
+                listenedPigEvent.setEventType((Integer) results.get("type"));
+                coreEventDispatcher.publish(listenedPigEvent);
+            } else {
+                List<ListenedPigEvent> list = Lists.newArrayList();
+                results.keySet().forEach(pigId -> {
+                    Map<String, Object> map = (Map<String, Object>) results.get(pigId);
+                    ListenedPigEvent listenedPigEvent = new ListenedPigEvent();
+                    listenedPigEvent.setPigId((Long.parseLong(pigId)));
+                    listenedPigEvent.setEventType((Integer) map.get("type"));
+                    list.add(listenedPigEvent);
+                });
+                coreEventDispatcher.publish(new ListenedPigEvents(list));
             }
+        } catch (Exception e) {
+            log.error("failed to publish pig event, cause:{}", Throwables.getStackTraceAsString(e));
         }
     }
+
+
 
     /**
      * 推送猪舍事件信息
      * @param result
      */
-    private void publishBarnEvent (Map<String,Object> result){
-        if(publisher == null){
-            // 发送 DataEvent 事件
-            coreEventDispatcher.publish(DataEvent.make(DataEventType.BarnUpdate.getKey(), result));
-        }else{
-            try {
-                publisher.publish(DataEvent.toBytes(DataEventType.BarnUpdate.getKey(), result));
-            }catch (Exception e){
-                log.error("failed to publish event, cause:{}", e);
-            }
+    private void publishBarnEvent(Map<String, Object> result) {
+        try {
+            ListenedBarnEvent listenedBarnEvent = new ListenedBarnEvent();
+            listenedBarnEvent.setBarnId((Long) result.get("doctorBarnId"));
+            coreEventDispatcher.publish(listenedBarnEvent);
+        } catch (Exception e) {
+            log.error("failed to publish barn event, cause:{}", Throwables.getStackTraceAsString(e));
         }
+
     }
 }

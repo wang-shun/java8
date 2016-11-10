@@ -1,23 +1,17 @@
 package io.terminus.doctor.event.service;
 
 import com.google.common.base.Throwables;
-import com.google.common.collect.ImmutableMap;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.Response;
-import io.terminus.doctor.common.enums.DataEventType;
 import io.terminus.doctor.common.event.CoreEventDispatcher;
-import io.terminus.doctor.common.event.DataEvent;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
+import io.terminus.doctor.event.event.ListenedBarnEvent;
 import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.zookeeper.pubsub.Publisher;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.util.Map;
-
-import static io.terminus.common.utils.Arguments.notNull;
 
 /**
  * Desc: 猪舍表写服务实现类
@@ -109,17 +103,17 @@ public class DoctorBarnWriteServiceImpl implements DoctorBarnWriteService {
     }
 
     private void publishZookeeperEvent(Long barnId){
-        Integer eventType = DataEventType.BarnUpdate.getKey();
-        Map<String, Long> data = ImmutableMap.of("doctorBarnId", barnId);
-        if(notNull(publisher)) {
-            try {
-                publisher.publish(DataEvent.toBytes(eventType, data));
-            } catch (Exception e) {
-                log.error("publish zk event, eventType:{}, data:{} cause:{}", eventType, data, Throwables.getStackTraceAsString(e));
-            }
-        } else {
-            coreEventDispatcher.publish(DataEvent.make(eventType, data));
-        }
+//        Integer eventType = DataEventType.BarnUpdate.getKey();
+//        Map<String, Long> data = ImmutableMap.of("doctorBarnId", barnId);
+//        if(notNull(publisher)) {
+//            try {
+//                publisher.publish(DataEvent.toBytes(eventType, data));
+//            } catch (Exception e) {
+//                log.error("publish zk event, eventType:{}, data:{} cause:{}", eventType, data, Throwables.getStackTraceAsString(e));
+//            }
+//        } else {
+            coreEventDispatcher.publish(ListenedBarnEvent.builder().barnId(barnId).build());
+        //}
     }
 
     private void checkBarnNameRepeat(Long farmId, String barnName) {
