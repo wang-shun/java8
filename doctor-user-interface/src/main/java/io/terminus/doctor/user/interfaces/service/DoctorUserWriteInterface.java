@@ -79,4 +79,13 @@ public interface DoctorUserWriteInterface {
      * @return
      */
     RespDto<Boolean> removeRole(Long userId, String userTypeName);
+
+    /**
+     * 删除用户的一个角色，同时添加另一个角色
+     * @param userId 不可为空
+     * @param oldRole 删除的角色，null 表示不删除
+     * @param newRole 添加的角色，null 表示不添加
+     * @return
+     */
+    RespDto<Boolean> removeAndAddRole(Long userId, String oldRole, String newRole);
 }

@@ -1,15 +1,11 @@
 package io.terminus.doctor.event.handler.group;
 
-import com.google.common.base.Throwables;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.common.utils.JsonMapper;
-import io.terminus.doctor.common.enums.DataEventType;
 import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.event.CoreEventDispatcher;
-import io.terminus.doctor.common.event.DataEvent;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dao.DoctorGroupDao;
@@ -23,6 +19,8 @@ import io.terminus.doctor.event.dto.event.group.input.BaseGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorTransGroupInput;
 import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.enums.IsOrNot;
+import io.terminus.doctor.event.event.ListenedBarnEvent;
+import io.terminus.doctor.event.event.ListenedGroupEvent;
 import io.terminus.doctor.event.handler.DoctorGroupEventHandler;
 import io.terminus.doctor.event.manager.DoctorGroupReportManager;
 import io.terminus.doctor.event.model.DoctorBarn;
@@ -274,22 +272,21 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
 
     //发布猪群猪舍事件
     protected void publistGroupAndBarn(Long orgId, Long farmId, Long groupId, Long barnId, Long eventId) {
-        publishZookeeperEvent(DataEventType.GroupEventCreate.getKey(), ImmutableMap.of(
-                "doctorOrgId", orgId, "doctorFarmId", farmId, "doctorGroupId", groupId, "doctorGroupEventId", eventId));
-        publishZookeeperEvent(DataEventType.BarnUpdate.getKey(), ImmutableMap.of("doctorBarnId", barnId));
+        publishZookeeperEvent(ListenedGroupEvent.builder().doctorGroupEventId(eventId).farmId(farmId).orgId(orgId).groupId(groupId).build());
+        publishZookeeperEvent(ListenedBarnEvent.builder().barnId(barnId).build());
     }
 
     //发布zk事件, 用于更新es索引
-    protected <T> void publishZookeeperEvent(Integer eventType, T data) {
-        if (notNull(publisher)) {
-            try {
-                publisher.publish(DataEvent.toBytes(eventType, data));
-            } catch (Exception e) {
-                log.error("publish zk event, eventType:{}, data:{} cause:{}", eventType, data, Throwables.getStackTraceAsString(e));
-            }
-        } else {
-            coreEventDispatcher.publish(DataEvent.make(eventType, data));
-        }
+    private <T> void publishZookeeperEvent(T data){
+//        if(notNull(publisher)) {
+//            try {
+//                publisher.publish(DataEvent.toBytes(eventType, data));
+//            } catch (Exception e) {
+//                log.error("publish zk event, eventType:{}, data:{} cause:{}", eventType, data, Throwables.getStackTraceAsString(e));
+//            }
+//        } else {
+        coreEventDispatcher.publish(data);
+        //}
     }
 
     //品种校验, 如果猪群的品种已经确定, 那么录入的品种必须和猪群的品种一致
