@@ -1,8 +1,8 @@
 package io.terminus.doctor.user.interfaces.model;
 
-import com.google.common.base.MoreObjects;
-
 import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
 
 public class RespDto<T> implements Serializable {
     private static final long serialVersionUID = -6586901193547572760L;
@@ -41,12 +41,11 @@ public class RespDto<T> implements Serializable {
 
     @Override
     public String toString() {
-        return MoreObjects.toStringHelper(this)
-                .add("success", success)
-                .add("result", result)
-                .add("error", error)
-                .omitNullValues()
-                .toString();
+        Map<String, Object> map = new HashMap<>();
+        map.put("success", success);
+        map.put("result", result);
+        map.put("error", error);
+        return this.getClass() + map.toString();
     }
 
     public static <T> RespDto<T> ok(T data) {
