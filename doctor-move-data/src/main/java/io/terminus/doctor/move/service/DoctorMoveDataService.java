@@ -695,6 +695,9 @@ public class DoctorMoveDataService {
 
         //更新母猪胎次,配种的公猪号
         updateParityAndBoarCode(farm);
+
+        //更新拼哺事件extra
+        updateFosterSowCode(farm);
     }
 
     //如果是哺乳状态, 设置一下哺乳猪群的信息
@@ -2457,6 +2460,24 @@ public class DoctorMoveDataService {
             if(!result){
                 log.info("update parity boarCode fail: {}", lists);
             }
+        });
+    }
+
+    public void updateFosterSowCode(DoctorFarm farm){
+        List<DoctorPigEvent> doctorPigEvensList = doctorPigEventDao.list(ImmutableMap.of("farmId", farm.getId(), "type", PigEvent.FOSTERS.getKey(), "kind", 1));
+        List<List<DoctorPigEvent>> lists = Lists.partition(doctorPigEvensList, 1000);
+        lists.stream().forEach(list->{
+            list.stream().forEach(doctorPigEvent -> {
+                Map<String, Object> extra = doctorPigEvent.getExtraMap();
+                if(extra.containsKey("fosterSowId") && !extra.containsKey("fosterSowCode")){
+                    DoctorPig doctorPig = doctorPigDao.findById(Long.valueOf(Objects.toString(extra.get("fosterSowId"))));
+                    if(!isNull(doctorPig)){
+                        extra.put("fosterSowCode", doctorPig.getPigCode());
+                    }
+                }
+                doctorPigEvent.setExtraMap(extra);
+            });
+            doctorPigEventDao.updates(list);
         });
     }
 

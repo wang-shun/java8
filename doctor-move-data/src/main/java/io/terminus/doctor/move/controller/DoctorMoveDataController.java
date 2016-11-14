@@ -377,6 +377,20 @@ public class DoctorMoveDataController {
         }
     }
 
+    @RequestMapping(value = "/updatePigEventExtra", method = RequestMethod.GET)
+    public Boolean updatePigEventExtra(@RequestParam("farmId") Long farmId){
+        try {
+            DoctorFarm farm = doctorFarmDao.findById(farmId);
+            log.warn("update pigevent extra start, farmId:{}", farmId);
+            doctorMoveDataService.updateFosterSowCode(farm);
+            log.warn("update pigevent extra end");
+            return true;
+        } catch (Exception e) {
+            log.error("update pigevent extra failed, farmId:{}, cause:{}", farmId, Throwables.getStackTraceAsString(e));
+            return false;
+        }
+    }
+
     /**
      * 日报
      * @param moveId
