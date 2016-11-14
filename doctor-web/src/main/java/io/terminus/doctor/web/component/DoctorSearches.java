@@ -496,7 +496,7 @@ public class DoctorSearches {
             } else if (searchType.equals(SearchType.SOW.getValue())) {
                 params.put("pigType", DoctorPig.PIG_TYPE.SOW.getKey().toString());
                 //只查询未离场的猪
-                params.put("isRemoval", IsOrNot.NO.toString());
+                params.put("isRemoval", String.valueOf(IsOrNot.NO.getValue()));
             }
             params.remove("ids");
             params.remove("searchType");
