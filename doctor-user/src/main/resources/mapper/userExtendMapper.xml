@@ -59,6 +59,8 @@
                 <![CDATA[ instr(roles_json, #{role}) > 0 ]]>
             </foreach>
         </if>
+        <if test="createdFrom">AND `created_at` &gt;= #{createdFrom}</if>
+        <if test="createdTo">AND `created_at` &lt; #{createdTo}</if>
     </sql>
 
     <select id="list" resultMap="UserMap" parameterType="map">
@@ -94,7 +96,9 @@
         <include refid="cols_all"/>
         FROM <include refid="tb"/>
         <include refid="criteria"/>
-        ORDER BY id DESC LIMIT #{offset}, #{limit}
+        ORDER BY
+        <if test="orderBy != null"> ${orderBy}, </if>
+        id DESC LIMIT #{offset}, #{limit}
     </select>
 
     <update id="batchUpdateRoles" parameterType="map">
