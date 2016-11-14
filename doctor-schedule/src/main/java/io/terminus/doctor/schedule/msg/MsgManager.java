@@ -94,7 +94,7 @@ public class MsgManager {
             List<Long> userIds = Lists.newArrayList();
             List<Sub> subs = RespHelper.orServEx(primaryUserReadService.findAllActiveSubs());
             if (!Arguments.isNullOrEmpty(subs)){
-                userIds.addAll(subUsers.stream().map(sub -> sub.getUserId()).collect(Collectors.toList()));
+                userIds.addAll(subs.stream().map(sub -> sub.getUserId()).collect(Collectors.toList()));
             }
             List<PrimaryUser> primaryUsers = RespHelper.orServEx(primaryUserReadService.findAllPrimaryUser());
             if (!Arguments.isNullOrEmpty(primaryUsers)){
