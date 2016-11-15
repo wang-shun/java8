@@ -4,10 +4,10 @@ import com.google.common.collect.Maps;
 import io.terminus.pampas.openplatform.core.OPHook;
 import io.terminus.pampas.openplatform.core.SecurityManager;
 import io.terminus.pampas.openplatform.entity.OPClientInfo;
+import io.terminus.pampas.openplatform.entity.OpClient;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 /**
@@ -26,8 +26,9 @@ public class OPSecurityManager implements SecurityManager {
         clientMap = Maps.newHashMap();
         clientMap.put("pigDoctorAndroid", new OPClientInfo(1L, "pigDoctorAndroid", "pigDoctorAndroidSecret"));
         clientMap.put("pigDoctorIOS", new OPClientInfo(2L, "pigDoctorIOS", "pigDoctorIOSSecret"));
+        clientMap.put("pigDoctorPC", new OPClientInfo(3L, "pigDoctorPC", "pigDoctorPCSecret"));
 
-        idClientMap = clientMap.values().stream().collect(Collectors.toMap(o->o.getClientId(), o->o));
+        idClientMap = clientMap.values().stream().collect(Collectors.toMap(OpClient::getClientId, o->o));
     }
 
     @Override
