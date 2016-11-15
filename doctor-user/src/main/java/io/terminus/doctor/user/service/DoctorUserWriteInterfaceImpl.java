@@ -84,6 +84,25 @@ public class DoctorUserWriteInterfaceImpl implements DoctorUserWriteInterface {
     public RespDto<Boolean> update(UserDto user) {
         RespDto<Boolean> response = new RespDto<>();
         try {
+            if(user.getName() != null){
+                User exist = userDaoExt.findByName(user.getName());
+                if(exist != null && !exist.getId().equals(user.getId())){
+                    return RespDto.fail("duplicated.name");
+                }
+            }
+            if(user.getMobile() != null){
+                User exist = userDaoExt.findByMobile(user.getMobile());
+                if(exist != null && !exist.getId().equals(user.getId())){
+                    return RespDto.fail("duplicated.mobile");
+                }
+            }
+            if(user.getEmail() != null){
+                User exist = userDaoExt.findByEmail(user.getEmail());
+                if(exist != null && !exist.getId().equals(user.getId())){
+                    return RespDto.fail("duplicated.email");
+                }
+            }
+
             User paranaUser = BeanMapper.map(user, User.class);
             userDaoExt.update(paranaUser);
             if(paranaUser.getRoles() != null && paranaUser.getRoles().size() > 0){
@@ -202,7 +221,7 @@ public class DoctorUserWriteInterfaceImpl implements DoctorUserWriteInterface {
     private User makeParanaUserFromInterface(UserDto user){
         User paranaUser = BeanMapper.map(user, User.class);
         if(paranaUser.getType() == null){
-            paranaUser.setType(UserType.NORMAL.value());
+            paranaUser.setType(UserType.FARM_ADMIN_PRIMARY.value());
         }
         return paranaUser;
     }
