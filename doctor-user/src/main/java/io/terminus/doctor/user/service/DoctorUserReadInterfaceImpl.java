@@ -31,7 +31,6 @@ public class DoctorUserReadInterfaceImpl implements DoctorUserReadInterface {
 
     private final UserDaoExt userDaoExt;
 
-
     @Autowired
     public DoctorUserReadInterfaceImpl(UserDaoExt userDaoExt){
         this.userDaoExt = userDaoExt;
@@ -156,7 +155,7 @@ public class DoctorUserReadInterfaceImpl implements DoctorUserReadInterface {
     public RespDto<List<UserDto>> loadsBy(Map<String, Object> criteria) {
         RespDto<List<UserDto>> response = new RespDto<>();
         try {
-            List<UserDto> list = BeanMapper.mapList(userDaoExt.list(this.changeMapKey(criteria)), UserDto.class);
+            List<UserDto> list = BeanMapper.mapList(userDaoExt.list(criteria), UserDto.class);
             response.setResult(list);
         } catch (Exception e) {
             log.error("find user failed, cause:{}", Throwables.getStackTraceAsString(e));
@@ -230,7 +229,7 @@ public class DoctorUserReadInterfaceImpl implements DoctorUserReadInterface {
         RespDto<PagingDto<UserDto>> response = new RespDto<>();
         try {
             Map<String, Object> map = BeanMapper.convertObjectToMap(criteria);
-            response.setResult(this.getPagingDto(userDaoExt.paging(offset, limit, this.changeMapKey(map))));
+            response.setResult(this.getPagingDto(userDaoExt.paging(offset, limit, map)));
         } catch (Exception e) {
             log.error("find user failed, cause:{}", Throwables.getStackTraceAsString(e));
             response.setError("find.user.failed");
@@ -242,7 +241,7 @@ public class DoctorUserReadInterfaceImpl implements DoctorUserReadInterface {
     public RespDto<PagingDto<UserDto>> paging(Integer offset, Integer limit, Map<String, Object> criteria) {
         RespDto<PagingDto<UserDto>> response = new RespDto<>();
         try {
-            response.setResult(this.getPagingDto(userDaoExt.paging(offset, limit, this.changeMapKey(criteria))));
+            response.setResult(this.getPagingDto(userDaoExt.paging(offset, limit, criteria)));
         } catch (Exception e) {
             log.error("find user failed, cause:{}", Throwables.getStackTraceAsString(e));
             response.setError("find.user.failed");
@@ -254,25 +253,12 @@ public class DoctorUserReadInterfaceImpl implements DoctorUserReadInterface {
     public RespDto<PagingDto<UserDto>> paging(Map<String, Object> criteria) {
         RespDto<PagingDto<UserDto>> response = new RespDto<>();
         try {
-            response.setResult(this.getPagingDto(userDaoExt.paging(this.changeMapKey(criteria))));
+            response.setResult(this.getPagingDto(userDaoExt.paging(criteria)));
         } catch (Exception e) {
             log.error("find user failed, cause:{}", Throwables.getStackTraceAsString(e));
             response.setError("find.user.failed");
         }
         return response;
-    }
-
-    private Map<String, Object> changeMapKey(Map<String, Object> criteria){
-        criteria = Params.filterNullOrEmpty(criteria);
-        if(criteria.get("type") != null){
-            String type = criteria.get("type").toString();
-            criteria.remove("type");
-            criteria.put("roles", Lists.newArrayList(type));
-        }else if(criteria.get("types") != null){
-            criteria.put("roles", criteria.get("types"));
-            criteria.remove("types");
-        }
-        return criteria;
     }
 
     @Override

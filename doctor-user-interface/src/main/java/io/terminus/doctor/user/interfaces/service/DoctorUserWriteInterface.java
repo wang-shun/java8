@@ -12,31 +12,7 @@ import java.util.List;
 public interface DoctorUserWriteInterface {
 
     /**
-     * 更新用户状态
-     * @param userId
-     * @param status 0:未激活, 1:正常, -1:锁定, -2:冻结, -3: 删除
-     * @return
-     */
-    RespDto<Integer> updateStatus(Long userId, Integer status);
-
-    /**
-     * 批量更新用户状态
-     * @param userIds
-     * @param status 0:未激活, 1:正常, -1:锁定, -2:冻结, -3: 删除
-     * @return
-     */
-    RespDto<Integer> batchUpdateStatus(List<Long> userIds, Integer status);
-
-    /**
-     * 更新用户类型
-     * @param userId
-     * @param typeName 可选: ADMIN, SELLER, BUYER, SITE_OWNER, AGENT, OPERATOR
-     * @return
-     */
-    RespDto<Integer> updateType(Long userId, String typeName);
-
-    /**
-     * 更新用户基本信息, 仅支持更新 name, email, mobile, password, roles_json
+     * 更新用户基本信息, 仅支持更新 name, email, mobile, password
      * @param user
      * @return
      */
@@ -72,20 +48,4 @@ public interface DoctorUserWriteInterface {
      */
     RespDto<Integer> deletes(Long id0, Long id1, Long... idn);
 
-    /**
-     * 删除用户的一个角色
-     * @param userId
-     * @param userTypeName 角色英文名称
-     * @return
-     */
-    RespDto<Boolean> removeRole(Long userId, String userTypeName);
-
-    /**
-     * 删除用户的一个角色，同时添加另一个角色
-     * @param userId 不可为空
-     * @param oldRole 删除的角色，null 表示不删除
-     * @param newRole 添加的角色，null 表示不添加
-     * @return
-     */
-    RespDto<Boolean> removeAndAddRole(Long userId, String oldRole, String newRole);
 }

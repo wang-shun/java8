@@ -72,10 +72,12 @@ public class CacheCenter {
             try {
                 cacheListener.subscribe(data -> {
                 CacheEvent m = CacheEvent.from(data);
-                if (Objects.equal(CacheMessage.USER_DATA_PERMISSION.getValue(), m.getEventType())){
-                    coreEventDispatcher.publish(new UserDataPermissionModifyEvent(m.getData()));
-                } else if (Objects.equal(CacheMessage.USER_STAFF_INFO.getValue(), m.getEventType())){
-                    coreEventDispatcher.publish(new UserStaffInfoModifyEvent(m.getData()));
+                if(m != null){
+                    if (Objects.equal(CacheMessage.USER_DATA_PERMISSION.getValue(), m.getEventType())){
+                        coreEventDispatcher.publish(new UserDataPermissionModifyEvent(m.getData()));
+                    } else if (Objects.equal(CacheMessage.USER_STAFF_INFO.getValue(), m.getEventType())){
+                        coreEventDispatcher.publish(new UserStaffInfoModifyEvent(m.getData()));
+                    }
                 }
             });
             } catch (Exception e) {
