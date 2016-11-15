@@ -3,7 +3,7 @@ package io.terminus.doctor.user.interfaces.model;
 import java.io.Serializable;
 import java.util.Date;
 
-public class UserDto implements Serializable{
+public class UserDto implements Serializable {
     private static final long serialVersionUID = 8718347798835230297L;
 
     public UserDto(Long id){
@@ -75,5 +75,18 @@ public class UserDto implements Serializable{
 
     public void setUpdatedAt(Date updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    @Override
+    public String toString() {
+        return "UserDto{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", email='" + email + '\'' +
+                ", mobile='" + mobile + '\'' +
+                ", password='" + password + '\'' +
+                ", createdAt=" + createdAt +
+                ", updatedAt=" + updatedAt +
+                '}';
     }
 }

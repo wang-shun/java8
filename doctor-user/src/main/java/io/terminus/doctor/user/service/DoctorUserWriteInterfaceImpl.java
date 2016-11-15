@@ -13,7 +13,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Arrays;
 import java.util.List;
 
 @Slf4j
@@ -32,7 +31,7 @@ public class DoctorUserWriteInterfaceImpl implements DoctorUserWriteInterface {
     }
 
     @Override
-    public RespDto<Boolean> update(UserDto user) {
+    public RespDto<Boolean> update(UserDto user, String systemCode) {
         RespDto<Boolean> response = new RespDto<>();
         try {
             if(user.getName() != null){
@@ -54,7 +53,7 @@ public class DoctorUserWriteInterfaceImpl implements DoctorUserWriteInterface {
                 }
             }
 
-            userInterfaceManager.update(user);
+            userInterfaceManager.update(user, systemCode);
             response.setResult(true);
         } catch (Exception e) {
             log.error("update user failed, cause:{}", Throwables.getStackTraceAsString(e));
@@ -64,7 +63,7 @@ public class DoctorUserWriteInterfaceImpl implements DoctorUserWriteInterface {
     }
 
     @Override
-    public RespDto<UserDto> createUser(UserDto user) {
+    public RespDto<UserDto> createUser(UserDto user, String systemCode) {
         RespDto<UserDto> response = new RespDto<>();
         try {
             if(userDaoExt.findByName(user.getName()) != null){
@@ -76,7 +75,7 @@ public class DoctorUserWriteInterfaceImpl implements DoctorUserWriteInterface {
             if(userDaoExt.findByEmail(user.getEmail()) != null){
                 return RespDto.fail("duplicated.email");
             }
-            response.setResult(userInterfaceManager.create(user));
+            response.setResult(userInterfaceManager.create(user, systemCode));
         } catch (Exception e) {
             log.error("create user failed, cause:{}", Throwables.getStackTraceAsString(e));
             response.setError("create.user.failed");
@@ -85,10 +84,10 @@ public class DoctorUserWriteInterfaceImpl implements DoctorUserWriteInterface {
     }
 
     @Override
-    public RespDto<Boolean> delete(Long id) {
+    public RespDto<Boolean> delete(Long id, String systemCode) {
         RespDto<Boolean> response = new RespDto<>();
         try {
-            userInterfaceManager.deletes(Lists.newArrayList(id));
+            userInterfaceManager.deletes(Lists.newArrayList(id), systemCode);
             response.setResult(true);
         } catch (Exception e) {
             log.error("update user failed, cause:{}", Throwables.getStackTraceAsString(e));
@@ -98,26 +97,10 @@ public class DoctorUserWriteInterfaceImpl implements DoctorUserWriteInterface {
     }
 
     @Override
-    public RespDto<Integer> deletes(List<Long> ids) {
+    public RespDto<Integer> deletes(List<Long> ids, String systemCode) {
         RespDto<Integer> response = new RespDto<>();
         try {
-            userInterfaceManager.deletes(ids);
-            response.setResult(ids.size());
-        } catch (Exception e) {
-            log.error("update user failed, cause:{}", Throwables.getStackTraceAsString(e));
-            response.setError("delete.user.failed");
-        }
-        return response;
-    }
-
-    @Override
-    public RespDto<Integer> deletes(Long id0, Long id1, Long... idn) {
-        RespDto<Integer> response = new RespDto<>();
-        try {
-            List<Long> ids = Arrays.asList(idn);
-            ids.add(id0);
-            ids.add(id1);
-            userInterfaceManager.deletes(ids);
+            userInterfaceManager.deletes(ids, systemCode);
             response.setResult(ids.size());
         } catch (Exception e) {
             log.error("update user failed, cause:{}", Throwables.getStackTraceAsString(e));

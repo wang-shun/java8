@@ -13,39 +13,31 @@ public interface DoctorUserWriteInterface {
 
     /**
      * 更新用户基本信息, 仅支持更新 name, email, mobile, password
-     * @param user
-     * @return
+     * @param user 用户信息
+     * @param systemCode 系统标识
+     * @return 是否成功
      */
-    RespDto<Boolean> update(UserDto user);
+    RespDto<Boolean> update(UserDto user, String systemCode);
 
     /**
      * 创建用户
-     * @param user
-     * @return
+     * @param user 用户信息
+     * @param systemCode 系统标识
+     * @return 创建的用户
      */
-    RespDto<UserDto> createUser(UserDto user);
+    RespDto<UserDto> createUser(UserDto user, String systemCode);
 
     /**
      * 删除用户
      * @param id 用户id
-     * @return
+     * @return 是否成功
      */
-    RespDto<Boolean> delete(Long id);
+    RespDto<Boolean> delete(Long id, String systemCode);
 
     /**
      * 批量删除用户
      * @param ids 用户id
      * @return
      */
-    RespDto<Integer> deletes(List<Long> ids);
-
-    /**
-     * 批量删除用户
-     * @param id0 用户id
-     * @param id1 用户id
-     * @param idn 用户id
-     * @return
-     */
-    RespDto<Integer> deletes(Long id0, Long id1, Long... idn);
-
+    RespDto<Integer> deletes(List<Long> ids, String systemCode);
 }

@@ -34,10 +34,6 @@ public class CacheEvent implements Serializable{
     }
 
     public static CacheEvent from(String value) {
-        if(value.contains("eventType") && value.contains("data")){
-            return JsonMapper.JSON_NON_EMPTY_MAPPER.fromJson(value, CacheEvent.class);
-        }else{
-            return null;
-        }
+        return JsonMapper.JSON_NON_EMPTY_MAPPER.fromJson(value, CacheEvent.class);
     }
 }

@@ -6,5 +6,5 @@ package io.terminus.doctor.user.interfaces.event;
 public enum EventType {
     CREATE,
     UPDATE,
-    DELETE;
+    DELETE
 }
