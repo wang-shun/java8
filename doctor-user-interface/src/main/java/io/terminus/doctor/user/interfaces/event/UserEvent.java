@@ -19,11 +19,7 @@ public class UserEvent implements Serializable {
         this.eventType = eventType;
         this.systemCode = DoctorSystemCode.PIG_DOCTOR;
     }
-
-    public UserEvent(){
-
-    }
-
+    
     /**
      * 用户信息公共字段
      */
