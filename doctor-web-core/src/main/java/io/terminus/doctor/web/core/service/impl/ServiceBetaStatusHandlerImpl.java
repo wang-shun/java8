@@ -42,12 +42,10 @@ public class ServiceBetaStatusHandlerImpl implements ServiceBetaStatusHandler {
         DoctorServiceStatus status = new DoctorServiceStatus();
         status.setUserId(userId);
 
-        status.setPigdoctorStatus(DoctorServiceStatus.Status.BETA.value());
-        status.setPigdoctorReason(dto.getBetaDesc());
-
         //猪场软件初始状态
         if(Objects.equals(dto.getPigdoctor(), ServiceBetaStatusToken.Status.BETA.value())){
-
+            status.setPigdoctorStatus(DoctorServiceStatus.Status.BETA.value());
+            status.setPigdoctorReason(dto.getBetaDesc());
         }else{
             status.setPigdoctorStatus(DoctorServiceStatus.Status.CLOSED.value());
         }
