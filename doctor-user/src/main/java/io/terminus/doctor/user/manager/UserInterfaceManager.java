@@ -6,17 +6,20 @@ import io.terminus.common.utils.BeanMapper;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.enums.UserStatus;
 import io.terminus.doctor.common.enums.UserType;
-import io.terminus.doctor.common.utils.RespHelper;
+import io.terminus.doctor.user.dao.PrimaryUserDao;
 import io.terminus.doctor.user.dao.UserDaoExt;
 import io.terminus.doctor.user.interfaces.event.EventType;
 import io.terminus.doctor.user.interfaces.event.UserEvent;
 import io.terminus.doctor.user.interfaces.model.UserDto;
 import io.terminus.doctor.user.model.DoctorServiceReview;
 import io.terminus.doctor.user.model.DoctorServiceStatus;
+import io.terminus.doctor.user.model.PrimaryUser;
 import io.terminus.doctor.user.service.DoctorServiceReviewWriteService;
 import io.terminus.doctor.user.service.DoctorServiceStatusWriteService;
+import io.terminus.parana.user.impl.dao.UserDao;
+import io.terminus.parana.user.impl.dao.UserProfileDao;
 import io.terminus.parana.user.model.User;
-import io.terminus.parana.user.service.UserWriteService;
+import io.terminus.parana.user.model.UserProfile;
 import io.terminus.zookeeper.ZKClientFactory;
 import io.terminus.zookeeper.pubsub.Publisher;
 import lombok.extern.slf4j.Slf4j;
@@ -43,7 +46,11 @@ public class UserInterfaceManager {
     @Autowired
     private DoctorServiceStatusWriteService doctorServiceStatusWriteService;
     @Autowired
-    private UserWriteService<User> userUserWriteService;
+    private UserDao userDao;
+    @Autowired
+    private PrimaryUserDao primaryUserDao;
+    @Autowired
+    private UserProfileDao userProfileDao;
 
     @Autowired
     public UserInterfaceManager(ZKClientFactory zkClientFactory,
@@ -110,7 +117,21 @@ public class UserInterfaceManager {
         user.setStatus(UserStatus.NORMAL.value());  //默认正常
         user.setType(UserType.FARM_ADMIN_PRIMARY.value()); //默认猪场主账号
         user.setRoles(Lists.newArrayList("PRIMARY", "PRIMARY(OWNER)"));
-        user.setId(RespHelper.orServEx(userUserWriteService.create(user)));
+        userDao.create(user);
+        Long userId = user.getId();
+
+        //猪场管理员
+        PrimaryUser primaryUser = new PrimaryUser();
+        primaryUser.setUserId(userId);
+        //暂时暂定手机号
+        primaryUser.setUserName(user.getMobile());
+        primaryUser.setStatus(UserStatus.NORMAL.value());
+        primaryUserDao.create(primaryUser);
+
+        //用户个人信息
+        UserProfile userProfile = new UserProfile();
+        userProfile.setUserId(userId);
+        userProfileDao.create(userProfile);
 
         //初始化审核信息
         initReview(user, systemCode);
