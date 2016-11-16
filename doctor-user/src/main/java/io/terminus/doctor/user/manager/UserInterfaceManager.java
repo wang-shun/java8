@@ -61,6 +61,9 @@ public class UserInterfaceManager {
         }
     }
 
+    /**
+     * 向同一zkTopic下的各个子系统广播，由各子系统处理此次更新事件
+     */
     @Transactional
     public void update(UserDto user, String systemCode) throws Exception{
         User paranaUser = BeanMapper.map(user, User.class);
@@ -68,6 +71,9 @@ public class UserInterfaceManager {
         pulishZkEvent(user, EventType.UPDATE, systemCode);
     }
 
+    /**
+     * 向同一zkTopic下的各个子系统广播，由各子系统处理此次创建事件
+     */
     @Transactional
     public UserDto create(UserDto user, String systemCode) throws Exception {
         registerByMobile(BeanMapper.map(user, User.class), systemCode);
@@ -75,6 +81,9 @@ public class UserInterfaceManager {
         return user;
     }
 
+    /**
+     * 向同一zkTopic下的各个子系统广播，由各子系统处理此次删除事件
+     */
     @Transactional
     public void deletes(List<Long> ids, String systemCode) throws Exception {
         if(ids != null){
