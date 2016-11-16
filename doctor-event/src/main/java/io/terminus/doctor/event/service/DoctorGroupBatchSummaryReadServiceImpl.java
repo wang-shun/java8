@@ -29,6 +29,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import static io.terminus.common.utils.Arguments.notEmpty;
+
 /**
  * Desc: 猪群批次总结表读服务实现类
  * Mail: yangzl@terminus.io
@@ -206,7 +208,10 @@ public class DoctorGroupBatchSummaryReadServiceImpl implements DoctorGroupBatchS
 
     //获取料肉比增重: 增重 = 转出重 - 转入重
     private static double getFcrDeltaWeight(List<DoctorGroupEvent> events, int inCount, double inAvgWeight) {
-        double outWeight = CountUtil.doubleStream(events, DoctorGroupEvent::getWeight,
+        if (!notEmpty(events)) {
+            return 0D;
+        }
+        double outWeight = CountUtil.doubleStream(events, event -> MoreObjects.firstNonNull(event.getWeight(), 0D),
                 event -> Objects.equals(event.getType(), GroupEventType.TRANS_GROUP.getValue()) ||  //转群
                         Objects.equals(event.getType(), GroupEventType.TRANS_FARM.getValue()) ||    //转场
                         Objects.equals(event.getType(), GroupEventType.TURN_SEED.getValue()) ||     //转种猪
