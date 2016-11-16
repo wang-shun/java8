@@ -4,21 +4,12 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.api.client.util.Maps;
 import com.google.common.base.Throwables;
 import io.terminus.doctor.common.utils.RespHelper;
-import io.terminus.doctor.event.service.DoctorPigReadService;
-import io.terminus.doctor.event.service.DoctorPigWriteService;
 import io.terminus.doctor.msg.dto.Rule;
 import io.terminus.doctor.msg.dto.RuleValue;
 import io.terminus.doctor.msg.dto.SubUser;
 import io.terminus.doctor.msg.enums.Category;
 import io.terminus.doctor.msg.model.DoctorMessageRuleRole;
-import io.terminus.doctor.msg.service.DoctorMessageReadService;
-import io.terminus.doctor.msg.service.DoctorMessageRuleReadService;
-import io.terminus.doctor.msg.service.DoctorMessageRuleRoleReadService;
-import io.terminus.doctor.msg.service.DoctorMessageRuleTemplateReadService;
-import io.terminus.doctor.msg.service.DoctorMessageTemplateReadService;
-import io.terminus.doctor.msg.service.DoctorMessageWriteService;
 import io.terminus.doctor.schedule.msg.producer.factory.MaterialDtoFactory;
-import io.terminus.doctor.user.service.DoctorUserDataPermissionReadService;
 import io.terminus.doctor.warehouse.dto.DoctorMaterialConsumeAvgDto;
 import io.terminus.doctor.warehouse.service.DoctorMaterialConsumeAvgReadService;
 import lombok.extern.slf4j.Slf4j;
@@ -39,30 +30,11 @@ import java.util.Map;
 @Slf4j
 public class StorageShortageProducer extends AbstractJobProducer {
 
-    private final DoctorMaterialConsumeAvgReadService doctorMaterialConsumeAvgReadService;
-
     @Autowired
-    public StorageShortageProducer(DoctorMessageRuleTemplateReadService doctorMessageRuleTemplateReadService,
-                                   DoctorMessageRuleReadService doctorMessageRuleReadService,
-                                   DoctorMessageRuleRoleReadService doctorMessageRuleRoleReadService,
-                                   DoctorMessageReadService doctorMessageReadService,
-                                   DoctorMessageWriteService doctorMessageWriteService,
-                                   DoctorMaterialConsumeAvgReadService doctorMaterialConsumeAvgReadService,
-                                   DoctorMessageTemplateReadService doctorMessageTemplateReadService,
-                                   DoctorPigReadService doctorPigReadService,
-                                   DoctorPigWriteService doctorPigWriteService,
-                                   DoctorUserDataPermissionReadService doctorUserDataPermissionReadService) {
-        super(doctorMessageTemplateReadService,
-                doctorMessageRuleTemplateReadService,
-                doctorMessageRuleReadService,
-                doctorMessageRuleRoleReadService,
-                doctorMessageReadService,
-                doctorMessageWriteService,
-                doctorPigReadService,
-                doctorPigWriteService,
-                doctorUserDataPermissionReadService,
-                Category.STORAGE_SHORTAGE);
-        this.doctorMaterialConsumeAvgReadService = doctorMaterialConsumeAvgReadService;
+    private DoctorMaterialConsumeAvgReadService doctorMaterialConsumeAvgReadService;
+
+    public StorageShortageProducer() {
+        super(Category.STORAGE_SHORTAGE);
     }
 
     @Override

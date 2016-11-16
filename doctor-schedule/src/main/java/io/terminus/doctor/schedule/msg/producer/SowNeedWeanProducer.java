@@ -8,8 +8,6 @@ import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.enums.PigStatus;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigEvent;
-import io.terminus.doctor.event.service.DoctorPigReadService;
-import io.terminus.doctor.event.service.DoctorPigWriteService;
 import io.terminus.doctor.msg.dto.Rule;
 import io.terminus.doctor.msg.dto.RuleValue;
 import io.terminus.doctor.msg.dto.SubUser;
@@ -17,16 +15,8 @@ import io.terminus.doctor.msg.enums.Category;
 import io.terminus.doctor.msg.model.DoctorMessageRule;
 import io.terminus.doctor.msg.model.DoctorMessageRuleRole;
 import io.terminus.doctor.msg.model.DoctorMessageRuleTemplate;
-import io.terminus.doctor.msg.service.DoctorMessageReadService;
-import io.terminus.doctor.msg.service.DoctorMessageRuleReadService;
-import io.terminus.doctor.msg.service.DoctorMessageRuleRoleReadService;
-import io.terminus.doctor.msg.service.DoctorMessageRuleTemplateReadService;
-import io.terminus.doctor.msg.service.DoctorMessageTemplateReadService;
-import io.terminus.doctor.msg.service.DoctorMessageWriteService;
-import io.terminus.doctor.user.service.DoctorUserDataPermissionReadService;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -45,26 +35,8 @@ import java.util.stream.Collectors;
 @Slf4j
 public class SowNeedWeanProducer extends AbstractJobProducer {
 
-    @Autowired
-    public SowNeedWeanProducer(DoctorMessageRuleTemplateReadService doctorMessageRuleTemplateReadService,
-                               DoctorMessageRuleReadService doctorMessageRuleReadService,
-                               DoctorMessageRuleRoleReadService doctorMessageRuleRoleReadService,
-                               DoctorMessageReadService doctorMessageReadService,
-                               DoctorMessageWriteService doctorMessageWriteService,
-                               DoctorPigReadService doctorPigReadService,
-                               DoctorPigWriteService doctorPigWriteService,
-                               DoctorMessageTemplateReadService doctorMessageTemplateReadService,
-                               DoctorUserDataPermissionReadService doctorUserDataPermissionReadService) {
-        super(doctorMessageTemplateReadService,
-                doctorMessageRuleTemplateReadService,
-                doctorMessageRuleReadService,
-                doctorMessageRuleRoleReadService,
-                doctorMessageReadService,
-                doctorMessageWriteService,
-                doctorPigReadService,
-                doctorPigWriteService,
-                doctorUserDataPermissionReadService,
-                Category.SOW_NEEDWEAN);
+    public SowNeedWeanProducer() {
+        super(Category.SOW_NEEDWEAN);
     }
 
     @Override

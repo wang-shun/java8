@@ -14,6 +14,7 @@ rpc.dubbo:
 zookeeper:
   host: 101.201.44.35
   port: 2181
+  zkTopic: pig.doctor.topic
 
 logging:
   file: /var/log/doctor/schedule.log
@@ -77,3 +78,4 @@ msg:
       sow: /sow/detail
       boar: /boar/detail
     group: /group/detail
+
