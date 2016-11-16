@@ -511,5 +511,8 @@ ALTER TABLE doctor_messages ADD COLUMN rule_value_id BIGINT(20) DEFAULT NULL COM
 DROP INDEX idx_message_user_id ON doctor_message_user;
 CREATE INDEX   idx_userid_farmid_templateid ON doctor_message_user(user_id, farm_id, template_id);
 
+-- 2016-11-16 在message_id 字段添加索引
+CREATE INDEX   idx_messageid ON doctor_message_user(message_id);
+
 
 

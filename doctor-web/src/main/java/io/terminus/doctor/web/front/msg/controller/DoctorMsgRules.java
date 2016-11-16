@@ -197,6 +197,13 @@ public class DoctorMsgRules {
         return result;
     }
 
+    /**
+     * 禁用启用规则
+     * @param farmId
+     * @param templateId
+     * @param status
+     * @return
+     */
     @RequestMapping(value = "/rule/chgStatus", method = RequestMethod.GET)
     public Boolean changeStatus(@RequestParam(value = "farmId") Long farmId,
                                 @RequestParam(value = "templateId") Long templateId,
@@ -211,7 +218,7 @@ public class DoctorMsgRules {
             doctorMessageRuleWriteService.updateMessageRule(doctorMessageRule);
             return Boolean.TRUE;
         } catch (Exception e) {
-            log.error("change status faild");
+            log.error("change status failed");
         }
         return Boolean.FALSE;
     }
