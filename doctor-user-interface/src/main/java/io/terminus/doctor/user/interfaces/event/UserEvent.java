@@ -20,6 +20,10 @@ public class UserEvent implements Serializable {
         this.systemCode = DoctorSystemCode.PIG_DOCTOR;
     }
 
+    public UserEvent(){
+
+    }
+
     /**
      * 用户信息公共字段
      */
@@ -55,5 +59,35 @@ public class UserEvent implements Serializable {
 
     public void setEventType(EventType eventType) {
         this.eventType = eventType;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        UserEvent userEvent = (UserEvent) o;
+
+        if (!user.equals(userEvent.user)) return false;
+        if (eventType != userEvent.eventType) return false;
+        return systemCode.equals(userEvent.systemCode);
+
+    }
+
+    @Override
+    public int hashCode() {
+        int result = user.hashCode();
+        result = 31 * result + eventType.hashCode();
+        result = 31 * result + systemCode.hashCode();
+        return result;
+    }
+
+    @Override
+    public String toString() {
+        return "UserEvent{" +
+                "user=" + user +
+                ", eventType=" + eventType +
+                ", systemCode='" + systemCode + '\'' +
+                '}';
     }
 }
