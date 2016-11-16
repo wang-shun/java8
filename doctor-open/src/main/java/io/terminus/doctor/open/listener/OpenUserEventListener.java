@@ -1,10 +1,7 @@
 package io.terminus.doctor.open.listener;
 
-import com.google.common.base.Throwables;
 import com.google.common.eventbus.Subscribe;
-import io.terminus.doctor.common.enums.PigmallCacheMessage;
 import io.terminus.doctor.common.enums.UserType;
-import io.terminus.doctor.common.event.CacheEvent;
 import io.terminus.doctor.common.event.EventListener;
 import io.terminus.doctor.user.service.DoctorServiceReviewWriteService;
 import io.terminus.doctor.user.service.DoctorServiceStatusWriteService;
@@ -55,20 +52,12 @@ public class OpenUserEventListener implements EventListener {
             log.error("catch user register event, but parameter ParanaUser or ParanaUserId is null.");
             return;
         }
-        Long userId = paranaUser.getId();
-        User user = RespHelper.orServEx(userReadService.findById(userId));
+        User user = RespHelper.orServEx(userReadService.findById(paranaUser.getId()));
 
         //当注册用户是猪场管理员(主账号)
         if(Objects.equals(UserType.FARM_ADMIN_PRIMARY.value(), paranaUser.getType())){
-            serviceBetaStatusHandler.initDefaultServiceStatus(userId);
-            doctorServiceReviewWriteService.initServiceReview(userId, user.getMobile());
-        }
-
-        //向电商系统分发注册事件
-        try {
-            publish2Pigmall.publish(CacheEvent.toBytes(CacheEvent.make(PigmallCacheMessage.REGISTER_FROM_PIGDOCTOR.getValue(), userId)));
-        } catch (Exception e) {
-            log.error("failed to publish cache event, cause: {}", Throwables.getStackTraceAsString(e));
+            serviceBetaStatusHandler.initDefaultServiceStatus(paranaUser.getId());
+            doctorServiceReviewWriteService.initServiceReview(paranaUser.getId(), user.getMobile());
         }
     }
 }
