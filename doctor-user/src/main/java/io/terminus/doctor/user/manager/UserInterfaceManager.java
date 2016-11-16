@@ -46,11 +46,19 @@ public class UserInterfaceManager {
     private UserWriteService<User> userUserWriteService;
 
     @Autowired
-    public UserInterfaceManager(ZKClientFactory zkClientFactory, @Value("${user.center.topic}") String userCenterTopic) throws Exception {
+    public UserInterfaceManager(ZKClientFactory zkClientFactory,
+                                @Value("${user.center.topic}") String userCenterTopic) throws Exception {
         this.publisher = new Publisher(zkClientFactory, userCenterTopic);
     }
 
-    private void pulishZkEvent(UserDto user, EventType eventType, String systemCode) throws Exception {
+    /**
+     * 向用户中心专用 zookeeper topic 发送事件
+     * @param user 用户对象
+     * @param eventType 事件类型
+     * @param systemCode 产生事件的系统
+     * @throws Exception
+     */
+    public void pulishZkEvent(UserDto user, EventType eventType, String systemCode) throws Exception {
         try {
             publisher.publish(JsonMapper.nonEmptyMapper().toJson(new UserEvent(user, eventType, systemCode)).getBytes());
         } catch(Exception e) {

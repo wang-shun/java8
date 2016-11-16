@@ -17,6 +17,8 @@ import javax.servlet.http.HttpServletResponse;
  */
 public class RegisterEvent extends UserEvent {
 
+    private static final long serialVersionUID = -5181023758973567234L;
+
     public RegisterEvent(HttpServletRequest request, HttpServletResponse response, ParanaUser user) {
         super(request, response, user);
     }
