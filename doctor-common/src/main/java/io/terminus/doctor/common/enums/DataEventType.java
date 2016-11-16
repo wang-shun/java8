@@ -20,7 +20,8 @@ public enum DataEventType {
     BasicUpdate(6, "基础数据变动信息"),
     RollBackReport(7, "统计报表回滚"),
     ImportExcel(8, "excel导数"),
-    UpdateMessageRule(9, "消息规则变动");
+    UpdateMessageRule(9, "消息规则变动"),
+    UpdateMessageRules(10, "批量规则变动");
 
     @Getter
     private int key;

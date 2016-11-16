@@ -1,6 +1,8 @@
 package io.terminus.doctor.msg.service;
 
 import com.google.common.base.Throwables;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.common.enums.DataEventType;
@@ -18,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -51,7 +54,7 @@ public class DoctorMessageRuleWriteServiceImpl implements DoctorMessageRuleWrite
     public Response<Long> createMessageRule(DoctorMessageRule messageRule) {
         try {
             doctorMessageRuleDao.create(messageRule);
-            publisher.publish(DataEvent.toBytes(DataEventType.UpdateMessageRule.getKey(), messageRule));
+            publishMessageRuleChg(messageRule.getId());
             return Response.ok(messageRule.getId());
         } catch (Exception e) {
             log.error("create messageRule failed, messageRule:{}, cause:{}", messageRule, Throwables.getStackTraceAsString(e));
@@ -77,7 +80,7 @@ public class DoctorMessageRuleWriteServiceImpl implements DoctorMessageRuleWrite
                 });
             }
             Boolean result = doctorMessageRuleDao.update(messageRule);
-            publisher.publish(DataEvent.toBytes(DataEventType.UpdateMessageRule.getKey(), messageRule));
+            publishMessageRuleChg(messageRule.getId());
             return Response.ok(result);
         } catch (Exception e) {
             log.error("update messageRule failed, messageRule:{}, cause:{}", messageRule, Throwables.getStackTraceAsString(e));
@@ -93,7 +96,7 @@ public class DoctorMessageRuleWriteServiceImpl implements DoctorMessageRuleWrite
             if (rule != null) {
                 rule.setStatus(DoctorMessageRule.Status.DELETE.getValue());
                 Response<Boolean> result = Response.ok(doctorMessageRuleDao.update(rule));
-                publisher.publish(DataEvent.toBytes(DataEventType.UpdateMessageRule.getKey(), rule));
+                publishMessageRuleChg(rule.getId());
                 return result;
             }
             return Response.ok(Boolean.TRUE);
@@ -111,6 +114,7 @@ public class DoctorMessageRuleWriteServiceImpl implements DoctorMessageRuleWrite
                 return Response.fail("message.template.rule.fail");
             }
             List<DoctorMessageRuleTemplate> ruleTemplates = doctorMessageRuleTemplateDao.findAllWarnMessageTpl();
+            List<Long> ids = Lists.newArrayList();
             for (int i = 0; ruleTemplates != null && i < ruleTemplates.size(); i++) {
                 DoctorMessageRuleTemplate ruleTemplate = ruleTemplates.get(i);
                 // 1. 判断模板与farm的关系是否存在
@@ -135,12 +139,27 @@ public class DoctorMessageRuleWriteServiceImpl implements DoctorMessageRuleWrite
                         .describe(ruleTemplate.getDescribe())
                         .build();
                 doctorMessageRuleDao.create(rule);
-                publisher.publish(DataEvent.toBytes(DataEventType.UpdateMessageRule.getKey(), rule));
+                ids.add(rule.getId());
             }
+
+            Map<String, List<Long>> map = Maps.newHashMap();
+            map.put("messageRuleIds", ids);
+            publisher.publish(DataEvent.toBytes(DataEventType.UpdateMessageRules.getKey(), map));
             return Response.ok(Boolean.TRUE);
         } catch (Exception e) {
             log.error("init msg template to farm failed, farm id is {}, cause by {}", farmId, Throwables.getStackTraceAsString(e));
             return Response.fail("init.msg.template.fail");
         }
+    }
+
+    private void publishMessageRuleChg(Long messageRuleId){
+        Map<String, Long> map = Maps.newHashMap();
+        map.put("messageRuleId", messageRuleId);
+        try {
+            publisher.publish(DataEvent.toBytes(DataEventType.UpdateMessageRule.getKey(), map));
+        } catch (Exception e) {
+            log.error("publish.message.rule.chg.failed, cause by {}", Throwables.getStackTraceAsString(e));
+        }
+
     }
 }
