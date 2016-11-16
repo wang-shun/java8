@@ -6,6 +6,8 @@ import java.io.Serializable;
 public class UserEvent implements Serializable {
     private static final long serialVersionUID = -5258263518867720731L;
 
+    public UserEvent() {}
+
     public UserEvent(UserDto user, EventType eventType, String systemCode) {
         this.user = user;
         this.eventType = eventType;
