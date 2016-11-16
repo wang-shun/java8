@@ -6,7 +6,11 @@ import io.terminus.doctor.web.core.msg.sms.LuoSiMaoSmsServiceConfig;
 import io.terminus.doctor.workflow.WorkFlowJobConfiguration;
 import io.terminus.parana.config.ConfigCenter;
 import io.terminus.parana.web.msg.config.MsgWebConfig;
+import io.terminus.zookeeper.ZKClientFactory;
+import io.terminus.zookeeper.pubsub.Publisher;
+import io.terminus.zookeeper.pubsub.Subscriber;
 import org.springframework.beans.factory.annotation.Autowire;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -37,6 +41,18 @@ public class DoctorScheduleConfiguration extends WebMvcConfigurerAdapter {
     @Bean(autowire = Autowire.BY_NAME)
     public ConfigCenter configCenter() {
         return new ConfigCenter();
+    }
+
+    @Bean
+    public Subscriber cacheListenerBean(ZKClientFactory zkClientFactory,
+                                        @Value("${zookeeper.zkTopic}") String zkTopic) throws Exception{
+        return new Subscriber(zkClientFactory,zkTopic);
+    }
+
+    @Bean
+    public Publisher cachePublisherBean(ZKClientFactory zkClientFactory,
+                                        @Value("${zookeeper.zkTopic}") String zkTopic) throws Exception{
+        return new Publisher(zkClientFactory, zkTopic);
     }
 
 }

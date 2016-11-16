@@ -128,82 +128,38 @@ public abstract class AbstractProducer implements IProducer {
 
                 // > 记录对应每个用户的消息
                 List<DoctorMessageRule> messageRules = RespHelper.orServEx(doctorMessageRuleReadService.findMessageRulesByTplId(ruleTemplate.getId()));
-
-                for (int j = 0; messageRules != null && j < messageRules.size(); j++) {
-                    DoctorMessageRule messageRule = messageRules.get(j);
-                    if (!Objects.equals(messageRule.getStatus(), DoctorMessageRule.Status.NORMAL.getValue())) {
-                        DoctorMessageSearchDto doctorMessageSearchDto = new DoctorMessageSearchDto();
-                        doctorMessageSearchDto.setRuleId(messageRule.getId());
-                        deleteMessages(doctorMessageSearchDto);
-                        continue;
-                    }
-                    // 获取最新的发送消息
-                    DoctorMessage latestMessage = getLatestWarnMessage(messageRule.getTemplateId(), messageRule.getFarmId());
-                    // 检查消息是否在频率范围之内
-                    if (!checkFrequence(latestMessage, messageRule.getRule())) {
-                        continue;
-                    }
-                    //将之前消息删除
-                    DoctorMessageSearchDto dto = new DoctorMessageSearchDto();
-                    dto.setRuleId(messageRule.getId());
-                    deleteMessages(dto);
-
-                    DoctorMessageRuleRole ruleRole = DoctorMessageRuleRole.builder()
-                            .ruleId(messageRule.getId())
-                            .templateId(messageRule.getTemplateId())
-                            .farmId(messageRule.getFarmId())
-                            .ruleValue(messageRule.getRuleValue())
-                            .build();
-                    message(ruleRole,
-                            subUsers.stream().filter(sub -> sub.getFarmIds().contains(messageRule.getFarmId())).collect(Collectors.toList()));
-//                    if (Arguments.notEmpty(message)) {
-//                        //分批次插入数据
-//                        Lists.partition(message, 5000).forEach(list -> doctorMessageWriteService.createMessages(list));
-//                    }
-                }
-
-                // List<DoctorMessageRuleRole> ruleRoles = RespHelper.orServEx(doctorMessageRuleRoleReadService.findByTplId(ruleTemplate.getId()));
-                // > 记录对应每个用户的消息
-                /*for (int j = 0; ruleRoles != null && j < ruleRoles.size(); j++) {
-                    DoctorMessageRuleRole ruleRole = ruleRoles.get(j);
-                    // 查询对应的message_rule
-                    DoctorMessageRule messageRule = RespHelper.orServEx(doctorMessageRuleReadService.findMessageRuleById(ruleRole.getRuleId()));
-                    if(messageRule == null || !Objects.equals(messageRule.getStatus(), DoctorMessageRule.Status.NORMAL.getValue())) {
-                        continue;
-                    }
-                    // 获取最新的发送消息
-                    DoctorMessage latestMessage = getLatestWarnMessage(ruleRole.getTemplateId(), ruleRole.getFarmId(), ruleRole.getRoleId());
-                    // 检查消息是否在频率范围之内
-                    if (!checkFrequence(latestMessage, ruleRole.getRule())) {
-                        continue;
-                    }
-                    // 获取信息
-                    log.info("[AbstractProducer] {} -> 预警消息产生, roleId: {}", ruleTemplate.getName(), ruleRole.getRoleId());
-                    List<DoctorMessage> message = message(ruleRole,
-                            subUsers.stream().filter(sub -> Objects.equals(sub.getRoleId(), ruleRole.getRoleId())).collect(Collectors.toList()));
-                    if(message != null && message.size() > 0) {
-                        doctorMessageWriteService.createMessages(message);
-                    }
-                }*/
+                messageRules.forEach(messageRule -> {
+                    createWarnMessageByMessageRule(messageRule, subUsers);
+                });
                 stopWatch.stop();
                 log.info("[AbstractProducer] {} -> 预警消息产生结束, 耗时 {}ms, ending......", ruleTemplate.getName(), stopWatch.elapsed(TimeUnit.MILLISECONDS));
             }
-
-//            // > 记录对应每只猪类型的消息
-//            ImmutableList<Integer> ofCategories = ImmutableList.of(
-//                    // 当前支持这些消息提醒
-//                    Category.SOW_NEEDWEAN.getKey(),
-//                    Category.SOW_BREEDING.getKey(),
-//                    Category.SOW_BIRTHDATE.getKey(),
-//                    Category.SOW_PREGCHECK.getKey(),
-//                    Category.SOW_BACK_FAT.getKey(),
-//                    Category.SOW_ELIMINATE.getKey());
-//            RespHelper.orServEx(doctorMessageRuleReadService.findMessageRulesByTplId(ruleTemplate.getId())).forEach(doctorMessageRule -> {
-//                if (ofCategories.contains(doctorMessageRule.getCategory())) {
-//                    recordPigMessages(doctorMessageRule);
-//                }
-//            });
         }
+    }
+
+    public void createWarnMessageByMessageRule(DoctorMessageRule messageRule, List<SubUser> subUsers) {
+        //将之前消息删除
+        DoctorMessageSearchDto dto = new DoctorMessageSearchDto();
+        dto.setRuleId(messageRule.getId());
+        deleteMessages(dto);
+
+        if (!Objects.equals(messageRule.getStatus(), DoctorMessageRule.Status.NORMAL.getValue())) {
+            return;
+        }
+//        // 获取最新的发送消息
+//        DoctorMessage latestMessage = getLatestWarnMessage(messageRule.getTemplateId(), messageRule.getFarmId());
+//        // 检查消息是否在频率范围之内
+//        if (!checkFrequence(latestMessage, messageRule.getRule())) {
+//            continue;
+//        }
+
+        DoctorMessageRuleRole ruleRole = DoctorMessageRuleRole.builder()
+                .ruleId(messageRule.getId())
+                .templateId(messageRule.getTemplateId())
+                .farmId(messageRule.getFarmId())
+                .ruleValue(messageRule.getRuleValue())
+                .build();
+        message(ruleRole, subUsers);
     }
 
     /**
