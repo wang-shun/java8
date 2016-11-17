@@ -194,7 +194,7 @@ public class Users {
         final String redisKey = ImportExcelRedisKey + fileUrl;
         try {
             jedisTemplate.execute(jedis -> {
-                jedis.set(redisKey, null);
+                jedis.set(redisKey, "null");
             });
 
             publisher.publish(DataEvent.toBytes(DataEventType.ImportExcel.getKey(), fileUrl));
@@ -204,7 +204,7 @@ public class Users {
                 String result = jedisTemplate.execute(jedis -> {
                     return jedis.get(redisKey);
                 });
-                if (result == null) {
+                if ("null".equals(result)) {
                     if (plusTime >= maxWaitTime) {
                         throw new JsonResponseException("time out " + maxWaitTime + " seconds");
                     }
