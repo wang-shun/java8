@@ -189,8 +189,8 @@ public class Users {
 
     @RequestMapping(value = "/importExcel", method = RequestMethod.GET)
     public String importExcel(@RequestParam String fileUrl){
-        final int maxWaitTime = 180; // 最长等待时间，180秒
-        final int sleepTime = 3; //每次沉睡3秒
+        final int maxWaitTime = 90; // 最长等待时间，秒
+        final int sleepTime = 1; //每次沉睡多少秒
         final String redisKey = ImportExcelRedisKey + fileUrl;
         try {
             jedisTemplate.execute(jedis -> {
@@ -220,7 +220,7 @@ public class Users {
             throw e;
         } catch (Exception e) {
             log.error(Throwables.getStackTraceAsString(e));
-            return Throwables.getStackTraceAsString(e);
+            return "导入猪场失败，请将此错误信息发送给工程师以帮您分析错误原因\n" + Throwables.getStackTraceAsString(e);
         } finally {
             jedisTemplate.execute(jedis -> {
                 jedis.del(redisKey);
