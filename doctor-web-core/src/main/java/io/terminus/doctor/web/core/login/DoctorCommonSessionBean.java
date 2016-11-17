@@ -231,10 +231,10 @@ public class DoctorCommonSessionBean {
                          @NotEmpty(message = "user.code.miss") String code,
                          @NotEmpty(message = "session.id.miss")String sessionId) {
         checkPasswordFormat(password);
-        User user = null;
+
         // 校验手机验证码
         validateSmsCode(code, mobile, sessionId);
-        user = registerByMobile(mobile, password, null);
+        User user = registerByMobile(mobile, password, null);
         coreEventDispatcher.publish(new RegisterEvent(null, null, DoctorUserMaker.from(user)));
         return user.getId();
     }
