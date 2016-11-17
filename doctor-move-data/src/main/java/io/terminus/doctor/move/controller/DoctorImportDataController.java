@@ -4,6 +4,7 @@ import com.google.common.base.Stopwatch;
 import com.google.common.base.Throwables;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.exception.ServiceException;
+import io.terminus.common.redis.utils.JedisTemplate;
 import io.terminus.doctor.common.enums.DataEventType;
 import io.terminus.doctor.common.event.DataEvent;
 import io.terminus.doctor.event.search.barn.BarnSearchDumpService;
@@ -44,6 +45,7 @@ import java.util.concurrent.TimeUnit;
 @RestController
 @RequestMapping("/api/doctor/import/data")
 public class DoctorImportDataController {
+    private static final String ImportExcelRedisKey = "import-excel-result:";
 
     @Autowired
     private DoctorImportDataService doctorImportDataService;
@@ -59,6 +61,8 @@ public class DoctorImportDataController {
     private DoctorDailyReportWriteService doctorDailyReportWriteService;
     @Autowired
     private DoctorMoveReportService doctorMoveReportService;
+    @Autowired
+    private JedisTemplate jedisTemplate;
 
     @PostConstruct
     public void init () throws Exception{
@@ -169,7 +173,7 @@ public class DoctorImportDataController {
     }
 
     @RequestMapping(value = "/importByHttpUrl", method = RequestMethod.GET)
-    public String importByHttpUrl(@RequestParam String fileURL){
+    public void importByHttpUrl(@RequestParam String fileURL){
         String fileType;
         if(fileURL.endsWith(".xlsx")){
             fileType = "xlsx";
@@ -179,13 +183,19 @@ public class DoctorImportDataController {
             throw new ServiceException("file.type.error");
         }
         InputStream inputStream = null;
+        final String redisKey = ImportExcelRedisKey + fileURL;
         try {
             inputStream = new URL(fileURL.replace("https", "http")).openConnection().getInputStream();
             importByInputStream(inputStream, fileType);
-            return "true";
+            //  成功
+            jedisTemplate.execute(jedis -> {
+               jedis.set(redisKey, "true");
+            });
         } catch (Exception e) {
             log.error(Throwables.getStackTraceAsString(e));
-            return "false";
+            jedisTemplate.execute(jedis -> {
+                jedis.set(redisKey, Throwables.getStackTraceAsString(e));
+            });
         } finally {
             if(inputStream != null){
                 try {
