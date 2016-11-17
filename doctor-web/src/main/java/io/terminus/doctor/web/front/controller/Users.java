@@ -28,6 +28,7 @@ import io.terminus.parana.auth.model.ParanaThreadVars;
 import io.terminus.parana.auth.model.PermissionData;
 import io.terminus.parana.user.model.LoginType;
 import io.terminus.parana.user.model.User;
+import io.terminus.parana.user.service.UserReadService;
 import io.terminus.parana.user.service.UserWriteService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,6 +61,7 @@ public class Users {
 
     private final UserWriteService<User> userWriteService;
     private final DoctorUserReadService doctorUserReadService;
+    private final UserReadService<User> userUserReadService;
     private final CaptchaGenerator captchaGenerator;
     private final MobilePattern mobilePattern;
     private final AclLoader aclLoader;
@@ -70,6 +72,7 @@ public class Users {
     @Autowired
     public Users(UserWriteService<User> userWriteService,
                  DoctorUserReadService doctorUserReadService,
+                 UserReadService<User> userUserReadService,
                  CaptchaGenerator captchaGenerator,
                  MobilePattern mobilePattern,
                  AclLoader aclLoader,
@@ -77,6 +80,7 @@ public class Users {
                  DoctorCommonSessionBean doctorCommonSessionBean) {
         this.userWriteService = userWriteService;
         this.doctorUserReadService = doctorUserReadService;
+        this.userUserReadService = userUserReadService;
         this.captchaGenerator = captchaGenerator;
         this.mobilePattern = mobilePattern;
         this.doctorCommonSessionBean = doctorCommonSessionBean;
@@ -246,6 +250,9 @@ public class Users {
             throw new JsonResponseException("mobile.format.error");
         }
 
+        //校验手机号是否已经注册
+        checkMobileExist(mobile);
+
         //更新user
         User user = RespHelper.or500(doctorUserReadService.findById(baseUser.getId()));
         user.setMobile(mobile);
@@ -253,6 +260,14 @@ public class Users {
         extraMap.put("contact", mobile);
         user.setExtra(extraMap);
         return RespHelper.or500(userWriteService.update(user));
+    }
+
+    private void checkMobileExist(String mobile) {
+        User exist = RespHelper.or500(userUserReadService.findBy(mobile, LoginType.MOBILE));
+        if (exist != null) {
+            log.error("change mobile exist, loginerId:{} mobile:{}", UserUtil.getUserId(), mobile);
+            throw new JsonResponseException("mobile.already.exist");
+        }
     }
 
     @RequestMapping(value = "/suggest", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
