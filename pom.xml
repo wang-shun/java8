@@ -418,7 +418,7 @@
             <dependency>
                 <groupId>io.terminus.doctor</groupId>
                 <artifactId>doctor-user-interface</artifactId>
-                <version>${project.parent.version}</version>
+                <version>1.1-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>io.terminus.doctor</groupId>
