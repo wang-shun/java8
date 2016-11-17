@@ -14,6 +14,7 @@ import io.terminus.common.model.BaseUser;
 import io.terminus.common.model.Response;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.common.utils.MapBuilder;
+import io.terminus.doctor.common.utils.RandomUtil;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.user.model.DoctorUser;
 import io.terminus.doctor.user.service.DoctorUserReadService;
@@ -110,6 +111,14 @@ public class Users {
     }
 
     /**
+     * 生成sessionId
+     */
+    @RequestMapping(value = "/getSid", method = RequestMethod.POST)
+    public String getSessionId(@RequestParam(value = "key", required = false) String key) {
+        return doctorCommonSessionBean.getSessionId(MoreObjects.firstNonNull(key, String.valueOf(RandomUtil.random(1000, 99999))));
+    }
+
+    /**
      * 用户注册
      *
      * @param password   密码
@@ -120,7 +129,7 @@ public class Users {
      */
     @RequestMapping(value = "/register", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public Long register(@RequestParam("password") String password,
-                         @RequestParam(value = "mobile", required = false) String mobile,
+                         @RequestParam("mobile") String mobile,
                          @RequestParam(value = "code", required = false) String code,
                          @RequestParam("sid") String sessionId){
         return doctorCommonSessionBean.register(password, mobile, code, sessionId);
