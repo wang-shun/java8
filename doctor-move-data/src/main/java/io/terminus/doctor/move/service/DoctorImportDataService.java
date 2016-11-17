@@ -1092,30 +1092,4 @@ public class DoctorImportDataService {
         return row.getRowNum() > 0 && notEmpty(ImportExcelUtils.getString(row, 0));
     }
 
-    /**
-     * 修改judgedate
-     * @param sheet
-     * @return
-     */
-    public Boolean fixJudgePregDate(Long farmId, Sheet sheet){
-        Map<String, List<DoctorImportSow>> sowMap = getImportSows(sheet).stream().collect(Collectors.groupingBy(DoctorImportSow::getSowCode));
-        sowMap.entrySet().forEach(map -> {
-            List<DoctorImportSow> importSows = map.getValue().stream().sorted((a, b) -> a.getParity().compareTo(b.getParity())).collect(Collectors.toList());
-            DoctorImportSow doctorImportSow = importSows.get(importSows.size()-1);
-            DoctorPig pig = doctorPigDao.findPigByFarmIdAndPigCode(farmId, doctorImportSow.getSowCode());
-            if (pig != null){
-                DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(pig.getId());
-                Map<String, Object> extra = doctorPigTrack.getExtraMap();
-                if (extra == null){
-                    extra = Maps.newHashMap();
-                }
-                if(doctorImportSow.getPrePregDate() != null && extra.get("judgePregDate") == null){
-                    extra.put("judgePregDate", doctorImportSow.getPrePregDate());
-                    doctorPigTrack.setExtraMap(extra);
-                    doctorPigTrackDao.update(doctorPigTrack);
-                }
-            }
-        });
-        return Boolean.TRUE;
-    }
 }

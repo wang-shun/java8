@@ -10,13 +10,12 @@ import com.google.common.eventbus.EventBus;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.BaseUser;
 import io.terminus.common.model.Response;
+import io.terminus.common.redis.utils.JedisTemplate;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.enums.DataEventType;
 import io.terminus.doctor.common.enums.UserStatus;
 import io.terminus.doctor.common.enums.UserType;
 import io.terminus.doctor.common.event.DataEvent;
-import io.terminus.doctor.common.utils.RespHelper;
-import io.terminus.doctor.user.model.DoctorFarm;
 import io.terminus.doctor.user.model.DoctorUser;
 import io.terminus.doctor.user.service.DoctorFarmReadService;
 import io.terminus.doctor.user.service.DoctorUserReadService;
@@ -49,7 +48,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import static io.terminus.common.utils.Arguments.isNull;
@@ -63,6 +61,7 @@ import static io.terminus.common.utils.Arguments.isNull;
 @RequestMapping("/api/user")
 public class Users {
 
+    private static final String ImportExcelRedisKey = "import-excel-result:";
 
     private final DoctorUserReadService doctorUserReadService;
 
@@ -78,13 +77,16 @@ public class Users {
 
     private final Publisher publisher;
 
+    private final JedisTemplate jedisTemplate;
+
     @Autowired
     public Users(DoctorUserReadService doctorUserReadService,
                  DoctorFarmReadService doctorFarmReadService, EventBus eventBus,
                  AclLoader aclLoader,
                  PermissionHelper permissionHelper,
                  MobilePattern mobilePattern,
-                 Publisher publisher) {
+                 Publisher publisher,
+                 JedisTemplate jedisTemplate) {
         this.doctorUserReadService = doctorUserReadService;
         this.doctorFarmReadService = doctorFarmReadService;
         this.eventBus = eventBus;
@@ -92,6 +94,7 @@ public class Users {
         this.permissionHelper = permissionHelper;
         this.mobilePattern = mobilePattern;
         this.publisher = publisher;
+        this.jedisTemplate = jedisTemplate;
     }
 
     @RequestMapping("")
@@ -185,23 +188,43 @@ public class Users {
     }
 
     @RequestMapping(value = "/importExcel", method = RequestMethod.GET)
-    public boolean importExcel(String fileUrl){
+    public String importExcel(@RequestParam String fileUrl){
+        final int maxWaitTime = 90; // 最长等待时间，秒
+        final int sleepTime = 1; //每次沉睡多少秒
+        final String redisKey = ImportExcelRedisKey + fileUrl;
         try {
-            List<DoctorFarm> farms = RespHelper.orServEx(doctorFarmReadService.findAllFarms());
+            jedisTemplate.execute(jedis -> {
+                jedis.set(redisKey, "null");
+            });
+
             publisher.publish(DataEvent.toBytes(DataEventType.ImportExcel.getKey(), fileUrl));
 
-            //每10s查一发数据看看是否导入成功，超过200s后返回失败
-            for (int i = 0; i < 20; i++) {
-                Thread.sleep(10000);
-                if (RespHelper.orServEx(doctorFarmReadService.findAllFarms()).size() > farms.size()) {
-                    return true;
+            int plusTime = 0; //已累计等待时间，秒
+            while (true) {
+                String result = jedisTemplate.execute(jedis -> {
+                    return jedis.get(redisKey);
+                });
+                if ("null".equals(result)) {
+                    if (plusTime >= maxWaitTime) {
+                        throw new JsonResponseException("time out " + maxWaitTime + " seconds");
+                    }
+                    Thread.sleep(1000L * sleepTime);
+                    plusTime += sleepTime;
+                } else if ("true".equals(result)) {
+                    return "true";
+                } else {
+                    return "导入猪场失败，您可以将此错误信息发送给工程师以帮您分析错误原因\n" + result;
                 }
-                log.info("Oops! Import excel not ok, please wait! Try times:{}", i + 1);
             }
-            return false;
+        } catch (JsonResponseException e){
+            throw e;
         } catch (Exception e) {
             log.error(Throwables.getStackTraceAsString(e));
-            return false;
+            return "导入猪场失败，您可以将此错误信息发送给工程师以帮您分析错误原因\n" + Throwables.getStackTraceAsString(e);
+        } finally {
+            jedisTemplate.execute(jedis -> {
+                jedis.del(redisKey);
+            });
         }
     }
 
