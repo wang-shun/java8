@@ -56,8 +56,8 @@ public class DoctorLoginInterceptor extends HandlerInterceptorAdapter {
         WebUtil.putRequestAndResponse(request, response);
 
         if (request.getAttribute("sid") == null || isEmpty((String)request.getAttribute("sid"))) {
-            log.error("session id miss");
-            return false;
+            log.warn("session id miss");
+            return true;
         }
 
         String sessionId = request.getAttribute("sid").toString();
