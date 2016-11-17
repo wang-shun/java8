@@ -213,14 +213,14 @@ public class Users {
                 } else if ("true".equals(result)) {
                     return "true";
                 } else {
-                    return "导入猪场失败，请将此错误信息发送给工程师以帮您分析错误原因\n" + result;
+                    return "导入猪场失败，您可以将此错误信息发送给工程师以帮您分析错误原因\n" + result;
                 }
             }
         } catch (JsonResponseException e){
             throw e;
         } catch (Exception e) {
             log.error(Throwables.getStackTraceAsString(e));
-            return "导入猪场失败，请将此错误信息发送给工程师以帮您分析错误原因\n" + Throwables.getStackTraceAsString(e);
+            return "导入猪场失败，您可以将此错误信息发送给工程师以帮您分析错误原因\n" + Throwables.getStackTraceAsString(e);
         } finally {
             jedisTemplate.execute(jedis -> {
                 jedis.del(redisKey);
