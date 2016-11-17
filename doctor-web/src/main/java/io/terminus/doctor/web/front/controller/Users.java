@@ -130,7 +130,7 @@ public class Users {
     @RequestMapping(value = "/register", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public Long register(@RequestParam("password") String password,
                          @RequestParam("mobile") String mobile,
-                         @RequestParam(value = "code", required = false) String code,
+                         @RequestParam("code") String code,
                          @RequestParam("sid") String sessionId){
         return doctorCommonSessionBean.register(password, mobile, code, sessionId);
     }
