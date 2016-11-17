@@ -136,7 +136,7 @@ public class Users {
      */
     @RequestMapping(value = "/login", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public Map<String, Object> login(@RequestParam("name") String name,
+    public Map<String, Object> login(@RequestParam("loginBy") String name,
                                      @RequestParam("password") String password,
                                      @RequestParam("deviceId") String deviceId,
                                      @RequestParam(value = "sid", required = false) String sid,
