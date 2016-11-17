@@ -29,7 +29,6 @@ import io.terminus.parana.auth.model.ParanaThreadVars;
 import io.terminus.parana.auth.model.PermissionData;
 import io.terminus.parana.user.model.LoginType;
 import io.terminus.parana.user.model.User;
-import io.terminus.parana.user.service.UserReadService;
 import io.terminus.parana.user.service.UserWriteService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,7 +61,6 @@ public class Users {
 
     private final UserWriteService<User> userWriteService;
     private final DoctorUserReadService doctorUserReadService;
-    private final UserReadService<User> userUserReadService;
     private final CaptchaGenerator captchaGenerator;
     private final MobilePattern mobilePattern;
     private final AclLoader aclLoader;
@@ -73,7 +71,6 @@ public class Users {
     @Autowired
     public Users(UserWriteService<User> userWriteService,
                  DoctorUserReadService doctorUserReadService,
-                 UserReadService<User> userUserReadService,
                  CaptchaGenerator captchaGenerator,
                  MobilePattern mobilePattern,
                  AclLoader aclLoader,
@@ -81,7 +78,6 @@ public class Users {
                  DoctorCommonSessionBean doctorCommonSessionBean) {
         this.userWriteService = userWriteService;
         this.doctorUserReadService = doctorUserReadService;
-        this.userUserReadService = userUserReadService;
         this.captchaGenerator = captchaGenerator;
         this.mobilePattern = mobilePattern;
         this.doctorCommonSessionBean = doctorCommonSessionBean;
@@ -272,7 +268,7 @@ public class Users {
     }
 
     private void checkMobileExist(String mobile) {
-        User exist = RespHelper.or500(userUserReadService.findBy(mobile, LoginType.MOBILE));
+        User exist = RespHelper.or500(doctorUserReadService.findBy(mobile, LoginType.MOBILE));
         if (exist != null) {
             log.error("change mobile exist, loginerId:{} mobile:{}", UserUtil.getUserId(), mobile);
             throw new JsonResponseException("mobile.already.exist");

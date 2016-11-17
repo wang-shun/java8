@@ -5,7 +5,6 @@ import com.github.cage.image.EffectConfig;
 import com.github.cage.image.Painter;
 import com.github.cage.token.RandomCharacterGeneratorFactory;
 import com.github.cage.token.RandomTokenGenerator;
-import org.springframework.stereotype.Component;
 
 import javax.servlet.http.HttpSession;
 import java.util.Random;
@@ -18,7 +17,6 @@ import static com.github.cage.token.RandomCharacterGeneratorFactory.ARABIC_NUMER
  * Date: 2016-03-15 6:15 PM  <br>
  * Author: xiao
  */
-@Component
 public class CaptchaGenerator {
     public static final String CAPTCHA_TOKEN = "captchaToken";
 
