@@ -327,11 +327,13 @@ public class DoctorWareHouseQuery {
                 reportmap.put(houseId, new WarehouseReport.Report());
             }
             WarehouseReport.Report inner = reportmap.get(houseId);
-            if(eventType.equals(DoctorMaterialConsumeProvider.EVENT_TYPE.PROVIDER)){
+            if(eventType.equals(DoctorMaterialConsumeProvider.EVENT_TYPE.PROVIDER)
+                    || eventType.equals(DoctorMaterialConsumeProvider.EVENT_TYPE.FORMULA_FEED)){
                 inner.setInAmount(inner.getInAmount() + report.getAmount());
                 inner.setInCount(inner.getInCount() + report.getCount());
             }
-            if(eventType.equals(DoctorMaterialConsumeProvider.EVENT_TYPE.CONSUMER)){
+            if(eventType.equals(DoctorMaterialConsumeProvider.EVENT_TYPE.CONSUMER)
+                    || eventType.equals(DoctorMaterialConsumeProvider.EVENT_TYPE.FORMULA_RAW_MATERIAL)){
                 inner.setOutAmount(inner.getOutAmount() + report.getAmount());
                 inner.setOutCount(inner.getOutCount() + report.getCount());
             }

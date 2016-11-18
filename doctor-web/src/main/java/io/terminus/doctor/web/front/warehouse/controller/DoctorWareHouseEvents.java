@@ -141,20 +141,20 @@ public class DoctorWareHouseEvents {
                             farmId, dto.getWarehouseId(), dto.getMaterialId(), null, null, null, null, null, DateUtil.toDateString(monthStart.toDate()), DateUtil.toDateString(nextMonthStart.toDate()))
                     ).forEach(report -> {
                         if(Objects.equals(report.getEventType(), DoctorMaterialConsumeProvider.EVENT_TYPE.CONSUMER.getValue())){
-                            dto.setOutAmount(report.getAmount());
-                            dto.setOutCount(report.getCount());
+                            dto.setOutAmount(dto.getOutAmount() + report.getAmount());
+                            dto.setOutCount(dto.getOutCount() + report.getCount());
                         }
                         if(Objects.equals(report.getEventType(), DoctorMaterialConsumeProvider.EVENT_TYPE.PROVIDER.getValue())){
-                            dto.setInAmount(report.getAmount());
-                            dto.setInCount(report.getCount());
+                            dto.setInAmount(dto.getInAmount() + report.getAmount());
+                            dto.setInCount(dto.getInCount() + report.getCount());
                         }
                         if(Objects.equals(report.getEventType(), DoctorMaterialConsumeProvider.EVENT_TYPE.DIAORU.getValue())){
-                            dto.setDiaoruAmount(report.getAmount());
-                            dto.setDiaoruCount(report.getCount());
+                            dto.setDiaoruAmount(dto.getDiaoruAmount() + report.getAmount());
+                            dto.setDiaoruCount(dto.getDiaoruCount() + report.getCount());
                         }
                         if(Objects.equals(report.getEventType(), DoctorMaterialConsumeProvider.EVENT_TYPE.DIAOCHU.getValue())){
-                            dto.setDiaochuAmount(report.getAmount());
-                            dto.setDiaochuCount(report.getCount());
+                            dto.setDiaochuAmount(dto.getDiaochuAmount() + report.getAmount());
+                            dto.setDiaochuCount(dto.getDiaochuCount() + report.getCount());
                         }
                     });
                     return dto;
