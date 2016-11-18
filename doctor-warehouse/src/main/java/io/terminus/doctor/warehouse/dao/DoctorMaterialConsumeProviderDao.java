@@ -2,12 +2,14 @@ package io.terminus.doctor.warehouse.dao;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
+import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.Paging;
 import io.terminus.common.mysql.dao.MyBatisDao;
 import io.terminus.common.utils.Constants;
 import io.terminus.common.utils.MapBuilder;
 import io.terminus.doctor.common.enums.WareHouseType;
 import io.terminus.doctor.common.utils.Params;
+import io.terminus.doctor.warehouse.dto.BarnConsumeMaterialReport;
 import io.terminus.doctor.warehouse.dto.MaterialCountAmount;
 import io.terminus.doctor.warehouse.dto.MaterialEventReport;
 import io.terminus.doctor.warehouse.dto.WarehouseEventReport;
@@ -112,5 +114,50 @@ public class DoctorMaterialConsumeProviderDao extends MyBatisDao<DoctorMaterialC
             param.put("type", type.getKey());
         }
         return sqlSession.selectList(sqlId("materialEventReport"), ImmutableMap.copyOf(Params.filterNullOrEmpty(param)));
+    }
+
+    /**
+     * 以猪舍为维度统计物资领用情况
+     * @param farmId
+     * @param wareHouseId
+     * @param materialId
+     * @param materialName
+     * @param type
+     * @param barnId
+     * @param staffId
+     * @param creatorId
+     * @param startAt
+     * @param endAt
+     * @return
+     */
+    public Paging<BarnConsumeMaterialReport> barnReport(Long farmId, Long wareHouseId, Long materialId, String materialName,
+                                                      WareHouseType type, Long barnId, Long staffId, Long creatorId,
+                                                      String startAt, String endAt, Integer offset, Integer limit){
+        if(farmId == null){
+            throw new ServiceException("farmId.not.null");
+        }
+        Map<String, Object> param = MapBuilder.<String, Object>of()
+                .put("farmId", farmId)
+                .put("wareHouseId", wareHouseId)
+                .put("startAt", startAt)
+                .put("endAt", endAt)
+                .put("materialId", materialId)
+                .put("materialName", materialName)
+                .put("barnId", barnId)
+                .put("staffId", staffId)
+                .put("creatorId", creatorId)
+                .put("offset", offset)
+                .put("limit", limit)
+                .map();
+        if(type != null){
+            param.put("type", type.getKey());
+        }
+        param = ImmutableMap.copyOf(Params.filterNullOrEmpty(param));
+        long total = sqlSession.selectOne(sqlId("countBarnReport"), param);
+        if (total <= 0){
+            return new Paging<>(0L, Collections.<BarnConsumeMaterialReport>emptyList());
+        }
+        List<BarnConsumeMaterialReport> datas = sqlSession.selectList(sqlId("pageBarnReport"), param);
+        return new Paging<>(total, datas);
     }
 }
