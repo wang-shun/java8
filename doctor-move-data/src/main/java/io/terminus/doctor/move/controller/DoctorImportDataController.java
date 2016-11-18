@@ -169,6 +169,7 @@ public class DoctorImportDataController {
         new Thread(() -> {
             doctorDailyReportWriteService.createDailyReports(begin.toDate(), end.toDate(), farmId);
             doctorMoveReportService.moveMonthlyReport(farmId, 12);
+            doctorMoveReportService.moveWeeklyReport(farmId, 50);
             doctorMoveReportService.moveParityMonthlyReport(farmId, 12);
             doctorMoveReportService.moveBoarMonthlyReport(farmId, 12);
         }).start();

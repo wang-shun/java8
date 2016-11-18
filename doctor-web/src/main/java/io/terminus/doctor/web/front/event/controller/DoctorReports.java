@@ -14,7 +14,7 @@ import io.terminus.doctor.event.model.DoctorGroupBatchSummary;
 import io.terminus.doctor.event.service.DoctorDailyReportReadService;
 import io.terminus.doctor.event.service.DoctorDailyReportWriteService;
 import io.terminus.doctor.event.service.DoctorGroupBatchSummaryReadService;
-import io.terminus.doctor.event.service.DoctorMonthlyReportReadService;
+import io.terminus.doctor.event.service.DoctorCommonReportReadService;
 import io.terminus.doctor.warehouse.service.DoctorMaterialConsumeProviderReadService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -47,7 +47,7 @@ public class DoctorReports {
     private DoctorDailyReportWriteService doctorDailyReportWriteService;
 
     @RpcConsumer
-    private DoctorMonthlyReportReadService doctorMonthlyReportReadService;
+    private DoctorCommonReportReadService doctorCommonReportReadService;
 
     @RpcConsumer
     private DoctorGroupBatchSummaryReadService doctorGroupBatchSummaryReadService;
@@ -91,7 +91,7 @@ public class DoctorReports {
     public DoctorMonthlyReportTrendDto findMonthlyReportTrendByFarmIdAndSumAt(@RequestParam("farmId") Long farmId,
                                                                               @RequestParam("date") String date,
                                                                               @RequestParam(value = "index", required = false) Integer index) {
-        return RespHelper.or500(doctorMonthlyReportReadService.findMonthlyReportTrendByFarmIdAndSumAt(farmId, date, index));
+        return RespHelper.or500(doctorCommonReportReadService.findMonthlyReportTrendByFarmIdAndSumAt(farmId, date, index));
     }
 
     /**

@@ -1,4 +1,4 @@
-package io.terminus.doctor.event.dto.report.monthly;
+package io.terminus.doctor.event.dto.report.common;
 
 import lombok.Data;
 
@@ -11,7 +11,7 @@ import java.io.Serializable;
  * Date: 16/9/16
  */
 @Data
-public class DoctorLiveStockChangeMonthlyReport implements Serializable {
+public class DoctorLiveStockChangeCommonReport implements Serializable {
     private static final long serialVersionUID = 1000955498510651232L;
 
     /**

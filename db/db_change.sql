@@ -514,5 +514,14 @@ CREATE INDEX   idx_userid_farmid_templateid ON doctor_message_user(user_id, farm
 -- 2016-11-16 在message_id 字段添加索引
 CREATE INDEX   idx_messageid ON doctor_message_user(message_id);
 
-
-
+-- 2016-11-18 新建周报表
+CREATE TABLE `doctor_weekly_reports` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '自增主键',
+  `farm_id` bigint(20) DEFAULT NULL COMMENT '猪场id',
+  `data` text COMMENT '周报数据，json存储',
+  `extra` text COMMENT '附加字段',
+  `sum_at` date DEFAULT NULL COMMENT '统计时间',
+  `created_at` datetime DEFAULT NULL COMMENT '创建时间(仅做记录创建时间，不参与查询)',
+  PRIMARY KEY (`id`),
+  KEY `idx_doctor_monthly_reports_farm_id_agg_sumat` (`farm_id`,`sum_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='猪场周报表';

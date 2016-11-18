@@ -1,8 +1,8 @@
 package io.terminus.doctor.event.dao;
 
 import com.google.common.collect.ImmutableMap;
-import io.terminus.doctor.event.dto.report.monthly.DoctorLiveStockChangeMonthlyReport;
-import io.terminus.doctor.event.dto.report.monthly.DoctorStockStructureMonthlyReport;
+import io.terminus.doctor.event.dto.report.common.DoctorLiveStockChangeCommonReport;
+import io.terminus.doctor.event.dto.report.common.DoctorStockStructureCommonReport;
 import io.terminus.doctor.event.handler.sow.DoctorSowMatingHandler;
 import org.joda.time.DateTime;
 import org.mybatis.spring.SqlSessionTemplate;
@@ -551,8 +551,8 @@ public class DoctorKpiDao {
     /**
      * 存栏变动月报: 期初
      */
-    public DoctorLiveStockChangeMonthlyReport getMonthlyLiveStockChangeBegin(Long farmId, Date startAt) {
-        DoctorLiveStockChangeMonthlyReport report = new DoctorLiveStockChangeMonthlyReport();
+    public DoctorLiveStockChangeCommonReport getMonthlyLiveStockChangeBegin(Long farmId, Date startAt) {
+        DoctorLiveStockChangeCommonReport report = new DoctorLiveStockChangeCommonReport();
         report.setHoubeiBegin(realTimeLiveStockHoubeiSow(farmId, startAt) + realTimeLiveStockHoubeiBoar(farmId, startAt));
         report.setFarrowSowBegin(realTimeLiveStockFarrowSow(farmId, startAt));
         report.setPeiHuaiBegin(realTimeLiveStockSow(farmId, startAt) - report.getFarrowSowBegin());
@@ -565,7 +565,7 @@ public class DoctorKpiDao {
     /**
      * 存栏变动月报: 转入(后备,产房仔猪,保育,育肥)
      */
-    public DoctorLiveStockChangeMonthlyReport getMonthlyLiveStockChangeIn(Long farmId, Date startAt, Date endAt) {
+    public DoctorLiveStockChangeCommonReport getMonthlyLiveStockChangeIn(Long farmId, Date startAt, Date endAt) {
         return sqlSession.selectOne("getMonthlyLiveStockChangeIn", ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
     }
 
@@ -616,35 +616,35 @@ public class DoctorKpiDao {
     /**
      * 存栏变动月报: 死淘(后备,产房仔猪,保育,育肥)
      */
-    public DoctorLiveStockChangeMonthlyReport getMonthlyLiveStockChangeGroupDead(Long farmId, Date startAt, Date endAt) {
+    public DoctorLiveStockChangeCommonReport getMonthlyLiveStockChangeGroupDead(Long farmId, Date startAt, Date endAt) {
         return sqlSession.selectOne("getMonthlyLiveStockChangeGroupDead", ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
     }
 
     /**
      * 存栏变动月报: 死淘(配怀,产房母猪)
      */
-    public DoctorLiveStockChangeMonthlyReport getMonthlyLiveStockChangeSowDead(Long farmId, Date startAt, Date endAt) {
+    public DoctorLiveStockChangeCommonReport getMonthlyLiveStockChangeSowDead(Long farmId, Date startAt, Date endAt) {
         return sqlSession.selectOne("getMonthlyLiveStockChangeSowDead", ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
     }
 
     /**
      * 存栏变动月报: 销售(后备,产房仔猪,保育,育肥)
      */
-    public DoctorLiveStockChangeMonthlyReport getMonthlyLiveStockChangeSale(Long farmId, Date startAt, Date endAt) {
+    public DoctorLiveStockChangeCommonReport getMonthlyLiveStockChangeSale(Long farmId, Date startAt, Date endAt) {
         return sqlSession.selectOne("getMonthlyLiveStockChangeSale", ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
     }
 
     /**
      * 存栏变动月报: 饲料数量
      */
-    public DoctorLiveStockChangeMonthlyReport getMonthlyLiveStockChangeFeedCount(Long farmId, Date startAt, Date endAt) {
+    public DoctorLiveStockChangeCommonReport getMonthlyLiveStockChangeFeedCount(Long farmId, Date startAt, Date endAt) {
         return sqlSession.selectOne("getMonthlyLiveStockChangeFeedCount", ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
     }
 
     /**
      * 存栏变动月报: 物料金额(饲料, 药品, 疫苗, 易耗品
      */
-    public DoctorLiveStockChangeMonthlyReport getMonthlyLiveStockChangeMaterielAmount(Long farmId, Date startAt, Date endAt) {
+    public DoctorLiveStockChangeCommonReport getMonthlyLiveStockChangeMaterielAmount(Long farmId, Date startAt, Date endAt) {
         return sqlSession.selectOne("getMonthlyLiveStockChangeMaterielAmount", ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
     }
 
@@ -655,7 +655,7 @@ public class DoctorKpiDao {
      * @param endAt
      * @return
      */
-    public List<DoctorStockStructureMonthlyReport> getMonthlyParityStock(Long farmId, Date startAt, Date endAt){
+    public List<DoctorStockStructureCommonReport> getMonthlyParityStock(Long farmId, Date startAt, Date endAt){
         return sqlSession.selectList(sqlId("getParityStockMonthly"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
     }
 
@@ -666,7 +666,7 @@ public class DoctorKpiDao {
      * @param endAt
      * @return
      */
-    public List<DoctorStockStructureMonthlyReport> getMonthlyBreedStock(Long farmId, Date startAt, Date endAt){
+    public List<DoctorStockStructureCommonReport> getMonthlyBreedStock(Long farmId, Date startAt, Date endAt){
         return sqlSession.selectList(sqlId("getBreedStockMonthly"), ImmutableMap.of("farmId", farmId, "startAt", startAt, "endAt", endAt));
     }
 

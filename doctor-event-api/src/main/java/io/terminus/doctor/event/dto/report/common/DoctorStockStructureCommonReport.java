@@ -1,4 +1,4 @@
-package io.terminus.doctor.event.dto.report.monthly;
+package io.terminus.doctor.event.dto.report.common;
 
 import lombok.Data;
 
@@ -10,7 +10,7 @@ import java.io.Serializable;
  * Date: 18:42 16/9/21
  */
 @Data
-public class DoctorStockStructureMonthlyReport implements Serializable{
+public class DoctorStockStructureCommonReport implements Serializable{
     private static final long serialVersionUID = -4518103155605236994L;
 
     private String sumAt;              //统计月份

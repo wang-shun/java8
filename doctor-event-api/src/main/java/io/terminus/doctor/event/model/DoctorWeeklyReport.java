@@ -7,14 +7,14 @@ import java.io.Serializable;
 import java.util.Date;
 
 /**
- * Desc: 猪场月报表Model类
+ * Desc: 猪场周报表Model类
  * Mail: yangzl@terminus.io
  * author: DreamYoung
  * Date: 2016-08-11
  */
 @Data
-public class DoctorMonthlyReport implements Serializable {
-    private static final long serialVersionUID = -6794869708968237462L;
+public class DoctorWeeklyReport implements Serializable {
+    private static final long serialVersionUID = 8251705900654083560L;
 
     private Long id;
     
@@ -24,7 +24,7 @@ public class DoctorMonthlyReport implements Serializable {
     private Long farmId;
     
     /**
-     * 月报数据，json存储
+     * 周报报数据，json存储
      * @see DoctorCommonReportDto
      */
     private String data;

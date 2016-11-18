@@ -7,13 +7,13 @@ import javax.annotation.Nullable;
 import javax.validation.constraints.NotNull;
 
 /**
- * Desc: 猪场月报表读服务
+ * Desc: 猪场报表读服务
  * Mail: yangzl@terminus.io
  * author: DreamYoung
  * Date: 2016-08-11
  */
 
-public interface DoctorMonthlyReportReadService {
+public interface DoctorCommonReportReadService {
 
     /**
      * 根据farmId和统计日期查询猪场月报表和趋势图

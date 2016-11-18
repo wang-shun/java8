@@ -11,7 +11,7 @@ import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.dao.DoctorBoarMonthlyReportDao;
 import io.terminus.doctor.event.dao.DoctorMonthlyReportDao;
 import io.terminus.doctor.event.dao.DoctorParityMonthlyReportDao;
-import io.terminus.doctor.event.dto.report.monthly.DoctorMonthlyReportDto;
+import io.terminus.doctor.event.dto.report.common.DoctorCommonReportDto;
 import io.terminus.doctor.event.dto.report.monthly.DoctorMonthlyReportTrendDto;
 import io.terminus.doctor.event.model.DoctorBoarMonthlyReport;
 import io.terminus.doctor.event.model.DoctorMonthlyReport;
@@ -27,7 +27,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * Desc: 猪场月报表读服务实现类
+ * Desc: 猪场报表读服务实现类
  * Mail: yangzl@terminus.io
  * author: DreamYoung
  * Date: 2016-08-11
@@ -35,7 +35,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 @RpcProvider
-public class DoctorMonthlyReportReadServiceImpl implements DoctorMonthlyReportReadService {
+public class DoctorCommonReportReadServiceImpl implements DoctorCommonReportReadService {
 
     private static final JsonMapper JSON_MAPPER = JsonMapper.nonEmptyMapper();
     private static final int MONTH_INDEX = 12;
@@ -45,9 +45,9 @@ public class DoctorMonthlyReportReadServiceImpl implements DoctorMonthlyReportRe
     private final DoctorBoarMonthlyReportDao doctorBoarMonthlyReportDao;
 
     @Autowired
-    public DoctorMonthlyReportReadServiceImpl(DoctorMonthlyReportDao doctorMonthlyReportDao,
-                                              DoctorParityMonthlyReportDao doctorParityMonthlyReportDao,
-                                              DoctorBoarMonthlyReportDao doctorBoarMonthlyReportDao) {
+    public DoctorCommonReportReadServiceImpl(DoctorMonthlyReportDao doctorMonthlyReportDao,
+                                             DoctorParityMonthlyReportDao doctorParityMonthlyReportDao,
+                                             DoctorBoarMonthlyReportDao doctorBoarMonthlyReportDao) {
         this.doctorMonthlyReportDao = doctorMonthlyReportDao;
         this.doctorParityMonthlyReportDao = doctorParityMonthlyReportDao;
         this.doctorBoarMonthlyReportDao = doctorBoarMonthlyReportDao;
@@ -70,18 +70,18 @@ public class DoctorMonthlyReportReadServiceImpl implements DoctorMonthlyReportRe
                 return Response.ok(failReportTrend(date));
             }
 
-            DoctorMonthlyReportDto reportDto;
+            DoctorCommonReportDto reportDto;
 
             // 如果当前日期是1号, 并且查询的月份是当月, 则返回 0 月报
             if(DateTime.now().getDayOfMonth() == 1 && DateUtil.inSameYearMonth(date, new Date())){
-                reportDto = new DoctorMonthlyReportDto();
+                reportDto = new DoctorCommonReportDto();
             }else{
                 //查询月报结果, 如果没查到, 返回失败的结果
                 DoctorMonthlyReport report = doctorMonthlyReportDao.findByFarmIdAndSumAt(farmId, date);
                 if (report == null) {
                     return Response.ok(failReportTrend(date));
                 }
-                reportDto = JSON_MAPPER.fromJson(report.getData(), DoctorMonthlyReportDto.class);
+                reportDto = JSON_MAPPER.fromJson(report.getData(), DoctorCommonReportDto.class);
                 if (reportDto == null) {
                     return Response.ok(failReportTrend(date));
                 }
@@ -97,11 +97,11 @@ public class DoctorMonthlyReportReadServiceImpl implements DoctorMonthlyReportRe
     }
 
     //查询趋势图
-    private List<DoctorMonthlyReportDto> getMonthlyReportByIndex(Long farmId, Date date, Integer index) {
+    private List<DoctorCommonReportDto> getMonthlyReportByIndex(Long farmId, Date date, Integer index) {
         return DateUtil.getBeforeMonthEnds(date, MoreObjects.firstNonNull(index, MONTH_INDEX)).stream()
                 .map(month -> {
                     if (DateTime.now().getDayOfMonth() == 1 && DateUtil.inSameYearMonth(month, new Date())) {
-                        DoctorMonthlyReportDto reportDto = new DoctorMonthlyReportDto();
+                        DoctorCommonReportDto reportDto = new DoctorCommonReportDto();
                         reportDto.setDate(DateUtil.getDateStr(month));
                         return reportDto;
                     }
@@ -109,7 +109,7 @@ public class DoctorMonthlyReportReadServiceImpl implements DoctorMonthlyReportRe
                     if (report == null || !StringUtils.hasText(report.getData())) {
                         return failReportDto(month);
                     }
-                    DoctorMonthlyReportDto dto = JSON_MAPPER.fromJson(report.getData(), DoctorMonthlyReportDto.class);
+                    DoctorCommonReportDto dto = JSON_MAPPER.fromJson(report.getData(), DoctorCommonReportDto.class);
                     if (dto == null) {
                         return failReportDto(month);
                     }
@@ -128,8 +128,8 @@ public class DoctorMonthlyReportReadServiceImpl implements DoctorMonthlyReportRe
     }
 
     //查询失败的月报
-    private static DoctorMonthlyReportDto failReportDto(Date date) {
-        DoctorMonthlyReportDto dto = new DoctorMonthlyReportDto();
+    private static DoctorCommonReportDto failReportDto(Date date) {
+        DoctorCommonReportDto dto = new DoctorCommonReportDto();
         dto.setFail(true);
         dto.setDate(DateUtil.getDateStr(date));
         return dto;
