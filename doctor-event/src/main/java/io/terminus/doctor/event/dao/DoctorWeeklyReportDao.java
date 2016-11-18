@@ -2,7 +2,6 @@ package io.terminus.doctor.event.dao;
 
 import com.google.common.collect.ImmutableMap;
 import io.terminus.common.mysql.dao.MyBatisDao;
-import io.terminus.doctor.event.model.DoctorMonthlyReport;
 import io.terminus.doctor.event.model.DoctorWeeklyReport;
 import org.springframework.stereotype.Repository;
 
@@ -22,7 +21,7 @@ public class DoctorWeeklyReportDao extends MyBatisDao<DoctorWeeklyReport> {
      * @param sumAt  统计日期
      * @return 猪场周报
      */
-    public DoctorMonthlyReport findByFarmIdAndSumAt(Long farmId, Date sumAt) {
+    public DoctorWeeklyReport findByFarmIdAndSumAt(Long farmId, Date sumAt) {
         return getSqlSession().selectOne(sqlId("findByFarmIdAndSumAt"), ImmutableMap.of("farmId", farmId, "sumAt", sumAt));
     }
 

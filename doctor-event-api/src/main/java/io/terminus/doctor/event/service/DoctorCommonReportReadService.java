@@ -1,7 +1,7 @@
 package io.terminus.doctor.event.service;
 
 import io.terminus.common.model.Response;
-import io.terminus.doctor.event.dto.report.monthly.DoctorMonthlyReportTrendDto;
+import io.terminus.doctor.event.dto.report.common.DoctorCommonReportTrendDto;
 
 import javax.annotation.Nullable;
 import javax.validation.constraints.NotNull;
@@ -23,7 +23,19 @@ public interface DoctorCommonReportReadService {
      * @param index  趋势月份数
      * @return 猪场月报表
      */
-    Response<DoctorMonthlyReportTrendDto> findMonthlyReportTrendByFarmIdAndSumAt(@NotNull(message = "farmId.not.null") Long farmId,
-                                                                                 @NotNull(message = "date.not.null") String sumAt,
-                                                                                 @Nullable Integer index);
+    Response<DoctorCommonReportTrendDto> findMonthlyReportTrendByFarmIdAndSumAt(@NotNull(message = "farmId.not.null") Long farmId,
+                                                                                @NotNull(message = "date.not.null") String sumAt,
+                                                                                @Nullable Integer index);
+
+    /**
+     * 根据farmId和统计日期查询猪场周报表和趋势图
+     *
+     * @param farmId 猪场id
+     * @param week   统计日期 当年的第几周
+     * @param index  趋势图
+     * @return 猪场周报表
+     */
+    Response<DoctorCommonReportTrendDto> findWeeklyReportTrendByFarmIdAndSumAt(@NotNull(message = "farmId.not.null") Long farmId,
+                                                                               @NotNull(message = "week.not.null") Integer week,
+                                                                               @Nullable Integer index);
 }

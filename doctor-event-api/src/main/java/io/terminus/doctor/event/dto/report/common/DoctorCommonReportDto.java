@@ -114,7 +114,7 @@ public class DoctorCommonReportDto implements Serializable {
      */
     private DoctorLiveStockChangeCommonReport liveStockChange;
 
-    private String date;                      //统计月份 2016年08月, 供前台显示
+    private String date;                      //统计月份 2016年08月, 供前台显示 或 第几周
 
     /**
      * 胎次分布

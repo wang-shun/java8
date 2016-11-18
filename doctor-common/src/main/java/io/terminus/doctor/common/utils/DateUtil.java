@@ -30,9 +30,11 @@ public class DateUtil {
 
     public static final DateTimeFormatter YYYYMM = DateTimeFormat.forPattern("yyyy-MM");
 
-    private static final DateTimeFormatter DATE = DateTimeFormat.forPattern("yyyy-MM-dd");
+    public static final DateTimeFormatter DATE = DateTimeFormat.forPattern("yyyy-MM-dd");
 
-    private static final DateTimeFormatter DATE_TIME = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss");
+    public static final DateTimeFormatter DATE_CN = DateTimeFormat.forPattern("yyyy年MM月dd日");
+
+    public static final DateTimeFormatter DATE_TIME = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss");
 
     public static final DateTimeFormatter DATE_SLASH = DateTimeFormat.forPattern("yyyy/MM/dd");
 
@@ -146,6 +148,27 @@ public class DateUtil {
         }
         return months;
     }
+
+    /**
+     * 获取index之前的所有周日
+     *
+     * @param date  初始date
+     * @param index 前几月
+     * @return 月末list(本月是当前天)
+     */
+    public static List<Date> getBeforeWeekEnds(Date date, Integer index) {
+        List<Date> weeks = Lists.newArrayListWithCapacity(index);
+        DateTime todayEnd = getDateEnd(MoreObjects.firstNonNull(new DateTime(date), DateTime.now()));
+        weeks.add(todayEnd.toDate());
+
+        DateTime start = todayEnd.withDayOfWeek(7);
+        for (int i = 1; i < index; i++) {
+            weeks.add(start.toDate());
+            start = start.plusWeeks(-1);
+        }
+        return weeks;
+    }
+
 
     /**
      * 获取当月的最后一天

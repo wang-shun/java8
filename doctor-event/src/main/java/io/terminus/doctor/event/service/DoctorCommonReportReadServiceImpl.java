@@ -11,11 +11,13 @@ import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.dao.DoctorBoarMonthlyReportDao;
 import io.terminus.doctor.event.dao.DoctorMonthlyReportDao;
 import io.terminus.doctor.event.dao.DoctorParityMonthlyReportDao;
+import io.terminus.doctor.event.dao.DoctorWeeklyReportDao;
 import io.terminus.doctor.event.dto.report.common.DoctorCommonReportDto;
-import io.terminus.doctor.event.dto.report.monthly.DoctorMonthlyReportTrendDto;
+import io.terminus.doctor.event.dto.report.common.DoctorCommonReportTrendDto;
 import io.terminus.doctor.event.model.DoctorBoarMonthlyReport;
 import io.terminus.doctor.event.model.DoctorMonthlyReport;
 import io.terminus.doctor.event.model.DoctorParityMonthlyReport;
+import io.terminus.doctor.event.model.DoctorWeeklyReport;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,22 +41,26 @@ public class DoctorCommonReportReadServiceImpl implements DoctorCommonReportRead
 
     private static final JsonMapper JSON_MAPPER = JsonMapper.nonEmptyMapper();
     private static final int MONTH_INDEX = 12;
+    private static final int WEEK_INDEX = 20;
 
     private final DoctorMonthlyReportDao doctorMonthlyReportDao;
+    private final DoctorWeeklyReportDao doctorWeeklyReportDao;
     private final DoctorParityMonthlyReportDao doctorParityMonthlyReportDao;
     private final DoctorBoarMonthlyReportDao doctorBoarMonthlyReportDao;
 
     @Autowired
     public DoctorCommonReportReadServiceImpl(DoctorMonthlyReportDao doctorMonthlyReportDao,
+                                             DoctorWeeklyReportDao doctorWeeklyReportDao,
                                              DoctorParityMonthlyReportDao doctorParityMonthlyReportDao,
                                              DoctorBoarMonthlyReportDao doctorBoarMonthlyReportDao) {
         this.doctorMonthlyReportDao = doctorMonthlyReportDao;
+        this.doctorWeeklyReportDao = doctorWeeklyReportDao;
         this.doctorParityMonthlyReportDao = doctorParityMonthlyReportDao;
         this.doctorBoarMonthlyReportDao = doctorBoarMonthlyReportDao;
     }
 
     @Override
-    public Response<DoctorMonthlyReportTrendDto> findMonthlyReportTrendByFarmIdAndSumAt(Long farmId, String sumAt, Integer index) {
+    public Response<DoctorCommonReportTrendDto> findMonthlyReportTrendByFarmIdAndSumAt(Long farmId, String sumAt, Integer index) {
         try {
             Date date;
 
@@ -65,9 +71,11 @@ public class DoctorCommonReportReadServiceImpl implements DoctorCommonReportRead
                 date = getLastDay(DateUtil.toYYYYMM(sumAt));
             }
 
+            String monthStr = DateUtil.getDateStr(date);
+
             //如果查询未来的数据, 返回失败查询
             if (new DateTime(date).isAfter(DateUtil.getDateEnd(DateTime.now()))) {
-                return Response.ok(failReportTrend(date));
+                return Response.ok(failReportTrend(monthStr));
             }
 
             DoctorCommonReportDto reportDto;
@@ -79,20 +87,60 @@ public class DoctorCommonReportReadServiceImpl implements DoctorCommonReportRead
                 //查询月报结果, 如果没查到, 返回失败的结果
                 DoctorMonthlyReport report = doctorMonthlyReportDao.findByFarmIdAndSumAt(farmId, date);
                 if (report == null) {
-                    return Response.ok(failReportTrend(date));
+                    return Response.ok(failReportTrend(monthStr));
                 }
                 reportDto = JSON_MAPPER.fromJson(report.getData(), DoctorCommonReportDto.class);
                 if (reportDto == null) {
-                    return Response.ok(failReportTrend(date));
+                    return Response.ok(failReportTrend(monthStr));
                 }
             }
 
             //拼接趋势图
-            return Response.ok(new DoctorMonthlyReportTrendDto(reportDto, getMonthlyReportByIndex(farmId, date, index), getParityMonthlyReportByIndex(farmId, date), getBoarMonthlyReportByIndex(farmId, date)));
+            return Response.ok(new DoctorCommonReportTrendDto(reportDto, getMonthlyReportByIndex(farmId, date, index), getParityMonthlyReportByIndex(farmId, date), getBoarMonthlyReportByIndex(farmId, date)));
         } catch (Exception e) {
             log.error("find monthly report by farmId and sumAt failed, farmId:{}, sumAt:{}, cause:{}",
                     farmId, sumAt, Throwables.getStackTraceAsString(e));
-            return Response.ok(failReportTrend(new Date()));
+            return Response.ok(failReportTrend(DateUtil.getDateStr(new Date())));
+        }
+    }
+
+    // TODO: 2016/11/18 查询周报 
+    @Override
+    public Response<DoctorCommonReportTrendDto> findWeeklyReportTrendByFarmIdAndSumAt(Long farmId, Integer week, Integer index) {
+        DateTime weekDateTime = new DateTime().withWeekOfWeekyear(week).withTimeAtStartOfDay();
+        String weekStr = getWeekStr(weekDateTime.withDayOfWeek(1)); //取周一代表一周
+
+        try {
+            //如果查询未来的数据, 返回失败查询
+            if (weekDateTime.isAfter(DateUtil.getDateEnd(DateTime.now()))) {
+                return Response.ok(failReportTrend(weekStr));
+            }
+
+            DoctorCommonReportDto reportDto;
+
+            // 如果今天是周一，并且查今天，返回 0 周报
+            if(todayIsMonday(weekDateTime.toDate())) {
+                reportDto = new DoctorCommonReportDto();
+            }else{
+                //查询周报结果, 如果没查到, 返回失败的结果
+                DoctorWeeklyReport report = doctorWeeklyReportDao.findByFarmIdAndSumAt(farmId, getLastWeek(weekDateTime.toDate()));
+                if (report == null) {
+                    return Response.ok(failReportTrend(weekStr));
+                }
+                reportDto = JSON_MAPPER.fromJson(report.getData(), DoctorCommonReportDto.class);
+                if (reportDto == null) {
+                    return Response.ok(failReportTrend(weekStr));
+                }
+            }
+
+            DoctorCommonReportTrendDto reportTrendDto = new DoctorCommonReportTrendDto();
+            reportTrendDto.setReport(reportDto);
+            reportTrendDto.setReports(getWeeklyReportByIndex(farmId, weekDateTime, index));
+            return Response.ok(reportTrendDto);
+        } catch (Exception e) {
+            log.error("find weekly report by farmId and sumAt failed, farmId:{}, week:{}, cause:{}",
+                    farmId, week, Throwables.getStackTraceAsString(e));
+            return Response.ok(failReportTrend(weekStr));
         }
     }
 
@@ -100,24 +148,53 @@ public class DoctorCommonReportReadServiceImpl implements DoctorCommonReportRead
     private List<DoctorCommonReportDto> getMonthlyReportByIndex(Long farmId, Date date, Integer index) {
         return DateUtil.getBeforeMonthEnds(date, MoreObjects.firstNonNull(index, MONTH_INDEX)).stream()
                 .map(month -> {
+                    String monthStr = DateUtil.getDateStr(month);
+
                     if (DateTime.now().getDayOfMonth() == 1 && DateUtil.inSameYearMonth(month, new Date())) {
                         DoctorCommonReportDto reportDto = new DoctorCommonReportDto();
-                        reportDto.setDate(DateUtil.getDateStr(month));
+                        reportDto.setDate(monthStr);
                         return reportDto;
                     }
                     DoctorMonthlyReport report = doctorMonthlyReportDao.findByFarmIdAndSumAt(farmId, Dates.startOfDay(month));
                     if (report == null || !StringUtils.hasText(report.getData())) {
-                        return failReportDto(month);
+                        return failReportDto(DateUtil.getDateStr(month));
                     }
                     DoctorCommonReportDto dto = JSON_MAPPER.fromJson(report.getData(), DoctorCommonReportDto.class);
                     if (dto == null) {
-                        return failReportDto(month);
+                        return failReportDto(monthStr);
                     }
-                    dto.setDate(DateUtil.getDateStr(month));        //填上月份, 供前台显示
+                    dto.setDate(monthStr);        //填上月份, 供前台显示
                     return dto;
                 })
                 .collect(Collectors.toList());
     }
+
+    //获取日报趋势
+    private List<DoctorCommonReportDto> getWeeklyReportByIndex(Long farmId, DateTime date, Integer index) {
+        return DateUtil.getBeforeWeekEnds(date.toDate(), MoreObjects.firstNonNull(index, WEEK_INDEX)).stream()
+                .map(week -> {
+                    String weekStr = getWeekStr(new DateTime(week).withDayOfWeek(1));
+                    
+                    if(todayIsMonday(week)) {
+                        DoctorCommonReportDto reportDto = new DoctorCommonReportDto();
+                        reportDto.setDate(weekStr);
+                        return reportDto;
+                    }
+                    
+                    DoctorWeeklyReport report = doctorWeeklyReportDao.findByFarmIdAndSumAt(farmId, week);
+                    if (report == null || !StringUtils.hasText(report.getData())) {
+                        return failReportDto(weekStr);
+                    }
+                    DoctorCommonReportDto dto = JSON_MAPPER.fromJson(report.getData(), DoctorCommonReportDto.class);
+                    if (dto == null) {
+                        return failReportDto(weekStr);
+                    }
+                    dto.setDate(weekStr);        //填上月份, 供前台显示
+                    return dto;
+                })
+                .collect(Collectors.toList());
+    }
+
 
     private List<DoctorParityMonthlyReport> getParityMonthlyReportByIndex(Long farmId, Date date){
         return doctorParityMonthlyReportDao.findDoctorParityMonthlyReports(farmId, new DateTime(date).toString(DateUtil.YYYYMM));
@@ -127,17 +204,17 @@ public class DoctorCommonReportReadServiceImpl implements DoctorCommonReportRead
         return doctorBoarMonthlyReportDao.findDoctorBoarMonthlyReports(farmId, new DateTime(date).toString(DateUtil.YYYYMM));
     }
 
-    //查询失败的月报
-    private static DoctorCommonReportDto failReportDto(Date date) {
+    //查询失败的报表
+    private static DoctorCommonReportDto failReportDto(String date) {
         DoctorCommonReportDto dto = new DoctorCommonReportDto();
         dto.setFail(true);
-        dto.setDate(DateUtil.getDateStr(date));
+        dto.setDate(date);
         return dto;
     }
 
     //查询失败的结果
-    private static DoctorMonthlyReportTrendDto failReportTrend(Date date) {
-        return new DoctorMonthlyReportTrendDto(failReportDto(date), Lists.newArrayList(), Lists.newArrayList(), Lists.newArrayList());
+    private static DoctorCommonReportTrendDto failReportTrend(String date) {
+        return new DoctorCommonReportTrendDto(failReportDto(date), Lists.newArrayList(), Lists.newArrayList(), Lists.newArrayList());
     }
 
     //获取月末
@@ -153,5 +230,20 @@ public class DoctorCommonReportReadServiceImpl implements DoctorCommonReportRead
             }
         }
         return datetime.withDayOfMonth(1).plusMonths(1).plusDays(-1).toDate();
+    }
+    
+    //本星期非周一：前一天，本星期周一：周一，上星期：周日
+    private static Date getLastWeek(Date date) {
+        // TODO: 2016/11/18  
+        return new Date();
+    }
+
+    private static String getWeekStr(DateTime date) {
+        return "第" + date.getWeekOfWeekyear() + "周(" + date.toString(DateUtil.DATE) + ")";
+    }
+
+    private boolean todayIsMonday(Date date) {
+        return DateTime.now().withTimeAtStartOfDay().isEqual(new DateTime(date).withTimeAtStartOfDay())
+                && DateTime.now().getDayOfWeek() == 1;
     }
 }

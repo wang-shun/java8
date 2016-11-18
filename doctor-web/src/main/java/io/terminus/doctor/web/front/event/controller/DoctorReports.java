@@ -8,7 +8,7 @@ import io.terminus.doctor.common.utils.Params;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dto.DoctorGroupSearchDto;
 import io.terminus.doctor.event.dto.report.daily.DoctorDailyReportDto;
-import io.terminus.doctor.event.dto.report.monthly.DoctorMonthlyReportTrendDto;
+import io.terminus.doctor.event.dto.report.common.DoctorCommonReportTrendDto;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupBatchSummary;
 import io.terminus.doctor.event.service.DoctorDailyReportReadService;
@@ -88,10 +88,23 @@ public class DoctorReports {
      * @return 猪场月报表
      */
     @RequestMapping(value = "/monthly", method = RequestMethod.GET)
-    public DoctorMonthlyReportTrendDto findMonthlyReportTrendByFarmIdAndSumAt(@RequestParam("farmId") Long farmId,
-                                                                              @RequestParam("date") String date,
-                                                                              @RequestParam(value = "index", required = false) Integer index) {
+    public DoctorCommonReportTrendDto findMonthlyReportTrendByFarmIdAndSumAt(@RequestParam("farmId") Long farmId,
+                                                                             @RequestParam("date") String date,
+                                                                             @RequestParam(value = "index", required = false) Integer index) {
         return RespHelper.or500(doctorCommonReportReadService.findMonthlyReportTrendByFarmIdAndSumAt(farmId, date, index));
+    }
+
+    /**
+     * 根据farmId和日期查询猪场周报表
+     * @param farmId 猪场id
+     * @param week   当年第几周
+     * @return 猪场周报报表
+     */
+    @RequestMapping(value = "/weekly", method = RequestMethod.GET)
+    public DoctorCommonReportTrendDto findWeeklyReportTrendByFarmIdAndSumAt(@RequestParam("farmId") Long farmId,
+                                                                            @RequestParam("week") Integer week,
+                                                                            @RequestParam(value = "index", required = false) Integer index) {
+        return RespHelper.or500(doctorCommonReportReadService.findWeeklyReportTrendByFarmIdAndSumAt(farmId, week, index));
     }
 
     /**

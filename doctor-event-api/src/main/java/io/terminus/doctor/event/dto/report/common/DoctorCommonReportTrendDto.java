@@ -1,10 +1,10 @@
-package io.terminus.doctor.event.dto.report.monthly;
+package io.terminus.doctor.event.dto.report.common;
 
-import io.terminus.doctor.event.dto.report.common.DoctorCommonReportDto;
 import io.terminus.doctor.event.model.DoctorBoarMonthlyReport;
 import io.terminus.doctor.event.model.DoctorParityMonthlyReport;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 import java.util.List;
@@ -17,7 +17,8 @@ import java.util.List;
  */
 @Data
 @AllArgsConstructor
-public class DoctorMonthlyReportTrendDto implements Serializable {
+@NoArgsConstructor
+public class DoctorCommonReportTrendDto implements Serializable {
     private static final long serialVersionUID = -135956012454392909L;
 
     private DoctorCommonReportDto report;          //查询当月统计
