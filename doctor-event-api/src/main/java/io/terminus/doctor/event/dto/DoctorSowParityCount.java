@@ -56,8 +56,6 @@ public class DoctorSowParityCount implements Serializable{
 
     private String boarCode;
 
-    private Long boarId;
-
     public static DoctorSowParityCount doctorSowParityCountConvert(Integer parity, List<DoctorPigEvent> doctorPigEvents){
 
         Map<Integer, DoctorPigEvent> eventTypeMap = Maps.newHashMap();
