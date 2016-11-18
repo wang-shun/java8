@@ -105,7 +105,8 @@ public class OPUsers {
      * @return
      */
     @OpenMethod(key="user.login", paramNames = {"name", "password", "code", "sid", "deviceId"})
-    public DoctorCommonSessionBean.Token login(String name, String password, String code, String sessionId, String deviceId) {
+    public DoctorCommonSessionBean.Token login(String name, String password, String code, String sessionId,
+                                               @NotEmpty(message = "deviceId.not.empty") String deviceId) {
         return orOpenException(doctorCommonSessionBean.login(name, password, code, sessionId, deviceId));
     }
 

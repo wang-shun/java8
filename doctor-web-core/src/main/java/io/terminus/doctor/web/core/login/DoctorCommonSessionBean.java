@@ -252,9 +252,6 @@ public class DoctorCommonSessionBean {
         if (isEmpty(sessionId)) {
             throw new JsonResponseException(500, "session.id.miss");
         }
-        if (isEmpty(deviceId)) {
-            throw new JsonResponseException(500, "device.id.miss");
-        }
 
         // 当用户次数超过指定次数之后,需要校验code
         if (arriveErrorLimit(sessionId)) {

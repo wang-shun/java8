@@ -138,7 +138,7 @@ public class Users {
     @ResponseBody
     public Map<String, Object> login(@RequestParam("loginBy") String name,
                                      @RequestParam("password") String password,
-                                     @RequestParam("deviceId") String deviceId,
+                                     @RequestParam(value = "deviceId", required = false) String deviceId,
                                      @RequestParam(value = "sid", required = false) String sid,
                                      @RequestParam(value = "code", required = false) String code,
                                      @RequestParam(value = "target", required = false) String target) {
