@@ -10,9 +10,12 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 
 /**
  * Created by yaoqijun.
@@ -51,6 +54,10 @@ public class DoctorSowParityCount implements Serializable{
 
     private Double weanAvgWeight; //断奶均重
 
+    private String boarCode;
+
+    private Long boarId;
+
     public static DoctorSowParityCount doctorSowParityCountConvert(Integer parity, List<DoctorPigEvent> doctorPigEvents){
 
         Map<Integer, DoctorPigEvent> eventTypeMap = Maps.newHashMap();
@@ -88,6 +95,13 @@ public class DoctorSowParityCount implements Serializable{
             doctorSowParityCount.setWeanAvgWeight(Double.valueOf(MoreObjects.firstNonNull(extra.get("partWeanAvgWeight"), "0").toString()));
         }
 
+        Optional<DoctorPigEvent> optional = doctorPigEvents.stream()
+                .filter(doctorPigEvent -> Objects.equals(doctorPigEvent.getType(), PigEvent.MATING.getKey()))
+                .max(Comparator.comparing(DoctorPigEvent::getEventAt));
+        if (optional.isPresent()){
+            DoctorPigEvent matingEvent = optional.get();
+            doctorSowParityCount.setBoarCode(matingEvent.getBoarCode());
+        }
         return doctorSowParityCount;
     }
 
