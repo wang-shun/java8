@@ -8,6 +8,7 @@ import io.terminus.doctor.common.DoctorCommonConfiguration;
 import io.terminus.doctor.open.auth.DoctorCustomRoleLoaderConfigurer;
 import io.terminus.doctor.user.service.DoctorServiceStatusWriteService;
 import io.terminus.doctor.user.service.SubRoleReadService;
+import io.terminus.doctor.web.core.DoctorCoreWebConfiguration;
 import io.terminus.doctor.web.core.image.FileHelper;
 import io.terminus.doctor.web.core.msg.email.CommonEmailServiceConfig;
 import io.terminus.doctor.web.core.msg.sms.LuoSiMaoSmsServiceConfig;
@@ -45,6 +46,7 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 @ComponentScan(value = {"io.terminus.doctor.open"})
 @EnableAutoConfiguration
 @Import({
+        DoctorCoreWebConfiguration.class,
         MsgWebConfig.class,
         LuoSiMaoSmsServiceConfig.class,
         CommonEmailServiceConfig.class,

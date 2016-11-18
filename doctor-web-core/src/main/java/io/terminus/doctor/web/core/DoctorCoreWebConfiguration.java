@@ -41,7 +41,9 @@ import java.util.concurrent.Executors;
         "io.terminus.doctor.web.core.advices",
         "io.terminus.doctor.web.core.exceptions",
         "io.terminus.doctor.web.core.util",
-        "io.terminus.doctor.web.core.image"
+        "io.terminus.doctor.web.core.image",
+        "io.terminus.doctor.web.core.component",
+        "io.terminus.doctor.web.core.login"
 
 })
 @Import(DoctorCommonConfiguration.class)

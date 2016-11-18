@@ -1,4 +1,4 @@
-package io.terminus.doctor.open.common;
+package io.terminus.doctor.web.core.login;
 
 /**
  * Mail: xiao@terminus.io <br>

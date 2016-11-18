@@ -6,7 +6,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.hash.Hashing;
 import configuration.open.OpenWebConfiguration;
 import io.terminus.doctor.open.BaseOpenWebTest;
-import io.terminus.doctor.open.common.Sessions;
+import io.terminus.doctor.web.core.login.Sessions;
 import io.terminus.doctor.user.dto.DoctorServiceApplyDto;
 import io.terminus.doctor.user.model.DoctorOrg;
 import io.terminus.doctor.user.model.DoctorServiceReview;

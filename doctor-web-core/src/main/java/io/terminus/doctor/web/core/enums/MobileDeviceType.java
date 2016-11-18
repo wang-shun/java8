@@ -1,4 +1,4 @@
-package io.terminus.doctor.open.enums;
+package io.terminus.doctor.web.core.enums;
 
 import com.google.common.base.Objects;
 
