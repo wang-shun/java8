@@ -182,7 +182,8 @@ public class DoctorServiceReviewManager {
 
     @Transactional
     public List<DoctorFarm> openDoctorService(BaseUser user, Long userId, String loginName, List<DoctorFarm> farms){
-        if(userDao.findByName(loginName) != null){
+        User exist = userDao.findByName(loginName);
+        if(exist != null && !exist.getId().equals(userId)){
             throw new ServiceException("duplicated.name"); // 用户名已存在
         }
         User primaryUser = userDao.findById(userId); // 被审核的主账号
