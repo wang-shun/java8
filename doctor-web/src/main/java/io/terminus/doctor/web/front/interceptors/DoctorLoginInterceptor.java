@@ -67,7 +67,7 @@ public class DoctorLoginInterceptor extends HandlerInterceptorAdapter {
             return false;
         }
 
-        //判断设备号是否一致
+        //如果存在设备号，判断设备号是否一致
         Object sessionDeviceId = snapshot.get(Sessions.DEVICE_ID);
         Object requestDeviceId = request.getAttribute("deviceId");
         if (sessionDeviceId != null && !Objects.equals(sessionDeviceId, requestDeviceId)) {
