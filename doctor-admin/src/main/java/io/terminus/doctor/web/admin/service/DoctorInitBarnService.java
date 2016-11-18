@@ -48,7 +48,7 @@ public class DoctorInitBarnService {
             Response<User> response = doctorUserReadService.findById(userId);
             String userName = RespHelper.orServEx(response).getName();
 
-            or500(doctorBarnReadService.findBarnsByFarmId(0L)).forEach(barn -> {
+            /*or500(doctorBarnReadService.findBarnsByFarmId(0L)).forEach(barn -> {
                 barn.setFarmId(farm.getId());
                 barn.setFarmName(farm.getName());
                 barn.setOrgId(farm.getOrgId());
@@ -57,7 +57,7 @@ public class DoctorInitBarnService {
                 Long barnId = or500(doctorBarnWriteService.createBarn(barn));
                 doctorBarnWriteService.publistBarnEvent(barnId);
                 log.info("init barn info, barn:{}", barn);
-            });
+            });*/
             doctorWareHouseTypeWriteService.initDoctorWareHouseType(farm.getId(), farm.getName(), userId, userName);
             return Response.ok(Boolean.TRUE);
         } catch (Exception e) {
