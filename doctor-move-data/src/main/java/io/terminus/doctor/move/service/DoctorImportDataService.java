@@ -1081,6 +1081,10 @@ public class DoctorImportDataService {
         // 主账号的 profile
         UserProfile userProfile = userProfileDao.findByUserId(user.getId());
 
+        // 初始化仓库大类，数据都是0
+        RespHelper.or500(doctorWareHouseTypeWriteService.initDoctorWareHouseType(farm.getId(), farm.getName(), user.getId(), userProfile.getRealName()));
+
+
         // 创建仓库
         Map<String, Long> warehouseMap = new HashMap<>(); // key = 仓库名称, value = 仓库id
         for (Row row : shit.getWarehouse()) {
@@ -1100,11 +1104,14 @@ public class DoctorImportDataService {
                 if(StringUtils.isNotBlank(manager) && userMap.get(manager) != null){
                     wareHouse.setManagerId(userMap.get(manager));
                     wareHouse.setManagerName(manager);
+                }else{
+                    wareHouse.setManagerId(user.getId());
+                    wareHouse.setManagerName(userProfile.getRealName());
                 }
                 if(warehouseMap.containsKey(warehouseName)){
                     throw new JsonResponseException("仓库名称重复：" + warehouseName + "，row " + line + "column" + 1);
                 }else{
-                    RespHelper.or500(doctorWareHouseWriteService.createWareHouse(wareHouse));
+                    warehouseMap.put(warehouseName, RespHelper.or500(doctorWareHouseWriteService.createWareHouse(wareHouse)));
                 }
             }
         }
