@@ -148,6 +148,14 @@ public class DoctorWareHouseEvents {
                             dto.setInAmount(report.getAmount());
                             dto.setInCount(report.getCount());
                         }
+                        if(Objects.equals(report.getEventType(), DoctorMaterialConsumeProvider.EVENT_TYPE.DIAORU.getValue())){
+                            dto.setDiaoruAmount(report.getAmount());
+                            dto.setDiaoruCount(report.getCount());
+                        }
+                        if(Objects.equals(report.getEventType(), DoctorMaterialConsumeProvider.EVENT_TYPE.DIAOCHU.getValue())){
+                            dto.setDiaochuAmount(report.getAmount());
+                            dto.setDiaochuCount(report.getCount());
+                        }
                     });
                     return dto;
                 })

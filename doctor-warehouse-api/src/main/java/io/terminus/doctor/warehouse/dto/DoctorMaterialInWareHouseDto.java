@@ -51,6 +51,12 @@ public class DoctorMaterialInWareHouseDto implements Serializable{
 
     private double outAmount; // 出库金额
 
+    private double diaoruCount; // 调入数量
+    private double diaoruAmount; // 调入金额
+
+    private double diaochuCount; // 调出数量
+    private double diaochuAmount; // 调出金额
+
     public static DoctorMaterialInWareHouseDto buildDoctorMaterialInWareHouseInfo(DoctorMaterialInWareHouse inWareHouse){
         return DoctorMaterialInWareHouseDto.builder()
                 .materialInWareHouseId(inWareHouse.getId())
