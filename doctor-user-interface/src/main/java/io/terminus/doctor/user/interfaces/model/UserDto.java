@@ -3,18 +3,21 @@ package io.terminus.doctor.user.interfaces.model;
 import java.io.Serializable;
 import java.util.Date;
 
-public class UserDto implements Serializable{
-    private static final long serialVersionUID = -2196001047486486653L;
+public class UserDto implements Serializable {
+    private static final long serialVersionUID = 8718347798835230297L;
+
+    public UserDto(Long id){
+        this.id = id;
+    }
+    public UserDto(){
+
+    }
 
     private Long id;
-
     private String name;
-
     private String email;
     private String mobile;
     private String password;
-    private Integer status; //用户状态 0:未激活, 1:正常, -1:锁定, -2:冻结, -3: 删除
-    private String rolesJson;
     private Date createdAt;
     private Date updatedAt;
 
@@ -58,22 +61,6 @@ public class UserDto implements Serializable{
         this.password = password;
     }
 
-    public Integer getStatus() {
-        return status;
-    }
-
-    public void setStatus(Integer status) {
-        this.status = status;
-    }
-
-    public String getRolesJson() {
-        return rolesJson;
-    }
-
-    public void setRolesJson(String rolesJson) {
-        this.rolesJson = rolesJson;
-    }
-
     public Date getCreatedAt() {
         return createdAt;
     }
@@ -88,5 +75,18 @@ public class UserDto implements Serializable{
 
     public void setUpdatedAt(Date updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    @Override
+    public String toString() {
+        return "UserDto{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", email='" + email + '\'' +
+                ", mobile='" + mobile + '\'' +
+                ", password='" + password + '\'' +
+                ", createdAt=" + createdAt +
+                ", updatedAt=" + updatedAt +
+                '}';
     }
 }

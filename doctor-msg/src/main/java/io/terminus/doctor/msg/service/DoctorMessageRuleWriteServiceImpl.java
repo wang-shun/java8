@@ -1,8 +1,12 @@
 package io.terminus.doctor.msg.service;
 
 import com.google.common.base.Throwables;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.model.Response;
+import io.terminus.doctor.common.enums.DataEventType;
+import io.terminus.doctor.common.event.DataEvent;
 import io.terminus.doctor.msg.dao.DoctorMessageRuleDao;
 import io.terminus.doctor.msg.dao.DoctorMessageRuleRoleDao;
 import io.terminus.doctor.msg.dao.DoctorMessageRuleTemplateDao;
@@ -10,11 +14,13 @@ import io.terminus.doctor.msg.enums.Category;
 import io.terminus.doctor.msg.model.DoctorMessageRule;
 import io.terminus.doctor.msg.model.DoctorMessageRuleRole;
 import io.terminus.doctor.msg.model.DoctorMessageRuleTemplate;
+import io.terminus.zookeeper.pubsub.Publisher;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -32,6 +38,8 @@ public class DoctorMessageRuleWriteServiceImpl implements DoctorMessageRuleWrite
     private final DoctorMessageRuleTemplateDao doctorMessageRuleTemplateDao;
     private final DoctorMessageRuleRoleDao doctorMessageRuleRoleDao;
 
+    @Autowired
+    private Publisher publisher;
 
     @Autowired
     public DoctorMessageRuleWriteServiceImpl(DoctorMessageRuleDao doctorMessageRuleDao,
@@ -46,6 +54,7 @@ public class DoctorMessageRuleWriteServiceImpl implements DoctorMessageRuleWrite
     public Response<Long> createMessageRule(DoctorMessageRule messageRule) {
         try {
             doctorMessageRuleDao.create(messageRule);
+            publishMessageRuleChg(messageRule.getId());
             return Response.ok(messageRule.getId());
         } catch (Exception e) {
             log.error("create messageRule failed, messageRule:{}, cause:{}", messageRule, Throwables.getStackTraceAsString(e));
@@ -70,7 +79,9 @@ public class DoctorMessageRuleWriteServiceImpl implements DoctorMessageRuleWrite
                             doctorMessageRuleRoleDao.update(role);
                 });
             }
-            return Response.ok(doctorMessageRuleDao.update(messageRule));
+            Boolean result = doctorMessageRuleDao.update(messageRule);
+            publishMessageRuleChg(messageRule.getId());
+            return Response.ok(result);
         } catch (Exception e) {
             log.error("update messageRule failed, messageRule:{}, cause:{}", messageRule, Throwables.getStackTraceAsString(e));
             return Response.fail("messageRule.update.fail");
@@ -84,7 +95,9 @@ public class DoctorMessageRuleWriteServiceImpl implements DoctorMessageRuleWrite
             DoctorMessageRule rule = doctorMessageRuleDao.findById(messageRuleId);
             if (rule != null) {
                 rule.setStatus(DoctorMessageRule.Status.DELETE.getValue());
-                return Response.ok(doctorMessageRuleDao.update(rule));
+                Response<Boolean> result = Response.ok(doctorMessageRuleDao.update(rule));
+                publishMessageRuleChg(rule.getId());
+                return result;
             }
             return Response.ok(Boolean.TRUE);
         } catch (Exception e) {
@@ -101,6 +114,7 @@ public class DoctorMessageRuleWriteServiceImpl implements DoctorMessageRuleWrite
                 return Response.fail("message.template.rule.fail");
             }
             List<DoctorMessageRuleTemplate> ruleTemplates = doctorMessageRuleTemplateDao.findAllWarnMessageTpl();
+            List<Long> ids = Lists.newArrayList();
             for (int i = 0; ruleTemplates != null && i < ruleTemplates.size(); i++) {
                 DoctorMessageRuleTemplate ruleTemplate = ruleTemplates.get(i);
                 // 1. 判断模板与farm的关系是否存在
@@ -125,11 +139,27 @@ public class DoctorMessageRuleWriteServiceImpl implements DoctorMessageRuleWrite
                         .describe(ruleTemplate.getDescribe())
                         .build();
                 doctorMessageRuleDao.create(rule);
+                ids.add(rule.getId());
             }
+
+            Map<String, List<Long>> map = Maps.newHashMap();
+            map.put("messageRuleIds", ids);
+            publisher.publish(DataEvent.toBytes(DataEventType.UpdateMessageRules.getKey(), map));
             return Response.ok(Boolean.TRUE);
         } catch (Exception e) {
             log.error("init msg template to farm failed, farm id is {}, cause by {}", farmId, Throwables.getStackTraceAsString(e));
             return Response.fail("init.msg.template.fail");
         }
+    }
+
+    private void publishMessageRuleChg(Long messageRuleId){
+        Map<String, Long> map = Maps.newHashMap();
+        map.put("messageRuleId", messageRuleId);
+        try {
+            publisher.publish(DataEvent.toBytes(DataEventType.UpdateMessageRule.getKey(), map));
+        } catch (Exception e) {
+            log.error("publish.message.rule.chg.failed, cause by {}", Throwables.getStackTraceAsString(e));
+        }
+
     }
 }

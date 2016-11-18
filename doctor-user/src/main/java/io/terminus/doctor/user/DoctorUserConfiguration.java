@@ -9,8 +9,10 @@ import io.terminus.zookeeper.ZKClientFactory;
 import io.terminus.zookeeper.pubsub.Publisher;
 import io.terminus.zookeeper.pubsub.Subscriber;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
-import org.springframework.context.annotation.*;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 
 /**
  * @author Effet
@@ -24,7 +26,6 @@ import org.springframework.context.annotation.*;
 public class DoctorUserConfiguration {
 
     @Configuration
-    @Profile("zookeeper")
     public static class ZookeeperConfiguration{
 
         @Bean

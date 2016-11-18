@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.RespHelper;
@@ -24,23 +23,14 @@ import io.terminus.doctor.event.model.DoctorPigEvent;
 import io.terminus.doctor.event.model.DoctorVaccinationPigWarn;
 import io.terminus.doctor.event.service.DoctorBarnReadService;
 import io.terminus.doctor.event.service.DoctorGroupReadService;
-import io.terminus.doctor.event.service.DoctorPigReadService;
-import io.terminus.doctor.event.service.DoctorPigWriteService;
 import io.terminus.doctor.event.service.DoctorVaccinationPigWarnReadService;
 import io.terminus.doctor.msg.dto.Rule;
 import io.terminus.doctor.msg.dto.RuleValue;
 import io.terminus.doctor.msg.dto.SubUser;
 import io.terminus.doctor.msg.enums.Category;
 import io.terminus.doctor.msg.model.DoctorMessageRuleRole;
-import io.terminus.doctor.msg.service.DoctorMessageReadService;
-import io.terminus.doctor.msg.service.DoctorMessageRuleReadService;
-import io.terminus.doctor.msg.service.DoctorMessageRuleRoleReadService;
-import io.terminus.doctor.msg.service.DoctorMessageRuleTemplateReadService;
-import io.terminus.doctor.msg.service.DoctorMessageTemplateReadService;
-import io.terminus.doctor.msg.service.DoctorMessageWriteService;
 import io.terminus.doctor.schedule.msg.producer.factory.GroupDetailFactory;
 import io.terminus.doctor.schedule.msg.producer.factory.PigDtoFactory;
-import io.terminus.doctor.user.service.DoctorUserDataPermissionReadService;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
@@ -64,37 +54,15 @@ import java.util.stream.Collectors;
 @Slf4j
 public class PigVaccinationProducer extends AbstractJobProducer {
 
-    private final DoctorGroupReadService doctorGroupReadService;
-    private final DoctorVaccinationPigWarnReadService doctorVaccinationPigWarnReadService;
-
-    @RpcConsumer
+    @Autowired
+    private  DoctorGroupReadService doctorGroupReadService;
+    @Autowired
+    private  DoctorVaccinationPigWarnReadService doctorVaccinationPigWarnReadService;
     @Autowired
     private DoctorBarnReadService doctorBarnReadService;
 
-    @Autowired
-    public PigVaccinationProducer(DoctorMessageRuleTemplateReadService doctorMessageRuleTemplateReadService,
-                                  DoctorMessageRuleReadService doctorMessageRuleReadService,
-                                  DoctorMessageRuleRoleReadService doctorMessageRuleRoleReadService,
-                                  DoctorMessageReadService doctorMessageReadService,
-                                  DoctorMessageWriteService doctorMessageWriteService,
-                                  DoctorPigReadService doctorPigReadService,
-                                  DoctorPigWriteService doctorPigWriteService,
-                                  DoctorVaccinationPigWarnReadService doctorVaccinationPigWarnReadService,
-                                  DoctorGroupReadService doctorGroupReadService,
-                                  DoctorMessageTemplateReadService doctorMessageTemplateReadService,
-                                  DoctorUserDataPermissionReadService doctorUserDataPermissionReadService) {
-        super(doctorMessageTemplateReadService,
-                doctorMessageRuleTemplateReadService,
-                doctorMessageRuleReadService,
-                doctorMessageRuleRoleReadService,
-                doctorMessageReadService,
-                doctorMessageWriteService,
-                doctorPigReadService,
-                doctorPigWriteService,
-                doctorUserDataPermissionReadService,
-                Category.PIG_VACCINATION);
-        this.doctorGroupReadService = doctorGroupReadService;
-        this.doctorVaccinationPigWarnReadService = doctorVaccinationPigWarnReadService;
+    public PigVaccinationProducer() {
+        super(Category.PIG_VACCINATION);
     }
 
     @Override
