@@ -56,6 +56,8 @@ public class DoctorLoginInterceptor extends HandlerInterceptorAdapter {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         WebUtil.putRequestAndResponse(request, response);
+
+        //兼容app壳里的h5和web！！！
         HttpSession session = request.getSession(false);
         if (session != null) {
             Object userIdInSession = session.getAttribute(Constants.SESSION_USER_ID);
