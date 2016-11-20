@@ -9,6 +9,7 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.user.util.DoctorUserMaker;
+import io.terminus.doctor.web.core.Constants;
 import io.terminus.doctor.web.core.login.Sessions;
 import io.terminus.pampas.common.UserUtil;
 import io.terminus.pampas.engine.common.WebUtil;
@@ -56,8 +57,20 @@ public class DoctorLoginInterceptor extends HandlerInterceptorAdapter {
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         WebUtil.putRequestAndResponse(request, response);
         HttpSession session = request.getSession(false);
-        if (session == null) {
-            return true;
+        if (session != null) {
+            Object userIdInSession = session.getAttribute(Constants.SESSION_USER_ID);
+            if (userIdInSession != null) {
+                final Long userId = Long.valueOf(userIdInSession.toString());
+                Response<? extends User> result = userCache.getUnchecked(userId);
+                if (!result.isSuccess()) {
+                    userCache.invalidate(userId);
+                    log.warn("failed to find user where id={},error code:{}", userId, result.getError());
+                    return false;
+                }
+                User user = result.getResult();
+                if (user != null) {
+                    ParanaUser paranaUser = DoctorUserMaker.from(user);
+                    UserUtil.putCurrentUser(paranaUser);
         }
 
         if (request.getAttribute("sid") == null || isEmpty((String)request.getAttribute("sid"))) {
