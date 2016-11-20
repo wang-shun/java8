@@ -23,6 +23,7 @@ import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
@@ -54,6 +55,10 @@ public class DoctorLoginInterceptor extends HandlerInterceptorAdapter {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         WebUtil.putRequestAndResponse(request, response);
+        HttpSession session = request.getSession(false);
+        if (session == null) {
+            return true;
+        }
 
         if (request.getAttribute("sid") == null || isEmpty((String)request.getAttribute("sid"))) {
             log.warn("session id miss");
