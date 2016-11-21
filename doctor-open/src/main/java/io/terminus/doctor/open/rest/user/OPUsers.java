@@ -39,7 +39,11 @@ public class OPUsers {
      */
     @OpenMethod(key = "get.session.id", paramNames = {"key"})
     public Map<String, String> getSessionId(String key) {
-        return orOpenException(ImmutableMap.of("sessionId", doctorCommonSessionBean.getSessionId(key)));
+        try{
+            return ImmutableMap.of("sessionId", doctorCommonSessionBean.getSessionId(key));
+        } catch(Exception e) {
+            throw new OPClientException(e.getMessage());
+        }
     }
 
     /**
@@ -63,7 +67,11 @@ public class OPUsers {
     public Boolean getMobileCode(@NotEmpty(message = "user.mobile.miss") String mobile,
                                  @NotEmpty(message = "session.id.miss")String sessionId,
                                  Integer type) {
-        return orOpenException(doctorCommonSessionBean.getMobileCode(mobile, sessionId, type));
+        try{
+            return doctorCommonSessionBean.getMobileCode(mobile, sessionId, type);
+        } catch(Exception e) {
+            throw new OPClientException(e.getMessage());
+        }
     }
 
     /**
@@ -75,7 +83,11 @@ public class OPUsers {
     public Boolean sendSmsCode(@NotEmpty(message = "user.mobile.miss") String mobile,
                                @NotEmpty(message = "session.id.miss")String sessionId,
                                @NotEmpty(message = "template.name.miss")String templateName) {
-        return orOpenException(doctorCommonSessionBean.sendSmsCode(mobile, sessionId, templateName));
+        try{
+            return doctorCommonSessionBean.sendSmsCode(mobile, sessionId, templateName);
+        } catch(Exception e) {
+            throw new OPClientException(e.getMessage());
+        }
     }
 
     /**
@@ -91,7 +103,11 @@ public class OPUsers {
                          @NotEmpty(message = "user.mobile.miss") String mobile,
                          @NotEmpty(message = "user.code.miss") String code,
                          @NotEmpty(message = "session.id.miss")String sessionId) {
-        return orOpenException(doctorCommonSessionBean.register(password, mobile, code, sessionId));
+        try {
+            return doctorCommonSessionBean.register(password, mobile, code, sessionId);
+        } catch(Exception e) {
+            throw new OPClientException(e.getMessage());
+        }
     }
 
 
@@ -107,7 +123,11 @@ public class OPUsers {
     @OpenMethod(key="user.login", paramNames = {"name", "password", "code", "sid", "deviceId"})
     public DoctorCommonSessionBean.Token login(String name, String password, String code, String sessionId,
                                                @NotEmpty(message = "deviceId.not.empty") String deviceId) {
-        return orOpenException(doctorCommonSessionBean.login(name, password, code, sessionId, deviceId));
+        try {
+            return doctorCommonSessionBean.login(name, password, code, sessionId, deviceId);
+        } catch(Exception e) {
+            throw new OPClientException(e.getMessage());
+        }
     }
 
     /**
@@ -118,12 +138,20 @@ public class OPUsers {
      */
     @OpenMethod(key="user.auto.login", paramNames = {"sid", "deviceId"})
     public DoctorCommonSessionBean.Token autologin(String sessionId, String deviceId) {
-        return orOpenException(doctorCommonSessionBean.autologin(sessionId, deviceId));
+        try {
+            return doctorCommonSessionBean.autologin(sessionId, deviceId);
+        } catch(Exception e) {
+            throw new OPClientException(e.getMessage());
+        }
     }
 
     @OpenMethod(key="get.user.captcher", paramNames = {"sid"})
     public Map<String, String> captcher(String sessionId) {
-        return orOpenException(doctorCommonSessionBean.captcher(sessionId));
+        try {
+            return doctorCommonSessionBean.captcher(sessionId);
+        } catch(Exception e) {
+            throw new OPClientException(e.getMessage());
+        }
     }
 
 
@@ -152,7 +180,11 @@ public class OPUsers {
     public Boolean changePassword(@NotEmpty(message = "oldPassword.not.empty") String oldPassword,
                                   @NotEmpty(message = "newPassword.not.empty") String newPassword,
                                   @NotEmpty(message = "session.id.miss")String sessionId) {
-        return orOpenException(doctorCommonSessionBean.changePassword(oldPassword, newPassword, sessionId));
+        try {
+            return doctorCommonSessionBean.changePassword(oldPassword, newPassword, sessionId);
+        } catch(Exception e) {
+            throw new OPClientException(e.getMessage());
+        }
     }
 
     /**
@@ -167,7 +199,11 @@ public class OPUsers {
                                   @NotEmpty(message = "code.not.empty") String code,
                                   @NotEmpty(message = "newPassword.not.empty") String newPassword,
                                   @NotEmpty(message = "session.id.miss")String sessionId) {
-        return orOpenException(doctorCommonSessionBean.forgetPassword(mobile, code, newPassword, sessionId));
+        try {
+            return doctorCommonSessionBean.forgetPassword(mobile, code, newPassword, sessionId);
+        } catch(Exception e) {
+            throw new OPClientException(e.getMessage());
+        }
     }
 
     /**
@@ -182,11 +218,4 @@ public class OPUsers {
         return result;
     }
 
-    private static <T> T orOpenException(T result) {
-        try {
-            return result;
-        } catch (Exception e) {
-            throw new OPClientException(e.getMessage());
-        }
-    }
 }
