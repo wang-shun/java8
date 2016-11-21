@@ -243,8 +243,15 @@ public class DoctorImportDataService {
                 subUser.setStatus(UserStatus.NORMAL.value());
 
                 if(existRole.get(roleName) == null){
-                    log.error("role not exist, row {} column {}, sheet : staff", row.getRowNum(), 3);
-                    throw new JsonResponseException("role not exist, row " + row.getRowNum() + " column 3, sheet : staff");
+                    SubRole subRole = new SubRole();
+                    subRole.setName(roleName);
+                    subRole.setUserId(primaryUser.getId());
+                    subRole.setAppKey(appKey);
+                    subRole.setStatus(1);
+                    subRole.setAllowJson("[]");
+                    subRole.setExtraJson("{}");
+                    subRoleDao.create(subRole);
+                    existRole.put(roleName, subRole.getId());
                 }
                 List<String> roles = Lists.newArrayList("SUB", "SUB(SUB(" + existRole.get(roleName) + "))");
                 subUser.setRoles(roles);
@@ -384,7 +391,7 @@ public class DoctorImportDataService {
                 } else if ("后备母猪".equals(barnTypeXls) || "后备公猪".equals(barnTypeXls)) {
                     barn.setPigType(PigType.RESERVE.getValue());
                 } else {
-                    log.error("farm:{}, barn:{} type is null, please check!", farm, barn.getName());
+                    throw new JsonResponseException("猪舍类型错误：" + barnTypeXls + "，row " + (row.getRowNum() + 1) + "column " + 2);
                 }
 
                 barn.setCanOpenGroup(DoctorBarn.CanOpenGroup.YES.getValue());
@@ -1022,7 +1029,7 @@ public class DoctorImportDataService {
                 //获取母猪状态
                 PigStatus status = getPigStatus(ImportExcelUtils.getString(row, 2));
                 if (status == null) {
-                    log.error("WTF! The pig status is null! row:{}, pigCode:{}", row.getRowNum(), sow.getSowCode());
+                    throw new JsonResponseException("母猪状态错误，猪号：" + sow.getSowCode() + "，row " + (row.getRowNum() + 1));
                 } else {
                     sow.setStatus(status.getKey());         //当前状态
                 }
