@@ -97,14 +97,16 @@ public class DoctorReports {
     /**
      * 根据farmId和日期查询猪场周报表
      * @param farmId 猪场id
-     * @param week   当年第几周
+     * @param year   年份  2016
+     * @param week   当年第几周 20
      * @return 猪场周报报表
      */
     @RequestMapping(value = "/weekly", method = RequestMethod.GET)
     public DoctorCommonReportTrendDto findWeeklyReportTrendByFarmIdAndSumAt(@RequestParam("farmId") Long farmId,
-                                                                            @RequestParam("week") Integer week,
+                                                                            @RequestParam(value = "year", required = false) Integer year,
+                                                                            @RequestParam(value = "week", required = false) Integer week,
                                                                             @RequestParam(value = "index", required = false) Integer index) {
-        return RespHelper.or500(doctorCommonReportReadService.findWeeklyReportTrendByFarmIdAndSumAt(farmId, week, index));
+        return RespHelper.or500(doctorCommonReportReadService.findWeeklyReportTrendByFarmIdAndSumAt(farmId, year, week, index));
     }
 
     /**

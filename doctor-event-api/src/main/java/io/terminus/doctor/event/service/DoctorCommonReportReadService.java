@@ -31,11 +31,13 @@ public interface DoctorCommonReportReadService {
      * 根据farmId和统计日期查询猪场周报表和趋势图
      *
      * @param farmId 猪场id
-     * @param week   统计日期 当年的第几周
+     * @param year   年份，默认今年
+     * @param week   统计日期 当年的第几周，默认今天所在周
      * @param index  趋势图
      * @return 猪场周报表
      */
     Response<DoctorCommonReportTrendDto> findWeeklyReportTrendByFarmIdAndSumAt(@NotNull(message = "farmId.not.null") Long farmId,
-                                                                               @NotNull(message = "week.not.null") Integer week,
+                                                                               @Nullable Integer year,
+                                                                               @Nullable Integer week,
                                                                                @Nullable Integer index);
 }
