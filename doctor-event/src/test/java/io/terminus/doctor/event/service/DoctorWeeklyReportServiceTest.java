@@ -24,7 +24,7 @@ public class DoctorWeeklyReportServiceTest extends BaseServiceTest {
     @Test
     public void testFindWeeklyReportTrendByFarmIdAndSumAt() {
         Response<DoctorCommonReportTrendDto> response = doctorCommonReportReadService
-                .findWeeklyReportTrendByFarmIdAndSumAt(1L, null, 10, null);
+                .findWeeklyReportTrendByFarmIdAndSumAt(1L, null, null, 2);
         assertTrue(response.isSuccess());
         log.info("weekly report:{}", response.getResult());
     }

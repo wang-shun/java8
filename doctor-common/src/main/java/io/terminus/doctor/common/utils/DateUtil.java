@@ -150,7 +150,7 @@ public class DateUtil {
     }
 
     /**
-     * 获取index之前的所有周日
+     * 获取index之前的所有周日的日末
      *
      * @param date  初始date
      * @param index 前几月
@@ -161,7 +161,8 @@ public class DateUtil {
         DateTime todayEnd = getDateEnd(MoreObjects.firstNonNull(new DateTime(date), DateTime.now()));
         weeks.add(todayEnd.toDate());
 
-        DateTime start = todayEnd.withDayOfWeek(7);
+        //从上周开始
+        DateTime start = todayEnd.withDayOfWeek(7).plusWeeks(-1);
         for (int i = 1; i < index; i++) {
             weeks.add(start.toDate());
             start = start.plusWeeks(-1);
