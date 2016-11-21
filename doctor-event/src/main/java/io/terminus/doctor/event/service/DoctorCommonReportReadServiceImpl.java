@@ -182,7 +182,7 @@ public class DoctorCommonReportReadServiceImpl implements DoctorCommonReportRead
                         return reportDto;
                     }
                     
-                    DoctorWeeklyReport report = doctorWeeklyReportDao.findByFarmIdAndSumAt(farmId, week);
+                    DoctorWeeklyReport report = doctorWeeklyReportDao.findByFarmIdAndSumAt(farmId, Dates.startOfDay(week));
                     if (report == null || !StringUtils.hasText(report.getData())) {
                         return failReportDto(weekStr);
                     }
@@ -235,15 +235,20 @@ public class DoctorCommonReportReadServiceImpl implements DoctorCommonReportRead
     
     //本星期非周一：前一天，本星期周一：周一，上星期：周日
     private static Date getLastWeek(Date date) {
-        // TODO: 2016/11/18  
-        return new Date();
+        if (DateTime.now().withTimeAtStartOfDay().isEqual(new DateTime(date).withTimeAtStartOfDay())) {
+            if (DateTime.now().getDayOfWeek() == 1) {
+                return new DateTime(date).withTimeAtStartOfDay().toDate();
+            }
+            return new DateTime(date).plusDays(-1).withTimeAtStartOfDay().toDate();
+        }
+        return new DateTime(date).withDayOfWeek(7).withTimeAtStartOfDay().toDate();
     }
 
     private static String getWeekStr(DateTime date) {
         return "第" + date.getWeekOfWeekyear() + "周(" + date.toString(DateUtil.DATE) + ")";
     }
 
-    private boolean todayIsMonday(Date date) {
+    private static boolean todayIsMonday(Date date) {
         return DateTime.now().withTimeAtStartOfDay().isEqual(new DateTime(date).withTimeAtStartOfDay())
                 && DateTime.now().getDayOfWeek() == 1;
     }
