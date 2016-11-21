@@ -33,6 +33,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.validation.constraints.NotNull;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -172,23 +173,15 @@ public class DoctorPigEventReadServiceImpl implements DoctorPigEventReadService 
             checkState(!isNull(doctorPigTrack), "input.pigIdCode.error");
             checkState(Objects.equals(doctorPigTrack.getPigType(), DoctorPig.PIG_TYPE.SOW.getKey()), "count.pigType.error");
 
-            // 获取胎次关联的 PigId : eventIds
-            String relEventIds = doctorPigTrack.getRelEventIds();
-
             // 获取Pig 所有的 EventId
-            Map<Long, DoctorPigEvent> doctorPigEventMap = doctorPigEventDao.queryAllEventsByPigId(pigId)
-                    .stream().collect(Collectors.toMap(k->k.getId(), v->v));
-
-            Map<Integer, List<Long>> pigRelEventIds = convertPigRelEventId(relEventIds);
-
-            List<DoctorSowParityCount> doctorSowParityCounts = pigRelEventIds.entrySet().stream()
-                    .map(s -> DoctorSowParityCount.doctorSowParityCountConvert(
-                            s.getKey(),
-                            s.getValue().stream().map(v -> doctorPigEventMap.get(v)).collect(Collectors.toList())))
-                    .collect(Collectors.toList());
-
-            doctorSowParityCounts.sort((a, b)->b.getParity().compareTo(a.getParity()));
-        	return Response.ok(doctorSowParityCounts);
+            Map<Integer, List<DoctorPigEvent>> map = doctorPigEventDao.queryAllEventsByPigId(pigId).stream()
+                    .sorted(Comparator.comparing(DoctorPigEvent::getParity))
+                    .collect(Collectors.groupingBy(k -> k.getParity(), Collectors.toList()));
+            List<DoctorSowParityCount> doctorSowParityCounts = Lists.newArrayList();
+            map.keySet().forEach(parity ->
+                    doctorSowParityCounts.add(DoctorSowParityCount.doctorSowParityCountConvert(parity, map.get(parity)))
+            );
+            return Response.ok(doctorSowParityCounts);
         }catch (IllegalStateException se){
             log.warn("query sow parity illegal state fail, cause:{}", Throwables.getStackTraceAsString(se));
             return Response.fail(se.getMessage());
