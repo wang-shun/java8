@@ -175,24 +175,13 @@ public class DoctorPigEventReadServiceImpl implements DoctorPigEventReadService 
 
             // 获取Pig 所有的 EventId
             Map<Integer, List<DoctorPigEvent>> map = doctorPigEventDao.queryAllEventsByPigId(pigId).stream()
-                    .filter(doctorPigEvent -> Objects.equals(doctorPigEvent.getKind(), DoctorPig.PIG_TYPE.SOW.getKey()))
                     .sorted(Comparator.comparing(DoctorPigEvent::getParity))
                     .collect(Collectors.groupingBy(k -> k.getParity(), Collectors.toList()));
-//
-//            Map<Integer, List<Long>> pigRelEventIds = convertPigRelEventId(relEventIds);
-//
-//            List<DoctorSowParityCount> doctorSowParityCounts = pigRelEventIds.entrySet().stream()
-//                    .map(s -> DoctorSowParityCount.doctorSowParityCountConvert(
-//                            s.getKey(),
-//                            s.getValue().stream().map(v -> doctorPigEventMap.get(v)).collect(Collectors.toList())))
-//                    .collect(Collectors.toList());
-
-
             List<DoctorSowParityCount> doctorSowParityCounts = Lists.newArrayList();
-                    map.keySet().forEach(parity ->
-                        doctorSowParityCounts.add(DoctorSowParityCount.doctorSowParityCountConvert(parity, map.get(parity)))
-                    );
-        	return Response.ok(doctorSowParityCounts);
+            map.keySet().forEach(parity ->
+                    doctorSowParityCounts.add(DoctorSowParityCount.doctorSowParityCountConvert(parity, map.get(parity)))
+            );
+            return Response.ok(doctorSowParityCounts);
         }catch (IllegalStateException se){
             log.warn("query sow parity illegal state fail, cause:{}", Throwables.getStackTraceAsString(se));
             return Response.fail(se.getMessage());
