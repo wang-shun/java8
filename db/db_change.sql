@@ -514,5 +514,15 @@ CREATE INDEX   idx_userid_farmid_templateid ON doctor_message_user(user_id, farm
 -- 2016-11-16 在message_id 字段添加索引
 CREATE INDEX   idx_messageid ON doctor_message_user(message_id);
 
-
-
+-- 2016-11-21 增加猪场id与基础数据关联表
+CREATE TABLE `doctor_farm_basics` (
+  `id` BIGINT(20) NOT NULL AUTO_INCREMENT COMMENT '自增主键',
+  `farm_id` BIGINT(20) DEFAULT NULL COMMENT '猪场id',
+  `basic_ids` VARCHAR(1024) DEFAULT NULL COMMENT '基础数据ids, 逗号分隔',
+  `reason_ids` VARCHAR(1024) DEFAULT NULL COMMENT '变动原因ids',
+  `extra` TEXT COMMENT '附加字段',
+  `created_at` DATETIME DEFAULT NULL COMMENT '创建时间',
+  `updated_at` DATETIME DEFAULT NULL COMMENT '修改时间',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `idx_doctor_farm_basics_farm_id` (`farm_id`)
+) ENGINE=INNODB  DEFAULT CHARSET=utf8 COMMENT='猪场基础数据关联表';
