@@ -37,4 +37,13 @@ public enum WareHouseType {
         }
         return null;
     }
+
+    public static WareHouseType from(String desc){
+        for(WareHouseType wareHouseType : WareHouseType.values()){
+            if(Objects.equals(wareHouseType.getDesc(), desc)){
+                return wareHouseType;
+            }
+        }
+        return null;
+    }
 }
