@@ -566,7 +566,7 @@ public class DoctorPigCreateEvents {
                     .pigType(entryDto.getPigType()).pigCode(entryDto.getPigCode()).barnId(entryDto.getBarnId()).barnName(entryDto.getBarnName())
                     .farmId(doctorFarm.getId()).farmName(doctorFarm.getName()).orgId(doctorFarm.getOrgId()).orgName(doctorFarm.getOrgName())
                     .staffId(userId).staffName(RespHelper.orServEx(doctorGroupWebService.findRealName(userId)))
-                    .eventType(pigEvent.getKey()).eventName(pigEvent.getDesc()).eventDesc(pigEvent.getDesc())
+                    .eventType(pigEvent.getKey()).eventName(pigEvent.getName()).eventDesc(pigEvent.getDesc())
                     .build();
         }catch (IllegalStateException ee){
             log.error("illegal state exception error, cause:{}", Throwables.getStackTraceAsString(ee));
@@ -601,7 +601,7 @@ public class DoctorPigCreateEvents {
                     .pigId(pigDto.getId()).pigCode(pigDto.getPigCode()).pigType(pigDto.getPigType()).barnId(pigDto.getBarnId()).barnName(pigDto.getBarnName())
                     .farmId(doctorFarm.getId()).farmName(doctorFarm.getName()).orgId(doctorFarm.getOrgId()).orgName(doctorFarm.getOrgName())
                     .staffId(userId).staffName(RespHelper.orServEx(doctorGroupWebService.findRealName(userId)))
-                    .eventType(pigEvent.getKey()).eventName(pigEvent.getDesc()).eventDesc(pigEvent.getDesc())
+                    .eventType(pigEvent.getKey()).eventName(pigEvent.getName()).eventDesc(pigEvent.getDesc())
                     .isAuto(isAuto)
                     .relPigEventId(relPigEventId)
                     .build();
@@ -721,5 +721,21 @@ public class DoctorPigCreateEvents {
             log.error("add.failed, cause{}", Throwables.getStackTraceAsString(e));
             return Boolean.FALSE;
         }
+    }
+
+    /**
+     * 修复事件名称(临时)
+     * @return
+     */
+    @RequestMapping(value = "/fix/eventName", method = RequestMethod.GET)
+    @ResponseBody
+    public Boolean fixEventName(){
+        for (PigEvent pigEvent : PigEvent.values()) {
+            Map<String, Object> map = Maps.newHashMap();
+            map.put("type", pigEvent.getKey());
+            map.put("name", pigEvent.getName());
+            doctorPigEventWriteService.updatePigEvents(map);
+        }
+       return Boolean.TRUE;
     }
 }
