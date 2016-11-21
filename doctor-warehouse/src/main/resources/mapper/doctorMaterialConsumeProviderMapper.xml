@@ -78,6 +78,7 @@
         <if test="barnId != null" > AND `barn_id` = #{barnId}</if>
         <if test="groupId != null" > AND `group_id` = #{groupId}</if>
         <if test="providerFactoryId != null" > AND `provider_factory_id` = #{providerFactoryId}</if>
+        <if test="creatorId != null" > AND `creator_id` = #{creatorId}</if>
         <if test="startAt != null" > <![CDATA[ AND `event_time` >= #{startAt} ]]> </if>
         <if test="endAt != null" > <![CDATA[ AND `event_time` < #{endAt} ]]> </if>
     </sql>
@@ -259,5 +260,22 @@
         </where>
         group by material_id, DATE_FORMAT(event_time, '%Y-%m-%d'), event_type, material_name
         order by eventTime, eventType, materialId
+    </select>
+
+    <select id="pageBarnReport" parameterType="map" resultType="io.terminus.doctor.warehouse.dto.BarnConsumeMaterialReport">
+        select barn_id as barnId, barn_name as barnName, material_id as materialId, material_name as materialName, sum(event_count) as count
+        from <include refid="tb"/>
+        where event_type = 1 and barn_id is not null
+        <include refid="criteria"/>
+        group by barn_id, barn_name, material_id, material_name
+        order by count desc
+        limit #{offset}, #{limit}
+    </select>
+
+    <select id="countBarnReport" parameterType="map" resultType="long">
+        select count(distinct barn_id , material_id)
+        from <include refid="tb"/>
+        where event_type = 1 and barn_id is not null
+        <include refid="criteria"/>
     </select>
 </mapper>
