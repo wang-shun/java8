@@ -69,6 +69,7 @@ import io.terminus.parana.user.model.User;
 import io.terminus.parana.user.model.UserProfile;
 import io.terminus.parana.user.service.UserWriteService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.joda.time.DateTime;
@@ -437,7 +438,12 @@ public class DoctorImportDataService {
                 boar.setInitBarnId(barn.getId());
             }
             boar.setBreedName(ImportExcelUtils.getString(row, 6));
-            boar.setBreedId(breedMap.get(boar.getBreedName()));
+            if(!StringUtils.isBlank(boar.getBreedName())){
+                boar.setBreedId(breedMap.get(boar.getBreedName()));
+                if(boar.getBreedId() == null){
+                    throw new JsonResponseException("公猪品种错误：" + boar.getBreedName() + "，row " + (row.getRowNum() + 1) + "column" + 7);
+                }
+            }
             doctorPigDao.create(boar);
 
             //公猪跟踪
@@ -710,8 +716,13 @@ public class DoctorImportDataService {
         if (barn != null) {
             sow.setInitBarnId(barn.getId());
         }
-        sow.setBreedName(last.getBreed());
-        sow.setBreedId(breedMap.get(last.getBreed()));
+        if(last.getBreed() != null){
+            sow.setBreedName(last.getBreed());
+            sow.setBreedId(breedMap.get(last.getBreed()));
+            if(sow.getBreedId() == null){
+                throw new JsonResponseException("母猪品种错误:" + sow.getBreedName());
+            }
+        }
         doctorPigDao.create(sow);
         return sow;
     }
