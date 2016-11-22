@@ -518,8 +518,8 @@ CREATE INDEX   idx_messageid ON doctor_message_user(message_id);
 CREATE TABLE `doctor_farm_basics` (
   `id` BIGINT(20) NOT NULL AUTO_INCREMENT COMMENT '自增主键',
   `farm_id` BIGINT(20) DEFAULT NULL COMMENT '猪场id',
-  `basic_ids` VARCHAR(1024) DEFAULT NULL COMMENT '基础数据ids, 逗号分隔',
-  `reason_ids` VARCHAR(1024) DEFAULT NULL COMMENT '变动原因ids',
+  `basic_ids` TEXT COMMENT '基础数据ids, 逗号分隔',
+  `reason_ids` TEXT COMMENT '变动原因ids, 逗号分隔',
   `extra` TEXT COMMENT '附加字段',
   `created_at` DATETIME DEFAULT NULL COMMENT '创建时间',
   `updated_at` DATETIME DEFAULT NULL COMMENT '修改时间',
