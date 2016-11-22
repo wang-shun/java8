@@ -7,6 +7,7 @@ import lombok.AccessLevel;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.SneakyThrows;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -62,17 +63,15 @@ public class DoctorFarmBasic implements Serializable {
      */
     private Date updatedAt;
 
-    public List<Long> getBasicIdList() throws Exception {
-        if (Strings.isNullOrEmpty(basicIds)) {
-            return Lists.newArrayList();
-        }
-        return Splitters.splitToLong(basicIds, Splitters.COMMA);
+    @SneakyThrows
+    public List<Long> getBasicIdList() {
+        return Strings.isNullOrEmpty(basicIds) ?
+                Lists.newArrayList() : Splitters.splitToLong(basicIds, Splitters.COMMA);
     }
 
-    public List<Long> getReasonIdList() throws Exception {
-        if (Strings.isNullOrEmpty(reasonIds)) {
-            return Lists.newArrayList();
-        }
-        return Splitters.splitToLong(reasonIds, Splitters.COMMA);
+    @SneakyThrows
+    public List<Long> getReasonIdList() {
+        return Strings.isNullOrEmpty(reasonIds) ?
+                Lists.newArrayList() : Splitters.splitToLong(reasonIds, Splitters.COMMA);
     }
 }
