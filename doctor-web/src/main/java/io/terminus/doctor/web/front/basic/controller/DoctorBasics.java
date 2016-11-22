@@ -61,10 +61,7 @@ public class DoctorBasics {
     @RequestMapping(value = "/id", method = RequestMethod.GET)
     public DoctorBasic findBasicById(@RequestParam("farmId") Long farmId,
                                      @RequestParam("basicId") Long basicId) {
-        if(!doctorFarmAuthCenter.checkFarmBasicAuth(farmId, basicId)) {
-            return null;
-        }
-        return RespHelper.or500(doctorBasicReadService.findBasicById(basicId));
+        return RespHelper.or500(doctorBasicReadService.findBasicByIdFilterByFarmId(farmId, basicId));
     }
 
     /**
@@ -78,9 +75,7 @@ public class DoctorBasics {
     public List<DoctorBasic> findBasicByTypeAndSrmWithCache(@RequestParam("farmId") Long farmId,
                                                             @RequestParam("type") Integer type,
                                                             @RequestParam(value = "srm", required = false) String srm) {
-
-        List<DoctorBasic> basics = RespHelper.or500(doctorBasicReadService.findBasicByTypeAndSrmWithCache(type, srm));
-        return doctorFarmAuthCenter.filterBasicByFarmAuth(farmId, basics);
+        return RespHelper.or500(doctorBasicReadService.findBasicByTypeAndSrmWithCacheFilterByFarmId(farmId, type, srm));
     }
 
     /************************** 猪群变动相关 **************************/
@@ -92,10 +87,7 @@ public class DoctorBasics {
     @RequestMapping(value = "/changeReason/id", method = RequestMethod.GET)
     public DoctorChangeReason findChangeReasonById(@RequestParam("farmId") Long farmId,
                                                    @RequestParam("changeReasonId") Long changeReasonId) {
-        if(!doctorFarmAuthCenter.checkFarmBasicReasonAuth(farmId, changeReasonId)) {
-            return null;
-        }
-        return RespHelper.or500(doctorBasicReadService.findChangeReasonById(changeReasonId));
+        return RespHelper.or500(doctorBasicReadService.findChangeReasonByIdFilterByFarmId(farmId, changeReasonId));
     }
 
     /**
@@ -108,8 +100,7 @@ public class DoctorBasics {
     public List<DoctorChangeReason> findChangeReasonByChangeTypeIdAndSrm(@RequestParam("farmId") Long farmId,
                                                                          @RequestParam("changeTypeId") Long changeTypeId,
                                                                          @RequestParam(required = false) String srm) {
-        List<DoctorChangeReason> reasons = RespHelper.or500(doctorBasicReadService.findChangeReasonByChangeTypeIdAndSrm(changeTypeId, srm));
-        return doctorFarmAuthCenter.filterReasonByFarmAuth(farmId, reasons);
+        return RespHelper.or500(doctorBasicReadService.findChangeReasonByChangeTypeIdAndSrmFilterByFarmId(farmId, changeTypeId, srm));
     }
 
     /*********************** 猪场客户相关 ************************/

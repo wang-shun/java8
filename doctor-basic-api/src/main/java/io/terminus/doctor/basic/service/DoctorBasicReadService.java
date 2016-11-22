@@ -36,7 +36,8 @@ public interface DoctorBasicReadService {
      * @param srm   输入码
      * @return 基础数据信息
      */
-    Response<List<DoctorBasic>> findBasicByTypeAndSrm(@NotNull(message = "type.not.null") Integer type, @Nullable String srm);
+    Response<List<DoctorBasic>> findBasicByTypeAndSrm(@NotNull(message = "type.not.null") Integer type,
+                                                      @Nullable String srm);
 
     /**
      * 根据基础数据类型和输入码查询(缓存)
@@ -45,7 +46,38 @@ public interface DoctorBasicReadService {
      * @param srm   输入码
      * @return 基础数据信息
      */
-    Response<List<DoctorBasic>> findBasicByTypeAndSrmWithCache(@NotNull(message = "type.not.null") Integer type, @Nullable String srm);
+    Response<List<DoctorBasic>> findBasicByTypeAndSrmWithCache(@NotNull(message = "type.not.null") Integer type,
+                                                               @Nullable String srm);
+
+    /**
+     * 根据id查询基础数据表 根据猪场id过滤
+     * @param basicId 主键id
+     * @return 基础数据表
+     */
+    Response<DoctorBasic> findBasicByIdFilterByFarmId(@NotNull(message = "farmId.not.null") Long farmId,
+                                                      @NotNull(message = "basicId.not.null") Long basicId);
+
+    /**
+     * 根据基础数据类型和输入码查询(非缓存)
+     * @param type  类型
+     * @see io.terminus.doctor.basic.model.DoctorBasic.Type
+     * @param srm   输入码
+     * @return 基础数据信息
+     */
+    Response<List<DoctorBasic>> findBasicByTypeAndSrmFilterByFarmId(@NotNull(message = "farmId.not.null") Long farmId,
+                                                                    @NotNull(message = "type.not.null") Integer type,
+                                                                    @Nullable String srm);
+
+    /**
+     * 根据基础数据类型和输入码查询(缓存)
+     * @param type  类型
+     * @see io.terminus.doctor.basic.model.DoctorBasic.Type
+     * @param srm   输入码
+     * @return 基础数据信息
+     */
+    Response<List<DoctorBasic>> findBasicByTypeAndSrmWithCacheFilterByFarmId(@NotNull(message = "farmId.not.null") Long farmId,
+                                                                             @NotNull(message = "type.not.null") Integer type,
+                                                                             @Nullable String srm);
 
     //////////////////////////// 猪群变动相关 ////////////////////////////
     /**
@@ -61,9 +93,25 @@ public interface DoctorBasicReadService {
      * @param srm 不区分大小写模糊匹配
      * @return 变动原因列表
      */
-    Response<List<DoctorChangeReason>> findChangeReasonByChangeTypeIdAndSrm(@NotNull(message = "changeTypeId.not.null") Long changeTypeId,
-                                                                            String srm);
+    Response<List<DoctorChangeReason>> findChangeReasonByChangeTypeIdAndSrm(@NotNull(message = "changeTypeId.not.null") Long changeTypeId, @Nullable String srm);
 
+    /**
+     * 根据id查询变动原因表
+     * @param changeReasonId 主键id
+     * @return 变动类型表
+     */
+    Response<DoctorChangeReason> findChangeReasonByIdFilterByFarmId(@NotNull(message = "farmId.not.null") Long farmId,
+                                                                    @NotNull(message = "changeReasonId.not.null") Long changeReasonId);
+
+    /**
+     * 根据变动类型和输入码查询
+     * @param changeTypeId 变动类型id
+     * @param srm 不区分大小写模糊匹配
+     * @return 变动原因列表
+     */
+    Response<List<DoctorChangeReason>> findChangeReasonByChangeTypeIdAndSrmFilterByFarmId(@NotNull(message = "farmId.not.null") Long farmId,
+                                                                                          @NotNull(message = "changeTypeId.not.null") Long changeTypeId,
+                                                                                          @Nullable String srm);
 
     //////////////////////////// 猪场客户相关 ////////////////////////////
     /**
