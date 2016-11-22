@@ -737,7 +737,7 @@ public class DoctorImportDataService {
         if (barn != null) {
             sow.setInitBarnId(barn.getId());
         }
-        if(last.getBreed() != null){
+        if(StringUtils.isNotBlank(last.getBreed())){
             sow.setBreedName(last.getBreed());
             sow.setBreedId(breedMap.get(last.getBreed()));
             if(sow.getBreedId() == null){
