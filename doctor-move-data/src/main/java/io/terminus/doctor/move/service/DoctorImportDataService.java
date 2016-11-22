@@ -849,6 +849,9 @@ public class DoctorImportDataService {
         //描述
         event.setDesc(getEventDesc(entry.descMap()));
         event.setExtra(MAPPER.toJson(entry));
+        if(event.getEventAt() == null){
+            throw new JsonResponseException("猪号：" + event.getPigCode() + "，无法获取进场事件时间，请检查数据");
+        }
         doctorPigEventDao.create(event);
         return event;
     }
@@ -869,6 +872,9 @@ public class DoctorImportDataService {
         extra.setChgLocationToBarnName(info.getBarnName());
         event.setExtra(MAPPER.toJson(extra));
         event.setDesc(getEventDesc(extra.descMap()));
+        if(event.getEventAt() == null){
+            throw new JsonResponseException("猪号：" + event.getPigCode() + "，无法获取去分娩舍事件时间，请检查数据");
+        }
         doctorPigEventDao.create(event);
         return event;
     }
@@ -893,6 +899,9 @@ public class DoctorImportDataService {
         mate.setJudgePregDate(info.getPrePregDate());
         event.setDesc(getEventDesc(mate.descMap()));
         event.setExtra(MAPPER.toJson(mate));
+        if(event.getEventAt() == null){
+            throw new JsonResponseException("猪号：" + event.getPigCode() + "，无法获取配种事件时间，请检查数据");
+        }
         doctorPigEventDao.create(event);
         return event;
     }
@@ -925,6 +934,9 @@ public class DoctorImportDataService {
 
         event.setDesc(getEventDesc(result.descMap()));
         event.setExtra(MAPPER.toJson(result));
+        if(event.getEventAt() == null){
+            throw new JsonResponseException("猪号：" + event.getPigCode() + "，无法获取妊娠检查事件时间，请检查数据");
+        }
         doctorPigEventDao.create(event);
         return event;
     }
@@ -976,6 +988,9 @@ public class DoctorImportDataService {
 
         event.setDesc("分娩");
         event.setExtra(MAPPER.toJson(farrow));
+        if(event.getEventAt() == null){
+            throw new JsonResponseException("猪号：" + event.getPigCode() + "，无法获取分娩事件时间，请检查数据");
+        }
         doctorPigEventDao.create(event);
         return event;
     }
@@ -1009,6 +1024,9 @@ public class DoctorImportDataService {
 
         event.setDesc(getEventDesc(wean.descMap()));
         event.setExtra(MAPPER.toJson(wean));
+        if(event.getEventAt() == null){
+            throw new JsonResponseException("猪号：" + event.getPigCode() + "，无法获取断奶事件时间，请检查数据");
+        }
         doctorPigEventDao.create(event);
         return event;
     }
