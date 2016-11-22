@@ -83,7 +83,7 @@ public class DoctorCommonSessionBean {
     private DoctorUserReadService doctorUserReadService;
     @Autowired
     private UserWriteService<User> userWriteService;
-    @Autowired
+    @Autowired(required = false)
     private DeviceWriteService deviceWriteService;
     @Autowired
     private MsgWebService smsWebService;
