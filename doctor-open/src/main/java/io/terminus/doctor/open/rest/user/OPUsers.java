@@ -157,17 +157,29 @@ public class OPUsers {
 
     @OpenMethod(key="user.device.bind", paramNames = {"deviceToken", "deviceType"})
     public void bindDevice(String deviceToken, Integer deviceType) {
-        doctorCommonSessionBean.bindDevice(deviceToken, deviceType);
+        try{
+            doctorCommonSessionBean.bindDevice(deviceToken, deviceType);
+        } catch(Exception e) {
+            throw new OPClientException(e.getMessage());
+        }
     }
 
     @OpenMethod(key="user.device.unbind", paramNames = {"deviceToken"})
     public void unbindDevice(String deviceToken){
-        doctorCommonSessionBean.unbindDevice(deviceToken);
+        try{
+            doctorCommonSessionBean.unbindDevice(deviceToken);
+        } catch(Exception e) {
+            throw new OPClientException(e.getMessage());
+        }
     }
 
     @OpenMethod(key="user.logout", paramNames = {"sid"})
     public void logout(String sessionId) {
-        doctorCommonSessionBean.logout(sessionId);
+        try{
+            doctorCommonSessionBean.logout(sessionId);
+        } catch(Exception e) {
+            throw new OPClientException(e.getMessage());
+        }
     }
 
     /**

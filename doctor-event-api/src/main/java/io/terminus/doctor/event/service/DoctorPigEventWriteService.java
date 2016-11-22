@@ -186,4 +186,11 @@ public interface DoctorPigEventWriteService {
      * @return
      */
     Response<Boolean> createPigEvent(DoctorPigEvent doctorPigEvent);
+
+    /**
+     * 更新事件(临时使用)
+     * @param criteria
+     * @return
+     */
+    Response<Boolean> updatePigEvents(Map<String,Object> criteria);
 }
