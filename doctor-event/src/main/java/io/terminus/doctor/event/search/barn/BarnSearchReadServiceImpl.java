@@ -88,8 +88,7 @@ public class BarnSearchReadServiceImpl implements BarnSearchReadService {
             if (aggregations != null) {
                 // 猪群类型
                 aggregations.get("aggs_pigType").forEach(bucket ->
-                        aggPigTypes.add(SearchedBarnDto.createPigType(
-                                PigType.from(Integer.parseInt(bucket.getKey())))));
+                        aggPigTypes.add(SearchedBarnDto.createPigType(PigType.from(Integer.parseInt(bucket.getKey())), bucket.getDoc_count())));
             }
 
             // 构建返回对象

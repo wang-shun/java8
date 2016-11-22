@@ -42,13 +42,15 @@ public class SearchedBarnDto implements Serializable {
 
         private int key;
         private String name;
+        private Long count;  //此类型的数量
     }
 
-    public static PigType createPigType(io.terminus.doctor.common.enums.PigType pigType) {
+    public static PigType createPigType(io.terminus.doctor.common.enums.PigType pigType, Long count) {
         if (pigType != null) {
             return PigType.builder()
                     .key(pigType.getValue())
                     .name(pigType.getDesc())
+                    .count(count)
                     .build();
         }
         return null;
