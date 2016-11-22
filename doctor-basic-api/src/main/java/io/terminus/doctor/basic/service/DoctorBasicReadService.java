@@ -30,6 +30,13 @@ public interface DoctorBasicReadService {
     Response<DoctorBasic> findBasicById(@NotNull(message = "basicId.not.null") Long basicId);
 
     /**
+     * 根据ids查询基础数据表
+     * @param basicIds 主键ids
+     * @return 基础数据表
+     */
+    Response<List<DoctorBasic>> findBasicByIds(@NotNull(message = "basicId.not.null") List<Long> basicIds);
+
+    /**
      * 根据基础数据类型和输入码查询(非缓存)
      * @param type  类型
      * @see io.terminus.doctor.basic.model.DoctorBasic.Type
@@ -86,6 +93,14 @@ public interface DoctorBasicReadService {
      * @return 变动类型表
      */
     Response<DoctorChangeReason> findChangeReasonById(@NotNull(message = "changeReasonId.not.null") Long changeReasonId);
+
+    /**
+     * 根据ids查询变动原因表
+     * @param changeReasonIds 主键ids
+     * @return 变动类型表
+     */
+    Response<List<DoctorChangeReason>> findChangeReasonByIds(@NotNull(message = "changeReasonId.not.null") List<Long> changeReasonIds);
+
 
     /**
      * 根据变动类型和输入码查询

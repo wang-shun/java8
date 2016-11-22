@@ -68,6 +68,16 @@ public class DoctorBasicReadServiceImpl implements DoctorBasicReadService {
     }
 
     @Override
+    public Response<List<DoctorBasic>> findBasicByIds(List<Long> basicIds) {
+        try {
+            return Response.ok(doctorBasicDao.findByIds(basicIds));
+        } catch (Exception e) {
+            log.error("find basic by ids failed, basicId:{}, cause:{}", basicIds, Throwables.getStackTraceAsString(e));
+            return Response.fail("basic.find.fail");
+        }
+    }
+
+    @Override
     public Response<List<DoctorBasic>> findBasicByTypeAndSrm(Integer type, String srm) {
         try {
             List<DoctorBasic> basics = doctorBasicDao.findByType(type);
@@ -141,6 +151,16 @@ public class DoctorBasicReadServiceImpl implements DoctorBasicReadService {
             return Response.ok(doctorChangeReasonDao.findById(changeReasonId));
         } catch (Exception e) {
             log.error("find changeReason by id failed, changeReasonId:{}, cause:{}", changeReasonId, Throwables.getStackTraceAsString(e));
+            return Response.fail("changeReason.find.fail");
+        }
+    }
+
+    @Override
+    public Response<List<DoctorChangeReason>> findChangeReasonByIds(List<Long> changeReasonIds) {
+        try {
+            return Response.ok(doctorChangeReasonDao.findByIds(changeReasonIds));
+        } catch (Exception e) {
+            log.error("find changeReason by ids failed, changeReasonIds:{}, cause:{}", changeReasonIds, Throwables.getStackTraceAsString(e));
             return Response.fail("changeReason.find.fail");
         }
     }

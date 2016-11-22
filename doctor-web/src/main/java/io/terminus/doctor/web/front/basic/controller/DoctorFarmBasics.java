@@ -2,7 +2,10 @@ package io.terminus.doctor.web.front.basic.controller;
 
 import com.google.common.base.Throwables;
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
+import io.terminus.doctor.basic.model.DoctorBasic;
+import io.terminus.doctor.basic.model.DoctorChangeReason;
 import io.terminus.doctor.basic.model.DoctorFarmBasic;
+import io.terminus.doctor.basic.service.DoctorBasicReadService;
 import io.terminus.doctor.basic.service.DoctorFarmBasicReadService;
 import io.terminus.doctor.basic.service.DoctorFarmBasicWriteService;
 import io.terminus.parana.common.utils.RespHelper;
@@ -34,16 +37,20 @@ public class DoctorFarmBasics {
     @RpcConsumer
     private DoctorFarmBasicWriteService doctorFarmBasicWriteService;
 
+    @RpcConsumer
+    private DoctorBasicReadService doctorBasicReadService;
+
     /**
      * 根据猪场id查询猪场有权限的基础数据ids
      * @param farmId 猪场id
      * @return 基础数据ids
      */
     @RequestMapping(value = "/farmBasic/basicIds", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    public List<Long> findBasicIdsByFarmId(@RequestParam("farmId") Long farmId) {
+    public List<DoctorBasic> findBasicIdsByFarmId(@RequestParam("farmId") Long farmId) {
         DoctorFarmBasic farmBasic = RespHelper.or500(doctorFarmBasicReadService.findFarmBasicByFarmId(farmId));
         try {
-            return farmBasic == null ? Collections.emptyList() : farmBasic.getBasicIdList();
+            return farmBasic == null ? Collections.emptyList() :
+                    RespHelper.or500(doctorBasicReadService.findBasicByIds(farmBasic.getBasicIdList()));
         } catch (Exception e) {
             log.error("find basic ids by farm id failed, farmId:{}, farmBasic:{}, cause:{}",
                     farmId, farmBasic, Throwables.getStackTraceAsString(e));
@@ -57,10 +64,11 @@ public class DoctorFarmBasics {
      * @return 变动原因ids
      */
     @RequestMapping(value = "/farmBasic/reasonIds", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-    public List<Long> findChangeReasonIdsByFarmId(@RequestParam("farmId") Long farmId) {
+    public List<DoctorChangeReason> findChangeReasonIdsByFarmId(@RequestParam("farmId") Long farmId) {
         DoctorFarmBasic farmBasic = RespHelper.or500(doctorFarmBasicReadService.findFarmBasicByFarmId(farmId));
         try {
-            return farmBasic == null ? Collections.emptyList() : farmBasic.getReasonIdList();
+            return farmBasic == null ? Collections.emptyList() :
+                    RespHelper.or500(doctorBasicReadService.findChangeReasonByIds(farmBasic.getReasonIdList()));
         } catch (Exception e) {
             log.error("find reason ids by farm id failed, farmId:{}, farmBasic:{}, cause:{}",
                     farmId, farmBasic, Throwables.getStackTraceAsString(e));

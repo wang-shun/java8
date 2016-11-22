@@ -64,6 +64,15 @@
         WHERE id = #{id}
     </select>
 
+    <select id="findByIds" parameterType="list" resultMap="DoctorChangeReasonMap" >
+        SELECT <include refid="cols_all" />
+        FROM <include refid="tb" />
+        WHERE id IN
+        <foreach collection="list" open="(" separator="," close=")" item="id">
+            #{id}
+        </foreach>
+    </select>
+
     <update id="update" parameterType="DoctorChangeReason">
         UPDATE
         <include refid="tb"/>
