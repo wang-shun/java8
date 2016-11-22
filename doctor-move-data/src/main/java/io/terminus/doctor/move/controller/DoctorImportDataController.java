@@ -118,7 +118,7 @@ public class DoctorImportDataController {
     private Sheet getSheet(Workbook wk, String name) {
         Sheet sheet = wk.getSheet(name);
         if (sheet == null) {
-            throw new JsonResponseException("sheet.not.found");
+            throw new JsonResponseException("sheet.not.found：" + name);
         }
         return sheet;
     }

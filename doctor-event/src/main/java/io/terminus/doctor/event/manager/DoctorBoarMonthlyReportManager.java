@@ -31,8 +31,8 @@ public class DoctorBoarMonthlyReportManager {
      * @param sumAt
      */
     @Transactional
-    public void createMonthlyReports(List<DoctorBoarMonthlyReport> reports, String sumAt) {
-        doctorBoarMonthlyReportDao.deleteBySumAt(sumAt);
+    public void createMonthlyReports(Long farmId, List<DoctorBoarMonthlyReport> reports, String sumAt) {
+        doctorBoarMonthlyReportDao.deleteByFarmIdAndSumAt(farmId, sumAt);
         doctorBoarMonthlyReportDao.creates(reports);
     }
 

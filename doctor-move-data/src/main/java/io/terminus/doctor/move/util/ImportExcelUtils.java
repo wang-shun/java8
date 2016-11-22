@@ -30,12 +30,12 @@ public class ImportExcelUtils {
     public static String getStringOrThrow(Row row, int col) {
         Cell cell = row.getCell(col);
         if (cell == null) {
-            throw new IllegalStateException("row " + row.getRowNum() + "column " + col + " is null");
+            throw new IllegalStateException("row " + (row.getRowNum() + 1) + "column " + (col + 1) + " is null");
         }
         cell.setCellType(Cell.CELL_TYPE_STRING);
         String value = cell.getStringCellValue();
         if(StringUtils.isBlank(value)){
-            throw new IllegalStateException("row " + row.getRowNum() + "column " + col + " is blank");
+            throw new IllegalStateException("row " + (row.getRowNum() + 1) + "column " + (col + 1) + " is blank");
         }
         return value;
     }

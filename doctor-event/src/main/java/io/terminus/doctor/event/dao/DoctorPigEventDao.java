@@ -250,4 +250,13 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
     public DoctorPigEvent canRollbackEvent(Map<String, Object> criteria){
         return getSqlSession().selectOne(sqlId("canRollbackEvent"), criteria);
     }
+
+    /**
+     * 临时使用
+     * @param criteria
+     */
+    @Deprecated
+    public void updatePigEvents(Map<String, Object> criteria){
+        sqlSession.update("updatePigEvents", criteria);
+    }
 }
