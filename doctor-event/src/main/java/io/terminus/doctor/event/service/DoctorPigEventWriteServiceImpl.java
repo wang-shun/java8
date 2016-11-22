@@ -478,6 +478,7 @@ public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteServic
         }
     }
 
+    @Deprecated
     @Override
     public Response<Boolean> createPigEvent(DoctorPigEvent doctorPigEvent) {
         try {
@@ -486,6 +487,18 @@ public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteServic
         } catch (Exception e) {
             log.error("create.pig.event.failed, cause{}", Throwables.getStackTraceAsString(e));
             return Response.fail("create.pig.event.failed");
+        }
+    }
+
+    @Deprecated
+    @Override
+    public Response<Boolean> updatePigEvents(Map<String,Object> criteria) {
+        try {
+            doctorPigEventDao.updatePigEvents(criteria);
+            return Response.ok(Boolean.TRUE);
+        } catch (Exception e) {
+            log.error("update.pig.event.failed, cause{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("update.pig.event.failed");
         }
     }
 

@@ -3,6 +3,7 @@ package io.terminus.doctor.warehouse.service;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
 import io.terminus.doctor.common.enums.WareHouseType;
+import io.terminus.doctor.warehouse.dto.BarnConsumeMaterialReport;
 import io.terminus.doctor.warehouse.dto.MaterialCountAmount;
 import io.terminus.doctor.warehouse.dto.MaterialEventReport;
 import io.terminus.doctor.warehouse.dto.WarehouseEventReport;
@@ -83,4 +84,22 @@ public interface DoctorMaterialConsumeProviderReadService {
      * @return
      */
     Response<List<MaterialEventReport>> materialEventReport(Long farmId, Long warehouseId, WareHouseType type, Date startAt, Date endAt);
+
+    /**
+     * 以猪舍为维度统计物资领用情况
+     * @param farmId
+     * @param wareHouseId
+     * @param materialId
+     * @param materialName
+     * @param type
+     * @param barnId
+     * @param staffId
+     * @param creatorId
+     * @param startAt
+     * @param endAt
+     * @return
+     */
+    Response<Paging<BarnConsumeMaterialReport>> barnConsumeMaterialReport(Long farmId, Long wareHouseId, Long materialId, String materialName,
+                                                                        WareHouseType type, Long barnId, Long staffId, Long creatorId,
+                                                                        String startAt, String endAt, Integer pageNo, Integer pageSize);
 }

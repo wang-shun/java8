@@ -9,6 +9,7 @@ import io.terminus.common.utils.BeanMapper;
 import io.terminus.doctor.common.enums.WareHouseType;
 import io.terminus.doctor.common.utils.Params;
 import io.terminus.doctor.warehouse.dao.DoctorMaterialConsumeProviderDao;
+import io.terminus.doctor.warehouse.dto.BarnConsumeMaterialReport;
 import io.terminus.doctor.warehouse.dto.MaterialCountAmount;
 import io.terminus.doctor.warehouse.dto.MaterialEventReport;
 import io.terminus.doctor.warehouse.dto.WarehouseEventReport;
@@ -152,6 +153,21 @@ public class DoctorMaterialConsumeProviderReadServiceImpl implements DoctorMater
         }catch(Exception e){
             log.error("warehouseEventReport failed, cause:{}", Throwables.getStackTraceAsString(e));
             return Response.fail("warehouseEventReport.fail");
+        }
+    }
+
+    @Override
+    public Response<Paging<BarnConsumeMaterialReport>> barnConsumeMaterialReport(Long farmId, Long wareHouseId, Long materialId, String materialName,
+                                                                               WareHouseType type, Long barnId, Long staffId, Long creatorId,
+                                                                               String startAt, String endAt, Integer pageNo, Integer pageSize) {
+        try{
+            PageInfo pageInfo = new PageInfo(pageNo, pageSize);
+            return Response.ok(doctorMaterialConsumeProviderDao.barnReport(
+                    farmId, wareHouseId, materialId, materialName, type, barnId, staffId, creatorId, startAt, endAt, pageInfo.getOffset(), pageInfo.getLimit())
+            );
+        }catch(Exception e){
+            log.error("barnConsumeMaterialReport failed, cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("barnConsumeMaterialReport.fail");
         }
     }
 

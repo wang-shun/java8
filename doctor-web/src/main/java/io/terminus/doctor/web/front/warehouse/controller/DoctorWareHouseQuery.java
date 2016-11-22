@@ -15,6 +15,7 @@ import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.user.model.DoctorFarm;
 import io.terminus.doctor.user.service.DoctorFarmReadService;
 import io.terminus.doctor.user.service.DoctorUserProfileReadService;
+import io.terminus.doctor.warehouse.dto.BarnConsumeMaterialReport;
 import io.terminus.doctor.warehouse.dto.DoctorWareHouseDto;
 import io.terminus.doctor.warehouse.dto.MaterialCountAmount;
 import io.terminus.doctor.warehouse.dto.WarehouseEventReport;
@@ -327,11 +328,13 @@ public class DoctorWareHouseQuery {
                 reportmap.put(houseId, new WarehouseReport.Report());
             }
             WarehouseReport.Report inner = reportmap.get(houseId);
-            if(eventType.equals(DoctorMaterialConsumeProvider.EVENT_TYPE.PROVIDER)){
+            if(eventType.equals(DoctorMaterialConsumeProvider.EVENT_TYPE.PROVIDER)
+                    || eventType.equals(DoctorMaterialConsumeProvider.EVENT_TYPE.FORMULA_FEED)){
                 inner.setInAmount(inner.getInAmount() + report.getAmount());
                 inner.setInCount(inner.getInCount() + report.getCount());
             }
-            if(eventType.equals(DoctorMaterialConsumeProvider.EVENT_TYPE.CONSUMER)){
+            if(eventType.equals(DoctorMaterialConsumeProvider.EVENT_TYPE.CONSUMER)
+                    || eventType.equals(DoctorMaterialConsumeProvider.EVENT_TYPE.FORMULA_RAW_MATERIAL)){
                 inner.setOutAmount(inner.getOutAmount() + report.getAmount());
                 inner.setOutCount(inner.getOutCount() + report.getCount());
             }
@@ -442,5 +445,41 @@ public class DoctorWareHouseQuery {
                 .collect(Collectors.toList());
         result.setEvents(events);
         return result;
+    }
+
+    /**
+     * 以猪舍为维度统计物资领用情况
+     * @param farmId
+     * @param warehouseId
+     * @param materialId
+     * @param materialName
+     * @param warehouseType
+     * @param barnId
+     * @param staffId
+     * @param creatorId
+     * @param startAt
+     * @param endAt
+     */
+    @RequestMapping(value = "/barnReport", method = RequestMethod.GET)
+    @ResponseBody
+    public Paging<BarnConsumeMaterialReport> barnReport(
+            @RequestParam Long farmId,
+            @RequestParam(required = false) Long warehouseId,
+            @RequestParam(required = false) Long materialId,
+            @RequestParam(required = false) String materialName,
+            @RequestParam(required = false) Integer warehouseType,
+            @RequestParam(required = false) Long barnId,
+            @RequestParam(required = false) Long staffId,
+            @RequestParam(required = false) Long creatorId,
+            @RequestParam(required = false) String startAt,
+            @RequestParam(required = false) String endAt,
+            @RequestParam(value = "pageNo", required = false) Integer pageNo,
+            @RequestParam(value = "pageSize", required = false) Integer pageSize
+    ){
+        Date end = endAt == null ? null : DateTime.parse(endAt).plusDays(1).toDate();
+        return RespHelper.or500(doctorMaterialConsumeProviderReadService.barnConsumeMaterialReport(
+                farmId, warehouseId, materialId, materialName, WareHouseType.from(warehouseType), barnId, staffId,
+                creatorId, startAt, DateUtil.toDateString(end), pageNo, pageSize
+        ));
     }
 }
