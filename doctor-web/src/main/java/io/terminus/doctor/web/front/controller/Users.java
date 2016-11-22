@@ -18,9 +18,11 @@ import io.terminus.doctor.common.utils.RandomUtil;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.user.model.DoctorUser;
 import io.terminus.doctor.user.service.DoctorUserReadService;
+import io.terminus.doctor.web.core.Constants;
 import io.terminus.doctor.web.core.component.CaptchaGenerator;
 import io.terminus.doctor.web.core.component.MobilePattern;
 import io.terminus.doctor.web.core.login.DoctorCommonSessionBean;
+import io.terminus.doctor.web.core.login.Sessions;
 import io.terminus.pampas.common.UserUtil;
 import io.terminus.parana.auth.core.AclLoader;
 import io.terminus.parana.auth.core.PermissionHelper;
@@ -30,6 +32,7 @@ import io.terminus.parana.auth.model.PermissionData;
 import io.terminus.parana.user.model.LoginType;
 import io.terminus.parana.user.model.User;
 import io.terminus.parana.user.service.UserWriteService;
+import io.terminus.session.AFSessionManager;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -66,6 +69,7 @@ public class Users {
     private final AclLoader aclLoader;
     private final PermissionHelper permissionHelper;
     private final DoctorCommonSessionBean doctorCommonSessionBean;
+    private final AFSessionManager sessionManager;
 
 
     @Autowired
@@ -75,7 +79,8 @@ public class Users {
                  MobilePattern mobilePattern,
                  AclLoader aclLoader,
                  PermissionHelper permissionHelper,
-                 DoctorCommonSessionBean doctorCommonSessionBean) {
+                 DoctorCommonSessionBean doctorCommonSessionBean,
+                 AFSessionManager sessionManager) {
         this.userWriteService = userWriteService;
         this.doctorUserReadService = doctorUserReadService;
         this.captchaGenerator = captchaGenerator;
@@ -83,6 +88,7 @@ public class Users {
         this.doctorCommonSessionBean = doctorCommonSessionBean;
         this.aclLoader = aclLoader;
         this.permissionHelper = permissionHelper;
+        this.sessionManager = sessionManager;
     }
 
     /**
@@ -138,13 +144,18 @@ public class Users {
     @ResponseBody
     public Map<String, Object> login(@RequestParam("loginBy") String name,
                                      @RequestParam("password") String password,
-                                     @RequestParam(value = "deviceId", required = false) String deviceId,
+                                     @RequestParam(value = "deviceId", required = false, defaultValue = "PC") String deviceId,
                                      @RequestParam(value = "sid", required = false) String sid,
                                      @RequestParam(value = "code", required = false) String code,
-                                     @RequestParam(value = "target", required = false) String target) {
+                                     @RequestParam(value = "target", required = false) String target,
+                                     HttpServletRequest request) {
 
         String sessionId = MoreObjects.firstNonNull(sid, doctorCommonSessionBean.getSessionId(name));
         DoctorCommonSessionBean.Token token = doctorCommonSessionBean.login(name, password, code, sessionId, deviceId);
+
+        // 存一份 http session
+        Map<String, Object> snapshot = sessionManager.findSessionById(Sessions.TOKEN_PREFIX, sessionId);
+        request.getSession().setAttribute(Constants.SESSION_USER_ID, snapshot.get(Sessions.USER_ID));
 
         //将后台生成的sessionId返回给前台，用于以后的sid
         return MapBuilder.<String, Object>of()

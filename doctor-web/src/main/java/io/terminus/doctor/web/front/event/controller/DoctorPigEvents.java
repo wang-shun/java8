@@ -196,9 +196,8 @@ public class DoctorPigEvents {
             return Paging.empty();
         }
         params = Params.filterNullOrEmpty(params);
-        if (params.containsKey("eventName")) {
-            params.put("type", PigEvent.fromDesc((String) params.get("eventName")).getKey().toString());
-            params.remove("eventName");
+        if (params.get("eventTypes") !=null) {
+            params.put("types", Splitters.COMMA.splitToList((String)params.get("eventTypes")));
         }
         return RespHelper.or500(doctorPigEventReadService.queryPigEventsByCriteria(params, pageNo, pageSize));
     }
@@ -225,9 +224,8 @@ public class DoctorPigEvents {
     @ResponseBody
     public List<DoctorPigEvent> queryOperatorForEvent(@RequestParam  Map<String, Object> params){
         params = Params.filterNullOrEmpty(params);
-        if (params.containsKey("eventName")) {
-            params.put("type", PigEvent.fromDesc((String) params.get("eventName")).getKey().toString());
-            params.remove("eventName");
+        if (params.get("eventTypes") !=null) {
+            params.put("types", Splitters.COMMA.splitToList((String)params.get("eventTypes")));
         }
         return RespHelper.or500(doctorPigEventReadService.queryOperators(params));
     }

@@ -12,10 +12,13 @@ import io.terminus.common.utils.Joiners;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.common.utils.MapBuilder;
 import io.terminus.doctor.basic.dao.DoctorBasicDao;
+import io.terminus.doctor.basic.dao.DoctorBasicMaterialDao;
 import io.terminus.doctor.basic.model.DoctorBasic;
+import io.terminus.doctor.basic.model.DoctorBasicMaterial;
 import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.enums.UserStatus;
 import io.terminus.doctor.common.enums.UserType;
+import io.terminus.doctor.common.enums.WareHouseType;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
@@ -62,13 +65,19 @@ import io.terminus.doctor.user.model.Sub;
 import io.terminus.doctor.user.model.SubRole;
 import io.terminus.doctor.user.service.DoctorUserReadService;
 import io.terminus.doctor.user.service.SubRoleWriteService;
+import io.terminus.doctor.warehouse.dto.DoctorMaterialConsumeProviderDto;
+import io.terminus.doctor.warehouse.model.DoctorMaterialConsumeProvider;
+import io.terminus.doctor.warehouse.model.DoctorWareHouse;
+import io.terminus.doctor.warehouse.service.DoctorMaterialInWareHouseWriteService;
 import io.terminus.doctor.warehouse.service.DoctorWareHouseTypeWriteService;
+import io.terminus.doctor.warehouse.service.DoctorWareHouseWriteService;
 import io.terminus.parana.user.impl.dao.UserProfileDao;
 import io.terminus.parana.user.model.LoginType;
 import io.terminus.parana.user.model.User;
 import io.terminus.parana.user.model.UserProfile;
 import io.terminus.parana.user.service.UserWriteService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.joda.time.DateTime;
@@ -143,6 +152,12 @@ public class DoctorImportDataService {
     private DoctorPigTypeStatisticWriteService doctorPigTypeStatisticWriteService;
     @Autowired
     private DoctorWareHouseTypeWriteService doctorWareHouseTypeWriteService;
+    @Autowired
+    private DoctorBasicMaterialDao basicMaterialDao;
+    @Autowired
+    private DoctorMaterialInWareHouseWriteService doctorMaterialInWareHouseWriteService;
+    @Autowired
+    private DoctorWareHouseWriteService doctorWareHouseWriteService;
 
     /**
      * 根据shit导入所有的猪场数据
@@ -175,7 +190,7 @@ public class DoctorImportDataService {
         movePigTypeStatistic(farm);
 
         //最后仓库数据
-        importWarehouse(farm, shit.getFarm());
+        importWarehouse(farm, shit, primaryUser, userMap);
         return farm;
     }
 
@@ -228,8 +243,15 @@ public class DoctorImportDataService {
                 subUser.setStatus(UserStatus.NORMAL.value());
 
                 if(existRole.get(roleName) == null){
-                    log.error("role not exist, row {} column {}, sheet : staff", row.getRowNum(), 3);
-                    throw new JsonResponseException("role not exist, row " + row.getRowNum() + " column 3, sheet : staff");
+                    SubRole subRole = new SubRole();
+                    subRole.setName(roleName);
+                    subRole.setUserId(primaryUser.getId());
+                    subRole.setAppKey(appKey);
+                    subRole.setStatus(1);
+                    subRole.setAllowJson("[]");
+                    subRole.setExtraJson("{}");
+                    subRoleDao.create(subRole);
+                    existRole.put(roleName, subRole.getId());
                 }
                 List<String> roles = Lists.newArrayList("SUB", "SUB(SUB(" + existRole.get(roleName) + "))");
                 subUser.setRoles(roles);
@@ -369,7 +391,7 @@ public class DoctorImportDataService {
                 } else if ("后备母猪".equals(barnTypeXls) || "后备公猪".equals(barnTypeXls)) {
                     barn.setPigType(PigType.RESERVE.getValue());
                 } else {
-                    log.error("farm:{}, barn:{} type is null, please check!", farm, barn.getName());
+                    throw new JsonResponseException("猪舍类型错误：" + barnTypeXls + "，row " + (row.getRowNum() + 1) + "column " + 2);
                 }
 
                 barn.setCanOpenGroup(DoctorBarn.CanOpenGroup.YES.getValue());
@@ -437,7 +459,12 @@ public class DoctorImportDataService {
                 boar.setInitBarnId(barn.getId());
             }
             boar.setBreedName(ImportExcelUtils.getString(row, 6));
-            boar.setBreedId(breedMap.get(boar.getBreedName()));
+            if(!StringUtils.isBlank(boar.getBreedName())){
+                boar.setBreedId(breedMap.get(boar.getBreedName()));
+                if(boar.getBreedId() == null){
+                    throw new JsonResponseException("公猪品种错误：" + boar.getBreedName() + "，row " + (row.getRowNum() + 1) + "column" + 7);
+                }
+            }
             doctorPigDao.create(boar);
 
             //公猪跟踪
@@ -710,8 +737,13 @@ public class DoctorImportDataService {
         if (barn != null) {
             sow.setInitBarnId(barn.getId());
         }
-        sow.setBreedName(last.getBreed());
-        sow.setBreedId(breedMap.get(last.getBreed()));
+        if(StringUtils.isNotBlank(last.getBreed())){
+            sow.setBreedName(last.getBreed());
+            sow.setBreedId(breedMap.get(last.getBreed()));
+            if(sow.getBreedId() == null){
+                throw new JsonResponseException("母猪品种错误:" + sow.getBreedName());
+            }
+        }
         doctorPigDao.create(sow);
         return sow;
     }
@@ -997,7 +1029,7 @@ public class DoctorImportDataService {
                 //获取母猪状态
                 PigStatus status = getPigStatus(ImportExcelUtils.getString(row, 2));
                 if (status == null) {
-                    log.error("WTF! The pig status is null! row:{}, pigCode:{}", row.getRowNum(), sow.getSowCode());
+                    throw new JsonResponseException("母猪状态错误，猪号：" + sow.getSowCode() + "，row " + (row.getRowNum() + 1));
                 } else {
                     sow.setStatus(status.getKey());         //当前状态
                 }
@@ -1062,28 +1094,104 @@ public class DoctorImportDataService {
         return null;
     }
 
-    public void importWarehouse(DoctorFarm farm, Sheet shit) {
-        //仓库大类，数据都是0
-        RespHelper.or500(doctorWareHouseTypeWriteService.initDoctorWareHouseType(farm.getId(), farm.getName(), null, null));
+    private void importWarehouse(DoctorFarm farm, DoctorImportSheet shit, User user, Map<String, Long> userMap) {
+        // 主账号的 profile
+        UserProfile userProfile = userProfileDao.findByUserId(user.getId());
+
+        // 初始化仓库大类，数据都是0
+        RespHelper.or500(doctorWareHouseTypeWriteService.initDoctorWareHouseType(farm.getId(), farm.getName(), user.getId(), userProfile.getRealName()));
+
+
+        // 创建仓库
+        Map<String, Long> warehouseMap = new HashMap<>(); // key = 仓库名称, value = 仓库id
+        for (Row row : shit.getWarehouse()) {
+            if (canImport(row)) {
+                int line = row.getRowNum() + 1;
+                String warehouseName = ImportExcelUtils.getStringOrThrow(row, 0);
+                WareHouseType wareHouseType = WareHouseType.from(ImportExcelUtils.getStringOrThrow(row, 1));
+                if(wareHouseType == null){
+                    throw new JsonResponseException("仓库类型错误，仓库名称：" + warehouseName + "，row " + line + "column" + 2);
+                }
+                DoctorWareHouse wareHouse = DoctorWareHouse.builder()
+                        .wareHouseName(warehouseName).type(wareHouseType.getKey())
+                        .farmId(farm.getId()).farmName(farm.getName())
+                        .creatorId(user.getId()).creatorName(userProfile.getRealName())
+                        .build();
+                String manager = ImportExcelUtils.getString(row, 2);
+                if(StringUtils.isNotBlank(manager) && userMap.get(manager) != null){
+                    wareHouse.setManagerId(userMap.get(manager));
+                    wareHouse.setManagerName(manager);
+                }else{
+                    wareHouse.setManagerId(user.getId());
+                    wareHouse.setManagerName(userProfile.getRealName());
+                }
+                if(warehouseMap.containsKey(warehouseName)){
+                    throw new JsonResponseException("仓库名称重复：" + warehouseName + "，row " + line + "column" + 1);
+                }else{
+                    warehouseMap.put(warehouseName, RespHelper.or500(doctorWareHouseWriteService.createWareHouse(wareHouse)));
+                }
+            }
+        }
+
+        // 导入库存
+        this.importStock(shit.getFeed(), WareHouseType.FEED, warehouseMap, farm, user.getId(), userProfile.getRealName());
+        this.importStock(shit.getMaterial(), WareHouseType.MATERIAL, warehouseMap, farm, user.getId(), userProfile.getRealName());
+        this.importStock(shit.getConsume(), WareHouseType.CONSUME, warehouseMap, farm, user.getId(), userProfile.getRealName());
+        this.importStock(shit.getMedicine(), WareHouseType.MEDICINE, warehouseMap, farm, user.getId(), userProfile.getRealName());
+        this.importStock(shit.getVacc(), WareHouseType.VACCINATION, warehouseMap, farm, user.getId(), userProfile.getRealName());
     }
 
-    public void importMedicine(DoctorFarm farm, Sheet shit) {
+    private void importStock(Sheet shit, WareHouseType materialType, Map<String, Long> warehouseMap, DoctorFarm farm, Long userId, String userName) {
+        String shitName = materialType.getDesc();
+        for (Row row : shit) {
+            if (canImport(row)) {
+                int line = row.getRowNum() + 1;
+                String warehouseName = ImportExcelUtils.getStringOrThrow(row, 0);
+                String materialName = ImportExcelUtils.getStringOrThrow(row, 1);
+                Double stock = ImportExcelUtils.getDouble(row, 2);
+                if(stock == null || stock < 0D){
+                    throw new JsonResponseException("库存数量错误，sheet:" + shitName + "，row " + line + "column " + 3);
+                }
+                String unitName;
+                Double unitPrice;
+                if(materialType == WareHouseType.FEED || materialType == WareHouseType.MATERIAL){
+                    unitPrice = ImportExcelUtils.getDouble(row, 3);
+                    unitName = "千克";
+                }else{
+                    unitName = ImportExcelUtils.getStringOrThrow(row, 3);
+                    if(StringUtils.isBlank(unitName)){
+                        throw new JsonResponseException("单位错误，sheet:" + shitName + "，row " + line);
+                    }
+                    unitPrice = ImportExcelUtils.getDouble(row, 4);
+                }
+                if(unitPrice == null || unitPrice <= 0){
+                    throw new JsonResponseException("单价错误，sheet:" + shitName + "，row " + line);
+                }else{
+                    unitPrice = unitPrice * 100D;
+                }
+                Long wareHouseId = warehouseMap.get(warehouseName);
+                if(wareHouseId == null){
+                    throw new JsonResponseException("仓库名称错误，sheet:" + shitName + "，row " + line);
+                }
+                DoctorBasicMaterial basicMaterial = basicMaterialDao.findByTypeAndName(materialType, materialName);
+                if(basicMaterial == null){
+                    throw new JsonResponseException("基础物料不存在：" + materialName + "，sheet:" + shitName + "，row " + line);
+                }
 
-    }
-
-    public void importVacc(DoctorFarm farm, Sheet shit) {
-
-    }
-
-    public void importMaterial(DoctorFarm farm, Sheet shit) {
-
-    }
-
-    public void importFeed(DoctorFarm farm, Sheet shit) {
-
-    }
-
-    public void importConsume(DoctorFarm farm, Sheet shit) {
+                // 来一炮入库逻辑，所有应该关联的表就都有数据了
+                RespHelper.or500(doctorMaterialInWareHouseWriteService.providerMaterialInfo(
+                        DoctorMaterialConsumeProviderDto.builder()
+                                .actionType(DoctorMaterialConsumeProvider.EVENT_TYPE.PROVIDER.getValue())
+                                .type(materialType.getKey()).farmId(farm.getId()).farmName(farm.getName())
+                                .materialTypeId(basicMaterial.getId()).materialName(materialName)
+                                .wareHouseId(wareHouseId).wareHouseName(warehouseName)
+                                .staffId(userId).staffName(userName)
+                                .count(stock).unitPrice(unitPrice.longValue())
+                                .unitName(unitName).eventTime(new Date())
+                                .build()
+                ));
+            }
+        }
 
     }
 
