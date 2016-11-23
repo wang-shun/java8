@@ -198,6 +198,7 @@ public class DoctorPigEvents {
         params = Params.filterNullOrEmpty(params);
         if (params.get("eventTypes") !=null) {
             params.put("types", Splitters.COMMA.splitToList((String)params.get("eventTypes")));
+            params.remove("eventTypes");
         }
         return RespHelper.or500(doctorPigEventReadService.queryPigEventsByCriteria(params, pageNo, pageSize));
     }
@@ -226,6 +227,7 @@ public class DoctorPigEvents {
         params = Params.filterNullOrEmpty(params);
         if (params.get("eventTypes") !=null) {
             params.put("types", Splitters.COMMA.splitToList((String)params.get("eventTypes")));
+            params.remove("eventTypes");
         }
         return RespHelper.or500(doctorPigEventReadService.queryOperators(params));
     }
