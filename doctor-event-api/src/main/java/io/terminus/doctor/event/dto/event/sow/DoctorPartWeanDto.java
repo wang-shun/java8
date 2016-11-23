@@ -55,12 +55,12 @@ public class DoctorPartWeanDto extends AbstractPigEventInputDto implements Seria
         if(partWeanAvgWeight != null){
             map.put("断奶平均重量", partWeanAvgWeight.toString());
         }
-        if(qualifiedCount != null){
-            map.put("合格数量", qualifiedCount.toString());
-        }
-        if(notQualifiedCount != null){
-            map.put("不合格数量", notQualifiedCount.toString());
-        }
+//        if(qualifiedCount != null){
+//            map.put("合格数量", qualifiedCount.toString());
+//        }
+//        if(notQualifiedCount != null){
+//            map.put("不合格数量", notQualifiedCount.toString());
+//        }
         return map;
     }
 
