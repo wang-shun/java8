@@ -826,7 +826,7 @@ public class DoctorImportDataService {
         DoctorPigEvent event = createSowEvent(info, sow);
         event.setEventAt(new DateTime(info.getMateDate()).plusDays(-1).toDate());
         event.setType(PigEvent.ENTRY.getKey());
-        event.setName(PigEvent.ENTRY.getDesc());
+        event.setName(PigEvent.ENTRY.getName());
         event.setPigStatusAfter(PigStatus.Entry.getKey());
         event.setParity(info.getParity() - 1 <= 0 ? 0 : info.getParity() - 1);
 
@@ -861,7 +861,7 @@ public class DoctorImportDataService {
         DoctorPigEvent event = createSowEvent(info, sow);
         event.setEventAt(new DateTime(info.getPrePregDate()).minusDays(7).toDate());
         event.setType(PigEvent.TO_FARROWING.getKey());
-        event.setName(PigEvent.TO_FARROWING.getDesc());
+        event.setName(PigEvent.TO_FARROWING.getName());
         event.setRelEventId(beforeEvent.getId());
         event.setPigStatusBefore(PigStatus.Pregnancy.getKey());
         event.setPigStatusAfter(PigStatus.Farrow.getKey());
