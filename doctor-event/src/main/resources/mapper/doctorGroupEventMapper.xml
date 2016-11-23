@@ -178,6 +178,12 @@
         <if test="creatorName != null">AND creator_name = #{creatorName}</if>
         <if test="updatorId != null">AND updator_id = #{updatorId}</if>
         <if test="updatorName != null">AND updator_name = #{updatorName}</if>
+        <if test="types != null &amp;&amp; types.size() > 0">
+            AND `type` IN
+            <foreach collection="types" item="i" open="(" close=")" separator=",">
+                #{i}
+            </foreach>
+        </if>
     </sql>
     <insert id="create" parameterType="DoctorGroupEvent" keyProperty="id" useGeneratedKeys="true">
         INSERT INTO
