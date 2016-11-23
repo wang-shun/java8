@@ -16,6 +16,7 @@ import io.terminus.doctor.event.service.DoctorMonthlyReportWriteService;
 import io.terminus.doctor.event.service.DoctorParityMonthlyReportWriteService;
 import io.terminus.doctor.event.service.DoctorPigTypeStatisticWriteService;
 import io.terminus.doctor.move.handler.DoctorMoveDatasourceHandler;
+import io.terminus.doctor.move.service.DoctorImportDataService;
 import io.terminus.doctor.move.service.DoctorMoveBasicService;
 import io.terminus.doctor.move.service.DoctorMoveDataService;
 import io.terminus.doctor.move.service.DoctorMoveReportService;
@@ -71,6 +72,7 @@ public class DoctorMoveDataController {
     private final BarnSearchDumpService barnSearchDumpService;
     private final GroupDumpService groupDumpService;
     private final PigDumpService pigDumpService;
+    private final DoctorImportDataService doctorImportDataService;
 
     @Autowired
     public DoctorMoveDataController(UserInitService userInitService,
@@ -86,7 +88,8 @@ public class DoctorMoveDataController {
                                     DoctorDailyReportWriteService doctorDailyReportWriteService,
                                     DoctorMonthlyReportWriteService doctorMonthlyReportWriteService,
                                     DoctorParityMonthlyReportWriteService doctorParityMonthlyReportWriteService,
-                                    DoctorBoarMonthlyReportWriteService doctorBoarMonthlyReportWriteService, BarnSearchDumpService barnSearchDumpService, GroupDumpService groupDumpService, PigDumpService pigDumpService) {
+                                    DoctorBoarMonthlyReportWriteService doctorBoarMonthlyReportWriteService, BarnSearchDumpService barnSearchDumpService,
+                                    GroupDumpService groupDumpService, PigDumpService pigDumpService, DoctorImportDataService doctorImportDataService) {
         this.userInitService = userInitService;
         this.wareHouseInitService = wareHouseInitService;
         this.doctorMoveBasicService = doctorMoveBasicService;
@@ -104,6 +107,7 @@ public class DoctorMoveDataController {
         this.barnSearchDumpService = barnSearchDumpService;
         this.groupDumpService = groupDumpService;
         this.pigDumpService = pigDumpService;
+        this.doctorImportDataService = doctorImportDataService;
     }
 
 
@@ -234,6 +238,11 @@ public class DoctorMoveDataController {
         log.warn("move warehouse start, mobile:{}, moveId:{}", mobile, moveId);
         wareHouseInitService.init(mobile, moveId, farm);
         log.warn("move warehouse end");
+
+        //迁移仓库/物料
+        log.warn("move farmBasic start, mobile:{}, moveId:{}", mobile, moveId);
+        doctorImportDataService.importFarmBasics(farm.getId());
+        log.warn("move farmBasic end");
     }
 
     //统计下首页数据

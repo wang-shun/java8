@@ -12,7 +12,11 @@ import io.terminus.common.utils.Joiners;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.common.utils.MapBuilder;
 import io.terminus.doctor.basic.dao.DoctorBasicDao;
+import io.terminus.doctor.basic.dao.DoctorChangeReasonDao;
+import io.terminus.doctor.basic.dao.DoctorFarmBasicDao;
 import io.terminus.doctor.basic.model.DoctorBasic;
+import io.terminus.doctor.basic.model.DoctorChangeReason;
+import io.terminus.doctor.basic.model.DoctorFarmBasic;
 import io.terminus.doctor.common.enums.PigType;
 import io.terminus.doctor.common.enums.UserStatus;
 import io.terminus.doctor.common.enums.UserType;
@@ -143,6 +147,10 @@ public class DoctorImportDataService {
     private DoctorPigTypeStatisticWriteService doctorPigTypeStatisticWriteService;
     @Autowired
     private DoctorWareHouseTypeWriteService doctorWareHouseTypeWriteService;
+    @Autowired
+    private DoctorFarmBasicDao doctorFarmBasicDao;
+    @Autowired
+    private DoctorChangeReasonDao doctorChangeReasonDao;
 
     /**
      * 根据shit导入所有的猪场数据
@@ -176,7 +184,22 @@ public class DoctorImportDataService {
 
         //最后仓库数据
         importWarehouse(farm, shit.getFarm());
+
+        //最最后，猪场基础数据权限
+        importFarmBasics(farm.getId());
         return farm;
+    }
+
+    //猪场基础数据权限 默认全部
+    public void importFarmBasics(Long farmId) {
+        List<Long> basicIds = doctorBasicDao.list(Maps.newHashMap()).stream().map(DoctorBasic::getId).collect(Collectors.toList());
+        List<Long> reasonIds = doctorChangeReasonDao.list(Maps.newHashMap()).stream().map(DoctorChangeReason::getId).collect(Collectors.toList());
+
+        DoctorFarmBasic farmBasic = new DoctorFarmBasic();
+        farmBasic.setFarmId(farmId);
+        farmBasic.setBasicIds(Joiners.COMMA.join(basicIds));
+        farmBasic.setReasonIds(Joiners.COMMA.join(reasonIds));
+        doctorFarmBasicDao.create(farmBasic);
     }
 
     //统计下首页数据
