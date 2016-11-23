@@ -57,6 +57,10 @@ import io.terminus.doctor.user.dao.DoctorStaffDao;
 import io.terminus.doctor.user.dao.DoctorUserDataPermissionDao;
 import io.terminus.doctor.user.dao.SubDao;
 import io.terminus.doctor.user.dao.SubRoleDao;
+import io.terminus.doctor.user.interfaces.event.DoctorSystemCode;
+import io.terminus.doctor.user.interfaces.event.EventType;
+import io.terminus.doctor.user.interfaces.model.UserDto;
+import io.terminus.doctor.user.manager.UserInterfaceManager;
 import io.terminus.doctor.user.model.DoctorFarm;
 import io.terminus.doctor.user.model.DoctorOrg;
 import io.terminus.doctor.user.model.DoctorStaff;
@@ -158,40 +162,49 @@ public class DoctorImportDataService {
     private DoctorMaterialInWareHouseWriteService doctorMaterialInWareHouseWriteService;
     @Autowired
     private DoctorWareHouseWriteService doctorWareHouseWriteService;
+    @Autowired
+    private UserInterfaceManager userInterfaceManager;
 
     /**
      * 根据shit导入所有的猪场数据
      */
     @Transactional
     public DoctorFarm importAll(DoctorImportSheet shit) {
-        // 猪场和员工
-        Object[] result = this.importOrgFarmUser(shit.getFarm(), shit.getStaff());
-        User primaryUser = (User) result[0];
-        DoctorFarm farm = (DoctorFarm) result[1];
-        Map<String, Long> userMap = doctorMoveBasicService.getSubMap(farm.getOrgId());
+        DoctorFarm farm = null;
+        try{
+            // 猪场和员工
+            Object[] result = this.importOrgFarmUser(shit.getFarm(), shit.getStaff());
+            User primaryUser = (User) result[0];
+            farm = (DoctorFarm) result[1];
+            Map<String, Long> userMap = doctorMoveBasicService.getSubMap(farm.getOrgId());
 
-        importBarn(farm, userMap, shit.getBarn());
-        //把所有猪舍添加到所有用户的权限里去
-        userInitService.updatePermissionBarn(primaryUser.getMobile());
+            importBarn(farm, userMap, shit.getBarn());
+            //把所有猪舍添加到所有用户的权限里去
+            userInitService.updatePermissionBarn(primaryUser.getMobile());
 
-        importBreed(shit.getBreed());
+            importBreed(shit.getBreed());
 
-        Map<String, DoctorBarn> barnMap = doctorMoveBasicService.getBarnMap2(farm.getId());
-        Map<String, Long> breedMap = doctorMoveBasicService.getBreedMap();
+            Map<String, DoctorBarn> barnMap = doctorMoveBasicService.getBarnMap2(farm.getId());
+            Map<String, Long> breedMap = doctorMoveBasicService.getBreedMap();
 
-        importBoar(farm, barnMap, breedMap, shit.getBoar());
-        importGroup(farm, barnMap, shit.getGroup());
-        importSow(farm, barnMap, breedMap, shit.getSow());
+            importBoar(farm, barnMap, breedMap, shit.getBoar());
+            importGroup(farm, barnMap, shit.getGroup());
+            importSow(farm, barnMap, breedMap, shit.getSow());
 
-        // 工作流
-        doctorMoveDataService.moveWorkflow(farm);
+            // 工作流
+            doctorMoveDataService.moveWorkflow(farm);
 
-        //首页统计数据
-        movePigTypeStatistic(farm);
+            //首页统计数据
+            movePigTypeStatistic(farm);
 
-        //最后仓库数据
-        importWarehouse(farm, shit, primaryUser, userMap);
-        return farm;
+            //最后仓库数据
+            importWarehouse(farm, shit, primaryUser, userMap);
+            return farm;
+        } catch(Exception e) {
+            // 导入猪场失败，需要删除一些数据
+            deleteUser(farm);
+            throw e;
+        }
     }
 
     //统计下首页数据
@@ -199,6 +212,20 @@ public class DoctorImportDataService {
         doctorPigTypeStatisticWriteService.statisticGroup(farm.getOrgId(), farm.getId());
         doctorPigTypeStatisticWriteService.statisticPig(farm.getOrgId(), farm.getId(), DoctorPig.PIG_TYPE.BOAR.getKey());
         doctorPigTypeStatisticWriteService.statisticPig(farm.getOrgId(), farm.getId(), DoctorPig.PIG_TYPE.SOW.getKey());
+    }
+
+    private void deleteUser(DoctorFarm farm){
+        if(farm != null && farm.getOrgId() != null){
+            for(DoctorStaff staff : doctorStaffDao.findByOrgId(farm.getOrgId())){
+                // 向用户中心专用 zk 发送删除用户的消息
+                try {
+                    UserDto dto = new UserDto(staff.getUserId());
+                    userInterfaceManager.pulishZkEvent(dto, EventType.DELETE, DoctorSystemCode.PIG_DOCTOR);
+                } catch (Exception e) {
+                    log.error("导入猪场失败，且无法向用户中心专用 zk 发送删除用户的消息，请务必手动处理，farm={}, userId={}", farm, staff.getUserId());
+                }
+            }
+        }
     }
 
     @Transactional
