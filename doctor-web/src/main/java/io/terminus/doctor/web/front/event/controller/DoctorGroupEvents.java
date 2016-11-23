@@ -3,6 +3,7 @@ package io.terminus.doctor.web.front.event.controller;
 import com.google.common.collect.Lists;
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.model.Paging;
+import io.terminus.common.utils.Splitters;
 import io.terminus.doctor.basic.model.DoctorBasic;
 import io.terminus.doctor.basic.service.DoctorBasicReadService;
 import io.terminus.doctor.common.utils.Params;
@@ -344,9 +345,9 @@ public class DoctorGroupEvents {
             return Paging.empty();
         }
         params = Params.filterNullOrEmpty(params);
-        if (params.containsKey("eventName")) {
-            params.put("type", String.valueOf(GroupEventType.from((String) params.get("eventName")).getValue()));
-            params.remove("eventName");
+        if (params.get("eventTypes") !=null) {
+            params.put("types", Splitters.COMMA.splitToList((String)params.get("eventTypes")));
+            params.remove("eventTypes");
         }
         return RespHelper.or500(doctorGroupReadService.queryGroupEventsByCriteria(params, pageNo, pageSize));
     }
