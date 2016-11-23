@@ -31,7 +31,7 @@ public class DoctorPigInfoCache {
     public DoctorPigInfoCache(DoctorPigDao doctorPigDao){
         this.doctorPigDao = doctorPigDao;
 
-        pigCodeCache = CacheBuilder.newBuilder().expireAfterWrite(30, TimeUnit.MINUTES).maximumSize(10000).build(new CacheLoader<Long, List<String>>() {
+        pigCodeCache = CacheBuilder.newBuilder().expireAfterWrite(1, TimeUnit.DAYS).maximumSize(10000).build(new CacheLoader<Long, List<String>>() {
             @Override
             public List<String> load(Long key) throws Exception {
                 return doctorPigDao.findPigCodesByCompanyId(key);
