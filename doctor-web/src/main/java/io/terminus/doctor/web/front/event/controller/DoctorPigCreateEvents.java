@@ -738,31 +738,49 @@ public class DoctorPigCreateEvents {
                     .build();
             doctorPigEventWriteService.updatePigEvents(doctorPigEvent);
         }
-       return Boolean.TRUE;
+        return Boolean.TRUE;
     }
 
     /**
      * 修复事件描述(临时)
+     *
      * @return
      */
     @RequestMapping(value = "/fix/desc", method = RequestMethod.GET)
     @ResponseBody
-    public Boolean fixEventDesc(){
+    public Boolean fixEventDesc() {
         try {
             int pageNo = 1;
             int pageSize = 5000;
             while (true) {
-                Map<String ,Object> map = Maps.newHashMap();
-                map.put("type", PigEvent.FARROWING.getKey());
+                Map<String, Object> map = Maps.newHashMap();
+                map.put("types", Lists.newArrayList(PigEvent.ENTRY.getKey(),PigEvent.WEAN.getKey(), PigEvent.FARROWING.getKey()));
                 List<DoctorPigEvent> events = RespHelper.or500(doctorPigEventReadService.queryPigEventsByCriteria(map, pageNo, pageSize)).getData();
                 events.parallelStream()
                         .forEach(doctorPigEvent -> {
-                            DoctorFarrowingDto doctorFarrowingDto = JsonMapper.JSON_NON_DEFAULT_MAPPER.fromJson(doctorPigEvent.getExtra(), DoctorFarrowingDto.class);
-                            DoctorPigEvent event = DoctorPigEvent.builder().name(doctorPigEvent.getName())
-                                    .id(doctorPigEvent.getId()).desc(Joiner.on("#").withKeyValueSeparator("：").join(doctorFarrowingDto.descMap())).build();
-                            RespHelper.or500(doctorPigEventWriteService.updatePigEvents(event));
+                            try {
+                                Map<String, String> descMap = null;
+                                if (Objects.equals(doctorPigEvent.getType(), PigEvent.ENTRY.getKey())) {
+                                    DoctorFarmEntryDto doctorFarmEntryDto = JsonMapper.JSON_NON_DEFAULT_MAPPER.fromJson(doctorPigEvent.getExtra(), DoctorFarmEntryDto.class);
+                                    descMap = doctorFarmEntryDto.descMap();
+                                }
+                                if (Objects.equals(doctorPigEvent.getType(), PigEvent.WEAN.getKey())) {
+                                    DoctorPartWeanDto doctorPartWeanDto = JsonMapper.JSON_NON_DEFAULT_MAPPER.fromJson(doctorPigEvent.getExtra(), DoctorPartWeanDto.class);
+                                    descMap = doctorPartWeanDto.descMap();
+                                }
+                                if (Objects.equals(doctorPigEvent.getType(), PigEvent.FARROWING.getKey())) {
+                                    DoctorFarrowingDto doctorFarrowingDto = JsonMapper.JSON_NON_DEFAULT_MAPPER.fromJson(doctorPigEvent.getExtra(), DoctorFarrowingDto.class);
+                                    descMap = doctorFarrowingDto.descMap();
+                                }
+                                DoctorPigEvent event = DoctorPigEvent.builder().name(doctorPigEvent.getName())
+                                        .id(doctorPigEvent.getId()).desc(Joiner.on("#").withKeyValueSeparator("：").join(descMap)).build();
+                                RespHelper.or500(doctorPigEventWriteService.updatePigEvents(event));
+
+                            } catch (Exception e) {
+                                log.error("fix desc error, event {}", doctorPigEvent);
+                            }
                         });
-                if (events.size()< pageSize) {
+                if (events.size() < pageSize) {
                     break;
                 }
                 pageNo++;
