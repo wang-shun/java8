@@ -124,6 +124,7 @@ public class OPDoctorUsers {
                 case PIGMALL:
                     innerDto.setServiceStatus(serviceStatus.getPigmallStatus());
                     innerDto.setReason(serviceStatus.getPigmallReason());
+                    innerDto.setUrl("http://www.xrnm.com"); // TODO: 2016/11/23 just test
                     dto.setPigmall(innerDto);
                     break;
                 case NEVEREST:
