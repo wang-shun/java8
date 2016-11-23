@@ -2,6 +2,7 @@ package io.terminus.doctor.web.front.event.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.api.client.util.Maps;
+import com.google.common.base.Joiner;
 import com.google.common.base.Strings;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
@@ -69,7 +70,7 @@ import static java.util.Objects.isNull;
  */
 @Slf4j
 @Controller
-@RequestMapping("/api/doctor/events/create")
+    @RequestMapping("/api/doctor/events/create")
 @SuppressWarnings("all")
 public class DoctorPigCreateEvents {
 
@@ -731,11 +732,46 @@ public class DoctorPigCreateEvents {
     @ResponseBody
     public Boolean fixEventName(){
         for (PigEvent pigEvent : PigEvent.values()) {
-            Map<String, Object> map = Maps.newHashMap();
-            map.put("type", pigEvent.getKey());
-            map.put("name", pigEvent.getName());
-            doctorPigEventWriteService.updatePigEvents(map);
+            DoctorPigEvent doctorPigEvent = DoctorPigEvent.builder()
+                    .name(pigEvent.getName())
+                    .type(pigEvent.getKey())
+                    .build();
+            doctorPigEventWriteService.updatePigEvents(doctorPigEvent);
         }
        return Boolean.TRUE;
+    }
+
+    /**
+     * 修复事件描述(临时)
+     * @return
+     */
+    @RequestMapping(value = "/fix/desc", method = RequestMethod.GET)
+    @ResponseBody
+    public Boolean fixEventDesc(){
+        try {
+            int pageNo = 1;
+            int pageSize = 5000;
+            while (true) {
+                Map<String ,Object> map = Maps.newHashMap();
+                map.put("type", PigEvent.FARROWING.getKey());
+                List<DoctorPigEvent> events = RespHelper.or500(doctorPigEventReadService.queryPigEventsByCriteria(map, pageNo, pageSize)).getData();
+                events.parallelStream()
+                        .forEach(doctorPigEvent -> {
+                            DoctorFarrowingDto doctorFarrowingDto = JsonMapper.JSON_NON_DEFAULT_MAPPER.fromJson(doctorPigEvent.getExtra(), DoctorFarrowingDto.class);
+                            DoctorPigEvent event = DoctorPigEvent.builder().name(doctorPigEvent.getName())
+                                    .id(doctorPigEvent.getId()).desc(Joiner.on("#").withKeyValueSeparator("：").join(doctorFarrowingDto.descMap())).build();
+                            RespHelper.or500(doctorPigEventWriteService.updatePigEvents(event));
+                        });
+                if (events.size()< pageSize) {
+                    break;
+                }
+                pageNo++;
+            }
+            return Boolean.TRUE;
+        } catch (Exception e) {
+            log.error("fix desc cause by {}", Throwables.getStackTraceAsString(e));
+            return Boolean.FALSE;
+        }
+
     }
 }
