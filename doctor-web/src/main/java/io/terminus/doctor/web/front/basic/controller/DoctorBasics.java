@@ -60,7 +60,11 @@ public class DoctorBasics {
      */
     @RequestMapping(value = "/id", method = RequestMethod.GET)
     public DoctorBasic findBasicById(@RequestParam("farmId") Long farmId,
-                                     @RequestParam("basicId") Long basicId) {
+                                     @RequestParam("basicId") Long basicId,
+                                     @RequestParam(value = "enable", defaultValue = "true") Boolean enable) {
+        if (!enable) {
+            return RespHelper.or500(doctorBasicReadService.findBasicById(basicId));
+        }
         return RespHelper.or500(doctorBasicReadService.findBasicByIdFilterByFarmId(farmId, basicId));
     }
 
@@ -74,7 +78,11 @@ public class DoctorBasics {
     @RequestMapping(value = "/type", method = RequestMethod.GET)
     public List<DoctorBasic> findBasicByTypeAndSrmWithCache(@RequestParam("farmId") Long farmId,
                                                             @RequestParam("type") Integer type,
-                                                            @RequestParam(value = "srm", required = false) String srm) {
+                                                            @RequestParam(value = "srm", required = false) String srm,
+                                                            @RequestParam(value = "enable", defaultValue = "true") Boolean enable) {
+        if (!enable) {
+            return RespHelper.or500(doctorBasicReadService.findBasicByTypeAndSrmWithCache(type, srm));
+        }
         return RespHelper.or500(doctorBasicReadService.findBasicByTypeAndSrmWithCacheFilterByFarmId(farmId, type, srm));
     }
 
@@ -86,7 +94,11 @@ public class DoctorBasics {
      */
     @RequestMapping(value = "/changeReason/id", method = RequestMethod.GET)
     public DoctorChangeReason findChangeReasonById(@RequestParam("farmId") Long farmId,
-                                                   @RequestParam("changeReasonId") Long changeReasonId) {
+                                                   @RequestParam("changeReasonId") Long changeReasonId,
+                                                   @RequestParam(value = "enable", defaultValue = "true") Boolean enable) {
+        if (!enable) {
+            return RespHelper.or500(doctorBasicReadService.findChangeReasonById(changeReasonId));
+        }
         return RespHelper.or500(doctorBasicReadService.findChangeReasonByIdFilterByFarmId(farmId, changeReasonId));
     }
 
@@ -99,7 +111,11 @@ public class DoctorBasics {
     @RequestMapping(value = "/changeReason/typeId", method = RequestMethod.GET)
     public List<DoctorChangeReason> findChangeReasonByChangeTypeIdAndSrm(@RequestParam("farmId") Long farmId,
                                                                          @RequestParam("changeTypeId") Long changeTypeId,
-                                                                         @RequestParam(required = false) String srm) {
+                                                                         @RequestParam(required = false) String srm,
+                                                                         @RequestParam(value = "enable", defaultValue = "true") Boolean enable) {
+        if (!enable) {
+            return RespHelper.or500(doctorBasicReadService.findChangeReasonByChangeTypeIdAndSrm(changeTypeId, srm));
+        }
         return RespHelper.or500(doctorBasicReadService.findChangeReasonByChangeTypeIdAndSrmFilterByFarmId(farmId, changeTypeId, srm));
     }
 
