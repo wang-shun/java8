@@ -52,7 +52,7 @@ public class CacheCenter {
     @PostConstruct
     public void initCache(){
         //初始化数据权限缓存对象
-        permissionLoadingCache = CacheBuilder.newBuilder().expireAfterWrite(10L, TimeUnit.MINUTES).build(new CacheLoader<Long, DoctorUserDataPermission>() {
+        permissionLoadingCache = CacheBuilder.newBuilder().expireAfterWrite(10L, TimeUnit.MINUTES).maximumSize(10000).build(new CacheLoader<Long, DoctorUserDataPermission>() {
             @Override
             public DoctorUserDataPermission load(Long userId) throws Exception {
                 return doctorUserDataPermissionDao.findByUserId(userId);
@@ -60,7 +60,7 @@ public class CacheCenter {
         });
 
         //初始化员工信息缓存对象
-        staffLoadingCache = CacheBuilder.newBuilder().expireAfterWrite(10L, TimeUnit.MINUTES).build(new CacheLoader<Long, DoctorStaff>() {
+        staffLoadingCache = CacheBuilder.newBuilder().expireAfterWrite(10L, TimeUnit.MINUTES).maximumSize(10000).build(new CacheLoader<Long, DoctorStaff>() {
             @Override
             public DoctorStaff load(Long userId) throws Exception {
                 return doctorStaffDao.findByUserId(userId);

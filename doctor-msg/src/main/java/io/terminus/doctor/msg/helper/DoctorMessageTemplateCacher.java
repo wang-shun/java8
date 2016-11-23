@@ -39,7 +39,7 @@ public class DoctorMessageTemplateCacher {
         this.doctorHandleBarsHelper = doctorHandleBarsHelper;
         this.messageTemplateDao = messageTemplateDao;
 
-        templateTitleCache = CacheBuilder.newBuilder().expireAfterAccess(1L, TimeUnit.HOURS).build(new CacheLoader<String, Optional<Template>>() {
+        templateTitleCache = CacheBuilder.newBuilder().expireAfterAccess(1L, TimeUnit.HOURS).maximumSize(10000).build(new CacheLoader<String, Optional<Template>>() {
             @Override
             public Optional<Template> load(String name) throws Exception {
                 MessageTemplate template = messageTemplateDao.findByName(name);
@@ -50,7 +50,7 @@ public class DoctorMessageTemplateCacher {
             }
         });
 
-        templateContentCache = CacheBuilder.newBuilder().expireAfterAccess(1L, TimeUnit.HOURS).build(new CacheLoader<String, Optional<Template>>() {
+        templateContentCache = CacheBuilder.newBuilder().expireAfterAccess(1L, TimeUnit.HOURS).maximumSize(10000).build(new CacheLoader<String, Optional<Template>>() {
             @Override
             public Optional<Template> load(String name) throws Exception {
                 MessageTemplate template = messageTemplateDao.findByName(name);

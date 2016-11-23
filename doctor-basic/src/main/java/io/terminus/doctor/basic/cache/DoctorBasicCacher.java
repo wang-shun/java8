@@ -33,7 +33,7 @@ public class DoctorBasicCacher {
         this.doctorBasicDao = doctorBasicDao;
 
         //基础数据缓存
-        this.basicCache = CacheBuilder.newBuilder().expireAfterAccess(1L, TimeUnit.DAYS).build(new CacheLoader<Integer, List<DoctorBasic>>() {
+        this.basicCache = CacheBuilder.newBuilder().expireAfterAccess(1L, TimeUnit.DAYS).maximumSize(10000).build(new CacheLoader<Integer, List<DoctorBasic>>() {
             @Override
             public List<DoctorBasic> load(Integer type) {
                 return doctorBasicDao.findByType(type);

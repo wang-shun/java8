@@ -38,7 +38,7 @@ public class DoctorLoginInterceptor extends HandlerInterceptorAdapter {
 
     @Autowired
     public DoctorLoginInterceptor(final UserReadService<User> userReadService) {
-        userCache = CacheBuilder.newBuilder().expireAfterWrite(30, TimeUnit.MINUTES).build(new CacheLoader<Long, Response<User>>() {
+        userCache = CacheBuilder.newBuilder().expireAfterWrite(30, TimeUnit.MINUTES).maximumSize(10000).build(new CacheLoader<Long, Response<User>>() {
             @Override
             public Response<User> load(Long userId) throws Exception {
                 return userReadService.findById(userId);
