@@ -126,15 +126,21 @@ public class Users {
      * @param password   密码
      * @param mobile     手机号
      * @param code       手机验证码
-     * @param sessionId  前台传入的会话session
      * @return 注册成功之后的用户ID
      */
     @RequestMapping(value = "/register", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
     public Long register(@RequestParam("password") String password,
                          @RequestParam("mobile") String mobile,
-                         @RequestParam("code") String code,
-                         @RequestParam("sid") String sessionId){
-        return doctorCommonSessionBean.register(password, mobile, code, sessionId);
+                         @RequestParam("code") String code, HttpServletRequest request){
+        HttpSession session = request.getSession(false);
+        if (session == null) {
+            throw new JsonResponseException(500, "session.expired");
+        }
+        Object sessionId = session.getAttribute(Constants.SESSION_USER_ID);
+        if (sessionId == null) {
+            throw new JsonResponseException(500, "session.expired");
+        }
+        return doctorCommonSessionBean.register(password, mobile, code, String.valueOf(sessionId));
     }
 
     /**
@@ -229,16 +235,22 @@ public class Users {
      * 发送短信验证码
      *
      * @param mobile 手机号
-     * @param sessionId 请求
      * @param templateName 短信模板名称
      * @return 短信发送结果
      */
     @RequestMapping(value = "/sms", method = RequestMethod.POST)
     @ResponseBody
     public Boolean sendSms(@RequestParam("mobile") String mobile,
-                           @RequestParam("sid") String sessionId,
-                           @RequestParam("templateName") String templateName) {
-        return doctorCommonSessionBean.sendSmsCode(mobile, sessionId, templateName);
+                           @RequestParam("templateName") String templateName, HttpServletRequest request) {
+        HttpSession session = request.getSession(false);
+        if (session == null) {
+            return false;
+        }
+        Object sessionId = session.getAttribute(Constants.SESSION_USER_ID);
+        if (sessionId == null) {
+            return false;
+        }
+        return doctorCommonSessionBean.sendSmsCode(mobile, String.valueOf(sessionId), templateName);
     }
 
     /**
