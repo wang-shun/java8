@@ -199,6 +199,7 @@ public class DoctorPigEvents {
         params = Params.filterNullOrEmpty(params);
         if (params.get("eventTypes") !=null) {
             params.put("types", Splitters.COMMA.splitToList((String)params.get("eventTypes")));
+            params.remove("eventTypes");
         }
         if(StringUtils.isNotBlank((String) params.get("endDate"))) {
             params.put("endDate", new DateTime(params.get("endDate")).plusDays(1).minusSeconds(1).toDate());
@@ -230,6 +231,7 @@ public class DoctorPigEvents {
         params = Params.filterNullOrEmpty(params);
         if (params.get("eventTypes") !=null) {
             params.put("types", Splitters.COMMA.splitToList((String)params.get("eventTypes")));
+            params.remove("eventTypes");
         }
         return RespHelper.or500(doctorPigEventReadService.queryOperators(params));
     }
