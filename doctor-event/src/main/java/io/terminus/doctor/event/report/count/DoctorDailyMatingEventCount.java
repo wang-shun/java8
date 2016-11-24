@@ -28,7 +28,7 @@ public class DoctorDailyMatingEventCount implements DoctorDailyEventCount {
 
     @Override
     public void dailyEventHandle(DoctorPigEvent event, DoctorDailyReportDto doctorDailyReportDto) {
-        DoctorMatingDailyReport doctorMatingDailyReport = doctorDailyReportDto.getMating();
+        DoctorMatingDailyReport doctorMatingDailyReport = new DoctorMatingDailyReport();
 
         DoctorMatingType matingType = DoctorMatingType.from(event.getDoctorMateType());
         if (matingType == null) {
@@ -36,22 +36,22 @@ public class DoctorDailyMatingEventCount implements DoctorDailyEventCount {
         }
         switch (matingType) {
             case HP:
-                doctorMatingDailyReport.setHoubei(doctorMatingDailyReport.getHoubei() + 1);
+                doctorMatingDailyReport.setHoubei(1);
                 break;
             case LPC:
-                doctorMatingDailyReport.setLiuchan(doctorMatingDailyReport.getLiuchan() + 1);
+                doctorMatingDailyReport.setLiuchan(1);
                 break;
             case LPL:
-                doctorMatingDailyReport.setLiuchan(doctorMatingDailyReport.getLiuchan() + 1);
+                doctorMatingDailyReport.setLiuchan(1);
                 break;
             case DP:
-                doctorMatingDailyReport.setDuannai(doctorMatingDailyReport.getDuannai() + 1);
+                doctorMatingDailyReport.setDuannai(1);
                 break;
             case YP:
-                doctorMatingDailyReport.setPregCheckResultYing(doctorMatingDailyReport.getPregCheckResultYing() + 1);
+                doctorMatingDailyReport.setPregCheckResultYing(1);
                 break;
             case FP:
-                doctorMatingDailyReport.setFanqing(doctorMatingDailyReport.getFanqing() + 1);
+                doctorMatingDailyReport.setFanqing(1);
                 break;
             default:
                 return;
