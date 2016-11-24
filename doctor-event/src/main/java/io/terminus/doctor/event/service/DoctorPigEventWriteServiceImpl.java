@@ -508,10 +508,6 @@ public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteServic
      */
     private void publishEvent (Map<String,Object> results){
         try {
-            publisher.publish(DataEvent.toBytes(DataEventType.PigEventCreate.getKey(), new PigEventCreateEvent(results)));
-
-
-
             if ("single".equals(results.get("contextType"))) {
                 ListenedPigEvent listenedPigEvent = new ListenedPigEvent();
                 listenedPigEvent.setPigId(Long.parseLong(results.get("doctorPigId").toString()));
@@ -530,6 +526,13 @@ public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteServic
             }
         } catch (Exception e) {
             log.error("failed to publish pig event, cause:{}", Throwables.getStackTraceAsString(e));
+        }
+
+        try{
+            // 向zk发送刷新消息的事件
+            publisher.publish(DataEvent.toBytes(DataEventType.PigEventCreate.getKey(), new PigEventCreateEvent(results)));
+        }catch(Exception e){
+            log.error(Throwables.getStackTraceAsString(e));
         }
     }
 
