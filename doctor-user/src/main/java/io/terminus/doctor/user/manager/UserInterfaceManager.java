@@ -92,8 +92,9 @@ public class UserInterfaceManager {
     @Transactional
     public UserDto create(UserDto user, String systemCode) throws Exception {
         User newUser = registerByMobile(BeanMapper.map(user, User.class), systemCode);
+        user = BeanMapper.map(newUser, UserDto.class);
         pulishZkEvent(user, EventType.CREATE, systemCode);
-        return BeanMapper.map(newUser, UserDto.class);
+        return user;
     }
 
     /**
