@@ -69,8 +69,8 @@ public class DoctorEventListener implements EventListener{
     public void handlePigEvent(ListenedPigEvent listenedPigEvent){
         try {
             log.info("[DoctorEventListener]-> handle.pig.event, listenedPigEvent->{}", listenedPigEvent);
-                pigSearchWriteService.update(listenedPigEvent.getPigId());
-                pigDailyReportUpdate(listenedPigEvent.getPigEventId());
+            pigSearchWriteService.update(listenedPigEvent.getPigId());
+            pigDailyReportUpdate(listenedPigEvent.getPigEventId());
         } catch (Exception e) {
             log.error("[DoctorEventListener]-> handle.pig.event.failed, cause {}, listenedPigEvent->{}", Throwables.getStackTraceAsString(e), listenedPigEvent);
         }
