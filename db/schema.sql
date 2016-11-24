@@ -321,7 +321,7 @@ CREATE TABLE `doctor_barns` (
   `created_at` datetime DEFAULT NULL COMMENT '创建时间',
   `updated_at` datetime DEFAULT NULL COMMENT '修改时间',
   PRIMARY KEY (`id`)
-) ENGINE=Myisam DEFAULT CHARSET=utf8 COMMENT='猪舍表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='猪舍表';
 CREATE INDEX idx_doctor_barns_farm_id ON doctor_barns(farm_id);
 
 -- 变动类型表
@@ -341,7 +341,7 @@ CREATE TABLE `doctor_change_types` (
   `created_at` datetime DEFAULT NULL COMMENT '创建时间',
   `updated_at` datetime DEFAULT NULL COMMENT '修改时间',
   PRIMARY KEY (`id`)
-) ENGINE=Myisam DEFAULT CHARSET=utf8 COMMENT='变动类型表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='变动类型表';
 CREATE INDEX idx_doctor_change_types_farm_id ON doctor_change_types(farm_id);
 
 -- 变动原因
@@ -359,7 +359,7 @@ CREATE TABLE `doctor_change_reasons` (
   `created_at` datetime DEFAULT NULL COMMENT '创建时间',
   `updated_at` datetime DEFAULT NULL COMMENT '修改时间',
   PRIMARY KEY (`id`)
-) ENGINE=Myisam DEFAULT CHARSET=utf8 COMMENT='变动原因表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='变动原因表';
 CREATE INDEX idx_doctor_change_reasons_change_type_id ON doctor_change_reasons(change_type_id);
 
 -- 疾病表
@@ -378,7 +378,7 @@ CREATE TABLE `doctor_diseases` (
   `created_at` datetime DEFAULT NULL COMMENT '创建时间',
   `updated_at` datetime DEFAULT NULL COMMENT '修改时间',
   PRIMARY KEY (`id`)
-) ENGINE=Myisam DEFAULT CHARSET=utf8 COMMENT='疾病表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='疾病表';
 CREATE INDEX idx_doctor_diseases_farm_id ON doctor_diseases(farm_id);
 
 -- 客户表
@@ -399,7 +399,7 @@ CREATE TABLE `doctor_customers` (
   `created_at` datetime DEFAULT NULL COMMENT '创建时间',
   `updated_at` datetime DEFAULT NULL COMMENT '修改时间',
   PRIMARY KEY (`id`)
-) ENGINE=Myisam DEFAULT CHARSET=utf8 COMMENT='客户表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='客户表';
 CREATE INDEX idx_doctor_customers_farm_id ON doctor_customers(farm_id);
 
 -- 品种表
@@ -412,7 +412,7 @@ CREATE TABLE `doctor_breeds` (
   `created_at` datetime DEFAULT NULL COMMENT '创建时间',
   `updated_at` datetime DEFAULT NULL COMMENT '修改时间',
   PRIMARY KEY (`id`)
-) ENGINE=Myisam DEFAULT CHARSET=utf8 COMMENT='品种表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='品种表';
 
 -- 品系表
 DROP TABLE IF EXISTS `doctor_genetics`;
@@ -424,7 +424,7 @@ CREATE TABLE `doctor_genetics` (
   `created_at` datetime DEFAULT NULL COMMENT '创建时间',
   `updated_at` datetime DEFAULT NULL COMMENT '修改时间',
   PRIMARY KEY (`id`)
-) ENGINE=Myisam DEFAULT CHARSET=utf8 COMMENT='品系表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='品系表';
 
 -- 计量单位表
 DROP TABLE IF EXISTS `doctor_units`;
@@ -435,7 +435,7 @@ CREATE TABLE `doctor_units` (
   `created_at` datetime DEFAULT NULL COMMENT '创建时间',
   `updated_at` datetime DEFAULT NULL COMMENT '修改时间',
   PRIMARY KEY (`id`)
-) ENGINE=Myisam DEFAULT CHARSET=utf8 COMMENT='计量单位表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='计量单位表';
 
 -- 猪群表
 -- 猪群卡片表
@@ -979,7 +979,7 @@ CREATE TABLE `doctor_staffs` (
   `created_at` datetime DEFAULT NULL COMMENT '创建时间',
   `updated_at` datetime DEFAULT NULL COMMENT '修改时间',
   PRIMARY KEY (`id`)
-) ENGINE=Myisam DEFAULT CHARSET=utf8 COMMENT='猪场职员表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='猪场职员表';
 CREATE UNIQUE INDEX idx_doctor_staffs_user_id ON doctor_staffs(user_id);
 CREATE INDEX idx_doctor_staffs_role_id ON doctor_staffs(role_id);
 
@@ -1090,7 +1090,7 @@ CREATE TABLE `doctor_user_data_permissions` (
   `created_at` datetime DEFAULT NULL COMMENT '创建时间',
   `updated_at` datetime DEFAULT NULL COMMENT '修改时间',
   PRIMARY KEY (`id`)
-) ENGINE=Myisam DEFAULT CHARSET=utf8 COMMENT='用户数据权限表';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='用户数据权限表';
 CREATE UNIQUE INDEX idx_doctor_user_data_permissions_user_id ON doctor_user_data_permissions(user_id);
 
 -- 用户服务审批表设计:
