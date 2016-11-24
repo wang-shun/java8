@@ -253,10 +253,10 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
 
     /**
      * 临时使用
-     * @param criteria
+     * @param doctorPigEvent
      */
     @Deprecated
-    public void updatePigEvents(Map<String, Object> criteria){
-        sqlSession.update("updatePigEvents", criteria);
+    public void updatePigEvents(DoctorPigEvent doctorPigEvent){
+        sqlSession.update("updatePigEvents", doctorPigEvent);
     }
 }

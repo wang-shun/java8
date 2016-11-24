@@ -492,9 +492,9 @@ public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteServic
 
     @Deprecated
     @Override
-    public Response<Boolean> updatePigEvents(Map<String,Object> criteria) {
+    public Response<Boolean> updatePigEvents(DoctorPigEvent doctorPigEvent) {
         try {
-            doctorPigEventDao.updatePigEvents(criteria);
+            doctorPigEventDao.updatePigEvents(doctorPigEvent);
             return Response.ok(Boolean.TRUE);
         } catch (Exception e) {
             log.error("update.pig.event.failed, cause{}", Throwables.getStackTraceAsString(e));

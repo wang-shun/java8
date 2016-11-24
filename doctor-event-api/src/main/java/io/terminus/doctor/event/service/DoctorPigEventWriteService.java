@@ -189,8 +189,8 @@ public interface DoctorPigEventWriteService {
 
     /**
      * 更新事件(临时使用)
-     * @param criteria
+     * @param doctorPigEvent
      * @return
      */
-    Response<Boolean> updatePigEvents(Map<String,Object> criteria);
+    Response<Boolean> updatePigEvents(DoctorPigEvent doctorPigEvent);
 }
