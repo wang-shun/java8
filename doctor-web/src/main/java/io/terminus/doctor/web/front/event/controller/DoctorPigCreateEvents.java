@@ -70,7 +70,7 @@ import static java.util.Objects.isNull;
  */
 @Slf4j
 @Controller
-    @RequestMapping("/api/doctor/events/create")
+@RequestMapping("/api/doctor/events/create")
 @SuppressWarnings("all")
 public class DoctorPigCreateEvents {
 
