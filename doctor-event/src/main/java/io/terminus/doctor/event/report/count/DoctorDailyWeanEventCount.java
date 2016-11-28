@@ -13,7 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
-import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -43,7 +42,7 @@ public class DoctorDailyWeanEventCount implements DoctorDailyEventCount{
         Date startAt = Dates.startOfDay(event.getEventAt());
         Date endAt = DateUtil.getDateEnd(new DateTime(event.getEventAt())).toDate();
 
-        doctorWeanDailyReport.setCount(Integer.valueOf(event.getExtraMap().get("partWeanPigletsCount").toString()));
+        doctorWeanDailyReport.setCount(event.getWeanCount());
         doctorWeanDailyReport.setWeight(doctorKpiDao.getWeanPigletWeightAvg(event.getFarmId(), startAt, endAt));
         doctorWeanDailyReport.setNest(1);
         doctorWeanDailyReport.setAvgDayAge(doctorKpiDao.getWeanDayAgeAvg(event.getFarmId(), startAt, endAt));   //断奶日领

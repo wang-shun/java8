@@ -23,7 +23,6 @@ import io.terminus.doctor.event.model.DoctorGroupSnapshot;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
 import io.terminus.doctor.event.service.DoctorGroupReadService;
 import io.terminus.doctor.event.util.EventUtil;
-import io.terminus.zookeeper.pubsub.Publisher;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -52,9 +51,6 @@ public class DoctorGroupManager {
     private final DoctorGroupTrackDao doctorGroupTrackDao;
     private final DoctorGroupReadService doctorGroupReadService;
     private final CoreEventDispatcher coreEventDispatcher;
-
-    @Autowired(required = false)
-    private Publisher publisher;
 
     @Autowired
     public DoctorGroupManager(DoctorGroupDao doctorGroupDao,
@@ -213,20 +209,7 @@ public class DoctorGroupManager {
 
     //发布猪群猪舍事件
     private void publistGroupAndBarn(Long orgId, Long farmId, Long groupId, Long barnId, Long eventId) {
-        publishZookeeperEvent(ListenedGroupEvent.builder().doctorGroupEventId(eventId).farmId(farmId).orgId(orgId).groupId(groupId).build());
-        publishZookeeperEvent(ListenedBarnEvent.builder().barnId(barnId).build());
-    }
-
-    //发布zk事件, 用于更新es索引
-    private <T> void publishZookeeperEvent(T data){
-//        if(notNull(publisher)) {
-//            try {
-//                publisher.publish(DataEvent.toBytes(eventType, data));
-//            } catch (Exception e) {
-//                log.error("publish zk event, eventType:{}, data:{} cause:{}", eventType, data, Throwables.getStackTraceAsString(e));
-//            }
-//        } else {
-            coreEventDispatcher.publish(data);
-        //}
+        coreEventDispatcher.publish(ListenedGroupEvent.builder().doctorGroupEventId(eventId).farmId(farmId).orgId(orgId).groupId(groupId).build());
+        coreEventDispatcher.publish(ListenedBarnEvent.builder().barnId(barnId).build());
     }
 }
