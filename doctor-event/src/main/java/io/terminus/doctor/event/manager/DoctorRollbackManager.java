@@ -9,7 +9,6 @@ import io.terminus.doctor.event.handler.DoctorRollbackPigEventHandler;
 import io.terminus.doctor.event.handler.rollback.DoctorRollbackHandlerChain;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorPigEvent;
-import io.terminus.zookeeper.pubsub.Publisher;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -34,9 +33,6 @@ public class DoctorRollbackManager {
 
     @Autowired
     private CoreEventDispatcher coreEventDispatcher;
-
-    @Autowired(required = false)
-    private Publisher publisher;
 
     /**
      * 事务回滚猪群
@@ -71,25 +67,16 @@ public class DoctorRollbackManager {
     /**
      * 校验携带数据正确性，发布事件
      */
-    public void checkAndPublishRollback(List<DoctorRollbackDto> dtos) {
+    public void  checkAndPublishRollback(List<DoctorRollbackDto> dtos) {
         if (notEmpty(dtos)) {
             checkFarmIdAndEventAt(dtos);
             publishRollbackEvent(dtos);
         }
     }
 
-    //发布zk事件, 用于更新回滚后操作
+    //发布事件, 用于更新回滚后操作
     private void publishRollbackEvent(List<DoctorRollbackDto> dtos) {
-//        String rollbackJson = JsonMapper.nonEmptyMapper().toJson(dtos);
-//        if (notNull(publisher)) {
-//            try {
-//                publisher.publish(DataEvent.toBytes(DataEventType.RollBackReport.getKey(), rollbackJson));
-//            } catch (Exception e) {
-//                log.error("publish rollback group zk event, DoctorRollbackDtos:{}, cause:{}", dtos, Throwables.getStackTraceAsString(e));
-//            }
-//        } else {
-            coreEventDispatcher.publish(ListenedRollbackEvent.builder().doctorRollbackDtos(dtos).build());
-        //}
+        coreEventDispatcher.publish(ListenedRollbackEvent.builder().doctorRollbackDtos(dtos).build());
     }
 
     private void checkFarmIdAndEventAt(List<DoctorRollbackDto> dtos) {
