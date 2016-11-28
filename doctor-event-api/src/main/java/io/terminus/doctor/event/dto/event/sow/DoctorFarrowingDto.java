@@ -125,7 +125,7 @@ public class DoctorFarrowingDto extends AbstractPigEventInputDto implements Seri
             map.put("弱崽数", weakCount.toString());
         }
         if(groupCode != null){
-            map.put("仔猪猪群", groupCode);
+            map.put("转入猪群", groupCode);
         }
 //        if(mnyCount != null){
 //            map.put("木乃伊数", mnyCount.toString());
