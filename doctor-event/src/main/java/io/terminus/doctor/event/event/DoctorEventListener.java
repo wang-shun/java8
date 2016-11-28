@@ -23,30 +23,26 @@ import org.springframework.stereotype.Component;
 @Component
 public class DoctorEventListener implements EventListener{
 
-    private final PigSearchWriteService pigSearchWriteService;
-    private final GroupSearchWriteService groupSearchWriteService;
-    private final BarnSearchWriteService barnSearchWriteService;
-    private final DoctorDailyPigReportWriteService doctorDailyPigReportWriteService;
-    private final DoctorPigTypeStatisticWriteService doctorPigTypeStatisticWriteService;
-    private final DoctorDailyGroupReportWriteService doctorDailyGroupReportWriteService;
-    private final DoctorRollbackService doctorRollbackService;
+    @Autowired
+    private PigSearchWriteService pigSearchWriteService;
 
     @Autowired
-    public DoctorEventListener(PigSearchWriteService pigSearchWriteService,
-                               GroupSearchWriteService groupSearchWriteService,
-                               BarnSearchWriteService barnSearchWriteService,
-                               DoctorDailyPigReportWriteService doctorDailyPigReportWriteService,
-                               DoctorPigTypeStatisticWriteService doctorPigTypeStatisticWriteService,
-                               DoctorDailyGroupReportWriteService doctorDailyGroupReportWriteService,
-                               DoctorRollbackService doctorRollbackService) {
-        this.pigSearchWriteService = pigSearchWriteService;
-        this.groupSearchWriteService = groupSearchWriteService;
-        this.barnSearchWriteService = barnSearchWriteService;
-        this.doctorDailyPigReportWriteService = doctorDailyPigReportWriteService;
-        this.doctorPigTypeStatisticWriteService = doctorPigTypeStatisticWriteService;
-        this.doctorDailyGroupReportWriteService = doctorDailyGroupReportWriteService;
-        this.doctorRollbackService = doctorRollbackService;
-    }
+    private GroupSearchWriteService groupSearchWriteService;
+
+    @Autowired
+    private BarnSearchWriteService barnSearchWriteService;
+
+    @Autowired
+    private DoctorDailyPigReportWriteService doctorDailyPigReportWriteService;
+
+    @Autowired
+    private DoctorPigTypeStatisticWriteService doctorPigTypeStatisticWriteService;
+
+    @Autowired
+    private DoctorDailyGroupReportWriteService doctorDailyGroupReportWriteService;
+
+    @Autowired
+    private DoctorRollbackService doctorRollbackService;
 
     /**
      * 监听处理多个猪事件

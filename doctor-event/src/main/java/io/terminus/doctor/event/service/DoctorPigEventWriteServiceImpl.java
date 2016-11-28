@@ -2,7 +2,6 @@ package io.terminus.doctor.event.service;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Throwables;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
@@ -29,7 +28,6 @@ import io.terminus.doctor.event.dto.event.usual.DoctorDiseaseDto;
 import io.terminus.doctor.event.dto.event.usual.DoctorFarmEntryDto;
 import io.terminus.doctor.event.dto.event.usual.DoctorRemovalDto;
 import io.terminus.doctor.event.dto.event.usual.DoctorVaccinationDto;
-import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.event.DoctorPigCountEvent;
 import io.terminus.doctor.event.event.ListenedBarnEvent;
 import io.terminus.doctor.event.event.ListenedPigEvent;
@@ -61,13 +59,6 @@ import static java.util.Objects.isNull;
 @Slf4j
 @RpcProvider
 public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteService{
-
-    private static final List<Integer> NOT_ALLOW_ROLL_BACK_EVENTS =Lists.newArrayList(
-            PigEvent.ENTRY.getKey(),
-            PigEvent.FARROWING.getKey(),
-            PigEvent.FOSTERS.getKey(),
-            PigEvent.FOSTERS_BY.getKey()
-    );
 
     private final DoctorPigEventManager doctorPigEventManager;
     private final DoctorPigReadService doctorPigReadService;
