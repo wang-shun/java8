@@ -128,7 +128,7 @@ public class DoctorEventListener implements EventListener{
 
     private void pigDailyReportUpdate(Long eventId){
         Response<Boolean> response = doctorDailyPigReportWriteService.updateDailyPigReportInfo(eventId);
-        if(! response.isSuccess()){
+        if(!response.isSuccess()){
             log.error("update daily pig report error, cause:{}", response.getError());
         }
     }
