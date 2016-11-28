@@ -51,20 +51,17 @@ public class DoctorDailyMatingEventCount implements DoctorDailyEventCount {
             case HP:
                 doctorMatingDailyReport.setHoubei(doctorKpiDao.firstMatingCounts(event.getFarmId(), startAt, endAt));
                 break;
-            case LPC:
-                doctorMatingDailyReport.setLiuchan(doctorKpiDao.firstMatingCounts(event.getFarmId(), startAt, endAt));
-                break;
-            case LPL:
-                doctorMatingDailyReport.setLiuchan(doctorKpiDao.firstMatingCounts(event.getFarmId(), startAt, endAt));
+            case LPC: case LPL:
+                doctorMatingDailyReport.setLiuchan(doctorKpiDao.abortionMatingCounts(event.getFarmId(), startAt, endAt));
                 break;
             case DP:
-                doctorMatingDailyReport.setDuannai(doctorKpiDao.firstMatingCounts(event.getFarmId(), startAt, endAt));
+                doctorMatingDailyReport.setDuannai(doctorKpiDao.weanMatingCounts(event.getFarmId(), startAt, endAt));
                 break;
             case YP:
-                doctorMatingDailyReport.setPregCheckResultYing(doctorKpiDao.firstMatingCounts(event.getFarmId(), startAt, endAt));
+                doctorMatingDailyReport.setPregCheckResultYing(doctorKpiDao.yinMatingCounts(event.getFarmId(), startAt, endAt));
                 break;
             case FP:
-                doctorMatingDailyReport.setFanqing(doctorKpiDao.firstMatingCounts(event.getFarmId(), startAt, endAt));
+                doctorMatingDailyReport.setFanqing(doctorKpiDao.fanQMatingCounts(event.getFarmId(), startAt, endAt));
                 break;
             default:
                 return;
