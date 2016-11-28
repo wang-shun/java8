@@ -1,14 +1,20 @@
 package io.terminus.doctor.event.report.count;
 
+import io.terminus.common.utils.Dates;
+import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.daily.DoctorDailyEventCount;
+import io.terminus.doctor.event.dao.DoctorKpiDao;
 import io.terminus.doctor.event.dto.report.daily.DoctorDailyReportDto;
 import io.terminus.doctor.event.dto.report.daily.DoctorMatingDailyReport;
 import io.terminus.doctor.event.enums.DoctorMatingType;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import lombok.extern.slf4j.Slf4j;
+import org.joda.time.DateTime;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.Date;
 import java.util.Objects;
 
 /**
@@ -20,6 +26,9 @@ import java.util.Objects;
 @Slf4j
 @Component
 public class DoctorDailyMatingEventCount implements DoctorDailyEventCount {
+
+    @Autowired
+    private DoctorKpiDao doctorKpiDao;
 
     @Override
     public boolean preDailyEventHandleValidate(DoctorPigEvent event) {
@@ -35,24 +44,27 @@ public class DoctorDailyMatingEventCount implements DoctorDailyEventCount {
         if (matingType == null) {
             return;
         }
+        Date startAt = Dates.startOfDay(event.getEventAt());
+        Date endAt = DateUtil.getDateEnd(new DateTime(event.getEventAt())).toDate();
+
         switch (matingType) {
             case HP:
-                doctorMatingDailyReport.setHoubei(1);
+                doctorMatingDailyReport.setHoubei(doctorKpiDao.firstMatingCounts(event.getFarmId(), startAt, endAt));
                 break;
             case LPC:
-                doctorMatingDailyReport.setLiuchan(1);
+                doctorMatingDailyReport.setLiuchan(doctorKpiDao.firstMatingCounts(event.getFarmId(), startAt, endAt));
                 break;
             case LPL:
-                doctorMatingDailyReport.setLiuchan(1);
+                doctorMatingDailyReport.setLiuchan(doctorKpiDao.firstMatingCounts(event.getFarmId(), startAt, endAt));
                 break;
             case DP:
-                doctorMatingDailyReport.setDuannai(1);
+                doctorMatingDailyReport.setDuannai(doctorKpiDao.firstMatingCounts(event.getFarmId(), startAt, endAt));
                 break;
             case YP:
-                doctorMatingDailyReport.setPregCheckResultYing(1);
+                doctorMatingDailyReport.setPregCheckResultYing(doctorKpiDao.firstMatingCounts(event.getFarmId(), startAt, endAt));
                 break;
             case FP:
-                doctorMatingDailyReport.setFanqing(1);
+                doctorMatingDailyReport.setFanqing(doctorKpiDao.firstMatingCounts(event.getFarmId(), startAt, endAt));
                 break;
             default:
                 return;

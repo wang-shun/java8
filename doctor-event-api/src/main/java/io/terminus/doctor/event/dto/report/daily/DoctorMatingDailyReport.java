@@ -40,10 +40,10 @@ public class DoctorMatingDailyReport implements Serializable {
     private int liuchan;
 
     public void addMatingDaily(DoctorMatingDailyReport doctorMatingDailyReport){
-        this.houbei += doctorMatingDailyReport.getHoubei();
-        this.pregCheckResultYing += doctorMatingDailyReport.getPregCheckResultYing();
-        this.duannai += doctorMatingDailyReport.getDuannai();
-        this.fanqing += doctorMatingDailyReport.getFanqing();
-        this.liuchan += doctorMatingDailyReport.getLiuchan();
+        this.houbei = doctorMatingDailyReport.getHoubei();
+        this.pregCheckResultYing = doctorMatingDailyReport.getPregCheckResultYing();
+        this.duannai = doctorMatingDailyReport.getDuannai();
+        this.fanqing = doctorMatingDailyReport.getFanqing();
+        this.liuchan = doctorMatingDailyReport.getLiuchan();
     }
 }

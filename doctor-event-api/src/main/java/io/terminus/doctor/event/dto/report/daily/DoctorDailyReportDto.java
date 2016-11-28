@@ -106,10 +106,10 @@ public class DoctorDailyReportDto implements Serializable {
         this.liveStock.setKonghuaiSow(report.getLiveStock().getKonghuaiSow() == 0 ? this.liveStock.getKonghuaiSow() : report.getLiveStock().getKonghuaiSow());
 
         //配种
-        this.mating.setHoubei(this.mating.getHoubei() + report.getMating().getHoubei());
-        this.mating.setDuannai(this.mating.getDuannai() + report.getMating().getDuannai());
-        this.mating.setFanqing(this.mating.getFanqing() + report.getMating().getFanqing());
-        this.mating.setLiuchan(this.mating.getLiuchan() + report.getMating().getLiuchan());
+        this.mating.setHoubei(report.getMating().getHoubei());
+        this.mating.setDuannai(report.getMating().getDuannai());
+        this.mating.setFanqing(report.getMating().getFanqing());
+        this.mating.setLiuchan(report.getMating().getLiuchan());
 
         //销售
         this.sale.setBoar(this.sale.getBoar() + report.getSale().getBoar());
