@@ -30,6 +30,7 @@ public class DoctorDailyMatingEventCount implements DoctorDailyEventCount {
     public void dailyEventHandle(DoctorPigEvent event, DoctorDailyReportDto doctorDailyReportDto) {
         DoctorMatingDailyReport doctorMatingDailyReport = new DoctorMatingDailyReport();
 
+        log.info("daily mate report event:{},report:{} ", event, doctorDailyReportDto);
         DoctorMatingType matingType = DoctorMatingType.from(event.getDoctorMateType());
         if (matingType == null) {
             return;
@@ -57,5 +58,6 @@ public class DoctorDailyMatingEventCount implements DoctorDailyEventCount {
                 return;
         }
         doctorDailyReportDto.getMating().addMatingDaily(doctorMatingDailyReport);
+        log.info("daily mate report end event:{}, report:{} ", doctorMatingDailyReport, doctorDailyReportDto);
     }
 }

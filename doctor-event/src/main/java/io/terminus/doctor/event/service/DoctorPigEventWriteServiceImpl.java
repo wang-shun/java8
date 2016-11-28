@@ -103,7 +103,7 @@ public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteServic
 
             // publish zk event
             publishEvent(result);
-            publishBarnEvent(ImmutableMap.of("doctorBarnId", doctorFarmEntryDto.getBarnId()));
+            publishBarnEvent(doctorFarmEntryDto.getBarnId());
             coreEventDispatcher.publish(DoctorPigCountEvent.builder()
                     .farmId(doctorBasicInputInfoDto.getFarmId())
                     .orgId(doctorBasicInputInfoDto.getOrgId())
@@ -230,8 +230,8 @@ public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteServic
 
             Map<String,Object> result = doctorPigEventManager.createCasualPigEvent(doctorBasicInputInfoDto, dto);
             publishEvent(result);
-            publishBarnEvent(ImmutableMap.of("doctorBarnId", doctorChgLocationDto.getChgLocationFromBarnId()));
-            publishBarnEvent(ImmutableMap.of("doctorBarnId", doctorChgLocationDto.getChgLocationToBarnId()));
+            publishBarnEvent(doctorChgLocationDto.getChgLocationFromBarnId());
+            publishBarnEvent(doctorChgLocationDto.getChgLocationToBarnId());
             return Response.ok(Params.getWithConvert(result,"doctorEventId",a->Long.valueOf(a.toString())));
         }catch (Exception e){
             log.error("vaccination event create fail, cause:{}", Throwables.getStackTraceAsString(e));
@@ -247,8 +247,8 @@ public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteServic
 
             Map<String,Object> result = doctorPigEventManager.createCasualPigEvent(doctorBasicInputInfoDto, dto);
             publishEvent(result);
-            publishBarnEvent(ImmutableMap.of("doctorBarnId", doctorChgFarmDto.getFromBarnId()));
-            publishBarnEvent(ImmutableMap.of("doctorBarnId", doctorChgFarmDto.getToBarnId()));
+            publishBarnEvent(doctorChgFarmDto.getFromBarnId());
+            publishBarnEvent(doctorChgFarmDto.getToBarnId());
             coreEventDispatcher.publish(DoctorPigCountEvent.builder()
                     .farmId(doctorBasicInputInfoDto.getFarmId())
                     .orgId(doctorBasicInputInfoDto.getOrgId())
@@ -272,7 +272,7 @@ public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteServic
 
             Map<String,Object> result = doctorPigEventManager.createCasualPigEvent(doctorBasicInputInfoDto, dto);
             publishEvent(result);
-            publishBarnEvent(ImmutableMap.of("doctorBarnId", doctorBasicInputInfoDto.getBarnId()));
+            publishBarnEvent(doctorBasicInputInfoDto.getBarnId());
             return Response.ok(Params.getWithConvert(result,"doctorEventId",a->Long.valueOf(a.toString())));
         } catch (ServiceException e) {
             return Response.fail(e.getMessage());
@@ -325,8 +325,8 @@ public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteServic
 
             Map<String,Object> result = doctorPigEventManager.createSowPigEvent(doctorBasicInputInfoDto, dto);
             publishEvent(result);
-            publishBarnEvent(ImmutableMap.of("doctorBarnId", doctorChgLocationDto.getChgLocationFromBarnId()));
-            publishBarnEvent(ImmutableMap.of("doctorBarnId", doctorChgLocationDto.getChgLocationToBarnId()));
+            publishBarnEvent(doctorChgLocationDto.getChgLocationFromBarnId());
+            publishBarnEvent(doctorChgLocationDto.getChgLocationToBarnId());
             return Response.ok(Params.getWithConvert(result, "doctorEventId", a->Long.valueOf(a.toString())));
         }catch(IllegalStateException e){
             log.error("change sow location event illegal status, cause:{}", e.getMessage());
@@ -506,7 +506,7 @@ public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteServic
      * 推送对应的事件信息
      * @param results
      */
-    private void publishEvent (Map<String,Object> results){
+    private void publishEvent(Map<String,Object> results){
         try {
             if ("single".equals(results.get("contextType"))) {
                 ListenedPigEvent listenedPigEvent = new ListenedPigEvent();
@@ -535,21 +535,12 @@ public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteServic
             log.error(Throwables.getStackTraceAsString(e));
         }
     }
-
-
-
+    
     /**
      * 推送猪舍事件信息
-     * @param result
+     * @param barnId 猪舍id
      */
-    private void publishBarnEvent(Map<String, Object> result) {
-        try {
-            ListenedBarnEvent listenedBarnEvent = new ListenedBarnEvent();
-            listenedBarnEvent.setBarnId((Long) result.get("doctorBarnId"));
-            coreEventDispatcher.publish(listenedBarnEvent);
-        } catch (Exception e) {
-            log.error("failed to publish barn event, cause:{}", Throwables.getStackTraceAsString(e));
-        }
-
+    private void publishBarnEvent(Long barnId) {
+        coreEventDispatcher.publish(ListenedBarnEvent.builder().barnId(barnId).build());
     }
 }
