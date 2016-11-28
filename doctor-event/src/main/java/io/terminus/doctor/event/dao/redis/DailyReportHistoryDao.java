@@ -62,7 +62,7 @@ public class DailyReportHistoryDao {
      * @param sumAt
      */
     public void saveDailyReport(DoctorDailyReportDto reportDto, Long farmId, Date sumAt){
-        log.info("save DoctorDailyReportDto:{}", reportDto);
+        log.info("save farmId:{}, sumAt:{}, DoctorDailyReportDto:{}", farmId, sumAt, reportDto);
         jedisTemplate.execute(jedis -> {
             jedis.setex(getRedisKey(farmId, sumAt), 86400, JsonMapper.JSON_NON_EMPTY_MAPPER.toJson(reportDto));
         });
