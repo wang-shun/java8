@@ -502,6 +502,7 @@ public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteServic
             if ("single".equals(results.get("contextType"))) {
                 ListenedPigEvent listenedPigEvent = new ListenedPigEvent();
                 listenedPigEvent.setPigId(Long.parseLong(results.get("doctorPigId").toString()));
+                listenedPigEvent.setPigEventId(Params.getWithConvert(results,"doctorEventId", a -> Long.valueOf(a.toString())));
                 listenedPigEvent.setEventType((Integer) results.get("type"));
                 coreEventDispatcher.publish(listenedPigEvent);
             } else {
@@ -510,6 +511,7 @@ public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteServic
                     Map<String, Object> map = (Map<String, Object>) results.get(pigId);
                     ListenedPigEvent listenedPigEvent = new ListenedPigEvent();
                     listenedPigEvent.setPigId((Long.parseLong(pigId)));
+                    listenedPigEvent.setPigEventId(Params.getWithConvert(map,"doctorEventId", a -> Long.valueOf(a.toString())));
                     listenedPigEvent.setEventType((Integer) map.get("type"));
                     list.add(listenedPigEvent);
                 });
