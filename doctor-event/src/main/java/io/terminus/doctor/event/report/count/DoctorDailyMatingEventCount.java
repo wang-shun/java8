@@ -37,7 +37,7 @@ public class DoctorDailyMatingEventCount implements DoctorDailyEventCount {
 
     @Override
     public void dailyEventHandle(DoctorPigEvent event, DoctorDailyReportDto doctorDailyReportDto) {
-        DoctorMatingDailyReport doctorMatingDailyReport = new DoctorMatingDailyReport();
+        DoctorMatingDailyReport doctorMatingDailyReport =doctorDailyReportDto.getMating();
 
         log.info("daily mate report event:{},report:{} ", event, doctorDailyReportDto);
         DoctorMatingType matingType = DoctorMatingType.from(event.getDoctorMateType());
