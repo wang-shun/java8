@@ -55,6 +55,12 @@ public class DoctorReports {
     @RpcConsumer
     private DoctorMaterialConsumeProviderReadService doctorMaterialConsumeProviderReadService;
 
+    @RequestMapping(value = "/test", method = RequestMethod.GET)
+    public Boolean testRedis(@RequestParam("farmId") Long farmId,
+                             @RequestParam("date") String date, @RequestParam("json") String json) {
+        return RespHelper.or500(doctorDailyReportReadService.testRedis(farmId, date, json));
+    }
+
     /**
      * 根据farmId和日期查询猪场日报表(缓存方式)
      * @param farmId 猪场id

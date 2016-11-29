@@ -72,4 +72,6 @@ public interface DoctorDailyReportReadService {
      * @return map 的 key 为 farmId, value 为开始日期
      */
     Response<Map<Long, String>> getDailyReport2Update();
+
+    Response<Boolean> testRedis(Long farmId, String sumAt, String json);
 }

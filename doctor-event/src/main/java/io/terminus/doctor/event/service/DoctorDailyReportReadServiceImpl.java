@@ -6,6 +6,7 @@ import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.Response;
 import io.terminus.common.utils.Dates;
+import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.cache.DoctorDailyReportCache;
@@ -179,6 +180,18 @@ public class DoctorDailyReportReadServiceImpl implements DoctorDailyReportReadSe
         }catch(Exception e) {
             log.error("getDailyReport2Update failed, cause:{}", Throwables.getStackTraceAsString(e));
             return Response.fail("get.daily.report.to.update.fail");
+        }
+    }
+
+    @Override
+    public Response<Boolean> testRedis(Long farmId, String sumAt, String json) {
+        try {
+            dailyReportHistoryDao.saveDailyReport(JsonMapper.nonEmptyMapper().fromJson(json, JsonMapper.nonEmptyMapper().createCollectionType(DoctorDailyReportDto.class))
+                    , farmId, DateUtil.toDate(sumAt));
+            return Response.ok(true);
+        } catch (Exception e) {
+            log.error("failed, cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("hehe");
         }
     }
 }
