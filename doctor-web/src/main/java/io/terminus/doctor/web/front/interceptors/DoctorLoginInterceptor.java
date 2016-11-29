@@ -56,13 +56,11 @@ public class DoctorLoginInterceptor extends HandlerInterceptorAdapter {
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         WebUtil.putRequestAndResponse(request, response);
-
         //兼容app壳里的h5和web！！！
         HttpSession session = request.getSession(false);
         if (session != null) {
             Object userIdInSession = session.getAttribute(Constants.SESSION_USER_ID);
             if (userIdInSession != null) {
-
                 final Long userId = Long.valueOf(userIdInSession.toString());
                 Response<? extends User> result = userCache.getUnchecked(userId);
                 if (!result.isSuccess()) {
@@ -74,9 +72,9 @@ public class DoctorLoginInterceptor extends HandlerInterceptorAdapter {
                 if (user != null) {
                     ParanaUser paranaUser = DoctorUserMaker.from(user);
                     UserUtil.putCurrentUser(paranaUser);
+                    return true;
                 }
             }
-            return true;
         }
 
         if (request.getAttribute("sid") == null || isEmpty((String)request.getAttribute("sid"))) {

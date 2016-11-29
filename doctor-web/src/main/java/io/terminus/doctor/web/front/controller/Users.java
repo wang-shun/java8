@@ -16,6 +16,7 @@ import io.terminus.common.utils.JsonMapper;
 import io.terminus.common.utils.MapBuilder;
 import io.terminus.doctor.common.utils.RandomUtil;
 import io.terminus.doctor.common.utils.RespHelper;
+import io.terminus.doctor.msg.enums.SmsCodeType;
 import io.terminus.doctor.user.model.DoctorUser;
 import io.terminus.doctor.user.service.DoctorUserReadService;
 import io.terminus.doctor.web.core.Constants;
@@ -40,11 +41,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
@@ -111,7 +108,14 @@ public class Users {
             throw new JsonResponseException("auth.permission.find.fail");
         }
     }
-
+    @RequestMapping(value = "/getUserById/{id}",method = RequestMethod.GET,produces = MediaType.APPLICATION_JSON_VALUE)
+    public User getUserById(@PathVariable(value = "id") Long id) {
+        Response<User> userResponse=doctorUserReadService.findById(id);
+        if (!userResponse.isSuccess()){
+            throw new JsonResponseException(userResponse.getError());
+        }
+        return userResponse.getResult();
+    }
     /**
      * 生成sessionId
      */
@@ -165,6 +169,7 @@ public class Users {
 
         //将后台生成的sessionId返回给前台，用于以后的sid
         return MapBuilder.<String, Object>of()
+                .put("userId",snapshot.get(Sessions.USER_ID))
                 .put("sid", token.getSessionId())
                 .put("redirect", !StringUtils.hasText(target) ? "/" : target)
                 .put("expiredAt", token.getExpiredAt())
@@ -235,13 +240,13 @@ public class Users {
      * 发送短信验证码
      *
      * @param mobile 手机号
-     * @param templateName 短信模板名称
+     * @param smsCodeType 短信模板ID
      * @return 短信发送结果
      */
     @RequestMapping(value = "/sms", method = RequestMethod.POST)
     @ResponseBody
     public Boolean sendSms(@RequestParam("mobile") String mobile,
-                           @RequestParam("templateName") String templateName, HttpServletRequest request) {
+                           @RequestParam("smsCodeType") Integer smsCodeType, HttpServletRequest request) {
         HttpSession session = request.getSession(false);
         if (session == null) {
             return false;
@@ -250,7 +255,7 @@ public class Users {
         if (sessionId == null) {
             return false;
         }
-        return doctorCommonSessionBean.sendSmsCode(mobile, String.valueOf(sessionId), templateName);
+        return doctorCommonSessionBean.sendSmsCode(mobile, String.valueOf(sessionId), SmsCodeType.from(smsCodeType).template());
     }
 
     /**
