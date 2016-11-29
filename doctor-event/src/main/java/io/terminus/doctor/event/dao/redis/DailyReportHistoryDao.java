@@ -64,6 +64,7 @@ public class DailyReportHistoryDao {
      */
     public void saveDailyReport(DoctorDailyReportDto reportDto, Long farmId, Date sumAt){
         String result = JsonMapper.nonEmptyMapper().toJson(reportDto);
+        log.info("save daily report:{}", result);
         jedisTemplate.execute(jedis -> {
             jedis.setex(getRedisKey(farmId, sumAt), 86400, result);
         });

@@ -133,13 +133,17 @@ public class DoctorPigEventListener implements EventListener {
             case HP:
                 int hp = doctorKpiDao.firstMatingCounts(event.getFarmId(), startAt, endAt);
                 DoctorDailyReportDto reportHP = doctorDailyReportCache.getDailyReport(event.getFarmId(), startAt);
+                log.info("reportHP before:{}", reportHP);
                 reportHP.getMating().setHoubei(hp);
+                log.info("reportHP after:{}", reportHP);
                 doctorDailyReportCache.putDailyReport(event.getFarmId(), startAt, reportHP);
                 break;
             case DP:
                 int dp = doctorKpiDao.weanMatingCounts(event.getFarmId(), startAt, endAt);
                 DoctorDailyReportDto reportDP = doctorDailyReportCache.getDailyReport(event.getFarmId(), startAt);
+                log.info("reportDP before:{}", reportDP);
                 reportDP.getMating().setDuannai(dp);
+                log.info("reportDP after:{}", reportDP);
                 doctorDailyReportCache.putDailyReport(event.getFarmId(), startAt, reportDP);
                 break;
             case YP:

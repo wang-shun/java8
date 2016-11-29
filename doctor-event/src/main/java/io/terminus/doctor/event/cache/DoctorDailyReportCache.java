@@ -67,6 +67,7 @@ public class DoctorDailyReportCache {
      * @param report 日报统计
      */
     public void putDailyReport(Long farmId, Date date, DoctorDailyReportDto report) {
+        log.info("putDailyReport farmId:{}, date:{}, report:{}", farmId, date, report);
         dailyReportHistoryDao.saveDailyReport(report, farmId, date);
     }
 
