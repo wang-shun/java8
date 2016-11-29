@@ -47,6 +47,7 @@ public class DailyReportHistoryDao {
         String json = jedisTemplate.execute(jedis -> {
             return jedis.get(getRedisKey(farmId, sumAt));
         });
+        //String json = jedis.get(getRedisKey(farmId, sumAt));
         if(json != null){
             return JsonMapper.JSON_NON_EMPTY_MAPPER.fromJson(json, DoctorDailyReportDto.class);
         }
