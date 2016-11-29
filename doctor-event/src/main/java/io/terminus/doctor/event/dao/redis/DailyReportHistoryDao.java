@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import java.util.Date;
+import java.util.UUID;
 
 /**
  * Created by chenzenghui on 16/8/29.
@@ -63,7 +64,7 @@ public class DailyReportHistoryDao {
      */
     public void saveDailyReport(DoctorDailyReportDto reportDto, Long farmId, Date sumAt){
         log.info("save farmId:{}, sumAt:{}, DoctorDailyReportDto:{}", farmId, sumAt, reportDto);
-        String result = JsonMapper.JSON_NON_EMPTY_MAPPER.toJson(reportDto);
+        String result = JsonMapper.JSON_NON_EMPTY_MAPPER.toJson(reportDto) + " ----- "+ UUID.randomUUID().toString();
         log.info("fucked result:{}", result);
         jedisTemplate.execute(jedis -> {
             jedis.setex(getRedisKey(farmId, sumAt), 86400, result);
