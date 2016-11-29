@@ -67,7 +67,7 @@ public class DailyReportHistoryDao {
         String result = JsonMapper.JSON_NON_EMPTY_MAPPER.toJson(reportDto) + " ----- "+ UUID.randomUUID().toString();
         log.info("fucked result:{}", result);
         jedisTemplate.execute(jedis -> {
-            jedis.setex(getRedisKey(farmId, sumAt), 86400, result);
+            jedis.setex(getRedisKey(farmId, sumAt), 86400, result + " ===== " + UUID.randomUUID().toString());
         });
     }
 
