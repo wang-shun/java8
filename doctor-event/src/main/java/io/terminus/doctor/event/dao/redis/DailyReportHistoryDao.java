@@ -12,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import java.util.Date;
-import java.util.UUID;
 
 /**
  * Created by chenzenghui on 16/8/29.
@@ -36,10 +35,7 @@ public class DailyReportHistoryDao {
         return REDIS_KEY_DAILY_REPORT_HISTORY + farmId + ":" + DateUtil.toDateString(sumAt);
     }
 
-//    @PostConstruct
-//    void initJedis(){
-//        jedis = new Jedis("127.0.0.1", 6379);
-//    }
+
     /**
      * 根据farmId和sumAt从redis查询日报dto. 如果redis中没有就从数据库查询并存入redis
      */
@@ -47,7 +43,6 @@ public class DailyReportHistoryDao {
         String json = jedisTemplate.execute(jedis -> {
             return jedis.get(getRedisKey(farmId, sumAt));
         });
-        //String json = jedis.get(getRedisKey(farmId, sumAt));
         if(json != null){
             return JsonMapper.JSON_NON_EMPTY_MAPPER.fromJson(json, DoctorDailyReportDto.class);
         }
@@ -68,12 +63,9 @@ public class DailyReportHistoryDao {
      * @param sumAt
      */
     public void saveDailyReport(DoctorDailyReportDto reportDto, Long farmId, Date sumAt){
-        log.info("save farmId:{}, sumAt:{}, DoctorDailyReportDto:{}", farmId, sumAt, reportDto);
-        String result = JsonMapper.JSON_NON_EMPTY_MAPPER.toJson(reportDto) + " +-----+ "+ UUID.randomUUID().toString();
-        log.info("fucked result:{}", result);
+        String result = JsonMapper.nonEmptyMapper().toJson(reportDto);
         jedisTemplate.execute(jedis -> {
-            jedis.set(getRedisKey(farmId, sumAt), result + " ===== " + UUID.randomUUID().toString());
-            jedis.set(UUID.randomUUID().toString(), result + " ===== " + UUID.randomUUID().toString());
+            jedis.setex(getRedisKey(farmId, sumAt), 86400, result);
         });
     }
 
