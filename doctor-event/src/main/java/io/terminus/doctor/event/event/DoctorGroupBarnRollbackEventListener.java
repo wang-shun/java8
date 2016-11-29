@@ -18,7 +18,7 @@ import org.springframework.stereotype.Component;
  */
 @Slf4j
 @Component
-public class DoctorEventListener implements EventListener{
+public class DoctorGroupBarnRollbackEventListener implements EventListener{
 
     @Autowired
     private GroupSearchWriteService groupSearchWriteService;

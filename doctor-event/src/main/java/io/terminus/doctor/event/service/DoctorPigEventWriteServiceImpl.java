@@ -7,7 +7,9 @@ import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.Response;
 import io.terminus.common.utils.BeanMapper;
+import io.terminus.doctor.common.enums.DataEventType;
 import io.terminus.doctor.common.event.CoreEventDispatcher;
+import io.terminus.doctor.common.event.DataEvent;
 import io.terminus.doctor.common.utils.Params;
 import io.terminus.doctor.event.dao.DoctorPigEventDao;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
@@ -25,6 +27,7 @@ import io.terminus.doctor.event.dto.event.usual.DoctorDiseaseDto;
 import io.terminus.doctor.event.dto.event.usual.DoctorFarmEntryDto;
 import io.terminus.doctor.event.dto.event.usual.DoctorRemovalDto;
 import io.terminus.doctor.event.dto.event.usual.DoctorVaccinationDto;
+import io.terminus.doctor.event.event.DoctorZkPigEvent;
 import io.terminus.doctor.event.event.ListenedBarnEvent;
 import io.terminus.doctor.event.event.ListenedPigEvent;
 import io.terminus.doctor.event.manager.DoctorPigEventManager;
@@ -505,7 +508,7 @@ public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteServic
 
         try{
             // 向zk发送刷新消息的事件
-           // publisher.publish(DataEvent.toBytes(DataEventType.PigEventCreate.getKey(), new PigEventCreateEvent(results)));
+            publisher.publish(DataEvent.toBytes(DataEventType.PigEventCreate.getKey(), new DoctorZkPigEvent(results)));
         }catch(Exception e){
             log.error(Throwables.getStackTraceAsString(e));
         }
