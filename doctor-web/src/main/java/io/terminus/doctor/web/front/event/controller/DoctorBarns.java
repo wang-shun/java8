@@ -188,7 +188,7 @@ public class DoctorBarns {
     //根据猪id过滤猪舍: 取出猪的猪舍type, 过滤一把
     private List<DoctorBarn> filterBarnByPigIds(List<DoctorBarn> barns, String pigIds) {
         if (barns == null || isEmpty(pigIds)) {
-            return MoreObjects.firstNonNull(barns, Lists.newArrayList());
+            return MoreObjects.firstNonNull(barns, Lists.<DoctorBarn>newArrayList());
         }
 
         List<Integer> barnTypes = Splitters.splitToLong(pigIds, Splitters.COMMA).stream()
