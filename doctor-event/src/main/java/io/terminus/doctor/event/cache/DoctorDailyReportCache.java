@@ -51,6 +51,16 @@ public class DoctorDailyReportCache {
     }
 
     /**
+     * 从redis中取report，如果没有取数据库的
+     * @param farmId  猪场id
+     * @param date    日期
+     * @return  日报
+     */
+    public DoctorDailyReportDto getDailyReport(Long farmId, Date date) {
+        return dailyReportHistoryDao.getDailyReportWithRedis(farmId, Dates.startOfDay(date));
+    }
+
+    /**
      * report put 到redis, 覆盖原先的report
      * @param farmId 猪场id
      * @param date   统计日期

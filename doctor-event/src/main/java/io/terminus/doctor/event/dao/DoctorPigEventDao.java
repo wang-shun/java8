@@ -252,6 +252,14 @@ public class DoctorPigEventDao extends MyBatisDao<DoctorPigEvent> {
     }
 
     /**
+     * 根据事件类型和时间区间查询
+     */
+    public List<DoctorPigEvent> findByFarmIdAndTypeAndDate(long farmId, int type, Date startAt, Date endAt) {
+        return getSqlSession().selectList(sqlId("findByFarmIdAndTypeAndDate"),
+                ImmutableMap.of("farmId", farmId, "type", type, "startAt", startAt, "endAt", endAt));
+    }
+
+    /**
      * 临时使用
      * @param doctorPigEvent
      */

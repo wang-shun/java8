@@ -8,6 +8,7 @@ import io.terminus.common.model.Response;
  * Email:yaoqj@terminus.io
  * Descirbe:
  */
+@Deprecated
 public interface DoctorDailyPigReportWriteService {
 
     /**
@@ -15,6 +16,7 @@ public interface DoctorDailyPigReportWriteService {
      * @param pigEventId
      * @return
      */
+    @Deprecated
     Response<Boolean> updateDailyPigReportInfo(Long pigEventId);
 
 }

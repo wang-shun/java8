@@ -28,7 +28,6 @@ import io.terminus.doctor.event.dto.event.usual.DoctorDiseaseDto;
 import io.terminus.doctor.event.dto.event.usual.DoctorFarmEntryDto;
 import io.terminus.doctor.event.dto.event.usual.DoctorRemovalDto;
 import io.terminus.doctor.event.dto.event.usual.DoctorVaccinationDto;
-import io.terminus.doctor.event.event.DoctorPigCountEvent;
 import io.terminus.doctor.event.event.ListenedBarnEvent;
 import io.terminus.doctor.event.event.ListenedPigEvent;
 import io.terminus.doctor.event.event.ListenedPigEvents;
@@ -95,11 +94,6 @@ public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteServic
             // publish zk event
             publishEvent(result);
             publishBarnEvent(doctorFarmEntryDto.getBarnId());
-            coreEventDispatcher.publish(DoctorPigCountEvent.builder()
-                    .farmId(doctorBasicInputInfoDto.getFarmId())
-                    .orgId(doctorBasicInputInfoDto.getOrgId())
-                    .pigType(doctorBasicInputInfoDto.getPigType()).build());
-
             return Response.ok(Params.getWithConvert(result,"doctorPigId",a->Long.valueOf(a.toString())));
         } catch (ServiceException e) {
             return Response.fail(e.getMessage());
@@ -240,11 +234,6 @@ public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteServic
             publishEvent(result);
             publishBarnEvent(doctorChgFarmDto.getFromBarnId());
             publishBarnEvent(doctorChgFarmDto.getToBarnId());
-            coreEventDispatcher.publish(DoctorPigCountEvent.builder()
-                    .farmId(doctorBasicInputInfoDto.getFarmId())
-                    .orgId(doctorBasicInputInfoDto.getOrgId())
-                    .pigType(doctorBasicInputInfoDto.getPigType()).build());
-
             return Response.ok(Params.getWithConvert(result,"doctorEventId",a->Long.valueOf(a.toString())));
         }catch (IllegalStateException e){
             log.error("chg farm event illegal state, cause:{}", Throwables.getStackTraceAsString(e));
