@@ -47,10 +47,10 @@ public class DailyReportHistoryDao {
      * 根据farmId和sumAt从redis查询日报dto. 如果redis中没有就从数据库查询并存入redis
      */
     public DoctorDailyReportDto getDailyReportWithRedis(Long farmId, Date sumAt) {
-//        String json = jedisTemplate.execute(jedis -> {
-//            return jedis.get(getRedisKey(farmId, sumAt));
-//        });
-        String json = jedis.get(getRedisKey(farmId, sumAt));
+        String json = jedisTemplate.execute(jedis -> {
+            return jedis.get(getRedisKey(farmId, sumAt));
+        });
+        //String json = jedis.get(getRedisKey(farmId, sumAt));
         if(json != null){
             return JsonMapper.JSON_NON_EMPTY_MAPPER.fromJson(json, DoctorDailyReportDto.class);
         }
