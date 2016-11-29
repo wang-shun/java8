@@ -10,9 +10,7 @@ import io.terminus.doctor.event.model.DoctorDailyReport;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
-import redis.clients.jedis.Jedis;
 
-import javax.annotation.PostConstruct;
 import java.util.Date;
 import java.util.UUID;
 
@@ -25,7 +23,6 @@ import java.util.UUID;
 public class DailyReportHistoryDao {
     private static final String REDIS_KEY_DAILY_REPORT_HISTORY = "daily-report:history:";
     private final JedisTemplate jedisTemplate;
-    private Jedis jedis;
     private final DoctorDailyReportDao doctorDailyReportDao;
 
     @Autowired
@@ -39,10 +36,10 @@ public class DailyReportHistoryDao {
         return REDIS_KEY_DAILY_REPORT_HISTORY + farmId + ":" + DateUtil.toDateString(sumAt);
     }
 
-    @PostConstruct
-    void initJedis(){
-        jedis = new Jedis("127.0.0.1", 6379);
-    }
+//    @PostConstruct
+//    void initJedis(){
+//        jedis = new Jedis("127.0.0.1", 6379);
+//    }
     /**
      * 根据farmId和sumAt从redis查询日报dto. 如果redis中没有就从数据库查询并存入redis
      */
@@ -74,11 +71,10 @@ public class DailyReportHistoryDao {
         log.info("save farmId:{}, sumAt:{}, DoctorDailyReportDto:{}", farmId, sumAt, reportDto);
         String result = JsonMapper.JSON_NON_EMPTY_MAPPER.toJson(reportDto) + " +-----+ "+ UUID.randomUUID().toString();
         log.info("fucked result:{}", result);
-//        jedisTemplate.execute(jedis -> {
-//            jedis.setex(getRedisKey(farmId, sumAt), 86400, result + " ===== " + UUID.randomUUID().toString());
-//            jedis.setex(UUID.randomUUID().toString(), 86400, result + " ===== " + UUID.randomUUID().toString());
-//        });
-        jedis.set(getRedisKey(farmId, sumAt), result);
+        jedisTemplate.execute(jedis -> {
+            jedis.set(getRedisKey(farmId, sumAt), result + " ===== " + UUID.randomUUID().toString());
+            jedis.set(UUID.randomUUID().toString(), result + " ===== " + UUID.randomUUID().toString());
+        });
     }
 
     /**
