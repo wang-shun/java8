@@ -78,51 +78,6 @@ public class DoctorDailyReportDto implements Serializable {
     private boolean fail;
 
     /**
-     * 只修改猪相关的统计
-     */
-    public void setPig(DoctorDailyReportDto report) {
-        //妊娠检查
-        this.checkPreg.setPositive(report.getCheckPreg().getPositive());
-        this.checkPreg.setNegative(report.getCheckPreg().getNegative());
-        this.checkPreg.setFanqing(report.getCheckPreg().getFanqing());
-        this.checkPreg.setLiuchan(report.getCheckPreg().getLiuchan());
-
-        //死淘
-        this.dead.setBoar(this.dead.getBoar() + report.getDead().getBoar());
-        this.dead.setSow(this.dead.getSow() + report.getDead().getSow());
-
-        //分娩
-        this.deliver.setNest(this.deliver.getNest() + report.getDeliver().getNest());
-        this.deliver.setLive(this.deliver.getLive() + report.getDeliver().getLive());
-        this.deliver.setHealth(this.deliver.getHealth() + report.getDeliver().getHealth());
-        this.deliver.setWeak(this.deliver.getWeak() + report.getDeliver().getWeak());
-        this.deliver.setBlack(this.deliver.getBlack() + report.getDeliver().getBlack());
-        this.deliver.setAvgWeight(report.getDeliver().getAvgWeight() == 0D ? this.deliver.getAvgWeight() : report.getDeliver().getAvgWeight());
-
-        //存栏
-        this.liveStock.setBoar(report.getLiveStock().getBoar()==0 ? this.liveStock.getBoar() : report.getLiveStock().getBoar());
-        this.liveStock.setPeihuaiSow(report.getLiveStock().getPeihuaiSow() == 0? this.liveStock.getPeihuaiSow() : report.getLiveStock().getPeihuaiSow());
-        this.liveStock.setBuruSow(report.getLiveStock().getBuruSow() == 0 ? this.liveStock.getBuruSow(): report.getLiveStock().getBuruSow());
-        this.liveStock.setKonghuaiSow(report.getLiveStock().getKonghuaiSow() == 0 ? this.liveStock.getKonghuaiSow() : report.getLiveStock().getKonghuaiSow());
-
-        //配种
-        this.mating.setHoubei(report.getMating().getHoubei());
-        this.mating.setDuannai(report.getMating().getDuannai());
-        this.mating.setFanqing(report.getMating().getFanqing());
-        this.mating.setLiuchan(report.getMating().getLiuchan());
-
-        //销售
-        this.sale.setBoar(this.sale.getBoar() + report.getSale().getBoar());
-        this.sale.setSow(this.sale.getSow() + report.getSale().getSow());
-
-        //断奶仔猪
-        this.wean.setCount(this.wean.getCount() + report.getWean().getCount());
-        this.wean.setWeight(report.getWean().getWeight() == 0 ? this.wean.getWeight() : report.getWean().getWeight());
-        this.wean.setNest(this.wean.getNest() + report.getWean().getNest());
-        this.wean.setAvgDayAge(report.getWean().getAvgDayAge() == 0 ? this.wean.getAvgDayAge() : report.getWean().getAvgDayAge());
-    }
-
-    /**
      * 只修改猪群相关的统计
      */
     public void setGroup(DoctorDailyReportDto report) {

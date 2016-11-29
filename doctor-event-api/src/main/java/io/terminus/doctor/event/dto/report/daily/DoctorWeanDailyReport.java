@@ -33,11 +33,4 @@ public class DoctorWeanDailyReport implements Serializable {
      * 断奶均日龄
      */
     private double avgDayAge;
-
-    public void addWeanCount(DoctorWeanDailyReport dto){
-        this.count += dto.getCount();
-        this.weight = dto.getWeight();
-        this.nest += dto.getNest();
-        this.avgDayAge = dto.getAvgDayAge();
-    }
 }

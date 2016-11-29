@@ -72,43 +72,6 @@ public class DoctorDailyReportCache {
 
     /**
      * 更新redis中的日报
-     * @param reportDto 猪日报
-     * @param date 日报的日期
-     */
-    public void putDailyPigReport(Long farmId, Date date, DoctorDailyReportDto reportDto) {
-        log.info("put daily report pig dto:{}", reportDto);
-        Date startAt = Dates.startOfDay(date);
-        Date endAt = Dates.startOfDay(new Date());
-        DoctorDailyReportDto redisDto = dailyReportHistoryDao.getDailyReportWithRedis(farmId, startAt);
-        log.info("put daily report redis dto:{}", redisDto);
-        if (redisDto != null) {
-            redisDto.setPig(reportDto);
-            dailyReportHistoryDao.saveDailyReport(redisDto, farmId, startAt);
-        }
-        dailyReport2UpdateDao.saveDailyReport2Update(startAt, farmId);
-
-        //第一天已经算过了, 不用重新算
-        startAt = new DateTime(startAt).plusDays(1).toDate();
-
-        //更新猪存栏
-        while (!startAt.after(endAt)) {
-            DoctorDailyReportDto everyRedis = dailyReportHistoryDao.getDailyReportWithRedis(farmId, startAt);
-
-            //存栏
-            DoctorLiveStockDailyReport liveStock = everyRedis.getLiveStock();
-            liveStock.setBuruSow(doctorKpiDao.realTimeLiveStockFarrowSow(farmId, startAt));    //产房母猪
-            liveStock.setPeihuaiSow(doctorKpiDao.realTimeLiveStockSow(farmId, startAt) - liveStock.getBuruSow());    //配怀 = 总存栏 - 产房母猪
-            liveStock.setKonghuaiSow(0);                                                       //空怀猪作废, 置成0
-            liveStock.setBoar(doctorKpiDao.realTimeLiveStockBoar(farmId, startAt));            //公猪
-
-            everyRedis.setLiveStock(liveStock);
-            dailyReportHistoryDao.saveDailyReport(everyRedis, farmId, startAt);
-            startAt = new DateTime(startAt).plusDays(1).toDate();
-        }
-    }
-
-    /**
-     * 更新redis中的日报
      * @param reportDto 猪群日报
      */
     public void putDailyGroupReport(Long farmId, Date date, DoctorDailyReportDto reportDto) {

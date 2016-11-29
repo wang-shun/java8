@@ -2,15 +2,12 @@ package io.terminus.doctor.event.service;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Throwables;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.model.Response;
 import io.terminus.common.utils.BeanMapper;
-import io.terminus.doctor.common.enums.DataEventType;
 import io.terminus.doctor.common.event.CoreEventDispatcher;
-import io.terminus.doctor.common.event.DataEvent;
 import io.terminus.doctor.common.utils.Params;
 import io.terminus.doctor.event.dao.DoctorPigEventDao;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
@@ -30,8 +27,6 @@ import io.terminus.doctor.event.dto.event.usual.DoctorRemovalDto;
 import io.terminus.doctor.event.dto.event.usual.DoctorVaccinationDto;
 import io.terminus.doctor.event.event.ListenedBarnEvent;
 import io.terminus.doctor.event.event.ListenedPigEvent;
-import io.terminus.doctor.event.event.ListenedPigEvents;
-import io.terminus.doctor.event.event.PigEventCreateEvent;
 import io.terminus.doctor.event.manager.DoctorPigEventManager;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigEvent;
@@ -495,16 +490,14 @@ public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteServic
                 listenedPigEvent.setEventType((Integer) results.get("type"));
                 coreEventDispatcher.publish(listenedPigEvent);
             } else {
-                List<ListenedPigEvent> list = Lists.newArrayList();
                 results.keySet().forEach(pigId -> {
                     Map<String, Object> map = (Map<String, Object>) results.get(pigId);
                     ListenedPigEvent listenedPigEvent = new ListenedPigEvent();
                     listenedPigEvent.setPigId((Long.parseLong(pigId)));
                     listenedPigEvent.setPigEventId(Params.getWithConvert(map,"doctorEventId", a -> Long.valueOf(a.toString())));
                     listenedPigEvent.setEventType((Integer) map.get("type"));
-                    list.add(listenedPigEvent);
+                    coreEventDispatcher.publish(listenedPigEvent);
                 });
-                coreEventDispatcher.publish(new ListenedPigEvents(list));
             }
         } catch (Exception e) {
             log.error("failed to publish pig event, cause:{}", Throwables.getStackTraceAsString(e));
@@ -512,7 +505,7 @@ public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteServic
 
         try{
             // 向zk发送刷新消息的事件
-            publisher.publish(DataEvent.toBytes(DataEventType.PigEventCreate.getKey(), new PigEventCreateEvent(results)));
+           // publisher.publish(DataEvent.toBytes(DataEventType.PigEventCreate.getKey(), new PigEventCreateEvent(results)));
         }catch(Exception e){
             log.error(Throwables.getStackTraceAsString(e));
         }

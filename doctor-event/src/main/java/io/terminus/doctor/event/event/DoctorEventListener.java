@@ -2,23 +2,15 @@ package io.terminus.doctor.event.event;
 
 import com.google.common.base.Throwables;
 import com.google.common.eventbus.Subscribe;
-import io.terminus.common.model.Response;
-import io.terminus.common.utils.Dates;
 import io.terminus.doctor.common.event.EventListener;
-import io.terminus.doctor.event.dao.redis.DailyReportHistoryDao;
-import io.terminus.doctor.event.dto.report.daily.DoctorDailyReportDto;
 import io.terminus.doctor.event.search.barn.BarnSearchWriteService;
 import io.terminus.doctor.event.search.group.GroupSearchWriteService;
-import io.terminus.doctor.event.search.pig.PigSearchWriteService;
 import io.terminus.doctor.event.service.DoctorDailyGroupReportWriteService;
-import io.terminus.doctor.event.service.DoctorDailyPigReportWriteService;
 import io.terminus.doctor.event.service.DoctorPigTypeStatisticWriteService;
 import io.terminus.doctor.event.service.DoctorRollbackService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import java.util.Date;
 
 /**
  * Created by xjn on 16/11/9.
@@ -29,16 +21,10 @@ import java.util.Date;
 public class DoctorEventListener implements EventListener{
 
     @Autowired
-    private PigSearchWriteService pigSearchWriteService;
-
-    @Autowired
     private GroupSearchWriteService groupSearchWriteService;
 
     @Autowired
     private BarnSearchWriteService barnSearchWriteService;
-
-    @Autowired
-    private DoctorDailyPigReportWriteService doctorDailyPigReportWriteService;
 
     @Autowired
     private DoctorPigTypeStatisticWriteService doctorPigTypeStatisticWriteService;
@@ -48,43 +34,6 @@ public class DoctorEventListener implements EventListener{
 
     @Autowired
     private DoctorRollbackService doctorRollbackService;
-
-    @Autowired
-    private DailyReportHistoryDao dailyReportHistoryDao;
-
-    /**
-     * 监听处理多个猪事件
-     * @param listenedPigEvents
-     */
-    @Subscribe
-    public void handlePigEvents(ListenedPigEvents listenedPigEvents){
-        try {
-            log.info("[DoctorEventListener]-> handle.pig.events, listenedPigEvents->{}", listenedPigEvents);
-            listenedPigEvents.getList().forEach(listenedPigEvent -> {
-                pigSearchWriteService.update(listenedPigEvent.getPigId());
-                pigDailyReportUpdate(listenedPigEvent.getPigEventId());
-            });
-        } catch (Exception e) {
-            log.error("[DoctorEventListener]-> handle.pig.events.failed, cause {}, listenedPigEvents->{}", Throwables.getStackTraceAsString(e), listenedPigEvents);
-        }
-    }
-
-    /**
-     * 监听处理猪事件
-     * @param listenedPigEvent
-     */
-    @Subscribe
-    public void handlePigEvent(ListenedPigEvent listenedPigEvent){
-        try {
-            log.info("[DoctorEventListener]-> handle.pig.event, listenedPigEvent->{}", listenedPigEvent);
-            pigSearchWriteService.update(listenedPigEvent.getPigId());
-            DoctorDailyReportDto redisDto = dailyReportHistoryDao.getDailyReportWithRedis(1L, Dates.startOfDay(new Date()));
-            log.info("redisDto : {}", redisDto);
-            pigDailyReportUpdate(listenedPigEvent.getPigEventId());
-        } catch (Exception e) {
-            log.error("[DoctorEventListener]-> handle.pig.event.failed, cause {}, listenedPigEvent->{}", Throwables.getStackTraceAsString(e), listenedPigEvent);
-        }
-    }
 
     /**
      * 处理监听到的猪群事件
@@ -129,13 +78,6 @@ public class DoctorEventListener implements EventListener{
             doctorRollbackService.rollbackReportAndES(listenedRollbackEvent.getDoctorRollbackDtos());
         } catch (Exception e) {
             log.error("[DoctorEventListener]-> handle.rollback.event.failed, cause {}, listenedRollbackEvent->{}", Throwables.getStackTraceAsString(e), listenedRollbackEvent);
-        }
-    }
-
-    private void pigDailyReportUpdate(Long eventId){
-        Response<Boolean> response = doctorDailyPigReportWriteService.updateDailyPigReportInfo(eventId);
-        if(!response.isSuccess()){
-            log.error("update daily pig report error, cause:{}", response.getError());
         }
     }
 
