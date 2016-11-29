@@ -2,6 +2,7 @@ package io.terminus.doctor.event.event;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 import java.util.Map;
@@ -14,6 +15,7 @@ import java.util.Map;
  */
 @Data
 @AllArgsConstructor
+@NoArgsConstructor
 public class DoctorZkPigEvent implements Serializable {
     private static final long serialVersionUID = -3809912042345219678L;
 

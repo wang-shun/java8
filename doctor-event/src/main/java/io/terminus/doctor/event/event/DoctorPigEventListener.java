@@ -114,6 +114,8 @@ public class DoctorPigEventListener implements EventListener {
 
     //处理配种
     private void handleMate(DoctorPigEvent event) {
+        log.info("handle handleMate, event:{}", event);
+
         if (reportIsFullInit(event.getFarmId(), event.getEventAt())) {
             return;
         }
@@ -163,6 +165,8 @@ public class DoctorPigEventListener implements EventListener {
 
     //处理妊检
     private void handlePregCheck(DoctorPigEvent event) {
+        log.info("handle handlePregCheck, event:{}", event);
+
         if (reportIsFullInit(event.getFarmId(), event.getEventAt())) {
             return;
         }
@@ -207,6 +211,8 @@ public class DoctorPigEventListener implements EventListener {
 
     //处理分娩
     private void handleFarrow(DoctorPigEvent event) {
+        log.info("handle handleFarrow, event:{}", event);
+
         if (reportIsFullInit(event.getFarmId(), event.getEventAt())) {
             return;
         }
@@ -241,6 +247,7 @@ public class DoctorPigEventListener implements EventListener {
 
     //处理断奶
     private void handleWean(DoctorPigEvent event) {
+        log.info("handle handleWean, event:{}", event);
         if (reportIsFullInit(event.getFarmId(), event.getEventAt())) {
             return;
         }
@@ -282,7 +289,7 @@ public class DoctorPigEventListener implements EventListener {
         doctorPigTypeStatisticWriteService.statisticPig(event.getOrgId(), event.getFarmId(), event.getKind());
 
         //更新到今天的存栏
-        while (startAt.before(endAt)) {
+        while (!startAt.after(endAt)) {
             //查询startAt 这条的日报是否存在，如果已经初始化过了，则不做处理
             if (!reportIsFullInit(event.getFarmId(), startAt)) {
                 getLiveStock(event.getKind(), event.getFarmId(), startAt);
@@ -292,6 +299,7 @@ public class DoctorPigEventListener implements EventListener {
     }
 
     private void getLiveStock(Integer sex, Long farmId, Date startAt) {
+        log.info("handle getLiveStock, farmId:{}, startAt:{}", farmId, startAt);
         if (Objects.equals(sex, DoctorPig.PIG_TYPE.BOAR.getKey())) {
             int boar = doctorKpiDao.realTimeLiveStockBoar(farmId, startAt);
 
@@ -313,6 +321,8 @@ public class DoctorPigEventListener implements EventListener {
 
     //处理离场类型：死淘或销售
     private void handleSaleAndDead(DoctorPigEvent event) {
+        log.info("handle handleSaleAndDead, event:{}", event);
+
         Date startAt = Dates.startOfDay(event.getEventAt());
         Date endAt = DateUtil.getDateEnd(new DateTime(event.getEventAt())).toDate();
         Long farmId = event.getFarmId();

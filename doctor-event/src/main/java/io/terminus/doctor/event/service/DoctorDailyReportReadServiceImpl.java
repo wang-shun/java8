@@ -1,6 +1,5 @@
 package io.terminus.doctor.event.service;
 
-import com.google.common.base.Strings;
 import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
 import io.terminus.boot.rpc.common.annotation.RpcProvider;
@@ -75,8 +74,8 @@ public class DoctorDailyReportReadServiceImpl implements DoctorDailyReportReadSe
             }
             DoctorDailyReportDto report = dailyReportHistoryDao.getDailyReportWithRedis(farmId, date);
             if(report == null){
-                // 如果查当天的日报, 查不到就直接计算并存入redis
-                if(date.equals(Dates.startOfDay(new Date()))){
+                // 如果查当天的日报, 查不到就直接计算并存入redis, 如果查未来，返回失败查询
+                if(!date.after(Dates.startOfDay(new Date()))){
                     report = doctorDailyReportCache.initDailyReportByFarmIdAndDate(farmId, date);
                     dailyReportHistoryDao.saveDailyReport(report, farmId, date);
                     return Response.ok(report);
@@ -171,17 +170,6 @@ public class DoctorDailyReportReadServiceImpl implements DoctorDailyReportReadSe
             log.error("find daily report by sumat failed, date:{}, cause:{}", date, Throwables.getStackTraceAsString(e));
             return Response.fail("daily.report.find.fail");
         }
-    }
-
-    //根据farmId和sumAt从数据库查询, 并转换成日报统计
-    private DoctorDailyReportDto getDailyReportWithSql(Long farmId, Date sumAt) {
-        DoctorDailyReport report = doctorDailyReportDao.findByFarmIdAndSumAt(farmId, sumAt);
-
-        //如果没有查到, 要返回null, 交给上层判断
-        if (report == null || Strings.isNullOrEmpty(report.getData())) {
-            return null;
-        }
-        return report.getReportData();
     }
 
     @Override
