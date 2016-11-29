@@ -817,10 +817,16 @@
         order by event_at desc ,id DESC limit 1;
     </select>
 
-    <update id="updatePigEvents" parameterType="map">
+    <update id="updatePigEvents" parameterType="DoctorPigEvent">
         UPDATE
         <include refid="tb"/>
-        SET `name` = #{name}
-        WHERE `type` = #{type}
+        SET
+        `name` = #{name},
+        <if test="desc != null">`desc` = #{desc}</if>
+        WHERE
+        1=1
+        <if test="type != null">AND `type` = #{type}</if>
+        <if test="id != null">AND `id` = #{id}</if>
+
     </update>
 </mapper>

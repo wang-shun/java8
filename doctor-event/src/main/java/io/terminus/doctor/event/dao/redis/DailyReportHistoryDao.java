@@ -7,6 +7,7 @@ import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.dao.DoctorDailyReportDao;
 import io.terminus.doctor.event.dto.report.daily.DoctorDailyReportDto;
 import io.terminus.doctor.event.model.DoctorDailyReport;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
@@ -16,6 +17,7 @@ import java.util.Date;
  * Created by chenzenghui on 16/8/29.
  * 历史日报
  */
+@Slf4j
 @Repository
 public class DailyReportHistoryDao {
     private static final String REDIS_KEY_DAILY_REPORT_HISTORY = "daily-report:history:";
@@ -40,6 +42,7 @@ public class DailyReportHistoryDao {
         String json = jedisTemplate.execute(jedis -> {
             return jedis.get(getRedisKey(farmId, sumAt));
         });
+        log.info("json->{}",json);
         if(json != null){
             return JsonMapper.JSON_NON_EMPTY_MAPPER.fromJson(json, DoctorDailyReportDto.class);
         }
@@ -60,6 +63,7 @@ public class DailyReportHistoryDao {
      * @param sumAt
      */
     public void saveDailyReport(DoctorDailyReportDto reportDto, Long farmId, Date sumAt){
+        log.info("save farmId:{}, sumAt:{}, DoctorDailyReportDto:{}", farmId, sumAt, reportDto);
         jedisTemplate.execute(jedis -> {
             jedis.setex(getRedisKey(farmId, sumAt), 86400, JsonMapper.JSON_NON_EMPTY_MAPPER.toJson(reportDto));
         });

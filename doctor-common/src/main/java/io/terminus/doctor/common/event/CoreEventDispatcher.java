@@ -7,6 +7,7 @@ package io.terminus.doctor.common.event;
 import com.google.common.eventbus.AsyncEventBus;
 import com.google.common.eventbus.EventBus;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 
@@ -42,6 +43,7 @@ public class CoreEventDispatcher {
     public void registerListeners() {
         Map<String, EventListener> listeners = applicationContext.getBeansOfType(EventListener.class);
         for(EventListener eventListener : listeners.values()) {
+            log.info("registerListener->{}", eventListener.getClass().getName());
             eventBus.register(eventListener);
         }
     }

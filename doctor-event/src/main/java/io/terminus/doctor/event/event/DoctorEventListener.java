@@ -69,8 +69,8 @@ public class DoctorEventListener implements EventListener{
     public void handlePigEvent(ListenedPigEvent listenedPigEvent){
         try {
             log.info("[DoctorEventListener]-> handle.pig.event, listenedPigEvent->{}", listenedPigEvent);
-                pigSearchWriteService.update(listenedPigEvent.getPigId());
-                pigDailyReportUpdate(listenedPigEvent.getPigEventId());
+            pigSearchWriteService.update(listenedPigEvent.getPigId());
+            pigDailyReportUpdate(listenedPigEvent.getPigEventId());
         } catch (Exception e) {
             log.error("[DoctorEventListener]-> handle.pig.event.failed, cause {}, listenedPigEvent->{}", Throwables.getStackTraceAsString(e), listenedPigEvent);
         }
@@ -106,7 +106,6 @@ public class DoctorEventListener implements EventListener{
         } catch (Exception e) {
             log.error("[DoctorEventListener]-> handle.barn.event.failed, cause {}, listenedBarnEvent->{}", Throwables.getStackTraceAsString(e), listenedBarnEvent);
         }
-
     }
 
     /**
@@ -125,7 +124,7 @@ public class DoctorEventListener implements EventListener{
 
     private void pigDailyReportUpdate(Long eventId){
         Response<Boolean> response = doctorDailyPigReportWriteService.updateDailyPigReportInfo(eventId);
-        if(! response.isSuccess()){
+        if(!response.isSuccess()){
             log.error("update daily pig report error, cause:{}", response.getError());
         }
     }

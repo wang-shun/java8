@@ -1,22 +1,14 @@
 package io.terminus.doctor.event.report.count;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import io.terminus.common.utils.JsonMapper;
-import io.terminus.doctor.common.constants.JacksonType;
 import io.terminus.doctor.event.daily.DoctorDailyEventCount;
-import io.terminus.doctor.event.dao.DoctorPigTrackDao;
 import io.terminus.doctor.event.dto.report.daily.DoctorDailyReportDto;
 import io.terminus.doctor.event.dto.report.daily.DoctorMatingDailyReport;
+import io.terminus.doctor.event.enums.DoctorMatingType;
 import io.terminus.doctor.event.enums.PigEvent;
-import io.terminus.doctor.event.enums.PregCheckResult;
 import io.terminus.doctor.event.model.DoctorPigEvent;
-import io.terminus.doctor.event.model.DoctorPigTrack;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.io.IOException;
-import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -29,15 +21,6 @@ import java.util.Objects;
 @Component
 public class DoctorDailyMatingEventCount implements DoctorDailyEventCount {
 
-    private static final ObjectMapper OBJECT_MAPPER = JsonMapper.JSON_NON_DEFAULT_MAPPER.getMapper();
-
-    private final DoctorPigTrackDao doctorPigTrackDao;
-
-    @Autowired
-    public DoctorDailyMatingEventCount(DoctorPigTrackDao doctorPigTrackDao){
-        this.doctorPigTrackDao = doctorPigTrackDao;
-    }
-
     @Override
     public boolean preDailyEventHandleValidate(DoctorPigEvent event) {
         return Objects.equals(event.getType(), PigEvent.MATING.getKey());
@@ -47,37 +30,34 @@ public class DoctorDailyMatingEventCount implements DoctorDailyEventCount {
     public void dailyEventHandle(DoctorPigEvent event, DoctorDailyReportDto doctorDailyReportDto) {
         DoctorMatingDailyReport doctorMatingDailyReport = new DoctorMatingDailyReport();
 
-        Map<String,Object> extraMap = event.getExtraMap();
-        if(extraMap.containsKey("checkResult")){
-            PregCheckResult checkResult = PregCheckResult.from(Integer.valueOf(extraMap.get("checkResult").toString()));
-            switch (checkResult){
-                case YING:
-                    doctorMatingDailyReport.setPregCheckResultYing(doctorMatingDailyReport.getPregCheckResultYing()+1);
-                    break;
-                case LIUCHAN:
-                    doctorMatingDailyReport.setLiuchan(doctorMatingDailyReport.getLiuchan() + 1);
-                    break;
-                case FANQING:
-                    doctorMatingDailyReport.setFanqing(doctorMatingDailyReport.getFanqing() + 1);
-                    break;
-                default:
-                    break;
-            }
-        }else {
-            DoctorPigTrack doctorPigTrack = doctorPigTrackDao.findByPigId(event.getPigId());
-            Map<String, String> result;
-            try {
-                result = OBJECT_MAPPER.readValue(doctorPigTrack.getRelEventIds(), JacksonType.MAP_OF_STRING);
-            } catch (IOException e1) {
-                throw new IllegalStateException("dailyMating.event.fail");
-            }
-            if(result.size() > 1){
-                doctorMatingDailyReport.setDuannai(doctorMatingDailyReport.getDuannai()+1);
-            }else {
-                doctorMatingDailyReport.setHoubei(doctorMatingDailyReport.getHoubei() + 1);
-            }
+        log.info("daily mate report event:{},report:{} ", event, doctorDailyReportDto);
+        DoctorMatingType matingType = DoctorMatingType.from(event.getDoctorMateType());
+        if (matingType == null) {
+            return;
         }
-
+        switch (matingType) {
+            case HP:
+                doctorMatingDailyReport.setHoubei(1);
+                break;
+            case LPC:
+                doctorMatingDailyReport.setLiuchan(1);
+                break;
+            case LPL:
+                doctorMatingDailyReport.setLiuchan(1);
+                break;
+            case DP:
+                doctorMatingDailyReport.setDuannai(1);
+                break;
+            case YP:
+                doctorMatingDailyReport.setPregCheckResultYing(1);
+                break;
+            case FP:
+                doctorMatingDailyReport.setFanqing(1);
+                break;
+            default:
+                return;
+        }
         doctorDailyReportDto.getMating().addMatingDaily(doctorMatingDailyReport);
+        log.info("daily mate report end event:{}, report:{} ", doctorMatingDailyReport, doctorDailyReportDto);
     }
 }

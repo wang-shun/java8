@@ -12,7 +12,6 @@ import io.terminus.doctor.event.model.DoctorPigEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -42,26 +41,20 @@ public class DoctorDailyRemovalEventCount implements DoctorDailyEventCount {
         DoctorSaleDailyReport doctorSaleDailyReport = new DoctorSaleDailyReport();
         DoctorDeadDailyReport doctorDeadDailyReport = new DoctorDeadDailyReport();
 
-        Map<String, Object> extra = event.getExtraMap();
-        DoctorPig doctorPig = doctorPigDao.findById(event.getPigId());
-
-        if (extra == null || extra.get("chgTypeId") == null ) {
-            return;
+        if (Objects.equals(event.getChangeTypeId(), DoctorBasicEnums.DEAD.getId())
+                || Objects.equals(event.getChangeTypeId(), DoctorBasicEnums.ELIMINATE.getId())) {
+            if (Objects.equals(event.getKind(), DoctorPig.PIG_TYPE.SOW.getKey())) {
+                doctorDeadDailyReport.setSow(1);
+            } else {
+                doctorDeadDailyReport.setBoar(1);
+            }
         }
 
-        Long chgTypeId = Long.valueOf(extra.get("chgTypeId").toString());
-        if(Objects.equals(chgTypeId, DoctorBasicEnums.DEAD.getId()) || Objects.equals(chgTypeId, DoctorBasicEnums.ELIMINATE.getId())){
-            if(Objects.equals(doctorPig.getPigType(), DoctorPig.PIG_TYPE.BOAR.getKey())){
-                doctorDeadDailyReport.setBoar(doctorDeadDailyReport.getBoar() + 1);
-            }else if(Objects.equals(doctorPig.getPigType(), DoctorPig.PIG_TYPE.SOW.getKey())){
-                doctorDeadDailyReport.setSow(doctorDeadDailyReport.getSow() + 1);
-            }
-        }else if(Objects.equals(chgTypeId, DoctorBasicEnums.SALE.getId())){
-            //添加对应的销售数量
-            if(Objects.equals(doctorPig.getPigType(), DoctorPig.PIG_TYPE.BOAR.getKey())){
-                doctorSaleDailyReport.setBoar(doctorSaleDailyReport.getBoar() + 1);
-            }else if (Objects.equals(doctorPig.getPigType(), DoctorPig.PIG_TYPE.SOW.getKey())){
-                doctorSaleDailyReport.setSow(doctorSaleDailyReport.getSow() + 1);
+        if (Objects.equals(event.getChangeTypeId(), DoctorBasicEnums.SALE.getId())) {
+            if (Objects.equals(event.getKind(), DoctorPig.PIG_TYPE.SOW.getKey())){
+                doctorSaleDailyReport.setSow(1);
+            } else {
+                doctorSaleDailyReport.setBoar(1);
             }
         }
 
