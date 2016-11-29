@@ -38,6 +38,7 @@ import static io.terminus.common.utils.Arguments.notEmpty;
  */
 @Slf4j
 @Component
+@SuppressWarnings("unused")
 public class DoctorPigEventListener implements EventListener {
 
     @Autowired
@@ -58,6 +59,9 @@ public class DoctorPigEventListener implements EventListener {
     @Autowired
     private DailyReport2UpdateDao dailyReport2UpdateDao;
 
+    /**
+     * 监听猪相关事件，处理下日报统计
+     */
     @Subscribe
     public void handlePigEvent(ListenedPigEvent listenedPigEvent) {
         log.info("[DoctorPigEventListener]-> handle.pig.event, listenedPigEvent:{}", listenedPigEvent);

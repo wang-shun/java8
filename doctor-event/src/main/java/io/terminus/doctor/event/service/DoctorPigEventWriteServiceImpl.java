@@ -89,7 +89,6 @@ public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteServic
             BeanMapper.copy(doctorFarmEntryDto, extra);
             Map<String,Object> result = doctorPigEventManager.createCasualPigEvent(doctorBasicInputInfoDto, extra);
 
-            // publish zk event
             publishEvent(result);
             publishBarnEvent(doctorFarmEntryDto.getBarnId());
             return Response.ok(Params.getWithConvert(result,"doctorPigId",a->Long.valueOf(a.toString())));
@@ -116,7 +115,6 @@ public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteServic
             BeanMapper.copy(doctorDiseaseDto, dto);
 
             Map<String, Object> result = doctorPigEventManager.createCasualPigEvent(doctorBasicInputInfoDto, dto);
-            publishEvent(result);
             return Response.ok(Params.getWithConvert(result,"doctorEventId",a->Long.valueOf(a.toString())));
         }catch (Exception e){
             log.error("disease event create fail, cause:{}", Throwables.getStackTraceAsString(e));
@@ -158,7 +156,6 @@ public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteServic
             BeanMapper.copy(doctorVaccinationDto, dto);
 
             Map<String,Object> result = doctorPigEventManager.createCasualPigEvent(doctorBasicInputInfoDto, dto);
-            publishEvent(result);
             return Response.ok(Params.getWithConvert(result,"doctorEventId",a->Long.valueOf(a.toString())));
         }catch (Exception e){
             log.error("vaccination event create fail, cause:{}", Throwables.getStackTraceAsString(e));
@@ -197,7 +194,6 @@ public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteServic
             BeanMapper.copy(doctorConditionDto, dto);
 
             Map<String,Object> result = doctorPigEventManager.createCasualPigEvent(doctorBasicInputInfoDto, dto);
-            publishEvent(result);
             return Response.ok(Params.getWithConvert(result,"doctorEventId",a->Long.valueOf(a.toString())));
         }catch (Exception e){
             log.error("condition event create fail, cause:{}", Throwables.getStackTraceAsString(e));
@@ -267,7 +263,6 @@ public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteServic
             BeanMapper.copy(doctorSemenDto, dto);
 
             Map<String,Object> result = doctorPigEventManager.createCasualPigEvent(doctorBasicInputInfoDto, dto);
-            publishEvent(result);
             return Response.ok(Params.getWithConvert(result,"doctorEventId",a->Long.valueOf(a.toString())));
         }catch (Exception e){
             log.error("vaccination event create fail, cause:{}", Throwables.getStackTraceAsString(e));
@@ -379,7 +374,6 @@ public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteServic
             BeanMapper.copy(doctorPigletsChgDto, dto);
 
             Map<String, Object> result = doctorPigEventManager.createSowPigEvent(doctorBasicInputInfoDto, dto);
-            publishEvent(result);
             return Response.ok(Params.getWithConvert(result, "doctorEventId", a -> Long.valueOf(a.toString())));
         } catch (ServiceException e) {
             return Response.fail(e.getMessage());
@@ -405,10 +399,6 @@ public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteServic
                         ), "partWean.qualified.error");
             }
 
-//            double avgWeight = doctorPartWeanDto.getPartWeanAvgWeight();
-//            log.info("断奶事件: 均重" + avgWeight);
-//            checkState(avgWeight <= 9.0 && avgWeight >= 5.0, "input.weanAvgWeight.error");
-
             Map<String,Object> result = doctorPigEventManager.createSowPigEvent(doctorBasicInputInfoDto, dto);
             publishEvent(result);
             return Response.ok(Params.getWithConvert(result,"doctorEventId",a->Long.valueOf(a.toString())));
@@ -427,9 +417,7 @@ public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteServic
             // 批量信息创建
             Map<String,Object> result = doctorPigEventManager.createSowEvents(basics, extra);
 
-            // pub result info
             publishEvent(result);
-
             return Response.ok(Boolean.TRUE);
         } catch (ServiceException e) {
             return Response.fail(e.getMessage());
@@ -445,7 +433,6 @@ public class DoctorPigEventWriteServiceImpl implements DoctorPigEventWriteServic
             // 批量信息创建
             Map<String, Object> result = doctorPigEventManager.createCasualPigEvents(basics, extra);
 
-            // pull result info
             publishEvent(result);
             return Response.ok(Boolean.TRUE);
         } catch (ServiceException e) {
