@@ -76,29 +76,4 @@ public class DoctorDailyReportDto implements Serializable {
      * 是否失败, true 失败
      */
     private boolean fail;
-
-    /**
-     * 只修改猪群相关的统计
-     */
-    public void setGroup(DoctorDailyReportDto report) {
-        //死淘
-        this.dead.setFarrow(this.dead.getFarrow() + report.getDead().getFarrow());
-        this.dead.setNursery(this.dead.getNursery() + report.getDead().getNursery());
-        this.dead.setFatten(this.dead.getFatten() + report.getDead().getFatten());
-        this.dead.setHoubei(this.dead.getHoubei() + report.getDead().getHoubei());
-
-        //存栏
-        this.liveStock.setFarrow(report.getLiveStock().getFarrow());
-        this.liveStock.setNursery(report.getLiveStock().getNursery());
-        this.liveStock.setFatten(report.getLiveStock().getFatten());
-        this.liveStock.setHoubeiSow(report.getLiveStock().getHoubeiSow() == 0? this.liveStock.getHoubeiSow() : report.getLiveStock().getHoubeiSow());
-        this.liveStock.setHoubeiBoar(report.getLiveStock().getHoubeiBoar() == 0? this.liveStock.getHoubeiBoar() : report.getLiveStock().getHoubeiBoar());
-
-        //销售
-        this.sale.setNursery(this.sale.getNursery() + report.getSale().getNursery());
-        this.sale.setFatten(this.sale.getFatten() + report.getSale().getFatten());
-        this.sale.setFattenPrice(report.getSale().getFattenPrice() == 0L? this.sale.getFattenPrice() : report.getSale().getFattenPrice());
-        this.sale.setBasePrice10(report.getSale().getBasePrice10() == 0L? this.sale.getBasePrice10() : report.getSale().getBasePrice10());
-        this.sale.setBasePrice15(report.getSale().getBasePrice15() == 0L? this.sale.getBasePrice15() : report.getSale().getBasePrice15());
-    }
 }
