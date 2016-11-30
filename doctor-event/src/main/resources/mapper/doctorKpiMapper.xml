@@ -195,7 +195,7 @@
         FROM doctor_group_events
         WHERE
         change_type_id = 109 AND -- 变动类型是销售
-        pig_type IN (1, 2) -- 产房 + 保育
+        pig_type IN (1, 7, 2) -- 产房 + 保育
         <include refid="criteria"/>
     </select>
 
