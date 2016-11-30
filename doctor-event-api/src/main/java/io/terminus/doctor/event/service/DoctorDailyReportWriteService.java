@@ -5,7 +5,6 @@ import io.terminus.common.model.Response;
 import javax.validation.constraints.NotNull;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Desc: 猪场日报表写服务
@@ -39,12 +38,5 @@ public interface DoctorDailyReportWriteService {
      * @param farmId 猪场
      * @return 是否成功
      */
-    Response deleteDailyReport2Update(Long farmId);
-
-    /**
-     * 删除redis中的日报
-     * @param farmId
-     * @return
-     */
-    Response deleteDailyReportFromRedis(Long farmId);
+    Response<Boolean> deleteDailyReport2Update(Long farmId);
 }

@@ -55,12 +55,6 @@ public interface DoctorDailyReportReadService {
                                                                   @NotNull(message = "date.not.null") Date date);
 
     /**
-     * 清理全部的日报缓存
-     * @return 是否成功
-     */
-    Response<Boolean> clearAllReportCache();
-
-    /**
      * 根据查询查询日报
      * @param date 日期
      * @return 日报list
