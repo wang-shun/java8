@@ -211,6 +211,8 @@ public class DoctorGroupEventListener implements EventListener {
         long base10 = doctorKpiDao.getGroupSaleBasePrice10(farmId, startAt, endAt);
         long base15 = doctorKpiDao.getGroupSaleBasePrice15(farmId, startAt, endAt);
 
+        log.info("+++++++++++++++++++++++ nursery:{}, base10:{}, base15:{}", nursery, base10, base15);
+
         DoctorDailyReportDto reportDtoNursery = doctorDailyReportCache.getDailyReportDto(farmId, startAt);
         reportDtoNursery.getSale().setNursery(nursery);
         reportDtoNursery.getSale().setBasePrice10(base10);
