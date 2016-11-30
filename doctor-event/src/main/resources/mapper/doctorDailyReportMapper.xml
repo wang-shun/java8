@@ -134,6 +134,7 @@
     <update id="updateByFarmIdAndSumAt" parameterType="DoctorDailyReport">
         UPDATE <include refid="tb"/>
         <set>
+            created_at = now(),
             <if test="sowCount != null">sow_count = #{sowCount},</if>
             <if test="farrowCount != null">farrow_count = #{farrowCount},</if>
             <if test="nurseryCount != null">nursery_count = #{nurseryCount},</if>

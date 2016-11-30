@@ -84,7 +84,7 @@ public class DoctorDailyReportReadServiceImpl implements DoctorDailyReportReadSe
                     report.setFarrowCount(reportDto.getLiveStock().getFarrow());
                     report.setNurseryCount(reportDto.getLiveStock().getNursery());
                     report.setFattenCount(reportDto.getLiveStock().getFatten());
-                    doctorDailyReportCache.putDailyReportToMySQL(report);
+                    doctorDailyReportDao.create(report);
                     return Response.ok(reportDto);
                 }else{
                     return Response.ok(failReport(sumAt));

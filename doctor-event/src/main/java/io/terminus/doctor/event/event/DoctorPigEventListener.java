@@ -8,6 +8,7 @@ import io.terminus.doctor.common.utils.CountUtil;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.cache.DoctorDailyReportCache;
 import io.terminus.doctor.event.constants.DoctorBasicEnums;
+import io.terminus.doctor.event.dao.DoctorDailyReportDao;
 import io.terminus.doctor.event.dao.DoctorKpiDao;
 import io.terminus.doctor.event.dao.DoctorPigEventDao;
 import io.terminus.doctor.event.dao.redis.DailyReport2UpdateDao;
@@ -59,6 +60,9 @@ public class DoctorPigEventListener implements EventListener {
 
     @Autowired
     private DailyReport2UpdateDao dailyReport2UpdateDao;
+
+    @Autowired
+    private DoctorDailyReportDao doctorDailyReportDao;
 
     /**
      * 监听猪相关事件，处理下日报统计
@@ -242,6 +246,7 @@ public class DoctorPigEventListener implements EventListener {
             return;
         }
         DoctorDailyReport report = doctorDailyReportCache.getDailyReport(farmId, startAt);
+        log.info("farrow before report:{}", report);
         DoctorDailyReportDto reportDto = report.getReportData();
         int live = CountUtil.intStream(events, DoctorPigEvent::getLiveCount).sum();
         reportDto.getDeliver().setNest(events.size());
@@ -257,6 +262,8 @@ public class DoctorPigEventListener implements EventListener {
         //均重
         double farrowWeiht = CountUtil.doubleStream(events, DoctorPigEvent::getFarrowWeight).sum();
         reportDto.getDeliver().setAvgWeight(live == 0 ? 0 : farrowWeiht/live);
+
+        log.info("farrow after report:{}", report);
         doctorDailyReportCache.putDailyReportToMySQL(report);
     }
 
@@ -287,12 +294,20 @@ public class DoctorPigEventListener implements EventListener {
 
     //日报是否已被全量更新
     private boolean reportIsFullInit(Long farmId, Date date) {
-//        DoctorDailyReport report = doctorDailyReportCache.getDailyReport(farmId, date);
-//        if (reportDto == null) {
-//            reportDto = doctorDailyReportCache.initDailyReportByFarmIdAndDate(farmId, date);
-//            doctorDailyReportCache.putDailyReportToMySQL(report);
-//            return true;
-//        }
+        DoctorDailyReport report = doctorDailyReportCache.getDailyReport(farmId, date);
+        if (report == null || report.getReportData() == null) {
+            DoctorDailyReportDto reportDto = doctorDailyReportCache.initDailyReportByFarmIdAndDate(farmId, date);
+            report = new DoctorDailyReport();
+            report.setFarmId(farmId);
+            report.setSumAt(date);
+            report.setReportData(reportDto);
+            report.setSowCount(reportDto.getLiveStock().getBuruSow() + reportDto.getLiveStock().getPeihuaiSow());
+            report.setFarrowCount(reportDto.getLiveStock().getFarrow());
+            report.setNurseryCount(reportDto.getLiveStock().getNursery());
+            report.setFattenCount(reportDto.getLiveStock().getFatten());
+            doctorDailyReportDao.create(report);
+            return true;
+        }
         return false;
     }
 
