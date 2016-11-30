@@ -141,6 +141,7 @@ public class DoctorPigEventListener implements EventListener {
                 DoctorDailyReportDto reportDtoHP = reportHP.getReportData();
                 log.info("reportHP before:{}", reportHP);
                 reportDtoHP.getMating().setHoubei(hp);
+                reportHP.setReportData(reportDtoHP);
                 log.info("reportHP after:{}", reportHP);
                 doctorDailyReportCache.putDailyReportToMySQL(reportHP);
                 break;
@@ -263,6 +264,7 @@ public class DoctorPigEventListener implements EventListener {
         double farrowWeiht = CountUtil.doubleStream(events, DoctorPigEvent::getFarrowWeight).sum();
         reportDto.getDeliver().setAvgWeight(live == 0 ? 0 : farrowWeiht/live);
 
+        report.setReportData(reportDto);
         log.info("farrow after report:{}", report);
         doctorDailyReportCache.putDailyReportToMySQL(report);
     }
@@ -301,7 +303,7 @@ public class DoctorPigEventListener implements EventListener {
             report.setFarmId(farmId);
             report.setSumAt(date);
             report.setReportData(reportDto);
-            report.setSowCount(reportDto.getLiveStock().getBuruSow() + reportDto.getLiveStock().getPeihuaiSow());
+            report.setSowCount(reportDto.getSowCount());
             report.setFarrowCount(reportDto.getLiveStock().getFarrow());
             report.setNurseryCount(reportDto.getLiveStock().getNursery());
             report.setFattenCount(reportDto.getLiveStock().getFatten());

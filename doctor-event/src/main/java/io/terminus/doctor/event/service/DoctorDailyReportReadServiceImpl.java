@@ -80,7 +80,7 @@ public class DoctorDailyReportReadServiceImpl implements DoctorDailyReportReadSe
                     report.setFarmId(farmId);
                     report.setSumAt(date);
                     report.setReportData(reportDto);
-                    report.setSowCount(reportDto.getLiveStock().getBuruSow() + reportDto.getLiveStock().getPeihuaiSow());
+                    report.setSowCount(reportDto.getSowCount());
                     report.setFarrowCount(reportDto.getLiveStock().getFarrow());
                     report.setNurseryCount(reportDto.getLiveStock().getNursery());
                     report.setFattenCount(reportDto.getLiveStock().getFatten());
