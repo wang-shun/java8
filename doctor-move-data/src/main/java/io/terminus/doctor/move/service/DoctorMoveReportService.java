@@ -11,7 +11,7 @@ import io.terminus.doctor.event.dto.report.daily.DoctorDailyReportDto;
 import io.terminus.doctor.event.model.DoctorDailyReport;
 import io.terminus.doctor.event.service.DoctorBoarMonthlyReportWriteService;
 import io.terminus.doctor.event.service.DoctorDailyReportReadService;
-import io.terminus.doctor.event.service.DoctorMonthlyReportWriteService;
+import io.terminus.doctor.event.service.DoctorCommonReportWriteService;
 import io.terminus.doctor.event.service.DoctorParityMonthlyReportWriteService;
 import io.terminus.doctor.move.handler.DoctorMoveDatasourceHandler;
 import io.terminus.doctor.move.model.ReportBoarLiveStock;
@@ -49,7 +49,7 @@ public class DoctorMoveReportService {
     private final DoctorFarmDao doctorFarmDao;
     private final DoctorMoveDatasourceHandler doctorMoveDatasourceHandler;
     private final DoctorDailyReportReadService doctorDailyReportReadService;
-    private final DoctorMonthlyReportWriteService doctorMonthlyReportWriteService;
+    private final DoctorCommonReportWriteService doctorCommonReportWriteService;
     private final DoctorParityMonthlyReportWriteService doctorParityMonthlyReportWriteService;
     private final DoctorBoarMonthlyReportWriteService doctorBoarMonthlyReportWriteService;
 
@@ -58,14 +58,14 @@ public class DoctorMoveReportService {
                                    DoctorFarmDao doctorFarmDao,
                                    DoctorMoveDatasourceHandler doctorMoveDatasourceHandler,
                                    DoctorDailyReportReadService doctorDailyReportReadService,
-                                   DoctorMonthlyReportWriteService doctorMonthlyReportWriteService,
+                                   DoctorCommonReportWriteService doctorCommonReportWriteService,
                                    DoctorParityMonthlyReportWriteService doctorParityMonthlyReportWriteService,
                                    DoctorBoarMonthlyReportWriteService doctorBoarMonthlyReportWriteService) {
         this.doctorDailyReportDao = doctorDailyReportDao;
         this.doctorFarmDao = doctorFarmDao;
         this.doctorMoveDatasourceHandler = doctorMoveDatasourceHandler;
         this.doctorDailyReportReadService = doctorDailyReportReadService;
-        this.doctorMonthlyReportWriteService = doctorMonthlyReportWriteService;
+        this.doctorCommonReportWriteService = doctorCommonReportWriteService;
         this.doctorParityMonthlyReportWriteService = doctorParityMonthlyReportWriteService;
         this.doctorBoarMonthlyReportWriteService = doctorBoarMonthlyReportWriteService;
     }
@@ -155,13 +155,27 @@ public class DoctorMoveReportService {
 
     /**
      * 迁移猪场月报(放在日报迁移之后进行)
-     * @
      * @param farmId 猪场id
      */
     @Transactional
     public void moveMonthlyReport(Long farmId, Integer index) {
         DateUtil.getBeforeMonthEnds(DateTime.now().plusDays(-1).toDate(), MoreObjects.firstNonNull(index, MONTH_INDEX))
-                .forEach(date -> doctorMonthlyReportWriteService.createMonthlyReport(farmId, date));
+                .forEach(date -> doctorCommonReportWriteService.createMonthlyReport(farmId, date));
+    }
+
+    /**
+     * 迁移猪场周报(放在日报迁移之后进行)
+     * @param farmId 猪场id
+     */
+    @Transactional
+    public void moveWeeklyReport(Long farmId, Integer index) {
+        Date now = DateTime.now().withTimeAtStartOfDay().toDate();
+        doctorCommonReportWriteService.createMonthlyReport(farmId, now);
+
+        //默认12周
+        for (int i = 1; i < MoreObjects.firstNonNull(index, MONTH_INDEX); i++) {
+            doctorCommonReportWriteService.createMonthlyReport(farmId, new DateTime(now).plusWeeks(-i).toDate());
+        }
     }
 
     @Transactional

@@ -12,7 +12,7 @@ import io.terminus.doctor.event.model.DoctorDailyReport;
 import io.terminus.doctor.event.service.DoctorBoarMonthlyReportWriteService;
 import io.terminus.doctor.event.service.DoctorDailyReportReadService;
 import io.terminus.doctor.event.service.DoctorDailyReportWriteService;
-import io.terminus.doctor.event.service.DoctorMonthlyReportWriteService;
+import io.terminus.doctor.event.service.DoctorCommonReportWriteService;
 import io.terminus.doctor.event.service.DoctorParityMonthlyReportWriteService;
 import io.terminus.doctor.user.model.DoctorFarm;
 import io.terminus.doctor.user.service.DoctorFarmReadService;
@@ -48,7 +48,7 @@ public class DoctorReportJobs {
     @RpcConsumer
     private DoctorDailyReportWriteService doctorDailyReportWriteService;
     @RpcConsumer
-    private DoctorMonthlyReportWriteService doctorMonthlyReportWriteService;
+    private DoctorCommonReportWriteService doctorCommonReportWriteService;
     @RpcConsumer
     private DoctorFarmReadService doctorFarmReadService;
     @RpcConsumer
@@ -105,19 +105,30 @@ public class DoctorReportJobs {
             for(Map.Entry<Long, String> entry : RespHelper.or500(doctorDailyReportReadService.getDailyReport2Update()).entrySet()){
                 Long farmId = entry.getKey();
                 Date beginDate = DateUtil.toDate(entry.getValue()); // 自此日期之后(包括此日期)的日报和月报应当被更新
-                if(beginDate == null) continue;
+                if(beginDate == null) {
+                    continue;
+                }
 
-                Date sumAt = new Date(beginDate.getTime());
-                while(!sumAt.after(endDate)){
-                    RespHelper.or500(doctorDailyReportWriteService.createDailyReports(Lists.newArrayList(farmId), sumAt));
-                    sumAt = new DateTime(sumAt).plusDays(1).toDate();
+                //日报更新
+                Date daily = new Date(beginDate.getTime());
+                while(!daily.after(endDate)){
+                    RespHelper.or500(doctorDailyReportWriteService.createDailyReports(Lists.newArrayList(farmId), daily));
+                    daily = new DateTime(daily).plusDays(1).toDate();
                 }
                 RespHelper.or500(doctorDailyReportWriteService.deleteDailyReport2Update(farmId));
 
-                //月报更新
-                while(!DateUtil.inSameYearMonth(beginDate, endDate)){
-                    RespHelper.or500(doctorMonthlyReportWriteService.createMonthlyReport(farmId, DateUtil.getMonthEnd(new DateTime(beginDate)).toDate()));
-                    beginDate = new DateTime(beginDate).plusMonths(1).toDate();
+                // 周报更新
+                Date weekly = new DateTime(beginDate).withDayOfWeek(7).toDate();
+                while (!weekly.after(endDate)) {
+                    RespHelper.or500(doctorCommonReportWriteService.createWeeklyReport(farmId, weekly));
+                    weekly = new DateTime(weekly).plusWeeks(1).toDate();
+                }
+
+                // 月报更新
+                Date monthly = new Date(beginDate.getTime());
+                while(!DateUtil.inSameYearMonth(monthly, endDate)){
+                    RespHelper.or500(doctorCommonReportWriteService.createMonthlyReport(farmId, DateUtil.getMonthEnd(new DateTime(monthly)).toDate()));
+                    monthly = new DateTime(monthly).plusMonths(1).toDate();
                 }
             }
 
@@ -149,11 +160,13 @@ public class DoctorReportJobs {
                 throw new ServiceException("daily.report.find.fail");
             }
 
-            RespHelper.or500(doctorMonthlyReportWriteService.createMonthlyReports(getAllFarmIds(), yesterday));
+            List<Long> farmIds = getAllFarmIds();
+            RespHelper.or500(doctorCommonReportWriteService.createMonthlyReports(farmIds, yesterday));
+            RespHelper.or500(doctorCommonReportWriteService.createWeeklyReports(farmIds, yesterday));
 
-            log.info("monthly report job end, now is:{}", DateUtil.toDateTimeString(new Date()));
+            log.info("monthly and weekly report job end, now is:{}", DateUtil.toDateTimeString(new Date()));
         } catch (Exception e) {
-            log.error("monthly report job failed, cause:{}", Throwables.getStackTraceAsString(e));
+            log.error("monthly and weekly report job failed, cause:{}", Throwables.getStackTraceAsString(e));
         }
     }
 

@@ -7,10 +7,11 @@ import io.terminus.common.utils.Dates;
 import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.dao.DoctorKpiDao;
-import io.terminus.doctor.event.dto.report.monthly.DoctorLiveStockChangeMonthlyReport;
-import io.terminus.doctor.event.dto.report.monthly.DoctorMonthlyReportDto;
-import io.terminus.doctor.event.manager.DoctorMonthlyReportManager;
+import io.terminus.doctor.event.dto.report.common.DoctorLiveStockChangeCommonReport;
+import io.terminus.doctor.event.dto.report.common.DoctorCommonReportDto;
+import io.terminus.doctor.event.manager.DoctorCommonReportManager;
 import io.terminus.doctor.event.model.DoctorMonthlyReport;
+import io.terminus.doctor.event.model.DoctorWeeklyReport;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +22,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * Desc: 猪场月报表写服务实现类
+ * Desc: 猪场报表写服务实现类
  * Mail: yangzl@terminus.io
  * author: DreamYoung
  * Date: 2016-08-11
@@ -29,17 +30,17 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 @RpcProvider
-public class DoctorMonthlyReportWriteServiceImpl implements DoctorMonthlyReportWriteService {
+public class DoctorCommonReportWriteServiceImpl implements DoctorCommonReportWriteService {
 
     private static final JsonMapper JSON_MAPPER = JsonMapper.nonEmptyMapper();
 
-    private final DoctorMonthlyReportManager doctorMonthlyReportManager;
+    private final DoctorCommonReportManager doctorCommonReportManager;
     private final DoctorKpiDao doctorKpiDao;
 
     @Autowired
-    public DoctorMonthlyReportWriteServiceImpl(DoctorMonthlyReportManager doctorMonthlyReportManager,
-                                               DoctorKpiDao doctorKpiDao) {
-        this.doctorMonthlyReportManager = doctorMonthlyReportManager;
+    public DoctorCommonReportWriteServiceImpl(DoctorCommonReportManager doctorCommonReportManager,
+                                              DoctorKpiDao doctorKpiDao) {
+        this.doctorCommonReportManager = doctorCommonReportManager;
         this.doctorKpiDao = doctorKpiDao;
     }
 
@@ -51,7 +52,7 @@ public class DoctorMonthlyReportWriteServiceImpl implements DoctorMonthlyReportW
             List<DoctorMonthlyReport> reports = farmIds.stream()
                     .map(farmId -> getMonthlyReport(farmId, startAt, endAt, sumAt))
                     .collect(Collectors.toList());
-            doctorMonthlyReportManager.createMonthlyReports(reports, Dates.startOfDay(sumAt));
+            doctorCommonReportManager.createMonthlyReports(reports, Dates.startOfDay(sumAt));
             return Response.ok(Boolean.TRUE);
         } catch (Exception e) {
             log.error("create monthly reports failed, sumAt:{}, cause:{}", sumAt, Throwables.getStackTraceAsString(e));
@@ -64,11 +65,40 @@ public class DoctorMonthlyReportWriteServiceImpl implements DoctorMonthlyReportW
         try {
             Date startAt = new DateTime(sumAt).withDayOfMonth(1).withTimeAtStartOfDay().toDate(); //月初: 2016-08-01 00:00:00
             Date endAt = new DateTime(Dates.endOfDay(sumAt)).plusSeconds(-1).toDate();            //天末: 2016-08-12 23:59:59
-            doctorMonthlyReportManager.createMonthlyReport(farmId, getMonthlyReport(farmId, startAt, endAt, sumAt), Dates.startOfDay(sumAt));
+            doctorCommonReportManager.createMonthlyReport(farmId, getMonthlyReport(farmId, startAt, endAt, sumAt), Dates.startOfDay(sumAt));
             return Response.ok(Boolean.TRUE);
         } catch (Exception e) {
             log.error("create monthly reports failed, sumAt:{}, cause:{}", sumAt, Throwables.getStackTraceAsString(e));
             return Response.fail("monthlyReport.create.fail");
+        }
+    }
+
+    @Override
+    public Response<Boolean> createWeeklyReports(List<Long> farmIds, Date sumAt) {
+        try {
+            Date startAt = new DateTime(sumAt).withDayOfWeek(1).withTimeAtStartOfDay().toDate(); //本周周一: 2016-08-01 00:00:00
+            Date endAt = new DateTime(Dates.endOfDay(sumAt)).plusSeconds(-1).toDate();            //天末: 2016-08-12 23:59:59
+            List<DoctorWeeklyReport> reports = farmIds.stream()
+                    .map(farmId -> getWeeklyReport(farmId, startAt, endAt, sumAt))
+                    .collect(Collectors.toList());
+            doctorCommonReportManager.createWeeklyReports(reports, Dates.startOfDay(sumAt));
+            return Response.ok(Boolean.TRUE);
+        } catch (Exception e) {
+            log.error("create weekly reports failed, sumAt:{}, cause:{}", sumAt, Throwables.getStackTraceAsString(e));
+            return Response.fail("weeklyReport.create.fail");
+        }
+    }
+
+    @Override
+    public Response<Boolean> createWeeklyReport(Long farmId, Date sumAt) {
+        try {
+            Date startAt = new DateTime(sumAt).withDayOfWeek(1).withTimeAtStartOfDay().toDate();  //本周周一: 2016-08-01 00:00:00
+            Date endAt = new DateTime(Dates.endOfDay(sumAt)).plusSeconds(-1).toDate();            //天末: 2016-08-12 23:59:59
+            doctorCommonReportManager.createWeeklyReport(farmId, getWeeklyReport(farmId, startAt, endAt, sumAt), Dates.startOfDay(sumAt));
+            return Response.ok(Boolean.TRUE);
+        } catch (Exception e) {
+            log.error("create weekly reports failed, sumAt:{}, cause:{}", sumAt, Throwables.getStackTraceAsString(e));
+            return Response.fail("weeklyReport.create.fail");
         }
     }
 
@@ -87,20 +117,29 @@ public class DoctorMonthlyReportWriteServiceImpl implements DoctorMonthlyReportW
     }
 
     //月报
+    private DoctorWeeklyReport getWeeklyReport(Long farmId, Date startAt, Date endAt, Date sumAt) {
+        DoctorWeeklyReport report = new DoctorWeeklyReport();
+        report.setFarmId(farmId);
+        report.setSumAt(sumAt);
+        report.setData(JSON_MAPPER.toJson(getCommonReportDto(farmId, startAt, endAt)));
+        return report;
+    }
+
+    //月报
     private DoctorMonthlyReport getMonthlyReport(Long farmId, Date startAt, Date endAt, Date sumAt) {
         DoctorMonthlyReport report = new DoctorMonthlyReport();
         report.setFarmId(farmId);
         report.setSumAt(sumAt);
-        report.setData(JSON_MAPPER.toJson(getMonthlyReportDto(farmId, startAt, endAt)));
+        report.setData(JSON_MAPPER.toJson(getCommonReportDto(farmId, startAt, endAt)));
         return report;
     }
 
     //月报统计结果
-    private DoctorMonthlyReportDto getMonthlyReportDto(Long farmId, Date startAt, Date endAt) {
+    private DoctorCommonReportDto getCommonReportDto(Long farmId, Date startAt, Date endAt) {
 
         log.info("get monthly report, farmId:{}, startAr:{}, endAt:{}", farmId, startAt, endAt);
 
-        DoctorMonthlyReportDto dto = new DoctorMonthlyReportDto();
+        DoctorCommonReportDto dto = new DoctorCommonReportDto();
         //配种情况
         dto.setMateHoubei(doctorKpiDao.firstMatingCounts(farmId, startAt, endAt));                   //配后备
         dto.setMateWean(doctorKpiDao.weanMatingCounts(farmId, startAt, endAt));                      //配断奶
@@ -182,16 +221,16 @@ public class DoctorMonthlyReportWriteServiceImpl implements DoctorMonthlyReportW
     }
 
     //存栏变动月报
-    private DoctorLiveStockChangeMonthlyReport getLiveStockChangeReport(Long farmId, Date startAt, Date endAt) {
-        DoctorLiveStockChangeMonthlyReport report = new DoctorLiveStockChangeMonthlyReport();
+    private DoctorLiveStockChangeCommonReport getLiveStockChangeReport(Long farmId, Date startAt, Date endAt) {
+        DoctorLiveStockChangeCommonReport report = new DoctorLiveStockChangeCommonReport();
 
-        DoctorLiveStockChangeMonthlyReport begin = doctorKpiDao.getMonthlyLiveStockChangeBegin(farmId, startAt);
-        DoctorLiveStockChangeMonthlyReport in = doctorKpiDao.getMonthlyLiveStockChangeIn(farmId, startAt, endAt);
-        DoctorLiveStockChangeMonthlyReport groupDead = doctorKpiDao.getMonthlyLiveStockChangeGroupDead(farmId, startAt, endAt);
-        DoctorLiveStockChangeMonthlyReport sowDead = doctorKpiDao.getMonthlyLiveStockChangeSowDead(farmId, startAt, endAt);
-        DoctorLiveStockChangeMonthlyReport sale = doctorKpiDao.getMonthlyLiveStockChangeSale(farmId, startAt, endAt);
-        DoctorLiveStockChangeMonthlyReport feedCount = doctorKpiDao.getMonthlyLiveStockChangeFeedCount(farmId, startAt, endAt);
-        DoctorLiveStockChangeMonthlyReport amount = doctorKpiDao.getMonthlyLiveStockChangeMaterielAmount(farmId, startAt, endAt);
+        DoctorLiveStockChangeCommonReport begin = doctorKpiDao.getMonthlyLiveStockChangeBegin(farmId, startAt);
+        DoctorLiveStockChangeCommonReport in = doctorKpiDao.getMonthlyLiveStockChangeIn(farmId, startAt, endAt);
+        DoctorLiveStockChangeCommonReport groupDead = doctorKpiDao.getMonthlyLiveStockChangeGroupDead(farmId, startAt, endAt);
+        DoctorLiveStockChangeCommonReport sowDead = doctorKpiDao.getMonthlyLiveStockChangeSowDead(farmId, startAt, endAt);
+        DoctorLiveStockChangeCommonReport sale = doctorKpiDao.getMonthlyLiveStockChangeSale(farmId, startAt, endAt);
+        DoctorLiveStockChangeCommonReport feedCount = doctorKpiDao.getMonthlyLiveStockChangeFeedCount(farmId, startAt, endAt);
+        DoctorLiveStockChangeCommonReport amount = doctorKpiDao.getMonthlyLiveStockChangeMaterielAmount(farmId, startAt, endAt);
 
         //后备舍
         report.setHoubeiBegin(begin.getHoubeiBegin());                                                      //期初
