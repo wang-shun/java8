@@ -72,18 +72,26 @@ public class DoctorDailyReportReadServiceImpl implements DoctorDailyReportReadSe
             if(date == null){
                 return Response.ok(failReport(sumAt));
             }
-            DoctorDailyReportDto report = dailyReportHistoryDao.getDailyReportWithRedis(farmId, date);
-            if(report == null){
+            DoctorDailyReport report = doctorDailyReportCache.getDailyReport(farmId, date);
+            if(report == null || report.getReportData() == null){
                 // 如果查当天的日报, 查不到就直接计算并存入redis, 如果查未来，返回失败查询
                 if(!date.after(Dates.startOfDay(new Date()))){
-                    report = doctorDailyReportCache.initDailyReportByFarmIdAndDate(farmId, date);
-                    dailyReportHistoryDao.saveDailyReport(report, farmId, date);
-                    return Response.ok(report);
+                    DoctorDailyReportDto reportDto = doctorDailyReportCache.initDailyReportByFarmIdAndDate(farmId, date);
+                    report = new DoctorDailyReport();
+                    report.setFarmId(farmId);
+                    report.setSumAt(date);
+                    report.setReportData(reportDto);
+                    report.setSowCount(reportDto.getLiveStock().getBuruSow() + reportDto.getLiveStock().getPeihuaiSow());
+                    report.setFarrowCount(reportDto.getLiveStock().getFarrow());
+                    report.setNurseryCount(reportDto.getLiveStock().getNursery());
+                    report.setFattenCount(reportDto.getLiveStock().getFatten());
+                    doctorDailyReportCache.putDailyReportToMySQL(report);
+                    return Response.ok(reportDto);
                 }else{
                     return Response.ok(failReport(sumAt));
                 }
             }else{
-                return Response.ok(report);
+                return Response.ok(report.getReportData());
             }
         } catch (Exception e) {
             log.error("find dailyReport by farm id and sumat fail, farmId:{}, sumat:{}, cause:{}",
