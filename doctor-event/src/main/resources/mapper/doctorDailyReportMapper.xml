@@ -141,6 +141,6 @@
             <if test="data != null">data = #{data},</if>
             <if test="extra != null">extra = #{extra},</if>
         </set>
-        WHERE farm_id = #{farmId} AND sumAt = #{sumAt}
+        WHERE farm_id = #{farmId} AND sum_at = #{sumAt}
     </update>
 </mapper>
