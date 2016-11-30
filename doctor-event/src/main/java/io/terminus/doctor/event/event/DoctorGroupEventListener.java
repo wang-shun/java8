@@ -196,6 +196,7 @@ public class DoctorGroupEventListener implements EventListener {
 
     //处理销售
     private void getSale(PigType pigType, Long farmId, Date startAt, Date endAt) {
+        log.info("handle group sale type:{}, startAt:{}, endAt:{}", pigType, startAt, endAt);
         if (Objects.equals(pigType, PigType.FATTEN_PIG)) {
             int fatten = doctorKpiDao.getSaleFatten(farmId, startAt, endAt);
             long fattenPrice = doctorKpiDao.getGroupSaleFattenPrice(farmId, startAt, endAt);
