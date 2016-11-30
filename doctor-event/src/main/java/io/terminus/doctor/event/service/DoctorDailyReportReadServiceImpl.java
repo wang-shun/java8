@@ -19,7 +19,6 @@ import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.PostConstruct;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -53,7 +52,7 @@ public class DoctorDailyReportReadServiceImpl implements DoctorDailyReportReadSe
         this.dailyReport2UpdateDao = dailyReport2UpdateDao;
     }
 
-    @PostConstruct
+    //@PostConstruct
     public void init() {
         try {
             Date now = new Date();
