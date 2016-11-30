@@ -10,7 +10,6 @@ import io.terminus.doctor.event.dao.DoctorPigSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorPigTrackDao;
 import io.terminus.doctor.event.dao.DoctorRevertLogDao;
 import io.terminus.doctor.event.dao.redis.DailyReport2UpdateDao;
-import io.terminus.doctor.event.dao.redis.DailyReportHistoryDao;
 import io.terminus.doctor.event.dto.DoctorBasicInputInfoDto;
 import io.terminus.doctor.event.dto.report.daily.DoctorCheckPregDailyReport;
 import io.terminus.doctor.event.dto.report.daily.DoctorDailyReportDto;
@@ -48,7 +47,6 @@ import static io.terminus.common.utils.Arguments.notNull;
 public class DoctorSowPregCheckHandler extends DoctorAbstractEventFlowHandler {
 
     private final DailyReport2UpdateDao dailyReport2UpdateDao;
-    private final DailyReportHistoryDao dailyReportHistoryDao;
     private final DoctorDailyReportDao doctorDailyReportDao;
 
     @Autowired
@@ -59,11 +57,9 @@ public class DoctorSowPregCheckHandler extends DoctorAbstractEventFlowHandler {
                                      DoctorRevertLogDao doctorRevertLogDao,
                                      DoctorBarnDao doctorBarnDao,
                                      DailyReport2UpdateDao dailyReport2UpdateDao,
-                                     DailyReportHistoryDao dailyReportHistoryDao,
                                      DoctorDailyReportDao doctorDailyReportDao) {
         super(doctorPigDao, doctorPigEventDao, doctorPigTrackDao, doctorPigSnapshotDao, doctorRevertLogDao, doctorBarnDao);
         this.dailyReport2UpdateDao = dailyReport2UpdateDao;
-        this.dailyReportHistoryDao = dailyReportHistoryDao;
         this.doctorDailyReportDao = doctorDailyReportDao;
     }
 
@@ -214,7 +210,7 @@ public class DoctorSowPregCheckHandler extends DoctorAbstractEventFlowHandler {
         throw new ServiceException("preg.check.not.allow");
     }
 
-    //恶心的办法更新日报妊检统计, 先更新数据库, 再把redis里的删掉, 这样查redis的时候查不到, 就直接查数据库了
+    //更新日报妊检统计
     private void updateDailyReport(Date updateAt, Integer checkResult, DoctorPigTrack pigTrack) {
         Date updateStartAt = Dates.startOfDay(updateAt);
 
@@ -244,9 +240,6 @@ public class DoctorSowPregCheckHandler extends DoctorAbstractEventFlowHandler {
             dto.setCheckPreg(preg);
             report.setReportData(dto);
             doctorDailyReportDao.update(report);
-
-            //删掉redis中的日报(空怀的那天)
-            dailyReportHistoryDao.deleteDailyReport(pigTrack.getFarmId(), updateStartAt);
         }
     }
 }
