@@ -11,7 +11,6 @@ import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.cache.DoctorDailyReportCache;
 import io.terminus.doctor.event.dao.DoctorDailyReportDao;
 import io.terminus.doctor.event.dao.redis.DailyReport2UpdateDao;
-import io.terminus.doctor.event.dao.redis.DailyReportHistoryDao;
 import io.terminus.doctor.event.dto.report.daily.DoctorDailyReportDto;
 import io.terminus.doctor.event.model.DoctorDailyReport;
 import lombok.extern.slf4j.Slf4j;
@@ -19,6 +18,7 @@ import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -38,26 +38,23 @@ public class DoctorDailyReportReadServiceImpl implements DoctorDailyReportReadSe
 
     private final DoctorDailyReportDao doctorDailyReportDao;
     private final DoctorDailyReportCache doctorDailyReportCache;
-    private final DailyReportHistoryDao dailyReportHistoryDao;
     private final DailyReport2UpdateDao dailyReport2UpdateDao;
 
     @Autowired
     public DoctorDailyReportReadServiceImpl(DoctorDailyReportDao doctorDailyReportDao,
                                             DoctorDailyReportCache doctorDailyReportCache,
-                                            DailyReportHistoryDao dailyReportHistoryDao,
                                             DailyReport2UpdateDao dailyReport2UpdateDao) {
         this.doctorDailyReportDao = doctorDailyReportDao;
         this.doctorDailyReportCache = doctorDailyReportCache;
-        this.dailyReportHistoryDao = dailyReportHistoryDao;
         this.dailyReport2UpdateDao = dailyReport2UpdateDao;
     }
 
-    //@PostConstruct
+    @PostConstruct
     public void init() {
         try {
             Date now = new Date();
             List<DoctorDailyReportDto> reportDtos = RespHelper.orServEx(initDailyReportByDate(now));
-            reportDtos.forEach(report -> doctorDailyReportCache.putDailyReport(report.getFarmId(), now, report));
+            reportDtos.forEach(report -> doctorDailyReportCache.putDailyReportToMySQL(report.getFarmId(), now, report));
             log.info("init daily report cache success!");
         } catch (ServiceException e) {
             log.error("init daily report failed, cause:{}", Throwables.getStackTraceAsString(e));
@@ -149,17 +146,6 @@ public class DoctorDailyReportReadServiceImpl implements DoctorDailyReportReadSe
         } catch (Exception e) {
             log.error("init daily report failed, date:{}, cause:{}", date, Throwables.getStackTraceAsString(e));
             return Response.fail("init.daily.report.fail");
-        }
-    }
-
-    @Override
-    public Response<Boolean> clearAllReportCache() {
-        try {
-            doctorDailyReportCache.clearAllReport();
-            return Response.ok(Boolean.TRUE);
-        } catch (Exception e) {
-            log.error("clear report cache failed, cause:{}", Throwables.getStackTraceAsString(e));
-            return Response.ok(Boolean.FALSE);
         }
     }
 

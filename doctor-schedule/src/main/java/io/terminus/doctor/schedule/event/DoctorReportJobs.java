@@ -113,7 +113,6 @@ public class DoctorReportJobs {
                     sumAt = new DateTime(sumAt).plusDays(1).toDate();
                 }
                 RespHelper.or500(doctorDailyReportWriteService.deleteDailyReport2Update(farmId));
-                RespHelper.or500(doctorDailyReportWriteService.deleteDailyReportFromRedis(farmId));
 
                 //月报更新
                 while(!DateUtil.inSameYearMonth(beginDate, endDate)){

@@ -432,7 +432,9 @@ public class DoctorKpiDao {
      * @param farmId 猪场id
      * @param date   日期
      * @return 存栏数量
+     * @deprecated 已经没有后备公猪了，统称后备猪
      */
+    @Deprecated
     public int realTimeLiveStockHoubeiBoar(Long farmId, Date date) {
         return sqlSession.selectOne(sqlId("realTimeLiveStockHoubeiBoar"), ImmutableMap.of("farmId", farmId, "date", date));
     }

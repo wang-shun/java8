@@ -5,7 +5,6 @@ import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.model.Response;
 import io.terminus.common.utils.Dates;
 import io.terminus.doctor.event.dao.redis.DailyReport2UpdateDao;
-import io.terminus.doctor.event.dao.redis.DailyReportHistoryDao;
 import io.terminus.doctor.event.manager.DoctorDailyReportManager;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
@@ -14,7 +13,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Desc: 猪场日报表写服务实现类
@@ -29,15 +27,12 @@ public class DoctorDailyReportWriteServiceImpl implements DoctorDailyReportWrite
 
     private final DoctorDailyReportManager doctorDailyReportManager;
     private final DailyReport2UpdateDao dailyReport2UpdateDao;
-    private final DailyReportHistoryDao dailyReportHistoryDao;
 
     @Autowired
     public DoctorDailyReportWriteServiceImpl(DoctorDailyReportManager doctorDailyReportManager,
-                                             DailyReport2UpdateDao dailyReport2UpdateDao,
-                                             DailyReportHistoryDao dailyReportHistoryDao) {
+                                             DailyReport2UpdateDao dailyReport2UpdateDao) {
         this.doctorDailyReportManager = doctorDailyReportManager;
         this.dailyReport2UpdateDao = dailyReport2UpdateDao;
-        this.dailyReportHistoryDao = dailyReportHistoryDao;
     }
 
     @Override
@@ -68,25 +63,13 @@ public class DoctorDailyReportWriteServiceImpl implements DoctorDailyReportWrite
     }
 
     @Override
-    public Response deleteDailyReport2Update(Long farmId){
+    public Response<Boolean> deleteDailyReport2Update(Long farmId){
         try{
             dailyReport2UpdateDao.deleteDailyReport2Update(farmId);
-            return Response.ok();
+            return Response.ok(Boolean.TRUE);
         }catch(Exception e) {
             log.error("saveDailyReport2Update failed, cause:{}", Throwables.getStackTraceAsString(e));
             return Response.fail("save.daily.report.to.update.fail");
         }
     }
-
-    @Override
-    public Response deleteDailyReportFromRedis(Long farmId){
-        try{
-            dailyReportHistoryDao.deleteDailyReport(farmId);
-            return Response.ok();
-        }catch(Exception e){
-            log.error("deleteDailyReport failed, cause:{}", Throwables.getStackTraceAsString(e));
-            return Response.fail("delete.daily.report.redis.fail");
-        }
-    }
-
 }
