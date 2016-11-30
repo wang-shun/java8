@@ -2,6 +2,7 @@ package io.terminus.doctor.event.cache;
 
 import io.terminus.common.utils.Dates;
 import io.terminus.doctor.common.utils.DateUtil;
+import io.terminus.doctor.event.dao.DoctorDailyReportDao;
 import io.terminus.doctor.event.dao.DoctorKpiDao;
 import io.terminus.doctor.event.dao.DoctorPigTypeStatisticDao;
 import io.terminus.doctor.event.dao.redis.DailyReport2UpdateDao;
@@ -14,6 +15,7 @@ import io.terminus.doctor.event.dto.report.daily.DoctorLiveStockDailyReport;
 import io.terminus.doctor.event.dto.report.daily.DoctorMatingDailyReport;
 import io.terminus.doctor.event.dto.report.daily.DoctorSaleDailyReport;
 import io.terminus.doctor.event.dto.report.daily.DoctorWeanDailyReport;
+import io.terminus.doctor.event.model.DoctorDailyReport;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -39,15 +41,17 @@ public class DoctorDailyReportCache {
     private final DoctorPigTypeStatisticDao doctorPigTypeStatisticDao;
     private final DailyReportHistoryDao dailyReportHistoryDao;
     private final DailyReport2UpdateDao dailyReport2UpdateDao;
+    private final DoctorDailyReportDao doctorDailyReportDao;
 
     @Autowired
     public DoctorDailyReportCache(DoctorKpiDao doctorKpiDao, DailyReportHistoryDao dailyReportHistoryDao,
                                   DoctorPigTypeStatisticDao doctorPigTypeStatisticDao,
-                                  DailyReport2UpdateDao dailyReport2UpdateDao) {
+                                  DailyReport2UpdateDao dailyReport2UpdateDao, DoctorDailyReportDao doctorDailyReportDao) {
         this.doctorKpiDao = doctorKpiDao;
         this.doctorPigTypeStatisticDao = doctorPigTypeStatisticDao;
         this.dailyReportHistoryDao = dailyReportHistoryDao;
         this.dailyReport2UpdateDao = dailyReport2UpdateDao;
+        this.doctorDailyReportDao = doctorDailyReportDao;
     }
 
     /**
@@ -56,8 +60,10 @@ public class DoctorDailyReportCache {
      * @param date    日期
      * @return  日报
      */
-    public DoctorDailyReportDto getDailyReport(Long farmId, Date date) {
-        return dailyReportHistoryDao.getDailyReportWithRedis(farmId, Dates.startOfDay(date));
+    public DoctorDailyReport getDailyReport(Long farmId, Date date) {
+        //return dailyReportHistoryDao.getDailyReportWithRedis(farmId, Dates.startOfDay(date));
+
+        return doctorDailyReportDao.findByFarmIdAndSumAt(farmId, Dates.startOfDay(date));
     }
 
     /**
@@ -69,6 +75,15 @@ public class DoctorDailyReportCache {
     public void putDailyReport(Long farmId, Date date, DoctorDailyReportDto report) {
         log.info("putDailyReport farmId:{}, date:{}, report:{}", farmId, date, report);
         dailyReportHistoryDao.saveDailyReport(report, farmId, date);
+    }
+
+    /**
+     * report put 到MySQL, 覆盖原先的report
+     * @param report 日报统计
+     */
+    public void putDailyReportToMySQL(DoctorDailyReport report) {
+        log.info("putDailyReportToMySQL, report:{}", report);
+        doctorDailyReportDao.updateByFarmIdAndSumAt(report);
     }
 
     /**

@@ -130,4 +130,17 @@
         DELETE FROM <include refid="tb"/>
         WHERE farm_id = #{farmId} AND sum_at = #{sumAt}
     </delete>
+
+    <update id="updateByFarmIdAndDate" parameterType="DoctorDailyReport">
+        UPDATE <include refid="tb"/>
+        <set>
+            <if test="sowCount != null">sow_count = #{sowCount},</if>
+            <if test="farrowCount != null">farrow_count = #{farrowCount},</if>
+            <if test="nurseryCount != null">nursery_count = #{nurseryCount},</if>
+            <if test="fattenCount != null">fatten_count = #{fattenCount},</if>
+            <if test="data != null">data = #{data},</if>
+            <if test="extra != null">extra = #{extra},</if>
+        </set>
+        WHERE farm_id = #{farmId} AND sumAt = #{sumAt}
+    </update>
 </mapper>
