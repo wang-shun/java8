@@ -1,4 +1,4 @@
-package io.terminus.doctor.event.dto.report.monthly;
+package io.terminus.doctor.event.dto.report.common;
 
 import lombok.Data;
 
@@ -6,13 +6,13 @@ import java.io.Serializable;
 import java.util.List;
 
 /**
- * Desc: 猪场月报json字段
+ * Desc: 猪场报表json字段(月报，周报公用)
  * Mail: yangzl@terminus.io
  * author: DreamYoung
  * Date: 16/8/12
  */
 @Data
-public class DoctorMonthlyReportDto implements Serializable {
+public class DoctorCommonReportDto implements Serializable {
     private static final long serialVersionUID = -2490312543838256507L;
 
     /**
@@ -112,17 +112,17 @@ public class DoctorMonthlyReportDto implements Serializable {
     /**
      * 存栏变动
      */
-    private DoctorLiveStockChangeMonthlyReport liveStockChange;
+    private DoctorLiveStockChangeCommonReport liveStockChange;
 
-    private String date;                      //统计月份 2016年08月, 供前台显示
+    private String date;                      //统计月份 2016年08月, 供前台显示 或 第几周
 
     /**
      * 胎次分布
      */
-    private List<DoctorStockStructureMonthlyReport> parityStockList;
+    private List<DoctorStockStructureCommonReport> parityStockList;
 
     /**
      * 品类分布
      */
-    private List<DoctorStockStructureMonthlyReport> breedStockList;
+    private List<DoctorStockStructureCommonReport> breedStockList;
 }

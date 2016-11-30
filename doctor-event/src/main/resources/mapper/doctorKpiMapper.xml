@@ -1160,7 +1160,7 @@
     </select>
 
     <!--存栏变动月报: 转入(后备,产房仔猪,保育,育肥)-->
-    <select id="getMonthlyLiveStockChangeIn" parameterType="map" resultType="io.terminus.doctor.event.dto.report.monthly.DoctorLiveStockChangeMonthlyReport">
+    <select id="getMonthlyLiveStockChangeIn" parameterType="map" resultType="io.terminus.doctor.event.dto.report.common.DoctorLiveStockChangeCommonReport">
         SELECT
             ifnull(max(CASE WHEN pig_type = 1 THEN result ELSE 0 END), 0) +
             ifnull(max(CASE WHEN pig_type = 7 THEN result ELSE 0 END), 0) AS farrowIn,
@@ -1247,7 +1247,7 @@
     </select>
 
     <!--存栏变动月报: 死淘(后备,产房仔猪,保育,育肥)-->
-    <select id="getMonthlyLiveStockChangeGroupDead" parameterType="map" resultType="io.terminus.doctor.event.dto.report.monthly.DoctorLiveStockChangeMonthlyReport">
+    <select id="getMonthlyLiveStockChangeGroupDead" parameterType="map" resultType="io.terminus.doctor.event.dto.report.common.DoctorLiveStockChangeCommonReport">
         SELECT
             ifnull(max(CASE WHEN pig_type = 1 THEN result ELSE 0 END), 0) +
             ifnull(max(CASE WHEN pig_type = 7 THEN result ELSE 0 END), 0) AS farrowDead,
@@ -1268,7 +1268,7 @@
     </select>
 
     <!--存栏变动月报: 死淘(配怀,产房母猪)-->
-    <select id="getMonthlyLiveStockChangeSowDead" parameterType="map" resultType="io.terminus.doctor.event.dto.report.monthly.DoctorLiveStockChangeMonthlyReport">
+    <select id="getMonthlyLiveStockChangeSowDead" parameterType="map" resultType="io.terminus.doctor.event.dto.report.common.DoctorLiveStockChangeCommonReport">
         SELECT
             ifnull(max(CASE WHEN pig_type = 5 THEN result ELSE 0 END), 0) +
             ifnull(max(CASE WHEN pig_type = 6 THEN result ELSE 0 END), 0) AS peiHuaiDead,
@@ -1297,7 +1297,7 @@
     </select>
 
     <!--存栏变动月报: 销售(后备,产房仔猪,保育,育肥)-->
-    <select id="getMonthlyLiveStockChangeSale" parameterType="map" resultType="io.terminus.doctor.event.dto.report.monthly.DoctorLiveStockChangeMonthlyReport">
+    <select id="getMonthlyLiveStockChangeSale" parameterType="map" resultType="io.terminus.doctor.event.dto.report.common.DoctorLiveStockChangeCommonReport">
         SELECT
             ifnull(max(CASE WHEN pig_type = 1 THEN result ELSE 0 END), 0) +
             ifnull(max(CASE WHEN pig_type = 7 THEN result ELSE 0 END), 0) AS farrowSale,
@@ -1318,7 +1318,7 @@
     </select>
 
     <!--存栏变动月报: 饲料数量-->
-    <select id="getMonthlyLiveStockChangeFeedCount" parameterType="map" resultType="io.terminus.doctor.event.dto.report.monthly.DoctorLiveStockChangeMonthlyReport">
+    <select id="getMonthlyLiveStockChangeFeedCount" parameterType="map" resultType="io.terminus.doctor.event.dto.report.common.DoctorLiveStockChangeCommonReport">
         SELECT
             ifnull(max(CASE WHEN pig_type = 1 THEN result ELSE 0 END), 0) +
             ifnull(max(CASE WHEN pig_type = 7 THEN result ELSE 0 END), 0) AS farrowSowFeedCount,
@@ -1347,7 +1347,7 @@
     </select>
 
     <!--存栏变动月报: 饲料金额-->
-    <select id="getMonthlyLiveStockChangeMaterielAmount" parameterType="map" resultType="io.terminus.doctor.event.dto.report.monthly.DoctorLiveStockChangeMonthlyReport">
+    <select id="getMonthlyLiveStockChangeMaterielAmount" parameterType="map" resultType="io.terminus.doctor.event.dto.report.common.DoctorLiveStockChangeCommonReport">
         SELECT
             -- 饲料
             ifnull(max(CASE WHEN pig_type = 4 AND material_type = 1 THEN amount ELSE 0 END), 0) +
@@ -1410,7 +1410,7 @@
         ) AS res
     </select>
 
-    <select id="getParityStockMonthly" parameterType="map" resultType="io.terminus.doctor.event.dto.report.monthly.DoctorStockStructureMonthlyReport">
+    <select id="getParityStockMonthly" parameterType="map" resultType="io.terminus.doctor.event.dto.report.common.DoctorStockStructureCommonReport">
         select  date_format(#{endAt}, '%Y-%m-%d') as sumAt,
                 1 as type,
                 null as businessId,
@@ -1471,7 +1471,7 @@
         ) t15 on t11.parity = t15.parity
     </select>
 
-    <select id="getBreedStockMonthly" parameterType="map" resultType="io.terminus.doctor.event.dto.report.monthly.DoctorStockStructureMonthlyReport">
+    <select id="getBreedStockMonthly" parameterType="map" resultType="io.terminus.doctor.event.dto.report.common.DoctorStockStructureCommonReport">
         select
               date_format(#{endAt}, '%Y-%m-%d') as sumAt,
               2 as type,
