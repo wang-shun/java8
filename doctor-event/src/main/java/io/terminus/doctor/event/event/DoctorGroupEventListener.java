@@ -214,5 +214,6 @@ public class DoctorGroupEventListener implements EventListener {
         reportDtoNursery.getSale().setNursery(nursery);
         reportDtoNursery.getSale().setBasePrice10(base10);
         reportDtoNursery.getSale().setBasePrice15(base15);
+        doctorDailyReportCache.putDailyReportToMySQL(farmId, startAt, reportDtoNursery);
     }
 }
