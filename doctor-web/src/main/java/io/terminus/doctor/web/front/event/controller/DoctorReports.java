@@ -93,19 +93,7 @@ public class DoctorReports {
                                                                               @RequestParam(value = "index", required = false) Integer index) {
         return RespHelper.or500(doctorMonthlyReportReadService.findMonthlyReportTrendByFarmIdAndSumAt(farmId, date, index));
     }
-
-    /**
-     * 清除某猪场在redis中的日报
-     * @param farmId
-     * @return
-     */
-    @RequestMapping(value = "/daily/clearRedis", method = RequestMethod.GET)
-    public Boolean clearRedis(@RequestParam("farmId") Long farmId) {
-        RespHelper.or500(doctorDailyReportWriteService.deleteDailyReportFromRedis(farmId));
-        return true;
-    }
-
-
+    
     /**
      * 分页查询猪群批次总结
      * @return 批次总结
