@@ -131,7 +131,7 @@
         WHERE farm_id = #{farmId} AND sum_at = #{sumAt}
     </delete>
 
-    <update id="updateByFarmIdAndDate" parameterType="DoctorDailyReport">
+    <update id="updateByFarmIdAndSumAt" parameterType="DoctorDailyReport">
         UPDATE <include refid="tb"/>
         <set>
             <if test="sowCount != null">sow_count = #{sowCount},</if>
