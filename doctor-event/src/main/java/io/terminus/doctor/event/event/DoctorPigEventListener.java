@@ -327,7 +327,7 @@ public class DoctorPigEventListener implements EventListener {
                 doctorDailyReportCache.putDailyReportToMySQL(farmId, startAt, reportDto);
 
             } else {
-                int deadBoar = doctorKpiDao.getDeadSow(farmId, startAt, endAt);
+                int deadBoar = doctorKpiDao.getDeadBoar(farmId, startAt, endAt);
                 DoctorDailyReport report = doctorDailyReportCache.getDailyReport(farmId, startAt);
                 DoctorDailyReportDto reportDto = report.getReportData();
                 reportDto.getDead().setBoar(deadBoar);
@@ -339,13 +339,13 @@ public class DoctorPigEventListener implements EventListener {
         //销售
         if (Objects.equals(event.getChangeTypeId(), DoctorBasicEnums.SALE.getId())) {
             if (Objects.equals(event.getKind(), DoctorPig.PIG_TYPE.SOW.getKey())) {
-                int saleSow = doctorKpiDao.getDeadSow(farmId, startAt, endAt);
+                int saleSow = doctorKpiDao.getSaleSow(farmId, startAt, endAt);
                 DoctorDailyReportDto reportDto = doctorDailyReportCache.getDailyReportDto(farmId, startAt);
                 reportDto.getSale().setSow(saleSow);
                 doctorDailyReportCache.putDailyReportToMySQL(farmId, startAt, reportDto);
 
             } else {
-                int saleBoar = doctorKpiDao.getDeadSow(farmId, startAt, endAt);
+                int saleBoar = doctorKpiDao.getSaleBoar(farmId, startAt, endAt);
                 DoctorDailyReportDto reportDto = doctorDailyReportCache.getDailyReportDto(farmId, startAt);
                 reportDto.getSale().setBoar(saleBoar);
                 doctorDailyReportCache.putDailyReportToMySQL(farmId, startAt, reportDto);
