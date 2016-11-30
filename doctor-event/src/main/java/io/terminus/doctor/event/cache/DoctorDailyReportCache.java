@@ -72,7 +72,6 @@ public class DoctorDailyReportCache {
      * report put 到MySQL
      */
     public void putDailyReportToMySQL(Long farmId, Date date, DoctorDailyReportDto reportDto) {
-        log.info("================= putDailyReportToMySQL farmId:{}, date:{}, report:{}", farmId, date, reportDto);
         saveEventAtWhenLiveStock(farmId, date);
         doctorDailyReportDao.updateByFarmIdAndSumAt(makeDailyReport(farmId, date, reportDto));
     }
