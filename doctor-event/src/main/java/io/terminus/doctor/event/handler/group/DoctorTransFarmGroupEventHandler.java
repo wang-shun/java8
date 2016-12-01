@@ -111,8 +111,7 @@ public class DoctorTransFarmGroupEventHandler extends DoctorAbstractGroupEventHa
 
         //5.判断转场数量, 如果 = 猪群数量, 触发关闭猪群事件, 同时生成批次总结
         if (Objects.equals(oldQuantity, transFarm.getQuantity())) {
-            doctorCommonGroupEventHandler.createGroupBatchSummaryWhenClosed(group, groupTrack, event.getEventAt(), transFarm.getFcrFeed());
-            doctorCommonGroupEventHandler.autoGroupEventClose(group, groupTrack, transFarm);
+            doctorCommonGroupEventHandler.autoGroupEventClose(group, groupTrack, transFarm, event.getEventAt(), transFarm.getFcrFeed());
 
             DoctorGroupEvent closeEvent = doctorGroupEventDao.findByRelGroupEventId(event.getId());
             transFarm.setRelGroupEventId(closeEvent.getId());    //如果发生关闭猪群事件，关联事件id要换下

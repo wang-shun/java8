@@ -30,7 +30,6 @@ import io.terminus.doctor.event.model.DoctorGroupSnapshot;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
 import io.terminus.doctor.event.service.DoctorBarnReadService;
 import io.terminus.doctor.event.util.EventUtil;
-import io.terminus.zookeeper.pubsub.Publisher;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -80,9 +79,6 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
 
     @Autowired
     private DoctorGroupReportManager doctorGroupReportManager;
-
-    @Autowired(required = false)
-    private Publisher publisher;
 
     @Autowired
     public DoctorAbstractGroupEventHandler(DoctorGroupSnapshotDao doctorGroupSnapshotDao,
@@ -197,7 +193,7 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
         }
         groupTrack.setExtraEntity(extra);
 
-        groupTrack =  doctorGroupReportManager.updateFarrowGroupTrack(groupTrack, event.getPigType());
+        groupTrack = doctorGroupReportManager.updateFarrowGroupTrack(groupTrack, event.getPigType());
         doctorGroupTrackDao.update(groupTrack);
     }
 
@@ -272,21 +268,14 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
 
     //发布猪群猪舍事件
     protected void publistGroupAndBarn(Long orgId, Long farmId, Long groupId, Long barnId, Long eventId) {
-        publishZookeeperEvent(ListenedGroupEvent.builder().doctorGroupEventId(eventId).farmId(farmId).orgId(orgId).groupId(groupId).build());
-        publishZookeeperEvent(ListenedBarnEvent.builder().barnId(barnId).build());
-    }
+        coreEventDispatcher.publish(ListenedGroupEvent.builder()
+                .doctorGroupEventId(eventId)
+                .farmId(farmId)
+                .orgId(orgId)
+                .groupId(groupId)
+                .build());
 
-    //发布zk事件, 用于更新es索引
-    private <T> void publishZookeeperEvent(T data){
-//        if(notNull(publisher)) {
-//            try {
-//                publisher.publish(DataEvent.toBytes(eventType, data));
-//            } catch (Exception e) {
-//                log.error("publish zk event, eventType:{}, data:{} cause:{}", eventType, data, Throwables.getStackTraceAsString(e));
-//            }
-//        } else {
-        coreEventDispatcher.publish(data);
-        //}
+        coreEventDispatcher.publish(ListenedBarnEvent.builder().barnId(barnId).build());
     }
 
     //品种校验, 如果猪群的品种已经确定, 那么录入的品种必须和猪群的品种一致

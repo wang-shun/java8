@@ -80,9 +80,11 @@ public class DoctorCommonGroupEventHandler {
     }
 
     /**
-     * 系统触发的自动关闭猪群事件
+     * 系统触发的自动关闭猪群事件(先生成一发批次总结)
      */
-    public void autoGroupEventClose(DoctorGroup group, DoctorGroupTrack groupTrack, BaseGroupInput baseInput) {
+    public void autoGroupEventClose(DoctorGroup group, DoctorGroupTrack groupTrack, BaseGroupInput baseInput, Date eventAt, Double fcrFeed) {
+        createGroupBatchSummaryWhenClosed(group, groupTrack, eventAt, fcrFeed);
+
         DoctorCloseGroupInput closeInput = new DoctorCloseGroupInput();
         closeInput.setIsAuto(IsOrNot.YES.getValue());   //系统触发事件, 属于自动生成
         closeInput.setEventAt(baseInput.getEventAt());
@@ -217,7 +219,7 @@ public class DoctorCommonGroupEventHandler {
     /**
      * 当猪群关闭时, 创建猪群批次总结(这个统计放到猪群关闭之前进行)
      */
-    public void createGroupBatchSummaryWhenClosed(DoctorGroup group, DoctorGroupTrack groupTrack, Date eventAt, Double fcrFeed) {
+    private void createGroupBatchSummaryWhenClosed(DoctorGroup group, DoctorGroupTrack groupTrack, Date eventAt, Double fcrFeed) {
         DoctorGroupBatchSummary summary = RespHelper.orServEx(doctorGroupBatchSummaryReadService
                 .getSummaryByGroupDetail(new DoctorGroupDetail(group, groupTrack), fcrFeed));
 
