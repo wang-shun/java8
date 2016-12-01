@@ -3,6 +3,9 @@ package io.terminus.doctor.web.front.event.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.api.client.repackaged.com.google.common.base.Strings;
 import com.google.common.base.Throwables;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableMultimap;
+import com.google.common.collect.Lists;
 import io.terminus.common.exception.JsonResponseException;
 import io.terminus.common.model.Paging;
 import io.terminus.common.utils.JsonMapper;
@@ -38,7 +41,11 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
+
+import static com.google.common.collect.ImmutableMultimap.of;
+import static java.util.stream.Collectors.toList;
 
 /**
  * Created by yaoqijun.
@@ -125,7 +132,7 @@ public class DoctorPigEvents {
         Paging<DoctorPigEvent> doctorPigEventPaging = pagingDoctorPigEvent(farmId, pigId, pageNo, pageSize, startDate, endDate);
         DoctorPigEvent doctorPigEvent = RespHelper.or500(doctorPigEventReadService.canRollbackEvent(pigId));
         Long canRollback = null;
-        if (doctorPigEvent != null){
+        if (doctorPigEvent != null) {
             canRollback = doctorPigEvent.getId();
         }
         return DoctorPigEventPagingDto.builder().paging(doctorPigEventPaging).canRollback(canRollback).build();
@@ -173,6 +180,7 @@ public class DoctorPigEvents {
 
     /**
      * 同步流程数据
+     *
      * @param key
      * @param businessId
      * @return
@@ -185,6 +193,7 @@ public class DoctorPigEvents {
 
     /**
      * 分页查询某一类型的猪事件
+     *
      * @param params
      * @param pageNo
      * @param pageSize
@@ -197,11 +206,11 @@ public class DoctorPigEvents {
             return Paging.empty();
         }
         params = Params.filterNullOrEmpty(params);
-        if (params.get("eventTypes") !=null) {
-            params.put("types", Splitters.COMMA.splitToList((String)params.get("eventTypes")));
+        if (params.get("eventTypes") != null) {
+            params.put("types", Splitters.COMMA.splitToList((String) params.get("eventTypes")));
             params.remove("eventTypes");
         }
-        if(StringUtils.isNotBlank((String) params.get("endDate"))) {
+        if (StringUtils.isNotBlank((String) params.get("endDate"))) {
             params.put("endDate", new DateTime(params.get("endDate")).plusDays(1).minusSeconds(1).toDate());
         }
         return RespHelper.or500(doctorPigEventReadService.queryPigEventsByCriteria(params, pageNo, pageSize));
@@ -209,28 +218,35 @@ public class DoctorPigEvents {
 
     /**
      * 获取相应的猪类型事件列表
+     *
      * @param types
      * @return
      * @see PigEvent
      */
     @RequestMapping(value = "/pigEvents")
     @ResponseBody
-    public List<String> queryPigEvents(@RequestParam String types) {
-        List<PigEvent> events = PigEvent.from(Splitters.UNDERSCORE.splitToList(types).stream().filter(type -> StringUtils.isNotBlank(type)).map(type -> Integer.parseInt(type)).collect(Collectors.toList()));
-        return events.stream().map(pigEvent -> pigEvent.getDesc()).collect(Collectors.toList());
+    public List<ImmutableMap<String, Object>> queryPigEvents(@RequestParam String types) {
+        List<PigEvent> events = PigEvent.from(Splitters.UNDERSCORE.splitToList(types).stream().filter(type -> StringUtils.isNotBlank(type)).map(type -> Integer.parseInt(type)).collect(toList()));
+        List<ImmutableMap<String,Object>> list= Lists.newArrayList();
+        for (PigEvent p:events) {
+            list.add(ImmutableMap.of("id",p.getKey(),"name",p.getDesc()));
+        }
+        return list;
     }
+
 
     /**
      * 获取拥有猪事件的操作人列表
+     *
      * @param params
      * @return
      */
     @RequestMapping(value = "/event/operators")
     @ResponseBody
-    public List<DoctorPigEvent> queryOperatorForEvent(@RequestParam  Map<String, Object> params){
+    public List<DoctorPigEvent> queryOperatorForEvent(@RequestParam Map<String, Object> params) {
         params = Params.filterNullOrEmpty(params);
-        if (params.get("eventTypes") !=null) {
-            params.put("types", Splitters.COMMA.splitToList((String)params.get("eventTypes")));
+        if (params.get("eventTypes") != null) {
+            params.put("types", Splitters.COMMA.splitToList((String) params.get("eventTypes")));
             params.remove("eventTypes");
         }
         return RespHelper.or500(doctorPigEventReadService.queryOperators(params));
