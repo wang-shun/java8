@@ -225,7 +225,21 @@ public class DoctorPigEvents {
      */
     @RequestMapping(value = "/pigEvents")
     @ResponseBody
-    public List<ImmutableMap<String, Object>> queryPigEvents(@RequestParam String types) {
+    public List<String> queryPigEvents(@RequestParam String types) {
+        List<PigEvent> events = PigEvent.from(Splitters.UNDERSCORE.splitToList(types).stream().filter(type -> StringUtils.isNotBlank(type)).map(type -> Integer.parseInt(type)).collect(Collectors.toList()));
+        return events.stream().map(pigEvent -> pigEvent.getDesc()).collect(Collectors.toList());
+    }
+
+    /**
+     * 获取相应的猪类型事件列表<K,V>形式
+     *
+     * @param types
+     * @return
+     * @see PigEvent
+     */
+    @RequestMapping(value = "/getPigEvents")
+    @ResponseBody
+    public List<ImmutableMap<String, Object>> getPigEvents(@RequestParam String types) {
         List<PigEvent> events = PigEvent.from(Splitters.UNDERSCORE.splitToList(types).stream().filter(type -> StringUtils.isNotBlank(type)).map(type -> Integer.parseInt(type)).collect(toList()));
         List<ImmutableMap<String,Object>> list= Lists.newArrayList();
         for (PigEvent p:events) {
