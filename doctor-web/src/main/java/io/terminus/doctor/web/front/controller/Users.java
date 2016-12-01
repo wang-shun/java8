@@ -159,7 +159,7 @@ public class Users {
                                      @RequestParam(value = "code", required = false) String code,
                                      @RequestParam(value = "target", required = false) String target,
                                      HttpServletRequest request) {
-
+        log.info("loginBy = {}, password ={}", name, password);
         String sessionId = MoreObjects.firstNonNull(sid, doctorCommonSessionBean.getSessionId(name));
         DoctorCommonSessionBean.Token token = doctorCommonSessionBean.login(name, password, code, sessionId, deviceId);
 
