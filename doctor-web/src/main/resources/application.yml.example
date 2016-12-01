@@ -28,5 +28,5 @@ parana:
 
 pay:
   debug: false
-openApi:
-    url: http://localhost:8888
+
+openApi.url: http://localhost:8081

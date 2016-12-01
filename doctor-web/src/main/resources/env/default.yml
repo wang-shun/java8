@@ -108,3 +108,5 @@ msg:
       appKey: 574cecdce0f55a85f00028fe
       appSecret: ws685rsevimn8fgx6mmxzzgx7bs1y9pn
 
+openApi.url: http://doctor-test.xrnm.com
+
