@@ -137,7 +137,7 @@ public class DoctorGroupBatchSummaryReadServiceImpl implements DoctorGroupBatchS
 
         Double fcrWeight = getFcrDeltaWeight(events, inCount, inAvgWeight);
         if (fcrFeed == null) {
-            summary.setFcr(fcrWeight);            //料肉比(这里只放分母，由上层算出物料的分子，出一下)
+            summary.setFcr(fcrWeight);            //料肉比(这里只放分母，由上层算出物料的分子，出一下)2
         } else {
             summary.setFcr(fcrFeed / fcrWeight);
         }

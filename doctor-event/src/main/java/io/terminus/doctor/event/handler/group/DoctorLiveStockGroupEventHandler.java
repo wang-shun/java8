@@ -66,11 +66,4 @@ public class DoctorLiveStockGroupEventHandler extends DoctorAbstractGroupEventHa
         //4.创建镜像
         createGroupSnapShot(oldShot, new DoctorGroupSnapShotInfo(group, event, groupTrack), GroupEventType.LIVE_STOCK);
     }
-
-    @Override
-    protected <E extends BaseGroupEdit> void editEvent(DoctorGroup group, DoctorGroupTrack groupTrack, DoctorGroupEvent event, E edit) {
-        editGroupEvent(event, edit);
-        //更新猪群镜像
-        editGroupSnapShot(group, groupTrack, event);
-    }
 }

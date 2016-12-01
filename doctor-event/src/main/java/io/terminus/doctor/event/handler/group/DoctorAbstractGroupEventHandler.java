@@ -14,7 +14,6 @@ import io.terminus.doctor.event.dao.DoctorGroupSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
 import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
 import io.terminus.doctor.event.dto.event.group.DoctorMoveInGroupEvent;
-import io.terminus.doctor.event.dto.event.group.edit.BaseGroupEdit;
 import io.terminus.doctor.event.dto.event.group.input.BaseGroupInput;
 import io.terminus.doctor.event.dto.event.group.input.DoctorTransGroupInput;
 import io.terminus.doctor.event.enums.GroupEventType;
@@ -98,11 +97,6 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
         handleEvent(group, groupTrack, input);
     }
 
-    @Override
-    public <E extends BaseGroupEdit> void edit(DoctorGroup group, DoctorGroupTrack groupTrack, DoctorGroupEvent event, E edit) {
-        editEvent(group, groupTrack, event, edit);
-    }
-
     /**
      * 处理事件的抽象方法, 由继承的子类去实现
      * @param group       猪群
@@ -111,16 +105,6 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
      * @param <I>         规定输入上界
      */
     protected abstract <I extends BaseGroupInput> void handleEvent(DoctorGroup group, DoctorGroupTrack groupTrack, I input);
-
-    /**
-     * 编辑事件的抽象方法, 由继承的子类去实现
-     * @param group       猪群
-     * @param groupTrack  猪群跟踪
-     * @param event       猪群事件
-     * @param edit        编辑信息
-     * @param <E>         规定输入上界
-     */
-    protected abstract <E extends BaseGroupEdit> void editEvent(DoctorGroup group, DoctorGroupTrack groupTrack, DoctorGroupEvent event, E edit);
 
     //转换下猪群基本数据
     protected DoctorGroupEvent dozerGroupEvent(DoctorGroup group, GroupEventType eventType, BaseGroupInput baseInput) {
@@ -233,21 +217,6 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
                 .groupTrack(newShot.getGroupTrack())
                 .build()));
         doctorGroupSnapshotDao.create(groupSnapshot);
-    }
-
-    //更新猪群事件
-    protected <E extends BaseGroupEdit> void editGroupEvent(DoctorGroupEvent event, E edit) {
-        event.setRemark(edit.getRemark());
-        event.setUpdatorId(edit.getUpdatorId());
-        event.setUpdatorName(edit.getUpdatorName());
-        doctorGroupEventDao.update(event);
-    }
-
-    //更新猪群跟踪
-    protected void editGroupSnapShot(DoctorGroup group, DoctorGroupTrack groupTrack, DoctorGroupEvent event) {
-        DoctorGroupSnapshot snapshot = doctorGroupSnapshotDao.findGroupSnapshotByToEventId(event.getId());
-        snapshot.setToInfo(JSON_MAPPER.toJson(new DoctorGroupSnapShotInfo(group, event, groupTrack)));
-        doctorGroupSnapshotDao.update(snapshot);
     }
 
     //校验数量

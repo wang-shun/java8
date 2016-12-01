@@ -65,21 +65,4 @@ public class DoctorDiseaseGroupEventHandler extends DoctorAbstractGroupEventHand
         //4.创建镜像
         createGroupSnapShot(oldShot, new DoctorGroupSnapShotInfo(group, event, groupTrack), GroupEventType.DISEASE);
     }
-
-    @Override
-    protected <E extends BaseGroupEdit> void editEvent(DoctorGroup group, DoctorGroupTrack groupTrack, DoctorGroupEvent event, E edit) {
-        DoctorDiseaseGroupEdit diseaseEdit = (DoctorDiseaseGroupEdit) edit;
-
-        //更新字段
-        DoctorDiseaseGroupEvent diseaseEvent = JSON_MAPPER.fromJson(event.getExtra(), DoctorDiseaseGroupEvent.class);
-        diseaseEvent.setDiseaseId(diseaseEdit.getDiseaseId());
-        diseaseEvent.setDiseaseName(diseaseEdit.getDiseaseName());
-        diseaseEvent.setDoctorId(diseaseEdit.getDoctorId());
-        diseaseEvent.setDoctorName(diseaseEdit.getDoctorName());
-        event.setExtraMap(diseaseEvent);
-
-        editGroupEvent(event, edit);
-        //更新猪群镜像
-        editGroupSnapShot(group, groupTrack, event);
-    }
 }

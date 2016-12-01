@@ -49,7 +49,7 @@ public class DoctorDailyReportReadServiceImpl implements DoctorDailyReportReadSe
         this.dailyReport2UpdateDao = dailyReport2UpdateDao;
     }
 
-    @PostConstruct
+    //@PostConstruct
     public void init() {
         try {
             Date now = new Date();

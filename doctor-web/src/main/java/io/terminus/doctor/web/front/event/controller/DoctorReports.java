@@ -6,6 +6,7 @@ import io.terminus.common.utils.BeanMapper;
 import io.terminus.common.utils.Splitters;
 import io.terminus.doctor.common.utils.Params;
 import io.terminus.doctor.common.utils.RespHelper;
+import io.terminus.doctor.event.dto.DoctorGroupDetail;
 import io.terminus.doctor.event.dto.DoctorGroupSearchDto;
 import io.terminus.doctor.event.dto.report.daily.DoctorDailyReportDto;
 import io.terminus.doctor.event.dto.report.common.DoctorCommonReportTrendDto;
@@ -15,6 +16,7 @@ import io.terminus.doctor.event.service.DoctorDailyReportReadService;
 import io.terminus.doctor.event.service.DoctorDailyReportWriteService;
 import io.terminus.doctor.event.service.DoctorGroupBatchSummaryReadService;
 import io.terminus.doctor.event.service.DoctorCommonReportReadService;
+import io.terminus.doctor.event.service.DoctorGroupReadService;
 import io.terminus.doctor.warehouse.service.DoctorMaterialConsumeProviderReadService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -54,6 +56,9 @@ public class DoctorReports {
 
     @RpcConsumer
     private DoctorMaterialConsumeProviderReadService doctorMaterialConsumeProviderReadService;
+
+    @RpcConsumer
+    private DoctorGroupReadService doctorGroupReadService;
 
     /**
      * 根据farmId和日期查询猪场日报表(缓存方式)
@@ -134,5 +139,15 @@ public class DoctorReports {
                 })
                 .collect(Collectors.toList());
         return new Paging<>(paging.getTotal(), summaries);
+    }
+
+    /**
+     * 分页查询猪群批次总结
+     * @return 批次总结
+     */
+    @RequestMapping(value = "/group/batch", method = RequestMethod.GET)
+    public DoctorGroupBatchSummary getGroupBatchSummary(@RequestParam("groupId") Long groupId, @RequestParam("fcc") Double fcc) {
+        DoctorGroupDetail groupDetail = RespHelper.or500(doctorGroupReadService.findGroupDetailByGroupId(groupId));
+        return RespHelper.or500(doctorGroupBatchSummaryReadService.getSummaryByGroupDetail(groupDetail, fcc));
     }
 }
