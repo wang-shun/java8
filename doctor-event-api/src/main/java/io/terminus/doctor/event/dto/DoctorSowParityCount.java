@@ -77,7 +77,7 @@ public class DoctorSowParityCount implements Serializable{
             doctorSowParityCount.setFarrowingDate(event.getFarrowingDate());
             doctorSowParityCount.setPigLetCount(event.getLiveCount());
             if (event.getFarrowWeight() != null && event.getLiveCount() != null && event.getLiveCount() != 0) {
-                doctorSowParityCount.setAvgBirthWeight(event.getFarrowWeight()/event.getLiveCount());
+                doctorSowParityCount.setAvgBirthWeight(Double.valueOf(String.format("%.2f", event.getFarrowWeight() / event.getLiveCount())));
             } else {
                 doctorSowParityCount.setAvgBirthWeight(0d);
             }
