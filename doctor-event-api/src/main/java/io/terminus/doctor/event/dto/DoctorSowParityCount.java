@@ -1,8 +1,6 @@
 package io.terminus.doctor.event.dto;
 
-import com.google.common.base.MoreObjects;
 import com.google.common.collect.Maps;
-import io.terminus.doctor.common.utils.Params;
 import io.terminus.doctor.event.enums.PigEvent;
 import io.terminus.doctor.event.model.DoctorPigEvent;
 import lombok.AllArgsConstructor;
@@ -69,28 +67,30 @@ public class DoctorSowParityCount implements Serializable{
         doctorSowParityCount.setParity(parity);
 
         if (eventTypeMap.containsKey(PigEvent.MATING.getKey())){
-            Map<String,Object> extra = eventTypeMap.get(PigEvent.MATING.getKey()).getExtraMap();
-            doctorSowParityCount.setMatingDate(new Date(Long.valueOf(extra.get("matingDate").toString())));
-            doctorSowParityCount.setMatingStaff(extra.get("matingStaff").toString());
+            DoctorPigEvent event = eventTypeMap.get(PigEvent.MATING.getKey());
+            doctorSowParityCount.setMatingDate(event.getMattingDate());
+            doctorSowParityCount.setMatingStaff(event.getOperatorName());
         }
 
         if(eventTypeMap.containsKey(PigEvent.FARROWING.getKey())){
-            Map<String,Object> extra = eventTypeMap.get(PigEvent.FARROWING.getKey()).getExtraMap();
-            doctorSowParityCount.setFarrowingDate(new Date(Long.valueOf(extra.get("farrowingDate").toString())));
-            doctorSowParityCount.setPigLetCount(
-                    DoctorSowParityCount.getCountFromMap(extra, "farrowingLiveCount"));
-            doctorSowParityCount.setAvgBirthWeight(Double.valueOf(MoreObjects.firstNonNull(extra.get("birthNestAvg"), "0").toString()));
-            doctorSowParityCount.setHealthCount(DoctorSowParityCount.getCountFromMap(extra, "healthCount"));
-            doctorSowParityCount.setWeakCount(DoctorSowParityCount.getCountFromMap(extra, "weakCount"));
-            doctorSowParityCount.setDeadCount(DoctorSowParityCount.getCountFromMap(extra, "deadCount"));
-            doctorSowParityCount.setMujiCount(DoctorSowParityCount.getCountFromMap(extra,"mnyCount") +
-                    DoctorSowParityCount.getCountFromMap(extra, "jxCount"));
+            DoctorPigEvent event = eventTypeMap.get(PigEvent.FARROWING.getKey());
+            doctorSowParityCount.setFarrowingDate(event.getFarrowingDate());
+            doctorSowParityCount.setPigLetCount(event.getLiveCount());
+            if (event.getFarrowWeight() != null && event.getLiveCount() != null && event.getLiveCount() != 0) {
+                doctorSowParityCount.setAvgBirthWeight(event.getFarrowWeight()/event.getLiveCount());
+            } else {
+                doctorSowParityCount.setAvgBirthWeight(0d);
+            }
+            doctorSowParityCount.setHealthCount(event.getHealthCount());
+            doctorSowParityCount.setWeakCount(event.getWeakCount());
+            doctorSowParityCount.setDeadCount(event.getDeadCount());
+            doctorSowParityCount.setMujiCount((event.getMnyCount() == null ? 0 : event.getMnyCount()) + (event.getJxCount() == null ? 0 : event.getJxCount()));
         }
 
         if(eventTypeMap.containsKey(PigEvent.WEAN.getKey())){
-            Map<String,Object> extra = eventTypeMap.get(PigEvent.WEAN.getKey()).getExtraMap();
-            doctorSowParityCount.setWeanCount(getCountFromMap(extra, "partWeanPigletsCount"));
-            doctorSowParityCount.setWeanAvgWeight(Double.valueOf(MoreObjects.firstNonNull(extra.get("partWeanAvgWeight"), "0").toString()));
+            DoctorPigEvent event = eventTypeMap.get(PigEvent.WEAN.getKey());
+            doctorSowParityCount.setWeanCount(event.getWeanCount());
+            doctorSowParityCount.setWeanAvgWeight(event.getWeanAvgWeight());
         }
 
         Optional<DoctorPigEvent> optional = doctorPigEvents.stream()
@@ -103,10 +103,4 @@ public class DoctorSowParityCount implements Serializable{
         return doctorSowParityCount;
     }
 
-    private static Integer getCountFromMap(Map<String,Object> map, String key){
-        if(! map.containsKey(key)){
-            return 0;
-        }
-        return Params.getWithConvert(map, key, o->Integer.valueOf(o.toString()));
-    }
 }
