@@ -73,12 +73,12 @@ public class DoctorTransGroupEventHandler extends DoctorAbstractGroupEventHandle
         checkFarrowGroupUnique(transGroup.getIsCreateGroup(), transGroup.getToBarnId());
         checkQuantity(groupTrack.getQuantity(), transGroup.getQuantity());
         checkQuantityEqual(transGroup.getQuantity(), transGroup.getBoarQty(), transGroup.getSowQty());
-        checkUnweanTrans(group.getPigType(), groupTrack, transGroup.getQuantity());
         Double realWeight = transGroup.getAvgWeight() * transGroup.getQuantity();   //后台计算的总重
         //checkDayAge(groupTrack.getAvgDayAge(), transGroup);
 
         //转入猪舍
         DoctorBarn toBarn = getBarn(transGroup.getToBarnId());
+        checkUnweanTrans(group.getPigType(), toBarn.getPigType(), groupTrack, transGroup.getQuantity());
 
         //1.转换转群事件
         DoctorTransGroupEvent transGroupEvent = BeanMapper.map(transGroup, DoctorTransGroupEvent.class);
