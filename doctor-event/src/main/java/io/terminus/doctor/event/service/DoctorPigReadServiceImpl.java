@@ -10,6 +10,7 @@ import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.model.PageInfo;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
+import io.terminus.common.utils.Arguments;
 import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.cache.DoctorPigInfoCache;
@@ -222,7 +223,7 @@ public class DoctorPigReadServiceImpl implements DoctorPigReadService {
     @Override
     public Response<String> generateFostersCode(String eventAt, Long farmId) {
         try{
-            DateTime dateTime = DateUtil.DATE.parseDateTime(eventAt);
+            DateTime dateTime = Arguments.isEmpty(eventAt) ? DateTime.now() : DateUtil.DATE.parseDateTime(eventAt);
             Long farrowingCount =  doctorPigEventDao.countPigEventTypeDuration(
                     farmId, PigEvent.FARROWING.getKey(),
                     dateTime.withDayOfMonth(1).withTimeAtStartOfDay().toDate(),
