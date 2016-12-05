@@ -2220,11 +2220,6 @@ public class DoctorMoveDataService {
             groupTrack.setBoarQty(gain.getQuantity() / 2);
             groupTrack.setSowQty(groupTrack.getQuantity() - groupTrack.getBoarQty());
             groupTrack.setBirthDate(DateTime.now().minusDays(groupTrack.getAvgDayAge() == null ? 1 : groupTrack.getAvgDayAge()).toDate());
-            groupTrack.setAvgWeight(MoreObjects.firstNonNull(gain.getAvgWeight(), 0D));
-            groupTrack.setWeight(groupTrack.getAvgWeight() * groupTrack.getQuantity());
-            groupTrack.setPrice(MoreObjects.firstNonNull(groupTrack.getPrice(), 0L));
-            groupTrack.setAmount(MoreObjects.firstNonNull(groupTrack.getAmount(), 0L));
-            groupTrack.setSaleQty(MoreObjects.firstNonNull(groupTrack.getSaleQty(), 0));
         }
         DoctorGroupEvent lastEvent = events.stream().sorted((a, b) -> b.getEventAt().compareTo(a.getEventAt())).findFirst().orElse(null);
         groupTrack.setRelEventId(lastEvent == null ? null : lastEvent.getId());
@@ -2243,11 +2238,6 @@ public class DoctorMoveDataService {
         groupTrack.setQuantity(0);
         groupTrack.setBoarQty(0);
         groupTrack.setSowQty(0);
-        groupTrack.setAvgWeight(0D);
-        groupTrack.setWeight(0D);
-        groupTrack.setPrice(0L);
-        groupTrack.setAmount(0L);
-        groupTrack.setSaleQty(0);
         return groupTrack;
     }
 
@@ -2356,7 +2346,7 @@ public class DoctorMoveDataService {
     private Integer quantityChange;
     public void updateParityAndBoarCode(DoctorFarm farm) {
         List<DoctorPigEvent> doctorPigEvensList = doctorPigEventDao.list(ImmutableMap.of("farmId", farm.getId(), "type", PigEvent.ENTRY.getKey(), "kind", 1));
-        doctorPigEvensList.stream().forEach( doctorPigEvent -> {
+        doctorPigEvensList.forEach(doctorPigEvent -> {
             //log.info("update doctor_pig_events start: {}", doctorPigEvent);
             List<DoctorPigEvent> lists = doctorPigEventDao.queryAllEventsByPigId(doctorPigEvent.getPigId());
             parity = 1;
@@ -2366,7 +2356,7 @@ public class DoctorMoveDataService {
             statusAfter = PigStatus.Entry.getKey();
             quantity = 1000; //一个胎次中分娩的活仔数, 默认1000,为了与quantityChange 不相等
             quantityChange = 0; //在一个胎次中仔猪变化的数量
-            lists.stream().forEach(doctorPigEvent1 -> {
+            lists.forEach(doctorPigEvent1 -> {
                 statusAfter = statusBefore;
                 switch (doctorPigEvent1.getType()){
                     case 6:

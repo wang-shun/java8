@@ -38,7 +38,6 @@ public class DoctorChangeGroupEventHandler extends DoctorAbstractGroupEventHandl
 
     private final DoctorGroupEventDao doctorGroupEventDao;
     private final DoctorCommonGroupEventHandler doctorCommonGroupEventHandler;
-    private final DoctorGroupTrackDao doctorGroupTrackDao;
 
     @Autowired
     public DoctorChangeGroupEventHandler(DoctorGroupSnapshotDao doctorGroupSnapshotDao,
@@ -50,7 +49,6 @@ public class DoctorChangeGroupEventHandler extends DoctorAbstractGroupEventHandl
         super(doctorGroupSnapshotDao, doctorGroupTrackDao, coreEventDispatcher, doctorGroupEventDao, doctorBarnReadService);
         this.doctorGroupEventDao = doctorGroupEventDao;
         this.doctorCommonGroupEventHandler = doctorCommonGroupEventHandler;
-        this.doctorGroupTrackDao = doctorGroupTrackDao;
     }
 
     @Override
@@ -93,7 +91,6 @@ public class DoctorChangeGroupEventHandler extends DoctorAbstractGroupEventHandl
         boarQty = boarQty > groupTrack.getQuantity() ? groupTrack.getQuantity() : boarQty;
         groupTrack.setBoarQty(boarQty < 0 ? 0 : boarQty);
         groupTrack.setSowQty(EventUtil.minusQuantity(groupTrack.getQuantity(), groupTrack.getBoarQty()));
-        groupTrack.setSaleQty(Objects.equals(DoctorBasicEnums.SALE.getId(), change.getChangeTypeId()) ? change.getQuantity() : 0);  //直接判断是否是销售
         updateGroupTrack(groupTrack, event);
 
         //4.创建镜像

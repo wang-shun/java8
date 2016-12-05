@@ -12,7 +12,6 @@ import io.terminus.doctor.event.dao.DoctorGroupSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
 import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
 import io.terminus.doctor.event.dto.event.group.DoctorNewGroupEvent;
-import io.terminus.doctor.event.dto.event.group.edit.DoctorNewGroupEdit;
 import io.terminus.doctor.event.dto.event.group.input.DoctorNewGroupInput;
 import io.terminus.doctor.event.enums.GroupEventType;
 import io.terminus.doctor.event.event.ListenedBarnEvent;
@@ -30,7 +29,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -96,10 +94,6 @@ public class DoctorGroupManager {
         groupTrack.setQuantity(0);
         groupTrack.setAvgDayAge(0);             //日龄
         groupTrack.setBirthDate(new Date());    //出生日期(用于计算日龄)
-        groupTrack.setAvgWeight(0D);            //均重
-        groupTrack.setWeight(0D);               //总重
-        groupTrack.setPrice(0L);                //单价
-        groupTrack.setAmount(0L);               //金额
         groupTrack.setSex(EventUtil.getSex(groupTrack.getBoarQty(), groupTrack.getSowQty()));
         doctorGroupTrackDao.create(groupTrack);
 
@@ -118,37 +112,6 @@ public class DoctorGroupManager {
         //发布统计事件
         publistGroupAndBarn(group.getOrgId(), group.getFarmId(), group.getId(), group.getCurrentBarnId(), groupEvent.getId());
         return groupId;
-    }
-
-    /**
-     * 编辑新建猪群事件
-     * @param group         猪群
-     * @param event         猪群事件
-     * @param newEdit       编辑信息
-     */
-    @Transactional
-    public void editNewGroupEvent(DoctorGroup group, DoctorGroupTrack groupTrack, DoctorGroupEvent event, DoctorNewGroupEdit newEdit) {
-        //1. 更新猪群
-        group.setGroupCode(newEdit.getGroupCode());
-        group.setBreedId(newEdit.getBreedId());
-        group.setBreedName(newEdit.getBreedName());
-        group.setGeneticId(newEdit.getGeneticId());
-        group.setGeneticName(newEdit.getGeneticName());
-        doctorGroupDao.update(group);
-
-        //2. 更新事件
-        event.setRemark(newEdit.getRemark());
-        doctorGroupEventDao.update(event);
-
-        //3. 更新所有事件的猪群号(如果有变更)
-        if (!Objects.equals(group.getGroupCode(), newEdit.getGroupCode())) {
-            doctorGroupEventDao.updateGroupCodeByGroupId(group.getId(), group.getGroupCode());
-        }
-
-        //4. 更新镜像
-        DoctorGroupSnapshot snapshot = doctorGroupSnapshotDao.findGroupSnapshotByToEventId(event.getId());
-        snapshot.setToInfo(JSON_MAPPER.toJson(new DoctorGroupSnapShotInfo(group, event, groupTrack)));
-        doctorGroupSnapshotDao.update(snapshot);
     }
 
     private DoctorGroup getNewGroup(DoctorGroup group, DoctorNewGroupInput newGroupInput) {

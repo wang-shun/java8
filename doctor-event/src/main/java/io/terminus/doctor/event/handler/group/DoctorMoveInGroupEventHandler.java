@@ -1,6 +1,5 @@
 package io.terminus.doctor.event.handler.group;
 
-import com.google.common.base.MoreObjects;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.doctor.common.event.CoreEventDispatcher;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
@@ -93,13 +92,6 @@ public class DoctorMoveInGroupEventHandler extends DoctorAbstractGroupEventHandl
 
         groupTrack.setBirthDate(EventUtil.getBirthDate(new Date(), groupTrack.getAvgDayAge()));
 
-        //重新计算重量
-        groupTrack.setAvgWeight(EventUtil.getAvgWeight(groupTrack.getWeight(), EventUtil.getWeight(moveIn.getAvgWeight(), moveIn.getQuantity()), groupTrack.getQuantity()));
-        groupTrack.setWeight(EventUtil.getWeight(groupTrack.getAvgWeight(), groupTrack.getQuantity()));
-
-        //重新计算金额
-        groupTrack.setAmount(MoreObjects.firstNonNull(groupTrack.getAmount() , 0L)+ MoreObjects.firstNonNull(moveIn.getAmount(), 0L));
-        groupTrack.setPrice(EventUtil.getPrice(groupTrack.getAmount(), groupTrack.getQuantity()));
         updateGroupTrack(groupTrack, event);
 
         //4.创建镜像

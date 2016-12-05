@@ -42,7 +42,6 @@ public class DoctorTransGroupEventHandler extends DoctorAbstractGroupEventHandle
     private final DoctorCommonGroupEventHandler doctorCommonGroupEventHandler;
     private final DoctorGroupManager doctorGroupManager;
     private final DoctorBarnReadService doctorBarnReadService;
-    private final DoctorGroupTrackDao doctorGroupTrackDao;
 
     @Autowired
     public DoctorTransGroupEventHandler(DoctorGroupSnapshotDao doctorGroupSnapshotDao,
@@ -57,7 +56,6 @@ public class DoctorTransGroupEventHandler extends DoctorAbstractGroupEventHandle
         this.doctorCommonGroupEventHandler = doctorCommonGroupEventHandler;
         this.doctorGroupManager = doctorGroupManager;
         this.doctorBarnReadService = doctorBarnReadService;
-        this.doctorGroupTrackDao = doctorGroupTrackDao;
     }
 
     @Override
@@ -86,7 +84,7 @@ public class DoctorTransGroupEventHandler extends DoctorAbstractGroupEventHandle
         //2.创建转群事件
         DoctorGroupEvent<DoctorTransGroupEvent> event = dozerGroupEvent(group, GroupEventType.TRANS_GROUP, transGroup);
         event.setQuantity(transGroup.getQuantity());
-        event.setAvgDayAge(groupTrack.getAvgDayAge());  //转群的日龄不需要录入, 直接取猪群的日龄
+        event.setAvgDayAge(groupTrack.getAvgDayAge());  //转群的日龄不需要录入, 直接取猪群的日龄 // TODO: 2016/12/5 日龄重新计算
         event.setAvgWeight(transGroup.getAvgWeight());  //均重
         event.setWeight(realWeight);                    //总重
         event.setTransGroupType(getTransType(null, group.getPigType(), toBarn).getValue());   //区别内转还是外转(null是因为不用判断转入类型)

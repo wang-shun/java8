@@ -555,10 +555,6 @@ public class DoctorImportDataService {
             groupTrack.setSowQty(groupTrack.getQuantity() - groupTrack.getBoarQty());
             groupTrack.setAvgDayAge(dayAge);
             groupTrack.setBirthDate(DateTime.now().minusDays(groupTrack.getAvgDayAge()).toDate());
-            groupTrack.setWeight(ImportExcelUtils.getDouble(row, 5));
-            groupTrack.setAvgWeight(MoreObjects.firstNonNull(groupTrack.getWeight(), 0D) / groupTrack.getQuantity());
-            groupTrack.setWeanAvgWeight(0D);
-            groupTrack.setBirthAvgWeight(0D);
             groupTrack.setWeakQty(0);
             groupTrack.setUnweanQty(0);
             groupTrack.setUnqQty(0);
@@ -606,10 +602,6 @@ public class DoctorImportDataService {
             groupTrack.setSowQty(groupTrack.getQuantity() - groupTrack.getBoarQty());
             groupTrack.setAvgDayAge(DateUtil.getDeltaDaysAbs(new DateTime(openAt).withTimeAtStartOfDay().toDate(), DateTime.now().withTimeAtStartOfDay().toDate()));
             groupTrack.setBirthDate(openAt);
-            groupTrack.setWeight(baseWeight * pigletCount);
-            groupTrack.setAvgWeight(baseWeight);
-            groupTrack.setWeanAvgWeight(0D);
-            groupTrack.setBirthAvgWeight(baseWeight);
             groupTrack.setWeakQty(weak);
             groupTrack.setUnweanQty(pigletCount);
             groupTrack.setUnqQty(pigletCount);

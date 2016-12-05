@@ -70,26 +70,31 @@ public class DoctorGroupTrack implements Serializable {
      * 平均日龄
      */
     private Integer avgDayAge;
-    
-    /**
-     * 总活体重(公斤)
-     */
-    private Double weight;
-    
-    /**
-     * 平均体重(公斤)
-     */
-    private Double avgWeight;
 
     /**
-     * 断奶均重kg
+     * 断奶重kg
      */
-    private Double weanAvgWeight;
+    private Double weanWeight;
 
     /**
-     * 出生均重kg
+     * 出生重kg
      */
-    private Double birthAvgWeight;
+    private Double birthWeight;
+
+    /**
+     * 窝数(分娩时累加)
+     */
+    private Integer nest;
+
+    /**
+     * 活仔数(分娩时累加)
+     */
+    private Integer liveQty;
+
+    /**
+     * 健仔数(分娩时累加)
+     */
+    private Integer healthyQty;
 
     /**
      * 弱仔数
@@ -102,35 +107,40 @@ public class DoctorGroupTrack implements Serializable {
     private Integer unweanQty;
 
     /**
-     * 合格数(需求变更，只需要合格数了，这里翻一下)
+     * 断奶数(断奶时累加)
+     */
+    private Integer weanQty;
+
+    /**
+     * 合格数
+     */
+    private Integer quaQty;
+
+    /**
+     * 不合格数(分娩时累加)
      */
     private Integer unqQty;
-    
+
     /**
-     * 单价(分)
+     * 阶段转出数
      */
-    private Long price;
-    
+    private Integer stageOutQty;
+
     /**
-     * 总金额(分)
+     * 阶段转出重kg
      */
-    private Long amount;
-    
+    private Double stageOutWeight;
+
     /**
-     * 客户id
+     * 阶段转入数
      */
-    private Long customerId;
-    
+    private Integer stageInQty;
+
     /**
-     * 客户名称
+     * 阶段转入重kg
      */
-    private String customerName;
-    
-    /**
-     * 销售数量
-     */
-    private Integer saleQty;
-    
+    private Double stageInWeight;
+
     /**
      * 附加字段
      */
