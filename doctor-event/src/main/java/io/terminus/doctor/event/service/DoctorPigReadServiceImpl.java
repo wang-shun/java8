@@ -10,6 +10,7 @@ import io.terminus.boot.rpc.common.annotation.RpcProvider;
 import io.terminus.common.model.PageInfo;
 import io.terminus.common.model.Paging;
 import io.terminus.common.model.Response;
+import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.cache.DoctorPigInfoCache;
 import io.terminus.doctor.event.dao.DoctorBarnDao;
@@ -219,14 +220,15 @@ public class DoctorPigReadServiceImpl implements DoctorPigReadService {
     }
 
     @Override
-    public Response<String> generateFostersCode(Long farmId) {
+    public Response<String> generateFostersCode(String eventAt, Long farmId) {
         try{
+            DateTime dateTime = DateUtil.DATE.parseDateTime(eventAt);
             Long farrowingCount =  doctorPigEventDao.countPigEventTypeDuration(
                     farmId, PigEvent.FARROWING.getKey(),
-                    DateTime.now().withDayOfMonth(1).withTimeAtStartOfDay().toDate(),
-                    DateTime.now().plusMonths(1).withDayOfMonth(1).withTimeAtStartOfDay().toDate());
+                    dateTime.withDayOfMonth(1).withTimeAtStartOfDay().toDate(),
+                    dateTime.plusMonths(1).withDayOfMonth(1).withTimeAtStartOfDay().toDate());
             farrowingCount += 1;
-            return Response.ok(DateTime.now().toString(DTF)+ "-"+ farrowingCount);
+            return Response.ok(dateTime.toString(DTF) + "-" + farrowingCount);
         }catch (IllegalStateException e){
             log.error(" input pigId not exist, farmId:{} ", farmId);
             return Response.fail(e.getMessage());

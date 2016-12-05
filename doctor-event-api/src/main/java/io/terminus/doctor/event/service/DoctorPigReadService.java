@@ -7,6 +7,7 @@ import io.terminus.doctor.event.dto.DoctorPigInfoDto;
 import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorPig;
 import io.terminus.doctor.event.model.DoctorPigTrack;
+import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.validation.constraints.NotNull;
 import java.util.Date;
@@ -76,7 +77,8 @@ public interface DoctorPigReadService {
      * @param farmId
      * @return
      */
-    Response<String> generateFostersCode(@NotNull(message = "input.farmId.empty") Long farmId);
+    Response<String> generateFostersCode(@NotEmpty(message = "eventAt.not.empty") String eventAt,
+                                         @NotNull(message = "input.farmId.empty") Long farmId);
 
     /**
      * 获取猪舍pig 信息内容

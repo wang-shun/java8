@@ -107,14 +107,13 @@ public class DoctorPigs {
     }
 
     /**
-     * 生成FostersCode
-     * @param farmId
-     * @return
+     * 生成窝号
      */
-    @RequestMapping(value = "/generate/fostersCode", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(value = "/generate/fostersCode", method = RequestMethod.GET)
     @ResponseBody
-    public String generateFostersCode(@RequestParam("farmId") Long farmId){
-        return RespHelper.or500(doctorPigReadService.generateFostersCode(farmId));
+    public String generateFostersCode(@RequestParam("eventAt") String eventAt,
+                                      @RequestParam("farmId") Long farmId){
+        return RespHelper.or500(doctorPigReadService.generateFostersCode(eventAt, farmId));
     }
 
     /**
