@@ -207,4 +207,11 @@ public interface DoctorGroupWriteService {
     Response<Long> createGroupTrack(DoctorGroupTrack groupTrack);
     Response<Long> createGroupEvent(DoctorGroupEvent groupEvent);
     Response<Long> createGroupSnapShot(DoctorGroupSnapshot groupSnapshot);
+
+    /**
+     * 更新猪事件(暂时)
+     * @param event
+     * @return
+     */
+    Response<Boolean> updateGroupEvent(DoctorGroupEvent event);
 }
