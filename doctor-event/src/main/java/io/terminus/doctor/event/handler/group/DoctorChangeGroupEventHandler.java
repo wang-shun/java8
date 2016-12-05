@@ -62,7 +62,7 @@ public class DoctorChangeGroupEventHandler extends DoctorAbstractGroupEventHandl
 
         checkQuantity(groupTrack.getQuantity(), change.getQuantity());
         checkQuantityEqual(change.getQuantity(), change.getBoarQty(), change.getSowQty());
-        checkUnweanTrans(group.getPigType(), groupTrack, change.getQuantity());
+        checkUnweanTrans(group.getPigType(), null, groupTrack, change.getQuantity());
         if(Objects.equals(group.getPigType(), PigType.NURSERY_PIGLET.getValue())){
             checkSalePrice(change.getChangeTypeId(), change.getPrice(), change.getBaseWeight(), change.getOverPrice());
         }
