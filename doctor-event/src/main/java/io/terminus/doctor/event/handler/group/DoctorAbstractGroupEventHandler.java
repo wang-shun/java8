@@ -1,5 +1,6 @@
 package io.terminus.doctor.event.handler.group;
 
+import com.google.common.base.MoreObjects;
 import com.google.common.collect.Lists;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.utils.BeanMapper;
@@ -350,5 +351,16 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
 
     protected DoctorBarn getBarnById(Long barnId) {
         return RespHelper.orServEx(doctorBarnReadService.findBarnById(barnId));
+    }
+
+    //校验产房仔猪未断奶数量，如果还有未断奶的仔猪，转群/变动数量要限制
+    protected void checkUnweanTrans(Integer pigType, DoctorGroupTrack groupTrack, Integer eventQty) {
+        if (!Objects.equals(pigType, PigType.DELIVER_SOW.getValue())) {
+            return;
+        }
+        Integer unwean = MoreObjects.firstNonNull(groupTrack.getUnweanQty(), 0);
+        if (eventQty > (groupTrack.getQuantity() - unwean)) {
+            throw new ServiceException("group.has.unwean");
+        }
     }
 }

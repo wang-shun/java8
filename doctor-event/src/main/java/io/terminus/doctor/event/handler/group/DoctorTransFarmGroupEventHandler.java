@@ -69,7 +69,7 @@ public class DoctorTransFarmGroupEventHandler extends DoctorAbstractGroupEventHa
         checkFarrowGroupUnique(transFarm.getIsCreateGroup(), transFarm.getToBarnId());
         checkQuantity(groupTrack.getQuantity(), transFarm.getQuantity());
         checkQuantityEqual(transFarm.getQuantity(), transFarm.getBoarQty(), transFarm.getSowQty());
-        //checkDayAge(groupTrack.getAvgDayAge(), transFarm);
+        checkUnweanTrans(group.getPigType(), groupTrack, transFarm.getQuantity());
 
         //转入猪舍
         DoctorBarn toBarn = getBarn(transFarm.getToBarnId());
