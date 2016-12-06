@@ -1,6 +1,5 @@
 package io.terminus.doctor.event.handler.group;
 
-import io.terminus.common.exception.ServiceException;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.doctor.common.event.CoreEventDispatcher;
 import io.terminus.doctor.common.utils.DateUtil;
@@ -89,7 +88,6 @@ public class DoctorMoveInGroupEventHandler extends DoctorAbstractGroupEventHandl
         int deltaDays = DateUtil.getDeltaDaysAbs(event.getEventAt(), new Date());
         groupTrack.setAvgDayAge(EventUtil.getAvgDayAge(getGroupEventAge(groupTrack.getAvgDayAge(), deltaDays), oldQty, moveIn.getAvgDayAge(), moveIn.getQuantity()) + deltaDays);
 
-
         //如果是母猪分娩转入，窝数，分娩统计字段需要累加
         if (moveIn.isFarrow()) {
             groupTrack.setNest(EventUtil.plusInt(groupTrack.getNest(), 1));  //窝数加 1
@@ -99,7 +97,6 @@ public class DoctorMoveInGroupEventHandler extends DoctorAbstractGroupEventHandl
             groupTrack.setUnweanQty(EventUtil.plusInt(groupTrack.getUnweanQty(), moveIn.getQuantity()));
             groupTrack.setBirthWeight(EventUtil.plusDouble(groupTrack.getBirthWeight(), moveIn.getAvgWeight() * moveIn.getQuantity()));
         }
-
         updateGroupTrack(groupTrack, event);
 
         //4.创建镜像
@@ -107,14 +104,5 @@ public class DoctorMoveInGroupEventHandler extends DoctorAbstractGroupEventHandl
 
         //发布统计事件
         publistGroupAndBarn(group.getOrgId(), group.getFarmId(), group.getId(), group.getCurrentBarnId(), event.getId());
-    }
-
-    //获取事件发生时，猪群的日龄
-    private static int getGroupEventAge(int groupAge, int deltaDays) {
-        int eventAge = groupAge - deltaDays;
-        if (eventAge <= 0) {
-            throw new ServiceException("day.age.error");
-        }
-        return eventAge;
     }
 }

@@ -364,4 +364,12 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
             throw new ServiceException("group.has.unwean");
         }
     }
+    //获取事件发生时，猪群的日龄
+    protected static int getGroupEventAge(int groupAge, int deltaDays) {
+        int eventAge = groupAge - deltaDays;
+        if (eventAge <= 0) {
+            throw new ServiceException("day.age.error");
+        }
+        return eventAge;
+    }
 }

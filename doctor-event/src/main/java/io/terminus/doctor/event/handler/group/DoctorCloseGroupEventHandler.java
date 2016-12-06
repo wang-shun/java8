@@ -3,6 +3,7 @@ package io.terminus.doctor.event.handler.group;
 import io.terminus.common.exception.ServiceException;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.doctor.common.event.CoreEventDispatcher;
+import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.dao.DoctorGroupDao;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorGroupSnapshotDao;
@@ -19,6 +20,8 @@ import io.terminus.doctor.event.service.DoctorBarnReadService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.util.Date;
 
 /**
  * Desc: 关闭猪群事件处理器
@@ -63,7 +66,9 @@ public class DoctorCloseGroupEventHandler extends DoctorAbstractGroupEventHandle
         event.setExtraMap(closeEvent);
         doctorGroupEventDao.create(event);
 
-        //3.更新猪群跟踪
+        //3.更新猪群跟踪, 日龄是事件发生时的日龄
+        int deltaDays = DateUtil.getDeltaDaysAbs(event.getEventAt(), new Date());
+        groupTrack.setAvgDayAge(getGroupEventAge(groupTrack.getAvgDayAge(), deltaDays));
         updateGroupTrack(groupTrack, event);
 
         //4.猪群状态改为关闭
