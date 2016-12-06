@@ -21,6 +21,11 @@ import java.util.Map;
 public interface DoctorBasicReadService {
 
     /////////////////////////// 基础数据表 ///////////////////////////
+    /**
+     * 查询全部基础数据表
+     * @return 基础数据表
+     */
+    Response<List<DoctorBasic>> findAllBasics();
 
     /**
      * 根据id查询基础数据表

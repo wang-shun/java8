@@ -86,6 +86,15 @@ public class DoctorBasics {
         return RespHelper.or500(doctorBasicReadService.findBasicByTypeAndSrmWithCacheFilterByFarmId(farmId, type, srm));
     }
 
+    /**
+     * 查询全部基础数据表
+     * @return 基础数据信息
+     */
+    @RequestMapping(value = "/all", method = RequestMethod.GET)
+    public List<DoctorBasic> findAllBasics() {
+        return RespHelper.or500(doctorBasicReadService.findAllBasics());
+    }
+
     /************************** 猪群变动相关 **************************/
     /**
      * 根据id查询变动原因表

@@ -58,6 +58,16 @@ public class DoctorBasicReadServiceImpl implements DoctorBasicReadService {
     }
 
     @Override
+    public Response<List<DoctorBasic>> findAllBasics() {
+        try {
+            return Response.ok(doctorBasicDao.listAll());
+        } catch (Exception e) {
+            log.error("find all basics failed, cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("basic.find.fail");
+        }
+    }
+
+    @Override
     public Response<DoctorBasic> findBasicById(Long basicId) {
         try {
             return Response.ok(doctorBasicDao.findById(basicId));
