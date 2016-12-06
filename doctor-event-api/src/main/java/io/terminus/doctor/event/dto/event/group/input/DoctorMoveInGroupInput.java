@@ -101,6 +101,21 @@ public class DoctorMoveInGroupInput extends BaseGroupInput implements Serializab
     @Min(value = 0L, message = "amount.gt.0")
     private Long amount;
 
+    /**
+     * 是否是母猪分娩转入(用于计算猪群批次总结数据)
+     */
+    private boolean farrow;
+
+    /**
+     * 健仔数
+     */
+    private Integer healthyQty;
+
+    /**
+     * 弱仔数
+     */
+    private Integer weakQty;
+
     @Override
     public Map<String, String> descMap() {
         Map<String, String> map = new HashMap<>();

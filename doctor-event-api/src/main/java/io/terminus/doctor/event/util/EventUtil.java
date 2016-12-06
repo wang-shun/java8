@@ -1,5 +1,6 @@
 package io.terminus.doctor.event.util;
 
+import com.google.common.base.MoreObjects;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
 import org.joda.time.DateTime;
 
@@ -37,8 +38,12 @@ public class EventUtil {
         return getAvgWeight(oldWeight + newWeight, allQty);
     }
 
-    public static int plusQuantity(int aq, int bq) {
-        return aq + bq;
+    public static int plusInt(Integer aq, Integer bq) {
+        return MoreObjects.firstNonNull(aq, 0) + MoreObjects.firstNonNull(bq, 0);
+    }
+
+    public static double plusDouble(Double aq, Double bq) {
+        return MoreObjects.firstNonNull(aq, 0D) + MoreObjects.firstNonNull(bq, 0D);
     }
 
     public static int minusQuantity(int aq, int bq) {
@@ -60,9 +65,9 @@ public class EventUtil {
 
     /**
      * 重新计算下日龄(四舍五入)
-     * @param oldAge 旧猪日龄
+     * @param oldAge 旧猪日龄(事件发生时的日龄)
      * @param oldQty 旧猪只数
-     * @param newAge 新进猪日龄
+     * @param newAge 新进猪日龄(事件发生时的日龄)
      * @param newQty 新进猪只数
      * @return 日龄
      */

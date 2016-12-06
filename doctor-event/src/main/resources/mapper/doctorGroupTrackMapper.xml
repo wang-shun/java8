@@ -25,10 +25,6 @@
         <result column="wean_qty" property="weanQty"/>
         <result column="qua_qty" property="quaQty"/>
         <result column="unq_qty" property="unqQty"/>
-        <result column="stage_out_qty" property="stageOutQty"/>
-        <result column="stage_out_weight" property="stageOutWeight"/>
-        <result column="stage_in_qty" property="stageInQty"/>
-        <result column="stage_in_weight" property="stageInWeight"/>
         <result column="extra" property="extra"/>
         <result column="creator_id" property="creatorId"/>
         <result column="creator_name" property="creatorName"/>
@@ -65,10 +61,6 @@
         wean_qty,
         qua_qty,
         unq_qty,
-        stage_out_qty,
-        stage_out_weight,
-        stage_in_qty,
-        stage_in_weight,
         extra,
         creator_id,
         creator_name,
@@ -98,10 +90,6 @@
         #{weanQty},
         #{quaQty},
         #{unqQty},
-        #{stageOutQty},
-        #{stageOutWeight},
-        #{stageInQty},
-        #{stageInWeight},
         #{extra},
         #{creatorId},
         #{creatorName},
@@ -147,10 +135,6 @@
             <if test="weanQty != null">wean_qty = #{weanQty},</if>
             <if test="quaQty != null">qua_qty = #{quaQty},</if>
             <if test="unqQty != null">unq_qty = #{unqQty},</if>
-            <if test="stageOutQty != null">stage_out_qty = #{stageOutQty},</if>
-            <if test="stageOutWeight != null">stage_out_weight = #{stageOutWeight},</if>
-            <if test="stageInQty != null">stage_in_qty = #{stageInQty},</if>
-            <if test="stageInWeight != null">stage_in_weight = #{stageInWeight},</if>
             <if test="extra != null">extra = #{extra},</if>
             <if test="creatorId != null">creator_id = #{creatorId},</if>
             <if test="creatorName != null">creator_name = #{creatorName},</if>
@@ -224,10 +208,6 @@
             #{item.weanQty},
             #{item.quaQty},
             #{item.unqQty},
-            #{item.stageOutQty},
-            #{item.stageOutWeight},
-            #{item.stageInQty},
-            #{item.stageInWeight},
             #{item.extra},
             #{item.creatorId},
             #{item.creatorName},

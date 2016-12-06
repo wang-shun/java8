@@ -1,7 +1,9 @@
 package io.terminus.doctor.event.handler.group;
 
+import io.terminus.common.exception.ServiceException;
 import io.terminus.common.utils.BeanMapper;
 import io.terminus.doctor.common.event.CoreEventDispatcher;
+import io.terminus.doctor.common.utils.DateUtil;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
 import io.terminus.doctor.event.dao.DoctorGroupSnapshotDao;
 import io.terminus.doctor.event.dao.DoctorGroupTrackDao;
@@ -79,18 +81,24 @@ public class DoctorMoveInGroupEventHandler extends DoctorAbstractGroupEventHandl
 
         //3.更新猪群跟踪
         Integer oldQty = groupTrack.getQuantity();
-        groupTrack.setQuantity(EventUtil.plusQuantity(groupTrack.getQuantity(), moveIn.getQuantity()));
-        groupTrack.setBoarQty(EventUtil.plusQuantity(groupTrack.getBoarQty(), moveIn.getBoarQty()));
-        groupTrack.setSowQty(EventUtil.plusQuantity(groupTrack.getSowQty(), moveIn.getSowQty()));
+        groupTrack.setQuantity(EventUtil.plusInt(groupTrack.getQuantity(), moveIn.getQuantity()));
+        groupTrack.setBoarQty(EventUtil.plusInt(groupTrack.getBoarQty(), moveIn.getBoarQty()));
+        groupTrack.setSowQty(EventUtil.plusInt(groupTrack.getSowQty(), moveIn.getSowQty()));
 
-        //重新计算日龄
-        if (oldQty + moveIn.getQuantity() == 0){
-            groupTrack.setAvgDayAge(0);
-        }else {
-            groupTrack.setAvgDayAge(EventUtil.getAvgDayAge(groupTrack.getAvgDayAge(), oldQty, moveIn.getAvgDayAge(), moveIn.getQuantity()));
+        //重新计算日龄, 按照事件录入日期计算
+        int deltaDays = DateUtil.getDeltaDaysAbs(event.getEventAt(), new Date());
+        groupTrack.setAvgDayAge(EventUtil.getAvgDayAge(getGroupEventAge(groupTrack.getAvgDayAge(), deltaDays), oldQty, moveIn.getAvgDayAge(), moveIn.getQuantity()) + deltaDays);
+
+
+        //如果是母猪分娩转入，窝数，分娩统计字段需要累加
+        if (moveIn.isFarrow()) {
+            groupTrack.setNest(EventUtil.plusInt(groupTrack.getNest(), 1));  //窝数加 1
+            groupTrack.setLiveQty(EventUtil.plusInt(groupTrack.getLiveQty(), moveIn.getQuantity()));
+            groupTrack.setHealthyQty(EventUtil.plusInt(groupTrack.getHealthyQty(), moveIn.getHealthyQty()));
+            groupTrack.setWeakQty(EventUtil.plusInt(groupTrack.getWeakQty(), moveIn.getWeakQty()));
+            groupTrack.setUnweanQty(EventUtil.plusInt(groupTrack.getUnweanQty(), moveIn.getQuantity()));
+            groupTrack.setBirthWeight(EventUtil.plusDouble(groupTrack.getBirthWeight(), moveIn.getAvgWeight() * moveIn.getQuantity()));
         }
-
-        groupTrack.setBirthDate(EventUtil.getBirthDate(new Date(), groupTrack.getAvgDayAge()));
 
         updateGroupTrack(groupTrack, event);
 
@@ -99,5 +107,14 @@ public class DoctorMoveInGroupEventHandler extends DoctorAbstractGroupEventHandl
 
         //发布统计事件
         publistGroupAndBarn(group.getOrgId(), group.getFarmId(), group.getId(), group.getCurrentBarnId(), event.getId());
+    }
+
+    //获取事件发生时，猪群的日龄
+    private static int getGroupEventAge(int groupAge, int deltaDays) {
+        int eventAge = groupAge - deltaDays;
+        if (eventAge <= 0) {
+            throw new ServiceException("day.age.error");
+        }
+        return eventAge;
     }
 }

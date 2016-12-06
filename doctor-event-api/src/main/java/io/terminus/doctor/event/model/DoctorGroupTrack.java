@@ -122,26 +122,6 @@ public class DoctorGroupTrack implements Serializable {
     private Integer unqQty;
 
     /**
-     * 阶段转出数
-     */
-    private Integer stageOutQty;
-
-    /**
-     * 阶段转出重kg
-     */
-    private Double stageOutWeight;
-
-    /**
-     * 阶段转入数
-     */
-    private Integer stageInQty;
-
-    /**
-     * 阶段转入重kg
-     */
-    private Double stageInWeight;
-
-    /**
      * 附加字段
      */
     @Setter(AccessLevel.NONE)

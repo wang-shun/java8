@@ -544,8 +544,3 @@ ALTER TABLE doctor_group_tracks ADD COLUMN nest INT(11) DEFAULT NULL COMMENT '�
 ALTER TABLE doctor_group_tracks ADD COLUMN live_qty INT(11) DEFAULT NULL COMMENT '活仔数(分娩时累加)' AFTER nest;
 ALTER TABLE doctor_group_tracks ADD COLUMN healthy_qty INT(11) DEFAULT NULL COMMENT '健仔数(分娩时累加)' AFTER live_qty;
 ALTER TABLE doctor_group_tracks ADD COLUMN wean_qty INT(11) DEFAULT NULL COMMENT '断奶数(断奶时累加)' AFTER unwean_qty;
-ALTER TABLE doctor_group_tracks ADD COLUMN stage_out_qty INT(11) DEFAULT NULL COMMENT '阶段转出数' AFTER unq_qty;
-ALTER TABLE doctor_group_tracks ADD COLUMN stage_out_weight DOUBLE DEFAULT NULL COMMENT '阶段转出重kg' AFTER stage_out_qty;
-ALTER TABLE doctor_group_tracks ADD COLUMN stage_in_qty INT(11) DEFAULT NULL COMMENT '阶段转入数' AFTER stage_out_weight;
-ALTER TABLE doctor_group_tracks ADD COLUMN stage_in_weight DOUBLE DEFAULT NULL COMMENT '阶段转入重kg' AFTER stage_in_qty;
-
