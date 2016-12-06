@@ -70,7 +70,7 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
             PigType.FATTEN_PIG.getValue(),
             PigType.RESERVE.getValue());
 
-    private final DoctorGroupSnapshotDao doctorGroupSnapshotDao;
+    protected final DoctorGroupSnapshotDao doctorGroupSnapshotDao;
     private final DoctorGroupTrackDao doctorGroupTrackDao;
     private final CoreEventDispatcher coreEventDispatcher;
     private final DoctorGroupEventDao doctorGroupEventDao;
@@ -216,7 +216,7 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
     }
 
     //创建猪群镜像信息
-    protected void createGroupSnapShot(DoctorGroupSnapShotInfo oldShot, DoctorGroupSnapShotInfo newShot, GroupEventType eventType) {
+    protected DoctorGroupSnapshot createGroupSnapShot(DoctorGroupSnapShotInfo oldShot, DoctorGroupSnapShotInfo newShot, GroupEventType eventType) {
         DoctorGroupSnapshot groupSnapshot = new DoctorGroupSnapshot();
         groupSnapshot.setEventType(eventType.getValue());  //猪群事件类型
 
@@ -238,6 +238,7 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
                 .groupTrack(newShot.getGroupTrack())
                 .build()));
         doctorGroupSnapshotDao.create(groupSnapshot);
+        return groupSnapshot;
     }
 
     //更新猪群事件

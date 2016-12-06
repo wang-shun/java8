@@ -1,8 +1,11 @@
 package io.terminus.doctor.web.front.event.controller;
 
+import com.google.common.base.Throwables;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import io.terminus.boot.rpc.common.annotation.RpcConsumer;
 import io.terminus.common.model.Paging;
+import io.terminus.common.utils.JsonMapper;
 import io.terminus.common.utils.Splitters;
 import io.terminus.doctor.basic.model.DoctorBasic;
 import io.terminus.doctor.basic.service.DoctorBasicReadService;
@@ -10,8 +13,10 @@ import io.terminus.doctor.common.utils.Params;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dto.DoctorGroupDetail;
 import io.terminus.doctor.event.dto.DoctorGroupSnapShotInfo;
+import io.terminus.doctor.event.dto.event.group.DoctorTransGroupEvent;
 import io.terminus.doctor.event.dto.event.group.input.DoctorNewGroupInput;
 import io.terminus.doctor.event.enums.GroupEventType;
+import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
 import io.terminus.doctor.event.model.DoctorPigTrack;
@@ -350,5 +355,40 @@ public class DoctorGroupEvents {
             params.remove("eventTypes");
         }
         return RespHelper.or500(doctorGroupReadService.queryGroupEventsByCriteria(params, pageNo, pageSize));
+    }
+
+    /**
+     * 猪群转群事件的extra中添加groupid(暂时)
+     * @return
+     */
+    @RequestMapping(value = "/fix/groupExtra", method = RequestMethod.GET)
+    public Boolean fixGroupEventExtra() {
+        try {
+            Map<String, Object> map = Maps.newHashMap();
+            map.put("type", GroupEventType.NEW.getValue());
+            map.put("isAuto", IsOrNot.YES.getValue());
+            Paging<DoctorGroupEvent> paging = RespHelper.or500(doctorGroupReadService.queryGroupEventsByCriteria(map, 1, Integer.MAX_VALUE));
+            if (paging.isEmpty()) {
+                return Boolean.TRUE;
+            }
+            paging.getData().forEach(doctorGroupEvent -> {
+                try {
+                    DoctorGroupEvent relEvent = RespHelper.or500(doctorGroupReadService.findGroupEventById(doctorGroupEvent.getRelGroupEventId()));
+                    if (Objects.equals(relEvent.getType(), GroupEventType.TRANS_GROUP.getValue())) {
+                        DoctorTransGroupEvent doctorTransGroupEvent = JsonMapper.JSON_NON_EMPTY_MAPPER.fromJson(relEvent.getExtra(), DoctorTransGroupEvent.class);
+                        doctorTransGroupEvent.setToGroupId(doctorGroupEvent.getGroupId());
+                        relEvent.setExtraMap(doctorTransGroupEvent);
+                        doctorGroupWriteService.updateGroupEvent(relEvent);
+                    }
+                } catch (Exception e) {
+                    log.error("eventId {}", doctorGroupEvent.getId());
+                }
+            });
+            return Boolean.TRUE;
+        } catch (Exception e) {
+            log.error("fix group event extra error, cause by {}", Throwables.getStackTraceAsString(e));
+            return Boolean.FALSE;
+        }
+
     }
 }
