@@ -106,6 +106,11 @@ public interface DoctorBasicReadService {
      */
     Response<List<DoctorChangeReason>> findChangeReasonByIds(@NotNull(message = "changeReasonId.not.null") List<Long> changeReasonIds);
 
+    /**
+     * 查询全部变动原因表
+     * @return 变动类型表
+     */
+    Response<List<DoctorChangeReason>> findAllChangeReasons();
 
     /**
      * 根据变动类型和输入码查询

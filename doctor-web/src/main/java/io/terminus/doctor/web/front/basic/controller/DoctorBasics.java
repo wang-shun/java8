@@ -112,6 +112,15 @@ public class DoctorBasics {
     }
 
     /**
+     * 查询全部变动原因表
+     * @return 变动原因表
+     */
+    @RequestMapping(value = "/changeReason/all", method = RequestMethod.GET)
+    public List<DoctorChangeReason> findAllChangeReasons() {
+        return RespHelper.or500(doctorBasicReadService.findAllChangeReasons());
+    }
+
+    /**
      * 根据变动类型和输入码查询
      * @param changeTypeId 变动类型id
      * @param srm 不区分大小写模糊匹配

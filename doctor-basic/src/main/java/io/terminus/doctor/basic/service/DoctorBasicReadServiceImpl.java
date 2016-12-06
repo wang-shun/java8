@@ -176,6 +176,16 @@ public class DoctorBasicReadServiceImpl implements DoctorBasicReadService {
     }
 
     @Override
+    public Response<List<DoctorChangeReason>> findAllChangeReasons() {
+        try {
+            return Response.ok(doctorChangeReasonDao.listAll());
+        } catch (Exception e) {
+            log.error("find all changeReasons failed, cause:{}", Throwables.getStackTraceAsString(e));
+            return Response.fail("changeReason.find.fail");
+        }
+    }
+
+    @Override
     public Response<List<DoctorChangeReason>> findChangeReasonByChangeTypeIdAndSrm(Long changeTypeId, String srm) {
         try {
             return Response.ok(doctorChangeReasonDao.findByChangeTypeIdAndSrm(changeTypeId, srm));
