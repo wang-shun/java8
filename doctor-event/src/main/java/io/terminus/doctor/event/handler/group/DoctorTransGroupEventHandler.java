@@ -1,6 +1,7 @@
 package io.terminus.doctor.event.handler.group;
 
 import io.terminus.common.utils.BeanMapper;
+import io.terminus.common.utils.JsonMapper;
 import io.terminus.doctor.common.event.CoreEventDispatcher;
 import io.terminus.doctor.common.utils.RespHelper;
 import io.terminus.doctor.event.dao.DoctorGroupEventDao;
@@ -18,6 +19,7 @@ import io.terminus.doctor.event.manager.DoctorGroupManager;
 import io.terminus.doctor.event.model.DoctorBarn;
 import io.terminus.doctor.event.model.DoctorGroup;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
+import io.terminus.doctor.event.model.DoctorGroupSnapshot;
 import io.terminus.doctor.event.model.DoctorGroupTrack;
 import io.terminus.doctor.event.service.DoctorBarnReadService;
 import io.terminus.doctor.event.util.EventUtil;
@@ -69,12 +71,12 @@ public class DoctorTransGroupEventHandler extends DoctorAbstractGroupEventHandle
         checkFarrowGroupUnique(transGroup.getIsCreateGroup(), transGroup.getToBarnId());
         checkQuantity(groupTrack.getQuantity(), transGroup.getQuantity());
         checkQuantityEqual(transGroup.getQuantity(), transGroup.getBoarQty(), transGroup.getSowQty());
-        checkUnweanTrans(group.getPigType(), groupTrack, transGroup.getQuantity());
         Double realWeight = transGroup.getAvgWeight() * transGroup.getQuantity();   //后台计算的总重
         //checkDayAge(groupTrack.getAvgDayAge(), transGroup);
 
         //转入猪舍
         DoctorBarn toBarn = getBarn(transGroup.getToBarnId());
+        checkUnweanTrans(group.getPigType(), toBarn.getPigType(), groupTrack, transGroup.getQuantity());
 
         //1.转换转群事件
         DoctorTransGroupEvent transGroupEvent = BeanMapper.map(transGroup, DoctorTransGroupEvent.class);
@@ -108,7 +110,7 @@ public class DoctorTransGroupEventHandler extends DoctorAbstractGroupEventHandle
         updateGroupTrack(groupTrack, event);
 
         //4.创建镜像
-        createGroupSnapShot(oldShot, new DoctorGroupSnapShotInfo(group, event, groupTrack), GroupEventType.TRANS_GROUP);
+        DoctorGroupSnapshot doctorGroupSnapshot = createGroupSnapShot(oldShot, new DoctorGroupSnapShotInfo(group, event, groupTrack), GroupEventType.TRANS_GROUP);
 
         //5.判断转群数量, 如果 = 猪群数量, 触发关闭猪群事件, 同时生成批次总结
         if (Objects.equals(oldQuantity, transGroup.getQuantity())) {
@@ -126,6 +128,17 @@ public class DoctorTransGroupEventHandler extends DoctorAbstractGroupEventHandle
             //新建猪群
             Long toGroupId = autoTransGroupEventNew(group, groupTrack, transGroup, toBarn);
             transGroup.setToGroupId(toGroupId);
+
+            //更新事件
+            transGroupEvent.setToGroupId(toGroupId);
+            event.setExtraMap(transGroupEvent);
+            doctorGroupEventDao.update(event);
+
+            //更新镜像
+            DoctorGroupSnapShotInfo toInfo = JsonMapper.JSON_NON_EMPTY_MAPPER.fromJson(doctorGroupSnapshot.getToInfo(), DoctorGroupSnapShotInfo.class);
+            toInfo.setGroupEvent(event);
+            doctorGroupSnapshot.setToInfo(JsonMapper.JSON_NON_DEFAULT_MAPPER.toJson(toInfo));
+            doctorGroupSnapshotDao.update(doctorGroupSnapshot);
 
             //刷新最新事件id
             DoctorGroupEvent newGroupEvent = doctorGroupEventDao.findLastEventByGroupId(toGroupId);

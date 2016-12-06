@@ -68,7 +68,7 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
             PigType.FATTEN_PIG.getValue(),
             PigType.RESERVE.getValue());
 
-    private final DoctorGroupSnapshotDao doctorGroupSnapshotDao;
+    protected final DoctorGroupSnapshotDao doctorGroupSnapshotDao;
     private final DoctorGroupTrackDao doctorGroupTrackDao;
     private final CoreEventDispatcher coreEventDispatcher;
     private final DoctorGroupEventDao doctorGroupEventDao;
@@ -196,7 +196,7 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
     }
 
     //创建猪群镜像信息
-    protected void createGroupSnapShot(DoctorGroupSnapShotInfo oldShot, DoctorGroupSnapShotInfo newShot, GroupEventType eventType) {
+    protected DoctorGroupSnapshot createGroupSnapShot(DoctorGroupSnapShotInfo oldShot, DoctorGroupSnapShotInfo newShot, GroupEventType eventType) {
         DoctorGroupSnapshot groupSnapshot = new DoctorGroupSnapshot();
         groupSnapshot.setEventType(eventType.getValue());  //猪群事件类型
 
@@ -218,6 +218,7 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
                 .groupTrack(newShot.getGroupTrack())
                 .build()));
         doctorGroupSnapshotDao.create(groupSnapshot);
+        return groupSnapshot;
     }
 
     //校验数量
@@ -354,8 +355,8 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
     }
 
     //校验产房仔猪未断奶数量，如果还有未断奶的仔猪，转群/变动数量要限制
-    protected void checkUnweanTrans(Integer pigType, DoctorGroupTrack groupTrack, Integer eventQty) {
-        if (!Objects.equals(pigType, PigType.DELIVER_SOW.getValue())) {
+    protected void checkUnweanTrans(Integer pigType, Integer toType, DoctorGroupTrack groupTrack, Integer eventQty) {
+        if (!Objects.equals(pigType, PigType.DELIVER_SOW.getValue()) || Objects.equals(pigType, toType)) {
             return;
         }
         Integer unwean = MoreObjects.firstNonNull(groupTrack.getUnweanQty(), 0);

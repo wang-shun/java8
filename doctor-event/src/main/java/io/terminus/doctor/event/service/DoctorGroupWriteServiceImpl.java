@@ -330,4 +330,15 @@ public class DoctorGroupWriteServiceImpl implements DoctorGroupWriteService {
             return Response.fail("groupSnapshot.create.fail");
         }
     }
+
+    @Deprecated
+    @Override
+    public Response<Boolean> updateGroupEvent(DoctorGroupEvent event) {
+        try {
+            return Response.ok(doctorGroupEventDao.update(event));
+        } catch (Exception e) {
+            log.error("update group event failed, cause by {}", Throwables.getStackTraceAsString(e));
+            return Response.fail("update.group.event.fail");
+        }
+    }
 }

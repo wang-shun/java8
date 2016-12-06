@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import io.terminus.doctor.event.dto.DoctorRollbackDto;
 import io.terminus.doctor.event.dto.event.group.DoctorTransGroupEvent;
 import io.terminus.doctor.event.enums.GroupEventType;
+import io.terminus.doctor.event.enums.IsOrNot;
 import io.terminus.doctor.event.enums.RollbackType;
 import io.terminus.doctor.event.handler.rollback.DoctorAbstractRollbackGroupEventHandler;
 import io.terminus.doctor.event.model.DoctorGroupEvent;
@@ -98,7 +99,12 @@ public class DoctorRollbackGroupTransHandler extends DoctorAbstractRollbackGroup
         toDto.setEsGroupId(trans.getToGroupId());
 
         //更新统计：猪舍统计，猪群统计
-        toDto.setRollbackTypes(Lists.newArrayList(RollbackType.SEARCH_BARN, RollbackType.SEARCH_GROUP));
+        //如果关闭猪群
+        if (Objects.equals(trans.getIsCreateGroup(), IsOrNot.YES.getValue())) {
+            toDto.setRollbackTypes(Lists.newArrayList(RollbackType.SEARCH_BARN, RollbackType.SEARCH_GROUP_DELETE));
+        } else {
+            toDto.setRollbackTypes(Lists.newArrayList(RollbackType.SEARCH_BARN, RollbackType.SEARCH_GROUP));
+        }
 
         return Lists.newArrayList(fromDto, toDto);
     }
