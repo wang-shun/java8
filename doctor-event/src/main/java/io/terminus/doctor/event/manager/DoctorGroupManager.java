@@ -92,8 +92,11 @@ public class DoctorGroupManager {
         groupTrack.setBoarQty(0);
         groupTrack.setSowQty(0);
         groupTrack.setQuantity(0);
-        groupTrack.setAvgDayAge(0);             //日龄
-        groupTrack.setBirthDate(new Date());    //出生日期(用于计算日龄)
+        groupTrack.setBirthDate(DateUtil.toDate(newGroupInput.getEventAt()));    //出生日期(用于计算日龄)
+
+        int age = DateUtil.getDeltaDaysAbs(groupTrack.getBirthDate(), new Date());
+        groupTrack.setAvgDayAge(age + 1);             //日龄
+
         groupTrack.setSex(EventUtil.getSex(groupTrack.getBoarQty(), groupTrack.getSowQty()));
         doctorGroupTrackDao.create(groupTrack);
 

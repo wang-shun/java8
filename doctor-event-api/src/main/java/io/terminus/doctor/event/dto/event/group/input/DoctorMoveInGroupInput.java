@@ -102,11 +102,6 @@ public class DoctorMoveInGroupInput extends BaseGroupInput implements Serializab
     private Long amount;
 
     /**
-     * 是否是母猪分娩转入(用于计算猪群批次总结数据)
-     */
-    private boolean farrow;
-
-    /**
      * 健仔数
      */
     private Integer healthyQty;

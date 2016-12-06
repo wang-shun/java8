@@ -354,7 +354,7 @@ public abstract class DoctorAbstractGroupEventHandler implements DoctorGroupEven
         return RespHelper.orServEx(doctorBarnReadService.findBarnById(barnId));
     }
 
-    //校验产房仔猪未断奶数量，如果还有未断奶的仔猪，转群/变动数量要限制
+    //校验产房0仔猪未断奶数量，如果还有未断奶的仔猪，转群/变动数量要限制
     protected void checkUnweanTrans(Integer pigType, Integer toType, DoctorGroupTrack groupTrack, Integer eventQty) {
         if (!Objects.equals(pigType, PigType.DELIVER_SOW.getValue()) || Objects.equals(pigType, toType)) {
             return;

@@ -89,12 +89,12 @@ public class DoctorMoveInGroupEventHandler extends DoctorAbstractGroupEventHandl
         groupTrack.setAvgDayAge(EventUtil.getAvgDayAge(getGroupEventAge(groupTrack.getAvgDayAge(), deltaDays), oldQty, moveIn.getAvgDayAge(), moveIn.getQuantity()) + deltaDays);
 
         //如果是母猪分娩转入，窝数，分娩统计字段需要累加
-        if (moveIn.isFarrow()) {
+        if (moveIn.isSowEvent()) {
             groupTrack.setNest(EventUtil.plusInt(groupTrack.getNest(), 1));  //窝数加 1
             groupTrack.setLiveQty(EventUtil.plusInt(groupTrack.getLiveQty(), moveIn.getQuantity()));
             groupTrack.setHealthyQty(EventUtil.plusInt(groupTrack.getHealthyQty(), moveIn.getHealthyQty()));
             groupTrack.setWeakQty(EventUtil.plusInt(groupTrack.getWeakQty(), moveIn.getWeakQty()));
-            groupTrack.setUnweanQty(EventUtil.plusInt(groupTrack.getUnweanQty(), moveIn.getQuantity()));
+            groupTrack.setUnweanQty(EventUtil.plusInt(groupTrack.getUnweanQty(), moveIn.getQuantity()));    //分娩时，未断奶数累加
             groupTrack.setBirthWeight(EventUtil.plusDouble(groupTrack.getBirthWeight(), moveIn.getAvgWeight() * moveIn.getQuantity()));
         }
         updateGroupTrack(groupTrack, event);
