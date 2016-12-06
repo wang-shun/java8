@@ -318,6 +318,12 @@ public class DoctorBarns {
                 if(!RespHelper.or500(doctorPigReadService.findActivePigTrackByCurrentBarnId(barnId)).isEmpty()){
                     throw new JsonResponseException("barn.type.forbid.update");
                 }
+                RespHelper.or500(doctorGroupReadService.findGroupByCurrentBarnId(barnId)).forEach(group -> {
+                    DoctorGroupDetail detail = RespHelper.or500(doctorGroupReadService.findGroupDetailByGroupId(group.getId()));
+                    if(detail.getGroupTrack().getQuantity() != null && detail.getGroupTrack().getQuantity() > 0){
+                        throw new JsonResponseException("barn.type.forbid.update");
+                    }
+                });
             }
             RespHelper.or500(doctorBarnWriteService.updateBarn(barn));
         }
