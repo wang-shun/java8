@@ -15,6 +15,6 @@ import org.springframework.stereotype.Repository;
 public class DoctorFarmBasicDao extends MyBatisDao<DoctorFarmBasic> {
 
     public DoctorFarmBasic findByFarmId(Long farmId) {
-        return getSqlSession().selectOne("findByFarmId", ImmutableMap.of("farmId", farmId));
+        return getSqlSession().selectOne("findFarmBasicsByFarmId", ImmutableMap.of("farmId", farmId));
     }
 }
